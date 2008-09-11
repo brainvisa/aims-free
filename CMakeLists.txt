@@ -1,7 +1,3 @@
-# This will be the main CMakeLists.txt of aims project.
-# It is still work in progress, this is why there are
-# several $ENV{P4} that will disappear later.
-
 cmake_minimum_required( VERSION 2.6 )
 
 find_package( soma-infra REQUIRED )
@@ -77,18 +73,18 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib )
 
 
-add_subdirectory( $ENV{P4}/cartobase-main cartobase-main )
-add_subdirectory( $ENV{P4}/cartodata-main cartodata-main )
-add_subdirectory( $ENV{P4}/graph-main graph-main )
-add_subdirectory( $ENV{P4}/ecat-main ecat-main )
-add_subdirectory( $ENV{P4}/ecat+-main ecat+-main )
-add_subdirectory( $ENV{P4}/vidaIO-main vidaIO-main )
-add_subdirectory( $ENV{P4}/aimsdata-main aimsdata-main )
-add_subdirectory( $ENV{P4}/aimsalgo-main aimsalgo-main )
+add_subdirectory( cartobase )
+add_subdirectory( cartodata )
+add_subdirectory( graph )
+add_subdirectory( ecat )
+add_subdirectory( ecat+ )
+add_subdirectory( vidaIO )
+add_subdirectory( aimsdata )
+add_subdirectory( aimsalgo )
 if( PYTHONLIBS_FOUND AND NUMPY_FOUND AND SIP_FOUND )
   set( AIMS_RELATIVE_SIP_DIRECTORY
        "share/sip/${PROJECT_NAME}-${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}" )
-  add_subdirectory( $ENV{P4}/pyaims-main pyaims-main )
+  add_subdirectory( pyaims )
 else( PYTHONLIBS_FOUND AND NUMPY_FOUND AND SIP_FOUND )
   message( "WARNING: Not building pyaims and pyaimsalgo due to missing dependency:\n  PYTHONLIBS_FOUND=${PYTHONLIBS_FOUND}\n  NUMPY_FOUND=${NUMPY_FOUND}\n  SIP_FOUND=${SIP_FOUND}" )
 endif( PYTHONLIBS_FOUND AND NUMPY_FOUND AND SIP_FOUND )
