@@ -1,0 +1,50 @@
+*BEGIN SYNTAX graphe_sillon
+Talairach_rotation    float_vector !
+Talairach_translation float_vector !
+Talairach_scale       float_vector !
+voxel_size            float_vector !
+filename_base         string       !
+bounding_box_min      int_vector
+bounding_box_max      int_vector
+anterior_commissure   int_vector
+*END
+
+*BEGIN SYNTAX hull 
+name string !
+*END
+
+*BEGIN SYNTAX fold 
+point_number        int          !
+size                float        !
+name                string       !
+skeleton_label      int          !
+gravity_center      float_vector !
+depth               float        !
+ss_point_number     int          !
+bottom_point_number int          !
+ss_filename         string       !
+bottom_filename     string       !
+oldtri_filename     string
+normal              float_vector
+*END
+
+*BEGIN SYNTAX hull_junction
+point_number        int          !
+size                float        !
+junction_filename   string       !
+*END
+
+*BEGIN SYNTAX junction
+point_number        int          !
+size                float        !
+junction_filename   string       !
+*END
+
+*BEGIN SYNTAX cortical
+point_number        int          !
+size                float        !
+cortical_filename   string       !
+*END
+
+#normal			float_vector
+#oldtri_filename	string

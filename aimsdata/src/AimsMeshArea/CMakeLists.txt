@@ -1,0 +1,10 @@
+
+ADD_EXECUTABLE(AimsMeshArea
+meshArea.cc
+)
+
+TARGET_LINK_LIBRARIES(AimsMeshArea
+aimsdata
+)
+
+INSTALL(TARGETS AimsMeshArea DESTINATION bin/)

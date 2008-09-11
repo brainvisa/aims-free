@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsParameterize2DImageDomain main.cc aimsalgo)

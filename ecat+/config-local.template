@@ -1,0 +1,8 @@
+VERSION         = @version@
+
+INCLUDEPATH     = @includeBuild@
+
+BUILDMODEEXT	= @buildModeExtension@
+
+LIBS    = @libDepsLine@
+

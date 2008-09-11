@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<minf expander="minf_2.0">
+<d>
+  <l name="test">
+    <none/>
+    <false/>
+    <true/>
+    <n>1234</n>
+    <n>-12.34</n>
+    <s>a string</s>
+    <s>héhé !</s>
+    <l>
+      <none/>
+      <false/>
+      <true/>
+      <n>1234</n>
+      <n>-12.34</n>
+      <s>a string</s>
+      <s>héhé !</s>
+      <l length="7">
+        <none/>
+        <false/>
+        <true/>
+        <n>1234</n>
+        <n>-12.34</n>
+        <s>a string</s>
+        <s>héhé !</s>
+      </l>
+      <d length="8">
+        <none name="None"/>
+        <false name="False"/>
+        <true name="True"/>
+        <n name="integer">1234</n>
+        <s name="string">a string</s>
+        <s name="unicode">héhé !</s>
+        <s name="héhé !">unicode</s>
+      </d>
+    </l>
+    <d>
+      <none name="None"/>
+      <false name="False"/>
+      <true name="True"/>
+      <n name="integer">1234</n>
+      <s name="string">a string</s>
+      <s name="unicode">héhé !</s>
+      <l length="7" name="list">
+        <none/>
+        <false/>
+        <true/>
+        <n>1234</n>
+        <n>-12.34</n>
+        <s>a string</s>
+        <s>héhé !</s>
+      </l>
+    </d>
+  </l>
+</d>
+</minf>

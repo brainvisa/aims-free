@@ -1,0 +1,10 @@
+
+ADD_EXECUTABLE(AimsFileInfo
+fileInfo.cc
+)
+
+TARGET_LINK_LIBRARIES(AimsFileInfo 
+aimsdata
+)
+
+INSTALL(TARGETS AimsFileInfo DESTINATION bin/)

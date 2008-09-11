@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsGraphTransferLabels graphtransferlabels.cc aimsalgo)

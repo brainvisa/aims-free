@@ -1,0 +1,4 @@
+#-----------------------------------------------------------------------------
+class VidaIOComponent( GenericMakerComponent ):
+  _name = 'vidaIO'
+

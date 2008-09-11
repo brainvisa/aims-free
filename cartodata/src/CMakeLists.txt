@@ -1,0 +1,3 @@
+
+ADD_SUBDIRECTORY(library)
+ADD_SUBDIRECTORY(tests)

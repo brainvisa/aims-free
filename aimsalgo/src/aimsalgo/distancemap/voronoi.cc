@@ -1,0 +1,233 @@
+/* Copyright (c) 1995-2007 CEA
+ *
+ *  This software and supporting documentation were developed by
+ *      CEA/DSV/SHFJ
+ *      4 place du General Leclerc
+ *      91401 Orsay cedex
+ *      France
+ *
+ * This software is governed by the CeCILL license version 2 under 
+ * French law and abiding by the rules of distribution of free software.
+ * You can  use, modify and/or redistribute the software under the 
+ * terms of the CeCILL license version 2 as circulated by CEA, CNRS
+ * and INRIA at the following URL "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL license version 2 and that you accept its terms.
+ */
+
+
+#include <aims/distancemap/mask.h>
+#include <iomanip>
+#include <aims/data/data.h>
+#include <aims/bucket/bucket.h>
+#include <aims/math/mathelem.h>
+
+using namespace aims;
+using namespace std;
+
+#define AIMS_OUTSIDE 32501
+#define AIMS_DOMAIN  32500
+
+
+void AimsVoronoiPreparation( AimsData<int16_t>& vol, 
+                             int16_t val_domain, int16_t val_outside)
+{
+  int x, y, z;
+
+  ForEach3d( vol, x, y, z )
+    if ( vol( x, y, z ) == val_outside )
+      vol( x, y, z ) = AIMS_OUTSIDE;
+    else if ( vol( x, y, z ) == val_domain )
+      vol( x, y, z ) = AIMS_DOMAIN;
+    else
+      vol( x, y, z ) = 0;
+}
+
+
+void AimsRestoreVol( AimsData<int16_t>& vol, 
+                     int16_t val_domain, int16_t val_outside)
+{
+  int x, y, z;
+
+  ForEach3d( vol, x, y, z )
+    if ( vol( x, y, z ) == AIMS_OUTSIDE )
+      vol( x, y, z ) = val_outside;
+    else if ( vol( x, y, z ) == AIMS_DOMAIN )
+      vol( x, y, z ) = val_domain;
+    else
+      vol( x, y, z ) = 0;
+}
+
+
+inline
+bool inside( Point3d& pt, int dimX, int dimY, int dimZ )
+{
+  if ( pt.item(0) < 0     ||
+       pt.item(0) >= dimX ||
+       pt.item(1) < 0     ||
+       pt.item(1) >= dimY ||
+       pt.item(2) < 0     ||
+       pt.item(2) >= dimZ   )
+    return false;
+  return true;
+}
+
+
+void 
+FillVoronoiBucket( AimsBucket<Void>& bucket, AimsData<int16_t>& vol,
+                   AimsData<int16_t>& label,
+                   const ChamferMask& mask )
+{
+  int x=0, y=0, z=0, n=0;
+  int dimX = vol.dimX();
+  int dimY = vol.dimY();
+  int dimZ = vol.dimZ();
+  Point3d neigh;
+  AimsBucketItem<Void> item;
+  int16_t new_val;
+
+  for ( z = 0; z < dimZ; z++ )
+    for ( y = 0; y < dimY; y++ )
+      for ( x = 0; x < dimX; x++ )
+      {
+        if ( vol( x, y, z ) == 0 )
+        {
+          for ( n = 0; n < mask.length(); n++ )
+          {
+            neigh[0] = x + mask.offset( n ).item(0);
+            neigh[1] = y + mask.offset( n ).item(1);
+            neigh[2] = z + mask.offset( n ).item(2);
+            if ( inside( neigh, dimX, dimY, dimZ ) == true )
+            {
+              if ( vol( neigh ) && vol( neigh ) != AIMS_OUTSIDE )
+              {
+                new_val = mask.distance( n );
+                if ( new_val < vol( neigh ) )
+                {
+                  item.location() = neigh;
+                  vol( neigh ) = new_val;
+                  label( neigh ) = label( x, y, z );
+                  bucket[ new_val ].push_back( item );
+                }
+              }
+            }
+          }
+        }
+      }
+}
+
+
+void 
+EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<int16_t>& vol,
+                    AimsData<int16_t>& label,
+                    const ChamferMask& mask, int limit, float mult_factor )
+{
+
+  list< AimsBucketItem<Void> >::const_iterator it,ite;
+  list< AimsBucketItem<Void> >* ptr=NULL;
+  AimsBucketItem<Void> item;
+  int dimX = vol.dimX();
+  int dimY = vol.dimY();
+  int dimZ = vol.dimZ();
+  int dist,n,d;
+  Point3d center,neigh;
+  int16_t new_val;
+  int last_dist=0;
+
+  AimsData< list< AimsBucketItem<Void> >* > lstPtr( limit );
+  lstPtr = NULL;
+  for ( AimsBucket<Void>::iterator lst  = bucket.begin();
+                                   lst != bucket.end(); lst++ )
+    lstPtr( (*lst).first ) = &( (*lst).second );
+  
+
+  cout << "distance : " << setw(10) << setprecision(8) << 0 << flush;
+  for ( dist = 1; dist < limit; dist++ )
+  {
+    ptr = lstPtr( dist );
+    if ( ptr )
+    {
+      last_dist = dist;
+      if ( dist % 100 == 0 )
+        cout <<  "\b\b\b\b\b\b\b\b\b\b" << setw(10) << setprecision(8) 
+             << float( dist ) / mult_factor << flush;
+      for ( it  = ptr->begin(),
+            ite = ptr->end(); it != ite; it++ )
+      {
+	center = it->location();
+        if ( vol( center ) >= dist )
+          for ( n = 0; n < mask.length(); n++ )
+          {
+            neigh.item(0) = center.item(0) + mask.offset( n ).item(0);
+            neigh.item(1) = center.item(1) + mask.offset( n ).item(1);
+            neigh.item(2) = center.item(2) + mask.offset( n ).item(2);
+            if ( inside( neigh, dimX, dimY, dimZ ) && 
+                 vol( neigh ) > dist               &&
+                 vol( neigh ) != AIMS_OUTSIDE         )
+            {
+              new_val = vol( center ) + mask.distance( n );
+              if ( new_val < vol( neigh ) )
+              {
+		vol( neigh ) = new_val;
+                label( neigh ) = label( center );
+                item.location() = neigh;
+                bucket[ ( d = dist + mask.distance( n ) ) ].push_back( item );
+                if ( lstPtr( d ) == NULL )
+                  lstPtr( d ) = &bucket[ d ];
+
+              }
+            }
+          }
+      }
+    }
+  }
+  cout <<  "\b\b\b\b\b\b\b\b\b\b" << setw(10) << setprecision(8) 
+       << float( last_dist ) / mult_factor << endl;
+}
+
+
+AimsData<int16_t> 
+AimsVoronoiFrontPropagation( AimsData<int16_t>& vol,
+                             int16_t val_domain, int16_t val_outside,
+                             int xm, int ym, int zm, float mult_factor )
+{
+  ChamferMask mask;
+  AimsBucket<Void> bucket;
+  int limit;
+
+  limit = int( mult_factor * sqrt( sqr( vol.dimX() * vol.sizeX() ) +
+                                    sqr( vol.dimY() * vol.sizeY() ) +
+                                    sqr( vol.dimZ() * vol.sizeZ() )  ) + 0.5 );
+  mask.set( xm, ym, zm, vol.sizeX(), vol.sizeY(), vol.sizeZ(), mult_factor );
+
+  AimsData<int16_t> label = vol.clone();
+
+  AimsVoronoiPreparation( vol, val_domain, val_outside );
+
+  FillVoronoiBucket( bucket, vol, label, mask );
+
+  EmptyVoronoiBucket( bucket, vol, label, mask, limit, 
+                      mult_factor );
+  
+  AimsRestoreVol( vol, val_domain, val_outside );
+
+  return label;
+}

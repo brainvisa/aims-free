@@ -1,0 +1,27 @@
+#
+#  Copyright (C) 2000-2001 CEA
+#
+#  This software and supporting documentation were developed by
+#  	CEA/DSV/SHFJ
+#  	4 place du General Leclerc
+#  	91401 Orsay cedex
+#  	France
+#
+#  Library configuration.
+#
+#  $Id: //depot/graph/main/config#14 $
+#
+
+VERSION         	= @version@
+release:CXXFLAGS	= -O2
+# bug in Apple gcc-3.1 optimizer
+release-darwin:CXXFLAGS = -O
+CONFIG    = thread
+
+DEFINES	+= @defines@
+
+INCLUDEPATH = @includeBuild@
+
+BUILDMODEEXT	= @buildModeExtension@
+
+LIBS = @libDepsLine@

@@ -1,0 +1,25 @@
+#
+#  Copyright (C) 2000-2005 CEA
+#
+#  This software and supporting documentation were developed by
+#  	CEA/DSV/SHFJ
+#  	4 place du General Leclerc
+#  	91401 Orsay cedex
+#  	France
+#
+#  Library configuration.
+#
+
+DEFINES		= VIDA_LIB
+VERSION		= @version@
+
+INCLUDEPATH = @includeBuild@
+
+BUILDMODEEXT = @buildModeExtension@
+	
+LIBS	=	\
+	-lm -lrpcsvc
+
+darwin:LIBS	= 
+cygwin:LIBS = -lm -lrpc
+

@@ -1,0 +1,85 @@
+/* Copyright (c) 1995-2007 CEA
+ *
+ *  This software and supporting documentation were developed by
+ *      CEA/DSV/SHFJ
+ *      4 place du General Leclerc
+ *      91401 Orsay cedex
+ *      France
+ *
+ * This software is governed by the CeCILL license version 2 under 
+ * French law and abiding by the rules of distribution of free software.
+ * You can  use, modify and/or redistribute the software under the 
+ * terms of the CeCILL license version 2 as circulated by CEA, CNRS
+ * and INRIA at the following URL "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL license version 2 and that you accept its terms.
+ */
+
+
+#ifndef AIMS_RESAMPLING_RESAMPLERFACTORY_D_H
+#define AIMS_RESAMPLING_RESAMPLERFACTORY_D_H
+
+#include <aims/resampling/resamplerfactory.h>
+#include <aims/resampling/nearestneighborresampler.h>
+#include <aims/resampling/linearresampler.h>
+#include <aims/resampling/quadraticresampler.h>
+#include <aims/resampling/cubicresampler.h>
+#include <aims/resampling/quarticresampler.h>
+#include <aims/resampling/quinticresampler.h>
+#include <aims/resampling/sixthorderresampler.h>
+#include <aims/resampling/seventhorderresampler.h>
+#include <iostream>
+
+namespace aims
+{
+
+  template <typename T>
+  Resampler<T> *ResamplerFactory<T>::getResampler( int order )
+  {
+    switch( order )
+      {
+      case 0:
+        return new NearestNeighborResampler<T>;
+      case 1:
+        return new LinearResampler<T>;
+      case 2:
+        return new QuadraticResampler<T>;
+      case 3:
+        return new CubicResampler<T>;
+      case 4:
+        return new QuarticResampler<T>;
+      case 5:
+        return new QuinticResampler<T>;
+      case 6:
+        return new SixthOrderResampler<T>;
+      case 7:
+        return new SeventhOrderResampler<T>;
+      default:
+        std::cerr << "no resampler for order " << order 
+                  << ", taking order 3 (cubic) instead" << std::endl;
+      }
+    return new CubicResampler<T>;
+  }
+
+}
+
+#endif
+

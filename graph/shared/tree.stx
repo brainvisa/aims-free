@@ -1,0 +1,12 @@
+*BEGIN SYNTAX example_tree
+attribute3	float		!
+*END
+
+*BEGIN SYNTAX example_tree_node
+attribute1	int_vector	!
+attribute2	string		!
+attribute3	float
+*END
+
+
+

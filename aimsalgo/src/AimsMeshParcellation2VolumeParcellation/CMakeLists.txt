@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsMeshParcellation2VolumeParcellation main.cc aimsalgo)

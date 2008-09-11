@@ -1,0 +1,10 @@
+
+ADD_EXECUTABLE(AimsMeshCut
+meshCut.cc
+)
+
+TARGET_LINK_LIBRARIES(AimsMeshCut
+aimsdata
+)
+
+INSTALL(TARGETS AimsMeshCut DESTINATION bin/)

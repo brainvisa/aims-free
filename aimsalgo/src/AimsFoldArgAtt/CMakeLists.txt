@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsFoldArgAtt foldargatt.cc aimsalgo)

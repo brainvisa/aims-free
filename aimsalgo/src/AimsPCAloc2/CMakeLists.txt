@@ -1,0 +1,10 @@
+ADD_EXECUTABLE(AimsPCAloc2
+individu.cc
+main.cc
+)
+
+TARGET_LINK_LIBRARIES(AimsPCAloc2
+aimsalgo
+)
+
+INSTALL(TARGETS AimsPCAloc2 DESTINATION bin/)

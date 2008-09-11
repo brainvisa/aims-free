@@ -1,0 +1,24 @@
+#
+#  Copyright (C) 2000-2001 CEA
+#
+#  This software and supporting documentation were developed by
+#  	CEA/DSV/SHFJ
+#  	4 place du General Leclerc
+#  	91401 Orsay cedex
+#  	France
+#
+#  Executables configuration.
+#
+#  $Id: //depot/aims/main/config-app#12 $
+#
+
+linux:LIBS	= 
+solaris:LIBS	=
+
+LIBS = @libBuildLine@
+
+# seems to be needed here to anable proper multithreading
+#LIBS		+= -lpthread
+
+LIBS_GUI = @aimsgui:libBuildLine@
+LIBS_AIMSTIFF = @aimstiff:libBuildLine@

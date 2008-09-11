@@ -1,0 +1,20 @@
+# print 'aims.bcg'
+# print currentComponentFile
+
+modules = [ 'aimsalgo', 'aimsdata', 'graph', 'cartodata', 'cartobase', 'pyaims', 'pyaimsalgo' ]
+subprojects = modules + [ 'ecat', 'ecat+', 'vidaIO' ]
+
+class AimsComponent( GenericMakerModuleComponent ):
+  _name = 'aims'
+  def dependencies( self ):
+    global modules
+    return modules
+
+currentComponentDirectory = os.path.dirname( currentComponentFile )
+for component in subprojects:
+  c = options.setdefault( component, {} )
+  c[ 'source' ] = os.path.join( currentComponentDirectory, component )
+  c[ 'version' ] = '4.0'
+#  print c
+
+

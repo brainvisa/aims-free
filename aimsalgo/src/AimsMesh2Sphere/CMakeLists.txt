@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsMesh2Sphere AimsMesh2Sphere.cc aimsalgo)

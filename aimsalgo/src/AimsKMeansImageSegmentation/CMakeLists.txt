@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsKMeansImageSegmentation main.cc aimsalgo)

@@ -1,0 +1,139 @@
+# tree 1.0
+
+*BEGIN TREE selector 
+graph_syntax selector
+
+   *BEGIN TREE subset
+   surname Brain
+	*BEGIN TREE subset
+	nomenName Brain
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Heart
+	*BEGIN TREE subset
+	nomenName Heart
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Lung
+	*BEGIN TREE subset
+	nomenName Lung
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Left_Kidney
+	*BEGIN TREE subset
+	nomenName Left_Kidney
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Right_Kidney
+	*BEGIN TREE subset
+	nomenName Right_Kidney
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Spleen
+	*BEGIN TREE subset
+	nomenName Spleen
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Bladder
+	*BEGIN TREE subset
+	nomenName Bladder
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Intestine
+	*BEGIN TREE subset
+	nomenName Intestine
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Muscle_Leg_1
+	*BEGIN TREE subset
+	nomenName Muscle_Leg_1
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Muscle_Leg_2
+	*BEGIN TREE subset
+	nomenName Muscle_Leg_2
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Tumor_1
+	*BEGIN TREE subset
+	nomenName Tumor_1
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Tumor_2
+	*BEGIN TREE subset
+	nomenName Tumor_2
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Tumor_3
+	*BEGIN TREE subset
+	nomenName Tumor_3
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Nose
+	*BEGIN TREE subset
+	nomenName Nose
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Liver
+	*BEGIN TREE subset
+	nomenName Liver
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Spine
+	*BEGIN TREE subset
+	nomenName Spine
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Vesicle
+	*BEGIN TREE subset
+	nomenName Vesicle
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Injection
+	*BEGIN TREE subset
+	nomenName Injection
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname Muscle
+	*BEGIN TREE subset
+	nomenName Muscle
+	*END
+   *END
+   
+*END

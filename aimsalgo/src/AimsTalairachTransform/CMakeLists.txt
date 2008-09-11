@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsTalairachTransform main.cc aimsalgo)

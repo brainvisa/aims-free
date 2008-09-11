@@ -1,0 +1,61 @@
+#
+#  Copyright (C) 2000-2004 CEA
+#
+#  This software and supporting documentation were developed by
+#  	CEA/DSV/SHFJ
+#  	4 place du General Leclerc
+#  	91401 Orsay cedex
+#  	France
+#
+#  Library configuration.
+#
+
+DEFINES   = @defines@
+VERSION   = @version@
+CONFIG    = thread
+
+INCLUDEPATH = @includeBuild@
+
+LIBS			= @libDepsLine@
+LIBS_LINKED             = @libBuildLine@
+LIBS_DICOM		= @aimsdicom:libDepsLine@
+LIBS_ECAT		= @aimsecat:libDepsLine@
+LIBS_JPEG		= @aimsjpeg:libDepsLine@
+LIBS_TIFF		= @aimstiff:libDepsLine@
+LIBS_VIDA		= @aimsvida:libDepsLine@
+LIBS_MINC		= @aimsminc:libDepsLine@
+LIBS_PLY		= @aimsply:libDepsLine@
+LIBS_NIFTI		= @aimsnifti:libDepsLine@
+cygwin:LIBS_FOR_AIMSGUI = -Wl,--enable-auto-import
+
+release:BUILDMODE	= @buildMode@
+debug:BUILDMODE		= @buildMode@
+BUILDMODEEXT            = @buildModeExtension@
+
+defmodule(aimsgui)	 = @aimsgui:enabled@
+defmodule(aimsdicom) = @aimsdicom:enabled@
+defmodule(aimsecat)	 = @aimsecat:enabled@
+defmodule(aimsjpeg)	 = @aimsjpeg:enabled@
+defmodule(aimstiff)	 = @aimstiff:enabled@
+defmodule(aimsvida)	 = @aimsvida:enabled@
+defmodule(aimsminc)	 = @aimsminc:enabled@
+defmodule(aimsply)	 = @aimsply:enabled@
+defmodule(aimsnifti) = @aimsnifti:enabled@
+
+module(aimsgui)  :LIBS_FOR_AIMSGUI += @aimsgui:libDepsLine@
+
+module(aimsgui)  :INCLUDEPATH += @qt:includes@
+module(aimsgui)  :DEFINES += @qt:defines@
+module(aimsdicom):INCLUDEPATH += @dcmtk:includes@
+module(aimsecat) :INCLUDEPATH += @ecat+:includes@
+module(aimsjpeg) :INCLUDEPATH += @jpeg:includes@
+module(aimstiff) :INCLUDEPATH += @tiff:includes@
+module(aimsvida) :INCLUDEPATH += @vidaIO:includes@
+module(aimsminc) :INCLUDEPATH += @minc:includes@
+module(aimsply)  :INCLUDEPATH += @rply:includes@
+module(aimsnifti):INCLUDEPATH += @zlib:includes@ @include@/aims/io/znzlib
+#module(aimsnifti):INCLUDEPATH += @zlib:includes@ /home/flandin/perforce/aimsdata-main/src/aimsnifti/io/znzlib
+
+# bug in Apple gcc-3.1 optimizer
+#release-darwin:CXXFLAGS = -O
+

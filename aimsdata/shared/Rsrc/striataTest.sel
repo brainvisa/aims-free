@@ -1,0 +1,21 @@
+# tree 1.0
+
+*BEGIN TREE selector 
+graph_syntax selector
+
+   *BEGIN TREE subset
+   surname RPu
+	*BEGIN TREE subset
+	nomenName Right_putamen-nucleus(RPu)
+	*END
+   *END
+
+   *BEGIN TREE subset
+   surname LPu
+	*BEGIN TREE subset
+	nomenName Left_putamen-nucleus(LPu)
+	*END
+   *END
+
+   
+*END

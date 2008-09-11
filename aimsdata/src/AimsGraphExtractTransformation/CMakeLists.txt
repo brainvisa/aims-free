@@ -1,0 +1,10 @@
+
+ADD_EXECUTABLE(AimsGraphExtractTransformation
+graphExtractTransformation.cc
+)
+
+TARGET_LINK_LIBRARIES(AimsGraphExtractTransformation
+aimsdata
+)
+
+INSTALL(TARGETS AimsGraphExtractTransformation DESTINATION bin/)

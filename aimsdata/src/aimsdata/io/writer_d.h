@@ -1,0 +1,231 @@
+/* Copyright (c) 1995-2005 CEA
+ *
+ *  This software and supporting documentation were developed by
+ *      CEA/DSV/SHFJ
+ *      4 place du General Leclerc
+ *      91401 Orsay cedex
+ *      France
+ *
+ * This software is governed by the CeCILL license version 2 under 
+ * French law and abiding by the rules of distribution of free software.
+ * You can  use, modify and/or redistribute the software under the 
+ * terms of the CeCILL license version 2 as circulated by CEA, CNRS
+ * and INRIA at the following URL "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL license version 2 and that you accept its terms.
+ */
+
+/*
+ *  writer class
+ */
+#ifndef AIMS_IO_WRITER_D_H
+#define AIMS_IO_WRITER_D_H
+
+
+#include <aims/io/writer.h>
+#include <aims/io/fileFormat.h>
+#include <cartobase/exception/ioexcept.h>
+#include <cartobase/stream/fileutil.h>
+#include <cartobase/plugin/plugin.h>
+#include <set>
+
+#include <iostream>
+
+
+/* WARNING: be careful to include <aims/io/datatypecode.h> before 
+   including this writer_d.h header
+*/
+
+namespace aims
+{
+
+  template <typename T>
+  bool GenericWriter::write( const T & obj, bool ascii, 
+			     const std::string* format )
+  {
+    Writer<T> *writer = dynamic_cast< Writer<T> * >( this );
+    if ( ! writer ) {
+      throw carto::format_mismatch_error( fileName() );
+    }
+    return writer->write( obj, ascii, format );
+  }
+
+
+
+  template<class T>
+  std::string Writer<T>::writtenObjectType() const
+  {
+    return carto::DataTypeCode<T>().objectType();
+  }
+
+
+  template<class T>
+  std::string Writer<T>::writtenObjectDataType() const
+  {
+    return carto::DataTypeCode<T>().dataType();
+  }
+  
+
+  template<class T>
+  std::string Writer<T>::writtenObjectFullType() const
+  {
+    return carto::DataTypeCode<T>::name();
+  }
+
+
+
+  template<class T>
+  bool Writer<T>::write( const T & obj, bool ascii, const std::string* format )
+  {
+    // force loading plugins if it has not been done already
+    carto::PluginLoader::load();
+
+    std::set<std::string>		tried;
+    FileFormat<T>			*writer;
+    std::set<std::string>::iterator	notyet = tried.end();
+    int					excp = 0;
+    int					exct = -1;
+    std::string				excm;
+
+    if( format )	// priority to format hint
+      {
+	writer = FileFormatDictionary<T>::fileFormat( *format );
+	if( writer )
+	  {
+	    try
+	      {
+		if( writer->write( _filename, obj, ascii ) )
+		  return( true );
+	      }
+	    catch( std::exception & e )
+	      {
+		carto::io_error::keepExceptionPriority( e, excp, exct, excm, 
+							5 );
+	      }
+	    tried.insert( *format );
+	  }
+      }
+
+    std::string                bname = carto::FileUtil::basename( _filename );
+    std::string::size_type     pos = bname.find( '.' );
+    std::string::size_type     dlen = _filename.length() - bname.length();
+    std::string                ext;
+
+    if( pos != std::string::npos )
+      ext = _filename.substr( dlen+pos+1, _filename.length() - pos - 1 );
+
+    const std::map<std::string, std::list<std::string> >        & extensions
+        = FileFormatDictionary<T>::extensions();
+
+    std::map<std::string, std::list<std::string> >::const_iterator iext
+        = extensions.find( ext ),
+    eext = extensions.end();
+    std::list<std::string>::const_iterator ie, ee;
+
+    while( iext == eext && (pos=bname.find( '.', pos+1 ))!=std::string::npos )
+    {
+      ext = _filename.substr( dlen+pos+1, _filename.length() - pos - 1 );
+      iext = extensions.find( ext );
+    }
+
+    // try every matching format until one works
+    if( iext != eext )
+      for( ie=iext->second.begin(), ee=iext->second.end(); ie!=ee; ++ie )
+        if( tried.find( *ie ) == notyet )
+        {
+          writer = FileFormatDictionary<T>::fileFormat( *ie );
+          if( writer )
+          {
+            try
+            {
+              if( writer->write( _filename, obj, ascii ) )
+                return( true );
+            }
+            catch( std::exception & e )
+            {
+              carto::io_error::keepExceptionPriority( e, excp, exct,
+                                                      excm );
+            }
+            tried.insert( *ie );
+          }
+        }
+
+    if( !ext.empty() )
+    {
+      // not found or none works: try writers with no extension
+      iext = extensions.find( "" );
+
+      if( iext != eext )
+        for( ie=iext->second.begin(), ee=iext->second.end(); ie!=ee; ++ie )
+          if( tried.find( *ie ) == notyet )
+          {
+            writer = FileFormatDictionary<T>::fileFormat( *ie );
+            if( writer )
+            {
+              try
+              {
+                if( writer->write( _filename, obj, ascii ) )
+                  return( true );
+              }
+              catch( std::exception & e )
+              {
+                carto::io_error::keepExceptionPriority( e, excp, exct,
+                                                        excm );
+              }
+              tried.insert( *ie );
+            }
+          }
+    }
+
+    // still not found ? well, try EVERY format this time...
+    for( iext=extensions.begin(); iext!=eext; ++iext )
+      for( ie=iext->second.begin(), ee=iext->second.end(); ie!=ee; ++ie )
+        if( tried.find( *ie ) == notyet )
+        {
+          writer = FileFormatDictionary<T>::fileFormat( *ie );
+          if( writer )
+          {
+            try
+            {
+              if( writer->write( _filename, obj, ascii ) )
+                return( true );
+            }
+            catch( std::exception & e )
+            {
+              carto::io_error::keepExceptionPriority( e, excp, exct,
+                                                      excm );
+            }
+            tried.insert( *ie );
+          }
+        }
+
+    // still not succeeded, it's hopeless...
+    carto::io_error::launchExcept( exct, excm, 
+				   _filename + " : no matching format" );
+    return( false );
+  }
+
+}
+
+
+#endif
+
+

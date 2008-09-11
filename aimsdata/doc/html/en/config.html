@@ -1,0 +1,172 @@
+<!DOCTYPE public "-//w3c//dtd html 4.01 transitional//en" 
+		"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>AIMS config file</title>
+  <style type="text/css">
+    BODY {
+	  text-align: justify;
+	  margin: 0.5cm;
+	}
+  </style>
+</head>
+
+<body text="#000000" bgcolor="#ffffff" link="#0000ee" vlink="#551a8b"
+ alink="#ff0000">
+    
+<center><h1>Aims configuration file</h1></center>
+<hr width="100%"><br>
+
+<b>Date: 2008/01/05</b><br>
+
+<p>In <b>AIMS version 2.13</b> and later, AIMS uses a settings file, currently used 
+to specify SPM IO conventions, and possibly other things in the future. There is one 
+site-wide settings file (in the shared directory of Aims: 
+<tt>$AIMS_PATH/shared/aimsrc</tt> or <tt>$SHFJ_SHARED_PATH/aims/aimsrc</tt>) and one 
+personal <tt>$HOME/.aimsrc</tt> file. Personal settings override site-wide settings. 
+Both files are in the same format: python format 
+at the moment, until we have XML IO. Example:
+</p>
+<pre>
+attributes = {
+  '__syntax__' : 'aims_settings', 
+  'spm_input_radio_convention' : 1, 
+  'spm_input_spm2_normalization' : 0, 
+  'spm_output_radio_convention' : 1, 
+  'spm_output_spm2_normalization' : 0, 
+  'spm_output_4d_volumes' : 0, 
+}</pre>
+
+<p>By the way, these specific settings correspond to the behaviour of SPM99. They used to be the site-wide defaults in AIMS 3.0 and earlier.<br>
+In AIMS 3.1, the defaults correspond to SPM2: all <tt>spm_*</tt> options set to <tt>1</tt>.
+</p>
+
+<p><b>Note:</b> these defaults are different from the defaults used by the library if 
+no settings are provided: with no settings provided, AIMS will act like 
+<em>SPM2</em> does, because it's the future behaviour. Nevertheless many people are 
+still using <em>SPM99</em>, and for smooth compatibility with previous 
+versions of AIMS and Anatomist, we heve decided not to adopt this default right now. 
+When <em>SPM99</em> has disapeared, we may change the defaults.</p>
+
+<p>Don't change the two first lines: <tt>attributes&nbsp;=&nbsp;{</tt> is the 
+identifier of the python-like format for the config file, and 
+<tt>'__syntax__'&nbsp;:&nbsp;'aims_settings',</tt> identifies the file type to be AIMS 
+configuration file. The other attributes can change, be modified, removed, or added.</p>
+
+<p>The set of currently known attributes (in AIMS 2.13) is:</p>
+
+<table cellspacing="0" border="1">
+<tr bgcolor="#e0e0ff">
+  <td><b>Attribute name:</b></td>
+  <td><b>type:</b></td>
+  <td><b>Default value:</b></td>
+  <td><b>Explanation:</b></td>
+  <td><b>Appeared in AIMS version:</b></td>
+</tr>
+<tr>
+  <td><tt>spm_input_radio_convention</tt></td>
+  <td><tt>bool</tt> (or at least, number)</td>
+  <td><tt>0</tt></td>
+  <td>Determines how to understand the unspecified orientation of SPM images read by 
+    AIMS. "Unspecified orientation" means no indication in the <tt>.minf</tt> file 
+	written by AIMS or Anatomist with the image. This flag is quite equivalent to the 
+	SPM flag. <tt>0</tt> means <em>neurological</em> convention, and <tt>1</tt> means 
+	<em>radiological</em> convention (left and right are flipped). Note that this flag 
+	is not supposed to tell Anatomist how to display the image, but how to <em>read</em> 
+	it: if read in the correct orientation, Anatomist should always display images in 
+	<em>radiological</em> convention by default (unless a <em>display-only</em> flag is 
+	set in Anatomist). This flag actually affects processings, but Anatomist flag does 
+	<em>not</em>.<br>
+	When AIMS (or Anatomist) writes an image in SPM format, its orientation convention 
+	is written with it in the <tt>.minf</tt> file going with it.<br>
+	See <a href="spmformat.html">this page</a> for further explanations of the SPM 
+	format ambiguity.
+  </td>
+  <td>2.13</td>
+</tr>
+<tr>
+  <td><tt>spm_input_spm2_normalization</tt></td>
+  <td><tt>bool</tt></td>
+  <td><tt>1</tt></td>
+  <td>Determines if <em>normailzed</em> SPM volumes with no specified orientation 
+    should be read in <em>SPM99</em> or <em>SPM2</em> way.<br>
+	<em>SPM99</em> always wrote normalized images in <em>neurological</em> 
+	convention, regardless of the input convention.<br>
+	<em>SPM2</em> writes norlalized images in the orientation specified for reading, ie 
+	if images are specified to be in <em>radiological</em> convention before 
+	normalization, the normalized images made from them will be saved in 
+	<em>radiological</em> orientation.<br>
+	See <a href="spmformat.html">this page</a> for further explanations of the SPM 
+	format ambiguity.
+  </td>
+  <td>2.13</td>
+</tr>
+<tr>
+  <td><tt>spm_output_4d_volumes</tt></td>
+  <td><tt>bool</tt></td>
+  <td><tt>1</tt></td>
+  <td>Allows or forbids 4D volumes writing in SPM format. If disabled, 
+    a 4D volume will be split into a series of 3D volumes like SPM99 does. 
+	This was the behaviour of previous AIMS releases (2.12 and earlier).
+	See <a href="spmformat.html#volume4d">here</a> for further explanations.
+  </td>
+  <td>2.13</td>
+</tr>
+<tr>
+  <td><tt>spm_output_radio_convention</tt></td>
+  <td><tt>bool</tt></td>
+  <td><tt>0</tt></td>
+  <td>Tells in which orientation images with unspecified orientation should be 
+    written to disk in SPM format by AIMS and Anatomist. This flag is especially useful 
+	when converting images from another format to SPM format. If images were read 
+	already in SPM format, their orientation has been determined at read-time and will not 
+	change, so this flag will not apply (unless <tt>spm_force_output_convention</tt> is 
+	set).<br>
+	See <a href="spmformat.html">this page</a> for further explanations of the SPM 
+	format ambiguity.
+  </td>
+  <td>2.13</td>
+</tr>
+<tr>
+  <td><tt>spm_output_spm2_normalization</tt></td>
+  <td><tt>bool</tt></td>
+  <td>1</td>
+  <td>Tells if images that are recognized to be normalized should be writen in SPM 
+    format preferably in <em>SPM99</em> or <em>SPM2</em> convention. If images were 
+	read in SPM format, their orientation has already be set at read-time and will not 
+	change, so this flag will not act (unless <tt>spm_force_output_convention</tt> is 
+	set).<br>
+	See <a href="spmformat.html">this page</a> for further explanations of the SPM 
+	format ambiguity.
+  </td>
+  <td>2.13</td>
+</tr>
+<tr>
+  <td><tt>spm_force_output_convention</tt></td>
+  <td><tt>bool</tt></td>
+  <td><tt>0</tt></td>
+  <td>If set, this flag tells AIMS to override SPM reading orientation when re-writing 
+    an image in SPM format, and to force using <tt>spm_output_radio_convention</tt> and 
+	<tt>spm_output_spm2_normalization</tt> settings. For instance if an image has been 
+	determined to be in <em>radiological</em> orientation at read-time, and if 
+	<tt>spm_force_output_convention</tt> is set to <tt>1</tt> and 
+	<tt>spm_output_radio_convention</tt> set to <tt>0</tt>, then it will be 
+	re-written in <em>neurological</em> orientation.<br>
+	See <a href="spmformat.html">this page</a> for further explanations of the SPM 
+	format ambiguity.
+  </td>
+  <td>2.13</td>
+</tr>
+<tr>
+  <td><tt>nifti_output_4d_volumes</tt></td>
+  <td><tt>bool</tt></td>
+  <td><tt>1</tt></td>
+  <td>Same as <tt>spm_output_4d_volumes</tt> but for NIFTI-1 format.
+  </td>
+  <td>3.1</td>
+</tr>
+</table>
+
+</body>
+</html>

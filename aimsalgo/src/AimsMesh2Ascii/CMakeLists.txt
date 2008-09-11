@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsMesh2Ascii mesh2ascii.cc aimsalgo)

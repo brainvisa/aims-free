@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsRegisterStriataMainLines main.cc aimsalgo)

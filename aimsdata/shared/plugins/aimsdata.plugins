@@ -1,0 +1,26 @@
+attributes = {
+  'release_plugins' : [
+    'libaimsvida.so', 
+    'libaimsdicom.so', 
+    'libaimsecat.so', 
+    'libaimsjpeg.so', 
+    'libaimstiff.so', 
+    'libaimsqtformats.so', 
+    'libaimsminc.so', 
+    'libaimsply.so', 
+    'libaimsnifti.so',
+    'libconnectomist_aims_plugin.so',
+  ], 
+  'debug_plugins' : [
+    'libaimsvida-debug.so', 
+    'libaimsdicom-debug.so', 
+    'libaimsecat-debug.so', 
+    'libaimsjpeg-debug.so', 
+    'libaimstiff-debug.so', 
+    'libaimsqtformats-debug.so', 
+    'libaimsminc-debug.so', 
+    'libaimsply-debug.so', 
+    'libaimsnifti-debug.so', 
+    'libconnectomist_aims_plugin-debug.so',
+  ], 
+}

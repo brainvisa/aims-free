@@ -1,0 +1,99 @@
+/* Copyright (c) 1995-2007 CEA
+ *
+ *  This software and supporting documentation were developed by
+ *      CEA/DSV/SHFJ
+ *      4 place du General Leclerc
+ *      91401 Orsay cedex
+ *      France
+ *
+ * This software is governed by the CeCILL license version 2 under 
+ * French law and abiding by the rules of distribution of free software.
+ * You can  use, modify and/or redistribute the software under the 
+ * terms of the CeCILL license version 2 as circulated by CEA, CNRS
+ * and INRIA at the following URL "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL license version 2 and that you accept its terms.
+ */
+
+
+#ifndef AIMS_PRIMALSKETCH_FINITEELEMENTSMOOTHER_D_H
+#define AIMS_PRIMALSKETCH_FINITEELEMENTSMOOTHER_D_H
+
+#include <aims/primalsketch/finiteElementSmoother.h>
+#include <aims/mesh/curv.h>
+#include <cartobase/type/converter.h>
+#include <stdlib.h>
+#include <math.h>
+#include <float.h>
+
+namespace aims {
+
+template<int D, typename T> Texture<T> FiniteElementSmoother<D,T>::doSmoothing(const Texture<T> & ima, int maxiter, bool verbose)
+{
+	Texture<T>	textOut;
+	TimeTexture<T> textIn, textTmp1;
+	TimeTexture<float> textTmp2;
+	Texture<float>	smooth, lapl;
+	float			s;
+	unsigned		i,n=ima.nItem();
+	int 			iter;
+	//float threshold=0.1;
+
+	carto::Converter<TimeTexture<T> , TimeTexture<float> > conv;
+	textIn[0]=ima;
+
+	if (maxiter >= 0)
+	{
+		conv.convert(textIn, textTmp2);
+		smooth=textTmp2[0];
+		std::cout << "Starting smoothing in " << maxiter << " iterations" << std::endl;
+		for (iter=0; iter< maxiter; ++iter)
+		{
+			lapl =  AimsMeshLaplacian(smooth, weightLapl);
+			//lapl =  AimsMeshLaplacian(smooth, weightLapl, threshold);
+			//lapl =  AimsMeshLaplacian(smooth, weightLapl, FLT_MAX);
+			for ( i=0; i<n; ++i)
+			{
+				s = smooth.item(i) + _dt * lapl.item(i);
+				smooth.item(i) = s;
+			}
+		}
+		std::cout  << std::endl;
+
+		textTmp2[0]=smooth;
+
+		carto::Converter< TimeTexture<float> , TimeTexture<T> > conv2;
+		conv2.convert( textTmp2, textTmp1);
+
+		textOut=textTmp1[0];
+		return textOut;
+	}
+	else
+	{
+		std::cerr << "diffusionConvolution Smoother: must have tIn < tOut" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+}
+
+
+}
+
+#endif

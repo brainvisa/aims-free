@@ -1,0 +1,12 @@
+#-----------------------------------------------------------------------------
+class GraphComponent( GenericMakerComponent ):
+  _name = 'graph'
+
+  optionsDescription = GenericMakerComponent.optionsDescription.copy()
+  optionsDescription.update( {
+    'attisexchanger': ( None, "Obsolete option. Don't use it." ), 
+  } )
+
+  def dependencies( self ):
+    return [ "cartobase" ]
+

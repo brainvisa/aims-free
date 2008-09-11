@@ -1,0 +1,10 @@
+
+ADD_EXECUTABLE(AimsTCat
+tcat.cc
+)
+
+TARGET_LINK_LIBRARIES(AimsTCat
+aimsdata
+)
+
+INSTALL(TARGETS AimsTCat DESTINATION bin/)

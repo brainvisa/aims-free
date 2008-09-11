@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsTexture2Primal texture2primal.cc aimsalgo)

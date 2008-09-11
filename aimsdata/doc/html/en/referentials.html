@@ -1,0 +1,410 @@
+<!DOCTYPE public "-//w3c//dtd html 4.01 transitional//en" 
+		"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>AIMS</title>
+  <link href="bvstyle.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    
+<center>  
+<h2>Referentials</h2>
+</center>
+<hr width="100%"> <br>
+
+<p>Here is a description of the coordinates sytems used in Aims and Anatomist, and 
+what I have understood of how SPM handles its referentials.
+</p>
+
+<h3>AIMS and Anatomist</h3>
+
+<h4>Internally</h4>
+
+<p>Anatomist uses AIMS to handle its referentials so behaves exactly the same way.</p>
+<p>Aims tries to work internally in an image-specific referential, but with always 
+the same orientation. This orientation is axial with the following coordinates system:
+<li>X axis: right to left</li>
+<li>Y axis: front to back</li>
+<li>Z axis: top to bottom</li>
+<li>origin: the center of the <em>first</em> voxel: the voxel in the top, right, front corner</li>
+If you look at it you will realize that this referential is in <em>radiological convention</em> 
+ans is <em>indirect</em>. This is, in my opinion, a bad choice, but it's a bit too late to change.
+</p>
+<p>Once loaded in memory, all voxels should be organized in this order. As a consequence, images 
+in Anatomist are always displayed in radiological mode, whatever the actual orientation of data on 
+disk.</p>
+
+<h4>Externally</h4>
+
+<p>Images on disk, depending on their format and acquisition modes, are not necessarily in this 
+orientation. When a different orientation is detected, images are flipped in memory at load-time 
+to fit the standard AIMS orientation. And when images are written back to disk, they may also 
+be flipped back according to the specific format needs.
+</p>
+
+<h4>Transformations</h4>
+
+<p>By default, AIMS doesn't apply any transformation other than flipping images at load time 
+as described just before.
+</p>
+<p>But transformations can be provided in some Aims commands or loaded in Anatomist to apply 
+coordinates changes. Then coords transformations are applied on the fly when processing or 
+displaying data which are not in the same referential.
+</p>
+<p>There is no special referential (such as a common central working referential).</p>
+<p>Transformation files used by AIMS (<tt>.trm</tt> files) are ASCII files looking like this:
+<pre>Tx Ty Tz
+R11 R12 R13
+R21 R22 R23
+R31 R32 R33
+</pre>
+<tt>Tx</tt>, <tt>Ty</tt>, <tt>Tz</tt> are the translation components while the <tt>Rij</tt> 
+coefficients are the linear matrix part. When used, these coefficients are applied as a 
+"standard" 4x4 transformation matrix:
+<pre>    [ R11  R12  R13  Tx ]
+M = [ R21  R22  R23  Ty ]
+    [ R31  R32  R33  Tz ]
+    [   0    0    0   1 ]
+</pre>
+</p>
+
+
+<h3>SPM</h3>
+
+<h4>Internally</h4>
+
+<p>Internally, SPM <em>thinks</em> things is always in the same orientation, which is also axial 
+but with different axes:
+<li>X axis: left to right</li>
+<li>Y axis: back to front</li>
+<li>Z axis: bottom to top</li>
+<li>origin: the center of the voxel specified by the <em>origin</em> field of the SPM image 
+  header. This origin is specified in voxels and starts counting from 1 (not 0) like a matlab 
+  array index does.
+</li>
+This is a <em>neurological</em> convention orientation. The axes happen to be exactly the 
+contrary of what is done in AIMS. Bad luck... But this referential is direct so cannot be 
+considered worse than in AIMS...
+</p>
+<p>Working on the coordinate transformations for years and regularly getting headaches from it, 
+I am still not 100% sure of what I say here, so if I'm wrong, please correct me by sending a 
+message on BrainVisa forum (<a href="http://brainvisa.info/forum/">http://brainvisa.info/forum/</a>).
+Especially, I'm not sure that SPM99 and SPM2 really use the same referentials.
+</p>
+
+<h4>Externally</h4>
+
+<p>SPM handles input images in two different orientations: axial radiological and axial 
+neurological orientations. 
+This orientation is <b>not specified</b> in SPM format image files, so <b>you</b> have to 
+tell how they are oriented. This is done in SPM by a flipping flag set somewhere in SPM 
+defaults configuration (<tt>default.analyze.flip</tt> in SPM2).
+</p>
+<p>This flipping flag has changed in form and meaning between SPM99 and SPM2.</p>
+<p>As I have understood:
+<li><b>SPM99:</b>
+  <ul>
+    <li>SPM99 uses the flipping flag only when normalizing images, indicating that the 
+      normalization process must perform or not a flip towards the normalization template. 
+      A clear indication of it is that the flag is part of the normalization parameters and is 
+      not present in other parts of SPM.
+    </li>
+    <li>Otherwise, SPM99 does not bother about the orientation of images. This is to say: 
+      even when displaying images, radiological images will be displayed with the left on the right 
+      of the display window, and neurological images with the left on the left, regardless of the 
+      flipping flag.
+    </li>
+    <li>Normalized images are <b>always</b> in neurological orientation whatever the orientation 
+      of input unnormalized images. Consequently, after normalizing a radiological image, loading 
+      both a normalized image and an unnormalized one in SPM will display them with different 
+      orientations.
+    </li>
+    <li>I am not sure if normalization templates have to be necessarily in neurological 
+      orientation or not but I guess yes because there is no way to indicate that the template 
+      is in radiological orientation.
+    </li>
+    <li>Normalization matrices for radiological data contain a X axis flip (negative 1st coefficient)
+    </li>
+  </ul>
+</li>
+<li><b>SPM2:</b>
+  <ul>
+    <li>SPM2 uses the flipping flag at load time: radiological images are systematically 
+      flipped when loaded (and flipped back when rewritten so as to keep their radiological 
+      orientation on disk). This is true for <b>all Analyze/SPM</b> image files.
+    </li>
+    <li>This means all processings use it. As a consequence, all images are displayed in 
+      neurological orientation, left on the left, even for radiological images.
+    </li>
+    <li>But as this flag is global in SPM, <em>all</em> SPM images are considered to be in the 
+      same orientation: you cannot mix radio and neuro images. What I am pointing out here is 
+      only valid for SPM format images: SPM2 also handles MINC format, and Minc images contain 
+      orientation information (I don't know if SPM handles it correctly or not).
+    </li>
+    <li>Normalized images are now in the same orientation as the input unnormalized image. 
+      Normalizing a radiological image will result in a normalized file in the radiological 
+      orientation (in SPM format). <b>This is not what SPM99 used to do</b>.
+    </li>
+    <li>SPM2 does not understand SPM99 and vice versa: no compatibility at all (neither forward 
+      nor backward): if you are using the radiological convention (like we are), loading in 
+      SPM2 an image normalized by SPM99 will result in a spurious flip and incorrect display and 
+      processing. This means you cannot use with SPM2 an image database built with SPM99.
+    </li>
+    <li>Normalization templates can be in either orientation. More precisely, I guess the 
+      template must be in the orientation specified by the flipping flag, or in Minc format 
+      in neurological orientation. I'm not completely sure of this. But this is perhaps an 
+      explanation of why the standard normalization template is now in Minc format and not 
+      in SPM format (otherwise its interpretation would depend on a user-defined flag).
+    </li>
+    <li>Last minute: I have just discovered that SPM now sometimes produces images with negative 
+      voxel sizes. I guess it is a kind of flipping indication, but I don't know from what to 
+      what else. And we know that all radiological images don't have this negative voxel size 
+      feature. So my opinion is that it's not reliable at all (at least unless you exactly know 
+      which version of SPM has written each image and this info is not available). This sign 
+      information is ignored in the current version of AIMS.<br>
+      The headache goes on...
+    </li>
+  </ul>
+</li>
+</p>
+
+<h4>Transformations</h4>
+
+<p>SPM uses a common central referential to work in. Every image can provide a transformation 
+matrix to this referential. Such a transformation is specified in an optional <tt>.mat</tt> 
+file with the same name as the SPM format image. If this transformation is not provided, then 
+the origin translation is considered to be the only transformation needed to reach the 
+central referential. If the <tt>.mat</tt> file is specified, information contained in it 
+overrides some of the header information (including the origin).
+</p>
+<p>Normalization files (<tt>*_sn3d.mat</tt> for SPM99, <tt>*_sn.mat</tt> for SPM2) contain 
+transformations to the referential of a normalization template (either a standard one 
+provided with the SPM software distribution, or a custom user-made one). This transformation 
+contains an affine part (matrix), and optionally, depending on the normalization type, a 
+non-linear part (coefficients on a functions base as far as I know but I don't know much 
+about this part). Information about the input and template images are also included 
+(dimensions, voxel sizes and origins).
+</p>
+<p>Normalized images are in the referential of the normalization template used, but not 
+necessarily with the same bounding box, resolution and field of view.
+</p>
+<p>SPM99 and SPM2 use normalization files with different names and different contents. 
+They are not compatible, even if there is some common and similar information in them.
+</p>
+
+
+<h3>Changing between SPM and AIMS</h3>
+
+<p>Due to the different internal orientations of the coordinate systems, going from SPM to AIMS 
+and vice versa causes some serious problems.
+</p>
+
+<h4>Normalization</h4>
+
+<p>SPM normalization files are in matlab (<tt>.mat</tt>) format. AIMS cannot read the 
+proprietary matlab format, so such files cannot be directly imported in AIMS.
+</p>
+<p>However, BrainVisa can use Matlab (if Matlab is installed) and convert SPM matrices to 
+AIMS <tt>.trm</tt> format. <b>Only the affine part can be converted</b>, because AIMS only 
+use matrices for transformations, and non-linear information cannot fit into a matrix.
+</p>
+<p>As the orientation is different in SPM and AIMS, a transformation to a template image 
+is not the same as a transformation to a normalized image with a different field of view. 
+So, when converting SPM normalization matrices, the normalized image must be also provided, 
+otherwise BrainVisa can only give the transformation to the normalization template. Note 
+the difference.
+</p>
+
+
+<h3>Issues</h3>
+
+<h4>Unnormalized SPM images</h4>
+
+<p>It is impossible to guess the orientation of such images if you don't know how 
+they were acquired. This means you have to manually specify their orientation, either 
+for all images in SPM, or in BrainVisa when importing them into a database. BrainVisa tags 
+them so it knows everything afterwards and avoids mistakes. SPM does not.
+</p>
+
+<h4>Normalized SPM images</h4>
+
+<p>Normalizing the same image in radiological orientation  with SPM99 and SPM2 results in 
+normalized images in different orientations. When you import normalized images coming from 
+another site, you have to know whether they have been normalized by SPM99 or by SPM2, and if the 
+original image was in radiological or neurological orientation.
+</p>
+<p>I think the normalization file (<tt>*_sn3d.mat</tt> for SPM99, or <tt>*_sn.mat</tt> 
+for SPM2) contains enough information to retreive the orientation of input and template images, 
+so can disambiguate the situation.
+</p>
+
+<h4>Reading SPM origin</h4>
+
+<p>The origin field of SPM format is the position of the referential origin, 
+in voxels and starting from 1 (not from 0). In fact it's a matlab array index. So it is given in 
+the orientation of the image on disk. AIMS flips SPM images on several axes when loading them, so 
+the origin information also has to be flipped. Flipping it needs to know the image dimensions.
+</p>
+<p>AIMS referentials have their origin in the first voxel, (almost) in the corner of the image, and
+normally don't use the SPM origin. But the origin information is read and maintained. Anatomist 
+can, if asked for, make a transformation going from AIMS origin (corner) to the SPM origin. This 
+allows to display several aligned SPM images in Anatomist with the correct correspondance. However 
+after this translation, the coordinates are still in AIMS orientation (radiological and indirect), 
+not in SPM, so the coordinates do not correspond to what they are in SPM.
+</p>
+<p>To compare coordinates of SPM images in Anatomist and SPM, another transformation has to be 
+applied in Anatomist, with all the flips included. But this would result to a change in the 
+referential orientation (it would become direct) and would produce some strange 3D rendering 
+problems so it is not recommended to do so it you are not forced to.
+</p>
+
+<h4>Other formats (GIS etc)</h4>
+
+<p>Up to now, GIS images are considered being always in AIMS orientation. No flips are applied. 
+Future releases may take orientation information into account.
+</p>
+<p>The new Minc IO plugin takes orientation into account and flips data accordingly when reading 
+/ writing files.
+</p>
+<p>I am not sure if other formats (Dicom, Ecat...) can specify an image orientation or not. If they 
+do, the current release of AIMS will probably not take it into account.
+</p>
+
+
+<h3>Technical details</h3>
+
+<h4>SPM normalization matrices conversion to AIMS world</h4>
+
+<p>SPM99 and SPM2 don't use the same format of normalization files, but both provide more or less 
+the following information:
+<li>An affine transformation matrix, called <tt>Affine</tt>, transforming coordinates from the 
+  template space to the input space, in voxels
+</li>
+<li>A voxels-to-mm transformation matrix for the input image, transforming voxels of the image 
+  into a mm position in the SPM internal orientation, taking the origin into account. This 
+  matrix is called <tt>VF.mat</tt> in SPM2 and also performs flipping, and called <tt>MF</tt> 
+  in SPM99 but doesn't seem to contain the flipping information.
+</li>
+<li>Another voxel-to-mm matrix for the template image: <tt>VG.mat</tt> in SPM2, or <tt>MG</tt> 
+  in SPM99.
+</li>
+<li>Input and template image dimensions in voxels and a bit more: <tt>VF.dim</tt> and 
+  <tt>VG.dim</tt>in SPM2, or <tt>Dims</tt> in SPM99.
+</li>
+</p>
+
+<h5>Notations:</h5>
+
+<li>3 images: input (I call it Anatomy to be clearer), template, and normalized images. I use 
+  the suffixes <tt>A</tt>, <tt>T</tt> and <tt>N</tt> for coordinates on these 3 images.
+</li>
+<li>I use the same name for a given referential and coordinates in this referential: for instance 
+  <tt>RAA</tt> is both the AIMS referential of the anstomical image and a coordinates vector in it. 
+  I don't bother about standardized math notations: I don't remember them and haven't been using math 
+  anymore for many years. Don't ask me too much.
+</li>
+<li>Images dimensions and origins:
+  <ul>
+    <li><tt>dimA</tt>: vector of dimensions of the anatomical image (number of voxels)</li>
+    <li><tt>dimN</tt>: dimensions of the normalized image</li>
+    <li><tt>vsA</tt>: vector of voxel sizes of the anatomical image (mm)</li>
+    <li><tt>vsN</tt>: voxel sizes of the normalized image</li>
+    <li><tt>orgA</tt>: origin of the anatomical image (SPM, in voxels)</li>
+    <li><tt>orgN</tt>: origin of the normalized image</li>
+  </ul>
+</li>
+<li>AIMS referentials:
+  <ul>
+    <li><tt>RAA</tt>: anatomy (in mm, radio convention, origin in 1st voxel)</li>
+    <li><tt>RAN</tt>: normalized (in mm...)</li>
+  </ul>
+</li>
+<li>SPM referentials:
+  <ul>
+    <li><tt>RSA</tt>: anatomy, in voxels</li>
+    <li><tt>RSCA</tt>: anatomy, "central" referential (mm, neurological orientation, origin 
+      taken into account
+    </li>
+    <li><tt>RST</tt>: template, in voxels</li>
+    <li><tt>RSCT</tt>: template, "central" in mm</li>
+    <li><tt>RSN</tt>: normalized, in voxels</li>
+    <li><tt>RSCN</tt>: normalized, "central" in mm</li>
+  </ul>
+</li>
+<li>Transformation matrices:
+  <ul>
+    <li><tt>AIMS</tt>: <tt>RAA</tt> to <tt>RAN</tt>, what we want to calculate. Here again, 
+      I'm maybe not using correctly math notations. I mean: <tt>RAN = AIMS * RAA</tt>.
+    </li>
+    <li><tt>ASA</tt>: Aims to SPM-mm anat: <tt>RAA</tt> to <tt>RSCA</tt></li>
+    <li><tt>ASN</tt>: Aims to SPM-mm normalizedt: <tt>RAN</tt> to <tt>RSCN</tt></li>
+    <li><tt>Affine</tt>: the SPM affine matrix (voxels): <tt>RSA</tt> to <tt>RST</tt></li>
+    <li><tt>MA</tt>: anatomy, voxels-to-mm: <tt>RSA</tt> to <tt>RSCA</tt> (it's the SPM2 
+      <tt>VF.mat</tt> matrix)
+    </li>
+    <li><tt>MN</tt>: normalized, voxels-to-mm: <tt>RSN</tt> to <tt>RSCN</tt> (it's the SPM2 
+      <tt>VG.mat</tt> matrix)
+    </li>
+    <li><tt>TN</tt>: template to normalized in SPM-mm: <tt>RST</tt> to <tt>RSN</tt>. This 
+      transformation is identity in fact because the template and normalized images are in 
+      the same referential internally in SPM, but it's maybe clearer if I mention it.
+    </li>
+  </ul>
+</li>
+
+<h5>Resolution:</h5>
+
+<p>We want to calculate <tt>AIMS</tt>, provided <tt>Affine</tt>, <tt>MA</tt> and <tt>MT</tt>
+</p>
+<p>Directly:
+<pre>RSA = Affine * RST, or RST = Affine^-1 * RSA
+RAN = AIMS * RAA
+RSCA = MA * RSA
+RSCT = MT * RST
+RSCA = ASA * RAA
+RSCN = ASN * RAN
+RSCN = TN * RSCT
+</pre>
+</p>
+<p>Combining them:
+<pre>RSCN = ASN * AIMS * RAA
+AIMS * RAA = ASN^-1 * RSCN
+           = ASN^-1 * TN * RSCT
+           = ASN^-1 * TN * MT * RST
+           = ASN^-1 * TN * MT * Affine^-1 * RSA
+           = ASN^-1 * TN * MT * Affine^-1 * MA^-1 * RSCA
+           = ASN^-1 * TN * MT * Affine^-1 * MA^-1 * ASA * RAA
+<b>AIMS = ASN^-1 * TN * MT * Affine^-1 * MA^-1 * ASA</b>
+</pre>
+</p>
+<p><tt>ASA</tt> is a combination of an origin translation <tt>OA</tt>, and axes flips <tt>FA</tt> 
+from AIMS standard ref to SPM standard ref:
+<pre>     [ 1  0  0  -Ox ]
+OA = [ 0  1  0  -Oy ]
+     [ 0  0  1  -Oz ]
+     [ 0  0  0   1  ]
+
+O = ( orgA - 1 ) .* vsA
+
+     [ -1   0   0  Tx ]
+FA = [  0  -1   0  Ty ]
+     [  0   0  -1  Tz ]
+     [  0   0   0   1 ]
+
+T = ( dimA - 1 ) .* vsA
+
+ASA = OA * FA
+</pre>
+</p>
+<p>Similarly, for the normalized image:
+<pre>ASN = ON * TN
+</pre>
+using the normalized image sizes. To get the transformation to the template image only, 
+use the sizes of the template image instead.
+</p>
+
+
+</body>
+</html>

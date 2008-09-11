@@ -1,0 +1,14 @@
+*BEGIN ATTRIBUTES_TABLE 1.0
+
+attribute1	string
+attribute2	string
+attribute3	float
+
+work		string
+eval		string
+
+
+
+*END
+
+

@@ -1,0 +1,308 @@
+# tree 1.0
+
+*BEGIN TREE hierarchy
+graph_syntax RoiArg
+
+*BEGIN TREE fold_name
+name brain
+
+  *BEGIN TREE fold_name
+  name SKIN_FAT
+  color 0 127 0
+  roi_label 1
+  *END
+
+
+  *BEGIN TREE fold_name
+  name BONE
+  color 0 127 0
+  roi_label 4
+  *END
+
+  *BEGIN TREE fold_name
+  name carotids
+  color 0 127 0
+  roi_label 25
+  *END
+
+
+  *BEGIN TREE fold_name
+  name BLOOD
+  color 0 127 0
+  roi_label 24
+  *END
+
+
+  *BEGIN TREE fold_name
+  name BRAINBRAIN
+
+    *BEGIN TREE fold_name
+    name cerebrocerebellar_fissure_(ccbf)
+    *END
+
+    *BEGIN TREE fold_name
+    name anterior_cerebellar_incisure_(acbi)
+    *END
+
+    *BEGIN TREE fold_name
+    name superior_pontine_sulcus_(sps)
+    *END
+
+    *BEGIN TREE fold_name
+    name choroidal_fissure_(chf)
+    *END
+
+    *BEGIN TREE fold_name
+    name interpeduncular_cistern_(icis)
+    *END
+
+    *BEGIN TREE fold_name
+    name superior_cistern_(scis)
+    *END
+    
+    *BEGIN TREE fold_name
+    name lcr
+    color 0 127 0
+    roi_label 8
+    *END
+
+    *BEGIN TREE fold_name
+    name FOREBRAIN_(FB)
+
+        *BEGIN TREE fold_name
+        name chiasmatic_cistern_(ccis)
+        *END
+
+        *BEGIN TREE fold_name
+        name TELENCEPHALON_(Tel)
+
+             *BEGIN TREE fold_name
+             name posterior_parolfactory_sulcus_(ppos)
+             *END
+
+             *BEGIN TREE fold_name
+             name CEREBRAL_CORTEX_(Cx)
+             color 0 127 0
+             roi_label 22
+             *END
+	     
+	     *BEGIN TREE fold_name
+             name CEREBRAL_WHITE_MATTER_(cw)
+             color 0 127 0
+             roi_label 23
+             *END
+	     
+             *BEGIN TREE fold_name
+             name LATERAL_VENTRICLE_(LV)
+             *END
+	     
+             *BEGIN TREE fold_name
+             name BASAL_GANGLIA_(BG)
+
+                  *BEGIN TREE fold_name
+                  name STRIATUM_(Str)
+
+                       *BEGIN TREE fold_name
+                       name CAUDATE_NUCLEUS_(Cd)
+
+                            *BEGIN TREE fold_name
+                            name Right_caudate-nucleus(RCd)
+			    color 0 127 0
+			    roi_label 225
+                            *END
+
+                            *BEGIN TREE fold_name
+                            name Left_caudate-nucleus(LCd)
+			    color 0 127 0
+			    roi_label 145
+                            *END
+			    
+                       *END
+
+                       *BEGIN TREE fold_name
+                       name PUTAMEN_(Pu)
+
+                            *BEGIN TREE fold_name
+                            name Right_putamen-nucleus(RPu)
+			    color 0 127 0
+			    roi_label 235
+                            *END
+
+                            *BEGIN TREE fold_name
+                            name Left_putamen-nucleus(LPu)
+			    color 0 127 0
+			    roi_label 175
+                            *END
+			    		       
+                       *END
+
+                  *END
+
+                  *BEGIN TREE fold_name
+                  name GLOBUS_PALLIDUS_(GP)
+
+                       *BEGIN TREE fold_name
+                       name lateral_globus_pallidus_(LGP)
+                       *END
+
+                       *BEGIN TREE fold_name
+                       name medial_globus_pallidus_(MGP)
+                       *END
+
+                       *BEGIN TREE fold_name
+                       name lateral_medullary_lamina_(lml)
+                       *END
+
+                       *BEGIN TREE fold_name
+                       name medial_medullary_lamina_(mml)
+                       *END
+
+                       *BEGIN TREE fold_name
+                       name accessory_medullary_lamina_(aml)
+                       *END
+
+                  *END
+
+                  *BEGIN TREE fold_name
+                  name claustrum_(Cl)
+                  *END
+
+                  *BEGIN TREE fold_name
+                  name external_capsule_(exc)
+                  *END
+
+                  *BEGIN TREE fold_name
+                  name extreme_capsule_(emc)
+                  *END
+
+             *END
+	     
+             *BEGIN TREE fold_name
+              name SEPTUM_(Spt)
+	     *END
+	     
+	     *BEGIN TREE fold_name
+             name FORNIX_(fx)
+	     *END
+
+             *BEGIN TREE fold_name
+             name nucleus_accumbens_(Acb)
+	     
+                            *BEGIN TREE fold_name
+                            name Right_nucleus_accumbens(RAcb)
+			    color 0 127 127
+			    roi_label 215
+                            *END
+
+                            *BEGIN TREE fold_name
+                            name Left_nucleus_accumbens(LAcb)
+			    color 127 127 0
+			    roi_label 155
+                            *END
+
+             *END
+	     
+	  *END
+	  
+	  *BEGIN TREE fold_name
+	  name DIENCEPHALON_(DiE)
+	  
+             *BEGIN TREE fold_name
+             name THALAMUS_(Th)
+
+                  *BEGIN TREE fold_name
+                  name interthalamic_adhesion_(itha)
+                  *END
+
+                  *BEGIN TREE fold_name
+                  name ANTERIOR_NUCLEAR_GROUPGROUP
+
+                       *BEGIN TREE fold_name
+                       name anterodorsal_nucleus_(AD)
+                       *END
+
+                       *BEGIN TREE fold_name
+                       name anteromedial_nucleus_(AM)
+                       *END
+
+                       *BEGIN TREE fold_name
+                       name anteroventral_nucleus_(AV)
+                       *END
+		   *END
+		   
+                  *BEGIN TREE fold_name
+                  name THALAMUS_(Th)
+
+                       *BEGIN TREE fold_name
+                       name Right_Thalamus_(RTh)
+                       *END
+
+                       *BEGIN TREE fold_name
+                       name Left_Thalamus_(LTh)
+                       *END
+
+		   *END
+		   
+		   
+             *END
+	    
+	     *BEGIN TREE fold_name
+	     name THIRDVENTRICULE_(3V)
+	     *END
+	   
+	     
+	     *BEGIN TREE fold_name
+	     name HYPOTHALAMUS_(Hy)
+	     *END
+	  
+	  *END
+        
+	*END
+	
+	*BEGIN TREE fold_name
+	name MIDBRAIN
+
+	
+	  *BEGIN TREE fold_name
+	  name SUBSTANTIA_NIGRA(SN)
+	  *END
+
+
+        *END
+	
+	*BEGIN TREE fold_name
+	name HINDBRAIN
+	
+	  *BEGIN TREE fold_name
+	  name METENCEPHALON_(MET)
+	  
+            *BEGIN TREE fold_name
+            name PONS_(Pons)
+            *END
+
+            *BEGIN TREE fold_name
+            name CEREBELLUM_(Cb)
+	  
+	      *BEGIN TREE fold_name
+	      name CEREBELLAR_CORTEX
+	      color 0 127 0
+	      roi_label 77
+	      *END
+	     
+	      *BEGIN TREE fold_name
+	      name CEREBELLAR_WHITE_MATER
+	      color 0 127 0
+	      roi_label 78
+	      *END   
+	   
+	   *END
+	  
+	  *END
+	
+	*END
+	
+      *END
+ 
+  *END
+
+*END 

@@ -1,0 +1,4 @@
+
+darwin:INCLUDEPATH	+= /sw/lib/glib/include
+
+LIBS	= @libBuildLine@

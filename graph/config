@@ -1,0 +1,14 @@
+#
+#  Copyright (C) 2000-2004 CEA
+#
+#  This software and supporting documentation were developed by
+#  	CEA/DSV/SHFJ
+#  	4 place du General Leclerc
+#  	91401 Orsay cedex
+#  	France
+#
+#  Library configuration.
+
+release:CXXFLAGS	= -O2
+
+#!include config-local

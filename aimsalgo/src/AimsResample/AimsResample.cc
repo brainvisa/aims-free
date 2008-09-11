@@ -1,0 +1,266 @@
+/* Copyright (c) 1995-2007 CEA
+ *
+ *  This software and supporting documentation were developed by
+ *      CEA/DSV/SHFJ
+ *      4 place du General Leclerc
+ *      91401 Orsay cedex
+ *      France
+ *
+ * This software is governed by the CeCILL license version 2 under 
+ * French law and abiding by the rules of distribution of free software.
+ * You can  use, modify and/or redistribute the software under the 
+ * terms of the CeCILL license version 2 as circulated by CEA, CNRS
+ * and INRIA at the following URL "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL license version 2 and that you accept its terms.
+ */
+
+
+#include <aims/data/data_g.h>
+#include <aims/io/finder.h>
+#include <aims/io/process.h>
+#include <aims/io/reader.h>
+#include <aims/io/motionR.h>
+#include <aims/io/writer.h>
+#include <aims/vector/vector.h>
+#include <aims/resampling/resampling_g.h>
+#include <aims/getopt/getopt2.h>
+#include <aims/getopt/getoptProcess.h>
+#include <cartobase/smart/rcptr.h>
+#include <iomanip>
+
+using namespace aims;
+using namespace carto;
+using namespace std;
+
+
+class Resamp : public Process
+{
+public:
+  Resamp();
+
+  string	motionfile;
+  int		dx, dy, dz;
+  Point3df	size;
+  string	fout;
+  string	resampler;
+  double	defaultval;
+};
+
+
+template<class T> 
+bool doit( Process & p, const string & fname, Finder & f )
+{
+  Resamp		& rp = (Resamp &) p;
+
+  // resamplers map
+  map<string, int>	resamplers;
+  resamplers[ "n" ] = 0;
+  resamplers[ "nearest" ] = 0;
+  resamplers[ "0" ] = 0;
+  resamplers[ "l" ] = 1;
+  resamplers[ "linear" ] = 1;
+  resamplers[ "1" ] = 1;
+  resamplers[ "q" ] = 2;
+  resamplers[ "quadratic" ] = 2;
+  resamplers[ "2" ] = 2;
+  resamplers[ "c" ] = 3;
+  resamplers[ "cubic" ] = 3;
+  resamplers[ "3" ] = 3;
+  resamplers[ "quadric" ] = 4;
+  resamplers[ "4" ] = 4;
+  resamplers[ "quintic" ] = 5;
+  resamplers[ "5" ] = 5;
+  resamplers[ "six" ] = 6;
+  resamplers[ "sixthorder" ] = 6;
+  resamplers[ "6" ] = 6;
+  resamplers[ "seven" ] = 7;
+  resamplers[ "seventhorder" ] = 7;
+  resamplers[ "7" ] = 7;
+
+  typename map<string, int>::iterator	i 
+    = resamplers.find( rp.resampler );
+  if( i == resamplers.end() )
+    throw invalid_argument( "invalid resampler type: " + rp.resampler );
+
+  ResamplerFactory<T>	rf;
+  rc_ptr<Resampler<T> >	resamp( rf.getResampler( i->second ) );
+  AimsData<T>		data;
+  string		format = f.format();
+  Reader<AimsData<T> >	r( fname );
+  cout << "reading volume...\n";
+  if( !r.read( data, 0, &format ) )
+    return false;
+
+  cout << "done\n";
+
+  Motion motion;
+  if( ! rp.motionfile.empty() ) {
+    MotionReader mReader( rp.motionfile );
+    mReader.read( motion );
+  }
+
+  Resampler<T> & resampler = *resamp;
+  resampler.setRef( data );
+  resampler.setDefaultValue( (T) rp.defaultval );
+  
+  if ( rp.dx == 0 )
+    rp.dx = data.dimX() ;
+  if ( rp.dy == 0 )
+    rp.dy = data.dimY() ;
+  if ( rp.dz == 0 )
+    rp.dz = data.dimZ() ;
+
+  if ( rp.size[0] == 0 )
+    rp.size[0] = data.sizeX() ;
+  if ( rp.size[1] == 0 )
+    rp.size[1] = data.sizeY() ;
+  if ( rp.size[2] == 0 )
+    rp.size[2] = data.sizeZ() ;
+
+  cout << "resampling...\n";
+  AimsData<T> resampled = resampler.doit( motion, rp.dx, rp.dy, rp.dz, 
+					  rp.size );
+
+  if( data.header() )
+    {
+      resampled.setHeader( data.header()->cloneHeader() );
+      resampled.setSizeXYZT( rp.size[0],
+			     rp.size[1],
+			     rp.size[2],
+			     data.sizeT() );			     
+    }
+
+  cout << "done\n";
+
+  Writer<AimsData<T> >	w( rp.fout );
+  cout << "writing result...\n";
+  return w.write( resampled );
+}
+
+
+Resamp::Resamp() 
+  : Process(), dx( 0 ), dy( 0 ), dz( 0 )
+{
+  registerProcessType( "Volume", "S16", &doit<int16_t> );
+  registerProcessType( "Volume", "U8", &doit<uint8_t> );
+  registerProcessType( "Volume", "FLOAT", &doit<float> );
+}
+
+
+int main( int argc, const char **argv )
+{
+  try {
+    string	fileout, motionfile, rt = "l";
+    int		dx = 0, dy = 0, dz = 0;
+    Point3df	size(0, 0, 0);
+    string	tr = "linear";
+    Resamp	proc;
+    ProcessInput	filein( proc );
+    string 	referenceFile;
+    double	defaultval = 0;
+    
+    AimsApplication	app( argc, argv, "Resampling. Applies a " 
+                         "transformation matrix to a volume. Performs " 
+                         "linear resampling" );
+    app.addOption( filein, "-i", "source volume" );
+    app.addOption( fileout, "-o", "destination volume" );
+    app.addOption( motionfile, "-m", "motion file [default=identity]", true );
+    app.addOption( dx, "--dx", "dimx of the resampled volume", true );
+    app.addOption( dy, "--dy", "dimy of the resampled volume", true );
+    app.addOption( dz, "--dz", "dimz of the resampled volume", true );
+    app.addOption( size[0], "--sx", 
+                   "voxel x dimension of the resampled volume", 
+                   true );
+    app.addOption( size[1], 
+                   "--sy", "voxel y dimension of the resampled volume", 
+                   true );
+    app.addOption( size[2], 
+                   "--sz", "voxel z dimension of the resampled volume", 
+                   true );
+    app.addOption( rt, "-t", 
+                   "Resampling type: l[inear], n[earest], q[uadratic], " 
+                   "c[cubic], quartic, quintic, six[thorder], seven[thorder] " 
+                   "[default=linear]. Modes may also be specified as order " 
+                   "number: 0=nearest, 1=linear etc.",
+                   true );
+    app.addOption( referenceFile, "-r", "Volume used to define output voxel "
+                   "size and volume dimension (values are overrided by --dx, "
+                   "--dy, --dz, --sx, --sy and --sz)",
+                   true );
+    app.addOption( defaultval, "-d", "Default value for borders [default=0]", 
+                   true );
+    app.alias( "--input", "-i" );
+    app.alias( "--output", "-o" );
+    app.alias( "--motion", "-m" );
+    app.alias( "--type", "-t" );
+    app.alias( "--reference", "-r" );
+    app.alias( "--defaultvalue", "-d" );
+    app.initialize();
+    
+    if ( ! referenceFile.empty() ) {
+      Finder f;
+      if( ! f.check( referenceFile ) ) {
+        throw runtime_error( string( "cannot load " ) + referenceFile );
+      }
+      const PythonHeader *pheader = 
+        static_cast<const PythonHeader *>( f.header() );
+      vector< int > vd;
+      if( pheader->getProperty( "volume_dimension", vd ) ) {
+        if ( ! dx ) dx = vd[ 0 ];
+        if ( ! dy ) dy = vd[ 1 ];
+        if ( ! dz ) dz = vd[ 2 ];
+      }
+      else {
+        throw runtime_error( string( "cannot get volume_dimenstion attribute "
+                                     "of file " ) + referenceFile );
+      }
+      vector< float > vs;
+      if( pheader->getProperty( "voxel_size", vs ) ) {
+        if ( ! size[ 0 ] ) size[ 0 ] = vs[ 0 ];
+        if ( ! size[ 1 ] ) size[ 1 ] = vs[ 1 ];
+        if ( ! size[ 2 ] ) size[ 2 ] = vs[ 2 ];
+      }
+      else {
+        throw runtime_error(  string( "cannot get voxel_size attribute of "
+                                      "file " ) + referenceFile );
+      }
+    }
+
+    proc.motionfile = motionfile;
+    proc.fout = fileout;
+    proc.dx = dx;
+    proc.dy = dy;
+    proc.dz = dz;
+    proc.size = size;
+    proc.resampler = rt;
+    proc.defaultval = defaultval;
+
+    proc.execute( filein.filename );
+
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption & ) {}
+  catch( exception & e ) {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
+}

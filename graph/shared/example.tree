@@ -1,0 +1,26 @@
+*BEGIN TREE 1.0 example_tree
+
+attribute3	18.98
+
+*BEGIN TREE example_tree_node
+attribute1	1 2 3 5
+attribute2	Rototo
+attribute3	0.2
+*END
+
+
+*BEGIN TREE example_tree_node
+attribute1	1 4 6
+attribute2	et hop.
+attribute3	0.12
+
+*BEGIN TREE example_tree_node
+attribute1	1 4 6
+attribute2	pouka
+*END
+
+*END
+
+
+*END
+

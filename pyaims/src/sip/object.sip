@@ -1,0 +1,761 @@
+
+%ModuleCode
+#if SIP_VERSION >= 0x040700
+#ifndef PYAIMS_BUCKETMAP_VOID_DEFINED
+#define PYAIMS_BUCKETMAP_VOID_DEFINED
+#include <aims/bucket/bucket.h>
+typedef aims::BucketMap< Void > BucketMap_VOID;
+#endif
+#endif
+%End
+
+
+namespace carto
+{
+
+  class Object : rc_ptr_GenericObject
+  {
+%TypeHeaderCode
+#include <pyaims/object/object.h>
+#include <cartobase/object/pythonwriter.h>
+#include <cartobase/stream/sstream.h>
+#if SIP_VERSION < 0x040700
+#include "sipaimssiprc_ptr_GenericObject.h"
+#endif
+%End
+
+%TypeCode
+#include <cartobase/smart/rcptrtrick.h>
+
+#if SIP_VERSION >= 0x040700
+#ifndef PYAIMS_RCPTR_GenericObject_DEFINED
+#define PYAIMS_RCPTR_GenericObject_DEFINED
+typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
+#endif
+#endif
+%End
+
+  public:
+    bool isNone() const;
+
+%ConvertToTypeCode
+  if (!sipIsErr)
+  {
+    // Checking whether or not None has been passed instead of a list
+    // has already been done.
+    // The type is always valid.
+    return 1;
+  }
+
+  try
+    {
+      void    *obj;
+      int state = 0;
+      // std::cout << "convert to Object_n";
+      if( sipPy == Py_None )
+        *sipCppPtr = new sipcarto_Object;
+      if( PyBool_Check( sipPy ) )
+      {
+        if( sipPy == Py_False )
+          *sipCppPtr = new sipcarto_Object( carto::Object::value( false ) );
+        else
+          *sipCppPtr = new sipcarto_Object( carto::Object::value( true ) );
+      }
+      else if( PyInt_Check( sipPy ) )
+        *sipCppPtr = new sipcarto_Object( carto::Object::value
+                                        ( (int) PyInt_AsLong( sipPy ) ) );
+      else if( PyLong_Check( sipPy ) )
+        *sipCppPtr = new sipcarto_Object( carto::Object::value
+                                        ( PyLong_AsLong( sipPy ) ) );
+      else if( PyFloat_Check( sipPy ) )
+        *sipCppPtr = new sipcarto_Object( carto::Object::value
+                                        ( PyFloat_AsDouble( sipPy ) ) );
+      else if( PyString_Check( sipPy ) )
+        *sipCppPtr = new sipcarto_Object( carto::Object::value
+                              ( std::string( PyString_AsString( sipPy ) ) ) );
+      else if( sipCanConvertToInstance( sipPy, sipClass_carto_Object,
+               SIP_NO_CONVERTORS ) )
+      {
+        obj = sipConvertToInstance( sipPy, sipClass_carto_Object,
+                                    sipTransferObj,
+                                    SIP_NO_CONVERTORS, &state, sipIsErr );
+        carto::Object       *o = (carto::Object *) obj;
+        sipReleaseInstance( obj, sipClass_carto_Object, state );
+        *sipCppPtr = new carto::Object( *o ); //sipcarto_Object( *o );
+        return sipGetState( sipTransferObj );
+      }
+      else if( sipCanConvertToInstance( sipPy, sipClass_carto_GenericObject,
+               SIP_NO_CONVERTORS ) )
+      {
+        obj = sipConvertToInstance( sipPy, sipClass_carto_GenericObject,
+                                    sipTransferObj,
+                                    SIP_NO_CONVERTORS, &state, sipIsErr );
+        carto::GenericObject        *o = (carto::GenericObject *) obj;
+        *sipCppPtr = new carto::Object( o ); //sipcarto_Object( o );
+        // if there is no rc_ptr on this object yet, make it inactive
+        // std::cout << "Object from GenericObject\n";
+        if( carto::rc_ptr_trick::refCount( **sipCppPtr ) == 1 )
+        {
+          // std::cout << "inactive RCObject\n";
+          (*sipCppPtr)->release();
+          delete *sipCppPtr;
+          *sipCppPtr = new carto::Object( o, true );
+          /* std::cout << "refcount: "
+            << carto::rc_ptr_trick::refCount( **sipCppPtr ) << std::endl; */
+        }
+        sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+        return sipGetState(sipTransferObj);
+      }
+      else
+      {
+        // attempt to re-use an existing container GenericObject if it exists
+        if( PyObject_HasAttrString( sipPy, "__genericobject__" ) )
+        {
+          PyObject *gobj = PyObject_GetAttrString( sipPy, "__genericobject__" );
+          obj = sipConvertToInstance( gobj, sipClass_carto_GenericObject,
+                                      sipTransferObj, SIP_NO_CONVERTORS, &state,
+                                      sipIsErr );
+          carto::GenericObject        *o = (carto::GenericObject *) obj;
+          *sipCppPtr = new carto::Object( o );
+          // if there is no rc_ptr on this object yet, make it inactive
+          if( carto::rc_ptr_trick::refCount( **sipCppPtr ) == 1 )
+          {
+            (*sipCppPtr)->release();
+            delete *sipCppPtr;
+            *sipCppPtr = new carto::Object( o, true );
+          }
+          sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+          Py_DECREF( gobj );
+          return sipGetState(sipTransferObj);
+        }
+        // attempt to use sipPy.toObject() method if it is defined
+        if( PyObject_HasAttrString( sipPy, "toObject" ) )
+        {
+          PyObject *toobj = PyObject_GetAttrString( sipPy, "toObject" );
+          PyObject *restoobj = PyObject_CallFunctionObjArgs( toobj, 0 );
+          if( restoobj )
+          {
+            if( sipCanConvertToInstance( restoobj, sipClass_carto_Object,
+               SIP_NO_CONVERTORS ) )
+            {
+              obj = sipConvertToInstance( restoobj, sipClass_carto_Object,
+                                          sipTransferObj, SIP_NO_CONVERTORS,
+                                          &state, sipIsErr );
+              carto::Object       *o = (carto::Object *) obj;
+              *sipCppPtr = new carto::Object( *o );
+              sipReleaseInstance( obj, sipClass_carto_Object, state );
+            }
+            Py_DECREF( restoobj );
+            if( *sipCppPtr )
+              return sipGetState( sipTransferObj );
+          }
+          Py_DECREF( toobj );
+        }
+        // no other solution works: embed a PyObject* into a GenericObject
+        *sipCppPtr = new carto::Object( carto::Object::value( sipPy ) );
+      }
+      sipIsErr = 0;
+      PyErr_Clear();
+      return SIP_TEMPORARY;
+    }
+  catch( std::exception & e )
+    {
+      // sipIsErr = 1;
+      PyErr_SetString( PyExc_AttributeError, e.what() );
+      return 0;
+    }
+%End
+
+
+  protected:
+    Object() /ReleaseGIL/;
+    Object( const carto::Object & ) /ReleaseGIL/;
+    Object( carto::GenericObject*, bool = false ) /ReleaseGIL/;
+%MethodCode
+  // std::cout << "Object( GenericObject* )\n";
+  if( !a0 )
+    sipCpp = new sipcarto_Object;
+  else
+  {
+    sipCpp = new sipcarto_Object( a0, false );
+    // if there is no rc_ptr on this object yet, make it inactive
+    if( carto::rc_ptr_trick::refCount( *sipCpp ) == 1 )
+    {
+      sipCpp->release();
+      delete sipCpp;
+      sipCpp = new sipcarto_Object( a0, true );
+    }
+  }
+%End
+  };
+
+
+
+  // --------
+
+
+  class GenericObject : carto::RCObject
+  {
+%TypeHeaderCode
+#include <pyaims/object/object.h>
+#include <cartobase/object/pythonwriter.h>
+#include <cartobase/stream/sstream.h>
+#include <graph/graph/graph.h>
+#include <graph/tree/tree.h>
+#include <aims/roi/hie.h>
+#if SIP_VERSION < 0x040700
+#include "sipaimssipcartoGenericObject.h"
+#include "sipaimssipGraph.h"
+#include "sipaimssipTree.h"
+#include "sipaimssipaimsHierarchy.h"
+#include "sipaimssipGraphObject.h"
+#include "sipaimssipBucketMap_VOID.h"
+#endif
+#include <stdio.h>
+%End
+
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToSubClassCode
+  //std::cout << "ConvertToSubClassCode GenericObject " << sipCpp << std::endl;
+  if (dynamic_cast<Vertex *>(sipCpp))
+        sipClass = sipClass_Vertex;
+  else if (dynamic_cast<Edge *>(sipCpp))
+        sipClass = sipClass_Edge;
+  else if (dynamic_cast<Graph*>(sipCpp))
+        sipClass = sipClass_Graph;
+  else if (dynamic_cast<GraphObject *>(sipCpp))
+        sipClass = sipClass_GraphObject;
+  else if(dynamic_cast<Tree *>( sipCpp ))
+  {
+  	if(dynamic_cast<aims::Hierarchy *>( sipCpp ))
+        	sipClass = sipClass_aims_Hierarchy;
+        else sipClass = sipClass_Tree;
+  }
+  else if (dynamic_cast<BucketMap_VOID *>(sipCpp))
+    sipClass = sipClass_BucketMap_VOID;
+  else if (dynamic_cast<carto::GenericObject *>(sipCpp))
+	sipClass = sipClass_carto_GenericObject;
+  else if (dynamic_cast<carto::RCObject *>(sipCpp))
+	sipClass = sipClass_carto_RCObject;
+  else  sipClass = NULL;
+%End
+
+%ConvertToTypeCode
+  if( !sipIsErr )
+  {
+    return ( sipPy == Py_None )
+      || sipCanConvertToInstance( sipPy, sipClass_carto_GenericObject,
+           SIP_NO_CONVERTORS )
+      || sipCanConvertToInstance( sipPy, sipClass_carto_Object, 0 );
+  }
+
+  // std::cout << "ConvertToTypeCode GenericObject\n";
+  *sipCppPtr = pyaims::fromT<carto::GenericObject>( sipPy,
+    sipClass_carto_GenericObject, sipTransferObj );
+  /*
+  if( *sipCppPtr ) std::cout << "is GenericObject: " << *sipCppPtr << ", "
+    << (*sipCppPtr)->type() << ", rc: "
+    << carto::rc_ptr_trick::refCount( **sipCppPtr )
+    << ", rcobj: " << static_cast<carto::RCObject *>( *sipCppPtr )
+    << std::endl;
+  else std::cout << "not a GenericObject\n";
+  */
+  if( !*sipCppPtr )
+  {
+    //std::cout << "fromRcptr...\n";
+    *sipCppPtr = pyaims::fromRcptr<carto::GenericObject, carto::Object>
+      ( sipPy, sipClass_carto_Object, 0 /*sipTransferObj*/ );
+    /*
+    if( *sipCppPtr ) std::cout << "is Object: " << *sipCppPtr << ", "
+      << (*sipCppPtr)->type() << std::endl;
+    else std::cout << "not a Rcptr\n";
+    */
+    if( sipCppPtr )
+      return sipGetState(sipTransferObj);
+  }
+  if( !*sipCppPtr )
+  {
+    std::cout << "error\n";
+    *sipIsErr = 1;
+  }
+  return 0; // NOT a temporary: build from an existing instance.
+  // I don't get everything from this return code, but returning anything
+  // else results in a segfault sooner or later.
+
+%End
+
+  public:
+    virtual std::string type() const = 0;
+
+    // Size API
+    virtual size_t size() const = 0;
+    int __len__() const;
+%MethodCode
+    carto::Object i = sipCpp->objectIterator();
+    int	c = 0;
+    for( ; i->isValid(); i->next(), ++c ) {}
+    sipRes = c;
+%End
+
+    // Scalar API
+    virtual double getScalar() const = 0;
+
+    // String API
+    virtual std::string getString() const = 0;
+
+
+    // Array API
+
+    virtual bool isArray() const = 0;
+    virtual bool isDynArray() const = 0;
+
+    carto::Object __getitem__( int ) /Factory, ReleaseGIL/;
+%MethodCode
+    try
+      {
+        carto::Object o = sipCpp->getArrayItem( a0 );
+        sipRes = new carto::Object( o );
+      }
+    catch( ... )
+      {
+        sipIsErr = 1;
+        sipRes = 0;
+        std::ostringstream x;
+        x << a0;
+        SIP_BLOCK_THREADS
+        PyErr_SetString( PyExc_KeyError, x.str().c_str() );
+        SIP_UNBLOCK_THREADS
+      }
+%End
+
+    // Dictionary API
+
+    virtual bool isDictionary() const = 0;
+
+    SIP_PYTUPLE keys() const /AutoGen/;
+%MethodCode
+    carto::Object i;
+    unsigned c = 0;
+    try
+      {
+        // I can't rely on size() which is sometimes wrongly overriden
+        for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c ) {}
+        PyObject	*po = PyTuple_New( c );
+        c = 0;
+        for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c )
+          PyTuple_SetItem( po, c, PyString_FromString( i->key().c_str() ) );
+        sipRes = po;
+      }
+    catch( std::exception & e )
+      {
+        PyErr_SetString( PyExc_RuntimeError, 
+                         ( std::string( "error while iterating dictionary: " ) 
+                           + e.what() ).c_str() );
+        sipIsErr = 1;
+      }
+%End
+
+
+    SIP_PYTUPLE items() const /AutoGen/;
+%MethodCode
+    carto::Object i;
+    unsigned c = 0;
+    try
+    {
+        // I can't rely on size() which is sometimes wrongly overriden
+        for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c ) {}
+        PyObject	*po = PyTuple_New( c ), *pi;
+        c = 0;
+        for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c )
+        {
+          pi = PyTuple_New( 2 );
+          PyTuple_SetItem( pi, 0, PyString_FromString( i->key().c_str() ) );
+          PyTuple_SetItem( pi, 1,
+            sipConvertFromInstance( new carto::Object( i->currentValue() ),
+              sipClass_carto_Object, Py_None ) );
+          PyTuple_SetItem( po, c, pi );
+        }
+        sipRes = po;
+    }
+    catch( std::exception & e )
+    {
+        PyErr_SetString( PyExc_RuntimeError, 
+                         ( std::string( "error while iterating dictionary: " ) 
+                           + e.what() ).c_str() );
+        sipIsErr = 1;
+    }
+%End
+
+
+    SIP_PYTUPLE values() const /AutoGen/;
+%MethodCode
+    carto::Object i;
+    unsigned c = 0;
+    try
+    {
+        // I can't rely on size() which is sometimes wrongly overriden
+        for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c ) {}
+        PyObject	*po = PyTuple_New( c );
+        c = 0;
+        for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c )
+          PyTuple_SetItem( po, c,
+            sipConvertFromInstance( new carto::Object( i->currentValue() ),
+              sipClass_carto_Object, Py_None ) );
+        sipRes = po;
+    }
+    catch( std::exception & e )
+    {
+        PyErr_SetString( PyExc_RuntimeError, 
+                         ( std::string( "error while iterating dictionary: " ) 
+                           + e.what() ).c_str() );
+        sipIsErr = 1;
+    }
+%End
+
+
+    carto::Object __getitem__( const std::string & )
+      /Factory, AutoGen, ReleaseGIL/;
+%MethodCode
+    try
+      {
+        carto::Object o = sipCpp->getProperty( *a0 );
+        sipRes = new carto::Object( o );
+      }
+    catch( ... )
+      {
+        sipIsErr = 1;
+        sipRes = 0;
+        SIP_BLOCK_THREADS
+        PyErr_SetString( PyExc_KeyError, a0->c_str() );
+        SIP_UNBLOCK_THREADS
+      }
+%End
+
+
+    void __setitem__( int, const SIP_PYOBJECT ) /AutoGen/;
+%MethodCode
+    // std::cout << "setitem(int)\n";
+    try
+      {
+        void	*obj;
+        if( PyInt_Check( a1 ) )
+          {
+            sipCpp->setArrayItem( a0,
+                                  carto::Object::value
+                                   ( (int) PyInt_AsLong( a1 ) ) );
+          }
+        else if( PyLong_Check( a1 ) )
+          {
+            sipCpp->setArrayItem( a0,
+                                 carto::Object::value( PyLong_AsLong( a1 ) ) );
+          }
+        else if( PyFloat_Check( a1 ) )
+          {
+            sipCpp->setArrayItem( a0, 
+                                 carto::Object::value
+                                 ( PyFloat_AsDouble( a1 ) ) );
+          }
+        else if( PyString_Check( a1 ) )
+          {
+            sipCpp->setArrayItem
+              ( a0,
+                carto::Object::value
+                ( std::string( PyString_AsString( a1 ) ) ) );
+          }
+        else if( ( obj = sipForceConvertTo_carto_Object( a1, &sipIsErr ) ) )
+          {
+            carto::Object	*o = (carto::Object *) obj;
+            sipCpp->setArrayItem( a0, *o );
+          }
+        else if( ( obj = sipForceConvertTo_carto_GenericObject( a1, &sipIsErr ) ) )
+          {
+            carto::GenericObject	*o = (carto::GenericObject *) obj;
+            sipCpp->setArrayItem( a0, carto::Object( o ) );
+          }
+        else
+          {
+            sipCpp->setArrayItem( a0, carto::Object::value( a1 ) );
+          }
+        sipIsErr = 0;
+        PyErr_Clear();
+      }
+    catch( std::exception & e )
+      {
+        sipIsErr = 1;
+        PyErr_SetString( PyExc_AttributeError, e.what() );
+      }
+%End
+
+    void __setitem__( const std::string &, const SIP_PYOBJECT ) /AutoGen/;
+%MethodCode
+    // std::cout << "setitem\n";
+    try
+      {
+        void    *obj;
+        if( PyInt_Check( a1 ) )
+          {
+            sipCpp->setProperty( *a0, 
+                                 carto::Object::value
+                                   ( (int) PyInt_AsLong( a1 ) ) );
+          }
+        else if( PyLong_Check( a1 ) )
+          {
+            sipCpp->setProperty( *a0, 
+                                 carto::Object::value( PyLong_AsLong( a1 ) ) );
+          }
+        else if( PyFloat_Check( a1 ) )
+          {
+            sipCpp->setProperty( *a0, 
+                                 carto::Object::value
+                                 ( PyFloat_AsDouble( a1 ) ) );
+          }
+        else if( PyString_Check( a1 ) )
+          {
+            sipCpp->setProperty
+              ( *a0, 
+                carto::Object::value
+                ( std::string( PyString_AsString( a1 ) ) ) );
+          }
+        else if( ( obj = sipForceConvertTo_carto_Object( a1, &sipIsErr ) ) )
+          {
+            carto::Object       *o = (carto::Object *) obj;
+            sipCpp->setProperty( *a0, *o );
+          }
+        else if( ( obj = sipForceConvertTo_carto_GenericObject( a1, &sipIsErr ) ) )
+          {
+            carto::GenericObject        *o = (carto::GenericObject *) obj;
+            sipCpp->setProperty( *a0, carto::Object( o ) );
+          }
+        else
+          {
+            sipCpp->setProperty( *a0, carto::Object::value( a1 ) );
+          }
+        sipIsErr = 0;
+        PyErr_Clear();
+      }
+    catch( std::exception & e )
+      {
+        sipIsErr = 1;
+        PyErr_SetString( PyExc_AttributeError, e.what() );
+      }
+%End
+
+
+    void __delitem__( const std::string & ) /AutoGen/;
+%MethodCode
+    sipCpp->removeProperty( *a0 );
+%End
+
+
+    // printing
+
+    SIP_PYOBJECT __str__() /AutoGen, ReleaseGIL/;
+%MethodCode
+    try
+      {
+        carto::PythonWriter	pw;
+        std::ostringstream	ss;
+        pw.attach( ss );
+        pw.setSingleLineMode( true );
+        pw.setCatchFunction( &carto::_objectStrCatchFunction );
+        pw.write( *sipCpp, false, false );
+        std::string	s = ss.str();
+        const char	*s2 = s.c_str();
+
+        if( s2 == 0 )
+          s2 = "";
+
+        SIP_BLOCK_THREADS
+        sipRes = PyString_FromString(s2);
+        SIP_UNBLOCK_THREADS
+      }
+    catch( std::exception & e )
+      {
+        sipIsErr = 1;
+        sipRes = 0;
+        SIP_BLOCK_THREADS
+        PyErr_SetString( PyExc_RuntimeError, e.what() );
+        SIP_UNBLOCK_THREADS
+      }
+%End
+
+    // Syntaxed API
+
+    virtual bool hasSyntax() const /AutoGen/;
+%MethodCode
+    carto::SyntaxedInterface 
+      *si = sipCpp->getInterface<carto::SyntaxedInterface>();
+    if( si && si->hasSyntax() )
+      sipRes = true;
+    else
+      sipRes = false;
+%End
+
+    virtual std::string getSyntax() const /Factory, AutoGen/;
+%MethodCode
+    try
+      {
+        carto::SyntaxedInterface 
+          *si = sipCpp->getInterface<carto::SyntaxedInterface>();
+        if( si && si->hasSyntax() )
+          sipRes = new std::string( si->getSyntax() );
+        else
+          {
+            sipRes = 0;
+            sipIsErr = 1;
+            PyErr_SetString( PyExc_RuntimeError, "object has no syntax" );
+          }
+      }
+    catch( std::exception & e )
+      {
+        sipIsErr = 1;
+        sipRes = 0;
+        PyErr_SetString( PyExc_RuntimeError, e.what() );
+      }
+%End
+
+    void setSyntax( const std::string & ) /AutoGen/;
+%MethodCode
+    try
+      {
+        carto::SyntaxedInterface 
+          *si = sipCpp->getInterface<carto::SyntaxedInterface>();
+        if( si && si->hasSyntax() )
+          si->setSyntax( *a0 );
+        else
+          {
+            sipIsErr = 1;
+            PyErr_SetString( PyExc_RuntimeError, "object has no syntax" );
+          }
+      }
+    catch( std::exception & e )
+      {
+        sipIsErr = 1;
+        PyErr_SetString( PyExc_RuntimeError, e.what() );
+      }
+%End
+
+    // iterable API
+
+    virtual bool isIterable() const = 0;
+    /*virtual*/ carto::Object objectIterator() const = 0;
+
+    // __iter__ isn't called by python iter() function when defined in SIP
+    carto::Object __objiter__() const /Factory, AutoGen/;
+%MethodCode
+    //std::cout << "__iter__\n";
+    if( sipCpp->isIterator() )
+      sipRes = new carto::Object( sipCpp );
+    else
+      sipRes = new carto::Object( sipCpp->objectIterator() );
+%End
+
+    int __contains__( const std::string & ) const /AutoGen, ReleaseGIL/;
+%MethodCode
+    carto::Object i = sipCpp->objectIterator();
+    if( i->isValid() && i->isDictionaryIterator() )
+      {
+        for( ; i->isValid() && i->key()!= *a0; i->next() ) {}
+        sipRes = i->isValid();
+      }
+    else
+      {
+        for( ; i->isValid(); i->next() )
+          try
+            {
+              if( i->currentValue()->getString() == *a0 )
+                break;
+            }
+          catch( std::exception & )
+            {
+            }
+        sipRes = i->isValid();
+      }
+%End
+
+    int __contains__( carto::Object ) const /AutoGen, ReleaseGIL/;
+%MethodCode
+    carto::Object i = sipCpp->objectIterator();
+    if( i->isValid() && i->isDictionaryIterator() )
+      {
+        std::string k = (*a0)->getString();
+        for( ; i->isValid() && i->key()!= k; i->next() ) {}
+        sipRes = i->isValid();
+      }
+    else
+      {
+        for( ; i->isValid() && i->currentValue()!= *a0; i->next() ) {}
+        sipRes = i->isValid();
+      }
+%End
+
+    virtual bool hasProperty( const std::string & ) const = 0
+      /PyName=has_key, ReleaseGIL/;
+
+    // iterator API
+    virtual bool isIterator() const = 0;
+    virtual bool isDictionaryIterator() const = 0;
+    virtual bool isValid() const = 0;
+    /*virtual*/ carto::Object currentValue() const = 0 /Factory, ReleaseGIL/;
+
+    SIP_PYOBJECT next() /AutoGen/;
+%MethodCode
+    //std::cout << "it next\n";
+    if( !sipCpp->isIterator() )
+      {
+        sipRes = 0;
+        sipIsErr = 1;
+        PyErr_SetString( PyExc_TypeError, "not an iterator" );
+      }
+    else if( !sipCpp->isValid() )
+      {
+        sipRes = 0;
+        sipIsErr = 1;
+        PyErr_SetString( PyExc_StopIteration, "iterator outside bounds" );
+      }
+    else
+      {
+        if( sipCpp->isDictionaryIterator() )
+          sipRes = PyString_FromString( sipCpp->key().c_str() );
+        else
+#if SIP_VERSION >= 0x040400
+          sipRes = sipConvertFromInstance
+            ( new carto::Object( sipCpp->currentValue() ), 
+              sipClass_carto_Object, 0 );
+#else
+          sipRes = sipMapCppToSelfSubClass
+            ( new carto::Object( sipCpp->currentValue() ), 
+              sipClass_carto_Object );
+#endif
+        sipCpp->next();
+      }
+%End
+
+    virtual std::string key() const = 0 /Factory/;
+
+  protected:
+    GenericObject();
+
+  private:
+    GenericObject( const carto::GenericObject & );
+    virtual carto::GenericObject* clone() const = 0;
+  };
+
+// --------
+
+  class NumericGenericObjectConverter
+  {
+%TypeHeaderCode
+#include <pyaims/object/object.h>
+%End
+
+  public:
+    static bool asBool( const carto::GenericObject & x );
+    static long asInt( const carto::GenericObject & x );
+    static long asLong( const carto::GenericObject & x );
+  };
+
+};

@@ -1,0 +1,46 @@
+#
+#  Copyright (C) 2000-2003 CEA
+#
+#  This software and supporting documentation were developed by
+#  	CEA/DSV/SHFJ
+#  	4 place du General Leclerc
+#  	91401 Orsay cedex
+#  	France
+#
+#  Library configuration.
+#
+
+DEFINES = @defines@
+VERSION = @version@
+#CONFIG = warn_off
+CONFIG    = thread
+
+# bug in Apple gcc-3.1 optimizer
+release-darwin:CXXFLAGS = -O
+
+INCLUDEPATH = @includeBuild@
+BUILDMODEEXT	= @buildModeExtension@
+LIBS = @libDepsLine@
+
+LIBS_FOR_AIMSALGO	= -L@lib@ -laimsalgopub@buildModeExtension@ @libDepsLine@
+LIBS_DICOM		= @libLine@ @aimsdicom:libBuildLine@
+LIBS_AIMSJPEG		= @libLine@ @aimsjpeg:libBuildLine@
+LIBS_JPEG		= @libLine@ @jpeg:libLine@
+LIBS_ECAT		= @libLine@ @aimsecat:libBuildLine@
+LIBS_VIDA		= @libLine@ @aimsvida:libBuildLine@
+LIBS_GLUT		= @libLine@ @glut:libBuildLine@
+LIBS_FORTRAN		= @libLine@ @fortran:libBuildLine@
+
+defmodule(aimsdicom)	= @aimsdicom:enabled@
+defmodule(aimsjpeg)	= @aimsjpeg:enabled@
+defmodule(aimsecat)	= @aimsecat:enabled@
+defmodule(aimsvida)	= @aimsvida:enabled@
+defmodule(jpeg) 	= @jpeg:enabled@
+defmodule(glut) 	= @glut:enabled@
+defmodule(aimsfortran)	= @aimsfortran:enabled@
+
+module(aimsdicom):INCLUDEPATH += @dcmtk:includes@
+module(jpeg)     :INCLUDEPATH += @jpeg:includes@
+module(aimsecat) :INCLUDEPATH += @ecat+:includes@
+module(aimsvida) :INCLUDEPATH += @vidaIO:includes@
+module(glut)     :INCLUDEPATH += @glut:includes@

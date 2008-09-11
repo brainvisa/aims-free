@@ -1,0 +1,339 @@
+/* Copyright (c) 1995-2005 CEA
+ *
+ *  This software and supporting documentation were developed by
+ *      CEA/DSV/SHFJ
+ *      4 place du General Leclerc
+ *      91401 Orsay cedex
+ *      France
+ *
+ * This software is governed by the CeCILL license version 2 under 
+ * French law and abiding by the rules of distribution of free software.
+ * You can  use, modify and/or redistribute the software under the 
+ * terms of the CeCILL license version 2 as circulated by CEA, CNRS
+ * and INRIA at the following URL "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL license version 2 and that you accept its terms.
+ */
+
+#ifndef AIMS_SURFACE_SURFACEOPERATION_D_H
+#define AIMS_SURFACE_SURFACEOPERATION_D_H
+
+#include <aims/mesh/surfaceOperation.h>
+#include <aims/mesh/texture.h>
+#include <aims/resampling/motion.h>
+
+namespace aims
+{
+
+  template<int D, class T> std::vector<std::set<uint> >
+  SurfaceManip::surfaceNeighbours( const AimsTimeSurface<D,T> & surf )
+  {
+    const std::vector< AimsVector<uint,D> >	& poly = surf.polygon();
+    uint					n = poly.size();
+    std::vector<std::set<uint> >		neigh( surf.vertex().size() );
+
+    for ( uint i=0; i<n; ++i )
+      for ( uint j=0; j<D; ++j )
+	for ( uint k=0; k<D; ++k )
+	  if ( j != k )
+	    neigh[poly[i][j]].insert( poly[i][k] );
+
+    return neigh;
+  }
+
+  template<int D, class T> std::vector<std::set<uint> > 
+  SurfaceManip::surfaceNeighbours2ndOrder( const AimsTimeSurface<D,T> & surf )
+  {
+    const std::vector< AimsVector<uint,D> >	& poly = surf.polygon();
+    uint					n = poly.size();
+    std::vector<std::set<uint> >		neigh( surf.vertex().size() );
+    std::vector<std::set<uint> >			neigh_final( surf.vertex().size() );
+
+    for ( uint i=0; i<n; ++i )
+      for ( uint j=0; j<D; ++j )
+	for ( uint k=0; k<D; ++k )
+	  if ( j != k )
+	    neigh[poly[i][j]].insert( poly[i][k] );
+
+    for ( uint i=0; i<neigh.size() ; ++i)
+    {
+        std::set<uint> voisin=neigh[i];
+	std::set<uint> voisin_final=neigh[i];
+	std::set<uint>::iterator voisin_pt=voisin.begin();
+	for ( ; voisin_pt!=voisin.end(); ++voisin_pt)
+	{
+		uint j=*voisin_pt;
+		std::set<uint> vois2=neigh[j];
+		std::set<uint>::iterator v_pt=vois2.begin();
+		for ( ; v_pt!=vois2.end(); ++v_pt)
+			voisin_final.insert(*v_pt);
+	}
+	neigh_final[i]=voisin_final;
+    }	
+
+    return neigh_final;
+  }
+
+
+  template<int D, class T> std::vector<std::map<uint, float> >
+  SurfaceManip::surfaceNeighbourDistance( const AimsTimeSurface<D,T> & surf )
+  {
+    const std::vector< AimsVector<uint,D> >	& poly = surf.polygon();
+    uint					n = poly.size();
+    const std::vector<Point3df>			& vert  = surf.vertex();
+    std::vector<std::map<uint, float> > neighDist(surf.vertex().size());
+    Point3df					diff;
+    float					dist;
+
+    for ( uint i=0; i<n; ++i )
+      for ( uint j=0; j<D; ++j )
+	for ( uint k=0; k<D; ++k )
+	  if ( j != k )
+	    {
+	      diff=vert[poly[i][j]] - vert[poly[i][k]]; // COURANT - VOISIN
+	      dist = diff.norm();	//DISTANCE ENTRE LES DEUX;
+	      neighDist[poly[i][j]][poly[i][k]] = dist;
+	    }
+
+    return neighDist;
+  }
+
+  template<int D, class T> 
+  void SurfaceManip::invertSurfacePolygons( AimsTimeSurface<D,T> & surface )
+  {
+    typename AimsTimeSurface<D,T>::iterator		is, fs=surface.end();
+    typename std::vector< AimsVector<uint,D> >::iterator	ip, fp;
+    uint					n = D/2;
+    for ( is=surface.begin(); is!=fs; ++is )
+      {
+	AimsSurface<D, T>		& surf = is->second;
+	std::vector< AimsVector<uint,D> >	& poly = surf.polygon();
+
+	for ( ip=poly.begin(), fp=poly.end(); ip!=fp; ++ip )
+	  {
+	    AimsVector<uint,D>	& p = *ip;
+	    for ( uint i=0; i<n; ++i )
+	      {
+		uint vert = p[i];
+		p[i] = p[D-i-1];
+		p[D-i-1] = vert;
+	      }
+	  }
+      }
+  }
+
+
+  template<int D, class T>
+  void SurfaceManip::meshMerge( AimsTimeSurface<D,T> & dst, 
+                                const AimsTimeSurface<D,T> & add )
+  {
+    std::vector<Point3df> & vert = dst.vertex();
+    std::vector<Point3df> & norm = dst.normal();
+    std::vector<AimsVector<uint,D> > & poly = dst.polygon();
+    const std::vector<Point3df>  & vert2 = add.vertex();
+    const std::vector<Point3df>  & norm2 = add.normal();
+    const std::vector<AimsVector<uint,D> >  & poly2 = add.polygon();
+    unsigned i, j, n = vert.size(), m = vert2.size(), p = poly2.size();
+
+    // copy vertices & normals
+    for ( i=0; i<m; ++i )
+      vert.push_back( vert2[i] );
+    for ( i=0, m=norm2.size(); i<m; ++i )
+	norm.push_back( norm2[i] );
+
+    // translate & copy polygons
+    for ( i=0; i<p; ++i )
+      {
+	AimsVector<uint,D>  pol;
+	for ( j=0; j<D; ++j )
+	  pol[j] = poly2[i][j] + n;
+	poly.push_back( pol );
+      }
+    dst.header().setProperty( "vertex_number", int( n + m ) );
+  }
+
+  template<int D, class T>
+  void SurfaceManip::meshMerge( AimsTimeSurface<D,T> & dst, 
+				const std::list<AimsTimeSurface<D,T> > & src )
+  {
+    dst.erase();
+    typename std::list<AimsTimeSurface<D,T> >::const_iterator
+      im, em = src.end();
+    for ( im=src.begin(); im!=em; ++im )
+      meshMerge( dst, *im );
+  }
+
+
+  template<int D, class T>
+  void SurfaceManip::meshTransform( AimsTimeSurface<D,T> & mesh, 
+                                    const Motion & motion )
+  {
+    typename AimsTimeSurface<D,T>::iterator	itime, tend = mesh.end();
+    float					norm;
+
+    for( itime=mesh.begin(); itime!=tend; ++itime )
+      {
+        typedef std::vector< Point3df > Points;
+        Points& vertex = itime->second.vertex();
+        Points& normal = itime->second.normal();
+        for( Points::size_type k = 0; k < vertex.size(); ++k )
+          {
+            vertex[ k ] = motion.transform( vertex[ k ] );
+            /* Denis: applying this transformation to normals is WRONG if 
+               there is any scale factor ! */
+            normal[ k ] = motion.transform( normal[ k ] ) 
+              - motion.translation();
+            // normalize normals
+            norm = normal[k][0] * normal[k][0] + normal[k][1] * normal[k][1] 
+              + normal[k][2] * normal[k][2];
+            norm = 1. / sqrt( norm );
+            normal[k][0] *= norm;
+            normal[k][1] *= norm;
+            normal[k][2] *= norm;
+          }
+      }
+    if( !motion.isDirect() )
+      invertSurfacePolygons( mesh );
+  }
+
+
+  template <int D, typename T>
+  AimsTimeSurface<D,T> *
+      SurfaceManip::meshExtract( const AimsTimeSurface<D,T> & mesh,
+                                 const TimeTexture<int16_t> & tex,
+                                 int16_t value, std::vector<size_t> ** overtIndex)
+  {
+    AimsTimeSurface<D,T>  *omesh = new AimsTimeSurface<D,T>;
+    typename AimsTimeSurface<D,T>::const_iterator  imt, jmt, emt = mesh.end();
+    typename TimeTexture<int16_t>::const_iterator  itt, jtt, ett = tex.end();
+    * overtIndex = new std::vector<size_t>;
+    jmt = mesh.begin();
+    imt = jmt;
+    jtt = tex.begin();
+    itt = jtt;
+    int ti = 0;
+    while( jmt != emt || jtt != ett )
+    {
+      if( jmt != emt )
+        imt = jmt;
+      if( jtt != ett )
+        itt = jtt;
+      AimsSurface<D,T>  & mh = (*omesh)[ ti ];
+      std::vector<Point3df>  & overt = mh.vertex();
+      std::vector<Point3df>  & onorm = mh.normal();
+      std::vector<AimsVector<uint, D> > & opoly = mh.polygon();
+      const std::vector<Point3df>  & vert = imt->second.vertex();
+      const std::vector<Point3df>  & norm = imt->second.normal();
+      const std::vector<AimsVector<uint, D> > & poly = imt->second.polygon();
+      typename std::vector<AimsVector<uint, D> >::const_iterator
+          im, em = poly.end();
+      int i = 0, k;
+      const Texture<int16_t>  & tx = itt->second;
+      std::map<uint, uint> vmap;
+      typename std::map<uint, uint>::iterator iv, ev = vmap.end();
+      unsigned nt;
+      bool  absmaj, hasdist;
+      int16_t y, mval = 0;
+      Point3df  g;
+      float dist, dist2;
+      for( im=poly.begin(); im != em; ++im )
+      {
+        std::map<int16_t, unsigned> vals;
+        nt = 0;
+        absmaj = false;
+        g = Point3df( 0, 0, 0 );
+        // let's have a vote
+        for( k=0; k<D; ++k )
+        {
+          g += vert[ (*im)[k] ];
+          y = tx[ (*im)[k] ];
+          unsigned  & x = vals[y];
+          ++x;
+          if( x > nt )
+          {
+            nt = x;
+            mval = y;
+            absmaj = true;
+          }
+          else if( x == nt )
+            absmaj = false;
+        }
+        if( vals[ value ] == nt )
+        {
+          // 'value' is amongst the most taken value
+          if( !absmaj )
+          {
+            // take nearest vertex from barycenter with value in majority
+            g /= D;
+            dist = 0;
+            hasdist = false;
+            for( k=0; k<D; ++k )
+            {
+              y = tx[ (*im)[k] ];
+              if( vals[ y ] == nt )
+              {
+                dist2 = ( vert[ (*im)[k] ] - g ).norm2();
+                if( !hasdist || dist2 < dist )
+                {
+                  dist = dist2;
+                  mval = y;
+                }
+              }
+            }
+            if( mval == value )
+              absmaj = true;
+          }
+          // else absmaj == true: value has absolute majority
+        }
+        else
+          // value is in minority
+          absmaj = false;
+        if( absmaj )
+        { // copy polygon
+          AimsVector<uint, D> p;
+          for( k=0; k<D; ++k )
+          {
+            iv = vmap.find( (*im)[k] );
+            if( iv == ev )
+            {
+              vmap[ (*im)[k] ] = i;
+              p[k] = i;
+              overt.push_back( vert[ (*im)[k] ] );
+              onorm.push_back( norm[ (*im)[k] ] );
+              (** overtIndex).push_back((*im)[k]);
+              ++i;
+            }
+            else
+              p[k] = iv->second;
+          }
+          opoly.push_back( p );
+        }
+      }
+      ++ti;
+      ++jmt;
+      ++jtt;
+    }
+    return omesh;
+  }
+
+}
+
+#endif

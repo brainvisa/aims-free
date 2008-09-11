@@ -1,0 +1,7 @@
+This is a slightly reorganized version of ecat library made by 
+Merence Sibomana <Sibomana@topo.ucl.ac.be> found at 
+ftp://dormeur.topo.ucl.ac.be/pub/ecat/ - see README
+
+We have just organized the sources to fit our Makefile system (and fixed 
+one or two little bugs, I can't remember where), the contents are mainly 
+unchanged.

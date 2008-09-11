@@ -1,0 +1,41 @@
+#
+#  Copyright (C) 2000-2001 CEA
+#
+#  This software and supporting documentation were developed by
+#  	CEA/DSV/SHFJ
+#  	4 place du General Leclerc
+#  	91401 Orsay cedex
+#  	France
+#
+#  Executables configuration.
+#
+#  $Id: //depot/aims/main/config-app#12 $
+#
+
+TEMPLATE        = app
+
+#!include config
+
+# disable optimization under linux / egcs
+release-linux:CXXFLAGS = 
+
+
+irix:LIBS	+= -L../../lib -laimsalgo -laimsalgopub
+darwin:LIBS	+= -L../../lib -laimsalgo -laimsalgopub
+
+release-solaris:LIBS =					\
+	-L../../lib/solaris -laimsalgo -laimsalgopub
+
+debug-solaris:LIBS    = 				\
+	-L../../lib/solaris -laimsalgo-debug -laimsalgopub-debug
+
+release-linux:LIBS =					\
+	-L../../lib/linux -laimsalgo -laimsalgopub
+
+debug-linux:LIBS =					\
+	-L../../lib/linux -laimsalgo-debug -laimsalgopub-debug
+
+# seems to be needed here to anable proper multithreading
+LIBS		+= -lpthread
+
+#!include config-app-local

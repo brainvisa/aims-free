@@ -1,0 +1,16 @@
+*BEGIN RULES_TABLE 1.0
+
+
+*BEGIN RULE example_tree
+attribute3
+*END
+
+*BEGIN RULE example_tree_node
+attribute1
+attribute2
+*END
+
+
+*END
+
+

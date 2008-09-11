@@ -1,0 +1,5 @@
+IF ( DOXYGEN_FOUND )
+  SET( DOXYFILE_HTML_HEADER "\"${DOXYGEN_BINARY_DIR}/head_aimsdata.html\"" )
+  FILE( READ "${DOXYGEN_BINARY_DIR}/doxygenInput" _doxygenInput )
+  SOMA_GENERATE_DOXYGEN_DOC( ${PROJECT_NAME}_doxygen _doxygenInput head_aims.html aims.gif )
+ENDIF ( DOXYGEN_FOUND )

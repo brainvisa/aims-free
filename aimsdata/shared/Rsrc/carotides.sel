@@ -1,0 +1,82 @@
+# tree 1.0
+
+*BEGIN TREE selector 
+graph_syntax selector
+
+# Cervelet **************************************
+	*BEGIN TREE subset
+   surname Cerebellum
+
+	      *BEGIN TREE subset
+	      nomenName Cerebellum
+	      *END	  
+	  
+	      *BEGIN TREE subset
+	      nomenName CEREBELLUM_(Cb)
+	      *END
+	  
+	      *BEGIN TREE subset
+	      nomenName CEREBELLAR_CORTEX
+	      *END
+	     
+	      *BEGIN TREE subset
+	      nomenName CEREBELLAR_WHITE_MATER
+	      *END   
+	   
+   *END
+# peau************************	
+	*BEGIN TREE subset
+   surname Skin-Fat
+   
+	      *BEGIN TREE subset
+	   	nomenName Skin-Fat
+	   	*END
+			 
+        *BEGIN TREE subset
+        nomenName SKIN_FAT
+        *END
+			
+   *END
+# cortex (matière grise) *************************	
+	*BEGIN TREE subset
+   surname Cortex
+   
+	      *BEGIN TREE subset
+	   	nomenName Cortex
+	   	*END
+   
+	      *BEGIN TREE subset
+	      nomenName CEREBRAL_CORTEX_(Cx)
+	      *END	    
+   *END
+
+# matière blanche ********************************
+   *BEGIN TREE subset
+   surname WhiteMatter
+	
+	      *BEGIN TREE subset
+	      nomenName WhiteMatter
+	      *END
+			
+	      *BEGIN TREE subset
+	      nomenName CEREBRAL_WHITE_MATTER_(cw)
+	      *END	    
+   *END
+	
+# carotids ********************************
+	*BEGIN TREE subset
+   surname carotids
+	
+	      *BEGIN TREE subset
+	      nomenName carotids
+	      *END
+			
+	
+	      *BEGIN TREE subset
+	      nomenName BLOOD
+	      *END
+			
+	*END
+
+
+*END

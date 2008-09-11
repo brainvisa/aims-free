@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsClusterArg clusterArg.cc aimsalgo)

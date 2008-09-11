@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsMesh2SSGraph mesh2ssgraph.cc aimsalgo)

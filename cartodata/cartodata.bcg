@@ -1,0 +1,62 @@
+#
+#  Copyright (C) 2004-2006 CEA
+#
+#  This software and supporting documentation were developed by
+#  	CEA/DSV/SHFJ
+#  	4 place du General Leclerc
+#  	91401 Orsay cedex
+#  	France
+#
+
+
+#------------------------- Blitz++ optional dependency ------------------------
+class BlitzComponent( SystemComponent ):
+  _name = 'blitz'
+  _includeFile = 'blitz/array.h'
+
+
+#------------------------- Common CARTODATA definitions -----------------------
+class CartoDataComponent( GenericMakerComponent ):
+  _name = 'cartodata'
+
+  optionsDescription = GenericMakerComponent.optionsDescription.copy()
+  optionsDescription.update( {
+    'blitz': ( None, 'include Blitz++ array support and API (default: yes)' ),
+  } )
+
+  def __init__( self, options ):
+    self._useblitz = None
+    GenericMakerComponent.__init__( self, options )
+    # Default options values
+    self.setDefaultOption( 'blitz', 1 )
+
+  def useBlitz( self ):
+    if self._useblitz is None:
+      self._useblitz = ( int( self.getOption( 'blitz' ) ) \
+        and weakDependency( BlitzComponent, self ) )
+      # if self._useblitz:
+      #   print 'using blitz++'
+    return self._useblitz
+
+  def dependencies( self ):
+    deps = [ 'cartobase' ]
+    if self.useBlitz():
+      deps.append( BlitzComponent )
+    return deps
+
+  def weakDependencies( self ):
+    weakDeps = []
+    # print 'CartoData weak deps:', weakDeps
+    return weakDeps
+
+  def postInit( self ):
+    if not self._initialized:
+      GenericMakerComponent.postInit( self )
+      if self.useBlitz():
+        # Define substitution variables
+        defines = self.get( 'defines' )
+        if not defines:
+          defines = []
+        defines.append( 'CARTO_USE_BLITZ' )
+        self._data[ 'defines' ] = defines
+

@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsMeshWhite AimsMeshWhite.cc aimsalgo)

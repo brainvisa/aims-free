@@ -1,0 +1,166 @@
+<!DOCTYPE public "-//w3c//dtd html 4.01 transitional//en" 
+		"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>AIMS: SPM format notes</title>
+  <style type="text/css">
+    BODY {
+	  text-align: justify;
+	  margin: 0.5cm;
+	}
+  </style>
+</head>
+
+<body text="#000000" bgcolor="#ffffff" link="#0000ee" vlink="#551a8b"
+ alink="#ff0000">
+
+<center>  
+<h2>AIMS: SPM format notes</h2>
+</center>
+<hr width="100%"> <br>
+
+<h1><font color="#c00000">SPM images IO: <font color="#ff0000">***CAUTION***</font>, 
+behaviour change in AIMS 3.1</font></h1>
+
+<p><b>Date: 2008/01/05</b></p>
+
+The default settings in AIMS now conform to the SPM2 behaviour, not SPM99 anymore. This affects Aims, Anatomist, Vip and all of our software. User-level options can still override this, of course.<br>
+Read the <a href="config.html">config files documentation</a>.<br>
+However to avoid problems, it is recommended to avoid the SPM/Analyze format and to use NIFTI-1 instead: NIFTI is the new standard format used by SPM5, FSL and several other software. Unfortunately NIFTI-1 was not supported in AIMS 3.0 and prior versions. 3.1 supports NIFTI-1.
+
+
+<!-- -->
+
+<h1><font color="#c00000">SPM images IO: <font color="#ff0000">***CAUTION***</font>, 
+behaviour change in AIMS 2.13</font></h1>
+
+<p><b>Date: 26/11/2003</b></p>
+
+<h3>Image orientation</h3>
+
+As SPM2 changed its image storage conventions regarding neurological / radiological 
+images storage compared to SPM99, we had to do something quite similar, but it's kind 
+of a mess:
+<ul>
+  <li>in SPM99:
+    <ul>
+    <li>images were considered to be in neurological convention (left/right not 
+      flipped) unless a default was changed in SPM settings. This flag affected how 
+	  images were read.</li>
+	<li>Normalized images were always stored in <b>neurological convention</b>, so 
+      in labs (like ours) where images were acquired in radio mode, <b>normalized 
+	  images were flipped compared to original images</b>.</li>
+	<li>Visualization always showed images in their own mode (no flip when viewing 
+	  them).</li>
+	</ul>
+  </li>
+  <li>in SPM2:
+	<ul>
+	<li>images are still considered to be in neurological convention unless a setting 
+	  is changed in SPM</li>
+	  <li>Normalized images are now stored in their <b>original convention</b>, ie 
+	  following the setting, so <b><em>radiological images normalized with SPM99 
+	  and the same images normalized withg SPM2 are not written in the same 
+	  direction</em></b>. The setting is taken into account for calculations (ie 
+	  internally flipping the normalization template or something like this).
+	</li>
+	<li>Visualization now always shows images in <b>neurological convention</b>, 
+	  <em>not</em> what it did before.
+	</li>
+	<li>As far as we know, there is <b><em>no way to know how an image has been 
+	  written</em></b>, this means we can't guess if it was normalized with SPM99 or 
+	  with SPM2, and so we <em>don't know</em> if a normalized image made from a 
+	  radiological raw image is in neuro or radio convention.
+	</li>
+	</ul>
+  </li>
+</ul>
+   
+We can't automatically know when reading an image, so <em>YOU</em> have to tell what 
+happened to your images (see below).<br>
+In AIMS/Anatomist, it' another mess:
+<ul>
+  <li>in 2.2.x packages and earlier (AIMS 2.12, anatomist 1.29, VIP 2.4):
+  <ul>
+    <li>Non-normalized images were <b>always</b> considered to be in <b>radiological</b>
+	  convention (left/right flipped) because, er... just because it's the way 
+	  <em>we</em> use them in our lab...
+    </li>
+    <li>Normalized images were always considered in <b>neurological</b> mode as 
+	  SPM99 wrote them.
+    </li>
+    <li>Visualization always showed images in <b>radiological convention</b></li>
+    <li>There was (and is still) no clean way to guess if an image is normalized 
+	  or not. The only thing we can do is compare the image field of view to those of 
+	  standard normalization templates used in SPM (like the MNI template), which 
+	  hopefully have so funny dimensions that we can more or less reliably recognize 
+	  them. But using a custom template, or using an non-normalized image with the 
+	  same dimensions as the template, can abuse our detection.
+    </li>
+  </ul>
+  </li>
+  <li>in 2.3.x packages and later (AIMS 2.13, anatomist 1.30):<br>
+	We can't guess everything, so we now use settings, like SPM does. Like in 
+	SPM, a settings configuration is <b>not able to read correctly every image</b>. 
+	You will have to change Aims settings when switching between SPM99 and SPM2 images. 
+	There is a "site-wide" settings file (located in <tt>$AIMS_PATH/shared/aimsrc</tt> 
+	or <tt>$SHFJ_SHARED_PATH/aims/aimsrc</tt>), and a "personal" settings file, located 
+	if <tt>$HOME/.aimsrc</tt>. See the <a href="config.html">configuration file 
+	documentation</a> for more details.<br>
+	For SPM files, the following parameters can change the behaviour of reading/writing
+	SPM files by Aims:
+	<ul>
+	  <li><tt>spm_input_radio_convention</tt></li>
+	  <li><tt>spm_input_spm2_normalization</tt></li>
+	  <li><tt>spm_output_radio_convention</tt></li>
+	  <li><tt>spm_output_spm2_normalization</tt></li>
+	  <li><tt>spm_force_output_convention</tt></li>
+	</ul>
+	All these parameters are described in the <a href="config.html">config file 
+	documentation</a>.<br>
+	Tags are set in <tt>.minf</tt> files saved with images in SPM format by 
+	Aims/Anatomist, so the next time we read them, we know how to read them.<br>
+	These tags are:
+	<ul>
+	  <li><tt>spm_radio_convention</tt></li>
+	  <li><tt>spm_spm2_normalization</tt></li>
+	</ul>
+	and are the equivalents of the above input/output flags of the settings.<br>
+  </li>
+</ul>
+	
+<p><b>Be careful, any mistake in these options can result in flipped images with 
+left and right switched.</b> This is not always visible at the first sight and can 
+mess a whole study if you don't pay attention to that.</p>
+  
+<p><b><font color="#ff0000">Warning:</font> VIP library and commands have not 
+changed, they are still in "SPM99/radiological" mode</b>.</p>
+
+<a name="volume4d"></a>
+<h3>4D volumes</h3>
+
+<p>SPM99 could not read 4D Analyze/SPM images. It used to read/write series of 3D
+volumes, so a 4D volume had to be split. SPM2 now supports 4D volumes.</p>
+
+<p>AIMS 2.12 and earlier versions followed SPM rule when writing 4D volumes: they 
+were split into a series of 3D volumes. Aims 2.13 is able to write 4D volumes 
+that can be read by SPM2. The behaviour of AIMS is determined by an option in 
+the <a href="config.html">settings file</a>: <tt>spm_output_4d_volumes</tt>. 
+This variable is 1 if not specified (4D enabled), but is disabled by default 
+in the global config file going with the AIMS 2.13 distribution so as to 
+keep complete compatibility with SPM99.</p>
+
+<p>4D Volumes saved as 3D series can now be read as a 4D volume if:
+<li>they were saved by AIMS 2.13 or later</li>
+<li>the first volume of the series is given as input to Aims or Anatomist</li>
+Aims 2.13 saves indications about the series (timesteps number, files in the 
+series) in the <tt>.minf</tt> header of the first 3D volume.</p>
+
+<p><b>Note:</b> AIMS 2.12 and earlier had a bug and did not write correctly 4D 
+volumes as a series, the <tt>.minf</tt> meta-header should be removed from 
+those volumes, and they cannot be re-read as a 4D volume (unless the 
+<tt>.minf</tt> is manually fixed).</p>
+
+</body>
+</html>

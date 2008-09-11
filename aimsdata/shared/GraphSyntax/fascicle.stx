@@ -1,0 +1,18 @@
+##############################
+#       GRAPH FIBER          #
+##############################
+
+*BEGIN SYNTAX FascicleArg
+FascicleArg_VERSION string 
+filename_base     string      !
+voxel_size float_vector !
+*END
+
+# Syntactic attributes
+
+*BEGIN SYNTAX fascicle
+index             int         !
+*END
+
+*BEGIN SYNTAX fascicle_junction
+*END

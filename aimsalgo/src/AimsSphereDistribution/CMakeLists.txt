@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsSphereDistribution AimsSphereDistribution.cc aimsalgo)

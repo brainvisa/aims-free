@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsSiemensEPI2Volume main.cc aimsalgo aimsdicom)

@@ -1,0 +1,1 @@
+SHFJ_ADD_EXECUTABLE(AimsGaussianSmoothing1d main.cc aimsalgo)

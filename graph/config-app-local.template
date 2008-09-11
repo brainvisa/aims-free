@@ -1,0 +1,3 @@
+
+LIBS	= @libBuildLine@
+#darwin:LIBS	+= @libDepsLine@

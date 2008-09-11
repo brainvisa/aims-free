@@ -1,0 +1,11 @@
+
+ADD_EXECUTABLE(AimsFlip
+main.cc
+)
+
+
+TARGET_LINK_LIBRARIES(AimsFlip
+aimsdata
+)
+
+INSTALL(TARGETS AimsFlip DESTINATION bin/)

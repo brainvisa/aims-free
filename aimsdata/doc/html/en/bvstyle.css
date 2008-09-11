@@ -1,0 +1,67 @@
+/*
+@import url("style.css");
+*/
+BODY {
+	  background-color: white;
+	  text-align: justify;
+	  margin: 0.5cm;
+	  color: black;
+	}
+a:link
+	{
+		color: #113377;
+		text-decoration:none;
+	}
+a:visited
+	{
+		color: #113377;
+		text-decoration:none;
+	}
+a:hover
+	{
+		color: #7F0000;
+		text-decoration: none;
+	}
+a:active
+	{
+		color: #7F0000;
+	}
+#menu {
+		width: 100%;
+		font-weight: bold;
+		margin:0px;
+		padding:0px;
+	}
+#menu td {
+		text-align:center;
+		background-color: #FFE6C8;
+		padding-top:10px;
+		padding-left:5px;
+		padding-bottom:10px;
+		padding-right:5px;
+		border: 1px solid #FFFFFF;
+		/* text-shadow: black 0.2em 0.2em 5px; */
+		font-variant: small-caps;
+	}
+#menu a {
+		text-decoration:none;
+	}
+#menu td:hover {
+		background-color: #FFC8C8;
+	}
+#firstimg {
+		margin: 0 60px 0 0;
+	}
+LI
+{
+	/* list-style-type: square; */
+	list-style-image: url("images/tick.png");
+	/*background: url("images/tick.png") no-repeat;
+	background-position: top left;
+	margin-left: -5mm;
+	padding-left: 5mm; */
+}
+
+/* h3.news {
+	display: inline;
+} */

@@ -1,0 +1,30 @@
+# tree 1.0
+
+*BEGIN TREE selector 
+graph_syntax selector
+
+   *BEGIN TREE subset
+   surname RightStriata
+   
+	*BEGIN TREE subset
+	nomenName Right_putamen-nucleus(RPu)
+	*END
+	
+	*BEGIN TREE subset
+	nomenName Right_caudate-nucleus(RCd)
+	*END
+   *END
+   
+   *BEGIN TREE subset
+   surname LeftStriata
+   
+	*BEGIN TREE subset
+	nomenName Left_putamen-nucleus(LPu)
+	*END
+	
+	*BEGIN TREE subset
+	nomenName Left_caudate-nucleus(LCd)
+	*END
+   *END
+   
+*END

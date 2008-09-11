@@ -1,0 +1,229 @@
+#-----------------------------------------------------------------------------
+class AimsDataComponent( GenericMakerComponent ):
+  _name = 'aimsdata'
+
+  optionsDescription = GenericMakerComponent.optionsDescription.copy()
+  optionsDescription.update( {
+    'vida': ( None, 'include VIDA/SPM file format support (default: yes)' ),
+    'ecat': ( None, 'include ECAT file format support (default: yes)' ),
+    'dicom': ( None, 'include DICOM file format support (default: yes)' ),
+    'jpeg': ( None, 'include JPEG file format support (default: yes)' ),
+    'tiff': ( None, 'include TIFF file format support (default: yes)' ),
+    'minc': ( None, 'include MINC file format support (default: yes)' ), 
+    'ply': ( None, 'include PLY file format support (default: yes)' ), 
+    'nifti': ( None, 'include NIFTI1 file format support (default: yes)' ), 
+    'aimsgui': ( None, 'configure/build GUI part (default: yes)' ),
+    'dlopen': (None, 'include dynamic library loading plugins support (default: yes)'),
+  } )
+
+  def __init__( self, options ):
+    GenericMakerComponent.__init__( self, options )
+    # Default options values
+    self.setDefaultOption( 'vida', 1 )
+    self.setDefaultOption( 'dicom', 1 )
+    self.setDefaultOption( 'jpeg', 1 )
+    self.setDefaultOption( 'tiff', 1 )    
+    self.setDefaultOption( 'ecat', 1 )
+    self.setDefaultOption( 'minc', 1 )
+    self.setDefaultOption( 'aimsgui', 1 )
+    self.setDefaultOption( 'dlopen', 1 )
+    self.setDefaultOption( 'ply', 1 )
+    self.setDefaultOption( 'nifti', 1 )
+
+  
+  def shareDir( self ):
+    return os.path.join( 'share', 'aims-' + self.version() )
+
+
+  def useCarto( self ):
+    ver = self._data.get( 'version' )
+    if ver:
+      v = map( lambda x: int(x), ver.split( '.' ) )
+      minversion = ( 2, 14 )
+      if v[0] > minversion[0] \
+        or ( v[0] == minversion[0] and v[1] >= minversion[1] ):
+        return 1
+    return 0
+
+  def postInit( self ):
+    if not self._initialized:
+      GenericMakerComponent.postInit( self )
+      # Define substitution variables
+      defines = self.get( 'defines' )
+      if not defines:
+        defines = []
+      defines.append( 'AIMS' )
+      if not int( self.getOption( 'dlopen', 0 ) ):
+        self._data[ 'dlopen' ] = 'AIMS_NO_DLOPEN'
+        defines.append( 'AIMS_NO_DLOPEN' )
+      if int( self.getOption( 'nifti', 0 ) ) \
+        and weakDependency( AimsNiftiComponent, self ):
+        defines.append( 'HAVE_ZLIB' )
+      self._data[ 'defines' ] = defines
+
+  def dependencies( self ):
+    result = [ 'graph' ]
+    ver = self._data.get( 'version' )
+    if self.useCarto():
+      result.append( 'cartodata' )
+    if systemname != 'windows':
+      result.append( PThreadComponent )
+    if self.getOption( 'dlopen' ) and systemname != 'cygwin' \
+        and systemname != 'windows':
+      result.append( DlopenComponent )
+    if systemname == 'irix':
+      result.append( LibGenComponent )
+    return result
+
+  def weakDependencies( self ):
+    result = []
+    if int( self.getOption( 'dicom', 0 ) ) \
+      and weakDependency( AimsDicomComponent, self ):
+      result.append( AimsDicomComponent )
+    if int( self.getOption( 'ecat', 0 ) ) \
+      and weakDependency( AimsEcatComponent, self ):
+      result.append( AimsEcatComponent )
+    if int( self.getOption( 'jpeg', 0 ) ) \
+      and weakDependency( AimsJpegComponent, self ):
+      result.append( AimsJpegComponent )
+    if int( self.getOption( 'tiff', 0 ) ) \
+      and weakDependency( AimsTiffComponent, self ):
+      result.append( AimsTiffComponent )      
+    if int( self.getOption( 'vida', 0 ) ) \
+      and weakDependency( AimsVidaComponent, self ):
+      result.append( AimsVidaComponent )
+    if int( self.getOption( 'minc', 0 ) ) \
+      and weakDependency( AimsMincComponent, self ):
+      result.append( AimsMincComponent )
+    if int( self.getOption( 'aimsgui', 0 ) ) \
+      and weakDependency( AimsGuiComponent, self ):
+      result.append( AimsGuiComponent )
+    if self.getOption( 'ply' ) \
+      and weakDependency( AimsPlyComponent, self ):
+      result.append( AimsPlyComponent )
+    if int( self.getOption( 'nifti', 0 ) ) \
+      and weakDependency( AimsNiftiComponent, self ):
+      result.append( AimsNiftiComponent )
+    return result
+
+
+  def package( self ):
+    GenericMakerComponent.package( self )
+    if systemname == 'darwin' and not x11 \
+      and AimsGuiComponent in self.weakDependencies():
+      guis = [ 'AimsAttributedViewer', 'AimsLabelSelector' ]
+      prefix = os.path.join( packageDir(), 'bin' )
+      src = self._data.get( 'sources' )
+      icon = os.path.join( self.buildDir(), self.shareDir(), 'icons', self._name + '.icns' )
+      qt = getInstance( QtComponent )
+      if not os.path.exists( icon ):
+        icon = None
+      for x in guis:
+        qt.installMacOSApp( self, prefix, os.path.join( prefix, x ), icon )
+
+
+#-----------------------------------------------------------------------------
+class AimsGuiComponent( GenericMakerModuleComponent ):
+  _name = 'aimsgui'
+  
+  def __init__( self, options ):
+    #print 'aimsgui: init'
+    GenericMakerModuleComponent.__init__( self, options )
+    #print 'aimsgui:__init__: libDepsLine:', self._data.get( 'libDepsLine' )
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ QtComponent, AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class AimsDicomComponent( GenericMakerModuleComponent ):
+  _name = 'aimsdicom'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ DcmtkComponent, AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class AimsEcatComponent( GenericMakerModuleComponent ):
+  _name = 'aimsecat'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ "ecat+", AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class AimsTiffComponent( GenericMakerModuleComponent ):
+  _name = 'aimstiff'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ TiffComponent, AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class AimsJpegComponent( GenericMakerModuleComponent ):
+  _name = 'aimsjpeg'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def __init__( self, options ):
+    #print 'aimsjpeg: init'
+    GenericMakerModuleComponent.__init__( self, options )
+    #print 'aimsjpeg:__init__: libDepsLine:', self._data.get( 'libDepsLine' )
+
+  def dependencies( self ):
+    return [ JpegComponent, AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class AimsVidaComponent( GenericMakerModuleComponent ):
+  _name = 'aimsvida'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ 'vidaIO', AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class AimsMincComponent( GenericMakerModuleComponent ):
+  _name = 'aimsminc'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ MincComponent, AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class RPlyComponent( SystemComponent ):
+  '''Get it at http://www.cs.princeton.edu/~diego/professional/rply/'''
+  _name = 'rply'
+
+#-----------------------------------------------------------------------------
+class AimsPlyComponent( GenericMakerModuleComponent ):
+  _name = 'aimsply'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class AimsNiftiComponent( GenericMakerModuleComponent ):
+  _name = 'aimsnifti'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ LibZComponent, AimsDataComponent ]
+

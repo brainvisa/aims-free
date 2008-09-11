@@ -1,0 +1,145 @@
+# tree 1.0
+
+*BEGIN TREE selector 
+graph_syntax selector
+
+   *BEGIN TREE subset
+   surname RAcb
+   	*BEGIN TREE subset
+	nomenName RAcb
+	*END
+   
+	*BEGIN TREE subset
+	nomenName Right_nucleus_accumbens(RAcb)
+	*END
+   *END
+
+   *BEGIN TREE subset
+   surname LAcb
+   	*BEGIN TREE subset
+	nomenName LAcb
+	*END
+   
+	*BEGIN TREE subset
+	nomenName Left_nucleus_accumbens(LAcb)
+	*END
+   *END
+
+   *BEGIN TREE subset
+   surname Cerebellum
+
+	      *BEGIN TREE subset
+	      nomenName Cerebellum
+	      *END	  
+	  
+	      *BEGIN TREE subset
+	      nomenName CEREBELLUM_(Cb)
+	      *END
+	  
+	      *BEGIN TREE subset
+	      nomenName CEREBELLAR_CORTEX
+	      *END
+	     
+	      *BEGIN TREE subset
+	      nomenName CEREBELLAR_WHITE_MATER
+	      *END   
+	   
+   *END
+
+   *BEGIN TREE subset
+   surname RPu
+   	*BEGIN TREE subset
+	nomenName RPu
+	*END
+   
+	*BEGIN TREE subset
+	nomenName Right_putamen-nucleus(RPu)
+	*END
+   *END
+
+   *BEGIN TREE subset
+   surname LPu
+   
+ 	*BEGIN TREE subset
+	nomenName LPu
+	*END
+	  
+	*BEGIN TREE subset
+	nomenName Left_putamen-nucleus(LPu)
+	*END
+   *END
+
+   *BEGIN TREE subset
+   surname RCd
+   
+   	*BEGIN TREE subset
+	nomenName RCd
+	*END
+	
+	*BEGIN TREE subset
+	nomenName Right_caudate-nucleus(RCd)
+	*END
+   *END
+
+   *BEGIN TREE subset
+   surname LCd
+   
+   	*BEGIN TREE subset
+	nomenName LCd
+	*END
+   
+	*BEGIN TREE subset
+	nomenName Left_caudate-nucleus(LCd)
+	*END		    
+   *END
+
+   *BEGIN TREE subset
+   surname Skin-Fat
+   
+   	*BEGIN TREE subset
+	nomenName Skin-Fat
+	*END
+	
+	*BEGIN TREE subset
+	nomenName SKIN_FAT
+	*END		    
+   *END
+  
+   
+   *BEGIN TREE subset
+   surname Cortex
+   
+   	*BEGIN TREE subset
+	nomenName Cortex
+	*END
+   
+	*BEGIN TREE subset
+	nomenName CEREBRAL_CORTEX_(Cx)
+	*END	    
+   *END
+
+   *BEGIN TREE subset
+   surname WhiteMatter
+   	*BEGIN TREE subset
+	nomenName WhiteMatter
+	*END
+	*BEGIN TREE subset
+	nomenName CEREBRAL_WHITE_MATTER_(cw)
+	*END
+			    
+   *END
+ 
+   *BEGIN TREE subset
+   surname carotids
+   	*BEGIN TREE subset
+	   nomenName carotids
+	*END
+	*BEGIN TREE subset
+	   nomenName Left_carotids
+	*END
+	*BEGIN TREE subset
+	   nomenName Right_carotids
+	*END			    
+   *END
+   
+*END

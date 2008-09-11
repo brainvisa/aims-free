@@ -1,0 +1,55 @@
+<!DOCTYPE public "-//w3c//dtd html 4.01 transitional//en" 
+		"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+                
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>CartoData changelog</title>
+  <!-- link href="bvstyle.css" rel="stylesheet" type="text/css" -->
+</head>
+
+<body text="#000000" bgcolor="#ffffff" link="#0000ee" vlink="#551a8b"
+ alink="#ff0000">
+
+<center>  
+<h2>CartoData ChangeLog</h2>
+ </center>
+    
+<hr width="100%"> <br>
+
+
+
+<b><a href="#version-3.1">Version 3.1</a></b><br>
+<b><a href="#version-3.0">Version 3.0</a></b><br>
+
+<!-- -->
+
+<h4> <a name="version-3.1"></a>january 5, 2008 - Version 3.1.0</h4>
+
+<li>operators +, -, *, / on volumes</li>
+<li>improved pyhton bindings (pyaims) accordingly</li>
+<li><tt>VolumeUtil</tt> class providing <tt>apply</tt> and <tt>selfApply</tt> functions that operate 
+  a function on every voxel of one or two volume(s)
+</li>
+<li>IO classes on <tt>VolumeRef</tt></li>
+<li>Improvements in Volume API</li>
+<li>Optional use of the <a href="http://www.oonumerics.org/blitz/">Blitz++</a> library. When present, blitz++ is used to implement volume accessors and iterators, which both dramatically improves performance and will allow the use of strides (array ordering).
+</li>
+<li>"normalized" some volume header properties: "referentials", "transformations", "storage_to_memory" allow to completely handle image orientation
+</li>
+<li>python bindings for most of cartodata library: see the pyaims project
+</li>
+<li>other little things...</li>
+
+
+<!-- -->
+
+<h4> <a name="version-3.0"></a>march 22, 2005 - Version 3.0</h4>
+
+Beginning of CartoData library
+<li>Volumes and IO</li>
+<li>beginning of generic ROI handling system</li>
+
+</body>
+</html>
+
