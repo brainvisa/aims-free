@@ -692,8 +692,6 @@ namespace aims
     BucketMap<U> & src = *other.data();
     BucketMap<T> *data = new BucketMap<T>;
     data->setSizeXYZT( src.sizeX(), src.sizeY(), src.sizeZ(), src.sizeT() );
-    std::cout << "src sizeX: " << src.sizeX() << ", dst sizeX: " << data->sizeX()
-    << std::endl;
     data->header().getValue() = src.header().getValue();
     return SparseVolume<BucketMap<T> >( carto::rc_ptr<BucketMap<T> >( data ) );
   }
