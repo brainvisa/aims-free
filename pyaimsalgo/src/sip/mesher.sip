@@ -29,7 +29,7 @@ class Mesher
     void setVerbose( bool);
 
     void getBrain( const AimsData_S16&, AimsSurfaceTriangle& )
-      throw ( std::runtime_error ) /ReleaseGIL/;
+      throw ( /* std::runtime_error */ ) /ReleaseGIL/;
 
     void getWhite( const AimsData_S16& , AimsSurfaceTriangle& ) /ReleaseGIL/;
 

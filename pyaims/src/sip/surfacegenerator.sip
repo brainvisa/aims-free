@@ -10,9 +10,9 @@ class SurfaceGenerator
 
 public:
   static AimsSurfaceTriangle* generate( carto::Object )
-    throw( std::runtime_error, std::invalid_argument ) /Factory/;
+    throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
   static AimsSurfaceTriangle* generate( const carto::GenericObject & )
-    throw( std::runtime_error, std::invalid_argument ) /Factory/;
+    throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
   static carto::Object description();
   static AimsSurfaceTriangle* cube( const carto::GenericObject & ) /Factory/;
   static AimsSurfaceTriangle* cube( const Point3df &, float, 

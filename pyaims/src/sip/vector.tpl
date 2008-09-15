@@ -227,7 +227,7 @@ public:
   if( a0 < sipCpp->size() )
   {
     sipCpp->erase( sipCpp->begin() + a0 );
-    int dims = sipCpp->size();
+    int dims = (int) sipCpp->size();
     aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(*sipCpp)[0] );
   }
 %End

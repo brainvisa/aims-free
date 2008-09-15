@@ -15,7 +15,7 @@ public:
 
   virtual %Template1PyType% *read( int = 0, const std::string * = 0,
                                    int = -1 )
-    throw ( carto::io_error, std::exception ) /Factory, ReleaseGIL/;
+    throw ( /* carto::io_error, std::exception */ ) /Factory, ReleaseGIL/;
 
   void setFileName( std::string & );
   const std::string & fileName() const;
@@ -42,7 +42,7 @@ public:
 
   virtual bool write( const %Template1PyType% &, bool = false, 
                       const std::string * = 0 )
-    throw ( carto::io_error, std::exception ) /ReleaseGIL/;
+    throw ( /* carto::io_error, std::exception */ ) /ReleaseGIL/;
 
   void setFileName( std::string & );
   const std::string & fileName() const;

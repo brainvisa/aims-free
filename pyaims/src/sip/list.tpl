@@ -124,7 +124,7 @@ public:
   else
   {
     int n;
-    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i );
+    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i ) {}
     if( n >= a0 )
     {
       sipIsErr = 1;
@@ -148,7 +148,7 @@ public:
   else
   {
     int n;
-    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i );
+    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i ) {}
     if( n >= a0 )
     {
       sipIsErr = 1;
@@ -232,7 +232,7 @@ public:
   else
   {
     int n;
-    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i );
+    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i ) {}
     if( n >= a0 )
     {
       sipIsErr = 1;

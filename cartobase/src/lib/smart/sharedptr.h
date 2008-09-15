@@ -54,6 +54,8 @@ namespace carto
     /// notifies observers
     virtual ~SharedObject();
 
+    SharedObject & operator = ( const SharedObject & ) { return *this; }
+
     /** tests if the shared object can be deleted (no strong pointers to it).
         The test also returns false if no smart pointer at all points to the
         object (counters are 0), because it may mean the SharedObject has been
@@ -285,7 +287,8 @@ namespace carto
       ++x->weak_count;
       x->attachWeakPtr( *this );
     }
-    return rc_ptr<T>::operator = ( x );
+    rc_ptr<T>::operator = ( x );
+    return *this;
   }
 
 

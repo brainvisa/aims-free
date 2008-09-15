@@ -141,7 +141,6 @@ public:
   void add( %Template1PyType%%Template1deref% );
 %MethodCode
   sipCpp->insert( %Template1deref%a0 );
-  int dims = sipCpp->size();
 %End
 
   bool operator == ( const set_%Template1typecode% & ) const;
