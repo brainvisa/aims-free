@@ -20,5 +20,4 @@ LIBS = @libBuildLine@
 # seems to be needed here to anable proper multithreading
 #LIBS		+= -lpthread
 
-LIBS_GUI = @aimsgui:libBuildLine@
 LIBS_AIMSTIFF = @aimstiff:libBuildLine@

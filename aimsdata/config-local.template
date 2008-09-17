@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2000-2004 CEA
+#  Copyright (C) 2000-2008 CEA
 #
 #  This software and supporting documentation were developed by
 #  	CEA/DSV/SHFJ
@@ -26,13 +26,11 @@ LIBS_VIDA		= @aimsvida:libDepsLine@
 LIBS_MINC		= @aimsminc:libDepsLine@
 LIBS_PLY		= @aimsply:libDepsLine@
 LIBS_NIFTI		= @aimsnifti:libDepsLine@
-cygwin:LIBS_FOR_AIMSGUI = -Wl,--enable-auto-import
 
 release:BUILDMODE	= @buildMode@
 debug:BUILDMODE		= @buildMode@
 BUILDMODEEXT            = @buildModeExtension@
 
-defmodule(aimsgui)	 = @aimsgui:enabled@
 defmodule(aimsdicom) = @aimsdicom:enabled@
 defmodule(aimsecat)	 = @aimsecat:enabled@
 defmodule(aimsjpeg)	 = @aimsjpeg:enabled@
@@ -42,10 +40,6 @@ defmodule(aimsminc)	 = @aimsminc:enabled@
 defmodule(aimsply)	 = @aimsply:enabled@
 defmodule(aimsnifti) = @aimsnifti:enabled@
 
-module(aimsgui)  :LIBS_FOR_AIMSGUI += @aimsgui:libDepsLine@
-
-module(aimsgui)  :INCLUDEPATH += @qt:includes@
-module(aimsgui)  :DEFINES += @qt:defines@
 module(aimsdicom):INCLUDEPATH += @dcmtk:includes@
 module(aimsecat) :INCLUDEPATH += @ecat+:includes@
 module(aimsjpeg) :INCLUDEPATH += @jpeg:includes@
