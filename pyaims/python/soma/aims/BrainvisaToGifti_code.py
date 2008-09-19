@@ -295,7 +295,7 @@ def writeMesh(hd, mesh):
                                   'nbv': str( nbVertices ), 'nbn': str( nbNormals ) } )
 
      hd.startDocument()
-     attr = AttributesImpl({ 'Version': giftiVersion, 'NumberOfDataArrays':'3' })
+     attr = AttributesImpl({ 'Version': giftiVersion, 'NumberOfDataArrays':'2' })
      
     #head element
      hd.startElement('GIFTI', attr)
@@ -319,8 +319,8 @@ def writeMesh(hd, mesh):
      attributs={ "Intent":"NIFTI_INTENT_TRIANGLE", "DataType":"NIFTI_TYPE_INT32", "ArrayIndexingOrder":"RowMajorOrder", "Dimensionality":"2",  "Dim0":nbTriangles, "Dim1":"3", "Encoding":encode, "Endian":endian, "ExternalFileName":"", "ExternalFileOffset":""}
      insertTriangleArray(hd, attributs, p)
 
-     attributs={ "Intent":"NIFTI_INTENT_VECTOR", "DataType":"NIFTI_TYPE_FLOAT32", "ArrayIndexingOrder":"RowMajorOrder", "Dimensionality":"2", "Dim0":nbNormals, "Dim1":"3", "Encoding":encode, "Endian":endian, "ExternalFileName":"", "ExternalFileOffset":""}
-     insertNormalArray(hd, attributs, n)
+     #attributs={ "Intent":"NIFTI_INTENT_VECTOR", "DataType":"NIFTI_TYPE_FLOAT32", "ArrayIndexingOrder":"RowMajorOrder", "Dimensionality":"2", "Dim0":nbNormals, "Dim1":"3", "Encoding":encode, "Endian":endian, "ExternalFileName":"", "ExternalFileOffset":""}
+     #insertNormalArray(hd, attributs, n)
 
     # closing everything
      hd.endElement("GIFTI")

@@ -28,8 +28,14 @@ class Mesher
     bool verbose() const;
     void setVerbose( bool);
 
+%If (SIP_THROW_BUG)
     void getBrain( const AimsData_S16&, AimsSurfaceTriangle& )
-      throw ( /* std::runtime_error */ ) /ReleaseGIL/;
+      throw ( ) /ReleaseGIL/;
+%End
+%If (!SIP_THROW_BUG)
+   void getBrain( const AimsData_S16&, AimsSurfaceTriangle& )
+      throw ( std::runtime_error ) /ReleaseGIL/;
+%End
 
     void getWhite( const AimsData_S16& , AimsSurfaceTriangle& ) /ReleaseGIL/;
 

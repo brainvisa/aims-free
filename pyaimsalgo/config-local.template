@@ -26,4 +26,5 @@ SIP_QT_VERSION = @sip:sip_qt_version@
 SIP_PLATFORM = @sip:platform@
 PYTHON_LIBS = @sip:libLine@
 SIP_LIBS = @libDepsLine@
+SIP_OPTIONS = @sip:sip_options@
 AIMSALGOPYTHON_LIBS = @aimsalgo:libLine@ @python:libLine@

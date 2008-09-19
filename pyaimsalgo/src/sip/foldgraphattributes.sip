@@ -36,6 +36,7 @@ class FoldGraphAttributes
     float getDepthfactor();
     void prepareDepthMap();
     void prepareBrainDepthMap();
+    AimsData_S16 rebuildCorticalRelations();
 
 };
 
@@ -50,6 +51,9 @@ public:
   FoldArgOverSegment( Graph* g );
   ~FoldArgOverSegment();
   Vertex * splitVertex( Vertex* v, const Point3d & pos );
+  rc_ptr_Volume_S16 argBackToSkeleton( const rc_ptr_Volume_S16 oldskel );
+  void printSplitInSkeleton( rc_ptr_Volume_S16 skel,
+                             const Vertex* v1, const Vertex* v2 );
 };
 
 };

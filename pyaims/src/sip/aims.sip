@@ -1,4 +1,5 @@
 %Feature CARTODATA
+%Platforms { SIP_THROW_BUG }
 
 %Module soma.aims.aimssip
 %ModuleCode
