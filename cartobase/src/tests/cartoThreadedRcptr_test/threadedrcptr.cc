@@ -317,13 +317,6 @@ int main()
 
   int retcode = EXIT_SUCCESS;
 
-  if( string( CARTO_DEBUGMODE ) != "release" )
-  {
-    cout << "Warning: this test is not compiled in optimized mode: " << endl;
-    cout <<"speed tests will be inacurate and pessimistic." << endl;
-    cout << endl;
-  }
-
   cout << "/-- carto::rc_ptr (external counter) tests --/" << endl;
   cout << "-- Test 1: mono-threaded speed test --" << endl;
   if( !monothreadedTest<rc_ptr<Type> >() )

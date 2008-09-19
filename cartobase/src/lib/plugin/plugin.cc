@@ -195,7 +195,7 @@ static bool loadlib2( const string & lname, int verbose )
 
 
 static bool loadlib( const string & libname, const std::string & ver, 
-                     int verbose, bool specify )
+                     int verbose )
 {
 #ifndef CARTO_NO_DLOPEN
 
@@ -203,25 +203,12 @@ static bool loadlib( const string & libname, const std::string & ver,
   string	lnamespec;
   string::size_type	sopos = lname.rfind( ".so" );
 
-  if( specify )
-  {
-    if( sopos != string::npos )
-      lnamespec = lname.substr( 0, sopos ) + "-" + CARTO_DEBUGMODE 
-        + lname.substr( sopos, lname.length() - sopos );
-    else
-      lnamespec = lname + "-" + CARTO_DEBUGMODE;
-  }
-
   if( !ver.empty() && lname.substr( lname.length() - 3, 3 ) == ".so" )
     {
 #ifdef _WIN32
       lname.replace( lname.length() - 3, 3, ".dll" );
-      if( specify )
-        lnamespec.replace( lnamespec.length() - 3, 3, ".dll" );
 #endif
       lname += string( "." ) + ver;
-      if( specify )
-        lnamespec += string( "." ) + ver;
     }
 #ifdef _WIN32
   else
@@ -230,17 +217,10 @@ static bool loadlib( const string & libname, const std::string & ver,
       if( pos != string::npos )
         {
           lname.replace( pos, 4, ".dll." );
-          if( specify )
-            {
-              pos = lnamespec.rfind( ".so." );
-              lnamespec.replace( pos, 4, ".dll." );
-            }
         }
     }
 #endif
 
-  if( specify )
-    return loadlib2( lnamespec, verbose );
   return loadlib2( lname, verbose );
 
 #else	// CARTO_NO_DLOPEN
@@ -295,9 +275,6 @@ void PluginLoader::loadPluginFile( const std::string & p,
 
   ValueObject<Dictionary>	plugins;
   Object			modep;
-  bool				specify = false;
-
-  string mode = std::string( CARTO_DEBUGMODE );
 
   try
     {
@@ -305,23 +282,15 @@ void PluginLoader::loadPluginFile( const std::string & p,
       r.read( plugins );
 
       try
-	{
-	  modep = plugins.getProperty( mode + "_plugins" );
-	}
+        {
+          modep = plugins.getProperty( "release_plugins" );
+        }
       catch( exception & )
-	{
-	  if( mode != "release" )
-	    try
-	      {
-                specify = true;	// fallback: try specifying the buildmode first
-		modep = plugins.getProperty( "release_plugins" );
-	      }
-	    catch( exception & )
-	      {
-		// cerr << "no release_plugins\n";
-		return;
-	      }
-	}
+        {
+          // cerr << "no release_plugins\n";
+          return;
+        }
+
       if( modep )
         {
           ObjectVector		&dic = modep->value<ObjectVector>();
@@ -330,7 +299,7 @@ void PluginLoader::loadPluginFile( const std::string & p,
             try
               {
                 const string & name = (*ip)->value<string>();
-                loadlib( name, ver, verbose, specify );
+                loadlib( name, ver, verbose );
               }
             catch( exception & )
               {

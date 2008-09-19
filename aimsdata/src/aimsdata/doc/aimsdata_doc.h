@@ -134,16 +134,6 @@
 
   Use build-config...
 
-  Some macros that can be set at compile time to enable or disable some of 
-  AIMS builtin features :
-
-  - <b>\c CARTO_DEBUGMODE </b>	if defined, it contains a string (between 
-				quotes) representing the build mode the 
-				sources were compiled in: "debug", "default", 
-				"release", "insure". It is useful for instance 
-				to load the right type of plugins and so avoid 
-				dynamic linking conflicts.
-
 Normally, the configuration and compilation is all handled by the 
 \c build_config utility.
 
