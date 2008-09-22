@@ -150,6 +150,8 @@ int main( int argc, const char** argv )
 
       FoldGraphAttributes	fatt( skel, graph, motion.get(), inside, 
                                       outside, !nomesh );
+      // this in case the graph topology has changed (folds splits...)
+      fatt.rebuildCorticalRelations();
       fatt.doAll();
 
       if( graphw.fileName() != graphr.fileName() )

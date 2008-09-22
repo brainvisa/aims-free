@@ -589,12 +589,13 @@ public:
 
   CartoApplication( int argc, const char **argv, 
                     const std::string &documentation );
+  virtual ~CartoApplication();
   /** Parse and check all parameters, and handle common options (such as 
       the \c "--help" option).
       initialize() also triggers loading plugins because some functionalities 
       provided as plugins may be needed to correctly handle some options.
   */
-  void initialize();
+  virtual void initialize();
 };
 
 

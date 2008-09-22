@@ -90,6 +90,8 @@ namespace aims
     float getDepthfactor() const;
     void prepareDepthMap();
     void prepareBrainDepthMap();
+    /// outputs the voronoi in brain hull from hull junctions
+    AimsData<int16_t> rebuildCorticalRelations();
 
   private:
     AimsData<int16_t>	_skel;

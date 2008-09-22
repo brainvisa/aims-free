@@ -45,10 +45,36 @@ using namespace aims;
 ///////////////////////
 
 //-----------------------------------------------------------------------------
+AimsApplication *_globalApplication = NULL;
+AimsApplication *AimsApplication::globalApplication()
+{
+  return _globalApplication;
+}
+
+
+//-----------------------------------------------------------------------------
 AimsApplication::AimsApplication( int argc, const char **argv, 
 				  const string &documentation ) :
   CartoApplication( argc, argv, documentation )
 {
+  _globalApplication = this;
 }
+
+
+//-----------------------------------------------------------------------------
+AimsApplication::~AimsApplication()
+{
+}
+
+
+//-----------------------------------------------------------------------------
+void AimsApplication::initialize()
+{
+  spm_output_4d_volumes = -1;
+  addOption( spm_output_4d_volumes, "--spm_output_4d_volumes", 
+	     "Write 4D SPM images as several 3D files (0 = no, 1 = yes, no value = use .aimsrc configuration files)", true );
+  CartoApplication::initialize();
+}
+
 
 

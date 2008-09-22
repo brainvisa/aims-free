@@ -239,6 +239,13 @@ public:
 
   AimsApplication( int argc, const char **argv, 
 		   const std::string &documentation );
+  ~AimsApplication();
+
+  static AimsApplication *globalApplication();
+
+  virtual void initialize();
+
+  int spm_output_4d_volumes;
 };
 
 } // namespace aims

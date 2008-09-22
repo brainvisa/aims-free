@@ -143,6 +143,8 @@ namespace
   template <typename T>
   struct FastMarchingPrivateStruct
   {
+    FastMarchingPrivateStruct( map<pair<int16_t, int16_t>,BucketMap<float> >
+        & mid_interface ) : mid_interface_map( mid_interface ) {}
     SparseVolume<typename FastMarching<T>::FloatType> dist;
     SparseVolume<T> seed;
     SparseVolume<typename FastMarching<T>::FloatType> inv_speed;
@@ -153,7 +155,7 @@ namespace
     multimap<float, Point3d> front;
     SparseVolume<T> status;
     bool mid_interface_option;
-    map<pair<int16_t, int16_t>,BucketMap<float> > mid_interface_map;
+    map<pair<int16_t, int16_t>,BucketMap<float> > & mid_interface_map;
     bool verbose;
   };
 
@@ -361,7 +363,7 @@ FastMarching<T>::doit( const RCType & labels,
 {
   if( _verbose )
     cout << "FastMarching...\n";
-  FastMarchingPrivateStruct<T> fps;
+  FastMarchingPrivateStruct<T> fps( _mid_interface_map );
   SparseVolume<T> slabels( labels );
   vector<int> sz = slabels.getSize();
   slabels.setBackground( -1 );
@@ -467,6 +469,8 @@ namespace
       active
     };
 
+  cout << "doit_private, mid_interface_option: " << fps.mid_interface_option
+      << endl;
   multimap<float, Point3d> & front = fps.front;
   SparseVolume<T> & status = fps.status;
   Connectivity c( 0, 0, Connectivity::CONNECTIVITY_6_XYZ );
@@ -548,6 +552,11 @@ namespace
       fps.mid_interface_map[mid_key][0][pos_min] = dist_min + dist_neighbour;
     }
   }
+  map<pair<int16_t,int16_t>,BucketMap<float> >::iterator
+      im, em = fps.mid_interface_map.end();
+  for( im=fps.mid_interface_map.begin(); im!=em; ++im )
+    im->second.setSizeXYZT( fps.voxel_size[0], fps.voxel_size[1],
+                            fps.voxel_size[2], 1. );
   return fps.dist.data();
 }
 

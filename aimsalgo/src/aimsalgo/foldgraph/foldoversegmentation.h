@@ -38,16 +38,19 @@
 #define AIMS_FOLDGRAPH_FOLDOVERSEGMENTATION_H
 
 #include <aims/vector/vector.h>
+#include <cartodata/volume/volume.h>
 class Graph;
 class Vertex;
 
+
 /*
-en cas de split:
-- dupliquer/séparer ss, bottom, other
-- ajouter une jonction
-- ajouter un pp (?)
-- dupliquer/séparer hull_junction
-- séparer toutes rels existantes -> comment ?
+in case of split:
+- duplicate/separate ss, bottom, other: OK
+- add a jonction:                       OK
+- [ or add a pp (?) ]
+- duplicate/separate hull_junction      OK
+- separate all existing rels -> how ?   OK junction, hull_junction, pp
+                                        not done cortical
 */
 
 namespace aims
@@ -59,6 +62,16 @@ namespace aims
     FoldArgOverSegment( Graph* g );
     ~FoldArgOverSegment();
     Vertex * splitVertex( Vertex* v, const Point3d & pos );
+    /** Convert a folds graph back to a skeleton image.
+        This is needed after a fold split to rebuild relations: the graph
+        structure must be recalculated.
+        The old skeleton image is still needed to get the brain hull.
+    */
+    carto::rc_ptr<carto::Volume<int16_t> >
+      argBackToSkeleton( const carto::rc_ptr<carto::Volume<int16_t> >
+        oldskel );
+    void printSplitInSkeleton( carto::rc_ptr<carto::Volume<int16_t> > skel,
+                               const Vertex* v1, const Vertex* v2 );
 
   private:
     Graph *_graph;

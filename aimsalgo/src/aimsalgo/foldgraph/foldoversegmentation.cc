@@ -559,7 +559,21 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0 )
   v2->setProperty( "ss_point_number", (int) (*ss2)[0].size() );
   v2->setProperty( "bottom_point_number", (int) (*bottom2)[0].size() );
   v2->setProperty( "other_point_number", (int) (*other2)[0].size() );
-  v2->setProperty( "skeleton_label", (int) -1 ); // TODO: fix me
+  // find a free number for skeleton_label
+  Graph::const_iterator ig, eg = _graph->end();
+  int skeleton_label = 290, skl2 = 0; // conventional starting value: 300
+  int index = 0, index2 = 0;
+  for( ig=_graph->begin(); ig!=eg; ++ig )
+  {
+    if( (*ig)->getProperty( "skeleton_label", skl2 ) && skl2 > skeleton_label )
+      skeleton_label = skl2;
+    if( (*ig)->getProperty( "index", index2 ) && index2 > index )
+      index = index2;
+  }
+  skeleton_label += 10;
+  ++index;
+  v2->setProperty( "skeleton_label", skeleton_label );
+  v2->setProperty( "index", index );
   pnum = (*ss1)[0].size() + (*bottom1)[0].size() + (*other1)[0].size();
   v->setProperty( "point_number", pnum );
   v->setProperty( "size", pnum * voxvol );
@@ -642,4 +656,113 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0 )
   cout << "splitVertex end\n";
   return v2;
 }
+
+
+namespace
+{
+
+  void printBucket( rc_ptr<Volume<int16_t> > vol,
+                    const rc_ptr<BucketMap<Void> > bck, int16_t value )
+  {
+    const BucketMap<Void>::Bucket & bk = bck->begin()->second;
+    BucketMap<Void>::Bucket::const_iterator i, e = bk.end();
+
+    for( i=bk.begin(); i!=e; ++i )
+    {
+      const Point3d & p = i->first;
+      vol->at( p[0], p[1], p[2] ) = value;
+    }
+  }
+
+}
+
+
+rc_ptr<Volume<int16_t> > FoldArgOverSegment::argBackToSkeleton(
+  const rc_ptr<Volume<int16_t> > oldskel )
+{
+  rc_ptr<Volume<int16_t> > skel( new Volume<int16_t>( *oldskel ) );
+
+  // erase all
+  Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
+  int x, y, z, dx = oldskel->getSizeX(), dy = oldskel->getSizeY(),
+    dz = oldskel->getSizeZ(), i, n = c.nbNeighbors();
+  for( z=0; z<dz; ++z )
+    for( y=0; y<dy; ++y )
+      for( x=0; x<dx; ++x )
+      {
+        int16_t & val = skel->at( x, y, z );
+        switch( val )
+        {
+        case 30: // bottom/other ?
+          val = 11; // brain interior
+          break;
+        case 60: // simple surface
+          for( i=0; i<n; ++i )
+          {
+            Point3d p( Point3d( x, y, z ) + c.xyzOffset( i ) );
+            if( p[0] < 0 || p[1] < 0 || p[2] < 0 || p[0] >= dx || p[1] >= dy
+              || p[2] >= dz || oldskel->at( p[0], p[1], p[2] ) == 0 )
+              break; // connects exterior or border: keep as is
+          }
+          if( i == n )
+            val = 11; // doesn't connect exterior: erase to interior value
+          break;
+        case 80: // junction
+          val = 11;
+          break;
+        default:
+          break;
+        }
+      }
+
+  rc_ptr<BucketMap<Void> > bck;
+  Graph::const_iterator iv, ev = _graph->end();
+  for( iv=_graph->begin(); iv!=ev; ++iv )
+  {
+    if( (*iv)->getProperty( "aims_ss", bck ) )
+      printBucket( skel, bck, 60 );
+    if( (*iv)->getProperty( "aims_bottom", bck ) )
+      printBucket( skel, bck, 30 );
+    if( (*iv)->getProperty( "aims_other", bck ) )
+      printBucket( skel, bck, 60 ); // ? or 30 ?
+  }
+
+  set<Edge *>::const_iterator ie, ee = _graph->edges().end();
+  for( ie=_graph->edges().begin(); ie!=ee; ++ie )
+  {
+    if( (*ie)->getSyntax() == "junction"
+      || (*ie)->getSyntax() == "hull_junction" )
+    {
+      if( (*ie)->getProperty( "aims_junction", bck ) )
+        printBucket( skel, bck, 80 );
+    }
+    // else: do nothing, they will be recalculated
+  }
+
+  return skel;
+}
+
+
+void FoldArgOverSegment::printSplitInSkeleton( rc_ptr<Volume<int16_t> > skel,
+                                               const Vertex* v1,
+                                               const Vertex* v2 )
+{
+  Vertex::const_iterator ie, ee = v1->end();
+  Edge::const_iterator iv;
+  for( ie=v1->begin(); ie!=ee; ++ie )
+    if( (*ie)->getSyntax() == "junction" )
+    {
+      iv = (*ie)->begin();
+      if( *iv != v2 )
+        ++iv;
+      if( *iv == v2 )
+      {
+        rc_ptr<BucketMap<Void> > bck;
+        if( (*ie)->getProperty( "aims_junction", bck ) )
+          printBucket( skel, bck, 80 );
+        break;
+      }
+    }
+}
+
 

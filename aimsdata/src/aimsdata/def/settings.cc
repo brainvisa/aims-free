@@ -34,6 +34,7 @@
  */
 
 #include <aims/def/settings.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/def/path.h>
 #include <cartobase/stream/fileutil.h>
 //#include <cartobase/object/pythonreader.h>
@@ -83,5 +84,14 @@ Settings::Settings()
   // copy personal settings to add / override globals
   copyProperties( Object::reference
                   ( _perso.value<AttributedObject::ContentType>() ) );
+
+  AimsApplication *app = AimsApplication::globalApplication();
+  if ( app )
+  {
+    if ( app->spm_output_4d_volumes >= 0 )
+    {
+      setProperty( "spm_output_4d_volumes", app->spm_output_4d_volumes );
+    }
+  }
 }
 

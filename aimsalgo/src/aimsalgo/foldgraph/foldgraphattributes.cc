@@ -38,6 +38,7 @@
 #include <aims/utility/threshold.h>
 #include <aims/utility/merge.h>
 #include <aims/distancemap/front.h>
+#include <aims/distancemap/fastmarching.h>
 #include <aims/utility/boundingbox.h>
 #include <aims/resampling/motion.h>
 #include <aims/graph/graphmanip.h>
@@ -1650,6 +1651,153 @@ void FoldGraphAttributes::makeSummaryGlobalAttributes()
       if( narea != 0 )
         _graph.setProperty( "reffolds_area", narea );
     }
+}
+
+
+namespace
+{
+
+  void printBucket( AimsData<int16_t> vol,
+                    const rc_ptr<BucketMap<Void> > bck, int16_t value )
+  {
+    const BucketMap<Void>::Bucket & bk = bck->begin()->second;
+    BucketMap<Void>::Bucket::const_iterator i, e = bk.end();
+
+    for( i=bk.begin(); i!=e; ++i )
+    {
+      const Point3d & p = i->first;
+      vol( p[0], p[1], p[2] ) = value;
+    }
+  }
+
+}
+
+
+AimsData<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
+{
+  AimsData<int16_t> seedvol( _skel.dimX(), _skel.dimY(), _skel.dimZ() );
+  seedvol.setHeader( _skel.header()->cloneHeader() );
+  int x, y, z, dx = seedvol.dimX(), dy = seedvol.dimY(), dz = seedvol.dimZ();
+  Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
+  Connectivity c6( 0, 0, Connectivity::CONNECTIVITY_6_XYZ );
+  int i, j, n = c.nbNeighbors(), m = c6.nbNeighbors();
+
+  // DEBUG
+  unsigned long nwork = 0;
+
+  // keep only hull
+  seedvol = -1;
+  for( z=0; z<dz; ++z )
+    for( y=0; y<dy; ++y )
+      for( x=0; x<dx; ++x )
+        switch( _skel( x, y, z ) )
+        {
+        case 30:
+        case 60:
+        case 80:
+          for( i=0; i<n; ++i )
+          {
+            Point3d p = c.xyzOffset(i) + Point3d( x, y, z );
+            if( p[0] >= 0 && p[1] >= 0 && p[2] >= 0 && p[0] < dx && p[1] < dy
+              && p[2] < dz && _skel( p[0], p[1], p[2] ) == _outside )
+            {
+              seedvol( x, y, z ) = -10;
+              // dilate on 6 neighbourhood
+              for( j=0; j<m; ++j )
+              {
+                Point3d q = c6.xyzOffset(j) + Point3d( x, y, z );
+                if( q[0] >= 0 && q[1] >= 0 && q[2] >= 0 && q[0] < dx
+                  && q[1] < dy && q[2] < dz )
+                {
+                  seedvol( q[0], q[1], q[2] ) = -10;
+                  ++nwork;
+                }
+              }
+            break;
+            }
+          }
+          break;
+        default:
+          break;
+        }
+
+  cout << "work voxels: " << nwork << endl;
+  // print hull_junctions seeds
+  set<int16_t> seeds;
+  set<Edge *>::iterator ie, ee = _graph.edges().end(), je;
+  Edge::const_iterator iv;
+  rc_ptr<BucketMap<Void> > bck;
+  int index;
+  for( ie=_graph.edges().begin(); ie!=ee; ++ie )
+    if( (*ie)->getSyntax() == "hull_junction"
+      && (*ie)->getProperty( "aims_junction", bck ) )
+    {
+      iv = (*ie)->begin();
+      if( (*iv)->getSyntax() != "fold" )
+        ++iv;
+      if( (*iv)->getProperty( "skeleton_label", index ) )
+      {
+        printBucket( seedvol, bck, index );
+        seeds.insert( index );
+      }
+    }
+
+  // voronoi
+  set<int16_t> work;
+  work.insert( -10 );
+  cout << "seeds: " << seeds.size() << endl;
+  FastMarching<Volume<int16_t> > fm( Connectivity::CONNECTIVITY_26_XYZ, true );
+  fm.doit( seedvol.volume(), work, seeds );
+  VolumeRef<int16_t> voronoi = fm.voronoiVol();
+
+  cout << "clear cortical relatinons...\n";
+  // clear existing cortical relations in graph
+  ie=_graph.edges().begin();
+  while( ie != ee )
+  {
+    if( (*ie)->getSyntax() == "cortical" )
+    {
+      je = ie;
+      ++ie;
+      _graph.removeEdge( *je );
+    }
+    else
+      ++ie;
+  }
+
+  cout << "rebuild cortical relatinons...\n";
+  // take interfaces as cortical relations
+  vector<pair<int16_t,int16_t> > interf = fm.midInterfaceLabels();
+  map<int16_t, Vertex *> vertices;
+  Graph::iterator ivv, ev = _graph.end();
+  for( ivv=_graph.begin(); ivv!=ev; ++ivv )
+    if( (*ivv)->getSyntax() == "fold"
+      && (*ivv)->getProperty( "skeleton_label", index ) )
+      vertices[ index ] = *ivv;
+
+  vector<float> vs;
+  _graph.getProperty( "voxel_size", vs );
+  while( vs.size() < 3 )
+    vs.push_back( 1. );
+  float voxvol = vs[0] * vs[1] * vs[2];
+
+  vector<pair<int16_t,int16_t> >::const_iterator ii, ei = interf.end();
+  Edge *cort;
+  Converter<BucketMap<float>, BucketMap<Void> > cv;
+  cout << "interfaces: " << interf.size() << endl;
+  for( ii=interf.begin(); ii!=ei; ++ii )
+  {
+    const BucketMap<float> & cbck = fm.midInterface( ii->first, ii->second );
+    cort = _graph.addEdge( vertices[ ii->first ], vertices[ ii->second ],
+      "cortical" );
+    GraphManip::storeAims( _graph, cort, "aims_cortical",
+      rc_ptr<BucketMap<Void> >( cv( cbck ) ) );
+    cort->setProperty( "point_number", (int) cbck.begin()->second.size() );
+    cort->setProperty( "size", (float) cbck.begin()->second.size() * voxvol );
+  }
+
+  cout << "done.\n";
+  return voronoi;
 }
 
 

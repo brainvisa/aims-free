@@ -336,6 +336,13 @@ CartoApplication::CartoApplication( int argc, const char **argv,
 }
 
 
+//-----------------------------------------------------------------------------
+CartoApplication::~CartoApplication()
+{
+}
+
+
+//-----------------------------------------------------------------------------
 static void printInfo()
 {
   Info::print();
@@ -344,6 +351,7 @@ static void printInfo()
 namespace
 {
 
+  //---------------------------------------------------------------------------
   string formatted( const string & in, unsigned indent = 4 )
   {
     string::size_type	pos = 0, cols = 80, sz = in.size(), p2, ccols = cols, 
