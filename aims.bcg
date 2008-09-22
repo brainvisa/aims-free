@@ -1,26 +1,29 @@
 # print 'aims.bcg'
 # print currentComponentFile
 
-modules = [ 'aimsdata' ]
-weakdeps = [ 'aimsalgo', 'pyaims', 'pyaimsalgo' ]
-subprojects = modules + weakdeps + [ 'ecat', 'ecat+', 'vidaIO', 'graph', 'cartodata', 'cartobase'  ]
+aims_modules = [ 'aimsdata', 'aimsalgo' ]
+aims_weakdeps = [ 'pyaims', 'pyaimsalgo' ]
+aims_subprojects = aims_modules + aims_weakdeps + [ 'ecat', 'ecat+', 'vidaIO', 'graph', 'cartodata', 'cartobase'  ]
 
 class AimsComponent( GenericMakerModuleComponent ):
   _name = 'aims'
   def dependencies( self ):
-    global modules
-    return modules
+    global aims_modules
+    return aims_modules
 
   def weakDependencies( self ):
-    global weakdeps
+    global aims_weakdeps
     deps = []
-    for component in weakdeps:
+    for component in aims_weakdeps:
       if weakDependency( component ):
         deps.append( component )
     return deps
 
+  def libraries( self ):
+    return []
+
 currentComponentDirectory = os.path.dirname( currentComponentFile )
-for component in subprojects:
+for component in aims_subprojects:
   c = options.setdefault( component, {} )
   c[ 'source' ] = os.path.join( currentComponentDirectory, component )
   c[ 'version' ] = '4.0'
