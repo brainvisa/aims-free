@@ -29,6 +29,3 @@ SIP_OPTIONS = @sip:sip_options@
 CARTOPYTHON_LIBS = @python:libLine@ @cartobase:libLine@
 
 defmodule(CARTODATA_DEPS) = @cartodata:enabled@
-defmodule(pyaimsgui)	  = @aimsgui:enabled@
-
-module(pyaimsgui)  :INCLUDEPATH += @qt:includes@

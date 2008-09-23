@@ -20,7 +20,7 @@ class PyAimsComponent( GenericMakerComponent ):
       self.setupDeps( instances )
 
   def dependencies( self ):
-    return [ "aimsdata", PyQtComponent, NumpyComponent ]
+    return [ "aimsdata", SipComponent, NumpyComponent ]
 
 
   def build( self, instances ):

@@ -93,8 +93,6 @@ ExtendedImporter().importInModule( '', globals(), locals(), 'aimssip', [],
   [GenericHandlers.removeChildren], ['Reader_', 'Writer_']  )
 ExtendedImporter().importInModule( '', globals(), locals(), 'aimssip',
   ['aimssip.aims'] )
-ExtendedImporter().importInModule( '', globals(), locals(), 'aimsguisip',
-  ['aimsguisip.aims'] )
 # move Object out of carto namespace
 Object = carto.Object
 
