@@ -44,6 +44,7 @@
 #include <aims/foldgraph/foldgraphattributes.h>
 #include <graph/graph/graph.h> 
 #include <cartobase/stream/fileutil.h>
+#include <cartobase/config/version.h>
 
 using namespace aims;
 using namespace carto;
@@ -60,6 +61,7 @@ int main( int argc, const char** argv )
       string				motionfname, apcfilename;
       int16_t				inside = 0, outside = 11;
       bool				nomesh = false;
+      string                            gver;
 
       AimsApplication	app( argc, argv, "Builds cortical folds graph " 
                              "attributes - replaces VipFoldArgAtt" );
@@ -77,6 +79,9 @@ int main( int argc, const char** argv )
                      "[default: 0]", true );
       app.addOption( outside, "-lo", "'outside' label on skeleton image " 
                      "[default: 11]", true );
+      app.addOption( gver, "--graphversion",
+                     "output graph version [default: "
+                         + cartobaseShortVersion() + "]", true );
 
       app.initialize();
 
@@ -148,10 +153,22 @@ int main( int argc, const char** argv )
           graph.setProperty( "interhemi_point", y );
         }
 
+      vector<int> gversion;
+      string::size_type l = 0, ls = 0;
+      int x;
+      while( ls < gver.length() )
+      {
+        l = gver.find( '.', ls );
+        if( l == string::npos )
+          l = gver.length();
+        stringstream ss( gver.substr( ls, l - ls ) );
+        ss >> x;
+        gversion.push_back( x );
+        ls = l + 1;
+      };
+
       FoldGraphAttributes	fatt( skel, graph, motion.get(), inside, 
-                                      outside, !nomesh );
-      // this in case the graph topology has changed (folds splits...)
-      fatt.rebuildCorticalRelations();
+                                      outside, !nomesh, gversion );
       fatt.doAll();
 
       if( graphw.fileName() != graphr.fileName() )

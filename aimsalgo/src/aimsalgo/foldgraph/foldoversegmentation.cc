@@ -584,7 +584,10 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0 )
   {
     // remove mesh: it's not the right one anymore
     v->removeProperty( "aims_Tmtktri" );
-    cout << "mesh removed\n";
+    if( v->hasProperty( "Tmtktri_label" ) )
+      v->removeProperty( "Tmtktri_label" );
+    if( v->hasProperty( "Tmtktri_filename" ) )
+      v->removeProperty( "Tmtktri_filename" );
   }
   catch( ... )  {}
   hj->setProperty( "point_number", (int) (*hjl)[0].size() );

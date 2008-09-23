@@ -66,9 +66,10 @@ using namespace std;
 FoldGraphAttributes::FoldGraphAttributes( const AimsData<int16_t> & skel, 
                                           Graph & graph, const Motion *motion, 
                                           int16_t inside, int16_t outside, 
-                                          bool withmeshes )
+                                          bool withmeshes,
+                                          const vector<int> & gver )
   : _skel( skel ), _graph( graph ), _inside( inside ), _outside( outside ), 
-    _motion( motion ), _domeshes( withmeshes )
+    _motion( motion ), _domeshes( withmeshes ), _graphversion( gver )
 {
 }
 
@@ -607,8 +608,32 @@ void FoldGraphAttributes::prepareBrainDepthMap()
 }
 
 
+vector<int> FoldGraphAttributes::graphVersion() const
+{
+  vector<int> ver;
+  if( !_graphversion.empty() )
+  {
+    unsigned i, n = _graphversion.size();
+    for( i=0; i<n; ++i )
+      ver.push_back( _graphversion[i] );
+    for( ; i<2; ++i )
+      ver.push_back( 0 );
+  }
+  else
+  {
+    ver.push_back( CARTOBASE_VERSION_MAJOR );
+    ver.push_back( CARTOBASE_VERSION_MINOR );
+  }
+  return ver;
+}
+
+
 void FoldGraphAttributes::doAll()
 {
+  vector<int> ver = graphVersion();
+  if( ver[0] >= 4 || ( ver[0] == 3 && ver[1] >= 2 ) )
+    rebuildCorticalRelations();
+
   if( _domeshes )
     makeMeshes();
   makeGlobalAttributes();
@@ -636,12 +661,22 @@ void FoldGraphAttributes::makeMeshes()
 
 void FoldGraphAttributes::makeGlobalAttributes()
 {
-  _graph.setProperty( "CorticalFoldArg_VERSION", 
-                      carto::cartobaseShortVersion() );
-  _graph.setProperty( "datagraph_VERSION", 
-                      carto::cartobaseShortVersion() );
-  _graph.setProperty( "datagraph_compatibility_model_VERSION", 
-                      string( "3.1" ) );
+  string ver;
+  vector<int> iver = graphVersion();
+  {
+    unsigned i, j = iver.size();
+    stringstream ss;
+    for( i=0; i<j; ++i )
+    {
+      ss << iver[i];
+      if( i < j-1 )
+        ss << ".";
+    }
+    ver = ss.str();
+  }
+  _graph.setProperty( "CorticalFoldArg_VERSION", ver );
+  _graph.setProperty( "datagraph_VERSION", ver );
+  _graph.setProperty( "datagraph_compatibility_model_VERSION", ver );
 
   // Talairach transform
   if( !_motion )

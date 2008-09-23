@@ -53,7 +53,9 @@ namespace aims
     FoldGraphAttributes( const AimsData<int16_t> & skel, Graph & graph, 
                          const Motion *talairachMotion = 0, 
                          int16_t inside = 0, int16_t outside = 11, 
-                         bool withmeshes = true );
+                         bool withmeshes = true,
+                         const std::vector<int> & graphversion
+                             = std::vector<int>() );
     /// frees the depth map
     void cleanup();
     /// creates all attributes (global + all nodes/relations types)
@@ -92,6 +94,10 @@ namespace aims
     void prepareBrainDepthMap();
     /// outputs the voronoi in brain hull from hull junctions
     AimsData<int16_t> rebuildCorticalRelations();
+    /** returns a vector value of 2 or more numbers from the target graph
+        version, or the current cartograph library version
+    */
+    std::vector<int> graphVersion() const;
 
   private:
     AimsData<int16_t>	_skel;
@@ -119,6 +125,7 @@ namespace aims
     ///braindepthmap Z gradient
     AimsData<float>	_dilated_depthmap_gradZ;
     bool		_domeshes;
+    std::vector<int>    _graphversion;
   };
 
 }
