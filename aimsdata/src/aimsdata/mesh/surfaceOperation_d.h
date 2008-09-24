@@ -219,7 +219,8 @@ namespace aims
   AimsTimeSurface<D,T> *
       SurfaceManip::meshExtract( const AimsTimeSurface<D,T> & mesh,
                                  const TimeTexture<int16_t> & tex,
-                                 int16_t value, std::vector<size_t> ** overtIndex)
+                                 int16_t value,
+                                 std::vector<size_t> ** overtIndex )
   {
     AimsTimeSurface<D,T>  *omesh = new AimsTimeSurface<D,T>;
     typename AimsTimeSurface<D,T>::const_iterator  imt, jmt, emt = mesh.end();

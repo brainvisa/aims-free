@@ -43,6 +43,7 @@ class Motion;
 
 namespace aims
 {
+  template <typename T> class BucketMap;
 
   /// Creation of cortical folds graph attributes
   class FoldGraphAttributes
@@ -98,6 +99,10 @@ namespace aims
         version, or the current cartograph library version
     */
     std::vector<int> graphVersion() const;
+    void thickness( const BucketMap<float> & midinterfaceDistances,
+                    const carto::VolumeRef<int16_t> voronoi );
+    void greyAndCSFVolumes( const carto::VolumeRef<int16_t> gw,
+                            const carto::VolumeRef<int16_t> voronoi );
 
   private:
     AimsData<int16_t>	_skel;

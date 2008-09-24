@@ -76,7 +76,8 @@ namespace carto
   class RawConverter<aims::BucketMap<INP>, VolumeRef<OUTP> >
   {
   public :
-    void convert( const aims::BucketMap<INP> &in, VolumeRef<OUTP> & out ) const;
+    void convert( const aims::BucketMap<INP> &in,
+      VolumeRef<OUTP> & out ) const;
     /// writes bucket in an already allocated data
     void printToVolume( const aims::BucketMap<INP> &in, VolumeRef<OUTP> & out,
                         const Point3d & offset = Point3d( 0, 0, 0 ) ) const;
@@ -89,8 +90,10 @@ namespace carto
   class RawConverter<aims::BucketMap<Void>, AimsData<OUTP> >
   {
   public :
-    RawConverter( bool timeislabel = false ) 
-      : _timeIsLabel( timeislabel ) {}
+    RawConverter( bool timeislabel = false, bool withConstantValue = false,
+      OUTP value = 0 )
+      : _timeIsLabel( timeislabel ), _hasValue( withConstantValue ),
+        _value( value ) {}
     void convert( const aims::BucketMap<Void> &in,
                   AimsData<OUTP> & out ) const;
     void printToVolume( const aims::BucketMap<Void> &in, AimsData<OUTP> & out, 
@@ -99,7 +102,9 @@ namespace carto
     bool timeIsLabel() const { return( _timeIsLabel ); }
 
   private:
-    bool	_timeIsLabel;
+    bool        _timeIsLabel;
+    bool        _hasValue;
+    OUTP        _value;
   };
 
 
@@ -247,13 +252,13 @@ namespace carto
 
     for( it=in.begin(); it!=et; ++it, ++i )
       {
-	for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
-	  {
-	    const Point3d	& pos = ib->first;
-	    itemconv.convert( ib->second, 
-                              out( pos[0] + offset[0], pos[1] + offset[1], 
-                                   pos[2] + offset[2], i ) );
-	  }
+        for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
+          {
+            const Point3d	& pos = ib->first;
+            itemconv.convert( ib->second,
+                              out( pos[0] + offset[0], pos[1] + offset[1],
+                                  pos[2] + offset[2], i ) );
+          }
       }
   }
 
@@ -356,7 +361,23 @@ namespace carto
   ( const aims::BucketMap<Void> & in, AimsData<OUTP> & out, 
     const Point3d & offset ) const
   {
-    internal::printToVolume_smart( in, out, offset, timeIsLabel() );
+    if( _hasValue )
+    {
+      typename aims::BucketMap<Void>::const_iterator   it, et = in.end();
+      typename aims::BucketMap<Void>::Bucket::const_iterator   ib, eb;
+      unsigned                                        i = 0;
+      for( it=in.begin(); it!=et; ++it, ++i )
+        {
+          for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
+            {
+              const Point3d     & pos = ib->first;
+              out( pos[0] + offset[0], pos[1] + offset[1],
+                pos[2] + offset[2], i ) = _value;
+            }
+        }
+      }
+    else
+      internal::printToVolume_smart( in, out, offset, timeIsLabel() );
   }
 
 

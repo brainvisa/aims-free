@@ -469,8 +469,6 @@ namespace
       active
     };
 
-  cout << "doit_private, mid_interface_option: " << fps.mid_interface_option
-      << endl;
   multimap<float, Point3d> & front = fps.front;
   SparseVolume<T> & status = fps.status;
   Connectivity c( 0, 0, Connectivity::CONNECTIVITY_6_XYZ );
@@ -567,14 +565,10 @@ template <typename T>
 const BucketMap<float> & FastMarching<T>::midInterface (int16_t label1, int16_t label2) const
 {
   pair<int16_t,int16_t> mid_key (min(label1,label2),max(label1,label2));
-  map<pair<int16_t,int16_t>,BucketMap<float> >::const_iterator mid_interface_it = _mid_interface_map.find(mid_key);
+  map<pair<int16_t,int16_t>,BucketMap<float> >::const_iterator
+      mid_interface_it = _mid_interface_map.find(mid_key);
   if (mid_interface_it == _mid_interface_map.end())
-  {
-    map<pair<int16_t,int16_t>,BucketMap<float> >::const_iterator mid_interface_et;
-    for (mid_interface_it = _mid_interface_map.begin(), mid_interface_et = _mid_interface_map.end(); mid_interface_it != mid_interface_et; ++ mid_interface_it)
-
     throw runtime_error("interface does not exist");
-  }
   return mid_interface_it->second;
 }
 
@@ -585,7 +579,7 @@ FastMarching<T>::midInterfaceVol (int16_t label1, int16_t label2) const
 {
   vector<int> sz = _voronoi.getSize();
   VolumeRef<float> mid_interface_vol( sz[0], sz[1], sz[2] );
-  mid_interface_vol = -1;
+  mid_interface_vol->fill( -1 );
   const BucketMap<float> & mid_interface_buck = midInterface(label1, label2);
   Converter<BucketMap<float>, VolumeRef<float> > conv;
   conv.convert(mid_interface_buck, mid_interface_vol);

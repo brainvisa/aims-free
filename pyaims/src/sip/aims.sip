@@ -172,6 +172,8 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include reader_AimsData_RGB.sip
 %Include reader_AimsData_RGBA.sip
 
+%Include rawconverter_bucket_S16.sip
+
 %If ( CARTODATA )
 
 %Include volume_U8.sip

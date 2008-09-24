@@ -43,9 +43,6 @@
 #include <aims/scalespace/bucketblob.h>
 #include <aims/resampling/mask.h>
 #include <aims/graph/graphmanip.h>
-// debug
-#include <aims/io/writer.h>
-#include <aims/utility/converter_bucket.h>
 
 using namespace aims;
 using namespace carto;
@@ -253,15 +250,6 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0 )
       ++ibf;
   }
 
-  // DEBUG
-  {
-    Converter<BucketMap<float>, AimsData<float> > cv;
-    AimsData<float> *avol = cv( *fss );
-    Writer<AimsData<float> > fbw( "/tmp/distmap1.ima" );
-    fbw.write( *avol );
-    delete avol;
-  }
-
   // find closest point on hull_junction
   Point3d hjmin;
   dmin = numeric_limits<float>::max();
@@ -278,9 +266,6 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0 )
   cout << "hjmin: " << hjmin << endl;
   // split path
   rc_ptr<BucketMap<Void> > splitline( downPath( *fss, hjmin ) );
-  // DEBUG
-  Writer<BucketMap<Void> > w( "/tmp/split.bck" );
-  w.write( *splitline );
 
   // split simple surface
 
@@ -334,10 +319,6 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0 )
     sssplit.reset( dilateBucket( *sssplit ) );
   sssplit.reset( mask( *sssplit, *ss ) );
   sssplit.reset( mask( *sssplit, *splitline, false ) );
-
-  // DEBUG
-  Writer<BucketMap<Void> > w2( "/tmp/ss_split.bck" );
-  w2.write( *sssplit );
 
   if( sssplit->size() <= ncss )
   {
@@ -470,13 +451,6 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0 )
     ++ibm;
     (*ss2)[0] = ibm->second;
   }
-  // DEBUG
-  {
-    Writer<BucketMap<Void> > w5( "/tmp/ss_bit1.bck" );
-    w5.write( *ss1 );
-    Writer<BucketMap<Void> > w6( "/tmp/ss_bit2.bck" );
-    w6.write( *ss2 );
-  }
 
   // voronoi
   rc_ptr<BucketMap<int16_t> > voronoi( new BucketMap<int16_t> );
@@ -503,14 +477,6 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0 )
   voronoi.reset( dilateBucket( *voronoi ) );
   fm.doit( voronoi, work, seeds );
   voronoi = fm.voronoiVol();
-  // DEBUG
-  {
-    Converter<BucketMap<int16_t>, AimsData<int16_t> > cv;
-    AimsData<int16_t> *avol = cv( *voronoi );
-    Writer<AimsData<int16_t> > fbw( "/tmp/voronoi.ima" );
-    fbw.write( *avol );
-    delete avol;
-  }
 
   // split ss according to voronoi: definitive pass
   splitBucket( ss1, ss2, *ss, *voronoi, 10 );

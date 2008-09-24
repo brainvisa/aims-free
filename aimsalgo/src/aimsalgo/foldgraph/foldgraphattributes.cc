@@ -1800,7 +1800,7 @@ AimsData<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
       ++ie;
   }
 
-  cout << "rebuild cortical relatinons...\n";
+  cout << "rebuild cortical relations...\n";
   // take interfaces as cortical relations
   vector<pair<int16_t,int16_t> > interf = fm.midInterfaceLabels();
   map<int16_t, Vertex *> vertices;
@@ -1833,6 +1833,115 @@ AimsData<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
 
   cout << "done.\n";
   return voronoi;
+}
+
+
+namespace
+{
+  struct ThicknessStat
+  {
+    ThicknessStat() : npoint( 0 ), mean( 0 ), var( 0 ) {}
+    int npoint;
+    float mean;
+    float var;
+  };
+}
+
+
+void FoldGraphAttributes::thickness( const BucketMap<float> & midInterface,
+                                     const VolumeRef<int16_t> voronoi )
+{
+  Graph::iterator iv, ev = _graph.end();
+  int skel;
+  Vertex *v;
+  const BucketMap<float>::Bucket & mid0 = midInterface.begin()->second;
+  BucketMap<float>::Bucket::const_iterator ib, eb = mid0.end();
+  map<int16_t, ThicknessStat> tstats;
+
+  for( ib=mid0.begin(); ib!=eb; ++ib )
+  {
+    const Point3d & p = ib->first;
+    skel = voronoi.at( p[0], p[1], p[2] );
+    if( skel > 0 )
+    {
+      ThicknessStat & s = tstats[ skel ];
+      ++s.npoint;
+      s.mean += ib->second;
+      s.var += ib->second * ib->second;
+    }
+  }
+
+  for( iv=_graph.begin(); iv!=ev; ++iv )
+  {
+    v = *iv;
+    if( v->getSyntax() != "fold" )
+      continue;
+    v->getProperty( "skeleton_label", skel );
+    ThicknessStat & s = tstats[ skel ];
+    v->setProperty( "mid_interface_voxels", s.npoint );
+    if( s.npoint != 0 )
+    {
+      s.mean /= s.npoint;
+      v->setProperty( "thickness_mean", s.mean );
+      v->setProperty( "thickness_std",
+                      sqrt( ( s.var - s.npoint * s.mean * s.mean )
+                      / (s.npoint - 1) ) );
+    }
+  }
+}
+
+
+void FoldGraphAttributes::greyAndCSFVolumes( const VolumeRef<int16_t> gw,
+                                             const VolumeRef<int16_t> voronoi )
+{
+  Graph::iterator iv, ev = _graph.end();
+  int skel, g;
+  Vertex *v;
+  int16_t CSF_label = 255;
+  int16_t GM_label = 100;
+  int x, y, z, dx = voronoi->getSizeX(), dy = voronoi->getSizeY(),
+    dz = voronoi->getSizeZ();
+  vector<int> grey( 65536, 0 );
+  vector<int> csf( 65536, 0 );
+  vector<float> vs;
+  gw->header().getProperty( "voxel_size", vs );
+  float vvol = 1;
+  if( vs.size() >= 1 )
+  {
+    vvol *= vs[0];
+    if( vs.size() >= 2 )
+    {
+      vvol *= vs[1];
+      if( vs.size() >= 3 )
+        vvol *= vs[2];
+    }
+  }
+
+  for( z=0; z<dz; ++z )
+    for( y=0; y<dy; ++y )
+      for( x=0; x<dx; ++x )
+      {
+        skel = voronoi->at( x, y, z );
+        if( skel > 0 )
+        {
+          g = gw->at( x, y, z );
+          if( g == GM_label )
+            ++grey[skel];
+          else if( g == CSF_label )
+            ++csf[skel];
+        }
+      }
+
+  for( iv=_graph.begin(); iv!=ev; ++iv )
+  {
+    v = *iv;
+    if( v->getSyntax() != "fold" )
+      continue;
+    v->getProperty( "skeleton_label", skel );
+    v->setProperty( "GM_volume", grey[ skel ] * vvol );
+    v->setProperty( "LCR_volume", csf[ skel ] * vvol ); // use CSF_volume !
+    v->setProperty( "CSF_volume", csf[ skel ] * vvol );
+  }
 }
 
 

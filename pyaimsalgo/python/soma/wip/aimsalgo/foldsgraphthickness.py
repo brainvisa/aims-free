@@ -19,12 +19,11 @@ class FoldsGraphThickness:
     #self.seed.header()["voxel_size"] = self.lgw_vol.header()["voxel_size"]
     seed = - self.lgw_vol
     voxel_size = self.lgw_vol.header()["voxel_size"]
-    
+
     def printbucket( bck, vol, value ):
-      bk = bck[0]
-      for p in bk.keys():
-        vol.setValue( value, *p )
-    
+      c = aims.RawConverter_BucketMap_VOID_AimsData_S16( False, True, value )
+      c.printToVolume( bck.get(), vol )
+
     seed_label_list = []
     for v in self.fold_graph.vertices():
       try:
@@ -32,13 +31,19 @@ class FoldsGraphThickness:
         index = v[ 'skeleton_label' ]
         seed_label_list.append(int(index))
         printbucket( b, seed, index )
-        b = v[ 'aims_bottom' ]
-        printbucket( b, seed, index )
-        b = v[ 'aims_other' ]
-        printbucket( b, seed, index )
+        try:
+          b = v[ 'aims_bottom' ]
+          printbucket( b, seed, index )
+        except:
+          pass
+        try:
+          b = v[ 'aims_other' ]
+          printbucket( b, seed, index )
+        except:
+          pass
       except:
         pass
-    
+
     f1 = aims.FastMarching()
     print "Voronoi in Grey matter"
     f1.doit(seed, [-self.LCR_label, -self.GM_label], seed_label_list)
@@ -46,7 +51,7 @@ class FoldsGraphThickness:
     print "Voronoi in White matter"
     f1.doit(self.voronoi_vol, [-1], seed_label_list)
     self.voronoi_vol = f1.voronoiVol()
-    
+
     def vorTexCreation(mesh):
       mesh_vertex_set = mesh.vertex()
       mesh_size = mesh_vertex_set.size()
@@ -62,14 +67,18 @@ class FoldsGraphThickness:
         text.push_back(self.voronoi_vol.at(int(round(mesh_vertex[0]/voxel_size[0])), int(round(mesh_vertex[1]/voxel_size[1])), int(round(mesh_vertex[2]/voxel_size[2]))))
         #print str(compteur)
       return tex
-      
+
+    print 'extracting meshes'
     self.gm_wm_tex = vorTexCreation(self.gm_wm_mesh)
     self.gm_lcr_tex = vorTexCreation(self.gm_lcr_mesh)
+    print 'making thickness map'
     f1 = aims.FastMarching(True)
     dist = f1.doit(self.lgw_vol, [self.GM_label], [self.WM_label, self.LCR_label])
+    self.mid_interface_bck = f1.midInterface(self.WM_label, self.LCR_label)
     self.mid_interface = f1.midInterfaceVol(self.WM_label, self.LCR_label)
+    self.fastmarching = f1
     return self.voronoi_vol, self.mid_interface
-    
+
   def graphProcess(self):
     voxel_size = self.lgw_vol.header()["voxel_size"]
     voxel_volume = voxel_size[0]*voxel_size[1]*voxel_size[2]
@@ -83,56 +92,42 @@ class FoldsGraphThickness:
     coords = self.lgw_vol.arraydata()==self.LCR_label
     LCR_voxels = numpy.where(coords)[0].size
     self.fold_graph['LCR_volume'] = LCR_voxels * voxel_volume
-    
+    self.fold_graph['CSF_volume'] = LCR_voxels * voxel_volume
+
   def vertexProcess(self):
     print "vertexProcess"
     voxel_size = self.lgw_vol.header()["voxel_size"]
     voxel_volume = voxel_size[0]*voxel_size[1]*voxel_size[2]
     coords = self.mid_interface.arraydata()!=-1
-    
-    def thickness(self,v, skel, coords):
-      print "thickness"
-      coords_vertex = numpy.copy( coords )
-      coords_vertex[self.voronoi_vol.arraydata()!=skel] = False
-      data = self.mid_interface.arraydata()[coords_vertex]
-      if len(data)!=0:
-        v['thickness_mean'] = data.mean()
-        v['thickness_std'] = data.std()
-        v['mid_interface_voxels'] = len(data)
-        
+
     def vertex_mesh(self, v, skel):
-      cut_mesh = aims.SurfaceManip.meshExtract( self.gm_wm_mesh, self.gm_wm_tex, skel )
+      cut_mesh = aims.SurfaceManip.meshExtract( self.gm_wm_mesh, self.gm_wm_tex, skel )[0]
       v['white_surface_area'] = aims.SurfaceManip.meshArea(cut_mesh)
       #aims.GraphManip.storeAims( self.fold_graph, v, 'cortexWhite',  aims.rc_ptr_AimsTimeSurface_3(cut_mesh))
-      cut_mesh = aims.SurfaceManip.meshExtract( self.gm_lcr_mesh, self.gm_wm_tex, skel )
+      cut_mesh = aims.SurfaceManip.meshExtract( self.gm_lcr_mesh, self.gm_wm_tex, skel )[0]
       v['grey_surface_area'] = aims.SurfaceManip.meshArea(cut_mesh)
       #aims.GraphManip.storeAims( self.fold_graph, v, 'cortexHemi',  aims.rc_ptr_AimsTimeSurface_3(cut_mesh))
-      
-    def volumes(self, v, skel):
-      print "volumes"
-      coords = self.voronoi_vol.arraydata()==skel
-      coords[self.lgw_vol.arraydata()!=self.GM_label]=False
-      GM_voxels = numpy.where(coords)[0].size
-      v['GM_volume'] = GM_voxels * voxel_volume
-      coords =  self.voronoi_vol.arraydata()==skel
-      coords[self.lgw_vol.arraydata()!=self.LCR_label]=False
-      LCR_voxels = numpy.where(coords)[0].size
-      v['LCR_volume'] = LCR_voxels * voxel_volume
 
+    print 'calculating vertices thickness'
+    fat = aims.FoldGraphAttributes( self.voronoi_vol, self.fold_graph )
+    fat.thickness( self.mid_interface_bck, self.voronoi_vol )
+
+    print 'calculating GM and CSF volumes'
+    fat.greyAndCSFVolumes( self.lgw_vol, self.voronoi_vol )
+
+    print 'calculating surfaces areas'
     compteur = 0
     n = len(self.fold_graph.vertices())
     for v in self.fold_graph.vertices():
       try:
         skel = v['skeleton_label']
         print "skel : " + str(skel) + " compteur : " + str(compteur) + '/' + str(n)
-        thickness(self,v, skel,coords)
-        vertex_mesh(self, v, skel)
-        volumes(self, v, skel)
         compteur = compteur + 1
+        vertex_mesh(self, v, skel)
       except:
-          pass
+        pass
     return self.fold_graph
-  
+
   def process(self):
     self.preProcess()
     self.graphProcess()

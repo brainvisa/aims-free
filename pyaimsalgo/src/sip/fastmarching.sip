@@ -31,6 +31,7 @@ sipCpp = new aims::FastMarching_Volume_S16( aims::Connectivity::CONNECTIVITY_26_
     rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const
       throw ( std::runtime_error, std::exception );
 %End
+    const BucketMap_FLOAT & midInterface( short label1, short label2 ) const;
     rc_ptr_Volume_S16 voronoiVol() const;
     void setVerbose( bool x );
     bool verbose() const;
@@ -66,6 +67,7 @@ sipCpp = new aims::FastMarching_BucketMap_S16( aims::Connectivity::CONNECTIVITY_
     rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const
       throw ( std::runtime_error, std::exception );
 %End
+    const BucketMap_FLOAT & midInterface( short label1, short label2 ) const;
     rc_ptr_BucketMap_S16 voronoiVol() const;
     void setVerbose( bool x );
     bool verbose() const;

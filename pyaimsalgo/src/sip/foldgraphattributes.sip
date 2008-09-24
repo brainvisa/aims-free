@@ -37,6 +37,10 @@ class FoldGraphAttributes
     void prepareDepthMap();
     void prepareBrainDepthMap();
     AimsData_S16 rebuildCorticalRelations();
+    void thickness( const BucketMap_FLOAT & fm,
+                    const rc_ptr_Volume_S16 voronoi );
+    void greyAndCSFVolumes( const rc_ptr_Volume_S16 gw,
+                            const rc_ptr_Volume_S16 voronoi );
 
 };
 
