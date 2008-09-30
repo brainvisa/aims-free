@@ -43,16 +43,6 @@ class Graph;
 class Vertex;
 
 
-/*
-in case of split:
-- duplicate/separate ss, bottom, other: OK
-- add a jonction:                       OK
-- [ or add a pp (?) ]
-- duplicate/separate hull_junction      OK
-- separate all existing rels -> how ?   OK junction, hull_junction, pp
-                                        not done cortical
-*/
-
 namespace aims
 {
 
@@ -61,17 +51,19 @@ namespace aims
   public:
     FoldArgOverSegment( Graph* g );
     ~FoldArgOverSegment();
-    Vertex * splitVertex( Vertex* v, const Point3d & pos );
-    /** Convert a folds graph back to a skeleton image.
-        This is needed after a fold split to rebuild relations: the graph
-        structure must be recalculated.
-        The old skeleton image is still needed to get the brain hull.
-    */
-    carto::rc_ptr<carto::Volume<int16_t> >
-      argBackToSkeleton( const carto::rc_ptr<carto::Volume<int16_t> >
-        oldskel );
+    Vertex * splitVertex( Vertex* v, const Point3d & pos,
+                          size_t minsize = 50 );
     void printSplitInSkeleton( carto::rc_ptr<carto::Volume<int16_t> > skel,
                                const Vertex* v1, const Vertex* v2 );
+    /** Splits a vertex into pieces of more or less piecesize voxels.
+        @return number of vertices actually created
+    */
+    int subdivizeVertex( Vertex* v, float piecelength = 20,
+                         size_t minsize = 50,
+                         std::set<Vertex *> *newvertices = 0 );
+    /// same as subdivizeVertex but on all vertices of the graph
+    int subdivizeGraph( float piecelength = 20, size_t minsize = 50,
+                         std::set<Vertex *> *newvertices = 0 );
 
   private:
     Graph *_graph;

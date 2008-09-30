@@ -54,10 +54,13 @@ class FoldArgOverSegment
 public:
   FoldArgOverSegment( Graph* g );
   ~FoldArgOverSegment();
-  Vertex * splitVertex( Vertex* v, const Point3d & pos );
-  rc_ptr_Volume_S16 argBackToSkeleton( const rc_ptr_Volume_S16 oldskel );
+  Vertex * splitVertex( Vertex* v, const Point3d & pos, size_t minsize = 50 );
   void printSplitInSkeleton( rc_ptr_Volume_S16 skel,
                              const Vertex* v1, const Vertex* v2 );
+  int subdivizeVertex( Vertex* v, float piecelength = 50,
+                       size_t minsize = 50, set_VertexPtr* = 0 );
+  int subdivizeGraph( float piecelength = 50, size_t minsize = 50,
+                      set_VertexPtr* = 0 );
 };
 
 };
