@@ -28,7 +28,18 @@ public:
                          rc_ptr_AimsTimeSurface_3 obj );
   static void storeAims( Graph & graph, GraphObject* vertex,
                          const std::string & attribute,
+                         rc_ptr_AimsTimeSurface_2 obj );
+
+  static void storeAims( Graph & graph, GraphObject* vertex,
+                         const std::string & attribute,
                          rc_ptr_BucketMap_VOID obj );
+  static void setAttributeColor( Graph & graph, const std::string & att,
+                                 const AimsRGB & );
+  static void setAttributeColor( Graph & graph, const std::string & att,
+                                 const AimsRGBA & );
+  static void setAttributeColor( Graph & graph, const std::string & att,
+                                 const vector_S32 & );
+  vector_S32 attributeColor( const Graph & graph, const std::string & att );
   static void completeGraph( Graph & );
 };
 

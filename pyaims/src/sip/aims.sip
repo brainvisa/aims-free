@@ -34,6 +34,7 @@ carto::pyaims_init();
 %Include vector_S16.sip
 %Include vector_S32.sip
 %Include vector_U32.sip
+%Include vector_ULONG.sip
 %Include vector_FLOAT.sip
 %Include vector_DOUBLE.sip
 %Include vector_POINT2DF.sip

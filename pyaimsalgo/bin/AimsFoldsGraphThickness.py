@@ -15,7 +15,10 @@ parser.add_option( '-w', '--white', dest='white_mesh_name', help='white mesh' )
 parser.add_option( '-l', '--lcr', dest='hemi_mesh_name', help='hemi mesh (Grey-LCR interface)' )
 
 parser.add_option( '-o', '--output', dest='output_graph_name', help='output graph' )
+parser.add_option( '-m', '--mid', dest='output_mid_interface_name', help='output mid_interface' )
 (options, args) = parser.parse_args()
+
+print "options.output_mid_interface_name : " ,options.output_mid_interface_name
 
 r = aims.Reader()
 graph = r.read(options.graph_name)
@@ -40,3 +43,6 @@ fd = foldsgraphthickness.FoldsGraphThickness(graph, vol, white_mesh, hemi_mesh)
 graph_out = fd.process()
 w = aims.Writer()
 w.write(graph_out, options.output_graph_name)
+mid=fd.mid_interface
+print "mid : " ,type(mid), mid.getSizeX()
+w.write(mid.get(), options.output_mid_interface_name)

@@ -56,7 +56,9 @@
 #include <cartobase/thread/loopContext.h>
 #include <cartobase/thread/threadedLoop.h>
 #include <cartobase/thread/thread.h>
+#include <cartobase/thread/cpu.h>
 #include <cartobase/config/version.h>
+#include <cartobase/config/verbose.h>
 
 using namespace aims;
 using namespace carto;
@@ -185,6 +187,20 @@ namespace
 {
 
   static const float	depthfactor = 50.F;
+
+
+  float threadsByCpu( int maxth )
+  {
+    if( maxth == 0 )
+      return 1;
+    int ncpu = cpuCount();
+    if( maxth > 0 )
+      return ((float) maxth) / ncpu;
+    if( ncpu <= -maxth )
+      return 1;
+    return ((float) -maxth) / ncpu;
+  }
+
 
   class NodeContext : public LoopContext
   {
@@ -504,78 +520,209 @@ namespace
 
 }
 
+class FoldGraphAttributes::DistanceMapThreadContext : public LoopContext
+{
+public:
+  DistanceMapThreadContext( FoldGraphAttributes &fa,
+                            const AimsData<int16_t> & th )
+    : LoopContext(), foldatt( fa ), thresh( th )
+  {}
+
+  virtual ~DistanceMapThreadContext() { }
+
+  virtual void doIt( int startIndex, int count )
+  {
+    for ( int i = startIndex; i < startIndex + count; i++ )
+      switch( i )
+      {
+        case 0:
+          foldatt.prepareNativeDepthMap();
+          break;
+        case 1:
+          foldatt.prepareNormalizedDepthMap( thresh );
+          break;
+        case 2:
+          foldatt.prepareDilatedDepthMap( thresh );
+          break;
+        case 3:
+          foldatt.prepareBrainDepthMap();
+          break;
+        case 4:
+          foldatt.prepareGradientX();
+          break;
+        case 5:
+          foldatt.prepareGradientY();
+          break;
+        case 6:
+          foldatt.prepareGradientZ();
+          break;
+        case 7:
+          foldatt.prepareBrainGradientX();
+          break;
+        case 8:
+          foldatt.prepareBrainGradientY();
+          break;
+        case 9:
+          foldatt.prepareBrainGradientZ();
+          break;
+        default:
+          break;
+      }
+  }
+
+  FoldGraphAttributes & foldatt;
+  const AimsData<int16_t> & thresh;
+};
+
+
 float FoldGraphAttributes::getDepthfactor() const
 {
   return depthfactor;
 }
 
-void FoldGraphAttributes::prepareDepthMap()
+
+void FoldGraphAttributes::prepareNativeDepthMap()
 {
-  // geodesic depth on skeleton
-  AimsData<int16_t> th;
-  AimsData<int16_t> thb;
-  AimsGradient<float>	grad;
-  carto::Converter< AimsData<int16_t>, AimsData<float> > conv;
-
-  if( _depth.dimX() == _skel.dimX() )
-    return; // already done
-
-  cout << "making depth map (constrainted to sulci)..." << endl;
-  int16_t				forbidden = -111;
-  AimsThreshold<int16_t, int16_t>	thr( AIMS_BETWEEN, _inside, _outside, 
-                                             forbidden );
-  cout << "thresholding\n";
-  th = thr( _skel );
-  _depth = th.clone();
-  if( _motion )
-    _ndepth = _depth.clone();
-  cout << "front propagation...\n";
-  AimsDistanceFrontPropagation<int16_t>( _depth, forbidden, _inside, 3, 3, 3, 
+  if( verbose )
+    cout << "building depth map..." << endl;
+  int16_t forbidden = -111;
+  AimsDistanceFrontPropagation<int16_t>( _depth, forbidden, _inside, 3, 3, 3,
                                          depthfactor, false );
+  if( verbose )
+    cout << "depth map done." << endl;
+}
 
+
+void FoldGraphAttributes::prepareNormalizedDepthMap
+( const AimsData<int16_t> & th )
+{
   if( _motion )
-    {
-      cout << "making normalized depth map..." << endl;
-      Point3df	vs( _skel.sizeX(), _skel.sizeY(), _skel.sizeZ() );
-      _ndepth.setSizeX
-        ( ( _motion->transform( Point3df( vs[0], 0, 0 ) )
-            - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
-      _ndepth.setSizeY
-        ( ( _motion->transform( Point3df( 0, vs[1], 0 ) ) 
-            - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
-      _ndepth.setSizeZ
-        ( ( _motion->transform( Point3df( 0, 0, vs[2] ) ) 
-            - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
-      cout << "front propagation...\n";
-      AimsDistanceFrontPropagation<int16_t>( _ndepth, forbidden, _inside, 
-                                             3, 3, 3, depthfactor, false );
-    }
-  cout << "making depth map (constrainted to dilated sulci)..." << endl;
-  cout << "dilation\n";
-  AimsThreshold<int16_t, int16_t>	thr2( AIMS_EQUAL_TO, -111, 0, 0);
+  {
+    if( verbose )
+      cout << "building normalized depth map..." << endl;
+    int16_t forbidden = -111;
+    _ndepth = th.clone();
+    Point3df  vs( _skel.sizeX(), _skel.sizeY(), _skel.sizeZ() );
+    _ndepth.setSizeX
+    ( ( _motion->transform( Point3df( vs[0], 0, 0 ) )
+    - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
+    _ndepth.setSizeY
+    ( ( _motion->transform( Point3df( 0, vs[1], 0 ) )
+    - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
+    _ndepth.setSizeZ
+    ( ( _motion->transform( Point3df( 0, 0, vs[2] ) )
+    - _motion->transform( Point3df( 0, 0, 0 ) ) ).norm() );
+    AimsDistanceFrontPropagation<int16_t>( _ndepth, forbidden, _inside,
+                                          3, 3, 3, depthfactor, false );
+    if( verbose )
+      cout << "normalized depth map done." << endl;
+  }
+}
+
+
+void FoldGraphAttributes::prepareDilatedDepthMap
+( const AimsData<int16_t> & th )
+{
+  if( verbose )
+    cout << "building dilated depth map..." << endl;
+  AimsData<int16_t> thb;
+  int16_t forbidden = -111;
+  AimsThreshold<int16_t, int16_t>       thr2( AIMS_EQUAL_TO, -111, 0, 0);
   thb = thr2(th);
   thb = AimsData<int16_t>(th, 1);
   thb = AimsMorphoDilation(thb, 1.);
+  _dilated_depthmap = AimsData<float>( th.dimX(), th.dimY(),
+                                       th.dimZ(), th.dimT() );
+  _dilated_depthmap.setSizeX(th.sizeX());
+  _dilated_depthmap.setSizeY(th.sizeY());
+  _dilated_depthmap.setSizeZ(th.sizeZ());
+  carto::Converter< AimsData<int16_t>, AimsData<float> > conv;
+  conv.convert( th, _dilated_depthmap );
   int x, y, z, t;
   for (t = 0; t < thb.dimT(); t++)
     for (z = 0; z < thb.dimZ(); z++)
       for (y = 0; y < thb.dimY(); y++)
         for (x = 0; x < thb.dimX(); x++)
-           if (thb(x, y, z, t) and th(x, y, z, t) == _inside)
-		th(x, y, z, t) = forbidden;
-  _dilated_depthmap = AimsData<float>(th.dimX(), th.dimY(),
-				th.dimZ(), th.dimT() );
-  _dilated_depthmap.setSizeX(th.sizeX());
-  _dilated_depthmap.setSizeY(th.sizeY());
-  _dilated_depthmap.setSizeZ(th.sizeZ());
-  conv.convert( th, _dilated_depthmap );
-  cout << "front propagation...\n";
+          if (thb(x, y, z, t) and th(x, y, z, t) == _inside)
+            _dilated_depthmap(x, y, z, t) = forbidden;
   AimsDistanceFrontPropagation<float>( _dilated_depthmap, forbidden, _inside,
-						3, 3, 3, 1., false );
-  cout << "gradient...\n";
+                                       3, 3, 3, 1., false );
+  if( verbose )
+    cout << "dilated depth map done." << endl;
+}
+
+
+void FoldGraphAttributes::prepareGradientX()
+{
+  AimsGradient<float>   grad;
   _dilated_depthmap_gradX = grad.X(_dilated_depthmap);
+}
+
+
+void FoldGraphAttributes::prepareGradientY()
+{
+  AimsGradient<float>   grad;
   _dilated_depthmap_gradY = grad.Y(_dilated_depthmap);
+}
+
+
+void FoldGraphAttributes::prepareGradientZ()
+{
+  AimsGradient<float>   grad;
   _dilated_depthmap_gradZ = grad.Z(_dilated_depthmap);
+}
+
+
+void FoldGraphAttributes::prepareBrainGradientX()
+{
+  AimsGradient<float>   grad;
+  _braindepthmap_gradX = grad.X(_braindepthmap);
+}
+
+
+void FoldGraphAttributes::prepareBrainGradientY()
+{
+  AimsGradient<float>   grad;
+  _braindepthmap_gradY = grad.Y(_braindepthmap);
+}
+
+
+void FoldGraphAttributes::prepareBrainGradientZ()
+{
+  AimsGradient<float>   grad;
+  _braindepthmap_gradZ = grad.Z(_braindepthmap);
+}
+
+
+void FoldGraphAttributes::prepareDepthMap()
+{
+  if( _depth.dimX() == _skel.dimX() )
+    return; // already done
+
+  // geodesic depth on skeleton
+  AimsData<int16_t> th;
+
+  cout << "making various depth maps..." << endl;
+  int16_t				forbidden = -111;
+  AimsThreshold<int16_t, int16_t>	thr( AIMS_BETWEEN, _inside, _outside, 
+                                             forbidden );
+  th = thr( _skel );
+  _depth = th.clone();
+
+  cout << "running 4 distance maps..." << endl;
+  int verb = verbose;
+  if( maxThreads() != 1 )
+    verbose = 0;
+  DistanceMapThreadContext   dc( *this, th );
+  float tpcpu = threadsByCpu( maxThreads() );
+  ThreadedLoop  tl( &dc, 1, 0, 4, tpcpu );
+  tl.launch();
+  cout << "done." << endl;
+  cout << "calculating gradients..." << endl;
+  ThreadedLoop  tl2( &dc, 1, 4, 6, tpcpu );
+  tl2.launch();
+  cout << "done." << endl;
+  verbose = verb;
 }
 
 void FoldGraphAttributes::prepareBrainDepthMap()
@@ -584,10 +731,10 @@ void FoldGraphAttributes::prepareBrainDepthMap()
   AimsData<int16_t> th;
   int16_t				forbidden = -111;
 
-  cout << "making depth map (unconstrained)..." << endl;
+  if( verbose )
+    cout << "making depth map (unconstrained)..." << endl;
   AimsThreshold<int16_t, int16_t>	thr3( AIMS_EQUAL_TO, _outside, 0,
                                              forbidden );
-  cout << "thresholding\n";
   th = thr3( _skel );
   _braindepthmap = AimsData<float>(th.dimX(), th.dimY(),
 				th.dimZ(), th.dimT() );
@@ -595,16 +742,11 @@ void FoldGraphAttributes::prepareBrainDepthMap()
   _braindepthmap.setSizeY(th.sizeY());
   _braindepthmap.setSizeZ(th.sizeZ());
   conv.convert( th, _braindepthmap );
-   
-  cout << "front propagation...\n";
+
   AimsDistanceFrontPropagation<float>( _braindepthmap, forbidden, _inside,
-						3, 3, 3, 1., false );
-  cout << "gradient...\n";
-  AimsGradient<float>	grad;
-  _braindepthmap_gradX = grad.X(_braindepthmap);
-  _braindepthmap_gradY = grad.Y(_braindepthmap);
-  _braindepthmap_gradZ = grad.Z(_braindepthmap);
-  cout << "done" << endl;
+                                       3, 3, 3, 1., false );
+  if( verbose )
+    cout << "done" << endl;
 }
 
 
@@ -651,7 +793,8 @@ void FoldGraphAttributes::makeMeshes()
   cout << "Making meshes...\n";
 
   NodeContext	nc( _graph, &meshVertex );
-  ThreadedLoop	tl( &nc, 1, 0, _graph.order(), 1 );
+  float tpcpu = threadsByCpu( maxThreads() );
+  ThreadedLoop	tl( &nc, 1, 0, _graph.order(), tpcpu );
   tl.launch();
 
   cout << "\nDone: meshes\n";
@@ -737,7 +880,7 @@ void FoldGraphAttributes::makeGlobalAttributes()
 void FoldGraphAttributes::makeSimpleSurfaceAttributes()
 {
   prepareDepthMap();
-  prepareBrainDepthMap();
+  // prepareBrainDepthMap();
 
   Graph::iterator	iv, ev = _graph.end();
   Vertex		*v;
@@ -1944,4 +2087,9 @@ void FoldGraphAttributes::greyAndCSFVolumes( const VolumeRef<int16_t> gw,
   }
 }
 
+
+void FoldGraphAttributes::setMaxThreads( int mt )
+{
+  _maxthreads = mt;
+}
 

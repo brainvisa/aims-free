@@ -194,7 +194,7 @@ namespace
   template <class T>
   void 
   EmptyDistanceBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
-                     const ChamferMask& mask, int limit, float mult_factor )
+                       const ChamferMask& mask, int limit, float mult_factor )
   {
 
     list< AimsBucketItem<Void> >::const_iterator it,ite;
@@ -215,14 +215,15 @@ namespace
       lstPtr( (*lst).first ) = &( (*lst).second );
   
 
-    cout << "distance : " << setw(10) << setprecision(8) << 0 << flush;
+    if( verbose )
+      cout << "distance : " << setw(10) << setprecision(8) << 0 << flush;
     for ( dist = 0; dist < limit; dist++ )
       {
         ptr = lstPtr( dist );
         if ( ptr )
           {
             last_dist = dist;
-            if ( dist % 100 == 0 )
+            if( verbose && dist % 100 == 0 )
               cout <<  "\b\b\b\b\b\b\b\b\b\b" << setw(10) << setprecision(8) 
                    << float( dist ) / mult_factor << flush;
 
@@ -258,8 +259,9 @@ namespace
               }
           }
       }
-    cout <<  "\b\b\b\b\b\b\b\b\b\b" << setw(10) << setprecision(8) 
-         << float( last_dist ) / mult_factor << endl;
+    if( verbose )
+      cout <<  "\b\b\b\b\b\b\b\b\b\b" << setw(10) << setprecision(8) 
+           << float( last_dist ) / mult_factor << endl;
   }
 
 

@@ -347,7 +347,7 @@ namespace carto
     { return DataTypeCode<T>::dataType(); }
     static std::string name() 
     { 
-      return std::string("mesh of ") + DataTypeCode< T >::name(); 
+      return objectType() + std::string(" of ") + DataTypeCode< T >::name(); 
     }
     // Nothing about D ?
   };
@@ -362,6 +362,12 @@ namespace carto
   DataTypeCode<AimsTimeSurface<4,Void> >::objectType()
   {
     return "Mesh4";
+  }
+
+  template<> inline std::string
+  DataTypeCode<AimsTimeSurface<3,Void> >::name()
+  {
+    return "mesh of VOID";
   }
 
 }

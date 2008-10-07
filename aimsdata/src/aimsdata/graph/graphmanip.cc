@@ -1341,6 +1341,62 @@ void GraphManip::printGraphElementTable( const Graph & g, ostream & out )
 }
 
 
+void GraphManip::setAttributeColor( Graph & graph, const string & att,
+                                    const AimsRGB & col )
+{
+  vector<int> c( 3 );
+  c[0] = col[0];
+  c[1] = col[1];
+  c[2] = col[2];
+  rc_ptr<map<string, vector<int> > > cols;
+  if( !graph.getProperty( "object_attributes_colors", cols ) )
+    cols = rc_ptr<map<string, vector<int> > >( new map<string, vector<int> > );
+  (*cols)[att] = c;
+  graph.setProperty( "object_attributes_colors", cols );
+}
+
+
+void GraphManip::setAttributeColor( Graph & graph, const string & att,
+                                    const AimsRGBA & col )
+{
+  vector<int> c( 4 );
+  c[0] = col[0];
+  c[1] = col[1];
+  c[2] = col[2];
+  c[3] = col[3];
+  rc_ptr<map<string, vector<int> > > cols;
+  if( !graph.getProperty( "object_attributes_colors", cols ) )
+    cols = rc_ptr<map<string, vector<int> > >( new map<string, vector<int> > );
+  (*cols)[att] = c;
+  graph.setProperty( "object_attributes_colors", cols );
+}
+
+
+void GraphManip::setAttributeColor( Graph & graph, const string & att,
+                                    const vector<int> & col )
+{
+  rc_ptr<map<string, vector<int> > > cols;
+  if( !graph.getProperty( "object_attributes_colors", cols ) )
+    cols = rc_ptr<map<string, vector<int> > >( new map<string, vector<int> > );
+  (*cols)[att] = col;
+  graph.setProperty( "object_attributes_colors", cols );
+}
+
+
+vector<int> GraphManip::attributeColor( const Graph & graph,
+                                        const string & att )
+{
+  vector<int> col;
+  rc_ptr<map<string, vector<int> > > cols;
+  if( !graph.getProperty( "object_attributes_colors", cols ) )
+    return col;
+  map<string, vector<int> >::const_iterator ia = cols->find( att );
+  if( ia == cols->end() )
+    return col;
+  return ia->second;
+}
+
+
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
                                      rc_ptr<AimsData<short> > );
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 

@@ -86,6 +86,7 @@ PSUBDIRS = \
     AimsMeshSmoothing         \
     AimsMeshWhite             \
     AimsMixtureOfPpcaForRats \
+    AimsMIRegister \
     AimsMoment           \
     AimsMorphoMath            \
     AimsMultiply \

@@ -144,12 +144,16 @@ public:
   */
   SIP_PYOBJECT __getitem__( int ) const;
 %MethodCode
+  if( a0 < 0 )
+    a0 = sipCpp->size() + a0;
   sipRes = %Template1pyFromC%( %Template1address%(*sipCpp)[ a0 ] );
 %End
 
 
   void __setitem__( int, %Template1PyType%%Template1deref% );
 %MethodCode
+  if( a0 < 0 )
+    a0 = sipCpp->size() + a0;
   (*sipCpp)[ a0 ] = %Template1deref%a1;
 %End
 
@@ -224,7 +228,9 @@ public:
 
   void __delitem__( int );
 %MethodCode
-  if( a0 < sipCpp->size() )
+  if( a0 < 0 )
+    a0 = sipCpp->size() + a0;
+  if( (unsigned) a0 < sipCpp->size() )
   {
     sipCpp->erase( sipCpp->begin() + a0 );
     int dims = (int) sipCpp->size();

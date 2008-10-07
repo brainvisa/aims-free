@@ -194,20 +194,24 @@ namespace aims
         typedef std::vector< Point3df > Points;
         Points& vertex = itime->second.vertex();
         Points& normal = itime->second.normal();
+        unsigned nnorm = normal.size();
         for( Points::size_type k = 0; k < vertex.size(); ++k )
           {
             vertex[ k ] = motion.transform( vertex[ k ] );
             /* Denis: applying this transformation to normals is WRONG if 
                there is any scale factor ! */
-            normal[ k ] = motion.transform( normal[ k ] ) 
-              - motion.translation();
-            // normalize normals
-            norm = normal[k][0] * normal[k][0] + normal[k][1] * normal[k][1] 
-              + normal[k][2] * normal[k][2];
-            norm = 1. / sqrt( norm );
-            normal[k][0] *= norm;
-            normal[k][1] *= norm;
-            normal[k][2] *= norm;
+            if( k < nnorm )
+            {
+              normal[ k ] = motion.transform( normal[ k ] ) 
+                - motion.translation();
+              // normalize normals
+              norm = normal[k][0] * normal[k][0] + normal[k][1] * normal[k][1] 
+                + normal[k][2] * normal[k][2];
+              norm = 1. / sqrt( norm );
+              normal[k][0] *= norm;
+              normal[k][1] *= norm;
+              normal[k][2] *= norm;
+            }
           }
       }
     if( !motion.isDirect() )

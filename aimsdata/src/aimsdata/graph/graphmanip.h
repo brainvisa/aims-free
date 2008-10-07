@@ -45,6 +45,8 @@ class GraphObject;
 class Motion;
 class Void;
 template<typename T> class AimsData;
+class AimsRGB;
+class AimsRGBA;
 
 namespace aims
 {
@@ -161,6 +163,14 @@ namespace aims
 				 short background = 0, 
 				 std::map<short,std::string> *trans = 0,
 				 bool automaticBackgroundSearch = true );
+    static void setAttributeColor( Graph & graph, const std::string & att,
+                                   const AimsRGB & );
+    static void setAttributeColor( Graph & graph, const std::string & att,
+                                   const AimsRGBA & );
+    static void setAttributeColor( Graph & graph, const std::string & att,
+                                   const std::vector<int> & );
+    std::vector<int> attributeColor( const Graph & graph,
+                                     const std::string & att );
     /** Completes folds graph information.
 	Adds missing information to sulcal nodes, like meshes surface...
     */

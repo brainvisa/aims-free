@@ -29,12 +29,15 @@ public:
 
   static void meshMerge( AimsTimeSurface_3 &, const AimsTimeSurface_3 & );
   static void meshTransform( AimsTimeSurface_3 &, const Motion & );
+  static void meshTransform( AimsTimeSurface_2 &, const Motion & );
+
   static float meshArea( const AimsSurfaceTriangle & surf );
   static float meshVolume( const AimsSurfaceTriangle & surf );
 
   static AimsTimeSurface_3 *
       meshExtract( const AimsTimeSurface_3 & mesh,
-                   const TimeTexture_S16 & tex, short value, vector_U32 ** overtex = 0 ) /Factory/;
+                   const TimeTexture_S16 & tex, short value,
+                   vector_SIZE_T ** overtex = 0 ) /Factory/;
 
   static void cutMesh( const AimsSurfaceTriangle & insurf,
                        const Point4df & plane, AimsSurfaceTriangle & cut,

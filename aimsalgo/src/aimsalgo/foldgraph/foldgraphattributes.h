@@ -103,8 +103,28 @@ namespace aims
                     const carto::VolumeRef<int16_t> voronoi );
     void greyAndCSFVolumes( const carto::VolumeRef<int16_t> gw,
                             const carto::VolumeRef<int16_t> voronoi );
+    /** Sets the maxumum number of threads used in multithreaded-enabled
+        parts. 1 means mono-threaded, 0 means une thread per CPU.
+        A negative value means one thread per CPU, but never use more CPUs
+        than the absolute value of the given number.
+    */
+    void setMaxThreads( int mt );
+    int maxThreads() const { return _maxthreads; }
 
   private:
+    class DistanceMapThreadContext;
+    friend class DistanceMapThreadContext;
+
+    void prepareNativeDepthMap();
+    void prepareNormalizedDepthMap( const AimsData<int16_t> & th );
+    void prepareDilatedDepthMap( const AimsData<int16_t> & th );
+    void prepareGradientX();
+    void prepareGradientY();
+    void prepareGradientZ();
+    void prepareBrainGradientX();
+    void prepareBrainGradientY();
+    void prepareBrainGradientZ();
+
     AimsData<int16_t>	_skel;
     Graph		& _graph;
     int16_t		_inside;
@@ -131,6 +151,7 @@ namespace aims
     AimsData<float>	_dilated_depthmap_gradZ;
     bool		_domeshes;
     std::vector<int>    _graphversion;
+    int                 _maxthreads;
   };
 
 }
