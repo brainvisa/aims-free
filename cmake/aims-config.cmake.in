@@ -1,7 +1,10 @@
-set( aims_VERSION_MAJOR @aims_VERSION_MAJOR@ )
-set( aims_VERSION_MINOR @aims_VERSION_MINOR@ )
-set( aims_VERSION_PATCH @aims_VERSION_PATCH@ )
-set( aims_VERSION @aims_VERSION@ )
+set( _project "@PROJECT_NAME@" )
+string( TOUPPER "@PROJECT_NAME@" _uproject )
+
+set( ${_project}_VERSION_MAJOR @aims_VERSION_MAJOR@ )
+set( ${_project}_VERSION_MINOR @aims_VERSION_MINOR@ )
+set( ${_project}_VERSION_PATCH @aims_VERSION_PATCH@ )
+set( ${_project}_VERSION @aims_VERSION@ )
 
 find_package( Sigc++2 REQUIRED )
 find_package( LibXml2 REQUIRED )
@@ -14,31 +17,31 @@ endif( PYTHONINTERP_FOUND )
 find_package( VTK QUIET )
 
 
-if( SOMA_BUILD_ALL_FROM_SOURCES )
-  set( AIMS_BINARY_DIR "@AIMS_BINARY_DIR@" )
-else( SOMA_BUILD_ALL_FROM_SOURCES )
-  get_filename_component( AIMS_BINARY_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
-  get_filename_component( AIMS_BINARY_DIR "${AIMS_BINARY_DIR}" PATH )
-  get_filename_component( AIMS_BINARY_DIR "${AIMS_BINARY_DIR}" PATH )
-endif( SOMA_BUILD_ALL_FROM_SOURCES )
+get_filename_component( ${_uproject}_BINARY_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
+get_filename_component( ${_uproject}_BINARY_DIR "${${_uproject}_BINARY_DIR}" PATH )
+get_filename_component( ${_uproject}_BINARY_DIR "${${_uproject}_BINARY_DIR}" PATH )
+get_filename_component( ${_uproject}_BINARY_DIR "${${_uproject}_BINARY_DIR}" PATH )
 
-set( AIMS_DEFINITIONS @AIMS_DEFINITIONS@ )
-set( AIMS_INCLUDE_DIRS
-     "${AIMS_BINARY_DIR}/include"
+if( "${CMAKE_CURRENT_LIST_FILE}" STREQUAL "@AIMS_BINARY_DIR@/share/@PROJECT_NAME@-${@PROJECT_NAME@_VERSION_MAJOR}.${@PROJECT_NAME@_VERSION_MINOR}/cmake/@PROJECT_NAME@-config.cmake" )
+  message( STATUS "Using @PROJECT_NAME@ build tree: adding "${${_uproject}_BINARY_DIR}" to CMAKE_PREFIX_PATH" )
+  set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${${_uproject}_BINARY_DIR}" )
+endif( "${CMAKE_CURRENT_LIST_FILE}" STREQUAL "@AIMS_BINARY_DIR@/share/@PROJECT_NAME@-${@PROJECT_NAME@_VERSION_MAJOR}.${@PROJECT_NAME@_VERSION_MINOR}/cmake/@PROJECT_NAME@-config.cmake" )
+
+set( ${_uproject}_DEFINITIONS @AIMS_DEFINITIONS@ )
+set( ${_uproject}_INCLUDE_DIRS
+     "${${_uproject}_BINARY_DIR}/include"
      ${Sigc++2_INCLUDE_DIRS} 
      "${LIBXML2_INCLUDE_DIR}"
      ${Boost_INCLUDE_DIRS} )
-set( AIMS_SIP_DIRECTORY "${AIMS_BINARY_DIR}/@AIMS_RELATIVE_SIP_DIRECTORY@" )
+set( ${_uproject}_SIP_DIRECTORY "${${_uproject}_BINARY_DIR}/@AIMS_RELATIVE_SIP_DIRECTORY@" )
 
-find_library( AIMS_AIMSALGO_LIB aimsalgo "${AIMS_BINARY_DIR}/lib" )
-set( AIMS_LIBRARIES "${AIMS_AIMSALGO_LIB}" )
-find_library( AIMS_AIMSGUI_LIB aimsgui "${AIMS_BINARY_DIR}/lib" )
-set( AIMS_GUI_LIBRARIES ${AIMS_LIBRARIES} "${AIMS_AIMSGUI_LIB}" )
-find_library( AIMS_PYAIMS_LIB pyaims "${AIMS_BINARY_DIR}/lib" )
-set( AIMS_SIP_LIBRARIES ${AIMS_PYAIMS_LIB} )
+find_library( AIMS_AIMSALGO_LIB aimsalgo "${${_uproject}_BINARY_DIR}/lib" )
+set( ${_uproject}_LIBRARIES "${AIMS_AIMSALGO_LIB}" )
+find_library( AIMS_PYAIMS_LIB pyaims "${${_uproject}_BINARY_DIR}/lib" )
+set( ${_uproject}_SIP_LIBRARIES ${AIMS_PYAIMS_LIB} )
 
 if( AIMS_AIMSALGO_LIB )
-  set( AIMS_FOUND true )
+  set( ${_uproject}_FOUND true )
 else( AIMS_AIMSALGO_LIB )
-  set( AIMS_FOUND false )
+  set( ${_uproject}_FOUND false )
 endif( AIMS_AIMSALGO_LIB )
