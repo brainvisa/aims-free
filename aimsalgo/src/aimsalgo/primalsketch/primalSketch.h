@@ -245,6 +245,65 @@ namespace aims
         
         ComputeBlobMeasurements(statFile);        
         cout << "ssblobs avant : " << blobList.size() << endl;
+
+        // on va faire une texture de blobs
+
+/*        uint nb_scales = _scaleSpace->GetScaleLevels().size();
+//         cout << "nb d'échelles :" << nb_scales << " " << _scaleSpace->Scale(0.0)->Mesh()->vertex().size() << endl;
+//         AimsSurfaceTriangle *auxmesh; auxmesh = _scaleSpace->AuxMesh();
+        TimeTexture<float> blobs(nb_scales, _scaleSpace->Scale(0.0)->Mesh()->vertex().size());
+        TimeTexture<float> blobs_t(nb_scales, _scaleSpace->Scale(0.0)->Mesh()->vertex().size());
+        for (uint i=0;i<blobs.size();i++)
+          for (uint j=0;j<blobs[i].nItem();j++)
+            blobs[i].item(j) = 0.0;
+        typename std::list<ScaleSpaceBlob<Site>*>::iterator itssb = blobList.begin();
+          set<float> scales = _scaleSpace->GetScaleList();
+
+        vector<uint> histoblobs(20);
+        
+        for (; itssb != blobList.end(); ++itssb){
+          ScaleSpaceBlob<Site> *ssb; ssb = *itssb;
+          
+          
+          
+          typename std::list<GreyLevelBlob<Site>*>::iterator glBlobit= ssb->glBlobs.begin();
+          float deplacement = 0.0;
+          float areaevol = 0.0;
+          Point3df bar = (*glBlobit)->GetMaximum()->_node.first;
+          float area = (*glBlobit)->measurements.area;
+          for (; glBlobit != ssb->glBlobs.end(); glBlobit++){
+            Point3df old = bar;
+            bar = (*glBlobit)->GetMaximum()->_node.first;
+            deplacement += sqrt(pow(old[0]-bar[0],2) + pow(old[1]-bar[1],2) + pow(old[2]-bar[2],2));
+
+          }
+          cout << "dep: " << deplacement << " " ;
+          deplacement = ssb->GetMeasurements().t;
+          areaevol = ssb->GetMeasurements().tValue;
+          glBlobit= ssb->glBlobs.begin();
+          for (; glBlobit != ssb->glBlobs.end(); glBlobit++){
+            float sc = (*glBlobit)->GetScale();
+            uint indexsc = 0;
+            set<float>::iterator scit;
+            for (scit=scales.begin();scit!=scales.end() && *scit != sc;scit++,indexsc++){}
+            set<Site,ltstr_p3d<Site> > &listepts = (*glBlobit)->GetListePoints();
+            typename set<Site,ltstr_p3d<Site> >::iterator ptsit=listepts.begin();
+            for (;ptsit!=listepts.end();ptsit++){
+              blobs[indexsc].item((*ptsit).second) = deplacement+1.0;
+              blobs_t[indexsc].item((*ptsit).second) = areaevol+1.0;
+            }
+//             blobs[indexsc].item((*glBlobit)->GetMaximum()->_node.second) = deplacement + 1000.0;
+              
+          }
+
+          
+        }*/
+//         Writer<TimeTexture<float> > ww("/home/grg/testblobs_t.tex");
+//         Writer<TimeTexture<float> > ww1("/home/grg/testblobs_tvalue.tex");
+//         ww.write(blobs);
+//         ww1.write(blobs_t);
+
+
         // ELAGAGE
         typename std::list<Bifurcation<Site>*>::iterator bifit=bifurcationList.begin();
         for (bifit = bifurcationList.begin() ;  bifit != bifurcationList.end() ; bifit++){

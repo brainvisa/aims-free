@@ -35,3 +35,4 @@
 %Include hypergeometric.sip
 %Include knn.sip
 %Include pdf.sip
+%Include advection.sip

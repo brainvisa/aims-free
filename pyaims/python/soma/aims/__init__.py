@@ -254,17 +254,18 @@ class Writer:
     self._dataType = None
     self._fullType = None
     try:
-      w = getattr( aimssip, wr )( filename )
+      W = getattr( aimssip, wr )
     except:
       if c.startswith( 'rc_ptr_' ):
         obj = obj.get()
         wr = 'Writer_' + obj.__class__.__name__.split( '.' )[ -1 ]
         try:
-          w = getattr( aimssip, wr )( filename )
+          W = getattr( aimssip, wr )
         except:
           raise AttributeError( 'no Writer for type ' + obj.__class__.__name__ )
       else:
         raise AttributeError( 'no Writer for type ' + obj.__class__.__name__ )
+    w = W( filename )
     w.write( obj, False, format )
     try:
       self._objectType = w.writtenObjectType()

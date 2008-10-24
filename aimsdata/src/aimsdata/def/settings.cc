@@ -88,9 +88,10 @@ Settings::Settings()
   AimsApplication *app = AimsApplication::globalApplication();
   if ( app )
   {
-    if ( app->spm_output_4d_volumes >= 0 )
+    if ( app->output_4d_volumes >= 0 )
     {
-      setProperty( "spm_output_4d_volumes", app->spm_output_4d_volumes );
+      setProperty( "spm_output_4d_volumes", app->output_4d_volumes );
+      setProperty( "nitfi_output_4d_volumes", app->output_4d_volumes );
     }
   }
 }

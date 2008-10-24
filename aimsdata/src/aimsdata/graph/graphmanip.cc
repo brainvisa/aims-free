@@ -1348,11 +1348,7 @@ void GraphManip::setAttributeColor( Graph & graph, const string & att,
   c[0] = col[0];
   c[1] = col[1];
   c[2] = col[2];
-  rc_ptr<map<string, vector<int> > > cols;
-  if( !graph.getProperty( "object_attributes_colors", cols ) )
-    cols = rc_ptr<map<string, vector<int> > >( new map<string, vector<int> > );
-  (*cols)[att] = c;
-  graph.setProperty( "object_attributes_colors", cols );
+  setAttributeColor( graph, att, c );
 }
 
 
@@ -1364,36 +1360,55 @@ void GraphManip::setAttributeColor( Graph & graph, const string & att,
   c[1] = col[1];
   c[2] = col[2];
   c[3] = col[3];
-  rc_ptr<map<string, vector<int> > > cols;
-  if( !graph.getProperty( "object_attributes_colors", cols ) )
-    cols = rc_ptr<map<string, vector<int> > >( new map<string, vector<int> > );
-  (*cols)[att] = c;
-  graph.setProperty( "object_attributes_colors", cols );
+  setAttributeColor( graph, att, c );
 }
 
 
 void GraphManip::setAttributeColor( Graph & graph, const string & att,
                                     const vector<int> & col )
 {
+  string attname = att;
+  if( attname.length() >= 6
+      && attname.substr( attname.length()-6, 6 ) == "_label" )
+    attname = attname.substr( 0, attname.length()-6 );
+  else if( attname.length() >= 9
+           && attname.substr( attname.length()-9, 9 ) == "_filename" )
+    attname = attname.substr( 0, attname.length()-9 );
+  string attfname = attname + "_filename";
+  attname += "_label";
   rc_ptr<map<string, vector<int> > > cols;
   if( !graph.getProperty( "object_attributes_colors", cols ) )
     cols = rc_ptr<map<string, vector<int> > >( new map<string, vector<int> > );
-  (*cols)[att] = col;
+  (*cols)[attname] = col;
+  (*cols)[attfname] = col;
   graph.setProperty( "object_attributes_colors", cols );
+  graph.setProperty( attname, col );
+  graph.setProperty( attfname, col );
 }
 
 
 vector<int> GraphManip::attributeColor( const Graph & graph,
                                         const string & att )
 {
+  string attname = att;
+  if( attname.length() >= 6
+      && attname.substr( attname.length()-6, 6 ) == "_label" )
+    attname = attname.substr( 0, attname.length()-6 );
+  else if( attname.length() >= 9
+           && attname.substr( attname.length()-9, 9 ) == "_filename" )
+    attname = attname.substr( 0, attname.length()-9 );
   vector<int> col;
   rc_ptr<map<string, vector<int> > > cols;
   if( !graph.getProperty( "object_attributes_colors", cols ) )
     return col;
-  map<string, vector<int> >::const_iterator ia = cols->find( att );
-  if( ia == cols->end() )
-    return col;
-  return ia->second;
+  map<string, vector<int> >::const_iterator ia = cols->find( attname
+      + "_label" );
+  if( ia != cols->end() )
+    return ia->second;
+  ia = cols->find( attname + "_filename" );
+  if( ia != cols->end() )
+    return ia->second;
+  return col;
 }
 
 

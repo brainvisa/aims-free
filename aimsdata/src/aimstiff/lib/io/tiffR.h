@@ -207,6 +207,7 @@ namespace aims
           }
         }
       }
+      TIFFClose(tif);
     }
   }
 }

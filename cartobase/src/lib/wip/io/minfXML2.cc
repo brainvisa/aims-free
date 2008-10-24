@@ -312,6 +312,10 @@ string DefaultMinfNodeExpander::startStructure( MinfTreeExpander &expander,
           rc_ptr< ObjectListener >( new ListBuilder( _objectListener ) )
     ) ) );
   }
+  else
+  {
+    throw format_error( string( "unrecognized XML tag" ) + nodeType, "" );
+  }
 
   return structureType;
 }
@@ -586,6 +590,14 @@ void MinfXMLReader::read( DataSource &ds )
       }
       xmlFreeTextReader( reader );
       xmlFreeParserInputBuffer( buf );
+    }
+    catch( format_error & e )
+    {
+      xmlFreeTextReader( reader );
+      xmlFreeParserInputBuffer( buf );
+      ostringstream s;
+      s << e.what() << " at position " << ds.at();
+      throw format_error( s.str(), ds.url() );
     }
     catch( ... ) {
       xmlFreeTextReader( reader );

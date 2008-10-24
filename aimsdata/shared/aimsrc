@@ -4,5 +4,6 @@ attributes = {
   'spm_input_spm2_normalization' : 1, 
   'spm_output_radio_convention' : 1, 
   'spm_output_spm2_normalization' : 1, 
-  'spm_output_4d_volumes' : 1, 
+  'spm_output_4d_volumes' : 1,
+  'nifti_output_4d_volumes' : 1,
 }

@@ -60,6 +60,14 @@ namespace aims
     carto::DataTypeCode<T>	dtc;
     gec.objectType = dtc.objectType();
     gec.dataType = dtc.dataType();
+    gec.attribute = att;
+    std::string att2 = att;
+    if( att2.substr( 0, 5 ) == "aims_" )
+      att2 = att2.substr( 5, att2.length() - 5 );
+    if( gec.global_index_attribute.empty() )
+      gec.global_index_attribute = att2 + "_label";
+    if( gec.local_file_attribute.empty() )
+      gec.local_file_attribute = att2 + "_filename";
   }
 
 }

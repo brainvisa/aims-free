@@ -35,7 +35,21 @@ sipCpp = new aims::FastMarching_Volume_S16( aims::Connectivity::CONNECTIVITY_26_
     rc_ptr_Volume_S16 voronoiVol() const;
     void setVerbose( bool x );
     bool verbose() const;
-};
+
+    SIP_PYTUPLE midInterfaceLabels() const;
+%MethodCode
+  std::vector<std::pair<short, short> > mil = sipCpp->midInterfaceLabels();
+  sipRes = PyTuple_New( mil.size() );
+  int i, n = (int) mil.size();
+  for( i=0; i<n; ++i )
+  {
+    PyObject *item = PyTuple_New( 2 );
+    PyTuple_SetItem( item, 0, PyInt_FromLong( mil[i].first ) );
+    PyTuple_SetItem( item, 1, PyInt_FromLong( mil[i].second ) );
+    PyTuple_SetItem( sipRes, i, item );
+  }
+%End
+  };
 
 
   class FastMarching_BucketMap_S16
@@ -71,6 +85,19 @@ sipCpp = new aims::FastMarching_BucketMap_S16( aims::Connectivity::CONNECTIVITY_
     rc_ptr_BucketMap_S16 voronoiVol() const;
     void setVerbose( bool x );
     bool verbose() const;
+    SIP_PYTUPLE midInterfaceLabels() const;
+%MethodCode
+  std::vector<std::pair<short, short> > mil = sipCpp->midInterfaceLabels();
+  sipRes = PyTuple_New( mil.size() );
+  int i, n = (int) mil.size();
+  for( i=0; i<n; ++i )
+  {
+    PyObject *item = PyTuple_New( 2 );
+    PyTuple_SetItem( item, 0, PyInt_FromLong( mil[i].first ) );
+    PyTuple_SetItem( item, 1, PyInt_FromLong( mil[i].second ) );
+    PyTuple_SetItem( sipRes, i, item );
+  }
+%End
 };
 
 };

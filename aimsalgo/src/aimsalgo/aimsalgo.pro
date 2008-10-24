@@ -36,6 +36,7 @@ HEADERS = \
     config/aimsalgo_config.h  \
     connectivity/meshcc.h    \
     connectivity/meshcc_d.h    \
+    distancemap/advection.h  \
     distancemap/distancemap_g.h  \
     distancemap/chamfer.h    \
     distancemap/danielsson.h  \
@@ -251,6 +252,7 @@ SOURCES = \
     compression/huffman.cc    \
     compression/lz.cc    \
     connectivity/meshcc.cc    \
+    distancemap/advection.cc  \
     distancemap/chamfer.cc    \
     distancemap/chamfermask.cc  \
     distancemap/chamfersweep.cc  \

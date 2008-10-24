@@ -11,6 +11,53 @@ typedef carto::Converter<AimsData<%Template1%>, AimsData<%Template2%> >
 
 public:
   Converter_Volume_%Template1typecode%_Volume_%Template2typecode%( bool = false );
+  Converter_Volume_%Template1typecode%_Volume_%Template2typecode%( bool, SIP_PYOBJECT, SIP_PYOBJECT, SIP_PYOBJECT, SIP_PYOBJECT );
+%MethodCode
+  // Allocate rescaler info object
+  carto::RescalerInfo info;
+
+  bool  a1isnone = (a1 == Py_None);
+  bool  a2isnone = (a2 == Py_None);
+  bool  a3isnone = (a3 == Py_None);
+  bool  a4isnone = (a4 == Py_None);
+
+  if ((!a1isnone and !PyFloat_Check(a1)) or
+     (!a2isnone and !PyFloat_Check(a2)) or
+     (!a3isnone and !PyFloat_Check(a3)) or
+     (!a4isnone and !PyFloat_Check(a4))  )
+  {
+    sipIsErr = 1;
+    PyErr_SetString(PyExc_TypeError, "wrong argument type");
+  }
+  else {
+
+    if (!a1isnone) {
+      info.vmin = PyFloat_AsDouble(a1);
+    }
+
+    if (!a2isnone) {
+      info.vmax = PyFloat_AsDouble(a2);
+    }
+
+    if (!a3isnone) {
+      info.omin =  PyFloat_AsDouble(a3);
+    }
+
+    if (!a4isnone) {
+      info.omax =  PyFloat_AsDouble(a4);
+    }
+
+  }
+
+  if( !sipIsErr )  {
+    sipCpp = new Converter_Volume_%Template1typecode%_Volume_%Template2typecode%( a0, info );
+  }
+  else {
+    sipCpp = NULL;
+  }
+
+%End
+
   ~Converter_Volume_%Template1typecode%_Volume_%Template2typecode%();
 
 %If ( CARTODATA )

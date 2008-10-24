@@ -257,15 +257,14 @@ int main(int argc, const char **argv)
 //       for (float i=-9.0;i<9.0;i++){
       cout << "filtre: " << filterout << endl;
 //       sketch=filterPS(sketch,filterout);
-    printf("BOURRIN\n");
+//     printf("BOURRIN\n");
 //     std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* > *blobLis; blobLis=&(sketch.BlobSet());
     std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSBlobs=sketch.BlobSet().begin();
     std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSend=sketch.BlobSet().end();
-
-
-    printf("  %d\n", sketch.BlobSet().size());
+    
 
     printf("  %d\n", sketch.BlobSet().size());
+
     printf("FIN\n");
       test=0; 
       for (blobIt=blobList.begin();blobIt!=blobList.end();blobIt++){

@@ -140,7 +140,7 @@ namespace aims
         std::cout << "Creating blob labels by decreasing maximum intensity" << std::endl;
         for (blobIt=blobList.begin(); blobIt!=blobList.end(); ++blobIt)
         {
-            labelSet.insert(std::pair<int,float>((*blobIt)->Label(), (*blobIt)->GetMeasurements().t));
+            labelSet.insert(std::pair<int,float>((*blobIt)->Label(), (*blobIt)->GetMeasurements().tValue));
         }
         for (labelIt=labelSet.begin(); labelIt!=labelSet.end(); ++labelIt)
         {
@@ -172,7 +172,6 @@ namespace aims
         char conv[10];
           string nameBase="*";
         int rank;
-
         SortBlobs();
         _graph->setProperty( "filename_base", "*");
         _graph->setProperty("sujet", _primalSketch->Subject());
@@ -200,12 +199,22 @@ namespace aims
                //lab="0";
                vert->setProperty("label", 0);
                vert->setProperty("name", rank+10000);
+               vert->setProperty("rank", rank);
                vert->setProperty("index",(*blobIt)->Label());
                vert->setProperty("tmin",(*blobIt)->ScaleMin());
                vert->setProperty("tmax",(*blobIt)->ScaleMax());
                vert->setProperty("trep", (*blobIt)->ScaleRep());
                vert->setProperty("lifeTime", (*blobIt)->LifeTime());
-
+               vector<int> nodeslist;
+               set<Site,ltstr_p3d<Site> > &liste = (*blobIt)->GlBlobRep()->GetListePoints();
+               typename set<Site,ltstr_p3d<Site> >::iterator listit = liste.begin();
+              cout << liste.size() << " ";
+//                for (;listit!=liste.end();listit++){
+//                  nodeslist.push_back((*listit).second);
+//                }
+              cout  << nodeslist.size() << "! " ;
+               vert->setProperty("nodes_list", nodeslist);
+ 
                vert->setProperty("maxIntensity",(*blobIt)->GetMeasurements().maxIntensity);
                vert->setProperty("meanIntensity",(*blobIt)->GetMeasurements().meanIntensity);
                vert->setProperty("maxContrast",(*blobIt)->GetMeasurements().maxContrast);
@@ -226,7 +235,7 @@ namespace aims
                x2=vectF[3]; y2=vectF[4];  z2=vectF[5];
                gx=(x1+x2)/2.0; gy=(y1+y2)/2.0; gz=(z1+z2)/2.0;
                triplet[0]=gx; triplet[1]=gy; triplet[2]=gz;
-               // je change triplet pour les coordonnées du max du glblobrep (comme ça le barycentre utilisé pour les recouvrements dans le recuit devient le max et non plus un barycentre de merde)
+               // je change triplet pour les coordonnées du max du glblobrep (comme ça le barycentre utilisé pour les recouvrements dans le recuit devient le max et non plus un barycentre de merde) 
                triplet = blobTools.Barycenter();
 //                triplet[0]=max[0]; triplet[1]=max[1]; triplet[2]=max[2];
                vert->setProperty("gravity_center", triplet);

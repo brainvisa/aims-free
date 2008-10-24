@@ -185,7 +185,7 @@ namespace aims
 
                             for (; itPoints!=points.end(); ++itPoints)
                             {
-                              tex[i].item((*itPoints).second)=100+test*10;
+                              tex[i].item((*itPoints).second)= (*itBlob)->GetMeasurements().t;  //100+test*10;
 //                               if (test == 0) {cout << " :" << (*itPoints).second << endl;
 //                                 cout << GetScaleImage
 //                               }
@@ -343,14 +343,14 @@ namespace aims
                   }
                   
 
-//                   if (oneMesh[0].polygon().size()!=0){
-//                     (*meshBlob)[label]=AimsSurface<3,Void>();
-//                     (*meshBlob)[label].polygon()=oneMesh[0].polygon();
-//                     (*meshBlob)[label].vertex()=oneMesh[0].vertex();
-//                     (*meshBlob)[label].updateNormals();
-//                   }
-//                   else {
-                  if (true){
+                  if (oneMesh[0].polygon().size()!=0){
+                    (*meshBlob)[label]=AimsSurface<3,Void>();
+                    (*meshBlob)[label].polygon()=oneMesh[0].polygon();
+                    (*meshBlob)[label].vertex()=oneMesh[0].vertex();
+                    (*meshBlob)[label].updateNormals();
+                  }
+                  else {
+//                   if (true){
                     AimsSurfaceTriangle *msh;
                     Point3df auxnode = (*mesh)[0].vertex()[(*ssblobit)->GlBlobRep()->GetMaximum()->_node.second];
                     msh = SurfaceGenerator::sphere(auxnode , 3.0,6 );

@@ -34,41 +34,34 @@
  */
 
 
-#ifndef _AIMSMIREGISTER_MUTUALFUNC_BUCKET_H_
-#define _AIMSMIREGISTER_MUTUALFUNC_BUCKET_H_
+#ifndef AIMS_DISTANCEMAP_ADVECTION_H
+#define AIMS_DISTANCEMAP_ADVECTION_H
 
+#include <cartodata/volume/volume.h>
+#include <aims/data/data.h>
+#include <set>
 
-#include "objfuncbucket.h"
-#include <aims/optimization/optimization_g.h>
-#include <aims/data/data_g.h>
-#include <aims/information/information_g.h>
-
-class MutualInfoFuncBucket : public ObjFuncBucket
+namespace aims
 {
+
+  /** Classe de test pour propager des labels le long d'un champs vectoriel.
+    */
+  class GradientAdvection
+  {
   public:
-    MutualInfoFuncBucket( int numLevel, 
-			  Resampler<short>* interpolator,
-			  BucketSampler<short>* comb,
-			  int maskSize )
-      : ObjFuncBucket( numLevel, interpolator, comb, maskSize ) {}
-      
-    ~MutualInfoFuncBucket() {}
-      
-    float eval( const AimsVector<float,6>& param ) const;
+    GradientAdvection( );
+    ~GradientAdvection();
+    void doit(const carto::VolumeRef<int16_t>  & vol,
+			const AimsData<float> &gradX,
+			const AimsData<float> &gradY,
+			const AimsData<float> &gradZ,
+			const std::set<int16_t> &seeds);
+    void doit(const carto::VolumeRef<int16_t>  & vol,
+			const AimsData<float> &gradX,
+			const AimsData<float> &gradY,
+			const AimsData<float> &gradZ, int seed);
+  };
 };
 
-
-inline
-float MutualInfoFuncBucket::eval( const AimsVector<float,6>& param ) const
-{
-  ASSERT( dataSettingOK() );
-  doPdf( param );
-  float mi = - AimsMutualInformation( *_p1, *_p2, *_p12 );
-
-  cout << "Eval : " << mi << " " << param << endl;
-
-  return mi;
-}
-
-
 #endif
+

@@ -102,6 +102,7 @@ void TiffHeader::read()
   TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &_dimY);
   TIFFGetField(tif, TIFFTAG_XRESOLUTION, &_sizeX);
   TIFFGetField(tif, TIFFTAG_YRESOLUTION, &_sizeY);
+  TIFFClose(tif);
   
   /* ici code du default val en cm que nous convertissons en mm */
   _sizeX = 10 / _sizeX;

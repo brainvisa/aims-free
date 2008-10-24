@@ -208,8 +208,9 @@ void Directory::mkdir() const
 #if defined( _WIN32 )
       if( ::mkdir( d->dirname.c_str() ) )
 #else
-      if( ::mkdir( d->dirname.c_str(), 
-                   S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH ) )
+      if( ::mkdir( d->dirname.c_str(),
+            S_IRWXU | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH
+                | S_IXOTH ) )
 #endif
         throw file_error( "couldn't create directory", d->dirname );
     }

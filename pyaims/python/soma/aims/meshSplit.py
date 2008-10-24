@@ -50,10 +50,16 @@ def meshSplit2(mesh, tex, graph, voxel_size):
     bucketMap = aims.BucketMap_VOID()
     bucket = bucketMap[0]
     sub_mesh_vertex = sub_mesh[0].vertex()
+    countVertex = 0
     for vertex in sub_mesh_vertex:
       px = round(vertex[0]/voxel_size[0])
       py = round(vertex[1]/voxel_size[1])
       pz = round(vertex[2]/voxel_size[2])
       p3d = aims.Point3d(px, py, pz)
       bucket[p3d] = 1
+      countVertex+=1
+    if int(voxel_size.size())>=3:
+      bucketMap.setSizeXYZT(voxel_size[0],voxel_size[1], voxel_size[2],1)
+    else:
+      bucketMap.setSizeXYZT(1,1,1,1)
     aims.GraphManip.storeAims( graph, v.get(),'aims_roi', aims.rc_ptr_BucketMap_VOID(bucketMap) )

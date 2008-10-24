@@ -245,7 +245,7 @@ public:
 
   virtual void initialize();
 
-  int spm_output_4d_volumes;
+  int output_4d_volumes;
 };
 
 } // namespace aims
