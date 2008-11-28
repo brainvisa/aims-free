@@ -86,12 +86,15 @@ Settings::Settings()
                   ( _perso.value<AttributedObject::ContentType>() ) );
 
   AimsApplication *app = AimsApplication::globalApplication();
+  cout << "test output_4d_volumes, app: " << app << endl;
   if ( app )
   {
+    cout << "output_4d_volumes: " << app->output_4d_volumes << endl;
     if ( app->output_4d_volumes >= 0 )
     {
+      cout << "set it\n";
       setProperty( "spm_output_4d_volumes", app->output_4d_volumes );
-      setProperty( "nitfi_output_4d_volumes", app->output_4d_volumes );
+      setProperty( "nifti_output_4d_volumes", app->output_4d_volumes );
     }
   }
 }

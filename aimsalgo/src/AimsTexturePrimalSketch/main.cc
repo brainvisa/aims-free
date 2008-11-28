@@ -82,6 +82,28 @@ void bloquerAscendance(ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>*ssb
   return;
 }
     
+    
+PrimalSketch<AimsSurface<3,Void>, Texture<float> > filterPS2(PrimalSketch<AimsSurface<3,Void>, Texture<float> > &sketch, float threshold=1.0){
+  printf("FILTERPS\n");
+  std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* > blobList(sketch.BlobSet());
+  std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSBlobs=blobList.begin();
+
+//   std::multimap<float, ScaleSpaceBlob<SiteType<AimsSurface<3,Void> >::type> *> blobmap;
+//   std::multimap<float, ScaleSpaceBlob<SiteType<AimsSurface<3,Void> >::type> * >::iterator mapit;
+  
+  printf("\n\n%d", sketch.BlobSet().size());
+  PrimalSketch<AimsSurface<3, Void>, Texture<float> > outsketch(sketch.Subject(), sketch.scaleSpace(), SURFACE);
+
+  printf("\n\n%d", outsketch.BlobSet().size());
+  for (itSSBlobs=blobList.begin();itSSBlobs!=blobList.end();itSSBlobs++){
+    cout << (*itSSBlobs)->GetMeasurements().t << " ";
+    if ((*itSSBlobs)->GetMeasurements().t > 2.0)
+      outsketch.AddBlob(*itSSBlobs);
+  }
+  printf("\n\n%d", outsketch.BlobSet().size());
+  return outsketch;
+}
+    
 PrimalSketch<AimsSurface<3,Void>, Texture<float> > filterPS(PrimalSketch<AimsSurface<3,Void>, Texture<float> > &sketch, float threshold=1.0){
   printf("FILTERPS\n");
   std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* > blobList(sketch.BlobSet());
@@ -141,6 +163,7 @@ int main(int argc, const char **argv)
       std::string fileInT, fileInM, fileout, fileoutBlobs, motionfile, subject,
         graphout, auxmeshpath, fileLat, fileLongit;
       float dt=0.05, tmax, tmin=1.0,filterout;
+      uint intersection_param=10;
 
       AimsApplication app( argc, argv, "ScaleSpace et grey level blobs d'une surface/texture au format float");
 
@@ -163,8 +186,8 @@ int main(int argc, const char **argv)
       app.alias( "--auxmesh", "-mX" );
       app.addOption( subject, "-sj", "subject name (default : inputImage)", "none");
       app.alias ("--subject", "-sj");
-      app.addOption( motionfile, "--trans", "Transformation matrix to Talairach " 
-                     "space", true );
+      app.addOption( motionfile, "--trans", "Transformation matrix to Talairach space", true );
+      app.addOption( intersection_param, "-iP", "Intersection condition for grey-level blobs matching across scales", true );
       app.addOption( filterout, "-f", "filter out blobs whose tvalues are under (default=1.0)", 4.0);
       app.addOption( fileLat, "-l", "texture latitude", "");
       app.addOption( fileLongit, "-L", "texture longitude", "");
@@ -239,7 +262,7 @@ int main(int argc, const char **argv)
       PrimalSketch<AimsSurface<3, Void>, Texture<float> > sketch(subject, &scale_space, SURFACE);
       
       printf("%.3f, %.3f\n", tmin, tmax);
-      sketch.ComputePrimalSketch(tmin, tmax);
+      sketch.ComputePrimalSketch(tmin, tmax, "", intersection_param);
       std::list<ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type >*> blobList=sketch.BlobSet();
 
       std::list<ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type >*>::iterator blobIt;
@@ -256,7 +279,8 @@ int main(int argc, const char **argv)
       printf("\n");
 //       for (float i=-9.0;i<9.0;i++){
       cout << "filtre: " << filterout << endl;
-//       sketch=filterPS(sketch,filterout);
+      sketch=filterPS2(sketch,filterout);
+      
 //     printf("BOURRIN\n");
 //     std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* > *blobLis; blobLis=&(sketch.BlobSet());
     std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSBlobs=sketch.BlobSet().begin();

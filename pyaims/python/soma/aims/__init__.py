@@ -377,6 +377,25 @@ def proxysetitem( self, attr, value ):
   except:
     return self.get().__setitem__( attr, value )
 
+def proxydelitem( self, attr ):
+  try:
+    return self.__delitem__( attr )
+  except:
+    if self.isNull():
+      raise RuntimeError( 'Null object called' )
+    return self.get().__delitem__( attr )
+
+def proxynonzero( self ):
+  if self.isNull():
+    return False
+  try:
+    return self.get().__nonzero__()
+  except:
+    try:
+      return len( self.get() )
+    except:
+      return True
+
 def proxystr( self ):
   if self.isNull():
     return 'None'
@@ -396,7 +415,9 @@ def __fixsipclasses__( classes ):
         y.__getattr__ = __fixsipclasses__.proxygetattr
         y.__getitem__ = __fixsipclasses__.proxygetitem
         # y.__setitem__ = __fixsipclasses__.proxysetitem
+        y.__delitem__ = __fixsipclasses__.proxydelitem
         y.__str__ = __fixsipclasses__.proxystr
+        y.__nonzero__ = __fixsipclasses__.proxynonzero
       else:
         if hasattr( y, '__objiter__' ):
           y.__iter__ = __fixsipclasses__.newiter
@@ -419,15 +440,18 @@ __fixsipclasses__.proxygetattr = proxygetattr
 __fixsipclasses__.proxylen = proxylen
 __fixsipclasses__.proxygetitem = proxygetitem
 __fixsipclasses__.proxysetitem = proxysetitem
+__fixsipclasses__.proxydelitem = proxydelitem
 __fixsipclasses__.proxystr = proxystr
+__fixsipclasses__.proxynonzero = proxynonzero
 
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
-del proxygetitem, proxysetitem, proxystr
+del proxygetitem, proxysetitem, proxystr, proxynonzero
 
 __fixsipclasses__( globals().items() + carto.__dict__.items() )
 
 Object.__iter__ = __fixsipclasses__.objiter
 Object.next = __fixsipclasses__.objnext
+Object.__delitem__ = __fixsipclasses__.proxydelitem
 
 __fixsipclasses__.fakerepr = lambda a : "<%s.%s object at 0x%x>" % (a.__class__.__module__, a.__class__.__name__, id(a))
 
@@ -450,10 +474,25 @@ def __toMatrix(s):
     """ This function return a copy of the transformation matrix """
     m = numpy.identity(4)
     t, r = s.translation(), s.rotation()
-    m[0:3,0:3].flat = [r.value(x) for x in xrange(9)]
+    m[0:3,0:3].transpose().flat = [r.value(x) for x in xrange(9)]
     m[0:3,3].flat = t.items()
     return m
+def __MotionFromMatrix(self, value):
+  self.rotation().volume().arraydata().reshape(3,3).transpose()[:,:] \
+    = value[ 0:3, 0:3 ]
+  self.translation().arraydata()[:] = value[ 0:3, 3 ]
+def __Motion__init__( self, *args ):
+  if len( args ) != 0 and isinstance( args[0], numpy.ndarray ) \
+    and args[0].shape == ( 4, 4 ):
+    self.__oldinit__()
+    self.fromMatrix( args[0] )
+  else:
+    self.__oldinit__( *args )
 Motion.toMatrix = __toMatrix
+Motion.fromMatrix = __MotionFromMatrix
+Motion.__oldinit__ = Motion.__init__
+Motion.__init__ = __Motion__init__
+del __toMatrix, __MotionFromMatrix, __Motion__init__
 
 Motion.__repr__ = lambda self : __fixsipclasses__.fakerepr(self) + "\n"+str(self.toMatrix())
 Motion.__str__ = lambda self: self.toMatrix().__str__()
@@ -631,6 +670,17 @@ def genobj__update__( self, x ):
   for x,y in x.iteritems():
     self[x] = y
 
+def genobj__iadd__( self, x ):
+  if not self.isDynArray():
+    raise ValueError( 'Generic object is not a list-compatible object' )
+  for y in x:
+    self.append( y )
+  return self
+
+def obj__iadd__( self, x ):
+  self.get().__iadd__( x )
+  return self
+
 carto.GenericObject.__repr__ = carto.GenericObject.__str__
 carto.GenericObject._proxy = _proxy
 del _proxy
@@ -641,12 +691,15 @@ carto.GenericObject.__new__ = staticmethod( genobj__new__ )
 carto.GenericObject.__oldgetattribute__ = carto.GenericObject.__getattribute__
 carto.GenericObject.__getattribute__ = genobj__getattribute__
 carto.GenericObject.update = genobj__update__
+carto.GenericObject.__iadd__ = genobj__iadd__
 carto.GenericObject.iteritems = objiteritems
 carto.GenericObject.itervalues = objitervalues
 carto.GenericObject.iterkeys = carto.GenericObject.__iter__
-del genobj__getitem__, genobj__new__
+Object.__iadd__ = obj__iadd__
+del genobj__getitem__, genobj__new__, genobj__update__, genobj__iadd__
 del genobj__getattribute__
 del objiteritems, objitervalues
+del obj__iadd__
 
 
 # trap every access to Point3df's instance methods to check for the

@@ -39,6 +39,7 @@
 #include <aims/io/defaultItemR.h>
 #include <aims/io/defaultItemW.h>
 #include <cartobase/exception/ioexcept.h>
+#include <cartobase/datasource/streamdatasource.h>
 
 using namespace aims;
 using namespace carto;
@@ -60,39 +61,45 @@ void ArgHeader::read( size_t * )
 {
   string fileName = filename();
   if( fileName.length() >= 8 && 
-      fileName.substr( _name.length() - 8, 8 ) == ".bundles" ) {
-    setProperty( "file_type", string( "ARG" ) );
+      fileName.substr( _name.length() - 8, 8 ) == ".bundles" )
+  {
+    setProperty( "file_type", string( "BUNDLES" ) );
     setProperty( "object_type", string( "Graph" ) );
     setProperty( "data_type", string( "VOID" ) );
     // Read bundles header
     readMinf( fileName );
     // add meta-info to header
     readMinf( fileName + ".minf" );
-  } else {
+  }
+  else
+  {
     // ARG format
     ifstream is( fileName.c_str() );
     if( !is )
       io_error::launchErrnoExcept( fileName );
-    
-    setProperty( "file_type", string( "BUNDLES" ) );
+    IStreamDataSource ds( is, fileName );
+
+    setProperty( "file_type", string( "ARG" ) );
     setProperty( "object_type", string( "Graph" ) );
     setProperty( "data_type", string( "VOID" ) );
-    
+
     // try to read syntactic attribute
     string	l;
     char		c;
-    
+
     do {
       l.erase( 0, l.length() );
-      while( !is.eof() ) {
-        c = is.get();
-        if( c != '\n' && c != '\0' )
+      while( !ds.eof() )
+      {
+        c = ds.getch();
+        if( c != '\n' && c != '\0' && c != '\r' )
           l += c;
         else
           break;
       }
-    } while( !is.eof() && ( l.length() == 0 || l[0] == '#' ) );
-    if( l.find( "*BEGIN GRAPH" ) == 0 ) {
+    } while( !ds.eof() && ( l.length() == 0 || l[0] == '#' ) );
+    if( l.find( "*BEGIN GRAPH" ) == 0 )
+    {
       unsigned	i = 12;
       while( l.length() > i && ( l[i] == ' ' || l[i] == '\t' ) )
         ++i;

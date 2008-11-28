@@ -19,7 +19,7 @@ public:
 %End
 %If (!SIP_THROW_BUG)
   virtual %Template1PyType% *read( int = 0, const std::string * = 0, int = -1 )
-    throw ( carto::io_error, std::exception ) /Factory, ReleaseGIL/;
+    throw ( carto::io_error, std::exception ) /Factory/; //, ReleaseGIL/;
 %End
 
   void setFileName( std::string & );
@@ -53,7 +53,7 @@ public:
 %If (!SIP_THROW_BUG)
   virtual bool write( const %Template1PyType% &, bool = false, 
                       const std::string * = 0 )
-    throw ( carto::io_error, std::exception ) /Factory, ReleaseGIL/;
+    throw ( carto::io_error, std::exception ) /Factory/; //, ReleaseGIL/;
 %End
 
   void setFileName( std::string & );

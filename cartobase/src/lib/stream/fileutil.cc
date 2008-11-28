@@ -241,7 +241,7 @@ string FileUtil::temporaryFile( const string & prefix, int & fd )
 #else
           int	mode = O_RDWR | O_CREAT | O_TRUNC | O_LARGEFILE;
 #endif
-          fd = ::open( fname.c_str(), mode );
+          fd = ::open( fname.c_str(), mode, 0777 );
           if( fd != -1 )
             unlink( fname.c_str() );
         }

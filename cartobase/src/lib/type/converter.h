@@ -101,12 +101,6 @@ namespace carto
     {
       // Initialize scale information
       _scale = this->getscale();
-
-       std::cout << "dynamic scale : " << _scale << std::endl;
-//       std::cout << "vmin : " << this->_info.vmin << std::endl;
-//       std::cout << "vmax : " << this->_info.vmin << std::endl;
-//       std::cout << "omin : " << this->_info.omin << std::endl;
-//       std::cout << "omax : " << this->_info.omax << std::endl;
     }
 
     double getScale() { return this-> getscale(); }

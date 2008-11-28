@@ -70,14 +70,16 @@ namespace aims
     */
     void read(AimsData<T>& thing, const carto::AllocatorContext & context, 
               carto::Object options );
-	
+
+    void readSubImage( NiftiHeader* hdr, int t, AimsData<T> & data );
+    /*
     void readFrame( std::ifstream &, AimsData<T> & data, int t, 
                     const std::string & type, NiftiHeader* hdr, bool bswap, 
                     bool radio );
 
     void readScaledFrame( std::ifstream &, AimsData<T> & data, int t, 
                           NiftiHeader* hdr, bool bswap, bool radio );
-						    
+    */
     /// Return a name without .hdr or .img or .nii or .nii.gz extension
     std::string removeExtension(const std::string& name);
 	

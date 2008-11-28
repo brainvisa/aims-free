@@ -52,6 +52,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <limits.h>
 
 using namespace aims;
 using namespace carto;

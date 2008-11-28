@@ -140,7 +140,7 @@ namespace aims
         std::cout << "Creating blob labels by decreasing maximum intensity" << std::endl;
         for (blobIt=blobList.begin(); blobIt!=blobList.end(); ++blobIt)
         {
-            labelSet.insert(std::pair<int,float>((*blobIt)->Label(), (*blobIt)->GetMeasurements().tValue));
+            labelSet.insert(std::pair<int,float>((*blobIt)->Label(), (*blobIt)->GetMeasurements().t));
         }
         for (labelIt=labelSet.begin(); labelIt!=labelSet.end(); ++labelIt)
         {
@@ -209,10 +209,10 @@ namespace aims
                set<Site,ltstr_p3d<Site> > &liste = (*blobIt)->GlBlobRep()->GetListePoints();
                typename set<Site,ltstr_p3d<Site> >::iterator listit = liste.begin();
               cout << liste.size() << " ";
-//                for (;listit!=liste.end();listit++){
-//                  nodeslist.push_back((*listit).second);
-//                }
-              cout  << nodeslist.size() << "! " ;
+               for (;listit!=liste.end();listit++){
+                 nodeslist.push_back((*listit).second);
+               }
+              cout  << nodeslist.size() << "!!!!!!!!!!!!! " ;
                vert->setProperty("nodes_list", nodeslist);
  
                vert->setProperty("maxIntensity",(*blobIt)->GetMeasurements().maxIntensity);

@@ -148,16 +148,20 @@ namespace aims
     //hdr.setProperty( "minimum", (int) vmin ); // cal_min ?
     //hdr.setProperty( "maximum", (int) vmax ); // cal_max ?
 
+    std::cout << "before settings\n";
     const Settings sett = Settings::settings();
     bool  write4d = true;
     try
     {
       write4d = (bool) 
         sett.getProperty( "nifti_output_4d_volumes" )->getScalar();
+      std::cout << "write4d OK\n";
     }
     catch( std::exception & )
     {
+      std::cout << "exception\n";
     }
+    std::cout << "write4d: " << write4d << "\n";
 
     if( write4d || thing.dimT() == 1 )
     {

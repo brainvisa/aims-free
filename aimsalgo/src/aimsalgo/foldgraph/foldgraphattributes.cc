@@ -57,6 +57,7 @@
 #include <cartobase/thread/threadedLoop.h>
 #include <cartobase/thread/thread.h>
 #include <cartobase/thread/cpu.h>
+#include <cartobase/thread/mutex.h>
 #include <cartobase/config/version.h>
 #include <cartobase/config/verbose.h>
 
@@ -383,8 +384,10 @@ namespace
       conv.printToVolume( **i, vol );
 
     // keep only biggest connected component
+    // cout << "before AimsConnectedComponent, thread " << pthread_self() << endl;
     AimsConnectedComponent( vol, Connectivity::CONNECTIVITY_18_XYZ, int16_t(0),
                             true, 0, 1, false );
+    // cout << "after AimsConnectedComponent, thread " << pthread_self() << endl;
 
     // mesh
     Mesher	mesher;
@@ -437,7 +440,10 @@ namespace
         cout << "meshing node " << i+1 << " / " << n << "..." << endl;
         context.unlock();
         mesh = meshBuckets( bks );
+        // lock a mutex since storeAims() is not thread-safe
+        context.lock();
         GraphManip::storeAims( graph, v, "aims_Tmtktri", mesh );
+        context.unlock();
       }
   }
 
@@ -2026,9 +2032,12 @@ void FoldGraphAttributes::thickness( const BucketMap<float> & midInterface,
     {
       s.mean /= s.npoint;
       v->setProperty( "thickness_mean", s.mean );
-      v->setProperty( "thickness_std",
-                      sqrt( ( s.var - s.npoint * s.mean * s.mean )
-                      / (s.npoint - 1) ) );
+      if( s.npoint >= 2 )
+        v->setProperty( "thickness_std",
+                        sqrt( ( s.var - s.npoint * s.mean * s.mean )
+                        / (s.npoint - 1) ) );
+      else
+        v->setProperty( "thickness_std", 0.F ); // should we just omit it ?
     }
   }
 }

@@ -27,6 +27,7 @@ public:
   Motion( const carto::Object );
   Motion( const vector_FLOAT & );
   virtual ~Motion();
+  virtual bool operator == ( const Motion & );
   Point3df & translation();
   // const Point3df & translation() const;
   AimsData_FLOAT & rotation();

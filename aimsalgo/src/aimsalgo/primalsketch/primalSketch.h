@@ -35,10 +35,9 @@ namespace aims
      {
 
      protected:
-
           typedef typename SiteType<Geom>::type Site;
           typedef typename TexType<Text>::type Val;
-
+          
           string _subject;
 
           ScaleSpace<Geom, Text>   *_scaleSpace;
@@ -82,9 +81,9 @@ namespace aims
 
           ScaleSpaceBlob<Site>     *Blob(int label);
 
-          void ComputePrimalSketch(float tmin, float tMax, string statFile="");
+          void ComputePrimalSketch(float tmin, float tMax, string statFile="", uint intersection_param=10);
 
-          void MatchScaleLevels(float t_up, float t_down);
+          void MatchScaleLevels(float t_up, float t_down, uint intersection_param );
 
           void ComputeBlobMeasurements(string statName="");
 
@@ -136,7 +135,7 @@ namespace aims
      //---------------------------------------------------------------------
 
      template<typename Geom, typename Text>
-     void PrimalSketch<Geom,Text>::ComputePrimalSketch(float tmin, float tmax, string statFile)
+     void PrimalSketch<Geom,Text>::ComputePrimalSketch(float tmin, float tmax, string statFile, uint intersection_param)
      {
           // Algo : On part del'echelle la plus haute et on descend vers l'image originale
           // A chaque niveau : on regarde vers le niveau en dessous et on applique
@@ -213,7 +212,7 @@ namespace aims
                itScaleDown++;
                t_up=*itScaleUp;
                t_down=*itScaleDown;
-               MatchScaleLevels(t_up, t_down);
+               MatchScaleLevels(t_up, t_down, intersection_param);
           }
 
         // "closing" the primal sketch at bottom
@@ -487,7 +486,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
      //---------------------------------------------------------------------
 
      template<typename Geom, typename Text>
-     void PrimalSketch<Geom,Text>::MatchScaleLevels(float t_up, float t_down)
+     void PrimalSketch<Geom,Text>::MatchScaleLevels(float t_up, float t_down, uint intersection_param)
      {
           float t, t_new;
           int stat1=0, stat2=0, stat3=0;
@@ -542,7 +541,8 @@ cout << "ssblobs après : " << blobList.size() << endl;
                                                             pointsUp.begin(), pointsUp.end(),
                                                             std::inserter(pointsInter, pointsInter.begin()),
                                                             ltstr_p3d<Site>() );
-                    if (pointsInter.size()>0)
+//                     if (2*pointsInter.size()/(pointsUp.size() + pointsDown.size()) >0.5)
+                    if (pointsInter.size()>intersection_param)
                     {
                          matchUp[labelUp].insert(labelDown);
                          matchDown[labelDown].insert(labelUp);
@@ -607,8 +607,8 @@ cout << "ssblobs après : " << blobList.size() << endl;
                          break;
                }
                std::cout << "\tNew scale : " << t_new << std::endl;
-               MatchScaleLevels(t_up, t_new);
-               MatchScaleLevels(t_new, t_down);
+               MatchScaleLevels(t_up, t_new, intersection_param);
+               MatchScaleLevels(t_new, t_down, intersection_param);
                std::cout << "\trefinement successful" << std::endl;
           }
           else

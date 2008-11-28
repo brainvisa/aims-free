@@ -66,7 +66,7 @@ bool meshIt( carto::AttributedObject* ao, const vector<string> & meshatt,
   Mesher					mesher;
   const float	deciMaxClearance = 5., deciMaxError = 0.5;
 
-  mesher.setDecimation( 100.0, deciMaxClearance, deciMaxError, 120.0 );
+  mesher.setDecimation( 99, deciMaxClearance, deciMaxError, 120.0 );
   mesher.setMinFacetNumber( minFacetNumber );
   mesher.setSmoothing( 180, 5, 0.4, 0.4, 0.4 );
 
@@ -104,7 +104,6 @@ bool meshIt( carto::AttributedObject* ao, const vector<string> & meshatt,
     return( false );
 
   syntaxes.insert( ao->getSyntax() );
-  cout << "bound : " << bmax << endl;
   AimsData<short>	vol( bmax[0] + 1, bmax[1] + 1, bmax[2] + 1, 1, 1 );
   vol.fillBorder( -1 );
   vol = 0;

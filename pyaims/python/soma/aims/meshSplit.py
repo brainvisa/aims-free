@@ -32,6 +32,7 @@ def meshSplit2(mesh, tex, graph, voxel_size):
                                           add vertex "others" : void
   """
   labels = numpy.unique(tex[0].arraydata())
+  print labels
   labels = labels.tolist()
   if labels.count(0) > 1:
     labels.remove(0)

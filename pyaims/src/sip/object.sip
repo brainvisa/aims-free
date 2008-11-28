@@ -549,6 +549,16 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     sipCpp->removeProperty( *a0 );
 %End
 
+    void __delitem__( int ) /AutoGen/;
+%MethodCode
+    sipCpp->removeArrayItem( a0 );
+%End
+
+    void append( const carto::Object );
+%MethodCode
+    sipCpp->insertArrayItem( sipCpp->size(), *a0 );
+%End
+
 
     // printing
 

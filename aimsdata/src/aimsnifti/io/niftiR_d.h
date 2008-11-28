@@ -60,7 +60,7 @@ namespace aims
   {
   public:
     NiftiReadProcess( AimsData<T> & data, nifti_image *nim, Motion & m,
-                      std::vector<float> & _scale );
+                      std::vector<float> & _scale, int t, int nt );
 
     template <typename U>
     static bool readNifti( Process &, const std::string &, Finder & );
@@ -70,13 +70,17 @@ namespace aims
     nifti_image *_nim;
     Motion      & _motion;  // from NIFTI-disk to AIMS-memory
     std::vector<float> & _scale;
+    int _t0;
+    int _nt;
   };
 
 
   template <typename T>
   NiftiReadProcess<T>::NiftiReadProcess( AimsData<T> & data, nifti_image* nim,
-                                         Motion & m , std::vector<float> & s )
-    : Process(), _data( data ), _nim( nim ), _motion( m ), _scale( s )
+                                         Motion & m , std::vector<float> & s,
+                                         int t, int nt )
+    : Process(), _data( data ), _nim( nim ), _motion( m ), _scale( s ),
+      _t0( t ), _nt( nt )
   {
     registerProcessType( "Volume", "S8",     &readNifti<int8_t> );
     registerProcessType( "Volume", "U8",     &readNifti<uint8_t> );
@@ -126,19 +130,24 @@ namespace aims
     long offmax = (long) toff * data.dimT();
     long off;
     bool fail = false;
+    int t2, nt = np._nt;
+    if( nt < 0 )
+      nt = data.dimT();
     if (((carto::DataTypeCode<T>::name() == "FLOAT")
       || (carto::DataTypeCode<T>::name() == "DOUBLE"))&& (s[0] != 0.0))
     {
       if( ph )
         ph->setProperty( "scale_factor_applied", true );
-      for( int t=0; t<data.dimT(); ++t )
+      for( int t=0; t<nt; ++t )
+      {
+        t2 = t + np._t0;
         for( int z=0; z<dz; ++z )
           for( int y=0; y<dy; ++y )
           {
             d0f = m2s.transform( Point3df( 0, y, z ) );
             d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
                           int16_t( rint( d0f[2] ) ), t );
-            d = &data( 0, y, z, t );
+            d = &data( 0, y, z, t2 );
             for( int x=0; x<dx; ++x, d0+=inc )
             {
               off = toff * t + zoff * d0[2] + yoff * d0[1] + d0[0];
@@ -151,17 +160,20 @@ namespace aims
               }
             }
           }
+      }
     }
     else
     {
-      for( int t=0; t<data.dimT(); ++t )
+      for( int t=0; t<nt; ++t )
+      {
+        t2 = t + np._t0;
         for( int z=0; z<dz; ++z )
           for( int y=0; y<dy; ++y )
           {
             d0f = m2s.transform( Point3df( 0, y, z ) );
             d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
                           int16_t( rint( d0f[2] ) ), t );
-            d = &data( 0, y, z, t );
+            d = &data( 0, y, z, t2 );
             for( int x=0; x<dx; ++x, d0+=inc )
             {
               off = toff * t + zoff * d0[2] + yoff * d0[1] + d0[0];
@@ -174,6 +186,7 @@ namespace aims
               }
             }
           }
+      }
     }
     if( fail )
       std::cerr << "Warning: storage_to_memory transformation in NIFTI1 file "
@@ -221,7 +234,6 @@ namespace aims
           bname = carto::FileUtil::dirname( _name ) +
               carto::FileUtil::separator();
           hdr->removeProperty( "series_filenames" );
-          std::cout << "Series of files not handled yet." << std::endl;
       }
     }
 
@@ -232,19 +244,42 @@ namespace aims
         false, context.useFactor() );
 
     AimsData<T> data;
-    if( !series )
-      data = AimsData<T>( hdr->dimX(), hdr->dimY(), hdr->dimZ(), hdr->dimT(),
-                          border, al );
-    else
-      /* TODO */ //handle series_filenames
-      // only read first image (remove after fixing series_filenames)
-      data = AimsData<T>( hdr->dimX(), hdr->dimY(), hdr->dimZ(), 1,
+    data = AimsData<T>( hdr->dimX(), hdr->dimY(), hdr->dimZ(), hdr->dimT(),
                           border, al );
     data.setHeader( hdr->cloneHeader() );
 
+    int t = 0;
+    readSubImage( hdr, t, data );
+    t += hdr->niftiNim()->dim[4];
+
+    if( series )
+    {
+      int i, n = fnames.size();
+      std::string fnm;
+      for( i=1; i<n; ++i )
+      {
+        fnm = bname + carto::FileUtil::basename( fnames[i]->getString() );
+        NiftiHeader hdr2( fnm );
+        hdr2.read();
+        readSubImage( &hdr2, t, data );
+        t += hdr2.niftiNim()->dim[4];
+        hdr2.freeNiftiStruct();
+      }
+    }
+
+    thing = data;
+    hdr->freeNiftiStruct();
+    delete hdr;
+  }
+
+
+  template <typename T> void
+  NiftiReader<T>::readSubImage( NiftiHeader* hdr, int t, AimsData<T> & data )
+  {
     nifti_image *nim = hdr->niftiNim();
     if (nifti_image_load( nim ) == -1)
-      std::cerr << "Error while loading NIFTI1 image data." << std::endl;
+      throw carto::wrong_format_error( "Error while loading NIFTI1 image "
+          "data.", _name );
 
     std::vector< float > storage_to_memory;
     hdr->getProperty( "storage_to_memory", storage_to_memory );
@@ -256,17 +291,13 @@ namespace aims
     hdr->getProperty( "scale_factor", s[0] );
     hdr->getProperty( "scale_offset", s[1] );
 
-    NiftiReadProcess<T> proc( data, nim, m, s );
+    NiftiReadProcess<T> proc( data, nim, m, s, t, nim->dim[4] );
     Finder		f2;
     f2.setObjectType( "Volume" );
     std::string dt;
     hdr->getProperty( "disk_data_type", dt );
     f2.setDataType( dt );
     proc.execute( f2, "" );
-
-    thing = data;
-    hdr->freeNiftiStruct();
-    delete hdr;
   }
 
 }

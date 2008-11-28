@@ -10,6 +10,7 @@
 carto::pyaims_init();
 %End
 
+%Include libxml2.sip
 %Include carto.sip
 %Include paths.sip
 %Include info.sip
@@ -76,6 +77,7 @@ carto::pyaims_init();
 /* %Include map_STRING_Semantic.sip
 %Include map_STRING_Syntax.sip */
 %Include graph.sip
+%Include rcptr_Graph.sip
 %Include graphmanip.sip
 %Include tree.sip
 %Include hierarchy.sip
@@ -147,6 +149,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include threshold_S16_S16.sip
 %Include threshold_FLOAT_S16.sip
 %Include mask.sip
+%Include standardreferentials.sip
 
 %Include merge.sip
 %Include merge_S16_S16.sip
