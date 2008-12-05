@@ -1888,6 +1888,33 @@ typessub = { 'signed char' : \
                'compareElement' : '',
               },
 
+             'std::set<unsigned>' : \
+             { 'typecode' : 'set_U32',
+               'pyFromC' : 'pyaimsConvertFrom_set',
+               'CFromPy' : 'pyaimsConvertTo_set<unsigned>',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&', 
+               'pyaddress' : '&', 
+               'defScalar' : '',
+               'new' : 'new set_U32',
+               'NumType' : 'PyArray_OBJECT', 
+               'PyType' : 'set_U32',
+               'sipClass' : 'set_U32',
+               'typeinclude' : '#include <set>',
+               'sipinclude' : '#include <pyaims/vector/sipset.h>\n'
+               '#ifndef PYAIMS_WRAPPER_SET_U32\n'
+               '#define PYAIMS_WRAPPER_SET_U32\n'
+               'template <> inline sipWrapperType*\n'
+               'sipClass_set<unsigned>()\n'
+               '{ return sipClass_set_U32; }\n'
+               '#endif', 
+               'module' : 'aims', 
+               'testPyType' : 'pyaimsCheck_set<unsigned>',
+               'compareElement' : '',
+               },
+
              }
 
 completeTypesSub( typessub )

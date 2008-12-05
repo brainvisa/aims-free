@@ -11,7 +11,7 @@ typedef carto::Converter<AimsData<%Template1%>, AimsData<%Template2%> >
 
 public:
   Converter_Volume_%Template1typecode%_Volume_%Template2typecode%( bool = false );
-  Converter_Volume_%Template1typecode%_Volume_%Template2typecode%( bool, SIP_PYOBJECT, SIP_PYOBJECT, SIP_PYOBJECT, SIP_PYOBJECT );
+  Converter_Volume_%Template1typecode%_Volume_%Template2typecode%( bool, SIP_PYOBJECT, SIP_PYOBJECT, SIP_PYOBJECT, SIP_PYOBJECT, bool = false );
 %MethodCode
   // Allocate rescaler info object
   carto::RescalerInfo info;
@@ -46,6 +46,8 @@ public:
     if (!a4isnone) {
       info.omax =  PyFloat_AsDouble(a4);
     }
+
+    info.usevtypelimits = a5;
 
   }
 

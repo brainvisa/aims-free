@@ -72,6 +72,7 @@ void TiffHeader::read()
 
   _dimZ = 0;
   TIFFSetErrorHandler( 0 );
+  TIFFSetWarningHandler( 0 );
 
 
   TIFF* tif = TIFFOpen( _name.c_str(), "r" );

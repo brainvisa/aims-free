@@ -13,18 +13,17 @@ else( soma-infra_FOUND )
 
   getFromPro(aimsdata.pro HEADERS SOURCES)
   
-  IF(APPLE)
-    SET(SOURCES
-    ${SOURCES}
-    io/fileFormat_graph2.cc
-    )
+  #IF(APPLE)
+  #  SET(SOURCES
+  #  ${SOURCES}
+  #  io/fileFormat_graph2.cc
+  #  )
   
-    SET(HEADERS
-    ${HEADERS}
-    io/fileFormat_graph2.h
-    )
-  
-  ENDIF(APPLE)
+  #  SET(HEADERS
+  #  ${HEADERS}
+  #  io/fileFormat_graph2.h
+  #  )
+  #ENDIF(APPLE)
   
   SHFJ_COPY_HEADERS(include/aims ${HEADERS})
   

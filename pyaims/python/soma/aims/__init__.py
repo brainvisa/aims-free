@@ -520,6 +520,7 @@ convertersObjectToPython = {
   'S32' : carto.NumericGenericObjectConverter.asInt,
   'U32' : carto.NumericGenericObjectConverter.asInt,
   'boolean' : carto.NumericGenericObjectConverter.asBool,
+  'string' : carto.GenericObject.getString,
   }
 
 def getPython( self ):

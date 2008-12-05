@@ -1000,7 +1000,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
             
             
             float tvalue2 = tvmax * (ssBlob->LifeTime()) ; //* glBlob1->measurements.area;
-            cout << "\tt" << tvmax <<";" << ssBlob->LifeTime() << ";" << glBlob1->measurements.area << ";" << area;            
+            cout << "\tt" << tvmax <<";" << ssBlob->LifeTime() << ";" << tvalue2 << " "; 
             measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvalue2, tvmax);
             areamoy +=area;
             areavar +=area*area;

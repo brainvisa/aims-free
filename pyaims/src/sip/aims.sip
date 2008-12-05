@@ -46,6 +46,7 @@ carto::pyaims_init();
 %Include vector_AimsVector_U32_2.sip
 %Include vector_AimsVector_U32_3.sip
 %Include vector_AimsVector_U32_4.sip
+%Include vector_set_U32.sip
 //%Include vector_InfoPtr.sip
 %Include set_S16.sip
 %Include set_S32.sip

@@ -62,6 +62,7 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( std::vector<std::string> )
 INSTANTIATE_GENERIC_OBJECT_TYPE( std::vector<std::string> * )
 INSTANTIATE_GENERIC_OBJECT_TYPE( std::vector<std::vector<float> > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( std::vector<std::vector<char> > )
+INSTANTIATE_GENERIC_OBJECT_TYPE( std::vector<std::set<unsigned> > )
 
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< std::vector<int> > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< std::vector<unsigned> > )

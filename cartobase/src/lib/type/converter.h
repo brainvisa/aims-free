@@ -40,122 +40,33 @@
 #include <cartobase/type/types.h>
 #include <cartobase/type/limits.h>
 
+#define CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( IN , OUT ) \
+template<> \
+inline \
+void RawConverter< IN , OUT >::convert( const IN &in, OUT & out ) const \
+{ \
+  out = ( OUT )rint( in ); \
+} \
+
 namespace carto
 {
-
-  template<typename T>
-  inline T min_limit() {
-    /// Returns the negative minimum value, because for some types (double and float)
-    /// the min value is the nearest value to 0
-    T result = std::numeric_limits<T>::min();
-
-    if ( std::numeric_limits<T>::is_signed ) {
-      if ( result > 0 ) {
-        result = 0 - std::numeric_limits<T>::max();
-      }
-    }
-
-    return result;
-  }
-
-  template<typename T>
-  inline bool ismin_limit( T value ){
-    return ( value == carto::min_limit<T>() );
-  }
-
-  template<typename T>
-  inline bool ismax_limit( T value ){
-    return ( value == std::numeric_limits<T>::max() );
-  }
-
-  template<typename TYPE, typename TEST>
-  inline bool isvalidvalue( TYPE value ){
-    /// Check that value is valid for the test type
-    return ( ((TYPE)carto::min_limit<TEST>()) <= value )
-      && ( value <= ((TYPE)std::numeric_limits<TEST>::max()) );
-  }
-
   /// Low level rescaler info used for rescaling
   class RescalerInfo
   {
   public:
     RescalerInfo()
-      : vmin( std::numeric_limits<double>::quiet_NaN() ),
+      : usevtypelimits(false),
+        vmin( std::numeric_limits<double>::quiet_NaN() ),
         vmax( std::numeric_limits<double>::quiet_NaN() ),
         omin( std::numeric_limits<double>::quiet_NaN() ),
         omax( std::numeric_limits<double>::quiet_NaN() )
     {}
 
+    bool    usevtypelimits; 
     double  vmin;
     double  vmax;
     double  omin;
     double  omax;
-  };
-
-  template<typename INP, typename OUTP>
-  class DefaultedRescalerInfo
-  {
-  public:
-    DefaultedRescalerInfo( const RescalerInfo & info )
-      : _info( info )
-    {
-      // Initialize scale information
-      _scale = this->getscale();
-    }
-
-    double getScale() { return this-> getscale(); }
-    OUTP getScaledValue( INP value ) {
-      OUTP result;
-      double scaledvalue;
-
-      scaledvalue = ( value - this->getvmin() ) * _scale + this->getomin();
-
-      if ( scaledvalue < ((double)carto::min_limit<OUTP>())) {
-        result = carto::min_limit<OUTP>();
-      } else if ( scaledvalue > ((double)std::numeric_limits<OUTP>::max()) ) {
-        result = std::numeric_limits<OUTP>::max();
-      } else {
-        result = (OUTP)scaledvalue;
-      }
-
-      return result;
-    }
-
-    INP getvmin() {
-      return ( carto::isvalidvalue<double, INP>( _info.vmin ) ?
-        (INP)_info.vmin : carto::min_limit<INP>() );
-    }
-
-    INP getvmax() {
-      return ( carto::isvalidvalue<double, INP>( _info.vmax ) ?
-        (INP)_info.vmax : std::numeric_limits<INP>::max() );
-    }
-
-    OUTP getomin() {
-      return ( carto::isvalidvalue<double, OUTP>( _info.omin ) ?
-        (OUTP)_info.omin : carto::min_limit<OUTP>() );
-    }
-
-    OUTP getomax() {
-      return ( carto::isvalidvalue<double, OUTP>( _info.omax ) ?
-        (OUTP)_info.omax : std::numeric_limits<OUTP>::max() );
-    }
-
-  private:
-
-    DefaultedRescalerInfo();
-
-    double getscale() {
-      double vdiff, odiff;
-      vdiff = (double)this->getvmax() - (double)this->getvmin();
-      vdiff = ( vdiff != 0 ? vdiff : 1 );
-      odiff = (double)this->getomax() - (double)this->getomin();
-
-      return odiff / vdiff ;
-    }
-
-    const RescalerInfo & _info;
-    double _scale;
   };
 
   /// Low-level raw converter (not rescaling)
@@ -166,6 +77,62 @@ namespace carto
     void convert( const INP &in, OUTP & out ) const;
   };
 
+  // Conversion with Void
+  template <typename OUTP>
+  class RawConverter<Void, OUTP>
+  {
+  public:
+    void convert( const Void &, OUTP & out ) const
+    {
+      out = OUTP( 1 );
+    }
+  };
+
+
+  template <typename INP>
+  class RawConverter<INP, Void>
+  {
+  public:
+    void convert( const INP &, Void & ) const
+    {
+    }
+  };
+
+
+  template<> 
+  class RawConverter<Void, Void>
+  {
+    public:
+    void convert( const Void &, Void & ) const
+    {
+    }
+  };
+
+  template<typename INP, typename OUTP>
+  class DefaultedRescalerInfo
+  {
+  public:
+    DefaultedRescalerInfo( const RescalerInfo & info );
+
+    double getScale();
+    OUTP getScaledValue( INP value );
+
+    void setvmin( double vmin );
+    void setvmax( double vmax );
+    void setomin( double omin );
+    void setomax( double omax );
+
+  private:
+    DefaultedRescalerInfo();
+    double getscale();
+    INP _defaultedvmin;
+    INP _defaultedvmax;
+    OUTP _defaultedomin;
+    OUTP _defaultedomax;
+
+    const RescalerInfo & _info;
+    double _scale;
+  };
 
   /// Low-level rescaling converter
   template<typename INP, typename OUTP>
@@ -282,40 +249,6 @@ namespace carto
       : Converter<INP, OUTP>( rescale, info ) {}
   };
 
-
-  // conversion with Void
-
-  template <typename OUTP>
-  class RawConverter<Void, OUTP>
-  {
-  public:
-    void convert( const Void &, OUTP & out ) const
-    {
-      out = OUTP( 1 );
-    }
-  };
-
-
-  template <typename INP>
-  class RawConverter<INP, Void>
-  {
-  public:
-    void convert( const INP &, Void & ) const
-    {
-    }
-  };
-
-
-  template<> 
-  class RawConverter<Void, Void>
-  {
-    public:
-    void convert( const Void &, Void & ) const
-    {
-    }
-  };
-
-
   // implementation
   template<typename INP, typename OUTP>
   inline
@@ -336,6 +269,21 @@ namespace carto
     out = this->_info->getScaledValue( in );
   }
 
+  // Specialization for integer conversions rawconverter methods
+  // In the case of conversion to integer types, we must round values, not only convert.
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( double, int16_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( float, int16_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( double, uint16_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( float, uint16_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( double, int32_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( float, int32_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( double, uint32_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( float, uint32_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( double, int64_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( float, int64_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( double, uint64_t )
+  CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( float, uint64_t )
+
   template<typename INP, typename OUTP>
   inline
   void RawConverter<INP,OUTP>::convert( const INP &in, OUTP & out ) const
@@ -350,11 +298,10 @@ namespace carto
   }
 
   // Converter
-
   template<class INP, class OUTP>
   inline OUTP* Converter<INP,OUTP>::operator () ( const INP & in ) const
   {
-    OUTP	*out = ConverterAllocator<INP,OUTP>::alloc( in );
+    OUTP    *out = ConverterAllocator<INP,OUTP>::alloc( in );
     convert( in, *out );
     return out;
   }
@@ -365,16 +312,127 @@ namespace carto
   {
     if( _rescale )
       {
-        SmartConverter<INP,OUTP>	sc(this->_info);
+        SmartConverter<INP,OUTP>    sc(this->_info);
         sc.convert( in, out );
       }
     else
       {
-        RawConverter<INP,OUTP>	rc;
+        RawConverter<INP,OUTP>  rc;
         rc.convert( in, out );
       }
   }
 
+  template<typename T>
+  inline T min_limit() {
+    /// Returns the negative minimum value, because for some types (double and float)
+    /// the min value is the nearest value to 0
+    T result = std::numeric_limits<T>::min();
+
+    if ( std::numeric_limits<T>::is_signed ) {
+      if ( result > 0 ) {
+        result = 0 - std::numeric_limits<T>::max();
+      }
+    }
+
+    return result;
+  }
+
+  template<typename T>
+  inline bool ismin_limit( T value ){
+    return ( value == carto::min_limit<T>() );
+  }
+
+  template<typename T>
+  inline bool ismax_limit( T value ){
+    return ( value == std::numeric_limits<T>::max() );
+  }
+
+  template<typename TYPE, typename TEST>
+  inline bool isvalidvalue( TYPE value ){
+    /// Check that value is valid for the test type
+    return ( ((TYPE)carto::min_limit<TEST>()) <= value )
+      && ( value <= ((TYPE)std::numeric_limits<TEST>::max()) );
+  }
+
+  template<typename TYPE>
+  inline TYPE getcheckedmin( double min ) {
+    return ( carto::isvalidvalue<double, TYPE>( min ) ? min : carto::min_limit<TYPE>() );
+  }
+
+  template<typename TYPE>
+  inline TYPE getcheckedmax( double max ) {
+    return ( carto::isvalidvalue<double, TYPE>( max ) ? max : std::numeric_limits<TYPE>::max() );
+  }
+
+  /*
+   * DefaultedRescalerInfo methods implementation
+   */
+  template<typename INP, typename OUTP>
+  DefaultedRescalerInfo<INP,OUTP>::DefaultedRescalerInfo( const RescalerInfo & info )
+    : _info( info )
+  {
+    // Initialize scale information
+    setvmin( _info.vmin );
+    setvmax( _info.vmax );
+    setomin( _info.omin );
+    setomax( _info.omax );
+
+    _scale = this->getscale();
+  }
+
+  template<typename INP, typename OUTP>
+  double DefaultedRescalerInfo<INP,OUTP>::getScale() {
+    return _scale;
+  }
+
+  template<typename INP, typename OUTP>
+  OUTP DefaultedRescalerInfo<INP,OUTP>::getScaledValue( INP value ) {
+    OUTP result;
+    RawConverter<double, OUTP> doubleconverter;
+    double scaledvalue;
+
+    scaledvalue = ( value - this->_defaultedvmin ) * _scale + this->_defaultedomin;
+
+    if ( scaledvalue < ((double)carto::min_limit<OUTP>())) {
+      result = carto::min_limit<OUTP>();
+    } else if ( scaledvalue > ((double)std::numeric_limits<OUTP>::max()) ) {
+      result = std::numeric_limits<OUTP>::max();
+    } else {
+      doubleconverter.convert( scaledvalue, result );
+    }
+
+    return result;
+  }
+
+  template<typename INP, typename OUTP>
+  void DefaultedRescalerInfo<INP,OUTP>::setvmin( double vmin ) {
+    _defaultedvmin = carto::getcheckedmin<INP>( vmin );
+  }
+
+  template<typename INP, typename OUTP>
+  void DefaultedRescalerInfo<INP,OUTP>::setvmax( double vmax ) {
+    _defaultedvmax = carto::getcheckedmax<INP>( vmax );
+  }
+
+  template<typename INP, typename OUTP>
+  void DefaultedRescalerInfo<INP,OUTP>::setomin( double omin ) {
+    _defaultedomin = carto::getcheckedmin<OUTP>( omin );
+  }
+
+  template<typename INP, typename OUTP>
+  void DefaultedRescalerInfo<INP,OUTP>::setomax( double omax ) {
+    _defaultedomax = carto::getcheckedmax<OUTP>( omax );
+  }
+
+  template<typename INP, typename OUTP>
+  double DefaultedRescalerInfo<INP,OUTP>::getscale() {
+    double vdiff, odiff;
+    vdiff = (double)this->_defaultedvmax - (double)this->_defaultedvmin;
+    vdiff = ( vdiff != 0 ? vdiff : 1 );
+    odiff = (double)this->_defaultedomax - (double)this->_defaultedomin;
+
+    return odiff / vdiff ;
+  }
 }
 
 #endif

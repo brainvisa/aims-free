@@ -641,7 +641,15 @@ void PythonWriter::writeString( DataSource & ds, string x )
 {
   unsigned	i, n = x.length();
   for( i=0; i!=n; ++i )
-    switch( x[i] )
+    if( x[i] < 32 )
+    {
+      x.replace( i, 1, string( "\\x" ) + (char) ( '0' + ( x[i] >> 4 ) ) \
+          + (char) ( '0' + ( x[i] & 0xf ) ) );
+      i += 3;
+      n += 3;
+    }
+    else
+      switch( x[i] )
       {
       case '\'':
       case '\\':

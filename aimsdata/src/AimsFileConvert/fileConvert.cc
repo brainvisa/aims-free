@@ -574,6 +574,9 @@ int main( int argc, const char **argv )
   app.addOption( proc.info.omax, "--omax",
                  "specify output maximum value for rescaling.",
                  true );
+  app.addOption( proc.info.usevtypelimits, "--itypelimits",
+                 "uses input type limits instead of dynamic min max to rescale data dynamic.",
+                 true );
   app.addOption( proc.form, "-f", "force a specific output format (GIS, "
 		 "VIDA, ...) (default: guessed by the output filename " 
 		 "extension)", true );
@@ -614,16 +617,16 @@ int main( int argc, const char **argv )
       cout << "zdim    : " << zdim << endl;
       ostringstream vminstream;
       vminstream << (double)proc.info.vmin;
-      cout << "imin    : " << (carto::ismin_limit<double>( proc.info.vmin ) ? "default" : vminstream.str()) << endl;
+      cout << "imin    : " << (isnan<double>( proc.info.vmin ) ? "default" : vminstream.str()) << endl;
       ostringstream vmaxstream;
       vmaxstream << (double)proc.info.vmax;
-      cout << "imax    : " << (carto::ismax_limit<double>( proc.info.vmax ) ? "default" : vmaxstream.str()) << endl;
+      cout << "imax    : " << (isnan<double>( proc.info.vmax ) ? "default" : vmaxstream.str()) << endl;
       ostringstream ominstream;
       ominstream << (double)proc.info.omin;
-      cout << "omin    : " << (carto::ismin_limit<double>( proc.info.omin ) ? "default" : ominstream.str()) << endl;
+      cout << "omin    : " << (isnan<double>( proc.info.omin ) ? "default" : ominstream.str()) << endl;
       ostringstream omaxstream;
       omaxstream << (double)proc.info.omax;
-      cout << "omax    : " << (carto::ismax_limit<double>( proc.info.omax ) ? "default" : omaxstream.str()) << endl;
+      cout << "omax    : " << (isnan<double>( proc.info.omax ) ? "default" : omaxstream.str()) << endl;
 
       //	Use the Process mechanism to switch on types
       if( !proc.execute( pi.filename ) )

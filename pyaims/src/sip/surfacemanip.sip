@@ -47,6 +47,8 @@ public:
                                       const AimsSurfaceTriangle & mesh, 
                                       unsigned nneighbours = 1, 
                                       unsigned* index = 0 );
+  static vector_set_U32
+    surfaceNeighbours( const AimsSurfaceTriangle & surf );
 };
 
 };

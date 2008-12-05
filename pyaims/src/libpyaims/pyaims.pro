@@ -15,6 +15,7 @@ HEADERS = \
         object/object.h \
         object/rcptrconv.h \
         vector/numpyarrayfunc.h \
+        vector/sipset.h \
         vector/sipvector.h \
         vector/stdvector.h \
         vector/vector.h 

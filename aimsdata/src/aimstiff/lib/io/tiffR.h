@@ -178,6 +178,7 @@ namespace aims
     int tiled, stripSize, rowsPerStrip, i, s;
     ushort photometric;
 
+    TIFFSetWarningHandler( 0 );
     TIFF* tif = TIFFOpen(name.c_str(), "r");
     if (tif) {
       tiled = TIFFIsTiled(tif);

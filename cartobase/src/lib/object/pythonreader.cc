@@ -1061,12 +1061,14 @@ GenericObject* PythonReader::read( GenericObject* object,
   if( h != d->helpers.end() )
     {
       // make new rule (should we really do that ?)
+      /*
       if( !semantic.empty() && synt != "__generic__" )
         {
           Semantic & rule = d->rules[ synt ][ semantic ];
           rule.type = type;
           rule.needed = false;
         }
+      */
       // call the associated I/O function
       return( (h->second)( object, semantic, *this ) );
     }

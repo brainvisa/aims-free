@@ -268,10 +268,17 @@ namespace carto
       out.setHeader( in.header()->cloneHeader( true ) );
 
     RescalerInfo info( _info );
-    if( std::isnan( info.vmin ) )
-      info.vmin = (double) in.minimum();
-    if( std::isnan( info.vmax ) )
-      info.vmax = (double) in.maximum();
+    if( std::isnan( info.vmin ) ) {
+      if ( ! info.usevtypelimits ) {
+        info.vmin = (double) in.minimum();
+      }
+    }
+
+    if( std::isnan( info.vmax ) ) {
+      if ( ! info.usevtypelimits ) {
+        info.vmax = (double) in.maximum();
+      }
+    }
 
     DefaultedRescalerInfo<INP, OUTP> defaultedinfo( info );
 

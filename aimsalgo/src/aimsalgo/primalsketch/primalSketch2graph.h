@@ -208,11 +208,11 @@ namespace aims
                vector<int> nodeslist;
                set<Site,ltstr_p3d<Site> > &liste = (*blobIt)->GlBlobRep()->GetListePoints();
                typename set<Site,ltstr_p3d<Site> >::iterator listit = liste.begin();
-              cout << liste.size() << " ";
+//               cout << liste.size() << " ";
                for (;listit!=liste.end();listit++){
                  nodeslist.push_back((*listit).second);
                }
-              cout  << nodeslist.size() << "!!!!!!!!!!!!! " ;
+//               cout  << nodeslist.size() << "!!!!!!!!!!!!! " ;
                vert->setProperty("nodes_list", nodeslist);
  
                vert->setProperty("maxIntensity",(*blobIt)->GetMeasurements().maxIntensity);
@@ -222,6 +222,7 @@ namespace aims
                vert->setProperty("area",(*blobIt)->GetMeasurements().area);
                vert->setProperty("tValue",(*blobIt)->GetMeasurements().tValue);
                vert->setProperty("t",(*blobIt)->GetMeasurements().t);
+               cout << (*blobIt)->GetMeasurements().t << ";";
                moy+=(*blobIt)->GetMeasurements().tValue;
                tab.push_back((*blobIt)->GetMeasurements().tValue);
                GreyLevelBlobTools<Site> blobTools((*blobIt)->GlBlobRep());
