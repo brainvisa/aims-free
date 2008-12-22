@@ -10,6 +10,7 @@ HEADERS = \
         numpyarray.h \
         data/data.h \
         data/sipdatatypes.h \
+        debugging/debuggingvol.h \
         io/reader.h \
         io/writer.h \
         object/object.h \
@@ -22,5 +23,6 @@ HEADERS = \
 
 SOURCES = \
         init.cc \
+        debugging/debuggingvol.cc \
         object/object.cc \
         vector/numpyarrayfunc.cc

@@ -401,6 +401,18 @@ def proxystr( self ):
     return 'None'
   return self.get().__str__()
 
+def rcptr_getAttributeNames( self ):
+  '''for IPython completion'''
+  m = self.__dict__.keys()
+  m += filter( lambda x: not x.startswith( '_' ),
+    self.get().__dict__.keys() )
+  try:
+    m += filter( lambda x: not x.startswith( '_' ),
+      self.get().__class__.__dict__.keys() )
+  except:
+    pass
+  return m
+
 # scan classes and modify some of them
 
 def __fixsipclasses__( classes ):
@@ -418,6 +430,7 @@ def __fixsipclasses__( classes ):
         y.__delitem__ = __fixsipclasses__.proxydelitem
         y.__str__ = __fixsipclasses__.proxystr
         y.__nonzero__ = __fixsipclasses__.proxynonzero
+        y._getAttributeNames = rcptr_getAttributeNames
       else:
         if hasattr( y, '__objiter__' ):
           y.__iter__ = __fixsipclasses__.newiter
@@ -443,15 +456,17 @@ __fixsipclasses__.proxysetitem = proxysetitem
 __fixsipclasses__.proxydelitem = proxydelitem
 __fixsipclasses__.proxystr = proxystr
 __fixsipclasses__.proxynonzero = proxynonzero
-
+__fixsipclasses__.getAttributeNames = rcptr_getAttributeNames
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
+del rcptr_getAttributeNames
 
 __fixsipclasses__( globals().items() + carto.__dict__.items() )
 
 Object.__iter__ = __fixsipclasses__.objiter
 Object.next = __fixsipclasses__.objnext
 Object.__delitem__ = __fixsipclasses__.proxydelitem
+Object._getAttributeNames = __fixsipclasses__.getAttributeNames
 
 __fixsipclasses__.fakerepr = lambda a : "<%s.%s object at 0x%x>" % (a.__class__.__module__, a.__class__.__name__, id(a))
 
@@ -520,7 +535,7 @@ convertersObjectToPython = {
   'S32' : carto.NumericGenericObjectConverter.asInt,
   'U32' : carto.NumericGenericObjectConverter.asInt,
   'boolean' : carto.NumericGenericObjectConverter.asBool,
-  'string' : carto.GenericObject.getString,
+  'string' : lambda x: x.getString(),
   }
 
 def getPython( self ):

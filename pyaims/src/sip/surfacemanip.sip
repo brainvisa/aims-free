@@ -4,6 +4,7 @@ namespace aims
 class SurfaceManip
 {
 %TypeHeaderCode
+#include <pyaims/vector/stdvector.h>
 #include <aims/mesh/surfaceOperation.h>
 #ifndef PYAIMS_AIMSTIMESURFACE_2_VOID_DEFINED
 #define PYAIMS_AIMSTIMESURFACE_2_VOID_DEFINED

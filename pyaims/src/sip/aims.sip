@@ -78,6 +78,7 @@ carto::pyaims_init();
 /* %Include map_STRING_Semantic.sip
 %Include map_STRING_Syntax.sip */
 %Include graph.sip
+%Include rcptr_Tree.sip
 %Include rcptr_Graph.sip
 %Include graphmanip.sip
 %Include tree.sip
@@ -190,6 +191,8 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include volume_DOUBLE.sip
 %Include volume_RGB.sip
 %Include volume_RGBA.sip
+
+%Include debuggingvol.sip
 
 %Include rcptr_Volume_U8.sip
 %Include rcptr_Volume_S16.sip

@@ -42,16 +42,24 @@
 template <typename T>
 inline std::vector<T> * pyaimsCopyFrom_Array( T * array, unsigned size )
 {
-	std::vector<T> * result = new std::vector<T>;
-	result->reserve( size );
+  std::vector<T> * result = new std::vector<T>;
+  result->reserve( size );
 
-	for( unsigned index=0; index < size; ++index )
-	{
-		result->push_back( array[index] );
-	}
+  for( unsigned index=0; index < size; ++index )
+  {
+    result->push_back( array[index] );
+  }
 
-	return result;
+  return result;
 }
+
+#if defined( __APPLE__ ) || defined( __LP64__ )
+// typedef unsigned long size_t;
+typedef std::vector<unsigned long> vector_SIZE_T;
+#else
+// typedef unsigned size_t;
+typedef std::vector<unsigned> vector_SIZE_T;
+#endif
 
 #endif
 

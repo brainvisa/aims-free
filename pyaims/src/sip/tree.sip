@@ -29,6 +29,10 @@ public:
   virtual carto::Object currentValue() const;
   virtual std::string key() const;
 
+  void insert( Tree* child /Transfer/, int index=-1 );
+  void remove( unsigned index );
+  void remove( Tree* node /TransferBack/ );
+  // void removeFromParent();
   virtual size_t childrenSize() const;
   SIP_PYTUPLE children() const;
 %MethodCode

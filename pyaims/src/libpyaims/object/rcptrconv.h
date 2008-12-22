@@ -51,7 +51,10 @@ namespace pyaims
       void *obj = sipConvertToInstance( sipPy, tclass, transferObj,
                                         SIP_NO_CONVERTORS, &state,
                                         &sipIsErr );
-      //sipReleaseInstance( obj, tclass, state );
+      /* *don't* call sipReleaseInstance here because we are not done
+      with the object. But sipReleaseInstance should be called later on it
+      (normally internally by sip).
+      */
       return reinterpret_cast<T *>( obj );
     }
     return 0;
@@ -61,15 +64,20 @@ namespace pyaims
   T* fromRcptr( PyObject * sipPy, sipWrapperType* rcclass,
                 PyObject *transferObj )
   {
-    if( sipCanConvertToInstance( sipPy, rcclass, 0 ) )
+    if( sipCanConvertToInstance( sipPy, rcclass, SIP_NO_CONVERTORS ) )
     {
       int state = 0;
       int sipIsErr = 0;
       void *obj = sipConvertToInstance( sipPy, rcclass, transferObj,
-                                        0, &state, &sipIsErr );
+                                        SIP_NO_CONVERTORS, &state, &sipIsErr );
       RcT *robj = reinterpret_cast<RcT *>( obj );
-      if( robj->get() && carto::rc_ptr_trick::refCount( *robj ) > 0 )
-        ++carto::rc_ptr_trick::refCount( *robj );
+      /* release rc_ptr instance after using sipConvertToInstance: allow it
+      to be deleted later.
+      We don't need the rc_ptr instance any longer, but its reference count
+      must not go down to 0 otherwise the contained T is deleted.
+      However it should not be such if we get an existing rc_ptr.
+      So we *must* use SIP_NO_CONVERTORS here.
+      */
       sipReleaseInstance( obj, rcclass, state );
       return robj->get();
     }
