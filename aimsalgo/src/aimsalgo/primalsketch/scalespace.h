@@ -56,7 +56,7 @@ namespace aims
 class BaseScaleSpace {
   public:
   BaseScaleSpace() {}
-  ~BaseScaleSpace() {}
+  virtual ~BaseScaleSpace() {}
 
   virtual float dt() = 0;
 
@@ -95,18 +95,25 @@ class BaseScaleSpace {
 
     std::map<float, ScaleLevel<Geom, Text>*> scales;
 		Smoother<Geom, Text> *_smoother;
+    TexturedData<Geom, Text> *_auxdata;
 
   public:
 
-    ScaleSpace() : BaseScaleSpace() {_smoother=NULL;}
+    ScaleSpace() : BaseScaleSpace() {_smoother=NULL; _auxdata=NULL;}
 
-    ~ScaleSpace() {if (_smoother != NULL) delete _smoother;}
+    virtual ~ScaleSpace() { delete _smoother; delete _auxdata;  }
 
     void PutSmoother(Smoother<Geom, Text> *blur) {_smoother=blur;}
+    
+    void SetAuxData(TexturedData<Geom, Text> *auxdata){ _auxdata=auxdata; }
 
-		ScaleLevel<Geom, Text> * Scale(float t)
-						{ if (scales.find(t) != scales.end()) return scales[t];
-						else { AddScale(t); return scales[t]; }}
+    TexturedData<Geom, Text> *GetAuxData(){return _auxdata; }
+    
+    ScaleLevel<Geom, Text> * Scale(float t)
+    {
+      if (scales.find(t) != scales.end()) return scales[t];
+      else { AddScale(t); return scales[t]; }
+    }
 
     Text & GetScaleImage(float t) {return Scale(t)->Level();}
 
@@ -117,9 +124,10 @@ class BaseScaleSpace {
     void AddScale(float t);
     void RemoveScale(float t);
 
-    void GenerateDefaultScaleSpace(float tmax) { float t; for (t=1; t<=tmax; t=t*2) { std::cout << "Adding scale " << t << std::endl; AddScale(t); } }
+    void GenerateDefaultScaleSpace(float tmax)
+    { float t; for (t=1; t<=tmax; t=t*2) { std::cout << "Adding scale " << t << std::endl; AddScale(t); } }
 
-	  std::set<float> GetScaleList();
+    std::set<float> GetScaleList();
 
     void WriteScale(float t, std::string name);
 
@@ -136,27 +144,46 @@ class BaseScaleSpace {
     float dt() { return _smoother->dt(); };
     std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*> scales;
     Smoother<AimsData<T>, AimsData<T> > *_smoother;
+    TexturedData<AimsData<T>, AimsData<T> > *_auxdata;
 
   public:
 
-    ScaleSpace() : BaseScaleSpace() {_smoother=NULL;}
+    ScaleSpace() : BaseScaleSpace() {_smoother=NULL; _auxdata=NULL;}
 
     ScaleSpace(AimsData<T> * originalImage, Smoother<AimsData<T>,AimsData<T> > *smoother)
-      { PutSmoother(smoother); PutOriginalImage(originalImage);}
+      { PutSmoother(smoother); PutOriginalImage(originalImage); _auxdata=NULL;}
 
-    ~ScaleSpace() {if (_smoother!= NULL) delete _smoother;}
+    virtual ~ScaleSpace() {delete _smoother; delete _auxdata;}
+    
+    void SetAuxData(TexturedData<AimsData<T>, AimsData<T> > *auxdata)
+    {
+      delete _auxdata;
+      _auxdata=auxdata;
+      typename std::map<float,
+        ScaleLevel<AimsData<T>, AimsData<T> >*>::iterator
+          i, e = scales.end();
+      for( i=scales.begin(); i!=e; ++i )
+        i->second->SetAuxData( auxdata );
+    }
 
+    TexturedData<AimsData<T>, AimsData<T> > *GetAuxData(){return _auxdata; }
+    
     void PutSmoother(Smoother<AimsData<T>, AimsData<T> > *smoother) {_smoother=smoother;}
 
     void PutOriginalImage(AimsData<T> *originalImage)
-				{ScaleLevel<AimsData<T>, AimsData<T> > *level;
-				level=new ScaleLevel<AimsData<T>, AimsData<T> >(0.0f, *originalImage);
-				scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T> >*>(0.0f, level));}
+    {
+      ScaleLevel<AimsData<T>, AimsData<T> > *level;
+      level=new ScaleLevel<AimsData<T>, AimsData<T> >(0.0f, *originalImage);
+      level->SetAuxData(_auxdata);
+      scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T> >*>(0.0f, level));
+    }
 
 
-		ScaleLevel<AimsData<T>, AimsData<T> > * Scale(float t)
-						{if (scales.find(t) != scales.end()) return scales[t];
-						else { AddScale(t); return scales[t];}}
+    ScaleLevel<AimsData<T>, AimsData<T> > * Scale(float t)
+    {
+      if (scales.find(t) != scales.end()) return scales[t];
+      else { AddScale(t); return scales[t];}
+    }
 
     AimsData<T> & GetScaleImage(float t) {return Scale(t)->Level();}
 
@@ -188,40 +215,62 @@ class BaseScaleSpace {
     float dt() { return _smoother->dt(); };
     AimsSurface<D, Void> *_mesh;
     AimsSurfaceTriangle *_auxmesh;
+    TexturedData<AimsSurface<D, Void>, Texture<T> > *_auxdata;
+
     std::vector<Point3df> *_coordinates;
     Smoother<AimsSurface<D, Void>, Texture<T> > *_smoother;
     std::map<float, ScaleLevel<AimsSurface<D, Void>, Texture<T> >*> scales;
 
   public:
 
-    ScaleSpace() : BaseScaleSpace() {
-	    _smoother=NULL; _auxmesh=NULL; _coordinates=NULL;
+    ScaleSpace() : BaseScaleSpace()
+    {
+      _smoother=NULL; _auxmesh=NULL; _coordinates=NULL; _auxdata=NULL;
     }
 
     ScaleSpace(AimsSurface<D, Void> *mesh, Texture<T>  *originalTexture, Smoother<AimsSurface<D, Void>, Texture<T> > *smoother)
-    { _auxmesh=NULL;  _coordinates=NULL; PutSmoother(smoother); PutMesh(mesh); PutOriginalImage(originalTexture);}
+    {
+      _auxmesh=NULL;  _coordinates=NULL; PutSmoother(smoother); PutMesh(mesh);
+      PutOriginalImage(originalTexture); _auxdata=NULL;
+    }
 
-    
     ScaleSpace(const ScaleSpace< AimsSurface<D, Void>, Texture<T> >  &other)
-    {(*this)._auxmesh=NULL; (*this)._mesh=other._mesh; (*this)._coordinates=other._coordinates; (*this)._smoother=other._smoother; (*this)._scales=other._scales;}
-
-    ~ScaleSpace() {if (_smoother != NULL) delete _smoother; if (_auxmesh != NULL) delete _auxmesh;}
-
+    {(*this)._auxmesh=NULL; (*this)._mesh=other._mesh; (*this)._coordinates=other._coordinates; (*this)._smoother=other._smoother; (*this)._scales=other._scales; _auxdata=NULL;}
+    
+    virtual ~ScaleSpace() {delete _smoother; delete _auxmesh; delete _auxdata;}
+    
+    void SetAuxData(TexturedData<AimsSurface<D, Void>, Texture<T> > *auxdata)
+    {
+      delete _auxdata;
+      _auxdata=auxdata;
+      typename std::map<float,
+        ScaleLevel<AimsSurface<D, Void>, Texture<T> >*>::iterator
+          i, e = scales.end();
+      for( i=scales.begin(); i!=e; ++i )
+        i->second->SetAuxData( auxdata );
+    }
+    TexturedData<AimsSurface<D, Void>, Texture<T> > *GetAuxData(){return _auxdata; }
+    
     void PutSmoother(Smoother<AimsSurface<D, Void>, Texture<T> > *smoother) {_smoother=smoother;}
     void PutMesh(AimsSurface<D, Void> *mesh) {_mesh=mesh;}
     void PutAuxMesh(AimsSurfaceTriangle *auxmesh) {_auxmesh=auxmesh;}
     void PutCoordinates(std::vector<Point3df> *coord){_coordinates = coord;}
     void PutOriginalImage(Texture<T> *originalTexture)
-						{ScaleLevel<AimsSurface<D, Void>, Texture<T> > *level;
-						level=new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(0.0f, *originalTexture, _mesh,_coordinates);
-						scales.insert(std::pair<float, ScaleLevel<AimsSurface<D, Void>, Texture<T> >*>(0.0f, level));}
+    {
+      ScaleLevel<AimsSurface<D, Void>, Texture<T> > *level;
+      level=new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(0.0f, *originalTexture, _mesh,_coordinates);
+      level->SetAuxData(_auxdata);
+      scales.insert(std::pair<float, ScaleLevel<AimsSurface<D, Void>, Texture<T> >*>(0.0f, level));
+    }
 
     AimsSurface<D, Void> *Mesh() {return _mesh;}
     AimsSurfaceTriangle *AuxMesh() { return _auxmesh; }
 
-		ScaleLevel<AimsSurface<D, Void>, Texture<T> > * Scale(float t)
-						{if (scales.find(t) != scales.end()) return scales[t];
-						else { AddScale(t); return scales[t];}}
+    ScaleLevel<AimsSurface<D, Void>, Texture<T> > * Scale(float t)
+    {
+      if (scales.find(t) != scales.end()) return scales[t];
+      else { AddScale(t); return scales[t];}
+    }
     Texture<T> & GetScaleImage(float t) {return Scale(t)->Level();}
 
     Texture<T> & GetOriginalImage() {return Scale(0.0)->Level();}
@@ -236,7 +285,17 @@ class BaseScaleSpace {
     
     void RemoveScale(float t) {if (scales.find(t) != scales.end()) {ScaleLevel<AimsSurface<D, Void>, Texture<T> >* lev=scales[t]; scales.erase(t); delete lev;} }
 
-    void GenerateDefaultScaleSpace(float tmax) {float t; for (t=1; t<=tmax; t=t*2) {std::cout << "Adding scale " << t << std::endl; AddScale(t);} std::cout << "Checking last scale level : " <<  tmax << std::endl; AddScale(tmax);}
+    void GenerateDefaultScaleSpace(float tmax)
+    {
+      float t;
+      for (t=1; t<=tmax; t=t*2)
+      {
+        std::cout << "Adding scale " << t << std::endl;
+        AddScale(t);
+      }
+      std::cout << "Checking last scale level : " <<  tmax << std::endl;
+      AddScale(tmax);
+    }
 
     void WriteScale(float t, std::string name);
 
@@ -251,72 +310,73 @@ class BaseScaleSpace {
   template<typename T> void ScaleSpace<AimsData<T>, AimsData<T> >::AddScale(float t)
   {
     if (scales.find(t) == scales.end())
-	{
-	  if (!(_smoother->optimal()))
-	    {
-	      std::cout << "Smoothing from original image" << std::endl;
-                  int time = this->get_timediff(0, t);
-		  AimsData<T> lisse=_smoother->doSmoothing(GetOriginalImage(), time);
-          
+    {
+      if (!(_smoother->optimal()))
+      {
+        std::cout << "Smoothing from original image" << std::endl;
+            int time = this->get_timediff(0, t);
+        AimsData<T> lisse=_smoother->doSmoothing(GetOriginalImage(), time);
+
+        ScaleLevel<AimsData<T>, AimsData<T> > *lisseLevel;
+        lisseLevel=new ScaleLevel<AimsData<T>, AimsData<T> >(t,lisse);
+        lisseLevel->SetAuxData(_auxdata);
+        scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T> >*>(t, lisseLevel));
+      }
+      else
+      {
+          std::cout << "Smoothing from previous scale " << std::flush;
+
+          float tlow, tmax;
+          AimsData<T> imageLow;
+          typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itS = scales.begin();
+
+          for ( ; itS!=scales.end(); ++itS)
+            tmax=itS->first;
+
+          if (t<=0)
+            return;
+          else if (t>tmax)
+          {
+            typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itscales = scales.begin();
+            typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator  itLow;
+            float tmax=-1;
+            for ( ; itscales != scales.end(); ++itscales)
+            {
+              if ((*itscales).first >= tmax)
+                itLow=itscales;
+            }
+            tlow=(*itLow).first;
+            ScaleLevel<AimsData<T>, AimsData<T> > *nivEch=(*itLow).second;
+            imageLow=nivEch->Level();
+          }
+          else
+          {
+            typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itscales = scales.begin();
+            typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itnext = itscales;
+
+            for ( ; itnext != scales.end(); ++itscales)
+            {
+              itnext=itscales;
+              ++itnext;
+              if (((*itscales).first < t) && ((*itnext).first > t))
+              {
+                tlow=(*itscales).first;
+                ScaleLevel<AimsData<T>, AimsData<T> > *nivEch=(*itscales).second;
+                imageLow=nivEch->Level();
+                itnext=scales.end();
+              }
+            }
+          }
+          std::cout << "t=" << tlow << ", image: " << imageLow.dimX() << "x" << imageLow.dimY() << "x" << imageLow.dimZ() << "x" << imageLow.dimT() << std::endl;
+
+          int time = this->get_timediff(tlow, t);
+          AimsData<T> lisse=_smoother->doSmoothing(imageLow, time);
           ScaleLevel<AimsData<T>, AimsData<T> > *lisseLevel;
-		  lisseLevel=new ScaleLevel<AimsData<T>, AimsData<T> >(t,lisse);
-		  scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T> >*>(t, lisseLevel));
-	    }
-	  else
-	    {
- 	     std::cout << "Smoothing from previous scale " << std::flush;
-
-	      float tlow, tmax;
-	      AimsData<T> imageLow;
-		  typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itS = scales.begin();
-
-		  for ( ; itS!=scales.end(); ++itS)
-			    tmax=itS->first;
-
-	      if (t<=0)
-					return;
-	      else if (t>tmax)
-				{
-		  		typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itscales = scales.begin();
-		  		typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator  itLow;
-		  		float tmax=-1;
-		  		for ( ; itscales != scales.end(); ++itscales)
-		    	{
-		      	if ((*itscales).first >= tmax)
-							itLow=itscales;
-		    	}
-		  		tlow=(*itLow).first;
-				ScaleLevel<AimsData<T>, AimsData<T> > *nivEch=(*itLow).second;
-		  		imageLow=nivEch->Level();
-				}
-	      else
-			{
-		  		typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itscales = scales.begin();
-		  		typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itnext = itscales;
-
-		  		for ( ; itnext != scales.end(); ++itscales)
-		    	{
-		      	itnext=itscales;
-				++itnext;
-		      	if (((*itscales).first < t) && ((*itnext).first > t))
-				{
-			  		tlow=(*itscales).first;
-					ScaleLevel<AimsData<T>, AimsData<T> > *nivEch=(*itscales).second;
-		  			imageLow=nivEch->Level();
-			  		itnext=scales.end();
-				}
-		        }
-			}
-	  	std::cout << "t=" << tlow << ", image: " << imageLow.dimX() << "x" << imageLow.dimY() << "x" << imageLow.dimZ() << "x" << imageLow.dimT() << std::endl;
-
-                int time = this->get_timediff(tlow, t);
-	   	AimsData<T> lisse=_smoother->doSmoothing(imageLow, time);
-			ScaleLevel<AimsData<T>, AimsData<T> > *lisseLevel;
-			lisseLevel=new ScaleLevel<AimsData<T>, AimsData<T> >(t,lisse);
-			scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T> >*>(t, lisseLevel));
-	  }
-	}
-
+          lisseLevel=new ScaleLevel<AimsData<T>, AimsData<T> >(t,lisse);
+          lisseLevel->SetAuxData(_auxdata);
+          scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T> >*>(t, lisseLevel));
+        }
+      }
 
       return;
     }
@@ -326,80 +386,82 @@ class BaseScaleSpace {
   template<int D, typename T> void ScaleSpace<AimsSurface<D>, Texture<T> >::AddScale(float t)
   {
     if (scales.find(t) == scales.end())
-	{
-	  if (!(_smoother->optimal()))
-	    {
-	      std::cout << "Smoothing from original image" << std::endl;
-	                int time = this->get_timediff(0, t);
-			  Texture<T> lisse=_smoother->doSmoothing(GetOriginalImage(), time);
-				ScaleLevel<AimsSurface<D, Void>, Texture<T> > *lisseLevel;
-				lisseLevel=new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t,lisse, _mesh,_coordinates, &GetOriginalImage());
-				scales.insert(std::pair<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>(t, lisseLevel));
-	    }
-	  else
-	    {
-	    	std::cout << "Smoothing from previous scale " << std::flush;
-	      float tlow, tmax;
-	      Texture<T> imageLow;
-		  typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator itS = scales.begin();
-            for ( ; itS!=scales.end(); ++itS)
-			    tmax=(*itS).first;
-
-	      if (t<=0)
-		return;
-	      else if (t>tmax)
-		{
-		  typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator
-		    itscales = scales.begin();
-		  typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator  itLow;
-		  float tmax=-1;
-		  for ( ; itscales != scales.end(); ++itscales)
-		    {
-		      if ((*itscales).first >= tmax)
-			itLow=itscales;
-		    }
-
-
-		  tlow=(*itLow).first;
-			ScaleLevel<AimsSurface<D>, Texture<T> > *nivEch=(*itLow).second;
-		  imageLow=nivEch->Level();
-		}
-	      else
-		{
-		  typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator
-		    itscales = scales.begin();
-		  typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator
-		    itnext = itscales;
-
-		  for ( ; itnext != scales.end(); ++itscales)
-		    {
-		      itnext=itscales;
-			  ++itnext;
-
-		      if (((*itscales).first < t) && ((*itnext).first > t))
-			{
-			  tlow=(*itscales).first;
-				ScaleLevel<AimsSurface<D>, Texture<T> > *nivEch=(*itscales).second;
-			  imageLow=nivEch->Level();
-			  itnext=scales.end();
-			}
-		    }
-		}
-	      std::cout << "t = " << tlow << std::endl;
-                    int time = this->get_timediff(tlow, t);
-		    Texture<T> lisse=_smoother->doSmoothing(imageLow, time);
-				ScaleLevel<AimsSurface<D, Void>, Texture<T> > *lisseLevel;
-                                lisseLevel=new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t,lisse, _mesh,_coordinates,&GetOriginalImage());
-				scales.insert(std::pair<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>(t, lisseLevel));
-	    }
-	}
+    {
+      if (!(_smoother->optimal()))
+      {
+        std::cout << "Smoothing from original image" << std::endl;
+        int time = this->get_timediff(0, t);
+        Texture<T> lisse=_smoother->doSmoothing(GetOriginalImage(), time);
+        ScaleLevel<AimsSurface<D, Void>, Texture<T> > *lisseLevel;
+        lisseLevel=new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t,lisse, _mesh,_coordinates, &GetOriginalImage());
+        lisseLevel->SetAuxData(_auxdata);
+        scales.insert(std::pair<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>(t, lisseLevel));
+      }
       else
-	{
-	  std::cout << "Scale " << t << " already computed... " << std::endl;
-	}
+      {
+        std::cout << "Smoothing from previous scale " << std::flush;
+        float tlow, tmax;
+        Texture<T> imageLow;
+        typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator itS = scales.begin();
+        for ( ; itS!=scales.end(); ++itS)
+          tmax=(*itS).first;
 
-      return;
+        if (t<=0)
+          return;
+        else if (t>tmax)
+        {
+          typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator
+          itscales = scales.begin();
+          typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator  itLow;
+          float tmax=-1;
+          for ( ; itscales != scales.end(); ++itscales)
+          {
+            if ((*itscales).first >= tmax)
+              itLow=itscales;
+          }
+
+
+          tlow=(*itLow).first;
+          ScaleLevel<AimsSurface<D>, Texture<T> > *nivEch=(*itLow).second;
+          imageLow=nivEch->Level();
+        }
+        else
+        {
+          typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator
+          itscales = scales.begin();
+          typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator
+          itnext = itscales;
+
+          for ( ; itnext != scales.end(); ++itscales)
+          {
+            itnext=itscales;
+            ++itnext;
+
+            if (((*itscales).first < t) && ((*itnext).first > t))
+            {
+              tlow=(*itscales).first;
+              ScaleLevel<AimsSurface<D>, Texture<T> > *nivEch=(*itscales).second;
+              imageLow=nivEch->Level();
+              itnext=scales.end();
+            }
+          }
+        }
+        std::cout << "t = " << tlow << std::endl;
+        int time = this->get_timediff(tlow, t);
+        Texture<T> lisse=_smoother->doSmoothing(imageLow, time);
+        ScaleLevel<AimsSurface<D, Void>, Texture<T> > *lisseLevel;
+        lisseLevel=new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t,lisse, _mesh,_coordinates,&GetOriginalImage());
+        lisseLevel->SetAuxData(_auxdata);
+        scales.insert(std::pair<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>(t, lisseLevel));
+      }
     }
+    else
+    {
+      std::cout << "Scale " << t << " already computed... " << std::endl;
+    }
+
+    return;
+  }
 
  //----------------------------
 

@@ -53,19 +53,19 @@ namespace carto
     typedef std::map<std::string, Helper> HelperSet;
 
     PythonReader( const std::string& filename ,
-		  const SyntaxSet& rules = SyntaxSet(),
-		  const HelperSet& helpers = HelperSet() );
+          const SyntaxSet& rules = SyntaxSet(),
+          const HelperSet& helpers = HelperSet() );
     PythonReader( const SyntaxSet& rules = SyntaxSet(),
-		  const HelperSet& helpers = HelperSet() );
+          const HelperSet& helpers = HelperSet() );
     /// PythonReader takes ownership of the DataSource
     PythonReader( rc_ptr<DataSource> ds, const SyntaxSet& rules = SyntaxSet(),
-		  const HelperSet& helpers = HelperSet() );
+          const HelperSet& helpers = HelperSet() );
     virtual ~PythonReader();
 
     virtual GenericObject* read();
     /** attemps to read an already allocated object, if file data matches 
-	the object type.
-	It currently only works for dictionaries */
+    the object type.
+    It currently only works for dictionaries */
     virtual void read( GenericObject & );
     virtual void read( Object & );
     /// reads an already allocated dictionary: just fills it (doesn't clear it)
@@ -79,7 +79,7 @@ namespace carto
     /// obsolete: use attach() instead
     void open( const std::string& filename );
     void close();
-    ///	attach to an existing istream
+    /// attach to an existing istream
     void attach( std::istream & s, int line_num = 1 );
     void attach( rc_ptr<DataSource> ds );
     void attach( const std::string& filename );
@@ -88,33 +88,33 @@ namespace carto
     virtual std::string name() const;
     int line() const;
     std::string lineString() const;
-    ///	status of the stream
+    /// status of the stream
     bool operator!() const;
-    ///	is the stream open?
+    /// is the stream open?
     bool is_open() const;
-    ///	have we hit EOF?
+    /// have we hit EOF?
     bool eof() const;
-    ///	helper functions read basic data type
+    /// helper functions read basic data type
     const HelperSet & helpers() const;
     HelperSet & helpers();
     const SyntaxSet & syntaxes() const;
     SyntaxSet & syntaxes();
 
-    /**	read characters not in s
+    /** read characters not in s
        @param s continue while characters outside s
        @return accepted characters
     */
     std::string readUntil(const std::string& s);
-    /**	skip characters not in s
+    /** skip characters not in s
        @param s continue while characters outside s
     */
     void skipUntil(const std::string& s);
-    /**	read characters in s
+    /** read characters in s
        @param s continue while characters in s
        @return accepted characters
     */
     std::string readWhile(const std::string& s);
-    /**	skip characters in s
+    /** skip characters in s
        \param s continue while characters in s
        \return number of characters read
     */
@@ -123,19 +123,27 @@ namespace carto
                          const std::string & semantic );
     std::string readVariableName();
     /** attempts to read the syntax and general type of next element and fills 
-	\c syntax and \c type accordingly. \c type will be "dictionary" or 
-	"list".
-	\return false in case of failure (no syntax or not able to read it)
+    \c syntax and \c type accordingly. \c type will be "dictionary" or 
+    "list".
+    \return false in case of failure (no syntax or not able to read it)
     */
     bool readSyntax( std::string & syntax );
     std::string readString( char separator, unsigned & charsread );
 
     /** utility function, dictionary helper (can be useful in more specialized 
-	readers) */
+    readers) */
     static GenericObject* dictHelper( GenericObject *, const std::string&, 
                                       PythonReader & r );
 
     static GenericObject* propertySetHelper(GenericObject *, const std::string&,
+                                      PythonReader & r );
+
+    template<typename T>
+    static GenericObject* genericSequenceHelper( GenericObject *, const std::string&,
+                                      PythonReader & r );
+
+    template<typename T>
+    static GenericObject* genericDictHelper( GenericObject *, const std::string&,
                                       PythonReader & r );
 
   protected:

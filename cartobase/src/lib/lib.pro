@@ -50,7 +50,9 @@ HEADERS = \
   object/property.h \
   object/propertyfilter.h \
   object/pythonreader.h \
+  object/pythonreader_d.h \
   object/pythonwriter.h \
+  object/pythonwriter_d.h \
   object/sprinter.h \
   object/sreader.h \
   object/swriter.h \

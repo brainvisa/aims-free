@@ -97,7 +97,7 @@ PrimalSketch<AimsSurface<3,Void>, Texture<float> > filterPS2(PrimalSketch<AimsSu
   printf("\n\n%d", outsketch.BlobSet().size());
   for (itSSBlobs=blobList.begin();itSSBlobs!=blobList.end();itSSBlobs++){
     cout << (*itSSBlobs)->GetMeasurements().t << " ";
-    if ((*itSSBlobs)->GetMeasurements().t > 2.0)
+    if ((*itSSBlobs)->GetMeasurements().t > threshold)
       outsketch.AddBlob(*itSSBlobs);
   }
   printf("\n\n%d", outsketch.BlobSet().size());
@@ -160,37 +160,40 @@ int main(int argc, const char **argv)
 {
   try
     {
-      std::string fileInT, fileInM, fileout, fileoutBlobs, motionfile, subject,
-        graphout, auxmeshpath, fileLat, fileLongit;
-      float dt=0.05, tmax, tmin=1.0,filterout;
+      std::string fileInT, fileInM, fileout, fileoutBlobs, motionfile, subject="none",
+        graphout, auxmeshpath="", fileLat="", fileLongit="", auxtexpath="";
+      float dt=0.05, tmax, tmin=1.0,filterout=-100000000.0;
       uint intersection_param=10;
 
       AimsApplication app( argc, argv, "ScaleSpace et grey level blobs d'une surface/texture au format float");
 
       app.addOption( fileInT, "-t", "inputTexture");
       app.alias( "--inputT", "-t" );
-      app.addOption( graphout, "-o", "output primal sketch graph", true );
+      app.addOption( graphout, "-o", "output primal sketch graph" );
       app.addOption( fileInM, "-m", "inputMesh");
       app.alias( "--inputM", "-m" );
       app.addOption( fileout, "-os", "scale space texture filename");
       app.alias( "--output-scales", "-os" );
       app.addOption( fileoutBlobs, "-ob", "blobs texture filename");
       app.alias( "--output-blobs", "-ob" );
-      app.addOption( tmin, "-t1", "minimum scale (default=1.0)", 1.0);
+      app.addOption( tmin, "-t1", "minimum scale (default=1.0)", true);
       app.alias( "--scalemin", "-t1" );
       app.addOption( tmax, "-t2", "maximum scale");
       app.alias( "--scalemax", "-t2" );
-      app.addOption( dt, "-dt", "time step (default=0.05)", 0.05);
+      app.addOption( dt, "-dt", "time step (default=0.05)", true);
       app.alias( "--deltat", "-dt" );
-      app.addOption( auxmeshpath, "-mX", "auxilliary mesh (for the rendering)", "");
+      app.addOption( auxmeshpath, "-mX", "auxilliary mesh (for the rendering)",true);
       app.alias( "--auxmesh", "-mX" );
-      app.addOption( subject, "-sj", "subject name (default : inputImage)", "none");
+      app.addOption( subject, "-sj", "subject name (default : inputImage)", true);
       app.alias ("--subject", "-sj");
+      app.addOption( auxtexpath, "-tX", "auxilliary texture (for more embedded features)", true);
+      app.alias ("--subject", "-sj");
+
       app.addOption( motionfile, "--trans", "Transformation matrix to Talairach space", true );
       app.addOption( intersection_param, "-iP", "Intersection condition for grey-level blobs matching across scales", true );
-      app.addOption( filterout, "-f", "filter out blobs whose tvalues are under (default=1.0)", 4.0);
-      app.addOption( fileLat, "-l", "texture latitude", "");
-      app.addOption( fileLongit, "-L", "texture longitude", "");
+      app.addOption( filterout, "-f", "filter out blobs whose tvalues are under (default=1.0)", true);
+      app.addOption( fileLat, "-l", "texture latitude", true);
+      app.addOption( fileLongit, "-L", "texture longitude", true);
 
   
       app.initialize();
@@ -239,6 +242,8 @@ int main(int argc, const char **argv)
       cout << "Scale-space creation" << endl;
       Texture1d lat,longit;
       std::vector<Point3df> coordinates;
+      TimeTexture<float> tmptex;
+
       if (fileLat != "" && fileLongit != ""){
       
       Reader<Texture1d> r3(fileLat);
@@ -249,6 +254,15 @@ int main(int argc, const char **argv)
         coordinates.push_back(Point3df(lat[0].item(i), longit[0].item(i),i));
       }
       scale_space.PutCoordinates(&coordinates);
+      }
+      if (auxtexpath!=""){
+        cout << "Auxilliary texture for more embedded features : " << auxtexpath << endl;
+
+        Reader<TimeTexture<float> > r(auxtexpath);
+        r.read(tmptex);
+        TexturedData<AimsSurface<3, Void>, Texture<float> > *tmptd = new TexturedData<AimsSurface<3, Void>, Texture<float> >( &laMesh[0], &tmptex[0] );
+        ASSERT(tmptex[0].nItem() == laMesh[0].vertex().size());
+        scale_space.SetAuxData(tmptd);
       }
 
       scale_space.GenerateDefaultScaleSpace(tmax);
@@ -278,8 +292,10 @@ int main(int argc, const char **argv)
 //       graphePS(sketch);
       printf("\n");
 //       for (float i=-9.0;i<9.0;i++){
-      cout << "filtre: " << filterout << endl;
-      sketch=filterPS2(sketch,filterout);
+      if (pow(filterout+100000000.0,2) > 0.01){
+        cout << "filtre: " << filterout << endl;
+        sketch=filterPS2(sketch,filterout);
+      }
       
 //     printf("BOURRIN\n");
 //     std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* > *blobLis; blobLis=&(sketch.BlobSet());
@@ -304,7 +320,7 @@ int main(int argc, const char **argv)
 //       graphePS(sketch);
       cout << "Converting primal sketch into graph" << endl;
 
-      if (!auxmeshpath.empty()){
+      if (auxmeshpath!=""){
         cout << "Auxilliary mesh used for rendering : " << auxmeshpath << endl;
         AimsSurfaceTriangle *tmpmesh;
         tmpmesh = new AimsSurfaceTriangle();
@@ -313,6 +329,7 @@ int main(int argc, const char **argv)
         ASSERT((*tmpmesh)[0].vertex().size() == laMesh[0].vertex().size() && (*tmpmesh)[0].polygon().size() == laMesh[0].polygon().size());
         sketch.scaleSpace()->PutAuxMesh(tmpmesh);
       }
+      
 
       Primalsketch2graph<AimsSurface<3, Void>, Texture<float> > translate(&sketch);
       if( !motionfile.empty() ) {

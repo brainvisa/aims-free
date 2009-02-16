@@ -16,6 +16,7 @@
 #include <set>
 #include <map>
 #include <list>
+#include <vector>
 
 namespace aims
 {
@@ -72,9 +73,9 @@ namespace aims
 
      public:
         BlobMeasurements() {}
-        BlobMeasurements(const BlobMeasurements &other) {maxIntensity=other.maxIntensity; meanIntensity=other.meanIntensity; maxContrast=other.maxContrast; meanContrast= other.meanContrast;  area=other.area; t=other.t; tValue=other.tValue;}
-        BlobMeasurements(float maxInt, float meanInt, float maxCont, float meanCont, float a, float tv=0.0, float tvalue=0.0):
-            maxIntensity(maxInt), meanIntensity(meanInt), maxContrast(maxCont), meanContrast(meanCont), area(a), t(tv), tValue(tvalue) {}
+        BlobMeasurements(const BlobMeasurements &other) {maxIntensity=other.maxIntensity; meanIntensity=other.meanIntensity; maxContrast=other.maxContrast; meanContrast= other.meanContrast;  area=other.area; t=other.t; tValue=other.tValue; t2=other.t2;}
+        BlobMeasurements(float maxInt, float meanInt, float maxCont, float meanCont, float a, float tv=0.0, float tvalue=0.0, float t2=0.0):
+            maxIntensity(maxInt), meanIntensity(meanInt), maxContrast(maxCont), meanContrast(meanCont), area(a), t(tv), tValue(tvalue), t2(t2) {}
 
           float maxIntensity;
           float meanIntensity;
@@ -83,6 +84,7 @@ namespace aims
           float area;
           float t;
           float tValue;
+          float t2;
 
         BlobMeasurements & operator = (const BlobMeasurements & other);
      };
@@ -173,6 +175,7 @@ namespace aims
 
       TexturedData<Geom,Text> *_texdata;
       TexturedData<Geom,Text> *_rawtexdata;
+      TexturedData<Geom,Text> *_auxdata;
        TexturedData<Geom, Text> *_mask;      // For convenience, data and mask are same type.
                                                        // This is the only simple solution to keep type genericity
                                                  // Mask is 0 outside, >0 inside
@@ -189,22 +192,24 @@ namespace aims
     public :
 
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata, TexturedData<Geom,Text> *rawtexdata, TexturedData<Geom,Text> *mask)
-      : _texdata(texdata), _rawtexdata(rawtexdata), _mask(mask), _stats(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
+      : _texdata(texdata), _rawtexdata(rawtexdata), _mask(mask), _stats(0), _auxdata(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata, TexturedData<Geom,Text> *rawtexdata, TexturedData<Geom,Text> *mask, char *stats)
-      : _texdata(texdata), _rawtexdata(rawtexdata), _mask(mask), _stats(stats) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
+      : _texdata(texdata), _rawtexdata(rawtexdata), _mask(mask), _stats(stats), _auxdata(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
       
       
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata)
-      : _texdata(texdata), _rawtexdata(NULL), _mask(0), _stats(0) {                    labelsImage=TexturedData<Geom, Text>(*_texdata);}
+      : _texdata(texdata), _rawtexdata(NULL), _mask(0), _stats(0), _auxdata(0) {                    labelsImage=TexturedData<Geom, Text>(*_texdata);}
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata, TexturedData<Geom,Text> *mask)
-      : _texdata(texdata), _rawtexdata(NULL),  _mask(mask), _stats(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
+      : _texdata(texdata), _rawtexdata(NULL),  _mask(mask), _stats(0), _auxdata(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata, TexturedData<Geom,Text> *mask, char *stats)
-      : _texdata(texdata), _rawtexdata(NULL),  _mask(mask), _stats(stats) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
+      : _texdata(texdata), _rawtexdata(NULL),  _mask(mask), _stats(stats), _auxdata(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
       void Run(); // possibility of masking to exclude an area
-
+  
        void ComputeBlobMeasurements();
        void SetOriginalTexture(TexturedData<Geom,Text> *rawtexdata){ _rawtexdata = rawtexdata; }
+       void SetAuxData(TexturedData<Geom,Text> *auxdata){ _auxdata= auxdata; }
       TexturedData<Geom,Text> *GetOriginalTexture(){return _rawtexdata; }
+      TexturedData<Geom,Text> *GetAuxData(){return _auxdata; }
     // doit renvoyer une liste de GLB, de maximums et de saddle points
       std::list<SaddlePoint<Site> *> GetSaddleList() {return saddleList;}
       std::list<MaximumPoint<Site> *> GetMaxList() {return  maximumList;}
@@ -246,6 +251,7 @@ namespace aims
         area=other.area;
         t=other.t;
         tValue=other.tValue;
+        t2 = other.t2;
      return *this;
     }
 
@@ -281,7 +287,7 @@ namespace aims
           scale=other.scale;
           saddle=other.saddle;
           maximum=other.maximum;
-
+          
           return *this;
      }
 
@@ -463,8 +469,7 @@ namespace aims
  void
  ExtractGreyLevelBlobs<Geom, Text>::ComputeBlobMeasurements()
  {
-          typename std::map<int, GreyLevelBlob<Site>* >::iterator
-                  blobIt;
+          typename std::map<int, GreyLevelBlob<Site>* >::iterator blobIt;
           GreyLevelBlob<Site> *blob;
           SaddlePoint<Site> *saddle;
           MaximumPoint<Site> *maxi;
@@ -560,6 +565,22 @@ namespace aims
               }
               else 
                 blob->measurements.t = 0.0;
+              TexturedData<Geom, Text> * auxt = GetAuxData();
+              if (auxt != NULL){
+                std::set<Site,ltstr_p3d<Site> >  pixels;
+                pixels=blob->GetListePoints();
+  
+                typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
+                float tvmax=-100.0;
+                for ( itPix=pixels.begin(); itPix!=pixels.end(); itPix++)
+                {
+                  if (float(auxt->intensity(*itPix)) > tvmax)
+                    tvmax= float(auxt->intensity(*itPix));
+                }
+                blob->measurements.t2 = tvmax;
+              }
+            else
+              blob->measurements.t2 = 0;
 
             //std::cout << " - " << std::flush;
             if (fileStat!=0)

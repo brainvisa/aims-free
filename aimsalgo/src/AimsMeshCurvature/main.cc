@@ -67,7 +67,9 @@ int main( int argc, const char** argv )
       app.alias( "--input", "-i" );
       app.addOption( outtexfile, "-o", "output texture" );
       app.alias( "--output", "-o" );
-      app.addOption( method, "-m", "method" );
+      app.addOption( method, "-m", "method: \"fem\" -> finite elements, "
+          "\"boix\" -> Boix, \"barycenter\" -> barycenter, "
+          "\"boixgaussian\" -> Boix Gaussian" );
       app.alias( "--method", "-m" );
       app.addOption( ratio, "-r", "proportion (%) of point to be thresholded ", true );
       app.alias( "--ratio", "-r" );

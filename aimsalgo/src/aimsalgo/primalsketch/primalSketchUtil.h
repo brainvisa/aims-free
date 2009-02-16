@@ -353,7 +353,7 @@ namespace aims
 //                   if (true){
                     AimsSurfaceTriangle *msh;
                     Point3df auxnode = (*mesh)[0].vertex()[(*ssblobit)->GlBlobRep()->GetMaximum()->_node.second];
-                    msh = SurfaceGenerator::sphere(auxnode , 3.0,6 );
+                    msh = SurfaceGenerator::sphere(auxnode , 0.5,6 );
                     (*meshBlob)[label]=AimsSurface<3,Void>();
                     (*meshBlob)[label].polygon()=(*msh).polygon();
                     (*meshBlob)[label].vertex()=(*msh).vertex();

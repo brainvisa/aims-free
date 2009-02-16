@@ -34,7 +34,7 @@
  */
 
 #include <cartobase/object/object_d.h>
-#include <cartobase/object/pythonreader.h>
+#include <cartobase/object/pythonreader_d.h>
 #include <cartobase/object/syntobject.h>
 #include <cartobase/exception/parse.h>
 #include <cartobase/exception/file.h>
@@ -52,280 +52,12 @@ using namespace std;
 using namespace carto;
 
 
-struct PythonReader::Private
-{
-  Private( const SyntaxSet & r, rc_ptr<DataSource> ds )
-  : rules( r ), datasource( ds ), eof( false )
-  {}
-
-  Private( const SyntaxSet & r )
-  : rules( r ), datasource(), eof( false )
-  {}
-
-  SyntaxSet           rules;
-  rc_ptr<DataSource>  datasource;
-  HelperSet           helpers;
-  bool                eof;
-};
-
-
-namespace
-{
-
-  template<typename T>
-  GenericObject*
-  genericHelper( GenericObject*, const string &, PythonReader & r )
-  {
-    r.skipWhile( " \t\n\\\r" );
-    DataSource & ds = *r.dataSource();
-    if( r.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    T	x;
-    *r.dataSource() >> x;
-    if( r.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    return( new ValueObject<T>( x ) );
-  }
-
-
-  template<>
-  GenericObject*
-  genericHelper<char>( GenericObject*, const string &, PythonReader & r )
-  {
-    r.skipWhile( " \t\n\\\r" );
-    DataSource & ds = *r.dataSource();
-    if( r.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    int	x;
-    *r.dataSource() >> x;
-    if( r.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    //cout << "number: " << x << endl;
-    return( new ValueObject<char>( char( x ) ) );
-  }
-
-
-  template<>
-  GenericObject*
-  genericHelper<unsigned char>( GenericObject*, const string &, 
-                                PythonReader & r )
-  {
-    r.skipWhile( " \t\n\\\r" );
-    DataSource & ds = *r.dataSource();
-    if( r.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    unsigned	x;
-    *r.dataSource() >> x;
-    if( r.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    //cout << "number: " << x << endl;
-    return( new ValueObject<unsigned char>( (unsigned char) x ) );
-  }
-
-
-  template<>
-  GenericObject* 
-  genericHelper<string>( GenericObject*, const string &, PythonReader & r )
-  {
-    string	x;
-    char	quote;
-    DataSource	& ds = *r.dataSource();
-    if( !ds.isOpen() )
-      throw eof_error( string( "EOF: line" ) + r.lineString(), r.name() );
-
-    r.readWhile( " \t\n\\\r" );
-    if( ds.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    quote = ds.getch();
-    if( ds.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    if( quote == 'u' ) // unicode string
-    {
-      quote = ds.getch();
-      if( ds.eof() )
-        io_error::launchErrnoExcept( ds.url() );
-    }
-    if( quote != '"' && quote != '\'' )
-    {
-      cerr << "string reader: NOT a string: " << quote << endl;
-      return 0;	// not a string
-    }
-    unsigned	n = 0;
-    x = r.readString( quote, n );
-    if( ds.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-
-    //cout << "string: " << x << endl;
-    return( new ValueObject<string>( x ) );
-  }
-
-
-  template<typename T>
-  GenericObject* genericSequenceHelper( GenericObject*, const string &, 
-                                        PythonReader & r )
-  {
-    bool		end = false;
-    string	id, type;
-    DataSource	& ds = *r.dataSource();
-
-    if( !ds.isOpen() )
-      return( 0 );
-    r.skipWhile( " \t\n\\\r" );
-    if( r.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    char	c = ds.getch(), mark;
-    if( r.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    if( c == '(' )
-      mark = ')';
-    else if( c == '[' )
-      mark = ']';
-    else
-      {
-        //cout << "char: " << c << endl;
-        throw runtime_error( string( "PythonReader: Not a list/tuple: " ) 
-                             + r.name() + ", line " + r.lineString() );
-      }
-
-    ValueObject<T> *obj = new ValueObject<T>;
-    GenericObject		*de;
-    ValueObject<typename T::value_type>	*dev;
-
-    try
-      {
-        do
-          {
-            r.skipWhile( " \t\n\\\r" );
-            if( r.eof() )
-              io_error::launchErrnoExcept( ds.url() );
-            c = ds.getch();
-            if( ds.eof() )
-              io_error::launchErrnoExcept( ds.url() );
-            if( c == ',' )	// separator
-              {
-                r.skipWhile( " \t\n\\\r" );
-                if( r.eof() )
-                  io_error::launchErrnoExcept( ds.url() );
-                c = ds.getch();
-                if( ds.eof() )
-                  io_error::launchErrnoExcept( ds.url() );
-              }
-            if( c == mark )
-              {
-                end = true;
-                break;	// end
-              }
-            ds.ungetch( c );
-            de = genericHelper<typename T::value_type>( obj, "", r );
-            dev 
-              = dynamic_cast<ValueObject<typename T::value_type>*>( de );
-            if( dev )
-              obj->getValue().push_back( dev->getValue() );
-            else
-              {
-                delete de;
-                throw runtime_error( string( "PythonReader: wrong type " 
-                                             "inserted in homogen sequence: " 
-                                             ) 
-                                     + r.name() + ", line " + r.lineString() );
-              }
-            delete de;
-          }
-        while( ds.isOpen() );
-
-        return( obj );
-      }
-    catch( exception & e )
-      {
-        delete obj;
-        throw;
-      }
-  }
-
-
-  GenericObject* listHelper( GenericObject*, const string &, PythonReader & r )
-  {
-    // cout << "list\n";
-    bool		end = false;
-    string	id, type;
-    DataSource	& ds = *r.dataSource();
-
-    if( !ds.isOpen() )
-      return 0;
-    r.skipWhile( " \t\n\\\r" );
-    if( r.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    char	c = ds.getch(), mark;
-    if( ds.eof() )
-      io_error::launchErrnoExcept( ds.url() );
-    if( c == '(' )
-      mark = ')';
-    else if( c == '[' )
-      mark = ']';
-    else
-      {
-        // cout << "char: " << c << endl;
-        throw runtime_error( string( "PythonReader: Not a list/tuple: " ) 
-                             + r.name() + ", line " + r.lineString() );
-      }
-
-    ValueObject<ObjectVector> *obj = new ValueObject<ObjectVector>;
-
-    try
-      {
-        do
-          {
-            r.skipWhile( " \t\n\\\r" );
-            if( r.eof() )
-              io_error::launchErrnoExcept( ds.url() );
-            c = ds.getch();
-            if( ds.eof() )
-              io_error::launchErrnoExcept( ds.url() );
-            if( c == ',' )	// separator
-              {
-                r.skipWhile( " \t\n\\\r" );
-                if( r.eof() )
-                  io_error::launchErrnoExcept( ds.url() );
-                c = ds.getch();
-                if( ds.eof() )
-                  io_error::launchErrnoExcept( ds.url() );
-              }
-            if( c == mark )
-              {
-                end = true;
-                break;	// end
-              }
-            ds.ungetch( c );
-            obj->getValue().push_back( r.read( obj, "" ) );
-          }
-        while( ds.isOpen() );
-
-        return( obj );
-      }
-    catch( exception & e )
-      {
-        delete obj;
-        throw;
-      }
-  }
-
-
-  GenericObject* noneHelper( GenericObject*, const string &, PythonReader & )
-  {
-    return 0;
-  }
-
-
-} // namespace (internal linkage)
-
-
-
 GenericObject* PythonReader::propertySetHelper(GenericObject *, const string &, 
                                          PythonReader & r)
 {
-  string				synt;
-  DataSource	& ds = *r.dataSource();
-  char		c;
+  string                synt;
+  DataSource    & ds = *r.dataSource();
+  char      c;
 
   r.skipWhile( " \t\n\\\r" );
   if( r.eof() )
@@ -367,11 +99,11 @@ GenericObject* PythonReader::propertySetHelper(GenericObject *, const string &,
     case '.':
     case '-':
     case '+':
-    case '\'':	// string identifier
+    case '\'':  // string identifier
     case '"': 
       {
         ds.ungetch( c );
-        GenericObject	*obj;
+        GenericObject   *obj;
 
         if( r.readSyntax( synt ) )
           obj = new SyntaxedObject<PropertySet>( synt );
@@ -404,9 +136,9 @@ GenericObject* PythonReader::propertySetHelper(GenericObject *, const string &,
 GenericObject* PythonReader::dictHelper( GenericObject *, const string &, 
                                          PythonReader & r )
 {
-  string				synt;
-  DataSource	& ds = *r.dataSource();
-  char		c;
+  string                synt;
+  DataSource    & ds = *r.dataSource();
+  char      c;
 
   r.skipWhile( " \t\n\\\r" );
   if( r.eof() )
@@ -438,11 +170,11 @@ GenericObject* PythonReader::dictHelper( GenericObject *, const string &,
   // expect attribute name
   switch( c )
     {
-    case '\'':	// string identifier
+    case '\'':  // string identifier
     case '"': 
       {
         ds.ungetch( c );
-        ValueObject<Dictionary>	*obj;
+        ValueObject<Dictionary> *obj;
 
         if( r.readSyntax( synt ) )
           obj = new SyntaxedObject<Dictionary>( synt );
@@ -484,7 +216,7 @@ GenericObject* PythonReader::dictHelper( GenericObject *, const string &,
     case 'N':
       {
         ds.ungetch( c );
-        ValueObject<IntDictionary>	*obj;
+        ValueObject<IntDictionary>  *obj;
 
         obj = new ValueObject<IntDictionary>;
 
@@ -509,9 +241,8 @@ GenericObject* PythonReader::dictHelper( GenericObject *, const string &,
   return 0;
 }
 
-
 PythonReader::PythonReader( const string& filename, const SyntaxSet& rules,
-			    const HelperSet& helpers )
+                const HelperSet& helpers )
   : d( new Private( rules,
          rc_ptr<DataSource>( new IStreamDataSource( rc_ptr<istream>(
              new cuifstream( filename.c_str(), ios::in | ios::binary ) ),
@@ -537,7 +268,7 @@ PythonReader::PythonReader( const SyntaxSet& rules, const HelperSet& helpers )
 
 
 PythonReader::PythonReader( rc_ptr<DataSource> ds, const SyntaxSet& rules,
-			    const HelperSet& helpers )
+                const HelperSet& helpers )
   : d( new Private( rules, ds ) )
 {
   init( helpers );
@@ -575,13 +306,13 @@ void PythonReader::init( const HelperSet& helpers )
   if (d->helpers.find("PropertySet") == d->helpers.end())
     d->helpers["PropertySet"] = &propertySetHelper;
   if (d->helpers.find("int_vector") == d->helpers.end())
-    d->helpers["int_vector"] = &genericSequenceHelper<vector<int> >;
+    d->helpers["int_vector"] = &PythonReader::genericSequenceHelper<vector<int> >;
   if (d->helpers.find("uint_vector") == d->helpers.end())
-    d->helpers["uint_vector"] = &genericSequenceHelper<vector<unsigned int> >;
+    d->helpers["uint_vector"] = &PythonReader::genericSequenceHelper<vector<unsigned int> >;
   if (d->helpers.find("float_vector") == d->helpers.end())
-    d->helpers["float_vector"] = &genericSequenceHelper<vector<float> >;
+    d->helpers["float_vector"] = &PythonReader::genericSequenceHelper<vector<float> >;
   if (d->helpers.find("string_vector") == d->helpers.end())
-    d->helpers["string_vector"] = &genericSequenceHelper<vector<string> >;
+    d->helpers["string_vector"] = &PythonReader::genericSequenceHelper<vector<string> >;
   if (d->helpers.find("None") == d->helpers.end())
     d->helpers["None"] = &noneHelper;
 
@@ -648,7 +379,7 @@ PythonReader::attach( rc_ptr<DataSource> ds )
 void PythonReader::attach( istream & s, int line_num )
 {
   //_stream.attach( s, line_num );
-  attachable_cuifstream	*c = new attachable_cuifstream;
+  attachable_cuifstream *c = new attachable_cuifstream;
   c->enableUncomment( false );
   c->unsetf( ios::skipws );
   c->attach( s, line_num );
@@ -683,7 +414,7 @@ PythonReader::line() const
     = dynamic_cast<IStreamDataSource *>( d->datasource.get() );
   if( !sds )
     return 0;
-  cuifstream	*cs = dynamic_cast<cuifstream *>( &sds->stream() );
+  cuifstream    *cs = dynamic_cast<cuifstream *>( &sds->stream() );
   if( !cs )
     return 0;
   return cs->line();
@@ -735,7 +466,7 @@ PythonReader::readUntil( const string& s )
   /*if( _stream.eof() )
     throw file_error( string( "EOF found" ) + name() );*/
 
-  return token;	
+  return token; 
 }
 
 
@@ -785,14 +516,14 @@ PythonReader::readWhile(const string& s)
   /*if( _stream.eof() )
     throw file_error( string( "EOF found" ) + name() );*/
 
-  return token;	
+  return token; 
 }
 
 
 unsigned
 PythonReader::skipWhile(const string& s)
 {
-  unsigned	n = 0;
+  unsigned  n = 0;
   if( eof() )
     return n;
 
@@ -859,7 +590,7 @@ string PythonReader::readVariableName()
     throw file_error( "EOF", name() );
 
   // var name
-  // string	x = readUntil( "= \t\n\\\r" );
+  // string x = readUntil( "= \t\n\\\r" );
   /* to avoid confusion with other files, we ensure the variable name
   is the hard-coded string 'attributes' for now. */
   static const string hardcoded = "attributes";
@@ -903,8 +634,8 @@ GenericObject* PythonReader::read( GenericObject* object,
 
   // cout << "source OK\n";
 
-  string	synt;
-  bool		genfallback = false;
+  string    synt;
+  bool      genfallback = false;
   if( object )
   {
     SyntaxedInterface *si = object->getInterface<SyntaxedInterface>();
@@ -915,11 +646,11 @@ GenericObject* PythonReader::read( GenericObject* object,
   }
   // cout << "read syntax: " << synt << ", semantic: " << semantic << endl;
 
-  //	try to use syntax
+  //    try to use syntax
   /*
   SyntaxSet::const_iterator i, f;
   for (i = d->rules.begin(), f = d->rules.end(); i != f; ++i)
-	std::cout << (*i).first << std::endl;*/
+    std::cout << (*i).first << std::endl;*/
   if( !semantic.empty() )
     {
       // if this semantic attribute does have associated I/O properties...
@@ -936,7 +667,7 @@ GenericObject* PythonReader::read( GenericObject* object,
           if( property == syntax->second.end() && !genfallback )
             {
               genfallback = true;
-              SyntaxSet::const_iterator	syntax2 = d->rules.find( "__generic__" );
+              SyntaxSet::const_iterator syntax2 = d->rules.find( "__generic__" );
               if( syntax2 != d->rules.end() )
                 {
                   syntax = syntax2;
@@ -957,7 +688,7 @@ GenericObject* PythonReader::read( GenericObject* object,
                  char buffer[10];
                  sprintf( buffer, "%d", _stream.line() );
                  throw runtime_error( string( "Attribute already read for "
-					       "attribute " ) + semantic
+                           "attribute " ) + semantic
                  + " in " + name() + ", line " 
                  + buffer );
                  }
@@ -976,7 +707,7 @@ GenericObject* PythonReader::read( GenericObject* object,
   // cout << "not in syntax or no helper\n";
 
   skipWhile( " \t\n\\\r" );
-  int	c = d->datasource->getch();
+  int   c = d->datasource->getch();
   if( c == 'u' ) // unicode string
   {
     c = d->datasource->getch();
@@ -990,22 +721,22 @@ GenericObject* PythonReader::read( GenericObject* object,
   }
   d->datasource->ungetch( c );
 
-  string	type;
+  string    type;
 
   switch( c )
     {
-    case '{':	// dictionary
+    case '{':   // dictionary
       type = "dictionary";
       break;
-    case '[':	// list
-    case '(':	// tuple
+    case '[':   // list
+    case '(':   // tuple
       type = "list";
       break;
-    case '\"':	// string
+    case '\"':  // string
     case '\'':
       type = "string";
       break;
-    case '0':	// number
+    case '0':   // number
     case '1':
     case '2':
     case '3':
@@ -1025,8 +756,8 @@ GenericObject* PythonReader::read( GenericObject* object,
       break;
     case 'N':
       {
-        const string	none = "None";
-        unsigned	count = 0;
+        const string    none = "None";
+        unsigned    count = 0;
         while( is_open() && !eof() 
                && ( c = d->datasource->getch() ) == none[count] )
           ++count;
@@ -1057,7 +788,7 @@ GenericObject* PythonReader::read( GenericObject* object,
 
   // now try to find an appropriate helper function
 
-  HelperSet::const_iterator h =	d->helpers.find( type );
+  HelperSet::const_iterator h = d->helpers.find( type );
   if( h != d->helpers.end() )
     {
       // make new rule (should we really do that ?)
@@ -1084,7 +815,7 @@ GenericObject* PythonReader::read( GenericObject* object,
 
 string PythonReader::lineString() const
 {
-  ostringstream	ss;
+  ostringstream ss;
   ss << line();
   return ss.str();
 }
@@ -1096,7 +827,7 @@ void PythonReader::read( Object & obj )
     read( *obj );
   else
     {
-      GenericObject	*go = read();
+      GenericObject *go = read();
       obj = go;
     }
 }
@@ -1109,7 +840,7 @@ void PythonReader::read( GenericObject & obj )
     *dic = dynamic_cast<ValueObject<Dictionary> *>( &obj );
   if( !dic )
     throw runtime_error( string( "Can't read allocated object of type " ) 
-			 + obj.type() );
+             + obj.type() );
   */
 
   // better test in the future but always true right now
@@ -1126,11 +857,11 @@ void PythonReader::read( GenericObject & obj )
 
 string PythonReader::readString( char sep, unsigned & n )
 {
-  DataSource	& ds = *d->datasource;
-  char		x;
-  bool		esc = false;
+  DataSource    & ds = *d->datasource;
+  char      x;
+  bool      esc = false;
   int           cnum = 0, numch = 0;
-  string	str;
+  string    str;
 
   do
   {
@@ -1214,12 +945,12 @@ string PythonReader::readString( char sep, unsigned & n )
 bool PythonReader::readSyntax( string & synt )
 {
   //cout << "readSyntax\n";
-  DataSource	& ds = *d->datasource;
+  DataSource    & ds = *d->datasource;
 
   if( !ds.isOpen() )
     throw file_error( string( "EOF, line " ) + lineString(), name() );
-  unsigned	n = 0;
-  bool		ok = true;
+  unsigned  n = 0;
+  bool      ok = true;
 
   skipWhile( " \t\n\\\r" );
   //return false; // ungetch() doesn't work for several chars
@@ -1235,7 +966,7 @@ bool PythonReader::readSyntax( string & synt )
     ok = false;
   else
     {
-      string	att = readString( c, n );
+      string    att = readString( c, n );
       // cout << "readSyntax: read: " << att << endl;
       if( att == "__syntax__" )
         {
@@ -1274,14 +1005,14 @@ bool PythonReader::readSyntax( string & synt )
 void PythonReader::readDictionary( GenericObject & obj )
 {
   // cout << "readDictionary\n";
-  DataSource	& ds = *d->datasource;
+  DataSource    & ds = *d->datasource;
 
   if( !ds.isOpen() )
     throw file_error( string( "EOF, line " ) + lineString(), name() );
   skipWhile( " \t\n\\\r" );
   if( eof() )
     throw file_error( string( "EOF, line " ) + lineString(), name() );
-  char	c = ds.getch();
+  char  c = ds.getch();
   if( c != '{' )
     throw runtime_error( string( "PythonReader: Not a dictionary: " )
                          + name() + ", line " + lineString() );
@@ -1293,12 +1024,12 @@ void
 PythonReader::readDictionary2( GenericObject & obj )
 {
   // cout << "readDictionary2 on " << obj.type() << endl;
-  DataSource	& ds = *d->datasource;
-  bool		end = false, sep;
-  string	id, type;
-  unsigned	n = 0;
-  char		c;
-  GenericObject	*de;
+  DataSource    & ds = *d->datasource;
+  bool      end = false, sep;
+  string    id, type;
+  unsigned  n = 0;
+  char      c;
+  GenericObject *de;
 
   if( eof() )
     throw file_error( string( "EOF, line " ) + lineString(), name() );
@@ -1309,7 +1040,7 @@ PythonReader::readDictionary2( GenericObject & obj )
       if( eof() )
         throw file_error( string( "EOF, line " ) + lineString(), name() );
       c = ds.getch();
-      if( c == ',' )	// separator
+      if( c == ',' )    // separator
         {
           skipWhile( " \t\n\\\r" );
           if( eof() )
@@ -1330,7 +1061,7 @@ PythonReader::readDictionary2( GenericObject & obj )
             end = true;
             break;
           }
-        case '\'':	// string identifier
+        case '\'':  // string identifier
         case '"':
           id = readString( c, n );
           if( eof() )
@@ -1374,7 +1105,7 @@ PythonReader::readDictionary2( GenericObject & obj )
       if( de )
         {
           // cout << "value type: " << de->type() << endl;
-          SyntaxedInterface	*si = obj.getInterface<SyntaxedInterface>();
+          SyntaxedInterface *si = obj.getInterface<SyntaxedInterface>();
           if( si && si->hasSyntax() && id == "__syntax__" )
             si->setSyntax( de->value<string>() );
           else
@@ -1389,11 +1120,11 @@ void
 PythonReader::readIntDictionary2( TypedObject<IntDictionary> & obj )
 {
   // cout << "readIntDictionary2\n";
-  DataSource	& ds = *d->datasource;
-  bool		end = false, sep;
-  int	id;
-  char		c;
-  GenericObject	*de;
+  DataSource    & ds = *d->datasource;
+  bool      end = false, sep;
+  int   id;
+  char      c;
+  GenericObject *de;
 
   if( !ds.isOpen() )
     throw file_error( string( "EOF, line " ) + lineString(), name() );
@@ -1402,7 +1133,7 @@ PythonReader::readIntDictionary2( TypedObject<IntDictionary> & obj )
     {
       skipWhile( " \t\n\\\r" );
       c = ds.getch();
-      if( c == ',' )	// separator
+      if( c == ',' )    // separator
         {
           skipWhile( " \t\n\\\r" );
           c = ds.getch();

@@ -847,7 +847,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
         std::map<float, BlobMeasurements > statsM, statsSD;
         FILE *fileStats;
         float t;
-        float max_int, mean_int, max_cont, mean_cont, area, areamoy, areavar, tvalue;
+        float max_int, mean_int, max_cont, mean_cont, area, areamoy, areavar, tvalue, tv2;
         BlobMeasurements *measurements;
         GreyLevelBlob<Site> *glBlob, *glBlob1, *glBlob2;
 
@@ -935,7 +935,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
             typename std::list<GreyLevelBlob<Site>*>::iterator itGLBlobs=ssBlob->glBlobs.begin();
             BlobMeasurements measure;
             float t2,t1, dt;
-            max_int=0; mean_int=0; max_cont=0; mean_cont=0; area=0; areamoy=0; areavar=0; tvalue=0;
+            max_int=0; mean_int=0; max_cont=0; mean_cont=0; area=0; areamoy=0; areavar=0; tvalue=0, tv2 = 0;
             glBlob1=*itGLBlobs;
             t1=glBlob1->GetScale();
             dt=log(ssBlob->TopBifurcation()->tMid())-log(t1);
@@ -949,6 +949,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
             mean_cont += dt * (glBlob1->measurements.meanContrast);
             area += dt * (glBlob1->measurements.area);            
             tvalue += dt * (glBlob1->measurements.t);
+            tv2 += dt * (glBlob1->measurements.t2);
 //             cout << dt << ";" << glBlob1->measurements.t << " == " ;
 
             ++itGLBlobs;
@@ -963,6 +964,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
                 mean_cont += dt * (glBlob2->measurements.meanContrast + glBlob1->measurements.meanContrast)/2.0;
                 area += dt * (glBlob2->measurements.area + glBlob1->measurements.area)/2.0;
                 tvalue += dt * (glBlob2->measurements.t + glBlob1->measurements.t)/2.0;
+                tv2 += dt * (glBlob2->measurements.t2 + glBlob1->measurements.t2)/2.0;
 //                 cout << glBlob2->measurements.tValue << " == ";
 
                 glBlob1=glBlob2;
@@ -980,34 +982,44 @@ cout << "ssblobs après : " << blobList.size() << endl;
             mean_cont += dt * (glBlob1->measurements.meanContrast);
             area += dt * (glBlob1->measurements.area);
             tvalue += dt * (glBlob1->measurements.t);
+            tv2 += dt * (glBlob1->measurements.t2);
 //             cout << tvalue << endl;
 
             // getting t-value from original map... NORMALEMENT PLUS BESOIN
 
             TexturedData<Geom, Text> ima=scaleSpace()->Scale(0.0)->Data();
+            TexturedData<Geom, Text> *ima2=scaleSpace()->Scale(0.0)->AuxData();
 
             glBlob1=ssBlob->GlBlobRep();
             std::set<Site,ltstr_p3d<Site> >  pixels;
             pixels=glBlob1->GetListePoints();
 
             typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
-            float tvmax=-100.0;
+            float tvmax=-100.0, tvmax2 = -100.;
+            if( !ima2 )
+            {
+              tvmax2 = 0.;
+            }
             for ( itPix=pixels.begin(); itPix!=pixels.end(); itPix++)
             {
                if (float(ima.intensity(*itPix)) > tvmax)
                     tvmax= float(ima.intensity(*itPix));
+               if( ima2 && float(ima2->intensity(*itPix)) > tvmax2 )
+               {
+                 tvmax2= float(ima2->intensity(*itPix));
+               }
             }
-            
-            
+
             float tvalue2 = tvmax * (ssBlob->LifeTime()) ; //* glBlob1->measurements.area;
-            cout << "\tt" << tvmax <<";" << ssBlob->LifeTime() << ";" << tvalue2 << " "; 
-            measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvalue2, tvmax);
+            float tvalue2bis = tvmax2 * (ssBlob->LifeTime());
+//             cout << "\tt" << tvmax <<";" << ssBlob->LifeTime() << ";" << tvalue2 << " ";
+            measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvalue2, tvmax, tvmax2);
             areamoy +=area;
             areavar +=area*area;
             ssBlob->SetMeasurements(measure);
 
-            float tt;
-            tt=ssBlob->GetMeasurements().tValue;
+/*            float tt;
+            tt=ssBlob->GetMeasurements().tValue;*/
 //             fprintf(spmV, "%.4f\n", tt);
 
         }

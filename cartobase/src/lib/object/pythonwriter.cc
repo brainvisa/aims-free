@@ -33,7 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
-#include <cartobase/object/pythonwriter.h>
+#include <cartobase/object/pythonwriter_d.h>
 #include <cartobase/object/object_d.h>
 #include <cartobase/object/property.h>
 #include <cartobase/exception/file.h>
@@ -47,415 +47,6 @@
 using namespace std;
 using namespace carto;
 
-
-namespace {
-
-template<typename T> 
-void 
-genericHelper( const GenericObject & obj, PythonWriter & w, int, bool )
-{
-  DataSource	& ds = *w.dataSource();
-  // using GenericObject:: avoids a bug in gcc-2.96
-  const T	& x = obj.GenericObject::value<T>();
-  AsciiDataSourceTraits<T>::write( ds, x );
-}
-
-
-template<>
-void genericHelper<char>( const GenericObject & obj, PythonWriter & w, int, 
-                          bool )
-{
-  DataSource	& ds = *w.dataSource();
-  // using GenericObject:: avoids a bug in gcc-2.96
-  const char	& x = obj.GenericObject::value<char>();
-  AsciiDataSourceTraits<int>::write( ds, x );
-}
-
-
-template<>
-void genericHelper<unsigned char>( const GenericObject & obj, 
-                                   PythonWriter & w, int, bool )
-{
-  DataSource	& ds = *w.dataSource();
-  // using GenericObject:: avoids a bug in gcc-2.96
-  const unsigned char	& x = obj.GenericObject::value<unsigned char>();
-  AsciiDataSourceTraits<unsigned>::write( ds, x );
-}
-
-
-template<>
-void genericHelper<string>( const GenericObject & obj, 
-                            PythonWriter & w, int, bool )
-{
-  w.writeString( *w.dataSource(), obj.getString() );
-}
-
-
-template<>
-void genericHelper<double>( const GenericObject & obj, 
-                            PythonWriter & w, int, bool )
-{
-  DataSource	& ds = *w.dataSource();
-  AsciiDataSourceTraits<double>::write( ds, obj.getScalar() );
-}
-
-
-template<>
-void genericHelper<float>( const GenericObject & obj,
-                           PythonWriter & w, int, bool )
-{
-  DataSource	& ds = *w.dataSource();
-  AsciiDataSourceTraits<float>::write( ds, (float) obj.getScalar() );
-}
-
-
-template<>
-void genericHelper<int16_t>( const GenericObject & obj,
-                             PythonWriter & w, int, bool )
-{
-  DataSource	& ds = *w.dataSource();
-  AsciiDataSourceTraits<int16_t>::write( ds, (int16_t) obj.getScalar() );
-}
-
-
-template<>
-void genericHelper<uint16_t>( const GenericObject & obj,
-                              PythonWriter & w, int, bool )
-{
-  DataSource	& ds = *w.dataSource();
-  AsciiDataSourceTraits<uint16_t>::write( ds, (uint16_t) obj.getScalar() );
-}
-
-
-template<>
-void genericHelper<int32_t>( const GenericObject & obj,
-                             PythonWriter & w, int, bool )
-{
-  DataSource	& ds = *w.dataSource();
-  AsciiDataSourceTraits<int32_t>::write( ds, (int32_t) obj.getScalar() );
-}
-
-
-template<>
-void genericHelper<uint32_t>( const GenericObject & obj,
-                              PythonWriter & w, int, bool )
-{
-  DataSource	& ds = *w.dataSource();
-  AsciiDataSourceTraits<uint32_t>::write( ds, (uint32_t) obj.getScalar() );
-}
-
-
-template<typename T> 
-void 
-genericSequenceHelper( const GenericObject & obj, PythonWriter & w, int ind, 
-		       bool writeInternals )
-{
-  DataSource	& ds = *w.dataSource();
-  // using GenericObject:: avoids a bug in gcc-2.96
-  const T	& x = obj.GenericObject::value<T>();
-  typename T::const_iterator	ix;
-  typename T::const_iterator	ex = x.end();
-  ValueObject<typename T::value_type>	de;
-  bool				first = true;
-
-  ds.putch( '[' );
-  for( ix=x.begin(); ix!=ex; ++ix )
-    {
-      if( first )
-	{
-	  first = false;
-          ds.putch( ' ' );
-	}
-      else
-        {
-          ds.putch( ',' );
-          ds.putch( ' ' );
-        }
-      de.getValue() = *ix;
-      genericHelper<typename T::value_type>( de, w, ind, writeInternals );
-    }
-  ds.putch( ' ' );
-  ds.putch( ']' );
-}
-
-
-template<typename T> 
-void dictHelper( const GenericObject & obj, PythonWriter & w, int indent, 
-		 bool writeInternals )
-{
-  // cout << "dictHelper<" << DataTypeCode<T>::name() << ">\n";
-
-  DataSource				& ds = *w.dataSource();
-  const map<T, Object> 
-    & x = obj.GenericObject::value<map<T, Object> >();
-  typename map<T, Object>::const_iterator	im, em = x.end();
-  bool					first = true, hassyntax = false;
-  string				ind, ind2;
-  int					i;
-  char					sep = '\n';
-
-  if( w.singleLine() )
-    sep = ' ';
-  else
-    {
-      for( i=0; i<indent-1; ++i )
-	ind += "    ";
-      ind2 = ind + "  ";
-      if( indent > 0 )
-        ind += "    ";
-      ++indent;
-    }
-
-  ds.putch( '{' );
-  ds.putch( sep );
-  AsciiDataSourceTraits<string>::write( ds, ind );
-
-  string	synt;
-  const SyntaxedInterface *si 
-    = obj.GenericObject::getInterface<SyntaxedInterface>();
-  if( si && si->hasSyntax() )
-    {
-      synt = si->getSyntax();
-      hassyntax = true;
-    }
-  else
-    {
-      try
-        {
-          Object	sx = obj.getProperty( "__syntax__" );
-          if( sx.get() )
-            {
-              synt = sx->GenericObject::value<string>();
-              hassyntax = true;
-            }
-        }
-      catch( ... )
-        {
-        }
-    }
-
-  if( hassyntax )
-    {
-      AsciiDataSourceTraits<string>::write( ds, "'__syntax__' : " );
-      w.writeString( ds, synt );
-      first = false;
-    }
-
-  for( im=x.begin(); im!=em; ++im )
-    {
-      if( first )
-	first = false;
-      else
-        {
-          ds.putch( ',' );
-          ds.putch( sep );
-          AsciiDataSourceTraits<string>::write( ds, ind );
-        }
-      // const_cast: just to avoid referencing a const T
-      Object key = Object::reference( const_cast<T &>( im->first ) );
-      w.write( *key, indent, "", "", writeInternals );
-      AsciiDataSourceTraits<string>::write( ds, " : " );
-      w.write( *im->second, indent, "", "", writeInternals );
-    }
-  ds.putch( sep );
-  AsciiDataSourceTraits<string>::write( ds, ind );
-  ds.putch( '}' );
-}
-
-
-template<> 
-void dictHelper<string>( const GenericObject & obj, PythonWriter & w, 
-			 int indent, bool writeInternals )
-{
-  DataSource				& ds = *w.dataSource();
-  const IterableInterface 
-    & y = *obj.getInterface<IterableInterface>();
-  Object				im;
-
-  bool					first = true, hassyntax = false;
-  string				ind, ind2;
-  int					i;
-  char					sep = '\n';
-
-  if( w.singleLine() )
-    sep = ' ';
-  else
-    {
-      for( i=0; i<indent-1; ++i )
-	ind += "    ";
-      ind2 = ind + "  ";
-      if( indent > 0 )
-        ind += "    ";
-      ++indent;
-    }
-
-  ds.putch( '{' );
-  ds.putch( sep );
-  AsciiDataSourceTraits<string>::write( ds, ind );
-
-  string	synt;
-  const SyntaxedInterface	*si = obj.getInterface<SyntaxedInterface>();
-  if( si && si->hasSyntax() )
-    {
-      synt = si->getSyntax();
-      hassyntax = true;
-    }
-  else
-    {
-      try
-        {
-          Object	sx = obj.getProperty( "__syntax__" );
-          if( sx.get() )
-            {
-              synt = sx->GenericObject::value<string>();
-              hassyntax = true;
-            }
-        }
-      catch( ... )
-        {
-        }
-    }
-
-  if( hassyntax )
-    {
-      AsciiDataSourceTraits<string>::write( ds, "'__syntax__' : " );
-      w.writeString( ds, synt );
-      first = false;
-    }
-
-  string	key;
-  im=y.objectIterator();
-  while( im->isValid() )
-    {
-      key = im->key();
-      if( ( writeInternals || !w.isInternal( "", key ) ) 
-          && ( key != "__syntax__" || !hassyntax ) )
-        {
-          if( first )
-            first = false;
-          else
-            {
-              ds.putch( ',' );
-              ds.putch( sep );
-              AsciiDataSourceTraits<string>::write( ds, ind );
-            }
-          w.writeString( ds, key );
-          AsciiDataSourceTraits<string>::write( ds, " : " );
-          w.write( *im->currentValue(), indent, "", key, writeInternals );
-        }
-      im->next();
-    }
-
-  ds.putch( sep );
-  AsciiDataSourceTraits<string>::write( ds, ind2 );
-  ds.putch( '}' );
-}
-
-
-void rcDictHelper( const GenericObject & obj, PythonWriter & w, int indent, 
-		   bool writeInternals )
-{
-  DataSource				& ds = *w.dataSource();
-  const map<Object, Object>	& x 
-    = obj.value<map<Object, Object> >();
-  map<Object, Object>::const_iterator	im, em = x.end();
-  bool					first = true, hassyntax = false;
-  string				ind, ind2;
-  int					i;
-  char					sep = '\n';
-
-  if( w.singleLine() )
-    sep = ' ';
-  else
-    {
-      for( i=0; i<indent-1; ++i )
-	ind += "    ";
-      ind2 = ind + "  ";
-      if( indent > 0 )
-        ind += "    ";
-      ++indent;
-    }
-
-  ds.putch( '{' );
-  ds.putch( sep );
-  AsciiDataSourceTraits<string>::write( ds, ind );
-
-  string	synt;
-  const SyntaxedInterface	*si = obj.getInterface<SyntaxedInterface>();
-  if( si && si->hasSyntax() )
-    {
-      synt = si->getSyntax();
-      hassyntax = true;
-    }
-  else
-    {
-      try
-        {
-          Object	sx = obj.getProperty( "__syntax__" );
-          if( sx.get() )
-            {
-              synt = sx->GenericObject::value<string>();
-              hassyntax = true;
-            }
-        }
-      catch( ... )
-        {
-        }
-    }
-
-  if( hassyntax )
-    {
-      AsciiDataSourceTraits<string>::write( ds, "'__syntax__' : " );
-      w.writeString( ds, synt );
-      first = false;
-    }
-
-  for( im=x.begin(); im!=em; ++im )
-    {
-      if( first )
-	first = false;
-      else
-        {
-          ds.putch( ',' );
-          ds.putch( sep );
-          AsciiDataSourceTraits<string>::write( ds, ind );
-        }
-      w.write( *im->first, indent, "", "", writeInternals );
-      AsciiDataSourceTraits<string>::write( ds, " : " );
-      w.write( *im->second, indent, "", "", writeInternals );
-    }
-
-  ds.putch( sep );
-  AsciiDataSourceTraits<string>::write( ds, ind2 );
-  ds.putch( '}' );
-}
-
-
-void listHelper( const GenericObject & obj, PythonWriter & w, int indent, 
-		 bool writeInternals )
-{
-  DataSource			& ds = *w.dataSource();
-  Object			it = obj.objectIterator();
-  bool				first = true;
-
-  ds.putch( '[' );
-  ++indent;
-  for( it=obj.objectIterator(); it->isValid(); it->next() )
-    {
-      if( first )
-	first = false;
-      else
-        ds.putch( ',' );
-      ds.putch( ' ' );
-      w.write( *it->currentValue(), indent, "", "", writeInternals );
-    }
-  ds.putch( ' ' );
-  ds.putch( ']' );
-}
-
-} // namespace (internal linkage)
-
-// -----------
 
 PythonWriter::PythonWriter( const std::string& filename, 
 			    const SyntaxSet& rules, const HelperSet& helpers )
@@ -598,33 +189,33 @@ void PythonWriter::init( const HelperSet & helpers )
       _helpers[ x.type() ] = &listHelper;
   }
   if( _helpers.find( "int_vector" ) == _helpers.end() )
-    _helpers[ "int_vector" ] = &genericSequenceHelper<vector<int> >;
+    _helpers[ "int_vector" ] = &PythonWriter::genericSequenceHelper<vector<int> >;
   {
     ValueObject<vector<int> >	x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericSequenceHelper<vector<int> >;
+      _helpers[ x.type() ] = &PythonWriter::genericSequenceHelper<vector<int> >;
   }
   if( _helpers.find( "uint_vector" ) == _helpers.end() )
-    _helpers[ "uint_vector" ] = &genericSequenceHelper<vector<unsigned int> >;
+    _helpers[ "uint_vector" ] = &PythonWriter::genericSequenceHelper<vector<unsigned int> >;
   {
     ValueObject<vector<unsigned int> >	x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericSequenceHelper<vector<unsigned int> >;
+      _helpers[ x.type() ] = &PythonWriter::genericSequenceHelper<vector<unsigned int> >;
   }
 
   if( _helpers.find( "float_vector" ) == _helpers.end() )
-    _helpers[ "float_vector" ] = &genericSequenceHelper<vector<float> >;
+    _helpers[ "float_vector" ] = &PythonWriter::genericSequenceHelper<vector<float> >;
   {
     ValueObject<vector<float> >	x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericSequenceHelper<vector<float> >;
+      _helpers[ x.type() ] = &PythonWriter::genericSequenceHelper<vector<float> >;
   }
   if( _helpers.find( "string_vector" ) == _helpers.end() )
-    _helpers[ "string_vector" ] = &genericSequenceHelper<vector<string> >;
+    _helpers[ "string_vector" ] = &PythonWriter::genericSequenceHelper<vector<string> >;
   {
     ValueObject<vector<string> >	x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericSequenceHelper<vector<string> >;
+      _helpers[ x.type() ] = &PythonWriter::genericSequenceHelper<vector<string> >;
   }
   // ### remove after everything has been moved to intN_t/uintN_t  
   if( _helpers.find( "long" ) == _helpers.end() )
@@ -855,6 +446,30 @@ void PythonWriter::setCatchFunction( CatchFunction f )
 {
   _catchFunction = f;
 }
+
+const PythonWriter::HelperSet & PythonWriter::helpers() const
+{
+   return _helpers;
+}
+
+
+PythonWriter::HelperSet & PythonWriter::helpers()
+{
+   return _helpers;
+}
+
+
+const SyntaxSet & PythonWriter::syntaxes() const
+{
+   return _rules;
+}
+
+
+SyntaxSet & PythonWriter::syntaxes()
+{
+   return _rules;
+}
+
 
 INSTANTIATE_GENERIC_OBJECT_TYPE( PythonWriter::Helper )
 INSTANTIATE_GENERIC_OBJECT_TYPE( PythonWriter::HelperSet )

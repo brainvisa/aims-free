@@ -76,6 +76,12 @@ namespace carto
     bool is_open() const;
     rc_ptr<DataSource> dataSource() { return _datasource; }
 
+    /// helper functions read basic data type
+    const HelperSet & helpers() const;
+    HelperSet & helpers();
+    const SyntaxSet & syntaxes() const;
+    SyntaxSet & syntaxes();
+
     /// Writes a generic object to stream
     void write( const GenericObject & object, bool writeInternals = false, 
 		bool writevariable = true );
@@ -96,6 +102,9 @@ namespace carto
 
     /// utility function
     static void writeString( DataSource &, std::string );
+
+    template<typename T>
+    static void genericSequenceHelper( const GenericObject & obj, PythonWriter & w, int ind, bool writeInternals );
 
   protected:
     void init( const HelperSet & helpers );
