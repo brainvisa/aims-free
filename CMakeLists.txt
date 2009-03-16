@@ -22,6 +22,8 @@ include( CPack )
 
 SOMA_CREATE_MAIN_COMPONENTS()
 
+set( ${PROJECT_NAME}_IS_COMPILED ON PARENT_SCOPE )
+
 find_package( Sigc++2 REQUIRED )
 find_package( LibXml2 REQUIRED )
 find_package( Boost REQUIRED )

@@ -22,10 +22,10 @@ get_filename_component( ${_uproject}_BINARY_DIR "${${_uproject}_BINARY_DIR}" PAT
 get_filename_component( ${_uproject}_BINARY_DIR "${${_uproject}_BINARY_DIR}" PATH )
 get_filename_component( ${_uproject}_BINARY_DIR "${${_uproject}_BINARY_DIR}" PATH )
 
-if( "${CMAKE_CURRENT_LIST_FILE}" STREQUAL "@AIMS_BINARY_DIR@/share/@PROJECT_NAME@-${@PROJECT_NAME@_VERSION_MAJOR}.${@PROJECT_NAME@_VERSION_MINOR}/cmake/@PROJECT_NAME@-config.cmake" )
-  message( STATUS "Using @PROJECT_NAME@ build tree: adding "${${_uproject}_BINARY_DIR}" to CMAKE_PREFIX_PATH" )
-  set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${${_uproject}_BINARY_DIR}" )
-endif( "${CMAKE_CURRENT_LIST_FILE}" STREQUAL "@AIMS_BINARY_DIR@/share/@PROJECT_NAME@-${@PROJECT_NAME@_VERSION_MAJOR}.${@PROJECT_NAME@_VERSION_MINOR}/cmake/@PROJECT_NAME@-config.cmake" )
+# if( "${CMAKE_CURRENT_LIST_FILE}" STREQUAL "${${_uproject}_BINARY_DIR}/share/@PROJECT_NAME@-${@PROJECT_NAME@_VERSION_MAJOR}.${@PROJECT_NAME@_VERSION_MINOR}/cmake/@PROJECT_NAME@-config.cmake" )
+#   message( STATUS "Using @PROJECT_NAME@ build tree: adding "${${_uproject}_BINARY_DIR}" to CMAKE_PREFIX_PATH" )
+#   set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${${_uproject}_BINARY_DIR}" )
+# endif( "${CMAKE_CURRENT_LIST_FILE}" STREQUAL "${${_uproject}_BINARY_DIR}/share/@PROJECT_NAME@-${@PROJECT_NAME@_VERSION_MAJOR}.${@PROJECT_NAME@_VERSION_MINOR}/cmake/@PROJECT_NAME@-config.cmake" )
 
 set( ${_uproject}_DEFINITIONS @AIMS_DEFINITIONS@ )
 set( ${_uproject}_INCLUDE_DIRS
@@ -35,9 +35,14 @@ set( ${_uproject}_INCLUDE_DIRS
      ${Boost_INCLUDE_DIRS} )
 set( ${_uproject}_SIP_DIRECTORY "${${_uproject}_BINARY_DIR}/@AIMS_RELATIVE_SIP_DIRECTORY@" )
 
-find_library( AIMS_AIMSALGO_LIB aimsalgo "${${_uproject}_BINARY_DIR}/lib" )
+if( ${_project}_IS_COMPILED )
+  set( AIMS_AIMSALGO_LIB aimsalgo )
+  set( AIMS_PYAIMS_LIB pyaims )
+else( ${_project}_IS_COMPILED )
+  find_library( AIMS_AIMSALGO_LIB aimsalgo "${${_uproject}_BINARY_DIR}/lib" )
+  find_library( AIMS_PYAIMS_LIB pyaims "${${_uproject}_BINARY_DIR}/lib" )
+endif( ${_project}_IS_COMPILED )
 set( ${_uproject}_LIBRARIES "${AIMS_AIMSALGO_LIB}" )
-find_library( AIMS_PYAIMS_LIB pyaims "${${_uproject}_BINARY_DIR}/lib" )
 set( ${_uproject}_SIP_LIBRARIES ${AIMS_PYAIMS_LIB} )
 
 if( AIMS_AIMSALGO_LIB )
