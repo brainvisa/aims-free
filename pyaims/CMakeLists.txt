@@ -1,5 +1,3 @@
-if( soma-infra_FOUND )
-
 #   project( pyaims )
 #   SOMA_SET_PROJECT_VERSION()
 # 
@@ -14,30 +12,13 @@ if( soma-infra_FOUND )
 #                       GROUP epydoc-doc
 #                       DESCRIPTION "Epydoc documentation of pyaims" )
 
-  OPTION( AIMS_PARTIAL_PYAIMSSIP "Use only parts of PyAims, shorter to compile, for devel purpose" OFF )
-  
-  set( PYAIMS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" )
+OPTION( AIMS_PARTIAL_PYAIMSSIP "Use only parts of PyAims, shorter to compile, for devel purpose" OFF )
 
-  add_subdirectory( src )
-  add_subdirectory( python )
-  add_subdirectory( bin )
-  add_subdirectory( doc )
+set( PYAIMS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" )
 
-  add_subdirectory( $ENV{P4}/pyaimsalgo-main pyaimsalgo-main )
+add_subdirectory( src )
+add_subdirectory( python )
+add_subdirectory( bin )
+add_subdirectory( doc )
 
-else( soma-infra_FOUND )
-  PROJECT(PYAIMS)
-  
-  IF(COMMAND cmake_policy)
-    cmake_policy(VERSION 2.4)
-    cmake_policy(SET CMP0002 NEW)
-    cmake_policy(SET CMP0003 NEW)
-  #  cmake_policy(SET CMP0005 OLD)
-  ENDIF(COMMAND cmake_policy)
-  
-  ADD_SUBDIRECTORY(src)
-  ADD_SUBDIRECTORY(python)
-  ADD_SUBDIRECTORY(bin)
-  ADD_SUBDIRECTORY(doc)
-
-endif( soma-infra_FOUND )
+add_subdirectory( ${aims_SOURCE_DIR}/pyaimsalgo pyaimsalgo )
