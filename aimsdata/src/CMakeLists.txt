@@ -2,11 +2,13 @@ add_subdirectory(aimsdata)
 add_subdirectory(aimsecat)
 add_subdirectory(aimsply)
 add_subdirectory(aimsvida)
+add_subdirectory(aimsnifti)
 
 IF(APPLE)
   add_subdirectory(bundle_aimsecat)
   add_subdirectory(bundle_aimsply)
   add_subdirectory(bundle_aimsvida)
+  add_subdirectory(bundle_aimsnifti)
 ENDIF(APPLE)
 
 
@@ -41,11 +43,6 @@ IF(TIFF_FOUND)
   ENDIF(APPLE)
 ENDIF(TIFF_FOUND)
 
-
-add_subdirectory(aimsnifti)
-IF(APPLE)
-  add_subdirectory(bundle_aimsnifti)
-ENDIF(APPLE)
 
 
 #------------------------------------------------------------------------------
@@ -95,6 +92,6 @@ foreach( _command
     target_link_libraries( ${_target} aimsdata )
     SOMA_INSTALL( TARGETS ${_target}
                   DESTINATION bin
-                  COMPONENT aims )
+                  COMPONENT ${PROJECT_NAME} )
   endif( IS_DIRECTORY "${_command}" )
 endforeach( _command )
