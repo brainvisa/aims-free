@@ -41,6 +41,7 @@
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/config/version.h>
 #include <aims/def/path.h>
+#include <cstdlib>
 #include <iostream>
 
 using namespace aims;

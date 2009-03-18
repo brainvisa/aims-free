@@ -53,7 +53,7 @@ namespace carto
     class Mutex
     {
     public:
-      enum Type { Recursive=2 }
+      enum Type { Recursive=2 };
       Mutex( int = Recursive ) {}
       void lock() {}
       void unlock() {}
@@ -305,7 +305,7 @@ namespace carto
   template <typename T>
   inline void MutexRcPtr<T>::lock()
   {
-    Mutex	*m = mutex();
+    MutexedObject::Mutex	*m = mutex();
     if( m )
       m->lock();
   }
@@ -314,7 +314,7 @@ namespace carto
   template <typename T>
   inline void MutexRcPtr<T>::unlock()
   {
-    Mutex	*m = mutex();
+    MutexedObject::Mutex	*m = mutex();
     if( m )
       m->unlock();
   }

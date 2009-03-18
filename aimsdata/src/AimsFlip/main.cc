@@ -36,6 +36,7 @@
 /*
  *  Image flip
  */
+#include <cstdlib>
 #include <aims/data/data_g.h>
 #include <aims/io/process.h>
 #include <aims/io/reader.h>

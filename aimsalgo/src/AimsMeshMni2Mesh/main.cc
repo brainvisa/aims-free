@@ -34,6 +34,7 @@
  */
 
  
+#include <cstdlib>
 #include <aims/io/io_g.h>
 #include <aims/mesh/surface.h>
 #include <aims/data/data.h>

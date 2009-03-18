@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <aims/getopt/getopt2.h>

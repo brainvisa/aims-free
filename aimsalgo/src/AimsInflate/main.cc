@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <iostream>
 #include <aims/mesh/inflate.h>
 #include <aims/getopt/getopt2.h>

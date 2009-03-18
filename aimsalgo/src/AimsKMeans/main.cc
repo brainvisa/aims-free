@@ -41,6 +41,7 @@ AimsEssai-JD -i ../AimsThalamus-JD/sortie_classe -f ~/clust/sortie_cla
 
 */
 
+#include <cstdlib>
 #include <aims/getopt/getopt.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>

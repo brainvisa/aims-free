@@ -36,9 +36,11 @@
 /*
  *  UNIX-like argument and option management
  */
+#include <cstdlib>
 #include <aims/getopt/getopt.h>
 #include <limits.h>
 #include <errno.h>
+#include <cstdlib>
 #include <iostream>
 #include <cartobase/plugin/plugin.h>
 #include <string.h>

@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <aims/resampling/polynomial.h>
 #include <cmath>
 #include <sstream>

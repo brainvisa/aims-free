@@ -36,6 +36,7 @@
 /*
  *  Inversion, determinant of a matrix.
  */
+#include <cstdlib>
 #include <aims/math/gausslu.h>
 #include <aims/math/mathelem.h>
 #include <aims/data/data.h>

@@ -35,6 +35,7 @@
 
 
 
+#include <cstdlib>
 #include <aims/perfusion/perfSplitVol.h>
 #include <aims/perfusion/perfAifPoints.h>
 #include <aims/utility/utility_g.h>

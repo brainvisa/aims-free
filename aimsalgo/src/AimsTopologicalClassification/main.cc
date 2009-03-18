@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/io/io_g.h>
 #include <aims/topology/topoClassifier.h>
 #include <aims/getopt/getopt.h>

@@ -34,10 +34,12 @@
  */
 
 
+#include <cstdlib>
 #include <aims/distancemap/danielsson.h>
 #include <aims/connectivity/connectivity.h>
 #include <aims/data/data.h>
 #include <aims/utility/clock.h>
+#include <cstdlib>
 #include <iostream>
 #include <iomanip>
 

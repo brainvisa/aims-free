@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/io/process.h>
 #include <aims/io/finder.h>
 #include <aims/io/reader.h>

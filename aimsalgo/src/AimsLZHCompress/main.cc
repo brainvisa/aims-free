@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/compression/compression_g.h>
 #include <aims/getopt/getopt.h>
 #include <iostream>

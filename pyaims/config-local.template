@@ -25,6 +25,7 @@ SIP_PLATFORM = @sip:platform@
 AIMS_LIBS = @aimsdata:libLine@
 PYTHON_LIBS = @sip:libLine@
 SIP_LIBS = @libBuildLine@
+SIP_GUI_LIBS = @aimsgui:libLine@ @sip:libLine@
 SIP_OPTIONS = @sip:sip_options@
 CARTOPYTHON_LIBS = @python:libLine@ @cartobase:libLine@
 

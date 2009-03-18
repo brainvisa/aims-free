@@ -926,6 +926,7 @@ string PythonReader::readString( char sep, unsigned & n )
           break;
         default:
           // unrecognized escape char
+          str += '\\';
           str += x;
       }
       x = 0;

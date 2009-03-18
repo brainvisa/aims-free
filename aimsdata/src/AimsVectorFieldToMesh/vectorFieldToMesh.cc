@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <aims/data/data.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/io/reader.h>

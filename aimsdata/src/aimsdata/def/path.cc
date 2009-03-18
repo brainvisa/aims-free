@@ -42,6 +42,7 @@
 #include <cartobase/stream/directory.h>
 #include <cartobase/config/paths.h>
 #include <cartobase/config/version.h>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sys/types.h>

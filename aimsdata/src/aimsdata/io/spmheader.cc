@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <aims/io/spmheader.h>
 #include <aims/io/dbh.h>
 #include <aims/io/byteswap.h>

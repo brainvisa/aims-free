@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/scalespace/meshDiffuse.h>
 #include <aims/mesh/texture.h>
 #include <aims/io/reader.h>

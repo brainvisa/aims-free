@@ -14,30 +14,5 @@
 
 TEMPLATE        = app
 
-#!include config
-
-# disable optimization under linux / egcs
-release-linux:CXXFLAGS = 
-
-LIBS += -L../../lib -laimsdata
-
-release-solaris:LIBS =					\
-	-L../../lib/solaris -laimsdata
-
-debug-solaris:LIBS    = 				\
-	-L../../lib/solaris -laimsdata-debug
-
-release-linux:LIBS =					\
-	-L../../lib/linux -laimsdata
-
-debug-linux:LIBS =					\
-	-L../../lib/linux -laimsdata-debug
-
-# seems to be needed here to anable proper multithreading
-LIBS		+= -lpthread
-
-release:LIBS_GUI = $(LIBS) -laimsgui
-default:LIBS_GUI = $(LIBS) -laimsgui
-debug:LIBS_GUI = $(LIBS) -laimsgui-debug
-
+#!include config-local
 #!include config-app-local

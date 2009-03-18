@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/distancemap/meshdistance.h>
 #include <aims/data/data.h>
 #include <aims/io/reader.h>

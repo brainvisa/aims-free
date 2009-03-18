@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <cartobase/wip/io/minfXML2.h>
 #include <cartobase/object/pythonwriter.h>
 

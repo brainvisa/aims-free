@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/getopt/getopt2.h>
 #include <aims/io/aimsGraphR.h>
 #include <aims/io/aimsGraphW.h>

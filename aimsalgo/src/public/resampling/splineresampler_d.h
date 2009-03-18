@@ -39,6 +39,7 @@
 
 #include <aims/resampling/splineresampler.h>
 #include <aims/utility/converter_volume.h>
+#include <cstdlib>
 #include <math.h>
 
 #define EPSILON   1.192092896e-7

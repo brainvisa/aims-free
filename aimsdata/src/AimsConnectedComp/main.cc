@@ -10,6 +10,7 @@
  *  Connected components
  */
 
+#include <cstdlib>
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>
 #include <aims/connectivity/component.h>

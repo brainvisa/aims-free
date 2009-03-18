@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/math/mathelem.h>
 #include <aims/math/hqr.h>
 #include <aims/data/fastAllocationData.h>

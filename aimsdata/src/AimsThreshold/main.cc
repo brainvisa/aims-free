@@ -36,6 +36,7 @@
 /*
  *  Apply threshold
  */
+#include <cstdlib>
 #include <aims/io/io_g.h>
 #include <aims/data/data_g.h>
 #include <cartobase/config/verbose.h>

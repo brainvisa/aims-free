@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/scalespace/meshDiffuse.h>
 #include <aims/io/io_g.h>
 #include <aims/getopt/getopt.h>

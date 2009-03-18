@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/transform/fft1d.h>
 #include <aims/data/data.h>
 #include <aims/math/mathelem.h>

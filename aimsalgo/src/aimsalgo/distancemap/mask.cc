@@ -34,9 +34,11 @@
  */
 
 
+#include <cstdlib>
 #include <aims/distancemap/mask.h>
 #include <aims/math/mathelem.h>
 //debug
+#include <cstdlib>
 #include <iostream>
 using namespace aims;
 using namespace std;

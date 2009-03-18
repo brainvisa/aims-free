@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include "postscript.h"
 #include <aims/getopt/getopt.h>
 #include <aims/rgb/rgb.h>

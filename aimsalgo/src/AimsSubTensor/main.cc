@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/bucket/bucket_g.h>
 #include <aims/io/io_g.h>
 #include <aims/getopt/getopt.h>

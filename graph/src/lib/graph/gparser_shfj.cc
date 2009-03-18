@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <graph/graph/gparser_shfj.h>
 #include <graph/graph/graph.h>
 #include <cartobase/object/lexicon.h>

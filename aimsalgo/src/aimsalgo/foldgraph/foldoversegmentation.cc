@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/foldgraph/foldoversegmentation.h>
 #include <graph/graph/graph.h>
 #include <aims/bucket/bucket.h>

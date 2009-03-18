@@ -79,6 +79,11 @@ TiffPlugin::TiffPlugin() : Plugin()
   VolumeFormat<uint16_t>	*vf4 = new VolumeFormat<uint16_t>( "TIFF" );
   FileFormatDictionary<Volume<uint16_t> >::registerFormat( "TIFF", vf4, ext );
 
+
+  TiffFormat<uint32_t>	*df32 = new TiffFormat<uint32_t>;
+  FileFormatDictionary<AimsData<uint32_t> >::registerFormat( "TIFF", df32, 
+                                                             ext );
+
   TiffFormat<AimsRGB>	*df8 = new TiffFormat<AimsRGB>;
 #ifdef AIMS_APPLE_GCC33BUG
   macosxbugs::fileFormatDictionary_dataRGB_registerFormat( "TIFF", df8, ext );

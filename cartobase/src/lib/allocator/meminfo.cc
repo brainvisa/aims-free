@@ -33,8 +33,10 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <cartobase/allocator/allocator.h>
 #include <iostream>
+#include <cstdlib>
 #ifdef linux
 #include <cstring>
 #include <fstream>

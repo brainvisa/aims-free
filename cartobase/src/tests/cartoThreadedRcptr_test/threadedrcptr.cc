@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <cartobase/config/cartobase_config.h>
 #ifndef CARTO_NO_BOOST
 #include <boost/smart_ptr.hpp>
@@ -44,6 +45,7 @@ using namespace boost;
 #include <cartobase/thread/threadedLoop.h>
 #include <cartobase/thread/thread.h>
 #include <cartobase/thread/cpu.h>
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 #include <sys/time.h>

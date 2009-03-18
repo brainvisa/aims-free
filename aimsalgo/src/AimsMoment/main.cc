@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/def/def_g.h>
 #include <aims/getopt/getopt.h>
 #include <aims/io/io_g.h>

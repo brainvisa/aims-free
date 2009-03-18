@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/math/mathelem.h>
 
 using namespace aims;

@@ -232,15 +232,27 @@ void PythonWriter::writeString( DataSource & ds, string x )
 {
   unsigned	i, n = x.length();
   for( i=0; i!=n; ++i )
-    if( x[i] < 32 )
+    if( x[i] < 32 ) // or negative (>= 0x80)
     {
-      x.replace( i, 1, string( "\\x" ) + (char) ( '0' + ( x[i] >> 4 ) ) \
-          + (char) ( '0' + ( x[i] & 0xf ) ) );
+      unsigned char x1 = ((unsigned char) x[i]) >> 4;
+      if( x1 >= 10 )
+        x1 = 'a' + x1 -10;
+      else
+        x1 = '0' + x1;
+      char x2 = x[i] & 0xf;
+      if( x2 >= 10 )
+        x2 = 'a' + x2 -10;
+      else
+        x2 = '0' + x2;
+      string rep = "\\x";
+      rep += x1;
+      rep += x2;
+      x.replace( i, 1, rep );
       i += 3;
       n += 3;
     }
     else
-      switch( x[i] )
+      switch( (unsigned char) x[i] )
       {
       case '\'':
       case '\\':

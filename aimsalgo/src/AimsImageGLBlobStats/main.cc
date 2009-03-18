@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/getopt/getopt2.h>   // Utilitaire pour le parsing des options
 #include <aims/data/data_g.h>      // Format mémoire données Aims
 #include <aims/io/io_g.h>	   // IO standard des formats disque

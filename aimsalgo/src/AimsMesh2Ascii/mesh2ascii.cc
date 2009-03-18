@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/mesh/surface.h>
 #include <aims/io/reader.h>
 

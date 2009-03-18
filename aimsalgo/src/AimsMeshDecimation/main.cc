@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/mesh/mesh_g.h>
 #include <aims/io/io_g.h> 
 #include <aims/utility/utility_g.h>

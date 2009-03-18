@@ -33,7 +33,8 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
-
+#include <cstdlib>
+#include <cstdlib>
 #include <aims/distancemap/chamfer.h>
 #include <aims/data/data.h>
 

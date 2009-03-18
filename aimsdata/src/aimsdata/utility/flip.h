@@ -94,7 +94,7 @@ AimsData<T> AimsFlip<T>::doXX( const AimsData<T> &thing )
   res.setSizeXYZT( thing );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing( thing.dimX() - x - 1, y, z, t );
 
   return res;
@@ -111,7 +111,7 @@ AimsData<T> AimsFlip<T>::doYY( const AimsData<T> &thing )
   res.setSizeXYZT( thing );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing( x, thing.dimY() - y - 1, z, t );
 
   return res;
@@ -128,7 +128,7 @@ AimsData<T> AimsFlip<T>::doZZ( const AimsData<T> &thing )
   res.setSizeXYZT( thing );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing( x, y, thing.dimZ() - z - 1, t );
 
   return res;
@@ -145,7 +145,7 @@ AimsData<T> AimsFlip<T>::doXXZZ( const AimsData<T> &thing )
   res.setSizeXYZT( thing );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing(thing.dimX() - x - 1, y, 
 			      thing.dimZ() - z - 1, t);
 
@@ -162,7 +162,7 @@ AimsData<T> AimsFlip<T>::doXXYY( const AimsData<T> &thing )
   res.setSizeXYZT( thing );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing(thing.dimX() - x - 1, thing.dimY() - y - 1, 
 			      z, t);
 
@@ -179,7 +179,7 @@ AimsData<T> AimsFlip<T>::doYYZZ( const AimsData<T> &thing )
   res.setSizeXYZT( thing );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing(x, thing.dimY() - y - 1, 
 			      thing.dimZ() - z - 1, t);
 
@@ -200,7 +200,7 @@ AimsData<T> AimsFlip<T>::doXY( const AimsData<T> &thing )
   res.setSizeT( thing.sizeT() );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing( y, x, z, t );
 
   return res;
@@ -220,7 +220,7 @@ AimsData<T> AimsFlip<T>::doXZ( const AimsData<T> &thing )
   res.setSizeT( thing.sizeT() );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing( z, y, x, t );
 
   return res;
@@ -240,7 +240,7 @@ AimsData<T> AimsFlip<T>::doYZ( const AimsData<T> &thing )
   res.setSizeT( thing.sizeT() );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing( x, z, y, t );
 
   return res;
@@ -257,7 +257,7 @@ AimsData<T> AimsFlip<T>::doXXYYZZ( const AimsData<T> &thing )
   res.setSizeXYZT( thing );
 
   int x, y, z, t;
-  ForEach4d( thing, x, y, z, t )
+  ForEach4d( res, x, y, z, t )
     res( x, y, z, t ) = thing( thing.dimX() - x - 1,
                                thing.dimY() - y - 1,
                                thing.dimZ() - z - 1, t );

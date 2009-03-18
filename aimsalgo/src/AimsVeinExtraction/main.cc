@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include "segmentation/veinextraction_d.h"
 #include <aims/io/process.h>
 #include <aims/io/reader.h>

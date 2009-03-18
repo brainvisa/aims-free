@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <aims/io/jpegheader.h>
 
 #include <cartobase/exception/file.h>

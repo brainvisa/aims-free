@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/def/def_g.h>
 #include <aims/data/data_g.h>
 #include <aims/io/io_g.h>
@@ -41,6 +42,7 @@
 #include <aims/getopt/getopt.h>
 #include <aims/utility/utility_g.h>
 #include <aims/bucket/bucket_g.h>
+#include <cstdlib>
 
 using namespace aims;
 using namespace std;

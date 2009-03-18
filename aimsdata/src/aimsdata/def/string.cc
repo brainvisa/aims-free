@@ -36,7 +36,9 @@
 /*
  *  General String operations
  */
+#include <cstdlib>
 #include <aims/def/general.h>
+#include <cstdlib>
 #include <iostream>
 #include <stdio.h>
 

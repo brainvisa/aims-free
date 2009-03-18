@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/distancemap/meshparcellation.h>
 #include <aims/distancemap/meshdistance.h>
 #include <aims/distancemap/projection.h>

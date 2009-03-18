@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <cartobase/wip/io/datasourceinfo.h>
 #include <cartobase/type/limits.h>
 #include <cartobase/datasource/filedatasource.h>

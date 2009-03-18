@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/perfusion/perfBBB.h>
 #include <cartobase/stream/fileutil.h>
 

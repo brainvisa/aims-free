@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/data/data_g.h>
 #include <cartobase/allocator/mappingcopy.h>
 #include <aims/io/io_g.h>

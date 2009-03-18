@@ -33,8 +33,10 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <cartodata/volume/volumeview.h>
 #include <cartodata/volume/volumeoperators.h>
+#include <cstdlib>
 #include <iostream>
 #include <time.h>
 

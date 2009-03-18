@@ -35,6 +35,7 @@
 
 
 
+#include <cstdlib>
 #include <aims/scalespace/meshBlob.h>
 #include <aims/io/reader.h>
 #include <aims/io/finder.h>

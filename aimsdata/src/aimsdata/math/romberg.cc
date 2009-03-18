@@ -36,6 +36,7 @@
 /*
  *  Romberg's numerical integration.
  */
+#include <cstdlib>
 #include <aims/math/romberg.h>
 #include <aims/data/data.h>
 #include <aims/math/lagrange.h>

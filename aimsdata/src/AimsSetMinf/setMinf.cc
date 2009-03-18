@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/data/data.h>
 #include <aims/data/pheader.h>
 #include <aims/getopt/getopt2.h>

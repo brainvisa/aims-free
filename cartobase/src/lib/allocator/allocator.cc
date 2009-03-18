@@ -41,6 +41,8 @@
 #include <cartobase/datasource/filedatasource.h>
 #include <cartobase/datasource/bufferdatasource.h>
 #include <iostream>
+#include <cstdlib>
+
 
 using namespace carto;
 using namespace std;

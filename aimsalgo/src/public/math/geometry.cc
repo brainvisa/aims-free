@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/math/geometry.h>
 #include <aims/vector/vector.h>
 #include <aims/data/fastAllocationData.h>

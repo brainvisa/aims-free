@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/io/process.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
@@ -43,6 +44,7 @@
 #include <aims/getopt/getopt.h>
 #include <aims/utility/utility_g.h>
 #include <aims/signalfilter/signalfilter_g.h>
+#include <cstdlib>
 
 using namespace aims;
 using namespace std;

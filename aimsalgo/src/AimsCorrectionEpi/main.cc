@@ -35,6 +35,7 @@
 
 
 
+#include <cstdlib>
 #include "contextEPI.h"
 #include <aims/def/assert.h>
 #include <aims/getopt/getopt2.h>

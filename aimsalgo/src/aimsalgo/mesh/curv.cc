@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/math/math_g.h>
 #include <aims/mesh/curv.h>
 #include <set>

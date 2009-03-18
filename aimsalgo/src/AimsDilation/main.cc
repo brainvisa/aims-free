@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/data/data_g.h>
 #include <aims/morphology/morphology_g.h>
 #include <aims/io/process.h>
@@ -41,6 +42,7 @@
 #include <aims/io/writer.h>
 #include <aims/io/finder.h>
 #include <aims/getopt/getopt.h>
+#include <cstdlib>
 #include <iostream>
 
 using namespace aims;

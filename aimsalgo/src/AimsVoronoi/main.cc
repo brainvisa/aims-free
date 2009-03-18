@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/getopt/getopt.h>
 #include <aims/distancemap/distancemap_g.h>
 #include <aims/data/data_g.h>

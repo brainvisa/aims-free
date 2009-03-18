@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/compression/huffman.h>
 #include <aims/compression/lz.h>
 #include <algorithm>

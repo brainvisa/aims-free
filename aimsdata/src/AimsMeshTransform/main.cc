@@ -8,6 +8,7 @@
  *  	France
  */
 
+#include <cstdlib>
 #include <aims/resampling/motion.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>

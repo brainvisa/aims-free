@@ -36,6 +36,7 @@
 
 //	Uses 3 levels of templates, hope your compiler is strong enough...
 
+#include <cstdlib>
 #include <aims/data/data_g.h>
 #include <aims/io/finder.h>
 #include <aims/io/process.h>

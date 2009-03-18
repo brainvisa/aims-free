@@ -40,6 +40,7 @@
 
 #include <aims/connectivity/meshcc.h>
 #include <aims/distancemap/meshvoronoi.h>
+#include <cstdlib>
 #include <map>
 #include <set>
 #include <stack>

@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <cartobase/thread/thread.h>
 #include <cartobase/thread/mutex.h>
 #include <iostream>

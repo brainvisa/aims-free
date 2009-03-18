@@ -33,9 +33,11 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <cartobase/object/object_d.h>
 #include <cartobase/object/property.h>
 #include <assert.h>
+#include <cstdlib>
 #include <iostream>
 #include <cartobase/stream/sstream.h>
 #include <time.h>

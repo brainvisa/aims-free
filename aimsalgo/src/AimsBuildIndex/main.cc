@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <aims/data/data_g.h>
 #include <aims/bucket/bucket.h>
 #include <aims/io/io_g.h>

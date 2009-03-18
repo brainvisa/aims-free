@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <aims/io/niftiheader.h>
 #include <aims/io/niftilib/nifti1_io.h>
 #include <aims/io/byteswap.h>

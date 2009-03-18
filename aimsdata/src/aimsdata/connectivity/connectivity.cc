@@ -36,6 +36,7 @@
 /*
  *  Connectivity class methods
  */
+#include <cstdlib>
 #include <aims/connectivity/connectivity.h>
 using aims::Connectivity;
 #include <aims/def/general.h>

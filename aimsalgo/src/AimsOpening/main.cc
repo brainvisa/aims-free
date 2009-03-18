@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/data/data_g.h>
 #include <aims/morphology/morphology_g.h>
 #include <aims/io/io_g.h>

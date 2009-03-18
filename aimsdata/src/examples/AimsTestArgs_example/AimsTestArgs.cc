@@ -38,6 +38,7 @@
    Temporary command used to test new option declaration scheme
 */
 
+#include <cstdlib>
 #include <aims/data/data_g.h>
 #include <aims/getopt/getopt2.h>
 

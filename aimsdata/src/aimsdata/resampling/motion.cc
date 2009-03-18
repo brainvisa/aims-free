@@ -36,6 +36,7 @@
 /*
  *  Non elastic motion ( rotation + translation )
  */
+#include <cstdlib>
 #include <aims/resampling/motion.h>
 #include <aims/resampling/quaternion.h>
 #include <aims/vector/vector.h>

@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/getopt/getopt2.h>
 #include <aims/mesh/surfacegen.h>
 #include <cartobase/object/pythonreader.h>

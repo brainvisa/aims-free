@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/getopt/getopt.h>
 #include <aims/data/data_g.h>
 #include <aims/roi/roi_g.h>

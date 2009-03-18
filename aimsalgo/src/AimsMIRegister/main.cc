@@ -10,6 +10,7 @@
  *  Mutual Information Rigid registration
  */
 
+#include <cstdlib>
 #include "miProbe.h"
 #include "mutualfunc.h"
 #include "corratiofunc.h"

@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/foldgraph/foldgraphattributes.h>
 #include <aims/utility/threshold.h>
 #include <aims/utility/merge.h>

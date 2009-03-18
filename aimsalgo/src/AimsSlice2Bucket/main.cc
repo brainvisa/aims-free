@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/getopt/getopt.h>
 #include <aims/rgb/rgb.h>
 #include <aims/io/io_g.h>

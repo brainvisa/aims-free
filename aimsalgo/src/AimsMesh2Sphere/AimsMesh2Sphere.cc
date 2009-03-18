@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <cmath>
 #ifdef isnan
 #warning isnan declared

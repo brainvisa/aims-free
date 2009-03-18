@@ -34,6 +34,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <cartobase/getopt/getopt.h>
 #include <cartobase/wip/io/reader.h>
 #include <cartobase/wip/io/writer.h>

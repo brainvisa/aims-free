@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include "contextEPI.h"
 #include "interpolation.h"
 #include <aims/def/assert.h>

@@ -32,7 +32,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
-
+#include <cstdlib>
 #include <graph/graph/graph.h>
 #include <graph/graph/gprinter.h>
 

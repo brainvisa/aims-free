@@ -40,6 +40,7 @@
    So we have to include <cmath> before <cartobase/config/cartobase_config.h>
    in order to have a working macro afterwards.
 */
+#include <cstdlib>
 #include <cmath>
 #endif
 

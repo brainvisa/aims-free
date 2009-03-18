@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/vector/vector.h>
 #include <aims/io/io_g.h>
 #include <aims/data/data_g.h>

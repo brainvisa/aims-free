@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/math/mathelem.h>
 #include <aims/math/householder.h>
 #include <aims/data/data.h>

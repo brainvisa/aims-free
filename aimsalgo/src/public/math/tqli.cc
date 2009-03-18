@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/math/mathelem.h>
 #include <aims/math/tqli.h>
 #include <aims/data/data.h>

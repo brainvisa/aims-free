@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/data/data.h>
 #include <aims/optimization/levmrq.h>
 #include <aims/io/writer.h>

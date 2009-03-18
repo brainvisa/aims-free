@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/roi/clusterArg.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>

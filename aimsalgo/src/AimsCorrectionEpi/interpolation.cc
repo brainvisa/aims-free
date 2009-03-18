@@ -35,6 +35,7 @@
 
 
 
+#include <cstdlib>
 #include "interpolation.h"
 #include <aims/vector/vector.h>
 #include <aims/math/mathelem.h>

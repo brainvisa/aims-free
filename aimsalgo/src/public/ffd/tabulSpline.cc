@@ -34,7 +34,9 @@
  */
 
 
+#include <cstdlib>
 #include <aims/ffd/tabulSpline.h>
+#include <cstdlib>
 #include <iostream>
 
 using namespace std;

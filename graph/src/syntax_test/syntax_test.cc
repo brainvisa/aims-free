@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <cartobase/object/syntax.h>
 #include <cartobase/object/sreader.h>
 #include <cartobase/object/swriter.h>

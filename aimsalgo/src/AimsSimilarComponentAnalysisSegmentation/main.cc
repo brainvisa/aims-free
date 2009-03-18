@@ -33,6 +33,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#include <cstdlib>
 #include <cartobase/smart/rcptr.h>
 #include <aims/data/fastAllocationData.h>
 #include <aims/io/io_g.h>

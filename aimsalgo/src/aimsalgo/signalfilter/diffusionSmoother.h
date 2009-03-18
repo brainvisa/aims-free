@@ -38,6 +38,7 @@
 #ifndef AIMS_PRIMALSKETCH_DIFFUSIONSMOOTHER_H
 #define AIMS_PRIMALSKETCH_DIFFUSIONSMOOTHER_H
 
+#include <cstdlib>
 #include <aims/primalsketch/imageSmoother.h>
 
 namespace aims {

@@ -37,6 +37,7 @@
 #define AIMS_PROCESS_TYPES
 #define AIMS_PROCESS_VOLSCALAR
 
+#include <cstdlib>
 #include <aims/data/data_g.h>
 #include <aims/io/finder.h>
 #include <aims/io/process.h>

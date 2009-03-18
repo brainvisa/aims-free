@@ -16,6 +16,8 @@ parser.add_option( '-l', '--lcr', dest='hemi_mesh_name', help='hemi mesh (Grey-L
 
 parser.add_option( '-o', '--output', dest='output_graph_name', help='output graph' )
 parser.add_option( '-m', '--mid', dest='output_mid_interface_name', help='output mid_interface (optional)' )
+parser.add_option( '-s', '--savelgw', dest='output_lcr_grey_white_name', help='output volume of lcr, grey and white matter for the use of computing thickness (optional)' )
+
 (options, args) = parser.parse_args()
 
 r = aims.Reader()
@@ -45,3 +47,6 @@ if options.output_mid_interface_name:
   mid=fd.mid_interface
   print "mid : " ,type(mid), mid.getSizeX()
   w.write(mid.get(), options.output_mid_interface_name)
+  
+if options.output_lcr_grey_white_name:
+  w.write(vol, options.output_lcr_grey_white_name)

@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/getopt/getopt2.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
@@ -215,7 +216,7 @@ int main( int argc, const char** argv )
 
       // compare voronoi to g graph buckets
 
-      cout << "getting labels in graph " << rg1.fileName() << endl;
+      cout << "setting labels in graph " << rg1.fileName() << endl;
       if( !g->getProperty( "aims_objects_table", get ) )
         {
           cerr << "no buckets in graph " << rg1.fileName() << endl;
@@ -223,95 +224,94 @@ int main( int argc, const char** argv )
         }
 
       for( ig=g->begin(); ig!=eg; ++ig )
-        if( (*ig)->getProperty( labelatt, l ) )
+      {
+        (*ig)->getProperty( labelatt, l );
+        si = (*ig)->getInterface<SyntaxedInterface>();
+        if( si )
           {
-            si = (*ig)->getInterface<SyntaxedInterface>();
-            if( si )
+            iget = get->find( si->getSyntax() );
+            if( iget != eget )
               {
-                iget = get->find( si->getSyntax() );
-                if( iget != eget )
+                il = labels.find( l );
+                if( il == labels.end() )
+                {
+                  cerr << "warning: label " << l << " present in graph "
+                        << rg1.fileName() << " but not in "
+                        << rg2.fileName() << endl;
+                  current = 0;
+                }
+                else
+                  current = il->second;
+                map<int, int>	count;
+                for( ic=iget->second.begin(), ec=iget->second.end();
+                      ic != ec; ++ic )
                   {
-                    il = labels.find( l );
-                    if( il == labels.end() )
+                    const GraphElementCode	& gec = ic->second;
+                    if( gec.objectType == "Bucket" )
                       {
-                        cerr << "warning: label " << l << " present in graph " 
-                             << rg1.fileName() << " but not in " 
-                             << rg2.fileName() << endl;
+                        if( (*ig)->getProperty( gec.attribute, bck ) )
+                          {
+                            for( ib=bck->begin()->second.begin(),
+                                    eb=bck->begin()->second.end();
+                                  ib!=eb; ++ib )
+                              {
+                                p[0] = (int) rint( ib->first[0]
+                                                    * vsg[0] / vs[0] );
+                                p[1] = (int) rint( ib->first[1]
+                                                    * vsg[1] / vs[1] );
+                                p[2] = (int) rint( ib->first[2]
+                                                    * vsg[2] / vs[2] );
+                                ++count[ voro( p ) ];
+                              }
+                          }
                       }
+                    else if( gec.objectType == "Volume"
+                              && gec.dataType == "S16" )
+                      {
+                        cout << "warning: labels image not "
+                              << "implemented\n";
+                      }
+                  }
+                if( count.empty() )
+                  cerr << "warning: a node " << si->getSyntax()
+                        << " of label " << l << " has no bucket\n";
+                else
+                  {
+                    if( count.size() == 1 )
+                      current = count.begin()->first;
                     else
                       {
-                        current = il->second;
-                        map<int, int>	count;
-                        for( ic=iget->second.begin(), ec=iget->second.end(); 
-                             ic != ec; ++ic )
+                        int	tot = 0, c = 0;
+                        current = -1;
+                        map<int, int>::const_iterator
+                          ix, ex = count.end();
+                        for( ix=count.begin(); ix!=ex; ++ix )
                           {
-                            const GraphElementCode	& gec = ic->second;
-                            if( gec.objectType == "Bucket" )
+                            tot += ix->second;
+                            if( ix->second > c )
                               {
-                                if( (*ig)->getProperty( gec.attribute, bck ) )
-                                  {
-                                    for( ib=bck->begin()->second.begin(), 
-                                           eb=bck->begin()->second.end(); 
-                                         ib!=eb; ++ib )
-                                      {
-                                        p[0] = (int) rint( ib->first[0] 
-                                                           * vsg[0] / vs[0] );
-                                        p[1] = (int) rint( ib->first[1] 
-                                                           * vsg[1] / vs[1] );
-                                        p[2] = (int) rint( ib->first[2] 
-                                                           * vsg[2] / vs[2] );
-                                        ++count[ voro( p ) ];
-                                      }
-                                  }
-                              }
-                            else if( gec.objectType == "Volume" 
-                                     && gec.dataType == "S16" )
-                              {
-                                cout << "warning: labels image not " 
-                                     << "implemented\n";
+                                current = ix->first;
+                                c = ix->second;
                               }
                           }
-                        if( count.empty() )
-                          cerr << "warning: a node " << si->getSyntax() 
-                               << " of label " << l << " has no bucket\n";
-                        else
-                          {
-                            if( count.size() == 1 )
-                              current = count.begin()->first;
-                            else
-                              {
-                                int	tot = 0, c = 0;
-                                current = -1;
-                                map<int, int>::const_iterator 
-                                  ix, ex = count.end();
-                                for( ix=count.begin(); ix!=ex; ++ix )
-                                  {
-                                    tot += ix->second;
-                                    if( ix->second > c )
-                                      {
-                                        current = ix->first;
-                                        c = ix->second;
-                                      }
-                                  }
-                                if( float(c) / tot < 1 )
-                                  cerr << "a node of label " << l 
-                                       << " is only " 
-                                       << int( float(c) * 100 / tot ) 
-                                       << "% inside label " 
-                                       << rlabels[ current ] 
-                                       << " of graph " << rg2.fileName() 
-                                       << endl;
-                              }
-                            if( rlabels.find( current ) == rlabels.end() )
-                              cout << "label ID " << current << " not found\n";
-                            else
-                              (*ig)->setProperty( labelatt, 
-                                                  rlabels[ current ] );
-                          }
+                        if( float(c) / tot < 1 )
+                          cerr << "a node of label " << l
+                                << " is only "
+                                << int( float(c) * 100 / tot )
+                                << "% inside label "
+                                << rlabels[ current ]
+                                << " of graph " << rg2.fileName()
+                                << endl;
                       }
+                    if( rlabels.find( current ) == rlabels.end() )
+                      cout << "label ID " << current << " not found\n";
+                    else
+                      (*ig)->setProperty( labelatt,
+                                          rlabels[ current ] );
                   }
               }
           }
+      }
 
       g->setProperty( "filename_base", string( "*" ) );
 
@@ -320,6 +320,7 @@ int main( int argc, const char** argv )
       cout << "writing graph " << wg.fileName() << endl;
       wg.write( *g );
       cout << "done." << endl;
+      return EXIT_SUCCESS;
     }
   catch( user_interruption & )
     {

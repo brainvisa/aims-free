@@ -9,6 +9,4 @@
 #
 #  Library configuration.
 
-release:CXXFLAGS	= -O2
-
 #!include config-local

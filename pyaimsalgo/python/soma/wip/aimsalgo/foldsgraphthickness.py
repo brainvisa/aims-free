@@ -31,6 +31,7 @@ class FoldsGraphThickness:
         index = v[ 'skeleton_label' ]
         seed_label_list.append(int(index))
         printbucket( b, seed, index )
+        printbucket( b, self.lgw_vol, self.LCR_label ) #pour que le lcr rentre jusqu au fond des silons
         try:
           b = v[ 'aims_bottom' ]
           printbucket( b, seed, index )

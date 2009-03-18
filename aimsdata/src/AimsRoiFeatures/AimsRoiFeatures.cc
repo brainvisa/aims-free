@@ -36,6 +36,7 @@
 /*
  *  Apply threshold
  */
+#include <cstdlib>
 #include <aims/features/roi_features.h>
 #include <cartobase/config/verbose.h>
 #include <cartobase/stream/fileutil.h>

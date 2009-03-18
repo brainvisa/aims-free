@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include "interpolator.h"
 #include <aims/getopt/getopt.h>
 #include <aims/data/data_g.h>
