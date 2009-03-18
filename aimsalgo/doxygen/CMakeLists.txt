@@ -1,5 +1,5 @@
 IF ( DOXYGEN_FOUND )
   SET( DOXYFILE_HTML_HEADER "\"head_aimsalgo.html\"" )
   set( _doxygenInput "${CMAKE_BINARY_DIR}/include/aims" )
-  SOMA_GENERATE_DOXYGEN_DOC( ${PROJECT_NAME}-doxygen _doxygenInput head_aimsalgo.html aims.gif )
+  SOMA_GENERATE_DOXYGEN_DOC( _doxygenInput head_aimsalgo.html aims.gif )
 ENDIF ( DOXYGEN_FOUND )

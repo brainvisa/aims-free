@@ -1,4 +1,4 @@
 add_subdirectory( src )
 SOMA_COPY_DIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}/shared"
-                      "share/graph-${graph_VERSION_MAJOR}.${graph_VERSION_MINOR}"
-                      aims-graph-share graph-share )
+                      "share/graph-${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}"
+                      ${PROJECT_NAME}-share )

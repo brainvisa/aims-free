@@ -1,5 +1,5 @@
 SOMA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/lib.pro "HEADERS" _headers "SOURCES" _sources )
-SOMA_COPY_AND_INSTALL_HEADERS( _headers cartobase ${PROJECT_NAME}-devel )
+SOMA_COPY_AND_INSTALL_HEADERS( _headers cartobase )
 add_library( cartobase SHARED ${_sources} )
 set_property( TARGET cartobase PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 target_link_libraries( cartobase ${LIBXML2_LIBRARIES} ${Sigc++2_LIBRARIES}  )
@@ -12,4 +12,4 @@ endif(APPLE)
 SOMA_INSTALL( TARGETS cartobase
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
-SOMA_GENERATE_DOXYGEN_DOC( cartobase-doxygen _headers  )
+SOMA_GENERATE_DOXYGEN_DOC( _headers  )

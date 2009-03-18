@@ -1,11 +1,11 @@
 SOMA_GET_FILE_LIST_FROM_PRO( "${CMAKE_CURRENT_SOURCE_DIR}/sip.pro" "HEADERS" _headers "SOURCES" _sources )
-SOMA_COPY_AND_INSTALL_HEADERS( _headers pyaimsalgo ${PROJECT_NAME}-devel )
+SOMA_COPY_AND_INSTALL_HEADERS( _headers pyaimsalgo )
 
 file( GLOB _sipTemplates RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*.tpl" )
-SOMA_COPY_FILES( aims-pyaimsalgotemplates ${PROJECT_NAME}-devel
-                  aimsalgotypessub.py ${_sipTemplates}
-                  SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-                  DESTINATION "${AIMS_RELATIVE_SIP_DIRECTORY}" )
+SOMA_COPY_FILES( ${PROJECT_NAME}-devel
+                 aimsalgotypessub.py ${_sipTemplates}
+                 SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                 DESTINATION "${AIMS_RELATIVE_SIP_DIRECTORY}" )
 
 file( GLOB _sipSources "${CMAKE_CURRENT_SOURCE_DIR}/*.sip" )
 
@@ -25,7 +25,7 @@ if( NOT _returnValue EQUAL 0 )
 endif( NOT _returnValue EQUAL 0 )
 
 SOMA_ADD_SIP_PYTHON_MODULE( aimsalgosip
-  soma/aims ${PROJECT_NAME} ${PROJECT_NAME}-devel 
+  soma/aims
   "aimsalgo.sip"
   SIP_SOURCES ${_generatedSipFileList} ${_sipSources}
   SIP_INCLUDE "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}"
