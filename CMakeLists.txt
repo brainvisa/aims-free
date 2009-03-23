@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 2.6 )
 
 find_package( soma-infra REQUIRED )
 
-SOMA_PROJECT( aims 4 0 0 "CEA - IFR 49" )
+SOMA_PROJECT()
 
 find_package( Sigc++2 REQUIRED )
 find_package( LibXml2 REQUIRED )
