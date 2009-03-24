@@ -138,7 +138,7 @@ AimsFloatChamferDistanceMap(const AimsData<int16_t> &vol,int side,
                                    xsize,ysize,zsize,mult_factor);
 
   AimsData<float> distfloat(distmap.dimX(),distmap.dimY(),
-                            distmap.dimZ(),distmap.borderWidth());
+                            distmap.dimZ(),1,distmap.borderWidth());
 
   distfloat.setSizeX(vol.sizeX());
   distfloat.setSizeY(vol.sizeY());

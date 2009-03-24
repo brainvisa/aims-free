@@ -149,9 +149,62 @@ float DicomHeader::sizeT() const
 }
 
 
+bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
+{
+#ifdef UID_RawDataStorage // #if (OFFIS_DCMTK_VERSION_NUMBER-0 > 351)
+  DcmInputFileStream stream( filename.c_str() );
+  if ( ! stream.good() )
+#else
+    DcmFileStream stream( filename.c_str(), DCM_ReadMode );
+  if ( stream.GetError() != EC_Normal )
+#endif
+    {
+      perror( 0 );
+      return false;
+    }
+
+  // allocate header
+  DcmFileFormat header;
+
+  // read header
+  header.transferInit();
+  header.read( stream, EXS_Unknown, EGL_noChange );
+  header.transferEnd();
+  if ( header.error() != EC_Normal )  return false;
+
+  DcmStack stack;
+
+  if ( header.search( DCM_ActualFrameDuration, stack ) == EC_Normal )
+    {
+      if( stack.top()->ident() != EVR_IS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        return false;
+      }
+      DcmIntegerString *object = (DcmIntegerString *)stack.top();
+      Sint32 durationTime;
+      object->getSint32( durationTime );
+      dt = (int) durationTime ;
+    }
+  else return false ;
+   
+  if ( header.search( DCM_FrameReferenceTime, stack ) == EC_Normal )
+    {
+      if( stack.top()->ident() != EVR_DS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        return false ;
+      }
+      DcmDecimalString *object = (DcmDecimalString *)stack.top();
+      Float64 startTime;
+      object->getFloat64( startTime );
+      st = (int) startTime ;
+    } 
+  else return false ;
+       
+  return true ;
+}
+
 int DicomHeader::read()
 {
-  //cout << "DicomHeader::read " << _name << endl;
   int slice1 = readFirst();
   if ( slice1 < 0 )  return -1;
 
@@ -182,31 +235,44 @@ int DicomHeader::read()
 
   map< int, FileElement >::const_iterator i = _slices.begin();
   int dimT;
+  double maxZVoxSize = 0. , minZVoxSize = 100000. ;
   bool status = getProperty( "nb_t_pos", dimT );
+  // look for slice arrangement I -> S or S -> I
+  bool sensInverse = false;
+  i = _slices.begin();
+  double loc1 = i->second.location();
+  ++i;
+      
+  if ( i != _slices.end() && i->second.location() > loc1 ) 
+    sensInverse = true;
+
+  // look for dimT
+  int nbTrans = 0;
+  i = _slices.begin();
+  float previousSliceLocation = i->second.location() ;
+  int counter = 0 ;
+  std::multiset<float> dZs ;
+  while( i != _slices.end() )
+    {
+      if ( !sensInverse && i->second.location() > loc1 )  nbTrans++;
+      else if ( sensInverse && i->second.location() < loc1 )  nbTrans++;
+	  
+      float dZ = abs( i->second.location() - previousSliceLocation ) ;
+      if( i != _slices.begin() ){
+        dZs.insert(dZ) ;
+        if( dZ < minZVoxSize )
+          minZVoxSize = dZ ;
+        if( dZ > maxZVoxSize )
+          maxZVoxSize = dZ ;
+      }
+      previousSliceLocation = i->second.location() ;
+      loc1 = i->second.location();
+      ++i;
+      ++counter ;
+   }
+
   if ( !status )
     {
-      // look for slice arrangement I -> S or S -> I
-      bool sensInverse = false;
-      i = _slices.begin();
-      double loc1 = i->second.location();
-      ++i;
-      
-      if ( i != _slices.end() && i->second.location() > loc1 ) 
-        sensInverse = true;
-
-      // look for dimT
-      int nbTrans = 0;
-      i = _slices.begin();
-      ++i;
-      while( i != _slices.end() )
-        {
-          if ( !sensInverse && i->second.location() > loc1 )  nbTrans++;
-          else if ( sensInverse && i->second.location() < loc1 )  nbTrans++;
-
-          loc1 = i->second.location();
-          ++i;
-        }
-
       dimT = nbTrans + 1;
     } 
  
@@ -241,6 +307,62 @@ int DicomHeader::read()
             }
         }
 */
+      string moda ;
+      getProperty( "modality", moda );
+      if( manufac == "SIEMENS" && ( moda == "PT" || moda == "CT" ) ){
+        string mode ;
+	vector<float> vs ;
+	getProperty("voxel_size", vs ) ;
+	if( abs( *(dZs.rbegin()) - *(dZs.begin()) ) > 0.0001 ){
+	  if( dimT == 1 )
+	    cerr << "Non homogeneous voxel size !" << endl ;
+	  else {
+	    // the non homogeniity of the voxel size is due to the step from one frame to the next
+	    int n = 0 ;
+	    for( std::multiset<float>::iterator it = dZs.begin() ; it != dZs.end() ; ++it, ++n )
+	      if( n == int( dZs.size() / 2 ) )
+	        vs[2] = *it ;
+	  } 
+   
+	} else vs[2] = (minZVoxSize + maxZVoxSize) / 2 ;
+	setProperty("voxel_size", vs ) ;
+	
+	if( moda == "PT" ){
+          getProperty( "acquisition_mode", mode ) ;
+          vector<int> startTimes, durationTimes ;
+	  int st, dt ;
+	  startTimes.reserve( dimT ) ;
+	  durationTimes.reserve( dimT ) ;
+	  
+	  is=files.begin() ;
+	  map<int, int> stDt ;
+  	  if( mode == "DYNAMIC" ){
+	    for( int t = 0 ; t < dimT && is != files.end() ; ++t ){
+	      for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) { 
+	        if( getStartAndDurationTimes( *is, st, dt ) )
+	          stDt[st] = dt ;
+	      }
+	      //for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) ;
+	    }
+	  } else {
+	    for( int t = 0 ; t < dimT && is != files.end() ; ++t ){
+	      //for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) { 
+	      if( getStartAndDurationTimes( *is, st, dt ) )
+	        stDt[st] = dt ;
+	      //}
+	      for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) ;
+	    } 
+	  }
+	  
+	  map<int, int>::iterator it ;
+	  for( it = stDt.begin() ; it != stDt.end() ; ++it ){
+	    startTimes.push_back( it->first ) ;
+	    durationTimes.push_back( it->second ) ;
+	  }
+	  setProperty( "start_time", startTimes ) ;
+	  setProperty( "duration_time", durationTimes ) ;
+	}
+      }
     }
 
   vector< int > volDim;
@@ -276,7 +398,6 @@ namespace
 
 }
 
-
 int DicomHeader::readFirst()
 {
   // open file
@@ -289,7 +410,7 @@ int DicomHeader::readFirst()
 #endif
     {
       //perror( 0 );
-      //cout << "could not open stream " << _name << endl;
+      cout << "could not open stream " << _name << endl;
       return -1;
     }
 
@@ -305,7 +426,7 @@ int DicomHeader::readFirst()
   cerr.rdbuf( sb );
   if ( header.error() != EC_Normal ) 
     {
-      //cerr << dcmErrorConditionToString( header.error() ) << endl;
+      cerr << dcmErrorConditionToString( header.error() ) << endl;
       return -1;
     }
 
@@ -316,7 +437,7 @@ int DicomHeader::readFirst()
     {
       if( stack.top()->ident() != EVR_UI )
         { 
-          //cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+          cerr << "fail 1, id: " << stack.top()->ident() << "\n";
           return( -1 );
         }
       DcmUniqueIdentifier *object = (DcmUniqueIdentifier *)stack.top();
@@ -325,11 +446,13 @@ int DicomHeader::readFirst()
       setProperty( "transfer_syntax", string( syntax.c_str() ) );
     }
 
-  string manufacturer;
+  string manufacturer, modality;
   if ( header.search( DCM_Manufacturer, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_LO )
+      if( stack.top()->ident() != EVR_LO ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmLongString *object = (DcmLongString *)stack.top();
       OFString manufac;
       object->getOFString( manufac, 0 );
@@ -339,17 +462,22 @@ int DicomHeader::readFirst()
 
   if ( header.search( DCM_Modality, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_CS )
+      if( stack.top()->ident() != EVR_CS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmCharString *object = (DcmCharString *)stack.top();
       OFString moda;
       object->getOFString( moda, 0 );
-      setProperty( "modality", string( moda.c_str() ) );
+      modality = moda.c_str() ;
+      setProperty( "modality", modality );
     }
   if ( header.search( DCM_PatientID, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_LO )
+      if( stack.top()->ident() != EVR_LO ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmLongString *object = (DcmLongString *)stack.top();
       OFString patId;
       object->getOFString( patId, 0 );
@@ -358,8 +486,10 @@ int DicomHeader::readFirst()
 
   if ( header.search( DCM_StudyID, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_SH )
+      if( stack.top()->ident() != EVR_SH ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmShortString *object = (DcmShortString *)stack.top();
       OFString studyId;
       object->getOFString( studyId, 0 );
@@ -368,8 +498,10 @@ int DicomHeader::readFirst()
 
   if ( header.search( DCM_SeriesNumber, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_IS )
+      if( stack.top()->ident() != EVR_IS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmIntegerString *object = (DcmIntegerString *)stack.top();
       Sint32 seriesNum;
       object->getSint32( seriesNum );
@@ -379,8 +511,10 @@ int DicomHeader::readFirst()
   vector< int > volDim;
   if ( header.search( DCM_Columns, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_US )
+      if( stack.top()->ident() != EVR_US ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
       Uint16 col;
       object->getUint16( col );
@@ -389,8 +523,10 @@ int DicomHeader::readFirst()
 
   if ( header.search( DCM_Rows, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_US )
+      if( stack.top()->ident() != EVR_US ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
       Uint16 row;
       object->getUint16( row );
@@ -401,8 +537,10 @@ int DicomHeader::readFirst()
   vector< float > voxSize;
   if ( header.search( DCM_PixelSpacing, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_DS )
+      if( stack.top()->ident() != EVR_DS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
       Float64 pixSpace;
       object->getFloat64( pixSpace, 0 );
@@ -414,8 +552,10 @@ int DicomHeader::readFirst()
   Float64 thickness = 0.0f;
   if ( header.search( DCM_SliceThickness, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_DS )
+      if( stack.top()->ident() != EVR_DS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
       object->getFloat64( thickness );
       setProperty( "slice_thickness", (float)thickness );
@@ -424,8 +564,10 @@ int DicomHeader::readFirst()
   Float64 spaceSlice = 0.0f;
   if ( header.search( DCM_SpacingBetweenSlices, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_DS )
+      if( stack.top()->ident() != EVR_DS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
       object->getFloat64( spaceSlice );
       setProperty( "inter_slices", (float)spaceSlice );
@@ -439,8 +581,10 @@ int DicomHeader::readFirst()
 
   if ( header.search( DCM_NumberOfTemporalPositions, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_IS )
+      if( stack.top()->ident() != EVR_IS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmIntegerString *object = (DcmIntegerString *)stack.top();
       Sint32 nbTempPos;
       object->getSint32( nbTempPos );
@@ -449,8 +593,10 @@ int DicomHeader::readFirst()
 
   if ( header.search( DCM_BitsAllocated, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_US )
+      if( stack.top()->ident() != EVR_US ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
       Uint16 nbits;
       object->getUint16( nbits );
@@ -462,8 +608,10 @@ int DicomHeader::readFirst()
 
   if ( header.search( DCM_RepetitionTime, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_DS )
+      if( stack.top()->ident() != EVR_DS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
       Float64 tr;
       object->getFloat64( tr );
@@ -472,8 +620,10 @@ int DicomHeader::readFirst()
 
   if ( header.search( DCM_EchoTime, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_DS )
+      if( stack.top()->ident() != EVR_DS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
       Float64 te;
       object->getFloat64( te );
@@ -493,15 +643,15 @@ int DicomHeader::readFirst()
   Sint32 instance_number = -1;
   if ( header.search( DCM_InstanceNumber, stack ) == EC_Normal )
     {
-      if( stack.top()->ident() != EVR_IS )
+      if( stack.top()->ident() != EVR_IS ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
+      }
       DcmIntegerString *object = (DcmIntegerString *)stack.top();
       object->getSint32( instance_number );
       //cerr << "readFirst: " << _name << ": instance_number = " 
       //     << instance_number << endl;
     }
-
-
   if ( manufacturer == "GE MEDICAL SYSTEMS" )
     {
       if ( header.search( DcmTagKey( 0x0019, 0x10B9 ), stack ) == EC_Normal )
@@ -512,8 +662,183 @@ int DicomHeader::readFirst()
           setProperty( "b_value", (float)bvalue );
         }
     }
+  if ( manufacturer == "SIEMENS" && modality == "PT" )
+    {
+      
+      if ( header.search( DCM_PatientsWeight, stack ) == EC_Normal )
+        {
+          DcmDecimalString *object = (DcmDecimalString *)stack.top();
+          Float64 patientWeight;
+          object->getFloat64( patientWeight );
+          setProperty( "patient_weight", (float)patientWeight );
+        }
+     if ( header.search( DCM_PatientsAge, stack ) == EC_Normal )
+        {
+          if( stack.top()->ident() != EVR_AS ){
+            cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+            return( -1 );
+          }
+	  
+          DcmAgeString *object = (DcmAgeString *)stack.top();
+          OFString age;
+          object->getOFString( age, 0 );
+	  string ageStr = string( age.c_str() ) ;
+	  int ageInt = atoi( ageStr.substr( 0, ageStr.length() - 1 ).c_str() ) ;
+          setProperty( "patient_age", ageInt ) ;
+        }
+    if ( header.search( DCM_PatientsSex, stack ) == EC_Normal )
+      {
+        if( stack.top()->ident() != EVR_CS ){
+          cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+          return( -1 );
+        }
+        DcmCharString *object = (DcmCharString *)stack.top();
+        OFString sex;
+        object->getOFString( sex, 0 );
+        string patientsSex = sex.c_str() ;
+        setProperty( "patient_sex", patientsSex );
+      }
+      
+      if ( header.search( DCM_StudyDate, stack ) == EC_Normal )
+        {
+          DcmDate *object = (DcmDate *)stack.top();
+          OFString date;
+          object->getOFString( date, 0 );
+          setProperty( "study_date", string( date.c_str() ) );
+        }
+      if ( header.search( DCM_StudyTime, stack ) == EC_Normal )
+        {
+          DcmTime *object = (DcmTime *)stack.top();
+          OFString time;
+          object->getOFString( time, 0 );
+          setProperty( "study_time", string( time.c_str() ) );
+        }
+      if ( header.search( DCM_SeriesDate, stack ) == EC_Normal )
+        {
+          DcmDate *object = (DcmDate *)stack.top();
+          OFString date;
+          object->getOFString( date, 0 );
+          setProperty( "series_date", string( date.c_str() ) );
+        }
+      if ( header.search( DCM_SeriesTime, stack ) == EC_Normal )
+        {
+          DcmTime *object = (DcmTime *)stack.top();
+          OFString time;
+          object->getOFString( time, 0 );
+          setProperty( "series_time", string( time.c_str() ) );
+        }
+      if ( header.search( DCM_AcquisitionDate, stack ) == EC_Normal )
+        {
+          DcmDate *object = (DcmDate *)stack.top();
+          OFString date;
+          object->getOFString( date, 0 );
+          setProperty( "acquisition_date", string( date.c_str() ) );
+        }
+      if ( header.search( DCM_AcquisitionTime, stack ) == EC_Normal )
+        {
+          DcmTime *object = (DcmTime *)stack.top();
+          OFString time;
+          object->getOFString( time, 0 );
+          setProperty( "acquisition_time", string( time.c_str() ) );
+        }
+      if ( header.search( DCM_AcquisitionTime, stack ) == EC_Normal )
+        {
+          DcmTime *object = (DcmTime *)stack.top();
+          OFString time;
+          object->getOFString( time, 0 );
+	  int hour = int( atoi(time.substr(0,2).c_str() ) ) ;
+	  int min = int( atoi(time.substr(0,2).c_str() ) ) ;
+	  int sec = int( atoi(time.substr(0,2).c_str() ) ) ;
+          //setProperty( "acquisition_time", string( time.c_str() ) );
+          setProperty( "zero_start_time", ( hour*60 + min )*60 + sec ) ;
+        }
+       if ( header.search( DCM_AcquisitionNumber, stack ) == EC_Normal )
+        {
+          DcmSignedShort *object = (DcmSignedShort *)stack.top();
+          Sint16 acquiNb ;
+          object->getSint16( acquiNb );
+          setProperty( "acquisition_number", int16_t(acquiNb) );
+        }
 
-  //cout << "readFirst OK\n";
+      if ( header.search( DCM_TriggerTime, stack ) == EC_Normal )
+        {
+          DcmDecimalString *object = (DcmDecimalString *)stack.top();
+          Float64 time;
+          object->getFloat64( time );
+	  
+          setProperty( "gate_time", (float)time );
+        }
+
+      vector< float > patientPosition;
+      if ( header.search( DCM_ImagePositionPatient, stack ) == EC_Normal )
+        {
+          if( stack.top()->ident() != EVR_DS ){
+             cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+             return( -1 );
+          }
+          DcmDecimalString *object = (DcmDecimalString *)stack.top();   
+          Float64 patientCoord;
+          object->getFloat64( patientCoord, 0 );
+          patientPosition.push_back( (float)patientCoord );
+          object->getFloat64( patientCoord, 0 );
+          patientPosition.push_back( (float)patientCoord );
+          object->getFloat64( patientCoord, 0 );
+          patientPosition.push_back( (float)patientCoord );
+	  
+          setProperty( "patient_position", patientPosition );
+	}
+      if ( header.search( DCM_RadionuclideHalfLife, stack ) == EC_Normal )
+        {
+          DcmDecimalString *object = (DcmDecimalString *)stack.top();
+          if( stack.top()->ident() != EVR_DS ){
+            cerr << "fail DCM_RadionuclideHalfLife, id: " << stack.top()->ident() << "\n";
+            return( -1 );
+          }
+          Float64 halfLife;
+          object->getFloat64( halfLife );
+          setProperty( "isotope_halflife", (float)halfLife );
+        }
+      if ( header.search( DCM_SeriesType, stack ) == EC_Normal )
+        {  
+          if( stack.top()->ident() != EVR_CS ){
+            cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+            return( -1 );
+          }
+          DcmLongString *object = (DcmLongString *)stack.top() ;
+          OFString type ;
+          object->getOFString( type, 0 ) ;
+          string seriesType = type.c_str() ;
+          setProperty( "acquisition_mode", seriesType ) ;
+	  
+	  if( seriesType == "DYNAMIC"){
+            if ( header.search( DCM_NumberOfTimeSlices, stack ) == EC_Normal ){ 
+	      
+	      DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
+              if( stack.top()->ident() != EVR_US ){
+                cerr << "fail DCM_NumberOfTimeSlices, id: " << stack.top()->ident() << "\n";
+                return( -1 );
+              }
+              Uint16 frames;
+              object->getUint16( frames ) ;
+              setProperty( "nb_t_pos", (int) frames );
+    
+	    } else {
+	      setProperty( "nb_t_pos", int(1) );
+	    }
+            if ( header.search( DCM_NumberOfTimeSlots, stack ) == EC_Normal ){ 
+              DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
+              if( stack.top()->ident() != EVR_US ){
+                cerr << "fail DCM_NumberOfTimeSlots, id: " << stack.top()->ident() << "\n";
+                return( -1 );
+              }
+              Uint16 gates;
+              object->getUint16( gates ) ;
+              setProperty( "nb_gates", (float) gates );
+	    }
+	  }
+        }
+      }
+
   return (int)instance_number;
 }
 
@@ -631,7 +956,7 @@ DicomHeader::FileElement DicomHeader::readNext( const std::string& filename )
       //cerr << "readNext: " << filename << ": instance_number = "
       //     << instance_number << endl;
     }
-
+    
   FileElement fl( (int)instance_number, (double)loc, filename );
 
   return fl;
