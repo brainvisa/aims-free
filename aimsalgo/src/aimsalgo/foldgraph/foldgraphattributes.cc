@@ -292,16 +292,23 @@ namespace
       else
         {
           x = depth( i->first );
-          if( x < dmin )
-            {
-              pmin = i->first;
-              dmin = x;
-            }
-          if( x > dmax )
-            {
-              pmax = i->first;
-              dmax = x;
-            }
+          if( x >= 32501 )
+          {
+            cerr << "invalid point: " << i->first << endl;
+          }
+          else
+          {
+            if( x < dmin )
+              {
+                pmin = i->first;
+                dmin = x;
+              }
+            if( x > dmax )
+              {
+                pmax = i->first;
+                dmax = x;
+              }
+          }
         }
   }
 
@@ -882,7 +889,6 @@ void FoldGraphAttributes::makeGlobalAttributes()
                           SurfaceManip::meshArea( bhsurf ) );
     }
 }
-
 
 void FoldGraphAttributes::makeSimpleSurfaceAttributes()
 {

@@ -10,7 +10,7 @@
 
 
 #------------------------- Blitz++ optional dependency ------------------------
-class BlitzComponent( SystemComponent ):
+class BlitzComponent( PkgConfigDetectedComponent ):
   _name = 'blitz'
   _includeFile = 'blitz/array.h'
 

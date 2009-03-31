@@ -34,6 +34,9 @@
  */
 
 
+#include <limits>
+#include <algorithm>
+#include <cartobase/type/string_conversion.h>
 #include <aims/features/roi_features.h>
 
 using namespace std;
@@ -157,7 +160,11 @@ void RoiFeatures::
 addImageStatistics( const std::string &prefix, 
                     const rc_ptr< Interpolator > &interpolator )
 {
-  _interpolators[ prefix ] = interpolator;
+  if ( _interpolators.find( prefix ) == _interpolators.end() ) {
+    _interpolators[ prefix ] = interpolator;
+  } else {
+    throw runtime_error( string( "Cannot compute statistics because the label \"" ) + prefix + "\" is used for several images." );
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -195,7 +202,7 @@ static void writeFeatures( const Object &features, ostream &out,
 
 
 //-----------------------------------------------------------------------------
-void RoiFeatures::write( ostream &out ) const
+void RoiFeatures::writeMinf( ostream &out ) const
 {
   out << "attributes = {" << endl
       << "  'format': 'features_1.0'," << endl
@@ -206,10 +213,78 @@ void RoiFeatures::write( ostream &out ) const
 
 
 //-----------------------------------------------------------------------------
-void RoiFeatures::write( const string &fileName ) const
+void RoiFeatures::writeCSV( ostream &out ) const
 {
-  ofstream out( fileName.c_str() );
-  write( out );
+  list< string > roiNames;
+  list< string > csvHeader;
+  map< string, map< string, double > > csvValues;
+
+  for( Object itRoi = _result->objectIterator(); itRoi->isValid(); itRoi->next() ) {
+    const string roiName( itRoi->key() );
+    if ( roiName == "format" || roiName == "content_type" ) continue;
+    Object features = itRoi->currentValue();
+    if ( features->isDictionary() ) {
+      roiNames.push_back( roiName );
+      list< pair< string, Object > > stack;
+      stack.push_back( pair< string, Object >( "", features ) );
+      while( ! stack.empty() ) {
+        const string key = stack.front().first;
+        const Object feature = stack.front().second;
+        stack.pop_front();
+        if ( feature->isScalar() ) {
+          if ( find( csvHeader.begin(), csvHeader.end(), key ) == csvHeader.end() ) {
+            csvHeader.push_back( key );
+          }
+          const double value = feature->getScalar();
+          map< string, double > &values = csvValues[ roiName ];
+          if ( values.find( key ) == values.end() ) {
+            values[ key ] = value;
+          } else {
+            throw runtime_error( string( "Cannot write CVS file because there is more than one value in column \"" ) + key + "\" for region \"" + roiName + "\"" );
+          }
+        } else if ( feature->isDictionary() ) {
+          for( Object itFeature = feature->objectIterator(); itFeature->isValid(); itFeature->next() ) {
+            const string key2( ( key.empty() ? string() : key + "." ) + itFeature->key() );
+            stack.push_front( pair< string, Object >( key2, itFeature->currentValue() ) );
+          }
+        } else {
+          cerr << "Warning: ignoring feature of type " << feature->type() << " for key " << key << endl;
+        }
+      }
+    } else {
+      cerr << "Cannot write features in CSV format for ROI " << roiName << " because it contains data of type " << features->type() << endl;
+    }
+  }
+
+  out << "ROI_label";
+  for( list< string >::iterator itH = csvHeader.begin(); itH != csvHeader.end(); ++itH ) {
+    out << "\t" << *itH;
+  }
+  out << endl;
+  for( list< string >::iterator itR = roiNames.begin(); itR != roiNames.end(); ++itR ) {
+    out << *itR;
+    for( list< string >::iterator itH = csvHeader.begin(); itH != csvHeader.end(); ++itH ) {
+      const map< string, double > &values = csvValues[ *itR ];
+      map< string, double >::const_iterator itV = values.find( *itH );
+      if ( itV != values.end() ) {
+        out << "\t" << itV->second;
+      } else {
+        out << "\t";
+      }
+    }
+    out << endl;
+  }
+}
+
+
+//-----------------------------------------------------------------------------
+void RoiFeatures::write( ostream &out, const string &format ) const
+{
+  if ( format == "csv" ) {
+    writeCSV( out );
+  } else {
+    writeMinf( out );
+  }
 }
 
 

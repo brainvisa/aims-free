@@ -101,7 +101,11 @@ namespace aims
 
     if( !sipRes )
     {
-      sipRes = PyArray_FromDimsAndData( ndim, dims, numType, buffer );
+      std::vector<npy_intp> dimsp( ndim );
+      for( int i=0; i<ndim; ++i )
+        dimsp[i] = dims[i];
+      sipRes = PyArray_SimpleNewFromData( ndim, &dimsp[0], numType, buffer );
+      //sipRes = PyArray_FromDimsAndData( ndim, dims, numType, buffer );
       if( sipRes )
       {
         sipRes = PyArray_Return( (PyArrayObject *) sipRes );

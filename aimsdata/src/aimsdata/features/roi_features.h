@@ -58,10 +58,12 @@ public:
   void addImageStatistics( const std::string &name, 
                            const carto::rc_ptr< Interpolator > & );
   void computeFeatures( const carto::rc_ptr< RoiIterator > & );
-  void write( const std::string &fileName ) const;
-  void write( std::ostream &out ) const;
+  void write( std::ostream &out, const std::string &format = "minf" ) const;
 
-private:
+protected:
+
+  void writeMinf( std::ostream &out ) const;
+  void writeCSV( std::ostream &out ) const;
 
 
   typedef std::map< std::string,
