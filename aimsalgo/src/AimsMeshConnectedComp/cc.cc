@@ -64,7 +64,7 @@ BEGIN_USAGE(usage)
   "     meshfilein          : input *.tri or *.mesh file                    ",
   "     output_dist_texture : output *.tex file (distance)                  ",
   "     threshold           : applied on input texture                      ",
-  "     mode          : 0: lesser than threshold, 1: greater [default=1]    ",
+  "     mode          : 1: lesser than threshold, 0: greater [default=1]    ",
   "     input_texture       : object definition                             ",
   "     tri           : mesh in *.tri format [default=*.mesh]               ",
   "     ascii         : write *.tex file in ASCII [default=binar]           ",
@@ -86,7 +86,7 @@ int main( int argc, char** argv )
   char	*meshfile = 0, *intexfile = 0, *outtexfile = 0;
   int	triFlag = 0;
   int	asciiFlag = 0;
-  int	modeFlag = 1;
+  int	modeFlag = 0;
   float threshold = 0;
 
   //

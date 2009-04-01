@@ -52,7 +52,7 @@
 namespace
 {
   template <typename T>
-  void dataTOnim( nifti_image *nim, const aims::NiftiHeader& hdr,
+  void dataTOnim( nifti_image *nim, aims::NiftiHeader& hdr,
                   const AimsData<T>& thing, int tt = 0 );
 }
 
@@ -148,20 +148,16 @@ namespace aims
     //hdr.setProperty( "minimum", (int) vmin ); // cal_min ?
     //hdr.setProperty( "maximum", (int) vmax ); // cal_max ?
 
-    std::cout << "before settings\n";
     const Settings sett = Settings::settings();
     bool  write4d = true;
     try
     {
       write4d = (bool) 
         sett.getProperty( "nifti_output_4d_volumes" )->getScalar();
-      std::cout << "write4d OK\n";
     }
     catch( std::exception & )
     {
-      std::cout << "exception\n";
     }
-    std::cout << "write4d: " << write4d << "\n";
 
     if( write4d || thing.dimT() == 1 )
     {
@@ -185,7 +181,7 @@ namespace aims
     }
     else
     {
-      std::cout << "Converting from 4D to 3D." << std::endl;
+      // std::cout << "Converting from 4D to 3D." << std::endl;
       char sequence[16];
       int  nt = thing.dimT();
       std::vector<std::string> fnames;
@@ -224,8 +220,21 @@ namespace aims
 
 namespace
 {
+  void dataTOnim_checks2m( Motion & m, const Point3df & p,
+                           const Point3df & tp, int ip, int il )
+  {
+    if( tp[il] != 0 )
+    {
+      if( tp[il] < 0 )
+        m.translation()[il] = p[ip];
+      else
+        m.translation()[il] = 0;
+    }
+  }
+
+
   template <typename T>
-  void dataTOnim( nifti_image *nim, const aims::NiftiHeader& hdr,
+  void dataTOnim( nifti_image *nim, aims::NiftiHeader& hdr,
                   const AimsData<T>& thing, int tt = 0 )
   {
     std::vector< float > storage_to_memory;
@@ -233,6 +242,24 @@ namespace
     if( hdr.getProperty( "storage_to_memory", storage_to_memory ) )
     {
       m = storage_to_memory;
+      /* adjust translations so that they fit (in case the vol size has
+         changed) */
+      Point3df p( nim->nx - 1, 0, 0 ), p0( 0, 0, 0 );
+      Point3df tp = m.transform( p ) - m.transform( p0 );
+      dataTOnim_checks2m( m, p, tp, 0, 0 );
+      dataTOnim_checks2m( m, p, tp, 0, 1 );
+      dataTOnim_checks2m( m, p, tp, 0, 2 );
+      p = Point3df( 0, nim->ny - 1, 0 );
+      tp = m.transform( p ) - m.transform( p0 );
+      dataTOnim_checks2m( m, p, tp, 1, 0 );
+      dataTOnim_checks2m( m, p, tp, 1, 1 );
+      dataTOnim_checks2m( m, p, tp, 1, 2 );
+      p = Point3df( 0, 0, nim->nz - 1 );
+      tp = m.transform( p ) - m.transform( p0 );
+      dataTOnim_checks2m( m, p, tp, 2, 0 );
+      dataTOnim_checks2m( m, p, tp, 2, 1 );
+      dataTOnim_checks2m( m, p, tp, 2, 2 );
+      hdr.setProperty( "storage_to_memory", m.toVector() );
     }
     else
     {
