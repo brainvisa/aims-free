@@ -81,7 +81,7 @@ foreach( _command
           AimsSplitRgb )
   if( IS_DIRECTORY "${_command}" )
     file( GLOB _pro "${_command}/*.pro" )
-    SOMA_GET_FILE_LIST_FROM_PRO( "${_pro}"
+    BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"
                                 TARGET _target
                                 SOURCES _proSources )
     set( _sources )
@@ -90,7 +90,7 @@ foreach( _command
     endforeach( _f ${_proSources} )
     add_executable( ${_target} ${_sources} )
     target_link_libraries( ${_target} aimsdata )
-    SOMA_INSTALL( TARGETS ${_target}
+    BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin
                   COMPONENT ${PROJECT_NAME} )
   endif( IS_DIRECTORY "${_command}" )

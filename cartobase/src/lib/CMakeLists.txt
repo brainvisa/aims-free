@@ -1,5 +1,5 @@
-SOMA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/lib.pro "HEADERS" _headers "SOURCES" _sources )
-SOMA_COPY_AND_INSTALL_HEADERS( _headers cartobase )
+BRAINVISA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/lib.pro "HEADERS" _headers "SOURCES" _sources )
+BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers cartobase )
 add_library( cartobase SHARED ${_sources} )
 set_property( TARGET cartobase PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 target_link_libraries( cartobase ${LIBXML2_LIBRARIES} ${Sigc++2_LIBRARIES}  )
@@ -9,7 +9,7 @@ endif(UNIX)
 if(APPLE)
   target_link_libraries( cartobase "-framework CoreServices" )
 endif(APPLE)
-SOMA_INSTALL( TARGETS cartobase
+BRAINVISA_INSTALL( TARGETS cartobase
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
-SOMA_GENERATE_DOXYGEN_DOC( _headers  )
+BRAINVISA_GENERATE_DOXYGEN_DOC( _headers  )
