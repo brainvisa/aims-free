@@ -21,8 +21,9 @@ class Quaternion
   // AimsVector_FLOAT_S16 inverseRotationMatrix() const;
   void buildFromMatrix( const float *m );
   void buildFromMotion( const Motion & m );
-  Point3df apply( const Point3df &p ) const;
-  Point3df applyInverse( const Point3df &p ) const;
+  Point3df transform( const Point3df &p ) const;
+  Point3df transform( float x, float y, float z ) const;
+  Point3df transformInverse( const Point3df &p ) const;
   aims::Quaternion & operator+= ( const aims::Quaternion &q );
   aims::Quaternion & operator *= ( const aims::Quaternion &q );
   void norm();

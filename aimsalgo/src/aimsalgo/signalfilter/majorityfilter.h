@@ -80,10 +80,14 @@ AimsData< T > MajoritySmoothing< T >::doit( const AimsData< T >& ref )
   dz = _win_size_z / 2 ;
  
 
-  AimsData<T> out(ref.dimX(), ref.dimY(), ref.dimZ(), ref.dimT());
-  out.setSizeXYZT(ref.sizeX(), ref.sizeY(), ref.sizeZ(), ref.sizeT());
+  AimsData<T> out = ref.clone();
 
+  // update mask dims since it is always an odd number
+  _win_size_x = dx * 2 + 1;
+  _win_size_y = dy * 2 + 1;
+  _win_size_z = dz * 2 + 1;
   AimsData<T> tab( _win_size_x * _win_size_y * _win_size_z );
+
   bz = (ref.dimZ() - dz);
   by = (ref.dimY() - dy);
   bx = (ref.dimX() - dx);

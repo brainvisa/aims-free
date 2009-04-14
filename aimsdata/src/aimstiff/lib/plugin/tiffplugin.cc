@@ -83,6 +83,8 @@ TiffPlugin::TiffPlugin() : Plugin()
   TiffFormat<uint32_t>	*df32 = new TiffFormat<uint32_t>;
   FileFormatDictionary<AimsData<uint32_t> >::registerFormat( "TIFF", df32, 
                                                              ext );
+  VolumeFormat<uint32_t>	*vf5 = new VolumeFormat<uint32_t>( "TIFF" );
+  FileFormatDictionary<Volume<uint32_t> >::registerFormat( "TIFF", vf5, ext );
 
   TiffFormat<AimsRGB>	*df8 = new TiffFormat<AimsRGB>;
 #ifdef AIMS_APPLE_GCC33BUG

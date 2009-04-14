@@ -182,6 +182,65 @@ AimsData<T> Resampler<T>::doit( const Motion& motion, int dimX, int dimY,
                      _ref->sizeT() );
 
   resample( *_ref, motion, _defval, thing, carto::verbose );
+  thing.setHeader( _ref->header()->cloneHeader() );
+  thing.setSizeXYZT( resolution[0], resolution[1], resolution[2],
+                     _ref->sizeT() );
+  if( !motion.isIdentity() )
+  {
+    aims::PythonHeader
+        *ph = dynamic_cast<aims::PythonHeader *>( thing.header() );
+    try
+    {
+      // remove any referential ID since we are no longer in the same ref
+      ph->removeProperty( "referential" );
+    }
+    catch( ... )
+    {
+    }
+    try
+    {
+      if( ph )
+      {
+        carto::Object trs = ph->getProperty( "transformations" );
+        carto::Object tit = trs->objectIterator();
+        Motion motioninv = motion.inverse();
+        std::vector<std::vector<float> > trout;
+        trout.reserve( trs->size() );
+        for( ; tit->isValid(); tit->next() )
+        {
+          Motion m( tit->currentValue() );
+          m *= motioninv;
+          trout.push_back( m.toVector() );
+        }
+        ph->setProperty( "transformations", trout );
+      }
+    }
+    catch( ... )
+    {
+      // setup a new transformations list
+      std::vector<std::vector<float> > trout;
+      std::vector<std::string> refsout;
+      const aims::PythonHeader
+          *iph = dynamic_cast<const aims::PythonHeader *>( _ref->header() );
+      if( iph )
+        try
+        {
+          carto::Object iref = iph->getProperty( "referential" );
+          std::string refid = iref->getString();
+          refsout.push_back( refid );
+        }
+        catch( ... )
+        {
+        }
+      if( refsout.empty() )
+        refsout.push_back( "Coordinates aligned to another file or to "
+            "anatomical truth" );
+
+      trout.push_back( motion.inverse().toVector() );
+      ph->setProperty( "transformations", trout );
+      ph->setProperty( "referentials", refsout );
+    }
+  }
   return thing;
 }
 

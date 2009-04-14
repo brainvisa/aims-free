@@ -66,9 +66,18 @@ namespace aims
     /// 4x4 matrix in columns (OpenGL-style)
     void buildFromMatrix( const float* m );
     void buildFromMotion( const Motion & m );
+    /// Rotates vecotor (x,y,z)
+    Point3df transform( float x, float y, float z ) const
+    { return transform( Point3df( x, y, z ) ); }
     /// Rotates vecotor p
-    Point3df apply( const Point3df & p ) const;
-    Point3df applyInverse( const Point3df & p ) const;
+    Point3df transform( const Point3df & p ) const;
+    Point3df transformInverse( const Point3df & p ) const;
+    /// OBSOLETE BUGGY FUNCTION - Don't use it ever.
+    Point3df apply( const Point3df & p ) const
+    { return transformInverse( p ); }
+    /// OBSOLETE BUGGY FUNCTION - Don't use it ever.
+    Point3df applyInverse( const Point3df & p ) const
+    { return transform( p ); }
 
     Quaternion & operator += ( const Quaternion & q );
     Quaternion & operator *= ( const Quaternion & q );

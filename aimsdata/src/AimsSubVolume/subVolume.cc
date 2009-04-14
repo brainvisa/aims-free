@@ -188,52 +188,124 @@ bool subvolume( Process & p, const string & filein, Finder & f )
       outimage.setSizeXYZT( data.sizeX(), data.sizeY(), data.sizeZ(),
                             data.sizeT() );
     }
-  
+
     cout << "Input volume dimensions : " << data.dimX() << " "
-	 << data.dimY() << " "
-	 << data.dimZ() << " "
-	 << data.dimT() << endl;
+        << data.dimY() << " "
+        << data.dimZ() << " "
+        << data.dimT() << endl;
     cout << "Output volume dimensions : " << outimage.dimX() << " "
-	 << outimage.dimY() << " "
-	 << outimage.dimZ() << " "
-	 << outimage.dimT() << endl;
+        << outimage.dimY() << " "
+        << outimage.dimZ() << " "
+        << outimage.dimT() << endl;
     int i, j, k, l;
     ForEach4d(outimage, i, j, k, l)
       outimage(i, j, k, l) = data(i+sx, j+sy, k+sz, l+st);
 
-    if( ( first || !sv.nominf ) && data.header() ){
-      const PythonHeader *pheader = dynamic_cast<const PythonHeader *>( data.header() );
-      if ( !pheader->hasProperty("zero_start_time") )
-	outimage.setHeader( data.header()->cloneHeader() );
-      else{
-	PythonHeader * outHeader = dynamic_cast<PythonHeader *>(data.header()->cloneHeader() ) ;
-	if( outHeader )
+    // keep track of transformations
+    Motion motion, im;
+    im.setToIdentity();
+    im.setTranslation( Point3df( sx * data.sizeX(), sy * data.sizeY(),
+                       sz * data.sizeZ()) );
+    motion = im.inverse();
+
+    // setup output header
+    if( ( first || !sv.nominf ) && data.header() )
+    {
+      const PythonHeader
+          *pheader = dynamic_cast<const PythonHeader *>( data.header() );
+      if ( pheader && !pheader->hasProperty("zero_start_time") )
+        outimage.setHeader( data.header()->cloneHeader() );
+      else
+      {
+        PythonHeader
+            *outHeader = dynamic_cast<PythonHeader *>
+            (data.header()->cloneHeader() ) ;
+        if( outHeader )
         {
-	  if ( !outHeader->hasProperty("zero_start_time") )
-	    outimage.setHeader( data.header()->cloneHeader() );
-	  else{
-	    vector<int> tmp;
-	    if( pheader->getProperty( "start_time", tmp ) ){
-	      vector<int> out(et - st + 1) ;
-	      for( int i = std::max( st, 0 ) ; i <= std::min( et, data.dimT()-1 ) ; ++i ){
-		out[i - st] = tmp[i] ;
-	      }
-	      outHeader->setProperty("start_time", out) ;
-	    }
-	    if( pheader->getProperty( "duration_time", tmp ) ){
-	      vector<int> out(et - st + 1) ;
-	      for( int i = std::max( st, 0 ) ; i <= std::min( et, data.dimT()-1 ) ; ++i ){
-		out[i - st] = tmp[i] ;
-	      }
-	      outHeader->setProperty("duration_time", out) ;
-	    }
-	    outimage.setHeader( outHeader );
-	  }
+          if ( !outHeader->hasProperty("zero_start_time") )
+            outimage.setHeader( data.header()->cloneHeader() );
+          else
+          {
+            vector<int> tmp;
+            if( pheader->getProperty( "start_time", tmp ) ){
+              vector<int> out(et - st + 1) ;
+              for( int i = std::max( st, 0 );
+                   i <= std::min( et, data.dimT()-1 ); ++i )
+              {
+                out[i - st] = tmp[i] ;
+              }
+              outHeader->setProperty("start_time", out);
+            }
+            if( pheader->getProperty( "duration_time", tmp ) ){
+              vector<int> out(et - st + 1) ;
+              for( int i = std::max( st, 0 );
+                   i <= std::min( et, data.dimT()-1 ); ++i )
+              {
+                out[i - st] = tmp[i] ;
+              }
+              outHeader->setProperty("duration_time", out) ;
+            }
+            outimage.setHeader( outHeader );
+          }
+        }
+      }
+
+      PythonHeader
+          *outHeader = dynamic_cast<PythonHeader *>(outimage.header() );
+      // set transformation info
+      if( outHeader && !motion.isIdentity() )
+      {
+        try
+        {
+          // remove any referential ID since we are no longer in the
+          // same ref
+          outHeader->removeProperty( "referential" );
+        }
+        catch( ... )
+        {
+        }
+        try
+        {
+          carto::Object
+              trs = outHeader->getProperty( "transformations" );
+          carto::Object tit = trs->objectIterator();
+          std::vector<std::vector<float> > trout;
+          trout.reserve( trs->size() );
+          for( ; tit->isValid(); tit->next() )
+          {
+            Motion m( tit->currentValue() );
+            m *= im;
+            trout.push_back( m.toVector() );
+          }
+          outHeader->setProperty( "transformations", trout );
+        }
+        catch( ... )
+        {
+          // setup a new transformations list
+          std::vector<std::vector<float> > trout;
+          std::vector<std::string> refsout;
+          if( pheader )
+            try
+            {
+              carto::Object iref = pheader->getProperty( "referential" );
+              std::string refid = iref->getString();
+              refsout.push_back( refid );
+            }
+            catch( ... )
+            {
+            }
+          if( refsout.empty() )
+            refsout.push_back( "Coordinates aligned to another file or to "
+                "anatomical truth" );
+
+          trout.push_back( im.toVector() );
+          outHeader->setProperty( "transformations", trout );
+          outHeader->setProperty( "referentials", refsout );
         }
       }
     }
-    
-    
+
+    //
     Writer< AimsData<T> > w(fileout);
     w << outimage;
 
@@ -259,9 +331,9 @@ bool subvolume( Process & p, const string & filein, Finder & f )
 	m = im.inverse();
 
 	MotionWriter mw( sv.motiondirect );
-	mw.write( m );	      
+	mw.write( m );
 	MotionWriter imw( sv.motioninverse );
-	imw.write( im );	      
+	imw.write( im );
       }
 
     if( first )

@@ -439,6 +439,10 @@ Object DataSourceInfo::readMinf( DataSource & ds, Object base )
     {
       Reader<GenericObject>	rg( filename );
       rg.setOptions( opts );
+      bool hasbs = minf->hasProperty( "byte_swapping" );
+      int bs = 0;
+      if( hasbs )
+        hasbs = minf->getProperty( "byte_swapping", bs );
       rg.read( *minf );
       // remove some forbidden properties
       if( minf->hasProperty( "object_type" ) )
@@ -447,6 +451,10 @@ Object DataSourceInfo::readMinf( DataSource & ds, Object base )
         minf->removeProperty( "data_type" );
       if( minf->hasProperty( "item_type" ) )
         minf->removeProperty( "item_type" );
+      if( hasbs )
+        minf->setProperty( "byte_swapping", bs );
+      else if( minf->hasProperty( "byte_swapping" ) )
+        minf->removeProperty( "byte_swapping" );
       return minf;
     }
   catch( exception & e )

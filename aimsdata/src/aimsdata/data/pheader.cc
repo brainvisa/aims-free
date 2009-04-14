@@ -147,8 +147,16 @@ bool PythonHeader::readMinf( const string &filename )
     Reader<GenericObject> r( filename );
     Object options = Object::value( Dictionary() );
     options->setProperty( "syntaxset", rc_ptr<SyntaxSet>( syntax(), true ) );
+    bool hasbs = hasProperty( "byte_swapping" );
+    int bs = 0;
+    if( hasbs )
+      hasbs = getProperty( "byte_swapping", bs );
     r.setOptions( options );
     r.read( *this );
+    if( hasbs )
+      setProperty( "byte_swapping", bs );
+    else if( hasProperty( "byte_swapping" ) )
+      removeProperty( "byte_swapping" );
     return true;
   }
   catch( file_error & ) {

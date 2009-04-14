@@ -229,7 +229,8 @@ namespace aims
     AimsTimeSurface<D,T>  *omesh = new AimsTimeSurface<D,T>;
     typename AimsTimeSurface<D,T>::const_iterator  imt, jmt, emt = mesh.end();
     typename TimeTexture<int16_t>::const_iterator  itt, jtt, ett = tex.end();
-    * overtIndex = new std::vector<size_t>;
+    if( overtIndex )
+      * overtIndex = new std::vector<size_t>;
     jmt = mesh.begin();
     imt = jmt;
     jtt = tex.begin();
@@ -323,7 +324,8 @@ namespace aims
               p[k] = i;
               overt.push_back( vert[ (*im)[k] ] );
               onorm.push_back( norm[ (*im)[k] ] );
-              (** overtIndex).push_back((*im)[k]);
+              if( overtIndex )
+                (** overtIndex).push_back((*im)[k]);
               ++i;
             }
             else

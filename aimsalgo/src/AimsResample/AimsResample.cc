@@ -141,15 +141,6 @@ bool doit( Process & p, const string & fname, Finder & f )
   AimsData<T> resampled = resampler.doit( motion, rp.dx, rp.dy, rp.dz, 
 					  rp.size );
 
-  if( data.header() )
-    {
-      resampled.setHeader( data.header()->cloneHeader() );
-      resampled.setSizeXYZT( rp.size[0],
-			     rp.size[1],
-			     rp.size[2],
-			     data.sizeT() );			     
-    }
-
   cout << "done\n";
 
   Writer<AimsData<T> >	w( rp.fout );

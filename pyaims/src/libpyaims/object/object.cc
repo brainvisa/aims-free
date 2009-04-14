@@ -62,6 +62,12 @@ namespace carto
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
     bool x = PyMapping_Check( _value );
+    if( x ) // it seems PyMapping_Check is not sufficient...
+    {
+      // this at least avoids problems for numpy.float32 objects...
+      if( !PyObject_HasAttrString( _value, "keys" ) )
+        x = false;
+    }
     PyGILState_Release(gstate);
     return x;
   }
@@ -76,7 +82,17 @@ namespace carto
       return false;
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
-    bool x = PySequence_Check( _value ) || PyMapping_Check( _value );
+    bool x = PySequence_Check( _value );
+    if( !x )
+    {
+      x = PyMapping_Check( _value );
+      if( x ) // it seems PyMapping_Check is not sufficient...
+      {
+        // this at least avoids problems for numpy.float32 objects...
+        if( !PyObject_HasAttrString( _value, "keys" ) )
+          x = false;
+      }
+    }
     PyGILState_Release(gstate);
     return x;
   }
@@ -226,7 +242,9 @@ namespace carto
           throw std::runtime_error( "" );
         }
         if( to.getValue() )
+        {
           Py_DECREF( to.getValue() );
+        }
         PyGILState_Release(gstate);
         to.getValue() = po;
       }
@@ -279,7 +297,9 @@ namespace carto
         gstate = PyGILState_Ensure();
         PyObject	*po = PyString_FromString( value.c_str() );
         if( to.getValue() )
+        {
           Py_DECREF( to.getValue() );
+        }
         PyGILState_Release(gstate);
         to.getValue() = po;
       }
@@ -584,7 +604,9 @@ namespace carto
         }
         // WARNING should not replace the object
         if( to.getValue() )
+        {
           Py_DECREF( to.getValue() );
+        }
         to.getValue() = PyDict_New();
         PyGILState_Release(gstate);
       }
@@ -708,9 +730,13 @@ IterableImpl<PyObject *, false>::PyObjectIterator::~PyObjectIterator()
   PyGILState_STATE gstate;
   gstate = PyGILState_Ensure();
   if( _pycur )
+  {
     Py_DECREF( _pycur );
+  }
   if( _pyiter )
+  {
     Py_DECREF( _pyiter );
+  }
   PyGILState_Release(gstate);
 }
 
@@ -801,7 +827,9 @@ IterableImpl<PyObject *, false>::PyMappingIterator::~PyMappingIterator()
   PyGILState_STATE gstate;
   gstate = PyGILState_Ensure();
   if( _dict )
+  {
     Py_DECREF( _dict );
+  }
   PyGILState_Release(gstate);
 }
 

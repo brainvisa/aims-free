@@ -84,6 +84,11 @@ AimsData< T > MedianSmoothing< T >::doit( const AimsData< T >& ref )
   AimsData<T> out;
   out = ref.clone();
  
+  // update mask dims since it is always an odd number
+  _win_size_x = dx * 2 + 1;
+  _win_size_y = dy * 2 + 1;
+  _win_size_z = dz * 2 + 1;
+
   AimsData<T> tab( _win_size_x * _win_size_y * _win_size_z );
   bz = (ref.dimZ() - dz);
   by = (ref.dimY() - dy);

@@ -165,37 +165,33 @@ AimsVector<float,16> Quaternion::inverseRotationMatrix() const
 }
 
 
-Point3df Quaternion::apply( const Point3df & p ) const
+Point3df Quaternion::transformInverse( const Point3df & p ) const
 {
-  /*float	a[9] = { _vector[0] * _vector[0] * 2, // 0
-		 _vector[1] * _vector[1] * 2, // 1
-		 _vector[2] * _vector[2] * 2, // 2
-		 _vector[0] * _vector[1] * 2, // 3
-		 _vector[0] * _vector[2] * 2, // 4
-		 _vector[0] * _vector[3] * 2, // 5
-		 _vector[1] * _vector[2] * 2, // 6
-		 _vector[1] * _vector[3] * 2, // 7
-		 _vector[2] * _vector[3] * 2 }; // 8
-  return( Point3df( p[0] * (1. - a[1] + a[2] ) + p[1] * ( a[3] - a[8] ) 
-		    + p[2] * ( a[4] + a[7] ), 
-		    p[0] * ( a[3] + a[8] ) + p[1] * ( 1. - a[2] - a[0] ) 
-		    + p[2] * ( a[6] - a[5] ), 
-		    p[0] * ( a[4] - a[7] ) + p[1] * ( a[6] + a[5] ) 
-		    + p[2] * ( 1. - a[1] - a[0] ) ) );*/
-
+  /* WARNING: BUG: I think this is applyInverse(), the matrix is in rows and
+  is used as columns here ! */
   AimsVector<float,16>	r = rotationMatrix();
   return( Point3df( r[0] * p[0] + r[4] * p[1] + r[8] * p[2], 
-		    r[1] * p[0] + r[5] * p[1] + r[9] * p[2], 
-		    r[2] * p[0] + r[6] * p[1] + r[10] * p[2] ) );
+                    r[1] * p[0] + r[5] * p[1] + r[9] * p[2],
+                    r[2] * p[0] + r[6] * p[1] + r[10] * p[2] ) );
+  /* this seems to be slower...
+  Point3df a( _vector[0], _vector[1], _vector[2] );
+  return p * (2*sqr(_vector[3]) - 1) - vectProduct( a, p ) * 2*_vector[3]
+  + a * 2 * a.dot(p);
+  */
 }
 
 
-Point3df Quaternion::applyInverse( const Point3df & p ) const
+Point3df Quaternion::transform( const Point3df & p ) const
 {
   AimsVector<float,16>	r = rotationMatrix();
   return( Point3df( r[0] * p[0] + r[1] * p[1] + r[2] * p[2], 
-		    r[4] * p[0] + r[5] * p[1] + r[6] * p[2], 
-		    r[8] * p[0] + r[9] * p[1] + r[10] * p[2] ) );
+                    r[4] * p[0] + r[5] * p[1] + r[6] * p[2],
+                    r[8] * p[0] + r[9] * p[1] + r[10] * p[2] ) );
+  /* this seems to be slower...
+  Point3df a( _vector[0], _vector[1], _vector[2] );
+  return p * (2*sqr(_vector[3]) - 1) + vectProduct( a, p ) * 2*_vector[3]
+  + a * 2 * a.dot(p);
+  */
 }
 
 
