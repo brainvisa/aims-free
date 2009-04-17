@@ -1,4 +1,8 @@
 
 darwin:INCLUDEPATH	+= /sw/lib/glib/include
 
+# avoid -O2 because of a problem with gcc 4.2.2 (Mandriva 2008)
+# which makes at least AimsZCat crash.
+release:CXXFLAGS = -O
+
 LIBS	= @libBuildLine@

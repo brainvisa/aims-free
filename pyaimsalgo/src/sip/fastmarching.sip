@@ -35,6 +35,9 @@ sipCpp = new aims::FastMarching_Volume_S16( aims::Connectivity::CONNECTIVITY_26_
     rc_ptr_Volume_S16 voronoiVol() const;
     void setVerbose( bool x );
     bool verbose() const;
+    void setSpeedMap( rc_ptr_Volume_FLOAT speed );
+    void setInvSpeedMap( rc_ptr_Volume_FLOAT invspeed );
+    void clearSpeedMap();
 
     SIP_PYTUPLE midInterfaceLabels() const;
 %MethodCode
@@ -85,6 +88,10 @@ sipCpp = new aims::FastMarching_BucketMap_S16( aims::Connectivity::CONNECTIVITY_
     rc_ptr_BucketMap_S16 voronoiVol() const;
     void setVerbose( bool x );
     bool verbose() const;
+    void setSpeedMap( rc_ptr_BucketMap_FLOAT speed );
+    void setInvSpeedMap( rc_ptr_BucketMap_FLOAT invspeed );
+    void clearSpeedMap();
+
     SIP_PYTUPLE midInterfaceLabels() const;
 %MethodCode
   std::vector<std::pair<short, short> > mil = sipCpp->midInterfaceLabels();

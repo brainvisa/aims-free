@@ -45,10 +45,31 @@ using namespace carto;
 using namespace std;
 using namespace aims::internal::fastmarching;
 
+
+template <typename T>
+struct FastMarching<T>::Private
+{
+  Private( Connectivity::Type c, bool mid_interface );
+
+  Connectivity::Type connectivity;
+  bool mid_interface_option;
+  std::map<std::pair<int16_t, int16_t>,BucketMap<float> > mid_interface_map;
+  SparseVolume<T> voronoi;
+  SparseVolume<FloatType> inv_speed;
+  bool verbose;
+};
+
+
+template <typename T>
+FastMarching<T>::Private::Private( Connectivity::Type c, bool mid_interface )
+  : connectivity( c ), mid_interface_option( mid_interface ), verbose( false )
+{
+}
+
+
 template <typename T>
 FastMarching<T>::FastMarching( Connectivity::Type c, bool mid_interface)
-  : _connectivity( c ), _mid_interface_option( mid_interface),
-    _verbose( false )
+  : d( new Private( c, mid_interface ) )
 {
 }
 
@@ -56,6 +77,7 @@ FastMarching<T>::FastMarching( Connectivity::Type c, bool mid_interface)
 template <typename T>
 FastMarching<T>::~FastMarching()
 {
+  delete d;
 }
 
 
@@ -147,7 +169,7 @@ namespace
         & mid_interface ) : mid_interface_map( mid_interface ) {}
     SparseVolume<typename FastMarching<T>::FloatType> dist;
     SparseVolume<T> seed;
-    SparseVolume<typename FastMarching<T>::FloatType> inv_speed;
+    SparseVolume<typename FastMarching<T>::FloatType> *inv_speed;
     vector<float> voxel_size;
     int xm;
     int ym;
@@ -211,7 +233,7 @@ namespace
     Point3d p( x, y, z );
     float u = fps.dist.at(p);
     float u_tmp;
-    float inv_speed = fps.inv_speed.at( p );
+    float inv_speed = fps.inv_speed->at( p );
     float hx = fps.voxel_size[0], hy= fps.voxel_size[1],
       hz = fps.voxel_size[2];
     if (x > 0 && fps.seed.at( x-1, y, z ) == seed_front)
@@ -354,16 +376,16 @@ namespace
   doit_private( FastMarchingPrivateStruct<T> & fps );
 }
 
-
+#include <aims/io/writer.h>
 template <typename T>
 typename FastMarching<T>::RCFloatType
 FastMarching<T>::doit( const RCType & labels,
                        const set<int16_t> & worklabels,
                        const set<int16_t> & seeds )
 {
-  if( _verbose )
+  if( d->verbose )
     cout << "FastMarching...\n";
-  FastMarchingPrivateStruct<T> fps( _mid_interface_map );
+  FastMarchingPrivateStruct<T> fps( d->mid_interface_map );
   SparseVolume<T> slabels( labels );
   vector<int> sz = slabels.getSize();
   slabels.setBackground( -1 );
@@ -371,14 +393,25 @@ FastMarching<T>::doit( const RCType & labels,
   fps.ym = sz[1];
   fps.zm = sz[2];
   fps.voxel_size = slabels.voxelSize();
-  fps.mid_interface_option = _mid_interface_option;
+  fps.mid_interface_option = d->mid_interface_option;
   int default_seed = -1;
-  fps.verbose = _verbose;
+  fps.verbose = d->verbose;
 
   fps.dist = SparseVolume<FloatType>::alloc( slabels );
   SparseVolume<T> status( SparseVolume<T>::alloc( slabels ) );
   fps.seed = SparseVolume<T>::alloc( slabels );
-  fps.inv_speed = SparseVolume<FloatType>::alloc( slabels );
+  bool initspeed = false;
+  d->inv_speed.setBackground( FLT_MAX );
+  vector<int> ssz = d->inv_speed.getSize();
+  if( ssz.size() < 3 || ssz[0] != sz[0] || ssz[1] != sz[1] || ssz[2] != sz[2] )
+  {
+    initspeed = true;
+    cout << "initializing speed map\n";
+    d->inv_speed = SparseVolume<FloatType>::alloc( slabels );
+  }
+  else
+    cout << "using already defined speed map\n";
+  fps.inv_speed = &d->inv_speed;
   multimap<float, Point3d> & front = fps.front;
   fps.status = status;
 
@@ -391,11 +424,12 @@ FastMarching<T>::doit( const RCType & labels,
   status.fill( far );
   fps.dist.fill( FLT_MAX );
   fps.seed.fill( default_seed );
-  fps.inv_speed.fill( FLT_MAX );
+  if( initspeed )
+    fps.inv_speed->fill( FLT_MAX );
   typename SparseVolume<T>::iterator ist, est = slabels.end();
   typename SparseVolume<T>::LowLevelStorage::iterator iv, ev;
   set<int16_t>::const_iterator is, es = seeds.end(), iw, ew = worklabels.end();
-  Connectivity c( 0, 0, _connectivity );
+  Connectivity c( 0, 0, d->connectivity );
   int i, n = c.nbNeighbors();
   long long nwork = 0, ninter = 0;
 
@@ -410,7 +444,8 @@ FastMarching<T>::doit( const RCType & labels,
         fps.status.setValue( far, pos );
         fps.seed.setValue( default_seed, pos );
         fps.dist.setValue( FLT_MAX, pos );
-        fps.inv_speed.setValue( 1, pos );
+        if( initspeed )
+          fps.inv_speed->setValue( 1, pos );
         ++nwork;
       }
       else
@@ -433,26 +468,30 @@ FastMarching<T>::doit( const RCType & labels,
             fps.dist.setValue( 0, pos );
             fps.seed.setValue( val, pos );
             fps.status.setValue( near, pos );
-            fps.inv_speed.setValue( 1, pos );
+            if( initspeed )
+              fps.inv_speed->setValue( 1, pos );
             front.insert( pair<float,Point3d>( 0, pos ) );
             ++ninter;
           }
-          /* else // inside seed
-          {
-            fps.status.setValue( far, pos );
-            fps.inv_speed.setValue( FLT_MAX, pos );
-          } */
+          else // inside seed
+            if( !initspeed )
+            {
+              // fps.status.setValue( far, pos );
+              fps.inv_speed->setValue( FLT_MAX, pos );
+            }
         }
       }
     }
 
-  if( _verbose )
+  Writer<FloatType> w( "/tmp/flopspd.ima" );
+  w.write( *d->inv_speed.data() );
+  if( d->verbose )
     cout << "work voxels: " << nwork << ", interface voxels: " << ninter
       << endl;
 
   doit_private( fps );
-  _voronoi = fps.seed;
-  fillInitialVoronoi<T>( slabels, seeds, _voronoi );
+  d->voronoi = fps.seed;
+  fillInitialVoronoi<T>( slabels, seeds, d->voronoi );
   return fps.dist.data();
 }
 
@@ -503,7 +542,7 @@ namespace
       x = p[0];
       y = p[1];
       z = p[2];
-      if( fps.inv_speed.checkedAt( p ) != FLT_MAX )
+      if( fps.inv_speed->checkedAt( p ) < FLT_MAX )
       {
         if( status.at( p ) != active)
         {
@@ -566,8 +605,8 @@ const BucketMap<float> & FastMarching<T>::midInterface (int16_t label1, int16_t 
 {
   pair<int16_t,int16_t> mid_key (min(label1,label2),max(label1,label2));
   map<pair<int16_t,int16_t>,BucketMap<float> >::const_iterator
-      mid_interface_it = _mid_interface_map.find(mid_key);
-  if (mid_interface_it == _mid_interface_map.end())
+      mid_interface_it = d->mid_interface_map.find(mid_key);
+  if (mid_interface_it == d->mid_interface_map.end())
     throw runtime_error("interface does not exist");
   return mid_interface_it->second;
 }
@@ -577,16 +616,17 @@ template <typename T>
 VolumeRef<float>
 FastMarching<T>::midInterfaceVol (int16_t label1, int16_t label2) const
 {
-  vector<int> sz = _voronoi.getSize();
+  vector<int> sz = d->voronoi.getSize();
   VolumeRef<float> mid_interface_vol( sz[0], sz[1], sz[2] );
   mid_interface_vol->fill( -1 );
   const BucketMap<float> & mid_interface_buck = midInterface(label1, label2);
   Converter<BucketMap<float>, VolumeRef<float> > conv;
   conv.convert(mid_interface_buck, mid_interface_vol);
-  vector<float> voxel_size = _voronoi.voxelSize();
+  vector<float> voxel_size = d->voronoi.voxelSize();
   mid_interface_vol->header().setProperty("voxel_size",voxel_size );
   return mid_interface_vol;
 }
+
 
 template <typename T>
 vector<pair<int16_t,int16_t> > FastMarching<T>::midInterfaceLabels () const
@@ -594,8 +634,8 @@ vector<pair<int16_t,int16_t> > FastMarching<T>::midInterfaceLabels () const
   vector<pair<int16_t,int16_t> > mid_interface_labels;
   map<pair<int16_t,int16_t>,BucketMap<float> >::const_iterator
     mid_interface_it, mid_interface_et;
-  for (mid_interface_it = _mid_interface_map.begin(),
-    mid_interface_et = _mid_interface_map.end();
+  for (mid_interface_it = d->mid_interface_map.begin(),
+    mid_interface_et = d->mid_interface_map.end();
     mid_interface_it != mid_interface_et; ++ mid_interface_it)
   {
     mid_interface_labels.push_back(mid_interface_it->first);
@@ -603,10 +643,56 @@ vector<pair<int16_t,int16_t> > FastMarching<T>::midInterfaceLabels () const
   return mid_interface_labels;
 }
 
+
 template <typename T>
 typename FastMarching<T>::RCType FastMarching<T>::voronoiVol() const
 {
-  return _voronoi.data();
+  return d->voronoi.data();
+}
+
+
+template <typename T>
+void FastMarching<T>::setSpeedMap( FastMarching<T>::RCFloatType speed )
+{
+  SparseVolume<FloatType> s = SparseVolume<FloatType>( speed );
+  d->inv_speed = SparseVolume<FloatType>::alloc( s );
+  typename SparseVolume<FloatType>::const_iterator i, e = s.end();
+  typename SparseVolume<FloatType>::LowLevelStorage::const_iterator iv, ev;
+  Point3d pos;
+  for( i=s.begin(); i!=e; ++i )
+    for( iv=i->second.begin(), ev=i->second.end(); iv!=ev; ++iv )
+    {
+      pos = s.position3d( i, iv );
+      d->inv_speed.setValue( 1./s.at( pos ), pos );
+    }
+}
+
+
+template <typename T>
+void FastMarching<T>::setInvSpeedMap( FastMarching<T>::RCFloatType invspeed )
+{
+  d->inv_speed = SparseVolume<FloatType>( invspeed );
+}
+
+
+template <typename T>
+void FastMarching<T>::clearSpeedMap()
+{
+  d->inv_speed = SparseVolume<FloatType>();
+}
+
+
+template <typename T>
+void FastMarching<T>::setVerbose( bool x )
+{
+  d->verbose = x;
+}
+
+
+template <typename T>
+bool FastMarching<T>::verbose() const
+{
+  return d->verbose;
 }
 
 

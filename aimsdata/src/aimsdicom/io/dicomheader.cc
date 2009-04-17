@@ -410,7 +410,7 @@ int DicomHeader::readFirst()
 #endif
     {
       //perror( 0 );
-      cout << "could not open stream " << _name << endl;
+      //cout << "could not open stream " << _name << endl;
       return -1;
     }
 

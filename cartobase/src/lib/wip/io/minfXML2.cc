@@ -212,6 +212,8 @@ string MinfTreeExpander::startStructure( const std::string &nodeType,
   const string &parentSyntax, 
   const string & name )
 {
+  if( _stack.empty() )
+    throw parse_error( "XML parsing error", identifier, name, 0 );
   return _stack.back()->startStructure( *this, nodeType, identifier, attributes, parentSyntax, name );
 }
 

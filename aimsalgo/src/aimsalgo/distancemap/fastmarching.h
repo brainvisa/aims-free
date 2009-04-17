@@ -78,8 +78,8 @@ namespace aims
     */
     FastMarching( Connectivity::Type c, bool mid_interface = false );
     ~FastMarching();
-    void setVerbose( bool x ) { _verbose = x; }
-    bool verbose() const { return _verbose; }
+    void setVerbose( bool x );
+    bool verbose() const;
     RCFloatType doit( const RCType & vol,
       int16_t worklabel, int16_t inlabel, int16_t outlabel);
     RCFloatType doit( const RCType & vol,
@@ -94,13 +94,18 @@ namespace aims
                                              int16_t label2 ) const;
     std::vector<std::pair<int16_t,int16_t> > midInterfaceLabels () const;
     RCType voronoiVol() const;
+    /** sets an initialized speed map.
+    The inverse speed will be deduced from it. */
+    void setSpeedMap( RCFloatType speed );
+    /** sets an initialized inverse speed map (overrides any previous speed
+    map) */
+    void setInvSpeedMap( RCFloatType invspeed );
+    /// clear (inverse) speed map
+    void clearSpeedMap();
 
   private:
-    Connectivity::Type _connectivity;
-    bool _mid_interface_option;
-    std::map<std::pair<int16_t, int16_t>,BucketMap<float> > _mid_interface_map;
-    SparseVolume<T> _voronoi;
-    bool _verbose;
+    struct Private;
+    Private *d;
   };
 
 
