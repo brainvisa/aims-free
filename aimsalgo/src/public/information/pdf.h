@@ -99,6 +99,16 @@ void AimsJointPVPdf( const aims::BucketMap<short>&         data1,
 		     AimsData<float>& p12, 
 		     AimsData<float>& p1, AimsData<float>& p2 );
 
+/** Compute Knn density estimation.
+    img : output pdf
+    db : input database (order of dots may be modified)
+    k : distance to the kth nearest neighbours is used to set parzen
+        window width
+ */
+AIMSALGOPUB_API
+void	AimsKnnPdf(aims::knn::Database &db,
+			AimsData<float> &pdf, unsigned int k);
+
 /** Compute Generalized Knn Parzen density estimation.
     img : output pdf
     db : input database (order of dots may be modified)
@@ -108,6 +118,5 @@ void AimsJointPVPdf( const aims::BucketMap<short>&         data1,
 AIMSALGOPUB_API
 void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
 			AimsData<float> &pdf, unsigned int k);
-
 
 #endif

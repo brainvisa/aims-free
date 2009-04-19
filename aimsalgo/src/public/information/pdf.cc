@@ -750,7 +750,8 @@ void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
   	int				x, y, z;
 	double				dx, dy, dz;
 	double				h, sum, val, dist;
-	std::vector<double>		vec(db.dim());
+	int				dim = db.dim();
+	std::vector<double>		vec(dim);
 	aims::knn::KnnGlobalFriedman	knn(db, k);
 	std::pair<std::vector<unsigned int>, std::vector<double> > res;
 	knn.precompute();
@@ -765,6 +766,7 @@ void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
 		vec[2] = z;
 		res = knn.find(vec);
 		h = res.second[0];
+		if (h == 0) h = 10e-10;
 		const std::vector<unsigned int> &id = res.first;
 
 		for (int i = id.size() - 1; i >= 0; --i)
@@ -775,6 +777,7 @@ void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
 			dz = (z - d[2]);
 			dist = dx * dx + dy * dy + dz * dz;
 			val = parzen2(dist, h);
+			val /= h;
 			pdf(x, y, z) += val;
 			sum += val;
 		}
@@ -783,7 +786,38 @@ void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
 		pdf(x, y, z) /= sum;
 }
 
+AIMSALGOPUB_API
+void	AimsKnnPdf(aims::knn::Database &db,
+			AimsData<float> &pdf, unsigned int k)
+{
+  	int				x, y, z;
+	double				dx, dy, dz;
+	double				h, sum, val, dist;
+	int				dim = db.dim();
+	std::vector<double>		vec(dim);
+	aims::knn::KnnGlobalFriedman	knn(db, k);
+	std::pair<std::vector<unsigned int>, std::vector<double> > res;
+	knn.precompute();
 
+	pdf = 0.;
+	sum = 0.;
+
+	ForEach3d(pdf, x, y, z )
+	{
+		vec[0] = x;
+		vec[1] = y;
+		vec[2] = z;
+		res = knn.find(vec);
+		h = res.second[0];
+		if (h == 0) h = 10e-10;
+		h = pow(h, dim); // proportional to volume
+		val = k / h;
+		pdf(x, y, z) = val;
+		sum += val;
+	}
+	ForEach3d(pdf, x, y, z )
+		pdf(x, y, z) /= sum;
+}
 
 
 // compilation of some Volume classes on Aims types

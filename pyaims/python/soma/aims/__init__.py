@@ -402,15 +402,23 @@ def proxystr( self ):
   return self.get().__str__()
 
 def rcptr_getAttributeNames( self ):
-  '''for IPython completion'''
-  m = self.__dict__.keys()
-  m += filter( lambda x: not x.startswith( '_' ),
-    self.get().__dict__.keys() )
-  try:
-    m += filter( lambda x: not x.startswith( '_' ),
-      self.get().__class__.__dict__.keys() )
-  except:
-    pass
+  '''IPython completion feature...'''
+  m = []
+  l = [ self.get(), self ]
+  done = set()
+  while l:
+    c = l.pop()
+    done.add( c )
+    m += filter( lambda x: not x.startswith( '_' ) and x not in m,
+      c.__dict__.keys() )
+    cl = getattr( c, '__bases__', None )
+    if not cl:
+      cl = getattr( c, '__class__', None )
+      if cl is None:
+        continue
+      else:
+        cl = [ cl ]
+    l += filter( lambda x: x not in done, cl )
   return m
 
 # scan classes and modify some of them
@@ -631,6 +639,8 @@ del toObject, ptrToObject, rcToObject
 class _proxy:
   def retvalue( x ):
     if callable( x ):
+      if isinstance( x, carto.GenericObject._proxy ):
+        return x
       return carto.GenericObject._proxy(x)
     if isinstance( x, Object ):
       try:
@@ -651,13 +661,27 @@ class _proxy:
     else:
       self._x = x
   def __call__( self, *args, **kwargs ):
-    return carto.GenericObject._proxy.retvalue( self._x.__call__( *args,
-      **kwargs ) )
+    r = self._x
+    obj = getattr( r, '__self__', None )
+    if obj is not None:
+      # determine if we were called recursively.
+      # We need to detect this because SIP methods may call the proxy and
+      # keep no other access to the C method
+      import traceback
+      sf = traceback.extract_stack()[-2]
+      if sf[-2] == '__call__' and \
+        sf[-1] == 'return carto.GenericObject._proxy.retvalue( r( *args, ' \
+          '**kwargs ) )' \
+        and sf[0] == __file__:
+        # try to call with selfWasArg=True (class unound method)
+        cl = object.__getattribute__( obj, '__class__' )
+        return getattr( cl, r.__name__ )( obj, *args, **kwargs )
+    return carto.GenericObject._proxy.retvalue( r( *args, **kwargs ) )
 
 def genobj__getattribute__( self, attr ):
   ga = object.__getattribute__( self, '__oldgetattribute__' )
   x = ga( attr )
-  if( attr.startswith( '__' ) ):
+  if( attr.startswith( '__' ) ) or attr == '_proxy':
     return x
   return ga( '_proxy' ).retvalue( x )
 
