@@ -2,13 +2,22 @@
 # print currentComponentFile
 
 aimsfree_modules = [ 'aimsdata', 'aimsalgo' ]
-aimsfree_subprojects = aimsfree_modules + [ 'ecat', 'ecat+', 'vidaIO', 'graph', 'cartodata', 'cartobase'  ]
+aimsfree_weakdeps = [ 'pyaims', 'pyaimsalgo' ]
+aimsfree_subprojects = aimsfree_modules + aimsfree_weakdeps + [ 'ecat', 'ecat+', 'vidaIO', 'graph', 'cartodata', 'cartobase'  ]
 
 class AimsFreeComponent( GenericMakerModuleComponent ):
   _name = 'aims-free'
   def dependencies( self ):
     global aimsfree_modules
     return aimsfree_modules
+
+  def weakDependencies( self ):
+    global aimsfree_weakdeps
+    deps = []
+    for component in aimsfree_weakdeps:
+      if weakDependency( component ):
+        deps.append( component )
+    return deps
 
   def libraries( self ):
     return []
