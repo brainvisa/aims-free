@@ -1,10 +1,18 @@
-set( _project "@PROJECT_NAME@" )
-string( TOUPPER "@PROJECT_NAME@" _uproject )
+# Defines the following variables:
+#   @PROJECT_NAME@_VERSION_MAJOR
+#   @PROJECT_NAME@_VERSION_MINOR
+#   @PROJECT_NAME@_VERSION_PATCH
+#   @PROJECT_NAME@_VERSION
+#   @PROJECT_NAME_UPPER@_BINARY_DIR
+#   @PROJECT_NAME_UPPER@_DEFINITIONS
+#   @PROJECT_NAME_UPPER@_INCLUDE_DIRS
+#   @PROJECT_NAME_UPPER@_LIBRARIES
+#   @PROJECT_NAME_UPPER@_FOUND
 
-set( ${_project}_VERSION_MAJOR @aims_VERSION_MAJOR@ )
-set( ${_project}_VERSION_MINOR @aims_VERSION_MINOR@ )
-set( ${_project}_VERSION_PATCH @aims_VERSION_PATCH@ )
-set( ${_project}_VERSION @aims_VERSION@ )
+set( @PROJECT_NAME@_VERSION_MAJOR @aims_VERSION_MAJOR@ )
+set( @PROJECT_NAME@_VERSION_MINOR @aims_VERSION_MINOR@ )
+set( @PROJECT_NAME@_VERSION_PATCH @aims_VERSION_PATCH@ )
+set( @PROJECT_NAME@_VERSION @aims_VERSION@ )
 
 find_package( Sigc++2 REQUIRED )
 find_package( LibXml2 REQUIRED )
@@ -17,36 +25,32 @@ endif( PYTHONINTERP_FOUND )
 find_package( VTK QUIET )
 
 
-get_filename_component( ${_uproject}_BINARY_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
-get_filename_component( ${_uproject}_BINARY_DIR "${${_uproject}_BINARY_DIR}" PATH )
-get_filename_component( ${_uproject}_BINARY_DIR "${${_uproject}_BINARY_DIR}" PATH )
-get_filename_component( ${_uproject}_BINARY_DIR "${${_uproject}_BINARY_DIR}" PATH )
+get_filename_component( @PROJECT_NAME_UPPER@_BINARY_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
+get_filename_component( @PROJECT_NAME_UPPER@_BINARY_DIR "${@PROJECT_NAME_UPPER@_BINARY_DIR}" PATH )
+get_filename_component( @PROJECT_NAME_UPPER@_BINARY_DIR "${@PROJECT_NAME_UPPER@_BINARY_DIR}" PATH )
+get_filename_component( @PROJECT_NAME_UPPER@_BINARY_DIR "${@PROJECT_NAME_UPPER@_BINARY_DIR}" PATH )
 
-# if( "${CMAKE_CURRENT_LIST_FILE}" STREQUAL "${${_uproject}_BINARY_DIR}/share/@PROJECT_NAME@-${@PROJECT_NAME@_VERSION_MAJOR}.${@PROJECT_NAME@_VERSION_MINOR}/cmake/@PROJECT_NAME@-config.cmake" )
-#   message( STATUS "Using @PROJECT_NAME@ build tree: adding "${${_uproject}_BINARY_DIR}" to CMAKE_PREFIX_PATH" )
-#   set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${${_uproject}_BINARY_DIR}" )
-# endif( "${CMAKE_CURRENT_LIST_FILE}" STREQUAL "${${_uproject}_BINARY_DIR}/share/@PROJECT_NAME@-${@PROJECT_NAME@_VERSION_MAJOR}.${@PROJECT_NAME@_VERSION_MINOR}/cmake/@PROJECT_NAME@-config.cmake" )
 
-set( ${_uproject}_DEFINITIONS @AIMS_DEFINITIONS@ )
-set( ${_uproject}_INCLUDE_DIRS
-     "${${_uproject}_BINARY_DIR}/include"
+set( @PROJECT_NAME_UPPER@_DEFINITIONS @AIMS_DEFINITIONS@ )
+set( @PROJECT_NAME_UPPER@_INCLUDE_DIRS
+     "${@PROJECT_NAME_UPPER@_BINARY_DIR}/include"
      ${Sigc++2_INCLUDE_DIRS} 
      "${LIBXML2_INCLUDE_DIR}"
      ${Boost_INCLUDE_DIRS} )
-set( ${_uproject}_SIP_DIRECTORY "${${_uproject}_BINARY_DIR}/@AIMS_RELATIVE_SIP_DIRECTORY@" )
+set( @PROJECT_NAME_UPPER@_SIP_DIRECTORY "${@PROJECT_NAME_UPPER@_BINARY_DIR}/@AIMS_RELATIVE_SIP_DIRECTORY@" )
 
-if( ${_project}_IS_COMPILED )
+if( @PROJECT_NAME@_IS_COMPILED )
   set( AIMS_AIMSALGO_LIB aimsalgo )
   set( AIMS_PYAIMS_LIB pyaims )
-else( ${_project}_IS_COMPILED )
-  find_library( AIMS_AIMSALGO_LIB aimsalgo "${${_uproject}_BINARY_DIR}/lib" )
-  find_library( AIMS_PYAIMS_LIB pyaims "${${_uproject}_BINARY_DIR}/lib" )
-endif( ${_project}_IS_COMPILED )
-set( ${_uproject}_LIBRARIES "${AIMS_AIMSALGO_LIB}" )
-set( ${_uproject}_SIP_LIBRARIES ${AIMS_PYAIMS_LIB} )
+else( @PROJECT_NAME@_IS_COMPILED )
+  find_library( AIMS_AIMSALGO_LIB aimsalgo "${@PROJECT_NAME_UPPER@_BINARY_DIR}/lib" )
+  find_library( AIMS_PYAIMS_LIB pyaims "${@PROJECT_NAME_UPPER@_BINARY_DIR}/lib" )
+endif( @PROJECT_NAME@_IS_COMPILED )
+set( @PROJECT_NAME_UPPER@_LIBRARIES "${AIMS_AIMSALGO_LIB}" )
+set( @PROJECT_NAME_UPPER@_SIP_LIBRARIES ${AIMS_PYAIMS_LIB} )
 
 if( AIMS_AIMSALGO_LIB )
-  set( ${_uproject}_FOUND true )
+  set( @PROJECT_NAME_UPPER@_FOUND true )
 else( AIMS_AIMSALGO_LIB )
-  set( ${_uproject}_FOUND false )
+  set( @PROJECT_NAME_UPPER@_FOUND false )
 endif( AIMS_AIMSALGO_LIB )
