@@ -758,6 +758,9 @@ def __getattribute__(self, name):
 Point3df.__getattribute__ = __getattribute__
 del __getattribute__
 
+# complement Quaternion
+Quaternion.compose = Quaternion.__mul__
+
 # documentation
 
 carto.GenericObject.__doc__ = '''

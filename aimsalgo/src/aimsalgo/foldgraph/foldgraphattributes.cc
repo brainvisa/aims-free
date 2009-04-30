@@ -1326,7 +1326,7 @@ void FoldGraphAttributes::makeJunctionAttributes()
   Point3d			extr, pmin, pmax;
   BoundingBox			bb, bbt;
   Point3df			nvs;
-  float				vvol, nvvol = 0;
+  float				vvol, nvvol = 0, hjlen = 0, nhjlen = 0;
 
   cout << "Making junction attributes" << endl;
 
@@ -1488,6 +1488,12 @@ void FoldGraphAttributes::makeJunctionAttributes()
         e->setProperty( "length", dmaxf );
         if( _motion )
           e->setProperty( "reflength", ndmaxf );
+        if( e->getSyntax() == "hull_junction" )
+        {
+          hjlen += dmaxf;
+          if( _motion )
+            nhjlen += ndmaxf;
+        }
       }
 
   // bounding box
@@ -1511,6 +1517,11 @@ void FoldGraphAttributes::makeJunctionAttributes()
           _graph.setProperty( "Tal_boundingbox_max", point );
         }
     }
+
+  if( hjlen != 0 )
+    _graph.setProperty( "total_sulci_length", hjlen );
+  if( nhjlen != 0 )
+    _graph.setProperty( "reftotal_sulci_length", nhjlen );
 
   cout << "Done: junction attributes" << endl;
 }
@@ -1827,21 +1838,31 @@ void FoldGraphAttributes::makeCorticalRelationAttributes()
 
 void FoldGraphAttributes::makeSummaryGlobalAttributes()
 {
-  float	area = 0, narea = 0, x;
+  float	area = 0, narea = 0, x, csf = 0, grey = 0;
   Graph::iterator	iv, ev = _graph.end();
   for( iv=_graph.begin(); iv!=ev; ++iv )
+  {
     if( (*iv)->getProperty( "surface_area", x ) )
       {
         area += x;
         if( (*iv)->getProperty( "refsurface_area", x ) )
           narea += x;
       }
+    if( (*iv)->getProperty( "CSF_volume", x ) )
+      csf += x;
+    if( (*iv)->getProperty( "GM_volume", x ) )
+      grey += x;
+  }
   if( area != 0 )
-    {
-      _graph.setProperty( "folds_area", area );
-      if( narea != 0 )
-        _graph.setProperty( "reffolds_area", narea );
-    }
+  {
+    _graph.setProperty( "folds_area", area );
+    if( narea != 0 )
+      _graph.setProperty( "reffolds_area", narea );
+  }
+  if( csf != 0 )
+    _graph.setProperty( "CSF_volume", csf );
+  if( grey != 0 )
+    _graph.setProperty( "GM_volume", grey );
 }
 
 

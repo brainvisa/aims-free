@@ -280,6 +280,9 @@ namespace aims
     if (nifti_image_load( nim ) == -1)
       throw carto::wrong_format_error( "Error while loading NIFTI1 image "
           "data.", _name );
+    // fix erroneous null dimT
+    if( nim->dim[4] == 0 )
+      nim->dim[4] = 1;
 
     std::vector< float > storage_to_memory;
     hdr->getProperty( "storage_to_memory", storage_to_memory );

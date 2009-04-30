@@ -53,9 +53,9 @@ double parzen( double u, double h )
 }
 
 inline
-double parzen2( double u, double h )
+double parzen2( double u, double h, int dim)
 {
-  return exp( - 0.5 * u / h ) / ( sqrt( 2 * M_PI * h));
+  return exp( - 0.5 * u / (h * h) ) / ( pow(h, dim));
 }
 
 
@@ -776,8 +776,7 @@ void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
 			dy = (y - d[1]);
 			dz = (z - d[2]);
 			dist = dx * dx + dy * dy + dz * dz;
-			val = parzen2(dist, h);
-			val /= h;
+			val = parzen2(dist, h, dim);
 			pdf(x, y, z) += val;
 			sum += val;
 		}

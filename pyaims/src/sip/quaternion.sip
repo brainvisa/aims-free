@@ -26,6 +26,7 @@ class Quaternion
   Point3df transformInverse( const Point3df &p ) const;
   aims::Quaternion & operator+= ( const aims::Quaternion &q );
   aims::Quaternion & operator *= ( const aims::Quaternion &q );
+  static aims::Quaternion operator * ( const aims::Quaternion &b ) const;
   void norm();
   aims::Quaternion normalized() const;
   void fromAxis( const Point3df &c, float phi );

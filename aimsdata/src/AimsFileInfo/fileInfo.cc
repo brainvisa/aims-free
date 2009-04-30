@@ -54,12 +54,37 @@
 #include <aims/resampling/motion.h>
 #include <cartobase/object/pythonwriter.h>
 #include <cartobase/object/attributed.h>
+#include <cartobase/stream/sstream.h>
 #include <time.h>
 
 using namespace aims;
 using namespace carto;
 using namespace std;
 
+
+// helper for printing values
+
+template<typename T> void outHelper( T value, ostream& os )
+{
+    os << value;
+}
+
+template<> void outHelper<int8_t>( int8_t value, ostream& os )
+{
+    os << int(value);
+}
+
+template<> void outHelper<uint8_t>( uint8_t value, ostream& os )
+{
+    os << int(value);
+}
+
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template<> void outHelper<char>( char value, ostream& os )
+{
+    os << (char)value;
+}
+#endif
 
 //	helper for printing attributes
 template<typename T> void outHelper( const AttributedObject& object,
@@ -233,15 +258,18 @@ try
               }
             sum += val;
           }
-  cout << "minimum : " << valmin
-       << " at " 
+
+  cout << "minimum : ";
+  outHelper<T>(valmin, cout);
+  cout << " at " 
        << "(" << xmin << "," << ymin << "," 
        << zmin << "," << tmin << ")" << endl;
-  cout << "maximum : " << valmax
-       << " at " 
+  cout << "maximum : ";
+  outHelper<T>(valmax, cout);
+  cout << " at " 
        << "(" << xmax << "," << ymax << "," 
        << zmax << "," << tmax << ")" << endl;
-  cout << "mean : " 
+  cout   << "mean : " 
        << sum / ( vol.getSizeX() * vol.getSizeY() * vol.getSizeZ() 
                   * vol.getSizeT() ) << endl;
 
