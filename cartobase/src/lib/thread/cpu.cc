@@ -37,7 +37,7 @@
 #include <cartobase/thread/cpu.h>
 #if defined(_WIN32)
 // for GetSystemInfo() on Windows
-#include <Windows.h>
+#include <windows.h>
 #elif defined(__APPLE__)
 // for MPProcessorsScheduled() on Mac OS X
 #include <CoreServices/CoreServices.h>

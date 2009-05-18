@@ -20,22 +20,24 @@ foreach( _command ${_commands} )
                 DESTINATION bin
                 COMPONENT ${PROJECT_NAME} )
 endforeach( _command ${commands} )
-# Targets linking with aimsecat
-foreach( _command AimsFovSplit AimsSumPETFrame )
-  file( GLOB _pro "${_command}/*.pro" )
-  BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"
-                              TARGET _target
-                              SOURCES _proSources )
-  set( _sources )
-  foreach( _f ${_proSources} )
-    set( _sources ${_sources} ${_command}/${_f} )
-  endforeach( _f ${_proSources} )
-  add_executable( ${_target} ${_sources} )
-  target_link_libraries( ${_target} aimsalgo aimsecat )
-  BRAINVISA_INSTALL( TARGETS ${_target}
-                DESTINATION bin
-                COMPONENT ${PROJECT_NAME} )
-endforeach( _command AimsFovSplit AimsSumPETFrame )
+if( NOT WIN32 )
+  # Targets linking with aimsecat
+  foreach( _command AimsFovSplit AimsSumPETFrame )
+    file( GLOB _pro "${_command}/*.pro" )
+    BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"
+                                TARGET _target
+                                SOURCES _proSources )
+    set( _sources )
+    foreach( _f ${_proSources} )
+      set( _sources ${_sources} ${_command}/${_f} )
+    endforeach( _f ${_proSources} )
+    add_executable( ${_target} ${_sources} )
+    target_link_libraries( ${_target} aimsalgo aimsecat )
+    BRAINVISA_INSTALL( TARGETS ${_target}
+                  DESTINATION bin
+                  COMPONENT ${PROJECT_NAME} )
+  endforeach( _command AimsFovSplit AimsSumPETFrame )
+endif( NOT WIN32 )
 # Targets linking with aimsjpeg
 if( JPEG_FOUND )
   foreach( _command AimsData2Jpeg )

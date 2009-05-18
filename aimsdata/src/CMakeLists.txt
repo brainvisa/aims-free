@@ -1,16 +1,16 @@
 add_subdirectory(aimsdata)
-add_subdirectory(aimsecat)
+if( NOT WIN32 )
+  add_subdirectory(aimsecat)
+  add_subdirectory(aimsvida)
+endif( NOT WIN32 )
 add_subdirectory(aimsply)
-add_subdirectory(aimsvida)
 add_subdirectory(aimsnifti)
- add_subdirectory(aimsfdf)
 
 IF(APPLE)
   add_subdirectory(bundle_aimsecat)
   add_subdirectory(bundle_aimsply)
   add_subdirectory(bundle_aimsvida)
   add_subdirectory(bundle_aimsnifti)
-  add_subdirectory(bundle_aimsfdf)
 ENDIF(APPLE)
 
 
