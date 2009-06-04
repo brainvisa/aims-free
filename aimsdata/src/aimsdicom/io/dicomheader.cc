@@ -186,6 +186,24 @@ bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
       dt = (int) durationTime ;
     }
   else return false ;
+  
+/*  if ( header.search( DCM_FrameReferenceDatetime, stack ) == EC_Normal )
+    {
+      if( stack.top()->ident() != EVR_DT ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        return false;
+      }
+      DcmDateTime *object = (DcmDateTime *)stack.top();
+      OFString frdt;
+      object->getOFString( frdt, 0 );
+      
+      std::cout << "Frame reference date time is " << frdt << std::endl ;
+      
+    }
+  else {
+    std::cerr << "No FrameReferenceDateTime" << std::endl ;
+    return false ;
+  }*/
    
   if ( header.search( DCM_FrameReferenceTime, stack ) == EC_Normal )
     {
@@ -194,9 +212,12 @@ bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
         return false ;
       }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
-      Float64 startTime;
-      object->getFloat64( startTime );
-      st = (int) startTime ;
+//      Float64 startTime;
+//     object->getFloat64( startTime );
+//      st = (int) startTime ;
+      Float64 frameReferenceTime;
+      object->getFloat64( frameReferenceTime );
+      st = (int) frameReferenceTime /*- dt / 2*/ ;
     } 
   else return false ;
        
@@ -426,7 +447,7 @@ int DicomHeader::readFirst()
   cerr.rdbuf( sb );
   if ( header.error() != EC_Normal ) 
     {
-      cerr << dcmErrorConditionToString( header.error() ) << endl;
+      //cerr << dcmErrorConditionToString( header.error() ) << endl;
       return -1;
     }
 

@@ -50,3 +50,15 @@ string StandardReferentials::acPcReferential()
 }
 
 
+string StandardReferentials::mniTemplateReferentialID()
+{
+  return "803552a6-ac4d-491d-99f5-b938392b674b";
+}
+
+
+string StandardReferentials::acPcReferentialID()
+{
+  return "a2a820ac-a686-461e-bcf8-856400740a6c";
+}
+
+

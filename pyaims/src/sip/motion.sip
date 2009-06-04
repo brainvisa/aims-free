@@ -52,5 +52,6 @@ public:
   static AimsData_FLOAT rotationaroundy( float );
   static AimsData_FLOAT rotationaroundz( float );
 
+  carto::GenericObject* header();
 };
 

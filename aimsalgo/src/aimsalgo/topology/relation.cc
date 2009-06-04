@@ -65,7 +65,7 @@ void TopologicalRelation::init()
   int i, j, k, cpt = 0;
 
   for ( i=0; i<27; i++ )
-    for ( j=0; j<27; j++ )  _relation[ i ][ j ] = 0;
+    for ( j=0; j<26; j++ )  _relation[ i ][ j ] = 0;
 
   P[ cpt++ ] = Point3d( 0, 0, 0 );
 

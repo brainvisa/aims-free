@@ -51,6 +51,14 @@ namespace aims
   template <typename T> class BucketMap;
 
   template<typename T>
+  void AimsConnectedComponent( AimsData<T>& data, 
+                               aims::Connectivity::Type connectivity,
+                               std::map<T, size_t>& valids, 
+                               const T & backgrnd = 0, bool bin = true, 
+                               size_t minSize = 0, size_t numMax = 0, 
+                               bool verbose = true );
+
+  template<typename T>
   void AimsConnectedComponent( AimsData<T>& data,
                                aims::Connectivity::Type connectivity,
                                const T & backgrnd = 0, bool bin = true, 

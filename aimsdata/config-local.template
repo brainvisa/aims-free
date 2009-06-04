@@ -26,6 +26,7 @@ LIBS_VIDA		= @aimsvida:libDepsLine@
 LIBS_MINC		= @aimsminc:libDepsLine@
 LIBS_PLY		= @aimsply:libDepsLine@
 LIBS_NIFTI		= @aimsnifti:libDepsLine@
+LIBS_FDF		= @aimsfdf:libDepsLine@
 
 release:BUILDMODE	= @buildMode@
 debug:BUILDMODE		= @buildMode@
@@ -39,6 +40,7 @@ defmodule(aimsvida)	 = @aimsvida:enabled@
 defmodule(aimsminc)	 = @aimsminc:enabled@
 defmodule(aimsply)	 = @aimsply:enabled@
 defmodule(aimsnifti) = @aimsnifti:enabled@
+defmodule(aimsfdf) = @aimsfdf:enabled@
 
 module(aimsdicom):INCLUDEPATH += @dcmtk:includes@
 module(aimsecat) :INCLUDEPATH += @ecat+:includes@

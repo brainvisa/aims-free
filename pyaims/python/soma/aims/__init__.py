@@ -100,6 +100,10 @@ del aims, ExtendedImporter
 
 from soma.aims import hierarchy
 del hierarchy # init has been done, get rid of it...
+try:
+  from soma.aims.spmnormalizationreader import *
+except:
+  pass # probably cannot import scipy.io
 
 # typedefs
 
@@ -503,7 +507,7 @@ def __toMatrix(s):
 def __MotionFromMatrix(self, value):
   self.rotation().volume().arraydata().reshape(3,3).transpose()[:,:] \
     = value[ 0:3, 0:3 ]
-  self.translation().arraydata()[:] = value[ 0:3, 3 ]
+  self.translation().arraydata()[:] = value[ 0:3, 3 ].flatten()
 def __Motion__init__( self, *args ):
   if len( args ) != 0 and isinstance( args[0], numpy.ndarray ) \
     and args[0].shape == ( 4, 4 ):

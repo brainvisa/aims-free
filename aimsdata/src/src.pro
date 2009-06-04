@@ -12,6 +12,7 @@ module(aimsecat) :SUBDIRS	+= aimsecat
 module(aimsminc) :SUBDIRS	+= aimsminc
 module(aimsply)  :SUBDIRS	+= aimsply
 module(aimsnifti):SUBDIRS	+= aimsnifti
+module(aimsfdf):SUBDIRS   += aimsfdf
 
 darwin-module(aimsdicom):PSUBDIRS	+= bundle_aimsdicom
 darwin-module(aimsecat):PSUBDIRS	+= bundle_aimsecat
@@ -21,6 +22,7 @@ darwin-module(aimsvida):PSUBDIRS	+= bundle_aimsvida
 darwin-module(aimsminc):PSUBDIRS	+= bundle_aimsminc
 darwin-module(aimsply):PSUBDIRS         += bundle_aimsply
 darwin-module(aimsnifti):PSUBDIRS       += bundle_aimsnifti
+darwin-module(aimsfdf):PSUBDIRS       += bundle_aimsfdf
 
 PSUBDIRS += \
     AimsAverage	\

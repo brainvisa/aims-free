@@ -62,7 +62,9 @@ namespace
 DicomPlugin::DicomPlugin() : Plugin()
 {
   vector<string>	ext;
+  ext.push_back( "dcm" );
   ext.push_back( "" );
+
   DicomFormat<int8_t>	*df1 = new DicomFormat<int8_t>;
 #ifdef AIMS_APPLE_GCC33BUG
   macosxbugs::fileFormatDictionary_dataint8_registerFormat( "DICOM", df1, ext );
@@ -142,7 +144,7 @@ DicomPlugin::~DicomPlugin()
 
 string DicomPlugin::name() const
 {
-  return string("DICOM reading");
+  return string("DICOM IO");
 }
 
 

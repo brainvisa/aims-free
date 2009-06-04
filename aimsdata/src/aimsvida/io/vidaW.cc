@@ -41,8 +41,10 @@
 #include <aims/io/vidaheader.h>
 #include <aims/data/data.h>
 #include <aims/io/vidaW.h>
+#include <cartobase/exception/ioexcept.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
@@ -64,43 +66,50 @@ void VidaWriter::write(const AimsData<short>& thing)
 		                          VSIZE_PZ,  (double)thing.sizeZ(),
 		                          VSIZE_PT,  (double)thing.sizeT(),
 		                          NULL));
-   ASSERT( vp != NULL ); 
+   if( !vp )
+     io_error::launchErrnoExcept( _name );
 
    short *s_pt,*s_ima = new short[ thing.dimX() * thing.dimY() ];
    ASSERT(s_ima);
-            
+   bool ok = true;
    for (int frame=0;frame<VIDA_T(vp);frame++)
-   { for (int slice=0;slice<VIDA_Z(vp);slice++)
-     { s_pt = s_ima;
+   {
+     for (int slice=0;slice<VIDA_Z(vp);slice++)
+     {
+       s_pt = s_ima;
        for(int line=0;line<VIDA_Y(vp);line++)
-       { memcpy((char *)s_pt,(char *)&thing(0,line,slice,frame),
+       {
+         memcpy((char *)s_pt,(char *)&thing(0,line,slice,frame),
                 VIDA_X(vp)*sizeof(short));
          s_pt  += VIDA_X(vp);
        }
-       ASSERT(VidaWrite((char *)s_ima,slice,frame,vp) != -1);
+       if(VidaWrite((char *)s_ima,slice,frame,vp) == -1)
+         ok = false;
      } 
    }
    delete[] s_ima;
    VidaClose(vp);
+   if( !ok )
+     io_error::launchErrnoExcept( _name );
 
     const PythonHeader 
       *ph = dynamic_cast<const PythonHeader *>( thing.header() );
     if( ph )
-      {
-	hdr.copy( *ph );
-	vector<int>	dims(4);
-	dims[0] = thing.dimX();
-	dims[1] = thing.dimY();
-	dims[2] = thing.dimZ();
-	dims[3] = thing.dimT();
-	hdr.setProperty( "volume_dimension", dims );
-	vector<float>	vs(4);
-	vs[0] = thing.sizeX();
-	vs[1] = thing.sizeY();
-	vs[2] = thing.sizeZ();
-	vs[3] = thing.sizeT();
-	hdr.setProperty( "voxel_size", vs );
-      }
+    {
+      hdr.copy( *ph );
+      vector<int>	dims(4);
+      dims[0] = thing.dimX();
+      dims[1] = thing.dimY();
+      dims[2] = thing.dimZ();
+      dims[3] = thing.dimT();
+      hdr.setProperty( "volume_dimension", dims );
+      vector<float>	vs(4);
+      vs[0] = thing.sizeX();
+      vs[1] = thing.sizeY();
+      vs[2] = thing.sizeZ();
+      vs[3] = thing.sizeT();
+      hdr.setProperty( "voxel_size", vs );
+    }
     hdr.write();
 }
 

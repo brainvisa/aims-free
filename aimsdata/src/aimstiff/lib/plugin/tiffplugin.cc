@@ -96,6 +96,13 @@ TiffPlugin::TiffPlugin() : Plugin()
   FileFormatDictionary<Volume<AimsRGB> >::registerFormat( "TIFF", vf13, ext );
 
   Finder::registerFormat( "TIFF", new FinderTiffFormat, ext );
+
+  TiffFormat<AimsRGBA>	*df14 = new TiffFormat<AimsRGBA>;
+  FileFormatDictionary<AimsData<AimsRGBA> >::registerFormat( "TIFF", df14, ext );
+  VolumeFormat<AimsRGBA> *vf14 = new VolumeFormat<AimsRGBA>( "TIFF" );
+  FileFormatDictionary<Volume<AimsRGBA> >::registerFormat( "TIFF", vf14, ext );
+
+  Finder::registerFormat( "TIFF", new FinderTiffFormat, ext );
 }
 
 

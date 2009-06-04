@@ -262,35 +262,38 @@ bool lintex( Process & p, const string & fname, Finder & f )
   cout << "done\n";
   if( lp.type.empty() )
     lp.type = f.dataType();
-  
-  unsigned		i , n = tex1[0].nItem();  
+
+  unsigned		i , n = tex1[0].nItem();
   double	a = lp.a;
   double	b = lp.b;
   double	c = lp.c;
   double	d = lp.d;
   double	e = lp.e;
- 
-   
+
+  Texture<T> & t0 = texO[0];
+  t0.reserve( n );
+
   if( lp.i2.empty() )
     {
       cout << "processing..." << endl;
       for(i = 0; i < n; ++i)
-	texO.push_back( T (a * tex1.item(i) / b + e)  );
-      cout << "done" << endl;    
+        t0.push_back( T (a * tex1.item(i) / b + e)  );
+      cout << "done" << endl;
     }
   else
     { 
       Reader<TimeTexture<T> >	r2( lp.i2 );
       cout << "Reading " << lp.i2 << "..." << flush;
       if( !r2.read( tex2, 0, &format ) )
-	return( false );
+        return false;
       cout << "done\n";
 
       for(i = 0; i < n; ++i)
-	texO.push_back( T ( a * tex1.item(i) / b + 
-			      c * tex2.item( i ) / d + e ) );
+        t0.push_back( T ( a * tex1.item(i) / b +
+          c * tex2.item( i ) / d + e ) );
     }
-  
+
+  texO.header().copy( tex1.header() );
   Writer<TimeTexture<T>	> w( lp.fout );
   cout << "writing result..." << endl;
   return( w.write( texO ) );

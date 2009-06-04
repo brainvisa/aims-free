@@ -48,6 +48,10 @@ namespace aims
     virtual bool read( const std::string & filename, AimsData<T> & vol, 
                        const carto::AllocatorContext & context, 
                        carto::Object options );
+
+    virtual bool write( const std::string & filename, 
+                        const AimsData<T> & vol, 
+                        bool ascii = false );
   };
 
 }

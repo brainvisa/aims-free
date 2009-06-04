@@ -11,7 +11,8 @@ class AimsDataComponent( GenericMakerComponent ):
     'tiff': ( None, 'include TIFF file format support (default: yes)' ),
     'minc': ( None, 'include MINC file format support (default: yes)' ), 
     'ply': ( None, 'include PLY file format support (default: yes)' ), 
-    'nifti': ( None, 'include NIFTI1 file format support (default: yes)' ), 
+    'nifti': ( None, 'include NIFTI1 file format support (default: yes)' ),
+    'fdf': ( None, 'include FDF file format support (default: yes)' ),
     'dlopen': (None, 'include dynamic library loading plugins support (default: yes)'),
   } )
 
@@ -27,6 +28,7 @@ class AimsDataComponent( GenericMakerComponent ):
     self.setDefaultOption( 'dlopen', 1 )
     self.setDefaultOption( 'ply', 1 )
     self.setDefaultOption( 'nifti', 1 )
+    self.setDefaultOption( 'fdf', 1 )
 
   
   def shareDir( self ):
@@ -99,6 +101,9 @@ class AimsDataComponent( GenericMakerComponent ):
     if int( self.getOption( 'nifti', 0 ) ) \
       and weakDependency( AimsNiftiComponent, self ):
       result.append( AimsNiftiComponent )
+    if int( self.getOption( 'fdf', 0 ) ) \
+      and weakDependency( AimsFdfComponent, self ):
+      result.append( AimsFdfComponent )
     return result
 
 
@@ -191,4 +196,15 @@ class AimsNiftiComponent( GenericMakerModuleComponent ):
 
   def dependencies( self ):
     return [ LibZComponent, AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class AimsFdfComponent( GenericMakerModuleComponent ):
+  _name = 'aimsfdf'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ AimsDataComponent ]
+
 

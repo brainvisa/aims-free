@@ -383,7 +383,7 @@ UnifiedEcatInfo *EcatOpen( char *fname, char *mode )
 	mh->sw_version = V7;
 	mh->file_type = PetVolume;
 	if ((mptr = matrix_create(fname,MAT_CREATE,mh)) == NULL) {
-	  printf("EcatOpen : Can't open new file %s\n", fname);
+	  /* printf("EcatOpen : Can't open new file %s\n", fname); */
 	  free( uei->fname );
 	  free(uei);
 	  free(mh);

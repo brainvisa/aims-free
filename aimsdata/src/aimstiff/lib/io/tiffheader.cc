@@ -91,7 +91,7 @@ void TiffHeader::read()
     throw file_not_found_error( _name );
 
     //printf("Fichier ouvert \n");
-    _name = fileName;
+  _name = fileName;
 
   vector<string> pt;
   _dimZ = TIFFNumberOfDirectories(tif);
@@ -170,35 +170,6 @@ void TiffHeader::read()
   readMinf( removeExtension( _name ) + extension() + ".minf" );
 
   inputFilenames();
-
-  // if .minf has been modified
-  if( getProperty( "volume_dimension", dims ) )
-    if( dims.size() >= 1 )
-      {
-        _dimX = dims[0];
-        if( dims.size() >= 2 )
-          {
-            _dimY = dims[1];
-            if( dims.size() >= 3 )
-              {
-                _dimZ = dims[2];
-                if( dims.size() >= 4 )
-                  {
-                    _dimT = dims[3];
-                  }
-              }
-          }
-      }
-
-  getProperty( "voxel_size", vs );
-  if( vs.size() >= 3 )
-    {
-      _sizeX = vs[0];
-      _sizeY = vs[1];
-      _sizeZ = vs[2];
-      if( vs.size() >= 4 )
-        _sizeT = vs[3];
-    }
 }
 
 

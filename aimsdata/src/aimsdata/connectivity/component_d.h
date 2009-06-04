@@ -54,6 +54,7 @@ namespace aims
   template<typename T>
   void AimsConnectedComponent( AimsData<T>& data, 
                                Connectivity::Type connectivity, 
+                               std::map<T, size_t>& valids, 
                                const T & backg, bool bin, size_t minSize, 
                                size_t numMax, bool verbose )
   {
@@ -159,9 +160,6 @@ namespace aims
 
       std::multimap<size_t, size_t>::reverse_iterator 
         im, em = compSize.rend();
-      std::map<T, size_t>	valids;
-
-
 
       label = 1;
 
@@ -203,11 +201,21 @@ namespace aims
         std::cout << "after filtering: " << valids.size() << " components\n";
 
     }
+  }
 
-
-
-
-
+  template<typename T>
+  void AimsConnectedComponent( AimsData<T>& data, 
+                               Connectivity::Type connectivity, 
+                               const T & backg, bool bin, size_t minSize, 
+                               size_t numMax, bool verbose )
+  {
+      std::map<T, size_t>	valids;
+    
+      AimsConnectedComponent( data, 
+                               connectivity, 
+                               valids, 
+                               backg, bin, minSize, 
+                               numMax, verbose );
   }
 
 

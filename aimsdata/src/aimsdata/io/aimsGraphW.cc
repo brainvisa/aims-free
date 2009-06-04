@@ -507,7 +507,7 @@ void AimsGraphWriter::writeElements( Graph & g, SavingMode newmode,
   //	set up output directory
   directory = FileUtil::dirname( d->filename );
   g.getProperty( "filename_base", fname_base );
-  if( fname_base == "*" 
+  if( fname_base == "*"
       || ( !reader.empty() && FileUtil::dirname( reader ) != directory 
            && FileUtil::removeExtension( fname_base ) 
            == FileUtil::removeExtension( FileUtil::basename( reader ) ) ) )

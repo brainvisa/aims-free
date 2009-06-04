@@ -63,6 +63,12 @@ int main( int argc, const char** argv )
       int16_t				inside = 0, outside = 11;
       bool				nomesh = false;
       string                            gver;
+#ifdef _WIN32
+      // on windows, disable threading because something is going wrong in it
+      int  nthreads = 1;
+#else
+      int  nthreads = 0;
+#endif
 
       AimsApplication	app( argc, argv, "Builds cortical folds graph " 
                              "attributes - replaces VipFoldArgAtt" );
@@ -83,8 +89,17 @@ int main( int argc, const char** argv )
       app.addOption( gver, "--graphversion",
                      "output graph version [default: "
                          + cartobaseShortVersion() + "]", true );
+      app.addOption( nthreads, "--threads", string( "limit threads usage. " \
+        "code: 0: one thread per CPU; 1: mono-threaded; n>0: use exactly n " \
+        "threads; -n: use one thread per CPU, up to n max. Default: " ) 
+        + toString( nthreads ) + ". Note: no effect on Windows, threading " \
+        "is disabled", true );
 
       app.initialize();
+
+#ifdef _WIN32
+      nthreads = 1;
+#endif
 
       if( graphw.fileName().empty() )
         graphw.setFileName( graphr.fileName() );
@@ -170,6 +185,7 @@ int main( int argc, const char** argv )
 
       FoldGraphAttributes	fatt( skel, graph, motion.get(), inside, 
                                       outside, !nomesh, gversion );
+      fatt.setMaxThreads( nthreads );
       fatt.doAll();
 
       if( graphw.fileName() != graphr.fileName() )

@@ -9,6 +9,7 @@
 #include <aims/io/mincheader.h>
 #include <aims/resampling/motion.h>
 #include <cartobase/stream/fileutil.h>
+#include <cartobase/stream/fdinhibitor.h>
 
 using namespace carto;
 using namespace std;
@@ -212,104 +213,116 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     ASSERT( hdr.getProperty( "MINC_space_type", space_name) );
     set_volume_space_type(volume,(char*)space_name.c_str());
   }
-    
   //3) Other attributes
-  output_volume((char*)(_name.c_str()),
+  bool ok = true;
+  fdinhibitor fdi( 2 );
+  fdi.close(); // inhibit output on stderr
+  if( output_volume((char*)(_name.c_str()),
                 nc_data_type,
                 signed_flag,
                 thing.minimum(),
                 thing.maximum(),
                 volume,
                 NULL,
-                NULL);
+                NULL) != OK )
+    ok = false;
+  int mincid = -1;
+  if( ok )
+  {
+    mincid=ncopen((char*)(_name.c_str()),NC_WRITE);
+    if( mincid < 0 )
+      ok = false;
+  }
+  fdi.open(); // allow again output on stderr
+  if( ok )
+  {
+    ncredef(mincid);
 
-  int mincid=ncopen((char*)(_name.c_str()),NC_WRITE);
-  ncredef(mincid);
+    //ncopts=NC_VERBOSE;
+    ncopts=0;
 
-  //ncopts=NC_VERBOSE;
-  ncopts=0;
+    SyntaxSet	*s = PythonHeader::syntax();
+    Syntax	&sx = (*s)[ "__generic__" /*"PythonHeader"*/ ];
 
-  SyntaxSet	*s = PythonHeader::syntax();
-  Syntax	&sx = (*s)[ "__generic__" /*"PythonHeader"*/ ];
-    
-  hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "varid", "MINC_patient:varid");
-  hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "vartype", "MINC_patient:vartype");
-  hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "version", "MINC_patient:version");
-  hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "full_name", "patient_id");
-  hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "identification", "MINC_patient:identification");
-  hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "birthdate", "MINC_patient:birthdate");
-  hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "sex", "MINC_patient:sex");
-  hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "weight", "MINC_patient:weight");
+    hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "varid", "MINC_patient:varid");
+    hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "vartype", "MINC_patient:vartype");
+    hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "version", "MINC_patient:version");
+    hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "full_name", "patient_id");
+    hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "identification", "MINC_patient:identification");
+    hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "birthdate", "MINC_patient:birthdate");
+    hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "sex", "MINC_patient:sex");
+    hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "weight", "MINC_patient:weight");
 
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "varid", "MINC_study:varid");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "vartype", "MINC_study:vartype");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "version", "MINC_study:version");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "start_time", "MINC_study:start_time");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "modality", "modality");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "institution", "MINC_study:institution");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "station_id", "MINC_study:station_id");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "procedure", "MINC_study:procedure");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "study_id", "study_id");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "acquisition_id", "MINC_study:acquisition_id");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "varid", "MINC_study:varid");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "vartype", "MINC_study:vartype");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "version", "MINC_study:version");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "start_time", "MINC_study:start_time");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "modality", "modality");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "institution", "MINC_study:institution");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "station_id", "MINC_study:station_id");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "procedure", "MINC_study:procedure");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "study_id", "study_id");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "acquisition_id", "MINC_study:acquisition_id");
 
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "varid", "MINC_acquisition:varid");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "vartype", "MINC_acquisition:vartype");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "version", "MINC_acquisition:version");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "scanning_sequence", "MINC_acquisition:scanning_sequence");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "repetition_time", "tr");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "echo_time", "te");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "inversion_time", "MINC_acquisition:inversion_time");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "flip_angle", "flip_angle");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "num_averages", "MINC_acquisition:num_averages");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "imaging_frequency", "MINC_acquisition:imaging_frequency");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "imaged_nucleus", "MINC_acquisition:imaged_nucleus");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "comments", "MINC_acquisition:comments");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "varid", "MINC_acquisition:varid");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "vartype", "MINC_acquisition:vartype");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "version", "MINC_acquisition:version");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "scanning_sequence", "MINC_acquisition:scanning_sequence");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "repetition_time", "tr");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "echo_time", "te");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "inversion_time", "MINC_acquisition:inversion_time");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "flip_angle", "flip_angle");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "num_averages", "MINC_acquisition:num_averages");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "imaging_frequency", "MINC_acquisition:imaging_frequency");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "imaged_nucleus", "MINC_acquisition:imaged_nucleus");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "comments", "MINC_acquisition:comments");
 
-  hdr.writeMincAttribute(sx,mincid,"image-min", NC_DOUBLE, "image", "units", "MINC_image-min:units");
-  hdr.writeMincAttribute(sx,mincid,"image-max", NC_DOUBLE, "image", "units", "MINC_image-max:units");
+    hdr.writeMincAttribute(sx,mincid,"image-min", NC_DOUBLE, "image", "units", "MINC_image-min:units");
+    hdr.writeMincAttribute(sx,mincid,"image-max", NC_DOUBLE, "image", "units", "MINC_image-max:units");
 
-  //Siemens sonata
-  hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "age", "MINC_patient:age");
- 
-
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "start_date", "MINC_study:start_date");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "manufacturer", "MINC_study:manufacturer");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "model", "MINC_study:model");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "field_value", "MINC_study:field_value");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "software_version", "MINC_study:software_version");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "serial_no", "MINC_study:serial_no");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "performing_physician", "MINC_study:performing_physician");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "operator", "MINC_study:operator");
-  hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "calibration_date", "MINC_study:calibration_date");
-
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "acquisition_id", "MINC_acquisition:acquisition_id");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "start_time", "MINC_acquisition:start_time");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "protocol_name", "MINC_acquisition:protocol_name");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "receive_coil", "MINC_acquisition:receive_coil");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "transmit_coil", "MINC_acquisition:transmit_coil");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "echo_number", "MINC_acquisition:echo_number");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "slice_thickness", "MINC_acquisition:slice_thickness");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "num_slices", "MINC_acquisition:num_slices");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "num_dyn_scans", "MINC_acquisition:num_dyn_scans");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "window_center", "MINC_acquisition:window_center");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "window_width", "MINC_acquisition:window_width");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "num_phase_enc_steps", "MINC_acquisition:num_phase_enc_steps");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "percent_sampling", "MINC_acquisition:percent_sampling");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "percent_phase_fov", "MINC_acquisition:percent_phase_fov");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "pixel_bandwidth", "MINC_acquisition:pixel_bandwidth");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "phase_enc_dir", "MINC_acquisition:phase_enc_dir");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "SAR", "MINC_acquisition:SAR");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "mr_acq_type", "MINC_acquisition:mr_acq_type");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "image_type", "MINC_acquisition:image_type");
-  hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "MrProt_dump", "MINC_acquisition:MrProt_dump");
-
-  hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filename", "MINC_processing:transformation0-filename");
-  hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filedata", "MINC_processing:transformation0-filedata");
+    //Siemens sonata
+    hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "age", "MINC_patient:age");
 
 
-  hdr.writeMincHistory(mincid);
-  hdr.writeMinf( FileUtil::removeExtension( _name ) + ".mnc.minf" );
-  miclose(mincid);
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "start_date", "MINC_study:start_date");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "manufacturer", "MINC_study:manufacturer");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "model", "MINC_study:model");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "field_value", "MINC_study:field_value");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "software_version", "MINC_study:software_version");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "serial_no", "MINC_study:serial_no");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "performing_physician", "MINC_study:performing_physician");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "operator", "MINC_study:operator");
+    hdr.writeMincAttribute(sx,mincid,"study", NC_LONG, "rootvariable", "calibration_date", "MINC_study:calibration_date");
+
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "acquisition_id", "MINC_acquisition:acquisition_id");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "start_time", "MINC_acquisition:start_time");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "protocol_name", "MINC_acquisition:protocol_name");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "receive_coil", "MINC_acquisition:receive_coil");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "transmit_coil", "MINC_acquisition:transmit_coil");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "echo_number", "MINC_acquisition:echo_number");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "slice_thickness", "MINC_acquisition:slice_thickness");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "num_slices", "MINC_acquisition:num_slices");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "num_dyn_scans", "MINC_acquisition:num_dyn_scans");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "window_center", "MINC_acquisition:window_center");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "window_width", "MINC_acquisition:window_width");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "num_phase_enc_steps", "MINC_acquisition:num_phase_enc_steps");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "percent_sampling", "MINC_acquisition:percent_sampling");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "percent_phase_fov", "MINC_acquisition:percent_phase_fov");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "pixel_bandwidth", "MINC_acquisition:pixel_bandwidth");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "phase_enc_dir", "MINC_acquisition:phase_enc_dir");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "SAR", "MINC_acquisition:SAR");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "mr_acq_type", "MINC_acquisition:mr_acq_type");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "image_type", "MINC_acquisition:image_type");
+    hdr.writeMincAttribute(sx,mincid,"acquisition", NC_LONG, "rootvariable", "MrProt_dump", "MINC_acquisition:MrProt_dump");
+
+    hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filename", "MINC_processing:transformation0-filename");
+    hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filedata", "MINC_processing:transformation0-filedata");
+
+
+    hdr.writeMincHistory(mincid);
+    hdr.writeMinf( FileUtil::removeExtension( _name ) + ".mnc.minf" );
+    miclose(mincid);
+  }
 
   //std::cout << "Delete starts\n";
   delete_string(dim_names[0]);
@@ -320,6 +333,8 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   delete_volume(volume);
   //std::cout << "Delete ends2\n";
 
+  if( !ok )
+    io_error::launchErrnoExcept( _name );
   return( true );
 }
 

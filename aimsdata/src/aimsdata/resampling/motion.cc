@@ -78,7 +78,7 @@ ostream& operator << ( ostream& os, const Motion& thing )
 //-----------------------------------------------------------------------------
 Motion::Motion()
   : _translation( 0.0 ), _rotation( 3, 3 ),
-    _header( 0 )
+    _header( new PythonHeader )
 {
   _rotation = 0.0f;
   _translation = 0.0f;
@@ -101,14 +101,15 @@ Motion::Motion( const Motion& other ) :
   RCObject(),
   _translation( other._translation ), 
   _rotation( other._rotation.clone() ), 
-  _header( other.header() ? new PythonHeader( *other.header() ) : 0 )
+  _header( other.header() ? new PythonHeader( *other.header() )
+    : new PythonHeader )
 {
 }
 
 
 //-----------------------------------------------------------------------------
 Motion::Motion( const vector<float> & mat ) :
-    RCObject(), _rotation( 3, 3 ), _header( 0 )
+    RCObject(), _rotation( 3, 3 ), _header( new PythonHeader )
 {
   *this = mat;
 }
@@ -116,7 +117,7 @@ Motion::Motion( const vector<float> & mat ) :
 
 //-----------------------------------------------------------------------------
 Motion::Motion( const Object mat ) :
-    RCObject(), _rotation( 3, 3 ), _header( 0 )
+    RCObject(), _rotation( 3, 3 ), _header( new PythonHeader )
 {
   *this = mat;
 }
@@ -124,7 +125,7 @@ Motion::Motion( const Object mat ) :
 
 //-----------------------------------------------------------------------------
 Motion::Motion( const Quaternion & quat ) :
-    RCObject(), _rotation( 3, 3 ), _header( 0 )
+    RCObject(), _rotation( 3, 3 ), _header( new PythonHeader )
 {
   *this = quat;
 }
@@ -141,7 +142,7 @@ Motion& Motion::operator = ( const Motion& other )
   if( other.header() )
     _header = new PythonHeader( *other.header() );
   else
-    _header = 0;
+    _header = new PythonHeader;
   return *this;
 }
 
@@ -243,7 +244,10 @@ bool Motion::operator == ( const Motion & other )
 void Motion::setHeader( PythonHeader* ph )
 {
   delete _header;
-  _header = ph;
+  if( ph )
+    _header = ph;
+  else
+    _header = new PythonHeader;
 }
 
 

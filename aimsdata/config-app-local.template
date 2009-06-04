@@ -21,3 +21,4 @@ LIBS = @libBuildLine@
 #LIBS		+= -lpthread
 
 LIBS_AIMSTIFF = @aimstiff:libBuildLine@
+LIBS_AIMSFDF = @aimsfdf:libBuildLine@

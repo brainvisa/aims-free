@@ -2,7 +2,8 @@ attributes = {
   'release_plugins' : [
     'libaimsvida.so', 
     'libaimsdicom.so', 
-    'libaimsecat.so', 
+    'libaimsecat.so',
+    'libaimsfdf.so',
     'libaimsjpeg.so', 
     'libaimstiff.so', 
     'libaimsqtformats.so', 
@@ -14,7 +15,8 @@ attributes = {
   'debug_plugins' : [
     'libaimsvida-debug.so', 
     'libaimsdicom-debug.so', 
-    'libaimsecat-debug.so', 
+    'libaimsecat-debug.so',
+    'libaimsfdf-debug.so',
     'libaimsjpeg-debug.so', 
     'libaimstiff-debug.so', 
     'libaimsqtformats-debug.so', 

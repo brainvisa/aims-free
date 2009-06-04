@@ -130,6 +130,9 @@ namespace aims
             // cbk holds a ref to self until the array is destroyed
             // so self will not be destroyed before the array
             Py_DECREF( wr );
+            // increment refcount to self so it doesn't get destroyed until
+            // the array is destroyed
+            Py_INCREF( sipSelf );
           }
           else
             std::cerr << "could not make a weakref to the array"

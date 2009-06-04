@@ -106,7 +106,7 @@ void MotionReader::read( Motion& motion )
     motion.setHeader( ph );
   else
   {
-    motion.setHeader( 0 );
+    motion.setHeader( new PythonHeader );
     delete ph;
   }
 }

@@ -174,7 +174,13 @@ PowellOptimizer< T, D >::doit( const AimsVector< T, D > & pinit,
       return p;
 
     }
-    assert( iter != 200 );  // iteration maxi
+    if( iter == 200 ){
+      std::cerr << "Reached maximal iteration" << std::endl ;
+      _optCost = _fret;
+      this->_probe->end() ;
+      return p;
+    }
+    //assert( iter != 200 );  // iteration maxi
     ptt = p * ( T )2 - pt;
     xit = p - pt;
     pt = p;

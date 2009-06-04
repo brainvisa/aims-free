@@ -2,7 +2,6 @@
 		"http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-                
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <title>AIMS changelog</title>
   <link href="bvstyle.css" rel="stylesheet" type="text/css">
@@ -14,11 +13,13 @@
 <center>  
 <h2>AIMSdata ChangeLog</h2>
  </center>
-    
+
 <hr width="100%"> <br>
 
 
 
+ <b><a href="#version-3.1.6">Version 3.1.6</a></b><br>
+ <b><a href="#version-3.1.5">Version 3.1.5</a></b><br>
  <b><a href="#version-3.1.4">Version 3.1.4</a></b><br>
  <b><a href="#version-3.1.3">Version 3.1.3</a></b><br>
  <b><a href="#version-3.1.2">Version 3.1.2</a></b><br>
@@ -35,6 +36,31 @@
 
 <!-- -->
 
+<h4> <a name="version-3.1.6"></a>May 10, 2009, Version 3.1.6</h4>
+
+<li>IO: Fix in NIFTI-1 writer when the storage_to_memory matrix is not what it should be
+</li>
+<li>IO: Fix in reading pure 3D NIFTI-1 images (no 4th dimension)</li>
+<li>Transformation information is set and maintained in sub-volumes and resampled volumes
+</li>
+<li>A fix in the Quaternion class (apply() function)
+</li>
+<li>IO: support TIFF format on U32 data type</li>
+<li>Fix in meshExtract when no index array is needed</li>
+<li>AimsFileInfo: correctly display min/max values for U8 and S8 types </li>
+
+
+<!-- -->
+
+<h4> <a name="version-3.1.6"></a>November 14, 2009, Version 3.1.5</h4>
+
+<li>Correctly save alpha channel of RGBA volumes in Qt formats IO</li>
+<li>Correctly use the "output_4d_volumes" option in NIFTI-1 writer</li>
+<li>A few more minor fixes</li>
+
+
+<!-- -->
+
 <h4> <a name="version-3.1.4"></a>October 24, 2008, Version 3.1.4</h4>
 
 <li>New global commandlines option: "output_4d_volumes" (used for NIFTI and SPM), replacing the recent "spm_output_4d_volumes".
@@ -46,7 +72,7 @@
 
 <!-- -->
 
-<h4> <a name="version-3.1.3"></a>eptember 24, 2008, Version 3.1.3</h4>
+<h4> <a name="version-3.1.3"></a>September 24, 2008, Version 3.1.3</h4>
 
 <li>various minor things</li>
 
@@ -340,12 +366,12 @@
  
 <h4>User-level changes:</h4>
      <li>beginning of ChangeLog: nothing yet</li>
-        
+
 <h4>Programmer-level changes:</h4>
      <li>nothing yet</li>
 <br>
-   &nbsp;    
-     
+&nbsp;
+
 </body>
 </html>
 

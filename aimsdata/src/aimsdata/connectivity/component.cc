@@ -44,6 +44,18 @@ using namespace std;
 
 namespace aims
 {
+  template void 
+  AimsConnectedComponent( AimsData<uint8_t>&, Connectivity::Type, 
+                          std::map<uint8_t, size_t> &, const uint8_t &, 
+                          bool, size_t, size_t, bool );
+  template void 
+  AimsConnectedComponent( AimsData<int16_t>&, Connectivity::Type, 
+                          std::map<int16_t, size_t> &, const int16_t &, 
+                          bool, size_t, size_t, bool );
+  template void 
+  AimsConnectedComponent( AimsData<float>&, Connectivity::Type, 
+                          std::map<float, size_t> &, const float &, 
+                          bool, size_t, size_t, bool );
 
   template void 
   AimsConnectedComponent( AimsData<uint8_t>&, Connectivity::Type, 

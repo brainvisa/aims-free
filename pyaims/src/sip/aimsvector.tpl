@@ -343,7 +343,10 @@ public:
 %MethodCode
   // remove weak reference in volume
   PyObject_DelAttrString( sipSelf, "_arrayref" );
-  // the aditional ref to self will be deleted when the callback 
+  // dec reference to self that was manually incremented in arraydata()
+  // when building the numpy array
+  Py_DECREF( sipSelf );
+  // the aditional ref to self will be deleted when the callback
   // (method bound on self) is destroyed, just after now
   // so self can be destroyed safely
 %End

@@ -49,6 +49,8 @@ extern "C"
 #include <tiffio.h>
 }
 
+using namespace std;
+
 
 namespace aims
 {
@@ -65,7 +67,7 @@ namespace aims
     /**	called by read(), but you can call it for single frame reading 
 	(axial slice) */
     void readFrame( AimsData<T> & thing, const std::string & filename, 
-		    unsigned zfame, unsigned tframe );
+		    int zframe, unsigned tframe );
 
   private:
     std::string		_name;
@@ -158,9 +160,24 @@ namespace aims
       dir += carto::FileUtil::separator();
 
     unsigned	i = 0, s, t, ns = (unsigned) data.dimZ(), nt = tmax - tmin + 1;
-    for( t=0; t<nt; ++t )
-      for( s=0; s<ns; ++s, ++i )
-        readFrame( data, dir + files[i], s, t );
+    
+    if ( files.size() == ns * nt ) {
+        // Each file contain 1 slice and 1 frame
+        for( t=0; t<nt; ++t ) {
+            for( s=0; s<ns; ++s, ++i ) {
+                if ( ! carto::FileUtil::fileStat( dir + files[i] ).empty() ) {
+                    readFrame( data, dir + files[i], s, t );
+                }
+            }
+        }
+    } else if ( files.size() == nt ) {
+        // Each file contain z slices and 1 frame
+        for( t=0; t<nt; ++t ) {
+            if ( ! carto::FileUtil::fileStat( dir + files[t] ).empty() ) {
+                readFrame( data, dir + files[t], -1, t );
+            }
+        }
+    }
 
     thing = data;
     if( hdr->hasProperty( "filenames" ) )
@@ -171,11 +188,12 @@ namespace aims
   template<class T>
   inline
   void TiffReader<T>::readFrame( AimsData<T> & data, 
-				 const std::string & name, unsigned z, 
-				 unsigned t )
+				 const std::string & name, int zframe, 
+				 unsigned tframe )
   {
     byte* buffer;
     int tiled, stripSize, rowsPerStrip, i, s;
+    uint zmin, zmax;
     ushort photometric;
 
     TIFFSetWarningHandler( 0 );
@@ -187,25 +205,37 @@ namespace aims
                           "can't read" );
       }
       else {
-        TIFFSetDirectory(tif,  z );
-        stripSize = TIFFStripSize(tif);
-
-        // Read tif frame properties
-        TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rowsPerStrip);
-        TIFFGetFieldDefaulted(tif, TIFFTAG_PHOTOMETRIC, &photometric);
-
-        for(s=0, i=0; s < data.dimY(); s += rowsPerStrip, ++i) {
-          TIFFReadEncodedStrip(tif, i, &data(0, s, z, t), stripSize);
+        if ( zframe == -1 ) {
+            // Process all Tiff directories
+            zmin = 0;
+            zmax = data.dimZ();
+        } else {
+            // Process only the matching z slice
+            zmin = (uint)zframe;
+            zmax = (uint)zframe + 1;
         }
 
-        if(photometric == PHOTOMETRIC_MINISWHITE){
-          // Flip bits
-          for(int y = 0; y < data.dimY(); ++y) {
-            buffer = (byte*)&data(0, y, z, t);
-            for (unsigned index = 0; index < (data.dimX() * sizeof(T)) ; index++) {
-              buffer[index] =~ buffer[index];
+        for ( uint z = zmin; z < zmax; z++ ) {
+            TIFFSetDirectory(tif,  z );
+            stripSize = TIFFStripSize(tif);
+    
+            // Read tif frame properties
+            TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rowsPerStrip);
+            TIFFGetFieldDefaulted(tif, TIFFTAG_PHOTOMETRIC, &photometric);
+    
+            for(s=0, i=0; s < data.dimY(); s += rowsPerStrip, ++i) {
+                TIFFReadEncodedStrip(tif, i, &data(0, s, z, tframe), stripSize);
             }
-          }
+    
+            if(photometric == PHOTOMETRIC_MINISWHITE){
+                // Flip bits
+                for(int y = 0; y < data.dimY(); ++y) {
+                    buffer = (byte*)&data(0, y, z, tframe);
+                    for (unsigned index = 0; index < (data.dimX() * sizeof(T)) ; index++) {
+                        buffer[index] =~ buffer[index];
+                    }
+                }
+            }
         }
       }
       TIFFClose(tif);

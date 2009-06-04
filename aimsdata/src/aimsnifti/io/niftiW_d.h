@@ -45,6 +45,7 @@
 #include <cartobase/exception/ioexcept.h>
 #include <aims/resampling/motion.h>
 #include <aims/io/scaledcoding.h>
+#include <cartobase/stream/fdinhibitor.h>
 #include <string>
 #include <stdio.h>
 
@@ -71,17 +72,26 @@ namespace aims
   void NiftiWriter<T>::write( const AimsData<T>& thing )
   {
     // If .hdr/.img extension then give the hand to SPM/Analyze writer
-    std::string ext( nifti_find_file_extension( _name.c_str() ) );
+    char *cext = nifti_find_file_extension( _name.c_str() );
+    std::string ext, name = _name;
+    if( cext )
+      ext = cext;
+    else
+    {
+      ext = ".nii";
+      name += ext;
+    }
     if((ext == ".hdr") || (ext == ".img"))
     {
       throw carto::wrong_format_error( _name );
-    } 
+    }
 
     // std::cout << "This is NIFTI Writer: use at your own risk." << std::endl;
+    std::cout << "name: " << name << std::endl;
 
     NiftiHeader hdr( thing.dimX(), thing.dimY(), thing.dimZ(), thing.dimT(),
                     thing.sizeX(), thing.sizeY(), thing.sizeZ(),
-                    thing.sizeT(), _name );
+                    thing.sizeT(), name );
 
     const PythonHeader 
       *ph = dynamic_cast<const PythonHeader *>( thing.header() );
@@ -159,6 +169,9 @@ namespace aims
     {
     }
 
+    bool ok = true;
+    carto::fdinhibitor fdi( 2 );
+    fdi.close(); // disable output on stderr
     if( write4d || thing.dimT() == 1 )
     {
       // fill in nifti_image struct from properties
@@ -172,9 +185,16 @@ namespace aims
       dataTOnim(nim, hdr, thing);
 
       // write Nifti header and data
-      nifti_image_write_hdr_img( nim, 1, "wb" );
+      znzFile zfp = nifti_image_write_hdr_img( nim, 3, "wb" );
+      // don't close file because we have no other way to know it it failed
+      if( znz_isnull( zfp ) )
+        ok = false;
 
-      hdr.writeMinf(std::string(nim->iname) + ".minf");
+      if( ok )
+      {
+        znzclose(zfp);
+        hdr.writeMinf(std::string(nim->iname) + ".minf");
+      }
 
       // unload data in the nifti_image struct
       nifti_image_unload( nim );
@@ -186,9 +206,9 @@ namespace aims
       int  nt = thing.dimT();
       std::vector<std::string> fnames;
       std::string dname, bname;
-      dname = carto::FileUtil::dirname( _name )
+      dname = carto::FileUtil::dirname( name )
           + carto::FileUtil::separator();
-      bname = carto::FileUtil::basename( removeExtension( _name ) );
+      bname = carto::FileUtil::basename( removeExtension( name ) );
       fnames.reserve( nt );
       for( f=0; f<nt; ++f )
       {
@@ -207,13 +227,21 @@ namespace aims
 
         dataTOnim(nim, hdr, thing, f);
 
-        nifti_image_write_hdr_img( nim, 1, "wb" );
-        if( f == 0 )
+        znzFile zfp = nifti_image_write_hdr_img( nim, 3, "wb" );
+        if( znz_isnull( zfp ) )
+          ok = false;
+        else
+          znzclose( zfp );
+        if( f == 0 && ok )
           hdr.writeMinf(std::string(nim->iname) + ".minf");
         nifti_image_unload( nim );
+        if( !ok )
+          break;
       }
     }
-
+    fdi.open(); // enable stderr
+    if( !ok )
+      carto::io_error::launchErrnoExcept();
   }
 
 } // namespace aims

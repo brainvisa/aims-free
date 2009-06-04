@@ -53,9 +53,9 @@ public:
   virtual ~GaussianGradient() { }
 
   AimsData< float >  doit( const AimsData<T>& );
-
+  AimsVector< AimsData< float >, 3 > doitGradientVector( const AimsData<T>& ) ;
 private:
-
+  
   float sigx;
   float sigy;
   float sigz;
@@ -127,4 +127,48 @@ GaussianGradient< T >::doit( const AimsData< T >& data )
   return grad;
 }
 
+template< class T > inline AimsVector< AimsData< float >, 3 >
+GaussianGradient< T >::doitGradientVector( const AimsData< T >& data )
+{
+  float sx = sigx / data.sizeX();
+  float sy = sigy / data.sizeY();
+  float sz = sigz / data.sizeZ();
+
+  carto::Converter< AimsData<T>, AimsData<float> > conv;
+  AimsVector< AimsData< float >, 3 > res;
+
+  AimsData< float> imaF;
+  imaF=AimsData<float>( data.dimX(), data.dimY(), data.dimZ(),
+			  data.dimT() );
+  conv.convert( data, imaF );
+
+  for ( int i=0; i<3; i++ )
+	  res[i]=imaF.clone();
+
+
+
+  AimsData<float> grad;
+  grad=AimsData<float>( data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
+
+  GaussianSlices gsli;
+  GaussianLines glin;
+  GaussianColumns gcol;
+
+  // d / dx
+  glin.doit( res[ 0 ], GCoef( sx, GCoef::gradient ) );
+  gcol.doit( res[ 0 ], GCoef( sy ) );  // because default is smoothing
+  gsli.doit( res[ 0 ], GCoef( sz ) );
+
+  // d / dy
+  glin.doit( res[ 1 ], GCoef( sx ) );
+  gcol.doit( res[ 1 ], GCoef( sy, GCoef::gradient ) );
+  gsli.doit( res[ 1 ], GCoef( sz ) );
+
+  // d / dz
+  glin.doit( res[ 2 ], GCoef( sx ) );
+  gcol.doit( res[ 2 ], GCoef( sy ) );
+  gsli.doit( res[ 2 ], GCoef( sz, GCoef::gradient ) );
+
+  return res ;
+}
 #endif

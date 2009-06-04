@@ -62,12 +62,13 @@ int main( int argc, const char **argv )
     // Collecte des arguments.
     //
     
-    string filein, fileout ;
+    string filein, fileout, filesum = "" ;
     float radius = 8. ;
     
     AimsApplication application( argc, argv, "Lighten anatomical probabilistic atlas" );
     application.addOption( filein, "-i", "Probabilistic atlas image with one region per frame" );
     application.addOption( fileout, "-o", "Lightened atlas image" );    
+    application.addOption( filesum, "-s", "Sum of the lightened atlas image", 1 );    
     application.addOption( radius, "-r", "Radius around a point in the structure within which a point with a 1 probability\n"
 			   "to belong to the structure is supposed to exist (default : 8 mm)", 1 );    
     application.initialize();
@@ -78,7 +79,9 @@ int main( int argc, const char **argv )
     reader.read( atlasImage ) ;
     
     
-    AimsData<float> newAtlasImage( atlasImage.clone() ) ; 
+    AimsData<float> newAtlasImage(  atlasImage.dimX(), atlasImage.dimY(), atlasImage.dimZ(), atlasImage.dimT() ) ; 
+    newAtlasImage.setSizeXYZT(  atlasImage.sizeX(), atlasImage.sizeY(), atlasImage.sizeZ(), 1.0 ) ;
+    
     AimsData<float> maxAtlasImage( atlasImage.dimX(), atlasImage.dimY(), atlasImage.dimZ(), atlasImage.dimT() ) ; 
     maxAtlasImage.setSizeXYZT(  atlasImage.sizeX(), atlasImage.sizeY(), atlasImage.sizeZ(), 1.0 ) ;
     
@@ -124,24 +127,29 @@ int main( int argc, const char **argv )
 	else
 	  newAtlasImage( x, y, z, t ) = 0. ;
     }
-    Writer< AimsData<float> > writerBef( "beforeNorm.ima" ) ;
-    writerBef.write( newAtlasImage ) ;
+    
+    AimsData<float> sumAtlasImage( atlasImage.dimX(), atlasImage.dimY(), atlasImage.dimZ() ) ; 
+    sumAtlasImage.setSizeXYZT(  atlasImage.sizeX(), atlasImage.sizeY(), atlasImage.sizeZ(), 1.0 ) ;
+    atlasImage = AimsData<float>(1) ;
 
-    ForEach3d( newAtlasImage, x, y, z ){
-      float sum = 0. ;
+     ForEach3d( newAtlasImage, x, y, z ){
       for( int t = 0 ; t < newAtlasImage.dimT() ; ++t )
-	sum += newAtlasImage( x, y, z, t ) ;
-      if( sum > 1. )
+	sumAtlasImage(x, y, z) += newAtlasImage( x, y, z, t ) ;
+      if( sumAtlasImage(x, y, z) > 1. ){
+        sumAtlasImage(x, y, z) = 1. ;
 	for( int t = 0 ; t < newAtlasImage.dimT() ; ++t )
-	  newAtlasImage( x, y, z, t ) /= sum ;
+	  newAtlasImage( x, y, z, t ) /= sumAtlasImage(x, y, z) ;
+      }
     }
     
     Writer< AimsData<float> > writer( fileout ) ;
     writer.write( newAtlasImage ) ;
+    if( filesum != "" ){
+      Writer< AimsData<float> > writerSum( filesum ) ;
+      writerSum.write( sumAtlasImage ) ;
+    }
+      
     
-    Writer< AimsData<float> > writerM( "maxAtlasImage.ima" ) ;
-    writerM.write( maxAtlasImage ) ;
-
   } catch( user_interruption &e ) {
   } catch( std::exception &e ) {
     cerr << argv[ 0 ] << ": " << e.what() << endl;
