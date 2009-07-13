@@ -62,6 +62,7 @@
 #include <cartobase/stream/counter.h>
 #include <limits.h>
 #include <assert.h>
+#include <stdio.h>
 
 using namespace carto;
 using namespace std;

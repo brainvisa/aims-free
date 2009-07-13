@@ -11,6 +11,7 @@
 #ifndef AIMS_PRIMALSKETCH_GREYLEVELBLOB_H
 #define AIMS_PRIMALSKETCH_GREYLEVELBLOB_H
 
+#include <cstdlib>
 #include <aims/config/aimsalgo_config.h>
 #include <iostream>
 #include <set>

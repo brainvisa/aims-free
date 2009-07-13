@@ -37,6 +37,7 @@
 #ifndef AIMS_RESAMPLING_CUBICRESAMPLER_D_H
 #define AIMS_RESAMPLING_CUBICRESAMPLER_D_H
 
+#include <cstdlib>
 #include <aims/resampling/cubicresampler.h>
 
 template < class T >

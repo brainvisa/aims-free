@@ -36,6 +36,7 @@
 /*
  *  Paths required for A.I.M.S.
  */
+#include <cstdlib>
 #include <aims/def/path.h>
 #include <aims/def/general.h>
 #include <cartobase/stream/fileutil.h>

@@ -63,7 +63,8 @@ namespace aims
   {
     int dx = vol.dimX();
     int dy = vol.dimY();
-    unsigned long n = dx * dy * sizeof( T );
+    unsigned long lineSize = dx * sizeof( T );
+    unsigned long n = lineSize * dy;
     char uid[ 100 ];
     Uint8* data = new Uint8[ n ];
 
@@ -159,10 +160,26 @@ namespace aims
     str += str2;
     dataset->putAndInsertString( DCM_PixelSpacing, str.c_str() );
 
-    int x, y, z, t, iN = 1;
     int dz = vol.dimZ();
-    int dt = vol.dimT();
     float sz = vol.sizeZ();
+
+    if ( dz > 1 )
+    {
+      std::ostringstream sliceThickness;
+      sliceThickness << sz;
+
+      std::string slThick = sliceThickness.str();
+
+      if ( slThick.length() > 16 )
+      {
+        slThick.resize( 16 );
+      }
+
+      dataset->putAndInsertString( DCM_SliceThickness, slThick.c_str() );
+    }
+
+    int y, z, t, iN = 1;
+    int dt = vol.dimT();
     typename AimsData<T>::const_iterator it = vol.begin() + vol.oFirstPoint();
     Float64 sliceLocation;
 
@@ -174,16 +191,13 @@ namespace aims
       {
         std::ostringstream instanceNumber;
         std::ostringstream sliceLocationStr;
-        T* dptr = (T*)data;
+        Uint8* dptr = data;
 
         for ( y = 0; y < dy; y++ )
         {
-          for ( x = 0; x < dx; x++ )
-          {
-            *dptr++ = *it++;
-          }
-
-          it += vol.oPointBetweenLine();
+          std::memcpy( dptr, (const void*)it, lineSize );
+          dptr += lineSize;
+          it += vol.oLine();
         }
 
         it += vol.oLineBetweenSlice();

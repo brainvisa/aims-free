@@ -36,6 +36,7 @@
 #ifndef CARTODATA_VOLUME_VOLUME_D_H
 #define CARTODATA_VOLUME_VOLUME_D_H
 
+#include <cstdlib>
 #include <cartodata/volume/volume.h>
 #include <cartodata/volume/volumeproxy_d.h>
 #include <cartobase/type/limits.h>

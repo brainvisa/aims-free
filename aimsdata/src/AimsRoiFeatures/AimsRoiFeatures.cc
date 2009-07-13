@@ -68,7 +68,7 @@ int main( int argc, const char **argv )
 "2) To compute the statistics of regions defined in an image of labels on several images:\n\n\tAimsRoiFeature -i imageOfLabels.ima -s first.ima second.ima\n\n"
 "3) To compute statistics on several images with the same filename:\n\nAimsRoiFeature -i imageOfLabels.ima -s first:first/image.ima second:second/image.ima\n\n"
 "4) Same as 3) but save the result in csv format:\n\nAimsRoiFeature -i imageOfLabels.ima -s first:first/image.ima second:second/image.ima -f csv\n\n"
-"5) Same as 4) but use comma for decimal point in result:\n\nAimsRoiFeature -i imageOfLabels.ima -s first:first/image.ima second:second/image.ima -f csv -d ,\n\n"
+"5) Same as 4) but use french locale (i.e. comma for decimal point in numbers):\n\nAimsRoiFeature -i imageOfLabels.ima -s first:first/image.ima second:second/image.ima -f csv -l fr\n\n"
  );
     app.addOption( inputFileName, "-i",
                    "input ROI file (either ROI graph or image)" );

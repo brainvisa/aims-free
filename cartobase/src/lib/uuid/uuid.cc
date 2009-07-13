@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <cartobase/uuid/uuid.h>
 #include <stdlib.h>
 

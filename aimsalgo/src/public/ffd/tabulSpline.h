@@ -37,6 +37,7 @@
 
 #ifndef AIMS_FFD_TABULSPLINE_H
 #define AIMS_FFD_TABULSPLINE_H
+#include <cstdlib>
 #include <aims/vector/vector.h>
 #include <aims/data/data_g.h>
 #include <aims/math/bspline3.h>

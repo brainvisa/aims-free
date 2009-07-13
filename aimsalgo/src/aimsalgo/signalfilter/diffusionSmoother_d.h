@@ -38,6 +38,7 @@
 #ifndef AIMS_DIFFUSION_SMOOTHER_D_H
 #define AIMS_DIFFUSION_SMOOTHER_D_H
 
+#include <cstdlib>
 #include <aims/signalfilter/diffusionSmoother.h>
 #include <aims/signalfilter/convol.h>
 #include <aims/utility/converter_volume.h>

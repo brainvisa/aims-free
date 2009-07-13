@@ -37,6 +37,7 @@
 #ifndef AIMS_PRIMALSKETCH_PERONAMALIKSMOOTHER_D_H
 #define AIMS_PRIMALSKETCH_PERONAMALIKSMOOTHER_D_H
 
+#include <cstdlib>
 #include <aims/primalsketch/peronaMalikSmoother.h>
 #include <aims/signalfilter/ggradient.h>
 #include <aims/signalfilter/gjacobian.h>

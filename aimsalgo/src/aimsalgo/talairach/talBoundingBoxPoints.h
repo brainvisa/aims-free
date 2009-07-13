@@ -37,6 +37,7 @@
 #ifndef AIMS_TALAIRACH_TALBOUNDINGBOX_POINTS_H
 #define AIMS_TALAIRACH_TALBOUNDINGBOX_POINTS_H
 
+#include <cstdlib>
 #include <aims/data/data.h>
 #include <cartobase/smart/rcptr.h>
 #include <aims/talairach/talBoxBase.h>

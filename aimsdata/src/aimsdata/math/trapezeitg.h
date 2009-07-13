@@ -40,6 +40,7 @@
 #define AIMS_MATH_TRAPEZEITG_H
 
 
+#include <cstdlib>
 #include <aims/math/integrator.h>
 #include <math.h>
 

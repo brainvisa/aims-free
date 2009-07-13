@@ -73,6 +73,12 @@ namespace
       return true;
     return false;
   }
+  
+  void safe_strcpy( char * destination, const char * source, size_t num )
+  {
+    strncpy( destination, source, num );
+    destination[ num-1 ] = '\0';
+  }
 
 }
 
@@ -391,7 +397,7 @@ bool SpmHeader::read()
 
   setProperty( "db_name", string( header.hk.db_name ) );
 
-  strcpy( header.hist.descrip, "" );
+  safe_strcpy( header.hist.descrip, "", 80 );
 
   setProperty( "aux_file", string( header.hist.aux_file) ) ;
   setProperty( "orient", int( header.hist.orient ) ) ;
@@ -980,14 +986,14 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
 
   string dbName ;
   if( getProperty("db_name", dbName) )
-    strcpy( header.hk.db_name, dbName.c_str() ) ;
+    safe_strcpy( header.hk.db_name, dbName.c_str(), 18 );
   else
     header.hk.db_name[0] = '\0';
 
-  strcpy( header.hist.descrip, "Written with A.I.M.S." );
+  safe_strcpy( header.hist.descrip, "Written with A.I.M.S.", 80 );
   string auxFile ;
   if( getProperty("aux_file", auxFile) )
-    strcpy( header.hist.aux_file, auxFile.c_str() ) ;
+    safe_strcpy( header.hist.aux_file, auxFile.c_str(), 24 ) ;
   else
     header.hist.aux_file[0] = '\0';
 
@@ -1032,37 +1038,38 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
 
   string generated ;
   if( getProperty("generated", generated) )
-    strcpy( header.hist.generated, generated.c_str() ) ;
+    safe_strcpy( header.hist.generated, generated.c_str(), 10 ) ;
   else
     header.hist.generated[0] = '\0';
 
   string scannum ;
   if( getProperty("scannum", scannum) )
-    strcpy( header.hist.scannum, scannum.c_str() ) ;
+    safe_strcpy( header.hist.scannum, scannum.c_str(), 10 ) ;
   else
     header.hist.scannum[0] = '\0';
 
   string patient_id ;
-  if( getProperty("patient_id", patient_id) )
-    strcpy( header.hist.patient_id, patient_id.c_str() ) ;
-  else
+  if( getProperty("patient_id", patient_id) ) {
+    safe_strcpy( header.hist.patient_id, patient_id.c_str(), 10 ) ;
+  } else {
     header.hist.patient_id[0] = '\0';
-
+  }
+  
   string exp_date ;
   if( getProperty("exp_date", exp_date) )
-    strcpy( header.hist.exp_date, exp_date.c_str() ) ;
+    safe_strcpy( header.hist.exp_date, exp_date.c_str(), 10 ) ;
   else
     header.hist.exp_date[0] = '\0';
 
   string exp_time ;
   if( getProperty("exp_time", exp_time) )
-    strcpy( header.hist.exp_time, exp_time.c_str() ) ;
+    safe_strcpy( header.hist.exp_time, exp_time.c_str(), 10 ) ;
   else
     header.hist.exp_time[0] = '\0';
 
   string SPM_data_type ;
   if( getProperty("SPM_data_type", SPM_data_type) )
-    strcpy( header.hk.data_type, SPM_data_type.c_str() ) ;
+    safe_strcpy( header.hk.data_type, SPM_data_type.c_str(), 10 ) ;
   else
     header.hk.data_type[0] = '\0';
 

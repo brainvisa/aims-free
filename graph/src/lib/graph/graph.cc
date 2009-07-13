@@ -37,6 +37,7 @@
 //	H E A D E R  F I L E S
 //=============================================================================
 
+#include <cstdlib>
 #include <graph/graph/graph.h>
 #include <graph/graph/uedge.h>
 #include <graph/graph/dedge.h>

@@ -36,6 +36,7 @@
 #ifndef AIMS_IO_TIFFW_H
 #define AIMS_IO_TIFFW_H
 
+#include <cstdlib>
 #include <aims/io/tiffheader.h>
 #include <aims/io/datatypecode.h>
 #include <aims/data/pheader.h>

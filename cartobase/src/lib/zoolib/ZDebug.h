@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #ifndef __ZDebug__
 #define __ZDebug__ 1
+#include <cstdlib>
 #include "zconfig.h"
 
 /* ====================================================================================================

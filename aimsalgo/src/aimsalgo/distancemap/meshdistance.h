@@ -64,8 +64,9 @@ namespace aims
 				 bool allowUnreached );
 
     extern template Texture<float> 
-    MeshDistance( const AimsSurface<3,Void> &, const Texture<short> &, 
-                  bool );
+    MeshDistance( const AimsSurface<3,Void> &, const Texture<short> &, bool );
+    extern template Texture<float>
+    MeshDistance( const AimsSurface<3,Void> &, const Texture<float> &, bool );
   }
 
 }

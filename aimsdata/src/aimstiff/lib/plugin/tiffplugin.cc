@@ -73,11 +73,23 @@ TiffPlugin::TiffPlugin() : Plugin()
   VolumeFormat<uint8_t> *vf8 = new VolumeFormat<uint8_t>( "TIFF" );
   FileFormatDictionary<Volume<uint8_t> >::registerFormat( "TIFF", vf8, ext );
 
+  TiffFormat<int8_t>  *tfs8 = new TiffFormat<int8_t>;
+  FileFormatDictionary<AimsData<int8_t> >::registerFormat( "TIFF", tfs8,
+                                                           ext );
+  VolumeFormat<int8_t> *vfs8 = new VolumeFormat<int8_t>( "TIFF" );
+  FileFormatDictionary<Volume<int8_t> >::registerFormat( "TIFF", vfs8, ext );
+
   TiffFormat<uint16_t>	*df16 = new TiffFormat<uint16_t>;
   FileFormatDictionary<AimsData<uint16_t> >::registerFormat( "TIFF", df16, 
                                                              ext );
   VolumeFormat<uint16_t>	*vf4 = new VolumeFormat<uint16_t>( "TIFF" );
   FileFormatDictionary<Volume<uint16_t> >::registerFormat( "TIFF", vf4, ext );
+
+  TiffFormat<int16_t>  *dfs16 = new TiffFormat<int16_t>;
+  FileFormatDictionary<AimsData<int16_t> >::registerFormat( "TIFF", dfs16,
+                                                             ext );
+  VolumeFormat<int16_t>        *vfs4 = new VolumeFormat<int16_t>( "TIFF" );
+  FileFormatDictionary<Volume<int16_t> >::registerFormat( "TIFF", vfs4, ext );
 
 
   TiffFormat<uint32_t>	*df32 = new TiffFormat<uint32_t>;
@@ -85,6 +97,12 @@ TiffPlugin::TiffPlugin() : Plugin()
                                                              ext );
   VolumeFormat<uint32_t>	*vf5 = new VolumeFormat<uint32_t>( "TIFF" );
   FileFormatDictionary<Volume<uint32_t> >::registerFormat( "TIFF", vf5, ext );
+
+  TiffFormat<int32_t>  *dfs32 = new TiffFormat<int32_t>;
+  FileFormatDictionary<AimsData<int32_t> >::registerFormat( "TIFF", dfs32,
+                                                             ext );
+  VolumeFormat<int32_t>        *vfs5 = new VolumeFormat<int32_t>( "TIFF" );
+  FileFormatDictionary<Volume<int32_t> >::registerFormat( "TIFF", vfs5, ext );
 
   TiffFormat<AimsRGB>	*df8 = new TiffFormat<AimsRGB>;
 #ifdef AIMS_APPLE_GCC33BUG
@@ -101,6 +119,30 @@ TiffPlugin::TiffPlugin() : Plugin()
   FileFormatDictionary<AimsData<AimsRGBA> >::registerFormat( "TIFF", df14, ext );
   VolumeFormat<AimsRGBA> *vf14 = new VolumeFormat<AimsRGBA>( "TIFF" );
   FileFormatDictionary<Volume<AimsRGBA> >::registerFormat( "TIFF", vf14, ext );
+
+  TiffFormat<float>  *dffl = new TiffFormat<float>;
+  FileFormatDictionary<AimsData<float> >::registerFormat( "TIFF", dffl,
+                                                          ext );
+  VolumeFormat<float>        *vffl = new VolumeFormat<float>( "TIFF" );
+  FileFormatDictionary<Volume<float> >::registerFormat( "TIFF", vffl, ext );
+
+  TiffFormat<double>  *dfdb = new TiffFormat<double>;
+  FileFormatDictionary<AimsData<double> >::registerFormat( "TIFF", dfdb,
+                                                           ext );
+  VolumeFormat<double>        *vfdb = new VolumeFormat<double>( "TIFF" );
+  FileFormatDictionary<Volume<double> >::registerFormat( "TIFF", vfdb, ext );
+
+  TiffFormat<cfloat>  *dfcfl = new TiffFormat<cfloat>;
+  FileFormatDictionary<AimsData<cfloat> >::registerFormat( "TIFF", dfcfl,
+                                                          ext );
+  VolumeFormat<cfloat>        *vfcfl = new VolumeFormat<cfloat>( "TIFF" );
+  FileFormatDictionary<Volume<cfloat> >::registerFormat( "TIFF", vfcfl, ext );
+
+  TiffFormat<cdouble>  *dfcdb = new TiffFormat<cdouble>;
+  FileFormatDictionary<AimsData<cdouble> >::registerFormat( "TIFF", dfcdb,
+                                                            ext );
+  VolumeFormat<cdouble>        *vfcdb = new VolumeFormat<cdouble>( "TIFF" );
+  FileFormatDictionary<Volume<cdouble> >::registerFormat( "TIFF", vfcdb, ext );
 
   Finder::registerFormat( "TIFF", new FinderTiffFormat, ext );
 }

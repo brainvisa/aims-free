@@ -37,6 +37,7 @@
 #ifndef AIMS_RESAMPLING_QUADRATICRESAMPLER_D_H
 #define AIMS_RESAMPLING_QUADRATICRESAMPLER_D_H
 
+#include <cstdlib>
 #include <aims/resampling/quadraticresampler.h>
 
 template < class T >

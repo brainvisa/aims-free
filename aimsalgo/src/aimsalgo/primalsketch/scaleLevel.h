@@ -37,6 +37,7 @@
 #ifndef AIMS_PRIMALSKETCH_SCALELEVEL_H
 #define AIMS_PRIMALSKETCH_SCALELEVEL_H
 
+#include <cstdlib>
 #include <aims/config/aimsalgo_config.h>
 #include <aims/texdata/texdata.h>
 #include <aims/primalsketch/greyLevelBlob.h>

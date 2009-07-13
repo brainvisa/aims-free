@@ -569,6 +569,14 @@ namespace aims
   SparseVolume<BucketMap<T> >::getSize() const
   {
     std::vector<int> sz(4);
+    if( _data->empty() )
+    {
+      sz[0] = 0;
+      sz[1] = 0;
+      sz[2] = 0;
+      sz[3] = 0;
+      return sz;
+    }
     sz[3] = _data->rbegin()->first + 1;
     int & x = sz[0];
     int & y = sz[1];

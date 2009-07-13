@@ -37,6 +37,7 @@
  *  SPM reader template functions
  */
 
+#include <cstdlib>
 #include <aims/io/spmR.h>
 #include <aims/io/datatypecode.h>
 #include <aims/io/defaultItemR.h>

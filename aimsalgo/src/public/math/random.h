@@ -37,6 +37,7 @@
 #ifndef AIMS_MATH_RANDOM_H
 #define AIMS_MATH_RANDOM_H
 
+#include <cstdlib>
 #include <aims/config/aimsalgopub_config.h>
 #include <stdlib.h>
 #include <time.h>

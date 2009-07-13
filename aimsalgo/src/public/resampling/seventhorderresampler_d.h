@@ -37,6 +37,7 @@
 #ifndef AIMS_RESAMPLING_SEVENTHORDERRESAMPLER_D_H
 #define AIMS_RESAMPLING_SEVENTHORDERRESAMPLER_D_H
 
+#include <cstdlib>
 #include <aims/resampling/seventhorderresampler.h>
 
 template < class T >

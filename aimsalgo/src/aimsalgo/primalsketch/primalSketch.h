@@ -11,6 +11,7 @@
 #ifndef AIMS_PRIMALSKETCH_PRIMALSKETCH_H
 #define AIMS_PRIMALSKETCH_PRIMALSKETCH_H
 
+#include <cstdlib>
 #include <aims/config/aimsalgo_config.h>
 #include <aims/primalsketch/scaleSpaceBlob.h>
 #include <aims/primalsketch/scalespace.h>

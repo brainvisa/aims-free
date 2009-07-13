@@ -376,17 +376,18 @@ namespace
   doit_private( FastMarchingPrivateStruct<T> & fps );
 }
 
-#include <aims/io/writer.h>
 template <typename T>
 typename FastMarching<T>::RCFloatType
 FastMarching<T>::doit( const RCType & labels,
                        const set<int16_t> & worklabels,
                        const set<int16_t> & seeds )
 {
+  d->verbose = true;
   if( d->verbose )
-    cout << "FastMarching...\n";
+    cout << "FastMarching...\n" << flush;
   FastMarchingPrivateStruct<T> fps( d->mid_interface_map );
   SparseVolume<T> slabels( labels );
+  cout << "slabels allocated\n" << flush;
   vector<int> sz = slabels.getSize();
   slabels.setBackground( -1 );
   fps.xm = sz[0];
@@ -398,19 +399,24 @@ FastMarching<T>::doit( const RCType & labels,
   fps.verbose = d->verbose;
 
   fps.dist = SparseVolume<FloatType>::alloc( slabels );
+  cout << "dist allocated\n" << flush;
   SparseVolume<T> status( SparseVolume<T>::alloc( slabels ) );
+  cout << "status allocated\n" << flush;
   fps.seed = SparseVolume<T>::alloc( slabels );
+  cout << "seed allocated\n" << flush;
   bool initspeed = false;
   d->inv_speed.setBackground( FLT_MAX );
+  cout << "before inv_speed.getSize\n" << flush;
   vector<int> ssz = d->inv_speed.getSize();
+  cout << "after inv_speed.getSize\n" << flush;
   if( ssz.size() < 3 || ssz[0] != sz[0] || ssz[1] != sz[1] || ssz[2] != sz[2] )
   {
     initspeed = true;
-    cout << "initializing speed map\n";
+    cout << "initializing speed map\n" << flush;
     d->inv_speed = SparseVolume<FloatType>::alloc( slabels );
   }
   else
-    cout << "using already defined speed map\n";
+    cout << "using already defined speed map\n" << flush;
   fps.inv_speed = &d->inv_speed;
   multimap<float, Point3d> & front = fps.front;
   fps.status = status;
@@ -483,8 +489,6 @@ FastMarching<T>::doit( const RCType & labels,
       }
     }
 
-  Writer<FloatType> w( "/tmp/flopspd.ima" );
-  w.write( *d->inv_speed.data() );
   if( d->verbose )
     cout << "work voxels: " << nwork << ", interface voxels: " << ninter
       << endl;

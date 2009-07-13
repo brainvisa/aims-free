@@ -36,6 +36,7 @@
 /*
  *  lecture de fichiers DICOM avec DCMTK
  */
+#include <cstdlib>
 #include <aims/io/dicomheader.h>
 #include <aims/def/general.h>
 #include <aims/def/assert.h>
@@ -239,6 +240,7 @@ int DicomHeader::read()
   set<string>::iterator	is, es = files.end();
   string	fullname;
   char		sep = FileUtil::separator();
+  std::vector< std::string > fileVector;
 
   for( is=files.begin(); is!=es; ++is )
     {
@@ -251,8 +253,22 @@ int DicomHeader::read()
       if ( slice.instance() < 0 )  continue;
 
       _slices[ slice.instance() ] = slice;
+      fileVector.push_back( s );
     }
-
+ 
+  // save file name list into header properties
+  std::vector< Object > fileVector2;
+  int n_files = fileVector.size();
+  fileVector2.reserve( n_files );
+  std::vector< std::string >::const_iterator
+    ifb = fileVector.begin(),
+    ife = fileVector.end();
+  while ( ifb != ife )
+  {
+    fileVector2.push_back( Object::value( *ifb ) );
+    ++ifb;
+  }
+  setProperty( "filenames", fileVector2 );
 
   map< int, FileElement >::const_iterator i = _slices.begin();
   int dimT;
@@ -447,7 +463,7 @@ int DicomHeader::readFirst()
   cerr.rdbuf( sb );
   if ( header.error() != EC_Normal ) 
     {
-      //cerr << dcmErrorConditionToString( header.error() ) << endl;
+      cerr << dcmErrorConditionToString( header.error() ) << endl;
       return -1;
     }
 
@@ -527,6 +543,19 @@ int DicomHeader::readFirst()
       Sint32 seriesNum;
       object->getSint32( seriesNum );
       setProperty( "series_number", (int)seriesNum );
+    }
+
+  if ( header.search( DCM_SeriesInstanceUID, stack ) == EC_Normal )
+    {
+      if( stack.top()->ident() != EVR_UI ){
+        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        return( -1 );
+      }
+      DcmUniqueIdentifier *object = (DcmUniqueIdentifier *)stack.top();
+      char* seriesUID;
+      object->getString( seriesUID );
+      string seriesInstanceUID( seriesUID );
+      setProperty( "series_instance_uid", seriesInstanceUID );
     }
 
   vector< int > volDim;
@@ -893,39 +922,15 @@ DicomHeader::FileElement DicomHeader::readNext( const std::string& filename )
 
   bool status;
 
-  if ( header.search( DCM_PatientID, stack ) == EC_Normal )
+  if ( header.search( DCM_SeriesInstanceUID, stack ) == EC_Normal )
     {
-      ASSERT( stack.top()->ident() == EVR_LO );
-      DcmLongString *object = (DcmLongString *)stack.top();
-      OFString patient_id;
-      object->getOFString( patient_id, 0 );
-      std::string patId;
-      status = getProperty( "patient_id", patId );
-      if ( !status || std::string( patient_id.c_str() ) != patId )
-        return -1;
-    }
-
-  if ( header.search( DCM_StudyID, stack ) == EC_Normal ) 
-    {
-      ASSERT( stack.top()->ident() == EVR_SH );
-      DcmShortString *object = (DcmShortString *)stack.top();
-      OFString study_id;
-      object->getOFString( study_id, 0 );
-      std::string studId;
-      status = getProperty( "study_id", studId );
-      if ( !status || std::string( study_id.c_str() ) != studId )
-        return -1;
-    }
-
-  if ( header.search( DCM_SeriesNumber, stack ) == EC_Normal ) 
-    {
-      ASSERT( stack.top()->ident() == EVR_IS );
-      DcmIntegerString *object = (DcmIntegerString *)stack.top();
-      Sint32 series_number;
-      object->getSint32( series_number, 0 );
-      int serNum;
-      status = getProperty( "series_number", serNum );
-      if ( !status || (int)series_number != serNum )
+      ASSERT( stack.top()->ident() == EVR_UI );
+      DcmUniqueIdentifier *object = (DcmUniqueIdentifier *)stack.top();
+      char* seriesUID;
+      object->getString( seriesUID );
+      std::string seriesInstanceUID;
+      status = getProperty( "series_instance_uid", seriesInstanceUID );
+      if ( !status || seriesInstanceUID != seriesUID )
         return -1;
     }
 

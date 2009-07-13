@@ -37,6 +37,7 @@
 #ifndef AIMS_ESTIMATION_WLMS_ESTIMATOR_H
 #define AIMS_ESTIMATION_WLMS_ESTIMATOR_H
 
+#include <cstdlib>
 #include <aims/config/aimsalgo_config.h>
 #include <aims/estimation/lms-estimator.h>
 #include <aims/estimation/m-func.h>

@@ -39,6 +39,7 @@
 #ifndef AIMS_MATH_LAGRANGE_H
 #define AIMS_MATH_LAGRANGE_H
 
+#include <cstdlib>
 #include <aims/config/aimsdata_config.h>
 #include <aims/data/data.h>
 #include <math.h>

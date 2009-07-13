@@ -37,6 +37,7 @@
 #ifndef AIMS_PRIMALSKETCH_PERONAMALIKSMOOTHER_H
 #define AIMS_PRIMALSKETCH_PERONAMALIKSMOOTHER_H
 
+#include <cstdlib>
 #include <aims/primalsketch/imageSmoother.h>
 
 namespace aims {

@@ -274,6 +274,7 @@ It's a list of little things
 \code
 using namespace std;
 \endcode
+#include <cstdlib>
   (put it after the \c #include lines)
   -> no need to use \c std:: everywhere in .cc files
 

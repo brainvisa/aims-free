@@ -67,7 +67,7 @@ set<string> TiffHeader::extensions() const
 void TiffHeader::read()
 {
   string fileName = _name;
-  ushort  typesize, mbps, spp, unit;
+  ushort  typesize, mbps, spp, unit, sampleformat, photometric;
   ostringstream oss;
 
   _dimZ = 0;
@@ -103,8 +103,13 @@ void TiffHeader::read()
   TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &_dimY);
   TIFFGetField(tif, TIFFTAG_XRESOLUTION, &_sizeX);
   TIFFGetField(tif, TIFFTAG_YRESOLUTION, &_sizeY);
+  if( TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &sampleformat) == 0 )
+    sampleformat = SAMPLEFORMAT_UINT;
+  if( TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &photometric) == 0 )
+    photometric = PHOTOMETRIC_MINISBLACK;
+            
   TIFFClose(tif);
-  
+
   /* ici code du default val en cm que nous convertissons en mm */
   _sizeX = 10 / _sizeX;
   _sizeY = 10 / _sizeY;
@@ -119,17 +124,65 @@ void TiffHeader::read()
   switch( spp ) {
     case 1:
     case 2:
-      typesize = ( spp * mbps );
-      if ( ( typesize % 8 ) > 0 ) {
-        // Get the next multiple of 8
-        typesize = ( ( typesize / 8 ) + 1 ) * 8;
-      }
-      oss << ( typesize );
-      _type = "U" + oss.str();
-      pt.push_back( _type );
-      pt.push_back( "RGB" );
-      pt.push_back( "RGBA" );
-      break;
+        switch( sampleformat )
+        {
+            case SAMPLEFORMAT_VOID:
+                switch ( photometric ) {
+                    case PHOTOMETRIC_PALETTE :
+                        // Indexed colormap
+                        _type = "RGBA";
+                        pt.push_back( "RGBA" );
+                        pt.push_back( "RGB" );
+                        break;
+                    default:
+                        _type = "unknown";
+                        break;
+                }
+                break;
+            case SAMPLEFORMAT_UINT:
+                typesize = ( spp * mbps );
+                if ( ( typesize % 8 ) > 0 ) {
+                    // Get the next multiple of 8
+                    typesize = ( ( typesize / 8 ) + 1 ) * 8;
+                }
+                oss << ( typesize );
+                _type = "U" + oss.str();
+                pt.push_back( _type );
+                pt.push_back( "RGB" );
+                pt.push_back( "RGBA" );
+                break;
+            case SAMPLEFORMAT_INT:
+                typesize = ( spp * mbps );
+                if ( ( typesize % 8 ) > 0 ) {
+                // Get the next multiple of 8
+                typesize = ( ( typesize / 8 ) + 1 ) * 8;
+                }
+                oss << ( typesize );
+                _type = "S" + oss.str();
+                pt.push_back( _type );
+                pt.push_back( "RGB" );
+                pt.push_back( "RGBA" );
+                break;
+            case SAMPLEFORMAT_IEEEFP:
+                if( mbps == 32 )
+                _type = "FLOAT";
+                else
+                _type = "DOUBLE";
+                pt.push_back( _type );
+                break;
+            case SAMPLEFORMAT_COMPLEXINT:
+            case SAMPLEFORMAT_COMPLEXIEEEFP:
+                if( mbps == 32 ) // not sure it is 32 or 64...
+                _type = "CFLOAT";
+                else
+                _type = "CDOUBLE";
+                pt.push_back( _type );
+                break;
+            default: // undefined
+                _type = "unknown";
+                break;
+        }
+        break;
     case 3:
       _type = "RGB";
       pt.push_back( "RGB" );

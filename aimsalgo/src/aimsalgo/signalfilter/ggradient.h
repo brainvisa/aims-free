@@ -53,7 +53,7 @@ public:
   virtual ~GaussianGradient() { }
 
   AimsData< float >  doit( const AimsData<T>& );
-  AimsVector< AimsData< float >, 3 > doitGradientVector( const AimsData<T>& ) ;
+  AimsVector< AimsData< float >, 3 > doitGradientVector( const AimsData< T >& data ) ;
 private:
   
   float sigx;

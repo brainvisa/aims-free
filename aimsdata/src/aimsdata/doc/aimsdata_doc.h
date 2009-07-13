@@ -268,6 +268,7 @@ Writer classes for their internal purpose
 \section io_mid Mid-level IO: What to do to read a volume of short data ?
 
   \code
+#include <cstdlib>
   #include <aims/io/reader.h>
   #include <aims/data/data.h>
   #include <stdexcept>

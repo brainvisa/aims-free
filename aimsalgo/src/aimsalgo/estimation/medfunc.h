@@ -38,6 +38,7 @@
 #define AIMS_ESTIMATION_MEDFUNC_H
 
 
+#include <cstdlib>
 #include <aims/config/aimsalgo_config.h>
 #include <aims/estimation/m-func.h>
 #include <aims/math/mathelem.h>

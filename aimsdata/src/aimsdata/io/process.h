@@ -39,6 +39,7 @@
 #ifndef AIMS_IO_PROCESS_H
 #define AIMS_IO_PROCESS_H
 
+#include <cstdlib>
 #include <aims/config/aimsdata_config.h>
 #include <string>
 #include <map>

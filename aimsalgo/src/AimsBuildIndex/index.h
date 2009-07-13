@@ -37,6 +37,7 @@
 /***************************************************************/
 /*                        include                              */
 /***************************************************************/
+#include <cstdlib>
 #include <aims/data/data_g.h>
 #include <aims/bucket/bucket_g.h>
 #include <aims/math/math_g.h>

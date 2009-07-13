@@ -103,8 +103,7 @@ void FdfHeader::read()
   // Check if there was an error opening the file
   if (!inFile)
   {
-    std::cout << "Unable to open the file\n";
-    return;
+    io_error::launchErrnoExcept( _name );
   }
 
   while (getline(inFile, line, '\n')) {

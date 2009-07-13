@@ -38,6 +38,7 @@
 //=============================================================================
 
 #include <cartobase/stream/uncomment.h>
+#include <stdio.h>
 
 using namespace carto;
 using namespace std;

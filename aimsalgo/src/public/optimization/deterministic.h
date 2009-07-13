@@ -37,6 +37,7 @@
 #ifndef AIMS_OPTIMIZATION_DETERMINISTIC_H
 #define AIMS_OPTIMIZATION_DETERMINISTIC_H
 
+#include <cstdlib>
 #include <aims/math/mathelem.h>
 #include <aims/math/random.h>
 #include <aims/vector/vector.h>

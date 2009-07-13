@@ -17,6 +17,7 @@ extern "C" {
 #define FLOAT MINC_FLOAT
 #define DOUBLE MINC_DOUBLE
 #define SHORT MINC_SHORT
+#include <cstdlib>
 #include <volume_io.h>
 #undef SHORT
 #undef DOUBLE

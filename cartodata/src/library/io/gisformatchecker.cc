@@ -42,6 +42,7 @@
 #include <cartobase/wip/io/asciidatasourcetraits.h>
 #include <cartobase/object/object.h>
 #include <cartobase/object/property.h>
+#include <stdio.h>
 
 using namespace carto;
 using namespace std;

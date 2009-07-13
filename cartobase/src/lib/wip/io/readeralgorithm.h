@@ -36,6 +36,7 @@
 #ifndef CARTOBASE_IO_READERALGORITHM_H
 #define CARTOBASE_IO_READERALGORITHM_H
 
+#include <cstdlib>
 #include <cartobase/config/cartobase_config.h>
 #include <cartobase/algorithm/algorithm.h>
 #include <string>

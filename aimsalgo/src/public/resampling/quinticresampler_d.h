@@ -37,6 +37,7 @@
 #ifndef AIMS_RESAMPLING_QUINTICRESAMPLER_D_H
 #define AIMS_RESAMPLING_QUINTICRESAMPLER_D_H
 
+#include <cstdlib>
 #include <aims/resampling/quinticresampler.h>
 
 template < class T >

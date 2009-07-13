@@ -37,6 +37,7 @@
 #ifndef AIMS_PRIMALSKETCH_SCALESPACE_H
 #define AIMS_PRIMALSKETCH_SCALESPACE_H
 
+#include <cstdlib>
 #include <aims/config/aimsalgo_config.h>
 #include <aims/primalsketch/smoother.h>
 #include <aims/primalsketch/scaleLevel.h>

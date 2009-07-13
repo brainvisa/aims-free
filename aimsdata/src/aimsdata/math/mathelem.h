@@ -39,6 +39,7 @@
 #ifndef AIMS_MATH_MATHELEM_H
 #define AIMS_MATH_MATHELEM_H
 
+#include <cstdlib>
 #include <aims/config/aimsdata_config.h>
 #include <math.h>
 

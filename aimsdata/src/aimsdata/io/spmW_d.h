@@ -36,6 +36,7 @@
 #ifndef AIMS_IO_SPMW_D_H
 #define AIMS_IO_SPMW_D_H
 
+#include <cstdlib>
 #include <aims/io/spmW.h>
 #include <aims/io/datatypecode.h>
 #include <aims/def/settings.h>

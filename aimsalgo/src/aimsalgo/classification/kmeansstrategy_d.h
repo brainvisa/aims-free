@@ -37,6 +37,7 @@
 #ifndef KMEANSSTRATEGY_D_H
 #define KMEANSSTRATEGY_D_H
 
+#include <cstdlib>
 #include <aims/classification/kmeansstrategy.h>
 #include <aims/classification/classifstrategy.h>
 #include <aims/classification/iterativeclassification.h>

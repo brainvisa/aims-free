@@ -36,6 +36,7 @@
 #ifndef AIMS_MATH_KNN_H
 #define AIMS_MATH_KNN_H
 
+#include <cstdlib>
 #include <stdlib.h>
 #include <math.h>
 #include <vector>

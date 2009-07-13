@@ -34,6 +34,7 @@
  */
 
 #include <cartobase/datasource/filteringdatasource.h>
+#include <stdio.h>
 
 using namespace carto;
 using namespace std;

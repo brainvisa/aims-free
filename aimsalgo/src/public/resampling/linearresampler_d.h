@@ -37,6 +37,7 @@
 #ifndef AIMS_RESAMPLING_LINEARRESAMPLER_D_H
 #define AIMS_RESAMPLING_LINEARRESAMPLER_D_H
 
+#include <cstdlib>
 #include <aims/resampling/linearresampler.h>
 
 template < class T >

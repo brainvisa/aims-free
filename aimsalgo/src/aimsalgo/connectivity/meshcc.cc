@@ -33,8 +33,9 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
-
+#include <cstdlib>
 #include <aims/connectivity/meshcc_d.h>
+
 
 using namespace std;
 

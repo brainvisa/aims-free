@@ -37,6 +37,7 @@
  *  NIFTI reader template functions
  */
  
+#include <cstdlib>
 #include <aims/io/niftiheader.h>
 #include <aims/io/niftilib/nifti1_io.h>
 #include <aims/io/niftiR.h>

@@ -37,6 +37,7 @@
 #ifndef AIMS_PRIMALSKETCH_FINITEELEMENTSMOOTHER_D_H
 #define AIMS_PRIMALSKETCH_FINITEELEMENTSMOOTHER_D_H
 
+#include <cstdlib>
 #include <aims/primalsketch/finiteElementSmoother.h>
 #include <aims/mesh/curv.h>
 #include <cartobase/type/converter.h>

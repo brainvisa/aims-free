@@ -36,6 +36,7 @@
 /*
  *  General variables and Group/Type returning string
  */
+#include <cstdlib>
 #include <aims/def/general.h>
 #include <cartobase/plugin/plugin.h>
 #include <cartobase/stream/fileutil.h>

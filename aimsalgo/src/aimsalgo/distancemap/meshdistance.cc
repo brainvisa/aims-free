@@ -97,7 +97,11 @@ namespace aims
     Texture<float> MeshDistance( const AimsSurface<3,Void> & mesh, 
 				 const Texture<short> & 
 				 inittex, bool allowUnreached );
-  } 
+    template
+    Texture<float> MeshDistance( const AimsSurface<3,Void> & mesh,
+                                 const Texture<float> &
+                                 inittex, bool allowUnreached );
+  }
 
 }
 

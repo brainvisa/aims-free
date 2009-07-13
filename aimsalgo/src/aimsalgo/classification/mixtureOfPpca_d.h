@@ -37,6 +37,7 @@
 #ifndef MIXTURE_OF_PPCA_D_H
 #define MIXTURE_OF_PPCA_D_H
 
+#include <cstdlib>
 #include <aims/classification/mixtureOfPpca.h>
 #include <aims/io/finder.h>
 #include <aims/io/writer.h>

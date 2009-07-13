@@ -37,6 +37,7 @@
 #ifndef AIMS_DISTANCEMAP_PROJECTION_H
 #define AIMS_DISTANCEMAP_PROJECTION_H
 
+#include <cstdlib>
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
 #include <aims/data/data.h>

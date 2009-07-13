@@ -70,7 +70,10 @@ static int AimsOptionMatch(const AimsOption *opt,const char *s,int lng)
   nopt = AimsOptionCount(opt);
   if (lng) 
   {
-#ifdef __BORLANDC__	// Borland strchr() doesn't take a const char* !!
+    #if (defined __BORLANDC__ ) || (defined(__GNUC__) && ((__GNUC__-0 > 4) \
+      || ((__GNUC__-0 == 4) && (__GNUC_MINOR__-0 >= 4) ) ) )
+    // Borland strchr() doesn't take a const char* !!
+    // neither does gcc 4.4 !!
     if ((p = strchr((char *)s, '=')) != NULL)
 #else
     if ((p = strchr(s, '=')) != NULL)

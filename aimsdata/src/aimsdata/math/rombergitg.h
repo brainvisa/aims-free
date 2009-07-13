@@ -40,6 +40,7 @@
 #define AIMS_MATH_ROMBERGITG_H
 
 
+#include <cstdlib>
 #include <aims/math/trapezeitg.h>
 #include <aims/data/data.h>
 #include <aims/math/lagrange.h>

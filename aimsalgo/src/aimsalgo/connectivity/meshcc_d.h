@@ -44,7 +44,8 @@
 #include <map>
 #include <set>
 #include <stack>
-#include <stdio.h>
+#include <cstdlib>
+//#include <stdio.h>
 
 
 template<class T>

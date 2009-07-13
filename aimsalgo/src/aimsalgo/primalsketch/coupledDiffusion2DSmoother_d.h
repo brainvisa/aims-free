@@ -37,6 +37,7 @@
 #ifndef AIMS_PRIMALSKETCH_COUPLEDDIFFUSION2DSMOOTHER_D_H
 #define AIMS_PRIMALSKETCH_COUPLEDDIFFUSION2DSMOOTHER_D_H
 
+#include <cstdlib>
 #include <aims/primalsketch/coupledDiffusion2DSmoother.h>
 #include <aims/signalfilter/convol.h>
 #include <cmath>

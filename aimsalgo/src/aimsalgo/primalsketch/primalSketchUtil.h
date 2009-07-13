@@ -37,6 +37,7 @@
 #ifndef AIMS_PRIMALSKETCH_PRIMALSKETCHUTIL_H
 #define AIMS_PRIMALSKETCH_PRIMALSKETCHUTIL_H
 
+#include <cstdlib>
 #include <aims/config/aimsalgo_config.h>
 #include <aims/primalsketch/primalSketch.h>
 #include <aims/bucket/bucket.h>

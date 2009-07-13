@@ -34,6 +34,7 @@
  */
 
 #include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <stdio.h>
 
 using namespace carto;
 using namespace std;

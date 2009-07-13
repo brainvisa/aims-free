@@ -32,6 +32,7 @@ Hypergeometric Function of a Matrix Argument, Mathematics of Computation
   http://www-math.mit.edu/~plamen/software/mhgref.html
 */
 
+#include <cstdlib>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>

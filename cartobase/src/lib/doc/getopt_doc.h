@@ -64,6 +64,7 @@ namespace carto
   like the following example:
 
   \code
+#include <cstdlib>
   #include <cartobase/getopt/getopt.h>
   #include <iostream>
 

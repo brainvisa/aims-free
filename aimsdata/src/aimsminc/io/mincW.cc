@@ -5,6 +5,7 @@
  *  (c) 2004-2005 CEA
  */
 
+#include <cstdlib>
 #include <aims/io/mincW.h>
 #include <aims/io/mincheader.h>
 #include <aims/resampling/motion.h>

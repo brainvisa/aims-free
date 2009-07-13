@@ -37,6 +37,7 @@
 #ifndef AIMS_PRIMALSKETCH_COUPLEDDIFFUSION2DSMOOTHER_H
 #define AIMS_PRIMALSKETCH_COUPLEDDIFFUSION2DSMOOTHER_H
 
+#include <cstdlib>
 #include <aims/primalsketch/imageCoupledSmoother.h>
 #include <aims/signalfilter/g2dsmooth.h>
 

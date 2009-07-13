@@ -37,6 +37,7 @@
 //	H E A D E R  F I L E S
 //=============================================================================
 #include <cstdlib>
+#include <cstdlib>
 #include <graph/graph/vertex.h>
 #include <graph/graph/edge.h>
 

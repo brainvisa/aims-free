@@ -37,6 +37,7 @@
 #ifndef DISTANCE_D_H
 #define DISTANCE_D_H
 
+#include <cstdlib>
 #include <aims/classification/distance.h>
 #include <math.h>
 

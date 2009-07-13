@@ -37,6 +37,7 @@
 #ifndef AIMS_RESAMPLING_QUARTICRESAMPLER_D_H
 #define AIMS_RESAMPLING_QUARTICRESAMPLER_D_H
 
+#include <cstdlib>
 #include <aims/resampling/quarticresampler.h>
 
 template < class T >

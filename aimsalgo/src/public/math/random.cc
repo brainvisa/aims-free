@@ -34,6 +34,7 @@
  */
 
 
+#include <cstdlib>
 #include <aims/math/random.h>
 #include <math.h>
 

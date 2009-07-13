@@ -50,6 +50,7 @@ extern "C"
 }
 
 using namespace std;
+using namespace carto;
 
 
 namespace aims
@@ -191,7 +192,6 @@ namespace aims
 				 const std::string & name, int zframe, 
 				 unsigned tframe )
   {
-    byte* buffer;
     int tiled, stripSize, rowsPerStrip, i, s;
     uint zmin, zmax;
     ushort photometric;
@@ -222,19 +222,27 @@ namespace aims
             // Read tif frame properties
             TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rowsPerStrip);
             TIFFGetFieldDefaulted(tif, TIFFTAG_PHOTOMETRIC, &photometric);
-    
-            for(s=0, i=0; s < data.dimY(); s += rowsPerStrip, ++i) {
-                TIFFReadEncodedStrip(tif, i, &data(0, s, z, tframe), stripSize);
-            }
-    
-            if(photometric == PHOTOMETRIC_MINISWHITE){
-                // Flip bits
-                for(int y = 0; y < data.dimY(); ++y) {
-                    buffer = (byte*)&data(0, y, z, tframe);
-                    for (unsigned index = 0; index < (data.dimX() * sizeof(T)) ; index++) {
-                        buffer[index] =~ buffer[index];
+            if ( photometric != PHOTOMETRIC_PALETTE ) {
+                for(s=0, i=0; s < data.dimY(); s += rowsPerStrip, ++i) {
+                     TIFFReadEncodedStrip(tif, i, &data(0, s, z, tframe), stripSize);
+                }
+
+                if(photometric == PHOTOMETRIC_MINISWHITE){
+                    // Flip bits
+                    byte* buffer;
+
+                    for(int y = 0; y < data.dimY(); ++y) {
+                        buffer = (byte*)&data(0, y, z, tframe);
+                        for (unsigned index = 0; index < (data.dimX() * sizeof(T)) ; index++) {
+                            buffer[index] =~ buffer[index];
+                        }
                     }
                 }
+            }
+            else if ( DataTypeCode<T>().dataType() == DataTypeCode<AimsRGBA>().dataType() ) {
+                // Indexed images can only be read as RGBA data
+                uint32 * rgba_data = (uint32 *)&data(0, 0, z, tframe);
+                TIFFReadRGBAImageOriented(tif, data.dimX(), data.dimY(), rgba_data, ORIENTATION_TOPLEFT);
             }
         }
       }

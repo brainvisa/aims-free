@@ -44,6 +44,7 @@
 #endif
 #include <iostream>
 #include <stdexcept>
+#include <stdio.h>
 
 #if defined( __APPLE__ )
 // another bug in MacOS: sem_init doesn't work and just sets 

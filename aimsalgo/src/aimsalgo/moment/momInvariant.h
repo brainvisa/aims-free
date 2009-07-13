@@ -37,6 +37,7 @@
 #ifndef AIMS_MOMENT_MOMINVARIANT_H
 #define AIMS_MOMENT_MOMINVARIANT_H
 
+#include <cstdlib>
 #include <aims/moment/moment.h>
 #include <math.h>
 #include <complex>

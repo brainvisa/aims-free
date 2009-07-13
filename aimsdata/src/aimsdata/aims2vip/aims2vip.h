@@ -39,6 +39,7 @@
 #ifndef AIMS_AIMS2VIP_AIMS2VIP_H
 #define AIMS_AIMS2VIP_AIMS2VIP_H
 
+#include <cstdlib>
 #include <aims/config/aimsdata_config.h>
 #include <aims/def/assert.h>
 #include <aims/data/data.h>

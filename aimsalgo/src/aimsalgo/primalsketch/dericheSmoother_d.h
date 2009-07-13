@@ -37,6 +37,7 @@
 #ifndef AIMS_PRIMALSKETCH_DERICHESMOOTHER_D_H
 #define AIMS_PRIMALSKETCH_DERICHESMOOTHER_D_H
 
+#include <cstdlib>
 #include <aims/primalsketch/dericheSmoother.h>
 #include <stdlib.h>
 
