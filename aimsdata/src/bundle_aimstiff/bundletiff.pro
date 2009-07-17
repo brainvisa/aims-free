@@ -1,8 +1,5 @@
 TEMPLATE		= bundle
-default:TARGET		= aimstiff
-debug:TARGET		= aimstiff-debug
-insure:TARGET		= aimstiff-insure
-release:TARGET		= aimstiff
+TARGET		    = aimstiff${BUILDMODEEXT}
 
 #!include ../../config
 
@@ -12,8 +9,4 @@ SOURCES =			\
     bundle/tiffbundle.cc
 
 LIBS	= ${LIBS_TIFF}
-
-default:LIBS	+= -laimstiff
-debug:LIBS	+= -laimstiff-debug
-insure:LIBS	+= -laimstiff-insure
-release:LIBS	+= -laimstiff
+LIBS	+= -laimstiff${BUILDMODEEXT}

@@ -1,8 +1,5 @@
 TEMPLATE		= bundle
-default:TARGET		= aimsjpeg
-debug:TARGET		= aimsjpeg-debug
-insure:TARGET		= aimsjpeg-insure
-release:TARGET		= aimsjpeg
+TARGET		    = aimsjpeg${BUILDMODEEXT}
 
 #!include ../../config
 
@@ -12,8 +9,4 @@ SOURCES =			\
     bundle/jpegbundle.cc
 
 LIBS	= ${LIBS_JPEG}
-
-default:LIBS	+= -laimsjpeg
-debug:LIBS	+= -laimsjpeg-debug
-insure:LIBS	+= -laimsjpeg-insure
-release:LIBS	+= -laimsjpeg
+LIBS	+= -laimsjpeg${BUILDMODEEXT}

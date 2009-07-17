@@ -1,8 +1,5 @@
 TEMPLATE		= bundle
-default:TARGET		= aimsvida
-debug:TARGET		= aimsvida-debug
-insure:TARGET		= aimsvida-insure
-release:TARGET		= aimsvida
+TARGET		    = aimsvida${BUILDMODEEXT}
 
 #!include ../../config
 
@@ -12,8 +9,4 @@ SOURCES =			\
     bundle/vidabundle.cc
 
 LIBS	= ${LIBS_VIDA}
-
-default:LIBS	+= -laimsvida
-debug:LIBS	+= -laimsvida-debug
-insure:LIBS	+= -laimsvida-insure
-release:LIBS	+= -laimsvida
+LIBS	+= -laimsvida${BUILDMODEEXT}

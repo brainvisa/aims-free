@@ -6,10 +6,6 @@ TARGET = aimsalgo${BUILDMODEEXT}
 INCBDIR = aims
 
 LIBS = $(LIBS_FOR_AIMSALGO)
-#release:LIBS	+= -laimsalgopub
-#default:LIBS	+= -laimsalgopub
-#debug:LIBS	+= -laimsalgopub-debug
-#insure:LIBS	+= -laimsalgopub-insure
 
 HEADERS = \
     classification/individuals.h \

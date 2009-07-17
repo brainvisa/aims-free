@@ -1,8 +1,5 @@
 TEMPLATE		= bundle
-default:TARGET		= aimsqtformats
-debug:TARGET		= aimsqtformats-debug
-insure:TARGET		= aimsqtformats-insure
-release:TARGET		= aimsqtformats
+TARGET	        = aimsqtformats${BUILDMODEEXT}
 
 #!include ../../config
 
