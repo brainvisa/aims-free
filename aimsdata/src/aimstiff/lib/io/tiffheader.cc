@@ -223,6 +223,16 @@ void TiffHeader::read()
   readMinf( removeExtension( _name ) + extension() + ".minf" );
 
   inputFilenames();
+  // check if dimensions have changed
+  getProperty( "volume_dimension", dims );
+  if( dims.size() >= 3 )
+  {
+    _dimX = dims[0];
+    _dimY = dims[1];
+    _dimZ = dims[2];
+    if( dims.size() >= 4 )
+      _dimT = dims[3];
+  }
 }
 
 

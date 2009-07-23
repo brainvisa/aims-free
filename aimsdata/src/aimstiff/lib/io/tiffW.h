@@ -127,23 +127,73 @@ namespace aims
     }
 
     std::string name = carto::DataTypeCode<T>().name();
+    uint16_t sampleformat = SAMPLEFORMAT_UINT;
 
-    if ( name == "U8"  ) {
+    if ( name == "U8"  )
+    {
       spp = 1;
       bps = 8;
       photometric = PHOTOMETRIC_MINISBLACK;
-    } else if ( name == "U16"  ) {
+    }
+    else if ( name == "S8"  )
+    {
+      spp = 1;
+      bps = 8;
+      photometric = PHOTOMETRIC_MINISBLACK;
+      sampleformat = SAMPLEFORMAT_INT;
+    }
+    else if ( name == "U16"  )
+    {
       spp = 1;
       bps = 16;
-      photometric = PHOTOMETRIC_MINISBLACK;     
-    } else if ( name == "RGBA"  ) {
+      photometric = PHOTOMETRIC_MINISBLACK;
+    }
+    else if ( name == "S16"  )
+    {
+      spp = 1;
+      bps = 16;
+      photometric = PHOTOMETRIC_MINISBLACK;
+      sampleformat = SAMPLEFORMAT_INT;
+    }
+    else if ( name == "FLOAT"  )
+    {
+      spp = 1;
+      bps = 32;
+      photometric = PHOTOMETRIC_MINISBLACK;
+      sampleformat = SAMPLEFORMAT_IEEEFP;
+    }
+    else if ( name == "DOUBLE"  )
+    {
+      spp = 1;
+      bps = 64;
+      photometric = PHOTOMETRIC_MINISBLACK;
+      sampleformat = SAMPLEFORMAT_IEEEFP;
+    }
+    else if ( name == "CFLOAT"  )
+    {
+      spp = 2;
+      bps = 32;
+      photometric = PHOTOMETRIC_MINISBLACK;
+      sampleformat = SAMPLEFORMAT_COMPLEXIEEEFP;
+    }
+    else if ( name == "CDOUBLE"  )
+    {
+      spp = 2;
+      bps = 64;
+      photometric = PHOTOMETRIC_MINISBLACK;
+      sampleformat = SAMPLEFORMAT_COMPLEXIEEEFP;
+    }
+    else if ( name == "RGBA"  )
+    {
       spp = 4;
       bps = 8;
       photometric = PHOTOMETRIC_RGB;
-    } else {
+    }
+    else
+    {
       spp = 3;
       bps = 8;
-      photometric = PHOTOMETRIC_RGB;      
+      photometric = PHOTOMETRIC_RGB;
     }
 
 //     std::cout << "Filename : " << filename << std::endl;
@@ -165,6 +215,7 @@ namespace aims
     TIFFSetField(tif, TIFFTAG_XRESOLUTION, 10 / data.sizeX());
     TIFFSetField(tif, TIFFTAG_YRESOLUTION, 10 / data.sizeY());
     TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, RESUNIT_CENTIMETER);
+    TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, sampleformat);
 
     // Write the information to the file
     buffer = (byte *)&data(0, 0, z, t);

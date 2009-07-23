@@ -61,6 +61,12 @@ namespace aims
                                 const AimsData<T> & vol, 
                                 bool /* ascii */ )
   {
+    /* fail if no extension has been specified, so that DICOM is not the
+       default writer format when no ext is given
+    */
+    if( carto::FileUtil::extension( filename ).empty() )
+      return false;
+
     int dx = vol.dimX();
     int dy = vol.dimY();
     unsigned long lineSize = dx * sizeof( T );

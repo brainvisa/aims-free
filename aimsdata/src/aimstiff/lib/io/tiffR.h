@@ -108,7 +108,7 @@ namespace aims
 
     std::vector<std::string>	files = hdr->inputFilenames();
     std::vector<int>		dims;
-    hdr->getProperty( "volume_dimensions", dims );
+    hdr->getProperty( "volume_dimension", dims );
 
     if( dims.size() < 1 )
       dims.push_back( hdr->dimX() );
@@ -161,8 +161,9 @@ namespace aims
       dir += carto::FileUtil::separator();
 
     unsigned	i = 0, s, t, ns = (unsigned) data.dimZ(), nt = tmax - tmin + 1;
-    
-    if ( files.size() == ns * nt ) {
+
+    if ( files.size() == ns * nt )
+    {
         // Each file contain 1 slice and 1 frame
         for( t=0; t<nt; ++t ) {
             for( s=0; s<ns; ++s, ++i ) {
@@ -171,7 +172,8 @@ namespace aims
                 }
             }
         }
-    } else if ( files.size() == nt ) {
+    } else if ( files.size() == nt )
+    {
         // Each file contain z slices and 1 frame
         for( t=0; t<nt; ++t ) {
             if ( ! carto::FileUtil::fileStat( dir + files[t] ).empty() ) {
