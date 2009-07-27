@@ -11,13 +11,16 @@ HEADERS =			\
     io/fdfheader.h		\
     io/fdfR.h			\
     io/fdffinderformat.h	\
-    io/fdfutil.h     \
+    io/fdfprocpar.h	        \
+    io/fdfprocpar_g.h	        \
+    io/fdfutil.h                \
     plugin/fdfplugin.h
 
 SOURCES =			\
     io/fdfformat.cc		\
     io/fdfheader.cc		\
-    io/fdfutil.cc     \
+    io/fdfprocpar.cc            \
+    io/fdfutil.cc               \
     plugin/fdfplugin.cc
 
 LIBS    = ${LIBS_FDF}

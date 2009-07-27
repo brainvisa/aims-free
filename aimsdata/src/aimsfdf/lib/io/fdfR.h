@@ -77,8 +77,7 @@ namespace aims
 
       std::string	_name;
 
-      void readData( const std::string&, AimsData< T >&,  
-                     const aims::FdfHeader * );
+      void readFrame( AimsData< T >& thing, string file, uint slice, const aims::FdfHeader *hdr );
     };
 
 
@@ -105,15 +104,27 @@ namespace aims
         = std::auto_ptr<aims::FdfHeader>( new aims::FdfHeader( _name ) );
       hdr->read();
 
-      carto::DataTypeCode<T>  dtc;
+      int rank = 2;
+      hdr->getProperty( "rank", rank );
 
       // check if data type is compatible with type T
       int bits_allocated;
+
       bool status;
       status = hdr->getProperty( "bits_allocated", bits_allocated );
       if ( status && ( bits_allocated / 8 ) > (int)sizeof( T ) )
       {
         throw carto::format_error( _name );
+      }
+      
+      string		dir = FileUtil::dirname( _name );
+      vector<string>	files;
+
+      if ( rank == 2 ) {
+        files = hdr->inputFilenames();
+      }
+      else {
+        files.push_back( FileUtil::basename( _name ) );
       }
 
       // create an AimsData
@@ -127,17 +138,22 @@ namespace aims
       AimsData< T > data( hdr->dimX(), hdr->dimY(), hdr->dimZ(), hdr->dimT(),
                           borderWidth, cont );
       data.setSizeXYZT( hdr->sizeX(), hdr->sizeY(), hdr->sizeZ(), hdr->sizeT() );
-      readData( _name, data, hdr.get() );
+
+      // Read frames
+      for( uint slice=0; slice < files.size(); slice++ ) {
+          if ( ! FileUtil::fileStat( dir + FileUtil::separator() + files[slice] ).empty() ) {
+            readFrame( data, dir + FileUtil::separator() + files[slice], slice, hdr.get() );
+          }
+      }
 
       thing = data;
       thing.setHeader( hdr.release() );
     }
 
   template< class T > inline
-    void FdfReader< T >::readData( const std::string& filename,
-                                     AimsData< T >& thing, 
-                                     const aims::FdfHeader *hdr )
+    void FdfReader< T >::readFrame( AimsData< T >& thing, string filename, uint slice, const aims::FdfHeader *hdr )
     {
+
       std::vector< int > dims;
       hdr->getProperty( "volume_dimension", dims );
 
@@ -147,9 +163,12 @@ namespace aims
       int byte_swapping;
       hdr->getProperty( "byte_swapping", byte_swapping );
 
-      unsigned int pixels_number = 1;
+      int rank;
+      hdr->getProperty( "rank", rank );
 
-      for( unsigned int dim=0; dim < dims.size(); dim++ )
+      uint pixels_number = 1;
+
+      for( int dim = 0; dim < rank; dim++ )
       {
         pixels_number *= dims[ dim ];
       }
@@ -163,6 +182,7 @@ namespace aims
       }
 
       // Get data position
+      int zstart = 0, zend = thing.dimZ();
       inFile.seekg (0, std::ios::end);
       long int fileSize = inFile.tellg();
       size_t dataPosition = fileSize - (pixels_number * ( bits_allocated / 8 ) );
@@ -173,14 +193,21 @@ namespace aims
         = itemr.reader( "binar",
                          byte_swapping != AIMS_MAGIC_NUMBER );
 
-      for( int t=0; t<thing.dimT(); ++t )
-        for( int z=0; z<thing.dimZ(); ++z )
-          for( int y=0; y<thing.dimY(); ++y )
+      if ((rank == 2) && (dims.size() > 2) && (dims[2] > 1)) {
+         zstart = slice;
+         zend = slice + 1;
+      }
+
+      for( int t=0; t < thing.dimT(); ++t )
+        for( int z=zstart; z < zend; ++z ) {
+          for( int y=0; y < thing.dimY(); ++y )
           {
-            ir->read( inFile, &thing(0,y,z,t), thing.dimX() );
-            if( !inFile || inFile.eof() )
+            ir->read( inFile, &thing(0, y, z, t), thing.dimX() );
+            if( !inFile || inFile.eof() ) {
               carto::io_error::launchErrnoExcept( filename );
+            }
           }
+        }
 
       bool success = !inFile.bad();
       inFile.close();

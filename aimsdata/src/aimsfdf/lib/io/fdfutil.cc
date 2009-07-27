@@ -36,7 +36,7 @@
 #include "fdfutil.h"
 
 // Remove a particular type of character from a string
-void RemoveCharacters(std::string &line, std::string character)
+void removeCharacters(std::string &line, std::string character)
 {
     std::string::size_type characterPosition = line.find_first_of(character, 0);
     while ( characterPosition != std::string::npos ) {
@@ -45,7 +45,7 @@ void RemoveCharacters(std::string &line, std::string character)
     }
 }
 
-void Tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters)
+void tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters)
 {
     // Skip delimiters at beginning.
     std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
@@ -63,13 +63,13 @@ void Tokenize(const std::string& str, std::vector<std::string>& tokens, const st
     }
 }
 
-std::string ParseLine(std::string line)
+std::string parseLine(std::string line)
 {
     // strip *
-    RemoveCharacters(line, "*");
-    RemoveCharacters(line, "\"");
-    RemoveCharacters(line, "[");
-    RemoveCharacters(line, "]");
+    removeCharacters(line, "*");
+    removeCharacters(line, "\"");
+    removeCharacters(line, "[");
+    removeCharacters(line, "]");
 
     // Need to deal with space between {}
     std::string::size_type startBracketPosition = line.find_first_of("{", 0);

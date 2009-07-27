@@ -48,13 +48,13 @@ void graphePS(PrimalSketch<AimsSurface<3, Void>, Texture<float> > &sketch){
     votes.push_back(0);
   float tmin=1000000000000.0,tmax=-1000000000000.0;
   for (; itSSBlobs!=blobList.end(); ++itSSBlobs)  {
-    float valeur = (*itSSBlobs)->GetMeasurements().t;
+    float valeur = (*itSSBlobs)->GetMeasurements().tValue;
     if (valeur<tmin) tmin=valeur;
     if (valeur>tmax) tmax=valeur;
   }
   printf("min: %f - max: %f\n", tmin, tmax);
   for (itSSBlobs=blobList.begin(); itSSBlobs!=blobList.end(); ++itSSBlobs)  {
-    float valeur = (*itSSBlobs)->GetMeasurements().t;
+    float valeur = (*itSSBlobs)->GetMeasurements().tValue;
 //     printf("%d ", (uint) (((valeur - tmin) / (tmax-tmin))*votes.size()));
     votes[(uint) (((valeur - tmin) / (tmax-tmin))*votes.size())]++;
   }
@@ -97,8 +97,8 @@ PrimalSketch<AimsSurface<3,Void>, Texture<float> > filterPS2(PrimalSketch<AimsSu
 
   printf("\n\n%d", outsketch.BlobSet().size());
   for (itSSBlobs=blobList.begin();itSSBlobs!=blobList.end();itSSBlobs++){
-    cout << (*itSSBlobs)->GetMeasurements().t << " ";
-    if ((*itSSBlobs)->GetMeasurements().t > threshold)
+    cout << (*itSSBlobs)->GetMeasurements().tValue << " ";
+    if ((*itSSBlobs)->GetMeasurements().tValue > threshold)
       outsketch.AddBlob(*itSSBlobs);
   }
   printf("\n\n%d", outsketch.BlobSet().size());
@@ -134,8 +134,8 @@ PrimalSketch<AimsSurface<3,Void>, Texture<float> > filterPS(PrimalSketch<AimsSur
     ScaleSpaceBlob<SiteType<AimsSurface<3,Void> >::type> *ssb=(*mapit).second;
     uint label = ssb->Label();
     if (blobtag[label]){
-      if (ssb->GetMeasurements().t > threshold){
-        printf("%.3f ", ssb->GetMeasurements().t);
+      if (ssb->GetMeasurements().tValue > threshold){
+        printf("%.3f ", ssb->GetMeasurements().tValue);
         // ça passe le seuil je bloque le blob courant et ses ancetres
         bloquerAscendance(ssb, blobtag);
       }

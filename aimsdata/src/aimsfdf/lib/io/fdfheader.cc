@@ -37,12 +37,14 @@
  *  lecture de fichiers FDF
  */
 
-#include <cartobase/stream/fileutil.h>
-#include <aims/io/fdfutil.h>
-#include <aims/io/fdfheader.h>
-
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/type/byte_order.h>
+#include <cartobase/stream/fileutil.h>
+#include <cartobase/type/string_conversion.h>
+#include <aims/io/fdfutil.h>
+#include <aims/io/fdfheader.h>
+#include <aims/io/fdfprocpar_g.h>
+
 #include <iostream>
 #include <vector>
 #include <unistd.h>
@@ -82,6 +84,12 @@ void FdfHeader::setType( const string & t )
   setProperty( "data_type", t );
 }
 
+set<string> FdfHeader::getFiles(string) const
+{
+    set<string> result;
+    return result;
+}
+
 void FdfHeader::read()
 {
   // Header elements
@@ -89,8 +97,9 @@ void FdfHeader::read()
   string spatial_rank, checksum, storage, bits, bigendian;
   vector<int> matrix, dims;
   vector<string> pt;
-  int typesize = 32, bits_allocated = 32, matrix_size = 1, byte_swapping;
+  int typesize = 32, bits_allocated = 32, byte_swapping;
   uint byte_order = 1;
+  int rank = 2, dimz = 1;
 
   // Parsing elements
   string line;
@@ -113,8 +122,8 @@ void FdfHeader::read()
     }
 
     // Formats the lines in the FDF header such as removing whitespace between {}
-    line = ParseLine(line);
-    Tokenize(line, tokens, " ;");
+    line = parseLine(line);
+    tokenize(line, tokens, " ;");
     
     if(tokens.size() == 4) {
                                                                                                                             
@@ -122,30 +131,49 @@ void FdfHeader::read()
           name = tokens[1];
           value = tokens[3];
 
+          if (name == "rank") {
+              stringTo(value, rank);
+          }
+
           if (name == "spatial_rank") {
               spatial_rank = value;
           }
 
+          if (name == "slices") {
+              stringTo(value, dimz);
+          }
+            
           if (name == "matrix") {
-              StringToVector(value, matrix);
+              stringToVector(value, matrix);
 
-              for(unsigned int i=0; i<matrix.size(); i++) {
-                  matrix_size *= matrix[i];
+              for(uint i=0; i < matrix.size(); i++) {
                   // Set the size of each dimension
                   dims.push_back( matrix[i] );
               }
           }
 
           if (name == "span") {
-              StringToVector(value, span);
+              stringToVector(value, span);
+
+              if (!span.empty()) {
+                setProperty( "span", span);
+              }
           }
 
           if (name == "roi") {
-              StringToVector(value, roi);
+              stringToVector(value, roi);
+
+              if (!roi.empty()) {
+                setProperty( "roi", roi);
+              }
           }
 
           if (name == "location") {
-              StringToVector(value, location);
+              stringToVector(value, location);
+
+              if (!location.empty()) {
+                setProperty( "location", location);
+              }
           }
 
           // Get the binary data type
@@ -196,21 +224,21 @@ void FdfHeader::read()
 
           // Get the bits
           if (name == "bits") {
-              ConvertFromString (value, bits);
+              stringTo(value, bits);
               istringstream is(bits);
               is >> bits_allocated;
           }
 
           // Get the bits order
           if (name == "bigendian") {
-              ConvertFromString (value, bigendian);
+              stringTo(value, bigendian);
               istringstream is(bigendian);
               is >> byte_order;
           }
 
           // Get the checksum
           if (name == "checksum") {
-              ConvertFromString (value, checksum);
+              stringTo(value, checksum);
           }
 
       }
@@ -220,6 +248,12 @@ void FdfHeader::read()
 
   for(unsigned int i=0; i<matrix.size(); i++) {
     resolutions.push_back( (roi[i] * 10 ) / matrix[i] );
+  }
+
+  if ((matrix.size() < 3) && (rank == 2) && (dimz > 1)) {
+    // We add a third dimension to the image
+    dims.push_back(dimz);
+    resolutions.push_back(roi[2] * 10);
   }
 
   // Get image type
@@ -270,6 +304,7 @@ void FdfHeader::read()
     _sizeT = resolutions[3];
   }
 
+  setProperty( "rank", rank );
   setProperty( "file_type", string( "FDF" ) );
   setProperty( "bits_allocated", bits_allocated );
 
@@ -280,7 +315,6 @@ void FdfHeader::read()
     byte_swapping = stringToByteOrder( "ABCD" );
   }
   setProperty( "byte_swapping", byte_swapping );
-
   setProperty( "volume_dimension", dims );
   setProperty( "voxel_size", resolutions );
   setProperty( "data_type", _type );
@@ -289,6 +323,206 @@ void FdfHeader::read()
     setProperty( "possible_data_types", pt );
 
   // add meta-info to header
+  readProcPar( FileUtil::dirname( _name ) + FileUtil::separator() + "procpar" );
+
   readMinf( removeExtension( _name ) + extension() + ".minf" );
 
+  string pattern;
+  if (rank < 3) {
+    // We use 2D slices to try to get a complete volume
+    if ( !getProperty("input_file_pattern", pattern)) {
+        // Set a default fdf pattern to be able to get slice files
+        string      filename = FileUtil::basename( _name );
+        string      searchpattern = "^([^0-9]+)([0-9]+)([^0-9]+)([0-9]+)([^0-9]+)([0-9]+)(" + extension() + ")$";
+        regex_t	    reg;
+        regcomp( &reg, searchpattern.c_str(),
+                REG_EXTENDED | REG_ICASE );
+        regmatch_t	rmatch[8];
+    
+        if( !regexec( &reg, filename.c_str(), 8, rmatch, 0 ) )
+        {
+            uint length = rmatch[2].rm_eo - rmatch[2].rm_so;
+            ostringstream	pattern;
+            pattern << filename.substr(0, rmatch[1].rm_eo) << "\%0" << length << "d" << filename.substr(rmatch[3].rm_so);
+            setProperty("input_file_pattern", pattern.str());
+            setProperty("slice_min", 1);
+        }
+        regfree( &reg );
+    }
+
+    inputFilenames();
+  }
+
+  // check if dimensions have changed
+  getProperty( "volume_dimension", dims );
+  if( dims.size() >= 3 )
+  {
+      _dimX = dims[0];
+      _dimY = dims[1];
+      _dimZ = dims[2];
+      if( dims.size() >= 4 )
+          _dimT = dims[3];
+  }
 }
+
+void FdfHeader::readProcPar( string name ) {
+
+    FdfProcPar procpar( name );
+
+    // Set header properties
+    setProperty( "manufacturer",  "varian" );
+
+    string patientid = procpar.value<string>("ident");
+    if (!patientid.empty()) {
+        setProperty( "patient_id", patientid );
+    }
+
+    string studyid = procpar.value<string>("studyid_");
+    if (!studyid.empty()) {
+        setProperty( "study_id", studyid );
+    }
+
+    vector< float > patientposition;
+    float position1 = procpar.value<float>("position1");
+    float position2 = procpar.value<float>("position2");
+
+    if (position1 != 0.) {
+        patientposition.push_back( position1 );
+    }
+    if (position2 != 0.) {
+        patientposition.push_back( position2 );
+    }
+    if (! patientposition.empty() ) {
+        setProperty( "patient_position", patientposition );
+    }
+    
+    string acquisitionmode = procpar.value<string>("acquisition_mode");
+    if (!acquisitionmode.empty()) {
+        setProperty( "acquisition_mode", acquisitionmode );
+    }
+    
+    string tn = procpar.value<string>("tn");
+    if (!tn.empty()) {
+        setProperty( "tn", tn );
+    }
+
+    string dn = procpar.value<string>("dn");
+    if (!dn.empty()) {
+        setProperty( "dn", dn );
+    }
+
+    vector<float> nuclearfrequency;
+    float sfrq = procpar.value<float>("sfrq");
+    float dfrq = procpar.value<float>("dfrq");
+
+    if (sfrq != 0.) {
+        nuclearfrequency.push_back( sfrq );
+    }
+    if (dfrq != 0.) {
+        nuclearfrequency.push_back( dfrq );
+    }
+    if (!nuclearfrequency.empty()) {
+        setProperty( "nuclear_frequency", nuclearfrequency );
+    }
+
+    float lro = procpar.value<float>("lro");
+    if (lro != 0.) {
+        setProperty( "lro", lro );
+    }
+
+    float lpe = procpar.value<float>("lpe");
+    if (lpe != 0.) {
+        setProperty( "lpe", lpe );
+    }
+
+    float lpe2 = procpar.value<float>("lpe2");
+    if (lpe2 != 0.) {
+        setProperty( "lpe2", lpe2 );
+    }
+
+    float pro = procpar.value<float>("pro");
+    if (pro != 0.) {
+        setProperty( "pro", pro );
+    }
+
+    float ppe = procpar.value<float>("ppe");
+    if (ppe != 0.) {
+        setProperty( "ppe", ppe );
+    }
+
+    float ppe2 = procpar.value<float>("ppe2");
+    if (ppe2 != 0.) {
+        setProperty( "ppe2", ppe2 );
+    }
+
+    float thk = procpar.value<float>("thk");
+    if (thk != 0.) {
+        setProperty( "thk", thk );
+    }
+
+    float gap = procpar.value<float>("gap");
+    if (gap != 0.) {
+        setProperty( "gap", gap );
+    }
+
+    float psi = procpar.value<float>("psi");
+    if (psi != 0.) {
+        setProperty( "psi", psi );
+    }
+
+    float phi = procpar.value<float>("phi");
+    if (phi != 0.) {
+        setProperty( "phi", phi );
+    }
+
+    float theta = procpar.value<float>("theta");
+    if (theta != 0.) {
+        setProperty( "theta", theta );
+    }
+
+    float dro = procpar.value<float>("dro");
+    if (dro != 0.) {
+        setProperty( "dro", dro );
+    }
+    
+    float dpe = procpar.value<float>("dpe");
+    if (dpe != 0.) {
+        setProperty( "dpe", dpe );
+    }
+
+    float dsl = procpar.value<float>("dsl");
+    if (dsl != 0.) {
+        setProperty( "dsl", dsl );
+    }
+
+    float bvalue = procpar.value<float>("bvalue");
+    if (bvalue != 0.) {
+        setProperty( "b_value", bvalue );
+    }
+
+    float te = procpar.value<float>("te");
+    if (te != 0.) {
+        setProperty( "te", te );
+    }
+
+    float tr = procpar.value<float>("tr");
+    if (tr != 0.) {
+        setProperty( "tr", tr );
+    }
+
+    float ti = procpar.value<float>("ti");
+    if (ti != 0.) {
+        setProperty( "ti", ti );
+    }
+
+    int ns = procpar.value<int>("ns");
+    if (ns != 0) {
+        setProperty( "ns", ns );
+    }
+
+    int ne = procpar.value<int>("ne");
+    if (ne != 0) {
+        setProperty( "ne", ne );
+    }
+}
+
