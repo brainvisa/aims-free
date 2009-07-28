@@ -93,7 +93,8 @@ set<string> FdfHeader::getFiles(string) const
 void FdfHeader::read()
 {
   // Header elements
-  vector<float> resolutions, location, span, roi;
+  //Motion transfo;
+  vector<float> resolutions, location, orientation, span, roi, storagetomemory(16);
   string spatial_rank, checksum, storage, bits, bigendian;
   vector<int> matrix, dims;
   vector<string> pt;
@@ -114,6 +115,16 @@ void FdfHeader::read()
   {
     io_error::launchErrnoExcept( _name );
   }
+
+  // Initialize the transformation
+  //storagetomemory = transfo.toVector();
+  cout << "[";
+  for (uint x=0; x<4; x++)
+    for (uint y=0; y<4; y++) {
+        storagetomemory[4*x + y] = ((x == y) ? 1 : 0);
+        cout << storagetomemory[4*x + y] << ",";
+    }
+  cout << "]" << endl;
 
   while (getline(inFile, line, '\n')) {
 
@@ -170,9 +181,22 @@ void FdfHeader::read()
 
           if (name == "location") {
               stringToVector(value, location);
-
               if (!location.empty()) {
-                setProperty( "location", location);
+                for (uint i=0; i < 3; i++) {
+                    storagetomemory[ 4 * i + 3 ] = location[i];
+                    //cout << "location[" << (4 * i + 3) << "] = " << storagetomemory[ 4 * i + 3 ] << endl;
+                }
+              }
+          }
+
+          if (name == "orientation"){
+              stringToVector(value, orientation);
+              if (!orientation.empty()) {
+                for (uint x=0; x < 3; x++)
+                    for (uint y=0; y < 3; y++) {
+                        storagetomemory[ 4 * x + y ] = orientation[ 3 * x + y];
+                        //cout << "orientation[" << (4 * x + y) << "] = " << storagetomemory[ 4 * x + y ] << endl;
+                    }
               }
           }
 
@@ -246,6 +270,7 @@ void FdfHeader::read()
       tokens.clear();
   }
 
+  // Process image resolution
   for(unsigned int i=0; i<matrix.size(); i++) {
     resolutions.push_back( (roi[i] * 10 ) / matrix[i] );
   }
@@ -304,6 +329,8 @@ void FdfHeader::read()
     _sizeT = resolutions[3];
   }
 
+  // Set properties
+  setProperty( "storage_to_memory", storagetomemory);
   setProperty( "rank", rank );
   setProperty( "file_type", string( "FDF" ) );
   setProperty( "bits_allocated", bits_allocated );
