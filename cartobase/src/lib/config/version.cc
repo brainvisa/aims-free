@@ -47,7 +47,7 @@ string carto::cartobaseVersionString()
       s << CARTOBASE_VERSION_MAJOR << '.' << CARTOBASE_VERSION_MINOR << '.' 
         << CARTOBASE_VERSION_TINY;
       // in alpha/beta releases
-      s << "alpha";
+      // s << "alpha";
       ver = s.str();
     }
   return ver;
