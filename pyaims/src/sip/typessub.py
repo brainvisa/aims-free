@@ -20,7 +20,7 @@ def classInNamespace( include, cls, namespace ):
     '#ifndef PYAIMS_' + namespace.upper() + '_' + cls.upper() + '_CHECK_DEFINED\n'
     '#define PYAIMS_' + namespace.upper() + '_' + cls.upper() + '_CHECK_DEFINED\n'
     'inline int pyaims' + cls + '_Check( PyObject* o )\n'
-    '{ return sipIsSubClassInstance( o, sipClass_' + namespace + '_' + cls + ' ); }\n'
+    '{ return sipCanConvertToInstance( o, sipClass_' + namespace + '_' + cls + ', SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
     '#endif', 
     'module' : 'aims', 
     'testPyType' : 'pyaims' + cls + '_Check',
@@ -299,7 +299,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_RGB_DEFINED\n' 
                '#define PYAIMS_RGB_DEFINED\n'
                'inline int pyaimsRGB_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsRGB ); }\n' 
+               '{ return sipCanConvertToInstance( o, sipClass_AimsRGB, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsRGB_Check', 
@@ -326,7 +326,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_RGBA_DEFINED\n' 
                '#define PYAIMS_RGBA_DEFINED\n'
                'inline int pyaimsRGBA_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsRGBA ); }\n' 
+               '{ return sipCanConvertToInstance( o, sipClass_AimsRGBA, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsRGBA_Check', 
@@ -564,7 +564,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_SEMANTIC_DEFINED\n' 
                '#define PYAIMS_SEMANTIC_DEFINED\n'
                'inline int pyaimsSemantic_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_carto_Semantic ); }\n' 
+               '{ return sipCanConvertToInstance( o, sipClass_carto_Semantic, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsSemantic_Check', 
@@ -590,7 +590,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TREE_DEFINED\n'
                '#define PYAIMS_TREE_DEFINED\n'
                'inline int pyaimsTree_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Tree ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Tree, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTree_Check',
@@ -616,7 +616,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_HIERARCHY_DEFINED\n'
                '#define PYAIMS_HIERARCHY_DEFINED\n'
                'inline int pyaimsHierarchy_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_aims_Hierarchy ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_aims_Hierarchy, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsHierarchy_Check',
@@ -642,7 +642,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_GRAPH_DEFINED\n' 
                '#define PYAIMS_GRAPH_DEFINED\n'
                'inline int pyaimsGraph_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Graph ); }\n' 
+               '{ return sipCanConvertToInstance( o, sipClass_Graph, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsGraph_Check', 
@@ -668,7 +668,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_SYNTAX_DEFINED\n' 
                '#define PYAIMS_SYNTAX_DEFINED\n'
                'inline int pyaimsSyntax_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_carto_Syntax ); }\n' 
+               '{ return sipCanConvertToInstance( o, sipClass_carto_Syntax, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsSyntax_Check', 
@@ -694,7 +694,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_SURFACETRIANGLE_DEFINED\n' 
                '#define PYAIMS_SURFACETRIANGLE_DEFINED\n'
                'inline int pyaimsSurfaceTriangle_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsSurfaceTriangle ); }\n' 
+               '{ return sipCanConvertToInstance( o, sipClass_AimsSurfaceTriangle, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsSurfaceTriangle_Check', 
@@ -720,7 +720,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_GENERICOBJECT_DEFINED\n' 
                '#define PYAIMS_GENERICOBJECT_DEFINED\n'
                'inline int pyaimsGenericObject_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_carto_GenericObject ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_carto_GenericObject, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsGenericObject_Check', 
@@ -747,7 +747,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_S8_CHECK_DEFINED\n' 
                '#define PYAIMS_AIMSDATA_S8_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_S8_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_S8 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_S8, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_S8_Check', 
@@ -773,7 +773,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_U8_CHECK_DEFINED\n' 
                '#define PYAIMS_AIMSDATA_U8_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_U8_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_U8 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_U8, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_U8_Check', 
@@ -799,7 +799,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_S16_CHECK_DEFINED\n'
                '#define PYAIMS_AIMSDATA_S16_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_S16_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_S16 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_S16_Check', 
@@ -825,7 +825,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_U16_CHECK_DEFINED\n'
                '#define PYAIMS_AIMSDATA_U16_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_U16_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_U16 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_U16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_U16_Check', 
@@ -851,7 +851,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_S32_CHECK_DEFINED\n'
                '#define PYAIMS_AIMSDATA_S32_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_S32_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_S32 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_S32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_S32_Check', 
@@ -877,7 +877,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_U32_CHECK_DEFINED\n'
                '#define PYAIMS_AIMSDATA_U32_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_U32_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_U32 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_U32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_U32_Check', 
@@ -903,7 +903,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_FLOAT_CHECK_DEFINED\n'
                '#define PYAIMS_AIMSDATA_FLOAT_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_FLOAT_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_FLOAT ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_FLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_FLOAT_Check', 
@@ -929,7 +929,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_DOUBLE_CHECK_DEFINED\n'
                '#define PYAIMS_AIMSDATA_DOUBLE_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_DOUBLE_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_DOUBLE ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_DOUBLE, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_DOUBLE_Check', 
@@ -956,7 +956,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_RGB_CHECK_DEFINED\n'
                '#define PYAIMS_AIMSDATA_RGB_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_RGB_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_RGB ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_RGB, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_RGB_Check', 
@@ -983,7 +983,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_AIMSDATA_RGBA_CHECK_DEFINED\n'
                '#define PYAIMS_AIMSDATA_RGBA_CHECK_DEFINED\n'
                'inline int pyaimsAimsData_RGBA_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsData_RGBA ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_RGBA, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_RGBA_Check', 
@@ -1010,7 +1010,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_S8_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_S8_CHECK_DEFINED\n'
                'inline int pyaimsVolume_S8_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_S8 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_S8, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_S8_Check', 
@@ -1036,7 +1036,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_U8_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_U8_CHECK_DEFINED\n'
                'inline int pyaimsVolume_U8_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_U8 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_U8, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_U8_Check', 
@@ -1062,7 +1062,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_S16_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_S16_CHECK_DEFINED\n'
                'inline int pyaimsVolume_S16_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_S16 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_S16_Check', 
@@ -1088,7 +1088,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_U16_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_U16_CHECK_DEFINED\n'
                'inline int pyaimsVolume_U16_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_U16 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_U16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_U16_Check', 
@@ -1114,7 +1114,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_S32_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_S32_CHECK_DEFINED\n'
                'inline int pyaimsVolume_S32_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_S32 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_S32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_S32_Check', 
@@ -1140,7 +1140,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_U32_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_U32_CHECK_DEFINED\n'
                'inline int pyaimsVolume_U32_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_U32 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_U32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_U32_Check', 
@@ -1166,7 +1166,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_FLOAT_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_FLOAT_CHECK_DEFINED\n'
                'inline int pyaimsVolume_FLOAT_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_FLOAT ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_FLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_FLOAT_Check', 
@@ -1192,7 +1192,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_DOUBLE_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_DOUBLE_CHECK_DEFINED\n'
                'inline int pyaimsVolume_DOUBLE_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_DOUBLE ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_DOUBLE, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_DOUBLE_Check', 
@@ -1220,7 +1220,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_RGB_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_RGB_CHECK_DEFINED\n'
                'inline int pyaimsVolume_RGB_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_RGB ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_RGB, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_RGB_Check', 
@@ -1248,7 +1248,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_VOLUME_RGBA_CHECK_DEFINED\n'
                '#define PYAIMS_VOLUME_RGBA_CHECK_DEFINED\n'
                'inline int pyaimsVolume_RGBA_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Volume_RGBA ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_RGBA, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_RGBA_Check', 
@@ -1345,7 +1345,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TIMESURFACE_2_CHECK_DEFINED\n'
                '#define PYAIMS_TIMESURFACE_2_CHECK_DEFINED\n'
                'inline int pyaimsTimeSurface_2_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsTimeSurface_2 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_2, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTimeSurface_2_Check', 
@@ -1372,7 +1372,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TIMESURFACE_3_CHECK_DEFINED\n'
                '#define PYAIMS_TIMESURFACE_3_CHECK_DEFINED\n'
                'inline int pyaimsTimeSurface_3_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsTimeSurface_3 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTimeSurface_3_Check', 
@@ -1399,7 +1399,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TIMESURFACE_4_CHECK_DEFINED\n'
                '#define PYAIMS_TIMESURFACE_4_CHECK_DEFINED\n'
                'inline int pyaimsTimeSurface_4_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_AimsTimeSurface_4 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_4, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTimeSurface_4_Check', 
@@ -1427,7 +1427,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TEXTURE_FLOAT_CHECK_DEFINED\n'
                '#define PYAIMS_TEXTURE_FLOAT_CHECK_DEFINED\n'
                'inline int pyaimsTexture_FLOAT_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Texture_FLOAT ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Texture_FLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTexture_FLOAT_Check', 
@@ -1454,7 +1454,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TEXTURE_S16_CHECK_DEFINED\n'
                '#define PYAIMS_TEXTURE_S16_CHECK_DEFINED\n'
                'inline int pyaimsTexture_S16_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Texture_S16 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Texture_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTexture_S16_Check', 
@@ -1481,7 +1481,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TEXTURE_S32_CHECK_DEFINED\n'
                '#define PYAIMS_TEXTURE_S32_CHECK_DEFINED\n'
                'inline int pyaimsTexture_S32_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Texture_S32 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Texture_S32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTexture_FLOAT_Check', 
@@ -1508,7 +1508,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TEXTURE_U32_CHECK_DEFINED\n'
                '#define PYAIMS_TEXTURE_U32_CHECK_DEFINED\n'
                'inline int pyaimsTexture_U32_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Texture_U32 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Texture_U32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTexture_FLOAT_Check', 
@@ -1536,7 +1536,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TEXTURE_POINT2DF_CHECK_DEFINED\n'
                '#define PYAIMS_TEXTURE_POINT2DF_CHECK_DEFINED\n'
                'inline int pyaimsTexture_POINT2DF_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Texture_POINT2DF ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Texture_POINT2DF, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTexture_POINT2DF_Check', 
@@ -1564,7 +1564,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TIMETEXTURE_FLOAT_CHECK_DEFINED\n'
                '#define PYAIMS_TIMETEXTURE_FLOAT_CHECK_DEFINED\n'
                'inline int pyaimsTimeTexture_FLOAT_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_TimeTexture_FLOAT ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_TimeTexture_FLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTimeTexture_FLOAT_Check', 
@@ -1591,7 +1591,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TIMETEXTURE_S16_CHECK_DEFINED\n'
                '#define PYAIMS_TIMETEXTURE_S16_CHECK_DEFINED\n'
                'inline int pyaimsTimeTexture_S16_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_TimeTexture_S16 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_TimeTexture_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTimeTexture_S16_Check', 
@@ -1618,7 +1618,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TIMETEXTURE_S32_CHECK_DEFINED\n'
                '#define PYAIMS_TIMETEXTURE_S32_CHECK_DEFINED\n'
                'inline int pyaimsTimeTexture_S32_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_TimeTexture_S32 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_TimeTexture_S32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTimeTexture_S32_Check', 
@@ -1645,7 +1645,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TIMETEXTURE_U32_CHECK_DEFINED\n'
                '#define PYAIMS_TIMETEXTURE_U32_CHECK_DEFINED\n'
                'inline int pyaimsTimeTexture_U32_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_TimeTexture_U32 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_TimeTexture_U32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTimeTexture_U32_Check', 
@@ -1673,7 +1673,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_TIMETEXTURE_POINT2DF_CHECK_DEFINED\n'
                '#define PYAIMS_TIMETEXTURE_POINT2DF_CHECK_DEFINED\n'
                'inline int pyaimsTimeTexture_POINT2DF_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_TimeTexture_POINT2DF ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_TimeTexture_POINT2DF, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTimeTexture_POINT2DF_Check', 
@@ -1702,7 +1702,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_BUCKETMAP_VOID_CHECK_DEFINED\n'
                '#define PYAIMS_BUCKETMAP_VOID_CHECK_DEFINED\n'
                'inline int pyaimsBucketMap_VOID_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_BucketMap_VOID ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_BucketMap_VOID, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsBucketMap_VOID_Check', 
@@ -1731,7 +1731,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_BUCKETMAP_S16_CHECK_DEFINED\n'
                '#define PYAIMS_BUCKETMAP_S16_CHECK_DEFINED\n'
                'inline int pyaimsBucketMap_S16_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_BucketMap_S16 ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_BucketMap_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsBucketMap_S16_Check', 
@@ -1761,7 +1761,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_BUCKETMAP_FLOAT_CHECK_DEFINED\n'
                '#define PYAIMS_BUCKETMAP_FLOAT_CHECK_DEFINED\n'
                'inline int pyaimsBucketMap_FLOAT_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_BucketMap_FLOAT ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_BucketMap_FLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsBucketMap_FLOAT_Check', 
@@ -1789,7 +1789,7 @@ typessub = { 'signed char' : \
                '#ifndef PYAIMS_MOTION_DEFINED\n'
                '#define PYAIMS_MOTION_DEFINED\n'
                'inline int pyaimsMotion_Check( PyObject* o )\n'
-               '{ return sipIsSubClassInstance( o, sipClass_Motion ); }\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Motion, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsMotion_Check', 

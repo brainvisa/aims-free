@@ -15,8 +15,8 @@ typedef std::list<%Template1% > list_%Template1typecode%;
 %ConvertToTypeCode
   if (sipIsErr == NULL)
     return PySequence_Check( sipPy ) 
-      || sipIsSubClassInstance( sipPy,
-        sipClass_list_%Template1typecode% );
+      || sipCanConvertToInstance( sipPy,
+        sipClass_list_%Template1typecode%, SIP_NOT_NONE | SIP_NO_CONVERTORS );
 
   if( PySequence_Check( sipPy ) )
   {

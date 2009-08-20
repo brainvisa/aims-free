@@ -18,8 +18,9 @@ typedef AimsVector<%Template1%, %Template2%>
   if (sipIsErr == NULL)
     return ( PySequence_Check( sipPy ) 
              && PySequence_Size( sipPy ) == %Template2%) 
-             || sipIsSubClassInstance( sipPy, 
-                sipClass_AimsVector_%Template1typecode%_%Template2typecode% );
+             || sipCanConvertToInstance( sipPy, 
+                sipClass_AimsVector_%Template1typecode%_%Template2typecode%,
+                SIP_NOT_NONE | SIP_NO_CONVERTORS );
 
   if( PyObject_IsInstance( sipPy, (PyObject *) 
       sipClass_AimsVector_%Template1typecode%_%Template2typecode% ) )

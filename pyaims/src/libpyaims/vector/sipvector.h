@@ -110,7 +110,8 @@ inline AimsVector<T, D> *pyaimsConvertTo_AimsVector( PyObject* p )
 template <typename T, int D>
 inline bool pyaimsCheck_AimsVector( PyObject* o )
 {
-  return sipIsSubClassInstance( o, (sipClass_AimsVector<T,D>()) );
+  return sipCanConvertToInstance( o, (sipClass_AimsVector<T,D>()),
+                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 #endif

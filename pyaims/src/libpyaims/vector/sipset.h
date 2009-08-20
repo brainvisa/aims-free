@@ -62,7 +62,8 @@ inline std::set<T> *pyaimsConvertTo_set( PyObject* p )
 template <typename T>
 inline bool pyaimsCheck_set( PyObject* o )
 {
-  return sipIsSubClassInstance( o, (sipClass_set<T>()) );
+  return sipCanConvertToInstance( o, (sipClass_set<T>()),
+                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 #endif
