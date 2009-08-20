@@ -52,7 +52,8 @@ inline void* pyaimsConvertTo_VertexP( PyObject * o )
 
 inline int pyaimsVertexP_Check( PyObject* o )
 {
-  return sipIsSubClassInstance( o, sipClass_Vertex );
+  return sipCanConvertToInstance( o, sipClass_Vertex,
+                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 
@@ -72,7 +73,8 @@ inline void* pyaimsConvertTo_EdgeP( PyObject * o )
 
 inline int pyaimsEdgeP_Check( PyObject* o )
 {
-  return sipIsSubClassInstance( o, sipClass_Edge );
+  return sipCanConvertToInstance( o, sipClass_Edge,
+                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 

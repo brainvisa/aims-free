@@ -15,8 +15,9 @@ typedef std::set<%Template1% > set_%Template1typecode%;
 %ConvertToTypeCode
   if (sipIsErr == NULL)
     return ( PySequence_Check( sipPy ) && !PyString_Check( sipPy ) )
-           || sipIsSubClassInstance( sipPy, 
-                                     sipClass_set_%Template1typecode% );
+           || sipCanConvertToInstance( sipPy, 
+                                       sipClass_set_%Template1typecode%,
+                                       SIP_NOT_NONE | SIP_NO_CONVERTORS );
 
   if( sipCanConvertToInstance( sipPy, sipClass_set_%Template1typecode%,
       SIP_NO_CONVERTORS ) )

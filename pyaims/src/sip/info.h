@@ -51,7 +51,8 @@ inline void* pyaimsConvertTo_InfoP( PyObject * o )
 
 inline int pyaimsInfoP_Check( PyObject* o )
 {
-  return sipIsSubClassInstance( o, sipClass_carto_Info );
+  return sipCanConvertToInstance( o, sipClass_carto_Info,
+                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 #endif
