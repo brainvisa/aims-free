@@ -19,7 +19,9 @@ class AimsDataComponent( GenericMakerComponent ):
   def __init__( self, options ):
     GenericMakerComponent.__init__( self, options )
     # Default options values
-    self.setDefaultOption( 'vida', 1 )
+    if not systemname == 'windows' :
+      self.setDefaultOption( 'vida', 1 )
+      
     self.setDefaultOption( 'dicom', 1 )
     self.setDefaultOption( 'jpeg', 1 )
     self.setDefaultOption( 'tiff', 1 )    
