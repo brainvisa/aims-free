@@ -27,20 +27,10 @@ typedef AimsVector<%Template1%, %Template2%>
     {
       *sipCppPtr =
         (AimsVector_%Template1typecode%_%Template2typecode% *)
-#if 0 //SIP_VERSION >= 0x040400
-     /* sipConvertToInstance() calls ConvertToTypeCode and an infinite
-        recursion */
-
         sipConvertToInstance( sipPy,
           sipClass_AimsVector_%Template1typecode%_%Template2typecode%,
-          sipTransferObj, 0, 0, sipIsErr );
-      return sipGetState( sipTransferObj );
-#else
-        sipConvertToCpp( sipPy,
-          sipClass_AimsVector_%Template1typecode%_%Template2typecode%,
-          sipIsErr );
+          0, SIP_NO_CONVERTORS, 0, sipIsErr );
       return 0;
-#endif
     }
   if( PySequence_Check( sipPy ) )
   {
@@ -73,17 +63,10 @@ typedef AimsVector<%Template1%, %Template2%>
   }
   *sipCppPtr = 
     (AimsVector_%Template1typecode%_%Template2typecode% *) 
-#if 0 //SIP_VERSION >= 0x040400
-    /* sipConvertToInstance() calls ConvertToTypeCode and an infinite recursion */
-    sipConvertToInstance( sipPy, 
+    sipConvertToInstance( sipPy,
       sipClass_AimsVector_%Template1typecode%_%Template2typecode%, 
-      sipTransferObj, 0, 0, sipIsErr );
-  return sipGetState( sipTransferObj );
-#else
-     sipConvertToCpp( sipPy, 
-       sipClass_AimsVector_%Template1typecode%_%Template2typecode%, sipIsErr );
+      0, SIP_NO_CONVERTORS, 0, sipIsErr );
   return 0;
-#endif
 %End
 
 public:

@@ -68,15 +68,9 @@ typedef std::set<%Template1% > set_%Template1typecode%;
   }
   *sipCppPtr = 
      (set_%Template1typecode% *)
-#if SIP_VERSION >= 0x040400
   sipConvertToInstance( sipPy, sipClass_set_%Template1typecode%,
                            sipTransferObj, SIP_NO_CONVERTORS, 0, sipIsErr );
   return sipGetState( sipTransferObj );
-#else
-  sipConvertToCpp( sipPy, sipClass_set_%Template1typecode%,
-                   sipIsErr );
-  return 0;
-#endif
 %End
 
 public:

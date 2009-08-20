@@ -77,16 +77,9 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
   }
   *sipCppPtr = 
      (vector_%Template1typecode% *) 
-#if 0 //SIP_VERSION >= 0x040400
-     /* sipConvertToInstance() calls ConvertToTypeCode and an infinite recursion */
-     sipConvertToInstance( sipPy, sipClass_vector_%Template1typecode%, 
-                           sipTransferObj, 0, 0, sipIsErr );
-  return sipGetState( sipTransferObj );
-#else
-     sipConvertToCpp( sipPy, sipClass_vector_%Template1typecode%, 
-                      sipIsErr );
+     sipConvertToInstance( sipPy, sipClass_vector_%Template1typecode%,
+                           0, SIP_NO_CONVERTORS, 0, sipIsErr );
   return 0;
-#endif
 %End
 
 public:
