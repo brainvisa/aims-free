@@ -437,6 +437,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     void __setitem__( int, const SIP_PYOBJECT ) /AutoGen/;
 %MethodCode
     // std::cout << "setitem(int)\n";
+    int state;
     try
       {
         void	*obj;
@@ -464,15 +465,19 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
                 carto::Object::value
                 ( std::string( PyString_AsString( a1 ) ) ) );
           }
-        else if( ( obj = sipForceConvertTo_carto_Object( a1, &sipIsErr ) ) )
+        else if( ( obj = sipForceConvertToInstance( a1, sipClass_carto_Object,
+          0, 0, &state, &sipIsErr ) ) )
           {
             carto::Object	*o = (carto::Object *) obj;
             sipCpp->setArrayItem( a0, *o );
+            sipReleaseInstance( obj, sipClass_carto_Object, state );
           }
-        else if( ( obj = sipForceConvertTo_carto_GenericObject( a1, &sipIsErr ) ) )
+        else if( ( obj = sipForceConvertToInstance( a1,
+          sipClass_carto_GenericObject, 0, 0, &state, &sipIsErr ) ) )
           {
             carto::GenericObject	*o = (carto::GenericObject *) obj;
             sipCpp->setArrayItem( a0, carto::Object( o ) );
+            sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
           }
         else
           {
