@@ -1,7 +1,7 @@
 def classInNamespace( include, cls, namespace ):
   return { 'typecode' : cls,
-    'pyFromC' : 'sipConvertFrom_' + namespace + '_' + cls,
-    'CFromPy' : 'sipForceConvertTo_' + namespace + '_' + cls,
+    'pyFromC' : 'pyaimsConvertFrom_' + namespace + '_' + cls,
+    'CFromPy' : 'pyaimsConvertTo_' + namespace + '_' + cls,
     'castFromSip' : '(' + namespace + '::' + cls + ' *)',
     'deref' : '*',
     'pyderef' : '*',
@@ -14,14 +14,21 @@ def classInNamespace( include, cls, namespace ):
     'sipClass' : namespace + '_' + cls,
     'typeinclude' : \
     '#include <' + include + '>', 
-    'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-    '#include "sipaimssip' + namespace + cls + '.h"\n'
-    '#endif\n'
-    '#ifndef PYAIMS_' + namespace.upper() + '_' + cls.upper() + '_CHECK_DEFINED\n'
+    'sipinclude' : '#ifndef PYAIMS_' + namespace.upper() + '_' + cls.upper() + '_CHECK_DEFINED\n'
     '#define PYAIMS_' + namespace.upper() + '_' + cls.upper() + '_CHECK_DEFINED\n'
     'inline int pyaims' + cls + '_Check( PyObject* o )\n'
     '{ return sipCanConvertToInstance( o, sipClass_' + namespace + '_' + cls + ', SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
-    '#endif', 
+    '#endif\n'
+    '#ifndef PYAIMS_' + namespace.upper() + '_' + cls.upper() + '_CONVERT_DEFINED\n'
+    '#define PYAIMS_' + namespace.upper() + '_' + cls.upper() + '_CONVERT_DEFINED\n'
+    'inline void* pyaimsConvertTo_' + namespace + '_' + cls + '( PyObject* o )\n'
+    '{ int iserr = 0;\n'
+    '  void *ptr = sipForceConvertToInstance( o, sipClass_' + namespace + '_' + cls + ', 0, 0, 0, &iserr );\n'
+    '  if( iserr ) return 0;\n'
+    '  return ptr;\n}\n'
+    'inline PyObject* pyaimsConvertFrom_' + namespace + '_' + cls + '( void * a )\n'
+    '{ return sipConvertFromInstance( a, sipClass_' + namespace + '_' + cls + ', 0 ); }\n'
+    '#endif\n', 
     'module' : 'aims', 
     'testPyType' : 'pyaims' + cls + '_Check',
     'compareElement' : '&',
@@ -544,31 +551,8 @@ typessub = { 'signed char' : \
                },
 
              'carto::Semantic' : \
-             { 'typecode' : 'Semantic',
-               'pyFromC' : 'sipConvertFrom_carto_Semantic',
-               'CFromPy' : 'sipForceConvertTo_carto_Semantic',
-               'castFromSip' : '(carto::Semantic *)',
-               'deref' : '*',
-               'pyderef' : '*',
-               'address' : '&', 
-               'pyaddress' : '&', 
-               'defScalar' : '',
-               'new' : 'new carto::Semantic', 
-               'NumType' : 'PyArray_OBJECT', 
-               'PyType' : 'carto::Semantic',
-               'sipClass' : 'carto_Semantic',
-               'typeinclude' : '#include <cartobase/object/syntax.h>', 
-               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipcartoSemantic.h"\n' 
-               '#endif\n'
-               '#ifndef PYAIMS_SEMANTIC_DEFINED\n' 
-               '#define PYAIMS_SEMANTIC_DEFINED\n'
-               'inline int pyaimsSemantic_Check( PyObject* o )\n'
-               '{ return sipCanConvertToInstance( o, sipClass_carto_Semantic, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
-               '#endif', 
-               'module' : 'aims', 
-               'testPyType' : 'pyaimsSemantic_Check', 
-               },
+                classInCartoNamespace( 'cartobase/object/syntax.h',
+                'Semantic' ),
              'Tree' : \
              { 'typecode' : 'Tree',
                'pyFromC' : '',
@@ -636,10 +620,7 @@ typessub = { 'signed char' : \
                'PyType' : 'Graph',
                'sipClass' : 'Graph',
                'typeinclude' : '#include <graph/graph/graph.h>', 
-               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipGraph.h"\n' 
-               '#endif\n'
-               '#ifndef PYAIMS_GRAPH_DEFINED\n' 
+               'sipinclude' : '#ifndef PYAIMS_GRAPH_DEFINED\n'
                '#define PYAIMS_GRAPH_DEFINED\n'
                'inline int pyaimsGraph_Check( PyObject* o )\n'
                '{ return sipCanConvertToInstance( o, sipClass_Graph, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
@@ -648,31 +629,8 @@ typessub = { 'signed char' : \
                'testPyType' : 'pyaimsGraph_Check', 
                },
              'carto::Syntax' : \
-             { 'typecode' : 'Syntax',
-               'pyFromC' : 'sipConvertFrom_std_map_27000100std_string_0200carto_Semantic',
-               'CFromPy' : 'sipForceConvertTo_std_map_27000100std_string_0200carto_Semantic',
-               'castFromSip' : '(carto::Syntax *)',
-               'deref' : '*',
-               'pyderef' : '*',
-               'address' : '&', 
-               'pyaddress' : '&', 
-               'defScalar' : '',
-               'new' : 'new carto::Syntax', 
-               'NumType' : 'PyArray_OBJECT', 
-               'PyType' : 'carto_Syntax',
-               'sipClass' : '',
-               'typeinclude' : '#include <cartobase/object/syntax.h>', 
-               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipstdmap.h"\n' 
-               '#endif\n'
-               '#ifndef PYAIMS_SYNTAX_DEFINED\n' 
-               '#define PYAIMS_SYNTAX_DEFINED\n'
-               'inline int pyaimsSyntax_Check( PyObject* o )\n'
-               '{ return sipCanConvertToInstance( o, sipClass_carto_Syntax, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
-               '#endif', 
-               'module' : 'aims', 
-               'testPyType' : 'pyaimsSyntax_Check', 
-               }, 
+                classInCartoNamespace( 'cartobase/object/syntax.h',
+                'Syntax' ),
              'AimsSurfaceTriangle' : \
              { 'typecode' : 'AimsSurfaceTriangle',
                'pyFromC' : '',
