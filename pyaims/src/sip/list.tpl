@@ -47,17 +47,9 @@ typedef std::list<%Template1% > list_%Template1typecode%;
 #endif
   }
   *sipCppPtr = (list_%Template1typecode% *)
-#if 0 //SIP_VERSION >= 0x040400
-  /* sipConvertToInstance() calls ConvertToTypeCode and an infinite
-      recursion */
   sipConvertToInstance( sipPy, sipClass_list_%Template1typecode%,
-                           sipTransferObj, 0, 0, sipIsErr );
-  return sipGetState( sipTransferObj );
-#else
-  sipConvertToCpp( sipPy, sipClass_list_%Template1typecode%,
-                   sipIsErr );
+                           0, SIP_NO_CONVERTORS, 0, sipIsErr );
   return 0;
-#endif
 %End
 
 public:
