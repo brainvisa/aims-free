@@ -26,8 +26,13 @@ public:
     << carto::rc_ptr_trick::refCount( *a0 ) << ", pyowned: "
     << sipIsPyOwned( (sipWrapper *) a0Wrapper ) << std::endl;
 #endif
-if( sipIsPyOwned( (sipWrapper *) a0Wrapper ) 
+#if SIP_VERSION >= 0x040800
+if( sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) 
       || carto::rc_ptr_trick::refCount( *a0 ) > 0 )
+#else
+if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
+      || carto::rc_ptr_trick::refCount( *a0 ) > 0 )
+#endif
   {
     // increase C++ ref counter to avoid destruction by C++
     ++carto::rc_ptr_trick::refCount( *a0 );
