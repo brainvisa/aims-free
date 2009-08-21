@@ -23,10 +23,13 @@ class AimsFreeComponent( GenericMakerModuleComponent ):
     return []
 
 currentComponentDirectory = os.path.dirname( currentComponentFile )
+opts = options.setdefault( 'aims-free' )
 for component in aimsfree_subprojects:
+  oldop = options.setdefault( component, {} )
+  options[ component ] = copy.copy( opts )
+  options[ component ].update( oldop )
   c = options.setdefault( component, {} )
   c[ 'source' ] = os.path.join( currentComponentDirectory, component )
   c[ 'version' ] = '4.0'
-#  print c
 
 
