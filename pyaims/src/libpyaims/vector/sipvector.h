@@ -81,7 +81,7 @@ inline sipWrapperType* sipClass_AimsVector<float, 3>()
 template <typename T, int D>
 inline PyObject *pyaimsConvertFrom_AimsVector( AimsVector<T,D> * p )
 {
-  return sipConvertFromInstance( p, sipClass_AimsVector<T,D>(), 0 );
+  return sipConvertFromInstance( p, (sipClass_AimsVector<T,D>()), 0 );
 }
 
 /* inline PyObject *pyaimsConvertFrom_AimsVector_U32_4( AimsVector_U32_4 * p )
@@ -93,7 +93,7 @@ inline AimsVector<T, D> *pyaimsConvertTo_AimsVector( PyObject* p )
 {
   int	iserr = 0;
   return (AimsVector<T,D> *) 
-    sipConvertToInstance( p, sipClass_AimsVector<T,D>(), 0, 
+    sipConvertToInstance( p, (sipClass_AimsVector<T,D>()), 0, 
                           SIP_NO_CONVERTORS, 0, &iserr );
 }
 
