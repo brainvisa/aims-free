@@ -65,9 +65,25 @@ configuration file. The other attributes can change, be modified, removed, or ad
   <td><b>Appeared in AIMS version:</b></td>
 </tr>
 <tr>
+  <td><tt>default_writers</tt></td>
+  <td><tt>dictionary</tt></td>
+  <td><tt>{ 'Volume' : 'NIFTI1' }</tt></td>
+  <td>Hints about the IO format to use when writing an object with no information about it (no extension, no specified format). The value of this attribute is a dictionary. Each entry key is an object type name, either completely specified ( <tt>'volume of S16'</tt>), or a general object type name (<tt>'Volume'</tt>). The corresponding value is the format name (<tt>'NIFTI1'</tt>, <tt>'GIS'</tt> etc.).
+  </td>
+  <td>3.2</td>
+</tr>
+<tr>
+  <td><tt>nifti_output_4d_volumes</tt></td>
+  <td><tt>bool</tt></td>
+  <td><tt>1</tt></td>
+  <td>Same as <tt><a href="#spm_output_4d_volumes">spm_output_4d_volumes</a></tt> but for NIFTI-1 format.
+  </td>
+  <td>3.1</td>
+</tr>
+<tr>
   <td><tt>spm_input_radio_convention</tt></td>
   <td><tt>bool</tt> (or at least, number)</td>
-  <td><tt>0</tt></td>
+  <td><tt>1</tt></td>
   <td>Determines how to understand the unspecified orientation of SPM images read by 
     AIMS. "Unspecified orientation" means no indication in the <tt>.minf</tt> file 
 	written by AIMS or Anatomist with the image. This flag is quite equivalent to the 
@@ -102,6 +118,7 @@ configuration file. The other attributes can change, be modified, removed, or ad
   </td>
   <td>2.13</td>
 </tr>
+<a name="spm_output_4d_volumes"></a>
 <tr>
   <td><tt>spm_output_4d_volumes</tt></td>
   <td><tt>bool</tt></td>
@@ -116,7 +133,7 @@ configuration file. The other attributes can change, be modified, removed, or ad
 <tr>
   <td><tt>spm_output_radio_convention</tt></td>
   <td><tt>bool</tt></td>
-  <td><tt>0</tt></td>
+  <td><tt>1</tt></td>
   <td>Tells in which orientation images with unspecified orientation should be 
     written to disk in SPM format by AIMS and Anatomist. This flag is especially useful 
 	when converting images from another format to SPM format. If images were read 
@@ -157,14 +174,6 @@ configuration file. The other attributes can change, be modified, removed, or ad
 	format ambiguity.
   </td>
   <td>2.13</td>
-</tr>
-<tr>
-  <td><tt>nifti_output_4d_volumes</tt></td>
-  <td><tt>bool</tt></td>
-  <td><tt>1</tt></td>
-  <td>Same as <tt>spm_output_4d_volumes</tt> but for NIFTI-1 format.
-  </td>
-  <td>3.1</td>
 </tr>
 </table>
 
