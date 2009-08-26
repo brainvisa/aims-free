@@ -186,10 +186,7 @@ namespace aims
   {
     try
       {
-        /*
-        NiftiWriter<T>  r( filename );
-        r.write( vol );
-        */
+        return false;
       }
     catch( std::exception & e )
       {

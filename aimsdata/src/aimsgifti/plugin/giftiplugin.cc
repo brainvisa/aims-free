@@ -35,9 +35,9 @@
 
 #include <aims/plugin/giftiplugin.h>
 #include <aims/io/giftimeshformat_d.h>
+#include <aims/io/giftitextureformat_d.h>
 #include <aims/io/giftifinderformat.h>
 #include <aims/io/finder.h>
-#include <aims/mesh/surface.h>
 
 using namespace aims;
 using namespace carto;
@@ -60,74 +60,26 @@ GiftiPlugin::GiftiPlugin() : Plugin()
 {
   vector<string> ext;
   ext.push_back( "gii" );
-  ext.push_back( "gii.gz" );
 
   GiftiMeshFormat<3, Void>   *df1 = new GiftiMeshFormat<3, Void>;
   FileFormatDictionary<AimsTimeSurface<3, Void> >::registerFormat( "GIFTI",
                                                                    df1, ext );
 
-#if 0
+  GiftiTextureFormat<float> *df2 = new GiftiTextureFormat<float>;
+  FileFormatDictionary<TimeTexture<float> >::registerFormat( "GIFTI",
+                                                             df2, ext );
 
-// ### remove after everything has been moved to intN_t/uintN_t
-#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-  NiftiFormat<char>     *df0 = new NiftiFormat<char>;
-  FileFormatDictionary<AimsData<char> >::registerFormat( "NIFTI1", df0, ext,
-      "SPM" );
-  VolumeFormat<char>    *vf0 = new VolumeFormat<char>( "NIFTI1" );
-  FileFormatDictionary<Volume<char> >::registerFormat( "NIFTI1", vf0, ext,
-      "SPM" );
-#endif
+  GiftiTextureFormat<int16_t> *df3 = new GiftiTextureFormat<int16_t>;
+  FileFormatDictionary<TimeTexture<int16_t> >::registerFormat( "GIFTI",
+                                                               df3, ext );
 
-  NiftiFormat<uint8_t>  *df2 = new NiftiFormat<uint8_t>;
-  FileFormatDictionary<AimsData<uint8_t> >::registerFormat( "NIFTI1", df2, ext,
-      "SPM" );
-  VolumeFormat<uint8_t> *vf2 = new VolumeFormat<uint8_t>( "NIFTI1" );
-  FileFormatDictionary<Volume<uint8_t> >::registerFormat( "NIFTI1", vf2, ext,
-      "SPM" );
+  GiftiTextureFormat<int32_t> *df4 = new GiftiTextureFormat<int32_t>;
+  FileFormatDictionary<TimeTexture<int32_t> >::registerFormat( "GIFTI",
+                                                               df4, ext );
 
-  NiftiFormat<int16_t>  *df3 = new NiftiFormat<int16_t>;
-  FileFormatDictionary<AimsData<int16_t> >::registerFormat( "NIFTI1", df3, ext,
-      "SPM" );
-  VolumeFormat<int16_t> *vf3 = new VolumeFormat<int16_t>( "NIFTI1" );
-  FileFormatDictionary<Volume<int16_t> >::registerFormat( "NIFTI1", vf3, ext,
-      "SPM" );
-
-  NiftiFormat<uint16_t> *df4 = new NiftiFormat<uint16_t>;
-  FileFormatDictionary<AimsData<uint16_t> >::registerFormat( "NIFTI1", df4,
-      ext, "SPM" );
-  VolumeFormat<uint16_t>        *vf4 = new VolumeFormat<uint16_t>( "NIFTI1" );
-  FileFormatDictionary<Volume<uint16_t> >::registerFormat( "NIFTI1", vf4, ext,
-      "SPM" );
-
-  NiftiFormat<int32_t>  *df5 = new NiftiFormat<int32_t>;
-  FileFormatDictionary<AimsData<int32_t> >::registerFormat( "NIFTI1", df5,
-      ext , "SPM");
-  VolumeFormat<int32_t> *vf5 = new VolumeFormat<int32_t>( "NIFTI1" );
-  FileFormatDictionary<Volume<int32_t> >::registerFormat( "NIFTI1", vf5, ext,
-      "SPM" );
-
-  NiftiFormat<uint32_t> *df6 = new NiftiFormat<uint32_t>;
-  FileFormatDictionary<AimsData<uint32_t> >::registerFormat( "NIFTI1", df6,
-      ext, "SPM" );
-  VolumeFormat<uint32_t>        *vf6 = new VolumeFormat<uint32_t>( "NIFTI1" );
-  FileFormatDictionary<Volume<uint32_t> >::registerFormat( "NIFTI1", vf6, ext,
-      "SPM" );
-
-  NiftiFormat<float>    *df7 = new NiftiFormat<float>;
-  FileFormatDictionary<AimsData<float> >::registerFormat( "NIFTI1", df7, ext,
-      "SPM" );
-  VolumeFormat<float>   *vf7 = new VolumeFormat<float>( "NIFTI1" );
-  FileFormatDictionary<Volume<float> >::registerFormat( "NIFTI1", vf7, ext,
-      "SPM" );
-
-  NiftiFormat<double>   *df8 = new NiftiFormat<double>;
-  FileFormatDictionary<AimsData<double> >::registerFormat( "NIFTI1", df8, ext,
-      "SPM" );
-  VolumeFormat<double>  *vf8 = new VolumeFormat<double>( "NIFTI1" );
-  FileFormatDictionary<Volume<double> >::registerFormat( "NIFTI1", vf8, ext,
-      "SPM" );
-
-#endif
+  GiftiTextureFormat<Point2df> *df5 = new GiftiTextureFormat<Point2df>;
+  FileFormatDictionary<TimeTexture<Point2df> >::registerFormat( "GIFTI",
+                                                               df5, ext );
 
   Finder::registerFormat( "GIFTI", new FinderGiftiFormat, ext );
 }

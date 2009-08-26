@@ -58,7 +58,9 @@ bool FinderGiftiFormat::check( const string & filename, Finder & f ) const
     return false;
   }
 
-  f.setObjectType( "Mesh" );
+  string ot;
+  hdr->getProperty( "object_type", ot );
+  f.setObjectType( ot );
   f.setFormat( "GIFTI" );
 
   string dt;

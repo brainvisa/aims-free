@@ -38,7 +38,11 @@
 
 #include <aims/io/fileFormat.h>
 #include <aims/mesh/surface.h>
+#include <aims/mesh/texture.h>
+extern "C"
+{
 #include <nifti1_io.h>
+}
 
 namespace aims
 {
@@ -46,15 +50,31 @@ namespace aims
   template <typename U>
   inline U convertedNiftiValue( void* data, int index, int dtype );
 
+
   template<int D, typename T>
   class GiftiMeshFormat : public FileFormat<AimsTimeSurface<D, T> >
   {
+  public:
     virtual bool read( const std::string & filename,
                        AimsTimeSurface<D, T> & vol,
                        const carto::AllocatorContext & context,
                        carto::Object options );
     virtual bool write( const std::string & filename,
                         const AimsTimeSurface<D, T> & vol,
+                        bool ascii = false );
+  };
+
+
+  template<typename T>
+  class GiftiTextureFormat : public FileFormat<TimeTexture<T> >
+  {
+  public:
+    virtual bool read( const std::string & filename,
+                       TimeTexture<T> & vol,
+                       const carto::AllocatorContext & context,
+                       carto::Object options );
+    virtual bool write( const std::string & filename,
+                        const TimeTexture<T> & vol,
                         bool ascii = false );
   };
 
@@ -85,8 +105,17 @@ namespace aims
       case NIFTI_TYPE_UINT64:
         return (U) reinterpret_cast<uint64_t *>(data)[index];
       default:
-        return (U) 0;
+        return U();
     }
+  }
+
+  template <typename U, int D>
+  AimsVector<U,D> convertedNiftiValue( void* data, int index, int dtype )
+  {
+    AimsVector<U,D> v;
+    int i;
+    for( i=0; i<D; ++i )
+      v[i] = convertedNiftiValue<U>( data, index * D + i, dtype );
   }
 
 }

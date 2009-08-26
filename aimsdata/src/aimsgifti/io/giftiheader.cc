@@ -148,7 +148,8 @@ bool GiftiHeader::read()
 
   int nda = gim->numDA;
   setProperty( "GIFTI_version", string( gim->version ) );
-  int nmesh = 0, nnorm = 0, npoly = 0, ntex = 0, polydim = 0, vnum = 0;
+  int nmesh = 0, nnorm = 0, npoly = 0, ntex = 0, polydim = 0, vnum = 0,
+    texlen = 0, texdim = 0;
   string dtype, otype;
   int i;
   for( i=0; i<nda; ++i )
@@ -170,6 +171,31 @@ bool GiftiHeader::read()
     default:
       ++ntex;
       dtype = ni_datatype( da->datatype );
+      texlen = da->dims[0];
+      texdim = da->num_dim;
+      switch( texdim )
+      {
+        case 1:
+          break;
+        case 2:
+          if( dtype == "FLOAT" )
+            dtype = "POINT2DF";
+          else
+            dtype = "VECTOR_OF_2_" + dtype;
+          break;
+        case 3:
+          if( dtype == "FLOAT" )
+            dtype = "POINT3DF";
+          else
+            dtype = "VECTOR_OF_3_" + dtype;
+          break;
+        default:
+          {
+            ostringstream os;
+            os << "VECTOR_OF_" << texdim << "_" << dtype;
+            dtype = os.str();
+          }
+      }
     }
   }
 
@@ -179,16 +205,21 @@ bool GiftiHeader::read()
     setProperty( "object_type", "Mesh" );
     setProperty( "vertex_number", vnum );
     setProperty( "nb_t_pos", std::max(nmesh, ntex) );
+    setProperty( "polygon_dimension", polydim );
   }
   else if( ntex > 0 )
   {
     setProperty( "object_type", "Texture" );
   }
   if( ntex > 0 )
+  {
     setProperty( "data_type", dtype );
+    setProperty( "texture_dimension", texdim );
+    if( nmesh == 0 )
+      setProperty( "vertex_number", texlen );
+  }
   else
     setProperty( "data_type", "VOID" );
-  setProperty( "polygon_dimension", polydim );
 
   gifti_free_image( gim );
 
