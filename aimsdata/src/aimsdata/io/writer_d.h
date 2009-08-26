@@ -42,6 +42,7 @@
 
 #include <aims/io/writer.h>
 #include <aims/io/fileFormat.h>
+#include <aims/def/settings.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/plugin/plugin.h>
@@ -106,23 +107,23 @@ namespace aims
     std::string				excm;
 
     if( format )	// priority to format hint
+    {
+      writer = FileFormatDictionary<T>::fileFormat( *format );
+      if( writer )
       {
-	writer = FileFormatDictionary<T>::fileFormat( *format );
-	if( writer )
-	  {
-	    try
-	      {
-		if( writer->write( _filename, obj, ascii ) )
-		  return( true );
-	      }
-	    catch( std::exception & e )
-	      {
-		carto::io_error::keepExceptionPriority( e, excp, exct, excm, 
-							5 );
-	      }
-	    tried.insert( *format );
-	  }
+        try
+        {
+          if( writer->write( _filename, obj, ascii ) )
+            return( true );
+        }
+        catch( std::exception & e )
+        {
+          carto::io_error::keepExceptionPriority( e, excp, exct, excm,
+                                                  5 );
+        }
+        tried.insert( *format );
       }
+    }
 
     std::string                bname = carto::FileUtil::basename( _filename );
     std::string::size_type     pos = bname.find( '.' );
@@ -139,6 +140,53 @@ namespace aims
         = extensions.find( ext ),
     eext = extensions.end();
     std::list<std::string>::const_iterator ie, ee;
+
+    if( ext.empty() )
+    {
+      // no extension: use settings for default_writer if one is specified
+      const Settings      &sett = Settings::settings();
+      try
+      {
+        carto::Object defwriters = sett.getProperty( "default_writers" );
+        carto::Object defformato;
+        try
+        {
+          defformato
+            = defwriters->getProperty( carto::DataTypeCode<T>::name() );
+        }
+        catch( std::exception & )
+        {
+          // exact type not found, try just the object type
+          defformato
+            = defwriters->getProperty( carto::DataTypeCode<T>::objectType() );
+        }
+        if( defformato )
+        {
+          std::string defformat = defformato->getString();
+          if( tried.find( defformat ) == notyet )
+          {
+            writer = FileFormatDictionary<T>::fileFormat( defformat );
+            if( writer )
+            {
+              try
+              {
+                if( writer->write( _filename, obj, ascii ) )
+                  return( true );
+              }
+              catch( std::exception & e )
+              {
+                carto::io_error::keepExceptionPriority( e, excp, exct, excm,
+                                                        5 );
+              }
+              tried.insert( defformat );
+            }
+          }
+        }
+      }
+      catch( std::exception & )
+      {
+      }
+    }
 
     while( iext == eext && (pos=bname.find( '.', pos+1 ))!=std::string::npos )
     {

@@ -6,4 +6,7 @@ attributes = {
   'spm_output_spm2_normalization' : 1, 
   'spm_output_4d_volumes' : 1,
   'nifti_output_4d_volumes' : 1,
+  'default_writers' : {
+    'Volume' : 'NIFTI1',
+  },
 }
