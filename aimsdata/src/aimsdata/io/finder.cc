@@ -215,12 +215,14 @@ bool Finder::check( const string& filename )
     }
 
   initPrivate();
+  _state = Unchecked;
 
   // try using DataSourceInfo first (new system 2005)
   DataSourceInfo	dsi;
   FileDataSource	ds( filename );
   Object		h = dsi.check( ds );
-  if( !h.isNone() )
+  bool dsok = !h.isNone();
+  if( dsok )
     {
       _state = Ok;
 
@@ -246,10 +248,11 @@ bool Finder::check( const string& filename )
       setHeader( ph );
 
       // cout << "DataSourceInfo worked\n";
-      return true;
+      if( filename.substr( filename.length() - 4, 4 ) != ".gii" )
+        // bidouille to let the gifti reader work (it's both gifti and XML)
+        return true;
     }
 
-  _state = Unchecked;
   _errorcode = -1;
   _errormsg = "";
 
@@ -371,6 +374,9 @@ bool Finder::check( const string& filename )
 
   // cout << "not found at all, giving up\n";
   // still not succeeded, it's hopeless...
+
+  if( dsok )
+    return true; // well, the datasource was OK (exception for .gii )
 
   _state = Error;
   if( _errorcode < 0 )

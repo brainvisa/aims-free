@@ -26,6 +26,7 @@ LIBS_VIDA		= @aimsvida:libDepsLine@
 LIBS_MINC		= @aimsminc:libDepsLine@
 LIBS_PLY		= @aimsply:libDepsLine@
 LIBS_NIFTI		= @aimsnifti:libDepsLine@
+LIBS_GIFTI              = @aimsgifti:libDepsLine@
 LIBS_FDF		= @aimsfdf:libDepsLine@
 
 release:BUILDMODE	= @buildMode@
@@ -40,6 +41,7 @@ defmodule(aimsvida)	 = @aimsvida:enabled@
 defmodule(aimsminc)	 = @aimsminc:enabled@
 defmodule(aimsply)	 = @aimsply:enabled@
 defmodule(aimsnifti) = @aimsnifti:enabled@
+defmodule(aimsgifti) = @aimsgifti:enabled@
 defmodule(aimsfdf) = @aimsfdf:enabled@
 
 module(aimsdicom):INCLUDEPATH += @dcmtk:includes@
@@ -50,8 +52,6 @@ module(aimsvida) :INCLUDEPATH += @vidaIO:includes@
 module(aimsminc) :INCLUDEPATH += @minc:includes@
 module(aimsply)  :INCLUDEPATH += @rply:includes@
 module(aimsnifti):INCLUDEPATH += @zlib:includes@ @include@/aims/io/znzlib
-#module(aimsnifti):INCLUDEPATH += @zlib:includes@ /home/flandin/perforce/aimsdata-main/src/aimsnifti/io/znzlib
-
-# bug in Apple gcc-3.1 optimizer
-#release-darwin:CXXFLAGS = -O
+module(aimsgifti):INCLUDEPATH += @gifticlib:includes@ @zlib:includes@ @include@/aims/io/niftilib
+module(aimsgifti):DEFINES = @aimsgifti:defines@
 

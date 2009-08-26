@@ -12,6 +12,7 @@ class AimsDataComponent( GenericMakerComponent ):
     'minc': ( None, 'include MINC file format support (default: yes)' ), 
     'ply': ( None, 'include PLY file format support (default: yes)' ), 
     'nifti': ( None, 'include NIFTI1 file format support (default: yes)' ),
+    'gifti': ( None, 'include GIFTI1 file format support (default: yes)' ),
     'fdf': ( None, 'include FDF file format support (default: yes)' ),
     'dlopen': (None, 'include dynamic library loading plugins support (default: yes)'),
   } )
@@ -21,7 +22,7 @@ class AimsDataComponent( GenericMakerComponent ):
     # Default options values
     if not systemname == 'windows' :
       self.setDefaultOption( 'vida', 1 )
-      
+
     self.setDefaultOption( 'dicom', 1 )
     self.setDefaultOption( 'jpeg', 1 )
     self.setDefaultOption( 'tiff', 1 )    
@@ -30,9 +31,10 @@ class AimsDataComponent( GenericMakerComponent ):
     self.setDefaultOption( 'dlopen', 1 )
     self.setDefaultOption( 'ply', 1 )
     self.setDefaultOption( 'nifti', 1 )
+    self.setDefaultOption( 'gifti', 1 )
     self.setDefaultOption( 'fdf', 1 )
 
-  
+
   def shareDir( self ):
     return os.path.join( 'share', 'aims-' + self.version() )
 
@@ -103,11 +105,34 @@ class AimsDataComponent( GenericMakerComponent ):
     if int( self.getOption( 'nifti', 0 ) ) \
       and weakDependency( AimsNiftiComponent, self ):
       result.append( AimsNiftiComponent )
+    if int( self.getOption( 'gifti', 0 ) ) \
+      and weakDependency( AimsGiftiComponent, self ):
+      result.append( AimsNiftiComponent )
     if int( self.getOption( 'fdf', 0 ) ) \
       and weakDependency( AimsFdfComponent, self ):
       result.append( AimsFdfComponent )
     return result
 
+
+#-----------------------------------------------------------------------------
+class GiftiCLibComponent( SystemComponent ):
+  _name = 'gifticlib'
+  _includeFile = 'gifti_io.h'
+  _libFile = 'libgiftiio'
+
+  def __init__( self, options ):
+    SystemComponent.__init__( self, options )
+    defines = self.get( 'defines' )
+    if not defines:
+      defines = []
+    defines.append( 'HAVE_ZLIB' )
+    self._data[ 'defines' ] = defines
+
+  def dependencies( self ):
+    return [ ExpatComponent, LibZComponent ]
+
+  def _libraries( self ):
+    return [ 'giftiio' ]
 
 #-----------------------------------------------------------------------------
 class AimsDicomComponent( GenericMakerModuleComponent ):
@@ -198,6 +223,16 @@ class AimsNiftiComponent( GenericMakerModuleComponent ):
 
   def dependencies( self ):
     return [ LibZComponent, AimsDataComponent ]
+
+#-----------------------------------------------------------------------------
+class AimsGiftiComponent( GenericMakerModuleComponent ):
+  _name = 'aimsgifti'
+
+  def sourceName( self ):
+    return 'aimsdata'
+
+  def dependencies( self ):
+    return [ GiftiCLibComponent, AimsDataComponent ]
 
 #-----------------------------------------------------------------------------
 class AimsFdfComponent( GenericMakerModuleComponent ):
