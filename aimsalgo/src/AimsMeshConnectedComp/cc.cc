@@ -64,7 +64,7 @@ BEGIN_USAGE(usage)
   "     meshfilein          : input *.tri or *.mesh file                    ",
   "     output_dist_texture : output *.tex file (distance)                  ",
   "     threshold           : applied on input texture                      ",
-  "     mode          : 1: lesser than threshold, 0: greater [default=1]    ",
+  "     mode          : 1: lesser than threshold, 0: greater [default=0]    ",
   "     input_texture       : object definition                             ",
   "     tri           : mesh in *.tri format [default=*.mesh]               ",
   "     ascii         : write *.tex file in ASCII [default=binar]           ",
