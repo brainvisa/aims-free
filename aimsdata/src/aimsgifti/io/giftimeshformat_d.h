@@ -38,7 +38,11 @@
 
 #include <aims/io/giftiformat.h>
 #include <aims/io/giftiheader.h>
-
+#include <aims/io/giftiutil.h>
+extern "C"
+{
+#include <gifti_io.h>
+}
 
 namespace aims
 {

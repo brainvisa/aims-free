@@ -39,17 +39,9 @@
 #include <aims/io/fileFormat.h>
 #include <aims/mesh/surface.h>
 #include <aims/mesh/texture.h>
-extern "C"
-{
-#include <nifti1_io.h>
-}
 
 namespace aims
 {
-
-  template <typename U>
-  inline U convertedNiftiValue( void* data, int index, int dtype );
-
 
   template<int D, typename T>
   class GiftiMeshFormat : public FileFormat<AimsTimeSurface<D, T> >
@@ -77,46 +69,6 @@ namespace aims
                         const TimeTexture<T> & vol,
                         bool ascii = false );
   };
-
-
-  template <typename U>
-  U convertedNiftiValue( void* data, int index, int dtype )
-  {
-    switch( dtype )
-    {
-      case NIFTI_TYPE_UINT8:
-        return (U) reinterpret_cast<uint8_t *>(data)[index];
-      case NIFTI_TYPE_INT16:
-        return (U) reinterpret_cast<int16_t *>(data)[index];
-      case NIFTI_TYPE_INT32:
-        return (U) reinterpret_cast<int32_t *>(data)[index];
-      case NIFTI_TYPE_FLOAT32:
-        return (U) reinterpret_cast<float *>(data)[index];
-      case NIFTI_TYPE_FLOAT64:
-        return (U) reinterpret_cast<double *>(data)[index];
-      case NIFTI_TYPE_INT8:
-        return (U) reinterpret_cast<int8_t *>(data)[index];
-      case NIFTI_TYPE_UINT16:
-        return (U) reinterpret_cast<uint16_t *>(data)[index];
-      case NIFTI_TYPE_UINT32:
-        return (U) reinterpret_cast<uint32_t *>(data)[index];
-      case NIFTI_TYPE_INT64:
-        return (U) reinterpret_cast<int64_t *>(data)[index];
-      case NIFTI_TYPE_UINT64:
-        return (U) reinterpret_cast<uint64_t *>(data)[index];
-      default:
-        return U();
-    }
-  }
-
-  template <typename U, int D>
-  AimsVector<U,D> convertedNiftiValue( void* data, int index, int dtype )
-  {
-    AimsVector<U,D> v;
-    int i;
-    for( i=0; i<D; ++i )
-      v[i] = convertedNiftiValue<U>( data, index * D + i, dtype );
-  }
 
 }
 

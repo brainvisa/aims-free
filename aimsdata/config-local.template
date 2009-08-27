@@ -52,6 +52,6 @@ module(aimsvida) :INCLUDEPATH += @vidaIO:includes@
 module(aimsminc) :INCLUDEPATH += @minc:includes@
 module(aimsply)  :INCLUDEPATH += @rply:includes@
 module(aimsnifti):INCLUDEPATH += @zlib:includes@ @include@/aims/io/znzlib
-module(aimsgifti):INCLUDEPATH += @gifticlib:includes@ @zlib:includes@ @include@/aims/io/niftilib
+module(aimsgifti):INCLUDEPATH += @zlib:includes@ @expat:includes@ @include@/aims/io/niftilib @include@/aims/io/znzlib @include@/aims/io/gifticlib
 module(aimsgifti):DEFINES = @aimsgifti:defines@
 

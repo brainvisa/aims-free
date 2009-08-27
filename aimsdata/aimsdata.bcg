@@ -115,6 +115,7 @@ class AimsDataComponent( GenericMakerComponent ):
 
 
 #-----------------------------------------------------------------------------
+# not used after all: we include a copy of gifticlib
 class GiftiCLibComponent( SystemComponent ):
   _name = 'gifticlib'
   _includeFile = 'gifti_io.h'
@@ -228,11 +229,19 @@ class AimsNiftiComponent( GenericMakerModuleComponent ):
 class AimsGiftiComponent( GenericMakerModuleComponent ):
   _name = 'aimsgifti'
 
+  def __init__( self, options ):
+    GenericMakerModuleComponent.__init__( self, options )
+    defines = self.get( 'defines' )
+    if not defines:
+      defines = []
+    defines.append( 'HAVE_ZLIB' )
+    self._data[ 'defines' ] = defines
+
   def sourceName( self ):
     return 'aimsdata'
 
   def dependencies( self ):
-    return [ GiftiCLibComponent, AimsDataComponent ]
+    return [ AimsDataComponent, ExpatComponent, LibZComponent ]
 
 #-----------------------------------------------------------------------------
 class AimsFdfComponent( GenericMakerModuleComponent ):

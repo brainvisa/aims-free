@@ -39,10 +39,6 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/data/pheader.h>
-extern "C"
-{
-#include <gifti_io.h>
-}
 
 
 namespace aims
@@ -57,23 +53,17 @@ namespace aims
     /*GiftiHeader( int dimx, int dimy, int dimz, int dimt, float sx, float sy,
                  float sz, float st, const std::string & name );*/
     virtual ~GiftiHeader();
-    void freeGiftiStruct();
 
     const std::string& name() const;
     void setName( const std::string & fname ) { _name = fname; }
 
     virtual std::string extension() const;
 
-    gifti_image* giftiImage() { return _gim; }
-
     bool read();
     bool write( bool writeminf = true );
 
-    bool fillGifti();
-
   private:
     std::string _name;
-    gifti_image *_gim;
   };
 
 }

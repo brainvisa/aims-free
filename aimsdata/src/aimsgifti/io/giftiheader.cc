@@ -34,6 +34,10 @@
  */
 
 #include <aims/io/giftiheader.h>
+extern "C"
+{
+#include "../gifticlib/gifti_io.h"
+}
 // #include <aims/io/byteswap.h>
 // #include <aims/def/general.h>
 // #include <aims/def/assert.h>
@@ -55,20 +59,11 @@ GiftiHeader::GiftiHeader( const string & name ) :
   PythonHeader(),
   _name( name )
 {
-  _gim = 0;
 }
 
 
 GiftiHeader::~GiftiHeader()
 {
-  freeGiftiStruct();
-}
-
-
-void GiftiHeader::freeGiftiStruct()
-{
-  gifti_free_image( _gim );
-  _gim = 0;
 }
 
 
@@ -227,15 +222,15 @@ bool GiftiHeader::read()
 }
 
 
-bool GiftiHeader::fillGifti()
-{
-  return false;
-}
+// bool GiftiHeader::fillGifti()
+// {
+//   return false;
+// }
 
 
 bool GiftiHeader::write( bool writeminf )
 {
-  fillGifti();
+//   fillGifti();
   return false;
 }
 

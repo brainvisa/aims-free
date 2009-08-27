@@ -1,0 +1,1 @@
+This is a copy of gifticlib 1.0.3
