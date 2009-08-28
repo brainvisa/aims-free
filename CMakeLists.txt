@@ -84,15 +84,31 @@ if( SIP_FOUND )
   set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
        "${SIP_INCLUDE_DIR}" )
 endif( SIP_FOUND )
+if( JPEG_FOUND )
+  set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
+       "${JPEG_INCLUDE_DIR}" )
+endif()
+if( DCMTK_FOUND )
+  set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
+       "${DCMTK_INCLUDE_DIR}" )
+endif()
+if( MINC_FOUND )
+  set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
+       "${MINC_INCLUDE_DIRS}" )
+endif()
+if( TIFF_FOUND )
+  set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
+       "${TIFF_INCLUDE_DIR}" )
+endif()
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
 
 add_subdirectory( cartobase )
 add_subdirectory( cartodata )
 add_subdirectory( graph )
+add_subdirectory( ecat )
+add_subdirectory( ecat+ )
 if( NOT WIN32 )
-  add_subdirectory( ecat )
-  add_subdirectory( ecat+ )
   add_subdirectory( vidaIO )
 endif( NOT WIN32 )
 add_subdirectory( aimsdata )
