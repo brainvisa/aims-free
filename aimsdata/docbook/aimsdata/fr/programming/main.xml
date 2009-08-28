@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="iso8859-1"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5CR1//EN"
-"/usr/share/sgml/docbook/xml-dtd-4.2-1.0-24/docbookx.dtd" 
+<!DOCTYPE book
 [
 <!ENTITY % local.common.attrib "infoid CDATA #IMPLIED">
 <!ATTLIST bookinfo code CDATA #REQUIRED>

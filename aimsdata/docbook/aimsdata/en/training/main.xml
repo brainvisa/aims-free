@@ -738,7 +738,7 @@ M = [ R21  R22  R23  Ty ]
         AIMS referentials have their origin in the first voxel, (almost) in the corner of the image, and normally don't use the SPM origin. But the origin information is read and maintained. Anatomist can, if asked for, make a transformation going from AIMS origin (corner) to the SPM origin. This allows to display several aligned SPM images in Anatomist with the correct correspondance. However after this translation, the coordinates are still in AIMS orientation (radiological and indirect), not in SPM, so the coordinates do not correspond to what they are in SPM.
       </para>
       <para>
-        To compare coordinates of SPM images in Anatomist and SPM, another transformation has to be applied in Anatomist, with all the flips included. Anatomist 3.1 can directly use the SPM/MNI normalization referential.
+        To compare coordinates of SPM images in Anatomist and SPM, another transformation has to be applied in Anatomist, with all the flips included. Anatomist can directly use the SPM/MNI normalization referential.
       </para>
     </sect3>
 
