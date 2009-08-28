@@ -1,4 +1,4 @@
-TEMPLATE        = lib
+TEMPLATE        = bundle
 TARGET          = aimsgifti${BUILDMODEEXT}
 
 #!include ../../config

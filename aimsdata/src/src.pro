@@ -23,7 +23,7 @@ darwin-module(aimsvida):PSUBDIRS	+= bundle_aimsvida
 darwin-module(aimsminc):PSUBDIRS	+= bundle_aimsminc
 darwin-module(aimsply):PSUBDIRS         += bundle_aimsply
 darwin-module(aimsnifti):PSUBDIRS       += bundle_aimsnifti
-darwin-module(aimsgifti):PSUBDIRS       += bundle_aimsgifti
+# darwin-module(aimsgifti):PSUBDIRS       += bundle_aimsgifti
 darwin-module(aimsfdf):PSUBDIRS       += bundle_aimsfdf
 
 PSUBDIRS += \
