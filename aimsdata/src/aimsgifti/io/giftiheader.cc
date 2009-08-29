@@ -38,6 +38,8 @@ extern "C"
 {
 #include "../gifticlib/gifti_io.h"
 }
+#include <cartobase/stream/fileutil.h>
+#include <cartobase/stream/fdinhibitor.h>
 // #include <aims/io/byteswap.h>
 // #include <aims/def/general.h>
 // #include <aims/def/assert.h>
@@ -45,11 +47,6 @@ extern "C"
 // #include <aims/resampling/standardreferentials.h>
 // #include <aims/resampling/motion.h>
 // #include <cartobase/exception/ioexcept.h>
-#include <cartobase/stream/fileutil.h>
-// #include <vector>
-// #include <string>
-// #include <fstream>
-// #include <iostream>
 
 using namespace aims;
 using namespace carto;
@@ -65,6 +62,7 @@ GiftiHeader::GiftiHeader( const string & name ) :
 GiftiHeader::~GiftiHeader()
 {
 }
+#include <cartobase/stream/fdinhibitor.h>
 
 
 string GiftiHeader::extension() const
@@ -126,18 +124,29 @@ namespace
 
 bool GiftiHeader::read()
 {
-//   cout << "GiftiHeader::read\n";
+  // cout << "GiftiHeader::read\n";
 
   gifti_image   *gim = 0;
   string fname = _name;
   gifti_set_verb( 0 ); // not enough to make it fail silently...
-  gim = gifti_read_image( fname.c_str(), 0 );
+  if( !FileUtil::fileStat( fname ).empty() )
+  {
+    // avoid printing anything from gitficlib
+    fdinhibitor   fdi( STDERR_FILENO );
+    fdi.close();
+    gim = gifti_read_image( fname.c_str(), 0 );
+    fdi.open();
+  }
   if( !gim && fname.substr( fname.length()-4, 4 ) != ".gii" )
   {
     fname += ".gii";
     if( FileUtil::fileStat( fname ).empty() )
       return false;
+    // avoid printing anything from gitficlib
+    fdinhibitor   fdi( STDERR_FILENO );
+    fdi.close();
     gim = gifti_read_image( fname.c_str(), 0 );
+    fdi.open();
   }
   if( !gim )
     return false;
