@@ -45,7 +45,7 @@ extern "C"
 // #include <aims/resampling/standardreferentials.h>
 // #include <aims/resampling/motion.h>
 // #include <cartobase/exception/ioexcept.h>
-// #include <cartobase/stream/fileutil.h>
+#include <cartobase/stream/fileutil.h>
 // #include <vector>
 // #include <string>
 // #include <fstream>
@@ -135,6 +135,8 @@ bool GiftiHeader::read()
   if( !gim && fname.substr( fname.length()-4, 4 ) != ".gii" )
   {
     fname += ".gii";
+    if( FileUtil::fileStat( fname ).empty() )
+      return false;
     gim = gifti_read_image( fname.c_str(), 0 );
   }
   if( !gim )
