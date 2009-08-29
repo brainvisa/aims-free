@@ -38,15 +38,10 @@ extern "C"
 {
 #include "../gifticlib/gifti_io.h"
 }
+#include <aims/resampling/motion.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/fdinhibitor.h>
-// #include <aims/io/byteswap.h>
-// #include <aims/def/general.h>
-// #include <aims/def/assert.h>
-// #include <aims/def/settings.h>
 // #include <aims/resampling/standardreferentials.h>
-// #include <aims/resampling/motion.h>
-// #include <cartobase/exception/ioexcept.h>
 
 using namespace aims;
 using namespace carto;
@@ -152,19 +147,75 @@ bool GiftiHeader::read()
     return false;
   _name = fname;
 
-  int nda = gim->numDA;
+  int i;
+  string mname, mval;
+
+  // read meta-data
+  if( gim->meta.length > 0 )
+  {
+    Object o = Object::value( Dictionary() );
+    for( i=0; i<gim->meta.length; ++i )
+    {
+      mname = gim->meta.name[i];
+      if( !gim->meta.value[i] )
+        o->setProperty( mname, none() );
+      else
+      {
+        mval = gim->meta.value[i];
+        o->setProperty( mname, mval );
+      }
+    }
+    setProperty( "GIFTI_metadata", o );
+  }
+  if( gim->ex_atrs.length > 0 )
+  {
+    Object o = Object::value( Dictionary() );
+    for( i=0; i<gim->ex_atrs.length; ++i )
+    {
+      mname = gim->ex_atrs.name[i];
+      if( !gim->ex_atrs.value[i] )
+        o->setProperty( mname, none() );
+      else
+      {
+        mval = gim->ex_atrs.value[i];
+        o->setProperty( mname, mval );
+      }
+    }
+    setProperty( "GIFTI_extra_attributes", o );
+  }
+
+  // read labels table
+  if( gim->labeltable.length > 0 )
+  {
+    Object o = Object::value( IntDictionary() );
+    for( i=0; i<gim->labeltable.length; ++i )
+      o->setArrayItem( gim->labeltable.index[i],
+                       Object::value( string( gim->labeltable.label[i] ) ) );
+    setProperty( "GIFTI_labels_table", o );
+  }
+
   setProperty( "GIFTI_version", string( gim->version ) );
+  if( gim->compressed )
+    setProperty( "GIFTI_compressed", int(1) );
+
+  // read arrays information
+  int nda = gim->numDA, j;
   int nmesh = 0, nnorm = 0, npoly = 0, ntex = 0, polydim = 0, vnum = 0,
     texlen = 0, texdim = 0;
   string dtype, otype;
-  int i;
+  Object daattr = Object::value( IntDictionary() );
+  bool mesh, tex;
+
   for( i=0; i<nda; ++i )
   {
+    mesh = false;
+    tex = false;
     giiDataArray *da = gim->darray[i];
     switch( da->intent )
     {
     case NIFTI_INTENT_POINTSET:
       ++nmesh;
+      mesh = true;
       vnum = da->dims[0];
       break;
     case NIFTI_INTENT_VECTOR:
@@ -176,6 +227,7 @@ bool GiftiHeader::read()
       break;
     default:
       ++ntex;
+      tex = true;
       dtype = ni_datatype( da->datatype );
       texlen = da->dims[0];
       texdim = da->num_dim;
@@ -203,7 +255,81 @@ bool GiftiHeader::read()
           }
       }
     }
+
+    // read meta-data
+    Object daattr2 = Object::value( Dictionary() );
+    if( da->meta.length > 0 )
+    {
+      Object o = Object::value( Dictionary() );
+      for( j=0; j<da->meta.length; ++j )
+      {
+        mname = da->meta.name[j];
+        if( !da->meta.value[j] )
+          o->setProperty( mname, none() );
+        else
+        {
+          mval = da->meta.value[j];
+          o->setProperty( mname, mval );
+        }
+      }
+      daattr2->setProperty( "GIFTI_metadata", o );
+    }
+    if( da->ex_atrs.length > 0 )
+    {
+      Object o = Object::value( Dictionary() );
+      for( j=0; j<da->ex_atrs.length; ++j )
+      {
+        mname = da->ex_atrs.name[j];
+        if( !da->ex_atrs.value[j] )
+          o->setProperty( mname, none() );
+        else
+        {
+          mval = da->ex_atrs.value[j];
+          o->setProperty( mname, mval );
+        }
+      }
+      daattr2->setProperty( "GIFTI_extra_attributes", o );
+    }
+
+    // read coordinates system info
+    if( da->numCS > 0 )
+    {
+      vector<Object> cs;
+      cs.reserve( da->numCS );
+      for( j=0; j<da->numCS; ++j )
+      {
+        Object o = Object::value( Dictionary() );
+        o->setProperty( "dataspace", string( da->coordsys[i]->dataspace ) );
+        o->setProperty( "xformspace", string( da->coordsys[i]->xformspace ) );
+        vector<float> m( 16 );
+        for( j=0; j<4; ++j )
+        {
+          m[ j*4 ] = da->coordsys[i]->xform[j][0];
+          m[ j*4+1 ] = da->coordsys[i]->xform[j][1];
+          m[ j*4+2 ] = da->coordsys[i]->xform[j][2];
+          m[ j*4+3 ] = da->coordsys[i]->xform[j][3];
+        }
+        o->setProperty( "transformation", m );
+        cs.push_back( o );
+      }
+      daattr2->setProperty( "GIFTI_coordinates_systems", cs );
+    }
+
+    daattr2->setProperty( "intent",
+                          string( gifti_intent_to_string( da->intent ) ) );
+    if( tex )
+      daattr2->setProperty( "data_type", dtype );
+    daattr2->setProperty( "ind_ord", da->ind_ord );
+    vector<int> dims( da->num_dim );
+    for( j=0; j<da->num_dim; ++j )
+      dims[j] = da->dims[j];
+    daattr2->setProperty( "dimensions", dims );
+    cout << "DA: " << i << " / " << nda << ", daattr2 size: " << daattr2->size() << endl;
+    if( daattr2->size() != 0 )
+      daattr->setArrayItem( i, daattr2 );
   }
+  if( daattr->size() != 0 )
+    setProperty( "GIFTI_dataarrays_info", daattr );
 
   setProperty( "file_type", "GIFTI" );
   if( nmesh > 0 )
