@@ -17,6 +17,7 @@
 
 import sys, os, types, stat, shutil, filecmp, glob, re
 from optparse import OptionParser
+import subprocess
 
 parser = OptionParser( description = 'Preprocess a template file to generate '
                        'typed SIP inpuyt files' )
@@ -78,9 +79,11 @@ try:
       moc = 'moc'
   else:
     moc = 'moc'
-  f = os.popen3( moc + ' -v' )
-  l = f[2].read()
-  del f
+  #f = os.popen3( moc + ' -v' )
+  #l = f[2].read()
+  #del f
+  l = subprocess.Popen( [ moc, '-v' ], stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE ).communicate()[1]
   x = re.search( '^.*\(Qt ([^\)]*)\)$', l ).group(1)
   qt_version = [ convert_string_to_int(k) for k in x.split( '.' ) ]
 except Exception, e:
