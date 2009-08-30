@@ -38,6 +38,7 @@ extern "C"
 {
 #include "../gifticlib/gifti_io.h"
 }
+#include <aims/io/giftiutil.h>
 #include <aims/resampling/motion.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/fdinhibitor.h>
@@ -69,51 +70,6 @@ string GiftiHeader::extension() const
 const string& GiftiHeader::name() const
 {
   return _name;
-}
-
-
-namespace
-{
-  string ni_datatype( int dt )
-  {
-    switch( dt )
-    {
-      case NIFTI_TYPE_UINT8:
-        return "U8";
-      case NIFTI_TYPE_INT16:
-        return "S16";
-      case NIFTI_TYPE_INT32:
-        return "S32";
-      case NIFTI_TYPE_FLOAT32:
-        return "FLOAT";
-      case NIFTI_TYPE_COMPLEX64:
-        return "CFLOAT";
-      case NIFTI_TYPE_FLOAT64:
-        return "DOUBLE";
-      case NIFTI_TYPE_RGB24:
-        return "RGB";
-      case NIFTI_TYPE_INT8:
-        return "S8";
-      case NIFTI_TYPE_UINT16:
-        return "U16";
-      case NIFTI_TYPE_UINT32:
-        return "U32";
-      case NIFTI_TYPE_INT64:
-        return "S64";
-      case NIFTI_TYPE_UINT64:
-        return "U64";
-      case NIFTI_TYPE_FLOAT128:
-        return "FLOAT128";
-      case NIFTI_TYPE_COMPLEX128:
-        return "CDOUBLE";
-      case NIFTI_TYPE_COMPLEX256:
-        return "CFLOAT128";
-      case NIFTI_TYPE_RGBA32:
-        return "RGBA";
-      default:
-        return "VOID";
-    }
-  }
 }
 
 
@@ -201,10 +157,11 @@ bool GiftiHeader::read()
   // read arrays information
   int nda = gim->numDA, j;
   int nmesh = 0, nnorm = 0, npoly = 0, ntex = 0, polydim = 0, vnum = 0,
-    texlen = 0, texdim = 0;
+    texlen = 0, texdim = 0, polynum = 0;
   string dtype, otype;
   Object daattr = Object::value( IntDictionary() );
   bool mesh, tex;
+  vector<string> texnames;
 
   for( i=0; i<nda; ++i )
   {
@@ -224,36 +181,15 @@ bool GiftiHeader::read()
     case NIFTI_INTENT_TRIANGLE:
       ++npoly;
       polydim = da->dims[1];
+      polynum = da->dims[0];
       break;
     default:
       ++ntex;
       tex = true;
-      dtype = ni_datatype( da->datatype );
+      dtype = niftiDataType( da->datatype );
       texlen = da->dims[0];
       texdim = da->num_dim;
-      switch( texdim )
-      {
-        case 1:
-          break;
-        case 2:
-          if( dtype == "FLOAT" )
-            dtype = "POINT2DF";
-          else
-            dtype = "VECTOR_OF_2_" + dtype;
-          break;
-        case 3:
-          if( dtype == "FLOAT" )
-            dtype = "POINT3DF";
-          else
-            dtype = "VECTOR_OF_3_" + dtype;
-          break;
-        default:
-          {
-            ostringstream os;
-            os << "VECTOR_OF_" << texdim << "_" << dtype;
-            dtype = os.str();
-          }
-      }
+      dtype = giftiTextureDataType( da->datatype, texdim, da->dims );
     }
 
     // read meta-data
@@ -265,11 +201,17 @@ bool GiftiHeader::read()
       {
         mname = da->meta.name[j];
         if( !da->meta.value[j] )
+        {
           o->setProperty( mname, none() );
+          if( tex && mname == "Name" )
+            texnames.push_back( "<unnamed>" );
+        }
         else
         {
           mval = da->meta.value[j];
           o->setProperty( mname, mval );
+          if( tex && mname == "Name" )
+            texnames.push_back( mval );
         }
       }
       daattr2->setProperty( "GIFTI_metadata", o );
@@ -318,13 +260,12 @@ bool GiftiHeader::read()
     daattr2->setProperty( "intent",
                           string( gifti_intent_to_string( da->intent ) ) );
     if( tex )
-      daattr2->setProperty( "data_type", dtype );
+      daattr2->setProperty( "data_type", niftiDataType( da->datatype ) );
     daattr2->setProperty( "ind_ord", da->ind_ord );
     vector<int> dims( da->num_dim );
     for( j=0; j<da->num_dim; ++j )
       dims[j] = da->dims[j];
     daattr2->setProperty( "dimensions", dims );
-    cout << "DA: " << i << " / " << nda << ", daattr2 size: " << daattr2->size() << endl;
     if( daattr2->size() != 0 )
       daattr->setArrayItem( i, daattr2 );
   }
@@ -338,6 +279,9 @@ bool GiftiHeader::read()
     setProperty( "vertex_number", vnum );
     setProperty( "nb_t_pos", std::max(nmesh, ntex) );
     setProperty( "polygon_dimension", polydim );
+    setProperty( "polygon_number", polynum );
+    if( !texnames.empty() )
+      setProperty( "texture_names", texnames );
   }
   else if( ntex > 0 )
   {
@@ -349,6 +293,14 @@ bool GiftiHeader::read()
     setProperty( "texture_dimension", texdim );
     if( nmesh == 0 )
       setProperty( "vertex_number", texlen );
+    if( nmesh > 0 && dtype != "VOID" )
+    {
+      vector<string> pdt;
+      pdt.reserve( 2 );
+      pdt.push_back( dtype );
+      pdt.push_back( "VOID" );
+      setProperty( "possible_data_types", pdt );
+    }
   }
   else
     setProperty( "data_type", "VOID" );

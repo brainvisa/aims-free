@@ -39,6 +39,8 @@
 #include <aims/io/giftiformat.h>
 #include <aims/io/giftiheader.h>
 #include <aims/io/giftiutil.h>
+#include <aims/io/process.h>
+#include <aims/io/finder.h>
 extern "C"
 {
 #include <gifti_io.h>
@@ -46,6 +48,108 @@ extern "C"
 
 namespace aims
 {
+
+  namespace
+  {
+    template <int D, typename T>
+    void giftiReadTexture( AimsTimeSurface<D, T> & vol, int texnum,
+                           giiDataArray *da, GiftiHeader & hdr )
+    {
+      int vnum = da->dims[0];
+      int j;
+      std::vector<T> & tex = vol[texnum].texture();
+      tex.clear();
+      tex.reserve( vnum );
+      for( j=0; j<vnum; ++j )
+      {
+        tex.push_back( convertedNiftiValue<T>( da->data, j,
+                                              da->datatype ) );
+      }
+    }
+
+
+    class GiftiReadExternalTexture : public Process
+    {
+    public:
+      GiftiReadExternalTexture( carto::Object textures, giiDataArray* da )
+      : Process()
+      {
+        textures = textures;
+        da = da;
+      }
+
+      carto::Object textures;
+      giiDataArray *da;
+    };
+
+
+    template <typename T>
+    bool giftiReadExternalTexture( Process & p, const std::string &, Finder & )
+    {
+      std::cout << "giftiReadExternalTexture\n";
+      GiftiReadExternalTexture & gp
+        = static_cast<GiftiReadExternalTexture &>( p );
+      giiDataArray *da = gp.da;
+      int j, vnum = da->dims[0];
+      carto::Object o = carto::Object::value( TimeTexture<T>() );
+      TimeTexture<T> & ttex
+        = o->carto::GenericObject::value< TimeTexture<T> >();
+      std::vector<T> & tex = ttex[0].data();
+      tex.reserve( vnum );
+      for( j=0; j<vnum; ++j )
+      {
+        tex.push_back( convertedNiftiValue<T>( da->data, j, da->datatype ) );
+      }
+      carto::Object textures = gp.textures;
+      textures->insertArrayItem( -1, o );
+
+      return true;
+    }
+
+
+    template <int D>
+    void giftiReadTexture( AimsTimeSurface<D, Void> & /*vol*/, int /*texnum*/,
+                           giiDataArray *da, GiftiHeader & hdr )
+    {
+      carto::Object textures;
+      try
+      {
+        textures = hdr.getProperty( "textures" );
+      }
+      catch( ... )
+      {
+        textures = carto::Object::value( carto::ObjectVector() );
+      }
+      // get data type
+      int ndim = da->num_dim;
+      std::string dtype = giftiTextureDataType( da->datatype, ndim, da->dims );
+      std::cout << "reading texture of: " << dtype << std::endl;
+
+      GiftiReadExternalTexture p( textures, da );
+      p.registerProcessType( "Texture", "FLOAT",
+                             &giftiReadExternalTexture<float> );
+      p.registerProcessType( "Texture", "POINT2DF",
+                             &giftiReadExternalTexture<Point2df> );
+      p.registerProcessType( "Texture", "S16",
+                             &giftiReadExternalTexture<int16_t> );
+      p.registerProcessType( "Texture", "S32",
+                             &giftiReadExternalTexture<int32_t> );
+      p.registerProcessType( "Texture", "U32",
+                             &giftiReadExternalTexture<uint32_t> );
+      p.registerProcessType( "Texture", "VECTOR_OF_2_S16",
+                             &giftiReadExternalTexture<Point2d> );
+      // TODO: etc fo other types...
+      Finder f;
+      f.setObjectType( "Texture" );
+      f.setDataType( dtype );
+      if( p.execute( f, "" ) )
+      {
+        hdr.setProperty( "textures", textures );
+      }
+    }
+
+  }
+
 
   template<int D, typename T>
   bool GiftiMeshFormat<D, T>::read( const std::string & filename,
@@ -119,16 +223,8 @@ namespace aims
           }
         default:
           {
-            int vnum = da->dims[0];
-            int j;
-            std::vector<T> & tex = vol[ttex].texture();
-            tex.clear();
-            tex.reserve( vnum );
-            for( j=0; j<vnum; ++j )
-            {
-              tex.push_back( convertedNiftiValue<T>( da->data, j,
-                                                     da->datatype ) );
-            }
+            // texture
+            giftiReadTexture( vol, ttex, da, hdr );
             ++ttex;
           }
       }
