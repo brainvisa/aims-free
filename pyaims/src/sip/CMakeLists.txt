@@ -1,9 +1,9 @@
 if( AIMS_PARTIAL_AIMSSIP )
-  set( _mainSipFile aimsLight.sip )
-  set( _generatedtypes_py ${CMAKE_CURRENT_SOURCE_DIR}/generatedtypesLight.py )
+  set( _mainSipFile "${CMAKE_CURRENT_SOURCE_DIR}/aimsLight.sip" )
+  set( _generatedtypes_py "${CMAKE_CURRENT_SOURCE_DIR}/generatedtypesLight.py" )
 else( AIMS_PARTIAL_AIMSSIP )
-  set( _mainSipFile aims.sip )
-  set( _generatedtypes_py ${CMAKE_CURRENT_SOURCE_DIR}/generatedtypes.py )
+  set( _mainSipFile "${CMAKE_CURRENT_SOURCE_DIR}/aims.sip" )
+  set( _generatedtypes_py "${CMAKE_CURRENT_SOURCE_DIR}/generatedtypes.py" )
 endif( AIMS_PARTIAL_AIMSSIP )
 
 BRAINVISA_GET_FILE_LIST_FROM_PRO( "${CMAKE_CURRENT_SOURCE_DIR}/sip.pro" "HEADERS" _headers "SOURCES" _sources )

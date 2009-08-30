@@ -38,18 +38,11 @@ extern "C"
 {
 #include "../gifticlib/gifti_io.h"
 }
-// #include <aims/io/byteswap.h>
-// #include <aims/def/general.h>
-// #include <aims/def/assert.h>
-// #include <aims/def/settings.h>
+#include <aims/io/giftiutil.h>
+#include <aims/resampling/motion.h>
+#include <cartobase/stream/fileutil.h>
+#include <cartobase/stream/fdinhibitor.h>
 // #include <aims/resampling/standardreferentials.h>
-// #include <aims/resampling/motion.h>
-// #include <cartobase/exception/ioexcept.h>
-// #include <cartobase/stream/fileutil.h>
-// #include <vector>
-// #include <string>
-// #include <fstream>
-// #include <iostream>
 
 using namespace aims;
 using namespace carto;
@@ -65,6 +58,7 @@ GiftiHeader::GiftiHeader( const string & name ) :
 GiftiHeader::~GiftiHeader()
 {
 }
+#include <cartobase/stream/fdinhibitor.h>
 
 
 string GiftiHeader::extension() const
@@ -79,81 +73,106 @@ const string& GiftiHeader::name() const
 }
 
 
-namespace
-{
-  string ni_datatype( int dt )
-  {
-    switch( dt )
-    {
-      case NIFTI_TYPE_UINT8:
-        return "U8";
-      case NIFTI_TYPE_INT16:
-        return "S16";
-      case NIFTI_TYPE_INT32:
-        return "S32";
-      case NIFTI_TYPE_FLOAT32:
-        return "FLOAT";
-      case NIFTI_TYPE_COMPLEX64:
-        return "CFLOAT";
-      case NIFTI_TYPE_FLOAT64:
-        return "DOUBLE";
-      case NIFTI_TYPE_RGB24:
-        return "RGB";
-      case NIFTI_TYPE_INT8:
-        return "S8";
-      case NIFTI_TYPE_UINT16:
-        return "U16";
-      case NIFTI_TYPE_UINT32:
-        return "U32";
-      case NIFTI_TYPE_INT64:
-        return "S64";
-      case NIFTI_TYPE_UINT64:
-        return "U64";
-      case NIFTI_TYPE_FLOAT128:
-        return "FLOAT128";
-      case NIFTI_TYPE_COMPLEX128:
-        return "CDOUBLE";
-      case NIFTI_TYPE_COMPLEX256:
-        return "CFLOAT128";
-      case NIFTI_TYPE_RGBA32:
-        return "RGBA";
-      default:
-        return "VOID";
-    }
-  }
-}
-
-
 bool GiftiHeader::read()
 {
-//   cout << "GiftiHeader::read\n";
+  // cout << "GiftiHeader::read\n";
 
   gifti_image   *gim = 0;
   string fname = _name;
   gifti_set_verb( 0 ); // not enough to make it fail silently...
-  gim = gifti_read_image( fname.c_str(), 0 );
+  if( !FileUtil::fileStat( fname ).empty() )
+  {
+    // avoid printing anything from gitficlib
+    fdinhibitor   fdi( STDERR_FILENO );
+    fdi.close();
+    gim = gifti_read_image( fname.c_str(), 0 );
+    fdi.open();
+  }
   if( !gim && fname.substr( fname.length()-4, 4 ) != ".gii" )
   {
     fname += ".gii";
+    if( FileUtil::fileStat( fname ).empty() )
+      return false;
+    // avoid printing anything from gitficlib
+    fdinhibitor   fdi( STDERR_FILENO );
+    fdi.close();
     gim = gifti_read_image( fname.c_str(), 0 );
+    fdi.open();
   }
   if( !gim )
     return false;
   _name = fname;
 
-  int nda = gim->numDA;
-  setProperty( "GIFTI_version", string( gim->version ) );
-  int nmesh = 0, nnorm = 0, npoly = 0, ntex = 0, polydim = 0, vnum = 0,
-    texlen = 0, texdim = 0;
-  string dtype, otype;
   int i;
+  string mname, mval;
+
+  // read meta-data
+  if( gim->meta.length > 0 )
+  {
+    Object o = Object::value( Dictionary() );
+    for( i=0; i<gim->meta.length; ++i )
+    {
+      mname = gim->meta.name[i];
+      if( !gim->meta.value[i] )
+        o->setProperty( mname, none() );
+      else
+      {
+        mval = gim->meta.value[i];
+        o->setProperty( mname, mval );
+      }
+    }
+    setProperty( "GIFTI_metadata", o );
+  }
+  if( gim->ex_atrs.length > 0 )
+  {
+    Object o = Object::value( Dictionary() );
+    for( i=0; i<gim->ex_atrs.length; ++i )
+    {
+      mname = gim->ex_atrs.name[i];
+      if( !gim->ex_atrs.value[i] )
+        o->setProperty( mname, none() );
+      else
+      {
+        mval = gim->ex_atrs.value[i];
+        o->setProperty( mname, mval );
+      }
+    }
+    setProperty( "GIFTI_extra_attributes", o );
+  }
+
+  // read labels table
+  if( gim->labeltable.length > 0 )
+  {
+    Object o = Object::value( IntDictionary() );
+    for( i=0; i<gim->labeltable.length; ++i )
+      o->setArrayItem( gim->labeltable.index[i],
+                       Object::value( string( gim->labeltable.label[i] ) ) );
+    setProperty( "GIFTI_labels_table", o );
+  }
+
+  setProperty( "GIFTI_version", string( gim->version ) );
+  if( gim->compressed )
+    setProperty( "GIFTI_compressed", int(1) );
+
+  // read arrays information
+  int nda = gim->numDA, j;
+  int nmesh = 0, nnorm = 0, npoly = 0, ntex = 0, polydim = 0, vnum = 0,
+    texlen = 0, texdim = 0, polynum = 0;
+  string dtype, otype;
+  Object daattr = Object::value( IntDictionary() );
+  bool mesh, tex;
+  vector<string> texnames;
+
   for( i=0; i<nda; ++i )
   {
+    mesh = false;
+    tex = false;
     giiDataArray *da = gim->darray[i];
     switch( da->intent )
     {
     case NIFTI_INTENT_POINTSET:
       ++nmesh;
+      mesh = true;
       vnum = da->dims[0];
       break;
     case NIFTI_INTENT_VECTOR:
@@ -162,37 +181,96 @@ bool GiftiHeader::read()
     case NIFTI_INTENT_TRIANGLE:
       ++npoly;
       polydim = da->dims[1];
+      polynum = da->dims[0];
       break;
     default:
       ++ntex;
-      dtype = ni_datatype( da->datatype );
+      tex = true;
+      dtype = niftiDataType( da->datatype );
       texlen = da->dims[0];
       texdim = da->num_dim;
-      switch( texdim )
-      {
-        case 1:
-          break;
-        case 2:
-          if( dtype == "FLOAT" )
-            dtype = "POINT2DF";
-          else
-            dtype = "VECTOR_OF_2_" + dtype;
-          break;
-        case 3:
-          if( dtype == "FLOAT" )
-            dtype = "POINT3DF";
-          else
-            dtype = "VECTOR_OF_3_" + dtype;
-          break;
-        default:
-          {
-            ostringstream os;
-            os << "VECTOR_OF_" << texdim << "_" << dtype;
-            dtype = os.str();
-          }
-      }
+      dtype = giftiTextureDataType( da->datatype, texdim, da->dims );
     }
+
+    // read meta-data
+    Object daattr2 = Object::value( Dictionary() );
+    if( da->meta.length > 0 )
+    {
+      Object o = Object::value( Dictionary() );
+      for( j=0; j<da->meta.length; ++j )
+      {
+        mname = da->meta.name[j];
+        if( !da->meta.value[j] )
+        {
+          o->setProperty( mname, none() );
+          if( tex && mname == "Name" )
+            texnames.push_back( "<unnamed>" );
+        }
+        else
+        {
+          mval = da->meta.value[j];
+          o->setProperty( mname, mval );
+          if( tex && mname == "Name" )
+            texnames.push_back( mval );
+        }
+      }
+      daattr2->setProperty( "GIFTI_metadata", o );
+    }
+    if( da->ex_atrs.length > 0 )
+    {
+      Object o = Object::value( Dictionary() );
+      for( j=0; j<da->ex_atrs.length; ++j )
+      {
+        mname = da->ex_atrs.name[j];
+        if( !da->ex_atrs.value[j] )
+          o->setProperty( mname, none() );
+        else
+        {
+          mval = da->ex_atrs.value[j];
+          o->setProperty( mname, mval );
+        }
+      }
+      daattr2->setProperty( "GIFTI_extra_attributes", o );
+    }
+
+    // read coordinates system info
+    if( da->numCS > 0 )
+    {
+      vector<Object> cs;
+      cs.reserve( da->numCS );
+      for( j=0; j<da->numCS; ++j )
+      {
+        Object o = Object::value( Dictionary() );
+        o->setProperty( "dataspace", string( da->coordsys[i]->dataspace ) );
+        o->setProperty( "xformspace", string( da->coordsys[i]->xformspace ) );
+        vector<float> m( 16 );
+        for( j=0; j<4; ++j )
+        {
+          m[ j*4 ] = da->coordsys[i]->xform[j][0];
+          m[ j*4+1 ] = da->coordsys[i]->xform[j][1];
+          m[ j*4+2 ] = da->coordsys[i]->xform[j][2];
+          m[ j*4+3 ] = da->coordsys[i]->xform[j][3];
+        }
+        o->setProperty( "transformation", m );
+        cs.push_back( o );
+      }
+      daattr2->setProperty( "GIFTI_coordinates_systems", cs );
+    }
+
+    daattr2->setProperty( "intent",
+                          string( gifti_intent_to_string( da->intent ) ) );
+    if( tex )
+      daattr2->setProperty( "data_type", niftiDataType( da->datatype ) );
+    daattr2->setProperty( "ind_ord", da->ind_ord );
+    vector<int> dims( da->num_dim );
+    for( j=0; j<da->num_dim; ++j )
+      dims[j] = da->dims[j];
+    daattr2->setProperty( "dimensions", dims );
+    if( daattr2->size() != 0 )
+      daattr->setArrayItem( i, daattr2 );
   }
+  if( daattr->size() != 0 )
+    setProperty( "GIFTI_dataarrays_info", daattr );
 
   setProperty( "file_type", "GIFTI" );
   if( nmesh > 0 )
@@ -201,6 +279,9 @@ bool GiftiHeader::read()
     setProperty( "vertex_number", vnum );
     setProperty( "nb_t_pos", std::max(nmesh, ntex) );
     setProperty( "polygon_dimension", polydim );
+    setProperty( "polygon_number", polynum );
+    if( !texnames.empty() )
+      setProperty( "texture_names", texnames );
   }
   else if( ntex > 0 )
   {
@@ -212,6 +293,14 @@ bool GiftiHeader::read()
     setProperty( "texture_dimension", texdim );
     if( nmesh == 0 )
       setProperty( "vertex_number", texlen );
+    if( nmesh > 0 && dtype != "VOID" )
+    {
+      vector<string> pdt;
+      pdt.reserve( 2 );
+      pdt.push_back( dtype );
+      pdt.push_back( "VOID" );
+      setProperty( "possible_data_types", pdt );
+    }
   }
   else
     setProperty( "data_type", "VOID" );

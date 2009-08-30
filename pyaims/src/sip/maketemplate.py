@@ -2,6 +2,7 @@
 
 import sys, os, re, sipconfig
 from optparse import OptionParser
+import subprocess
 
 def convert_string_to_int( s ):
   '''
@@ -24,7 +25,7 @@ def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C',
   fo = open( outfile, 'w' )
   if cpp:
     c = sipconfig.Configuration()
-    cppcmd = cpp + ' -DSIP_VERSION=' + '0x%06x' % c.sip_version
+    cppcmd = [ cpp, '-DSIP_VERSION=' + '0x%06x' % c.sip_version ]
     # determine Qt version
     try:
       qtdir = os.getenv( 'QTDIR' )
@@ -34,20 +35,25 @@ def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C',
           moc = 'moc'
       else:
         moc = 'moc'
-      f = os.popen3( moc + ' -v' )
-      l = f[2].read()
-      del f
+      #f = os.popen3( moc + ' -v' )
+      #l = f[2].read()
+      #del f
+      l = subprocess.Popen( [ moc, '-v' ], stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE ).communicate()[1]
       x = re.search( '^.*\(Qt ([^\)]*)\)$', l ).group(1)
       qv = [ convert_string_to_int(k) for k in x.split( '.' ) ]
       qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
-      cppcmd += ' -DQT_VERSION=' + hex( qver )
+      cppcmd.append( '-DQT_VERSION=' + hex( qver ) )
       #print 'Qt version:', hex( qver )
     except Exception, e:
       print e
       #pass # Qt not available ?
     if not quiet:
-        print cppcmd
-    fo2, cppout = os.popen2( cppcmd )
+        print ' '.join( cppcmd )
+    #fo2, cppout = os.popen2( cppcmd )
+    p = subprocess.Popen( cppcmd, shell=True, bufsize=0,
+              stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True )
+    fo2, cppout = ( p.stdin, p.stdout )
 
   templatere = re.compile( '(%(Template[0-9]+)([^%]*)%)' )
   disableprere = re.compile( '(^\s*)(#)(.*$)', re.M )
@@ -91,6 +97,7 @@ def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C',
       fo2.write( lo )
 
   if cpp:
+    #cppout = p.communicate()[0]
     fo2.close()
     for line in cppout.xreadlines():
       lo = line

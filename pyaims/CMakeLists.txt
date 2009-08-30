@@ -7,4 +7,4 @@ add_subdirectory( python )
 add_subdirectory( bin )
 add_subdirectory( doc )
 
-add_subdirectory( ${aims_SOURCE_DIR}/pyaimsalgo pyaimsalgo )
+add_subdirectory( ../pyaimsalgo pyaimsalgo )

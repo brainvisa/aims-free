@@ -81,6 +81,14 @@ GiftiPlugin::GiftiPlugin() : Plugin()
   FileFormatDictionary<TimeTexture<Point2df> >::registerFormat( "GIFTI",
                                                                df5, ext );
 
+  GiftiTextureFormat<uint32_t> *df6 = new GiftiTextureFormat<uint32_t>;
+  FileFormatDictionary<TimeTexture<uint32_t> >::registerFormat( "GIFTI",
+                                                                df6, ext );
+
+  GiftiTextureFormat<Point2d> *df7 = new GiftiTextureFormat<Point2d>;
+  FileFormatDictionary<TimeTexture<Point2d> >::registerFormat( "GIFTI",
+                                                               df7, ext );
+
   Finder::registerFormat( "GIFTI", new FinderGiftiFormat, ext );
 }
 
