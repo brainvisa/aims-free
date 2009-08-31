@@ -316,10 +316,15 @@ bool GiftiHeader::read()
   setProperty( "file_type", "GIFTI" );
   if( nmesh > 0 )
   {
-    setProperty( "object_type", "Mesh" );
     setProperty( "vertex_number", vnum );
     setProperty( "nb_t_pos", std::max(nmesh, ntex) );
     setProperty( "polygon_dimension", polydim );
+    if( polydim == 2 )
+      setProperty( "object_type", "Segments" );
+    else if( polydim == 4 )
+      setProperty( "object_type", "Mesh4" );
+    else
+      setProperty( "object_type", "Mesh" );
     setProperty( "polygon_number", polynum );
     if( !texnames.empty() )
       setProperty( "texture_names", texnames );
@@ -351,16 +356,4 @@ bool GiftiHeader::read()
   return true;
 }
 
-
-// bool GiftiHeader::fillGifti()
-// {
-//   return false;
-// }
-
-
-bool GiftiHeader::write( bool writeminf )
-{
-//   fillGifti();
-  return false;
-}
 

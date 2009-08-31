@@ -124,6 +124,45 @@ namespace aims
   }
 
 
+  inline int niftiIntDataType( const std::string & typecode )
+  {
+    if( typecode == "U8" )
+      return NIFTI_TYPE_UINT8;
+    else if( typecode == "S16" )
+      return NIFTI_TYPE_INT16;
+    else if( typecode == "S32" )
+      return NIFTI_TYPE_INT32;
+    else if( typecode == "FLOAT" )
+      return NIFTI_TYPE_FLOAT32;
+    else if( typecode == "CFLOAT" )
+      return NIFTI_TYPE_COMPLEX64;
+    else if( typecode == "DOUBLE" )
+      return NIFTI_TYPE_FLOAT64;
+    else if( typecode == "RGB" )
+      return NIFTI_TYPE_RGB24;
+    else if( typecode == "S8" )
+      return NIFTI_TYPE_INT8;
+    else if( typecode == "U16" )
+      return NIFTI_TYPE_UINT16;
+    else if( typecode == "U32" )
+      return NIFTI_TYPE_UINT32;
+    else if( typecode == "S64" )
+      return NIFTI_TYPE_INT64;
+    else if( typecode == "U64" )
+      return NIFTI_TYPE_UINT64;
+    else if( typecode == "FLOAT128" )
+      return NIFTI_TYPE_FLOAT128;
+    else if( typecode == "CDOUBLE" )
+      return NIFTI_TYPE_COMPLEX128;
+    else if( typecode == "CFLOAT128" )
+      return NIFTI_TYPE_COMPLEX256;
+    else if( typecode == "RGBA" )
+      return NIFTI_TYPE_RGBA32;
+    else
+      return DT_NONE;
+  }
+
+
   inline std::string giftiTextureDataType( int dtype, int & ndim, int* dims )
   {
     std::string elemtype = niftiDataType( dtype );
