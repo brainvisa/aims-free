@@ -86,7 +86,7 @@ namespace aims
     template <typename T>
     bool giftiReadExternalTexture( Process & p, const std::string &, Finder & )
     {
-      std::cout << "giftiReadExternalTexture\n";
+      // std::cout << "giftiReadExternalTexture\n";
       GiftiReadExternalTexture & gp
         = static_cast<GiftiReadExternalTexture &>( p );
       giiDataArray *da = gp.da;

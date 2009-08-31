@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso8859-1"?>
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE book
 [
 <!ENTITY % local.common.attrib "infoid CDATA #IMPLIED">
@@ -8,7 +8,7 @@
 
 <book id='aims_pg%book'>
   <bookinfo code='aims_pg'>
-    <date>Date de mise à jour : 02.11.2005</date>
+    <date>Date de mise ? jour : 02.11.2005</date>
     <title>Programmation AIMS</title>
   </bookinfo>
   <chapter id="aims_pg%chap1" infoid="pour le premier chapitre">
@@ -16,25 +16,25 @@
     <title>Utilisation des graphes</title>
 
     <para>Projets: graph, aims, cartobase, pyaims, [sigraph]</para>
-    <para>Les exemples présentés sont compilables avec build-config et utilisables: ils sont dans le projet perforce <computeroutput>documents/main/coursGraphes-1005/examples/graphex-main</computeroutput>
+    <para>Les exemples pr?sent?s sont compilables avec build-config et utilisables: ils sont dans le projet perforce <computeroutput>documents/main/coursGraphes-1005/examples/graphex-main</computeroutput>
     </para>
 
     <sect2>
-      <title>Utilité</title>
-      <para>en quoi c'est vachement générique: on peut mettre tout et n'importe quoi dedans, de façon "semi-structurée", sans qu'on ait à vraiment savoir ce qu'il y a dedans depuis les couches logicielles "génériques".
+      <title>Utilit?</title>
+      <para>en quoi c'est vachement g?n?rique: on peut mettre tout et n'importe quoi dedans, de fa?on "semi-structur?e", sans qu'on ait ? vraiment savoir ce qu'il y a dedans depuis les couches logicielles "g?n?riques".
       </para>
-      <para>ça aggrège un ensemble d'objets qu'on n'a pas à charger/manipuler/sauver un par un (par ex. on le charge dans anatomist en tant qu'un seul objet)
+      <para>?a aggr?ge un ensemble d'objets qu'on n'a pas ? charger/manipuler/sauver un par un (par ex. on le charge dans anatomist en tant qu'un seul objet)
       </para>
-      <para>ça sert à tout: ROIs, clusters, sillons, gyri, fibres, modèles de reconnaissance, primalsketches, modèles du monde
+      <para>?a sert ? tout: ROIs, clusters, sillons, gyri, fibres, mod?les de reconnaissance, primalsketches, mod?les du monde
       </para>
     </sect2>
 
     <sect2>
       <title>Formats de fichiers</title>
-      <para>fichier .arg [/ python-minf-like / XML], répertoire .data</para>
-      <para>objets dans .data: objets Aims, sous forme "compacte" (global) ou "éclatée" (local)
+      <para>fichier .arg [/ python-minf-like / XML], r?pertoire .data</para>
+      <para>objets dans .data: objets Aims, sous forme "compacte" (global) ou "?clat?e" (local)
       </para>
-      <para>Le format .arg actuel a des limites (ou des garde-fou) dans sa généricité: la syntaxe, donnée par des
+      <para>Le format .arg actuel a des limites (ou des garde-fou) dans sa g?n?ricit?: la syntaxe, donn?e par des
         fichiers externes.
       </para>
     </sect2>
@@ -44,9 +44,9 @@
       <title>Pre-requis: librairie cartobase</title>
 
       <sect3>
-        <title>Les compteurs de référence: <computeroutput>rc_ptr&lt;T&gt;</computeroutput></title>
+        <title>Les compteurs de r?f?rence: <computeroutput>rc_ptr&lt;T&gt;</computeroutput></title>
 
-        <para>C'est comme des pointeurs: ça s'utilise pareil:
+        <para>C'est comme des pointeurs: ?a s'utilise pareil:
           <programlisting>#include &lt;cartobase/smart/rcptr.h&gt;
 
 {
@@ -55,34 +55,34 @@
   int a = *rc1 + *rc2;
 }</programlisting>
         </para>
-        <para>Les compteurs de référence se partagent l'appartenance d'un objet et le
-          détruisent quand il n'y en a plus besoin:
+        <para>Les compteurs de r?f?rence se partagent l'appartenance d'un objet et le
+          d?truisent quand il n'y en a plus besoin:
         </para>
         <para>
-          <emphasis role="bold">on ne doit jamais faire de <computeroutput>delete</computeroutput> sur l'objet pointé</emphasis>: ça se
+          <emphasis role="bold">on ne doit jamais faire de <computeroutput>delete</computeroutput> sur l'objet point?</emphasis>: ?a se
           fait tout seul.
         </para>
       </sect3>
 
 
       <sect3>
-        <title>Les objets génériques (cartobase)</title>
+        <title>Les objets g?n?riques (cartobase)</title>
 
         <para><ulink url="#doxycartob%classcarto_1_1GenericObject"><computeroutput>GenericObject</computeroutput></ulink> est la classe de base pour tous les objets graphe, noeuds et relation.
         </para>
-        <para>Un objet générique particulier super-courant: le dictionnaire: il contient un <computeroutput>Dictionary</computeroutput> (qui est un <computeroutput>typedef</computeroutput> sur <computeroutput>map&lt;string,Object&gt;</computeroutput>), ou un <computeroutput>PropertySet</computeroutput> qui est un truc maison équivalent à la base (mais avec d'autres trucs en plus).
+        <para>Un objet g?n?rique particulier super-courant: le dictionnaire: il contient un <computeroutput>Dictionary</computeroutput> (qui est un <computeroutput>typedef</computeroutput> sur <computeroutput>map&lt;string,Object&gt;</computeroutput>), ou un <computeroutput>PropertySet</computeroutput> qui est un truc maison ?quivalent ? la base (mais avec d'autres trucs en plus).
         </para>
-        <para>Fonctions génériques (<ulink url="#doxycartob%classcarto_1_1Interface"><computeroutput>Interface</computeroutput></ulink>):
+        <para>Fonctions g?n?riques (<ulink url="#doxycartob%classcarto_1_1Interface"><computeroutput>Interface</computeroutput></ulink>):
           <itemizedlist>
             <listitem><computeroutput>getProperty</computeroutput>
             </listitem>
             <listitem><computeroutput>setProperty</computeroutput>
             </listitem>
-            <listitem>itération sur les propriétés</listitem>
+            <listitem>it?ration sur les propri?t?s</listitem>
           </itemizedlist>
         </para>
-        <para><computeroutput>Object</computeroutput> est un compteur de référence sur un <computeroutput>GenericObject</computeroutput>:
-          on utilise surtout son opérateur <computeroutput>-&gt;</computeroutput>.
+        <para><computeroutput>Object</computeroutput> est un compteur de r?f?rence sur un <computeroutput>GenericObject</computeroutput>:
+          on utilise surtout son op?rateur <computeroutput>-&gt;</computeroutput>.
         </para>
       </sect3>
     </sect2>
@@ -110,7 +110,7 @@
         <listitem><ulink url="#doxyaims%classaims_1_1Writer"><computeroutput>Writer&lt;Graph&gt;</computeroutput></ulink>
         </listitem>
 
-        <listitem><ulink url="#doxyaims%classaims_1_1RoiIterator"><computeroutput>RoiIterator</computeroutput></ulink> et dérivées
+        <listitem><ulink url="#doxyaims%classaims_1_1RoiIterator"><computeroutput>RoiIterator</computeroutput></ulink> et d?riv?es
         </listitem>
 
         <listitem><ulink url="#doxyaims%classaims_1_1MaskIterator"><computeroutput>MaskIterator</computeroutput></ulink>
@@ -128,7 +128,7 @@
 
         <para>Ne pas utiliser les classes bas-niveau dans la lib graph (GraphReader / GraphParser / GraphWriter)
         </para>
-        <para>Utiliser les IO génériques d'AIMS:
+        <para>Utiliser les IO g?n?riques d'AIMS:
           <programlisting>#include &lt;aims/io/reader.h&gt;
 #include &lt;graph/graph/graph.h&gt;
 #include &lt;iostream&gt;
@@ -153,7 +153,7 @@ int main( int, char** )
       </sect3>
 
       <sect3>
-        <title>itération sur les noeuds</title>
+        <title>it?ration sur les noeuds</title>
 
         <programlisting>  Graph::iterator i, e = graph.end();
   Vertex *v;
@@ -173,9 +173,9 @@ int main( int, char** )
       </sect3>
 
       <sect3>
-        <title>itération sur les relations</title>
+        <title>it?ration sur les relations</title>
 
-        <para>à travers les noeuds:
+        <para>? travers les noeuds:
           <programlisting>  Graph::iterator i, e = graph.end();
   Vertex::iterator ie, ee;
   Vertex *v;
@@ -190,15 +190,15 @@ int main( int, char** )
     }
   }</programlisting>
         </para>
-        <para>illustré aussi dans <ulink url="#aims_ex.graphex1.cc">l'exemple 1</ulink></para>
+        <para>illustr? aussi dans <ulink url="#aims_ex.graphex1.cc">l'exemple 1</ulink></para>
       </sect3>
 
       <sect3>
-        <title>itération sur les ROI</title>
+        <title>it?ration sur les ROI</title>
 
-        <para>Ça se fait en utilisant
+        <para>?a se fait en utilisant
           <ulink url="#doxyaims%classaims_1_1RoiIteratorOf_3_01Graph_01_4"><computeroutput>RoiIteratorOf&#060;Graph&#062;</computeroutput></ulink>
-          et MaskIterator, des itérateurs "simplifiés" pour les ROIs contenant des buckets.
+          et MaskIterator, des it?rateurs "simplifi?s" pour les ROIs contenant des buckets.
         </para>
         <para>Apparemment MaskIterator ne fonctionne pas encore sur des graphes sous forme de volumes de labels.
         </para>
@@ -206,12 +206,12 @@ int main( int, char** )
           <ulink url="#doxyaims%classaims_1_1RoiIteratorOf_3_01AimsData_3_01T_01_4_01_4"><computeroutput>RoiIteratorOf&#060;
               AimsData&#060;T&#062; &#062;</computeroutput></ulink> fonctionne sur des volumes. Il manque un petit lien entre les deux...
         </para>
-        <para>démonstration dans <ulink url="#aims_ex.graphex2.cc">l'exemple 2</ulink>
+        <para>d?monstration dans <ulink url="#aims_ex.graphex2.cc">l'exemple 2</ulink>
         </para>
       </sect3>
 
       <sect3>
-        <title>accès aux objets Aims (maillages, buckets...) dans les graphes</title>
+        <title>acc?s aux objets Aims (maillages, buckets...) dans les graphes</title>
 
         <para>classe <ulink url="#doxyaims%classaims_1_1GraphManip"><computeroutput>GraphManip</computeroutput></ulink> et structures
           <ulink url="#doxyaims%namespaceaims"><computeroutput>GraphElementTable</computeroutput></ulink>,
@@ -224,28 +224,28 @@ int main( int, char** )
       </sect3>
 
       <sect3>
-        <title>représentation interne: locale ou globale (cf fichiers dans .data)</title>
+        <title>repr?sentation interne: locale ou globale (cf fichiers dans .data)</title>
 
         <para>locale: 1 fichier par objet</para>
-        <para>globale: 1 fichier pour tous les objets de même "identifiant", concaténés en utilisant la dimension temporelle
+        <para>globale: 1 fichier pour tous les objets de m?me "identifiant", concat?n?s en utilisant la dimension temporelle
         </para>
-        <para>illustré dans <ulink url="#aims_ex.graphex4.cc">l'exemple 4</ulink> aussi.
-        </para>
-      </sect3>
-
-      <sect3>
-        <title>représentation interne/externe: buckets ou volumes</title>
-
-        <para>Buckets: un bucket par noeud (ou relation), représentation globale ou locale
-        </para>
-        <para>Volumes: un volume de labels stocké dans le graphe, et un indice dans chaque noeud/relation
+        <para>illustr? dans <ulink url="#aims_ex.graphex4.cc">l'exemple 4</ulink> aussi.
         </para>
       </sect3>
 
       <sect3>
-        <title>lecture partielle / écriture</title>
+        <title>repr?sentation interne/externe: buckets ou volumes</title>
 
-        <para>On utilise le 3ème paramètre (optionnel) de Reader::read() pour dire si on veut lire les objets AIMS
+        <para>Buckets: un bucket par noeud (ou relation), repr?sentation globale ou locale
+        </para>
+        <para>Volumes: un volume de labels stock? dans le graphe, et un indice dans chaque noeud/relation
+        </para>
+      </sect3>
+
+      <sect3>
+        <title>lecture partielle / ?criture</title>
+
+        <para>On utilise le 3?me param?tre (optionnel) de Reader::read() pour dire si on veut lire les objets AIMS
           dans les graphes, et lesquels:
           <screen>  Reader&lt;Graph&gt; reader( "filename.arg" );
   Graph graph;
@@ -253,7 +253,7 @@ int main( int, char** )
   reader.read( graph, 0, 0 ); // ne lit rien
   reader.read( graph, 0, 1 ); // lit les objets dans les noeuds
 
-  // ou avec les options de lectures plus génériques (système plus moderne):
+  // ou avec les options de lectures plus g?n?riques (syst?me plus moderne):
   Reader&lt;Graph&gt; reader( "filename.arg" );
   Graph graph;
   Object options( new Dictionary );
@@ -261,8 +261,8 @@ int main( int, char** )
   reader.setOptions( options );
   reader.read( graph );</screen>
         </para>
-        <para>Écriture: maintenant tous les objets manquants (pas lus) sont lus avant que le graphe soit ré-écrit, de
-          manière à ce qu'il ne manque rien.
+        <para>?criture: maintenant tous les objets manquants (pas lus) sont lus avant que le graphe soit r?-?crit, de
+          mani?re ? ce qu'il ne manque rien.
           <screen>#include &lt;aims/io/writer.h&gt;
 // ...
 Writer&lt;Graph&gt; writer( "filename.arg" );
@@ -270,9 +270,9 @@ writer.write( graph );
           </screen>
         </para>
         <note>
-          <para>quand on réécrit un graphe dans son directory d'origine, mais sous un autre nom, le comportement par défaut est de réutiliser le même répertoire <computeroutput>.data</computeroutput> (par mesure d'économie). C'est peut-être une mauvaise idée...
+          <para>quand on r??crit un graphe dans son directory d'origine, mais sous un autre nom, le comportement par d?faut est de r?utiliser le m?me r?pertoire <computeroutput>.data</computeroutput> (par mesure d'?conomie). C'est peut-?tre une mauvaise id?e...
           </para>
-          <para>Pour éviter ça, mettre "*" dans la propriété "filename_base" du graphe.
+          <para>Pour ?viter ?a, mettre "*" dans la propri?t? "filename_base" du graphe.
           </para>
         </note>
       </sect3>
@@ -281,12 +281,12 @@ writer.write( graph );
 
 
     <sect2>
-      <title>Graphes spécialisés (sigraph)</title>
+      <title>Graphes sp?cialis?s (sigraph)</title>
 
-      <para>sillons: FGraph, modèles: MGraph, FRGraph, primal sketches...
+      <para>sillons: FGraph, mod?les: MGraph, FRGraph, primal sketches...
       </para>
-      <para>Pour lire un graphe spécialisé, normalement il suffit d'utiliser les <computeroutput>Reader</computeroutput> en mode "factory", qui
-        renvoient l'objet lu plutôt que d'en remplir un existant:
+      <para>Pour lire un graphe sp?cialis?, normalement il suffit d'utiliser les <computeroutput>Reader</computeroutput> en mode "factory", qui
+        renvoient l'objet lu plut?t que d'en remplir un existant:
         <screen>  Reader&#060;Graph&#062; reader( "filename.arg" );
   Graph *graph = reader.read();
   // graph can be a derived graph, like FGraph or FRGraph.</screen>
@@ -300,13 +300,13 @@ writer.write( graph );
 
 
     <sect2>
-      <title>Autre utilisation spécialisée: les bundles</title>
+      <title>Autre utilisation sp?cialis?e: les bundles</title>
 
-      <para>Les "bundles" (faisceaux de fibres) sont stockés sur disque en format (<computeroutput>.bundles</computeroutput>, <computeroutput>.bundlesdata</computeroutput>).
-        Ils n'ont pas de structure de donnée propre en mémoire: ce format est fait pour être lu et réécrit à la volée
-        (classes <computeroutput>BundleProducer</computeroutput>, <computeroutput>BundleListener</computeroutput> et dérivées).
+      <para>Les "bundles" (faisceaux de fibres) sont stock?s sur disque en format (<computeroutput>.bundles</computeroutput>, <computeroutput>.bundlesdata</computeroutput>).
+        Ils n'ont pas de structure de donn?e propre en m?moire: ce format est fait pour ?tre lu et r??crit ? la vol?e
+        (classes <computeroutput>BundleProducer</computeroutput>, <computeroutput>BundleListener</computeroutput> et d?riv?es).
       </para>
-      <para>Ceci dit, ils peuvent aussi être lus sous forme de graphe: c'est ce que fait anatomuist. En principe,
+      <para>Ceci dit, ils peuvent aussi ?tre lus sous forme de graphe: c'est ce que fait anatomuist. En principe,
         <computeroutput>Reader&#060;Graph&#062;</computeroutput> sait lire des <computeroutput>.bundles</computeroutput>. On trouve dans les noeuds des graphes de bundles
         des courbes ou des maillages (maillages de segments ou de triangles).
       </para>
@@ -319,7 +319,7 @@ writer.write( graph );
       <para>exemple dans
         <ulink url="#pyaims_ex.graph_test"><computeroutput>pyaims/examples/graph_test.py</computeroutput></ulink>
       </para>
-      <para>Les RoiIterator / MaskIterator n'ont pas encore été exportés en python.</para>
+      <para>Les RoiIterator / MaskIterator n'ont pas encore ?t? export?s en python.</para>
       <para>GraphManip non plus.</para>
     </sect2>
 
@@ -331,21 +331,21 @@ writer.write( graph );
       <para>nomenclatures</para>
       <para>visu maillages / buckets</para>
       <para>labels</para>
-      <para>modèles, recuit simulé</para>
+      <para>mod?les, recuit simul?</para>
     </sect2>
 
 
     <sect2>
-      <title>Futures évolutions, prévues, rêvées, en plan...</title>
+      <title>Futures ?volutions, pr?vues, r?v?es, en plan...</title>
 
       <itemizedlist>
-        <listitem>ROI / DOI: lien entre ROIs et des "textures" de données</listitem>
+        <listitem>ROI / DOI: lien entre ROIs et des "textures" de donn?es</listitem>
         <listitem>Manipulations plus simples et transparentes pour les objets AIMS dans les graphes (avec des sur-couches
           dans le style RoiIterator / MaskIterator
         </listitem>
         <listitem>Support complet des formats XML et minf</listitem>
-        <listitem>Réunion des concepts de graphe et de .minf</listitem>
-        <listitem>Prise en compte transparente des référentiels et transformations</listitem>
+        <listitem>R?union des concepts de graphe et de .minf</listitem>
+        <listitem>Prise en compte transparente des r?f?rentiels et transformations</listitem>
         <listitem>... ... ... ...</listitem>
       </itemizedlist>
     </sect2>
