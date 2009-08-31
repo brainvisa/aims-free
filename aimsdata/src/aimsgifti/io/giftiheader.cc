@@ -42,7 +42,7 @@ extern "C"
 #include <aims/resampling/motion.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/fdinhibitor.h>
-// #include <aims/resampling/standardreferentials.h>
+#include <aims/resampling/standardreferentials.h>
 
 using namespace aims;
 using namespace carto;
@@ -70,6 +70,27 @@ string GiftiHeader::extension() const
 const string& GiftiHeader::name() const
 {
   return _name;
+}
+
+namespace
+{
+
+  string niftiReferential( const string & dataspace )
+  {
+    if( dataspace == "NIFTI_XFORM_MNI_152" )
+      return StandardReferentials::mniTemplateReferential();
+    else if( dataspace == "NIFTI_XFORM_SCANNER_ANAT" )
+      return "Scanner-based anatomical coordinates";
+    else if( dataspace == "NIFTI_XFORM_ALIGNED_ANAT" )
+      return "Coordinates aligned to another file or to anatomical truth";
+    else if( dataspace == "NIFTI_XFORM_TALAIRACH" )
+      return StandardReferentials::talairachReferential();
+    else if( dataspace == "NIFTI_XFORM_UNKNOWN" )
+      return "Arbitrary coordinates";
+    else
+      return dataspace;
+  }
+
 }
 
 
@@ -241,9 +262,18 @@ bool GiftiHeader::read()
       for( j=0; j<da->numCS; ++j )
       {
         Object o = Object::value( Dictionary() );
-        o->setProperty( "dataspace", string( da->coordsys[i]->dataspace ) );
-        o->setProperty( "xformspace", string( da->coordsys[i]->xformspace ) );
-        vector<float> m( 16 );
+        string dataspace = da->coordsys[i]->dataspace;
+        dataspace = niftiReferential( dataspace );
+        o->setProperty( "referential", dataspace );
+        if( mesh && nmesh == 1 && dataspace != "Arbitrary coordinates" )
+          // share ref/transfo information in the main header
+          setProperty( "referential", o->getProperty( "referential") );
+        string xformspace = niftiReferential( da->coordsys[i]->xformspace );
+        vector<string> refs;
+        refs.push_back( xformspace );
+        vector<vector<float> > trs(1);
+        vector<float> & m = trs[0];
+        m = vector<float>( 16 );
         for( j=0; j<4; ++j )
         {
           m[ j*4 ] = da->coordsys[i]->xform[j][0];
@@ -251,7 +281,18 @@ bool GiftiHeader::read()
           m[ j*4+2 ] = da->coordsys[i]->xform[j][2];
           m[ j*4+3 ] = da->coordsys[i]->xform[j][3];
         }
-        o->setProperty( "transformation", m );
+        if( !Motion( m ).isIdentity() || dataspace != xformspace )
+        {
+          o->setProperty( "referentials", refs );
+          o->setProperty( "transformations", trs );
+          if( mesh && nmesh == 1 )
+          {
+            // share ref/transfo information in the main header
+            setProperty( "referentials", o->getProperty( "referentials") );
+            setProperty( "transformations",
+                         o->getProperty( "transformations") );
+          }
+        }
         cs.push_back( o );
       }
       daattr2->setProperty( "GIFTI_coordinates_systems", cs );

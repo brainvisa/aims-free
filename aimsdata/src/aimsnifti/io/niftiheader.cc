@@ -235,7 +235,7 @@ namespace {
     	return "Coordinates aligned to another file or to anatomical truth";
     	break;
 	  case NIFTI_XFORM_TALAIRACH: 
-    	return StandardReferentials::acPcReferential(); 
+    	return StandardReferentials::talairachReferential();
     	break;
 	  case NIFTI_XFORM_MNI_152: 
     	return StandardReferentials::mniTemplateReferential();

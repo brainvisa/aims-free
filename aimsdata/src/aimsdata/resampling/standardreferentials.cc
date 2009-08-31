@@ -50,6 +50,12 @@ string StandardReferentials::acPcReferential()
 }
 
 
+string StandardReferentials::talairachReferential()
+{
+  return "Talairach";
+}
+
+
 string StandardReferentials::mniTemplateReferentialID()
 {
   return "803552a6-ac4d-491d-99f5-b938392b674b";
