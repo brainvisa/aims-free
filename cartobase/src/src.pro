@@ -1,4 +1,6 @@
-TEMPLATE=	subdirs
-SUBDIRS	=	lib
+TEMPLATE= subdirs
+SUBDIRS = lib \
+          libobjects
+
 PSUBDIRS = \
                 tests

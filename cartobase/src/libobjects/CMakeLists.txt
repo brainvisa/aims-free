@@ -1,0 +1,9 @@
+BRAINVISA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/libobjects.pro "HEADERS" _headers "SOURCES" _sources )
+# BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers cartobase )
+add_library( cartobase SHARED ${_sources} )
+set_property( TARGET cartobase PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
+target_link_libraries( cartobase "cartobase_0" )
+BRAINVISA_INSTALL( TARGETS cartobase
+              DESTINATION lib
+              COMPONENT ${PROJECT_NAME} )
+# BRAINVISA_GENERATE_DOXYGEN_DOC( _headers  )

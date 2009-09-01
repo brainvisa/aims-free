@@ -45,7 +45,6 @@ namespace carto {
 //------------------//
 
 INSTANTIATE_GENERIC_OBJECT_TYPE( std::set<int> )
-INSTANTIATE_GENERIC_OBJECT_TYPE( std::set<unsigned> )
 INSTANTIATE_GENERIC_OBJECT_TYPE( std::set<char> )
 INSTANTIATE_GENERIC_OBJECT_TYPE( std::set<signed char> )
 INSTANTIATE_GENERIC_OBJECT_TYPE( std::set<unsigned char> )
