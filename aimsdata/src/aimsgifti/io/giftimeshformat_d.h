@@ -342,7 +342,8 @@ namespace aims
     void giftiAddTextureObject( gifti_image* gim, carto::Object texture,
                                 const PythonHeader & hdr )
     {
-      TimeTexture<T> & tex = texture->value<TimeTexture<T> >();
+      TimeTexture<T> & tex 
+        = texture->carto::GenericObject::value<TimeTexture<T> >();
       unsigned i, n = tex.size();
       for( i=0; i<n; ++i )
         giftiAddTexture( gim, tex[i].data(), hdr );
