@@ -31,6 +31,9 @@ class CartoBaseComponent( GenericMakerComponent ):
       self._data[ 'defines' ] = defines
       os.environ[ 'SHFJ_SHARED_PATH' ] = os.path.join( self.buildDir(), 'share' )
 
+  def _libraries( self ):
+    return [ 'cartobase', 'cartobase_0' ]
+
   def dependencies( self ):
     deps = [ SigCppComponent, 'libxml2' ]
     if self.getOption( 'dlopen' ) and systemname != 'cygwin' \

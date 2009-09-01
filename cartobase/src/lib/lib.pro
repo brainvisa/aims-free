@@ -1,5 +1,6 @@
 TEMPLATE = lib
-TARGET = $(TARGETLIB)
+#TARGET = $(TARGETLIB)
+TARGET = cartobase_0
 
 #!include ../../config
 
@@ -173,10 +174,10 @@ SOURCES = \
   object/object.cc \
   object/object_factory.cc \
   object/object_map.cc \
-  object/object_map_string_vector.cc \
-  object/object_rcptr_map.cc \
-  object/object_rcptr_map_string_vector.cc \
-  object/object_set.cc \
+#  object/object_map_string_vector.cc \
+#  object/object_rcptr_map.cc \
+#  object/object_rcptr_map_string_vector.cc \
+#  object/object_set.cc \
   object/object_usual.cc \
   object/object_vector.cc \
   object/property.cc \
