@@ -89,16 +89,7 @@ namespace aims
   std::string niftiDataType( int dt );
   int niftiIntDataType( const std::string & typecode );
   std::string giftiTextureDataType( int dtype, int & ndim, int* dims );
-  std::string niftiRefFromAimsString( const std::string & space );
 
-
-  namespace internal
-  {
-    carto::Object giftiFindHdrDA( int & nda, carto::Object dainfo,
-                                  const std::string & intent );
-    void giftiCopyMetaToGii( carto::Object dainf, giiDataArray *da );
-    void giftiSetTransformations( carto::Object cs, giiDataArray *da );
-  }
 }
 
 #endif

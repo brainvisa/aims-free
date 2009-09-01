@@ -277,81 +277,6 @@ namespace aims
   }
 
 
-  namespace
-  {
-
-    template <typename T>
-    void giftiFillTextureBuffer( gifti_image *gim, giiDataArray * da,
-                                 const std::vector<T> & tex )
-    {
-      unsigned i, n = tex.size();
-      da->dims[1] = 1;
-      da->nbyper = sizeof( T );
-      da->datatype = niftiIntDataType( carto::DataTypeCode<T>::name() );
-      da->nvals = n;
-      int nda = gim->numDA - 1;
-      gifti_alloc_DA_data( gim, &nda, 1 );
-      T* buf = reinterpret_cast<T *>( da->data );
-      for( i=0; i<n; ++i )
-        *buf++ = tex[i];
-    }
-
-
-    template <typename T, int D>
-    void giftiFillTextureBuffer( gifti_image *gim, giiDataArray * da,
-                                 const std::vector<AimsVector<T, D> > & tex )
-    {
-      unsigned i, n = tex.size();
-      int j;
-      da->dims[1] = D;
-      da->nbyper = sizeof( T );
-      da->datatype = niftiIntDataType( carto::DataTypeCode<T>::name() );
-      da->nvals = n * D;
-      int nda = gim->numDA - 1;
-      gifti_alloc_DA_data( gim, &nda, 1 );
-      T* buf = reinterpret_cast<T *>( da->data );
-      for( i=0; i<n; ++i )
-        for( j=0; j<D; ++j )
-          *buf++ = tex[i][j];
-    }
-
-
-    template <typename T>
-    void giftiAddTexture( gifti_image* gim, const std::vector<T> & tex,
-                          const PythonHeader & /*hdr*/ )
-    {
-      if( !tex.empty() )
-      {
-        int nda = gim->numDA;
-        gifti_add_empty_darray( gim, 1 );
-        giiDataArray * da = gim->darray[nda];
-        gifti_set_DA_defaults( da );
-        da->intent = NIFTI_INTENT_SHAPE;
-        da->num_dim = 2;
-        da->dims[0] = tex.size();
-        da->dims[2] = 0;
-        da->dims[3] = 0;
-        da->dims[4] = 0;
-        da->dims[5] = 0;
-        giftiFillTextureBuffer( gim, da, tex );
-      }
-    }
-
-
-    template <typename T>
-    void giftiAddTextureObject( gifti_image* gim, carto::Object texture,
-                                const PythonHeader & hdr )
-    {
-      TimeTexture<T> & tex 
-        = texture->carto::GenericObject::value<TimeTexture<T> >();
-      unsigned i, n = tex.size();
-      for( i=0; i<n; ++i )
-        giftiAddTexture( gim, tex[i].data(), hdr );
-    }
-
-  }     // namespace {}
-
-
   template<int D, typename T>
   bool GiftiMeshFormat<D, T>::write( const std::string & filename,
                                      const AimsTimeSurface<D, T> & thing,
@@ -360,39 +285,11 @@ namespace aims
     try
       {
         // std::cout << "GiftiMeshFormat<D, T>::write\n";
-        std::string fname = filename;
-        if( fname.length() < 4
-          || fname.substr( fname.length() - 4, 4 ) != ".gii" )
-          fname += ".gii";
-        gifti_image * gim = gifti_create_image( -1, -1, -1, -1, 0, 0 );
-
-        int nda = 0, t = 0;
         const PythonHeader & thdr = thing.header();
-        GiftiHeader hdr( fname );
+        GiftiHeader hdr( filename );
         hdr.copy( thdr );
-
-        // metadata
-        if( thdr.hasProperty( "GIFTI_metadata" ) )
-        {
-          carto::Object md = thdr.getProperty( "GIFTI_metadata" );
-          carto::Object it = md->objectIterator();
-          for( ; it->isValid(); it->next() )
-          {
-            carto::Object val = it->currentValue();
-            if( val.isNull() )
-              gifti_add_to_meta( &gim->meta, it->key().c_str(), 0, 0 );
-            else
-              try
-              {
-                gifti_add_to_meta( &gim->meta, it->key().c_str(),
-                                   val->getString().c_str(), 0 );
-              }
-              catch( ... )
-              {
-              }
-          }
-        }
-        // TODO: should we put all .minf properties in Gifti metadata ?
+        gifti_image *gim = hdr.giftiImageBase();
+        std::string fname = hdr.name();
 
         int hdrmeshda = 0, hdrnormda = 0, hdrpolyda = 0, hdrtexda = 0;
         carto::Object da_info;
@@ -404,7 +301,9 @@ namespace aims
         {
         }
 
+        int nda = 0, t = 0;
         typename AimsTimeSurface<D, T>::const_iterator is, es=thing.end();
+
         for( is=thing.begin(); is!=es; ++is, ++t )
         {
           const AimsSurface<D, T> & surf = is->second;
@@ -445,12 +344,12 @@ namespace aims
 
             // metadata
             carto::Object dainf
-              = internal::giftiFindHdrDA( hdrmeshda, da_info,
-                                          "NIFTI_INTENT_POINTSET" );
+              = GiftiHeader::giftiFindHdrDA( hdrmeshda, da_info,
+                                             "NIFTI_INTENT_POINTSET" );
             if( !dainf.isNone() )
             {
               ++hdrmeshda;
-              internal::giftiCopyMetaToGii( dainf, da );
+              GiftiHeader::giftiCopyMetaToGii( dainf, da );
             }
           }
           // write normals
@@ -484,12 +383,12 @@ namespace aims
 
             // metadata
             carto::Object dainf
-              = internal::giftiFindHdrDA( hdrnormda, da_info,
-                                          "NIFTI_INTENT_VECTOR" );
+              = GiftiHeader::giftiFindHdrDA( hdrnormda, da_info,
+                                             "NIFTI_INTENT_VECTOR" );
             if( !dainf.isNone() )
             {
               ++hdrnormda;
-              internal::giftiCopyMetaToGii( dainf, da );
+              GiftiHeader::giftiCopyMetaToGii( dainf, da );
             }
           }
           // write polygons
@@ -520,103 +419,34 @@ namespace aims
 
             // metadata
             carto::Object dainf
-              = internal::giftiFindHdrDA( hdrpolyda, da_info,
-                                          "NIFTI_INTENT_TRIANGLE" );
+              = GiftiHeader::giftiFindHdrDA( hdrpolyda, da_info,
+                                             "NIFTI_INTENT_TRIANGLE" );
             if( !dainf.isNone() )
             {
               ++hdrpolyda;
-              internal::giftiCopyMetaToGii( dainf, da );
+              GiftiHeader::giftiCopyMetaToGii( dainf, da );
             }
           }
           // write texture
           const std::vector<T> & tex = surf.texture();
-          giftiAddTexture( gim, tex, thdr );
+          hdr.giftiAddTexture( gim, tex );
 
           // metadata
           carto::Object dainf
-            = internal::giftiFindHdrDA( hdrtexda, da_info, "" );
+            = GiftiHeader::giftiFindHdrDA( hdrtexda, da_info, "" );
           if( !dainf.isNone() )
           {
             ++hdrtexda;
-            internal::giftiCopyMetaToGii( dainf, gim->darray[gim->numDA-1] );
+            GiftiHeader::giftiCopyMetaToGii( dainf,
+                                             gim->darray[gim->numDA-1] );
           }
         }
 
         // add external textures
-        try
-        {
-          carto::Object tex = thdr.getProperty( "textures" );
-          carto::Object it = tex->objectIterator();
-          for( ; it->isValid(); it->next() )
-          {
-            carto::Object texture = it->currentValue();
-            std::string ttype = texture->type();
-            if( ttype == carto::DataTypeCode<TimeTexture<float> >::name() )
-              giftiAddTextureObject<float>( gim, texture, thdr );
-            else if( ttype
-              == carto::DataTypeCode<TimeTexture<Point2df> >::name() )
-              giftiAddTextureObject<Point2df>( gim, texture, thdr );
-            else if( ttype
-              == carto::DataTypeCode<TimeTexture<int16_t> >::name() )
-              giftiAddTextureObject<int16_t>( gim, texture, thdr );
-            else if( ttype
-              == carto::DataTypeCode<TimeTexture<int32_t> >::name() )
-              giftiAddTextureObject<int32_t>( gim, texture, thdr );
-            else if( ttype
-              == carto::DataTypeCode<TimeTexture<uint32_t> >::name() )
-              giftiAddTextureObject<uint32_t>( gim, texture, thdr );
-            else if( ttype
-              == carto::DataTypeCode<TimeTexture<Point2d> >::name() )
-              giftiAddTextureObject<Point2d>( gim, texture, thdr );
-            else
-              {
-                std::cerr
-                << "GIFTI writer warning: cannot save texture of type "
-                << ttype << std::endl;
-                continue;
-              }
-
-            // metadata
-            carto::Object dainf
-              = internal::giftiFindHdrDA( hdrtexda, da_info, "" );
-            if( !dainf.isNone() )
-            {
-              ++hdrtexda;
-              internal::giftiCopyMetaToGii( dainf, gim->darray[gim->numDA-1] );
-            }
-          }
-        }
-        catch( ... )
-        {
-        }
+        hdr.giftiAddExternalTextures( gim, hdrtexda, da_info );
 
         // labels table
-        if( thdr.hasProperty( "GIFTI_labels_table" ) )
-        {
-          hdr.removeProperty( "GIFTI_labels_table" );
-          carto::IntDictionary lt;
-          thdr.getProperty( "GIFTI_labels_table", lt );
-          carto::IntDictionary::const_iterator it, et = lt.end();
-          giiLabelTable & glt = gim->labeltable;
-          glt.length = lt.size();
-          glt.index = (int *) malloc( glt.length * sizeof( int ) );
-          glt.label = (char **) malloc( glt.length * sizeof( char * ) );
-          int i = 0;
-          for( it=lt.begin(); it!=et; ++it, ++i )
-            try
-            {
-              glt.index[i] = it->first;
-              if( it->second.isNone() )
-                glt.label[i] = 0;
-              else
-                glt.label[i] = strdup( it->second->getString().c_str() );
-            }
-            catch( ... )
-            {
-              glt.index[i] = 0;
-              glt.label[i] = 0;
-            }
-        }
+        hdr.giftiAddLabelTable( gim );
 
         // global referential
         if( thdr.hasProperty( "transformations" )
@@ -633,8 +463,8 @@ namespace aims
               && ( first || da->numCS == 0 ) )
             {
               first = false;
-              internal::giftiSetTransformations(
-                carto::Object::reference( thdr ), da );
+              hdr.giftiSetTransformations( carto::Object::reference( thdr ),
+                                           da );
             }
           }
         }
