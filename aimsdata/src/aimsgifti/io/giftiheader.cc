@@ -257,45 +257,57 @@ bool GiftiHeader::read()
     // read coordinates system info
     if( da->numCS > 0 )
     {
-      vector<Object> cs;
-      cs.reserve( da->numCS );
+      Object cs = Object::value( Dictionary() );
+      Object datarefso = Object::value( vector<string>() );
+      Object refso = Object::value( vector<string>() );
+      Object trso = Object::value( vector<vector<float> >() );
+      vector<string> & refs = refso->value<vector<string> >(),
+        & datarefs = datarefso->value<vector<string> >();
+      vector<vector<float> > & trs= trso->value<vector<vector<float> > >();
+      refs.reserve( da->numCS );
+      datarefs.reserve( da->numCS );
+      trs.reserve( da->numCS );
       for( j=0; j<da->numCS; ++j )
       {
-        Object o = Object::value( Dictionary() );
         string dataspace = da->coordsys[i]->dataspace;
         dataspace = niftiReferential( dataspace );
-        o->setProperty( "referential", dataspace );
-        if( mesh && nmesh == 1 && dataspace != "Arbitrary coordinates" )
+//         o->setProperty( "referential", dataspace );
+        if( mesh && nmesh == 1 && j == 0
+          && dataspace != "Arbitrary coordinates" )
           // share ref/transfo information in the main header
-          setProperty( "referential", o->getProperty( "referential") );
+          setProperty( "referential", dataspace );
         string xformspace = niftiReferential( da->coordsys[i]->xformspace );
-        vector<string> refs;
-        refs.push_back( xformspace );
-        vector<vector<float> > trs(1);
-        vector<float> & m = trs[0];
-        m = vector<float>( 16 );
-        for( j=0; j<4; ++j )
+        vector<float> m( 16 );
+        int k;
+        for( k=0; k<4; ++k )
         {
-          m[ j*4 ] = da->coordsys[i]->xform[j][0];
-          m[ j*4+1 ] = da->coordsys[i]->xform[j][1];
-          m[ j*4+2 ] = da->coordsys[i]->xform[j][2];
-          m[ j*4+3 ] = da->coordsys[i]->xform[j][3];
+          m[ k*4 ] = da->coordsys[j]->xform[k][0];
+          m[ k*4+1 ] = da->coordsys[j]->xform[k][1];
+          m[ k*4+2 ] = da->coordsys[j]->xform[k][2];
+          m[ k*4+3 ] = da->coordsys[j]->xform[k][3];
         }
         if( !Motion( m ).isIdentity() || dataspace != xformspace )
         {
-          o->setProperty( "referentials", refs );
-          o->setProperty( "transformations", trs );
-          if( mesh && nmesh == 1 )
-          {
-            // share ref/transfo information in the main header
-            setProperty( "referentials", o->getProperty( "referentials") );
-            setProperty( "transformations",
-                         o->getProperty( "transformations") );
-          }
+          trs.push_back( m );
+          datarefs.push_back( dataspace );
+          refs.push_back( xformspace );
         }
-        cs.push_back( o );
       }
-      daattr2->setProperty( "GIFTI_coordinates_systems", cs );
+      if( !trs.empty() )
+      {
+        cs->setProperty( "referentials", refso );
+        cs->setProperty( "data_referentials", datarefso );
+        cs->setProperty( "transformations", trso );
+
+        if( mesh && nmesh == 1 )
+        {
+          // share ref/transfo information in the main header
+          setProperty( "referentials", cs->getProperty( "referentials") );
+          setProperty( "transformations",
+                      cs->getProperty( "transformations") );
+        }
+        daattr2->setProperty( "GIFTI_coordinates_systems", cs );
+      }
     }
 
     daattr2->setProperty( "intent",
@@ -316,10 +328,15 @@ bool GiftiHeader::read()
   setProperty( "file_type", "GIFTI" );
   if( nmesh > 0 )
   {
-    setProperty( "object_type", "Mesh" );
     setProperty( "vertex_number", vnum );
     setProperty( "nb_t_pos", std::max(nmesh, ntex) );
     setProperty( "polygon_dimension", polydim );
+    if( polydim == 2 )
+      setProperty( "object_type", "Segments" );
+    else if( polydim == 4 )
+      setProperty( "object_type", "Mesh4" );
+    else
+      setProperty( "object_type", "Mesh" );
     setProperty( "polygon_number", polynum );
     if( !texnames.empty() )
       setProperty( "texture_names", texnames );
@@ -351,16 +368,4 @@ bool GiftiHeader::read()
   return true;
 }
 
-
-// bool GiftiHeader::fillGifti()
-// {
-//   return false;
-// }
-
-
-bool GiftiHeader::write( bool writeminf )
-{
-//   fillGifti();
-  return false;
-}
 

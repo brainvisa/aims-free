@@ -60,7 +60,6 @@ namespace aims
     virtual std::string extension() const;
 
     bool read();
-    bool write( bool writeminf = true );
 
   private:
     std::string _name;
