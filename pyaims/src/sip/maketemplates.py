@@ -79,7 +79,6 @@ try:
       moc = 'moc'
   else:
     moc = 'moc'
-  sys.stdout.flush()
   l = subprocess.Popen( [ moc, '-v' ], stdout=subprocess.PIPE,
     stderr=subprocess.PIPE ).communicate()[1]
   x = re.search( '^.*\(Qt ([^\)]*)\).*$', l ).group(1)
