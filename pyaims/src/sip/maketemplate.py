@@ -2,7 +2,7 @@
 
 import sys, os, re, sipconfig
 from optparse import OptionParser
-import subprocess
+import subprocess, platform
 
 def convert_string_to_int( s ):
   '''
@@ -40,7 +40,7 @@ def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C',
       #del f
       l = subprocess.Popen( [ moc, '-v' ], stdout=subprocess.PIPE,
         stderr=subprocess.PIPE ).communicate()[1]
-      x = re.search( '^.*\(Qt ([^\)]*)\)$', l ).group(1)
+      x = re.search( '^.*\(Qt ([^\)]*)\).*$', l ).group(1)
       qv = [ convert_string_to_int(k) for k in x.split( '.' ) ]
       qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
       cppcmd.append( '-DQT_VERSION=' + hex( qver ) )
@@ -51,8 +51,12 @@ def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C',
     if not quiet:
         print ' '.join( cppcmd )
     #fo2, cppout = os.popen2( cppcmd )
-    p = subprocess.Popen( cppcmd, shell=True, bufsize=0,
-              stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True )
+    if platform.system() == 'Windows':
+      p = subprocess.Popen( cppcmd, shell=True, bufsize=0,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE )
+    else:
+      p = subprocess.Popen( cppcmd, shell=True, bufsize=0,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True )
     fo2, cppout = ( p.stdin, p.stdout )
 
   templatere = re.compile( '(%(Template[0-9]+)([^%]*)%)' )
