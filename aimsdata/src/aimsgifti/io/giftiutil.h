@@ -38,6 +38,10 @@
 
 #include <aims/vector/vector.h>
 #include <nifti1_io.h>
+extern "C"
+{
+#include <gifti_io.h>
+}
 
 namespace aims
 {
@@ -82,128 +86,19 @@ namespace aims
   }
 
 
-  inline std::string niftiDataType( int dt )
+  std::string niftiDataType( int dt );
+  int niftiIntDataType( const std::string & typecode );
+  std::string giftiTextureDataType( int dtype, int & ndim, int* dims );
+  std::string niftiRefFromAimsString( const std::string & space );
+
+
+  namespace internal
   {
-    switch( dt )
-    {
-      case NIFTI_TYPE_UINT8:
-        return "U8";
-      case NIFTI_TYPE_INT16:
-        return "S16";
-      case NIFTI_TYPE_INT32:
-        return "S32";
-      case NIFTI_TYPE_FLOAT32:
-        return "FLOAT";
-      case NIFTI_TYPE_COMPLEX64:
-        return "CFLOAT";
-      case NIFTI_TYPE_FLOAT64:
-        return "DOUBLE";
-      case NIFTI_TYPE_RGB24:
-        return "RGB";
-      case NIFTI_TYPE_INT8:
-        return "S8";
-      case NIFTI_TYPE_UINT16:
-        return "U16";
-      case NIFTI_TYPE_UINT32:
-        return "U32";
-      case NIFTI_TYPE_INT64:
-        return "S64";
-      case NIFTI_TYPE_UINT64:
-        return "U64";
-      case NIFTI_TYPE_FLOAT128:
-        return "FLOAT128";
-      case NIFTI_TYPE_COMPLEX128:
-        return "CDOUBLE";
-      case NIFTI_TYPE_COMPLEX256:
-        return "CFLOAT128";
-      case NIFTI_TYPE_RGBA32:
-        return "RGBA";
-      default:
-        return "VOID";
-    }
+    carto::Object giftiFindHdrDA( int & nda, carto::Object dainfo,
+                                  const std::string & intent );
+    void giftiCopyMetaToGii( carto::Object dainf, giiDataArray *da );
+    void giftiSetTransformations( carto::Object cs, giiDataArray *da );
   }
-
-
-  inline int niftiIntDataType( const std::string & typecode )
-  {
-    if( typecode == "U8" )
-      return NIFTI_TYPE_UINT8;
-    else if( typecode == "S16" )
-      return NIFTI_TYPE_INT16;
-    else if( typecode == "S32" )
-      return NIFTI_TYPE_INT32;
-    else if( typecode == "FLOAT" )
-      return NIFTI_TYPE_FLOAT32;
-    else if( typecode == "CFLOAT" )
-      return NIFTI_TYPE_COMPLEX64;
-    else if( typecode == "DOUBLE" )
-      return NIFTI_TYPE_FLOAT64;
-    else if( typecode == "RGB" )
-      return NIFTI_TYPE_RGB24;
-    else if( typecode == "S8" )
-      return NIFTI_TYPE_INT8;
-    else if( typecode == "U16" )
-      return NIFTI_TYPE_UINT16;
-    else if( typecode == "U32" )
-      return NIFTI_TYPE_UINT32;
-    else if( typecode == "S64" )
-      return NIFTI_TYPE_INT64;
-    else if( typecode == "U64" )
-      return NIFTI_TYPE_UINT64;
-    else if( typecode == "FLOAT128" )
-      return NIFTI_TYPE_FLOAT128;
-    else if( typecode == "CDOUBLE" )
-      return NIFTI_TYPE_COMPLEX128;
-    else if( typecode == "CFLOAT128" )
-      return NIFTI_TYPE_COMPLEX256;
-    else if( typecode == "RGBA" )
-      return NIFTI_TYPE_RGBA32;
-    else
-      return DT_NONE;
-  }
-
-
-  inline std::string giftiTextureDataType( int dtype, int & ndim, int* dims )
-  {
-    std::string elemtype = niftiDataType( dtype );
-    std::string gdtype = elemtype;
-
-    if( ndim < 2 )
-      ndim = 1;
-    else if( ndim == 2 )
-      ndim = dims[1];
-    else if( ndim >= 3 )
-    {
-      gdtype = "volume of " + elemtype;
-      ndim = 1;
-    }
-    switch( ndim )
-    {
-      case 1:
-        break;
-      case 2:
-        if( elemtype == "FLOAT" )
-          gdtype = "POINT2DF";
-        else
-          gdtype = "VECTOR_OF_2_" + elemtype;
-        break;
-      case 3:
-        if( elemtype == "FLOAT" )
-          gdtype = "POINT3DF";
-        else
-          gdtype = "VECTOR_OF_3_" + elemtype;
-        break;
-      default:
-      {
-        std::ostringstream os;
-        os << "VECTOR_OF_" << ndim << "_" << elemtype;
-        gdtype = os.str();
-      }
-    }
-
-    return gdtype;
-  }
-
 }
 
 #endif

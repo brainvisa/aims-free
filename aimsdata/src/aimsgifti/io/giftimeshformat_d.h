@@ -46,8 +46,6 @@ extern "C"
 #include <gifti_io.h>
 }
 
-// DEBUG
-#include <cartobase/object/pythonwriter.h>
 
 namespace aims
 {
@@ -350,90 +348,7 @@ namespace aims
         giftiAddTexture( gim, tex[i].data(), hdr );
     }
 
-
-    carto::Object giftiFindHdrDA( int & nda, carto::Object dainfo,
-                                  const std::string & intent )
-    {
-      if( dainfo.isNone() )
-        return carto::none();
-      carto::Object inf;
-      carto::Object it = dainfo->objectIterator();
-      int i;
-      std::string intentit;
-      for( i=0; i<nda && it->isValid(); ++i, it->next() ) {}
-      for( ; it->isValid(); ++i, it->next() )
-      {
-        carto::Object el = it->currentValue();
-        if( el->getProperty( "intent", intentit ) )
-        {
-          if( intent.empty() )
-          {
-            if( intentit == "NIFTI_INTENT_POINTSET"
-              || intentit == "NIFTI_INTENT_VECTOR"
-              || intentit == "NIFTI_INTENT_TRIANGLE" )
-              continue;
-          }
-          else
-            if( intentit != intent )
-              continue;
-          inf = el;
-          nda = i;
-          break;
-        }
-      }
-
-      return inf;
-    }
-
-
-    void giftiCopyMetaToGii( carto::Object dainf, giiDataArray *da )
-    {
-      std::cout << "giftiCopyMetaToGii\n";
-      std::cout << dainf->size() << std::endl;
-      carto::PythonWriter pw;
-      pw.attach( std::cout );
-      pw.write( dainf );
-      if( dainf->hasProperty( "GIFTI_coordinates_systems" ) )
-      {
-        std::cout << "GIFTI_coordinates_systems found\n";
-        carto::Object cs
-          = dainf->getProperty( "GIFTI_coordinates_systems" );
-        std::cout << "cs: " << cs << std::endl;
-        carto::Object it = cs->objectIterator();
-        std::cout << "it: " << it << std::endl;
-        for( ; it->isValid(); it->next() )
-        {
-          carto::Object lcs = it->currentValue();
-          std::vector<float> tr;
-          if( lcs->getProperty( "transformations", tr ) )
-          {
-            std::cout << "transfo\n";
-          }
-        }
-      }
-      if( dainf->hasProperty( "GIFTI_metadata" ) )
-      {
-        carto::Object md = dainf->getProperty( "GIFTI_metadata" );
-        carto::Object it = md->objectIterator();
-        for( ; it->isValid(); it->next() )
-        {
-          carto::Object val = it->currentValue();
-          if( val.isNull() )
-            gifti_add_to_meta( &da->meta, it->key().c_str(), 0, 1 );
-          else
-            try
-            {
-              gifti_add_to_meta( &da->meta, it->key().c_str(),
-                                 val->getString().c_str(), 1 );
-            }
-            catch( ... )
-            {
-            }
-        }
-      }
-    }
-
-}
+  }     // namespace {}
 
 
   template<int D, typename T>
@@ -478,7 +393,7 @@ namespace aims
         }
         // TODO: should we put all .minf properties in Gifti metadata ?
 
-        int hdrmeshda = 0, hdrnormda = 0, hdrpolyda = 0, hdrtexa = 0;
+        int hdrmeshda = 0, hdrnormda = 0, hdrpolyda = 0, hdrtexda = 0;
         carto::Object da_info;
         try
         {
@@ -526,16 +441,16 @@ namespace aims
               ts << is->first;
               gifti_add_to_meta( &da->meta, "Timestep", ts.str().c_str(), 1 );
             }
+
             // metadata
-            carto::Object dainf = giftiFindHdrDA( hdrmeshda, da_info,
-                                                  "NIFTI_INTENT_POINTSET" );
+            carto::Object dainf
+              = internal::giftiFindHdrDA( hdrmeshda, da_info,
+                                          "NIFTI_INTENT_POINTSET" );
             if( !dainf.isNone() )
             {
-              std::cout << "mesh DA meta found: " << hdrmeshda << std::endl;
               ++hdrmeshda;
-              giftiCopyMetaToGii( dainf, da );
+              internal::giftiCopyMetaToGii( dainf, da );
             }
-
           }
           // write normals
           const std::vector<Point3df> & norm = surf.normal();
@@ -565,6 +480,16 @@ namespace aims
               buf[i*3+1] = norm[i][1];
               buf[i*3+2] = norm[i][2];
             }
+
+            // metadata
+            carto::Object dainf
+              = internal::giftiFindHdrDA( hdrnormda, da_info,
+                                          "NIFTI_INTENT_VECTOR" );
+            if( !dainf.isNone() )
+            {
+              ++hdrnormda;
+              internal::giftiCopyMetaToGii( dainf, da );
+            }
           }
           // write polygons
           {
@@ -591,10 +516,29 @@ namespace aims
             for( i=0; i<n; ++i )
               for( j=0; j<D; ++j )
                 buf[i*D+j] = poly[i][j];
+
+            // metadata
+            carto::Object dainf
+              = internal::giftiFindHdrDA( hdrpolyda, da_info,
+                                          "NIFTI_INTENT_TRIANGLE" );
+            if( !dainf.isNone() )
+            {
+              ++hdrpolyda;
+              internal::giftiCopyMetaToGii( dainf, da );
+            }
           }
           // write texture
           const std::vector<T> & tex = surf.texture();
           giftiAddTexture( gim, tex, thdr );
+
+          // metadata
+          carto::Object dainf
+            = internal::giftiFindHdrDA( hdrtexda, da_info, "" );
+          if( !dainf.isNone() )
+          {
+            ++hdrtexda;
+            internal::giftiCopyMetaToGii( dainf, gim->darray[gim->numDA-1] );
+          }
         }
 
         // add external textures
@@ -624,12 +568,74 @@ namespace aims
               == carto::DataTypeCode<TimeTexture<Point2d> >::name() )
               giftiAddTextureObject<Point2d>( gim, texture, thdr );
             else
-              std::cerr << "GIFTI writer warning: cannot save texture of type "
-              << ttype << std::endl;
+              {
+                std::cerr
+                << "GIFTI writer warning: cannot save texture of type "
+                << ttype << std::endl;
+                continue;
+              }
+
+            // metadata
+            carto::Object dainf
+              = internal::giftiFindHdrDA( hdrtexda, da_info, "" );
+            if( !dainf.isNone() )
+            {
+              ++hdrtexda;
+              internal::giftiCopyMetaToGii( dainf, gim->darray[gim->numDA-1] );
+            }
           }
         }
         catch( ... )
         {
+        }
+
+        // labels table
+        if( thdr.hasProperty( "GIFTI_labels_table" ) )
+        {
+          hdr.removeProperty( "GIFTI_labels_table" );
+          carto::IntDictionary lt;
+          thdr.getProperty( "GIFTI_labels_table", lt );
+          carto::IntDictionary::const_iterator it, et = lt.end();
+          giiLabelTable & glt = gim->labeltable;
+          glt.length = lt.size();
+          glt.index = (int *) malloc( glt.length * sizeof( int ) );
+          glt.label = (char **) malloc( glt.length * sizeof( char * ) );
+          int i = 0;
+          for( it=lt.begin(); it!=et; ++it, ++i )
+            try
+            {
+              glt.index[i] = it->first;
+              if( it->second.isNone() )
+                glt.label[i] = 0;
+              else
+                glt.label[i] = strdup( it->second->getString().c_str() );
+            }
+            catch( ... )
+            {
+              glt.index[i] = 0;
+              glt.label[i] = 0;
+            }
+        }
+
+        // global referential
+        if( thdr.hasProperty( "transformations" )
+          && thdr.hasProperty( "referentials" ) )
+        {
+          // set it on the first mesh, and in any other which does not have
+          // coordinates systems information
+          nda = gim->numDA;
+          bool first = true;
+          for( t=0; t<nda; ++t )
+          {
+            giiDataArray *da = gim->darray[t];
+            if( da->intent == NIFTI_INTENT_POINTSET
+              && ( first || da->numCS == 0 ) )
+            {
+              first = false;
+              internal::giftiSetTransformations(
+                carto::Object::reference( thdr ), da );
+            }
+          }
         }
 
         // write all

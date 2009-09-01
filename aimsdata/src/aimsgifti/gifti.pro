@@ -21,6 +21,7 @@ io/gifticlib/gifti_io.c  \
 io/gifticlib/gifti_xml.c \
 io/giftiformat.cc        \
 io/giftiheader.cc        \
+io/giftiutil.cc          \
 plugin/giftiplugin.cc
 
 LIBS    = ${LIBS_GIFTI}
