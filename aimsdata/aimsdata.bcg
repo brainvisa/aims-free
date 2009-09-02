@@ -107,7 +107,7 @@ class AimsDataComponent( GenericMakerComponent ):
       result.append( AimsNiftiComponent )
     if int( self.getOption( 'gifti', 0 ) ) \
       and weakDependency( AimsGiftiComponent, self ):
-      result.append( AimsNiftiComponent )
+      result.append( AimsGiftiComponent )
     if int( self.getOption( 'fdf', 0 ) ) \
       and weakDependency( AimsFdfComponent, self ):
       result.append( AimsFdfComponent )
