@@ -75,5 +75,9 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( AttributedObject * )
 
 INSTANTIATE_GENERIC_OBJECT_TYPE( std::set<unsigned> )
 
+#define _TMP_ std::map< std::string, Object >
+INSTANTIATE_GENERIC_OBJECT_TYPE( _TMP_ )
+#undef _TMP_
+
 }
 

@@ -149,7 +149,7 @@ SOURCES = \
   allocator/mappingro.cc \
   allocator/mappingrw.cc \
   allocator/meminfo.cc \
-  config/info.cc \
+#  config/info.cc \
   config/paths.cc \
   config/verbose.cc \
   config/version.cc \
@@ -166,30 +166,30 @@ SOURCES = \
   exception/file.cc \
   exception/format.cc \
   exception/ioexcept.cc \
-  getopt/getopt.cc \
+#  getopt/getopt.cc \
   object/achecker.cc \
-  object/areader.cc \
-  object/awriter.cc \
+#  object/areader.cc \
+#  object/awriter.cc \
   object/headered.cc \
   object/object.cc \
-  object/object_factory.cc \
-  object/object_map.cc \
+#  object/object_factory.cc \
+#  object/object_map.cc \
 #  object/object_map_string_vector.cc \
 #  object/object_rcptr_map.cc \
 #  object/object_rcptr_map_string_vector.cc \
 #  object/object_set.cc \
   object/object_usual.cc \
-  object/object_vector.cc \
+#  object/object_vector.cc \
   object/property.cc \
   object/propertyfilter.cc \
-  object/pythonreader.cc \
-  object/pythonwriter.cc \
+#  object/pythonreader.cc \
+#  object/pythonwriter.cc \
   object/sprinter.cc \
   object/sreader.cc \
   object/swriter.cc \
   object/syntobject.cc \
   pattern/observer.cc \
-  plugin/plugin.cc \
+#  plugin/plugin.cc \
   smart/mutexrcptr.cc \
   smart/rcobject.cc \
   smart/sharedptr.cc \
@@ -219,14 +219,15 @@ SOURCES = \
   type/string_conversion.cc \
   uuid/uuid.cc \
   wip/io/asciidatasourcetraits.cc \
-  wip/io/datasourceinfo.cc \
+#  wip/io/datasourceinfo.cc \
   wip/io/formatdictionary.cc \
-  wip/io/minfXML2.cc \
-  wip/io/pythonformatchecker.cc \
-  wip/io/pythonformatreader.cc \
-  wip/io/pythonformatwriter.cc \
-  wip/io/reader_object.cc \
-  wip/io/readeralgorithm.cc \
-  wip/io/writer.cc \
-  wip/io/xmlformatchecker.cc \
-  wip/io/xmlformatreader.cc
+#  wip/io/minfXML2.cc \
+#  wip/io/pythonformatchecker.cc \
+#  wip/io/pythonformatreader.cc \
+#  wip/io/pythonformatwriter.cc \
+#  wip/io/reader_object.cc \
+#  wip/io/readeralgorithm.cc \
+#  wip/io/writer.cc \
+#  wip/io/xmlformatchecker.cc \
+#  wip/io/xmlformatreader.cc
+

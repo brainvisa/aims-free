@@ -118,13 +118,13 @@ void FdfHeader::read()
 
   // Initialize the transformation
   //storagetomemory = transfo.toVector();
-  cout << "[";
+  //cout << "[";
   for (uint x=0; x<4; x++)
     for (uint y=0; y<4; y++) {
         storagetomemory[4*x + y] = ((x == y) ? 1 : 0);
-        cout << storagetomemory[4*x + y] << ",";
+        //cout << storagetomemory[4*x + y] << ",";
     }
-  cout << "]" << endl;
+  //cout << "]" << endl;
 
   while (getline(inFile, line, '\n')) {
 

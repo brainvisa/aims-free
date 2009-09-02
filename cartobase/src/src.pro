@@ -1,6 +1,7 @@
 TEMPLATE= subdirs
 SUBDIRS = lib \
-          libobjects
+          libobjects \
+          libcartobase
 
 PSUBDIRS = \
                 tests
