@@ -3,7 +3,7 @@ TEMPLATE = lib
 
 TARGET = cartobase
 
-LIBS += -lcartobase_1 -lcartobase_0
+LIBS += -L../../../lib -lcartobase_1 -lcartobase_0
 
 SOURCES = \
   ../lib/config/info.cc \
