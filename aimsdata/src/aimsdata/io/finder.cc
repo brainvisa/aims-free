@@ -206,7 +206,9 @@ FinderFormat* Finder::finderFormat( const string & format )
 
 bool Finder::check( const string& filename )
 {
-  // cout << "Finder::check( " << filename << " )\n";
+#ifdef AIMS_DEBUG_IO
+  cout << "Finder::check( " << filename << " )\n";
+#endif
   static bool plugs = false;
   if( !plugs )
     {
@@ -266,7 +268,9 @@ bool Finder::check( const string& filename )
   if( pos != string::npos )
     ext = filename.substr( dlen+pos+1, filename.length() - pos - 1 );
 
-  // cout << "ext : " << ext << endl;
+#ifdef AIMS_DEBUG_IO
+  cout << "ext : " << ext << endl;
+#endif
   //	Check compatible formats
   set<string>			tried;
   FinderFormat			*reader;
@@ -288,7 +292,9 @@ bool Finder::check( const string& filename )
     for( ie=iext->second.begin(), ee=iext->second.end(); ie!=ee; ++ie )
       if( tried.find( *ie ) == notyet )
         {
-          // cout << "trying " << *ie << "...\n";
+#ifdef AIMS_DEBUG_IO
+          cout << "trying " << *ie << "...\n";
+#endif
           reader = finderFormat( *ie );
           if( reader )
             {
@@ -311,7 +317,9 @@ bool Finder::check( const string& filename )
         }
   }
 
-  // cout << "not found yet... pass2...\n";
+#ifdef AIMS_DEBUG_IO
+  cout << "not found yet... pass2...\n";
+#endif
   if( !ext.empty() )
     {
       // not found or none works: try readers with no extension
@@ -321,7 +329,9 @@ bool Finder::check( const string& filename )
         for( ie=iext->second.begin(), ee=iext->second.end(); ie!=ee; ++ie )
           if( tried.find( *ie ) == notyet )
             {
-              // cout << "pass2, trying " << *ie << "...\n";
+#ifdef AIMS_DEBUG_IO
+              cout << "pass2, trying " << *ie << "...\n";
+#endif
               reader = finderFormat( *ie );
               if( reader )
                 {
@@ -344,7 +354,9 @@ bool Finder::check( const string& filename )
             }
     }
 
-  // cout << "not found yet... pass3...\n";
+#ifdef AIMS_DEBUG_IO
+  cout << "not found yet... pass3...\n";
+#endif
   // still not found ? well, try EVERY format this time...
   for( iext=pd->extensions.begin(); iext!=eext; ++iext )
     for( ie=iext->second.begin(), ee=iext->second.end(); ie!=ee; ++ie )
@@ -353,7 +365,9 @@ bool Finder::check( const string& filename )
         reader = finderFormat( *ie );
         if( reader )
           {
-            // cout << "pass3, trying " << ifm->first << "...\n";
+#ifdef AIMS_DEBUG_IO
+            cout << "pass3, trying " << *ie << "...\n";
+#endif
             try
               {
                 if( reader->check( filename, *this ) )
@@ -372,7 +386,9 @@ bool Finder::check( const string& filename )
           }
       }
 
-  // cout << "not found at all, giving up\n";
+#ifdef AIMS_DEBUG_IO
+  cout << "not found at all, giving up\n";
+#endif
   // still not succeeded, it's hopeless...
 
   if( dsok )

@@ -42,6 +42,7 @@
 #include <aims/def/assert.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/directory.h>
+#include <cartobase/stream/fdinhibitor.h>
 #include <vector>
 
 #ifndef HAVE_CONFIG_H
@@ -437,12 +438,16 @@ namespace
 
 int DicomHeader::readFirst()
 {
+  // avoid printing anything from dcmtk
+  fdinhibitor   fdi( STDERR_FILENO );
+  fdi.close();
   // open file
 #ifdef UID_RawDataStorage // #if (OFFIS_DCMTK_VERSION_NUMBER-0 > 351)
   DcmInputFileStream  stream( _name.c_str() );
   if ( ! stream.good() )
 #else
     DcmFileStream stream( _name.c_str(), DCM_ReadMode );
+  fdi.open();
   if ( stream.GetError() != EC_Normal )
 #endif
     {
