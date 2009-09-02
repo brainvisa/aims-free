@@ -34,15 +34,12 @@
  */
 
 #include <aims/io/giftiheader.h>
-extern "C"
-{
-#include "../gifticlib/gifti_io.h"
-}
 #include <aims/io/giftiutil.h>
 #include <aims/resampling/motion.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/fdinhibitor.h>
 #include <aims/resampling/standardreferentials.h>
+#include <aims/mesh/texture.h>
 
 using namespace aims;
 using namespace carto;
@@ -368,4 +365,361 @@ bool GiftiHeader::read()
   return true;
 }
 
+
+gifti_image* GiftiHeader::giftiImageBase()
+{
+  std::string fname = _name;
+  if( fname.length() < 4
+    || fname.substr( fname.length() - 4, 4 ) != ".gii" )
+    fname += ".gii";
+  _name = fname;
+  gifti_image * gim = gifti_create_image( -1, -1, -1, -1, 0, 0 );
+
+  // metadata
+  if( hasProperty( "GIFTI_metadata" ) )
+  {
+    carto::Object md = getProperty( "GIFTI_metadata" );
+    carto::Object it = md->objectIterator();
+    for( ; it->isValid(); it->next() )
+    {
+      carto::Object val = it->currentValue();
+      if( val.isNull() )
+        gifti_add_to_meta( &gim->meta, it->key().c_str(), 0, 0 );
+      else
+        try
+        {
+          gifti_add_to_meta( &gim->meta, it->key().c_str(),
+                             val->getString().c_str(), 0 );
+        }
+        catch( ... )
+        {
+        }
+    }
+  }
+  // TODO: should we put all .minf properties in Gifti metadata ?
+
+  return gim;
+}
+
+
+template <typename T>
+void GiftiHeader::giftiAddTexture( gifti_image* gim,
+                                   const TimeTexture<T> & tex )
+{
+  typename TimeTexture<T>::const_iterator it, et = tex.end();
+  for( it=tex.begin(); it!=et; ++it )
+    giftiAddTexture( gim, it->second.data() );
+}
+
+
+template <typename T>
+void GiftiHeader::giftiAddTextureObject( gifti_image* gim, Object texture )
+{
+  TimeTexture<T> & tex
+    = texture->carto::GenericObject::value<TimeTexture<T> >();
+  giftiAddTexture( gim, tex );
+}
+
+
+void GiftiHeader::giftiAddExternalTextures( gifti_image *gim, int & hdrtexda,
+                                            carto::Object da_info )
+{
+  try
+  {
+    carto::Object tex = getProperty( "textures" );
+    carto::Object it = tex->objectIterator();
+    for( ; it->isValid(); it->next() )
+    {
+      carto::Object texture = it->currentValue();
+      std::string ttype = texture->type();
+      if( ttype == carto::DataTypeCode<TimeTexture<float> >::name() )
+        giftiAddTextureObject<float>( gim, texture );
+      else if( ttype
+        == carto::DataTypeCode<TimeTexture<Point2df> >::name() )
+        giftiAddTextureObject<Point2df>( gim, texture );
+      else if( ttype
+        == carto::DataTypeCode<TimeTexture<int16_t> >::name() )
+        giftiAddTextureObject<int16_t>( gim, texture );
+      else if( ttype
+        == carto::DataTypeCode<TimeTexture<int32_t> >::name() )
+        giftiAddTextureObject<int32_t>( gim, texture );
+      else if( ttype
+        == carto::DataTypeCode<TimeTexture<uint32_t> >::name() )
+        giftiAddTextureObject<uint32_t>( gim, texture );
+      else if( ttype
+        == carto::DataTypeCode<TimeTexture<Point2d> >::name() )
+        giftiAddTextureObject<Point2d>( gim, texture );
+      else
+      {
+        std::cerr << "GIFTI writer warning: cannot save texture of type "
+        << ttype << std::endl;
+        continue;
+      }
+
+      // metadata
+      carto::Object dainf = giftiFindHdrDA( hdrtexda, da_info, "" );
+      if( !dainf.isNone() )
+      {
+        ++hdrtexda;
+        giftiCopyMetaToGii( dainf, gim->darray[gim->numDA-1] );
+      }
+    }
+  }
+  catch( ... )
+  {
+  }
+}
+
+
+void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
+{
+  if( hasProperty( "GIFTI_labels_table" ) )
+  {
+    carto::IntDictionary lt;
+    getProperty( "GIFTI_labels_table", lt );
+    carto::IntDictionary::const_iterator it, et = lt.end();
+    giiLabelTable & glt = gim->labeltable;
+    glt.length = lt.size();
+    glt.index = (int *) malloc( glt.length * sizeof( int ) );
+    glt.label = (char **) malloc( glt.length * sizeof( char * ) );
+    int i = 0;
+    for( it=lt.begin(); it!=et; ++it, ++i )
+      try
+      {
+        glt.index[i] = it->first;
+        if( it->second.isNone() )
+          glt.label[i] = 0;
+        else
+          glt.label[i] = strdup( it->second->getString().c_str() );
+      }
+      catch( ... )
+      {
+        glt.index[i] = 0;
+        glt.label[i] = 0;
+      }
+    removeProperty( "GIFTI_labels_table" );
+  }
+}
+
+
+Object GiftiHeader::giftiFindHdrDA( int & nda, Object dainfo,
+                                    const string & intent )
+{
+  if( dainfo.isNone() )
+    return carto::none();
+  Object inf;
+  Object it = dainfo->objectIterator();
+  int i;
+  string intentit;
+  for( i=0; i<nda && it->isValid(); ++i, it->next() ) {}
+  for( ; it->isValid(); ++i, it->next() )
+  {
+    Object el = it->currentValue();
+    if( el->getProperty( "intent", intentit ) )
+    {
+      if( intent.empty() )
+      {
+        if( intentit == "NIFTI_INTENT_POINTSET"
+          || intentit == "NIFTI_INTENT_VECTOR"
+          || intentit == "NIFTI_INTENT_TRIANGLE" )
+          continue;
+      }
+      else
+        if( intentit != intent )
+          continue;
+        inf = el;
+      nda = i;
+      break;
+    }
+  }
+
+  return inf;
+}
+
+
+std::string GiftiHeader::niftiRefFromAimsString( const std::string & space )
+{
+  if( space == "Arbitrary coordinates" )
+    return "NIFTI_XFORM_UNKNOWN";
+  if( space == StandardReferentials::talairachReferential() )
+    return "NIFTI_XFORM_TALAIRACH";
+  if( space == StandardReferentials::mniTemplateReferential()
+    || space == StandardReferentials::mniTemplateReferentialID() )
+    return "NIFTI_XFORM_MNI_152";
+  if( space == "Scanner-based anatomical coordinates" )
+    return "NIFTI_XFORM_SCANNER_ANAT";
+  if( space
+    == "Coordinates aligned to another file or to anatomical truth" )
+    return "NIFTI_XFORM_ALIGNED_ANAT";
+  if( space == StandardReferentials::acPcReferentialID() )
+    return StandardReferentials::acPcReferential();
+  // else left it as is
+  return space;
+}
+
+
+void GiftiHeader::giftiSetTransformations( carto::Object cs, giiDataArray *da )
+{
+  std::vector<std::vector<float> > trs;
+  std::vector<std::string> refs;
+  std::vector<std::string> datarefs;
+  if( cs->getProperty( "transformations", trs )
+    && cs->getProperty( "referentials", refs ) )
+  {
+    if( !cs->getProperty( "data_referentials", datarefs ) )
+    {
+      std::string dataref;
+      if( cs->getProperty( "referential", dataref ) )
+        datarefs.push_back( dataref );
+    }
+    unsigned i, n = trs.size(), m = datarefs.size();
+    if( refs.size() < n )
+      n = refs.size();
+    if( da->numCS != 0 )
+      // erase older CS
+      gifti_free_CS_list( da );
+    for( i=0; i<n; ++i )
+    {
+      gifti_add_empty_CS( da );
+      giiCoordSystem *c = da->coordsys[i];
+      if( i < m )
+        c->dataspace
+        = strdup( niftiRefFromAimsString( datarefs[i] ).c_str() );
+      else
+        c->dataspace = strdup( "NIFTI_XFORM_UNKNOWN" );
+      c->xformspace = strdup( niftiRefFromAimsString( refs[i] ).c_str() );
+      for( unsigned j=0; j<4; ++j )
+      {
+        c->xform[j][0] = trs[i][j*4];
+        c->xform[j][1] = trs[i][j*4+1];
+        c->xform[j][2] = trs[i][j*4+2];
+        c->xform[j][3] = trs[i][j*4+3];
+      }
+    }
+  }
+}
+
+
+void GiftiHeader::giftiCopyMetaToGii( carto::Object dainf, giiDataArray *da )
+{
+  if( dainf->hasProperty( "GIFTI_coordinates_systems" ) )
+  {
+    carto::Object cs
+    = dainf->getProperty( "GIFTI_coordinates_systems" );
+    giftiSetTransformations( cs, da );
+  }
+  if( dainf->hasProperty( "GIFTI_metadata" ) )
+  {
+    carto::Object md = dainf->getProperty( "GIFTI_metadata" );
+    carto::Object it = md->objectIterator();
+    for( ; it->isValid(); it->next() )
+    {
+      carto::Object val = it->currentValue();
+      if( val.isNull() )
+        gifti_add_to_meta( &da->meta, it->key().c_str(), 0, 1 );
+      else
+        try
+        {
+          gifti_add_to_meta( &da->meta, it->key().c_str(),
+                             val->getString().c_str(), 1 );
+        }
+        catch( ... )
+        {
+        }
+    }
+  }
+  if( dainf->hasProperty( "GIFTI_extra_attributes" ) )
+  {
+    carto::Object md = dainf->getProperty( "GIFTI_extra_attributes" );
+    carto::Object it = md->objectIterator();
+    for( ; it->isValid(); it->next() )
+    {
+      carto::Object val = it->currentValue();
+      if( val.isNull() )
+        gifti_add_to_nvpairs( &da->ex_atrs, it->key().c_str(), 0 );
+      else
+        try
+        {
+          gifti_add_to_nvpairs( &da->ex_atrs, it->key().c_str(),
+                                val->getString().c_str() );
+        }
+        catch( ... )
+        {
+        }
+    }
+  }
+}
+
+
+namespace
+{
+
+  template <typename T>
+  void giftiFillTextureBuffer( gifti_image *gim, giiDataArray * da,
+                                const std::vector<T> & tex )
+  {
+    unsigned i, n = tex.size();
+    da->dims[1] = 1;
+    da->nbyper = sizeof( T );
+    da->datatype = niftiIntDataType( carto::DataTypeCode<T>::name() );
+    da->nvals = n;
+    int nda = gim->numDA - 1;
+    gifti_alloc_DA_data( gim, &nda, 1 );
+    T* buf = reinterpret_cast<T *>( da->data );
+    for( i=0; i<n; ++i )
+      *buf++ = tex[i];
+  }
+
+
+  template <typename T, int D>
+  void giftiFillTextureBuffer( gifti_image *gim, giiDataArray * da,
+                                const std::vector<AimsVector<T, D> > & tex )
+  {
+    unsigned i, n = tex.size();
+    int j;
+    da->dims[1] = D;
+    da->nbyper = sizeof( T );
+    da->datatype = niftiIntDataType( carto::DataTypeCode<T>::name() );
+    da->nvals = n * D;
+    int nda = gim->numDA - 1;
+    gifti_alloc_DA_data( gim, &nda, 1 );
+    T* buf = reinterpret_cast<T *>( da->data );
+    for( i=0; i<n; ++i )
+      for( j=0; j<D; ++j )
+        *buf++ = tex[i][j];
+  }
+
+}
+
+
+template <typename T>
+void GiftiHeader::giftiAddTexture( gifti_image* gim, const vector<T> & tex )
+{
+  if( !tex.empty() )
+  {
+    int nda = gim->numDA;
+    gifti_add_empty_darray( gim, 1 );
+    giiDataArray * da = gim->darray[nda];
+    gifti_set_DA_defaults( da );
+    da->intent = NIFTI_INTENT_SHAPE;
+    da->num_dim = 2;
+    da->dims[0] = tex.size();
+    da->dims[2] = 0;
+    da->dims[3] = 0;
+    da->dims[4] = 0;
+    da->dims[5] = 0;
+    giftiFillTextureBuffer( gim, da, tex );
+  }
+}
+
+
+namespace aims
+{
+
+  template <>
+  void GiftiHeader::giftiAddTexture( gifti_image*, const vector<Void> & )
+  {
+  }
+
+}
 

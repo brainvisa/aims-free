@@ -39,6 +39,13 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/data/pheader.h>
+extern "C"
+{
+  #include <gifti_io.h>
+}
+
+
+template <typename T> class TimeTexture;
 
 
 namespace aims
@@ -60,8 +67,29 @@ namespace aims
     virtual std::string extension() const;
 
     bool read();
+    static std::string niftiRefFromAimsString( const std::string & space );
 
   private:
+    template <int D, typename T>
+    friend class GiftiMeshFormat;
+    template <typename T>
+    friend class GiftiTextureFormat;
+
+    gifti_image* giftiImageBase();
+    void giftiAddExternalTextures( gifti_image *gim, int & hdrtexda,
+                                   carto::Object da_info );
+    void giftiAddLabelTable( gifti_image *gim );
+    static carto::Object giftiFindHdrDA( int & nda, carto::Object dainfo,
+                                         const std::string & intent );
+    static void giftiCopyMetaToGii( carto::Object dainf, giiDataArray *da );
+    static void giftiSetTransformations( carto::Object cs, giiDataArray *da );
+    template <typename T>
+    void giftiAddTexture( gifti_image* gim, const std::vector<T> & tex );
+    template <typename T>
+    void giftiAddTexture( gifti_image* gim, const TimeTexture<T> & texture );
+    template <typename T>
+    void giftiAddTextureObject( gifti_image* gim, carto::Object texture );
+
     std::string _name;
   };
 

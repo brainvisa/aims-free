@@ -101,13 +101,60 @@ namespace aims
   }
 
   template<typename T>
-  bool GiftiTextureFormat<T>::write( const std::string & /*filename*/,
-                                     const TimeTexture<T> & /*vol*/,
+  bool GiftiTextureFormat<T>::write( const std::string & filename,
+                                     const TimeTexture<T> & thing,
                                      bool )
   {
     try
       {
-        return false;
+        // std::cout << "GiftiTextureFormat<T>::write\n";
+        const PythonHeader & thdr = thing.header();
+        GiftiHeader hdr( filename );
+        hdr.copy( thdr );
+        gifti_image *gim = hdr.giftiImageBase();
+        std::string fname = hdr.name();
+
+        int hdrtexda = 0;
+        carto::Object da_info;
+        try
+        {
+          da_info = thdr.getProperty( "GIFTI_dataarrays_info" );
+        }
+        catch( ... )
+        {
+        }
+
+        hdr.giftiAddTexture( gim, thing );
+        // metadata
+        carto::Object dainf
+          = GiftiHeader::giftiFindHdrDA( hdrtexda, da_info, "" );
+        if( !dainf.isNone() )
+        {
+          ++hdrtexda;
+          GiftiHeader::giftiCopyMetaToGii( dainf, gim->darray[gim->numDA-1] );
+        }
+
+        // add external textures
+        hdr.giftiAddExternalTextures( gim, hdrtexda, da_info );
+
+        // labels table
+        hdr.giftiAddLabelTable( gim );
+
+        // write all
+        gifti_write_image( gim, fname.c_str(), 1 );
+        gifti_free_image( gim );
+        // .minf header
+        if( hdr.hasProperty( "GIFTI_metadata") )
+          hdr.removeProperty( "GIFTI_metadata" );
+        if( hdr.hasProperty( "GIFTI_version" ) )
+          hdr.removeProperty( "GIFTI_version" );
+        if( hdr.hasProperty( "GIFTI_dataarrays_info" ) )
+          hdr.removeProperty( "GIFTI_dataarrays_info" );
+        if( hdr.hasProperty( "file_type" ) )
+          hdr.removeProperty( "file_type" );
+        hdr.writeMinf( fname + ".minf" );
+
+        return true;
       }
     catch( std::exception & e )
       {
