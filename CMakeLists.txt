@@ -115,7 +115,7 @@ add_subdirectory( aimsdata )
 add_subdirectory( aimsalgo )
 if( PYTHONLIBS_FOUND AND NUMPY_FOUND AND SIP_FOUND )
   set( AIMS_RELATIVE_SIP_DIRECTORY
-       "share/sip/${PROJECT_NAME}-${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}" )
+       "share/${PROJECT_NAME}-${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}/sip" )
   add_subdirectory( pyaims )
 else( PYTHONLIBS_FOUND AND NUMPY_FOUND AND SIP_FOUND )
   message( "WARNING: Not building pyaims and pyaimsalgo due to missing dependency:\n  PYTHONLIBS_FOUND=${PYTHONLIBS_FOUND}\n  NUMPY_FOUND=${NUMPY_FOUND}\n  SIP_FOUND=${SIP_FOUND}" )
