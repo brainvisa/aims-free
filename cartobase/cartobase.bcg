@@ -32,7 +32,7 @@ class CartoBaseComponent( GenericMakerComponent ):
       os.environ[ 'SHFJ_SHARED_PATH' ] = os.path.join( self.buildDir(), 'share' )
 
   def _libraries( self ):
-    return [ 'cartobase', 'cartobase_0' ]
+    return [ 'cartobase', 'cartobase_1', 'cartobase_0' ]
 
   def dependencies( self ):
     deps = [ SigCppComponent, 'libxml2' ]

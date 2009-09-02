@@ -89,9 +89,6 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( _TMP_ )
 #define _TMP_ std::map< std::string, std::string >
 INSTANTIATE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
-#define _TMP_ std::map< std::string, Object >
-INSTANTIATE_GENERIC_OBJECT_TYPE( _TMP_ )
-#undef _TMP_
 #define TMP std::map< int, Object >
 INSTANTIATE_GENERIC_OBJECT_TYPE( TMP )
 #undef TMP
