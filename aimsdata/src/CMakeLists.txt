@@ -5,6 +5,7 @@ if( NOT WIN32 )
 endif( NOT WIN32 )
 add_subdirectory(aimsply)
 add_subdirectory(aimsnifti)
+add_subdirectory(aimsfdf)
 
 IF(APPLE)
   add_subdirectory(bundle_aimsecat)
@@ -45,6 +46,9 @@ IF(TIFF_FOUND)
   ENDIF(APPLE)
 ENDIF(TIFF_FOUND)
 
+IF(EXPAT_FOUND)
+  add_subdirectory(aimsgifti)
+ENDIF(EXPAT_FOUND)
 
 
 #------------------------------------------------------------------------------
