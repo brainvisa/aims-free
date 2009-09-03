@@ -1,26 +1,9 @@
-if( soma-infra_FOUND )
+BRAINVISA_GET_FILE_LIST_FROM_PRO( "${CMAKE_CURRENT_SOURCE_DIR}/rfdf.pro"
+                            TARGET _target
+                            SOURCES _sources )
+add_executable( ${_target} ${_sources} )
+target_link_libraries( ${_target} aimsfdf )
+BRAINVISA_INSTALL( TARGETS ${_target}
+              DESTINATION bin
+              COMPONENT ${PROJECT_NAME} )
 
-  SOMA_GET_FILE_LIST_FROM_PRO( rfdf.pro SOURCES _sources )
-  add_executable( AimsRfdf ${_sources} )
-  target_link_libraries( AimsRfdf aimsdata aimsfdf )
-  SOMA_INSTALL( TARGETS AimsRfdf
-                DESTINATION bin
-                COMPONENT aimsdata )
-
-else( soma-infra_FOUND )
-
-  getFromPro(rfdf.pro HEADERS SOURCES)
-  
-  add_executable(AimsRfdf
-  ${SOURCES}
-  )
-  
-  TARGET_LINK_LIBRARIES(AimsRfdf
-  aimsdata
-  aimsfdf
-  )
-  
-  
-  INSTALL_TARGETS(/bin AimsRfdf)
-
-endif( soma-infra_FOUND )

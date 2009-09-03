@@ -1,6 +1,7 @@
-TEMPLATE = lib
-#!include ../../config
 
+#!include ../../config-local
+
+TEMPLATE = lib
 TARGET = cartobase
 
 LIBS += -L../../../lib -lcartobase_1 -lcartobase_0

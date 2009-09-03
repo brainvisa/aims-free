@@ -221,7 +221,18 @@ static bool loadlib( const string & libname, const std::string & ver,
     }
 #endif
 
-  return loadlib2( lname, verbose );
+  if( loadlib2( lname, verbose ) )
+    return true;
+  if( !ver.empty() )
+  {
+    // try to remove tiny version number
+    string::size_type x = lname.rfind( '.' );
+    if( x != string::npos )
+    {
+      lname = lname.substr( 0, x );
+      return loadlib2( lname, verbose );
+    }
+  }
 
 #else	// CARTO_NO_DLOPEN
 

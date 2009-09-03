@@ -5,6 +5,7 @@ if( NOT WIN32 )
 endif( NOT WIN32 )
 add_subdirectory(aimsply)
 add_subdirectory(aimsnifti)
+add_subdirectory(aimsfdf)
 
 IF(APPLE)
   add_subdirectory(bundle_aimsecat)
@@ -45,6 +46,9 @@ IF(TIFF_FOUND)
   ENDIF(APPLE)
 ENDIF(TIFF_FOUND)
 
+IF(EXPAT_FOUND)
+  add_subdirectory(aimsgifti)
+ENDIF(EXPAT_FOUND)
 
 
 #------------------------------------------------------------------------------
@@ -81,8 +85,8 @@ foreach( _command
           AimsGraphConvert
           AimsTex2Graph
           AimsSplitRgb )
-  if( IS_DIRECTORY "${_command}" )
-    file( GLOB _pro "${_command}/*.pro" )
+  if( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
+    file( GLOB _pro "${CMAKE_CURRENT_SOURCE_DIR}/${_command}/*.pro" )
     BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"
                                 TARGET _target
                                 SOURCES _proSources )
@@ -95,5 +99,5 @@ foreach( _command
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin
                   COMPONENT ${PROJECT_NAME} )
-  endif( IS_DIRECTORY "${_command}" )
+  endif( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
 endforeach( _command )

@@ -65,7 +65,7 @@ void AimsClear()
 void AimsPrintVersion(void)
 {
   cout << "A.I.M.S. Library " << aims::aimsVersion() 
-       << " - (c)1995-2005, CEA/SHFJ (France) and POUPON Cyril & Fabrice - " 
+       << " - (c)1995-2009, CEA/SHFJ (France) and POUPON Cyril & Fabrice - "
        << "http://www.brainvisa.info" << std::endl;
 }
 
@@ -142,11 +142,11 @@ namespace
     plugins.push_back( PluginLoader::PluginFile
                        ( Path::singleton().home() + s + ".aims" 
                          + s + "plugins" + s + "aimsdata.plugins", 
-                         carto::cartobaseShortVersion() ) );
+                         carto::cartobaseVersionString() ) );
     plugins.push_back( PluginLoader::PluginFile
                        ( Path::singleton().dependencies() 
                          + s + "plugins" + s + "aimsdata.plugins", 
-                         carto::cartobaseShortVersion() ) );
+                         carto::cartobaseVersionString() ) );
     return true;
   }
 
