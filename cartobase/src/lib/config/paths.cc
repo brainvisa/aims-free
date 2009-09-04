@@ -147,29 +147,71 @@ const string & Paths::globalShared()
 
   if( _shared.empty() )
     {
-      const char* shfj_path = getenv( "SHFJ_SHARED_PATH" );
+      const char* shfj_path = getenv( "BRAINVISA_SHARE" );
       Directory	d( "/" );
 
+      if( !shfj_path )
+        shfj_path = getenv( "SHFJ_SHARED_PATH" );
       if( shfj_path )
         _shared = shfj_path;
       else
         {
-          cerr << "no SHFJ_SHARED_PATH env variable!\n";
-#ifdef _WIN32
-          _shared = "C:\\appli\\shared-main";
-#else
-          _shared = "/home/appli/shared-main";
-          d.chdir( _shared );
-          if( !d.isValid() )
+          // look in PATH
+          const char *path = getenv( "PATH" );
+          if( path )
+          {
+            list<string> plist = FileUtil::filenamesSplit( path,
+                string( "" ) + FileUtil::pathSeparator() );
+            list<string>::const_iterator ip, ep = plist.end();
+            for( ip=plist.begin(); ip!=ep; ++ip )
             {
-              _shared = "/usr/local/share/cartograph";
-              d.chdir( _shared );
-              if( !d.isValid() )
-                _shared = "/usr/share/cartograph";
-            }
+              string p;
+              if( ip->length() >= 4
+                  && ( ip->substr( ip->length()-4, 4 ) == "/bin"
+#ifdef _WIN32
+                  || ip->substr( ip->length()-4, 4 ) == "\\bin"
 #endif
+                     ) )
+                p = ip->substr( 0, ip->length() - 4 );
+              else if( ip->length() >= 19
+                       && ( ip->substr( ip->length()-19, 19 )
+                       == "/bin/commands_links"
+#ifdef _WIN32
+                       || ip->substr( ip->length()-19, 19 )
+                       == "\\bin\\commands_links"
+#endif
+                          ) )
+                p = ip->substr( 0, ip->length() - 19 );
+              if( p.empty() )
+                p = "/";
+              p += string( "" ) + FileUtil::separator() + "share";
+              d.chdir( p );
+              if( d.isValid() )
+              {
+                _shared = p;
+                break;
+              }
+            }
+          }
         }
-    }
+      if( _shared.empty() )
+      {
+        cerr << "no BRAINVISA_SHARE env variable!\n";
+#ifdef _WIN32
+        _shared = "C:\\appli\\shared-main";
+#else
+        _shared = "/home/appli/shared-main";
+        d.chdir( _shared );
+        if( !d.isValid() )
+          {
+            _shared = "/usr/local/share";
+            d.chdir( _shared );
+            if( !d.isValid() )
+              _shared = "/usr/share";
+          }
+#endif
+      }
+  }
 
   return _shared;
 }
