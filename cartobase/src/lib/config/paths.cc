@@ -175,10 +175,10 @@ const string & Paths::globalShared()
                 p = ip->substr( 0, ip->length() - 4 );
               else if( ip->length() >= 19
                        && ( ip->substr( ip->length()-19, 19 )
-                       == "/bin/commands_links"
+                       == "/bin/commands-links"
 #ifdef _WIN32
                        || ip->substr( ip->length()-19, 19 )
-                       == "\\bin\\commands_links"
+                       == "\\bin\\commands-links"
 #endif
                           ) )
                 p = ip->substr( 0, ip->length() - 19 );

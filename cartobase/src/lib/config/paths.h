@@ -45,7 +45,7 @@ namespace carto
 
   The functions in Paths provide a portable access to the paths of 
   useful directories that may depend on the site or user configuration, or on 
-  environment variables (such as \c SHFJ_SHARED_PATH or \c HOME ).
+  environment variables (such as \c BRAINVISA_SHARE or \c HOME ).
 
   Path is implemented as a namespace rather than a class with static methods 
   so that it can easily be extended in upper-level libraries.
