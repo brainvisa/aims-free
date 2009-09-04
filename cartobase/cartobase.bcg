@@ -29,7 +29,8 @@ class CartoBaseComponent( GenericMakerComponent ):
         self._data[ 'boost' ] = 'CARTO_NO_BOOST'
         defines.append( 'CARTO_NO_BOOST' )
       self._data[ 'defines' ] = defines
-      os.environ[ 'SHFJ_SHARED_PATH' ] = os.path.join( self.buildDir(), 'share' )
+      os.environ[ 'BRAINVISA_SHARE' ] = os.path.join( self.buildDir(),
+        'share' )
 
   def _libraries( self ):
     return [ 'cartobase', 'cartobase_1', 'cartobase_0' ]

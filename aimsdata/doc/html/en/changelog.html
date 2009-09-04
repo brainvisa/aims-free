@@ -37,7 +37,7 @@
 
  <!-- -->
 
-<h4> <a name="version-3.2"></a>September 2, 2009, Version 3.2</h4>
+<h4> <a name="version-3.2"></a>September 4, 2009, Version 3.2</h4>
 
 <li>Re-organization of sources of aims: aims now regroups aimsdata, aimsalgo, graph, cartobase, cartodata, IO libs (ecat, ecat+, vidaIO), and aims-gpl which is the gui part.
 </li>
@@ -46,6 +46,10 @@
 <li>the default output volumes format when no extension is specified is now NIFTI1.
 </li>
 <li>GIFTI IO support for meshes and textures</li>
+<li>The <tt>$SHFJ_SHARED_PATH</tt> environment variable is deprecated. It is replaced with the <tt>$BRAINVISA_SHARE</tt> variable. For now it contains a single directory, but will evolve in a PATH-like behaviour in future versions. <tt>$SHFJ_SHARED_PATH</tt> still exists as a fallback for backwards compatibility.
+</li>
+<li>If no environment variable is set at all, the share directory is guessed from the <tt>$PATH</tt> variable.
+</li>
 
 
 <!-- -->

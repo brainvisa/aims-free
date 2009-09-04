@@ -84,12 +84,17 @@
   \c shared project).
 
   To run correctly, at least one environment variables has to be set:
-  - \c SHFJ_SHARED_PATH has to point to the global share directory
+  - \c BRAINVISA_SHARE has to point to the global share directory
+  - for backwards compatibility, if \c $BRAINVISA_SHARE is not set, then
+    \c $SHFJ_SHARED_PATH is used instead. But it is deprecated, please do not
+    use it any longer
   - normally \c SHFH_SHARED_PATH is enough. But if AIMS-specific shared
     data are not located in the standard
-    \c $SHFJ_SHARED_PATH/aims-\<aims_version\>
-    or \c $SHFJ_SHARED_PATH/aims directory, then an additional \c AIMS_PATH
+    \c $BRAINVISA_SHARE/aims-\<aims_version\>
+    or \c $BRAINVISA_SHARE/aims directory, then an additional \c AIMS_PATH
     variable may to point to AIMS shared directory.
+  - In aims 3.2, if no variable is set, the share directory is searched from
+    the \c $PATH environment variable.
 
 
   \section aimsdata_building Building:
