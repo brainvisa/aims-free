@@ -1185,16 +1185,16 @@ static int ply_type_check(void) {
     assert(sizeof(unsigned char) == 1);
     assert(sizeof(short) == 2);
     assert(sizeof(unsigned short) == 2);
-    assert(sizeof(long) == 4);
-    assert(sizeof(unsigned long) == 4);
+/*    assert(sizeof(long) == 4);
+    assert(sizeof(unsigned long) == 4);*/
     assert(sizeof(float) == 4);
     assert(sizeof(double) == 8);
     if (sizeof(char) != 1) return 0;
     if (sizeof(unsigned char) != 1) return 0;
     if (sizeof(short) != 2) return 0;
     if (sizeof(unsigned short) != 2) return 0;
-    if (sizeof(long) != 4) return 0;
-    if (sizeof(unsigned long) != 4) return 0;
+/*    if (sizeof(long) != 4) return 0;
+    if (sizeof(unsigned long) != 4) return 0;*/
     if (sizeof(float) != 4) return 0;
     if (sizeof(double) != 8) return 0;
     return 1;
