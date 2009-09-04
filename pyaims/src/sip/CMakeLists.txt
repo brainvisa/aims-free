@@ -7,12 +7,13 @@ else( AIMS_PARTIAL_AIMSSIP )
 endif( AIMS_PARTIAL_AIMSSIP )
 
 BRAINVISA_GET_FILE_LIST_FROM_PRO( "${CMAKE_CURRENT_SOURCE_DIR}/sip.pro" "HEADERS" _headers "SOURCES" _sources )
-BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers pyaims )
+BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers pyaims headersTarget )
 
 file( GLOB _sipTemplates RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*.tpl" )
 BRAINVISA_COPY_FILES( ${PROJECT_NAME}-devel maketemplates.py maketemplate.py typessub.py ${_sipTemplates}
-                 SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-                 DESTINATION "${AIMS_RELATIVE_SIP_DIRECTORY}" )
+                      SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                      DESTINATION "${AIMS_RELATIVE_SIP_DIRECTORY}" 
+                      IMMEDIATE )
 
 file( GLOB _sipSources "${CMAKE_CURRENT_SOURCE_DIR}/*.sip" )
 
@@ -28,7 +29,7 @@ exec_program( ${PYTHON_EXECUTABLE}
   RETURN_VALUE _returnValue )
 
 if( NOT _returnValue EQUAL 0 )
-  message( FATAL_ERROR "The sip generation from pyaims templates returned an error:\n  ${_generatedSipFileList}\n========================")
+  message( SEND_ERROR "The sip generation from pyaims templates returned an error:\n  ${_generatedSipFileList}\n========================")
 endif( NOT _returnValue EQUAL 0 )
 
 BRAINVISA_ADD_SIP_PYTHON_MODULE( aimssip 
@@ -37,6 +38,7 @@ BRAINVISA_ADD_SIP_PYTHON_MODULE( aimssip
   SIP_SOURCES ${_generatedSipFileList} ${_sipSources}
   SIP_INCLUDE  "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}" )
 target_link_libraries( aimssip ${PYTHON_LIBRARY} cartobase cartodata graph aimsdata pyaims )
+add_dependencies( aimssip ${headersTarget} )
 
 BRAINVISA_INSTALL( TARGETS aimssip 
               DESTINATION python/soma/aims
