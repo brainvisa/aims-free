@@ -1,6 +1,7 @@
 BRAINVISA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/lib.pro "HEADERS" _headers "SOURCES" _sources )
-BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers cartobase )
+BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers cartobase headersTarget )
 add_library( cartobase_0 SHARED ${_sources} )
+add_dependencies( cartobase_0 ${headersTarget} )
 set_property( TARGET cartobase_0 PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 target_link_libraries( cartobase_0 ${LIBXML2_LIBRARIES} ${Sigc++2_LIBRARIES}  )
 if( WIN32 AND CMAKE_CROSSCOMPILING )
