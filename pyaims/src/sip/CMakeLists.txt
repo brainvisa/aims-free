@@ -16,6 +16,10 @@ BRAINVISA_COPY_FILES( ${PROJECT_NAME}-devel maketemplates.py maketemplate.py typ
                       IMMEDIATE )
 
 file( GLOB _sipSources "${CMAKE_CURRENT_SOURCE_DIR}/*.sip" )
+BRAINVISA_COPY_FILES( ${PROJECT_NAME}-devel ${_sipSources}
+                      SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                      DESTINATION "${AIMS_RELATIVE_SIP_DIRECTORY}" 
+                      IMMEDIATE )
 
 file( MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}" )
 exec_program( ${PYTHON_EXECUTABLE}
