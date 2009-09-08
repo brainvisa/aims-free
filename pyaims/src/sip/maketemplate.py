@@ -15,7 +15,7 @@ def convert_string_to_int( s ):
       break
   return int( s )
 
-def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C',
+def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C', moc=None,
   quiet=0 ):
   #print 'input :', infile
   #print 'output:', outfile
@@ -25,23 +25,24 @@ def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C',
   fo = open( outfile, 'w' )
   if cpp:
     c = sipconfig.Configuration()
-    cppcmd = [ cpp, '-DSIP_VERSION=' + '0x%06x' % c.sip_version ]
+    cppcmd = cpp.split() + [ '-DSIP_VERSION=' + '0x%06x' % c.sip_version ]
     # determine Qt version
     try:
       qtdir = os.getenv( 'QTDIR' )
-      if qtdir:
-        moc = os.path.join( qtdir, 'bin', 'moc' )
-        if not os.path.exists( moc ):
+      if not moc:
+        if qtdir:
+          moc = os.path.join( qtdir, 'bin', 'moc' )
+          if not os.path.exists( moc ):
+            moc = 'moc'
+        else:
           moc = 'moc'
-      else:
-        moc = 'moc'
       l = subprocess.Popen( [ moc, '-v' ], stdout=subprocess.PIPE,
         stderr=subprocess.PIPE ).communicate()[1]
       x = re.search( '^.*\(Qt ([^\)]*)\).*$', l ).group(1)
       qv = [ convert_string_to_int(k) for k in x.split( '.' ) ]
       qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
       cppcmd.append( '-DQT_VERSION=' + hex( qver ) )
-      #print 'Qt version:', hex( qver )
+      #print >> sys.stderr, 'Qt version:', hex( qver )
     except Exception, e:
       print e
       #pass # Qt not available ?
@@ -49,11 +50,11 @@ def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C',
         print ' '.join( cppcmd )
     #fo2, cppout = os.popen2( cppcmd )
     if platform.system() == 'Windows':
-      p = subprocess.Popen( cppcmd, shell=True, bufsize=0,
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE )
+      p = subprocess.Popen( cppcmd,
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE )
     else:
-      p = subprocess.Popen( cppcmd, shell=True, bufsize=0,
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True )
+      p = subprocess.Popen( cppcmd,
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True )
     fo2, cppout = ( p.stdin, p.stdout )
 
   templatere = re.compile( '(%(Template[0-9]+)([^%]*)%)' )
@@ -125,6 +126,9 @@ if __name__ == '__main__':
                      action='append', help="templates list" )
   parser.add_option( "-s", "--subs", dest='subs', 
                      help="substitutions file (python file)" )
+  parser.add_option( '-m', '--moc', dest='moc', 
+                    help='Path to the moc executable.',
+                    default=None )
 
   (options, args) = parser.parse_args()
   if not options.infile or not options.outfile or len( args ) % 2 != 0:
@@ -158,4 +162,4 @@ if __name__ == '__main__':
   for i in xrange( len( args ) / 2 ):
     types[ args[ i*2 ] ] = args[i*2+1]
 
-  makeTemplate( infile, outfile, types, templates, cppc )
+  makeTemplate( infile, outfile, types, templates, cppc, moc=options.moc )
