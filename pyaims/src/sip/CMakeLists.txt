@@ -25,6 +25,7 @@ exec_program( ${PYTHON_EXECUTABLE}
         -o "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}"
         -t "${CMAKE_CURRENT_SOURCE_DIR}/typessub.py"
         -l
+        -m "${QT_MOC_EXECUTABLE}"
   OUTPUT_VARIABLE _generatedSipFileList 
   RETURN_VALUE _returnValue )
 
@@ -36,11 +37,12 @@ BRAINVISA_ADD_SIP_PYTHON_MODULE( aimssip
   soma/aims
   "${_mainSipFile}" 
   SIP_SOURCES ${_generatedSipFileList} ${_sipSources}
-  SIP_INCLUDE  "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}" )
+  SIP_INCLUDE  "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}"
+  SIP_INSTALL "${AIMS_RELATIVE_SIP_DIRECTORY}" )
 target_link_libraries( aimssip ${PYTHON_LIBRARY} cartobase cartodata graph aimsdata pyaims )
 add_dependencies( aimssip ${headersTarget} )
 
 BRAINVISA_INSTALL( TARGETS aimssip 
-              DESTINATION python/soma/aims
-              COMPONENT ${PROJECT_NAME} )
+                   DESTINATION python/soma/aims
+                   COMPONENT ${PROJECT_NAME} )
 

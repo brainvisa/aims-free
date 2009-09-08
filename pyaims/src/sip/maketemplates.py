@@ -44,6 +44,9 @@ parser.add_option( '-l', '--listing', dest='listFilesOnly',
                    action='store_true',
                    help='change the display : show the generated file list'
                    '[default:false]', default=False )
+parser.add_option( '-m', '--moc', dest='moc', 
+                   help='Path to the moc executable.',
+                   default=None )
 
 (options, args) = parser.parse_args()
 if args:
@@ -73,12 +76,15 @@ def convert_string_to_int( s ):
 # determine Qt version
 try:
   qtdir = os.getenv( 'QTDIR' )
-  if qtdir:
-    moc = os.path.join( qtdir, 'bin', 'moc' )
-    if not os.path.exists( moc ):
-      moc = 'moc'
+  if options.moc:
+    moc = options.moc
   else:
-    moc = 'moc'
+    if qtdir:
+      moc = os.path.join( qtdir, 'bin', 'moc' )
+      if not os.path.exists( moc ):
+        moc = 'moc'
+    else:
+      moc = 'moc'
   l = subprocess.Popen( [ moc, '-v' ], stdout=subprocess.PIPE,
     stderr=subprocess.PIPE ).communicate()[1]
   x = re.search( '^.*\(Qt ([^\)]*)\).*$', l ).group(1)
@@ -156,7 +162,7 @@ for file, tps in todo.items():
       if not done:
         if not options.listFilesOnly:
             sys.stdout.write( 'generating ' + ofile )
-        makeTemplate( infile, otmpfile, typessub, templates,
+        makeTemplate( infile, otmpfile, typessub, templates, moc=options.moc,
           quiet = options.listFilesOnly )
         if ofile != otmpfile:
           if not filecmp.cmp( ofile, otmpfile ):
