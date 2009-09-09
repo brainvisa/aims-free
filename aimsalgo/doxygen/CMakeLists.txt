@@ -1,5 +1,5 @@
 IF ( DOXYGEN_FOUND )
-  SET( DOXYFILE_HTML_HEADER "\"head_aimsalgo.html\"" )
+  SET( DOXYFILE_HTML_HEADER "\"${CMAKE_CURRENT_SOURCE_DIR}/head_aimsalgo.html\"" )
   set( _doxygenInput "${CMAKE_BINARY_DIR}/include/aims" )
   BRAINVISA_GENERATE_DOXYGEN_DOC( _doxygenInput head_aimsalgo.html aims.gif )
 ENDIF ( DOXYGEN_FOUND )
