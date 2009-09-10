@@ -51,7 +51,8 @@ namespace aims
   template<typename T>
   bool GiftiTextureFormat<T>::read( const std::string & filename,
                                     TimeTexture<T> & vol,
-                                    const carto::AllocatorContext & /*context*/,
+                                    const carto::AllocatorContext
+                                        & /*context*/,
                                     carto::Object /*options*/ )
   {
     GiftiHeader hdr( filename );

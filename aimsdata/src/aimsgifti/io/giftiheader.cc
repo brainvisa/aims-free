@@ -175,7 +175,7 @@ bool GiftiHeader::read()
   // read arrays information
   int nda = gim->numDA, j;
   int nmesh = 0, nnorm = 0, npoly = 0, ntex = 0, polydim = 0, vnum = 0,
-    texlen = 0, texdim = 0, polynum = 0;
+    texlen = 0, texdim = 0, polynum = 0, nttex = 0;
   string dtype, otype;
   Object daattr = Object::value( IntDictionary() );
   bool mesh, tex;
@@ -185,6 +185,7 @@ bool GiftiHeader::read()
   {
     mesh = false;
     tex = false;
+    int nt = 1;
     giiDataArray *da = gim->darray[i];
     switch( da->intent )
     {
@@ -207,7 +208,10 @@ bool GiftiHeader::read()
       dtype = niftiDataType( da->datatype );
       texlen = da->dims[0];
       texdim = da->num_dim;
-      dtype = giftiTextureDataType( da->datatype, texdim, da->dims );
+      dtype = giftiTextureDataType( da->datatype, texdim, da->dims, da->intent,
+                                    nt );
+      if( nt > nttex )
+        nttex = nt;
     }
 
     // read meta-data
@@ -326,7 +330,7 @@ bool GiftiHeader::read()
   if( nmesh > 0 )
   {
     setProperty( "vertex_number", vnum );
-    setProperty( "nb_t_pos", std::max(nmesh, ntex) );
+    setProperty( "nb_t_pos", std::max(nmesh, nttex) );
     setProperty( "polygon_dimension", polydim );
     if( polydim == 2 )
       setProperty( "object_type", "Segments" );
@@ -359,6 +363,8 @@ bool GiftiHeader::read()
   }
   else
     setProperty( "data_type", "VOID" );
+
+  readMinf( fname + ".minf" );
 
   gifti_free_image( gim );
 
@@ -402,13 +408,146 @@ gifti_image* GiftiHeader::giftiImageBase()
 }
 
 
+// ---
+
+namespace
+{
+
+  template <typename T>
+  class giftiAllocDAData // make it a functor to allow partial specialization
+  {
+  public:
+    void operator() ( gifti_image *gim, giiDataArray * da,
+                      size_t npadding, size_t nt )
+    {
+      da->dims[1] = 1;
+      da->nbyper = sizeof( T );
+      da->datatype = niftiIntDataType( carto::DataTypeCode<T>::name() );
+      da->nvals = npadding * nt;
+      int nda = gim->numDA - 1;
+      gifti_alloc_DA_data( gim, &nda, 1 );
+    }
+  };
+
+
+  template <typename T, int D>
+  class giftiAllocDAData<AimsVector<T,D> >
+  {
+  public:
+    void operator() ( gifti_image *gim, giiDataArray * da,
+                      size_t npadding, size_t nt )
+    {
+      da->dims[1] = D;
+      da->nbyper = sizeof( T );
+      da->datatype = niftiIntDataType( carto::DataTypeCode<T>::name() );
+      da->nvals = npadding * D * nt;
+      int nda = gim->numDA - 1;
+      gifti_alloc_DA_data( gim, &nda, 1 );
+    }
+  };
+
+
+  template <typename T>
+  class giftiFillTextureBuffer
+  {
+    public:
+      void operator () ( giiDataArray * da, const std::vector<T> & tex,
+                         size_t npadding, int t )
+    {
+      unsigned i, n = tex.size();
+      T* buf = reinterpret_cast<T *>( da->data );
+      buf += t * npadding;
+      for( i=0; i<n; ++i )
+        *buf++ = tex[i];
+      T null(0);
+      for( ; i<npadding; ++i )
+        *buf++ = null;
+    }
+  };
+
+
+  template <typename T, int D>
+  class giftiFillTextureBuffer<AimsVector<T,D> >
+  {
+  public:
+    void operator() ( giiDataArray * da,
+                      const std::vector<AimsVector<T, D> > & tex,
+                      size_t npadding, int t )
+    {
+      unsigned i, n = tex.size();
+      int j;
+      T* buf = reinterpret_cast<T *>( da->data );
+      buf += t * npadding * D;
+      for( i=0; i<n; ++i, ++buf )
+        for( j=0; j<D; ++j )
+          *(buf+j*npadding) = tex[i][j];
+      T null(0);
+      for( ; i<npadding; ++i, ++buf )
+        for( j=0; j<D; ++j )
+          *(buf+j*npadding) = null;
+    }
+  };
+
+}
+
+
 template <typename T>
 void GiftiHeader::giftiAddTexture( gifti_image* gim,
                                    const TimeTexture<T> & tex )
 {
   typename TimeTexture<T>::const_iterator it, et = tex.end();
+  bool first = true;
+  size_t nmax = 0;
+  int t = 0;
+
   for( it=tex.begin(); it!=et; ++it )
-    giftiAddTexture( gim, it->second.data() );
+    if( it->second.nItem() > nmax )
+      nmax = it->second.nItem();
+
+  for( it=tex.begin(); it!=et; ++it, ++t )
+  {
+    const vector<T> & tx = it->second.data();
+    if( !tx.empty() )
+    {
+      int nda = gim->numDA-1;
+      giiDataArray * da = 0;
+      if( first )
+      {
+        gifti_add_empty_darray( gim, 1 );
+        ++nda;
+        da = gim->darray[nda];
+        gifti_set_DA_defaults( da );
+        if( tex.size() == 1 )
+        {
+          da->intent = NIFTI_INTENT_SHAPE;
+          da->dims[2] = 0;
+          da->num_dim = 2;
+        }
+        else
+        {
+          da->intent = NIFTI_INTENT_TIME_SERIES;
+          da->dims[2] = tex.size();
+          da->num_dim = 3;
+        }
+        da->dims[0] = nmax;
+        da->dims[3] = 0;
+        da->dims[4] = 0;
+        da->dims[5] = 0;
+        giftiAllocDAData<T>()( gim, da, nmax, tex.size() );
+        if( da->intent == NIFTI_INTENT_TIME_SERIES && da->dims[1] == 1 )
+        {
+          // shift dimensions
+          da->dims[1] = da->dims[2];
+          da->dims[2] = 0;
+          --da->num_dim;
+        }
+        first = false;
+      }
+      else
+        da = gim->darray[nda];
+      giftiFillTextureBuffer<T>()( da, tx, nmax, t );
+    }
+  }
 }
 
 
@@ -651,47 +790,6 @@ void GiftiHeader::giftiCopyMetaToGii( carto::Object dainf, giiDataArray *da )
 }
 
 
-namespace
-{
-
-  template <typename T>
-  void giftiFillTextureBuffer( gifti_image *gim, giiDataArray * da,
-                                const std::vector<T> & tex )
-  {
-    unsigned i, n = tex.size();
-    da->dims[1] = 1;
-    da->nbyper = sizeof( T );
-    da->datatype = niftiIntDataType( carto::DataTypeCode<T>::name() );
-    da->nvals = n;
-    int nda = gim->numDA - 1;
-    gifti_alloc_DA_data( gim, &nda, 1 );
-    T* buf = reinterpret_cast<T *>( da->data );
-    for( i=0; i<n; ++i )
-      *buf++ = tex[i];
-  }
-
-
-  template <typename T, int D>
-  void giftiFillTextureBuffer( gifti_image *gim, giiDataArray * da,
-                                const std::vector<AimsVector<T, D> > & tex )
-  {
-    unsigned i, n = tex.size();
-    int j;
-    da->dims[1] = D;
-    da->nbyper = sizeof( T );
-    da->datatype = niftiIntDataType( carto::DataTypeCode<T>::name() );
-    da->nvals = n * D;
-    int nda = gim->numDA - 1;
-    gifti_alloc_DA_data( gim, &nda, 1 );
-    T* buf = reinterpret_cast<T *>( da->data );
-    for( i=0; i<n; ++i )
-      for( j=0; j<D; ++j )
-        *buf++ = tex[i][j];
-  }
-
-}
-
-
 template <typename T>
 void GiftiHeader::giftiAddTexture( gifti_image* gim, const vector<T> & tex )
 {
@@ -708,7 +806,8 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim, const vector<T> & tex )
     da->dims[3] = 0;
     da->dims[4] = 0;
     da->dims[5] = 0;
-    giftiFillTextureBuffer( gim, da, tex );
+    gifti_alloc_DA_data( gim, &nda, 1 );
+    giftiFillTextureBuffer<T>()( da, tex, da->dims[0], 0 );
   }
 }
 
