@@ -123,25 +123,41 @@ namespace aims
   }
 
 
-  string giftiTextureDataType( int dtype, int & ndim, int* dims )
+  string giftiTextureDataType( int dtype, int & ndim, int* dims, int intent,
+                               int & nt )
   {
     string elemtype = niftiDataType( dtype );
     string gdtype = elemtype;
+    nt = 1;
 
     if( ndim < 2 )
       ndim = 1;
-    else if( ndim == 2 )
-      ndim = dims[1];
-    else if( ndim >= 3 )
+    else
     {
-      gdtype = "volume of " + elemtype;
-      ndim = 1;
+      if( intent == NIFTI_INTENT_TIME_SERIES )
+      {
+        nt = dims[ ndim-1 ];
+        --ndim;
+        if( ndim == 2 )
+        {
+          nt = dims[1];
+          ndim = 1;
+        }
+      }
+      if( ndim == 2 )
+        ndim = dims[1];
+      else if( ndim >= 3 )
+      {
+        gdtype = "volume of " + elemtype;
+        ndim = 1;
+      }
     }
     switch( ndim )
     {
       case 1:
         break;
       case 2:
+        if( intent != NIFTI_INTENT_TIME_SERIES )
         if( elemtype == "FLOAT" )
           gdtype = "POINT2DF";
         else

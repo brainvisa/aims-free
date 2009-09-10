@@ -72,12 +72,14 @@ namespace aims
     class GiftiReadExternalTexture : public Process
     {
     public:
-      GiftiReadExternalTexture( carto::Object textures, giiDataArray* da )
-      : Process(), textures( textures ), da( da )
+      GiftiReadExternalTexture( carto::Object textures, giiDataArray* da,
+                                int nt )
+      : Process(), textures( textures ), da( da ), nt( nt )
       {}
 
       carto::Object textures;
       giiDataArray *da;
+      int nt;
     };
 
 
@@ -87,15 +89,18 @@ namespace aims
       GiftiReadExternalTexture & gp
         = static_cast<GiftiReadExternalTexture &>( p );
       giiDataArray *da = gp.da;
-      int j, vnum = da->dims[0];
+      int j, vnum = da->dims[0], t, nt = gp.nt;
       carto::Object o = carto::Object::value( TimeTexture<T>() );
       TimeTexture<T> & ttex
         = o->carto::GenericObject::value< TimeTexture<T> >();
-      std::vector<T> & tex = ttex[0].data();
-      tex.reserve( vnum );
-      for( j=0; j<vnum; ++j )
+      for( t=0; t<nt; ++t )
       {
-        tex.push_back( convertedNiftiValue<T>( da->data, j, da->datatype ) );
+        std::vector<T> & tex = ttex[t].data();
+        tex.reserve( vnum );
+        for( j=0; j<vnum; ++j )
+        {
+          tex.push_back( convertedNiftiValue<T>( da->data, j, da->datatype ) );
+        }
       }
       carto::Object textures = gp.textures;
       textures->insertArrayItem( -1, o );
@@ -119,10 +124,12 @@ namespace aims
       }
       // get data type
       int ndim = da->num_dim;
-      std::string dtype = giftiTextureDataType( da->datatype, ndim, da->dims );
+      int nt = 1;
+      std::string dtype = giftiTextureDataType( da->datatype, ndim, da->dims,
+                                                da->intent, nt );
       // std::cout << "reading texture of: " << dtype << std::endl;
 
-      GiftiReadExternalTexture p( textures, da );
+      GiftiReadExternalTexture p( textures, da, nt );
       p.registerProcessType( "Texture", "FLOAT",
                              &giftiReadExternalTexture<float> );
       p.registerProcessType( "Texture", "POINT2DF",

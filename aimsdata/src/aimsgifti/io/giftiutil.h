@@ -46,49 +46,67 @@ extern "C"
 namespace aims
 {
 
+  template <typename U>
+  class _convertedNiftiValue // functor to allow partial specialization
+  {
+  public:
+    inline U operator () ( void* data, int index, int dtype )
+    {
+      switch( dtype )
+      {
+        case NIFTI_TYPE_UINT8:
+          return (U) reinterpret_cast<uint8_t *>(data)[index];
+        case NIFTI_TYPE_INT16:
+          return (U) reinterpret_cast<int16_t *>(data)[index];
+        case NIFTI_TYPE_INT32:
+          return (U) reinterpret_cast<int32_t *>(data)[index];
+        case NIFTI_TYPE_FLOAT32:
+          return (U) reinterpret_cast<float *>(data)[index];
+        case NIFTI_TYPE_FLOAT64:
+          return (U) reinterpret_cast<double *>(data)[index];
+        case NIFTI_TYPE_INT8:
+          return (U) reinterpret_cast<int8_t *>(data)[index];
+        case NIFTI_TYPE_UINT16:
+          return (U) reinterpret_cast<uint16_t *>(data)[index];
+        case NIFTI_TYPE_UINT32:
+          return (U) reinterpret_cast<uint32_t *>(data)[index];
+        case NIFTI_TYPE_INT64:
+          return (U) reinterpret_cast<int64_t *>(data)[index];
+        case NIFTI_TYPE_UINT64:
+          return (U) reinterpret_cast<uint64_t *>(data)[index];
+        default:
+          return U();
+      }
+    }
+  };
+
+
+  template <typename U, int D>
+  class _convertedNiftiValue<AimsVector<U,D> >
+  {
+  public:
+    inline AimsVector<U,D> operator () ( void* data, int index, int dtype )
+    {
+      AimsVector<U,D> v;
+      int i;
+      for( i=0; i<D; ++i )
+        v[i] = _convertedNiftiValue<U>()( data, index * D + i, dtype );
+      return v;
+    }
+  };
+
+
   template <typename U> inline
   U convertedNiftiValue( void* data, int index, int dtype )
   {
-    switch( dtype )
-    {
-      case NIFTI_TYPE_UINT8:
-        return (U) reinterpret_cast<uint8_t *>(data)[index];
-      case NIFTI_TYPE_INT16:
-        return (U) reinterpret_cast<int16_t *>(data)[index];
-      case NIFTI_TYPE_INT32:
-        return (U) reinterpret_cast<int32_t *>(data)[index];
-      case NIFTI_TYPE_FLOAT32:
-        return (U) reinterpret_cast<float *>(data)[index];
-      case NIFTI_TYPE_FLOAT64:
-        return (U) reinterpret_cast<double *>(data)[index];
-      case NIFTI_TYPE_INT8:
-        return (U) reinterpret_cast<int8_t *>(data)[index];
-      case NIFTI_TYPE_UINT16:
-        return (U) reinterpret_cast<uint16_t *>(data)[index];
-      case NIFTI_TYPE_UINT32:
-        return (U) reinterpret_cast<uint32_t *>(data)[index];
-      case NIFTI_TYPE_INT64:
-        return (U) reinterpret_cast<int64_t *>(data)[index];
-      case NIFTI_TYPE_UINT64:
-        return (U) reinterpret_cast<uint64_t *>(data)[index];
-      default:
-        return U();
-    }
-  }
-
-  template <typename U, int D> inline
-  AimsVector<U,D> convertedNiftiValue( void* data, int index, int dtype )
-  {
-    AimsVector<U,D> v;
-    int i;
-    for( i=0; i<D; ++i )
-      v[i] = convertedNiftiValue<U>( data, index * D + i, dtype );
+    return _convertedNiftiValue<U>()( data, index, dtype );
   }
 
 
   std::string niftiDataType( int dt );
   int niftiIntDataType( const std::string & typecode );
-  std::string giftiTextureDataType( int dtype, int & ndim, int* dims );
+  std::string giftiTextureDataType( int dtype, int & ndim, int* dims,
+                                    int intent, int & ntime );
 
 }
 
