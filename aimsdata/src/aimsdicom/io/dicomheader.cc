@@ -444,6 +444,7 @@ int DicomHeader::readFirst()
   // open file
 #ifdef UID_RawDataStorage // #if (OFFIS_DCMTK_VERSION_NUMBER-0 > 351)
   DcmInputFileStream  stream( _name.c_str() );
+  fdi.open();
   if ( ! stream.good() )
 #else
     DcmFileStream stream( _name.c_str(), DCM_ReadMode );

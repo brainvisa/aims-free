@@ -55,7 +55,6 @@ GiftiHeader::GiftiHeader( const string & name ) :
 GiftiHeader::~GiftiHeader()
 {
 }
-#include <cartobase/stream/fdinhibitor.h>
 
 
 string GiftiHeader::extension() const
