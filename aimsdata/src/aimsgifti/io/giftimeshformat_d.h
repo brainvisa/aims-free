@@ -171,7 +171,7 @@ namespace aims
       throw carto::format_error( "could not re-read GIFTI file", hdr.name() );
     }
     int nda = gim->numDA, i;
-    int tmesh = 0, ttex = 0, tnorm = 0, tpoly = 0;
+    int tmesh = -1, ttex = -1, tnorm = -1, tpoly = -1;
     for( i=0; i<nda; ++i )
     {
       giiDataArray *da = gim->darray[i];
@@ -179,6 +179,10 @@ namespace aims
       {
         case NIFTI_INTENT_POINTSET:
           {
+            ++tmesh;
+            char *ts = gifti_get_meta_value( &da->meta, "Timestep" );
+            if( ts )
+              sscanf( ts, "%d", &tmesh );
             int vnum = da->dims[0];
             int j;
             std::vector<Point3df> & vert = vol[tmesh].vertex();
@@ -188,12 +192,18 @@ namespace aims
               vert.push_back( Point3df(
                 convertedNiftiValue<float>( da->data, j*3, da->datatype ),
                 convertedNiftiValue<float>( da->data, j*3+1, da->datatype ),
-                convertedNiftiValue<float>( da->data, j*3+2, da->datatype ) ) );
-            ++tmesh;
+                convertedNiftiValue<float>( da->data, j*3+2, da->datatype ) )
+                            );
           }
           break;
         case NIFTI_INTENT_VECTOR:
           {
+            ++tnorm;
+            char *ts = gifti_get_meta_value( &da->meta, "Timestep" );
+            if( ts )
+              sscanf( ts, "%d", &tnorm );
+            else if( tnorm < tmesh )
+              tnorm = tmesh;
             int vnum = da->dims[0];
             int j;
             std::vector<Point3df> & norm = vol[tnorm].normal();
@@ -203,12 +213,18 @@ namespace aims
               norm.push_back( Point3df(
                 convertedNiftiValue<float>( da->data, j*3, da->datatype ),
                 convertedNiftiValue<float>( da->data, j*3+1, da->datatype ),
-                convertedNiftiValue<float>( da->data, j*3+2, da->datatype ) ) );
-            ++tnorm;
+                convertedNiftiValue<float>( da->data, j*3+2, da->datatype ) )
+                            );
             break;
           }
         case NIFTI_INTENT_TRIANGLE:
           {
+            ++tpoly;
+            char *ts = gifti_get_meta_value( &da->meta, "Timestep" );
+            if( ts )
+              sscanf( ts, "%d", &tpoly );
+            else if( tpoly < tmesh )
+              tpoly = tmesh;
             int vnum = da->dims[0];
             int j, k;
             std::vector<AimsVector<unsigned,D> > & poly = vol[tpoly].polygon();
@@ -222,28 +238,32 @@ namespace aims
                 p[k] = convertedNiftiValue<unsigned>( da->data, j*D+k,
                                                       da->datatype );
             }
-            ++tpoly;
             break;
           }
         default:
           {
             // texture
+            ++ttex;
             giftiReadTexture( vol, ttex, da, hdr );
             ++ttex;
           }
       }
     }
 
+    ++tmesh;
+    ++tnorm;
+    ++tpoly;
+    ++ttex;
     if( tmesh > tpoly )
       tmesh = tpoly;
-    if( vol.size() > (unsigned) tmesh )
+/*    if( vol.size() > (unsigned) tmesh )
     {
       std::cout << "warning: some incomplete meshes; truncating "
         << vol.size() << " instead of " << tmesh << "elements" << std::endl;
       while( vol.size() > (unsigned) tmesh )
         static_cast<std::map<int,AimsSurface<D,T> > &>(vol).erase(
           (int) vol.size() - 1 );
-    }
+    }*/
     // verify polygons are all in the vertices range
     bool        broken = false;
     for( i=0; i<tmesh; ++i )
@@ -388,6 +408,14 @@ namespace aims
               buf[i*3+2] = norm[i][2];
             }
 
+            if( t != is->first )
+            {
+              // store timestep
+              std::ostringstream ts;
+              ts << is->first;
+              gifti_add_to_meta( &da->meta, "Timestep", ts.str().c_str(), 1 );
+            }
+
             // metadata
             carto::Object dainf
               = GiftiHeader::giftiFindHdrDA( hdrnormda, da_info,
@@ -423,6 +451,14 @@ namespace aims
             for( i=0; i<n; ++i )
               for( j=0; j<D; ++j )
                 buf[i*D+j] = poly[i][j];
+
+            if( t != is->first )
+            {
+              // store timestep
+              std::ostringstream ts;
+              ts << is->first;
+              gifti_add_to_meta( &da->meta, "Timestep", ts.str().c_str(), 1 );
+            }
 
             // metadata
             carto::Object dainf
