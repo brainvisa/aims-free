@@ -8,5 +8,6 @@ attributes = {
   'nifti_output_4d_volumes' : 1,
   'default_writers' : {
     'Volume' : 'NIFTI1',
+    'Mesh' : 'MESH',
   },
 }
