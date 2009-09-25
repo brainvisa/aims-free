@@ -39,7 +39,9 @@
 #include <cartobase/stream/directory.h>
 #include <iostream>
 #include <cstdlib>
-
+#ifdef USE_SOMA_CONFIG
+#include <soma/config.h>
+#endif
 using namespace carto;
 using namespace std;
 
@@ -156,6 +158,12 @@ const string & Paths::globalShared()
         _shared = shfj_path;
       else
         {
+#ifdef USE_SOMA_CONFIG
+          d.chdir( DEFAULT_BRAINVISA_SHARE );
+          if ( d.isValid() ) {
+            _shared = DEFAULT_BRAINVISA_SHARE;
+          } else {
+#endif  // #ifdef USE_SOMA_CONFIG
           // look in PATH
           const char *path = getenv( "PATH" );
           if( path )
@@ -193,6 +201,9 @@ const string & Paths::globalShared()
               }
             }
           }
+#ifdef USE_SOMA_CONFIG
+          }
+#endif // #ifdef USE_SOMA_CONFIG
         }
       if( _shared.empty() )
       {
