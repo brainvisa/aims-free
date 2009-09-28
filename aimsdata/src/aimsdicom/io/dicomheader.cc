@@ -179,7 +179,7 @@ bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
   if ( header.search( DCM_ActualFrameDuration, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_IS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return false;
       }
       DcmIntegerString *object = (DcmIntegerString *)stack.top();
@@ -210,7 +210,7 @@ bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
   if ( header.search( DCM_FrameReferenceTime, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_DS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return false ;
       }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
@@ -451,11 +451,11 @@ int DicomHeader::readFirst()
   fdi.open();
   if ( stream.GetError() != EC_Normal )
 #endif
-    {
-      //perror( 0 );
-      //cout << "could not open stream " << _name << endl;
-      return -1;
-    }
+  {
+    //perror( 0 );
+    // cout << "could not open stream " << _name << endl;
+    return -1;
+  }
 
   // allocate header
   DcmFileFormat header;
@@ -467,9 +467,9 @@ int DicomHeader::readFirst()
   header.read( stream, EXS_Unknown, EGL_noChange );
   header.transferEnd();
   cerr.rdbuf( sb );
-  if ( header.error() != EC_Normal ) 
+  if ( header.error() != EC_Normal )
     {
-      cerr << dcmErrorConditionToString( header.error() ) << endl;
+      // cerr << dcmErrorConditionToString( header.error() ) << endl;
       return -1;
     }
 
@@ -480,7 +480,7 @@ int DicomHeader::readFirst()
     {
       if( stack.top()->ident() != EVR_UI )
         { 
-          cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+          // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
           return( -1 );
         }
       DcmUniqueIdentifier *object = (DcmUniqueIdentifier *)stack.top();
@@ -493,7 +493,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_Manufacturer, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_LO ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmLongString *object = (DcmLongString *)stack.top();
@@ -506,7 +506,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_Modality, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_CS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmCharString *object = (DcmCharString *)stack.top();
@@ -518,7 +518,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_PatientID, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_LO ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmLongString *object = (DcmLongString *)stack.top();
@@ -530,7 +530,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_StudyID, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_SH ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmShortString *object = (DcmShortString *)stack.top();
@@ -542,7 +542,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_SeriesNumber, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_IS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmIntegerString *object = (DcmIntegerString *)stack.top();
@@ -554,7 +554,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_SeriesInstanceUID, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_UI ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmUniqueIdentifier *object = (DcmUniqueIdentifier *)stack.top();
@@ -568,7 +568,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_Columns, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_US ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
@@ -580,7 +580,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_Rows, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_US ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
@@ -594,7 +594,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_PixelSpacing, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_DS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
@@ -609,7 +609,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_SliceThickness, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_DS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
@@ -621,7 +621,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_SpacingBetweenSlices, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_DS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
@@ -638,7 +638,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_NumberOfTemporalPositions, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_IS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmIntegerString *object = (DcmIntegerString *)stack.top();
@@ -650,7 +650,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_BitsAllocated, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_US ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
@@ -665,7 +665,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_RepetitionTime, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_DS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
@@ -677,7 +677,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_EchoTime, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_DS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
@@ -700,7 +700,7 @@ int DicomHeader::readFirst()
   if ( header.search( DCM_InstanceNumber, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_IS ){
-        cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
         return( -1 );
       }
       DcmIntegerString *object = (DcmIntegerString *)stack.top();
@@ -731,7 +731,7 @@ int DicomHeader::readFirst()
      if ( header.search( DCM_PatientsAge, stack ) == EC_Normal )
         {
           if( stack.top()->ident() != EVR_AS ){
-            cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+            // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
             return( -1 );
           }
 	  
@@ -745,7 +745,7 @@ int DicomHeader::readFirst()
     if ( header.search( DCM_PatientsSex, stack ) == EC_Normal )
       {
         if( stack.top()->ident() != EVR_CS ){
-          cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+          // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
           return( -1 );
         }
         DcmCharString *object = (DcmCharString *)stack.top();
@@ -829,7 +829,7 @@ int DicomHeader::readFirst()
       if ( header.search( DCM_ImagePositionPatient, stack ) == EC_Normal )
         {
           if( stack.top()->ident() != EVR_DS ){
-             cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+             // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
              return( -1 );
           }
           DcmDecimalString *object = (DcmDecimalString *)stack.top();   
@@ -847,7 +847,7 @@ int DicomHeader::readFirst()
         {
           DcmDecimalString *object = (DcmDecimalString *)stack.top();
           if( stack.top()->ident() != EVR_DS ){
-            cerr << "fail DCM_RadionuclideHalfLife, id: " << stack.top()->ident() << "\n";
+            // cerr << "fail DCM_RadionuclideHalfLife, id: " << stack.top()->ident() << "\n";
             return( -1 );
           }
           Float64 halfLife;
@@ -857,7 +857,7 @@ int DicomHeader::readFirst()
       if ( header.search( DCM_SeriesType, stack ) == EC_Normal )
         {  
           if( stack.top()->ident() != EVR_CS ){
-            cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+            // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
             return( -1 );
           }
           DcmLongString *object = (DcmLongString *)stack.top() ;
@@ -871,7 +871,7 @@ int DicomHeader::readFirst()
 	      
 	      DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
               if( stack.top()->ident() != EVR_US ){
-                cerr << "fail DCM_NumberOfTimeSlices, id: " << stack.top()->ident() << "\n";
+                // cerr << "fail DCM_NumberOfTimeSlices, id: " << stack.top()->ident() << "\n";
                 return( -1 );
               }
               Uint16 frames;
@@ -884,7 +884,7 @@ int DicomHeader::readFirst()
             if ( header.search( DCM_NumberOfTimeSlots, stack ) == EC_Normal ){ 
               DcmUnsignedShort *object = (DcmUnsignedShort *)stack.top();
               if( stack.top()->ident() != EVR_US ){
-                cerr << "fail DCM_NumberOfTimeSlots, id: " << stack.top()->ident() << "\n";
+                // cerr << "fail DCM_NumberOfTimeSlots, id: " << stack.top()->ident() << "\n";
                 return( -1 );
               }
               Uint16 gates;
