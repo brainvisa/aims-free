@@ -6,5 +6,5 @@ set_property( TARGET graph PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 target_link_libraries( graph cartobase )
 BRAINVISA_INSTALL( TARGETS graph
               DESTINATION lib
-              COMPONENT graph )
+              COMPONENT ${PROJECT_NAME} )
 BRAINVISA_GENERATE_DOXYGEN_DOC( _headers  )

@@ -342,14 +342,13 @@ bool NiftiHeader::read()
 	  sz = 32;
 	  break;
 	default:
-	  cerr << "Unrecognized datatype code in NIFTI file " << fileName << endl;
+	  cerr << "Unrecognized datatype code in NIFTI file \"" << fileName << "\"" << endl;
     }
   setProperty( "disk_data_type", type );
   setProperty( "bits_allocated", (int) sz );
   
   if ( sz != nim->nbyper * 8 )
-    cerr << "Number of bytes per voxel doesn't match datatype in NIFTI file " 
-	     << fileName << endl;
+    cerr << "Number of bytes per voxel doesn't match datatype in NIFTI file \"" << fileName << "\"" << endl;
   
   /******************************/
   /* DATA SCALING and DATA_TYPE */
@@ -618,7 +617,7 @@ bool NiftiHeader::read()
   if( nim->num_ext ) {
     vector < int > extcode( nim->num_ext );
 	vector < vector < char > > extdata( nim->num_ext );
-    cerr << "NIFTI-1 extensions are present in header but will be ignored." << endl;
+    cerr << "NIFTI-1 extensions are present in header but will be ignored: \"" << fileName << "\"" << endl;
     for (int i=0; i<nim->num_ext;++i) {
 	  extcode.push_back(nim->ext_list[i].ecode);
 	  vector < char > edata(nim->ext_list[i].esize);
@@ -652,7 +651,7 @@ bool NiftiHeader::read()
       setProperty( "storage_to_memory", s2m.toVector() );
       setProperty( "voxel_size", vs );
       cerr << "Warning: .minf storage_to_memory / volume_dimension mismatch. "
-          << "setting back initial NIFTI1 header values." << endl;
+          << "setting back initial NIFTI1 header values:\"" << fileName << "\"" << endl;
     }
   }
   setProperty( "file_type", string( "NIFTI1" ) );
@@ -789,7 +788,7 @@ bool NiftiHeader::fillNim( bool allow4d )
     nim->datatype = DT_UINT32;
   else
   {
-    cerr << "Unknown NIFTI1 datatype." << endl;
+    cerr << "Unknown NIFTI1 datatype, using FLOAT: " << type << endl;
     nim->datatype = DT_FLOAT32;
   }
 
