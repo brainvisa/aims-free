@@ -82,7 +82,7 @@ namespace aims
                  carto::Object options );
 
     private:
-
+      
       std::string	_name;
 
       void readData( const std::string&, AimsData< T >&, int, 
@@ -95,6 +95,7 @@ namespace aims
                                  const carto::AllocatorContext & context, 
                                  carto::Object options )
     {
+      cout << "Reading image" << endl ;
       int	frame = -1, borderWidth = 0;
       options->getProperty( "frame", frame );
       options->getProperty( "border", borderWidth );
@@ -229,6 +230,7 @@ namespace aims
 
           if ( shortValues )
             {
+/* 	      cout << "short values" << endl ; */
               std::string tr_syntax;
               hdr->getProperty( "transfer_syntax", tr_syntax );
               if ( tr_syntax == "1.2.840.113619.5.2" )
@@ -236,23 +238,93 @@ namespace aims
                   Uint32 byteLength = object->getLength();
                   swapBytes( shortValues, byteLength, sizeof( Uint16 ) );
                 }
-
-              Uint16 *sptr = shortValues;
-              int frame = instance / thing.dimZ();
-              int slice = instance % thing.dimZ();
-
-              if ( hdr->reverseZ() )  {
-                slice = thing.dimZ() - slice - 1;
-                //if ( slice == 0 ) std::cerr << "DICOM Z axis reversed" 
-                // << std::endl;
-              }
-
-              int i, j;
-              int dx = thing.dimX();
-              int dy = thing.dimY();
-              for ( j=0; j<dy; j++ )
-                for ( i=0; i<dx; i++ )
-                  thing( i, j, slice, frame ) = (T)*sptr++;
+	      
+	      Uint16 *sptr = shortValues;
+	      int frame = instance / thing.dimZ();
+	      int slice = instance % thing.dimZ();
+	      
+	      if ( hdr->reverseZ() )  {
+		slice = thing.dimZ() - slice - 1;
+		//if ( slice == 0 ) std::cerr << "DICOM Z axis reversed" 
+		// << std::endl;
+	      }
+		
+	      bool useScaleAndIntercept = true ;
+	      if( useScaleAndIntercept ){
+		double wc = -1.0;
+		double ww = -1.0;
+		Float64 gtmp;
+		
+		if ( dfile.search( DCM_WindowCenter, stack ) == EC_Normal )
+		  {
+		    ASSERT( stack.top()->ident() == EVR_DS );
+		    DcmDecimalString *object = (DcmDecimalString *)stack.top();
+		    object->getFloat64( gtmp );
+		    wc = (double)gtmp;
+		  }
+		
+		if ( dfile.search( DCM_WindowWidth, stack ) == EC_Normal )
+		  {
+		    ASSERT( stack.top()->ident() == EVR_DS );
+		    DcmDecimalString *object = (DcmDecimalString *)stack.top();
+		    object->getFloat64( gtmp );
+		    ww = (double)gtmp;
+		  }
+		
+		double slope = 1.0;
+		double inter = 0.0;
+		
+		if ( dfile.search( DCM_RescaleSlope, stack ) == EC_Normal )
+		  {
+		    ASSERT( stack.top()->ident() == EVR_DS );
+		    DcmDecimalString *object = (DcmDecimalString *)stack.top();
+		    object->getFloat64( gtmp );
+		    slope = (double)gtmp;
+		  }
+		
+		if ( dfile.search( DCM_RescaleIntercept, stack ) == EC_Normal )
+		  {
+		    ASSERT( stack.top()->ident() == EVR_DS );
+		    DcmDecimalString *object = (DcmDecimalString *)stack.top();
+		    object->getFloat64( gtmp );
+		    inter = (double)gtmp;
+		  }
+		
+/* 		double min = -32767.; */
+/* 		double max = 32767; */
+		
+/* 		if ( wc >= 0.0 && ww >= 0.0 ) */
+/* 		  { */
+/* 		    min = wc - ww / 2.0; */
+/* 		    max = wc + ww / 2.0; */
+/* 		  } */
+		
+		
+		int i, j;
+		int dx = thing.dimX();
+		int dy = thing.dimY();
+		double signal ;
+		for ( j=0; j<dy; j++ )
+		  for ( i=0; i<dx; i++ )
+		    {
+/* 		      cout << "slope = " << slope << " & intercept = " << inter << endl ; */
+		      signal = (double)*sptr++ * slope + inter;
+		      
+/* 		      if ( signal <= min )  signal = 0.0; */
+/* 		      else if ( signal >= max )  signal = 255.0; */
+/* 		      else signal = ( signal - min ) * coef; */
+		      
+		      thing( i, j, slice, frame ) = (T)signal;
+		    }
+		
+	      } else {
+		int i, j;
+		int dx = thing.dimX();
+		int dy = thing.dimY();
+		for ( j=0; j<dy; j++ )
+		  for ( i=0; i<dx; i++ )
+		    thing( i, j, slice, frame ) = (T)*sptr++;
+	      }
             }
           else if ( byteValues )
             {
@@ -303,16 +375,16 @@ namespace aims
                   object->getFloat64( gtmp );
                   inter = (double)gtmp;
                 }
-
+	      
               double min = 0.0;
               double max = 255.0;
-
+	      
               if ( wc >= 0.0 && ww >= 0.0 )
                 {
                   min = wc - ww / 2.0;
                   max = wc + ww / 2.0;
                 }
-
+	      
               int i, j;
               int dx = thing.dimX();
               int dy = thing.dimY();
@@ -320,6 +392,7 @@ namespace aims
               for ( j=0; j<dy; j++ )
                 for ( i=0; i<dx; i++ )
                   {
+		    cout << "slope = " << slope << " & intercept = " << inter << endl ;
                     signal = (double)*bptr++ * slope + inter;
 
                     if ( signal <= min )  signal = 0.0;
