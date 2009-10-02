@@ -150,7 +150,6 @@ float DicomHeader::sizeT() const
   return( tr );
 }
 
-
 bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
 {
 #ifdef UID_RawDataStorage // #if (OFFIS_DCMTK_VERSION_NUMBER-0 > 351)
@@ -175,7 +174,17 @@ bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
   if ( header.error() != EC_Normal )  return false;
 
   DcmStack stack;
-
+  
+  if ( header.search( DCM_AcquisitionTime, stack ) == EC_Normal )
+    {
+      DcmTime *object = (DcmTime *)stack.top() ;
+      OFString time ;
+      object->getOFString( time, 0 ) ;
+      string timeStr(time.c_str()) ;
+      st = 1000. * ( atof(timeStr.substr(0,2).c_str() ) * 60 * 60 + atof(timeStr.substr(2,2).c_str() ) * 60 + atof(timeStr.substr(4,2).c_str() ) ) 
+	+ atof(timeStr.substr(7, timeStr.size() - 7 - 1).c_str() ) / 1000 ;
+    } else return false;
+  
   if ( header.search( DCM_ActualFrameDuration, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_IS ){
@@ -207,21 +216,20 @@ bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
     return false ;
   }*/
    
-  if ( header.search( DCM_FrameReferenceTime, stack ) == EC_Normal )
-    {
-      if( stack.top()->ident() != EVR_DS ){
-        // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
-        return false ;
-      }
-      DcmDecimalString *object = (DcmDecimalString *)stack.top();
-//      Float64 startTime;
-//     object->getFloat64( startTime );
-//      st = (int) startTime ;
-      Float64 frameReferenceTime;
-      object->getFloat64( frameReferenceTime );
-      st = (int) frameReferenceTime /*- dt / 2*/ ;
-    } 
-  else return false ;
+//   if ( header.search( DCM_FrameReferenceTime, stack ) == EC_Normal )
+//     {
+//       if( stack.top()->ident() != EVR_DS ){
+//         cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+//         return false ;
+//       }
+//       DcmDecimalString *object = (DcmDecimalString *)stack.top();
+//       Float64 frameReferenceTime;
+//       object->getFloat64( frameReferenceTime );
+//       st = (int) frameReferenceTime /*- dt / 2*/ ;
+//       cout << "St = " << st << endl ;
+//       cout << "St - studyTime " << st - studyTime << " & st - seriesTime = " << st - seriesTime << " & st - acquisitionTime = " << st - acquisitionTime << endl ;
+//     } 
+//   else return false ;
        
   return true ;
 }
@@ -269,7 +277,12 @@ int DicomHeader::read()
     fileVector2.push_back( Object::value( *ifb ) );
     ++ifb;
   }
-  setProperty( "filenames", fileVector2 );
+  
+  string moda ;
+  getProperty( "modality", moda );
+  
+  if( moda != "PET" && moda != "CT" )
+    setProperty( "filenames", fileVector2 );
 
   map< int, FileElement >::const_iterator i = _slices.begin();
   int dimT;
@@ -345,8 +358,7 @@ int DicomHeader::read()
             }
         }
 */
-      string moda ;
-      getProperty( "modality", moda );
+      std::cout << "Moda : " << moda << " & manufac is " << manufac << std::endl ;
       if( manufac == "SIEMENS" && ( moda == "PT" || moda == "CT" ) ){
         string mode ;
 	vector<float> vs ;
@@ -364,7 +376,7 @@ int DicomHeader::read()
    
 	} else vs[2] = (minZVoxSize + maxZVoxSize) / 2 ;
 	setProperty("voxel_size", vs ) ;
-	
+	std::cout << "VS Z = " << vs[2] << std::endl ;
 	if( moda == "PT" ){
           getProperty( "acquisition_mode", mode ) ;
           vector<int> startTimes, durationTimes ;
@@ -394,7 +406,7 @@ int DicomHeader::read()
 	  
 	  map<int, int>::iterator it ;
 	  for( it = stDt.begin() ; it != stDt.end() ; ++it ){
-	    startTimes.push_back( it->first ) ;
+	    startTimes.push_back( it->first - stDt.begin()->first ) ;
 	    durationTimes.push_back( it->second ) ;
 	  }
 	  setProperty( "start_time", startTimes ) ;
@@ -488,7 +500,7 @@ int DicomHeader::readFirst()
       object->getOFString( syntax, 0 );
       setProperty( "transfer_syntax", string( syntax.c_str() ) );
     }
-
+  
   string manufacturer, modality;
   if ( header.search( DCM_Manufacturer, stack ) == EC_Normal )
     {
@@ -767,7 +779,8 @@ int DicomHeader::readFirst()
           DcmTime *object = (DcmTime *)stack.top();
           OFString time;
           object->getOFString( time, 0 );
-          setProperty( "study_time", string( time.c_str() ) );
+          setProperty( "study_time", float( atof( time.c_str() ) ) );
+	  cout << "study_time : " <<  float( atof( time.c_str() ) ) << endl ;
         }
       if ( header.search( DCM_SeriesDate, stack ) == EC_Normal )
         {
@@ -781,7 +794,8 @@ int DicomHeader::readFirst()
           DcmTime *object = (DcmTime *)stack.top();
           OFString time;
           object->getOFString( time, 0 );
-          setProperty( "series_time", string( time.c_str() ) );
+          setProperty( "series_time", float( atof( time.c_str() ) ) );
+	  cout << "series_time : " <<  float( atof( time.c_str() ) ) << endl ;
         }
       if ( header.search( DCM_AcquisitionDate, stack ) == EC_Normal )
         {
@@ -795,7 +809,8 @@ int DicomHeader::readFirst()
           DcmTime *object = (DcmTime *)stack.top();
           OFString time;
           object->getOFString( time, 0 );
-          setProperty( "acquisition_time", string( time.c_str() ) );
+          setProperty( "acquisition_time", float( atof( time.c_str() ) ) );
+	  cout << "acquis_time : " <<  float( atof( time.c_str() ) ) << endl ;
         }
       if ( header.search( DCM_AcquisitionTime, stack ) == EC_Normal )
         {
@@ -803,8 +818,8 @@ int DicomHeader::readFirst()
           OFString time;
           object->getOFString( time, 0 );
 	  int hour = int( atoi(time.substr(0,2).c_str() ) ) ;
-	  int min = int( atoi(time.substr(0,2).c_str() ) ) ;
-	  int sec = int( atoi(time.substr(0,2).c_str() ) ) ;
+	  int min = int( atoi(time.substr(2,2).c_str() ) ) ;
+	  int sec = int( atoi(time.substr(4,2).c_str() ) ) ;
           //setProperty( "acquisition_time", string( time.c_str() ) );
           setProperty( "zero_start_time", ( hour*60 + min )*60 + sec ) ;
         }
