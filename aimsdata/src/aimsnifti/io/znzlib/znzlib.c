@@ -1,24 +1,34 @@
-/** \file znzlib.c
-    \brief Low level i/o interface to compressed and noncompressed files.
-        Written by Mark Jenkinson, FMRIB
-
-This library provides an interface to both compressed (gzip/zlib) and
-uncompressed (normal) file IO.  The functions are written to have the
-same interface as the standard file IO functions.
-
-To use this library instead of normal file IO, the following changes
-are required:
- - replace all instances of FILE* with znzFile
- - change the name of all function calls, replacing the initial character
-   f with the znz  (e.g. fseek becomes znzseek)
-   one exception is rewind() -> znzrewind()
- - add a third parameter to all calls to znzopen (previously fopen)
-   that specifies whether to use compression (1) or not (0)
- - use znz_isnull rather than any (pointer == NULL) comparisons in the code
-   for znzfile types (normally done after a return from znzopen)
- 
-NB: seeks for writable files with compression are quite restricted
-
+/* This software and supporting documentation are distributed by
+ *     Institut Federatif de Recherche 49
+ *     CEA/NeuroSpin, Batiment 145,
+ *     91191 Gif-sur-Yvette cedex
+ *     France
+ *
+ * This software is governed by the CeCILL-B license under
+ * French law and abiding by the rules of distribution of free software.
+ * You can  use, modify and/or redistribute the software under the
+ * terms of the CeCILL-B license as circulated by CEA, CNRS
+ * and INRIA at the following URL "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and,  more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
 #include "znzlib.h"
