@@ -376,7 +376,6 @@ void FdfHeader::read()
             uint length = rmatch[1].rm_eo - rmatch[1].rm_so;
             ostringstream	pattern;
             pattern << filename.substr(0, rmatch[1].rm_so) << "\%0" << length << "d" << filename.substr(rmatch[1].rm_eo);
-            cout << "Pattern : " << pattern.str() << endl << flush;
             setProperty("input_file_pattern", pattern.str());
             setProperty("slice_min", 1);
         }
