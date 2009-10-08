@@ -673,11 +673,23 @@ class _proxy:
       sf = traceback.extract_stack()[-2]
       if sf[-2] == '__call__' and \
         sf[-1] == 'return carto.GenericObject._proxy.retvalue( r( *args, ' \
-          '**kwargs ) )' \
-        and sf[0] == __file__:
-        # try to call with selfWasArg=True (class unound method)
-        cl = object.__getattribute__( obj, '__class__' )
-        return getattr( cl, r.__name__ )( obj, *args, **kwargs )
+          '**kwargs ) )':
+        # compare sf[0] and __file__, after removing .py/.pyc extension
+        # which may make the comparison not to match
+        f1 = sf[0]
+        if f1.endswith( '.py' ):
+          f1 = f1[:-3]
+        elif f1.endswith( '.pyc' ):
+          f1 = f1[:-4]
+        f2 = __file__
+        if f2.endswith( '.py' ):
+          f2 = f2[:-3]
+        elif f2.endswith( '.pyc' ):
+          f2 = f2[:-4]
+        if f1 == f2:
+          # try to call with selfWasArg=True (class unound method)
+          cl = object.__getattribute__( obj, '__class__' )
+          return getattr( cl, r.__name__ )( obj, *args, **kwargs )
     return carto.GenericObject._proxy.retvalue( r( *args, **kwargs ) )
 
 def genobj__getattribute__( self, attr ):
