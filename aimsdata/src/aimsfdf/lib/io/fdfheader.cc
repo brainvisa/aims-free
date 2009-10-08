@@ -124,19 +124,27 @@ void FdfHeader::read()
     }
   //cout << "]" << endl;
 
+  bool headerstarted = false;
+
   while (getline(inFile, line, '\n')) {
 
     if ( line == "\0" ) {
-      break;
+      if ( not headerstarted ) {
+        continue;
+      }
+      else {
+        break;
+      }
     }
 
     // Formats the lines in the FDF header such as removing whitespace between {}
     line = parseLine(line);
     tokenize(line, tokens, " ;");
-    
     if(tokens.size() == 4) {
-                                                                                                                            
-          type = tokens[0];
+                                                                                                                           
+      type = tokens[0];
+      if ( ( type != "/*" ) && ( type != "//" ) ) {
+          headerstarted=true;
           name = tokens[1];
           value = tokens[3];
 
@@ -264,8 +272,8 @@ void FdfHeader::read()
           }
 
       }
-
-      tokens.clear();
+    }
+    tokens.clear();
   }
 
   // Process image resolution
@@ -358,20 +366,21 @@ void FdfHeader::read()
     if ( !getProperty("input_file_pattern", pattern)) {
         // Set a default fdf pattern to be able to get slice files
         string      filename = FileUtil::basename( _name );
-        string      searchpattern = "^([^0-9]+)([0-9]+)([^0-9]+)([0-9]+)([^0-9]+)([0-9]+)(" + extension() + ")$";
+        string      searchpattern = "^slice([0-9]+).*" + extension() + "$";
         regex_t	    reg;
         regcomp( &reg, searchpattern.c_str(),
                 REG_EXTENDED | REG_ICASE );
-        regmatch_t	rmatch[8];
+        regmatch_t	rmatch[2];
     
-        if( !regexec( &reg, filename.c_str(), 8, rmatch, 0 ) )
-        {
-            uint length = rmatch[2].rm_eo - rmatch[2].rm_so;
+        if( !regexec( &reg, filename.c_str(), 2, rmatch, 0 ) ) {
+            uint length = rmatch[1].rm_eo - rmatch[1].rm_so;
             ostringstream	pattern;
-            pattern << filename.substr(0, rmatch[1].rm_eo) << "\%0" << length << "d" << filename.substr(rmatch[3].rm_so);
+            pattern << filename.substr(0, rmatch[1].rm_so) << "\%0" << length << "d" << filename.substr(rmatch[1].rm_eo);
+            cout << "Pattern : " << pattern.str() << endl << flush;
             setProperty("input_file_pattern", pattern.str());
             setProperty("slice_min", 1);
         }
+
         regfree( &reg );
     }
 
