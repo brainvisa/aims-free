@@ -42,6 +42,7 @@
 #include <aims/data/pheader.h>
 #include <aims/mesh/surface.h>
 #include <aims/bucket/bucket.h>
+#include <aims/graph/graphmanip.h>
 #include <graph/graph/gwriter.h>
 #include <graph/graph/graph.h>
 #include <cartobase/object/sreader.h>
@@ -159,7 +160,7 @@ int main( int argc, char** argv )
       if( inpTex.item( i ) > tmax )
 	tmax = inpTex.item( i );
     }
-  cout << "nb of nodes : " << tmax;
+  cout << "nb of nodes : " << tmax << endl;
 
   const vector<Point3df>	&vert = surface.vertex();
   Graph				gr( "ClusterArg" );
@@ -183,25 +184,7 @@ int main( int argc, char** argv )
   gr.setProperty( "ClusterArg_VERSION", string( "1.0" ) );
   gr.setProperty( "type.bck", string( "cluster.bck" ) );
   gr.setProperty( "cluster.bck", string( "cluster bucket_filename" ) );
-
-  string	fbase, aname = outargfile;
-  string::size_type	pos2;
-
-  string::size_type	pos = aname.rfind( '/' );
-  if( pos == string::npos )
-    fbase = "";
-  else
-    {
-      fbase = aname.substr( pos+1, aname.length() - pos - 1 );
-      aname.erase( 0, pos );
-    }
-  pos2 = aname.rfind( '.' );
-  if( pos2 != string::npos )
-    aname.erase( pos2, aname.length() - pos2 );
-  aname += ".data";
-  fbase += aname;
-
-  gr.setProperty( "filename_base", fbase );
+  gr.setProperty( "filename_base", "*" );
 
   // ...
 
@@ -243,7 +226,6 @@ int main( int argc, char** argv )
 
   set<Point3d>::const_iterator	ip, ep;
   AimsBucketItem<Void>	bi;
-
   for( i=1; i<nn; ++i )
     {
       AimsBucket<Void>	& b = *bmap[i];
@@ -272,36 +254,20 @@ int main( int argc, char** argv )
   char		num[10];
   Vertex	*v;
 
-  Directory	dir( fbase );
-  dir.mkdir();
-  cout << "writing buckets...\n";
+  cout << "writing clusters graph...\n";
 
   for( i=1; i<nn; ++i )
     {
       sprintf( num, "%d", i );
       string	bname = string( "bucket_" ) + num + ".bck";
-      Writer<AimsBucket<Void> >	bw( fbase + "/" + bname );
-      bw << *bmap[i];
       v = vmap[i];
-      v->setProperty( "bucket_filename", bname );
+      GraphManip::storeAims( gr, v, "aims_bucket", rc_ptr<BucketMap<Void> >( new BucketMap<Void>( *bmap[i] ) ) );
       v->setProperty( "name", string( "unknown" ) );
     }
 
-  SyntaxSet	ss;
   try
     {
-      SyntaxReader	sr( Path::singleton().syntax() + "/graph.stx" );
-      sr >> ss;
-    }
-  catch( exception & e )
-    {
-      cerr << e.what() << endl;
-      exit(EXIT_FAILURE);
-    }
-
-  try
-    {
-      GraphWriter	gw( outargfile, ss );
+      Writer<Graph> gw( outargfile );
       gw << gr;
     }
   catch( exception & e )
