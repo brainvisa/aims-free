@@ -952,9 +952,10 @@ cout << "ssblobs après : " << blobList.size() << endl;
         cout << "Computing multi-scale measurements" << std::endl;
 
 //         FILE *spmV=fopen("/home/grg/spmV.txt", "w");
-
+	uint itest =0;
         for (; itSSBlobs!=blobList.end(); ++itSSBlobs)
         {
+	    cout << itest << endl;
             ssBlob=*itSSBlobs;
             typename std::list<GreyLevelBlob<Site>*>::iterator itGLBlobs=ssBlob->glBlobs.begin();
             BlobMeasurements measure;
@@ -1012,32 +1013,22 @@ cout << "ssblobs après : " << blobList.size() << endl;
             // getting t-value from original map... NORMALEMENT PLUS BESOIN
 
             TexturedData<Geom, Text> ima=scaleSpace()->Scale(0.0)->Data();
-            TexturedData<Geom, Text> *ima2=scaleSpace()->Scale(0.0)->AuxData();
 
             glBlob1=ssBlob->GlBlobRep();
             std::set<Site,ltstr_p3d<Site> >  pixels;
             pixels=glBlob1->GetListePoints();
+            cout << "hé" << endl;
 
             typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
             float tvmax=-100.0, tvmax2 = -100.;
-            if( !ima2 )
-            {
-              tvmax2 = 0.;
-            }
-            for ( itPix=pixels.begin(); itPix!=pixels.end(); itPix++)
-            {
-               if (float(ima.intensity(*itPix)) > tvmax)
-                    tvmax= float(ima.intensity(*itPix));
-               if( ima2 && float(ima2->intensity(*itPix)) > tvmax2 )
-               {
-                 tvmax2= float(ima2->intensity(*itPix));
-               }
-            }
+
 
             float tvalue2 = tvmax * (ssBlob->LifeTime()) ; //* glBlob1->measurements.area;
             float tvalue2bis = tvmax2 * (ssBlob->LifeTime());
 //             cout << "\tt" << tvmax <<";" << ssBlob->LifeTime() << ";" << tvalue2 << " ";
+
             measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvmax, tvalue, tvmax2);
+
             areamoy +=area;
             areavar +=area*area;
             ssBlob->SetMeasurements(measure);
