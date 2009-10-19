@@ -239,7 +239,7 @@ public:
   list_%Template1typecode%_iterator* __objiter__() const /Factory, AutoGen/;
 %MethodCode
   std::list<%Template1% >::iterator i = sipCpp->begin();
-  sipRes = new list_%Template1typecode%_iterator( i, sipCpp );
+  sipRes = new list_%Template1typecode%_iterator( i, sipCpp, sipSelf );
 %End
 
 
@@ -391,24 +391,30 @@ typedef std::list<%Template1% > list_%Template1typecode%;
 class list_%Template1typecode%_iterator
 {
   public:
-  list_%Template1typecode%_iterator( list_%Template1typecode%* v )
-  : _list( v )
-  { }
+  list_%Template1typecode%_iterator( list_%Template1typecode%* v,
+                                     PyObject* pylist )
+  : _list( v ), _pylist( pylist )
+  { Py_INCREF( pylist ); }
   list_%Template1typecode%_iterator( std::list<%Template1PyType%>::iterator
                                      & i,
-                                     list_%Template1typecode%* v )
-    : _iter( i ), _list( v )
-  { }
-  ~list_%Template1typecode%_iterator() {}
+                                     list_%Template1typecode%* v,
+                                     PyObject* pylist )
+    : _iter( i ), _list( v ), _pylist( pylist )
+  { Py_INCREF( pylist ); }
+  ~list_%Template1typecode%_iterator() { if( _pylist ) { Py_DECREF( _pylist ); } }
 
   list_%Template1typecode%::iterator _iter;
   list_%Template1typecode%	*_list;
+  PyObject *_pylist;
 };
 #endif
 %End
 
   public:
-  list_%Template1typecode%_iterator( list_%Template1typecode% * );
+  list_%Template1typecode%_iterator( list_%Template1typecode% * /GetWrapper/ );
+%MethodCode
+  sipCpp = new list_%Template1typecode%_iterator( a0, a0Wrapper );
+%End
   ~list_%Template1typecode%_iterator();
 
   SIP_PYOBJECT __objnext__();
