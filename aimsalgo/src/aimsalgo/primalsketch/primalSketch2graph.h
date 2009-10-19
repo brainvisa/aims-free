@@ -246,7 +246,6 @@ namespace aims
                vert->setProperty("tValue",(*blobIt)->GetMeasurements().tValue);
                assert((*blobIt)->GetMeasurements().t!=(*blobIt)->GetMeasurements().tValue);
                vert->setProperty("t",(*blobIt)->GetMeasurements().t);
-               vert->setProperty("t2",(*blobIt)->GetMeasurements().t2);
                cout << (*blobIt)->GetMeasurements().t << ";";
                moy+=(*blobIt)->GetMeasurements().tValue;
                tab.push_back((*blobIt)->GetMeasurements().tValue);
