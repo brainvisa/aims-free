@@ -236,7 +236,7 @@ public:
   AimsSurface<D,Void> *GetMesh() {return _mesh;}
   Texture<T> *GetTexture() {return _tex;}
 
-	TexturedData<AimsSurface<D,Void>, Texture<T> > & operator = (const TexturedData<AimsSurface<D,Void>, Texture<T> >& other );
+  TexturedData<AimsSurface<D,Void>, Texture<T> > & operator = (const TexturedData<AimsSurface<D,Void>, Texture<T> >& other );
 
   // nb of sites (comes handy sometime)
 

@@ -229,7 +229,7 @@ namespace aims
           }
 
           // primal sketch computation, top to bottom
-
+          
           for (; (*itScaleUp) > tmin; ++itScaleUp)
           {
                itScaleDown=itScaleUp;
@@ -522,10 +522,10 @@ cout << "ssblobs après : " << blobList.size() << endl;
           ScaleSpaceBlob<Site> *ssBlobUp, *ssBlobDown;
           Bifurcation<Site> *bifurc;
 
-        std::cout << "Blob detection at scale " << t_up << std::endl;
+          std::cout << "Blob detection at scale " << t_up << std::endl;
           levelUp->DetectBlobs(_mask);
-        std::cout << "Blob detection at scale " << t_down << std::endl;
-        levelDown->DetectBlobs(_mask);
+          std::cout << "Blob detection at scale " << t_down << std::endl;
+          levelDown->DetectBlobs(_mask);
 
           std::cout << "\tt=" << t_up << " : " << levelUp->nbBlobs() << " blobs" << std::endl;
           std::cout << "\tt=" << t_down << " : " << levelDown->nbBlobs() << " blobs" << std::endl;
@@ -955,7 +955,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
 	uint itest =0;
         for (; itSSBlobs!=blobList.end(); ++itSSBlobs)
         {
-	    cout << itest << endl;
+// 	    cout << itest << endl;
             ssBlob=*itSSBlobs;
             typename std::list<GreyLevelBlob<Site>*>::iterator itGLBlobs=ssBlob->glBlobs.begin();
             BlobMeasurements measure;
@@ -974,7 +974,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
             mean_cont += dt * (glBlob1->measurements.meanContrast);
             area += dt * (glBlob1->measurements.area);            
             tvalue += dt * (glBlob1->measurements.t);
-            tv2 += dt * (glBlob1->measurements.t2);
+            
 //             cout << dt << ";" << glBlob1->measurements.t << " == " ;
 
             ++itGLBlobs;
@@ -989,7 +989,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
                 mean_cont += dt * (glBlob2->measurements.meanContrast + glBlob1->measurements.meanContrast)/2.0;
                 area += dt * (glBlob2->measurements.area + glBlob1->measurements.area)/2.0;
                 tvalue += dt * (glBlob2->measurements.t + glBlob1->measurements.t)/2.0;
-                tv2 += dt * (glBlob2->measurements.t2 + glBlob1->measurements.t2)/2.0;
+                
 //                 cout << glBlob2->measurements.tValue << " == ";
 
                 glBlob1=glBlob2;
@@ -1007,7 +1007,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
             mean_cont += dt * (glBlob1->measurements.meanContrast);
             area += dt * (glBlob1->measurements.area);
             tvalue += dt * (glBlob1->measurements.t);
-            tv2 += dt * (glBlob1->measurements.t2);
+            
 //             cout << tvalue << endl;
 
             // getting t-value from original map... NORMALEMENT PLUS BESOIN
@@ -1017,7 +1017,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
             glBlob1=ssBlob->GlBlobRep();
             std::set<Site,ltstr_p3d<Site> >  pixels;
             pixels=glBlob1->GetListePoints();
-            cout << "hé" << endl;
+            
 
             typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
             float tvmax=-100.0, tvmax2 = -100.;
@@ -1027,7 +1027,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
             float tvalue2bis = tvmax2 * (ssBlob->LifeTime());
 //             cout << "\tt" << tvmax <<";" << ssBlob->LifeTime() << ";" << tvalue2 << " ";
 
-            measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvmax, tvalue, tvmax2);
+            measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvmax, tvalue);
 
             areamoy +=area;
             areavar +=area*area;

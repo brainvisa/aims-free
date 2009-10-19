@@ -244,9 +244,9 @@ namespace aims
      void ScaleLevel<AimsData<T>, AimsData<T> >::DetectBlobs(TexturedData<AimsData<T>, AimsData<T> > *mask, char *stats)
      {
           TexturedData<AimsData<T>, AimsData<T> >textdata(&_level) ;
-          TexturedData<AimsData<T>, AimsData<T> > & auxtextdata( *_auxdata );
+          
           ExtractGreyLevelBlobs<AimsData<T>, AimsData<T> > extractor(&textdata, mask, stats);
-          extractor.SetAuxData(&auxtextdata);
+          
         typename std::map<int, GreyLevelBlob<Site> *>::iterator itBlob;
 
         //std::cout << "DEBUG: starting detection" << std::endl;
@@ -272,18 +272,15 @@ namespace aims
      {
           TexturedData<AimsSurface<D, Void>, Texture<T> > textdata(_mesh, &_level, _coordinates) ;
           TexturedData<AimsSurface<D, Void>, Texture<T> > rawtextdata(_mesh, _originallevel, _coordinates) ;
-          TexturedData<AimsSurface<D, Void>, Texture<T> > &auxtextdata( *_auxdata );
           ExtractGreyLevelBlobs<AimsSurface<D, Void>, Texture<T> > extractor(&textdata, &rawtextdata, mask, stats);
-          extractor.SetAuxData(&auxtextdata);
           typename std::map<int, GreyLevelBlob<Site> *>::iterator itBlob;
-          if (blobs.size() == 0)
-          {
+          if (blobs.size() == 0){
                extractor.Run();
                blobs=extractor.GetBlobs();
                saddlePoints=extractor.GetSaddleList();
                maximumPoints=extractor.GetMaxList();
                itBlob=blobs.begin();
-              for ( ; itBlob != blobs.end(); ++itBlob)
+               for ( ; itBlob != blobs.end(); ++itBlob)
                   ((*itBlob).second)->SetScale(_scale);
           }
      }

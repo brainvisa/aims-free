@@ -178,7 +178,7 @@ int main(int argc, const char **argv)
   try
     {
       std::string fileInT, fileInM, fileout, fileoutBlobs, motionfile, subject="none",
-        graphout, auxmeshpath="", fileLat="", fileLongit="", auxtexpath="";
+        graphout, auxmeshpath="", fileLat="", fileLongit="";
       float dt=0.05, tmax, tmin=1.0,filterout=-100000000.0;
       uint intersection_param=10;
 
@@ -203,7 +203,6 @@ int main(int argc, const char **argv)
       app.alias( "--auxmesh", "-mX" );
       app.addOption( subject, "-sj", "subject name (default : inputImage)", true);
       app.alias ("--subject", "-sj");
-      app.addOption( auxtexpath, "-tX", "auxilliary texture (for more embedded features)", true);
       app.alias ("--subject", "-sj");
 
       app.addOption( motionfile, "--trans", "Transformation matrix to Talairach space", true );
@@ -272,15 +271,7 @@ int main(int argc, const char **argv)
       }
       scale_space.PutCoordinates(&coordinates);
       }
-      if (auxtexpath!=""){
-        cout << "Auxilliary texture for more embedded features : " << auxtexpath << endl;
 
-        Reader<TimeTexture<float> > r(auxtexpath);
-        r.read(tmptex);
-        TexturedData<AimsSurface<3, Void>, Texture<float> > *tmptd = new TexturedData<AimsSurface<3, Void>, Texture<float> >( &laMesh[0], &tmptex[0] );
-        ASSERT(tmptex[0].nItem() == laMesh[0].vertex().size());
-        scale_space.SetAuxData(tmptd);
-      }
 
       scale_space.GenerateDefaultScaleSpace(tmax);
 

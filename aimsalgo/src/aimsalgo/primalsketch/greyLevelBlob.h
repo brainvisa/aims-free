@@ -97,9 +97,9 @@ namespace aims
 
      public:
         BlobMeasurements() {}
-        BlobMeasurements(const BlobMeasurements &other) {maxIntensity=other.maxIntensity; meanIntensity=other.meanIntensity; maxContrast=other.maxContrast; meanContrast= other.meanContrast;  area=other.area; t=other.t; tValue=other.tValue; t2=other.t2;}
-        BlobMeasurements(float maxInt, float meanInt, float maxCont, float meanCont, float a, float tv=0.0, float tvalue=0.0, float t2=0.0):
-            maxIntensity(maxInt), meanIntensity(meanInt), maxContrast(maxCont), meanContrast(meanCont), area(a), t(tv), tValue(tvalue), t2(t2) {}
+        BlobMeasurements(const BlobMeasurements &other) {maxIntensity=other.maxIntensity; meanIntensity=other.meanIntensity; maxContrast=other.maxContrast; meanContrast= other.meanContrast;  area=other.area; t=other.t; tValue=other.tValue;}
+        BlobMeasurements(float maxInt, float meanInt, float maxCont, float meanCont, float a, float tv=0.0, float tvalue=0.0):
+            maxIntensity(maxInt), meanIntensity(meanInt), maxContrast(maxCont), meanContrast(meanCont), area(a), t(tv), tValue(tvalue) {}
 
           float maxIntensity;
           float meanIntensity;
@@ -108,8 +108,7 @@ namespace aims
           float area;
           float t;
           float tValue;
-          float t2;
-
+          
         BlobMeasurements & operator = (const BlobMeasurements & other);
      };
 
@@ -199,8 +198,7 @@ namespace aims
 
       TexturedData<Geom,Text> *_texdata;
       TexturedData<Geom,Text> *_rawtexdata;
-      TexturedData<Geom,Text> *_auxdata;
-       TexturedData<Geom, Text> *_mask;      // For convenience, data and mask are same type.
+      TexturedData<Geom, Text> *_mask;      // For convenience, data and mask are same type.
                                                        // This is the only simple solution to keep type genericity
                                                  // Mask is 0 outside, >0 inside
       std::map<int, GreyLevelBlob<Site>* >  blobMap; // map label -> blob
@@ -210,30 +208,28 @@ namespace aims
 
       char *_stats;        // File name for blob statistics
 
-       void DoMasking(); // if required, use a mask to remove some blobs
-       void CheckMask(); // basic check : is the geometry of the mask the same than the data ?
+      void DoMasking(); // if required, use a mask to remove some blobs
+      void CheckMask(); // basic check : is the geometry of the mask the same than the data ?
 
     public :
 
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata, TexturedData<Geom,Text> *rawtexdata, TexturedData<Geom,Text> *mask)
-      : _texdata(texdata), _rawtexdata(rawtexdata), _mask(mask), _stats(0), _auxdata(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
+      : _texdata(texdata), _rawtexdata(rawtexdata), _mask(mask), _stats(0){ labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata, TexturedData<Geom,Text> *rawtexdata, TexturedData<Geom,Text> *mask, char *stats)
-      : _texdata(texdata), _rawtexdata(rawtexdata), _mask(mask), _stats(stats), _auxdata(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
+      : _texdata(texdata), _rawtexdata(rawtexdata), _mask(mask), _stats(stats) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
       
       
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata)
-      : _texdata(texdata), _rawtexdata(NULL), _mask(0), _stats(0), _auxdata(0) {                    labelsImage=TexturedData<Geom, Text>(*_texdata);}
+      : _texdata(texdata), _rawtexdata(NULL), _mask(0), _stats(0) {                    labelsImage=TexturedData<Geom, Text>(*_texdata);}
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata, TexturedData<Geom,Text> *mask)
-      : _texdata(texdata), _rawtexdata(NULL),  _mask(mask), _stats(0), _auxdata(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
+      : _texdata(texdata), _rawtexdata(NULL),  _mask(mask), _stats(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
       ExtractGreyLevelBlobs(TexturedData<Geom,Text> *texdata, TexturedData<Geom,Text> *mask, char *stats)
-      : _texdata(texdata), _rawtexdata(NULL),  _mask(mask), _stats(stats), _auxdata(0) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
+      : _texdata(texdata), _rawtexdata(NULL),  _mask(mask), _stats(stats) { labelsImage=TexturedData<Geom, Text>(*_texdata); CheckMask();}
       void Run(); // possibility of masking to exclude an area
   
        void ComputeBlobMeasurements();
        void SetOriginalTexture(TexturedData<Geom,Text> *rawtexdata){ _rawtexdata = rawtexdata; }
-       void SetAuxData(TexturedData<Geom,Text> *auxdata){ _auxdata= auxdata; }
       TexturedData<Geom,Text> *GetOriginalTexture(){return _rawtexdata; }
-      TexturedData<Geom,Text> *GetAuxData(){return _auxdata; }
     // doit renvoyer une liste de GLB, de maximums et de saddle points
       std::list<SaddlePoint<Site> *> GetSaddleList() {return saddleList;}
       std::list<MaximumPoint<Site> *> GetMaxList() {return  maximumList;}
@@ -275,7 +271,7 @@ namespace aims
         area=other.area;
         t=other.t;
         tValue=other.tValue;
-        t2 = other.t2;
+        
      return *this;
     }
 
@@ -317,21 +313,20 @@ namespace aims
 
        //----------------------------------------------------------------------------------------------------------
 
-     template<typename Geom, typename Text> void ExtractGreyLevelBlobs<Geom, Text>::Run()
-     {
-          int currentLabel=0, labelBlob;
-          MaximumPoint<Site> *maximum;
-          SaddlePoint<Site> *saddle;
-          GreyLevelBlob<Site> *greyLevelBlob;
+  template<typename Geom, typename Text> void ExtractGreyLevelBlobs<Geom, Text>::Run()
+  {
+      int currentLabel=0, labelBlob;
+      MaximumPoint<Site> *maximum;
+      SaddlePoint<Site> *saddle;
+      GreyLevelBlob<Site> *greyLevelBlob;
 
       // multimap<intensity, data.site> for intensity based sorting of sites/voxels
-          std::multimap<const Val, Site> sortedSites;
-          SiteIterator<Geom> ptSite=(*_texdata).siteBegin();
+      std::multimap<const Val, Site> sortedSites;
+      SiteIterator<Geom> ptSite=(*_texdata).siteBegin();
+      
+      for ( ; ptSite != (*_texdata).siteEnd(); ++ptSite)
+          sortedSites.insert(std::pair<Val, Site>((*_texdata).intensity(*ptSite), (*ptSite)));
 
-          for ( ; ptSite != (*_texdata).siteEnd(); ++ptSite)
-          {
-                  sortedSites.insert(std::pair<Val, Site>((*_texdata).intensity(*ptSite), (*ptSite)));
-          }
 
       // TexturedData that will contains the label associated with each site,
       // that is:  BACKGROUND, or grey-level blob number.
@@ -340,92 +335,88 @@ namespace aims
       // Rem: labels should be (int) but will be same type than Text to handle both surfaces
       // and images. Not elegant but that's all I found so far.
 
-          for (ptSite=labelsImage.siteBegin(); ptSite !=  labelsImage.siteEnd(); ++ptSite)
-          labelsImage.intensity(*ptSite)=BACKGROUND;
+      for (ptSite=labelsImage.siteBegin(); ptSite !=  labelsImage.siteEnd(); ++ptSite)
+        labelsImage.intensity(*ptSite)=BACKGROUND;
       // GL Blob extraction
       // This is the core algorithm
-          typename std::multimap<Val, Site>::reverse_iterator ptSortedSites;
+      typename std::multimap<Val, Site>::reverse_iterator ptSortedSites;
 
-        //std::cout << "DEBUG: extractor has started detection" << std::endl;
-          for ( ptSortedSites=sortedSites.rbegin(); ptSortedSites != sortedSites.rend(); ++ptSortedSites)
-          {
-               Val intensity=(*_texdata).intensity((*ptSortedSites).second);
+      //std::cout << "DEBUG: extractor has started detection" << std::endl;
+      for ( ptSortedSites=sortedSites.rbegin(); ptSortedSites != sortedSites.rend(); ++ptSortedSites) {
+            Val intensity=(*_texdata).intensity((*ptSortedSites).second);
 
-               int nbAbove;
-               int nbAboveLabels;
+            int nbAbove;
+            int nbAboveLabels;
 
-       // How many neighbours with higher intensity ?
+      // How many neighbours with higher intensity ?
 
-               std::vector<Site> neighb=(*_texdata).neighbours((*ptSortedSites).second); //neighbours
-               std::vector<Site> above; //neighbours with higher intensity
-               std::set<int> aboveLabels; // labels of (above)
-               typename std::vector<Site>::iterator ptNeigh=neighb.begin();
-               for ( ; ptNeigh != neighb.end(); ++ptNeigh)
-          {
-                    if ((*_texdata).intensity(*ptNeigh) > intensity)
-                    {
-                         above.push_back(*ptNeigh);
-                         aboveLabels.insert(int(labelsImage.intensity(*ptNeigh)));
-                    }
-         }
-               nbAbove=above.size();
-               nbAboveLabels=aboveLabels.size();
+            std::vector<Site> neighb=(*_texdata).neighbours((*ptSortedSites).second); //neighbours
+            std::vector<Site> above; //neighbours with higher intensity
+            std::set<int> aboveLabels; // labels of (above)
+            typename std::vector<Site>::iterator ptNeigh=neighb.begin();
+            for ( ; ptNeigh != neighb.end(); ++ptNeigh){
+              if ((*_texdata).intensity(*ptNeigh) > intensity){
+                  above.push_back(*ptNeigh);
+                  aboveLabels.insert(int(labelsImage.intensity(*ptNeigh)));
+              }
+            }
+            nbAbove=above.size();
+            nbAboveLabels=aboveLabels.size();
 
-               if (nbAbove==0)      // Case 1: local max, new blob
-         {
-           currentLabel++;
-           maximum=new MaximumPoint<Site>((*ptSortedSites).second);
-           greyLevelBlob=new GreyLevelBlob<Site>(maximum, currentLabel);
-           labelsImage.intensity((*ptSortedSites).second)=(Val) currentLabel;
-           maximumList.push_back(maximum);
-           blobMap[currentLabel]=(greyLevelBlob);
-         }
-          else if ( (nbAbove==1) && ((labelsImage.intensity(*(above.begin())))==BACKGROUND) )
-                            // Case 2: point in background
-         {
-           labelsImage.intensity((*ptSortedSites).second)=BACKGROUND;
-         }
+            if (nbAbove==0){      // Case 1: local max, new blob
+              currentLabel++;
+              maximum=new MaximumPoint<Site>((*ptSortedSites).second);
+              greyLevelBlob=new GreyLevelBlob<Site>(maximum, currentLabel);
+              labelsImage.intensity((*ptSortedSites).second)=(Val) currentLabel;
+              maximumList.push_back(maximum);
+              blobMap[currentLabel]=(greyLevelBlob);
+            }
+            else if ( (nbAbove==1) && ((labelsImage.intensity(*(above.begin())))==BACKGROUND) ){
+                              // Case 2: point in background
+              labelsImage.intensity((*ptSortedSites).second)=BACKGROUND;
+            }
 
-          else if ((nbAbove>1) && (nbAboveLabels>1))  // Case 3: one or several blobs to stop -> Saddle point
-         {
-                    int flagS=0;
-           labelsImage.intensity((*ptSortedSites).second)=BACKGROUND;
-           std::set<int>::iterator ptLabels=aboveLabels.begin();
-           for (; ptLabels != aboveLabels.end(); ++ptLabels)
-                    if (*ptLabels!=BACKGROUND)
-                         if (blobMap[*ptLabels]->CanGrow())
-                              {
-                                   if (flagS==0)
-                                   {
-                              saddle=new SaddlePoint<Site>((*ptSortedSites).second);
-                              saddleList.push_back(saddle);
-                                   blobMap[*ptLabels]->SetSaddle(saddle);
-                                        flagS=1;
-                                   }
-                                   else
-                                        blobMap[*ptLabels]->SetSaddle(saddle);
-                              }
-         }
-          else                 // Case 4: point belong to a growing blob
-         {
-           labelBlob=int(labelsImage.intensity(*(above.begin())));
-           if ((labelBlob != BACKGROUND) && (blobMap[labelBlob]->CanGrow() ))
-                    {
+            else if ((nbAbove>1) && (nbAboveLabels>1)){
+                // Case 3: one or several blobs to stop -> Saddle point
+        
+                int flagS=0;
+                labelsImage.intensity((*ptSortedSites).second)=BACKGROUND;
+                std::set<int>::iterator ptLabels=aboveLabels.begin();
+                for (; ptLabels != aboveLabels.end(); ++ptLabels)
+                if (*ptLabels!=BACKGROUND)
+                      if (blobMap[*ptLabels]->CanGrow())
+                          {
+                                if (flagS==0)
+                                {
+                          saddle=new SaddlePoint<Site>((*ptSortedSites).second);
+                          saddleList.push_back(saddle);
+                                blobMap[*ptLabels]->SetSaddle(saddle);
+                                    flagS=1;
+                                }
+                                else
+                                    blobMap[*ptLabels]->SetSaddle(saddle);
+                          }
+            }
+            else                 // Case 4: point belong to a growing blob
+            {
+              labelBlob=int(labelsImage.intensity(*(above.begin())));
+              if ((labelBlob != BACKGROUND) && (blobMap[labelBlob]->CanGrow() )) 
+                {
                     labelsImage.intensity((*ptSortedSites).second)=(Val) labelBlob;
                     blobMap[labelBlob]->AddPoint((*ptSortedSites).second);
-                    }
-           else
-                    {
+                }
+              else
+                {
                     labelsImage.intensity((*ptSortedSites).second)=BACKGROUND;
-                    }
-         }
-          }
-        //std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
-        //std::cout << "DEBUG: extractor about to enter masking" << std::endl;
-          if (_mask!=0) DoMasking();
-        //std::cout << "DEBUG: masking done, extractor about to enter measurements" << std::endl;
-          ComputeBlobMeasurements();
-        //std::cout << "DEBUG: done" << std::endl;
+                }
+            }
+      }
+      //std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
+      //std::cout << "DEBUG: extractor about to enter masking" << std::endl;
+      if (_mask!=0) DoMasking();
+      //std::cout << "DEBUG: masking done, extractor about to enter measurements" << std::endl;
+      ComputeBlobMeasurements();
+      //std::cout << "DEBUG: done" << std::endl;
   }
 
     //----------------------------------------------------------------------------------------------------------
@@ -433,44 +424,44 @@ namespace aims
   template<typename Geom, typename Text> void ExtractGreyLevelBlobs<Geom, Text>::DoMasking()
   {
     typename std::list<MaximumPoint<Site> *>::iterator itMax=maximumList.begin(), itPrevious=itMax;
-     SaddlePoint<Site> *saddle;
-     double EPSILON=0.00001;
-     int del=0;
+    SaddlePoint<Site> *saddle;
+    double EPSILON=0.00001;
+    int del=0;
 
     //std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
     //std::cout << "DEBUG: saddle list size : " << saddleList.size() << std::endl;
 
-     for ( ; itMax!=maximumList.end(); ++itMax)
-     {
+    for ( ; itMax!=maximumList.end(); ++itMax)
+    {
           if (del==1)
           {
-               maximumList.erase(itPrevious);
+              maximumList.erase(itPrevious);
           }
           del=0;
           if (fabs(_mask->intensity((*itMax)->_node)) < EPSILON) // this is to test float=0.0
           {
-               blobMap.erase((*itMax)->blob->Label());                // remove the blob from the list.
+              blobMap.erase((*itMax)->blob->Label());                // remove the blob from the list.
 
-               saddle=(*itMax)->blob->GetSaddle();                    // check the saddle
+              saddle=(*itMax)->blob->GetSaddle();                    // check the saddle
             if (saddle != 0) // some blobs can have no saddle if they are on the image border
             {
-                   if (saddle->blobList.size()>1)
-                   {
+                  if (saddle->blobList.size()>1)
+                  {
                         saddle->blobList.remove((*itMax)->blob);
-                   }
-                   else
-                   {
+                  }
+                  else
+                  {
                         saddle->blobList.remove((*itMax)->blob);
                         saddleList.remove(saddle);
                         delete saddle;
-                   }
+                  }
             }
-               delete (*itMax)->blob;        // delete the blob
-               del=1;                             // maximum has to be deleted
+              delete (*itMax)->blob;        // delete the blob
+              del=1;                             // maximum has to be deleted
           }
           itPrevious=itMax;
-     }
-     if (del==1)
+    }
+    if (del==1)
           maximumList.erase(itPrevious);
     //std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
   }
@@ -589,22 +580,7 @@ namespace aims
               }
               else 
                 blob->measurements.t = 0.0;
-              TexturedData<Geom, Text> * auxt = GetAuxData();
-              if (auxt != NULL){
-                std::set<Site,ltstr_p3d<Site> >  pixels;
-                pixels=blob->GetListePoints();
-  
-                typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
-                float tvmax=-100.0;
-                for ( itPix=pixels.begin(); itPix!=pixels.end(); itPix++)
-                {
-                  if (float(auxt->intensity(*itPix)) > tvmax)
-                    tvmax= float(auxt->intensity(*itPix));
-                }
-                blob->measurements.t2 = tvmax;
-              }
-            else
-              blob->measurements.t2 = 0;
+
 
             //std::cout << " - " << std::flush;
             if (fileStat!=0)
