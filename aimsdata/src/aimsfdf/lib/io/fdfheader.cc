@@ -38,12 +38,14 @@
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/type/byte_order.h>
 #include <cartobase/stream/fileutil.h>
+#include <cartobase/stream/directory.h>
 #include <cartobase/type/string_conversion.h>
 #include <aims/io/fdfutil.h>
 #include <aims/io/fdfheader.h>
 #include <aims/io/fdfprocpar_g.h>
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <unistd.h>
 #include <stdio.h>
@@ -275,7 +277,7 @@ void FdfHeader::read()
     }
     tokens.clear();
   }
-
+  
   // Process image resolution
   for(unsigned int i=0; i<matrix.size(); i++) {
     resolutions.push_back( (roi[i] * 10 ) / matrix[i] );
@@ -357,32 +359,11 @@ void FdfHeader::read()
 
   // add meta-info to header
   readProcPar( FileUtil::dirname( _name ) + FileUtil::separator() + "procpar" );
-
   readMinf( removeExtension( _name ) + extension() + ".minf" );
 
   string pattern;
   if (rank < 3) {
     // We use 2D slices to try to get a complete volume
-    if ( !getProperty("input_file_pattern", pattern)) {
-        // Set a default fdf pattern to be able to get slice files
-        string      filename = FileUtil::basename( _name );
-        string      searchpattern = "^slice([0-9]+).*" + extension() + "$";
-        regex_t	    reg;
-        regcomp( &reg, searchpattern.c_str(),
-                REG_EXTENDED | REG_ICASE );
-        regmatch_t	rmatch[2];
-    
-        if( !regexec( &reg, filename.c_str(), 2, rmatch, 0 ) ) {
-            uint length = rmatch[1].rm_eo - rmatch[1].rm_so;
-            ostringstream	pattern;
-            pattern << filename.substr(0, rmatch[1].rm_so) << "\%0" << length << "d" << filename.substr(rmatch[1].rm_eo);
-            setProperty("input_file_pattern", pattern.str());
-            setProperty("slice_min", 1);
-        }
-
-        regfree( &reg );
-    }
-
     inputFilenames();
   }
 
@@ -399,163 +380,249 @@ void FdfHeader::read()
 }
 
 void FdfHeader::readProcPar( string name ) {
+    string stat = FileUtil::fileStat( name );
 
-    FdfProcPar procpar( name );
-
-    // Set header properties
-    setProperty( "manufacturer",  "varian" );
-
-    string patientid = procpar.value<string>("ident");
-    if (!patientid.empty()) {
-        setProperty( "patient_id", patientid );
-    }
-
-    string studyid = procpar.value<string>("studyid_");
-    if (!studyid.empty()) {
-        setProperty( "study_id", studyid );
-    }
-
-    vector< float > patientposition;
-    float position1 = procpar.value<float>("position1");
-    float position2 = procpar.value<float>("position2");
-
-    if (position1 != 0.) {
-        patientposition.push_back( position1 );
-    }
-    if (position2 != 0.) {
-        patientposition.push_back( position2 );
-    }
-    if (! patientposition.empty() ) {
-        setProperty( "patient_position", patientposition );
-    }
+    if ( stat.find('r') != string::npos ) {
+        // File exists and is readable
+        FdfProcPar procpar( name );
     
-    string acquisitionmode = procpar.value<string>("acquisition_mode");
-    if (!acquisitionmode.empty()) {
-        setProperty( "acquisition_mode", acquisitionmode );
-    }
+        // Set header properties
+        setProperty( "manufacturer",  "varian" );
     
-    string tn = procpar.value<string>("tn");
-    if (!tn.empty()) {
-        setProperty( "tn", tn );
-    }
-
-    string dn = procpar.value<string>("dn");
-    if (!dn.empty()) {
-        setProperty( "dn", dn );
-    }
-
-    vector<float> nuclearfrequency;
-    float sfrq = procpar.value<float>("sfrq");
-    float dfrq = procpar.value<float>("dfrq");
-
-    if (sfrq != 0.) {
-        nuclearfrequency.push_back( sfrq );
-    }
-    if (dfrq != 0.) {
-        nuclearfrequency.push_back( dfrq );
-    }
-    if (!nuclearfrequency.empty()) {
-        setProperty( "nuclear_frequency", nuclearfrequency );
-    }
-
-    float lro = procpar.value<float>("lro");
-    if (lro != 0.) {
-        setProperty( "lro", lro );
-    }
-
-    float lpe = procpar.value<float>("lpe");
-    if (lpe != 0.) {
-        setProperty( "lpe", lpe );
-    }
-
-    float lpe2 = procpar.value<float>("lpe2");
-    if (lpe2 != 0.) {
-        setProperty( "lpe2", lpe2 );
-    }
-
-    float pro = procpar.value<float>("pro");
-    if (pro != 0.) {
-        setProperty( "pro", pro );
-    }
-
-    float ppe = procpar.value<float>("ppe");
-    if (ppe != 0.) {
-        setProperty( "ppe", ppe );
-    }
-
-    float ppe2 = procpar.value<float>("ppe2");
-    if (ppe2 != 0.) {
-        setProperty( "ppe2", ppe2 );
-    }
-
-    float thk = procpar.value<float>("thk");
-    if (thk != 0.) {
-        setProperty( "thk", thk );
-    }
-
-    float gap = procpar.value<float>("gap");
-    if (gap != 0.) {
-        setProperty( "gap", gap );
-    }
-
-    float psi = procpar.value<float>("psi");
-    if (psi != 0.) {
-        setProperty( "psi", psi );
-    }
-
-    float phi = procpar.value<float>("phi");
-    if (phi != 0.) {
-        setProperty( "phi", phi );
-    }
-
-    float theta = procpar.value<float>("theta");
-    if (theta != 0.) {
-        setProperty( "theta", theta );
-    }
-
-    float dro = procpar.value<float>("dro");
-    if (dro != 0.) {
-        setProperty( "dro", dro );
-    }
+        string patientid = procpar.value<string>("ident");
+        if (!patientid.empty()) {
+            setProperty( "patient_id", patientid );
+        }
     
-    float dpe = procpar.value<float>("dpe");
-    if (dpe != 0.) {
-        setProperty( "dpe", dpe );
+        string studyid = procpar.value<string>("studyid_");
+        if (!studyid.empty()) {
+            setProperty( "study_id", studyid );
+        }
+    
+        vector< float > patientposition;
+        float position1 = procpar.value<float>("position1");
+        float position2 = procpar.value<float>("position2");
+    
+        if (position1 != 0.) {
+            patientposition.push_back( position1 );
+        }
+        if (position2 != 0.) {
+            patientposition.push_back( position2 );
+        }
+        if (! patientposition.empty() ) {
+            setProperty( "patient_position", patientposition );
+        }
+        
+        string acquisitionmode = procpar.value<string>("acquisition_mode");
+        if (!acquisitionmode.empty()) {
+            setProperty( "acquisition_mode", acquisitionmode );
+        }
+        
+        string tn = procpar.value<string>("tn");
+        if (!tn.empty()) {
+            setProperty( "tn", tn );
+        }
+    
+        string dn = procpar.value<string>("dn");
+        if (!dn.empty()) {
+            setProperty( "dn", dn );
+        }
+    
+        vector<float> nuclearfrequency;
+        float sfrq = procpar.value<float>("sfrq");
+        float dfrq = procpar.value<float>("dfrq");
+    
+        if (sfrq != 0.) {
+            nuclearfrequency.push_back( sfrq );
+        }
+        if (dfrq != 0.) {
+            nuclearfrequency.push_back( dfrq );
+        }
+        if (!nuclearfrequency.empty()) {
+            setProperty( "nuclear_frequency", nuclearfrequency );
+        }
+    
+        float lro = procpar.value<float>("lro");
+        if (lro != 0.) {
+            setProperty( "lro", lro );
+        }
+    
+        float lpe = procpar.value<float>("lpe");
+        if (lpe != 0.) {
+            setProperty( "lpe", lpe );
+        }
+    
+        float lpe2 = procpar.value<float>("lpe2");
+        if (lpe2 != 0.) {
+            setProperty( "lpe2", lpe2 );
+        }
+    
+        float pro = procpar.value<float>("pro");
+        if (pro != 0.) {
+            setProperty( "pro", pro );
+        }
+    
+        float ppe = procpar.value<float>("ppe");
+        if (ppe != 0.) {
+            setProperty( "ppe", ppe );
+        }
+    
+        float ppe2 = procpar.value<float>("ppe2");
+        if (ppe2 != 0.) {
+            setProperty( "ppe2", ppe2 );
+        }
+    
+        float thk = procpar.value<float>("thk");
+        if (thk != 0.) {
+            setProperty( "thk", thk );
+        }
+    
+        float gap = procpar.value<float>("gap");
+        if (gap != 0.) {
+            setProperty( "gap", gap );
+        }
+    
+        float psi = procpar.value<float>("psi");
+        if (psi != 0.) {
+            setProperty( "psi", psi );
+        }
+    
+        float phi = procpar.value<float>("phi");
+        if (phi != 0.) {
+            setProperty( "phi", phi );
+        }
+    
+        float theta = procpar.value<float>("theta");
+        if (theta != 0.) {
+            setProperty( "theta", theta );
+        }
+    
+        float dro = procpar.value<float>("dro");
+        if (dro != 0.) {
+            setProperty( "dro", dro );
+        }
+        
+        float dpe = procpar.value<float>("dpe");
+        if (dpe != 0.) {
+            setProperty( "dpe", dpe );
+        }
+    
+        float dsl = procpar.value<float>("dsl");
+        if (dsl != 0.) {
+            setProperty( "dsl", dsl );
+        }
+    
+        float bvalue = procpar.value<float>("bvalue");
+        if (bvalue != 0.) {
+            setProperty( "b_value", bvalue );
+        }
+    
+        float te = procpar.value<float>("te");
+        if (te != 0.) {
+            setProperty( "te", te );
+        }
+    
+        float tr = procpar.value<float>("tr");
+        if (tr != 0.) {
+            setProperty( "tr", tr );
+        }
+    
+        float ti = procpar.value<float>("ti");
+        if (ti != 0.) {
+            setProperty( "ti", ti );
+        }
+    
+        int ns = procpar.value<int>("ns");
+        if (ns != 0) {
+            setProperty( "ns", ns );
+        }
+    
+        int ne = procpar.value<int>("ne");
+        if (ne != 0) {
+            setProperty( "ne", ne );
+        }
     }
+}
 
-    float dsl = procpar.value<float>("dsl");
-    if (dsl != 0.) {
-        setProperty( "dsl", dsl );
-    }
+vector<string> FdfHeader::inputFilenames() {
 
-    float bvalue = procpar.value<float>("bvalue");
-    if (bvalue != 0.) {
-        setProperty( "b_value", bvalue );
-    }
+  bool          loop = false;
+  string        regex = "";
+  string        prefix = "", suffix;
+  string        pattern = "";
+  string	name = _name;
+  string	dirname = FileUtil::dirname( _name );
+  regex_t	reg;
+  regmatch_t	rmatch[2], pmatch[2];
 
-    float te = procpar.value<float>("te");
-    if (te != 0.) {
-        setProperty( "te", te );
-    }
+  name = FileUtil::basename( name );
 
-    float tr = procpar.value<float>("tr");
-    if (tr != 0.) {
-        setProperty( "tr", tr );
-    }
+  // Scan directory for matching files
+  Directory	        dir( dirname );
+  set<string>	        files = dir.files();
+  set<string>::iterator	is, es = files.end();
+  vector<string>        foundfiles;
 
-    float ti = procpar.value<float>("ti");
-    if (ti != 0.) {
-        setProperty( "ti", ti );
-    }
+  loop = true;
 
-    int ns = procpar.value<int>("ns");
-    if (ns != 0) {
-        setProperty( "ns", ns );
-    }
+  while ( loop ) {
+    regex = "^" + prefix + "[^0-9]*([0-9]+).*" + extension() + "$";  
+    regcomp( &reg, regex.c_str(), REG_EXTENDED | REG_ICASE );
 
-    int ne = procpar.value<int>("ne");
-    if (ne != 0) {
-        setProperty( "ne", ne );
+    if( !regexec( &reg, name.c_str(), 2, rmatch, 0 ) ) {
+
+      // We found a number in the file name
+      prefix = name.substr( 0, rmatch[1].rm_so );
+      suffix = name.substr( rmatch[1].rm_eo );
+
+      pattern = "^" + prefix + "([0-9]+)" + suffix + "$";
+      //cout << "Pattern : '" << pattern << "'" << endl << flush;
+      regcomp( &reg, pattern.c_str(), REG_EXTENDED | REG_ICASE );
+
+      vector<string> matchingfiles;
+      int min = std::numeric_limits<int>::max();
+      int max = std::numeric_limits<int>::min();
+
+      for( is=files.begin(); is!=es; ++is ) {
+          // We check for files that match the pattern
+          if( !regexec( &reg, is->c_str(), 2, pmatch, 0 ) ) {
+            int slicenumber;
+            istringstream sstream(is->substr( pmatch[1].rm_so, pmatch[1].rm_eo - pmatch[1].rm_so ));
+            sstream >> slicenumber;
+
+            if ( slicenumber < min ) {
+              min = slicenumber;
+            }
+            if ( slicenumber > max ) {
+              max = slicenumber;
+            }
+            matchingfiles.push_back( *is );
+            //cout << "File : '" << (*is) << "' matches fdf." << endl << flush;
+          }
+      }
+      // cout << "matchingfiles : " << matchingfiles.size() << ", min : " << min << ", max : " << max << endl << flush;
+
+      if ( ( ((int)matchingfiles.size()) == _dimZ ) && ( ( max - min + 1 ) == _dimZ ) ) {
+        loop = false;
+        foundfiles = matchingfiles;
+
+        vector<Object>	names;
+        names.reserve(foundfiles.size());
+        for( uint i=0; i<foundfiles.size(); ++i )
+          names.push_back( Object::value( foundfiles[i] ) );
+        setProperty( "filenames", names );
+        //cout << "Found pattern : " << pattern << endl;
+      }
+      else {
+        prefix += name.substr( rmatch[1].rm_so, rmatch[1].rm_eo - rmatch[1].rm_so );
+      }
     }
+    else {
+      loop = false;
+    }
+  }
+
+  regfree( &reg );
+  return foundfiles;
 }
 
