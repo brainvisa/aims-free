@@ -78,6 +78,7 @@ namespace aims
 
     void read();
     void readProcPar( std::string name );
+    virtual std::vector<std::string> inputFilenames();
 
   protected:
     virtual std::set<std::string> getFiles(std::string filename) const;
