@@ -263,68 +263,11 @@ namespace aims
                (*itBlob)->ComputeLifeTime();
                (*itBlob)->ComputeScaleRep();
           }
-//           typename std::list<ScaleSpaceBlob<Site>*>::iterator itBlob=blobList.begin();
         // blob (multiscale) measurements are computed here.
         
         ComputeBlobMeasurements(statFile);        
         cout << "ssblobs avant : " << blobList.size() << endl;
 
-        // on va faire une texture de blobs
-
-/*        uint nb_scales = _scaleSpace->GetScaleLevels().size();
-//         cout << "nb d'échelles :" << nb_scales << " " << _scaleSpace->Scale(0.0)->Mesh()->vertex().size() << endl;
-//         AimsSurfaceTriangle *auxmesh; auxmesh = _scaleSpace->AuxMesh();
-        TimeTexture<float> blobs(nb_scales, _scaleSpace->Scale(0.0)->Mesh()->vertex().size());
-        TimeTexture<float> blobs_t(nb_scales, _scaleSpace->Scale(0.0)->Mesh()->vertex().size());
-        for (uint i=0;i<blobs.size();i++)
-          for (uint j=0;j<blobs[i].nItem();j++)
-            blobs[i].item(j) = 0.0;
-        typename std::list<ScaleSpaceBlob<Site>*>::iterator itssb = blobList.begin();
-          set<float> scales = _scaleSpace->GetScaleList();
-
-        vector<uint> histoblobs(20);
-        
-        for (; itssb != blobList.end(); ++itssb){
-          ScaleSpaceBlob<Site> *ssb; ssb = *itssb;
-          
-          
-          
-          typename std::list<GreyLevelBlob<Site>*>::iterator glBlobit= ssb->glBlobs.begin();
-          float deplacement = 0.0;
-          float areaevol = 0.0;
-          Point3df bar = (*glBlobit)->GetMaximum()->_node.first;
-          float area = (*glBlobit)->measurements.area;
-          for (; glBlobit != ssb->glBlobs.end(); glBlobit++){
-            Point3df old = bar;
-            bar = (*glBlobit)->GetMaximum()->_node.first;
-            deplacement += sqrt(pow(old[0]-bar[0],2) + pow(old[1]-bar[1],2) + pow(old[2]-bar[2],2));
-
-          }
-          cout << "dep: " << deplacement << " " ;
-          deplacement = ssb->GetMeasurements().t;
-          areaevol = ssb->GetMeasurements().tValue;
-          glBlobit= ssb->glBlobs.begin();
-          for (; glBlobit != ssb->glBlobs.end(); glBlobit++){
-            float sc = (*glBlobit)->GetScale();
-            uint indexsc = 0;
-            set<float>::iterator scit;
-            for (scit=scales.begin();scit!=scales.end() && *scit != sc;scit++,indexsc++){}
-            set<Site,ltstr_p3d<Site> > &listepts = (*glBlobit)->GetListePoints();
-            typename set<Site,ltstr_p3d<Site> >::iterator ptsit=listepts.begin();
-            for (;ptsit!=listepts.end();ptsit++){
-              blobs[indexsc].item((*ptsit).second) = deplacement+1.0;
-              blobs_t[indexsc].item((*ptsit).second) = areaevol+1.0;
-            }
-//             blobs[indexsc].item((*glBlobit)->GetMaximum()->_node.second) = deplacement + 1000.0;
-              
-          }
-
-          
-        }*/
-//         Writer<TimeTexture<float> > ww("/home/grg/testblobs_t.tex");
-//         Writer<TimeTexture<float> > ww1("/home/grg/testblobs_tvalue.tex");
-//         ww.write(blobs);
-//         ww1.write(blobs_t);
 
 
         // ELAGAGE
@@ -951,11 +894,8 @@ cout << "ssblobs après : " << blobList.size() << endl;
         typename std::list< ScaleSpaceBlob<Site>* >::iterator itSSBlobs=blobList.begin();
         cout << "Computing multi-scale measurements" << std::endl;
 
-//         FILE *spmV=fopen("/home/grg/spmV.txt", "w");
-	uint itest =0;
         for (; itSSBlobs!=blobList.end(); ++itSSBlobs)
         {
-// 	    cout << itest << endl;
             ssBlob=*itSSBlobs;
             typename std::list<GreyLevelBlob<Site>*>::iterator itGLBlobs=ssBlob->glBlobs.begin();
             BlobMeasurements measure;
@@ -975,7 +915,6 @@ cout << "ssblobs après : " << blobList.size() << endl;
             area += dt * (glBlob1->measurements.area);            
             tvalue += dt * (glBlob1->measurements.t);
             
-//             cout << dt << ";" << glBlob1->measurements.t << " == " ;
 
             ++itGLBlobs;
             for (; itGLBlobs!=ssBlob->glBlobs.end(); ++itGLBlobs)
@@ -990,7 +929,6 @@ cout << "ssblobs après : " << blobList.size() << endl;
                 area += dt * (glBlob2->measurements.area + glBlob1->measurements.area)/2.0;
                 tvalue += dt * (glBlob2->measurements.t + glBlob1->measurements.t)/2.0;
                 
-//                 cout << glBlob2->measurements.tValue << " == ";
 
                 glBlob1=glBlob2;
                 t1=t2;
@@ -1008,9 +946,8 @@ cout << "ssblobs après : " << blobList.size() << endl;
             area += dt * (glBlob1->measurements.area);
             tvalue += dt * (glBlob1->measurements.t);
             
-//             cout << tvalue << endl;
 
-            // getting t-value from original map... NORMALEMENT PLUS BESOIN
+            // getting t-value from original map... 
 
             TexturedData<Geom, Text> ima=scaleSpace()->Scale(0.0)->Data();
 
@@ -1020,39 +957,17 @@ cout << "ssblobs après : " << blobList.size() << endl;
             
 
             typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
-            float tvmax=-100.0, tvmax2 = -100.;
+            float tvmax=-100.0;
 
-
-            float tvalue2 = tvmax * (ssBlob->LifeTime()) ; //* glBlob1->measurements.area;
-            float tvalue2bis = tvmax2 * (ssBlob->LifeTime());
-//             cout << "\tt" << tvmax <<";" << ssBlob->LifeTime() << ";" << tvalue2 << " ";
 
             measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvmax, tvalue);
 
             areamoy +=area;
             areavar +=area*area;
             ssBlob->SetMeasurements(measure);
-
-/*            float tt;
-            tt=ssBlob->GetMeasurements().tValue;*/
-//             fprintf(spmV, "%.4f\n", tt);
-
         }
-        
-        
-//         for (itSSBlobs=blobList.end() ; itSSBlobs!=blobList.end(); ++itSSBlobs)
-//         {
-//             ssBlob=*itSSBlobs;
-//             float measure = (ssBlob->GetMeasurements().area - areamoy) / (areavar - areamoy*areamoy);
-//             
-//             if (measure > 0) ssBlob->GetMeasurements().area =  measure + 1;
-//             else ssBlob->GetMeasurements().area = exp(measure);
-//         }
-//         fclose(spmV);
-
     }
 
-    //--------------------------------------------------------------------
 
 }
 

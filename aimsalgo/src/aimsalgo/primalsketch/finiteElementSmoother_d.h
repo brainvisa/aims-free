@@ -55,7 +55,7 @@ template<int D, typename T> Texture<T> FiniteElementSmoother<D,T>::doSmoothing(c
 	unsigned		i,n=ima.nItem();
 	int 			iter;
 	//float threshold=0.1;
-
+        
 	carto::Converter<TimeTexture<T> , TimeTexture<float> > conv;
 	textIn[0]=ima;
 
@@ -63,7 +63,7 @@ template<int D, typename T> Texture<T> FiniteElementSmoother<D,T>::doSmoothing(c
 	{
 		conv.convert(textIn, textTmp2);
 		smooth=textTmp2[0];
-		std::cout << "Starting smoothing in " << maxiter << " iterations" << std::endl;
+		if (verbose) std::cout << "Starting smoothing in " << maxiter << " iterations" << std::endl;
 		for (iter=0; iter< maxiter; ++iter)
 		{
 			lapl =  AimsMeshLaplacian(smooth, weightLapl);

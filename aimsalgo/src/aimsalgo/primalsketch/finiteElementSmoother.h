@@ -65,7 +65,7 @@ namespace aims
 		
     float dt() { return _dt; }                                                                 //smooooth operatooor..
 
-    Texture<T> doSmoothing(const Texture<T> & ima, int maxiter, bool verbose=false);
+    Texture<T> doSmoothing(const Texture<T> & ima, int maxiter, bool verbose=true);
 
     bool optimal() { return true; }
   };

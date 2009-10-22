@@ -114,7 +114,7 @@ class BaseScaleSpace {
 
     Text & GetOriginalImage() {return Scale(0.0)->Level();}
 
-	std::map<float, ScaleLevel<Geom, Text>*> GetScaleLevels() {return scales;}
+    std::map<float, ScaleLevel<Geom, Text>*> GetScaleLevels() {return scales;}
 
     void AddScale(float t);
     void RemoveScale(float t);
@@ -215,8 +215,8 @@ class BaseScaleSpace {
       PutOriginalImage(originalTexture); 
     }
 
-    ScaleSpace(const ScaleSpace< AimsSurface<D, Void>, Texture<T> >  &other)
-    {(*this)._auxmesh=NULL; (*this)._mesh=other._mesh; (*this)._coordinates=other._coordinates; (*this)._smoother=other._smoother; (*this).scales=other.scales; }
+//     ScaleSpace(const ScaleSpace< AimsSurface<D, Void>, Texture<T> >  &other)
+//     {(*this)._auxmesh=NULL; (*this)._mesh=other._mesh; (*this)._coordinates=other._coordinates; (*this)._smoother=other._smoother; (*this).scales=other.scales; }
     
     virtual ~ScaleSpace() {delete _smoother; delete _auxmesh; }
     
