@@ -43,6 +43,7 @@
 #include <aims/io/fdfutil.h>
 #include <aims/io/fdfheader.h>
 #include <aims/io/fdfprocpar_g.h>
+#include <cartobase/type/limits.h>
 
 #include <iostream>
 #include <iomanip>

@@ -237,7 +237,7 @@ public:
   vector_%Template1typecode%_iterator* __objiter__() const /Factory, AutoGen/;
 %MethodCode
   std::vector<%Template1% >::iterator i = sipCpp->begin();
-  sipRes = new vector_%Template1typecode%_iterator( i, sipCpp );
+  sipRes = new vector_%Template1typecode%_iterator( i, sipCpp, sipSelf );
 %End
 
 
@@ -419,23 +419,30 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
 class vector_%Template1typecode%_iterator 
 {
 public:
-  vector_%Template1typecode%_iterator( vector_%Template1typecode%* v )
-    : _vector( v )
-  { }
+  vector_%Template1typecode%_iterator( vector_%Template1typecode%* v,
+                                       PyObject* pyvec )
+    : _vector( v ), _pyvec( pyvec )
+  { Py_INCREF( pyvec ); }
   vector_%Template1typecode%_iterator( std::vector<%Template1PyType%>::iterator & i, 
-                                       vector_%Template1typecode%* v )
-    : _iter( i ), _vector( v )
-  { }
-  ~vector_%Template1typecode%_iterator() {}
+                                       vector_%Template1typecode%* v,
+                                       PyObject *pyvec  )
+    : _iter( i ), _vector( v ), _pyvec( pyvec )
+  { Py_INCREF( pyvec ); }
+  ~vector_%Template1typecode%_iterator() { if( _pyvec ) { Py_DECREF( _pyvec ); } }
 
   vector_%Template1typecode%::iterator _iter;
   vector_%Template1typecode%	*_vector;
+  PyObject *_pyvec;
 };
 #endif
 %End
 
 public:
-  vector_%Template1typecode%_iterator( vector_%Template1typecode% * );
+  vector_%Template1typecode%_iterator(
+    vector_%Template1typecode% * /GetWrapper/ );
+%MethodCode
+  sipCpp = new vector_%Template1typecode%_iterator( a0, a0Wrapper );
+%End
   ~vector_%Template1typecode%_iterator();
 
   SIP_PYOBJECT __objnext__();
@@ -455,14 +462,9 @@ public:
 
   SIP_PYOBJECT __iter__();
 %MethodCode
-#if SIP_VERSION >= 0x040400
   sipRes = 
     sipConvertFromInstance( sipCpp, 
                             sipClass_vector_%Template1typecode%_iterator, 0 );
-#else
-  sipRes = sipMapCppToSelfSubClass( sipCpp, 
-                            sipClass_vector_%Template1typecode%_iterator );
-#endif
 %End
 };
 

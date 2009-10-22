@@ -170,7 +170,7 @@ public:
   set_%Template1typecode%_iterator* __objiter__() const /Factory, AutoGen/;
 %MethodCode
   std::set<%Template1% >::iterator i = sipCpp->begin();
-  sipRes = new set_%Template1typecode%_iterator( i, sipCpp );
+  sipRes = new set_%Template1typecode%_iterator( i, sipCpp, sipSelf );
 %End
 
 
@@ -310,23 +310,27 @@ typedef std::set<%Template1% > set_%Template1typecode%;
 class set_%Template1typecode%_iterator
 {
 public:
-  set_%Template1typecode%_iterator( set_%Template1typecode%* v )
-    : _set( v )
-  { }
+  set_%Template1typecode%_iterator( set_%Template1typecode%* v, PyObject *pyset )
+    : _set( v ), _pyset( pyset )
+  { Py_INCREF( pyset ); /* prevent the set from dying */ }
   set_%Template1typecode%_iterator( std::set<%Template1% >::iterator & i,
-                                       set_%Template1typecode%* v )
-    : _iter( i ), _set( v )
-  { }
-  ~set_%Template1typecode%_iterator() {}
+                                    set_%Template1typecode%* v, PyObject* pyset )
+    : _iter( i ), _set( v ), _pyset( pyset )
+  { Py_INCREF( pyset ); }
+  ~set_%Template1typecode%_iterator() { if( _pyset ) { Py_DECREF( _pyset );} }
 
   set_%Template1typecode%::iterator _iter;
   set_%Template1typecode%    *_set;
+  PyObject *_pyset;
 };
 #endif
 %End
 
 public:
-  set_%Template1typecode%_iterator( set_%Template1typecode% * );
+  set_%Template1typecode%_iterator( set_%Template1typecode% * /GetWrapper/ );
+%MethodCode
+  sipCpp = new set_%Template1typecode%_iterator( a0, a0Wrapper );
+%End
   ~set_%Template1typecode%_iterator();
 
   SIP_PYOBJECT __objnext__();
