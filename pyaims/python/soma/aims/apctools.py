@@ -42,17 +42,17 @@ def apcRead( filename, imagefile = None ):
     apcdict = {}
     ac = []
     pc = []
-    ip = []
+    ih = []
     acm = []
     pcm = []
-    ipm = []
+    ihm = []
     for l in lines:
         if l[:3] == 'AC:':
             apcdict[ 'ac' ] = map( lambda x: int(x), l.split()[1:4] )
         elif l[:3] == 'PC:':
             apcdict[ 'pc' ] = map( lambda x: int(x), l.split()[1:4] )
         elif l[:3] == 'IH:':
-            apcdict[ 'ip' ] = map( lambda x: int(x), l.split()[1:4] )
+            apcdict[ 'ih' ] = map( lambda x: int(x), l.split()[1:4] )
         elif l[:5] == 'ACmm:':
             acm = map( lambda x: float(x), l.split()[1:4] )
             apcdict[ 'acmm' ] = acm
@@ -60,8 +60,8 @@ def apcRead( filename, imagefile = None ):
             pcm = map( lambda x: float(x), l.split()[1:4] )
             apcdict[ 'pcmm' ] = pcm
         elif l[:5] == 'IHmm:':
-            ipm = map( lambda x: float(x), l.split()[1:4] )
-            apcdict[ 'ipmm' ] = ipm
+            ihm = map( lambda x: float(x), l.split()[1:4] )
+            apcdict[ 'ihmm' ] = ihm
         else:
             comment = apcdict.get( 'comment', None )
             if comment is None:
@@ -69,7 +69,7 @@ def apcRead( filename, imagefile = None ):
                 apcdict[ 'comment' ] = comment
             comment.append( l.strip() )
 
-    if len( acm ) == 3 and len( pcm ) == 3 and len( ipm ) == 3:
+    if len( acm ) == 3 and len( pcm ) == 3 and len( ihm ) == 3:
         return apcdict
     if imagefile is None:
         return apcdict
@@ -95,9 +95,9 @@ def apcRead( filename, imagefile = None ):
     if len( pcm ) != 3:
         pcm = [ pc[0] * vs[0], pc[1] * vs[1], pc[2] * vs[2] ]
         apcdict[ 'pcmm' ] = pcm
-    if len( ipm ) != 3:
-        ipm = [ ip[0] * vs[0], ip[1] * vs[1], ip[2] * vs[2] ]
-        apcdict[ 'ipmm' ] = ipm
+    if len( ihm ) != 3:
+        ihm = [ ih[0] * vs[0], ih[1] * vs[1], ih[2] * vs[2] ]
+        apcdict[ 'ihmm' ] = ihm
     try:
         apcWrite( filename, apcdict )
     except:
@@ -110,27 +110,27 @@ def apcRead( filename, imagefile = None ):
 def apcWrite( apcdict, filename ):
     ac = apcdict[ 'ac' ]
     pc = apcdict[ 'pc' ]
-    ip = apcdict[ 'ip' ]
+    ih = apcdict[ 'ih' ]
     f = open( filename, 'w' )
     f.write( 'AC: ' + ' '.join( [ str(x) for x in ac ] ) + '\n' )
     f.write( 'PC: ' + ' '.join( [ str(x) for x in pc ] ) + '\n' )
-    f.write( 'IP: ' + ' '.join( [ str(x) for x in ip ] ) + '\n' )
+    f.write( 'IH: ' + ' '.join( [ str(x) for x in ih ] ) + '\n' )
     comment = apcdict.get( 'comment', None )
     acm = apcdict.get( 'acmm', None )
     pcm = apcdict.get( 'pcmm', None )
-    ipm = apcdict.get( 'ipmm', None )
+    ihm = apcdict.get( 'ihmm', None )
     if comment is None:
         comment = []
-        if acm and pcm and ipm:
+        if acm and pcm and ihm:
             comment = [ '# The previous coordinates, used by the system, ' \
             'are defined in voxels',
             '# They stem from the following coordinates in millimeters:' ]
     for l in comment:
         f.write( l + '\n' )
-    if acm and pcm and ipm:
+    if acm and pcm and ihm:
         f.write( 'ACmm: ' + ' '.join( [ str(x) for x in acm ] ) + '\n' )
         f.write( 'PCmm: ' + ' '.join( [ str(x) for x in pcm ] ) + '\n' )
-        f.write( 'IPmm: ' + ' '.join( [ str(x) for x in ipm ] ) + '\n' )
+        f.write( 'IHmm: ' + ' '.join( [ str(x) for x in ihm ] ) + '\n' )
 
     f.close()
 
@@ -150,7 +150,7 @@ def apcTransform( apcdict, transform, outimagevoxelsize ):
               or not outhdr.has_key( 'voxel_size' ):
             outhdr = { 'voxel_size' : outhdr } # directly the VS list ?
     outvs = outhdr[ 'voxel_size' ]
-    for p in ( 'ac', 'pc', 'ip' ):
+    for p in ( 'ac', 'pc', 'ih' ):
         px = apcdict.get( p, None )
         pmm = apcdict[ p + 'mm' ]
         pmm2 = transform.transform( pmm )
