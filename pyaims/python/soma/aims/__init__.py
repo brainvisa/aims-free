@@ -440,7 +440,7 @@ def __fixsipclasses__( classes ):
         y.__delitem__ = __fixsipclasses__.proxydelitem
         y.__str__ = __fixsipclasses__.proxystr
         y.__nonzero__ = __fixsipclasses__.proxynonzero
-        y._getAttributeNames = rcptr_getAttributeNames
+        y._getAttributeNames = __fixsipclasses__.getAttributeNames
       else:
         if hasattr( y, '__objiter__' ):
           y.__iter__ = __fixsipclasses__.newiter
