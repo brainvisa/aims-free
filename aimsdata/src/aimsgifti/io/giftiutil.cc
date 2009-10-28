@@ -132,7 +132,7 @@ namespace aims
       ndim = 1;
     else
     {
-      if( intent == NIFTI_INTENT_TIME_SERIES )
+/*      if( intent == NIFTI_INTENT_TIME_SERIES )
       {
         nt = dims[ ndim-1 ];
         --ndim;
@@ -141,7 +141,7 @@ namespace aims
           nt = dims[1];
           ndim = 1;
         }
-      }
+      }*/
       if( ndim == 2 )
         ndim = dims[1];
       else if( ndim >= 3 )

@@ -177,6 +177,7 @@ bool GiftiHeader::read()
   Object daattr = Object::value( IntDictionary() );
   bool mesh, tex;
   vector<string> texnames;
+  int nts = 0;
 
   for( i=0; i<nda; ++i )
   {
@@ -199,10 +200,22 @@ bool GiftiHeader::read()
       polydim = da->dims[1];
       polynum = da->dims[0];
       break;
+    case NIFTI_INTENT_TIME_SERIES:
+      if( nts == 0 )
+        ++ntex;
+      ++nts;
+      tex = true;
+      texlen = da->dims[0];
+      texdim = da->num_dim;
+      dtype = giftiTextureDataType( da->datatype, texdim, da->dims, da->intent,
+                                    nt );
+      if( nts > nttex )
+        nttex = nts;
+      break;
     default:
       ++ntex;
+      nts = 0;
       tex = true;
-      dtype = niftiDataType( da->datatype );
       texlen = da->dims[0];
       texdim = da->num_dim;
       dtype = giftiTextureDataType( da->datatype, texdim, da->dims, da->intent,
@@ -349,6 +362,8 @@ bool GiftiHeader::read()
     setProperty( "texture_dimension", texdim );
     if( nmesh == 0 )
       setProperty( "vertex_number", texlen );
+    if( ntex > 0 )
+      setProperty( "texture_number", ntex );
     if( nmesh > 0 && dtype != "VOID" )
     {
       vector<string> pdt;
@@ -493,7 +508,6 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
                                    const TimeTexture<T> & tex )
 {
   typename TimeTexture<T>::const_iterator it, et = tex.end();
-  bool first = true;
   size_t nmax = 0;
   int t = 0;
 
@@ -506,43 +520,24 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
     const vector<T> & tx = it->second.data();
     if( !tx.empty() )
     {
-      int nda = gim->numDA-1;
+      int nda = gim->numDA;
       giiDataArray * da = 0;
-      if( first )
-      {
-        gifti_add_empty_darray( gim, 1 );
-        ++nda;
-        da = gim->darray[nda];
-        gifti_set_DA_defaults( da );
-        if( tex.size() == 1 )
-        {
-          da->intent = NIFTI_INTENT_SHAPE;
-          da->dims[2] = 0;
-          da->num_dim = 2;
-        }
-        else
-        {
-          da->intent = NIFTI_INTENT_TIME_SERIES;
-          da->dims[2] = tex.size();
-          da->num_dim = 3;
-        }
-        da->dims[0] = nmax;
-        da->dims[3] = 0;
-        da->dims[4] = 0;
-        da->dims[5] = 0;
-        giftiAllocDAData<T>()( gim, da, nmax, tex.size() );
-        if( da->intent == NIFTI_INTENT_TIME_SERIES && da->dims[1] == 1 )
-        {
-          // shift dimensions
-          da->dims[1] = da->dims[2];
-          da->dims[2] = 0;
-          --da->num_dim;
-        }
-        first = false;
-      }
+      gifti_add_empty_darray( gim, 1 );
+      da = gim->darray[nda];
+      gifti_set_DA_defaults( da );
+      if( tex.size() == 1 )
+        da->intent = NIFTI_INTENT_SHAPE;
       else
-        da = gim->darray[nda];
-      giftiFillTextureBuffer<T>()( da, tx, nmax, t );
+        da->intent = NIFTI_INTENT_TIME_SERIES;
+      da->num_dim = 1;
+      da->dims[0] = nmax;
+      da->dims[1] = 0;
+      da->dims[2] = 0;
+      da->dims[3] = 0;
+      da->dims[4] = 0;
+      da->dims[5] = 0;
+      giftiAllocDAData<T>()( gim, da, nmax, 1 );
+      giftiFillTextureBuffer<T>()( da, tx, nmax, 0 );
     }
   }
 }
