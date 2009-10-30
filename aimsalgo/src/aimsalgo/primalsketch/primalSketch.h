@@ -958,9 +958,13 @@ cout << "ssblobs après : " << blobList.size() << endl;
 
             typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
             float tvmax=-100.0;
+            for (itPix=pixels.begin();itPix!=pixels.end();itPix++){
+              if (ima.intensity(*itPix) > tvmax )
+                    tvmax = ima.intensity(*itPix);
+            }
+            
 
-
-            measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvmax, tvalue);
+            measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvalue, tvmax);
 
             areamoy +=area;
             areavar +=area*area;
