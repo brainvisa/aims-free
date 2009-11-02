@@ -105,9 +105,6 @@ PrimalSketch<AimsSurface<3,Void>, Texture<float> > filterPS2(PrimalSketch<AimsSu
   std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* > blobList(sketch.BlobSet());
   std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSBlobs=blobList.begin();
 
-//   std::multimap<float, ScaleSpaceBlob<SiteType<AimsSurface<3,Void> >::type> *> blobmap;
-//   std::multimap<float, ScaleSpaceBlob<SiteType<AimsSurface<3,Void> >::type> * >::iterator mapit;
-  
   printf("\n\n%d", sketch.BlobSet().size());
   PrimalSketch<AimsSurface<3, Void>, Texture<float> > outsketch(sketch.Subject(), sketch.scaleSpace(), SURFACE);
 
