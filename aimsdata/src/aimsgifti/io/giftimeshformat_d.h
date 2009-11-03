@@ -71,13 +71,14 @@ namespace aims
     {
     public:
       GiftiReadExternalTexture( carto::Object textures, giiDataArray* da,
-                                int nt )
-      : Process(), textures( textures ), da( da ), nt( nt )
+                                int nt, int nts )
+      : Process(), textures( textures ), da( da ), nt( nt ), nts( nts )
       {}
 
       carto::Object textures;
       giiDataArray *da;
       int nt;
+      int nts;
     };
 
 
@@ -87,21 +88,25 @@ namespace aims
       GiftiReadExternalTexture & gp
         = static_cast<GiftiReadExternalTexture &>( p );
       giiDataArray *da = gp.da;
-      int j, vnum = da->dims[0], t, nt = gp.nt;
-      carto::Object o = carto::Object::value( TimeTexture<T>() );
+      int j, vnum = da->dims[0], t, nt = gp.nt, nts = gp.nts;
+      carto::Object textures = gp.textures;
+      carto::Object o;
+      if( (int) textures->size() < nt )
+        o = textures->getArrayItem( nt );
+      else
+      {
+        o = carto::Object::value( TimeTexture<T>() );
+        textures->insertArrayItem( -1, o );
+      }
       TimeTexture<T> & ttex
         = o->carto::GenericObject::value< TimeTexture<T> >();
-      for( t=0; t<nt; ++t )
+      ttex[ ttex.size() ]; // force inserting a new timepoint
+      std::vector<T> & tex = ttex[ ttex.size() - 1 ].data();
+      tex.reserve( vnum );
+      for( j=0; j<vnum; ++j )
       {
-        std::vector<T> & tex = ttex[t].data();
-        tex.reserve( vnum );
-        for( j=0; j<vnum; ++j )
-        {
-          tex.push_back( convertedNiftiValue<T>( da->data, j, da->datatype ) );
-        }
+        tex.push_back( convertedNiftiValue<T>( da->data, j, da->datatype ) );
       }
-      carto::Object textures = gp.textures;
-      textures->insertArrayItem( -1, o );
 
       return true;
     }
@@ -109,7 +114,7 @@ namespace aims
 
     template <int D>
     void giftiReadTexture( AimsTimeSurface<D, Void> & /*vol*/, int /*texnum*/,
-                           giiDataArray *da, GiftiHeader & hdr )
+                           giiDataArray *da, GiftiHeader & hdr, int nts )
     {
       carto::Object textures;
       try
@@ -127,7 +132,7 @@ namespace aims
                                                 da->intent, nt );
       // std::cout << "reading texture of: " << dtype << std::endl;
 
-      GiftiReadExternalTexture p( textures, da, nt );
+      GiftiReadExternalTexture p( textures, da, nt, nts );
       p.registerProcessType( "Texture", "FLOAT",
                              &giftiReadExternalTexture<float> );
       p.registerProcessType( "Texture", "POINT2DF",
@@ -169,7 +174,7 @@ namespace aims
       throw carto::format_error( "could not re-read GIFTI file", hdr.name() );
     }
     int nda = gim->numDA, i;
-    int tmesh = -1, ttex = -1, tnorm = -1, tpoly = -1;
+    int tmesh = -1, ttex = -1, tnorm = -1, tpoly = -1, nts = 0;
     for( i=0; i<nda; ++i )
     {
       giiDataArray *da = gim->darray[i];
@@ -238,12 +243,18 @@ namespace aims
             }
             break;
           }
+        case NIFTI_INTENT_TIME_SERIES:
+          if( nts == 0 )
+            ++ttex;
+          giftiReadTexture( vol, ttex, da, hdr, nts );
+          ++nts;
+          break;
         default:
           {
             // texture
             ++ttex;
-            giftiReadTexture( vol, ttex, da, hdr );
-            ++ttex;
+            nts = 0;
+            giftiReadTexture( vol, ttex, da, hdr, 0 );
           }
       }
     }
