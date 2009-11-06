@@ -272,9 +272,9 @@ int main(int argc, const char **argv)
 
       scale_space.GenerateDefaultScaleSpace(tmax);
 
-      cout << "Writing scale space in file " << fileout << endl;
-
-      //scale_space.Write(fileout);
+//       cout << "Writing scale space in file " << fileout << endl;
+// 
+//       scale_space.Write(fileout);
 
       cout << "Computing primal sketch" << endl;
 
@@ -289,21 +289,19 @@ int main(int argc, const char **argv)
       for (blobIt=blobList.begin();blobIt!=blobList.end();blobIt++){
         ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type > ssb(**blobIt);
         GreyLevelBlob<SiteType<AimsSurface<3, Void> >::type > glb(*(ssb.GlBlobRep()));
-//         if (glb.GetListePoints().size() == 1) 
         test++;
-        
+       
       }
       cout << "nb de blobs : " << test << endl;
-//       graphePS(sketch);
+
       printf("\n");
-//       for (float i=-9.0;i<9.0;i++){
+
       if (pow(filterout+100000000.0,2) > 0.01){
         cout << "filtre: " << filterout << endl;
         sketch=filterPS2(sketch,filterout);
       }
       
-//     printf("BOURRIN\n");
-//     std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* > *blobLis; blobLis=&(sketch.BlobSet());
+
     std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSBlobs=sketch.BlobSet().begin();
     std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSend=sketch.BlobSet().end();
     
@@ -355,17 +353,11 @@ int main(int argc, const char **argv)
       TimeTexture<float> blobTexture;
       blobTexture=GetSSBlobTexture(&sketch);
 
-//       cout << "Getting blob triangulations and writing it" << endl;
-//       AimsSurfaceTriangle *triangles;
-//       triangles=GetSSBlobTore(&sketch);
-//       aims::Writer<AimsSurfaceTriangle> meshW(fileoutBlobs);
-//       meshW.write(*triangles);
-
       cout << "Writing it in file " << fileoutBlobs << endl;
       
-      aims::Writer<TimeTexture<float> > blobW(fileoutBlobs);
+      Writer<TimeTexture<float> > blobW(fileoutBlobs);
       blobW.write(blobTexture);
-      //
+
       scale_space.Write(fileout);
 
       cout << "Finished" << endl;

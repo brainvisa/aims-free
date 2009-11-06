@@ -51,12 +51,17 @@
 #include <list>
 #include <utility>
 
+using namespace aims;
+using namespace std;
+using namespace carto;
+
+
 void graphe(vector<float> tab){
   
   vector<uint> votes;
   for (uint i=0;i<100;i++)
     votes.push_back(0);
-  float tmin=1000000000000.0,tmax=-1000000000000.0;
+  float tmin=1000000.0,tmax=-1000000.0;
   
   for (uint i=0; i<tab.size() ; i++)  {
     float valeur = tab[i];
@@ -66,16 +71,11 @@ void graphe(vector<float> tab){
   printf("min: %f - max: %f\n", tmin, tmax);
   for (uint i=0; i<tab.size() ; i++)  {
     float valeur = tab[i];
-//     printf("%d ", (uint) (((valeur - tmin) / (tmax-tmin))*votes.size()));
     votes[(uint) (((valeur - tmin) / (tmax-tmin))*votes.size())]++;
   }
   printf("\n");
   for (uint i=0;i<100;i++){
     int aux=votes[i];
-//     for (uint j=i;j<100;j++){
-//       aux += votes[j];
-//       
-//     }
     printf("%.3f %d\n",tmin+i*(tmax-tmin)/100.0, aux);
   }
   printf("\n");
@@ -83,8 +83,6 @@ void graphe(vector<float> tab){
   
 }
 
-namespace aims
-{
 
     struct ltstr_blob // ranking criteria for blobs
     {
@@ -177,8 +175,7 @@ namespace aims
      void Primalsketch2graph<Geom,Text>::DoIt()
      {
         std::list<Bifurcation<Site>*> bifList=_primalSketch->BifurcationList();
-        cout << "testttt : " << bifList.size() << endl;
-          std::list<ScaleSpaceBlob<Site>*> blobList=_primalSketch->BlobSet();
+        std::list<ScaleSpaceBlob<Site>*> blobList=_primalSketch->BlobSet();
 
         typename std::list<ScaleSpaceBlob<Site>*>::iterator blobIt;
         typename std::list<Bifurcation<Site> *>::iterator bifIt;
@@ -217,9 +214,7 @@ namespace aims
                vert=_graph->addVertex("ssblob");
                rank=sortedLabels[(*blobIt)->Label()];
                sprintf(conv, "%4i", rank);
-               // This is to label blobs by rank...
                lab = conv;
-               //lab="0";
                vert->setProperty("label", 0);
                vert->setProperty("name", rank+10000);
                vert->setProperty("rank", rank);
@@ -231,11 +226,9 @@ namespace aims
                vector<int> nodeslist;
                set<Site,ltstr_p3d<Site> > &liste = (*blobIt)->GlBlobRep()->GetListePoints();
                typename set<Site,ltstr_p3d<Site> >::iterator listit = liste.begin();
-//               cout << liste.size() << " ";
                for (;listit!=liste.end();listit++){
                  nodeslist.push_back((*listit).second);
                }
-//               cout  << nodeslist.size() << "!!!!!!!!!!!!! " ;
                vert->setProperty("nodes_list", nodeslist);
  
                vert->setProperty("maxIntensity",(*blobIt)->GetMeasurements().maxIntensity);
@@ -260,11 +253,8 @@ namespace aims
                x2=vectF[3]; y2=vectF[4];  z2=vectF[5];
                gx=(x1+x2)/2.0; gy=(y1+y2)/2.0; gz=(z1+z2)/2.0;
                triplet[0]=gx; triplet[1]=gy; triplet[2]=gz;
-               // je change triplet pour les coordonnées du max du glblobrep (comme ça le barycentre utilisé pour les recouvrements dans le recuit devient le max et non plus un barycentre de merde) 
                triplet = blobTools.Barycenter();
-//                triplet[0]=max[0]; triplet[1]=max[1]; triplet[2]=max[2];
                vert->setProperty("gravity_center", triplet);
-               //cout << triplet[0] << ";" << triplet[1] << ";" << triplet[2] << ";"  << (*blobIt)->GetMeasurements().t << endl;
 
                 if( _motion )  {
                     Point3df    tal
@@ -288,7 +278,6 @@ namespace aims
           float ecart=0.0;
           for ( blobIt=blobList.begin(); blobIt!=blobList.end(); ++blobIt)
           {
-//             vert->setProperty("tValue",(*blobIt)->GetMeasurements().tValue);
             ecart+=pow((*blobIt)->GetMeasurements().tValue-moy,2);
           }
 
@@ -296,13 +285,11 @@ namespace aims
           cout << "ecart :" << ecart << endl;
           graphe(tab);
 
-          cout << "TEST" << bifList.size() << endl;
           bifIt=bifList.begin();
 
           // Adding meshes or buckets
-//         cout << "test4" << endl;
           AddBlobsToPSGraph(_primalSketch, _graph);
      }
-}
+
 
 #endif
