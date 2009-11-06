@@ -10,9 +10,9 @@
 
 
 <book id="aims_training%book">
-  <bookinfo code='aims_training'><title>The Aims getting started guide</title></bookinfo>  
-  
-  
+  <bookinfo code='aims_training'><title>Aims tutorial</title></bookinfo>
+
+
 <chapter><title>Foreward</title>
 &disclaimer_en;
 <para>In order to work through the following sections, please download the demonstration data from one of the following links:
@@ -27,6 +27,7 @@
 </chapter>
 
 
+<!-->             <-->
 <chapter>
 <title>Basic command lines </title>
 
@@ -271,6 +272,7 @@ prompt%
 </chapter>  
 
 
+<!--> <-->
 <chapter>
 <title>Conversion</title>
 
@@ -365,6 +367,7 @@ prompt%
 
 
 
+<!-->  <-->
 <chapter>
 <title>Calculation of images</title>
 
@@ -433,6 +436,7 @@ you want to do a division ....</para>
 </chapter> 
 
 
+<!--> <-->
 <chapter>
 <title>Handling meshes</title>
 
@@ -482,6 +486,7 @@ END------CUT HERE------END
 
 
 
+<!--> <-->
 <chapter>
 <title>Handling referentials and transformations</title>
 
@@ -904,6 +909,8 @@ M = [ R21  R22  R23  Ty ]
 
 
 
+<!--> <-->
+
 <chapter>
 <title>Handling graphs</title>
 <sect1><title>Copy a set of graph attributes to another graph <!-- with the same structure--> </title>
@@ -932,6 +939,8 @@ This command has many other options, but for the current application, the useful
 </sect1>
 </chapter>
 
+
+<!-->  <-->
 
 <chapter>
 <title>Rigid registration</title>
@@ -992,6 +1001,8 @@ This command has many other options, but for the current application, the useful
 
 </chapter>
 
+
+<!--> <-->
 
 <chapter>
 <title>Advanced level</title>
@@ -1136,7 +1147,104 @@ prompt% AimsThreshold -i roi.ima -o roi.ima -m ge -t 8000
 </chapter>
  -->
 
-  
 
-      
+
+<!--> <-->
+
+<chapter id='aims_training%pyaims' infoid='Programming with AIMS in Python language'>
+  <title>Programming with AIMS in Python language</title>
+
+  <para>AIMS is a C++ library, but has python language bindings: <emphasis role="bold">PyAIMS</emphasis>. This means that the C++ classes and functions can be used from python. This has many advantages compared to pure C++:
+    <itemizedlist>
+      <listitem>Writing python scripts and programs is much easier and faster than C++: there is no fastidious and long compilation step.
+      </listitem>
+      <listitem>Scripts are more flexible, can be modified on-the-fly, etc
+      </listitem>
+      <listitem>It can be used interactively in a python interactive shell.
+      </listitem>
+      <listitem>As pyaims is actually C++ code called from python, it is still fast to execute complex algorithms. There is obviously an overhead to call C++ from python, but once in the C++ layer, it is C++ execution speed.
+      </listitem>
+    </itemizedlist>
+    A few examples of how to use and manipulate the main data structures will be shown here.
+  </para>
+
+  <sect1>
+    <title>Basics</title>
+
+    <sect3>
+      <title>Module importation</title>
+      <para>In python, the aimsdata library is available as the <computeroutput>soma.aims</computeroutput> module.
+        <screen>import soma.aims
+# the module is actually soma.aims:
+vol = soma.aims.Volume_S16( 100, 100, 100 )</screen>
+        or:
+        <screen>from soma import aims
+# the module is available as aims (not soma.aims):
+vol = aims.Volume_S16( 100, 100, 100 )
+# in the following, we will be using this form because it is shorter.</screen>
+      </para>
+    </sect3>
+
+    <sect3>
+      <title>IO: reading and writing objects</title>
+
+      <para>
+        Reading operations are accessed via a single <computeroutput>read()</computeroutput> function, and writing through a single <computeroutput>write()</computeroutput> function. The <computeroutput>read()</computeroutput> function reads any object from a given file name, in any supported file format, and returns it:
+        <screen>from soma import aims
+obj = aims.read( 'data/volume_example.nii' )
+print obj
+obj2 = aims.read( 'data/volume_example2.ima' )
+print obj2
+obj3 = aims.read( 'data/mesh_example.mesh' )
+print obj3
+obj4 = aims.read( 'data/mesh_example2.gii' )
+print obj4</screen>
+        The returned object can have various types according to what is found in the disk file(s).
+      </para>
+      <para>
+        Writing is just as easy. The file name extension generally determines the output format. An object read from a given format can be re-written in any other supported format, provided the format can actually store the object type.
+        <screen>from soma import aims
+obj2 = aims.read( 'data/volume_example2.ima' )
+aims.write( obj2, '/tmp/vol_ex2.nii' )
+obj3 = aims.read( 'data/mesh_example.mesh' )
+aims.write( obj3, '/tmp/mesh_ex.gii' )
+        </screen>
+      </para>
+      <highlights><emphasis role="bold">Exercise:</emphasis> write a little file format conversion tool
+      </highlights>
+    </sect3>
+
+    <sect3>
+      <title>Volumes</title>
+    </sect3>
+
+    <sect3>
+      <title>Meshes</title>
+    </sect3>
+
+    <sect3>
+      <title>Textures</title>
+    </sect3>
+
+    <sect3>
+      <title>Buckets</title>
+    </sect3>
+
+    <sect3>
+      <title>Graphs</title>
+    </sect3>
+
+  </sect1>
+
+
+  <sect1>
+    <title>Using algorithms</title>
+  </sect1>
+
+  <sect1>
+  </sect1>
+
+</chapter>
+
+
 </book>
