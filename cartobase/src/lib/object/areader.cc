@@ -237,6 +237,8 @@ void AttributedReader::init()
     _helpers["float_vector"] = &float_vectorHelper;
   if (_helpers.find("dictionary") == _helpers.end())
     _helpers["dictionary"] = &genericobjectHelper;
+  if (_helpers.find("list") == _helpers.end())
+    _helpers["list"] = &genericobjectHelper;
 }
 
 
