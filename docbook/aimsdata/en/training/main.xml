@@ -1284,13 +1284,12 @@ vs = vol.header()[ 'voxel_size' ]
 pos0 = ( 100 * vs[0], 100 * vs[1], 60 * vs[2] ) # in millimeters
 arr = numpy.array( vol, copy=False )
 # build arrays of coordinates for x, y, z
-x = numpy.vstack( ( numpy.array( xrange( vol.getSizeX() ), dtype=numpy.float32 ), ) * vol.getSizeY() ).transpose()
-x = numpy.dstack( (x,) * vol.getSizeZ() )
-y = numpy.vstack( ( numpy.array( xrange( vol.getSizeY() ), dtype=numpy.float32 ), ) * vol.getSizeX() )
-y = numpy.dstack( (y,) * vol.getSizeZ() )
-z = numpy.array( xrange( vol.getSizeZ() ), dtype=numpy.float32 ).reshape( 1, 1, vol.getSizeZ() )
-z = numpy.vstack( (z,) * vol.getSizeX() )
-z = numpy.hstack( (z,) * vol.getSizeY() )
+x = numpy.array( xrange( vol.getSizeX() ), dtype=numpy.float32 ).reshape( vol.getSizeX(), 1, 1, 1 )
+print 'x.shape:', x.shape
+y = numpy.array( xrange( vol.getSizeY() ), dtype=numpy.float32 ).reshape( 1, vol.getSizeY(), 1, 1 )
+print 'y.shape:', y.shape
+z = numpy.array( xrange( vol.getSizeZ() ), dtype=numpy.float32 ).reshape( 1, 1, vol.getSizeZ(), 1 )
+print 'z.shape:', z.shape
 # get coords in millimeters
 x *= vs[0]
 y *= vs[1]
@@ -1299,12 +1298,106 @@ z *= vs[2]
 x -= pos0[0]
 y -= pos0[1]
 z -= pos0[2]
-# get norm
-arr[:] = numpy.sqrt( x*x+y*y+z*z ).reshape( vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), 1 )
-
+# get norm, using numpy arrays broadcasting
+arr[:] = numpy.sqrt( x*x+y*y+z*z )
 # and save result
 aims.write( vol, 'distance2.nii' )</screen>
-        This example appears a bit more complex, or more tricky, since we must build the coordinates arrays, and it uses far more memory (3 additional volumes of 32-bit floats, namely 96 MB, for... almost nothing), but is way faster to execute, because all loops within the code are executed in compiled routines.
+        This example appears a bit more complex, or more tricky, since we must build the coordinates arrays, and it may temporarily use more memory (additional volumes of 32-bit floats coordinates), but is way faster to execute, because all loops within the code are executed in compiled routines. One interesting thing to note is that this code is using the famous "array broadcasting" feature of numpy, where arrays of heterogeneous sizes can be added, and the "missing" dimensions are extended.
+      </para>
+      <para>
+        <emphasis role="bold">Copying volumes or volumes structure, or building from an array</emphasis><sbr/>
+        To make a deep-copy of a volume, use the copy constructor:
+        <screen>vol2 = aims.Volume_S16( vol )
+vol2.setValue( 12, 100, 100, 60 )
+# now vol and vol2 have different values
+print 'vol.value( 200, 100, 60 ):', vol.value( 200, 100, 60 )
+print 'vol2.value( 200, 100, 60 ):', vol2.value( 200, 100, 60 )</screen>
+        If you need to build another, different volume, with the same structure and size, don't forget to copy the header part:
+        <screen>vol2 = aims.Volume_FLOAT( vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), vol.getSizeT() )
+        vol2.header().update( vol.header() )</screen>
+        Important information can reside in the header, like voxel size, or coordinates systems and geometric transformations to other coordinates systems, so it is really very important to carry this information with duplicated volumes.
+      </para>
+      <para>
+        You can also build a volume from a numy array:
+        <screen>arr = numpy.array( numpy.diag( xrange( 40 ) ), dtype=numpy.float32 ).reshape( 40, 40, 1 ) \
+    + numpy.array( xrange( 20 ), dtype=numpy.float32 ).reshape( 1, 1, 20 )
+# WARNING: the array must be in Fortran ordering for AIMS, at leat at the moment
+# whereas the numpy addition always returns a C-ordered array
+arr = numpy.array( arr, order='F' )
+arr[ 10, 12, 3 ] = 25
+vol = aims.Volume_FLOAT( arr )
+print 'vol.value( 10, 12, 3 ):', vol.value( 10, 12, 3 )
+# data are shared with arr
+vol.setValue( 35, 10, 15, 2 )
+print 'arr[ 10, 15, 2 ]:', arr[ 10, 15, 2 ]
+arr[ 12, 15, 1 ] = 44
+print 'vol.value( 12, 15, 1 ):', vol.value( 12, 15, 1 )</screen>
+      </para>
+      <para><emphasis role="bold">4D volumes</emphasis><sbr/>
+        4D volumes work just like 3D volumes. Actually all volumes are 4D in AIMS, but the last dimension is commonly of size 1. In <computeroutput>value()</computeroutput> and <computeroutput>setValue()</computeroutput> methods, only the first dimension is mandatory, others are optional and default to 0, but up to 4 coordinates may be used. In the same way, the constructor takes up to 4 dimension parameters:
+        <screen>from soma import aims
+# create a 4D volume of signed 16-bit ints, of size 30x30x30x4
+vol = aims.Volume_S16( 30, 30, 30, 4 )
+# fill it with zeros
+vol.fill(0)
+# set value 12 at voxel ( 10, 10, 20, 2 )
+vol.setValue( 12, 10, 10, 20, 2 )
+# get value at the same position
+x = vol.value( 10, 10, 20, 2 )
+# set the voxels size
+vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+print vol.header()</screen>
+        Similarly, 1D or 2D volumes may be used exactly the same way.
+      </para>
+      <para><emphasis role="bold">The older AimsData classes</emphasis><sbr/>
+        For historical reasons, another set of classes may also represent volumes. These classes are the older API in AIMS, and tend to be obsolete. But as they were used in many many routines and programs, they have still not been eradicated. Many C++ routines build volumes and actually return those older classes, so we could not really hide them, and they also have python bindings. These classes are <computeroutput>aims.AimsData_&lt;type&gt;</computeroutput>. Converting from and to <computeroutput>aims.Volume_</computeroutput> classes is rather simple since the newer <computeroutput>Volume</computeroutput> classes are used internally in the <computeroutput>AimsData</computeroutput> API.
+        <screen>from soma import aims
+# create a 4D volume of signed 16-bit ints, of size 30x30x30x4
+vol = aims.Volume_S16( 30, 30, 30, 4 )
+vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+advol = aims.AimsData_S16( vol )
+# vol and advol share the same header and voxel data
+vol.setValue( 12, 10, 10, 20, 2 )
+print 'advol.value( 10, 10, 20, 2 ):', advol.value( 10, 10, 20, 2 )
+advol.setValue( 44, 12, 12, 24, 1 )
+print 'vol.value( 12, 12, 24, 1 ):', vol.value( 12, 12, 24, 1 )</screen>
+        And, in the other side:
+        <screen>from soma import aims
+# create a 4D volume of signed 16-bit ints, of size 30x30x30x4
+advol = aims.AimsData_S16( 30, 30, 30, 4 )
+advol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+vol = advol.volume()
+# vol and advol share the same header and voxel data
+vol.setValue( 12, 10, 10, 20, 2 )
+print 'advol.value( 10, 10, 20, 2 ):', advol.value( 10, 10, 20, 2 )
+advol.setValue( 44, 12, 12, 24, 1 )
+print 'vol.value( 12, 12, 24, 1 ):', vol.value( 12, 12, 24, 1 )</screen>
+        <computeroutput>AimsData</computeroutput> has a bit richer API, since it includes minor processing functions that have been removed from the newer <computeroutput>Volume</computeroutput> for the sake of API simplicity and minimalism.
+        <screen># minimum / maximum
+print 'min:', advol.minimum(), 'at', advol.minIndex()
+print 'max:', advol.maximum(), 'at', advol.maxIndex()
+# clone copy
+advol2 = advol.clone()
+advol2.setValue( 12, 4, 8, 11, 3 )
+# now advol and advol2 have different values
+print 'advol.value( 4, 8, 11, 3 ):', advol.value( 4, 8, 11, 3 )
+print 'advol2.value( 4, 8, 11, 3 ):', advol2.value( 4, 8, 11, 3 )
+# Border handling
+# Border width is th 5th parameter of AimsData constructor
+advol = aims.AimsData_S16( 256, 256, 128, 1, 2 )
+advol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+advol.fill( 0 )
+advol.setValue( 15, 100, 100, 60 )
+vol = advol.volume()
+# then vol is 4 voxels wider in each direction, and shifted:
+print 'vol.value( 100, 100, 60 ):', vol.value( 100, 100, 60 )
+# ... it is 0, not 15...
+print 'vol.value( 102, 102, 62 ):', vol.value( 102, 102, 62 )
+# here we get 15
+# some algorithms require this border to exist, otherwise fail or crash...
+from soma import aimsalgo
+aimsalgo.AimsDistanceFrontPropagation( advol, 0, -1, 3, 3, 3, 10, 10 )
+aims.write( advol, 'distance3.nii' )</screen>
       </para>
     </sect3>
 
