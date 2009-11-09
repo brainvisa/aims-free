@@ -320,7 +320,7 @@ int main(int argc, const char **argv)
       cout << "nb de blobs : " << test << endl;
       
       printf("\n");
-//       graphePS(sketch);
+      
       cout << "Converting primal sketch into graph" << endl;
 
       if (auxmeshpath!=""){
@@ -346,7 +346,7 @@ int main(int argc, const char **argv)
 
       Graph *graphSketch=translate.GetGraph();
 
-      aims::Writer<Graph > dataW( graphout );
+      Writer<Graph > dataW( graphout );
       dataW.write(*graphSketch);
 
       cout << "Getting scale-space blob texture" << endl;
