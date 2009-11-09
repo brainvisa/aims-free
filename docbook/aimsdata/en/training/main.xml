@@ -1216,6 +1216,96 @@ aims.write( obj3, '/tmp/mesh_ex.gii' )
 
     <sect3>
       <title>Volumes</title>
+
+      <para>
+        Volumes are array-like containers of voxels, plus a set of additional information kept in a header structure. In AIMS, the header structure is generic and extensible, and does not depend on a specific file format. Voxels may have various types, so a specific type of volume should be used for a specific type of voxel. The type of voxel has a code that is used to suffix the Volume type: <computeroutput>Volume_S16</computeroutput> for signed 16-bit ints, <computeroutput>Volume_U32</computeroutput> for unsigned 32-bit ints, <computeroutput>Volume_DOUBLE</computeroutput> for 32-bit floats, <computeroutput>Volume_RGBA</computeroutput> for RGBA colors, etc.
+      </para>
+      <para><emphasis role="bold">Building a volume</emphasis>
+        <screen># create a 3D volume of signed 16-bit ints, of size 256x256x128
+vol = aims.Volume_S16( 256, 256, 128 )
+# fill it with zeros
+vol.fill(0)
+# set value 12 at voxel ( 100, 100, 60 )
+vol.setValue( 12, 100, 100, 60 )
+# get value at the same position
+x = vol.value( 100, 100, 60 )
+# set the voxels size
+vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+print vol.header()</screen>
+      </para>
+
+      <para><emphasis role="bold">Basic operations:</emphasis><sbr/>
+        Whole volume operations:
+        <screen># multiplication, addition etc
+vol *= 2
+vol2 = vol * 3 + 12
+vol /= 2
+vol3 = vol2 - vol - 12
+vol4 = vol2 * vol / 6</screen>
+        Voxel-wise operations:
+        <screen># fill the volume with the distance to voxel ( 100, 100, 60 )
+vs = vol.header()[ 'voxel_size' ]
+pos0 = ( 100 * vs[0], 100 * vs[1], 60 * vs[2] ) # in millimeters
+for z in xrange( vol.getSizeZ() ):
+  for y in xrange( vol.getSizeY() ):
+    for x in xrange( vol.getSizeX() ):
+      # get current position in an aims.Point3df structure, in mm
+      p = aims.Point3df( x * vs[0], y * vs[1], z * vs[2] )
+      # get relative position to pos0, in voxels
+      p -= pos0
+      # distance: norm of vector p
+      dist = p.norm()
+      # set it into the volume
+      vol.setValue( dist, x, y, z )
+# save the volume
+aims.write( vol, 'distance.nii' )</screen>
+        Now look at the <computeroutput>"distance.nii"</computeroutput> volume in Anatomist.
+      </para>
+      <para>
+        The first thing that comes to mind when running this example, is that it is <emphasis>slow</emphasis>. Indeed, python is an interpreted language and loops in any interpreted language are slow. In addition, accessing individually each voxel of the volume has the overhead of python/C++ bindings communications. The conclusion is that that kind of example is probably a bit too low-level, and should be done, when possible, by compiled libraries or specialized array-handling libraries. This is the role of <emphasis role="bold">numpy</emphasis>.
+      </para>
+      <para>
+        Accessing numpy arrays to AIMS volume voxels is supported:
+        <screen>import numpy
+vol.fill( 0 )
+arr = numpy.array( vol, copy=False )
+arr[60:120, 60:120, 40:80] = 100
+# note that arr is a shared view to the volume contents, modifications
+# will also affect the volume
+aims.write( vol, "cube.nii" )</screen>
+      </para>
+      <para>
+        Now we can re-write the distance example using numpy:
+        <screen>from soma import aims
+import numpy
+vol = aims.Volume_S16( 256, 256, 128 )
+vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+vs = vol.header()[ 'voxel_size' ]
+pos0 = ( 100 * vs[0], 100 * vs[1], 60 * vs[2] ) # in millimeters
+arr = numpy.array( vol, copy=False )
+# build arrays of coordinates for x, y, z
+x = numpy.vstack( ( numpy.array( xrange( vol.getSizeX() ), dtype=numpy.float32 ), ) * vol.getSizeY() ).transpose()
+x = numpy.dstack( (x,) * vol.getSizeZ() )
+y = numpy.vstack( ( numpy.array( xrange( vol.getSizeY() ), dtype=numpy.float32 ), ) * vol.getSizeX() )
+y = numpy.dstack( (y,) * vol.getSizeZ() )
+z = numpy.array( xrange( vol.getSizeZ() ), dtype=numpy.float32 ).reshape( 1, 1, vol.getSizeZ() )
+z = numpy.vstack( (z,) * vol.getSizeX() )
+z = numpy.hstack( (z,) * vol.getSizeY() )
+# get coords in millimeters
+x *= vs[0]
+y *= vs[1]
+z *= vs[2]
+# relative to pos0
+x -= pos0[0]
+y -= pos0[1]
+z -= pos0[2]
+# get norm
+arr[:] = numpy.sqrt( x*x+y*y+z*z ).reshape( vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), 1 )
+
+# and save result
+aims.write( vol, 'distance2.nii' )</screen>
+        This example appears a bit more complex, or more tricky, since we must build the coordinates arrays, and it uses far more memory (3 additional volumes of 32-bit floats, namely 96 MB, for... almost nothing), but is way faster to execute, because all loops within the code are executed in compiled routines.
+      </para>
     </sect3>
 
     <sect3>
