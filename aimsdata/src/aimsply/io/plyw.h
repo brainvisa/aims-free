@@ -87,6 +87,8 @@ namespace aims
 
     std::string			dir = carto::FileUtil::dirname( _name );
 
+    if( hdr.hasProperty( "nb_t_pos" ) )
+      hdr.removeProperty( "nb_t_pos" );
     hdr.setProperty( "file_type", std::string( "PLY" ) );
     hdr.setProperty( "object_type", 
                      carto::DataTypeCode<AimsTimeSurface<D,T> >::objectType()
