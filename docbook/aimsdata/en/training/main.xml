@@ -1221,8 +1221,8 @@ aims.write( obj3, '/tmp/mesh_ex.gii' )
         Volumes are array-like containers of voxels, plus a set of additional information kept in a header structure. In AIMS, the header structure is generic and extensible, and does not depend on a specific file format. Voxels may have various types, so a specific type of volume should be used for a specific type of voxel. The type of voxel has a code that is used to suffix the Volume type: <computeroutput>Volume_S16</computeroutput> for signed 16-bit ints, <computeroutput>Volume_U32</computeroutput> for unsigned 32-bit ints, <computeroutput>Volume_DOUBLE</computeroutput> for 32-bit floats, <computeroutput>Volume_RGBA</computeroutput> for RGBA colors, etc.
       </para>
       <para><emphasis role="bold">Building a volume</emphasis>
-        <screen># create a 3D volume of signed 16-bit ints, of size 256x256x128
-vol = aims.Volume_S16( 256, 256, 128 )
+        <screen># create a 3D volume of signed 16-bit ints, of size 192x256x128
+vol = aims.Volume_S16( 192, 256, 128 )
 # fill it with zeros
 vol.fill(0)
 # set value 12 at voxel ( 100, 100, 60 )
@@ -1278,18 +1278,13 @@ aims.write( vol, "cube.nii" )</screen>
         Now we can re-write the distance example using numpy:
         <screen>from soma import aims
 import numpy
-vol = aims.Volume_S16( 256, 256, 128 )
+vol = aims.Volume_S16( 192, 256, 128 )
 vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
 vs = vol.header()[ 'voxel_size' ]
 pos0 = ( 100 * vs[0], 100 * vs[1], 60 * vs[2] ) # in millimeters
 arr = numpy.array( vol, copy=False )
 # build arrays of coordinates for x, y, z
-x = numpy.array( xrange( vol.getSizeX() ), dtype=numpy.float32 ).reshape( vol.getSizeX(), 1, 1, 1 )
-print 'x.shape:', x.shape
-y = numpy.array( xrange( vol.getSizeY() ), dtype=numpy.float32 ).reshape( 1, vol.getSizeY(), 1, 1 )
-print 'y.shape:', y.shape
-z = numpy.array( xrange( vol.getSizeZ() ), dtype=numpy.float32 ).reshape( 1, 1, vol.getSizeZ(), 1 )
-print 'z.shape:', z.shape
+x, y, z = numpy.ogrid[ 0.:vol.getSizeX(), 0.:vol.getSizeY(), 0.:vol.getSizeZ() ]
 # get coords in millimeters
 x *= vs[0]
 y *= vs[1]
@@ -1299,10 +1294,10 @@ x -= pos0[0]
 y -= pos0[1]
 z -= pos0[2]
 # get norm, using numpy arrays broadcasting
-arr[:] = numpy.sqrt( x*x+y*y+z*z )
+arr[:,:,:,0] = numpy.sqrt( x**2+y**2+z**2 )
 # and save result
 aims.write( vol, 'distance2.nii' )</screen>
-        This example appears a bit more complex, or more tricky, since we must build the coordinates arrays, and it may temporarily use more memory (additional volumes of 32-bit floats coordinates), but is way faster to execute, because all loops within the code are executed in compiled routines. One interesting thing to note is that this code is using the famous "array broadcasting" feature of numpy, where arrays of heterogeneous sizes can be added, and the "missing" dimensions are extended.
+        This example appears a bit more tricky, since we must build the coordinates arrays, but is way faster to execute, because all loops within the code are executed in compiled routines in numpy. One interesting thing to note is that this code is using the famous "array broadcasting" feature of numpy, where arrays of heterogeneous sizes can be added, and the "missing" dimensions are extended.
       </para>
       <para>
         <emphasis role="bold">Copying volumes or volumes structure, or building from an array</emphasis><sbr/>
@@ -1310,8 +1305,8 @@ aims.write( vol, 'distance2.nii' )</screen>
         <screen>vol2 = aims.Volume_S16( vol )
 vol2.setValue( 12, 100, 100, 60 )
 # now vol and vol2 have different values
-print 'vol.value( 200, 100, 60 ):', vol.value( 200, 100, 60 )
-print 'vol2.value( 200, 100, 60 ):', vol2.value( 200, 100, 60 )</screen>
+print 'vol.value( 100, 100, 60 ):', vol.value( 100, 100, 60 )
+print 'vol2.value( 100, 100, 60 ):', vol2.value( 100, 100, 60 )</screen>
         If you need to build another, different volume, with the same structure and size, don't forget to copy the header part:
         <screen>vol2 = aims.Volume_FLOAT( vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), vol.getSizeT() )
         vol2.header().update( vol.header() )</screen>
@@ -1384,7 +1379,7 @@ print 'advol.value( 4, 8, 11, 3 ):', advol.value( 4, 8, 11, 3 )
 print 'advol2.value( 4, 8, 11, 3 ):', advol2.value( 4, 8, 11, 3 )
 # Border handling
 # Border width is th 5th parameter of AimsData constructor
-advol = aims.AimsData_S16( 256, 256, 128, 1, 2 )
+advol = aims.AimsData_S16( 192, 256, 128, 1, 2 )
 advol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
 advol.fill( 0 )
 advol.setValue( 15, 100, 100, 60 )
@@ -1403,10 +1398,108 @@ aims.write( advol, 'distance3.nii' )</screen>
 
     <sect3>
       <title>Meshes</title>
+      <para>
+      A surfacic mesh represents a surface, as a set of small polygons (genrally triangles, but sometimes quads). It has two main components: a vector of vertices (each vertex is a 3D point, with coordinates in millimeters), and a vector of polygons: each polygon is defined by the vertices it links (3 for a triangle). It also optionally has normals (unit vectors). In our mesh structures, there is one normal for each vertex.
+      <screen>from soma import aims
+mesh = aims.read( 'example_mesh.mesh' )
+vert = mesh.vertex()
+print 'vertices:', len( vert )
+poly = mesh.polygon()
+print 'polygons:', len( poly )
+norm = mesh.normal()
+print 'normals:', len( norm )</screen>
+      To build a mesh, we can instantiate an object of type <computeroutput>aims.AimsTimeSurface_&lt;n&gt;</computeroutput>, with <emphasis>n</emphasis> being the number of vertices by polygon. Then we can add vertices, normals and polygons to the mesh:
+      <screen># build a flying saucer mesh
+from soma import aims
+import numpy
+mesh = aims.AimsTimeSurface_3()
+# a mesh has a header
+mesh.header()[ 'toto' ] = 'a message in the header'
+vert = mesh.vertex()
+poly = mesh.polygon()
+x = numpy.cos( numpy.ogrid[ 0.:20 ] * numpy.pi / 10. ) * 100
+y = numpy.sin( numpy.ogrid[ 0.:20 ] * numpy.pi / 10. ) * 100
+z = numpy.zeros( 20 )
+c = numpy.vstack( ( x, y, z ) ).transpose()
+vert.assign( [ aims.Point3df( 0., 0., -40. ), aims.Point3df( 0., 0., 40. ) ] + [ aims.Point3df( x ) for x in c ] )
+pol = numpy.vstack( ( numpy.zeros( 20, dtype=numpy.int32 ), numpy.ogrid[ 3:23 ], numpy.ogrid[ 2:22 ] ) ).transpose()
+pol[ 19, 1 ] = 2
+pol2 = numpy.vstack( ( numpy.ogrid[ 2:22 ], numpy.ogrid[ 3:23 ], numpy.ones( 20, dtype=numpy.int32 ) ) ).transpose()
+pol2[19,1] = 2
+poly.assign( [ aims.AimsVector_U32_3(x) for x in numpy.vstack( ( pol, pol2 ) ) ] )
+# write result
+aims.write( mesh, 'saucer.mesh' )
+# automatically calculate normals
+mesh.updateNormals()</screen>
+      </para>
+      <para><emphasis role="bold">Modifying a mesh</emphasis>
+        <screen># slightly inflate a mesh
+from soma import aims
+import numpy
+mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+vert = mesh.vertex()
+varr = numpy.array( vert )
+norm = numpy.array( mesh.normal() )
+varr += norm * 2 # push vertices 2mm away along normal
+vert.assign( [ aims.Point3df(x) for x in varr ] )
+mesh.updateNormals()
+aims.write( mesh, 's12069_Lwhite_semiinflated.mesh' )</screen>
+        Now look at both meshes in Anatomist...<sbr/>
+        Alternatively, without numpy, we could have written the code like this:
+        <screen>from soma import aims
+mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+vert = mesh.vertex()
+norm = mesh.normal()
+for v, n in zip( vert, norm ):
+  v += n * 2
+mesh.updateNormals()
+aims.write( mesh, 's12069_Lwhite_semiinflated.mesh' )</screen>
+      </para>
+      <para><emphasis role="bold">Handling time</emphasis><sbr/>
+        In AIMS, meshes are actually time-indexed dictionaries of meshes. This way a deforming mesh can be stored in the same object. To copy a timestep to aonother, use the following:
+        <screen>from soma import aims
+mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+# mesh.vertex() is equivalent to mesh.vectex( 0 )
+mesh.vertex( 1 ).assign( mesh.vertex( 0 ) )
+# same for normals and polygons
+mesh.normal( 1 ).assign( mesh.normal( 0 ) )
+mesh.polygon( 1 ).assign( mesh.polygon( 0 ) )
+print 'number of time steps:', mesh.size()</screen>
+        <highlights><emphasis role="bold">Exercise:</emphasis> make a deforming mesh that goes from the original mesh to 5mm away, by steps of 0.5 mm<sbr/>
+          <screen>from soma import aims
+import numpy
+mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+vert = mesh.vertex()
+varr = numpy.array( vert )
+norm = numpy.array( mesh.normal() )
+for i in xrange( 1, 10 ):
+  vert.assign( mesh.vertex() )
+  mesh.normal( i ).assign( mesh.normal() )
+  mesh.polygon( i ).assign( mesh.polygon() )
+  varr += norm * 0.5
+  mesh.vertex( i ).assign( [ aims.Point3df(x) for x in varr ] )
+mesh.updateNormals()
+# sorry, this is a bug in AIMS 3.2.0 IO system... it is fixed for 3.2.1
+if mesh.header().has_key( 'nb_t_pos' ):
+  del mesh.header()[ 'nb_t_pos' ]
+aims.write( mesh, 's12069_Lwhite_semiinflated_time.mesh' )</screen>
+        </highlights>
+      </para>
     </sect3>
 
     <sect3>
       <title>Textures</title>
+      <para>A texture is merely a vector of values, each of them is assigned to a mesh vertex, with a one-to-one mapping, in the same order. A texture is also a time-texture.
+        <screen>from soma import aims
+tex = aims.TimeTexture_FLOAT()
+t = tex[0] # time index, inserts on-the-fly
+t.reserve( 10 ) # pre-allocates memory
+for i in xrange( 10 ):
+  t.append( i / 10. )</screen>
+      </para>
+      <para><highlights><emphasis role="bold">Exercise:</emphasis> make a time-texture, with at each time/vertex of the previous mesh, sets the value of the underlying volume <computeroutput>data_for_anatomist/functional/s12069.nii</computeroutput>
+        </highlights>
+      </para>
     </sect3>
 
     <sect3>
