@@ -1167,6 +1167,8 @@ prompt% AimsThreshold -i roi.ima -o roi.ima -m ge -t 8000
     </itemizedlist>
     A few examples of how to use and manipulate the main data structures will be shown here.
   </para>
+  <para>The data for the examples in this section is the data of the JIRFNI 2008 training course, and can be downloaded here: <ulink url="ftp://ftp.cea.fr/pub/dsv/anatomist/data/data_jirfni2008.zip">ftp://ftp.cea.fr/pub/dsv/anatomist/data/data_jirfni2008.zip</ulink>. To use the examples directly, users should go to the jirfni2008 directory of this archive, and then run ipthon from this directory.
+  </para>
 
   <sect1>
     <title>Using data structures</title>
@@ -1191,24 +1193,21 @@ vol = aims.Volume_S16( 100, 100, 100 )
       <para>
         Reading operations are accessed via a single <computeroutput>read()</computeroutput> function, and writing through a single <computeroutput>write()</computeroutput> function. The <computeroutput>read()</computeroutput> function reads any object from a given file name, in any supported file format, and returns it:
         <screen>from soma import aims
-obj = aims.read( 'data/volume_example.nii' )
+obj = aims.read( 'data_for_anatomist/functional/s12069.nii' )
 print obj
-obj2 = aims.read( 'data/volume_example2.ima' )
+obj2 = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
 print obj2
-obj3 = aims.read( 'data/mesh_example.mesh' )
-print obj3
-obj4 = aims.read( 'data/mesh_example2.gii' )
-print obj4</screen>
+obj3 = aims.read( 'data_for_anatomist/functional/s12069_Lhemi.mesh' )
+print obj3</screen>
         The returned object can have various types according to what is found in the disk file(s).
       </para>
       <para>
         Writing is just as easy. The file name extension generally determines the output format. An object read from a given format can be re-written in any other supported format, provided the format can actually store the object type.
         <screen>from soma import aims
-obj2 = aims.read( 'data/volume_example2.ima' )
-aims.write( obj2, '/tmp/vol_ex2.nii' )
-obj3 = aims.read( 'data/mesh_example.mesh' )
-aims.write( obj3, '/tmp/mesh_ex.gii' )
-        </screen>
+obj2 = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
+aims.write( obj2, '/tmp/Audio-Video_T_map.ima' )
+obj3 = aims.read( 'data_for_anatomist/functional/s12069_Lhemi.mesh' )
+aims.write( obj3, '/tmp/s12069_Lhemi.gii' )</screen>
       </para>
       <highlights><emphasis role="bold">Exercise:</emphasis> write a little file format conversion tool
       </highlights>
@@ -1266,20 +1265,42 @@ aims.write( vol, 'distance.nii' )</screen>
         Now look at the <computeroutput>"distance.nii"</computeroutput> volume in Anatomist.
         </para>
         <para>
-          The first thing that comes to mind when running this example, is that it is <emphasis>slow</emphasis>. Indeed, python is an interpreted language and loops in any interpreted language are slow. In addition, accessing individually each voxel of the volume has the overhead of python/C++ bindings communications. The conclusion is that that kind of example is probably a bit too low-level, and should be done, when possible, by compiled libraries or specialized array-handling libraries. This is the role of <emphasis role="bold">numpy</emphasis>.
+          <highlights><emphasis role="bold">Exercise:</emphasis> Make a program which loads the image <computeroutput>data_for_anatomist/functional/Audio-Video_T_map.nii</computeroutput> and thresholds it so as to keep values above 3.
+          </highlights>
+          <screen>from soma import aims
+vol = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
+for z in xrange( vol.getSizeZ() ):
+  for y in xrange( vol.getSizeY() ):
+    for x in xrange( vol.getSizeX() ):
+      if vol.value( x, y, z ) &lt; 3.:
+        vol.setValue( 0, x, y, z )
+aims.write( vol, 'Audio-Video_T_thresholded.nii' )</screen>
+        </para>
+        <para>
+          The first thing that comes to mind when running these examples, is that they are <emphasis>slow</emphasis>. Indeed, python is an interpreted language and loops in any interpreted language are slow. In addition, accessing individually each voxel of the volume has the overhead of python/C++ bindings communications. The conclusion is that that kind of example is probably a bit too low-level, and should be done, when possible, by compiled libraries or specialized array-handling libraries. This is the role of <emphasis role="bold">numpy</emphasis>.
         </para>
         <para>
           Accessing numpy arrays to AIMS volume voxels is supported:
           <screen>import numpy
 vol.fill( 0 )
 arr = numpy.array( vol, copy=False )
+# set value 100 in a whole sub-volume
 arr[60:120, 60:120, 40:80] = 100
-# note that arr is a shared view to the volume contents, modifications
-# will also affect the volume
+# note that arr is a shared view to the volume contents,
+# modifications will also affect the volume
 aims.write( vol, "cube.nii" )</screen>
         </para>
         <para>
-          Now we can re-write the distance example using numpy:
+          Now we can re-write thethresholding example using numpy:
+          <screen>from soma import aims
+vol = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
+arr = numpy.array( vol, copy=False )
+arr[ numpy.where( arr &lt; 3. ) ] = 0.
+aims.write( vol, 'Audio-Video_T_thresholded2.nii' )</screen>
+          Here, <computeroutput>arr &lt; 3.</computeroutput> returns a boolean array with the same size as <computeroutput>arr</computeroutput>, and <computeroutput>numpy.where()</computeroutput> returns arrays of coordinates where the specified contition is true.
+        </para>
+        <para>
+          The distance example, using numpy, would like the following:
           <screen>from soma import aims
 import numpy
 vol = aims.Volume_S16( 192, 256, 128 )
@@ -1316,7 +1337,7 @@ print 'vol2.value( 100, 100, 60 ):', vol2.value( 100, 100, 60 )</screen>
           If you need to build another, different volume, with the same structure and size, don't forget to copy the header part:
           <screen>vol2 = aims.Volume_FLOAT( vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), vol.getSizeT() )
 vol2.header().update( vol.header() )</screen>
-          Important information can reside in the header, like voxel size, or coordinates systems and geometric transformations to other coordinates systems, so it is really very important to carry this information with duplicated volumes.
+          Important information can reside in the header, like voxel size, or coordinates systems and geometric transformations to other coordinates systems, so it is really very important to carry this information with duplicated or derived volumes.
         </para>
         <para>
           You can also build a volume from a numy array:
