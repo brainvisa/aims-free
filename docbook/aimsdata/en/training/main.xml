@@ -1277,6 +1277,23 @@ for z in xrange( vol.getSizeZ() ):
 aims.write( vol, 'Audio-Video_T_thresholded.nii' )</screen>
         </para>
         <para>
+          <highlights><emphasis role="bold">Exercise:</emphasis> Make a program to dowsample the anatomical image <computeroutput>data_for_anatomist/functional/s12069.nii</computeroutput> and keeps one voxel out of two in every direction.
+          </highlights>
+          <screen>from soma import aims
+            vol = aims.read( 'data_for_anatomist/functional/s12069.nii' )
+            # allocate a new volume with half dimensions
+            vol2 = aims.Volume_DOUBLE( vol.getSizeX() / 2, vol.getSizeY() / 2, vol.getSizeZ() / 2 )
+            # set the voxel size to twice it was in vol
+            vs = vol.header()[ 'voxel_size' ]
+            vs2 = [ x * 2 for x in vs ]
+            vol2.header()[ 'voxel_size' ] = vs2
+            for z in xrange( vol2.getSizeZ() ):
+            for y in xrange( vol2.getSizeY() ):
+            for x in xrange( vol2.getSizeX() ):
+            vol2.setValue( vol.value( x*2, y*2, z*2 ), x, y, z )
+            aims.write( vol2, 'resampled.nii' )</screen>
+        </para>
+        <para>
           The first thing that comes to mind when running these examples, is that they are <emphasis>slow</emphasis>. Indeed, python is an interpreted language and loops in any interpreted language are slow. In addition, accessing individually each voxel of the volume has the overhead of python/C++ bindings communications. The conclusion is that that kind of example is probably a bit too low-level, and should be done, when possible, by compiled libraries or specialized array-handling libraries. This is the role of <emphasis role="bold">numpy</emphasis>.
         </para>
         <para>
@@ -1505,8 +1522,9 @@ mesh.vertex( 1 ).assign( mesh.vertex( 0 ) )
 mesh.normal( 1 ).assign( mesh.normal( 0 ) )
 mesh.polygon( 1 ).assign( mesh.polygon( 0 ) )
 print 'number of time steps:', mesh.size()</screen>
-          <highlights><emphasis role="bold">Exercise:</emphasis> make a deforming mesh that goes from the original mesh to 5mm away, by steps of 0.5 mm<sbr/>
-            <screen>from soma import aims
+          <highlights><emphasis role="bold">Exercise:</emphasis> make a deforming mesh that goes from the original mesh to 5mm away, by steps of 0.5 mm
+          </highlights>
+          <screen>from soma import aims
 import numpy
 mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
 vert = mesh.vertex()
@@ -1523,7 +1541,6 @@ mesh.updateNormals()
 if mesh.header().has_key( 'nb_t_pos' ):
   del mesh.header()[ 'nb_t_pos' ]
 aims.write( mesh, 's12069_Lwhite_semiinflated_time.mesh' )</screen>
-          </highlights>
         </para>
       </sect3>
     </sect2>
@@ -1705,10 +1722,53 @@ m.getBrain( clvol, mesh )
 aims.write( mesh, 'head_mesh.gii' )
         </screen>
       </para>
+
+      <para>The above examples make up a simplified version of the head mesh extraction algorithm in <computeroutput>VipGetHead</computeroutput>, used in the T1 pipeline.
+      </para>
     </sect3>
 
-    <para>The examples in this section make up a simplified version of the head mesh extraction algorithm in <computeroutput>VipGetHead</computeroutput>, used in the T1 pipeline.
-    </para>
+    <sect3><title>Surface generation</title>
+      <para>The <computeroutput>aims.SurfaceGenerator</computeroutput> allows to create simple meshes of predefined shapes: cube, cylinder, sphere, icosehedron, cone, arrow.
+        <screen>from soma import aims
+center = ( 50, 25, 20 )
+radius = 53
+mesh1 = aims.SurfaceGenerator.icosahedron( center, radius )
+# this dictionary-based generation will work correctly in pyaims >= 3.2.1
+mesh2 = aims.SurfaceGenerator.generate( { 'type' : 'arrow', 'point1' : [ 30, 70, 0 ],
+  'point2' : [ 100, 100, 100 ], 'radius' : 20, 'arrow_radius' : 30,
+  'arrow_length_factor' : 0.7, 'facets' : 50 } )
+# get the list of all possible generated objects and parameters:
+print aims.SurfaceGenerator.description()</screen>
+      </para>
+    </sect3>
+
+    <sect3><title>Interpolation</title>
+      <para>
+        Interpolators help to get values in millimeters coordinates in a discrete space (volume grid), and may allow voxels values mixing (linear interpolation, typically).
+        <screen>from soma import aims
+# load a functional volume
+vol = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
+# get the position of the maximum
+pmax, maxval = aims.AimsData_DOUBLE( vol ).maxIndex()
+# get transformation from functional to anatomical coords
+f = aims.Finder()
+f.check( 'data_for_anatomist/functional/s12069.nii' )
+anathdr = f.header()
+# get functional -> MNI transformation
+m1 = aims.Motion( vol.header()[ 'transformations' ][1] )
+# get anat -> MNI transformation
+m2 = aims.Motion( anathdr[ 'transformations' ][1] )
+# make anat -> functional transformation
+anat2func = m1.inverse() * m2
+# contrarily to the other previous example, we stay in mm this time.
+# take a sphere of 5mm radius, with about 200 vertices
+mesh = aims.SurfaceGenerator.sphere( pmax[:3], 5., 200 )
+# create a texture for that sphere
+tex = aims.TimeTexture_FLOAT( len( mesh.vertex() ) )
+        </screen>
+      </para>
+    </sect3>
+
   </sect1>
 
   <sect1>
