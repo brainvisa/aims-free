@@ -1610,6 +1610,56 @@ aims.write( tex, 's12069_Lwhite_semiinflated_audio_video.tex' )</screen>
           <listitem>optionally, relations, which link nodes and can also contain properties and geometrical elements.</listitem>
         </itemizedlist>
       </para>
+
+      <sect3><title>Properties</title>
+        <para>
+          Properties are stored in a dictionary-like way. They can hold almost anything, but a restricted set of types can be saved and loaded. It is exactly the same thing as headers found in volumes, meshes, textures or buckets.
+          <screen>from soma import aims
+graph = aims.read( 'data_for_anatomist/objects/roi/basal_ganglia.arg' )
+print graph
+print 'properties:', graph.keys()
+for p, v in graph.iteritems():
+  print p, ':', v
+graph[ 'gudule' ] = [ 12, 'a comment' ]</screen>
+          <emphasis rome="bold">Note:</emphasis> Only properties declared in a "syntax" file may be saved and re-loaded. Other properties are just not saved.
+        </para>
+      </sect3>
+
+      <sect3><title>Vertices</title>
+        <para>
+          Vertices (or nodes) can be accessed via the vertices() method. Each vertex is also a dictionary-like properties set.
+          <screen>for v in graph.vertices():
+  print v['name']</screen>
+        </para>
+        <para>
+          To insert a new vertex, the <computeroutput>addVertex()</computeroutput> method should be used:
+          <screen>v = graph.addVertex( 'roi' )
+print v
+v[ 'name' ] = 'new ROI'</screen>
+        </para>
+      </sect3>
+
+      <sect3><title>Edges</title>
+        <para>
+          An edge, or relation, links nodes together. Up to now we have always used binary, unoriented, edges. They can be added using the <computeroutput>addEdge()</computeroutput> method. Edges are also dictionary-like properties sets.
+          <screen>v2 = graph.vertices().list()[1]
+e = graph.addEdge( v.get(), v2, 'roi_link' )
+print graph.edges()
+# get vertices linked by this edge
+print e.vertices()</screen>
+        </para>
+      </sect3>
+
+      <sect3><title>Adding meshes or buckets in a graph vertex or relation</title>
+        <para>
+          Setting meshes or buckets in vertices properties is OK internally, but for saving and loading, additional consistancy must be ensured and internal tables update is required. Then, use the <computeroutput>aims.GraphManip.storeAims</computeroutput> function:
+          <screen>mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+# store mesh in the 'roi' property of vertex v of graph graph
+aims.GraphManip.storeAims( graph, v.get(), 'roi', mesh )
+# the v.get() is a wrapper conversion that should not have been visible to
+# users - we will try to eliminate this in future versions</screen>
+        </para>
+      </sect3>
     </sect2>
 
   </sect1>
@@ -1617,6 +1667,48 @@ aims.write( tex, 's12069_Lwhite_semiinflated_audio_video.tex' )</screen>
 
   <sect1>
     <title>Using algorithms</title>
+
+    <para>
+      AIMS contains, in addition to the different data structures used in neuroimaging, a set of algorithms which operate on these structures. Currently only a few of them have Python bindings, because we develop these bindings in a "lazy" way, only when they are needed. The algorthms currently available include data conversion, resampling, thresholding, mathematical morphology, distance maps, the mesher, some mesh generators, and a few others. But most of the algorithms are still only available in C++.
+    </para>
+
+    <sect3><title>Volume Thresholding</title>
+      <para>
+        <screen>from soma import aims, aimsalgo
+# read a volume with 2 voxels border
+vol = aims.read( 'data_for_anatomist/functional/s12069.nii', border=2 )
+# use a thresholder which will keep values above 600
+ta = aims.AimsThreshold_S16_S16( aims.AIMS_GREATER_OR_EQUAL_TO, 600 )
+# use it to make a binary thresholded volume
+tvol = ta.bin( vol )
+aims.write( tvol, 'thresholded.nii' )</screen>
+      </para>
+    </sect3>
+
+    <sect3><title>Mathematical morphology</title>
+
+      <para>
+        <screen>
+# apply 5mm closing
+clvol = aimsalgo.AimsMorphoClosing( tvol, 5 )
+aims.write( clvol, 'closed.nii' )</screen>
+      </para>
+    </sect3>
+
+    <sect3><title>Mesher</title>
+      <para>
+        <screen>m = aimsalgo.Mesher()
+mesh = aims.AimsSurfaceTriangle() # create an empty mesh
+clvol -= 1 # the background value should be -1
+# get a smooth mesh of the interface of the biggest connected component
+m.getBrain( clvol, mesh )
+aims.write( mesh, 'head_mesh.gii' )
+        </screen>
+      </para>
+    </sect3>
+
+    <para>The examples in this section make up a simplified version of the head mesh extraction algorithm in <computeroutput>VipGetHead</computeroutput>, used in the T1 pipeline.
+    </para>
   </sect1>
 
   <sect1>
