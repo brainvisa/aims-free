@@ -38,10 +38,11 @@
 #include <aims/resampling/resampler.h>
 #include <cartobase/config/verbose.h>
 #include <iomanip>
+#include <stdexcept>
 
 template < typename T >
 void 
-Resampler< T >::resample( const AimsData< T >& inVolume,     
+Resampler< T >::resample( const AimsData< T >& inVolume,
                           const Motion& transform3d,
                           const T& outBackground,
                           AimsData< T >& outVolume,
@@ -167,6 +168,9 @@ void Resampler<T>::updateParameters( const AimsData< T > &, int,
 template <typename T>
 void Resampler<T>::doit( const Motion& motion, AimsData<T>& thing )
 {
+  if( !_ref )
+    throw std::runtime_error( "Resampler used without a ref volme to resample"
+    );
   resample( *_ref, motion, _defval, thing, carto::verbose );
 }
 
@@ -175,6 +179,9 @@ template <typename T>
 AimsData<T> Resampler<T>::doit( const Motion& motion, int dimX, int dimY, 
                                 int dimZ, const Point3df& resolution )
 {
+  if( !_ref )
+    throw std::runtime_error( "Resampler used without a ref volme to resample"
+    );
   AimsData<T>	thing( dimX, dimY, dimZ, _ref->dimT() );
   thing.setSizeXYZT( resolution[0], resolution[1], resolution[2], 
                      _ref->sizeT() );

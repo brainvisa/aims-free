@@ -1750,22 +1750,65 @@ print aims.SurfaceGenerator.description()</screen>
 vol = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
 # get the position of the maximum
 pmax, maxval = aims.AimsData_DOUBLE( vol ).maxIndex()
-# get transformation from functional to anatomical coords
-f = aims.Finder()
-f.check( 'data_for_anatomist/functional/s12069.nii' )
-anathdr = f.header()
-# get functional -> MNI transformation
-m1 = aims.Motion( vol.header()[ 'transformations' ][1] )
-# get anat -> MNI transformation
-m2 = aims.Motion( anathdr[ 'transformations' ][1] )
-# make anat -> functional transformation
-anat2func = m1.inverse() * m2
-# contrarily to the other previous example, we stay in mm this time.
+# set pmax in mm
+vs = vol.header()[ 'voxel_size' ]
+pmax = [ x * y for x,y in zip( pmax, vs ) ]
 # take a sphere of 5mm radius, with about 200 vertices
 mesh = aims.SurfaceGenerator.sphere( pmax[:3], 5., 200 )
+vert = mesh.vertex()
+# get an interpolator
+interpolator = aims.aims.getLinearInterpolator( vol )
 # create a texture for that sphere
-tex = aims.TimeTexture_FLOAT( len( mesh.vertex() ) )
-        </screen>
+tex = aims.TimeTexture_FLOAT()
+tx = tex[0]
+tx2 = tex[1]
+tx.reserve( len( vert ) )
+tx2.reserve( len( vert ) )
+for v in vert:
+  tx.append( interpolator.value( v ) )
+  # compare to non-interpolated value
+  tx2.append( vol.value( *[ int( round(x/y) ) for x,y in zip( v, vs ) ] ) )
+aims.write( tex, 'functional_tex.gii' )
+aims.write( mesh, 'sphere.gii' )</screen>
+        Look at the difference between the two timesteps (interpolated and non-interpolated) of the texture in Anatomist.
+      </para>
+    </sect3>
+
+    <sect3><title>Types conversion</title>
+      <para>
+        The <computeroutput>Converter_*_*</computeroutput> classes allow to convert some data structures types to others. Of course all types cannot be converted to any other, but they are typically used ton convert volumed from a given voxel type to another one. For instance, to convert the anatomical volume of the previous examples to float type:
+        <screen>from soma import aims
+vol = aims.read( 'data_for_anatomist/functional/s12069.nii' )
+print 'type of vol:', type( vol )
+c = aims.Converter_Volume_S16_Volume_FLOAT()
+vol2 = c( vol )
+print 'type of converted volume:', type( vol2 )
+print 'value of initial volume at voxel (50,50,50):', vol.value( 50, 50, 50 )
+print 'value of converted volume at voxel (50,50,50):', vol2.value( 50, 50, 50 )</screen>
+      </para>
+    </sect3>
+
+    <sect3><title>Resampling</title>
+      <para>
+        Resampling allows to apply a geometric transformation or/and to change voxels size. Several types of resampling may be used depending on how we interpolate values between neighbouring voxels (see interpolators): nearest-neighbour (order 0), linear (order 1), spline resampling with order 2 to 7 in AIMS.
+        <screen>from soma import aims, aimsalgo
+import math
+vol = aims.read( 'data_for_anatomist/functional/s12069.nii' )
+# create an affine transformation matrix
+# rotating pi/8 along z axis
+tr = aims.Motion( aims.Quaternion( [ 0, 0, math.sin( math.pi/16 ), math.cos( math.pi/16 ) ] ) )
+tr.setTranslation( ( 100, -50, 0 ) )
+# get an order 2 resampler for volumes of S16
+resp = aims.ResamplerFactory_S16().getResampler( 2 )
+resp.setDefaultValue( -1 ) # set background to -1
+resp.setRef( vol ) # volume to resample
+# resample into a volume of dimension 200x200x200 with voxel size 1.1, 1.1, 1.5
+resampled = resp.doit( tr, 200, 200, 200, ( 1.1, 1.1, 1.5 ) )
+# Note that the header transformations to external referentials have been updated
+print resampled.header()[ 'referentials' ]
+print resampled.header()[ 'transformations' ]
+aims.write( resampled, 'resampled.nii' )</screen>
+        Load the original image and the resampled in Anatomist. See how the resampled has been rotated. Now apply the NIFTI/SPM referential info on both images. They are now aligned again, and cursor clicks correctly go to the same location on both volume, whatever the display referential for each of them.
       </para>
     </sect3>
 

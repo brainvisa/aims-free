@@ -61,10 +61,10 @@ public:
   Resampler_%Template1typecode%();
   virtual ~Resampler_%Template1typecode%();
 
-  virtual void doit( const Motion&, AimsData_%Template1typecode% & )
+  virtual void doit( const Motion&, AimsData_%Template1typecode% & ) throw()
     /ReleaseGIL/;
   virtual AimsData_%Template1typecode% doit( const Motion &, int, int, int,
-    const Point3df & ) /Factory, ReleaseGIL/;
+    const Point3df & ) throw() /Factory, ReleaseGIL/;
   virtual void resample( const AimsData_%Template1typecode% &,
                          const Motion &, const %Template1% &,
                          AimsData_%Template1typecode% &,
