@@ -56,3 +56,20 @@
 };
 
 
+%Exception carto::assert_error(std::exception) /PyName=AssertionError/
+{
+%TypeHeaderCode
+#include <cartobase/exception/assert.h>
+%End
+%RaiseCode
+        const char *detail = sipExceptionRef.what();
+        SIP_BLOCK_THREADS
+        if( !detail )
+          PyErr_SetString(PyExc_AssertionError, "assertion failed" );
+        else
+          PyErr_SetString(PyExc_AssertionError, detail);
+        SIP_UNBLOCK_THREADS
+%End
+};
+
+

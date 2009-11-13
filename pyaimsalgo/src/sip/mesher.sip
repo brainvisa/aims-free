@@ -34,7 +34,7 @@ class Mesher
 %End
 %If (!SIP_THROW_BUG)
    void getBrain( const AimsData_S16&, AimsSurfaceTriangle& )
-      throw ( std::runtime_error ) /ReleaseGIL/;
+      throw ( std::runtime_error, carto::assert_error ) /ReleaseGIL/;
 %End
 
     void getWhite( const AimsData_S16& , AimsSurfaceTriangle& ) /ReleaseGIL/;
