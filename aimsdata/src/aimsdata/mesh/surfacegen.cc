@@ -317,10 +317,10 @@ Object SurfaceGenerator::description()
 
 AimsSurfaceTriangle* SurfaceGenerator::cube( const GenericObject & params )
 {
-  ObjectVector	vp1;
+  Object	vp1;
   float		sz;
   bool		smth = false;
-  vp1 = params.getProperty( "center" )->value<ObjectVector>();
+  vp1 = params.getProperty( "center" );
   sz = (float) params.getProperty( "radius" )->getScalar();
   try
     {
@@ -329,8 +329,9 @@ AimsSurfaceTriangle* SurfaceGenerator::cube( const GenericObject & params )
   catch( exception & )
     {
     }
-  return cube( Point3df( vp1[0]->getScalar(), vp1[1]->getScalar(), 
-			 vp1[2]->getScalar() ), sz, smth );
+  return cube( Point3df( vp1->getArrayItem(0)->getScalar(),
+               vp1->getArrayItem(1)->getScalar(),
+               vp1->getArrayItem(2)->getScalar() ), sz, smth );
 }
 
 
@@ -486,14 +487,14 @@ AimsSurfaceTriangle* SurfaceGenerator::cube( const Point3df & pos,
 AimsSurfaceTriangle* 
 SurfaceGenerator::cylinder( const GenericObject & params )
 {
-  ObjectVector	vp1, vp2;
+  Object	vp1, vp2;
   float		sz, sz2;
   unsigned	nf = 4;
   bool		closed = false;
   bool		smth = false;
 
-  vp1 = params.getProperty( "point1" )->value<ObjectVector>();
-  vp2 = params.getProperty( "point2" )->value<ObjectVector>();
+  vp1 = params.getProperty( "point1" );
+  vp2 = params.getProperty( "point2" );
   sz = (float) params.getProperty( "radius" )->getScalar();
   sz2 = sz;
   try
@@ -524,11 +525,13 @@ SurfaceGenerator::cylinder( const GenericObject & params )
   catch( exception & )
     {
     }
-  return cylinder( Point3df( vp1[0]->getScalar(), vp1[1]->getScalar(), 
-			     vp1[2]->getScalar() ), 
-		   Point3df( vp2[0]->getScalar(), vp2[1]->getScalar(), 
-			     vp2[2]->getScalar() ), sz, sz2, nf, closed, 
-		   smth );
+  return cylinder( Point3df( vp1->getArrayItem(0)->getScalar(),
+                             vp1->getArrayItem(1)->getScalar(),
+                             vp1->getArrayItem(2)->getScalar() ),
+                   Point3df( vp2->getArrayItem(0)->getScalar(),
+                             vp2->getArrayItem(1)->getScalar(),
+                             vp2->getArrayItem(2)->getScalar() ),
+                   sz, sz2, nf, closed, smth );
 }
 
 
@@ -649,14 +652,14 @@ SurfaceGenerator::cylinder( const Point3df & p1, const Point3df & p2,
 
 AimsSurfaceTriangle* SurfaceGenerator::cone( const GenericObject & params )
 {
-  ObjectVector	vp1, vp2;
+  Object	vp1, vp2;
   float		sz;
   unsigned	nf = 4;
   bool		closed = false;
   bool		smth = false;
 
-  vp1 = params.getProperty( "point1" )->value<ObjectVector>();
-  vp2 = params.getProperty( "point2" )->value<ObjectVector>();
+  vp1 = params.getProperty( "point1" );
+  vp2 = params.getProperty( "point2" );
   sz = (float) params.getProperty( "radius" )->getScalar();
   try
     {
@@ -679,10 +682,13 @@ AimsSurfaceTriangle* SurfaceGenerator::cone( const GenericObject & params )
   catch( exception & )
     {
     }
-  return cone( Point3df( vp1[0]->getScalar(), vp1[1]->getScalar(), 
-			 vp1[2]->getScalar() ), 
-	       Point3df( vp2[0]->getScalar(), vp2[1]->getScalar(), 
-			 vp2[2]->getScalar() ), sz, nf, closed, smth );
+  return cone( Point3df( vp1->getArrayItem(0)->getScalar(),
+                         vp1->getArrayItem(1)->getScalar(),
+                         vp1->getArrayItem(2)->getScalar() ),
+               Point3df( vp2->getArrayItem(0)->getScalar(),
+                         vp2->getArrayItem(1)->getScalar(),
+                         vp2->getArrayItem(2)->getScalar() ),
+               sz, nf, closed, smth );
 }
 
 
@@ -783,11 +789,11 @@ SurfaceGenerator::cone( const Point3df & p1, const Point3df & p2,
 AimsSurfaceTriangle* 
 SurfaceGenerator::arrow( const GenericObject & params )
 {
-  ObjectVector	vp1, vp2;
+  Object	vp1, vp2;
   float		sz, sz2, len;
   unsigned	nf = 4;
-  vp1 = params.getProperty( "point1" )->value<ObjectVector>();
-  vp2 = params.getProperty( "point2" )->value<ObjectVector>();
+  vp1 = params.getProperty( "point1" );
+  vp2 = params.getProperty( "point2" );
   sz = (float) params.getProperty( "radius" )->getScalar();
   sz2 = (float) params.getProperty( "arrow_radius" )->getScalar();
   len = (float) params.getProperty( "arrow_length_factor" )->getScalar();
@@ -798,10 +804,13 @@ SurfaceGenerator::arrow( const GenericObject & params )
   catch( exception & )
     {
     }
-  return arrow( Point3df( vp1[0]->getScalar(), vp1[1]->getScalar(), 
-			  vp1[2]->getScalar() ), 
-		Point3df( vp2[0]->getScalar(), vp2[1]->getScalar(), 
-			  vp2[2]->getScalar() ), sz, sz2, nf, len );
+  return arrow( Point3df( vp1->getArrayItem(0)->getScalar(),
+                          vp1->getArrayItem(1)->getScalar(),
+                          vp1->getArrayItem(2)->getScalar() ),
+                Point3df( vp2->getArrayItem(0)->getScalar(),
+                          vp2->getArrayItem(1)->getScalar(),
+                          vp2->getArrayItem(2)->getScalar() ),
+                sz, sz2, nf, len );
 }
 
 
@@ -824,13 +833,14 @@ SurfaceGenerator::arrow( const Point3df & p1, const Point3df & p2,
 AimsSurfaceTriangle *
 SurfaceGenerator::icosahedron( const GenericObject & params )
 {
-  ObjectVector	vp1;
+  Object	vp1;
   float		sz;
-  vp1 = params.getProperty( "center" )->value<ObjectVector>();
+  vp1 = params.getProperty( "center" );
   sz = (float) params.getProperty( "radius" )->getScalar();
 
-  return icosahedron( Point3df( vp1[0]->getScalar(), vp1[1]->getScalar(), 
-				vp1[2]->getScalar() ), sz );
+  return icosahedron( Point3df( vp1->getArrayItem(0)->getScalar(),
+                      vp1->getArrayItem(1)->getScalar(),
+                      vp1->getArrayItem(2)->getScalar() ), sz );
 }
 
 

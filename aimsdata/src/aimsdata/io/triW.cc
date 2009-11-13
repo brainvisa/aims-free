@@ -71,6 +71,8 @@ TriWriter::write( const AimsSurfaceTriangle& thing )
        << thing.polygon()[ n ][ 2 ] << endl;
 
   hdr.copy( thing.header() );
+  if( hdr.hasProperty( "nb_t_pos" ) )
+    hdr.removeProperty( "nb_t_pos" );
   hdr.writeMinf( hdr.filename() + ".minf" );
 }
 

@@ -1167,11 +1167,13 @@ prompt% AimsThreshold -i roi.ima -o roi.ima -m ge -t 8000
     </itemizedlist>
     A few examples of how to use and manipulate the main data structures will be shown here.
   </para>
+  <para>The data for the examples in this section is the data of the JIRFNI 2008 training course, and can be downloaded here: <ulink url="ftp://ftp.cea.fr/pub/dsv/anatomist/data/data_jirfni2008.zip">ftp://ftp.cea.fr/pub/dsv/anatomist/data/data_jirfni2008.zip</ulink>. To use the examples directly, users should go to the jirfni2008 directory of this archive, and then run ipthon from this directory.
+  </para>
 
   <sect1>
-    <title>Basics</title>
+    <title>Using data structures</title>
 
-    <sect3>
+    <sect2>
       <title>Module importation</title>
       <para>In python, the aimsdata library is available as the <computeroutput>soma.aims</computeroutput> module.
         <screen>import soma.aims
@@ -1183,62 +1185,633 @@ vol = soma.aims.Volume_S16( 100, 100, 100 )</screen>
 vol = aims.Volume_S16( 100, 100, 100 )
 # in the following, we will be using this form because it is shorter.</screen>
       </para>
-    </sect3>
+    </sect2>
 
-    <sect3>
+    <sect2>
       <title>IO: reading and writing objects</title>
 
       <para>
         Reading operations are accessed via a single <computeroutput>read()</computeroutput> function, and writing through a single <computeroutput>write()</computeroutput> function. The <computeroutput>read()</computeroutput> function reads any object from a given file name, in any supported file format, and returns it:
         <screen>from soma import aims
-obj = aims.read( 'data/volume_example.nii' )
+obj = aims.read( 'data_for_anatomist/functional/s12069.nii' )
 print obj
-obj2 = aims.read( 'data/volume_example2.ima' )
+obj2 = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
 print obj2
-obj3 = aims.read( 'data/mesh_example.mesh' )
-print obj3
-obj4 = aims.read( 'data/mesh_example2.gii' )
-print obj4</screen>
+obj3 = aims.read( 'data_for_anatomist/functional/s12069_Lhemi.mesh' )
+print obj3</screen>
         The returned object can have various types according to what is found in the disk file(s).
       </para>
       <para>
         Writing is just as easy. The file name extension generally determines the output format. An object read from a given format can be re-written in any other supported format, provided the format can actually store the object type.
         <screen>from soma import aims
-obj2 = aims.read( 'data/volume_example2.ima' )
-aims.write( obj2, '/tmp/vol_ex2.nii' )
-obj3 = aims.read( 'data/mesh_example.mesh' )
-aims.write( obj3, '/tmp/mesh_ex.gii' )
-        </screen>
+obj2 = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
+aims.write( obj2, '/tmp/Audio-Video_T_map.ima' )
+obj3 = aims.read( 'data_for_anatomist/functional/s12069_Lhemi.mesh' )
+aims.write( obj3, '/tmp/s12069_Lhemi.gii' )</screen>
       </para>
       <highlights><emphasis role="bold">Exercise:</emphasis> write a little file format conversion tool
       </highlights>
-    </sect3>
+    </sect2>
 
-    <sect3>
+    <sect2>
       <title>Volumes</title>
-    </sect3>
 
-    <sect3>
+      <para>
+        Volumes are array-like containers of voxels, plus a set of additional information kept in a header structure. In AIMS, the header structure is generic and extensible, and does not depend on a specific file format. Voxels may have various types, so a specific type of volume should be used for a specific type of voxel. The type of voxel has a code that is used to suffix the Volume type: <computeroutput>Volume_S16</computeroutput> for signed 16-bit ints, <computeroutput>Volume_U32</computeroutput> for unsigned 32-bit ints, <computeroutput>Volume_DOUBLE</computeroutput> for 32-bit floats, <computeroutput>Volume_RGBA</computeroutput> for RGBA colors, etc.
+      </para>
+
+      <sect3><title>Building a volume</title>
+        <para>
+          <screen># create a 3D volume of signed 16-bit ints, of size 192x256x128
+vol = aims.Volume_S16( 192, 256, 128 )
+# fill it with zeros
+vol.fill(0)
+# set value 12 at voxel ( 100, 100, 60 )
+vol.setValue( 12, 100, 100, 60 )
+# get value at the same position
+x = vol.value( 100, 100, 60 )
+# set the voxels size
+vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+print vol.header()</screen>
+        </para>
+      </sect3>
+
+      <sect3><title>Basic operations:</title>
+        <para>
+          Whole volume operations:
+          <screen># multiplication, addition etc
+vol *= 2
+vol2 = vol * 3 + 12
+vol /= 2
+vol3 = vol2 - vol - 12
+vol4 = vol2 * vol / 6</screen>
+          Voxel-wise operations:
+          <screen># fill the volume with the distance to voxel ( 100, 100, 60 )
+vs = vol.header()[ 'voxel_size' ]
+pos0 = ( 100 * vs[0], 100 * vs[1], 60 * vs[2] ) # in millimeters
+for z in xrange( vol.getSizeZ() ):
+  for y in xrange( vol.getSizeY() ):
+    for x in xrange( vol.getSizeX() ):
+      # get current position in an aims.Point3df structure, in mm
+      p = aims.Point3df( x * vs[0], y * vs[1], z * vs[2] )
+      # get relative position to pos0, in voxels
+      p -= pos0
+      # distance: norm of vector p
+      dist = p.norm()
+      # set it into the volume
+      vol.setValue( dist, x, y, z )
+# save the volume
+aims.write( vol, 'distance.nii' )</screen>
+        Now look at the <computeroutput>"distance.nii"</computeroutput> volume in Anatomist.
+        </para>
+        <para>
+          <highlights><emphasis role="bold">Exercise:</emphasis> Make a program which loads the image <computeroutput>data_for_anatomist/functional/Audio-Video_T_map.nii</computeroutput> and thresholds it so as to keep values above 3.
+          </highlights>
+          <screen>from soma import aims
+vol = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
+for z in xrange( vol.getSizeZ() ):
+  for y in xrange( vol.getSizeY() ):
+    for x in xrange( vol.getSizeX() ):
+      if vol.value( x, y, z ) &lt; 3.:
+        vol.setValue( 0, x, y, z )
+aims.write( vol, 'Audio-Video_T_thresholded.nii' )</screen>
+        </para>
+        <para>
+          <highlights><emphasis role="bold">Exercise:</emphasis> Make a program to dowsample the anatomical image <computeroutput>data_for_anatomist/functional/s12069.nii</computeroutput> and keeps one voxel out of two in every direction.
+          </highlights>
+          <screen>from soma import aims
+            vol = aims.read( 'data_for_anatomist/functional/s12069.nii' )
+            # allocate a new volume with half dimensions
+            vol2 = aims.Volume_DOUBLE( vol.getSizeX() / 2, vol.getSizeY() / 2, vol.getSizeZ() / 2 )
+            # set the voxel size to twice it was in vol
+            vs = vol.header()[ 'voxel_size' ]
+            vs2 = [ x * 2 for x in vs ]
+            vol2.header()[ 'voxel_size' ] = vs2
+            for z in xrange( vol2.getSizeZ() ):
+            for y in xrange( vol2.getSizeY() ):
+            for x in xrange( vol2.getSizeX() ):
+            vol2.setValue( vol.value( x*2, y*2, z*2 ), x, y, z )
+            aims.write( vol2, 'resampled.nii' )</screen>
+        </para>
+        <para>
+          The first thing that comes to mind when running these examples, is that they are <emphasis>slow</emphasis>. Indeed, python is an interpreted language and loops in any interpreted language are slow. In addition, accessing individually each voxel of the volume has the overhead of python/C++ bindings communications. The conclusion is that that kind of example is probably a bit too low-level, and should be done, when possible, by compiled libraries or specialized array-handling libraries. This is the role of <emphasis role="bold">numpy</emphasis>.
+        </para>
+        <para>
+          Accessing numpy arrays to AIMS volume voxels is supported:
+          <screen>import numpy
+vol.fill( 0 )
+arr = numpy.array( vol, copy=False )
+# set value 100 in a whole sub-volume
+arr[60:120, 60:120, 40:80] = 100
+# note that arr is a shared view to the volume contents,
+# modifications will also affect the volume
+aims.write( vol, "cube.nii" )</screen>
+        </para>
+        <para>
+          Now we can re-write thethresholding example using numpy:
+          <screen>from soma import aims
+vol = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
+arr = numpy.array( vol, copy=False )
+arr[ numpy.where( arr &lt; 3. ) ] = 0.
+aims.write( vol, 'Audio-Video_T_thresholded2.nii' )</screen>
+          Here, <computeroutput>arr &lt; 3.</computeroutput> returns a boolean array with the same size as <computeroutput>arr</computeroutput>, and <computeroutput>numpy.where()</computeroutput> returns arrays of coordinates where the specified contition is true.
+        </para>
+        <para>
+          The distance example, using numpy, would like the following:
+          <screen>from soma import aims
+import numpy
+vol = aims.Volume_S16( 192, 256, 128 )
+vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+vs = vol.header()[ 'voxel_size' ]
+pos0 = ( 100 * vs[0], 100 * vs[1], 60 * vs[2] ) # in millimeters
+arr = numpy.array( vol, copy=False )
+# build arrays of coordinates for x, y, z
+x, y, z = numpy.ogrid[ 0.:vol.getSizeX(), 0.:vol.getSizeY(), 0.:vol.getSizeZ() ]
+# get coords in millimeters
+x *= vs[0]
+y *= vs[1]
+z *= vs[2]
+# relative to pos0
+x -= pos0[0]
+y -= pos0[1]
+z -= pos0[2]
+# get norm, using numpy arrays broadcasting
+arr[:,:,:,0] = numpy.sqrt( x**2+y**2+z**2 )
+# and save result
+aims.write( vol, 'distance2.nii' )</screen>
+        This example appears a bit more tricky, since we must build the coordinates arrays, but is way faster to execute, because all loops within the code are executed in compiled routines in numpy. One interesting thing to note is that this code is using the famous "array broadcasting" feature of numpy, where arrays of heterogeneous sizes can be combined, and the "missing" dimensions are extended.
+        </para>
+      </sect3>
+      <sect3>
+        <title>Copying volumes or volumes structure, or building from an array</title>
+        <para>
+          To make a deep-copy of a volume, use the copy constructor:
+          <screen>vol2 = aims.Volume_S16( vol )
+vol2.setValue( 12, 100, 100, 60 )
+# now vol and vol2 have different values
+print 'vol.value( 100, 100, 60 ):', vol.value( 100, 100, 60 )
+print 'vol2.value( 100, 100, 60 ):', vol2.value( 100, 100, 60 )</screen>
+          If you need to build another, different volume, with the same structure and size, don't forget to copy the header part:
+          <screen>vol2 = aims.Volume_FLOAT( vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), vol.getSizeT() )
+vol2.header().update( vol.header() )</screen>
+          Important information can reside in the header, like voxel size, or coordinates systems and geometric transformations to other coordinates systems, so it is really very important to carry this information with duplicated or derived volumes.
+        </para>
+        <para>
+          You can also build a volume from a numy array:
+          <screen>arr = numpy.array( numpy.diag( xrange( 40 ) ), dtype=numpy.float32 ).reshape( 40, 40, 1 ) \
+    + numpy.array( xrange( 20 ), dtype=numpy.float32 ).reshape( 1, 1, 20 )
+# WARNING: the array must be in Fortran ordering for AIMS, at leat at the moment
+# whereas the numpy addition always returns a C-ordered array
+arr = numpy.array( arr, order='F' )
+arr[ 10, 12, 3 ] = 25
+vol = aims.Volume_FLOAT( arr )
+print 'vol.value( 10, 12, 3 ):', vol.value( 10, 12, 3 )
+# data are shared with arr
+vol.setValue( 35, 10, 15, 2 )
+print 'arr[ 10, 15, 2 ]:', arr[ 10, 15, 2 ]
+arr[ 12, 15, 1 ] = 44
+print 'vol.value( 12, 15, 1 ):', vol.value( 12, 15, 1 )</screen>
+        </para>
+      </sect3>
+      <sect3><title>4D volumes</title>
+        <para>
+          4D volumes work just like 3D volumes. Actually all volumes are 4D in AIMS, but the last dimension is commonly of size 1. In <computeroutput>value()</computeroutput> and <computeroutput>setValue()</computeroutput> methods, only the first dimension is mandatory, others are optional and default to 0, but up to 4 coordinates may be used. In the same way, the constructor takes up to 4 dimension parameters:
+          <screen>from soma import aims
+# create a 4D volume of signed 16-bit ints, of size 30x30x30x4
+vol = aims.Volume_S16( 30, 30, 30, 4 )
+# fill it with zeros
+vol.fill(0)
+# set value 12 at voxel ( 10, 10, 20, 2 )
+vol.setValue( 12, 10, 10, 20, 2 )
+# get value at the same position
+x = vol.value( 10, 10, 20, 2 )
+# set the voxels size
+vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+print vol.header()</screen>
+          Similarly, 1D or 2D volumes may be used exactly the same way.
+        </para>
+      </sect3>
+      <sect3><title>The older AimsData classes</title>
+        <para>
+          For historical reasons, another set of classes may also represent volumes. These classes are the older API in AIMS, and tend to be obsolete. But as they were used in many many routines and programs, they have still not been eradicated. Many C++ routines build volumes and actually return those older classes, so we could not really hide them, and they also have python bindings. These classes are <computeroutput>aims.AimsData_&lt;type&gt;</computeroutput>. Converting from and to <computeroutput>aims.Volume_</computeroutput> classes is rather simple since the newer <computeroutput>Volume</computeroutput> classes are used internally in the <computeroutput>AimsData</computeroutput> API.
+          <screen>from soma import aims
+# create a 4D volume of signed 16-bit ints, of size 30x30x30x4
+vol = aims.Volume_S16( 30, 30, 30, 4 )
+vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+advol = aims.AimsData_S16( vol )
+# vol and advol share the same header and voxel data
+vol.setValue( 12, 10, 10, 20, 2 )
+print 'advol.value( 10, 10, 20, 2 ):', advol.value( 10, 10, 20, 2 )
+advol.setValue( 44, 12, 12, 24, 1 )
+print 'vol.value( 12, 12, 24, 1 ):', vol.value( 12, 12, 24, 1 )</screen>
+          And, in the other side:
+          <screen>from soma import aims
+# create a 4D volume of signed 16-bit ints, of size 30x30x30x4
+advol = aims.AimsData_S16( 30, 30, 30, 4 )
+advol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+vol = advol.volume()
+# vol and advol share the same header and voxel data
+vol.setValue( 12, 10, 10, 20, 2 )
+print 'advol.value( 10, 10, 20, 2 ):', advol.value( 10, 10, 20, 2 )
+advol.setValue( 44, 12, 12, 24, 1 )
+print 'vol.value( 12, 12, 24, 1 ):', vol.value( 12, 12, 24, 1 )</screen>
+          <computeroutput>AimsData</computeroutput> has a bit richer API, since it includes minor processing functions that have been removed from the newer <computeroutput>Volume</computeroutput> for the sake of API simplicity and minimalism.
+          <screen># minimum / maximum
+print 'min:', advol.minimum(), 'at', advol.minIndex()
+print 'max:', advol.maximum(), 'at', advol.maxIndex()
+# clone copy
+advol2 = advol.clone()
+advol2.setValue( 12, 4, 8, 11, 3 )
+# now advol and advol2 have different values
+print 'advol.value( 4, 8, 11, 3 ):', advol.value( 4, 8, 11, 3 )
+print 'advol2.value( 4, 8, 11, 3 ):', advol2.value( 4, 8, 11, 3 )
+# Border handling
+# Border width is th 5th parameter of AimsData constructor
+advol = aims.AimsData_S16( 192, 256, 128, 1, 2 )
+advol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
+advol.fill( 0 )
+advol.setValue( 15, 100, 100, 60 )
+vol = advol.volume()
+# then vol is 4 voxels wider in each direction, and shifted:
+print 'vol.value( 100, 100, 60 ):', vol.value( 100, 100, 60 )
+# ... it is 0, not 15...
+print 'vol.value( 102, 102, 62 ):', vol.value( 102, 102, 62 )
+# here we get 15
+# some algorithms require this border to exist, otherwise fail or crash...
+from soma import aimsalgo
+aimsalgo.AimsDistanceFrontPropagation( advol, 0, -1, 3, 3, 3, 10, 10 )
+aims.write( advol, 'distance3.nii' )</screen>
+        </para>
+      </sect3>
+    </sect2>
+
+    <sect2>
       <title>Meshes</title>
-    </sect3>
 
-    <sect3>
+      <sect3><title>Structure</title>
+        <para>
+        A surfacic mesh represents a surface, as a set of small polygons (genrally triangles, but sometimes quads). It has two main components: a vector of vertices (each vertex is a 3D point, with coordinates in millimeters), and a vector of polygons: each polygon is defined by the vertices it links (3 for a triangle). It also optionally has normals (unit vectors). In our mesh structures, there is one normal for each vertex.
+        <screen>from soma import aims
+mesh = aims.read( 'example_mesh.mesh' )
+vert = mesh.vertex()
+print 'vertices:', len( vert )
+poly = mesh.polygon()
+print 'polygons:', len( poly )
+norm = mesh.normal()
+print 'normals:', len( norm )</screen>
+        To build a mesh, we can instantiate an object of type <computeroutput>aims.AimsTimeSurface_&lt;n&gt;</computeroutput>, with <emphasis>n</emphasis> being the number of vertices by polygon. Then we can add vertices, normals and polygons to the mesh:
+        <screen># build a flying saucer mesh
+from soma import aims
+import numpy
+mesh = aims.AimsTimeSurface_3()
+# a mesh has a header
+mesh.header()[ 'toto' ] = 'a message in the header'
+vert = mesh.vertex()
+poly = mesh.polygon()
+x = numpy.cos( numpy.ogrid[ 0.:20 ] * numpy.pi / 10. ) * 100
+y = numpy.sin( numpy.ogrid[ 0.:20 ] * numpy.pi / 10. ) * 100
+z = numpy.zeros( 20 )
+c = numpy.vstack( ( x, y, z ) ).transpose()
+vert.assign( [ aims.Point3df( 0., 0., -40. ), aims.Point3df( 0., 0., 40. ) ] + [ aims.Point3df( x ) for x in c ] )
+pol = numpy.vstack( ( numpy.zeros( 20, dtype=numpy.int32 ), numpy.ogrid[ 3:23 ], numpy.ogrid[ 2:22 ] ) ).transpose()
+pol[ 19, 1 ] = 2
+pol2 = numpy.vstack( ( numpy.ogrid[ 2:22 ], numpy.ogrid[ 3:23 ], numpy.ones( 20, dtype=numpy.int32 ) ) ).transpose()
+pol2[19,1] = 2
+poly.assign( [ aims.AimsVector_U32_3(x) for x in numpy.vstack( ( pol, pol2 ) ) ] )
+# write result
+aims.write( mesh, 'saucer.mesh' )
+# automatically calculate normals
+mesh.updateNormals()</screen>
+        </para>
+      </sect3>
+
+      <sect3><title>Modifying a mesh</title>
+        <para>
+          <screen># slightly inflate a mesh
+from soma import aims
+import numpy
+mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+vert = mesh.vertex()
+varr = numpy.array( vert )
+norm = numpy.array( mesh.normal() )
+varr += norm * 2 # push vertices 2mm away along normal
+vert.assign( [ aims.Point3df(x) for x in varr ] )
+mesh.updateNormals()
+aims.write( mesh, 's12069_Lwhite_semiinflated.mesh' )</screen>
+        Now look at both meshes in Anatomist...<sbr/>
+        Alternatively, without numpy, we could have written the code like this:
+        <screen>from soma import aims
+mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+vert = mesh.vertex()
+norm = mesh.normal()
+for v, n in zip( vert, norm ):
+  v += n * 2
+mesh.updateNormals()
+aims.write( mesh, 's12069_Lwhite_semiinflated.mesh' )</screen>
+        </para>
+      </sect3>
+
+      <sect3><title>Handling time</title>
+        <para>
+          In AIMS, meshes are actually time-indexed dictionaries of meshes. This way a deforming mesh can be stored in the same object. To copy a timestep to aonother, use the following:
+          <screen>from soma import aims
+mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+# mesh.vertex() is equivalent to mesh.vectex( 0 )
+mesh.vertex( 1 ).assign( mesh.vertex( 0 ) )
+# same for normals and polygons
+mesh.normal( 1 ).assign( mesh.normal( 0 ) )
+mesh.polygon( 1 ).assign( mesh.polygon( 0 ) )
+print 'number of time steps:', mesh.size()</screen>
+          <highlights><emphasis role="bold">Exercise:</emphasis> make a deforming mesh that goes from the original mesh to 5mm away, by steps of 0.5 mm
+          </highlights>
+          <screen>from soma import aims
+import numpy
+mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+vert = mesh.vertex()
+varr = numpy.array( vert )
+norm = numpy.array( mesh.normal() )
+for i in xrange( 1, 10 ):
+  vert.assign( mesh.vertex() )
+  mesh.normal( i ).assign( mesh.normal() )
+  mesh.polygon( i ).assign( mesh.polygon() )
+  varr += norm * 0.5
+  mesh.vertex( i ).assign( [ aims.Point3df(x) for x in varr ] )
+mesh.updateNormals()
+# sorry, this is a bug in AIMS 3.2.0 IO system... it is fixed for 3.2.1
+if mesh.header().has_key( 'nb_t_pos' ):
+  del mesh.header()[ 'nb_t_pos' ]
+aims.write( mesh, 's12069_Lwhite_semiinflated_time.mesh' )</screen>
+        </para>
+      </sect3>
+    </sect2>
+
+    <sect2>
       <title>Textures</title>
-    </sect3>
 
-    <sect3>
+      <para>A texture is merely a vector of values, each of them is assigned to a mesh vertex, with a one-to-one mapping, in the same order. A texture is also a time-texture.
+        <screen>from soma import aims
+tex = aims.TimeTexture_FLOAT()
+t = tex[0] # time index, inserts on-the-fly
+t.reserve( 10 ) # pre-allocates memory
+for i in xrange( 10 ):
+  t.append( i / 10. )</screen>
+      </para>
+      <para>
+        <highlights><emphasis role="bold">Exercise:</emphasis> make a time-texture, with at each time/vertex of the previous mesh, sets the value of the underlying volume <computeroutput>data_for_anatomist/functional/s12069.nii</computeroutput>
+        </highlights>
+        <screen>from soma import aims
+mesh = aims.read( 's12069_Lwhite_semiinflated_time.mesh' )
+vol = aims.read( 'data_for_anatomist/functional/s12069.nii' )
+tex = aims.TimeTexture_FLOAT()
+vs = vol.header()[ 'voxel_size' ]
+for i in xrange( mesh.size() ):
+  t = tex[i]
+  vert = mesh.vertex( i )
+  t.reserve( len( vert ) )
+  for p in vert:
+    t.append( vol.value( *[ int( round(x/y) ) for x,y in zip( p, vs ) ] ) )
+aims.write( tex, 's12069_Lwhite_semiinflated_texture.tex' )</screen>
+        Now look at the texture on the mesh (inflated or not) in Anatomist. Compare it to a 3D fusion between the mesh and the MRI volume.
+      </para>
+      <para><emphasis role="bold">Bonus:</emphasis> We can do the same for functional data. But in this case we may have a spatial transformation to apply between anatomical data and functional data (which may have been normalized, or acquired in a different referential).
+        <screen>from soma import aims
+import numpy
+mesh = aims.read( 's12069_Lwhite_semiinflated_time.mesh' )
+vol = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
+# get header info from anatomical volume
+f = aims.Finder()
+f.check( 'data_for_anatomist/functional/s12069.nii' )
+anathdr = f.header()
+# get functional -> MNI transformation
+m1 = aims.Motion( vol.header()[ 'transformations' ][1] )
+# get anat -> MNI transformation
+m2 = aims.Motion( anathdr[ 'transformations' ][1] )
+# make anat -> functional transformation
+anat2func = m1.inverse() * m2
+# include functional voxel size to get to voxel coordinates
+vs = vol.header()[ 'voxel_size' ]
+mvs = aims.Motion( numpy.diag( vs[:3] + [ 1. ] ) )
+anat2func = mvs.inverse() * anat2func
+# now go as in the previous program
+tex = aims.TimeTexture_FLOAT()
+for i in xrange( mesh.size() ):
+  t = tex[i]
+  vert = mesh.vertex( i )
+  t.reserve( len( vert ) )
+  for p in vert:
+    t.append( vol.value( *[ int(round(x)) for x in anat2func.transform( p ) ] ) )
+aims.write( tex, 's12069_Lwhite_semiinflated_audio_video.tex' )</screen>
+      </para>
+    </sect2>
+
+    <sect2>
       <title>Buckets</title>
-    </sect3>
 
-    <sect3>
+      <para>
+        "Buckets" are voxels lists. They are typically used to represent ROIs.
+      </para>
+    </sect2>
+
+    <sect2>
       <title>Graphs</title>
-    </sect3>
+
+      <para>
+        Graphs are data structures that may contain various elements. They can represent sets of smaller structures, and also relations between such structures. The main usage we have for them is to represent ROIs sets, sulci, or fiber bundles.
+      </para>
+      <para>
+        A graph contains:
+        <itemizedlist>
+          <listitem>properties of any type, like a volume or mesh header.</listitem>
+          <listitem>nodes (also called vertices), which represent structured elements (a ROI, a sulcus part, etc), which in turn can store properties, and geometrical elements: buckets, meshes...
+          </listitem>
+          <listitem>optionally, relations, which link nodes and can also contain properties and geometrical elements.</listitem>
+        </itemizedlist>
+      </para>
+
+      <sect3><title>Properties</title>
+        <para>
+          Properties are stored in a dictionary-like way. They can hold almost anything, but a restricted set of types can be saved and loaded. It is exactly the same thing as headers found in volumes, meshes, textures or buckets.
+          <screen>from soma import aims
+graph = aims.read( 'data_for_anatomist/objects/roi/basal_ganglia.arg' )
+print graph
+print 'properties:', graph.keys()
+for p, v in graph.iteritems():
+  print p, ':', v
+graph[ 'gudule' ] = [ 12, 'a comment' ]</screen>
+          <emphasis rome="bold">Note:</emphasis> Only properties declared in a "syntax" file may be saved and re-loaded. Other properties are just not saved.
+        </para>
+      </sect3>
+
+      <sect3><title>Vertices</title>
+        <para>
+          Vertices (or nodes) can be accessed via the vertices() method. Each vertex is also a dictionary-like properties set.
+          <screen>for v in graph.vertices():
+  print v['name']</screen>
+        </para>
+        <para>
+          To insert a new vertex, the <computeroutput>addVertex()</computeroutput> method should be used:
+          <screen>v = graph.addVertex( 'roi' )
+print v
+v[ 'name' ] = 'new ROI'</screen>
+        </para>
+      </sect3>
+
+      <sect3><title>Edges</title>
+        <para>
+          An edge, or relation, links nodes together. Up to now we have always used binary, unoriented, edges. They can be added using the <computeroutput>addEdge()</computeroutput> method. Edges are also dictionary-like properties sets.
+          <screen>v2 = graph.vertices().list()[1]
+e = graph.addEdge( v.get(), v2, 'roi_link' )
+print graph.edges()
+# get vertices linked by this edge
+print e.vertices()</screen>
+        </para>
+      </sect3>
+
+      <sect3><title>Adding meshes or buckets in a graph vertex or relation</title>
+        <para>
+          Setting meshes or buckets in vertices properties is OK internally, but for saving and loading, additional consistancy must be ensured and internal tables update is required. Then, use the <computeroutput>aims.GraphManip.storeAims</computeroutput> function:
+          <screen>mesh = aims.read( 'data_for_anatomist/functional/s12069_Lwhite.mesh' )
+# store mesh in the 'roi' property of vertex v of graph graph
+aims.GraphManip.storeAims( graph, v.get(), 'roi', mesh )
+# the v.get() is a wrapper conversion that should not have been visible to
+# users - we will try to eliminate this in future versions</screen>
+        </para>
+      </sect3>
+    </sect2>
 
   </sect1>
 
 
   <sect1>
     <title>Using algorithms</title>
+
+    <para>
+      AIMS contains, in addition to the different data structures used in neuroimaging, a set of algorithms which operate on these structures. Currently only a few of them have Python bindings, because we develop these bindings in a "lazy" way, only when they are needed. The algorthms currently available include data conversion, resampling, thresholding, mathematical morphology, distance maps, the mesher, some mesh generators, and a few others. But most of the algorithms are still only available in C++.
+    </para>
+
+    <sect3><title>Volume Thresholding</title>
+      <para>
+        <screen>from soma import aims, aimsalgo
+# read a volume with 2 voxels border
+vol = aims.read( 'data_for_anatomist/functional/s12069.nii', border=2 )
+# use a thresholder which will keep values above 600
+ta = aims.AimsThreshold_S16_S16( aims.AIMS_GREATER_OR_EQUAL_TO, 600 )
+# use it to make a binary thresholded volume
+tvol = ta.bin( vol )
+aims.write( tvol, 'thresholded.nii' )</screen>
+      </para>
+    </sect3>
+
+    <sect3><title>Mathematical morphology</title>
+
+      <para>
+        <screen>
+# apply 5mm closing
+clvol = aimsalgo.AimsMorphoClosing( tvol, 5 )
+aims.write( clvol, 'closed.nii' )</screen>
+      </para>
+    </sect3>
+
+    <sect3><title>Mesher</title>
+      <para>
+        <screen>m = aimsalgo.Mesher()
+mesh = aims.AimsSurfaceTriangle() # create an empty mesh
+clvol -= 1 # the background value should be -1
+# get a smooth mesh of the interface of the biggest connected component
+m.getBrain( clvol, mesh )
+aims.write( mesh, 'head_mesh.gii' )
+        </screen>
+      </para>
+
+      <para>The above examples make up a simplified version of the head mesh extraction algorithm in <computeroutput>VipGetHead</computeroutput>, used in the T1 pipeline.
+      </para>
+    </sect3>
+
+    <sect3><title>Surface generation</title>
+      <para>The <computeroutput>aims.SurfaceGenerator</computeroutput> allows to create simple meshes of predefined shapes: cube, cylinder, sphere, icosehedron, cone, arrow.
+        <screen>from soma import aims
+center = ( 50, 25, 20 )
+radius = 53
+mesh1 = aims.SurfaceGenerator.icosahedron( center, radius )
+# this dictionary-based generation will work correctly in pyaims >= 3.2.1
+mesh2 = aims.SurfaceGenerator.generate( { 'type' : 'arrow', 'point1' : [ 30, 70, 0 ],
+  'point2' : [ 100, 100, 100 ], 'radius' : 20, 'arrow_radius' : 30,
+  'arrow_length_factor' : 0.7, 'facets' : 50 } )
+# get the list of all possible generated objects and parameters:
+print aims.SurfaceGenerator.description()</screen>
+      </para>
+    </sect3>
+
+    <sect3><title>Interpolation</title>
+      <para>
+        Interpolators help to get values in millimeters coordinates in a discrete space (volume grid), and may allow voxels values mixing (linear interpolation, typically).
+        <screen>from soma import aims
+# load a functional volume
+vol = aims.read( 'data_for_anatomist/functional/Audio-Video_T_map.nii' )
+# get the position of the maximum
+pmax, maxval = aims.AimsData_DOUBLE( vol ).maxIndex()
+# set pmax in mm
+vs = vol.header()[ 'voxel_size' ]
+pmax = [ x * y for x,y in zip( pmax, vs ) ]
+# take a sphere of 5mm radius, with about 200 vertices
+mesh = aims.SurfaceGenerator.sphere( pmax[:3], 5., 200 )
+vert = mesh.vertex()
+# get an interpolator
+interpolator = aims.aims.getLinearInterpolator( vol )
+# create a texture for that sphere
+tex = aims.TimeTexture_FLOAT()
+tx = tex[0]
+tx2 = tex[1]
+tx.reserve( len( vert ) )
+tx2.reserve( len( vert ) )
+for v in vert:
+  tx.append( interpolator.value( v ) )
+  # compare to non-interpolated value
+  tx2.append( vol.value( *[ int( round(x/y) ) for x,y in zip( v, vs ) ] ) )
+aims.write( tex, 'functional_tex.gii' )
+aims.write( mesh, 'sphere.gii' )</screen>
+        Look at the difference between the two timesteps (interpolated and non-interpolated) of the texture in Anatomist.
+      </para>
+    </sect3>
+
+    <sect3><title>Types conversion</title>
+      <para>
+        The <computeroutput>Converter_*_*</computeroutput> classes allow to convert some data structures types to others. Of course all types cannot be converted to any other, but they are typically used ton convert volumed from a given voxel type to another one. For instance, to convert the anatomical volume of the previous examples to float type:
+        <screen>from soma import aims
+vol = aims.read( 'data_for_anatomist/functional/s12069.nii' )
+print 'type of vol:', type( vol )
+c = aims.Converter_Volume_S16_Volume_FLOAT()
+vol2 = c( vol )
+print 'type of converted volume:', type( vol2 )
+print 'value of initial volume at voxel (50,50,50):', vol.value( 50, 50, 50 )
+print 'value of converted volume at voxel (50,50,50):', vol2.value( 50, 50, 50 )</screen>
+      </para>
+    </sect3>
+
+    <sect3><title>Resampling</title>
+      <para>
+        Resampling allows to apply a geometric transformation or/and to change voxels size. Several types of resampling may be used depending on how we interpolate values between neighbouring voxels (see interpolators): nearest-neighbour (order 0), linear (order 1), spline resampling with order 2 to 7 in AIMS.
+        <screen>from soma import aims, aimsalgo
+import math
+vol = aims.read( 'data_for_anatomist/functional/s12069.nii' )
+# create an affine transformation matrix
+# rotating pi/8 along z axis
+tr = aims.Motion( aims.Quaternion( [ 0, 0, math.sin( math.pi/16 ), math.cos( math.pi/16 ) ] ) )
+tr.setTranslation( ( 100, -50, 0 ) )
+# get an order 2 resampler for volumes of S16
+resp = aims.ResamplerFactory_S16().getResampler( 2 )
+resp.setDefaultValue( -1 ) # set background to -1
+resp.setRef( vol ) # volume to resample
+# resample into a volume of dimension 200x200x200 with voxel size 1.1, 1.1, 1.5
+resampled = resp.doit( tr, 200, 200, 200, ( 1.1, 1.1, 1.5 ) )
+# Note that the header transformations to external referentials have been updated
+print resampled.header()[ 'referentials' ]
+print resampled.header()[ 'transformations' ]
+aims.write( resampled, 'resampled.nii' )</screen>
+        Load the original image and the resampled in Anatomist. See how the resampled has been rotated. Now apply the NIFTI/SPM referential info on both images. They are now aligned again, and cursor clicks correctly go to the same location on both volume, whatever the display referential for each of them.
+      </para>
+    </sect3>
+
   </sect1>
 
   <sect1>
