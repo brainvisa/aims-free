@@ -1168,11 +1168,11 @@ prompt% AimsThreshold -i roi.ima -o roi.ima -m ge -t 8000
     A few examples of how to use and manipulate the main data structures will be shown here.
   </para>
   <para>
-    The data for the examples in this section is the data of the JIRFNI 2008 training course, and can be downloaded here: <ulink url="ftp://ftp.cea.fr/pub/dsv/anatomist/data/data_jirfni2008.zip">ftp://ftp.cea.fr/pub/dsv/anatomist/data/data_jirfni2008.zip</ulink>. To use the examples directly, users should go to the jirfni2008 directory of this archive, and then run ipthon from this directory. An cleaner alternative, especially if no write access is allowed on this data directory, is to make a symbolic link to the <computeroutput>"data_for_anatomist"</computeroutput> subdirectory:
+    The data for the examples in this section is the data of the JIRFNI 2008 training course, and can be downloaded here: <ulink url="ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip">ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip</ulink>. To use the examples directly, users should go to the directory where this archive was uncompressed, and then run ipthon from this directory. A cleaner alternative, especially if no write access is allowed on this data directory, is to make a symbolic link to the <computeroutput>"data_for_anatomist"</computeroutput> subdirectory:
     <screen>cd /scratch/user
 mkdir bvcourse
 cd bvcourse
-ln -s &lt;path_ti_data&gt;/jirfni2008/data_for_anatomist .</screen>
+ln -s &lt;path_ti_data&gt;/data_for_anatomist .</screen>
   </para>
 
   <sect1>
@@ -1821,7 +1821,67 @@ aims.write( resampled, 'resampled.nii' )</screen>
 
   </sect1>
 
-  <sect1>
+  <sect1><title>PyAIMS / PyAnatomist integration</title>
+
+    <sect3><title>Running PyAnatomist with PyAims</title>
+      <para>
+        When PyAnatomist is run in "direct" mode (library bindings), it is possible to share objects between processing routines in pyaims and viewing models in Anatomist, and interact on them directly and interactively.
+      </para>
+      <para>
+        For an interactive shell with Anatomist rendering enabled, IPython should be run in an appropriate mode for graphical events loop to run. If Anatomist is built using Qt3:
+        <screen>ipython -qthread</screen>
+        If Anatomist is built using Qt4:
+        <screen>ipython -q4thread</screen>
+      </para>
+      <para>
+        Then, in IPython, start Anatomist in direct mode:
+        <screen>import anatomist.direct.api as ana
+a = ana.Anatomist()</screen>
+        Now Anatomist main window is here.
+      </para>
+    </sect3>
+
+    <sect3><title>Sharing objects between Aims and Anatomist</title>
+      <para>
+        Objects loaded in pyaims may be wrapped as Anatomist objects:
+        <screen>from soma import aims
+vol = aims.read( 'data_for_anatomist/subject01/subject01.nii' )
+anavol = ana.cpp.AObjectConverter.anatomist( vol )
+win = a.createWindow( 'Axial' )
+win.addObjects( anavol )</screen>
+        Or, in the other way, Anatomist objects may be exported as AIMS objects:
+        <screen>anamesh = a.loadObject( 'data_for_anatomist/subject01/subject01_Lwhite.mesh' )
+mesh = ana.cpp.AObjectConverter.aims( anamesh )
+win.addObjects( anamesh )</screen>
+      </para>
+    </sect3>
+
+    <sect3><title>Interactive modifications in objects</title>
+      <para>
+        Objects may be modified on AIMS side. Then Anatomist must be notified of such modifications so that views on the objects can be refreshed.
+        <screen>import numpy
+arr = numpy.array( vol, copy=False )
+arr[ 100:150, 100:150, 50:80 ] += 200
+anavol.setChanged() # say this object has changed
+anavol.notifyObservers() # refresh views and other interactions</screen>
+      </para>
+      <para>
+        It is also possible to interact on objects created within Anatomist:
+        <screen>fusion3d = a.fusionObjects( [ anavol, anamesh ], method='Fusion3DMethod' )
+# create a texture object from the fusion3d
+a.execute( 'ExtractTexture', object=fusion3d )
+# find it in the objects list
+anatex = filter( lambda o: o.name.startswith( 'extracted_' ), a.getObjects() )
+anatex = anatex[0]
+texsurf = a.fusionObjects( [ anamesh, anatex ], method='FusionTexSurfMethod' )
+win2 = a.createWindow( '3D' )
+win2.addObjects( texsurf )
+# now modify the texture
+tex = ana.cpp.AObjectConverter.aims( anatex )
+        </screen>
+      </para>
+    </sect3>
+
   </sect1>
 
 </chapter>
