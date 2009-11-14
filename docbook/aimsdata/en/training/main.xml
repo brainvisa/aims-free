@@ -1685,6 +1685,12 @@ aims.GraphManip.storeAims( graph, v.get(), 'roi', mesh )
       </sect3>
     </sect2>
 
+    <sect2><title>Other examples</title>
+      <para>
+        There are other examples for pyaims in the following directory: <ulink url="http://brainvisa.info/doc/pyaims/examples"><computeroutput>share/doc/pyaims-3.2/examples</computeroutput></ulink>
+      </para>
+    </sect2>
+
   </sect1>
 
 
@@ -1867,18 +1873,20 @@ anavol.notifyObservers() # refresh views and other interactions</screen>
       </para>
       <para>
         It is also possible to interact on objects created within Anatomist:
-        <screen>fusion3d = a.fusionObjects( [ anavol, anamesh ], method='Fusion3DMethod' )
-# create a texture object from the fusion3d
-a.execute( 'ExtractTexture', object=fusion3d )
-# find it in the objects list
-anatex = filter( lambda o: o.name.startswith( 'extracted_' ), a.getObjects() )
-anatex = anatex[0]
-texsurf = a.fusionObjects( [ anamesh, anatex ], method='FusionTexSurfMethod' )
+        <screen>cutmesh = a.fusionObjects( [ anavol, anamesh ], method='FusionCutMeshMethod' )
 win2 = a.createWindow( '3D' )
-win2.addObjects( texsurf )
-# now modify the texture
-tex = ana.cpp.AObjectConverter.aims( anatex )
-        </screen>
+win2.addObjects( cutmesh )
+# find the planar mes in cutmesh children
+anaplanar = filter( lambda x: x.name.startswith( 'PlanarMesh' ), cutmesh.children )[0]
+# get the Aims mesh from it
+planar = ana.cpp.AObjectConverter.aims( anaplanar )
+# now modify the mesh, adding a random value to vertices along the normal
+vert = planar.vertex()
+norm = planar.normal()
+for v,n in zip( vert, norm ):
+  v += n * numpy.random.randn()
+anaplanar.setChanged()
+anaplanar.notifyObservers()</screen>
       </para>
     </sect3>
 
