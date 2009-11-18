@@ -52,7 +52,7 @@ namespace
 {
   template <typename T>
   void dataTOnim( nifti_image *nim, aims::NiftiHeader& hdr,
-                  const AimsData<T>& thing, int tt = 0 );
+                  const AimsData<T>& thing, int tt, znzFile );
 }
 
 
@@ -85,7 +85,6 @@ namespace aims
     }
 
     // std::cout << "This is NIFTI Writer: use at your own risk." << std::endl;
-    std::cout << "name: " << name << std::endl;
 
     NiftiHeader hdr( thing.dimX(), thing.dimY(), thing.dimZ(), thing.dimT(),
                     thing.sizeX(), thing.sizeY(), thing.sizeZ(),
@@ -121,8 +120,6 @@ namespace aims
       hdr.removeProperty( "scale_factor" );
     if( hdr.hasProperty( "scale_offset" ) )
       hdr.removeProperty( "scale_offset" );
-    int x, y, z, f;
-    T vmin = thing( 0 ), vmax = thing( 0 );
 
     // Can float data be saved as integer without loss?
     if( code == "FLOAT" || code == "DOUBLE" )
@@ -145,16 +142,6 @@ namespace aims
       /* else
       std::cout << "matching interval not found. Not 16 bit codable\n"; */
     }
-    ForEach4d( thing, x, y, z, f )
-    {
-      if( thing( x, y, z, f ) < vmin )
-            vmin = thing( x, y, z, f );
-      if( thing( x, y, z, f ) > vmax )
-            vmax = thing( x, y, z, f );
-    }
-    //hdr.setProperty( "bits_allocated", (int) ( sizeof( T ) * 8 ) );
-    //hdr.setProperty( "minimum", (int) vmin ); // cal_min ?
-    //hdr.setProperty( "maximum", (int) vmax ); // cal_max ?
 
     const Settings sett = Settings::settings();
     bool  write4d = true;
@@ -178,20 +165,24 @@ namespace aims
       // get nifti_image as filled in by NiftiHeader
       nifti_image *nim = hdr.niftiNim();
 
-      nim->data = (void *)calloc(1, nifti_get_volsize(nim));
-
-      dataTOnim(nim, hdr, thing);
-
       // write Nifti header and data
-      znzFile zfp = nifti_image_write_hdr_img( nim, 3, "wb" );
+      znzFile zfp = nifti_image_write_hdr_img( nim, 2, "wb" );
       // don't close file because we have no other way to know it it failed
       if( znz_isnull( zfp ) )
         ok = false;
 
       if( ok )
       {
-        znzclose(zfp);
-        hdr.writeMinf(std::string(nim->iname) + ".minf");
+
+        dataTOnim(nim, hdr, thing, -1, zfp );
+
+        if( znz_isnull( zfp ) )
+          ok = false;
+        else
+        {
+          znzclose(zfp);
+          hdr.writeMinf(std::string(nim->iname) + ".minf");
+        }
       }
 
       // unload data in the nifti_image struct
@@ -201,6 +192,7 @@ namespace aims
     {
       // std::cout << "Converting from 4D to 3D." << std::endl;
       char sequence[16];
+      int f;
       int  nt = thing.dimT();
       std::vector<std::string> fnames;
       std::string dname, bname;
@@ -221,15 +213,17 @@ namespace aims
         hdr.fillNim( false ); // allow4D set to false
         nifti_image *nim = hdr.niftiNim();
 
-        nim->data = (void *)calloc(1, nifti_get_volsize(nim));
-
-        dataTOnim(nim, hdr, thing, f);
-
-        znzFile zfp = nifti_image_write_hdr_img( nim, 3, "wb" );
+        znzFile zfp = nifti_image_write_hdr_img( nim, 2, "wb" );
         if( znz_isnull( zfp ) )
           ok = false;
         else
-          znzclose( zfp );
+        {
+          dataTOnim(nim, hdr, thing, f, zfp);
+          if( znz_isnull( zfp ) )
+            ok = false;
+          else
+            znzclose( zfp );
+        }
         if( f == 0 && ok )
           hdr.writeMinf(std::string(nim->iname) + ".minf");
         nifti_image_unload( nim );
@@ -261,7 +255,7 @@ namespace
 
   template <typename T>
   void dataTOnim( nifti_image *nim, aims::NiftiHeader& hdr,
-                  const AimsData<T>& thing, int tt = 0 )
+                  const AimsData<T>& thing, int tt, znzFile zfp )
   {
     std::vector< float > storage_to_memory;
     Motion m;
@@ -298,7 +292,7 @@ namespace
     }
 
     int tmin, tmax;
-    if(tt == 0)
+    if(tt < 0)
     {
       tmin = 0;
       tmax = nim->nt;
@@ -323,7 +317,9 @@ namespace
         && hdr.getProperty( "scale_factor", s[0] )
         && hdr.getProperty( "scale_offset", s[1] ) )
     {
-      int16_t *d = (int16_t*) nim->data;
+      size_t numbytes = nim->nx * sizeof( int16_t ), ss;
+      std::vector<int16_t> buf( nim->nx );
+      int16_t *d = 0;
       for( int t=tmin; t<tmax; ++t )
         for( int z=0; z<nim->nz; ++z )
           for( int y=0; y<nim->ny; ++y )
@@ -331,13 +327,25 @@ namespace
             d0f = m.transform( Point3df( 0, y, z ) );
             d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
                           int16_t( rint( d0f[2] ) ), t );
+            d = &buf[0];
             for( int x=0; x<nim->nx; ++x, d0+=inc )
               *d++ = (int16_t) rint( (thing(d0) - s[1]) / s[0] );
+            ss = znzwrite( (void*) &buf[0] , 1 , numbytes , zfp );
+            if( ss != numbytes )
+            {
+              // ok = false;
+              y = nim->ny;
+              z = nim->nz;
+              t = tmax;
+              break;
+            }
           }
     }
     else
     {
-      T *d = (T*)nim->data;
+      size_t numbytes = nim->nx * sizeof( T ), ss;
+      std::vector<T> buf( nim->nx );
+      T *d = 0;
 
       for( int t=tmin; t<tmax; ++t )
         for( int z=0; z<nim->nz; ++z )
@@ -346,8 +354,18 @@ namespace
             d0f = m.transform( Point3df( 0, y, z ) );
             d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
                           int16_t( rint( d0f[2] ) ), t );
+            d = &buf[0];
             for( int x=0; x<nim->nx; ++x, d0+=inc )
               *d++ = thing(d0);
+            ss = znzwrite( (void*) &buf[0] , 1 , numbytes , zfp );
+            if( ss != numbytes )
+            {
+              // ok = false;
+              y = nim->ny;
+              z = nim->nz;
+              t = tmax;
+              break;
+            }
           }
     }
   }
