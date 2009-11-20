@@ -1666,7 +1666,7 @@ v[ 'name' ] = 'new ROI'</screen>
         <para>
           An edge, or relation, links nodes together. Up to now we have always used binary, unoriented, edges. They can be added using the <computeroutput>addEdge()</computeroutput> method. Edges are also dictionary-like properties sets.
           <screen>v2 = graph.vertices().list()[1]
-e = graph.addEdge( v.get(), v2, 'roi_link' )
+e = graph.addEdge( v, v2, 'roi_link' )
 print graph.edges()
 # get vertices linked by this edge
 print e.vertices()</screen>
@@ -1678,9 +1678,9 @@ print e.vertices()</screen>
           Setting meshes or buckets in vertices properties is OK internally, but for saving and loading, additional consistancy must be ensured and internal tables update is required. Then, use the <computeroutput>aims.GraphManip.storeAims</computeroutput> function:
           <screen>mesh = aims.read( 'data_for_anatomist/subject01/subject01_Lwhite.mesh' )
 # store mesh in the 'roi' property of vertex v of graph graph
-aims.GraphManip.storeAims( graph, v.get(), 'roi', mesh )
-# the v.get() is a wrapper conversion that should not have been visible to
-# users - we will try to eliminate this in future versions</screen>
+aims.GraphManip.storeAims( graph, v, 'roi', mesh )</screen>
+<!--# the v.get() is a wrapper conversion that should not have been visible to
+# users - we will try to eliminate this in future versions</screen-->
         </para>
       </sect3>
     </sect2>
@@ -1726,8 +1726,7 @@ aims.write( clvol, 'closed.nii' )</screen>
 
     <sect3><title>Mesher</title>
       <para>
-        <screen>import numpy
-m = aimsalgo.Mesher()
+        <screen>m = aimsalgo.Mesher()
 mesh = aims.AimsSurfaceTriangle() # create an empty mesh
 # the border should be -1
 clvol.fillBorder( -1 )
