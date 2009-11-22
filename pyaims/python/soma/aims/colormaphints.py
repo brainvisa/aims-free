@@ -201,8 +201,8 @@ anatomicalFusionColormaps = [ ( 'B-W LINEAR-fusion', ( 1., 1., 1. ) ),
   ( 'Blue-White-fusion', ( 0., 0., 1. ) ),
   ( 'Green-White-linear-fusion', ( 0., 1., 0. ) ),
 ]
-diffusionColormaps = [ ( 'B-W LINEAR', ( 1., 1., 1. ) ) ]
-diffusionFusionColormaps = [ ( 'B-W LINEAR-fusion', ( 1., 1., 1. ) ) ]
+diffusionColormaps = anatomicalColormaps
+diffusionFusionColormaps = anatomicalFusionColormaps
 functionalColormaps = [ ( 'RED TEMPERATURE', ( 1., 0.5, 0. ) ),
   ( 'RAINBOW', ( 1., 0., 0. ) ),
   ( 'Blue-Red', ( 1., 0., 0. ) ),
@@ -213,7 +213,10 @@ functionalFusionColormaps = [ ( 'Rainbow1-fusion', ( 1., 0., 0. ) ),
   ( 'Blue-Red-fusion', ( 1., 0., 0. ) ),
   ( 'Yellow-red-fusion', ( 1., 1., 0. ) ),
 ]
-twotailColormaps = [ ( 'tvalues100-200-100', ( 1., 0., 0. ) ),
+twotailColormaps = [ ( 'tvalues100-200-100-lfusion', ( 1., 0., 0. ) ),
+  ( 'tvalues100-100-100-lfusion', ( 1., 0., 0. ) ),
+]
+twotailFusionColormaps = [ ( 'tvalues100-200-100', ( 1., 0., 0. ) ),
   ( 'tvalues100-100-100', ( 1., 0., 0. ) ),
 ]
 labelsColormaps = [ ( 'Blue-Red', ( 1., 0., 0. ) ),
@@ -221,7 +224,15 @@ labelsColormaps = [ ( 'Blue-Red', ( 1., 0., 0. ) ),
 ]
 labelsFusionColormaps = [
 ]
-binaryColormaps = [ ( 'BLUE-ufusion', ( 0., 0., 1. ) ),
+binaryColormaps = [ ( 'BLUE-lfusion', ( 0., 0., 1. ) ),
+  ( 'GREEN-lfusion', ( 0., 1., 0. ) ),
+  ( 'RED-lfusion', ( 1., 0., 0. ) ),
+  ( 'CYAN-lfusion', ( 0., 1., 1. ) ),
+  ( 'VIOLET-lfusion', ( 1., 0., 1. ) ),
+  ( 'YELLOW-lfusion', ( 1., 1., 0. ) ),
+  ( 'WHITE-lfusion', ( 1., 1., 1. ) ),
+]
+binaryFusionColormaps = [ ( 'BLUE-ufusion', ( 0., 0., 1. ) ),
   ( 'GREEN-ufusion', ( 0., 1., 0. ) ),
   ( 'RED-ufusion', ( 1., 0., 0. ) ),
   ( 'CYAN-ufusion', ( 0., 1., 1. ) ),
