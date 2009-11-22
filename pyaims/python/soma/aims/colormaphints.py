@@ -260,10 +260,6 @@ def chooseColormaps( vols ):
     return numpy.sqrt( ( rgb ** 2 ).sum() )
   chooseColormaps.rgbDist = rgbDist
   def chooseColormap( vtype, cmaps, rgbcmaps ):
-    print 'chooseColormap:', vtype
-    print cmaps
-    print rgbcmaps
-    print '*-'
     disttoothers = []
     ct = cmapbytype[vtype]
     for cmap in ct:
@@ -279,9 +275,7 @@ def chooseColormaps( vols ):
             bd = dist
       disttoothers.append( bd )
     disttoothers = numpy.array( disttoothers )
-    print 'disttoothers:', disttoothers
     bests = numpy.where( disttoothers == disttoothers.max() )[0]
-    print 'bests:', bests
     if len( bests ) == 1:
       return ct[ bests[0] ]
     else:
@@ -335,15 +329,9 @@ def chooseColormaps( vols ):
       cmap = chooseColormap( vtype, cmaps, rgbcmaps )
       cmaps.append( cmap[0] )
       rgbcmaps.append( cmap[1] )
-      print cmaps
-      print rgbcmaps
-      print '----------'
 
   orderedcmaps = [ None ] * len( ordered )
   for i in xrange( len( ordered ) ):
     orderedcmaps[ ordered[i][1] ] = cmaps[i]
-  print [ i[1] for i in ordered ]
-  print orderedcmaps
-  print '$$$$$'
   return orderedcmaps
 
