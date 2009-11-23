@@ -115,21 +115,29 @@ namespace aims
                               (int) rint( fabs( pdims[2] ) ) );
     Point3df incf = m2s.transform( Point3df( 1, 0, 0 ) )
         - m2s.transform( Point3df( 0, 0, 0 ) );
-    Point4d inc = Point4d( int16_t( rint( incf[0] ) ), 
+    Point3d inc = Point3d( int16_t( rint( incf[0] ) ),
                            int16_t( rint( incf[1] ) ),
-                           int16_t( rint( incf[2] ) ), 0 );
+                           int16_t( rint( incf[2] ) ) );
     Point3df d0f;
-    Point4d d0;
+    Point3d d0;
 
-    U *src = (U*)nim->data;
+    std::vector<U> src( dx * dy * dz );
     T *d = 0;
+    void *buf = &src[0];
+    size_t ntot = dx * dy * dz * sizeof(U), ii;
     size_t yoff = idims[0];
     size_t zoff = yoff * idims[1];
-    size_t toff = zoff * idims[2];
-    long offmax = (long) toff * data.dimT();
+//     size_t toff = zoff * idims[2];
+//     long offmax = (long) toff * data.dimT();
+    long offmax = (long) zoff * data.dimZ();
     long off;
     bool fail = false;
     int t2, nt = np._nt;
+    int subbb0[7] = { 0, 0, 0, 0, 0, 0, 0 },
+    subbb1[7] = { 0, 0, 0, 1, 1, 1, 1 };
+    subbb1[0] = dx;
+    subbb1[1] = dy;
+    subbb1[2] = dz;
     if( nt < 0 )
       nt = data.dimT();
     if (((carto::DataTypeCode<T>::name() == "FLOAT")
@@ -140,16 +148,25 @@ namespace aims
       for( int t=0; t<nt; ++t )
       {
         t2 = t + np._t0;
+
+        subbb0[3] = t2;
+        ii = nifti_read_subregion_image( nim, subbb0, subbb1, &buf );
+        if( ii < ntot )
+        {
+          return false;
+        }
+
         for( int z=0; z<dz; ++z )
           for( int y=0; y<dy; ++y )
           {
             d0f = m2s.transform( Point3df( 0, y, z ) );
-            d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
-                          int16_t( rint( d0f[2] ) ), t );
+            d0 = Point3d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
+                          int16_t( rint( d0f[2] ) ) );
             d = &data( 0, y, z, t2 );
+
             for( int x=0; x<dx; ++x, d0+=inc )
             {
-              off = toff * t + zoff * d0[2] + yoff * d0[1] + d0[0];
+              off = /* toff * t + */ zoff * d0[2] + yoff * d0[1] + d0[0];
               if( off >= 0 && off < offmax )
                 *d++ = (T) ( ((T) src[ off ] ) * s[0] + s[1] );
               else
@@ -166,16 +183,24 @@ namespace aims
       for( int t=0; t<nt; ++t )
       {
         t2 = t + np._t0;
+
+        subbb0[3] = t2;
+        ii = nifti_read_subregion_image( nim, subbb0, subbb1, &buf );
+        if( ii < ntot )
+        {
+          return false;
+        }
+
         for( int z=0; z<dz; ++z )
           for( int y=0; y<dy; ++y )
           {
             d0f = m2s.transform( Point3df( 0, y, z ) );
-            d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
-                          int16_t( rint( d0f[2] ) ), t );
+            d0 = Point3d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
+                          int16_t( rint( d0f[2] ) ) );
             d = &data( 0, y, z, t2 );
             for( int x=0; x<dx; ++x, d0+=inc )
             {
-              off = toff * t + zoff * d0[2] + yoff * d0[1] + d0[0];
+              off = /* toff * t + */ zoff * d0[2] + yoff * d0[1] + d0[0];
               if( off >= 0 && off < offmax )
                 *d++ = (T) src[ off ];
               else
@@ -276,9 +301,7 @@ namespace aims
   NiftiReader<T>::readSubImage( NiftiHeader* hdr, int t, AimsData<T> & data )
   {
     nifti_image *nim = hdr->niftiNim();
-    if (nifti_image_load( nim ) == -1)
-      throw carto::wrong_format_error( "Error while loading NIFTI1 image "
-          "data.", _name );
+
     // fix erroneous null dimT
     if( nim->dim[4] == 0 )
       nim->dim[4] = 1;
@@ -287,7 +310,6 @@ namespace aims
     hdr->getProperty( "storage_to_memory", storage_to_memory );
 
     Motion m( storage_to_memory );
-    //std::cout << m << std::endl;
 
     std::vector<float> s(2);
     hdr->getProperty( "scale_factor", s[0] );

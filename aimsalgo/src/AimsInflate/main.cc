@@ -145,7 +145,7 @@ int main(int argc, const char **argv)
       inflated 
         = AimsInflateMesh(t, *surf, Knorm, Kspring, Ksmooth, bound, timeSet);
 
-      MeshWriter<3,Void> writer( fileout );
+      Writer<AimsSurfaceTriangle> writer( fileout );
       cout << endl;
       cout << "Writing inflated surface/sequence " << fileout << endl;
       //   if ( !writer.write( *inflated, true ) )
