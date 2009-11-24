@@ -411,7 +411,6 @@ void UUID::generate()
       // Set multicast bit, to prevent conflicts with
       // genuine MAC addresses.
       node_id[ 0 ] |= 0x80;
-      printf( "BOOOOOO\n" );
 
     }
     // Initialize time.
