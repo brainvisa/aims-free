@@ -203,6 +203,69 @@ public:
   Volume_%Template1typecode%( SIP_PYOBJECT ) 
     [(int, int, int, int, %Template1% *)];
 %MethodCode
+  static std::list<std::set<int> > compatibletypes;
+  if( compatibletypes.empty() )
+  {
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      tl.insert( PyArray_BYTE );
+      tl.insert( PyArray_INT8 );
+    }
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      tl.insert( PyArray_UBYTE );
+      tl.insert( PyArray_UINT8 );
+    }
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      tl.insert( PyArray_SHORT );
+      tl.insert( PyArray_INT16 );
+    }
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      tl.insert( PyArray_USHORT );
+      tl.insert( PyArray_UINT16 );
+    }
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      tl.insert( PyArray_INT32 );
+    }
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      // tl.insert( PyArray_UINT );
+      tl.insert( PyArray_UINT32 );
+    }
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      // tl.insert( PyArray_INT );
+      tl.insert( PyArray_INT64 );
+    }
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      tl.insert( PyArray_UINT );
+      tl.insert( PyArray_UINT64 );
+    }
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      tl.insert( PyArray_FLOAT32 );
+    }
+    compatibletypes.push_back( std::set<int>() );
+    {
+      std::set<int> & tl = compatibletypes.back();
+      // tl.insert( PyArray_FLOAT );
+      tl.insert( PyArray_DOUBLE );
+      tl.insert( PyArray_FLOAT64 );
+    }
+  }
   PyArrayObject *arr = 0;
   if( !PyArray_Check( a0 ) )
   {
@@ -232,8 +295,25 @@ public:
     }
     else if( arr->descr->type_num != %Template1NumType% )
     {
-      sipIsErr = 1;
-      PyErr_SetString( PyExc_TypeError, "wrong array data type" );
+      std::list<std::set<int> >::const_iterator ict, ect = compatibletypes.end();
+      bool ok = false;
+      int i = 0;
+      for( ict=compatibletypes.begin(); ict!=ect; ++ict, ++i )
+        if( ict->find( arr->descr->type_num ) != ict->end() )
+        {
+          if( ict->find( %Template1NumType% ) != ict->end() )
+          {
+            ok = true;
+            break;
+          }
+          else
+            break;
+        }
+      if( !ok )
+      {
+        sipIsErr = 1;
+        PyErr_SetString( PyExc_TypeError, "wrong array data type" );
+      }
     }
   }
   if( !sipIsErr )
