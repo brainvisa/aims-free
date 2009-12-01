@@ -191,6 +191,7 @@ public:
   //void setRotationVectorial( const Point3df& v1, const Point3df& v2 );
   void setShearing(float Cx, float Cy, float Cz ) ;
   void setScaling(float Sx, float Sy, float Sz ) ;
+  void setRotation( float Rx, float Ry, float Rz ) ;
   void transAffine(Point3df cg = Point3df( 0.0 ) );
 
 
