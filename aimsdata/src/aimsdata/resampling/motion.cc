@@ -957,6 +957,14 @@ void DecomposedMotion::setScaling(float Sx, float Sy, float Sz )
 
 }
 
+//-----------------------------------------------------------------------------
+void DecomposedMotion::setRotation(float Rx, float Ry, float Rz )
+{
+  AimsData<float> rx = rotationaroundx(Rx);
+  AimsData<float> ry = rotationaroundy(Ry);
+  AimsData<float> rz = rotationaroundz(Rz);
+  rot() = rz.cross(ry.cross(rx));
+}
 
 //-----------------------------------------------------------------------------
 void DecomposedMotion::transAffine(Point3df cg) 
