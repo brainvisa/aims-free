@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-15"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE book
 [
 <!ENTITY % entities SYSTEM 'catalog.ent'>
@@ -1172,8 +1172,9 @@ prompt% AimsThreshold -i roi.ima -o roi.ima -m ge -t 8000
     <screen>cd /scratch/user
 mkdir bvcourse
 cd bvcourse
-ln -s &lt;path_ti_data&gt;/data_for_anatomist .</screen>
+ln -s &lt;path_to_data&gt;/data_for_anatomist .</screen>
   </para>
+  <para>More information about the API is available <ulink url="#cartointernet_pg%pyaims">here</ulink>.</para>
 
   <sect1>
     <title>Using data structures</title>
@@ -1313,7 +1314,7 @@ arr[60:120, 60:120, 40:80] = 100
 aims.write( vol, "cube.nii" )</screen>
         </para>
         <para>
-          Now we can re-write thethresholding example using numpy:
+          Now we can re-write the thresholding example using numpy:
           <screen>from soma import aims
 vol = aims.read( 'data_for_anatomist/subject01/Audio-Video_T_map.nii' )
 arr = numpy.array( vol, copy=False )

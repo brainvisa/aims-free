@@ -191,6 +191,14 @@ public:
   // so self can be destroyed safely
 %End
 
+  // assignation operator: uses copy operator
+  void assign( const vector_%Template1typecode% & );
+%MethodCode
+  sipCpp->data() = *a0;
+  int dims = sipCpp->data().size();
+  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(*sipCpp)[0] );
+%End
+
 %#endif%
 };
 

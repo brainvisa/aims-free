@@ -27,6 +27,8 @@ set( @PROJECT_NAME_UPPER@_USE_FILE "${@PROJECT_NAME_UPPER@_BINARY_DIR}/share/@PR
 find_package( Sigc++2 REQUIRED )
 find_package( LibXml2 REQUIRED )
 find_package( Boost REQUIRED )
+@BLITZ_FIND_PACKAGE@
+
 find_package( PythonInterp )
 if( PYTHONINTERP_FOUND )
   find_package( PythonLibs )
