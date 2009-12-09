@@ -37,6 +37,9 @@
 #include <cartobase/stream/directory.h>
 #include <iostream>
 #include <cstdlib>
+#ifdef USE_SHARE_CONFIG
+#include <brainvisa-share/config.h>
+#endif
 #ifdef USE_SOMA_CONFIG
 #include <soma/config.h>
 #endif
@@ -140,6 +143,22 @@ const string & Paths::tempDir()
   return _memmap;
 }
 
+#ifdef USE_SHARE_CONFIG
+const string & Paths::globalShared()
+{
+  static string	_shared;
+
+  if( _shared.empty() ) {
+    const char *env_path = getenv( "BRAINVISA_SHARE" );
+    if( ! env_path ) {
+      env_path = DEFAULT_BRAINVISA_SHARE;
+    }
+    _shared = string( env_path ) + FileUtil::separator() + BRAINVISA_SHARE_DIRECTORY;
+  }
+  return _shared;
+}
+
+#else USE_SHARE_CONFIG
 
 const string & Paths::globalShared()
 {
@@ -147,13 +166,13 @@ const string & Paths::globalShared()
 
   if( _shared.empty() )
     {
-      const char* shfj_path = getenv( "BRAINVISA_SHARE" );
+      const char* env_path = getenv( "BRAINVISA_SHARE" );
       Directory	d( "/" );
 
-      if( !shfj_path )
-        shfj_path = getenv( "SHFJ_SHARED_PATH" );
-      if( shfj_path )
-        _shared = shfj_path;
+      if( !env_path )
+        env_path = getenv( "SHFJ_SHARED_PATH" );
+      if( env_path )
+        _shared = env_path;
       else
         {
 #ifdef USE_SOMA_CONFIG
@@ -224,6 +243,7 @@ const string & Paths::globalShared()
 
   return _shared;
 }
+#endif // #ifdef USE_SHARE_CONFIG
 
 
 const string & Paths::shfjShared()
