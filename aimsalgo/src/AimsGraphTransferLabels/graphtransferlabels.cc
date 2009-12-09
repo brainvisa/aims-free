@@ -38,6 +38,7 @@
 #include <aims/io/writer.h>
 #include <aims/graph/graphmanip.h>
 #include <aims/distancemap/voronoi.h>
+#include <aims/resampling/motion.h>
 #include <graph/graph/graph.h>
 
 using namespace aims;
@@ -63,12 +64,12 @@ int main( int argc, const char** argv )
       app.addOption( rg2, "-j", "input labelled graph to take labels from" );
       app.alias( "--input2", "-j" );
       app.addOption( wg, "-o", "output labelled graph [default=input]", 
-		     true );
+                     true );
       app.alias( "--output", "-o" );
       app.addOption( labelatt, "-l", "label attribute [default=name]", true );
       app.alias( "--label", "-l" );
-      app.addOption( wv, "-v", "output voronoi diagram [default=not saved]", 
-		     true );
+      app.addOption( wv, "-v", "output voronoi diagram (in input2 space) "
+                     "[default=not saved]", true );
       app.alias( "--voronoi", "-v" );
       app.addOption( labelsfile, "-m", 
                      "output labels map file [default=not saved]", true );
@@ -108,15 +109,44 @@ int main( int argc, const char** argv )
           return EXIT_FAILURE;
         }
 
-      Point3d	dims( bbmaxh[0]+1, bbmaxh[1]+1, bbmaxh[2]+1 ), p;
+      // handle transformations
+      Motion  gToTal = GraphManip::talairach( *g );
+      Motion  hToTal = GraphManip::talairach( *h );
+      Motion vsgm;
+      vsgm.rotation()(0,0) = vsg[0];
+      vsgm.rotation()(1,1) = vsg[1];
+      vsgm.rotation()(2,2) = vsg[2];
+      Motion vshm;
+      vshm.rotation()(0,0) = vsh[0];
+      vshm.rotation()(1,1) = vsh[1];
+      vshm.rotation()(2,2) = vsh[2];
+      Motion gToh = vshm.inverse() * hToTal.inverse() * gToTal * vsgm;
+      // gToh goes from g to h in voxels
+
+      Point3df bbmingm( 0, 0, 0 ), bbmaxgm( bbmaxg[0], bbmaxg[1], bbmaxg[2] );
+      Point3df bbminht, bbmaxht;
+      transformBoundingBox( gToh, bbmingm, bbmaxgm, bbminht, bbmaxht );
+
+      Point3d	dims( bbmaxh[0]+1, bbmaxh[1]+1, bbmaxh[2]+1 );
+      if( dims[0] < bbmaxht[0]+1 )
+        dims[0] = bbmaxht[0]+1;
+      if( dims[1] < bbmaxht[1]+1 )
+        dims[1] = bbmaxht[1]+1;
+      if( dims[2] < bbmaxht[2]+1 )
+        dims[2] = bbmaxht[2]+1;
+
       Point3df	vs( vsh[0], vsh[1], vsh[2] );
+
+      /*
       if( dims[0] * vs[0] < (bbmaxg[0]+1) * vsg[0] )
         dims[0] = (int) ceil( (bbmaxg[0]+1) * vsg[0] / vs[0] );
       if( dims[1] * vs[1] < (bbmaxg[1]+1) * vsg[1] )
         dims[1] = (int) ceil( (bbmaxg[1]+1) * vsg[1] / vs[1] );
       if( dims[2] * vs[2] < (bbmaxg[2]+1) * vsg[2] )
         dims[2] = (int) ceil( (bbmaxg[2]+1) * vsg[2] / vs[2] );
+      */
 
+      // voronoi in h space
       cout << "volume dim: " << dims << endl;
 
       AimsData<short>	voro( dims[0], dims[1], dims[2] );
@@ -215,6 +245,8 @@ int main( int argc, const char** argv )
       // compare voronoi to g graph buckets
 
       cout << "setting labels in graph " << rg1.fileName() << endl;
+      Point3d p;
+      Point3df pf;
       if( !g->getProperty( "aims_objects_table", get ) )
         {
           cerr << "no buckets in graph " << rg1.fileName() << endl;
@@ -253,6 +285,15 @@ int main( int argc, const char** argv )
                                     eb=bck->begin()->second.end();
                                   ib!=eb; ++ib )
                               {
+                                pf = gToh.transform( ib->first );
+                                p[0] = (int) rint( pf[0] );
+                                p[1] = (int) rint( pf[1] );
+                                p[2] = (int) rint( pf[2] );
+                                if( p[0] >= 0 && p[1] >= 0 && p[2] >= 0 )
+                                  ++count[ voro( p ) ];
+                                // else: point outside voronoi
+
+                                /*
                                 p[0] = (int) rint( ib->first[0]
                                                     * vsg[0] / vs[0] );
                                 p[1] = (int) rint( ib->first[1]
@@ -260,6 +301,7 @@ int main( int argc, const char** argv )
                                 p[2] = (int) rint( ib->first[2]
                                                     * vsg[2] / vs[2] );
                                 ++count[ voro( p ) ];
+                                */
                               }
                           }
                       }
@@ -314,10 +356,12 @@ int main( int argc, const char** argv )
       g->setProperty( "filename_base", string( "*" ) );
 
       if( wg.fileName().empty() )
-	wg.setFileName( rg1.fileName() );
+        wg.setFileName( rg1.fileName() );
       cout << "writing graph " << wg.fileName() << endl;
       wg.write( *g );
       cout << "done." << endl;
+      delete g;
+      delete h;
       return EXIT_SUCCESS;
     }
   catch( user_interruption & )
