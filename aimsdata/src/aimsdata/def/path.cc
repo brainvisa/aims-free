@@ -47,6 +47,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifdef USE_SHARE_CONFIG
+#include <brainvisa-share/config.h>
+#endif
 
 
 using namespace std;
@@ -105,7 +108,11 @@ Path::Path()
   if( !d.isValid() )
     _dependencies = _aims;
 
+#if USE_SHARE_CONFIG
+  _nomenclature = _shared + s + BRAINVISA_SHARE_DIRECTORY + s + "nomenclature";
+#else
   _nomenclature = Paths::shfjShared() + s + "nomenclature";
+#endif
   Directory	dir( _nomenclature );
   if( !dir.isValid() )
     _nomenclature = _shared + s + "nomenclature";
