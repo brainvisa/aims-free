@@ -50,7 +50,7 @@ def fslMatToTrm( matfile, srcimage, dstimage ):
       im1 = srcimage.header()
     except: # otherwise it is considered to already be a header
       im1 = srcimage
-  if type( srcimage ) in types.StringTypes:
+  if type( dstimage ) in types.StringTypes:
     f = aims.Finder()
     f.check( dstimage )
     im2 = f.header()
@@ -58,7 +58,7 @@ def fslMatToTrm( matfile, srcimage, dstimage ):
     try:
       im2 = dstimage.header()
     except: # otherwise it is considered to already be a header
-      im1 = dstimage
+      im2 = dstimage
 
   height1 = im1['voxel_size'][1] * ( im1['volume_dimension'][1] - 1 )
   height2 = im2['voxel_size'][1] * ( im2['volume_dimension'][1] - 1 )
