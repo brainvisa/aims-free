@@ -1119,6 +1119,8 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
   // write meta-info header
   setProperty( "file_type", string( "SPM" ) );
   setProperty( "object_type", string( "Volume" ) );
+  if( hasProperty( "filenames" ) )
+    removeProperty( "filenames" );
   if( writeminf )
     {
       bool	changedims = true;

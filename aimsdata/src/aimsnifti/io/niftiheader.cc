@@ -1192,6 +1192,8 @@ bool NiftiHeader::write( bool writeminf)
       changedims = false;
     else
       removeProperty( "volume_dimension" );
+    if( hasProperty( "filenames" ) )
+      removeProperty( "filenames" );
     writeMinf( string(_nim->iname) + ".minf" );
     //if( changedims )
     //  setProperty( "volume_dimension", dims );
