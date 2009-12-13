@@ -153,12 +153,12 @@ const string & Paths::globalShared()
     if( ! env_path ) {
       env_path = DEFAULT_BRAINVISA_SHARE;
     }
-    _shared = string( env_path ) + FileUtil::separator() + BRAINVISA_SHARE_DIRECTORY;
+    _shared = string( env_path ); // + FileUtil::separator() + BRAINVISA_SHARE_DIRECTORY;
   }
   return _shared;
 }
 
-#else USE_SHARE_CONFIG
+#else // #ifdef USE_SHARE_CONFIG
 
 const string & Paths::globalShared()
 {

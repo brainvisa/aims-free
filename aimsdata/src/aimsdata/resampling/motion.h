@@ -101,6 +101,10 @@ public:
   {
     return transform( p[0], p[1], p[2] );
   }
+  inline Point3df transform( const Point3d & p ) const
+  {
+    return transform( p[0], p[1], p[2] );
+  }
 
   // Transform normalized normal data
   Point3df transform_normal( float x, float y, float z ) const;
