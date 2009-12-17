@@ -306,42 +306,51 @@ bool NiftiHeader::read()
   string type;
   short	 sz = 0;
   switch( nim->datatype )
-    {
-	case DT_INT8:
-	  type = "S8";
-	  sz = 8;
-	  break;
-	case DT_INT16:
-	  type = "S16";
-	  sz = 16;
-	  break;
-	case DT_INT32:
-	  type = "S32";
-	  sz = 32;
-	  break;
-	case DT_FLOAT32:
-	  type = "FLOAT";
-	  sz = 32;
-	  break;
-    case DT_DOUBLE:
-	  type = "DOUBLE";
-	  sz = 64;
-	  break;
-    case DT_UINT8:
-	  type = "U8";
-	  sz = 8;
-	  break;
-    case DT_UINT16:
-	  type = "U16";
-	  sz = 16;
-	  break;
-    case DT_UINT32:
-	  type = "U32";
-	  sz = 32;
-	  break;
-	default:
-	  cerr << "Unrecognized datatype code in NIFTI file \"" << fileName << "\"" << endl;
-    }
+  {
+  case DT_INT8:
+    type = "S8";
+    sz = 8;
+    break;
+  case DT_INT16:
+    type = "S16";
+    sz = 16;
+    break;
+  case DT_INT32:
+    type = "S32";
+    sz = 32;
+    break;
+  case DT_FLOAT32:
+    type = "FLOAT";
+    sz = 32;
+    break;
+  case DT_DOUBLE:
+    type = "DOUBLE";
+    sz = 64;
+    break;
+  case DT_UINT8:
+    type = "U8";
+    sz = 8;
+    break;
+  case DT_UINT16:
+    type = "U16";
+    sz = 16;
+    break;
+  case DT_UINT32:
+    type = "U32";
+    sz = 32;
+    break;
+  case DT_RGB:
+    type = "RGB";
+    sz = sizeof( AimsRGB ) * 8;
+    break;
+  case DT_RGBA32:
+    type = "RGBA";
+    sz = 32;
+    break;
+  default:
+    cerr << "Unrecognized datatype code in NIFTI file \"" << fileName
+        << "\"" << endl;
+  }
   setProperty( "disk_data_type", type );
   setProperty( "bits_allocated", (int) sz );
   
@@ -784,6 +793,10 @@ bool NiftiHeader::fillNim( bool allow4d )
     nim->datatype = DT_UINT16;
   else if (type == "U32" )
     nim->datatype = DT_UINT32;
+  else if( type == "RGB" )
+    nim->datatype = DT_RGB;
+  else if( type == "RGBA" )
+    nim->datatype = DT_RGBA32;
   else
   {
     cerr << "Unknown NIFTI1 datatype, using FLOAT: " << type << endl;

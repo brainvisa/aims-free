@@ -50,9 +50,75 @@
 
 namespace
 {
+
   template <typename T>
   void dataTOnim( nifti_image *nim, aims::NiftiHeader& hdr,
                   const AimsData<T>& thing, int tt, znzFile );
+
+  template <typename T>
+  bool expandNiftiScaleFactor( const aims::NiftiHeader & hdr,
+                               nifti_image *nim, const Motion & m,
+                               const AimsData<T> & thing, int tmin, int tmax,
+                               znzFile zfp )
+  {
+    Point3df d0f;
+    Point4d d0;
+    Point3df incf = m.transform( Point3df( 1, 0, 0 ) )
+        - m.transform( Point3df( 0, 0, 0 ) );
+    Point4d inc = Point4d( int16_t( rint( incf[0] ) ),
+                           int16_t( rint( incf[1] ) ),
+                           int16_t( rint( incf[2] ) ), 0 );
+    bool scalef;
+    std::vector<float> s(2);
+    if( hdr.getProperty( "scale_factor_applied", scalef ) && scalef
+        && hdr.getProperty( "scale_factor", s[0] )
+        && hdr.getProperty( "scale_offset", s[1] ) )
+    {
+      size_t numbytes = nim->nx * sizeof( int16_t ), ss;
+      std::vector<int16_t> buf( nim->nx );
+      int16_t *d = 0;
+      for( int t=tmin; t<tmax; ++t )
+        for( int z=0; z<nim->nz; ++z )
+          for( int y=0; y<nim->ny; ++y )
+      {
+        d0f = m.transform( Point3df( 0, y, z ) );
+        d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
+                      int16_t( rint( d0f[2] ) ), t );
+        d = &buf[0];
+        for( int x=0; x<nim->nx; ++x, d0+=inc )
+          *d++ = (int16_t) rint( (thing(d0) - s[1]) / s[0] );
+        ss = znzwrite( (void*) &buf[0] , 1 , numbytes , zfp );
+        if( ss != numbytes )
+        {
+          y = nim->ny;
+          z = nim->nz;
+          t = tmax;
+          break;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+
+  template <>
+  bool expandNiftiScaleFactor( const aims::NiftiHeader &, nifti_image *,
+                               const Motion &, const AimsData<AimsRGB> &,
+                               int, int, znzFile )
+  {
+    return false;
+  }
+
+
+  template <>
+  bool expandNiftiScaleFactor( const aims::NiftiHeader &, nifti_image *,
+                               const Motion &, const AimsData<AimsRGBA> &,
+                               int, int, znzFile )
+  {
+    return false;
+  }
+
 }
 
 
@@ -303,46 +369,16 @@ namespace
       tmax = tt+1;
     }
 
-    Point3df incf = m.transform( Point3df( 1, 0, 0 ) )
-        - m.transform( Point3df( 0, 0, 0 ) );
-    Point4d inc = Point4d( int16_t( rint( incf[0] ) ),
-                          int16_t( rint( incf[1] ) ),
-                          int16_t( rint( incf[2] ) ), 0 );
-    Point3df d0f;
-    Point4d d0;
+    if( !expandNiftiScaleFactor( hdr, nim, m, thing, tmin, tmax, zfp ) )
+    {
+      Point3df d0f;
+      Point4d d0;
+      Point3df incf = m.transform( Point3df( 1, 0, 0 ) )
+          - m.transform( Point3df( 0, 0, 0 ) );
+      Point4d inc = Point4d( int16_t( rint( incf[0] ) ),
+                             int16_t( rint( incf[1] ) ),
+                             int16_t( rint( incf[2] ) ), 0 );
 
-    bool scalef;
-    std::vector<float> s(2);
-    if( hdr.getProperty( "scale_factor_applied", scalef ) && scalef
-        && hdr.getProperty( "scale_factor", s[0] )
-        && hdr.getProperty( "scale_offset", s[1] ) )
-    {
-      size_t numbytes = nim->nx * sizeof( int16_t ), ss;
-      std::vector<int16_t> buf( nim->nx );
-      int16_t *d = 0;
-      for( int t=tmin; t<tmax; ++t )
-        for( int z=0; z<nim->nz; ++z )
-          for( int y=0; y<nim->ny; ++y )
-          {
-            d0f = m.transform( Point3df( 0, y, z ) );
-            d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
-                          int16_t( rint( d0f[2] ) ), t );
-            d = &buf[0];
-            for( int x=0; x<nim->nx; ++x, d0+=inc )
-              *d++ = (int16_t) rint( (thing(d0) - s[1]) / s[0] );
-            ss = znzwrite( (void*) &buf[0] , 1 , numbytes , zfp );
-            if( ss != numbytes )
-            {
-              // ok = false;
-              y = nim->ny;
-              z = nim->nz;
-              t = tmax;
-              break;
-            }
-          }
-    }
-    else
-    {
       size_t numbytes = nim->nx * sizeof( T ), ss;
       std::vector<T> buf( nim->nx );
       T *d = 0;
