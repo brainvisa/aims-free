@@ -324,13 +324,11 @@ CartoApplication::CartoApplication( int argc, const char **argv,
 {
   _name = FileUtil::basename( argv[ 0 ] );
   addOption( verboseParameter, "--verbose", 
-	     "Set verbosity level (default = 0, without value = 1)", true );
+             "Set verbosity level (default = 0, without value = 1)", true );
   --insertIndex;
-#ifdef CARTO_DEBUG
   addOption( carto::debugMessageLevel, "--debugLevel", 
-	     "Set debug information level (default = 0)", true );
+             "Set debug information level (default = 0)", true );
   --insertIndex;
-#endif
 }
 
 

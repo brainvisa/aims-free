@@ -265,7 +265,7 @@ void PluginLoader::load( int verbose, bool forcereload )
     return;*/
   pluginLoaderStatic().loaded = true;
   if( verbose < 0 )
-    verbose = carto::verbose;
+    verbose = carto::debugMessageLevel;
   list<PluginFile>		& plugins = pluginFiles();
   list<PluginFile>::iterator	ip;
   for( ip=plugins.begin(); ip!=plugins.end(); ++ip )
