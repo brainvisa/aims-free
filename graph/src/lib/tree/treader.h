@@ -99,6 +99,8 @@ public:
   carto::rc_ptr<carto::DataSource> dataSource();
 
   std::list<carto::TreeParser *> & parsers();
+  const carto::SyntaxSet & syntaxSet() const { return _syntax; }
+  void setSyntax( const carto::SyntaxSet & syntax );
 
 private:
   /// Disable copy constructor

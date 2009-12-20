@@ -81,6 +81,12 @@ GraphReader::~GraphReader()
 }
 
 
+void GraphReader::setSyntax( const SyntaxSet & syntax )
+{
+  _syntax = syntax;
+}
+
+
 void
 GraphReader::read(Graph& graph)
 {

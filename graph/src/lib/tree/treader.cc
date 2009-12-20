@@ -85,6 +85,12 @@ TreeReader::~TreeReader()
 }
 
 
+void TreeReader::setSyntax( const SyntaxSet & syntax )
+{
+  _syntax = syntax;
+}
+
+
 TreeReader& operator >> ( TreeReader& reader, Tree& tree )
 {
   reader.read( tree );
