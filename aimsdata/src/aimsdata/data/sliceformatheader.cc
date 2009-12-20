@@ -244,6 +244,8 @@ SliceFormatHeader::outputFilenames() const
           }
     }
   else
+  {
+    if( nz > 1 )
     {
       fp += "_";
       for( z=0; z<nz; ++z )
@@ -253,6 +255,9 @@ SliceFormatHeader::outputFilenames() const
           names.push_back( ss.str() );
         }
     }
+    else
+      names.push_back( fp + ext );
+  }
 
   return names;
 }

@@ -92,6 +92,32 @@ namespace aims
   }
 
 
+  template <>
+  NiftiReadProcess<AimsRGB>::NiftiReadProcess( AimsData<AimsRGB> & data,
+                                               nifti_image* nim, Motion & m ,
+                                               std::vector<float> & s,
+                                               int t, int nt )
+  : Process(), _data( data ), _nim( nim ), _motion( m ), _scale( s ),
+    _t0( t ), _nt( nt )
+  {
+    registerProcessType( "Volume", "RGB",    &readNifti<AimsRGB> );
+    registerProcessType( "Volume", "RGBA",   &readNifti<AimsRGBA> );
+  }
+
+
+  template <>
+  NiftiReadProcess<AimsRGBA>::NiftiReadProcess( AimsData<AimsRGBA> & data,
+                                                nifti_image* nim, Motion & m ,
+                                                std::vector<float> & s,
+                                                int t, int nt )
+  : Process(), _data( data ), _nim( nim ), _motion( m ), _scale( s ),
+    _t0( t ), _nt( nt )
+  {
+    registerProcessType( "Volume", "RGB",    &readNifti<AimsRGB> );
+    registerProcessType( "Volume", "RGBA",   &readNifti<AimsRGBA> );
+  }
+
+
   template <typename T>
   template <typename U>
   bool NiftiReadProcess<T>::readNifti( Process & proc, const std::string &,

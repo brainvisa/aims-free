@@ -43,6 +43,8 @@ template class NiftiReader<int32_t> ;
 template class NiftiReader<uint32_t> ;
 template class NiftiReader<float> ;
 template class NiftiReader<double> ;
+template class NiftiReader<AimsRGB>;
+template class NiftiReader<AimsRGBA>;
 
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)

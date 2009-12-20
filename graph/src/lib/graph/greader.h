@@ -115,14 +115,16 @@ public:
   bool eof() const;
   carto::rc_ptr<carto::DataSource> dataSource();
   const carto::rc_ptr<carto::DataSource> dataSource() const;
+  const carto::SyntaxSet & syntaxSet() const { return _syntax; }
+  void setSyntax( const carto::SyntaxSet & syntax );
 
 private:
-  
+
   //---------------------------------------------------------------------
   /**	@name Disable copy*/
   //---------------------------------------------------------------------
   //@{
-  
+
   /// Copy constructor
   GraphReader(const GraphReader&);
 

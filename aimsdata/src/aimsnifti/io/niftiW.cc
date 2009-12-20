@@ -43,6 +43,8 @@ template class NiftiWriter<int32_t> ;
 template class NiftiWriter<uint32_t> ;
 template class NiftiWriter<float> ;
 template class NiftiWriter<double> ;
+template class NiftiWriter<AimsRGB>;
+template class NiftiWriter<AimsRGBA>;
 
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)

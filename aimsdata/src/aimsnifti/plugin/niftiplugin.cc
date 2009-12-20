@@ -131,6 +131,20 @@ NiftiPlugin::NiftiPlugin() : Plugin()
   FileFormatDictionary<Volume<double> >::registerFormat( "NIFTI1", vf8, ext,
       "SPM" );
 
+  NiftiFormat<AimsRGB>	*df9 = new NiftiFormat<AimsRGB>;
+  FileFormatDictionary<AimsData<AimsRGB> >::registerFormat( "NIFTI1", df9, ext,
+      "SPM" );
+  VolumeFormat<AimsRGB>	*vf9 = new VolumeFormat<AimsRGB>( "NIFTI1" );
+  FileFormatDictionary<Volume<AimsRGB> >::registerFormat( "NIFTI1", vf9, ext,
+      "SPM" );
+
+  NiftiFormat<AimsRGBA>	*df10 = new NiftiFormat<AimsRGBA>;
+  FileFormatDictionary<AimsData<AimsRGBA> >::registerFormat( "NIFTI1", df10,
+      ext, "SPM" );
+  VolumeFormat<AimsRGBA> *vf10 = new VolumeFormat<AimsRGBA>( "NIFTI1" );
+  FileFormatDictionary<Volume<AimsRGBA> >::registerFormat( "NIFTI1", vf10, ext,
+      "SPM" );
+
   Finder::registerFormat( "NIFTI1", new FinderNiftiFormat, ext, "SPM" );
 }
 

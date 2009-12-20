@@ -52,25 +52,35 @@ extern int debugMessageLevel;
 } // namespace carto
 
 
+#define cartoDbgMsg( level, message ) if ( (level) <= ::carto::debugMessageLevel ) ::std::cerr << "!! " << (message) << ::std::endl;
+
+#define cartoDbgMsgVerb( level, message ) if ( (level) <= ::carto::debugMessageLevel ) ::std::cerr << "!! " << __FILE__ << " (" << __LINE__ << ")" << ::std::endl << "  " << (message) << ::std::endl;
+
+#define catroDbgVar( level, variable ) if ( (level) <= ::carto::debugMessageLevel ) ::std::cerr << #variable " = " << toString( variable ) << :std::endl;
+
+#define cartoDbgVarVerb( level, variable ) if ( (level) <= ::carto::debugMessageLevel ) ::std::cerr << "!! " << __FILE__ << " (" << __LINE__ << ")" << ::std::endl << "  " #variable " = " << toString( variable ) << ::std::endl;
+
+/* conditional debug output: only active if CARTO_DEBUG is defined */
+
 #ifdef CARTO_DEBUG
 
-#define dbgMsg( level, message ) if ( (level) <= ::carto::debugMessageLevel ) ::std::cerr << "!! " << (message) << ::std::endl;
+#define cartoCondDbgMsg( level, message ) cartoDbgMsg( level, message )
 
-#define dbgMsgVerb( level, message ) if ( (level) <= ::carto::debugMessageLevel ) ::std::cerr << "!! " << __FILE__ << " (" << __LINE__ << ")" << ::std::endl << "  " << (message) << ::std::endl;
+#define cartoCondDbgMsgVerb( level, message ) cartoDbgMsgVerb( level, message )
 
-#define dbgVar( level, variable ) if ( (level) <= ::carto::debugMessageLevel ) ::std::cerr << #variable " = " << toString( variable ) << :std::endl;
+#define cartoCondDbgVar( level, variable ) cartoDbgVar( level, variable )
 
-#define dbgVarVerb( level, variable ) if ( (level) <= ::carto::debugMessageLevel ) ::std::cerr << "!! " << __FILE__ << " (" << __LINE__ << ")" << ::std::endl << "  " #variable " = " << toString( variable ) << ::std::endl;
+#define cartoCondDbgVarVerb( level, variable ) cartoDbgVarVerb( level, variable )
 
 #else
 
-#define dbgMsg( level, message )
+#define cartoCondDbgMsg( level, message )
 
-#define dbgMsgVerb( level, message )
+#define cartoCondDbgMsgVerb( level, message )
 
-#define dbgVar( level, message )
+#define cartoCondDbgVar( level, message )
 
-#define dbgVarVerb( level, message )
+#define cartoCondDbgVarVerb( level, message )
 
 #endif
 

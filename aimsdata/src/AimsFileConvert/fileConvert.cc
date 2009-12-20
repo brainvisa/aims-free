@@ -405,7 +405,9 @@ template<class T>
 bool write( T & data, const string & file, bool ascii, const string & form )
 {
   cout << "writing " << file << "...\n";
-  Writer<T>	w( file );
+  Object options = Object::value( Dictionary() );
+  options->setProperty( "exact_format", true );
+  Writer<T>	w( file, options );
   const string	*wf = 0;
   if( !form.empty() )
     wf = &form;
