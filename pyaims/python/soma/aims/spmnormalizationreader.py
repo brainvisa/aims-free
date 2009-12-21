@@ -94,11 +94,14 @@ def readSpmNormalization( matfilename, source=None, destref=None, srcref=None ):
   else:
     hdr = source
   try:
-    s2m = aims.Motion( hdr[ 'storage_to_memory' ] )
     vsA = aims.Motion( numpy.diag( hdr[ 'voxel_size' ][:3] + [ 1. ] ) )
   except:
     raise RuntimeError( 'Source image header information could not be ' \
       'accessed.' )
+  try:
+    s2m = aims.Motion( hdr[ 'storage_to_memory' ] )
+  except:
+    s2m = aims.Motion()
   sn3d = scipy.io.loadmat( matfilename )
   Affine = aims.Motion( sn3d[ 'Affine' ] )
   if sn3d.has_key( 'VG' ):
