@@ -100,8 +100,10 @@ namespace aims
   : Process(), _data( data ), _nim( nim ), _motion( m ), _scale( s ),
     _t0( t ), _nt( nt )
   {
-    registerProcessType( "Volume", "RGB",    &readNifti<AimsRGB> );
-    registerProcessType( "Volume", "RGBA",   &readNifti<AimsRGBA> );
+    registerProcessType( "Volume", "RGB",
+      &NiftiReadProcess::readNifti<AimsRGB> );
+    registerProcessType( "Volume", "RGBA",
+      &NiftiReadProcess::readNifti<AimsRGBA> );
   }
 
 
@@ -113,8 +115,10 @@ namespace aims
   : Process(), _data( data ), _nim( nim ), _motion( m ), _scale( s ),
     _t0( t ), _nt( nt )
   {
-    registerProcessType( "Volume", "RGB",    &readNifti<AimsRGB> );
-    registerProcessType( "Volume", "RGBA",   &readNifti<AimsRGBA> );
+    registerProcessType( "Volume", "RGB",
+      &NiftiReadProcess::readNifti<AimsRGB> );
+    registerProcessType( "Volume", "RGBA",
+      &NiftiReadProcess::readNifti<AimsRGBA> );
   }
 
 
