@@ -14,8 +14,8 @@ class SpamBase /Abstract/
     void set_bb_talairach_offset(const Point3dd &bb_talairach_offset);
     void set_bb_talairach_size(const Point3dd &bb_talairach_size);
 
-    virtual SIP_PYTUPLE
-    prodlikelihoods(const Volume_DOUBLE &X, float shift) = 0 /ReleaseGIL/;
+    SIP_PYTUPLE
+    prodlikelihoods(const Volume_DOUBLE &X, float shift) /ReleaseGIL/;
 %MethodCode
     std::pair<double, double> res = sipCpp->prodlikelihoods(*a0, a1);
     PyObject *tuple = PyTuple_New(2);
