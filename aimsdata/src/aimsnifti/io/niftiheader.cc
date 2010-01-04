@@ -1053,9 +1053,9 @@ bool NiftiHeader::fillNim( bool allow4d )
                             &nim->qoffset_y, &nim->qoffset_z,
                             NULL, NULL, NULL, &nim->qfac );
     /* TODO */ // use 'origin' field
-    nim->qoffset_x = 0; //-(nim->nx / 2.0 - 1.0) * nim->dx;
-    nim->qoffset_y = 0; //-(nim->ny / 2.0) * nim->dy;
-    nim->qoffset_z = 0; //-(nim->nz / 2.0) * nim->dz;
+    nim->qoffset_x = -(nim->nx / 2.0 - 1.0) * nim->dx;
+    nim->qoffset_y = -(nim->ny / 2.0) * nim->dy;
+    nim->qoffset_z = -(nim->nz / 2.0) * nim->dz;
   }
 
   if( !t2.empty() )

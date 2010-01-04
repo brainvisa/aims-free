@@ -282,10 +282,10 @@ def chooseColormaps( vols ):
       candidates = numpy.array( [ ct[x][0] for x in bests ] )
       count = numpy.zeros( len( bests ) )
       for c in cmaps:
-        cc = numpy.where( candidates == c[0] )[0]
+        cc = numpy.where( candidates == c )[0]
         if len( cc ) == 1:
           count[ cc[0] ] += 1
-      return ct[ count.argmax() ]
+      return ct[ bests[ count.argmin() ] ]
   cmaps = []
   rgbcmaps = []
   typeclasses = [ {}, {}, {}, {}, {}, {} ]
@@ -316,15 +316,19 @@ def chooseColormaps( vols ):
   for t in typeclasses:
     keys = t.keys()
     keys.sort()
+    keys.reverse() # highest at first
     for k in keys:
       ordered += t[k]
   # now choose cmap in ordered volumes
   for vol, i in ordered:
     pal = vol.get( 'palette' )
     if pal:
-      cmaps.append( pal )
-      rgbcmaps.append( findRgbColormap( pal ) )
-    else:
+      if pal not in cmaps:
+        cmaps.append( pal )
+        rgbcmaps.append( findRgbColormap( pal ) )
+      else:
+        pal = None
+    if not pal:
       vtype = vtypes[i]
       cmap = chooseColormap( vtype, cmaps, rgbcmaps )
       cmaps.append( cmap[0] )
