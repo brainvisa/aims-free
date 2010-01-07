@@ -154,7 +154,8 @@ namespace aims
     std::vector<U> src( dx * dy * dz );
     T *d = 0;
     void *buf = &src[0];
-    size_t ntot = dx * dy * dz * sizeof(U), ii;
+    size_t ntot = dx * dy * dz * sizeof(U);
+    int ii;
     size_t yoff = idims[0];
     size_t zoff = yoff * idims[1];
 //     size_t toff = zoff * idims[2];
@@ -165,9 +166,9 @@ namespace aims
     int t2, nt = np._nt;
     int subbb0[7] = { 0, 0, 0, 0, 0, 0, 0 },
     subbb1[7] = { 0, 0, 0, 1, 1, 1, 1 };
-    subbb1[0] = dx;
-    subbb1[1] = dy;
-    subbb1[2] = dz;
+    subbb1[0] = idims[0];
+    subbb1[1] = idims[1];
+    subbb1[2] = idims[2];
     if( nt < 0 )
       nt = data.dimT();
     if (((carto::DataTypeCode<T>::name() == "FLOAT")
@@ -181,7 +182,7 @@ namespace aims
 
         subbb0[3] = t2;
         ii = nifti_read_subregion_image( nim, subbb0, subbb1, &buf );
-        if( ii < ntot )
+        if( ii < 0 || (size_t) ii < ntot )
         {
           return false;
         }
@@ -216,7 +217,7 @@ namespace aims
 
         subbb0[3] = t2;
         ii = nifti_read_subregion_image( nim, subbb0, subbb1, &buf );
-        if( ii < ntot )
+        if( ii < 0 || (size_t) ii < ntot )
         {
           return false;
         }
