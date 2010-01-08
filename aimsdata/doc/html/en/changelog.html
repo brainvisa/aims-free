@@ -18,6 +18,7 @@
 
 
 
+ <b><a href="#version-3.2.1">Version 3.2.1</a></b><br>
  <b><a href="#version-3.2">Version 3.2</a></b><br>
  <b><a href="#version-3.1.6">Version 3.1.6</a></b><br>
  <b><a href="#version-3.1.5">Version 3.1.5</a></b><br>
@@ -36,6 +37,17 @@
  &nbsp;  
 
  <!-- -->
+
+<h4> <a name="version-3.2.1"></a>January 8, 2010, Version 3.2.1</h4>
+
+<li>New global option to Aims commandlines: <tt>--debugLevel</tt>. It is used instead of the <tt>--verbose</tt> option to print debug messages, when loading plugins for instance.
+</li>
+<li>Nifti IO: When loading large 4D volumes which need a reorientation in memory, don't duplicate the whole 4D volume when reorienting. This saves temporary memory allocation.
+</li>
+<li>Nifti IO: when no qform/sform/transformations are already in a volume written in nifti, set the origin at the center of the volume, otherwise SPM is lost (normalizaton fails)
+</li>
+
+<!-- -->
 
 <h4> <a name="version-3.2"></a>September 4, 2009, Version 3.2</h4>
 
