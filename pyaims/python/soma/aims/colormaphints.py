@@ -47,6 +47,11 @@ def checkVolume( vol ):
   else:
     raise ValueError( 'input parameter should be a volume' )
   hints[ 'data_type' ] = dtype
+  if dtype not in ( 'U8', 'S8', 'U16', 'S16', 'U32', 'S32', 'U64', 'S64',
+    'FLOAT', 'DOUBLE' ):
+    # not a scalar, we cannot perform scalar things, and the volume will have
+    # no colormap, so we are done
+    return hints
   arr = numpy.array( vol, copy=False )
   u = numpy.unique( arr )
   maxv = u[-1]
