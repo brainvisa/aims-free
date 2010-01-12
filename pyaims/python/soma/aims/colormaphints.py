@@ -166,14 +166,14 @@ def checkVolume( vol ):
     if hints[ 'negative_values' ]:
       likes *= [ 0.2, 0.3, 1., 0. ]
     else:
-      if dims[4] > 1:
-        likes *= [ 0.1, 0.5, 1., 0. ]
+      if dims[3] > 1:
+        likes *= [ 0.1, 0.5, 2., 0. ]
       else:
-        likes *= [ 0.5, 0.3, 1., 0. ]
+        likes *= [ 0.3, 0.3, 2., 0. ]
   else:
     ll = 1. - hints[ 'labels_likelihood' ]
     if hints[ 'negative_values' ]:
-      if dims[4] > 1:
+      if dims[3] > 1:
         likes *= [ 0.2 * ll, 0.5 * ll, ll, 1. ]
       else:
         likes *= [ 0.5 * ll, 0.2 * ll, ll, 1. ]
