@@ -93,6 +93,7 @@ HEADERS= config/aimsalgopub_config.h		\
 
 SOURCES = \
                 information/corratio.cc		       \
+		information/meshdistance.cc            \
 		information/mutual.cc		       \
 		ffd/tabulSpline.cc                \
 		information/pdf.cc		          \
