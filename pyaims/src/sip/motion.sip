@@ -28,6 +28,10 @@ public:
   Motion( const vector_FLOAT & );
   virtual ~Motion();
   virtual bool operator == ( const Motion & );
+  Motion *__neg__() const /Factory, ReleaseGIL/;
+%MethodCode
+  sipRes = new Motion( -*sipCpp );
+%End
   Point3df & translation();
   // const Point3df & translation() const;
   AimsData_FLOAT & rotation();

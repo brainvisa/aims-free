@@ -746,8 +746,8 @@ Motion Motion::operator - () const
 {
   Motion t;
 
-  t._translation = _translation;
-  t._rotation = t._rotation - _rotation;
+  t._translation = -_translation;
+  t._rotation = -VolumeRef<float>( _rotation.volume() );
 
   return t;
 }

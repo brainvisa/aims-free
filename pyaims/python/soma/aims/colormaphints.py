@@ -47,6 +47,11 @@ def checkVolume( vol ):
   else:
     raise ValueError( 'input parameter should be a volume' )
   hints[ 'data_type' ] = dtype
+  if dtype not in ( 'U8', 'S8', 'U16', 'S16', 'U32', 'S32', 'U64', 'S64',
+    'FLOAT', 'DOUBLE' ):
+    # not a scalar, we cannot perform scalar things, and the volume will have
+    # no colormap, so we are done
+    return hints
   arr = numpy.array( vol, copy=False )
   u = numpy.unique( arr )
   maxv = u[-1]
@@ -161,14 +166,14 @@ def checkVolume( vol ):
     if hints[ 'negative_values' ]:
       likes *= [ 0.2, 0.3, 1., 0. ]
     else:
-      if dims[4] > 1:
-        likes *= [ 0.1, 0.5, 1., 0. ]
+      if dims[3] > 1:
+        likes *= [ 0.1, 0.5, 2., 0. ]
       else:
-        likes *= [ 0.5, 0.3, 1., 0. ]
+        likes *= [ 0.3, 0.3, 2., 0. ]
   else:
     ll = 1. - hints[ 'labels_likelihood' ]
     if hints[ 'negative_values' ]:
-      if dims[4] > 1:
+      if dims[3] > 1:
         likes *= [ 0.2 * ll, 0.5 * ll, ll, 1. ]
       else:
         likes *= [ 0.5 * ll, 0.2 * ll, ll, 1. ]
