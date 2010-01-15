@@ -934,7 +934,7 @@ bool NiftiHeader::fillNim( bool allow4d )
   int icod, jcod, kcod;
   nifti_mat44_to_orientation( S2M_m44, &icod, &jcod, &kcod );
 
-  bool s2moriented = false;
+  bool s2moriented = false, s2morientedbis;
 
   for( i=0; i<nt; ++i )
   {
@@ -961,6 +961,7 @@ bool NiftiHeader::fillNim( bool allow4d )
       vector < float > m = (mot * voxsz * s2m).toVector();
       mat44 R;
 
+      s2morientedbis = false;
       if( !s2moriented )
       {
         // check if it can also store s2m
@@ -974,8 +975,8 @@ bool NiftiHeader::fillNim( bool allow4d )
             R.m[x][j] = m[j+4*x];
         int icod2, jcod2, kcod2;
         nifti_mat44_to_orientation( R, &icod2, &jcod2, &kcod2 );
-        s2moriented = ( icod == icod2 && jcod == jcod2 && kcod == kcod2 );
-        // cout << "s2moriented: " << s2moriented << endl;
+        s2morientedbis = ( icod == icod2 && jcod == jcod2 && kcod == kcod2 );
+        // cout << "s2moriented: " << s2morientedbis << endl;
       }
 
       for (int x=0; x<4; ++x)
@@ -986,7 +987,7 @@ bool NiftiHeader::fillNim( bool allow4d )
       int xform_code = NiftiReferential(ref);
       if (((xform_code == NIFTI_XFORM_SCANNER_ANAT)
             /* || (xform_code == NIFTI_XFORM_ALIGNED_ANAT) */ )
-            && (nim->qform_code == NIFTI_XFORM_UNKNOWN) && s2moriented )
+            && (nim->qform_code == NIFTI_XFORM_UNKNOWN) && s2morientedbis )
       {
         // cout << "save transformation " << i << " as qform\n";
         nim->qform_code = xform_code;
@@ -1000,6 +1001,7 @@ bool NiftiHeader::fillNim( bool allow4d )
                                           nim->qoffset_y, nim->qoffset_z,
                                           tvs[0], tvs[1], tvs[2], nim->qfac );
         ok = true;
+        s2moriented = true;
         for( int x=0; x<3 && ok; ++x )
           for( int j=0; j<3; ++j )
             if( fabs( P.m[x][j] - R.m[x][j] ) > 1e-5 )
@@ -1022,15 +1024,15 @@ bool NiftiHeader::fillNim( bool allow4d )
       }
       if( !ok )
       {
-        cerr << "Could not save transformation." << endl;
+        cout << "Could not save transformation." << endl;
       }
     }
   }
 
   if( !s2moriented && nim->qform_code == NIFTI_XFORM_UNKNOWN )
   {
-    // cout << "add s2m\n";
-    // cout << s2m << endl;
+    /* cout << "add s2m\n";
+    cout << s2m << endl; */
     Motion NIs2m;
     NIs2m.rotation()( 0, 0 ) = -1; // invert all axes
     NIs2m.rotation()( 1, 1 ) = -1;
