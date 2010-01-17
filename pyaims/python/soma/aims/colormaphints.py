@@ -31,11 +31,45 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 from soma import aims
-import numpy
+import numpy, types
+try:
+  from soma import aimsalgo
+except:
+  aimsalgo = None
 
 def checkVolume( vol ):
   '''Checks colormap-related clues in a volume, and tries to determine whether it is an anatomical volume, a diffusion volume, a functional volume, or a labels volume. This is determined as "likelihoods" for each class (based on a pure empirical heurisrtic), based on, mainly, the histogram, voxel type, and voxel sizes.
   '''
+  def _histogram( vol, bins ):
+    histo = getattr( aims, 'RegularBinnedHistogram_' + dtype )
+    if not type( bins ) is types.IntType:
+      m, M = bins[0], bins[-1]
+      bins = len(bins) - 1
+      hg = histo( bins )
+      hg.doit( vol, m, M )
+    else:
+      hg = histo( bins )
+      hg.doit( vol )
+    d = hg.data()
+    h = numpy.array( d.volume(), copy=False ).reshape( d.dimX() )
+    step = float( hg.maxDataValue() - hg.minDataValue() ) /  hg.bins()
+    his = ( h, numpy.arange( hg.minDataValue(), hg.maxDataValue() + step,
+      step ) )
+    return his
+
+  def _unique( vol ):
+    hg = getattr( aims, 'RegularBinnedHistogram_' + dtype )()
+    return hg.unique( vol ).arraydata()
+
+  if aimsalgo is not None:
+    # aims histogram is 15 times faster than numpy...
+    histogram = _histogram
+    # and unique is only 5 times faster than numpy
+    unique = _unique
+  else:
+    histogram = numpy.histogram
+    unique = lambda vol: numpy.unique( numpy.array( vol, copy=False ) )
+
   hints = {}
   # check data type
   tname = vol.__class__.__name__
@@ -52,8 +86,7 @@ def checkVolume( vol ):
     # not a scalar, we cannot perform scalar things, and the volume will have
     # no colormap, so we are done
     return hints
-  arr = numpy.array( vol, copy=False )
-  u = numpy.unique( arr )
+  u = unique( vol )
   maxv = u[-1]
   minv = u[0]
   if len(u) == 2:
@@ -79,7 +112,7 @@ def checkVolume( vol ):
     hints[ 'negative_values' ] = False
 
   # determine background color (most frequent value)
-  his = numpy.histogram( arr, min( len(u), 200 ) )
+  his = histogram( vol, min( len(u), 200 ) )
   maxhis = numpy.argmax( his[0] )
   subval = numpy.where( (u < his[1][maxhis+1] ).__and__( \
     u >= his[1][maxhis] ) )[0]
@@ -88,7 +121,7 @@ def checkVolume( vol ):
   else:
     # more precise histogram
     bins = numpy.hstack( ( u[subval], u[subval[-1]+1] ) )
-    h = numpy.histogram( arr, bins )
+    h = histogram( vol, bins )
     hints[ 'background' ] = h[1][ numpy.argmax( h[0] ) ]
     maxhis = numpy.where( his[1] <= hints[ 'background' ] )[0][-1]
 

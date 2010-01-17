@@ -68,6 +68,7 @@ HEADERS = \
     histogram/histogram.h    \
     histogram/simpleHisto.h    \
     histogram/equalizedHisto.h      \
+    histogram/regularBinnedHisto.h \
     io/roiselectorR.h    \
     io/roigtmR.h      \
     io/roigtmW.h      \
