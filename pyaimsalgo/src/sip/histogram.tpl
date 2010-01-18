@@ -55,7 +55,7 @@ typedef Histogram<%Template1% > Histogram_%Template1typecode%;
       %Template1% minDataValue() const;
       %Template1% maxDataValue() const;
       vector_%Template1typecode% *unique( const AimsData_%Template1typecode%
-        & thing ) const;
+        & thing ) const /Factory/;
   };
 
 };
