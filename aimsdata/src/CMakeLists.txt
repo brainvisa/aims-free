@@ -48,7 +48,7 @@ IF(TIFF_FOUND AND ZLIB_FOUND)
   IF(APPLE)
     add_subdirectory(bundle_aimstiff)
   ENDIF(APPLE)
-ENDIF(TIFF_FOUND)
+ENDIF()
 
 IF(EXPAT_FOUND)
   add_subdirectory(aimsgifti)
