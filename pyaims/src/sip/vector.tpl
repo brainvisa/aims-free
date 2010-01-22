@@ -423,7 +423,7 @@ public:
                                        PyObject* pyvec )
     : _vector( v ), _pyvec( pyvec )
   { Py_INCREF( pyvec ); }
-  vector_%Template1typecode%_iterator( std::vector<%Template1PyType%>::iterator & i, 
+  vector_%Template1typecode%_iterator( std::vector<%Template1% >::iterator & i,
                                        vector_%Template1typecode%* v,
                                        PyObject *pyvec  )
     : _iter( i ), _vector( v ), _pyvec( pyvec )

@@ -59,13 +59,13 @@ ostream& operator << ( ostream& os, const Motion& thing )
   //   << "rotation=" << thing.rotation() << "}";
   os << "{translation=" << thing.translation() << ", "<<endl
      << "rotation=[[" << thing.rotation()(0,0) 
-     << ", " << thing.rotation()(1,0) 
-     << ", " << thing.rotation()(2,0) 
-     << "]," << endl << "[" << thing.rotation()(0,1) 
+     << ", " << thing.rotation()(0,1)
+     << ", " << thing.rotation()(0,2)
+     << "]," << endl << "[" << thing.rotation()(1,0)
      << ", " << thing.rotation()(1,1) 
-     << ", " << thing.rotation()(2,1) 
-     << "]," << endl << "[" << thing.rotation()(2,0) 
-     << ", " << thing.rotation()(1,2) 
+     << ", " << thing.rotation()(1,2)
+     << "]," << endl << "[" << thing.rotation()(2,0)
+     << ", " << thing.rotation()(2,1)
      << ", " << thing.rotation()(2,2) 
      << "]]}";
 

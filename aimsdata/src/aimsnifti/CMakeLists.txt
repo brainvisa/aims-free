@@ -5,7 +5,7 @@ include_directories( "${CMAKE_BINARY_DIR}/include/aims/io/znzlib" "${CMAKE_BINAR
 add_library( aimsnifti SHARED ${_sources} )
 add_dependencies( aimsnifti ${headersTarget} )
 set_property( TARGET aimsnifti PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-target_link_libraries( aimsnifti aimsdata )
+target_link_libraries( aimsnifti aimsdata "${ZLIB_LIBRARIES}" )
 BRAINVISA_INSTALL( TARGETS aimsnifti
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )

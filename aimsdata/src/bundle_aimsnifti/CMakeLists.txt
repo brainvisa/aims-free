@@ -1,6 +1,6 @@
 add_library( bundle_aimsnifti MODULE bundle/niftibundle.cc )
-set_property( TARGET bundle_aimsnifti PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-set_property( TARGET bundle_aimsnifti PROPERTY OUTPUT_NAME aimsnifti )
+# set_property( TARGET bundle_aimsnifti PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
+set_property( TARGET bundle_aimsnifti PROPERTY OUTPUT_NAME aimsnifti.${${PROJECT_NAME}_VERSION} )
 target_link_libraries( bundle_aimsnifti aimsnifti )
 BRAINVISA_INSTALL( TARGETS bundle_aimsnifti
               DESTINATION lib

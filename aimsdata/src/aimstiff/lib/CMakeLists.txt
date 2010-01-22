@@ -3,7 +3,7 @@ BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
 add_library( aimstiff SHARED ${_sources} )
 add_dependencies( aimstiff ${headersTarget} )
 set_property( TARGET aimstiff PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-target_link_libraries( aimstiff aimsdata ${TIFF_LIBRARIES} )
+target_link_libraries( aimstiff aimsdata ${TIFF_LIBRARIES} ${ZLIB_LIBRARIES} )
 BRAINVISA_INSTALL( TARGETS aimstiff
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )

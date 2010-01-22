@@ -36,3 +36,10 @@
 %Include knn.sip
 %Include pdf.sip
 %Include advection.sip
+%Include histogram_S16.sip
+%Include histogram_S32.sip
+%Include histogram_U16.sip
+%Include histogram_U32.sip
+%Include histogram_U8.sip
+%Include histogram_FLOAT.sip
+%Include histogram_DOUBLE.sip
