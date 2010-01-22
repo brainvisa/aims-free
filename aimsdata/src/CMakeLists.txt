@@ -43,7 +43,7 @@ IF(MINC_FOUND)
 ENDIF(MINC_FOUND)
 
 
-IF(TIFF_FOUND)
+IF(TIFF_FOUND AND ZLIB_FOUND)
   add_subdirectory(aimstiff)
   IF(APPLE)
     add_subdirectory(bundle_aimstiff)
