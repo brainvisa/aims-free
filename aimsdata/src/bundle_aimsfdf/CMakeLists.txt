@@ -1,8 +1,8 @@
 if( soma-infra_FOUND )
 
   add_library( bundle_aimsfdf MODULE bundle/fdfbundle.cc )
-  set_property( TARGET bundle_aimsfdf PROPERTY VERSION ${aimsdata_VERSION} )
-  set_property( TARGET bundle_aimsfdf PROPERTY OUTPUT_NAME aimsfdf )
+#   set_property( TARGET bundle_aimsfdf PROPERTY VERSION ${aimsdata_VERSION} )
+  set_property( TARGET bundle_aimsfdf PROPERTY OUTPUT_NAME aimsfdf.${${PROJECT_NAME}_VERSION} )
   target_link_libraries( bundle_aimsfdf aimsfdf )
   SOMA_INSTALL( TARGETS bundle_aimsfdf
                 DESTINATION lib
