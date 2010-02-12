@@ -215,12 +215,28 @@ class BaseScaleSpace {
       PutOriginalImage(originalTexture); 
     }
 
-//     ScaleSpace(const ScaleSpace< AimsSurface<D, Void>, Texture<T> >  &other)
-//     {(*this)._auxmesh=NULL; (*this)._mesh=other._mesh; (*this)._coordinates=other._coordinates; (*this)._smoother=other._smoother; (*this).scales=other.scales; }
-    
+
     virtual ~ScaleSpace() {delete _smoother; delete _auxmesh; }
     
 
+    void GenerateDefaultScaleSpace(TimeTexture<float> &tex)
+    {
+         
+      float t=1.0;
+      int i=0;
+      std::cout << "Checking that the scale-space has more than just one texture..." << std::flush;
+      assert(tex.size()>1);
+      std::cout << "OK" << std::endl;
+      for (i = 1 ; i < tex.size() ; i++)
+      {
+        std::cout << "Adding scale " << t << std::flush;
+        AddScale(t, tex[i]);
+        t=t*2;
+        std::cout << " OK" << std::endl;
+
+      }
+      
+    }
     
     void PutSmoother(Smoother<AimsSurface<D, Void>, Texture<T> > *smoother) {_smoother=smoother;}
     void PutMesh(AimsSurface<D, Void> *mesh) {_mesh=mesh;}
@@ -252,7 +268,7 @@ class BaseScaleSpace {
     Smoother<AimsSurface<D, Void>, Texture<T> > *smoother() {return _smoother;}
 
     void AddScale(float t);
-    
+    void AddScale(float t, Texture<float> &tex);
     void RemoveScale(float t) {if (scales.find(t) != scales.end()) {ScaleLevel<AimsSurface<D, Void>, Texture<T> >* lev=scales[t]; scales.erase(t); delete lev;} }
 
     void GenerateDefaultScaleSpace(float tmax)
@@ -277,6 +293,22 @@ class BaseScaleSpace {
   //-----------------DEFINITIONS--------------------------------------------
   //------------------------------------------------------------------------
 
+  template<int D, typename T> void ScaleSpace<AimsSurface<D, Void>, Texture<T>  >::AddScale(
+                                                    float t, Texture<float> &tex)
+  {
+    if (scales.find(t) == scales.end())
+    {
+        ScaleLevel<AimsSurface<D, Void>, Texture<T> > *lisseLevel;
+        lisseLevel=new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t,tex, _mesh,_coordinates, &GetOriginalImage());
+        scales.insert(std::pair<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>(t, lisseLevel));
+    }
+    else
+    {
+      std::cout << "Scale " << t << " already computed... " << std::endl;
+    }
+    return ;
+  }
+  
   template<typename T> void ScaleSpace<AimsData<T>, AimsData<T> >::AddScale(float t)
   {
     if (scales.find(t) == scales.end())
