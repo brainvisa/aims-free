@@ -313,111 +313,119 @@ namespace aims
 
        //----------------------------------------------------------------------------------------------------------
 
-  template<typename Geom, typename Text> void ExtractGreyLevelBlobs<Geom, Text>::Run()
-  {
-      int currentLabel=0, labelBlob;
-      MaximumPoint<Site> *maximum;
-      SaddlePoint<Site> *saddle;
-      GreyLevelBlob<Site> *greyLevelBlob;
+    template<typename Geom, typename Text> void ExtractGreyLevelBlobs<Geom, Text>::Run()
+    {
+        int currentLabel=0, labelBlob;
+        MaximumPoint<Site> *maximum;
+        SaddlePoint<Site> *saddle;
+        GreyLevelBlob<Site> *greyLevelBlob;
 
-      // multimap<intensity, data.site> for intensity based sorting of sites/voxels
-      std::multimap<const Val, Site> sortedSites;
-      SiteIterator<Geom> ptSite=(*_texdata).siteBegin();
-      
-      for ( ; ptSite != (*_texdata).siteEnd(); ++ptSite)
-          sortedSites.insert(std::pair<Val, Site>((*_texdata).intensity(*ptSite), (*ptSite)));
+        // multimap<intensity, data.site> for intensity based sorting of sites/voxels
+        std::multimap<const Val, Site> sortedSites;
+        SiteIterator<Geom> ptSite=(*_texdata).siteBegin();
+
+        for ( ; ptSite != (*_texdata).siteEnd(); ++ptSite)
+            sortedSites.insert(std::pair<Val, Site>((*_texdata).intensity(*ptSite), (*ptSite)));
 
 
-      // TexturedData that will contains the label associated with each site,
-      // that is:  BACKGROUND, or grey-level blob number.
-      // This TexturedData also gives acess to the neighbours of each site
 
-      // Rem: labels should be (int) but will be same type than Text to handle both surfaces
-      // and images. Not elegant but that's all I found so far.
+        // TexturedData that will contains the label associated with each site,
+        // that is:  BACKGROUND, or grey-level blob number.
+        // This TexturedData also gives acess to the neighbours of each site
 
-      for (ptSite=labelsImage.siteBegin(); ptSite !=  labelsImage.siteEnd(); ++ptSite)
-        labelsImage.intensity(*ptSite)=BACKGROUND;
-      // GL Blob extraction
-      // This is the core algorithm
-      typename std::multimap<Val, Site>::reverse_iterator ptSortedSites;
+        // Rem: labels should be (int) but will be same type than Text to handle both surfaces
+        // and images. Not elegant but that's all I found so far.
 
-      //std::cout << "DEBUG: extractor has started detection" << std::endl;
-      for ( ptSortedSites=sortedSites.rbegin(); ptSortedSites != sortedSites.rend(); ++ptSortedSites) {
+        for (ptSite=labelsImage.siteBegin(); ptSite !=  labelsImage.siteEnd(); ++ptSite)
+            labelsImage.intensity(*ptSite)=BACKGROUND;
+        // GL Blob extraction
+        // This is the core algorithm
+        typename std::multimap<Val, Site>::reverse_iterator ptSortedSites;
+
+        //std::cout << "DEBUG: extractor has started detection" << std::endl;
+        for ( ptSortedSites=sortedSites.rbegin(); ptSortedSites != sortedSites.rend(); ++ptSortedSites) {
             Val intensity=(*_texdata).intensity((*ptSortedSites).second);
 
             int nbAbove;
             int nbAboveLabels;
 
-      // How many neighbours with higher intensity ?
-
+            // How many neighbours with higher intensity ?
+            
             std::vector<Site> neighb=(*_texdata).neighbours((*ptSortedSites).second); //neighbours
+            
             std::vector<Site> above; //neighbours with higher intensity
             std::set<int> aboveLabels; // labels of (above)
             typename std::vector<Site>::iterator ptNeigh=neighb.begin();
+            
             for ( ; ptNeigh != neighb.end(); ++ptNeigh){
-              if ((*_texdata).intensity(*ptNeigh) > intensity){
-                  above.push_back(*ptNeigh);
-                  aboveLabels.insert(int(labelsImage.intensity(*ptNeigh)));
-              }
+                
+                if ((*_texdata).intensity(*ptNeigh) > intensity){
+                    
+                    above.push_back(*ptNeigh);
+                    aboveLabels.insert(int(labelsImage.intensity(*ptNeigh)));
+                }
             }
+            
             nbAbove=above.size();
             nbAboveLabels=aboveLabels.size();
 
             if (nbAbove==0){      // Case 1: local max, new blob
-              currentLabel++;
-              maximum=new MaximumPoint<Site>((*ptSortedSites).second);
-              greyLevelBlob=new GreyLevelBlob<Site>(maximum, currentLabel);
-              labelsImage.intensity((*ptSortedSites).second)=(Val) currentLabel;
-              maximumList.push_back(maximum);
-              blobMap[currentLabel]=(greyLevelBlob);
+                currentLabel++;
+                maximum=new MaximumPoint<Site>((*ptSortedSites).second);
+                greyLevelBlob=new GreyLevelBlob<Site>(maximum, currentLabel);
+                labelsImage.intensity((*ptSortedSites).second)=(Val) currentLabel;
+                maximumList.push_back(maximum);
+                blobMap[currentLabel]=(greyLevelBlob);
+                
             }
             else if ( (nbAbove==1) && ((labelsImage.intensity(*(above.begin())))==BACKGROUND) ){
-                              // Case 2: point in background
-              labelsImage.intensity((*ptSortedSites).second)=BACKGROUND;
+                                // Case 2: point in background
+                labelsImage.intensity((*ptSortedSites).second)=BACKGROUND;
+                
             }
 
             else if ((nbAbove>1) && (nbAboveLabels>1)){
-                // Case 3: one or several blobs to stop -> Saddle point
-        
+                               // Case 3: one or several blobs to stop -> Saddle point
+                               
                 int flagS=0;
                 labelsImage.intensity((*ptSortedSites).second)=BACKGROUND;
                 std::set<int>::iterator ptLabels=aboveLabels.begin();
                 for (; ptLabels != aboveLabels.end(); ++ptLabels)
                 if (*ptLabels!=BACKGROUND)
-                      if (blobMap[*ptLabels]->CanGrow())
-                          {
-                                if (flagS==0)
-                                {
-                          saddle=new SaddlePoint<Site>((*ptSortedSites).second);
-                          saddleList.push_back(saddle);
+                    if (blobMap[*ptLabels]->CanGrow())
+                        {
+                            if (flagS==0)
+                            {
+                        saddle=new SaddlePoint<Site>((*ptSortedSites).second);
+                        saddleList.push_back(saddle);
+                            blobMap[*ptLabels]->SetSaddle(saddle);
+                                flagS=1;
+                            }
+                            else
                                 blobMap[*ptLabels]->SetSaddle(saddle);
-                                    flagS=1;
-                                }
-                                else
-                                    blobMap[*ptLabels]->SetSaddle(saddle);
-                          }
+                        }
             }
             else                 // Case 4: point belong to a growing blob
             {
-              labelBlob=int(labelsImage.intensity(*(above.begin())));
-              if ((labelBlob != BACKGROUND) && (blobMap[labelBlob]->CanGrow() )) 
+                labelBlob=int(labelsImage.intensity(*(above.begin())));
+                if ((labelBlob != BACKGROUND) && (blobMap[labelBlob]->CanGrow() ))
                 {
                     labelsImage.intensity((*ptSortedSites).second)=(Val) labelBlob;
                     blobMap[labelBlob]->AddPoint((*ptSortedSites).second);
                 }
-              else
+                else
                 {
                     labelsImage.intensity((*ptSortedSites).second)=BACKGROUND;
                 }
             }
-      }
-      //std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
-      //std::cout << "DEBUG: extractor about to enter masking" << std::endl;
-      if (_mask!=0) DoMasking();
-      //std::cout << "DEBUG: masking done, extractor about to enter measurements" << std::endl;
-      ComputeBlobMeasurements();
-      //std::cout << "DEBUG: done" << std::endl;
-  }
+        }
+        //std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
+        //std::cout << "DEBUG: extractor about to enter masking" << std::endl;
+        if (_mask!=0) DoMasking();
+        //std::cout << "DEBUG: masking done, extractor about to enter measurements" << std::endl;
+        ComputeBlobMeasurements();
+        //std::cout << "DEBUG: done" << std::endl;
+    }
 
     //----------------------------------------------------------------------------------------------------------
 

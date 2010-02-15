@@ -49,192 +49,187 @@
 namespace aims
 {
 
-  // scaleLevel is templated with respect to a geometry and a texture
-  // same mechanism than TexturedData and ExtractGreyLevelBlobs
+    // Scalelevel Is Templated With Respect To A Geometry And A Texture
+    // Same Mechanism Than Textureddata And Extractgreylevelblobs
 
-     // A scale level
+    // A Scale Level
 
-     template<typename Geom, typename Text> class ScaleLevel {
+    template<typename Geom, typename Text> class ScaleLevel {
 
-     public:
+        public:
 
-          typedef typename SiteType<Geom>::type Site;
-          typedef typename TexType<Text>::type Val;
+            typedef typename SiteType<Geom>::type Site;
+            typedef typename TexType<Text>::type Val;
 
-          ScaleLevel(float scale) { _scale=scale; }
+            ScaleLevel(float scale) { _scale=scale; }
 
-          ScaleLevel() {}
+            ScaleLevel() {}
 
-          float     Scale() { return _scale; }
-          std::map<int, GreyLevelBlob<Site> *> BlobList() { return blobs; }
-          std::list<SaddlePoint<Site> *> SaddlePointList() { return saddlePoints; }
-          std::list<MaximumPoint<Site> *> MaximumPointList() { return maximumPoints; }
+            float     Scale() { return _scale; }
+            std::map<int, GreyLevelBlob<Site> *> BlobList() { return blobs; }
+            std::list<SaddlePoint<Site> *> SaddlePointList() { return saddlePoints; }
+            std::list<MaximumPoint<Site> *> MaximumPointList() { return maximumPoints; }
 
-          GreyLevelBlob<Site> *Blob(int label)
-          {
-            if (blobs.find(label) !=  blobs.end())
-              return blobs[label];
-            else
+            GreyLevelBlob<Site> *Blob(int label)
             {
-              std::cerr << "looking for GLB that does not exist..." << std::endl;
-              exit(EXIT_FAILURE);
+                if (blobs.find(label) !=  blobs.end())
+                    return blobs[label];
+                else
+                {
+                    std::cerr << "looking for GLB that does not exist..." << std::endl;
+                    exit(EXIT_FAILURE);
+                }
             }
-          }
 
-          TexturedData<Geom, Text > Data() {}
-          TexturedData<Geom, Text > *AuxData() {}
-          void DetectBlobs(TexturedData<Geom, Text> *mask, char *stats=0);
-          int nbBlobs() { return blobs.size(); }
+            TexturedData<Geom, Text > Data() {}
 
-          ScaleLevel<Geom, Text> & operator = (const ScaleLevel<Geom, Text> & other)
-               {_scale=other._scale; blobs=other.blobs;
-               saddlePoints=other.saddlePoints; maximumPoints=other.maximumPoints; return *this;}
-          void SetAuxData(TexturedData<Geom, Text > *auxdata);
-     private:
+            void DetectBlobs(TexturedData<Geom, Text> *mask, char *stats=0);
+            int nbBlobs() { return blobs.size(); }
 
-          float _scale;
-          
-          std::map<int, GreyLevelBlob<Site> *> blobs;
-          std::list<SaddlePoint<Site> *> saddlePoints;
-          std::list<MaximumPoint<Site> *> maximumPoints;
+            ScaleLevel<Geom, Text> & operator = (const ScaleLevel<Geom, Text> & other)
+                {_scale=other._scale; blobs=other.blobs;
+                saddlePoints=other.saddlePoints; maximumPoints=other.maximumPoints; return *this;}
 
-     };
+        private:
 
-     // scale levels image partial specialisation
+            float _scale;
 
-     template<typename T> class ScaleLevel<AimsData<T>, AimsData<T> > {
+            std::map<int, GreyLevelBlob<Site> *> blobs;
+            std::list<SaddlePoint<Site> *> saddlePoints;
+            std::list<MaximumPoint<Site> *> maximumPoints;
 
-     public:
+    };
 
-        typedef typename SiteType<AimsData<T> >::type Site;
+    // Scale Levels Image Partial Specialisation
 
-        ScaleLevel(float scale, AimsData<T> level) {_scale=scale; _level=level.clone();}
+    template<typename T> class ScaleLevel<AimsData<T>, AimsData<T> > {
 
-        ScaleLevel() : _auxdata(0) {}
+        public:
 
-        ~ScaleLevel() {}
+            typedef typename SiteType<AimsData<T> >::type Site;
 
-          AimsData<T> & Level() { return _level; }
-          // essai
-          TexturedData<AimsData<T>, AimsData<T> > Data() {TexturedData<AimsData<T>, AimsData<T> > data(&_level); return data;}
-          TexturedData<AimsData<T>, AimsData<T> > *AuxData() {return _auxdata;}
+            ScaleLevel(float scale, AimsData<T> level) {_scale=scale; _level=level.clone();}
 
-          float     Scale() { return _scale; }
-          std::map<int, GreyLevelBlob<Site> *> BlobList() { return blobs; }
-          std::list<SaddlePoint<Site> *> SaddlePointList() { return saddlePoints; }
-          std::list<MaximumPoint<Site> *> MaximumPointList() { return maximumPoints; }
+            ~ScaleLevel() {}
 
-          GreyLevelBlob<Site> *Blob(int label) {if (blobs.find(label) !=  blobs.end())
+            AimsData<T> & Level() { return _level; }
+            // Essai
+            TexturedData<AimsData<T>, AimsData<T> > Data() {TexturedData<AimsData<T>, AimsData<T> > data(&_level); return data;}
+
+            float     Scale() { return _scale; }
+            std::map<int, GreyLevelBlob<Site> *> BlobList() { return blobs; }
+            std::list<SaddlePoint<Site> *> SaddlePointList() { return saddlePoints; }
+            std::list<MaximumPoint<Site> *> MaximumPointList() { return maximumPoints; }
+
+            GreyLevelBlob<Site> *Blob(int label) {if (blobs.find(label) !=  blobs.end())
                                                             return blobs[label];
-                                                       else
-                                                 {std::cerr << "looking for GLB " << label << " that does not exist at scale " << _scale << std::endl;
+                                                        else
+                                                    {std::cerr << "looking for GLB " << label << " that does not exist at scale " << _scale << std::endl;
                                                             exit(EXIT_FAILURE);}}
 
-          void DetectBlobs(TexturedData<AimsData<T>, AimsData<T> > *mask=0, char *stats=0);
-          int nbBlobs() { return blobs.size(); }
+            void DetectBlobs(TexturedData<AimsData<T>, AimsData<T> > *mask=0, char *stats=0);
+            int nbBlobs() { return blobs.size(); }
 
-          ScaleLevel<AimsData<T>, AimsData<T> > & operator = (const ScaleLevel<AimsData<T>, AimsData<T> > & other)
-               {_scale=other._scale; _level=other._level; blobs=other.blobs;
-               saddlePoints=other.saddlePoints; maximumPoints=other.maximumPoints; return *this;}
+            ScaleLevel<AimsData<T>, AimsData<T> > & operator = (const ScaleLevel<AimsData<T>, AimsData<T> > & other)
+                {_scale=other._scale; _level=other._level; blobs=other.blobs;
+                saddlePoints=other.saddlePoints; maximumPoints=other.maximumPoints; return *this;}
 
-          void WriteBlobImage(std::string fileBlob);
-          void SetAuxData(TexturedData<AimsData<T>, AimsData<T> > *auxdata){_auxdata=auxdata;}
+            void WriteBlobImage(std::string fileBlob);
 
-     private:
+        private:
 
-          float _scale;
-          AimsData<T> _level;
-          TexturedData<AimsData<T>, AimsData<T> > *_auxdata;
-          std::map<int, GreyLevelBlob<Site> *> blobs;
-          std::list<SaddlePoint<Site> *> saddlePoints;
-          std::list<MaximumPoint<Site> *> maximumPoints;
-     };
+            float _scale;
+            AimsData<T> _level;
+            std::map<int, GreyLevelBlob<Site> *> blobs;
+            std::list<SaddlePoint<Site> *> saddlePoints;
+            std::list<MaximumPoint<Site> *> maximumPoints;
+    };
 
-     // scale levels texture partial specialisation
+    // Scale Levels Texture Partial Specialisation
 
     template<int D, typename T> class ScaleLevel<AimsSurface<D, Void>, Texture<T> >
     {
-    public:
+        
+        public:
 
-      typedef typename SiteType<AimsSurface<D, Void> >::type Site;
+            typedef typename SiteType<AimsSurface<D, Void> >::type Site;
 
-      ScaleLevel(float scale, Texture<T> level, AimsSurface<D, Void> *mesh) : _auxdata(0)
-      {
-        _scale=scale; _level=level; _mesh=mesh; _coordinates=NULL; _originallevel=NULL;
-      }
-      ScaleLevel(float scale, Texture<T> level, AimsSurface<D, Void> *mesh, std::vector<Point3df> *coords) : _auxdata(0)
-      {
-        _scale=scale; _level=level; _mesh=mesh; _coordinates=coords; _originallevel=NULL;
-      }
-      ScaleLevel(const ScaleLevel<AimsSurface<D, Void>, Texture<T> > &other) : _auxdata( other._auxdata )
-      {
-        (*this)._scale=other._scale; (*this)._level=other._level; (*this)._mesh=other._mesh; (*this)._coordinates=_coordinates; _originallevel=NULL;
-      }
-      ScaleLevel(float scale, Texture<T> level, AimsSurface<D, Void> *mesh, Texture<T> *originallevel) : _auxdata(0)
-      {
-        _scale=scale; _level=level; _mesh=mesh; _coordinates=NULL; _originallevel=originallevel;
-      }
-      ScaleLevel(float scale, Texture<T> level, AimsSurface<D, Void> *mesh, std::vector<Point3df> *coords, Texture<T> *originallevel) : _auxdata(0)
-      {
-        _scale=scale; _level=level; _mesh=mesh; _coordinates=coords; _originallevel=originallevel;
-      }
-      ScaleLevel(const ScaleLevel<AimsSurface<D, Void>, Texture<T> > &other, Texture<T> *originallevel) : _auxdata( other._auxdata )
-      {
-        (*this)._scale=other._scale; (*this)._level=other._level; (*this)._mesh=other._mesh; (*this)._coordinates=_coordinates; _originallevel=originallevel;
-      }
+            ScaleLevel(float scale, Texture<T> level, AimsSurface<D, Void> *mesh)
+            {
+            _scale=scale; _level=level; _mesh=mesh; _coordinates=NULL; _originallevel=NULL;
+            }
+            ScaleLevel(float scale, Texture<T> level, AimsSurface<D, Void> *mesh, std::vector<Point3df> *coords)
+            {
+            _scale=scale; _level=level; _mesh=mesh; _coordinates=coords; _originallevel=NULL;
+            }
+            ScaleLevel(const ScaleLevel<AimsSurface<D, Void>, Texture<T> > &other)
+            {
+            (*this)._scale=other._scale; (*this)._level=other._level; (*this)._mesh=other._mesh; (*this)._coordinates=_coordinates; _originallevel=NULL;
+            }
+            ScaleLevel(float scale, Texture<T> level, AimsSurface<D, Void> *mesh, Texture<T> *originallevel)
+            {
+            _scale=scale; _level=level; _mesh=mesh; _coordinates=NULL; _originallevel=originallevel;
+            }
+            ScaleLevel(float scale, Texture<T> level, AimsSurface<D, Void> *mesh, std::vector<Point3df> *coords, Texture<T> *originallevel)
+            {
+            _scale=scale; _level=level; _mesh=mesh; _coordinates=coords; _originallevel=originallevel;
+            }
+            ScaleLevel(const ScaleLevel<AimsSurface<D, Void>, Texture<T> > &other, Texture<T> *originallevel)
+            {
+            (*this)._scale=other._scale; (*this)._level=other._level; (*this)._mesh=other._mesh; (*this)._coordinates=_coordinates; _originallevel=originallevel;
+            }
 
-      ScaleLevel() : _auxdata(0) {}
+            ScaleLevel() {}
 
 
-      Texture<T> & Level() { return _level; }
-      TexturedData<AimsSurface<D, Void>, Texture<T> > Data() {TexturedData<AimsSurface<D, Void>, Texture<T> > data(_mesh, &_level); return data;}
-      TexturedData<AimsSurface<D, Void>, Texture<T> > OriginalData(){TexturedData<AimsSurface<D, Void>, Texture<T> > data(_mesh, _originallevel); return data;}
-      TexturedData<AimsSurface<D, Void>, Texture<T> > *AuxData()
-      { return _auxdata;}
+            Texture<T> & Level() { return _level; }
+            TexturedData<AimsSurface<D, Void>, Texture<T> > Data() {TexturedData<AimsSurface<D, Void>, Texture<T> > data(_mesh, &_level); return data;}
+            TexturedData<AimsSurface<D, Void>, Texture<T> > OriginalData(){TexturedData<AimsSurface<D, Void>, Texture<T> > data(_mesh, _originallevel); return data;}
 
-      float     Scale() { return _scale; }
-      AimsSurface<D, Void> *Mesh() { return _mesh; }
-      std::map<int, GreyLevelBlob<Site> *> & BlobList() { return blobs; }
-      std::list<SaddlePoint<Site> *> & SaddlePointList()
-      { return saddlePoints; }
-      std::list<MaximumPoint<Site> *> & MaximumPointList()
-      { return maximumPoints; }
 
-      GreyLevelBlob<Site> *Blob(int label)
-      {
-        if (blobs.find(label) !=  blobs.end())
-          return blobs[label];
-        else
-        {
-          std::cerr << "looking for GLB " << label << " that does not exist..." << std::endl;
-          exit(EXIT_FAILURE);
-        }
-      }
+            float     Scale() { return _scale; }
+            AimsSurface<D, Void> *Mesh() { return _mesh; }
+            std::map<int, GreyLevelBlob<Site> *> & BlobList() { return blobs; }
+            std::list<SaddlePoint<Site> *> & SaddlePointList()
+            { return saddlePoints; }
+            std::list<MaximumPoint<Site> *> & MaximumPointList()
+            { return maximumPoints; }
 
-      void DetectBlobs(TexturedData<AimsSurface<D, Void>, Texture<T> > *mask=0, char *stats=0);
+            GreyLevelBlob<Site> *Blob(int label)
+            {
+            if (blobs.find(label) !=  blobs.end())
+                return blobs[label];
+            else
+            {
+                std::cerr << "looking for GLB " << label << " that does not exist..." << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            }
 
-      int nbBlobs() { return blobs.size(); }
-      void PutCoordinates(std::vector<Point3df> *coord){ _coordinates = coord; }
-      void SetAuxData(TexturedData<AimsSurface<D, Void>, Texture<T> > *auxdata){_auxdata=auxdata; }
+            void DetectBlobs(TexturedData<AimsSurface<D, Void>, Texture<T> > *mask=0, char *stats=0);
 
-      ScaleLevel<AimsSurface<D, Void>, Texture<T> > &
-      operator = (const ScaleLevel<AimsSurface<D, Void>, Texture<T> > & other)
-      {
-        (*this)._scale=other._scale;(*this)._level=other._level;(*this)._mesh=other._mesh; (*this).blobs=other.blobs;
-        (*this).saddlePoints=other.saddlePoints; (*this).maximumPoints=other.maximumPoints; (*this)._auxdata = other._auxdata; return *this;
-      }
+            int nbBlobs() { return blobs.size(); }
+            void PutCoordinates(std::vector<Point3df> *coord){ _coordinates = coord; }
 
-     private:
 
-      float _scale;
-      Texture<T> _level;
-      AimsSurface<D, Void> *_mesh;
-      std::vector<Point3df> *_coordinates;
-      TexturedData<AimsSurface<D, Void>, Texture<T> > *_auxdata;
-      Texture<T> *_originallevel;
-      std::map<int, GreyLevelBlob<Site> *> blobs;
-      std::list<SaddlePoint<Site> *> saddlePoints;
-      std::list<MaximumPoint<Site> *> maximumPoints;
+            ScaleLevel<AimsSurface<D, Void>, Texture<T> > &
+            operator = (const ScaleLevel<AimsSurface<D, Void>, Texture<T> > & other)
+            {
+            (*this)._scale=other._scale;(*this)._level=other._level;(*this)._mesh=other._mesh; (*this).blobs=other.blobs;
+            (*this).saddlePoints=other.saddlePoints; (*this).maximumPoints=other.maximumPoints;  return *this;
+            }
+
+        private:
+
+            float _scale;
+            Texture<T> _level;
+            AimsSurface<D, Void> *_mesh;
+            std::vector<Point3df> *_coordinates;
+
+            Texture<T> *_originallevel;
+            std::map<int, GreyLevelBlob<Site> *> blobs;
+            std::list<SaddlePoint<Site> *> saddlePoints;
+            std::list<MaximumPoint<Site> *> maximumPoints;
     };
 
 
@@ -270,19 +265,23 @@ namespace aims
      template<int D, typename T>
      void ScaleLevel<AimsSurface<D, Void>, Texture<T> >::DetectBlobs(TexturedData<AimsSurface<D, Void>, Texture<T> > *mask, char *stats)
      {
-          TexturedData<AimsSurface<D, Void>, Texture<T> > textdata(_mesh, &_level, _coordinates) ;
-          TexturedData<AimsSurface<D, Void>, Texture<T> > rawtextdata(_mesh, _originallevel, _coordinates) ;
-          ExtractGreyLevelBlobs<AimsSurface<D, Void>, Texture<T> > extractor(&textdata, &rawtextdata, mask, stats);
-          typename std::map<int, GreyLevelBlob<Site> *>::iterator itBlob;
-          if (blobs.size() == 0){
-               extractor.Run();
-               blobs=extractor.GetBlobs();
-               saddlePoints=extractor.GetSaddleList();
-               maximumPoints=extractor.GetMaxList();
-               itBlob=blobs.begin();
-               for ( ; itBlob != blobs.end(); ++itBlob)
-                  ((*itBlob).second)->SetScale(_scale);
-          }
+         
+        TexturedData<AimsSurface<D, Void>, Texture<T> > textdata(_mesh, &_level, _coordinates) ;
+        TexturedData<AimsSurface<D, Void>, Texture<T> > rawtextdata(_mesh, _originallevel, _coordinates) ;
+       
+        ExtractGreyLevelBlobs<AimsSurface<D, Void>, Texture<T> > extractor(&textdata, &rawtextdata, mask, stats);
+        
+        typename std::map<int, GreyLevelBlob<Site> *>::iterator itBlob;
+        if (blobs.size() == 0){
+            extractor.Run();
+            blobs=extractor.GetBlobs();
+            saddlePoints=extractor.GetSaddleList();
+            maximumPoints=extractor.GetMaxList();
+            itBlob=blobs.begin();
+            for ( ; itBlob != blobs.end(); ++itBlob)
+                ((*itBlob).second)->SetScale(_scale);
+        }
+        
      }
 
      //-------------------------------------------------------------------

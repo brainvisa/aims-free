@@ -134,28 +134,10 @@ namespace aims
                 
 		SiteIterator<AimsSurface<D,Void> > itSite=textBlob->siteBegin();
 
-// 		for (; itSite != textBlob->siteEnd(); ++itSite)
-// 			textBlob->intensity(*itSite)=0;
+
                 set<float> scale= sketch->scaleSpace()->GetScaleList();
-                cout << "DEBEUG : " << scale.size() << endl;
                
-//                 std::map<float, ScaleLevel<AimsSurface<D, Void>, Texture<T> >*>::iterator sit=sketch->scaleSpace()->GetScaleLevels().begin();
-//                 for (; sit!=sketch->scaleSpace()->GetScaleLevels().end(); ++sit)
-// 		{
-//                   scale.insert((*sit).first);
-                  
-// 			label=(*itBlob)->Label();
-// 			glBlob=(*itBlob)->GlBlobRep();
-// 			points=glBlob->GetListePoints();
-// 			itPoints=points.begin();
-// 			for (; itPoints!=points.end(); ++itPoints)
-// 			{
-// 				if ((textBlob->intensity(*itPoints))==0)
-// 					textBlob->intensity(*itPoints)=100 + (label * 10);
-// 				else
-// 					textBlob->intensity(*itPoints)=105 + (label * 10);
-// 			}
-// 		}
+
                 TimeTexture<float> tex(scale.size(),sketch->scaleSpace()->Mesh()->vertex().size());
                 for (uint i=0;i<scale.size();i++)
                   for (uint j=0;j<sketch->scaleSpace()->Mesh()->vertex().size();j++)

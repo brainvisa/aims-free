@@ -95,7 +95,7 @@ namespace aims
           void SetMinDt() {if (!_scaleSpace->smoother()->optimal()) min_delta_t=0.5;
                                                        else min_delta_t=_scaleSpace->smoother()->dt();}
           void SetScaleSpace(ScaleSpace<Geom, Text> *scaleSpace)
-                                                  {_scaleSpace=scaleSpace;SetMinDt();}
+                                                  { _scaleSpace=scaleSpace;  SetMinDt();}
           std::list<Bifurcation<Site>*> BifurcationList() {return bifurcationList;}
           std::list<ScaleSpaceBlob<Site>*> BlobSet() {return blobList;}
           ScaleSpace<Geom, Text>   *scaleSpace() {return _scaleSpace;}
@@ -161,83 +161,87 @@ namespace aims
      template<typename Geom, typename Text>
      void PrimalSketch<Geom,Text>::ComputePrimalSketch(float tmin, float tmax, string statFile, uint intersection_param)
      {
-          // Algo : On part del'echelle la plus haute et on descend vers l'image originale
-          // A chaque niveau : on regarde vers le niveau en dessous et on applique
-          //                                           MatchScaleLevels();
-          // Si ca marche on descend d'un cran et on recommence
-          // Si ca ne marche pas on calcule un niveau intermediaire et on recommence (~recursif)
+        // Algo : On part del'echelle la plus haute et on descend vers l'image originale
+        // A chaque niveau : on regarde vers le niveau en dessous et on applique
+        //                                           MatchScaleLevels();
+        // Si ca marche on descend d'un cran et on recommence
+        // Si ca ne marche pas on calcule un niveau intermediaire et on recommence (~recursif)
 
-          std::cout << "Computing primal sketch between tmin=" << tmin << " and tmax=" << tmax << std::endl;
+        std::cout << "Computing primal sketch between tmin=" << tmin << " and tmax=" << tmax << std::endl;
 
-          t_min=tmin;
-          t_max=tmax;
+        t_min=tmin;
+        t_max=tmax;
         float t_bif=tmax*2;
 
-          if (_scaleSpace==NULL)
-          {
-               std::cerr << "Trying to compute a primal sketch without a scale-space" << std::endl;
-               std::cerr << "Subject : " << _subject;
-               exit(EXIT_FAILURE);
-          }
+        if (_scaleSpace==NULL)
+        {
+            std::cerr << "Trying to compute a primal sketch without a scale-space" << std::endl;
+            std::cerr << "Subject : " << _subject;
+            exit(EXIT_FAILURE);
+        }
 
-          std::set<float> scaleList=_scaleSpace->GetScaleList();
-          std::set<float>::reverse_iterator itScaleUp=scaleList.rbegin();
-          std::set<float>::reverse_iterator itScaleDown;
-          float t_up, t_down;
+        std::set<float> scaleList=_scaleSpace->GetScaleList();
+        std::set<float>::reverse_iterator itScaleUp=scaleList.rbegin();
+        std::set<float>::reverse_iterator itScaleDown;
+        float t_up, t_down;
 
-          for (; (*itScaleUp) != tmax; ++itScaleUp)
-          {
-               if (itScaleUp==scaleList.rend())
-               {
-                    std::cerr << "Scale max " << tmax << " does not exist" << std::endl;
-                    exit(EXIT_FAILURE);
-               }
-          }
+        for (; (*itScaleUp) != tmax; ++itScaleUp)
+        {
+            if (itScaleUp==scaleList.rend())
+            {
+                std::cerr << "Scale max " << tmax << " does not exist" << std::endl;
+                exit(EXIT_FAILURE);
+            }
+        }
 
-          ScaleLevel<Geom,Text> *levelUp;
-          levelUp=_scaleSpace->Scale(*itScaleUp);
-        ScaleLevel<Geom,Text> *levelDown;
-          levelDown=_scaleSpace->Scale(tmin);
-
-          int nbBlobs;
-
-          levelUp->DetectBlobs(_mask);
-
-          nbBlobs=levelUp->nbBlobs();
-
-          GreyLevelBlob<Site> *glBlob;
-          ScaleSpaceBlob<Site> *ssBlob;
-          Bifurcation<Site> *bifurc;
-          // scale-space blob initalisation
-          std::map<int, GreyLevelBlob<Site> *>
-                  listeGLB=levelUp->BlobList();
-          typename std::map<int, GreyLevelBlob<Site> *>::iterator
-                  itGL=listeGLB.begin();
-          for (; itGL != listeGLB.end(); ++itGL)
-          {
-               glBlob=(*itGL).second;
-               ssBlob=new ScaleSpaceBlob<Site>(_subject, labelMax);
-               ssBlob->SetScaleMax(*itScaleUp);
-               ssBlob->SetScaleMin(t_min);
-               ssBlob->AddGreyLevelBlob(glBlob);
-               bifurc=new Bifurcation<Site>(DISAPPEAR, t_bif, t_max);
-               bifurc->AddBottomBlob(ssBlob);
-               ssBlob->SetTopBifurcation(bifurc);
-               AddBlob(ssBlob);
-               AddBifurcation(bifurc);
-               labelMax++;
-          }
-
-          // primal sketch computation, top to bottom
           
-          for (; (*itScaleUp) > tmin; ++itScaleUp)
-          {
-               itScaleDown=itScaleUp;
-               itScaleDown++;
-               t_up=*itScaleUp;
-               t_down=*itScaleDown;
-               MatchScaleLevels(t_up, t_down, intersection_param);
-          }
+        ScaleLevel<Geom,Text> *levelUp;
+        levelUp=_scaleSpace->Scale(*itScaleUp);
+        ScaleLevel<Geom,Text> *levelDown;
+        levelDown=_scaleSpace->Scale(tmin);
+        
+        int nbBlobs;
+
+        levelUp->DetectBlobs(_mask);
+        
+        nbBlobs=levelUp->nbBlobs();
+        
+        GreyLevelBlob<Site> *glBlob;
+        ScaleSpaceBlob<Site> *ssBlob;
+        Bifurcation<Site> *bifurc;
+        
+        // Scale-space blob initialisation
+        std::map<int, GreyLevelBlob<Site> *>
+                listeGLB=levelUp->BlobList();
+                
+        typename std::map<int, GreyLevelBlob<Site> *>::iterator
+                itGL=listeGLB.begin();
+                                
+        for (; itGL != listeGLB.end(); ++itGL)
+        {
+            glBlob=(*itGL).second;
+            ssBlob=new ScaleSpaceBlob<Site>(_subject, labelMax);
+            ssBlob->SetScaleMax(*itScaleUp);
+            ssBlob->SetScaleMin(t_min);
+            ssBlob->AddGreyLevelBlob(glBlob);
+            bifurc=new Bifurcation<Site>(DISAPPEAR, t_bif, t_max);
+            bifurc->AddBottomBlob(ssBlob);
+            ssBlob->SetTopBifurcation(bifurc);
+            AddBlob(ssBlob);
+            AddBifurcation(bifurc);
+            labelMax++;
+        }
+                
+        // Primal Sketch Computation, Top To Bottom
+
+        for (; (*itScaleUp) > tmin; ++itScaleUp)
+        {
+            itScaleDown=itScaleUp;
+            itScaleDown++;
+            t_up=*itScaleUp;
+            t_down=*itScaleDown;
+            MatchScaleLevels(t_up, t_down, intersection_param);
+        }
 
         // "closing" the primal sketch at bottom
 
@@ -947,7 +951,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
             tvalue += dt * (glBlob1->measurements.t);
             
 
-            // getting t-value from original map... 
+            // Getting T-Value From Original Map... 
 
             TexturedData<Geom, Text> ima=scaleSpace()->Scale(0.0)->Data();
 
