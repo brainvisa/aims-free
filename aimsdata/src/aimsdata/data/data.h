@@ -39,6 +39,7 @@
 
 #include <aims/data/cartodatavolume.h>
 #include <aims/rgb/rgb.h>
+#include <aims/hsv/hsv.h>
 
 // this part will not be always included in future releases
 #include <aims/data/volumemanip.h>
@@ -57,6 +58,7 @@ DECLARE_GENERIC_OBJECT_TYPE( AimsData< std::complex<float> > )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData< std::complex<double> > )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<AimsRGB> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<AimsRGBA> )
+DECLARE_GENERIC_OBJECT_TYPE( AimsData<AimsHSV> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<Point3d> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<Point3df> )
 #define _TMP_ AimsData< AimsVector<float, 6> > 
@@ -75,6 +77,7 @@ DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData< std::complex<double> > > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData< std::complex<float> > > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<AimsRGB> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<AimsRGBA> > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<AimsHSV> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<Point3d> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<Point3df> > )
 #define _TMP_ rc_ptr< AimsData< AimsVector<float, 6> > >

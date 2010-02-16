@@ -37,6 +37,7 @@
 
 #include <cartodata/volume/volume_d.h>
 #include <aims/rgb/rgb.h>
+#include <aims/hsv/hsv.h>
 #include <aims/io/datatypecode.h>
 #include <aims/vector/vector.h>
 #include <aims/math/dtitensor.h>
@@ -88,6 +89,12 @@ namespace carto
     return apply( Scaler<AimsRGBA>( -1 ), o ); 
   }
 
+  template<> template<> VolumeRef<AimsHSV> 
+  VolumeUtil<AimsHSV>::apply( std::negate<AimsHSV>, 
+                              const VolumeRef<AimsHSV> & o )
+  {
+    return apply( Scaler<AimsHSV>( -1 ), o );
+  }
 }
 
 template class carto::VolumeProxy< AimsRGB >;
@@ -101,6 +108,12 @@ template class carto::Volume< AimsRGBA >;
 instantiate_volutil( AimsRGBA )
 instantiate_volutil2( AimsRGBA, std::plus<AimsRGBA> )
 instantiate_volutil2( AimsRGBA, std::minus<AimsRGBA> )
+
+template class carto::VolumeProxy< AimsHSV >;
+template class carto::Volume< AimsHSV >;
+instantiate_volutil( AimsHSV )
+instantiate_volutil2( AimsHSV, std::plus<AimsHSV> )
+instantiate_volutil2( AimsHSV, std::minus<AimsHSV> )
 
 template class carto::VolumeProxy< Point3df >;
 template class carto::Volume< Point3df >;

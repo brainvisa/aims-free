@@ -41,6 +41,7 @@
 #include <aims/io/fileFormat_d.h>
 #include <aims/io/baseFormats_volume_d.h>
 #include <aims/rgb/rgb.h>
+#include <aims/hsv/hsv.h>
 #include <aims/io/fileFormat_cartovolume_d.h>
 
 using namespace aims;
@@ -74,6 +75,20 @@ FileFormatDictionary<VolumeRef<AimsRGBA> >::registerBaseFormats()
   std::vector<std::string>	ext;
   ext.push_back( "" );
   VolumeRefFormat<AimsRGBA>	*f = new VolumeRefFormat<AimsRGBA>;
+  registerFormat( "ALLVOLUMES", f, ext );
+}
+
+template<> void
+FileFormatDictionary<Volume<AimsHSV> >::registerBaseFormats()
+{
+}
+
+template<> void 
+FileFormatDictionary<VolumeRef<AimsHSV> >::registerBaseFormats()
+{
+  std::vector<std::string>	ext;
+  ext.push_back( "" );
+  VolumeRefFormat<AimsHSV>	*f = new VolumeRefFormat<AimsHSV>;
   registerFormat( "ALLVOLUMES", f, ext );
 }
 
@@ -156,6 +171,18 @@ FileFormatDictionary<AimsData<AimsRGBA> >::registerBaseFormats()
 }
 
 template<> void 
+FileFormatDictionary<AimsData<AimsHSV> >::registerBaseFormats()
+{
+  std::vector<std::string>	ext;
+  ext.push_back( "ima" );
+  ext.push_back( "dim" );
+  GisFormat<AimsHSV>	*gf = new GisFormat<AimsHSV>;
+  registerFormat( "GIS", gf, ext );
+  VolumeFormat<AimsHSV>	*vf = new VolumeFormat<AimsHSV>( "GIS" );
+  FileFormatDictionary<Volume<AimsHSV> >::registerFormat( "GIS", vf, ext );
+}
+
+template<> void 
 FileFormatDictionary<AimsData<Point3df> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
@@ -198,47 +225,55 @@ FileFormatDictionary<AimsData<AimsVector<float,6> > >::registerBaseFormats()
 
 template class FileFormatDictionary<AimsData<AimsRGB> >;
 template class FileFormatDictionary<AimsData<AimsRGBA> >;
+template class FileFormatDictionary<AimsData<AimsHSV> >;
 template class FileFormatDictionary<AimsData<Point3df> >;
 template class FileFormatDictionary<AimsData<Point3d> >;
 template class FileFormatDictionary<AimsData<AimsVector<float,6> > >;
 
 template class FileFormatDictionary<Volume<AimsRGB> >;
 template class FileFormatDictionary<Volume<AimsRGBA> >;
+template class FileFormatDictionary<Volume<AimsHSV> >;
 template class FileFormatDictionary<Volume<Point3df> >;
 template class FileFormatDictionary<Volume<Point3d> >;
 template class FileFormatDictionary<Volume<AimsVector<float,6> > >;
 
 template class FileFormatDictionary<VolumeRef<AimsRGB> >;
 template class FileFormatDictionary<VolumeRef<AimsRGBA> >;
+template class FileFormatDictionary<VolumeRef<AimsHSV> >;
 template class FileFormatDictionary<VolumeRef<Point3df> >;
 template class FileFormatDictionary<VolumeRef<Point3d> >;
 template class FileFormatDictionary<VolumeRef<AimsVector<float,6> > >;
 
 template class FileFormat<AimsData<AimsRGB> >;
 template class FileFormat<AimsData<AimsRGBA> >;
+template class FileFormat<AimsData<AimsHSV> >;
 template class FileFormat<AimsData<Point3df> >;
 template class FileFormat<AimsData<Point3d> >;
 template class FileFormat<AimsData<AimsVector<float,6> > >;
 template class FileFormat<Volume<AimsRGB> >;
 template class FileFormat<Volume<AimsRGBA> >;
+template class FileFormat<Volume<AimsHSV> >;
 template class FileFormat<Volume<Point3df> >;
 template class FileFormat<Volume<Point3d> >;
 template class FileFormat<Volume<AimsVector<float,6> > >;
 
 template class FileFormat<VolumeRef<AimsRGB> >;
 template class FileFormat<VolumeRef<AimsRGBA> >;
+template class FileFormat<VolumeRef<AimsHSV> >;
 template class FileFormat<VolumeRef<Point3df> >;
 template class FileFormat<VolumeRef<Point3d> >;
 template class FileFormat<VolumeRef<AimsVector<float,6> > >;
 
 template class VolumeFormat<AimsRGB>;
 template class VolumeFormat<AimsRGBA>;
+template class VolumeFormat<AimsHSV>;
 template class VolumeFormat<Point3df>;
 template class VolumeFormat<Point3d>;
 template class VolumeFormat<AimsVector<float,6> >;
 
 template class VolumeRefFormat<AimsRGB>;
 template class VolumeRefFormat<AimsRGBA>;
+template class VolumeRefFormat<AimsHSV>;
 template class VolumeRefFormat<Point3df>;
 template class VolumeRefFormat<Point3d>;
 template class VolumeRefFormat<AimsVector<float,6> >;
@@ -247,18 +282,21 @@ static bool _volvecdic()
 {
   FileFormatDictionary<AimsData<AimsRGB> >::init();
   FileFormatDictionary<AimsData<AimsRGBA> >::init();
+  FileFormatDictionary<AimsData<AimsHSV> >::init();
   FileFormatDictionary<AimsData<Point3df> >::init();
   FileFormatDictionary<AimsData<Point3d> >::init();
   FileFormatDictionary<AimsData<AimsVector<float,6> > >::init();
 
   FileFormatDictionary<Volume<AimsRGB> >::init();
   FileFormatDictionary<Volume<AimsRGBA> >::init();
+  FileFormatDictionary<Volume<AimsHSV> >::init();
   FileFormatDictionary<Volume<Point3df> >::init();
   FileFormatDictionary<Volume<Point3d> >::init();
   FileFormatDictionary<Volume<AimsVector<float,6> > >::init();
 
   FileFormatDictionary<VolumeRef<AimsRGB> >::init();
   FileFormatDictionary<VolumeRef<AimsRGBA> >::init();
+  FileFormatDictionary<VolumeRef<AimsHSV> >::init();
   FileFormatDictionary<VolumeRef<Point3df> >::init();
   FileFormatDictionary<VolumeRef<Point3d> >::init();
   FileFormatDictionary<VolumeRef<AimsVector<float,6> > >::init();

@@ -41,6 +41,7 @@
 #include <aims/io/reader_d.h>
 #include <aims/data/data.h>
 #include <aims/rgb/rgb.h>
+#include <aims/hsv/hsv.h>
 #include <aims/bucket/bucket.h>
 #include <aims/math/dtitensor.h>
 #include <aims/mesh/surface.h>
@@ -65,6 +66,7 @@ template class Reader<AimsData<cfloat> >;
 template class Reader<AimsData<cdouble> >;
 template class Reader<AimsData<AimsRGB> >;
 template class Reader<AimsData<AimsRGBA> >;
+template class Reader<AimsData<AimsHSV> >;
 template class Reader<AimsData<Point3df> >;
 template class Reader<AimsData<Point3d> >;
 template class Reader<AimsData<AimsVector<float,6> > >;
@@ -88,6 +90,7 @@ template class Reader<Volume<cfloat> >;
 template class Reader<Volume<cdouble> >;
 template class Reader<Volume<AimsRGB> >;
 template class Reader<Volume<AimsRGBA> >;
+template class Reader<Volume<AimsHSV> >;
 template class Reader<Volume<Point3df> >;
 template class Reader<Volume<Point3d> >;
 template class Reader<Volume<AimsVector<float,6> > >;
@@ -110,6 +113,7 @@ template class Reader<VolumeRef<cfloat> >;
 template class Reader<VolumeRef<cdouble> >;
 template class Reader<VolumeRef<AimsRGB> >;
 template class Reader<VolumeRef<AimsRGBA> >;
+template class Reader<VolumeRef<AimsHSV> >;
 template class Reader<VolumeRef<Point3df> >;
 template class Reader<VolumeRef<Point3d> >;
 template class Reader<VolumeRef<AimsVector<float,6> > >;

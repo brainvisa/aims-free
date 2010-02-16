@@ -42,6 +42,7 @@
 #include <aims/io/writer_d.h>
 #include <aims/data/data.h>
 #include <aims/rgb/rgb.h>
+#include <aims/hsv/hsv.h>
 #include <aims/bucket/bucket.h>
 #include <aims/math/dtitensor.h>
 #include <aims/mesh/surface.h>
@@ -66,6 +67,7 @@ template class Writer<AimsData<cfloat> >;
 template class Writer<AimsData<cdouble> >;
 template class Writer<AimsData<AimsRGB> >;
 template class Writer<AimsData<AimsRGBA> >;
+template class Writer<AimsData<AimsHSV> >;
 template class Writer<AimsData<Point3df> >;
 template class Writer<AimsData<Point3d> >;
 template class Writer<AimsData<AimsVector<float,6> > >;
@@ -89,6 +91,7 @@ template class Writer<Volume<cfloat> >;
 template class Writer<Volume<cdouble> >;
 template class Writer<Volume<AimsRGB> >;
 template class Writer<Volume<AimsRGBA> >;
+template class Writer<Volume<AimsHSV> >;
 template class Writer<Volume<Point3df> >;
 template class Writer<Volume<Point3d> >;
 template class Writer<Volume<AimsVector<float,6> > >;
@@ -111,6 +114,7 @@ template class Writer<VolumeRef<cfloat> >;
 template class Writer<VolumeRef<cdouble> >;
 template class Writer<VolumeRef<AimsRGB> >;
 template class Writer<VolumeRef<AimsRGBA> >;
+template class Writer<VolumeRef<AimsHSV> >;
 template class Writer<VolumeRef<Point3df> >;
 template class Writer<VolumeRef<Point3d> >;
 template class Writer<VolumeRef<AimsVector<float,6> > >;
@@ -195,6 +199,9 @@ template bool
 GenericWriter::write< AimsData<AimsRGBA> >( const AimsData<AimsRGBA> &, 
 					    bool, const string * );
 template bool 
+GenericWriter::write< AimsData<AimsHSV> >( const AimsData<AimsHSV> &, 
+					   bool, const string * );
+template bool 
 GenericWriter::write< AimsData<Point3df> >( const AimsData<Point3df> &, 
 					    bool, const string * );
 template bool 
@@ -251,6 +258,9 @@ GenericWriter::write< Volume<AimsRGB> >( const Volume<AimsRGB> &,
 template bool 
 GenericWriter::write< Volume<AimsRGBA> >( const Volume<AimsRGBA> &, 
                                           bool, const string * );
+template bool 
+GenericWriter::write< Volume<AimsHSV> >( const Volume<AimsHSV> &, 
+                                         bool, const string * );
 template bool 
 GenericWriter::write< Volume<Point3df> >( const Volume<Point3df> &, 
                                           bool, const string * );
