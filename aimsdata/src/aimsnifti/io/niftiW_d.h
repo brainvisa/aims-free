@@ -39,7 +39,7 @@
 #include <aims/def/settings.h>
 #include <aims/io/niftiheader.h>
 #include <aims/io/defaultItemW.h>
-#include <aims/io/spmW.h>
+#include <aims/io/fileFormat.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/ioexcept.h>
 #include <aims/resampling/motion.h>
@@ -148,10 +148,18 @@ namespace aims
     }
     if((ext == ".hdr") || (ext == ".img"))
     {
-      // if .img/.hdr, then say we use the Analyze format
-      SpmWriter<T> sw( name );
-      sw.write( thing );
-      return;
+      // if .img/.hdr, then say we use the Analyze format if it is available
+      FileFormat<AimsData<T> > *fmt
+        = FileFormatDictionary<AimsData<T> >::fileFormat( "SPM" );
+      if( fmt )
+        try
+        {
+          if( fmt->write( name, thing, false ) )
+            return;
+        }
+        catch( ... )
+        {
+        }
     }
 
     // std::cout << "This is NIFTI Writer: use at your own risk." << std::endl;
