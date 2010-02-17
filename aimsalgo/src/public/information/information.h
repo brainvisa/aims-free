@@ -47,9 +47,10 @@ float AimsCorrelationRatio( const AimsData<float>& p1,
 
 float AimsMeshDistance( const AimsData< float > & refMap,
                         const AimsSurfaceTriangle & testMesh,
-																								const Point3d  & dimImage,
-																								const Point3df & sizeVoxel,
-																								const float & maxDistanceMap,
-																								const int32_t & numVertices          );
+                        const Point3d  & dimImage,
+												const Point3df & sizeVoxel,
+												const float & maxDistanceMap,
+												const int32_t & numVertices,
+												const int16_t & dim          );
 #endif
 

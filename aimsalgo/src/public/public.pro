@@ -5,9 +5,10 @@ TARGET		= aimsalgopub${BUILDMODEEXT}
 
 INCBDIR = aims
 
-HEADERS= config/aimsalgopub_config.h		\
-		ffd/tabulSpline.h			\
-		information/information.h         \
+HEADERS=	\
+		config/aimsalgopub_config.h	\
+		ffd/tabulSpline.h	\
+		information/information.h	\
 		information/pdf.h                 \
 		math/math_g.h			\
 		math/balanc.h			\
@@ -92,10 +93,10 @@ HEADERS= config/aimsalgopub_config.h		\
 
 
 SOURCES = \
-                information/corratio.cc		       \
-		information/meshdistance.cc            \
-		information/mutual.cc		       \
 		ffd/tabulSpline.cc                \
+		information/corratio.cc		       \
+		information/meshdistance.cc \
+		information/mutual.cc		       \
 		information/pdf.cc		          \
 		math/balanc.cc			\
 		math/balbak.cc			\
