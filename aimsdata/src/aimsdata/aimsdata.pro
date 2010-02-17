@@ -184,6 +184,7 @@ HEADERS=  bucket/bucket_g.h	\
     utility/anytype_reader_details.h \
     utility/bininverse.h    \
     utility/boundingbox.h \
+    utility/channel.h \
     utility/converter_g.h    \
     utility/converter_bucket.h  \
     utility/converter_hsv.h  \
