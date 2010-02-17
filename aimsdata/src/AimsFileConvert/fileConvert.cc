@@ -123,6 +123,8 @@ FileConvert::FileConvert()
 		       &convert<AimsData<AimsRGB> > );
   registerProcessType( "Volume", "RGBA", 
 		       &convert<AimsData<AimsRGBA> > );
+  registerProcessType( "Volume", "HSV", 
+		       &convert<AimsData<AimsHSV> > );
   registerProcessType( "Volume", "POINT3DF", 
 		       &readAndWrite<AimsData<Point3df> > );
   registerProcessType( "Volume", "VECTOR_OF_3_SHORT", 
@@ -299,6 +301,7 @@ DataConverter<AimsData<T> >::DataConverter( AimsData<T> & dat,
   registerProcessType( "Volume", "DOUBLE", &convInternal<AimsData<double> > );
   registerProcessType( "Volume", "RGB", &convInternal<AimsData<AimsRGB> > );
   registerProcessType( "Volume", "RGBA", &convInternal<AimsData<AimsRGBA> > );
+  registerProcessType( "Volume", "HSV", &convInternal<AimsData<AimsHSV> > );
   registerProcessType( "Bucket", "VOID", &convInternal<BucketMap<Void> > );
   registerProcessType( "Bucket", "S16", &convInternal<BucketMap<int16_t> > );
 #else
@@ -322,6 +325,8 @@ DataConverter<AimsData<T> >::DataConverter( AimsData<T> & dat,
 		       &convData<AimsData<T>,AimsData<AimsRGB> > );
   registerProcessType( "Volume", "RGBA", 
 		       &convData<AimsData<T>,AimsData<AimsRGBA> > );
+  registerProcessType( "Volume", "HSV", 
+		       &convData<AimsData<T>,AimsData<AimsHSV> > );
   registerProcessType( "Bucket", "VOID", 
 		       &convData<AimsData<T>,BucketMap<Void> > );
   registerProcessType( "Bucket", "S16", 

@@ -47,6 +47,7 @@ HEADERS=  bucket/bucket_g.h	\
     graph/graphiterator.h	\
     graph/graphmanip.h		\
     graph/graphmanip_d.h	\
+    hsv/hsv.h                   \
     io/dbh.h			\
     io/aimsGraphR.h		\
     io/aimsGraphR_d.h		\
@@ -185,6 +186,7 @@ HEADERS=  bucket/bucket_g.h	\
     utility/boundingbox.h \
     utility/converter_g.h    \
     utility/converter_bucket.h  \
+    utility/converter_hsv.h  \
     utility/converter_rgb.h  \
     utility/converter_texture.h  \
     utility/converter_volume.h  \
