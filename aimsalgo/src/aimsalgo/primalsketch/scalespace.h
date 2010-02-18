@@ -215,14 +215,12 @@ namespace aims
             virtual ~ScaleSpace() {delete _smoother; delete _auxmesh; }
 
 
-            void GenerateDefaultScaleSpace(TimeTexture<float> &tex)
+            void uploadPreviouslyComputedScaleSpace(TimeTexture<float> &tex)
             {
 
                 float t=1.0;
                 int i=0;
-                std::cout << "Checking that the scale-space has more than just one texture..." << std::flush;
-                assert(tex.size()>1);
-                std::cout << "OK" << std::endl;
+
                 for (i = 1 ; i < tex.size() ; i++)
                 {
                 std::cout << "Adding scale " << t << std::flush;
