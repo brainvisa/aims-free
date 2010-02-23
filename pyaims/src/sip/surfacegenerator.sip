@@ -40,7 +40,7 @@ public:
   static AimsSurfaceTriangle* icosahedron( const Point3df &, float ) /Factory/;
   static AimsSurfaceTriangle* sphere( const carto::GenericObject & ) /Factory/;
   static AimsSurfaceTriangle* sphere( const Point3df &, float, 
-                                      unsigned ) /Factory/;
+                                      unsigned, bool=false ) /Factory/;
 };
 
 };

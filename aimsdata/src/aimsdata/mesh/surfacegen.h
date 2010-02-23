@@ -109,7 +109,8 @@ attributes = {
     static AimsSurfaceTriangle* 
     sphere( const carto::GenericObject & params );
     static AimsSurfaceTriangle* sphere( const Point3df & p1, float radius, 
-                                        unsigned nfacets );
+                                        unsigned nfacets,
+                                        bool uniquevertices = false );
   };
 
 }
