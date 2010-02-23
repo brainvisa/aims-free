@@ -250,12 +250,15 @@ namespace
                                            "parameter" ) );
     p[ "radius" ] = Object::value( string( "radius" ) );
     p[ "facets" ] = Object::value( string( "(optional) number of facets of " 
-                                           "the cone section. May also be " 
-                                           "specified as 'nfacets' parameter " 
-                                           "(default: 4)" ) );
-    p[ "smooth" ] = Object::value( string( "(optional) make smooth normals " 
+                                           "the sphere. May also be specified "
+                                           "as 'nfacets' parameter "
+                                           "(default: 225)" ) );
+/*    p[ "smooth" ] = Object::value( string( "(optional) make smooth normals "
                                            "and shared vertices (default: " 
-                                           "0)" ) );
+                                           "0)" ) );*/
+    p[ "uniquevertices" ] = Object::value( string( "(optional) if set to "
+                                           "1, the pole vertices are not "
+                                           "duplicated( default: 0)" ) );
     return d;
   }
 
@@ -920,7 +923,8 @@ SurfaceGenerator::sphere( const GenericObject & params )
   Object        vp1;
   float         radius;
   unsigned      nfacets = 15*15;
-  bool          smth = false;
+  bool          uniquevert = false;
+  // bool          smth = false;
 
   try
     { 
@@ -947,9 +951,17 @@ SurfaceGenerator::sphere( const GenericObject & params )
         }
     }
 
+//   try
+//     {
+//       smth = (bool) params.getProperty( "smooth" )->getScalar();
+//     }
+//   catch( exception & )
+//     {
+//     }
+
   try
     {
-      smth = (bool) params.getProperty( "smooth" )->getScalar();
+      uniquevert = (bool) params.getProperty( "uniquevertices" )->getScalar();
     }
   catch( exception & )
     {
@@ -961,21 +973,22 @@ SurfaceGenerator::sphere( const GenericObject & params )
   for( it=vp1->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
     p[i] = it->currentValue()->getScalar();
 
-  return sphere(p, radius, nfacets );
+  return sphere(p, radius, nfacets, uniquevert );
 }
 
 
 AimsSurfaceTriangle* 
 SurfaceGenerator::sphere( const Point3df & p1, float radius, 
-                                unsigned nfacets)
+                          unsigned nfacets, bool uniquevertices )
 {
-  int                           j = 0, nslices, ncircles;
+  int                           j = 0, k = 0, nslices, ncircles;
   float                         normZ, z, currentRadius, angle, angle2;
   AimsSurfaceTriangle           *mesh = new AimsSurfaceTriangle;
   AimsSurface<3,Void>           & s = (*mesh)[0];
   vector<Point3df>              & vert = s.vertex();
   vector<Point3df>              & norm = s.normal();
-  vector< AimsVector<uint,3> > & poly = s.polygon();
+  vector< AimsVector<uint,3> >  & poly = s.polygon();
+  bool                          singlevertex = false, genvertex = true;
 
   //Checking parameters
   nslices = ncircles = (int)sqrt((float)nfacets);
@@ -996,8 +1009,6 @@ SurfaceGenerator::sphere( const Point3df & p1, float radius,
   //No normals
   norm.clear();
 
-  j = 0;
-
   //Along the Z axis, one circle after the other
 
   angle2 = -M_PI/2; //From -M_PI/2 to M_PI/2
@@ -1014,12 +1025,48 @@ SurfaceGenerator::sphere( const Point3df & p1, float radius,
       //radius of the current circle
       currentRadius = radius*sqrt(1-normZ*normZ);
 
+      k = j + nslices;
+      if( uniquevertices )
+      {
+        genvertex = true;
+        if( v == 0 )
+        {
+          Point3df p( 0., 0., z );
+          vert.push_back(p + p1);
+          singlevertex = true;
+          genvertex = false;
+          k = 1;
+        }
+        else if( v == ncircles - 1 )
+        {
+          Point3df p( 0., 0., z );
+          vert.push_back(p + p1);
+          singlevertex = true;
+          genvertex = false;
+          break;
+        }
+        else
+        {
+          if( v == ncircles - 2 )
+            singlevertex = true;
+          else
+            singlevertex = false;
+          j = 1 + (v-1) * nslices;
+          k = j + nslices;
+        }
+      }
+      else
+        singlevertex = false;
+
       //Creating the circle
       angle = 0; // from 0 to 2*M_PI
       for(int u = 0; u < nslices; u++)
       {
-        Point3df p(currentRadius * cos(angle), currentRadius*sin(angle),z);
-        vert.push_back(p + p1);
+        if( genvertex )
+        {
+          Point3df p(currentRadius * cos(angle), currentRadius*sin(angle),z);
+          vert.push_back(p + p1);
+        }
 
         //Last circle, no need to make the triangles
         if(v+1 >= ncircles)
@@ -1032,18 +1079,54 @@ SurfaceGenerator::sphere( const Point3df & p1, float radius,
         if(u +1 >= nslices)//Last point of this circle : triangle between the
           // first and last points of the circle
         {
-          poly.push_back(AimsVector<uint,3>( j, j-nslices + 1,  j+nslices));
-          poly.push_back(AimsVector<uint,3>( j-nslices + 1,  j+1, j+nslices));
+          if( singlevertex )
+          {
+            if( v == 0 )
+            {
+              poly.push_back(AimsVector<uint,3>( 0, k-nslices + 1, k));
+              ++k;
+            }
+            else
+            {
+              poly.push_back(AimsVector<uint,3>( j, j-nslices + 1, k));
+              ++j;
+            }
+          }
+          else
+          {
+            poly.push_back(AimsVector<uint,3>( j, j-nslices + 1, k));
+            poly.push_back(AimsVector<uint,3>( j-nslices + 1,  j+1, k));
+            // next point
+            ++j;
+            ++k;
+          }
 
         }
         else
         {
-          poly.push_back(AimsVector<uint,3>(j, j+1, j+nslices ));
-          poly.push_back(AimsVector<uint,3>(j+1, j+nslices +1, j+nslices));
+          if( singlevertex )
+          {
+            if( v == 0 )
+            {
+              poly.push_back(AimsVector<uint,3>(0, k +1, k));
+              ++k;
+            }
+            else
+            {
+              poly.push_back(AimsVector<uint,3>(j, j+1, k ));
+              ++j;
+            }
+          }
+          else
+          {
+            poly.push_back(AimsVector<uint,3>(j, j+1, k ));
+            poly.push_back(AimsVector<uint,3>(j+1, k +1, k));
+            // next point
+            ++j;
+            ++k;
+          }
         }
 
-        // next point
-        j++;
 
         angle += 2*M_PI/(float)nslices;//updating the angle for the next point
         // of the circle
