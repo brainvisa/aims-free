@@ -446,7 +446,7 @@ namespace aims
             giiDataArray * da = gim->darray[nda];
             gifti_set_DA_defaults( da );
             da->intent = NIFTI_INTENT_TRIANGLE;
-            da->datatype = NIFTI_TYPE_UINT32;
+            da->datatype = NIFTI_TYPE_INT32;
             da->num_dim = 2;
             da->dims[0] = poly.size();
             da->dims[1] = D;
@@ -458,7 +458,7 @@ namespace aims
             da->nbyper = 4;
             gifti_alloc_DA_data( gim, &nda, 1 );
             unsigned i, j, n = poly.size();
-            unsigned *buf = reinterpret_cast<unsigned *>( da->data );
+            int *buf = reinterpret_cast<int *>( da->data );
             for( i=0; i<n; ++i )
               for( j=0; j<D; ++j )
                 buf[i*D+j] = poly[i][j];
