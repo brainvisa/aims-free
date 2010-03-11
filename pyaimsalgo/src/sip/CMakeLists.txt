@@ -33,7 +33,7 @@ BRAINVISA_ADD_SIP_PYTHON_MODULE( aimsalgosip
   SIP_INCLUDE "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}"
     "${PYAIMS_SOURCE_DIR}/src/sip"
   SIP_INSTALL "${AIMS_RELATIVE_SIP_DIRECTORY}" )
-target_link_libraries( aimsalgosip ${PYTHON_LIBRARIES} cartobase cartodata aimsdata aimsalgo pyaims )
+target_link_libraries( aimsalgosip "${PYTHON_LIBRARY}" cartobase cartodata aimsdata aimsalgo pyaims )
 add_dependencies( aimsalgosip ${headersTarget} )
 
 BRAINVISA_INSTALL( TARGETS aimsalgosip 
