@@ -32,8 +32,72 @@
  */
 
 /*
- *  Non elastic motion ( rotation + translation )
+ *  AFFINE 3-D transformations (Linear + Translation)
  */
+ 
+/* NOTE: the class motion has got real problem of CLARITY and IMPLEMENTATION.
+For example the order of specification of the attributes can change the
+resulting motion.
+At this stage of the code (11/03/2010, submitted by Thierry Delzescaux, Nicolas
+Souedet and Hugo Raguet), one must respect this order of specification to get
+the right motion:
+
+	Motion::
+		- create the motion
+		- first specify setRotationAffine
+		- then specify setTranslation
+		- one can then redo this process any time as long as we first specify
+setRotationAffine
+
+	DecomposedMotion::
+		- create the motion
+		- first specify setTranslation
+		- then specify transAffine
+		- it is then IMPOSSIBLE to reset the transformation because neither the
+setTranslation nor the transAffine methods resets the _translation attribute
+
+One way to address those problems (and several others, see methods below) would
+be to create the Affine::Motion class according to the following specifications:
+
+ # the motion, applied to a point P, should do an AFFINE transformation under
+the form
+	motion( P ) = C + A x ( P - C ) + T                            (1)
+where
+	A is the linear transformation, composition of rotation, scaling, shearing
+	C is the "center" of the linear transformation
+	T is the translation.
+	
+ # then, an AffineMotion should contain the following attributes:
+ 	_rotation (the equivalent of _rot in DecomposedMotion), 3x3 matrix
+ 	_scaling (equivalent in DecomposedMotion), 3x3 matrix
+ 	_shearing (equivalent in DecomposedMotion), 3x3 matrix
+ 	_translation (would contain only T), 3x1 vector
+ 	_center ( would contain C ), 3x1 vector
+ 	_linear ( would contain A = _rotation x _scaling x _shearing, i.e. the
+equivalent of the current _rotation attribute, whose name is highly confusing),
+3x3 matrix
+ 	_shift ( would contain t = C - A x C + T ), 3x1 vector
+ 
+ # by rewritting (1) as
+ 	motion( P ) = A x P + ( C - A x C + T ) = A x P + t            (2)
+we see that the method AffineMotion::transform corresponds the current
+Motion::transform, implementing P = _linear x P + _shift.
+The reason of the attributes _linear and _shift is a matter of optimization:
+each transformation require only 9 multiplications et 12 additions. Otherwise,
+computing directly the trnsformation as written in (1) will more than double
+the number of necessary operations.
+
+ # there must be methods which simply SETS the attributes _rotation, _scaling,
+_shearing, _translation, _center, BUT DO NOT CHANGE _linear and _shift, so it
+does not change the results of a transformation by this motion
+
+ # finally a method like "AffineMotion::updateTransformation" should update
+the attributes _linear and _shift so that the transformation (2) correctly
+computes (1) consistently with all attributes i.e. this methods do
+	_linear <- _rotation x _scaling x _shearing;
+	_shift <- _center - _linear x _center + _translation;
+
+*/
 #include <cstdlib>
 #include <aims/resampling/motion.h>
 #include <aims/resampling/quaternion.h>
@@ -439,6 +503,20 @@ bool Motion::isDirect() const
 
 //-----------------------------------------------------------------------------
 void Motion::setTranslation(Point3df t)
+/* NOTE: for the moment, in spite of its name, this method actually ADD t to the
+current translation ( _translation <- (_translation + t) ). This LONG and
+UNCLEAR code seems to be strictly equivalent to
+	  translation() += t;
+To be more relevent (and consistent with the name of the method), one should
+even use
+		translation() = t;
+however, it should be noted that for the moment, the informations about the
+center of transformations are contained in the _translation attribute (see for
+example Motion::setRotationAffine or DecomposedMotion::transAffine) so that
+ using this last form would reset the center of transformation to the origin
+(0,0,0).
+
+see NOTE, line 38. */
 {
   AimsData<float> THomogene(4,4), MotionHomogene(4,4);
 
@@ -478,10 +556,18 @@ void Motion::setTranslation(Point3df t)
   rotation()(2,2) = tmp(2,2);
 }
 
-
 //-----------------------------------------------------------------------------
 void Motion::setRotationAffine( float rx, float ry, float rz, 
                                 const Point3df &cg )
+/* NOTE: this method is UNCLEAR and SUBOPTIMAL.
+
+Currently this methid destroys any already specified translation.
+We could avoid this side effect with
+  translation().item(0) += tmp(3,0);
+  translation().item(1) += tmp(3,1);
+  translation().item(2) += tmp(3,2);
+in the current code but it would be better to follow specification in NOTE,
+line 38. */
 {
   
   AimsData<float> Rx = rotationaroundx(rx);
@@ -521,6 +607,8 @@ void Motion::setRotationAffine( float rx, float ry, float rz,
 
 //-----------------------------------------------------------------------------
 AimsData<float> Motion::rotationaroundx(float rx)
+/* this method return a 4-by-4 matrix, but a 3-by-3 matrix would be
+enough and better. see NOTE, line 38. */
 {
   AimsData<float> thing( 4,4 );
   thing = 0.0; thing(3,3) = 1.0;
@@ -543,10 +631,12 @@ AimsData<float> Motion::rotationaroundx(float rx)
 
 //-----------------------------------------------------------------------------
 AimsData<float> Motion::rotationaroundy(float ry)
+/* this method return a 4-by-4 matrix, but a 3-by-3 matrix would be
+enough and better. see NOTE, line 38. */
 {
   AimsData<float> thing( 4,4 );
   thing = 0.0; thing(3,3) = 1.0;
-  
+	
   double a = (double) ry / 180.0 * M_PI;
   thing(0,0) = (float) cos(a);
   thing(0,1) = 0.0;
@@ -565,10 +655,12 @@ AimsData<float> Motion::rotationaroundy(float ry)
 
 //-----------------------------------------------------------------------------
 AimsData<float> Motion::rotationaroundz(float rz)
+/* this method return a 4-by-4 matrix, but a 3-by-3 matrix would be
+enough and better. see NOTE, line 38. */
 {
   AimsData<float> thing( 4,4 );
   thing = 0.0; thing(3,3) = 1.0;
-  
+
   double a = (double) rz / 180.0 * M_PI;
   thing(0,0) = (float) cos(a);
   thing(0,1) = (float) sin(a);
@@ -959,119 +1051,49 @@ void DecomposedMotion::setScaling(float Sx, float Sy, float Sz )
 
 //-----------------------------------------------------------------------------
 void DecomposedMotion::setRotation(float Rx, float Ry, float Rz )
+/* this method sets uses 4-by-4 matrices, but 3-by-3 matrices would be
+enough and better. see NOTE, line 38. */
 {
   AimsData<float> rx = rotationaroundx(Rx);
   AimsData<float> ry = rotationaroundy(Ry);
   AimsData<float> rz = rotationaroundz(Rz);
-  rot() = rz.cross(ry.cross(rx));
+  AimsData<float> uselessMatrix_seeLine38( 4, 4 );
+  uselessMatrix_seeLine38 = rz.cross(ry.cross(rx));
+  for( int16_t i=0; i<3; i++ ){
+  	for( int16_t j=0; j<3; j++ ){
+			rot()( i, j ) = uselessMatrix_seeLine38( i, j );
+		}
+	}
 }
 
 //-----------------------------------------------------------------------------
-void DecomposedMotion::transAffine(Point3df cg) 
+void DecomposedMotion::transAffine(Point3df C) 
 {
-  AimsData<float> tmp_sc (4,4), tmp_sh (4,4), tmp_rt(4,4), mat (4,4);
+// given the rotation (R), scaling (Sc) and shearing (Sh) matrices,
+// given the translation (T), and given a center of transformation (C),
+// compute the resulting linear transformation (A) and the new translation (t),
+// such that the motion can be algebraicly described as, for any point P,
+// motion(P) = C + A x (P - C) + T = A x P + (C - A x C + T)
+//                                 = A x P +        t
+// where A = R x Sc x Sh
+// the method motion::transform actually uses the form A x P + t, such that
+// A is put in the _rotation attribute and t is in the _translation attribute,
+// in spite of those IMPROPER terms. see NOTE, line 38.
 
-  tmp_sc = 0.0;
-  tmp_sc (3,3) = 1.0;  
-  tmp_sc (0,0) = scaling() (0,0);
-  tmp_sc (0,1) = scaling() (1,0);
-  tmp_sc (0,2) = scaling() (2,0);
-  tmp_sc (1,0) = scaling() (0,1);
-  tmp_sc (1,1) = scaling() (1,1);
-  tmp_sc (1,2) = scaling() (2,1);
-  tmp_sc (2,0) = scaling() (0,2);
-  tmp_sc (2,1) = scaling() (1,2);
-  tmp_sc (2,2) = scaling() (2,2);
-
-//  cout<<"scale = "<<endl<<tmp_sc<<endl;
-
-  tmp_sh = 0.0;
-  tmp_sh (3,3) = 1.0;  
-  tmp_sh (0,0) = shearing() (0,0);
-  tmp_sh (0,1) = shearing() (1,0);
-  tmp_sh (0,2) = shearing() (2,0);
-  tmp_sh (1,0) = shearing() (0,1);
-  tmp_sh (1,1) = shearing() (1,1);
-  tmp_sh (1,2) = shearing() (2,1);
-  tmp_sh (2,0) = shearing() (0,2);
-  tmp_sh (2,1) = shearing() (1,2);
-  tmp_sh (2,2) = shearing() (2,2);
-
-//  cout<<"shearing = "<<endl<<tmp_sh<<endl;
-
-  tmp_rt = 0.0;
-  tmp_rt (3,3) = 1.0;  
-  tmp_rt (0,0) = rot() (0,0);
-  tmp_rt (0,1) = rot() (1,0);
-  tmp_rt (0,2) = rot() (2,0);
-  tmp_rt (1,0) = rot() (0,1);
-  tmp_rt (1,1) = rot() (1,1);
-  tmp_rt (1,2) = rot() (2,1);
-  tmp_rt (2,0) = rot() (0,2);
-  tmp_rt (2,1) = rot() (1,2);
-  tmp_rt (2,2) = rot() (2,2);
-
-
-//  cout<<"rot = "<<endl<<tmp_rt<<endl;
-
-
-  
-  mat = tmp_sh.cross(tmp_sc.cross(tmp_rt));
-
-
-//  cout<<"mat = "<<endl<<mat<<endl;
-
-
-  rotation()(0,0) = mat(0,0);
-  rotation()(0,1) = mat(1,0);
-  rotation()(0,2) = mat(2,0);
-  rotation()(1,0) = mat(0,1);
-  rotation()(1,1) = mat(1,1);
-  rotation()(1,2) = mat(2,1);
-  rotation()(2,0) = mat(0,2);
-  rotation()(2,1) = mat(1,2);
-  rotation()(2,2) = mat(2,2);
-
-  mat(0,0) = rotation()(0,0);
-  mat(0,1) = rotation()(0,1);
-  mat(0,2) = rotation()(0,2);
-  mat(1,0) = rotation()(1,0);
-  mat(1,1) = rotation()(1,1);
-  mat(1,2) = rotation()(1,2);
-  mat(2,0) = rotation()(2,0);
-  mat(2,1) = rotation()(2,1);
-  mat(2,2) = rotation()(2,2);
-
-
-  AimsData<float> T(4,4), Tmoins1(4,4);
-  T = 0.0; Tmoins1 = 0.0;
-
-  T(3,0) = -cg.item(0); Tmoins1(3,0) = cg.item(0);
-  T(3,1) = -cg.item(1); Tmoins1(3,1) = cg.item(1);
-  T(3,2) = -cg.item(2); Tmoins1(3,2) = cg.item(2);
-  T(0,0) = T(1,1) = T(2,2) = T(3, 3) = 1.0;
-  Tmoins1(0,0) = Tmoins1(1,1) = Tmoins1(2,2) = Tmoins1(3,3) = 1.0;
-  
-
-
-  AimsData<float> tmp = T.cross( mat.cross( Tmoins1 ) ); //Produit transpos
-
-/*  rotation()(0,0) = tmp(0,0);  //Transpo
-  rotation()(0,1) = tmp(1,0);
-  rotation()(0,2) = tmp(2,0);
-  rotation()(1,0) = tmp(0,1);
-  rotation()(1,1) = tmp(1,1);
-  rotation()(1,2) = tmp(2,1);
-  rotation()(2,0) = tmp(0,2);
-  rotation()(2,1) = tmp(1,2);
-  rotation()(2,2) = tmp(2,2);*/
-
-  translation().item(0) += tmp(3,0);
-  translation().item(1) += tmp(3,1);
-  translation().item(2) += tmp(3,2);
-
-}   
-
+	rotation() = _rot.cross( _scaling.cross( _shear ) );
+                   
+  translation().item(0) += C.item(0) - _rotation(0,0)*C.item(0)
+                                     - _rotation(0,1)*C.item(1)
+	                                   - _rotation(0,2)*C.item(2);
+																			
+  translation().item(1) += C.item(1) - _rotation(1,0)*C.item(0)
+                                     - _rotation(1,1)*C.item(1)
+	                                   - _rotation(1,2)*C.item(2);
+																			
+  translation().item(2) += C.item(2) - _rotation(2,0)*C.item(0)
+                                     - _rotation(2,1)*C.item(1)
+	                                   - _rotation(2,2)*C.item(2);
+}
 
 //-----------------------------------------------------------------------------
 namespace aims

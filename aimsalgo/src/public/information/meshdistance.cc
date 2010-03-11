@@ -36,6 +36,12 @@
 //  a binary image represented by its distance map
 //--------------------------------------------------
 
+// "merge" the mesh vertices in the distance map and average the distances
+// corresponding to the positions of those vertices.
+// NOTE: THE VERTICES OUTSIDE THE FIELD OF THE DISTANCE MAP ARE PENALIZED AS IF
+// THEY WERE AT A POINT OF MAXIMUM DISTANCE VALUE. best practice is to use a
+// distance map defined on a field wider than just the object bounding box
+
 #include <aims/data/data.h>
 #include <aims/mesh/surfaceOperation.h>
 
@@ -79,6 +85,7 @@ float AimsMeshDistance( const AimsData< float > & refMap,
 			}
 			if( outside ) {
 				score += maxDistanceMap; // penalize out of range positions
+				// or should we just skip them ? in that case, be careful to averaging
 			}
 			else {
 				for(int16_t pX = 0; pX < 2; pX++)
