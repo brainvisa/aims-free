@@ -37,6 +37,7 @@
 
 #include <cstdlib>
 #include <aims/resampling/quadraticresampler.h>
+#include <aims/utility/channel.h>
 
 template < class T >
 QuadraticResampler< T >::QuadraticResampler()
@@ -63,7 +64,6 @@ int QuadraticResampler< T >::getOrder() const
 
 }
 
-
 template < class T >
 double QuadraticResampler< T >::getBSplineWeight( int i, double x ) const
 {
@@ -85,6 +85,10 @@ double QuadraticResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
+
+// AimsRGB Specialization
+AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuadraticResampler, AimsRGB )
+AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuadraticResampler, AimsRGBA )
 
 #endif
 

@@ -79,6 +79,7 @@ HEADERS=	\
 		resampling/resampler_d.h		\
 		resampling/resamplerfactory.h		\
 		resampling/resamplerfactory_d.h	\
+		resampling/multichannelresampler.h	\
 		resampling/samplable.h	\
 		resampling/samplable_cone.h	\
 		resampling/samplable_sphere.h	\

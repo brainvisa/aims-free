@@ -37,6 +37,7 @@
 
 #include <cstdlib>
 #include <aims/resampling/seventhorderresampler.h>
+#include <aims/utility/channel.h>
 
 template < class T >
 SeventhOrderResampler< T >::SeventhOrderResampler()
@@ -109,6 +110,10 @@ double SeventhOrderResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
+
+// AimsRGB Specialization
+AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( SeventhOrderResampler, AimsRGB )
+AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( SeventhOrderResampler, AimsRGBA )
 
 #endif
 

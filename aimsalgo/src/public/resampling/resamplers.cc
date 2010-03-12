@@ -142,3 +142,10 @@ template class SixthOrderResampler<double>;
 template class SeventhOrderResampler<double>;
 template class ResamplerFactory<double>;
 
+template class Resampler<AimsRGB>;
+template class NearestNeighborResampler<AimsRGB>;
+template class ResamplerFactory<AimsRGB>;
+
+template class Resampler<AimsRGBA>;
+template class NearestNeighborResampler<AimsRGBA>;
+template class ResamplerFactory<AimsRGBA>;

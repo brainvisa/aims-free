@@ -36,6 +36,7 @@
 #define AIMS_RESAMPLING_QUINTICRESAMPLER_H
 
 #include <aims/resampling/splineresampler.h>
+#include <aims/resampling/multichannelresampler.h>
 
 template <class T>
 class QuinticResampler : public SplineResampler< T >
@@ -52,6 +53,8 @@ protected:
   double getBSplineWeight( int i, double x ) const;
 };
 
+AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( QuinticResampler, AimsRGB, 5 )
+AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( QuinticResampler, AimsRGBA, 5 )
 
 #endif
 
