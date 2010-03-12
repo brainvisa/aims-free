@@ -37,6 +37,7 @@
 
 #include <cstdlib>
 #include <aims/resampling/quarticresampler.h>
+#include <aims/utility/channel.h>
 
 template < class T >
 QuarticResampler< T >::QuarticResampler()
@@ -66,7 +67,6 @@ int QuarticResampler< T >::getOrder() const
   return 4;
 
 }
-
 
 template < class T >
 double QuarticResampler< T >::getBSplineWeight( int i, double x ) const
@@ -98,6 +98,10 @@ double QuarticResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
+
+// AimsRGB Specialization
+AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuarticResampler, AimsRGB )
+AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuarticResampler, AimsRGBA )
 
 #endif
 

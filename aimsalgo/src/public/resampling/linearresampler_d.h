@@ -37,6 +37,7 @@
 
 #include <cstdlib>
 #include <aims/resampling/linearresampler.h>
+#include <aims/utility/channel.h>
 
 template < class T >
 LinearResampler< T >::LinearResampler()
@@ -216,7 +217,6 @@ void LinearResampler< T >::doResample(
 
 }
 
-
 template < class T >
 double LinearResampler< T >::getBSplineWeight( int i, double x ) const
 {
@@ -226,6 +226,9 @@ double LinearResampler< T >::getBSplineWeight( int i, double x ) const
 
 }
 
+// AimsRGB Specialization
+AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGB )
+AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGBA )
 
 #endif
 

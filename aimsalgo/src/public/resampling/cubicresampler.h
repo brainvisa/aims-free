@@ -36,6 +36,7 @@
 #define AIMS_RESAMPLING_CUBICRESAMPLER_H
 
 #include <aims/resampling/splineresampler.h>
+#include <aims/resampling/multichannelresampler.h>
 
 template <class T>
 class CubicResampler : public SplineResampler< T >
@@ -52,6 +53,8 @@ protected:
   double getBSplineWeight( int i, double x ) const;
 };
 
+AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( CubicResampler, AimsRGB, 3 )
+AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( CubicResampler, AimsRGBA, 3 )
 
 #endif
 

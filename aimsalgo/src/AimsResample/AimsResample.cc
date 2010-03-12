@@ -153,6 +153,8 @@ Resamp::Resamp()
   registerProcessType( "Volume", "S16", &doit<int16_t> );
   registerProcessType( "Volume", "U8", &doit<uint8_t> );
   registerProcessType( "Volume", "FLOAT", &doit<float> );
+  registerProcessType( "Volume", "RGB", &doit<AimsRGB> );
+  registerProcessType( "Volume", "RGBA", &doit<AimsRGBA> );
 }
 
 
