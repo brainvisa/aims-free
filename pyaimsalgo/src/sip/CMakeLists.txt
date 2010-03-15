@@ -27,7 +27,7 @@ if( NOT _returnValue EQUAL 0 )
 endif( NOT _returnValue EQUAL 0 )
 
 BRAINVISA_ADD_SIP_PYTHON_MODULE( aimsalgosip
-  soma/aims
+  soma/aimsalgo
   "aimsalgo.sip"
   SIP_SOURCES ${_generatedSipFileList} ${_sipSources}
   SIP_INCLUDE "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}"
@@ -37,5 +37,5 @@ target_link_libraries( aimsalgosip "${PYTHON_LIBRARY}" cartobase cartodata aimsd
 add_dependencies( aimsalgosip ${headersTarget} )
 
 BRAINVISA_INSTALL( TARGETS aimsalgosip 
-                   DESTINATION python/soma/aims
+                   DESTINATION python/soma/aimsalgo
                    COMPONENT ${PROJECT_NAME} )
