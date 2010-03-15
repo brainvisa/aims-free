@@ -3,7 +3,6 @@ BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers pyaims headersTarget )
 add_library( pyaims SHARED ${_sources} )
 add_dependencies( pyaims ${headersTarget} )
 set_property( TARGET pyaims PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-message( "!!! PYTHON_LIBRARY: ${PYTHON_LIBRARY}" )
 target_link_libraries( pyaims aimsdata "${PYTHON_LIBRARY}" )
 BRAINVISA_INSTALL( TARGETS pyaims
               DESTINATION lib
