@@ -99,8 +99,8 @@ namespace aims
     const std::vector<Point3df> &p = vol.vertex();
     std::vector<Point3df>::const_iterator i;
     for (i = p.begin(); i != p.end(); i++)
-      os << "\t\t\t\t" << i->item(0) << ", " << i->item(1) << 
-        ", " << i->item(2) << ", " << std::endl;
+      os << "\t\t\t\t" << i->item(0) << " " << i->item(1) << 
+        " " << i->item(2) << "," << std::endl;
 
     os << "\t\t\t]\n\t\t}\n\n\t\tIndexedFaceSet {\n\t\tcoordIndex [\n";
     const std::vector< AimsVector<uint,3> >&k = vol.polygon();
