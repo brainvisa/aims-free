@@ -305,13 +305,9 @@ namespace aims
 		for ( j=0; j<dy; j++ )
 		  for ( i=0; i<dx; i++ )
 		    {
-/* 		      cout << "slope = " << slope << " & intercept = " << inter << endl ; */
-		      signal = (double)*sptr++ * slope + inter;
-		      
-/* 		      if ( signal <= min )  signal = 0.0; */
-/* 		      else if ( signal >= max )  signal = 255.0; */
-/* 		      else signal = ( signal - min ) * coef; */
-		      
+                      // Data is stored as int16_t so we must read it as int16_t otherwise 
+                      // signed values will be lost
+		      signal = ((double)(int16_t)*sptr++) * slope + inter;
 		      thing( i, j, slice, frame ) = (T)signal;
 		    }
 		

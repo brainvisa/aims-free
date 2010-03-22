@@ -10,6 +10,7 @@ HEADERS =			\
     io/dicomformat_d.h		\
     io/dicomheader.h		\
     io/dicomR.h			\
+    io/dicomW.h			\
     io/dicomfinderformat.h	\
     plugin/dicomplugin.h
 
