@@ -657,6 +657,27 @@ int DicomHeader::readFirst()
       setProperty( "nb_t_pos", (int)nbTempPos );
     }
 
+  double slope = 1.0;
+  double inter = 0.0;
+  Float64 gtmp;
+
+  if ( header.search( DCM_RescaleSlope, stack ) == EC_Normal )
+    {
+      ASSERT( stack.top()->ident() == EVR_DS );
+      DcmDecimalString *object = (DcmDecimalString *)stack.top();
+      object->getFloat64( gtmp );
+      slope = (double)gtmp;
+    }
+  
+  if ( header.search( DCM_RescaleIntercept, stack ) == EC_Normal )
+    {
+      ASSERT( stack.top()->ident() == EVR_DS );
+      DcmDecimalString *object = (DcmDecimalString *)stack.top();
+      object->getFloat64( gtmp );
+      inter = (double)gtmp;
+    }
+
+
   if ( header.search( DCM_BitsAllocated, stack ) == EC_Normal )
     {
       if( stack.top()->ident() != EVR_US ){
@@ -668,7 +689,14 @@ int DicomHeader::readFirst()
       object->getUint16( nbits );
       setProperty( "bits_allocated", (int)nbits );
 
-      if ( nbits == 16 )  setProperty( "data_type",  string( "S16" ) );
+      if ( (slope != 1.0) || (inter != 0.0) ) {
+        setProperty( "data_type",  string( "FLOAT" ) );
+        if ( nbits == 16 )  
+          setProperty( "disk_data_type",  string( "S16" ) );
+        else
+          setProperty( "disk_data_type",  string( "U8" ) );
+      }
+      else if ( nbits == 16 )  setProperty( "data_type",  string( "S16" ) );
       else setProperty( "data_type", string( "U8" ) );
     }
 
