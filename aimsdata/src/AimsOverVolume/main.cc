@@ -59,7 +59,7 @@ class OverVolumeProcess : public Process
                        int x0,
                        int y0,
                        int z0,
-                       int t0);
+                       int t0 );
 
     int dimX() const { return _dimX; }
     int dimY() const { return _dimY; }
@@ -116,6 +116,16 @@ bool OverVolumeDoIt(  Process& process, const string& fileNameIn,
   dataOut.setSizeZ( dataIn.sizeZ() );
   dataOut.setSizeT( dataIn.sizeT() );
 
+//   cout << "min=" << dataIn.minimum() << endl;
+  if ( dataIn.minimum() < 0 )  
+    {
+      dataOut = dataIn.minimum();
+    }
+  else 
+    {
+      dataOut = 0;
+    }
+
   ForEach4d( dataIn, x, y, z, t )
   {
 
@@ -154,8 +164,11 @@ OverVolumeProcess::OverVolumeProcess( const std::string& fileout,
 				      int z0,
 				      int t0 )
   : _fileout( fileout), _dimX(dimX), _dimY(dimY), _dimZ(dimZ), _dimT(dimT), 
-    _x0(x0), _y0(y0), _z0(z0), _t0(t0) 
+    _x0(x0), _y0(y0), _z0(z0), _t0(t0)
 {
+ 
+ registerProcessType( "Volume", "S8",
+		       &OverVolumeDoIt< AimsData< int8_t > > );
 
   registerProcessType( "Volume", "S16",
 		       &OverVolumeDoIt< AimsData< int16_t > > );
@@ -173,7 +186,7 @@ BEGIN_USAGE(usage)
   "AimsOverVolume       -i[nput] <filein>                                   ",
   "                     -o[utput] <fileout>                                 ",
   "                    [--x0 <x0> --y0 <y0> --z0 <z0> --t0 <t0> ]           ",
-  "                    --dx <dimx> --dy <dimy> --dz <dimz> --dt <dimT>       ",
+  "                    --dx <dimx> --dy <dimy> --dz <dimz> --dt <dimT>      ",
   "                    [-h[elp]]                                            ",
   "-------------------------------------------------------------------------",
   "Change the dimension of an image.                                         ",
@@ -204,10 +217,10 @@ int main(int argc, char **argv)
   { ' ',"dy"      ,AIMS_OPT_LONG  ,&dy        ,0                ,1},
   { ' ',"dz"      ,AIMS_OPT_LONG  ,&dz        ,0                ,1},
   { ' ',"dt"      ,AIMS_OPT_LONG  ,&dt        ,0                ,0},
-  { ' ',"x0"      ,AIMS_OPT_LONG ,&x0        ,0                ,0},
-  { ' ',"y0"      ,AIMS_OPT_LONG ,&y0        ,0                ,0},
-  { ' ',"z0"      ,AIMS_OPT_LONG ,&z0        ,0                ,0},
-  { ' ',"z0"      ,AIMS_OPT_LONG ,&t0        ,0                ,0},
+  { ' ',"x0"      ,AIMS_OPT_LONG  ,&x0        ,0                ,0},
+  { ' ',"y0"      ,AIMS_OPT_LONG  ,&y0        ,0                ,0},
+  { ' ',"z0"      ,AIMS_OPT_LONG  ,&z0        ,0                ,0},
+  { ' ',"z0"      ,AIMS_OPT_LONG  ,&t0        ,0                ,0},
   { 'i',"input"   ,AIMS_OPT_STRING,&filein    ,0                ,1},
   { 'o',"output"  ,AIMS_OPT_STRING,&fileout   ,0                ,1},
   { 0  ,0         ,AIMS_OPT_END   ,0          ,0                ,0}};
