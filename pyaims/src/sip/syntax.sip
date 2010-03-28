@@ -19,10 +19,11 @@ public:
 };
 
 
-//typedef std::map<std::string,carto::Semantic> Syntax;
+typedef std::map<std::string,carto::Semantic> Syntax;
+typedef std::map<std::string,carto::Syntax> SyntaxSet;
 
 
-class PySyntaxSet /PyName=SyntaxSet/
+class PySyntaxSet /PyName=PSyntaxSet/
 {
 %TypeHeaderCode
 #include <pyaims/object/object.h>
@@ -36,6 +37,37 @@ public:
 %MethodCode
   sipRes = &(*sipCpp)[ *a0 ][ *a1 ];
 %End
+
+  vector_STRING * keys() const /Factory/;
+%MethodCode
+  sipRes = new std::vector<std::string>;
+  sipRes->reserve( sipCpp->size() );
+  carto::SyntaxSet::const_iterator i, e = sipCpp->end();
+  for( i=sipCpp->begin(); i!=e; ++i )
+    sipRes->push_back( i->first );
+%End
+
+  vector_STRING * syntaxKeys( const std::string & ) const /Factory/;
+%MethodCode
+  sipRes = new std::vector<std::string>;
+  sipRes->reserve( sipCpp->size() );
+  carto::SyntaxSet::const_iterator i = sipCpp->find( *a0 );
+  if( i != sipCpp->end() )
+  {
+    const carto::Syntax & stx = i->second;
+    carto::Syntax::const_iterator is, es = stx.end();
+    for( is=stx.begin(); is!=es; ++is )
+      sipRes->push_back( is->first );
+  }
+%End
+
+/*
+//  std::map<std::string,carto::Syntax> * tomap() /Factory/;
+  std::map<std::string,carto::Syntax> * tomap();
+%MethodCode
+  sipRes = new SyntaxSet( *sipCpp );
+%End
+*/
 };
 
 
@@ -64,6 +96,9 @@ public:
     sipRes = 0;
   }
 %End
+
+
+  // carto::SyntaxSet* read() /Factory/;
 
 private:
   SyntaxReader( const carto::SyntaxReader & );

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -53,7 +54,8 @@ todo = { 'system' : [ 'Void' ],
          'map' :    [ ( 'std::string', x ) \
                       for x in basetypes + \
                       [ 'std::string', 'carto::Semantic' ]] +
-                      [('int', 'std::string')],
+                      [('int', 'std::string'),
+                       ( 'std::string', 'carto::Syntax' ) ],
          'rcptr' : [ 'AimsSurfaceTriangle', 'carto::GenericObject',
                      'AimsData<uint8_t>', 'AimsData<int16_t>',
                      'AimsData<uint16_t>', 'AimsData<int32_t>',

@@ -66,6 +66,7 @@ HEADERS=  bucket/bucket_g.h	\
     io/baseFormats_mesh.h	\
     io/baseFormats_mesh_d.h	\
     io/baseFormats_motion.h	\
+    io/baseFormats_syntax.h     \
     io/baseFormats_texture.h	\
     io/baseFormats_texture_d.h	\
     io/baseFormats_volume.h	\
@@ -273,6 +274,7 @@ SOURCES = \
     io/fileFormat_graph.cc    \
      io/baseFormats_hierarchy.cc  \
      io/fileFormat_hierarchy.cc  \
+    io/baseFormats_syntax.cc    \
     io/fileFormat_volume.cc    \
     io/fileFormat_volumeVec.cc  \
     io/writer.cc      \

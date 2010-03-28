@@ -37,18 +37,21 @@
 
 #include <aims/io/fileFormat_d.h>
 #include <aims/io/baseFormats_graph.h>
+#include <aims/io/baseFormats_syntax.h>
 #include <graph/graph/graph.h>
 
 
 using namespace aims;
 using namespace std;
+using namespace carto;
 
 namespace aims
 {
 
   // The following line is required for compilation on gcc 3.3
   template<> void FileFormatDictionary<Graph>::registerBaseFormats();
-
+  template<> void FileFormatDictionary<SyntaxSet>::registerBaseFormats();
+  
   template<> const map<string, list<string> >
   & FileFormatDictionary<Graph>::extensions()
   {
@@ -81,15 +84,28 @@ namespace aims
     _formats()[ "GraphVolume" ] = new GraphVolumeFormat;
   }
 
+
+  template<> void FileFormatDictionary<SyntaxSet>::registerBaseFormats()
+  {
+    vector<string>      ext;
+    ext.push_back( "stx" );
+    StxFormat           *af = new StxFormat;
+    registerFormat( "STX", af, ext );
+  }
+
 }
+
 
 template class FileFormatDictionary<Graph>;
 template class FileFormat<Graph>;
+template class FileFormatDictionary<SyntaxSet>;
+template class FileFormat<SyntaxSet>;
 
 
 static bool _graphdic()
 {
   FileFormatDictionary<Graph>::init();
+  FileFormatDictionary<SyntaxSet>::init();
   return true;
 }
 
