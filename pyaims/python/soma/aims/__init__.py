@@ -513,11 +513,17 @@ def __Motion__init__( self, *args ):
     self.fromMatrix( args[0] )
   else:
     self.__oldinit__( *args )
+def __Motion__header(self):
+  h=Motion.__oldheader__(self)
+  h.__motion=self
+  return h
 Motion.toMatrix = __toMatrix
 Motion.fromMatrix = __MotionFromMatrix
 Motion.__oldinit__ = Motion.__init__
 Motion.__init__ = __Motion__init__
-del __toMatrix, __MotionFromMatrix, __Motion__init__
+Motion.__oldheader__ = Motion.header
+Motion.header = __Motion__header
+del __toMatrix, __MotionFromMatrix, __Motion__init__, __Motion__header
 
 Motion.__repr__ = lambda self : __fixsipclasses__.fakerepr(self) + "\n"+str(self.toMatrix())
 Motion.__str__ = lambda self: self.toMatrix().__str__()
