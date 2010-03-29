@@ -339,7 +339,7 @@ void FdfHeader::read()
   }
 
   // Set properties
-  setProperty( "storage_to_memory", storagetomemory);
+  //setProperty( "storage_to_memory", storagetomemory);
   setProperty( "rank", rank );
   setProperty( "file_type", string( "FDF" ) );
   setProperty( "bits_allocated", bits_allocated );
