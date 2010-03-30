@@ -160,7 +160,7 @@ namespace aims
     size_t zoff = yoff * idims[1];
 //     size_t toff = zoff * idims[2];
 //     long offmax = (long) toff * data.dimT();
-    long offmax = (long) zoff * data.dimZ();
+    long offmax = (long) zoff * idims[ 2 ];
     long off;
     bool fail = false;
     int t2, nt = np._nt;
