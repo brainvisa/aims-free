@@ -73,3 +73,41 @@
 };
 
 
+%Exception carto::errno_error(std::runtime_error) /PyName=ErrnoError/
+{
+%TypeHeaderCode
+#include <cartobase/exception/errno.h>
+#include <string.h>
+%End
+%RaiseCode
+  const char *detail = sipExceptionRef.what();
+  SIP_BLOCK_THREADS
+  if( !detail )
+  {
+    char s[214] = "errno error: ";
+    strerror_r( errno, s+13, 200 );
+    PyErr_SetString(PyExc_RuntimeError, s );
+  }
+  else
+  {
+    PyErr_SetString(PyExc_RuntimeError, detail);
+  }
+  SIP_UNBLOCK_THREADS
+%End
+};
+
+
+%Exception carto::file_error(std::runtime_error) /PyName=FileError/
+{
+%TypeHeaderCode
+  #include <cartobase/exception/file.h>
+%End
+%RaiseCode
+  const char *detail = sipExceptionRef.what();
+  SIP_BLOCK_THREADS
+  PyErr_SetString(PyExc_IOError, detail);
+  SIP_UNBLOCK_THREADS
+%End
+};
+
+
