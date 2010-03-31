@@ -78,8 +78,12 @@ class SyntaxReader
 #include <pyaims/object/object.h>
 %End
 
+%TypeCode
+#include <cartobase/exception/file.h>
+%End
+
 public:
-  SyntaxReader( const std::string & );
+  SyntaxReader( const std::string & ) throw ( carto::file_error );
   virtual ~SyntaxReader();
   carto::PySyntaxSet *_read() /Factory, PyName=read/;
 %MethodCode
