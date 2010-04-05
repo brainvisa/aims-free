@@ -155,15 +155,15 @@ void FdfHeader::read()
               stringTo(value, rank);
           }
 
-          if (name == "spatial_rank") {
+          else if (name == "spatial_rank") {
               spatial_rank = value;
           }
 
-          if (name == "slices") {
+          else if (name == "slices") {
               stringTo(value, dimz);
           }
             
-          if (name == "matrix") {
+          else if (name == "matrix") {
               stringToVector(value, matrix);
 
               for(uint i=0; i < matrix.size(); i++) {
@@ -172,7 +172,7 @@ void FdfHeader::read()
               }
           }
 
-          if (name == "span") {
+          else if (name == "span") {
               stringToVector(value, span);
 
               if (!span.empty()) {
@@ -180,7 +180,7 @@ void FdfHeader::read()
               }
           }
 
-          if (name == "roi") {
+          else if (name == "roi") {
               stringToVector(value, roi);
 
               if (!roi.empty()) {
@@ -188,7 +188,7 @@ void FdfHeader::read()
               }
           }
 
-          if (name == "location") {
+          else if (name == "location") {
               stringToVector(value, location);
               if (!location.empty()) {
                 for (uint i=0; i < 3; i++) {
@@ -198,7 +198,7 @@ void FdfHeader::read()
               }
           }
 
-          if (name == "orientation"){
+          else if (name == "orientation"){
               stringToVector(value, orientation);
               if (!orientation.empty()) {
                 for (uint x=0; x < 3; x++)
@@ -210,7 +210,7 @@ void FdfHeader::read()
           }
 
           // Get the binary data type
-          if (name == "storage") {
+          else if (name == "storage") {
               storage = value;
 
               if (value == "double" ) {
@@ -256,23 +256,28 @@ void FdfHeader::read()
           }
 
           // Get the bits
-          if (name == "bits") {
+          else if (name == "bits") {
               stringTo(value, bits);
               istringstream is(bits);
               is >> bits_allocated;
           }
 
           // Get the bits order
-          if (name == "bigendian") {
+          else if (name == "bigendian") {
               stringTo(value, bigendian);
               istringstream is(bigendian);
               is >> byte_order;
           }
 
           // Get the checksum
-          if (name == "checksum") {
+          else if (name == "checksum") {
               stringTo(value, checksum);
           }
+
+          else
+            // failure on unrecognized token
+            throw invalid_format_error( "unknown tag " + name + "in FDF file",
+                                        _name );
 
       }
     }
@@ -312,6 +317,8 @@ void FdfHeader::read()
       break;
   }
 
+  if( dims.size() == 0 )
+    throw invalid_format_error( "no dimensions in FDF file", _name );
   if ( dims.size() > 0 ) {
     _dimX = dims[0];
   }
