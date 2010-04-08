@@ -67,6 +67,7 @@ FileFormatDictionary<AimsSurfaceTriangle>::registerBaseFormats()
   ext.clear();
 
   ext.push_back( "vrml" );
+  ext.push_back( "wrl" );
   Vrml1Format *fv = new Vrml1Format;
   registerFormat( "VRML1", fv, ext );
   ext.clear();
