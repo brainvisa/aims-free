@@ -469,6 +469,7 @@ int DicomHeader::readFirst()
 
   // allocate header
   DcmFileFormat header;
+  OFCondition dcmStatus;
 
   // read header
   null_streambuf	nsb;
@@ -708,8 +709,11 @@ int DicomHeader::readFirst()
       }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
       Float64 tr;
-      object->getFloat64( tr );
-      setProperty( "tr", (float)tr );
+      dcmStatus = object->getFloat64( tr );
+      if ( dcmStatus.good() )
+      {
+        setProperty( "tr", (float)tr );
+      }
     }
 
   if ( header.search( DCM_EchoTime, stack ) == EC_Normal )
@@ -720,8 +724,11 @@ int DicomHeader::readFirst()
       }
       DcmDecimalString *object = (DcmDecimalString *)stack.top();
       Float64 te;
-      object->getFloat64( te );
-      setProperty( "te", (float)te );
+      dcmStatus = object->getFloat64( te );
+      if ( dcmStatus.good() )
+      {
+        setProperty( "te", (float)te );
+      }
     }
 
   if ( header.search( DCM_FlipAngle, stack ) == EC_Normal )
