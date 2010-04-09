@@ -454,6 +454,10 @@ namespace aims
     }
     
     _current[ 0 ] = _current[ 1 ] = _current[ 2 ] = 0;
+    _lastPoint[ 0 ] = _data->dimX()-1;
+    _lastPoint[ 1 ] = _data->dimY()-1;
+    _lastPoint[ 2 ] = _data->dimZ()-1;
+
     if ( isValid() &&  ( _useLabel ? 
                          (*_data)( _current ) != (T) _label :
                          ! (*_data)( _current  ) ) ) next();
@@ -471,6 +475,10 @@ namespace aims
     _label = label;
     _useLabel = true;
     _current[ 0 ] = _current[ 1 ] = _current[ 2 ] = 0;
+    _lastPoint[ 0 ] = _data->dimX()-1;
+    _lastPoint[ 1 ] = _data->dimY()-1;
+    _lastPoint[ 2 ] = _data->dimZ()-1;
+
     if ( isValid() && (  (*_data)( _current ) != _label ) )
     { 
       next();
