@@ -148,6 +148,8 @@ namespace aims {
 carto::rc_ptr_RoiIterator getRoiIterator( std::string & );
 carto::rc_ptr_RoiIterator getRoiIterator( const Graph &data );
 carto::rc_ptr_RoiIterator getRoiIterator( const AimsData_S16 &data );
+
+carto::rc_ptr_MaskIterator getMaskIterator( std::string & );
 }; // namespace aims
 
 
