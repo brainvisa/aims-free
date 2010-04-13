@@ -274,15 +274,16 @@ void FdfHeader::read()
               stringTo(value, checksum);
           }
 
-          else
-            // failure on unrecognized token
-            throw invalid_format_error( "unknown tag " + name + "in FDF file",
-                                        _name );
-
       }
     }
     tokens.clear();
   }
+
+  if( ( matrix.size() == 0 ) || ( roi.size() == 0 ) )
+    throw wrong_format_error( _name );
+
+  if( matrix.size() > roi.size() )
+    throw invalid_format_error( "matrix and roi attributes in FDF file are not consistent", _name );
   
   // Process image resolution
   for(unsigned int i=0; i<matrix.size(); i++) {
@@ -319,6 +320,7 @@ void FdfHeader::read()
 
   if( dims.size() == 0 )
     throw invalid_format_error( "no dimensions in FDF file", _name );
+
   if ( dims.size() > 0 ) {
     _dimX = dims[0];
   }
