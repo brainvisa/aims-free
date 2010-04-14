@@ -239,5 +239,10 @@ Graph* LowLevelStandardArgReader::read( const string & filename,
       throw;
     }
 
-  return( g );
+  PythonHeader *ph = new PythonHeader;
+  Object pho( static_cast<GenericObject *>( ph ) );
+  ph->readMinf( filename + ".minf" );
+  g->copyProperties( pho );
+
+  return g;
 }

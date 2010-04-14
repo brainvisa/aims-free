@@ -34,6 +34,7 @@
 #include <aims/io/argW.h>
 #include <aims/def/path.h>
 #include <aims/io/aimsGraphW.h>
+#include <aims/data/pheader.h>
 #include <graph/graph/graph.h>
 #include <graph/graph/gwriter.h>
 #include <cartobase/object/sreader.h>
@@ -194,6 +195,39 @@ void LowLevelStandardArgWriter::write( const string & filename, Graph & g,
       cerr << e.what() << endl;
       throw;
     }
+
+  // make a .minf header
+  PythonHeader ph;
+  try
+  {
+    Object v = g.getProperty( "uuid" );
+    ph.setProperty( "uuid", v );
+  }
+  catch( ... )
+  {}
+  try
+  {
+    Object v = g.getProperty( "referential" );
+    ph.setProperty( "referential", v );
+  }
+  catch( ... )
+  {}
+  try
+  {
+    Object v = g.getProperty( "referentials" );
+    ph.setProperty( "referentials", v );
+  }
+  catch( ... )
+  {}
+  try
+  {
+    Object v = g.getProperty( "transformations" );
+    ph.setProperty( "transformations", v );
+  }
+  catch( ... )
+  {}
+  if( ph.size() > 0 )
+    ph.writeMinf( filename + ".minf" );
   //cout << "LowLevelStandardArgWriter done\n";
 }
 
