@@ -99,8 +99,8 @@ void FdfHeader::read()
   string spatial_rank, checksum, storage, bits, bigendian;
   vector<int> matrix, dims;
   vector<string> pt;
-  int typesize = 32, bits_allocated = 32, byte_swapping;
-  uint byte_order = 1;
+  int typesize = 32, bits_allocated = 32, byte_swapping = 0;
+  //uint byte_order = 1;
   int rank = 2, dimz = 1;
 
   // Parsing elements
@@ -155,15 +155,15 @@ void FdfHeader::read()
               stringTo(value, rank);
           }
 
-          if (name == "spatial_rank") {
+          else if (name == "spatial_rank") {
               spatial_rank = value;
           }
 
-          if (name == "slices") {
+          else if (name == "slices") {
               stringTo(value, dimz);
           }
             
-          if (name == "matrix") {
+          else if (name == "matrix") {
               stringToVector(value, matrix);
 
               for(uint i=0; i < matrix.size(); i++) {
@@ -172,7 +172,7 @@ void FdfHeader::read()
               }
           }
 
-          if (name == "span") {
+          else if (name == "span") {
               stringToVector(value, span);
 
               if (!span.empty()) {
@@ -180,7 +180,7 @@ void FdfHeader::read()
               }
           }
 
-          if (name == "roi") {
+          else if (name == "roi") {
               stringToVector(value, roi);
 
               if (!roi.empty()) {
@@ -188,7 +188,7 @@ void FdfHeader::read()
               }
           }
 
-          if (name == "location") {
+          else if (name == "location") {
               stringToVector(value, location);
               if (!location.empty()) {
                 for (uint i=0; i < 3; i++) {
@@ -198,7 +198,7 @@ void FdfHeader::read()
               }
           }
 
-          if (name == "orientation"){
+          else if (name == "orientation"){
               stringToVector(value, orientation);
               if (!orientation.empty()) {
                 for (uint x=0; x < 3; x++)
@@ -210,7 +210,7 @@ void FdfHeader::read()
           }
 
           // Get the binary data type
-          if (name == "storage") {
+          else if (name == "storage") {
               storage = value;
 
               if (value == "double" ) {
@@ -256,21 +256,21 @@ void FdfHeader::read()
           }
 
           // Get the bits
-          if (name == "bits") {
+          else if (name == "bits") {
               stringTo(value, bits);
               istringstream is(bits);
               is >> bits_allocated;
           }
 
           // Get the bits order
-          if (name == "bigendian") {
+          else if (name == "bigendian") {
               stringTo(value, bigendian);
               istringstream is(bigendian);
-              is >> byte_order;
+              is >> byte_swapping;
           }
 
           // Get the checksum
-          if (name == "checksum") {
+          else if (name == "checksum") {
               stringTo(value, checksum);
           }
 
@@ -278,6 +278,12 @@ void FdfHeader::read()
     }
     tokens.clear();
   }
+
+  if( ( matrix.size() == 0 ) || ( roi.size() == 0 ) )
+    throw wrong_format_error( _name );
+
+  if( matrix.size() > roi.size() )
+    throw invalid_format_error( "matrix and roi attributes in FDF file are not consistent", _name );
   
   // Process image resolution
   for(unsigned int i=0; i<matrix.size(); i++) {
@@ -312,6 +318,9 @@ void FdfHeader::read()
       break;
   }
 
+  if( dims.size() == 0 )
+    throw invalid_format_error( "no dimensions in FDF file", _name );
+
   if ( dims.size() > 0 ) {
     _dimX = dims[0];
   }
@@ -343,13 +352,6 @@ void FdfHeader::read()
   setProperty( "rank", rank );
   setProperty( "file_type", string( "FDF" ) );
   setProperty( "bits_allocated", bits_allocated );
-
-  if (byte_order) {
-    byte_swapping = stringToByteOrder( "DCBA" );
-  }
-  else {
-    byte_swapping = stringToByteOrder( "ABCD" );
-  }
   setProperty( "byte_swapping", byte_swapping );
   setProperty( "volume_dimension", dims );
   setProperty( "voxel_size", resolutions );
@@ -361,6 +363,9 @@ void FdfHeader::read()
   // add meta-info to header
   readProcPar( FileUtil::dirname( _name ) + FileUtil::separator() + "procpar" );
   readMinf( removeExtension( _name ) + extension() + ".minf" );
+
+  // check if rank have changed
+  rank = getProperty( "rank" )->getScalar();
 
   string pattern;
   if (rank < 3) {
