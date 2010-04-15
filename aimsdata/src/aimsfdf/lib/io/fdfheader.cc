@@ -99,8 +99,8 @@ void FdfHeader::read()
   string spatial_rank, checksum, storage, bits, bigendian;
   vector<int> matrix, dims;
   vector<string> pt;
-  int typesize = 32, bits_allocated = 32, byte_swapping;
-  uint byte_order = 1;
+  int typesize = 32, bits_allocated = 32, byte_swapping = 0;
+  //uint byte_order = 1;
   int rank = 2, dimz = 1;
 
   // Parsing elements
@@ -266,7 +266,7 @@ void FdfHeader::read()
           else if (name == "bigendian") {
               stringTo(value, bigendian);
               istringstream is(bigendian);
-              is >> byte_order;
+              is >> byte_swapping;
           }
 
           // Get the checksum
@@ -352,13 +352,6 @@ void FdfHeader::read()
   setProperty( "rank", rank );
   setProperty( "file_type", string( "FDF" ) );
   setProperty( "bits_allocated", bits_allocated );
-
-  if (byte_order) {
-    byte_swapping = stringToByteOrder( "DCBA" );
-  }
-  else {
-    byte_swapping = stringToByteOrder( "ABCD" );
-  }
   setProperty( "byte_swapping", byte_swapping );
   setProperty( "volume_dimension", dims );
   setProperty( "voxel_size", resolutions );
@@ -370,6 +363,9 @@ void FdfHeader::read()
   // add meta-info to header
   readProcPar( FileUtil::dirname( _name ) + FileUtil::separator() + "procpar" );
   readMinf( removeExtension( _name ) + extension() + ".minf" );
+
+  // check if rank have changed
+  rank = getProperty( "rank" )->getScalar();
 
   string pattern;
   if (rank < 3) {

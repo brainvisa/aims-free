@@ -97,24 +97,20 @@ namespace aims
       int borderWidth = 0;
       options->getProperty( "border", borderWidth );
 
-      // load the header of the first file
+      // Load the header of the first file
       std::auto_ptr<aims::FdfHeader> hdr
         = std::auto_ptr<aims::FdfHeader>( new aims::FdfHeader( _name ) );
       hdr->read();
 
-      int rank = 2;
-      hdr->getProperty( "rank", rank );
+      int rank = hdr->getProperty( "rank" )->getScalar();
 
       // check if data type is compatible with type T
-      int bits_allocated;
-
-      bool status;
-      status = hdr->getProperty( "bits_allocated", bits_allocated );
-      if ( status && ( bits_allocated / 8 ) > (int)sizeof( T ) )
+      int bits_allocated = hdr->getProperty( "bits_allocated" )->getScalar();
+      if ( ( bits_allocated / 8 ) > (int)sizeof( T ) )
       {
         throw carto::format_error( _name );
       }
-      
+
       string		dir = FileUtil::dirname( _name );
       vector<string>	files;
 
@@ -151,18 +147,18 @@ namespace aims
   template< class T > inline
     void FdfReader< T >::readFrame( AimsData< T >& thing, string filename, uint slice, const aims::FdfHeader *hdr )
     {
-
       std::vector< int > dims;
       hdr->getProperty( "volume_dimension", dims );
-
-      int bits_allocated;
-      hdr->getProperty( "bits_allocated", bits_allocated );
-
-      int byte_swapping;
-      hdr->getProperty( "byte_swapping", byte_swapping );
-
-      int rank;
-      hdr->getProperty( "rank", rank );
+      int bits_allocated = hdr->getProperty( "bits_allocated" )->getScalar();
+      int byte_swapping = hdr->getProperty( "byte_swapping" )->getScalar();
+      int rank = hdr->getProperty( "rank" )->getScalar();
+//       uint byte_order;
+//       if (byte_swapping) {
+//         byte_order = stringToByteOrder( "DCBA" );
+//       }
+//       else {
+//         byte_order = stringToByteOrder( "ABCD" );
+//       }
 
       uint pixels_number = 1;
 
@@ -189,7 +185,7 @@ namespace aims
       DefaultItemReader<T> itemr;
       ItemReader<T> *ir
         = itemr.reader( "binar",
-                         byte_swapping != AIMS_MAGIC_NUMBER );
+                         byte_swapping );
 
       if ((rank == 2) && (dims.size() > 2) && (dims[2] > 1)) {
          zstart = slice;
