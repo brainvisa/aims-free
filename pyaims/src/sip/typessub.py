@@ -29,19 +29,20 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
-def classInNamespace( include, cls, namespace ):
+def classInNamespace( include, cls, namespace, cppnamespace=None ):
+  if cppnamespace is None: cppnamespace = namespace
   return { 'typecode' : cls,
     'pyFromC' : 'pyaimsConvertFrom_' + namespace + '_' + cls,
     'CFromPy' : 'pyaimsConvertTo_' + namespace + '_' + cls,
-    'castFromSip' : '(' + namespace + '::' + cls + ' *)',
+    'castFromSip' : '(' + cppnamespace + '::' + cls + ' *)',
     'deref' : '*',
     'pyderef' : '*',
     'address' : '&', 
     'pyaddress' : '&', 
     'defScalar' : '',
-    'new' : 'new ' + namespace + '::' + cls, 
+    'new' : 'new ' + cppnamespace + '::' + cls,
     'NumType' : 'PyArray_OBJECT', 
-    'PyType' : namespace + '::' + cls,
+    'PyType' : cppnamespace + '::' + cls,
     'sipClass' : namespace + '_' + cls,
     'typeinclude' : \
     '#include <' + include + '>', 
@@ -1904,6 +1905,9 @@ typessub = { 'signed char' : \
                'compareElement' : '',
                },
 
+             'carto::PluginLoader::PluginFile' : \
+                classInNamespace( 'cartobase/plugin/plugin.h',
+                'PluginFile', 'carto_PluginLoader', 'carto::PluginLoader' ),
              }
 
 completeTypesSub( typessub )

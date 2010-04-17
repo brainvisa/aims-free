@@ -82,6 +82,8 @@ namespace carto
     struct PluginFile
     {
       PluginFile( const std::string & file, const std::string & ver = "" );
+      bool operator == ( const PluginFile & pf ) const
+      { return filename == pf.filename && version == pf.version; }
       std::string filename;
       std::string version;
       bool loaded;

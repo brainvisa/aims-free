@@ -116,13 +116,14 @@ public:
   else
   {
     int n;
-    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i ) {}
-    if( n >= a0 )
+    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i, ++n ) {}
+    if( i == e )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_IndexError, "std::list index out of range" );
     }
-    sipRes = %Template1pyFromC%( %Template1address% *i );
+    else
+      sipRes = %Template1pyFromC%( %Template1address% *i );
   }
 %End
 
@@ -140,13 +141,14 @@ public:
   else
   {
     int n;
-    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i ) {}
-    if( n >= a0 )
+    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i, ++n ) {}
+    if( i == e )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_IndexError, "std::list index out of range" );
     }
-  *i = %Template1deref%a1;
+    else
+      *i = %Template1deref%a1;
   }
 %End
 
@@ -224,13 +226,14 @@ public:
   else
   {
     int n;
-    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i ) {}
-    if( n >= a0 )
+    for( i=sipCpp->begin(), n=0; n<a0 && i!=e; ++i, ++n ) {}
+    if( i == e )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_IndexError, "std::list index out of range" );
     }
-    sipCpp->erase( i );
+    else
+      sipCpp->erase( i );
   }
 %End
 

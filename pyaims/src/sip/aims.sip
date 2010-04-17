@@ -63,6 +63,7 @@ carto::pyaims_init();
 %Include list_FLOAT.sip
 %Include list_DOUBLE.sip
 %Include list_STRING.sip
+%Include list_PluginFile.sip
 %Include map_STRING_STRING.sip
 %Include map_S32_STRING.sip
 
@@ -75,6 +76,7 @@ carto::pyaims_init();
 %Include aimsrgb.sip
 %Include getopt.sip
 %Include finder.sip
+%Include plugin.sip
 
 %Include syntax.sip
 /* %Include map_STRING_Semantic.sip
