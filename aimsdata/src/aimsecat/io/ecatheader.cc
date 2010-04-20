@@ -36,7 +36,6 @@
  */
 #include <aims/io/ecatheader.h>
 #include <aims/def/general.h>
-#include <aims/def/assert.h>
 #include <ecat+/io/io.h>
 #include <cartobase/exception/file.h>
 #include <vector>
@@ -180,7 +179,6 @@ void EcatHeader::read()
   UnifiedEcatInfo  *uei;
 
   //fileName = removeExtension(_name) + ".v";
-  //ASSERT((uei = EcatOpen((char*) fileName.c_str(), "r" )) != ECATSHFJ_FAIL );
   fileName = _name;   // .i, .v, .p are different ECAT volumes
   if( (uei = EcatOpen( const_cast<char*>( fileName.c_str() ),
     const_cast<char*>( "r" ) )) == ECATSHFJ_FAIL )
@@ -245,7 +243,7 @@ void EcatHeader::read()
   if (flag) _type = (int)ECAT_LABEL;
   else      _type = (int)ECAT_QUANT;
 
-  // Catégorie de données : Image Projection Sinogramme .....
+  // Catï¿½gorie de donnï¿½es : Image Projection Sinogramme .....
   setProperty("category", string(uei->category) );
 
   // 

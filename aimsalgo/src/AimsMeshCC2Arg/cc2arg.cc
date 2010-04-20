@@ -137,7 +137,8 @@ int main( int argc, char** argv )
   // read volume
   //
   Finder	f;
-  assert( f.check( volfile ) );
+  if( ! f.check( volfile ) )
+    throw logic_error( "Internal error: f.check( volfile )" );
   const PythonHeader 
     *hd = dynamic_cast<const PythonHeader *>( f.header() );
   if( !hd )

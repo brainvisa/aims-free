@@ -33,50 +33,50 @@
 
 #define private public // don't have time to augment the API for testing...
 #include <cartobase/uuid/uuid.h>
-#include <assert.h>
+#include <cartobase/exception/assert.h>
 
 
 int main()
 {
 
   carto::UUID uuid;
-  assert( uuid.isNull() );
+  ASSERT( uuid.isNull() );
   carto::UUID uuid1;
   uuid1.generate();
-  assert( !uuid1.isNull() );
+  ASSERT( !uuid1.isNull() );
 
 #if defined(__linux) || defined(__osf__) || defined(_WIN32)
 
-  assert( ( uuid1.data[ 10 ] & 0x80 ) == 0);
+  ASSERT( ( uuid1.data[ 10 ] & 0x80 ) == 0);
 
 #else
 
-  assert( ( uuid1.data[ 10 ] & 0x80 ) != 0);
+  ASSERT( ( uuid1.data[ 10 ] & 0x80 ) != 0);
 
 #endif
 
   carto::UUID uuid2;
   uuid2.generate();
-  assert( !uuid2.isNull() );
+  ASSERT( !uuid2.isNull() );
 
 #if defined(__linux) || defined(__osf__) || defined(_WIN32)
 
-  assert( ( uuid2.data[ 10 ] & 0x80 ) == 0);
+  ASSERT( ( uuid2.data[ 10 ] & 0x80 ) == 0);
 
 #else
 
-  assert( ( uuid2.data[ 10 ] & 0x80 ) != 0);
+  ASSERT( ( uuid2.data[ 10 ] & 0x80 ) != 0);
 
 #endif
 
-  assert( !( uuid1 == uuid2 ) );
+  ASSERT( !( uuid1 == uuid2 ) );
   std::string input( "1d827ae8-57ca-45bb-871d-c3e080495795" );
   carto::UUID uuid3( input );
   std::string output = uuid3.toString();
-  assert( input == output );
+  ASSERT( input == output );
   carto::UUID uuid4( uuid );
-  assert( uuid4 == uuid );
+  ASSERT( uuid4 == uuid );
   uuid1 = uuid;
-  assert( uuid1 == uuid );
+  ASSERT( uuid1 == uuid );
 
 }

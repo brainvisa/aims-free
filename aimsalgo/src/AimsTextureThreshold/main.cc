@@ -173,7 +173,8 @@ int main( int argc, char **argv )
     AimsError("AimsThreshold : bad mode" );
 
   Thresholder	proc( mode, fileout, t1, t2, binary );
-  assert( proc.execute( filein ) );
+  if( ! proc.execute( filein ) )
+    throw logic_error( "Internal error: execute failed" );
   cout << "done\n";
 
   return( EXIT_SUCCESS );

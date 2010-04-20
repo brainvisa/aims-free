@@ -55,7 +55,6 @@
 #include <aims/io/argheader.h>
 #include <aims/io/trmheader.h>
 #include <aims/io/byteswap.h>
-#include <aims/def/assert.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/cuifstream.h>
 #include <fstream>
@@ -420,7 +419,7 @@ bool FinderBckFormat::check( const string & filename, Finder & f ) const
 }
 
 
-// Yann // A vérifier et compléter
+// Yann // A vï¿½rifier et complï¿½ter
 bool FinderGraphFormat::check( const string & filename, Finder & f ) const
 {
   ArgHeader	*hdr = new ArgHeader( filename );

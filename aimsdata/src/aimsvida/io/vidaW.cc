@@ -145,7 +145,8 @@ void VidaWriter::write(const AimsData<float>& thing)
                 VIDA_X(vp)*sizeof(float));
          f_pt  += VIDA_X(vp);
        }
-       ASSERT(VidaWrite((char *)f_ima,slice,frame,vp) != -1);
+       if(VidaWrite((char *)f_ima,slice,frame,vp) == -1)
+        throw logic_error( "Internal error: write failed" );
      } 
    }
    delete[] f_ima;

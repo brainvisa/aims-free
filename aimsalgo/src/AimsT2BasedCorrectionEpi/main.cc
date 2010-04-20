@@ -35,7 +35,6 @@
 #include <cstdlib>
 #include "contextEPI.h"
 #include "interpolation.h"
-#include <aims/def/assert.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/data/data_g.h>
 #include <aims/io/io_g.h>

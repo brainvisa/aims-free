@@ -31,7 +31,6 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <aims/def/assert.h>
 #include <aims/def/general.h>
 #include <aims/io/ecatSinoheader.h>
 #include <aims/data/data.h>
@@ -68,7 +67,7 @@ void EcatSinoReader< short >::read( Sinogram<short>& sino,
   UnifiedEcatSinoInfo    *uesi;
   string             fileName;
   
-  // --------------------------------Initialisation du header propriétaire
+  // --------------------------------Initialisation du header propriï¿½taire
   EcatSinoHeader *hdr = new EcatSinoHeader( _name ); 
   try 
     { 
@@ -116,7 +115,7 @@ void EcatSinoReader< short >::read( Sinogram<short>& sino,
       else if ( multiType == EcatSinoHeader::MULTIFRAME )
 	frame = bedDataOrFrame + 1 ;
     }
-  // ici implémenter des itérateurs.
+  // ici implï¿½menter des itï¿½rateurs.
   int s;
   ForEach1d( (sino.start()), s)
     {
@@ -194,7 +193,7 @@ void EcatSinoReader< float >::read( Sinogram<float>& sino,
   UnifiedEcatSinoInfo    *uesi;
   string             fileName;
   
-  // --------------------------------Initialisation du header propriétaire
+  // --------------------------------Initialisation du header propriï¿½taire
   
   //cout << "continue  sino read ?" << endl ;
   //cin >> c ;
@@ -266,7 +265,7 @@ void EcatSinoReader< float >::read( Sinogram<float>& sino,
   
   //cout << "continue subHddr deleted ?" << endl ;
   //cin >> c ;
-  // ici implémenter des itérateurs.
+  // ici implï¿½menter des itï¿½rateurs.
   int s;
   //cout << "number of seg = " << sino.start().dimX() << endl ;
 

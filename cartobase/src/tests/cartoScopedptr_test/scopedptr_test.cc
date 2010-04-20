@@ -33,7 +33,7 @@
 
 #include <cartobase/smart/scopedptr.h>
 #include <iostream>
-#include <assert.h>
+#include <cartobase/exception/assert.h>
 
 
 int main() 
@@ -42,42 +42,42 @@ int main()
   std::cout << "testing scoped_ptr default constructor..." << std::endl;
   {
     carto::scoped_ptr<int> x1, x2;
-    assert( !x1 );
-    assert( !x2 );
-    assert( x1 == 0 );
-    assert( x2 == 0 );
-    assert( x1 == x2 );
+    ASSERT( !x1 );
+    ASSERT( !x2 );
+    ASSERT( x1 == 0 );
+    ASSERT( x2 == 0 );
+    ASSERT( x1 == x2 );
   }
 
   std::cout << "testing scoped_ptr constructor from pointer..." << std::endl;
   {
     carto::scoped_ptr<int> x1( new int );
     carto::scoped_ptr<int> x2( new int );
-    assert( x1 );
-    assert( x2 );
-    assert( x1 != 0 );
-    assert( x2 != 0 );
-    assert( x1 != x2 );
+    ASSERT( x1 );
+    ASSERT( x2 );
+    ASSERT( x1 != 0 );
+    ASSERT( x2 != 0 );
+    ASSERT( x1 != x2 );
   }
 
   std::cout << "testing scoped_ptr constructor from auto_ptr..." << std::endl;
   {
     std::auto_ptr<int> x1( new int );
-    assert( x1.get() != 0 );
+    ASSERT( x1.get() != 0 );
     {
       carto::scoped_ptr<int> x2( x1 );
-      assert( x1.get() == 0 );
-      assert( x2 != 0 );
+      ASSERT( x1.get() == 0 );
+      ASSERT( x2 != 0 );
     }
   }
 
   std::cout << "testing scoped_ptr::reset()..." << std::endl;
   {
     carto::scoped_ptr<int> x1;
-    assert( x1 == 0 );
+    ASSERT( x1 == 0 );
     x1.reset( new int );
-    assert( x1 != 0 );
+    ASSERT( x1 != 0 );
     x1.reset();
-    assert( x1 == 0 );
+    ASSERT( x1 == 0 );
   }
 }

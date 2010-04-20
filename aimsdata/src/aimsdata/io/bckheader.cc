@@ -34,7 +34,6 @@
 /*
  *  Bucket header class members
  */
-#include <aims/def/assert.h>
 #include <aims/io/bckheader.h>
 #include <aims/def/general.h>
 #include <aims/io/defaultItemR.h>

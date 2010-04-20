@@ -36,7 +36,6 @@
 #include <aims/io/niftilib/nifti1_io.h>
 #include <aims/io/byteswap.h>
 #include <aims/def/general.h>
-#include <aims/def/assert.h>
 #include <aims/def/settings.h>
 #include <aims/resampling/standardreferentials.h>
 #include <aims/resampling/motion.h>

@@ -41,7 +41,6 @@
 #include <aims/io/defaultItemR.h>
 #include <aims/io/spmheader.h>
 #include <aims/utility/flip.h>
-#include <aims/def/assert.h>
 #include <aims/resampling/motion.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
@@ -90,8 +89,10 @@ namespace aims
 
     std::vector<int>	dims;
     std::vector<float>	vs;
-    ASSERT( hdr->getProperty( "volume_dimension", dims ) );
-    ASSERT( hdr->getProperty( "voxel_size", vs ) );
+    if( ! hdr->getProperty( "volume_dimension", dims ) )
+      throw std::logic_error( "Internal error: getProperty volume_dimension failed" );
+    if( ! hdr->getProperty( "voxel_size", vs ) )
+      throw std::logic_error( "Internal error: getProperty voxel_size failed" );
 
     int	frame = -1, border = 0;
     options->getProperty( "frame", frame );

@@ -40,7 +40,6 @@
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/datasource/streamdatasource.h>
 #include <iostream>
-#include <assert.h>
 
 using namespace std;
 using namespace carto;

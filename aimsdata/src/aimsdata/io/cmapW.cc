@@ -37,7 +37,6 @@
 #include <aims/io/cmapW.h>
 #include <aims/color/colormap.h>
 using aims::ColorMap;
-#include <aims/def/assert.h>
 #include <iomanip>
 
 using namespace std;

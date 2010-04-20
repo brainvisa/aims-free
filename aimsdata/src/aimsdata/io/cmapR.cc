@@ -38,7 +38,6 @@
 #include <aims/io/cmapR.h>
 #include <aims/color/colormap.h>
 #include <aims/def/assert.h>
-#include <assert.h>
 
 using namespace aims;
 using namespace std;
@@ -82,7 +81,7 @@ void AimsColorMapReader::read( ColorMap& thing )
   int tp;
 
   _is >> tmp;
-  assert( tmp == "Red" );
+  ASSERT( tmp == "Red" );
   for ( n = 0; n < size; n++ )
   {
     _is >> tp;
@@ -90,7 +89,7 @@ void AimsColorMapReader::read( ColorMap& thing )
   }
 
   _is >> tmp;
-  assert( tmp == "Green" );
+  ASSERT( tmp == "Green" );
   for ( n = 0; n < size; n++ )
   {
     _is >> tp;
@@ -98,7 +97,7 @@ void AimsColorMapReader::read( ColorMap& thing )
   }
 
   _is >> tmp;
-  assert( tmp == "Blue" );
+  ASSERT( tmp == "Blue" );
   for ( n = 0; n < size; n++ )
   {
     _is >> tp;

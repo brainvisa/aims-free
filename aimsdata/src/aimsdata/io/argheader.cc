@@ -31,7 +31,6 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <aims/def/assert.h>
 #include <aims/io/argheader.h>
 #include <aims/def/general.h>
 #include <aims/io/defaultItemR.h>
@@ -119,7 +118,7 @@ void ArgHeader::write()
   if( !os )
     io_error::launchErrnoExcept( fileName );
 
-// Yann // A vérifier et compléter
+// Yann // A vï¿½rifier et complï¿½ter
 
   // write meta-info header
   setProperty( "file_type", string( "ARG" ) );

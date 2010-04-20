@@ -37,7 +37,6 @@
 
 #include <cartobase/object/achecker.h>
 #include <cartobase/object/syntobject.h>
-#include <assert.h>
 
 using namespace carto;
 using namespace std;

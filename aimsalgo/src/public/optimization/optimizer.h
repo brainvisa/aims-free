@@ -37,7 +37,6 @@
 
 #include <aims/math/mathelem.h>
 #include <aims/vector/vector.h>
-#include <aims/def/assert.h>
 #include <aims/optimization/objective.h>
 #include <cartobase/object/attributed.h>
 

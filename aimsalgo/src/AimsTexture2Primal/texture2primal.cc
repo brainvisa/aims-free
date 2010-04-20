@@ -227,9 +227,11 @@ int main( int argc, char** argv )
   cout << "reading triangulation   : " << flush;
   AimsSurfaceTriangle surface,inflate_surface;
   Reader<AimsSurfaceTriangle>	surfaceR( meshfile );
-  assert( surfaceR.read( surface ) );
+  if( ! surfaceR.read( surface ) )
+    throw logic_error( "Internal error: read failed" );
   Reader<AimsSurfaceTriangle>	surfaceRF( inflate_meshfile );
-  assert( surfaceRF.read( inflate_surface ) );
+  if( ! surfaceRF.read( inflate_surface ) )
+    throw logic_error( "Internal error: read failed" );
   cout << "done" << endl;
 
  
@@ -238,14 +240,17 @@ int main( int argc, char** argv )
   //
   cout << "reading volume info\n";
   Finder	f;
-  assert( f.check( volfile ) );
+  if( ! f.check( volfile ) )
+    throw logic_error( "Internal error: check failed" );
   const PythonHeader	*hd 
   = dynamic_cast<const PythonHeader *>( f.header() );
   assert( hd );
   vector<float>	vs;
   vector<int>	bbmin, bbmax;
-  assert( hd->getProperty( "voxel_size", vs ) );
-  assert( hd->getProperty( "volume_dimension", bbmax ) );
+  if( ! hd->getProperty( "voxel_size", vs ) )
+    throw logic_error( "Internal error: getProperty failed" );
+  if( ! hd->getProperty( "volume_dimension", bbmax ) )
+    throw logic_error( "Internal error: getProperty failed" );
   cout << "voxel size : " << vs[0] << ", " << vs[1] << ", " << vs[2] << endl;
   g.setProperty( "voxel_size", vs );
   bbmin.push_back( 0 );

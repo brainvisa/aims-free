@@ -59,7 +59,6 @@
 #include <functional>
 #include <set>
 #include <stdexcept>
-#include <assert.h>
 
 
 //=============================================================================

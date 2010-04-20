@@ -32,7 +32,7 @@
  */
 
 #include <cartobase/smart/rcptrtrick.h>
-#include <assert.h>
+#include <cartobase/exception/assert.h>
 #include <list>
 
 using namespace carto;
@@ -55,17 +55,17 @@ int main( int, char** )
     Toto  *obj = new Toto;
     cout << "no ref. canDel: " << obj->testDeletable() << " (should be false)"
         << endl;
-    assert( !obj->testDeletable() );
+    ASSERT( !obj->testDeletable() );
     rc_ptr<Toto> *sp = new rc_ptr<Toto>( obj );
     cout << "strong ref. testDeletable: " << obj->testDeletable() << endl;
-    assert( !obj->testDeletable() );
+    ASSERT( !obj->testDeletable() );
     weak_shared_ptr<Toto> *wsp = new weak_shared_ptr<Toto>( obj );
     cout << "+weak shared ref. testDeletable: " << obj->testDeletable()
         << endl;
-    assert( !obj->testDeletable() );
+    ASSERT( !obj->testDeletable() );
     delete sp;
     cout << "-strong ref. testDeletable: " << obj->testDeletable() << endl;
-    assert( obj->testDeletable() );
+    ASSERT( obj->testDeletable() );
     delete wsp;
     cout << "-weak shared ref. obj should be destroyed." << endl;
 
@@ -85,7 +85,7 @@ int main( int, char** )
     cout << "shared ptr:" << wsp2->get() << endl;
     sp = new rc_ptr<Toto>( obj );
     cout << "+strong.\n";
-    assert( !obj->tryDelete() );
+    ASSERT( !obj->tryDelete() );
     // cout << "deletion forced.\n";
     cout << "weak ptr:" << wp->get() << endl;
     cout << "shared ptr:" << wsp2->get() << endl;
@@ -101,10 +101,10 @@ int main( int, char** )
     obj = new Toto;
     wsp2 = new weak_shared_ptr<Toto>( obj );
     cout << "+weak_shared\n";
-    assert( obj->tryDelete() );
+    ASSERT( obj->tryDelete() );
     cout << "tryDelete done - obj should be destroyed.\n";
     cout << "weak_shared ptr (sould be null): " << wsp2->get() << endl;
-    assert( !wsp2->get() );
+    ASSERT( !wsp2->get() );
     delete wsp2;
     cout << "-weak_shared\n";
   }
@@ -115,15 +115,15 @@ int main( int, char** )
     shared_ptr<Toto> *sp = new shared_ptr<Toto>( shared_ptr<Toto>::Strong,
         obj );
     cout << "strong ref. testDeletable: " << obj->testDeletable() << endl;
-    assert( !obj->testDeletable() );
+    ASSERT( !obj->testDeletable() );
     shared_ptr<Toto> *wsp = new shared_ptr<Toto>( shared_ptr<Toto>::WeakShared,
         obj );
     cout << "+weak shared ref. testDeletable: " << obj->testDeletable()
         << endl;
-    assert( !obj->testDeletable() );
+    ASSERT( !obj->testDeletable() );
     delete sp;
     cout << "-strong ref. testDeletable: " << obj->testDeletable() << endl;
-    assert( obj->testDeletable() );
+    ASSERT( obj->testDeletable() );
     delete wsp;
     cout << "-weak shared ref. obj should be destroyed." << endl;
 
@@ -144,7 +144,7 @@ int main( int, char** )
     cout << "shared ptr:" << wsp2->get() << endl;
     sp = new shared_ptr<Toto>( shared_ptr<Toto>::Strong, obj );
     cout << "+strong.\n";
-    assert( !obj->tryDelete() );
+    ASSERT( !obj->tryDelete() );
     // cout << "deletion forced.\n";
     cout << "weak ptr:" << wp->get() << endl;
     cout << "shared ptr:" << wsp2->get() << endl;
@@ -160,10 +160,10 @@ int main( int, char** )
     obj = new Toto;
     wsp2 = new shared_ptr<Toto>( shared_ptr<Toto>::WeakShared, obj );
     cout << "+weak_shared\n";
-    assert( obj->tryDelete() );
+    ASSERT( obj->tryDelete() );
     cout << "tryDelete done - obj should be destroyed.\n";
     cout << "weak_shared ptr (sould be null): " << wsp2->get() << endl;
-    assert( !wsp2->get() );
+    ASSERT( !wsp2->get() );
     delete wsp2;
     cout << "-weak_shared\n";
   }

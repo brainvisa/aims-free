@@ -39,7 +39,6 @@
 
 #include <fstream>
 #include <string>
-#include <aims/def/assert.h>
 #include <aims/io/defaultItemW.h>
 #include <aims/resampling/motion.h>
 

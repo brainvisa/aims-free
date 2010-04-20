@@ -87,7 +87,8 @@ string DicomHeader::name() const
 int DicomHeader::dimX() const
 {
   vector< int > vd;
-  ASSERT( getProperty("volume_dimension", vd) );
+  if( !getProperty("volume_dimension", vd) )
+    throw logic_error( "Internal error: getProperty volume_dimension failed" );
 
   return( vd[0] );
 }
@@ -95,7 +96,8 @@ int DicomHeader::dimX() const
 int DicomHeader::dimY() const
 {
   vector< int > vd;
-  ASSERT( getProperty("volume_dimension", vd) );
+  if( ! getProperty("volume_dimension", vd) )
+    throw logic_error( "Internal error: getProperty volume_dimension failed" );
 
   return( vd[1] );
 }
@@ -103,7 +105,8 @@ int DicomHeader::dimY() const
 int DicomHeader::dimZ() const
 {
   vector< int > vd;
-  ASSERT( getProperty("volume_dimension", vd) );
+  if( ! getProperty("volume_dimension", vd) )
+    throw logic_error( "Internal error: getProperty volume_dimension failed" );
 
   return( vd[2] );
 }
@@ -111,7 +114,8 @@ int DicomHeader::dimZ() const
 int DicomHeader::dimT() const
 {
   vector< int > vd;
-  ASSERT( getProperty("volume_dimension", vd) );
+  if( ! getProperty("volume_dimension", vd) )
+    throw logic_error( "Internal error: getProperty volume_dimension failed" );
 
   return( vd[3] );
 }
@@ -119,7 +123,8 @@ int DicomHeader::dimT() const
 float DicomHeader::sizeX() const
 {
   vector< float > vs;
-  ASSERT( getProperty("voxel_size", vs) );
+  if( ! getProperty("voxel_size", vs) )
+    throw logic_error( "Internal error: getProperty voxel_size failed" );
 
   return( vs[0] );
 }
@@ -127,7 +132,8 @@ float DicomHeader::sizeX() const
 float DicomHeader::sizeY() const
 {
   vector< float > vs;
-  ASSERT( getProperty("voxel_size", vs) );
+  if( ! getProperty("voxel_size", vs) )
+    throw logic_error( "Internal error: getProperty voxel_size failed" );
 
   return( vs[1] );
 }
@@ -135,7 +141,8 @@ float DicomHeader::sizeY() const
 float DicomHeader::sizeZ() const
 {
   vector< float > vs;
-  ASSERT( getProperty("voxel_size", vs) );
+  if( ! getProperty("voxel_size", vs) )
+    throw logic_error( "Internal error: getProperty voxel_size failed" );
 
   return( vs[2] );
 }
@@ -143,7 +150,8 @@ float DicomHeader::sizeZ() const
 float DicomHeader::sizeT() const
 {
   float tr;
-  ASSERT( getProperty( "tr", tr ) );
+  if( ! getProperty( "tr", tr ) )
+    throw logic_error( "Internal error: getProperty tr failed" );
 
   return( tr );
 }

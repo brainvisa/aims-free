@@ -128,7 +128,8 @@ int main( int argc, char **argv )
     }
 
   Writer<AimsData<int16_t> > dataW( fileDist );
-  assert( dataW.write( data ) );
+  if( ! dataW.write( data ) )
+    throw logic_error( "Internal error: write failed" );
 
   return EXIT_SUCCESS;
 }

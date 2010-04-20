@@ -34,7 +34,7 @@
 #include <cstdlib>
 #include <cartobase/object/object_d.h>
 #include <cartobase/object/property.h>
-#include <assert.h>
+#include <cartobase/exception/assert.h>
 #include <cstdlib>
 #include <iostream>
 #include <cartobase/stream/sstream.h>
@@ -82,112 +82,112 @@ int main()
 {
   try {
     Object object;
-    assert( object.isNull() );
+    ASSERT( object.isNull() );
     
     // Test ValueObject creation and value access
     cout << "ValueObject test..." << endl;
     uint8_t u8 = 8;
     object = Object::value( u8 );
-    assert( object->type() == DataTypeCode<uint8_t>::name() );
-    assert( object->value<uint8_t>() == 8 );
+    ASSERT( object->type() == DataTypeCode<uint8_t>::name() );
+    ASSERT( object->value<uint8_t>() == 8 );
     
     int8_t s8 = -8;
     object = Object::value( s8 );
-    assert( object->type() == DataTypeCode<int8_t>::name() );
-    assert( object->value<int8_t>() == -8 );
+    ASSERT( object->type() == DataTypeCode<int8_t>::name() );
+    ASSERT( object->value<int8_t>() == -8 );
     
     uint16_t u16 = 16;
     object = Object::value( u16 );
-    assert( object->type() == DataTypeCode<uint16_t>::name() );
-    assert( object->value<uint16_t>() == 16 );
+    ASSERT( object->type() == DataTypeCode<uint16_t>::name() );
+    ASSERT( object->value<uint16_t>() == 16 );
     
     int16_t s16 = -16;
     object = Object::value( s16 );
-    assert( object->type() == DataTypeCode<int16_t>::name() );
-    assert( object->value<int16_t>() == -16 );
+    ASSERT( object->type() == DataTypeCode<int16_t>::name() );
+    ASSERT( object->value<int16_t>() == -16 );
     
     uint32_t u32 = 32;
     object = Object::value( u32 );
-    assert( object->type() == DataTypeCode<uint32_t>::name() );
-    assert( object->value<uint32_t>() == 32 );
+    ASSERT( object->type() == DataTypeCode<uint32_t>::name() );
+    ASSERT( object->value<uint32_t>() == 32 );
     
     int32_t s32 = -32;
     object = Object::value( s32 );
-    assert( object->type() == DataTypeCode<int32_t>::name() );
-    assert( object->value<int32_t>() == -32 );
+    ASSERT( object->type() == DataTypeCode<int32_t>::name() );
+    ASSERT( object->value<int32_t>() == -32 );
     
     float f = 1.2F;
     object = Object::value( f );
-    assert( object->type() == DataTypeCode<float>::name() );
-    assert( object->value<float>() == 1.2F );
+    ASSERT( object->type() == DataTypeCode<float>::name() );
+    ASSERT( object->value<float>() == 1.2F );
     
     double d = 3.4;
     object = Object::value( d );
-    assert( object->type() == DataTypeCode<double>::name() );
-    assert( object->value<double>() == 3.4 );
+    ASSERT( object->type() == DataTypeCode<double>::name() );
+    ASSERT( object->value<double>() == 3.4 );
     
     string s = "content";
     object = Object::value( s );
-    assert( object->type() == DataTypeCode<string>::name() );
-    assert( object->value<string>() == "content" );
+    ASSERT( object->type() == DataTypeCode<string>::name() );
+    ASSERT( object->value<string>() == "content" );
     cout << "OK." << endl;
 
     // Test ReferenceObject creation, value access and value modification
 
     cout << "ReferenceObject test..." << endl;
     object = Object::reference( u8 );
-    assert( object->type() == DataTypeCode<uint8_t>::name() );
-    assert( object->value<uint8_t>() == 8 );
+    ASSERT( object->type() == DataTypeCode<uint8_t>::name() );
+    ASSERT( object->value<uint8_t>() == 8 );
     object->setScalar( 9 );
-    assert( u8 == 9 );
+    ASSERT( u8 == 9 );
     
     object = Object::reference( s8 );
-    assert( object->type() == DataTypeCode<int8_t>::name() );
-    assert( object->value<int8_t>() == -8 );
+    ASSERT( object->type() == DataTypeCode<int8_t>::name() );
+    ASSERT( object->value<int8_t>() == -8 );
     object->setScalar( -9 );
-    assert( s8 == -9 );
+    ASSERT( s8 == -9 );
     
     object = Object::reference( u16 );
-    assert( object->type() == DataTypeCode<uint16_t>::name() );
-    assert( object->value<uint16_t>() == 16 );
+    ASSERT( object->type() == DataTypeCode<uint16_t>::name() );
+    ASSERT( object->value<uint16_t>() == 16 );
     object->setScalar( 17 );
-    assert( u16 == 17 );
+    ASSERT( u16 == 17 );
     
     object = Object::reference( s16 );
-    assert( object->type() == DataTypeCode<int16_t>::name() );
-    assert( object->value<int16_t>() == -16 );
+    ASSERT( object->type() == DataTypeCode<int16_t>::name() );
+    ASSERT( object->value<int16_t>() == -16 );
     object->setScalar( -17 );
-    assert( s16 == -17 );
+    ASSERT( s16 == -17 );
     
     object = Object::reference( u32 );
-    assert( object->type() == DataTypeCode<uint32_t>::name() );
-    assert( object->value<uint32_t>() == 32 );
+    ASSERT( object->type() == DataTypeCode<uint32_t>::name() );
+    ASSERT( object->value<uint32_t>() == 32 );
     object->setScalar( 33 );
-    assert( u32 == 33 );
+    ASSERT( u32 == 33 );
     
     object = Object::reference( s32 );
-    assert( object->type() == DataTypeCode<int32_t>::name() );
-    assert( object->value<int32_t>() == -32 );
+    ASSERT( object->type() == DataTypeCode<int32_t>::name() );
+    ASSERT( object->value<int32_t>() == -32 );
     object->setScalar( -33 );
-    assert( s32 == -33 );
+    ASSERT( s32 == -33 );
     
     object = Object::reference( f );
-    assert( object->type() == DataTypeCode<float>::name() );
-    assert( object->value<float>() == 1.2F );
+    ASSERT( object->type() == DataTypeCode<float>::name() );
+    ASSERT( object->value<float>() == 1.2F );
     object->setScalar( 2.2F );
-    assert( f == 2.2F );
+    ASSERT( f == 2.2F );
     
     object = Object::reference( d );
-    assert( object->type() == DataTypeCode<double>::name() );
-    assert( object->value<double>() == 3.4 );
+    ASSERT( object->type() == DataTypeCode<double>::name() );
+    ASSERT( object->value<double>() == 3.4 );
     object->setScalar( 4.4 );
-    assert( d == 4.4 );
+    ASSERT( d == 4.4 );
     
     object = Object::reference( s );
-    assert( object->type() == DataTypeCode<string>::name() );
-    assert( object->value<string>() == "content" );
+    ASSERT( object->type() == DataTypeCode<string>::name() );
+    ASSERT( object->value<string>() == "content" );
     object->setString( "new" );
-    assert( s == "new" );
+    ASSERT( s == "new" );
     cout << "OK." << endl;
 
     // Test PropertySet
@@ -218,26 +218,26 @@ int main()
     ps.setProperty( "float", (float) 7 );
     ps.setProperty( "double", (double) 8 );
     ps.setProperty( "string", string( "yop" ) );
-    assert( u8 == 1 );
-    assert( s8 == 2 );
-    assert( u16 == 3 );
-    assert( s16 == 4 );
-    assert( u32 == 5 );
-    assert( s32 == 6 );
-    assert( f == 7 );
-    assert( d == 8 );
-    assert( s == "yop" );
+    ASSERT( u8 == 1 );
+    ASSERT( s8 == 2 );
+    ASSERT( u16 == 3 );
+    ASSERT( s16 == 4 );
+    ASSERT( u32 == 5 );
+    ASSERT( s32 == 6 );
+    ASSERT( f == 7 );
+    ASSERT( d == 8 );
+    ASSERT( s == "yop" );
     ps.setProperty( "optional2", 12 );
-    assert( !ps.hasProperty( "optional1" ) );
-    assert( ps.hasProperty( "optional2" ) );
-    assert( ps.hasProperty( "optional3" ) );
-    assert( opt2 == 12 );
-    assert( opt2ok == true );
+    ASSERT( !ps.hasProperty( "optional1" ) );
+    ASSERT( ps.hasProperty( "optional2" ) );
+    ASSERT( ps.hasProperty( "optional3" ) );
+    ASSERT( opt2 == 12 );
+    ASSERT( opt2ok == true );
     ps.setProperty( "optional3", 23 );
-    assert( opt3 == 23 );
-    assert( opt3ok == true );
-    assert( ps.removeProperty( "optional3" ) );
-    assert( opt3ok == false );
+    ASSERT( opt3 == 23 );
+    ASSERT( opt3ok == true );
+    ASSERT( ps.removeProperty( "optional3" ) );
+    ASSERT( opt3ok == false );
 
     Object ops = Object::reference( ps );
     ops->setProperty( "xu8", (uint8_t) 9 );
@@ -249,26 +249,26 @@ int main()
     ops->setProperty( "xfloat", (float) 15 );
     ops->setProperty( "xdouble", (double) 16 );
     ops->setProperty( "xstring", "yep" );
-    assert( ops->getProperty( "xu8" )->getScalar() == 9 );
-    assert( ops->getProperty( "xs8" )->getScalar() == 10 );
-    assert( ops->getProperty( "xu16" )->getScalar() == 11 );
-    assert( ops->getProperty( "xs16" )->getScalar() == 12 );
-    assert( ops->getProperty( "xu32" )->getScalar() == 13 );
-    assert( ops->getProperty( "xs32" )->getScalar() == 14 );
-    assert( ops->getProperty( "xfloat" )->getScalar() == 15 );
-    assert( ops->getProperty( "xdouble" )->getScalar() == 16 );
-    assert( ops->getProperty( "xstring" )->getString() == "yep" );
+    ASSERT( ops->getProperty( "xu8" )->getScalar() == 9 );
+    ASSERT( ops->getProperty( "xs8" )->getScalar() == 10 );
+    ASSERT( ops->getProperty( "xu16" )->getScalar() == 11 );
+    ASSERT( ops->getProperty( "xs16" )->getScalar() == 12 );
+    ASSERT( ops->getProperty( "xu32" )->getScalar() == 13 );
+    ASSERT( ops->getProperty( "xs32" )->getScalar() == 14 );
+    ASSERT( ops->getProperty( "xfloat" )->getScalar() == 15 );
+    ASSERT( ops->getProperty( "xdouble" )->getScalar() == 16 );
+    ASSERT( ops->getProperty( "xstring" )->getString() == "yep" );
 
-    assert( ops->size() == 19 );
+    ASSERT( ops->size() == 19 );
 
     
-    assert( ops->removeProperty( "u32" ) == false );
-    assert( ops->removeProperty( "xu32" ) == true );
+    ASSERT( ops->removeProperty( "u32" ) == false );
+    ASSERT( ops->removeProperty( "xu32" ) == true );
     std::ostringstream stream;
     for( Object it = ps.objectIterator(); it->isValid(); it->next() ) {
       stream << it->key() << ": "<< it->currentValue()->getString() << endl;
     }
-    assert( stream.str() == "u8: 1\ns8: 2\nu16: 3\ns16: 4\nu32: 5\ns32: 6\nfloat: 7\ndouble: 8\nstring: yop\noptional2: 12\nxu8: 9\nxs8: 10\nxu16: 11\nxs16: 12\nxs32: 14\nxfloat: 15\nxdouble: 16\nxstring: yep\n" );
+    ASSERT( stream.str() == "u8: 1\ns8: 2\nu16: 3\ns16: 4\nu32: 5\ns32: 6\nfloat: 7\ndouble: 8\nstring: yop\noptional2: 12\nxu8: 9\nxs8: 10\nxu16: 11\nxs16: 12\nxs32: 14\nxfloat: 15\nxdouble: 16\nxstring: yep\n" );
 
     cout << "OK." << endl;
 
@@ -277,12 +277,12 @@ int main()
     ms.value = 13.5;
     Object oms = Object::reference( ms );
     ScalarInterface *si = oms->getInterface< ScalarInterface >();
-    assert( si != NULL );
-    assert( si->getScalar() == ms.value );
+    ASSERT( si != NULL );
+    ASSERT( si->getScalar() == ms.value );
     StringInterface *sti = oms->getInterface< StringInterface >();
-    assert( sti == NULL );
+    ASSERT( sti == NULL );
     MyInterface *myi = oms->getInterface< MyInterface >();
-    assert( myi != NULL );
+    ASSERT( myi != NULL );
     cout << "OK" << endl;
 
     cout << "Performance test..." << endl;

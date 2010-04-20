@@ -33,7 +33,6 @@
 
 #include <aims/io/vidaheader.h>
 #include <aims/def/general.h>
-#include <aims/def/assert.h>
 #include <cartobase/exception/ioexcept.h>
 #include <vector>
 #include <iostream>

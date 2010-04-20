@@ -33,7 +33,6 @@
 
 #include <cstdlib>
 #include <aims/def/general.h>
-#include <aims/def/assert.h>
 #include <aims/resampling/motion.h>
 #include <aims/io/mincheader.h>
 #include <aims/resampling/standardreferentials.h>

@@ -46,7 +46,6 @@
 #include <aims/io/finder.h>
 #include <aims/resampling/motion.h>
 #include <aims/utility/flip.h>
-#include <aims/def/assert.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/datasource/filedatasource.h>

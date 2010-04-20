@@ -34,7 +34,6 @@
 /*
  *  EACT data writer class
  */
-#include <aims/def/assert.h>
 #include <aims/io/ecatSinoheader.h>
 #include <aims/data/data.h>
 #include <aims/data/pheader.h>
@@ -125,9 +124,9 @@ static void fillEcatSinoHdr( UnifiedEcatSinoInfo *uesi, const vector< Sinogram<T
       uesi->subfirst = currentUesiSub;
       uesi->sublast = &(currentUesiSub[thing.size() -1]);
       
-      // Get Info partagées par les subheaders
+      // Get Info partagï¿½es par les subheaders
 	  
-      // Get Info locales à chaque subheaders
+      // Get Info locales ï¿½ chaque subheaders
       
       for ( i = 0 ; i<(int) thing.size() ;++i)
 	{
@@ -239,15 +238,15 @@ void EcatSinoWriter<T>::write( const vector< Sinogram<T> >& thing)
     throw file_error("Cannot create file ", fileName);
 
   // On peut peut ete faire plus simple mais les pb d'ordre d'initialisation
-  // sont dus au fait que des informations d'intérêt général sont stockées 
+  // sont dus au fait que des informations d'intï¿½rï¿½t gï¿½nï¿½ral sont stockï¿½es 
   // dans des subheader de la structure Ecat.
   // Modus operandi
   // Init du main header
-  //   -1 Init des champs très généraux de uesi (tailles...) par méthodes de Sinogram
+  //   -1 Init des champs trï¿½s gï¿½nï¿½raux de uesi (tailles...) par mï¿½thodes de Sinogram
   //   -2 Init du champs ecat_file_type
   // Init des subheaders
-  //   -3 Init des champs via le header du Sinogram (objet attribué...)
-  //   -4 Init des champs via les méthodes directes de Sinogram.
+  //   -3 Init des champs via le header du Sinogram (objet attribuï¿½...)
+  //   -4 Init des champs via les mï¿½thodes directes de Sinogram.
 
 
 
@@ -310,7 +309,7 @@ void EcatSinoWriter<T>::write( const vector< Sinogram<T> >& thing)
   else
     uesi->num_dimensions = 3;      
 
-  // Ecriture des données proprement dites
+  // Ecriture des donnï¿½es proprement dites
   // Ecriture segment par segment
   // Normalemement il faudrait remplcer short par T
   if (thing[0].getInternalMode() !=  Sinogram<T>::VIEW ) // temporaire
@@ -342,23 +341,25 @@ void EcatSinoWriter<T>::write( const vector< Sinogram<T> >& thing)
 	    s_pt += l;
 	  }
 	
-	//for (int t=0;t< 1;t++) // On ne gère que un seul lit ou une seul frame 
+	//for (int t=0;t< 1;t++) // On ne gï¿½re que un seul lit ou une seul frame 
 	
 	if( dt.dataType() == "S16" ){
 	  //cout << "Writing S16" << endl ;
 
-	  ASSERT(EcatWriteSino_S16(uesi, (short *)s_vol,
+	  if(EcatWriteSino_S16(uesi, (short *)s_vol,
 				   thing[fileNum].transCodeSegment(seg),
 				   fileNum*isMultiBed,
 				   fileNum*isMultiGate,
-				   fileNum*isMultiFrame )      != -1 ) ;
+				   fileNum*isMultiFrame ) == -1 )
+            throw logic_error( "Internal error: EcatWriteSino_S16 failed" );
 	}else if( dt.dataType() == "FLOAT" ){
 	  //cout << "Writing FLOAT" << endl ;
-	  ASSERT(EcatWriteSino_FLOAT(uesi, (float *)s_vol,
+	  if(EcatWriteSino_FLOAT(uesi, (float *)s_vol,
 				     thing[fileNum].transCodeSegment(seg),
 				     fileNum*isMultiBed,
 				     fileNum*isMultiGate,
-				     fileNum*isMultiFrame )      != -1 ) ;
+				     fileNum*isMultiFrame ) == -1 )
+            throw logic_error( "Internal error: EcatWriteSino_FLOAT failed" );
 	}
 	delete[] s_vol; 
       }

@@ -81,7 +81,7 @@ void EcatReader< float >::frameRead( AimsData<float>& thing,
   UnifiedEcatInfo    *uei;
   string             fileName;
 
-  // -------------------------Initialisation du header propriétaire and Fix it
+  // -------------------------Initialisation du header propriï¿½taire and Fix it
   EcatHeader *hdr = new EcatHeader( _name );
   try
     {
@@ -136,7 +136,8 @@ void EcatReader< float >::frameRead( AimsData<float>& thing,
   AimsData<float>::iterator wit = data.begin() + data.oFirstPoint();
   if ( ! EcatDataCalibrated(uei) )
     {
-	  ASSERT( ( f_ima = EcatReadVolume_FLOAT( uei ,frame))!=ECATSHFJ_FAIL );
+	  if( ( f_ima = EcatReadVolume_FLOAT( uei ,frame)) == ECATSHFJ_FAIL )
+            throw logic_error( "Internal error: read failed" );
 	  f_pt = f_ima;
 	  for( int z = 0; z < EcatSizeZ(uei); z++ )
 	    {
@@ -155,7 +156,8 @@ void EcatReader< float >::frameRead( AimsData<float>& thing,
     }
   else
     {
-	  ASSERT( ( f_ima = EcatReadVolume_FLOAT( uei ,frame))!=ECATSHFJ_FAIL );
+	  if( ( f_ima = EcatReadVolume_FLOAT( uei ,frame)) == ECATSHFJ_FAIL )
+            throw logic_error( "Internal error: read failed" );
 	  f_pt = f_ima;
 	  for( int z = 0; z < EcatSizeZ(uei); z++ )
 	    {
@@ -199,7 +201,7 @@ void EcatReader< short >::read( AimsData<short>& thing,
   EcatHeader         *hdr;
  
 
-  // --------------------------------Initialisation du header propriétaire
+  // --------------------------------Initialisation du header propriï¿½taire
   hdr = new EcatHeader( _name );
   try
     {
@@ -233,7 +235,8 @@ void EcatReader< short >::read( AimsData<short>& thing,
   // --------------------------------------------Lecture frame par frame
   for(int frame=0; frame < uei->size.t; frame++)
     {
-      ASSERT( ( s_ima = EcatReadVolume_S16( uei ,frame))!=ECATSHFJ_FAIL );
+      if( ( s_ima = EcatReadVolume_S16( uei ,frame))==ECATSHFJ_FAIL )
+        throw logic_error( "Internal error: read failed" );
       s_pt = s_ima;
       for(int slice=0; slice<uei->size.z;slice++)
 	for(int line=0;line <uei->size.y;line++)
@@ -329,7 +332,7 @@ void EcatReader< float >::read( AimsData<float>& thing,
   EcatHeader         *hdr;
   float              *f_pt, *f_ima;
 
-  // --------------------------------Initialisation du header propriétaire
+  // --------------------------------Initialisation du header propriï¿½taire
   hdr = new EcatHeader( _name );
   try
     {
@@ -369,7 +372,8 @@ void EcatReader< float >::read( AimsData<float>& thing,
     {
       for(int frame=0; frame < uei->size.t; frame++)
 	{
-	  ASSERT( ( f_ima = EcatReadVolume_FLOAT( uei ,frame))!=ECATSHFJ_FAIL );
+	  if( ( f_ima = EcatReadVolume_FLOAT( uei ,frame))==ECATSHFJ_FAIL )
+            throw logic_error( "Internal error: read failed" );
 	  f_pt = f_ima;
 	  for( int z = 0; z < EcatSizeZ(uei); z++ )
 	    {
@@ -391,7 +395,8 @@ void EcatReader< float >::read( AimsData<float>& thing,
     {
       for(int frame=0; frame < uei->size.t; frame++)
 	{
-	  ASSERT( ( f_ima = EcatReadVolume_FLOAT( uei ,frame))!=ECATSHFJ_FAIL );
+	  if( ( f_ima = EcatReadVolume_FLOAT( uei ,frame))==ECATSHFJ_FAIL )
+            throw logic_error( "Internal error: read failed" );
 	  f_pt = f_ima;
 	  for( int z = 0; z < EcatSizeZ(uei); z++ )
 	    {

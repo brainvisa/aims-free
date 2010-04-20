@@ -33,7 +33,7 @@
 
 #include <cartobase/smart/weakptr.h>
 #include <cartobase/smart/weakobject.h>
-#include <assert.h>
+#include <cartobase/exception/assert.h>
 
 class Foo : public carto::WeakObject
 {
@@ -51,20 +51,20 @@ int main()
 {
   Foo* p1 = new Foo;
   carto::weak_ptr< Foo > x1( p1 );
-  assert( x1 );
+  ASSERT( x1 );
   Foo* p2 = new Foo;
   carto::weak_ptr< Foo > x2;
-  assert( !x2 );
-  assert( x1 != x2 );
+  ASSERT( !x2 );
+  ASSERT( x1 != x2 );
   x2.reset( p2 );
-  assert( x2 );
+  ASSERT( x2 );
   x2.release();
-  assert( !x2 );
+  ASSERT( !x2 );
   x2 = x1;
-  assert( x2 );
+  ASSERT( x2 );
   delete p2;
-  assert( x2 );
+  ASSERT( x2 );
   delete p1;
-  assert( !x1 );
-  assert( !x2 );
+  ASSERT( !x1 );
+  ASSERT( !x2 );
 }

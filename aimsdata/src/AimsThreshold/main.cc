@@ -41,7 +41,6 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>
 #include <aims/utility/utility_g.h>
-#include <assert.h>
 
 using namespace aims;
 using namespace std;

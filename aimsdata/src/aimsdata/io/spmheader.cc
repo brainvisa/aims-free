@@ -36,7 +36,6 @@
 #include <aims/io/dbh.h>
 #include <aims/io/byteswap.h>
 #include <aims/def/general.h>
-#include <aims/def/assert.h>
 #include <aims/def/settings.h>
 #include <aims/resampling/motion.h>
 #include <aims/resampling/standardreferentials.h>
@@ -687,7 +686,8 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
   vector<float> vs;
   vector<int>   dims;
 
-  ASSERT( getProperty( "volume_dimension", dims ) );
+  if( ! getProperty( "volume_dimension", dims ) )
+      throw logic_error( "Internal error: getProperty volume_dimension failed" );
 
   getProperty( "voxel_size", vs );
   if( vs.size() == 0 )
@@ -860,7 +860,8 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
 
   int		dlen = 0;
 
-  ASSERT( getProperty( "bits_allocated", dlen ) );
+  if( ! getProperty( "bits_allocated", dlen ) )
+    throw logic_error( "Internal error: getProperty bits_allocated failed" );
   header.dime.bitpix = dlen;
   header.dime.vox_offset = 0.0;
 

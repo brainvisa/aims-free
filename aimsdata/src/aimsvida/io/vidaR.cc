@@ -31,7 +31,6 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <aims/def/assert.h>
 #include <aims/def/general.h>
 #include <aims/io/vidaheader.h>
 #include <aims/data/data.h>

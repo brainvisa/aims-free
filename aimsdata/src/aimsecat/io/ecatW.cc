@@ -185,7 +185,8 @@ void EcatWriter::write(const AimsData<short>& thing)
 	    s_pt  += EcatSizeX(uei);
 	  }
 	} 
-      ASSERT(EcatWriteVolume_S16(uei,s_vol,t) != -1);
+      if(EcatWriteVolume_S16(uei,s_vol,t) == -1)
+        throw logic_error( "Internal error: EcatWriteVolume_S16 failed" );
     }
 
   delete[] s_vol;
@@ -269,7 +270,8 @@ void EcatWriter::write(const AimsData<float>& thing)
 	    f_pt  += EcatSizeX(uei);
 	  }
 	} 
-      ASSERT(EcatWriteVolume_FLOAT(uei,f_vol,t) != -1);
+      if(EcatWriteVolume_FLOAT(uei,f_vol,t) == -1)
+        throw logic_error( "Internal error: EcatWriteVolume_FLOAT failed" );
     }
 
   delete[] f_vol;

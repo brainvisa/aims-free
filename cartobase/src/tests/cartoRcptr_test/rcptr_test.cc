@@ -34,7 +34,7 @@
 #define private public
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/smart/rcobject.h>
-#include <assert.h>
+#include <cartobase/exception/assert.h>
 #include <iostream>
 
 
@@ -107,118 +107,118 @@ int main()
   std::cout << "testing rc_ptr constructors (RCObject)..." << std::endl;
   {
     carto::rc_ptr<Foo> x1, x2;
-    assert( !x1 );
-    assert( !x2 );
-    assert( x1 == 0 );
-    assert( x2 == 0 );
-    assert( x1 == x2 );
+    ASSERT( !x1 );
+    ASSERT( !x2 );
+    ASSERT( x1 == 0 );
+    ASSERT( x2 == 0 );
+    ASSERT( x1 == x2 );
   }
   std::cout << "testing rc_ptr constructors..." << std::endl;
   {
     carto::rc_ptr<Bar> x1, x2;
-    assert( !x1 );
-    assert( !x2 );
-    assert( x1 == 0 );
-    assert( x2 == 0 );
-    assert( x1 == x2 );
+    ASSERT( !x1 );
+    ASSERT( !x2 );
+    ASSERT( x1 == 0 );
+    ASSERT( x2 == 0 );
+    ASSERT( x1 == x2 );
   }
 
   std::cout << "testing rc_ptr constructors (RCObject)..." << std::endl;
   {
     carto::rc_ptr<Foo> x1 = carto::rc_ptr<Foo>( new Foo );
     carto::rc_ptr<Foo> x2 = carto::rc_ptr<Foo>( new Foo );
-    assert( x1 );
-    assert( x2 );
-    assert( !(x1 == 0) );
-    assert( !(x2 == 0) );
-    assert( x1 != x2 );
+    ASSERT( x1 );
+    ASSERT( x2 );
+    ASSERT( !(x1 == 0) );
+    ASSERT( !(x2 == 0) );
+    ASSERT( x1 != x2 );
   }
   std::cout << "testing rc_ptr constructors..." << std::endl;
   {
     carto::rc_ptr<Bar> x1 = carto::rc_ptr<Bar>( new Bar );
     carto::rc_ptr<Bar> x2 = carto::rc_ptr<Bar>( new Bar );
-    assert( x1 );
-    assert( x2 );
-    assert( !(x1 == 0) );
-    assert( !(x2 == 0) );
-    assert( x1 != x2 );
+    ASSERT( x1 );
+    ASSERT( x2 );
+    ASSERT( !(x1 == 0) );
+    ASSERT( !(x2 == 0) );
+    ASSERT( x1 != x2 );
   }
 
   std::cout << "testing rc_ptr constructors (RCObject)..." << std::endl;
   {
     carto::rc_ptr<Foo> x1;
-    assert( x1 == 0 );
+    ASSERT( x1 == 0 );
     {
       carto::rc_ptr<Foo> x2 = carto::rc_ptr<Foo>( new Foo );
       x1 = x2;
-      assert( x1 == x2 );
+      ASSERT( x1 == x2 );
     }
-    assert( x1 != 0 );
+    ASSERT( x1 != 0 );
   }
   std::cout << "testing rc_ptr constructors..." << std::endl;
   {
     carto::rc_ptr<Bar> x1;
-    assert( x1 == 0 );
+    ASSERT( x1 == 0 );
     {
       carto::rc_ptr<Bar> x2 = carto::rc_ptr<Bar>( new Bar );
       x1 = x2;
-      assert( x1 == x2 );
+      ASSERT( x1 == x2 );
     }
-    assert( x1 != 0 );
+    ASSERT( x1 != 0 );
   }
 
   std::cout << "testing rc_ptr::reset() (RCObject)..." << std::endl;
   {
     carto::rc_ptr<Foo> x1;
-    assert( x1 == 0 );
+    ASSERT( x1 == 0 );
     x1.reset( new Foo );
-    assert( x1 != 0 );
+    ASSERT( x1 != 0 );
     carto::rc_ptr<Foo> x2( x1 );
-    assert( x2 != 0 );
-    assert( x1 == x2 );
+    ASSERT( x2 != 0 );
+    ASSERT( x1 == x2 );
     x1.reset();
-    assert( x1 == 0 );
-    assert( x2 != 0 );
+    ASSERT( x1 == 0 );
+    ASSERT( x2 != 0 );
     x2.reset();
-    assert( x2 == 0 );
+    ASSERT( x2 == 0 );
   }
   std::cout << "testing rc_ptr::reset()..." << std::endl;
   {
     carto::rc_ptr<Bar> x1;
-    assert( x1 == 0 );
+    ASSERT( x1 == 0 );
     x1.reset( new Bar );
-    assert( x1 != 0 );
+    ASSERT( x1 != 0 );
     carto::rc_ptr<Bar> x2( x1 );
-    assert( x2 != 0 );
-    assert( x1 == x2 );
+    ASSERT( x2 != 0 );
+    ASSERT( x1 == x2 );
     carto::rc_ptr<Bar> x3( x1 );
-    assert( x3 != 0 );
-    assert( x1 == x3 );
+    ASSERT( x3 != 0 );
+    ASSERT( x1 == x3 );
     x1.reset();
-    assert( x1 == 0 );
-    assert( x2 != 0 );
+    ASSERT( x1 == 0 );
+    ASSERT( x2 != 0 );
     x2.reset();
-    assert( x2 == 0 );
+    ASSERT( x2 == 0 );
   }
 
   std::cout << "testing rc_ptr as a return value (RCObject)..." << std::endl;
   {
     carto::rc_ptr<Foo> x1;
-    assert( x1 == 0 );
+    ASSERT( x1 == 0 );
     x1 = function1();
-    assert( x1 != 0 );
+    ASSERT( x1 != 0 );
   }
 
   std::cout << "testing rc_ptr as an argument (RCObject)..." << std::endl;
   {
     carto::rc_ptr< Foo > x1( new Foo );
-    assert( x1 != 0 );
+    ASSERT( x1 != 0 );
     carto::rc_ptr< Foo > x2( function2( x1 ) );
-    assert( x1 == x2 );
+    ASSERT( x1 == x2 );
     carto::rc_ptr< Foo > x3( function3( x1 ) );
-    assert( x1 == x3 );
+    ASSERT( x1 == x3 );
     carto::rc_ptr< Foo > x4( function2( function2( x1 ) ) );
-    assert( x1 == x4 );
+    ASSERT( x1 == x4 );
   }
 
 }

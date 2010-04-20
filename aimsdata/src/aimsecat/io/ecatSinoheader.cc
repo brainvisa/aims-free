@@ -33,7 +33,6 @@
 
 #include <aims/io/ecatSinoheader.h>
 #include <aims/def/general.h>
-#include <aims/def/assert.h>
 #include <ecat+/io/io.h>
 #include <cartobase/exception/file.h>
 #include <fstream>
@@ -163,7 +162,7 @@ void EcatSinoHeader::read( )
       gt.push_back(it->gate_duration) ;
       smin.push_back(it->scan_min) ;
       smax.push_back(it->scan_max) ;
-      // Très moche .. Qui fait plus joli.
+      // Trï¿½s moche .. Qui fait plus joli.
       // ici les uncorr_singles sont a intepreter par paquet de 128
       // il faudrait un type vector<vector<float>> : Graph ne sait pas gerer.
       int i;

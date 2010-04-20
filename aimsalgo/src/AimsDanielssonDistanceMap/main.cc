@@ -101,7 +101,10 @@ int main( int argc, char **argv )
     map = AimsSignedDanielssonDistanceMap( vol );
 
   Writer<AimsData<float> > writer( fileout );
-  assert( writer.write( map ) );
+  if( ! writer.write( map ) )
+  {
+    throw logic_error( "Internal error: write failed" );
+  }
 
   return EXIT_SUCCESS;
 }

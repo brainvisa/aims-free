@@ -40,7 +40,6 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>
 #include <iostream>
-#include <assert.h>
 
 using namespace aims;
 using namespace carto;
@@ -89,7 +88,8 @@ bool makemapvol( Process & p, const string & filein, Finder & f )
   AimsData<T>		vol;
   string		format = f.format();
   Reader<AimsData<T> >	reader( filein );
-  assert( reader.read( vol,1, &format ) );
+  if( !reader.read( vol,1, &format ) )
+    throw logic_error( "Internal error: read failed" );
  
   AimsDistanceFrontPropagation( vol, (T) fp.val_domain, (T) fp.val_outside,
                                 fp.xmask, fp.ymask, fp.zmask, fp.factor, 
@@ -111,8 +111,9 @@ bool makemapbck( Process & p, const string & filein, Finder & f )
   BucketMap<T>		vol;
   string		format = f.format();
   Reader<BucketMap<T> >	reader( filein );
-  assert( reader.read( vol,1, &format ) );
- 
+  if( ! reader.read( vol,1, &format ) );
+    throw logic_error( "Internal error: read failed" );
+
   AimsDistanceFrontPropagation( vol, (T) fp.val_domain, (T) fp.val_outside,
                                 fp.xmask, fp.ymask, fp.zmask, fp.factor, 
 				false );
@@ -130,7 +131,8 @@ bool makemapbck<Void>( Process & p, const string & filein, Finder & f )
   BucketMap<Void>	vol;
   string		format = f.format();
   Reader<BucketMap<Void> >	reader( filein );
-  assert( reader.read( vol,1, &format ) );
+  if( ! reader.read( vol,1, &format ) )
+    throw logic_error( "Internal error: read failed" );
 
   BucketMap<float>	bck;
   bck.setSizeXYZT( vol.sizeX(), vol.sizeY(), vol.sizeZ(), vol.sizeT() );

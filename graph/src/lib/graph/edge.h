@@ -44,7 +44,6 @@
 #include <graph/graph/graphobject.h>
 #endif
 #include <cartobase/containers/block.h>
-#include <assert.h>
 
 
 //=============================================================================

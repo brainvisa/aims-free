@@ -36,7 +36,6 @@
 #include <aims/connectivity/component.h>
 #include <aims/bucket/bucket.h>
 #include <aims/io/writer.h>
-#include <assert.h>
 #include <string>
 #include <sstream>
 #include <math.h>

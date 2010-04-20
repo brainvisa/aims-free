@@ -33,7 +33,7 @@
 
 #include <cartobase/type/conversion.h>
 #include <cartobase/smart/rcobject.h>
-#include <assert.h>
+#include <cartobase/exception/assert.h>
 
 class Foo : public carto::RCObject
 {
@@ -77,8 +77,8 @@ struct test< true >
 int main()
 {
 
-  assert( test< SUPERSUBCLASS( carto::RCObject, Foo ) >::test_TRUE );
-  assert( !test< SUPERSUBCLASS( Foo, carto::RCObject ) >::test_TRUE );
-  assert( !test< SUPERSUBCLASS( int, Foo ) >::test_TRUE );
+  ASSERT( test< SUPERSUBCLASS( carto::RCObject, Foo ) >::test_TRUE );
+  ASSERT( !test< SUPERSUBCLASS( Foo, carto::RCObject ) >::test_TRUE );
+  ASSERT( !test< SUPERSUBCLASS( int, Foo ) >::test_TRUE );
 
 }

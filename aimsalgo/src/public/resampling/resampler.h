@@ -36,7 +36,6 @@
 #define AIMS_RESAMPLING_RESAMPLER_H
 
 
-#include <aims/def/assert.h>
 #include <aims/data/data.h>
 #include <aims/vector/vector.h>
 #include <aims/resampling/motion.h>

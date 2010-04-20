@@ -191,7 +191,10 @@ int main(int argc,const char **argv)
 
       cout << "reading target header  : " << flush;
 
-      assert( f.check( target ) );
+      if( ! f.check( target ) )
+      {
+        throw logic_error( "Internal error: f.check( target )" );
+      }
       const PythonHeader	*hdr 
         = dynamic_cast<const PythonHeader *>( f.header() );
 
@@ -203,7 +206,10 @@ int main(int argc,const char **argv)
 
       vector<float>	vsv;
       Point3df	vs;
-      assert( hdr->getProperty( "voxel_size", vsv ) );
+      if( ! hdr->getProperty( "voxel_size", vsv ) )
+      {
+        throw logic_error( "Internal error: invalid property voxel_size" );
+      }
       vs = Point3df( vsv[0], vsv[1], vsv[2] );
       cout << "target voxel size:" << vs[0] << " " << vs[1] << " " << vs[2] 
            << endl;
