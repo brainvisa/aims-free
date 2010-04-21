@@ -9,4 +9,5 @@ typedef AimsVector_FLOAT_2 Point2df;
 typedef AimsVector_S16_3 Point3d;
 
 Point3df vectProduct( const Point3df & v1, const Point3df & v2 );
+Point3dd vectProduct( const Point3dd & v1, const Point3dd & v2 );
 

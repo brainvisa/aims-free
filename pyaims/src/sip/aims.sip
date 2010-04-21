@@ -138,6 +138,7 @@ carto::pyaims_init();
 %Include aimsdata_RGBA.sip
 
 %Include motion.sip
+%Include transformation.sip
 %Include rcptr_Motion.sip
 %Include reader_Motion.sip
 

@@ -942,10 +942,13 @@ std::istream& operator >> (std::istream& is, AimsVector<byte,D>& thing)
 }
 
 
-inline 
-Point3df vectProduct( const Point3df & v1, const Point3df & v2 )
+
+template <typename T>
+inline
+AimsVector<T,3> vectProduct( const AimsVector<T,3> & v1,
+                             const AimsVector<T,3> & v2 )
 {
-  return Point3df( v1[1] * v2[2] - v1[2] * v2[1], 
+  return AimsVector<T,3>( v1[1] * v2[2] - v1[2] * v2[1],
         	   v1[2] * v2[0] - v1[0] * v2[2], 
         	   v1[0] * v2[1] - v1[1] * v2[0] );
 }

@@ -16,11 +16,21 @@ typedef AimsVector<%Template1%, %Template2%>
 
 %ConvertToTypeCode
   if (sipIsErr == NULL)
-    return ( PySequence_Check( sipPy ) 
-             && PySequence_Size( sipPy ) == %Template2%) 
-             || sipCanConvertToInstance( sipPy, 
-                sipClass_AimsVector_%Template1typecode%_%Template2typecode%,
-                SIP_NOT_NONE | SIP_NO_CONVERTORS );
+  {
+    if( sipCanConvertToInstance( sipPy,
+         sipClass_AimsVector_%Template1typecode%_%Template2typecode%,
+         SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
+      return 1;
+    if( PySequence_Check( sipPy ) && PySequence_Size( sipPy ) == %Template2% )
+    {
+      // check the 1st element (incomplete...)
+      PyObject	*pyitem = PySequence_GetItem( sipPy, 0 );
+      if( !pyitem || !%Template1testPyType%( pyitem ) )
+        return 0;
+      return 1;
+    }
+    return 0;
+  }
 
   if( PyObject_IsInstance( sipPy, (PyObject *) 
       sipClass_AimsVector_%Template1typecode%_%Template2typecode% ) )

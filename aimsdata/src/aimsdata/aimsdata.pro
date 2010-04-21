@@ -181,6 +181,7 @@ HEADERS=  bucket/bucket_g.h	\
     selection/selection.h    \
     selection/selector.h    \
     texdata/texdata.h    \
+    transformation/transformation.h \
     utility/anytype_reader.h \
     utility/anytype_reader_details.h \
     utility/bininverse.h    \
@@ -312,6 +313,7 @@ SOURCES = \
     roi/voxelSampling.cc      \
     selection/selection.cc	\
     selection/selector.cc	\
+    transformation/transformation.cc \
     utility/boundingbox.cc \
     utility/clock.cc \
     vector/vector.cc
