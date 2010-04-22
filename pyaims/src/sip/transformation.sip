@@ -21,6 +21,10 @@ namespace aims
 #include <aims/transformation/transformation.h>
 %End
 
+%TypeCode
+#include <pyaims/vector/numpyarrayfunc.h>
+%End
+
   public:
     virtual ~Transformation3d();
 
