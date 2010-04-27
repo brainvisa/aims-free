@@ -64,6 +64,7 @@ carto::pyaims_init();
 %Include list_DOUBLE.sip
 %Include list_STRING.sip
 %Include list_PluginFile.sip
+%Include list_GraphPtr.sip
 %Include map_STRING_STRING.sip
 %Include map_S32_STRING.sip
 

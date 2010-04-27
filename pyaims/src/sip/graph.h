@@ -34,6 +34,27 @@
 #ifndef PYAIMS_GRAPH_GRAPH_H
 #define PYAIMS_GRAPH_GRAPH_H
 
+inline PyObject* pyaimsConvertFrom_GraphP( void * a )
+{
+  return sipConvertFromInstance( a, sipClass_Graph, 0 );
+}
+
+
+inline void* pyaimsConvertTo_GraphP( PyObject * o )
+{
+  int isErr = 0;
+  return sipConvertToInstance( o, sipClass_Graph, 0, 0, 0,
+                               &isErr );
+}
+
+
+inline int pyaimsGraphP_Check( PyObject* o )
+{
+  return sipCanConvertToInstance( o, sipClass_Graph,
+                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+}
+
+
 inline PyObject* pyaimsConvertFrom_VertexP( void * a )
 {
   return sipConvertFromInstance( a, sipClass_Vertex, 0 );

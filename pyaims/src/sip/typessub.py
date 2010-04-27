@@ -1801,6 +1801,27 @@ typessub = { 'signed char' : \
                classInCartoNamespace( 'cartobase/object/object.h',
                'Object' ),
 
+             'Graph *' : \
+             { 'typecode' : 'GraphPtr',
+               'pyFromC' : 'pyaimsConvertFrom_GraphP',
+               'CFromPy' : 'pyaimsConvertTo_GraphP',
+               'castFromSip' : '(Graph *)',
+               'deref' : '',
+               'pyderef' : '',
+               'address' : '',
+               'pyaddress' : '',
+               'defScalar' : '',
+               'new' : 'new Graph *',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'Graph *',
+               'sipClass' : 'Graph *',
+               'typeinclude' : '#include <graph/graph/graph.h>',
+               'sipinclude' : '#include <pyaims/graph.h>',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsGraphP_Check',
+               'compareElement' : '',
+              },
+
              'Vertex *' : \
              { 'typecode' : 'VertexPtr',
                'pyFromC' : 'pyaimsConvertFrom_VertexP',
@@ -1816,10 +1837,7 @@ typessub = { 'signed char' : \
                'PyType' : 'Vertex *',
                'sipClass' : 'Vertex *',
                'typeinclude' : '#include <graph/graph/vertex.h>', 
-               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipVertex.h"\n'
-               '#endif\n'
-               '#include <pyaims/graph.h>',
+               'sipinclude' : '#include <pyaims/graph.h>',
                'module' : 'aims',
                'testPyType' : 'pyaimsVertexP_Check',
                'compareElement' : '',
@@ -1840,10 +1858,7 @@ typessub = { 'signed char' : \
                'PyType' : 'Edge *',
                'sipClass' : 'Edge *',
                'typeinclude' : '#include <graph/graph/edge.h>', 
-               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipEdge.h"\n'
-               '#endif\n'
-               '#include <pyaims/graph.h>',
+               'sipinclude' : '#include <pyaims/graph.h>',
                'module' : 'aims',
                'testPyType' : 'pyaimsEdgeP_Check',
                'compareElement' : '',
