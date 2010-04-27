@@ -75,7 +75,7 @@ template<int D, typename T> Texture<T> FiniteElementSmoother<D,T>::doSmoothing(c
 				smooth.item(i) = s;
 			}
 		}
-		std::cout  << std::endl;
+		if (verbose) std::cout  << std::endl;
 
 		textTmp2[0]=smooth;
 
