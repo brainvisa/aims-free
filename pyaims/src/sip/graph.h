@@ -54,6 +54,29 @@ inline int pyaimsGraphP_Check( PyObject* o )
                                   SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
+// ---
+
+inline PyObject* pyaimsConvertFrom_GraphR( void * a )
+{
+  return sipConvertFromInstance( a, sipClass_rc_ptr_Graph, 0 );
+}
+
+
+inline void* pyaimsConvertTo_GraphR( PyObject * o )
+{
+  int isErr = 0;
+  return sipConvertToInstance( o, sipClass_rc_ptr_Graph, 0, 0, 0,
+                               &isErr );
+}
+
+
+inline int pyaimsGraphR_Check( PyObject* o )
+{
+  return sipCanConvertToInstance( o, sipClass_rc_ptr_Graph,
+                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+}
+
+// ---
 
 inline PyObject* pyaimsConvertFrom_VertexP( void * a )
 {

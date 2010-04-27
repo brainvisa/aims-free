@@ -29,20 +29,22 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
-def classInNamespace( include, cls, namespace, cppnamespace=None ):
+def classInNamespace( include, cls, namespace, cppnamespace=None,
+                      cppclass=None ):
   if cppnamespace is None: cppnamespace = namespace
+  if cppclass is None: cppclass = cls
   return { 'typecode' : cls,
     'pyFromC' : 'pyaimsConvertFrom_' + namespace + '_' + cls,
     'CFromPy' : 'pyaimsConvertTo_' + namespace + '_' + cls,
-    'castFromSip' : '(' + cppnamespace + '::' + cls + ' *)',
+    'castFromSip' : '(' + cppnamespace + '::' + cppclass + ' *)',
     'deref' : '*',
     'pyderef' : '*',
     'address' : '&', 
     'pyaddress' : '&', 
     'defScalar' : '',
-    'new' : 'new ' + cppnamespace + '::' + cls,
+    'new' : 'new ' + cppnamespace + '::' + cppclass,
     'NumType' : 'PyArray_OBJECT', 
-    'PyType' : cppnamespace + '::' + cls,
+    'PyType' : cppnamespace + '::' + cppclass,
     'sipClass' : namespace + '_' + cls,
     'typeinclude' : \
     '#include <' + include + '>', 
@@ -66,11 +68,11 @@ def classInNamespace( include, cls, namespace, cppnamespace=None ):
     'compareElement' : '&',
     }
 
-def classInCartoNamespace( include, cls ):
-  return classInNamespace( include, cls, 'carto' )
+def classInCartoNamespace( include, cls, cppclass=None ):
+  return classInNamespace( include, cls, 'carto', cppclass=cppclass )
 
-def classInAimsNamespace( include, cls ):
-  return classInNamespace( include, cls, 'aims' )
+def classInAimsNamespace( include, cls, cppclass=None ):
+  return classInNamespace( include, cls, 'aims', cppclass=cppclass )
 
 
 def completeTypesSub( typessub ):
@@ -1821,6 +1823,27 @@ typessub = { 'signed char' : \
                'testPyType' : 'pyaimsGraphP_Check',
                'compareElement' : '',
               },
+
+             'carto::rc_ptr<Graph>' : \
+             { 'typecode' : 'rc_ptr_Graph',
+               'pyFromC' : 'pyaimsConvertFrom_GraphR',
+               'CFromPy' : 'pyaimsConvertTo_GraphR',
+               'castFromSip' : '(carto::rc_ptr<Graph> *)',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'new' : 'new carto::rc_ptr<Graph>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'rc_ptr_Graph',
+               'sipClass' : 'rc_ptr_Graph',
+               'typeinclude' : '#include <graph/graph/graph.h>',
+               'sipinclude' : '#include <pyaims/graph.h>',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsGraphR_Check',
+              },
+
 
              'Vertex *' : \
              { 'typecode' : 'VertexPtr',
