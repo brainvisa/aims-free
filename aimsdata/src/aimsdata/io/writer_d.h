@@ -103,6 +103,7 @@ namespace aims
     int					excp = 0;
     int					exct = -1;
     std::string				excm;
+
     bool exactformat = false;
     if( !_options.isNull() )
     {
