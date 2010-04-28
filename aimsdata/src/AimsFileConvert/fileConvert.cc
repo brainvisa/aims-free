@@ -69,6 +69,7 @@
 #include <aims/io/datatypecode.h>
 #include <aims/math/dtitensor.h>
 #include <aims/rgb/rgb.h>
+#include <locale.h>
 
 using namespace aims;
 using namespace carto;
@@ -81,10 +82,10 @@ static bool convert( Process &, const string &, Finder & );
 
 
 //	Processing class, with template operation function
-class FileConvert : public Process
+class FileTestGifti : public Process
 {
 public:
-  FileConvert();
+  FileTestGifti();
   template<class T>
   friend bool readAndWrite( Process &, const string &, Finder & );
   template<class T>
@@ -92,6 +93,7 @@ public:
 
   string	file;
   bool		ascii;
+  bool		normal;
   string	form;
   string	type;
   string	otype;
@@ -103,8 +105,8 @@ public:
 };
 
 
-FileConvert::FileConvert()
-  : Process(), ascii( false ), rescale( false ), xdim( 0 ), ydim( 0 ), 
+FileTestGifti::FileTestGifti()
+  : Process(), ascii( false ), normal( false ), rescale( false ), xdim( 0 ), ydim( 0 ),
     zdim( 0 ), info()
 {
   registerProcessType( "Volume", "S8", &convert<AimsData<int8_t> > );
@@ -163,7 +165,7 @@ template<typename T>
 class DataConverter : public Process
 {
 public:
-  DataConverter( T & dat, const string & fileout, bool a, 
+  DataConverter( T & dat, const string & fileout, bool a, bool n,
 		 const string & format, bool resc, unsigned dx, unsigned dy, 
 		 unsigned dz, RescalerInfo & info );
 
@@ -180,6 +182,7 @@ public:
   T		& data;
   string	file;
   bool		ascii;
+  bool      normal;
   const string	form;
   bool		rescale;
   unsigned	xdim;
@@ -193,7 +196,7 @@ template<typename T>
 bool DataConverter<T>::noConvert( Process & p, const string &, Finder & )
 {
   DataConverter	& dc = (DataConverter &) p;
-  return( write( dc.data, dc.file, dc.ascii, dc.form ) );
+  return( write( p, dc.data, dc.file, dc.ascii, dc.normal , dc.form ) );
 }
 
 // partial specializations
@@ -202,7 +205,7 @@ template<class T>
 class DataConverter<AimsData<T> > : public Process
 {
 public:
-  DataConverter( AimsData<T> & dat, const string & fileout, bool a, 
+  DataConverter( AimsData<T> & dat, const string & fileout, bool a, bool n,
 		 const string & format, bool resc, unsigned dx, unsigned dy, 
 		 unsigned dz, RescalerInfo & info );
 
@@ -218,6 +221,7 @@ public:
   AimsData<T>	& data;
   string	file;
   bool		ascii;
+  bool      normal;
   const string	form;
   bool		rescale;
   unsigned	xdim;
@@ -230,7 +234,7 @@ template<class T>
 class DataConverter<TimeTexture<T> > : public Process
 {
 public:
-  DataConverter( TimeTexture<T> & dat, const string & fileout, bool a, 
+  DataConverter( TimeTexture<T> & dat, const string & fileout, bool a, bool n,
 		 const string & format, bool resc, unsigned dx, unsigned dy, 
 		 unsigned dz, RescalerInfo & info );
 
@@ -246,6 +250,7 @@ public:
   TimeTexture<T>	& data;
   string		file;
   bool			ascii;
+  bool          normal;
   const string		form;
   bool			rescale;
   unsigned		xdim;
@@ -259,7 +264,7 @@ template<class T>
 class DataConverter<BucketMap<T> > : public Process
 {
 public:
-  DataConverter( BucketMap<T> & dat, const string & fileout, bool a, 
+  DataConverter( BucketMap<T> & dat, const string & fileout, bool a, bool n,
 		 const string & format, bool resc, unsigned dx, unsigned dy, 
 		 unsigned dz, RescalerInfo  & info );
 
@@ -270,6 +275,7 @@ public:
   BucketMap<T>		& data;
   string		file;
   bool			ascii;
+  bool          normal;
   const string		form;
   bool			rescale;
   unsigned		xdim;
@@ -284,10 +290,10 @@ public:
 template<class T>
 DataConverter<AimsData<T> >::DataConverter( AimsData<T> & dat, 
 					    const string & fileout,
-					    bool a, const string & format, 
+					    bool a, bool n, const string & format,
 					    bool resc, unsigned dx, 
 					    unsigned dy, unsigned dz, RescalerInfo & info )
-  : Process(), data( dat ), file( fileout ), ascii( a ), form( format ),
+  : Process(), data( dat ), file( fileout ), ascii( a ), normal(n), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info(info)
 {
 #if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
@@ -338,16 +344,17 @@ DataConverter<AimsData<T> >::DataConverter( AimsData<T> & dat,
 template<class T>
 DataConverter<TimeTexture<T> >::DataConverter( TimeTexture<T> & dat, 
 					       const string & fileout,
-					       bool a, const string & format, 
+					       bool a, bool n, const string & format,
 					       bool resc, unsigned dx, 
 					       unsigned dy, unsigned dz, RescalerInfo & info )
-  : Process(), data( dat ), file( fileout ), ascii( a ), form( format ),
+  : Process(), data( dat ), file( fileout ), ascii( a ), normal( n ), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info( info )
 {
 #if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
   registerProcessType( "Texture", "FLOAT", 
 		       &convInternal<TimeTexture<float> > );
   registerProcessType( "Texture", "S16", &convInternal<TimeTexture<short> > );
+  registerProcessType( "Texture", "S32", &convInternal<TimeTexture<int> > );
   registerProcessType( "Texture", "integer", &convInternal<TimeTexture<int> > );
   registerProcessType( "Texture", "unsigned integer", 
 		       &convInternal<TimeTexture<unsigned> > );
@@ -356,6 +363,8 @@ DataConverter<TimeTexture<T> >::DataConverter( TimeTexture<T> & dat,
 #else
   registerProcessType( "Texture", "S16", 
 		       &convData<TimeTexture<T>,TimeTexture<short> > );
+  registerProcessType( "Texture", "S32",
+  		       &convData<TimeTexture<T>,TimeTexture<int> > );
   registerProcessType( "Texture", "integer", 
 		       &convData<TimeTexture<T>,TimeTexture<int> > );
   registerProcessType( "Texture", "unsigned integer", 
@@ -371,10 +380,10 @@ DataConverter<TimeTexture<T> >::DataConverter( TimeTexture<T> & dat,
 template<typename T>
 DataConverter<BucketMap<T> >::DataConverter( BucketMap<T> & dat, 
                                              const string & fileout,
-                                             bool a, const string & format, 
+                                             bool a, bool n, const string & format,
                                              bool resc, unsigned dx, 
                                              unsigned dy, unsigned dz, RescalerInfo & info )
-  : Process(), data( dat ), file( fileout ), ascii( a ), form( format ),
+  : Process(), data( dat ), file( fileout ), ascii( a ), normal ( n ), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info( info )
 {
   registerProcessType( "Volume", "S16", 
@@ -387,9 +396,18 @@ DataConverter<BucketMap<T> >::DataConverter( BucketMap<T> & dat,
 
 
 template<class T>
-bool read( T & data, const string & filename, const Finder & f, bool rw )
+bool read( Process & p, T & data, const string & filename, const Finder & f, bool rw )
 {
+  FileTestGifti	&fc = (FileTestGifti &) p;
+
   Reader<T>	r( filename );
+
+  Object options = Object::value( Dictionary() );
+  options->setProperty( "ascii", fc.ascii );
+  options->setProperty( "normal", fc.normal );
+  options->setProperty( "exact_format", true );
+  r.setOptions(options);
+
   if( rw )
     r.setAllocatorContext( AllocatorContext( AllocatorStrategy::InternalModif, 
                                              DataSource::none(), false, 
@@ -399,25 +417,34 @@ bool read( T & data, const string & filename, const Finder & f, bool rw )
                                              DataSource::none(), false, 
                                              0.01 ) );
   string	format = f.format();
-  if( !r.read( data, 0, &format ) )
+
+  if( !r.read( data, 0, &format) )
     return( false );
+
   cout << "reading done\n";
   return( true );
 }
 
 
 template<class T>
-bool write( T & data, const string & file, bool ascii, const string & form )
+bool write( Process & p, T & data, const string & file, bool ascii, const string & form )
 {
+  FileTestGifti	&fc = (FileTestGifti &) p;
+
   cout << "writing " << file << "...\n";
   Object options = Object::value( Dictionary() );
   options->setProperty( "exact_format", true );
+  options->setProperty( "normal", fc.normal );
+  options->setProperty( "ascii", fc.ascii );
+
   Writer<T>	w( file, options );
   const string	*wf = 0;
   if( !form.empty() )
     wf = &form;
+
   if( !w.write( data, ascii, wf ) )
     return( false );
+
   cout << "done\n";
   return( true );
 }
@@ -426,28 +453,31 @@ bool write( T & data, const string & file, bool ascii, const string & form )
 template<class T>
 bool readAndWrite( Process & p, const string & filename, Finder & f )
 {
-  FileConvert	&fc = (FileConvert &) p;
+  FileTestGifti	&fc = (FileTestGifti &) p;
   T		data;
-  if( !read( data, filename, f, filename == fc.file ) )
+
+  std::cout << "ReadAndWrite\n";
+
+  if( !read( p, data, filename, f, filename == fc.file ) )
     return( false );
 
-  return( write( data, fc.file, fc.ascii, fc.form ) );
+  return( write( p, data, fc.file, fc.ascii, fc.form ) );
 }
 
 
 template<class T>
 bool convert( Process & p, const string & filename, Finder & f )
 {
-  FileConvert		&fc = (FileConvert &) p;
+  FileTestGifti		&fc = (FileTestGifti &) p;
   T			data;
   //DataTypeCode<T>	dtc;
   cout << "reading " << filename << " as " << f.objectType() << " / " 
        << f.dataType() << "...\n";
-  if( !read( data, filename, f, filename == fc.file ) )
+  if( !read( p, data, filename, f, filename == fc.file ) )
     return( false );
 
   //	second layer of processes
-  DataConverter<T>	proc( data, fc.file, fc.ascii, fc.form, fc.rescale, 
+  DataConverter<T>	proc( data, fc.file, fc.ascii, fc.normal, fc.form, fc.rescale,
 			      fc.xdim, fc.ydim, fc.zdim, fc.info );
   Finder		f2;
   if( fc.otype.empty() )
@@ -543,17 +573,17 @@ bool convData( Process & p, const string &, Finder & )
 
   cout << "convert done\n";
 
-  return( write( *vol2, dc.file, dc.ascii, dc.form ) );
+  return( write( p, *vol2, dc.file, dc.ascii, dc.form ) );
 }
 
 
 int main( int argc, const char **argv )
 {
-  FileConvert	proc;
+  FileTestGifti	proc;
   ProcessInput	pi( proc );
-  string	filein, fileout, format, type, otype;
-  bool		ascii = false, rescale = false;
-  unsigned	xdim = 0, ydim = 0, zdim = 0;
+
+//  bool		ascii = false, rescale = false;
+//  unsigned	xdim = 0, ydim = 0, zdim = 0;
 
   AimsApplication	app( argc, argv, 
 			     "Performs file format and data conversion" );
@@ -564,6 +594,9 @@ int main( int argc, const char **argv )
   app.addOption( proc.ascii, "-a", "write in ASCII mode if output format " 
                  "supports it (default: binary)", true );
   app.alias( "--ascii", "-a" );
+  app.addOption( proc.normal, "-n", "write normal in output file",
+                 true );
+    app.alias( "--normal", "-n" );
   app.addOption( proc.rescale, "-r", "rescale output values to amplitude of " 
                  "output format (if output format is an integer variant)", 
                  true );
@@ -575,52 +608,57 @@ int main( int argc, const char **argv )
                  "specify input maximum value for rescaling.",
                  true );
   app.addOption( proc.info.omin, "--omin",
-                 "specify output minimum value for rescaling.",
-                 true );
+				 "specify output minimum value for rescaling.",
+				 true );
   app.addOption( proc.info.omax, "--omax",
-                 "specify output maximum value for rescaling.",
-                 true );
+				 "specify output maximum value for rescaling.",
+				 true );
   app.addOption( proc.info.usevtypelimits, "--itypelimits",
-                 "uses input type limits instead of dynamic min max to rescale data dynamic.",
-                 true );
+				 "uses input type limits instead of dynamic min max to rescale data dynamic.",
+				 true );
   app.addOption( proc.form, "-f", "force a specific output format (GIS, "
 		 "VIDA, ...) (default: guessed by the output filename " 
 		 "extension)", true );
   app.alias( "--format", "-f" );
   app.addOption( proc.type, "-t", "output data type (only applicable to " 
-                 "volumes or textures of scalars, default: same as input)", 
-                 true );
+				 "volumes or textures of scalars, default: same as input)",
+				 true );
   app.alias( "--type", "-t" );
   app.addOption( proc.otype, "-c", "change object type in addition to data " 
-                 "type, currently only applicable to Bucket of VOID <-> " 
-                 "Volume", true );
+				 "type, currently only applicable to Bucket of VOID <-> "
+				 "Volume", true );
   app.alias( "--change", "-c" );
   app.alias( "--otype", "-c" );
   app.addOption( proc.xdim, "-x", "(for output volumes only) forces output " 
-                 "volume dimension", true );
+				 "volume dimension", true );
   app.alias( "--xdim", "-x" );
   app.addOption( proc.ydim, "-y", "(for output volumes only) forces output " 
-                 "volume dimension", true );
+				 "volume dimension", true );
   app.alias( "--ydim", "-y" );
   app.addOption( proc.zdim, "-z", "(for output volumes only) forces output " 
-                 "volume dimension", true );
+				 "volume dimension", true );
   app.alias( "--zdim", "-z" );
 
   try
     {
-      app.initialize();
+	  app.initialize();
+
+      setlocale(LC_ALL,"C");
+
+      cout << "fileTestGifti  : " << endl;
 
       //	Our specific process
-      cout << "filein  : " << filein << endl;
-      cout << "fileout : " << fileout << endl;
-      cout << "ascii   : " << ascii << endl;
-      cout << "rescale : " << rescale << endl;
-      cout << "format  : " << format << endl;
-      cout << "type    : " << type << endl;
-      cout << "objtype : " << otype << endl;
-      cout << "xdim    : " << xdim << endl;
-      cout << "ydim    : " << ydim << endl;
-      cout << "zdim    : " << zdim << endl;
+      cout << "filein  : " << pi.filename << endl;
+      cout << "fileout : " << proc.file << endl;
+      cout << "ascii   : " << proc.ascii << endl;
+      cout << "normal  : " << proc.normal << endl;
+      cout << "rescale : " << proc.rescale << endl;
+      cout << "format  : " << proc.form << endl;
+      cout << "type    : " << proc.type << endl;
+      cout << "objtype : " << proc.otype << endl;
+      cout << "xdim    : " << proc.xdim << endl;
+      cout << "ydim    : " << proc.ydim << endl;
+      cout << "zdim    : " << proc.zdim << endl;
       ostringstream vminstream;
       vminstream << (double)proc.info.vmin;
       cout << "imin    : " << (isnan<double>( proc.info.vmin ) ? "default" : vminstream.str()) << endl;
@@ -635,6 +673,8 @@ int main( int argc, const char **argv )
       cout << "omax    : " << (isnan<double>( proc.info.omax ) ? "default" : omaxstream.str()) << endl;
 
       //	Use the Process mechanism to switch on types
+      //cout << "filename process  : " << pi.filename << endl;
+
       if( !proc.execute( pi.filename ) )
 	cout << "Couldn't convert file - aborted";
     }
