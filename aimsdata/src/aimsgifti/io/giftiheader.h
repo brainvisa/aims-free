@@ -62,6 +62,9 @@ namespace aims
     const std::string& name() const;
     void setName( const std::string & fname ) { _name = fname; }
 
+    const carto::Object options() const { return _options; }
+    void setOptions( carto::Object opt ) { _options = opt; }
+
     virtual std::string extension() const;
 
     bool read();
@@ -89,6 +92,7 @@ namespace aims
     void giftiAddTextureObject( gifti_image* gim, carto::Object texture );
 
     std::string _name;
+    carto::Object _options;
   };
 
 }

@@ -51,9 +51,15 @@ namespace aims
                                     TimeTexture<T> & vol,
                                     const carto::AllocatorContext
                                         & /*context*/,
-                                    carto::Object /*options*/ )
+                                    carto::Object options )
   {
+
+    std::cout << "gifti texture read\n";
+
     GiftiHeader hdr( filename );
+
+    setOptions(options);
+
     if( !hdr.read() )
       carto::io_error::launchErrnoExcept( hdr.name() );
 
@@ -62,6 +68,17 @@ namespace aims
     {
       throw carto::format_error( "could not re-read GIFTI file", hdr.name() );
     }
+
+    carto::Object da_label;
+		try
+		{
+		  da_label = hdr.getProperty( "GIFTI_labels_table" );
+		  std::cout << "lecture label OK\n";
+		}
+		catch( ... )
+		{
+		}
+
     int nda = gim->numDA, i;
     int ttex = 0;
     for( i=0; i<nda; ++i )
@@ -95,18 +112,19 @@ namespace aims
     vol.setHeader( hdr );
     gifti_free_image( gim );
 
-    std::cout << "gifti texture read OK\n";
+    std::cout << "OK\n";
     return true;
   }
 
   template<typename T>
   bool GiftiTextureFormat<T>::write( const std::string & filename,
                                      const TimeTexture<T> & thing,
-                                     bool )
+                                     bool ascii)
   {
+
+    std::cout << "gifti texture write\n";
     try
       {
-        // std::cout << "GiftiTextureFormat<T>::write\n";
         const PythonHeader & thdr = thing.header();
         GiftiHeader hdr( filename );
         hdr.copy( thdr );
@@ -122,20 +140,35 @@ namespace aims
         catch( ... )
         {
         }
+        bool test_ascii = false;
 
-        hdr.giftiAddTexture( gim, thing );
-        // metadata
-        carto::Object dainf
-          = GiftiHeader::giftiFindHdrDA( hdrtexda, da_info, "" );
-        if( !dainf.isNone() )
-        {
-          ++hdrtexda;
-          GiftiHeader::giftiCopyMetaToGii( dainf, gim->darray[gim->numDA-1] );
-        }
+        if( !options().isNull() )
+			{
+			  try
+			  {
+				carto::Object a = options()->getProperty( "ascii" );
+				ascii = (bool) a->getScalar();
+				hdr.setOptions(options());
+			  }
+			  catch( ... )
+			  {
+			  }
+			}
+
+        hdr.giftiAddTexture( gim, thing);
 
         // add external textures
         hdr.giftiAddExternalTextures( gim, hdrtexda, da_info );
 
+        carto::Object da_label;
+		try
+		{
+		  da_label = thdr.getProperty( "GIFTI_labels_table" );
+		  std::cout << "ecriture label OK\n";
+		}
+		catch( ... )
+		{
+		}
         // labels table
         hdr.giftiAddLabelTable( gim );
 
@@ -151,18 +184,19 @@ namespace aims
           hdr.removeProperty( "GIFTI_dataarrays_info" );
         if( hdr.hasProperty( "file_type" ) )
           hdr.removeProperty( "file_type" );
+        if( hdr.hasProperty( "GIFTI_labels_table") )
+          hdr.removeProperty( "GIFTI_labels_table" );
         hdr.writeMinf( fname + ".minf" );
 
+        std::cout << "OK\n";
         return true;
       }
     catch( std::exception & e )
       {
         return false;
       }
-
     return true;
   }
-
 }
 
 #endif

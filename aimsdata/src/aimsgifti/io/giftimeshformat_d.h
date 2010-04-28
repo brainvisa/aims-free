@@ -39,11 +39,12 @@
 #include <aims/io/giftiutil.h>
 #include <aims/io/process.h>
 #include <aims/io/finder.h>
+#include <aims/io/writer.h>
+#include <aims/io/reader.h>
 extern "C"
 {
 #include <gifti_io.h>
 }
-
 
 namespace aims
 {
@@ -162,9 +163,30 @@ namespace aims
   bool GiftiMeshFormat<D, T>::read( const std::string & filename,
                                     AimsTimeSurface<D, T> & vol,
                                     const carto::AllocatorContext & /*context*/,
-                                    carto::Object /*options*/ )
+                                    carto::Object options )
   {
+    bool test_ascii = false;
+    bool test_normal = false;
+
     GiftiHeader hdr( filename );
+
+    if( !options.isNull() )
+    	{
+    	  try
+    	  {
+    		carto::Object a = options->getProperty( "ascii" );
+    		test_ascii = (bool) a->getScalar();
+    		carto::Object n = options->getProperty( "normal" );
+    		test_normal = (bool) n->getScalar();
+    		std::cout << "lecture ascii =  " << (bool) a->getScalar();
+    	  }
+    	  catch( ... )
+    	  {
+    	  }
+    	}
+
+    setOptions(options);
+
     if( !hdr.read() )
       carto::io_error::launchErrnoExcept( hdr.name() );
 
@@ -173,6 +195,7 @@ namespace aims
     {
       throw carto::format_error( "could not re-read GIFTI file", hdr.name() );
     }
+
     int nda = gim->numDA, i;
     int tmesh = -1, ttex = -1, tnorm = -1, tpoly = -1, nts = 0;
     for( i=0; i<nda; ++i )
@@ -316,14 +339,14 @@ namespace aims
   template<int D, typename T>
   bool GiftiMeshFormat<D, T>::write( const std::string & filename,
                                      const AimsTimeSurface<D, T> & thing,
-                                     bool )
+                                     bool ascii)
   {
-    try
+      try
       {
-        // std::cout << "GiftiMeshFormat<D, T>::write\n";
         const PythonHeader & thdr = thing.header();
         GiftiHeader hdr( filename );
         hdr.copy( thdr );
+
         if( hdr.hasProperty( "nb_t_pos" ) )
           hdr.removeProperty( "nb_t_pos" );
         gifti_image *gim = hdr.giftiImageBase();
@@ -339,6 +362,24 @@ namespace aims
         {
         }
 
+        bool normal = false;
+        bool ascii = false;
+
+        if( !options().isNull() )
+		{
+		  try
+		  {
+            carto::Object n = options()->getProperty( "normal" );
+			normal = (bool) n->getScalar();
+			carto::Object a = options()->getProperty( "ascii" );
+			ascii = (bool) a->getScalar();
+
+			hdr.setOptions(options());
+		  }
+		  catch( ... )
+		  {
+		  }
+		}
         int nda = 0, t = 0;
         typename AimsTimeSurface<D, T>::const_iterator is, es=thing.end();
 
@@ -363,8 +404,13 @@ namespace aims
             da->dims[5] = 0;
             da->nvals = vert.size() * 3;
             da->nbyper = 4;
+
+			if (ascii)
+			  da->encoding = GIFTI_ENCODING_ASCII;
+
             gifti_alloc_DA_data( gim, &nda, 1 );
             unsigned i, n = vert.size();
+
             float *buf = reinterpret_cast<float *>( da->data );
             for( i=0; i<n; ++i )
             {
@@ -372,6 +418,7 @@ namespace aims
               buf[i*3+1] = vert[i][1];
               buf[i*3+2] = vert[i][2];
             }
+
             if( t != is->first )
             {
               // store timestep
@@ -390,53 +437,62 @@ namespace aims
               GiftiHeader::giftiCopyMetaToGii( dainf, da );
             }
           }
+
           // write normals
-          const std::vector<Point3df> & norm = surf.normal();
-          if( !norm.empty() )
+          if (normal)
           {
-            nda = gim->numDA;
-            gifti_add_empty_darray( gim, 1 );
-            giiDataArray * da = gim->darray[nda];
-            gifti_set_DA_defaults( da );
-            da->intent = NIFTI_INTENT_VECTOR;
-            da->datatype = NIFTI_TYPE_FLOAT32;
-            da->num_dim = 2;
-            da->dims[0] = norm.size();
-            da->dims[1] = 3;
-            da->dims[2] = 0;
-            da->dims[3] = 0;
-            da->dims[4] = 0;
-            da->dims[5] = 0;
-            da->nvals = norm.size() * 3;
-            da->nbyper = 4;
-            gifti_alloc_DA_data( gim, &nda, 1 );
-            unsigned i, n = norm.size();
-            float *buf = reinterpret_cast<float *>( da->data );
-            for( i=0; i<n; ++i )
-            {
-              buf[i*3] = norm[i][0];
-              buf[i*3+1] = norm[i][1];
-              buf[i*3+2] = norm[i][2];
-            }
+			  const std::vector<Point3df> & norm = surf.normal();
+			  if( !norm.empty() )
+			  {
+				nda = gim->numDA;
+				gifti_add_empty_darray( gim, 1 );
+				giiDataArray * da = gim->darray[nda];
+				gifti_set_DA_defaults( da );
+				da->intent = NIFTI_INTENT_VECTOR;
+				da->datatype = NIFTI_TYPE_FLOAT32;
+				da->num_dim = 2;
+				da->dims[0] = norm.size();
+				da->dims[1] = 3;
+				da->dims[2] = 0;
+				da->dims[3] = 0;
+				da->dims[4] = 0;
+				da->dims[5] = 0;
+				da->nvals = norm.size() * 3;
+				da->nbyper = 4;
 
-            if( t != is->first )
-            {
-              // store timestep
-              std::ostringstream ts;
-              ts << is->first;
-              gifti_add_to_meta( &da->meta, "Timestep", ts.str().c_str(), 1 );
-            }
+				if (ascii)
+				  da->encoding = GIFTI_ENCODING_ASCII;
 
-            // metadata
-            carto::Object dainf
-              = GiftiHeader::giftiFindHdrDA( hdrnormda, da_info,
-                                             "NIFTI_INTENT_VECTOR" );
-            if( !dainf.isNone() )
-            {
-              ++hdrnormda;
-              GiftiHeader::giftiCopyMetaToGii( dainf, da );
-            }
+				gifti_alloc_DA_data( gim, &nda, 1 );
+				unsigned i, n = norm.size();
+				float *buf = reinterpret_cast<float *>( da->data );
+				for( i=0; i<n; ++i )
+				{
+				  buf[i*3] = norm[i][0];
+				  buf[i*3+1] = norm[i][1];
+				  buf[i*3+2] = norm[i][2];
+				}
+
+				if( t != is->first )
+				{
+				  // store timestep
+				  std::ostringstream ts;
+				  ts << is->first;
+				  gifti_add_to_meta( &da->meta, "Timestep", ts.str().c_str(), 1 );
+				}
+
+				// metadata
+				carto::Object dainf
+				  = GiftiHeader::giftiFindHdrDA( hdrnormda, da_info,
+												 "NIFTI_INTENT_VECTOR" );
+				if( !dainf.isNone() )
+				{
+				  ++hdrnormda;
+				  GiftiHeader::giftiCopyMetaToGii( dainf, da );
+				}
+			  }
           }
+
           // write polygons
           {
             const std::vector<AimsVector<unsigned, D> > & poly
@@ -456,6 +512,10 @@ namespace aims
             da->dims[5] = 0;
             da->nvals = poly.size() * D;
             da->nbyper = 4;
+
+            if (ascii)
+              da->encoding = GIFTI_ENCODING_ASCII;
+
             gifti_alloc_DA_data( gim, &nda, 1 );
             unsigned i, j, n = poly.size();
             int *buf = reinterpret_cast<int *>( da->data );
@@ -523,8 +583,8 @@ namespace aims
           }
         }
 
-        // write all
         gifti_write_image( gim, fname.c_str(), 1 );
+
         gifti_free_image( gim );
         // .minf header
         if( hdr.hasProperty( "GIFTI_metadata") )

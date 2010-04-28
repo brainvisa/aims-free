@@ -35,10 +35,11 @@ static char * g_history[] =
   "1.0  13 May, 2008: based on release library version 1.0\n",
   "     - added -set_extern_filelist\n"
   "1.1  02 Oct, 2008: mention NITRC web site in help\n"
-  "1.2  17 Apr, 2009: added -set_extern_filelist help and more examples\n"
+  "1.2  17 Apr, 2009: added -set_extern_filelist help and more examples\n",
+  "1.3  24 Dec, 2009: added -approx_gifti option\n"
 };
 
-static char g_version[] = "gifti_tool version 1.2, 17 April 2009";
+static char g_version[] = "gifti_tool version 1.3, 24 December 2009";
 
 /* globals: verbosity, for now */
 typedef struct { int verb; } gt_globs;
@@ -57,7 +58,8 @@ static int process_opts(int argc, char *argv[], gt_opts * opts);
 static int show_version(void);
 
 /* the main event */
-int main( int argc, char * argv[] )
+//ARN 7_04_10
+int gifti_tools( int argc, char * argv[] )
 {
     gt_opts       opts;
     int           rv = 0;
@@ -127,7 +129,10 @@ static int process_opts(int argc, char *argv[], gt_opts * opts)
         }
 
         /* now alphabetical */
-        else if( !strcmp(argv[ac], "-b64_check") ) {
+        else if( !strcmp(argv[ac], "-approx_gifti") ) {
+            opts->approx_gifti = 1;
+            opts->gt_compare = 1;
+        } else if( !strcmp(argv[ac], "-b64_check") ) {
             ac++;
             CHECK_NEXT_OPT(ac, argc, "-b64_check");
             if     ( !strcmp(argv[ac], "NONE" ) )
@@ -483,8 +488,13 @@ int gt_compare(gt_opts * opts)
     gimA = gt_read_dataset(opts, opts->infiles.list[0]);
     gimB = gt_read_dataset(opts, opts->infiles.list[1]);
 
-    if( !gimA || !gimB ) rv0 = -1;  /* if failure, make no comparison */
-    else {
+    if( !gimA || !gimB ) { /* if failure, make no comparison */
+        gifti_free_image(gimA);
+        gifti_free_image(gimB);
+        return -1;
+    }
+
+    if( opts->comp_gifti || opts->comp_data ) {
         if( opts->comp_gifti ) {
             rv0 = gifti_compare_gifti_images(gimA, gimB, 0, opts->comp_verb);
             if( !rv0 && opts->comp_verb > 0 )
@@ -497,6 +507,14 @@ int gt_compare(gt_opts * opts)
         }
 
         rv0 |= rv1;
+    } 
+
+    if( opts->approx_gifti ) {
+            /* return value of approx is opposite that of compare */
+            rv0 = gifti_approx_gifti_images(gimA, gimB, 1, opts->comp_verb);
+            if( rv0 && opts->comp_verb > 0 )
+                printf("++ gifti_images are approximately equal\n");
+        rv0 = !rv0;  /* invert return value for exit status */
     }
 
     gifti_free_image(gimA);
@@ -950,7 +968,8 @@ static int show_hist(void)
 {
     int c, len = sizeof(g_history)/sizeof(char *);
     for( c = 0; c < len; c++)
-        printf(g_history[c]);
+        fputs(g_history[c], stdout);
+    putchar('\n');
     return 0;
 }
 
@@ -1097,9 +1116,16 @@ static int show_help()
     );
     printf (
     "    6. compare 2 gifti datasets\n"
-    "       (compare GIFTI structures, compare data, and report all diffs)\n"
+    "\n"
+    "      a. compare GIFTI structures, compare data, and report all diffs\n"
     "\n"
     "         gifti_tool -compare_gifti -compare_data -compare_verb 3 \\\n"
+    "                    -infiles created.gii first_mod.gii\n"
+    "\n"
+    "      b. report approximate comparison: focusing on data, but allowing\n"
+    "         for small, fractional differences varying per datatype\n"
+    "\n"
+    "         gifti_tool -approx_gifti -compare_verb 3 \\\n"
     "                    -infiles created.gii first_mod.gii\n"
     "\n"
     "    7. copy MetaData from one dataset to another\n"
@@ -1213,7 +1239,7 @@ static int show_help()
     "\n"
     "           The other special way is to specify which DataArray elements\n"
     "           should be read in, using AFNI-style syntax within '[]'.  The\n"
-    "           quotes prevent the shell from interpretting the brackets.\n"
+    "           quotes prevent the shell from interpreting the brackets.\n"
     "\n"
     "           DataArray indices are zero-based.\n"
     "\n"
@@ -1252,7 +1278,7 @@ static int show_help()
     "\n"
     "           e.g. -verb 2\n"
     "\n"
-    "           Pring extra information to the screen.  The VERB level can\n"
+    "           Print extra information to the screen.  The VERB level can\n"
     "           be from 0 to 8, currently.\n"
     "\n"
     "           Level 0 is considered 'quiet' mode, and should only report\n"
@@ -1395,7 +1421,7 @@ static int show_help()
     "\n"
     "           e.g. -mod_gim_atr Version 3.141592\n"
     "\n"
-    "           Set the GIFTI element attribute correponding to NAME to the\n"
+    "           Set the GIFTI element attribute corresponding to NAME to the\n"
     "           value, VALUE.\n"
     "\n"
     "           Given that numDA is computed and version will rarely change,\n"
@@ -1439,6 +1465,15 @@ static int show_help()
     printf (
     "  ----------------------------------------\n"
     "  comparison options\n"
+    "\n"
+    "     -approx_gifti            : approximate comparison of GIFTI dsets\n"
+    "\n"
+    "           This compares all data elements of the two GIFTI structures.\n"
+    "           The attributes, MetaData, etc. are ignored if they do not\n"
+    "           pertain directly to the data.\n"
+    "\n"
+    "           The comparisons allow for small, fractional differences,\n"
+    "           which depend on the datatype.\n"
     "\n"
     "     -compare_gifti           : specifies to compare two GIFTI datasets\n"
     "\n"
@@ -1502,7 +1537,7 @@ static int show_help()
     "\n"
     "           http://www.nitrc.org/projects/gifti\n"
     "\n"
-    "R Reynolds, National Institues of Health\n"
+    "R Reynolds, National Institutes of Health\n"
     "------------------------------------------------------------\n"
     );
     return 0;

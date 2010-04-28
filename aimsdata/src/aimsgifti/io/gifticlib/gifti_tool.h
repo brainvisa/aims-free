@@ -7,7 +7,7 @@ typedef struct { int len; int   * list; } gt_int_list;
 typedef struct {
     /* main action flags */
     int           gt_compare;   /* somehow compare 2 datasets           */
-    int           gt_copy;      /* copy things between 2 datasets        */
+    int           gt_copy;      /* copy things between 2 datasets       */
     int           gt_display;   /* display something                    */
     int           gt_write;     /* create output datasets               */
     int           gt_modify;    /* sub-action: to modify datasets       */
@@ -33,10 +33,11 @@ typedef struct {
     int           comp_gifti;   /* compare structures                   */
     int           comp_data;    /* compare data in DataArrays           */
     int           comp_verb;    /* set verbose level for compare_gifti  */
+    int           approx_gifti; /* approximate comparison of structures */
 
     /* copy options */
     int           copy_gim_meta;/* copy metadata between GIFTI elements */
-    int           copy_DA_meta; /* copy metadata between DA elements */
+    int           copy_DA_meta; /* copy metadata between DA elements    */
 
     /* GIFTI user options */
     int           verb;         /* verbose level                        */
@@ -100,5 +101,10 @@ int ewrite_many_lines(void **, int, long long, long long, int, FILE *);
 int write_1D_file    (giiDataArray **, int, char *, int);
 int write_as_asc     (gifti_image *, char *);
 int write_surf_file  (giiDataArray *, giiDataArray *, char *, int);
+
+//ARN 7_04_10
+int gifti_tools( int argc, char * argv[] );
+
+static int init_opts(gt_opts * opts);
 
 #endif /* GIFTI_TOOL_H */

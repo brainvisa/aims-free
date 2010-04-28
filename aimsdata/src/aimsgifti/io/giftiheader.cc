@@ -121,13 +121,19 @@ bool GiftiHeader::read()
   int i;
   string mname, mval;
 
-  // read meta-data
+  // read meta-data GIFTI file
+
   if( gim->meta.length > 0 )
   {
     Object o = Object::value( Dictionary() );
     for( i=0; i<gim->meta.length; ++i )
     {
       mname = gim->meta.name[i];
+
+//      std::cout << "lecture meta data" << std::endl;
+//      std::cout << mname << std::endl;
+//      std::cout << gim->meta.value[i] << std::endl;
+
       if( !gim->meta.value[i] )
         o->setProperty( mname, none() );
       else
@@ -156,14 +162,30 @@ bool GiftiHeader::read()
   }
 
   // read labels table
+  //gifti_disp_LabelTable("gim->labeltable", &gim->labeltable);
+
   if( gim->labeltable.length > 0 )
   {
     Object o = Object::value( IntDictionary() );
     for( i=0; i<gim->labeltable.length; ++i )
-      o->setArrayItem( gim->labeltable.index[i],
-                       Object::value( string( gim->labeltable.label[i] ) ) );
+      {
+      vector<float> rgba;
+      rgba.push_back( (float)(gim->labeltable.rgba[4*i]));
+      rgba.push_back( (float)(gim->labeltable.rgba[4*i+1]));
+      rgba.push_back( (float)(gim->labeltable.rgba[4*i+2]));
+      rgba.push_back( (float)(gim->labeltable.rgba[4*i+3]));
+
+      Object LabelTable = Object::value( Dictionary() );
+      LabelTable->setProperty( "RGB", rgba );
+      LabelTable->setProperty( "Label", Object::value( string( gim->labeltable.label[i])) );
+      o->setArrayItem( gim->labeltable.key[i], LabelTable );
+      }
+
     setProperty( "GIFTI_labels_table", o );
   }
+  // labels table
+
+  giftiAddLabelTable( gim );
 
   setProperty( "GIFTI_version", string( gim->version ) );
   if( gim->compressed )
@@ -181,10 +203,11 @@ bool GiftiHeader::read()
 
   for( i=0; i<nda; ++i )
   {
-    mesh = false;
+	mesh = false;
     tex = false;
     int nt = 1;
     giiDataArray *da = gim->darray[i];
+
     switch( da->intent )
     {
     case NIFTI_INTENT_POINTSET:
@@ -201,6 +224,7 @@ bool GiftiHeader::read()
       polynum = da->dims[0];
       break;
     case NIFTI_INTENT_TIME_SERIES:
+
       if( nts == 0 )
         ++ntex;
       ++nts;
@@ -211,6 +235,7 @@ bool GiftiHeader::read()
                                     nt );
       if( nts > nttex )
         nttex = nts;
+
       break;
     default:
       ++ntex;
@@ -224,30 +249,36 @@ bool GiftiHeader::read()
         nttex = nt;
     }
 
-    // read meta-data
-    Object daattr2 = Object::value( Dictionary() );
-    if( da->meta.length > 0 )
+	Object daattr2 = Object::value( Dictionary() );
+
+     //read meta-data dataArray
+	if( da->meta.length > 0 )
     {
-      Object o = Object::value( Dictionary() );
-      for( j=0; j<da->meta.length; ++j )
-      {
-        mname = da->meta.name[j];
-        if( !da->meta.value[j] )
-        {
-          o->setProperty( mname, none() );
-          if( tex && mname == "Name" )
-            texnames.push_back( "<unnamed>" );
-        }
-        else
-        {
-          mval = da->meta.value[j];
-          o->setProperty( mname, mval );
-          if( tex && mname == "Name" )
-            texnames.push_back( mval );
-        }
-      }
-      daattr2->setProperty( "GIFTI_metadata", o );
-    }
+        Object o = Object::value( Dictionary() );
+		for( j=0; j<da->meta.length; ++j )
+		{
+		  mname = da->meta.name[j];
+		  //std::cout << mname << ":" ;
+          //value = gifti_get_meta_value(&da->meta, mname.c_str());
+
+		  if( !da->meta.value[j] )
+		  {
+			o->setProperty( mname, none() );
+			if( tex && mname == "Name" )
+			  texnames.push_back( "<unnamed>" );
+		  }
+		  else
+		  {
+			mval = da->meta.value[j];
+			o->setProperty( mname, mval );
+
+			if( tex && mname == "Name" )
+			  texnames.push_back( mval );
+		  }
+		}
+		daattr2->setProperty( "GIFTI_metadata", o );
+	}
+
     if( da->ex_atrs.length > 0 )
     {
       Object o = Object::value( Dictionary() );
@@ -264,7 +295,6 @@ bool GiftiHeader::read()
       }
       daattr2->setProperty( "GIFTI_extra_attributes", o );
     }
-
     // read coordinates system info
     if( da->numCS > 0 )
     {
@@ -282,7 +312,7 @@ bool GiftiHeader::read()
       {
         string dataspace = da->coordsys[i]->dataspace;
         dataspace = niftiReferential( dataspace );
-//         o->setProperty( "referential", dataspace );
+        //o->setProperty( "referential", dataspace );
         if( mesh && nmesh == 1 && j == 0
           && dataspace != "Arbitrary coordinates" )
           // share ref/transfo information in the main header
@@ -333,6 +363,7 @@ bool GiftiHeader::read()
     if( daattr2->size() != 0 )
       daattr->setArrayItem( i, daattr2 );
   }
+
   if( daattr->size() != 0 )
     setProperty( "GIFTI_dataarrays_info", daattr );
 
@@ -503,6 +534,7 @@ namespace
 }
 
 
+
 template <typename T>
 void GiftiHeader::giftiAddTexture( gifti_image* gim,
                                    const TimeTexture<T> & tex )
@@ -514,6 +546,9 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
   for( it=tex.begin(); it!=et; ++it )
     if( it->second.nItem() > nmax )
       nmax = it->second.nItem();
+
+  int hdrtexda = 0;
+
 
   for( it=tex.begin(); it!=et; ++it, ++t )
   {
@@ -538,10 +573,47 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
       da->dims[5] = 0;
       giftiAllocDAData<T>()( gim, da, nmax, 1 );
       giftiFillTextureBuffer<T>()( da, tx, nmax, 0 );
+
+      carto::Object da_info;
+        try
+        {
+      	da_info = getProperty( "GIFTI_dataarrays_info" );
+        }
+        catch( ... )
+        {
+        }
+
+        bool ascii = false;
+
+        if( !options().isNull() )
+		{
+		  try
+		  {
+			carto::Object n =  options()->getProperty( "ascii" );
+			ascii = (bool) n->getScalar();
+		  }
+		  catch( ... )
+		  {
+		  }
+		}
+
+      if (ascii)
+        da->encoding = GIFTI_ENCODING_ASCII;
+
+      string mname,mval;
+      // metadata dataArray
+	  carto::Object dainf
+	   = GiftiHeader::giftiFindHdrDA( hdrtexda, da_info,
+									  "" );
+	 if( !dainf.isNone() )
+	 {
+       ++hdrtexda;
+       GiftiHeader::giftiCopyMetaToGii( dainf, da );
+     }
+
     }
   }
 }
-
 
 template <typename T>
 void GiftiHeader::giftiAddTextureObject( gifti_image* gim, Object texture )
@@ -601,6 +673,100 @@ void GiftiHeader::giftiAddExternalTextures( gifti_image *gim, int & hdrtexda,
   }
 }
 
+//
+//void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
+//{
+//  if( hasProperty( "GIFTI_labels_table" ) )
+//  {
+//  carto::IntDictionary lt;
+//  getProperty( "GIFTI_labels_table", lt );
+//  carto::IntDictionary::const_iterator it, et = lt.end();
+//  giiLabelTable & glt = gim->labeltable;
+//  glt.length = lt.size();
+//  glt.key = (int *) malloc( glt.length * sizeof( int ) );
+//  glt.label = (char **) malloc( glt.length * sizeof( char * ) );
+////  glt.rgba = (float *) malloc( 4 * glt.length * sizeof( float ) );
+//  int i = 0;
+//  for( it=lt.begin(); it!=et; ++it, ++i )
+//    try
+//    {
+//      glt.key[i] = it->first;
+//
+//      //Object LabelTable = it->second;
+//      //Object LabelTable = Object::value( Dictionary() );
+////
+////      if( it->second.isNone() )
+////        glt.label[i] = 0;
+////      else
+////        {
+////    	std::string label;
+////    	try
+////    	  {
+////          //LabelTable->getProperty( "Label", label );
+////    	  }
+////    	catch( ... )
+////    	  {
+////    	  glt.label[i] = 0;
+////    	  }
+////    	  //glt.label[i] = strdup( it->second->getString().c_str() );
+////        }
+//    }
+//    catch( ... )
+//    {
+//      glt.key[i] = 0;
+//      glt.label[i] = 0;
+//    }
+//
+////	carto::IntDictionary lt;
+////	getProperty( "GIFTI_labels_table", lt );
+////
+////    carto::IntDictionary::const_iterator it, et = lt.end();
+////
+////    giiLabelTable & glt = gim->labeltable;
+////    glt.length = lt.size();
+////
+////    glt.key = (int *) malloc( glt.length * sizeof( int ) );
+////    glt.label = (char **) malloc( glt.length * sizeof( char * ) );
+////    glt.rgba = (float *) malloc( 4 * glt.length * sizeof( float ) );
+////
+////    int i = 0;
+////    for( it=lt.begin(); it!=et; ++it, ++i )
+//    //for( ; it->isValid(); i++, it->next() )
+//      {
+//        //Object el = it->currentValue();
+//
+//
+////        glt.key[i] = it->first;
+////
+////        Object LabelTable = it->second;
+////
+////        std::string label;
+////        LabelTable->getProperty( "Label", label );
+////
+////        if( it->second.isNone() )
+////          glt.label[i] = 0;
+////        else
+////          {
+////          glt.label[i] = strdup( it->second->getString().c_str() );
+////
+////          //std::cout << label << " " << std::endl;
+////
+////          std::vector<float> rgba;
+////          LabelTable->getProperty( "RGB", rgba );
+////          vector<float>::iterator itrgb = rgba.begin();
+////
+////          for (int j = 0; itrgb != rgba.end();itrgb++,j++)
+////		    {
+////            glt.rgba[j]=  *itrgb;
+////            //std::cout << (float)*itrgb << " ";
+////            }
+////          }
+//
+//      }
+//
+//    //removeProperty( "GIFTI_labels_table" );
+//  }
+//}
 
 void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
 {
@@ -611,24 +777,46 @@ void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
     carto::IntDictionary::const_iterator it, et = lt.end();
     giiLabelTable & glt = gim->labeltable;
     glt.length = lt.size();
-    glt.index = (int *) malloc( glt.length * sizeof( int ) );
+    glt.key = (int *) malloc( glt.length * sizeof( int ) );
     glt.label = (char **) malloc( glt.length * sizeof( char * ) );
+    glt.rgba = (float *) malloc( 4 * glt.length * sizeof( float ) );
     int i = 0;
+
+    Object LabelTable = Object::value( Dictionary() );
+
     for( it=lt.begin(); it!=et; ++it, ++i )
       try
       {
-        glt.index[i] = it->first;
+        glt.key[i] = it->first;
+        //std::cout << glt.key[i] << "\n";
+
+        LabelTable = it->second;
+
         if( it->second.isNone() )
           glt.label[i] = 0;
         else
-          glt.label[i] = strdup( it->second->getString().c_str() );
+          {
+        	LabelTable = it->second;
+        	std::string label;
+        	LabelTable->getProperty( "Label", label );
+        	glt.label[i] = strdup( label.c_str() );
+        	//std::cout << glt.label[i] << "\n";
+        	std::vector<float> rgba;
+		    LabelTable->getProperty( "RGB", rgba );
+		    vector<float>::iterator itrgb = rgba.begin();
+		    for (int j = 0; itrgb != rgba.end();itrgb++,j++)
+			  {
+			  glt.rgba[4*i + j]=  *itrgb;
+			  //std::cout << (float)*itrgb << " ";
+			  }
+          }
       }
       catch( ... )
       {
-        glt.index[i] = 0;
+        glt.key[i] = 0;
         glt.label[i] = 0;
       }
-    removeProperty( "GIFTI_labels_table" );
+    //removeProperty( "GIFTI_labels_table" );
   }
 }
 
@@ -646,6 +834,8 @@ Object GiftiHeader::giftiFindHdrDA( int & nda, Object dainfo,
   for( ; it->isValid(); ++i, it->next() )
   {
     Object el = it->currentValue();
+    //std::cout << intentit << std::endl;
+
     if( el->getProperty( "intent", intentit ) )
     {
       if( intent.empty() )
@@ -660,6 +850,8 @@ Object GiftiHeader::giftiFindHdrDA( int & nda, Object dainfo,
           continue;
         inf = el;
       nda = i;
+
+      //std::cout << i << std::endl;
       break;
     }
   }
