@@ -18,6 +18,16 @@ typedef std::list<%Template1% > list_%Template1typecode%;
       || sipCanConvertToInstance( sipPy,
         sipClass_list_%Template1typecode%, SIP_NOT_NONE | SIP_NO_CONVERTORS );
 
+  if( PyObject_IsInstance( sipPy, (PyObject *) 
+      sipClass_list_%Template1typecode% ) )
+  {
+    *sipCppPtr =
+      (list_%Template1typecode% *)
+      sipConvertToInstance( sipPy,
+        sipClass_list_%Template1typecode%,
+        0, SIP_NO_CONVERTORS, 0, sipIsErr );
+    return 0;
+  }
   if( PySequence_Check( sipPy ) )
   {
     *sipCppPtr = new std::list<%Template1% >;
