@@ -29,9 +29,17 @@ namespace aims
     virtual ~Transformation3d();
 
     virtual Point3dd transform( const Point3dd & pos ) const = 0;
+    virtual Point3df transform( const Point3df & dir ) const;
+    virtual Point3dd transform( double x, double y, double z ) const;
     virtual Point3dd transformVector( const Point3dd & vec ) const;
+    virtual Point3df transformVector( const Point3df & dir ) const;
+    virtual Point3dd transformVector( double x, double y, double z ) const;
     virtual Point3dd transformNormal( const Point3dd & dir ) const;
+    virtual Point3df transformNormal( const Point3df & dir ) const;
+    virtual Point3dd transformNormal( double x, double y, double z ) const;
     Point3dd transformUnitNormal( const Point3dd & dir ) const;
+    Point3df transformUnitNormal( const Point3df & dir ) const;
+    Point3dd transformUnitNormal( double x, double y, double z ) const;
 
     SIP_PYOBJECT transformPoints( SIP_PYOBJECT ) const /Factory/;
 %MethodCode
@@ -63,9 +71,8 @@ namespace aims
         double *opoint = (double *) ((PyArrayObject *) sipRes)->data;
         for( i=0; i<npoints; ++i )
         {
-          Point3dd vec( *(double *)point, *(double *) (point+stride1),
-            *(double *) (point+stride1*2) );
-          Point3dd tvec = sipCpp->transform( vec );
+          Point3dd tvec = sipCpp->transform( *(double *)point,
+            *(double *) (point+stride1), *(double *) (point+stride1*2) );
           *opoint++ = tvec[0];
           *opoint++ = tvec[1];
           *opoint++ = tvec[2];
