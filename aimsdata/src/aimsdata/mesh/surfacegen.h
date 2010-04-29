@@ -111,6 +111,11 @@ attributes = {
     static AimsSurfaceTriangle* sphere( const Point3df & p1, float radius, 
                                         unsigned nfacets,
                                         bool uniquevertices = false );
+    static AimsSurfaceTriangle*
+    ellipse( const carto::GenericObject & params );
+    static AimsSurfaceTriangle* ellipse( const Point3df & p1, float radius1, float radius2,
+                                            unsigned nfacets,
+                                            bool uniquevertices = false );
   };
 
 }

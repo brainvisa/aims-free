@@ -90,6 +90,12 @@ namespace
     virtual Object parameters() const;
   };
 
+  struct EllipseGen : public SurfaceGenerator::Generator
+  {
+      virtual AimsSurfaceTriangle*
+      generator( const carto::GenericObject & ) const;
+      virtual Object parameters() const;
+  };
 
   map<string, rc_ptr<SurfaceGenerator::Generator> > & generators()
   {
@@ -108,6 +114,8 @@ namespace
           = rc_ptr<SurfaceGenerator::Generator>( new IcosahedronGen );
         functs[ "sphere"      ] 
           = rc_ptr<SurfaceGenerator::Generator>( new SphereGen );
+        functs[ "ellipse"      ]
+          = rc_ptr<SurfaceGenerator::Generator>( new EllipseGen );
       }
     return functs;
   }
@@ -259,6 +267,34 @@ namespace
     p[ "uniquevertices" ] = Object::value( string( "(optional) if set to "
                                            "1, the pole vertices are not "
                                            "duplicated( default: 0)" ) );
+    return d;
+  }
+  
+  AimsSurfaceTriangle*
+  EllipseGen::generator( const carto::GenericObject & x ) const
+  {
+      return SurfaceGenerator::ellipse( x );
+  }
+
+  Object EllipseGen::parameters() const
+  {
+    Object      d = Object::value( Dictionary() );
+    Dictionary  & p = d->value<Dictionary>();
+    p[ "center" ] = Object::value( string( "3D position of the center, may "
+    "also be specified as 'point1' "
+    "parameter" ) );
+    p[ "radius1" ] = Object::value( string( "radius1" ) );
+    p[ "radius2" ] = Object::value( string( "radius2" ) );
+    p[ "facets" ] = Object::value( string( "(optional) number of facets of "
+    "the sphere. May also be specified "
+    "as 'nfacets' parameter "
+    "(default: 225)" ) );
+    /*    p[ "smooth" ] = Object::value( string( "(optional) make smooth normals "
+    "and shared vertices (default: "
+    "0)" ) );*/
+    p[ "uniquevertices" ] = Object::value( string( "(optional) if set to "
+    "1, the pole vertices are not "
+    "duplicated( default: 0)" ) );
     return d;
   }
 
@@ -1139,5 +1175,77 @@ SurfaceGenerator::sphere( const Point3df & p1, float radius,
     mesh->updateNormals();
 
   return mesh;
+}
+
+AimsSurfaceTriangle* SurfaceGenerator::ellipse( const carto::GenericObject & params ) {
+    Object        vp1;
+    float         radius1, radius2;
+    unsigned      nfacets = 15*15;
+    bool          uniquevert = false;
+    // bool          smth = false;
+    
+    try
+    {
+        vp1 = params.getProperty( "center" );
+    }
+    catch( exception & )
+    {
+        vp1 = params.getProperty( "point1" );
+    }
+    radius1 = (float) params.getProperty( "radius1" )->getScalar();
+    radius2 = (float) params.getProperty( "radius2" )->getScalar();
+    
+    try
+    {
+        nfacets = (unsigned) params.getProperty( "facets" )->getScalar();
+    }
+    catch( exception & )
+    {
+        try
+        {
+            nfacets = (unsigned) params.getProperty( "nfacets" )->getScalar();
+        }
+        catch( exception & )
+        {
+        }
+    }
+    
+    //   try
+    //     {
+        //       smth = (bool) params.getProperty( "smooth" )->getScalar();
+        //     }
+        //   catch( exception & )
+        //     {
+            //     }
+            
+            try
+            {
+                uniquevert = (bool) params.getProperty( "uniquevertices" )->getScalar();
+            }
+            catch( exception & )
+            {
+            }
+            
+            Point3df p;
+            int i = 0;
+            Object it;
+            for( it=vp1->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
+                p[i] = it->currentValue()->getScalar();
+            
+            return ellipse(p, radius1, radius2, nfacets, uniquevert );
+
+}
+
+AimsSurfaceTriangle* SurfaceGenerator::ellipse( const Point3df & p1, float radius1, float radius2,
+                                    unsigned nfacets,
+                                    bool uniquevertices ){
+    AimsSurfaceTriangle           *mesh = new AimsSurfaceTriangle;
+    mesh = sphere(p1, radius1, nfacets, uniquevertices);
+    for ( uint i = 0 ; i < (*mesh)[0].vertex().size() ; i++ ){
+        (*mesh)[0].vertex()[i] -= p1;
+        (*mesh)[0].vertex()[i][1] /= radius1 / radius2;
+        (*mesh)[0].vertex()[i] += p1;
+    }
+    return mesh;
 }
 
