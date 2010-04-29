@@ -49,6 +49,7 @@
 #include <iostream>
 #include <iomanip>
 #include <math.h>
+#include <aims/math/random.h>
 
 using namespace std;
 using namespace aims;
@@ -73,14 +74,14 @@ PpcaAnalyserElement::init( const std::list<int>& selectedIndividuals, double ini
 			   const AimsData<T>& individuals, double noiseRef )
 {
   AimsData<T> indivMatrix( max(int(selectedIndividuals.size()), 1), individuals.dimY() ) ;
-  list<int>::const_iterator iter( selectedIndividuals.begin() ), 
-    last( selectedIndividuals.end() ) ; 
+  list<int>::const_iterator iter( selectedIndividuals.begin() ),
+    last( selectedIndividuals.end() ) ;
   int i = 0 ;
 
   while( iter != last ){
     for( int t = 0 ; t < individuals.dimY() ; ++t )
       indivMatrix( i, t ) = individuals( *iter, t ) ;
-    ++i ; 
+    ++i ;
     ++iter ;
   }
 
@@ -244,7 +245,7 @@ PpcaAnalyserElement::newStep1( const AimsData<T>& indivMatrix, bool useOnlyCorrI
       sumInd += indivn[t] ;
       sumMean += _mean[t] ;
     }
-    // AJOUT 0411 calcul de la corrélation entre chaque individu et le vecteur moyen
+    // AJOUT 0411 calcul de la corrï¿½lation entre chaque individu et le vecteur moyen
     if( useOnlyCorrIndiv == 1 ){
       indMean = sumInd / (double)nbFrame ;
       meanMean = sumMean / (double)nbFrame ;
@@ -252,7 +253,7 @@ PpcaAnalyserElement::newStep1( const AimsData<T>& indivMatrix, bool useOnlyCorrI
 	corr += ( indivn[t] - indMean ) * ( _mean[t] - meanMean ) ;
       
       if( corr < 0. ){
-	// probabilité nulle si anti-corrélé
+	// probabilitï¿½ nulle si anti-corrï¿½lï¿½
 /* 	for( int t = 0 ; t < nbFrame ; ++t )       */
 /* 	  antiCorr( nbAntiCorr, t ) = indivn[t] ; */
 /* 	++nbAntiCorr ; */
@@ -595,7 +596,7 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
       }
     }
   }
-  if( sym == false ) cout << "--> Ci pas symétrique !" << endl ;
+  if( sym == false ) cout << "--> Ci pas symetrique !" << endl ;
 
 
   AimsData<double> u3 = Ci.clone();
@@ -661,7 +662,7 @@ PpcaAnalyserElement::newStep2( AimsData<double> pTn, const AimsData<T>& indivMat
 
     }
   
-  // AJOUT 12/11: calcul de l'énergie pour la mixture i Ei = nbOfInd * sigma2
+  // AJOUT 12/11: calcul de l'ï¿½nergie pour la mixture i Ei = nbOfInd * sigma2
   //_energy = nbIndTemp * _sigma2 ;
   cout << "energy = " << _energy ;
     
@@ -804,7 +805,7 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
   }
  
  
-// SAUVEGARDE DES CLASSES toutes les 10 itérations
+// SAUVEGARDE DES CLASSES toutes les 10 itï¿½rations
 //  AimsData< short > resultImage( data->dimX(), data->dimY(), data->dimZ() ) ;  // data inconnu ici
 //  resultImage.setSizeXYZT( data->sizeX(), data->sizeY(), data->sizeZ() ) ;
   if( nbOfIterations% 30  == 0  || theEnd ){
@@ -921,13 +922,13 @@ MixtureOfPPCA<T>::classesVisualisation( int nbOfIterations, const string & fileO
 	  fusion.insert( pair<double, Point2d> ( classCorrelationMatrix(i, j), Point2d(i, j) ) ) ;
       }
     
-    cout << "Classes à fusionner : " << endl ;
+    cout << "Classes ï¿½ fusionner : " << endl ;
 
     count = 0 ;
     for( multimap<double, Point2d>::reverse_iterator rit = fusion.rbegin() ; rit != fusion.rend() && count < 5 ; ++rit, ++count )
       cout << (rit->second)[0] << " avec " << (rit->second)[1] << " : " << rit->first << endl ;
     
-    cout << "Classe à séparer : " << endl ;
+    cout << "Classe ï¿½ sï¿½parer : " << endl ;
     count = 0 ;
     for( multimap<double, int>::reverse_iterator rit = split.rbegin() ; rit != split.rend() && count < 5  ; ++rit, ++count )
       cout << rit->second << " : " << rit->first << endl ;
@@ -1004,11 +1005,12 @@ MixtureOfPPCA<T>::distMatrixComputation()
 template <class T>
 MixtureOfPPCA<T>::MixtureOfPPCA( int nbOfClasses, int significantNumberOfVp, 
 				 int maxNbOfIterations, 
-				 const AimsData<T>& individuals, const std::vector< Point3d > indPosVector, 
+				 const AimsData<T>& individuals, const std::vector< Point3d > indPosVector,
 				 const std::vector< std::list <int> >& initialClasses,
-				 const std::string & fileOut, int runNb, int iterationToUseOnlyCorrelatedIndiv ) : 
+				 const std::string & fileOut, int runNb, int iterationToUseOnlyCorrelatedIndiv ) :
   _nbOfClasses( nbOfClasses ), _valid( true ), _significantNumberOfEigenValues( significantNumberOfVp ), _maxNbOfIterations( maxNbOfIterations ), _individuals( individuals ), _indPosVector( indPosVector ), _fileOut( fileOut ), _runNb( runNb ), _itToUseOnlyCorrelatedIndiv(iterationToUseOnlyCorrelatedIndiv)
 {
+  cout << "Entering MixtureOfPPCA Constructor" << endl ;
   
   double Pi_init = 1. / (double)_nbOfClasses ;
   _elements.reserve( _nbOfClasses ) ;  
@@ -1018,16 +1020,34 @@ MixtureOfPPCA<T>::MixtureOfPPCA( int nbOfClasses, int significantNumberOfVp,
   _sigma2init = vector<double>( _nbOfClasses ) ;
 
   cout << endl ;
-  
+  std::vector< std::list<int> > initClasses( initialClasses ) ;
+
+  if( initClasses.size() == 0 ){
+    initClasses = std::vector< std::list<int> >( _nbOfClasses ) ;
+    for( int i = 0 ; i < _individuals.dimX() ; ++i ){
+      double aux = UniformRandom( 0., 0.99999 ) ;
+      int c = int( aux * _nbOfClasses ) ;
+      initClasses[c].push_back( i ) ;
+    }
+    std::cout << std::endl ;
+  }
+
   for( int c = 0 ; c < _nbOfClasses ; ++c ){
-    if( int( initialClasses[c].size() ) > _individuals.dimY() ) {
+    std::cout << "Class " << c << " : ";
+    for( std::list<int>::iterator iter = initClasses[c].begin() ; iter < initClasses[c].end() ; ++iter )
+      std::cout << "\t" << (*iter) ;
+    std::cout << std::endl ;
+  }
+
+  for( int c = 0 ; c < _nbOfClasses ; ++c ){
+    if( int( initClasses[c].size() ) > _individuals.dimY() ) {
       PpcaAnalyserElement el( _significantNumberOfEigenValues ) ;
       cout << endl << "Initialization class " << c << " ..." ;
 
 /*       cout << endl << "numeros des indivs de la classe " << c << " : " ; */
 /*       count = 0 ; */
-/*       list<int>::const_iterator iter( initialClasses[c].begin() ),  */
-/* 	last( initialClasses[c].end() ) ; */
+/*       list<int>::const_iterator iter( initClasses[c].begin() ),  */
+/* 	last( initClasses[c].end() ) ; */
 /*       while( iter != last && count < 10 ){ */
 /* 	cout << *iter << " " ; */
 /* 	++count ; */
@@ -1036,11 +1056,11 @@ MixtureOfPPCA<T>::MixtureOfPPCA( int nbOfClasses, int significantNumberOfVp,
 
       // AJOUT: calcul d'un facteur noiseRef = bruit de la classe 0 pour normaliser normFactor
       if( c == 0 ){
-	el.init( initialClasses[c], Pi_init, individuals, _noiseRef ) ;
+	el.init( initClasses[c], Pi_init, individuals, _noiseRef ) ;
 	_noiseRef = el.getSigma2() ;
 	cout << "Noise Ref = " << setprecision(3) << _noiseRef << endl ;
       }
-      el.init( initialClasses[c], Pi_init, individuals, _noiseRef ) ;
+      el.init( initClasses[c], Pi_init, individuals, _noiseRef ) ;
       cout << "Class " << c << " initialized !" << endl ;
       _elements.push_back( el ) ;
     } 
@@ -1079,7 +1099,7 @@ MixtureOfPPCA<T>::doIt()
   do{
     for( int i = 0 ; i < _nbOfClasses ; ++i )    
       _finalClasses[i].clear() ;
-    cout << endl << "Iteration n°: " << nbOfIterations /*<< endl*/ ;
+    cout << endl << "Iteration nï¿½: " << nbOfIterations /*<< endl*/ ;
     
     // 1ERE PARTIE
     cout << endl << "Calcul des p(tn|i) pour chaque classe... " << endl ;
@@ -1112,7 +1132,7 @@ MixtureOfPPCA<T>::doIt()
 	sumOfEnergies += _elements[i].getEnergy() ;
 	criteria += _elements[i].getSumDiff2Rni() ;
 	
-	//------ AJOUT 12/11 pour visualiser les paramètres sous forme d'AimsData -----
+	//------ AJOUT 12/11 pour visualiser les paramï¿½tres sous forme d'AimsData -----
 	for( int t = 0 ; t < _individuals.dimY() ; ++t )
 	  imageOfMean( i, nbOfIterations, t ) = ( _elements[i].getMean() )[t] ;
 	imageOfSigma2( i, nbOfIterations ) = _elements[i].getSigma2() ; 
@@ -1149,11 +1169,11 @@ MixtureOfPPCA<T>::doIt()
     ++nbOfIterations ;
   } while( notYetTheEnd ) ;
   
-  // matrice des distances de chaque individu à chaque classe
+  // matrice des distances de chaque individu ï¿½ chaque classe
   /*   for( int i = 0 ; i < _nbOfClasses ; ++i ){ */
   /*     distToClass = _elements[i].getDist() ; */
   /*     for( int n = 0 ; n < distToClass.dimX() ; ++n ){ */
-  /*       // distToClass déjà au carré - division par la dimension */
+  /*       // distToClass dï¿½jï¿½ au carrï¿½ - division par la dimension */
       /*       _distToClasses(n, i) = distToClass[n] / _individuals.dimY() ;  */
       /*     } */
       /*   } */

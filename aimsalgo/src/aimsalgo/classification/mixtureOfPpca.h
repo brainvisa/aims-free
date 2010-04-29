@@ -76,21 +76,21 @@ class PpcaAnalyserElement
   template <class T>
     void doIt( const AimsData<T>& individuals, int totalNbOfIndividuals, double noiseRef = 1. ) ;
   
-  bool _useOnlyCorrIndiv ;                    // mis à true par doIt
+  bool _useOnlyCorrIndiv ;            // mis ï¿½ true par doIt
   int _significantNumberOfVp ;        // nb de valeurs propres significatives
-  bool _computed ;                    // mis à true par doIt
+  bool _computed ;                    // mis ï¿½ true par doIt
   double _Pi ;
-  AimsData<double> _dist ; 
-  AimsData<double> _pTni ; 
-  AimsData<double> _Rn ; 
-  AimsData<double> _mean ;    // meme dim que tn
-  AimsData<double> _Wi ;      // dim dxq
+  AimsData<double> _dist ;
+  AimsData<double> _pTni ;
+  AimsData<double> _Rn ;
+  AimsData<double> _mean ;       // meme dim que tn
+  AimsData<double> _Wi ;         // dim dxq
   AimsData<double> _invMi ;      // dim qxq
-  AimsData<double> _invCi ;   //   idem
+  AimsData<double> _invCi ;      //   idem
   double _sigma2 ;
   double _normFactor ;
-  int _explosionIndex ;  
-  double _sumDiff2Rni ;  // somme des (Rni - previousRni) au carré pour un i donné
+  int _explosionIndex ;
+  double _sumDiff2Rni ;          // somme des (Rni - previousRni) au carrï¿½ pour un i donnï¿½
   
   double _energy ;
   bool _valid ;
@@ -128,7 +128,7 @@ class MixtureOfPPCA
   int _runNb ;
   double _noiseRef ;
   std::vector< PpcaAnalyserElement > _elements ;
-  AimsData<double> _pTn ; 
+  AimsData<double> _pTn ;
   std::vector<double> _sigma2init ;
   std::vector< std::list< int > > _finalClasses ;
   AimsData<double> _distToClasses ;
