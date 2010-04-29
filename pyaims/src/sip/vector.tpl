@@ -439,11 +439,11 @@ public:
 
 public:
   vector_%Template1typecode%_iterator(
-    vector_%Template1typecode% * /GetWrapper/ );
+    vector_%Template1typecode% * /GetWrapper/ ) /HoldGIL/;
 %MethodCode
   sipCpp = new vector_%Template1typecode%_iterator( a0, a0Wrapper );
 %End
-  ~vector_%Template1typecode%_iterator();
+  ~vector_%Template1typecode%_iterator() /HoldGIL/;
 
   SIP_PYOBJECT __objnext__();
 %MethodCode

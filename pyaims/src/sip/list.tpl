@@ -424,11 +424,12 @@ class list_%Template1typecode%_iterator
 %End
 
   public:
-  list_%Template1typecode%_iterator( list_%Template1typecode% * /GetWrapper/ );
+  list_%Template1typecode%_iterator( list_%Template1typecode% * /GetWrapper/ )
+  /HoldGIL/;
 %MethodCode
   sipCpp = new list_%Template1typecode%_iterator( a0, a0Wrapper );
 %End
-  ~list_%Template1typecode%_iterator();
+  ~list_%Template1typecode%_iterator() /HoldGIL/;
 
   SIP_PYOBJECT __objnext__();
 %MethodCode
