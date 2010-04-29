@@ -14,7 +14,7 @@ HEADERS=  bucket/bucket_g.h	\
     bucket/bucketMap.h		\
     bucket/item.h		\
     bucket/sparsevolume.h       \
-	bucket/bucketgen.h		\
+    bucket/bucketgen.h		\
     color/colormap.h		\
     config/aimsdata_config.h	\
     connectivity/connectivity.h \
@@ -24,7 +24,7 @@ HEADERS=  bucket/bucket_g.h	\
     curve/curve.h		\
     data/cartodatavolume.h      \
     data/data.h			\
-    data/fastAllocationData.h			\
+    data/fastAllocationData.h	\
     data/header.h		\
     data/pheader.h		\
     data/pheader_doc.h		\
@@ -182,6 +182,7 @@ HEADERS=  bucket/bucket_g.h	\
     selection/selector.h    \
     texdata/texdata.h    \
     transformation/transformation.h \
+    transformation/affinetransformation3d.h \
     utility/anytype_reader.h \
     utility/anytype_reader_details.h \
     utility/bininverse.h    \
@@ -204,7 +205,7 @@ HEADERS=  bucket/bucket_g.h	\
 
 SOURCES = \
     bucket/bucketMap.cc \
-	bucket/bucketgen.cc \
+    bucket/bucketgen.cc \
     border/border.cc	\
     color/colormap.cc		\
     connectivity/component.cc   \
@@ -212,7 +213,7 @@ SOURCES = \
     curve/curve.cc		\
     data/cartodatavolume.cc     \
     data/data.cc     \
-    data/fastAllocationData.cc			\
+    data/fastAllocationData.cc	\
     data/header.cc		\
     data/pheader.cc		\
     data/sliceformatheader.cc	\
@@ -273,8 +274,8 @@ SOURCES = \
     io/fileFormat_texture.cc  \
     io/fileFormat_bucket.cc    \
     io/fileFormat_graph.cc    \
-     io/baseFormats_hierarchy.cc  \
-     io/fileFormat_hierarchy.cc  \
+    io/baseFormats_hierarchy.cc  \
+    io/fileFormat_hierarchy.cc  \
     io/baseFormats_syntax.cc    \
     io/fileFormat_volume.cc    \
     io/fileFormat_volumeVec.cc  \
@@ -314,6 +315,7 @@ SOURCES = \
     selection/selection.cc	\
     selection/selector.cc	\
     transformation/transformation.cc \
+    transformation/affinetransformation3d.cc \
     utility/boundingbox.cc \
     utility/clock.cc \
     vector/vector.cc

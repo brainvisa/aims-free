@@ -280,9 +280,9 @@ BucketSampler<T>::doit( const Motion& motion,
 
   invMotion.translation() = 0. ;
 
-  x = invMotion.transform( 1., 0., 0. ) ;
-  y = invMotion.transform( 0., 1., 0. ) ;
-  z = invMotion.transform( 0., 0., 1. ) ;
+  x = invMotion.transform( 1.F, 0.F, 0.F ) ;
+  y = invMotion.transform( 0.F, 1.F, 0.F ) ;
+  z = invMotion.transform( 0.F, 0.F, 1.F ) ;
 
   int maxX = _ref->dimX() - 1;
   int maxY = _ref->dimY() - 1;

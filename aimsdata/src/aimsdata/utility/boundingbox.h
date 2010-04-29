@@ -37,21 +37,21 @@
 #include <aims/vector/vector.h>
 #include <aims/bucket/bucket.h>
 
-class Motion;
 
 namespace aims
 {
+  class AffineTransformation3d;
 
   class BoundingBox
   {
   public:
-    BoundingBox( const Motion* motion = 0 );
+    BoundingBox( const AffineTransformation3d* motion = 0 );
     ~BoundingBox();
 
     void reset();
     /// \c motion will be copied. It's valid to pass a null pointer.
-    void setMotion( const Motion* motion );
-    const Motion *motion() const;
+    void setMotion( const AffineTransformation3d* motion );
+    const AffineTransformation3d *motion() const;
     /// number of points recorded
     unsigned count() const;
     Point3df minimum() const;
@@ -63,12 +63,12 @@ namespace aims
     unsigned	_npoints;
     Point3df	_minimum;
     Point3df	_maximum;
-    Motion	*_motion;
+    AffineTransformation3d	*_motion;
   };
 
 
   inline 
-  const Motion *BoundingBox::motion() const
+  const AffineTransformation3d *BoundingBox::motion() const
   {
     return _motion;
   }

@@ -1759,34 +1759,35 @@ typessub = { 'signed char' : \
                'testPyType' : 'pyaimsBucketMap_FLOAT_Check', 
                },
 
-             'Motion' : \
-             { 'typecode' : 'Motion',
-               'pyFromC' : '',
-               'CFromPy' : '',
-               'castFromSip' : '',
-               'deref' : '*',
-               'pyderef' : '*',
-               'address' : '&', 
-               'pyaddress' : '&', 
-               'defScalar' : '',
-               'new' : 'new Motion', 
-               'NumType' : 'PyArray_OBJECT', 
-               'PyType' : 'Motion',
-               'sipClass' : 'Motion',
-               'typeinclude' : \
-               '#include <aims/resampling/motion.h>', 
-               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipMotion.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_MOTION_DEFINED\n'
-               '#define PYAIMS_MOTION_DEFINED\n'
-               'inline int pyaimsMotion_Check( PyObject* o )\n'
-               '{ return sipCanConvertToInstance( o, sipClass_Motion, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
-               '#endif', 
-               'module' : 'aims', 
-               'testPyType' : 'pyaimsMotion_Check', 
-               'compareElement' : '',
-               },
+             'aims::AffineTransformation3d' : \
+             classInAimsNamespace( 'aims/resampling/motion.h', 'AffineTransformation3d' ),
+             #{ 'typecode' : 'Motion',
+               #'pyFromC' : '',
+               #'CFromPy' : '',
+               #'castFromSip' : '',
+               #'deref' : '*',
+               #'pyderef' : '*',
+               #'address' : '&', 
+               #'pyaddress' : '&', 
+               #'defScalar' : '',
+               #'new' : 'new Motion', 
+               #'NumType' : 'PyArray_OBJECT', 
+               #'PyType' : 'Motion',
+               #'sipClass' : 'Motion',
+               #'typeinclude' : \
+               #'#include <aims/resampling/motion.h>', 
+               #'sipinclude' : '#if SIP_VERSION < 0x040700\n'
+               #'#include "sipaimssipMotion.h"\n'
+               #'#endif\n'
+               #'#ifndef PYAIMS_MOTION_DEFINED\n'
+               #'#define PYAIMS_MOTION_DEFINED\n'
+               #'inline int pyaimsMotion_Check( PyObject* o )\n'
+               #'{ return sipCanConvertToInstance( o, sipClass_Motion, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               #'#endif', 
+               #'module' : 'aims', 
+               #'testPyType' : 'pyaimsMotion_Check', 
+               #'compareElement' : '',
+               #},
 
              'carto::Site' : \
                classInCartoNamespace( 'cartodata/wip/roi/siteIterator.h',

@@ -56,9 +56,9 @@ void TrmHeader::read( size_t * )
   MotionReader	mr( fileName );
   Motion	m;
   mr.read( m );
-    
+
   setProperty( "file_type", string( "TRM" ) );
-  setProperty( "object_type", string( "Motion" ) );
+  setProperty( "object_type", string( "AffineTransformation3d" ) );
   setProperty( "data_type", string( "VOID" ) );
 
   // add meta-info to header
@@ -75,7 +75,7 @@ void TrmHeader::write()
 
   // write meta-info header
   setProperty( "file_type", string( "TRM" ) );
-  setProperty( "object_type", string( "Motion" ) );
+  setProperty( "object_type", string( "AffineTransformation3d" ) );
   setProperty( "data_type", string( "VOID" ) );
 
   writeMinf( removeExtension( _name ) + extension() + ".minf" );

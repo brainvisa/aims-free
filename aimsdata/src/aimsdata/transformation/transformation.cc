@@ -34,9 +34,24 @@
 #include <aims/transformation/transformation.h>
 
 using namespace aims;
+using namespace std;
 
 Transformation::~Transformation()
 {
+}
+
+
+bool Transformation::isIdentity() const
+{
+  throw runtime_error( "Transformation::isIdentity should be reimplemented in "
+      "subclasses to be functional" );
+}
+
+
+void Transformation::setToIdentity()
+{
+  throw runtime_error( "Transformation::setToIdentity should be reimplemented "
+      "in subclasses to be functional" );
 }
 
 
@@ -45,15 +60,17 @@ Transformation3d::~Transformation3d()
 }
 
 
-Point3dd Transformation3d::transformVector( const Point3dd & vec ) const
+Point3dd Transformation3d::transformVectorDouble( double x, double y,
+                                                  double z ) const
 {
-  return transform( vec ) - transform( Point3dd( 0, 0, 0 ) );
+  return transform( x, y, z ) - transform( 0., 0., 0. );
 }
 
 
-Point3dd Transformation3d::transformNormal( const Point3dd & dir ) const
+Point3dd Transformation3d::transformNormalDouble( double x, double y,
+                                                  double z ) const
 {
-  Point3dd      dir2 = dir;
+  Point3dd      dir2( x, y, z );
   Point3dd	u = vectProduct( dir2, Point3dd( 0, 0, 1 ) );
   if( u.norm() <= 1e-4 ) u = vectProduct( dir2, Point3dd( 0, 1, 0 ) );
   Point3dd      w = vectProduct( dir2, u );

@@ -63,7 +63,8 @@ Main classes:
   - C{Texture_<type>}: textures to map on meshes
   - L{Graph}
   - L{Tree}
-  - L{Motion}: the transformation class that allows referential conversions
+  - L{AffineTransformation3d}: the transformation class that allows
+    referential conversions
   - C{Converter_<type1>_<type2>} and C{ShallowConverter_<type1>_<type2>}:
     conversions between data types (mainly volume types)
   - a few algorithms will be added
@@ -187,7 +188,8 @@ class Reader:
                           'default_object_type' : 'AimsTimeSurface_4',
                           },
                         'Graph' : { 'VOID' : 'Graph', },
-                        'Motion' : { 'VOID' : 'Motion', },
+                        'AffineTransformation3d' : \
+                        { 'VOID' : 'AffineTransformation3d', },
                         'Bucket' : 'BucketMap',
                         'Texture' : 'TimeTexture',
                         'Tree' : { 'hierarchy' : 'Hierarchy' },
@@ -502,31 +504,34 @@ def __toMatrix(s):
     m[0:3,0:3].transpose().flat = [r.value(x) for x in xrange(9)]
     m[0:3,3].flat = t.items()
     return m
-def __MotionFromMatrix(self, value):
+def __AffineTransformation3dFromMatrix(self, value):
   self.rotation().volume().arraydata().reshape(3,3).transpose()[:,:] \
     = value[ 0:3, 0:3 ]
   self.translation().arraydata()[:] = value[ 0:3, 3 ].flatten()
-def __Motion__init__( self, *args ):
+def __AffineTransformation3d__init__( self, *args ):
   if len( args ) != 0 and isinstance( args[0], numpy.ndarray ) \
     and args[0].shape == ( 4, 4 ):
     self.__oldinit__()
     self.fromMatrix( args[0] )
   else:
     self.__oldinit__( *args )
-def __Motion__header(self):
-  h=Motion.__oldheader__(self)
+def __AffineTransformation3d__header(self):
+  h = AffineTransformation3d.__oldheader__(self)
   h.__motion=self
   return h
-Motion.toMatrix = __toMatrix
-Motion.fromMatrix = __MotionFromMatrix
-Motion.__oldinit__ = Motion.__init__
-Motion.__init__ = __Motion__init__
-Motion.__oldheader__ = Motion.header
-Motion.header = __Motion__header
-del __toMatrix, __MotionFromMatrix, __Motion__init__, __Motion__header
+AffineTransformation3d.toMatrix = __toMatrix
+AffineTransformation3d.fromMatrix = __AffineTransformation3dFromMatrix
+AffineTransformation3d.__oldinit__ = AffineTransformation3d.__init__
+AffineTransformation3d.__init__ = __AffineTransformation3d__init__
+AffineTransformation3d.__oldheader__ = AffineTransformation3d.header
+AffineTransformation3d.header = __AffineTransformation3d__header
+del __toMatrix, __AffineTransformation3dFromMatrix, \
+  __AffineTransformation3d__init__, __AffineTransformation3d__header
+# backward compatibility
+Motion = AffineTransformation3d
 
-Motion.__repr__ = lambda self : __fixsipclasses__.fakerepr(self) + "\n"+str(self.toMatrix())
-Motion.__str__ = lambda self: self.toMatrix().__str__()
+AffineTransformation3d.__repr__ = lambda self : __fixsipclasses__.fakerepr(self) + "\n"+str(self.toMatrix())
+AffineTransformation3d.__str__ = lambda self: self.toMatrix().__str__()
 
 # This one add support for += in 3D mesh
 AimsTimeSurface_3.__iadd__ = lambda s, o : SurfaceManip.meshMerge(s, o) or s
@@ -1094,7 +1099,8 @@ Surface Manipulation Object. Available Methods are :
   - meshMerge(AimsTimeSurface_3, AimsTimeSurface_3) : concatenate two 3D
     meshes into the first. Also the += operator of meshes
  
-  - meshTransform(aims.AimsTimeSurface_3 mesh, aims.Motion trans) : apply a
+  - meshTransform(aims.AimsTimeSurface_3 mesh,
+      aims.AffineTransformation3d trans) : apply a
     transformation *in-place* to a mesh.
 
   - meshPlanarPolygon :

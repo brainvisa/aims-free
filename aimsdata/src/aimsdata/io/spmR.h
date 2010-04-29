@@ -45,7 +45,11 @@
 
 template <typename T> class AimsData;
 
-class Motion;
+namespace aims
+{
+class AffineTransformation3d;
+}
+typedef aims::AffineTransformation3d Motion;
 
 namespace aims 
 {

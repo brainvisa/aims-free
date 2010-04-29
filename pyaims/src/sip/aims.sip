@@ -141,8 +141,8 @@ carto::pyaims_init();
 
 %Include motion.sip
 %Include transformation.sip
-%Include rcptr_Motion.sip
-%Include reader_Motion.sip
+%Include rcptr_AffineTransformation3d.sip
+%Include reader_AffineTransformation3d.sip
 
 %Include headered.sip
 %Include roi.sip

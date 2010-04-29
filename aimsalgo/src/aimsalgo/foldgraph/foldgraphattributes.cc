@@ -1028,14 +1028,14 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
             {
               // ref hull normal
 	      v->getProperty( "hull_normal", point);
-              norm = _motion->transform_normal(point[0], point[1], point[2]);
+              norm = _motion->transformUnitNormal(point[0], point[1], point[2]);
               point[0] = norm[0];
               point[1] = norm[1];
               point[2] = norm[2];
               v->setProperty( "refhull_normal", point);
 	      // ref depth direction
 	      v->getProperty( "depth_direction", point);
-              norm = _motion->transform_normal(point[0], point[1], point[2]);
+              norm = _motion->transformUnitNormal(point[0], point[1], point[2]);
               point[0] = norm[0];
               point[1] = norm[1];
               point[2] = norm[2];
@@ -1213,7 +1213,7 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
               v->setProperty( "normal", point );
               if( _motion )
                 {
-                  norm = _motion->transform_normal(norm);
+                  norm = _motion->transformUnitNormal(norm);
                   point[0] = norm[0];
                   point[1] = norm[1];
                   point[2] = norm[2];

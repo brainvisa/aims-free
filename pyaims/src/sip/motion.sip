@@ -4,12 +4,12 @@
 
 namespace aims
 {
-void transformBoundingBox( const Motion &motion, const Point3df & pmin1,
+void transformBoundingBox( const aims::AffineTransformation3d &motion,
+                const Point3df & pmin1,
                 const Point3df & pmax1, Point3df & pmin2, Point3df & pmax2 );
-};
 
 
-class Motion : carto::RCObject
+class AffineTransformation3d : aims::Transformation3d
 {
 %TypeHeaderCode
 #include <aims/resampling/motion.h>
@@ -21,30 +21,26 @@ class Motion : carto::RCObject
 %End
 
 public:
-  Motion();
-  Motion( const Motion & );
-  Motion( const aims::Quaternion &);
-  Motion( const carto::Object );
-  Motion( const vector_FLOAT & );
-  virtual ~Motion();
-  virtual bool operator == ( const Motion & );
-  Motion *__neg__() const /Factory, ReleaseGIL/;
+  AffineTransformation3d();
+  AffineTransformation3d( const aims::AffineTransformation3d & );
+  AffineTransformation3d( const aims::Quaternion &);
+  AffineTransformation3d( const carto::Object );
+  AffineTransformation3d( const vector_FLOAT & );
+  virtual ~AffineTransformation3d();
+  virtual bool operator == ( const aims::AffineTransformation3d & );
+  aims::AffineTransformation3d *__neg__() const /Factory, ReleaseGIL/;
 %MethodCode
-  sipRes = new Motion( -*sipCpp );
+  sipRes = new aims::AffineTransformation3d( -*sipCpp );
 %End
   Point3df & translation();
   // const Point3df & translation() const;
   AimsData_FLOAT & rotation();
   // const AimsData_FLOAT & rotation() const;
-  Point3df transform( float, float, float) const;
-  Point3df transform( const Point3df ) const;
-  Point3df transform_normal( const Point3df ) const;
-  Point3df transform_normal( float, float, float) const;
   bool isIdentity() const;
   virtual void setToIdentity();
-  Motion inverse() const;
-  Motion operator* (const Motion & );
-  // Motion operator*= (const Motion & ); // SIP4.5> (*sipCpp) *= *a0))
+  aims::AffineTransformation3d inverse() const;
+  aims::AffineTransformation3d operator* (const aims::AffineTransformation3d & );
+  // aims::AffineTransformation3d operator*= (const aims::AffineTransformation3d & ); // SIP4.5> (*sipCpp) *= *a0))
   virtual void scale( const Point3df &, const Point3df & );
   bool isDirect() const;
   void setTranslation( Point3df );
@@ -57,5 +53,13 @@ public:
   static AimsData_FLOAT rotationaroundz( float );
 
   carto::GenericObject* header();
+
+protected:
+  virtual Point3dd transformDouble( double, double, double ) const;
+  virtual Point3dd transformVectorDouble( double x, double y, double z ) const;
 };
+
+};
+
+typedef aims::AffineTransformation3d Motion;
 

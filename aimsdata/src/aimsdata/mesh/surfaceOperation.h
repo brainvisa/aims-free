@@ -44,7 +44,11 @@
 #include <map>
 #include <list>
 
-class Motion;
+namespace aims
+{
+  class AffineTransformation3d;
+}
+typedef aims::AffineTransformation3d Motion;
 template<typename T> class TimeTexture;
 
 namespace aims

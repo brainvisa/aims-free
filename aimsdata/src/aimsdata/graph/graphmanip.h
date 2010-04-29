@@ -40,7 +40,11 @@
 
 class Graph;
 class GraphObject;
-class Motion;
+namespace aims
+{
+class AffineTransformation3d;
+}
+typedef aims::AffineTransformation3d Motion;
 class Void;
 template<typename T> class AimsData;
 class AimsRGB;

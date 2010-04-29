@@ -37,10 +37,10 @@
 
 #include <aims/data/data.h>
 class Graph;
-class Motion;
 
 namespace aims
 {
+  class AffineTransformation3d;
   template <typename T> class BucketMap;
 
   /// Creation of cortical folds graph attributes
@@ -50,7 +50,7 @@ namespace aims
     /** skel is the skeleton image of the hemisphere, It must be allocated 
         with a border of at least 1 voxel width. */
     FoldGraphAttributes( const AimsData<int16_t> & skel, Graph & graph, 
-                         const Motion *talairachMotion = 0, 
+                         const AffineTransformation3d *talairachAffineTransformation3d = 0,
                          int16_t inside = 0, int16_t outside = 11, 
                          bool withmeshes = true,
                          const std::vector<int> & graphversion
@@ -127,7 +127,7 @@ namespace aims
     Graph		& _graph;
     int16_t		_inside;
     int16_t		_outside;
-    const Motion	*_motion;
+    const AffineTransformation3d	*_motion;
     ///depth map from brain hull constrainted to sulci
     AimsData<int16_t>	_depth;
     AimsData<int16_t>	_ndepth;

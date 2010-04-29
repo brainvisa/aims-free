@@ -246,7 +246,6 @@ int main( int argc, const char** argv )
 
       cout << "setting labels in graph " << rg1.fileName() << endl;
       Point3d p;
-      Point3df pf;
       if( !g->getProperty( "aims_objects_table", get ) )
         {
           cerr << "no buckets in graph " << rg1.fileName() << endl;
@@ -285,10 +284,7 @@ int main( int argc, const char** argv )
                                     eb=bck->begin()->second.end();
                                   ib!=eb; ++ib )
                               {
-                                pf = gToh.transform( ib->first );
-                                p[0] = (int) rint( pf[0] );
-                                p[1] = (int) rint( pf[1] );
-                                p[2] = (int) rint( pf[2] );
+                                p = gToh.transform( ib->first );
                                 if( p[0] >= 0 && p[1] >= 0 && p[2] >= 0 )
                                   ++count[ voro( p ) ];
                                 // else: point outside voronoi

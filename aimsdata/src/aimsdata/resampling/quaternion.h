@@ -39,7 +39,11 @@
 #include <aims/vector/vector.h>
 #include <aims/data/data.h>
 
-class Motion;
+namespace aims
+{
+  class AffineTransformation3d;
+}
+typedef aims::AffineTransformation3d Motion;
 
 namespace aims
 {

@@ -462,7 +462,7 @@ bool FinderTrmFormat::check( const string & filename, Finder & f ) const
       throw;
     }
 
-  f.setObjectType( "Motion" );
+  f.setObjectType( "AffineTransformation3d" );
   f.setDataType( "VOID" );
   vector<string>	vt;
   vt.push_back( "VOID" );
