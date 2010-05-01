@@ -150,8 +150,8 @@ public:
   sipRes = sipCpp->carto::AttributedObject::size();
 %End
 
-  const set_VertexPtr & vertices() const;
-  const set_EdgePtr & edges() const;
+  const set_VertexPtr & vertices() const /NoCopy/;
+  const set_EdgePtr & edges() const /NoCopy/;
 
   void extract( Graph &, SIP_PYOBJECT );
 %MethodCode
