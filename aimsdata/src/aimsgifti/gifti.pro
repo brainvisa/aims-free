@@ -6,7 +6,6 @@ TARGET          = aimsgifti${BUILDMODEEXT}
 INCBDIR = aims
 
 HEADERS =                  \
-io/gifticlib/gifti_tool.h  \
 io/gifticlib/gifti_io.h    \
 io/gifticlib/gifti_xml.h   \
 io/giftiformat.h           \
@@ -18,7 +17,6 @@ io/giftiutil.h             \
 plugin/giftiplugin.h
 
 SOURCES =                 \
-io/gifticlib/gifti_tool.c \
 io/gifticlib/gifti_io.c   \
 io/gifticlib/gifti_xml.c  \
 io/giftiformat.cc         \

@@ -241,7 +241,7 @@ class AimsGiftiComponent( GenericMakerModuleComponent ):
     return 'aimsdata'
 
   def dependencies( self ):
-    return [ AimsDataComponent, ExpatComponent, LibZComponent ]
+    return [ AimsNiftiComponent, ExpatComponent, LibZComponent ]
 
 #-----------------------------------------------------------------------------
 class AimsFdfComponent( GenericMakerModuleComponent ):
