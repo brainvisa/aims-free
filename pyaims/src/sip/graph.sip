@@ -4,6 +4,15 @@ class GraphObject : carto::GenericObject
 #include <graph/graph/graphobject.h>
 %End
 
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_GraphObject,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 public:
     virtual ~GraphObject();
 
@@ -41,6 +50,15 @@ class Vertex : GraphObject
 #if SIP_VERSION < 0x040700
 #include "sipaimssipEdge.h"
 #endif
+%End
+
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_Vertex,
+    sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
 public:
@@ -92,6 +110,15 @@ class Edge : GraphObject
 #endif
 %End
 
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_Edge,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 public:
   bool hasVertex( const Vertex * ) const;
   unsigned verticesSize() const;
@@ -126,6 +153,12 @@ class Graph : GraphObject
 
 %TypeCode
 #include <aims/io/aimsGraphR.h>
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_Graph,
+    sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
 public:
