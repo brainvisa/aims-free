@@ -277,13 +277,13 @@ namespace aims
 
         // ELAGAGE
         typename std::list<Bifurcation<Site>*>::iterator bifit=bifurcationList.begin();
-        cout << "bifurcation number:" << bifurcationList.size() << endl;
+//         cout << "bifurcation number:" << bifurcationList.size() << endl;
         uint merge_count = 0;
         
         for (bifit = bifurcationList.begin() ;  bifit != bifurcationList.end() ; bifit++)
             if ((*bifit)->Type() == MERGE)
                 merge_count ++;
-        cout << "MERGECOUNT:" << merge_count << endl;
+//         cout << "MERGECOUNT:" << merge_count << endl;
 
         
         for (bifit = bifurcationList.begin() ;  bifit != bifurcationList.end() ; bifit++){
@@ -318,7 +318,7 @@ namespace aims
 //             }
           }
           else if ((*bifit)->Type() == MERGE){
-            cout << "merge" << (*bifit)->BottomBlobs().size()<< ";" << (*bifit)->TopBlobs().size() << endl;
+//             cout << "merge" << (*bifit)->BottomBlobs().size()<< ";" << (*bifit)->TopBlobs().size() << endl;
             std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->BottomBlobs();
             typename std::list<ScaleSpaceBlob<Site>*>::iterator bottomit=blist.begin();
             ScaleSpaceBlob<Site> *ssblob1, *ssblob2;
@@ -329,7 +329,7 @@ namespace aims
             float area2 = (*ssblob2).GetMeasurements().area; */
 //             cout << /*area1 << ";" << area2 << ";" <<*/ max(area1,area2)/min(area1,area2) << endl;
             if ((*ssblob2).GlBlobRep()->GetListePoints().size() == 1) {
-              cout << "ELAG" << endl;
+//               cout << "ELAG" << endl;
               // LE BLOB2 EST PETIT : ON FUSIONNE BLOB1 AVEC TOPBLOB ET TOPBIF DE BLOB2 DEVIENT DISPARITION
 
               ssblob2->TopBifurcation()->setType(DISAPPEAR);
@@ -357,7 +357,7 @@ namespace aims
             }
             else if ((*ssblob1).GlBlobRep()->GetListePoints().size() == 1){
               // LE BLOB1 EST PETIT : ON FUSIONNE BLOB2 AVEC TOPBLOB ET TOPBIF DE BLOB1 DEVIENT DISPARITION
-                cout << "ELAG" << endl;
+//                 cout << "ELAG" << endl;
               ssblob1->TopBifurcation()->setType(DISAPPEAR);
               ssblob1->TopBifurcation()->TopBlobs().clear();
               ssblob1->TopBifurcation()->BottomBlobs().clear();
@@ -385,7 +385,7 @@ namespace aims
           }
           else if ((*bifit)->Type() == SPLIT){
 
-            cout << "split" << (*bifit)->TopBlobs().size()<< ";" << (*bifit)->BottomBlobs().size() << endl;
+//             cout << "split" << (*bifit)->TopBlobs().size()<< ";" << (*bifit)->BottomBlobs().size() << endl;
             std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->TopBlobs();
             typename std::list<ScaleSpaceBlob<Site>*>::iterator topit=blist.begin();
             ScaleSpaceBlob<Site> *ssblob1, *ssblob2;
@@ -455,7 +455,7 @@ namespace aims
         for (bifit = bifurcationList.begin() ;  bifit != bifurcationList.end() ; bifit++)
             if ((*bifit)->Type() == MERGE)
                 merge_count ++;
-        cout << "MERGECOUNT:" << merge_count << endl;
+//         cout << "MERGECOUNT:" << merge_count << endl;
         
           // blob updates
 cout << "ssblobs après : " << blobList.size() << endl;
