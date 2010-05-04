@@ -7,6 +7,16 @@ class Interpolator : carto::RCObject /Abstract/
 %TypeHeaderCode
 #include <aims/resampling/linearInterpolator.h>
 %End
+
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_aims_Interpolator,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 public:
 
   virtual ~Interpolator();

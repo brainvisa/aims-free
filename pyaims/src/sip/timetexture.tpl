@@ -19,7 +19,15 @@ typedef Texture<%Template1% > Texture_%Template1typecode%;
 
 %TypeCode
 #include <pyaims/vector/numpyarrayfunc.h>
+#include <pyaims/object/rcptrconv.h>
 %End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy,
+    sipClass_TimeTexture_%Template1typecode%,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 
 public:
 

@@ -13,7 +13,15 @@ typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
 %TypeCode
 #include <iostream>
 #include <pyaims/vector/numpyarrayfunc.h>
+#include <pyaims/object/rcptrconv.h>
 %End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy,
+    sipClass_Volume_%Template1typecode%,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 
 public:
     Volume_%Template1typecode%( int = 1, int = 1, int = 1, int = 1,

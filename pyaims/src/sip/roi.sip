@@ -7,6 +7,15 @@ class MaskIterator : carto::RCObject /Abstract/
 #include <aims/roi/maskIterator.h>
 %End
 
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_aims_MaskIterator,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 public:
 
   virtual ~MaskIterator();
@@ -81,6 +90,15 @@ class RoiIterator : carto::RCObject /Abstract/
 {
 %TypeHeaderCode
 #include <aims/roi/roiIterator.h>
+%End
+
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_aims_RoiIterator,
+    sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
 public:
@@ -169,6 +187,15 @@ class Site /Abstract/
 #include <cartodata/wip/roi/siteIterator.h>
 %End
 
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_carto_Site,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 public:
 
   virtual ~Site();
@@ -192,6 +219,16 @@ namespace carto {
 typedef carto::rc_ptr< carto::Site > rc_ptr_Site;
 }
 %End
+
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_carto_SiteIterator,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 
 public:
   virtual ~SiteIterator();

@@ -13,6 +13,16 @@ typedef aims::BucketMap< %Template1% > BucketMap_%Template1typecode%;
 #endif
 %End
 
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy,
+    sipClass_BucketMap_%Template1typecode%,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 public:
 
   BucketMap_%Template1typecode%();

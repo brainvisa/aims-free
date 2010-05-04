@@ -5,6 +5,15 @@ class Tree : carto::GenericObject
 #include <graph/tree/tree.h>
 %End
 
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy, sipClass_Tree,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 public:
   Tree( bool = true, const std::string & = "" );
   virtual ~Tree();

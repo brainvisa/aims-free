@@ -20,6 +20,16 @@ class AffineTransformation3d : aims::Transformation3d
 #endif
 %End
 
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy,
+    sipClass_aims_AffineTransformation3d,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 public:
   AffineTransformation3d();
   AffineTransformation3d( const aims::AffineTransformation3d & );

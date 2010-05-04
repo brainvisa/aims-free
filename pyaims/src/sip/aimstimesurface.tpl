@@ -14,6 +14,16 @@ typedef AimsTimeSurface<%Template1%,Void> AimsTimeSurface_%Template1typecode%;
 #endif
 %End
 
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy,
+    sipClass_AimsTimeSurface_%Template1typecode%,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 public:
   AimsTimeSurface_%Template1typecode%();
   virtual ~AimsTimeSurface_%Template1typecode%();

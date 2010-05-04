@@ -125,7 +125,7 @@ namespace pyaims
   {
     if( !PyObject_HasAttrString( sipPy, "get" ) )
       return 0;
-    PyObject* pointee = PyObject_CallMethod( sipPy, "get", NULL );
+    PyObject* pointee = PyObject_CallMethod( sipPy, (char *) "get", NULL );
     if( !pointee )
     {
       PyErr_Clear();

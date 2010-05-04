@@ -5,18 +5,11 @@ class AimsData_%Template1typecode% : carto::RCObject
 #include <aims/data/data.h>
 %Template1typeinclude%
 typedef AimsData<%Template1% > AimsData_%Template1typecode%;
-#if SIP_VERSION < 0x040700
-#include "sipaimssiprc_ptr_Volume_%Template1typecode%.h"
-#endif
 %End
 
 %TypeCode
 #include <aims/data/pheader.h>
-#if SIP_VERSION < 0x040700
-#include "sipaimssiprc_ptr_Volume_%Template1typecode%.h"
-#include "sipaimssipVolume_%Template1typecode%.h"
-#endif
-
+#include <pyaims/object/rcptrconv.h>
 // DEBUG
 // #include <cartobase/smart/rcptrtrick.h>
 %End
@@ -33,7 +26,9 @@ typedef AimsData<%Template1% > AimsData_%Template1typecode%;
       sipClass_rc_ptr_Volume_%Template1typecode%,
       SIP_NOT_NONE | SIP_NO_CONVERTORS )
     || sipCanConvertToInstance( sipPy,
-        sipClass_rc_ptr_Volume_%Template1typecode%, SIP_NOT_NONE);
+        sipClass_rc_ptr_Volume_%Template1typecode%, SIP_NOT_NONE)
+    || pyaims::canConvertFromProxy( sipPy,
+        sipClass_AimsData_%Template1typecode% );
   }
 
   if( sipPy == Py_None )
@@ -44,24 +39,10 @@ typedef AimsData<%Template1% > AimsData_%Template1typecode%;
 
   int state = 0;
 
-  AimsData<%Template1% > * dat
-    = (AimsData<%Template1% > *)
-      sipConvertToInstance( sipPy,
-        sipClass_AimsData_%Template1typecode%,
-        sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
-  if( *sipIsErr && dat )
-  {
-    sipReleaseInstance( dat, sipClass_AimsData_%Template1typecode%,
-                        state );
-    dat = 0;
-  }
-  else if( dat )
-  {
-    *sipCppPtr = new AimsData< %Template1% >( *dat );
-    sipReleaseInstance( dat, sipClass_AimsData_%Template1typecode%,
-                        state );
-    return sipGetState(sipTransferObj);
-  }
+  int res = pyaims::standardConvertToTypeCode( sipPy,
+    sipClass_AimsData_%Template1typecode%, sipTransferObj, sipIsErr, sipCppPtr );
+  if( *sipCppPtr )
+    return res;
 
   carto::rc_ptr<carto::Volume<%Template1% > > * obj
     = (carto::rc_ptr<carto::Volume<%Template1% > > *)
