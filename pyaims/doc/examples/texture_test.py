@@ -33,8 +33,7 @@
 from soma import aims
 import sys
 
-reader = aims.Reader()
-tex = reader.read( '/home/riviere/data/texture2d.tex' )
+tex = aims.read( '/home/riviere/data/texture2d.tex' )
 print 'texture:', tex
 h = tex.header()
 print 'header:', h

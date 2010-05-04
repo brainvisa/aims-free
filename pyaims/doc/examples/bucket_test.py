@@ -33,8 +33,7 @@
 from soma import aims
 import sys
 
-reader = aims.Reader()
-bck = reader.read( '/neurospin/lnao/Panabase/data/diffusion/chaos/graphe/RchaosBase.data/ss_Bucket.bck' )
+bck = aims.read( '/neurospin/lnao/Panabase/data/diffusion/chaos/t1mri/default_acquisition/default_analysis/folds/3.0/default_session_manual/Rchaos_default_session_manual.data/ss_Bucket.bck' )
 print 'bucket:', bck
 
 print 'timesteps:', bck.size()

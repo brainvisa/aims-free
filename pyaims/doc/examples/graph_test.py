@@ -33,8 +33,7 @@
 from soma import aims
 import sys
 
-reader = aims.Reader()
-graph = reader.read( '/neurospin/lnao/Panabase/data/diffusion/chaos/graphe/RchaosBase.arg' )
+graph = aims.read( '/neurospin/lnao/Panabase/data/diffusion/chaos/t1mri/default_acquisition/default_analysis/folds/3.0/default_session_manual/Rchaos_default_session_manual.arg' )
 print 'graph:', graph
 print 'global properties:', graph.keys()
 print 'nodes:', graph.order()
@@ -47,8 +46,7 @@ for p in graph:
         else type( graph[p] ) )
 
 # iterate on vertices
-vert = graph.vertices()
-for v in vert:
+for v in graph.vertices():
     print 'vertex:', v.getSyntax(), ', edges:', v.edgesSize()
     if v.has_key( 'name' ):
         print '  name:', v[ 'name' ]
@@ -63,8 +61,7 @@ for v in vert:
         pass
 
 # iterate on edges
-edges = graph.edges()
-for e in edges:
+for e in graph.edges():
     print 'edge:', e.getSyntax(), ', links', e.verticesSize(), 'vertices'
 
 fileout = '/tmp/toto.arg'

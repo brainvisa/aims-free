@@ -33,8 +33,7 @@
 from soma import aims
 import sys
 
-reader = aims.Reader()
-mesh = reader.read( '/home/riviere/data/ra_head.mesh' )
+mesh = aims.read( '/home/riviere/data/ra_head.mesh' )
 print 'mesh:', mesh
 h = mesh.header()
 print 'header:', h

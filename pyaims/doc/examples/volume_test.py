@@ -37,8 +37,7 @@ app = aims.AimsApplication( sys.argv, 'Volume test in python' )
 
 app.initialize()
 
-reader = aims.Reader()
-vol = reader.read( '/home/riviere/data/irm.ima' )
+vol = aims.read( '/home/riviere/data/irm.ima' )
 print 'vol:', vol
 h = vol.header()
 print 'header:', h
