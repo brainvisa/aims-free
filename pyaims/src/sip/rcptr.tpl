@@ -43,7 +43,7 @@ typedef carto::rc_ptr<%Template1% > rc_ptr_%Template1typecode%;
 
   carto::rc_ptr<%Template1% > * dat
     = (carto::rc_ptr<%Template1% > *)
-      sipConvertToInstance( sipPy,
+      sipForceConvertToInstance( sipPy,
         sipClass_rc_ptr_%Template1typecode%,
         sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
   if( *sipIsErr && dat )
@@ -51,6 +51,7 @@ typedef carto::rc_ptr<%Template1% > rc_ptr_%Template1typecode%;
     sipReleaseInstance( dat, sipClass_rc_ptr_%Template1typecode%,
                         state );
     dat = 0;
+    *sipIsErr = 0;
   }
   else if( dat )
   {
@@ -92,6 +93,7 @@ typedef carto::rc_ptr<%Template1% > rc_ptr_%Template1typecode%;
         *sipCppPtr = new carto::rc_ptr< %Template1% >( obj, true );
       }
       sipReleaseInstance( obj, sipClass_%Template1sipClass%, state );
+      PyErr_Clear();
       return sipGetState(sipTransferObj);
     }
     *sipIsErr = 1;
