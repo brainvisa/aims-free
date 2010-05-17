@@ -131,7 +131,7 @@ void Finder::initPrivate()
       ext.clear();
       ext.push_back( "arg" );
       ext.push_back( "bundles" );
-      registerFormat( "GRAPH", new FinderGraphFormat, ext );
+      registerFormat( "ARG", new FinderGraphFormat, ext );
       ext.clear();
       ext.push_back( "trm" );
       registerFormat( "TRM", new FinderTrmFormat, ext );
@@ -443,5 +443,21 @@ void Finder::launchException()
 void Finder::postProcessHeader( carto::Object hdr )
 {
   spmAttributesConverter( *hdr );
+}
+
+
+set<string> Finder::extensions( const string & format )
+{
+  set<string> exts;
+  map<string, list<string> >::const_iterator ie, ee = pd->extensions.end();
+  list<string>::const_iterator ifo, efo;
+  for( ie=pd->extensions.begin(); ie!=ee; ++ie )
+    for( ifo=ie->second.begin(), efo=ie->second.end(); ifo!=efo; ++ifo )
+      if( *ifo == format )
+      {
+        exts.insert( ie->first );
+        break;
+      }
+  return exts;
 }
 

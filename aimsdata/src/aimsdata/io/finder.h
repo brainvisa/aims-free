@@ -161,6 +161,8 @@ namespace aims
     void launchException();
 
     static void postProcessHeader( carto::Object hdr );
+    /// show the set of official extensions for a given format
+    static std::set<std::string> extensions( const std::string & format );
 
   private:
     static void initPrivate();
