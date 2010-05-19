@@ -90,7 +90,7 @@ namespace
 
 bool GiftiHeader::read()
 {
-  // cout << "GiftiHeader::read\n";
+  //cout << "GiftiHeader::read\n";
 
   gifti_image   *gim = 0;
   string fname = _name;
@@ -353,6 +353,9 @@ bool GiftiHeader::read()
 
     daattr2->setProperty( "intent",
                           string( gifti_intent_to_string( da->intent ) ) );
+
+    daattr2->setProperty( "encoding",da->encoding);
+
     if( tex )
       daattr2->setProperty( "data_type", niftiDataType( da->datatype ) );
     daattr2->setProperty( "ind_ord", da->ind_ord );
@@ -539,6 +542,7 @@ template <typename T>
 void GiftiHeader::giftiAddTexture( gifti_image* gim,
                                    const TimeTexture<T> & tex )
 {
+  std::cout << "AddTexture type TimeTexture<T>\n";
   typename TimeTexture<T>::const_iterator it, et = tex.end();
   size_t nmax = 0;
   int t = 0;
@@ -548,7 +552,6 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
       nmax = it->second.nItem();
 
   int hdrtexda = 0;
-
 
   for( it=tex.begin(); it!=et; ++it, ++t )
   {
@@ -561,7 +564,27 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
       da = gim->darray[nda];
       gifti_set_DA_defaults( da );
       if( tex.size() == 1 )
-        da->intent = NIFTI_INTENT_SHAPE;
+        {
+    	carto::Object da_info;
+		try
+		  {
+		  da_info = getProperty( "GIFTI_dataarrays_info" );
+		  carto::Object it = da_info->objectIterator();
+		  std::string intentit;
+		  for( ; it->isValid(); it->next() )
+		    {
+		    carto::Object el = it->currentValue();
+			if( el->getProperty( "intent", intentit ) )
+			  break;
+		    }
+		  std::cout << intentit << "\n";
+		  da->intent = gifti_intent_from_string(intentit.c_str());
+		  }
+		catch( ... )
+		  {
+			std::cout << "error GIFTI_dataarrays_info\n";
+		  }
+        }
       else
         da->intent = NIFTI_INTENT_TIME_SERIES;
       da->num_dim = 1;
@@ -575,30 +598,39 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
       giftiFillTextureBuffer<T>()( da, tx, nmax, 0 );
 
       carto::Object da_info;
-        try
-        {
-      	da_info = getProperty( "GIFTI_dataarrays_info" );
-        }
-        catch( ... )
-        {
-        }
+	  try
+	  {
+	  da_info = getProperty( "GIFTI_dataarrays_info" );
+	  }
+	  catch( ... )
+	  {
+	  }
 
-        bool ascii = false;
-
-        if( !options().isNull() )
+	  if( !options().isNull() )
 		{
 		  try
 		  {
-			carto::Object n =  options()->getProperty( "ascii" );
-			ascii = (bool) n->getScalar();
+			carto::Object a = options()->getProperty( "encoding" );
+			if ((int) a->getScalar() != 0)
+				{
+				da->encoding = (int) a->getScalar();
+				}
+			else
+				{
+				carto::Object it = da_info->objectIterator();
+			    for( ; it->isValid(); it->next() )
+				  {
+				  carto::Object el = it->currentValue();
+				  if( el->getProperty( "encoding", da->encoding ) )
+				    break;
+				  }
+				}
+
 		  }
 		  catch( ... )
 		  {
 		  }
 		}
-
-      if (ascii)
-        da->encoding = GIFTI_ENCODING_ASCII;
 
       string mname,mval;
       // metadata dataArray
@@ -673,101 +705,6 @@ void GiftiHeader::giftiAddExternalTextures( gifti_image *gim, int & hdrtexda,
   }
 }
 
-//
-//void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
-//{
-//  if( hasProperty( "GIFTI_labels_table" ) )
-//  {
-//  carto::IntDictionary lt;
-//  getProperty( "GIFTI_labels_table", lt );
-//  carto::IntDictionary::const_iterator it, et = lt.end();
-//  giiLabelTable & glt = gim->labeltable;
-//  glt.length = lt.size();
-//  glt.key = (int *) malloc( glt.length * sizeof( int ) );
-//  glt.label = (char **) malloc( glt.length * sizeof( char * ) );
-////  glt.rgba = (float *) malloc( 4 * glt.length * sizeof( float ) );
-//  int i = 0;
-//  for( it=lt.begin(); it!=et; ++it, ++i )
-//    try
-//    {
-//      glt.key[i] = it->first;
-//
-//      //Object LabelTable = it->second;
-//      //Object LabelTable = Object::value( Dictionary() );
-////
-////      if( it->second.isNone() )
-////        glt.label[i] = 0;
-////      else
-////        {
-////    	std::string label;
-////    	try
-////    	  {
-////          //LabelTable->getProperty( "Label", label );
-////    	  }
-////    	catch( ... )
-////    	  {
-////    	  glt.label[i] = 0;
-////    	  }
-////    	  //glt.label[i] = strdup( it->second->getString().c_str() );
-////        }
-//    }
-//    catch( ... )
-//    {
-//      glt.key[i] = 0;
-//      glt.label[i] = 0;
-//    }
-//
-////	carto::IntDictionary lt;
-////	getProperty( "GIFTI_labels_table", lt );
-////
-////    carto::IntDictionary::const_iterator it, et = lt.end();
-////
-////    giiLabelTable & glt = gim->labeltable;
-////    glt.length = lt.size();
-////
-////    glt.key = (int *) malloc( glt.length * sizeof( int ) );
-////    glt.label = (char **) malloc( glt.length * sizeof( char * ) );
-////    glt.rgba = (float *) malloc( 4 * glt.length * sizeof( float ) );
-////
-////    int i = 0;
-////    for( it=lt.begin(); it!=et; ++it, ++i )
-//    //for( ; it->isValid(); i++, it->next() )
-//      {
-//        //Object el = it->currentValue();
-//
-//
-////        glt.key[i] = it->first;
-////
-////        Object LabelTable = it->second;
-////
-////        std::string label;
-////        LabelTable->getProperty( "Label", label );
-////
-////        if( it->second.isNone() )
-////          glt.label[i] = 0;
-////        else
-////          {
-////          glt.label[i] = strdup( it->second->getString().c_str() );
-////
-////          //std::cout << label << " " << std::endl;
-////
-////          std::vector<float> rgba;
-////          LabelTable->getProperty( "RGB", rgba );
-////          vector<float>::iterator itrgb = rgba.begin();
-////
-////          for (int j = 0; itrgb != rgba.end();itrgb++,j++)
-////		    {
-////            glt.rgba[j]=  *itrgb;
-////            //std::cout << (float)*itrgb << " ";
-////            }
-////          }
-//
-//      }
-//
-//    //removeProperty( "GIFTI_labels_table" );
-//  }
-//}
-
 void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
 {
   if( hasProperty( "GIFTI_labels_table" ) )
@@ -820,7 +757,6 @@ void GiftiHeader::giftiAddLabelTable( gifti_image *gim )
   }
 }
 
-
 Object GiftiHeader::giftiFindHdrDA( int & nda, Object dainfo,
                                     const string & intent )
 {
@@ -858,7 +794,6 @@ Object GiftiHeader::giftiFindHdrDA( int & nda, Object dainfo,
 
   return inf;
 }
-
 
 std::string GiftiHeader::niftiRefFromAimsString( const std::string & space )
 {
@@ -977,6 +912,7 @@ void GiftiHeader::giftiCopyMetaToGii( carto::Object dainf, giiDataArray *da )
 template <typename T>
 void GiftiHeader::giftiAddTexture( gifti_image* gim, const vector<T> & tex )
 {
+  std::cout << "AddTexture type vector<T>\n";
   if( !tex.empty() )
   {
     int nda = gim->numDA;
@@ -990,6 +926,23 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim, const vector<T> & tex )
     da->dims[3] = 0;
     da->dims[4] = 0;
     da->dims[5] = 0;
+
+    if( !options().isNull() )
+	{
+	  try
+	  {
+		carto::Object a = options()->getProperty( "encoding" );
+		if ((int) a->getScalar() != 0)
+			{
+			da->encoding = (int) a->getScalar();
+			}
+	  }
+	  catch( ... )
+	  {
+	  }
+	}
+
+    //std::cout << "encoding = "<< da->encoding << "\n";
     gifti_alloc_DA_data( gim, &nda, 1 );
     giftiFillTextureBuffer<T>()( da, tex, da->dims[0], 0 );
   }
@@ -998,10 +951,10 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim, const vector<T> & tex )
 
 namespace aims
 {
-
   template <>
   void GiftiHeader::giftiAddTexture( gifti_image*, const vector<Void> & )
   {
+  std::cout << "AddTexture type vector<Void>\n";
   }
 
 }

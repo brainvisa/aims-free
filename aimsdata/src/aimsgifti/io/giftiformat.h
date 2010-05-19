@@ -56,9 +56,13 @@ namespace aims
     const carto::Object options() const { return _options; }
     void setOptions( carto::Object opt ) { _options = opt; }
 
+    //int getEncoding() { return _encoding; }
+    //void setEncoding( int enc ) { _encoding = enc; }
+
   protected:
     std::string				_filename;
     carto::Object			_options;
+    //int						_encoding;
   };
 
 
@@ -77,9 +81,13 @@ namespace aims
     const carto::Object options() const { return _options; }
     void setOptions( carto::Object opt ) { _options = opt; }
 
+    int getEncoding() { return _encoding; }
+    void setEncoding( int enc ) { _encoding = enc; }
+
   protected:
     std::string				_filename;
     carto::Object			_options;
+    int						_encoding;
   };
 }
 

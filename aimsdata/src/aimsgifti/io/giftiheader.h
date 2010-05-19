@@ -88,12 +88,14 @@ namespace aims
     void giftiAddTexture( gifti_image* gim, const std::vector<T> & tex );
     template <typename T>
     void giftiAddTexture( gifti_image* gim, const TimeTexture<T> & texture );
+
+    //void giftiAddTexture( gifti_image* gim, const std::vector<Void> & tex );
     template <typename T>
     void giftiAddTextureObject( gifti_image* gim, carto::Object texture );
 
     std::string _name;
     carto::Object _options;
-  };
+   };
 
 }
 

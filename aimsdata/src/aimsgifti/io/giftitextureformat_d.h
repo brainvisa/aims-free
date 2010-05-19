@@ -69,16 +69,6 @@ namespace aims
       throw carto::format_error( "could not re-read GIFTI file", hdr.name() );
     }
 
-    carto::Object da_label;
-		try
-		{
-		  da_label = hdr.getProperty( "GIFTI_labels_table" );
-		  std::cout << "lecture label OK\n";
-		}
-		catch( ... )
-		{
-		}
-
     int nda = gim->numDA, i;
     int ttex = 0;
     for( i=0; i<nda; ++i )
@@ -92,8 +82,11 @@ namespace aims
           break;
         case NIFTI_INTENT_TRIANGLE:
           break;
+
         default:
           {
+        	std::cout << "type : " << gifti_intent_to_string(da->intent) << "\n";
+
             int vnum = da->dims[0];
             int j;
             std::vector<T> & tex = vol[ttex].data();
@@ -123,11 +116,16 @@ namespace aims
   {
 
     std::cout << "gifti texture write\n";
+
     try
       {
         const PythonHeader & thdr = thing.header();
         GiftiHeader hdr( filename );
         hdr.copy( thdr );
+
+        if( hdr.hasProperty( "nb_t_pos" ) )
+            hdr.removeProperty( "nb_t_pos" );
+
         gifti_image *gim = hdr.giftiImageBase();
         std::string fname = hdr.name();
 
@@ -139,24 +137,14 @@ namespace aims
         }
         catch( ... )
         {
+        std::cout << "error GIFTI_dataarrays_info\n";
         }
-        bool test_ascii = false;
 
-        if( !options().isNull() )
-			{
-			  try
-			  {
-				carto::Object a = options()->getProperty( "ascii" );
-				ascii = (bool) a->getScalar();
-				hdr.setOptions(options());
-			  }
-			  catch( ... )
-			  {
-			  }
-			}
+		hdr.setOptions(options());
 
-        hdr.giftiAddTexture( gim, thing);
+		//std::cout << "add texture\n";
 
+		hdr.giftiAddTexture( gim, thing);
         // add external textures
         hdr.giftiAddExternalTextures( gim, hdrtexda, da_info );
 
