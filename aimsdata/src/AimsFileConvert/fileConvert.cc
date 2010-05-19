@@ -92,7 +92,7 @@ public:
   friend bool convert( Process &, const string &, Finder & );
 
   string	file;
-  bool		ascii;
+  int		encoding;
   bool		normal;
   string	form;
   string	type;
@@ -106,7 +106,7 @@ public:
 
 
 FileTestGifti::FileTestGifti()
-  : Process(), ascii( false ), normal( false ), rescale( false ), xdim( 0 ), ydim( 0 ),
+  : Process(), encoding( 0 ), normal( false ), rescale( false ), xdim( 0 ), ydim( 0 ),
     zdim( 0 ), info()
 {
   registerProcessType( "Volume", "S8", &convert<AimsData<int8_t> > );
@@ -181,7 +181,7 @@ public:
 
   T		& data;
   string	file;
-  bool		ascii;
+  int		encoding;
   bool      normal;
   const string	form;
   bool		rescale;
@@ -196,7 +196,7 @@ template<typename T>
 bool DataConverter<T>::noConvert( Process & p, const string &, Finder & )
 {
   DataConverter	& dc = (DataConverter &) p;
-  return( write( p, dc.data, dc.file, dc.ascii, dc.normal , dc.form ) );
+  return( write( p, dc.data, dc.file, dc.encoding, dc.normal , dc.form ) );
 }
 
 // partial specializations
@@ -205,7 +205,7 @@ template<class T>
 class DataConverter<AimsData<T> > : public Process
 {
 public:
-  DataConverter( AimsData<T> & dat, const string & fileout, bool a, bool n,
+  DataConverter( AimsData<T> & dat, const string & fileout, int enc, bool n,
 		 const string & format, bool resc, unsigned dx, unsigned dy, 
 		 unsigned dz, RescalerInfo & info );
 
@@ -220,7 +220,7 @@ public:
 
   AimsData<T>	& data;
   string	file;
-  bool		ascii;
+  int		encoding;
   bool      normal;
   const string	form;
   bool		rescale;
@@ -234,7 +234,7 @@ template<class T>
 class DataConverter<TimeTexture<T> > : public Process
 {
 public:
-  DataConverter( TimeTexture<T> & dat, const string & fileout, bool a, bool n,
+  DataConverter( TimeTexture<T> & dat, const string & fileout, int enc, bool n,
 		 const string & format, bool resc, unsigned dx, unsigned dy, 
 		 unsigned dz, RescalerInfo & info );
 
@@ -249,7 +249,7 @@ public:
 
   TimeTexture<T>	& data;
   string		file;
-  bool			ascii;
+  int			encoding;
   bool          normal;
   const string		form;
   bool			rescale;
@@ -264,7 +264,7 @@ template<class T>
 class DataConverter<BucketMap<T> > : public Process
 {
 public:
-  DataConverter( BucketMap<T> & dat, const string & fileout, bool a, bool n,
+  DataConverter( BucketMap<T> & dat, const string & fileout, int enc, bool n,
 		 const string & format, bool resc, unsigned dx, unsigned dy, 
 		 unsigned dz, RescalerInfo  & info );
 
@@ -274,7 +274,7 @@ public:
  private:
   BucketMap<T>		& data;
   string		file;
-  bool			ascii;
+  int			encoding;
   bool          normal;
   const string		form;
   bool			rescale;
@@ -290,10 +290,10 @@ public:
 template<class T>
 DataConverter<AimsData<T> >::DataConverter( AimsData<T> & dat, 
 					    const string & fileout,
-					    bool a, bool n, const string & format,
+					    int enc, bool n, const string & format,
 					    bool resc, unsigned dx, 
 					    unsigned dy, unsigned dz, RescalerInfo & info )
-  : Process(), data( dat ), file( fileout ), ascii( a ), normal(n), form( format ),
+  : Process(), data( dat ), file( fileout ), encoding( enc ), normal(n), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info(info)
 {
 #if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
@@ -344,10 +344,10 @@ DataConverter<AimsData<T> >::DataConverter( AimsData<T> & dat,
 template<class T>
 DataConverter<TimeTexture<T> >::DataConverter( TimeTexture<T> & dat, 
 					       const string & fileout,
-					       bool a, bool n, const string & format,
+					       int enc, bool n, const string & format,
 					       bool resc, unsigned dx, 
 					       unsigned dy, unsigned dz, RescalerInfo & info )
-  : Process(), data( dat ), file( fileout ), ascii( a ), normal( n ), form( format ),
+  : Process(), data( dat ), file( fileout ), encoding( enc ), normal( n ), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info( info )
 {
 #if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
@@ -380,10 +380,10 @@ DataConverter<TimeTexture<T> >::DataConverter( TimeTexture<T> & dat,
 template<typename T>
 DataConverter<BucketMap<T> >::DataConverter( BucketMap<T> & dat, 
                                              const string & fileout,
-                                             bool a, bool n, const string & format,
+                                             int enc, bool n, const string & format,
                                              bool resc, unsigned dx, 
                                              unsigned dy, unsigned dz, RescalerInfo & info )
-  : Process(), data( dat ), file( fileout ), ascii( a ), normal ( n ), form( format ),
+  : Process(), data( dat ), file( fileout ), encoding( enc ), normal ( n ), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info( info )
 {
   registerProcessType( "Volume", "S16", 
@@ -403,7 +403,7 @@ bool read( Process & p, T & data, const string & filename, const Finder & f, boo
   Reader<T>	r( filename );
 
   Object options = Object::value( Dictionary() );
-  options->setProperty( "ascii", fc.ascii );
+  options->setProperty( "encoding", fc.encoding );
   options->setProperty( "normal", fc.normal );
   options->setProperty( "exact_format", true );
   r.setOptions(options);
@@ -427,7 +427,7 @@ bool read( Process & p, T & data, const string & filename, const Finder & f, boo
 
 
 template<class T>
-bool write( Process & p, T & data, const string & file, bool ascii, const string & form )
+bool write( Process & p, T & data, const string & file, int encoding, const string & form )
 {
   FileTestGifti	&fc = (FileTestGifti &) p;
 
@@ -435,12 +435,17 @@ bool write( Process & p, T & data, const string & file, bool ascii, const string
   Object options = Object::value( Dictionary() );
   options->setProperty( "exact_format", true );
   options->setProperty( "normal", fc.normal );
-  options->setProperty( "ascii", fc.ascii );
+  options->setProperty( "encoding", fc.encoding );
 
   Writer<T>	w( file, options );
   const string	*wf = 0;
   if( !form.empty() )
     wf = &form;
+
+  w.setOptions(options);
+
+  bool ascii;
+  if (encoding == 1) ascii = true; else ascii = false;
 
   if( !w.write( data, ascii, wf ) )
     return( false );
@@ -456,12 +461,12 @@ bool readAndWrite( Process & p, const string & filename, Finder & f )
   FileTestGifti	&fc = (FileTestGifti &) p;
   T		data;
 
-  std::cout << "ReadAndWrite\n";
+  std::cout << "ReadAndWrite \n";
 
   if( !read( p, data, filename, f, filename == fc.file ) )
     return( false );
 
-  return( write( p, data, fc.file, fc.ascii, fc.form ) );
+  return( write( p, data, fc.file, fc.encoding, fc.form ) );
 }
 
 
@@ -477,7 +482,7 @@ bool convert( Process & p, const string & filename, Finder & f )
     return( false );
 
   //	second layer of processes
-  DataConverter<T>	proc( data, fc.file, fc.ascii, fc.normal, fc.form, fc.rescale,
+  DataConverter<T>	proc( data, fc.file, fc.encoding, fc.normal, fc.form, fc.rescale,
 			      fc.xdim, fc.ydim, fc.zdim, fc.info );
   Finder		f2;
   if( fc.otype.empty() )
@@ -573,7 +578,7 @@ bool convData( Process & p, const string &, Finder & )
 
   cout << "convert done\n";
 
-  return( write( p, *vol2, dc.file, dc.ascii, dc.form ) );
+  return( write( p, *vol2, dc.file, dc.encoding, dc.form ) );
 }
 
 
@@ -591,9 +596,13 @@ int main( int argc, const char **argv )
   app.alias( "--input", "-i" );
   app.addOption( proc.file, "-o", "output filename" );
   app.alias( "--output", "-o" );
-  app.addOption( proc.ascii, "-a", "write in ASCII mode if output format " 
-                 "supports it (default: binary)", true );
-  app.alias( "--ascii", "-a" );
+
+  app.addOption( proc.encoding, "-e", "set the data encoding for any output file.\n"
+		  "0 : Binary (default)\n"
+		  "1 : ASCII \n"
+		  "2 : Base64 binary (for gifti format only)\n"
+		   "3 : Base64 compressed binary (for gifti format only)\n", true );
+  app.alias( "--encoding", "-e" );
   app.addOption( proc.normal, "-n", "write normal in output file",
                  true );
     app.alias( "--normal", "-n" );
@@ -650,7 +659,15 @@ int main( int argc, const char **argv )
       //	Our specific process
       cout << "filein  : " << pi.filename << endl;
       cout << "fileout : " << proc.file << endl;
-      cout << "ascii   : " << proc.ascii << endl;
+      if (proc.encoding == 0)
+    	  cout << "encoding: " << "Binary"  << endl;
+      if (proc.encoding == 1)
+          cout << "encoding: " << "ASCII"  << endl;
+      if (proc.encoding == 2)
+          cout << "encoding: " << "Base64 binary"  << endl;
+      if (proc.encoding == 3)
+          cout << "encoding: " << "Base64 compressed binary"  << endl;
+
       cout << "normal  : " << proc.normal << endl;
       cout << "rescale : " << proc.rescale << endl;
       cout << "format  : " << proc.form << endl;
