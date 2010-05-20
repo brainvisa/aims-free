@@ -582,7 +582,7 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
 		  }
 		catch( ... )
 		  {
-			std::cout << "error GIFTI_dataarrays_info\n";
+			//std::cout << "error GIFTI_dataarrays_info\n";
 		  }
         }
       else

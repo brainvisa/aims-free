@@ -298,7 +298,7 @@ bool GiftiMeshFormat<D, T>::write(const std::string & filename,
 		try {
 			da_info = thdr.getProperty("GIFTI_dataarrays_info");
 		} catch (...) {
-			std::cout << "error GIFTI_dataarrays_info\n";
+			//std::cout << "error GIFTI_dataarrays_info\n";
 		}
 
 		bool normal = false;

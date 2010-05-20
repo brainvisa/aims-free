@@ -137,7 +137,7 @@ namespace aims
         }
         catch( ... )
         {
-        std::cout << "error GIFTI_dataarrays_info\n";
+        //std::cout << "error GIFTI_dataarrays_info\n";
         }
 
 		hdr.setOptions(options());
