@@ -542,7 +542,7 @@ template <typename T>
 void GiftiHeader::giftiAddTexture( gifti_image* gim,
                                    const TimeTexture<T> & tex )
 {
-  std::cout << "AddTexture type TimeTexture<T>\n";
+  //std::cout << "AddTexture type TimeTexture<T>\n";
   typename TimeTexture<T>::const_iterator it, et = tex.end();
   size_t nmax = 0;
   int t = 0;
@@ -577,7 +577,7 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
 			if( el->getProperty( "intent", intentit ) )
 			  break;
 		    }
-		  std::cout << intentit << "\n";
+		  //std::cout << intentit << "\n";
 		  da->intent = gifti_intent_from_string(intentit.c_str());
 		  }
 		catch( ... )
@@ -912,7 +912,7 @@ void GiftiHeader::giftiCopyMetaToGii( carto::Object dainf, giiDataArray *da )
 template <typename T>
 void GiftiHeader::giftiAddTexture( gifti_image* gim, const vector<T> & tex )
 {
-  std::cout << "AddTexture type vector<T>\n";
+  //std::cout << "AddTexture type vector<T>\n";
   if( !tex.empty() )
   {
     int nda = gim->numDA;
@@ -954,7 +954,7 @@ namespace aims
   template <>
   void GiftiHeader::giftiAddTexture( gifti_image*, const vector<Void> & )
   {
-  std::cout << "AddTexture type vector<Void>\n";
+  //std::cout << "AddTexture type vector<Void>\n";
   }
 
 }

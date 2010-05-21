@@ -294,21 +294,23 @@ bool GiftiMeshFormat<D, T>::write(const std::string & filename,
 		std::string fname = hdr.name();
 
 		int hdrmeshda = 0, hdrnormda = 0, hdrpolyda = 0, hdrtexda = 0;
-		carto::Object da_info;
-		try {
-			da_info = thdr.getProperty("GIFTI_dataarrays_info");
-		} catch (...) {
-			//std::cout << "error GIFTI_dataarrays_info\n";
-		}
 
 		bool normal = false;
 		int encoding = 1;
 
-		carto::Object it = da_info->objectIterator();
-		for (; it->isValid(); it->next()) {
-			carto::Object el = it->currentValue();
-			if (el->getProperty("encoding", encoding))
-				break;
+		carto::Object da_info;
+		try {
+			da_info = thdr.getProperty("GIFTI_dataarrays_info");
+
+			carto::Object it = da_info->objectIterator();
+			for (; it->isValid(); it->next()) {
+				carto::Object el = it->currentValue();
+				if (el->getProperty("encoding", encoding))
+					break;
+			}
+
+		} catch (...) {
+			//std::cout << "error GIFTI_dataarrays_info\n";
 		}
 
 		if (!options().isNull()) {
