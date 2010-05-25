@@ -128,7 +128,7 @@ public:
   sipRes = !sipCpp->get();
 %End
 
-  %Template1PyType% *get();
+  %Template1PyType% *_get();
 %MethodCode
   sipRes = sipCpp->get();
   if( sipRes )

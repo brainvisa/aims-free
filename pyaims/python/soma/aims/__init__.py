@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -261,7 +262,7 @@ class Writer:
       W = getattr( aimssip, wr )
     except:
       if c.startswith( 'rc_ptr_' ):
-        obj = obj.get()
+        obj = obj._get()
         wr = 'Writer_' + obj.__class__.__name__.split( '.' )[ -1 ]
         try:
           W = getattr( aimssip, wr )
@@ -323,10 +324,10 @@ def newnext( self ):
   return self.__objnext__()
 
 def objiter( self ):
-  return self.get().__iter__()
+  return self._get().__iter__()
 
 def objnext( self ):
-  return self.get().next()
+  return self._get().next()
 
 def objiteritems( self ):
   class iterator( object ):
@@ -363,23 +364,23 @@ def proxygetattr( self, attr ):
   except:
     if self.__getattribute__( 'isNull' )():
       raise RuntimeError( 'Null object called' )
-    return getattr( self.get(), attr )
+    return getattr( self._get(), attr )
 
 def proxylen( self ):
   if self.isNull():
     raise TypeError( "object of type 'Object' has no len()" )
-  return self.get().__len__()
+  return self._get().__len__()
 
 def proxygetitem( self, attr ):
   if self.isNull():
     raise RuntimeError( 'Null object called' )
-  return self.get().__getitem__( attr )
+  return self._get().__getitem__( attr )
 
 def proxysetitem( self, attr, value ):
   try:
     return __setitem__( self, attr, value )
   except:
-    return self.get().__setitem__( attr, value )
+    return self._get().__setitem__( attr, value )
 
 def proxydelitem( self, attr ):
   try:
@@ -387,28 +388,28 @@ def proxydelitem( self, attr ):
   except:
     if self.isNull():
       raise RuntimeError( 'Null object called' )
-    return self.get().__delitem__( attr )
+    return self._get().__delitem__( attr )
 
 def proxynonzero( self ):
   if self.isNull():
     return False
   try:
-    return self.get().__nonzero__()
+    return self._get().__nonzero__()
   except:
     try:
-      return len( self.get() )
+      return len( self._get() )
     except:
       return True
 
 def proxystr( self ):
   if self.isNull():
     return 'None'
-  return self.get().__str__()
+  return self._get().__str__()
 
 def rcptr_getAttributeNames( self ):
   '''IPython completion feature...'''
   m = []
-  l = [ self.get(), self ]
+  l = [ self._get(), self ]
   done = set()
   while l:
     c = l.pop()
@@ -443,6 +444,7 @@ def __fixsipclasses__( classes ):
         y.__str__ = __fixsipclasses__.proxystr
         y.__nonzero__ = __fixsipclasses__.proxynonzero
         y._getAttributeNames = __fixsipclasses__.getAttributeNames
+        y.get = lambda self: self._get() # to maintain compatibiity with pyaims 3.x
       else:
         if hasattr( y, '__objiter__' ):
           y.__iter__ = __fixsipclasses__.newiter
@@ -567,7 +569,7 @@ def getPython( self ):
   t = self.type()
   cv = convertersObjectToPython.get( t )
   res = None
-  gen = self.get()
+  gen = self._get()
   if cv is not None:
     res = cv( gen )
     try:
@@ -743,7 +745,7 @@ def genobj__iadd__( self, x ):
   return self
 
 def obj__iadd__( self, x ):
-  self.get().__iadd__( x )
+  self._get().__iadd__( x )
   return self
 
 carto.GenericObject.__repr__ = carto.GenericObject.__str__

@@ -58,7 +58,7 @@ public:
   sipRes = !sipCpp->get();
 %End
 
-  aims::MaskIterator *get();
+  aims::MaskIterator *_get();
 %MethodCode
   sipRes = sipCpp->get();
   if( sipRes )
@@ -136,7 +136,7 @@ public:
   sipRes = !sipCpp->get();
 %End
 
-  aims::RoiIterator *get();
+  aims::RoiIterator *_get();
 %MethodCode
   sipRes = sipCpp->get();
   if( sipRes ) {

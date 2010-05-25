@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -33,7 +34,7 @@
 from soma import aims
 import sys
 
-graph = aims.read( '/neurospin/lnao/Panabase/data/diffusion/chaos/t1mri/default_acquisition/default_analysis/folds/3.0/default_session_manual/Rchaos_default_session_manual.arg' )
+graph = aims.read( '/neurospin/lnao/Panabase/data/diffusion/chaos/t1mri/default_acquisition/default_analysis/folds/3.0/base2005_manual/Rchaos_base2005_manual.arg' )
 print 'graph:', graph
 print 'global properties:', graph.keys()
 print 'nodes:', graph.order()
