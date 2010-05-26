@@ -179,7 +179,9 @@ class AimsRGBA
 {
 public:
   AimsRGBA( const AimsRGBA & other )
-  { *(unsigned *) this = *(unsigned *) &other; } // fast'n'ugly copy...
+  : _red( other._red ), _green( other._green ), _blue( other._blue ),
+    _alpha( other._alpha )
+  {}
   AimsRGBA( const AimsRGB & other )
     : _red ( other.red() ), _green( other.green() ), _blue( other.blue() ), 
       _alpha( 255 ) { }
@@ -189,8 +191,14 @@ public:
 
   AimsRGBA & operator = ( const AimsRGBA & other )
   {
-    *(unsigned *) this = *(unsigned *) &other;
-    return( *this );
+    if( &other != this )
+    {
+      _red = other._red;
+      _green = other._green;
+      _blue = other._blue;
+      _alpha = other._alpha;
+    }
+    return *this;
   }
 
   AimsRGBA & operator = ( const AimsRGB & other )
@@ -198,7 +206,8 @@ public:
     _red   = other.red();
     _green = other.green();
     _blue  = other.blue();
-    _alpha = 255; return(*this);
+    _alpha = 255;
+    return *this;
   }
 
   AimsRGBA & operator += ( const AimsRGBA & other )
