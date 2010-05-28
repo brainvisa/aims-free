@@ -156,8 +156,8 @@ namespace aims
       for ( std::map< int, aims::DicomHeader::FileElement >::const_iterator i =
               hdr->slices().begin(); i != hdr->slices().end(); ++i )
         {
-          //std::cerr << "DICOM: readData: slice = " << slice 
-          //     << " instance_number = "  << i->first << std::endl;
+          std::cerr << "DICOM: readData: slice = " << slice
+               << " instance_number = "  << i->first << std::endl;
           readData( i->second.name(), data, slice, hdr.get() );
           ++slice;
         }
@@ -228,11 +228,12 @@ namespace aims
 
           if ( shortValues )
             {
-/* 	      cout << "short values" << endl ; */
               std::string tr_syntax;
               hdr->getProperty( "transfer_syntax", tr_syntax );
               if ( tr_syntax == "1.2.840.113619.5.2" )
                 { // This is a private GE Implicit VR Big Endian transfer syntax
+                    std::cout << "3.\n";
+
                   Uint32 byteLength = object->getLength();
                   swapBytes( shortValues, byteLength, sizeof( Uint16 ) );
                 }
@@ -240,7 +241,13 @@ namespace aims
 	      Uint16 *sptr = shortValues;
 	      int frame = instance / thing.dimZ();
 	      int slice = instance % thing.dimZ();
-	      
+              if( frame >= thing.dimT() )
+              {
+                std::cerr << "DICOM reader error: size/slice number mismatch"
+                << std::endl;
+                return;
+              }
+
 	      if ( hdr->reverseZ() )  {
 		slice = thing.dimZ() - slice - 1;
 		//if ( slice == 0 ) std::cerr << "DICOM Z axis reversed" 

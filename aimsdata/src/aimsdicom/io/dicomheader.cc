@@ -265,8 +265,16 @@ int DicomHeader::read()
       fullname = directoryname + sep + s;
 
       FileElement slice = readNext( fullname );
-      if ( slice.instance() < 0 )  continue;
+      if ( slice.instance() < 0 )
+      {
+        // cout << "slice instance < 0: " << slice.instance() << endl;
+        continue;
+      }
 
+      if( _slices.find( slice.instance() ) != _slices.end() )
+        cerr << "DICOM reader warning: slice " << slice.instance() << ": "
+        << s << " at an existing position, overrides "
+        << _slices[ slice.instance() ].name() << endl;
       _slices[ slice.instance() ] = slice;
       fileVector.push_back( s );
     }
@@ -334,6 +342,12 @@ int DicomHeader::read()
     } 
  
   int dimZ = _slices.size() / dimT;
+  if( dimZ * dimT != _slices.size() )
+  {
+    cerr << "DICOM reader warning: slices number does not make a complete "
+      << "volume" << std::endl;
+    ++dimZ;
+  }
   
   string manufac;
   status = getProperty( "manufacturer", manufac );
