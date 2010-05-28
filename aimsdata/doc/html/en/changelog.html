@@ -39,9 +39,22 @@
 
  <!-- -->
 
-<h4> <a name="version-4.0"></a>April 29, 2010, Version 4.0</h4>
+<h4> <a name="version-4.0"></a>May 28, 2010, Version 4.0</h4>
+
+<h5>User-level changes:</h5>
+
+<li>Improvements and fixes in various IO modules: Dicom, Nifti, Gifti, FDF
+</li>
+<li>Beginning of a SQL database format for graphs (QSlite files for now). This will allow partial reading and queries in large graphs databases. But the module is still experimental and the SQL database schema will probably change, so it should not be used yet to store important graphs. Conversion from and to the .arg format are still possible.
+</li>
+
+<h5>Programmer-level changes:</h5>
 
 <li>Noticeable API change: the Motion class (for affine spatial transformations) has been renamed AffineTransformation3d in aims namespace, inherits the new Tansformation and Transformation3d classes, and undergoes some methods changes. Motion is still provided as a typedef to avoid breaking existing code, but some changes may be required anyway. See the AffineTransformation3d class documentation for details.
+</li>
+<li>python API: more automatic conversions between reference-counted objects (rc_ptr and Object classes) and their contents when calling wrapped C++ functions
+</li>
+<li>python API: the get() method of rc_ptr and Object classes is replaced by _get() so as not to shadow potential get() methods in the objects under the reference counter. In 4.0 the get() method is still present for backward compatibility and behaves as it did before, but this will be changed in a next release, so programmers are advised to use _get() instead (which is now rarely needed).
 </li>
 
  <!-- -->
