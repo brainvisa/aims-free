@@ -601,13 +601,16 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
 	  try
 	  {
 	  da_info = getProperty( "GIFTI_dataarrays_info" );
-	  }
-	  catch( ... )
-	  {
-	  }
+	  carto::Object it = da_info->objectIterator();
+		for( ; it->isValid(); it->next() )
+		  {
+		  carto::Object el = it->currentValue();
+		  if( el->getProperty( "encoding", da->encoding ) )
+			break;
+		  }
 
 	  if( !options().isNull() )
-		{
+	    {
 		  try
 		  {
 			carto::Object a = options()->getProperty( "encoding" );
@@ -615,22 +618,15 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
 				{
 				da->encoding = (int) a->getScalar();
 				}
-			else
-				{
-				carto::Object it = da_info->objectIterator();
-			    for( ; it->isValid(); it->next() )
-				  {
-				  carto::Object el = it->currentValue();
-				  if( el->getProperty( "encoding", da->encoding ) )
-				    break;
-				  }
-				}
-
 		  }
 		  catch( ... )
 		  {
 		  }
-		}
+	    }
+	  }
+	  catch( ... )
+	  {
+	  }
 
       string mname,mval;
       // metadata dataArray

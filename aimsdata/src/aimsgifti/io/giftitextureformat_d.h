@@ -85,7 +85,7 @@ namespace aims
 
         default:
           {
-        	std::cout << "type : " << gifti_intent_to_string(da->intent) << "\n";
+        	//std::cout << "type : " << gifti_intent_to_string(da->intent) << "\n";
 
             int vnum = da->dims[0];
             int j;
@@ -137,7 +137,7 @@ namespace aims
         }
         catch( ... )
         {
-        //std::cout << "error GIFTI_dataarrays_info\n";
+        std::cout << "error GIFTI_dataarrays_info\n";
         }
 
 		hdr.setOptions(options());

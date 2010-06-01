@@ -296,7 +296,7 @@ bool GiftiMeshFormat<D, T>::write(const std::string & filename,
 		int hdrmeshda = 0, hdrnormda = 0, hdrpolyda = 0, hdrtexda = 0;
 
 		bool normal = false;
-		int encoding = 1;
+		int encoding = 2;
 
 		carto::Object da_info;
 		try {
@@ -322,17 +322,6 @@ bool GiftiMeshFormat<D, T>::write(const std::string & filename,
 				if ((int) a->getScalar() != 0) {
 					encoding = (int) a->getScalar();
 				}
-				/*
-			else
-			{
-				carto::Object it = da_info->objectIterator();
-				for(; it->isValid(); it->next() )
-				{
-					carto::Object el = it->currentValue();
-					if( el->getProperty( "encoding", encoding ) )
-					break;
-				}
-			}*/
 
 		}
 		catch( ... )
