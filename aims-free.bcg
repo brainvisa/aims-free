@@ -30,4 +30,4 @@ for component in aimsfree_subprojects:
   options[ component ].update( oldop )
   c = options.setdefault( component, {} )
   c[ 'source' ] = os.path.join( currentComponentDirectory, component )
-  c[ 'version' ] = '4.0'
+  c[ 'version' ] = '4.1'
