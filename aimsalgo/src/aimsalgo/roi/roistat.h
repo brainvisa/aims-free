@@ -83,19 +83,17 @@ namespace aims
     std::set< Vertex*> currentRoiStatVert;  //tmp var for current set vert of this
     Vertex*       v;                   //tmp var for vertice of the object "this"
     std::vector< int > roi_st, roi_dt;
-    
-    
-    
+
     // Tatoo the roi object AND the RoiStat  object with the image name
     roi.setProperty( "last_image_stated", image);
     setProperty("last_image_stated", image);
-    
+
     // get the maximum bouding box
     std::vector< int > bbmaxTO;
     std::vector< float > vsTO;
     roi.getProperty( "boundingbox_max", bbmaxTO);
     roi.getProperty( "voxel_size", vsTO );
-    
+
     // Gestion de start et duration compte tenu d'appel monoframe ou multi frame
     std::vector< int > i_st, i_dt;
     PythonHeader	*hd = dynamic_cast<PythonHeader *>( image.header() );
@@ -118,7 +116,7 @@ namespace aims
         i_dt.push_back(1);           // Force val for "static" series
       }
     }
-    
+
     // Start gathering data.
     AimsData< float > tmpin( image.dimX(), image.dimY(), image.dimZ() );
     tmpin.setSizeXYZT( image.sizeX(), image.sizeY(), image.sizeZ(), 1.0 );
@@ -127,7 +125,7 @@ namespace aims
     const std::list<BaseTree*> & metaRoiList = _roiSel->children();
     carto::rc_ptr<BucketMap<Void> >		bck;
     BucketMap<Void>::Bucket::iterator	ibk, ebk;
-    
+
     // Level 1 : Start loop on time dimension
     for (int t = 0; t < image.dimT(); ++t) // populate may be invoked in byframe
       {                                    // or allframe mode
@@ -140,16 +138,16 @@ namespace aims
         getProperty( "duration_time", roi_dt );
         roi_dt.push_back( i_dt[ t ] );
         setProperty("duration_time",roi_dt);
-        
+
         int x,y,z;
         ForEach3d( tmpin, x, y, z )
           tmpin(x, y, z) = image(x, y, z, t);
-        
+
         _interpolator->setRef( tmpin );
         AimsData< float > tmpout = _interpolator->doit( motion, 
                                                         bbmaxTO[0]+1, bbmaxTO[1]+1, bbmaxTO[2]+1,
                                                         Point3df(  vsTO[0],vsTO[1],vsTO[2] )   );
-        
+
         // Level 2 : Loop on the different MetaRoi of selectionSet
         for (BaseTree::const_iterator metaRoi = metaRoiList.begin();
              metaRoi != metaRoiList.end();
@@ -160,7 +158,7 @@ namespace aims
               ib, eb = corresBuckets.end();
             Tree*   tmpTree = dynamic_cast< Tree *>( *metaRoi ); // Test 
             std::string surname;(*tmpTree).getProperty("surname", surname);
-            
+
             // Construct the corresBucket
             const std::list<BaseTree*> & metaRoiChild = (*metaRoi)->children();
             for( BaseTree::const_iterator metaRoiContent = metaRoiChild.begin();
@@ -170,7 +168,7 @@ namespace aims
                 tmpTree = dynamic_cast< Tree *>( *metaRoiContent ); // Test 
                 std::string tmp;(*tmpTree).getProperty("nomenName", tmp);
                 //std::cout << "Debug nomenName>> " << tmp << std::endl;
-                
+
                 std::set<Vertex*> roisv = roi.VertByNameAndDescendantName( tmp );
                 for( std::set< Vertex* >::const_iterator j = roisv.begin();
                      j != roisv.end(); ++j )
@@ -182,13 +180,13 @@ namespace aims
                       std::cout << "Bucket not found. Label = "  << l << std::endl ;
                   }
               }
-            
+
             if (corresBuckets.size() == 0) continue;
-            
+
             // Lets process the current corresBuckets
             // and construct the vertices of RoiStat.
             currentRoiStatVert = getVerticesWith("surname", surname);
-            
+
             ASSERT (currentRoiStatVert.size() < 2 ); // only 0 first loop 
             //or 1 -other loops
             if (currentRoiStatVert.size() == 0)
@@ -197,7 +195,7 @@ namespace aims
                 v->setProperty("surname", surname);
               }
             else v = *( currentRoiStatVert.begin() );
-            
+
             // Level 3: loop on the corresBuckets in the arg roi and accumulate
             float mean = 0.0;
             float std = 0.0;
@@ -210,9 +208,9 @@ namespace aims
                 // 0- Init
                 // 1-Retrieve  one bucket : (*v) 
                 // 2-Cumul stat
-                
-                for( ibk=bck->begin()->second.begin(), 
-                       ebk=bck->begin()->second.end(); ibk!=ebk; ++ibk )
+                if( !bck->empty() )
+                  for( ibk=bck->begin()->second.begin(),
+                        ebk=bck->begin()->second.end(); ibk!=ebk; ++ibk )
                   {
                     float pixel = tmpout( ibk->first );
                     mean += pixel;
@@ -222,10 +220,11 @@ namespace aims
                     ++pn2 ;
                   }
               } // end of Level 3 loop
+
             //Update the current vertice in the RoiStat object
             mean /= (float) pn2;
             std=(float)sqrt( (double)(std-square(mean)*pn2) / (float)(pn2-1) );
-            
+
             v->setProperty("voxel_number", pn2 );
             std::vector< float > tac, sac, mac, Mac;
             v->getProperty( "mean_ac", tac);
@@ -242,8 +241,7 @@ namespace aims
             v->setProperty( "max_ac", Mac);
           } //end of level 2 (loop on different set in the selectionSet)
       } // end level 1 (loop on time)
-    
-    
+
     setProperty("voxel_volume",vsTO[0]*vsTO[1]*vsTO[2]);
   }
 }
