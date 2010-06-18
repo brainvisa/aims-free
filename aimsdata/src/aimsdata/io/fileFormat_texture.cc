@@ -108,26 +108,24 @@ FileFormatDictionary<TimeTexture<Point2d> >::registerBaseFormats()
 
 template class FileFormatDictionary<TimeTexture<float> >;
 template class FileFormatDictionary<TimeTexture<Point2df> >;
-template class FileFormatDictionary<TimeTexture<short> >;
-template class FileFormatDictionary<TimeTexture<unsigned> >;
-template class FileFormatDictionary<TimeTexture<int> >;
+template class FileFormatDictionary<TimeTexture<int16_t> >;
+template class FileFormatDictionary<TimeTexture<uint32_t> >;
+template class FileFormatDictionary<TimeTexture<int32_t> >;
 template class FileFormatDictionary<TimeTexture<Point2d> >;
 
-#ifdef __APPLE__
 template class FileFormat<TimeTexture<float> >;
 template class FileFormat<TimeTexture<Point2df> >;
-template class FileFormat<TimeTexture<short> >;
-template class FileFormat<TimeTexture<unsigned> >;
-template class FileFormat<TimeTexture<int> >;
+template class FileFormat<TimeTexture<int16_t> >;
+template class FileFormat<TimeTexture<uint32_t> >;
+template class FileFormat<TimeTexture<int32_t> >;
 template class FileFormat<TimeTexture<Point2d> >;
-#endif
 
 static bool _texdic()
 {
   FileFormatDictionary<TimeTexture<float> >::init();
-  FileFormatDictionary<TimeTexture<short> >::init();
-  FileFormatDictionary<TimeTexture<unsigned> >::init();
-  FileFormatDictionary<TimeTexture<int> >::init();
+  FileFormatDictionary<TimeTexture<int16_t> >::init();
+  FileFormatDictionary<TimeTexture<uint32_t> >::init();
+  FileFormatDictionary<TimeTexture<int32_t> >::init();
   FileFormatDictionary<TimeTexture<Point2d> >::init();
   FileFormatDictionary<TimeTexture<Point2df> >::init();
   return true;
