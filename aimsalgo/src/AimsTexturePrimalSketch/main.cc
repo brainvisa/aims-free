@@ -172,205 +172,171 @@ PrimalSketch<AimsSurface<3,Void>, Texture<float> > filterPS(PrimalSketch<AimsSur
 
 int main(int argc, const char **argv)
 {
-  try
-    {
-      std::string fileInT, fileInM, fileout, fileoutBlobs, motionfile, subject="none",
-        graphout, auxmeshpath="", fileLat="", fileLongit="";
-      float dt=0.05, tmax, tmin=1.0,filterout=-100000000.0;
-      uint intersection_param=10;
+    try {
+        std::string fileInT, fileInM, fileout, fileoutBlobs, motionfile, subject="none",
+            graphout, auxmeshpath="", fileLat="", fileLongit="";
+        float dt=0.05, tmax, tmin=1.0,filterout=-100000000.0;
+        uint intersection_param=10;
 
-      AimsApplication app( argc, argv, "ScaleSpace et grey level blobs d'une surface/texture au format float");
+        AimsApplication app( argc, argv, "ScaleSpace et grey level blobs d'une surface/texture au format float");
 
-      app.addOption( fileInT, "-t", "inputTexture");
-      app.alias( "--inputT", "-t" );
-      app.addOption( graphout, "-o", "output primal sketch graph" );
-      app.addOption( fileInM, "-m", "inputMesh");
-      app.alias( "--inputM", "-m" );
-      app.addOption( fileout, "-os", "scale space texture filename");
-      app.alias( "--output-scales", "-os" );
-      app.addOption( fileoutBlobs, "-ob", "blobs texture filename");
-      app.alias( "--output-blobs", "-ob" );
-      app.addOption( tmin, "-t1", "minimum scale (default=1.0)", true);
-      app.alias( "--scalemin", "-t1" );
-      app.addOption( tmax, "-t2", "maximum scale");
-      app.alias( "--scalemax", "-t2" );
-      app.addOption( dt, "-dt", "time step (default=0.05)", true);
-      app.alias( "--deltat", "-dt" );
-      app.addOption( auxmeshpath, "-mX", "auxilliary mesh (for the rendering)",true);
-      app.alias( "--auxmesh", "-mX" );
-      app.addOption( subject, "-sj", "subject name (default : inputImage)", true);
-      app.alias ("--subject", "-sj");
-      app.alias ("--subject", "-sj");
+        app.addOption( fileInT, "-t", "inputTexture");
+        app.alias( "--inputT", "-t" );
+        app.addOption( graphout, "-o", "output primal sketch graph" );
+        app.addOption( fileInM, "-m", "inputMesh");
+        app.alias( "--inputM", "-m" );
+        app.addOption( fileout, "-os", "scale space texture filename");
+        app.alias( "--output-scales", "-os" );
+        app.addOption( fileoutBlobs, "-ob", "blobs texture filename");
+        app.alias( "--output-blobs", "-ob" );
+        app.addOption( tmin, "-t1", "minimum scale (default=1.0)", true);
+        app.alias( "--scalemin", "-t1" );
+        app.addOption( tmax, "-t2", "maximum scale");
+        app.alias( "--scalemax", "-t2" );
+        app.addOption( dt, "-dt", "time step (default=0.05)", true);
+        app.alias( "--deltat", "-dt" );
+        app.addOption( auxmeshpath, "-mX", "auxilliary mesh (for the rendering)",true);
+        app.alias( "--auxmesh", "-mX" );
+        app.addOption( subject, "-sj", "subject name (default : inputImage)", true);
+        app.alias ("--subject", "-sj");
+        app.alias ("--subject", "-sj");
 
-      app.addOption( motionfile, "--trans", "Transformation matrix to Talairach space", true );
-      app.addOption( intersection_param, "-iP", "Intersection condition for grey-level blobs matching across scales", true );
-      app.addOption( filterout, "-f", "filter out blobs whose tvalues are under (default=1.0)", true);
-      app.addOption( fileLat, "-l", "texture latitude", true);
-      app.addOption( fileLongit, "-L", "texture longitude", true);
+        app.addOption( motionfile, "--trans", "Transformation matrix to Talairach space", true );
+        app.addOption( intersection_param, "-iP", "Intersection condition for grey-level blobs matching across scales", true );
+        app.addOption( filterout, "-f", "filter out blobs whose tvalues are under (default=1.0)", true);
+        app.addOption( fileLat, "-l", "texture latitude", true);
+        app.addOption( fileLongit, "-L", "texture longitude", true);
 
-  
-      app.initialize();
+    
+        app.initialize();
 
-      if( graphout.empty() )
-        {
-          graphout = fileout;
-          string	bn = FileUtil::basename( fileout );
-          string::size_type pos = bn.rfind( '.' );
-          if( pos != string::npos )
-            graphout.erase( graphout.length() - bn.length() + pos + 1, 
-                            bn.length() - pos );
-          graphout += ".arg";
-          cout << "output primalsketch: " << graphout << endl;
+        if( graphout.empty() )
+            {
+            graphout = fileout;
+            string	bn = FileUtil::basename( fileout );
+            string::size_type pos = bn.rfind( '.' );
+            if( pos != string::npos )
+                graphout.erase( graphout.length() - bn.length() + pos + 1,
+                                bn.length() - pos );
+            graphout += ".arg";
+            cout << "output primalsketch: " << graphout << endl;
+            }
+        cout << "Reading input surface and texture: " << fileInM << " and " << fileInT << endl;
+        cout << "Creating up to scale " << tmax << " with geometric sampling of the scales (t=2^n)" << endl;
+
+        Reader<AimsSurfaceTriangle>	r1(fileInM);
+        Reader<Texture1d>             r2(fileInT);
+        AimsSurfaceTriangle           laMesh;
+        Texture1d                     laTexture;
+        r1.read(laMesh);
+        r2.read(laTexture);
+        if (subject=="none")
+            subject=fileInT;
+
+        // Elimination des NaN s'il y a :
+        float moy=0.0;
+        for (uint i=0;i<laTexture.nItem();i++)
+            if (laTexture.item(i) == laTexture.item(i))
+            moy += laTexture.item(i);
+            
+        moy /= laTexture.nItem();
+        for (uint i=0;i<laTexture.nItem();i++)
+            if (laTexture.item(i) != laTexture.item(i))
+            laTexture.item(i) = moy;
+
+        cout << "Size=" << laMesh[0].vertex().size() << endl;
+
+        cout << "Ssmoother creation" << endl;
+
+        FiniteElementSmoother<3, float> *smooth;
+        smooth=new FiniteElementSmoother<3, float>(dt, &(laMesh[0]));
+        ScaleSpace<AimsSurface<3, Void>, Texture<float> > scale_space(&(laMesh[0]), &(laTexture[0]), smooth);
+        cout << "Scale-space creation" << endl;
+        Texture1d lat,longit;
+        std::vector<Point3df> coordinates;
+        TimeTexture<float> tmptex;
+
+        if (fileLat != "" && fileLongit != ""){
+        
+            Reader<Texture1d> r3(fileLat);
+            Reader<Texture1d> r4(fileLongit);
+            r3.read(lat);
+            r4.read(longit);
+            for (uint i=0;i<lat[0].nItem();i++){
+                coordinates.push_back(Point3df(lat[0].item(i), longit[0].item(i),i));
+            }
+            scale_space.PutCoordinates(&coordinates);
         }
-      cout << "Reading input surface and texture: " << fileInM << " and " << fileInT << endl;
-      cout << "Creating up to scale " << tmax << " with geometric sampling of the scales (t=2^n)" << endl;
-
-      Reader<AimsSurfaceTriangle>	r1(fileInM);
-      Reader<Texture1d>             r2(fileInT);
-      AimsSurfaceTriangle           laMesh;
-      Texture1d                     laTexture;
-      r1.read(laMesh);
-      r2.read(laTexture);
-      if (subject=="none")
-        subject=fileInT;
-
-      // Elimination des NaN s'il y a :
-      float moy=0.0;
-      for (uint i=0;i<laTexture.nItem();i++)
-        if (laTexture.item(i) == laTexture.item(i))
-          moy += laTexture.item(i);
-         
-      moy /= laTexture.nItem();
-      for (uint i=0;i<laTexture.nItem();i++)
-        if (laTexture.item(i) != laTexture.item(i))
-          laTexture.item(i) = moy;
-
-      cout << "Size=" << laMesh[0].vertex().size() << endl;
-
-      cout << "Ssmoother creation" << endl;
-
-      FiniteElementSmoother<3, float> *smooth;
-      smooth=new FiniteElementSmoother<3, float>(dt, &(laMesh[0]));
-      ScaleSpace<AimsSurface<3, Void>, Texture<float> > scale_space(&(laMesh[0]), &(laTexture[0]), smooth);
-      cout << "Scale-space creation" << endl;
-      Texture1d lat,longit;
-      std::vector<Point3df> coordinates;
-      TimeTexture<float> tmptex;
-
-      if (fileLat != "" && fileLongit != ""){
-      
-      Reader<Texture1d> r3(fileLat);
-      Reader<Texture1d> r4(fileLongit);
-      r3.read(lat);
-      r4.read(longit);
-      for (uint i=0;i<lat[0].nItem();i++){
-        coordinates.push_back(Point3df(lat[0].item(i), longit[0].item(i),i));
-      }
-      scale_space.PutCoordinates(&coordinates);
-      }
 
 
-      scale_space.GenerateDefaultScaleSpace(tmax);
+        scale_space.GenerateDefaultScaleSpace(tmax);
+
+
+
+        cout << "Computing primal sketch" << endl;
+
+        PrimalSketch<AimsSurface<3, Void>, Texture<float> > sketch(subject, &scale_space, SURFACE);
+        
+        sketch.ComputePrimalSketch(tmin, tmax, "", intersection_param);
+        std::list<ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type >*> blobList=sketch.BlobSet();
+
+        std::list<ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type >*>::iterator blobIt;
+
+        sketch = filterPS2(sketch,filterout);
 
 //       cout << "Writing scale space in file " << fileout << endl;
-// 
+//
 //       scale_space.Write(fileout);
-
-      cout << "Computing primal sketch" << endl;
-
-      PrimalSketch<AimsSurface<3, Void>, Texture<float> > sketch(subject, &scale_space, SURFACE);
-      
-      printf("%.3f, %.3f\n", tmin, tmax);
-      sketch.ComputePrimalSketch(tmin, tmax, "", intersection_param);
-      std::list<ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type >*> blobList=sketch.BlobSet();
-
-      std::list<ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type >*>::iterator blobIt;
-      uint test=0;
-      for (blobIt=blobList.begin();blobIt!=blobList.end();blobIt++){
-        ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type > ssb(**blobIt);
-        GreyLevelBlob<SiteType<AimsSurface<3, Void> >::type > glb(*(ssb.GlBlobRep()));
-        test++;
-       
-      }
-      cout << "nb de blobs : " << test << endl;
-
-      printf("\n");
-
-      if (pow(filterout+100000000.0,2) > 0.01){
-        cout << "filtre: " << filterout << endl;
-        sketch=filterPS2(sketch,filterout);
-      }
-      
-
-    std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSBlobs=sketch.BlobSet().begin();
-    std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSend=sketch.BlobSet().end();
-    
-
-    printf("  %d\n", sketch.BlobSet().size());
-
-    printf("FIN\n");
-      test=0; 
-      for (blobIt=blobList.begin();blobIt!=blobList.end();blobIt++){
-        ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type > ssb(**blobIt);
-        GreyLevelBlob<SiteType<AimsSurface<3, Void> >::type > glb(*(ssb.GlBlobRep()));
-//         if (glb.GetListePoints().size() == 1) 
-        test++;
         
-      }
-      cout << "nb de blobs : " << test << endl;
-      
-      printf("\n");
-      
-      cout << "Converting primal sketch into graph" << endl;
+        cout << "Converting primal sketch into graph" << endl;
 
-      if (auxmeshpath!=""){
-        cout << "Auxilliary mesh used for rendering : " << auxmeshpath << endl;
-        AimsSurfaceTriangle *tmpmesh;
-        tmpmesh = new AimsSurfaceTriangle();
-        Reader<AimsSurfaceTriangle> r(auxmeshpath);
-        r.read(*tmpmesh);      
-        ASSERT((*tmpmesh)[0].vertex().size() == laMesh[0].vertex().size() && (*tmpmesh)[0].polygon().size() == laMesh[0].polygon().size());
-        sketch.scaleSpace()->PutAuxMesh(tmpmesh);
-      }
+        if (auxmeshpath!=""){
+            cout << "Auxilliary mesh used for rendering : " << auxmeshpath << endl;
+            AimsSurfaceTriangle *tmpmesh;
+            tmpmesh = new AimsSurfaceTriangle();
+            Reader<AimsSurfaceTriangle> r(auxmeshpath);
+            r.read(*tmpmesh);
+            ASSERT((*tmpmesh)[0].vertex().size() == laMesh[0].vertex().size() && (*tmpmesh)[0].polygon().size() == laMesh[0].polygon().size());
+            sketch.scaleSpace()->PutAuxMesh(tmpmesh);
+        }
       
 
-      Primalsketch2graph<AimsSurface<3, Void>, Texture<float> > translate(&sketch);
-      if( !motionfile.empty() ) {
-          MotionReader  mr( motionfile );
-          Motion  mot;
-          mr.read( mot );
-          translate.setMotion( mot );
+        Primalsketch2graph<AimsSurface<3, Void>, Texture<float> > translate(&sketch);
+        if( !motionfile.empty() ) {
+            MotionReader  mr( motionfile );
+            Motion  mot;
+            mr.read( mot );
+            translate.setMotion( mot );
         }
 
-      translate.DoIt();
+        translate.DoIt();
 
-      Graph *graphSketch=translate.GetGraph();
+        Graph *graphSketch=translate.GetGraph();
 
-      Writer<Graph > dataW( graphout );
-      dataW.write(*graphSketch);
+        Writer<Graph > dataW( graphout );
+        dataW.write(*graphSketch);
 
-      cout << "Getting scale-space blob texture" << endl;
-      TimeTexture<float> blobTexture;
-      blobTexture=GetSSBlobTexture(&sketch);
+        cout << "Getting scale-space blob texture" << endl;
+        TimeTexture<float> blobTexture;
+        blobTexture = GetSSBlobTexture(&sketch);
 
-      cout << "Writing it in file " << fileoutBlobs << endl;
-      
-      Writer<TimeTexture<float> > blobW(fileoutBlobs);
-      blobW.write(blobTexture);
+        cout << "Writing it in file " << fileoutBlobs << endl;
+        
+        Writer<TimeTexture<float> > blobW(fileoutBlobs);
+        blobW.write(blobTexture);
 
-      scale_space.Write(fileout);
+        scale_space.Write(fileout);
 
-      cout << "Finished" << endl;
-      cout<<"\a";
+        cout << "Finished" << endl;
+        cout<<"\a";
     }
-  catch( user_interruption & )
+    catch( user_interruption & ) {
+    }
+    catch( exception & e )
     {
-    }
-  catch( exception & e )
-    {
-      cout << e.what() << endl;
-      return EXIT_FAILURE;
+        cout << e.what() << endl;
+        return EXIT_FAILURE;
     }
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
