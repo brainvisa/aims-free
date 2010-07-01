@@ -50,7 +50,7 @@ namespace aims
   {
 
   private:
- 	
+
     std::map<unsigned, std::set< std::pair<unsigned,float> > >  weightLapl; // map (index, ensemble des pair(voisins,poids))
 
     void ComputeWeights( float threshold = 0.98) { weightLapl=AimsMeshWeightFiniteElementLaplacian(*this->_mesh,threshold); }
@@ -58,11 +58,21 @@ namespace aims
 
   public:
 
-    FiniteElementSmoother(float dt, AimsSurface<D, Void> *mesh)
+    FiniteElementSmoother( float dt, AimsSurface<D, Void> *mesh)
       : _dt(dt){ this->_mesh=mesh; ComputeWeights(); }
+
+    FiniteElementSmoother ( float dt,
+                            AimsSurface<D, Void> *mesh,
+                            std::map<unsigned, std::set< std::pair<unsigned,float> > >
+                                 &previouslyComputedWeights )
+      : _dt(dt) {
+        this->_mesh=mesh;
+        weightLapl = previouslyComputedWeights;
+    }
+
     virtual ~FiniteElementSmoother() {}
     void SetDt(float dt) { _dt = dt; }
-		
+
     float dt() { return _dt; }                                                                 //smooooth operatooor..
 
     Texture<T> doSmoothing(const Texture<T> & ima, int maxiter, bool verbose=true);

@@ -278,6 +278,7 @@ namespace aims
             }
 
             void WriteScale(float t, std::string name);
+            TimeTexture<T> getScaleSpaceTexture( );
 
             void Write(std::string name);
     };
@@ -526,21 +527,28 @@ namespace aims
 
  //----------------------------
 
+  template<int D, typename T> TimeTexture<T> ScaleSpace<AimsSurface<D, Void>, Texture<T> >::getScaleSpaceTexture()
+ {
+    typename std::map<float, ScaleLevel<AimsSurface<D, Void>, Texture<T> >*>::iterator itscales=scales.begin();
+    TimeTexture<T> multiEch ;
+    int t=0;
+    for ( ; itscales!=scales.end(); ++itscales)
+    {
+        multiEch[t]=((*itscales).second)->Level();
+        t++;
+    }
+
+    return multiEch;
+ }
+
  template<int D, typename T> void ScaleSpace<AimsSurface<D, Void>, Texture<T> >::Write(std::string name)
  {
 	typename std::map<float, ScaleLevel<AimsSurface<D, Void>, Texture<T> >*>::iterator itscales=scales.begin();
-	TimeTexture<T> multiEch;
-	int t=0;
-	for ( ; itscales!=scales.end(); ++itscales)
-	{
-		multiEch[t]=((*itscales).second)->Level();
-		t++;
-	}
-
+	TimeTexture<T> multiEch = getScaleSpaceTexture();
 	Writer<TimeTexture<T> > dataW(name);
 	dataW.write(multiEch);
  }
-
+ 
    //----------------------------
 
  template<int D, typename T> std::set<float> ScaleSpace<AimsSurface<D, Void>, Texture<T> >::GetScaleList()

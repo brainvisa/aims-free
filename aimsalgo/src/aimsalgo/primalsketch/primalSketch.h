@@ -213,10 +213,10 @@ namespace aims
         // Scale-space blob initialisation
         std::map<int, GreyLevelBlob<Site> *>
                 listeGLB=levelUp->BlobList();
-                
+
         typename std::map<int, GreyLevelBlob<Site> *>::iterator
                 itGL=listeGLB.begin();
-                                
+
         for (; itGL != listeGLB.end(); ++itGL)
         {
             glBlob=(*itGL).second;
@@ -231,7 +231,7 @@ namespace aims
             AddBifurcation(bifurc);
             labelMax++;
         }
-                
+
         // Primal Sketch Computation, Top To Bottom
 
         for (; (*itScaleUp) > tmin; ++itScaleUp)
@@ -838,13 +838,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
                     }  
                }
                std::cout << "\t OK" << std::endl;
-//                 list<Bifurcation<SiteType<AimsSurface<3, Void> >::type>*> bifList = BifurcationList();
-//                 list<Bifurcation<SiteType<AimsSurface<3, Void> >::type>*>::iterator bifit;
-//                 for (bifit = bifList.begin() ; bifit != bifList.end() ; bifit++){
-//                     Bifurcation<SiteType<AimsSurface<3, Void> >::type> *bif;
-//                     bif = *bifit;
-//                     cout << bif->TopBlobs().size() << " " << bif->BottomBlobs().size() << "/" << flush;
-//                 }
+
           }
      }
 
