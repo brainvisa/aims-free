@@ -122,22 +122,13 @@ namespace aims
     vs.push_back( 1 );
     vs.push_back( 1 );
     g.setProperty( "voxel_size", vs );
+    g.setProperty( "filename_base", "*" );
 
     vector<int>	bbmin(3), bbmax(3);
     bool		first = true;
     string        name;
     typename set<T>::iterator bl,fl;
 
-    //set<T>          	all_lab;
-    //map<T,int>     label2index;
-    //int                     inc = 0;
-
-    //for( i=0; i<n; ++i )
-    //  all_lab.insert( tex.item(i) );
-    
-    //for (bl=all_lab.begin(), fl=all_lab.end(); bl != fl; ++bl,++inc)
-    //  label2index[*bl] = inc;
-    
     fillLabel2index(tex);
 
     for( i=0; i<n; ++i )
@@ -218,7 +209,6 @@ namespace aims
 		a=ind;
 		++ind;
 		surface->vertex().push_back(mesh.vertex()[tri[0] ]  );
-		surface->normal().push_back(mesh.normal()[tri[0] ] );
 	      }
 	    else
 	      a =ic->second;
@@ -229,7 +219,6 @@ namespace aims
 		b=ind;
 		++ind;
 		surface->vertex().push_back(mesh.vertex()[tri[1] ] );
-		surface->normal().push_back(mesh.normal()[tri[1] ] );
 	      }
 	    else
 	      b = ic->second;
@@ -240,31 +229,18 @@ namespace aims
 		c=ind;
 		++ind;
 		surface->vertex().push_back(mesh.vertex()[tri[2] ] );
-		surface->normal().push_back(mesh.normal()[tri[2] ] );
 	      }
 	    else
 	      c = ic->second;
 	    surface->polygon().push_back(AimsVector<uint,3>(a,b,c) );
-	    v = nodeLabels[il->first];
-	    v->setProperty("aims_Tmtktri",surface);
 	  }
-	
+
+          v = nodeLabels[il->first];
+          surface->updateNormals();
+          GraphManip::storeAims( g, v, "aims_Tmtktri", surface );
+          v->setProperty("aims_Tmtktri",surface);
       }
-    
-    rc_ptr<map<string,map<string,GraphElementCode> > > 
-      objmap( new map<string,map<string,GraphElementCode> > );
-    GraphElementCode 	&gec = (*objmap)["roi"]["Tmtktri"];
-    gec.id = "Tmtktri";
-    gec.attribute = "aims_Tmtktri";
-    gec.objectType = "Mesh";
-    gec.dataType = "VOID";
-    gec.syntax = "roi";
-    gec.local_file_attribute = "Tmtktri_filename";
-    gec.global_index_attribute = "Tmtktri_label";
-    gec.global_filename = "patch.mesh";
-    //gec.global = false;
-    g.setProperty("aims_objects_table",objmap);
-    
+
   }
   
 
@@ -301,6 +277,7 @@ namespace aims
     vs.push_back( 1 );
     vs.push_back( 1 );
     g.setProperty( "voxel_size", vs );
+    g.setProperty( "filename_base", "*" );
 
     vector<int>	bbmin(3), bbmax(3);
     bool		first = true;

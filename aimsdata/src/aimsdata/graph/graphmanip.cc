@@ -1159,135 +1159,164 @@ Graph*  GraphManip::mergeGraph( const string & key,  Graph & h,  Graph &g,
  
   m->setProperty("aims_objects_table", m_get);
 
-  for ( im = m->begin(); im != em; ++im )
+  for( im = m->begin(); im != em; ++im )
+  {
+    vm = *im;
+    try
     {
-      vm = *im;
-      try
-	{      
-	  X = vm->getProperty( key );
-	  keyValue = X->getString();
-	  nodem[keyValue] = vm;
-	}
-      catch( exception & e )
-	{
-	  cerr << e.what() << endl;
-	  throw( e );
-	}
+      X = vm->getProperty( key );
+      keyValue = X->getString();
+      nodem[keyValue] = vm;
     }
-  
+    catch( exception & e )
+    {
+      cerr << e.what() << endl;
+      throw;
+    }
+  }
+
   bool matching;
 
   for ( ig = g.begin(); ig != eg; ++ig )
+  {
+    matching = true;
+    vg = *ig;
+
+    //vg->getProperty(key,keyValue);
+    try
     {
-      matching = true;
-      vg = *ig;
-      
-      //vg->getProperty(key,keyValue);
-      try
-	{ 
-          X = vm->getProperty( key );
-          keyValue = X->getString();
-        }
-     
-
-      catch( exception & e )
-	{
-	  cerr << "Can find the value of " << key << " in the current vertex." << endl;
-          matching = false;	}
-
-      if (matching)
-        in = nodem.find(keyValue);
-      else
-        in = en;
-     
-
-      rc_ptr<AimsSurfaceTriangle>	mesh1(new AimsSurfaceTriangle), 
-	mesh2(new AimsSurfaceTriangle),merge(new AimsSurfaceTriangle);
-      rc_ptr<BucketMap<Void > > bucket1(new BucketMap<Void >), 
-	bucket2(new BucketMap<Void >), bucketM(new BucketMap<Void >);  
-      BucketMap<Void>::Bucket::iterator ib,eb; 
-      if (in != en)
-	{
-	  vm = in->second;
-	  vm->copyProperties( Object::reference(
-	    vg->value<AttributedObject::ContentType>() ) );
-
-	  if (Merge)
-	    {
-	      imgec = m_get->find( (*ig)->getSyntax() );
-	      if( imgec != emgec )
-		for( igec=imgec->second.begin(), egec=imgec->second.end(); 
-		     igec!=egec; ++igec )
-		  {
-		    // we could pre-filter GECs to keep only those of type mesh
-		    // this would need fewer tests for each node
-		    GraphElementCode	& gec = igec->second;
-		    //Mesh
-		    if( gec.objectType == mdtc.objectType() 
-			&& gec.dataType == mdtc.dataType() 
-			&& vg->getProperty( gec.attribute, mesh1 ) 
-			&& mesh1.get() 
-			&& vm->getProperty( gec.attribute, mesh2 )
-			&& mesh2.get() )
-		    
-		      {
-			mesh1 = rc_ptr<AimsSurfaceTriangle >(new AimsSurfaceTriangle(*mesh1));
-			vector<Point3df>		& normal = mesh2->normal();
-			vector<Point3df>::iterator in,en = normal.end();
-			if (invNormal)
-			  for (in = normal.begin(); in != en; ++in)
-			    {
-			      Point3df & norm = *in;
-			      norm[0] *= -1;
-			      norm[1] *= -1;
-			      norm[2] *= -1;  
-			    }
- 
-			SurfaceManip::meshMerge(*mesh1,*mesh2);
-			vm->setProperty( gec.attribute, mesh1 ); 
-
-		      }
-		    //Bucket
-		    else
-		      if( gec.objectType == bdtc.objectType() 
-			  && gec.dataType == bdtc.dataType() 
-			  && vg->getProperty( gec.attribute, bucket1 ) 
-			  && bucket1.get() 
-			  && vm->getProperty( gec.attribute, bucket2 )
-			  && bucket2.get() )
-			{
-			  
-			  bucket1 = rc_ptr<BucketMap<Void > >
-			    (new BucketMap<Void >(*bucket1));
-			  for (ib = (*bucket2)[0].begin(), 
-			       eb = (*bucket2)[0].end(); ib != eb; ++ib)
-			    (*bucket1)[0][ib->first] = ib->second;
-			  
-			  vm->setProperty( gec.attribute, bucket1 ); 
-			} 
-			
-		  }
-	    }
-	      
-	}
-      else
-	{
-	  cout << "Cannot translate the (" << key << ") whose value is" << keyValue << endl;
-	  syntax = vg->getSyntax();
-	  vm = m->addVertex(syntax);
-	  vm->copyProperties( Object::reference
-	    ( vg->value<AttributedObject::ContentType>() ) );
-	}
-   
+      X = vg->getProperty( key );
+      keyValue = X->getString();
     }
-   
-      
-    
-    cout << "done\n";
+    catch( exception & e )
+    {
+      cerr << "Cannot find the value of " << key << " in the current vertex."
+        << endl;
+      matching = false;
+    }
 
-    //TODO : Copy of the node relations...
+    if (matching)
+      in = nodem.find(keyValue);
+    else
+      in = en;
 
-    return(m);
+    rc_ptr<AimsSurfaceTriangle>	mesh1(new AimsSurfaceTriangle),
+      mesh2(new AimsSurfaceTriangle),merge(new AimsSurfaceTriangle);
+    rc_ptr<BucketMap<Void > > bucket1(new BucketMap<Void >),
+      bucket2(new BucketMap<Void >), bucketM(new BucketMap<Void >);
+    BucketMap<Void>::Bucket::iterator ib,eb;
+    if( in != en )
+    {
+      vm = in->second;
+      // before copying properties, store the indices that should not be
+      // modified, and handle mesges/buckets merging
+      PropertySet savedvalues;
+      int index;
+      if( g_get )
+      {
+        imgec = m_get->find( vm->getSyntax() );
+        if( imgec != emgec )
+          for( igec=imgec->second.begin(), egec=imgec->second.end();
+               igec!=egec; ++igec )
+          {
+            GraphElementCode    & gec = igec->second;
+            if( vg->hasProperty( gec.global_index_attribute )
+              && vm->getProperty( gec.global_index_attribute, index ) )
+              savedvalues.setProperty( gec.global_index_attribute, index );
+
+            if( Merge )
+            {
+              // we could pre-filter GECs to keep only those of type mesh
+              // this would need fewer tests for each node
+              //Mesh
+              if( gec.objectType == mdtc.objectType()
+                  && gec.dataType == mdtc.dataType()
+                  && vg->getProperty( gec.attribute, mesh1 )
+                  && mesh1.get()
+                  && vm->getProperty( gec.attribute, mesh2 )
+                  && mesh2.get() )
+              {
+                mesh1 = rc_ptr<AimsSurfaceTriangle >(
+                  new AimsSurfaceTriangle(*mesh1) );
+                vector<Point3df>          & normal = mesh1->normal();
+                vector<Point3df>::iterator in,en = normal.end();
+                if (invNormal)
+                  for( in = normal.begin(); in != en; ++in )
+                  {
+                    Point3df & norm = *in;
+                    norm[0] *= -1;
+                    norm[1] *= -1;
+                    norm[2] *= -1;
+                  }
+
+                SurfaceManip::meshMerge(*mesh1,*mesh2);
+                savedvalues.setProperty( gec.attribute, mesh1 );
+
+              }
+              //Bucket
+              else
+                if( gec.objectType == bdtc.objectType()
+                    && gec.dataType == bdtc.dataType()
+                    && vg->getProperty( gec.attribute, bucket1 )
+                    && bucket1.get()
+                    && vm->getProperty( gec.attribute, bucket2 )
+                    && bucket2.get() )
+                {
+
+                  bucket1 = rc_ptr<BucketMap<Void > >
+                    (new BucketMap<Void >(*bucket1));
+                  for (ib = (*bucket2)[0].begin(),
+                        eb = (*bucket2)[0].end(); ib != eb; ++ib)
+                    (*bucket1)[0][ib->first] = ib->second;
+
+                  savedvalues.setProperty( gec.attribute, bucket1 );
+                }
+            }
+          }
+      }
+
+      // now copy all attributes
+      vm->copyProperties( Object::reference(
+        vg->value<AttributedObject::ContentType>() ) );
+
+      // restore attributes which should not change or be replaced by a 3rd
+      // value
+      Object it = savedvalues.objectIterator();
+      for( ; it->isValid(); it->next() )
+        vm->setProperty( it->key(), it->currentValue() );
+
+    }
+    else
+    {
+      cout << "Cannot translate the (" << key << ") whose value is" << keyValue
+        << endl;
+      syntax = vg->getSyntax();
+      vm = m->addVertex(syntax);
+      vm->copyProperties( Object::reference
+        ( vg->value<AttributedObject::ContentType>() ) );
+      // fix mesh/buckets elements indices
+      if( g_get )
+      {
+        ig_get = g_get->find( syntax );
+        if( ig_get != g_get->end() )
+        {
+          for( iget=(ig_get->second).begin(), eget=(ig_get->second).end();
+            iget != eget; ++iget )
+          {
+            if( vm->hasProperty( iget->second.global_index_attribute ) )
+              vm->removeProperty( iget->second.global_index_attribute );
+          }
+        }
+      }
+    }
+
+  }
+
+  cout << "done\n";
+
+  //TODO : Copy of the node relations...
+
+  return m;
 }
 
 
