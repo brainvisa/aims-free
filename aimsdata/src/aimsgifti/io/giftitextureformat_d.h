@@ -54,7 +54,7 @@ namespace aims
                                     carto::Object options )
   {
 
-    std::cout << "gifti texture read\n";
+    // std::cout << "gifti texture read\n";
 
     GiftiHeader hdr( filename );
 
@@ -105,84 +105,84 @@ namespace aims
     vol.setHeader( hdr );
     gifti_free_image( gim );
 
-    std::cout << "OK\n";
+    // std::cout << "OK\n";
     return true;
   }
 
   template<typename T>
   bool GiftiTextureFormat<T>::write( const std::string & filename,
                                      const TimeTexture<T> & thing,
-                                     bool ascii)
+                                     bool /* ascii */ )
   {
 
-    std::cout << "gifti texture write\n";
+    // std::cout << "gifti texture write\n";
 
     try
+    {
+      const PythonHeader & thdr = thing.header();
+      GiftiHeader hdr( filename );
+      hdr.copy( thdr );
+
+      if( hdr.hasProperty( "nb_t_pos" ) )
+          hdr.removeProperty( "nb_t_pos" );
+
+      gifti_image *gim = hdr.giftiImageBase();
+      std::string fname = hdr.name();
+
+      int hdrtexda = 0;
+      carto::Object da_info;
+      try
       {
-        const PythonHeader & thdr = thing.header();
-        GiftiHeader hdr( filename );
-        hdr.copy( thdr );
-
-        if( hdr.hasProperty( "nb_t_pos" ) )
-            hdr.removeProperty( "nb_t_pos" );
-
-        gifti_image *gim = hdr.giftiImageBase();
-        std::string fname = hdr.name();
-
-        int hdrtexda = 0;
-        carto::Object da_info;
-        try
-        {
-          da_info = thdr.getProperty( "GIFTI_dataarrays_info" );
-        }
-        catch( ... )
-        {
+        da_info = thdr.getProperty( "GIFTI_dataarrays_info" );
+      }
+      catch( ... )
+      {
         std::cout << "error GIFTI_dataarrays_info\n";
-        }
-
-		hdr.setOptions(options());
-
-		//std::cout << "add texture\n";
-
-		hdr.giftiAddTexture( gim, thing);
-        // add external textures
-        hdr.giftiAddExternalTextures( gim, hdrtexda, da_info );
-
-        carto::Object da_label;
-		try
-		{
-		  da_label = thdr.getProperty( "GIFTI_labels_table" );
-		  std::cout << "ecriture label OK\n";
-		}
-		catch( ... )
-		{
-		}
-        // labels table
-        hdr.giftiAddLabelTable( gim );
-
-        // write all
-        gifti_write_image( gim, fname.c_str(), 1 );
-        gifti_free_image( gim );
-        // .minf header
-        if( hdr.hasProperty( "GIFTI_metadata") )
-          hdr.removeProperty( "GIFTI_metadata" );
-        if( hdr.hasProperty( "GIFTI_version" ) )
-          hdr.removeProperty( "GIFTI_version" );
-        if( hdr.hasProperty( "GIFTI_dataarrays_info" ) )
-          hdr.removeProperty( "GIFTI_dataarrays_info" );
-        if( hdr.hasProperty( "file_type" ) )
-          hdr.removeProperty( "file_type" );
-        if( hdr.hasProperty( "GIFTI_labels_table") )
-          hdr.removeProperty( "GIFTI_labels_table" );
-        hdr.writeMinf( fname + ".minf" );
-
-        std::cout << "OK\n";
-        return true;
       }
-    catch( std::exception & e )
+
+      hdr.setOptions(options());
+
+      //std::cout << "add texture\n";
+
+      hdr.giftiAddTexture( gim, thing);
+      // add external textures
+      hdr.giftiAddExternalTextures( gim, hdrtexda, da_info );
+
+      carto::Object da_label;
+      try
       {
-        return false;
+        da_label = thdr.getProperty( "GIFTI_labels_table" );
+        // std::cout << "ecriture label OK\n";
       }
+      catch( ... )
+      {
+      }
+      // labels table
+      hdr.giftiAddLabelTable( gim );
+
+      // write all
+      gifti_write_image( gim, fname.c_str(), 1 );
+      gifti_free_image( gim );
+      // .minf header
+      if( hdr.hasProperty( "GIFTI_metadata") )
+        hdr.removeProperty( "GIFTI_metadata" );
+      if( hdr.hasProperty( "GIFTI_version" ) )
+        hdr.removeProperty( "GIFTI_version" );
+      if( hdr.hasProperty( "GIFTI_dataarrays_info" ) )
+        hdr.removeProperty( "GIFTI_dataarrays_info" );
+      if( hdr.hasProperty( "file_type" ) )
+        hdr.removeProperty( "file_type" );
+      if( hdr.hasProperty( "GIFTI_labels_table") )
+        hdr.removeProperty( "GIFTI_labels_table" );
+      hdr.writeMinf( fname + ".minf" );
+
+      // std::cout << "OK\n";
+      return true;
+    }
+    catch( std::exception & e )
+    {
+      return false;
+    }
     return true;
   }
 }
