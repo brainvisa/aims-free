@@ -75,6 +75,8 @@ Flip::Flip( const string & fout, const string& mm )
   registerProcessType( "Volume", "S32", &flip<int32_t> );
   registerProcessType( "Volume", "FLOAT", &flip<float> );
   registerProcessType( "Volume", "DOUBLE", &flip<double> );
+  registerProcessType( "Volume", "RGB", &flip<AimsRGB> );
+  registerProcessType( "Volume", "RGBA", &flip<AimsRGBA> );
 }
 
 template<class T> 
