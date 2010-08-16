@@ -136,7 +136,7 @@ int main( int argc, const char **argv )
   app.addOption( proc.out, "-o", 
                  "output labelled connected components volume" );
   app.addOption( connect, "-c", "connectivity  4xy / 4xz / 4yz / 6 / 8xy / " 
-                 "8xz / 8yz / 26 [default=26]", true );
+                 "8xz / 8yz / 18 / 26 [default=26]", true );
   app.addOption( proc.minSize, "-s", "minimum size of the seeds [default=0]", 
                  true );
   app.addOption( proc.numMax, "-n", 
@@ -152,21 +152,23 @@ int main( int argc, const char **argv )
       app.initialize();
 
       if ( connect == "4xy" ) 
-        proc.connectivity = Connectivity::CONNECTIVITY_4_XY;          
+        proc.connectivity = Connectivity::CONNECTIVITY_4_XY;
       else if ( connect == "4xz" ) 
-        proc.connectivity = Connectivity::CONNECTIVITY_4_XZ;       
+        proc.connectivity = Connectivity::CONNECTIVITY_4_XZ;
       else if ( connect == "4yz" ) 
-        proc.connectivity = Connectivity::CONNECTIVITY_4_YZ;       
+        proc.connectivity = Connectivity::CONNECTIVITY_4_YZ;
       else if ( connect == "6" ) 
-        proc.connectivity = Connectivity::CONNECTIVITY_6_XYZ;       
+        proc.connectivity = Connectivity::CONNECTIVITY_6_XYZ;
       else if ( connect == "8xy" ) 
-        proc.connectivity = Connectivity::CONNECTIVITY_8_XY;       
+        proc.connectivity = Connectivity::CONNECTIVITY_8_XY;
       else if ( connect == "8xz" ) 
-        proc.connectivity = Connectivity::CONNECTIVITY_8_XZ;       
+        proc.connectivity = Connectivity::CONNECTIVITY_8_XZ;
       else if ( connect == "8yz" ) 
-        proc.connectivity = Connectivity::CONNECTIVITY_8_YZ;       
-      else if ( connect == "26" ) 
-        proc.connectivity = Connectivity::CONNECTIVITY_26_XYZ;       
+        proc.connectivity = Connectivity::CONNECTIVITY_8_YZ;
+      else if ( connect == "18" )
+        proc.connectivity = Connectivity::CONNECTIVITY_18_XYZ;
+      else if ( connect == "26" )
+        proc.connectivity = Connectivity::CONNECTIVITY_26_XYZ;
       else
         throw invalid_number( "Invalid connectivity value" );
 

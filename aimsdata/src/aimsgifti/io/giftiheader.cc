@@ -310,14 +310,14 @@ bool GiftiHeader::read()
       trs.reserve( da->numCS );
       for( j=0; j<da->numCS; ++j )
       {
-        string dataspace = da->coordsys[i]->dataspace;
+        string dataspace = da->coordsys[j]->dataspace;
         dataspace = niftiReferential( dataspace );
         //o->setProperty( "referential", dataspace );
         if( mesh && nmesh == 1 && j == 0
           && dataspace != "Arbitrary coordinates" )
           // share ref/transfo information in the main header
           setProperty( "referential", dataspace );
-        string xformspace = niftiReferential( da->coordsys[i]->xformspace );
+        string xformspace = niftiReferential( da->coordsys[j]->xformspace );
         vector<float> m( 16 );
         int k;
         for( k=0; k<4; ++k )
