@@ -182,15 +182,33 @@ namespace aims
                   sscanf(ts, "%d", &tmesh);
           int vnum = da->dims[0];
           int j;
+
+          if (da->ind_ord == GIFTI_IND_ORD_UNDEF)
+            std::cout << "GIFTI_IND_ORD_UNDEF" << std::endl;
+
+          if (da->ind_ord == GIFTI_IND_ORD_ROW_MAJOR)
+            std::cout << "GIFTI_IND_ORD_ROW_MAJOR" << std::endl;
+
+          if (da->ind_ord == GIFTI_IND_ORD_COL_MAJOR)
+            std::cout << "GIFTI_IND_ORD_COL_MAJOR " << vnum << std::endl;
+
           std::vector<Point3df> & vert = vol[tmesh].vertex();
           vert.clear();
           vert.reserve(vnum);
-          for (j = 0; j < vnum; ++j)
-            vert.push_back(Point3df(convertedNiftiValue<float> (da->data, j
-              * 3, da->datatype), convertedNiftiValue<float> (
-                da->data, j * 3 + 1, da->datatype),
-                convertedNiftiValue<float> (da->data, j * 3 + 2,
-                                            da->datatype)));
+
+          if (da->ind_ord == GIFTI_IND_ORD_ROW_MAJOR || da->ind_ord == GIFTI_IND_ORD_UNDEF)
+            for (j = 0; j < vnum; ++j)
+              vert.push_back(Point3df(
+                convertedNiftiValue<float> (da->data, j* 3, da->datatype),
+                convertedNiftiValue<float> (da->data, j * 3 + 1, da->datatype),
+                convertedNiftiValue<float> (da->data, j * 3 + 2,da->datatype)));
+
+          if (da->ind_ord == GIFTI_IND_ORD_COL_MAJOR)
+            for (j = 0; j < vnum; ++j)
+              vert.push_back(Point3df(
+                convertedNiftiValue<float> (da->data, j , da->datatype),
+                convertedNiftiValue<float> (da->data, j + vnum, da->datatype),
+                convertedNiftiValue<float> (da->data, j + 2*vnum, da->datatype)));
         }
         break;
       case NIFTI_INTENT_VECTOR: 
@@ -206,12 +224,21 @@ namespace aims
           std::vector<Point3df> & norm = vol[tnorm].normal();
           norm.clear();
           norm.reserve(vnum);
-          for (j = 0; j < vnum; ++j)
-            norm.push_back(Point3df(convertedNiftiValue<float> (da->data, j
-              * 3, da->datatype), convertedNiftiValue<float> (
-              da->data, j * 3 + 1, da->datatype),
-              convertedNiftiValue<float> (da->data, j * 3 + 2,
-                da->datatype)));
+
+          if (da->ind_ord == GIFTI_IND_ORD_ROW_MAJOR || da->ind_ord == GIFTI_IND_ORD_UNDEF)
+            for (j = 0; j < vnum; ++j)
+              norm.push_back(Point3df(
+                convertedNiftiValue<float> (da->data, j * 3, da->datatype),
+                convertedNiftiValue<float> (da->data, j * 3 + 1, da->datatype),
+                convertedNiftiValue<float> (da->data, j * 3 + 2, da->datatype)));
+
+          if (da->ind_ord == GIFTI_IND_ORD_COL_MAJOR)
+            for (j = 0; j < vnum; ++j)
+              norm.push_back(Point3df(
+                convertedNiftiValue<float> (da->data, j , da->datatype),
+                convertedNiftiValue<float> (da->data, j + vnum, da->datatype),
+                convertedNiftiValue<float> (da->data, j + 2*vnum, da->datatype)));
+
           break;
         }
       case NIFTI_INTENT_TRIANGLE: 
@@ -227,14 +254,25 @@ namespace aims
           std::vector<AimsVector<unsigned, D> > & poly = vol[tpoly].polygon();
           poly.clear();
           poly.reserve(vnum);
-          for (j = 0; j < vnum; ++j) 
-          {
-            poly.push_back(AimsVector<unsigned, D> ());
-            AimsVector<unsigned, D> &p = poly[j];
-            for (k = 0; k < D; ++k)
-              p[k] = convertedNiftiValue<unsigned> (da->data, j * D + k,
-                da->datatype);
-          }
+
+          if (da->ind_ord == GIFTI_IND_ORD_ROW_MAJOR || da->ind_ord == GIFTI_IND_ORD_UNDEF)
+            for (j = 0; j < vnum; ++j)
+            {
+              poly.push_back(AimsVector<unsigned, D> ());
+              AimsVector<unsigned, D> &p = poly[j];
+              for (k = 0; k < D; ++k)
+                p[k] = convertedNiftiValue<unsigned> (da->data, j * D + k,
+                  da->datatype);
+            }
+
+          if (da->ind_ord == GIFTI_IND_ORD_COL_MAJOR)
+            for (j = 0; j < vnum; ++j)
+            {
+              poly.push_back(AimsVector<unsigned, D> ());
+              AimsVector<unsigned, D> &p = poly[j];
+              for (k = 0; k < D; ++k)
+                p[k] = convertedNiftiValue<unsigned> (da->data, j + k*vnum, da->datatype);
+            }
           break;
         }
       case NIFTI_INTENT_TIME_SERIES:

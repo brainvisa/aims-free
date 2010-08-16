@@ -263,11 +263,22 @@ class Writer:
     except:
       if c.startswith( 'rc_ptr_' ):
         obj = obj._get()
-        wr = 'Writer_' + obj.__class__.__name__.split( '.' )[ -1 ]
-        try:
-          W = getattr( aimssip, wr )
-        except:
-          raise AttributeError( 'no Writer for type ' + obj.__class__.__name__ )
+        tryclass = [ obj.__class__ ]
+        tried = set()
+        W = None
+        while len( tryclass ) != 0:
+          ocl = tryclass[0]
+          del tryclass[0]
+          tried.add( ocl )
+          wr = 'Writer_' + ocl.__name__.split( '.' )[ -1 ]
+          W = getattr( aimssip, wr, None )
+          if W is None:
+            tryclass += [ x for x in ocl.__bases__ if x not in tried ]
+          else:
+            break
+        if W is None:
+          raise AttributeError( 'no Writer for type ' + \
+            obj.__class__.__name__ )
       else:
         raise AttributeError( 'no Writer for type ' + obj.__class__.__name__ )
     w = W( filename )
