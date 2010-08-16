@@ -183,15 +183,6 @@ namespace aims
           int vnum = da->dims[0];
           int j;
 
-          if (da->ind_ord == GIFTI_IND_ORD_UNDEF)
-            std::cout << "GIFTI_IND_ORD_UNDEF" << std::endl;
-
-          if (da->ind_ord == GIFTI_IND_ORD_ROW_MAJOR)
-            std::cout << "GIFTI_IND_ORD_ROW_MAJOR" << std::endl;
-
-          if (da->ind_ord == GIFTI_IND_ORD_COL_MAJOR)
-            std::cout << "GIFTI_IND_ORD_COL_MAJOR " << vnum << std::endl;
-
           std::vector<Point3df> & vert = vol[tmesh].vertex();
           vert.clear();
           vert.reserve(vnum);
