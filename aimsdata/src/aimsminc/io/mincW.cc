@@ -195,43 +195,54 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
 
   //1) Voxel to world transform
-  vector< vector<float> > transs;
-  if( hdr.getProperty( "transformations", transs ) && !transs.empty()
-      && transs[0].size() == 16 )
+  Object transs;
+  try
   {
     // convert AIMS transformaton to storage coords
-    Motion tr( transs[0] );
-    Motion vsm;
-    vsm.rotation()(0,0) = thing.sizeX();
-    vsm.rotation()(1,1) = thing.sizeY();
-    vsm.rotation()(2,2) = thing.sizeZ();
-    tr *= vsm;
-    vector<float> s2mvec;
-    if( hdr.getProperty( "storage_to_memory", s2mvec ) )
+    transs = hdr.getProperty( "transformations" );
+    if( !transs.isNull() && transs->size() != 0 )
     {
-      Motion s2m( s2mvec );
-      tr *= s2m;
+      Object t0 = transs->getArrayItem( 0 );
+      if( !t0.isNull() )
+      {
+        Motion tr( t0 );
+        Motion vsm;
+        vsm.rotation()(0,0) = thing.sizeX();
+        vsm.rotation()(1,1) = thing.sizeY();
+        vsm.rotation()(2,2) = thing.sizeZ();
+        tr *= vsm;
+        vector<float> s2mvec;
+        if( hdr.getProperty( "storage_to_memory", s2mvec ) )
+        {
+          Motion s2m( s2mvec );
+          tr *= s2m;
+        }
+        // handle MINC transform
+        General_transform *gt=get_voxel_to_world_transform(volume);
+        gt->type=LINEAR;
+        gt->inverse_flag=FALSE;
+        gt->linear_transform=(Transform*)malloc(sizeof(Transform));
+        for(int i=0;i<3;i++)
+        {
+          for(int j=0;j<3;j++)
+            gt->linear_transform->m[j][i] = tr.rotation()(i,j);
+          gt->linear_transform->m[3][i] = tr.translation()[i];
+          gt->linear_transform->m[i][3] = 0;
+        }
+        gt->linear_transform->m[3][3] = 1;
+        convert_transform_to_starts_and_steps( gt,
+                                               get_volume_n_dimensions(volume),
+                                               separations,
+                                               volume->spatial_axes,
+                                               volume->starts,
+                                               volume->separations,
+                                               volume->direction_cosines );
+      }
     }
-    // handle MINC transform
-    General_transform *gt=get_voxel_to_world_transform(volume);
-    gt->type=LINEAR;
-    gt->inverse_flag=FALSE;
-    gt->linear_transform=(Transform*)malloc(sizeof(Transform));
-    for(int i=0;i<3;i++)
-    {
-      for(int j=0;j<3;j++)
-        gt->linear_transform->m[j][i] = tr.rotation()(i,j);
-      gt->linear_transform->m[3][i] = tr.translation()[i];
-      gt->linear_transform->m[i][3] = 0;
-    }
-    gt->linear_transform->m[3][3] = 1;
-    convert_transform_to_starts_and_steps( gt,
-                                           get_volume_n_dimensions(volume),
-                                           separations,
-                                           volume->spatial_axes,
-                                           volume->starts,
-                                           volume->separations,
-                                           volume->direction_cosines );
+  }
+  catch( ... )
+  {
+    cout << "no transform or problem in it\n";
   }
 
   //2) Space name
