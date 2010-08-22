@@ -542,7 +542,7 @@ template <typename T>
 void GiftiHeader::giftiAddTexture( gifti_image* gim,
                                    const TimeTexture<T> & tex )
 {
-  //std::cout << "AddTexture type TimeTexture<T>\n";
+  // std::cout << "AddTexture type TimeTexture<T>\n";
   typename TimeTexture<T>::const_iterator it, et = tex.end();
   size_t nmax = 0;
   int t = 0;
@@ -564,27 +564,32 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
       da = gim->darray[nda];
       gifti_set_DA_defaults( da );
       if( tex.size() == 1 )
+      {
+        carto::Object da_info;
+        try
         {
-    	carto::Object da_info;
-		try
-		  {
-		  da_info = getProperty( "GIFTI_dataarrays_info" );
-		  carto::Object it = da_info->objectIterator();
-		  std::string intentit;
-		  for( ; it->isValid(); it->next() )
-		    {
-		    carto::Object el = it->currentValue();
-			if( el->getProperty( "intent", intentit ) )
-			  break;
-		    }
-		  //std::cout << intentit << "\n";
-		  da->intent = gifti_intent_from_string(intentit.c_str());
-		  }
-		catch( ... )
-		  {
-			//std::cout << "error GIFTI_dataarrays_info\n";
-		  }
+          int ida;
+          da_info = getProperty( "GIFTI_dataarrays_info" );
+          carto::Object it = da_info->objectIterator();
+          std::string intentit;
+          // find in header if there was a corresponding data array
+          // specifying a given intent code
+          for( ida=0; it->isValid() && ida<=nda; it->next(), ++ida )
+          {}
+          if( ida <= nda )
+          {
+            carto::Object el = it->currentValue();
+            if( el->getProperty( "intent", intentit ) )
+              da->intent = gifti_intent_from_string(intentit.c_str());
+          }
+          else // nothing in header
+            da->intent = NIFTI_INTENT_SHAPE;
         }
+        catch( ... )
+        {
+          //std::cout << "error GIFTI_dataarrays_info\n";
+        }
+      }
       else
         da->intent = NIFTI_INTENT_TIME_SERIES;
       da->num_dim = 1;
@@ -597,47 +602,49 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
       giftiAllocDAData<T>()( gim, da, nmax, 1 );
       giftiFillTextureBuffer<T>()( da, tx, nmax, 0 );
 
+      da->encoding = GIFTI_ENCODING_B64GZ; // set it as default
       carto::Object da_info;
-	  try
-	  {
-	  da_info = getProperty( "GIFTI_dataarrays_info" );
-	  carto::Object it = da_info->objectIterator();
-		for( ; it->isValid(); it->next() )
-		  {
-		  carto::Object el = it->currentValue();
-		  if( el->getProperty( "encoding", da->encoding ) )
-			break;
-		  }
+      try
+      {
+        int ida;
+        da_info = getProperty( "GIFTI_dataarrays_info" );
+        carto::Object it = da_info->objectIterator();
+        for( ida=0; ida<=nda && it->isValid(); it->next(), ++ida )
+        {}
+        if( ida <= nda )
+        {
+          carto::Object el = it->currentValue();
+          el->getProperty( "encoding", da->encoding );
+        }
 
-	  if( !options().isNull() )
-	    {
-		  try
-		  {
-			carto::Object a = options()->getProperty( "encoding" );
-			if ((int) a->getScalar() != 0)
-				{
-				da->encoding = (int) a->getScalar();
-				}
-		  }
-		  catch( ... )
-		  {
-		  }
-	    }
-	  }
-	  catch( ... )
-	  {
-	  }
+        if( !options().isNull() )
+        {
+          try
+          {
+            carto::Object a = options()->getProperty( "encoding" );
+            if ((int) a->getScalar() != 0)
+            {
+              da->encoding = (int) a->getScalar();
+            }
+          }
+          catch( ... )
+          {
+          }
+        }
+      }
+      catch( ... )
+      {
+      }
 
       string mname,mval;
       // metadata dataArray
-	  carto::Object dainf
-	   = GiftiHeader::giftiFindHdrDA( hdrtexda, da_info,
-									  "" );
-	 if( !dainf.isNone() )
-	 {
-       ++hdrtexda;
-       GiftiHeader::giftiCopyMetaToGii( dainf, da );
-     }
+      carto::Object dainf
+        = GiftiHeader::giftiFindHdrDA( hdrtexda, da_info, "" );
+      if( !dainf.isNone() )
+      {
+        ++hdrtexda;
+        GiftiHeader::giftiCopyMetaToGii( dainf, da );
+      }
 
     }
   }
@@ -923,20 +930,21 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim, const vector<T> & tex )
     da->dims[4] = 0;
     da->dims[5] = 0;
 
+    da->encoding = GIFTI_ENCODING_B64GZ; // set it as default
     if( !options().isNull() )
-	{
-	  try
-	  {
-		carto::Object a = options()->getProperty( "encoding" );
-		if ((int) a->getScalar() != 0)
-			{
-			da->encoding = (int) a->getScalar();
-			}
-	  }
-	  catch( ... )
-	  {
-	  }
-	}
+    {
+      try
+      {
+        carto::Object a = options()->getProperty( "encoding" );
+        if ((int) a->getScalar() != 0)
+        {
+          da->encoding = (int) a->getScalar();
+        }
+      }
+      catch( ... )
+      {
+      }
+    }
 
     //std::cout << "encoding = "<< da->encoding << "\n";
     gifti_alloc_DA_data( gim, &nda, 1 );
