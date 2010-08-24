@@ -78,6 +78,13 @@ bool canencode( const carto::Volume<T> & thing, float & slope,
             return false;
         }
 
+  if( !enableoffset )
+  {
+    if( vmin > 0 )
+      vmin = 0;
+    if( vmax < 0 )
+      vmax = 0;
+  }
   if( values.size() < 2 )
   {
     if( enableoffset )
@@ -114,48 +121,39 @@ bool canencode( const carto::Volume<T> & thing, float & slope,
     off = *iv;
   }
 
-  if( enableoffset )
-  {
-    // take the offset as the nearest existing value around the mean
-    // (possibly not a good criterion if values around mean are never taken)
-    float mean = ( vmax + vmin ) / 2;
-    iv = values.lower_bound( mean );
-    float m1 = *iv;
-    --iv;
-    float m2 = *iv;
-    if( mean - m1 < m2 - mean )
-      off = m1;
-    else
-      off = m2;
-  }
-  else
-    off = 0;
 
   iv = intvl.begin();
   ev = intvl.end();
+  double span = double( vmax - vmin );
 
   while( iv != ev )
     for( iv=intvl.begin(); iv!=ev; ++iv )
     {
       intv2 = *iv;
-      if( ( vmax - off ) / intv2 >= 32767.1
-            || ( vmin - off ) / intv2 <= -32768.1 )
+      if( span / intv2 >= 65535.1 )
       {
-        // no hope
-        return false;
+        if( span / intv2 <= 65536.5 )
+          intv2 = span / 65535.; // fix rounding error
+        else
+          // no hope
+          return false;
       }
       v = ::fabs( intv2 - rint( intv2 / intv ) * intv );
       if( v > 0 ) //intv * 1e-3 )
       {
-        if( ( vmax - off ) / v < 32767.1 && ( vmin - off ) / v > -32768.1 )
+        if( span / v < 65536.5 )
         {
+          if( span / v > 65535. )
+            v = span / 65535.; // fix rounding error
           intv = v;     // use smaller interval
           break;
         }
       }
     }
-  v = std::max( ::fabs( vmin - off ), ::fabs( vmax - off ) );
-  intv = v / rint( v / intv );
+  intv2 = rint( span / intv );
+  if( intv2 > 65535. )
+    intv2 = 65535.;
+  intv = span / intv2;
 
   for( iv=intvl.begin(); iv!=ev; ++iv )
   {
@@ -168,7 +166,7 @@ bool canencode( const carto::Volume<T> & thing, float & slope,
     }
   }
   slope = intv;
-  offset = off;
+  offset = 32768. * slope + vmin;
   if( maxerr )
     *maxerr = maxm;
   return true;

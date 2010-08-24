@@ -35,6 +35,7 @@
 #include <aims/io/mincW.h>
 #include <aims/io/mincheader.h>
 #include <aims/resampling/motion.h>
+#include <aims/io/scaledcoding.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/fdinhibitor.h>
 
@@ -72,10 +73,13 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   dim_names[2] = create_string( const_cast<char*>( MIxspace ) );
   dim_names[3] = create_string( const_cast<char*>( MItime ) );
 
-  nc_type nc_data_type;
+  nc_type nc_data_type, nc_disk_data_type;
   BOOLEAN signed_flag;
   
   carto::DataTypeCode<T>	dtc;
+  bool scaledcoding = false;
+  T mini = thing.minimum(), maxi = thing.maximum();
+  double dmin = 0., dmax = 0.;
   //std::cout << "Type: " << dtc.dataType() << "\n";
   if(dtc.dataType()=="U8") {
     nc_data_type=NC_BYTE;
@@ -103,6 +107,14 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   }
   else if(dtc.dataType()=="FLOAT") {
     nc_data_type=NC_FLOAT;
+    float slope = 1., offset = 0.;
+    if( canEncodeAsScaledS16( *thing.volume(), slope, offset, true, 0 ) )
+    {
+      nc_disk_data_type=NC_SHORT;
+      scaledcoding = true;
+      dmin = rint( ( mini - offset ) / slope );
+      dmax = rint( ( maxi - offset ) / slope );
+    }
     signed_flag=TRUE;
   }
   else if(dtc.dataType()=="DOUBLE") {
@@ -113,14 +125,20 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     throw datatype_format_error( string( "Unsupported data type " ) 
                                  + dtc.dataType(), _name );
 
+  if( !scaledcoding )
+  {
+    nc_disk_data_type = nc_data_type;
+    dmin = mini;
+    dmax = maxi;
+  }
   volume=create_volume(n_dimensions,
 		       dim_names,
 		       nc_data_type,
 		       signed_flag,
-		       thing.minimum(),
-		       thing.maximum());
+		       mini,
+		       maxi);
     
-  set_volume_real_range(volume,thing.minimum(),thing.maximum());
+  set_volume_real_range(volume,mini,maxi);
     
   int       sizes[MAX_DIMENSIONS];
   sizes[3]=thing.dimZ();
@@ -256,10 +274,10 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   fdinhibitor fdi( 2 );
   fdi.close(); // inhibit output on stderr
   if( output_volume((char*)(_name.c_str()),
-                nc_data_type,
+                nc_disk_data_type,
                 signed_flag,
-                thing.minimum(),
-                thing.maximum(),
+                dmin,
+                dmax,
                 volume,
                 NULL,
                 NULL) != OK )
