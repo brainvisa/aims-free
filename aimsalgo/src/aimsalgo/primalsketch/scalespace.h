@@ -207,12 +207,22 @@ namespace aims
 
             ScaleSpace(AimsSurface<D, Void> *mesh, Texture<T>  *originalTexture, Smoother<AimsSurface<D, Void>, Texture<T> > *smoother)
             {
-                _auxmesh=NULL;  _coordinates=NULL; PutSmoother(smoother); PutMesh(mesh);
+                _auxmesh=NULL;  
+                _coordinates=NULL; 
+                
+                std::cout <<  "TEST" << std::endl;
+                PutSmoother(smoother); 
+                PutMesh(mesh);
                 PutOriginalImage(originalTexture);
             }
 
 
-            virtual ~ScaleSpace() {delete _smoother; delete _auxmesh; }
+            virtual ~ScaleSpace() { 
+//                if ( _smoother != NULL ) 
+//                  delete _smoother; 
+//                if ( _auxmesh != NULL )
+//                  delete _auxmesh; 
+                }
 
 
             void uploadPreviouslyComputedScaleSpace(TimeTexture<float> &tex)
@@ -232,7 +242,9 @@ namespace aims
 
             }
 
-            void PutSmoother(Smoother<AimsSurface<D, Void>, Texture<T> > *smoother) {_smoother=smoother;}
+            void PutSmoother(Smoother<AimsSurface<D, Void>, Texture<T> > *smoother) {
+                _smoother=smoother;
+                }
             void PutMesh(AimsSurface<D, Void> *mesh) {_mesh=mesh;}
             void PutAuxMesh(AimsSurfaceTriangle *auxmesh) {_auxmesh=auxmesh;}
             void PutCoordinates(std::vector<Point3df> *coord){_coordinates = coord;}
@@ -383,6 +395,7 @@ namespace aims
 
   template<int D, typename T> void ScaleSpace<AimsSurface<D>, Texture<T> >::AddScale(float t)
   {
+
     if (scales.find(t) == scales.end())
     {
       if (!(_smoother->optimal()))
@@ -397,6 +410,7 @@ namespace aims
       else
       {
         std::cout << "Smoothing from previous scale " << std::flush;
+
         float tlow, tmax;
         Texture<T> imageLow;
         typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator itS = scales.begin();
@@ -444,10 +458,12 @@ namespace aims
           }
         }
         std::cout << "t = " << tlow << std::endl;
+
         int time = this->get_timediff(tlow, t);
+
         Texture<T> lisse=_smoother->doSmoothing(imageLow, time);
         ScaleLevel<AimsSurface<D, Void>, Texture<T> > *lisseLevel;
-        lisseLevel=new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t,lisse, _mesh,_coordinates,&GetOriginalImage());
+        lisseLevel = new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t,lisse, _mesh,_coordinates,&GetOriginalImage());
         scales.insert(std::pair<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>(t, lisseLevel));
       }
     }

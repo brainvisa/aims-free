@@ -92,10 +92,27 @@ namespace aims
           int Type() {return _type;}
           void setType(int t){_type = t; }
 
-          void SetMinDt() {if (!_scaleSpace->smoother()->optimal()) min_delta_t=0.5;
-                                                       else min_delta_t=_scaleSpace->smoother()->dt();}
+          void SetMinDt() {
+              if ((_scaleSpace->smoother() == NULL))
+                  std::cout<< "setmindt:smoothernull" <<  std::endl;
+              else {
+                  std::cout<< "setmindt:smootherNOTnull" <<  std::endl;
+                  std::cout<< "setmindt:smoother" << _scaleSpace->smoother() << std::endl;
+                  std::cout<< "setmindt:smoother" << _scaleSpace->smoother()->dt() << std::endl;
+                  if (!_scaleSpace->smoother()->optimal()) {
+                      std::cout << "not optimal" << std::endl;
+                      min_delta_t=0.5;
+                  }
+                  else {
+                      std::cout << "optimal" << std::endl;
+                      min_delta_t=_scaleSpace->smoother()->dt();
+                  }
+              }
+          }
           void SetScaleSpace(ScaleSpace<Geom, Text> *scaleSpace)
-                                                  { _scaleSpace=scaleSpace;  SetMinDt();}
+                                                  {        std::cout<< "test" << std::endl; std::cout << scaleSpace << std::endl;
+ 
+              _scaleSpace=scaleSpace;  std::cout<< "testi" << std::endl; SetMinDt();}
           std::list<Bifurcation<Site>*> BifurcationList() {return bifurcationList;}
           std::list<ScaleSpaceBlob<Site>*> BlobSet() {return blobList;}
           ScaleSpace<Geom, Text>   *scaleSpace() {return _scaleSpace;}

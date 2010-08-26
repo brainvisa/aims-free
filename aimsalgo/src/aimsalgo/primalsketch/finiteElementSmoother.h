@@ -53,13 +53,18 @@ namespace aims
 
     std::map<unsigned, std::set< std::pair<unsigned,float> > >  weightLapl; // map (index, ensemble des pair(voisins,poids))
 
-    void ComputeWeights( float threshold = 0.98) { weightLapl=AimsMeshWeightFiniteElementLaplacian(*this->_mesh,threshold); }
+    void ComputeWeights( float threshold = 0.98) { 
+        weightLapl = AimsMeshWeightFiniteElementLaplacian( * this->_mesh , threshold ); 
+        }
     float _dt;
 
   public:
 
-    FiniteElementSmoother( float dt, AimsSurface<D, Void> *mesh)
-      : _dt(dt){ this->_mesh=mesh; ComputeWeights(); }
+    FiniteElementSmoother( float dt, AimsSurface<D, Void> *mesh )
+      : _dt(dt) { 
+        this->_mesh = mesh; 
+        ComputeWeights(); 
+        }
 
     FiniteElementSmoother ( float dt,
                             AimsSurface<D, Void> *mesh,
@@ -67,9 +72,9 @@ namespace aims
                                  &previouslyComputedWeights )
       : _dt(dt) {
         this->_mesh=mesh;
-        weightLapl = previouslyComputedWeights;
+        this->weightLapl = previouslyComputedWeights;
     }
-
+    std::map<unsigned, std::set< std::pair<unsigned,float> > > getWeights () { return weightLapl;}
     virtual ~FiniteElementSmoother() {}
     void SetDt(float dt) { _dt = dt; }
 
