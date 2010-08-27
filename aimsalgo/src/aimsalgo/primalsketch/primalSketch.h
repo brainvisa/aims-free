@@ -93,26 +93,15 @@ namespace aims
           void setType(int t){_type = t; }
 
           void SetMinDt() {
-              if ((_scaleSpace->smoother() == NULL))
-                  std::cout<< "setmindt:smoothernull" <<  std::endl;
-              else {
-                  std::cout<< "setmindt:smootherNOTnull" <<  std::endl;
-                  std::cout<< "setmindt:smoother" << _scaleSpace->smoother() << std::endl;
-                  std::cout<< "setmindt:smoother" << _scaleSpace->smoother()->dt() << std::endl;
-                  if (!_scaleSpace->smoother()->optimal()) {
-                      std::cout << "not optimal" << std::endl;
-                      min_delta_t=0.5;
-                  }
-                  else {
-                      std::cout << "optimal" << std::endl;
-                      min_delta_t=_scaleSpace->smoother()->dt();
-                  }
-              }
+              if (!_scaleSpace->smoother()->optimal())
+                  min_delta_t=0.5;
+              else             
+                  min_delta_t=_scaleSpace->smoother()->dt();
           }
           void SetScaleSpace(ScaleSpace<Geom, Text> *scaleSpace)
-                                                  {        std::cout<< "test" << std::endl; std::cout << scaleSpace << std::endl;
+                                                  {        
  
-              _scaleSpace=scaleSpace;  std::cout<< "testi" << std::endl; SetMinDt();}
+              _scaleSpace=scaleSpace;   SetMinDt();}
           std::list<Bifurcation<Site>*> BifurcationList() {return bifurcationList;}
           std::list<ScaleSpaceBlob<Site>*> BlobSet() {return blobList;}
           ScaleSpace<Geom, Text>   *scaleSpace() {return _scaleSpace;}
@@ -211,7 +200,7 @@ namespace aims
             }
         }
 
-          
+        
         ScaleLevel<Geom,Text> *levelUp;
         levelUp=_scaleSpace->Scale(*itScaleUp);
         ScaleLevel<Geom,Text> *levelDown;
@@ -288,9 +277,6 @@ namespace aims
         
         ComputeBlobMeasurements(statFile);        
         cout << "ssblobs avant : " << blobList.size() << endl;
-
-
-
 
         // ELAGAGE
         typename std::list<Bifurcation<Site>*>::iterator bifit=bifurcationList.begin();

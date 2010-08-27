@@ -55,7 +55,7 @@ template<int D, typename T> Texture<T> FiniteElementSmoother<D,T>::doSmoothing(c
 	unsigned		i,n=ima.nItem();
 	int 			iter;
 	//float threshold=0.1;
-        
+	
 	carto::Converter<TimeTexture<T> , TimeTexture<float> > conv;
 	textIn[0]=ima;
 

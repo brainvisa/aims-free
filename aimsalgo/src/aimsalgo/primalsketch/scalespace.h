@@ -209,8 +209,6 @@ namespace aims
             {
                 _auxmesh=NULL;  
                 _coordinates=NULL; 
-                
-                std::cout <<  "TEST" << std::endl;
                 PutSmoother(smoother); 
                 PutMesh(mesh);
                 PutOriginalImage(originalTexture);
@@ -460,11 +458,12 @@ namespace aims
         std::cout << "t = " << tlow << std::endl;
 
         int time = this->get_timediff(tlow, t);
-
-        Texture<T> lisse=_smoother->doSmoothing(imageLow, time);
+        
+        Texture<T> lisse = _smoother->doSmoothing(imageLow, time);
         ScaleLevel<AimsSurface<D, Void>, Texture<T> > *lisseLevel;
-        lisseLevel = new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t,lisse, _mesh,_coordinates,&GetOriginalImage());
+        lisseLevel = new ScaleLevel<AimsSurface<D, Void>, Texture<T> >( t, lisse, _mesh, _coordinates, &GetOriginalImage() );
         scales.insert(std::pair<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>(t, lisseLevel));
+
       }
     }
     else
