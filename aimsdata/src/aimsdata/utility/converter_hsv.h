@@ -67,18 +67,22 @@ namespace carto
     }
     else {
       /* Compute saturation */
-      out.saturation() = rint(255.0 * float(rgb_max - rgb_min) / out.value());
+      out.saturation() = uint8_t( rint(255.0 * float(rgb_max - rgb_min)
+        / out.value()) );
       if (out.saturation() == 0) {
           out.hue() = 0;
       }
       else {  
         /* Compute hue */
         if (rgb_max == in.red()) {
-            out.hue() = 0 + rint(43.0 * float(in.green() - in.blue())/(rgb_max - rgb_min));
+          out.hue() = uint8_t( rint(43.0 * float(in.green()
+            - in.blue())/(rgb_max - rgb_min)) );
         } else if (rgb_max == in.green()) {
-            out.hue() = 85 + rint(43.0 * float(in.blue() - in.red())/(rgb_max - rgb_min));
+          out.hue() = 85 + uint8_t( rint(43.0 * float(in.blue()
+            - in.red())/(rgb_max - rgb_min)) );
         } else /* rgb_max == rgb.b */ {
-            out.hue() = 171 + rint(43.0 * float(in.red() - in.green())/(rgb_max - rgb_min));
+          out.hue() = 171 + uint8_t( rint(43.0 * float(in.red()
+            - in.green())/(rgb_max - rgb_min)) );
         }
       }
     }
@@ -97,13 +101,13 @@ namespace carto
     }
 
     
-    h = float( in.hue() ) * 6 / 255;
-    s = float( in.saturation() ) / 255;
-    v = float( in.value() ) / 255;
-    i = floor( h );
-    p = rint( v * ( 1 - s ) * 255 );
-    q = rint( v * ( 1 - s * ( h - i ) ) * 255 );
-    t = rint( v * ( 1 - s * ( 1 - ( h - i ) ) ) * 255 );
+    h = uint8_t( rint( float( in.hue() ) * 6 / 255 ) );
+    s = uint8_t( rint( float( in.saturation() ) / 255 ) );
+    v = uint8_t( rint( float( in.value() ) / 255 ) );
+    i = long( floor( h ) );
+    p = long( rint( v * ( 1 - s ) * 255 ) );
+    q = long( rint( v * ( 1 - s * ( h - i ) ) * 255 ) );
+    t = long( rint( v * ( 1 - s * ( 1 - ( h - i ) ) ) * 255 ) );
 
     switch( i ) {
       case 0:
