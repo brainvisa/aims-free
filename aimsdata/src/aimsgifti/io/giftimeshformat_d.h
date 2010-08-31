@@ -68,8 +68,8 @@ namespace aims
     class GiftiReadExternalTexture: public Process 
     {
     public:
-      GiftiReadExternalTexture(carto::Object textures, giiDataArray* da, int nt,
-        int nts) :
+      GiftiReadExternalTexture( carto::Object textures, giiDataArray* da,
+                                int nt, int nts) :
         Process(), textures(textures), da(da), nt(nt), nts(nts) 
       {
       }
@@ -83,19 +83,21 @@ namespace aims
     template<typename T>
     bool giftiReadExternalTexture(Process & p, const std::string &, Finder &) 
     {
-      GiftiReadExternalTexture & gp = static_cast<GiftiReadExternalTexture &> (p);
+      GiftiReadExternalTexture & gp
+          = static_cast<GiftiReadExternalTexture &> (p);
       giiDataArray *da = gp.da;
       int j, vnum = da->dims[0], nt = gp.nt;
       carto::Object textures = gp.textures;
       carto::Object o;
-      if ((int) textures->size() < nt)
+      if ((int) textures->size() > nt)
         o = textures->getArrayItem(nt);
       else 
       {
         o = carto::Object::value(TimeTexture<T> ());
         textures->insertArrayItem(-1, o);
       }
-      TimeTexture<T> & ttex = o->carto::GenericObject::value<TimeTexture<T> >();
+      TimeTexture<T> & ttex
+          = o->carto::GenericObject::value<TimeTexture<T> >();
       ttex[ttex.size()]; // force inserting a new timepoint
       std::vector<T> & tex = ttex[ttex.size() - 1].data();
       tex.reserve(vnum);
@@ -128,14 +130,18 @@ namespace aims
       // std::cout << "reading texture of: " << dtype << std::endl;
 
       GiftiReadExternalTexture p(textures, da, nt, nts);
-      p.registerProcessType("Texture", "FLOAT", &giftiReadExternalTexture<float> );
-      p.registerProcessType("Texture", "POINT2DF", &giftiReadExternalTexture<
-                      Point2df> );
-      p.registerProcessType("Texture", "S16", &giftiReadExternalTexture<int16_t> );
-      p.registerProcessType("Texture", "S32", &giftiReadExternalTexture<int32_t> );
-      p.registerProcessType("Texture", "U32", &giftiReadExternalTexture<uint32_t> );
+      p.registerProcessType("Texture", "FLOAT",
+                            &giftiReadExternalTexture<float> );
+      p.registerProcessType("Texture", "POINT2DF",
+                            &giftiReadExternalTexture<Point2df> );
+      p.registerProcessType("Texture", "S16",
+                            &giftiReadExternalTexture<int16_t> );
+      p.registerProcessType("Texture", "S32",
+                            &giftiReadExternalTexture<int32_t> );
+      p.registerProcessType("Texture", "U32",
+                            &giftiReadExternalTexture<uint32_t> );
       p.registerProcessType("Texture", "VECTOR_OF_2_S16",
-                      &giftiReadExternalTexture<Point2d> );
+                            &giftiReadExternalTexture<Point2d> );
       // TODO: etc for other types...
       Finder f;
       f.setObjectType("Texture");

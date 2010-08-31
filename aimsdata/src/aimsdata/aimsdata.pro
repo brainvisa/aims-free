@@ -26,6 +26,7 @@ HEADERS=  bucket/bucket_g.h	\
     data/data.h			\
     data/fastAllocationData.h	\
     data/header.h		\
+    data/headerutil.h           \
     data/pheader.h		\
     data/pheader_doc.h		\
     data/sliceformatheader.h	\
@@ -215,6 +216,7 @@ SOURCES = \
     data/data.cc     \
     data/fastAllocationData.cc	\
     data/header.cc		\
+    data/headerutil.cc          \
     data/pheader.cc		\
     data/sliceformatheader.cc	\
     def/filedim.cc		\

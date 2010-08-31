@@ -354,12 +354,14 @@ namespace carto
 
   template<typename TYPE>
   inline TYPE getcheckedmin( double min ) {
-    return ( carto::isvalidvalue<double, TYPE>( min ) ? min : carto::min_limit<TYPE>() );
+    return ( carto::isvalidvalue<double, TYPE>( min ) ? (TYPE) min :
+        carto::min_limit<TYPE>() );
   }
 
   template<typename TYPE>
   inline TYPE getcheckedmax( double max ) {
-    return ( carto::isvalidvalue<double, TYPE>( max ) ? max : std::numeric_limits<TYPE>::max() );
+    return ( carto::isvalidvalue<double, TYPE>( max ) ? (TYPE) max :
+        std::numeric_limits<TYPE>::max() );
   }
 
   /*

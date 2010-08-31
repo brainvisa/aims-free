@@ -557,7 +557,6 @@ The final fewer-multiplications form is due to Bob Williamson.
 int  VolumeSign( tFace f, tVertex p )
 {
    double  vol;
-   int     voli;
    double  ax, ay, az, bx, by, bz, cx, cy, cz;
 
    ax = f->vertex[0]->v[X] - p->v[X];
@@ -575,8 +574,8 @@ int  VolumeSign( tFace f, tVertex p )
          + az * (bx*cy - by*cx);
 
    if ( debug )
-      fprintf(stderr,"Face=%6p; Vertex=%d: vol(int) = %d, vol(double) = %lf\n",
-	      (void *) f, p->vnum, voli, vol);
+      fprintf(stderr,"Face=%6p; Vertex=%d: vol(double) = %lf\n",
+	      (void *) f, p->vnum, vol);
 
    /* The volume should be an integer. */
    if      ( vol >  0.5 )  return  1;
@@ -587,7 +586,6 @@ int  VolumeSign( tFace f, tVertex p )
 int  Volumei( tFace f, tVertex p )
 {
    double  vol;
-   int     voli;
    double  ax, ay, az, bx, by, bz, cx, cy, cz;
 
    ax = f->vertex[0]->v[X] - p->v[X];
@@ -605,8 +603,8 @@ int  Volumei( tFace f, tVertex p )
          + az * (bx*cy - by*cx));
 
    if ( debug )
-      fprintf(stderr,"Face=%6p; Vertex=%d: vol(int) = %d, vol(double) = %lf\n",
-	      (void *) f,p->vnum,voli,vol);
+      fprintf(stderr,"Face=%6p; Vertex=%d: vol(double) = %lf\n",
+	      (void *) f,p->vnum,vol);
 
    /* The volume should be an integer. */
    if      ( vol > 0.5 )   return  1;
@@ -1200,7 +1198,11 @@ int main(int argc, const char **argv )
 
   AimsApplication	app( argc, argv, "Build triangulation of the convex "
                              "hull of a list of points" );
-  app.addOption( fileIn, "-i", "file containing 3D points" );
+  app.addOption( fileIn, "-i", "file containing 3D points. The file is an "
+      "ASCII text file. The first line should indicate the number of points, "
+      "the other lines are each one of the points, with x, y, z coordinates "
+      "separated by spaces. Actually the line breaks are nor needed but the "
+      "order of values should be respected." );
   app.addOption( writer, "-o", "output mesh file" );
   app.addOption( symetryFlag, "-s", "add symetric directions", true );
   app.addOption( asciiFlag, "--ascii", "output mesh file in ASCII (if " 
@@ -1212,13 +1214,19 @@ int main(int argc, const char **argv )
 
       // Load direction file
       vector< AimsVector<double,3> > points;
-      uint count;
+      uint count = 0;
       ifstream in( fileIn.c_str() );
-      if ( ! in ) {
+      if ( ! in || in.eof() ) {
         cerr << fileIn << ": " << strerror( errno ) << endl;
         return EXIT_FAILURE;
       }
-      for( in >> count; in && count; --count ) {
+      in >> count;
+      if( !in || in.eof() || count == 0 )
+        throw runtime_error( "EOF. Wrong input format." );
+      cout << "reading " << count << " points." << endl;
+      for( ; in && count; --count ) {
+        if( !in || in.eof() )
+          throw runtime_error( "EOF. Wrong input format." );
         double x, y, z;
         in >> x >> y >> z;
         points.push_back( AimsVector<double,3>( x, y, z ) );

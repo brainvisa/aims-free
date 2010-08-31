@@ -69,6 +69,7 @@
 #include <aims/io/datatypecode.h>
 #include <aims/math/dtitensor.h>
 #include <aims/rgb/rgb.h>
+#include <aims/data/headerutil.h>
 #include <locale.h>
 
 using namespace aims;
@@ -82,10 +83,10 @@ static bool convert( Process &, const string &, Finder & );
 
 
 //	Processing class, with template operation function
-class FileTestGifti : public Process
+class FileConvert : public Process
 {
 public:
-  FileTestGifti();
+  FileConvert();
   template<class T>
   friend bool readAndWrite( Process &, const string &, Finder & );
   template<class T>
@@ -102,12 +103,13 @@ public:
   unsigned	ydim;
   unsigned	zdim;
   RescalerInfo  info;
+  string        orient;
 };
 
 
-FileTestGifti::FileTestGifti()
-  : Process(), encoding( 0 ), normal( false ), rescale( false ), xdim( 0 ), ydim( 0 ),
-    zdim( 0 ), info()
+FileConvert::FileConvert()
+  : Process(), encoding( 0 ), normal( false ), rescale( false ), xdim( 0 ),
+    ydim( 0 ), zdim( 0 ), info()
 {
   registerProcessType( "Volume", "S8", &convert<AimsData<int8_t> > );
   registerProcessType( "Volume", "U8", &convert<AimsData<uint8_t> > );
@@ -395,10 +397,24 @@ DataConverter<BucketMap<T> >::DataConverter( BucketMap<T> & dat,
 }
 
 
-template<class T>
-bool read( Process & p, T & data, const string & filename, const Finder & f, bool rw )
+template <typename T>
+Object getHeader( T & )
 {
-  FileTestGifti	&fc = (FileTestGifti &) p;
+  return none();
+}
+
+template <typename T>
+Object getHeader( AimsData<T> & data )
+{
+  return Object::reference( *dynamic_cast<GenericObject *>( data.header() ) );
+}
+
+
+template<class T>
+bool read( Process & p, T & data, const string & filename, const Finder & f,
+           bool rw, const string & orient )
+{
+  FileConvert	&fc = (FileConvert &) p;
 
   Reader<T>	r( filename );
 
@@ -422,6 +438,10 @@ bool read( Process & p, T & data, const string & filename, const Finder & f, boo
     return( false );
 
   cout << "reading done\n";
+  cout << "orient: " << orient << endl;
+  cout << "header: " << getHeader( data ).get() << endl;
+  if( !orient.empty() )
+    setOrientationInformation( getHeader( data ), orient );
   return( true );
 }
 
@@ -429,7 +449,7 @@ bool read( Process & p, T & data, const string & filename, const Finder & f, boo
 template<class T>
 bool write( Process & p, T & data, const string & file, int encoding, const string & form )
 {
-  FileTestGifti	&fc = (FileTestGifti &) p;
+  FileConvert	&fc = (FileConvert &) p;
 
   cout << "writing " << file << "...\n";
   Object options = Object::value( Dictionary() );
@@ -458,12 +478,10 @@ bool write( Process & p, T & data, const string & file, int encoding, const stri
 template<class T>
 bool readAndWrite( Process & p, const string & filename, Finder & f )
 {
-  FileTestGifti	&fc = (FileTestGifti &) p;
+  FileConvert	&fc = (FileConvert &) p;
   T		data;
 
-  std::cout << "ReadAndWrite \n";
-
-  if( !read( p, data, filename, f, filename == fc.file ) )
+  if( !read( p, data, filename, f, filename == fc.file, fc.orient ) )
     return( false );
 
   return( write( p, data, fc.file, fc.encoding, fc.form ) );
@@ -473,12 +491,12 @@ bool readAndWrite( Process & p, const string & filename, Finder & f )
 template<class T>
 bool convert( Process & p, const string & filename, Finder & f )
 {
-  FileTestGifti		&fc = (FileTestGifti &) p;
+  FileConvert		&fc = (FileConvert &) p;
   T			data;
   //DataTypeCode<T>	dtc;
   cout << "reading " << filename << " as " << f.objectType() << " / " 
        << f.dataType() << "...\n";
-  if( !read( p, data, filename, f, filename == fc.file ) )
+  if( !read( p, data, filename, f, filename == fc.file, fc.orient ) )
     return( false );
 
   //	second layer of processes
@@ -584,7 +602,7 @@ bool convData( Process & p, const string &, Finder & )
 
 int main( int argc, const char **argv )
 {
-  FileTestGifti	proc;
+  FileConvert	proc;
   ProcessInput	pi( proc );
 
 //  bool		ascii = false, rescale = false;
@@ -647,6 +665,19 @@ int main( int argc, const char **argv )
   app.addOption( proc.zdim, "-z", "(for output volumes only) forces output " 
 				 "volume dimension", true );
   app.alias( "--zdim", "-z" );
+  app.addOption( proc.orient, "--orient", "change/force output volume voxels "
+      "orientation on disk (if the output format supports it), with different "
+      "syntaxes:\n"
+      "--orient \"flipx yflip\": flips orientations of x and y axes.\n"
+      "--orient neuro or --orient neurological or --orient left-to-right: "
+      "force neuro orientation.\n"
+      "--orient radio or --orient radiological or --orient right-to-left: "
+      "force radio orientation.\n"
+      "--orient \"-1 1 -1\": set a flip matrix flipping x and z axes.\n"
+      "--orient \"-1 0 0  0 1 0  0 0 -1\": same by specifying the full "
+      "rotation matrix.\n"
+      "--orient \"-1 0 0 255  0 1 0 0  0 0 -1 123  0 0 0 1\": same by "
+      "specifying the full 4x4 matrix.", true );
 
   try
     {
