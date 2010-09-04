@@ -10,13 +10,13 @@ BRAINVISA_GET_FILE_LIST_FROM_PRO( "${CMAKE_CURRENT_SOURCE_DIR}/sip.pro" "HEADERS
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers pyaims headersTarget )
 
 file( GLOB _sipTemplates RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*.tpl" )
-BRAINVISA_COPY_FILES( ${PROJECT_NAME}-devel maketemplates.py maketemplate.py typessub.py ${_sipTemplates}
+BRAINVISA_COPY_FILES( ${PROJECT_NAME}-dev maketemplates.py maketemplate.py typessub.py ${_sipTemplates}
                       SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                       DESTINATION "${AIMS_RELATIVE_SIP_DIRECTORY}" 
                       IMMEDIATE )
 
 file( GLOB _sipSources "${CMAKE_CURRENT_SOURCE_DIR}/*.sip" )
-BRAINVISA_COPY_FILES( ${PROJECT_NAME}-devel ${_sipSources}
+BRAINVISA_COPY_FILES( ${PROJECT_NAME}-dev ${_sipSources}
                       SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                       DESTINATION "${AIMS_RELATIVE_SIP_DIRECTORY}" 
                       IMMEDIATE )
