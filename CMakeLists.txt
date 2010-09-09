@@ -151,6 +151,7 @@ else()
   message( "WARNING: Not building pyaims and pyaimsalgo due to missing dependency:\n  PYTHON_FOUND=${PYTHON_FOUND}\n  NUMPY_FOUND=${NUMPY_FOUND}\n  SIP_FOUND=${SIP_FOUND}" )
 endif()
 
+
 set( AIMS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" )
 set( AIMS_BINARY_DIR "${CMAKE_BINARY_DIR}" )
 
