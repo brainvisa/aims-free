@@ -1,3 +1,4 @@
-BRAINVISA_COPY_FILES( ${PROJECT_NAME} 
-                      AimsFoldsGraphThickness.py AimsTMSCone.py 
-                      DESTINATION bin )
+BRAINVISA_COPY_DIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}"
+                          bin
+                          ${PROJECT_NAME} )
+
