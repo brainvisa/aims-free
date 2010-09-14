@@ -1,3 +1,3 @@
-BRAINVISA_COPY_FILES( ${PROJECT_NAME} 
-                      cartoGraphCat.py cartoGraphTransform.py cartoLinearComb.py cartoSetMinf.py
-                      DESTINATION bin )
+BRAINVISA_COPY_DIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}"
+                          bin
+                          ${PROJECT_NAME} )
