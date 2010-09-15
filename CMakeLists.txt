@@ -132,6 +132,9 @@ if( TIFF_FOUND )
 endif()
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
+set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase "${LIBXML2_LIBRARIES}" )
+set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}" )
+
 
 add_subdirectory( cartobase )
 add_subdirectory( cartodata )

@@ -5,7 +5,7 @@ add_definitions( "-DHAVE_ZLIB" )
 add_library( aimsgifti SHARED ${_sources} )
 add_dependencies( aimsgifti ${headersTarget} )
 set_property( TARGET aimsgifti PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-target_link_libraries( aimsgifti aimsdata ${EXPAT_LIBRARIES} )
+target_link_libraries( aimsgifti ${AIMS_AIMSDATA_LIBRARIES} aimsnifti "${ZLIB_LIBRARIES}" ${EXPAT_LIBRARIES} )
 BRAINVISA_INSTALL( TARGETS aimsgifti
 DESTINATION lib
 COMPONENT ${PROJECT_NAME} )
