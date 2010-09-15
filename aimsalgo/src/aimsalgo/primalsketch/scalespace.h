@@ -146,7 +146,7 @@ namespace aims
             ScaleSpace(AimsData<T> * originalImage, Smoother<AimsData<T>,AimsData<T> > *smoother)
                 { PutSmoother(smoother); PutOriginalImage(originalImage); }
 
-            virtual ~ScaleSpace() {delete _smoother; }
+            virtual ~ScaleSpace() { }
 
             void PutSmoother(Smoother<AimsData<T>, AimsData<T> > *smoother) {_smoother=smoother;}
 
@@ -174,13 +174,38 @@ namespace aims
             std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*> GetScaleLevels() {return scales;}
 
             void AddScale(float t);
+            void AddScale(float t, AimsData<float> ima);
+
             void RemoveScale(float t) {if (scales.find(t) != scales.end()) {ScaleLevel<AimsData<T>, AimsData<T> >* lev=scales[t]; scales.erase(t); delete lev;}}
 
-            void GenerateDefaultScaleSpace(float tmax) {float t; for (t=1; t<=tmax; t=t*2) {std::cout << "Adding scale " << t << std::endl; AddScale(t);} std::cout << "Adding scale" <<  tmax << std::endl; AddScale(tmax);}
+            void GenerateDefaultScaleSpace( float tmax ) {
+                float t; 
+                for ( t = 1 ; t <= tmax ; t = t*2 ) {
+                    std::cout << "Adding scale " << t << std::endl; 
+                    AddScale(t);
+                } 
+                std::cout << "Adding scale" <<  tmax << std::endl; 
+                AddScale(tmax);
+            }
 
             void WriteScale(float t, std::string name);
 
             void Write(std::string name);
+            
+            void uploadPreviouslyComputedScaleSpace( AimsData<float> &scale_space)  {
+                float t = 1.0;
+                for ( uint i = 0 ; i < scale_space.dimT() ; i++ ) {
+                    std::cout << "Adding scale " << t << std::flush;
+                    AimsData<float> scale ( scale_space.dimX(), scale_space.dimY(), scale_space.dimZ(), 1.0 );
+                    for ( uint x = 0 ; x < scale_space.dimX() ; x++ )
+                        for ( uint y = 0 ; y < scale_space.dimY() ; y++ )
+                            for ( uint z = 0 ; z < scale_space.dimZ() ; z++ )
+                                 scale( x, y, z, 0 ) = scale_space( x, y, z, i );
+                    AddScale( t, scale );
+                    t = t * 2;
+                    std::cout << " OK" << std::endl;
+                }
+            }
     };
 
 
@@ -215,29 +240,17 @@ namespace aims
             }
 
 
-            virtual ~ScaleSpace() { 
-//                if ( _smoother != NULL ) 
-//                  delete _smoother; 
-//                if ( _auxmesh != NULL )
-//                  delete _auxmesh; 
+            virtual ~ScaleSpace() { }
+
+
+            void uploadPreviouslyComputedScaleSpace(TimeTexture<float> &tex) {
+                float t = 1.0;
+                for ( uint i = 1 ; i < tex.size() ; i++ ) {
+                    std::cout << "Adding scale " << t << std::flush;
+                    AddScale(t, tex[i]);
+                    t = t * 2;
+                    std::cout << " OK" << std::endl;
                 }
-
-
-            void uploadPreviouslyComputedScaleSpace(TimeTexture<float> &tex)
-            {
-
-                float t=1.0;
-                int i=0;
-
-                for (i = 1 ; i < tex.size() ; i++)
-                {
-                std::cout << "Adding scale " << t << std::flush;
-                AddScale(t, tex[i]);
-                t=t*2;
-                std::cout << " OK" << std::endl;
-
-                }
-
             }
 
             void PutSmoother(Smoother<AimsSurface<D, Void>, Texture<T> > *smoother) {
@@ -249,8 +262,8 @@ namespace aims
             void PutOriginalImage(Texture<T> *originalTexture)
             {
                 ScaleLevel<AimsSurface<D, Void>, Texture<T> > *level;
-                level=new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(0.0f, *originalTexture, _mesh,_coordinates);
-                scales.insert(std::pair<float, ScaleLevel<AimsSurface<D, Void>, Texture<T> >*>(0.0f, level));
+                level = new ScaleLevel<AimsSurface<D, Void>, Texture<T> >( 0.0f, *originalTexture, _mesh, _coordinates );
+                scales.insert( std::pair<float, ScaleLevel<AimsSurface<D, Void>, Texture<T> >*>(0.0f, level) );
             }
 
             AimsSurface<D, Void> *Mesh() {return _mesh;}
@@ -298,16 +311,35 @@ namespace aims
     //-----------------DEFINITIONS--------------------------------------------
     //------------------------------------------------------------------------
 
+    template<typename T> void ScaleSpace<AimsData<T>, AimsData<T> >::AddScale(
+                                                    float t, AimsData<float> ima)
+    {
+        if (scales.find(t) == scales.end())
+        {
+            ScaleLevel<AimsData<T>, AimsData<T> > *lisseLevel;
+//            AimsData<float> aux(tex.nItem());
+//            for (uint i=0;i<tex.nItem();i++)
+//                aux.item(i) = tex.item(i);
+            lisseLevel = new ScaleLevel<AimsData<T>, AimsData<T>  >(t, ima);
+            scales.insert(std::pair<float, ScaleLevel<AimsData<T>, AimsData<T>  >*>(t, lisseLevel));
+        }
+        else
+        {
+            std::cout << "Scale " << t << " already computed... " << std::endl;
+        }
+        return ;
+    }
+    
     template<int D, typename T> void ScaleSpace<AimsSurface<D, Void>, Texture<T>  >::AddScale(
                                                     float t, Texture<float> tex)
     {
         if (scales.find(t) == scales.end())
         {
             ScaleLevel<AimsSurface<D, Void>, Texture<T> > *lisseLevel;
-            Texture<float> aux(tex.nItem());
-            for (uint i=0;i<tex.nItem();i++)
-                aux.item(i) = tex.item(i);
-            lisseLevel = new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t, aux, _mesh, _coordinates, &GetOriginalImage());
+//            Texture<float> aux(tex.nItem());
+//            for (uint i=0;i<tex.nItem();i++)
+//                aux.item(i) = tex.item(i);
+            lisseLevel = new ScaleLevel<AimsSurface<D, Void>, Texture<T> >(t, tex, _mesh, _coordinates, &GetOriginalImage());
             scales.insert(std::pair<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>(t, lisseLevel));
         }
         else

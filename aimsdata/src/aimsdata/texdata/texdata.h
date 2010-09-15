@@ -48,96 +48,85 @@
 
 //=================== types ======================================
 
-template<typename T> struct SiteType
-{
-  typedef T type;
+template<typename T> struct SiteType {
+    typedef T type;
 };
 
-template<typename T> struct TexType
-{
-  typedef T type;
+template<typename T> struct TexType {
+    typedef T type;
 };
 
 // specialisations de SiteType
 
-template<typename T> class SiteType<AimsData<T> > // Images
-{
-public:
-  typedef Point3d type;
+template<typename T> class SiteType<AimsData<T> >  { // Images
+    public:
+        typedef Point3d type;
 };
 
-template<int D> class SiteType<AimsSurface<D, Void> > // surface
-{
-public:
-  typedef std::pair<Point3df,uint> type;
+template<int D> class SiteType<AimsSurface<D, Void> > { // surface
+    public:
+        typedef std::pair<Point3df,uint> type;
 };
 
-template<typename T> class TexType<AimsData<T> >  // texture image
-{
-public:
-  typedef T type;
+template<typename T> class TexType<AimsData<T> >  { // texture image
+    public:
+        typedef T type;
 };
 
-template<typename T> class TexType<Texture<T> >  // texture surface
-{
-public:
-  typedef T type;
+template<typename T> class TexType<Texture<T> >  {// texture surface
+    public:
+        typedef T type;
 };
-
-
 
 //========== iterateur g��ique ==================================
 
-template<typename S> class SiteIterator
-{
-public:
-  typedef  typename SiteType<S>::type Site;
-  Site & operator *();
-  //const Site & operator * () const;
-  SiteIterator<S> & operator ++ ();
-  SiteIterator<S> & operator --(); // optionnel
-  bool operator == ( const SiteIterator<S> & other ) const;
-  bool operator != ( const SiteIterator<S> & other ) const;
-  // etc
+template<typename S> class SiteIterator {
+    public:
+        typedef  typename SiteType<S>::type Site;
+        Site & operator *();
+        //const Site & operator * () const;
+        SiteIterator<S> & operator ++ ();
+        SiteIterator<S> & operator --(); // optionnel
+        bool operator == ( const SiteIterator<S> & other ) const;
+        bool operator != ( const SiteIterator<S> & other ) const;
+        // etc
 };
 
 // iterateur semi-specialise pour images
 
-template<typename T> class SiteIterator<AimsData<T> >
-{
-public:
-  typedef typename SiteType<AimsData<T> >::type Site;
-  Site operator *() { return _pos; }
-  //const Site & operator *() const { return (*_data)( _pos ); }
-  SiteIterator<AimsData<T> > & operator ++ ();
-  SiteIterator<AimsData<T> > & operator --(); // optionnel
-  SiteIterator( const AimsData<T> *data, const Site & pos );
-  bool operator == ( const SiteIterator<AimsData<T> > & other ) const;
-  bool operator != ( const SiteIterator<AimsData<T> > & other ) const;
-private:
-  const AimsData<T>     *_data;
-  Site                  _pos;
+template<typename T> class SiteIterator<AimsData<T> > {
+    public:
+        typedef typename SiteType<AimsData<T> >::type Site;
+        Site operator *() { return _pos; }
+        //const Site & operator *() const { return (*_data)( _pos ); }
+        SiteIterator<AimsData<T> > & operator ++ ();
+        SiteIterator<AimsData<T> > & operator --(); // optionnel
+        SiteIterator( const AimsData<T> *data, const Site & pos );
+        bool operator == ( const SiteIterator<AimsData<T> > & other ) const;
+        bool operator != ( const SiteIterator<AimsData<T> > & other ) const;
+    private:
+        const AimsData<T>     *_data;
+        Site                  _pos;
 };
 
 // iterateur semi-specialise pour surfaces
 
-template<int D> class SiteIterator<AimsSurface<D,Void> >
-{
-public:
-  typedef typename SiteType<AimsSurface<D,Void> >::type Site;
-
-   const Site operator *() { return std::pair<Point3df,uint>((*_coordinates)[ _index], _index); }
-  //const Site & operator *() const { return _data->vertex()[ _index ]; }
-  SiteIterator<AimsSurface<D,Void> > & operator ++ ();
-  SiteIterator<AimsSurface<D,Void> > & operator --(); // optionnel
-  SiteIterator( const AimsSurface<D,Void> *data, uint index );
-  SiteIterator( const AimsSurface<D,Void> * data, std::vector<Point3df> *coords, uint index );
-  bool operator == ( const SiteIterator<AimsSurface<D,Void> > & other ) const;
-  bool operator != ( const SiteIterator<AimsSurface<D,Void> > & other ) const;
-private:
-  const AimsSurface<D,Void>  *_data;
-  uint                      _index;
-  std::vector<Point3df> *_coordinates;
+template<int D> class SiteIterator<AimsSurface<D,Void> > {
+    public:
+        typedef typename SiteType<AimsSurface<D,Void> >::type Site;
+    
+        const Site operator *() { return std::pair<Point3df,uint>((*_coordinates)[ _index], _index); }
+        //const Site & operator *() const { return _data->vertex()[ _index ]; }
+        SiteIterator<AimsSurface<D,Void> > & operator ++ ();
+        SiteIterator<AimsSurface<D,Void> > & operator --(); // optionnel
+        SiteIterator( const AimsSurface<D,Void> *data, uint index );
+        SiteIterator( const AimsSurface<D,Void> * data, std::vector<Point3df> *coords, uint index );
+        bool operator == ( const SiteIterator<AimsSurface<D,Void> > & other ) const;
+        bool operator != ( const SiteIterator<AimsSurface<D,Void> > & other ) const;
+    private:
+        const AimsSurface<D,Void>  *_data;
+        uint                      _index;
+        std::vector<Point3df> *_coordinates;
 };
 
 
@@ -146,18 +135,18 @@ private:
 
 // La classe generique qui nous interesse
 
-template<typename Geom, typename Text> class TexturedData
-{       // Geom est la geometrie (AimsSurface ou AimsData)
-        // Tex est la texture (Texture ou AimsData)
+template<typename Geom, typename Text> class TexturedData {
+       // Geom est la geometrie (AimsSurface ou AimsData)
+       // Tex est la texture (Texture ou AimsData)
 
-public:
-  typedef typename SiteType<Geom>::type Site; // j'espere que cette ruse marche
-  typedef typename TexType<Text>::type Tex;
-  SiteIterator<Geom> siteBegin();       // pointe sur le premier site
-  SiteIterator<Geom> siteEnd();         // pointe juste apres le dernier site
-  std::vector<Site> neighbours( const Site & pos ); // acces aux voisins de <pos>
-  Tex & intensity( const Site & pos );
-  int NbSites();     // nb of sites (comes handy sometime)
+    public:
+        typedef typename SiteType<Geom>::type Site; // j'espere que cette ruse marche
+        typedef typename TexType<Text>::type Tex;
+        SiteIterator<Geom> siteBegin();       // pointe sur le premier site
+        SiteIterator<Geom> siteEnd();         // pointe juste apres le dernier site
+        std::vector<Site> neighbours( const Site & pos ); // acces aux voisins de <pos>
+        Tex & intensity( const Site & pos );
+        int NbSites();     // nb of sites (comes handy sometime)
 };
 
 
@@ -209,52 +198,57 @@ private:
 // Specialisation de TexturedData pour surfaces
 //=============================================================================
 
-template<int D, class T> class TexturedData<AimsSurface<D,Void>, Texture<T> >
-{
-public:
-  // interface standard, commune
-  typedef typename SiteType<AimsSurface<D, Void> >::type Site;
-  typedef T Tex;
-  SiteIterator<AimsSurface<D,Void> > siteBegin();   // pointe sur le premier site
-  SiteIterator<AimsSurface<D,Void> > siteEnd();     // pointe juste apres le dernier site
-  std::vector<Site> neighbours( const Site & pos );    // acces aux voisins de <pos>
-  Tex & intensity( const Site & pos ); 
-  const Tex & intensity( const Site & pos ) const;
-  TexturedData() {}
-  TexturedData(AimsSurface<D, Void> *mesh, Texture<T> *tex ) : _mesh(mesh), _tex(tex), _coordinates(NULL){}
+template<int D, class T> class TexturedData<AimsSurface<D,Void>, Texture<T> > {
+    public:
+        // interface standard, commune
+        typedef typename SiteType<AimsSurface<D, Void> >::type Site;
+        typedef T Tex;
+        SiteIterator<AimsSurface<D,Void> > siteBegin();   // pointe sur le premier site
+        SiteIterator<AimsSurface<D,Void> > siteEnd();     // pointe juste apres le dernier site
+        std::vector<Site> neighbours( const Site & pos );    // acces aux voisins de <pos>
+        Tex & intensity( const Site & pos ); 
+        const Tex & intensity( const Site & pos ) const;
+        TexturedData () { }
+        TexturedData ( AimsSurface<D, Void> *mesh, Texture<T> *tex ) {
+            _mesh = mesh;
+            _tex = tex;
+            _coordinates = NULL;
+        }
                                                              // pass mesh and texture
-  TexturedData(AimsSurface<D, Void> *mesh, Texture<T> *tex, std::vector<Point3df> *coords) : _mesh(mesh), _tex(tex), _coordinates(coords){}
+        TexturedData ( AimsSurface<D, Void> *mesh, Texture<T> *tex, std::vector<Point3df> *coords ) : 
+            _mesh(mesh), _tex(tex), _coordinates(coords) { }
 
-  TexturedData(const TexturedData<AimsSurface<D,Void>, Texture<T> > &other);
+        TexturedData ( const TexturedData<AimsSurface<D,Void>, Texture<T> > &other );
                                                              //copy constructor
-  // Writer
+        // Writer
+        void write (char *name) {
+            TimeTexture<T> timetext; 
+            timetext[0] = *_tex; 
+            aims::Writer<TimeTexture<T> > writerT(name); 
+            writerT.write(timetext);
+        }
 
-  void write(char *name) {TimeTexture<T> timetext; timetext[0]=*_tex; aims::Writer<TimeTexture<T> > writerT(name); writerT.write(timetext);}
-
-    // Getting the texture and geometry
+        // Getting the texture and geometry    
+        AimsSurface<D,Void> *GetMesh() { return _mesh; }
+        Texture<T> *GetTexture() { return _tex; }
     
-  AimsSurface<D,Void> *GetMesh() {return _mesh;}
-  Texture<T> *GetTexture() {return _tex;}
+        TexturedData<AimsSurface<D,Void>, Texture<T> > & operator = ( const TexturedData<AimsSurface<D,Void>, Texture<T> >& other );
+    
+        // nb of sites (comes handy sometime)
+    
+        int NbSites() { return _mesh->vertex().size(); }
 
-  TexturedData<AimsSurface<D,Void>, Texture<T> > & operator = (const TexturedData<AimsSurface<D,Void>, Texture<T> >& other );
-
-  // nb of sites (comes handy sometime)
-
-  int NbSites() {return (_mesh->vertex().size());}
-
-private:
-  AimsSurface<D,Void>   *_mesh;
-  Texture<T>            *_tex;
-  std::vector<std::set<uint> > _allNeighbours;
-  std::vector<Point3df> *_coordinates;
+    private:
+        AimsSurface<D,Void>   *_mesh;
+        Texture<T>            *_tex;
+        std::vector<std::set<uint> > _allNeighbours;
+        std::vector<Point3df> *_coordinates;
   
 };
 
 
 //=================================================================================
-//
 //    Definitions
-//
 //=================================================================================
 
 template<typename T>  bool

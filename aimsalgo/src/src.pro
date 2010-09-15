@@ -48,7 +48,7 @@ PSUBDIRS = \
     AimsIcmSpaghettiN              \
     AimsIcosaList             \
     AimsImageGLBlobStats \
-#    AimsImagePrimalSketch     \
+    AimsImagePrimalSketch     \
     AimsImageScaleSpace  \
     AimsImageSmoothing   \
     AimsParameterize2DImageDomain \

@@ -56,33 +56,6 @@ using namespace std;
 using namespace carto;
 
 
-void graphe(vector<float> tab){
-  
-  vector<uint> votes;
-  for (uint i=0;i<100;i++)
-    votes.push_back(0);
-  float tmin=1000000.0,tmax=-1000000.0;
-  
-  for (uint i=0; i<tab.size() ; i++)  {
-    float valeur = tab[i];
-    if (valeur<tmin) tmin=valeur;
-    if (valeur>tmax) tmax=valeur;
-  }
-  printf("min: %f - max: %f\n", tmin, tmax);
-  for (uint i=0; i<tab.size() ; i++)  {
-    float valeur = tab[i];
-    votes[(uint) (((valeur - tmin) / (tmax-tmin))*votes.size())]++;
-  }
-  printf("\n");
-  for (uint i=0;i<100;i++){
-    int aux=votes[i];
-    printf("%.3f %d\n",tmin+i*(tmax-tmin)/100.0, aux);
-  }
-  printf("\n");
-  
-  
-}
-
 
     struct ltstr_blob // ranking criteria for blobs
     {
@@ -171,11 +144,10 @@ void graphe(vector<float> tab){
     }
 
 
-    template<typename Geom, typename Text>
-     void Primalsketch2graph<Geom,Text>::DoIt()
-     {
-        std::list<Bifurcation<Site>*> bifList=_primalSketch->BifurcationList();
-        std::list<ScaleSpaceBlob<Site>*> blobList=_primalSketch->BlobSet();
+    template<typename Geom, typename Text> 
+    void Primalsketch2graph<Geom,Text>::DoIt()  {
+        std::list<Bifurcation<Site>*> bifList = _primalSketch->BifurcationList();
+        std::list<ScaleSpaceBlob<Site>*> blobList = _primalSketch->BlobSet();
 
         typename std::list<ScaleSpaceBlob<Site>*>::iterator blobIt;
         typename std::list<Bifurcation<Site> *>::iterator bifIt;
@@ -185,74 +157,68 @@ void graphe(vector<float> tab){
         std::list<ScaleSpaceBlob<Site>*> top, bottom;
         typename std::list<ScaleSpaceBlob<Site>*>::iterator topIt, bottomIt;
 
-        string typeAtt;
-        string textType;
+        std::string typeAtt;
         Vertex *vert;
-        string lab;
+        std::string lab;
         char conv[10];
-          string nameBase="*";
+        std::string nameBase = "*";
         int rank;
         SortBlobs();
         _graph->setProperty( "filename_base", "*");
-        _graph->setProperty("sujet", _primalSketch->Subject());
+        _graph->setProperty( "subject", _primalSketch->Subject() );
 
+        
+        std::string textType;
         if (_primalSketch->Type()==IMAGE)
-              textType="image";
+            textType = "image";
         else if (_primalSketch->Type()==SURFACE)
-          textType="surface";
+            textType = "surface";
         else
-          textType="unknown";
+            textType = "unknown";
+        _graph->setProperty( "type", textType );
 
-        _graph->setProperty("type", textType);
 
+        blobIt = blobList.begin(); 
+//        std::vector<float> tab;
+          for ( ; blobIt != blobList.end() ; ++blobIt ) {
 
-        blobIt=blobList.begin();float moy=0.0;
-        vector<float> tab;
-          for ( ; blobIt!=blobList.end(); ++blobIt)
-          {
-
-               vert=_graph->addVertex("ssblob");
-               rank=sortedLabels[(*blobIt)->Label()];
-               sprintf(conv, "%4i", rank);
+               vert =_graph->addVertex( "ssblob" );
+               rank = sortedLabels[(*blobIt)->Label()];
+               sprintf( conv, "%4i", rank );
                lab = conv;
-               vert->setProperty("label", 0);
-               vert->setProperty("name", rank+10000);
-               vert->setProperty("rank", rank);
-               vert->setProperty("index",(*blobIt)->Label());
-               vert->setProperty("tmin",(*blobIt)->ScaleMin());
-               vert->setProperty("tmax",(*blobIt)->ScaleMax());
-               vert->setProperty("trep", (*blobIt)->ScaleRep());
-               vert->setProperty("lifeTime", (*blobIt)->LifeTime());
-               vector<int> nodeslist;
-               set<Site,ltstr_p3d<Site> > &liste = (*blobIt)->GlBlobRep()->GetListePoints();
-               typename set<Site,ltstr_p3d<Site> >::iterator listit = liste.begin();
-               for (;listit!=liste.end();listit++){
-                 nodeslist.push_back((*listit).second);
-               }
-               vert->setProperty("nodes_list", nodeslist);
- 
-               vert->setProperty("maxIntensity",(*blobIt)->GetMeasurements().maxIntensity);
-               vert->setProperty("meanIntensity",(*blobIt)->GetMeasurements().meanIntensity);
-               vert->setProperty("maxContrast",(*blobIt)->GetMeasurements().maxContrast);
-               vert->setProperty("meanContrast",(*blobIt)->GetMeasurements().meanContrast);
-               vert->setProperty("area",(*blobIt)->GetMeasurements().area);
-               vert->setProperty("tValue",(*blobIt)->GetMeasurements().tValue);
-               assert((*blobIt)->GetMeasurements().t!=(*blobIt)->GetMeasurements().tValue);
-               vert->setProperty("t",(*blobIt)->GetMeasurements().t);
-               cout << (*blobIt)->GetMeasurements().t << ";";
-               moy+=(*blobIt)->GetMeasurements().tValue;
-               tab.push_back((*blobIt)->GetMeasurements().tValue);
-               GreyLevelBlobTools<Site> blobTools((*blobIt)->GlBlobRep());
+               vert->setProperty( "label", 0 );
+               vert->setProperty( "name", rank+10000 );
+               vert->setProperty( "rank", rank );
+               vert->setProperty( "index",(*blobIt)->Label() );
+               vert->setProperty( "tmin",(*blobIt)->ScaleMin() );
+               vert->setProperty( "tmax",(*blobIt)->ScaleMax() );
+               vert->setProperty( "trep", (*blobIt)->ScaleRep() );
+               vert->setProperty( "lifeTime", (*blobIt)->LifeTime() );               
+               vert->setProperty( "maxIntensity",(*blobIt)->GetMeasurements().maxIntensity );
+               vert->setProperty( "meanIntensity",(*blobIt)->GetMeasurements().meanIntensity );
+               vert->setProperty( "maxContrast",(*blobIt)->GetMeasurements().maxContrast );
+               vert->setProperty( "meanContrast",(*blobIt)->GetMeasurements().meanContrast );
+               vert->setProperty( "area",(*blobIt)->GetMeasurements().area );
+               vert->setProperty( "tValue",(*blobIt)->GetMeasurements().tValue );
+               vert->setProperty( "t",(*blobIt)->GetMeasurements().t );
+               std::cout << (*blobIt)->GetMeasurements().tValue << ";";
+//               moy+=(*blobIt)->GetMeasurements().tValue;
+//               tab.push_back((*blobIt)->GetMeasurements().tValue);
+               GreyLevelBlobTools<Site> blobTools( (*blobIt)->GlBlobRep() );
 
-               float x1,x2,y1,y2,z1,z2,gx,gy,gz;
+               float x1, x2, y1, y2, z1, z2, gx, gy, gz;
                std::vector<float> vectF;
                std::vector<float> triplet(3), ref( 3 );
 
-               vectF=blobTools.Boundingbox();
-               x1=vectF[0]; y1=vectF[1];  z1=vectF[2];
-               x2=vectF[3]; y2=vectF[4];  z2=vectF[5];
-               gx=(x1+x2)/2.0; gy=(y1+y2)/2.0; gz=(z1+z2)/2.0;
-               triplet[0]=gx; triplet[1]=gy; triplet[2]=gz;
+               vectF = blobTools.Boundingbox();
+               x1 = vectF[0]; y1 = vectF[1];  z1 = vectF[2];
+               x2 = vectF[3]; y2 = vectF[4];  z2 = vectF[5];
+               gx = ( x1 + x2 ) / 2.0; 
+               gy = ( y1 + y2 ) / 2.0; 
+               gz = ( z1 + z2 ) / 2.0;
+               triplet[0] = gx; 
+               triplet[1] = gy; 
+               triplet[2] = gz;
                triplet = blobTools.Barycenter();
                vert->setProperty("gravity_center", triplet);
 
@@ -265,27 +231,21 @@ void graphe(vector<float> tab){
                     vert->setProperty( "refgravity_center", ref );
                   }
 
-               triplet[0]=x1; triplet[1]=y1; triplet[2]=z1;
-               vert->setProperty("boundingbox_min",triplet);
-               triplet[0]=x2; triplet[1]=y2; triplet[2]=z2;
-               vert->setProperty("boundingbox_max",triplet);
-
-               vertMap[(*blobIt)->Label()]=vert;
+               triplet[0] = x1;
+               triplet[1] = y1; 
+               triplet[2] = z1;
+               vert->setProperty( "boundingbox_min", triplet );
+               triplet[0] = x2;
+               triplet[1] = y2;
+               triplet[2] = z2;
+               vert->setProperty( "boundingbox_max", triplet );
+               
+               vertMap[(*blobIt)->Label()] = vert;
 
           }
-          moy /= blobList.size();
-          cout << "moyenne :" << moy << endl;
-          float ecart=0.0;
-          for ( blobIt=blobList.begin(); blobIt!=blobList.end(); ++blobIt)
-          {
-            ecart+=pow((*blobIt)->GetMeasurements().tValue-moy,2);
-          }
+         
 
-          ecart /=blobList.size();
-          cout << "ecart :" << ecart << endl;
-          graphe(tab);
-
-          bifIt=bifList.begin();
+          bifIt = bifList.begin();
 
           // Adding meshes or buckets
           AddBlobsToPSGraph(_primalSketch, _graph);

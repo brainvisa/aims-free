@@ -42,150 +42,157 @@
 #include <list>
 #include <vector>
 
-namespace aims
-{
-  const int BACKGROUND = 0;
+namespace aims {
+    const int BACKGROUND = 0;
 
-  template<typename T> struct ltstr_p3d // comparaison de Sites pour conteneurs tri�s (set, map)
-  {
-    bool operator()(const T p1, const T p2) { return false;}
-  };
+    template<typename T> struct ltstr_p3d { // comparaison de Sites pour conteneurs tri�s (set, map)
+        bool operator()(const T p1, const T p2) { return false;}
+    };
 
-  template <>
-  struct ltstr_p3d<Point3d>
-  {
-    bool operator()(const Point3d p1, const Point3d p2)
-    {
-      if (p1[2]<p2[2])
-     return true;
-      else if (p1[2]>p2[2])
-     return false;
-      else
-     {
-       if (p1[1]<p2[1])
-         return true;
-       else if (p1[1]>p2[1])
-         return false;
-       else
-         {
-           if (p1[0]<p2[0])
-          return true;
-           else return false;
-         }
-     }
-    }
-  };
+    template <> struct ltstr_p3d<Point3d> {
+        bool operator ()( const Point3d p1, const Point3d p2 ) {
+            if ( p1[2] < p2[2] )
+                return true;
+            else if ( p1[2] > p2[2] )
+                return false;
+            else {
+                if ( p1[1] < p2[1] )
+                    return true;
+                else if ( p1[1] > p2[1] )
+                    return false;
+                else
+                {
+                    if ( p1[0] < p2[0] )
+                        return true;
+                    else return false;
+                }
+            }
+        }
+    };
 
-  template <>
-  struct ltstr_p3d<std::pair<Point3df, uint> >
-  {
-    bool operator()(const std::pair<Point3df, uint> p1,
-                    const std::pair<Point3df, uint> p2)
-    {
-      if (p1.second<p2.second)
-     return true;
-      else
-     return false;
-    }
-  };
+    template <> struct ltstr_p3d<std::pair<Point3df, uint> > {
+        bool operator () ( const std::pair<Point3df, uint> p1,
+                           const std::pair<Point3df, uint> p2 ) {
+            if ( p1.second < p2.second )
+                return true;
+            else
+                return false;
+        }
+    };
 
-  template<class T> class MaximumPoint;
-  template<class T> class SaddlePoint;
-  template<class T> class GreyLevelBlob;
+    template<class T> class MaximumPoint;
+    template<class T> class SaddlePoint;
+    template<class T> class GreyLevelBlob;
 
-     class BlobMeasurements {
+    class BlobMeasurements {
 
-     public:
-        BlobMeasurements() {}
-        BlobMeasurements(const BlobMeasurements &other) {maxIntensity=other.maxIntensity; meanIntensity=other.meanIntensity; maxContrast=other.maxContrast; meanContrast= other.meanContrast;  area=other.area; t=other.t; tValue=other.tValue;}
-        BlobMeasurements(float maxInt, float meanInt, float maxCont, float meanCont, float a, float tv=0.0, float tvalue=0.0):
-            maxIntensity(maxInt), meanIntensity(meanInt), maxContrast(maxCont), meanContrast(meanCont), area(a), t(tv), tValue(tvalue) {}
+        public:
+            BlobMeasurements() {}
+            BlobMeasurements(const BlobMeasurements &other) {maxIntensity=other.maxIntensity; meanIntensity=other.meanIntensity; maxContrast=other.maxContrast; meanContrast= other.meanContrast;  area=other.area; t=other.t; tValue=other.tValue;}
+            BlobMeasurements(float maxInt, float meanInt, float maxCont, float meanCont, float a, float tv=0.0, float tvalue=0.0):
+                maxIntensity(maxInt), meanIntensity(meanInt), maxContrast(maxCont), meanContrast(meanCont), area(a), t(tv), tValue(tvalue) {}
 
-          float maxIntensity;
-          float meanIntensity;
-          float maxContrast;
-          float meanContrast;
-          float area;
-          float t;
-          float tValue;
+            float maxIntensity;
+            float meanIntensity;
+            float maxContrast;
+            float meanContrast;
+            float area;
+            float t;
+            float tValue;
           
-        BlobMeasurements & operator = (const BlobMeasurements & other);
-     };
+            BlobMeasurements & operator = (const BlobMeasurements & other);
+    };
 
-  // Class for grey-level blobs
-  // Templated with respect to the type of points:
-  // TypeSite<AimsData<T> >::type for images
-  // TypeSite<AimsSurface<D, Void> >::type for textures.
+    // Class for grey-level blobs
+    // Templated with respect to the type of points:
+    // TypeSite<AimsData<T> >::type for images
+    // TypeSite<AimsSurface<D, Void> >::type for textures.
 
-  template<class T> class GreyLevelBlob {
+    template<class T> class GreyLevelBlob {
 
-  protected:
+        protected:
 
-    int             _label;
-    std::set<T,ltstr_p3d<T> >          listePoints;
-    SaddlePoint<T>  *saddle;
-    MaximumPoint<T> *maximum;
-    float           scale;
-    bool            grow;
+            int             _label;
+            std::set<T,ltstr_p3d<T> >          listePoints;
+            SaddlePoint<T>  *saddle;
+            MaximumPoint<T> *maximum;
+            float           scale;
+            bool            grow;
 
-  public:
+        public:
 
-    GreyLevelBlob(MaximumPoint<T> *node, int label) {saddle=0; maximum=node; node->blob=this; grow=true; _label=label; AddPoint(maximum->_node);}
-    GreyLevelBlob() {saddle=0; maximum=0; grow=true; _label=BACKGROUND;}
+            GreyLevelBlob ( MaximumPoint<T> *node, int label ) {
+                saddle = 0; 
+                maximum = node; 
+                node->blob = this; 
+                grow = true; 
+                _label = label; 
+                AddPoint (maximum->_node);
+            }
+            GreyLevelBlob () {
+                saddle = 0; 
+                maximum = 0; 
+                grow = true; 
+                _label = BACKGROUND;
+            }
 
-     BlobMeasurements    measurements;
+            BlobMeasurements    measurements;
 
-    void AddPoint(T node) { listePoints.insert(node); }
-    void StopGrowth() { grow=false; }
-    bool CanGrow() { return grow; }
-    int  Label() { return _label; }
+            void AddPoint( T node ) { listePoints.insert(node); }
+            void StopGrowth() { grow = false; }
+            bool CanGrow() { return grow; }
+            int  Label() { return _label; }
 
-    std::set<T,ltstr_p3d<T> > & GetListePoints() { return listePoints; }
+            std::set<T, ltstr_p3d<T> > & GetListePoints () { return listePoints; }
 
-    void SetSaddle(SaddlePoint<T>  *node) {saddle=node; node->AddBlob(this); StopGrowth();}
+            void SetSaddle (SaddlePoint<T>  *node) {
+                saddle = node; 
+                node->AddBlob (this); 
+                StopGrowth();
+            }
 
-    SaddlePoint<T> *GetSaddle() {return saddle;}
-    MaximumPoint<T> *GetMaximum() {return maximum;}
-    float GetScale() {return scale;}
-     void SetScale(float t) {scale=t;}
+            SaddlePoint<T> *GetSaddle () { return saddle; }
+            MaximumPoint<T> *GetMaximum () { return maximum; }
+            float GetScale () { return scale; }
+            void SetScale (float t) { scale = t; }
 
-     GreyLevelBlob<T> & operator = (const GreyLevelBlob<T> & other);
+            GreyLevelBlob<T> & operator = ( const GreyLevelBlob<T> & other );
 
-  };
+    };
 
-  // class for saddle points
+    // class for saddle points
 
-  template<class T> class SaddlePoint {
+    template<class T> class SaddlePoint {
 
-  public:
-    T _node;
-    std::list<GreyLevelBlob<T>* > blobList;
+        public:
+            T _node;
+            std::list<GreyLevelBlob<T>* > blobList;
 
-     SaddlePoint() {}
-    SaddlePoint(T node) : _node(node) {}
-          ~SaddlePoint() {}
+            SaddlePoint () { }
+            SaddlePoint (T node) : _node(node) { }
+            ~SaddlePoint () { }
 
-    void AddBlob(GreyLevelBlob<T> *blob) { blobList.push_back(blob); }
-    std::list<GreyLevelBlob<T>*> & GetBlobList() { return blobList; }
+            void AddBlob(GreyLevelBlob<T> *blob) { blobList.push_back(blob); }
+            std::list<GreyLevelBlob<T>*> & GetBlobList() { return blobList; }
 
-     SaddlePoint<T> & operator = (const SaddlePoint<T>& other);
+            SaddlePoint<T> & operator = ( const SaddlePoint<T>& other );
 
-  };
+    };
 
-  // class for maxima
+    // class for maxima
 
-  template<class T> class MaximumPoint {
+    template<class T> class MaximumPoint {
 
-  public:
-    T                _node;
-    GreyLevelBlob<T> *blob;
-          ~MaximumPoint() {}
+        public:
+            T                _node;
+            GreyLevelBlob<T> *blob;
+            ~MaximumPoint() { }
 
-     MaximumPoint() : blob(0) {}
-    MaximumPoint(T node) : _node(node), blob(0) {}
-          MaximumPoint<T> & operator = (const MaximumPoint<T>& other);
+            MaximumPoint () : blob(0) { }
+            MaximumPoint ( T node ) : _node(node), blob(0) { }
+            MaximumPoint<T> & operator = ( const MaximumPoint<T>& other );
 
-  };
+    };
 
   // Class that define grey-level blobs algorithm extraction
 

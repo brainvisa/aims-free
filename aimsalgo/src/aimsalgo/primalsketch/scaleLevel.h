@@ -108,7 +108,7 @@ namespace aims
 
             typedef typename SiteType<AimsData<T> >::type Site;
 
-            ScaleLevel(float scale, AimsData<T> level) {_scale=scale; _level=level.clone();}
+            ScaleLevel(float scale, AimsData<T> level) { _scale=scale; _level = level.clone(); }
 
             ~ScaleLevel() {}
 

@@ -400,25 +400,25 @@ namespace aims
           resolution.push_back(sketch->scaleSpace()->GetOriginalImage().sizeY());
           resolution.push_back(sketch->scaleSpace()->GetOriginalImage().sizeZ());
 
-          graph->setProperty("boundingbox_min", bounding_min);
-          graph->setProperty("boundingbox_max", bounding_max);
-          graph->setProperty("voxel_size", resolution);
+          graph->setProperty( "boundingbox_min", bounding_min );
+          graph->setProperty( "boundingbox_max", bounding_max );
+          graph->setProperty( "voxel_size", resolution );
 
-          bckMap=new BucketMap<Void>(*GetSSBlobBucket(sketch));
-          bckMap->setSizeX(resolution[0]);
-          bckMap->setSizeY(resolution[1]);
-          bckMap->setSizeZ(resolution[2]);
-          vertSet=graph->vertices();
-          for (itVert=vertSet.begin(); itVert!=vertSet.end(); ++itVert){
-            node=*itVert;
-            node->getProperty("index", label);
-            ptrBck=carto::rc_ptr<BucketMap<Void> >(new BucketMap<Void>);
-            (*ptrBck)[0]=(*bckMap)[label];
-            ptrBck->setSizeX(resolution[0]);
-            ptrBck->setSizeY(resolution[1]);
-            ptrBck->setSizeZ(resolution[2]);
+          bckMap = new BucketMap<Void>( *GetSSBlobBucket(sketch) );
+          bckMap->setSizeX( resolution[0] );
+          bckMap->setSizeY( resolution[1] );
+          bckMap->setSizeZ( resolution[2] );
+          vertSet = graph->vertices();
+          for ( itVert = vertSet.begin() ; itVert != vertSet.end() ; ++itVert ) {
+            node =*itVert;
+            node->getProperty( "index", label );
+            ptrBck=carto::rc_ptr<BucketMap<Void> >( new BucketMap<Void> );
+            (*ptrBck)[0] = (*bckMap)[label];
+            ptrBck->setSizeX( resolution[0] );
+            ptrBck->setSizeY( resolution[1] );
+            ptrBck->setSizeZ( resolution[2] );
             manip.storeAims( *graph, node, "ssblob", ptrBck );
-            node->setProperty("ssblob_label", label);
+            node->setProperty( "ssblob_label", label );
           }
 	}
 
