@@ -61,7 +61,7 @@ namespace aims
      protected:
           typedef typename SiteType<Geom>::type Site;
           typedef typename TexType<Text>::type Val;
-          
+
           string _subject;
 
           ScaleSpace<Geom, Text>   *_scaleSpace;
@@ -95,12 +95,12 @@ namespace aims
           void SetMinDt() {
               if (!_scaleSpace->smoother()->optimal())
                   min_delta_t=0.5;
-              else             
+              else
                   min_delta_t=_scaleSpace->smoother()->dt();
           }
           void SetScaleSpace(ScaleSpace<Geom, Text> *scaleSpace)
-                                                  {        
- 
+                                                  {
+
               _scaleSpace=scaleSpace;   SetMinDt();}
           std::list<Bifurcation<Site>*> BifurcationList() {return bifurcationList;}
           std::list<ScaleSpaceBlob<Site>*> BlobSet() {return blobList;}
@@ -200,22 +200,22 @@ namespace aims
             }
         }
 
-        
+
         ScaleLevel<Geom,Text> *levelUp;
         levelUp=_scaleSpace->Scale(*itScaleUp);
         ScaleLevel<Geom,Text> *levelDown;
         levelDown=_scaleSpace->Scale(tmin);
-        
+
         int nbBlobs;
 
         levelUp->DetectBlobs(_mask);
-        
+
         nbBlobs=levelUp->nbBlobs();
-        
+
         GreyLevelBlob<Site> *glBlob;
         ScaleSpaceBlob<Site> *ssBlob;
         Bifurcation<Site> *bifurc;
-        
+
         // Scale-space blob initialisation
         std::map<int, GreyLevelBlob<Site> *>
                 listeGLB=levelUp->BlobList();
@@ -274,21 +274,21 @@ namespace aims
                (*itBlob)->ComputeScaleRep();
           }
         // blob (multiscale) measurements are computed here.
-        
-        ComputeBlobMeasurements(statFile);        
+
+        ComputeBlobMeasurements(statFile);
         cout << "ssblobs avant : " << blobList.size() << endl;
 
         // ELAGAGE
         typename std::list<Bifurcation<Site>*>::iterator bifit=bifurcationList.begin();
 //         cout << "bifurcation number:" << bifurcationList.size() << endl;
         uint merge_count = 0;
-        
+
         for (bifit = bifurcationList.begin() ;  bifit != bifurcationList.end() ; bifit++)
             if ((*bifit)->Type() == MERGE)
                 merge_count ++;
 //         cout << "MERGECOUNT:" << merge_count << endl;
 
-        
+
         for (bifit = bifurcationList.begin() ;  bifit != bifurcationList.end() ; bifit++){
           if ((*bifit)->Type() == APPEAR){
 //             std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->TopBlobs();
@@ -302,7 +302,7 @@ namespace aims
 //                   blobList.erase(itBlob);
 //                   break;
 //                 }
-// 
+//
 //             }
 
           }
@@ -459,20 +459,20 @@ namespace aims
             if ((*bifit)->Type() == MERGE)
                 merge_count ++;
 //         cout << "MERGECOUNT:" << merge_count << endl;
-        
+
           // blob updates
 cout << "ssblobs après : " << blobList.size() << endl;
-          
+
           for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
           {
                (*itBlob)->ComputeLifeTime();
                (*itBlob)->ComputeScaleRep();
           }
-        
+
         ComputeBlobMeasurements(statFile);
 
-        
-        
+
+
      }
 
      //---------------------------------------------------------------------
@@ -758,13 +758,13 @@ cout << "ssblobs après : " << blobList.size() << endl;
                               ssBlobUp->SetScaleMin(t_down);
                               bifurc->AddTopBlob(ssBlobUp);
                               ssBlobUp->SetBottomBifurcation(bifurc);
-                              std::set<int>::iterator itSet2=set2.begin();                              
+                              std::set<int>::iterator itSet2=set2.begin();
                               for (; itSet2!=set2.end(); ++itSet2)
                               {
                                    labelDown=*itSet2;
                                    blobDown=levelDown->Blob(labelDown);
                                    ssBlobDown=new ScaleSpaceBlob<Site>(_subject, labelMax);
-                                   labelMax++;                                   
+                                   labelMax++;
                                    ssBlobDown->SetScaleMax(t_down);
                                    ssBlobDown->SetScaleMin(t_min);
                                    ssBlobDown->AddGreyLevelBlob(blobDown);
@@ -777,7 +777,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
 //                                 Bifurcation<SiteType<AimsSurface<3, Void> >::type> *bif;
 //                                 bif = bifurc;
 //                                 cout << bif->TopBlobs().size() << " " << bif->BottomBlobs().size() << " - " << flush;
-                              
+
                          }
                          else if ((set1.size()==2) && (set2.size()==1)) // split
                          {
@@ -838,7 +838,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
                               }
                               AddBifurcation(bifurc);
                          }
-                    }  
+                    }
                }
                std::cout << "\t OK" << std::endl;
 
@@ -953,9 +953,9 @@ cout << "ssblobs après : " << blobList.size() << endl;
             mean_int += dt * (glBlob1->measurements.meanIntensity);
             max_cont += dt * (glBlob1->measurements.maxContrast);
             mean_cont += dt * (glBlob1->measurements.meanContrast);
-            area += dt * (glBlob1->measurements.area);            
+            area += dt * (glBlob1->measurements.area);
             tvalue += dt * (glBlob1->measurements.t);
-            
+
 
             ++itGLBlobs;
             for (; itGLBlobs!=ssBlob->glBlobs.end(); ++itGLBlobs)
@@ -969,7 +969,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
                 mean_cont += dt * (glBlob2->measurements.meanContrast + glBlob1->measurements.meanContrast)/2.0;
                 area += dt * (glBlob2->measurements.area + glBlob1->measurements.area)/2.0;
                 tvalue += dt * (glBlob2->measurements.t + glBlob1->measurements.t)/2.0;
-                
+
 
                 glBlob1=glBlob2;
                 t1=t2;
@@ -986,16 +986,16 @@ cout << "ssblobs après : " << blobList.size() << endl;
             mean_cont += dt * (glBlob1->measurements.meanContrast);
             area += dt * (glBlob1->measurements.area);
             tvalue += dt * (glBlob1->measurements.t);
-            
 
-            // Getting T-Value From Original Map... 
+
+            // Getting T-Value From Original Map...
 
             TexturedData<Geom, Text> ima=scaleSpace()->Scale(0.0)->Data();
 
             glBlob1=ssBlob->GlBlobRep();
             std::set<Site,ltstr_p3d<Site> >  pixels;
             pixels=glBlob1->GetListePoints();
-            
+
 
             typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
             float tvmax=-100.0;
@@ -1003,7 +1003,7 @@ cout << "ssblobs après : " << blobList.size() << endl;
               if (ima.intensity(*itPix) > tvmax )
                     tvmax = ima.intensity(*itPix);
             }
-            
+
 
             measure=BlobMeasurements(max_int, mean_int, max_cont,mean_cont, area, tvalue, tvmax);
 
