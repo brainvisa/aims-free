@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -7,10 +8,10 @@
 #
 # This software is governed by the CeCILL-B license under
 # French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the 
+# You can  use, modify and/or redistribute the software under the
 # terms of the CeCILL-B license as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info". 
-# 
+# and INRIA at the following URL "http://www.cecill.info".
+#
 # As a counterpart to the access to the source code and  rights to copy,
 # modify and redistribute granted by the license, users are provided only
 # with a limited warranty  and the software's author,  the holder of the
@@ -24,8 +25,8 @@
 # therefore means  that it is reserved for developers  and  experienced
 # professionals having in-depth computer knowledge. Users are therefore
 # encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or 
-# data to be ensured and,  more generally, to use and operate it in the 
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
 # same conditions as regards security.
 #
 # The fact that you are presently reading this means that you have had
@@ -43,7 +44,7 @@ class FoldsGraphThickness:
     self.LCR_label = 255
     self.GM_label = 100
     self.WM_label = 200
-    
+
   def preProcess(self):
     print "preProcess"
     #self.seed = aims.Volume_S16(self.lgw_vol.getSizeX(), self.lgw_vol.getSizeY(),self.lgw_vol.getSizeZ());
@@ -81,7 +82,10 @@ class FoldsGraphThickness:
     f1.doit(seed, [-self.LCR_label, -self.GM_label], seed_label_list)
     self.voronoi_vol = f1.voronoiVol()
     print "Voronoi in White matter"
-    f1.doit(self.voronoi_vol, [-1], seed_label_list)
+    n = numpy.array( voronoi_vol, copy=False )
+    n[ n == -1 ] = -100 # avoid value -1 which doesn't seem to work (!)
+    del n
+    f1.doit(self.voronoi_vol, [-100], seed_label_list)
     self.voronoi_vol = f1.voronoiVol()
 
     def vorTexCreation(mesh):
