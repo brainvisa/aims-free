@@ -38,6 +38,7 @@
 #include <cartobase/stream/sstream.h>
 #include <string>
 #include <vector>
+#include <set>
 
 namespace carto
 {
@@ -76,6 +77,9 @@ inline std::string toString( const char& object )
 */
 std::vector< std::string > split( const std::string &text,
 				  const std::string &sep );
+
+std::vector< std::string > split( const std::string &text,
+  const std::set<std::string> &sep );
 
 /*! Concatenate a series of \c string in a single \c string.
   \param pieces Series of \c string to be joined
@@ -143,7 +147,7 @@ void stringTo( const std::string& value, T& result )
 /////////////////////////
 
 template <>
-inline 
+inline
 void stringTo< std::string >( const std::string& value, std::string &result )
 {
 
@@ -210,13 +214,13 @@ void stringTo< signed char >( const std::string& value,
 ///////////////////////
 
 template <>
-inline 
+inline
 void stringTo< char >( const std::string& value, char& result )
 {
 
 #ifdef __CHAR_UNSIGNED__
 
-  stringTo< unsigned char >( value, 
+  stringTo< unsigned char >( value,
                              reinterpret_cast< unsigned char& >( result ) );
 
 #else

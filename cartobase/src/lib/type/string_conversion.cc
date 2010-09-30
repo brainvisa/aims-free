@@ -41,7 +41,7 @@
 
 using namespace std;
 
-namespace carto 
+namespace carto
 {
 
 
@@ -96,7 +96,7 @@ void stringTo< unsigned char >( const string& value, unsigned char& result )
 
   unsigned long r;
   stringTo< unsigned long >( value, r );
-  if ( r > UCHAR_MAX ) 
+  if ( r > UCHAR_MAX )
   {
 
     throw out_of_range_error( value );
@@ -480,7 +480,7 @@ void stringTo< bool >( const string& value, bool& result )
         }
       throw invalid_boolean( value );
     }
-}  
+}
 
 
 //-----------------------------------------------------------------------------
@@ -493,17 +493,53 @@ std::vector<std::string> split( const std::string &text,
   for( unsigned i = 0; i != text.size(); ++i ) {
     if ( text[ i ] == sep[ 0 ] ) {
       unsigned j;
-      for( j = 1; j != sep.size() && i+j < text.size() && 
-	     text[i+j] == sep[j]; ++j ) {}
+      for( j = 1; j != sep.size() && i+j < text.size() &&
+        text[i+j] == sep[j]; ++j ) {}
       if ( j == sep.size() ) {
-	result.push_back( current );
-	current = "";
+        if( !current.empty() )
+          result.push_back( current );
+        current = "";
       }
     } else {
       current += text[ i ];
     }
   }
-  result.push_back( current );
+  if( !current.empty() )
+    result.push_back( current );
+  return result;
+}
+
+
+std::vector<std::string> split( const std::string &text,
+  const std::set<std::string> &sep )
+{
+  vector<string> result;
+  string current;
+  set<string>::const_iterator isep, esep = sep.end();
+
+  for( unsigned i = 0; i != text.size(); ++i )
+  {
+    for( isep=sep.begin(); isep!=esep; ++isep )
+      if ( text[ i ] == (*isep)[ 0 ] )
+      {
+        unsigned j;
+        for( j = 1; j != isep->size() && i+j < text.size() &&
+          text[i+j] == (*isep)[j]; ++j ) {}
+        if ( j == isep->size() )
+        {
+          if( !current.empty() )
+            result.push_back( current );
+          current = "";
+          break;
+        }
+      }
+    if( isep == esep )
+    {
+      current += text[ i ];
+    }
+  }
+  if( !current.empty() )
+    result.push_back( current );
   return result;
 }
 

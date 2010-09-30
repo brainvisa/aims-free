@@ -35,7 +35,7 @@
  *  IO classes
  */
 
-/* this source is only here to force instanciation of some of the most useful 
+/* this source is only here to force instanciation of some of the most useful
    Reader templates */
 
 #include <aims/io/fileFormat_d.h>
@@ -47,7 +47,7 @@ using namespace aims;
 namespace aims
 {
 
-template<> void 
+template<> void
 FileFormatDictionary<AimsSurfaceTriangle>::registerBaseFormats()
 {
   std::vector<std::string>	ext;
@@ -71,10 +71,15 @@ FileFormatDictionary<AimsSurfaceTriangle>::registerBaseFormats()
   Vrml1Format *fv = new Vrml1Format;
   registerFormat( "VRML1", fv, ext );
   ext.clear();
+
+  ext.push_back( "obj" );
+  MniObjFormat *fo = new MniObjFormat;
+  registerFormat( "MNI OBJ", fo, ext );
+  ext.clear();
 }
 
 
-template<> void 
+template<> void
 FileFormatDictionary<AimsSurfaceFacet>::registerBaseFormats()
 {
   std::vector<std::string>	ext;
@@ -88,7 +93,7 @@ FileFormatDictionary<AimsSurfaceFacet>::registerBaseFormats()
 }
 
 
-template<> void 
+template<> void
 FileFormatDictionary<AimsTimeSurface<2,Void> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
