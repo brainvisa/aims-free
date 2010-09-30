@@ -51,11 +51,11 @@ namespace aims
   public:
     virtual ~MeshFormat();
 
-    virtual bool read( const std::string & filename, 
-		       AimsTimeSurface<D,T> & obj, 
-                       const carto::AllocatorContext & context, 
+    virtual bool read( const std::string & filename,
+		       AimsTimeSurface<D,T> & obj,
+                       const carto::AllocatorContext & context,
                        carto::Object options );
-    virtual bool write( const std::string & filename, 
+    virtual bool write( const std::string & filename,
 			const AimsTimeSurface<D,T> & vol, bool ascii = false );
   };
 
@@ -64,11 +64,11 @@ namespace aims
   public:
     virtual ~TriFormat();
 
-    virtual bool read( const std::string & filename, 
-		       AimsSurfaceTriangle & obj, 
-                       const carto::AllocatorContext & context, 
+    virtual bool read( const std::string & filename,
+		       AimsSurfaceTriangle & obj,
+                       const carto::AllocatorContext & context,
                        carto::Object options );
-    virtual bool write( const std::string & filename, 
+    virtual bool write( const std::string & filename,
 			const AimsSurfaceTriangle & vol, bool ascii = false );
   };
 
@@ -79,12 +79,12 @@ namespace aims
   public:
     virtual ~PovFormat();
 
-    virtual bool read( const std::string & filename, 
-		       AimsTimeSurface<D,Void> & obj, 
-                       const carto::AllocatorContext & context, 
+    virtual bool read( const std::string & filename,
+		       AimsTimeSurface<D,Void> & obj,
+                       const carto::AllocatorContext & context,
                        carto::Object options );
-    virtual bool write( const std::string & filename, 
-			const AimsTimeSurface<D,Void> & vol, 
+    virtual bool write( const std::string & filename,
+			const AimsTimeSurface<D,Void> & vol,
                         bool ascii = false );
   };
 
@@ -102,6 +102,22 @@ namespace aims
     virtual bool write(const std::string & filename,
 			const AimsTimeSurface<3, Void> &vol, bool ascii);
   };
+
+
+  class MniObjFormat : public FileFormat<AimsTimeSurface<3, Void> >
+  {
+  public:
+    virtual ~MniObjFormat();
+
+    virtual bool read( const std::string & filename,
+                       AimsTimeSurface<3,Void>&obj,
+                       const carto::AllocatorContext & context,
+                       carto::Object options );
+
+    virtual bool write(const std::string & filename,
+      const AimsTimeSurface<3, Void> &vol, bool ascii);
+  };
+
 }
 
 

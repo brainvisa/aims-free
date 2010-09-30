@@ -67,7 +67,7 @@ namespace aims
   namespace internal
   {
     //defined in reader_d.cc
-    void keep_exception_priority( std::exception & e, int & prio, int & type, 
+    void keep_exception_priority( std::exception & e, int & prio, int & type,
 				  std::string & message );
   }
 }
@@ -123,6 +123,9 @@ void Finder::initPrivate()
       ext.push_back( "tri" );
       registerFormat( "TRI", new FinderTriFormat, ext );
       ext.clear();
+      ext.push_back( "obj" );
+      registerFormat( "MNI OBJ", new FinderMniObjFormat, ext );
+      ext.clear();
       ext.push_back( "tex" );
       registerFormat( "TEX", new FinderTexFormat, ext );
       ext.clear();
@@ -162,7 +165,7 @@ Finder::~Finder()
 }
 
 
-void Finder::registerFormat( const string & fmtid, FinderFormat* format, 
+void Finder::registerFormat( const string & fmtid, FinderFormat* format,
 			     const vector<std::string> & extensions,
                              const string & before )
 {
@@ -194,7 +197,7 @@ FinderFormat* Finder::finderFormat( const string & format )
 {
   initPrivate();
 
-  map<string, FinderFormat *>::const_iterator	i 
+  map<string, FinderFormat *>::const_iterator	i
     = pd->formats.find( format );
   if( i == pd->formats.end() )
     return( 0 );
@@ -412,7 +415,7 @@ const Header* Finder::header() const
 void Finder::setHeader( Header* hdr )
 {
   if( !dynamic_cast<PythonHeader *>( hdr) )
-    throw runtime_error( "Finder::setHeader: non-generic Header is not " 
+    throw runtime_error( "Finder::setHeader: non-generic Header is not "
                          "supported anymore.");
   _header.reset( static_cast<PythonHeader *>( hdr ) );
 }
@@ -429,7 +432,7 @@ void Finder::setHeader( Object hdr )
 void Finder::launchException()
 {
   /* cout << "Finder::launchException\n";
-  cout << "code: " << _errorcode << ", state: " << (int) _state 
+  cout << "code: " << _errorcode << ", state: " << (int) _state
   << ", msg: " << _errormsg << endl; */
   if( _state != Error || _errorcode < 0 )
     return;	// no error (?)

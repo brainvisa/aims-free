@@ -110,7 +110,8 @@ HEADERS=  bucket/bucket_g.h	\
     io/labelImage.h		\
     io/listItemR.h		\
     io/listItemW.h		\
-    io/macosxbugs.h             \
+    io/macosxbugs.h \
+    io/mniobjheader.h \
     io/motionR.h		\
     io/motionW.h		\
     io/povW.h			\
@@ -283,6 +284,8 @@ SOURCES = \
     io/fileFormat_volumeVec.cc  \
     io/writer.cc      \
     io/meshheader.cc    \
+    io/mniobjformat.cc \
+    io/mniobjheader.cc \
     io/roiR.cc      \
     io/scaledcoding.cc \
     io/selectionr.cc \
