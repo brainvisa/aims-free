@@ -36,7 +36,8 @@ from soma import aimsalgo
 import numpy
 
 class FoldsGraphThickness:
-  def __init__(self, fold_graph, lgw_vol, gm_wm_mesh, gm_lcr_mesh):
+  def __init__( self, fold_graph, lgw_vol, gm_wm_mesh, gm_lcr_mesh,
+    voronoi=None ):
     self.fold_graph = fold_graph
     self.lgw_vol = lgw_vol
     self.gm_wm_mesh = gm_wm_mesh
@@ -44,49 +45,49 @@ class FoldsGraphThickness:
     self.LCR_label = 255
     self.GM_label = 100
     self.WM_label = 200
+    self.voronoi_vol = voronoi
 
   def preProcess(self):
     print "preProcess"
-    #self.seed = aims.Volume_S16(self.lgw_vol.getSizeX(), self.lgw_vol.getSizeY(),self.lgw_vol.getSizeZ());
-    #self.seed.header()["voxel_size"] = self.lgw_vol.header()["voxel_size"]
-    seed = - self.lgw_vol
     voxel_size = self.lgw_vol.header()["voxel_size"]
 
     def printbucket( bck, vol, value ):
       c = aims.RawConverter_BucketMap_VOID_AimsData_S16( False, True, value )
       c.printToVolume( bck.get(), vol )
 
-    seed_label_list = []
-    for v in self.fold_graph.vertices():
-      try:
-        b = v[ 'aims_ss' ]
-        index = v[ 'skeleton_label' ]
-        seed_label_list.append(int(index))
-        printbucket( b, seed, index )
-        printbucket( b, self.lgw_vol, self.LCR_label ) #pour que le lcr rentre jusqu au fond des silons
+    if self.voronoi_vol is None:
+      seed = - self.lgw_vol
+      seed_label_list = []
+      for v in self.fold_graph.vertices():
         try:
-          b = v[ 'aims_bottom' ]
+          b = v[ 'aims_ss' ]
+          index = v[ 'skeleton_label' ]
+          seed_label_list.append(int(index))
           printbucket( b, seed, index )
+          printbucket( b, self.lgw_vol, self.LCR_label ) #pour que le lcr rentre jusqu au fond des silons
+          try:
+            b = v[ 'aims_bottom' ]
+            printbucket( b, seed, index )
+          except:
+            pass
+          try:
+            b = v[ 'aims_other' ]
+            printbucket( b, seed, index )
+          except:
+            pass
         except:
           pass
-        try:
-          b = v[ 'aims_other' ]
-          printbucket( b, seed, index )
-        except:
-          pass
-      except:
-        pass
 
-    f1 = aims.FastMarching()
-    print "Voronoi in Grey matter"
-    f1.doit(seed, [-self.LCR_label, -self.GM_label], seed_label_list)
-    self.voronoi_vol = f1.voronoiVol()
-    print "Voronoi in White matter"
-    n = numpy.array( voronoi_vol, copy=False )
-    n[ n == -1 ] = -100 # avoid value -1 which doesn't seem to work (!)
-    del n
-    f1.doit(self.voronoi_vol, [-100], seed_label_list)
-    self.voronoi_vol = f1.voronoiVol()
+      f1 = aims.FastMarching()
+      print "Voronoi in Grey matter"
+      f1.doit(seed, [-self.LCR_label, -self.GM_label], seed_label_list)
+      self.voronoi_vol = f1.voronoiVol()
+      print "Voronoi in White matter"
+      n = numpy.array( voronoi_vol, copy=False )
+      n[ n == -1 ] = -100 # avoid value -1 which doesn't seem to work (!)
+      del n
+      f1.doit(self.voronoi_vol, [-100], seed_label_list)
+      self.voronoi_vol = f1.voronoiVol()
 
     def vorTexCreation(mesh):
       mesh_vertex_set = mesh.vertex()
