@@ -2,4 +2,4 @@
 <!ENTITY DIR_DEMO "data_for_aims/">
 <!ENTITY DIR_ANAT "data_for_anatomist/">
 <!ENTITY DIR_BV "database_brainvisa/">
-<!ENTITY PATH_WEB "http://brainvisa.info/doc/documents-3.2/shfjcommands/commands.html">
+<!ENTITY PATH_WEB "http://brainvisa.info/doc/documents/shfjcommands/commands.html">
