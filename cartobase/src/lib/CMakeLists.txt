@@ -19,4 +19,11 @@ endif(APPLE)
 BRAINVISA_INSTALL( TARGETS cartobase_0
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
-BRAINVISA_GENERATE_DOXYGEN_DOC( _headers  )
+
+IF ( DOXYGEN_FOUND )
+  SET(component_name "cartobase")
+  set( DOXYFILE_PREDEFINED "${AIMS_DEFINITIONS}")
+  BRAINVISA_GENERATE_DOXYGEN_DOC( _headers 
+                                  INPUT_PREFIX "${CMAKE_BINARY_DIR}/include/${component_name}"
+                                  COMPONENT "${component_name}")
+ENDIF ( DOXYGEN_FOUND )

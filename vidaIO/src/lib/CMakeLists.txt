@@ -7,4 +7,11 @@ target_link_libraries( vidaIO m )
 BRAINVISA_INSTALL( TARGETS vidaIO
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
-BRAINVISA_GENERATE_DOXYGEN_DOC( _headers  )
+
+IF ( DOXYGEN_FOUND )
+  set(component_name "vidaIO")
+  set( DOXYFILE_PREDEFINED "${AIMS_DEFINITIONS}")
+  BRAINVISA_GENERATE_DOXYGEN_DOC( _headers 
+                                  INPUT_PREFIX "${CMAKE_BINARY_DIR}/include/${component_name}"
+                                  COMPONENT "${component_name}" )
+ENDIF ( DOXYGEN_FOUND )

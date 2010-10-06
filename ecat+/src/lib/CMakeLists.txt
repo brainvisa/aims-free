@@ -7,4 +7,13 @@ target_link_libraries( ecat+ ecat )
 BRAINVISA_INSTALL( TARGETS ecat+
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
-BRAINVISA_GENERATE_DOXYGEN_DOC( _headers  )
+
+IF ( DOXYGEN_FOUND )
+  set(component_name "ecat+")
+  set( DOXYFILE_PREDEFINED "${AIMS_DEFINITIONS}")
+  set(aims_version "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}")
+  set( DOXYFILE_TAGFILES "${CMAKE_BINARY_DIR}/share/doc/ecat-${aims_version}/doxygen/ecat.tag=../../ecat-${aims_version}/doxygen")
+  BRAINVISA_GENERATE_DOXYGEN_DOC( _headers 
+                                  INPUT_PREFIX "${CMAKE_BINARY_DIR}/include/${component_name}" 
+                                  COMPONENT "${component_name}")
+ENDIF ( DOXYGEN_FOUND )

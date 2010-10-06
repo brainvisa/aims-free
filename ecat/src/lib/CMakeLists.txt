@@ -6,4 +6,12 @@ set_property( TARGET ecat PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 BRAINVISA_INSTALL( TARGETS ecat
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
-BRAINVISA_GENERATE_DOXYGEN_DOC( _headers  )
+              
+IF ( DOXYGEN_FOUND )
+  set(component_name "ecat")
+  set( DOXYFILE_PREDEFINED "${AIMS_DEFINITIONS}")
+  BRAINVISA_GENERATE_DOXYGEN_DOC( _headers 
+                                  INPUT_PREFIX "${CMAKE_BINARY_DIR}/include/${component_name}" 
+                                  COMPONENT "${component_name}")
+ENDIF ( DOXYGEN_FOUND )
+

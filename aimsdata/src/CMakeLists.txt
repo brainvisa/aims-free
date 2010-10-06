@@ -1,14 +1,18 @@
 add_subdirectory(aimsdata)
+set(HEADERS ${AIMSDATA_HEADERS})
 if( NOT WIN32 )
   add_subdirectory(aimsecat)
   add_subdirectory(aimsvida)
+  set(HEADERS ${HEADERS} ${AIMSECAT_HEADERS} ${AIMSVIDA_HEADERS})
 endif( NOT WIN32 )
 add_subdirectory(aimsply)
+set(HEADERS ${HEADERS} ${AIMSPLY_HEADERS})
 if( ZLIB_FOUND )
   add_subdirectory(aimsnifti)
+  set(HEADERS ${HEADERS} ${AIMSNIFTI_HEADERS})
 endif()
 add_subdirectory(aimsfdf)
-
+set(HEADERS ${HEADERS} ${AIMSFDF_HEADERS})
 IF(APPLE)
   add_subdirectory(bundle_aimsecat)
   add_subdirectory(bundle_aimsply)
@@ -21,6 +25,7 @@ ENDIF(APPLE)
 
 IF(JPEG_FOUND)
   add_subdirectory(aimsjpeg)
+  set(HEADERS ${HEADERS} ${AIMSJPEG_HEADERS})
   IF(APPLE)
     add_subdirectory(bundle_aimsjpeg)
   ENDIF(APPLE)
@@ -29,6 +34,7 @@ ENDIF(JPEG_FOUND)
 
 IF(DCMTK_FOUND)
   add_subdirectory(aimsdicom)
+  set(HEADERS ${HEADERS} ${AIMSDICOM_HEADERS})
   IF(APPLE)
     add_subdirectory(bundle_aimsdicom)
   ENDIF(APPLE)
@@ -37,6 +43,7 @@ ENDIF(DCMTK_FOUND)
 
 IF(MINC_FOUND)
   add_subdirectory(aimsminc)
+  set(HEADERS ${HEADERS} ${AIMSMINC_HEADERS})
   IF(APPLE)
     add_subdirectory(bundle_aimsminc)
   ENDIF(APPLE)
@@ -45,6 +52,7 @@ ENDIF(MINC_FOUND)
 
 IF(TIFF_FOUND AND ZLIB_FOUND)
   add_subdirectory(aimstiff)
+  set(HEADERS ${HEADERS} ${AIMSTIFF_HEADERS})
   IF(APPLE)
     add_subdirectory(bundle_aimstiff)
   ENDIF(APPLE)
@@ -52,9 +60,11 @@ ENDIF()
 
 IF(EXPAT_FOUND)
   add_subdirectory(aimsgifti)
+  set(HEADERS ${HEADERS} ${AIMSGIFTI_HEADERS})
 ENDIF(EXPAT_FOUND)
 
-
+# list of header files for doxygen
+set(HEADERS ${HEADERS} PARENT_SCOPE)
 #------------------------------------------------------------------------------
 # Build targets for commands
 #------------------------------------------------------------------------------

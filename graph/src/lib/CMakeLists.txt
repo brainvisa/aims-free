@@ -7,4 +7,3 @@ target_link_libraries( graph cartobase )
 BRAINVISA_INSTALL( TARGETS graph
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
-BRAINVISA_GENERATE_DOXYGEN_DOC( _headers  )

@@ -1,6 +1,6 @@
 add_subdirectory( public )
 add_subdirectory( aimsalgo )
-
+set(HEADERS ${AIMSALGO_HEADERS} ${PUBLIC_HEADERS} PARENT_SCOPE)
 #------------------------------------------------------------------------------
 # Build targets for commands by looking into directories listed in src.pro
 #------------------------------------------------------------------------------

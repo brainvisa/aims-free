@@ -9,4 +9,3 @@ endif(UNIX)
 BRAINVISA_INSTALL( TARGETS cartobase
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
-# BRAINVISA_GENERATE_DOXYGEN_DOC( _headers  )

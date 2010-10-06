@@ -1,5 +1,6 @@
 BRAINVISA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/aimsdata.pro "HEADERS" _headers "SOURCES" _sources )
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
+set(AIMSDATA_HEADERS ${_headers} PARENT_SCOPE)
 add_library( aimsdata SHARED ${_sources} )
 add_dependencies( aimsdata ${headersTarget} )
 set_property( TARGET aimsdata PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
