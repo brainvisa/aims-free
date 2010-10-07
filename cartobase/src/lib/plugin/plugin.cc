@@ -227,8 +227,21 @@ static bool loadlib( const string & libname, const std::string & ver,
     string::size_type x = lname.rfind( '.' );
     if( x != string::npos )
     {
-      lname = lname.substr( 0, x );
-      return loadlib2( lname, verbose );
+      string slname = lname.substr( 0, x );
+      if ( loadlib2( slname, verbose ) )
+        return true;
+#ifdef _WIN32
+      else
+        {
+          // try to completely remove version number
+          x = lname.rfind( string( "." ) + ver );
+          if( x != string::npos )
+          {
+            slname = lname.substr( 0, x );
+            return loadlib2( slname, verbose );
+          }
+        }
+#endif
     }
   }
 

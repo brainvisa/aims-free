@@ -17,6 +17,7 @@ HEADERS =			\
 SOURCES =			\
     io/dicomformat.cc		\
     io/dicomheader.cc		\
+    io/dicomR.cc			\
     plugin/dicomplugin.cc
 
 LIBS	= ${LIBS_DICOM}

@@ -1,7 +1,7 @@
 BRAINVISA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/gifti.pro "HEADERS" _headers "SOURCES" _sources )
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
 set(AIMSGIFTI_HEADERS ${_headers} PARENT_SCOPE)
-include_directories( "${CMAKE_BINARY_DIR}/include/aims/io/gifticlib" "${CMAKE_BINARY_DIR}/include/aims/io/niftilib" "${CMAKE_BINARY_DIR}/include/aims/io/znzlib" ${EXPAT_INCLUDE_DIRS} )
+include_directories( "${CMAKE_BINARY_DIR}/include/aims/io/gifticlib" "${CMAKE_BINARY_DIR}/include/aims/io/niftilib" "${CMAKE_BINARY_DIR}/include/aims/io/znzlib" ${EXPAT_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} )
 add_definitions( "-DHAVE_ZLIB" )
 add_library( aimsgifti SHARED ${_sources} )
 add_dependencies( aimsgifti ${headersTarget} )
