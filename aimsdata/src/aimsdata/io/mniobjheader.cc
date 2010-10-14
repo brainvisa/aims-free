@@ -62,11 +62,11 @@ bool MniObjHeader::read( uint32_t* offset )
 {
   string    fname = filename();
 
+  if( FileUtil::fileStat( fname ).find( '+' ) == string::npos )
+    throw file_not_found_error( fname );
   ifstream  is( fname.c_str(), ios::in | ios::binary );
   if( !is )
-  { cout << "open " << fname << " failed\n";
     io_error::launchErrnoExcept( fname );
-  }
   is.unsetf( ios::skipws );
 
   uint32_t  nvertex = 0;
