@@ -164,7 +164,29 @@ namespace aims
 
     // std::cout << "This is NIFTI Writer: use at your own risk." << std::endl;
 
-    NiftiHeader hdr( thing.dimX(), thing.dimY(), thing.dimZ(), thing.dimT(),
+    const Settings sett = Settings::settings();
+    bool  write4d = true;
+    try
+    {
+      write4d = (bool)
+        sett.getProperty( "nifti_output_4d_volumes" )->getScalar();
+    }
+    catch( std::exception & )
+    {
+    }
+
+    if( thing.dimX() >= 0x8000 || thing.dimY() >= 0x8000
+      || thing.dimZ() >= 0x8000 )
+      throw carto::invalid_format_error( "NIFTI-1 cannot handle volume "
+        "dimensions exceeding 32737", name );
+    int ntime = thing.dimT();
+    if( write4d && thing.dimT() >= 0x8000 )
+    {
+      ntime = 1;
+      write4d = false;
+    }
+
+    NiftiHeader hdr( thing.dimX(), thing.dimY(), thing.dimZ(), ntime,
                     thing.sizeX(), thing.sizeY(), thing.sizeZ(),
                     thing.sizeT(), name );
 
@@ -178,7 +200,7 @@ namespace aims
       dims[0] = thing.dimX();
       dims[1] = thing.dimY();
       dims[2] = thing.dimZ();
-      dims[3] = thing.dimT();
+      dims[3] = ntime;
       hdr.setProperty( "volume_dimension", dims );
       std::vector<float> vs(4);
       vs[0] = thing.sizeX();
@@ -221,17 +243,6 @@ namespace aims
       std::cout << "matching interval not found. Not 16 bit codable\n"; */
     }
 
-    const Settings sett = Settings::settings();
-    bool  write4d = true;
-    try
-    {
-      write4d = (bool) 
-        sett.getProperty( "nifti_output_4d_volumes" )->getScalar();
-    }
-    catch( std::exception & )
-    {
-    }
-
     bool ok = true;
     carto::fdinhibitor fdi( 2 );
     fdi.close(); // disable output on stderr
@@ -268,7 +279,6 @@ namespace aims
     }
     else
     {
-      // std::cout << "Converting from 4D to 3D." << std::endl;
       char sequence[16];
       int f;
       int  nt = thing.dimT();
@@ -284,6 +294,12 @@ namespace aims
         fnames.push_back( bname + std::string( sequence ) + ext );
       }
       hdr.setProperty( "series_filenames", fnames );
+      std::vector<int> vdim(4);
+      vdim[0] = thing.dimX();
+      vdim[1] = thing.dimY();
+      vdim[2] = thing.dimZ();
+      vdim[3] = thing.dimT();
+      hdr.setProperty( "volume_dimension", vdim );
 
       for( f=0; f < nt; ++f )
       {
@@ -384,12 +400,12 @@ namespace
     if( !expandNiftiScaleFactor( hdr, nim, m, thing, tmin, tmax, zfp ) )
     {
       Point3df d0f;
-      Point4d d0;
+      AimsVector<int,4> d0;
       Point3df incf = m.transform( Point3df( 1, 0, 0 ) )
           - m.transform( Point3df( 0, 0, 0 ) );
-      Point4d inc = Point4d( int16_t( rint( incf[0] ) ),
-                             int16_t( rint( incf[1] ) ),
-                             int16_t( rint( incf[2] ) ), 0 );
+      AimsVector<int,4> inc( int( rint( incf[0] ) ),
+                             int( rint( incf[1] ) ),
+                             int( rint( incf[2] ) ), 0 );
 
       size_t numbytes = nim->nx * sizeof( T ), ss;
       std::vector<T> buf( nim->nx );
@@ -400,11 +416,12 @@ namespace
           for( int y=0; y<nim->ny; ++y )
           {
             d0f = m.transform( Point3df( 0, y, z ) );
-            d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
-                          int16_t( rint( d0f[2] ) ), t );
+            d0 = AimsVector<int,4>( int( rint( d0f[0] ) ),
+                                    int( rint( d0f[1] ) ),
+                                    int( rint( d0f[2] ) ), t );
             d = &buf[0];
             for( int x=0; x<nim->nx; ++x, d0+=inc )
-              *d++ = thing(d0);
+              *d++ = thing(d0[0], d0[1], d0[2], d0[3]);
             ss = znzwrite( (void*) &buf[0] , 1 , numbytes , zfp );
             if( ss != numbytes )
             {
