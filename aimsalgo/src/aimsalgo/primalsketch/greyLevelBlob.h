@@ -235,14 +235,14 @@ namespace aims {
       void Run(); // possibility of masking to exclude an area
   
        void ComputeBlobMeasurements();
-       void SetOriginalTexture(TexturedData<Geom,Text> *rawtexdata){ _rawtexdata = rawtexdata; }
-      TexturedData<Geom,Text> *GetOriginalTexture(){return _rawtexdata; }
+       void SetOriginalTexture ( TexturedData<Geom,Text> *rawtexdata ) { _rawtexdata = rawtexdata; }
+      TexturedData<Geom,Text> *GetOriginalTexture ( ) { return _rawtexdata; }
     // doit renvoyer une liste de GLB, de maximums et de saddle points
-      std::list<SaddlePoint<Site> *> GetSaddleList() {return saddleList;}
-      std::list<MaximumPoint<Site> *> GetMaxList() {return  maximumList;}
-      std::map<int, GreyLevelBlob<Site> *> GetBlobs() {return blobMap;}
-      TexturedData<Geom, Text> GetBlobImage() {return labelsImage;}
-      int nbBlobs() {return(blobMap.size());}
+      std::list<SaddlePoint<Site> *> GetSaddleList() { return saddleList; }
+      std::list<MaximumPoint<Site> *> GetMaxList() { return  maximumList; }
+      std::map<int, GreyLevelBlob<Site> *> GetBlobs() { return blobMap; }
+      TexturedData<Geom, Text> GetBlobImage() { return labelsImage; }
+      int nbBlobs() { return blobMap.size(); }
 
   };
 
@@ -495,44 +495,41 @@ namespace aims {
 
   //----------------------------------------------------------------------------------------------------------
 
- template<typename Geom, typename Text>
- void
- ExtractGreyLevelBlobs<Geom, Text>::ComputeBlobMeasurements()
- {
-          typename std::map<int, GreyLevelBlob<Site>* >::iterator blobIt;
-          GreyLevelBlob<Site> *blob;
-          SaddlePoint<Site> *saddle;
-          MaximumPoint<Site> *maxi;
-          Val saddleInt, maxInt, intensity;
-          float maxIntensity, meanIntensity, maxContrast, meanContrast, area;
-          int nbPoint;
-        FILE *fileStat=0;
+  template<typename Geom, typename Text>
+  void
+  ExtractGreyLevelBlobs<Geom, Text>::ComputeBlobMeasurements ( ) {
+      typename std::map<int, GreyLevelBlob<Site>* >::iterator blobIt;
+      GreyLevelBlob<Site> *blob;
+      SaddlePoint<Site> *saddle;
+      MaximumPoint<Site> *maxi;
+      Val saddleInt, maxInt, intensity;
+      float maxIntensity, meanIntensity, maxContrast, meanContrast, area;
+      int nbPoint;
+      FILE *fileStat = 0;
 
-        if (_stats!=0)
-        {
-            fileStat=fopen(_stats, "w");
-            fprintf(fileStat, "Blob_label max_int mean_int max_cont mean_cont area\n");
-        }
+      if ( _stats != 0 ) {
+          fileStat = fopen ( _stats, "w" );
+          fprintf ( fileStat, "Blob_label max_int mean_int max_cont mean_cont area\n" );
+      }
 
-        //std::cout << "DEBUG: going through blob list" << std::endl;
-        //std::cout << "DEBUG: Size of list : " << blobMap.size() << std::endl;
-        //std::cout << "DEBUG: saddle list size : " << saddleList.size() << std::endl;
-          for (blobIt=blobMap.begin(); blobIt!=blobMap.end(); ++blobIt)
-          {
-            //std::cout << ((*blobIt).second)->Label(); fflulongsh(stdout);
-               //std::cout << "DEBUG : blob " << (*blobIt).first << std::endl;
-               maxIntensity=0.0;
-               meanIntensity=0.0;
-               maxContrast=0.0;
-               meanContrast=0.0;
-               nbPoint=0;
-               area=0.0; // pour l'instant il s'agit du nombre de points
+      //std::cout << "DEBUG: going through blob list" << std::endl;
+      //std::cout << "DEBUG: Size of list : " << blobMap.size() << std::endl;
+      //std::cout << "DEBUG: saddle list size : " << saddleList.size() << std::endl;
+      for ( blobIt = blobMap.begin() ; blobIt != blobMap.end() ; ++blobIt ) {
+          //std::cout << ((*blobIt).second)->Label(); fflulongsh(stdout);
+          //std::cout << "DEBUG : blob " << (*blobIt).first << std::endl;
+          maxIntensity = 0.0;
+          meanIntensity = 0.0;
+          maxContrast = 0.0;
+          meanContrast = 0.0;
+          nbPoint = 0;
+          area = 0.0; // pour l'instant il s'agit du nombre de points
                               // donc tres mauvais pour les surfaces
-               blob=(*blobIt).second;
-               //std::cout << "DEBUG : getting saddle" << std::endl;
-               saddle=blob->GetSaddle();
-               //std::cout << "DEBUG : getting maxi" << std::endl;
-               maxi=blob->GetMaximum();
+          blob = (*blobIt).second;
+          //std::cout << "DEBUG : getting saddle" << std::endl;
+          saddle = blob->GetSaddle();
+          //std::cout << "DEBUG : getting maxi" << std::endl;
+            maxi=blob->GetMaximum();
             //std::cout << "DEBUG : sites : " << (*_texdata).NbSites() << std::endl;
             //std::cout << "DEBUG : getting max intensity" << std::endl;
             maxInt=(*_texdata).intensity(maxi->_node);
@@ -578,32 +575,33 @@ namespace aims {
                blob->measurements.meanContrast=meanContrast;
                blob->measurements.area=area;
                
-//               TexturedData<Geom, Text> ima=ScaleSpace()->Scale(0.0)->Data();
 
-              if (GetOriginalTexture() != NULL){
-                std::set<Site,ltstr_p3d<Site> >  pixels;
-                pixels=blob->GetListePoints();
+
+              if ( GetOriginalTexture() != NULL ) {
+                  std::set<Site,ltstr_p3d<Site> >  pixels;
+                  pixels = blob->GetListePoints();
   
-                typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
-                float tvmax=-100.0;
-                for ( itPix=pixels.begin(); itPix!=pixels.end(); itPix++)
-                {
-                  if (float(GetOriginalTexture()->intensity(*itPix)) > tvmax)
-                    tvmax= float(GetOriginalTexture()->intensity(*itPix));
-                }   
-                blob->measurements.t=tvmax;
+                  typename std::set<Site, ltstr_p3d<Site> >::iterator itPix;
+                  float tvmax = -100.0;
+                  for ( itPix = pixels.begin() ; itPix != pixels.end() ; itPix++ ) {
+                      if ( float ( GetOriginalTexture()->intensity(*itPix) ) > tvmax )
+                          tvmax= float ( GetOriginalTexture()->intensity(*itPix) );
+                  }   
+                  blob->measurements.t = tvmax;
               }
-              else 
-                blob->measurements.t = 0.0;
+              else  {
+                  std::cout << "BLOBMEASUREMENT = 0.0" << std::endl;
+                  blob->measurements.t = 0.0;
+              }
 
 
-            //std::cout << " - " << std::flush;
-            if (fileStat!=0)
-                fprintf(fileStat, "%i %.4f %.4f %.4f %.4f %.4f\n", blob->Label(),
-                maxIntensity, meanIntensity, maxContrast, meanContrast, area);
-            //std::cout << " | " << std::flush;
-          }
-        if (fileStat!=0)
+              //std::cout << " - " << std::flush;
+              if ( fileStat != 0 )
+                  fprintf ( fileStat, "%i %.4f %.4f %.4f %.4f %.4f\n", blob->Label(), 
+                          maxIntensity, meanIntensity, maxContrast, meanContrast, area);
+              //std::cout << " | " << std::flush;
+              }
+        if ( fileStat != 0 )
             fclose(fileStat);
  }
 
