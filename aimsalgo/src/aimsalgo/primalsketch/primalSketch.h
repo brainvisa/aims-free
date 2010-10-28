@@ -36,9 +36,9 @@
 
 #include <cstdlib>
 #include <aims/config/aimsalgo_config.h>
-#include <aims/primalsketch/scaleSpaceBlob.h>
 #include <aims/primalsketch/scalespace.h>
 #include <aims/primalsketch/greyLevelBlob.h>
+#include <aims/primalsketch/scaleSpaceBlob.h>
 #include <set>
 #include <map>
 #include <list>
