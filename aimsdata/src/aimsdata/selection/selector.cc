@@ -34,7 +34,11 @@
 #include <aims/selection/selector.h>
 #include <aims/selection/selection.h>
 #include <aims/roi/hie.h>
+#include <aims/io/reader.h>
+#include <aims/io/selectionr.h>
+#include <aims/io/selectionw.h>
 #include <graph/graph/graph.h>
+#include <graph/tree/treader.h>
 #include <set>
 #include <queue>
 
@@ -42,13 +46,36 @@ using namespace aims;
 using namespace std;
 
 
+struct Selector::Private
+{
+  Private() : ownhie( true ), ownmodel( true ), hie( 0 ), model( 0 ) {}
+  ~Private();
+  bool ownhie;
+  bool ownmodel;
+  Hierarchy *hie;
+  Graph     *model;
+  SelectionSet presel;
+};
+
+
+Selector::Private::~Private()
+{
+  if( ownmodel )
+    delete model;
+  if( ownhie )
+    delete hie;
+}
+
+
 Selector::Selector()
+  : d( new Private )
 {
 }
 
 
 Selector::~Selector()
 {
+  delete d;
 }
 
 
@@ -87,6 +114,129 @@ Selection Selector::query( const Selection & sel, const Hierarchy & nom ) const
 
   return( outsel );
 }
+
+
+const Hierarchy* Selector::nomenclature() const
+{
+  return d->hie;
+}
+
+
+void Selector::setNomenclature( Hierarchy* hie, bool setowner )
+{
+  if( d->ownhie && hie != d->hie )
+    delete d->hie;
+  d->ownhie = setowner;
+  d->hie = hie;
+}
+
+
+void Selector::loadNomenclature( const string & filename )
+{
+  Hierarchy *h = new Hierarchy;
+  try
+  {
+    TreeReader        tr( filename, h->syntax() );
+    tr >> *h;
+    if( d->ownhie )
+      delete d->hie;
+    d->ownhie = true;
+    d->hie = h;
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    delete h;
+  }
+}
+
+
+const Graph* Selector::model() const
+{
+  return d->model;
+}
+
+
+void Selector::setModel( Graph* model, bool setowner )
+{
+  if( d->ownmodel && model != d->model )
+    delete d->model;
+  d->ownmodel = setowner;
+  d->model = model;
+}
+
+
+void Selector::loadModel( const string & filename )
+{
+  try
+  {
+    Graph *g;
+    Reader<Graph>     rg( filename );
+    g = rg.read( 0 );
+    if( g )
+    {
+      if( d->ownmodel )
+        delete d->model;
+      d->model = g;
+    }
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+}
+
+
+SelectionSet Selector::selection() const
+{
+  if( d->presel.empty() )
+  {
+    SelectionExpander expander = SelectionExpander();
+    SelectionSet *s = 0;
+    if( d->presel.begin() != d->presel.end() )
+      s = &d->presel;
+    SelectionSet sel = expander.query( d->model, s, d->hie );
+    d->presel = sel;
+    int i;
+    SelectionSet::const_iterator is, es = d->presel.end();
+  }
+  return d->presel;
+}
+
+
+void Selector::loadPreSelection( const string & fname )
+{
+  SelectionSet          ss;
+  try
+  {
+    SelectionReader   sr( fname );
+    if( fname == "-" )
+      sr.open( cin );
+    sr.read( ss );
+    d->presel = ss;
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+}
+
+
+void Selector::clearSelection()
+{
+  d->presel = SelectionSet();
+}
+
+
+void Selector::printSelection( ostream & ostr ) const
+{
+  SelectionSet  ss = selection();
+  SelectionWriter       sw( ostr );
+  sw.write( ss );
+}
+
+
+// ---
 
 
 SelectionExpander::SelectionExpander( bool enabledups )

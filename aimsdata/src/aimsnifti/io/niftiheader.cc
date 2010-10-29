@@ -260,7 +260,7 @@ namespace {
 }
 
 bool NiftiHeader::read()
-{ 
+{
   nifti_image *nim = NULL;
   string      fileName( _name );
 
@@ -274,11 +274,11 @@ bool NiftiHeader::read()
   // read header using niftilib without loading data
   nim = nifti_image_read( fileName.c_str() , 0 );
   if( !nim )
-    {
-	  io_error::launchErrnoExcept( fileName );
-      throw wrong_format_error( fileName );
-	}
-  
+  {
+    io_error::launchErrnoExcept( fileName );
+    throw wrong_format_error( fileName );
+  }
+
   /***********************/
   /* DATA DIMENSIONALITY */
   /***********************/
@@ -287,6 +287,8 @@ bool NiftiHeader::read()
   vector< int > dims;
   for (int i=1;i<=nim->ndim;++i)
     dims.push_back(nim->dim[i]);
+  while( dims.size() < 3 ) // complete to at least 3D
+    dims.push_back( 1 );
   // space: x,y,z, time: t and 3 extra
   // dim[8]: dim[0]=ndim, dim[1]=nx, etc.
   
@@ -355,7 +357,7 @@ bool NiftiHeader::read()
   
   if ( sz != nim->nbyper * 8 )
     cerr << "Number of bytes per voxel doesn't match datatype in NIFTI file \"" << fileName << "\"" << endl;
-  
+
   /******************************/
   /* DATA SCALING and DATA_TYPE */
   /******************************/
@@ -562,7 +564,7 @@ bool NiftiHeader::read()
   
   setProperty( "referentials", referentials );
   setProperty( "transformations", transformations );
-  
+
   /********************************************/
   /* UNITS OF SPATIAL AND TEMPORAL DIMENSIONS */
   /********************************************/
@@ -589,7 +591,7 @@ bool NiftiHeader::read()
     /* Optional description of intent data */
     setProperty( "intent_name", string( nim->intent_name ) );
   }
-  
+
   /**********************************/
   /* DESCRIPTION AND AUXILIARY FILE */
   /**********************************/
@@ -619,7 +621,7 @@ bool NiftiHeader::read()
   /*********************/
   /* HEADER EXTENSIONS */
   /*********************/
-  
+
   if( nim->num_ext ) {
     vector < int > extcode( nim->num_ext );
 	vector < vector < char > > extdata( nim->num_ext );
@@ -637,7 +639,7 @@ bool NiftiHeader::read()
   /* free the nifti structure and assign private one to current*/
   freeNiftiStruct();
   _nim = nim;
-  
+
   /* Read the associated .minf */
   readMinf( string(nim->iname) + ".minf" );
 

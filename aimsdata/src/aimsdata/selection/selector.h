@@ -34,6 +34,9 @@
 #ifndef AIMS_SELECTION_SELECTOR_H
 #define AIMS_SELECTION_SELECTOR_H
 
+#include <string>
+#include <iostream>
+
 class Graph;
 
 namespace aims
@@ -49,6 +52,22 @@ namespace aims
     virtual ~Selector();
 
     Selection query( const Selection &, const Hierarchy & ) const;
+
+    const Hierarchy* nomenclature() const;
+    void setNomenclature( Hierarchy* hie, bool setowner = true );
+    void loadNomenclature( const std::string & filename );
+    const Graph* model() const;
+    void setModel( Graph* model, bool setowner = true );
+    void loadModel( const std::string & filename );
+    void loadPreSelection( const std::string & filename );
+    void setPreSelection( SelectionSet* sel );
+    void printSelection( std::ostream & ostr = std::cout ) const;
+    SelectionSet selection() const;
+    void clearSelection();
+
+  private:
+    struct Private;
+    Private *d;
   };
 
 
