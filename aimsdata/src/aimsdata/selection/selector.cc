@@ -195,10 +195,7 @@ SelectionSet Selector::selection() const
     SelectionSet *s = 0;
     if( d->presel.begin() != d->presel.end() )
       s = &d->presel;
-    SelectionSet sel = expander.query( d->model, s, d->hie );
-    d->presel = sel;
-    int i;
-    SelectionSet::const_iterator is, es = d->presel.end();
+    d->presel = expander.query( d->model, s, d->hie );
   }
   return d->presel;
 }
