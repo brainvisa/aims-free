@@ -403,9 +403,9 @@ namespace
       AimsVector<int,4> d0;
       Point3df incf = m.transform( Point3df( 1, 0, 0 ) )
           - m.transform( Point3df( 0, 0, 0 ) );
-      AimsVector<int,4> inc( int( rint( incf[0] ) ),
-                             int( rint( incf[1] ) ),
-                             int( rint( incf[2] ) ), 0 );
+      AimsVector<int,4> inc( (int) rint( incf[0] ),
+                             (int) rint( incf[1] ),
+                             (int) rint( incf[2] ), 0 );
 
       size_t numbytes = nim->nx * sizeof( T ), ss;
       std::vector<T> buf( nim->nx );
@@ -416,9 +416,9 @@ namespace
           for( int y=0; y<nim->ny; ++y )
           {
             d0f = m.transform( Point3df( 0, y, z ) );
-            d0 = AimsVector<int,4>( int( rint( d0f[0] ) ),
-                                    int( rint( d0f[1] ) ),
-                                    int( rint( d0f[2] ) ), t );
+            d0 = AimsVector<int,4>( (int) rint( d0f[0] ),
+                                    (int) rint( d0f[1] ),
+                                    (int) rint( d0f[2] ), t );
             d = &buf[0];
             for( int x=0; x<nim->nx; ++x, d0+=inc )
               *d++ = thing(d0[0], d0[1], d0[2], d0[3]);
