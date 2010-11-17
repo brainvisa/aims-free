@@ -428,7 +428,9 @@ namespace aims {
         }
         //std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
         //std::cout << "DEBUG: extractor about to enter masking" << std::endl;
-        if (_mask!=0) DoMasking();
+        if (_mask!=0) { DoMasking();
+            std::cout<<"MASKING" << std::endl;
+        }
         //std::cout << "DEBUG: masking done, extractor about to enter measurements" << std::endl;
         ComputeBlobMeasurements();
         //std::cout << "DEBUG: done" << std::endl;
@@ -436,50 +438,43 @@ namespace aims {
 
     //----------------------------------------------------------------------------------------------------------
 
-  template<typename Geom, typename Text> void ExtractGreyLevelBlobs<Geom, Text>::DoMasking()
-  {
-    typename std::list<MaximumPoint<Site> *>::iterator itMax=maximumList.begin(), itPrevious=itMax;
-    SaddlePoint<Site> *saddle;
-    double EPSILON=0.00001;
-    int del=0;
-
-    //std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
-    //std::cout << "DEBUG: saddle list size : " << saddleList.size() << std::endl;
-
-    for ( ; itMax!=maximumList.end(); ++itMax)
-    {
-          if (del==1)
-          {
-              maximumList.erase(itPrevious);
-          }
-          del=0;
-          if (fabs(_mask->intensity((*itMax)->_node)) < EPSILON) // this is to test float=0.0
-          {
-              blobMap.erase((*itMax)->blob->Label());                // remove the blob from the list.
-
-              saddle=(*itMax)->blob->GetSaddle();                    // check the saddle
-            if (saddle != 0) // some blobs can have no saddle if they are on the image border
-            {
-                  if (saddle->blobList.size()>1)
-                  {
-                        saddle->blobList.remove((*itMax)->blob);
-                  }
-                  else
-                  {
+    template<typename Geom, typename Text> void ExtractGreyLevelBlobs<Geom, Text>::DoMasking() {
+        typename std::list<MaximumPoint<Site> *>::iterator itMax=maximumList.begin(), itPrevious=itMax;
+        SaddlePoint<Site> *saddle;
+        double EPSILON = 0.00001;
+        int del = 0;
+    
+        std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
+        std::cout << "DEBUG: saddle list size : " << saddleList.size() << std::endl;
+    
+        for ( ; itMax != maximumList.end() ; ++itMax ) {
+            if ( del == 1 ) {
+                maximumList.erase(itPrevious);
+            }
+            del = 0;
+            if ( fabs ( _mask->intensity((*itMax)->_node)) < EPSILON ) { // this is to test float=0.0             
+                blobMap.erase ( (*itMax)->blob->Label() );                // remove the blob from the list.
+    
+                saddle = (*itMax)->blob->GetSaddle();                    // check the saddle
+                if ( saddle != 0 ) { // some blobs can have no saddle if they are on the image border
+                    if ( saddle->blobList.size() > 1 ) {
+                        saddle->blobList.remove( (*itMax)->blob );
+                    }
+                    else {
                         saddle->blobList.remove((*itMax)->blob);
                         saddleList.remove(saddle);
                         delete saddle;
-                  }
+                    } 
+                }
+                delete (*itMax)->blob;        // delete the blob
+                del = 1;                             // maximum has to be deleted
             }
-              delete (*itMax)->blob;        // delete the blob
-              del=1;                             // maximum has to be deleted
-          }
-          itPrevious=itMax;
+            itPrevious=itMax;
+        }
+        if ( del == 1 )
+            maximumList.erase(itPrevious);
+        std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
     }
-    if (del==1)
-          maximumList.erase(itPrevious);
-    //std::cout << "DEBUG: found " << blobMap.size() << " blobs" << std::endl;
-  }
 
     //----------------------------------------------------------------------------------------------------------
 

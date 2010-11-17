@@ -139,7 +139,7 @@ namespace aims
           Bifurcation<T> *TopBifurcation() {return topBifurcation;}
           Bifurcation<T> *BottomBifurcation() {return bottomBifurcation;}
           //std::list<GreyLevelBlob<T>*> GlBlobs() {return glBlobs;}
-          void AddGreyLevelBlob(GreyLevelBlob<T> *blob) {glBlobs.push_back(blob);}
+          void AddGreyLevelBlob(GreyLevelBlob<T> *blob) { glBlobs.push_back(blob); }
           void ComputeLifeTime();
           void ComputeScaleRep();
           void SetMeasurements(BlobMeasurements meas) {measurements=meas;}

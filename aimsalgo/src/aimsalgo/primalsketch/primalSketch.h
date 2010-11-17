@@ -165,314 +165,301 @@ namespace aims
      //---------------------------------------------------------------------
 
      template<typename Geom, typename Text>
-     void PrimalSketch<Geom,Text>::ComputePrimalSketch(float tmin, float tmax, string statFile, uint intersection_param)
-     {
-        // Algo : On part del'echelle la plus haute et on descend vers l'image originale
-        // A chaque niveau : on regarde vers le niveau en dessous et on applique
-        //                                           MatchScaleLevels();
-        // Si ca marche on descend d'un cran et on recommence
-        // Si ca ne marche pas on calcule un niveau intermediaire et on recommence (~recursif)
+     void PrimalSketch<Geom,Text>::ComputePrimalSketch(float tmin, float tmax, string statFile, uint intersection_param) {
+         // Algo : On part del'echelle la plus haute et on descend vers l'image originale
+         // A chaque niveau : on regarde vers le niveau en dessous et on applique
+         //                                           MatchScaleLevels();
+         // Si ca marche on descend d'un cran et on recommence
+         // Si ca ne marche pas on calcule un niveau intermediaire et on recommence (~recursif)
 
-        std::cout << "Computing primal sketch between tmin=" << tmin << " and tmax=" << tmax << std::endl;
+         std::cout << "Computing primal sketch between tmin=" << tmin << " and tmax=" << tmax << std::endl;
 
-        t_min=tmin;
-        t_max=tmax;
-        float t_bif=tmax*2;
+         t_min = tmin;
+         t_max = tmax;
+         float t_bif = tmax*2;
 
-        if (_scaleSpace==NULL)
-        {
+         if ( _scaleSpace == NULL ) {
             std::cerr << "Trying to compute a primal sketch without a scale-space" << std::endl;
             std::cerr << "Subject : " << _subject;
             exit(EXIT_FAILURE);
-        }
+         }
 
-        std::set<float> scaleList=_scaleSpace->GetScaleList();
-        std::set<float>::reverse_iterator itScaleUp=scaleList.rbegin();
-        std::set<float>::reverse_iterator itScaleDown;
-        float t_up, t_down;
+         std::set<float> scaleList=_scaleSpace->GetScaleList();
+         std::set<float>::reverse_iterator itScaleUp=scaleList.rbegin();
+         std::set<float>::reverse_iterator itScaleDown;
+         float t_up, t_down;
 
-        for (; (*itScaleUp) != tmax; ++itScaleUp)
-        {
-            if (itScaleUp==scaleList.rend())
-            {
+         for ( ; (*itScaleUp) != tmax ; ++itScaleUp ) {
+             if ( itScaleUp == scaleList.rend() ) {
                 std::cerr << "Scale max " << tmax << " does not exist" << std::endl;
                 exit(EXIT_FAILURE);
-            }
-        }
+             }
+         }
 
+         ScaleLevel<Geom,Text> *levelUp;
+         levelUp = _scaleSpace->Scale(*itScaleUp);
+         ScaleLevel<Geom,Text> *levelDown;
+         levelDown=_scaleSpace->Scale(tmin);
 
-        ScaleLevel<Geom,Text> *levelUp;
-        levelUp=_scaleSpace->Scale(*itScaleUp);
-        ScaleLevel<Geom,Text> *levelDown;
-        levelDown=_scaleSpace->Scale(tmin);
+         int nbBlobs;
 
-        int nbBlobs;
+         levelUp->DetectBlobs( _mask );
 
-        levelUp->DetectBlobs(_mask);
+         nbBlobs = levelUp->nbBlobs();
 
-        nbBlobs=levelUp->nbBlobs();
+         GreyLevelBlob<Site> *glBlob;
+         ScaleSpaceBlob<Site> *ssBlob;
+         Bifurcation<Site> *bifurc;
 
-        GreyLevelBlob<Site> *glBlob;
-        ScaleSpaceBlob<Site> *ssBlob;
-        Bifurcation<Site> *bifurc;
-
-        // Scale-space blob initialisation
-        std::map<int, GreyLevelBlob<Site> *>
+         // Scale-space blob initialisation
+         std::map<int, GreyLevelBlob<Site> *>
                 listeGLB=levelUp->BlobList();
 
-        typename std::map<int, GreyLevelBlob<Site> *>::iterator
-                itGL=listeGLB.begin();
+         typename std::map<int, GreyLevelBlob<Site> *>::iterator
+                itGL = listeGLB.begin();
 
-        for (; itGL != listeGLB.end(); ++itGL)
-        {
-            glBlob=(*itGL).second;
-            ssBlob=new ScaleSpaceBlob<Site>(_subject, labelMax);
-            ssBlob->SetScaleMax(*itScaleUp);
-            ssBlob->SetScaleMin(t_min);
-            ssBlob->AddGreyLevelBlob(glBlob);
-            bifurc=new Bifurcation<Site>(DISAPPEAR, t_bif, t_max);
-            bifurc->AddBottomBlob(ssBlob);
-            ssBlob->SetTopBifurcation(bifurc);
-            AddBlob(ssBlob);
-            AddBifurcation(bifurc);
-            labelMax++;
-        }
+         for ( ; itGL != listeGLB.end() ; ++itGL ) {
+             glBlob=(*itGL).second;
+             ssBlob=new ScaleSpaceBlob<Site>(_subject, labelMax);
+             ssBlob->SetScaleMax(*itScaleUp);
+             ssBlob->SetScaleMin(t_min);
+             ssBlob->AddGreyLevelBlob(glBlob);
+             bifurc = new Bifurcation<Site>(DISAPPEAR, t_bif, t_max);
+             bifurc->AddBottomBlob(ssBlob);
+             ssBlob->SetTopBifurcation(bifurc);
+             AddBlob(ssBlob);
+             AddBifurcation(bifurc);
+             labelMax++;
+         }
 
-        // Primal Sketch Computation, Top To Bottom
+         // Primal Sketch Computation, Top To Bottom
 
-        for (; (*itScaleUp) > tmin; ++itScaleUp)
-        {
-            itScaleDown=itScaleUp;
-            itScaleDown++;
-            t_up=*itScaleUp;
-            t_down=*itScaleDown;
-            MatchScaleLevels(t_up, t_down, intersection_param);
-        }
+         for ( ; (*itScaleUp) > tmin ; ++itScaleUp ) {
+             itScaleDown=itScaleUp;
+             itScaleDown++;
+             t_up = *itScaleUp;
+             t_down = *itScaleDown;
+             MatchScaleLevels(t_up, t_down, intersection_param);
+         }
 
-        // "closing" the primal sketch at bottom
+         // "closing" the primal sketch at bottom
 
-        listeGLB=levelDown->BlobList();
-          itGL=listeGLB.begin();
-        t_bif=t_min/2.0;
-          for (; itGL != listeGLB.end(); ++itGL)
-          {
-               glBlob=(*itGL).second;
-            ssBlob=GetSSBlobFromGLBlob(glBlob);
-            bifurc=new Bifurcation<Site>(APPEAR, t_min, t_bif);
-            ssBlob->SetBottomBifurcation(bifurc);
-            bifurc->AddTopBlob(ssBlob);
-            AddBifurcation(bifurc);
-          }
+         listeGLB = levelDown->BlobList();
+         itGL = listeGLB.begin();
+         t_bif = t_min / 2.0;
+         for ( ; itGL != listeGLB.end() ; ++itGL ) {
+             glBlob = (*itGL).second;
+             ssBlob = GetSSBlobFromGLBlob(glBlob);
+             if ( ssBlob != NULL) {
+                 bifurc = new Bifurcation<Site>(APPEAR, t_min, t_bif);
+                 ssBlob->SetBottomBifurcation(bifurc);
+                 bifurc->AddTopBlob(ssBlob);
+                 AddBifurcation(bifurc);
+             }
+         }
 
-          // blob updates
-
-          typename std::list<ScaleSpaceBlob<Site>*>::iterator
-                  itBlob=blobList.begin();
-          for (; itBlob != blobList.end(); ++itBlob)
-          {
+         // blob updates
+         typename std::list<ScaleSpaceBlob<Site>*>::iterator
+                  itBlob = blobList.begin();
+         for ( ; itBlob != blobList.end() ; ++itBlob ) {
                (*itBlob)->ComputeLifeTime();
                (*itBlob)->ComputeScaleRep();
-          }
-        // blob (multiscale) measurements are computed here.
+         }
+         // blob (multiscale) measurements are computed here.
 
-        ComputeBlobMeasurements(statFile);
-        cout << "ssblobs avant : " << blobList.size() << endl;
+         ComputeBlobMeasurements(statFile);
+         std::cout << "ssblobs avant : " << blobList.size() << std::endl;
 
-        // ELAGAGE
-        typename std::list<Bifurcation<Site>*>::iterator bifit=bifurcationList.begin();
-//         cout << "bifurcation number:" << bifurcationList.size() << endl;
-        uint merge_count = 0;
+         // ELAGAGE
+         typename std::list<Bifurcation<Site>*>::iterator bifit = bifurcationList.begin();
+         //cout << "bifurcation number:" << bifurcationList.size() << endl;
+         uint merge_count = 0;
 
-        for (bifit = bifurcationList.begin() ;  bifit != bifurcationList.end() ; bifit++)
-            if ((*bifit)->Type() == MERGE)
-                merge_count ++;
-//         cout << "MERGECOUNT:" << merge_count << endl;
+         for ( bifit = bifurcationList.begin() ; bifit != bifurcationList.end() ; bifit++ )
+             if ((*bifit)->Type() == MERGE)
+                 merge_count ++;
+          //cout << "MERGECOUNT:" << merge_count << endl;
 
 
-        for (bifit = bifurcationList.begin() ;  bifit != bifurcationList.end() ; bifit++){
-          if ((*bifit)->Type() == APPEAR){
-//             std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->TopBlobs();
-//             typename std::list<ScaleSpaceBlob<Site>*>::iterator topit=blist.begin();
-//             ScaleSpaceBlob<Site> *ssblob1;
-//             ssblob1 = *topit;
-//             if ((*ssblob1).GlBlobRep()->GetListePoints().size() == 1) {
-//               int label1 = ssblob1->Label();
-//               for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
-//                 if ((*itBlob)->Label() == label1) {
-//                   blobList.erase(itBlob);
-//                   break;
-//                 }
-//
-//             }
+         for ( bifit = bifurcationList.begin() ; bifit != bifurcationList.end() ; bifit++ ) {
+             if ( (*bifit)->Type() == APPEAR ) {
+                // std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->TopBlobs();
+                // typename std::list<ScaleSpaceBlob<Site>*>::iterator topit=blist.begin();
+                // ScaleSpaceBlob<Site> *ssblob1;
+                // ssblob1 = *topit;
+                // if ((*ssblob1).GlBlobRep()->GetListePoints().size() == 1) {
+                //   int label1 = ssblob1->Label();
+                //   for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
+                //     if ((*itBlob)->Label() == label1) {
+                //       blobList.erase(itBlob);
+                //       break;
+                //     }
+                //
+                // }
 
-          }
-          else if ((*bifit)->Type() == DISAPPEAR){
-//             std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->BottomBlobs();
-//             typename std::list<ScaleSpaceBlob<Site>*>::iterator bottomit=blist.begin();
-//             ScaleSpaceBlob<Site> *ssblob1;
-//             ssblob1 = *bottomit;
-//             if ((*ssblob1).GlBlobRep()->GetListePoints().size()  == 1) {
-//               int label1 = ssblob1->Label();
-//               for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
-//                 if ((*itBlob)->Label() == label1) {
-//                   blobList.erase(itBlob);
-//                   break;
-//                 }
-//             }
-          }
-          else if ((*bifit)->Type() == MERGE){
-//             cout << "merge" << (*bifit)->BottomBlobs().size()<< ";" << (*bifit)->TopBlobs().size() << endl;
-            std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->BottomBlobs();
-            typename std::list<ScaleSpaceBlob<Site>*>::iterator bottomit=blist.begin();
-            ScaleSpaceBlob<Site> *ssblob1, *ssblob2;
-            ssblob1 = *bottomit;
-            bottomit++;
-            ssblob2 = *bottomit;
-            /* float area1 = (*ssblob1).GetMeasurements().area;
-            float area2 = (*ssblob2).GetMeasurements().area; */
-//             cout << /*area1 << ";" << area2 << ";" <<*/ max(area1,area2)/min(area1,area2) << endl;
-            if ((*ssblob2).GlBlobRep()->GetListePoints().size() == 1) {
-//               cout << "ELAG" << endl;
-              // LE BLOB2 EST PETIT : ON FUSIONNE BLOB1 AVEC TOPBLOB ET TOPBIF DE BLOB2 DEVIENT DISPARITION
+             }
+             else if ( (*bifit)->Type() == DISAPPEAR ) {
+                // std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->BottomBlobs();
+                // typename std::list<ScaleSpaceBlob<Site>*>::iterator bottomit=blist.begin();
+                // ScaleSpaceBlob<Site> *ssblob1;
+                // ssblob1 = *bottomit;
+                // if ((*ssblob1).GlBlobRep()->GetListePoints().size()  == 1) {
+                //   int label1 = ssblob1->Label();
+                //   for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
+                //     if ((*itBlob)->Label() == label1) {
+                //       blobList.erase(itBlob);
+                //       break;
+                //     }
+                // }
+             }
+             else if ( (*bifit)->Type() == MERGE ) {
+                 //cout << "merge" << (*bifit)->BottomBlobs().size()<< ";" << (*bifit)->TopBlobs().size() << endl;
+                 std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->BottomBlobs();
+                 typename std::list<ScaleSpaceBlob<Site>*>::iterator bottomit=blist.begin();
+                 ScaleSpaceBlob<Site> *ssblob1, *ssblob2;
+                 ssblob1 = *bottomit;
+                 bottomit++;
+                 ssblob2 = *bottomit;
+                 /* float area1 = (*ssblob1).GetMeasurements().area;
+                    float area2 = (*ssblob2).GetMeasurements().area; */
+                 //cout << /*area1 << ";" << area2 << ";" <<*/ max(area1,area2)/min(area1,area2) << endl;
+                 if ((*ssblob2).GlBlobRep()->GetListePoints().size() == 1) {
+                     //cout << "ELAG" << endl;
+                     // LE BLOB2 EST PETIT : ON FUSIONNE BLOB1 AVEC TOPBLOB ET TOPBIF DE BLOB2 DEVIENT DISPARITION
+        
+                     ssblob2->TopBifurcation()->setType(DISAPPEAR);
+                     ssblob2->TopBifurcation()->TopBlobs().clear();
+                     ssblob2->TopBifurcation()->BottomBlobs().clear();
+                     ssblob2->TopBifurcation()->AddBottomBlob(ssblob2);
+        
+                     blist = (*bifit)->TopBlobs();
+                     ScaleSpaceBlob<Site> *topblob = *(blist.begin());
+                     // RAJOUT DES GLB DE SSBLOB1
+                     std::list<GreyLevelBlob<Site>*> glb = ssblob1->glBlobs;
+                     typename std::list<GreyLevelBlob<Site>*>::iterator glbit = glb.begin();
+                     for (; glbit != glb.end() ; glbit++)
+                         topblob->AddGreyLevelBlob(*glbit);
+        
+                     topblob->SetBottomBifurcation(ssblob1->BottomBifurcation());
+                     topblob->SetScaleMin(ssblob1->ScaleMin());
+        
+                     int label1 = ssblob1->Label();
+                     for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
+                         if ((*itBlob)->Label() == label1) {
+                             blobList.erase(itBlob);
+                             break;
+                         }
+                 }
+                 else if ( (*ssblob1).GlBlobRep()->GetListePoints().size() == 1 ) {
+                     // LE BLOB1 EST PETIT : ON FUSIONNE BLOB2 AVEC TOPBLOB ET TOPBIF DE BLOB1 DEVIENT DISPARITION
+                     //cout << "ELAG" << endl;
+                     ssblob1->TopBifurcation()->setType(DISAPPEAR);
+                     ssblob1->TopBifurcation()->TopBlobs().clear();
+                     ssblob1->TopBifurcation()->BottomBlobs().clear();
+                     ssblob1->TopBifurcation()->AddBottomBlob(ssblob1);
 
-              ssblob2->TopBifurcation()->setType(DISAPPEAR);
-              ssblob2->TopBifurcation()->TopBlobs().clear();
-              ssblob2->TopBifurcation()->BottomBlobs().clear();
-              ssblob2->TopBifurcation()->AddBottomBlob(ssblob2);
+                     blist = (*bifit)->TopBlobs();
+                     ScaleSpaceBlob<Site> *topblob = *(blist.begin());
+                     // RAJOUT DES GLB DE SSBLOB2
+                     std::list<GreyLevelBlob<Site>*> glb = ssblob2->glBlobs;
+                     typename std::list<GreyLevelBlob<Site>*>::iterator glbit = glb.begin();
+                     for (; glbit != glb.end() ; glbit++)
+                         topblob->AddGreyLevelBlob(*glbit);
+                     
+                     topblob->SetBottomBifurcation(ssblob2->BottomBifurcation());
+                     topblob->SetScaleMin(ssblob2->ScaleMin());
 
-              blist = (*bifit)->TopBlobs();
-              ScaleSpaceBlob<Site> *topblob = *(blist.begin());
-              // RAJOUT DES GLB DE SSBLOB1
-              std::list<GreyLevelBlob<Site>*> glb = ssblob1->glBlobs;
-              typename std::list<GreyLevelBlob<Site>*>::iterator glbit = glb.begin();
-              for (; glbit != glb.end() ; glbit++)
-                topblob->AddGreyLevelBlob(*glbit);
+                     int label2 = ssblob2->Label();
+                     for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
+                         if ((*itBlob)->Label() == label2) {
+                             blobList.erase(itBlob);
+                             break;
+                         }
+                 }
+                 
+             }
+             else if ((*bifit)->Type() == SPLIT) {
 
-              topblob->SetBottomBifurcation(ssblob1->BottomBifurcation());
-              topblob->SetScaleMin(ssblob1->ScaleMin());
+                 //cout << "split" << (*bifit)->TopBlobs().size()<< ";" << (*bifit)->BottomBlobs().size() << endl;
+                 std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->TopBlobs();
+                 typename std::list<ScaleSpaceBlob<Site>*>::iterator topit=blist.begin();
+                 ScaleSpaceBlob<Site> *ssblob1, *ssblob2;
+                 ssblob1 = *topit;
+                 topit++;
+                 ssblob2 = *topit;
+                 /* float area1 = (*ssblob1).GetMeasurements().area;
+                float area2 = (*ssblob2).GetMeasurements().area; */
+                 //             cout << /*area1 << ";" << area2 << ";" <<*/ max(area1,area2)/min(area1,area2) << endl;
+                 if ((*ssblob1).GlBlobRep()->GetListePoints().size() == 1) {
+                     // LE BLOB2 EST PETIT : ON FUSIONNE BLOB1 AVEC BOTTOMBLOB ET BOTTOMBIF DE BLOB2 DEVIENT DISPARITION
 
-              int label1 = ssblob1->Label();
-              for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
-                if ((*itBlob)->Label() == label1) {
-                  blobList.erase(itBlob);
-                  break;
-                }
-            }
-            else if ((*ssblob1).GlBlobRep()->GetListePoints().size() == 1){
-              // LE BLOB1 EST PETIT : ON FUSIONNE BLOB2 AVEC TOPBLOB ET TOPBIF DE BLOB1 DEVIENT DISPARITION
-//                 cout << "ELAG" << endl;
-              ssblob1->TopBifurcation()->setType(DISAPPEAR);
-              ssblob1->TopBifurcation()->TopBlobs().clear();
-              ssblob1->TopBifurcation()->BottomBlobs().clear();
-              ssblob1->TopBifurcation()->AddBottomBlob(ssblob1);
+                     ssblob2->BottomBifurcation()->setType(DISAPPEAR);
+                     ssblob2->BottomBifurcation()->BottomBlobs().clear();
+                     ssblob2->BottomBifurcation()->TopBlobs().clear();
+                     ssblob2->BottomBifurcation()->AddTopBlob(ssblob2);
+                     
+                     blist = (*bifit)->BottomBlobs();
+                     ScaleSpaceBlob<Site> *topblob = *(blist.begin());
+                     // RAJOUT DES GLB DE SSBLOB1
+                     std::list<GreyLevelBlob<Site>*> glb = ssblob1->glBlobs;
+                     typename std::list<GreyLevelBlob<Site>*>::iterator glbit = glb.begin();
+                     for (; glbit != glb.end() ; glbit++)
+                         topblob->AddGreyLevelBlob(*glbit);
+                     
+                     topblob->SetTopBifurcation(ssblob1->TopBifurcation());
+                     topblob->SetScaleMin(ssblob1->ScaleMin());
+                     
+                     int label1 = ssblob1->Label();
+                     for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
+                         if ((*itBlob)->Label() == label1) {
+                             blobList.erase(itBlob);
+                             break;
+                         }
+                 }
+                 else if ((*ssblob1).GlBlobRep()->GetListePoints().size() == 1){
+                     // LE BLOB1 EST PETIT : ON FUSIONNE BLOB2 AVEC BOTTOMBLOB ET BOTTOMBIF DE BLOB1 DEVIENT DISPARITION
+                     
+                     ssblob1->BottomBifurcation()->setType(DISAPPEAR);
+                     ssblob1->BottomBifurcation()->BottomBlobs().clear();
+                     ssblob1->BottomBifurcation()->TopBlobs().clear();
+                     ssblob1->BottomBifurcation()->AddTopBlob(ssblob1);
+                     
+                     blist = (*bifit)->BottomBlobs();
+                     ScaleSpaceBlob<Site> *topblob = * ( blist.begin() );
+                     // RAJOUT DES GLB DE SSBLOB2
+                     std::list<GreyLevelBlob<Site>*> glb = ssblob2->glBlobs;
+                     typename std::list<GreyLevelBlob<Site>*>::iterator glbit = glb.begin();
+                     for ( ; glbit != glb.end() ; glbit++ )
+                         topblob->AddGreyLevelBlob( *glbit );
+                     
+                     topblob->SetTopBifurcation ( ssblob2->TopBifurcation() );
+                     topblob->SetScaleMin ( ssblob2->ScaleMin() );
 
-              blist = (*bifit)->TopBlobs();
-              ScaleSpaceBlob<Site> *topblob = *(blist.begin());
-              // RAJOUT DES GLB DE SSBLOB2
-              std::list<GreyLevelBlob<Site>*> glb = ssblob2->glBlobs;
-              typename std::list<GreyLevelBlob<Site>*>::iterator glbit = glb.begin();
-              for (; glbit != glb.end() ; glbit++)
-                topblob->AddGreyLevelBlob(*glbit);
-
-              topblob->SetBottomBifurcation(ssblob2->BottomBifurcation());
-              topblob->SetScaleMin(ssblob2->ScaleMin());
-
-              int label2 = ssblob2->Label();
-              for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
-                if ((*itBlob)->Label() == label2) {
-                  blobList.erase(itBlob);
-                  break;
-                }
-            }
-
-          }
-          else if ((*bifit)->Type() == SPLIT){
-
-//             cout << "split" << (*bifit)->TopBlobs().size()<< ";" << (*bifit)->BottomBlobs().size() << endl;
-            std::list<ScaleSpaceBlob<Site>*> blist = (*bifit)->TopBlobs();
-            typename std::list<ScaleSpaceBlob<Site>*>::iterator topit=blist.begin();
-            ScaleSpaceBlob<Site> *ssblob1, *ssblob2;
-            ssblob1 = *topit;
-            topit++;
-            ssblob2 = *topit;
-            /* float area1 = (*ssblob1).GetMeasurements().area;
-            float area2 = (*ssblob2).GetMeasurements().area; */
-//             cout << /*area1 << ";" << area2 << ";" <<*/ max(area1,area2)/min(area1,area2) << endl;
-            if ((*ssblob1).GlBlobRep()->GetListePoints().size() == 1) {
-              // LE BLOB2 EST PETIT : ON FUSIONNE BLOB1 AVEC BOTTOMBLOB ET BOTTOMBIF DE BLOB2 DEVIENT DISPARITION
-
-              ssblob2->BottomBifurcation()->setType(DISAPPEAR);
-              ssblob2->BottomBifurcation()->BottomBlobs().clear();
-              ssblob2->BottomBifurcation()->TopBlobs().clear();
-              ssblob2->BottomBifurcation()->AddTopBlob(ssblob2);
-
-              blist = (*bifit)->BottomBlobs();
-              ScaleSpaceBlob<Site> *topblob = *(blist.begin());
-              // RAJOUT DES GLB DE SSBLOB1
-              std::list<GreyLevelBlob<Site>*> glb = ssblob1->glBlobs;
-              typename std::list<GreyLevelBlob<Site>*>::iterator glbit = glb.begin();
-              for (; glbit != glb.end() ; glbit++)
-                topblob->AddGreyLevelBlob(*glbit);
-
-              topblob->SetTopBifurcation(ssblob1->TopBifurcation());
-              topblob->SetScaleMin(ssblob1->ScaleMin());
-
-              int label1 = ssblob1->Label();
-              for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
-                if ((*itBlob)->Label() == label1) {
-                  blobList.erase(itBlob);
-                  break;
-                }
-            }
-            else if ((*ssblob1).GlBlobRep()->GetListePoints().size() == 1){
-              // LE BLOB1 EST PETIT : ON FUSIONNE BLOB2 AVEC BOTTOMBLOB ET BOTTOMBIF DE BLOB1 DEVIENT DISPARITION
-
-              ssblob1->BottomBifurcation()->setType(DISAPPEAR);
-              ssblob1->BottomBifurcation()->BottomBlobs().clear();
-              ssblob1->BottomBifurcation()->TopBlobs().clear();
-              ssblob1->BottomBifurcation()->AddTopBlob(ssblob1);
-
-              blist = (*bifit)->BottomBlobs();
-              ScaleSpaceBlob<Site> *topblob = *(blist.begin());
-              // RAJOUT DES GLB DE SSBLOB2
-              std::list<GreyLevelBlob<Site>*> glb = ssblob2->glBlobs;
-              typename std::list<GreyLevelBlob<Site>*>::iterator glbit = glb.begin();
-              for (; glbit != glb.end() ; glbit++)
-                topblob->AddGreyLevelBlob(*glbit);
-
-              topblob->SetTopBifurcation(ssblob2->TopBifurcation());
-              topblob->SetScaleMin(ssblob2->ScaleMin());
-
-              int label2 = ssblob2->Label();
-              for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
-                if ((*itBlob)->Label() == label2) {
-                  blobList.erase(itBlob);
-                  break;
-                }
-            }
-
-          }
+                     int label2 = ssblob2->Label();
+                     for ( itBlob = blobList.begin() ; itBlob != blobList.end() ; ++itBlob )
+                         if ( (*itBlob)->Label() == label2 ) {
+                             blobList.erase ( itBlob );
+                             break;
+                         }
+                 }
+             }
         }
         merge_count = 0;
         bifit = bifurcationList.begin();
         for (bifit = bifurcationList.begin() ;  bifit != bifurcationList.end() ; bifit++)
             if ((*bifit)->Type() == MERGE)
                 merge_count ++;
-//         cout << "MERGECOUNT:" << merge_count << endl;
+        //cout << "MERGECOUNT:" << merge_count << endl;
 
-          // blob updates
-cout << "ssblobs après : " << blobList.size() << endl;
+        // blob updates
+        cout << "ssblobs après : " << blobList.size() << endl;
 
-          for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob)
-          {
-               (*itBlob)->ComputeLifeTime();
-               (*itBlob)->ComputeScaleRep();
-          }
+        for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob) {
+            (*itBlob)->ComputeLifeTime();
+            (*itBlob)->ComputeScaleRep();
+        }
 
         ComputeBlobMeasurements(statFile);
-
-
-
      }
 
      //---------------------------------------------------------------------
@@ -698,37 +685,39 @@ cout << "ssblobs après : " << blobList.size() << endl;
               std::cout << "\t Table -> Blobs and bifurcations" << std::endl;
                // transformation table -> bifurcations et blobs
 
-               for (; itTable!=bifurcTable.end(); ++itTable)
-               {
+              for (; itTable!=bifurcTable.end(); ++itTable) {
                     pairSet=(*itTable);
                     set1=pairSet.first;
                     set2=pairSet.second;
                     if (set2.size()==0) // creation
                     {
 //                         cout << "creation :" << flush;
-                         labelUp=*(set1.begin());
-                         blobUp=levelUp->Blob(labelUp);
-                         ssBlobUp=GetSSBlobFromGLBlob(blobUp);
-                         bifurc=new Bifurcation<Site>(APPEAR, t_up, t_down);
-                         ssBlobUp->SetScaleMin(t_down);
-                         bifurc->AddTopBlob(ssBlobUp);
-                         ssBlobUp->SetBottomBifurcation(bifurc);
-                         AddBifurcation(bifurc);
-//                                 Bifurcation<SiteType<AimsSurface<3, Void> >::type> *bif;
-//                                 bif = bifurc;
-//                                 cout << bif->TopBlobs().size() << " " << bif->BottomBlobs().size() << " - " << flush;
+                         labelUp = *(set1.begin());
+                         blobUp = levelUp->Blob(labelUp);
+                         ssBlobUp = GetSSBlobFromGLBlob(blobUp);
+                         if ( ssBlobUp != NULL) {
+                             bifurc = new Bifurcation<Site>(APPEAR, t_up, t_down);
+                             ssBlobUp->SetScaleMin(t_down);
+                             bifurc->AddTopBlob(ssBlobUp);
+                         
+                             ssBlobUp->SetBottomBifurcation(bifurc);
+                             AddBifurcation(bifurc);
+                            // Bifurcation<SiteType<AimsSurface<3, Void> >::type> *bif;
+                            // bif = bifurc;
+                            // cout << bif->TopBlobs().size() << " " << bif->BottomBlobs().size() << " - " << flush;
+                         }
                     }
                     else if (set1.size()==0) // annihilation
                     {
 //                          cout << "annihilation :" << flush;
                          labelDown=*(set2.begin());
                          blobDown=levelDown->Blob(labelDown);
-                         ssBlobDown=new ScaleSpaceBlob<Site>(_subject, labelMax);
+                         ssBlobDown=new ScaleSpaceBlob<Site>( _subject, labelMax );
                          labelMax++;
                          ssBlobDown->SetScaleMax(t_down);
                          ssBlobDown->SetScaleMin(t_min);
                          ssBlobDown->AddGreyLevelBlob(blobDown);
-                         bifurc=new Bifurcation<Site>(DISAPPEAR, t_up, t_down);
+                         bifurc = new Bifurcation<Site>(DISAPPEAR, t_up, t_down);
                          bifurc->AddBottomBlob(ssBlobDown);
                          ssBlobDown->SetTopBifurcation(bifurc);
                          AddBifurcation(bifurc);
@@ -741,51 +730,54 @@ cout << "ssblobs après : " << blobList.size() << endl;
                     {
                          if ((set1.size()==1) && (set2.size()==1)) // blob growth
                          {
-                              labelUp=*(set1.begin());
-                              labelDown=*(set2.begin());
-                              blobUp=levelUp->Blob(labelUp);
-                              ssBlobUp=GetSSBlobFromGLBlob(blobUp);
-                              blobDown=levelDown->Blob(labelDown);
-                              ssBlobUp->AddGreyLevelBlob(blobDown);
+                              labelUp = *(set1.begin());
+                              labelDown = *(set2.begin());
+                              blobUp = levelUp->Blob ( labelUp );
+                              ssBlobUp = GetSSBlobFromGLBlob ( blobUp );
+                              if ( ssBlobUp != NULL) {
+                                  blobDown = levelDown->Blob ( labelDown );
+                                  ssBlobUp->AddGreyLevelBlob ( blobDown );
+                              }
                          }
                          else if ((set1.size()==1) && (set2.size()==2)) // merge
                          {
 //                               cout << "merge " << flush ;
-                              bifurc=new Bifurcation<Site>(MERGE, t_up, t_down);
-                              labelUp=*(set1.begin());
-                              blobUp=levelUp->Blob(labelUp);
-                              ssBlobUp=GetSSBlobFromGLBlob(blobUp);
-                              ssBlobUp->SetScaleMin(t_down);
-                              bifurc->AddTopBlob(ssBlobUp);
-                              ssBlobUp->SetBottomBifurcation(bifurc);
-                              std::set<int>::iterator itSet2=set2.begin();
-                              for (; itSet2!=set2.end(); ++itSet2)
-                              {
-                                   labelDown=*itSet2;
-                                   blobDown=levelDown->Blob(labelDown);
-                                   ssBlobDown=new ScaleSpaceBlob<Site>(_subject, labelMax);
-                                   labelMax++;
-                                   ssBlobDown->SetScaleMax(t_down);
-                                   ssBlobDown->SetScaleMin(t_min);
-                                   ssBlobDown->AddGreyLevelBlob(blobDown);
-                                   bifurc->AddBottomBlob(ssBlobDown);
-
-                                   AddBlob(ssBlobDown);
-                                   ssBlobDown->SetTopBifurcation(bifurc);
+                              bifurc = new Bifurcation<Site>(MERGE, t_up, t_down);
+                              labelUp = *(set1.begin());
+                              blobUp = levelUp->Blob(labelUp);
+                              ssBlobUp = GetSSBlobFromGLBlob(blobUp);
+                              if ( ssBlobUp != NULL) {                              
+                                  ssBlobUp->SetScaleMin(t_down);
+                                  bifurc->AddTopBlob(ssBlobUp);
+                                  ssBlobUp->SetBottomBifurcation(bifurc);
+                                  std::set<int>::iterator itSet2=set2.begin();
+                                  for (; itSet2!=set2.end(); ++itSet2)
+                                  {
+                                       labelDown=*itSet2;
+                                       blobDown=levelDown->Blob(labelDown);
+                                       ssBlobDown=new ScaleSpaceBlob<Site>(_subject, labelMax);
+                                       labelMax++;
+                                       ssBlobDown->SetScaleMax(t_down);
+                                       ssBlobDown->SetScaleMin(t_min);
+                                       ssBlobDown->AddGreyLevelBlob(blobDown);
+                                       bifurc->AddBottomBlob(ssBlobDown);
+    
+                                       AddBlob(ssBlobDown);
+                                       ssBlobDown->SetTopBifurcation(bifurc);
+                                  }
+                                  AddBifurcation(bifurc);
+                                    // Bifurcation<SiteType<AimsSurface<3, Void> >::type> *bif;
+                                    // bif = bifurc;
+                                    // cout << bif->TopBlobs().size() << " " << bif->BottomBlobs().size() << " - " << flush;
                               }
-                              AddBifurcation(bifurc);
-//                                 Bifurcation<SiteType<AimsSurface<3, Void> >::type> *bif;
-//                                 bif = bifurc;
-//                                 cout << bif->TopBlobs().size() << " " << bif->BottomBlobs().size() << " - " << flush;
-
                          }
-                         else if ((set1.size()==2) && (set2.size()==1)) // split
+                         else if ( (set1.size()==2) && (set2.size()==1) ) // split
                          {
 //                               cout << "split " << flush;
-                              bifurc=new Bifurcation<Site>(SPLIT, t_up, t_down);
-                              labelDown=*(set2.begin());
-                              blobDown=levelDown->Blob(labelDown);
-                              ssBlobDown=new ScaleSpaceBlob<Site>(_subject, labelMax);
+                              bifurc = new Bifurcation<Site>(SPLIT, t_up, t_down);
+                              labelDown = *(set2.begin());
+                              blobDown = levelDown->Blob(labelDown);
+                              ssBlobDown = new ScaleSpaceBlob<Site>(_subject, labelMax);
                               labelMax++;
                               ssBlobDown->SetScaleMax(t_down);
                               ssBlobDown->SetScaleMin(t_min);
@@ -796,12 +788,14 @@ cout << "ssblobs après : " << blobList.size() << endl;
                               std::set<int>::iterator itSet1=set1.begin();
                               for (; itSet1!=set1.end(); ++itSet1)
                               {
-                                   labelUp=*itSet1;
-                                   blobUp=levelUp->Blob(labelUp);
-                                   ssBlobUp=GetSSBlobFromGLBlob(blobUp);
-                                   ssBlobUp->SetScaleMin(t_down);
-                                   bifurc->AddTopBlob(ssBlobUp);
-                                   ssBlobUp->SetBottomBifurcation(bifurc);
+                                   labelUp = *itSet1;
+                                   blobUp = levelUp->Blob(labelUp);
+                                   ssBlobUp = GetSSBlobFromGLBlob(blobUp);
+                                   if ( ssBlobUp != NULL) {
+                                       ssBlobUp->SetScaleMin(t_down);
+                                       bifurc->AddTopBlob(ssBlobUp);
+                                       ssBlobUp->SetBottomBifurcation(bifurc);
+                                   }
                               }
                               AddBifurcation(bifurc);
 //                                 Bifurcation<SiteType<AimsSurface<3, Void> >::type> *bif;
@@ -815,9 +809,9 @@ cout << "ssblobs après : " << blobList.size() << endl;
                               std::set<int>::iterator itSet2=set2.begin();
                               for (; itSet2!=set2.end(); ++itSet2)
                               {
-                                   labelDown=*itSet2;
-                                   blobDown=levelDown->Blob(labelDown);
-                                   ssBlobDown=new ScaleSpaceBlob<Site>(_subject, labelMax);
+                                   labelDown = *itSet2;
+                                   blobDown = levelDown->Blob(labelDown);
+                                   ssBlobDown = new ScaleSpaceBlob<Site>(_subject, labelMax);
                                    labelMax++;
                                    ssBlobDown->SetScaleMax(t_down);
                                    ssBlobDown->SetScaleMin(t_min);
@@ -829,12 +823,14 @@ cout << "ssblobs après : " << blobList.size() << endl;
                               std::set<int>::iterator itSet1=set1.begin();
                               for (; itSet1!=set1.end(); ++itSet1)
                               {
-                                   labelUp=*itSet1;
-                                   blobUp=levelUp->Blob(labelUp);
-                                   ssBlobUp=GetSSBlobFromGLBlob(blobUp);
-                                   ssBlobUp->SetScaleMin(t_down);
-                                   bifurc->AddTopBlob(ssBlobUp);
-                                   ssBlobUp->SetBottomBifurcation(bifurc);
+                                   labelUp = *itSet1;
+                                   blobUp = levelUp->Blob(labelUp);
+                                   ssBlobUp = GetSSBlobFromGLBlob(blobUp);
+                                   if ( ssBlobUp != NULL) {
+                                       ssBlobUp->SetScaleMin(t_down);
+                                       bifurc->AddTopBlob(ssBlobUp);
+                                       ssBlobUp->SetBottomBifurcation(bifurc);
+                                   }
                               }
                               AddBifurcation(bifurc);
                          }
