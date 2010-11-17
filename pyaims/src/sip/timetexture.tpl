@@ -24,7 +24,7 @@ typedef Texture<%Template1% > Texture_%Template1typecode%;
 
 %ConvertToTypeCode
   return pyaims::standardConvertToTypeCode( sipPy,
-    sipClass_TimeTexture_%Template1typecode%,
+    sipClass_Texture_%Template1typecode%,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -220,6 +220,17 @@ class TimeTexture_%Template1typecode% : carto::RCObject
 typedef TimeTexture<%Template1% > TimeTexture_%Template1typecode%;
 #endif
 %End
+
+%TypeCode
+#include <pyaims/object/rcptrconv.h>
+%End
+
+%ConvertToTypeCode
+  return pyaims::standardConvertToTypeCode( sipPy,
+    sipClass_TimeTexture_%Template1typecode%,
+    sipTransferObj, sipIsErr, sipCppPtr );
+%End
+
 
 public:
 
