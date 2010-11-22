@@ -642,7 +642,8 @@ bool GraphManip::buckets2Volume( Graph & g )
       gec.storageType = GraphElementCode::GlobalPacked;
       gec.objectType = dtcv.objectType();
       gec.dataType = dtcv.dataType();
-      gec.global_filename = gec.id + "_Volume.ima";
+      gec.global_filename = gec.id + "_Volume"
+        + defaultExtensionForObjectType( gec.objectType, gec.dataType );
       gec.global_attribute =  volumeProperty( gec.attribute );
       /*cout << "GEC: id: " << gec.id << endl;
       cout << "     objectType: " << gec.objectType << endl;
@@ -671,7 +672,8 @@ bool GraphManip::buckets2Volume( Graph & g )
 	    gec.storageType = GraphElementCode::GlobalPacked;
 	    gec.objectType = dtcv.objectType();
 	    gec.dataType = dtcv.dataType();
-	    gec.global_filename = gec.id + "_Volume.ima";
+	    gec.global_filename = gec.id + "_Volume"
+              + defaultExtensionForObjectType( gec.objectType, gec.dataType );
 	    gec.global_attribute =  volumeProperty( gec.attribute );
 	  }
       }
@@ -794,7 +796,8 @@ bool GraphManip::volume2Buckets( Graph & g, CreateBucketFunc createfunc )
       gec.storageType = GraphElementCode::Global;
       gec.objectType = dtcv.objectType();
       gec.dataType = dtcv.dataType();
-      gec.global_filename = gec.id + "_Bucket.bck";
+      gec.global_filename = gec.id + "_Bucket"
+        + defaultExtensionForObjectType( gec.objectType, gec.dataType );
       if( g.hasProperty( gec.id + ".global.vol" ) )
 	g.removeProperty( gec.id + ".global.vol" );
       att = gec.global_attribute;
@@ -814,7 +817,8 @@ bool GraphManip::volume2Buckets( Graph & g, CreateBucketFunc createfunc )
 	    gec.storageType = GraphElementCode::GlobalPacked;
 	    gec.objectType = dtcv.objectType();
 	    gec.dataType = dtcv.dataType();
-	    gec.global_filename = gec.id + "_Volume.ima";
+	    gec.global_filename = gec.id + "_Volume"
+              + defaultExtensionForObjectType( gec.objectType, gec.dataType );
 	    gec.global_attribute =  volumeProperty( gec.attribute );
 	  }
       }
@@ -886,7 +890,8 @@ GraphManip::graphElementCodeByAtt( Graph & g, const string & syntax,
   gec.storageType = GraphElementCode::Global;
   gec.local_file_attribute = attrib + "_filename";
   gec.global_attribute = attrib + "_label";
-  gec.global_filename = attrib;
+  gec.global_filename = attrib
+    + defaultExtensionForObjectType( gec.objectType, gec.dataType );
   gec.global_attribute = attrib;
   return gec;
 }
@@ -930,7 +935,8 @@ void GraphManip::graphFromVolume( const AimsData<short> & vol, Graph & g,
   gec.objectType = dtcv.objectType();
   gec.dataType = dtcv.dataType();
   gec.storageType = GraphElementCode::GlobalPacked;
-  gec.global_filename = gec.id + "_Volume.ima";
+  gec.global_filename = gec.id + "_Volume"
+    + defaultExtensionForObjectType( gec.objectType, gec.dataType );
   gec.global_attribute =  volumeProperty( gec.attribute );
   gec.global_index_attribute = "roi_label";
   gec.syntax = "roi";
@@ -1436,6 +1442,22 @@ vector<int> GraphManip::attributeColor( const Graph & graph,
   if( ia != cols->end() )
     return ia->second;
   return col;
+}
+
+
+string GraphManip::defaultExtensionForObjectType( const string & otype,
+                                                  const string & /*dtype*/ )
+{
+  string ext;
+  if( otype == "Mesh" || otype == "Segments" || otype == "Mesh4" )
+    ext = ".mesh";
+  else if( otype == "Volume" )
+    ext = ".ima";
+  else if( otype == "Bucket" )
+    ext = ".bck";
+  else if( otype == "Texture" )
+    ext = ".gii";
+  return ext;
 }
 
 

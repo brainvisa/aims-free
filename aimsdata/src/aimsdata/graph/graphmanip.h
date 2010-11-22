@@ -187,6 +187,9 @@ namespace aims
 			       bool mergeMesh = true, bool invNormal = false);
     static void printGraphElementTable( const Graph &,
                                         std::ostream & ostr = std::cout );
+    static std::string
+      defaultExtensionForObjectType( const std::string & otype,
+        const std::string & dtype );
   };
 
 }

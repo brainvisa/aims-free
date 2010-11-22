@@ -56,8 +56,13 @@ namespace aims
     GraphElementCode	& gec 
       = graphElementCodeByAtt( g, vertex->getSyntax(), att );
     carto::DataTypeCode<T>	dtc;
-    gec.objectType = dtc.objectType();
-    gec.dataType = dtc.dataType();
+    if( gec.objectType != dtc.objectType() || gec.dataType != dtc.dataType() )
+    {
+      gec.objectType = dtc.objectType();
+      gec.dataType = dtc.dataType();
+      gec.global_filename = att
+        + defaultExtensionForObjectType( gec.objectType, gec.dataType );
+    }
     gec.attribute = att;
     std::string att2 = att;
     if( att2.substr( 0, 5 ) == "aims_" )
@@ -65,7 +70,9 @@ namespace aims
     if( gec.global_index_attribute.empty() )
       gec.global_index_attribute = att2 + "_label";
     if( gec.local_file_attribute.empty() )
-      gec.local_file_attribute = att2 + "_filename";
+      gec.local_file_attribute = att2 + "_filename"
+      + GraphManip::defaultExtensionForObjectType( gec.objectType,
+                                                   gec.dataType );
   }
 
 }
