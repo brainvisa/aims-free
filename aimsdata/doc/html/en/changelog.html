@@ -17,7 +17,7 @@
 <hr width="100%"> <br>
 
 
-
+ <b><a href="#version-4.0.2">Version 4.0.2</a></b><br>
  <b><a href="#version-4.0">Version 4.0</a></b><br>
  <b><a href="#version-3.2.1">Version 3.2.1</a></b><br>
  <b><a href="#version-3.2">Version 3.2</a></b><br>
@@ -38,6 +38,16 @@
  &nbsp;  
 
  <!-- -->
+<h4> <a name="version-4.0.2"></a>November 19th, 2010, Version 4.0.2</h4>
+
+<li>Fix reading GIFTI files extracted from SPM 8</li>
+<li>Fix reading GIFTI mesh+texture files</li>
+<li>Fix reading and writing transformations in MINC format</li>
+<li>New option in AimsFileConvert: --orient, to specify output disk orientation or flip it</li>
+<li>support for MNI .obj mesh format</li>
+<li>AimsFoldGraphThickness can now use a pre-built sulci voronoi map (to speed things up)</li>
+<li>Forbids to write NIFTI format when volume dimensions do not fit in short ints: NIFTI stores dimensions as short.</li>
+<li>AimsLabelSelector can now work in batch mode (-b) without graphical interface.</li>
 
 <h4> <a name="version-4.0"></a>May 28, 2010, Version 4.0</h4>
 

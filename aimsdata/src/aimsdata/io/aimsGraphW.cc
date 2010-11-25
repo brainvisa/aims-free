@@ -162,10 +162,14 @@ static void findGlobal( AttributedObject *, AimsGraphWriter_Private & d,
     {
       if( d.elemcode.local_file_attribute.empty() )
 	d.elemcode.global_filename = d.elemcode.id + '_' 
-	  + d.elemcode.objectType;
+	  + d.elemcode.objectType
+	  + GraphManip::defaultExtensionForObjectType( d.elemcode.objectType,
+                                                       d.elemcode.dataType );
       else
 	d.elemcode.global_filename = d.elemcode.id + '_' 
-	  + d.elemcode.local_file_attribute + '_' + d.elemcode.objectType;
+	  + d.elemcode.local_file_attribute + '_' + d.elemcode.objectType
+	  + GraphManip::defaultExtensionForObjectType( d.elemcode.objectType,
+                                                       d.elemcode.dataType );
     }
   if( d.modified || index < 0 )
     d.globalmodified[ d.elemcode.global_filename ] = true;
@@ -190,8 +194,10 @@ static void findLocal( AttributedObject *ao, AimsGraphWriter_Private & d )
 #else
   sprintf( num, "%ld", t );
 #endif
-  string	fname = d.elemcode.id + "_" + d.elemcode.objectType 
-    + "_" + num + "_";
+  string	fname = d.elemcode.id + "_" + d.elemcode.objectType
+    + "_" + num + "_"
+    + GraphManip::defaultExtensionForObjectType( d.elemcode.objectType,
+                                                 d.elemcode.dataType );
   sprintf( num, "%d", d.genindexcount++ );
   fname += num;
   d.elemfname = d.directory + fname;
