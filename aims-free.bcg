@@ -2,7 +2,7 @@
 # print currentComponentFile
 
 aimsfree_modules = [ 'aimsdata', 'aimsalgo' ]
-aimsfree_weakdeps = [ 'pyaims', 'pyaimsalgo' ]
+aimsfree_weakdeps = [ 'pyaims', 'pyaimsalgo', 'aimsgui' ]
 aimsfree_subprojects = aimsfree_modules + aimsfree_weakdeps + [ 'ecat', 'ecat+', 'vidaIO', 'graph', 'cartodata', 'cartobase'  ]
 
 class AimsFreeComponent( GenericMakerModuleComponent ):

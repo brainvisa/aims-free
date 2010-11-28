@@ -27,6 +27,13 @@ if( BLITZ_FOUND )
 endif()
 BRAINVISA_DEPENDENCY( DEV RECOMMENDS blitz++ DEV )
 
+if( NOT DESIRED_QT_VERSION )
+  find_package( Qt )
+endif()
+if( DESIRED_QT_VERSION EQUAL 4 )
+  find_package( Qt4 COMPONENTS QtCore QtGui Qt3Support QtSql )
+endif()
+find_package( QtVersion )
 
 find_package( Doxygen )
 
@@ -146,6 +153,9 @@ if( NOT WIN32 )
 endif( NOT WIN32 )
 add_subdirectory( aimsdata )
 add_subdirectory( aimsalgo )
+if( QT_FOUND )
+  add_subdirectory( aimsgui )
+endif()
 if( PYTHON_FOUND AND NUMPY_FOUND AND SIP_FOUND )
   set( AIMS_RELATIVE_SIP_DIRECTORY
        "share/aims-${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}/sip" )

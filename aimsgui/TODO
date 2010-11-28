@@ -1,0 +1,80 @@
+
+march 22, 2005:
+  This TODO file hasn't been updated for two years and is completely obsolete.
+  It has been left here for historical reasons (mainly for ourselves) because 
+  a few things are still meaningful to us.
+
+
+-------------------------------------------------------------------------------
+
+
+31/10/2003, Yann
+TODO: Utiliser la classe ByteSwapper de cartobase comme brique de base des
+      BSwapItemReader et BSwapItemWriter.
+
+23/05/2003, Yann
+
+* BUG: Le reader des maillage devrait vérifier que les indexes des triangles ne
+  dépassent pas le nombre de coordonnées pour éviter un segmentation fault.
+  Ca arrive quand les gens génèrent leurs premiers maillages (buggés) avec
+  Matlab.
+  ---> fait
+  
+21/10/02, Denis
+
+(c'est des choses assez internes)
+* conversion de graphes de buckets <-> de volumes: permettre des conversions 
+  plus souples (partielles, attribut par attribut)
+* graphes encore: mécanisme plus générique et plus simple pour accéder aux 
+  éléments dans les graphes
+* graphes toujours: convertisseur plus générique des types de données stockés
+  (schéma: accès - conversion - passage à l'extérieur - reconversion - 
+  stockage)
+* Reader<Graph> devrait savoir lire des volumes seuls, des buckets temporels 
+  seuls, des maillages temporels seuls: recréer les noeuds (la structure), 
+  sans attributs de noms. -> clusterArg serait fait implicitement sous cette 
+  forme
+* graphes: convertisseur objets locaux/globaux/"GlobalPacked" interne (pas 
+  seulement à l'écriture)
+* graphes: itérateur/convertisseur générique pour les ROI (un peu dans le 
+  style MaskIterator)
+
+01 / 08 / 2002 Yann Cointepas
+* Déplacer la classe stringTo<T> de aimsdata (getopt) vers shfj. Attention à 
+  l'utilisation de DefaultAsciiItemReader.
+  ---> fait
+
+31 / 07 / 2002 Yann Cointepas
+* Ajouter la possibilité de toujours pouvoir lire les attributs numériques des headers sous forme de double en redéfinissant des opérateurs de cast.
+
+05/06/2002 Vincent FROUIN
+Concernant les objets et méthodes d'écriture des sinograms
+	Plusieurs choses sont en chantiers
+	- Il faudrait gèrer les RemoveExtension() et extensions() à la mode 
+		générale
+	- Il faudrait revoir le mécanisme de copy constructeur de ScannerConfig
+		et de Sinogram (FUITE de MEMOIRE probable)
+	- Il faudrait privatiser les attributs de ScannerConfig ou revoir 
+		l'emboitement des objets...
+	- Beaucoup d'attribut sont des les subheader des sino Ecat pour des 
+		mauvaises raisons : ils ont été centralisé dans le format mémoire !!!
+		
+	- Il faudrait rajouter des méhodes setAttribute("ecat_XXX_YYY"); Voir les
+		champs réservés dans data/pheader.cc (commencent par ecat_XX)
+	- Il faudrait voir comment gèrer en memoire des multi-frame et multi-lit.
+
+
+28/07/02 Denis, je liste de trucs qui attendent depuis longtemps
+
+* modules dans Aims (pour les entrees-sorties, les algos ajoutes etc)
+  ---> fait début  09/02 (denis): classes Plugin et PluginLoader
+* unifier les IO pour les graphes, les hierarchies etc (Reader<Graph>, ...), 
+  Yann a deja fait une partie pour le Finder
+  -> c'est fait pour les graphes 11/09/02
+  - c'est PAS fait pour les hiérarchies
+* aimsalgo: utiliser une librairie math freeware adaptee...
+* aimsalgo: separer les parties publiques (opensource) des parties privees, 
+  mieux que ce qui est fait maintenant. Rattacher la partie publique a aimsdata
+
+* DataFinder
+* Interface python pour certaines classes (DataFinder, justement)

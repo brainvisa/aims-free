@@ -1,0 +1,21 @@
+
+#-----------------------------------------------------------------------------
+class AimsGuiComponent( GenericMakerComponent ):
+  _name = 'aimsgui'
+
+  def dependencies( self ):
+    return [ QtComponent, 'aimsdata(aims)' ]
+
+  def package( self ):
+    GenericMakerComponent.package( self )
+    if systemname == 'darwin' and not x11:
+      guis = [ 'AimsAttributedViewer', 'AimsLabelSelector' ]
+      prefix = os.path.join( packageDir(), 'bin' )
+      src = self._data.get( 'sources' )
+      icon = os.path.join( self.buildDir(), self.shareDir(), 'icons', self._name + '.icns' )
+      qt = getInstance( QtComponent )
+      if not os.path.exists( icon ):
+        icon = None
+      for x in guis:
+        qt.installMacOSApp( self, prefix, os.path.join( prefix, x ), icon )
+
