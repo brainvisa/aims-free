@@ -36,6 +36,12 @@ if( PYTHON_FOUND )
   find_package( Numpy )
 endif( PYTHON_FOUND )
 
+if( @DESIRED_QT_VERSION@ EQUAL 3 )
+  find_package( Qt3 )
+else()
+  find_package( Qt4 COMPONENTS QtCore QtGui Qt3Support )
+endif()
+
 
 get_filename_component( @PROJECT_NAME_UPPER@_BINARY_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH )
 get_filename_component( @PROJECT_NAME_UPPER@_BINARY_DIR "${@PROJECT_NAME_UPPER@_BINARY_DIR}" PATH )
