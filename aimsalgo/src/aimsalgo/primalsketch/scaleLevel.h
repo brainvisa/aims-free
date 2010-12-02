@@ -256,15 +256,15 @@ namespace aims
           if (blobs.size() == 0)
           {
                extractor.Run();
-            //std::cout << "DEBUG: ran" << std::endl;
-               blobs=extractor.GetBlobs();
-               saddlePoints=extractor.GetSaddleList();
-               maximumPoints=extractor.GetMaxList();
-            //std::cout << "DEBUG: Got lists" << std::endl;
-            itBlob=blobs.begin();
+               //std::cout << "DEBUG: ran" << std::endl;
+               blobs = extractor.GetBlobs();
+               saddlePoints = extractor.GetSaddleList();
+               maximumPoints = extractor.GetMaxList();
+               //std::cout << "DEBUG: Got lists" << std::endl;
+               itBlob=blobs.begin();
                for ( ; itBlob != blobs.end(); ++itBlob)
                ((*itBlob).second)->SetScale(_scale);
-            //std::cout << "DEBUG: Set scales" << std::endl;
+               //std::cout << "DEBUG: Set scales" << std::endl;
           }
      }
 
