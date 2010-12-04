@@ -802,6 +802,187 @@ del __getattribute__
 # complement Quaternion
 Quaternion.compose = Quaternion.__mul__
 
+# templates / types helpers
+
+def typeCode( data ):
+  '''returns the AIMS type code for the given input data. data may be a string code, a python/numpy numeric type, an AIMS type, or an instance of such a type
+'''
+  dmap = { 'int' : 'S32', 'int32' : 'S32', 'uint' : 'U32', 'uint32' : 'U32',
+    'int64' : 'S64', 'uint64' : 'U64', 'int16' : 'S16', 'uint16' : 'U16',
+    'char' : 'S8', 'uchar' : 'U8', 'float' : 'DOUBLE', 'float32' : 'FLOAT',
+    'float64' : 'DOUBLE',
+    numpy.int8 : 'S8', numpy.uint8 : 'U8',
+    numpy.int16 : 'S16', numpy.uint16 : 'U16',
+    numpy.int32 : 'S32', numpy.uint32 : 'U32',
+    numpy.int64 : 'S64', numpy.uint32 : 'U64',
+    numpy.float32 : 'FLOAT', numpy.float64 : 'DOUBLE',
+  }
+  dt = dmap.get( data, None )
+  if dt is not None:
+    return dt
+  if type( data ) in types.StringTypes:
+    return data
+  dtn = getattr( data, '__name__', None )
+  if dtn is not None: # if data is a type class
+    dt = dmap.get( dtn, None )
+    if dt is not None:
+      return dt
+  dtn2 = type( data ).__name__ # instance
+  dt = dmap.get( dtn2, None )
+  if dt is not None:
+    return dt
+  if dtn is not None:
+    return dtn
+  return dtn2
+
+
+def _parseTypeInArgs( *args, **kwargs ):
+  dtype = kwargs.get( 'dtype', None )
+  if dtype is not None:
+    # kwargs = dict( kwargs )
+    del kwargs[ 'dtype' ]
+  else:
+    y = [ i for i, x in enumerate( args ) \
+      if type(x) in types.StringTypes or hasattr( x, '__name__' ) ]
+    if len( y ) != 0:
+      i = y[0]
+      dtype = args[ y[0] ]
+      args = args[:i] + args[i+1:]
+  if dtype is None:
+    dtype = kwargs.get( 'default_dtype', None )
+  if dtype is None:
+    raise KeyError( 'data type not specified' )
+  if kwargs.has_key( 'default_dtype' ):
+    del kwargs[ 'default_dtype' ]
+  dtype = typeCode( dtype )
+  return ( dtype, args, kwargs )
+
+
+def _parse2TypesInArgs( *args, **kwargs ):
+  dtype1 = kwargs.get( 'intype' )
+  dtype2 = kwargs.get( 'outtype' )
+  dtypeg = kwargs.get( 'dtype' )
+  if dtype1 is not None:
+    kwargs[ 'dtype' ] = dtype1
+    del kwargs[ 'intype' ]
+  intype, args2, kwargs2 = _parseTypeInArgs( *args, **kwargs )
+  if dtype2 is not None:
+    kwargs[ 'dtype' ] = dtype2
+    del kwargs[ 'outtype' ]
+  try:
+    outtype, args3, kwargs3 = _parseTypeInArgs( *args2, **kwargs )
+  except:
+    outtype, args3, kwargs3 = _parseTypeInArgs( *args, **kwargs )
+  return ( intype, outtype, args3, kwargs3 )
+
+
+def _createObject( objtype, *args, **kwargs ):
+  dtype, args, kwargs = _parseTypeInArgs( *args, **kwargs )
+  return getattr( aims, objtype + '_' + dtype )( *args, **kwargs )
+
+
+def Volume( *args, **kwargs ):
+  '''Create an instance of Aims Volume (Volume_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  The default type is 'FLOAT'.
+  Type definitions should match those accepted by typeCode().
+  '''
+  return _createObject( 'Volume', *args, default_dtype='FLOAT', **kwargs )
+
+def AimsData( *args, **kwargs ):
+  '''Create an instance of the older Aims volumes (AimsData_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  The default type is 'FLOAT'.
+  Type definitions should match those accepted by typeCode().
+  '''
+  return _createObject( 'AimsData', *args, default_dtype='FLOAT', **kwargs )
+
+def TimeTexture( *args, **kwargs ):
+  '''Create an instance of Aims texture (TimeTexture_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  The default type is 'FLOAT'.
+  Type definitions should match those accepted by typeCode().
+  '''
+  return _createObject( 'TimeTexture', *args, default_dtype='FLOAT', **kwargs )
+
+def Texture( *args, **kwargs ):
+  '''Create an instance of Aims low-level texture (Texture_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  The default type is 'FLOAT'.
+  Type definitions should match those accepted by typeCode().
+  '''
+  return _createObject( 'Texture', *args, default_dtype='FLOAT', **kwargs )
+
+def BucketMap( *args, **kwargs ):
+  '''Create an instance of Aims bucket (BucketMap_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  The default type is 'VOID'.
+  Type definitions should match those accepted by typeCode().
+  '''
+  return _createObject( 'BucketMap', *args, default_dtype='VOID', **kwargs )
+
+def Converter( *args, **kwargs ):
+  '''Create a Converter instance from input and output types. Types may be passed as keyword arguments intype and outtype, or dtype if both are the same (not very useful for a converter). Otherwise the arguments are parsed to find types arguments.
+  Types may be specified as allowed by typeCode().
+  '''
+  intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
+  return getattr( aims, 'Converter_' + intype + '_' + outtype )( *args )
+
+def ShallowConverter( *args, **kwargs ):
+  '''Create a ShallowConverter instance from input and output types. Types may be passed as keyword arguments intype and outtype, or dtype if both are the same (not very useful for a converter). Otherwise the arguments are parsed to find types arguments.
+  Types may be specified as allowed by typeCode().
+  '''
+  intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
+  return getattr( aims, 'ShallowConverter_' + intype + '_' + outtype )( *args )
+
+def TimeSurface( dim=3 ):
+  '''same as AimsTimeSurface( dim )'''
+  return AimsTimeSurface( dim )
+
+def AimsTimeSurface( dim=3 ):
+  '''Create an instance of Aims mesh (AimsTimeSurface_<dim>) from a dimension parameter'''
+  return getattr( aims, 'AimsTimeSurface_' + str( dim ) )
+
+def AimsThreshold( *args, **kwargs ):
+  '''Create a AimsThreshold instance from input and output types. Types may be passed as keyword arguments intype and outtype, or dtype if both are the same. Otherwise the arguments are parsed to find types arguments.
+  Types may be specified as allowed by typeCode().
+  '''
+  intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
+  return getattr( aims, 'AimsThreshold_' + intype + '_' + outtype )( *args )
+
+def AimsVector( *args, **kwargs ):
+  '''Create an AimsVector instance from type and dimension arguments. Types may be passed as the keyword argument dtype. Otherwise the arguments are parsed to find types arguments. Dimension should be passed as the keyword argument dim, or as the last unnamed argument.
+  Types may be specified as allowed by typeCode().
+  '''
+  dim = kwargs.get( 'dim', None )
+  if dim is not None:
+    del kwargs[ 'dim' ]
+  else:
+    dim = args[-1]
+    args = args[:-1]
+  dtype, args, kwargs = _parseTypeInArgs( *args, **kwargs )
+  return getattr( aims, 'AimsVector_' + dtype + '_' + str(dim) )( *args )
+
+def vector( *args, **kwargs ):
+  '''Create an instance of STL C++ vector (vector_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  Type definitions should match those accepted by typeCode().
+  '''
+  return _createObject( 'vector', *args, **kwargs )
+
+def set( *args, **kwargs ):
+  '''Create an instance of STL C++ set (set_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  Type definitions should match those accepted by typeCode().
+  '''
+  return _createObject( 'set', *args, **kwargs )
+
+def list( *args, **kwargs ):
+  '''Create an instance of STL C++ list (list_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  Type definitions should match those accepted by typeCode().
+  '''
+  return _createObject( 'list', *args, **kwargs )
+
+def rc_ptr( *args, **kwargs ):
+  '''Create an instance of aims reference-counting object (rc_ptr_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  Type definitions should match those accepted by typeCode().
+  '''
+  return _createObject( 'rc_ptr', *args, **kwargs )
+
+
 # documentation
 
 carto.GenericObject.__doc__ = '''
