@@ -885,29 +885,79 @@ def Volume( *args, **kwargs ):
   '''Create an instance of Aims Volume (Volume_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
   The default type is 'FLOAT'.
   Type definitions should match those accepted by typeCode().
+  Volume may also use a numpy array, or another Volume or AimsData_* as unique argument.
+  Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a copy of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* ) share the input data.
   '''
+  if len( args ) == 1 and len( kwargs ) == 0:
+    arg = args[0]
+    if isinstance( arg, numpy.ndarray ):
+      return _createObject( 'Volume', arg, dtype=arg.dtype.type )
+    elif type( arg ).__name__.startswith( 'Volume_' ):
+      return type( arg )( arg )
+    elif type( arg ).__name__.startswith( 'AimsData_' ):
+      return type( arg )( arg.volume() )
   return _createObject( 'Volume', *args, default_dtype='FLOAT', **kwargs )
+
 
 def AimsData( *args, **kwargs ):
   '''Create an instance of the older Aims volumes (AimsData_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
   The default type is 'FLOAT'.
   Type definitions should match those accepted by typeCode().
+  AimsData may also use a numpy array, or another Volume or AimsData_* as unique argument.
+  Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a copy of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* ) share the input data.
   '''
+  if len( args ) == 1 and len( kwargs ) == 0:
+    arg = args[0]
+    if isinstance( arg, numpy.ndarray ):
+      vol = _createObject( 'Volume', arg, dtype=arg.dtype.type )
+      return AimsData( vol )
+    elif type( arg ).__name__.startswith( 'Volume_' ):
+      return getattr( aims, 'AimsData_' + type( arg ).__name__[ 7:] )( arg )
+    elif type( arg ).__name__.startswith( 'AimsData_' ):
+      return type( arg )( arg.volume() )
   return _createObject( 'AimsData', *args, default_dtype='FLOAT', **kwargs )
+
 
 def TimeTexture( *args, **kwargs ):
   '''Create an instance of Aims texture (TimeTexture_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
   The default type is 'FLOAT'.
   Type definitions should match those accepted by typeCode().
+  TimeTexture may also use a numpy array, or another TimeTexture_* or Textrue_* as unique argument.
+  Building from a numpy arrays uses the 1st dimension as vertex, the 2nd as time (if any).
   '''
+  if len( args ) == 1 and len( kwargs ) == 0:
+    arg = args[0]
+    if isinstance( args[0], numpy.ndarray ):
+      tex = _createObject( 'TimeTexture', dtype=arg.dtype.type )
+      if len( arg.shape ) == 1:
+        tex[0].assign( arg )
+      else:
+        for i in xrange( arg.shape[1] ):
+          tex[i].assign( arg[:,i] )
+      return tex
+    if type( arg ).__name__.startswith( 'TimeTexture_' ):
+      return type( arg )( arg )
+    elif type( arg ).__name__.startswith( 'Texture_' ):
+      tex = getattr( aims, 'TimeTexture_' + type( arg ).__name__[ 8:] )()
+      tex[0] = arg
+      return tex
   return _createObject( 'TimeTexture', *args, default_dtype='FLOAT', **kwargs )
+
 
 def Texture( *args, **kwargs ):
   '''Create an instance of Aims low-level texture (Texture_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
   The default type is 'FLOAT'.
   Type definitions should match those accepted by typeCode().
+  Texture may also use a numpy array, or another Textrue_* as unique argument.
   '''
+  if len( args ) == 1 and len( kwargs ) == 0:
+    arg = args[0]
+    if isinstance( args[0], numpy.ndarray ):
+      return _createObject( 'Texture', arg, dtype=arg.dtype.type )
+    if type( arg ).__name__.startswith( 'Texture_' ):
+      return type( arg )( arg )
   return _createObject( 'Texture', *args, default_dtype='FLOAT', **kwargs )
+
 
 def BucketMap( *args, **kwargs ):
   '''Create an instance of Aims bucket (BucketMap_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
@@ -916,12 +966,14 @@ def BucketMap( *args, **kwargs ):
   '''
   return _createObject( 'BucketMap', *args, default_dtype='VOID', **kwargs )
 
+
 def Converter( *args, **kwargs ):
   '''Create a Converter instance from input and output types. Types may be passed as keyword arguments intype and outtype, or dtype if both are the same (not very useful for a converter). Otherwise the arguments are parsed to find types arguments.
   Types may be specified as allowed by typeCode().
   '''
   intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
   return getattr( aims, 'Converter_' + intype + '_' + outtype )( *args )
+
 
 def ShallowConverter( *args, **kwargs ):
   '''Create a ShallowConverter instance from input and output types. Types may be passed as keyword arguments intype and outtype, or dtype if both are the same (not very useful for a converter). Otherwise the arguments are parsed to find types arguments.
@@ -930,13 +982,16 @@ def ShallowConverter( *args, **kwargs ):
   intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
   return getattr( aims, 'ShallowConverter_' + intype + '_' + outtype )( *args )
 
+
 def TimeSurface( dim=3 ):
   '''same as AimsTimeSurface( dim )'''
   return AimsTimeSurface( dim )
 
+
 def AimsTimeSurface( dim=3 ):
   '''Create an instance of Aims mesh (AimsTimeSurface_<dim>) from a dimension parameter'''
   return getattr( aims, 'AimsTimeSurface_' + str( dim ) )
+
 
 def AimsThreshold( *args, **kwargs ):
   '''Create a AimsThreshold instance from input and output types. Types may be passed as keyword arguments intype and outtype, or dtype if both are the same. Otherwise the arguments are parsed to find types arguments.
@@ -944,6 +999,7 @@ def AimsThreshold( *args, **kwargs ):
   '''
   intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
   return getattr( aims, 'AimsThreshold_' + intype + '_' + outtype )( *args )
+
 
 def AimsVector( *args, **kwargs ):
   '''Create an AimsVector instance from type and dimension arguments. Types may be passed as the keyword argument dtype. Otherwise the arguments are parsed to find types arguments. Dimension should be passed as the keyword argument dim, or as the last unnamed argument.
@@ -958,11 +1014,13 @@ def AimsVector( *args, **kwargs ):
   dtype, args, kwargs = _parseTypeInArgs( *args, **kwargs )
   return getattr( aims, 'AimsVector_' + dtype + '_' + str(dim) )( *args )
 
+
 def vector( *args, **kwargs ):
   '''Create an instance of STL C++ vector (vector_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
   Type definitions should match those accepted by typeCode().
   '''
   return _createObject( 'vector', *args, **kwargs )
+
 
 def set( *args, **kwargs ):
   '''Create an instance of STL C++ set (set_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
@@ -970,11 +1028,13 @@ def set( *args, **kwargs ):
   '''
   return _createObject( 'set', *args, **kwargs )
 
+
 def list( *args, **kwargs ):
   '''Create an instance of STL C++ list (list_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
   Type definitions should match those accepted by typeCode().
   '''
   return _createObject( 'list', *args, **kwargs )
+
 
 def rc_ptr( *args, **kwargs ):
   '''Create an instance of aims reference-counting object (rc_ptr_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
@@ -1233,14 +1293,22 @@ specific type of data: for instance S16 is signed 16 bit short ints, FLOAT is
 32 bit floats,
 etc.
 
-Volumes are read and written using the L{Reader} and L{Writer} classes.
+Volumes are read and written using the L{Reader} and L{Writer} classes, which are in turn used by the simple aims.read() and aims.write() functions.
+
+A volume of a given type can be built either using its specialized class constructor, or the general Volume() function which can take a voxel type in its arguments: the following are equivalent:
+
+  >>> v = aims.Volume_S16( 100, 100, 10 )
+  >>> v = aims.Volume( 'S16', 100, 100, 10 )
+  >>> v = aims.Volume( 100, 100, 10, dtype='S16' )
+  >>> import numpy
+  >>> v = aims.Volume( numpy.int16, 100, 100, 10 )
 
 A volume is an array of voxels, which can be accessed via the C{at()} method.
 For standard numeric types, it is also posisble to get the voxels array as a
 U{numpy<http://numpy.scipy.org/>} array, using the C{arraydata()} method.
 The array returned is a reference to the actual data block, so any
 modification to its contents also affect the Volume contents, so it is
-generally an easy way of manipulating volume voxels becaus all the power of
+generally an easy way of manipulating volume voxels because all the power of
 the numpy module can be used on Volumes.
 
 Volumes also store a header which can contain various information (including
@@ -1264,6 +1332,11 @@ convert a Volume_S16 to a Volume_FLOAT: see the converter classes
 C{Converter_<type1>_<type2>} and C{ShallowConverter_<type1>_<type2>}
 with <type1> and <type2> being volume types: for instance
 L{Converter_Volume_S16_Volume_FLOAT}.
+The converter can also be called using type arguments:
+
+  >>> vol1 = aims.Volume( 'S16', 100, 100, 10 )
+  >>> c = aims.Converter( intype=vol1, outtype='Volume_DOUBLE' )
+  >>> vol2 = c( vol1 )
 '''
 
 _aimsdatadoc = '''
