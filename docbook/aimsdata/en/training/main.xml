@@ -1852,12 +1852,12 @@ a = ana.Anatomist()</screen>
         Objects loaded in pyaims may be wrapped as Anatomist objects:
         <screen>from soma import aims
 vol = aims.read( 'data_for_anatomist/subject01/subject01.nii' )
-anavol = ana.cpp.AObjectConverter.anatomist( vol )
+anavol = a.toAObject( vol )
 win = a.createWindow( 'Axial' )
 win.addObjects( anavol )</screen>
         Or, in the other way, Anatomist objects may be exported as AIMS objects:
         <screen>anamesh = a.loadObject( 'data_for_anatomist/subject01/subject01_Lwhite.mesh' )
-mesh = ana.cpp.AObjectConverter.aims( anamesh )
+mesh = a.toAimsObject( anamesh )
 win.addObjects( anamesh )</screen>
       </para>
     </sect3>
@@ -1879,7 +1879,7 @@ win2.addObjects( cutmesh )
 # find the planar mes in cutmesh children
 anaplanar = filter( lambda x: x.name.startswith( 'PlanarMesh' ), cutmesh.children )[0]
 # get the Aims mesh from it
-planar = ana.cpp.AObjectConverter.aims( anaplanar )
+planar = a.toAimsObject( anaplanar )
 # now modify the mesh, adding a random value to vertices along the normal
 vert = planar.vertex()
 norm = planar.normal()
