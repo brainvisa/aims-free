@@ -878,7 +878,7 @@ def _parse2TypesInArgs( *args, **kwargs ):
 
 def _createObject( objtype, *args, **kwargs ):
   dtype, args, kwargs = _parseTypeInArgs( *args, **kwargs )
-  return getattr( aims, objtype + '_' + dtype )( *args, **kwargs )
+  return getattr( aimssip, objtype + '_' + dtype )( *args, **kwargs )
 
 
 def Volume( *args, **kwargs ):
@@ -912,7 +912,7 @@ def AimsData( *args, **kwargs ):
       vol = _createObject( 'Volume', arg, dtype=arg.dtype.type )
       return AimsData( vol )
     elif type( arg ).__name__.startswith( 'Volume_' ):
-      return getattr( aims, 'AimsData_' + type( arg ).__name__[ 7:] )( arg )
+      return getattr( aimssip, 'AimsData_' + type( arg ).__name__[ 7:] )( arg )
     elif type( arg ).__name__.startswith( 'AimsData_' ):
       return type( arg )( arg.volume() )
   return _createObject( 'AimsData', *args, default_dtype='FLOAT', **kwargs )
@@ -938,7 +938,7 @@ def TimeTexture( *args, **kwargs ):
     if type( arg ).__name__.startswith( 'TimeTexture_' ):
       return type( arg )( arg )
     elif type( arg ).__name__.startswith( 'Texture_' ):
-      tex = getattr( aims, 'TimeTexture_' + type( arg ).__name__[ 8:] )()
+      tex = getattr( aimssip, 'TimeTexture_' + type( arg ).__name__[ 8:] )()
       tex[0] = arg
       return tex
   return _createObject( 'TimeTexture', *args, default_dtype='FLOAT', **kwargs )
@@ -972,7 +972,7 @@ def Converter( *args, **kwargs ):
   Types may be specified as allowed by typeCode().
   '''
   intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
-  return getattr( aims, 'Converter_' + intype + '_' + outtype )( *args )
+  return getattr( aimssip, 'Converter_' + intype + '_' + outtype )( *args )
 
 
 def ShallowConverter( *args, **kwargs ):
@@ -980,7 +980,8 @@ def ShallowConverter( *args, **kwargs ):
   Types may be specified as allowed by typeCode().
   '''
   intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
-  return getattr( aims, 'ShallowConverter_' + intype + '_' + outtype )( *args )
+  return getattr( aimssip, 'ShallowConverter_' + intype + '_' + outtype ) \
+    ( *args )
 
 
 def TimeSurface( dim=3 ):
@@ -990,7 +991,7 @@ def TimeSurface( dim=3 ):
 
 def AimsTimeSurface( dim=3 ):
   '''Create an instance of Aims mesh (AimsTimeSurface_<dim>) from a dimension parameter'''
-  return getattr( aims, 'AimsTimeSurface_' + str( dim ) )
+  return getattr( aimssip, 'AimsTimeSurface_' + str( dim ) )
 
 
 def AimsThreshold( *args, **kwargs ):
@@ -998,7 +999,15 @@ def AimsThreshold( *args, **kwargs ):
   Types may be specified as allowed by typeCode().
   '''
   intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
-  return getattr( aims, 'AimsThreshold_' + intype + '_' + outtype )( *args )
+  if intype.startswith( 'Volume_' ):
+    intype = intype[ 7: ]
+  elif intype.startswith( 'AimsData_' ):
+    intype = intype[ 9: ]
+  if outtype.startswith( 'Volume_' ):
+    outtype = outtype[ 7: ]
+  elif outtype.startswith( 'AimsData_' ):
+    outtype = outtype[ 9: ]
+  return getattr( aimssip, 'AimsThreshold_' + intype + '_' + outtype )( *args )
 
 
 def AimsVector( *args, **kwargs ):
@@ -1012,7 +1021,7 @@ def AimsVector( *args, **kwargs ):
     dim = args[-1]
     args = args[:-1]
   dtype, args, kwargs = _parseTypeInArgs( *args, **kwargs )
-  return getattr( aims, 'AimsVector_' + dtype + '_' + str(dim) )( *args )
+  return getattr( aimssip, 'AimsVector_' + dtype + '_' + str(dim) )( *args )
 
 
 def vector( *args, **kwargs ):
