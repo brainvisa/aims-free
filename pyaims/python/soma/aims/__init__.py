@@ -896,7 +896,7 @@ def Volume( *args, **kwargs ):
       return type( arg )( arg )
     elif type( arg ).__name__.startswith( 'AimsData_' ):
       return type( arg )( arg.volume() )
-  return _createObject( 'Volume', *args, default_dtype='FLOAT', **kwargs )
+  return _createObject( 'Volume', default_dtype='FLOAT', *args, **kwargs )
 
 
 def AimsData( *args, **kwargs ):
@@ -915,7 +915,7 @@ def AimsData( *args, **kwargs ):
       return getattr( aimssip, 'AimsData_' + type( arg ).__name__[ 7:] )( arg )
     elif type( arg ).__name__.startswith( 'AimsData_' ):
       return type( arg )( arg.volume() )
-  return _createObject( 'AimsData', *args, default_dtype='FLOAT', **kwargs )
+  return _createObject( 'AimsData', default_dtype='FLOAT', *args, **kwargs )
 
 
 def TimeTexture( *args, **kwargs ):
@@ -941,7 +941,7 @@ def TimeTexture( *args, **kwargs ):
       tex = getattr( aimssip, 'TimeTexture_' + type( arg ).__name__[ 8:] )()
       tex[0] = arg
       return tex
-  return _createObject( 'TimeTexture', *args, default_dtype='FLOAT', **kwargs )
+  return _createObject( 'TimeTexture', default_dtype='FLOAT', *args, **kwargs )
 
 
 def Texture( *args, **kwargs ):
@@ -956,7 +956,7 @@ def Texture( *args, **kwargs ):
       return _createObject( 'Texture', arg, dtype=arg.dtype.type )
     if type( arg ).__name__.startswith( 'Texture_' ):
       return type( arg )( arg )
-  return _createObject( 'Texture', *args, default_dtype='FLOAT', **kwargs )
+  return _createObject( 'Texture', default_dtype='FLOAT', *args, **kwargs )
 
 
 def BucketMap( *args, **kwargs ):
@@ -964,7 +964,7 @@ def BucketMap( *args, **kwargs ):
   The default type is 'VOID'.
   Type definitions should match those accepted by typeCode().
   '''
-  return _createObject( 'BucketMap', *args, default_dtype='VOID', **kwargs )
+  return _createObject( 'BucketMap', default_dtype='VOID', *args, **kwargs )
 
 
 def Converter( *args, **kwargs ):
