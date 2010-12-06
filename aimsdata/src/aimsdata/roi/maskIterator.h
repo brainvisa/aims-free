@@ -303,6 +303,7 @@ namespace aims
     _freeData( false ),
     _voxelSampler( voxelSampler )
   {
+    _useLabel = true;
     restart( label );
   }
 
@@ -315,6 +316,7 @@ namespace aims
     _freeData( false ),
     _voxelSampler( voxelSampler )
   {
+    _useLabel = true;
     restart( labels );
   }
 
@@ -344,6 +346,7 @@ namespace aims
   {
     Reader< AimsData<T> > reader( fileName );
     reader.read( *_data );
+    _useLabel = true;
     restart( label );
   }
 
@@ -359,6 +362,7 @@ namespace aims
   {
     Reader< AimsData<T> > reader( fileName );
     reader.read( *_data );
+    _useLabel = true;
     restart( labels );
   }
 
