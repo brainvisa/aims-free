@@ -45,6 +45,14 @@ namespace aims
   }
 }
 
+
+#if QT_VERSION >= 0x040000
+  class Q3ListViewItem;
+#else
+  class QListViewItem;
+#endif
+
+
 class SelectBox : public Q3ListView
 {
   Q_OBJECT
