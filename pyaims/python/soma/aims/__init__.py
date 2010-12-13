@@ -1024,21 +1024,21 @@ def AimsVector( *args, **kwargs ):
   return getattr( aimssip, 'AimsVector_' + dtype + '_' + str(dim) )( *args )
 
 
-def vector( *args, **kwargs ):
+def stdVector( *args, **kwargs ):
   '''Create an instance of STL C++ vector (vector_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
   Type definitions should match those accepted by typeCode().
   '''
   return _createObject( 'vector', *args, **kwargs )
 
 
-def set( *args, **kwargs ):
+def stdSet( *args, **kwargs ):
   '''Create an instance of STL C++ set (set_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
   Type definitions should match those accepted by typeCode().
   '''
   return _createObject( 'set', *args, **kwargs )
 
 
-def list( *args, **kwargs ):
+def stdList( *args, **kwargs ):
   '''Create an instance of STL C++ list (list_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
   Type definitions should match those accepted by typeCode().
   '''
