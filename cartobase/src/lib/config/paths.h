@@ -35,6 +35,7 @@
 #define CARTOBASE_CONFIG_PATHS_H
 
 #include <string>
+#include <list>
 
 namespace carto
 {
@@ -65,11 +66,16 @@ namespace carto
         globalShared() directory.
     */
     const std::string& shfjShared();
+    /** Shared resource files search path.
+        It typically includes:
+        - home() + "/.brainvisa";
+        - home();
+        - globalShared()
+    */
+    const std::list<std::string> & resourceSearchPath();
     /** Find a file in the shared resources directories, or in a personal
         directory.
-        The search path typically includes home() + "/.brainvisa";
-        home();
-        globalShared().
+        Files are looked in the search paths given by resourceSearchPath().
         For each search path, the filename is looked in a subdirectory
         containing the project name and version (if not specified, cartobase
         version is used), and then in a subdirectory containing the project
@@ -81,6 +87,13 @@ namespace carto
     std::string findResourceFile( const std::string & filename,
                                   const std::string & project = "",
                                   const std::string & version = "" );
+    /** Same as findResourceFile() except that it looks for every occurrence
+        of the searched file (or directory).
+    */
+    std::list<std::string> findResourceFiles( const std::string & filename,
+                                              const std::string & project = "",
+                                              const std::string & version = ""
+                                            );
   }
 
 }

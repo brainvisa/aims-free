@@ -13,6 +13,10 @@ namespace carto
     const std::string & memmap();
     const std::string & globalShared();
     const std::string & shfjShared();
+    const list_STRING & resourceSearchPath();
+    list_STRING findResourceFiles( const std::string & filename,
+                                   const std::string & project = "",
+                                   const std::string & version = "" );
     std::string findResourceFile( const std::string & filename,
                                   const std::string & project = "",
                                   const std::string & version = "" );

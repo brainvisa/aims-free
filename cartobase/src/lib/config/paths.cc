@@ -276,16 +276,74 @@ const string & Paths::shfjShared()
 }
 
 
+const list<string> & Paths::resourceSearchPath()
+{
+  static list<string> searchpath;
+  if( searchpath.empty() )
+  {
+    char s = FileUtil::separator();
+    searchpath.push_back( Paths::home() + s + ".brainvisa" );
+    searchpath.push_back( Paths::home() );
+    searchpath.push_back( Paths::globalShared() );
+  }
+  return searchpath;
+}
+
+
+list<string> Paths::findResourceFiles( const string & filename,
+                                       const string & project,
+                                       const string & version )
+{
+  const list<string> & searchpath = resourceSearchPath();
+  list<string> fpaths;
+  char s = FileUtil::separator();
+  list<string>::const_iterator ip, ep = searchpath.end();
+  string ppath, proj;
+  if( project.empty() )
+    proj = "brainvisa-share";
+  else
+    proj = project;
+  if( !proj.empty() && !version.empty() )
+    ppath = proj + "-" + version;
+  else
+    ppath = proj + "-" + cartobaseShortVersion();
+
+  for( ip=searchpath.begin(); ip!=ep; ++ip )
+  {
+    // search full versionned path
+    string fpath = *ip + s + ppath + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      fpaths.push_back( fpath );
+    /* search full versionned path, hidden directpry
+    (eg $HOME/.anatomist-4.1/...) */
+    fpath = *ip + s + '.' + ppath + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      fpaths.push_back( fpath );
+    // search in project without version
+    fpath = *ip + s + proj + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      fpaths.push_back( fpath );
+    // search in project without version, hidden directory
+    fpath = *ip + s + '.' + proj + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      fpaths.push_back( fpath );
+    // search in general share path
+    fpath = *ip + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      fpaths.push_back( fpath );
+  }
+
+  return fpaths;
+}
+
+
 string Paths::findResourceFile( const string & filename,
                                 const string & project,
                                 const string & version )
 {
-  list<string> searchpath;
+  const list<string> & searchpath = resourceSearchPath();
   char s = FileUtil::separator();
-  searchpath.push_back( Paths::home() + s + ".brainvisa" );
-  searchpath.push_back( Paths::home() );
-  searchpath.push_back( Paths::globalShared() );
-  list<string>::iterator ip, ep = searchpath.end();
+  list<string>::const_iterator ip, ep = searchpath.end();
   string ppath, proj;
   if( project.empty() )
     proj = "brainvisa-share";
@@ -323,5 +381,4 @@ string Paths::findResourceFile( const string & filename,
 
   return "";
 }
-
 
