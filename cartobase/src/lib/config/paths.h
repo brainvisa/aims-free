@@ -65,6 +65,22 @@ namespace carto
         globalShared() directory.
     */
     const std::string& shfjShared();
+    /** Find a file in the shared resources directories, or in a personal
+        directory.
+        The search path typically includes home() + "/.brainvisa";
+        home();
+        globalShared().
+        For each search path, the filename is looked in a subdirectory
+        containing the project name and version (if not specified, cartobase
+        version is used), and then in a subdirectory containing the project
+        name without version. For personal directories, a dot may be prepended
+        to the project name for use as a hidden directory (classical on Unix),
+        like "/home/user/.anatomist/..."
+        The function stops at the first match and return the first path.
+    */
+    std::string findResourceFile( const std::string & filename,
+                                  const std::string & project = "",
+                                  const std::string & version = "" );
   }
 
 }

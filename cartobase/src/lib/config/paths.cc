@@ -256,6 +256,9 @@ const string & Paths::shfjShared()
       Directory	d( "/" );
       const string	& shared = Paths::globalShared();
 
+#ifdef USE_SHARE_CONFIG
+      _shfjShared = shared + s + BRAINVISA_SHARE_DIRECTORY;
+#else
       _shfjShared = shared + s + "shfj-" + cartobaseShortVersion();
       d.chdir( _shfjShared );
       if( !d.isValid() )
@@ -266,9 +269,59 @@ const string & Paths::shfjShared()
           if( !d.isValid() )
             _shfjShared = shared;
         }
+#endif
     }
 
   return _shfjShared;
+}
+
+
+string Paths::findResourceFile( const string & filename,
+                                const string & project,
+                                const string & version )
+{
+  list<string> searchpath;
+  char s = FileUtil::separator();
+  searchpath.push_back( Paths::home() + s + ".brainvisa" );
+  searchpath.push_back( Paths::home() );
+  searchpath.push_back( Paths::globalShared() );
+  list<string>::iterator ip, ep = searchpath.end();
+  string ppath, proj;
+  if( project.empty() )
+    proj = "brainvisa-share";
+  else
+    proj = project;
+  if( !proj.empty() && !version.empty() )
+    ppath = proj + "-" + version;
+  else
+    ppath = proj + "-" + cartobaseShortVersion();
+
+  for( ip=searchpath.begin(); ip!=ep; ++ip )
+  {
+    // search full versionned path
+    string fpath = *ip + s + ppath + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      return fpath;
+    /* search full versionned path, hidden directpry
+    (eg $HOME/.anatomist-4.1/...) */
+    fpath = *ip + s + '.' + ppath + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      return fpath;
+    // search in project without version
+    fpath = *ip + s + proj + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      return fpath;
+    // search in project without version, hidden directory
+    fpath = *ip + s + '.' + proj + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      return fpath;
+    // search in general share path
+    fpath = *ip + s + filename;
+    if( FileUtil::fileStat( fpath ).find( '+' ) != string::npos )
+      return fpath;
+  }
+
+  return "";
 }
 
 
