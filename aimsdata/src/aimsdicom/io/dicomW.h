@@ -103,7 +103,19 @@ namespace aims
 
     if ( !directory.isValid() )
     {
-      directory.makedirs();
+      /* It's difficult to say wheter the writer should create a directory
+         or not. Sometimes we would like to create a dicom as a directory
+         (maybe without a file extension, but this is currently forbidden
+         about 20 lines earlier in this code), and sometimes we would like to
+         write a series of files in an existing directory.
+         Right now (2010/12/30) we disable making directories because if we
+         do, using a Writer in a non-existing directory will always result in
+         a Dicom file: writing a_directory/image.nii with a_directory not
+         existing will fail for the nifti writer, and work for the dicom
+         writer.
+       */
+      return false;
+      // directory.makedirs();
     }
 
     DcmFileFormat fileFormat;
