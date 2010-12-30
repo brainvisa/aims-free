@@ -49,19 +49,7 @@ int main( int argc, const char **argv )
   AimsApplication	app( argc, argv, "Generates a common-shaped mesh" );
   ostringstream	sg;
   sg << "input parameter file (.minf-like)\nPossible types and parameters:\n";
-  Object		pardesc = SurfaceGenerator::description();
-  ObjectVector		& pdl = pardesc->value<ObjectVector>();
-  ObjectVector::iterator	ipd, epd = pdl.end();
-  for( ipd=pdl.begin(); ipd!=epd; ++ipd )
-    {
-      Dictionary	& d = (*ipd)->value<Dictionary>();
-      sg << "\ntype : " << d[ "type" ]->getString() << endl;
-      Dictionary::iterator	id, ed = d.end();
-      for( id=d.begin(); id!=ed; ++id )
-        if( id->first != "type" )
-          sg << id->first << " : " << id->second->getString() << endl;
-    }
-
+  SurfaceGenerator::printDescription( sg );
   app.addOption( filein, "-i", sg.str() );
   app.alias( "--input", "-i" );
   app.addOption( meshout, "-o", "output mesh" );

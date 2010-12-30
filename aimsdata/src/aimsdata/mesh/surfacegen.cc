@@ -354,6 +354,23 @@ Object SurfaceGenerator::description()
 }
 
 
+void SurfaceGenerator::printDescription( ostream & ostr )
+{
+  Object                pardesc = description();
+  ObjectVector          & pdl = pardesc->value<ObjectVector>();
+  ObjectVector::iterator        ipd, epd = pdl.end();
+  for( ipd=pdl.begin(); ipd!=epd; ++ipd )
+  {
+    Dictionary        & d = (*ipd)->value<Dictionary>();
+    ostr << "\ntype : " << d[ "type" ]->getString() << endl;
+    Dictionary::iterator      id, ed = d.end();
+    for( id=d.begin(); id!=ed; ++id )
+      if( id->first != "type" )
+        ostr << id->first << " : " << id->second->getString() << endl;
+  }
+}
+
+
 AimsSurfaceTriangle* SurfaceGenerator::cube( const GenericObject & params )
 {
   Object	vp1;

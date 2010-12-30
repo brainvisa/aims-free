@@ -65,6 +65,8 @@ namespace aims
 
     /// description of known shapes and parameters (vector of dicts)
     static carto::Object description();
+    /// outputs the description() dictionary in a more huma-readable way
+    static void printDescription( std::ostream & s = std::cout );
 
     static AimsSurfaceTriangle* cube( const carto::GenericObject & params );
     static AimsSurfaceTriangle* cube( const Point3df & center, float radius, 
@@ -113,9 +115,10 @@ attributes = {
                                         bool uniquevertices = false );
     static AimsSurfaceTriangle*
     ellipse( const carto::GenericObject & params );
-    static AimsSurfaceTriangle* ellipse( const Point3df & p1, float radius1, float radius2,
-                                            unsigned nfacets,
-                                            bool uniquevertices = false );
+    static AimsSurfaceTriangle* ellipse( const Point3df & p1, float radius1,
+                                         float radius2,
+                                         unsigned nfacets,
+                                         bool uniquevertices = false );
   };
 
 }
