@@ -7,10 +7,10 @@
 #
 # This software is governed by the CeCILL-B license under
 # French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the 
+# You can  use, modify and/or redistribute the software under the
 # terms of the CeCILL-B license as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info". 
-# 
+# and INRIA at the following URL "http://www.cecill.info".
+#
 # As a counterpart to the access to the source code and  rights to copy,
 # modify and redistribute granted by the license, users are provided only
 # with a limited warranty  and the software's author,  the holder of the
@@ -24,8 +24,8 @@
 # therefore means  that it is reserved for developers  and  experienced
 # professionals having in-depth computer knowledge. Users are therefore
 # encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or 
-# data to be ensured and,  more generally, to use and operate it in the 
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
 # same conditions as regards security.
 #
 # The fact that you are presently reading this means that you have had
@@ -209,25 +209,40 @@ class Reader:
         'aims.carto.AllocatorContext or a carto.AllocatorStrategy.DataAccess' )
     self.options = options
 
-  def read( self, filename, border = 0, frame = -1 ):
+  def read( self, filename, border = 0, frame = -1, dtype=None ):
+    '''Reads the object contained in the file <filename>, whatever the type of
+    the contents of the file. All objects types supported by Aims IO system
+    can be read. A border width and a frame number may be specified and will
+    be only used by formats that support them.
+    If <dtype> is specified, the corresponding object/data type is forced. It
+    may be useful to force reading a volume with float voxels for instance.
+    It is only supported by a few formats. <dtype> may contain a string or
+    a type object, as accepted by typeCode().
+    The read function may follow other object/data types rules, allocators and
+    options, as specified in the Reader constructor.
+    '''
     f = Finder()
     if not f.check( filename ):
       open(filename).close() # "file not found"-case raising first
-      raise IOError( 'Unknown file format or missing meta-file(s): ' + filename )
-    otype = f.objectType()
-    dtype = f.dataType()
-    otype2 = self._typemap.get( otype, otype )
-    if type( otype2 ) is types.StringType:
-      finaltype = otype2 + '_' + dtype
-      otype = otype2
+      raise IOError( 'Unknown file format or missing meta-file(s): ' \
+        + filename )
+    if dtype is not None:
+      finaltype = typeCode( dtype )
     else:
-      finaltype = otype2.get( dtype )
-      if finaltype is None:
-        otype2 = otype2.get( 'default_object_type' )
-        if otype2 is not None:
-          finaltype = otype2 + '_' + dtype
-        else:
-          finaltype = otype + '_' + dtype
+      otype = f.objectType()
+      dtype = f.dataType()
+      otype2 = self._typemap.get( otype, otype )
+      if type( otype2 ) is types.StringType:
+        finaltype = otype2 + '_' + dtype
+        otype = otype2
+      else:
+        finaltype = otype2.get( dtype )
+        if finaltype is None:
+          otype2 = otype2.get( 'default_object_type' )
+          if otype2 is not None:
+            finaltype = otype2 + '_' + dtype
+          else:
+            finaltype = otype + '_' + dtype
     rdr = 'Reader_' + finaltype
     r = getattr( aimssip, rdr, None )
     if r is None:
@@ -253,6 +268,12 @@ class Writer:
     pass
 
   def write( self, obj, filename, format=None ):
+    '''Writes the object <obj> in a file named <filename>, whatever the type of
+    <obj>, as format <format>.
+    All objects types and formats supported by the Aims IO system can be used.
+    <obj> may be a reference-counter to an object type supported by the IO
+    system.
+    '''
     c = obj.__class__.__name__.split( '.' )[ -1 ]
     wr = 'Writer_' + c
     self._objectType = None
@@ -305,11 +326,19 @@ class Writer:
 
 # simple IO functions
 
-def read( filename, border = 0, frame = -1  ):
+def read( filename, border = 0, frame = -1, dtype=None ):
+  '''Equivalent to:
   r = Reader()
-  return r.read( filename, border, frame )
+  return r.read( filename, border=border, frame=frame, dtype=dtype )
+  '''
+  r = Reader()
+  return r.read( filename, border=border, frame=frame, dtype=dtype )
 
 def write( obj, filename, format=None ):
+  '''Equivalent to:
+  w = Writer()
+  w.write( obj, filename, format=format )
+  '''
   w = Writer()
   w.write( obj, filename, format=format )
 
@@ -1229,7 +1258,7 @@ is perfectly valid, but if C++ programs expect it to be a C++ C{std::string},
 they may fail.
 
 Moreover, when writing back to existing concrete objects, some additional
-conversions may take place: for instance C{hdr['voxel_size']} is a C++ 
+conversions may take place: for instance C{hdr['voxel_size']} is a C++
 object of type C{std::vector<float>}, so writing to C{hdr['voxel_size'][0]}
 needs to enure we are actually writing a C{float}, and if not, convert to it
 if possible.
@@ -1377,7 +1406,7 @@ Surface Manipulation Object. Available Methods are :
 
   - meshMerge(AimsTimeSurface_3, AimsTimeSurface_3) : concatenate two 3D
     meshes into the first. Also the += operator of meshes
- 
+
   - meshTransform(aims.AimsTimeSurface_3 mesh,
       aims.AffineTransformation3d trans) : apply a
     transformation *in-place* to a mesh.
