@@ -4,7 +4,7 @@ BRAINVISA_ADD_MOC_FILES( _sources ${_headers} )
 add_library( aimsgui SHARED ${_sources} )
 add_dependencies( aimsgui ${headersTarget} )
 set_property( TARGET aimsgui PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-target_link_libraries( aimsgui ${QT_LIBRARIES} ${AIMS_AIMSDATA_LIBRARIES} )
+target_link_libraries( aimsgui )
 BRAINVISA_INSTALL( TARGETS aimsgui
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
