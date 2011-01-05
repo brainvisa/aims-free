@@ -292,15 +292,30 @@ const list<string> & Paths::resourceSearchPath()
 
 list<string> Paths::findResourceFiles( const string & filename,
                                        const string & project,
-                                       const string & version )
+                                       const string & ver )
 {
   const list<string> & searchpath = resourceSearchPath();
   list<string> fpaths;
   char s = FileUtil::separator();
   list<string>::const_iterator ip, ep = searchpath.end();
   string ppath, proj;
+  string version = ver;
+
   if( project.empty() )
-    proj = "brainvisa-share";
+#ifdef USE_SHARE_CONFIG
+  {
+    proj = BRAINVISA_SHARE_DIRECTORY;
+    string::size_type x = proj.rfind( '-' ); // version
+    if( x != string::npos )
+    {
+      if( version.empty() )
+        version = proj.substr( x + 1, proj.length() - x - 1 );
+      proj = proj.substr( 0, x );
+    }
+  }
+#else
+    proj = "shfj";
+#endif
   else
     proj = project;
   if( !proj.empty() && !version.empty() )
@@ -339,14 +354,29 @@ list<string> Paths::findResourceFiles( const string & filename,
 
 string Paths::findResourceFile( const string & filename,
                                 const string & project,
-                                const string & version )
+                                const string & ver )
 {
   const list<string> & searchpath = resourceSearchPath();
   char s = FileUtil::separator();
   list<string>::const_iterator ip, ep = searchpath.end();
   string ppath, proj;
+  string version = ver;
+
   if( project.empty() )
-    proj = "brainvisa-share";
+#ifdef USE_SHARE_CONFIG
+  {
+    proj = BRAINVISA_SHARE_DIRECTORY;
+    string::size_type x = proj.rfind( '-' ); // version
+    if( x != string::npos )
+    {
+      if( version.empty() )
+        version = proj.substr( x + 1, proj.length() - x - 1 );
+      proj = proj.substr( 0, x );
+    }
+  }
+#else
+    proj = "shfj";
+#endif
   else
     proj = project;
   if( !proj.empty() && !version.empty() )
