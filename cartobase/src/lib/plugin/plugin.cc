@@ -200,50 +200,54 @@ static bool loadlib( const string & libname, const std::string & ver,
   string	lname = libname;
   string	lnamespec;
   string::size_type	sopos = lname.rfind( ".so" );
+  list<string>  liblist;
+  list<string>  vers;
+  list<string>::iterator iv, ev = vers.end();
 
-  if( !ver.empty() && lname.substr( lname.length() - 3, 3 ) == ".so" )
-    {
-#ifdef _WIN32
-      lname.replace( lname.length() - 3, 3, ".dll" );
-#endif
-      lname += string( "." ) + ver;
-    }
-#ifdef _WIN32
-  else
-    {
-      string::size_type	pos = lname.rfind( ".so." );
-      if( pos != string::npos )
-        {
-          lname.replace( pos, 4, ".dll." );
-        }
-    }
-#endif
-
-  if( loadlib2( lname, verbose ) )
-    return true;
   if( !ver.empty() )
   {
-    // try to remove tiny version number
-    string::size_type x = lname.rfind( '.' );
+    // try first with full version
+    vers.push_back( string( "." ) + ver );
+    // then try to remove tiny version number
+    string::size_type x = ver.rfind( '.' );
     if( x != string::npos )
-    {
-      string slname = lname.substr( 0, x );
-      if ( loadlib2( slname, verbose ) )
-        return true;
-#ifdef _WIN32
-      else
-        {
-          // try to completely remove version number
-          x = lname.rfind( string( "." ) + ver );
-          if( x != string::npos )
-          {
-            slname = lname.substr( 0, x );
-            return loadlib2( slname, verbose );
-          }
-        }
-#endif
-    }
+      vers.push_back( string( "." ) + ver.substr( 0, x ) );
   }
+  vers.push_back( "" ); // also try without version num
+
+  if( !ver.empty() && sopos == lname.length() - 3 )
+  {
+#ifdef _WIN32
+    lname.replace( sopos, 3, ".dll" );
+#endif
+    // lname += string( "." ) + ver;
+    for( iv=vers.begin(); iv!=ev; ++iv )
+      liblist.push_back( lname + *iv );
+#ifdef __APPLE__
+    lname = libname.substr( 0, sopos );
+    for( iv=vers.begin(); iv!=ev; ++iv )
+      liblist.push_back( lname + *iv + ".so" );
+#endif
+  }
+#ifdef _WIN32
+  else
+  {
+    sopos = lname.rfind( ".so." );
+    if( sopos != string::npos )
+    {
+      lname.replace( sopos, 4, ".dll." );
+    }
+    liblist.push_back( lname );
+  }
+#endif
+
+  list<string>::iterator il, el = liblist.end();
+  for( il=liblist.begin(); il!=el; ++il )
+    if( loadlib2( *il, verbose ) )
+      return true;
+  
+  // else, not found
+  return false;
 
 #else	// CARTO_NO_DLOPEN
 
