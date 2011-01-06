@@ -3,7 +3,7 @@ BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
 set(AIMSVIDA_HEADERS ${_headers} PARENT_SCOPE)
 add_library( aimsvida SHARED ${_sources} )
 add_dependencies( aimsvida ${headersTarget} )
-set_property( TARGET aimsvida PROPERTY VERSION ${${${PROJECT_NAME}_VERSION}} )
+set_property( TARGET aimsvida PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 target_link_libraries( aimsvida aimsdata vidaIO )
 BRAINVISA_INSTALL( TARGETS aimsvida
               DESTINATION lib
