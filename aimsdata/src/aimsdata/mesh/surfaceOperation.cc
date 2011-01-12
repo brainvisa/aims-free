@@ -2736,25 +2736,31 @@ float SurfaceManip::meshVolume( const AimsSurfaceTriangle & surf )
     A = x.dot( p1 );
     B = x.dot( p2 );
     C = x.dot( p3 );
+
     // A,B,C can be either positive or negative and can lead to
     // "negative" volumes according to the orientation and origin
     q1 = p1 - x * A;
     q2 = p2 - x * B;
     q3 = p3 - x * C;
+
     // (q1, q2, q3) is the projected triangle
     ca = q3 - q1;
     cb = q3 - q2;
     BC = cb.norm();
-    cb.normalize();
-    // projected triangle height
-    h = ( ca - cb * cb.dot( ca ) ).norm();
 
-    D = ( B + C ) / 2;
-    // volume between original triangle and its projection
-    // the sign compares the normal to the triangle and x
-    volume += ( crossed( ca, cb ).dot( x ) > 0 ? 1 : -1 )
-        * BC * h * ( ( D - A ) / 3 + A/2 );
-    // (obtained by the integral along h of the trapezium orthogonal to h)
+    if ( BC != 0 )
+    {
+      cb.normalize();
+      // projected triangle height
+      h = ( ca - cb * cb.dot( ca ) ).norm();
+  
+      D = ( B + C ) / 2;
+      // volume between original triangle and its projection
+      // the sign compares the normal to the triangle and x
+      volume += ( crossed( ca, cb ).dot( x ) > 0 ? 1 : -1 )
+          * BC * h * ( ( D - A ) / 3 + A/2 );
+      // (obtained by the integral along h of the trapezium orthogonal to h)
+    }
   }
 
   return volume;
