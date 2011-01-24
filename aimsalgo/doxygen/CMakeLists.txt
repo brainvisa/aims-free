@@ -9,4 +9,5 @@ IF ( DOXYGEN_FOUND )
   BRAINVISA_GENERATE_DOXYGEN_DOC( _doxygenInput  head_aimsalgo.html aims.gif
                                   INPUT_PREFIX "${CMAKE_BINARY_DIR}/include/aims"
                                   COMPONENT ${component_name} )
+  add_dependencies(aimsalgo-doxygen aimsdata-doxygen graph-doxygen cartobase-doxygen cartodata-doxygen)
 ENDIF ( DOXYGEN_FOUND )

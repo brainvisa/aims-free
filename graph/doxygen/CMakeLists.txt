@@ -8,4 +8,5 @@ IF ( DOXYGEN_FOUND )
   set( DOXYFILE_TAGFILES "${CMAKE_BINARY_DIR}/share/doc/cartobase-${aims_version}/doxygen/cartobase.tag=../../cartobase-${aims_version}/doxygen")
   BRAINVISA_GENERATE_DOXYGEN_DOC( _doxygenInput  head_graph.html graph.gif
                                   COMPONENT "${component_name}" )
+  add_dependencies( ${component_name}-doxygen cartobase-doxygen )
 ENDIF ( DOXYGEN_FOUND )
