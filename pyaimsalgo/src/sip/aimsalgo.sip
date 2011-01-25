@@ -1,6 +1,7 @@
 %Import aims.sip
 
-%Module aimsalgosip
+%Module soma.aimsalgo.aimsalgosip
+
 %Include moment_DOUBLE.sip
 %Include moment_FLOAT.sip
 %Include moment_S16.sip

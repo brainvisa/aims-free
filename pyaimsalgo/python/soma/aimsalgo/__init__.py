@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -30,8 +31,19 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-#import copy
-from soma.importer			import ExtendedImporter
+from soma.importer import ExtendedImporter
 
-ExtendedImporter().importInModule( 'aimsalgo', globals(), locals(), 'aimsalgosip' )
-ExtendedImporter().importInModule( 'aimsalgo', globals(), locals(), 'aimsalgosip', ['aimsalgosip.aimsalgo'] )
+ExtendedImporter().importInModule( '', globals(), locals(), 'aimsalgosip' )
+ExtendedImporter().importInModule( '', globals(), locals(), 'aimsalgosip', ['aimsalgosip.aimsalgo'] )
+
+# TODO: try to fix this using ExtendedImporter
+from soma import aims
+# some classes are in the aims (C++) namespace and are imported in aimssip.aims
+for k, v in aims.__dict__.iteritems():
+  if hasattr( v, '__module__' ) and v.__module__ == aimsalgosip.__name__:
+    try:
+      v.__module__ = 'soma.aims'
+    except:
+      pass
+del aims
+
