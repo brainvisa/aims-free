@@ -16,4 +16,5 @@ IF ( DOXYGEN_FOUND )
   BRAINVISA_GENERATE_DOXYGEN_DOC( _headers 
                                   INPUT_PREFIX "${CMAKE_BINARY_DIR}/include/${component_name}" 
                                   COMPONENT "${component_name}")
+  add_dependencies( ${component_name}-doxygen cartobase-doxygen )
 ENDIF ( DOXYGEN_FOUND )

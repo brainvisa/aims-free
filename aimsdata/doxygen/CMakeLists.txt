@@ -6,7 +6,7 @@ IF ( DOXYGEN_FOUND )
   set( DOXYFILE_PREDEFINED "${AIMS_DEFINITIONS}")
   set(aims_version "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}")
   set( DOXYFILE_TAGFILES "${CMAKE_BINARY_DIR}/share/doc/graph-${aims_version}/doxygen/graph.tag=../../graph-${aims_version}/doxygen ${CMAKE_BINARY_DIR}/share/doc/cartobase-${aims_version}/doxygen/cartobase.tag=../../cartobase-${aims_version}/doxygen ${CMAKE_BINARY_DIR}/share/doc/cartodata-${aims_version}/doxygen/cartodata.tag=../../cartodata-${aims_version}/doxygen")
-  BRAINVISA_GENERATE_DOXYGEN_DOC( _doxygenInput head_aims.html aims.gif
+  BRAINVISA_GENERATE_DOXYGEN_DOC( _doxygenInput head_aims.html aims.gif bvstyle.css
                                   INPUT_PREFIX "${CMAKE_BINARY_DIR}/include/aims"
                                   COMPONENT "${component_name}" )
   add_dependencies( ${component_name}-doxygen graph-doxygen cartobase-doxygen cartodata-doxygen)
