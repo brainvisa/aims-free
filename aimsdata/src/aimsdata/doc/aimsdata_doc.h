@@ -97,7 +97,7 @@
 
   \section aimsdata_building Building:
 
-  \ref compiling
+  Use cmake. More information on <a href="https://bioproj.extra.cea.fr/redmine/projects/brainvisa-devel/wiki/How_to_compile_BrainVISA_projects">this wiki page on Bioproj</a>, our Redmine based projects platform. To know more about Bioproj, see <a href="http://brainvisa.info/repository.html">this page on BrainVISA website</a>.
 
 
   \section aimsdata_maincontents Main contents:
@@ -129,16 +129,7 @@
 
   - <b><a href="../html/en/changelog.html">Change Log</a></b>
 
-  - <b><a href="TODO">To Do list</a></b>
-
-*/
-
-/*! \page compiling Compiling
-
-  Use build-config...
-
-Normally, the configuration and compilation is all handled by the 
-\c build_config utility.
+  - <b>To do list:</b> <a href="https://bioproj.extra.cea.fr/redmine/projects/brainvisa-aims/issues">issues in Bioproj</a>.
 
 */
 
