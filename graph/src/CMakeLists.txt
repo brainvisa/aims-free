@@ -1,5 +1,5 @@
 add_subdirectory(lib)
-
+set(GRAPH_HEADERS ${GRAPH_HEADERS} PARENT_SCOPE)
 #------------------------------------------------------------------------------
 # Build targets for test commands by looking into "*_test" directories
 #------------------------------------------------------------------------------
