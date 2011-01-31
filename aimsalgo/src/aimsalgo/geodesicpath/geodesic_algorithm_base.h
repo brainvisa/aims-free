@@ -51,6 +51,9 @@ public:
                   SurfacePoint& destination,
                   std::vector<SurfacePoint>& path,std::vector<int>& indexVertex);
 
+  double length(std::vector<SurfacePoint>& path);
+  void print_info_about_path(std::vector<SurfacePoint>& path);
+
   virtual unsigned best_source(SurfacePoint& point,     //after propagation step is done, quickly find what source this point belongs to and what is the distance to this source
                  double& best_source_distance) = 0;
 
@@ -85,7 +88,7 @@ protected:
   double m_propagation_distance_stopped;    //at what distance (if any) the propagation algorithm stopped
 };
 
-inline double length(std::vector<SurfacePoint>& path)
+inline double GeodesicAlgorithmBase::length(std::vector<SurfacePoint>& path)
 {
   double length = 0;
   if(!path.empty())
@@ -98,7 +101,7 @@ inline double length(std::vector<SurfacePoint>& path)
   return length;
 }
 
-inline void print_info_about_path(std::vector<SurfacePoint>& path)
+inline void GeodesicAlgorithmBase::print_info_about_path(std::vector<SurfacePoint>& path)
 {
   std::cout << "number of the points in the path = " << path.size()
         << ", length of the path = " << length(path)

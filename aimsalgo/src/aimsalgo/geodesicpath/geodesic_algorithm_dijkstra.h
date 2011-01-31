@@ -83,7 +83,7 @@ protected:
 									  double threshold_distance);	//list only the nodes whose current distance is larger than the threshold
 };
 
-void GeodesicAlgorithmDijkstra::list_nodes_visible_from_source(MeshElementBase* p,
+inline void GeodesicAlgorithmDijkstra::list_nodes_visible_from_source(MeshElementBase* p,
 															   std::vector<node_pointer>& storage)
 {
 	assert(p->type() != UNDEFINED_POINT);
