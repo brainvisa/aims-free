@@ -31,8 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef AIMS_GRAPH_GRAPHMANIP_H
-#define AIMS_GRAPH_GRAPHMANIP_H
+#ifndef AIMS_APC_READER_H
+#define AIMS_APC_READER_H
 
 #include <cartobase/object/object.h>
 

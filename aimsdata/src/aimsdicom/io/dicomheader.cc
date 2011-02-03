@@ -1,3 +1,10 @@
+/* Copyright (c) 1995-2005 CEA
+ *
+ *  This software and supporting documentation were developed by
+ *      CEA/DSV/SHFJ
+ *      4 place du General Leclerc
+ *      91401 Orsay cedex
+ *      France
 /* This software and supporting documentation are distributed by
  *     Institut Federatif de Recherche 49
  *     CEA/NeuroSpin, Batiment 145,
@@ -398,6 +405,7 @@ int DicomHeader::read()
 	setProperty("voxel_size", vs ) ;
 	std::cout << "VS Z = " << vs[2] << std::endl ;
 	if( moda == "PT" ){
+	  setProperty( "data_type", string( "FLOAT" ) );
           getProperty( "acquisition_mode", mode ) ;
           vector<int> startTimes, durationTimes ;
 	  int st, dt ;

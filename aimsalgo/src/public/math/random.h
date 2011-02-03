@@ -99,7 +99,7 @@ T UniformRandom(const T &min,const T &max)
 inline
 short UniformRandom( const short& min, const short& max )
 {
-  return min + short( UniformRandom() * (max-min+0.99) );
+  return min + short( UniformRandom() * (max-min+0.99999) );
 }
 
 
@@ -107,14 +107,14 @@ inline
 unsigned short
 UniformRandom( const unsigned short& min, const unsigned short& max )
 {
-  return min + (unsigned short)( UniformRandom() * (max-min+0.99) );
+  return min + (unsigned short)( UniformRandom() * (max-min+0.99999) );
 }
 
 
 inline
 int UniformRandom( const int& min, const int& max )
 {
-  return min + int( UniformRandom() * (max-min+0.99) );
+  return min + int( UniformRandom() * (max-min+0.99999) );
 }
 
 
@@ -122,14 +122,14 @@ inline
 unsigned int
 UniformRandom( const unsigned int& min, const unsigned int& max )
 {
-  return min + (unsigned int)( UniformRandom() * (max-min+0.99) );
+  return min + (unsigned int)( UniformRandom() * (max-min+0.99999) );
 }
 
 
 inline
 long UniformRandom( const long& min, const long& max )
 {
-  return min + long( UniformRandom() * (max-min+0.99) );
+  return min + long( UniformRandom() * (max-min+0.99999) );
 }
 
 
@@ -137,7 +137,7 @@ inline
 unsigned long
 UniformRandom( const unsigned long& min, const unsigned long& max )
 {
-  return min + (unsigned long)( UniformRandom() * (max-min+0.99) );
+  return min + (unsigned long)( UniformRandom() * (max-min+0.99999) );
 }
 
 

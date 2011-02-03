@@ -60,8 +60,7 @@ void AimsVoronoiPreparation( AimsData<int16_t>& vol,
 }
 
 
-void AimsRestoreVol( AimsData<int16_t>& vol, 
-                     int16_t val_domain, int16_t val_outside)
+void AimsRestoreVol( AimsData<int16_t>& vol, int16_t val_domain, int16_t val_outside)
 {
   int x, y, z;
 

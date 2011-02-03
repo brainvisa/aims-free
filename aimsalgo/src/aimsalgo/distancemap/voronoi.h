@@ -40,8 +40,7 @@
 template <class T> class AimsData;
 
 AIMSALGO_API AimsData<int16_t> 
-AimsVoronoiFrontPropagation( AimsData<int16_t>& vol,
-                             int16_t val_domain, int16_t val_outside,
+AimsVoronoiFrontPropagation( AimsData<int16_t>& vol, int16_t val_domain, int16_t val_outside,
                              int xm, int ym, int zm, float mult_factor );
 
 #endif

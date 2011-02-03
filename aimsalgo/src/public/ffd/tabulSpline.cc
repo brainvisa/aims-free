@@ -52,10 +52,9 @@ TabulSpline::TabulSpline( string name, int  order, int length) :
   _splineCoef          = new float[ _splineTabLength ] ;
   _derivatedSplineCoef = new float[ _splineTabLength ] ;
   
-  cout << "Filling Tables (length = " << _splineTabLength  << ")" << endl ;
   for(int i=0; i < _splineTabLength; i++)
     {
-      float parameter = 2.0 * (float) i / _splineTabLength ;
+      float parameter = 4.0 * (float) i / (_splineTabLength -1) ;
 
       _splineCoef[i] = betaSpline3( parameter );
       _derivatedSplineCoef[i] = betaSpline2( parameter + 0.5 ) -

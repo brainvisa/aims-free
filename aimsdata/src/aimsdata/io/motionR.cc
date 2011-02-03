@@ -74,7 +74,6 @@ void MotionReader::read( Motion& motion )
   }
 
   AsciiDataSourceTraits<float>		fir;
-
   if( !StreamUtil::skip( is, " \t\n\r" ) )
     throw wrong_format_error( _name );
   if( !fir.read( is, motion.translation().item( 0 ) ) )
@@ -84,7 +83,7 @@ void MotionReader::read( Motion& motion )
   if( !fir.read( is, motion.translation().item( 1 ) ) )
     throw wrong_format_error( _name );
   if( !StreamUtil::skip( is, " \t\n\r" ) )
-    throw wrong_format_error( _name );
+    throw wrong_format_error( _name  );
   if( !fir.read( is, motion.translation().item( 2 ) ) )
     throw wrong_format_error( _name );
 

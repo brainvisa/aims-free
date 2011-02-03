@@ -512,7 +512,7 @@ SplineResampler< T >::iirConvolveMirror( std::vector< double >& data ) const
     ptrD2 = ptrD1 ++;
     *ptrD1++ = x0;
     x0 = *( ptrD2++ + size );
-    while ( ptrD1 < dataEnd )
+    while ( ptrD1 < dataEnd - 1 ) // while ( ptrD1 < dataEnd )
     {
 
       *ptrD1++ += *ptrD2++ * *p;

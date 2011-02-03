@@ -118,8 +118,7 @@ doit( Process & p, const string & fname, Finder & f )
       cerr << "AimsSumFrame : summing frames #" << parsed_start+1
 	         << " to #"  << parsed_end << endl;
 
-      AimsData< float > *sum;
-      sum = new AimsData<float>(series.dimX(), series.dimY(), series.dimZ(),1);
+      AimsData< float > * sum = new AimsData<float>( series.dimX(), series.dimY(), series.dimZ(), 1 );
 
       sum->setSizeXYZT(series.sizeX(), series.sizeY(), series.sizeZ(),1);
       sum->setHeader( series.header()->cloneHeader() ) ;
@@ -140,19 +139,19 @@ doit( Process & p, const string & fname, Finder & f )
            if( int(st.size()) == series.dimT() && 
               int(dt.size()) == series.dimT())
             {
-  	          vector<int> sumSt(1) ;
-              sumSt[0] = st[parsed_start] ;
-  	          sumpoh->setProperty("start_time", sumSt) ;
-       	      vector<int> sumDt(1, 0) ;
-	            for( int l = parsed_start; l < parsed_end; ++l )
-	              sumDt[0] += dt[l] ;
-	            sumpoh->setProperty("duration_time", sumDt) ;
-	            sum->setHeader(sumpoh) ;
-	            int i, j, k, l;
-	            for (l=parsed_start; l< parsed_end; l++)
-	              ForEach3d( (*sum),i,j,k) 
-		          (*sum)(i,j,k) += series(i,j,k,l) * dt[l] / sumDt[0] ;
-	          }
+  	       vector<int> sumSt(1) ;
+               sumSt[0] = st[parsed_start] ;
+  	       sumpoh->setProperty("start_time", sumSt) ;
+       	       vector<int> sumDt(1, 0) ;
+	       for( int l = parsed_start; l < parsed_end; ++l )
+	         sumDt[0] += dt[l] ;
+	       sumpoh->setProperty("duration_time", sumDt) ;
+	       sum->setHeader(sumpoh) ;
+	       int i, j, k, l;
+	       for (l=parsed_start; l< parsed_end; l++)
+	         ForEach3d( (*sum), i, j, k ) 
+		   (*sum)(i,j,k) += float(series(i,j,k,l)) * float(dt[l]) / float(sumDt[0]) ;
+	    }
           } else
 	    throw runtime_error("Image i not an PET image !") ;
       }

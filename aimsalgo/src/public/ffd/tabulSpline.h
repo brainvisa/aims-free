@@ -51,9 +51,9 @@ class TabulSpline
                TabulSpline( std::string name, int  order=3, int length=65537);
   virtual     ~TabulSpline() ;
 
-  float        spline3( double ) ;
-  float        spline3derivative( double ) ;
-  float        dump( int i ) {return _splineCoef[i];}
+  float        spline3( double ) const ;
+  float        spline3derivative( double ) const ;
+  float        dump( int i ) const {return _splineCoef[i];}
 
  private:
   std::string _name;
@@ -65,21 +65,33 @@ class TabulSpline
 
 
 inline float 
-TabulSpline::spline3( double u ) 
+TabulSpline::spline3( double u ) const
 {
 /*   if ((u>2) || (u < -2)) */
 /*     cout << "valeur de u " << u << endl; */
-
-  return _splineCoef[ static_cast<int>( 0.5*fabs(u)*_splineTabLength ) ] ;
+  int index = static_cast<int>( 0.25*fabs(u)*(_splineTabLength-1) ) ;
+  
+  if( index < 0 || index >= _splineTabLength ){
+     //std::cerr << "Spline3 : Index " << index << " corresponding to parameter " << u << " out of tabulspline : " << _splineTabLength << std::endl ;
+     return 0. ;
+  }
+  return _splineCoef[ index ] ;
 }
 
 
 inline float 
-TabulSpline::spline3derivative( double u) 
+TabulSpline::spline3derivative( double u) const
 {
+  int index = static_cast<int>(0.25*fabs(u)*(_splineTabLength-1 ) ) ;
+
+  if( index < 0 || index >= _splineTabLength ){
+     //std::cerr << "Spline3 derivatives : Index " << index << " corresponding to parameter " << u << " out of tabulspline" << _splineTabLength << std::endl ;
+     return 0. ;
+  }
+  
   if (u > 0.0)
-    return _derivatedSplineCoef[ static_cast<int>(0.5*u*_splineTabLength ) ];
+    return _derivatedSplineCoef[ index ];
   else
-    return(- _derivatedSplineCoef[ static_cast<int>(-0.5*u*_splineTabLength)]);
+    return(- _derivatedSplineCoef[ index ]);
 }
 #endif
