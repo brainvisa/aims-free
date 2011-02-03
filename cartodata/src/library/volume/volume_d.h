@@ -251,8 +251,8 @@ namespace carto
 
     // adding size filter to headered and connecting signal to slot
     Headered::addPropertyFilter( sizeRcPropertyFilter );
-    connect( sizeRcPropertyFilter->getName(),
-             ::sigc::mem_fun( *this, &Volume< T >::slotSizeChanged ) );
+    Headered::connect( sizeRcPropertyFilter->getName(),
+                       ::sigc::mem_fun( *this, &Volume< T >::slotSizeChanged ) );
 
   }
 

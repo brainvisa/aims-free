@@ -35,6 +35,7 @@
 #include <cstdlib>
 #include <cartobase/uuid/uuid.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #if defined( _WIN32 )
 

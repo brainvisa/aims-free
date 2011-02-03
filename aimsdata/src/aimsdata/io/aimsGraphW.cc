@@ -43,6 +43,7 @@
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/file.h>
 #include <stdio.h>
+#include <time.h>
 
 using namespace aims;
 using namespace carto;
