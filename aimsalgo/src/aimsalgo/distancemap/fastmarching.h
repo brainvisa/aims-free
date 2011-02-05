@@ -74,7 +74,8 @@ namespace aims
        the work region and the seeds: the fast marching itself only uses
        6-connectivity.
     */
-    FastMarching( Connectivity::Type c, bool mid_interface = false );
+    FastMarching( Connectivity::Type c = Connectivity::CONNECTIVITY_26_XYZ,
+                  bool mid_interface = false );
     ~FastMarching();
     void setVerbose( bool x );
     bool verbose() const;
