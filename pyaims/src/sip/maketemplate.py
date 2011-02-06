@@ -75,8 +75,9 @@ def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C', moc=No
       cppcmd.append( '-DQT_VERSION=' + hex( qver ) )
       #print >> sys.stderr, 'Qt version:', hex( qver )
     except Exception, e:
-      print e
-      #pass # Qt not available ?
+      if not quiet:
+        print e
+      pass # Qt not available ?
     if not quiet:
         print ' '.join( cppcmd )
     #fo2, cppout = os.popen2( cppcmd )

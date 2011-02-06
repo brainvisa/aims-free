@@ -108,8 +108,9 @@ try:
   x = re.search( '^.*\(Qt ([^\)]*)\).*$', l ).group(1)
   qt_version = [ convert_string_to_int(k) for k in x.split( '.' ) ]
 except Exception, e:
-  print e
-  qt_version = [ 3, 0, 0 ] # Qt not available ?
+  if not options.listFilesOnly:
+    print e
+  qt_version = [ 4, 0, 0 ] # Qt not available ?
 
 # read generatedtypes file
 # expected to fill in the 'todo' dictionary variable
@@ -125,6 +126,7 @@ typesmtime = 0
 for x in options.typessub:
   typesmtime = max( typesmtime, os.stat( x )[ stat.ST_MTIME ] )
   execfile( x, globals(), globals() )
+
 typesmtime = max( typesmtime,
   os.stat( maketemplate.__file__ )[ stat.ST_MTIME ] )
 if os.path.exists( sys.argv[0] ):
