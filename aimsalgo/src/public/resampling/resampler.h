@@ -67,6 +67,7 @@ public:
 
   void setRef( const AimsData<T>& ref ) { _ref = &ref; }
   void setDefaultValue( T val ) { _defval = val; }
+  void setDefaultValue( const std::vector<double> val );
 
 protected:
 
