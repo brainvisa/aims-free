@@ -445,12 +445,14 @@ void Finder::launchException()
 
 void Finder::postProcessHeader( carto::Object hdr )
 {
+  initPrivate();
   spmAttributesConverter( *hdr );
 }
 
 
 set<string> Finder::extensions( const string & format )
 {
+  initPrivate();
   set<string> exts;
   map<string, list<string> >::const_iterator ie, ee = pd->extensions.end();
   list<string>::const_iterator ifo, efo;
