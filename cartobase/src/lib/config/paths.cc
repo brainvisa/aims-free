@@ -143,107 +143,113 @@ const string & Paths::tempDir()
   return _memmap;
 }
 
-#ifdef USE_SHARE_CONFIG
-const string & Paths::globalShared()
-{
-  static string	_shared;
-
-  if( _shared.empty() ) {
-    const char *env_path = getenv( "BRAINVISA_SHARE" );
-    if( ! env_path ) {
-      env_path = DEFAULT_BRAINVISA_SHARE;
-    }
-    _shared = string( env_path ); // + FileUtil::separator() + BRAINVISA_SHARE_DIRECTORY;
-  }
-  return _shared;
-}
-
-#else // #ifdef USE_SHARE_CONFIG
-
 const string & Paths::globalShared()
 {
   static string	_shared;
 
   if( _shared.empty() )
-    {
-      const char* env_path = getenv( "BRAINVISA_SHARE" );
-      Directory	d( "/" );
+  {
+    list<string> plist;
+    const char *env_path = getenv( "BRAINVISA_SHARE" );
+    if( env_path )
+      plist.push_back( env_path );
+    env_path = getenv( "SHFJ_SHARED_PATH" );
+    if( env_path )
+      plist.push_back( env_path );
+#ifdef USE_SOMA_CONFIG
+    env_path = DEFAULT_BRAINVISA_SHARE;
+    if( env_path )
+      plist.push_back( env_path );
+#endif
 
-      if( !env_path )
-        env_path = getenv( "SHFJ_SHARED_PATH" );
-      if( env_path )
-        _shared = env_path;
-      else
-        {
-#ifdef USE_SOMA_CONFIG
-          d.chdir( DEFAULT_BRAINVISA_SHARE );
-          if ( d.isValid() ) {
-            _shared = DEFAULT_BRAINVISA_SHARE;
-          } else {
-#endif  // #ifdef USE_SOMA_CONFIG
-          // look in PATH
-          const char *path = getenv( "PATH" );
-          if( path )
-          {
-            list<string> plist = FileUtil::filenamesSplit( path,
-                string( "" ) + FileUtil::pathSeparator() );
-            list<string>::const_iterator ip, ep = plist.end();
-            for( ip=plist.begin(); ip!=ep; ++ip )
-            {
-              string p;
-              if( ip->length() >= 4
-                  && ( ip->substr( ip->length()-4, 4 ) == "/bin"
-#ifdef _WIN32
-                  || ip->substr( ip->length()-4, 4 ) == "\\bin"
-#endif
-                     ) )
-                p = ip->substr( 0, ip->length() - 4 );
-              else if( ip->length() >= 19
-                       && ( ip->substr( ip->length()-19, 19 )
-                       == "/bin/commands-links"
-#ifdef _WIN32
-                       || ip->substr( ip->length()-19, 19 )
-                       == "\\bin\\commands-links"
-#endif
-                          ) )
-                p = ip->substr( 0, ip->length() - 19 );
-              if( p.empty() )
-                p = "/";
-              p += string( "" ) + FileUtil::separator() + "share";
-              d.chdir( p );
-              if( d.isValid() )
-              {
-                _shared = p;
-                break;
-              }
-            }
-          }
-#ifdef USE_SOMA_CONFIG
-          }
-#endif // #ifdef USE_SOMA_CONFIG
-        }
-      if( _shared.empty() )
-      {
-        cerr << "no BRAINVISA_SHARE env variable!\n";
-#ifdef _WIN32
-        _shared = "C:\\appli\\shared-main";
+#ifdef USE_SHARE_CONFIG
+    string bvshare = BRAINVISA_SHARE_DIRECTORY;
 #else
-        _shared = "/home/appli/shared-main";
+    string bvshare = "brainvisa-share-" + cartobaseShortVersion();
+#endif
+
+    Directory d( "/" );
+    list<string>::const_iterator ip, ep = plist.end();
+    for( ip=plist.begin(); ip!=ep; ++ip )
+    {
+      string p;
+      d.chdir( *ip + FileUtil::separator() + bvshare );
+      if ( d.isValid() )
+      {
+        _shared = *ip;
+        return _shared;
+      }
+    }
+
+    // look in argv[0] and PATH
+    string search;
+    if( !argv0().empty() )
+    {
+      if( !search.empty() )
+        search += FileUtil::pathSeparator();
+      search = FileUtil::dirname( argv0() );
+    }
+    const char *path = getenv( "PATH" );
+    if( path )
+    {
+      if( !search.empty() )
+        search += FileUtil::pathSeparator();
+      search += path;
+    }
+
+    plist = FileUtil::filenamesSplit( search,
+      string( "" ) + FileUtil::pathSeparator() );
+    for( ip=plist.begin(), ep=plist.end(); ip!=ep; ++ip )
+    {
+      string p;
+      if( ip->length() >= 4
+          && ( ip->substr( ip->length()-4, 4 ) == "/bin"
+#ifdef _WIN32
+          || ip->substr( ip->length()-4, 4 ) == "\\bin"
+#endif
+        ) )
+        p = ip->substr( 0, ip->length() - 4 );
+      else if( ip->length() >= 19
+               && ( ip->substr( ip->length()-19, 19 )
+                 == "/bin/commands-links"
+#ifdef _WIN32
+               || ip->substr( ip->length()-19, 19 )
+                 == "\\bin\\commands-links"
+#endif
+               ) )
+        p = ip->substr( 0, ip->length() - 19 );
+      if( p.empty() )
+        p = "/";
+      p += string( "" ) + FileUtil::separator() + "share";
+      d.chdir( p + FileUtil::separator() + bvshare );
+      if( d.isValid() )
+      {
+        _shared = p;
+        break;
+      }
+    }
+
+    if( _shared.empty() )
+    {
+      cerr << "no BRAINVISA_SHARE env variable!\n";
+#ifdef _WIN32
+      _shared = "C:\\brainvisa\\share";
+#else
+      _shared = "/usr/local/share";
+      d.chdir( _shared );
+      if( !d.isValid() )
+      {
+        _shared = "/usr/local/share";
         d.chdir( _shared );
         if( !d.isValid() )
-          {
-            _shared = "/usr/local/share";
-            d.chdir( _shared );
-            if( !d.isValid() )
-              _shared = "/usr/share";
-          }
-#endif
+          _shared = "/usr/share";
       }
+#endif
+    }
   }
 
   return _shared;
 }
-#endif // #ifdef USE_SHARE_CONFIG
 
 
 const string & Paths::shfjShared()
@@ -411,4 +417,28 @@ string Paths::findResourceFile( const string & filename,
 
   return "";
 }
+
+
+namespace
+{
+  string & argv0_rw()
+  {
+    static string argv0;
+    return argv0;
+  }
+}
+
+
+const string & Paths::argv0()
+{
+  return argv0_rw();
+}
+
+
+void Paths::setArgv0( const string & argv0 )
+{
+  string & a0 = argv0_rw();
+  a0 = argv0;
+}
+
 

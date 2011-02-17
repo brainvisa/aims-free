@@ -42,11 +42,11 @@ namespace carto
 
   /** Paths to configuration / shared data directories
 
-  The functions in Paths provide a portable access to the paths of 
-  useful directories that may depend on the site or user configuration, or on 
+  The functions in Paths provide a portable access to the paths of
+  useful directories that may depend on the site or user configuration, or on
   environment variables (such as \c BRAINVISA_SHARE or \c HOME ).
 
-  Path is implemented as a namespace rather than a class with static methods 
+  Path is implemented as a namespace rather than a class with static methods
   so that it can easily be extended in upper-level libraries.
   */
   namespace Paths
@@ -55,14 +55,14 @@ namespace carto
     const std::string& home();
     /// Temporary directory used for general usage
     const std::string& tempDir();
-    /** Temporary directory used for memory mapping with copy - this directory 
+    /** Temporary directory used for memory mapping with copy - this directory
         has better be large
     */
     const std::string& memmap();
     /// The base shared directory for all cartograph / SHFJ data
     const std::string& globalShared();
-    /** Shared directory for SHFJ-specific data. Depending on the 
-        installation and configuration, this may be the same as the 
+    /** Shared directory for SHFJ-specific data. Depending on the
+        installation and configuration, this may be the same as the
         globalShared() directory.
     */
     const std::string& shfjShared();
@@ -94,6 +94,10 @@ namespace carto
                                               const std::string & project = "",
                                               const std::string & version = ""
                                             );
+    /** argv[0], ie executable name and path; only available when a
+        CartoApplication has been built */
+    const std::string &argv0();
+    void setArgv0( const std::string & argv0 );
   }
 
 }

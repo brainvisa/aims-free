@@ -36,6 +36,7 @@
 #include <cartobase/config/info.h>
 #include <cartobase/plugin/plugin.h>
 #include <cartobase/config/verbose.h>
+#include <cartobase/config/paths.h>
 #include <cartobase/stream/fileutil.h>
 #include <fstream>
 
@@ -70,9 +71,9 @@ unexpected_option::unexpected_option( const string &optionName ) :
 ///////////////////////////////
 
 //-----------------------------------------------------------------------------
-unexpected_option_value::unexpected_option_value( const string &optionName, 
+unexpected_option_value::unexpected_option_value( const string &optionName,
 						  const string &value ) :
-  runtime_error( string("unexpected value for option \"") + optionName + 
+  runtime_error( string("unexpected value for option \"") + optionName +
 	       "\" (" + value + ")" )
 {
 }
@@ -136,7 +137,7 @@ namespace
             if( ( c != ' ' && c != '\t' ) || !line.empty() )
               line += c;
           }
-        while( !line.empty() && 
+        while( !line.empty() &&
                ( ( c = line[ line.length() - 1 ] ) == ' ' || c == '\t' ) )
           line.erase( line.length() - 1, 1 );
         if( !line.empty() )
@@ -181,8 +182,8 @@ void OptionsParser::pushOption( OptionBase *opt )
 void OptionsParser::parse()
 {
   string	optionFile;
-  addOption( optionFile, "--optionsfile", "Read additional commandline " 
-             "options from the specified file (one switch or value per line)", 
+  addOption( optionFile, "--optionsfile", "Read additional commandline "
+             "options from the specified file (one switch or value per line)",
              true );
 
   // Parse command line
@@ -239,7 +240,7 @@ void OptionsParser::parse()
 //-----------------------------------------------------------------------------
 void OptionsParser::check()
 {
-  // Check 
+  // Check
   for( OptionList::iterator i = options.begin(); i != options.end(); ++i ) {
     (*i)->check();
   }
@@ -317,16 +318,17 @@ static BoolOrNumber<int> verboseParameter( verbose );
 ///////////////////////
 
 //-----------------------------------------------------------------------------
-CartoApplication::CartoApplication( int argc, const char **argv, 
+CartoApplication::CartoApplication( int argc, const char **argv,
                                     const string &documentation ) :
   OptionsParser( argc, argv ),
   _documentation( documentation )
 {
   _name = FileUtil::basename( argv[ 0 ] );
-  addOption( verboseParameter, "--verbose", 
+  Paths::setArgv0( argv[0] );
+  addOption( verboseParameter, "--verbose",
              "Set verbosity level (default = 0, without value = 1)", true );
   --insertIndex;
-  addOption( carto::debugMessageLevel, "--debugLevel", 
+  addOption( carto::debugMessageLevel, "--debugLevel",
              "Set debug information level (default = 0)", true );
   --insertIndex;
 }
@@ -350,7 +352,7 @@ namespace
   //---------------------------------------------------------------------------
   string formatted( const string & in, unsigned indent = 4 )
   {
-    string::size_type	pos = 0, cols = 80, sz = in.size(), p2, ccols = cols, 
+    string::size_type	pos = 0, cols = 80, sz = in.size(), p2, ccols = cols,
       i, skip;
     string	out, prefix;
     char	c;
@@ -424,7 +426,7 @@ void CartoApplication::initialize()
 
   if ( help )
     {
-      cout << endl << "    " << _name << endl 
+      cout << endl << "    " << _name << endl
            << "    ";
       unsigned	i, n = _name.size();
       for( i=0; i<n; ++i )
