@@ -45,5 +45,5 @@ for k, v in aims.__dict__.iteritems():
       v.__module__ = 'soma.aims'
     except:
       pass
-del aims
+del aims, ExtendedImporter, k, v
 
