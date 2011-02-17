@@ -249,44 +249,5 @@ AimsData<T> Resampler<T>::doit( const Motion& motion, int dimX, int dimY,
   return thing;
 }
 
-template <typename T>
-void Resampler<T>::setDefaultValue( const std::vector<double> val )
-{
-  if (val.size() > 0)
-  {
-    _defval = (T)val[ 0 ];
-  }
-  else 
-  {
-    _defval = (T)0;
-  }
-}
-
-template <>
-void Resampler<AimsRGB>::setDefaultValue( const std::vector<double> val )
-{
-  if (val.size() > 2)
-  {
-    _defval = AimsRGB( (uint8_t)val[ 0 ], (uint8_t)val[ 1 ], (uint8_t)val[ 2 ] );
-  }
-  else 
-  {
-    _defval = 0;
-  }
-}
-
-template <>
-void Resampler<AimsRGBA>::setDefaultValue( const std::vector<double> val )
-{
-  if (val.size() > 3)
-  {
-    _defval = AimsRGBA( (uint8_t)val[ 0 ], (uint8_t)val[ 1 ], (uint8_t)val[ 2 ], (uint8_t)val[ 3 ] );
-  }
-  else 
-  {
-    _defval = 0;
-  }
-}
-
 #endif
 

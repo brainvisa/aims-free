@@ -44,7 +44,6 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-
 template<class T>
 static bool doit( Process &, const string &, Finder & );
 
@@ -52,7 +51,7 @@ static bool doit( Process &, const string &, Finder & );
 class Masker : public Process
 {
 public:
-  Masker( const string & maskf, const string & fout, bool doInverse);
+  Masker( const string & maskf, const string & fout, bool doInverse, string defaultval);
 
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
@@ -61,12 +60,13 @@ public:
 private:
   string	filemask;
   string	fileout;
-  bool _doInverse;
+  bool          _doInverse;
+  string        _defaultval;
 };
 
 
-Masker::Masker( const string & maskf, const string & fout, bool doInverse ) 
-  : Process(), filemask( maskf ), fileout( fout ), _doInverse(doInverse)
+Masker::Masker( const string & maskf, const string & fout, bool doInverse, string defaultval ) 
+  : Process(), filemask( maskf ), fileout( fout ), _doInverse(doInverse), _defaultval(defaultval)
 {
   registerProcessType( "Volume", "S8", &doit<int8_t> );
   registerProcessType( "Volume", "U8", &doit<uint8_t> );
@@ -77,6 +77,7 @@ Masker::Masker( const string & maskf, const string & fout, bool doInverse )
   registerProcessType( "Volume", "FLOAT", &doit<float> );
   registerProcessType( "Volume", "DOUBLE", &doit<double> );
   registerProcessType( "Volume", "RGB", &doit<AimsRGB> );
+  registerProcessType( "Volume", "RGBA", &doit<AimsRGBA> );
 }
 
 
@@ -84,9 +85,13 @@ template<class T> bool
 doit( Process & p, const string & fname, Finder & f )
 {
   Masker		& mp = (Masker &) p;
+  T                     dv;
+  stringTo( mp._defaultval, dv );
+
   AimsData<T>		data;
   string		format = f.format();
   Reader<AimsData<T> >	r( fname );
+
   cout << "reading volume...\n";
   if( !r.read( data, 0, &format ) )
     return( false );
@@ -137,7 +142,7 @@ doit( Process & p, const string & fname, Finder & f )
          z<mask.dimZ() &&
          mask(x,y,z,minT) == 0  
          )
-      data( x, y, z, t ) = 0; 
+      data( x, y, z, t ) = dv; 
   }
 
   Writer<AimsData<T> > writer( mp.fileout );
@@ -153,6 +158,7 @@ int main( int argc, const char **argv )
 
   string filein = "", fileout = "", filemask = "";
   bool doInverse = false;
+  string defaultval = "0";
 
 
   AimsApplication app( argc, argv, "Mask an image with another one" );
@@ -160,10 +166,11 @@ int main( int argc, const char **argv )
   app.addOption( fileout, "-o", "output file" ); 
   app.addOption( filemask, "-m", "S16 mask" ); 
   app.addOption( doInverse, "--inv", "use inverse mask image (default=no)" ,true);
+  app.addOption( defaultval, "-d", "Default values for masked pixels [default=0]", true );
   app.initialize(); 
 
 
-  Masker	proc( filemask, fileout, doInverse);
+  Masker	proc( filemask, fileout, doInverse, defaultval );
   if( !proc.execute( filein ) )
     {
       cerr << "Could not process\n";

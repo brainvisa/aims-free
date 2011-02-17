@@ -61,7 +61,7 @@ public:
   Point3df	size;
   string	fout;
   string	resampler;
-  vector<double> defaultval;
+  string        defaultval;
 };
 
 
@@ -69,6 +69,8 @@ template<class T>
 bool doit( Process & p, const string & fname, Finder & f )
 {
   Resamp		& rp = (Resamp &) p;
+  T                     dv;
+  stringTo( rp.defaultval, dv );
 
   // resamplers map
   map<string, int>	resamplers;
@@ -119,7 +121,7 @@ bool doit( Process & p, const string & fname, Finder & f )
 
   Resampler<T> & resampler = *resamp;
   resampler.setRef( data );
-  resampler.setDefaultValue( rp.defaultval );
+  resampler.setDefaultValue( dv );
   
   if ( rp.dx == 0 )
     rp.dx = data.dimX() ;
@@ -168,7 +170,7 @@ int main( int argc, const char **argv )
     Resamp	proc;
     ProcessInput	filein( proc );
     string 	referenceFile;
-    vector<double>	defaultval;
+    string	defaultval = "0";
     
     AimsApplication	app( argc, argv, "Resampling. Applies a " 
                          "transformation matrix to a volume. Performs " 
@@ -200,8 +202,7 @@ int main( int argc, const char **argv )
                    true );
 //     app.addOption( defaultval, "-d", "Default value for borders [default=0]", 
 //                    true );
-    app.addOptionSeries( defaultval, "-d", "Default value for borders [default=0]", 
-                         0, 4 );
+    app.addOption( defaultval, "-d", "Default value for borders [default=0]", true );
     app.alias( "--input", "-i" );
     app.alias( "--output", "-o" );
     app.alias( "--motion", "-m" );
