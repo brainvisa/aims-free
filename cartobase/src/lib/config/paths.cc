@@ -150,6 +150,7 @@ const string & Paths::globalShared()
   if( _shared.empty() )
   {
     list<string> plist;
+    list<string> pbvshare;
     const char *env_path = getenv( "BRAINVISA_SHARE" );
     if( env_path )
       plist.push_back( env_path );
@@ -163,21 +164,26 @@ const string & Paths::globalShared()
 #endif
 
 #ifdef USE_SHARE_CONFIG
-    string bvshare = BRAINVISA_SHARE_DIRECTORY;
+    pbvshare.push_back( BRAINVISA_SHARE_DIRECTORY );
 #else
-    string bvshare = "brainvisa-share-" + cartobaseShortVersion();
+    pbvshare.push_back( "brainvisa-share-" + cartobaseShortVersion() );
+    pbvshare.push_back( "brainvisa-" + cartobaseShortVersion() );
 #endif
 
     Directory d( "/" );
     list<string>::const_iterator ip, ep = plist.end();
+    list<string>::const_iterator is, es = pbvshare.end();
     for( ip=plist.begin(); ip!=ep; ++ip )
     {
-      string p;
-      d.chdir( *ip + FileUtil::separator() + bvshare );
-      if ( d.isValid() )
+      for( is = pbvshare.begin(); is!=es; is++ )
       {
-        _shared = *ip;
-        return _shared;
+        string p;
+        d.chdir( *ip + FileUtil::separator() + (*is) );
+        if ( d.isValid() )
+        {
+          _shared = *ip;
+          return _shared;
+        }
       }
     }
 
@@ -198,34 +204,39 @@ const string & Paths::globalShared()
     }
 
     plist = FileUtil::filenamesSplit( search,
-      string( "" ) + FileUtil::pathSeparator() );
+                                      string( "" ) + FileUtil::pathSeparator() );
     for( ip=plist.begin(), ep=plist.end(); ip!=ep; ++ip )
     {
-      string p;
-      if( ip->length() >= 4
-          && ( ip->substr( ip->length()-4, 4 ) == "/bin"
-#ifdef _WIN32
-          || ip->substr( ip->length()-4, 4 ) == "\\bin"
-#endif
-        ) )
-        p = ip->substr( 0, ip->length() - 4 );
-      else if( ip->length() >= 19
-               && ( ip->substr( ip->length()-19, 19 )
-                 == "/bin/commands-links"
-#ifdef _WIN32
-               || ip->substr( ip->length()-19, 19 )
-                 == "\\bin\\commands-links"
-#endif
-               ) )
-        p = ip->substr( 0, ip->length() - 19 );
-      if( p.empty() )
-        p = "/";
-      p += string( "" ) + FileUtil::separator() + "share";
-      d.chdir( p + FileUtil::separator() + bvshare );
-      if( d.isValid() )
+      for( is = pbvshare.begin(); is!=es; is++ )
       {
-        _shared = p;
-        break;
+        string p;
+        if( ip->length() >= 4
+            && ( ip->substr( ip->length()-4, 4 ) == "/bin"
+#ifdef _WIN32
+            || ip->substr( ip->length()-4, 4 ) == "\\bin"
+#endif
+          ) )
+          p = ip->substr( 0, ip->length() - 4 );
+        else if( ip->length() >= 19
+                && ( ip->substr( ip->length()-19, 19 )
+                  == "/bin/commands-links"
+#ifdef _WIN32
+                || ip->substr( ip->length()-19, 19 )
+                  == "\\bin\\commands-links"
+#endif
+                ) )
+          p = ip->substr( 0, ip->length() - 19 );
+  
+        if( p.empty() )
+          p = "/";
+        p += string( "" ) + FileUtil::separator() + "share";
+        d.chdir( p + FileUtil::separator() + (*is) );
+        if( d.isValid() )
+        {
+          _shared = p;
+          ip = ep;
+          break;
+        }
       }
     }
 
