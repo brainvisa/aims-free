@@ -142,7 +142,7 @@ PSUBDIRS = \
     AimsValidateFit           \
     AimsVeinExtraction             \
     AimsVFilter          \
-#    AimsVoiStat               \
+    AimsVoiStat               \
     AimsVoronoi               \
     AimsZCat
 
