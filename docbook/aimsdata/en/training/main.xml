@@ -23,7 +23,7 @@
 </itemizedlist>
 </para>
 <para>For more information concerning the installation, please refer to <ulink url="#bv_man%book"> the handbook of BrainVISA</ulink>.</para>
-<para>In order to read the help of one commande line, either tape <emphasis> name_commmande -h</emphasis> or refer to the list of commande lines on <ulink url="$PATH_WEB;" target='blank'>http://brainvisa.info</ulink>.</para>
+<para>In order to read the help of one commande line, either tape <emphasis> name_commmande -h</emphasis> or refer to the list of commande lines on <ulink url="&PATH_WEB;" target='blank'>http://brainvisa.info</ulink>.</para>
 </chapter>
 
 
