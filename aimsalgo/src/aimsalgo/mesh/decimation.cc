@@ -131,14 +131,13 @@ void computesFeatureFlag( vector< Point3df >& vertex, Flag& flag,
     n2 = crossed( a2, a3 );
 
     // comparing computed angle with given feature angle
-    if ( n1.dot( n2 ) / sqrt( norm( n1 ) * norm( n2 ) ) <= cosFeatureAngle )
+    if ( n1.dot( n2 ) / ( norm( n1 ) * norm( n2 ) ) <= cosFeatureAngle )
     {
       flag.featureFlag = true;
       break;
     }
   }
 }
-
 
 
 bool computesGoodToDeleteFlags( vector< Facet* >& vfac,
