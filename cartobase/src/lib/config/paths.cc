@@ -204,7 +204,8 @@ const string & Paths::globalShared()
     }
 
     plist = FileUtil::filenamesSplit( search,
-                                      string( "" ) + FileUtil::pathSeparator() );
+                                      string( "" ) + FileUtil::pathSeparator()
+                                    );
     for( ip=plist.begin(), ep=plist.end(); ip!=ep; ++ip )
     {
       for( is = pbvshare.begin(); is!=es; is++ )
@@ -234,7 +235,8 @@ const string & Paths::globalShared()
         if( d.isValid() )
         {
           _shared = p;
-          ip = ep;
+          ip = ep; // leave the ip loop
+          --ip; // will be incremented anyway
           break;
         }
       }
