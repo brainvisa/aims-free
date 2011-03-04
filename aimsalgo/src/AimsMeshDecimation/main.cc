@@ -36,68 +36,16 @@
 #include <aims/mesh/mesh_g.h>
 #include <aims/io/io_g.h> 
 #include <aims/utility/utility_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
-BEGIN_USAGE( usage )
-  "--------------------------------------------------------------------------",
-  "AimsDecimation  -i[nput]  <filein>                                        ",
-  "               [-o[utput] <fileout>]                                      ",
-  "               [--smooth]                                                 ",
-  "               [--smoothIt <nb iterations>]                               ",
-  "               [--smoothRate <smoothing rate>                             ",
-  "               [--smoothAngle <angle>                                     ",
-  "               [--deciReductionRate <rate>]                               ",
-  "               [--deciMaxClearance <clearance>]                           ",
-  "               [--deciMaxError <error>]                                   ",
-  "               [--deciAngle <angle>]                                      ",
-  "               [--deciWithSmoothing]                                      ",
-  "               [--tri]                                                    ",
-  "               [--minFacetNumber <fnumber>]                               ",
-  "               [--ascii]                                                  ",
-  "               [-h[elp]]                                                  ",
-  "--------------------------------------------------------------------------",
-  " Decimates a triangulation                                                ",
-  "--------------------------------------------------------------------------",
-  "-i[nput]             : prefix name for input triangulation is <filein>    ",
-  "-o[utput]            : prefix name for output triangulation is <fileout>  ",
-  "                       [default=filein]                                   ",
-  "--smooth             : smoothes the mesh [default is no smoothing]        ",
-  "--smoothIt           : smoothing number of iterations is <nb iterations>  ",
-  "                       [default=10]                                       ",
-  "--smoothRate         : smoothing moving factor at each iteration is       ",
-  "                       <smoothing rate> [default=0.2]                     ",
-  "--smoothAngle        : smoothing feature angle is <angle> degree ,        ",
-  "                       between 0 and 180 degree, [default=180]            ",
-  "--deciReductionRate  : decimation reduction rate expected is              ",
-  "                       <reduction rate> % [default=90%]                   ",
-  "--deciMaxClearance   : maximum clearance of the decimated mesh expected is",
-  "                       <clearance> mm [default=10]                        ",
-  "--deciMaxError       : maximum error distance from the original mesh      ",
-  "                       expected is <error> mm , [default=10]              ",
-  "--deciAngle          : feature angle is <angle> degree, between 0 and 180 ",
-  "                       degree, [default=180]                              ",
-  "--tri                : *.tri file format [default=*.mesh]                 ",
-  "--minFacetNumber     : minimum number of facets to allow decimation       ",
-  "                       [default=50]                                       ",
-  "--ascii              : write *.mesh in ASCII [default=binar]              ",
-  "-h[elp]              : display the current help message                   ",
-  "--------------------------------------------------------------------------",
-END_USAGE
-
-
-void Usage( void )
-{
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char* argv[] )
+int main( int argc, const char** argv )
 { 
-  char *fileIn = NULL, *fileOut = NULL;
+  // char *fileIn = NULL, *fileOut = NULL;
   int smoothFlag = 0;
   int smoothIt = 10;
   float smoothRate = 0.2;
@@ -109,78 +57,134 @@ int main( int argc, char* argv[] )
   int triFlag = 0;
   uint minFacetNumber = 50;
   int asciiFlag = 0;
+  Reader<AimsSurfaceTriangle> triR;
+  Writer<AimsSurfaceTriangle> triW;
+  Reader<TimeTexture<float> > texR;
+  TimeTexture<float> precisionmap;
+  vector<float> precthresholds;
 
   //
   // parse options
   //
-  AimsOption opt[] = {
-  { 'h',"help"              ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input"             ,AIMS_OPT_STRING,&fileIn           ,0          ,1},
-  { 'o',"output"            ,AIMS_OPT_STRING,&fileOut          ,0          ,0},
-  { ' ',"smooth"            ,AIMS_OPT_FLAG  ,&smoothFlag       ,0          ,0},
-  { ' ',"smoothIt"          ,AIMS_OPT_INT   ,&smoothIt         ,0          ,0},
-  { ' ',"smoothRate"        ,AIMS_OPT_FLOAT ,&smoothRate       ,0          ,0},
-  { ' ',"smoothAngle"       ,AIMS_OPT_FLOAT ,&smoothAngle      ,0          ,0},
-  { ' ',"deciReductionRate" ,AIMS_OPT_FLOAT ,&deciReductionRate,0          ,0},
-  { ' ',"deciMaxClearance"  ,AIMS_OPT_FLOAT ,&deciMaxClearance ,0          ,0},
-  { ' ',"deciMaxError"      ,AIMS_OPT_FLOAT ,&deciMaxError     ,0          ,0},
-  { ' ',"deciAngle"         ,AIMS_OPT_FLOAT ,&deciAngle        ,0          ,0},
-  { ' ',"tri"               ,AIMS_OPT_FLAG  ,&triFlag          ,0          ,0},
-  { ' ',"minFacetNumber"    ,AIMS_OPT_WORD  ,&minFacetNumber   ,0          ,0},
-  { ' ',"ascii"             ,AIMS_OPT_FLAG  ,&asciiFlag        ,0          ,0},
-  { 0  ,0                   ,AIMS_OPT_END   ,0                 ,0          ,0}};
+  AimsApplication app( argc, argv, "Decimates a triangulation" );
+  app.addOption( triR, "-i", "input triangulation" );
+  app.alias( "--input", "-i" );
+  app.addOption( triW, "-o", "output triangulation", true );
+  app.alias( "--output", "-o" );
+  app.addOption( smoothFlag, "--smooth",
+                 "smoothes the mesh [default is no smoothing]", true );
+  app.addOption( smoothIt, "--smoothIt",
+                 "smoothing number of iterations [default=10]", true );
+  app.addOption( smoothRate, "--smoothRate",
+                 "smoothing moving factor at each iteration [default=0.2]",
+                 true );
+  app.addOption( smoothAngle, "--smoothAngle",
+                 "smoothing feature angle in degrees, between 0 and 180 "
+                 "degree, [default=180]", true );
+  app.addOption( deciReductionRate, "--deciReductionRate",
+                 "decimation reduction rate expected in % [default=99%]",
+                 true );
+  app.addOption( deciMaxClearance, "--deciMaxClearance",
+                 "maximum clearance of the decimated mesh expected in mm "
+                 "[default=10]", true );
+  app.addOption( deciMaxError, "--deciMaxError",
+                 "maximum error distance from the original mesh in mm "
+                 "[default=10]", true );
+  app.addOption( deciAngle, "--deciAngle",
+                 "feature angle in degrees, between 0 and 180: angle formed "
+                 "by local mesh edges above which edges are preferably not "
+                 "smoothed [default=180: no filtering]", true );
+  app.addOption( asciiFlag, "--ascii",
+                 "write *.mesh in ASCII [default=binar]", true );
+  app.addOption( texR, "--precisionmap",
+                 "precision map texture: if provided, use this texture to "
+                 "determine if vertices can be removed easily or not during "
+                 "decimation, instead of the default edges angles (see "
+                 "--deciAngle parameter)", true );
+  app.addOptionSeries( precthresholds, "--precthreshold",
+                       "precision map thresholds (see --precisionmap "
+                       "parameter): vertices with precision above the "
+                       "threshold are not removed at a given iteration step. "
+                       "Several values may be used for the successive "
+                       "iteration steps.\nIf no threshold is provided, the "
+                       "proportion from the decimation reduction rate is used "
+                       "at step 0, then increases exponentially to "
+                       "asymtotically reach the max precision within "
+                       "about 20 steps",
+                       0 );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
 
-  //
-  // check options
-  //
-  ASSERT( smoothIt > 0 );
-  ASSERT( smoothAngle >= 0.0 && smoothAngle <= 180.0 );
-  ASSERT( smoothRate >= 0.0 && smoothRate <= 1.0 );
-  ASSERT( deciReductionRate >= 0.0 && deciReductionRate <= 100.0 );
-  ASSERT( deciMaxClearance >= 0.0 );
-  ASSERT( deciMaxError >= 0.0 );
-  ASSERT( deciAngle >= 0.0 && deciAngle <= 180.0 );
-
-
-  if ( fileOut == NULL )
-    fileOut = fileIn;
-
-  cout << endl;
-
-  //
-  // read triangulation
-  //
-  cout << "reading triangulation   : " << flush;
-  AimsSurfaceTriangle surface;
-  Reader<AimsSurfaceTriangle> triR( fileIn );
-  triR >> surface;
-  cout << "done" << endl;
+    //
+    // check options
+    //
+    ASSERT( smoothIt > 0 );
+    ASSERT( smoothAngle >= 0.0 && smoothAngle <= 180.0 );
+    ASSERT( smoothRate >= 0.0 && smoothRate <= 1.0 );
+    ASSERT( deciReductionRate >= 0.0 && deciReductionRate <= 100.0 );
+    ASSERT( deciMaxClearance >= 0.0 );
+    ASSERT( deciMaxError >= 0.0 );
+    ASSERT( deciAngle >= 0.0 && deciAngle <= 180.0 );
 
 
-  //
-  // decimating mesh
-  //
-  cout << "decimating mesh         : " << flush;
-  Mesher mesher;
-  if ( smoothFlag )
-    mesher.setSmoothing( smoothAngle, smoothIt, 
-                         smoothRate, smoothRate, smoothRate );
-  mesher.setDecimation( deciReductionRate, deciMaxClearance, 
-                        deciMaxError, deciAngle );
-  mesher.setMinFacetNumber( minFacetNumber );
-  float rate = mesher.decimate( surface );
-  cout << "done ( " << rate << "% ) " << endl;
+    if ( triW.fileName().empty() )
+      triW.setFileName( triR.fileName() );
+
+    cout << endl;
+
+    //
+    // read triangulation
+    //
+    cout << "reading triangulation        : " << flush;
+    AimsSurfaceTriangle surface;
+    triR >> surface;
+    cout << "done" << endl;
+
+    if( !texR.fileName().empty() )
+    {
+      cout << "reading precision texture : " << flush;
+      texR.read( precisionmap );
+      cout << "done" << endl;
+    }
 
 
-  //
-  // save triangulation
-  //
-  Writer<AimsSurfaceTriangle> triW( fileOut );
-  triW.write( surface, asciiFlag );
-  cout << "done" << endl;
+    //
+    // decimating mesh
+    //
+    cout << "decimating mesh             : " << flush;
+    Mesher mesher;
+    if ( smoothFlag )
+      mesher.setSmoothing( smoothAngle, smoothIt,
+                          smoothRate, smoothRate, smoothRate );
+    mesher.setDecimation( deciReductionRate, deciMaxClearance,
+                          deciMaxError, deciAngle );
+    mesher.setMinFacetNumber( minFacetNumber );
+    float rate;
+    if( !precisionmap.empty() )
+      rate = mesher.decimate( surface, precthresholds, precisionmap );
+    else
+      rate = mesher.decimate( surface );
+    cout << "done ( " << rate << "% ) " << endl;
 
+
+    //
+    // save triangulation
+    //
+    triW.write( surface, asciiFlag );
+    cout << "done" << endl;
+
+
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return( EXIT_FAILURE );
+  }
 
   return EXIT_SUCCESS;
 }

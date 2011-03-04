@@ -610,6 +610,22 @@ void Mesher::smooth( AimsSurfaceTriangle& surface )
 
 float Mesher::decimate( AimsSurfaceTriangle& surface )
 {
+  return decimate( surface, vector<float>(), 0 );
+}
+
+
+float Mesher::decimate( AimsSurfaceTriangle& surface,
+                        const std::vector<float> & precthresholds,
+                        const TimeTexture<float> & precisionmap )
+{
+  return decimate( surface, precthresholds, &precisionmap );
+}
+
+
+float Mesher::decimate( AimsSurfaceTriangle& surface,
+                        const std::vector<float> & precthresholds,
+                        const TimeTexture<float> *precisionmap )
+{
   vector< Facet* > vfac;
   getFacet( surface, vfac );
 
@@ -625,7 +641,7 @@ float Mesher::decimate( AimsSurfaceTriangle& surface )
   if ( vfac.size() > _minFacetNumber ) 
     getDecimatedVertices( vfac, surface.vertex(), _deciReductionRate,
                           _deciMaxClearance, _deciMaxError, 
-                          _deciFeatureAngle );
+                          _deciFeatureAngle, precthresholds, precisionmap );
 
   float endMeshSize = (float)vfac.size();
 

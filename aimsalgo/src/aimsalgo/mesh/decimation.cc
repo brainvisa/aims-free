@@ -34,9 +34,14 @@
 
 #include <aims/mesh/mesher.h>
 #include <aims/math/mathelem.h>
+#include <aims/mesh/texture.h>
+#include <aims/data/data.h>
+#include <aims/histogram/cumulated.h>
+#include <algorithm>
 #include <iomanip>
 #include <float.h>
 
+using namespace carto;
 using namespace std;
 
 #define MAX_COS_ALLOWED 0.9
@@ -55,14 +60,20 @@ struct Flag
   Point3df vertex;
   float min;
   float max;
+  size_t origID;
 };
 
 void computesMinMax( vector< Point3df >& vertex, Flag& flag );
 void computesFeatureFlag( vector< Point3df >& vertex, Flag& flag,
                           float cosFeatureAngle );
+/*void computesFeatureFlagFromTexture( vector< Point3df >& vertex, Flag& flag,
+                          float threshold,
+                          const Texture<float> & tex );*/
 bool computesGoodToDeleteFlags( vector< Facet* >& vfac,
                                 float maxClearanceMm,
-			        vector< Flag >& vFlag );
+                                vector< Flag >& vFlag,
+                                const Texture<float> *precisiontex,
+                                float precthreshold );
 void cleanVectors( vector< Facet* >& vfac,
                    vector< Point3df >& vertex,
                    vector< Flag >& vFlag );
@@ -142,7 +153,10 @@ void computesFeatureFlag( vector< Point3df >& vertex, Flag& flag,
 
 bool computesGoodToDeleteFlags( vector< Facet* >& vfac,
                                 float maxClearanceMm,
-			        vector< Flag >& vFlag )
+                                vector< Flag >& vFlag,
+                                const Texture<float> *precisiontex,
+                                float precthreshold
+                              )
 {
   // computes global min and max edge length
   float min = FLT_MAX;
@@ -177,7 +191,10 @@ bool computesGoodToDeleteFlags( vector< Facet* >& vfac,
            vFlag[ n ].deadFlag == false &&
            vFlag[ n ].steadyFlag == false &&
            vFlag[ n ].min <= priorityValue &&
-           vFlag[ n ].max <= maxClearanceMm )
+           vFlag[ n ].max <= maxClearanceMm &&
+           ( !precisiontex ||
+              (*precisiontex)[ vFlag[ n ].origID ] <= precthreshold )
+         )
       {
         if ( vFlag[ n ].featureFlag == false )
         {
@@ -201,6 +218,7 @@ bool computesGoodToDeleteFlags( vector< Facet* >& vfac,
       deleteFeature = true;
     }
   }
+  // cout << "deleted: " << nFound << endl;
 
   return nFound != 0 ? true : false;
 }
@@ -325,13 +343,11 @@ bool seeksHoleTriangulation( Flag& flag,
 
   // temporary data storage for recording the virtual re-triangulation
   int nNeighReorder = 0;
-  bool tabNeighUsedFlag[ 256 ];
-  bool tabBadNeighFlag[ 256 ];
+  vector<bool> tabNeighUsedFlag( facet->nNeighbor(), false );
+  vector<bool> tabBadNeighFlag( facet->nNeighbor(), false );
 
   for ( i = 0; i < facet->nNeighbor(); i++ )
   {
-    tabBadNeighFlag[ i ] = false;
-    tabNeighUsedFlag[ i ] = false;
     tabNeighReorder[ i ] = -1;
   }
 
@@ -341,7 +357,8 @@ bool seeksHoleTriangulation( Flag& flag,
   float currentBestNeighScore;
   float cosbac, error;
   Point3df a, b, c, f;
-  while ( nNeighReorder < facet->nNeighbor() - 2 && cancelSuppression == false )
+  while ( nNeighReorder < facet->nNeighbor() - 2
+          && cancelSuppression == false )
   {
     // initalizes the next neighbor selection 
     currentBestNeigh = -1; // no candidate found yet
@@ -449,7 +466,7 @@ bool seeksHoleTriangulation( Flag& flag,
 
 
 
-                 
+
 bool checkTriangleValidity( const Point3df& a, // 
                             const Point3df& b, // triangle to check is (abc)
                             const Point3df& c, // 
@@ -479,7 +496,7 @@ bool checkTriangleValidity( const Point3df& a, //
     return false;
   nabc /= normv;
 
-  // cheks the orientation  of (abc) respect to the two triangles
+  // checks the orientation  of (abc) respect to the two triangles
   // it substitute : (fca) and (fab)
   Point3df vaf( f - a );
   Point3df nfca( crossed( vaf, vac ) );
@@ -639,8 +656,27 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
                                    float maxErrorMm,
                                    float minFeatureEdgeAngleDegree )
 {
+  vector<float> thresholds( 1 );
+  thresholds.push_back( minFeatureEdgeAngleDegree );
+  getDecimatedVertices( vfac, vertex, reductionRatePercent, maxClearanceMm,
+    maxErrorMm, minFeatureEdgeAngleDegree, thresholds, 0 );
+}
+
+
+void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
+                                   vector< Point3df >& vertex,
+                                   float reductionRatePercent,
+                                   float maxClearanceMm,
+                                   float maxErrorMm,
+                                   float minFeatureEdgeAngleDegree,
+                                   const vector<float> & thresholds,
+                                   const TimeTexture<float> *precisionmap
+                                 )
+{
   if( _verbose )
     cout << "decimating " << flush;
+
+  cout << "angle: " << minFeatureEdgeAngleDegree << endl;
 
   // flags and constants initialization
   int n, size = (int)vfac.size();
@@ -649,7 +685,19 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
   bool endDecimationLoop = false;
   int nDecimated = 0;
   int nToDecimate = (int)( (float)size * reductionRatePercent / 100.0 + 0.5 );
-  float cosFeatureAngle = cos( minFeatureEdgeAngleDegree * M_PI / 180.0 );
+  float cosFeatureAngle;
+  const Texture<float> *precisiontex = 0;
+  unsigned step = 0;
+  TimeTexture<float>::const_iterator ipm;
+  float precthreshold = 0;
+
+  if( precisionmap )
+  {
+    ipm = precisionmap->upper_bound( step );
+    --ipm;
+    precisiontex = &ipm->second;
+  }
+  cosFeatureAngle = cos( minFeatureEdgeAngleDegree * M_PI / 180.0 );
   if ( minFeatureEdgeAngleDegree >= 180.0 )
     cosFeatureAngle = -100.0;
 
@@ -664,6 +712,7 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
     vFlag[ n ].error = 0.0;
     vFlag[ n ].facet = vfac[ n ];
     vFlag[ n ].vertex = vertex[ vfac[ n ]->id() ];
+    vFlag[ n ].origID = vfac[ n ]->id();
   }
 
   for ( n = 0; n != size; n++ )
@@ -680,19 +729,56 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
     cout << setw(6) << nDecimated << flush;
   do
   {
+    if( precisionmap )
+    {
+      ipm = precisionmap->upper_bound( step );
+      --ipm;
+      precisiontex = &ipm->second;
+      if( thresholds.empty() )
+      {
+        CumulatedHistogram<float> histo;
+        AimsData<float> vol( precisiontex->nItem(), 1, 1, 1, 0,
+                            AllocatorContext( AllocatorStrategy::NotOwner,
+                                rc_ptr<DataSource>(
+                                  new BufferDataSource(
+                                    (char *) &((*precisiontex)[0]),
+                                    precisiontex->nItem() * sizeof(float) ) ) )
+                      );
+        /* SimpleHistogram<float> shist;
+        shist.doit( vol );
+        shist.rebin( 100 ); */
+        histo.doit( vol );
+        float perc = 100. - ( 100. - reductionRatePercent )
+          * exp( - ((float) step) / 5. );
+        precthreshold = vol.minimum();
+        precthreshold += float( histo.valueForPercentage( perc ) )
+          / histo.data().dimX() * ( vol.maximum() - vol.minimum() );
+      }
+      else
+        precthreshold = thresholds[ std::min( step, thresholds.size() - 1 ) ];
+    }
+    cosFeatureAngle = cos( minFeatureEdgeAngleDegree * M_PI / 180.0 );
+    if ( minFeatureEdgeAngleDegree >= 180.0 )
+      cosFeatureAngle = -100.0;
+
     // refreshing complex and feature flags
     for ( n = 0; n != (int)vFlag.size(); n++ )
     {
       if ( vFlag[ n ].deadFlag == false )
         if ( vFlag[ n ].unknownFeatureFlagFlag )
         {
-          computesFeatureFlag( vertex, vFlag[ n ], cosFeatureAngle );
+/*          if( precisiontex )
+            computesFeatureFlagFromTexture( vertex, vFlag[ n ],
+                                            cosFeatureAngle, *precisiontex );
+          else*/
+            computesFeatureFlag( vertex, vFlag[ n ], cosFeatureAngle );
           computesMinMax( vertex, vFlag[ n ] );
         }
     }
 
     // refreshes main flag map
-    if ( computesGoodToDeleteFlags( vfac, maxClearanceMm, vFlag ) == false )
+    if ( computesGoodToDeleteFlags( vfac, maxClearanceMm, vFlag, precisiontex,
+         precthreshold ) == false )
     { 
       endDecimationLoop = true;
       break;
@@ -741,7 +827,9 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
       cleanVectors( vfac, vertex, vFlag );
       rehashValue += rehashStep;
     }
-  } 
+
+    ++step;
+  }
   while ( endDecimationLoop == false );
 
   if( _verbose )

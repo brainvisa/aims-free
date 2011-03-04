@@ -45,6 +45,8 @@
 
 typedef std::map< uint, Facet*, std::less< int > > MapOfFacet;
 
+template <typename T> class TimeTexture;
+
 
 class AIMSALGO_API Mesher
 {
@@ -107,6 +109,17 @@ class AIMSALGO_API Mesher
                         float deciFeatureAngle );
     void unsetDecimation();
     float decimate( AimsSurfaceTriangle& surface );
+    /** Decimation using a precision texture map.
+        In this mode, the texture values are checked according to the precision
+        thresholds, and vertices above the threshold are not removed.
+        A time texture may be provided if a step-by-step evolution is needed.
+        Similarly, the thresholds may evolve with decimation timesteps.
+        precisionmap and thresholds may have differing sizes (they are
+        clamped if overrun).
+    */
+    float decimate( AimsSurfaceTriangle& surface,
+                    const std::vector<float> & precthresholds,
+                    const TimeTexture<float> & precisionmap );
 
     // SPLITTING SURFACE OF CONNECTED COMP.
     // ====================================
@@ -186,6 +199,18 @@ class AIMSALGO_API Mesher
                                float maxClearanceMm,
                                float maxErrorMm,
                                float minFeatureEdgeAngleDegree );
+    void getDecimatedVertices( std::vector< Facet* >& vfac,
+                               std::vector< Point3df >& vertex,
+                               float reductionRatePercent,
+                               float maxClearanceMm,
+                               float maxErrorMm,
+                               float minFeatureEdgeAngleDegree,
+                               const std::vector<float> & thresholds,
+                               const TimeTexture<float> *precisionmap = 0
+                             );
+    float decimate( AimsSurfaceTriangle& surface,
+                    const std::vector<float> & thresholds,
+                    const TimeTexture<float> *precisionmap );
 
     void getNormals( const std::vector< Facet* >& vfac,
                      const std::vector< Point3df >& vertex,
