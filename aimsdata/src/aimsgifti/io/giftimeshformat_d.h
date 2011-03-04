@@ -189,6 +189,7 @@ namespace aims
           int vnum = da->dims[0];
           int j;
 
+#ifdef AIMS_DEBUG_IO
           if (da->ind_ord == GIFTI_IND_ORD_UNDEF)
             std::cout << "GIFTI_IND_ORD_UNDEF" << std::endl;
 
@@ -197,6 +198,7 @@ namespace aims
 
           if (da->ind_ord == GIFTI_IND_ORD_COL_MAJOR)
             std::cout << "GIFTI_IND_ORD_COL_MAJOR " << vnum << std::endl;
+#endif
 
           std::vector<Point3df> & vert = vol[tmesh].vertex();
           vert.clear();
