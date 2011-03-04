@@ -63,7 +63,7 @@ class CumulatedHistogram : public Histogram<T>
     //@}
 
     /// return the bin value for a given percentage
-    int valueForPercentage( int );
+    int valueForPercentage( float );
 };
 
 
@@ -99,10 +99,11 @@ void CumulatedHistogram<T>::doit( const SimpleHistogram<T>& thing )
 
 
 template< class T > inline
-int CumulatedHistogram<T>::valueForPercentage( int percent )
+int CumulatedHistogram<T>::valueForPercentage( float percent )
 {
   int index = 0;
-  int realValue = this->_nPoints * percent / 100;
+  int realValue = (int) ( this->_nPoints * percent / 100. );
+  std::cout << "hist value: " << realValue << ", percent: " << percent << std::endl;
 
   AimsData<int32_t>::iterator it = this->_data.begin();
   while ( *it < realValue && it != this->_data.end() ) 
