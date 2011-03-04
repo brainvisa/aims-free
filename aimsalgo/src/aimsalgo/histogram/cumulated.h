@@ -103,7 +103,6 @@ int CumulatedHistogram<T>::valueForPercentage( float percent )
 {
   int index = 0;
   int realValue = (int) ( this->_nPoints * percent / 100. );
-  std::cout << "hist value: " << realValue << ", percent: " << percent << std::endl;
 
   AimsData<int32_t>::iterator it = this->_data.begin();
   while ( *it < realValue && it != this->_data.end() ) 
