@@ -2823,6 +2823,131 @@ Point3df SurfaceManip::nearestPointToMesh( const Point3df & target,
 }
 
 
+AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
+  const AimsSurfaceTriangle & mesh )
+{
+  AimsSurfaceTriangle *nmesh = new AimsSurfaceTriangle;
+
+  AimsSurfaceTriangle::const_iterator imesh, em = mesh.end();
+  for( imesh=mesh.begin(); imesh!=em; ++imesh )
+  {
+    const AimsSurface<3,Void> & surf = imesh->second;
+    AimsSurface<3,Void> & nsurf = (*nmesh)[imesh->first];
+    const vector<Point3df> & ivert = surf.vertex();
+    const vector<Point3df> & inorm = surf.normal();
+    const vector<AimsVector<uint, 3> > & ipoly = surf.polygon();
+    vector<Point3df> & overt = nsurf.vertex();
+    vector<Point3df> & onorm = nsurf.normal();
+    vector<AimsVector<uint, 3> > & opoly = nsurf.polygon();
+    bool hasnorm = !inorm.empty();
+
+    // reserve 4 times the number of triangles
+    opoly.reserve( ipoly.size() * 4 );
+    opoly.insert( opoly.end(), ipoly.size() * 4,
+                  AimsVector<uint, 3>( 0,0,0 ) );
+    // build the list of edges and new vertices indices
+    map<pair<uint, uint>, uint > edges;
+    map<pair<uint, uint>, uint >::iterator ie, ee = edges.end();
+    vector<AimsVector<uint, 3> >::const_iterator ip, ep = ipoly.end();
+    uint vid = ivert.size(); // index of current new vertex
+    for( ip=ipoly.begin(); ip!=ep; ++ip )
+    {
+      const AimsVector<uint, 3> & p = *ip;
+      // identify edge with sorted vert indices
+      pair<uint, uint> e( min( p[0], p[1] ), max( p[0], p[1] ) );
+      if( edges.find( e ) == ee )
+        edges[ e ] = vid++;
+      e = make_pair( min( p[1], p[2] ), max( p[1], p[2] ) );
+      if( edges.find( e ) == ee )
+        edges[ e ] = vid++;
+      e = make_pair( min( p[2], p[0] ), max( p[2], p[0] ) );
+      if( edges.find( e ) == ee )
+        edges[ e ] = vid++;
+    }
+    // reserve final vertices/normals space
+    overt.reserve( vid );
+    overt.insert( overt.begin(), ivert.begin(), ivert.end() );
+    overt.insert( overt.end(), vid - ivert.size(), Point3df() );
+    if( hasnorm )
+    {
+      onorm.reserve( vid );
+      onorm.insert( onorm.begin(), inorm.begin(), inorm.end() );
+      onorm.insert( onorm.end(), vid - inorm.size(), Point3df() );
+    }
+    // insert new vertices
+    for( ie=edges.begin(); ie!=ee; ++ie )
+    {
+      // at the middle of existing edges
+      overt[ ie->second ] = ( ivert[ ie->first.first ]
+        + ivert[ ie->first.second ] ) * 0.5;
+      if( hasnorm )
+      {
+        onorm[ ie->second ] = ( inorm[ ie->first.first ]
+          + inorm[ ie->first.second ] ) * 0.5;
+        onorm[ ie->second ].normalize();
+      }
+    }
+    // remake triangles
+    vector<AimsVector<uint, 3> >::iterator iop = opoly.begin();
+    uint a, b, c;
+    for( ip=ipoly.begin(); ip!=ep; ++ip )
+    {
+      const AimsVector<uint, 3> & p = *ip;
+      // get triangle edges and mid-vertices
+      pair<uint, uint> e( min( p[0], p[1] ), max( p[0], p[1] ) );
+      ie = edges.find( e );
+      a = ie->second;
+      e = make_pair( min( p[1], p[2] ), max( p[1], p[2] ) );
+      ie = edges.find( e );
+      b = ie->second;
+      e = make_pair( min( p[2], p[0] ), max( p[2], p[0] ) );
+      ie = edges.find( e );
+      c = ie->second;
+      /*       p[0]
+                /\
+               /  \
+            a  ----  c
+             / \  / \
+            /___\/___\
+         p[1]    b    p[2]
+      */
+      {
+        AimsVector<uint, 3> & op = *iop;
+        op[0] = p[0];
+        op[1] = a;
+        op[2] = c;
+        ++iop;
+      }
+      {
+        AimsVector<uint, 3> & op = *iop;
+        op[0] = a;
+        op[1] = p[1];
+        op[2] = b;
+        ++iop;
+      }
+      {
+        AimsVector<uint, 3> & op = *iop;
+        op[0] = b;
+        op[1] = c;
+        op[2] = a;
+        ++iop;
+      }
+      {
+        AimsVector<uint, 3> & op = *iop;
+        op[0] = b;
+        op[1] = p[2];
+        op[2] = c;
+        ++iop;
+      }
+    }
+  }
+
+  return nmesh;
+}
+
+
+// ---
+
 template void SurfaceManip::meshMerge( AimsTimeSurface<2, Void> &,
 				       const AimsTimeSurface<2, Void> & );
 template void 

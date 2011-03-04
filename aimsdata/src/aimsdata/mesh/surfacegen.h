@@ -119,6 +119,10 @@ attributes = {
                                          float radius2,
                                          unsigned nfacets,
                                          bool uniquevertices = false );
+    static AimsSurfaceTriangle*
+    icosphere( const carto::GenericObject & params );
+    static AimsSurfaceTriangle* icosphere( const Point3df & center,
+                                           float radius, unsigned nfacets );
   };
 
 }

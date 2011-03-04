@@ -50,6 +50,8 @@ public:
                                       unsigned* index = 0 );
   static vector_set_U32
     surfaceNeighbours( const AimsSurfaceTriangle & surf );
+  static AimsSurfaceTriangle* refineMeshTri4(
+    const AimsSurfaceTriangle & mesh ) /Factory/;
 };
 
 };

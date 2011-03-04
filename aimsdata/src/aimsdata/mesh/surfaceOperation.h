@@ -136,7 +136,8 @@ namespace aims
     template <int D, typename T>
     static AimsTimeSurface<D,T> *
         meshExtract( const AimsTimeSurface<D,T> & mesh,
-                     const TimeTexture<int16_t> & tex, int16_t value, std::vector<size_t> ** overtIndex = 0 );
+                     const TimeTexture<int16_t> & tex, int16_t value,
+                     std::vector<size_t> ** overtIndex = 0 );
     /** computes the position of the point in the mesh nearest to the given 
         position, averaging across the nneighbours nearest vertices.
         The optional index parameter will contain, when given, the index of 
@@ -146,6 +147,11 @@ namespace aims
                                         const AimsSurfaceTriangle & mesh, 
                                         unsigned nneighbours = 1, 
                                         unsigned* index = 0 );
+
+    /** Refine a mesh by subdivising every triangle into 4 smaller ones
+    */
+    static AimsSurfaceTriangle* refineMeshTri4(
+      const AimsSurfaceTriangle & mesh );
   };
 
 }

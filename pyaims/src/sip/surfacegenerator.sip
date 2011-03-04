@@ -42,6 +42,13 @@ public:
   static AimsSurfaceTriangle* sphere( const carto::GenericObject & ) /Factory/;
   static AimsSurfaceTriangle* sphere( const Point3df &, float, 
                                       unsigned, bool=false ) /Factory/;
+  static AimsSurfaceTriangle* ellipse( const carto::GenericObject & ) /Factory/;
+  static AimsSurfaceTriangle* ellipse( const Point3df &, float radius1,
+                                       float radius2,
+                                       unsigned, bool=false ) /Factory/;
+  static AimsSurfaceTriangle* icosphere( const carto::GenericObject & ) /Factory/;
+  static AimsSurfaceTriangle* icosphere( const Point3df &, float,
+                                         unsigned=320 ) /Factory/;
 };
 
 };
