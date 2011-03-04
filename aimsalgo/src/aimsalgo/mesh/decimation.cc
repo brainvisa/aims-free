@@ -755,7 +755,8 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
           / histo.data().dimX() * ( vol.maximum() - vol.minimum() );
       }
       else
-        precthreshold = thresholds[ std::min( step, thresholds.size() - 1 ) ];
+        precthreshold = thresholds[ std::min( (vector<float>::size_type) step,
+                                              thresholds.size() - 1 ) ];
     }
     cosFeatureAngle = cos( minFeatureEdgeAngleDegree * M_PI / 180.0 );
     if ( minFeatureEdgeAngleDegree >= 180.0 )
