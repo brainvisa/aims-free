@@ -736,7 +736,9 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
       precisiontex = &ipm->second;
       if( thresholds.empty() )
       {
+        // calculate threshold from histogram of texture values
         CumulatedHistogram<float> histo;
+        // (using a volume built on the same memory block)
         AimsData<float> vol( precisiontex->nItem(), 1, 1, 1, 0,
                             AllocatorContext( AllocatorStrategy::NotOwner,
                                 rc_ptr<DataSource>(
@@ -768,11 +770,7 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
       if ( vFlag[ n ].deadFlag == false )
         if ( vFlag[ n ].unknownFeatureFlagFlag )
         {
-/*          if( precisiontex )
-            computesFeatureFlagFromTexture( vertex, vFlag[ n ],
-                                            cosFeatureAngle, *precisiontex );
-          else*/
-            computesFeatureFlag( vertex, vFlag[ n ], cosFeatureAngle );
+          computesFeatureFlag( vertex, vFlag[ n ], cosFeatureAngle );
           computesMinMax( vertex, vFlag[ n ] );
         }
     }
