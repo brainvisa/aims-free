@@ -23,11 +23,11 @@ sipCpp = new aims::FastMarching_Volume_S16( aims::Connectivity::CONNECTIVITY_26_
       short worklabel, short inlabel, short outlabel ) /ReleaseGIL/;
     rc_ptr_Volume_FLOAT doit( rc_ptr_Volume_S16 vol,
       const set_S16 & worklabels, const set_S16 & seedlabels ) /ReleaseGIL/;
-%If (SIP_THROW_BUG)
+%If (SIPTHROW_BUG)
     rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const
       throw ( );
 %End
-%If (!SIP_THROW_BUG)
+%If (!SIPTHROW_BUG)
     rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const
       throw ( std::runtime_error, std::exception );
 %End
@@ -76,11 +76,11 @@ sipCpp = new aims::FastMarching_BucketMap_S16( aims::Connectivity::CONNECTIVITY_
       short worklabel, short inlabel, short outlabel ) /ReleaseGIL/;
     rc_ptr_BucketMap_FLOAT doit( rc_ptr_BucketMap_S16 vol,
       const set_S16 & worklabels, const set_S16 & seedlabels ) /ReleaseGIL/;
-%If (SIP_THROW_BUG)
+%If (SIPTHROW_BUG)
     rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const
       throw ( );
 %End
-%If (!SIP_THROW_BUG)
+%If (!SIPTHROW_BUG)
     rc_ptr_Volume_FLOAT midInterfaceVol (short label1, short label2) const
       throw ( std::runtime_error, std::exception );
 %End

@@ -16,6 +16,11 @@ class Mesher
     void setDecimation( float, float, float, float );
     void unsetDecimation();
 
+    float decimate( AimsSurfaceTriangle& surface );
+    float decimate( AimsSurfaceTriangle& surface,
+                    const vector_FLOAT & precthresholds,
+                    const TimeTexture_FLOAT & precisionmap );
+
     void setSplitting();
     void unsetSplitting();
 
@@ -28,11 +33,11 @@ class Mesher
     bool verbose() const;
     void setVerbose( bool);
 
-%If (SIP_THROW_BUG)
+%If (SIPTHROW_BUG)
     void getBrain( const AimsData_S16&, AimsSurfaceTriangle& )
       throw ( ) /ReleaseGIL/;
 %End
-%If (!SIP_THROW_BUG)
+%If (!SIPTHROW_BUG)
    void getBrain( const AimsData_S16&, AimsSurfaceTriangle& )
       throw ( std::runtime_error, carto::assert_error ) /ReleaseGIL/;
 %End

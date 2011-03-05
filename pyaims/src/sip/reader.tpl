@@ -13,11 +13,11 @@ public:
   Reader_%Template1typecode%( const std::string & );
   virtual ~Reader_%Template1typecode%();
 
-%If (SIP_THROW_BUG)
+%If (SIPTHROW_BUG)
   virtual %Template1PyType% *read( int = 0, const std::string * = 0, int = -1 )
     throw ( ) /Factory, ReleaseGIL/;
 %End
-%If (!SIP_THROW_BUG)
+%If (!SIPTHROW_BUG)
   virtual %Template1PyType% *read( int = 0, const std::string * = 0, int = -1 )
     throw ( carto::io_error, std::exception ) /Factory/; //, ReleaseGIL/;
 %End
@@ -45,12 +45,12 @@ public:
   Writer_%Template1typecode%( const std::string & );
   virtual ~Writer_%Template1typecode%();
 
-%If (SIP_THROW_BUG)
+%If (SIPTHROW_BUG)
   virtual bool write( const %Template1PyType% &, bool = false, 
                       const std::string * = 0 )
     throw ( ) /Factory, ReleaseGIL/;
 %End
-%If (!SIP_THROW_BUG)
+%If (!SIPTHROW_BUG)
   virtual bool write( const %Template1PyType% &, bool = false, 
                       const std::string * = 0 )
     throw ( carto::io_error, std::exception ) /Factory/; //, ReleaseGIL/;

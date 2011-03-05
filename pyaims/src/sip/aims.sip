@@ -1,7 +1,8 @@
-%Feature CARTODATA
-%Platforms { SIP_THROW_BUG }
-
 %Module soma.aims.aimssip
+
+%Feature CARTODATA
+%Platforms { SIPTHROW_BUG }
+
 %ModuleCode
 #include <pyaims/init.h>
 %End

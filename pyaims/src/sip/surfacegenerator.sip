@@ -9,11 +9,11 @@ class SurfaceGenerator
 %End
 
 public:
-%If (SIP_THROW_BUG)
+%If (SIPTHROW_BUG)
   static AimsSurfaceTriangle* generate( carto::Object )
     throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
 %End
-%If (!SIP_THROW_BUG)
+%If (!SIPTHROW_BUG)
   static AimsSurfaceTriangle* generate( carto::Object )
     throw( std::runtime_error, std::invalid_argument ) /Factory/;
 %End
