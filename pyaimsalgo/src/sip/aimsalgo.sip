@@ -14,6 +14,7 @@
 %Include meshresampler.sip
 %Include meshresampler_AimsData_U32.sip
 %Include meshresampler_BucketMap_VOID.sip
+%Include meshinterpoler.sip
 %Include resampler_S16.sip
 %Include resampler_FLOAT.sip
 %Include sampler_FLOAT_3.sip

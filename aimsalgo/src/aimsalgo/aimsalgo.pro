@@ -79,6 +79,9 @@ HEADERS = \
     mesh/inflate.h    \
     mesh/mesher.h      \
     mesh/meshMerge.h    \
+    mesh/meshinterpoler.h \
+    mesh/meshinterpoler_d.h \
+    mesh/meshinterpoler_p.h \
     moment/geomMoment.h    \
     moment/momBase.h    \
     moment/momFactory.h    \
@@ -290,6 +293,7 @@ SOURCES = \
     mesh/getBrain.cc    \
     mesh/inflate.cc    \
     mesh/mesher.cc      \
+    mesh/meshinterpoler.cc \
     mesh/normals.cc      \
     mesh/reducedNeigh.cc    \
     mesh/smoothing.cc    \
