@@ -139,6 +139,13 @@ if( TIFF_FOUND )
   set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
        "${TIFF_INCLUDE_DIR}" )
 endif()
+
+set( AIMS_DEFINITIONS "${AIMS_DEFINITIONS} -DCARTO_USE_KDTREE" )
+if( LIBKDTREE_FOUND )
+  set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS} ${LIBKDTREE_INCLUDE_DIR} )
+  # else it will be done in aimsdata lib cmakelist
+endif()
+
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
 set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase "${LIBXML2_LIBRARIES}" )

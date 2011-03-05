@@ -1,5 +1,17 @@
 BRAINVISA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/aimsdata.pro "HEADERS" _headers "SOURCES" _sources )
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
+if( NOT LIBKDTREE_FOUND )
+  # copy internal headers for libkdtree+
+  set( _kdtreeHeaders kdtree++/allocator.hpp
+    kdtree++/function.hpp
+    kdtree++/iterator.hpp
+    kdtree++/kdtree.hpp
+    kdtree++/node.hpp
+    kdtree++/region.hpp
+    )
+  message( "kdtree headers: ${_kdtreeHeaders}" )
+  BRAINVISA_COPY_AND_INSTALL_HEADERS( _kdtreeHeaders "" headersTarget )
+endif()
 set(AIMSDATA_HEADERS ${_headers} PARENT_SCOPE)
 add_library( aimsdata SHARED ${_sources} )
 add_dependencies( aimsdata ${headersTarget} )
