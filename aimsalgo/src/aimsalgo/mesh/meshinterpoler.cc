@@ -149,10 +149,6 @@ void MeshInterpoler::findNeighbours()
 
       centers[t].first = t;
       centers[t].second = bary;
-/*      vector<float> & c = centers[t];
-      c[0] = bary[0];
-      c[0] = bary[1];
-      c[0] = bary[2];*/
     }
 
     // make a KDtree with polygons centers
@@ -160,16 +156,9 @@ void MeshInterpoler::findNeighbours()
       kdtree( centers.begin(), centers.end() );
 
     // find nearest polygon center for each vertex of dest mesh
-//     vector<float> point;
     for( i=0; i<n2; ++i )
     {
       const Point3df    & pt = vert2[i];
-/*      point[0] = pt[0];
-      point[1] = pt[1];
-      point[2] = pt[2];
-      pair<KDTree::KDTree::const_iterator, KDTree::KDTree::distance_type>
-        near = kdtree.find_nearest( pt );
-      triCorresp[i] = near.first->second;*/
       triCorresp[i] = kdtree.find_nearest( make_pair( 0U, pt ) ).first->first;
     }
 
