@@ -32,6 +32,9 @@
  */
 
 #include <aims/mesh/meshinterpoler_d.h>
+#ifdef CARTO_USE_KDTREE
+#include <kdtree++/kdtree.hpp>
+#endif
 
 using namespace aims;
 using namespace std;
@@ -85,6 +88,26 @@ void MeshInterpoler::project()
 }
 
 
+#ifdef CARTO_USE_KDTREE
+namespace
+{
+
+  struct Bracket_accessor_PointIndex
+  {
+    typedef float result_type;
+    typedef pair<uint, Point3df> _Val;
+
+    result_type
+    operator()(_Val const& V, size_t const N) const
+    {
+      return V.second[N];
+    }
+  };
+
+}
+#endif
+
+
 void MeshInterpoler::findNeighbours()
 {
   d->projTriangles.clear();
@@ -110,6 +133,47 @@ void MeshInterpoler::findNeighbours()
     Texture<unsigned> & triCorresp = d->projTriangles[ timestep ];
     triCorresp.reserve( n2 );
     triCorresp.data().insert( triCorresp.data().end(), n2, 0 );
+
+#ifdef CARTO_USE_KDTREE
+    // make a list of source triangles centers
+    vector<pair<uint, Point3df> > centers( nt1 );
+    for( t=0; t<nt1; ++t )
+    {
+      const AimsVector<uint, 3>     & tri = tri1[t];
+      const Point3df                & p1 = vert1[ tri[0] ];
+      const Point3df                & p2 = vert1[ tri[1] ];
+      const Point3df                & p3 = vert1[ tri[2] ];
+
+      // center of the triangle
+      bary = ( p1 + p2 + p3 ) * 0.33333;
+
+      centers[t].first = t;
+      centers[t].second = bary;
+/*      vector<float> & c = centers[t];
+      c[0] = bary[0];
+      c[0] = bary[1];
+      c[0] = bary[2];*/
+    }
+
+    // make a KDtree with polygons centers
+    KDTree::KDTree<3, pair<uint, Point3df>, Bracket_accessor_PointIndex >
+      kdtree( centers.begin(), centers.end() );
+
+    // find nearest polygon center for each vertex of dest mesh
+//     vector<float> point;
+    for( i=0; i<n2; ++i )
+    {
+      const Point3df    & pt = vert2[i];
+/*      point[0] = pt[0];
+      point[1] = pt[1];
+      point[2] = pt[2];
+      pair<KDTree::KDTree::const_iterator, KDTree::KDTree::distance_type>
+        near = kdtree.find_nearest( pt );
+      triCorresp[i] = near.first->second;*/
+      triCorresp[i] = kdtree.find_nearest( make_pair( 0U, pt ) ).first->first;
+    }
+
+#else
 
     for( i=0; i<n2; ++i )
     {
@@ -138,6 +202,8 @@ void MeshInterpoler::findNeighbours()
       }
       triCorresp[i] = trimin;
     }
+
+#endif
   }
 }
 
