@@ -101,7 +101,6 @@ endif( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR "${CMAKE_BUILD_TYPE}" STREQUA
 if( BLITZ_FOUND )
   set( AIMS_DEFINITIONS "${AIMS_DEFINITIONS} -DCARTO_USE_BLITZ" )
 endif()
-add_definitions( ${AIMS_DEFINITIONS} )
 
 set( AIMS_INCLUDE_DIRS 
      ${Sigc++2_INCLUDE_DIRS} 
@@ -146,6 +145,7 @@ if( LIBKDTREE_FOUND )
   # else it will be done in aimsdata lib cmakelist
 endif()
 
+add_definitions( ${AIMS_DEFINITIONS} )
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
 set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase "${LIBXML2_LIBRARIES}" )
