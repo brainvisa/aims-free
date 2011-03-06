@@ -87,9 +87,12 @@ namespace aims
       ) const;
     template <typename T> TimeTexture<T> *
       resampleTexture( const TimeTexture<T> & ) const;
-    template <typename T> Texture<T> *
+    template <typename T> void
       resampleTexture( const Texture<T> & source, Texture<T> & dest,
                        int timestep = 0 ) const;
+    /// low level texture resampling, working on preallocated buffers
+    template <typename T> void
+      resampleTexture( const T *source, T *dest, int timestep = 0 ) const;
 
     const TimeTexture<uint> & projectedTriangles() const;
     const TimeTexture<float> & projectedTriCoord1() const;

@@ -52,9 +52,36 @@ namespace aims
   }
 
 
-  template <typename T> Texture<T> *
+  template <typename T> void
     MeshInterpoler::resampleTexture( const Texture<T> & source,
                                      Texture<T> & dest, int timestep ) const
+  {
+    int stimestep;
+
+    if( d->sourceVert )
+    {
+      stimestep = 0;
+    }
+    else
+    {
+      // get corresponding timestep on source time mesh
+      AimsSurfaceTriangle::const_iterator its, ets = d->source->end();
+      its = d->source->upper_bound( timestep );
+      --its;
+      stimestep = its->first;
+    }
+    size_t n = d->projTriangles[stimestep].data().size();
+    std::vector<T> & tx = dest.data();
+    tx.clear();
+    tx.reserve( n );
+    tx.insert( tx.end(), n, T() );
+    resampleTexture( &source.data()[0], &tx[0], timestep );
+  }
+
+
+  template <typename T> void
+    MeshInterpoler::resampleTexture( const T *source, T *dest,
+                                     int timestep ) const
   {
     int stimestep;
     const AimsVector<uint,3> *poly1;
@@ -80,11 +107,7 @@ namespace aims
     const std::vector<float>      & coord3 = d->projCoord3[stimestep].data();
     const std::vector<unsigned>   & triCorresp
       = d->projTriangles[stimestep].data();
-    unsigned                      i, n = triCorresp.size();
-
-    std::vector<T> & tx = dest.data();
-    tx.reserve( n );
-    tx.insert( tx.end(), n, T() );
+    size_t                        i, n = triCorresp.size();
 
     for( i=0; i<n; ++i )
     {
@@ -93,7 +116,7 @@ namespace aims
       const T & v2 = source[ tri[1] ];
       const T & v3 = source[ tri[2] ];
       float a = coord1[i], b = coord2[i], c = coord3[i];
-      tx[i] = v1 * a + v2 * b + v3 * c;
+      dest[i] = v1 * a + v2 * b + v3 * c;
     }
   }
 

@@ -34,6 +34,8 @@
 #include <aims/mesh/meshinterpoler_d.h>
 #ifdef CARTO_USE_KDTREE
 #include <kdtree++/kdtree.hpp>
+#else
+#warning libkdtree not used, mesh interpolation will be SLOW !
 #endif
 
 using namespace aims;
@@ -452,7 +454,15 @@ AimsSurfaceTriangle *MeshInterpoler::resampleMesh(
 
 template TimeTexture<float> *
   MeshInterpoler::resampleTexture( const TimeTexture<float> & ) const;
-template Texture<float> *MeshInterpoler::resampleTexture(
+template void MeshInterpoler::resampleTexture(
   const Texture<float> &, Texture<float> &, int ) const;
+template void
+  MeshInterpoler::resampleTexture( const float *, float *, int ) const;
 
+template TimeTexture<Point2df> *
+  MeshInterpoler::resampleTexture( const TimeTexture<Point2df> & ) const;
+template void MeshInterpoler::resampleTexture(
+  const Texture<Point2df> &, Texture<Point2df> &, int ) const;
+template void
+  MeshInterpoler::resampleTexture( const Point2df *, Point2df *, int ) const;
 

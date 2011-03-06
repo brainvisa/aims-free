@@ -17,8 +17,7 @@ class MeshInterpoler
     AimsSurfaceTriangle *resampleMesh(
       const AimsSurfaceTriangle & sourceshape ) const;
     TimeTexture_FLOAT *resampleTexture( const TimeTexture_FLOAT & ) const;
-    Texture_FLOAT *resampleTexture( const Texture_FLOAT &, Texture_FLOAT &,
-      int=0 ) const;
+    void resampleTexture( const Texture_FLOAT &, Texture_FLOAT &, int=0 ) const;
 
     const TimeTexture_U32 & projectedTriangles() const;
     const TimeTexture_FLOAT & projectedTriCoord1() const;
