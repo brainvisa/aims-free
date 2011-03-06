@@ -56,13 +56,24 @@ namespace aims
     MeshInterpoler::resampleTexture( const Texture<T> & source,
                                      Texture<T> & dest, int timestep ) const
   {
-    // get corresponding timestep on source time mesh
-    AimsSurfaceTriangle::const_iterator its, ets = d->source->end();
-    its = d->source->upper_bound( timestep );
-    --its;
-    int stimestep = its->first;
-    const AimsSurface<3,Void> & s1 = its->second;
-    const std::vector< AimsVector<uint,3> > &poly1 = s1.polygon();
+    int stimestep;
+    const AimsVector<uint,3> *poly1;
+
+    if( d->sourceVert )
+    {
+      stimestep = 0;
+      poly1 = d->sourcePoly;
+    }
+    else
+    {
+      // get corresponding timestep on source time mesh
+      AimsSurfaceTriangle::const_iterator its, ets = d->source->end();
+      its = d->source->upper_bound( timestep );
+      --its;
+      stimestep = its->first;
+      const AimsSurface<3,Void> & s1 = its->second;
+      poly1 = &s1.polygon()[0];
+    }
 
     const std::vector<float>      & coord1 = d->projCoord1[stimestep].data();
     const std::vector<float>      & coord2 = d->projCoord2[stimestep].data();

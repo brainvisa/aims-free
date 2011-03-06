@@ -63,6 +63,13 @@ namespace aims
   public:
     MeshInterpoler( const AimsSurfaceTriangle & source, const
       AimsSurfaceTriangle & dest );
+    /** This constructor is used when meshes are low-level raw arrays.
+     */
+    MeshInterpoler( const Point3df* sourceVert,
+                    const AimsVector<uint,3>* sourcePoly,
+                    uint nSourcePolygon, const Point3df* destVertex,
+                    const AimsVector<uint,3>* destPolygon, uint nDestVertex,
+                    uint nDestPolygon );
     ~MeshInterpoler();
 
     /** Main projection function.
@@ -94,7 +101,12 @@ namespace aims
     void findNeighbours();
     /// sub-step 2 of project(): calculates projectedTriCoord*
     void processCoordinates();
-
+    void findNeighbours_timestep( const Point3df *sourceVert,
+      const AimsVector<uint,3>* sourcePoly, uint nSourcePolygon,
+      const Point3df* destVertex, uint nDestVertex, int timestep );
+    void processCoordinates_timestep( const Point3df *sourceVert,
+      const AimsVector<uint,3> *sourcePoly, const Point3df *destVertex,
+      uint nDestVertex, int timestep );
   private:
     struct Private;
     Private *d;
