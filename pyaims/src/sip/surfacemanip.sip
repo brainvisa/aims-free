@@ -52,6 +52,8 @@ public:
     surfaceNeighbours( const AimsSurfaceTriangle & surf );
   static AimsSurfaceTriangle* refineMeshTri4(
     const AimsSurfaceTriangle & mesh ) /Factory/;
+  static TimeTexture_FLOAT* meshDensity( const AimsSurfaceTriangle & mesh )
+    /Factory/;
 };
 
 };

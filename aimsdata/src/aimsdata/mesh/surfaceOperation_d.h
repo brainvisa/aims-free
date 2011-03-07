@@ -339,6 +339,60 @@ namespace aims
     return omesh;
   }
 
+
+  template <int D, typename T>
+  TimeTexture<float>*
+    SurfaceManip::meshDensity( const AimsTimeSurface<D,T> & mesh )
+  {
+    TimeTexture<float> *tex = new TimeTexture<float>;
+    typename AimsTimeSurface<D,T>::const_iterator is, es = mesh.end();
+    uint i;
+
+    for( is=mesh.begin(); is!=es; ++is )
+    {
+      const AimsSurface<D,T>                 & surf = is->second;
+      const std::vector<Point3df>            & vert = surf.vertex();
+      const std::vector<AimsVector<uint,D> > & poly = surf.polygon();
+
+      // create corresponding timestep texture
+      std::vector<float> & tx = (*tex)[ is->first ].data();
+      std::vector<unsigned> counts;
+      tx.reserve( vert.size() );
+      tx.insert( tx.end(), vert.size(), 0. );
+      counts.reserve( vert.size() );
+      counts.insert( counts.end(), vert.size(), 0 );
+
+      // record edges sizes on all polygons
+      typename std::vector<AimsVector<uint,D> >::const_iterator
+        ip, ep = poly.end(), jp;
+      float n;
+
+      for( ip=poly.begin(); ip!=ep; ++ip )
+      {
+        for( i=0; i<D; ++i )
+        {
+          // edge distance, accounted on both vertices of the edge
+          uint vi = (*ip)[i];
+          uint vj = (*ip)[ (i+1) % D ];
+          n = ( vert[ vi ] - vert[ vj ] ).norm();
+          tx[ vi ] += n;
+          tx[ vj ] += n;
+          // count
+          ++counts[ vi ];
+          ++counts[ vj ];
+        }
+      }
+
+      // now average distances, and invert them to get a density
+      std::vector<float>::iterator          it, et = tx.end();
+      std::vector<unsigned>::const_iterator itc;
+      for( it=tx.begin(), itc=counts.begin(); it!=et; ++it, ++itc )
+        *it = float( *itc ) / *it;
+    }
+
+    return tex;
+  }
+
 }
 
 #endif

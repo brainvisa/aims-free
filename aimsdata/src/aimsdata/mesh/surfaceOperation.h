@@ -152,6 +152,9 @@ namespace aims
     */
     static AimsSurfaceTriangle* refineMeshTri4(
       const AimsSurfaceTriangle & mesh );
+    /// Calculate a mesh density: inverse of the average edges distance
+    template <int D, typename T>
+    static TimeTexture<float>* meshDensity( const AimsTimeSurface<D,T> & mesh );
   };
 
 }

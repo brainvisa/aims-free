@@ -2970,5 +2970,10 @@ template void SurfaceManip::meshTransform( AimsSurfaceFacet &,
                                            const Motion & );
 
 template AimsTimeSurface<3,Void> *
-    SurfaceManip::meshExtract( const AimsTimeSurface<3,Void> &,
-                               const TimeTexture<int16_t> &, int16_t, vector<size_t> ** overtIndex);
+  SurfaceManip::meshExtract( const AimsTimeSurface<3,Void> &,
+                             const TimeTexture<int16_t> &, int16_t,
+                             vector<size_t> ** overtIndex);
+
+template TimeTexture<float>*
+  SurfaceManip::meshDensity( const AimsTimeSurface<3,Void> & );
+
