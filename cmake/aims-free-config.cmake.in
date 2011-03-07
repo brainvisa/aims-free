@@ -29,7 +29,7 @@ find_package( Sigc++2 REQUIRED )
 find_package( LibXml2 REQUIRED )
 find_package( Boost REQUIRED )
 @BLITZ_FIND_PACKAGE@
-find_package( LibKDTree )
+find_package( LibKDTree QUIET )
 
 find_package( python )
 if( PYTHON_FOUND )

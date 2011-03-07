@@ -86,7 +86,7 @@ if( ZLIB_FOUND )
 endif()
 BRAINVISA_DEPENDENCY( DEV RECOMMENDS zlib DEV )
 
-find_package( LibKDTree )
+find_package( LibKDTree QUIET )
 
 set( AIMS_DEFINITIONS "-D_REENTRANT -DAIMS" )
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" OR "${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel" )

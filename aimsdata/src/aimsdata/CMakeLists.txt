@@ -9,7 +9,6 @@ if( NOT LIBKDTREE_FOUND )
     kdtree++/node.hpp
     kdtree++/region.hpp
     )
-  message( "kdtree headers: ${_kdtreeHeaders}" )
   BRAINVISA_COPY_AND_INSTALL_HEADERS( _kdtreeHeaders "" headersTarget )
 endif()
 set(AIMSDATA_HEADERS ${_headers} PARENT_SCOPE)
