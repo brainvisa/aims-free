@@ -167,7 +167,6 @@ void SimpleHistogram<float>::doit( const AimsData<float>& thing )
   AimsData<int32_t> res( size );
 
   AimsData<float>::const_iterator it;
-  AimsData<int32_t>::iterator dest = res.begin();
 
   float minh = thing.minimum();
   float maxh = thing.maximum();
@@ -193,8 +192,15 @@ void SimpleHistogram<float>::doit( const AimsData<float>& thing )
   for ( t=thing.dimT(); t--; it += thing.oSliceBetweenVolume() )
     for ( z=thing.dimZ(); z--; it += thing.oLineBetweenSlice() )
       for ( y=thing.dimY(); y--; it += thing.oPointBetweenLine() )
-	for ( x=thing.dimX(); x--; it++ )
-	  dest[ (int)( (float)size * ( *it - minh ) / div ) ]++;
+        for ( x=thing.dimX(); x--; it++ )
+        {
+          int p = (int)( (float) size * ( *it - minh ) / div );
+          if( p < 0 )
+            p = 0;
+          else if( p >= size )
+            p = size - 1;
+          res[ p ]++;
+        }
 
   this->_data = res;
 }
