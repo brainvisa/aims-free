@@ -23,6 +23,11 @@ class MeshInterpoler
     const TimeTexture_FLOAT & projectedTriCoord1() const;
     const TimeTexture_FLOAT & projectedTriCoord2() const;
     const TimeTexture_FLOAT & projectedTriCoord3() const;
+
+    void reloadProjectionParams( const TimeTexture_U32 & projTriangles,
+      const TimeTexture_FLOAT & projTriCoord1,
+      const TimeTexture_FLOAT & projTriCoord2,
+      const TimeTexture_FLOAT & projTriCoord3 );
 };
 
 };

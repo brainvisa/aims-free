@@ -98,6 +98,11 @@ namespace aims
     const TimeTexture<float> & projectedTriCoord1() const;
     const TimeTexture<float> & projectedTriCoord2() const;
     const TimeTexture<float> & projectedTriCoord3() const;
+    /// set interpoler internal state (for instance to reload it after saving)
+    void reloadProjectionParams( const TimeTexture<uint> & projTriangles,
+      const TimeTexture<float> & projTriCoord1,
+      const TimeTexture<float> & projTriCoord2,
+      const TimeTexture<float> & projTriCoord3 );
 
   protected:
     /// sub-step 1 of project(): calculates projectedTriangles

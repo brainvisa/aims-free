@@ -452,6 +452,21 @@ AimsSurfaceTriangle *MeshInterpoler::resampleMesh(
 }
 
 
+void MeshInterpoler::reloadProjectionParams(
+  const TimeTexture<uint> & projTriangles,
+  const TimeTexture<float> & projTriCoord1,
+  const TimeTexture<float> & projTriCoord2,
+  const TimeTexture<float> & projTriCoord3 )
+{
+  d->projTriangles = projTriangles;
+  d->projCoord1 = projTriCoord1;
+  d->projCoord2 = projTriCoord2;
+  d->projCoord3 = projTriCoord3;
+}
+
+
+// ---
+
 template TimeTexture<float> *
   MeshInterpoler::resampleTexture( const TimeTexture<float> & ) const;
 template void MeshInterpoler::resampleTexture(
