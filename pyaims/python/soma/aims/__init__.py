@@ -1020,7 +1020,7 @@ def TimeSurface( dim=3 ):
 
 def AimsTimeSurface( dim=3 ):
   '''Create an instance of Aims mesh (AimsTimeSurface_<dim>) from a dimension parameter'''
-  return getattr( aimssip, 'AimsTimeSurface_' + str( dim ) )
+  return getattr( aimssip, 'AimsTimeSurface_' + str( dim ) )()
 
 
 def AimsThreshold( *args, **kwargs ):
