@@ -433,6 +433,12 @@ AimsSurfaceTriangle *MeshInterpoler::resampleMesh(
 
     for( i=0; i<n; ++i )
     {
+      if( triCorresp[i] >= poly1.size() )
+      {
+        /* cout << "polygon " << i << " index out of bounds: " << triCorresp[i]
+        << ", max: " << poly1.size() << endl; */
+      }
+      else {
       const AimsVector<uint,3> & tri = poly1[ triCorresp[i] ];
       const Point3df & v1 = vert1[ tri[0] ];
       const Point3df & v2 = vert1[ tri[1] ];
@@ -444,6 +450,7 @@ AimsSurfaceTriangle *MeshInterpoler::resampleMesh(
         norm[i] = norm1[ tri[0] ] * a + norm1[ tri[1] ] * b
           + norm1[ tri[2] ] * c;
         norm[i].normalize();
+      }
       }
     }
   }

@@ -15,14 +15,15 @@ class MeshInterpoler
 
     void project();
     AimsSurfaceTriangle *resampleMesh(
-      const AimsSurfaceTriangle & sourceshape ) const;
-    TimeTexture_FLOAT *resampleTexture( const TimeTexture_FLOAT & ) const;
+      const AimsSurfaceTriangle & sourceshape ) const /Factory/;
+    TimeTexture_FLOAT *resampleTexture( const TimeTexture_FLOAT & ) const
+      /Factory/;
     void resampleTexture( const Texture_FLOAT &, Texture_FLOAT &, int=0 ) const;
 
-    const TimeTexture_U32 & projectedTriangles() const;
-    const TimeTexture_FLOAT & projectedTriCoord1() const;
-    const TimeTexture_FLOAT & projectedTriCoord2() const;
-    const TimeTexture_FLOAT & projectedTriCoord3() const;
+    const TimeTexture_U32 & projectedTriangles() const /Transfer/;
+    const TimeTexture_FLOAT & projectedTriCoord1() const /Transfer/;
+    const TimeTexture_FLOAT & projectedTriCoord2() const /Transfer/;
+    const TimeTexture_FLOAT & projectedTriCoord3() const /Transfer/;
 
     void reloadProjectionParams( const TimeTexture_U32 & projTriangles,
       const TimeTexture_FLOAT & projTriCoord1,
