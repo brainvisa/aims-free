@@ -843,7 +843,7 @@ def typeCode( data ):
     numpy.int8 : 'S8', numpy.uint8 : 'U8',
     numpy.int16 : 'S16', numpy.uint16 : 'U16',
     numpy.int32 : 'S32', numpy.uint32 : 'U32',
-    numpy.int64 : 'S64', numpy.uint32 : 'U64',
+    numpy.int64 : 'S64', numpy.uint64 : 'U64',
     numpy.float32 : 'FLOAT', numpy.float64 : 'DOUBLE',
   }
   dt = dmap.get( data, None )
@@ -867,6 +867,7 @@ def typeCode( data ):
 
 def _parseTypeInArgs( *args, **kwargs ):
   dtype = kwargs.get( 'dtype', None )
+  print '_parseTypeInArgs:', dtype
   if dtype is not None:
     # kwargs = dict( kwargs )
     del kwargs[ 'dtype' ]
