@@ -13,6 +13,7 @@ HEADERS = \
         debugging/debuggingvol.h \
         io/reader.h \
         io/writer.h \
+        object/numconv.h \
         object/object.h \
         object/rcptrconv.h \
         vector/numpyarrayfunc.h \
@@ -24,5 +25,6 @@ HEADERS = \
 SOURCES = \
         init.cc \
         debugging/debuggingvol.cc \
+        object/numconv.cc \
         object/object.cc \
         vector/numpyarrayfunc.cc

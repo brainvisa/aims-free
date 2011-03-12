@@ -187,7 +187,7 @@ typessub = { 'signed char' : \
              'unsigned' : \
              { 'typecode' : 'U32',
                'pyFromC' : 'PyInt_FromLong',
-               'CFromPy' : 'PyLong_AsUnsignedLong',
+               'CFromPy' : 'carto::uint32_FromPy',
                'castFromSip' : '',
                'deref' : '',
                'pyderef' : '',
@@ -198,7 +198,7 @@ typessub = { 'signed char' : \
                'NumType' : 'PyArray_UINT32', 
                'PyType' : 'unsigned',
                'sipClass' : '',
-               'typeinclude' : '', 
+               'typeinclude' : '#include <pyaims/object/numconv.h>', 
                'sipinclude' : '', 
                'module' : 'aims', 
                'testPyType' : 'PyNumber_Check', 
