@@ -16,7 +16,7 @@
 
 <hr width="100%"> <br>
 
-
+ <b><a href="#version-4.1.0">Version 4.1.0</a></b><br>
  <b><a href="#version-4.0.2">Version 4.0.2</a></b><br>
  <b><a href="#version-4.0">Version 4.0</a></b><br>
  <b><a href="#version-3.2.1">Version 3.2.1</a></b><br>
@@ -36,6 +36,25 @@
  <b><a href="#version-2.11">Version 2.11</a></b><br>
  <b><a href="#version-2.10">Version 2.10</a></b><br>
  &nbsp;  
+ 
+<!-- -->
+<h4> <a name="version-4.1.0"></a>Version 4.1.0</h4>
+
+<p>In this version, an important change for the developers should be noted : the build tool used to compile from the source code has changed. We gave up our home-made tool <i>build-config</i> and replace it with the standard tool <a href="http://www.cmake.org/">CMake</a>, a cross-platform, open-source build system.
+</p>
+
+<p>This version also brings a number of bug fixes, and improvements:</p>
+
+<ul>
+<li>Add support for RGB/RGBA background in AimsResample</li>
+<li>PyAims</li>
+  <ul>
+    <li>Bug fix in aims.write when the specified path doesn't exist.</li>
+    <li>Helper functions to create the main Aims data types</li>
+    <li>Allow additional constructors arguments for volumes and textures (build from another volume, or a numpy array...)</li>
+    <li>Big fix in TimeSurface erase function</li>
+  </ul>
+</ul>
 
  <!-- -->
 <h4> <a name="version-4.0.2"></a>November 19th, 2010, Version 4.0.2</h4>
