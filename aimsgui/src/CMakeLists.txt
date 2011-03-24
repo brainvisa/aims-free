@@ -6,6 +6,7 @@ add_subdirectory( aimsqsqlgraphformat )
 set(HEADERS ${AIMSQSQLGRAPHFORMAT_HEADERS} ${HEADERS})
 if( APPLE )
   add_subdirectory( bundle_aimsqtformats )
+  set( _guiExecutable MACOSX_BUNDLE )
 endif( APPLE )
 
 #------------------------------------------------------------------------------
@@ -22,8 +23,21 @@ foreach( _command AimsAttributedViewer AimsLabelSelector )
       set( _sources ${_sources} ${_command}/${_f} )
     endforeach()
 
-    add_executable( ${_target} ${_sources} )
+    add_executable( ${_target} ${_guiExecutable} ${_sources} )
     target_link_libraries( ${_target} aimsgui )
+
+    if( APPLE )
+      add_custom_command( TARGET ${_target} POST_BUILD
+        COMMAND "ln"
+        ARGS "-sf"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_target}.app/Contents/MacOS/${_target}"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_target}"
+      )
+      BRAINVISA_INSTALL( FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_target}"
+                  DESTINATION bin
+                  COMPONENT ${PROJECT_NAME} )
+    endif()
+
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin
                   COMPONENT ${PROJECT_NAME} )
