@@ -30,7 +30,7 @@ foreach( _command AimsAttributedViewer AimsLabelSelector )
       add_custom_command( TARGET ${_target} POST_BUILD
         COMMAND "ln"
         ARGS "-sf"
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_target}.app/Contents/MacOS/${_target}"
+        "${_target}.app/Contents/MacOS/${_target}"
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_target}"
       )
       BRAINVISA_INSTALL( FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_target}"
