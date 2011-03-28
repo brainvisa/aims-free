@@ -130,10 +130,19 @@ namespace aims
                                                      SITE_INSTANCE_UID_ROOT ) );
 
     // Patient 
+#if OFFIS_DCMTK_VERSION_NUMBER >= 360
+    dataset->insertEmptyElement( DCM_PatientName );
+#else
     dataset->insertEmptyElement( DCM_PatientsName );
+#endif
     dataset->insertEmptyElement( DCM_PatientID );
+#if OFFIS_DCMTK_VERSION_NUMBER >= 360
+    dataset->insertEmptyElement( DCM_PatientBirthDate );
+    dataset->insertEmptyElement( DCM_PatientSex );
+#else
     dataset->insertEmptyElement( DCM_PatientsBirthDate );
     dataset->insertEmptyElement( DCM_PatientsSex );
+#endif
 
     // Study
     dataset->putAndInsertString( DCM_StudyInstanceUID,
@@ -142,7 +151,11 @@ namespace aims
                                                         SITE_STUDY_UID_ROOT ) );
     dataset->insertEmptyElement( DCM_StudyDate );
     dataset->insertEmptyElement( DCM_StudyTime );
+#if OFFIS_DCMTK_VERSION_NUMBER >= 360
+    dataset->insertEmptyElement( DCM_ReferringPhysicianName );
+#else
     dataset->insertEmptyElement( DCM_ReferringPhysiciansName );
+#endif
 
     // Series
     dataset->putAndInsertString( DCM_Modality,
@@ -181,7 +194,7 @@ namespace aims
         if ( hdr->hasProperty( "scale_factor" ) )
         {
           hdr->getProperty( "scale_factor", slope );
-          ostringstream oslope;
+          std::ostringstream oslope;
           oslope << slope;
           dataset->putAndInsertString( DCM_RescaleSlope, oslope.str().c_str() );
         }
@@ -189,7 +202,7 @@ namespace aims
         if ( hdr->hasProperty( "scale_offset" ) )
         {
           hdr->getProperty( "scale_offset", offset );
-          ostringstream ooffset;
+          std::ostringstream ooffset;
           ooffset << offset;
           dataset->putAndInsertString( DCM_RescaleIntercept, ooffset.str().c_str() );
         }
@@ -315,7 +328,7 @@ namespace aims
         PythonHeader * hdr = (PythonHeader *)dcmdata.header();
         hdr->setProperty( "scale_factor_applied", true );
         hdr->setProperty( "scale_factor", info.slope() );
-        hdr->setProperty( "scale_offset", info.offset() - info.slope() * (double)numeric_limits<int16_t>::min() );
+        hdr->setProperty( "scale_offset", info.offset() - info.slope() * (double)std::numeric_limits<int16_t>::min() );
 
         DicomWriter<int16_t>	w( _name );
         return w.write( dcmdata );

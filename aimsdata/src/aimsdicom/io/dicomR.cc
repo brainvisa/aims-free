@@ -53,7 +53,7 @@ namespace aims
                                  const carto::AllocatorContext & context, 
                                  carto::Object options )
     {
-      cout << "Reading image" << endl ;
+      std::cout << "Reading image" << std::endl ;
       int	frame = -1, borderWidth = 0;
       options->getProperty( "frame", frame );
       options->getProperty( "border", borderWidth );
@@ -353,7 +353,7 @@ namespace aims
               for ( j=0; j<dy; j++ )
                 for ( i=0; i<dx; i++ )
                   {
-		    cout << "slope = " << slope << " & intercept = " << inter << endl ;
+		    std::cout << "slope = " << slope << " & intercept = " << inter << std::endl ;
                     signal = (double)*bptr++ * slope + inter;
 
                     if ( signal <= min )  signal = 0.0;

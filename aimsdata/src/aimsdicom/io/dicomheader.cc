@@ -796,14 +796,22 @@ int DicomHeader::readFirst()
   if ( manufacturer == "SIEMENS" && modality == "PT" )
     {
       
+#if OFFIS_DCMTK_VERSION_NUMBER >= 360
+      if ( header.search( DCM_PatientWeight, stack ) == EC_Normal )
+#else
       if ( header.search( DCM_PatientsWeight, stack ) == EC_Normal )
+#endif
         {
           DcmDecimalString *object = (DcmDecimalString *)stack.top();
           Float64 patientWeight;
           object->getFloat64( patientWeight );
           setProperty( "patient_weight", (float)patientWeight );
         }
+#if OFFIS_DCMTK_VERSION_NUMBER >= 360
+     if ( header.search( DCM_PatientAge, stack ) == EC_Normal )
+#else
      if ( header.search( DCM_PatientsAge, stack ) == EC_Normal )
+#endif
         {
           if( stack.top()->ident() != EVR_AS ){
             // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
@@ -817,7 +825,11 @@ int DicomHeader::readFirst()
 	  int ageInt = atoi( ageStr.substr( 0, ageStr.length() - 1 ).c_str() ) ;
           setProperty( "patient_age", ageInt ) ;
         }
+#if OFFIS_DCMTK_VERSION_NUMBER >= 360
+    if ( header.search( DCM_PatientSex, stack ) == EC_Normal )
+#else
     if ( header.search( DCM_PatientsSex, stack ) == EC_Normal )
+#endif
       {
         if( stack.top()->ident() != EVR_CS ){
           // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
