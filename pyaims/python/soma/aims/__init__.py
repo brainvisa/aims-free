@@ -35,8 +35,8 @@
 The aims module allows access to the AIMS library in python.
 
 Most of it is a set of direct bindings to the
-U{C++ library<../../aimsdata-3.1/doxygen/index.html>} API. But a few classes
-have been specially written to make easy linke to the python world.
+U{C++ library<../../aimsdata-4.1/doxygen/index.html>} API. But a few classes
+have been specially written to make easy links to the python world.
 
 aims contains mainly the AIMS and carto data structures and IO system.
 It covers several C++ libraries: cartobase, cartodata, graph, aimsdata, plus
