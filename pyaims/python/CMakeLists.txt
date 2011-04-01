@@ -8,3 +8,7 @@ BRAINVISA_GENERATE_EPYDOC_DOC(
   EXCLUDE soma.signature numpy pickle StringIO copy* math soma.uuid soma.wip* string sys types scipy
 )
 
+find_package( Sphinx )
+BRAINVISA_GENERATE_SPHINX_DOC( "../doc/sphinx"
+  "share/doc/pyaims-${BRAINVISA_PACKAGE_VERSION_MAJOR}.${BRAINVISA_PACKAGE_VERSION_MINOR}/sphinx" )
+

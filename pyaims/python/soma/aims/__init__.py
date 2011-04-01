@@ -34,47 +34,63 @@
 '''
 The aims module allows access to the AIMS library in python.
 
+- organization: `NeuroSpin <http://www.neurospin.org>`_ and `IFR 49 <http://www.ifr49.org>`_
+
+- license: `CeCILL-B <http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html>`_
+
 Most of it is a set of direct bindings to the
-U{C++ library<../../aimsdata-4.1/doxygen/index.html>} API. But a few classes
-have been specially written to make easy links to the python world.
+`C++ library <../../aimsdata-4.1/doxygen/index.html>`_ API. But a few
+classes have been customized or specially written to make easy links to the
+python world.
 
 aims contains mainly the AIMS and carto data structures and IO system.
 It covers several C++ libraries: cartobase, cartodata, graph, aimsdata, plus
 some C++ classes from the standard library (like std::vector)
 
 Main classes:
-  - L{Reader} and L{Writer} for the generic IO system, which allows to
-    read and write everything. L{Finder} is also part of the IO system to
-    identify files and get information about them.
-  - C{Volume_<type>} and C{AimsData_<type>}: volumes (the cartodata new Volume
+  - :py:class:`Reader` and :py:class:`Writer` for the generic IO system,
+    which allows to read and write everything, and which can be, in most
+    cases, replaced with the more convenient global :py:func:`read` and
+    :py:func:`write` functions. :py:class:`Finder` is
+    also part of the IO system to identify files and get information about
+    them.
+  - Volume_<type> and AimsData_<type>: volumes (the cartodata newer Volume
     and the older aimsdata version). An important feature of Volumes is
-    the link with the C{numpy} arrays, so all the power of C{numpy} can be used
-    to work on volumes. See for instance L{Volume_FLOAT}.
-  - L{carto.GenericObject}: the dynamic C++ generic object which behaves much
-    like a python object, and its proxy L{Object} which should always be
-    used to access a C{GenericObject}
-  - C{AimsVector_<type>_<size>} for fixed-size vectors, and their aliases
-    for points: L{Point3df}, L{Point2df}, L{Point3d}
-  - C{vector_<type>} provides bindings to the C++ std::vector template classes
-    and easy conversions from / to python lists
-  - C{rc_ptr_<type>}: bridge with C++ reference counters, which should
-    interact quite well with python reference counting
-  - L{BucketMap_VOID}: list of voxels
-  - C{AimsTimeSurface_<polygons_size>}: meshes
-  - C{Texture_<type>}: textures to map on meshes
-  - L{Graph}
-  - L{Tree}
-  - L{AffineTransformation3d}: the transformation class that allows
+    the link with the numpy_ arrays, so all the power of numpy_ can be
+    used to work on volumes. See for instance :py:class:`Volume_FLOAT`.
+    Volumes of various types can be build using the convenience factory
+    functions :py:func:`Volume` and :py:func:`AimsData`.
+  - :py:class:`carto.GenericObject`: the dynamic C++ generic object which behaves
+    much like a python object, and its proxy :py:class:`Object` which should
+    always be used to access a :py:class:`GenericObject`
+  - AimsVector_<type>_<size> for fixed-size vectors, and their aliases
+    for points: :py:class:`Point3df`, :py:class:`Point2df`,
+    :py:class:`Point3d`
+  - vector_<type>, set_<type>, list_<type>, map_<type1>_<type2> provide
+    bindings to the C++ std::vector, std::list, std::set, std::map template
+    classes and easy conversions from / to python lists
+  - rc_ptr_<type>: bridge with C++ reference counters, which should
+    interact quite well, and most of the time transparently, with python
+    reference counting
+  - :py:class:`BucketMap_VOID`: list of voxels. Created using the factory
+    function :py:func:`BucketMap`
+  - AimsTimeSurface_<polygons_size>: meshes, and the factory function
+    :py:func:`AimsTimeSurface`
+  - TimeTexture_<type>: textures to map on meshes, and the factory function
+    :py:func:`TimeTexture`.
+  - :py:class:`Graph`
+  - :py:class:`Tree`
+  - :py:class:`AffineTransformation3d`: the transformation class that allows
     referential conversions
-  - C{Converter_<type1>_<type2>} and C{ShallowConverter_<type1>_<type2>}:
-    conversions between data types (mainly volume types)
+  - Converter_<type1>_<type2> and ShallowConverter_<type1>_<type2>:
+    conversions between data types (mainly volume types). See the factory
+    functions :py:func:`Converter` and :py:func:`ShallowConverter`
   - a few algorithms will be added
 
-@author: Denis Riviere + others
-@organization: U{NeuroSpin<http://www.neurospin.org>} and U{IFR 49<http://www.ifr49.org>}
-@license: U{CeCILL version 2<http://www.cecill.info/licences/Licence_CeCILL_V2-en.html>}
+.. _numpy: http://numpy.scipy.org/
 '''
-__docformat__ = "epytext en"
+__docformat__ = 'restructuredtext en'
+
 
 import types
 import sip
@@ -150,8 +166,9 @@ class Reader:
   Generic reader that can theorerically load any SIP-mapped AIMS or
   Cartograph object. A translation table can be provided to correctly map
   readers and objects.
-  For quick and simple operations, you can also use the gloabl read() and write()
-  functions, which use a Reader object internally
+  For quick and simple operations, you can also use the gloabl
+  :py:func:`soma.aims.read` and :py:func:`soma.aims.write` functions, which use
+  a Reader object internally.
   '''
   def __init__( self, typemap = None, allocmode = None, options = None ):
     '''
@@ -161,18 +178,20 @@ class Reader:
 
     The map has 2 modes:
 
-      - object_type : object_type (ex: C{'Volume' : 'AimsData'} )
-      - object_type : dict( data_type : full_type )
-        (ex: 'Mesh' : C{{ 'VOID' : 'AimsSurfaceTriangle' }} )
+    - object_type : object_type (ex: ``{'Volume' : 'AimsData'}`` )
+    - object_type : dict( data_type : full_type )
+      (ex: ``'Mesh' : { 'VOID' : 'AimsSurfaceTriangle' }`` )
 
-        A default object_type can be specified if the data_type is not
-        found:
+      A default object_type can be specified if the data_type is not
+      found:
 
-        'Mesh' : C{{ 'VOID' : 'AimsSurfaceTriangle', \
-                     'default_object_type' : 'AimsTimeSurface_3' }}
+      .. code-block:: python
 
-        (and this example corresponds to the default internal map if none is
-        specified)
+        'Mesh' : { 'VOID' : 'AimsSurfaceTriangle',
+                    'default_object_type' : 'AimsTimeSurface_3' }
+
+      (and this example corresponds to the default internal map if none is
+      specified)
     '''
     if typemap is None:
       self._typemap = { #'Volume' : 'AimsData', \
@@ -210,14 +229,14 @@ class Reader:
     self.options = options
 
   def read( self, filename, border = 0, frame = -1, dtype=None ):
-    '''Reads the object contained in the file <filename>, whatever the type of
-    the contents of the file. All objects types supported by Aims IO system
+    '''Reads the object contained in the file <filename>, whatever the type
+    of the contents of the file. All objects types supported by Aims IO system
     can be read. A border width and a frame number may be specified and will
     be only used by formats that support them.
     If <dtype> is specified, the corresponding object/data type is forced. It
     may be useful to force reading a volume with float voxels for instance.
     It is only supported by a few formats. <dtype> may contain a string or
-    a type object, as accepted by typeCode().
+    a type object, as accepted by :py:func:`soma.aims.typeCode`.
     The read function may follow other object/data types rules, allocators and
     options, as specified in the Reader constructor.
     '''
@@ -328,16 +347,22 @@ class Writer:
 
 def read( filename, border = 0, frame = -1, dtype=None ):
   '''Equivalent to:
-  r = Reader()
-  return r.read( filename, border=border, frame=frame, dtype=dtype )
+
+  .. code-block:: python
+
+    r = Reader()
+    return r.read( filename, border=border, frame=frame, dtype=dtype )
   '''
   r = Reader()
   return r.read( filename, border=border, frame=frame, dtype=dtype )
 
 def write( obj, filename, format=None ):
   '''Equivalent to:
-  w = Writer()
-  w.write( obj, filename, format=format )
+
+  .. code-block:: python
+
+    w = Writer()
+    w.write( obj, filename, format=format )
   '''
   w = Writer()
   w.write( obj, filename, format=format )
@@ -607,7 +632,9 @@ convertersObjectToPython = {
 def getPython( self ):
   """
   Conversion to python types: extracts what is in the Object (when
-  possible). The global dictionary convertersToPython stores converters
+  possible). The global dictionary
+  :py:data:`soma.aims.convertersObjectToPython` stores
+  converters
   """
   t = self.type()
   cv = convertersObjectToPython.get( t )
@@ -834,7 +861,9 @@ Quaternion.compose = Quaternion.__mul__
 # templates / types helpers
 
 def typeCode( data ):
-  '''returns the AIMS type code for the given input data. data may be a string code, a python/numpy numeric type, an AIMS type, or an instance of such a type
+  '''returns the AIMS type code for the given input data. data may be a string
+  code, a python/numpy numeric type, an AIMS type, or an instance of such a
+  type.
 '''
   dmap = { 'int' : 'S32', 'int32' : 'S32', 'uint' : 'U32', 'uint32' : 'U32',
     'int64' : 'S64', 'uint64' : 'U64', 'int16' : 'S16', 'uint16' : 'U16',
@@ -930,11 +959,16 @@ def Volume( *args, **kwargs ):
 
 
 def AimsData( *args, **kwargs ):
-  '''Create an instance of the older Aims volumes (AimsData_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  '''Create an instance of the older Aims volumes (AimsData_<type>) from a type
+  parameter, which may be specified as the dtype keyword argument, or as one of
+  the arguments if one is identitied as a type.
   The default type is 'FLOAT'.
   Type definitions should match those accepted by typeCode().
-  AimsData may also use a numpy array, or another Volume or AimsData_* as unique argument.
-  Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a copy of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* ) share the input data.
+  AimsData may also use a numpy array, or another Volume or AimsData_* as
+  unique argument.
+  Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a copy
+  of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* ) share the
+  input data.
   '''
   if len( args ) == 1 and len( kwargs ) == 0:
     arg = args[0]
@@ -949,11 +983,15 @@ def AimsData( *args, **kwargs ):
 
 
 def TimeTexture( *args, **kwargs ):
-  '''Create an instance of Aims texture (TimeTexture_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  '''Create an instance of Aims texture (TimeTexture_<type>) from a type
+  parameter, which may be specified as the dtype keyword argument, or as one of
+  the arguments if one is identitied as a type.
   The default type is 'FLOAT'.
   Type definitions should match those accepted by typeCode().
-  TimeTexture may also use a numpy array, or another TimeTexture_* or Textrue_* as unique argument.
-  Building from a numpy arrays uses the 1st dimension as vertex, the 2nd as time (if any).
+  TimeTexture may also use a numpy array, or another TimeTexture_* or Textrue_*
+  as unique argument.
+  Building from a numpy arrays uses the 1st dimension as vertex, the 2nd as
+  time (if any).
   '''
   if len( args ) == 1 and len( kwargs ) == 0:
     arg = args[0]
@@ -975,7 +1013,9 @@ def TimeTexture( *args, **kwargs ):
 
 
 def Texture( *args, **kwargs ):
-  '''Create an instance of Aims low-level texture (Texture_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  '''Create an instance of Aims low-level texture (Texture_<type>) from a type
+  parameter, which may be specified as the dtype keyword argument, or as one of
+  the arguments if one is identitied as a type.
   The default type is 'FLOAT'.
   Type definitions should match those accepted by typeCode().
   Texture may also use a numpy array, or another Textrue_* as unique argument.
@@ -990,7 +1030,9 @@ def Texture( *args, **kwargs ):
 
 
 def BucketMap( *args, **kwargs ):
-  '''Create an instance of Aims bucket (BucketMap_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+  '''Create an instance of Aims bucket (BucketMap_<type>) from a type
+  parameter, which may be specified as the dtype keyword argument, or as one of
+  the arguments if one is identitied as a type.
   The default type is 'VOID'.
   Type definitions should match those accepted by typeCode().
   '''
@@ -998,7 +1040,10 @@ def BucketMap( *args, **kwargs ):
 
 
 def Converter( *args, **kwargs ):
-  '''Create a Converter instance from input and output types. Types may be passed as keyword arguments intype and outtype, or dtype if both are the same (not very useful for a converter). Otherwise the arguments are parsed to find types arguments.
+  '''Create a Converter instance from input and output types. Types may be
+  passed as keyword arguments intype and outtype, or dtype if both are the same
+  (not very useful for a converter). Otherwise the arguments are parsed to find
+  types arguments.
   Types may be specified as allowed by typeCode().
   '''
   intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
@@ -1006,7 +1051,10 @@ def Converter( *args, **kwargs ):
 
 
 def ShallowConverter( *args, **kwargs ):
-  '''Create a ShallowConverter instance from input and output types. Types may be passed as keyword arguments intype and outtype, or dtype if both are the same (not very useful for a converter). Otherwise the arguments are parsed to find types arguments.
+  '''Create a ShallowConverter instance from input and output types. Types may
+  be passed as keyword arguments intype and outtype, or dtype if both are the
+  same (not very useful for a converter). Otherwise the arguments are parsed to
+  find types arguments.
   Types may be specified as allowed by typeCode().
   '''
   intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
@@ -1020,12 +1068,15 @@ def TimeSurface( dim=3 ):
 
 
 def AimsTimeSurface( dim=3 ):
-  '''Create an instance of Aims mesh (AimsTimeSurface_<dim>) from a dimension parameter'''
+  '''Create an instance of Aims mesh (AimsTimeSurface_<dim>) from a dimension
+  parameter'''
   return getattr( aimssip, 'AimsTimeSurface_' + str( dim ) )()
 
 
 def AimsThreshold( *args, **kwargs ):
-  '''Create a AimsThreshold instance from input and output types. Types may be passed as keyword arguments intype and outtype, or dtype if both are the same. Otherwise the arguments are parsed to find types arguments.
+  '''Create a AimsThreshold instance from input and output types. Types may be
+  passed as keyword arguments intype and outtype, or dtype if both are the
+  same. Otherwise the arguments are parsed to find types arguments.
   Types may be specified as allowed by typeCode().
   '''
   intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
@@ -1087,18 +1138,19 @@ def rc_ptr( *args, **kwargs ):
 carto.GenericObject.__doc__ = '''
 Generic dynamic polymorphic object.
 
-GenericObject should not be used directly, but rather through the L{Object} proxy.
+GenericObject should not be used directly, but rather through the
+:py:class:`soma.aims.Object` proxy.
 
-See L{Object} for a complete documentation.
+See :py:class:`soma.aims.Object` for a complete documentation.
 '''
 
 Object.__doc__ = '''
 Generic dynamic polymorphic object proxy.
 
-Object is a proxy and a reference counter to a L{GenericObject}. In most cases,
-Object and GenericObject are interchangeable and play the same role, there are
-two objects for technical reasons in the C++ layer, but in Python it whould
-make no difference.
+Object is a proxy and a reference counter to a GenericObject. In most
+cases, Object and GenericObject are interchangeable and play the same role,
+there are two objects for technical reasons in the C++ layer, but in Python
+it whould make no difference.
 
 The C++ generic object is an implementation of a mutable dynamic container
 which can hold any type of concrete data, with a generic access API which
@@ -1123,24 +1175,25 @@ using aims, and access its header data, which comes as a generic object.
   >>> vol = aims.read( 'volume.img' )
   >>> hdr = vol.header()
 
-Now C{vol} is the volume, and C{hdr} its header, of type Object.
+Now ``vol`` is the volume, and ``hdr`` its header, of type ``Object``.
 
   >>> type( hdr )
   <class 'soma.aims.Object'>
   >>> print hdr
   { 'voxel_size' : [ 1.875, 1.875, 4, 1 ], 'file_type' : 'SPM',
-  'byte_swapping' : 0, 'volume_dimension' : [ 128, 128, 16, 1 ], 'vox_units' :
-  'mm  ', 'cal_units' : '', 'data_type' : 'S16', 'disk_data_type' : 'S16',
-  'bits_allocated' : 2, 'tr' : 1, 'minimum' : 0, 'maximum' : 13645,
-  'scale_factor' : 1, 'scale_factor_applied' : 0, 'db_name' : '', 'aux_file' :
-  '', 'orient' : 3, 'generated' : '', 'scannum' : '', 'patient_id' : '',
-  'exp_date' : '', 'exp_time' : '', 'views' : 0, 'start_field' : 32768,
-  'field_skip' : 8192, 'omax' : 0, 'omin' : 0, 'smax' : 32, 'smin' : 0,
-  'SPM_data_type' : '', 'possible_data_types' : [ 'S16' ],
-  'spm_radio_convention' : 1, 'spm_origin' : [ 65, 65, 9 ], 'origin' : [ 64,
-  63, 7 ] }
+  'byte_swapping' : 0, 'volume_dimension' : [ 128, 128, 16, 1 ],
+  'vox_units' : 'mm  ', 'cal_units' : '', 'data_type' : 'S16',
+  'disk_data_type' : 'S16', 'bits_allocated' : 2, 'tr' : 1,
+  'minimum' : 0, 'maximum' : 13645, 'scale_factor' : 1,
+  'scale_factor_applied' : 0, 'db_name' : '',
+  'aux_file' : '', 'orient' : 3, 'generated' : '', 'scannum' : '',
+  'patient_id' : '', 'exp_date' : '', 'exp_time' : '', 'views' : 0,
+  'start_field' : 32768, 'field_skip' : 8192, 'omax' : 0,
+  'omin' : 0, 'smax' : 32, 'smin' : 0, 'SPM_data_type' : '',
+  'possible_data_types' : [ 'S16' ], 'spm_radio_convention' : 1,
+  'spm_origin' : [ 65, 65, 9 ], 'origin' : [ 64, 63, 7 ] }
 
-C{hdr} prints like a dictionary, but is not really a python dictionary object.
+``hdr`` prints like a dictionary, but is not really a python dictionary object.
 However it behaves like a dictionary:
 
   >>> print hdr[ 'voxel_size' ]
@@ -1225,7 +1278,8 @@ However it behaves like a dictionary:
   origin : [ 64, 63, 7 ]
 
 Elements returned by the dictionary queries can have various types, althrough
-they are all stored internally in a C++ structure through C{Object} wrappers.
+they are all stored internally in a C++ structure through
+:py:class:`soma.aims.Object` wrappers.
 But when the underlying type of the element is known and can be retreived as
 a python object (either a standard python type or a python binding of a C++
 class), it is done automatically. Such conversion is not possible when the
@@ -1234,15 +1288,15 @@ is no conversion function. In this case, an Object is returned and contains the
 selected data.
 
 Conversions are done using conversion methods that you generally do not
-need to call by hand: C{getScalar()}, C{getString()}, or the more general
-conversion method C{getPython}.
+need to call by hand: getScalar(), getString(), or the more general
+conversion method :py:meth:`soma.aims.Object.getPython`.
 Elements types that cannot be converted to python concrete types are retreived
 in their Object container.
 
-The generic conversion function in C{Object}: C{getPython}, is a static method
-and can be extended.
+The generic conversion function in ``Object``: ``getPython``, is a static
+method and can be extended.
 
-Elements in C{Object} containers can generally be read and written:
+Elements in ``Object`` containers can generally be read and written:
 
   >>> hdr[ 'data_type' ] = 'FLOAT'
   >>> hdr[ 'data_type' ]
@@ -1252,77 +1306,79 @@ This generally suits your needs. But in a few cases there will be a problem in
 internal types handling in the C++ layer.
 
 Here, the underlying C++ generic object which did hold a C++ string
-(C{std::string}) C{'S16'} is now replaced by another generic object built from
-the python string C{'FLOAT'}, and which now wraps an element of type
-C{PyObject} (or C{PyString}). It just behaves the same way, so this operation
-is perfectly valid, but if C++ programs expect it to be a C++ C{std::string},
-they may fail.
+(``std::string``) ``'S16'`` is now replaced by another generic object built
+from the python string ``'FLOAT'``, and which now wraps an element of type
+``PyObject`` (or ``PyString``). It just behaves the same way, so this
+operation is perfectly valid, but if C++ programs expect it to be a C++
+``std::string``, they may fail.
 
 Moreover, when writing back to existing concrete objects, some additional
-conversions may take place: for instance C{hdr['voxel_size']} is a C++
-object of type C{std::vector<float>}, so writing to C{hdr['voxel_size'][0]}
-needs to enure we are actually writing a C{float}, and if not, convert to it
-if possible.
+conversions may take place: for instance ``hdr['voxel_size']`` is a C++
+object of type ``std::vector<float>``, so writing to
+``hdr['voxel_size'][0]`` needs to enure we are actually writing a ``float``,
+and if not, convert to it if possible.
 
-You can query a type identifier for a generic object via the C{type()} method:
+You can query a type identifier for a generic object via the ``type()``
+method:
 
   >>> hdr.type()
   'PropertySet'
 
-Objects that can be converted from C++ generic objects to python are not necessarily known in advance. A conversion table is kept in the global variable convertersObjectToPython (in the aims module) and can be extended. Therefore other python modules using aims (such as sigraph) can extend this conversion table.
+Objects that can be converted from C++ generic objects to python are not necessarily known in advance. A conversion table is kept in the global variable :py:data:`soma.aims.convertersObjectToPython` (in the aims module) and can be extended. Therefore other python modules using aims (such as sigraph) can extend this conversion table.
 
-Details and tricks
-==================
-  There are some limitations and "unexpected behaviours" caused by the
-  underlying C++ implementation of generic objects, and general behaviour
-  differences between Python and C++. The following is expert-level details,
-  so read it only if you have problems or you are a C++ expert with good
-  knowledge of the cartobase C++ library...
+**Details and tricks**
 
-  Generic object - specialized object conversions
-  -----------------------------------------------
-    Putting a specific object in a generic Object makes a copy of it the
-    first time it is done, because C++ generic objects contain the
-    specialized elements. Once this has been done once, generic objects
-    are shared and not copied anymore, which is consistent with the normal
-    python behaviour. The non-pythonic thing is the first insertion in a
-    generic object:
+There are some limitations and "unexpected behaviours" caused by the
+underlying C++ implementation of generic objects, and general behaviour
+differences between Python and C++. The following is expert-level details,
+so read it only if you have problems or you are a C++ expert with good
+knowledge of the cartobase C++ library...
 
-    >>> a = aims.vector_FLOAT( [ 12.6, -5.7 ] )
-    >>> print a
-    [ 12.6, -5.7 ]
-    >>> hdr['foo'] = a # here a is copied into hdr['foo']
-    >>> a.append( 6.8 ) # a is changed but not hdr
-    >>> print a
-    [ 12.6, -5.7, 6.8 ]
-    >>> print hdr['foo']
-    [ 12.6, -5.7 ]
-    >>> hdr['dummy'] = hdr['foo']
-    >>> hdr['foo'].append( 4.2 )
-    >>> print hdr['dummy'] # this time hdr['dummy'] is changed
-    [ 12.6, -5.7, 4.2 ]
+**Generic object - specialized object conversions**
 
-    To overcome the first copy problem, you may have to reassign the initial
-    variable to the copy instance:
+Putting a specific object in a generic Object makes a copy of it the
+first time it is done, because C++ generic objects contain the
+specialized elements. Once this has been done once, generic objects
+are shared and not copied anymore, which is consistent with the normal
+python behaviour. The non-pythonic thing is the first insertion in a
+generic object:
 
-    >>> a = aims.vector_FLOAT( [ 1.2, 2.3, 3.4 ] )
-    >>> hdr['foo'] = a
-    >>> a = hdr['foo']
-    >>> print hdr['foo']
-    [ 1.2, 2.3, 3.4 ]
-    >>> a[1] = 12.8
-    >>> print a
-    [ 1.2, 12.8, 3.4 ]
-    >>> print hdr['foo']
-    [ 1.2, 12.8, 3.4 ]
+>>> a = aims.vector_FLOAT( [ 12.6, -5.7 ] )
+>>> print a
+[ 12.6, -5.7 ]
+>>> hdr['foo'] = a # here a is copied into hdr['foo']
+>>> a.append( 6.8 ) # a is changed but not hdr
+>>> print a
+[ 12.6, -5.7, 6.8 ]
+>>> print hdr['foo']
+[ 12.6, -5.7 ]
+>>> hdr['dummy'] = hdr['foo']
+>>> hdr['foo'].append( 4.2 )
+>>> print hdr['dummy'] # this time hdr['dummy'] is changed
+[ 12.6, -5.7, 4.2 ]
 
-    There are exceptions to this behaviour:
-      - pure python objects, like lists or dictionaries are never copied
-        since it is only a pointer to them (the C C{PyObject *} pointer) which
-        is stored.
-      - small builtin types: numbers and strings are always copied since they
-        are always converted and copied, not wrapped, when passed from python
-        to C++ and vice versa.
+To overcome the first copy problem, you may have to reassign the initial
+variable to the copy instance:
+
+>>> a = aims.vector_FLOAT( [ 1.2, 2.3, 3.4 ] )
+>>> hdr['foo'] = a
+>>> a = hdr['foo']
+>>> print hdr['foo']
+[ 1.2, 2.3, 3.4 ]
+>>> a[1] = 12.8
+>>> print a
+[ 1.2, 12.8, 3.4 ]
+>>> print hdr['foo']
+[ 1.2, 12.8, 3.4 ]
+
+There are exceptions to this behaviour:
+
+- pure python objects, like lists or dictionaries are never copied
+  since it is only a pointer to them (the C `PyObject *` pointer) which
+  is stored.
+- small builtin types: numbers and strings are always copied since they
+  are always converted and copied, not wrapped, when passed from python
+  to C++ and vice versa.
 '''
 
 _volumedoc = '''
@@ -1332,7 +1388,9 @@ specific type of data: for instance S16 is signed 16 bit short ints, FLOAT is
 32 bit floats,
 etc.
 
-Volumes are read and written using the L{Reader} and L{Writer} classes, which are in turn used by the simple aims.read() and aims.write() functions.
+Volumes are read and written using the :py:class:`soma.aims.Reader` and
+:py:class:`soma.aims.Writer` classes, which are in turn used by the simple
+:py:func:`soma.aims.read` and :py:func:`soma.aims.write` functions.
 
 A volume of a given type can be built either using its specialized class constructor, or the general Volume() function which can take a voxel type in its arguments: the following are equivalent:
 
@@ -1342,19 +1400,26 @@ A volume of a given type can be built either using its specialized class constru
   >>> import numpy
   >>> v = aims.Volume( numpy.int16, 100, 100, 10 )
 
-A volume is an array of voxels, which can be accessed via the C{at()} method.
+A volume is an array of voxels, which can be accessed via the ``at()``
+method.
 For standard numeric types, it is also posisble to get the voxels array as a
-U{numpy<http://numpy.scipy.org/>} array, using the C{arraydata()} method.
+numpy_ array, using the ``arraydata()`` method, or more conveniently,
+``numpy.array( volume, copy=False )``.
 The array returned is a reference to the actual data block, so any
 modification to its contents also affect the Volume contents, so it is
 generally an easy way of manipulating volume voxels because all the power of
 the numpy module can be used on Volumes.
+The ``arraydata()`` method returns a numpy array just like it is in memory,
+that is a 4D array indexed by ``[t][z][y][x]``, which is generally not what you like and is not consistent with AIMS indexing. Contrarily, using
+``numpy.array( volume, copy=False )`` sets strides in the returned numpy
+array, so that indexing is in the "normal" order ``[x][y][z][t]``, while still sharing the same memory block.
 
 Volumes also store a header which can contain various information (including
 sizes and voxel sizes). The header is a dictionary-like generic object
-(L{Object}) which can be accessed by the C{header()} method.
+(:py:class:`soma.aims.Object`) which can be accessed by the ``header()``
+method.
 This header object also has a read-write access with some restrictions
-inherent to the L{Object} mechanism. It will be saved with
+inherent to the :py:class:`soma.aims.Object` mechanism. It will be saved with
 the volume contents when the volume is saved on disk.
 
 Volumes support a number of arithmetic operators like +, - etc. when the
@@ -1368,27 +1433,29 @@ operands types and sizes match: for instance:
 
 Some type conversions can be performed on volumes, for istance to
 convert a Volume_S16 to a Volume_FLOAT: see the converter classes
-C{Converter_<type1>_<type2>} and C{ShallowConverter_<type1>_<type2>}
+``Converter_<type1>_<type2>`` and ``ShallowConverter_<type1>_<type2>``
 with <type1> and <type2> being volume types: for instance
-L{Converter_Volume_S16_Volume_FLOAT}.
+:py:class:`soma.aims.Converter_Volume_S16_Volume_FLOAT`.
 The converter can also be called using type arguments:
 
   >>> vol1 = aims.Volume( 'S16', 100, 100, 10 )
   >>> c = aims.Converter( intype=vol1, outtype='Volume_DOUBLE' )
   >>> vol2 = c( vol1 )
+
+.. _numpy: http://numpy.scipy.org/
 '''
 
 _aimsdatadoc = '''
-C{AimsData_<type>} classes correspond to the python bindings of C++ template
-classes C{AimsData<T>}. They are planned to be obsolete, and replaced with
-the Volume_<type> classes. Try avoiding using them unless using functions
-that work on C{AimsData_<type>}.
+``AimsData_<type>`` classes correspond to the python bindings of C++
+template classes ``AimsData<T>``. They are planned to be obsolete, and
+replaced with the Volume_<type> classes. Try avoiding using them unless
+using functions that work on ``AimsData_<type>``.
 
-C{AimsData} actually contains a C{Volume}: you can retreive it using the
-C{volume()} method.
+``AimsData`` actually contains a ``Volume``: you can retreive it using the
+``volume()`` method.
 
-Inversely, you can also build a C{Volume} from a C{AimsData} by passing it
-to the C{Volume} constructor.
+Inversely, you can also build a ``Volume`` from a ``AimsData`` by passing it
+to the ``Volume`` constructor.
 
 In all cases the voxels memory block is shared.
 '''
@@ -1430,7 +1497,8 @@ With arguments suffix _f:float, _i:int, _b:bool, _p: Point3df or 3-tuple
 
 Alternatively, all those may be called with a GenericObject as only parameter.
 
-This doc might not be up-to-date, check sources for more info.
+This doc might not be up-to-date, use the :py:meth:`printDescription` method
+for more info.
 """
 
 private = [ 'private', 'aimssip', 'aimsguisip', 'numpy', 'sip', 'types',
