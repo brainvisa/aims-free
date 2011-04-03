@@ -41,15 +41,116 @@ IO system
 Neuroimaging data structures
 ++++++++++++++++++++++++++++
 
+Volumes
+:::::::
+
 .. autoclass:: soma.aims.Volume_FLOAT
-  :members:
 
   See the :cartoddox:`Volume C++ documentation <classcarto_1_1Volume.html>`
+  
+  .. method:: arraydata()
+  
+    .. note::
+    
+      `arraydata()` returns a numpy array to the internal memory block, without strides. Given the internal ordering of Aims Volumes, the resulting numpy array is indexed as [t][z][y][x].
+      If you need the inverse, more natural, [x][y][z][t] ordering, use the following:
+      
+      >>> volarray = numpy.array( volume, copy=False )
+      
+    .. note::
+    
+      The array conversion is currently only supported for scalar volumes, and is not present on volumes of types RGB or RGBA.
+
+  .. method:: at( posx, posy = 0, posz = 0, post = 0 )
+  
+  .. method:: fill( value )
+  
+  .. method:: getSizeT()
+  
+  .. method:: getSizeX()
+  
+  .. method:: getSizeY()
+  
+  .. method:: getSizeZ()
+  
+  .. method:: header()
+
+  .. method:: setValue( value, posx, posy = 0, posz = 0, post = 0 )
+
+  .. method:: value( posx, posy = 0, posz = 0, post = 0 )
+  
+    value() is an alias to at().
+    
 
 .. autoclass:: soma.aims.AimsData_FLOAT
-  :members:
 
   See the :aimsdox:`AimsData C++ documentation <classAimsData.html>`
+  
+  .. method:: clone()
+
+  .. method:: dimT()
+  
+    equivalent to :py:meth:`soma.aims.Volume_FLOAT.getSizeT`
+
+  .. method:: dimX()
+
+    equivalent to :py:meth:`soma.aims.Volume_FLOAT.getSizeX`
+
+  .. method:: dimY()
+
+    equivalent to :py:meth:`soma.aims.Volume_FLOAT.getSizeY`
+
+  .. method:: dimZ()
+  
+    equivalent to :py:meth:`soma.aims.Volume_FLOAT.getSizeZ`
+
+  .. method:: fill( value )
+
+  .. method:: fillBorder( value )
+
+  .. method:: header()
+
+  .. method:: maxIndex()
+
+  .. method:: maximum()
+
+  .. method:: minIndex()
+
+  .. method:: minimum()
+
+  .. method:: setSizeT( sizet )
+  
+    This is the **voxel size**, not the volume size as in :py:class::`soma.aims.Volume_FLOAT`.
+
+  .. method:: setSizeX( sizex )
+
+  .. method:: setSizeXYZT( size )
+
+  .. method:: setSizeY( sizey )
+
+  .. method:: setSizeZ( sizez )
+
+  .. method:: setValue( value, posx, posy = 0, posz = 0, post = 0 )
+
+  .. method:: sizeT()
+
+    This is the **voxel size**, not the volume size as in :py:class::`soma.aims.Volume_FLOAT`.
+
+  .. method:: sizeX()
+
+  .. method:: sizeY()
+
+  .. method:: sizeZ()
+
+  .. method:: value( posx, posy = 0, posz = 0, post = 0 )
+
+  .. method:: volume()
+  
+    Returns the underlying :py:class::`soma.aims.Volume_FLOAT` object.
+
+
+Graphs and trees
+::::::::::::::::
 
 .. autoclass:: soma.aims.Graph
   :members:
@@ -61,6 +162,33 @@ Neuroimaging data structures
 
   See the :graphdox:`Tree C++ documentation <classTree.html>`
 
+
+Meshes and textures
+:::::::::::::::::::
+
+.. autoclass:: soma.aims.AimsTimeSurface_3
+  :members:
+
+  See the :aimsdox:`AimsTimeSurface C++ documentation <classAimsTimeSurface.html>`
+  
+  .. note::
+  
+    Compared to the C++ classes, the texture type template argument has beed dropped from the Python bindings, because textures are handled via separate objects (see :py:func:`soma.aims.TimeTexture`) and the builtin texture is actually never used.
+
+.. autoclass:: soma.aims.TimeTexture_FLOAT
+  :members:
+
+  See the :aimsdox:`TimeTexture C++ documentation <classTimeTexture.html>`
+
+.. autoclass:: soma.aims.Texture_FLOAT
+  :members:
+
+  See the :aimsdox:`Texture C++ documentation <classTexture.html>`
+
+
+"Buckets"
+:::::::::
+
 .. autoclass:: soma.aims.BucketMap_VOID
 
   See the :aimsdox:`BucketMap C++ documentation <classaims_1_1BucketMap.html>`
@@ -68,6 +196,9 @@ Neuroimaging data structures
 
 General purpose C++ containers
 ++++++++++++++++++++++++++++++
+
+Generic object
+::::::::::::::
 
 .. autoclass:: soma.aims.carto
   :members: GenericObject
@@ -85,6 +216,10 @@ General purpose C++ containers
 .. autoclass:: soma.aims.rc_ptr_GenericObject
   :members:
 
+
+Vectors and points
+::::::::::::::::::
+
 .. autoclass:: soma.aims.Point3df
   :members:
 
@@ -98,6 +233,10 @@ General purpose C++ containers
 
 .. autoclass:: soma.aims.Point3d
   :members:
+
+
+RGB
+:::
 
 .. autoclass:: soma.aims.AimsRGB
   :members:
