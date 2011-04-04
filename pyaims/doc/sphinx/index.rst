@@ -2,8 +2,8 @@
    :maxdepth: 3
 
 
-pyaims
-------
+PyAims programming documentation
+--------------------------------
 
 Overview
 ++++++++
@@ -21,4 +21,8 @@ Contents
 :doc:`pyaims_lowlevel`
 
 :doc:`pyaims_algo`
+
+:doc:`pyaims_examples`
+
+:doc:`pyaims_examples_advanced`
 
