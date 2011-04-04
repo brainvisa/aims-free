@@ -249,7 +249,8 @@ HEADERS = \
     geodesicpath/geodesic_mesh_elements.h     \
     geodesicpath/geodesic_algorithm_exact.h     \
     geodesicpath/geodesic_mesh.h     \
-    geodesicpath/geodesic_algorithm_graph_base.h
+    geodesicpath/geodesic_algorithm_graph_base.h \
+    geodesicpath/geodesicPath.h
 
 SOURCES = \
     classification/individuals.cc	\
@@ -282,6 +283,7 @@ SOURCES = \
     fastComputation/tabulation.cc \
     foldgraph/foldgraphattributes.cc \
     foldgraph/foldoversegmentation.cc \
+    geodesicpath/geodesicPath.cc \
     io/roiselectorR.cc    \
     io/roigtmR.cc      \
     io/roigtmW.cc      \
