@@ -1112,7 +1112,7 @@ inline void GeodesicAlgorithmExact::construct_propagated_intervals(bool invert,
 			first = candidates+1;
 			second = candidates;
 		}
-		assert(first->stop() == second->start());
+		//assert(first->stop() == second->start());
 	}
 
 	if(first->start() < local_epsilon)
@@ -1142,7 +1142,7 @@ inline void GeodesicAlgorithmExact::construct_propagated_intervals(bool invert,
 
 			p->min() = 0.0;					//it will be changed later on
 
-			assert(p->start() < p->stop());
+			//assert(p->start() < p->stop());
 		}
 	}
 	else				//now we have to invert the intervals 
@@ -1165,9 +1165,9 @@ inline void GeodesicAlgorithmExact::construct_propagated_intervals(bool invert,
 
 			p->min() = 0;
 
-			assert(p->start() < p->stop());
-			assert(p->start() >= 0.0);
-			assert(p->stop() <= edge->length());
+			//assert(p->start() < p->stop());
+			//assert(p->start() >= 0.0);
+			//assert(p->stop() <= edge->length());
 		}
 	}
 }

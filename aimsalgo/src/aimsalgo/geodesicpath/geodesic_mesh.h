@@ -38,7 +38,7 @@ public:
   template<class Points, class Faces>
   void initialize_mesh_data(Points& p, Faces& tri, const float* curvature, int mode,int strain);    //build mesh from regular point-triangle representation
 
-  void update_weight(const float *curvature,int mode,int strain);    //build internal structure of the mesh
+  void update_weight(const float *curvature,int mode,float strain, float sigmo);    //build internal structure of the mesh
 
   std::vector<Vertex>& vertices(){return m_vertices;};
   std::vector<Edge>& edges(){return m_edges;};
@@ -382,7 +382,7 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
       f.corner_angles()[j] = angle;
       sum += angle;
     }
-    assert(std::abs(sum - M_PI) < 1e-5);    //algorithm works well with non-degenerate meshes only
+    //assert(std::abs(sum - M_PI) < 1e-5);    //algorithm works well with non-degenerate meshes only
   }
 
     //define m_turn_around_flag for vertices
@@ -416,7 +416,7 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
   //assert(verify());
 }
 
-inline void Mesh::update_weight(const float *curvature, int mode,int strain)
+inline void Mesh::update_weight(const float *curvature, int mode,float strain,float sigmo)
 {
   //    Vertex->adjacent Faces
   std::vector<unsigned> count(m_vertices.size()); //count adjacent vertices
@@ -519,15 +519,15 @@ inline void Mesh::update_weight(const float *curvature, int mode,int strain)
       // Sulcal
       if (mode == 1)
       {
-        a1 = pow ((1.0)/(1.0 + exp(-strain*curvature[v1->id()])), 2);
-        a2 = pow ((1.0)/(1.0 + exp(-strain*curvature[v2->id()])), 2);
+        a1 = pow ((1.0)/(1.0 + exp(-strain*curvature[v1->id()])), sigmo);
+        a2 = pow ((1.0)/(1.0 + exp(-strain*curvature[v2->id()])), sigmo);
       }
 
       // Gyral
       if (mode == 2)
       {
-        a1 = pow ((1.0)/(1.0 + exp(strain*curvature[v1->id()])), 2);
-        a2 = pow ((1.0)/(1.0 + exp(strain*curvature[v2->id()])), 2);
+        a1 = pow ((1.0)/(1.0 + exp(strain*curvature[v1->id()])), sigmo);
+        a2 = pow ((1.0)/(1.0 + exp(strain*curvature[v2->id()])), sigmo);
       }
 
       e.length() = (v1->distance(v2) * (a1 + a2));
@@ -618,7 +618,7 @@ inline void Mesh::update_weight(const float *curvature, int mode,int strain)
       f.corner_angles()[j] = angle;
       sum += angle;
     }
-    assert(std::abs(sum - M_PI) < 1e-5);    //algorithm works well with non-degenerate meshes only
+    //assert(std::abs(sum - M_PI) < 1e-5);    //algorithm works well with non-degenerate meshes only
   }
 
     //define m_turn_around_flag for vertices
