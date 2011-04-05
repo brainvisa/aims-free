@@ -78,7 +78,7 @@ vector<Point3df> GeodesicPath::shortestPathCoordVextex(unsigned source, unsigned
   vector<int> listIndexVertexPathSP;
 
   // compute shortest path
-  cout << "compute shortest path : ";
+  //cout << "compute shortest path : ";
 
   vector<geodesic::SurfacePoint> sources;
   sources.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[source]));
@@ -86,7 +86,7 @@ vector<Point3df> GeodesicPath::shortestPathCoordVextex(unsigned source, unsigned
   vector<geodesic::SurfacePoint> targets;
   targets.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[target]));
 
-  printf("indice source = %d target = %d \n",source, target);
+  //printf("indice source = %d target = %d \n",source, target);
 
   // clear path
   vector<geodesic::SurfacePoint> SPath;
@@ -119,6 +119,9 @@ vector<Point3df> GeodesicPath::shortestPathCoordVextex(unsigned source, unsigned
     vertexList.push_back(newVertex);
   }
 
+  //Rajout olivier
+  delete(dijkstra_algorithm);
+
   return vertexList;
 }
 
@@ -150,7 +153,7 @@ vector<int> GeodesicPath::shortestPathIndiceVextex(unsigned source, unsigned tar
   vector<int> listIndexVertexPathSP;
 
   // compute shortest path
-  cout << "compute shortest path : ";
+  //cout << "compute shortest path : ";
 
   vector<geodesic::SurfacePoint> sources;
   sources.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[source]));
@@ -158,7 +161,7 @@ vector<int> GeodesicPath::shortestPathIndiceVextex(unsigned source, unsigned tar
   vector<geodesic::SurfacePoint> targets;
   targets.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[target]));
 
-  printf("indice source = %d target = %d \n",source, target);
+  //printf("indice source = %d target = %d \n",source, target);
 
   // clear path
   vector<geodesic::SurfacePoint> SPath;
@@ -179,6 +182,7 @@ vector<int> GeodesicPath::shortestPathIndiceVextex(unsigned source, unsigned tar
   reverse(listIndexVertexPathSP.begin(),listIndexVertexPathSP.end());
   listIndexVertexPathSP.push_back((int)target);
 
+  // OK
   delete(dijkstra_algorithm);
 
   return listIndexVertexPathSP;
@@ -209,7 +213,7 @@ void GeodesicPath::shortestPath2Texture(unsigned source, unsigned target, float 
 void GeodesicPath::shortestPathIndiceCoordVextex(unsigned source, unsigned target,std::vector<int>& indice, std::vector<Point3df>& coord3D )
 {
   // compute shortest path
-  cout << "compute shortest path : ";
+  //cout << "compute shortest path : ";
 
   vector<geodesic::SurfacePoint> sources;
   sources.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[source]));
@@ -217,7 +221,7 @@ void GeodesicPath::shortestPathIndiceCoordVextex(unsigned source, unsigned targe
   vector<geodesic::SurfacePoint> targets;
   targets.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[target]));
 
-  printf("indice source = %d target = %d \n",source, target);
+  //printf("indice source = %d target = %d \n",source, target);
 
   // clear path
   vector<geodesic::SurfacePoint> SPath;
@@ -249,6 +253,8 @@ void GeodesicPath::shortestPathIndiceCoordVextex(unsigned source, unsigned targe
     //cout << "(" << SPath[i].x() << ',' << SPath[i].y() << ',' <<  SPath[i].z() << ")\n";
     coord3D.push_back(newVertex);
   }
+  // rajout Olivier
+  delete(dijkstra_algorithm);
 
 }
 
