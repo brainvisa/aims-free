@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -116,6 +117,8 @@ def checkVolume( vol ):
   maxhis = numpy.argmax( his[0] )
   subval = numpy.where( (u < his[1][maxhis+1] ).__and__( \
     u >= his[1][maxhis] ) )[0]
+  if len( subval ) == 0:
+    subval = [ 0 ] # FIXME: take the next lower used bin
   if len( subval ) == 1:
     hints[ 'background' ] = u[ subval[0] ]
   else:
