@@ -99,6 +99,7 @@ private:
   void fillSmoothing( float );
   void fillGradient( float );
   void fillLaplacian( float );
+
 };
 
 

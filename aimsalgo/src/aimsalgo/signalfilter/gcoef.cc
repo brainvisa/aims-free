@@ -75,6 +75,23 @@ void GCoef::initialize( float s, GCoef::GOrder o )
   _d22 = 4.0f * cw1s * cw0s * eb0s * eb1s + e2b1s + e2b0s;
   _d33 = -2.0f * cw0s * eb0s * e2b1s - 2.0f * cw1s * eb1s * e2b0s;
   _d44 = e2b0s * e2b1s;
+  
+  if ( o == GCoef::smoothing )
+  {
+	  /* farneback normalization*/
+      
+	  float Sn0 = _n00 + _n11 + _n22 + _n33;
+	  float Sd0 = 1 + _d11 + _d22 + _d33 + _d44;
+      
+      
+	  float alpha0 = 2.*Sn0/Sd0 - _n00;
+      
+	  _n00 /= alpha0;
+	  _n11 /= alpha0;
+	  _n22 /= alpha0;
+	  _n33 /= alpha0;
+    
+  }
 
   if ( o == GCoef::gradient )  // antisymmetrical for derivative
     {
@@ -89,20 +106,41 @@ void GCoef::initialize( float s, GCoef::GOrder o )
       _n22b = _n22 - _d22 * _n00;
       _n33b = _n33 - _d33 * _n00;
       _n44b = -1.0f * _d44 * _n00;
+      
     }
+    
+ 
 }
 
 
 void GCoef::fillSmoothing( float s )
 {
-  a0 = 0.657f / s;
-  a1 = 1.979f / s;
-  c0 = -0.258f / s;
-  c1 = -0.239f / s;
-  b0 = 1.906f;
-  b1 = 1.881f;
-  w0 = 0.651f;
-  w1 = 2.053f;
+
+
+/*old values*/
+
+//   a0 = 0.657f / s;
+//   a1 = 1.979f / s;
+//   c0 = -0.258f / s;
+//   c1 = -0.239f / s;
+//   b0 = 1.906f;
+//   b1 = 1.881f;
+//   w0 = 0.651f;
+//   w1 = 2.053f;
+
+
+/* farneback coefficients*/
+
+  a0 = 1.353f ;
+  a1 = 1.8151f ;
+  c0 = -0.3531f ;
+  c1 = -0.0902f ;
+  
+  b0 = 1.3932f;
+  b1 = 1.3732f;
+  w0 = 0.6681f;
+  w1 = 2.0787f;
+
 }
 
 
@@ -118,11 +156,13 @@ void GCoef::fillGradient( float s )
   b1 = 1.594f;
   w0 = 0.700f;
   w1 = 2.145f;
+    
 }
 
 
 void GCoef::fillLaplacian( float s )
 {
+	
   float s3 = s * s * s;
 
   a0 = -0.724f / s3;
@@ -133,4 +173,5 @@ void GCoef::fillLaplacian( float s )
   b1 = 1.427f;
   w0 = 0.779f;
   w1 = 2.234f;
+  
 }
