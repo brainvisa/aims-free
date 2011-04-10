@@ -1,4 +1,4 @@
-<!DOCTYPE public "-//w3c//dtd html 4.01 transitional//en" 
+<!DOCTYPE public "-//w3c//dtd html 4.01 transitional//en"
 		"http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -10,7 +10,7 @@
 <body text="#000000" bgcolor="#ffffff" link="#0000ee" vlink="#551a8b"
  alink="#ff0000">
 
-<center>  
+<center>
 <h2>AIMSdata ChangeLog</h2>
  </center>
 
@@ -35,10 +35,10 @@
  <b><a href="#version-2.12">Version 2.12</a></b><br>
  <b><a href="#version-2.11">Version 2.11</a></b><br>
  <b><a href="#version-2.10">Version 2.10</a></b><br>
- &nbsp;  
- 
+ &nbsp;
+
 <!-- -->
-<h4> <a name="version-4.1.0"></a>Version 4.1.0</h4>
+<h4> <a name="version-4.1.0"></a>April 7th, 2011, Version 4.1.0</h4>
 
 <p>In this version, an important change for the developers should be noted : the build tool used to compile from the source code has changed. We gave up our home-made tool <i>build-config</i> and replace it with the standard tool <a href="http://www.cmake.org/">CMake</a>, a cross-platform, open-source build system.
 </p>
@@ -216,8 +216,8 @@
 <h4> <a name="version-3.0.2"></a>April 27, 2006, Version 3.0.2</h4>
 
 <h5>Bug fixes:</h5>
-<li>Image formats handled via the Qt plugin (png, bmp...) had several bugs that 
-  caused image corruption when saving/reading them. It has been fixed, and support 
+<li>Image formats handled via the Qt plugin (png, bmp...) had several bugs that
+  caused image corruption when saving/reading them. It has been fixed, and support
   for int types wider than 8bit has been unregistered (it can't work actually).
 </li>
 <li>Some 3D MINC images got an incorrect value (NaN or infinity) for 4th dimension in Aims
@@ -232,9 +232,9 @@
 <!-- -->
 
 <h4> <a name="version-3.0.1"></a>September 22, 2005 - Version 3.0.1</h4>
-    
+
 <h4>Bug fixes:</h4>
-  <li><b>important bugfix</b> in interpolation code which may affect, especially, all 
+  <li><b>important bugfix</b> in interpolation code which may affect, especially, all
     diffusion tracking algorithms
   </li>
   <li>a few compilation warnings and configuration fixes / cleanups</li>
@@ -242,63 +242,63 @@
   <li>The gui part is now compatible with Qt 4 - more compatibility headers</li>
   <li>Fixed IO type Texture of Point2df which did not appear amongst supported IO types</li>
   <li>Fixes in management of Aims objects contained in graphs</li>
-  <li>Fixed SPM writin of float/double images which were sometimes written 
+  <li>Fixed SPM writin of float/double images which were sometimes written
     in (short + scale factor) mode when they should not
   </li>
 
 
 <h4> <a name="version-3.0"></a>May 18, 2005 - Version 3.0</h4>
-    
+
 <h4>User-level changes:</h4>
-  <li>Volumes IO: better support for large files. Memory mapping has been automatically 
-    enabled on GIS and SPM volumes when image sizes become large compared to the free 
-	memory size (linux only right now) or to absolute amounts. This is especially useful 
-	when loading large data in Anatomist or for data conversions. Note that not all 
-	volume formats can benefit the same optimization: depending on the disk and memory 
-	format of low-level data, the whole file must be copied to a temporary file in 
+  <li>Volumes IO: better support for large files. Memory mapping has been automatically
+    enabled on GIS and SPM volumes when image sizes become large compared to the free
+	memory size (linux only right now) or to absolute amounts. This is especially useful
+	when loading large data in Anatomist or for data conversions. Note that not all
+	volume formats can benefit the same optimization: depending on the disk and memory
+	format of low-level data, the whole file must be copied to a temporary file in
 	some situations (always needed for SPM volumes). Prefer GIS format when possible...
   </li>
-  <li>SPM volumes of FLOAT data can now be saved as short int + scale factor when it 
-    appears to be possible without precision loss. The drawback right now is that 
+  <li>SPM volumes of FLOAT data can now be saved as short int + scale factor when it
+    appears to be possible without precision loss. The drawback right now is that
 	detecting the possibility of doing it takes some time and it's slower.
   </li>
-  <li>Minc format IO support: thanks to Olivier Coliot who wrote the reader/writer classes, there is 
-    now a Minc plugin in Aims. At the moment only 3D files are supported (not 4D) and the datatype 
-    detection may be improved in the future, but the base is here now. The plugin needs the Minc 
+  <li>Minc format IO support: thanks to Olivier Coliot who wrote the reader/writer classes, there is
+    now a Minc plugin in Aims. At the moment only 3D files are supported (not 4D) and the datatype
+    detection may be improved in the future, but the base is here now. The plugin needs the Minc
     library.
   </li>
   <li>The Ecat format IO has been ported to Windows</li>
-  <li>Graphs incompletely loaded (without buckets or meshes, like in the recognition program) and 
+  <li>Graphs incompletely loaded (without buckets or meshes, like in the recognition program) and
     saved back to disk now load their sub-objects before they are saved, so nothing is lost anymore.
     The drawback is that saving them is much longer and consumes far more RAM.
   </li>
   <li>Porting to 64 bit systems: done by Dimitri</li>
-  <li>Version numbering: all our projects will have the same version number: 3.0 for 
+  <li>Version numbering: all our projects will have the same version number: 3.0 for
     this release
   </li>
 
 <h4>Programmer-level changes:</h4>
-  <li>Allocators have changed a bit, and their choice has been facilitated by a 
+  <li>Allocators have changed a bit, and their choice has been facilitated by a
     helper / factory class.
   </li>
-  <li>Porting to 64 bit systems. This port implies some modifications on some programming rules: we 
-    sould avoid using the <tt>long</tt> type anymore, but always fixed size types: 
-    <tt>int32_t</tt>, <tt>int8_t</tt> etc, so <tt>AimsData&lt;long&gt;</tt> should be replaced 
+  <li>Porting to 64 bit systems. This port implies some modifications on some programming rules: we
+    sould avoid using the <tt>long</tt> type anymore, but always fixed size types:
+    <tt>int32_t</tt>, <tt>int8_t</tt> etc, so <tt>AimsData&lt;long&gt;</tt> should be replaced
     with <tt>AimsData&lt;int32_t&gt;</tt> in all Aims code.
   </li>
-  <li>In cartobase, the generic object API has been rewritten in a cleaner way <tt>GenObject</tt> 
-    becomes <tt>GenericObject</tt>. A compatibility interface is provided so code will not break, 
+  <li>In cartobase, the generic object API has been rewritten in a cleaner way <tt>GenObject</tt>
+    becomes <tt>GenericObject</tt>. A compatibility interface is provided so code will not break,
     but we plan to remove it once we have cleaned all code (maybe in the next version).
   </li>
-  <li>Preparations for deep changes in Aims API: some main classes will be re-written in a new 
-    library: cartodata. The first is the 4D volume class (<tt>aims::AimsData</tt>) which will 
-    become <tt>carto::Volume</tt>, a newer, cleaner and more powerful implementation. 
-    In this release, <tt>AimsData</tt> is only a wrapper for <tt>Volume</tt>. 
-    Compatibility will be preserved. Moreover the wrapping can be disabled by a #define (the 
+  <li>Preparations for deep changes in Aims API: some main classes will be re-written in a new
+    library: cartodata. The first is the 4D volume class (<tt>aims::AimsData</tt>) which will
+    become <tt>carto::Volume</tt>, a newer, cleaner and more powerful implementation.
+    In this release, <tt>AimsData</tt> is only a wrapper for <tt>Volume</tt>.
+    Compatibility will be preserved. Moreover the wrapping can be disabled by a #define (the
     older implementation is still present in the source code).
   </li>
-  <li>A Python interface project for Aims has been started: pyaims, at the moment it allows 
-    manipulating volumes (including IO), either under <tt>AimsData</tt> or <tt>Volume</tt> shape. 
+  <li>A Python interface project for Aims has been started: pyaims, at the moment it allows
+    manipulating volumes (including IO), either under <tt>AimsData</tt> or <tt>Volume</tt> shape.
     Meshes will be added soon.
   </li>
   <li>Porting to gcc 4.0 compiler</li>
@@ -311,11 +311,11 @@
 <h4><a name="version-2.13c"></a>17/11/2004 - Bugfix update 2.13(c)</h4>
 
   <li>fixes in SPM IO</li>
-  <li>little doc on coordinates systems of AIMS and SPM: 
+  <li>little doc on coordinates systems of AIMS and SPM:
     <a href="referentials.html">here</a>
   </li>
-  <li>fixes on the Windows port, especially the graph writer which could write the .data directory 
-    in the wrong location (in the current directory). This bug affected saving ROI sessions from 
+  <li>fixes on the Windows port, especially the graph writer which could write the .data directory
+    in the wrong location (in the current directory). This bug affected saving ROI sessions from
     Anatomist, for instance.
   </li>
   <li>various other minor fixes</li>
@@ -336,85 +336,85 @@
 
 
 <h4> <a name="version-2.13"></a>18/02/2004 - Version 2.13</h4>
-    
+
 <h4>User-level changes:</h4>
   <li>Porting to Windows: the sources can now be compiled on Windows platforms
-    using either cygwin or MinGW gcc compilers and environments. I guess there will 
-    still be some little glitches but lots of commands now work well on Windows. 
-    <b>Note:</b> Vida and Ecat IO modules don't compile under MinGW because they 
+    using either cygwin or MinGW gcc compilers and environments. I guess there will
+    still be some little glitches but lots of commands now work well on Windows.
+    <b>Note:</b> Vida and Ecat IO modules don't compile under MinGW because they
 	use a missing rpc/hdr library.
   </li>
 
 
-  <li><font color="#c00000">SPM images IO: <b><font color="#ff0000">***CAUTION***</font>, 
+  <li><font color="#c00000">SPM images IO: <b><font color="#ff0000">***CAUTION***</font>,
     behaviour change</b></font>: Read <a href="spmformat.html">this document</a>
     for details. There have been a number of fixes, improvements and changes.
   </li>
-  
+
   <li>Fixes in Dicom reader allowing to still read images with partially incoherent
     headers
   </li>
-  
-  <li>Beginning of a TIFF format reader (by Vincent Frouin), but it is not finished 
+
+  <li>Beginning of a TIFF format reader (by Vincent Frouin), but it is not finished
     yet and apparently only partially working.
   </li>
-  
-  <li>Rework of environment variables handling: to access data, several environment 
-    variables were needed: <tt>SHFJ_SHARED_PATH</tt>, <tt>AIMS_PATH</tt>, 
+
+  <li>Rework of environment variables handling: to access data, several environment
+    variables were needed: <tt>SHFJ_SHARED_PATH</tt>, <tt>AIMS_PATH</tt>,
     <tt>ANATOMIST_PATH</tt>, <tt>SIGRAPH_PATH</tt> etc.
-    Now a more standard shared data structure can be adopted and only one environment 
-    variable is needed (<tt>SHFJ_SHARED_PATH</tt>). The older way (with several variables) 
-    is still supported. Shared data can be organized in <tt>$SHFJ_SHARED_PATH/shfj</tt>, 
-    <tt>$SHFJ_SHARED_PATH/aims</tt>, <tt>$SHFJ_SHARED_PATH/anatomist</tt>, 
-    <tt>$SHFJ_SHARED_PATH/sigraph</tt> etc. If <tt>SHFJ_SHARED_PATH</tt> is set to 
-    <tt>/usr/local/share</tt> or <tt>/usr/share</tt>, you just get a completely 
+    Now a more standard shared data structure can be adopted and only one environment
+    variable is needed (<tt>SHFJ_SHARED_PATH</tt>). The older way (with several variables)
+    is still supported. Shared data can be organized in <tt>$SHFJ_SHARED_PATH/shfj</tt>,
+    <tt>$SHFJ_SHARED_PATH/aims</tt>, <tt>$SHFJ_SHARED_PATH/anatomist</tt>,
+    <tt>$SHFJ_SHARED_PATH/sigraph</tt> etc. If <tt>SHFJ_SHARED_PATH</tt> is set to
+    <tt>/usr/local/share</tt> or <tt>/usr/share</tt>, you just get a completely
     standard organization.
   </li>
-  
-  <li>Settings files for AIMS, currently used to specify SPM IO conventions. There is 
-    one site-wide settings files (in the shared directory of Aims) and one personal 
-    <tt>$HOME/.aimsrc</tt> file. See <a href="config.html">this page</a> for further 
+
+  <li>Settings files for AIMS, currently used to specify SPM IO conventions. There is
+    one site-wide settings files (in the shared directory of Aims) and one personal
+    <tt>$HOME/.aimsrc</tt> file. See <a href="config.html">this page</a> for further
     explanations.
   </li>
-  
+
   <li>Many other things... I can't remember</li>
 
 <h4>Programmer-level changes:</h4>
-  <li>Utility classes & functions for portably handling files, directories and 
+  <li>Utility classes & functions for portably handling files, directories and
     filenames (made for windows porting...) [in cartobase library]
   </li>
-  
-  <li>Threads: the threading package has moved from aimsalgo library (closed-source) 
-    to cartobase library (GPL). It implements a portable C++ interface to threads, and 
+
+  <li>Threads: the threading package has moved from aimsalgo library (closed-source)
+    to cartobase library (GPL). It implements a portable C++ interface to threads, and
     will be used in Anatomist now.
   </li>
-  
+
   <li>Many other things... I can't remember</li>
 
 <br>
- 
+
 <h4> <a name="version-2.12"></a>27/03/2003 - Version 2.12</h4>
-    
+
 <h4>User-level changes:</h4>
    <li>More explanatory IO error messages</li>
    <li>AimsFileConvert can handle RGB/RGBA images</li>
    <li>Many many other things I don't remember...</li>
-    
+
 <h4>Programmer-level changes:</h4>
-   <li><tt>libshfj</tt> has been renamed <tt>libcartobase</tt> (beginning of 
+   <li><tt>libshfj</tt> has been renamed <tt>libcartobase</tt> (beginning of
    <b>Cartograph</b> project)</li>
 
-   <li>Some classes have moved from aims and graph libraries to cartobase, 
-   especially low-level general utility classes. More of them should move in 
-   the future. For now: <tt>stream</tt> classes, exceptions, <tt>GenObject</tt> 
-   and associated classes (formerly named <tt>DataExchanger</tt>), 
-   <tt>AttributedObject</tt> and IO (including syntax), Python-like IO for 
-   <tt>Object</tt>, string conversion templates, <tt>DataTypeCode</tt> 
+   <li>Some classes have moved from aims and graph libraries to cartobase,
+   especially low-level general utility classes. More of them should move in
+   the future. For now: <tt>stream</tt> classes, exceptions, <tt>GenObject</tt>
+   and associated classes (formerly named <tt>DataExchanger</tt>),
+   <tt>AttributedObject</tt> and IO (including syntax), Python-like IO for
+   <tt>Object</tt>, string conversion templates, <tt>DataTypeCode</tt>
    template, basic <tt>typedef</tt>s...</li>
 
-   <li>Some classes still in aims have moved to the new namespace 
+   <li>Some classes still in aims have moved to the new namespace
    <tt>carto</tt>, like <tt>OptionParser</tt> and related classes</li>
-   
+
    <li>Classes renamings (in cartobase):
      <ul>
      <li><tt>DataExchanger</tt> renamed <tt>GenObject</tt></li>
@@ -424,26 +424,26 @@
      <li>...</li>
      </ul>
    </li>
-   
-   <li>Externalization (as plugins) of IO formats that use external libraries 
-   (I mean external to aims, even for libraries made in SHFJ): Vida, Ecat, 
+
+   <li>Externalization (as plugins) of IO formats that use external libraries
+   (I mean external to aims, even for libraries made in SHFJ): Vida, Ecat,
    Jpeg, Dicom</li>
-   
+
    <li>Many many other things I don't remember...</li>
 
 <br>
- 
+
 <h4> <a name="version-2.11"></a>31/10/2002 - Version 2.11</h4>
-    
+
 <h4>User-level changes:</h4>
    <li>Nothing has been recorded...</li>
-    
+
 <h4>Programmer-level changes:</h4>
    <li>nothing has been recorded...</li>
 <br>
- 
+
 <h4><a name="version-2.10"></a>09/07/2002 - Version 2.10</h4>
- 
+
 <h4>User-level changes:</h4>
      <li>beginning of ChangeLog: nothing yet</li>
 
