@@ -56,6 +56,9 @@ class GeodesicPath
     void shortestPathIndiceCoordVextex(unsigned source, unsigned target, std::vector<int>& indice, std::vector<Point3df>& coord3D);
     void shortestPath2Texture(unsigned source, unsigned target, float texturevalue, TimeTexture<float> &tex);
     float shortestPathLength(unsigned source, unsigned target);
+    vector<int> maxGeodesicDistance(vector<int> points, int* s, int *d);
+
+
 };
 
 #endif

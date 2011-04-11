@@ -258,6 +258,47 @@ void GeodesicPath::shortestPathIndiceCoordVextex(unsigned source, unsigned targe
 
 }
 
+vector<int> GeodesicPath::maxGeodesicDistance(vector<int> points, int* s, int *d)
+{
+  int i,j;
+  vector<int> listIndexVertexPathSP;
+  int index_max_i,index_max_j;
+  double dist,dist_max;
+
+  index_max_i = -1;
+  index_max_j = -1;
+
+  int nb_combinaison_max = (points.size() * (points.size()-1))/2;
+  int nb_combinaison = 0;
+
+  dist_max = -100000;
+
+  for (j=0; j<points.size(); j++)
+  {
+    for(i=j+1; i<points.size(); i++)
+    {
+      nb_combinaison++;
+
+      dist = shortestPathLength(points[j], points[i]);
+
+      std::cout << "\r" << i << " " << j << " " << dist << " " << nb_combinaison << "/" << nb_combinaison_max << std::flush;
+
+      if (dist >= dist_max)
+      {
+        dist_max = dist;
+        index_max_i = i;
+        index_max_j = j;
+      }
+    }
+  }
+
+  *s = points[index_max_i];
+  *d = points[index_max_j];
+
+  listIndexVertexPathSP = shortestPathIndiceVextex(*s,*d);
+
+  return listIndexVertexPathSP;
+}
 
 //GeodesicPath sp(surface,texCurv,0,3);
 //meshResult=mt.makeTubes(value);
