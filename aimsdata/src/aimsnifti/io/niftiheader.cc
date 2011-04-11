@@ -886,7 +886,7 @@ bool NiftiHeader::fillNim( bool allow4d )
    /**********************************************/
   /* 3D IMAGE ORIENTATION AND LOCATION IN SPACE */
   /**********************************************/
-  
+
   Object referentials;
   Object transformations;
 
@@ -1160,14 +1160,11 @@ bool NiftiHeader::fillNim( bool allow4d )
     nim->num_ext = extcode.size();
     vector < vector < char > > extdata( nim->num_ext );
     getProperty( "extdata", extdata );
-    nim->ext_list = new nifti1_extension[nim->num_ext];
     for (int i=0;i<nim->num_ext;++i)
     {
-      nim->ext_list[i].esize = extdata[i].size();
-      nim->ext_list[i].ecode = extcode[i];
-      memcpy(nim->ext_list[i].edata,&extdata[i],extdata[i].size());
+      nifti_add_extension( nim, &extdata[i][0], extdata[i].size(),
+                           extcode[i] );
     }
-    delete [] nim->ext_list;
   }
 
   /* Set Nifti type from given extension (default is Nifti 1 file) */
