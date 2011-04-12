@@ -1157,10 +1157,12 @@ bool NiftiHeader::fillNim( bool allow4d )
   vector < int > extcode;
   if( getProperty( "extcode", extcode ) )
   {
-    nim->num_ext = extcode.size();
-    vector < vector < char > > extdata( nim->num_ext );
+    int next = extcode.size();
+    vector < vector < char > > extdata( next );
     getProperty( "extdata", extdata );
-    for (int i=0;i<nim->num_ext;++i)
+    if( extdata.size() < next )
+      next = extdata.size();
+    for (int i=0;i<next;++i)
     {
       nifti_add_extension( nim, &extdata[i][0], extdata[i].size(),
                            extcode[i] );
