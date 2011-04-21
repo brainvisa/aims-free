@@ -196,6 +196,14 @@ latex_documents = [
 autoclass_content = "both"
 
 extlinks = {
+  'aimsalgodox': ('../../aimsalgo-' + version + '/doxygen/%s',
+    'aimsalgodox '),
+  'aimsalgoepy': ('../../pyaimsalgo-' + version + '/epydoc/%s',
+    'aimsalgoepy '),
+  'aimsalgoex': ('../../pyaimsalgo-' + version + '/examples/%s',
+    'aimsalgoex '),
+  'aims': ('%s',
+    'aims '),
   'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
     'aimsdox '),
   'aimsepy': ('../../pyaims-' + version + '/epydoc/%s',
