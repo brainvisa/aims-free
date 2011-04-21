@@ -206,6 +206,7 @@ extlinks = {
     'aims '),
   'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
     'aimsdox '),
+  'aimsdata' : ('../../aimsdata-' + version + '/%s', 'aimsdata '),
   'aimsepy': ('../../pyaims-' + version + '/epydoc/%s',
     'aimsepy '),
   'cartobdox' : ('../../cartobase-' + version + '/doxygen/%s',
