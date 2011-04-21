@@ -1,6 +1,6 @@
 
-PyAims algorithms
-=================
+PyAims basic algorithms
+=======================
 
 .. autofunction:: soma.aims.AimsThreshold
 

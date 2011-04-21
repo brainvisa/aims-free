@@ -1,7 +1,3 @@
-.. toctree::
-   :maxdepth: 3
-
-
 PyAimsAlgo programming documentation
 --------------------------------
 

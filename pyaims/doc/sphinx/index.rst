@@ -26,3 +26,6 @@ Contents
 
 :doc:`pyaims_examples_advanced`
 
+:doc:`pyaims_aimsalgo`
+
+:doc:`pyaims_aimsalgo_examples`
