@@ -36,7 +36,7 @@ The aims module allows access to the AIMS library in python.
 
 - organization: `NeuroSpin <http://www.neurospin.org>`_ and `IFR 49 <http://www.ifr49.org>`_
 
-- license: `CeCILL-B <http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html>`_
+- license: `CeCILL-B <http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html>`_ (a free licence comparable to BSD)
 
 Most of it is a set of direct bindings to the
 `C++ library <../../aimsdata-4.1/doxygen/index.html>`_ API. But a few
@@ -896,7 +896,7 @@ def typeCode( data ):
 
 def _parseTypeInArgs( *args, **kwargs ):
   dtype = kwargs.get( 'dtype', None )
-  print '_parseTypeInArgs:', dtype
+  # print '_parseTypeInArgs:', dtype
   if dtype is not None:
     # kwargs = dict( kwargs )
     del kwargs[ 'dtype' ]

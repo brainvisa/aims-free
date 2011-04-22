@@ -1,3 +1,4 @@
+%#define PyAims_AimsData_%Template1typecode%_defined%
 
 class AimsData_%Template1typecode% : carto::RCObject
 {
@@ -120,6 +121,14 @@ public:
  sipCpp->operator() ( a1, a2, a3, a4 ) = %Template1deref%a0;
 %End
 
+%#ifdef PyAims_AimsData_U8_defined%
+ void setValue( int, unsigned, unsigned = 0, unsigned = 0,
+                unsigned = 0 );
+%MethodCode
+ sipCpp->operator() ( a1, a2, a3, a4 ) = %Template1deref%a0;
+%End
+%#endif%
+
   AimsData_%Template1typecode% operator +
     ( const AimsData_%Template1typecode% & ) /ReleaseGIL/;
   AimsData_%Template1typecode% operator -
@@ -210,4 +219,6 @@ public:
 %#endif%
 
 };
+
+%#undef PyAims_AimsData_%Template1typecode%_defined%
 

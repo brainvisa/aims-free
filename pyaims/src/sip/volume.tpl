@@ -1,4 +1,6 @@
 
+%#define PyAims_Volume_%Template1typecode%_defined%
+
 class Volume_%Template1typecode% : carto::RCObject
 {
 %TypeHeaderCode
@@ -52,6 +54,14 @@ public:
 %MethodCode
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
 %End
+
+%#ifdef PyAims_Volume_U8_defined%
+ void setValue( int, unsigned, unsigned = 0, unsigned = 0,
+                unsigned = 0 );
+%MethodCode
+ sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
+%End
+%#endif%
 
   carto::Object* header() /Factory, ReleaseGIL/;
 %MethodCode
@@ -463,4 +473,6 @@ public:
 %#endif%
 
 };
+
+%#undef PyAims_Volume_%Template1typecode%_defined%
 
