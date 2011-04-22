@@ -896,7 +896,7 @@ def typeCode( data ):
 
 def _parseTypeInArgs( *args, **kwargs ):
   dtype = kwargs.get( 'dtype', None )
-  print '_parseTypeInArgs:', dtype
+  # print '_parseTypeInArgs:', dtype
   if dtype is not None:
     # kwargs = dict( kwargs )
     del kwargs[ 'dtype' ]
