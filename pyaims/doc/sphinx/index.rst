@@ -8,8 +8,6 @@ PyAims programming documentation
 Overview
 ++++++++
 
-(The epydoc version of this doc is :aimsepy:`here <soma.aims-module.html>`).
-
 .. automodule:: soma.aims
 
 
