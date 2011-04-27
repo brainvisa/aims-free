@@ -30,6 +30,11 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+'''This module is *obsolete* since the C++ aims library supports the GIFTI 
+format. The code is left here for the curiosity of those who want to know 
+how GIFTI IO work.
+'''
+
 import sys
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesImpl

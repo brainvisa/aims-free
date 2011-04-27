@@ -627,7 +627,7 @@ convertersObjectToPython = {
   'U32' : carto.NumericGenericObjectConverter.asInt,
   'boolean' : carto.NumericGenericObjectConverter.asBool,
   'string' : lambda x: x.getString(),
-  }
+}
 
 def getPython( self ):
   """
@@ -1472,26 +1472,28 @@ del _volumedoc, _aimsdatadoc
 SurfaceManip.__doc__ = """
 Surface Manipulation Object. Available Methods are :
 
-  - meshMerge(AimsTimeSurface_3, AimsTimeSurface_3) : concatenate two 3D
-    meshes into the first. Also the += operator of meshes
+- meshMerge(AimsTimeSurface_3, AimsTimeSurface_3) : concatenate two 3D
+  meshes into the first. Also the += operator of meshes
 
-  - meshTransform(aims.AimsTimeSurface_3 mesh,
-      aims.AffineTransformation3d trans) : apply a
-    transformation *in-place* to a mesh.
+- meshTransform(aims.AimsTimeSurface_3 mesh,
+  aims.AffineTransformation3d trans) : apply a
+  transformation *in-place* to a mesh.
 
-  - meshPlanarPolygon :
+- meshPlanarPolygon
 
-This doc might not be up-to-date, check sources for more info."""
+This doc might not be up-to-date, check sources for more info.
+"""
 
 SurfaceGenerator.__doc__ = """
 Surface Generator Object. Available Methods are :
 
-  - cube(center_p, radius_f, smoothnormal_b=false)
-  - cylinder(p1_p, p2_p, radius1_f, radius2_f, nfacets_i, closed_b, smooth_b=false)
-  - cone(arrow_p, base_p, radius_f, nfacets_i, closed_b, smooth_b=false)
-  - arrow(arrow_p, base_p, radius_f, arrowradius_f, nfacets_i, arrowlengthfract_f)
-  - icosahedron(center_p, radius_f)
-  - sphere(center_p, radius_f, nfacets_i)
+- cube(center_p, radius_f, smoothnormal_b=false)
+- cylinder(p1_p, p2_p, radius1_f, radius2_f, nfacets_i, closed_b, smooth_b=false)
+- cone(arrow_p, base_p, radius_f, nfacets_i, closed_b, smooth_b=false)
+- arrow(arrow_p, base_p, radius_f, arrowradius_f, nfacets_i, arrowlengthfract_f)
+- icosahedron(center_p, radius_f)
+- sphere(center_p, radius_f, nfacets_i)
+- icosphere(center_p, radius_f, nfacets_i)
 
 With arguments suffix _f:float, _i:int, _b:bool, _p: Point3df or 3-tuple
 

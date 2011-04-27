@@ -30,12 +30,15 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-# FSL matrixes seem to transform from/to internal refs, like Aims but with
-# a different convention:
-# X: right -> left
-# Y: back -> front
-# Z: bottom -> top
-# which appears to be Y and Z flipped compared to Aims
+'''FSL matrixes seem to transform from/to internal refs, like Aims but with
+a different convention:
+
+- X: right -> left
+- Y: back -> front
+- Z: bottom -> top
+
+which appears to be Y and Z flipped compared to Aims
+'''
 
 from soma import aims
 from soma.minf.api import readMinf
@@ -44,9 +47,12 @@ import numpy, types, os
 def fslMatToTrm( matfile, srcimage, dstimage ):
   '''
   As far as I have understood:
+  
   A FSL transformation goes from the disk referential of the source image
   to the disk referential of the destination image.
+  
   BUT:
+  
   if the qform of an image (disk -> "real world") implies a flip (goes from a
   direct referential to an indirect one or the contrary), then a flip along X
   axis is inserted in the matrix, since FSL flirt doesn't allow flipping.

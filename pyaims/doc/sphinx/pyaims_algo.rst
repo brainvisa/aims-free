@@ -13,18 +13,41 @@ PyAims basic algorithms
 .. autoclass:: soma.aims.GraphManip
   :members:
 
+
+soma.aims.apctools module
+-------------------------
+
 .. automodule:: soma.aims.apctools
   :members:
+
+soma.aims.colormaphints module
+------------------------------
 
 .. automodule:: soma.aims.colormaphints
   :members:
 
+soma.aims.fslTransformation module
+----------------------------------
+
 .. automodule:: soma.aims.fslTransformation
   :members:
+
+soma.aims.spmnormalizationreader module
+---------------------------------------
 
 .. automodule:: soma.aims.spmnormalizationreader
   :members:
 
+soma.aims.meshSplit module
+--------------------------
+
 .. automodule:: soma.aims.meshSplit
+  :members:
+
+
+soma.aims.pynifti module
+------------------------
+
+.. automodule:: soma.aims.pynifti
   :members:
 

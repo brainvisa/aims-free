@@ -39,7 +39,7 @@ __docformat__ = "epytext en"
 
 def readSpmNormalization( matfilename, source=None, destref=None, srcref=None ):
   '''
-  Read a SPM *_sn.mat normalization file and converts it to an Aims Motion.
+  Read a SPM \*_sn.mat normalization file and converts it to an Aims Motion.
   The converted transformation has for source the AIMS referential of the source
   image, and for destination the template referential of the SPM .mat file. All
   coordinates are in millimeters.
@@ -51,22 +51,35 @@ def readSpmNormalization( matfilename, source=None, destref=None, srcref=None ):
   If None is passed as source (the default), then the source image name will
   be built from the .mat filename and will be read if found.
 
-  @type matfilename: string
-  @param matfilename: file name of the *_sn.mat normalization file to reading
-  @type source: filename (string), or Volume (Volume or AimsData), or volume
-  header (MappingType)
-  @param source: file name of the *_sn.mat normalization file to reading
-  @type destref: string or UUID
-  @param destref: destination referential for the transformation. If not
-  specified, none will be set. If provided as a symbolic name ('Talairach-MNI
-  template-SPM'), it will be converted to an UUID string.
-  @type srcref: string or UUID
-  @param srcref: source referential for the transformation. If not specified,
-  an attempt will be made to take it from the source image, otherwise it will
-  not be set. If provided as a symbolic name ('Talairach-MNI template-SPM'), it
-  will be converted to an UUID string.
-  @rtype: aims.Motion object
-  @return: the converted transformation
+  - matfilename: *string*
+    
+    file name of the \*_sn.mat normalization file to reading
+
+  - source: *filename* (*string*), or *Volume* 
+    :py:class:`Volume <soma.aims.Volume_FLOAT>` or 
+    :py:class:`AimsData <soma.aims.AimsData_FLOAT>`), 
+    or *volume header* (*MappingType*)
+
+    file name of the \*_sn.mat normalization file to reading
+  
+  - destref: *string* or *UUID* (:py:class:`Uuid <soma.uuid.Uuid>`)
+  
+    destination referential for the transformation. If not
+    specified, none will be set. If provided as a symbolic name 
+    ('Talairach-MNI template-SPM'), it will be converted to an UUID string.
+  
+  - srcref: *string* or *UUID*
+  
+    source referential for the transformation. If not specified,
+    an attempt will be made to take it from the source image, otherwise it will
+    not be set. If provided as a symbolic name ('Talairach-MNI template-SPM'), 
+    it will be converted to an UUID string.
+  
+  - returns: 
+    :py:class:`AffineTransformation3d <soma.aims.AffineTransformation3d>` 
+    object
+
+    the converted transformation
   '''
   if source is None:
     if matfilename.endswith( '_sn3d.mat' ):

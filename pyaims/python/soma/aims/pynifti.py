@@ -30,8 +30,11 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-'''This class fakes the pynifti nifti.NiftiImage class using an underlying aims
-volume and aims IO'''
+'''This class fakes the `pynifti <http://niftilib.sourceforge.net/pynifti/>`_ 
+nifti.NiftiImage class using an underlying aims volume and aims IO.
+Now that `nipy <http://nipy.org>`_ has switched to a different IO system and 
+image model, this code is **unmaintained**.
+'''
 
 import types
 from soma import aims
