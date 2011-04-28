@@ -33,7 +33,11 @@ import numpy
 from soma import aims
 
 def meshSplit(mesh,tex,graph):
-  print "type(mesh) : ",type(mesh),", type(tex) : ",type(tex)
+  '''Splits a mesh into patches corresponding to a labels texture. Patches are
+  organized into a graph.
+  
+  The graph must preexist, and nodes will be inserted into it.
+  '''
   labels = numpy.unique(tex[0].arraydata())
   labels = labels.tolist()
   labels.remove(0)
@@ -55,12 +59,13 @@ def meshSplit(mesh,tex,graph):
 def meshSplit2(mesh, tex, graph, voxel_size):
   """
   inputs:
-            mesh : cortex mesh for example
-            tex: texture of labels (parcellation of the mesh, labels between 1 and nb_labels, background = 0), type : aims.TimeTexture_S16
-            graph: soma.aims.Graph, __syntax__:'roi'
+    - mesh : cortex mesh for example
+    - tex: texture of labels (parcellation of the mesh, labels between 1 and nb_labels, background = 0), type : aims.TimeTexture_S16
+    - graph: :py:class:`soma.aims.Graph`, __syntax__:'roi'
+
   outputs:
-            void: modify the input graph: add vertex : submeshes (one per texture label) and associated buckets
-                                          add vertex "others" : void
+    - None: modify the input graph: add vertex : submeshes (one per texture 
+      label) and associated buckets add vertex "others" : void
   """
   labels = numpy.unique(tex[0].arraydata())
   print labels
@@ -95,3 +100,4 @@ def meshSplit2(mesh, tex, graph, voxel_size):
     else:
       bucketMap.setSizeXYZT(1,1,1,1)
     aims.GraphManip.storeAims( graph, v.get(),'aims_roi', aims.rc_ptr_BucketMap_VOID(bucketMap) )
+

@@ -238,33 +238,54 @@ anatomicalColormaps = [ ( 'B-W LINEAR', ( 1., 1., 1. ) ),
   ( 'Green-White-linear', ( 0., 1., 0. ) ),
   ( 'Green-White-exponential', ( 0., 1., 0. ) ),
 ]
+'''predefined list of colormaps suitable for anatomical volumes'''
+
 anatomicalFusionColormaps = [ ( 'B-W LINEAR-fusion', ( 1., 1., 1. ) ),
   ( 'Blue-White-fusion', ( 0., 0., 1. ) ),
   ( 'Green-White-linear-fusion', ( 0., 1., 0. ) ),
 ]
+'''predefined list of colormaps suitable for fusionned anatomical volumes'''
+
 diffusionColormaps = anatomicalColormaps
+'''predefined list of colormaps suitable for diffusion volumes'''
+
 diffusionFusionColormaps = anatomicalFusionColormaps
+'''predefined list of colormaps suitable for fusionned diffusion volumes'''
+
 functionalColormaps = [ ( 'RED TEMPERATURE', ( 1., 0.5, 0. ) ),
   ( 'RAINBOW', ( 1., 0., 0. ) ),
   ( 'Blue-Red', ( 1., 0., 0. ) ),
   ( 'actif-ret', ( 1., 1., 0. ) ),
   ( 'Yellow-red', ( 1., 1., 0. ) ),
 ]
+'''predefined list of colormaps suitable for functional volumes'''
+
 functionalFusionColormaps = [ ( 'Rainbow1-fusion', ( 1., 0., 0. ) ),
   ( 'Blue-Red-fusion', ( 1., 0., 0. ) ),
   ( 'Yellow-red-fusion', ( 1., 1., 0. ) ),
 ]
+'''predefined list of colormaps suitable for fusionned functional volumes'''
+
 twotailColormaps = [ ( 'tvalues100-200-100-lfusion', ( 1., 0., 0. ) ),
   ( 'tvalues100-100-100-lfusion', ( 1., 0., 0. ) ),
 ]
+'''predefined list of colormaps suitable for two-tail T-values volumes'''
+
 twotailFusionColormaps = [ ( 'tvalues100-200-100', ( 1., 0., 0. ) ),
   ( 'tvalues100-100-100', ( 1., 0., 0. ) ),
 ]
+'''predefined list of colormaps suitable for fusionned two-tail T-values 
+volumes'''
+
 labelsColormaps = [ ( 'Blue-Red', ( 1., 0., 0. ) ),
   ( 'Talairach', ( 0., .0, .0, ) ),
 ]
+'''predefined list of colormaps suitable for labels volumes'''
+
 labelsFusionColormaps = [
 ]
+'''predefined list of colormaps suitable for fusionned labels volumes'''
+
 binaryColormaps = [ ( 'BLUE-lfusion', ( 0., 0., 1. ) ),
   ( 'GREEN-lfusion', ( 0., 1., 0. ) ),
   ( 'RED-lfusion', ( 1., 0., 0. ) ),
@@ -273,6 +294,8 @@ binaryColormaps = [ ( 'BLUE-lfusion', ( 0., 0., 1. ) ),
   ( 'YELLOW-lfusion', ( 1., 1., 0. ) ),
   ( 'WHITE-lfusion', ( 1., 1., 1. ) ),
 ]
+'''predefined list of colormaps suitable for binary volumes'''
+
 binaryFusionColormaps = [ ( 'BLUE-ufusion', ( 0., 0., 1. ) ),
   ( 'GREEN-ufusion', ( 0., 1., 0. ) ),
   ( 'RED-ufusion', ( 1., 0., 0. ) ),
@@ -281,9 +304,14 @@ binaryFusionColormaps = [ ( 'BLUE-ufusion', ( 0., 0., 1. ) ),
   ( 'YELLOW-ufusion', ( 1., 1., 0. ) ),
   ( 'Black-ufusion', ( 1., 1., 1. ) ),
 ]
+'''predefined list of colormaps suitable for fusionned binary volumes'''
 
 
 def chooseColormaps( vols ):
+  '''Automatically chooses distinc colormaps for a list of volumes
+  
+  - returns: a list of colormaps names. They should be known from Anatomist.
+  '''
   cmapbytype = [ anatomicalColormaps, diffusionColormaps, functionalColormaps,
     labelsColormaps, twotailColormaps, binaryColormaps ]
   cmapbytype_fusion = [ anatomicalFusionColormaps, diffusionFusionColormaps,

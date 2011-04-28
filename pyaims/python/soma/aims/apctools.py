@@ -30,12 +30,26 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-# .APC (commissure coordinates) IO and other tools
+'''.APC (commissure coordinates) IO and other tools'''
 
 from soma import aims
 import types
 
 def apcRead( filename, imagefile = None ):
+    '''Read a .APC file
+    - filename: *string*
+    - imagefile: *string*
+    
+      optional filename for the image file from which the AC/PC coordinates are
+      taken from. Its header may be used to recover millimeters positions from 
+      voxels if they are not specified in the .APC file itself (for older 
+      versions of the .APC files)
+    - returns: *dict*
+      
+      the contents of the file as a dictionary, keys being 'ac', 'pc', 'ih' 
+      for voxel coordinates, and 'acmm', 'pcmm', 'ihmm' for millimeters 
+      coordinates, and optionally 'comment'.
+    '''
     f = open( filename )
     lines = f.readlines()
     f.close()
@@ -108,6 +122,8 @@ def apcRead( filename, imagefile = None ):
 
 
 def apcWrite( apcdict, filename ):
+    '''Writes a .APC file from a dictionary
+    '''
     ac = apcdict[ 'ac' ]
     pc = apcdict[ 'pc' ]
     ih = apcdict[ 'ih' ]
@@ -135,6 +151,30 @@ def apcWrite( apcdict, filename ):
     f.close()
 
 def apcTransform( apcdict, transform, outimagevoxelsize ):
+    '''Transforms coordinates of commissures points through a specified 
+    transformation
+
+    - apcdict: *dict*
+
+      Commissures coordinates, as a dictionary with 'ac', 'pc', 'ih' keys for
+      voxel coordinates, 'acmm', 'pcmm', 'ihmm' for millimeters coordinates
+
+    - transform: 
+      :py:class:`AffineTransformation3d <soma.aims.AffineTransformation3d>` 
+      object
+
+    - outimagevoxelsize:
+
+      - as *string*: filename for the image whose voxel size should be used
+      - as :py:class:`Volume <soma.aims.Volume_FLOAT>`, 
+        :py:class:`AimsData <soma.aims.AimsData_FLOAT>` or any other object 
+        with a ``header()`` method: voxel_size is taken from its header
+      - as *dict* or *header object*: voxel size is takes as the 
+        ``voxel_size`` entry of the dictionary
+
+    Coordinates are transformed in the ``apcdict`` dictionary, which is 
+    modified in-place.
+    '''
     if type( outimagevoxelsize ) in types.StringTypes:
         f = aims.Finder()
         if f.check( outimagevoxelsize ):
@@ -161,6 +201,11 @@ def apcTransform( apcdict, transform, outimagevoxelsize ):
 
 def apcFileTransform( inAPCfilename, outAPCfilename, transform,
     outimagevoxelsize, imagefile = None ):
+    '''Transforms the coordinates of a .APC file points through a given 
+    transformation. It basically reads ``inAPCfilename``, transforms its 
+    contents using :py:func:`apcTransform`, then writes the result to 
+    ``outAPCfilename``.
+    '''
     apc = apcRead( inAPCfilename, imagefile )
     apcTransform( apc, transform, outimagevoxelsize )
     apcWrite( apc, outAPCfilename )
