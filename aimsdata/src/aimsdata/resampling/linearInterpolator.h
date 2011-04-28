@@ -237,9 +237,9 @@ bool LinearInterpolator<T>::isValid( Interpolator::Coordinate_t x,
                                      Interpolator::Coordinate_t y, 
                                      Interpolator::Coordinate_t z ) const
 {
-  const Interpolator::Coordinate_t hx = - _image.sizeX();
-  const Interpolator::Coordinate_t hy = - _image.sizeY();
-  const Interpolator::Coordinate_t hz = - _image.sizeZ();
+  const Interpolator::Coordinate_t hx = - _image.sizeX() / 2;
+  const Interpolator::Coordinate_t hy = - _image.sizeY() / 2;
+  const Interpolator::Coordinate_t hz = - _image.sizeZ() / 2;
   return x >= hx && y >= hy && z >= hz &&
     x < _image.dimX() * _image.sizeX() + hx &&
     y < _image.dimY() * _image.sizeY() + hy &&
