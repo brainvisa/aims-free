@@ -54,6 +54,9 @@ class GeodesicPath
     void shortestPath_1_1_ind_xyz(unsigned source, unsigned target, std::vector<int>& indice, std::vector<Point3df>& coord3D);
     void shortestPath_1_1_tex(unsigned source, unsigned target, float texturevalue, TimeTexture<float> &tex);
     double shortestPath_1_1_len(unsigned source, unsigned target);
+
+    void shortestPath_1_N_All_ind(unsigned sources, vector<unsigned> targets, vector<vector<int> >&indices);
+
     vector<int> longestPath_N_N_ind(vector<int> points, int* s, int *d);
 
 };

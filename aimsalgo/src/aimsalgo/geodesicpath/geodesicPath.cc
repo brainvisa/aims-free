@@ -63,14 +63,14 @@ void GeodesicPath::computeGraphDijkstra (AimsSurfaceTriangle surface, TimeTextur
   }
 
   // compute adjacence graph
-  //cout << "compute adjacence graph : ";
+  cout << "compute adjacence graph : ";
   if (method >= 0 && method < 3)
     _meshSP.initialize_mesh_data(pointsSP,facesSP, &curv[0],method ,strain);
   if (method == 3)
     _meshSP.initialize_mesh_data(pointsSP,facesSP, NULL ,method ,0);
   if (method > 3)
       _meshSP.initialize_mesh_data(pointsSP,facesSP, NULL ,0 ,0);
-  //cout << "done" << endl;
+  cout << "done" << endl;
 }
 
 vector<Point3df> GeodesicPath::shortestPath_1_1_xyz(unsigned source, unsigned target)
@@ -258,7 +258,7 @@ vector<int> GeodesicPath::longestPath_N_N_ind(vector<int> points, int* s, int *d
       index_max_i = index;
       index_max_j = target;
     }
-    std::cout << "\r\033[K" <<  nb_combinaison << "/" << nb_combinaison_max << " " << index_max_i << " " << index_max_j << " "<< dist << std::flush;
+    std::cout << "\r\033[K" <<  nb_combinaison << "/" << nb_combinaison_max << " " << index_max_i << " " << index_max_j << " "<< dist_max << std::flush;
   }
 
   *s = index_max_i;
@@ -299,6 +299,26 @@ void GeodesicPath::shortestPath_1_N_ind(unsigned source, vector<unsigned> target
 
   delete(dijkstra_algorithm);
 }
+
+void GeodesicPath::shortestPath_1_N_All_ind(unsigned source, vector<unsigned> targets, vector<vector<int> >&indices)
+{
+  geodesic::GeodesicAlgorithmDijkstra *dijkstra_algorithm;
+  dijkstra_algorithm = new geodesic::GeodesicAlgorithmDijkstra(&_meshSP);
+
+  geodesic::SurfacePoint short_sources(&_meshSP.vertices()[source]);
+
+  std::vector<geodesic::SurfacePoint> all_targets;
+
+  for (int i = 0 ; i < (int)targets.size() ; i++)
+    all_targets.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[targets[i]]));
+
+  std::vector<std::vector<SurfacePoint> > paths;
+
+  dijkstra_algorithm->geodesic(short_sources,all_targets,paths,indices);
+
+  delete(dijkstra_algorithm);
+}
+
 
 void GeodesicPath::longestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length)
 {
