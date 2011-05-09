@@ -218,58 +218,6 @@ double GeodesicPath::shortestPath_1_1_len(unsigned source, unsigned target)
 }
 
 
-vector<int> GeodesicPath::longestPath_N_N_ind(vector<int> points, int* s, int *d)
-{
-  int i,j;
-  unsigned target;
-  vector<int> listIndexVertexPathSP;
-  vector<unsigned> targetsTemp;
-
-  int index_max_i,index_max_j,index;
-  double dist,dist_max;
-
-  index_max_i = -1;
-  index_max_j = -1;
-
-  int nb_combinaison_max = (points.size() * (points.size()-1))/2;
-  int nb_combinaison = 0;
-
-  dist_max = -100000;
-
-  //std::cout << "nb extremities " << points.size() << "-->  ";
-
-  for (i=0; i<points.size(); i++)
-    {
-    targetsTemp.push_back(points[i]);
-    //cout << points[i] << " ";
-    }
-
-  for (i=0; i<points.size()-1; i++)
-  {
-    index = points[i];
-    targetsTemp.erase(targetsTemp.begin());
-    nb_combinaison = nb_combinaison + targetsTemp.size();
-    longestPath_1_N_ind(index, targetsTemp, &target, &dist);
-    //cout << index << " " << target << " " << dist << endl;
-
-    if (dist >= dist_max)
-    {
-      dist_max = dist;
-      index_max_i = index;
-      index_max_j = target;
-    }
-    std::cout << "\r\033[K" <<  nb_combinaison << "/" << nb_combinaison_max << " " << index_max_i << " " << index_max_j << " "<< dist_max << std::flush;
-  }
-
-  *s = index_max_i;
-  *d = index_max_j;
-
-  listIndexVertexPathSP = shortestPath_1_1_ind(*s,*d);
-
-  return listIndexVertexPathSP;
-}
-
-
 void GeodesicPath::shortestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length)
 {
   double distance_temp;
@@ -319,8 +267,7 @@ void GeodesicPath::shortestPath_1_N_All_ind(unsigned source, vector<unsigned> ta
   delete(dijkstra_algorithm);
 }
 
-
-void GeodesicPath::longestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length)
+void GeodesicPath::longestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length, int type_distance)
 {
   double distance_temp;
   double max_distance_temp = 0.0;
@@ -331,21 +278,123 @@ void GeodesicPath::longestPath_1_N_ind(unsigned source, vector<unsigned> targets
   geodesic::SurfacePoint short_sources(&_meshSP.vertices()[source]);
   std::vector<geodesic::SurfacePoint> all_sources(1,short_sources);
 
-  dijkstra_algorithm->propagate(all_sources);
-
-  for (int j = 0; j < targets.size(); j++)
+  // distance pondérée
+  if (type_distance == 0)
   {
-    geodesic::SurfacePoint t(&_meshSP.vertices()[targets[j]]);
+    dijkstra_algorithm->propagate(all_sources);
 
-    unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
-
-    if (distance_temp > max_distance_temp )
+    for (int j = 0; j < targets.size(); j++)
     {
-      max_distance_temp = distance_temp;
-      *target = targets[j];
-      *length = max_distance_temp;
+      geodesic::SurfacePoint t(&_meshSP.vertices()[targets[j]]);
+      unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
+
+      if (distance_temp > max_distance_temp )
+      {
+        max_distance_temp = distance_temp;
+        *target = targets[j];
+        *length = max_distance_temp;
+      }
+    }
+  }
+
+  // distance euclidienne
+  if (type_distance == 1)
+  {
+    std::vector<geodesic::SurfacePoint> all_targets;
+
+    for (int i = 0 ; i < (int)targets.size() ; i++)
+      all_targets.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[targets[i]]));
+
+
+    vector<vector<SurfacePoint> > paths;
+    vector<vector<int> >indices;
+
+    paths.clear();
+
+    dijkstra_algorithm->geodesic(short_sources,all_targets,paths,indices);
+
+    vector<vector<SurfacePoint> >::iterator ite = paths.begin();
+
+    double max_len,len;
+    max_len = 0.0;
+    int ind = 0;
+
+    for (; ite != paths.end(); ++ite)
+    {
+      ind++;
+      len = dijkstra_algorithm->length(*ite);
+//     vector< SurfacePoint >::iterator ite_holes = (*ite).begin();
+//      for (; ite_holes != (*ite).end(); ite_holes++)
+//      {
+//       cout << (double)((*ite_holes).x()) << " " << (double)((*ite_holes).y()) << " " << (double)((*ite_holes).z()) << " ";
+//      }
+
+      if (len > max_len)
+      {
+        max_len = len;
+        *length = max_len;
+        *target = targets[ind-1];
+      }
     }
   }
 
   delete(dijkstra_algorithm);
+}
+
+
+vector<int> GeodesicPath::longestPath_N_N_ind(vector<int> points, int* s, int *d, double *length,int type_distance)
+{
+  int i,j;
+  unsigned target;
+  vector<int> listIndexVertexPathSP;
+  vector<unsigned> targetsTemp;
+
+  int index_max_i,index_max_j,index;
+  double dist,dist_max;
+
+  index_max_i = -1;
+  index_max_j = -1;
+
+  int nb_combinaison_max = (points.size() * (points.size()-1))/2;
+  int nb_combinaison = 0;
+
+  dist_max = -100000;
+
+  //std::cout << "nb extremities " << points.size() << "-->  ";
+
+  for (i=0; i<points.size(); i++)
+    {
+    targetsTemp.push_back(points[i]);
+    //cout << points[i] << " ";
+    }
+
+  for (i=0; i<points.size()-1; i++)
+  {
+    index = points[i];
+    targetsTemp.erase(targetsTemp.begin());
+    nb_combinaison = nb_combinaison + targetsTemp.size();
+
+    //0 avec la distance euclidienne pondérée
+    //1 avec la distance euclidienne
+
+    longestPath_1_N_ind(index, targetsTemp, &target, &dist, type_distance);
+
+    //cout << index << " " << target << " " << dist << endl;
+
+    if (dist >= dist_max)
+    {
+      dist_max = dist;
+      index_max_i = index;
+      index_max_j = target;
+    }
+    std::cout << "\r\033[K" <<  nb_combinaison << "/" << nb_combinaison_max << " " << index_max_i << " " << index_max_j << " "<< dist_max << std::flush;
+  }
+
+  *s = index_max_i;
+  *d = index_max_j;
+  *length = dist;
+
+  listIndexVertexPathSP = shortestPath_1_1_ind(*s,*d);
+
+  return listIndexVertexPathSP;
 }
