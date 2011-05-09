@@ -16,20 +16,16 @@
 #include <aims/mesh/surface.h>
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surfacegen.h>
-//#include <aims/mesh/surfaceOperation.h>
-//#include <aims/distancemap/meshdistance.h>
-//#include <aims/distancemap/meshvoronoi.h>
 #include <aims/scalespace/meshDiffuse.h>
-//#include <aims/distancemap/meshmorphomat.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
+#include <aims/geodesicpath/geodesic_algorithm_exact.h>
 #include <aims/geodesicpath/geodesic_algorithm_dijkstra.h>
 #include <aims/geodesicpath/geodesic_mesh.h>
 
 using namespace geodesic;
 using namespace aims;
 using namespace std;
-//using namespace aims::meshdistance;
 
 class GeodesicPath
 {
@@ -50,14 +46,17 @@ class GeodesicPath
     void computeGraphDijkstra (AimsSurfaceTriangle surface ,TimeTexture<float> texCurv, int method, int strain);
 
   public :
-    vector<int> shortestPathIndiceVextex(unsigned source, unsigned target);
-    vector<int> shortestPathIndice3Vextex(unsigned source, unsigned middle, unsigned target);
-    vector<Point3df> shortestPathCoordVextex(unsigned source, unsigned target);
-    void shortestPathIndiceCoordVextex(unsigned source, unsigned target, std::vector<int>& indice, std::vector<Point3df>& coord3D);
-    void shortestPath2Texture(unsigned source, unsigned target, float texturevalue, TimeTexture<float> &tex);
-    float shortestPathLength(unsigned source, unsigned target);
+    vector<int> shortestPath_1_1_ind(unsigned source, unsigned target);
+    vector<int> shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target);
+    void shortestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length);
+    vector<Point3df> shortestPath_1_1_xyz(unsigned source, unsigned target);
+    void shortestPath_1_1_ind_xyz(unsigned source, unsigned target, std::vector<int>& indice, std::vector<Point3df>& coord3D);
+    void shortestPath_1_1_tex(unsigned source, unsigned target, float texturevalue, TimeTexture<float> &tex);
+    double shortestPath_1_1_len(unsigned source, unsigned target);
+    void shortestPath_1_N_All_ind(unsigned sources, vector<unsigned> targets, vector<vector<int> >&indices);
+
+    void longestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length, int type_distance);
+    vector<int> longestPath_N_N_ind(vector<int> points, int* s, int *d, double *length, int type_distance);
 };
 
 #endif
-
-

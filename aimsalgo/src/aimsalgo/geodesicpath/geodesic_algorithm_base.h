@@ -51,6 +51,11 @@ public:
                   SurfacePoint& destination,
                   std::vector<SurfacePoint>& path,std::vector<int>& indexVertex);
 
+  void geodesic(SurfacePoint& sources,
+                        std::vector<SurfacePoint>& destinations,
+                          std::vector<std::vector<SurfacePoint> >& paths,
+                            std::vector<std::vector<int> >& indexVertex);
+
   double length(std::vector<SurfacePoint>& path);
   void print_info_about_path(std::vector<SurfacePoint>& path);
 
@@ -169,6 +174,27 @@ inline void GeodesicAlgorithmBase::geodesic(std::vector<SurfacePoint>& sources,
   for(unsigned i=0; i<paths.size(); ++i)
   {
     trace_back(destinations[i], paths[i]);
+  }
+}
+
+inline void GeodesicAlgorithmBase::geodesic(SurfacePoint& source,
+                      std::vector<SurfacePoint>& destinations, std::vector<std::vector<SurfacePoint> >& paths,
+                      std::vector<std::vector<int> >& indexVertex) //lazy people can find geodesic paths with one function call
+{
+  double const max_propagation_distance = GEODESIC_INF;
+
+  std::vector<SurfacePoint> sources(1, source);
+
+  propagate(sources,
+        max_propagation_distance,
+        &destinations);   //we use desinations as stop points
+
+  paths.resize(destinations.size());
+  indexVertex.resize(destinations.size());
+
+  for(unsigned i=0; i<paths.size(); ++i)
+  {
+    trace_back_with_index(destinations[i], paths[i],indexVertex[i]);
   }
 }
 
