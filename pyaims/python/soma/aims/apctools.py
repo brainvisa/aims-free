@@ -31,6 +31,7 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 '''.APC (commissure coordinates) IO and other tools'''
+__docformat__ = 'restructuredtext en'
 
 from soma import aims
 import types
