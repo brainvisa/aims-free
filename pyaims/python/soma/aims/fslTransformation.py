@@ -39,6 +39,7 @@ a different convention:
 
 which appears to be Y and Z flipped compared to Aims
 '''
+__docformat__ = 'restructuredtext en'
 
 from soma import aims
 from soma.minf.api import readMinf

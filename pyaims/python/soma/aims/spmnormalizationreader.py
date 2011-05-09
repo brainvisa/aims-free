@@ -35,7 +35,7 @@ import numpy, sys
 from soma import uuid
 aims = sys.modules[ 'soma.aims']
 
-__docformat__ = "epytext en"
+__docformat__ = 'restructuredtext en'
 
 def readSpmNormalization( matfilename, source=None, destref=None, srcref=None ):
   '''

@@ -35,6 +35,7 @@ nifti.NiftiImage class using an underlying aims volume and aims IO.
 Now that `nipy <http://nipy.org>`_ has switched to a different IO system and 
 image model, this code is **unmaintained**.
 '''
+__docformat__ = 'restructuredtext en'
 
 import types
 from soma import aims
