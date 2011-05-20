@@ -141,46 +141,29 @@ void QtFormatsHeader::read()
     return;
 
   string	fname = _name;
-  const char	*fmt = QImageIO::imageFormat( fname.c_str() );
-  if( !fmt )
+  QByteArray fmt = QImageReader::imageFormat( fname.c_str() );
+  if( fmt.isNull() )
+  {
+    set<string>		exts = extensions();
+    set<string>::iterator	ie, ee = exts.end();
+
+    for( ie=exts.begin(); ie!=ee && fmt.isNull(); ++ie )
     {
-      set<string>		exts = extensions();
-      set<string>::iterator	ie, ee = exts.end();
-
-      for( ie=exts.begin(); ie!=ee && !fmt; ++ie )
-        {
-          fname = removeExtension( _name ) + '.' + *ie;
-          fmt = QImageIO::imageFormat( fname.c_str() );
-        }
+      fname = removeExtension( _name ) + '.' + *ie;
+      fmt = QImageReader::imageFormat( fname.c_str() );
     }
-  if( !fmt )
+  }
+  if( fmt.isNull() )
     throw format_error( _name );
-
-#if QT_VERSION >= 0x040000
 
   QImageReader	qio( fname.c_str(), fmt );
   d->qimage = qio.read();
 
   if( d->qimage.isNull() )
-    {
-      d->clear();
-      throw format_mismatch_error( fname );
-    }
-
-#else // Qt 3
-
-  QImageIO	qio( fname.c_str(), fmt );
-  bool	ok = qio.read();
-
-  if( !ok )
-    {
-      d->clear();
-      throw format_mismatch_error( fname );
-    }
-
-  d->qimage = qio.image();
-
-#endif
+  {
+    d->clear();
+    throw format_mismatch_error( fname );
+  }
 
   const QImage	& im = d->qimage;
 
@@ -289,7 +272,7 @@ void QtFormatsHeader::read()
     setProperty( "possible_data_types", pdt );
 
   setProperty( "object_type", string( "Volume" ) );
-  setProperty( "file_type", string( fmt ) );
+  setProperty( "file_type", string( fmt.data() ) );
 
   d->hasread = true;
 
