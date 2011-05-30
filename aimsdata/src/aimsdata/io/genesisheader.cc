@@ -77,7 +77,7 @@ void GenesisHeader::read()
     io_error::launchErrnoExcept( fileName );
   is.unsetf( ios::skipws );
 
-  //cerr << "GENESIS header " << fileName << endl;
+  cerr << "GENESIS header " << fileName << endl;
   ImgHdr	gehdr;
 
 #define macroRead( field ) \
@@ -86,6 +86,7 @@ void GenesisHeader::read()
   if ( bswap ) gehdr.field = byteswap(  gehdr.field )
   
   bool	bswap = false;
+  gehdr.img_magic = 0;
   macroRead( img_magic );
   if( gehdr.img_magic != IMG_MAGIC ) {
     gehdr.img_magic = byteswap( gehdr.img_magic );
@@ -112,7 +113,7 @@ void GenesisHeader::read()
   macroRead( img_p_image );
   macroRead( img_l_image );
 #undef macroRead
-  
+
   _dimX = gehdr.img_width;
   _dimY = gehdr.img_height;
   _data_offset = gehdr.img_hdr_length;
