@@ -77,7 +77,6 @@ void GenesisHeader::read()
     io_error::launchErrnoExcept( fileName );
   is.unsetf( ios::skipws );
 
-  cerr << "GENESIS header " << fileName << endl;
   ImgHdr	gehdr;
 
 #define macroRead( field ) \
