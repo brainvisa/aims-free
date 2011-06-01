@@ -47,6 +47,7 @@ class GeodesicPath
 
   public :
     vector<int> shortestPath_1_1_ind(unsigned source, unsigned target);
+    vector<int> shortestPath_1_1_ind(unsigned source, unsigned target, TimeTexture<short> subset);
     vector<int> shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target);
     void shortestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length);
     vector<Point3df> shortestPath_1_1_xyz(unsigned source, unsigned target);

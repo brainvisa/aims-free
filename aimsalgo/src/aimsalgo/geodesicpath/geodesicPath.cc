@@ -141,6 +141,73 @@ vector<int> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target)
   return listIndexVertexPathSP;
 }
 
+
+vector<int> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target, TimeTexture<short> subset)
+{
+
+	uint i, j, ns=_surface.vertex().size();
+	std::vector< AimsVector< uint, 3 > > polyS, poly=_surface.polygon();
+	uint np=poly.size();
+	AimsVector< uint, 3 > tri;
+	AimsSurfaceTriangle surfS;
+	std::map<int, int> mapAtoS, mapStoA;
+
+	std::vector< Point3df > vertS, vert=_surface.vertex();
+
+	// Ici subset contient 0 partout sauf là où on peut chercher le plus court chemin.
+
+	// On commence par vérifier que source et target sont dedans.
+
+	if (subset[0].item(source)==0)
+	{
+		cerr << "GeodesicPath.shortestPath_1_1_ind : looking for a path through a subset to which source does not belong" << endl;
+		exit(EXIT_FAILURE);
+	}
+	if (subset[0].item(target)==0)
+	{
+		cerr << "GeodesicPath.shortestPath_1_1_ind : looking for a path through a subset to which target does not belong" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	// ensuite on extrait une sous-surface et on garde l'équivalence de noeud avec l'ancienne.
+	j=0;
+	for (i=0; i<ns; i++)
+	{
+		if (subset[0].item(i)!=0)
+		{
+			vertS.push_back(vert[i]);
+			mapAtoS[i]=j;
+			mapStoA[j]=i;
+			j++;
+		}
+	}
+	for (i=0; i<np; i++)
+	{
+		tri=poly[i];
+		if ( (subset[0].item(tri[0])!=0) && (subset[0].item(tri[1])!=0) && (subset[0].item(tri[2])!=0))
+			polyS.push_back(AimsVector< uint, 3 >(mapAtoS[tri[0]], mapAtoS[tri[1]], mapAtoS[tri[2]]));
+	}
+	uint ns_sub=vertS.size();
+	TimeTexture<float> curvS(1, ns_sub);
+	for (j=0; j<ns_sub; j++)
+	{
+		curvS[0].item(j)=_texCurv[0].item(mapStoA[j]);
+	}
+    surfS.vertex()=vertS;
+    surfS.polygon()=polyS;
+
+    // Now computing shortest path on the subset surface
+	vector<int> listIndexVertexPathSP_sub, listIndexVertexPathSP;
+
+	GeodesicPath geoSub( surfS, curvS, _method, _strain);
+	listIndexVertexPathSP_sub=geoSub.shortestPath_1_1_ind(mapAtoS[source], mapAtoS[target]);
+	for (i=0; i<listIndexVertexPathSP_sub.size(); i++)
+		listIndexVertexPathSP.push_back(mapStoA[listIndexVertexPathSP_sub[i]]);
+
+	return listIndexVertexPathSP;
+}
+
+
 vector<int> GeodesicPath::shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target)
 {
   vector<int> first;
