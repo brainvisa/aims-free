@@ -782,7 +782,7 @@ public:
 private:
 
   // class _Test : ForbidInheritance< GenericObject, T > {};
-  mutable T &_value;
+  T &_value;
 };
 
 
