@@ -58,6 +58,7 @@ class GeodesicPath
 
     void longestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length, int type_distance);
     vector<int> longestPath_N_N_ind(vector<int> points, int* s, int *d, double *length, int type_distance);
+    void distanceMap_1_N_ind(unsigned source, vector<float> &distanceMap,double *length, int type_distance);
 };
 
 #endif

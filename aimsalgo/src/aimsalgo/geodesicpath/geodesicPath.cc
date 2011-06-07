@@ -154,9 +154,9 @@ vector<int> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target,
 
 	std::vector< Point3df > vertS, vert=_surface.vertex();
 
-	// Ici subset contient 0 partout sauf là où on peut chercher le plus court chemin.
+	// Ici subset contient 0 partout sauf lÔøΩ oÔøΩ on peut chercher le plus court chemin.
 
-	// On commence par vérifier que source et target sont dedans.
+	// On commence par vÔøΩrifier que source et target sont dedans.
 
 	if (subset[0].item(source)==0)
 	{
@@ -169,7 +169,7 @@ vector<int> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target,
 		exit(EXIT_FAILURE);
 	}
 
-	// ensuite on extrait une sous-surface et on garde l'équivalence de noeud avec l'ancienne.
+	// ensuite on extrait une sous-surface et on garde l'ÔøΩquivalence de noeud avec l'ancienne.
 	j=0;
 	for (i=0; i<ns; i++)
 	{
@@ -464,4 +464,84 @@ vector<int> GeodesicPath::longestPath_N_N_ind(vector<int> points, int* s, int *d
   listIndexVertexPathSP = shortestPath_1_1_ind(*s,*d);
 
   return listIndexVertexPathSP;
+}
+
+
+
+void GeodesicPath::distanceMap_1_N_ind(unsigned source, vector<float> &distanceMap,double *length, int type_distance)
+{
+  double distance_temp;
+  double max_distance_temp = 0.0;
+
+  geodesic::GeodesicAlgorithmDijkstra *dijkstra_algorithm;
+  dijkstra_algorithm = new geodesic::GeodesicAlgorithmDijkstra(&_meshSP);
+
+  geodesic::SurfacePoint short_sources(&_meshSP.vertices()[source]);
+  std::vector<geodesic::SurfacePoint> all_sources(1,short_sources);
+
+  //distanceMap.resize(_meshSP.vertices().size());
+
+  // distance pond√©r√©e
+  if (type_distance == 0)
+  {
+    dijkstra_algorithm->propagate(all_sources);
+
+    for (int j = 0; j < _meshSP.vertices().size(); j++)
+    {
+      geodesic::SurfacePoint t(&_meshSP.vertices()[j]);
+      unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
+
+      distanceMap.push_back(distance_temp);
+
+      if (distance_temp > max_distance_temp )
+      {
+        max_distance_temp = distance_temp;
+        *length = max_distance_temp;
+      }
+    }
+  }
+
+//
+//  // distance euclidienne
+//  if (type_distance == 1)
+//  {
+//    std::vector<geodesic::SurfacePoint> all_targets;
+//
+//    for (int i = 0 ; i < (int)targets.size() ; i++)
+//      all_targets.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[targets[i]]));
+//
+//
+//    vector<vector<SurfacePoint> > paths;
+//    vector<vector<int> >indices;
+//
+//    paths.clear();
+//
+//    dijkstra_algorithm->geodesic(short_sources,all_targets,paths,indices);
+//
+//    vector<vector<SurfacePoint> >::iterator ite = paths.begin();
+//
+//    double max_len,len;
+//    max_len = 0.0;
+//    int ind = 0;
+//
+//    for (; ite != paths.end(); ++ite)
+//    {
+//      ind++;
+//      len = dijkstra_algorithm->length(*ite);
+////     vector< SurfacePoint >::iterator ite_holes = (*ite).begin();
+////      for (; ite_holes != (*ite).end(); ite_holes++)
+////      {
+////       cout << (double)((*ite_holes).x()) << " " << (double)((*ite_holes).y()) << " " << (double)((*ite_holes).z()) << " ";
+////      }
+//
+//      if (len > max_len)
+//      {
+//        max_len = len;
+//        *length = max_len;
+//        *target = targets[ind-1];
+//      }
+//    }
+//  }
+
+  delete(dijkstra_algorithm);
 }
