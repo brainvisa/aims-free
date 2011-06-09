@@ -133,3 +133,16 @@ void cuifstream::enableUncomment( bool x )
   init_buffers();
 }
 
+
+bool
+cuifstream::eof() const
+{
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 6
+  // in gcc 4.6, the eof bit does never get set; fail does however.
+  return _base.eof() || istream::eof() || istream::fail();
+#else
+  return _base.eof() || istream::eof();
+#endif
+}
+
+
