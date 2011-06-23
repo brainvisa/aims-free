@@ -120,6 +120,7 @@ namespace carto
     virtual bool is_open() const;
     void enableUncomment( bool );
     bool uncommentEnabled() const { return _enableuncomment; }
+    virtual bool eof() const;
 
     //@}
 

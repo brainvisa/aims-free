@@ -129,6 +129,16 @@ bool doitMesh( Process & p, const string &, Finder & )
 
   AimsTimeSurface<D, Void> out;
 
+#if (__GNUC__==4) && (__GNUC_MINOR__==2) && (__GNUC_PATCHLEVEL__==2)
+  /* This cout, by chance, fixes a compiler bug of gcc 4.2.2 on Mandriva
+     2008. This bug caused some constructors (on the "out" variable) not
+     to be properly called, and lead to memory corruptions, use of
+     uninitialized memory, and crashes.
+     see:
+     https://brainvisa:Soma2009@bioproj.extra.cea.fr/redmine/issues/2832
+  */
+  cout << "Meshes concatenation\n";
+#endif
   return( zp.catMesh( out ) );
 }
 
@@ -210,6 +220,16 @@ bool doitBucket( Process & p, const string &, Finder & )
 
   BucketMap<Void>	out;
 
+#if (__GNUC__==4) && (__GNUC_MINOR__==2) && (__GNUC_PATCHLEVEL__==2)
+  /* This cout, by chance, fixes a compiler bug of gcc 4.2.2 on Mandriva
+     2008. This bug caused some constructors (on the "out" variable) not
+     to be properly called, and lead to memory corruptions, use of
+     uninitialized memory, and crashes.
+     see:
+     https://brainvisa:Soma2009@bioproj.extra.cea.fr/redmine/issues/2832
+  */
+  cout << "Buckets concatenation\n";
+#endif
   return( zp.catBucket( out ) );
 }
 
