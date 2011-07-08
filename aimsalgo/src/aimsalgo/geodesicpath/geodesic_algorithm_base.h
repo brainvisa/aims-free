@@ -37,7 +37,7 @@ public:
               std::vector<SurfacePoint>& path) = 0;
 
   virtual void trace_back_with_index(SurfacePoint& destination,
-                  std::vector<SurfacePoint>& path,std::vector<int>& indexVertex) = 0;
+                  std::vector<SurfacePoint>& path,std::vector<unsigned>& indexVertex) = 0;
 
   void geodesic(SurfacePoint& source,
               SurfacePoint& destination,
@@ -49,12 +49,12 @@ public:
 
   void geodesic(SurfacePoint& source,
                   SurfacePoint& destination,
-                  std::vector<SurfacePoint>& path,std::vector<int>& indexVertex);
+                  std::vector<SurfacePoint>& path,std::vector<unsigned>& indexVertex);
 
   void geodesic(SurfacePoint& sources,
                         std::vector<SurfacePoint>& destinations,
                           std::vector<std::vector<SurfacePoint> >& paths,
-                            std::vector<std::vector<int> >& indexVertex);
+                            std::vector<std::vector<unsigned> >& indexVertex);
 
   double length(std::vector<SurfacePoint>& path);
   void print_info_about_path(std::vector<SurfacePoint>& path);
@@ -146,7 +146,7 @@ inline void GeodesicAlgorithmBase::geodesic(SurfacePoint& source,
 
 inline void GeodesicAlgorithmBase::geodesic(SurfacePoint& source,
                       SurfacePoint& destination,
-                      std::vector<SurfacePoint>& path,std::vector<int>& indexVertex) //lazy people can find geodesic path with one function call
+                      std::vector<SurfacePoint>& path,std::vector<unsigned>& indexVertex) //lazy people can find geodesic path with one function call
 {
   std::vector<SurfacePoint> sources(1, source);
   std::vector<SurfacePoint> stop_points(1, destination);
@@ -179,7 +179,7 @@ inline void GeodesicAlgorithmBase::geodesic(std::vector<SurfacePoint>& sources,
 
 inline void GeodesicAlgorithmBase::geodesic(SurfacePoint& source,
                       std::vector<SurfacePoint>& destinations, std::vector<std::vector<SurfacePoint> >& paths,
-                      std::vector<std::vector<int> >& indexVertex) //lazy people can find geodesic paths with one function call
+                      std::vector<std::vector<unsigned> >& indexVertex) //lazy people can find geodesic paths with one function call
 {
   double const max_propagation_distance = GEODESIC_INF;
 

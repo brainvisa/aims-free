@@ -29,7 +29,7 @@ public:
 		std::vector<SurfacePoint>& path);
 
 	void trace_back_with_index(SurfacePoint& destination,
-	                  std::vector<SurfacePoint>& path,std::vector<int>& indexVertex);
+	                  std::vector<SurfacePoint>& path,std::vector<unsigned>& indexVertex);
 
 	unsigned best_source(SurfacePoint& point,			//quickly find what source this point belongs to and what is the distance to this source
 							double& best_source_distance); 
@@ -270,7 +270,7 @@ inline void GeodesicAlgorithmGraphBase<Node>::trace_back(SurfacePoint& destinati
 
 template<class Node>
 inline void GeodesicAlgorithmGraphBase<Node>::trace_back_with_index(SurfacePoint& destination,   //trace back piecewise-linear path
-                             std::vector<SurfacePoint>& path,std::vector<int>& indexVertex)
+                             std::vector<SurfacePoint>& path,std::vector<unsigned>& indexVertex)
 {
   path.clear();
   indexVertex.clear();

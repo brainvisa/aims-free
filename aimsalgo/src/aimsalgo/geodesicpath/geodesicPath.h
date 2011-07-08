@@ -46,18 +46,18 @@ class GeodesicPath
     void computeGraphDijkstra (AimsSurfaceTriangle surface ,TimeTexture<float> texCurv, int method, int strain);
 
   public :
-    vector<int> shortestPath_1_1_ind(unsigned source, unsigned target);
-    vector<int> shortestPath_1_1_ind(unsigned source, unsigned target, TimeTexture<short> subset);
-    vector<int> shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target);
+    vector<unsigned> shortestPath_1_1_ind(unsigned source, unsigned target);
+    vector<unsigned> shortestPath_1_1_ind(unsigned source, unsigned target, TimeTexture<short> subset);
+    vector<unsigned> shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target);
     void shortestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length);
     vector<Point3df> shortestPath_1_1_xyz(unsigned source, unsigned target);
-    void shortestPath_1_1_ind_xyz(unsigned source, unsigned target, std::vector<int>& indice, std::vector<Point3df>& coord3D);
+    void shortestPath_1_1_ind_xyz(unsigned source, unsigned target, std::vector<unsigned>& indice, std::vector<Point3df>& coord3D);
     void shortestPath_1_1_tex(unsigned source, unsigned target, float texturevalue, TimeTexture<float> &tex);
     double shortestPath_1_1_len(unsigned source, unsigned target);
-    void shortestPath_1_N_All_ind(unsigned sources, vector<unsigned> targets, vector<vector<int> >&indices);
+    void shortestPath_1_N_All_ind(unsigned sources, vector<unsigned> targets, vector<vector<unsigned> >&indices);
 
     void longestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length, int type_distance);
-    vector<int> longestPath_N_N_ind(vector<int> points, int* s, int *d, double *length, int type_distance);
+    vector<unsigned> longestPath_N_N_ind(vector<unsigned> points, int* s, int *d, double *length, int type_distance);
     void distanceMap_1_N_ind(unsigned source, vector<float> &distanceMap,double *length, int type_distance);
 };
 

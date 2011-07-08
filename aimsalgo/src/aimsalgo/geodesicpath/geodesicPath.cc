@@ -75,7 +75,7 @@ void GeodesicPath::computeGraphDijkstra (AimsSurfaceTriangle surface, TimeTextur
 
 vector<Point3df> GeodesicPath::shortestPath_1_1_xyz(unsigned source, unsigned target)
 {
-  vector<int> listIndexVertexPathSP;
+  vector<unsigned> listIndexVertexPathSP;
   listIndexVertexPathSP.clear();
 
   // clear path
@@ -115,9 +115,9 @@ vector<Point3df> GeodesicPath::shortestPath_1_1_xyz(unsigned source, unsigned ta
   return vertexList;
 }
 
-vector<int> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target)
+vector<unsigned> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target)
 {
-  vector<int> listIndexVertexPathSP;
+  vector<unsigned> listIndexVertexPathSP;
   listIndexVertexPathSP.clear();
 
   // clear path
@@ -142,7 +142,7 @@ vector<int> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target)
 }
 
 
-vector<int> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target, TimeTexture<short> subset)
+vector<unsigned> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target, TimeTexture<short> subset)
 {
 
 	uint i, j, ns=_surface.vertex().size();
@@ -197,7 +197,7 @@ vector<int> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target,
     surfS.polygon()=polyS;
 
     // Now computing shortest path on the subset surface
-	vector<int> listIndexVertexPathSP_sub, listIndexVertexPathSP;
+	vector<unsigned> listIndexVertexPathSP_sub, listIndexVertexPathSP;
 
 	GeodesicPath geoSub( surfS, curvS, _method, _strain);
 	listIndexVertexPathSP_sub=geoSub.shortestPath_1_1_ind(mapAtoS[source], mapAtoS[target]);
@@ -208,10 +208,10 @@ vector<int> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned target,
 }
 
 
-vector<int> GeodesicPath::shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target)
+vector<unsigned> GeodesicPath::shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target)
 {
-  vector<int> first;
-  vector<int> second;
+  vector<unsigned> first;
+  vector<unsigned> second;
   first=shortestPath_1_1_ind(source, middle);
   first.erase(remove(first.begin(), first.end(), middle), first.end());
   second=shortestPath_1_1_ind(middle, target);
@@ -221,7 +221,7 @@ vector<int> GeodesicPath::shortestPath_1_1_1_ind(unsigned source, unsigned middl
 
 void GeodesicPath::shortestPath_1_1_tex(unsigned source, unsigned target, float texturevalue, TimeTexture<float> &tex)
 {
-  vector<int> listIndexVertexPathSP;
+  vector<unsigned> listIndexVertexPathSP;
 
   listIndexVertexPathSP = shortestPath_1_1_ind(source,target);
 
@@ -229,7 +229,7 @@ void GeodesicPath::shortestPath_1_1_tex(unsigned source, unsigned target, float 
     tex[0].item(listIndexVertexPathSP[i]) = texturevalue;
 }
 
-void GeodesicPath::shortestPath_1_1_ind_xyz(unsigned source, unsigned target,std::vector<int>& indice, std::vector<Point3df>& coord3D )
+void GeodesicPath::shortestPath_1_1_ind_xyz(unsigned source, unsigned target,std::vector<unsigned>& indice, std::vector<Point3df>& coord3D )
 {
   // clear path
   vector<geodesic::SurfacePoint> SPath;
@@ -315,7 +315,7 @@ void GeodesicPath::shortestPath_1_N_ind(unsigned source, vector<unsigned> target
   delete(dijkstra_algorithm);
 }
 
-void GeodesicPath::shortestPath_1_N_All_ind(unsigned source, vector<unsigned> targets, vector<vector<int> >&indices)
+void GeodesicPath::shortestPath_1_N_All_ind(unsigned source, vector<unsigned> targets, vector<vector<unsigned> >&indices)
 {
   geodesic::GeodesicAlgorithmDijkstra *dijkstra_algorithm;
   dijkstra_algorithm = new geodesic::GeodesicAlgorithmDijkstra(&_meshSP);
@@ -374,7 +374,7 @@ void GeodesicPath::longestPath_1_N_ind(unsigned source, vector<unsigned> targets
 
 
     vector<vector<SurfacePoint> > paths;
-    vector<vector<int> >indices;
+    vector<vector<unsigned> >indices;
 
     paths.clear();
 
@@ -409,11 +409,11 @@ void GeodesicPath::longestPath_1_N_ind(unsigned source, vector<unsigned> targets
 }
 
 
-vector<int> GeodesicPath::longestPath_N_N_ind(vector<int> points, int* s, int *d, double *length,int type_distance)
+vector<unsigned> GeodesicPath::longestPath_N_N_ind(vector<unsigned> points, int* s, int *d, double *length,int type_distance)
 {
   int i,j;
   unsigned target;
-  vector<int> listIndexVertexPathSP;
+  vector<unsigned> listIndexVertexPathSP;
   vector<unsigned> targetsTemp;
 
   int index_max_i,index_max_j,index;
