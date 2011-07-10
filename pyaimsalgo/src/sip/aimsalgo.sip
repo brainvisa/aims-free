@@ -45,3 +45,5 @@
 %Include histogram_U8.sip
 %Include histogram_FLOAT.sip
 %Include histogram_DOUBLE.sip
+%Include geodesicPath.sip
+
