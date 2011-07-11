@@ -154,9 +154,9 @@ vector<unsigned> GeodesicPath::shortestPath_1_1_ind(unsigned source, unsigned ta
 
 	std::vector< Point3df > vertS, vert=_surface.vertex();
 
-	// Ici subset contient 0 partout sauf l� o� on peut chercher le plus court chemin.
+	// Ici subset contient 0 partout sauf la ou on peut chercher le plus court chemin.
 
-	// On commence par v�rifier que source et target sont dedans.
+	// On commence par verifier que source et target sont dedans.
 
 	if (subset[0].item(source)==0)
 	{

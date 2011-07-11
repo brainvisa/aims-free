@@ -41,6 +41,8 @@ class GeodesicPath
     GeodesicPath( AimsSurfaceTriangle surface , int method, int strain);
     ~GeodesicPath();
 
+    // method: 1=sulci 2=gyri 3=geodesic
+
   private :
     //private methods
     void computeGraphDijkstra (AimsSurfaceTriangle surface ,TimeTexture<float> texCurv, int method, int strain);
