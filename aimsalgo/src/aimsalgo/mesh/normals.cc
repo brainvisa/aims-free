@@ -75,7 +75,7 @@ void Mesher::getNormals( const vector< Facet* >& vfac,
       b  = crossed( vec1, vec2 );
       absNormal = norm( b );
       if ( absNormal == 0 )
-        cerr << "Warning : flat triangle encountered" << endl;
+        cout << "Warning : flat triangle encountered" << endl;
       else
       {
         b /= absNormal;
@@ -85,7 +85,7 @@ void Mesher::getNormals( const vector< Facet* >& vfac,
     absNormal = norm( Normal );
     if ( absNormal == 0 )
     {
-      cerr << "Warning : null normal encountered" << endl;
+      cout << "Warning : null normal encountered" << endl;
       Normal[ 0 ] = 1;
     }
     else
