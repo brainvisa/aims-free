@@ -94,8 +94,19 @@ __docformat__ = 'restructuredtext en'
 
 import types
 import sip
-from soma.aims import aimssip
+import os
 
+# check for share dir, and set the BRAINVISA_SHARE environment var if it is not
+# already set
+if not os.environ.has_key( 'BRAINVISA_SHARE' ):
+  sharepath = os.path.join( os.path.dirname( os.path.dirname( os.path.dirname( \
+    os.path.dirname( __file__ ) ) ) ), 'share' )
+  os.environ[ 'BRAINVISA_SHARE' ] = sharepath
+  os.putenv( 'BRAINVISA_SHARE', sharepath ) # environ[] and putenv() seem to
+  # have slightly different scopes...
+del os
+
+from soma.aims import aimssip
 #from soma.functiontools import partial
 from soma.importer import ExtendedImporter, GenericHandlers
 
