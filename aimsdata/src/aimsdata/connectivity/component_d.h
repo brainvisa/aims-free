@@ -278,12 +278,11 @@ namespace aims
             {
               if( !flag( x, y, z ) )
                 {
+   
                   val = data( x, y, z );
                   item.location() = Point3d( x, y, z );
                   que.push( item );
                   flag( x, y, z ) = true;
-                  //std::cout << "comp. " << label << ", val: " << val 
-                  // << std::endl;
                   std::list<AimsBucketItem<Void> > & bk = component[ label ];
                   while ( !que.empty() )
                     {
@@ -310,7 +309,6 @@ namespace aims
                               }
                         }
                     }
-                  //std::cout << "(" << bk.size() << " voxels)\n";
                   ++label;
                 }
             }
@@ -332,11 +330,10 @@ namespace aims
         std::list<AimsBucketItem<Void> > *>::reverse_iterator 
         im, em = comps.rend();
       label = 0;
-      for( im=comps.rbegin(); im!=em && label<maxcomp; ++im )
+      for( im=comps.rbegin(); im!=em && label < maxcomp; ++im )
         components[ label++ ] = *im->second;
     }
   }
-
 
   namespace internal
   {
@@ -408,7 +405,7 @@ namespace aims
             item.location() = ib->first;
             que.push( item );
             ifl->second = true;
-            //cout << "comp. " << label << ", val: " << val << std::endl;
+//             cout << "comp. " << label << ", val: " << val << std::endl;
             std::list<AimsBucketItem<Void> >	& bk = component[ label ];
             while ( !que.empty() )
               {
@@ -476,6 +473,142 @@ namespace aims
     for( i=comps.begin(); i!=e; ++i )
       for( ic=i->second.begin(), ec=i->second.end(); ic!=ec; ++ic )
         bk[ ic->location() ] = i->first + 1;
+  }
+
+
+  template <typename T> 
+  AimsData<int16_t> AimsLabeledConnectedComponent( AimsBucket<Void>& components,
+                                                   const AimsData<T>& data,
+                                                   Connectivity::Type connectivity, 
+                                                   const T & backgrnd, bool bin, size_t minsize, 
+                                                   size_t maxcomp, bool verbose )
+  {
+    AimsBucket<Void>      *cbk;
+//     ajout  pour retourner l'image de labels des composantes
+    AimsData<int16_t> labelImage (data.dimX(), data.dimY());
+    labelImage = 0;
+    std::auto_ptr<AimsBucket<Void> >  abk;
+    if( minsize == 0 && maxcomp == 0 )
+      cbk = &components;
+    else
+
+    {
+
+      abk.reset( new AimsBucket<Void> );
+      cbk = abk.get();
+    }
+    AimsBucket<Void>  & component = *cbk;
+
+    int x=0, y=0, z=0, t=0, n=0;
+
+    int dimX = data.dimX();
+    int dimY = data.dimY();
+    int dimZ = data.dimZ();
+    int dimT = data.dimT() ;
+
+
+
+    
+//     boolean volume to say if a voxel is already used
+    
+
+    for( t = 0 ; t < dimT ; ++t ){
+      AimsData<byte> flag( dimX, dimY, dimZ );
+      flag = false;
+      ForEach3d( flag, x, y, z )
+          if ( data( x, y, z, t ) == backgrnd )
+          flag( x, y, z ) = true;
+
+      Connectivity cd( data.oLine(), data.oSlice(), connectivity );
+      Connectivity cf( flag.oLine(), flag.oSlice(), connectivity );
+      size_t          label = 1;
+      AimsBucketItem<Void>      item,newItem;
+      std::queue< AimsBucketItem< Void > >  que;
+      T           val;
+
+
+//       track connected components
+      
+      for ( z = 0; z < dimZ; ++z )
+      {
+        if( verbose )
+          std::cout << "\rz: " << z << std::flush;
+        for ( y = 0; y < dimY; ++y )
+          for ( x = 0; x < dimX; ++x )
+        {
+
+          if( !flag( x, y, z ) )
+          {
+
+            val = data( x, y, z );
+            item.location() = Point3d( x, y, z );
+
+//             labelImage (x,y) = label;
+            que.push( item );
+            flag( x, y, z ) = true;
+                  std::cout << "comp. " << label << ", val: " << val 
+                  << std::endl;
+            std::list<AimsBucketItem<Void> > & bk = component[ label ];
+            while ( !que.empty() )
+            {
+              item.location() = que.front().location();
+              que.pop();
+              bk.push_back( item );
+//               labelImage (item.location()) =label;
+              for ( n = 0; n < cd.nbNeighbors(); n++ )
+              {
+                newItem.location() = item.location() 
+                    + cd.xyzOffset( n );
+                if ( newItem.location().item( 0 ) >= 0   &&
+                     newItem.location().item( 0 ) < dimX &&
+                     newItem.location().item( 1 ) >= 0   &&
+                     newItem.location().item( 1 ) < dimY &&
+                     newItem.location().item( 2 ) >= 0   &&
+                     newItem.location().item( 2 ) < dimZ   )
+                   
+                  if ( flag( newItem.location() ) == false 
+                       && ( bin || data( newItem.location() ) 
+                       == val ) )
+                {
+                  flag( newItem.location() ) = true;
+                  que.push( newItem );
+//                   labelImage (newItem.location()) = label;
+                }
+              }
+            }
+                  std::cout << "(" << bk.size() << " voxels)\n";
+            ++label;
+          }
+        }
+      }
+      if( verbose )
+        std::cout << std::endl;
+
+//       filtering probleme filtrage
+      if( minsize == 0 && maxcomp == 0 )
+        return labelImage;
+
+      AimsBucket<Void>::iterator  i, e = component.end();
+      std::multimap<unsigned, std::list<AimsBucketItem<Void> > *> comps;
+      for( i=component.begin(); i!=e; ++i )
+        if( minsize == 0 || i->second.size() >= minsize )
+          comps.insert( std::pair<unsigned, std::list<AimsBucketItem<Void> > *>
+              ( i->second.size(),&i->second ) );
+      
+      std::multimap<unsigned, 
+      std::list<AimsBucketItem<Void> > *>::reverse_iterator 
+          im, em = comps.rend();
+      label = 0;
+      for( im=comps.rbegin(); im!=em && (label < maxcomp || maxcomp == 0); ++im ){
+          std::list<AimsBucketItem<Void> > bucket = *im->second;
+          std::list<AimsBucketItem<Void> >::iterator ite, iteend = bucket.end();
+          for (ite = bucket.begin(); ite != iteend ; ite ++ ) {
+              labelImage ((*ite).location()) = label;
+          }
+        components[ label++ ] = *im->second;
+      }
+    }
+    return labelImage;
   }
 
 }

@@ -38,7 +38,6 @@
 #include <aims/config/aimsdata_config.h>
 #include <aims/connectivity/connectivity.h>
 
-
 template <typename T> class AimsBucket;
 class Void;
 template <typename T> class AimsData;
@@ -77,7 +76,7 @@ namespace aims
                                const T & backgrnd = 0, bool bin = true, 
                                size_t minsize = 0, size_t maxcomp = 0, 
                                bool verbose = true );
-
+    
   template <typename T>
   void AimsConnectedComponent( AimsBucket<Void>& component,
                                const BucketMap<T>& data,
@@ -86,6 +85,14 @@ namespace aims
                                size_t minsize = 0, size_t maxcomp = 0, 
                                bool verbose = true );
 
+  template <typename T>
+  AimsData<int16_t> AimsLabeledConnectedComponent( AimsBucket<Void>& component,
+                                                   const AimsData<T>& data,
+                                                   aims::Connectivity::Type connectivity, 
+                                                   const T & backgrnd = 0, bool bin = true, 
+                                                   size_t minsize = 0, size_t maxcomp = 0, 
+                                                   bool verbose = true );
+                                                   
 }
 
 #endif
