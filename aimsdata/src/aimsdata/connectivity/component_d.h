@@ -485,7 +485,7 @@ namespace aims
   {
     AimsBucket<Void>      *cbk;
 //     ajout  pour retourner l'image de labels des composantes
-    AimsData<int16_t> labelImage (data.dimX(), data.dimY());
+    AimsData<int16_t> labelImage (data.dimX(), data.dimY(), data.dimZ());
     labelImage = 0;
     std::auto_ptr<AimsBucket<Void> >  abk;
     if( minsize == 0 && maxcomp == 0 )
@@ -543,18 +543,18 @@ namespace aims
             val = data( x, y, z );
             item.location() = Point3d( x, y, z );
 
-//             labelImage (x,y) = label;
+            labelImage (x, y, z) = label;
             que.push( item );
             flag( x, y, z ) = true;
-                  std::cout << "comp. " << label << ", val: " << val 
-                  << std::endl;
+//                   std::cout << "comp. " << label << ", val: " << val 
+//                   << std::endl;
             std::list<AimsBucketItem<Void> > & bk = component[ label ];
             while ( !que.empty() )
             {
               item.location() = que.front().location();
               que.pop();
               bk.push_back( item );
-//               labelImage (item.location()) =label;
+              labelImage (item.location()) =label;
               for ( n = 0; n < cd.nbNeighbors(); n++ )
               {
                 newItem.location() = item.location() 
@@ -572,11 +572,11 @@ namespace aims
                 {
                   flag( newItem.location() ) = true;
                   que.push( newItem );
-//                   labelImage (newItem.location()) = label;
+                  labelImage (newItem.location()) = label;
                 }
               }
             }
-                  std::cout << "(" << bk.size() << " voxels)\n";
+//                   std::cout << "(" << bk.size() << " voxels)\n";
             ++label;
           }
         }
@@ -599,6 +599,7 @@ namespace aims
       std::list<AimsBucketItem<Void> > *>::reverse_iterator 
           im, em = comps.rend();
       label = 0;
+      labelImage = 0;
       for( im=comps.rbegin(); im!=em && (label < maxcomp || maxcomp == 0); ++im ){
           std::list<AimsBucketItem<Void> > bucket = *im->second;
           std::list<AimsBucketItem<Void> >::iterator ite, iteend = bucket.end();
