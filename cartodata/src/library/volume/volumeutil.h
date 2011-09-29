@@ -79,20 +79,82 @@ namespace carto
       Multiplies the argument with a constant (double) value.
       This class may move in another location later.
   */
-  template <typename T>
+  template <typename T, typename U>
   class Scaler
   {
   public:
-    inline Scaler( double x ) : scale( x ) {}
+    inline Scaler( U x ) : scale( x ) {}
     inline T operator () ( const T & x ) const 
     { return (T) ( x * scale ); }
-    double	scale;
+    U	scale;
   };
 
   template<> inline cfloat 
-  Scaler<cfloat>::operator () ( const cfloat & x ) const
+  Scaler<cfloat, double>::operator () ( const cfloat & x ) const
   {
     return x * (float) scale;
+  }
+
+  template<> inline cfloat
+  Scaler<cfloat, long>::operator () ( const cfloat & x ) const
+  {
+    return x * (float) scale;
+  }
+
+  template<> inline cdouble
+  Scaler<cdouble, float>::operator () ( const cdouble & x ) const
+  {
+    return x * (double) scale;
+  }
+
+  template<> inline cdouble
+  Scaler<cdouble, long>::operator () ( const cdouble & x ) const
+  {
+    return x * (double) scale;
+  }
+
+  /** Divider functor.
+      Divides the argument with a constant value.
+      This class may move in another location later.
+  */
+  template <typename T, typename U>
+  class Divider
+  {
+  public:
+    inline Divider( U x ) : divisor( x ) {}
+    inline T operator () ( const T & x ) const
+    { return (T) ( x / divisor ); }
+    U      divisor;
+  };
+
+  template<> inline cfloat
+  Divider<cfloat, double>::operator () ( const cfloat & x ) const
+  {
+    return x * (float) ( 1. / divisor );
+  }
+
+  template<> inline cfloat
+  Divider<cfloat, long>::operator () ( const cfloat & x ) const
+  {
+    return x * (float) ( 1. / (double) divisor );
+  }
+
+  template<> inline cdouble
+  Divider<cdouble, double>::operator () ( const cdouble & x ) const
+  {
+    return x * ( 1. / divisor );
+  }
+
+  template<> inline cdouble
+  Divider<cdouble, float>::operator () ( const cdouble & x ) const
+  {
+    return x * (double) ( 1. / divisor );
+  }
+
+  template<> inline cdouble
+  Divider<cdouble, long>::operator () ( const cdouble & x ) const
+  {
+    return x * (double) ( 1. / divisor );
   }
 
 

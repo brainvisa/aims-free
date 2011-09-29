@@ -183,6 +183,15 @@ public:
   r3.release();
 %End
 
+  Volume_%Template1typecode%* operator * ( long ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a0 );
+  carto::VolumeRef<%Template1% > r3 = r1 * a1;
+  r1.release();
+  sipRes = r3.get();
+  r3.release();
+%End
+
   void operator *= ( double ) /ReleaseGIL/;
 %MethodCode
   carto::VolumeRef<%Template1% > r1( sipCpp );
@@ -190,7 +199,23 @@ public:
   r1.release();
 %End
 
+  void operator *= ( long ) /ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( sipCpp );
+  r1 *= a0;
+  r1.release();
+%End
+
   Volume_%Template1typecode%* __rmul__( double ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( sipCpp );
+  carto::VolumeRef<%Template1% > r3 = r1 * a0;
+  r1.release();
+  sipRes = r3.get();
+  r3.release();
+%End
+
+  Volume_%Template1typecode%* __rmul__( long ) /Factory, ReleaseGIL/;
 %MethodCode
   carto::VolumeRef<%Template1% > r1( sipCpp );
   carto::VolumeRef<%Template1% > r3 = r1 * a0;
@@ -208,7 +233,23 @@ public:
   r3.release();
 %End
 
+  Volume_%Template1typecode%* operator / ( long ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a0 );
+  carto::VolumeRef<%Template1% > r3 = r1 / a1;
+  r1.release();
+  sipRes = r3.get();
+  r3.release();
+%End
+
   void operator /= ( double ) /ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( sipCpp );
+  r1 /= a0;
+  r1.release();
+%End
+
+  void operator /= ( long ) /ReleaseGIL/;
 %MethodCode
   carto::VolumeRef<%Template1% > r1( sipCpp );
   r1 /= a0;
