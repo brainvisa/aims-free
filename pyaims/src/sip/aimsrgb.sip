@@ -14,12 +14,12 @@ public:
 
   AimsRGB & operator += ( const AimsRGB & );
   AimsRGB & operator += ( const AimsRGBA & );
-  AimsRGB & operator /= ( unsigned );
-  AimsRGB & operator *= ( unsigned );
+  AimsRGB & operator /= ( long );
+  AimsRGB & operator *= ( long );
   AimsRGB operator + ( const AimsRGB & );
   AimsRGB operator - ( const AimsRGB & );
-  //AimsRGB operator * ( unsigned );
-  AimsRGB operator / ( unsigned );
+  AimsRGB operator * ( long );
+  AimsRGB operator / ( long );
 
   bool  operator == ( const AimsRGB & );
 %MethodCode
@@ -73,8 +73,8 @@ public:
 
   AimsRGBA & operator += ( const AimsRGBA & );
   AimsRGBA & operator += (const AimsRGB & );
-  AimsRGBA & operator /= ( const unsigned char & );
-  AimsRGBA & operator *= ( const unsigned char & );
+  AimsRGBA & operator /= ( const long & );
+  AimsRGBA & operator *= ( const long & );
   bool  operator == ( const AimsRGBA & );
 %MethodCode
   sipRes = ( (*sipCpp) == *a0 );

@@ -162,32 +162,32 @@ namespace carto
   }
 
 
-  template <typename T> inline 
-  VolumeRef<T> operator * ( const VolumeRef<T> & o1, double val )
+  template <typename T, typename U> inline 
+  VolumeRef<T> operator * ( const VolumeRef<T> & o1, U val )
   {
-    return VolumeUtil<T>::apply( Scaler<T>( val ), o1 );
+    return VolumeUtil<T>::apply( Scaler<T, U>( val ), o1 );
   }
 
 
-  template <typename T> inline 
-  VolumeRef<T> operator * ( double val, const VolumeRef<T> & o1 )
+  template <typename T, typename U> inline 
+  VolumeRef<T> operator * ( U val, const VolumeRef<T> & o1 )
   {
-    return VolumeUtil<T>::apply( Scaler<T>( val ), o1 );
+    return VolumeUtil<T>::apply( Scaler<T, U>( val ), o1 );
   }
 
 
-  template <typename T> inline 
-  VolumeRef<T> & operator *= ( VolumeRef<T> & o1, double val )
+  template <typename T, typename U> inline 
+  VolumeRef<T> & operator *= ( VolumeRef<T> & o1, U val )
   {
-    VolumeUtil<T>::selfApply( Scaler<T>( val ), o1 );
+    VolumeUtil<T>::selfApply( Scaler<T, U>( val ), o1 );
     return o1;
   }
 
 
-  template <typename T> inline 
-  VolumeRef<T> operator / ( const VolumeRef<T> & o1, double val )
+  template <typename T, typename U> inline
+  VolumeRef<T> operator / ( const VolumeRef<T> & o1, U val )
   {
-    return VolumeUtil<T>::apply( Scaler<T>( 1. / val ), o1 );
+    return VolumeUtil<T>::apply( Divider<T, U>( val ), o1 );
   }
 
 
@@ -200,10 +200,10 @@ namespace carto
   }
 
 
-  template <typename T> inline 
-  VolumeRef<T> & operator /= ( VolumeRef<T> & o1, double val )
+  template <typename T, typename U> inline
+  VolumeRef<T> & operator /= ( VolumeRef<T> & o1, U val )
   {
-    VolumeUtil<T>::selfApply( Scaler<T>( 1. / val ), o1 );
+    VolumeUtil<T>::selfApply( Divider<T, U>( val ), o1 );
     return o1;
   }
 

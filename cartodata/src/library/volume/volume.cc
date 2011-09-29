@@ -98,11 +98,31 @@ template class Creator<Volume< std::map<int, float> > >;
 #define instantiate_volutil( T ) \
 template class VolumeUtil<T>; \
 template VolumeRef<T> \
-VolumeUtil<T>::apply( Scaler<T>, const VolumeRef<T> & ); \
+VolumeUtil<T>::apply( Scaler<T,double>, const VolumeRef<T> & ); \
 template void \
-VolumeUtil<T>::selfApply( Scaler<T>, VolumeRef<T> & ); \
+VolumeUtil<T>::selfApply( Scaler<T,double>, VolumeRef<T> & ); \
 template VolumeRef<T> \
-VolumeUtil<T>::apply( std::negate<T>, const VolumeRef<T> & );
+VolumeUtil<T>::apply( Scaler<T,float>, const VolumeRef<T> & ); \
+template void \
+VolumeUtil<T>::selfApply( Scaler<T,float>, VolumeRef<T> & ); \
+template VolumeRef<T> \
+VolumeUtil<T>::apply( Scaler<T,long>, const VolumeRef<T> & ); \
+template void \
+VolumeUtil<T>::selfApply( Scaler<T,long>, VolumeRef<T> & ); \
+template VolumeRef<T> \
+VolumeUtil<T>::apply( std::negate<T>, const VolumeRef<T> & ); \
+template VolumeRef<T> \
+VolumeUtil<T>::apply( Divider<T,double>, const VolumeRef<T> & ); \
+template void \
+VolumeUtil<T>::selfApply( Divider<T,double>, VolumeRef<T> & ); \
+template VolumeRef<T> \
+VolumeUtil<T>::apply( Divider<T,float>, const VolumeRef<T> & ); \
+template void \
+VolumeUtil<T>::selfApply( Divider<T,float>, VolumeRef<T> & ); \
+template VolumeRef<T> \
+VolumeUtil<T>::apply( Divider<T,long>, const VolumeRef<T> & ); \
+template void \
+VolumeUtil<T>::selfApply( Divider<T,long>, VolumeRef<T> & );
 
 #define instantiate_volutil2( T, BinaryFunction ) \
 template VolumeRef<T> \

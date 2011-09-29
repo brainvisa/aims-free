@@ -53,9 +53,15 @@ std::istream& operator >> (std::istream &in , AimsRGB &aa);
 std::istream& operator >> (std::istream &in , AimsRGBA &aa);
 AimsRGB operator + (const AimsRGB &aa, const AimsRGB &bb);
 AimsRGB operator - (const AimsRGB &aa, const AimsRGB &bb);
+AimsRGB operator * (const AimsRGB &aa, const double &bb);
 AimsRGB operator * (const AimsRGB &aa, const byte &bb);
+AimsRGB operator * (const double &aa, const AimsRGB &bb);
 AimsRGB operator * (const byte &aa, const AimsRGB &bb);
+AimsRGB operator * (const AimsRGB &aa, const long &bb);
+AimsRGB operator * (const long &aa, const AimsRGB &bb);
+AimsRGB operator / (const AimsRGB &aa, const double &bb);
 AimsRGB operator / (const AimsRGB &aa, const byte &bb);
+AimsRGB operator / (const AimsRGB &aa, const long &bb);
 
 bool  operator == (const AimsRGB &aa, const AimsRGB &bb);
 bool  operator != (const AimsRGB &aa, const AimsRGB &bb);
@@ -117,11 +123,39 @@ public:
     _blue  /= val;
     return(*this); 
   }
+  AimsRGB& operator /= (const long &val)
+  {
+    ASSERT(val != 0);
+    _red   /= val;
+    _green /= val;
+    _blue  /= val;
+    return(*this);
+  }
+  AimsRGB& operator /= (const double &val)
+  {
+    ASSERT(val != 0);
+    _red   /= val;
+    _green /= val;
+    _blue  /= val;
+    return(*this);
+  }
+  AimsRGB& operator *= (const double &val)
+  { _red   *= val;
+  _green *= val;
+  _blue  *= val;
+  return(*this);
+  }
   AimsRGB& operator *= (const byte &val)
   { _red   *= val; 
   _green *= val; 
   _blue  *= val;
   return(*this); 
+  }
+  AimsRGB& operator *= (const long &val)
+  { _red   *= val;
+  _green *= val;
+  _blue  *= val;
+  return(*this);
   }
   //@}
 
@@ -154,13 +188,17 @@ public:
   friend AimsRGB operator - (const AimsRGB &aa,
 			     const AimsRGB &bb);
   friend AimsRGB operator * (const AimsRGB &aa,
+                             const double &bb);
+  friend AimsRGB operator * (const AimsRGB &aa,
 			     const byte &bb);
+  friend AimsRGB operator * (const AimsRGB &aa,
+                             const long &bb);
+  friend AimsRGB operator * (const double &aa,
+                             const AimsRGB &bb);
   friend AimsRGB operator * (const byte &aa,
 			     const AimsRGB &bb);
-  friend AimsRGB operator * (const AimsRGB &aa,
-			     const double &bb);
-  friend AimsRGB operator * (const double &aa,
-			     const AimsRGB &bb);
+  friend AimsRGB operator / (const AimsRGB &aa,
+                             const double &bb);
   friend AimsRGB operator / (const AimsRGB &aa,
 			     const byte &bb);
   friend AimsRGB operator + (const AimsRGB &aa);
@@ -269,6 +307,15 @@ public:
     return(*this);
   }
 
+  AimsRGBA & operator /= ( const double &val )
+  {
+    ASSERT(val != 0);
+    _red   /= val;
+    _green /= val;
+    _blue  /= val;
+    return(*this);
+  }
+
   AimsRGBA & operator /= ( const byte &val )
   {
     ASSERT(val != 0);
@@ -278,12 +325,37 @@ public:
     return(*this); 
   }
 
-  AimsRGBA & operator *= (const byte &val)
+  AimsRGBA & operator /= ( const long &val )
+  {
+    ASSERT(val != 0);
+    _red   /= val;
+    _green /= val;
+    _blue  /= val;
+    return(*this);
+  }
+
+  AimsRGBA & operator *= (const double &val)
   {
     _red   *= val; 
     _green *= val; 
     _blue  *= val;
     return(*this); 
+  }
+
+  AimsRGBA & operator *= (const byte &val)
+  {
+    _red   *= val;
+    _green *= val;
+    _blue  *= val;
+    return(*this);
+  }
+
+  AimsRGBA & operator *= (const long &val)
+  {
+    _red   *= val;
+    _green *= val;
+    _blue  *= val;
+    return(*this);
   }
 
   /**@name Accessors*/
@@ -471,6 +543,14 @@ AimsRGB operator * (const AimsRGB  &aa,
 
 inline
 AimsRGB operator * (const AimsRGB  &aa,
+                    const long &bb)
+{ return(AimsRGB(aa.red()   * bb,
+                 aa.green() * bb,
+                 aa.blue()  * bb));
+}
+
+inline
+AimsRGB operator * (const AimsRGB  &aa,
                     const double &bb)
 { return(AimsRGB((byte) (aa.red()   * bb),
                  (byte) (aa.green() * bb),
@@ -488,10 +568,27 @@ AimsRGBA operator * (const AimsRGBA  &aa,
                   aa.alpha()));
 }
 
+inline
+AimsRGBA operator * (const AimsRGBA  &aa,
+                     const long &bb)
+{ return(AimsRGBA((byte) (aa.red()   * bb),
+                 (byte) (aa.green() * bb),
+                 (byte) (aa.blue()  * bb),
+                  aa.alpha()));
+}
+
 
 
 inline
 AimsRGB operator * (const byte &aa,
+                    const AimsRGB  &bb)
+{ return(AimsRGB(bb.red()   * aa,
+                 bb.green() * aa,
+                 bb.blue()  * aa));
+}
+
+inline
+AimsRGB operator * (const long &aa,
                     const AimsRGB  &bb)
 { return(AimsRGB(bb.red()   * aa,
                  bb.green() * aa,
@@ -519,8 +616,36 @@ AimsRGBA operator * (const double &aa,
 
 
 inline
+AimsRGBA operator * (const long &aa,
+                     const AimsRGBA  &bb)
+{ return(AimsRGBA((byte) (bb.red()   * aa),
+                  (byte) (bb.green() * aa),
+                  (byte) (bb.blue()  * aa),
+                  bb.alpha()));
+}
+
+
+inline
+AimsRGB operator / (const AimsRGB  &aa,
+                    const double &bb)
+{ ASSERT(bb != 0);
+  return(AimsRGB((double) (aa.red()   / bb),
+                 (double) (aa.green() / bb),
+                 (double) (aa.blue()  / bb) ));
+}
+
+inline
 AimsRGB operator / (const AimsRGB  &aa,
                     const byte &bb)
+{ ASSERT(bb != 0);
+  return(AimsRGB(aa.red()   / bb,
+                 aa.green() / bb,
+                 aa.blue()  / bb));
+}
+
+inline
+AimsRGB operator / (const AimsRGB  &aa,
+                    const long &bb)
 { ASSERT(bb != 0);
   return(AimsRGB(aa.red()   / bb,
                  aa.green() / bb,

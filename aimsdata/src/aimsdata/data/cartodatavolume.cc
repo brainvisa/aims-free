@@ -50,9 +50,25 @@ using namespace carto;
 #define instantiate_volutil( T ) \
 template class VolumeUtil<T>; \
 template VolumeRef<T> \
-VolumeUtil<T>::apply( Scaler<T>, const VolumeRef<T> & ); \
+VolumeUtil<T>::apply( Scaler<T, double>, const VolumeRef<T> & ); \
 template void \
-VolumeUtil<T>::selfApply( Scaler<T>, VolumeRef<T> & );
+VolumeUtil<T>::selfApply( Scaler<T, double>, VolumeRef<T> & ); \
+template VolumeRef<T> \
+VolumeUtil<T>::apply( Scaler<T, float>, const VolumeRef<T> & ); \
+template void \
+VolumeUtil<T>::selfApply( Scaler<T, float>, VolumeRef<T> & ); \
+template VolumeRef<T> \
+VolumeUtil<T>::apply( Scaler<T, long>, const VolumeRef<T> & ); \
+template void \
+VolumeUtil<T>::selfApply( Scaler<T, long>, VolumeRef<T> & ); \
+template VolumeRef<T> \
+VolumeUtil<T>::apply( Divider<T, double>, const VolumeRef<T> & ); \
+template void \
+VolumeUtil<T>::selfApply( Divider<T, double>, VolumeRef<T> & ); \
+template VolumeRef<T> \
+VolumeUtil<T>::apply( Divider<T, long>, const VolumeRef<T> & ); \
+template void \
+VolumeUtil<T>::selfApply( Divider<T, long>, VolumeRef<T> & );
 
 #define instantiate_volutil2( T, BinaryFunction ) \
 template VolumeRef<T> \
@@ -79,21 +95,21 @@ namespace carto
   VolumeUtil<AimsRGB>::apply( std::negate<AimsRGB>, 
                               const VolumeRef<AimsRGB> & o )
   {
-    return apply( Scaler<AimsRGB>( -1 ), o );
+    return apply( Scaler<AimsRGB, long>( -1 ), o );
   }
 
   template<> template<> VolumeRef<AimsRGBA> 
   VolumeUtil<AimsRGBA>::apply( std::negate<AimsRGBA>, 
                                const VolumeRef<AimsRGBA> & o )
   {
-    return apply( Scaler<AimsRGBA>( -1 ), o ); 
+    return apply( Scaler<AimsRGBA, long>( -1 ), o );
   }
 
   template<> template<> VolumeRef<AimsHSV> 
   VolumeUtil<AimsHSV>::apply( std::negate<AimsHSV>, 
                               const VolumeRef<AimsHSV> & o )
   {
-    return apply( Scaler<AimsHSV>( -1 ), o );
+    return apply( Scaler<AimsHSV, long>( -1 ), o );
   }
 }
 

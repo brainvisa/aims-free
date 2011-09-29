@@ -1255,9 +1255,11 @@ namespace carto
 
   // VolumeUtil declarations (needed on Mac)
   extern template VolumeRef<AimsRGB> 
-  VolumeUtil<AimsRGB>::apply( Scaler<AimsRGB>, const VolumeRef<AimsRGB> & );
+  VolumeUtil<AimsRGB>::apply( Scaler<AimsRGB, double>,
+                              const VolumeRef<AimsRGB> & );
   extern template void 
-  VolumeUtil<AimsRGB>::selfApply( Scaler<AimsRGB>, VolumeRef<AimsRGB> & );
+  VolumeUtil<AimsRGB>::selfApply( Scaler<AimsRGB, double>,
+                                  VolumeRef<AimsRGB> & );
   extern template VolumeRef<AimsRGB> 
   VolumeUtil<AimsRGB>::apply( std::plus<AimsRGB>, const VolumeRef<AimsRGB> &, 
                               const VolumeRef<AimsRGB> & );
@@ -1295,9 +1297,11 @@ namespace carto
                               const VolumeRef<AimsRGB> & );
 
   extern template VolumeRef<AimsRGBA> 
-  VolumeUtil<AimsRGBA>::apply( Scaler<AimsRGBA>, const VolumeRef<AimsRGBA> & );
+  VolumeUtil<AimsRGBA>::apply( Scaler<AimsRGBA, double>,
+                               const VolumeRef<AimsRGBA> & );
   extern template void 
-  VolumeUtil<AimsRGBA>::selfApply( Scaler<AimsRGBA>, VolumeRef<AimsRGBA> & );
+  VolumeUtil<AimsRGBA>::selfApply( Scaler<AimsRGBA, double>,
+                                   VolumeRef<AimsRGBA> & );
   extern template VolumeRef<AimsRGBA> 
   VolumeUtil<AimsRGBA>::apply( std::plus<AimsRGBA>, 
                                const VolumeRef<AimsRGBA> &, 

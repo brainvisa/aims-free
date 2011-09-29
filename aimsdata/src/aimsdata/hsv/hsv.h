@@ -50,9 +50,15 @@ std::ostream& operator << (std::ostream &out, const AimsHSV &aa);
 std::istream& operator >> (std::istream &in , AimsHSV &aa);
 AimsHSV operator + (const AimsHSV &aa, const AimsHSV &bb);
 AimsHSV operator - (const AimsHSV &aa, const AimsHSV &bb);
+AimsHSV operator * (const AimsHSV &aa, const double &bb);
 AimsHSV operator * (const AimsHSV &aa, const byte &bb);
+AimsHSV operator * (const AimsHSV &aa, const long &bb);
+AimsHSV operator * (const double &aa, const AimsHSV &bb);
 AimsHSV operator * (const byte &aa, const AimsHSV &bb);
+AimsHSV operator * (const long &aa, const AimsHSV &bb);
 AimsHSV operator / (const AimsHSV &aa, const byte &bb);
+AimsHSV operator / (const AimsHSV &aa, const long &bb);
+AimsHSV operator / (const AimsHSV &aa, const double &bb);
 
 bool  operator == (const AimsHSV &aa, const AimsHSV &bb);
 bool  operator != (const AimsHSV &aa, const AimsHSV &bb);
@@ -111,11 +117,39 @@ public:
     _value      /= val;
     return(*this); 
   }
+  AimsHSV& operator /= (const long &val)
+  {
+    ASSERT(val != 0);
+    _hue        /= val;
+    _saturation /= val;
+    _value      /= val;
+    return(*this);
+  }
+  AimsHSV& operator /= (const float &val)
+  {
+    ASSERT(val != 0);
+    _hue        /= val;
+    _saturation /= val;
+    _value      /= val;
+    return(*this);
+  }
   AimsHSV& operator *= (const byte &val)
   { _hue        *= val;
     _saturation *= val;
     _value      *= val;
   return(*this); 
+  }
+  AimsHSV& operator *= (const long &val)
+  { _hue        *= val;
+    _saturation *= val;
+    _value      *= val;
+  return(*this);
+  }
+  AimsHSV& operator *= (const double &val)
+  { _hue        *= val;
+    _saturation *= val;
+    _value      *= val;
+  return(*this);
   }
   //@}
 
@@ -149,8 +183,12 @@ public:
 			     const AimsHSV &bb);
   friend AimsHSV operator * (const AimsHSV &aa,
 			     const byte &bb);
+  friend AimsHSV operator * (const AimsHSV &aa,
+                             const long &bb);
   friend AimsHSV operator * (const byte &aa,
 			     const AimsHSV &bb);
+  friend AimsHSV operator * (const long &aa,
+                             const AimsHSV &bb);
   friend AimsHSV operator * (const AimsHSV &aa,
 			     const double &bb);
   friend AimsHSV operator * (const double &aa,
@@ -247,6 +285,14 @@ AimsHSV operator * (const AimsHSV  &aa,
 
 inline
 AimsHSV operator * (const AimsHSV  &aa,
+                    const long &bb)
+{ return(AimsHSV(aa.value()      * bb,
+                 aa.saturation() * bb,
+                 aa.value()      * bb));
+}
+
+inline
+AimsHSV operator * (const AimsHSV  &aa,
                     const double &bb)
 { return(AimsHSV((byte) (aa.hue()        * bb),
                  (byte) (aa.saturation() * bb),
@@ -255,6 +301,14 @@ AimsHSV operator * (const AimsHSV  &aa,
 
 inline
 AimsHSV operator * (const byte &aa,
+                    const AimsHSV  &bb)
+{ return(AimsHSV(bb.hue()        * aa,
+                 bb.saturation() * aa,
+                 bb.value()      * aa));
+}
+
+inline
+AimsHSV operator * (const long &aa,
                     const AimsHSV  &bb)
 { return(AimsHSV(bb.hue()        * aa,
                  bb.saturation() * aa,
@@ -277,6 +331,24 @@ AimsHSV operator / (const AimsHSV  &aa,
   return(AimsHSV(aa.hue()        / bb,
                  aa.saturation() / bb,
                  aa.value()      / bb));
+}
+
+inline
+AimsHSV operator / (const AimsHSV  &aa,
+                    const long &bb)
+{ ASSERT(bb != 0);
+  return(AimsHSV(aa.hue()        / bb,
+                 aa.saturation() / bb,
+                 aa.value()      / bb));
+}
+
+inline
+AimsHSV operator / (const AimsHSV  &aa,
+                    const double &bb)
+{ ASSERT(bb != 0);
+  return(AimsHSV((byte) (aa.hue()        / bb),
+                 (byte) (aa.saturation() / bb),
+                 (byte) (aa.value()      / bb) ));
 }
 
 
