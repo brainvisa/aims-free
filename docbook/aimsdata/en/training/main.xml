@@ -113,7 +113,7 @@ prompt% AimsThreshold -i voronoi_lesson1.ima -o hemi_only.ima -m lt -t 3
 
 <para><emphasis role='bold'>HELP:</emphasis> <ulink url='&PATH_WEB;#aims_AimsGraphMesh' target='blank'>command help for AimsGraphMesh</ulink></para>
 
-<para><emphasis role='bold'>DATA:</emphasis> <filename>&DIR_ANAT;objects/roi/basal_ganglia.arg</filename> and <filename>&DIR_ANAT;objects/roi/basal_ganglia.dim</filename>.</para>
+<para><emphasis role='bold'>DATA:</emphasis> <filename>&DIR_ANAT;objects/roi/basal_ganglia.arg</filename> and <filename>&DIR_ANAT;objects/roi/basal_ganglia.data</filename>.</para>
 	
 <para><emphasis role='bold'>EXAMPLE: mesh a ROI graph.</emphasis> The viewing will be enhanced if the ROI graph is meshed.</para>
 <screen>
@@ -1829,7 +1829,7 @@ aims.write( resampled, 'resampled.nii' )</screen>
 
   </sect1>
 
-  <sect1><title>PyAIMS / PyAnatomist integration</title>
+  <sect1 id="aims_training%pyaims_pyanatomist"><title>PyAIMS / PyAnatomist integration</title>
 
     <sect3><title>Running PyAnatomist with PyAims</title>
       <para>
