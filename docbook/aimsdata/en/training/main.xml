@@ -1168,11 +1168,12 @@ prompt% AimsThreshold -i roi.ima -o roi.ima -m ge -t 8000
     A few examples of how to use and manipulate the main data structures will be shown here.
   </para>
   <para>
-    The data for the examples in this section is the data of the JIRFNI 2008 training course, and can be downloaded here: <ulink url="ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip">ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip</ulink>. To use the examples directly, users should go to the directory where this archive was uncompressed, and then run ipthon from this directory. A cleaner alternative, especially if no write access is allowed on this data directory, is to make a symbolic link to the <computeroutput>"data_for_anatomist"</computeroutput> subdirectory:
-    <screen>cd /scratch/user
+    The data for the examples in this section can be downloaded here: <ulink url="ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip">ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip</ulink>. To use the examples directly, users should go to the directory where this archive was uncompressed, and then run ipython from this directory. A cleaner alternative, especially if no write access is allowed on this data directory, is to make a symbolic link to the <computeroutput>"data_for_anatomist"</computeroutput> subdirectory:
+    <screen>cd $HOME
 mkdir bvcourse
 cd bvcourse
-ln -s &lt;path_to_data&gt;/data_for_anatomist .</screen>
+ln -s &lt;path_to_data&gt;/data_for_anatomist .
+ipython</screen>
   </para>
   <para>More information about the API is available <ulink url="#cartointernet_pg%pyaims">here</ulink>.</para>
 
@@ -1261,11 +1262,12 @@ for z in xrange( vol.getSizeZ() ):
       # get current position in an aims.Point3df structure, in mm
       p = aims.Point3df( x * vs[0], y * vs[1], z * vs[2] )
       # get relative position to pos0, in voxels
-      p -= pos0
+      p-= pos0
       # distance: norm of vector p
       dist = p.norm()
       # set it into the volume
       vol.setValue( dist, x, y, z )
+      
 # save the volume
 aims.write( vol, 'distance.nii' )</screen>
         Now look at the <computeroutput>"distance.nii"</computeroutput> volume in Anatomist.
@@ -1456,7 +1458,7 @@ aims.write( advol, 'distance3.nii' )</screen>
 
       <sect3><title>Structure</title>
         <para>
-        A surfacic mesh represents a surface, as a set of small polygons (genrally triangles, but sometimes quads). It has two main components: a vector of vertices (each vertex is a 3D point, with coordinates in millimeters), and a vector of polygons: each polygon is defined by the vertices it links (3 for a triangle). It also optionally has normals (unit vectors). In our mesh structures, there is one normal for each vertex.
+        A surfacic mesh represents a surface, as a set of small polygons (generally triangles, but sometimes quads). It has two main components: a vector of vertices (each vertex is a 3D point, with coordinates in millimeters), and a vector of polygons: each polygon is defined by the vertices it links (3 for a triangle). It also optionally has normals (unit vectors). In our mesh structures, there is one normal for each vertex.
         <screen>from soma import aims
 mesh = aims.read( 'data_for_anatomist/subject01/subject01_Lhemi.mesh' )
 vert = mesh.vertex()
@@ -1688,7 +1690,7 @@ aims.GraphManip.storeAims( graph, v, 'roi', mesh )</screen>
 
     <sect2><title>Other examples</title>
       <para>
-        There are other examples for pyaims in the following directory: <ulink url="http://brainvisa.info/doc/pyaims/examples"><computeroutput>share/doc/pyaims-3.2/examples</computeroutput></ulink>
+        There are other examples for pyaims referenced <ulink url="#cartointernet_pg%pyaims">here</ulink>.
       </para>
     </sect2>
 
@@ -1699,7 +1701,7 @@ aims.GraphManip.storeAims( graph, v, 'roi', mesh )</screen>
     <title>Using algorithms</title>
 
     <para>
-      AIMS contains, in addition to the different data structures used in neuroimaging, a set of algorithms which operate on these structures. Currently only a few of them have Python bindings, because we develop these bindings in a "lazy" way, only when they are needed. The algorthms currently available include data conversion, resampling, thresholding, mathematical morphology, distance maps, the mesher, some mesh generators, and a few others. But most of the algorithms are still only available in C++.
+      AIMS contains, in addition to the different data structures used in neuroimaging, a set of algorithms which operate on these structures. Currently only a few of them have Python bindings, because we develop these bindings in a "lazy" way, only when they are needed. The algorithms currently available include data conversion, resampling, thresholding, mathematical morphology, distance maps, the mesher, some mesh generators, and a few others. But most of the algorithms are still only available in C++.
     </para>
 
     <sect3><title>Volume Thresholding</title>
