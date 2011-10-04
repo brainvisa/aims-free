@@ -1416,7 +1416,7 @@ vol2.header().update( vol.header() )
           Important information can reside in the header, like voxel size, or coordinates systems and geometric transformations to other coordinates systems, so it is really very important to carry this information with duplicated or derived volumes.
         </para>
         <para>
-          You can also build a volume from a numy array:
+          You can also build a volume from a numpy array:
           <screen>arr = numpy.array( numpy.diag( xrange( 40 ) ), dtype=numpy.float32 ).reshape( 40, 40, 1 ) \
     + numpy.array( xrange( 20 ), dtype=numpy.float32 ).reshape( 1, 1, 20 )
 # WARNING: the array must be in Fortran ordering for AIMS, at leat at the moment
@@ -1835,6 +1835,9 @@ aims.write( tvol, 'thresholded.nii' )
 </figure>
 
       </para>
+      <warning><para>Some algorithms need that the volume they process have a <emphasis role="bold">border</emphasis>: a few voxels all around the volume. Indeed, some algorithms can try to access voxels outside the boundaries of the volume which may cause a segmentation error if the volume doesn't have a border. That's the case for example for operations like erosion, dilation, closing. There's no test in each point to detect if the algorithm tries to access outside the volume because it would slow down the process.
+        </para>
+        <para>In the previous example, a 2 voxels border is added by passing a parameter <emphasis>border=2</emphasis> to <emphasis>aims.read</emphasis> function. </para></warning>
     </sect3>
 
     <sect3><title>Mathematical morphology</title>
