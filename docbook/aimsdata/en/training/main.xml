@@ -1246,6 +1246,13 @@ vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
 print vol.header()
 </screen>
         </para>
+        <figure><title>3D volume: value 12 at voxel (100, 100 ,60)</title>
+          <mediaobject>
+            <imageobject role="fop"><imagedata fileref="&DIR_IMG;volume1.png" format="PNG"  width="150"/></imageobject>
+            <imageobject role="html"><imagedata fileref="&DIR_IMG;volume1.png" format="PNG" /></imageobject>
+          </mediaobject>
+        </figure>
+
       </sect3>
 
       <sect3><title>Basic operations:</title>
@@ -1278,6 +1285,13 @@ for z in xrange( vol.getSizeZ() ):
 aims.write( vol, 'distance.nii' )
 </screen>
         Now look at the <computeroutput>"distance.nii"</computeroutput> volume in Anatomist.
+        <figure><title>Distance example</title>
+          <mediaobject>
+            <imageobject role="fop"><imagedata fileref="&DIR_IMG;distance.png" format="PNG"  width="200"/></imageobject>
+            <imageobject role="html"><imagedata fileref="&DIR_IMG;distance.png" format="PNG" /></imageobject>
+          </mediaobject>
+        </figure>
+
         </para>
         <para>
           <highlights><emphasis role="bold">Exercise:</emphasis> Make a program which loads the image <computeroutput>data_for_anatomist/subject01/Audio-Video_T_map.nii</computeroutput> and thresholds it so as to keep values above 3.
@@ -1292,6 +1306,13 @@ for z in xrange( vol.getSizeZ() ):
 
 aims.write( vol, 'Audio-Video_T_thresholded.nii' )
 </screen>
+<figure><title>Thresholded Audio-Video T-map</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;threshold.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;threshold.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
         </para>
         <para>
           <highlights><emphasis role="bold">Exercise:</emphasis> Make a program to dowsample the anatomical image <computeroutput>data_for_anatomist/subject01/subject01.nii</computeroutput> and keeps one voxel out of two in every direction.
@@ -1311,6 +1332,13 @@ for z in xrange( vol2.getSizeZ() ):
 
 aims.write( vol2, 'resampled.nii' )
 </screen>
+<figure><title>Downsampled anatomical image</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;resampled.png" format="PNG"  width="400"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;resampled.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
         </para>
         <para>
           The first thing that comes to mind when running these examples, is that they are <emphasis>slow</emphasis>. Indeed, python is an interpreted language and loops in any interpreted language are slow. In addition, accessing individually each voxel of the volume has the overhead of python/C++ bindings communications. The conclusion is that that kind of example is probably a bit too low-level, and should be done, when possible, by compiled libraries or specialized array-handling libraries. This is the role of <emphasis role="bold">numpy</emphasis>.
@@ -1326,6 +1354,13 @@ arr[60:120, 60:120, 40:80] = 100
 # modifications will also affect the volume
 aims.write( vol, "cube.nii" )
 </screen>
+<figure><title>3D volume containing a cube</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;cube.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;cube.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
         </para>
         <para>
           Now we can re-write the thresholding example using numpy:
@@ -1513,6 +1548,13 @@ aims.write( mesh, 'saucer.mesh' )
 # automatically calculate normals
 mesh.updateNormals()
 </screen>
+<figure><title>Flying saucer mesh</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;saucer.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;saucer.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
         </para>
       </sect3>
 
@@ -1542,6 +1584,13 @@ for v, n in zip( vert, norm ):
 mesh.updateNormals()
 aims.write( mesh, 'subject01_Lwhite_semiinflated.mesh' )
 </screen>
+<figure><title>Inflated mesh</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;semi_inflated.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;semi_inflated.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
         </para>
       </sect3>
 
@@ -1574,6 +1623,13 @@ for i in xrange( 1, 10 ):
 mesh.updateNormals()
 aims.write( mesh, 'subject01_Lwhite_semiinflated_time.mesh' )
 </screen>
+<figure><title>Inflated mesh with timesteps</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;semi_inflated_time.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;semi_inflated_time.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
         </para>
       </sect3>
     </sect2>
@@ -1608,6 +1664,13 @@ for i in xrange( mesh.size() ):
 aims.write( tex, 'subject01_Lwhite_semiinflated_texture.tex' )
 </screen>
         Now look at the texture on the mesh (inflated or not) in Anatomist. Compare it to a 3D fusion between the mesh and the MRI volume.
+        <figure><title>Computed time-texture vs 3D fusion</title>
+          <mediaobject>
+            <imageobject role="fop"><imagedata fileref="&DIR_IMG;texture.png" format="PNG"  width="200"/></imageobject>
+            <imageobject role="html"><imagedata fileref="&DIR_IMG;texture.png" format="PNG" /></imageobject>
+          </mediaobject>
+        </figure>
+
       </para>
       <para><emphasis role="bold">Bonus:</emphasis> We can do the same for functional data. But in this case we may have a spatial transformation to apply between anatomical data and functional data (which may have been normalized, or acquired in a different referential).
         <screen>from soma import aims
@@ -1764,6 +1827,13 @@ ta = aims.AimsThreshold_S16_S16( aims.AIMS_GREATER_OR_EQUAL_TO, 600 )
 tvol = ta.bin( vol )
 aims.write( tvol, 'thresholded.nii' )
 </screen>
+<figure><title>Thresholded T1 MRI</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;aimsalgo_threshold.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;aimsalgo_threshold.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
       </para>
     </sect3>
 
@@ -1775,6 +1845,12 @@ aims.write( tvol, 'thresholded.nii' )
 clvol = aimsalgo.AimsMorphoClosing( tvol, 5 )
 aims.write( clvol, 'closed.nii' )
 </screen>
+<figure><title>Closing of a thresholded T1 MRI</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;closed.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;closed.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
       </para>
     </sect3>
 
@@ -1788,6 +1864,13 @@ clvol.fillBorder( -1 )
 m.getBrain( clvol, mesh )
 aims.write( mesh, 'head_mesh.gii' )
 </screen>
+<figure><title>Head mesh</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;head_mesh.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;head_mesh.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
       </para>
 
       <para>The above examples make up a simplified version of the head mesh extraction algorithm in <computeroutput>VipGetHead</computeroutput>, used in the T1 pipeline.
@@ -1807,6 +1890,13 @@ mesh2 = aims.SurfaceGenerator.generate( { 'type' : 'arrow', 'point1' : [ 30, 70,
 # get the list of all possible generated objects and parameters:
 print aims.SurfaceGenerator.description()
 </screen>
+<figure><title>Generated icosahedron and arrow</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;surface_generator.png" format="PNG"  width="300"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;surface_generator.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
       </para>
     </sect3>
 
@@ -1841,6 +1931,17 @@ aims.write( tex, 'functional_tex.gii' )
 aims.write( mesh, 'sphere.gii' )
 </screen>
         Look at the difference between the two timesteps (interpolated and non-interpolated) of the texture in Anatomist.
+        <figure float="1"><title>Interpolated vs not interpolated texture</title>
+          <inlinemediaobject>
+            <imageobject role="fop"><imagedata fileref="&DIR_IMG;interpolated.png" format="PNG"  width="200"/></imageobject>
+            <imageobject role="html"><imagedata fileref="&DIR_IMG;interpolated.png" format="PNG" /></imageobject>
+          </inlinemediaobject>
+          <inlinemediaobject>
+          <imageobject role="fop"><imagedata fileref="&DIR_IMG;not_interpolated.png" format="PNG"  width="200"/></imageobject>
+          <imageobject role="html"><imagedata fileref="&DIR_IMG;not_interpolated.png" format="PNG" /></imageobject>
+        </inlinemediaobject>
+        </figure>
+
       </para>
     </sect3>
 
@@ -1881,6 +1982,13 @@ print resampled.header()[ 'transformations' ]
 aims.write( resampled, 'resampled.nii' )
 </screen>
         Load the original image and the resampled in Anatomist. See how the resampled has been rotated. Now apply the NIFTI/SPM referential info on both images. They are now aligned again, and cursor clicks correctly go to the same location on both volume, whatever the display referential for each of them.
+        <figure><title>Aimsalgo resampling</title>
+          <mediaobject>
+            <imageobject role="fop"><imagedata fileref="&DIR_IMG;aimsalgo_resampled.png" format="PNG"  width="400"/></imageobject>
+            <imageobject role="html"><imagedata fileref="&DIR_IMG;aimsalgo_resampled.png" format="PNG" /></imageobject>
+          </mediaobject>
+        </figure>
+
       </para>
     </sect3>
 
@@ -1933,6 +2041,13 @@ arr[ 100:150, 100:150, 50:80 ] += 200
 anavol.setChanged() # say this object has changed
 anavol.notifyObservers() # refresh views and other interactions
 </screen>
+<figure><title>3D volume modified with numpy</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;pyaims_pyana.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;pyaims_pyana.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+ 
       </para>
       <para>
         It is also possible to interact on objects created within Anatomist:
@@ -1952,6 +2067,13 @@ for v,n in zip( vert, norm ):
 anacutsubmesh.setChanged()
 anacutsubmesh.notifyObservers()
 </screen>
+<figure><title>Modified cut mesh</title>
+  <mediaobject>
+    <imageobject role="fop"><imagedata fileref="&DIR_IMG;interactive_modif.png" format="PNG"  width="200"/></imageobject>
+    <imageobject role="html"><imagedata fileref="&DIR_IMG;interactive_modif.png" format="PNG" /></imageobject>
+  </mediaobject>
+</figure>
+
       </para>
     </sect3>
 
