@@ -1618,7 +1618,17 @@ aims.write( tex, 'subject01_Lwhite_semiinflated_audio_video.tex' )</screen>
 
       <para>
         "Buckets" are voxels lists. They are typically used to represent ROIs.
+        A BucketMap is a list of Buckets. Each Bucket contains a list of voxels coordinates.
       </para>
+      <screen>from soma import aims
+bck_map=aims.read( 'data_for_anatomist/roi/basal_ganglia.data/roi_Bucket.bck' )
+print 'Bucket map: ', bck_map
+print 'Nb buckets: ', bck_map.size()
+for i in xrange(bck_map.size()):
+  b=bck_map[i]
+  print "Bucket ", i, ", nb voxels: ", b.size()
+  if b.keys():
+    print "  Coordinates of the first voxel: ", b.keys()[0].list()</screen>
     </sect2>
 
     <sect2>
