@@ -129,8 +129,9 @@ void FdfHeader::read()
 
   bool headerstarted = false;
 
-  while (getline(inFile, line, '\n')) {
-
+  int linenum = 0;
+  while (inFile && getline(inFile, line, '\n'))
+  {
     if ( line == "\0" ) {
       if ( not headerstarted ) {
         continue;
@@ -139,12 +140,21 @@ void FdfHeader::read()
         break;
       }
     }
+    if( !inFile )
+      io_error::launchErrnoExcept( _name );
 
     // Formats the lines in the FDF header such as removing whitespace between {}
-    line = parseLine(line);
+    try
+    {
+      line = parseLine(line);
+    }
+    catch( parse_error & )
+    {
+      throw parse_error( "invalid character encountered", "", _name, linenum );
+    }
     tokenize(line, tokens, " ;");
     if(tokens.size() == 4) {
-                                                                                                                           
+
       type = tokens[0];
       if ( ( type != "/*" ) && ( type != "//" ) ) {
           headerstarted=true;
@@ -274,9 +284,13 @@ void FdfHeader::read()
               stringTo(value, checksum);
           }
 
+          else
+            throw parse_error( "unrecognized token", "", _name, linenum );
+
       }
     }
     tokens.clear();
+    ++linenum;
   }
 
   if( ( matrix.size() == 0 ) || ( roi.size() == 0 ) )
