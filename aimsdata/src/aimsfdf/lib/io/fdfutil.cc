@@ -32,6 +32,9 @@
  */
 
 #include "fdfutil.h"
+#include <cartobase/exception/ioexcept.h>
+
+using namespace carto;
 
 // Remove a particular type of character from a string
 void removeCharacters(std::string &line, std::string character)
@@ -63,6 +66,9 @@ void tokenize(const std::string& str, std::vector<std::string>& tokens, const st
 
 std::string parseLine(std::string line)
 {
+    // sanity check
+    if( line.find( '\0' ) != std::string::npos )
+      throw parse_error( "invalid character encountered", 0 );
     // strip *
     removeCharacters(line, "*");
     removeCharacters(line, "\"");

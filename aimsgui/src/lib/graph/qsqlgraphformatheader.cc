@@ -119,7 +119,7 @@ void QSqlGraphFormatHeader::read()
       QSqlQuery res = db.exec( "SELECT Graph.eid, class.class_name FROM Graph"
         " JOIN class on class.eid=Graph.eid" );
       if( db.lastError().type() != 0 )
-        throw syntax_check_error( db.lastError().text().utf8().data(),
+        throw wrong_format_error( db.lastError().text().utf8().data(),
                                   fileName );
       // cout << "GRAPHS:\n";
       while( res.next() )

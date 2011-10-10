@@ -132,6 +132,7 @@ void QSqlGraphDatabase::setUrl( const string & url, Object hdr )
     h = new QSqlGraphFormatHeader( url );
     hdr.reset( h );
   }
+  _header = hdr;
   _hostname = h->filename();
   _connectionname = _hostname; // for now
   // parse URL and retreive request if any
