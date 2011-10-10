@@ -16,7 +16,7 @@ HEADERS = \
   config/info.h \
   config/paths.h \
   config/verbose.h \
-  config/version.h \
+#   config/version.h \
   containers/allocatedvector.h \
   containers/block.h \
   datasource/bufferdatasource.h \
