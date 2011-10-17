@@ -37,7 +37,7 @@ from optparse import OptionParser
 from soma import aims
 from soma.aims import fslTransformation
 
-parser = OptionParser( description = 'Transforms a FLS registration matrix (.mat, but _not_ a matlab file) into an AIMS .trm transformation file, and converts coordinates systems from FSL to AIMS.' )
+parser = OptionParser( description = 'Transforms a FSL registration matrix (.mat, but _not_ a matlab file) into an AIMS .trm transformation file, and converts coordinates systems from FSL to AIMS.' )
 parser.add_option( '-i', '--input', dest='input',
                     help='input .mat FSL transformation' )
 parser.add_option( '-o', '--output', dest='output',
