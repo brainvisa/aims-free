@@ -548,8 +548,8 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
   Texture<float>                smooth = inittex ,lapl;
   unsigned                      i,n=smooth.nItem();
 
-  TimeTexture<float> temp;
-  unsigned inc = 0;
+  // TimeTexture<float> temp;
+  // unsigned inc = 0;
 
   if (dur != -1)
     for (t=0; t< rint(dur/dt); ++t)
@@ -571,12 +571,13 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
 	      else
 		smooth.item(i) = s;
 	  }
-	if (t%2 == 0)
+/*	if (t%2 == 0)
 	  {
 	  for ( i=0; i<n; ++i)
 	    temp[inc].push_back( smooth.item(i) );
 	  ++inc;
 	  }
+*/
       }
   else
     {
@@ -584,11 +585,12 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
       smooth =  AimsMeshLaplacian(smooth,weightLapl);
     }
 
-  
+/*
   cout << "size: " << temp.size() << endl;
   cout << "writing temp texture : " << endl;
   Writer<TimeTexture<float> >	texW( "/tmp/curv_ss.tex" );
   texW << temp ;
+*/
   cout << "done " << endl;
 
   return smooth;

@@ -642,7 +642,7 @@ vector< list<unsigned> > AimsMeshOrderTriangle(const AimsSurface<3,Void> & mesh)
 
 
 Texture<float> AimsMeshLaplacian( const Texture<float> &inittex, 
-					       const map<unsigned, set< pair<unsigned,float> > > &lapl)
+                                  const map<unsigned, set< pair<unsigned,float> > > &lapl)
 {
   unsigned					neigh,node, n =inittex.nItem();
   Texture<float>				tex(n);
@@ -656,7 +656,7 @@ Texture<float> AimsMeshLaplacian( const Texture<float> &inittex,
       node = il->first;
       L = 0;
 
-      //Pondered sum on the neighbour of the node 
+      //Weighted sum on the neighbour of the node
       for ( ip = (il->second).begin(), ep = (il->second).end(); ip != ep; ++ip    ) 
 	{
 	  neigh = ip->first;
