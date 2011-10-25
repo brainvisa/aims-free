@@ -143,7 +143,7 @@ private:
   double start[6];
   interval_pointer i_new[5];
 
-  unsigned m_queue_max_size;      //used for statistics
+  size_t m_queue_max_size;      //used for statistics
   unsigned m_iterations;      //used for statistics
 
   SortedSources m_sources;
