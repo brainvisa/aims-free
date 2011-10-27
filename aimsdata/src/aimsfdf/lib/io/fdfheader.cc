@@ -93,13 +93,22 @@ set<string> FdfHeader::getFiles(string) const
 
 void FdfHeader::read()
 {
+  // Extension check
+  set<string>   exts = extensions();
+
+  if (exts.find("." + stringLower(FileUtil::extension(_name))) == exts.end())
+  {
+    throw invalid_format_error( "FDF file has not a consistent extension", _name );
+  }
+
   // Header elements
-  //Motion transfo;
+  // Motion transfo;
   vector<float> resolutions, location, orientation, span, roi, storagetomemory(16);
   string spatial_rank, checksum, storage, bits, bigendian;
   vector<int> matrix, dims;
   vector<string> pt;
-  int typesize = 32, bits_allocated = 32, byte_swapping = 0;
+  bool chksumfound = false;
+  int chksum = 0, typesize = 32, bits_allocated = 32, byte_swapping = 0;
   //uint byte_order = 1;
   int rank = 2, dimz = 1;
 
@@ -107,6 +116,7 @@ void FdfHeader::read()
   string line;
   vector<std::string> tokens;
   string type, name, value;
+
 
   // Open file to read
   std::ifstream inFile( _name.c_str(), std::ios::in | std::ios::binary );
@@ -132,7 +142,7 @@ void FdfHeader::read()
   int linenum = 0;
   while (inFile && getline(inFile, line, '\n'))
   {
-    if ( line == "\0" ) {
+    if ( stringStrip(line) == "\0" ) {
       if ( not headerstarted ) {
         continue;
       }
@@ -140,8 +150,9 @@ void FdfHeader::read()
         break;
       }
     }
-    if( !inFile )
+    if( !inFile ) {
       io_error::launchErrnoExcept( _name );
+    }
 
     // Formats the lines in the FDF header such as removing whitespace between {}
     try
@@ -282,10 +293,16 @@ void FdfHeader::read()
           // Get the checksum
           else if (name == "checksum") {
               stringTo(value, checksum);
+              istringstream is(checksum);
+              is >> chksum;
+              chksumfound = true;
+              break;
           }
 
-          else
-            throw parse_error( "unrecognized token", "", _name, linenum );
+          //else {
+            //cout << "unrecognized token " << name << " at line " << linenum << " in file " << _name << endl << flush;
+            //throw parse_error( "unrecognized token", "", _name, linenum );
+          //}
 
       }
     }
@@ -293,11 +310,13 @@ void FdfHeader::read()
     ++linenum;
   }
 
-  if( ( matrix.size() == 0 ) || ( roi.size() == 0 ) )
+  if( ( !chksumfound ) || ( matrix.size() == 0 ) || ( roi.size() == 0 ) ) {
     throw wrong_format_error( _name );
+  }
 
-  if( matrix.size() > roi.size() )
+  if( matrix.size() > roi.size() ) {
     throw invalid_format_error( "matrix and roi attributes in FDF file are not consistent", _name );
+  }
   
   // Process image resolution
   for(unsigned int i=0; i<matrix.size(); i++) {
@@ -332,8 +351,9 @@ void FdfHeader::read()
       break;
   }
 
-  if( dims.size() == 0 )
+  if( dims.size() == 0 ) {
     throw invalid_format_error( "no dimensions in FDF file", _name );
+  }
 
   if ( dims.size() > 0 ) {
     _dimX = dims[0];

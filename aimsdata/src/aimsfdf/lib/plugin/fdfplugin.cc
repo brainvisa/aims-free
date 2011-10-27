@@ -60,7 +60,7 @@ namespace
 FdfPlugin::FdfPlugin() : Plugin()
 {
   vector<string>	ext;
-  ext.push_back( ".fdf" );  ext.push_back( ".Fdf" );
+  ext.push_back( "fdf" );  ext.push_back( "Fdf" );
 
   FdfFormat<int8_t>	*df1 = new FdfFormat<int8_t>;
 #ifdef AIMS_APPLE_GCC33BUG

@@ -587,5 +587,26 @@ string stringUpper( const string & s )
   return r;
 }
 
+string stringStrip( const string& s, char c)
+{
+
+  // Search the string for the last character before the last strip characters.
+  // Remove the strip characters at the end of the string, based on the found index.
+  // Next, search for the first character different from trim character and remove everything before it.
+
+  string r;
+  r.reserve( s.length() );
+  r.assign(s);
+
+  string::size_type pos = r.find_last_not_of(c);
+  if(pos != std::string::npos) {
+    r.erase(pos + 1);
+    pos = r.find_first_not_of(c);
+    if(pos != std::string::npos) r.erase(0, pos);
+  }
+  else r.erase(r.begin(), r.end());
+
+  return r;
+}
 
 }

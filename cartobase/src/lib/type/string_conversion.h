@@ -91,6 +91,11 @@ std::string join( const std::vector< std::string > &pieces,
 std::string stringLower( const std::string & );
 std::string stringUpper( const std::string & );
 
+/*! Return a copy of the \c string \param s with leading and trailing
+    whitespace removed.
+    If \c char \param c is given, remove leading and trailing \param c characters instead of whitespace.
+*/
+std::string stringStrip(const std::string& str, char c = ' ');
 
 ////////////////////////////////
 //  toString< unsigned char > //
