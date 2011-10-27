@@ -41,7 +41,7 @@ void removeCharacters(std::string &line, std::string character)
 {
     std::string::size_type characterPosition = line.find_first_of(character, 0);
     while ( characterPosition != std::string::npos ) {
-        line.erase(characterPosition, 1);
+        line.erase(characterPosition, character.size());
         characterPosition = line.find_first_of(character, characterPosition);
     }
 }
