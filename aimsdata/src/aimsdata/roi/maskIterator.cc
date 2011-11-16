@@ -93,7 +93,10 @@ void MotionedMaskIterator::restart()
 //----------------------------------------------------------------------------
 const Point3df MotionedMaskIterator::voxelSize() const
 {
-  throw runtime_error( "voxelSize() is not implemented for MotionedMaskIterator" );
+  Point3df vs = _maskIterator->voxelSize();
+  return Point3df( ( _motion.transform( Point3df( vs[0], 0, 0 ) - _motion.transform( Point3df( 0, 0, 0 ) ) ) ).norm(),
+		   ( _motion.transform( Point3df( 0, vs[1], 0 ) - _motion.transform( Point3df( 0, 0, 0 ) ) ) ).norm(),
+		   (_motion.transform( Point3df( 0, 0, vs[2] ) - _motion.transform( Point3df( 0, 0, 0 ) ) ) ).norm() );
 }
 
 //----------------------------------------------------------------------------
