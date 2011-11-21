@@ -386,10 +386,12 @@ int DicomHeader::read()
         }
 */
       std::cout << "Moda : " << moda << " & manufac is " << manufac << std::endl ;
-      if( manufac == "SIEMENS" && ( moda == "PT" || moda == "CT" ) ){
-        string mode ;
-	vector<float> vs ;
-	getProperty("voxel_size", vs ) ;
+
+      vector<float> vs ;
+      getProperty("voxel_size", vs ) ;
+      if( ( vs[2] < 1e-6 ) ||
+          ( manufac == "SIEMENS" && ( moda == "PT" || moda == "CT" ) ) )
+      {
 	if( abs( *(dZs.rbegin()) - *(dZs.begin()) ) > 0.0001 ){
 	  if( dimT == 1 )
 	    cerr << "Non homogeneous voxel size !" << endl ;
@@ -403,6 +405,11 @@ int DicomHeader::read()
    
 	} else vs[2] = (minZVoxSize + maxZVoxSize) / 2 ;
 	setProperty("voxel_size", vs ) ;
+	std::cout << "VS Z = " << vs[2] << std::endl ;
+      }
+
+      if( manufac == "SIEMENS" && ( moda == "PT" || moda == "CT" ) ){
+        string mode ;
 	std::cout << "VS Z = " << vs[2] << std::endl ;
 	if( moda == "PT" ){
 	  setProperty( "data_type", string( "FLOAT" ) );
@@ -671,8 +678,8 @@ int DicomHeader::readFirst()
     }
 
   if ( spaceSlice > 0.0f )  voxSize.push_back( (float)spaceSlice );
-  else if ( thickness > 0.0f )  voxSize.push_back( (float)thickness );
-  else  voxSize.push_back( 1.0f );
+  //else if ( thickness > 0.0f )  voxSize.push_back( (float)thickness );
+  else  voxSize.push_back( 0.0f ); // to determine Z resolution in read()
   voxSize.push_back( 1.0f ); // T dimension
   setProperty( "voxel_size", voxSize );
 
