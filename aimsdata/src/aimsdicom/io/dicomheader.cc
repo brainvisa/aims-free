@@ -77,6 +77,27 @@ DicomHeader::DicomHeader( const string& name ) :
   _name( name ),
   _reverseZ( false )
 {
+
+  // from DICOM 3 - Part 3 - C.8.9.1.1.3
+  _unitNames.insert( std::make_pair( "CNTS", "counts" ) );
+  _unitNames.insert( std::make_pair( "NONE", "unitless" ) );
+  _unitNames.insert( std::make_pair( "CM2", "cm2" ) );
+  _unitNames.insert( std::make_pair( "PCNT", "percent" ) );
+  _unitNames.insert( std::make_pair( "CPS", "counts/s" ) );
+  _unitNames.insert( std::make_pair( "BQML", "Bq/ml" ) );
+  _unitNames.insert( std::make_pair( "MGMINML", "mg/min/ml" ) );
+  _unitNames.insert( std::make_pair( "UMOLMINML", "uMol/min/ml" ) );
+  _unitNames.insert( std::make_pair( "MLMING", "ml/min/g" ) );
+  _unitNames.insert( std::make_pair( "MLG", "ml/g" ) );
+  _unitNames.insert( std::make_pair( "1CM", "1/cm" ) );
+  _unitNames.insert( std::make_pair( "UMOLML", "uMol/ml" ) );
+  _unitNames.insert( std::make_pair( "PROPCNTS", "proportional to counts" ) );
+  _unitNames.insert( std::make_pair( "PROPCPS", "proportional to counts/s" ) );
+  _unitNames.insert( std::make_pair( "MLMINML", "ml/min/ml" ) );
+  _unitNames.insert( std::make_pair( "MLML", "ml/ml" ) );
+  _unitNames.insert( std::make_pair( "GML", "g/ml" ) );
+  _unitNames.insert( std::make_pair( "STDDEV", "standard deviations" ) );
+
 }
 
 
@@ -302,7 +323,7 @@ int DicomHeader::read()
   string moda ;
   getProperty( "modality", moda );
   
-  if( moda != "PET" && moda != "CT" )
+  if( moda != "PT" && moda != "CT" )
     setProperty( "filenames", fileVector2 );
 
   map< int, FileElement >::const_iterator i = _slices.begin();
@@ -389,8 +410,7 @@ int DicomHeader::read()
 
       vector<float> vs ;
       getProperty("voxel_size", vs ) ;
-      if( ( vs[2] < 1e-6 ) ||
-          ( manufac == "SIEMENS" && ( moda == "PT" || moda == "CT" ) ) )
+      if( vs[2] < 1e-6 )
       {
 	if( abs( *(dZs.rbegin()) - *(dZs.begin()) ) > 0.0001 ){
 	  if( dimT == 1 )
@@ -405,48 +425,63 @@ int DicomHeader::read()
    
 	} else vs[2] = (minZVoxSize + maxZVoxSize) / 2 ;
 	setProperty("voxel_size", vs ) ;
-	std::cout << "VS Z = " << vs[2] << std::endl ;
       }
 
-      if( manufac == "SIEMENS" && ( moda == "PT" || moda == "CT" ) ){
-        string mode ;
-	std::cout << "VS Z = " << vs[2] << std::endl ;
-	if( moda == "PT" ){
-	  setProperty( "data_type", string( "FLOAT" ) );
-          getProperty( "acquisition_mode", mode ) ;
-          vector<int> startTimes, durationTimes ;
-	  int st, dt ;
-	  startTimes.reserve( dimT ) ;
-	  durationTimes.reserve( dimT ) ;
-	  
-	  is=files.begin() ;
-	  map<int, int> stDt ;
-  	  if( mode == "DYNAMIC" ){
-	    for( int t = 0 ; t < dimT && is != files.end() ; ++t ){
-	      for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) { 
-	        if( getStartAndDurationTimes( *is, st, dt ) )
-	          stDt[st] = dt ;
-	      }
-	      //for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) ;
-	    }
-	  } else {
-	    for( int t = 0 ; t < dimT && is != files.end() ; ++t ){
-	      //for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) { 
-	      if( getStartAndDurationTimes( *is, st, dt ) )
-	        stDt[st] = dt ;
-	      //}
-	      for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) ;
-	    } 
-	  }
-	  
-	  map<int, int>::iterator it ;
-	  for( it = stDt.begin() ; it != stDt.end() ; ++it ){
-	    startTimes.push_back( it->first - stDt.begin()->first ) ;
-	    durationTimes.push_back( it->second ) ;
-	  }
-	  setProperty( "start_time", startTimes ) ;
-	  setProperty( "duration_time", durationTimes ) ;
-	}
+      if( moda == "PT" ){
+        string mode;
+        setProperty( "data_type", string( "FLOAT" ) );
+        getProperty( "acquisition_mode", mode ) ;
+        vector<int> startTimes, durationTimes ;
+        int st, dt ;
+        startTimes.reserve( dimT ) ;
+        durationTimes.reserve( dimT ) ;
+        
+/*        is=files.begin() ;
+        map<int, int> stDt ;
+        if( mode == "DYNAMIC" ){
+          for( int t = 0 ; t < dimT && is != files.end() ; ++t ){
+            for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) { 
+              std::string fName = directoryname + sep + *is;
+              if( getStartAndDurationTimes( fName, st, dt ) )
+                stDt[st] = dt ;
+            }
+            //for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) ;
+          }
+        } else {
+          for( int t = 0 ; t < dimT && is != files.end() ; ++t ){
+            //for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) { 
+            std::string fName = directoryname + sep + *is;
+            if( getStartAndDurationTimes( fName, st, dt ) )
+              stDt[st] = dt ;
+            //}
+            for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) ;
+          } 
+        }*/
+        i = _slices.begin();
+        map<int, int> stDt ;
+        if( mode == "DYNAMIC" ){
+          for( int t = 0 ; t < dimT && i != _slices.end() ; ++t ){
+            for( int z = 0 ; z < dimZ && i != _slices.end() ; ++z, ++i ) { 
+              stDt[i->second.startTime()] = i->second.durationTime();
+            }
+            //for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) ;
+          }
+        } else {
+          for( int t = 0 ; t < dimT && i != _slices.end() ; ++t ){
+            //for( int z = 0 ; z < dimZ && is != files.end() ; ++z, ++is ) { 
+            stDt[i->second.startTime()] = i->second.durationTime();
+            //}
+            for( int z = 0 ; z < dimZ && i != _slices.end() ; ++z, ++i ) ;
+          } 
+        }
+        
+        map<int, int>::iterator it ;
+        for( it = stDt.begin() ; it != stDt.end() ; ++it ){
+          startTimes.push_back( it->first - stDt.begin()->first ) ;
+          durationTimes.push_back( it->second ) ;
+        }
+        setProperty( "start_time", startTimes ) ;
+        setProperty( "duration_time", durationTimes ) ;
       }
     }
 
@@ -800,7 +835,7 @@ int DicomHeader::readFirst()
           setProperty( "b_value", (float)bvalue );
         }
     }
-  if ( manufacturer == "SIEMENS" && modality == "PT" )
+  if ( /* manufacturer == "SIEMENS" && */ modality == "PT" )
     {
       
 #if OFFIS_DCMTK_VERSION_NUMBER >= 360
@@ -893,12 +928,6 @@ int DicomHeader::readFirst()
           object->getOFString( time, 0 );
           setProperty( "acquisition_time", float( atof( time.c_str() ) ) );
 	  cout << "acquis_time : " <<  float( atof( time.c_str() ) ) << endl ;
-        }
-      if ( header.search( DCM_AcquisitionTime, stack ) == EC_Normal )
-        {
-          DcmTime *object = (DcmTime *)stack.top();
-          OFString time;
-          object->getOFString( time, 0 );
 	  int hour = int( atoi(time.substr(0,2).c_str() ) ) ;
 	  int min = int( atoi(time.substr(2,2).c_str() ) ) ;
 	  int sec = int( atoi(time.substr(4,2).c_str() ) ) ;
@@ -990,6 +1019,27 @@ int DicomHeader::readFirst()
 	    }
 	  }
         }
+
+      if ( header.search( DCM_Units, stack ) == EC_Normal )
+        {
+          if( stack.top()->ident() != EVR_CS ){
+            // cerr << "fail 1, id: " << stack.top()->ident() << "\n";
+            return( -1 );
+          }
+          DcmLongString *object = (DcmLongString *)stack.top() ;
+          OFString unit;
+          object->getOFString( unit, 0 ) ;
+          if ( !unit.compare( "CNTS" ) && 
+               ( manufacturer == "Philips Medical Systems" ) &&
+               ( header.search( DcmTagKey( 0x7053, 0x1009 ), stack ) == 
+                                                                   EC_Normal ) )
+          {
+            setProperty( "image_unit", _unitNames[ "BQML" ] ) ;          
+          }
+          else
+            setProperty( "image_unit", _unitNames[ unit.c_str() ] ) ;
+          
+        }  
       }
 
   return (int)instance_number;
@@ -1086,7 +1136,46 @@ DicomHeader::FileElement DicomHeader::readNext( const std::string& filename )
       //     << instance_number << endl;
     }
     
-  FileElement fl( (int)instance_number, (double)loc, filename );
+  int startTime = 0;
+  int durationTime = 0;
+  string modality;
+
+  getProperty( "modality", modality );
+
+  if ( modality == "PT" )
+  {
+
+    if ( header.search( DCM_AcquisitionTime, stack ) == EC_Normal )                                                                                                                                            
+    {                                                                                                                                                                                                        
+      ASSERT( stack.top()->ident() == EVR_TM );
+      DcmTime *object = (DcmTime *)stack.top() ;                                                                                                                                                             
+      OFString stime ;                                                                                                                                                                                        
+      object->getOFString( stime, 0 ) ;                                                                                                                                                                       
+      string timeStr(stime.c_str()) ;                                                                                                                                                                         
+      startTime = ( atoi(timeStr.substr(0,2).c_str() ) * 60 + 
+                    atoi(timeStr.substr(2,2).c_str() ) ) * 60 + 
+                  atoi( timeStr.substr(4,2).c_str() );
+      if ( timeStr.length() > 6 )
+      {
+        double st = 1000.0 * startTime +
+                    atof(timeStr.substr(7,timeStr.size()-7-1).c_str() )/1000.0;
+        startTime = (int)st;
+      }
+    }                                                                                                                                                                                   
+  
+    if ( header.search( DCM_ActualFrameDuration, stack ) == EC_Normal )                                                                                                                                        
+    {                                                                                                                                                                                                        
+      ASSERT( stack.top()->ident() == EVR_IS );
+      DcmIntegerString *object = (DcmIntegerString *)stack.top();
+      Sint32 dTime;
+      object->getSint32( dTime );
+      durationTime = (int)dTime;
+    }                                                                                                                                                                                                      
+
+  }
+
+  FileElement fl( (int)instance_number, (double)loc, filename,
+                  startTime, durationTime );
 
   return fl;
 }
