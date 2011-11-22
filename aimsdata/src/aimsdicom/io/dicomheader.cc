@@ -415,7 +415,7 @@ int DicomHeader::read()
         if( abs( *(dZs.rbegin()) - *(dZs.begin()) ) > 0.0001 ){
           if( dimT == 1 )
           {
-            cerr << "Non homogeneous voxel size ! missing slices, max delta " << maxZVoxSize<<" min delta "<<minZVoxSize<<endl ;
+            cerr << "Non homogeneous voxel size ! missing slices, maxZVoxSize " << maxZVoxSize<<" minZVoxSize delta "<<minZVoxSize<<endl ;
             map< int, FileElement >::const_iterator idxSlice = _slices.begin();            
             float prevSliveLoc= i->second.location() ;
             while( idxSlice!= _slices.end() )
