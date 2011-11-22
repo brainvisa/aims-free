@@ -412,16 +412,27 @@ int DicomHeader::read()
       getProperty("voxel_size", vs ) ;
       if( vs[2] < 1e-6 )
       {
-	if( abs( *(dZs.rbegin()) - *(dZs.begin()) ) > 0.0001 ){
-	  if( dimT == 1 )
-	    cerr << "Non homogeneous voxel size !" << endl ;
-	  else {
-	    // the non homogeniity of the voxel size is due to the step from one frame to the next
-	    int n = 0 ;
-	    for( std::multiset<float>::iterator it = dZs.begin() ; it != dZs.end() ; ++it, ++n )
-	      if( n == int( dZs.size() / 2 ) )
-	        vs[2] = *it ;
-	  } 
+        if( abs( *(dZs.rbegin()) - *(dZs.begin()) ) > 0.0001 ){
+          if( dimT == 1 )
+          {
+            cerr << "Non homogeneous voxel size ! missing slices, maxZVoxSize " << maxZVoxSize<<" minZVoxSize delta "<<minZVoxSize<<endl ;
+            map< int, FileElement >::const_iterator idxSlice = _slices.begin();            
+            float prevSliveLoc= i->second.location() ;
+            while( idxSlice!= _slices.end() )
+            {        
+              float dZ = abs( idxSlice->second.location() - prevSliveLoc ) ;
+              cout << "slice idx "<<idxSlice->first<<" delta "<<dZ<<endl;              
+              prevSliveLoc= idxSlice->second.location() ;
+              ++idxSlice;              
+            }
+          }
+          else {
+            // the non homogeniity of the voxel size is due to the step from one frame to the next
+            int n = 0 ;
+            for( std::multiset<float>::iterator it = dZs.begin() ; it != dZs.end() ; ++it, ++n )
+              if( n == int( dZs.size() / 2 ) )
+                vs[2] = *it ;
+          } 
    
 	} else vs[2] = (minZVoxSize + maxZVoxSize) / 2 ;
 	setProperty("voxel_size", vs ) ;
