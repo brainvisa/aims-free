@@ -50,19 +50,24 @@ namespace aims
     {
     public:
 
-      FileElement( int i=-1, double l=0.0, const std::string n="" ) 
-	: _instance( i ), _loc( l ), _name( n )  { }
+      FileElement( int i=-1, double l=0.0, const std::string n="",
+                   int st=0, int dt=0 ) 
+	: _instance( i ), _loc( l ), _name( n ), _st( st ), _dt( dt )  { }
       virtual ~FileElement()  { }
 
       int instance() const { return _instance; }
       std::string name() const { return _name; }
       double location() const { return _loc; }
+      int startTime() const { return _st; }
+      int durationTime() const { return _dt; }
 
     private:
 
       int _instance;
       double _loc;
       std::string _name;
+      int _st;
+      int _dt;
     };
 
     DicomHeader( const std::string& name );
@@ -87,6 +92,7 @@ namespace aims
   private:
 
     std::map< int, FileElement > _slices;
+    std::map< std::string, std::string > _unitNames;
 
     std::string _name;
     bool _reverseZ;

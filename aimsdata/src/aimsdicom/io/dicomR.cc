@@ -186,6 +186,35 @@ namespace aims
                 }
             }
 
+	  double scale_factor = 1.0;
+          string modality;
+          hdr->getProperty( "modality", modality );
+          if ( modality == "PT" )
+          {
+            string unit;
+            hdr->getProperty( "image_unit", unit );
+
+            if ( unit == "Counts" )
+            {
+              string manufacturer;
+              hdr->getProperty( "manufacturer", manufacturer );
+
+              if ( manufacturer == "Philips Medical Systems" )
+              {
+                Float64 tmpScale;
+
+                if ( dfile.search( DcmTagKey( 0x7053, 0x1009 ), stack ) == 
+                     EC_Normal )
+                {
+		  ASSERT( stack.top()->ident() == EVR_DS );
+		  DcmDecimalString *object = (DcmDecimalString *)stack.top();
+		  object->getFloat64( tmpScale );
+		  scale_factor = (double)tmpScale;
+	        }
+              }
+            }
+          }
+
           if ( shortValues )
             {
               std::string tr_syntax;
@@ -264,7 +293,6 @@ namespace aims
 /* 		    max = wc + ww / 2.0; */
 /* 		  } */
 		
-		
 		int i, j;
 		int dx = thing.dimX();
 		int dy = thing.dimY();
@@ -275,6 +303,7 @@ namespace aims
                       // Data is stored as int16_t so we must read it as int16_t otherwise 
                       // signed values will be lost
 		      signal = ((double)(int16_t)*sptr++) * slope + inter;
+                      signal *= scale_factor;
 		      thing( i, j, slice, frame ) = (T)signal;
 		    }
 		
@@ -282,9 +311,12 @@ namespace aims
 		int i, j;
 		int dx = thing.dimX();
 		int dy = thing.dimY();
+                double signal;
 		for ( j=0; j<dy; j++ )
 		  for ( i=0; i<dx; i++ )
-		    thing( i, j, slice, frame ) = (T)*sptr++;
+		      signal = (double)(int16_t)*sptr++;
+                      signal *= scale_factor;
+		    thing( i, j, slice, frame ) = (T)signal;
 	      }
             }
           else if ( byteValues )
@@ -337,7 +369,7 @@ namespace aims
                   inter = (double)gtmp;
                 }
 	      
-              double min = 0.0;
+/*              double min = 0.0;
               double max = 255.0;
 	      
               if ( wc >= 0.0 && ww >= 0.0 )
@@ -345,20 +377,23 @@ namespace aims
                   min = wc - ww / 2.0;
                   max = wc + ww / 2.0;
                 }
+*/
 	      
               int i, j;
               int dx = thing.dimX();
               int dy = thing.dimY();
-              double signal, coef = 255.0 / ( max - min );
+              double signal; //, coef = 255.0 / ( max - min );
               for ( j=0; j<dy; j++ )
                 for ( i=0; i<dx; i++ )
                   {
 		    std::cout << "slope = " << slope << " & intercept = " << inter << std::endl ;
-                    signal = (double)*bptr++ * slope + inter;
+                    signal = ((double)(int8_t)*bptr++) * slope + inter;
+                    signal *= scale_factor;
 
-                    if ( signal <= min )  signal = 0.0;
+/*                    if ( signal <= min )  signal = 0.0;
                     else if ( signal >= max )  signal = 255.0;
                     else signal = ( signal - min ) * coef;
+*/
 
                     thing( i, j, slice, frame ) = (T)signal;
                   }
