@@ -46,6 +46,8 @@
 #include <cartobase/datasource/filedatasource.h>
 #include <memory>
 
+using namespace std;
+
 namespace aims
 {
   template< class T >
