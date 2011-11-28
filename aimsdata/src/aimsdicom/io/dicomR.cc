@@ -189,16 +189,16 @@ namespace aims
             }
 
 	  double scale_factor = 1.0;
-          string modality;
+          std::string modality;
           hdr->getProperty( "modality", modality );
           if ( modality == "PT" )
           {
-            string unit;
+            std::string unit;
             hdr->getProperty( "image_unit", unit );
 
             if ( unit == "Counts" )
             {
-              string manufacturer;
+              std::string manufacturer;
               hdr->getProperty( "manufacturer", manufacturer );
 
               if ( manufacturer == "Philips Medical Systems" )
