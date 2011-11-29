@@ -724,7 +724,8 @@ int DicomHeader::readFirst()
     }
 
   if ( spaceSlice > 0.0f )  voxSize.push_back( (float)spaceSlice );
-  //else if ( thickness > 0.0f )  voxSize.push_back( (float)thickness );
+  else if ( ( modality == "PT" ) && ( thickness > 0.0f ) )
+    voxSize.push_back( (float)thickness );
   else  voxSize.push_back( 0.0f ); // to determine Z resolution in read()
   voxSize.push_back( 1.0f ); // T dimension
   setProperty( "voxel_size", voxSize );
