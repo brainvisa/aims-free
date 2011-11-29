@@ -1185,12 +1185,12 @@ ipython</screen>
       <para>In python, the aimsdata library is available as the <computeroutput>soma.aims</computeroutput> module.
         <screen>import soma.aims
 # the module is actually soma.aims:
-vol = soma.aims.Volume_S16( 100, 100, 100 )
+vol = soma.aims.Volume( 100, 100, 100, dtype='int16' )
 </screen>
         or:
         <screen>from soma import aims
 # the module is available as aims (not soma.aims):
-vol = aims.Volume_S16( 100, 100, 100 )
+vol = aims.Volume( 100, 100, 100, dtype='int16' )
 # in the following, we will be using this form because it is shorter.
 </screen>
       </para>
@@ -1234,7 +1234,7 @@ aims.write( obj3, 'subject01_Lhemi.gii' )
       <sect3><title>Building a volume</title>
         <para>
           <screen># create a 3D volume of signed 16-bit ints, of size 192x256x128
-vol = aims.Volume_S16( 192, 256, 128 )
+vol = aims.Volume( 192, 256, 128, dtype='int16' )
 # fill it with zeros
 vol.fill(0)
 # set value 12 at voxel ( 100, 100, 60 )
@@ -1320,7 +1320,7 @@ aims.write( vol, 'Audio-Video_T_thresholded.nii' )
           <screen>from soma import aims
 vol = aims.read( 'data_for_anatomist/subject01/subject01.nii' )
 # allocate a new volume with half dimensions
-vol2 = aims.Volume_DOUBLE( vol.getSizeX() / 2, vol.getSizeY() / 2, vol.getSizeZ() / 2 )
+vol2 = aims.Volume( vol.getSizeX() / 2, vol.getSizeY() / 2, vol.getSizeZ() / 2, dtype='DOUBLE' )
 # set the voxel size to twice it was in vol
 vs = vol.header()[ 'voxel_size' ]
 vs2 = [ x * 2 for x in vs ]
@@ -1376,7 +1376,7 @@ aims.write( vol, 'Audio-Video_T_thresholded2.nii' )
           The distance example, using numpy, would like the following:
           <screen>from soma import aims
 import numpy
-vol = aims.Volume_S16( 192, 256, 128 )
+vol = aims.Volume( 192, 256, 128, 'S16' )
 vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
 vs = vol.header()[ 'voxel_size' ]
 pos0 = ( 100 * vs[0], 100 * vs[1], 60 * vs[2] ) # in millimeters
@@ -1403,14 +1403,14 @@ aims.write( vol, 'distance2.nii' )
         <title>Copying volumes or volumes structure, or building from an array</title>
         <para>
           To make a deep-copy of a volume, use the copy constructor:
-          <screen>vol2 = aims.Volume_S16( vol )
+          <screen>vol2 = aims.Volume( vol )
 vol2.setValue( 12, 100, 100, 60 )
 # now vol and vol2 have different values
 print 'vol.value( 100, 100, 60 ):', vol.value( 100, 100, 60 )
 print 'vol2.value( 100, 100, 60 ):', vol2.value( 100, 100, 60 )
 </screen>
           If you need to build another, different volume, with the same structure and size, don't forget to copy the header part:
-          <screen>vol2 = aims.Volume_FLOAT( vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), vol.getSizeT() )
+          <screen>vol2 = aims.Volume( vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), vol.getSizeT(), 'FLOAT' )
 vol2.header().update( vol.header() )
 </screen>
           Important information can reside in the header, like voxel size, or coordinates systems and geometric transformations to other coordinates systems, so it is really very important to carry this information with duplicated or derived volumes.
@@ -1423,7 +1423,7 @@ vol2.header().update( vol.header() )
 # whereas the numpy addition always returns a C-ordered array
 arr = numpy.array( arr, order='F' )
 arr[ 10, 12, 3 ] = 25
-vol = aims.Volume_FLOAT( arr )
+vol = aims.Volume( arr )
 print 'vol.value( 10, 12, 3 ):', vol.value( 10, 12, 3 )
 # data are shared with arr
 vol.setValue( 35, 10, 15, 2 )
@@ -1438,7 +1438,7 @@ print 'vol.value( 12, 15, 1 ):', vol.value( 12, 15, 1 )
           4D volumes work just like 3D volumes. Actually all volumes are 4D in AIMS, but the last dimension is commonly of size 1. In <computeroutput>value()</computeroutput> and <computeroutput>setValue()</computeroutput> methods, only the first dimension is mandatory, others are optional and default to 0, but up to 4 coordinates may be used. In the same way, the constructor takes up to 4 dimension parameters:
           <screen>from soma import aims
 # create a 4D volume of signed 16-bit ints, of size 30x30x30x4
-vol = aims.Volume_S16( 30, 30, 30, 4 )
+vol = aims.Volume( 30, 30, 30, 4, 'S16' )
 # fill it with zeros
 vol.fill(0)
 # set value 12 at voxel ( 10, 10, 20, 2 )
@@ -1457,19 +1457,19 @@ print vol.header()
           For historical reasons, another set of classes may also represent volumes. These classes are the older API in AIMS, and tend to be obsolete. But as they were used in many many routines and programs, they have still not been eradicated. Many C++ routines build volumes and actually return those older classes, so we could not really hide them, and they also have python bindings. These classes are <computeroutput>aims.AimsData_&lt;type&gt;</computeroutput>. Converting from and to <computeroutput>aims.Volume_</computeroutput> classes is rather simple since the newer <computeroutput>Volume</computeroutput> classes are used internally in the <computeroutput>AimsData</computeroutput> API.
           <screen>from soma import aims
 # create a 4D volume of signed 16-bit ints, of size 30x30x30x4
-vol = aims.Volume_S16( 30, 30, 30, 4 )
+vol = aims.Volume( 30, 30, 30, 4, 'S16' )
 vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
-advol = aims.AimsData_S16( vol )
+advol = aims.AimsData( vol )
 # vol and advol share the same header and voxel data
 vol.setValue( 12, 10, 10, 20, 2 )
 print 'advol.value( 10, 10, 20, 2 ):', advol.value( 10, 10, 20, 2 )
 advol.setValue( 44, 12, 12, 24, 1 )
 print 'vol.value( 12, 12, 24, 1 ):', vol.value( 12, 12, 24, 1 )
 </screen>
-          And, in the other side:
+          And, in the other direction:
           <screen>from soma import aims
 # create a 4D volume of signed 16-bit ints, of size 30x30x30x4
-advol = aims.AimsData_S16( 30, 30, 30, 4 )
+advol = aims.AimsData( 30, 30, 30, 4, 'S16' )
 advol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
 vol = advol.volume()
 # vol and advol share the same header and voxel data
@@ -1490,7 +1490,7 @@ print 'advol.value( 4, 8, 11, 3 ):', advol.value( 4, 8, 11, 3 )
 print 'advol2.value( 4, 8, 11, 3 ):', advol2.value( 4, 8, 11, 3 )
 # Border handling
 # Border width is th 5th parameter of AimsData constructor
-advol = aims.AimsData_S16( 192, 256, 128, 1, 2 )
+advol = aims.AimsData( 192, 256, 128, 1, 2, 'S16' )
 advol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
 advol.fill( 0 )
 advol.setValue( 15, 100, 100, 60 )
@@ -1528,7 +1528,7 @@ print 'normals:', len( norm )
         <screen># build a flying saucer mesh
 from soma import aims
 import numpy
-mesh = aims.AimsTimeSurface_3()
+mesh = aims.AimsTimeSurface( 3 )
 # a mesh has a header
 mesh.header()[ 'toto' ] = 'a message in the header'
 vert = mesh.vertex()
@@ -1542,7 +1542,7 @@ pol = numpy.vstack( ( numpy.zeros( 20, dtype=numpy.int32 ), numpy.ogrid[ 3:23 ],
 pol[ 19, 1 ] = 2
 pol2 = numpy.vstack( ( numpy.ogrid[ 2:22 ], numpy.ogrid[ 3:23 ], numpy.ones( 20, dtype=numpy.int32 ) ) ).transpose()
 pol2[19,1] = 2
-poly.assign( [ aims.AimsVector_U32_3(x) for x in numpy.vstack( ( pol, pol2 ) ) ] )
+poly.assign( [ aims.AimsVector(x,'U32',3) for x in numpy.vstack( ( pol, pol2 ) ) ] )
 # write result
 aims.write( mesh, 'saucer.mesh' )
 # automatically calculate normals
@@ -1639,7 +1639,7 @@ aims.write( mesh, 'subject01_Lwhite_semiinflated_time.mesh' )
 
       <para>A texture is merely a vector of values, each of them is assigned to a mesh vertex, with a one-to-one mapping, in the same order. A texture is also a time-texture.
         <screen>from soma import aims
-tex = aims.TimeTexture_FLOAT()
+tex = aims.TimeTexture( 'FLOAT' )
 t = tex[0] # time index, inserts on-the-fly
 t.reserve( 10 ) # pre-allocates memory
 for i in xrange( 10 ):
@@ -1652,7 +1652,7 @@ for i in xrange( 10 ):
         <screen>from soma import aims
 mesh = aims.read( 'subject01_Lwhite_semiinflated_time.mesh' )
 vol = aims.read( 'data_for_anatomist/subject01/subject01.nii' )
-tex = aims.TimeTexture_FLOAT()
+tex = aims.TimeTexture( 'FLOAT' )
 vs = vol.header()[ 'voxel_size' ]
 for i in xrange( mesh.size() ):
   t = tex[i]
@@ -1682,17 +1682,17 @@ f = aims.Finder()
 f.check( 'data_for_anatomist/subject01/subject01.nii' )
 anathdr = f.header()
 # get functional -> MNI transformation
-m1 = aims.Motion( vol.header()[ 'transformations' ][1] )
+m1 = aims.AffineTransformation3d( vol.header()[ 'transformations' ][1] )
 # get anat -> MNI transformation
-m2 = aims.Motion( anathdr[ 'transformations' ][1] )
+m2 = aims.AffineTransformation3d( anathdr[ 'transformations' ][1] )
 # make anat -> functional transformation
 anat2func = m1.inverse() * m2
 # include functional voxel size to get to voxel coordinates
 vs = vol.header()[ 'voxel_size' ]
-mvs = aims.Motion( numpy.diag( vs[:3] + [ 1. ] ) )
+mvs = aims.AffineTransformation3d( numpy.diag( vs[:3] + [ 1. ] ) )
 anat2func = mvs.inverse() * anat2func
 # now go as in the previous program
-tex = aims.TimeTexture_FLOAT()
+tex = aims.TimeTexture( 'FLOAT' )
 for i in xrange( mesh.size() ):
   t = tex[i]
   vert = mesh.vertex( i )
@@ -1822,7 +1822,7 @@ aims.GraphManip.storeAims( graph, v, 'roi', mesh )
 # read a volume with 2 voxels border
 vol = aims.read( 'data_for_anatomist/subject01/subject01.nii', border=2 )
 # use a thresholder which will keep values above 600
-ta = aims.AimsThreshold_S16_S16( aims.AIMS_GREATER_OR_EQUAL_TO, 600 )
+ta = aims.AimsThreshold( aims.AIMS_GREATER_OR_EQUAL_TO, 600, intype=vol )
 # use it to make a binary thresholded volume
 tvol = ta.bin( vol )
 aims.write( tvol, 'thresholded.nii' )
@@ -1950,11 +1950,11 @@ aims.write( mesh, 'sphere.gii' )
 
     <sect3><title>Types conversion</title>
       <para>
-        The <computeroutput>Converter_*_*</computeroutput> classes allow to convert some data structures types to others. Of course all types cannot be converted to any other, but they are typically used ton convert volumed from a given voxel type to another one. For instance, to convert the anatomical volume of the previous examples to float type:
+        The <computeroutput>Converter_*_*</computeroutput> classes allow to convert some data structures types to others. Of course all types cannot be converted to any other, but they are typically used ton convert volumed from a given voxel type to another one. A "factory" function may help to build the correct converter using input and output types. For instance, to convert the anatomical volume of the previous examples to float type:
         <screen>from soma import aims
 vol = aims.read( 'data_for_anatomist/subject01/subject01.nii' )
 print 'type of vol:', type( vol )
-c = aims.Converter_Volume_S16_Volume_FLOAT()
+c = aims.Converter( intype=vol, outtype=aims.Volume('FLOAT') )
 vol2 = c( vol )
 print 'type of converted volume:', type( vol2 )
 print 'value of initial volume at voxel (50,50,50):', vol.value( 50, 50, 50 )
@@ -1971,7 +1971,7 @@ import math
 vol = aims.read( 'data_for_anatomist/subject01/subject01.nii' )
 # create an affine transformation matrix
 # rotating pi/8 along z axis
-tr = aims.Motion( aims.Quaternion( [ 0, 0, math.sin( math.pi/16 ), math.cos( math.pi/16 ) ] ) )
+tr = aims.AffineTransformation3d( aims.Quaternion( [ 0, 0, math.sin( math.pi/16 ), math.cos( math.pi/16 ) ] ) )
 tr.setTranslation( ( 100, -50, 0 ) )
 # get an order 2 resampler for volumes of S16
 resp = aims.ResamplerFactory_S16().getResampler( 2 )

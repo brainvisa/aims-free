@@ -1103,16 +1103,27 @@ def AimsThreshold( *args, **kwargs ):
 
 
 def AimsVector( *args, **kwargs ):
-  '''Create an AimsVector instance from type and dimension arguments. Types may be passed as the keyword argument dtype. Otherwise the arguments are parsed to find types arguments. Dimension should be passed as the keyword argument dim, or as the last unnamed argument.
+  '''Create an AimsVector instance from type and dimension arguments. Types may be passed as the keyword argument dtype. Otherwise the arguments are parsed to find types arguments. Dimension should be passed as the keyword argument dim, or is guessed from the input value(s).
   Types may be specified as allowed by typeCode().
+  If unspecified, type is guessed from the 1st element of the vector data.
   '''
   dim = kwargs.get( 'dim', None )
   if dim is not None:
     del kwargs[ 'dim' ]
+  elif len( args ) == 1 and hasattr( args[0], '__len__' ):
+      dim = len( args[0] )
   else:
-    dim = args[-1]
-    args = args[:-1]
-  dtype, args, kwargs = _parseTypeInArgs( *args, **kwargs )
+    dim = len( args )
+  try:
+    dtype, args, kwargs = _parseTypeInArgs( *args, **kwargs )
+  except KeyError, e:
+    try:
+      if hasattr( args[0], '__len__' ) and len( args[0] ) != 0:
+        dtype = _parseTypeInArgs( dtype=args[0][0] )[0]
+      else:
+        dtype = _parseTypeInArgs( dtype=args[0] )[0]
+    except:
+      raise e
   return getattr( aimssip, 'AimsVector_' + dtype + '_' + str(dim) )( *args )
 
 
