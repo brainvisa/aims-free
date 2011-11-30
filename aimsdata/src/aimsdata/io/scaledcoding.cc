@@ -230,10 +230,12 @@ namespace aims
                 vmax = val;
 
               if (isexact)
+              {
                 if (values.size() < dynsize)
                   values.insert( val );
                 else
                   isexact = false;
+              }
             }
           }
 

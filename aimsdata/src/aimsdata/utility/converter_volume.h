@@ -44,7 +44,7 @@
 namespace std
 {
 
-  template<typename _Tp> 
+  template<typename _Tp>
   struct numeric_limits<AimsData<_Tp> > : public numeric_limits<_Tp>
   {
   public:
@@ -116,25 +116,16 @@ namespace carto
 
 
   template <typename INP>
-  class ShallowConverter<AimsData<INP>, AimsData<INP> > 
+  class ShallowConverter<AimsData<INP>, AimsData<INP> >
     : public Converter<AimsData<INP>, AimsData<INP> >
   {
   public:
-    ShallowConverter( bool rescale = false ) 
+    ShallowConverter( bool rescale = false )
       : Converter<AimsData<INP>, AimsData<INP> >( rescale ) {}
-    ShallowConverter( bool rescale, RescalerInfo & info )
+    ShallowConverter( bool rescale, const RescalerInfo & info )
       : Converter<AimsData<INP>, AimsData<INP> >( rescale, info ) {}
-    void convert( const AimsData<INP> &in, AimsData<INP> & out ) const;
+    virtual void convert( const AimsData<INP> &in, AimsData<INP> & out ) const;
   };
-
-
-  template<typename INP>
-  class Rescaler<AimsData<INP>, AimsData<INP> >
-  {
-  public:
-    void convert( const AimsData<INP> &in, AimsData<INP> & out ) const;
-  };
-
 
   template <class INP,class OUTP>
   class ConverterAllocator<AimsData<INP>,AimsData<OUTP> >
@@ -172,16 +163,16 @@ namespace carto
   // implementation
 
   template <class INP,class OUTP> inline
-  AimsData<OUTP>* ConverterAllocator<AimsData<INP>,AimsData<OUTP> >::alloc 
+  AimsData<OUTP>* ConverterAllocator<AimsData<INP>,AimsData<OUTP> >::alloc
     ( const AimsData<INP> &in )
   {
-    return new AimsData<OUTP>( in.dimX(), in.dimY(), in.dimZ(), 
+    return new AimsData<OUTP>( in.dimX(), in.dimY(), in.dimZ(),
                                in.dimT(), in.borderWidth() );
   }
 
 
   template <class INP> inline
-  AimsData<INP>* ConverterAllocator<AimsData<INP>,AimsData<INP> >::alloc 
+  AimsData<INP>* ConverterAllocator<AimsData<INP>,AimsData<INP> >::alloc
     ( const AimsData<INP> & )
   {
     return new AimsData<INP>( 0 );
@@ -201,7 +192,7 @@ namespace carto
     if( in.header() )
       out.setHeader( in.header()->cloneHeader( true ) );
 
-    int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(), 
+    int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
       dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
     if( in.dimX() < dx )
       dx = in.dimX();
@@ -257,6 +248,10 @@ namespace carto
   void Rescaler<AimsData<INP>,AimsData<OUTP> >::convert
   ( const AimsData<INP> &in, AimsData<OUTP> &out ) const
   {
+    if( out.dimX() == 0 )
+      out = AimsData<OUTP>( in.dimX(), in.dimY(), in.dimZ(),
+                            in.dimT(), in.borderWidth() );
+
     out.setSizeX( in.sizeX() );
     out.setSizeY( in.sizeY() );
     out.setSizeZ( in.sizeZ() );
@@ -280,7 +275,7 @@ namespace carto
 
     DefaultedRescalerInfo<INP, OUTP> defaultedinfo( info );
 
-    int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(), 
+    int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
       dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
     if( in.dimX() < dx )
       dx = in.dimX();
@@ -319,7 +314,7 @@ namespace carto
             out( x, y, z, t ) = OUTP(0);
 
     float	scf = 1.;
-    aims::PythonHeader 
+    aims::PythonHeader
       *h = dynamic_cast<aims::PythonHeader *>( out.header() );
     if( !h )
       h = new aims::PythonHeader;
@@ -336,9 +331,9 @@ namespace carto
   void RawConverter<AimsData<INP>,AimsData<INP> >::convert
   ( const AimsData<INP> &in, AimsData<INP> &out ) const
   {
-    if( out.dimX() == 0 
-        || ( in.dimX() == out.dimX() && in.dimY() == out.dimY() 
-             && in.dimZ() == out.dimZ() && in.dimT() == out.dimT() 
+    if( out.dimX() == 0
+        || ( in.dimX() == out.dimX() && in.dimY() == out.dimY()
+             && in.dimZ() == out.dimZ() && in.dimT() == out.dimT()
              && in.borderWidth() == out.borderWidth() ) )
     {
       if( this->_shallowcopy )
@@ -357,7 +352,7 @@ namespace carto
 	  out.setHeader( in.header()->cloneHeader( true ) );
 
 	out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
-	int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(), 
+	int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
 	  dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
 	if( in.dimX() < dx )
 	  dx = in.dimX();
@@ -409,119 +404,56 @@ namespace carto
   {
   }
 
-  template<class INP> inline
-  void Rescaler<AimsData<INP>,AimsData<INP> >::convert
-  ( const AimsData<INP> &in, AimsData<INP> &out ) const
-  {
-    if( out.dimX() == 0 )
-      out = AimsData<INP>( in.dimX(), in.dimY(), in.dimZ(), 
-                           in.dimT(), in.borderWidth() );
-
-    out.setSizeX( in.sizeX() );
-    out.setSizeY( in.sizeY() );
-    out.setSizeZ( in.sizeZ() );
-    out.setSizeT( in.sizeT() );
-
-    double	mino = std::numeric_limits<INP>::min();
-    double	maxo = std::numeric_limits<INP>::max();
-    double	min = (double) in.minimum();
-    double	max = (double) in.maximum();
-    double	ampo = maxo - mino;
-
-    if( min == max )
-      {
-        min = 0.0; 
-        max = 1.0;
-      }
-    double	amp = max - min;
-    int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(), 
-      dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
-    if( in.dimX() < dx )
-      dx = in.dimX();
-    if( in.dimY() < dy )
-      dy = in.dimY();
-    if( in.dimZ() < dz )
-      dz = in.dimZ();
-    if( in.dimT() < dt )
-      dt = in.dimT();
-
-    for( t=0; t<dt; ++t )
-      {
-        for( z=0; z<dz; ++z )
-          {
-            for( y=0; y<dy; ++y )
-              {
-                for( x=0; x<dx; ++x )
-                  out( x, y, z, t ) 
-                    = (INP) ( mino + ampo * ( (double) in( x, y, z, t ) 
-                                             - min) / amp );
-                for( ; x<ox; ++x )
-                  out( x, y, z, t ) = INP(0);
-              }
-            for( ; y<oy; ++y )
-              for( x=0; x<ox; ++x )
-                out( x, y, z, t ) = INP(0);
-          }
-        for( ; z<oz; ++z )
-          for( y=0; y<oy; ++y )
-            for( x=0; x<ox; ++x )
-              out( x, y, z, t ) = INP(0);
-      }
-
-    for( ; t<ot; ++t )
-      for( z=0; z<oz; ++z )
-        for( y=0; y<oy; ++y )
-          for( x=0; x<ox; ++x )
-            out( x, y, z, t ) = INP(0);
-
-    if( in.header() )
-      out.setHeader( in.header()->cloneHeader( true ) );
-  }
-
-
   template<typename INP>
-  class ConverterSwitch<AimsData<INP>,AimsData<INP>,false> 
+  class ConverterSwitch<AimsData<INP>,AimsData<INP>,false>
     : public RawConverter<AimsData<INP>,AimsData<INP> >
   {
   public:
-    ConverterSwitch( bool shallowcopy = false ) 
+    ConverterSwitch( bool shallowcopy = false )
+      : RawConverter<AimsData<INP>,AimsData<INP> >( shallowcopy ) {}
+    ConverterSwitch( const RescalerInfo&,  bool shallowcopy = false )
       : RawConverter<AimsData<INP>,AimsData<INP> >( shallowcopy ) {}
   };
 
 
   template<typename INP>
-  class ConverterSwitch<AimsData<INP>,AimsData<INP>,true> 
+  class ConverterSwitch<AimsData<INP>,AimsData<INP>,true>
     : public Rescaler<AimsData<INP>,AimsData<INP> >
   {
   public:
-    ConverterSwitch( bool = false ) 
+    ConverterSwitch( bool = false )
       : Rescaler<AimsData<INP>,AimsData<INP> >() {}
+    ConverterSwitch( const RescalerInfo& info, bool )
+      : Rescaler<AimsData<INP>,AimsData<INP> >(info) {}
   };
 
 
   template<typename INP>
   class SmartConverter<AimsData<INP>, AimsData<INP> >
-    : public ConverterSwitch<AimsData<INP>, AimsData<INP>, 
-                             std::numeric_limits<INP>::is_specialized 
+    : public ConverterSwitch<AimsData<INP>, AimsData<INP>,
+                             std::numeric_limits<INP>::is_specialized
   && std::numeric_limits<INP>::is_bounded >
   {
   public:
-    SmartConverter( bool shallowcopy = false ) 
-      : ConverterSwitch<AimsData<INP>, AimsData<INP>, 
-                        std::numeric_limits<INP>::is_specialized 
-      && std::numeric_limits<INP>::is_bounded >( shallowcopy ) {}
-    SmartConverter( const RescalerInfo & ) {}
+    SmartConverter( bool shallowcopy = false )
+      : ConverterSwitch<AimsData<INP>, AimsData<INP>,
+          std::numeric_limits<INP>::is_specialized
+          && std::numeric_limits<INP>::is_bounded >( shallowcopy ) {}
+    SmartConverter( const RescalerInfo& info, bool shallowcopy = false )
+      : ConverterSwitch<AimsData<INP>, AimsData<INP>,
+          std::numeric_limits<INP>::is_specialized
+          && std::numeric_limits<INP>::is_bounded >( info, shallowcopy ) {}
   };
 
 
   template<class INP>
-  inline void 
+  inline void
   ShallowConverter<AimsData<INP>, AimsData<INP> >::convert
   ( const AimsData<INP> &in, AimsData<INP> & out ) const
   {
     if( this->_rescale )
       {
-        SmartConverter<AimsData<INP>,AimsData<INP> >	sc( true );
+        SmartConverter<AimsData<INP>,AimsData<INP> >	sc( this->_info, true );
         sc.convert( in, out  );
       }
     else

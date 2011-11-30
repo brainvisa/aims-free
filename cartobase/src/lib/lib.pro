@@ -104,6 +104,7 @@ HEADERS = \
   thread/thread.h \
   type/byte_order.h \
   type/conversion.h \
+  type/converter_d.h \
   type/converter.h \
   type/limits.h \
   type/limits_gcc3.h \
@@ -216,6 +217,7 @@ SOURCES = \
   thread/threadGauge.cc \
   thread/thread.cc \
   type/byte_order.cc \
+  type/converter.cc \
   type/string_conversion.cc \
   uuid/uuid.cc \
   wip/io/asciidatasourcetraits.cc \

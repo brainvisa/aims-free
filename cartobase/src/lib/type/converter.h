@@ -38,29 +38,17 @@
 #include <cartobase/type/types.h>
 #include <cartobase/type/limits.h>
 
-#define CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( IN , OUT ) \
-template<> \
-inline \
-void RawConverter< IN , OUT >::convert( const IN &in, OUT & out ) const \
-{ \
-  out = ( OUT )rint( in ); \
-} \
-
 namespace carto
 {
   /// Low level rescaler info used for rescaling
   class RescalerInfo
   {
   public:
-    RescalerInfo()
-      : usevtypelimits(false),
-        vmin( std::numeric_limits<double>::quiet_NaN() ),
-        vmax( std::numeric_limits<double>::quiet_NaN() ),
-        omin( std::numeric_limits<double>::quiet_NaN() ),
-        omax( std::numeric_limits<double>::quiet_NaN() )
-    {}
+    RescalerInfo();
 
-    bool    usevtypelimits; 
+    bool explicitRescale() const;
+
+    bool    usevtypelimits;
     double  vmin;
     double  vmax;
     double  omin;
@@ -97,7 +85,7 @@ namespace carto
   };
 
 
-  template<> 
+  template<>
   class RawConverter<Void, Void>
   {
     public:
@@ -112,23 +100,20 @@ namespace carto
   public:
     DefaultedRescalerInfo( const RescalerInfo & info );
 
-    double getScale();
-    OUTP getScaledValue( INP value );
-
-    void setvmin( double vmin );
-    void setvmax( double vmax );
-    void setomin( double omin );
-    void setomax( double omax );
+    double getScale() const
+    {
+      return _scale;
+    }
+    OUTP getScaledValue( INP value ) const;
 
   private:
-    DefaultedRescalerInfo();
-    double getscale();
+    double getscale() const;
+
     INP _defaultedvmin;
     INP _defaultedvmax;
     OUTP _defaultedomin;
     OUTP _defaultedomax;
 
-    const RescalerInfo & _info;
     double _scale;
   };
 
@@ -146,19 +131,14 @@ namespace carto
   };
 
 
-  /** This converter is a bit higher-level than RawConverter and Rescaler, 
-      it switches to the one or the other depending on the bool template 
+  /** This converter is a bit higher-level than RawConverter and Rescaler,
+      it switches to the one or the other depending on the bool template
       parameter: still not very user-friendly */
   template<typename INP, typename OUTP, bool MODE>
-  class ConverterSwitch
-  {
-  public:
-    void convert( const INP &in, OUTP & out ) const;
-  };
+  class ConverterSwitch;
 
-
-  /** This allocator is used by the top-level Converter to allocate a new 
-      object depending on the input: it is responsible for dimensioning 
+  /** This allocator is used by the top-level Converter to allocate a new
+      object depending on the input: it is responsible for dimensioning
       the output object (ie image dimensions etc) */
   template<typename INP, typename OUTP>
   class ConverterAllocator
@@ -175,7 +155,7 @@ namespace carto
   public:
     ConverterSwitch( const RescalerInfo & info )
       : Rescaler<INP,OUTP>( info ) {}
-    ConverterSwitch()	: Rescaler<INP,OUTP>() {}
+    ConverterSwitch() : Rescaler<INP,OUTP>() {}
   };
 
 
@@ -191,19 +171,19 @@ namespace carto
 
 
   /** Mid-level converter.
-      This converter automatically switches to raw or rescaling converter 
+      This converter automatically switches to raw or rescaling converter
       depending on the ability to use rescaling on the data types */
   template<typename INP, typename OUTP>
   class SmartConverter
-    : public ConverterSwitch<INP,OUTP, 
-                             std::numeric_limits<INP>::is_specialized 
+    : public ConverterSwitch<INP,OUTP,
+                             std::numeric_limits<INP>::is_specialized
   && std::numeric_limits<OUTP>::is_bounded >
   {
   public:
     SmartConverter( const RescalerInfo & info )
       : ConverterSwitch<INP,OUTP,
-                             std::numeric_limits<INP>::is_specialized
-  && std::numeric_limits<OUTP>::is_bounded >( info ) {}
+                        std::numeric_limits<INP>::is_specialized
+                        && std::numeric_limits<OUTP>::is_bounded >( info ) {}
   };
 
 
@@ -213,17 +193,18 @@ namespace carto
   {
   public :
     Converter( bool rescale = false ) : _rescale( rescale ), _info() {}
-    Converter( bool rescale, RescalerInfo & info ) : _rescale( rescale ), _info(info) {}
+    Converter( bool rescale, const RescalerInfo & info )
+      : _rescale( rescale ), _info(info) {}
     ~Converter() {}
 
     /** converts an INP type data to an OUTP data.
-        If rescale mode is on, the conversion tries to use the whole dynamics 
-        of the OUTP type (int types), so all quantification info will be lost, 
+        If rescale mode is on, the conversion tries to use the whole dynamics
+        of the OUTP type (int types), so all quantification info will be lost,
         unless put as a scale factor in the header (used for AimsData).
     */
     OUTP* operator () ( const INP &in ) const;
     ///	converts INP into an existing OUTP object
-    void convert( const INP &in, OUTP & out ) const;
+    virtual void convert( const INP &in, OUTP & out ) const;
 
   protected:
     bool	_rescale;
@@ -232,16 +213,16 @@ namespace carto
   };
 
 
-  /** ShallowConverter only differs from the "standard" Converter in the 
-      way that it may make shallow copies of objects if input and output types 
-      are identical. When INP and OUTP types are different, it is the same as 
+  /** ShallowConverter only differs from the "standard" Converter in the
+      way that it may make shallow copies of objects if input and output types
+      are identical. When INP and OUTP types are different, it is the same as
       Converter.
    */
-  template <typename INP, typename OUTP> 
+  template <typename INP, typename OUTP>
   class ShallowConverter : public Converter<INP, OUTP>
   {
   public:
-    ShallowConverter( bool rescale = false ) 
+    ShallowConverter( bool rescale = false )
       : Converter<INP, OUTP>( rescale ) {}
     ShallowConverter( bool rescale, RescalerInfo & info )
       : Converter<INP, OUTP>( rescale, info ) {}
@@ -264,11 +245,21 @@ namespace carto
   inline
   void Rescaler<INP,OUTP>::convert( const INP &in, OUTP & out ) const
   {
+    // TODO: this is invalid: RescalerInfo has no getScaledValue method
     out = this->_info->getScaledValue( in );
   }
 
+
+#define CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( IN , OUT ) \
+template<> \
+inline \
+void RawConverter< IN , OUT >::convert( const IN &in, OUT & out ) const \
+{ \
+   out = static_cast<OUT>( rint( in ) ); \
+}
   // Specialization for integer conversions rawconverter methods
-  // In the case of conversion to integer types, we must round values, not only convert.
+  // In the case of conversion to integer types, we must round values,
+  // not only convert.
   CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( double, int16_t )
   CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( float, int16_t )
   CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( double, uint16_t )
@@ -281,12 +272,14 @@ namespace carto
   CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( float, int64_t )
   CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( double, uint64_t )
   CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT( float, uint64_t )
+#undef CARTO_SPECIALIZED_RAWCONVERTER_ROUNDED_CONVERT
+
 
   template<typename INP, typename OUTP>
   inline
   void RawConverter<INP,OUTP>::convert( const INP &in, OUTP & out ) const
   {
-    out = OUTP( in );
+    out = static_cast<OUTP>( in );
   }
 
   template<class INP, class OUTP>
@@ -305,25 +298,25 @@ namespace carto
   }
 
   template<class INP, class OUTP>
-  inline void 
+  inline void
   Converter<INP,OUTP>::convert( const INP &in, OUTP & out ) const
   {
     if( _rescale )
       {
-        SmartConverter<INP,OUTP>    sc(this->_info);
+        SmartConverter<INP,OUTP> sc(this->_info);
         sc.convert( in, out );
       }
     else
       {
-        RawConverter<INP,OUTP>  rc;
+        RawConverter<INP,OUTP> rc;
         rc.convert( in, out );
       }
   }
 
   template<typename T>
   inline T min_limit() {
-    /// Returns the negative minimum value, because for some types (double and float)
-    /// the min value is the nearest value to 0
+    /// Returns the negative minimum value, because for some types
+    /// (double and float) the min value is the nearest value to 0
     T result = std::numeric_limits<T>::min();
 
     if ( std::numeric_limits<T>::is_signed ) {
@@ -367,31 +360,16 @@ namespace carto
   /*
    * DefaultedRescalerInfo methods implementation
    */
+
   template<typename INP, typename OUTP>
-  DefaultedRescalerInfo<INP,OUTP>::DefaultedRescalerInfo( const RescalerInfo & info )
-    : _info( info )
+  inline OUTP DefaultedRescalerInfo<INP,OUTP>::getScaledValue( INP value ) const
   {
-    // Initialize scale information
-    setvmin( _info.vmin );
-    setvmax( _info.vmax );
-    setomin( _info.omin );
-    setomax( _info.omax );
-
-    _scale = this->getscale();
-  }
-
-  template<typename INP, typename OUTP>
-  double DefaultedRescalerInfo<INP,OUTP>::getScale() {
-    return _scale;
-  }
-
-  template<typename INP, typename OUTP>
-  OUTP DefaultedRescalerInfo<INP,OUTP>::getScaledValue( INP value ) {
     OUTP result;
     RawConverter<double, OUTP> doubleconverter;
     double scaledvalue;
 
-    scaledvalue = ( value - this->_defaultedvmin ) * _scale + this->_defaultedomin;
+    scaledvalue = ( value - this->_defaultedvmin ) * _scale
+      + this->_defaultedomin;
 
     if ( scaledvalue < ((double)carto::min_limit<OUTP>())) {
       result = carto::min_limit<OUTP>();
@@ -404,35 +382,83 @@ namespace carto
     return result;
   }
 
-  template<typename INP, typename OUTP>
-  void DefaultedRescalerInfo<INP,OUTP>::setvmin( double vmin ) {
-    _defaultedvmin = carto::getcheckedmin<INP>( vmin );
-  }
+  extern template class DefaultedRescalerInfo<int8_t, int8_t>;
+  extern template class DefaultedRescalerInfo<int8_t, uint8_t>;
+  extern template class DefaultedRescalerInfo<int8_t, int16_t>;
+  extern template class DefaultedRescalerInfo<int8_t, uint16_t>;
+  extern template class DefaultedRescalerInfo<int8_t, int32_t>;
+  extern template class DefaultedRescalerInfo<int8_t, uint32_t>;
+  extern template class DefaultedRescalerInfo<int8_t, float>;
+  extern template class DefaultedRescalerInfo<int8_t, double>;
 
-  template<typename INP, typename OUTP>
-  void DefaultedRescalerInfo<INP,OUTP>::setvmax( double vmax ) {
-    _defaultedvmax = carto::getcheckedmax<INP>( vmax );
-  }
+  extern template class DefaultedRescalerInfo<uint8_t, int8_t>;
+  extern template class DefaultedRescalerInfo<uint8_t, uint8_t>;
+  extern template class DefaultedRescalerInfo<uint8_t, int16_t>;
+  extern template class DefaultedRescalerInfo<uint8_t, uint16_t>;
+  extern template class DefaultedRescalerInfo<uint8_t, int32_t>;
+  extern template class DefaultedRescalerInfo<uint8_t, uint32_t>;
+  extern template class DefaultedRescalerInfo<uint8_t, float>;
+  extern template class DefaultedRescalerInfo<uint8_t, double>;
 
-  template<typename INP, typename OUTP>
-  void DefaultedRescalerInfo<INP,OUTP>::setomin( double omin ) {
-    _defaultedomin = carto::getcheckedmin<OUTP>( omin );
-  }
+  extern template class DefaultedRescalerInfo<int16_t, int8_t>;
+  extern template class DefaultedRescalerInfo<int16_t, uint8_t>;
+  extern template class DefaultedRescalerInfo<int16_t, int16_t>;
+  extern template class DefaultedRescalerInfo<int16_t, uint16_t>;
+  extern template class DefaultedRescalerInfo<int16_t, int32_t>;
+  extern template class DefaultedRescalerInfo<int16_t, uint32_t>;
+  extern template class DefaultedRescalerInfo<int16_t, float>;
+  extern template class DefaultedRescalerInfo<int16_t, double>;
 
-  template<typename INP, typename OUTP>
-  void DefaultedRescalerInfo<INP,OUTP>::setomax( double omax ) {
-    _defaultedomax = carto::getcheckedmax<OUTP>( omax );
-  }
+  extern template class DefaultedRescalerInfo<uint16_t, int8_t>;
+  extern template class DefaultedRescalerInfo<uint16_t, uint8_t>;
+  extern template class DefaultedRescalerInfo<uint16_t, int16_t>;
+  extern template class DefaultedRescalerInfo<uint16_t, uint16_t>;
+  extern template class DefaultedRescalerInfo<uint16_t, int32_t>;
+  extern template class DefaultedRescalerInfo<uint16_t, uint32_t>;
+  extern template class DefaultedRescalerInfo<uint16_t, float>;
+  extern template class DefaultedRescalerInfo<uint16_t, double>;
 
-  template<typename INP, typename OUTP>
-  double DefaultedRescalerInfo<INP,OUTP>::getscale() {
-    double vdiff, odiff;
-    vdiff = (double)this->_defaultedvmax - (double)this->_defaultedvmin;
-    vdiff = ( vdiff != 0 ? vdiff : 1 );
-    odiff = (double)this->_defaultedomax - (double)this->_defaultedomin;
+  extern template class DefaultedRescalerInfo<int32_t, int8_t>;
+  extern template class DefaultedRescalerInfo<int32_t, uint8_t>;
+  extern template class DefaultedRescalerInfo<int32_t, int16_t>;
+  extern template class DefaultedRescalerInfo<int32_t, uint16_t>;
+  extern template class DefaultedRescalerInfo<int32_t, int32_t>;
+  extern template class DefaultedRescalerInfo<int32_t, uint32_t>;
+  extern template class DefaultedRescalerInfo<int32_t, float>;
+  extern template class DefaultedRescalerInfo<int32_t, double>;
 
-    return odiff / vdiff ;
-  }
+  extern template class DefaultedRescalerInfo<uint32_t, int8_t>;
+  extern template class DefaultedRescalerInfo<uint32_t, uint8_t>;
+  extern template class DefaultedRescalerInfo<uint32_t, int16_t>;
+  extern template class DefaultedRescalerInfo<uint32_t, uint16_t>;
+  extern template class DefaultedRescalerInfo<uint32_t, int32_t>;
+  extern template class DefaultedRescalerInfo<uint32_t, uint32_t>;
+  extern template class DefaultedRescalerInfo<uint32_t, float>;
+  extern template class DefaultedRescalerInfo<uint32_t, double>;
+
+  extern template class DefaultedRescalerInfo<float, int8_t>;
+  extern template class DefaultedRescalerInfo<float, uint8_t>;
+  extern template class DefaultedRescalerInfo<float, int16_t>;
+  extern template class DefaultedRescalerInfo<float, uint16_t>;
+  extern template class DefaultedRescalerInfo<float, int32_t>;
+  extern template class DefaultedRescalerInfo<float, uint32_t>;
+  extern template class DefaultedRescalerInfo<float, float>;
+  extern template class DefaultedRescalerInfo<float, double>;
+
+  extern template class DefaultedRescalerInfo<double, int8_t>;
+  extern template class DefaultedRescalerInfo<double, uint8_t>;
+  extern template class DefaultedRescalerInfo<double, int16_t>;
+  extern template class DefaultedRescalerInfo<double, uint16_t>;
+  extern template class DefaultedRescalerInfo<double, int32_t>;
+  extern template class DefaultedRescalerInfo<double, uint32_t>;
+  extern template class DefaultedRescalerInfo<double, float>;
+  extern template class DefaultedRescalerInfo<double, double>;
+
+  // These three specializations seem to be needed in order to compile
+  // the AimsFileConvert command.
+  extern template class DefaultedRescalerInfo<char, short>;
+  extern template class DefaultedRescalerInfo<unsigned long, short>;
+  extern template class DefaultedRescalerInfo<long, short>;
 }
 
 #endif
