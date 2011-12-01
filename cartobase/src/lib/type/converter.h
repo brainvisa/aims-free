@@ -246,7 +246,7 @@ namespace carto
   void Rescaler<INP,OUTP>::convert( const INP &in, OUTP & out ) const
   {
     // TODO: this is invalid: RescalerInfo has no getScaledValue method
-    out = this->_info->getScaledValue( in );
+    out = this->_info.getScaledValue( in );
   }
 
 
