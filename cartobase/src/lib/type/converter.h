@@ -247,7 +247,7 @@ namespace carto
   {
     // TODO: this extremely sub-optimal...
     // (but hopefullty extremely rarely used)
-    dri DefaultedRescalerInfo<INP, OUTP>( _info );
+    DefaultedRescalerInfo<INP, OUTP> dri( _info );
     out = dri.getScaledValue( in );
   }
 
