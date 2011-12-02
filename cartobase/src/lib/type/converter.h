@@ -245,8 +245,10 @@ namespace carto
   inline
   void Rescaler<INP,OUTP>::convert( const INP &in, OUTP & out ) const
   {
-    // TODO: this is invalid: RescalerInfo has no getScaledValue method
-    out = this->_info.getScaledValue( in );
+    // TODO: this extremely sub-optimal...
+    // (but hopefullty extremely rarely used)
+    dri DefaultedRescalerInfo<INP, OUTP>( _info );
+    out = dri.getScaledValue( in );
   }
 
 
