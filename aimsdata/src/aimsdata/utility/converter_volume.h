@@ -111,7 +111,7 @@ namespace carto
     void convert( const AimsData<INP> &in, AimsData<INP> & out ) const;
 
   private:
-    bool	_shallowcopy;
+    bool _shallowcopy;
   };
 
 
@@ -192,7 +192,7 @@ namespace carto
     if( in.header() )
       out.setHeader( in.header()->cloneHeader( true ) );
 
-    int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
+    int x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
       dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
     if( in.dimX() < dx )
       dx = in.dimX();
@@ -203,7 +203,7 @@ namespace carto
     if( in.dimT() < dt )
       dt = in.dimT();
 
-    RawConverter<INP,OUTP>	itemconv;
+    RawConverter<INP,OUTP> itemconv;
 
     for( t=0; t<dt; ++t )
       {
@@ -248,6 +248,8 @@ namespace carto
   void Rescaler<AimsData<INP>,AimsData<OUTP> >::convert
   ( const AimsData<INP> &in, AimsData<OUTP> &out ) const
   {
+    // Accommodate the case where out is allocated with zero size by
+    // AllocatorConverter.  This happens when the INP and OUTP types are equal.
     if( out.dimX() == 0 )
       out = AimsData<OUTP>( in.dimX(), in.dimY(), in.dimZ(),
                             in.dimT(), in.borderWidth() );
@@ -275,7 +277,7 @@ namespace carto
 
     DefaultedRescalerInfo<INP, OUTP> defaultedinfo( info );
 
-    int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
+    int x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
       dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
     if( in.dimX() < dx )
       dx = in.dimX();
@@ -293,7 +295,8 @@ namespace carto
             for( y=0; y<dy; ++y )
               {
                 for( x=0; x<dx; ++x )
-                  out( x, y, z, t ) = defaultedinfo.getScaledValue( in( x, y, z, t ) );
+                  out( x, y, z, t ) =
+                    defaultedinfo.getScaledValue( in( x, y, z, t ) );
                 for( ; x<ox; ++x )
                   out( x, y, z, t ) = OUTP(0);
               }
@@ -313,7 +316,7 @@ namespace carto
           for( x=0; x<ox; ++x )
             out( x, y, z, t ) = OUTP(0);
 
-    float	scf = 1.;
+    float scf = 1.;
     aims::PythonHeader
       *h = dynamic_cast<aims::PythonHeader *>( out.header() );
     if( !h )
@@ -348,47 +351,47 @@ namespace carto
     }
     else
       {
-	if( in.header() )
-	  out.setHeader( in.header()->cloneHeader( true ) );
+        if( in.header() )
+          out.setHeader( in.header()->cloneHeader( true ) );
 
-	out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
-	int	x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
-	  dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
-	if( in.dimX() < dx )
-	  dx = in.dimX();
-	if( in.dimY() < dy )
-	  dy = in.dimY();
-	if( in.dimZ() < dz )
-	  dz = in.dimZ();
-	if( in.dimT() < dt )
-	  dt = in.dimT();
+        out.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
+        int     x, y, z, t, dx = out.dimX(), dy = out.dimY(), dz = out.dimZ(),
+          dt = out.dimT(), ox = dx, oy = dy, oz = dz, ot = dt;
+        if( in.dimX() < dx )
+          dx = in.dimX();
+        if( in.dimY() < dy )
+          dy = in.dimY();
+        if( in.dimZ() < dz )
+          dz = in.dimZ();
+        if( in.dimT() < dt )
+          dt = in.dimT();
 
-	for( t=0; t<dt; ++t )
-	  {
-	    for( z=0; z<dz; ++z )
-	      {
-		for( y=0; y<dy; ++y )
-		  {
-		    for( x=0; x<dx; ++x )
-		      out( x, y, z, t ) = in( x, y, z, t );
-		    for( ; x<ox; ++x )
-		      out( x, y, z, t ) = INP(0);
-		  }
-		for( ; y<oy; ++y )
-		  for( x=0; x<ox; ++x )
-		    out( x, y, z, t ) = INP(0);
-	      }
-	    for( ; z<oz; ++z )
-	      for( y=0; y<oy; ++y )
-		for( x=0; x<ox; ++x )
-		  out( x, y, z, t ) = INP(0);
-	  }
+        for( t=0; t<dt; ++t )
+          {
+            for( z=0; z<dz; ++z )
+              {
+                for( y=0; y<dy; ++y )
+                  {
+                    for( x=0; x<dx; ++x )
+                      out( x, y, z, t ) = in( x, y, z, t );
+                    for( ; x<ox; ++x )
+                      out( x, y, z, t ) = INP(0);
+                  }
+                for( ; y<oy; ++y )
+                  for( x=0; x<ox; ++x )
+                    out( x, y, z, t ) = INP(0);
+              }
+            for( ; z<oz; ++z )
+              for( y=0; y<oy; ++y )
+                for( x=0; x<ox; ++x )
+                  out( x, y, z, t ) = INP(0);
+          }
 
-	for( ; t<ot; ++t )
-	  for( z=0; z<oz; ++z )
-	    for( y=0; y<oy; ++y )
-	      for( x=0; x<ox; ++x )
-		out( x, y, z, t ) = INP(0);
+        for( ; t<ot; ++t )
+          for( z=0; z<oz; ++z )
+            for( y=0; y<oy; ++y )
+              for( x=0; x<ox; ++x )
+                out( x, y, z, t ) = INP(0);
       }
   }
 
@@ -400,7 +403,8 @@ namespace carto
 
   template<typename INP, typename OUTP>
   inline
-  Rescaler<AimsData<INP>, AimsData<OUTP> >::Rescaler(const RescalerInfo & info) : _info(info)
+  Rescaler<AimsData<INP>, AimsData<OUTP> >::Rescaler(const RescalerInfo & info)
+  : _info(info)
   {
   }
 
@@ -453,12 +457,12 @@ namespace carto
   {
     if( this->_rescale )
       {
-        SmartConverter<AimsData<INP>,AimsData<INP> >	sc( this->_info, true );
+        SmartConverter<AimsData<INP>,AimsData<INP> > sc( this->_info, true );
         sc.convert( in, out  );
       }
     else
       {
-        RawConverter<AimsData<INP>,AimsData<INP> >	rc( true );
+        RawConverter<AimsData<INP>,AimsData<INP> > rc( true );
         rc.convert( in, out );
       }
   }

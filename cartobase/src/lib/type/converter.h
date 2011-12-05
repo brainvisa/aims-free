@@ -40,15 +40,33 @@
 
 namespace carto
 {
-  /// Low level rescaler info used for rescaling
+  /** Low level rescaler info used for rescaling
+
+      Request linear rescaling from the input range [vmin, vmax] to the output
+      range [omin, omax].  These ranges are initialized with Not-a-Number (NaN)
+      values, which correspond to the following defaults:
+
+      - NaN in the input range means to use as input range the range of values
+        effectively used in the input of the rescaler; \e unless usevtypelimits
+        is \c true, in which case the whole range values of accommodated by the
+        input type is used.
+      - NaN in the output range means to use the whole range of values
+        accommodated by the output type.
+   */
   class RescalerInfo
   {
   public:
+    /// Construct object requesting default rescaling
     RescalerInfo();
 
+    /// Test if any explicit rescaling parameters has been specified
     bool explicitRescale() const;
 
+    /// Use limits of the input type instead of effective input min-max
+    ///
+    /// Has no effect if vmin and vmax are explicitly specified.
     bool    usevtypelimits;
+
     double  vmin;
     double  vmax;
     double  omin;
@@ -159,7 +177,15 @@ namespace carto
   };
 
 
-  /// Specialization of non-rescaling ConverterSwitch
+  /** Specialization of non-rescaling ConverterSwitch
+
+      \todo This is not completely satisfactory: this class is instantiated in
+      cases where rescaling has been requested, but the rescaling parameters
+      are ignored \b silently.  This may be acceptable if no explicit rescaling
+      parameters are passed, but the constructor of this class should probably
+      throw an exception if explicit rescaling has been requested
+      (i.e. RescalerInfo::explicitRescale() returns \c true).
+   */
   template<typename INP, typename OUTP>
   class ConverterSwitch<INP,OUTP,false> : public RawConverter<INP,OUTP>
   {
@@ -197,17 +223,21 @@ namespace carto
       : _rescale( rescale ), _info(info) {}
     ~Converter() {}
 
-    /** converts an INP type data to an OUTP data.
-        If rescale mode is on, the conversion tries to use the whole dynamics
-        of the OUTP type (int types), so all quantification info will be lost,
-        unless put as a scale factor in the header (used for AimsData).
+    /** Converts an INP type data to an OUTP data.
+
+        If rescale mode is on, the conversion uses the parameters provided as a
+        RescalerInfo object.  If no such object is provided, it tries to use
+        the whole dynamics of the OUTP type (int types).
+
+        In any case, all quantification info will be lost, unless put as a
+        scale factor in the header (used for AimsData).
     */
     OUTP* operator () ( const INP &in ) const;
-    ///	converts INP into an existing OUTP object
+    /// Converts INP into an existing OUTP object
     virtual void convert( const INP &in, OUTP & out ) const;
 
   protected:
-    bool	_rescale;
+    bool _rescale;
     RescalerInfo _info;
 
   };
