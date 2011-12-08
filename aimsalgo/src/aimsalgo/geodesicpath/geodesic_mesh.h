@@ -189,7 +189,7 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
     for(unsigned j=0; j<3; ++j)
     {
       unsigned vertex_id = f.adjacent_vertices()[j]->id();
-      assert(vertex_id < m_vertices.size());
+//      assert(vertex_id < m_vertices.size());
       count[vertex_id]++;
     }
   }
@@ -245,7 +245,7 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
     {
       if(i<half_edges.size()-1)   //sanity check: there should be at most two equal half-edges
       {               //if it fails, most likely the input data are messed up
-        assert(half_edges[i] != half_edges[i+1]);
+//        assert(half_edges[i] != half_edges[i+1]);
       }
     }
   }
@@ -535,7 +535,7 @@ inline void Mesh::update_weight(const float *curvature, int mode,double strain,d
     else
       e.length() = e.adjacent_vertices()[0]->distance(e.adjacent_vertices()[1]);
 
-    assert(e.length() > 1e-100);    //algorithm works well with non-degenerate meshes only
+    //assert(e.length() > 1e-100);    //algorithm works well with non-degenerate meshes only
 
     if(i != half_edges.size()-1 && half_edges[i] == half_edges[i+1])  //double edge
     {

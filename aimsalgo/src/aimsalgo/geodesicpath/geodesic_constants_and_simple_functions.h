@@ -28,9 +28,9 @@ inline double cos_from_edges(double const a,      //compute the cosine of the an
                double const b,
                double const c)
 {
-  assert(a>1e-50);
-  assert(b>1e-50);
-  assert(c>1e-50);
+//  assert(a>1e-50);
+//  assert(b>1e-50);
+//  assert(c>1e-50);
 
   double result = (b*b + c*c - a*a)/(2.0*b*c);
   result = std::max(result, -1.0);

@@ -107,9 +107,9 @@ vector<Point3df> GeodesicPath::shortestPath_1_1_xyz(unsigned source, unsigned ta
     dijkstra_algorithm->trace_back(t, path);
     dijkstra_algorithm->print_info_about_path(path);
 
-    for(int j=0; j<path.size(); ++j)
-      //cout << endl;
-      cout << path[j].x() << " " << path[j].y() << " "<< path[j].z() << "\n";
+//    for(int j=0; j<path.size(); ++j)
+//      //cout << endl;
+//      cout << path[j].x() << " " << path[j].y() << " "<< path[j].z() << "\n";
 
     cout << endl;
 
@@ -507,7 +507,7 @@ vector<unsigned> GeodesicPath::longestPath_N_N_ind(vector<unsigned> points, int*
       index_max_i = index;
       index_max_j = target;
     }
-    std::cout << "\r\033[K" <<  nb_combinaison << "/" << nb_combinaison_max << " " << index_max_i << " " << index_max_j << " "<< dist_max << std::flush;
+    //std::cout << "\r\033[K" <<  nb_combinaison << "/" << nb_combinaison_max << " " << index_max_i << " " << index_max_j << " "<< dist_max << std::flush;
   }
 
   *s = index_max_i;
