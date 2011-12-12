@@ -230,20 +230,33 @@ namespace aims
                 }
 	      
 	      Uint16 *sptr = shortValues;
-	      int frame = instance / thing.dimZ();
-	      int slice = instance % thing.dimZ();
-              if( frame >= thing.dimT() )
-              {
-                std::cerr << "DICOM reader error: size/slice number mismatch"
-                << std::endl;
-                return;
-              }
+              int z0, ze, frame;
 
-	      if ( hdr->reverseZ() )  {
-		slice = thing.dimZ() - slice - 1;
-		//if ( slice == 0 ) std::cerr << "DICOM Z axis reversed" 
-		// << std::endl;
-	      }
+              if ( modality == "NM" )
+              {
+                z0 = 0;
+                ze = thing.dimZ();
+                frame = 0;
+              }
+              else
+              {
+	        z0 = instance % thing.dimZ();
+                ze = z0 + 1;
+	        frame = instance / thing.dimZ();
+                if( frame >= thing.dimT() )
+                {
+                  std::cerr << "DICOM reader error: size/slice number mismatch"
+                            << std::endl;
+                  return;
+                }
+
+	        if ( hdr->reverseZ() )  {
+		  z0 = thing.dimZ() - z0 - 1;
+                  ze = z0 + 1;
+	  	  //if ( slice == 0 ) std::cerr << "DICOM Z axis reversed" 
+		  // << std::endl;
+	        }
+              }
 		
 	      bool useScaleAndIntercept = true ;
 	      if( useScaleAndIntercept ){
@@ -295,41 +308,59 @@ namespace aims
 /* 		    max = wc + ww / 2.0; */
 /* 		  } */
 		
-		int i, j;
+		int i, j, k;
 		int dx = thing.dimX();
 		int dy = thing.dimY();
 		double signal ;
-		for ( j=0; j<dy; j++ )
-		  for ( i=0; i<dx; i++ )
+                for ( k=z0; k<ze; k++ )
+  		  for ( j=0; j<dy; j++ )
+		    for ( i=0; i<dx; i++ )
 		    {
                       // Data is stored as int16_t so we must read it as int16_t otherwise 
                       // signed values will be lost
 		      signal = ((double)(int16_t)*sptr++) * slope + inter;
                       signal *= scale_factor;
-		      thing( i, j, slice, frame ) = (T)signal;
+		      thing( i, j, k, frame ) = (T)signal;
 		    }
 		
 	      } else {
-		int i, j;
+		int i, j, k;
 		int dx = thing.dimX();
 		int dy = thing.dimY();
                 double signal;
-		for ( j=0; j<dy; j++ )
-		  for ( i=0; i<dx; i++ )
+                for ( k=z0; k<ze; k++ )
+		  for ( j=0; j<dy; j++ )
+		    for ( i=0; i<dx; i++ )
+                    {
 		      signal = (double)(int16_t)*sptr++;
                       signal *= scale_factor;
-		    thing( i, j, slice, frame ) = (T)signal;
+		      thing( i, j, k, frame ) = (T)signal;
+                    }
 	      }
             }
           else if ( byteValues )
             {
               Uint8 *bptr = byteValues;
-              int frame = instance / thing.dimZ();
-              int slice = instance % thing.dimZ();
-              if ( hdr->reverseZ() ) {
-                slice = thing.dimZ() - slice - 1;
-                //if ( slice == 0 ) std::cerr << "DICOM Z axis reversed" 
-                // << std::endl;
+              int z0, ze, frame;
+
+              if ( modality == "NM" )
+              {
+                z0 = 0;
+                ze = thing.dimZ();
+                frame = 0;
+              }
+              else
+              {
+	        z0 = instance % thing.dimZ();
+                ze = z0 + 1;
+                frame = instance / thing.dimZ();
+
+                if ( hdr->reverseZ() ) {
+                  z0 = thing.dimZ() - z0 - 1;
+                  ze = z0 + 1;
+                  //if ( slice == 0 ) std::cerr << "DICOM Z axis reversed" 
+                  // << std::endl;
+                }
               }
 
               double wc = -1.0;
@@ -381,12 +412,13 @@ namespace aims
                 }
 */
 	      
-              int i, j;
+              int i, j, k;
               int dx = thing.dimX();
               int dy = thing.dimY();
               double signal; //, coef = 255.0 / ( max - min );
-              for ( j=0; j<dy; j++ )
-                for ( i=0; i<dx; i++ )
+              for ( k=z0; k<ze; k++ )
+                for ( j=0; j<dy; j++ )
+                  for ( i=0; i<dx; i++ )
                   {
 		    std::cout << "slope = " << slope << " & intercept = " << inter << std::endl ;
                     signal = ((double)(int8_t)*bptr++) * slope + inter;
@@ -397,7 +429,7 @@ namespace aims
                     else signal = ( signal - min ) * coef;
 */
 
-                    thing( i, j, slice, frame ) = (T)signal;
+                    thing( i, j, k, frame ) = (T)signal;
                   }
             }
         }

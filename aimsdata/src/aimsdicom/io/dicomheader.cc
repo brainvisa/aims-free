@@ -284,6 +284,7 @@ int DicomHeader::read()
   string	fullname;
   char		sep = FileUtil::separator();
   std::vector< std::string > fileVector;
+  bool status;
 
   for( is=files.begin(); is!=es; ++is )
     {
@@ -326,60 +327,68 @@ int DicomHeader::read()
   if( moda != "PT" && moda != "CT" )
     setProperty( "filenames", fileVector2 );
 
-  map< int, FileElement >::const_iterator i = _slices.begin();
-  int dimT;
-  double maxZVoxSize = 0. , minZVoxSize = 100000. ;
-  bool status = getProperty( "nb_t_pos", dimT );
-  // look for slice arrangement I -> S or S -> I
-  bool sensInverse = false;
-  i = _slices.begin();
-  double loc1 = i->second.location();
-  ++i;
-      
-  if ( i != _slices.end() && i->second.location() > loc1 ) 
-    sensInverse = true;
-
-  // look for dimT
-  int nbTrans = 0;
-  i = _slices.begin();
-  float previousSliceLocation = i->second.location() ;
-  int counter = 0 ;
-  std::multiset<float> dZs ;
-  while( i != _slices.end() )
-    {
-      if ( !sensInverse && i->second.location() > loc1 )  nbTrans++;
-      else if ( sensInverse && i->second.location() < loc1 )  nbTrans++;
-	  
-      float dZ = abs( i->second.location() - previousSliceLocation ) ;
-      if( i != _slices.begin() ){
-        dZs.insert(dZ) ;
-        if( dZ < minZVoxSize )
-          minZVoxSize = dZ ;
-        if( dZ > maxZVoxSize )
-          maxZVoxSize = dZ ;
-      }
-      previousSliceLocation = i->second.location() ;
-      loc1 = i->second.location();
-      ++i;
-      ++counter ;
-   }
-
-  if ( !status )
-    {
-      dimT = nbTrans + 1;
-    } 
- 
-  int dimZ = _slices.size() / dimT;
-  if( dimZ * dimT != _slices.size() )
+  int dimZ, dimT;
+  if ( moda == "NM" )
   {
-    cerr << "DICOM reader warning: slices number does not make a complete "
-      << "volume" << std::endl;
-    ++dimZ;
+    getProperty( "number_of_frames", dimZ );
+    dimT = 1;
+    setProperty( "data_type", string( "FLOAT" ) );
   }
+  else
+  {
+    map< int, FileElement >::const_iterator i = _slices.begin();
+    double maxZVoxSize = 0. , minZVoxSize = 100000. ;
+    status = getProperty( "nb_t_pos", dimT );
+    // look for slice arrangement I -> S or S -> I
+    bool sensInverse = false;
+    i = _slices.begin();
+    double loc1 = i->second.location();
+    ++i;
+      
+    if ( i != _slices.end() && i->second.location() > loc1 ) 
+      sensInverse = true;
+
+    // look for dimT
+    int nbTrans = 0;
+    i = _slices.begin();
+    float previousSliceLocation = i->second.location() ;
+    int counter = 0 ;
+    std::multiset<float> dZs ;
+    while( i != _slices.end() )
+      {
+        if ( !sensInverse && i->second.location() > loc1 )  nbTrans++;
+        else if ( sensInverse && i->second.location() < loc1 )  nbTrans++;
+            
+        float dZ = abs( i->second.location() - previousSliceLocation ) ;
+        if( i != _slices.begin() ){
+          dZs.insert(dZ) ;
+          if( dZ < minZVoxSize )
+            minZVoxSize = dZ ;
+          if( dZ > maxZVoxSize )
+            maxZVoxSize = dZ ;
+        }
+        previousSliceLocation = i->second.location() ;
+        loc1 = i->second.location();
+        ++i;
+        ++counter ;
+     }
+
+    if ( !status )
+      {
+        dimT = nbTrans + 1;
+      } 
+ 
+    dimZ = _slices.size() / dimT;
+    if( dimZ * dimT != _slices.size() )
+    {
+      cerr << "DICOM reader warning: slices number does not make a complete "
+        << "volume" << std::endl;
+      ++dimZ;
+    }
   
-  string manufac;
-  status = getProperty( "manufacturer", manufac );
-  if ( status ) 
+    string manufac;
+    status = getProperty( "manufacturer", manufac );
+    if ( status ) 
     { 
       if ( manufac == "GE MEDICAL SYSTEMS" )  _reverseZ = true;
 /*
@@ -495,6 +504,7 @@ int DicomHeader::read()
         setProperty( "duration_time", durationTimes ) ;
       }
     }
+  }
 
   vector< int > volDim;
   getProperty( "volume_dimension", volDim );
@@ -724,7 +734,8 @@ int DicomHeader::readFirst()
     }
 
   if ( spaceSlice > 0.0f )  voxSize.push_back( (float)spaceSlice );
-  else if ( ( modality == "PT" ) && ( thickness > 0.0f ) )
+  else if ( ( ( modality == "PT" ) || ( modality == "NM" ) ) && 
+            ( thickness > 0.0f ) )
     voxSize.push_back( (float)thickness );
   else  voxSize.push_back( 0.0f ); // to determine Z resolution in read()
   voxSize.push_back( 1.0f ); // T dimension
@@ -1053,6 +1064,18 @@ int DicomHeader::readFirst()
           
         }  
       }
+
+  if ( modality == "NM" )
+  {
+    if ( header.search( DCM_NumberOfFrames, stack ) == EC_Normal )
+    {
+      ASSERT( stack.top()->ident() == EVR_IS );
+      DcmIntegerString *object = (DcmIntegerString *)stack.top();
+      Sint32 nFrames;
+      object->getSint32( nFrames );
+      setProperty( "number_of_frames", (int)nFrames );
+    }
+  }
 
   return (int)instance_number;
 }
