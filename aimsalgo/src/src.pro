@@ -144,8 +144,7 @@ PSUBDIRS = \
     AimsVFilter          \
     AimsVoiStat               \
     AimsVoronoi               \
-    AimsZCat \
-    francois
+    AimsZCat
 
 
 module(jpeg):PSUBDIRS +=    AimsData2Jpeg
