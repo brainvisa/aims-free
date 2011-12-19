@@ -85,7 +85,7 @@ bool masscenter( Process & p, const string & filein, Finder & f )
   int	x, y, z, t;
   double	sum, val, totsum = 0, np, totnp = 0;
   double	vol = data.sizeX() * data.sizeY() * data.sizeZ();
-  Point3df	pos, totpos;
+  Point3df	pos, totpos = Point3df( 0, 0, 0 );
   for( t=0; t<data.dimT(); ++t )
     {
       sum = 0;
