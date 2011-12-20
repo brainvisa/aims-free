@@ -200,7 +200,9 @@ namespace pyaims
     else if( dat )
     {
       *sipCppPtr = dat;
-      return 0; //sipGetState(sipTransferObj);
+      // return 0; //sipGetState(sipTransferObj);
+      // Still don't understand this state/return codes, Denis 2011/12/20
+      return state;
     }
 
     *sipIsErr = 0;
@@ -209,7 +211,8 @@ namespace pyaims
     if( !*sipIsErr )
     {
       PyErr_Clear();
-      return 0; //sipGetState(sipTransferObj);
+      // return 0; //sipGetState(sipTransferObj);
+      return state;
     }
     return 0;
   }
