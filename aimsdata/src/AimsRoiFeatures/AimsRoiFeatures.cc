@@ -80,7 +80,7 @@ int main( int argc, const char **argv )
     app.addOption( outputFormat, "-f",
                    "output file format. Possible formats are minf or csv. Default value: guessed according to file name extension, if the extension is unknown, the minf format is used.", true );
     app.addOption( outputLocale, "-l",
-                   "Change the locale used for writing numbers in csv format. For instance, to use a csv file in a french version of Excel, one should use a french locale with \"-l fr\".", true );
+                   "Change the locale used for writing numbers in csv format. For instance, to use a csv file in a french version of Excel, one should use a french locale with \"-l fr_FR.utf8\".", true );
     app.alias( "--imageStatistics", "-s" );
     app.alias( "--input", "-i" );
     app.alias( "--transformation", "-t" );
