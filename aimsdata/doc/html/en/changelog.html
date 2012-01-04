@@ -16,6 +16,8 @@
 
 <hr width="100%"> <br>
 
+ <b><a href="#version-4.2.0">Version 4.2.0</a></b><br>
+ <b><a href="#version-4.1.1">Version 4.1.1</a></b><br>
  <b><a href="#version-4.1.0">Version 4.1.0</a></b><br>
  <b><a href="#version-4.0.2">Version 4.0.2</a></b><br>
  <b><a href="#version-4.0">Version 4.0</a></b><br>
@@ -36,6 +38,45 @@
  <b><a href="#version-2.11">Version 2.11</a></b><br>
  <b><a href="#version-2.10">Version 2.10</a></b><br>
  &nbsp;
+
+<!-- -->
+<h4> <a name="version-4.2.0"></a>Jan 4th, 2012, Version 4.2.0</h4>
+
+<p>This version brings a number of bug fixes, and improvements:</p>
+
+<ul>
+<li>Implemented native support for volume * T and volume / T with T numeric types, typically long int, calculating in native types rather than casting to double as it used to. This avoids rounding errors when back-casting to int types. Python bindings were adapted too.
+</li>
+<li>Geodesicpath library update</li>
+<li>Fix in AimsMassCenter averaging.</li>
+<li>DICOM reader fixes for a few header fields, and support for SPECT data.</li>
+<li>FiniteElementSmoothing: removed spurious debug texture writing during smoothing, which caused a hard-coded file /tmp/curv_ss.tex to be written, and participated to a memory leak which could lead (in pathologic cases) to memory overrun.
+</li>
+<li>Fixed rescaling in volume converters (AimsFileConvert + libs)</li>
+<li>Fixed a bug in SplineResampler: the spline coefficients could be wrong at the boundaries of the volume.
+</li>
+
+<li>PyAims</li>
+  <ul>
+    <li>Fixed a SIP ownership problem which caused some memory leaks (especially when automatically converting a Volume to a AimsData)
+    </li>
+  </ul>
+</ul>
+
+<!-- -->
+<h4> <a name="version-4.1.1"></a>Sept 14th, 2011, Version 4.1.1</h4>
+
+<ul>
+<li>Fixed an IMPORTANT BUG in Quaternion: the rotationMatrix() had a matrix elements index bug that caused the translation part not to be initialized. By chance it was most of the time 0 on most systems, but not all/always...
+</li>
+<li>Mesher debug output cleaning</li>
+<li>NIFTI IO: update to nifticlib 2.0.0</li>
+
+<li>PyAims</li>
+  <ul>
+    <li>try to setup BRAINVISA_SHARE envar if it is not set, from the path of the python module.</li>
+  </ul>
+</ul>
 
 <!-- -->
 <h4> <a name="version-4.1.0"></a>May 17th, 2011, Version 4.1.0</h4>
