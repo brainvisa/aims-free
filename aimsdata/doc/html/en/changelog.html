@@ -60,6 +60,7 @@
   <ul>
     <li>Fixed a SIP ownership problem which caused some memory leaks (especially when automatically converting a Volume to a AimsData)
     </li>
+    <li>Fixed a reference-counting problem in volume headers (the header could be deleted with the volume even if a header object in python was still existing).</li>
   </ul>
 </ul>
 
