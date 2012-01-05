@@ -63,10 +63,17 @@ public:
 %End
 %#endif%
 
-  carto::Object* header() /Factory, ReleaseGIL/;
+  SIP_PYOBJECT header() /Factory/;
 %MethodCode
   carto::PropertySet	& ps = sipCpp->header();
-  sipRes = new carto::Object( carto::Object::reference( ps ) );
+  carto::Object* h = new carto::Object( carto::Object::reference( ps ) );
+  sipRes = sipConvertFromNewType( h, sipType_carto_Object, 0 );
+  // set into header a reference to the volume to forbid it to die before the
+  // python header object
+  if( PyObject_SetAttrString( sipRes, "_volref", sipSelf ) == -1 )
+  {
+    std::cerr << "cannot set header ._volref" << std::endl;
+  }
 %End
 
   Volume_%Template1typecode%* operator + ( Volume_%Template1typecode% & )
