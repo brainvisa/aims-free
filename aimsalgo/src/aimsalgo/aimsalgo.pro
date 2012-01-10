@@ -207,6 +207,7 @@ HEADERS = \
     signalfilter/vfilter.h    \
     signalfilter/maxfilter.h  \
     signalfilter/medianfilter.h  \
+    signalfilter/meanfilter.h  \
     signalfilter/minfilter.h  \
     signalfilter/majorityfilter.h  \
     signalfilter/nonlin_filt-func.h \
@@ -377,6 +378,7 @@ SOURCES = \
     signalfilter/gframes.cc    \
     signalfilter/maxfilter.cc  \
     signalfilter/medianfilter.cc  \
+    signalfilter/meanfilter.cc \
     signalfilter/minfilter.cc  \
     signalfilter/majorityfilter.cc  \
     spam/spam.cc \

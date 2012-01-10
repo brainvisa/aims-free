@@ -34,6 +34,12 @@
 
 #include <aims/signalfilter/majorityfilter.h>
 
+template class MajoritySmoothing<uint8_t>;
+template class MajoritySmoothing<int8_t>;
+template class MajoritySmoothing<uint16_t>;
 template class MajoritySmoothing<int16_t>;
+template class MajoritySmoothing<uint32_t>;
+template class MajoritySmoothing<int32_t>;
 template class MajoritySmoothing<float>;
+template class MajoritySmoothing<double>;
 

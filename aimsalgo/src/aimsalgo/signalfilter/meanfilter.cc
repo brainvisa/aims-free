@@ -32,13 +32,13 @@
  */
 
 
-#include <aims/signalfilter/medianfilter.h>
+#include <aims/signalfilter/meanfilter.h>
 
-template class MedianSmoothing<uint8_t>;
-template class MedianSmoothing<int8_t>;
-template class MedianSmoothing<uint16_t>;
-template class MedianSmoothing<int16_t>;
-template class MedianSmoothing<uint32_t>;
-template class MedianSmoothing<int32_t>;
-template class MedianSmoothing<float>;
-template class MedianSmoothing<double>;
+template class MeanSmoothing<uint8_t>;
+template class MeanSmoothing<int8_t>;
+template class MeanSmoothing<uint16_t>;
+template class MeanSmoothing<int16_t>;
+template class MeanSmoothing<uint32_t>;
+template class MeanSmoothing<int32_t>;
+template class MeanSmoothing<float>;
+template class MeanSmoothing<double>;

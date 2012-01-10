@@ -45,33 +45,134 @@
 #include <aims/signalfilter/minfilter.h>
 #include <aims/signalfilter/medianfilter.h>
 #include <aims/signalfilter/majorityfilter.h>
+#include <aims/signalfilter/meanfilter.h>
 
 using namespace aims;
 using namespace carto;
 using namespace std;
 
+class AimsFilter : public Process {
+    public:
+      string fileIn;
+      string fileOut;
+      int32_t dx, dy, dz;
+      string type;
+    
+      AimsFilter();
+};
+
+template<class T> bool 
+filter( Process & p, const string &, Finder & ) {
+  AimsFilter & proc = (AimsFilter &)p;
+
+  // Lecture image
+  AimsData<T> in, out;
+  Reader< AimsData<T> > dataR( proc.fileIn );
+  dataR.read( in );
+
+  // Check dimensions of filter
+  proc.dx = (proc.dx > 1 ? proc.dx : 1 );
+  proc.dy = (proc.dy > 1 ? proc.dy : 1 );
+  proc.dz = (proc.dz > 1 ? proc.dz : 1 );
+
+  if ( proc.dz > in.dimZ() )
+  {
+     cerr << "Image Z dimension can not be lower than filter Z dimension\n";
+     return( 1 );
+  }
+  else if ( proc.dy > in.dimY() )
+  {
+     cerr << "Image Y dimension can not be lower than filter Y dimension\n";
+     return( 1 );
+  }
+  else if ( proc.dx > in.dimX() )
+  {
+     cerr << "Image X dimension can not be lower than filter X dimension\n";
+     return( 1 );
+  }
+
+  if ( (proc.type == "mean") 
+       || (proc.type == "mea") )
+  {
+    MeanSmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
+    out = smoothing.doit( in );
+  }
+  else if ( (proc.type == "median") 
+            || (proc.type == "med") )
+  {
+    MedianSmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
+    out = smoothing.doit( in );
+  }
+  else if ( (proc.type == "minimum") 
+            || (proc.type == "min") )
+  {
+    MinSmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
+    out = smoothing.doit( in );
+  }
+  else if ( (proc.type == "maximum") 
+            || (proc.type == "max") )
+  {
+    MaxSmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
+    out = smoothing.doit( in );
+  }
+  else
+  {
+    MajoritySmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
+    out = smoothing.doit( in );
+  }
+
+  // 
+  //   Writing smoothed image
+  //
+  out.setHeader( in.header()->cloneHeader() );
+  Writer< AimsData<T> > dataW( proc.fileOut );
+  dataW << out;
+
+  return true;
+}
+
+AimsFilter::AimsFilter() 
+  : Process(), dx(1), dy(1), dz(1)
+               
+{
+    registerProcessType( "Volume", "S8", &filter<int8_t> );
+    registerProcessType( "Volume", "U8", &filter<uint8_t> );
+    registerProcessType( "Volume", "S16", &filter<int16_t> );
+    registerProcessType( "Volume", "U16", &filter<uint16_t> );
+    registerProcessType( "Volume", "S32", &filter<int32_t> );
+    registerProcessType( "Volume", "U32", &filter<uint32_t> );
+    registerProcessType( "Volume", "FLOAT", &filter<float> );
+    registerProcessType( "Volume", "DOUBLE", &filter<double> );
+}
+
 int main( int argc, const char **argv )
 {
-  string  filein, fileout, motionfile, smoothingtype = "majority";
-  int     dx = 0, dy = 0, dz = 0;
+  try {
+    AimsFilter proc;
+    string  filein, fileout, motionfile, type = "majority";
 
-  AimsApplication app( argc, argv, "Applies a smoothing filter " 
-                        "to a volume.");
-  app.addOption( filein, "-i", "source volume" );
-  app.addOption( fileout, "-o", "destination volume" );
-  app.addOption( dx, "--dx", "x dimension of the filter to apply", true );
-  app.addOption( dy, "--dy", "y dimension of the filter to apply", true );
-  app.addOption( dz, "--dz", "z dimension of the filter to apply", true );
-  app.addOption( smoothingtype, "-t",
-                  "Smoothing filter type: med[ian], min[imum], "
-                  "max[imum], maj[ority] (default = majority)",
-                  true );
-  app.alias( "--input", "-i" );
-  app.alias( "--output", "-o" );
-  app.alias( "--type", "-t" );
-  try
-  {
+    AimsApplication app( argc, argv, "Applies a smoothing filter " 
+                          "to a volume.");
+    app.addOption( proc.fileIn, "-i", "source volume" );
+    app.addOption( proc.fileOut, "-o", "destination volume" );
+    app.addOption( proc.dx, "--dx", "x dimension of the filter to apply", true );
+    app.addOption( proc.dy, "--dy", "y dimension of the filter to apply", true );
+    app.addOption( proc.dz, "--dz", "z dimension of the filter to apply", true );
+    app.addOption( proc.type, "-t",
+                    "Smoothing filter type: mea[n], med[ian], min[imum], "
+                    "max[imum], maj[ority] (default = majority)",
+                    true );
+    app.alias( "--input", "-i" );
+    app.alias( "--output", "-o" );
+    app.alias( "--type", "-t" );
+
     app.initialize();
+
+    if( !proc.execute( proc.fileIn ) )
+    {
+        cerr << "Could not process\n";
+        return( EXIT_FAILURE );
+    }
   }
   catch( user_interruption & )
   {
@@ -82,50 +183,6 @@ int main( int argc, const char **argv )
     cerr << e.what() << endl;
     return( EXIT_FAILURE );
   }
-
-  // Check z dimension
-  dz = (dz > 1 ? dz : 1);
-    
-  // Lecture image
-  AimsData<short> in, out;
-  try
-    {
-      Reader<AimsData<short> > dataR( filein );
-      dataR.read( in );
-    }
-  catch( exception & e )
-    {
-      cerr << e.what() << endl;
-      exit( 1 );
-    }
-
-  if ( (smoothingtype == "median") || (smoothingtype == "med") )
-  {
-    MedianSmoothing< short > smoothing( dx, dy, dz );
-    out = smoothing.doit( in );
-  }
-  else if ( (smoothingtype == "minimum") || (smoothingtype == "min") )
-  {
-    MinSmoothing< short > smoothing( dx, dy, dz );
-    out = smoothing.doit( in );
-  }
-  else if ( (smoothingtype == "maximum") || (smoothingtype == "max") )
-  {
-    MaxSmoothing< short > smoothing( dx, dy, dz );
-    out = smoothing.doit( in );
-  }
-  else
-  {
-    MajoritySmoothing< short > smoothing( dx, dy, dz );
-    out = smoothing.doit( in );
-  }
-
-  // 
-  //   Writing smoothed image
-  //
-  out.setHeader( in.header()->cloneHeader() );
-  Writer< AimsData<short> > dataWtr( fileout );
-  dataWtr << out;
 
   return EXIT_SUCCESS; 
 }

@@ -34,5 +34,11 @@
 
 #include <aims/signalfilter/minfilter.h>
 
+template class MinSmoothing<uint8_t>;
+template class MinSmoothing<int8_t>;
+template class MinSmoothing<uint16_t>;
 template class MinSmoothing<int16_t>;
+template class MinSmoothing<uint32_t>;
+template class MinSmoothing<int32_t>;
 template class MinSmoothing<float>;
+template class MinSmoothing<double>;

@@ -34,5 +34,11 @@
 
 #include <aims/signalfilter/maxfilter.h>
 
+template class MaxSmoothing<uint8_t>;
+template class MaxSmoothing<int8_t>;
+template class MaxSmoothing<uint16_t>;
 template class MaxSmoothing<int16_t>;
+template class MaxSmoothing<uint32_t>;
+template class MaxSmoothing<int32_t>;
 template class MaxSmoothing<float>;
+template class MaxSmoothing<double>;

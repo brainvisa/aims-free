@@ -111,6 +111,34 @@ T MinFilterFunc<T>::doit( AimsData<T>& data ) const
 }
 
 template <class T>
+class MeanFilterFunc : public NonLinFilterFunc< T >
+{
+  public:
+    MeanFilterFunc () { }
+    virtual ~MeanFilterFunc () { }
+
+    T doit( AimsData<T>& data ) const; 
+  
+};
+ 
+template <class T> inline
+T MeanFilterFunc<T>::doit( AimsData<T>& data ) const
+{
+  double sum = 0;
+  uint32_t count = 0;
+  typename AimsData<T>::iterator it;
+
+  // Goes through the data and count number of values for each class
+  for (it = data.begin(); it != data.end(); it++)
+  {
+    sum += (T)(*it);
+    count ++;
+  }
+
+  return (T)( sum / count );
+}
+
+template <class T>
 class MajorityFilterFunc : public NonLinFilterFunc< T >
 {
   public:
@@ -124,8 +152,8 @@ template <class T> inline
 T MajorityFilterFunc<T>::doit( AimsData<T>& data ) const
 {
   T currentclass, majorityclass = 0;
-  unsigned currentclasscases = 0, majoritycases = 0;
-  std::map<T, unsigned> classcases;
+  uint32_t currentclasscases = 0, majoritycases = 0;
+  std::map<T, uint32_t> classcases;
   typename AimsData<T>::iterator it;
 
   // Goes through the data and count number of values for each class
