@@ -111,7 +111,7 @@ ZCat::ZCat( const list<string> & names, const string & out,
 template<class T>
 bool doit( Process & p, const string &, Finder & )
 {
-  ZCat	& zp = (ZCat &) p;
+  ZCat &zp = (ZCat &) p;
 
   cout << "concatenate...\n";
   Allocator	al;
@@ -146,11 +146,12 @@ bool doitMesh( Process & p, const string &, Finder & )
 template<class T> bool ZCat::cat( AimsData<T> & out )
 {
   out.setSizeXYZT( vs[0], vs[1], vs[2], vs[3] );
-		
+
   int x, y, z, t, Z = 0;  
   list<string>::const_iterator	it;
-  unsigned			n = 0;
-
+  unsigned n = 0;
+  bool copy_header = true;
+  
   for ( it = listName.begin() ; it != listName.end(); it++, ++n )
     {
       cout << n << " : adding " << *it << "..." << endl;
@@ -160,6 +161,11 @@ template<class T> bool ZCat::cat( AimsData<T> & out )
                                    DataSource::none(), false, 0.1 ) );
       AimsData<T> in;
       dataR >> in;
+
+      if ( copy_header ) {
+        out.volume()->header() = in.volume()->header();
+        copy_header = false;
+      }
 
       ForEach4d( in, x, y, z, t )
         out( x, y, Z + z, t ) = in( x, y, z, t );
@@ -246,14 +252,14 @@ int main( int argc, const char** argv )
     Point3df voxelsize(0.,0.,0.);  
 
     AimsApplication application( argc, argv,
-				 "concatenates volumes (along Z axis), " 
+                                 "concatenates volumes (along Z axis), " 
                                  "meshes or buckets" );
     application.addOptionSeries( listName, "-i",
-				 "input files (1 minimum)", 1 );
+                                 "input files (1 minimum)", 1 );
     application.addOption( fileOut, "-o",
                            "Output file name" );
     application.addOption( memmap, "--memmap", 
-			   "read in Memory Mapping mode (obsolete, " 
+                           "read in Memory Mapping mode (obsolete, " 
                            "automatic)", true );
     application.addOption( nocheckvs, "--nocheckvs", "Don't check if voxel " 
                            "sizes of all volumes to concatenate match", true );
@@ -294,44 +300,44 @@ int main( int argc, const char** argv )
 	vs.push_back( 1 );
       
       for(int i=0; i<3; ++i)
-	if( voxelsize[i] != 0 )
-	  {
-	    vs[i] = voxelsize[i];
-	    nocheckvs = 1;
-	  }
+      if( voxelsize[i] != 0 )
+        {
+          vs[i] = voxelsize[i];
+          nocheckvs = 1;
+        }
       
       int dimZ = dims[2];
       unsigned	n = 1;
       
       for ( ++it; it != listName.end(); ++it, ++n ) {
-	cout << "\rn" << flush;
-	ASSERT( f.check( *it ) );
-	hdr = dynamic_cast<const PythonHeader *>( f.header() );
-	if( !hdr ) {
-	  cerr << "Could not read header of " << *it << endl;
-	  return EXIT_FAILURE;
-	}
-	ASSERT( hdr->getProperty( "volume_dimension", dims2 ) );
-	ASSERT( hdr->getProperty( "voxel_size", vs2 ) );
-	ASSERT( f.objectType() == otype );
-	ASSERT( f.dataType() == dtype );
-	ASSERT( dims[0] == dims2[0] && dims[1] == dims2[1] 
-		&& ( ( dims2.size() < 4 && dims[3] == 1 ) 
-		     || ( dims2.size() == 4 &&  dims[3] == dims2[3] ) ) );
-	dimZ += dims2[2];
-        if( !nocheckvs )
-	  ASSERT( vs[0] == vs2[0] && vs[1] == vs2[1] && vs[2] == vs2[2] );
+        cout << "\rn" << flush;
+        ASSERT( f.check( *it ) );
+        hdr = dynamic_cast<const PythonHeader *>( f.header() );
+        if( !hdr ) {
+          cerr << "Could not read header of " << *it << endl;
+          return EXIT_FAILURE;
+        }
+        ASSERT( hdr->getProperty( "volume_dimension", dims2 ) );
+        ASSERT( hdr->getProperty( "voxel_size", vs2 ) );
+        ASSERT( f.objectType() == otype );
+        ASSERT( f.dataType() == dtype );
+        ASSERT( dims[0] == dims2[0] && dims[1] == dims2[1] 
+          && ( ( dims2.size() < 4 && dims[3] == 1 ) 
+              || ( dims2.size() == 4 &&  dims[3] == dims2[3] ) ) );
+        dimZ += dims2[2];
+              if( !nocheckvs )
+          ASSERT( vs[0] == vs2[0] && vs[1] == vs2[1] && vs[2] == vs2[2] );
       }
       cout << endl << dimZ << " slices\n";
       
       dims[2] = dimZ;
     }
-    ZCat	proc( listName, fileOut, dims, vs );
+    ZCat proc( listName, fileOut, dims, vs );
     if( !proc.execute( f, "toto" ) )
-      {
-	cerr << "Failed\n";
-	return EXIT_FAILURE;
-      }
+    {
+      cerr << "Failed\n";
+      return EXIT_FAILURE;
+    }
   }
   catch( user_interruption &e ) {
   }
