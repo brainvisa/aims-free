@@ -152,9 +152,14 @@ bool doit( Process & p, const string & fname, Finder & f )
 Resamp::Resamp() 
   : Process(), dx( 0 ), dy( 0 ), dz( 0 )
 {
-  registerProcessType( "Volume", "S16", &doit<int16_t> );
+  registerProcessType( "Volume", "S8", &doit<int8_t> );
   registerProcessType( "Volume", "U8", &doit<uint8_t> );
+  registerProcessType( "Volume", "S16", &doit<int16_t> );
+  registerProcessType( "Volume", "U16", &doit<uint16_t> );
+  registerProcessType( "Volume", "S32", &doit<int32_t> );
+  registerProcessType( "Volume", "U32", &doit<uint32_t> );
   registerProcessType( "Volume", "FLOAT", &doit<float> );
+  registerProcessType( "Volume", "DOUBLE", &doit<double> );
   registerProcessType( "Volume", "RGB", &doit<AimsRGB> );
   registerProcessType( "Volume", "RGBA", &doit<AimsRGBA> );
 }
