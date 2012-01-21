@@ -145,8 +145,6 @@ bool doitMesh( Process & p, const string &, Finder & )
 
 template<class T> bool ZCat::cat( AimsData<T> & out )
 {
-  out.setSizeXYZT( vs[0], vs[1], vs[2], vs[3] );
-
   int x, y, z, t, Z = 0;  
   list<string>::const_iterator	it;
   unsigned n = 0;
@@ -171,6 +169,8 @@ template<class T> bool ZCat::cat( AimsData<T> & out )
         out( x, y, Z + z, t ) = in( x, y, z, t );
       Z += in.dimZ();
     }
+  // It is necessary to set voxel size here, because copy_header could have set wrong voxel sizes
+  out.setSizeXYZT( vs[0], vs[1], vs[2], vs[3] );
   Writer<AimsData<T> > dataW( fileOut );
   dataW << out;
 
