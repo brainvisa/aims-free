@@ -51,7 +51,7 @@ void Mesher::getBrain( const AimsData<short>& thing,
   list< MapOfFacet >::iterator i, iBig;
   for ( ii=interface.begin(); ii!=ei; ++ii )
     if ( ii->second.size() )
-      for ( i = ii->second.begin(); i != ii->second.end(); ++i )
+      for ( i = ii->second.begin(), i++; i != ii->second.end(); ++i )
         if ( (int)i->size() > sizeMax )
         {
           sizeMax = (int)i->size();
