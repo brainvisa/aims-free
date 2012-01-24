@@ -40,7 +40,7 @@ using namespace std;
 
 
 void Mesher::getBrain( const AimsData<short>& thing,
-                       AimsSurfaceTriangle& surface )
+                       AimsSurfaceTriangle& surface, bool insideinterface )
 {
   map< size_t, list< MapOfFacet > > interface;
   map< size_t, list< MapOfFacet > >::iterator	ii, ei = interface.end();
@@ -48,19 +48,29 @@ void Mesher::getBrain( const AimsData<short>& thing,
   getInterface( interface, thing );
 
   int sizeMax = 0;
+  bool first = true;
   list< MapOfFacet >::iterator i, iBig;
   for ( ii=interface.begin(); ii!=ei; ++ii )
     if ( ii->second.size() )
-      for ( i = ii->second.begin(), i++; i != ii->second.end(); ++i )
+      for ( i = ii->second.begin(); i != ii->second.end(); ++i )
+      {
+        if( first )
+        {
+          first = false;
+          if( insideinterface )
+            continue; // skip 1st interface
+            // FIXME: probably not a good test...
+        }
         if ( (int)i->size() > sizeMax )
         {
           sizeMax = (int)i->size();
           iBig = i;
         }
+      }
 
-
-  getMeshFromMapOfFacet(thing, surface, *iBig);      
-  clear( interface ); 
+  if( sizeMax != 0 )
+    getMeshFromMapOfFacet(thing, surface, *iBig);
+  clear( interface );
 }
 
 //the code is duplicated in order to allow some fine tuning

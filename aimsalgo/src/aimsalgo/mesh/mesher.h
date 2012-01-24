@@ -72,7 +72,7 @@ class AIMSALGO_API Mesher
     void doit( const AimsData<short>& thing,
                std::map<size_t, std::list<AimsSurfaceTriangle> >& surface );
     void getBrain( const AimsData<short>& thing, 
-		   AimsSurfaceTriangle& surface );
+		   AimsSurfaceTriangle& surface, bool insideinterface=false );
   // like getBrain but dedicated to gray/white interface in 6 connectivity,
   // which solves hole problems. JFM
     void getWhite( const AimsData<short>& thing, 
