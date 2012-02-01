@@ -217,11 +217,13 @@ namespace aims
 
     // Write the information to the file
     buffer = (byte *)&data(0, 0, z, t);
-    TIFFWriteEncodedStrip(tif, 0, buffer, data.dimX() * data.dimY() * bps * spp / 8 );
+    tsize_t res = TIFFWriteEncodedStrip(tif, 0, buffer, (bps / 8) * spp * data.dimX() * data.dimY() );
+
+    if( res < 0 )
+      throw carto::file_error( "TIFF writer : an error occured writing file ", filename );
 
     // Close the file
     TIFFClose(tif);
-
   }
 }
 
