@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -73,6 +74,44 @@ def classInCartoNamespace( include, cls, cppclass=None ):
 
 def classInAimsNamespace( include, cls, cppclass=None ):
   return classInNamespace( include, cls, 'aims', cppclass=cppclass )
+
+def classOutsideNamespace( include, cls, cppclass=None, typecode=None ):
+  if cppclass is None: cppclass = cls
+  if typecode is None: typecode = cls
+  return { 'typecode' : typecode,
+    'pyFromC' : 'pyaimsConvertFrom_' + cls,
+    'CFromPy' : 'pyaimsConvertTo_' + cls,
+    'castFromSip' : '(' + cppclass + ' *)',
+    'deref' : '*',
+    'pyderef' : '*',
+    'address' : '&',
+    'pyaddress' : '&',
+    'defScalar' : '',
+    'new' : 'new ' + cppclass,
+    'NumType' : 'PyArray_OBJECT',
+    'PyType' : cppclass,
+    'sipClass' : cls,
+    'typeinclude' : \
+    '#include <' + include + '>',
+    'sipinclude' : '#ifndef PYAIMS_' + cls.upper() + '_CHECK_DEFINED\n'
+    '#define PYAIMS_' + cls.upper() + '_CHECK_DEFINED\n'
+    'inline int pyaims' + cls + '_Check( PyObject* o )\n'
+    '{ return sipCanConvertToInstance( o, sipClass_' + cls + ', SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+    '#endif\n'
+    '#ifndef PYAIMS_' + cls.upper() + '_CONVERT_DEFINED\n'
+    '#define PYAIMS_' + cls.upper() + '_CONVERT_DEFINED\n'
+    'inline void* pyaimsConvertTo_' + cls + '( PyObject* o )\n'
+    '{ int iserr = 0;\n'
+    '  void *ptr = sipForceConvertToInstance( o, sipClass_' + cls + ', 0, 0, 0, &iserr );\n'
+    '  if( iserr ) return 0;\n'
+    '  return ptr;\n}\n'
+    'inline PyObject* pyaimsConvertFrom_' + cls + '( void * a )\n'
+    '{ return sipConvertFromInstance( a, sipClass_' + cls + ', 0 ); }\n'
+    '#endif\n',
+    'module' : 'aims',
+    'testPyType' : 'pyaims' + cls + '_Check',
+    'compareElement' : '&',
+    }
 
 
 def completeTypesSub( typessub ):
@@ -319,6 +358,14 @@ typessub = { 'signed char' : \
                'testPyType' : 'pyaimsVoid_Check', 
                'compareElement' : '',
              },
+
+             'cfloat' : \
+                classOutsideNamespace( 'cartobase/type/types.h', 'cfloat',
+                  typecode='CFLOAT' ),
+             'cdouble' : \
+                classOutsideNamespace( 'cartobase/type/types.h', 'cdouble',
+                  typecode='CDOUBLE' ),
+
              'AimsRGB' : \
              { 'typecode' : 'RGB',
                'pyFromC' : '',
@@ -980,6 +1027,54 @@ typessub = { 'signed char' : \
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_RGBA_Check', 
                },
+             'AimsData<cfloat>' : \
+             { 'typecode' : 'AimsData_CFLOAT',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'new' : 'new AimsData<cfloat>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'AimsData_CFLOAT',
+               'sipClass' : 'AimsData_CFLOAT',
+               'typeinclude' : \
+               '#include <aims/data/data.h>\n#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_AIMSDATA_CFLOAT_CHECK_DEFINED\n'
+               '#define PYAIMS_AIMSDATA_CFLOAT_CHECK_DEFINED\n'
+               'inline int pyaimsAimsData_CFLOAT_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_CFLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsAimsData_CFLOAT_Check',
+               },
+             'AimsData<cdouble>' : \
+             { 'typecode' : 'AimsData_CDOUBLE',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'new' : 'new AimsData<cdouble>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'AimsData_CDOUBLE',
+               'sipClass' : 'AimsData_CDOUBLE',
+               'typeinclude' : \
+               '#include <aims/data/data.h>\n#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_AIMSDATA_CDOUBLE_CHECK_DEFINED\n'
+               '#define PYAIMS_AIMSDATA_CDOUBLE_CHECK_DEFINED\n'
+               'inline int pyaimsAimsData_CDOUBLE_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_CDOUBLE, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsAimsData_CDOUBLE_Check',
+               },
 
              'carto::Volume<int8_t>' : \
              { 'typecode' : 'Volume_S8',
@@ -991,7 +1086,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<int8_t>', 
+               'new' : 'new carto::Volume<int8_t>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_S8',
                'sipClass' : 'Volume_S8',
@@ -1017,7 +1112,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<uint8_t>', 
+               'new' : 'new carto::Volume<uint8_t>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_U8',
                'sipClass' : 'Volume_U8',
@@ -1043,7 +1138,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<int16_t>', 
+               'new' : 'new carto::Volume<int16_t>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_S16',
                'sipClass' : 'Volume_S16',
@@ -1069,7 +1164,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<uint16_t>', 
+               'new' : 'new carto::Volume<uint16_t>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_U16',
                'sipClass' : 'Volume_U16',
@@ -1095,7 +1190,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<int32_t>', 
+               'new' : 'new carto::Volume<int32_t>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_S32',
                'sipClass' : 'Volume_S32',
@@ -1121,7 +1216,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<uint32_t>', 
+               'new' : 'new carto::Volume<uint32_t>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_U32',
                'sipClass' : 'Volume_U32',
@@ -1147,7 +1242,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<float>', 
+               'new' : 'new carto::Volume<float>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_FLOAT',
                'sipClass' : 'Volume_FLOAT',
@@ -1173,7 +1268,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<double>', 
+               'new' : 'new carto::Volume<double>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_DOUBLE',
                'sipClass' : 'Volume_DOUBLE',
@@ -1199,7 +1294,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<AimsRGB>', 
+               'new' : 'new carto::Volume<AimsRGB>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_RGB',
                'sipClass' : 'Volume_RGB',
@@ -1227,7 +1322,7 @@ typessub = { 'signed char' : \
                'address' : '&', 
                'pyaddress' : '&', 
                'defScalar' : '',
-               'new' : 'new carto::Volumea<AimsRGBA>', 
+               'new' : 'new carto::Volume<AimsRGBA>',
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Volume_RGBA',
                'sipClass' : 'Volume_RGBA',
@@ -1244,6 +1339,56 @@ typessub = { 'signed char' : \
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_RGBA_Check', 
+               },
+             'carto::Volume<cfloat>' : \
+             { 'typecode' : 'Volume_CFLOAT',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'new' : 'new carto::Volume<cfloat>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'Volume_CFLOAT',
+               'sipClass' : 'Volume_CFLOAT',
+               'typeinclude' : \
+               '#include <cartodata/volume/volume.h>\n' \
+               '#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_VOLUME_CFLOAT_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_CFLOAT_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_CFLOAT_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_CFLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsVolume_CFLOAT_Check',
+               },
+             'carto::Volume<cdouble>' : \
+             { 'typecode' : 'Volume_CDOUBLE',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'new' : 'new carto::Volume<cdouble>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'Volume_CDOUBLE',
+               'sipClass' : 'Volume_CDOUBLE',
+               'typeinclude' : \
+               '#include <cartodata/volume/volume.h>\n' \
+               '#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_VOLUME_CDOUBLE_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_CDOUBLE_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_CDOUBLE_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_CDOUBLE, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsVolume_CDOUBLE_Check',
                },
 
              '1' : \
