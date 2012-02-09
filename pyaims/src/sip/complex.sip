@@ -5,6 +5,65 @@ class cfloat
 #include <cartobase/type/types.h>
 %End
 
+%ConvertToTypeCode
+  if (sipIsErr == NULL)
+    return ( PySequence_Check( sipPy ) && PySequence_Size( sipPy ) <= 2 )
+           || sipCanConvertToInstance(sipPy, sipClass_cfloat,
+                SIP_NOT_NONE | SIP_NO_CONVERTORS );
+
+  if( sipCanConvertToInstance( sipPy, sipClass_cfloat, SIP_NO_CONVERTORS ) )
+  {
+    int state = 0;
+
+    cfloat * dat
+      = (cfloat *)
+        sipConvertToInstance( sipPy, sipClass_cfloat,
+          sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
+    if( *sipIsErr && dat )
+    {
+      sipReleaseInstance( dat, sipClass_cfloat, state );
+      dat = 0;
+    }
+    else if( dat )
+    {
+      *sipCppPtr = dat;
+      return 0;
+    }
+  }
+
+  if( PySequence_Check( sipPy ) )
+  {
+    *sipCppPtr = new cfloat;
+    unsigned    i, n = PySequence_Size( sipPy );
+    PyObject    *pyitem;
+    for( i=0; i<n; ++i )
+    {
+      pyitem = PySequence_GetItem( sipPy, i );
+      if( !pyitem || !PyFloat_Check( pyitem ) )
+      {
+        *sipIsErr = 1;
+        delete *sipCppPtr;
+        sipCppPtr = 0;
+        std::ostringstream s;
+        s << "wrong list item type, item " << i;
+        PyErr_SetString( PyExc_TypeError, s.str().c_str() );
+        return 0;
+      }
+
+      if( i == 0 )
+        (*sipCppPtr)->real( (float) PyFloat_AsDouble( pyitem ) );
+      else
+        (*sipCppPtr)->imag( (float) PyFloat_AsDouble( pyitem ) );
+      Py_DECREF( pyitem );
+    }
+    return sipGetState( sipTransferObj );
+  }
+  *sipCppPtr =
+     (cfloat *) sipConvertToInstance( sipPy, sipClass_cfloat,
+                           0, SIP_NO_CONVERTORS, 0, sipIsErr );
+  return 0;
+%End
+
 public:
   cfloat( float r = float(), float i = float() );
   cfloat( const cfloat & );
@@ -115,6 +174,65 @@ class cdouble
 {
 %TypeHeaderCode
 #include <cartobase/type/types.h>
+%End
+
+%ConvertToTypeCode
+  if (sipIsErr == NULL)
+    return ( PySequence_Check( sipPy ) && PySequence_Size( sipPy ) <= 2 )
+           || sipCanConvertToInstance(sipPy, sipClass_cdouble,
+                SIP_NOT_NONE | SIP_NO_CONVERTORS );
+
+  if( sipCanConvertToInstance( sipPy, sipClass_cdouble, SIP_NO_CONVERTORS ) )
+  {
+    int state = 0;
+
+    cdouble * dat
+      = (cdouble *)
+        sipConvertToInstance( sipPy, sipClass_cdouble,
+          sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
+    if( *sipIsErr && dat )
+    {
+      sipReleaseInstance( dat, sipClass_cdouble, state );
+      dat = 0;
+    }
+    else if( dat )
+    {
+      *sipCppPtr = dat;
+      return 0;
+    }
+  }
+
+  if( PySequence_Check( sipPy ) )
+  {
+    *sipCppPtr = new cdouble;
+    unsigned    i, n = PySequence_Size( sipPy );
+    PyObject    *pyitem;
+    for( i=0; i<n; ++i )
+    {
+      pyitem = PySequence_GetItem( sipPy, i );
+      if( !pyitem || !PyFloat_Check( pyitem ) )
+      {
+        *sipIsErr = 1;
+        delete *sipCppPtr;
+        sipCppPtr = 0;
+        std::ostringstream s;
+        s << "wrong list item type, item " << i;
+        PyErr_SetString( PyExc_TypeError, s.str().c_str() );
+        return 0;
+      }
+
+      if( i == 0 )
+        (*sipCppPtr)->real( PyFloat_AsDouble( pyitem ) );
+      else
+        (*sipCppPtr)->imag( PyFloat_AsDouble( pyitem ) );
+      Py_DECREF( pyitem );
+    }
+    return sipGetState( sipTransferObj );
+  }
+  *sipCppPtr =
+     (cdouble *) sipConvertToInstance( sipPy, sipClass_cdouble,
+                           0, SIP_NO_CONVERTORS, 0, sipIsErr );
+  return 0;
 %End
 
 public:
