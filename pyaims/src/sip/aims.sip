@@ -19,6 +19,7 @@ carto::pyaims_init();
 %Include mutex.sip
 %Include system_VOID.sip
 %Include std.sip
+%Include complex.sip
 %Include cartobasetypes.sip
 %Include exception.sip
 %Include allocator.sip
@@ -139,6 +140,8 @@ carto::pyaims_init();
 %Include aimsdata_DOUBLE.sip
 %Include aimsdata_RGB.sip
 %Include aimsdata_RGBA.sip
+%Include aimsdata_CFLOAT.sip
+%Include aimsdata_CDOUBLE.sip
 
 %Include motion.sip
 %Include transformation.sip
@@ -175,6 +178,8 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include rcptr_AimsData_DOUBLE.sip
 %Include rcptr_AimsData_RGB.sip
 %Include rcptr_AimsData_RGBA.sip
+%Include rcptr_AimsData_CFLOAT.sip
+%Include rcptr_AimsData_CDOUBLE.sip
 
 %Include reader_AimsData_U8.sip
 %Include reader_AimsData_S16.sip
@@ -185,6 +190,8 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include reader_AimsData_DOUBLE.sip
 %Include reader_AimsData_RGB.sip
 %Include reader_AimsData_RGBA.sip
+%Include reader_AimsData_CFLOAT.sip
+%Include reader_AimsData_CDOUBLE.sip
 
 %Include rawconverter_bucket_S16.sip
 
@@ -201,6 +208,8 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include volume_DOUBLE.sip
 %Include volume_RGB.sip
 %Include volume_RGBA.sip
+%Include volume_CFLOAT.sip
+%Include volume_CDOUBLE.sip
 
 %Include debuggingvol.sip
 
@@ -213,6 +222,8 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include rcptr_Volume_DOUBLE.sip
 %Include rcptr_Volume_RGB.sip
 %Include rcptr_Volume_RGBA.sip
+%Include rcptr_Volume_CFLOAT.sip
+%Include rcptr_Volume_CDOUBLE.sip
 
 %Include reader_Volume_U8.sip
 %Include reader_Volume_S16.sip
@@ -223,6 +234,8 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include reader_Volume_DOUBLE.sip
 %Include reader_Volume_RGB.sip
 %Include reader_Volume_RGBA.sip
+%Include reader_Volume_CFLOAT.sip
+%Include reader_Volume_CDOUBLE.sip
 
 %Include converter_Volume_DOUBLE_DOUBLE.sip
 %Include converter_Volume_DOUBLE_FLOAT.sip
