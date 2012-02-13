@@ -51,9 +51,9 @@ class cfloat
       }
 
       if( i == 0 )
-        (*sipCppPtr)->real( (float) PyFloat_AsDouble( pyitem ) );
+        (*sipCppPtr)->real() = (float) PyFloat_AsDouble( pyitem );
       else
-        (*sipCppPtr)->imag( (float) PyFloat_AsDouble( pyitem ) );
+        (*sipCppPtr)->imag() = (float) PyFloat_AsDouble( pyitem );
       Py_DECREF( pyitem );
     }
     return sipGetState( sipTransferObj );
@@ -102,9 +102,9 @@ public:
         }
 
         if( i == 0 )
-          sipCpp->real( (float) PyFloat_AsDouble( pyitem ) );
+          sipCpp->real() = (float) PyFloat_AsDouble( pyitem );
         else
-          sipCpp->imag( (float) PyFloat_AsDouble( pyitem ) );
+          sipCpp->imag() = (float) PyFloat_AsDouble( pyitem );
       }
     }
   }
@@ -113,7 +113,13 @@ public:
   float real() const;
   float imag() const;
   void real( float val );
+%MethodCode
+  sipCpp->real() = a0; // older compilers do not support complex::real( value )
+%End
   void imag( float val );
+%MethodCode
+  sipCpp->imag() = a0;
+%End
   cfloat & operator+=(const float & t);
   cfloat & operator-=(const float & t);
   cfloat & operator*=(const float &);
@@ -151,9 +157,9 @@ public:
   if( a0 < 0 )
     a0 = 2 + a0;
   if( a0 == 0 )
-    sipCpp->real( a1 );
+    sipCpp->real() = a1;
   else if( a0 == 1 )
-    sipCpp->imag( a1 );
+    sipCpp->imag() = a1;
   if( a0 >= 2 )
   {
     sipIsErr = 1;
@@ -222,9 +228,9 @@ class cdouble
       }
 
       if( i == 0 )
-        (*sipCppPtr)->real( PyFloat_AsDouble( pyitem ) );
+        (*sipCppPtr)->real() = PyFloat_AsDouble( pyitem );
       else
-        (*sipCppPtr)->imag( PyFloat_AsDouble( pyitem ) );
+        (*sipCppPtr)->imag() = PyFloat_AsDouble( pyitem );
       Py_DECREF( pyitem );
     }
     return sipGetState( sipTransferObj );
@@ -272,9 +278,9 @@ public:
         }
 
         if( i == 0 )
-          sipCpp->real( PyFloat_AsDouble( pyitem ) );
+          sipCpp->real() = PyFloat_AsDouble( pyitem );
         else
-          sipCpp->imag( PyFloat_AsDouble( pyitem ) );
+          sipCpp->imag() = PyFloat_AsDouble( pyitem );
       }
     }
   }
@@ -283,7 +289,13 @@ public:
   double real() const;
   double imag() const;
   void real( double val );
+%MethodCode
+  sipCpp->real() = a0; // older compilers do not support complex::real( value )
+%End
   void imag( double val );
+%MethodCode
+  sipCpp->imag() = a0;
+%End
   cdouble & operator+=(const double & t);
   cdouble & operator-=(const double & t);
   cdouble & operator*=(const double &);
@@ -321,9 +333,9 @@ public:
   if( a0 < 0 )
     a0 = 2 + a0;
   if( a0 == 0 )
-    sipCpp->real( a1 );
+    sipCpp->real() = a1;
   else if( a0 == 1 )
-    sipCpp->imag( a1 );
+    sipCpp->imag() = a1;
   if( a0 >= 2 )
   {
     sipIsErr = 1;
