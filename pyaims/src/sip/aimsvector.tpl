@@ -81,6 +81,7 @@ typedef AimsVector<%Template1%, %Template2%>
 
 public:
 %%Template1defScalar%%
+%%Template1defNumpyBindings%%
 
   AimsVector_%Template1typecode%_%Template2typecode%();
   AimsVector_%Template1typecode%_%Template2typecode%
@@ -95,7 +96,7 @@ public:
   AimsVector_%Template1typecode%_%Template2typecode%( SIP_PYOBJECT );
 %MethodCode
   bool done = false;
-%#ifdef PYAIMS_SCALAR%
+%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS )%
   if( PyArray_Check( a0 ) )
   {
     PyArrayObject *arr = 0;
@@ -324,7 +325,7 @@ public:
   sipRes = new AimsVector_%Template1typecode%_%Template2typecode%( -*sipCpp );
 %End
 
-%#ifdef PYAIMS_SCALAR%
+%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS )%
 
   SIP_PYOBJECT arraydata() /Factory/;
 %MethodCode

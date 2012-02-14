@@ -373,7 +373,8 @@ public:
 %End
 
 %%Template1defScalar%%
-%#ifdef PYAIMS_SCALAR%
+%%Template1defNumpyBindings%%
+%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS )%
 
   SIP_PYOBJECT arraydata() /Factory/;
 %MethodCode
