@@ -266,7 +266,65 @@ public:
 %%Template1defScalar%%
 %#ifdef PYAIMS_SCALAR%
 
-  Volume_%Template1typecode%( SIP_PYOBJECT ) 
+  Volume_%Template1typecode%* operator * ( Volume_%Template1typecode% & )
+    /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a0 );
+  carto::VolumeRef<%Template1% > r2( a1 );
+  carto::VolumeRef<%Template1% > r3 = r1 * r2;
+  r1.release();
+  r2.release();
+  sipRes = r3.get();
+  r3.release();
+%End
+
+  void operator *= ( Volume_%Template1typecode% & ) /ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( sipCpp );
+  carto::VolumeRef<%Template1% > r2( a0 );
+  r1 *= r2;
+  r1.release();
+  r2.release();
+%End
+
+  Volume_%Template1typecode%* operator / ( Volume_%Template1typecode% & )
+    /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a0 );
+  carto::VolumeRef<%Template1% > r2( a1 );
+  carto::VolumeRef<%Template1% > r3 = r1 / r2;
+  r1.release();
+  r2.release();
+  sipRes = r3.get();
+  r3.release();
+%End
+
+  void operator /= ( Volume_%Template1typecode% & ) /ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( sipCpp );
+  carto::VolumeRef<%Template1% > r2( a0 );
+  r1 /= r2;
+  r1.release();
+  r2.release();
+%End
+
+  Volume_%Template1typecode%* __rdiv__( double ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( sipCpp );
+  carto::VolumeRef<%Template1% > r3 = a0 / r1;
+  r1.release();
+  sipRes = r3.get();
+  r3.release();
+%End
+
+%#endif%
+
+// numpy bindings
+
+%%Template1defNumpyBindings%%
+%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS) %
+
+  Volume_%Template1typecode%( SIP_PYOBJECT )
     [(int, int, int, int, %Template1% *)];
 %MethodCode
   static std::list<std::set<int> > compatibletypes;
@@ -346,8 +404,8 @@ public:
     if( !PyArray_ISCONTIGUOUS( arr ) )
     {
       sipIsErr = 1;
-      PyErr_SetString( PyExc_RuntimeError, 
-                       "Building a Volume from a non-contiguous array is not " 
+      PyErr_SetString( PyExc_RuntimeError,
+                       "Building a Volume from a non-contiguous array is not "
                        "supported" );
     }
     else
@@ -356,7 +414,7 @@ public:
     if( arr->nd < 0 || arr->nd >4 )
     {
       sipIsErr = 1;
-      PyErr_SetString( PyExc_RuntimeError, 
+      PyErr_SetString( PyExc_RuntimeError,
                        "Array dimensions are not compatible with Volume" );
     }
     else if( arr->descr->type_num != %Template1NumType% )
@@ -409,8 +467,8 @@ public:
         }
     }
 
-    sipCpp = new sipVolume_%Template1typecode%( dims[0], dims[1], dims[2], 
-                                                dims[3], 
+    sipCpp = new sipVolume_%Template1typecode%( dims[0], dims[1], dims[2],
+                                                dims[3],
                                                 ( %Template1% *) arr->data );
     // keep ref to the array to prevent its destruction
     PyObject_SetAttrString( (PyObject *) sipSelf, "_arrayext", a0 );
@@ -422,64 +480,6 @@ public:
   }
 
 %End
-
-  Volume_%Template1typecode%* operator * ( Volume_%Template1typecode% & )
-    /Factory, ReleaseGIL/;
-%MethodCode
-  carto::VolumeRef<%Template1% > r1( a0 );
-  carto::VolumeRef<%Template1% > r2( a1 );
-  carto::VolumeRef<%Template1% > r3 = r1 * r2;
-  r1.release();
-  r2.release();
-  sipRes = r3.get();
-  r3.release();
-%End
-
-  void operator *= ( Volume_%Template1typecode% & ) /ReleaseGIL/;
-%MethodCode
-  carto::VolumeRef<%Template1% > r1( sipCpp );
-  carto::VolumeRef<%Template1% > r2( a0 );
-  r1 *= r2;
-  r1.release();
-  r2.release();
-%End
-
-  Volume_%Template1typecode%* operator / ( Volume_%Template1typecode% & )
-    /Factory, ReleaseGIL/;
-%MethodCode
-  carto::VolumeRef<%Template1% > r1( a0 );
-  carto::VolumeRef<%Template1% > r2( a1 );
-  carto::VolumeRef<%Template1% > r3 = r1 / r2;
-  r1.release();
-  r2.release();
-  sipRes = r3.get();
-  r3.release();
-%End
-
-  void operator /= ( Volume_%Template1typecode% & ) /ReleaseGIL/;
-%MethodCode
-  carto::VolumeRef<%Template1% > r1( sipCpp );
-  carto::VolumeRef<%Template1% > r2( a0 );
-  r1 /= r2;
-  r1.release();
-  r2.release();
-%End
-
-  Volume_%Template1typecode%* __rdiv__( double ) /Factory, ReleaseGIL/;
-%MethodCode
-  carto::VolumeRef<%Template1% > r1( sipCpp );
-  carto::VolumeRef<%Template1% > r3 = a0 / r1;
-  r1.release();
-  sipRes = r3.get();
-  r3.release();
-%End
-
-%#endif%
-
-// numpy bindings
-
-%%Template1defNumpyBindings%%
-%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS) %
 
   SIP_PYOBJECT arraydata() /Factory/;
 %MethodCode
