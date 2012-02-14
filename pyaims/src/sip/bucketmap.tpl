@@ -8,9 +8,6 @@ class BucketMap_%Template1typecode% : carto::RCObject
 #define PYAIMS_BUCKETMAP_%Template1typecode%_DEFINED
 typedef aims::BucketMap< %Template1% > BucketMap_%Template1typecode%;
 #endif
-#if SIP_VERSION < 0x040700
-#include "sipaimssipAimsVector_S16_3.h"
-#endif
 %End
 
 %TypeCode
@@ -33,6 +30,11 @@ public:
   void insert( const Point3d &, const %Template1PyType% & );
   //void insert( const std::pair< const Point3d, %Template1PyType% > & );
   void erase( const Point3d & );
+  void erase( int );
+%MethodCode
+  sipCpp->erase( a0 );
+%End
+  void clear();
   void merge( const BucketMap_%Template1typecode% & );
   float sizeX() const;
   float sizeY() const;
@@ -96,6 +98,8 @@ public:
                                               sipClass_AimsVector_S16_3 ) );
 #endif
 %End
+
+    void clear();
   };
 
   unsigned size() const;
