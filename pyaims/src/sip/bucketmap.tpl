@@ -27,13 +27,19 @@ public:
   //BucketMap( const AimsBucket_%Template1typecode% & );
   virtual ~BucketMap_%Template1typecode%();
   //BucketMap_%Template1typecode% & operator = ( const AimsBucket_%Template1PyType% & );
-  void insert( const Point3d &, const %Template1PyType% & );
+  void insert( const Point3d &,
+    const %Template1PyType% & = %Template1PyType%() );
+  void insert( int t, const Point3d &,
+    const %Template1PyType% & = %Template1PyType%() );
+%MethodCode
+  (*sipCpp)[a0][ *a1 ] = %Template1deref%(a2);
+%End
   //void insert( const std::pair< const Point3d, %Template1PyType% > & );
-  void erase( const Point3d & );
   void erase( int );
 %MethodCode
-  sipCpp->erase( a0 );
+  sipCpp->std::map<int, BucketMap_%Template1typecode%::Bucket>::erase( a0 );
 %End
+  void erase( const Point3d & );
   void clear();
   void merge( const BucketMap_%Template1typecode% & );
   float sizeX() const;
