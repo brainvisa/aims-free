@@ -423,50 +423,6 @@ public:
 
 %End
 
-  SIP_PYOBJECT arraydata() /Factory/;
-%MethodCode
-  std::vector<int> dims(4);
-  dims[3] = sipCpp->getSizeX();
-  dims[2] = sipCpp->getSizeY();
-  dims[1] = sipCpp->getSizeZ();
-  dims[0] = sipCpp->getSizeT();
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
-                                 (char *) &sipCpp->at( 0 ) );
-%End
-
-  SIP_PYOBJECT __array__() /Factory/;
-%MethodCode
-  std::vector<int> dims(4);
-  dims[3] = sipCpp->getSizeX();
-  dims[2] = sipCpp->getSizeY();
-  dims[1] = sipCpp->getSizeZ();
-  dims[0] = sipCpp->getSizeT();
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
-                                 (char *) &sipCpp->at( 0 ), true );
-%End
-
-  void checkResize();
-%MethodCode
-  std::vector<int> dims(4);
-  dims[3] = sipCpp->getSizeX();
-  dims[2] = sipCpp->getSizeY();
-  dims[1] = sipCpp->getSizeZ();
-  dims[0] = sipCpp->getSizeT();
-  aims::resizeNumpyArray( sipSelf, 4, &dims[0], (char *) &sipCpp->at( 0 ) );
-%End
-
-  void _arrayDestroyedCallback( SIP_PYOBJECT );
-%MethodCode
-  // remove weak reference in volume
-  PyObject_DelAttrString( sipSelf, "_arrayref" );
-  // dec reference to self that was manually incremented in arraydata()
-  // when building the numpy array
-  Py_DECREF( sipSelf );
-  // the aditional ref to self will be deleted when the callback
-  // (method bound on self) is destroyed, just after now
-  // so self can be destroyed safely
-%End
-
   Volume_%Template1typecode%* operator * ( Volume_%Template1typecode% & )
     /Factory, ReleaseGIL/;
 %MethodCode
@@ -516,6 +472,57 @@ public:
   r1.release();
   sipRes = r3.get();
   r3.release();
+%End
+
+%#endif%
+
+// numpy bindings
+
+%%Template1defNumpyBindings%%
+%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS) %
+
+  SIP_PYOBJECT arraydata() /Factory/;
+%MethodCode
+  std::vector<int> dims(4);
+  dims[3] = sipCpp->getSizeX();
+  dims[2] = sipCpp->getSizeY();
+  dims[1] = sipCpp->getSizeZ();
+  dims[0] = sipCpp->getSizeT();
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
+                                 (char *) &sipCpp->at( 0 ) );
+%End
+
+  SIP_PYOBJECT __array__() /Factory/;
+%MethodCode
+  std::vector<int> dims(4);
+  dims[3] = sipCpp->getSizeX();
+  dims[2] = sipCpp->getSizeY();
+  dims[1] = sipCpp->getSizeZ();
+  dims[0] = sipCpp->getSizeT();
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
+                                 (char *) &sipCpp->at( 0 ), true );
+%End
+
+  void checkResize();
+%MethodCode
+  std::vector<int> dims(4);
+  dims[3] = sipCpp->getSizeX();
+  dims[2] = sipCpp->getSizeY();
+  dims[1] = sipCpp->getSizeZ();
+  dims[0] = sipCpp->getSizeT();
+  aims::resizeNumpyArray( sipSelf, 4, &dims[0], (char *) &sipCpp->at( 0 ) );
+%End
+
+  void _arrayDestroyedCallback( SIP_PYOBJECT );
+%MethodCode
+  // remove weak reference in volume
+  PyObject_DelAttrString( sipSelf, "_arrayref" );
+  // dec reference to self that was manually incremented in arraydata()
+  // when building the numpy array
+  Py_DECREF( sipSelf );
+  // the aditional ref to self will be deleted when the callback
+  // (method bound on self) is destroyed, just after now
+  // so self can be destroyed safely
 %End
 
 %#endif%

@@ -885,6 +885,8 @@ def typeCode( data ):
     numpy.int32 : 'S32', numpy.uint32 : 'U32',
     numpy.int64 : 'S64', numpy.uint64 : 'U64',
     numpy.float32 : 'FLOAT', numpy.float64 : 'DOUBLE',
+    complex : 'CDOUBLE', numpy.complex64 : 'CFLOAT',
+    numpy.complex128 : 'CDOUBLE', 'complex' : 'CDOUBLE',
   }
   dt = dmap.get( data, None )
   if dt is not None:
