@@ -147,7 +147,7 @@ public:
   *sipCpp = %Template1deref%a0;
 %End
 
-  carto::GenericObject* header() const /ReleaseGIL/; 
+  carto::GenericObject* header() /ReleaseGIL/;
 %MethodCode
   aims::PythonHeader	*h 
     = dynamic_cast<aims::PythonHeader *>( sipCpp->header() );
