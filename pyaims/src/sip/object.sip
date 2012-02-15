@@ -605,7 +605,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 
     virtual bool hasSyntax() const /AutoGen/;
 %MethodCode
-    carto::SyntaxedInterface 
+    const carto::SyntaxedInterface 
       *si = sipCpp->getInterface<carto::SyntaxedInterface>();
     if( si && si->hasSyntax() )
       sipRes = true;
@@ -617,7 +617,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %MethodCode
     try
       {
-        carto::SyntaxedInterface 
+        const carto::SyntaxedInterface
           *si = sipCpp->getInterface<carto::SyntaxedInterface>();
         if( si && si->hasSyntax() )
           sipRes = new std::string( si->getSyntax() );
@@ -663,7 +663,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     /*virtual*/ carto::Object objectIterator() const = 0;
 
     // __iter__ isn't called by python iter() function when defined in SIP
-    carto::Object __objiter__() const /Factory, AutoGen/;
+    carto::Object __objiter__() /Factory, AutoGen/;
 %MethodCode
     //std::cout << "__iter__\n";
     if( sipCpp->isIterator() )

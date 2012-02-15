@@ -7,14 +7,12 @@ class Texture_%Template1typecode%
 #define PYAIMS_TEXTURE_%Template1typecode%_DEFINED
 typedef Texture<%Template1% > Texture_%Template1typecode%;
 #endif
-#if SIP_VERSION < 0x040700
-#include "sipaimssipvector_%Template1typecode%.h"
-#endif
 #include <weakrefobject.h>
 #ifndef PY_ARRAY_TYPES_PREFIX
 #define PY_ARRAY_TYPES_PREFIX PyAIMSTypes
 #include <pyaims/numpyarray.h>
 #endif
+%Template1sipinclude%
 %End
 
 %TypeCode
