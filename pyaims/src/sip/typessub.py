@@ -482,10 +482,7 @@ typessub = { 'signed char' : \
                'PyType' : 'Point2df',
                'sipClass' : 'Point2df',
                'typeinclude' : '#include <pyaims/vector/vector.h>', 
-               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsVector_FLOAT_2.h"\n' 
-               '#endif\n'
-               '#include <pyaims/vector/sipvector.h>\n'
+               'sipinclude' : '#include <pyaims/vector/sipvector.h>\n'
                '#ifndef PYAIMS_WRAPPER_AIMSVECTOR_FLOAT_2\n'
                '#define PYAIMS_WRAPPER_AIMSVECTOR_FLOAT_2\n'
                'template <> inline sipWrapperType*\n'
