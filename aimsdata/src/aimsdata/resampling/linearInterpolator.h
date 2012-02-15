@@ -93,7 +93,7 @@ public:
   }
   /** Interpolate to get a value from point ( x, y ,z ). */
   inline Scalar_t value( Coordinate_t x, Coordinate_t y, 
-                         Coordinate_t z )
+                         Coordinate_t z ) const
   {
     return operator ()( x, y, z );
   }
