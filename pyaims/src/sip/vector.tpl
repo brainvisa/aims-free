@@ -241,7 +241,7 @@ public:
 %End
 
 
-  SIP_PYLIST list() const;
+  SIP_PYLIST list();
 %MethodCode
   // Convert to a Python list of %Template1%.
 
