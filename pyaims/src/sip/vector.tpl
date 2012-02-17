@@ -234,7 +234,7 @@ public:
 
 
   // __iter__ isn't called by python iter() function when defined in SIP
-  vector_%Template1typecode%_iterator* __objiter__() const /Factory, AutoGen/;
+  vector_%Template1typecode%_iterator* __objiter__() /Factory, AutoGen/;
 %MethodCode
   std::vector<%Template1% >::iterator i = sipCpp->begin();
   sipRes = new vector_%Template1typecode%_iterator( i, sipCpp, sipSelf );
