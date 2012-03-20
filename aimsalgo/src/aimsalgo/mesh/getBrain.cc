@@ -33,9 +33,11 @@
 
 
 #include <aims/mesh/mesher.h>
+#include <aims/mesh/surfaceOperation.h>
 #include <iomanip>
 #include <stdio.h>
 
+using namespace aims;
 using namespace std;
 
 
@@ -70,6 +72,9 @@ void Mesher::getBrain( const AimsData<short>& thing,
 
   if( sizeMax != 0 )
     getMeshFromMapOfFacet(thing, surface, *iBig);
+  if( insideinterface )
+    // change ext/int notions for internal mesh
+    SurfaceManip::invertSurfacePolygons( surface );
   clear( interface );
 }
 
