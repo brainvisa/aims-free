@@ -52,11 +52,12 @@ namespace aims
     virtual ~MeshFormat();
 
     virtual bool read( const std::string & filename,
-		       AimsTimeSurface<D,T> & obj,
+                       AimsTimeSurface<D,T> & obj,
                        const carto::AllocatorContext & context,
                        carto::Object options );
     virtual bool write( const std::string & filename,
-			const AimsTimeSurface<D,T> & vol, bool ascii = false );
+                        const AimsTimeSurface<D,T> & vol,
+                        carto::Object options = carto::none() );
   };
 
   class TriFormat : public FileFormat<AimsSurfaceTriangle>
@@ -65,11 +66,12 @@ namespace aims
     virtual ~TriFormat();
 
     virtual bool read( const std::string & filename,
-		       AimsSurfaceTriangle & obj,
+                       AimsSurfaceTriangle & obj,
                        const carto::AllocatorContext & context,
                        carto::Object options );
     virtual bool write( const std::string & filename,
-			const AimsSurfaceTriangle & vol, bool ascii = false );
+                        const AimsSurfaceTriangle & vol,
+                        carto::Object options = carto::none() );
   };
 
 
@@ -80,12 +82,12 @@ namespace aims
     virtual ~PovFormat();
 
     virtual bool read( const std::string & filename,
-		       AimsTimeSurface<D,Void> & obj,
+                       AimsTimeSurface<D,Void> & obj,
                        const carto::AllocatorContext & context,
                        carto::Object options );
     virtual bool write( const std::string & filename,
-			const AimsTimeSurface<D,Void> & vol,
-                        bool ascii = false );
+                        const AimsTimeSurface<D,Void> & vol,
+                        carto::Object options = carto::none() );
   };
 
 
@@ -99,8 +101,9 @@ namespace aims
                        const carto::AllocatorContext & context,
                        carto::Object options );
 
-    virtual bool write(const std::string & filename,
-			const AimsTimeSurface<3, Void> &vol, bool ascii);
+    virtual bool write( const std::string & filename,
+                        const AimsTimeSurface<3, Void> &vol,
+                        carto::Object options = carto::none());
   };
 
 
@@ -115,7 +118,8 @@ namespace aims
                        carto::Object options );
 
     virtual bool write(const std::string & filename,
-      const AimsTimeSurface<3, Void> &vol, bool ascii);
+      const AimsTimeSurface<3, Void> &vol,
+      carto::Object options = carto::none() );
   };
 
 }

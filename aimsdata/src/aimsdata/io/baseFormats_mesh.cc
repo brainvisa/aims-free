@@ -58,7 +58,7 @@ namespace aims
   }
 
   bool TriFormat::write( const std::string & filename, 
-			 const AimsSurfaceTriangle & obj, bool )
+			 const AimsSurfaceTriangle & obj, carto::Object )
   {
     TriWriter	r( filename );
     r.write( obj );
@@ -82,7 +82,7 @@ namespace aims
   }
 
   bool Vrml1Format::write(const std::string & filename,
-                          const AimsTimeSurface<3, Void> &vol, bool )
+                          const AimsTimeSurface<3, Void> &vol, carto::Object )
   {
     std::ofstream os( filename.c_str());
     if( !os )

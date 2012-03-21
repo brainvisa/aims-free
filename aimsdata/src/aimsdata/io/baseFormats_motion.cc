@@ -55,7 +55,7 @@ namespace aims
   }
 
   bool TrmFormat::write( const std::string & filename, 
-			 const Motion & obj, bool )
+			 const Motion & obj, carto::Object )
   {
     MotionWriter	r( filename );
     r.write( obj );

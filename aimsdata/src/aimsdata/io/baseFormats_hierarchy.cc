@@ -57,7 +57,7 @@ namespace aims
 
 
   bool HieFormat::write( const std::string & filename,
-                         const Hierarchy & obj, bool )
+                         const Hierarchy & obj, carto::Object )
   {
     TreeWriter     w( filename, HierarchyReader::syntaxSet() );
     w << obj;

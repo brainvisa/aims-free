@@ -49,7 +49,7 @@ namespace aims
                        carto::Object options );
     virtual bool write( const std::string & filename, 
                         const AimsTimeSurface<D,T> & vol, 
-			bool ascii = false );
+                        carto::Object options = carto::none() );
   };
 
 }

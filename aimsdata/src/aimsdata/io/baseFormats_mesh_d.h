@@ -56,7 +56,7 @@ namespace aims
 
   template<int D, class T>
   bool MeshFormat<D,T>::read( const std::string & filename, 
-			      AimsTimeSurface<D,T> & obj, 
+                              AimsTimeSurface<D,T> & obj, 
                               const carto::AllocatorContext & /*context*/, 
                               carto::Object options )
   {
@@ -69,8 +69,22 @@ namespace aims
 
   template<int D, class T> bool 
   MeshFormat<D,T>::write( const std::string & filename, 
-			  const AimsTimeSurface<D,T> & obj, bool ascii )
+                          const AimsTimeSurface<D,T> & obj,
+                          carto::Object options )
   {
+    bool ascii = false;
+    try
+    {
+      if( !options.isNull() )
+      {
+        carto::Object aso = options->getProperty( "ascii" );
+        if( !aso.isNull() )
+          ascii = (bool) aso->getScalar();
+      }
+    }
+    catch( ... )
+    {
+    }
     MeshWriter<D,T>	r( filename, ascii );
     r.write( obj );
     return( true );
@@ -94,7 +108,7 @@ namespace aims
 
   template<int D>
   bool PovFormat<D>::write( const std::string & filename, 
-                            const AimsTimeSurface<D,Void> & obj, bool )
+                            const AimsTimeSurface<D,Void> & obj, carto::Object )
   {
     PovWriter<D> r( filename );
     r.write( obj );

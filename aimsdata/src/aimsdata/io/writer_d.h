@@ -105,6 +105,7 @@ namespace aims
     std::string				excm;
 
     bool exactformat = false;
+    carto::Object options = carto::Object::value( carto::Dictionary() );
     if( !_options.isNull() )
     {
       try
@@ -115,7 +116,11 @@ namespace aims
       catch( ... )
       {
       }
+      options->copyProperties( _options );
     }
+
+    if( !options->hasProperty( "ascii" ) )
+      options->setProperty( "ascii", ascii );
 
     if( format )	// priority to format hint
     {
@@ -124,7 +129,7 @@ namespace aims
       {
         try
         {
-          if( writer->write( _filename, obj, ascii ) )
+          if( writer->write( _filename, obj, options ) )
             return true;
           else if( exactformat )
             throw carto::wrong_format_error( std::string( "Cannot write "
@@ -186,7 +191,7 @@ namespace aims
             {
               try
               {
-                if( writer->write( _filename, obj, ascii ) )
+                if( writer->write( _filename, obj, options ) )
                   return true;
                 else if( exactformat )
                   throw carto::wrong_format_error( std::string( "Cannot write "
@@ -225,7 +230,7 @@ namespace aims
           {
             try
             {
-              if( writer->write( _filename, obj, ascii ) )
+              if( writer->write( _filename, obj, options ) )
                 return true;
               else if( exactformat )
                 throw carto::wrong_format_error( std::string( "Cannot write "
@@ -256,7 +261,7 @@ namespace aims
             {
               try
               {
-                if( writer->write( _filename, obj, ascii ) )
+                if( writer->write( _filename, obj, options ) )
                   return true;
                 else if( exactformat )
                   throw carto::wrong_format_error( std::string( "Cannot write "
@@ -284,7 +289,7 @@ namespace aims
           {
             try
             {
-              if( writer->write( _filename, obj, ascii ) )
+              if( writer->write( _filename, obj, options ) )
                 return true;
               else if( exactformat )
                 throw carto::wrong_format_error( std::string( "Cannot write "

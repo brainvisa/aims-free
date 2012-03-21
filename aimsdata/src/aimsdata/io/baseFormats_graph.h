@@ -58,7 +58,7 @@ namespace aims
         mode (see AimsGraphWriter)
     */
     virtual bool write( const std::string & filename, const Graph & obj, 
-                        bool forceglobal = false );
+                        carto::Object options = carto::none() );
   };
   
   

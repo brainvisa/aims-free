@@ -52,7 +52,8 @@ namespace aims
                        const carto::AllocatorContext & context, 
                        carto::Object options );
     virtual bool write( const std::string & filename, 
-			const TimeTexture<T> & obj, bool ascii = false );
+                        const TimeTexture<T> & obj,
+                        carto::Object options = carto::none() );
   };
 
 }

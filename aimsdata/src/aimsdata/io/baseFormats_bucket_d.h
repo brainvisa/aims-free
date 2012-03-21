@@ -61,8 +61,22 @@ namespace aims
 
   template<class T>
   bool BckFormat<T>::write( const std::string & filename, 
-			    const AimsBucket<T> & obj, bool ascii )
+			    const AimsBucket<T> & obj, carto::Object options
+                          )
   {
+    bool ascii = false;
+    try
+    {
+      if( !options.isNull() )
+      {
+        carto::Object aso = options->getProperty( "ascii" );
+        if( !aso.isNull() )
+          ascii = (bool) aso->getScalar();
+      }
+    }
+    catch( ... )
+    {
+    }
     BckWriter<T>	w( filename, ascii );
     w.write( obj );
     return( true );
@@ -85,8 +99,22 @@ namespace aims
 
   template<class T>
   bool BckMapFormat<T>::write( const std::string & filename, 
-			       const BucketMap<T> & obj, bool ascii )
+			       const BucketMap<T> & obj, carto::Object options
+                             )
   {
+    bool ascii = false;
+    try
+    {
+      if( !options.isNull() )
+      {
+        carto::Object aso = options->getProperty( "ascii" );
+        if( !aso.isNull() )
+          ascii = (bool) aso->getScalar();
+      }
+    }
+    catch( ... )
+    {
+    }
     BckMapWriter<T>	w( filename, ascii );
     w.write( obj );
     return( true );

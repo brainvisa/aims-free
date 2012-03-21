@@ -46,7 +46,7 @@ namespace aims
   }
 
 
-  template<class T> T* 
+  template<typename  T> T*
   FileFormat<T>::read( const std::string & filename, 
                        const carto::AllocatorContext & context, 
                        carto::Object options )
@@ -64,6 +64,13 @@ namespace aims
       }
     delete object;
     return 0;
+  }
+
+
+  template <typename T>
+  bool FileFormat<T>::write( const std::string &, const T &, carto::Object )
+  {
+    return false;
   }
 
 

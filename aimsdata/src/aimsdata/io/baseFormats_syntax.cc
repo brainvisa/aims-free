@@ -53,7 +53,7 @@ namespace aims
 
 
   bool StxFormat::write( const std::string & filename,
-                         const SyntaxSet & obj, bool )
+                         const SyntaxSet & obj, carto::Object )
   {
     SyntaxWriter     w( filename );
     w.write( obj );

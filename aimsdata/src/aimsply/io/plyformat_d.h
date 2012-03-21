@@ -62,17 +62,32 @@ namespace aims
 
   template<long D, typename T>
   bool PlyFormat<D, T>::write( const std::string & filename, 
-                               const AimsTimeSurface<D,T> & vol, bool ascii )
+                               const AimsTimeSurface<D,T> & vol,
+                               carto::Object options )
   {
+    bool ascii = false;
     try
+    {
+      if( !options.isNull() )
       {
-	PlyWriter<D, T>	r( filename, ascii );
-	r.write( vol );
+        carto::Object aso = options->getProperty( "ascii" );
+        if( !aso.isNull() )
+          ascii = (bool) aso->getScalar();
       }
+    }
+    catch( ... )
+    {
+    }
+
+    try
+    {
+      PlyWriter<D, T>	r( filename, ascii );
+      r.write( vol );
+    }
     catch( std::exception & e )
-      {
-	return false;
-      }
+    {
+      return false;
+    }
 
     return true;
   }

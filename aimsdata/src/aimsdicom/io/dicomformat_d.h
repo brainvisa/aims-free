@@ -56,7 +56,7 @@ namespace aims
   template<class T>
   bool DicomFormat< T >::write( const std::string & filename, 
                                 const AimsData<T> & vol, 
-                                bool /* ascii */ )
+                                carto::Object )
   {
     try
     {

@@ -69,8 +69,8 @@ namespace aims
     /** the base class has a default implementation which only returns \c false
 	so if your new format only supports read operations, you won't have 
 	to bother about the write() function */
-    virtual bool write( const std::string &, const T &, bool = false ) 
-    { return( false ); }
+    virtual bool write( const std::string &, const T &,
+      carto::Object options = carto::none() );
   };
 
 

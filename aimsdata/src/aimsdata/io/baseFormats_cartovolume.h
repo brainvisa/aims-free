@@ -57,7 +57,8 @@ namespace aims
 		       const carto::AllocatorContext & context, 
                        carto::Object options );
     virtual bool write( const std::string & filename, 
-                        const carto::Volume<T> & vol, bool ascii = false );
+                        const carto::Volume<T> & vol,
+                        carto::Object options = carto::none() );
     virtual carto::Volume<T>* 
     read( const std::string &filename, 
           const carto::AllocatorContext & context, carto::Object options );
@@ -80,7 +81,7 @@ namespace aims
                        carto::Object options );
     virtual bool write( const std::string & filename, 
                         const carto::VolumeRef<T> & vol, 
-                        bool ascii = false );
+                        carto::Object options = carto::none() );
     virtual carto::VolumeRef<T>* 
     read( const std::string &filename, 
           const carto::AllocatorContext & context, carto::Object options );

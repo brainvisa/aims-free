@@ -354,7 +354,7 @@ namespace aims
 
   template<int D, typename T>
   bool GiftiMeshFormat<D, T>::write(const std::string & filename,
-    const AimsTimeSurface<D, T> & thing, bool /* ascii*/ ) 
+    const AimsTimeSurface<D, T> & thing, carto::Object )
   {
     // std::cout << "gifti mesh write\n";
     try 

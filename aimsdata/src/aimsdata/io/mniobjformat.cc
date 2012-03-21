@@ -217,7 +217,7 @@ bool MniObjFormat::read( const std::string & filename,
 
 
 bool MniObjFormat::write( const std::string & filename,
-  const AimsSurfaceTriangle & obj, bool )
+  const AimsSurfaceTriangle & obj, carto::Object )
 {
   string fname = filename;
   if( fname.substr( fname.length() - 4, 4 ) != ".obj" )

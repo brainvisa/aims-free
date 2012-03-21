@@ -67,8 +67,21 @@ namespace aims
 
   template<class T>
   bool GisFormat<T>::write( const std::string & filename, 
-			    const AimsData<T> & vol, bool ascii )
+			    const AimsData<T> & vol, carto::Object options )
   {
+    bool ascii = false;
+    try
+    {
+      if( !options.isNull() )
+      {
+        carto::Object aso = options->getProperty( "ascii" );
+        if( !aso.isNull() )
+          ascii = (bool) aso->getScalar();
+      }
+    }
+    catch( ... )
+    {
+    }
     GisWriter<T>	r( filename, ascii );
     r.write( vol );
     return( true );
@@ -95,7 +108,7 @@ namespace aims
 
   template<class T>
   bool SpmFormat<T>::write( const std::string & filename, 
-			    const AimsData<T> & vol, bool )
+			    const AimsData<T> & vol, carto::Object )
   {
     SpmWriter<T>	r( filename );
     r.write( vol );

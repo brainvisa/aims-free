@@ -56,9 +56,22 @@ namespace aims
 
   template<class T>
   bool TexFormat<T>::write( const std::string & filename, 
-			    const TimeTexture<T> & obj, bool ascii )
+			    const TimeTexture<T> & obj, carto::Object options )
   {
     TexWriter<T>	w( filename );
+    bool ascii = false;
+    try
+    {
+      if( !options.isNull() )
+      {
+        carto::Object aso = options->getProperty( "ascii" );
+        if( !aso.isNull() )
+          ascii = (bool) aso->getScalar();
+      }
+    }
+    catch( ... )
+    {
+    }
     w.write( obj, ascii );
     return( true );
   }

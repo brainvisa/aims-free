@@ -126,7 +126,8 @@ namespace aims
 
   template<typename T>
   bool VolumeFormat<T>::write( const std::string & filename, 
-                               const carto::Volume<T> & vol, bool ascii )
+                               const carto::Volume<T> & vol,
+                               carto::Object options )
   {
     Writer<AimsData<T> >		w( filename );
     carto::rc_ptr<carto::Volume<T> > 
@@ -136,6 +137,19 @@ namespace aims
       std::string			*fmt = 0;
       if( !_preferredFormat.empty() )
         fmt = &_preferredFormat;
+      bool ascii = false;
+      try
+      {
+        if( !options.isNull() )
+        {
+          carto::Object aso = options->getProperty( "ascii" );
+          if( !aso.isNull() )
+            ascii = (bool) aso->getScalar();
+        }
+      }
+      catch( ... )
+      {
+      }
       w.write( d, ascii, fmt );
     }
     ptr.release(); // don't destroy vol !
@@ -206,9 +220,9 @@ namespace aims
   template<typename T>
   bool VolumeRefFormat<T>::write( const std::string & filename, 
                                   const carto::VolumeRef<T> & vol,
-                                  bool ascii )
+                                  carto::Object options )
   {
-    return _volformat.write( filename, *vol, ascii );
+    return _volformat.write( filename, *vol, options );
   }
 
 }

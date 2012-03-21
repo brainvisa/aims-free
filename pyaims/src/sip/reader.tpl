@@ -42,7 +42,8 @@ typedef aims::Writer<%Template1% > Writer_%Template1typecode%;
 
 public:
   Writer_%Template1typecode%();
-  Writer_%Template1typecode%( const std::string & );
+  Writer_%Template1typecode%( const std::string &,
+    carto::Object = carto::none() );
   virtual ~Writer_%Template1typecode%();
 
 %If (SIPTHROW_BUG)

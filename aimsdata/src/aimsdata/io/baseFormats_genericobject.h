@@ -64,7 +64,8 @@ namespace aims
     virtual T* read( const std::string & filename,
                      const carto::AllocatorContext & context,
                      carto::Object options );
-    virtual bool write( const std::string &, const T &, bool = false );
+    virtual bool write( const std::string &, const T &,
+                        carto::Object options = carto::none() );
   };
 
 

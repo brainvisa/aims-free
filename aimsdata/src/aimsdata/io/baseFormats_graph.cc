@@ -94,10 +94,23 @@ Graph* ArgFormat::read( const string & filename,
 
 
 bool ArgFormat::write( const string & filename, const Graph & obj, 
-		       bool forceglobal )
+		       carto::Object options )
 {
   //cout << "ArgFormat::write " << filename << endl;
   ArgWriter	w( filename );
+  bool forceglobal = false;
+  try
+  {
+    if( !options.isNull() )
+    {
+      carto::Object aso = options->getProperty( "force_global" );
+      if( !aso.isNull() )
+        forceglobal = (bool) aso->getScalar();
+    }
+  }
+  catch( ... )
+  {
+  }
   return w.write( (Graph &) obj, forceglobal );
 }
 

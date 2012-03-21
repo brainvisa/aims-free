@@ -71,7 +71,7 @@ namespace aims
 
   template <typename T>
   bool MinfFormat<T>::write( const std::string & filename, const T & obj,
-                             bool )
+                             carto::Object )
   {
     carto::PythonWriter  pw( filename );
     pw.write( obj );

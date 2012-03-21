@@ -55,7 +55,7 @@ namespace aims
 
   template<class T>
   bool VidaFormat<T>::write( const std::string & filename, 
-			     const AimsData<T> & vol, bool )
+			     const AimsData<T> & vol, carto::Object )
   {
     try
       {

@@ -112,7 +112,7 @@ namespace aims
   template<typename T>
   bool GiftiTextureFormat<T>::write( const std::string & filename,
                                      const TimeTexture<T> & thing,
-                                     bool /* ascii */ )
+                                     carto::Object )
   {
 
     // std::cout << "gifti texture write\n";

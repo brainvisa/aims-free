@@ -51,7 +51,7 @@ namespace aims
                        carto::Object options );
     virtual bool write( const std::string & filename,
                         const AimsTimeSurface<D, T> & vol,
-                        bool ascii = false);
+                        carto::Object options = carto::none() );
 
     const carto::Object options() const { return _options; }
     void setOptions( carto::Object opt ) { _options = opt; }
@@ -76,7 +76,7 @@ namespace aims
                        carto::Object options );
     virtual bool write( const std::string & filename,
                         const TimeTexture<T> & vol,
-                        bool ascii = false );
+                        carto::Object options = carto::none() );
 
     const carto::Object options() const { return _options; }
     void setOptions( carto::Object opt ) { _options = opt; }
