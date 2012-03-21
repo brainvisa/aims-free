@@ -134,7 +134,7 @@ namespace aims
   }
 
   template <class T>
-  void NiftiWriter<T>::write( const AimsData<T>& thing )
+  void NiftiWriter<T>::write( const AimsData<T>& thing, carto::Object options )
   {
     // If .hdr/.img extension then give the hand to SPM/Analyze writer
     char *cext = nifti_find_file_extension( _name.c_str() );
@@ -154,7 +154,7 @@ namespace aims
       if( fmt )
         try
         {
-          if( fmt->write( name, thing, false ) )
+          if( fmt->write( name, thing, options ) )
             return;
         }
         catch( ... )
@@ -224,23 +224,39 @@ namespace aims
     // Can float data be saved as integer without loss?
     if( code == "FLOAT" || code == "DOUBLE" )
     {
-      // double maxm = 0;
-      float scale = 1, offset = 0;
-      bool shen = canEncodeAsScaledS16( *thing.volume(), scale, offset, true,
-                                         0 /* &maxm */ );
-      if( shen )
+      bool forcedDT = false;
+      try
       {
-        /* std::cout << "16 bit coding possible: scale: " << scale
-            << ", offset: " << offset << ", max error: " << maxm << std::endl;
-        */
-        hdr.setProperty( "disk_data_type",
-                         carto::DataTypeCode<int16_t>().dataType() );
-        hdr.setProperty( "scale_factor_applied", true );
-        hdr.setProperty( "scale_factor", scale );
-        hdr.setProperty( "scale_offset", offset );
+        if( !options.isNull() )
+        {
+          carto::Object aso = options->getProperty( "force_disk_data_type" );
+          if( !aso.isNull() )
+            forcedDT = (bool) aso->getScalar();
+        }
       }
-      /* else
-      std::cout << "matching interval not found. Not 16 bit codable\n"; */
+      catch( ... )
+      {
+      }
+      if( !forcedDT )
+      {
+        // double maxm = 0;
+        float scale = 1, offset = 0;
+        bool shen = canEncodeAsScaledS16( *thing.volume(), scale, offset, true,
+                                          0 /* &maxm */ );
+        if( shen )
+        {
+          /* std::cout << "16 bit coding possible: scale: " << scale
+              << ", offset: " << offset << ", max error: " << maxm << std::endl;
+          */
+          hdr.setProperty( "disk_data_type",
+                          carto::DataTypeCode<int16_t>().dataType() );
+          hdr.setProperty( "scale_factor_applied", true );
+          hdr.setProperty( "scale_factor", scale );
+          hdr.setProperty( "scale_offset", offset );
+        }
+        /* else
+        std::cout << "matching interval not found. Not 16 bit codable\n"; */
+      }
     }
 
     bool ok = true;

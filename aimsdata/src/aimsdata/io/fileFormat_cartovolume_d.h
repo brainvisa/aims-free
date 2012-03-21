@@ -129,7 +129,7 @@ namespace aims
                                const carto::Volume<T> & vol,
                                carto::Object options )
   {
-    Writer<AimsData<T> >		w( filename );
+    Writer<AimsData<T> >		w( filename, options );
     carto::rc_ptr<carto::Volume<T> > 
       ptr( const_cast<carto::Volume<T> *>( &vol ) );
     {

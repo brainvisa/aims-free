@@ -56,7 +56,8 @@ namespace aims
     /** Write the data with "name" file name to disk
         @param thing const reference to the data to write
     */
-    void write( const AimsData<T>& thing );
+    void write( const AimsData<T>& thing,
+                carto::Object options = carto::none() );
 
     /// Return a name without  extension
     inline std::string removeExtension( const std::string& name );

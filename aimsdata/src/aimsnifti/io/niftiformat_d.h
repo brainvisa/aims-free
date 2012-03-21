@@ -53,12 +53,12 @@ namespace aims
 
   template<class T>
   bool NiftiFormat<T>::write( const std::string & filename, 
-                              const AimsData<T> & vol, carto::Object )
+                              const AimsData<T> & vol, carto::Object options )
   {
     try
       {
 	NiftiWriter<T>	r( filename );
-	r.write( vol );
+	r.write( vol, options );
       }
     catch( std::exception & e )
       {

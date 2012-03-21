@@ -297,7 +297,7 @@ class Writer:
     self._fullType = None
     pass
 
-  def write( self, obj, filename, format=None ):
+  def write( self, obj, filename, format=None, options={} ):
     '''Writes the object <obj> in a file named <filename>, whatever the type of
     <obj>, as format <format>.
     All objects types and formats supported by the Aims IO system can be used.
@@ -335,7 +335,7 @@ class Writer:
       if W is None:
         raise AttributeError( 'no Writer for type ' + \
           obj.__class__.__name__ )
-    w = W( filename )
+    w = W( filename, options )
     w.write( obj, False, format )
     try:
       self._objectType = w.writtenObjectType()
@@ -367,7 +367,7 @@ def read( filename, border = 0, frame = -1, dtype=None ):
   r = Reader()
   return r.read( filename, border=border, frame=frame, dtype=dtype )
 
-def write( obj, filename, format=None ):
+def write( obj, filename, format=None, options={} ):
   '''Equivalent to:
 
   .. code-block:: python
@@ -376,7 +376,7 @@ def write( obj, filename, format=None ):
     w.write( obj, filename, format=format )
   '''
   w = Writer()
-  w.write( obj, filename, format=format )
+  w.write( obj, filename, format=format, options=options )
 
 
 # vector-like iterator
