@@ -303,6 +303,8 @@ class Writer:
     All objects types and formats supported by the Aims IO system can be used.
     <obj> may be a reference-counter to an object type supported by the IO
     system.
+    Additional specific options may be passed to the underlying IO system in an
+    optional <options> dictionary.
     '''
     c = obj.__class__.__name__.split( '.' )[ -1 ]
     wr = 'Writer_' + c
@@ -373,7 +375,7 @@ def write( obj, filename, format=None, options={} ):
   .. code-block:: python
 
     w = Writer()
-    w.write( obj, filename, format=format )
+    w.write( obj, filename, format=format, options=options )
   '''
   w = Writer()
   w.write( obj, filename, format=format, options=options )
