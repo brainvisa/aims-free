@@ -318,7 +318,7 @@ def chooseColormaps( vols ):
   functionalFusionColormaps, labelsFusionColormaps, twotailColormaps,
     binaryColormaps ]
   def findRgbColormap( cmap ):
-    for cmt in cmpasbytype:
+    for cmt in cmapbytype:
       for cm in cmt:
         if cm[0] == cmap:
           return cm[1]
