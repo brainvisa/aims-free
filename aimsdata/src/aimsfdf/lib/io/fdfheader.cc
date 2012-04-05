@@ -104,12 +104,10 @@ void FdfHeader::read()
   // Header elements
   // Motion transfo;
   vector<float> resolutions, location, orientation, span, roi, storagetomemory(16);
-  string spatial_rank, checksum, storage, bits, bigendian;
   vector<int> matrix, dims;
   vector<string> pt;
   bool chksumfound = false;
   int chksum = 0, typesize = 32, bits_allocated = 32, byte_swapping = 0;
-  //uint byte_order = 1;
   int rank = 2, dimz = 1;
 
   // Parsing elements
@@ -128,14 +126,10 @@ void FdfHeader::read()
   }
 
   // Initialize the transformation
-  //storagetomemory = transfo.toVector();
-  //cout << "[";
   for (uint x=0; x<4; x++)
     for (uint y=0; y<4; y++) {
         storagetomemory[4*x + y] = ((x == y) ? 1 : 0);
-        //cout << storagetomemory[4*x + y] << ",";
     }
-  //cout << "]" << endl;
 
   bool headerstarted = false;
 
@@ -176,10 +170,6 @@ void FdfHeader::read()
               stringTo(value, rank);
           }
 
-          else if (name == "spatial_rank") {
-              spatial_rank = value;
-          }
-
           else if (name == "slices") {
               stringTo(value, dimz);
           }
@@ -214,7 +204,6 @@ void FdfHeader::read()
               if (!location.empty()) {
                 for (uint i=0; i < 3; i++) {
                     storagetomemory[ 4 * i + 3 ] = location[i];
-                    //cout << "location[" << (4 * i + 3) << "] = " << storagetomemory[ 4 * i + 3 ] << endl;
                 }
               }
           }
@@ -225,14 +214,12 @@ void FdfHeader::read()
                 for (uint x=0; x < 3; x++)
                     for (uint y=0; y < 3; y++) {
                         storagetomemory[ 4 * x + y ] = orientation[ 3 * x + y];
-                        //cout << "orientation[" << (4 * x + y) << "] = " << storagetomemory[ 4 * x + y ] << endl;
                     }
               }
           }
 
           // Get the binary data type
           else if (name == "storage") {
-              storage = value;
 
               if (value == "double" ) {
                   _type = "DOUBLE";
@@ -278,32 +265,20 @@ void FdfHeader::read()
 
           // Get the bits
           else if (name == "bits") {
-              stringTo(value, bits);
-              istringstream is(bits);
-              is >> bits_allocated;
+              stringTo(value, bits_allocated);
           }
 
           // Get the bits order
           else if (name == "bigendian") {
-              stringTo(value, bigendian);
-              istringstream is(bigendian);
-              is >> byte_swapping;
+              stringTo(value, byte_swapping);
           }
 
           // Get the checksum
           else if (name == "checksum") {
-              stringTo(value, checksum);
-              istringstream is(checksum);
-              is >> chksum;
+              stringTo(value, chksum);
               chksumfound = true;
               break;
           }
-
-          //else {
-            //cout << "unrecognized token " << name << " at line " << linenum << " in file " << _name << endl << flush;
-            //throw parse_error( "unrecognized token", "", _name, linenum );
-          //}
-
       }
     }
     tokens.clear();
