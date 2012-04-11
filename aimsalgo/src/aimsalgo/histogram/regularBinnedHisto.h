@@ -121,20 +121,26 @@ namespace aims
     double x;
     int y;
 
-    for( iv=thing.begin(); iv!=fv; ++iv )
-    {
-      x = (double) ( (double) (*iv) - mini ) * scl;
-      y = (int) x;
-      if( y < 0 )
-      {}
-      else if( y >= (int) _bins )
-      {
-        if( x == (int) _bins )
-          ++this->_data( _bins-1 );
-      }
-      else
-        ++this->_data( y );
-    }
+    int iy, iz, it, nx = thing.dimX(), ny = thing.dimY(), nz = thing.dimZ(),
+      nt = thing.dimT();
+    for( it=0; it<nt; ++it )
+      for( iz=0; iz<nz; ++iz )
+        for( iy=0; iy<ny; ++iy )
+          for( iv=&thing( 0, iy, iz, it ), fv=iv+nx; iv!=fv; ++iv )
+          {
+            std::cout << "iv: " << iv << ", nx: " << nx << ", ny: " << ny << ", nz: " << nz << ", nt: " << nt << ", iv+1: " << &thing( 1, iy, iz, it ) << std::endl;
+            x = (double) ( (double) (*iv) - mini ) * scl;
+            y = (int) x;
+            if( y < 0 )
+            {}
+            else if( y >= (int) _bins )
+            {
+              if( x == (int) _bins )
+                ++this->_data( _bins-1 );
+            }
+            else
+              ++this->_data( y );
+          }
   }
 
 

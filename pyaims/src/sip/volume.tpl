@@ -529,5 +529,35 @@ public:
 
 };
 
+
+class VolumeView_%Template1typecode% : Volume_%Template1typecode%
+{
+%TypeHeaderCode
+#include <cartodata/volume/volumeview.h>
+%Template1typeinclude%
+typedef carto::VolumeView<%Template1% > VolumeView_%Template1typecode%;
+%End
+
+public:
+  class Position4Di
+  {
+  public:
+    Position4Di( int x = 0, int y = 0, int z = 0, int t = 0 );
+    ~Position4Di();
+    int operator [] ( int coord ) const;
+  };
+
+  VolumeView_%Template1typecode%( rc_ptr_Volume_%Template1typecode% other,
+              const VolumeView_%Template1typecode%::Position4Di & pos = VolumeView_%Template1typecode%::Position4Di( 0, 0, 0, 0 ),
+              const VolumeView_%Template1typecode%::Position4Di & size = VolumeView_%Template1typecode%::Position4Di( -1, -1, -1, -1 ),
+              const carto::AllocatorContext& allocatorContext
+              = carto::AllocatorContext() );
+  virtual ~VolumeView_%Template1typecode%();
+
+  rc_ptr_Volume_%Template1typecode% refVolume() const;
+  VolumeView_%Template1typecode%::Position4Di posInRefVolume() const;
+};
+
+
 %#undef PyAims_Volume_%Template1typecode%_defined%
 

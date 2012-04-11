@@ -36,6 +36,7 @@
 // compilation of some Volume classes on Aims types
 
 #include <cartodata/volume/volume_d.h>
+#include <cartodata/volume/volumeview.h>
 #include <aims/rgb/rgb.h>
 #include <aims/hsv/hsv.h>
 #include <aims/io/datatypecode.h>
@@ -176,3 +177,12 @@ template class carto::Volume< std::set<float> >;
 
 template class carto::VolumeProxy< std::map<int, float> >;
 template class carto::Volume< std::map<int, float> >;
+
+// VolumeView on RGB types
+
+template <typename T>
+VolumeView<T>::~VolumeView() {};
+
+template class VolumeView< AimsRGB >;
+template class VolumeView< AimsRGBA >;
+
