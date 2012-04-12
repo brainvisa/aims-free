@@ -46,14 +46,17 @@ Q34ToolButton::Q34ToolButton( const QIcon & s,
   // taken fom QToolBar code
   // there is apparently no simple way to do this in Qt 4...
   setAutoRaise( true );
-  setIconSize( parent->iconSize() );
   setFocusPolicy( Qt::NoFocus );
-  setToolButtonStyle( parent->toolButtonStyle() );
-  connect( parent, SIGNAL( iconSizeChanged( QSize ) ),
-           this, SLOT( setIconSize( QSize ) ) );
-  connect( parent, SIGNAL( toolButtonStyleChanged( Qt::ToolButtonStyle ) ),
-           this, SLOT( setToolButtonStyle( Qt::ToolButtonStyle ) ) );
-  parent->addWidget( this );
+  if( parent )
+  {
+    setIconSize( parent->iconSize() );
+    setToolButtonStyle( parent->toolButtonStyle() );
+    connect( parent, SIGNAL( iconSizeChanged( QSize ) ),
+            this, SLOT( setIconSize( QSize ) ) );
+    connect( parent, SIGNAL( toolButtonStyleChanged( Qt::ToolButtonStyle ) ),
+            this, SLOT( setToolButtonStyle( Qt::ToolButtonStyle ) ) );
+    parent->addWidget( this );
+  }
 }
 
 
@@ -63,14 +66,17 @@ Q34ToolButton::Q34ToolButton( QToolBar * parent )
   // taken fom QToolBar code
   // there is apparently no simple way to do this in Qt 4...
   setAutoRaise( true );
-  setIconSize( parent->iconSize() );
   setFocusPolicy( Qt::NoFocus );
+  if( parent )
+  {
+  setIconSize( parent->iconSize() );
   setToolButtonStyle( parent->toolButtonStyle() );
-  connect( parent, SIGNAL( iconSizeChanged( QSize ) ),
-           this, SLOT( setIconSize( QSize ) ) );
-  connect( parent, SIGNAL( toolButtonStyleChanged( Qt::ToolButtonStyle ) ),
-           this, SLOT( setToolButtonStyle( Qt::ToolButtonStyle ) ) );
-  parent->addWidget( this );
+    connect( parent, SIGNAL( iconSizeChanged( QSize ) ),
+            this, SLOT( setIconSize( QSize ) ) );
+    connect( parent, SIGNAL( toolButtonStyleChanged( Qt::ToolButtonStyle ) ),
+            this, SLOT( setToolButtonStyle( Qt::ToolButtonStyle ) ) );
+    parent->addWidget( this );
+  }
 }
 
 #else // Qt 3
@@ -120,13 +126,16 @@ QToolButtonInt::QToolButtonInt( int par, QToolBar * parent )
   // taken fom QToolBar code
   // there is apparently no simple way to do this in Qt 4...
   setAutoRaise( true );
-  setIconSize( parent->iconSize() );
   setFocusPolicy( Qt::NoFocus );
-  setToolButtonStyle( parent->toolButtonStyle() );
-  connect( parent, SIGNAL( iconSizeChanged( QSize ) ),
-           this, SLOT( setIconSize( QSize ) ) );
-  connect( parent, SIGNAL( toolButtonStyleChanged( Qt::ToolButtonStyle ) ),
-           this, SLOT( setToolButtonStyle( Qt::ToolButtonStyle ) ) );
+  if( parent )
+  {
+    setIconSize( parent->iconSize() );
+    setToolButtonStyle( parent->toolButtonStyle() );
+    connect( parent, SIGNAL( iconSizeChanged( QSize ) ),
+            this, SLOT( setIconSize( QSize ) ) );
+    connect( parent, SIGNAL( toolButtonStyleChanged( Qt::ToolButtonStyle ) ),
+            this, SLOT( setToolButtonStyle( Qt::ToolButtonStyle ) ) );
+  }
 }
 
 #else // Qt 3
