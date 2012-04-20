@@ -58,6 +58,7 @@ int main( int argc, const char** argv )
       Writer<Graph>			wg;
       Writer<AimsData<int16_t> >	wv;
       string				labelsfile;
+      bool                              forceSameSpace = false;
       string				labelatt = "name";
       app.addOption( rg1, "-i", "input graph to set labels into" );
       app.alias( "--input1", "-i" );
@@ -74,6 +75,9 @@ int main( int argc, const char** argv )
       app.addOption( labelsfile, "-m", 
                      "output labels map file [default=not saved]", true );
       app.alias( "--map", "-m" );
+      app.addOption( forceSameSpace, "-s", "force same space for both graphs "
+        "(ignore Talairach transforms)", true );
+      app.alias( "--samespace", "-s" );
       app.initialize();
 
       cout << "reading " << rg1.fileName() << endl;
@@ -110,8 +114,13 @@ int main( int argc, const char** argv )
         }
 
       // handle transformations
-      Motion  gToTal = GraphManip::talairach( *g );
-      Motion  hToTal = GraphManip::talairach( *h );
+      Motion  gToTal;
+      Motion  hToTal;
+      if( !forceSameSpace )
+      {
+        gToTal = GraphManip::talairach( *g );
+        hToTal = GraphManip::talairach( *h );
+      }
       Motion vsgm;
       vsgm.rotation()(0,0) = vsg[0];
       vsgm.rotation()(1,1) = vsg[1];
