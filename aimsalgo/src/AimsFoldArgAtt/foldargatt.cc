@@ -191,7 +191,11 @@ int main( int argc, const char** argv )
                            FileUtil::removeExtension
                            ( FileUtil::basename( graphw.fileName() ) ) 
                            + ".data" );
-      graphw.write( graph, true );
+
+      Object opts = Object::value( Dictionary() );
+      opts->setProperty( "force_global", true );
+      graphw.setOptions( opts );
+      graphw.write( graph );
     }
    catch( user_interruption & )
     {
