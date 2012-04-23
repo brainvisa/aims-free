@@ -128,7 +128,7 @@ namespace aims
         for( iy=0; iy<ny; ++iy )
           for( iv=&thing( 0, iy, iz, it ), fv=iv+nx; iv!=fv; ++iv )
           {
-            std::cout << "iv: " << iv << ", nx: " << nx << ", ny: " << ny << ", nz: " << nz << ", nt: " << nt << ", iv+1: " << &thing( 1, iy, iz, it ) << std::endl;
+//             std::cout << "iv: " << iv << ", nx: " << nx << ", ny: " << ny << ", nz: " << nz << ", nt: " << nt << ", iv+1: " << &thing( 1, iy, iz, it ) << std::endl;
             x = (double) ( (double) (*iv) - mini ) * scl;
             y = (int) x;
             if( y < 0 )
