@@ -98,7 +98,7 @@ inline
 Facet::~Facet()
 {
   if ( _pNeighbor )
-    delete _pNeighbor;
+    delete [] _pNeighbor;
 }
 
 
