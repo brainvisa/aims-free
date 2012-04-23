@@ -188,19 +188,19 @@ static void findLocal( AttributedObject *ao, AimsGraphWriter_Private & d )
 {
   d.mode = AimsGraphWriter::Local;
   d.elemcode.storageType = GraphElementCode::Local;
-  char	num[ 10 ];
-  time_t t = time( 0 );
-#if defined(__osf__)
-  sprintf( num, "%d", t );
-#else
-  sprintf( num, "%ld", t );
-#endif
+  string num;
+  {
+    ostringstream snum;
+    time_t t = time( 0 );
+    snum << t;
+    num = snum.str();
+  }
+  ostringstream snum;
+  snum << d.genindexcount++;
   string	fname = d.elemcode.id + "_" + d.elemcode.objectType
-    + "_" + num + "_"
+    + "_" + num + "_" + snum.str()
     + GraphManip::defaultExtensionForObjectType( d.elemcode.objectType,
                                                  d.elemcode.dataType );
-  sprintf( num, "%d", d.genindexcount++ );
-  fname += num;
   d.elemfname = d.directory + fname;
   ao->setProperty( d.elemcode.local_file_attribute, fname );
 }
