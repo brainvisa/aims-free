@@ -110,6 +110,16 @@ bool ArgFormat::write( const string & filename, const Graph & obj,
   }
   catch( ... )
   {
+    try
+    {
+      // compatibility: try the old ascii flag which was misused
+      carto::Object aso = options->getProperty( "ascii" );
+      if( !aso.isNull() )
+        forceglobal = (bool) aso->getScalar();
+    }
+    catch( ... )
+    {
+    }
   }
   return w.write( (Graph &) obj, forceglobal );
 }
