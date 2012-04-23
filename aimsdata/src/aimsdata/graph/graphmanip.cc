@@ -1449,10 +1449,12 @@ string GraphManip::defaultExtensionForObjectType( const string & otype,
                                                   const string & /*dtype*/ )
 {
   string ext;
-  if( otype == "Mesh" || otype == "Segments" || otype == "Mesh4" )
+  if( otype == "Mesh" )
+    ext = ".gii";
+  else if( otype == "Segments" || otype == "Mesh4" )
     ext = ".mesh";
   else if( otype == "Volume" )
-    ext = ".ima";
+    ext = ".nii";
   else if( otype == "Bucket" )
     ext = ".bck";
   else if( otype == "Texture" )
