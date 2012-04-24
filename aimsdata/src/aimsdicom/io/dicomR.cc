@@ -45,6 +45,7 @@
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/datasource/filedatasource.h>
 #include <memory>
+#include <dcerror.h>
 
 using namespace std;
 
