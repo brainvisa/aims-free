@@ -134,15 +134,15 @@ public:
   AimsRGB& operator /= (const double &val)
   {
     ASSERT(val != 0);
-    _red   /= val;
-    _green /= val;
-    _blue  /= val;
+    _red   = (byte)(_red / val);
+    _green = (byte)(_green / val);
+    _blue  = (byte)(_blue / val);
     return(*this);
   }
   AimsRGB& operator *= (const double &val)
-  { _red   *= val;
-  _green *= val;
-  _blue  *= val;
+  { _red = (byte)(_red * val);
+  _green = (byte)(_green * val);
+  _blue  = (byte)(_blue * val);
   return(*this);
   }
   AimsRGB& operator *= (const byte &val)
@@ -310,9 +310,9 @@ public:
   AimsRGBA & operator /= ( const double &val )
   {
     ASSERT(val != 0);
-    _red   /= val;
-    _green /= val;
-    _blue  /= val;
+    _red   = (byte)(_red / val);
+    _green = (byte)(_green / val);
+    _blue  = (byte)(_blue / val);
     return(*this);
   }
 
@@ -336,9 +336,9 @@ public:
 
   AimsRGBA & operator *= (const double &val)
   {
-    _red   *= val; 
-    _green *= val; 
-    _blue  *= val;
+    _red   = (byte)(_red * val);
+    _green = (byte)(_green * val);
+    _blue  = (byte)(_blue * val);
     return(*this); 
   }
 
@@ -629,9 +629,9 @@ inline
 AimsRGB operator / (const AimsRGB  &aa,
                     const double &bb)
 { ASSERT(bb != 0);
-  return(AimsRGB((double) (aa.red()   / bb),
-                 (double) (aa.green() / bb),
-                 (double) (aa.blue()  / bb) ));
+  return(AimsRGB((byte) (aa.red()   / bb),
+                 (byte) (aa.green() / bb),
+                 (byte) (aa.blue()  / bb) ));
 }
 
 inline

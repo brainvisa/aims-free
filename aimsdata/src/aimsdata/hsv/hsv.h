@@ -125,12 +125,12 @@ public:
     _value      /= val;
     return(*this);
   }
-  AimsHSV& operator /= (const float &val)
+  AimsHSV& operator /= (const double &val)
   {
     ASSERT(val != 0);
-    _hue        /= val;
-    _saturation /= val;
-    _value      /= val;
+    _hue        = (byte)(_hue / val);
+    _saturation = (byte)(_saturation / val);
+    _value      = (byte)(_value / val);
     return(*this);
   }
   AimsHSV& operator *= (const byte &val)
@@ -146,9 +146,9 @@ public:
   return(*this);
   }
   AimsHSV& operator *= (const double &val)
-  { _hue        *= val;
-    _saturation *= val;
-    _value      *= val;
+  { _hue        = (byte)(_hue * val);
+    _saturation = (byte)(_saturation * val);
+    _value      = (byte)(_value * val);
   return(*this);
   }
   //@}
