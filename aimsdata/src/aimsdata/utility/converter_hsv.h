@@ -67,7 +67,7 @@ namespace carto
     }
     else {
       /* Compute saturation */
-      out.saturation() = uint8_t( rint(255.0 * float(rgb_max - rgb_min)
+      out.saturation() = uint8_t( rint(255.0 * double(rgb_max - rgb_min)
         / out.value()) );
       if (out.saturation() == 0) {
           out.hue() = 0;
@@ -75,13 +75,13 @@ namespace carto
       else {  
         /* Compute hue */
         if (rgb_max == in.red()) {
-          out.hue() = uint8_t( rint(43.0 * float(in.green()
+          out.hue() = uint8_t( rint(43.0 * double(in.green()
             - in.blue())/(rgb_max - rgb_min)) );
         } else if (rgb_max == in.green()) {
-          out.hue() = 85 + uint8_t( rint(43.0 * float(in.blue()
+          out.hue() = 85 + uint8_t( rint(43.0 * double(in.blue()
             - in.red())/(rgb_max - rgb_min)) );
         } else /* rgb_max == rgb.b */ {
-          out.hue() = 171 + uint8_t( rint(43.0 * float(in.red()
+          out.hue() = 171 + uint8_t( rint(43.0 * double(in.red()
             - in.green())/(rgb_max - rgb_min)) );
         }
       }
@@ -91,7 +91,7 @@ namespace carto
   template <class T> inline
   void hsvtorgb( const AimsHSV &in, T & out )
   {
-    float h, s, v;
+    double f, h, s, v, r0 = 360.0 / 255, r1 = 1.0 / 255;
     long i, p, q, t;
 
     if( in.saturation() == 0 )
@@ -100,15 +100,15 @@ namespace carto
       return;
     }
 
+    h = double( in.hue() ) * r0;
+    s = double( in.saturation() ) * r1;
+    v = double( in.value() ) * r1;
+    i = long( floor( h / 60 ) ) % 6;
+    f = h / 60 - i;
+    p = byte( v * ( 1.0 - s ) * 255 );
+    q = byte( v * ( 1.0 - f * s ) * 255 );
+    t = byte( v * ( 1.0 - ( 1.0 - f ) * s ) * 255 );
     
-    h = uint8_t( rint( float( in.hue() ) * 6 / 255 ) );
-    s = uint8_t( rint( float( in.saturation() ) / 255 ) );
-    v = uint8_t( rint( float( in.value() ) / 255 ) );
-    i = long( floor( h ) );
-    p = long( rint( v * ( 1 - s ) * 255 ) );
-    q = long( rint( v * ( 1 - s * ( h - i ) ) * 255 ) );
-    t = long( rint( v * ( 1 - s * ( 1 - ( h - i ) ) ) * 255 ) );
-
     switch( i ) {
       case 0:
         out.red() = in.value();

@@ -103,36 +103,37 @@ inline uint8_t DataTypeInfo<AimsHSV>::samples()
 class ChannelSelector \
 
 
-#define DECLARE_CHANNEL_SELECTOR_SPEC( T, C ) \
+#define DECLARE_CHANNEL_SELECTOR_SPEC( T, U, C ) \
 { \
     public: \
       ChannelSelector() {} \
       virtual ~ChannelSelector() {} \
 \
-      C select( T input, uint8_t channel ); \
-      void set( T & input, uint8_t channel, C value ); \
+      U select( T input, uint8_t channel ); \
+      void set( T & input, uint8_t channel, U value ); \
 \
     private: \
-      ShallowConverter<T, C> conv; \
+      ShallowConverter<C, U> channelconv; \
+      ShallowConverter<T, U> dataconv; \
 }; \
 
 
 #define DECLARE_CHANNEL_SELECTOR_CLASS() \
-template <class T, class C > \
+template <class T, class U, class C = byte > \
 DECLARE_CHANNEL_SELECTOR_NAME() \
-DECLARE_CHANNEL_SELECTOR_SPEC( T, C ) \
+DECLARE_CHANNEL_SELECTOR_SPEC( T, U, C ) \
 
 
 #define DECLARE_CHANNEL_SELECTOR_SPECIALIZED( T ) \
-template <class C> \
-DECLARE_CHANNEL_SELECTOR_NAME() < T, C > \
-DECLARE_CHANNEL_SELECTOR_SPEC( T, C ) \
+template <class U> \
+DECLARE_CHANNEL_SELECTOR_NAME() < T, U > \
+DECLARE_CHANNEL_SELECTOR_SPEC( T, U, byte ) \
 
 
 #define DECLARE_CHANNEL_SELECTOR_VOLUME_SPECIALIZED() \
-template <class T, class C> \
-DECLARE_CHANNEL_SELECTOR_NAME() < AimsData<T>, AimsData<C> > \
-DECLARE_CHANNEL_SELECTOR_SPEC( AimsData<T>, AimsData<C> ) \
+template <class T, class U> \
+DECLARE_CHANNEL_SELECTOR_NAME() < AimsData<T>, AimsData<U> > \
+DECLARE_CHANNEL_SELECTOR_SPEC( AimsData<T>, AimsData<U>, Void ) \
 
 
 DECLARE_CHANNEL_SELECTOR_CLASS()
@@ -142,150 +143,152 @@ DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsRGBA )
 DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsHSV )
 
 
-template <class T, class C> inline
-C ChannelSelector< T, C >::select( T input, uint8_t )
+template <class T, class U, class C> inline
+U ChannelSelector< T, U, C >::select( T input, uint8_t )
 {
   return input;
 }
 
-template <class T, class C> inline
-void ChannelSelector< T, C >::set( T& input, uint8_t, C value )
+template <class T, class U, class C> inline
+void ChannelSelector< T, U, C >::set( T& input, uint8_t, U value )
 {
   input = value;
 }
 
-template <class C> inline
-C ChannelSelector< AimsRGB, C >::select( AimsRGB input, uint8_t channel )
+template <class U> inline
+U ChannelSelector< AimsRGB, U >::select( AimsRGB input, uint8_t channel )
 {
-  C output;
+  U output;
 
   switch(channel) {
     case RedChannel :
-      conv.convert( input.red(), output );
+      channelconv.convert( input.red(), output );
       break;
     case GreenChannel :
-      conv.convert( input.green(), output );
+      channelconv.convert( input.green(), output );
       break;
     case BlueChannel :
-      conv.convert( input.blue(), output );
+      channelconv.convert( input.blue(), output );
       break;
     default :
-      conv.convert( input, output );
+      dataconv.convert( input, output );
   }
   return output;
 }
 
-template <class C> inline
-void ChannelSelector< AimsRGB, C >::set( AimsRGB& input, uint8_t channel, C value )
+template <class U> inline
+void ChannelSelector< AimsRGB, U >::set( AimsRGB& input, uint8_t channel, U value )
 {
   switch(channel) {
     case RedChannel :
-      conv.convert( value, input.red() );
+      channelconv.convert( value, input.red() );
       break;
     case GreenChannel :
-      conv.convert( value, input.green() );
+      channelconv.convert( value, input.green() );
       break;
     case BlueChannel :
-      conv.convert( value, input.blue() );
+      channelconv.convert( value, input.blue() );
       break;
   }
 }
 
-template <class C> inline
-C ChannelSelector< AimsRGBA, C >::select( AimsRGBA input, uint8_t channel )
+template <class U> inline
+U ChannelSelector< AimsRGBA, U >::select( AimsRGBA input, uint8_t channel )
 {
-  C output;
+  U output;
 
   switch(channel) {
     case RedChannel :
-      conv.convert( input.red(), output );
+      channelconv.convert( input.red(), output );
       break;
     case GreenChannel :
-      conv.convert( input.green(), output );
+      channelconv.convert( input.green(), output );
       break;
     case BlueChannel :
-      conv.convert( input.blue(), output );
+      channelconv.convert( input.blue(), output );
       break;
     case AlphaChannel :
-      conv.convert( input.alpha(), output );
+      channelconv.convert( input.alpha(), output );
       break;
     default :
-      conv.convert( input, output );
+      dataconv.convert( input, output );
   }
 
   return output;
 }
 
-template <class C> inline
-void ChannelSelector< AimsRGBA, C >::set( AimsRGBA& input, uint8_t channel, C value )
+template <class U> inline
+void ChannelSelector< AimsRGBA, U >::set( AimsRGBA& input, uint8_t channel, U value )
 {
   switch(channel) {
     case RedChannel :
-      conv.convert( value, input.red() );
+      channelconv.convert( value, input.red() );
       break;
     case GreenChannel :
-      conv.convert( value, input.green() );
+      channelconv.convert( value, input.green() );
       break;
     case BlueChannel :
-      conv.convert( value, input.blue() );
+      channelconv.convert( value, input.blue() );
       break;
     case AlphaChannel :
-      conv.convert( value, input.alpha() );
+      dataconv.convert( value, input.alpha() );
       break;
   }
 }
 
-template <class C> inline
-C ChannelSelector< AimsHSV, C >::select( AimsHSV input, uint8_t channel )
+template <class U> inline
+U ChannelSelector< AimsHSV, U >::select( AimsHSV input, uint8_t channel )
 {
-  C output;
+  U output;
 
   switch(channel) {
     case HueChannel :
-      conv.convert( input.hue(), output );
+      channelconv.convert( input.hue(), output );
       break;
     case SaturationChannel :
-      conv.convert( input.saturation(), output );
+      channelconv.convert( input.saturation(), output );
       break;
     case ValueChannel :
-      conv.convert( input.value(), output );
+      channelconv.convert( input.value(), output );
       break;
     default :
-      conv.convert( input, output );
+      dataconv.convert( input, output );
+      break;
   }
+
   return output;
 }
 
 
-template <class C> inline
-void ChannelSelector< AimsHSV, C >::set( AimsHSV& input, uint8_t channel, C value )
+template <class U> inline
+void ChannelSelector< AimsHSV, U >::set( AimsHSV& input, uint8_t channel, U value )
 {
-  C output;
+  U output;
 
   switch(channel) {
     case HueChannel :
-      conv.convert( value, input.hue() );
+      channelconv.convert( value, input.hue() );
       break;
     case SaturationChannel :
-      conv.convert( value, input.saturation() );
+      channelconv.convert( value, input.saturation() );
       break;
     case ValueChannel :
-      conv.convert( value, input.value() );
+      channelconv.convert( value, input.value() );
       break;
   }
 }
 
-template<class T, class C> inline
-AimsData< C > ChannelSelector< AimsData< T >, AimsData< C > >::select( AimsData< T > input, uint8_t channel )
+template<class T, class U> inline
+AimsData< U > ChannelSelector< AimsData< T >, AimsData< U > >::select( AimsData< T > input, uint8_t channel )
 {
-  ChannelSelector< T, C > selector;
+  ChannelSelector< T, U > selector;
   int	x, y, z, t, 
         dx = input.dimX(), 
         dy = input.dimY(), 
         dz = input.dimZ(), 
         dt = input.dimT();
 
-  AimsData< C > output = AimsData< C >( dx, dy, dz, dt );
+  AimsData< U > output = AimsData< U >( dx, dy, dz, dt );
 
   output.setSizeXYZT( input.sizeX(), 
                       input.sizeY(), 
@@ -311,10 +314,10 @@ AimsData< C > ChannelSelector< AimsData< T >, AimsData< C > >::select( AimsData<
 }
 
 
-template<class T, class C> inline
-void ChannelSelector< AimsData< T >, AimsData< C > >::set( AimsData< T >& input, uint8_t channel, AimsData< C > value )
+template<class T, class U> inline
+void ChannelSelector< AimsData< T >, AimsData< U > >::set( AimsData< T >& input, uint8_t channel, AimsData< U > value )
 {
-  ChannelSelector< T, C > selector;
+  ChannelSelector< T, U > selector;
 
   int	x, y, z, t, 
         dx = input.dimX(), 
