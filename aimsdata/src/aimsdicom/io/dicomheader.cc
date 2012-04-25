@@ -734,7 +734,7 @@ int DicomHeader::readFirst()
     }
 
   if ( spaceSlice > 0.0f )  voxSize.push_back( (float)spaceSlice );
-  else if ( ( ( modality == "PT" ) || ( modality == "NM" ) ) && 
+  else if ( ( ( modality == "PT" ) || ( modality == "NM" ) ) &&
             ( thickness > 0.0f ) )
     voxSize.push_back( (float)thickness );
   else  voxSize.push_back( 0.0f ); // to determine Z resolution in read()
@@ -787,7 +787,7 @@ int DicomHeader::readFirst()
 
       if ( (slope != 1.0) || (inter != 0.0) ) {
         setProperty( "data_type",  string( "FLOAT" ) );
-        if ( nbits == 16 )  
+        if ( nbits == 16 )
           setProperty( "disk_data_type",  string( "S16" ) );
         else
           setProperty( "disk_data_type",  string( "U8" ) );
@@ -858,6 +858,15 @@ int DicomHeader::readFirst()
           setProperty( "b_value", (float)bvalue );
         }
     }
+
+  if ( header.search( DCM_StudyDate, stack ) == EC_Normal )
+  {
+	  DcmDate *object = (DcmDate *)stack.top();
+	  OFString date;
+	  object->getOFString( date, 0 );
+	  setProperty( "study_date", string( date.c_str() ) );
+  }
+
   if ( /* manufacturer == "SIEMENS" && */ modality == "PT" )
     {
       
@@ -1074,6 +1083,64 @@ int DicomHeader::readFirst()
       Sint32 nFrames;
       object->getSint32( nFrames );
       setProperty( "number_of_frames", (int)nFrames );
+    }
+
+#if OFFIS_DCMTK_VERSION_NUMBER >= 360
+    if (header.search( DCM_PatientSex, stack ) == EC_Normal)
+#else
+    if (header.search( DCM_PatientsSex, stack ) == EC_Normal)
+#endif
+    {
+    	if (stack.top()->ident() != EVR_CS)
+    	{
+    		return -1;
+        }
+
+        DcmCharString *object = (DcmCharString *)stack.top();
+        OFString sex;
+        object->getOFString( sex, 0 );
+        string patientsSex = sex.c_str() ;
+        setProperty( "patient_sex", patientsSex );
+    }
+
+#if OFFIS_DCMTK_VERSION_NUMBER >= 360
+    if (header.search( DCM_PatientName, stack ) == EC_Normal)
+#else
+    if (header.search( DCM_PatientsName, stack ) == EC_Normal)
+#endif
+    {
+//    	if (stack.top()->ident() != EVR_CS)
+//    	{
+//    		return -1;
+//        }
+
+        DcmCharString *object = (DcmCharString *)stack.top();
+        OFString name;
+        object->getOFString(name, 0);
+        string patientname = name.c_str() ;
+        setProperty("patient_name", patientname);
+    }
+
+#if OFFIS_DCMTK_VERSION_NUMBER >= 360
+    if (header.search( DCM_PatientBirthDate, stack ) == EC_Normal)
+#else
+    if (header.search( DCM_PatientsBirthDate, stack ) == EC_Normal)
+#endif
+	{
+		DcmCharString *object = (DcmCharString *)stack.top();
+		OFString birthdate;
+		object->getOFString(birthdate, 0);
+		string patientbirthdate = birthdate.c_str() ;
+		setProperty("patient_birthdate", patientbirthdate);
+	}
+
+    if (header.search( DCM_SeriesDescription, stack ) == EC_Normal)
+    {
+    	DcmCharString *object = (DcmCharString *)stack.top();
+    	OFString descr;
+    	object->getOFString(descr, 0);
+    	string seriesdescr = descr.c_str() ;
+    	setProperty("series_description", seriesdescr);
     }
   }
 
