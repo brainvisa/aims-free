@@ -46,4 +46,6 @@
 %Include histogram_FLOAT.sip
 %Include histogram_DOUBLE.sip
 %Include geodesicPath.sip
+%Include meshwatershed.sip
+
 

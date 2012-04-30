@@ -82,6 +82,7 @@ HEADERS = \
     mesh/meshinterpoler.h \
     mesh/meshinterpoler_d.h \
     mesh/meshinterpoler_p.h \
+    mesh/meshwatershed.h \
     moment/geomMoment.h    \
     moment/momBase.h    \
     moment/momFactory.h    \
@@ -297,6 +298,8 @@ SOURCES = \
     mesh/inflate.cc    \
     mesh/mesher.cc      \
     mesh/meshinterpoler.cc \
+    mesh/meshMerge.cc    \
+    mesh/meshwatershed.cc \
     mesh/normals.cc      \
     mesh/reducedNeigh.cc    \
     mesh/smoothing.cc    \
@@ -305,7 +308,6 @@ SOURCES = \
     mesh/surface.cc      \
     mesh/triangles.cc    \
     mesh/vertices.cc    \
-    mesh/meshMerge.cc    \
     mesh/voxel2facet.cc    \
     moment/momSurfStgy.cc    \
     moment/momTriFactory.cc    \

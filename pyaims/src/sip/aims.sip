@@ -118,6 +118,8 @@ carto::pyaims_init();
 %Include reader_AimsTimeSurface_3.sip
 %Include reader_AimsTimeSurface_4.sip
 %Include reader_TimeTexture_S16.sip
+%Include reader_TimeTexture_S32.sip
+%Include reader_TimeTexture_U32.sip
 %Include reader_TimeTexture_FLOAT.sip
 %Include reader_TimeTexture_POINT2DF.sip
 
