@@ -21,9 +21,10 @@ int meshWatershed( const AimsSurfaceTriangle & mesh,
 int meshWatershed( const AimsSurfaceTriangle & mesh,
                     const TimeTexture_DOUBLE & field,
                     double threshold,
-                    TimeTexture_S32 **idx,
-                    TimeTexture_S32 **depth, TimeTexture_S32 **major,
-                    TimeTexture_S32 **label );
+                    TimeTexture_S32 **idx /TransferBack/,
+                    TimeTexture_S32 **depth /TransferBack/,
+                    TimeTexture_S32 **major /TransferBack/,
+                    TimeTexture_S32 **label /TransferBack/ );
 %MethodCode
   a3 = new TimeTexture_S32;
   a4 = new TimeTexture_S32;
