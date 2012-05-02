@@ -40,8 +40,8 @@ namespace aims
 {
 
   void distancesFromMesh( const AimsSurfaceTriangle & mesh,
-                                vector<AimsVector<uint,2> > & edges,
-                                vector<double> & weights )
+                          vector<AimsVector<uint,2> > & edges,
+                          vector<double> & weights )
   {
     const vector<Point3df> & vert = mesh.vertex();
     const vector<AimsVector<uint,3> > & poly = mesh.polygon();
@@ -80,13 +80,11 @@ namespace aims
 
 
   int meshWatershed( const AimsSurfaceTriangle & mesh,
-                          const vector<double> & field, vector<int> & lidx,
-                          vector<int> & ldepth, vector<int> & lmajor,
-                          vector<int> & label, double th )
+                     const vector<double> & field, vector<int> & lidx,
+                     vector<int> & ldepth, vector<int> & lmajor,
+                     vector<int> & label, double th )
   {
     // taken from old fff_field.c (ancestor of nipy)
-    const vector<AimsVector<uint,3> > & poly = mesh.polygon();
-
     int i,r,N = mesh.vertex().size();
     vector<AimsVector<uint,2> > edges;
     vector<double> weights;
@@ -242,6 +240,200 @@ namespace aims
     return meshWatershed( mesh, field.begin()->second.data(), idx[0].data(),
                           depth[0].data(), major[0].data(), label[0].data(),
                           threshold );
+  }
+
+
+  static void _graph_to_neighb( vector<long> & cindices,
+                                vector<long> & neighb,
+                                vector<double> & weight,
+                                const vector<AimsVector<uint, 2> > & edges,
+                                const vector<double> & inweights, long V )
+  {
+    /* This function recomputes the connectivity system of the graph in an efficient way:
+    The edges are arraned in the following manner
+        origins =  [0..0 1..1 .. V-1..V-1]
+        ends    =  [neignb[0].. neighb[E-1]]
+        weight  =  [weights[0]..weights[E-1]]
+
+        cindices codes for the origin vector: origin=i between cindices[i] and cindices[i+1]-1
+    */
+    long E = edges.size();
+    long a,b;
+    long i,j;
+    double aux = 0;
+
+    if( ( cindices.size() < V ) | ( neighb.size() < E )
+      | ( weight.size() < E ) )
+      throw runtime_error( "inconsistant vector size" );
+
+    for( i=0; i<V; ++i )
+      cindices[i] = 0;
+
+    for( i=0 ; i<E ; i++ )
+    {
+      ++cindices[ edges[i][0] ];
+      neighb[i] = -1;
+    }
+
+    for( i=0; i<V; i++ )
+    {
+      j = cindices[i];
+      cindices[i] = aux;
+      aux += j;
+    }
+    if( cindices.size() > V )
+      cindices[V] = E;
+
+    for( i=0 ; i<E ; i++ )
+    {
+      a = edges[i][0];
+      b = edges[i][1];
+      j = cindices[a];
+      while( neighb[j] > -1 )
+        ++j;
+      neighb[j] = b;
+      weight[j] = inweights[i];
+    }
+  }
+
+
+  int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
+                             const vector<double> & field, vector<int> & Idx,
+                             vector<int> & Height, vector<int> & Father,
+                             vector<int> & label, double th )
+  {
+    // taken from old fff_field.c (ancestor of nipy)
+    int V = mesh.vertex().size();
+    vector<AimsVector<uint,2> > edges;
+    vector<double> weights;
+
+    distancesFromMesh( mesh, edges, weights );
+
+    int E = edges.size();
+
+    int i,j,k,l,win,start, end;
+    int ll = 0;
+    vector<long> cindices( V+1, 0 ), neighb( E, 0 );
+    vector<double> weight( E, 0. );
+    vector<double> cfield( V, 0 );
+    vector<long> father( 2*V, 0 ), possible( V, 0 ), idx( 2*V, 0 );
+    vector<double> height( 2*V, 0. );
+    vector<long> p( V, 0 );
+    long q;
+
+    if( label.size() != V )
+      label.resize( V );
+
+    _graph_to_neighb( cindices, neighb, weight, edges, weights, V );
+
+    if( field.size() != V )
+      throw runtime_error( "incompatible field / mesh size" );
+    cfield = field;
+    for( i=0; i<V; ++i )
+      cfield[i] *= -1;
+
+    /* sort the data */
+    multimap<double, int> scfield;
+    multimap<double, int>::iterator is, es = scfield.end();
+    for( i=0; i<V; ++i )
+      scfield.insert( make_pair( cfield[i], i ) );
+    for( i=0, is=scfield.begin(); is!=es; ++is, ++i )
+      p[i] = is->second;
+
+    for( i=0; i<V; ++i )
+      label[i] = -1;
+    for( i=0; i<2*V ; ++i )
+      father[i] = i;
+
+
+    for( i=0; i<V ; i++ )
+    {
+      win = p[i];
+      if( field[win] < th )
+        break;
+      else
+      {
+        start = cindices[win];
+        end = cindices[win+1];
+        for( i=0; i<V; ++i )
+          possible[i] = -1;
+        q = 0;
+
+        for( j=start; j<end; ++j )
+        {
+          k = label[neighb[j]];
+
+          if( k > -1 )
+          {
+            while( father[k] != k )
+              k = father[k];
+            for( l=0 ; l<q ; ++l )
+              if( possible[l] > -1 )
+                if( possible[l] ==k )
+                  break;
+            if( possible[l] !=k )
+            {
+              if( l > 1 )
+              {
+                /* printf("%ld %ld %ld",i,q, l);
+                    for (m=0 ; m<l+1 ; m++) printf(" %ld ",possible[m]);
+                    printf("\n"); */
+              }
+              possible[q] = k;
+              q++;
+            }
+          }
+        }
+
+        if( q == 0 )
+        {
+          label[win] = ll;
+          idx[ll] = win;
+          height[ll] = field[win];
+          ll++;
+        }
+        if( q == 1 )
+          label[win] = possible[0];
+        if( q > 1 )
+        {
+          /* birfurcation : create a new label */
+          for( j=0; j<q ; j++ )
+          {
+            k =  possible[j];
+            father[k] = ll;
+          }
+          label[win] = ll;
+          idx[ll] = win;
+          height[ll] = field[win];
+          ll++;
+        }
+      }
+    }
+
+    Father.resize( ll );
+    Idx.resize( ll );
+    Height.resize( ll );
+    for( i=0; i<ll; ++i )
+    {
+      Father[i] = father[i];
+      Idx[i] = idx[i];
+      Height[i] = height[i];
+    }
+
+    return ll;
+  }
+
+
+  int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
+                            const TimeTexture<double> & field,
+                            TimeTexture<int> & idx,
+                            TimeTexture<int> & height,
+                            TimeTexture<int> & father,
+                            TimeTexture<int> & label, double th )
+  {
+    return meshBlobsBifurcation( mesh, field.begin()->second.data(),
+                                 idx[0].data(), height[0].data(),
+                                 father[0].data(), label[0].data(), th );
   }
 
 }

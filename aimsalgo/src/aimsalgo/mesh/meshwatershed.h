@@ -43,7 +43,7 @@ namespace aims
 {
 
   void distancesFromMesh( const AimsSurfaceTriangle & mesh,
-                          std::vector<AimsVector<double,2> > & edges,
+                          std::vector<AimsVector<uint,2> > & edges,
                           std::vector<double> & weights );
   int meshWatershed( const AimsSurfaceTriangle & mesh,
                      const std::vector<double> & field,
@@ -55,6 +55,18 @@ namespace aims
                      TimeTexture<int> & idx,
                      TimeTexture<int> & depth, TimeTexture<int> & major,
                      TimeTexture<int> & label, double threshold );
+  int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
+                            const std::vector<double> & field,
+                            std::vector<int> & idx,
+                            std::vector<int> & height,
+                            std::vector<int> & father,
+                            std::vector<int> & label, double th );
+  int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
+                            const TimeTexture<double> & field,
+                            TimeTexture<int> & idx,
+                            TimeTexture<int> & height,
+                            TimeTexture<int> & father,
+                            TimeTexture<int> & label, double th );
 }
 
 #endif
