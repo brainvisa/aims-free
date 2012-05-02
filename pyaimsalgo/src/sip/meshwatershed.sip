@@ -35,9 +35,10 @@ int meshWatershed( const AimsSurfaceTriangle & mesh,
 void meshWatershed( const AimsSurfaceTriangle & mesh,
                     const TimeTexture_FLOAT & field,
                     double threshold,
-                    TimeTexture_S32 **idx,
-                    TimeTexture_S32 **depth, TimeTexture_S32 **major,
-                    TimeTexture_S32 **label );
+                    TimeTexture_S32 **idx /TransferBack/,
+                    TimeTexture_S32 **depth /TransferBack/,
+                    TimeTexture_S32 **major /TransferBack/,
+                    TimeTexture_S32 **label /TransferBack/ );
 %MethodCode
   TimeTexture_DOUBLE field;
   std::vector<double> & f = field[0].data();
