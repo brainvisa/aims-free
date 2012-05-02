@@ -39,197 +39,209 @@ using namespace std;
 namespace aims
 {
 
-void distancesFromMesh( const AimsSurfaceTriangle & mesh,
-                              vector<AimsVector<uint,2> > & edges,
-                              vector<double> & weights )
-{
-  const vector<Point3df> & vert = mesh.vertex();
-  const vector<AimsVector<uint,3> > & poly = mesh.polygon();
-  int i, N = vert.size();
-  int E = poly.size();
-  int sa, sb, sc;
-  set<pair<int, int> > sedges;
-
-  // create symmetric and non-redundant edges
-  for( i=0; i<E; ++i )
+  void distancesFromMesh( const AimsSurfaceTriangle & mesh,
+                                vector<AimsVector<uint,2> > & edges,
+                                vector<double> & weights )
   {
-    sa = poly[i][0];
-    sb = poly[i][1];
-    sc = poly[i][2];
+    const vector<Point3df> & vert = mesh.vertex();
+    const vector<AimsVector<uint,3> > & poly = mesh.polygon();
+    int i, N = vert.size();
+    int E = poly.size();
+    int sa, sb, sc;
+    set<pair<int, int> > sedges;
 
-    sedges.insert( make_pair( sa, sb ) );
-    sedges.insert( make_pair( sb, sa ) );
-    sedges.insert( make_pair( sa, sc ) );
-    sedges.insert( make_pair( sc, sa ) );
-    sedges.insert( make_pair( sb, sc ) );
-    sedges.insert( make_pair( sc, sb ) );
-  }
-
-  E = sedges.size();
-  edges.clear();
-  edges.reserve( E );
-  weights.clear();
-  weights.reserve( E );
-  set<pair<int, int> >::iterator is, es = sedges.end();
-  for( is=sedges.begin(); is!=es; ++is )
-  {
-    edges.push_back( AimsVector<uint,2>( is->first, is->second ) );
-    weights.push_back( (vert[is->first] - vert[is->second]).norm() );
-  }
-}
-
-
-int meshWatershed( const AimsSurfaceTriangle & mesh,
-                         const vector<double> & field, vector<int> & lidx,
-                         vector<int> & ldepth, vector<int> & lmajor,
-                         vector<int> & label, double th )
-{
-  // taken from old fff_field.c (ancestor of nipy)
-  const vector<AimsVector<uint,3> > & poly = mesh.polygon();
-
-  int i,r,N = mesh.vertex().size();
-  vector<AimsVector<uint,2> > edges;
-  vector<double> weights;
-
-  distancesFromMesh( mesh, edges, weights );
-
-  int E = edges.size();
-
-  int nA,nB,remain;
-  double delta;
-
-  int k = 0;
-
-  vector<int> win( N, 0 );
-  vector<int> maj1( N, 0 );
-  vector<int> maj2;
-  vector<int> incwin( N, 0 );
-  vector<double> mfield;
-  vector<double> Mfield;
-  if( field.size() != N )
-  {
-    mfield.reserve( N );
-    mfield.insert( mfield.begin(), 0., N );
-  }
-  else
-    mfield = field;
-  Mfield = mfield;
-
-  for (i=0 ; i<N ; i++)
-  {
-    maj1[i] = i;
-    if( field[i] > th )
-      win[i] = 1;
-  }
-  maj2 = maj1;
-
-  /* Iterative dilation  */
-  for( r=0 ; r<N ; r++ )
-  {
-    for (i=0 ; i<E ; i++)
+    // create symmetric and non-redundant edges
+    for( i=0; i<E; ++i )
     {
-      nA = edges[i][0];
-      nB = edges[i][1];
-      if( field[nA] > th )
-        if( mfield[nA] <  mfield[nB] )
-        {
-          win[nA] = 0;
-          if( Mfield[nA] < mfield[nB] )
-          {
-            Mfield[nA] = mfield[nB];
-            maj2[nA] = maj2[nB];
-            if( incwin[nA] == r )
-              maj1[nA] = maj2[nB];
-          }
-        }
+      sa = poly[i][0];
+      sb = poly[i][1];
+      sc = poly[i][2];
+
+      sedges.insert( make_pair( sa, sb ) );
+      sedges.insert( make_pair( sb, sa ) );
+      sedges.insert( make_pair( sa, sc ) );
+      sedges.insert( make_pair( sc, sa ) );
+      sedges.insert( make_pair( sb, sc ) );
+      sedges.insert( make_pair( sc, sb ) );
     }
-    remain = 0;
 
-    for( i=0; i<N; ++i )
-      mfield[i] -= Mfield[i];
-    delta = 0; // dot prod
-    for( i=0; i<N; ++i )
-      delta += mfield[i] * mfield[i];
-    mfield = Mfield;
-    for( i=0; i<N; ++i )
-      incwin[i] += win[i];
-    for( i=0 ; i<N ; i++ )
-      remain += (win[i]>0);
-
-    if (remain<2)
-      break;
-    if (delta==0)
-      break;
-    /* stop when all the maxima have been found  */
-  }
-
-  /* get the local maximum associated with any point  */
-  int j,aux;
-  for( i=0 ; i<N ; i++ )
-  {
-    if( field[i] > th )
+    E = sedges.size();
+    edges.clear();
+    edges.reserve( E );
+    weights.clear();
+    weights.reserve( E );
+    set<pair<int, int> >::iterator is, es = sedges.end();
+    for( is=sedges.begin(); is!=es; ++is )
     {
-      j = maj1[i];
-      while( incwin[j] ==0 )
-        j = maj1[j];
-      maj1[i] = j;
+      edges.push_back( AimsVector<uint,2>( is->first, is->second ) );
+      weights.push_back( (vert[is->first] - vert[is->second]).norm() );
     }
   }
 
-  /* number of bassins  */
-  for( i=0 ; i<N ; i++ )
-    k+= (incwin[i]>0);
 
-  if( lidx.size() != k )
-    lidx.resize( k );
-  if( ldepth.size() != k )
-    ldepth.resize( k );
-  if( lmajor.size() != k )
-    lmajor.resize( k );
+  int meshWatershed( const AimsSurfaceTriangle & mesh,
+                          const vector<double> & field, vector<int> & lidx,
+                          vector<int> & ldepth, vector<int> & lmajor,
+                          vector<int> & label, double th )
+  {
+    // taken from old fff_field.c (ancestor of nipy)
+    const vector<AimsVector<uint,3> > & poly = mesh.polygon();
 
-  /* write the maxima and related stuff  */
-  j=0;
-  for( i=0 ; i<N ; i++ )
-    if( incwin[i] > 0 )
+    int i,r,N = mesh.vertex().size();
+    vector<AimsVector<uint,2> > edges;
+    vector<double> weights;
+
+    distancesFromMesh( mesh, edges, weights );
+
+    int E = edges.size();
+
+    int nA,nB,remain;
+    double delta;
+
+    int k = 0;
+
+    vector<int> win( N, 0 );
+    vector<int> maj1( N, 0 );
+    vector<int> maj2;
+    vector<int> incwin( N, 0 );
+    vector<double> mfield;
+    vector<double> Mfield;
+    if( field.size() != N )
     {
-      lidx[j] = i;
-      ldepth[j] = incwin[i];
-      maj2[i] = j;/* ugly, but OK  */
-      j++;
+      mfield.reserve( N );
+      mfield.insert( mfield.begin(), 0., N );
     }
-  for( j=0 ; j<k ; j++ )
-  {
-    i = lidx[j];
-    if( maj1[i] != i )
-    { /* i is not a global maximum */
-      aux = maj2[maj1[i]];
-      lmajor[j] = aux;
-    }
-  else
-    lmajor[j] = j;
-  }
-
-  if( label.size() != N )
-    label.resize( N );
-
-  /* Finally set the labels */
-  for( i=0 ; i<N ; i++ )
-  {
-    if( field[i] <= th )
-      label[i] = -1;
     else
+      mfield = field;
+    Mfield = mfield;
+
+    for (i=0 ; i<N ; i++)
     {
-      aux = maj2[maj1[i]];
-      label[i] = aux;
+      maj1[i] = i;
+      if( field[i] > th )
+        win[i] = 1;
     }
-  }
-  for( j=0 ; j<k ; j++ )
-  {
-    i = lidx[j];
-    label[i] = j;
+    maj2 = maj1;
+
+    /* Iterative dilation  */
+    for( r=0 ; r<N ; r++ )
+    {
+      for (i=0 ; i<E ; i++)
+      {
+        nA = edges[i][0];
+        nB = edges[i][1];
+        if( field[nA] > th )
+          if( mfield[nA] <  mfield[nB] )
+          {
+            win[nA] = 0;
+            if( Mfield[nA] < mfield[nB] )
+            {
+              Mfield[nA] = mfield[nB];
+              maj2[nA] = maj2[nB];
+              if( incwin[nA] == r )
+                maj1[nA] = maj2[nB];
+            }
+          }
+      }
+      remain = 0;
+
+      for( i=0; i<N; ++i )
+        mfield[i] -= Mfield[i];
+      delta = 0; // dot prod
+      for( i=0; i<N; ++i )
+        delta += mfield[i] * mfield[i];
+      mfield = Mfield;
+      for( i=0; i<N; ++i )
+        incwin[i] += win[i];
+      for( i=0 ; i<N ; i++ )
+        remain += (win[i]>0);
+
+      if (remain<2)
+        break;
+      if (delta==0)
+        break;
+      /* stop when all the maxima have been found  */
+    }
+
+    /* get the local maximum associated with any point  */
+    int j,aux;
+    for( i=0 ; i<N ; i++ )
+    {
+      if( field[i] > th )
+      {
+        j = maj1[i];
+        while( incwin[j] ==0 )
+          j = maj1[j];
+        maj1[i] = j;
+      }
+    }
+
+    /* number of bassins  */
+    for( i=0 ; i<N ; i++ )
+      k+= (incwin[i]>0);
+
+    if( lidx.size() != k )
+      lidx.resize( k );
+    if( ldepth.size() != k )
+      ldepth.resize( k );
+    if( lmajor.size() != k )
+      lmajor.resize( k );
+
+    /* write the maxima and related stuff  */
+    j=0;
+    for( i=0 ; i<N ; i++ )
+      if( incwin[i] > 0 )
+      {
+        lidx[j] = i;
+        ldepth[j] = incwin[i];
+        maj2[i] = j;/* ugly, but OK  */
+        j++;
+      }
+    for( j=0 ; j<k ; j++ )
+    {
+      i = lidx[j];
+      if( maj1[i] != i )
+      { /* i is not a global maximum */
+        aux = maj2[maj1[i]];
+        lmajor[j] = aux;
+      }
+    else
+      lmajor[j] = j;
+    }
+
+    if( label.size() != N )
+      label.resize( N );
+
+    /* Finally set the labels */
+    for( i=0 ; i<N ; i++ )
+    {
+      if( field[i] <= th )
+        label[i] = -1;
+      else
+      {
+        aux = maj2[maj1[i]];
+        label[i] = aux;
+      }
+    }
+    for( j=0 ; j<k ; j++ )
+    {
+      i = lidx[j];
+      label[i] = j;
+    }
+
+    return k;
   }
 
-  return k;
-}
+
+  int meshWatershed( const AimsSurfaceTriangle & mesh,
+                     const TimeTexture<double> & field,
+                     TimeTexture<int> & idx,
+                     TimeTexture<int> & depth, TimeTexture<int> & major,
+                     TimeTexture<int> & label, double threshold )
+  {
+    return meshWatershed( mesh, field.begin()->second.data(), idx[0].data(),
+                          depth[0].data(), major[0].data(), label[0].data(),
+                          threshold );
+  }
 
 }

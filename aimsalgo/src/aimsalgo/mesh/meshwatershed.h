@@ -50,6 +50,11 @@ namespace aims
                      std::vector<int> & idx,
                      std::vector<int> & depth, std::vector<int> & major,
                      std::vector<int> & label, double threshold );
+  int meshWatershed( const AimsSurfaceTriangle & mesh,
+                     const TimeTexture<double> & field,
+                     TimeTexture<int> & idx,
+                     TimeTexture<int> & depth, TimeTexture<int> & major,
+                     TimeTexture<int> & label, double threshold );
 }
 
 #endif
