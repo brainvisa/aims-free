@@ -101,6 +101,7 @@ carto::pyaims_init();
 %Include timetexture_S32.sip
 %Include timetexture_U32.sip
 %Include timetexture_FLOAT.sip
+%Include timetexture_DOUBLE.sip
 %Include timetexture_POINT2DF.sip
 
 %Include rcptr_AimsTimeSurface_2.sip
@@ -110,6 +111,7 @@ carto::pyaims_init();
 %Include rcptr_TimeTexture_S32.sip
 %Include rcptr_TimeTexture_U32.sip
 %Include rcptr_TimeTexture_FLOAT.sip
+%Include rcptr_TimeTexture_DOUBLE.sip
 %Include rcptr_TimeTexture_POINT2DF.sip
 
 %Include reader_Graph.sip
@@ -121,6 +123,7 @@ carto::pyaims_init();
 %Include reader_TimeTexture_S32.sip
 %Include reader_TimeTexture_U32.sip
 %Include reader_TimeTexture_FLOAT.sip
+%Include reader_TimeTexture_DOUBLE.sip
 %Include reader_TimeTexture_POINT2DF.sip
 
 %Include bucketmap_VOID.sip

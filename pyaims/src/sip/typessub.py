@@ -1655,7 +1655,32 @@ typessub = { 'signed char' : \
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsTexture_FLOAT_Check', 
-               },
+             },
+             'Texture<double>' : \
+             { 'typecode' : 'Texture_DOUBLE',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new Texture<double>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'Texture_DOUBLE',
+               'sipClass' : 'Texture_DOUBLE',
+               'typeinclude' : \
+               '#include <aims/mesh/texture.h>',
+               'sipinclude' : '#ifndef PYAIMS_TEXTURE_DOUBLE_CHECK_DEFINED\n'
+               '#define PYAIMS_TEXTURE_DOUBLE_CHECK_DEFINED\n'
+               'inline int pyaimsTexture_DOUBLE_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Texture_DOUBLE, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsTexture_DOUBLE_Check',
+             },
              'Texture<int16_t>' : \
              { 'typecode' : 'Texture_S16',
                'pyFromC' : '',
@@ -1798,6 +1823,31 @@ typessub = { 'signed char' : \
                'module' : 'aims', 
                'testPyType' : 'pyaimsTimeTexture_FLOAT_Check', 
                },
+             'TimeTexture<double>' : \
+             { 'typecode' : 'TimeTexture_DOUBLE',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new TimeTexture<double>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'TimeTexture_DOUBLE',
+               'sipClass' : 'TimeTexture_DOUBLE',
+               'typeinclude' : \
+               '#include <aims/mesh/texture.h>',
+               'sipinclude' : '#ifndef PYAIMS_TIMETEXTURE_DOUBLE_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMETEXTURE_DOUBLE_CHECK_DEFINED\n'
+               'inline int pyaimsTimeTexture_DOUBLE_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_TimeTexture_DOUBLE, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsTimeTexture_DOUBLE_Check',
+             },
              'TimeTexture<int16_t>' : \
              { 'typecode' : 'TimeTexture_S16',
                'pyFromC' : '',
