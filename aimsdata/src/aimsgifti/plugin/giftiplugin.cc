@@ -67,7 +67,7 @@ GiftiPlugin::GiftiPlugin() : Plugin()
   FileFormatDictionary<TimeTexture<float> >::registerFormat( "GIFTI",
                                                              df2, ext );
 
-  GiftiTextureFormat<float> *df8 = new GiftiTextureFormat<double>;
+  GiftiTextureFormat<double> *df8 = new GiftiTextureFormat<double>;
   FileFormatDictionary<TimeTexture<double> >::registerFormat( "GIFTI",
                                                              df8, ext );
 
