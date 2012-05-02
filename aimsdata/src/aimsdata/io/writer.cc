@@ -150,6 +150,7 @@ template class Writer<AimsSurfaceFacet>;
 
 template class Writer<Texture1d>;
 template class Writer<Texture2d>;
+template class Writer<TimeTexture<double> >;
 template class Writer<TimeTexture<short> >;
 template class Writer<TimeTexture<int> >;
 template class Writer<TimeTexture<unsigned int> >;

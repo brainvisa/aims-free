@@ -149,6 +149,7 @@ template class Reader<AimsSurfaceFacet>;
 
 template class Reader<Texture1d>;
 template class Reader<Texture2d>;
+template class Reader<TimeTexture<double> >;
 template class Reader<TimeTexture<short> >;
 template class Reader<TimeTexture<unsigned> >;
 template class Reader<TimeTexture<int> >;

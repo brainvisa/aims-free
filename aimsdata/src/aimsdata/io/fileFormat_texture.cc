@@ -57,6 +57,15 @@ FileFormatDictionary<TimeTexture<float> >::registerBaseFormats()
   registerFormat( "TEX", fm, ext );
 }
 
+template<> void
+FileFormatDictionary<TimeTexture<double> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "tex" );
+  TexFormat<double>      *fm = new TexFormat<double>;
+  registerFormat( "TEX", fm, ext );
+}
+
 template<> void 
 FileFormatDictionary<TimeTexture<Point2df> >::registerBaseFormats()
 {
@@ -107,6 +116,7 @@ FileFormatDictionary<TimeTexture<Point2d> >::registerBaseFormats()
 }
 
 template class FileFormatDictionary<TimeTexture<float> >;
+template class FileFormatDictionary<TimeTexture<double> >;
 template class FileFormatDictionary<TimeTexture<Point2df> >;
 template class FileFormatDictionary<TimeTexture<int16_t> >;
 template class FileFormatDictionary<TimeTexture<uint32_t> >;
@@ -114,6 +124,7 @@ template class FileFormatDictionary<TimeTexture<int32_t> >;
 template class FileFormatDictionary<TimeTexture<Point2d> >;
 
 template class FileFormat<TimeTexture<float> >;
+template class FileFormat<TimeTexture<double> >;
 template class FileFormat<TimeTexture<Point2df> >;
 template class FileFormat<TimeTexture<int16_t> >;
 template class FileFormat<TimeTexture<uint32_t> >;
@@ -123,6 +134,7 @@ template class FileFormat<TimeTexture<Point2d> >;
 static bool _texdic()
 {
   FileFormatDictionary<TimeTexture<float> >::init();
+  FileFormatDictionary<TimeTexture<double> >::init();
   FileFormatDictionary<TimeTexture<int16_t> >::init();
   FileFormatDictionary<TimeTexture<uint32_t> >::init();
   FileFormatDictionary<TimeTexture<int32_t> >::init();
