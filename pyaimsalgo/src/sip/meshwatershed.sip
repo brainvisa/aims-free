@@ -68,7 +68,7 @@ int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
 %End
 
 
-int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
+void meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                           const TimeTexture_DOUBLE & field, double th,
                           TimeTexture_S32 **idx,
                           TimeTexture_S32 **height,
@@ -79,11 +79,11 @@ int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
   a4 = new TimeTexture_S32;
   a5 = new TimeTexture_S32;
   a6 = new TimeTexture_S32;
-  sipRes = aims::meshBlobsBifurcation( *a0, *a1, *a3, *a4, *a5, *a6, a2 );
+  aims::meshBlobsBifurcation( *a0, *a1, *a3, *a4, *a5, *a6, a2 );
 %End
 
 
-int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
+void meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                           const TimeTexture_FLOAT & field, double th,
                           TimeTexture_S32 **idx,
                           TimeTexture_S32 **height,

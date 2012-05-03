@@ -315,7 +315,6 @@ namespace aims
     int ll = 0;
     vector<long> cindices( V+1, 0 ), neighb( E, 0 );
     vector<double> weight( E, 0. );
-    vector<double> cfield( V, 0 );
     vector<long> father( 2*V, 0 ), possible( V, 0 ), idx( 2*V, 0 );
     vector<double> height( 2*V, 0. );
     vector<long> p( V, 0 );
@@ -328,15 +327,12 @@ namespace aims
 
     if( field.size() != V )
       throw runtime_error( "incompatible field / mesh size" );
-    cfield = field;
-    for( i=0; i<V; ++i )
-      cfield[i] *= -1;
 
     /* sort the data */
     multimap<double, int> scfield;
     multimap<double, int>::iterator is, es = scfield.end();
     for( i=0; i<V; ++i )
-      scfield.insert( make_pair( cfield[i], i ) );
+      scfield.insert( make_pair( -field[i], i ) );
     for( i=0, is=scfield.begin(); is!=es; ++is, ++i )
       p[i] = is->second;
 
@@ -355,8 +351,8 @@ namespace aims
       {
         start = cindices[win];
         end = cindices[win+1];
-        for( i=0; i<V; ++i )
-          possible[i] = -1;
+        for( j=0; j<V; ++j )
+          possible[j] = -1;
         q = 0;
 
         for( j=start; j<end; ++j )
