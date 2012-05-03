@@ -60,7 +60,7 @@ void meshWatershed( const AimsSurfaceTriangle & mesh,
 int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                           const vector_DOUBLE & field,
                           vector_S32 & idx,
-                          vector_S32 & height,
+                          vector_DOUBLE & height,
                           vector_S32 & father,
                           vector_S32 & label, double th );
 %MethodCode
@@ -71,12 +71,12 @@ int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
 void meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                           const TimeTexture_DOUBLE & field, double th,
                           TimeTexture_S32 **idx,
-                          TimeTexture_S32 **height,
+                          TimeTexture_DOUBLE **height,
                           TimeTexture_S32 **father,
                           TimeTexture_S32 **label );
 %MethodCode
   a3 = new TimeTexture_S32;
-  a4 = new TimeTexture_S32;
+  a4 = new TimeTexture_DOUBLE;
   a5 = new TimeTexture_S32;
   a6 = new TimeTexture_S32;
   aims::meshBlobsBifurcation( *a0, *a1, *a3, *a4, *a5, *a6, a2 );
@@ -86,7 +86,7 @@ void meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
 void meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                           const TimeTexture_FLOAT & field, double th,
                           TimeTexture_S32 **idx,
-                          TimeTexture_S32 **height,
+                          TimeTexture_DOUBLE **height,
                           TimeTexture_S32 **father,
                           TimeTexture_S32 **label );
 %MethodCode
@@ -98,7 +98,7 @@ void meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
   for( i=0; i<n; ++i )
     f.push_back( f0[i] );
   a3 = new TimeTexture_S32;
-  a4 = new TimeTexture_S32;
+  a4 = new TimeTexture_DOUBLE;
   a5 = new TimeTexture_S32;
   a6 = new TimeTexture_S32;
   aims::meshBlobsBifurcation( *a0, field, *a3, *a4, *a5, *a6, a2 );

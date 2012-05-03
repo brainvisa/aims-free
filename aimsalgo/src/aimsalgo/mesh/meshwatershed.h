@@ -58,13 +58,13 @@ namespace aims
   int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                             const std::vector<double> & field,
                             std::vector<int> & idx,
-                            std::vector<int> & height,
+                            std::vector<double> & height,
                             std::vector<int> & father,
                             std::vector<int> & label, double th );
   int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                             const TimeTexture<double> & field,
                             TimeTexture<int> & idx,
-                            TimeTexture<int> & height,
+                            TimeTexture<double> & height,
                             TimeTexture<int> & father,
                             TimeTexture<int> & label, double th );
 }

@@ -299,7 +299,7 @@ namespace aims
 
   int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                              const vector<double> & field, vector<int> & Idx,
-                             vector<int> & Height, vector<int> & Father,
+                             vector<double> & Height, vector<int> & Father,
                              vector<int> & label, double th )
   {
     // taken from old fff_field.c (ancestor of nipy)
@@ -423,7 +423,7 @@ namespace aims
   int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                             const TimeTexture<double> & field,
                             TimeTexture<int> & idx,
-                            TimeTexture<int> & height,
+                            TimeTexture<double> & height,
                             TimeTexture<int> & father,
                             TimeTexture<int> & label, double th )
   {
