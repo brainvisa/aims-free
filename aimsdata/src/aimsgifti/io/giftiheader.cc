@@ -673,6 +673,9 @@ void GiftiHeader::giftiAddExternalTextures( gifti_image *gim, int & hdrtexda,
       if( ttype == carto::DataTypeCode<TimeTexture<float> >::name() )
         giftiAddTextureObject<float>( gim, texture );
       else if( ttype
+        == carto::DataTypeCode<TimeTexture<double> >::name() )
+        giftiAddTextureObject<double>( gim, texture );
+      else if( ttype
         == carto::DataTypeCode<TimeTexture<Point2df> >::name() )
         giftiAddTextureObject<Point2df>( gim, texture );
       else if( ttype
