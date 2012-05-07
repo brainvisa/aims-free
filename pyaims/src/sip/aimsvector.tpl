@@ -309,8 +309,18 @@ public:
   AimsVector_%Template1typecode%_%Template2typecode% &
     operator += ( const AimsVector_%Template1typecode%_%Template2typecode% & );
 
+ AimsVector_%Template1typecode%_%Template2typecode% & operator += ( double );
+%MethodCode
+  *sipCpp += AimsVector_%Template1typecode%_%Template2typecode%( a0 );
+%End
+
   AimsVector_%Template1typecode%_%Template2typecode% &
     operator -= ( const AimsVector_%Template1typecode%_%Template2typecode% & );
+
+ AimsVector_%Template1typecode%_%Template2typecode% & operator -= ( double );
+%MethodCode
+  *sipCpp -= AimsVector_%Template1typecode%_%Template2typecode%( a0 );
+%End
 
   AimsVector_%Template1typecode%_%Template2typecode% &
     operator *= ( double );
@@ -349,4 +359,34 @@ public:
 %#endif%
 };
 
+
+AimsVector_%Template1typecode%_%Template2typecode% operator + ( AimsVector_%Template1typecode%_%Template2typecode% &, %Template1% );
+%MethodCode
+  sipRes = new AimsVector_%Template1typecode%_%Template2typecode%( *a0 + AimsVector_%Template1typecode%_%Template2typecode%( a1 ) );
+%End
+
+AimsVector_%Template1typecode%_%Template2typecode% operator + ( %Template1%, AimsVector_%Template1typecode%_%Template2typecode% & );
+%MethodCode
+  sipRes = new AimsVector_%Template1typecode%_%Template2typecode%( *a1 + AimsVector_%Template1typecode%_%Template2typecode%( a0 ) );
+%End
+
+AimsVector_%Template1typecode%_%Template2typecode% operator - ( AimsVector_%Template1typecode%_%Template2typecode% &, %Template1% );
+%MethodCode
+  sipRes = new AimsVector_%Template1typecode%_%Template2typecode%( *a0 - AimsVector_%Template1typecode%_%Template2typecode%( a1 ) );
+%End
+
+AimsVector_%Template1typecode%_%Template2typecode% operator - ( %Template1%, AimsVector_%Template1typecode%_%Template2typecode% & );
+%MethodCode
+  sipRes = new AimsVector_%Template1typecode%_%Template2typecode%( -*a1 + AimsVector_%Template1typecode%_%Template2typecode%( a0 ) );
+%End
+
+AimsVector_%Template1typecode%_%Template2typecode% operator * ( double, AimsVector_%Template1typecode%_%Template2typecode% & );
+%MethodCode
+  sipRes = new AimsVector_%Template1typecode%_%Template2typecode%( *a1 * a0 );
+%End
+
+AimsVector_%Template1typecode%_%Template2typecode% operator * ( long, AimsVector_%Template1typecode%_%Template2typecode% & );
+%MethodCode
+  sipRes = new AimsVector_%Template1typecode%_%Template2typecode%( *a1 * a0 );
+%End
 

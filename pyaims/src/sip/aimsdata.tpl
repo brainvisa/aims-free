@@ -220,5 +220,82 @@ public:
 
 };
 
+%#ifdef PYAIMS_SCALAR%
+
+AimsData_%Template1typecode% * operator + ( AimsData_%Template1typecode% &, %Template1% ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a0->volume() );
+  carto::VolumeRef<%Template1% > r3 = r1 + a1;
+  r1.release();
+  sipRes = new AimsData<%Template1% >( r3 );
+  r3.release();
+%End
+
+AimsData_%Template1typecode% * operator + ( %Template1%, AimsData_%Template1typecode% & ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a1->volume() );
+  carto::VolumeRef<%Template1% > r3 = r1 + a0;
+  r1.release();
+  sipRes = new AimsData<%Template1% >( r3 );
+  r3.release();
+%End
+
+AimsData_%Template1typecode% * operator - ( %Template1%, AimsData_%Template1typecode% & ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a1->volume() );
+  carto::VolumeRef<%Template1% > r3 = -r1 + a0;
+  r1.release();
+  sipRes = new AimsData<%Template1% >( r3 );
+  r3.release();
+%End
+
+AimsData_%Template1typecode% * operator - ( AimsData_%Template1typecode% &, %Template1% ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a0->volume() );
+  carto::VolumeRef<%Template1% > r3 = -r1 + a1;
+  r1.release();
+  sipRes = new AimsData<%Template1% >( r3 );
+  r3.release();
+%End
+
+AimsData_%Template1typecode% * operator * ( double, AimsData_%Template1typecode% & ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a1->volume() );
+  carto::VolumeRef<%Template1% > r3 = r1 * a0;
+  r1.release();
+  sipRes = new AimsData<%Template1% >( r3 );
+  r3.release();
+%End
+
+AimsData_%Template1typecode% * operator * ( long, AimsData_%Template1typecode% & ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a1->volume() );
+  carto::VolumeRef<%Template1% > r3 = r1 * a0;
+  r1.release();
+  sipRes = new AimsData<%Template1% >( r3 );
+  r3.release();
+%End
+
+AimsData_%Template1typecode% * operator / ( AimsData_%Template1typecode% &, double ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a0->volume() );
+  carto::VolumeRef<%Template1% > r3 = r1 / a1;
+  r1.release();
+  sipRes = new AimsData<%Template1% >( r3 );
+  r3.release();
+%End
+
+AimsData_%Template1typecode% * operator / ( AimsData_%Template1typecode% &, long ) /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( a0->volume() );
+  carto::VolumeRef<%Template1% > r3 = r1 / a1;
+  r1.release();
+  sipRes = new AimsData<%Template1% >( r3 );
+  r3.release();
+%End
+
+%#endif%
+
+
 %#undef PyAims_AimsData_%Template1typecode%_defined%
 

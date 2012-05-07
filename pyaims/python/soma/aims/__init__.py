@@ -534,7 +534,8 @@ def __fixsipclasses__( classes ):
         elif y.__name__.startswith( 'AimsVector_' ) \
           or y.__name__.startswith( 'Texture_' ):
           y.__iter__ = lambda z: VecIter(z)
-        if y.__name__.startswith( 'vector_' ) or y.__name__.startswith( 'AimsVector_' ):
+        if y.__name__.startswith( 'vector_' ) \
+          or y.__name__.startswith( 'AimsVector_' ):
           y.__getslice__ = lambda self, s, e : \
                           [self.__getitem__(x) for x in range(s, e)]
     except:
