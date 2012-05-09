@@ -553,6 +553,23 @@ namespace
     return splitline;
   }
 
+
+  int newSplitIndex( Graph & graph )
+  {
+    int curindex = 0;
+    if( !graph.getProperty( "_current_split_index", curindex ) )
+    {
+      int idx = -1;
+      Graph::const_iterator iv, ev = graph.end();
+      for( iv=graph.begin(); iv!=ev; ++iv )
+        if( (*iv)->getProperty( "splitnode_index", idx )
+          && idx + 1 > curindex )
+          curindex = idx + 1;
+    }
+    graph.setProperty( "_current_split_index", curindex + 1 );
+    return curindex;
+  }
+
 }
 
 
@@ -715,6 +732,35 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
   // create new Vertex and hull_junction
 
   Vertex *v2 = _graph->addVertex( v->getSyntax() );
+  // mark both nodes as originated from the same one
+  int splitindex = 0;
+  if( !v->getProperty( "splitnode_index", splitindex ) )
+  {
+    splitindex = newSplitIndex( *_graph );
+    v->setProperty( "splitnode_index", splitindex );
+  }
+  v2->setProperty( "splitnode_index", splitindex );
+  // change graph version for 3.3 minimum
+  string gvs;
+  vector<int> gver( 2, 0 );
+  if( _graph->getProperty( "datagraph_VERSION", gvs ) )
+  {
+    string::size_type x = 0, y = 0;
+    int i = 0;
+    for( i=0; i<2 && y != string::npos; ++i )
+    {
+      y = gvs.find( '.', x );
+      stringstream( gvs.substr( x, y-x ) ) >> gver[i];
+      x = y+1;
+    }
+  }
+  if( gver[0] < 3 || ( gver[0] == 3 && gver[1] < 3 ) )
+  {
+    _graph->setProperty( "datagraph_VERSION", "3.3" );
+    _graph->setProperty( "datagraph_compatibility_model_VERSION", "3.3" );
+    _graph->setProperty( "CorticalFoldArg_VERSION", "3.3" );
+  }
+
   GraphManip::storeAims( *_graph, v2, "aims_ss", ss2 );
   GraphManip::storeAims( *_graph, v2, "aims_bottom", bottom2 );
   GraphManip::storeAims( *_graph, v2, "aims_other", other2 );
