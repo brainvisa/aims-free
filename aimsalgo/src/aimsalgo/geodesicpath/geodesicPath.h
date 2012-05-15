@@ -27,6 +27,8 @@ using namespace geodesic;
 using namespace aims;
 using namespace std;
 
+typedef vector<unsigned> vect_ui;
+
 class GeodesicPath
 {
   public:
@@ -43,9 +45,10 @@ class GeodesicPath
 
     // method: 1=sulci 2=gyri 3=geodesic
 
-  private :
+  //private :
     //private methods
     void computeGraphDijkstra (AimsSurfaceTriangle surface ,TimeTexture<float> texCurv, int method, int strain);
+    void updateWeight(TimeTexture<float> texCurv,int method, int strain, double sigmo);
 
   public :
     vector<unsigned> shortestPath_1_1_ind(unsigned source, unsigned target);
@@ -59,6 +62,9 @@ class GeodesicPath
     void shortestPath_1_N_All_ind(unsigned sources, vector<unsigned> targets, vector<vector<unsigned> >&indices);
 
     void longestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length, int type_distance);
+    vector<vect_ui> longestPath_1_N_len(unsigned source, vector<unsigned> targets, vector<double> &length, int type_distance);
+
+
     vector<unsigned> longestPath_N_N_ind(vector<unsigned> points, int* s, int *d, double *length, int type_distance);
     void distanceMap_1_N_ind(unsigned source, vector<float> &distanceMap,double *length, int type_distance);
 };
