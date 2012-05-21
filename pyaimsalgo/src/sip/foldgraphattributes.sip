@@ -61,6 +61,15 @@ public:
                        size_t minsize = 50, set_VertexPtr* = 0 );
   int subdivizeGraph( float piecelength = 50, size_t minsize = 50,
                       set_VertexPtr* = 0 );
+  static rc_ptr_BucketMap_VOID splitLineOnBucket(
+    rc_ptr_BucketMap_VOID bucket, const list_POINT3D & pos );
+/*
+%MethodCode
+  std::list<Point3d> l;
+%End
+*/
+  static rc_ptr_BucketMap_VOID splitBucket( rc_ptr_BucketMap_VOID bucket,
+    rc_ptr_BucketMap_VOID splitline, size_t minsize = 50 );
 };
 
 };

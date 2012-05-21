@@ -68,6 +68,7 @@ carto::pyaims_init();
 %Include list_PluginFile.sip
 %Include list_GraphPtr.sip
 %Include list_rc_ptr_Graph.sip
+%Include list_POINT3D.sip
 %Include map_STRING_STRING.sip
 %Include map_S32_STRING.sip
 

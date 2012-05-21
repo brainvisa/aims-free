@@ -36,6 +36,7 @@
 #define AIMS_FOLDGRAPH_FOLDOVERSEGMENTATION_H
 
 #include <aims/vector/vector.h>
+#include <aims/bucket/bucketMap.h>
 #include <cartodata/volume/volume.h>
 class Graph;
 class Vertex;
@@ -51,6 +52,9 @@ namespace aims
     ~FoldArgOverSegment();
     Vertex * splitVertex( Vertex* v, const Point3d & pos,
                           size_t minsize = 50 );
+    /// split along a path defined by a series of points (dotted line)
+    Vertex * splitVertex( Vertex* v, const std::list<Point3d> & pos,
+                          size_t minsize = 50 );
     void printSplitInSkeleton( carto::rc_ptr<carto::Volume<int16_t> > skel,
                                const Vertex* v1, const Vertex* v2 );
     /** Splits a vertex into pieces of more or less piecesize voxels.
@@ -62,6 +66,23 @@ namespace aims
     /// same as subdivizeVertex but on all vertices of the graph
     int subdivizeGraph( float piecelength = 20, size_t minsize = 50,
                          std::set<Vertex *> *newvertices = 0 );
+
+    /** Trace a split line along a path defined by a series of points
+        (dotted line) on a bucket.
+        @return the line as a bucket
+    */
+    static carto::rc_ptr<BucketMap<Void> > splitLineOnBucket(
+      carto::rc_ptr<BucketMap<Void> > bucket, const std::list<Point3d> & pos );
+    /** split along a path defined by a series of points (dotted line).
+        The initial bucket will be truncated to be one of the split parts.
+        splitline should really separate the input bucket into distinct
+        connected components (normally the result of splitLineOnBucket() ).
+        @return a new bucket with the "other" part of the split
+    */
+    static carto::rc_ptr<BucketMap<Void> > splitBucket(
+      carto::rc_ptr<BucketMap<Void> > bucket,
+      carto::rc_ptr<BucketMap<Void> > splitline,
+      size_t minsize = 50 );
 
   private:
     Graph *_graph;

@@ -42,6 +42,9 @@
 #include <aims/scalespace/bucketblob.h>
 #include <aims/resampling/mask.h>
 #include <aims/graph/graphmanip.h>
+#include <aims/topology/topoClassifier.h>
+// DEBUG
+#include <aims/io/writer.h>
 
 using namespace aims;
 using namespace carto;
@@ -125,10 +128,10 @@ namespace
   /* splits src bucket into out1 and out2, according to the voronoi.
      voxels of voronoi label label1 will be dispatched to out1, others to out2.
   */
-  void splitBucket( rc_ptr<BucketMap<Void> > & out1,
-                    rc_ptr<BucketMap<Void> > & out2,
-                    const BucketMap<Void> & src,
-                    const BucketMap<int16_t> & voronoi, int16_t label1 )
+  void _splitBucket( rc_ptr<BucketMap<Void> > & out1,
+                     rc_ptr<BucketMap<Void> > & out2,
+                     const BucketMap<Void> & src,
+                     const BucketMap<int16_t> & voronoi, int16_t label1 )
   {
     const BucketMap<Void>::Bucket & bk = src.begin()->second;
     const BucketMap<int16_t>::Bucket & vor = voronoi.begin()->second;
@@ -584,6 +587,218 @@ FoldArgOverSegment::~FoldArgOverSegment()
 }
 
 
+rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
+  rc_ptr<BucketMap<Void> > bucket, const list<Point3d> & pts )
+{
+  Point3df vs( bucket->sizeX(), bucket->sizeY(), bucket->sizeZ() );
+
+  // topological classification to find bucket boundaries
+  TopologicalClassifier< BucketMap<Void> > topoClass;
+  rc_ptr< BucketMap<int16_t> > clas = topoClass.doit( *bucket );
+  BucketMap<int16_t>::Bucket & cbk = (*clas)[0];
+  BucketMap<int16_t>::Bucket::const_iterator icb, ecb = cbk.end();
+
+  // find nearest boundary point to first and last ones
+  // TODO: for now, just using euclidian distance
+  float dmin1 = FLT_MAX, dmin2 = FLT_MAX, dx;
+  Point3d pmin1, pmin2;
+  Point3d p1 = *pts.begin(), p2 = *pts.rbegin();
+  for( icb=cbk.begin(); icb!=ecb; ++icb )
+    if( icb->second == TopologicalClassificationMeaning::BorderPoint )
+    {
+      Point3d p = icb->first - p1;
+      dx = Point3df( p[0] * vs[0], p[1] * vs[1], p[2] * vs[2] ).norm2();
+      if( dx < dmin1 )
+      {
+        dmin1 = dx;
+        pmin1 = icb->first;
+      }
+      p = icb->first - p2;
+      dx = Point3df( p[0] * vs[0], p[1] * vs[1], p[2] * vs[2] ).norm2();
+      if( dx < dmin2 )
+      {
+        dmin2 = dx;
+        pmin2 = icb->first;
+      }
+    }
+  if( dmin1 == FLT_MAX )
+    return rc_ptr<BucketMap<Void> >( 0 ); // cound not find boundaries
+  // add boundaries points to list
+  list<Point3d> plist = pts;
+  if( pmin1 != p1 )
+    plist.insert( plist.begin(), pmin1 );
+  if( pmin2 != p2 )
+    plist.push_back( pmin2 );
+  cout << "pmin1: " << pmin1 << ", pmin2: " << pmin2 << endl;
+
+  // propagate across bucket surface
+  rc_ptr<BucketMap<float> > fbk( new BucketMap<float> ); // dist map
+  rc_ptr<BucketMap<int16_t> > iss( new BucketMap<int16_t> ); // seeds
+  iss->setSizeXYZT( bucket->sizeX(), bucket->sizeY(), bucket->sizeZ(),
+                    bucket->sizeT() );
+  BucketMap<Void>::Bucket & bk0 = (*bucket)[0];
+  BucketMap<Void>::Bucket::const_iterator ib, eb=bk0.end();
+  BucketMap<int16_t>::Bucket & iss0 = (*iss)[0];
+  for( ib=bk0.begin(); ib!=eb; ++ib )
+    iss0[ib->first] = 0;
+  list<Point3d>::const_iterator ip, ep = plist.end();
+  int16_t i = 1;
+  set<int16_t> seeds;
+  set<int16_t> work;
+  work.insert( 0 );
+  for( ip=plist.begin(); ip!=ep; ++ip, ++i )
+  {
+    iss0[*ip] = i;
+    seeds.insert( i );
+    cout << "seed: " << i << endl;
+  }
+
+  // dilate because the fast marching expects 6-connectivity
+  rc_ptr<BucketMap<int16_t> > iss2( dilateBucket( *iss ) );
+
+  // distance map between points of plist
+  FastMarching<BucketMap<int16_t> > fm( Connectivity::CONNECTIVITY_26_XYZ,
+                                        true );
+  fbk = fm.doit( iss2, work, seeds );
+  BucketMap<float>::Bucket & fbk0 = (*fbk)[0];
+  BucketMap<float>::Bucket::iterator ibf, ebf, jbf;
+  cout << "distmap: " << fbk0.size() << endl;
+  // cancel dilation: mask with initial region
+  for( ibf=fbk0.begin(), ebf=fbk0.end(); ibf!=ebf; ++ibf )
+  {
+    if( iss0.find( ibf->first ) == iss0.end() )
+    {
+      jbf = ibf;
+      ++ibf;
+      fbk0.erase( jbf );
+    }
+    else
+      ++ibf;
+  }
+  // DEBUG
+  Writer<BucketMap<float> > w1( "/tmp/distmap.bck" );
+  w1.write( *fbk );
+  Writer<BucketMap<int16_t> > w2( "/tmp/voronoi.bck" );
+  w2.write( *fm.voronoiVol() );
+
+  // reconstruct split line
+  rc_ptr< BucketMap<Void> > splitline( new BucketMap<Void> );
+  splitline->setSizeXYZT( bucket->sizeX(), bucket->sizeY(), bucket->sizeZ(),
+                          bucket->sizeT() );
+  BucketMap<Void>::Bucket & sline0 = (*splitline)[0];
+  vector<BucketMap<float> > regions( plist.size()+1 );
+  rc_ptr<BucketMap<int16_t> > voro = fm.voronoiVol();
+  // split distance map into voronoi regions
+  for( icb=(*voro)[0].begin(), ecb=(*voro)[0].end(); icb!=ecb; ++icb )
+    regions[ icb->second ][0][icb->first];
+
+  ip = plist.begin();
+  i = 1;
+  Point3d p0 = *ip;
+  for( ++ip; ip!=ep; ++ip, ++i )
+  {
+    Point3d pmin;
+    float dmin;
+    // find nearest point on each voronoi interface between successive points
+    try
+    {
+      const BucketMap<float> & mint = fm.midInterface( i, i+1 );
+      BucketMap<float>::Bucket::const_iterator ibf2,
+        ebf2 = mint.begin()->second.end();
+      dmin = FLT_MAX;
+      cout << "interface: " << i << " - " << i+1 << endl;
+      for( ibf2=mint.begin()->second.begin(); ibf2!=ebf2; ++ibf2 )
+        if( ibf2->second < dmin )
+        {
+          dmin = ibf2->second;
+          pmin = ibf2->first;
+        }
+    }
+    catch( ... )
+    {
+      // no interface between p0 and current point
+      cout << "no interface between seeds " << i << " and " << i+1 << endl;
+      vector<pair<int16_t,int16_t> > il = fm.midInterfaceLabels();
+      cout << "interfaces: " << il.size() << endl;
+      vector<pair<int16_t,int16_t> >::iterator ill, ell = il.end();
+      for( ill=il.begin(); ill!=ell; ++ill )
+        cout << ill->first << " - " << ill->second << endl;
+      throw;
+      return rc_ptr<BucketMap<Void> >( 0 );
+    }
+    // follow "gradient" to get line from pmin to p0 and p
+    // (restricted to voronoi regions)
+    cout << "pmin: " << pmin << ", d: " << dmin << endl;
+    BucketMap<Void> *line = downPath( regions[i], pmin );
+    cout << "line: " << (*line)[0].size() << endl;
+    sline0.insert( (*line)[0].begin(), (*line)[0].end() );
+    delete line;
+    p0 = *ip;
+  }
+
+  return splitline;
+}
+
+
+rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
+  rc_ptr<BucketMap<Void> > bucket, rc_ptr<BucketMap<Void> > splitline,
+  size_t minsize )
+{
+}
+
+
+Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const list<Point3d> & pts,
+                                          size_t minsize )
+{
+  cout << "splitVertex along dotted line...\n";
+  // get initial buckets
+  rc_ptr<BucketMap<Void> > ss, bottom, other, hjl, merged;
+  if( !v->getProperty( "aims_ss", ss ) || !ss )
+  {
+    cerr << "This fold seems not to have simple surface voxels. Aborting."
+      << endl;
+    return 0;
+  }
+  if( !v->getProperty( "aims_bottom", bottom ) || !bottom )
+  {
+    bottom.reset( new BucketMap<Void> );
+    bottom->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  }
+  if( !v->getProperty( "aims_other", other ) || !other )
+  {
+    other.reset( new BucketMap<Void> );
+    other->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  }
+  Vertex::const_iterator  ie, ee=v->end();
+  Edge  *hj = 0;
+  for( ie=v->begin(); ie!=ee; ++ie )
+    if((*ie)->getSyntax() == "hull_junction" )
+    {
+      hj = *ie;
+      break;
+    }
+  if( !hj || !hj->getProperty( "aims_junction", hjl ) || !hjl )
+  {
+    hjl.reset( new BucketMap<Void> );
+    hjl->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  }
+  // concatenate all buckets
+  merged.reset( new BucketMap<Void> );
+  merged->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  (*merged)[0].insert( (*ss)[0].begin(), (*ss)[0].end() );
+  (*merged)[0].insert( (*bottom)[0].begin(), (*bottom)[0].end() );
+  (*merged)[0].insert( (*other)[0].begin(), (*other)[0].end() );
+  (*merged)[0].insert( (*hjl)[0].begin(), (*hjl)[0].end() );
+  rc_ptr<BucketMap<Void> > splitline = splitLineOnBucket( merged, pts );
+  if( splitline.isNull() )
+    return 0; // split failed
+  rc_ptr<BucketMap<Void> > split = splitBucket( merged, splitline, minsize );
+  if( split.isNull() )
+    return 0; // split failed
+  // TODO: vertex part
+}
+
+
 Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
                                           size_t minsize )
 {
@@ -708,13 +923,13 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
                                                      ss1, ss2 );
 
   // split ss according to voronoi: definitive pass
-  splitBucket( ss1, ss2, *ss, *voronoi, 10 );
+  _splitBucket( ss1, ss2, *ss, *voronoi, 10 );
   rc_ptr<BucketMap<Void> > bottom1, bottom2;
-  splitBucket( bottom1, bottom2, *bottom, *voronoi, 10 );
+  _splitBucket( bottom1, bottom2, *bottom, *voronoi, 10 );
   rc_ptr<BucketMap<Void> > hj1, hj2;
-  splitBucket( hj1, hj2, *hjl, *voronoi, 10 );
+  _splitBucket( hj1, hj2, *hjl, *voronoi, 10 );
   rc_ptr<BucketMap<Void> > other1, other2;
-  splitBucket( other1, other2, *other, *voronoi, 10 );
+  _splitBucket( other1, other2, *other, *voronoi, 10 );
   cout << "split done for all buckets\n";
 
   if( minsize > 0
