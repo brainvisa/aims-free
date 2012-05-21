@@ -145,6 +145,16 @@ FileConvert::FileConvert()
 		       &convert<BucketMap<Void> > );
   registerProcessType( "Bucket", "S16", 
 		       &convert<BucketMap<int16_t> > );
+  registerProcessType( "Bucket", "S32",
+                       &convert<BucketMap<int32_t> > );
+  registerProcessType( "Bucket", "U16",
+                       &convert<BucketMap<uint16_t> > );
+  registerProcessType( "Bucket", "U32",
+                       &convert<BucketMap<uint32_t> > );
+  registerProcessType( "Bucket", "FLOAT",
+                       &convert<BucketMap<float> > );
+  registerProcessType( "Bucket", "DOUBLE",
+                       &convert<BucketMap<double> > );
   registerProcessType( "Bucket", "DTITENSOR", 
 		       &readAndWrite<BucketMap<DtiTensor> > );
   registerProcessType( "Texture", "FLOAT", &convert<Texture1d> );
@@ -158,10 +168,9 @@ FileConvert::FileConvert()
 }
 
 
-#if ( __GNUC__-0 >= 3 ) || ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 > 91 )
-template<class T1, class U>
-static bool convData( Process&, const string &, Finder & );
-#endif
+template <typename T1, typename U>
+static bool convData( Process &, const string &, Finder & );
+
 
 template<typename T>
 class DataConverter : public Process
@@ -175,10 +184,6 @@ public:
   friend bool convData( Process&, const string &, Finder & );
 
  private:
-#if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
-  template<class U>
-  static bool convInternal( Process&, const string &, Finder & );
-#endif
   static bool noConvert( Process &, const string &, Finder & );
 
   T		& data;
@@ -215,11 +220,6 @@ public:
   friend bool convData( Process&, const string &, Finder & );
 
  private:
-#if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
-  template<class U>
-  static bool convInternal( Process&, const string &, Finder & );
-#endif
-
   AimsData<T>	& data;
   string	file;
   int		encoding;
@@ -244,11 +244,6 @@ public:
   friend bool convData( Process&, const string &, Finder & );
 
  private:
-#if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
-  template<class U>
-  static bool convInternal( Process&, const string &, Finder & );
-#endif
-
   TimeTexture<T>	& data;
   string		file;
   int			encoding;
@@ -298,21 +293,6 @@ DataConverter<AimsData<T> >::DataConverter( AimsData<T> & dat,
   : Process(), data( dat ), file( fileout ), encoding( enc ), normal(n), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info(info)
 {
-#if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
-  registerProcessType( "Volume", "S8", &convInternal<AimsData<int8_t> > );
-  registerProcessType( "Volume", "U8", &convInternal<AimsData<uint8_t> > );
-  registerProcessType( "Volume", "S16", &convInternal<AimsData<int16_t> > );
-  registerProcessType( "Volume", "U16", &convInternal<AimsData<uint16_t> > );
-  registerProcessType( "Volume", "S32", &convInternal<AimsData<int32_t> > );
-  registerProcessType( "Volume", "U32", &convInternal<AimsData<uint32_t> > );
-  registerProcessType( "Volume", "FLOAT", &convInternal<AimsData<float> > );
-  registerProcessType( "Volume", "DOUBLE", &convInternal<AimsData<double> > );
-  registerProcessType( "Volume", "RGB", &convInternal<AimsData<AimsRGB> > );
-  registerProcessType( "Volume", "RGBA", &convInternal<AimsData<AimsRGBA> > );
-  registerProcessType( "Volume", "HSV", &convInternal<AimsData<AimsHSV> > );
-  registerProcessType( "Bucket", "VOID", &convInternal<BucketMap<Void> > );
-  registerProcessType( "Bucket", "S16", &convInternal<BucketMap<int16_t> > );
-#else
   registerProcessType( "Volume", "S8", 
 		       &convData<AimsData<T>,AimsData<int8_t> > );
   registerProcessType( "Volume", "U8", 
@@ -339,7 +319,16 @@ DataConverter<AimsData<T> >::DataConverter( AimsData<T> & dat,
 		       &convData<AimsData<T>,BucketMap<Void> > );
   registerProcessType( "Bucket", "S16", 
 		       &convData<AimsData<T>,BucketMap<int16_t> > );
-#endif
+  registerProcessType( "Bucket", "U16",
+                       &convData<AimsData<T>,BucketMap<uint16_t> > );
+  registerProcessType( "Bucket", "S32",
+                       &convData<AimsData<T>,BucketMap<int32_t> > );
+  registerProcessType( "Bucket", "U32",
+                       &convData<AimsData<T>,BucketMap<uint32_t> > );
+  registerProcessType( "Bucket", "FLOAT",
+                       &convData<AimsData<T>,BucketMap<float> > );
+  registerProcessType( "Bucket", "DOUBLE",
+                       &convData<AimsData<T>,BucketMap<double> > );
 }
 
 
@@ -352,17 +341,6 @@ DataConverter<TimeTexture<T> >::DataConverter( TimeTexture<T> & dat,
   : Process(), data( dat ), file( fileout ), encoding( enc ), normal( n ), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info( info )
 {
-#if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
-  registerProcessType( "Texture", "FLOAT", 
-		       &convInternal<TimeTexture<float> > );
-  registerProcessType( "Texture", "S16", &convInternal<TimeTexture<short> > );
-  registerProcessType( "Texture", "S32", &convInternal<TimeTexture<int> > );
-  registerProcessType( "Texture", "integer", &convInternal<TimeTexture<int> > );
-  registerProcessType( "Texture", "unsigned integer", 
-		       &convInternal<TimeTexture<unsigned> > );
-  registerProcessType( "Texture", "U32", 
-		       &convInternal<TimeTexture<uint32_t> > );
-#else
   registerProcessType( "Texture", "S16", 
 		       &convData<TimeTexture<T>,TimeTexture<short> > );
   registerProcessType( "Texture", "S32",
@@ -375,7 +353,6 @@ DataConverter<TimeTexture<T> >::DataConverter( TimeTexture<T> & dat,
 		       &convData<TimeTexture<T>,TimeTexture<uint32_t> > );
   registerProcessType( "Texture", "FLOAT", 
 		       &convData<TimeTexture<T>,TimeTexture<float> > );
-#endif
 }
 
 
@@ -390,10 +367,30 @@ DataConverter<BucketMap<T> >::DataConverter( BucketMap<T> & dat,
 {
   registerProcessType( "Volume", "S16", 
 		       &convData<BucketMap<T>,AimsData<short> > );
+  registerProcessType( "Volume", "U16",
+                       &convData<BucketMap<T>,AimsData<uint16_t> > );
+  registerProcessType( "Volume", "S32",
+                       &convData<BucketMap<T>,AimsData<int32_t> > );
+  registerProcessType( "Volume", "U32",
+                       &convData<BucketMap<T>,AimsData<uint32_t> > );
+  registerProcessType( "Volume", "FLOAT",
+                       &convData<BucketMap<T>,AimsData<float> > );
+  registerProcessType( "Volume", "DOUBLE",
+                       &convData<BucketMap<T>,AimsData<double> > );
   registerProcessType( "Bucket", "VOID", 
                        &convData<BucketMap<T>,BucketMap<Void> > );
   registerProcessType( "Bucket", "S16", 
                        &convData<BucketMap<T>,BucketMap<int16_t> > );
+  registerProcessType( "Bucket", "U16",
+                       &convData<BucketMap<T>,BucketMap<uint16_t> > );
+  registerProcessType( "Bucket", "S32",
+                       &convData<BucketMap<T>,BucketMap<int32_t> > );
+  registerProcessType( "Bucket", "U32",
+                       &convData<BucketMap<T>,BucketMap<uint32_t> > );
+  registerProcessType( "Bucket", "FLOAT",
+                       &convData<BucketMap<T>,BucketMap<float> > );
+  registerProcessType( "Bucket", "DOUBLE",
+                       &convData<BucketMap<T>,BucketMap<double> > );
 }
 
 
@@ -568,17 +565,9 @@ void sizeT( AimsTimeSurface<D,T> & obj )
 }
 
 
-#if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
-template<class T> template<class U>
-bool DataConverter<T>::convInternal( Process& p, const string &, Finder & )
-{
-#else
-
-
 template<class T,class U>
 bool convData( Process & p, const string &, Finder & )
 {
-#endif
   DataConverter<T>	& dc = (DataConverter<T> &) p;
   cout << "converting data...\n";
 

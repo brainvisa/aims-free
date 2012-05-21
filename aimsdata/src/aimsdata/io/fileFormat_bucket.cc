@@ -88,6 +88,60 @@ FileFormatDictionary<BucketMap<short> >::registerBaseFormats()
   registerFormat( "BCK", fm, ext );
 }
 
+template<> void
+FileFormatDictionary<AimsBucket<uint16_t> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "bck" );
+  BckFormat<uint16_t>      *fm = new BckFormat<uint16_t>;
+  registerFormat( "BCK", fm, ext );
+}
+
+template<> void
+FileFormatDictionary<BucketMap<uint16_t> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "bck" );
+  BckMapFormat<uint16_t>   *fm = new BckMapFormat<uint16_t>;
+  registerFormat( "BCK", fm, ext );
+}
+
+template<> void
+FileFormatDictionary<AimsBucket<int32_t> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "bck" );
+  BckFormat<int32_t>      *fm = new BckFormat<int32_t>;
+  registerFormat( "BCK", fm, ext );
+}
+
+template<> void
+FileFormatDictionary<BucketMap<int32_t> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "bck" );
+  BckMapFormat<int32_t>   *fm = new BckMapFormat<int32_t>;
+  registerFormat( "BCK", fm, ext );
+}
+
+template<> void
+FileFormatDictionary<AimsBucket<uint32_t> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "bck" );
+  BckFormat<uint32_t>      *fm = new BckFormat<uint32_t>;
+  registerFormat( "BCK", fm, ext );
+}
+
+template<> void
+FileFormatDictionary<BucketMap<uint32_t> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "bck" );
+  BckMapFormat<uint32_t>   *fm = new BckMapFormat<uint32_t>;
+  registerFormat( "BCK", fm, ext );
+}
+
 template<> void 
 FileFormatDictionary<AimsBucket<float> >::registerBaseFormats()
 {
@@ -219,12 +273,18 @@ FileFormatDictionary<BucketMap<DtiTensor> >::registerBaseFormats()
 
 template class FileFormatDictionary<AimsBucket<Void> >;
 template class FileFormatDictionary<AimsBucket<short> >;
+template class FileFormatDictionary<AimsBucket<uint16_t> >;
+template class FileFormatDictionary<AimsBucket<int32_t> >;
+template class FileFormatDictionary<AimsBucket<uint32_t> >;
 template class FileFormatDictionary<AimsBucket<float> >;
 template class FileFormatDictionary<AimsBucket<double> >;
 
 template class FileFormatDictionary<AimsBucket<DtiTensor> >;
 template class FileFormatDictionary<BucketMap<Void> >;
 template class FileFormatDictionary<BucketMap<short> >;
+template class FileFormatDictionary<BucketMap<uint16_t> >;
+template class FileFormatDictionary<BucketMap<int32_t> >;
+template class FileFormatDictionary<BucketMap<uint32_t> >;
 template class FileFormatDictionary<BucketMap<float> >;
 template class FileFormatDictionary<BucketMap<double> >;
 template class FileFormatDictionary<BucketMap<DtiTensor> >;
@@ -242,10 +302,16 @@ static bool _buckdic()
 {
   FileFormatDictionary<AimsBucket<Void> >::init();
   FileFormatDictionary<AimsBucket<short> >::init();
+  FileFormatDictionary<AimsBucket<uint16_t> >::init();
+  FileFormatDictionary<AimsBucket<int32_t> >::init();
+  FileFormatDictionary<AimsBucket<uint32_t> >::init();
   FileFormatDictionary<AimsBucket<float> >::init();
   FileFormatDictionary<AimsBucket<DtiTensor> >::init();
   FileFormatDictionary<BucketMap<Void> >::init();
   FileFormatDictionary<BucketMap<short> >::init();
+  FileFormatDictionary<BucketMap<uint16_t> >::init();
+  FileFormatDictionary<BucketMap<int32_t> >::init();
+  FileFormatDictionary<BucketMap<uint32_t> >::init();
   FileFormatDictionary<BucketMap<float> >::init();
   FileFormatDictionary<BucketMap<DtiTensor> >::init();
   FileFormatDictionary<AimsBucket<vector<float> > >::init();
