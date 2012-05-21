@@ -35,6 +35,7 @@
 #include <aims/distancemap/downpath.h>
 #include <aims/connectivity/connectivity.h>
 
+
 namespace aims
 {
 
@@ -51,12 +52,23 @@ downPath( const BucketMap<T> & region, const Point3d & pos )
   typename BucketMap<T>::Bucket::const_iterator ir, er = r0.end();
   Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
   int i, n = c.nbNeighbors();
-  T val = r0.find(p)->second, tmpval;
+  T val, tmpval;
+  ir = r0.find( p );
+  if( ir == er )
+  {
+    // cout << "downPath beginning out of bucket\n";
+    val = 1e38;
+  }
+  else
+  {
+    val = ir->second;
+    bk[ p ];
+  }
+  // cout << "p0: " << p << ", val0:" << val << endl;
   bool moved;
 
   do
   {
-    bk[ p ];
     tmpval = val;
     moved = false;
     for( i=0; i<n; ++i )
@@ -74,6 +86,7 @@ downPath( const BucketMap<T> & region, const Point3d & pos )
     {
       val = tmpval;
       p = p1;
+      bk[ p ];
     }
   }
   while( moved );

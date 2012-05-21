@@ -43,8 +43,6 @@
 #include <aims/resampling/mask.h>
 #include <aims/graph/graphmanip.h>
 #include <aims/topology/topoClassifier.h>
-// DEBUG
-#include <aims/io/writer.h>
 
 using namespace aims;
 using namespace carto;
@@ -629,7 +627,7 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
     plist.insert( plist.begin(), pmin1 );
   if( pmin2 != p2 )
     plist.push_back( pmin2 );
-  cout << "pmin1: " << pmin1 << ", pmin2: " << pmin2 << endl;
+  // cout << "pmin1: " << pmin1 << ", pmin2: " << pmin2 << endl;
 
   // propagate across bucket surface
   rc_ptr<BucketMap<float> > fbk( new BucketMap<float> ); // dist map
@@ -650,7 +648,6 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
   {
     iss0[*ip] = i;
     seeds.insert( i );
-    cout << "seed: " << i << endl;
   }
 
   // dilate because the fast marching expects 6-connectivity
@@ -662,11 +659,10 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
   fbk = fm.doit( iss2, work, seeds );
   BucketMap<float>::Bucket & fbk0 = (*fbk)[0];
   BucketMap<float>::Bucket::iterator ibf, ebf, jbf;
-  cout << "distmap: " << fbk0.size() << endl;
   // cancel dilation: mask with initial region
-  for( ibf=fbk0.begin(), ebf=fbk0.end(); ibf!=ebf; ++ibf )
+  for( ibf=fbk0.begin(), ebf=fbk0.end(); ibf!=ebf; )
   {
-    if( iss0.find( ibf->first ) == iss0.end() )
+    if( bk0.find( ibf->first ) == eb )
     {
       jbf = ibf;
       ++ibf;
@@ -676,10 +672,12 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
       ++ibf;
   }
   // DEBUG
+  /*
   Writer<BucketMap<float> > w1( "/tmp/distmap.bck" );
   w1.write( *fbk );
   Writer<BucketMap<int16_t> > w2( "/tmp/voronoi.bck" );
   w2.write( *fm.voronoiVol() );
+  */
 
   // reconstruct split line
   rc_ptr< BucketMap<Void> > splitline( new BucketMap<Void> );
@@ -690,7 +688,11 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
   rc_ptr<BucketMap<int16_t> > voro = fm.voronoiVol();
   // split distance map into voronoi regions
   for( icb=(*voro)[0].begin(), ecb=(*voro)[0].end(); icb!=ecb; ++icb )
-    regions[ icb->second ][0][icb->first];
+  {
+    ibf = fbk0.find( icb->first );
+    if( ibf != ebf )
+      regions[ icb->second ][0][icb->first] = fbk0[icb->first];
+  }
 
   ip = plist.begin();
   i = 1;
@@ -706,9 +708,8 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
       BucketMap<float>::Bucket::const_iterator ibf2,
         ebf2 = mint.begin()->second.end();
       dmin = FLT_MAX;
-      cout << "interface: " << i << " - " << i+1 << endl;
       for( ibf2=mint.begin()->second.begin(); ibf2!=ebf2; ++ibf2 )
-        if( ibf2->second < dmin )
+        if( ibf2->second < dmin && fbk0.find( ibf2->first ) != ebf )
         {
           dmin = ibf2->second;
           pmin = ibf2->first;
@@ -718,19 +719,14 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
     {
       // no interface between p0 and current point
       cout << "no interface between seeds " << i << " and " << i+1 << endl;
-      vector<pair<int16_t,int16_t> > il = fm.midInterfaceLabels();
-      cout << "interfaces: " << il.size() << endl;
-      vector<pair<int16_t,int16_t> >::iterator ill, ell = il.end();
-      for( ill=il.begin(); ill!=ell; ++ill )
-        cout << ill->first << " - " << ill->second << endl;
-      throw;
       return rc_ptr<BucketMap<Void> >( 0 );
     }
     // follow "gradient" to get line from pmin to p0 and p
     // (restricted to voronoi regions)
-    cout << "pmin: " << pmin << ", d: " << dmin << endl;
     BucketMap<Void> *line = downPath( regions[i], pmin );
-    cout << "line: " << (*line)[0].size() << endl;
+    sline0.insert( (*line)[0].begin(), (*line)[0].end() );
+    delete line;
+    line = downPath( regions[i+1], pmin );
     sline0.insert( (*line)[0].begin(), (*line)[0].end() );
     delete line;
     p0 = *ip;
@@ -882,7 +878,7 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
   BucketMap<float>::Bucket & fss0 = (*fss)[0];
   BucketMap<float>::Bucket::iterator ibf, ebf, jbf;
   // cancel dilation: mask with initial region
-  for( ibf=fss0.begin(), ebf=fss0.end(); ibf!=ebf; ++ibf )
+  for( ibf=fss0.begin(), ebf=fss0.end(); ibf!=ebf; )
   {
     if( iss0.find( ibf->first ) == iss0.end() )
     {
