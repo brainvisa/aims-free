@@ -35,31 +35,13 @@
 #include <cstdlib>
 #include <aims/io/io_g.h>
 #include <aims/topology/topoClassifier.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
+#include <aims/getopt/getoptProcess.h>
 #include <iostream>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
-
-
-BEGIN_USAGE(usage)
-  "--------------------------------------------------------------------------",
-  "AimsTopologicalClassification -i[nput]   <filein>                         ",
-  "                              -o[output] <fileout>                        ",
-  "                              [-h[elp]]                                   ",
-  "--------------------------------------------------------------------------",
-  "Topological classification of each point of a labeled image               ",
-  "--------------------------------------------------------------------------",
-  "  filein      : input volume                                              ",
-  "  fileout     : prefix name for output file name                          ",
-  "--------------------------------------------------------------------------",
-END_USAGE
-
-
-void Usage( void )
-{
-  AimsUsage( usage );
-}
 
 
 template< class T >
@@ -70,25 +52,26 @@ class Classifier : public Process
 {
 public:
 
-  Classifier( const string& fileout );
+  Classifier( const string& fileout = string() );
+  string fout;
 
 private:
 
   template< class T >
   friend bool doit( Process&, const string&, Finder& );
-
-  string fout;
 };
 
 
 Classifier::Classifier( const string& fileout ) : Process(), fout( fileout )
 {
-  registerProcessType( "Volume", "S8", &doit< int8_t > );
-  registerProcessType( "Volume", "U8", &doit< uint8_t > );
-  registerProcessType( "Volume", "S16", &doit< int16_t > );
-  registerProcessType( "Volume", "U16", &doit< uint16_t > );
-  registerProcessType( "Volume", "S32", &doit< int32_t > );
-  registerProcessType( "Volume", "U32", &doit< uint32_t > );
+  registerProcessType( "Volume", "S8", &doit< AimsData<int8_t> > );
+  registerProcessType( "Volume", "U8", &doit< AimsData<uint8_t> > );
+  registerProcessType( "Volume", "S16", &doit< AimsData<int16_t> > );
+  registerProcessType( "Volume", "U16", &doit< AimsData<uint16_t> > );
+  registerProcessType( "Volume", "S32", &doit< AimsData<int32_t> > );
+  registerProcessType( "Volume", "U32", &doit< AimsData<uint32_t> > );
+  registerProcessType( "Bucket", "S16", &doit< BucketMap<int16_t> > );
+  registerProcessType( "Bucket", "VOID", &doit< BucketMap<Void> > );
 }
 
 
@@ -96,42 +79,53 @@ template< class T >
 bool doit( Process& p, const string& fname, Finder& f )
 {
   Classifier& cl = (Classifier &)p;
-  AimsData< T > data;
-  Reader< AimsData< T > > r( fname );
+  T data;
+  Reader<T> r( fname );
   string format = f.format();
 
   cout << "Reading " << fname << "..." << endl;
   if ( !r.read( data, 0, &format ) )  return false;
 
   cout << "Classifying..." << endl;
-  TopologicalClassifier< T > topoClass;
-  Writer< AimsData< short > > writer( cl.fout );
+  TopologicalClassifier<T> topoClass;
+  Writer< typename TopologicalClassifier<T>::ResultType > writer( cl.fout );
 
-  return writer.write( topoClass.doit( data ) );
+  typename TopologicalClassifier<T>::ResultRcType out = topoClass.doit( data );
+  return writer.write( topoClass.takeResult( out ) );
 }
 
 
-int main( int argc, char* argv[] )
+int main( int argc, const char** argv )
 {
-  char *filein = NULL, *fileout = NULL;
+  string fileout;
+  Classifier proc;
+  ProcessInput  filein( proc );
 
   //
   // Getting options
   //
-  AimsOption opt[] = {
-  { 'h',"help"        ,AIMS_OPT_FLAG  ,( void* )Usage,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input"       ,AIMS_OPT_STRING,&filein     ,0                ,1},
-  { 'o',"output"      ,AIMS_OPT_STRING,&fileout    ,0                ,1},
-  { 0  ,0             ,AIMS_OPT_END   ,0           ,0                ,0}};
+  AimsApplication app( argc, argv, "Topological classification of each point "
+    "of a labeled image" );
+  app.addOption( filein, "-i", "input volume or bucket" );
+  app.addOption( fileout, "-o", "output volume or bucket" );
+  app.alias( "--input", "-i" );
+  app.alias( "--output", "-o" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
+    proc.fout = fileout;
+    proc.execute( filein.filename );
 
-  string theFilein = filein;
-  string theFileout = fileout;
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
 
-  Classifier proc( theFileout );
-  if ( !proc.execute( theFilein ) )
-    cerr << "Topological classification failed" << endl;
-
-  return EXIT_SUCCESS;
+  return EXIT_FAILURE;
 }

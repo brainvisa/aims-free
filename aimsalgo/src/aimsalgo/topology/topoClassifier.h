@@ -38,22 +38,57 @@
 #include <aims/data/data.h>
 #include <aims/topology/topoClassif.h>
 #include <aims/topology/classifMeaning.h>
+#include <aims/bucket/bucketMap.h>
+#include <aims/utility/converter_bucket.h>
 
 
-template< class T >
+template< typename T >
 class TopologicalClassifier
 {
 public:
+  class ResultRcType;
+  class ResultType;
 
   TopologicalClassifier() { }
   virtual ~TopologicalClassifier() { }
 
-  AimsData< short > doit( const AimsData< T >& );
+  ResultRcType doit( const T & );
+  ResultType & takeResult( ResultRcType & d ) { return d; }
 };
 
 
-template< class T > inline
-AimsData< short > TopologicalClassifier< T >::doit( const AimsData< T >& d )
+template< typename T >
+class TopologicalClassifier<AimsData<T> >
+{
+public:
+  typedef AimsData<int16_t> ResultRcType;
+  typedef AimsData<int16_t> ResultType;
+
+  TopologicalClassifier() { }
+  virtual ~TopologicalClassifier() { }
+
+  ResultRcType doit( const AimsData< T >& );
+  ResultType & takeResult( ResultRcType & d ) { return d; }
+};
+
+
+template< typename T >
+class TopologicalClassifier< aims::BucketMap<T> >
+{
+public:
+  typedef carto::rc_ptr< aims::BucketMap<int16_t> > ResultRcType;
+  typedef aims::BucketMap<int16_t> ResultType;
+
+  TopologicalClassifier() { }
+  virtual ~TopologicalClassifier() { }
+
+  ResultRcType doit( const aims::BucketMap< T >& );
+  ResultType & takeResult( ResultRcType & d ) { return *d; }
+};
+
+
+template< typename T > inline
+AimsData< short > TopologicalClassifier< AimsData<T> >::doit( const AimsData< T >& d )
 {
   int x, y, z;
   T label;
@@ -80,6 +115,72 @@ AimsData< short > TopologicalClassifier< T >::doit( const AimsData< T >& d )
 	  }
 
   return res;
+}
+
+
+template< typename T > inline
+carto::rc_ptr< aims::BucketMap<int16_t> >
+TopologicalClassifier< aims::BucketMap<T> >::doit(
+  const aims::BucketMap< T >& d )
+{
+  typename aims::BucketMap<T>::const_iterator ibm, ebm = d.end();
+  typename aims::BucketMap<T>::Bucket::const_iterator ib, eb;
+
+  aims::BucketMap<int16_t> *res = new aims::BucketMap<int16_t>;
+  res->setSizeXYZT( d.sizeX(), d.sizeY(), d.sizeZ(), d.sizeT() );
+
+  AimsData<int16_t> *dc;
+  carto::Converter< aims::BucketMap<T>, AimsData<T> > conv;
+  dc = conv( d );
+  TopologicalClassification< T > topo( *dc );
+  TopologicalClassificationMeaning topoMean;
+
+  for( ibm=d.begin(); ibm!=ebm; ++ibm )
+  {
+    aims::BucketMap<int16_t>::Bucket & bk = (*res)[ ibm->first ];
+    for( ib=ibm->second.begin(), eb=ibm->second.end(); ib!=eb; ++ib )
+    {
+      topo.computeLocalCCNumbers( ib->first, ib->second );
+      bk[ ib->first ] = (short)topoMean.classification( topo.Cstar(),
+                                                        topo.Cbar() );
+    }
+  }
+  delete dc;
+
+  return carto::rc_ptr< aims::BucketMap<int16_t> >( res );
+}
+
+
+template<> inline
+carto::rc_ptr< aims::BucketMap<int16_t> >
+TopologicalClassifier< aims::BucketMap<Void> >::doit(
+  const aims::BucketMap<Void>& d )
+{
+  aims::BucketMap<Void>::const_iterator ibm, ebm = d.end();
+  aims::BucketMap<Void>::Bucket::const_iterator ib, eb;
+
+  aims::BucketMap<int16_t> *res = new aims::BucketMap<int16_t>;
+  res->setSizeXYZT( d.sizeX(), d.sizeY(), d.sizeZ(), d.sizeT() );
+
+  AimsData<int16_t> *dc;
+  carto::Converter< aims::BucketMap<Void>, AimsData<int16_t> > conv;
+  dc = conv( d );
+  TopologicalClassification<int16_t> topo( *dc );
+  TopologicalClassificationMeaning topoMean;
+
+  for( ibm=d.begin(); ibm!=ebm; ++ibm )
+  {
+    aims::BucketMap<int16_t>::Bucket & bk = (*res)[ ibm->first ];
+    for( ib=ibm->second.begin(), eb=ibm->second.end(); ib!=eb; ++ib )
+    {
+      topo.computeLocalCCNumbers( ib->first, 1 );
+      bk[ ib->first ] = (short)topoMean.classification( topo.Cstar(),
+                                                        topo.Cbar() );
+    }
+  }
+  delete dc;
+
+  return carto::rc_ptr< aims::BucketMap<int16_t> >( res );
 }
 
 #endif
