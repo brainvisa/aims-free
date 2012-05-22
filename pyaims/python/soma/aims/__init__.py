@@ -624,6 +624,12 @@ AimsTimeSurface_3.__iadd__ = lambda s, o : SurfaceManip.meshMerge(s, o) or s
 convertersObjectToPython = {
   'PyObject' : carto.PyObjectfromObject,
   'rc_ptr of bucket of VOID' : BucketMap_VOID.fromObject,
+  'rc_ptr of bucket of S16' : BucketMap_S16.fromObject,
+  'rc_ptr of bucket of U16' : BucketMap_U16.fromObject,
+  'rc_ptr of bucket of S32' : BucketMap_S32.fromObject,
+  'rc_ptr of bucket of U32' : BucketMap_U32.fromObject,
+  'rc_ptr of bucket of FLOAT' : BucketMap_FLOAT.fromObject,
+  'rc_ptr of bucket of DOUBLE' : BucketMap_DOUBLE.fromObject,
   'rc_ptr of mesh of VOID' : AimsSurfaceTriangle.fromObject,
   'rc_ptr of Mesh4 of VOID' : AimsTimeSurface_4.fromObject,
   'rc_ptr of Segments of VOID' : AimsTimeSurface_2.fromObject,

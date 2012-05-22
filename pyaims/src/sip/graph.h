@@ -34,6 +34,11 @@
 #ifndef PYAIMS_GRAPH_GRAPH_H
 #define PYAIMS_GRAPH_GRAPH_H
 
+#ifndef PYAIMS_RCPTR_Graph_DEFINED
+#define PYAIMS_RCPTR_Graph_DEFINED
+typedef carto::rc_ptr<Graph> rc_ptr_Graph;
+#endif
+
 inline PyObject* pyaimsConvertFrom_GraphP( void * a )
 {
   return sipConvertFromInstance( a, sipClass_Graph, 0 );
