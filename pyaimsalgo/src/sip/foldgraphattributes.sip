@@ -54,15 +54,23 @@ class FoldArgOverSegment
 public:
   FoldArgOverSegment( Graph* g );
   ~FoldArgOverSegment();
+
+  rc_ptr_BucketMap_VOID
+  findSplitLine( Vertex* v, const Point3d & pos );
+  rc_ptr_BucketMap_VOID
+  findSplitLine( Vertex* v, const list_POINT3D & pos );
+  rc_ptr_BucketMap_VOID
+  findSplitLine( Vertex* v, const list_POINT3DF & pos );
+
+  Vertex * splitVertex( Vertex* v,
+                        rc_ptr_BucketMap_VOID splitline,
+                        size_t minsize = 50 );
   Vertex * splitVertex( Vertex* v, const Point3d & pos, size_t minsize = 50 );
   Vertex * splitVertex( Vertex* v,
                         const list_POINT3D & splitline,
                         size_t minsize = 50 );
   Vertex * splitVertex( Vertex* v,
                         const list_POINT3DF & splitline,
-                        size_t minsize = 50 );
-  Vertex * splitVertex( Vertex* v,
-                        rc_ptr_BucketMap_VOID splitline,
                         size_t minsize = 50 );
   void printSplitInSkeleton( rc_ptr_Volume_S16 skel,
                              const Vertex* v1, const Vertex* v2 );

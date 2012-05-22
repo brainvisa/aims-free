@@ -50,6 +50,23 @@ namespace aims
   public:
     FoldArgOverSegment( Graph* g );
     ~FoldArgOverSegment();
+
+    /** split along a path defined by a single point.
+        A line is found between the bottom and top of the fold.
+    */
+    carto::rc_ptr<BucketMap<Void> >
+    findSplitLine( Vertex* v, const Point3d & pos );
+    /** split along a path defined by a series of points (dotted line).
+        Here, points are given as voxels
+    */
+    carto::rc_ptr<BucketMap<Void> >
+    findSplitLine( Vertex* v, const std::list<Point3d> & pos );
+    /** split along a path defined by a series of points (dotted line).
+        Here, points are given as millimetric positions
+    */
+    carto::rc_ptr<BucketMap<Void> >
+    findSplitLine( Vertex* v, const std::list<Point3df> & pos );
+
     Vertex * splitVertex( Vertex* v, const Point3d & pos,
                           size_t minsize = 50 );
     /** split along a path defined by a series of points (dotted line).

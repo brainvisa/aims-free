@@ -754,214 +754,41 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
 }
 
 
-#if 0
-rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
-  rc_ptr<BucketMap<Void> > bucket, rc_ptr<BucketMap<Void> > splitline,
-  size_t minsize )
+rc_ptr< BucketMap<Void> >
+FoldArgOverSegment::findSplitLine( Vertex* v, const list<Point3d> & pts )
 {
-  // 1st distance map from the line
-  rc_ptr<BucketMap<float> > fbk( new BucketMap<float> ); // dist map
-  rc_ptr<BucketMap<int16_t> > iss( new BucketMap<int16_t> ); // seeds
-  iss->setSizeXYZT( bucket->sizeX(), bucket->sizeY(), bucket->sizeZ(),
-                    bucket->sizeT() );
-  BucketMap<Void>::Bucket & bk0 = (*bucket)[0];
-  BucketMap<Void>::Bucket & sl0 = (*splitline)[0];
-  BucketMap<Void>::Bucket::iterator ib, eb=bk0.end();
-  BucketMap<int16_t>::Bucket & iss0 = (*iss)[0];
-  for( ib=bk0.begin(); ib!=eb; ++ib )
-    iss0[ib->first] = 0;
-  for( ib=sl0.begin(), eb=sl0.end(); ib!=eb; ++ib )
-    iss0[ib->first] = 1;
-  set<int16_t> seeds;
-  set<int16_t> work;
-  seeds.insert( 1 );
-  work.insert( 0 );
-
-  // dilate because the fast marching expects 6-connectivity
-  rc_ptr<BucketMap<int16_t> > iss2( dilateBucket( *iss ) );
-
-  // distance map between points of plist
-  FastMarching<BucketMap<int16_t> > fm( Connectivity::CONNECTIVITY_26_XYZ );
-  fbk = fm.doit( iss2, work, seeds );
-  BucketMap<float>::Bucket & fbk0 = (*fbk)[0];
-  BucketMap<float>::Bucket::iterator ibf, ebf = fbk0.end();
-
-  // start from furthest point
-  float dmax = 0;
-  Point3d pmax;
-  eb = bk0.end();
-  for( ibf=fbk0.begin(); ibf!=ebf; ++ibf )
-    if( ibf->second > dmax && bk0.find( ibf->first ) != eb )
-    {
-      dmax = ibf->second;
-      pmax = ibf->first;
-    }
-
-  // second distance map: go towards the line, from one side
-  for( ib=bk0.begin(); ib!=eb; ++ib )
-    iss0[ib->first] = 0;
-  // remove split line values to make it diffcult to cross
-  for( ib=sl0.begin(), eb=sl0.end(); ib!=eb; ++ib )
-    iss0[ib->first] = 2;
-  iss0[ pmax ] = 1;
-  iss2.reset( dilateBucket( *iss ) );
-  BucketMap<int16_t>::Bucket::iterator ibs, jbs, ebs = (*iss2)[0].end();
-  for( ibs=(*iss2)[0].begin(); ibs!=ebs; )
+  cout << "splitVertex along dotted line...\n";
+  // get initial buckets
+  rc_ptr<BucketMap<Void> > ss;
+  if( !v->getProperty( "aims_ss", ss ) || !ss )
   {
-    // removed line voxels
-    if( ibs->second == 2 )
-    {
-      jbs = ibs;
-      ++ibs;
-      (*iss2)[0].erase( jbs );
-    }
-    else
-      ++ibs;
-  }
-  FastMarching<BucketMap<int16_t> > fm2( Connectivity::CONNECTIVITY_6_XYZ );
-  fbk = fm2.doit( iss2, work, seeds );
-  BucketMap<float>::Bucket & fbk1 = (*fbk)[0]; // fbk0 is invalid now.
-
-  // re-initialize seeds
-  for( ib=bk0.begin(), eb=bk0.end(); ib!=eb; ++ib )
-    iss0[ib->first] = 0;
-  /* look in neighborhood of each split line point for nearer and further
-     points */
-  Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
-  int i, n = c.nbNeighbors();
-  ebs = iss0.end();
-
-  for( ib=sl0.begin(), eb=sl0.end(); ib!=eb; ++ib )
-  {
-    float dmin = FLT_MAX, dmax = 0;
-    iss0[ ib->first ] = 1; // uncrossable point
-    Point3d pmin, pmax, q;
-    for( i=0; i<n; ++i )
-    {
-      q = ib->first + c.xyzOffset( i );
-      if( sl0.find( q ) == eb )
-      {
-        ibs = iss0.find( q );
-        if( ibs != ebs && ibs->second != 1 ) // neighbor in mask
-        {
-          ibf = fbk1.find( q );
-          if( ibf->second < dmin )
-          {
-            dmin = ibf->second;
-            pmin = q;
-          }
-          if( ibf->second > dmax )
-          {
-            dmax = ibf->second;
-            pmax = q;
-          }
-        }
-      }
-    }
-    if( dmin > 0 )
-    {
-      ibs = iss0.find( pmin );
-      if( ibs->second == 3 ) // already marked as far region
-        ibs->second = 0; // conflict: make it neutral
-      else if( ibs->second == 0 )
-        ibs->second = 2; // mark as near region
-    }
-    if( dmax < FLT_MAX )
-    {
-      ibs = iss0.find( pmax );
-      if( ibs->second == 2 ) // already marked as near region
-        ibs->second = 0; // conflict: make it neutral
-      else if( ibs->second == 0 )
-        ibs->second = 3; // mark as far region
-    }
-  }
-  seeds.clear();
-  seeds.insert( 2 );
-  seeds.insert( 3 ); // seeds are near and far regions, work is 0, 1 is removed
-
-  // 3rd distance map / voronoi
-  iss2.reset( dilateBucket( *iss ) );
-  for( ibs=(*iss2)[0].begin(), ebs=(*iss2)[0].end(); ibs!=ebs; )
-  {
-    // removed line voxels
-    if( ibs->second == 1 )
-    {
-      jbs = ibs;
-      ++ibs;
-      (*iss2)[0].erase( jbs );
-    }
-    else
-      ++ibs;
-  }
-  fm.clearSpeedMap();
-  fbk = fm.doit( iss2, work, seeds );
-  // take voronoi regions (and mask them) as result
-  rc_ptr< BucketMap<int16_t> > voro = fm.voronoiVol();
-  BucketMap<int16_t>::Bucket & vo0 = (*voro)[0];
-  BucketMap<Void>::Bucket::iterator jb;
-  rc_ptr< BucketMap<Void> > other( new BucketMap<Void> );
-  other->setSizeXYZT( bucket->sizeX(), bucket->sizeY(), bucket->sizeZ(),
-                      bucket->sizeT() );
-  BucketMap<Void>::Bucket & ot0 = (*other)[0];
-  ebs = vo0.end();
-  for( ib=bk0.begin(), eb=bk0.end(); ib!=eb; )
-  {
-    ibs = vo0.find( ib->first );
-    if( ibs != ebs && ibs->second == 3 ) // far region
-    {
-      ot0[ ib->first ];
-      jb = ib;
-      ++ib;
-      bk0.erase( jb );
-    }
-    else
-      ++ib;
-  }
-  // check minimum size
-  if( bk0.size() < minsize || ot0.size() < minsize )
-  {
-    // abort: put all in bk0 again
-    for( ib=ot0.begin(), eb=ot0.end(); ib!=eb; ++ib )
-      bk0[ib->first];
-    other.reset( 0 );
+    cerr << "This fold seems not to have simple surface voxels. Aborting."
+      << endl;
+    return rc_ptr<BucketMap<Void> >( 0 );
   }
 
-  return other;
+  return splitLineOnBucket( ss, pts );
 }
-#endif
 
 
 Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const list<Point3d> & pts,
                                           size_t minsize )
 {
-  cout << "splitVertex along dotted line...\n";
-  // get initial buckets
-  rc_ptr<BucketMap<Void> > ss, bottom, other, hjl, merged;
-  if( !v->getProperty( "aims_ss", ss ) || !ss )
-  {
-    cerr << "This fold seems not to have simple surface voxels. Aborting."
-      << endl;
-    return 0;
-  }
-
-  rc_ptr<BucketMap<Void> > splitline = splitLineOnBucket( ss, pts );
-  if( splitline.isNull() )
-    return 0; // split failed
+  rc_ptr<BucketMap<Void> > splitline = findSplitLine( v, pts );
   return splitVertex( v, splitline, minsize );
 }
 
 
-Vertex * FoldArgOverSegment::splitVertex( Vertex* v,
-                                          const list<Point3df> & pts,
-                                          size_t minsize )
+rc_ptr< BucketMap<Void> >
+FoldArgOverSegment::findSplitLine( Vertex* v, const list<Point3df> & pts )
 {
   // get initial buckets
-  rc_ptr<BucketMap<Void> > ss, bottom, other, hjl, merged;
+  rc_ptr<BucketMap<Void> > ss;
   if( !v->getProperty( "aims_ss", ss ) || !ss )
   {
     cerr << "This fold seems not to have simple surface voxels. Aborting."
       << endl;
-    return 0;
+    return rc_ptr<BucketMap<Void> >( 0 );
   }
   Point3df vs( ss->sizeX(), ss->sizeY(), ss->sizeZ() );
   list<Point3d> plist;
@@ -970,14 +797,25 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v,
     plist.push_back( Point3d( int16_t( round( (*ip)[0] / vs[0] ) ),
                               int16_t( round( (*ip)[1] / vs[1] ) ),
                               int16_t( round( (*ip)[2] / vs[2] ) ) ) );
-  return splitVertex( v, plist, minsize );
+
+  return findSplitLine( v, plist );
 }
 
 
-Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
+Vertex * FoldArgOverSegment::splitVertex( Vertex* v,
+                                          const list<Point3df> & pts,
                                           size_t minsize )
 {
-  cout << "splitVertex...\n";
+  rc_ptr< BucketMap<Void> > splitline = findSplitLine( v, pts );
+  return splitVertex( v, splitline, minsize );
+}
+
+
+rc_ptr< BucketMap<Void> >
+FoldArgOverSegment::findSplitLine( Vertex* v, const Point3d & pos0 )
+{
+  rc_ptr<BucketMap<Void> > splitline;
+
   // get initial buckets
   Point3d pos = pos0;
   rc_ptr<BucketMap<Void> > ss, bottom, other, hjl;
@@ -985,13 +823,13 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
   {
     cerr << "This fold seems not to have simple surface voxels. Aborting."
       << endl;
-    return 0;
+    return splitline;
   }
   if( !v->getProperty( "aims_bottom", bottom ) || !bottom )
   {
     cerr << "This fold seems not to have bottom line voxels. Aborting."
       << endl;
-    return 0;
+    return splitline;
   }
   if( !v->getProperty( "aims_other", other ) || !other )
   {
@@ -1009,14 +847,13 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
   if( !hj )
   {
     cerr << "cannot split fold with no hull junction" << endl;
-    return 0;
+    return splitline;
   }
   if( !hj->getProperty( "aims_junction", hjl ) || !hjl )
   {
     cerr << "vertex has no hull_junction: cannot split this way. abort.\n";
-    return 0;
+    return splitline;
   }
-  cout << "pos: " << pos << endl;
 
   // initial point: nearest in ss (if not already there)
   vector<rc_ptr<BucketMap<Void> > > bklines(1);
@@ -1027,7 +864,7 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
   {
     cerr << "Cannot find closest point in simple surface (!). Aborting."
       << endl;
-    return 0;
+    return splitline;
   }
   pos = pmin;
   cout << "ss pos: " << pmin << endl;
@@ -1078,16 +915,24 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
   {
     cerr << "Cannot find closest point in bottom and hull junction lines. "
       "Aborting." << endl;
-    return 0;
+    return splitline;
   }
 
   // split path
   // from bottom
   rc_ptr<BucketMap<Void> > spline1( downPath( *fss, nears[0] ) );
   // and from hj
-  rc_ptr<BucketMap<Void> > splitline( downPath( *fss, nears[1] ) );
+  splitline.reset( downPath( *fss, nears[1] ) );
   (*splitline)[0].insert( (*spline1)[0].begin(), (*spline1)[0].end() );
 
+  return splitline;
+}
+
+
+Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
+                                          size_t minsize )
+{
+  rc_ptr<BucketMap<Void> > splitline = findSplitLine( v, pos0 );
   return splitVertex( v, splitline, minsize );
 }
 
@@ -1095,6 +940,9 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
 Vertex *FoldArgOverSegment::splitVertex(
   Vertex *v, rc_ptr< BucketMap<Void> > splitline, size_t minsize )
 {
+  if( splitline.isNull() )
+    return 0; // split failed
+
   // get initial buckets
   rc_ptr<BucketMap<Void> > ss, bottom, other, hjl, merged;
   if( !v->getProperty( "aims_ss", ss ) || !ss )
