@@ -159,6 +159,28 @@ namespace
   };
 
 
+  Point3d findNearestPoint( const Point3d & pos,
+                            const BucketMap<Void> & bck )
+  {
+    const BucketMap<Void>::Bucket & bk0 = bck.begin()->second;
+    BucketMap<Void>::Bucket::const_iterator ib, eb = bk0.end();
+    float dmin = FLT_MAX, d;
+    Point3d pmin = pos, p;
+    Point3df vs( bck.sizeX(), bck.sizeY(), bck.sizeZ() );
+    for( ib=bk0.begin(); ib!=eb; ++ib )
+    {
+      p = pos - ib->first;
+      d = Point3df( p[0] * vs[0], p[1] * vs[1], p[2] * vs[2] ).norm2();
+      if( d < dmin )
+      {
+        dmin = d;
+        pmin = ib->first;
+      }
+    }
+    return pmin;
+  }
+
+
   /* finds the nearest point of pos in a list of buckets. Only matches a point
      in a connected group of at least nvoxmin voxels (if possible). which will
      contain the bucket number the nearest point was found in.
@@ -275,207 +297,6 @@ namespace
   }
 
 
-  /* Split ss in 2 parts ss1 and ss2 along splitline.
-     returns true if it succeeded
-  */
-  bool splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
-                           rc_ptr<BucketMap<Void> > splitline,
-                           rc_ptr<BucketMap<Void> > & ss1,
-                           rc_ptr<BucketMap<Void> > & ss2 )
-  {
-    rc_ptr<BucketMap<Void> > sssplit;
-    rc_ptr<BucketMap<Void> > dilline;
-    int nssdil = 0;
-    AimsBucket<Void> sssplb;
-    sssplb.setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
-
-    AimsConnectedComponent( sssplb, *ss,
-                          Connectivity::CONNECTIVITY_26_XYZ,
-                          Void(), true, 0, 0, false );
-    unsigned ncss = sssplb.size();
-    rc_ptr<BucketMap<Void> > sscomp( new BucketMap<Void>( sssplb ) );
-    sscomp->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
-    cout << "initial ss components: " << ncss << endl;
-
-    /* try to break ss into more than its initial number of connected
-      components, by masking it with an increaslingly dilated splitline
-    */
-    do
-    {
-      if( !dilline )
-        dilline.reset( dilateBucket( *splitline ) );
-      else
-      {
-        cout << "Dilating split line a bit more...\n";
-        dilline.reset( dilateBucket( *dilline ) );
-      }
-      if( sssplb.size() <= ncss )
-      {
-        sssplit.reset( mask( *ss, *dilline, false ) );
-        sssplb.clear();
-        AimsConnectedComponent( sssplb, *sssplit,
-                                Connectivity::CONNECTIVITY_26_XYZ,
-                                Void(), true, 0, 0, false );
-        ++nssdil;
-      }
-    }
-    while( ( sssplb.size() <= ncss && nssdil < 5 ) );
-
-    cout << "ss split comps: " << sssplb.size() << ", ndil: " << nssdil
-      << endl;
-    if( sssplb.size() <= ncss )
-    {
-      cout << "could not split the simple surface - split aborting\n";
-      return false;
-    }
-    *sssplit = sssplb;
-
-    /* is this needed ?
-    // re-dilate ss
-    int i;
-    for( i=0; i<nssdil; ++i )
-      sssplit.reset( dilateBucket( *sssplit ) );
-    sssplit.reset( mask( *sssplit, *ss ) );
-    sssplit.reset( mask( *sssplit, *splitline, false ) );
-    */
-
-    // recollect ss bits
-    ss1.reset( new BucketMap<Void> );
-    ss2.reset( new BucketMap<Void> );
-    ss1->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
-    ss2->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
-    BucketMap<Void>::iterator ibm, ebm, ibm2, ebm2;
-    if( sssplit->size() == 2 ) // simple case: exactly 2 bits
-    {
-      ibm = sssplit->begin();
-      (*ss1)[0] = ibm->second;
-      ++ibm;
-      (*ss2)[0] = ibm->second;
-    }
-    else // complex case of multiple bits where only one has split
-    {
-      cout << "ss in many pieces - re-aggregating...\n";
-      // determine bits correspondance before/after split
-      Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
-      map<int, set<int> > corr;
-      float match, maxmatch = 0;
-      int i;
-      for( ibm=sssplit->begin(), ebm=sssplit->end(); ibm!=ebm; ++ibm )
-      {
-        // cout << "  bit " << ibm->first << endl;
-        maxmatch = 0;
-        i = 0;
-        for( ibm2=sscomp->begin(), ebm2=sscomp->end(); ibm2!=ebm2; ++ibm2 )
-        {
-          // cout << " -> comp: " << ibm2->first << endl;
-          match = bucketMatch( ibm->second, ibm2->second );
-          if( match > maxmatch )
-          {
-            maxmatch = match;
-            i = ibm2->first;
-          }
-        }
-        corr[i].insert( ibm->first );
-      }
-      // cout << "correspondance map done\n";
-      i = 0;
-      map<int, set<int> >::iterator ic, ec = corr.end();
-      for( ic=corr.begin(); ic!=ec; ++ic )
-        if( ic->second.size() > 1 )
-        {
-          i = ic->first;
-          break;
-        }
-      set<int> & nums = ic->second;
-      set<int>::iterator  is, es = nums.end();
-      if( nums.size() > 2 )
-      { // keep only the 2 biggest bits
-        // cout << "more than 2 parts in the same split\n";
-        unsigned sbig1 = 0, sbig2 = 0, s;
-        int big1 = 0, big2 = 0;
-        for( is=nums.begin(); is!=es; ++is )
-        {
-          s = (*sssplit)[*is].size();
-          if( s > sbig1 )
-          {
-            sbig2 = sbig1;
-            big2 = big1;
-            sbig1 = s;
-            big1 = *is;
-          }
-          else if( s > sbig2 )
-          {
-            sbig2 = s;
-            big2 = *is;
-          }
-        }
-        nums.clear();
-        nums.insert( big1 );
-        nums.insert( big2 );
-        // cout << "kept " << big1 << " and " << big2 << endl;
-      }
-
-      // aggregate remaining bits
-      ebm2 = ebm;
-      ibm = sssplit->begin();
-      while( ibm != ebm )
-      {
-        // cout << "aggregate " << ibm->first << "...\n";
-        if( nums.find( ibm->first ) != nums.end() )
-        {
-          // cout << "   is a target bit : continue\n";
-          ++ibm;
-          continue;
-        }
-        maxmatch = 0;
-        i = 0;
-        for( ibm2 = sssplit->begin(); ibm2!=ebm; ++ibm2 )
-          if( ibm2 != ibm )
-          {
-            match = bucketMatch( ibm->second, ibm2->second, 2 );
-            // cout << "test " << ibm2->first << ", match = " << match << endl;
-            if( match >= maxmatch )
-            {
-              // cout << "increase max\n";
-              maxmatch = match;
-              i = ibm2->first;
-            }
-          }
-        ibm2 = sssplit->find( i );
-        if( ibm2 == ebm )
-        {
-          cerr << "error: no match found\n";
-          return false;
-        }
-        // cout << "  -> to bit " << ibm2->first << endl;
-        if( ibm == ibm2 )
-        {
-          cerr << "error: ibm == ibm2\n";
-          return false;
-        }
-        // add ibm to ibm2 (best matching)
-        ibm2->second.insert( ibm->second.begin(), ibm->second.end() );
-        // cout << "   ... inserted\n";
-        ibm2 = ibm;
-        ++ibm;
-        // delete current item
-        sssplit->map<int, std::map<Point3d,Void,BucketMapLess> >::erase(
-          ibm2 );
-        // cout << "   ... erased\n";
-      }
-      cout << "ss aggregation done: " << sssplit->size() << " bits at end\n";
-
-      // copy both final bits
-      ibm = sssplit->begin();
-      (*ss1)[0] = ibm->second;
-      ++ibm;
-      (*ss2)[0] = ibm->second;
-    }
-
-    return true;
-  }
-
-
   // voronoi of seed1 and seed2 into the mask of given buckets
   rc_ptr<BucketMap<int16_t> > foldVoronoi( rc_ptr<BucketMap<Void> > ss,
                                            rc_ptr<BucketMap<Void> > bottom,
@@ -585,6 +406,207 @@ FoldArgOverSegment::~FoldArgOverSegment()
 }
 
 
+/* Split ss in 2 parts ss1 and ss2 along splitline.
+    returns true if it succeeded
+*/
+bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
+  rc_ptr<BucketMap<Void> > splitline,
+  rc_ptr<BucketMap<Void> > & ss1,
+  rc_ptr<BucketMap<Void> > & ss2 )
+{
+  rc_ptr<BucketMap<Void> > sssplit;
+  rc_ptr<BucketMap<Void> > dilline;
+  int nssdil = 0;
+  AimsBucket<Void> sssplb;
+  sssplb.setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+
+  AimsConnectedComponent( sssplb, *ss,
+                        Connectivity::CONNECTIVITY_26_XYZ,
+                        Void(), true, 0, 0, false );
+  unsigned ncss = sssplb.size();
+  rc_ptr<BucketMap<Void> > sscomp( new BucketMap<Void>( sssplb ) );
+  sscomp->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  cout << "initial ss components: " << ncss << endl;
+
+  /* try to break ss into more than its initial number of connected
+    components, by masking it with an increaslingly dilated splitline
+  */
+  do
+  {
+    if( !dilline )
+      dilline.reset( dilateBucket( *splitline ) );
+    else
+    {
+      cout << "Dilating split line a bit more...\n";
+      dilline.reset( dilateBucket( *dilline ) );
+    }
+    if( sssplb.size() <= ncss )
+    {
+      sssplit.reset( mask( *ss, *dilline, false ) );
+      sssplb.clear();
+      AimsConnectedComponent( sssplb, *sssplit,
+                              Connectivity::CONNECTIVITY_26_XYZ,
+                              Void(), true, 0, 0, false );
+      ++nssdil;
+    }
+  }
+  while( ( sssplb.size() <= ncss && nssdil < 5 ) );
+
+  cout << "ss split comps: " << sssplb.size() << ", ndil: " << nssdil
+    << endl;
+  if( sssplb.size() <= ncss )
+  {
+    cout << "could not split the simple surface - split aborting\n";
+    return false;
+  }
+  *sssplit = sssplb;
+
+  /* is this needed ?
+  // re-dilate ss
+  int i;
+  for( i=0; i<nssdil; ++i )
+    sssplit.reset( dilateBucket( *sssplit ) );
+  sssplit.reset( mask( *sssplit, *ss ) );
+  sssplit.reset( mask( *sssplit, *splitline, false ) );
+  */
+
+  // recollect ss bits
+  ss1.reset( new BucketMap<Void> );
+  ss2.reset( new BucketMap<Void> );
+  ss1->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  ss2->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  BucketMap<Void>::iterator ibm, ebm, ibm2, ebm2;
+  if( sssplit->size() == 2 ) // simple case: exactly 2 bits
+  {
+    ibm = sssplit->begin();
+    (*ss1)[0] = ibm->second;
+    ++ibm;
+    (*ss2)[0] = ibm->second;
+  }
+  else // complex case of multiple bits where only one has split
+  {
+    cout << "ss in many pieces - re-aggregating...\n";
+    // determine bits correspondance before/after split
+    Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
+    map<int, set<int> > corr;
+    float match, maxmatch = 0;
+    int i;
+    for( ibm=sssplit->begin(), ebm=sssplit->end(); ibm!=ebm; ++ibm )
+    {
+      // cout << "  bit " << ibm->first << endl;
+      maxmatch = 0;
+      i = 0;
+      for( ibm2=sscomp->begin(), ebm2=sscomp->end(); ibm2!=ebm2; ++ibm2 )
+      {
+        // cout << " -> comp: " << ibm2->first << endl;
+        match = bucketMatch( ibm->second, ibm2->second );
+        if( match > maxmatch )
+        {
+          maxmatch = match;
+          i = ibm2->first;
+        }
+      }
+      corr[i].insert( ibm->first );
+    }
+    // cout << "correspondance map done\n";
+    i = 0;
+    map<int, set<int> >::iterator ic, ec = corr.end();
+    for( ic=corr.begin(); ic!=ec; ++ic )
+      if( ic->second.size() > 1 )
+      {
+        i = ic->first;
+        break;
+      }
+    set<int> & nums = ic->second;
+    set<int>::iterator  is, es = nums.end();
+    if( nums.size() > 2 )
+    { // keep only the 2 biggest bits
+      // cout << "more than 2 parts in the same split\n";
+      unsigned sbig1 = 0, sbig2 = 0, s;
+      int big1 = 0, big2 = 0;
+      for( is=nums.begin(); is!=es; ++is )
+      {
+        s = (*sssplit)[*is].size();
+        if( s > sbig1 )
+        {
+          sbig2 = sbig1;
+          big2 = big1;
+          sbig1 = s;
+          big1 = *is;
+        }
+        else if( s > sbig2 )
+        {
+          sbig2 = s;
+          big2 = *is;
+        }
+      }
+      nums.clear();
+      nums.insert( big1 );
+      nums.insert( big2 );
+      // cout << "kept " << big1 << " and " << big2 << endl;
+    }
+
+    // aggregate remaining bits
+    ebm2 = ebm;
+    ibm = sssplit->begin();
+    while( ibm != ebm )
+    {
+      // cout << "aggregate " << ibm->first << "...\n";
+      if( nums.find( ibm->first ) != nums.end() )
+      {
+        // cout << "   is a target bit : continue\n";
+        ++ibm;
+        continue;
+      }
+      maxmatch = 0;
+      i = 0;
+      for( ibm2 = sssplit->begin(); ibm2!=ebm; ++ibm2 )
+        if( ibm2 != ibm )
+        {
+          match = bucketMatch( ibm->second, ibm2->second, 2 );
+          // cout << "test " << ibm2->first << ", match = " << match << endl;
+          if( match >= maxmatch )
+          {
+            // cout << "increase max\n";
+            maxmatch = match;
+            i = ibm2->first;
+          }
+        }
+      ibm2 = sssplit->find( i );
+      if( ibm2 == ebm )
+      {
+        cerr << "error: no match found\n";
+        return false;
+      }
+      // cout << "  -> to bit " << ibm2->first << endl;
+      if( ibm == ibm2 )
+      {
+        cerr << "error: ibm == ibm2\n";
+        return false;
+      }
+      // add ibm to ibm2 (best matching)
+      ibm2->second.insert( ibm->second.begin(), ibm->second.end() );
+      // cout << "   ... inserted\n";
+      ibm2 = ibm;
+      ++ibm;
+      // delete current item
+      sssplit->map<int, std::map<Point3d,Void,BucketMapLess> >::erase(
+        ibm2 );
+      // cout << "   ... erased\n";
+    }
+    cout << "ss aggregation done: " << sssplit->size() << " bits at end\n";
+
+    // copy both final bits
+    ibm = sssplit->begin();
+    (*ss1)[0] = ibm->second;
+    ++ibm;
+    (*ss2)[0] = ibm->second;
+  }
+
+  return true;
+}
+
+
 rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
   rc_ptr<BucketMap<Void> > bucket, const list<Point3d> & pts )
 {
@@ -600,7 +622,12 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
   // TODO: for now, just using euclidian distance
   float dmin1 = FLT_MAX, dmin2 = FLT_MAX, dx;
   Point3d pmin1, pmin2;
-  Point3d p1 = *pts.begin(), p2 = *pts.rbegin();
+  // snap points to bucket
+  list<Point3d> plist = pts;
+  list<Point3d>::iterator ip, ep = plist.end();
+  for( ip=plist.begin(); ip!=ep; ++ip )
+    *ip = findNearestPoint( *ip, *bucket );
+  Point3d p1 = *plist.begin(), p2 = *plist.rbegin();
   for( icb=cbk.begin(); icb!=ecb; ++icb )
     if( icb->second == TopologicalClassificationMeaning::BorderPoint )
     {
@@ -622,7 +649,6 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
   if( dmin1 == FLT_MAX )
     return rc_ptr<BucketMap<Void> >( 0 ); // cound not find boundaries
   // add boundaries points to list
-  list<Point3d> plist = pts;
   if( pmin1 != p1 )
     plist.insert( plist.begin(), pmin1 );
   if( pmin2 != p2 )
@@ -639,7 +665,6 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
   BucketMap<int16_t>::Bucket & iss0 = (*iss)[0];
   for( ib=bk0.begin(); ib!=eb; ++ib )
     iss0[ib->first] = 0;
-  list<Point3d>::const_iterator ip, ep = plist.end();
   int16_t i = 1;
   set<int16_t> seeds;
   set<int16_t> work;
@@ -729,6 +754,7 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
 }
 
 
+#if 0
 rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
   rc_ptr<BucketMap<Void> > bucket, rc_ptr<BucketMap<Void> > splitline,
   size_t minsize )
@@ -902,6 +928,7 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
 
   return other;
 }
+#endif
 
 
 Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const list<Point3d> & pts,
@@ -916,43 +943,34 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const list<Point3d> & pts,
       << endl;
     return 0;
   }
-  if( !v->getProperty( "aims_bottom", bottom ) || !bottom )
-  {
-    bottom.reset( new BucketMap<Void> );
-    bottom->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
-  }
-  if( !v->getProperty( "aims_other", other ) || !other )
-  {
-    other.reset( new BucketMap<Void> );
-    other->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
-  }
-  Vertex::const_iterator  ie, ee=v->end();
-  Edge  *hj = 0;
-  for( ie=v->begin(); ie!=ee; ++ie )
-    if((*ie)->getSyntax() == "hull_junction" )
-    {
-      hj = *ie;
-      break;
-    }
-  if( !hj || !hj->getProperty( "aims_junction", hjl ) || !hjl )
-  {
-    hjl.reset( new BucketMap<Void> );
-    hjl->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
-  }
-  // concatenate all buckets
-  merged.reset( new BucketMap<Void> );
-  merged->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
-  (*merged)[0].insert( (*ss)[0].begin(), (*ss)[0].end() );
-  (*merged)[0].insert( (*bottom)[0].begin(), (*bottom)[0].end() );
-  (*merged)[0].insert( (*other)[0].begin(), (*other)[0].end() );
-  (*merged)[0].insert( (*hjl)[0].begin(), (*hjl)[0].end() );
-  rc_ptr<BucketMap<Void> > splitline = splitLineOnBucket( merged, pts );
+
+  rc_ptr<BucketMap<Void> > splitline = splitLineOnBucket( ss, pts );
   if( splitline.isNull() )
     return 0; // split failed
-  rc_ptr<BucketMap<Void> > split = splitBucket( merged, splitline, minsize );
-  if( split.isNull() )
-    return 0; // split failed
-  // TODO: vertex part
+  return splitVertex( v, splitline, minsize );
+}
+
+
+Vertex * FoldArgOverSegment::splitVertex( Vertex* v,
+                                          const list<Point3df> & pts,
+                                          size_t minsize )
+{
+  // get initial buckets
+  rc_ptr<BucketMap<Void> > ss, bottom, other, hjl, merged;
+  if( !v->getProperty( "aims_ss", ss ) || !ss )
+  {
+    cerr << "This fold seems not to have simple surface voxels. Aborting."
+      << endl;
+    return 0;
+  }
+  Point3df vs( ss->sizeX(), ss->sizeY(), ss->sizeZ() );
+  list<Point3d> plist;
+  list<Point3df>::const_iterator ip, ep = pts.end();
+  for( ip=pts.begin(); ip!=ep; ++ip )
+    plist.push_back( Point3d( int16_t( round( (*ip)[0] / vs[0] ) ),
+                              int16_t( round( (*ip)[1] / vs[1] ) ),
+                              int16_t( round( (*ip)[2] / vs[2] ) ) ) );
+  return splitVertex( v, plist, minsize );
 }
 
 
@@ -1069,6 +1087,45 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
   // and from hj
   rc_ptr<BucketMap<Void> > splitline( downPath( *fss, nears[1] ) );
   (*splitline)[0].insert( (*spline1)[0].begin(), (*spline1)[0].end() );
+
+  return splitVertex( v, splitline, minsize );
+}
+
+
+Vertex *FoldArgOverSegment::splitVertex(
+  Vertex *v, rc_ptr< BucketMap<Void> > splitline, size_t minsize )
+{
+  // get initial buckets
+  rc_ptr<BucketMap<Void> > ss, bottom, other, hjl, merged;
+  if( !v->getProperty( "aims_ss", ss ) || !ss )
+  {
+    cerr << "This fold seems not to have simple surface voxels. Aborting."
+      << endl;
+    return 0;
+  }
+  if( !v->getProperty( "aims_bottom", bottom ) || !bottom )
+  {
+    bottom.reset( new BucketMap<Void> );
+    bottom->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  }
+  if( !v->getProperty( "aims_other", other ) || !other )
+  {
+    other.reset( new BucketMap<Void> );
+    other->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  }
+  Vertex::const_iterator  ie, ee=v->end();
+  Edge  *hj = 0;
+  for( ie=v->begin(); ie!=ee; ++ie )
+    if((*ie)->getSyntax() == "hull_junction" )
+    {
+      hj = *ie;
+      break;
+    }
+  if( !hj || !hj->getProperty( "aims_junction", hjl ) || !hjl )
+  {
+    hjl.reset( new BucketMap<Void> );
+    hjl->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
+  }
 
   // split simple surface
   rc_ptr<BucketMap<Void> > ss1, ss2;

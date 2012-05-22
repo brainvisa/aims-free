@@ -52,8 +52,20 @@ namespace aims
     ~FoldArgOverSegment();
     Vertex * splitVertex( Vertex* v, const Point3d & pos,
                           size_t minsize = 50 );
-    /// split along a path defined by a series of points (dotted line)
+    /** split along a path defined by a series of points (dotted line).
+        Here, points are given as voxels
+    */
     Vertex * splitVertex( Vertex* v, const std::list<Point3d> & pos,
+                          size_t minsize = 50 );
+    /** split along a path defined by a series of points (dotted line).
+        Here, points are given as millimetric positions
+    */
+    Vertex * splitVertex( Vertex* v, const std::list<Point3df> & pos,
+                          size_t minsize = 50 );
+    /** split along a path defined by a continuous line separating the
+        simple surface into disconnected components */
+    Vertex * splitVertex( Vertex* v,
+                          carto::rc_ptr< BucketMap<Void> > splitline,
                           size_t minsize = 50 );
     void printSplitInSkeleton( carto::rc_ptr<carto::Volume<int16_t> > skel,
                                const Vertex* v1, const Vertex* v2 );
@@ -73,16 +85,17 @@ namespace aims
     */
     static carto::rc_ptr<BucketMap<Void> > splitLineOnBucket(
       carto::rc_ptr<BucketMap<Void> > bucket, const std::list<Point3d> & pos );
-    /** split along a path defined by a series of points (dotted line).
+    /** split simple surface along a line path.
         The initial bucket will be truncated to be one of the split parts.
         splitline should really separate the input bucket into distinct
         connected components (normally the result of splitLineOnBucket() ).
-        @return a new bucket with the "other" part of the split
+        @return true if it succeeds
     */
-    static carto::rc_ptr<BucketMap<Void> > splitBucket(
+    static bool splitSimpleSurface(
       carto::rc_ptr<BucketMap<Void> > bucket,
       carto::rc_ptr<BucketMap<Void> > splitline,
-      size_t minsize = 50 );
+      carto::rc_ptr<BucketMap<Void> > & ss1,
+      carto::rc_ptr<BucketMap<Void> > & ss2 );
 
   private:
     Graph *_graph;

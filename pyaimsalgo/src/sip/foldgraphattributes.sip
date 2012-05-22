@@ -55,6 +55,15 @@ public:
   FoldArgOverSegment( Graph* g );
   ~FoldArgOverSegment();
   Vertex * splitVertex( Vertex* v, const Point3d & pos, size_t minsize = 50 );
+  Vertex * splitVertex( Vertex* v,
+                        const list_POINT3D & splitline,
+                        size_t minsize = 50 );
+  Vertex * splitVertex( Vertex* v,
+                        const list_POINT3DF & splitline,
+                        size_t minsize = 50 );
+  Vertex * splitVertex( Vertex* v,
+                        rc_ptr_BucketMap_VOID splitline,
+                        size_t minsize = 50 );
   void printSplitInSkeleton( rc_ptr_Volume_S16 skel,
                              const Vertex* v1, const Vertex* v2 );
   int subdivizeVertex( Vertex* v, float piecelength = 50,
@@ -63,13 +72,25 @@ public:
                       set_VertexPtr* = 0 );
   static rc_ptr_BucketMap_VOID splitLineOnBucket(
     rc_ptr_BucketMap_VOID bucket, const list_POINT3D & pos );
-/*
+  static SIP_PYTUPLE splitSimpleSurface(
+      rc_ptr_BucketMap_VOID bucket,
+      rc_ptr_BucketMap_VOID splitline );
 %MethodCode
-  std::list<Point3d> l;
+  carto::rc_ptr<aims::BucketMap<Void> > ss1, ss2;
+  bool ok = aims::FoldArgOverSegment::splitSimpleSurface( *a0, *a1, ss1, ss2 );
+  if( !ok )
+    sipRes = Py_None;
+  else
+  {
+    sipRes = PyTuple_New( 2 );
+    PyTuple_SetItem( sipRes, 0, sipConvertFromType(
+      new carto::rc_ptr<aims::BucketMap<Void> >( ss1 ),
+      sipType_rc_ptr_BucketMap_VOID, Py_None ) );
+    PyTuple_SetItem( sipRes, 1, sipConvertFromType(
+      new carto::rc_ptr<aims::BucketMap<Void> >( ss2 ),
+      sipType_rc_ptr_BucketMap_VOID, Py_None ) );
+  }
 %End
-*/
-  static rc_ptr_BucketMap_VOID splitBucket( rc_ptr_BucketMap_VOID bucket,
-    rc_ptr_BucketMap_VOID splitline, size_t minsize = 50 );
 };
 
 };
