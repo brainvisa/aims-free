@@ -29,8 +29,12 @@ typedef unsigned short uint16_t;
 %Include aimsvector_FLOAT_2.sip
 %Include aimsvector_FLOAT_3.sip
 %Include aimsvector_FLOAT_4.sip
+%Include aimsvector_DOUBLE_2.sip
 %Include aimsvector_DOUBLE_3.sip
+%Include aimsvector_DOUBLE_4.sip
+%Include aimsvector_S16_2.sip
 %Include aimsvector_S16_3.sip
+%Include aimsvector_S16_4.sip
 %Include aimsvector_U32_2.sip
 %Include aimsvector_U32_3.sip
 %Include aimsvector_U32_4.sip

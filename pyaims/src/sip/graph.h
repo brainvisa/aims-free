@@ -36,6 +36,8 @@
 
 #ifndef PYAIMS_RCPTR_Graph_DEFINED
 #define PYAIMS_RCPTR_Graph_DEFINED
+#include <cartobase/smart/rcptr.h>
+class Graph;
 typedef carto::rc_ptr<Graph> rc_ptr_Graph;
 #endif
 

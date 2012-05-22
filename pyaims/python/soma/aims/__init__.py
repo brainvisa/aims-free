@@ -601,16 +601,25 @@ del BckIter, BckIterItem, VecIter
 __fixsipclasses__.fakerepr = lambda a : "<%s.%s object at 0x%x>" % (a.__class__.__module__, a.__class__.__name__, id(a))
 
 # added aimssip.Point3df attributes/methods
+Point4d = AimsVector_S16_4
+Point4du = AimsVector_U32_4
 Point4df = AimsVector_FLOAT_4
+Point4dd = AimsVector_DOUBLE_4
+Point3d = AimsVector_S16_3
+Point3du = AimsVector_U32_3
 Point3df = AimsVector_FLOAT_3
 Point3dd = AimsVector_DOUBLE_3
+Point2d = AimsVector_S16_2
+Point2du = AimsVector_U32_2
 Point2df = AimsVector_FLOAT_2
-Point3d = AimsVector_S16_3
+Point2dd = AimsVector_DOUBLE_2
 Point3df.__doc__ = """This class wraps an aims Point3df aka AimsVector<3, float>
 use the method items() to get a tuple out of it
 use setItems(Point3df) to affect new values"""
 
-Point4df.__repr__ = Point3df.__repr__ = Point2df.__repr__ = Point3d.__repr__ \
+Point4d.__repr__ = Point4du.__repr__ = Point4df.__repr__ = Point4dd.__repr__ \
+= Point3d.__repr__ = Point3du.__repr__ = Point3df.__repr__ = Point3dd.__repr__\
+= Point2d.__repr__ = Point2du.__repr__ = Point2df.__repr__ = Point2dd.__repr__\
 = lambda self: __fixsipclasses__.fakerepr(self) + "\n" + str(self.items())
 
 
