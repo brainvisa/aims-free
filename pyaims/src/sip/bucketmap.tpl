@@ -62,7 +62,7 @@ public:
   sipRes = (int) sipCpp->size();
 %End
 
-    %Template1PyType% __getitem__( const Point3d & );
+    %Template1PyType% %Template1address% __getitem__( const Point3d & );
 %MethodCode
     std::map< Point3d,%Template1% >::const_iterator i = sipCpp->find( *a0 );
     if( i != sipCpp->end() )

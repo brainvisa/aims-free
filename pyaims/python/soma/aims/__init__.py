@@ -565,7 +565,6 @@ def __fixsipclasses__( classes ):
           y.__getslice__ = lambda self, s, e : \
                           [self.__getitem__(x) for x in range(s, e)]
         if y.__name__.startswith( 'BucketMap_' ):
-          print 'set bck iterator'
           y.Bucket.__iterclass__ = BckIter
           y.Bucket.__iteritemclass__ = BckIterItem
           y.Bucket.__iter__ = lambda self: self.__iterclass__( self )
@@ -588,7 +587,6 @@ __fixsipclasses__.getAttributeNames = rcptr_getAttributeNames
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
-BckIter, BckIterItem
 
 __fixsipclasses__( globals().items() + carto.__dict__.items() )
 
@@ -596,6 +594,8 @@ Object.__iter__ = __fixsipclasses__.objiter
 Object.next = __fixsipclasses__.objnext
 Object.__delitem__ = __fixsipclasses__.proxydelitem
 Object._getAttributeNames = __fixsipclasses__.getAttributeNames
+
+del BckIter, BckIterItem, VecIter
 
 __fixsipclasses__.fakerepr = lambda a : "<%s.%s object at 0x%x>" % (a.__class__.__module__, a.__class__.__name__, id(a))
 
