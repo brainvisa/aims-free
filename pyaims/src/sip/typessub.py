@@ -201,7 +201,7 @@ typessub = { 'signed char' : \
                'defNumpyBindings' : '',
                'new' : '', 
                'NumType' : 'PyArray_USHORT', 
-               'PyType' : 'unsigned short',
+               'PyType' : 'uint16_t',
                'sipClass' : '',
                'typeinclude' : '', 
                'sipinclude' : '', 
@@ -2003,17 +2003,14 @@ typessub = { 'signed char' : \
                'pyaddress' : '&', 
                'defScalar' : '',
                'defNumpyBindings' : '',
-               'new' : 'new aims::BucketMap<short>', 
+               'new' : 'new aims::BucketMap<int16_t>', 
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'BucketMap_S16',
                'sipClass' : 'BucketMap_S16',
                'typeinclude' : \
                '#include <aims/bucket/bucket.h>\n' \
                '#include <cartobase/type/types.h>', 
-               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipBucketMap_S16.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_BUCKETMAP_S16_CHECK_DEFINED\n'
+               'sipinclude' : '#ifndef PYAIMS_BUCKETMAP_S16_CHECK_DEFINED\n'
                '#define PYAIMS_BUCKETMAP_S16_CHECK_DEFINED\n'
                'inline int pyaimsBucketMap_S16_Check( PyObject* o )\n'
                '{ return sipCanConvertToInstance( o, sipClass_BucketMap_S16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
@@ -2022,6 +2019,86 @@ typessub = { 'signed char' : \
                'testPyType' : 'pyaimsBucketMap_S16_Check', 
                },
 
+             'aims::BucketMap<uint16_t>' : \
+             { 'typecode' : 'BucketMap_U16',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new aims::BucketMap<uint16_t>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'BucketMap_U16',
+               'sipClass' : 'BucketMap_U16',
+               'typeinclude' : \
+               '#include <aims/bucket/bucket.h>\n' \
+               '#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_BUCKETMAP_U16_CHECK_DEFINED\n'
+               '#define PYAIMS_BUCKETMAP_U16_CHECK_DEFINED\n'
+               'inline int pyaimsBucketMap_U16_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_BucketMap_U16, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsBucketMap_U16_Check',
+               },
+
+             'aims::BucketMap<int32_t>' : \
+             { 'typecode' : 'BucketMap_S32',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new aims::BucketMap<int32_t>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'BucketMap_S32',
+               'sipClass' : 'BucketMap_S32',
+               'typeinclude' : \
+               '#include <aims/bucket/bucket.h>\n' \
+               '#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_BUCKETMAP_S32_CHECK_DEFINED\n'
+               '#define PYAIMS_BUCKETMAP_S32_CHECK_DEFINED\n'
+               'inline int pyaimsBucketMap_S32_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_BucketMap_S32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsBucketMap_S32_Check',
+               },
+
+             'aims::BucketMap<uint32_t>' : \
+             { 'typecode' : 'BucketMap_U32',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new aims::BucketMap<uint32_t>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'BucketMap_U32',
+               'sipClass' : 'BucketMap_U32',
+               'typeinclude' : \
+               '#include <aims/bucket/bucket.h>\n' \
+               '#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_BUCKETMAP_U32_CHECK_DEFINED\n'
+               '#define PYAIMS_BUCKETMAP_U32_CHECK_DEFINED\n'
+               'inline int pyaimsBucketMap_U32_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_BucketMap_U32, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsBucketMap_U32_Check',
+               },
 
              'aims::BucketMap<float>' : \
              { 'typecode' : 'BucketMap_FLOAT',
@@ -2041,16 +2118,40 @@ typessub = { 'signed char' : \
                'typeinclude' : \
                '#include <aims/bucket/bucket.h>\n' \
                '#include <cartobase/type/types.h>', 
-               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipBucketMap_FLOAT.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_BUCKETMAP_FLOAT_CHECK_DEFINED\n'
+               'sipinclude' : '#ifndef PYAIMS_BUCKETMAP_FLOAT_CHECK_DEFINED\n'
                '#define PYAIMS_BUCKETMAP_FLOAT_CHECK_DEFINED\n'
                'inline int pyaimsBucketMap_FLOAT_Check( PyObject* o )\n'
                '{ return sipCanConvertToInstance( o, sipClass_BucketMap_FLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsBucketMap_FLOAT_Check', 
+               },
+
+             'aims::BucketMap<double>' : \
+             { 'typecode' : 'BucketMap_DOUBLE',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new aims::BucketMap<double>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'BucketMap_DOUBLE',
+               'sipClass' : 'BucketMap_DOUBLE',
+               'typeinclude' : \
+               '#include <aims/bucket/bucket.h>\n' \
+               '#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_BUCKETMAP_DOUBLE_CHECK_DEFINED\n'
+               '#define PYAIMS_BUCKETMAP_DOUBLE_CHECK_DEFINED\n'
+               'inline int pyaimsBucketMap_DOUBLE_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_BucketMap_DOUBLE, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsBucketMap_DOUBLE_Check',
                },
 
              'aims::AffineTransformation3d' : \

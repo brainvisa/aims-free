@@ -380,12 +380,18 @@ namespace carto {
 
 DECLARE_GENERIC_OBJECT_TYPE( aims::BucketMap<Void> )
 DECLARE_GENERIC_OBJECT_TYPE( aims::BucketMap<int16_t> )
+DECLARE_GENERIC_OBJECT_TYPE( aims::BucketMap<uint16_t> )
+DECLARE_GENERIC_OBJECT_TYPE( aims::BucketMap<int32_t> )
+DECLARE_GENERIC_OBJECT_TYPE( aims::BucketMap<uint32_t> )
 DECLARE_GENERIC_OBJECT_TYPE( aims::BucketMap<float> )
 DECLARE_GENERIC_OBJECT_TYPE( aims::BucketMap<double> )
 DECLARE_GENERIC_OBJECT_TYPE( aims::BucketMap<DtiTensor> )
 
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< aims::BucketMap<Void> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< aims::BucketMap<int16_t> > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< aims::BucketMap<uint16_t> > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< aims::BucketMap<int32_t> > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< aims::BucketMap<uint32_t> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< aims::BucketMap<float> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< aims::BucketMap<double> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< aims::BucketMap<DtiTensor> > )

@@ -11,6 +11,8 @@
 carto::pyaims_init();
 %End
 
+typedef unsigned short uint16_t;
+
 %Include libxml2.sip
 %Include carto.sip
 %Include paths.sip
@@ -69,6 +71,7 @@ carto::pyaims_init();
 %Include list_GraphPtr.sip
 %Include list_rc_ptr_Graph.sip
 %Include list_POINT3D.sip
+%Include list_POINT3DF.sip
 %Include map_STRING_STRING.sip
 %Include map_S32_STRING.sip
 
@@ -129,13 +132,25 @@ carto::pyaims_init();
 
 %Include bucketmap_VOID.sip
 %Include bucketmap_S16.sip
+%Include bucketmap_U16.sip
+%Include bucketmap_S32.sip
+%Include bucketmap_U32.sip
 %Include bucketmap_FLOAT.sip
+%Include bucketmap_DOUBLE.sip
 %Include rcptr_BucketMap_VOID.sip
 %Include rcptr_BucketMap_S16.sip
+%Include rcptr_BucketMap_U16.sip
+%Include rcptr_BucketMap_S32.sip
+%Include rcptr_BucketMap_U32.sip
 %Include rcptr_BucketMap_FLOAT.sip
+%Include rcptr_BucketMap_DOUBLE.sip
 %Include reader_BucketMap_VOID.sip
 %Include reader_BucketMap_S16.sip
+%Include reader_BucketMap_U16.sip
+%Include reader_BucketMap_S32.sip
+%Include reader_BucketMap_U32.sip
 %Include reader_BucketMap_FLOAT.sip
+%Include reader_BucketMap_DOUBLE.sip
 
 %Include aimsdata_U8.sip
 %Include aimsdata_S16.sip
@@ -325,6 +340,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include converter_Volume_U8_U32.sip
 %Include converter_Volume_U8_U8.sip
 %Include converter_AimsData_U8_BucketMap_VOID.sip
+%Include converter_AimsData_U8_BucketMap_S16.sip
 %Include converter_AimsData_U8_BucketMap_FLOAT.sip
 %Include converter_AimsData_S16_BucketMap_VOID.sip
 %Include converter_AimsData_S16_BucketMap_S16.sip
