@@ -559,7 +559,8 @@ def __fixsipclasses__( classes ):
           y.next = __fixsipclasses__.newnext
         elif y.__name__.startswith( 'AimsVector_' ) \
           or y.__name__.startswith( 'Texture_' ):
-          y.__iter__ = lambda z: VecIter(z)
+          y.__iterclass__ = VecIter
+          y.__iter__ = lambda self: self.__iterclass__( self )
         if y.__name__.startswith( 'vector_' ) \
           or y.__name__.startswith( 'AimsVector_' ):
           y.__getslice__ = lambda self, s, e : \
