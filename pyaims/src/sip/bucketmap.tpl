@@ -57,6 +57,10 @@ public:
   public:
     Bucket();
     unsigned size() const;
+    int __len__() const;
+%MethodCode
+  sipRes = (int) sipCpp->size();
+%End
 
     %Template1PyType% __getitem__( const Point3d & );
 %MethodCode

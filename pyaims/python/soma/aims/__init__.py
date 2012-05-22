@@ -438,6 +438,32 @@ def objitervalues( self ):
       return res
   return iterator( self.objectIterator() )
 
+class BckIter:
+  '''iterator class for bucket containers'''
+  def __init__( self, bucket ):
+    self._bck = bucket
+    self._iter = None
+  def __iter__( self ):
+    return self
+  def next( self ):
+    if self._iter is None:
+      self._iter = iter( self._bck.keys() )
+    elem = self._iter.next()
+    return self._bck[ elem ]
+
+class BckIterItem:
+  '''item iterator class for bucket containers'''
+  def __init__( self, bucket ):
+    self._bck = bucket
+    self._iter = None
+  def __iter__( self ):
+    return self
+  def next( self ):
+    if self._iter is None:
+      self._iter = iter( self._bck.keys() )
+    elem = self._iter.next()
+    return elem, self._bck[ elem ]
+
 # automatic rc_ptr dereferencing
 def proxygetattr( self, attr ):
   try:
@@ -538,6 +564,12 @@ def __fixsipclasses__( classes ):
           or y.__name__.startswith( 'AimsVector_' ):
           y.__getslice__ = lambda self, s, e : \
                           [self.__getitem__(x) for x in range(s, e)]
+        if y.__name__.startswith( 'BucketMap_' ):
+          print 'set bck iterator'
+          y.Bucket.__iterclass__ = BckIter
+          y.Bucket.__iteritemclass__ = BckIterItem
+          y.Bucket.__iter__ = lambda self: self.__iterclass__( self )
+          y.Bucket.iteritems = lambda self: self.__iteritemclass__( self )
     except:
       pass
 
@@ -556,6 +588,7 @@ __fixsipclasses__.getAttributeNames = rcptr_getAttributeNames
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
+BckIter, BckIterItem
 
 __fixsipclasses__( globals().items() + carto.__dict__.items() )
 
