@@ -43,6 +43,8 @@
 #include <aims/resampling/mask.h>
 #include <aims/graph/graphmanip.h>
 #include <aims/topology/topoClassifier.h>
+// DEBUG
+#include <aims/io/writer.h>
 
 using namespace aims;
 using namespace carto;
@@ -740,6 +742,185 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
   rc_ptr<BucketMap<Void> > bucket, rc_ptr<BucketMap<Void> > splitline,
   size_t minsize )
 {
+  // 1st distance map from the line
+  rc_ptr<BucketMap<float> > fbk( new BucketMap<float> ); // dist map
+  rc_ptr<BucketMap<int16_t> > iss( new BucketMap<int16_t> ); // seeds
+  iss->setSizeXYZT( bucket->sizeX(), bucket->sizeY(), bucket->sizeZ(),
+                    bucket->sizeT() );
+  BucketMap<Void>::Bucket & bk0 = (*bucket)[0];
+  BucketMap<Void>::Bucket & sl0 = (*splitline)[0];
+  BucketMap<Void>::Bucket::iterator ib, eb=bk0.end();
+  BucketMap<int16_t>::Bucket & iss0 = (*iss)[0];
+  for( ib=bk0.begin(); ib!=eb; ++ib )
+    iss0[ib->first] = 0;
+  for( ib=sl0.begin(), eb=sl0.end(); ib!=eb; ++ib )
+    iss0[ib->first] = 1;
+  set<int16_t> seeds;
+  set<int16_t> work;
+  seeds.insert( 1 );
+  work.insert( 0 );
+
+  // dilate because the fast marching expects 6-connectivity
+  rc_ptr<BucketMap<int16_t> > iss2( dilateBucket( *iss ) );
+
+  // distance map between points of plist
+  FastMarching<BucketMap<int16_t> > fm( Connectivity::CONNECTIVITY_26_XYZ );
+  fbk = fm.doit( iss2, work, seeds );
+  BucketMap<float>::Bucket & fbk0 = (*fbk)[0];
+  BucketMap<float>::Bucket::iterator ibf, ebf = fbk0.end();
+
+  // start from furthest point
+  float dmax = 0;
+  Point3d pmax;
+  eb = bk0.end();
+  for( ibf=fbk0.begin(); ibf!=ebf; ++ibf )
+    if( ibf->second > dmax && bk0.find( ibf->first ) != eb )
+    {
+      dmax = ibf->second;
+      pmax = ibf->first;
+    }
+
+  // second distance map: go towards the line, from one side
+  for( ib=bk0.begin(); ib!=eb; ++ib )
+    iss0[ib->first] = 0;
+  // remove split line values to make it diffcult to cross
+  for( ib=sl0.begin(), eb=sl0.end(); ib!=eb; ++ib )
+    iss0[ib->first] = 2;
+  iss0[ pmax ] = 1;
+  cout << "iss size: " << iss0.size() << ", bk0: " << bk0.size() << endl;
+  iss2.reset( dilateBucket( *iss ) );
+  cout << "seeds1: " << (*iss2)[0].size() << endl;
+  Writer<BucketMap<int16_t> > w0( "/tmp/seeds1.bck" );
+  w0.write( *iss2 );
+  BucketMap<int16_t>::Bucket::iterator ibs, jbs, ebs = (*iss2)[0].end();
+  for( ibs=(*iss2)[0].begin(); ibs!=ebs; )
+  {
+    // removed line voxels
+    if( ibs->second == 2 )
+    {
+      jbs = ibs;
+      ++ibs;
+      (*iss2)[0].erase( jbs );
+    }
+    else
+      ++ibs;
+  }
+  cout << "seeds2: " << (*iss2)[0].size() << endl;
+//   Writer<BucketMap<int16_t> > w2( "/tmp/seeds2.bck" );
+//   w2.write( *iss2 );
+  FastMarching<BucketMap<int16_t> > fm2( Connectivity::CONNECTIVITY_6_XYZ );
+  fbk = fm2.doit( iss2, work, seeds );
+  BucketMap<float>::Bucket & fbk1 = (*fbk)[0]; // fbk0 is invalid now.
+
+//   Writer< BucketMap<float> > w1( "/tmp/distf1.bck" );
+//   w1.write( *fbk );
+
+
+  // re-initialize seeds
+  for( ib=bk0.begin(), eb=bk0.end(); ib!=eb; ++ib )
+    iss0[ib->first] = 0;
+  /* look in neighborhood of each split line point for nearer and further
+     points */
+  Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
+  int i, n = c.nbNeighbors();
+  ebs = iss0.end();
+
+  for( ib=sl0.begin(), eb=sl0.end(); ib!=eb; ++ib )
+  {
+    float dmin = FLT_MAX, dmax = 0;
+    iss0[ ib->first ] = 1; // uncrossable point
+    Point3d pmin, pmax, q;
+    for( i=0; i<n; ++i )
+    {
+      q = ib->first + c.xyzOffset( i );
+      if( sl0.find( q ) == eb )
+      {
+        ibs = iss0.find( q );
+        if( ibs != ebs && ibs->second != 1 ) // neighbor in mask
+        {
+          ibf = fbk1.find( q );
+          if( ibf->second < dmin )
+          {
+            dmin = ibf->second;
+            pmin = q;
+          }
+          if( ibf->second > dmax )
+          {
+            dmax = ibf->second;
+            pmax = q;
+          }
+        }
+      }
+    }
+    if( dmin > 0 )
+    {
+      ibs = iss0.find( pmin );
+      if( ibs->second == 3 ) // already marked as far region
+        ibs->second = 0; // conflict: make it neutral
+      else if( ibs->second == 0 )
+        ibs->second = 2; // mark as near region
+    }
+    if( dmax < FLT_MAX )
+    {
+      ibs = iss0.find( pmax );
+      if( ibs->second == 2 ) // already marked as near region
+        ibs->second = 0; // conflict: make it neutral
+      else if( ibs->second == 0 )
+        ibs->second = 3; // mark as far region
+    }
+  }
+  seeds.clear();
+  seeds.insert( 2 );
+  seeds.insert( 3 ); // seeds are near and far regions, work is 0, 1 is removed
+
+  // 3rd distance map / voronoi
+  iss2.reset( dilateBucket( *iss ) );
+  cout << "before filt, iss2: " << (*iss2)[0].size() << endl;
+  for( ibs=(*iss2)[0].begin(), ebs=(*iss2)[0].end(); ibs!=ebs; )
+  {
+    // removed line voxels
+    if( ibs->second == 1 )
+    {
+      jbs = ibs;
+      ++ibs;
+      (*iss2)[0].erase( jbs );
+    }
+    else
+      ++ibs;
+  }
+  cout << "after filt, iss2: " << (*iss2)[0].size() << endl;
+  fbk = fm.doit( iss2, work, seeds );
+  // take voronoi regions (and mask them) as result
+  rc_ptr< BucketMap<int16_t> > voro = fm.voronoiVol();
+  BucketMap<int16_t>::Bucket & vo0 = (*voro)[0];
+  BucketMap<Void>::Bucket::iterator jb;
+  rc_ptr< BucketMap<Void> > other( new BucketMap<Void> );
+  other->setSizeXYZT( bucket->sizeX(), bucket->sizeY(), bucket->sizeZ(),
+                      bucket->sizeT() );
+  BucketMap<Void>::Bucket & ot0 = (*other)[0];
+  for( ib=bk0.begin(), eb=bk0.end(); ib!=eb; )
+  {
+    ibs = vo0.find( ib->first );
+    if( ibs->second == 3 ) // far region
+    {
+      ot0[ ib->first ];
+      jb = ib;
+      ++ib;
+      bk0.erase( jb );
+    }
+    else
+      ++ib;
+  }
+  // check minimum size
+  if( bk0.size() < minsize || ot0.size() < minsize )
+  {
+    // abort: put all in bk0 again
+    for( ib=ot0.begin(), eb=ot0.end(); ib!=eb; ++ib )
+      bk0[ib->first];
+    other.reset( 0 );
+  }
+
+  return other;
 }
 
 
