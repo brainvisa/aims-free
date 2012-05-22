@@ -43,8 +43,6 @@
 #include <aims/resampling/mask.h>
 #include <aims/graph/graphmanip.h>
 #include <aims/topology/topoClassifier.h>
-// DEBUG
-#include <aims/io/writer.h>
 
 using namespace aims;
 using namespace carto;
@@ -673,13 +671,6 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
     else
       ++ibf;
   }
-  // DEBUG
-  /*
-  Writer<BucketMap<float> > w1( "/tmp/distmap.bck" );
-  w1.write( *fbk );
-  Writer<BucketMap<int16_t> > w2( "/tmp/voronoi.bck" );
-  w2.write( *fm.voronoiVol() );
-  */
 
   // reconstruct split line
   rc_ptr< BucketMap<Void> > splitline( new BucketMap<Void> );
@@ -787,11 +778,7 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
   for( ib=sl0.begin(), eb=sl0.end(); ib!=eb; ++ib )
     iss0[ib->first] = 2;
   iss0[ pmax ] = 1;
-  cout << "iss size: " << iss0.size() << ", bk0: " << bk0.size() << endl;
   iss2.reset( dilateBucket( *iss ) );
-  cout << "seeds1: " << (*iss2)[0].size() << endl;
-  Writer<BucketMap<int16_t> > w0( "/tmp/seeds1.bck" );
-  w0.write( *iss2 );
   BucketMap<int16_t>::Bucket::iterator ibs, jbs, ebs = (*iss2)[0].end();
   for( ibs=(*iss2)[0].begin(); ibs!=ebs; )
   {
@@ -805,16 +792,9 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
     else
       ++ibs;
   }
-  cout << "seeds2: " << (*iss2)[0].size() << endl;
-//   Writer<BucketMap<int16_t> > w2( "/tmp/seeds2.bck" );
-//   w2.write( *iss2 );
   FastMarching<BucketMap<int16_t> > fm2( Connectivity::CONNECTIVITY_6_XYZ );
   fbk = fm2.doit( iss2, work, seeds );
   BucketMap<float>::Bucket & fbk1 = (*fbk)[0]; // fbk0 is invalid now.
-
-//   Writer< BucketMap<float> > w1( "/tmp/distf1.bck" );
-//   w1.write( *fbk );
-
 
   // re-initialize seeds
   for( ib=bk0.begin(), eb=bk0.end(); ib!=eb; ++ib )
@@ -875,7 +855,6 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
 
   // 3rd distance map / voronoi
   iss2.reset( dilateBucket( *iss ) );
-  cout << "before filt, iss2: " << (*iss2)[0].size() << endl;
   for( ibs=(*iss2)[0].begin(), ebs=(*iss2)[0].end(); ibs!=ebs; )
   {
     // removed line voxels
@@ -888,7 +867,7 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
     else
       ++ibs;
   }
-  cout << "after filt, iss2: " << (*iss2)[0].size() << endl;
+  fm.clearSpeedMap();
   fbk = fm.doit( iss2, work, seeds );
   // take voronoi regions (and mask them) as result
   rc_ptr< BucketMap<int16_t> > voro = fm.voronoiVol();
@@ -898,10 +877,11 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitBucket(
   other->setSizeXYZT( bucket->sizeX(), bucket->sizeY(), bucket->sizeZ(),
                       bucket->sizeT() );
   BucketMap<Void>::Bucket & ot0 = (*other)[0];
+  ebs = vo0.end();
   for( ib=bk0.begin(), eb=bk0.end(); ib!=eb; )
   {
     ibs = vo0.find( ib->first );
-    if( ibs->second == 3 ) // far region
+    if( ibs != ebs && ibs->second == 3 ) // far region
     {
       ot0[ ib->first ];
       jb = ib;
