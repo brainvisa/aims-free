@@ -23,10 +23,15 @@ typedef AimsVector<%Template1%, %Template2%>
       return 1;
     if( PySequence_Check( sipPy ) && PySequence_Size( sipPy ) == %Template2% )
     {
-      // check the 1st element (incomplete...)
-      PyObject	*pyitem = PySequence_GetItem( sipPy, 0 );
-      if( !pyitem || !%Template1testPyType%( pyitem ) )
-        return 0;
+      // test compatibility of each element of the sequence
+      unsigned    i;
+      PyObject    *pyitem;
+      for( i=0; i<%Template2%; ++i )
+      {
+        pyitem = PySequence_GetItem( sipPy, i );
+        if( !pyitem || !%Template1testPyType%( pyitem ) )
+          return 0;
+      }
       return 1;
     }
     return 0;

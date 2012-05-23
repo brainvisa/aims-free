@@ -14,9 +14,23 @@ typedef std::list<%Template1% > list_%Template1typecode%;
 
 %ConvertToTypeCode
   if (sipIsErr == NULL)
-    return PySequence_Check( sipPy ) 
-      || sipCanConvertToInstance( sipPy,
-        sipClass_list_%Template1typecode%, SIP_NOT_NONE | SIP_NO_CONVERTORS );
+  {
+    if( sipCanConvertToInstance( sipPy,
+        sipClass_list_%Template1typecode%, SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
+      return 1;
+    if( !PySequence_Check( sipPy ) )
+      return 0;
+    // test compatibility of each element of the sequence
+    unsigned    i, n = PySequence_Size( sipPy );
+    PyObject    *pyitem;
+    for( i=0; i<n; ++i )
+    {
+      pyitem = PySequence_GetItem( sipPy, i );
+      if( !pyitem || !%Template1testPyType%( pyitem ) )
+        return 0;
+    }
+    return 1;
+  }
 
   if( PyObject_IsInstance( sipPy, (PyObject *) 
       sipClass_list_%Template1typecode% ) )
