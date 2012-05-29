@@ -940,7 +940,7 @@ Vertex * FoldArgOverSegment::splitVertex( Vertex* v, const Point3d & pos0,
 Vertex *FoldArgOverSegment::splitVertex(
   Vertex *v, rc_ptr< BucketMap<Void> > splitline, size_t minsize )
 {
-  if( splitline.isNull() )
+  if( splitline.isNull() || (*splitline)[0].size() == 0 )
     return 0; // split failed
 
   // get initial buckets
@@ -971,6 +971,7 @@ Vertex *FoldArgOverSegment::splitVertex(
     }
   if( !hj || !hj->getProperty( "aims_junction", hjl ) || !hjl )
   {
+    cout << "No hull_junction.\n";
     hjl.reset( new BucketMap<Void> );
     hjl->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
   }
@@ -1039,19 +1040,62 @@ Vertex *FoldArgOverSegment::splitVertex(
   }
 
   GraphManip::storeAims( *_graph, v2, "aims_ss", ss2 );
-  GraphManip::storeAims( *_graph, v2, "aims_bottom", bottom2 );
-  GraphManip::storeAims( *_graph, v2, "aims_other", other2 );
+  if( (*bottom2)[0].size() !=0 )
+    GraphManip::storeAims( *_graph, v2, "aims_bottom", bottom2 );
+  else cout << "warning: bottom2 has 0 points\n";
+  if( (*other2)[0].size() != 0 )
+    GraphManip::storeAims( *_graph, v2, "aims_other", other2 );
+  else cout << "warning: other2 has 0 points\n";
   // change existing buckets in v/hj
   GraphManip::storeAims( *_graph, v, "aims_ss", ss1 );
-  GraphManip::storeAims( *_graph, v, "aims_bottom", bottom1 );
-  GraphManip::storeAims( *_graph, v, "aims_other", other1 );
-  GraphManip::storeAims( *_graph, hj, "aims_junction", hj1 );
+  if( (*bottom1)[0].size() != 0 )
+    GraphManip::storeAims( *_graph, v, "aims_bottom", bottom1 );
+  else
+  {
+    if( v->hasProperty( "aims_bottom" ) )
+      v->removeProperty( "aims_bottom" );
+    cout << "warning: bottom1 has 0 points\n";
+  }
+  if( (*other1)[0].size() != 0 )
+    GraphManip::storeAims( *_graph, v, "aims_other", other1 );
+  else
+  {
+    if( v->hasProperty( "aims_other" ) )
+      v->removeProperty( "aims_other" );
+    cout << "warning: other1 has 0 points\n";
+  }
+  Edge *hje2 = 0;
   Edge::const_iterator  iv = hj->begin();
   if( *iv == v )
     ++iv;
   Vertex *hull = *iv;
-  Edge *hje2 = _graph->addEdge( v2, hull, hj->getSyntax() );
-  GraphManip::storeAims( *_graph, hje2, "aims_junction", hj2 );
+  if( hj )
+  {
+    cout << "hj split: " << (*hjl)[0].size() << " -> " << (*hj1)[0].size() << " + " << (*hj2)[0].size() << endl;
+    if( (*hj1)[0].size() != 0 )
+      GraphManip::storeAims( *_graph, hj, "aims_junction", hj1 );
+    else
+    {
+      if( hj->hasProperty( "aims_junction" ) )
+        hj->removeProperty( "aims_junction" );
+      cout << "warning: hj1 has 0 points\n";
+      cout << "transfering old hull_junction.\n";
+      hje2 = _graph->addEdge( v2, hull, hj->getSyntax() );
+      hje2->copyProperties( hj );
+      _graph->removeEdge( hj );
+      hj = 0;
+    }
+    if( (*hj2)[0].size() != 0 )
+    {
+      if( !hje2 )
+        hje2 = _graph->addEdge( v2, hull, hj->getSyntax() );
+      GraphManip::storeAims( *_graph, hje2, "aims_junction", hj2 );
+      cout << "hj2: " << (*hj2)[0].size() << endl;
+    }
+    else
+      cout << "warning: hj2 has 0 points\n";
+  }
+  else cout << "(no hull_junction to split)\n";
   Edge *junc = _graph->addEdge( v, v2, "junction" );
   GraphManip::storeAims( *_graph, junc, "aims_junction", splitline );
 
@@ -1103,10 +1147,16 @@ Vertex *FoldArgOverSegment::splitVertex(
       v->removeProperty( "Tmtktri_filename" );
   }
   catch( ... )  {}
-  hj->setProperty( "point_number", (int) (*hjl)[0].size() );
-  hj->setProperty( "size", (*hjl)[0].size() * voxvol );
-  hje2->setProperty( "point_number", (int) (*hj2)[0].size() );
-  hje2->setProperty( "size", (*hj2)[0].size() * voxvol );
+  if( hj )
+  {
+    hj->setProperty( "point_number", (int) (*hjl)[0].size() );
+    hj->setProperty( "size", (*hjl)[0].size() * voxvol );
+  }
+  if( hje2 )
+  {
+    hje2->setProperty( "point_number", (int) (*hj2)[0].size() );
+    hje2->setProperty( "size", (*hj2)[0].size() * voxvol );
+  }
   junc->setProperty( "point_number", (int) (*splitline)[0].size() );
   junc->setProperty( "size", (*splitline)[0].size() * voxvol );
 
