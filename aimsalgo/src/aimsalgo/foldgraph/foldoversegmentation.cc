@@ -140,12 +140,61 @@ namespace
     out2->setSizeXYZT( src.sizeX(), src.sizeY(), src.sizeZ(), src.sizeT() );
     BucketMap<Void>::Bucket & o1 = (*out1)[0];
     BucketMap<Void>::Bucket & o2 = (*out2)[0];
+    BucketMap<int16_t>::Bucket::const_iterator ivo, evo = vor.end();
+    BucketMap<Void>::Bucket notfound;
 
     for( ib=bk.begin(); ib!=eb; ++ib )
-      if( vor.find( ib->first )->second == label1 )
-        o1[ ib->first ];
+    {
+      ivo = vor.find( ib->first );
+      if( ivo == evo )
+        notfound[ ib->first ];
       else
-        o2[ ib->first ];
+      {
+        if( ivo->second == label1 )
+          o1[ ib->first ];
+        else
+          o2[ ib->first ];
+      }
+    }
+    // quick and dirty neighborhood classification of remaining voxels (if any)
+    BucketMap<Void>::Bucket::iterator ib3, ib2, eb2 = notfound.end();
+    Connectivity c( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
+    int i, n = c.nbNeighbors();
+    while( !notfound.empty() )
+    {
+      Point3d p;
+      bool removed, changed = false;
+      for( ib3=notfound.begin(); ib3!=eb2; )
+      {
+        removed = false;
+        for( i=0; i<n; ++i )
+        {
+          p = ib3->first + c.xyzOffset( i );
+          ivo = vor.find( p );
+          if( ivo != evo )
+          {
+            if( ivo->second == label1 )
+              o1[ ib3->first ];
+            else
+              o2[ ib3->first ];
+            ib2 = ib3;
+            ++ib3;
+            notfound.erase( ib2 );
+            removed = true;
+            break;
+          }
+        }
+        if( !removed )
+          ++ib3;
+        else
+          changed = true;
+      }
+      if( !changed )
+      {
+        cout << "warning: _splitBucket: disconnected voxels out of voronoi\n";
+        break;
+      }
+    }
   }
 
 
@@ -392,6 +441,24 @@ namespace
     return curindex;
   }
 
+
+  void copyGraphObjectProperties( GraphObject* src, GraphObject* dst )
+  {
+    set<string> dontcopy;
+    dontcopy.insert( src->getSyntax() + "_label" );
+    dontcopy.insert( src->getSyntax() + "_filename" );
+    dontcopy.insert( "aims_" + src->getSyntax() );
+    dontcopy.insert( "aims_" + src->getSyntax() + "_ana" );
+    dontcopy.insert( "index" );
+    dontcopy.insert( "ana_object" );
+    dontcopy.insert( "objects_map" );
+    set<string>::iterator keep = dontcopy.end();
+    Object iie;
+    for( iie = src->objectIterator(); iie->isValid(); iie->next() )
+      if( dontcopy.find( iie->key() ) == keep )
+        dst->setProperty( iie->key(), iie->currentValue() );
+  }
+
 }
 
 
@@ -426,7 +493,7 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
   unsigned ncss = sssplb.size();
   rc_ptr<BucketMap<Void> > sscomp( new BucketMap<Void>( sssplb ) );
   sscomp->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
-  cout << "initial ss components: " << ncss << endl;
+  // cout << "initial ss components: " << ncss << endl;
 
   /* try to break ss into more than its initial number of connected
     components, by masking it with an increaslingly dilated splitline
@@ -437,7 +504,7 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
       dilline.reset( dilateBucket( *splitline ) );
     else
     {
-      cout << "Dilating split line a bit more...\n";
+      // cout << "Dilating split line a bit more...\n";
       dilline.reset( dilateBucket( *dilline ) );
     }
     if( sssplb.size() <= ncss )
@@ -452,8 +519,8 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
   }
   while( ( sssplb.size() <= ncss && nssdil < 5 ) );
 
-  cout << "ss split comps: " << sssplb.size() << ", ndil: " << nssdil
-    << endl;
+  /* cout << "ss split comps: " << sssplb.size() << ", ndil: " << nssdil
+    << endl; */
   if( sssplb.size() <= ncss )
   {
     cout << "could not split the simple surface - split aborting\n";
@@ -867,7 +934,7 @@ FoldArgOverSegment::findSplitLine( Vertex* v, const Point3d & pos0 )
     return splitline;
   }
   pos = pmin;
-  cout << "ss pos: " << pmin << endl;
+  // cout << "ss pos: " << pmin << endl;
 
   // propagate across simple surface
   rc_ptr<BucketMap<float> > fss( new BucketMap<float> ); // dist map
@@ -971,7 +1038,7 @@ Vertex *FoldArgOverSegment::splitVertex(
     }
   if( !hj || !hj->getProperty( "aims_junction", hjl ) || !hjl )
   {
-    cout << "No hull_junction.\n";
+    // cout << "No hull_junction.\n";
     hjl.reset( new BucketMap<Void> );
     hjl->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
   }
@@ -993,7 +1060,7 @@ Vertex *FoldArgOverSegment::splitVertex(
   _splitBucket( hj1, hj2, *hjl, *voronoi, 10 );
   rc_ptr<BucketMap<Void> > other1, other2;
   _splitBucket( other1, other2, *other, *voronoi, 10 );
-  cout << "split done for all buckets\n";
+  // cout << "split done for all buckets\n";
 
   if( minsize > 0
       && ( (*ss1)[0].size() < minsize || (*ss2)[0].size() < minsize ) )
@@ -1042,10 +1109,8 @@ Vertex *FoldArgOverSegment::splitVertex(
   GraphManip::storeAims( *_graph, v2, "aims_ss", ss2 );
   if( (*bottom2)[0].size() !=0 )
     GraphManip::storeAims( *_graph, v2, "aims_bottom", bottom2 );
-  else cout << "warning: bottom2 has 0 points\n";
   if( (*other2)[0].size() != 0 )
     GraphManip::storeAims( *_graph, v2, "aims_other", other2 );
-  else cout << "warning: other2 has 0 points\n";
   // change existing buckets in v/hj
   GraphManip::storeAims( *_graph, v, "aims_ss", ss1 );
   if( (*bottom1)[0].size() != 0 )
@@ -1054,7 +1119,6 @@ Vertex *FoldArgOverSegment::splitVertex(
   {
     if( v->hasProperty( "aims_bottom" ) )
       v->removeProperty( "aims_bottom" );
-    cout << "warning: bottom1 has 0 points\n";
   }
   if( (*other1)[0].size() != 0 )
     GraphManip::storeAims( *_graph, v, "aims_other", other1 );
@@ -1062,7 +1126,6 @@ Vertex *FoldArgOverSegment::splitVertex(
   {
     if( v->hasProperty( "aims_other" ) )
       v->removeProperty( "aims_other" );
-    cout << "warning: other1 has 0 points\n";
   }
   Edge *hje2 = 0;
   Edge::const_iterator  iv = hj->begin();
@@ -1071,17 +1134,14 @@ Vertex *FoldArgOverSegment::splitVertex(
   Vertex *hull = *iv;
   if( hj )
   {
-    cout << "hj split: " << (*hjl)[0].size() << " -> " << (*hj1)[0].size() << " + " << (*hj2)[0].size() << endl;
     if( (*hj1)[0].size() != 0 )
       GraphManip::storeAims( *_graph, hj, "aims_junction", hj1 );
     else
     {
       if( hj->hasProperty( "aims_junction" ) )
         hj->removeProperty( "aims_junction" );
-      cout << "warning: hj1 has 0 points\n";
-      cout << "transfering old hull_junction.\n";
       hje2 = _graph->addEdge( v2, hull, hj->getSyntax() );
-      hje2->copyProperties( hj );
+      copyGraphObjectProperties( hj, hje2 );
       _graph->removeEdge( hj );
       hj = 0;
     }
@@ -1090,12 +1150,8 @@ Vertex *FoldArgOverSegment::splitVertex(
       if( !hje2 )
         hje2 = _graph->addEdge( v2, hull, hj->getSyntax() );
       GraphManip::storeAims( *_graph, hje2, "aims_junction", hj2 );
-      cout << "hj2: " << (*hj2)[0].size() << endl;
     }
-    else
-      cout << "warning: hj2 has 0 points\n";
   }
-  else cout << "(no hull_junction to split)\n";
   Edge *junc = _graph->addEdge( v, v2, "junction" );
   GraphManip::storeAims( *_graph, junc, "aims_junction", splitline );
 
@@ -1161,7 +1217,7 @@ Vertex *FoldArgOverSegment::splitVertex(
   junc->setProperty( "size", (*splitline)[0].size() * voxvol );
 
   /* separate relations (cortical, junctions, pli de passage)
-     - junctions, plidepassage: assign them to the closest node
+     - junctions, plidepassage: split them according to voronoi
      - cortical: for now just remove them: the voronoi must be rebuit
        afterwards
   */
@@ -1178,13 +1234,12 @@ Vertex *FoldArgOverSegment::splitVertex(
       rc_ptr<BucketMap<Void> > ebk;
       if( edge->getProperty( string( "aims_" ) + edge->getSyntax(), ebk ) )
       {
-        float m1 = bucketMatch( (*ebk)[0], (*ss1)[0], 0 );
-        float m2 = bucketMatch( (*ebk)[0], (*ss2)[0], 0 );
-        if( m2 > m1 ) // relation is closer to v2 than the original v
+        rc_ptr<BucketMap<Void> > j1, j2;
+        _splitBucket( j1, j2, *ebk, *voronoi, 10 );
+        if( (*j2)[0].size() != 0 )
         {
-          // so transfer relation to v2 rather than v
-          cout << "transfer rel " << edge << " / " << edge->getSyntax()
-            << " to new vertex\n";
+          /* cout << "split rel " << edge << " / " << edge->getSyntax()
+            << " to new vertex\n"; */
           Edge::const_iterator iiv;
           Vertex *vorg = 0, *vdest = 0;
           iiv=edge->begin();
@@ -1200,12 +1255,23 @@ Vertex *FoldArgOverSegment::splitVertex(
             vdest = v2;
           }
           Edge *e2 = _graph->addEdge( vorg, vdest, edge->getSyntax() );
-          Object iie;
-          for( iie = edge->objectIterator(); iie->isValid(); iie->next() )
-            e2->setProperty( iie->key(), iie->currentValue() );
+          copyGraphObjectProperties( edge, e2 );
+          GraphManip::storeAims( *_graph, e2, "aims_" + edge->getSyntax(),
+                                 j2 );
+          e2->setProperty( "point_number", int( (*j2)[0].size() ) );
+        }
+        if( (*j1)[0].size() == 0 ) // nothing left in original junction
+        {
+          // so remove original relation
           ++ie;
           inc = false;
           _graph->removeEdge( edge );
+        }
+        else
+        {
+          GraphManip::storeAims( *_graph, edge, "aims_" + edge->getSyntax(),
+                                 j1 );
+          edge->setProperty( "point_number", int( (*j2)[0].size() ) );
         }
       }
     }
@@ -1279,7 +1345,7 @@ int FoldArgOverSegment::subdivizeVertex( Vertex* v, float piecelength,
   }
   const BucketMap<Void>::Bucket & ss0 = ss->begin()->second;
   size_t totalsize = ss0.size();
-  cout << "ss size: " << totalsize << endl;
+  // cout << "ss size: " << totalsize << endl;
 
   rc_ptr<BucketMap<int16_t> > iss( new BucketMap<int16_t> );
   iss->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
@@ -1327,8 +1393,8 @@ int FoldArgOverSegment::subdivizeVertex( Vertex* v, float piecelength,
       pmax2 = ib->first;
     }
   }
-  cout << "fold length: " << dmax << endl;
-  cout << "exrtremities: " << pmax << ", " << pmax2 << endl;
+  // cout << "fold length: " << dmax << endl;
+  /// cout << "exrtremities: " << pmax << ", " << pmax2 << endl;
   // path from pmax2 to pmax
   rc_ptr<BucketMap<Void> > path( downPath( *distmap, pmax2 ) );
   cout << "path length: " << (*path)[0].size() << endl;
@@ -1346,7 +1412,7 @@ int FoldArgOverSegment::subdivizeVertex( Vertex* v, float piecelength,
   do
   {
     float pdist = dmax / nb_pieces * icut;
-    cout << "cut at: " << pdist << endl;
+    // cout << "cut at: " << pdist << endl;
     float dmax2 = numeric_limits<float>::max();
     for( ib=path->begin()->second.begin(), eb=path->begin()->second.end();
          ib!=eb; ++ib )
@@ -1358,7 +1424,7 @@ int FoldArgOverSegment::subdivizeVertex( Vertex* v, float piecelength,
         pmax = ib->first;
       }
     }
-    cout << "try to cut at pos: " << pmax << endl;
+    // cout << "try to cut at pos: " << pmax << endl;
     v2 = splitVertex( v, pmax, minsize );
     ++icut;
   } // until a cut has succeeded or all attempts have failed
