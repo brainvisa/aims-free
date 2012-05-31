@@ -57,17 +57,10 @@ namespace gui
 
     /// This function can be called from a slot
     static void unselectInvisibleItems( Q3ListView* lv );
-#if QT_VERSION >= 0x040000
     /// mouse buttons pressed at last event. Qt doesn't provide it
     Qt::MouseButtons buttonsAtLastEvent() const;
     /// dead keys pressed at last event. Qt doesn't provide it
     Qt::KeyboardModifiers deadKeysStateAtLastEvent() const;
-#else
-    /// mouse buttons pressed at last event. Qt doesn't provide it
-    ButtonState buttonsAtLastEvent() const;
-    /// dead keys pressed at last event. Qt doesn't provide it
-    ButtonState deadKeysStateAtLastEvent() const;
-#endif
 
   public slots:
     void unselectInvisibleItems();
@@ -84,11 +77,16 @@ namespace gui
     children
      */
     void itemCancelsRename( Q3ListViewItem*, int col );
+    /** emitted when the mouse cursor moves over a different element.
+    Needs so set mouse tracking on the QListView before it works.
+     */
+    void cursorMoved( Q3ListViewItem*, int col );
 
   protected:
     virtual void contentsMousePressEvent( QMouseEvent* mev );
     virtual void contentsMouseMoveEvent( QMouseEvent* mev );
     virtual void contentsMouseReleaseEvent( QMouseEvent* mev );
+    virtual void leaveEvent( QEvent* ev );
 
   private:
     friend class QEditableListViewItem;

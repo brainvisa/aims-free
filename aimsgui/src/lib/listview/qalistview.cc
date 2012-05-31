@@ -49,17 +49,14 @@ struct QAListView::QAListViewPrivate
   QAListViewPrivate();
   bool		dragpossible;
   QPoint	dragstartpos;
-#if QT_VERSION >= 0x040000
   Qt::MouseButtons buttons;
   Qt::KeyboardModifiers deadkeys;
-#else
-  ButtonState  buttons;
-  ButtonState  deadkeys;
-#endif
+  Q3ListViewItem *itemUnderCursor;
 };
 
 
-QAListView::QAListViewPrivate::QAListViewPrivate() : dragpossible( false )
+QAListView::QAListViewPrivate::QAListViewPrivate() : dragpossible( false ),
+  itemUnderCursor( 0 )
 {
 }
 
@@ -123,6 +120,16 @@ void QAListView::contentsMouseMoveEvent( QMouseEvent* mev )
        << d->dragpossible << endl;*/
   /*if( mev->button() == NoButton && mev->state() == LeftButton 
     && d->dragpossible )*/
+  //if( mev->buttons() == Qt::NoButton )
+  {
+    QPoint p( contentsToViewport( mev->pos() ) );
+    Q3ListViewItem        *item = itemAt( p );
+    if( d->itemUnderCursor != item )
+    {
+      d->itemUnderCursor = item;
+      emit cursorMoved( item, 0 ); // TODO: not always column 0...
+    }
+  }
   if( d->dragpossible )
     {
       QPoint	p = mev->pos() - d->dragstartpos;
@@ -140,6 +147,13 @@ void QAListView::contentsMouseMoveEvent( QMouseEvent* mev )
         }
     }
   Q3ListView::contentsMouseMoveEvent( mev );
+}
+
+
+void QAListView::leaveEvent( QEvent* ev )
+{
+  if( hasMouseTracking() )
+    emit cursorMoved( 0, 0 );
 }
 
 
@@ -176,7 +190,6 @@ void QAListView::unselectInvisibleItems()
 }
 
 
-#if QT_VERSION >= 0x040000
 Qt::MouseButtons QAListView::buttonsAtLastEvent() const
 {
   return d->buttons;
@@ -187,18 +200,6 @@ Qt::KeyboardModifiers QAListView::deadKeysStateAtLastEvent() const
 {
   return d->deadkeys;
 }
-#else
-Qt::ButtonState QAListView::buttonsAtLastEvent() const
-{
-  return d->buttons;
-}
-
-
-Qt::ButtonState QAListView::deadKeysStateAtLastEvent() const
-{
-  return d->deadkeys;
-}
-#endif
 
 
 void QAListView::_itemStartsRename( Q3ListViewItem* item, int col )
