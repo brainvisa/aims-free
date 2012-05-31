@@ -1128,12 +1128,12 @@ Vertex *FoldArgOverSegment::splitVertex(
       v->removeProperty( "aims_other" );
   }
   Edge *hje2 = 0;
-  Edge::const_iterator  iv = hj->begin();
-  if( *iv == v )
-    ++iv;
-  Vertex *hull = *iv;
   if( hj )
   {
+    Edge::const_iterator  iv = hj->begin();
+    if( *iv == v )
+      ++iv;
+    Vertex *hull = *iv;
     if( (*hj1)[0].size() != 0 )
       GraphManip::storeAims( *_graph, hj, "aims_junction", hj1 );
     else
