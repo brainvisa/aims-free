@@ -53,5 +53,6 @@ SOURCES = graph/qsqlgraphdatabase.cc \
     listview/qpython.cc \
     attributedview/attributedview.cc \
     plugin/plugin.cc \
+    qtmisc/qwidgetobject.cc \
     qtmisc/resolvesymlinks.cc
 

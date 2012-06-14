@@ -748,7 +748,8 @@ def getPython( self ):
     except:
       pass
 
-  raise RuntimeError( 'No conversion to python object possible' )
+  raise RuntimeError( 'No conversion to python object possible from type ' \
+    + t )
 
 def toObject( x ):
   if hasattr( x, 'toObject' ):

@@ -115,9 +115,9 @@ void QAListView::contentsMousePressEvent( QMouseEvent* mev )
 
 void QAListView::contentsMouseMoveEvent( QMouseEvent* mev )
 {
-  /*cout << "contentsMouseMoveEvent - button : " << (int) mev->button() 
+  /* cout << "contentsMouseMoveEvent - button : " << (int) mev->button()
        << ", state : " << (int) mev->state() << ", dragposs : " 
-       << d->dragpossible << endl;*/
+       << d->dragpossible << endl; */
   /*if( mev->button() == NoButton && mev->state() == LeftButton 
     && d->dragpossible )*/
   //if( mev->buttons() == Qt::NoButton )
@@ -141,12 +141,14 @@ void QAListView::contentsMouseMoveEvent( QMouseEvent* mev )
             {
               d->dragpossible = false;
               emit dragStart( item, mev->state() );
+              mev->ignore();
               return;
             }
           d->dragpossible = false;
         }
     }
   Q3ListView::contentsMouseMoveEvent( mev );
+  mev->ignore();
 }
 
 
