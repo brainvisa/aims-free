@@ -292,7 +292,7 @@ void RoiFeatures::writeCSV( ostream &out ) const
               image_features[ itImgFeatures->key() ] = DoubleStringOrNone( feature->getScalar() );
             }
           }
-          csvValues.push_back( image_features );
+          csvValues.push_front( image_features );
           add_roi_features = false;
           if ( feature->hasProperty( itFeatures->key() ) ) {
             Object time_features = feature->getProperty( itFeatures->key() ) ;
