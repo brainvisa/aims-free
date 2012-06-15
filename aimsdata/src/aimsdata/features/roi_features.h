@@ -54,7 +54,7 @@ class RoiFeatures
 public:
 
   void addImageStatistics( const std::string &name, 
-                           const carto::rc_ptr< Interpolator > & );
+                           const std::string & );
   void computeFeatures( const carto::rc_ptr< RoiIterator > & );
   void write( std::ostream &out, const std::string &format = "minf" ) const;
 
@@ -65,10 +65,10 @@ protected:
 
 
   typedef std::map< std::string,
-                    carto::rc_ptr< Interpolator > > Interpolators_t;
+                    std::string > Images_t;
 
   ScalarSetFeatures _scalarSetFeatures;
-  Interpolators_t _interpolators;
+  Images_t _images;
 
   carto::rc_ptr< RoiIterator > _roiIterator;
   carto::Object _result;

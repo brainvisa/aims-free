@@ -109,7 +109,7 @@ int main( int argc, const char **argv )
       }
       const string fileName = it->substr( index+1, it->size() - index - 1 );
       roiFeatures.addImageStatistics( label,
-                                      getLinearInterpolator( fileName ) );
+                                      fileName );
     }
     if ( transformationReader.fileName().empty() ) {
       roiFeatures.computeFeatures( getRoiIterator( inputFileName ) );

@@ -114,6 +114,9 @@ public:
   {
     operator ()( point[ 0 ], point[ 1 ], point[ 2 ], v );
   }
+  /** Return the header of the image.
+  */
+  virtual const carto::PropertySet &header() const = 0;
 };
 
 
@@ -148,6 +151,8 @@ class LinearInterpolator : public Interpolator
   Scalar_t operator()( Coordinate_t x, Coordinate_t y, Coordinate_t z ) const;
   void operator()( Coordinate_t x, Coordinate_t y, Coordinate_t z,
                    std::vector<Scalar_t> & ) const;
+
+  virtual const carto::PropertySet &header() const;
 
   const AimsData<T> _image;
 
@@ -330,6 +335,13 @@ void LinearInterpolator<T>::
   }
 }
 
+
+//-----------------------------------------------------------------------------
+template <typename T>
+const carto::PropertySet & LinearInterpolator<T>::header() const
+{
+  return _image.volume()->header();
+}
 
 
 //-----------------------------------------------------------------------------

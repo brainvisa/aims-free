@@ -75,9 +75,10 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
     features->setProperty( "point_count", point_count );
     features->setProperty( "volume", point_count * voxelSize[ 0 ] *
                            voxelSize[ 1 ] * voxelSize[ 2 ] );
-    if ( ! _interpolators.empty() ) {
-      for( Interpolators_t::const_iterator it = _interpolators.begin();
-           it != _interpolators.end(); ++it ) {
+    if ( ! _images.empty() ) {
+      for( Images_t::const_iterator it = _images.begin();
+           it != _images.end(); ++it ) {
+        const rc_ptr< Interpolator > interpolator = getLinearInterpolator( it->second );
         vector< Interpolator::Scalar_t > interpolated;
         vector<  ScalarFeaturesProvider::Scalar_t > allValues;
         allValues.reserve( point_count );
@@ -85,7 +86,7 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
         for( maskIterator->restart(); maskIterator->isValid();
              maskIterator->next() ) {
           const Point3df &p = maskIterator->valueMillimeters();
-          (*it->second)( p[ 0 ], p[ 1 ], p[ 2 ], interpolated );
+          (*interpolator)( p[ 0 ], p[ 1 ], p[ 2 ], interpolated );
           if ( interpolated.size() > 1 ) {
             if ( timesValues.empty() ) {
               allValues.reserve( point_count * interpolated.size() );
@@ -109,6 +110,14 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
           features->setProperty( it->first, PropertySet() );
           o = features->getProperty( it->first );
         }
+        
+        vector<int> v;
+        v.resize( 3 );
+        v[ 0 ] = 1;
+        v[ 1 ] = 2;
+        v[ 2 ] = 3;
+        const PropertySet &header = interpolator->header();
+        
         _scalarSetFeatures.setValues( allValues );
         _scalarSetFeatures.scalarFeatureValues( interpolated );
         for( size_t iName = 0; iName < featureNames.size(); ++iName ) {
@@ -133,6 +142,12 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
             o2->setProperty( featureNames[ iName ], 
                              vector< ScalarFeaturesProvider::Scalar_t >() );
           }
+          if ( header.hasProperty( "start_time" ) ) {
+            o2->setProperty( "start_time", header.getProperty( "start_time" ) );
+          }
+          if ( header.hasProperty( "duration_time" ) ) {
+            o2->setProperty( "duration_time", header.getProperty( "duration_time" ) );
+          }
           for( size_t i = 0; i < timesValues.size(); ++i ) {
             o2->getProperty( "abscissa" )
               ->value< vector< ScalarFeaturesProvider::Scalar_t > >()
@@ -156,10 +171,10 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
 //-----------------------------------------------------------------------------
 void RoiFeatures::
 addImageStatistics( const std::string &prefix, 
-                    const rc_ptr< Interpolator > &interpolator )
+                    const std::string &filename )
 {
-  if ( _interpolators.find( prefix ) == _interpolators.end() ) {
-    _interpolators[ prefix ] = interpolator;
+  if ( _images.find( prefix ) == _images.end() ) {
+    _images[ prefix ] = filename;
   } else {
     throw runtime_error( string( "Cannot compute statistics because the label \"" ) + prefix + "\" is used for several images." );
   }
@@ -176,15 +191,17 @@ static void writeFeatures( const Object &features, ostream &out,
       double d = v->getScalar();
       out << d  << "," << endl;
     } catch( exception & ) {
-      try {
+      if ( v->isArray() ) {
+/*      try {
         vector< ScalarFeaturesProvider::Scalar_t > *pVector =
-          &v->value<vector< ScalarFeaturesProvider::Scalar_t > >();
+          &v->value<vector< ScalarFeaturesProvider::Scalar_t > >();*/
         out << "[ ";
-        for( size_t i = 0; i < pVector->size(); ++i ) {
-          out << (*pVector)[ i ] << ", ";
+        for( size_t i = 0; i < v->size(); ++i ) {
+          out << v->getArrayItem( i )->getString() << ", ";
         }
         out << "]," << endl;
-      } catch( exception & ) {
+//       } catch( exception & ) {
+      } else {
         try {
           // Object it =  v->getInterface<DictionaryInterface>();
           out << "{" << endl;
@@ -210,51 +227,169 @@ void RoiFeatures::writeMinf( ostream &out ) const
 }
 
 
+class DoubleStringOrNone
+{
+public:
+  inline DoubleStringOrNone() : type( 0 ) {}
+  inline DoubleStringOrNone( double v ) : number( v ), type( 1 ) {}
+  inline DoubleStringOrNone( const string &v ) : str( v ), type( 2 ) {}
+  inline void write( ostream &out ) const {
+    if ( type == 1 ) {
+      out << number;
+    } else if ( type == 2 ) {
+      out << str;
+    }
+  }
+  double number;
+  string str;
+  int type;
+};
+
+
 //-----------------------------------------------------------------------------
 void RoiFeatures::writeCSV( ostream &out ) const
 {
-  list< string > roiNames;
   list< string > csvHeader;
-  map< string, map< string, double > > csvValues;
+//   map< string, map< string, double > > csvValues;
+  list< map< string, DoubleStringOrNone > > csvValues;
 
+  csvHeader.push_back( "ROI_label" );
+  csvHeader.push_back( "image_label" );
+  
   for( Object itRoi = _result->objectIterator(); itRoi->isValid(); itRoi->next() ) {
     const string roiName( itRoi->key() );
     if ( roiName == "format" || roiName == "content_type" ) continue;
     Object features = itRoi->currentValue();
     if ( features->isDictionary() ) {
-      roiNames.push_back( roiName );
-      list< pair< string, Object > > stack;
-      stack.push_back( pair< string, Object >( "", features ) );
-      while( ! stack.empty() ) {
-        const string key = stack.front().first;
-        const Object feature = stack.front().second;
-        stack.pop_front();
+      map< string, DoubleStringOrNone > roi_features;
+      roi_features[ "ROI_label" ] = DoubleStringOrNone( roiName );
+      for( Object itFeatures = features->objectIterator(); itFeatures->isValid(); itFeatures->next() ) {
+        Object feature = itFeatures->currentValue();
         if ( feature->isScalar() ) {
-          if ( find( csvHeader.begin(), csvHeader.end(), key ) == csvHeader.end() ) {
-            csvHeader.push_back( key );
+          if ( find( csvHeader.begin(), csvHeader.end(), itFeatures->key() ) == csvHeader.end() ) {
+            csvHeader.push_back( itFeatures->key() );
           }
-          const double value = feature->getScalar();
-          map< string, double > &values = csvValues[ roiName ];
-          if ( values.find( key ) == values.end() ) {
-            values[ key ] = value;
-          } else {
-            throw runtime_error( string( "Cannot write CVS file because there is more than one value in column \"" ) + key + "\" for region \"" + roiName + "\"" );
+          roi_features[ itFeatures->key() ] = DoubleStringOrNone( feature->getScalar() );
+        }
+      }
+      csvValues.push_back( roi_features );
+      for( Object itFeatures = features->objectIterator(); itFeatures->isValid(); itFeatures->next() ) {
+        Object feature = itFeatures->currentValue();
+        if ( feature->isDictionary() ) {
+          // Feature is an image
+          map< string, DoubleStringOrNone > image_features = roi_features;
+          image_features[ "image_label" ] = DoubleStringOrNone( itFeatures->key() );
+          for( Object itImgFeatures = feature->objectIterator(); itImgFeatures->isValid(); itImgFeatures->next() ) {
+            Object feature = itImgFeatures->currentValue();
+            if ( feature->isScalar() ) {
+              if ( find( csvHeader.begin(), csvHeader.end(), itImgFeatures->key() ) == csvHeader.end() ) {
+                csvHeader.push_back( itImgFeatures->key() );
+              }
+              image_features[ itImgFeatures->key() ] = DoubleStringOrNone( feature->getScalar() );
+            }
           }
-        } else if ( feature->isDictionary() ) {
-          for( Object itFeature = feature->objectIterator(); itFeature->isValid(); itFeature->next() ) {
-            const string key2( ( key.empty() ? string() : key + "." ) + itFeature->key() );
-            stack.push_front( pair< string, Object >( key2, itFeature->currentValue() ) );
+          csvValues.push_back( image_features );
+          if ( feature->hasProperty( itFeatures->key() ) ) {
+            Object time_features = feature->getProperty( itFeatures->key() ) ;
+            if ( time_features->isDictionary() ) {
+              list< string > time_feature_names;
+              int time_steps = 0;
+              for( Object itTimeFeatures = time_features->objectIterator(); itTimeFeatures->isValid(); itTimeFeatures->next() ) {
+                if ( itTimeFeatures->currentValue()->isArray() ) {
+                  bool ignore = true;
+                  if ( time_steps == 0 ) {
+                    time_steps = itTimeFeatures->currentValue()->size();
+                    ignore = false;
+                  } else if ( time_steps == itTimeFeatures->currentValue()->size() ) {
+                    ignore = false;
+                  }
+                  if ( ignore ) {
+                    cerr << "Warning: ignoring time feature " << itTimeFeatures->key() << " for image label " << itFeatures->key() << endl;
+                  } else {
+                    if ( find( csvHeader.begin(), csvHeader.end(), itTimeFeatures->key() ) == csvHeader.end() ) {
+                      csvHeader.push_back( itTimeFeatures->key() );
+                    }
+                    time_feature_names.push_back( itTimeFeatures->key() );
+                  }
+                }
+              }
+              for( int time_step = 0; time_step < time_steps; ++time_step ) {
+                map< string, DoubleStringOrNone > time_features_line = roi_features;
+                time_features_line[ "image_label" ] = DoubleStringOrNone( itFeatures->key() );
+                for( list< string >::const_iterator it = time_feature_names.begin(); it != time_feature_names.end(); ++it ) {
+                  time_features_line[ *it ] = DoubleStringOrNone( time_features->getProperty( *it )->getArrayItem( time_step )->getScalar() );
+                }
+                csvValues.push_back( time_features_line );
+              }
+            }
           }
-        } else {
-          cerr << "Warning: ignoring feature of type " << feature->type() << " for key " << key << endl;
         }
       }
     } else {
       cerr << "Cannot write features in CSV format for ROI " << roiName << " because it contains data of type " << features->type() << endl;
     }
   }
+  
+  bool first = true;
+  for( list< string >::const_iterator itH = csvHeader.begin(); itH != csvHeader.end(); ++itH ) {
+    if ( first ) {
+      first = false;
+    } else {
+      out << "\t" ;
+    }
+    out << *itH;
+  }
+  out << endl;
+  for( list< map< string, DoubleStringOrNone > >::const_iterator itL = csvValues.begin(); itL != csvValues.end(); ++itL ) {
+    first = true;
+    for( list< string >::const_iterator itH = csvHeader.begin(); itH != csvHeader.end(); ++itH ) {
+      if ( first ) {
+        first = false;
+      } else {
+        out << "\t" ;
+      }
+      map< string, DoubleStringOrNone >::const_iterator itV = (*itL).find( *itH );
+      if ( itV != itL->end() ) {
+        const DoubleStringOrNone &v = itV->second;
+        v.write( out );
+      }
+    }
+    out << endl;
+  }
 
-  out << "ROI_label";
+//       list< pair< string, Object > > stack;
+//       stack.push_back( pair< string, Object >( "", features ) );
+//       while( ! stack.empty() ) {
+//         const string key = stack.front().first;
+//         const Object feature = stack.front().second;
+//         stack.pop_front();
+//         if ( feature->isScalar() ) {
+//           if ( find( csvHeader.begin(), csvHeader.end(), key ) == csvHeader.end() ) {
+//             csvHeader.push_back( key );
+//           }
+//           const double value = feature->getScalar();
+//           map< string, double > &values = csvValues[ roiName ];
+//           if ( values.find( key ) == values.end() ) {
+//             values[ key ] = value;
+//           } else {
+//             throw runtime_error( string( "Cannot write CVS file because there is more than one value in column \"" ) + key + "\" for region \"" + roiName + "\"" );
+//           }
+//         } else if ( feature->isDictionary() ) {
+//           for( Object itFeature = feature->objectIterator(); itFeature->isValid(); itFeature->next() ) {
+//             const string key2( ( key.empty() ? string() : key + "." ) + itFeature->key() );
+//             stack.push_front( pair< string, Object >( key2, itFeature->currentValue() ) );
+//           }
+//         } else {
+//           cerr << "Warning: ignoring feature of type " << feature->type() << " for key " << key << endl;
+//         }
+//       }
+//     } else {
+//       cerr << "Cannot write features in CSV format for ROI " << roiName << " because it contains data of type " << features->type() << endl;
+//     }
+//   }
+
+
+/*  out << "ROI_label";
   for( list< string >::iterator itH = csvHeader.begin(); itH != csvHeader.end(); ++itH ) {
     out << "\t" << *itH;
   }
@@ -271,7 +406,7 @@ void RoiFeatures::writeCSV( ostream &out ) const
       }
     }
     out << endl;
-  }
+  }*/
 }
 
 
