@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsMassCenter
+BRAINVISA_ADD_EXECUTABLE(AimsMassCenter
 massCenter.cc
 )
 

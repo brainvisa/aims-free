@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsOverVolume
+BRAINVISA_ADD_EXECUTABLE(AimsOverVolume
 main.cc
 )
 

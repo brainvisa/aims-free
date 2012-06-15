@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsSplitRgb
+BRAINVISA_ADD_EXECUTABLE(AimsSplitRgb
 splitRgb.cc
 )
 

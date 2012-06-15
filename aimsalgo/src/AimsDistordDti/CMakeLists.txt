@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsDistordDti
+BRAINVISA_ADD_EXECUTABLE(AimsDistordDti
 interpolator.cc
 main.cc
 )

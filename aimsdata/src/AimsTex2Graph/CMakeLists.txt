@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsTex2Graph
+BRAINVISA_ADD_EXECUTABLE(AimsTex2Graph
 tex2graph.cc
 )
 

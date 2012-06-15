@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsGraphConvert
+BRAINVISA_ADD_EXECUTABLE(AimsGraphConvert
 graphConvert.cc
 )
 

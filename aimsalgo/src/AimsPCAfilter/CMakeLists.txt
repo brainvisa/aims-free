@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsPCAfilter
+BRAINVISA_ADD_EXECUTABLE(AimsPCAfilter
 individu.cc
 main.cc
 )

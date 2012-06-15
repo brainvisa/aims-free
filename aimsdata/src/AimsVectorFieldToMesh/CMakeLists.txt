@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsVectorFieldToMesh
+BRAINVISA_ADD_EXECUTABLE(AimsVectorFieldToMesh
 vectorFieldToMesh.cc
 )
 

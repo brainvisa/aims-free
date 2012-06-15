@@ -13,6 +13,8 @@ foreach( _command ${_commands} )
   foreach( _f ${_proSources} )
     set( _sources ${_sources} ${_command}/${_f} )
   endforeach( _f ${_proSources} )
-  add_executable( ${_target} ${_sources} )
+  
+  BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} 
+                            HELP_GENERATE FALSE )
   target_link_libraries( ${_target} graph )
 endforeach( _command ${commands} )

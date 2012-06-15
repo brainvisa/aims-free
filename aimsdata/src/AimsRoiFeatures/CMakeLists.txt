@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsRoiFeatures
+BRAINVISA_ADD_EXECUTABLE(AimsRoiFeatures
 AimsRoiFeatures.cc
 )
 

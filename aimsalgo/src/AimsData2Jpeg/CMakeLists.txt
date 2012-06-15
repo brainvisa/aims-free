@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsData2Jpeg
+BRAINVISA_ADD_EXECUTABLE(AimsData2Jpeg
 main.cc
 postscript.cc
 )

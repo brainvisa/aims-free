@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsInvertTransformation
+BRAINVISA_ADD_EXECUTABLE(AimsInvertTransformation
 inverttrans.cc
 )
 

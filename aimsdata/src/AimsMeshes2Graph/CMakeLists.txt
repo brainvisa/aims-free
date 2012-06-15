@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsMeshes2Graph
+BRAINVISA_ADD_EXECUTABLE(AimsMeshes2Graph
 meshes2graph.cc
 )
 

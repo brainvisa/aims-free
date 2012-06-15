@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsThreshold
+BRAINVISA_ADD_EXECUTABLE(AimsThreshold
 main.cc
 )
 

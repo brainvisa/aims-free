@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsAverage
+BRAINVISA_ADD_EXECUTABLE(AimsAverage
 average.cc
 )
 

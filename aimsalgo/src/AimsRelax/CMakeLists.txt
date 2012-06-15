@@ -1,4 +1,4 @@
-ADD_EXECUTABLE(AimsRelax
+BRAINVISA_ADD_EXECUTABLE(AimsRelax
 anneal.cc
 cliques.cc
 iograph.cc

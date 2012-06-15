@@ -1,4 +1,4 @@
-ADD_EXECUTABLE(AimsPCAloc
+BRAINVISA_ADD_EXECUTABLE(AimsPCAloc
 individu.cc
 main.cc
 )

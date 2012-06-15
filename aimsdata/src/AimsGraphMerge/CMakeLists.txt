@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsGraphMerge
+BRAINVISA_ADD_EXECUTABLE(AimsGraphMerge
 graphMerge.cc
 )
 

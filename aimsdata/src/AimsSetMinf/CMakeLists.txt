@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsSetMinf
+BRAINVISA_ADD_EXECUTABLE(AimsSetMinf
 setMinf.cc
 )
 

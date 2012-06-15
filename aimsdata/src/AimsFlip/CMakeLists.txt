@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsFlip
+BRAINVISA_ADD_EXECUTABLE(AimsFlip
 main.cc
 )
 

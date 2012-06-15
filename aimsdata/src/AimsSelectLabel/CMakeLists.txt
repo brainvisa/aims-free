@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsSelectLabel
+BRAINVISA_ADD_EXECUTABLE(AimsSelectLabel
 selectLabel.cc
 )
 

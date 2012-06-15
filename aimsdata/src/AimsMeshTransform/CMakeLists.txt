@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsMeshTransform
+BRAINVISA_ADD_EXECUTABLE(AimsMeshTransform
 main.cc
 )
 

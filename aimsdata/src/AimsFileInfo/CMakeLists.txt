@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsFileInfo
+BRAINVISA_ADD_EXECUTABLE(AimsFileInfo
 fileInfo.cc
 )
 

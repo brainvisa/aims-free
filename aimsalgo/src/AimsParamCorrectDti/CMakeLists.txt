@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsParamCorrectDti
+BRAINVISA_ADD_EXECUTABLE(AimsParamCorrectDti
 interpolator.cc
 main.cc
 )

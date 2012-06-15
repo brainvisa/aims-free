@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsMeshArea
+BRAINVISA_ADD_EXECUTABLE(AimsMeshArea
 meshArea.cc
 )
 

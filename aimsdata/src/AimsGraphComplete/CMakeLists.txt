@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsGraphComplete
+BRAINVISA_ADD_EXECUTABLE(AimsGraphComplete
 graphComplete.cc
 )
 

@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsRemoveNaN
+BRAINVISA_ADD_EXECUTABLE(AimsRemoveNaN
 AimsRemoveNaN.cc
 )
 

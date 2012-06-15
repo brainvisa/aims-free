@@ -14,7 +14,7 @@ foreach( _command ${_commands} )
   foreach( _f ${_proSources} )
     set( _sources ${_sources} ${_command}/${_f} )
   endforeach( _f ${_proSources} )
-  add_executable( ${_target} ${_sources} )
+  BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
   target_link_libraries( ${_target} aimsalgo )
   BRAINVISA_INSTALL( TARGETS ${_target}
                 DESTINATION bin
@@ -31,7 +31,7 @@ foreach( _command AimsFovSplit AimsSumPETFrame )
   foreach( _f ${_proSources} )
     set( _sources ${_sources} ${_command}/${_f} )
   endforeach( _f ${_proSources} )
-  add_executable( ${_target} ${_sources} )
+  BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
   target_link_libraries( ${_target} aimsalgo aimsecat )
   BRAINVISA_INSTALL( TARGETS ${_target}
                 DESTINATION bin
@@ -49,7 +49,7 @@ if( JPEG_FOUND )
     foreach( _f ${_proSources} )
       set( _sources ${_sources} ${_command}/${_f} )
     endforeach( _f ${_proSources} )
-    add_executable( ${_target} ${_sources} )
+    BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
     target_link_libraries( ${_target} aimsalgo aimsjpeg )
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin
@@ -68,7 +68,7 @@ if( DCMTK_FOUND )
     foreach( _f ${_proSources} )
       set( _sources ${_sources} ${_command}/${_f} )
     endforeach( _f ${_proSources} )
-    add_executable( ${_target} ${_sources} )
+    BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
     target_link_libraries( ${_target} aimsalgo aimsdicom )
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin

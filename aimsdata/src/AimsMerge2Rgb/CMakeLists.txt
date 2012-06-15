@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsMerge2Rgb
+BRAINVISA_ADD_EXECUTABLE(AimsMerge2Rgb
 merge2Rgb.cc
 )
 

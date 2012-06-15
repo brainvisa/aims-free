@@ -1,4 +1,4 @@
-ADD_EXECUTABLE(AimsVeinExtraction
+BRAINVISA_ADD_EXECUTABLE(AimsVeinExtraction
 volume/volume.cc
 geodesicminimalpath/geodesicminimalpath.cc
 main.cc

@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsTCat
+BRAINVISA_ADD_EXECUTABLE(AimsTCat
 tcat.cc
 )
 

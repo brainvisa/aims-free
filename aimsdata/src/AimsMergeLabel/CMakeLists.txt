@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsMergeLabel
+BRAINVISA_ADD_EXECUTABLE(AimsMergeLabel
 mergeLabel.cc
 )
 

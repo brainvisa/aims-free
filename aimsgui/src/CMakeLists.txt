@@ -23,7 +23,7 @@ foreach( _command AimsAttributedViewer AimsLabelSelector )
       set( _sources ${_sources} ${_command}/${_f} )
     endforeach()
 
-    add_executable( ${_target} ${_guiExecutable} ${_sources} )
+    BRAINVISA_ADD_EXECUTABLE( ${_target} ${_guiExecutable} ${_sources} )
     target_link_libraries( ${_target} aimsgui )
 
     if( APPLE )

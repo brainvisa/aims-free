@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsGraphExtractTransformation
+BRAINVISA_ADD_EXECUTABLE(AimsGraphExtractTransformation
 graphExtractTransformation.cc
 )
 

@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsConnectComp
+BRAINVISA_ADD_EXECUTABLE(AimsConnectComp
 main.cc
 )
 

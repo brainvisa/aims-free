@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsComposeTransformation
+BRAINVISA_ADD_EXECUTABLE(AimsComposeTransformation
 composetrans.cc
 )
 

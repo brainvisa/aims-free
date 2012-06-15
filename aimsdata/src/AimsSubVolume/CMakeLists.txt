@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsSubVolume
+BRAINVISA_ADD_EXECUTABLE(AimsSubVolume
 subVolume.cc
 )
 

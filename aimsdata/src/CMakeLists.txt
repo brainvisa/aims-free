@@ -13,6 +13,7 @@ if( ZLIB_FOUND )
   set(HEADERS ${HEADERS} ${AIMSNIFTI_HEADERS})
 endif()
 add_subdirectory(aimsfdf)
+#add_subdirectory(aimsndp)
 set(HEADERS ${HEADERS} ${AIMSFDF_HEADERS})
 IF(APPLE)
   add_subdirectory(bundle_aimsecat)
@@ -109,7 +110,7 @@ foreach( _command
     foreach( _f ${_proSources} )
       set( _sources ${_sources} ${_command}/${_f} )
     endforeach( _f ${_proSources} )
-    add_executable( ${_target} ${_sources} )
+    BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
     target_link_libraries( ${_target} aimsdata )
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin

@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsTestArgs_example
+BRAINVISA_ADD_EXECUTABLE(AimsTestArgs_example
 AimsTestArgs.cc
 )
 

@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsCorrectionEpi
+BRAINVISA_ADD_EXECUTABLE(AimsCorrectionEpi
 contextEPI.cc 
 epiDistortion.cc
 g2dSmoother.cc

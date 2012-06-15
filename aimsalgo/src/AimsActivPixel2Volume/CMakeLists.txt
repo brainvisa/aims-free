@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsActivPixel2Volume
+BRAINVISA_ADD_EXECUTABLE(AimsActivPixel2Volume
 main.cc
 pix2vol.cc
 )

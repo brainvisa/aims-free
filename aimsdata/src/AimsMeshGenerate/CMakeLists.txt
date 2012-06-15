@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsMeshGenerate
+BRAINVISA_ADD_EXECUTABLE(AimsMeshGenerate
 meshGenerate.cc
 )
 

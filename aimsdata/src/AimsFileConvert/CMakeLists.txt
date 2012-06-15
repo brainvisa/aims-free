@@ -1,5 +1,5 @@
 
-ADD_EXECUTABLE(AimsFileConvert
+BRAINVISA_ADD_EXECUTABLE(AimsFileConvert
 fileConvert.cc
 )
 
