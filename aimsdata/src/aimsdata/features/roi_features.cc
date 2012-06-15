@@ -254,7 +254,7 @@ void RoiFeatures::writeCSV( ostream &out ) const
   list< map< string, DoubleStringOrNone > > csvValues;
 
   csvHeader.push_back( "ROI_label" );
-  csvHeader.push_back( "image_label" );
+  bool image_label = false;
   
   for( Object itRoi = _result->objectIterator(); itRoi->isValid(); itRoi->next() ) {
     const string roiName( itRoi->key() );
@@ -272,13 +272,17 @@ void RoiFeatures::writeCSV( ostream &out ) const
           roi_features[ itFeatures->key() ] = DoubleStringOrNone( feature->getScalar() );
         }
       }
-      csvValues.push_back( roi_features );
+      bool add_roi_features = true;
       for( Object itFeatures = features->objectIterator(); itFeatures->isValid(); itFeatures->next() ) {
         Object feature = itFeatures->currentValue();
         if ( feature->isDictionary() ) {
           // Feature is an image
           map< string, DoubleStringOrNone > image_features = roi_features;
           image_features[ "image_label" ] = DoubleStringOrNone( itFeatures->key() );
+          if ( ! image_label ) {
+            csvHeader.push_back( "image_label" );
+            image_label= true;
+          }
           for( Object itImgFeatures = feature->objectIterator(); itImgFeatures->isValid(); itImgFeatures->next() ) {
             Object feature = itImgFeatures->currentValue();
             if ( feature->isScalar() ) {
@@ -289,6 +293,7 @@ void RoiFeatures::writeCSV( ostream &out ) const
             }
           }
           csvValues.push_back( image_features );
+          add_roi_features = false;
           if ( feature->hasProperty( itFeatures->key() ) ) {
             Object time_features = feature->getProperty( itFeatures->key() ) ;
             if ( time_features->isDictionary() ) {
@@ -320,11 +325,13 @@ void RoiFeatures::writeCSV( ostream &out ) const
                   time_features_line[ *it ] = DoubleStringOrNone( time_features->getProperty( *it )->getArrayItem( time_step )->getScalar() );
                 }
                 csvValues.push_back( time_features_line );
+                add_roi_features = false;
               }
             }
           }
         }
       }
+      if ( add_roi_features ) csvValues.push_back( roi_features );
     } else {
       cerr << "Cannot write features in CSV format for ROI " << roiName << " because it contains data of type " << features->type() << endl;
     }
