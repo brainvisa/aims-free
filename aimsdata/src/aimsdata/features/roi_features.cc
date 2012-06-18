@@ -192,15 +192,11 @@ static void writeFeatures( const Object &features, ostream &out,
       out << d  << "," << endl;
     } catch( exception & ) {
       if ( v->isArray() ) {
-/*      try {
-        vector< ScalarFeaturesProvider::Scalar_t > *pVector =
-          &v->value<vector< ScalarFeaturesProvider::Scalar_t > >();*/
         out << "[ ";
         for( size_t i = 0; i < v->size(); ++i ) {
           out << v->getArrayItem( i )->getString() << ", ";
         }
         out << "]," << endl;
-//       } catch( exception & ) {
       } else {
         try {
           // Object it =  v->getInterface<DictionaryInterface>();
@@ -238,6 +234,8 @@ public:
       out << number;
     } else if ( type == 2 ) {
       out << str;
+    } else {
+      out << "n/a";
     }
   }
   double number;
@@ -250,7 +248,6 @@ public:
 void RoiFeatures::writeCSV( ostream &out ) const
 {
   list< string > csvHeader;
-//   map< string, map< string, double > > csvValues;
   list< map< string, DoubleStringOrNone > > csvValues;
 
   csvHeader.push_back( "ROI_label" );
@@ -279,7 +276,7 @@ void RoiFeatures::writeCSV( ostream &out ) const
           // Feature is an image
           map< string, DoubleStringOrNone > image_features = roi_features;
           image_features[ "image_label" ] = DoubleStringOrNone( itFeatures->key() );
-          if ( ! image_label ) {
+          if ( ! image_label && ! itFeatures->key().empty() ) {
             csvHeader.push_back( "image_label" );
             image_label= true;
           }
@@ -360,60 +357,12 @@ void RoiFeatures::writeCSV( ostream &out ) const
         const DoubleStringOrNone &v = itV->second;
         v.write( out );
       }
-    }
-    out << endl;
-  }
-
-//       list< pair< string, Object > > stack;
-//       stack.push_back( pair< string, Object >( "", features ) );
-//       while( ! stack.empty() ) {
-//         const string key = stack.front().first;
-//         const Object feature = stack.front().second;
-//         stack.pop_front();
-//         if ( feature->isScalar() ) {
-//           if ( find( csvHeader.begin(), csvHeader.end(), key ) == csvHeader.end() ) {
-//             csvHeader.push_back( key );
-//           }
-//           const double value = feature->getScalar();
-//           map< string, double > &values = csvValues[ roiName ];
-//           if ( values.find( key ) == values.end() ) {
-//             values[ key ] = value;
-//           } else {
-//             throw runtime_error( string( "Cannot write CVS file because there is more than one value in column \"" ) + key + "\" for region \"" + roiName + "\"" );
-//           }
-//         } else if ( feature->isDictionary() ) {
-//           for( Object itFeature = feature->objectIterator(); itFeature->isValid(); itFeature->next() ) {
-//             const string key2( ( key.empty() ? string() : key + "." ) + itFeature->key() );
-//             stack.push_front( pair< string, Object >( key2, itFeature->currentValue() ) );
-//           }
-//         } else {
-//           cerr << "Warning: ignoring feature of type " << feature->type() << " for key " << key << endl;
-//         }
-//       }
-//     } else {
-//       cerr << "Cannot write features in CSV format for ROI " << roiName << " because it contains data of type " << features->type() << endl;
-//     }
-//   }
-
-
-/*  out << "ROI_label";
-  for( list< string >::iterator itH = csvHeader.begin(); itH != csvHeader.end(); ++itH ) {
-    out << "\t" << *itH;
-  }
-  out << endl;
-  for( list< string >::iterator itR = roiNames.begin(); itR != roiNames.end(); ++itR ) {
-    out << *itR;
-    for( list< string >::iterator itH = csvHeader.begin(); itH != csvHeader.end(); ++itH ) {
-      const map< string, double > &values = csvValues[ *itR ];
-      map< string, double >::const_iterator itV = values.find( *itH );
-      if ( itV != values.end() ) {
-        out << "\t" << itV->second;
-      } else {
-        out << "\t";
+      else {
+        out << "n/a";
       }
     }
     out << endl;
-  }*/
+  }
 }
 
 

@@ -272,6 +272,16 @@ int main( int argc, const char **argv )
     
     app.initialize();
     
+    cerr << endl << "Warning: This command is deprecated and will be removed in future releases. You should use the following command instead:" << endl;
+    if ( ! filemotion.empty() ) {
+      cerr << "  AimsInvertTransformation -i \"" << filemotion << "\" -o \"" << filemotion << ".inverted.trm\"" << endl;
+    }
+    cerr << "  AimsRoiFeatures -f csv -i \"" << filevoi << "\" -s \"" << fileseries << "\" -o \"" << fileoutput << "\"";
+    if ( ! filemotion.empty() ) {
+      cerr << " -t \"" << filemotion << ".inverted.trm\"";
+    }
+    cerr << endl << endl;
+    
     if( listsels )
       {
         Listsel();
