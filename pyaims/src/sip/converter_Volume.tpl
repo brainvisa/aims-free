@@ -64,7 +64,7 @@ public:
 
 %If ( CARTODATA )
 
-  Volume_%Template2typecode%* operator () ( const Volume_%Template1typecode% & ) const;
+  rc_ptr_Volume_%Template2typecode% * operator () ( const Volume_%Template1typecode% & ) const /Factory/;
 %MethodCode
   carto::rc_ptr<Volume_%Template1typecode%>	r( const_cast<Volume_%Template1typecode% *>( a0 ) );
   carto::rc_ptr<Volume_%Template2typecode%>	resvol;
@@ -74,7 +74,7 @@ public:
     resvol = d->volume();
   }
   r.release();
-  sipRes = resvol.get();
+  sipRes = new carto::rc_ptr<Volume_%Template2typecode%>( resvol );
   resvol.release();
 %End
 
@@ -92,7 +92,7 @@ public:
 %End
 
   AimsData_%Template2typecode%* operator ()
-    ( const AimsData_%Template1typecode% & ) const;
+    ( const AimsData_%Template1typecode% & ) const /Factory/;
   void convert( const AimsData_%Template1typecode% &,
     AimsData_%Template2typecode% & ) const;
 };
@@ -114,7 +114,7 @@ public:
 
 %If ( CARTODATA )
 
-  Volume_%Template2typecode%* operator () ( const Volume_%Template1typecode% & ) const;
+  rc_ptr_Volume_%Template2typecode% * operator () ( const Volume_%Template1typecode% & ) const /Factory/;
 %MethodCode
   carto::rc_ptr<Volume_%Template1typecode%>	r( const_cast<Volume_%Template1typecode% *>( a0 ) );
   carto::rc_ptr<Volume_%Template2typecode%>	resvol;
@@ -124,8 +124,7 @@ public:
     resvol = d->volume();
   }
   r.release();
-  sipRes = resvol.get();
-  resvol.release();
+  sipRes = new carto::rc_ptr<Volume_%Template2typecode%>( resvol );
 %End
 
   void convert( const Volume_%Template1typecode% &, Volume_%Template2typecode% & ) const;
@@ -142,7 +141,7 @@ public:
 %End
 
   AimsData_%Template2typecode%* operator ()
-    ( const AimsData_%Template1typecode% & ) const;
+    ( const AimsData_%Template1typecode% & ) const /Factory/;
   void convert( const AimsData_%Template1typecode% &,
     AimsData_%Template2typecode% & ) const;
 };
