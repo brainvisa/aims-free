@@ -6,6 +6,7 @@ class RCObject
 {
 %TypeHeaderCode
 #include <cartobase/smart/rcptrtrick.h>
+// #define PYAIMS_DEBUG_RC
 %End
 
 public:
@@ -24,7 +25,7 @@ public:
 #ifdef PYAIMS_DEBUG_RC
   std::cout << "setupRC for " << a0 << ", c++ refcount: "
     << carto::rc_ptr_trick::refCount( *a0 ) << ", pyowned: "
-    << sipIsPyOwned( (sipWrapper *) a0Wrapper ) << std::endl;
+    << sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) << std::endl;
 #endif
 #if SIP_VERSION >= 0x040800
 if( sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) 
@@ -49,7 +50,7 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
 #ifdef PYAIMS_DEBUG_RC
   std::cout << "releaseRC for " << a0 << ", c++ refcount: "
     << carto::rc_ptr_trick::refCount( *a0 ) << ", pyowned: "
-    << sipIsPyOwned( (sipWrapper *) a0Wrapper ) << std::endl;
+    << sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) << std::endl;
 #endif
   if( PyObject_HasAttrString( a0Wrapper, "_cpp_rcptr" ) )
   {
