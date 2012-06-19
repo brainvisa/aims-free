@@ -35,18 +35,18 @@
 #define AIMS_QTCOMPAT_QFILEDIALOG_H
 
 #include <qglobal.h>
-#if QT_VERSION >= 0x040000
-
-#include <Q3FileDialog>
-/* a typedef here cannot be used because QFileDialog is declared in 
-   <Q3FileDialog> */
-#define QFileDialog Q3FileDialog
-
-#else
+// #if QT_VERSION >= 0x040000
+// 
+// #include <Q3FileDialog>
+// /* a typedef here cannot be used because QFileDialog is declared in 
+//    <Q3FileDialog> */
+// #define QFileDialog Q3FileDialog
+// 
+// #else
 
 #include <qfiledialog.h>
 
-#endif
+// #endif
 
 #endif
 
