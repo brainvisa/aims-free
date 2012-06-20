@@ -41,6 +41,7 @@
 #include <aims/io/process.h>
 #include <aims/io/iooptions.h>
 #include <aims/io/motionW.h>
+#include <aims/io/fileFormat.h>
 #include <cartobase/stream/fileutil.h>
 
 using namespace aims;
@@ -58,7 +59,7 @@ public:
 	     vector<int> &ez, vector<int> &et,
 	     bool lap, vector<string> &fileout, 
 	     bool nominf, bool writemotion,
-	     string motiondirect, string motioninverse );
+	     string motiondirect, string motioninverse, bool split4d );
   virtual ~SubVolume();
 
   vector<int> sx, sy, sz, st, ex, ey, ez, et;
@@ -67,6 +68,7 @@ public:
   bool nominf;
   bool writemotion;
   string motiondirect, motioninverse;
+  bool split4d;
 };
 
 
@@ -75,10 +77,11 @@ SubVolume::SubVolume( vector<int> &sx, vector<int> &sy, vector<int> &sz,
 		      vector<int> &ez, vector<int> &et,
 		      bool lap, vector<string> &fileout, 
 		      bool nominf, bool writemotion,
-		      string motiondirect, string motioninverse ) 
+		      string motiondirect, string motioninverse, bool split4d )
   : sx(sx),sy(sy),sz(sz),st(st),ex(ex),ey(ey),ez(ez),et(et),
     lap(lap), fileout(fileout), nominf(nominf), writemotion(writemotion),
-    motiondirect(motiondirect), motioninverse(motioninverse)
+    motiondirect(motiondirect), motioninverse(motioninverse),
+    split4d( split4d )
 {
   registerProcessType( "Volume", "S8",    &subvolume<int8_t> );
   registerProcessType( "Volume", "U8",    &subvolume<uint8_t> );
@@ -109,6 +112,49 @@ bool subvolume( Process & p, const string & filein, Finder & f )
   r.read( data, 0, &format );
   bool	first = true;
 
+  if( sv.split4d )
+  {
+    size_t i, nt = data.dimT();
+    sv.st.clear();
+    sv.et.clear();
+    sv.st.reserve( nt );
+    sv.et.reserve( nt );
+    string outfilename = sv.fileout[0];
+    string extsuf;
+    const map<string, list<string> > & ext
+      = FileFormatDictionary<AimsData<T> >::extensions();
+    map<string, list<string> >::const_iterator ile, ele = ext.end();
+    for( ile=ext.begin(); ile!=ele; ++ile )
+    {
+      if( outfilename.substr( outfilename.length() - ile->first.length() - 1,
+        ile->first.length() + 1 ) == "." + ile->first )
+      {
+        outfilename = outfilename.substr( 0, outfilename.length()
+          - ile->first.length() - 1 );
+        extsuf = "." + ile->first;
+        break;
+      }
+    }
+    bool addout = false;
+    if( sv.fileout.size() != nt )
+    {
+      addout = true;
+      sv.fileout.clear();
+      sv.fileout.reserve( nt );
+    }
+    for( i=0; i<nt; ++i )
+    {
+      sv.st.push_back( i );
+      sv.et.push_back( i );
+      if( addout )
+      {
+        stringstream ss;
+        ss << setfill( '0' ) << setw( 4 ) << i;
+        sv.fileout.push_back( outfilename + "_" + ss.str() + extsuf );
+      }
+    }
+  }
+
   bool lap  = ( (SubVolume &) p).lap;
   vector<int>::iterator isx = sv.sx.begin();
   vector<int>::iterator isy = sv.sy.begin();
@@ -120,7 +166,8 @@ bool subvolume( Process & p, const string & filein, Finder & f )
   vector<int>::iterator iet = sv.et.begin();
 
   for( vector<string>::iterator ifileout = sv.fileout.begin();
-       ifileout != sv.fileout.end(); ++ifileout ) {
+       ifileout != sv.fileout.end(); ++ifileout )
+  {
     int sx, sy, sz, st, ex, ey, ez, et;
     if ( isx == sv.sx.end() ) {
       sx  = 0;
@@ -352,6 +399,7 @@ int main( int argc, const char **argv )
   vector<int> sx, sy, sz, st, ex, ey, ez, et;
   bool lap = false, nominf = false;
   bool writemotion = false;
+  bool split4d = false;
 
   AimsApplication	app( argc, argv, 
 			     "Carve a subvolume in the input volume ");
@@ -373,6 +421,10 @@ int main( int argc, const char **argv )
   app.alias( "--lastz", "-Z");
   app.addOptionSeries( et, "-T", "last t coordinate (default SizeT-1)" );
   app.alias( "--lastt", "-T");
+  app.addOption( split4d, "-s", "split a 4D volume into a series of 3D "
+    "volumes. Output filenames will be appended with a timestep number.",
+    true );
+  app.alias( "--split", "-s");
   app.addOption( lap, "-l", " take X,Y,Z and T as dimensions instead of coordinates)", true);
   app.alias( "--lap", "-l");
   app.addOptionSeries( fileout, "-o", "output data", 1 );
@@ -384,13 +436,15 @@ int main( int argc, const char **argv )
                  "the first sub-volume (useful when writing a series)", true );
 
 
-  try {
-		app.initialize();
-		SubVolume proc( sx, sy, sz, st, ex, ey, ez, et, lap, fileout, 
-                                nominf, writemotion, motiondirect, motioninverse );
-		if( !proc.execute( filein ) )
-			cout << "Couldn't process file - aborted\n";
-	}
+  try
+  {
+    app.initialize();
+    SubVolume proc( sx, sy, sz, st, ex, ey, ez, et, lap, fileout,
+                    nominf, writemotion, motiondirect, motioninverse,
+                    split4d );
+    if( !proc.execute( filein ) )
+            cout << "Couldn't process file - aborted\n";
+  }
   catch( user_interruption &e ) {}
   catch( exception & e ) {
 		cerr << e.what() << endl;
