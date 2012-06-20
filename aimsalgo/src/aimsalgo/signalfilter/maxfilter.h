@@ -36,78 +36,12 @@
 #define AIMS_SIGNALFILTER_MAXSMOOTH_H
 
 #include <aims/signalfilter/nonlin_filt-func.h>
+#include <aims/signalfilter/basefilter.h>
 
+AIMSALGO_SIGNALFILTER_DECLARE_FILTER(MaxSmoothing, T, MaxFilterFunc<T>)
 
-template< class T >
-class MaxSmoothing
-{
-public:
+AIMSALGO_SIGNALFILTER_SPECIALIZE_FILTER(MaxSmoothing, AimsRGB, MaxFilterFunc<uint8_t>)
 
-  MaxSmoothing( int sx=3, int sy = 3, int sz = 1 );
-  virtual ~MaxSmoothing() { }
-
-  AimsData< T >  doit( const AimsData<T>& );
-
-private:
-
-  int                        _win_size_x;
-  int                        _win_size_y;
-  int                        _win_size_z;
-  const MaxFilterFunc<T>  _func;
-};
-
-
-template< class T > inline 
-MaxSmoothing< T >::MaxSmoothing(int sx, int sy, int sz )
-{
-  _win_size_x = sx;
-  _win_size_y = sy;
-  _win_size_z = sz;
-}
-
-
-template< class T > inline
-AimsData< T > MaxSmoothing< T >::doit( const AimsData< T >& ref )
-{
-
-  int x, y, z, t, nx, ny, nz, n;
-  short dx, dy, dz, bz, by, bx;
- 
-  dx = _win_size_x / 2 ;
-  dy = _win_size_y / 2 ;
-  dz = _win_size_z / 2 ;
- 
-
-  AimsData<T> out = ref.clone();
-
-  // update mask dims since it is always an odd number
-  _win_size_x = dx * 2 + 1;
-  _win_size_y = dy * 2 + 1;
-  _win_size_z = dz * 2 + 1;
-
-  AimsData<T> tab( _win_size_x * _win_size_y * _win_size_z );
-  bz = (ref.dimZ() - dz);
-  by = (ref.dimY() - dy);
-  bx = (ref.dimX() - dx);
-
-  for ( t = 0; t < ref.dimT(); t++ )
-    for ( z = dz; z < bz; z++ )
-      for ( y = dy; y < by; y++ )
-        for ( x = dx; x < bx; x++ )
-          {
-            n = 0;
-            for ( nz = -dz; nz <= dz; nz++ )
-              for ( ny = -dy; ny <= dy; ny++ )
-                for ( nx = -dx; nx <= dx; nx++ )
-                  {
-                    tab(n) = ref(nx+x, ny+y, nz+z, t);
-                    ++n ;
-                  }
-           out( x, y, z, t ) = _func.doit( tab );
-          }
-
-  return( out );
-
-}
+AIMSALGO_SIGNALFILTER_SPECIALIZE_FILTER(MaxSmoothing, AimsRGBA, MaxFilterFunc<uint8_t>)
 
 #endif

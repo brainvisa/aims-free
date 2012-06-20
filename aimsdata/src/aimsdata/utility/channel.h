@@ -39,10 +39,6 @@
 #include <aims/data/data_g.h>
 #include <aims/utility/converter_g.h>
 
-using namespace std;
-using namespace carto;
-using namespace aims; 
-
 enum AimsRGBAChannel
 {
   RedChannel = 0,
@@ -113,8 +109,8 @@ class ChannelSelector \
       void set( T & input, uint8_t channel, U value ); \
 \
     private: \
-      ShallowConverter<C, U> channelconv; \
-      ShallowConverter<T, U> dataconv; \
+      carto::ShallowConverter<C, U> channelconv; \
+      carto::ShallowConverter<T, U> dataconv; \
 }; \
 
 

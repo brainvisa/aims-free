@@ -188,6 +188,7 @@ HEADERS = \
     scalespace/bucketblob_d.h \
     scalespace/meshBlob.h    \
     scalespace/meshDiffuse.h  \
+    signalfilter/basefilter.h    \
     signalfilter/signalfilter_g.h  \
     signalfilter/convol.h    \
     signalfilter/diffusionSmoother_d.h \
@@ -211,6 +212,7 @@ HEADERS = \
     signalfilter/meanfilter.h  \
     signalfilter/minfilter.h  \
     signalfilter/majorityfilter.h  \
+    signalfilter/multichannelfilter.h  \
     signalfilter/nonlin_filt-func.h \
     spam/spam.h \
     talairach/cramer.h    \
@@ -378,11 +380,6 @@ SOURCES = \
     signalfilter/gslices.cc    \
     signalfilter/parity.cc    \
     signalfilter/gframes.cc    \
-    signalfilter/maxfilter.cc  \
-    signalfilter/medianfilter.cc  \
-    signalfilter/meanfilter.cc \
-    signalfilter/minfilter.cc  \
-    signalfilter/majorityfilter.cc  \
     spam/spam.cc \
     talairach/cramer.cc    \
     talairach/talPoints.cc    \

@@ -41,6 +41,7 @@
 #include <aims/getopt/getoptProcess.h>
 #include <aims/math/math_g.h>
 #include <aims/utility/utility_g.h>
+#include <aims/rgb/rgb.h>
 #include <aims/signalfilter/maxfilter.h>
 #include <aims/signalfilter/minfilter.h>
 #include <aims/signalfilter/medianfilter.h>
@@ -135,14 +136,16 @@ AimsFilter::AimsFilter()
   : Process(), dx(1), dy(1), dz(1)
                
 {
-    registerProcessType( "Volume", "S8", &filter<int8_t> );
-    registerProcessType( "Volume", "U8", &filter<uint8_t> );
-    registerProcessType( "Volume", "S16", &filter<int16_t> );
-    registerProcessType( "Volume", "U16", &filter<uint16_t> );
-    registerProcessType( "Volume", "S32", &filter<int32_t> );
-    registerProcessType( "Volume", "U32", &filter<uint32_t> );
-    registerProcessType( "Volume", "FLOAT", &filter<float> );
-    registerProcessType( "Volume", "DOUBLE", &filter<double> );
+  registerProcessType( "Volume", "S8", &filter<int8_t> );
+  registerProcessType( "Volume", "U8", &filter<uint8_t> );
+  registerProcessType( "Volume", "S16", &filter<int16_t> );
+  registerProcessType( "Volume", "U16", &filter<uint16_t> );
+  registerProcessType( "Volume", "S32", &filter<int32_t> );
+  registerProcessType( "Volume", "U32", &filter<uint32_t> );
+  registerProcessType( "Volume", "FLOAT", &filter<float> );
+  registerProcessType( "Volume", "DOUBLE", &filter<double> );
+  registerProcessType( "Volume", "RGB", &filter<AimsRGB> );
+  registerProcessType( "Volume", "RGBA", &filter<AimsRGBA> );
 }
 
 int main( int argc, const char **argv )

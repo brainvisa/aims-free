@@ -31,14 +31,66 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#ifndef AIMSALGO_SIGNALFILTER_MULTICHANNELFILTER_H
+#define AIMSALGO_SIGNALFILTER_MULTICHANNELFILTER_H
 
-#include <aims/signalfilter/medianfilter.h>
+#include <aims/utility/channel.h>
 
-template class MedianSmoothing<uint8_t>;
-template class MedianSmoothing<int8_t>;
-template class MedianSmoothing<uint16_t>;
-template class MedianSmoothing<int16_t>;
-template class MedianSmoothing<uint32_t>;
-template class MedianSmoothing<int32_t>;
-template class MedianSmoothing<float>;
-template class MedianSmoothing<double>;
+#define AIMSALGO_SIGNALFILTER_SPECIALIZE_MULTICHANNELFILTER( R, T ) \
+template <class F> \
+class R< T, F > \
+{ \
+  public: \
+\
+    R ( int sx = 3, int sy = 3, int sz = 1 ); \
+    virtual ~R () {} \
+\
+    AimsData< T > doit( const AimsData<T>& ); \
+\
+protected: \
+\
+  int                        _win_size_x; \
+  int                        _win_size_y; \
+  int                        _win_size_z; \
+  const F                    _func; \
+\
+}; \
+\
+template< class F > \
+inline \
+R< T, F >::R(int sx, int sy, int sz ) \
+  : _win_size_x(sx), \
+    _win_size_y(sy),\
+    _win_size_z(sz) \
+{ \
+}\
+\
+template <class F> \
+inline \
+AimsData< T > \
+R< T, F >::doit( const AimsData<T>& ref ) \
+{ \
+  ChannelSelector< AimsData<T>, AimsData<uint8_t> > selector; \
+  DataTypeInfo< T > info; \
+\
+  AimsData<T> outVolume(ref.dimX(), ref.dimY(), ref.dimZ(), ref.dimT()); \
+  if( ref.header() ) { \
+    outVolume.setHeader( ref.header()->cloneHeader( true ) ); \
+  } \
+\
+  R<uint8_t, F> filter(_win_size_x, _win_size_y, _win_size_z); \
+  for (uint8_t channel = 0; channel < DataTypeInfo< T >::samples(); channel++) { \
+\
+    /* We split the data and process filter on each component */ \
+    const AimsData<uint8_t> & inChannel = selector.select( ref, channel ); \
+\
+    const AimsData<uint8_t> & outChannel = filter.doit( inChannel ); \
+    selector.set( outVolume, channel, outChannel ); \
+  } \
+\
+  return outVolume; \
+\
+} \
+
+
+#endif
