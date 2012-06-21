@@ -12,7 +12,8 @@
 
 using namespace std;
 
-GeodesicPath::GeodesicPath( AimsSurfaceTriangle surface, int method, int strain ) :
+GeodesicPath::GeodesicPath( const AimsSurfaceTriangle & surface, int method,
+                            int strain ) :
     _surface(surface), _method(method), _strain(strain)
 {
   //cout << "compute texture curvature : ";
@@ -23,7 +24,9 @@ GeodesicPath::GeodesicPath( AimsSurfaceTriangle surface, int method, int strain 
   computeGraphDijkstra(_surface, _texCurv, _method, _strain);
 }
 
-GeodesicPath::GeodesicPath( AimsSurfaceTriangle surface ,TimeTexture<float> texCurv, int method, int strain ) :
+GeodesicPath::GeodesicPath( const AimsSurfaceTriangle & surface,
+                            const TimeTexture<float> & texCurv, int method,
+                            int strain ) :
     _surface(surface), _texCurv(texCurv), _method(method), _strain(strain)
 {
   computeGraphDijkstra(_surface, _texCurv, _method, _strain);
@@ -36,16 +39,18 @@ GeodesicPath::~GeodesicPath()
 }
 
 //
-void GeodesicPath::computeGraphDijkstra (AimsSurfaceTriangle surface, TimeTexture<float> texCurv, int method,int strain)
+void GeodesicPath::computeGraphDijkstra( const AimsSurfaceTriangle & surface,
+                                         const TimeTexture<float> & texCurv,
+                                         int method,int strain )
 {
-  vector<float> &curv = _texCurv[0].data();
+  const vector<float> &curv = texCurv.begin()->second.data();
 
   // copy vertex and faces vector
   vector<double> pointsSP;
   vector<unsigned> facesSP;
 
-  vector<Point3df> & vert = surface.vertex();
-  vector<AimsVector<uint, 3> > & tri = surface.polygon();
+  const vector<Point3df> & vert = surface.vertex();
+  const vector<AimsVector<uint, 3> > & tri = surface.polygon();
   pointsSP.resize(3*vert.size());
   facesSP.resize(3*tri.size());
 
@@ -73,9 +78,10 @@ void GeodesicPath::computeGraphDijkstra (AimsSurfaceTriangle surface, TimeTextur
 //  cout << "done" << endl;
 }
 
-void GeodesicPath::updateWeight(TimeTexture<float> texCurv,int method, int strain, double sigmo)
+void GeodesicPath::updateWeight( const TimeTexture<float> & texCurv,
+                                 int method, int strain, double sigmo )
 {
-  vector<float> &curv = texCurv[0].data();
+  const vector<float> &curv = texCurv.begin()->second.data();
 
   if (method >= 0 && method < 3)
     _meshSP.update_weight(&curv[0],method,(double)strain,sigmo);

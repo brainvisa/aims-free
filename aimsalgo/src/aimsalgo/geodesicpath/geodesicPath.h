@@ -39,16 +39,21 @@ class GeodesicPath
     geodesic::Mesh _meshSP;
 
     //Constructor
-    GeodesicPath( AimsSurfaceTriangle surface ,TimeTexture<float> texCurv, int method, int strain);
-    GeodesicPath( AimsSurfaceTriangle surface , int method, int strain);
+    GeodesicPath( const AimsSurfaceTriangle & surface,
+                  const TimeTexture<float> & texCurv, int method, int strain);
+    GeodesicPath( const AimsSurfaceTriangle & surface , int method,
+                  int strain);
     ~GeodesicPath();
 
     // method: 1=sulci 2=gyri 3=geodesic
 
   //private :
     //private methods
-    void computeGraphDijkstra (AimsSurfaceTriangle surface ,TimeTexture<float> texCurv, int method, int strain);
-    void updateWeight(TimeTexture<float> texCurv,int method, int strain, double sigmo);
+    void computeGraphDijkstra( const AimsSurfaceTriangle & surface,
+                               const TimeTexture<float> & texCurv, int method,
+                               int strain);
+    void updateWeight( const TimeTexture<float> & texCurv, int method,
+                       int strain, double sigmo);
 
   public :
     vector<unsigned> shortestPath_1_1_ind(unsigned source, unsigned target);
