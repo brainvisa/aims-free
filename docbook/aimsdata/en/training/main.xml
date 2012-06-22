@@ -49,6 +49,8 @@ prompt% AimsFileConvert -i subject01.ima -o subject01.img
 
 <para><emphasis role='bold'>HELP:</emphasis> <ulink url='&PATH_WEB;#aims_AimsSubVolume' target='blank'>command help for AimsSubVolume</ulink></para>
 
+<para>It can also be used to split a 4D volume into a series of 3D volumes.</para>
+
 <para><emphasis role='bold'>DATA:</emphasis> <filename>&DIR_DEMO;AimsSubVolume/diff_data.ima</filename>, diffusion volume of size [256, 256, 23, 22].</para>
 
 <para><emphasis role='bold'>EXAMPLE 1: GET T2 VOLUME FROM DIFFUSION DATA.</emphasis> In order to get the first volume of the 4th dimension, which corresponds to a T2 volume, you can use the AimsSubVolume command in this way:  </para>
@@ -80,7 +82,18 @@ prompt%% AimsSubVolume -i diff_data.ima -o diff.ima -t 1 -T 21
 Input volume dimensions : 256 256 23 22
 Output volume dimensions : 256 256 23 21
 prompt%
-</screen>  
+</screen>
+
+<para><emphasis role='bold'>EXAMPLE 4: SPLIT A 4D VOLUME INTO A SERIES OF 3D VOLUMES.</emphasis>
+</para>
+<screen>
+AimsSubVolume -i subject01_raw_diffusion_o041.ima -o diff.nii -s
+Input volume dimensions : 128 128 60 46
+Output volume dimensions : 128 128 60 1
+[...]
+Input volume dimensions : 128 128 60 46
+Output volume dimensions : 128 128 60 1
+</screen>
 
 </sect1>
   
