@@ -145,7 +145,7 @@ bool doitMesh( Process & p, const string &, Finder & )
 
 template<class T> bool ZCat::cat( AimsData<T> & out )
 {
-  int x, y, z, t, Z = 0;  
+  long x, y, z, t, Z = 0;
   list<string>::const_iterator	it;
   unsigned n = 0;
   bool copy_header = true;

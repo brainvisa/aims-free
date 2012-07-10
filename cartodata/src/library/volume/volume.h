@@ -145,6 +145,17 @@ namespace carto
     const T& at( int x, int y = 0, int z = 0, int t = 0 ) const;
     /// same as \c operator()
     T& at( int x, int y = 0, int z = 0, int t = 0 );
+
+    const T& operator()( long x, long y = 0, long z = 0, long t = 0 ) const;
+    T& operator() ( long x, long y = 0, long z = 0, long t = 0 );
+    const T& at( long x, long y = 0, long z = 0, long t = 0 ) const;
+    T& at( long x, long y = 0, long z = 0, long t = 0 );
+    const T& operator()( size_t x, size_t y = 0, size_t z = 0,
+                         size_t t = 0 ) const;
+    T& operator() ( size_t x, size_t y = 0, size_t z = 0, size_t t = 0 );
+    const T& at( size_t x, size_t y = 0, size_t z = 0, size_t t = 0 ) const;
+    T& at( size_t x, size_t y = 0, size_t z = 0, size_t t = 0 );
+
 #ifdef CARTO_USE_BLITZ
     const T & at( const blitz::TinyVector<int,1> & ) const;
     T & at( const blitz::TinyVector<int,1> & );
@@ -238,6 +249,7 @@ namespace carto
     iterator end() { return (*this)->end(); }
     const_iterator begin() const { return (*this)->begin(); }
     const_iterator end() const { return (*this)->end(); }
+
     const T& operator()( int x, int y = 0, int z = 0, int t = 0 ) const
     { return (**this)( x, y, z, t ); }
     T& operator() ( int x, int y = 0, int z = 0, int t = 0 )
@@ -245,6 +257,25 @@ namespace carto
     const T& at( int x, int y = 0, int z = 0, int t = 0 ) const
     { return (*this)->at( x, y, z, t ); }
     T& at( int x, int y = 0, int z = 0, int t = 0 )
+    { return (*this)->at( x, y, z, t ); }
+
+    const T& operator()( long x, long y = 0, long z = 0, long t = 0 ) const
+    { return (**this)( x, y, z, t ); }
+    T& operator() ( long x, long y = 0, long z = 0, long t = 0 )
+    { return (**this)( x, y, z, t ); }
+    const T& at( long x, long y = 0, long z = 0, long t = 0 ) const
+    { return (*this)->at( x, y, z, t ); }
+    T& at( long x, long y = 0, long z = 0, long t = 0 )
+    { return (*this)->at( x, y, z, t ); }
+
+    const T& operator()( size_t x, size_t y = 0, size_t z = 0,
+                         size_t t = 0 ) const
+    { return (**this)( x, y, z, t ); }
+    T& operator() ( size_t x, size_t y = 0, size_t z = 0, size_t t = 0 )
+    { return (**this)( x, y, z, t ); }
+    const T& at( size_t x, size_t y = 0, size_t z = 0, size_t t = 0 ) const
+    { return (*this)->at( x, y, z, t ); }
+    T& at( size_t x, size_t y = 0, size_t z = 0, size_t t = 0 )
     { return (*this)->at( x, y, z, t ); }
 #endif
   };
@@ -307,8 +338,55 @@ namespace carto
 
 
   template < typename T >
+  inline
+  const T& Volume< T >::at( long x, long y, long z, long t ) const
+  {
+#ifdef CARTO_USE_BLITZ
+    const blitz::TinyVector<int,4> & stride = _blitz.stride();
+    return _blitz.data()[ x * stride[0] + y * stride[1] + z * stride[2]
+                   + t * stride[3] ];
+#else
+    return _items[ x + y * _lineoffset + z * _sliceoffset
+                   + t * _volumeoffset ];
+#endif
+  }
+
+
+  template < typename T >
+  inline
+  const T& Volume< T >::at( size_t x, size_t y, size_t z, size_t t ) const
+  {
+#ifdef CARTO_USE_BLITZ
+    const blitz::TinyVector<int,4> & stride = _blitz.stride();
+    return _blitz.data()[ x * stride[0] + y * stride[1] + z * stride[2]
+                   + t * stride[3] ];
+#else
+    return _items[ x + y * _lineoffset + z * _sliceoffset
+                   + t * _volumeoffset ];
+#endif
+  }
+
+
+  template < typename T >
   inline 
   const T& Volume< T >::operator()( int x, int y, int z, int t ) const
+  {
+    return at( x, y, z, t );
+  }
+
+
+  template < typename T >
+  inline
+  const T& Volume< T >::operator()( long x, long y, long z, long t ) const
+  {
+    return at( x, y, z, t );
+  }
+
+
+  template < typename T >
+  inline
+  const T& Volume< T >::operator()( size_t x, size_t y, size_t z,
+                                    size_t t ) const
   {
     return at( x, y, z, t );
   }
@@ -328,8 +406,54 @@ namespace carto
 
 
   template < typename T >
+  inline
+  T& Volume< T >::at( long x, long y, long z, long t )
+  {
+#ifdef CARTO_USE_BLITZ
+    const blitz::TinyVector<int,4> & stride = _blitz.stride();
+    return _blitz.data()[ x * stride[0] + y * stride[1] + z * stride[2]
+                   + t * stride[3] ];
+#else
+    return _items[ x + y * _lineoffset + z * _sliceoffset
+                   + t * _volumeoffset ];
+#endif
+  }
+
+
+  template < typename T >
+  inline
+  T& Volume< T >::at( size_t x, size_t y, size_t z, size_t t )
+  {
+#ifdef CARTO_USE_BLITZ
+    const blitz::TinyVector<int,4> & stride = _blitz.stride();
+    return _blitz.data()[ x * stride[0] + y * stride[1] + z * stride[2]
+                   + t * stride[3] ];
+#else
+    return _items[ x + y * _lineoffset + z * _sliceoffset
+                   + t * _volumeoffset ];
+#endif
+  }
+
+
+  template < typename T >
   inline 
   T& Volume< T >::operator()( int x, int y, int z, int t )
+  {
+    return at( x, y, z, t );
+  }
+
+
+  template < typename T >
+  inline
+  T& Volume< T >::operator()( long x, long y, long z, long t )
+  {
+    return at( x, y, z, t );
+  }
+
+
+  template < typename T >
+  inline
+  T& Volume< T >::operator()( size_t x, size_t y, size_t z, size_t t )
   {
     return at( x, y, z, t );
   }
