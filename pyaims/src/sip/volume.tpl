@@ -40,18 +40,10 @@ public:
     const carto::AllocatorContext & allocatorContext() const;
     void fill( const %Template1% & value ) /ReleaseGIL/;
 
-  %Template1PyType% at( int, int = 0, int = 0, int = 0 ) const;
-  %Template1PyType% at( unsigned long, unsigned long = 0, unsigned long = 0,
-                        unsigned long = 0 ) const;
+  %Template1PyType% at( long, long = 0, long = 0, long = 0 ) const;
 
   %Template1PyType% value( long, long = 0, long = 0,
                            long = 0 ) const;
-%MethodCode
- sipRes = %Template1new%( sipCpp->at( a0, a1, a2, a3 ) );
-%End
-
-  %Template1PyType% value( unsigned long, unsigned long = 0, unsigned long = 0,
-                           unsigned long = 0 ) const;
 %MethodCode
  sipRes = %Template1new%( sipCpp->at( a0, a1, a2, a3 ) );
 %End
@@ -62,20 +54,8 @@ public:
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
 %End
 
- void setValue( %Template1%, unsigned long, unsigned long = 0, unsigned long = 0,
-                unsigned long = 0 );
-%MethodCode
- sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
-%End
-
 %#ifdef PyAims_Volume_U8_defined%
  void setValue( int, long, long = 0, long = 0, long = 0 );
-%MethodCode
- sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
-%End
-
- void setValue( int, unsigned long, unsigned long = 0, unsigned long = 0,
-                unsigned long = 0 );
 %MethodCode
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
 %End
