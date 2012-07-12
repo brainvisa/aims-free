@@ -259,7 +259,7 @@ inline
 typename AimsData<T>::iterator AimsData<T>::end()
 {
 #ifdef CARTO_USE_BLITZ
-  return &*_volume->begin() + _volume->getSizeX() * _volume->getSizeY()
+  return &*_volume->begin() + long(_volume->getSizeX()) * _volume->getSizeY()
       * _volume->getSizeZ() * _volume->getSizeT();
 #else
   return &*_volume->end();
@@ -272,7 +272,7 @@ inline
 typename AimsData<T>::const_iterator AimsData<T>::end() const
 {
 #ifdef CARTO_USE_BLITZ
-  return &*_volume->begin() + _volume->getSizeX() * _volume->getSizeY()
+  return &*_volume->begin() + long(_volume->getSizeX()) * _volume->getSizeY()
       * _volume->getSizeZ() * _volume->getSizeT();
 #else
   return &*_volume->end();
@@ -339,7 +339,7 @@ AimsData<T>::AimsData( const AimsData<T>& other, int borderw)
   other.dimY() + borderw * 2, other.dimZ() + borderw * 2, other.dimT() ) ), 
     d( new Private )
 {
-  int x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
+  long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
   for ( t = 0; t < tm; t++ )
     for ( z = 0; z < zm; z++ )
       for ( y = 0; y < ym; y++ )
@@ -413,7 +413,7 @@ inline
 AimsData<T>& AimsData<T>::operator = ( const T& val )
 {
   iterator it = begin() + oFirstPoint();
-  int x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
+  long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
 
   for ( t = 0; t < tm; t++ )
   {
@@ -914,7 +914,7 @@ T AimsData<T>::minimum() const
   const_iterator it = begin() + oFirstPoint();
 
   mini = *it;
-  int x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
+  long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
 
   for ( t = 0; t < tm; t++ )
   {
@@ -947,7 +947,7 @@ T AimsData<T>::maximum() const
   const_iterator it = begin() + oFirstPoint();
 
   maxi = *it;
-  int x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
+  long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
 
   for ( t = 0; t < tm; t++ )
   {
@@ -1073,8 +1073,8 @@ inline
 void AimsData<T>::fillBorder( const T& val )
 {
   iterator	it;
-  int x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
-  int of = oFirstPoint(), op = oPointBetweenLine(), ol = oLineBetweenSlice();
+  long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
+  long of = oFirstPoint(), op = oPointBetweenLine(), ol = oLineBetweenSlice();
 
   for ( t = 0; t < tm; t++ )
   {
@@ -1119,11 +1119,11 @@ AimsData<T> AimsData<T>::cross( const AimsData<T>& other )
 
   AimsData<T> prod( dimX(), other.dimY(), 1, 1,
                     std::max( borderWidth(), other.borderWidth() ) );
-  for ( int y = 0; y < other.dimY(); y++ )
-    for ( int x = 0; x < dimX(); x++ )
+  for ( long y = 0; y < other.dimY(); y++ )
+    for ( long x = 0; x < dimX(); x++ )
     {
       prod( x, y ) = T( 0 );
-      for ( int k = 0; k < dimY(); k++ )
+      for ( long k = 0; k < dimY(); k++ )
         prod( x, y ) += (*this)( x, k ) * other( k, y );
     }
 
@@ -1150,7 +1150,7 @@ AimsData<T>& AimsData<T>::transpose()
   tmp.setSizeXYZT( sizeY(), sizeX(), sizeZ(), sizeT() );
   tmp.fillBorder( T( 0 ) );
 
-  int x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
+  long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
 
   for ( t = 0; t < tm; t++ )
     for ( z = 0; z < zm; z++ )
