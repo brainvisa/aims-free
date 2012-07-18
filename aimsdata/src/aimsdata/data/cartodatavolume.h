@@ -183,7 +183,7 @@ struct AimsData<T>::Private
 };
 
 
-// inline methods definition
+// inline methods definition
 
 // Private struct methods
 
