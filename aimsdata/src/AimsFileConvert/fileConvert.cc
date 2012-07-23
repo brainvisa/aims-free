@@ -158,6 +158,7 @@ FileConvert::FileConvert()
   registerProcessType( "Bucket", "DTITENSOR", 
 		       &readAndWrite<BucketMap<DtiTensor> > );
   registerProcessType( "Texture", "FLOAT", &convert<Texture1d> );
+  registerProcessType( "Texture", "DOUBLE", &convert<TimeTexture<double> > );
   registerProcessType( "Texture", "S16", &convert<TimeTexture<short> > );
   registerProcessType( "Texture", "S32", &convert<TimeTexture<int> > );
   registerProcessType( "Texture", "unsigned integer", 
@@ -353,6 +354,8 @@ DataConverter<TimeTexture<T> >::DataConverter( TimeTexture<T> & dat,
 		       &convData<TimeTexture<T>,TimeTexture<uint32_t> > );
   registerProcessType( "Texture", "FLOAT", 
 		       &convData<TimeTexture<T>,TimeTexture<float> > );
+  registerProcessType( "Texture", "DOUBLE",
+                       &convData<TimeTexture<T>,TimeTexture<double> > );
 }
 
 

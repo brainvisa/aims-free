@@ -124,7 +124,7 @@ namespace aims
       hdr.copy( thdr );
 
       if( hdr.hasProperty( "nb_t_pos" ) )
-          hdr.removeProperty( "nb_t_pos" );
+        hdr.removeProperty( "nb_t_pos" );
 
       gifti_image *gim = hdr.giftiImageBase();
       std::string fname = hdr.name();
