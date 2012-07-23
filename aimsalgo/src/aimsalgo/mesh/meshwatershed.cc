@@ -203,8 +203,8 @@ namespace aims
         aux = maj2[maj1[i]];
         lmajor[j] = aux;
       }
-    else
-      lmajor[j] = j;
+      else
+        lmajor[j] = j;
     }
 
     if( label.size() != N )
@@ -302,6 +302,11 @@ namespace aims
                              vector<double> & Height, vector<int> & Father,
                              vector<int> & label, double th )
   {
+    // idx: output table of seed node of each blob
+    // father: blob number which merges two (or more) others
+    // height: field value of the peak (seed) node in a blob
+    // label: blob number for each node
+
     // taken from old fff_field.c (ancestor of nipy)
     int V = mesh.vertex().size();
     vector<AimsVector<uint,2> > edges;
@@ -335,6 +340,7 @@ namespace aims
       scfield.insert( make_pair( -field[i], i ) );
     for( i=0, is=scfield.begin(); is!=es; ++is, ++i )
       p[i] = is->second;
+    // p contains an ordered list (decreasing field value) of indices
 
     for( i=0; i<V; ++i )
       label[i] = -1;
@@ -355,10 +361,12 @@ namespace aims
           possible[j] = -1;
         q = 0;
 
-        for( j=start; j<end; ++j )
+        for( j=start; j<end; ++j ) // all neighbours of win
         {
           k = label[neighb[j]];
 
+          /* fill in "possible": list of existing labels in neighbourhood of
+              win */
           if( k > -1 )
           {
             while( father[k] != k )
@@ -381,14 +389,14 @@ namespace aims
           }
         }
 
-        if( q == 0 )
+        if( q == 0 ) // no neighbouring label yet: assign a new one
         {
           label[win] = ll;
           idx[ll] = win;
           height[ll] = field[win];
           ll++;
         }
-        if( q == 1 )
+        if( q == 1 ) // one neighbouring label: grow the same one
           label[win] = possible[0];
         if( q > 1 )
         {

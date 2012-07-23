@@ -55,6 +55,13 @@ namespace aims
                      TimeTexture<int> & idx,
                      TimeTexture<int> & depth, TimeTexture<int> & major,
                      TimeTexture<int> & label, double threshold );
+  /** Blobs labeling and bifurcations.
+
+    \param idx: output table of seed node of each blob
+    \param father: blob number which merges two (or more) others
+    \param height: field value of the peak (seed) node in a blob
+    \param label: blob number for each vertex
+  */
   int meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
                             const std::vector<double> & field,
                             std::vector<int> & idx,
