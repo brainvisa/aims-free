@@ -84,6 +84,16 @@ namespace aims
                      vector<int> & ldepth, vector<int> & lmajor,
                      vector<int> & label, double th )
   {
+    /* If I understand:
+    lidx will contain the vertex index of each local maximum.
+    ldepth will contain the lifetime (number of iterations before death) of
+    each maximum.
+    label will contain the basin label, for each vertex.
+    lmajor will contain the label of the parent basin: standard points (non-
+    maxima) will have their own basin label, local maxima will contain the
+    label of the highest basin which grew over it.
+    */
+
     // taken from old fff_field.c (ancestor of nipy)
     int i,r,N = mesh.vertex().size();
     vector<AimsVector<uint,2> > edges;
@@ -104,6 +114,21 @@ namespace aims
     vector<int> incwin( N, 0 );
     vector<double> mfield;
     vector<double> Mfield;
+    /* mfield: max field of the basin associated with each vertex
+    Mfield: updated max field, during current iteration (will become mfield
+    at the next iteration)
+    win: 1 if local maximum, 0 otherwise. Becomes 0 when the basin reaches a
+    neighbouring, higher one.
+    incwin: incremental maximum marker: incremented at each iteration, until
+    the local basin reaches a neighbouring, higher one. In other words, it is
+    the number of iteration a local maximum has lived before being swallowed by
+    another one.
+    maj1 / maj2:
+    maj2: id of the neighbouring higher basin: local parent
+    maj1: set on a local maximum vertex when it merges, to the label of the
+    highest neighbouring one: parent one
+    */
+
     if( field.size() != N )
     {
       mfield.reserve( N );
