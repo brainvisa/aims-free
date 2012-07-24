@@ -50,9 +50,8 @@ namespace aims
     \param ldepth will contain the lifetime (number of iterations before death)
       of each maximum.
     \param label will contain the basin label, for each vertex.
-    \param lmajor will contain the label of the parent basin: standard points
-      (non-maxima) will have their own basin label, local maxima will contain
-      the label of the higher basin which directly grew over it.
+    \param lmajor will contain the label of the parent of each basin:
+      label of the highest basin which grew over it.
   */
   int meshWatershed( const AimsSurfaceTriangle & mesh,
                      const std::vector<double> & field,

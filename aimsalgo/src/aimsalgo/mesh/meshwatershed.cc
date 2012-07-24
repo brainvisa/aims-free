@@ -89,8 +89,7 @@ namespace aims
     ldepth will contain the lifetime (number of iterations before death) of
     each maximum.
     label will contain the basin label, for each vertex.
-    lmajor will contain the label of the parent basin: standard points (non-
-    maxima) will have their own basin label, local maxima will contain the
+    lmajor will contain the label of the parent of each basin:
     label of the highest basin which grew over it.
     */
 
@@ -154,11 +153,19 @@ namespace aims
         nA = edges[i][0];
         nB = edges[i][1];
         if( field[nA] > th )
-          if( mfield[nA] <  mfield[nB] )
+          if( mfield[nA] <  mfield[nB] ||
+            ( ( mfield[nA] == mfield[nB] ) && maj2[nA] > maj2[nB] ) )
           {
+            /* note about the above test: if mfield[nA] == mfield[nB] (flat
+            region), we decide to make the lowest basin number grow over the
+            others.
+            Without this test, such basins stay isolated and can never merge.
+            */
             win[nA] = 0;
-            if( Mfield[nA] < mfield[nB] )
+            if( ( Mfield[nA] < mfield[nB] ) ||
+              ( ( Mfield[nA] == mfield[nB] ) && maj2[nA] > maj2[nB] ) )
             {
+              // same remark on test
               Mfield[nA] = mfield[nB];
               maj2[nA] = maj2[nB];
               if( incwin[nA] == r )
