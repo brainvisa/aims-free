@@ -407,9 +407,12 @@ int main( int argc, const char** argv )
     return EXIT_FAILURE;
   }
   vector< int > v;
-  int sizeT;
-  if  ( ph->getProperty("volume_dimension", v ) )
-    sizeT = v[3];
+  int sizeT = 1;
+  if ( ph->getProperty("volume_dimension", v ) )
+  {
+    if( v.size() >= 4 )
+      sizeT = v[3];
+  }
 
 
 
