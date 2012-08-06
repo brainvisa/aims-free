@@ -188,7 +188,7 @@ int NiftiHeader::dimT() const
 float NiftiHeader::sizeX() const
 {
   vector< float > vs;
-  if( getProperty("voxel_size", vs) )
+  if( getProperty("voxel_size", vs) && vs.size() >= 1 )
     return vs[0];
   return 1;
 }
@@ -196,7 +196,7 @@ float NiftiHeader::sizeX() const
 float NiftiHeader::sizeY() const
 {
   vector< float > vs;
-  if( getProperty("voxel_size", vs) )
+  if( getProperty("voxel_size", vs) && vs.size() >= 2 )
     return vs[1];
   return 1;
 }
@@ -204,7 +204,7 @@ float NiftiHeader::sizeY() const
 float NiftiHeader::sizeZ() const
 {
   vector< float > vs;
-  if( getProperty("voxel_size", vs) )
+  if( getProperty("voxel_size", vs) && vs.size() >= 3 )
     return vs[2];
   return 1;
 }
@@ -294,8 +294,11 @@ bool NiftiHeader::read()
   
   /* Grid spacings */
   vector< float > vs;
+  vs.reserve( nim->ndim >= 3 ? nim->ndim : 3 );
   for (int i=1;i<=nim->ndim;++i)
     vs.push_back(nim->pixdim[i]);
+  for( int i=vs.size(); i<3; ++i )
+    vs.push_back( 1. );
   // space: x,y,z, time: t and 3 extra; index 0 is used for qfac
   // pixdim[8]: pixdim[1]=dx, etc.
   
