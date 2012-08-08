@@ -65,6 +65,7 @@ public:
   bool		bin;
   bool    	percentage;
   float		bg;
+  float		fg;
 };
 
 
@@ -105,12 +106,13 @@ doit( Process & p, const string & fname, Finder & f )
            << "  maximum = " << maxi << endl
            << "  threshold1 = " << tc.t1 << endl
            << "  threshold2 = " << tc.t2 << endl
-           << "  background = " << tc.bg << endl;
+           << "  background = " << tc.bg << endl
+           << "  foreground = " << tc.fg << endl;
     }
   }
   
   if ( verbose ) cout << "thresholding...\n";
-  AimsThreshold<T,short> thresh( tc.mode, (T) tc.t1, (T) tc.t2, (T) tc.bg );
+  AimsThreshold<T,short> thresh( tc.mode, (T) tc.t1, (T) tc.t2, (T) tc.bg, (T) tc.fg );
   if( tc.bin )
     {
       Writer<AimsData<short> > writer( tc.fout );
@@ -132,7 +134,7 @@ int main( int argc, const char **argv )
       Thresholder		proc;
       ProcessInput		filein( proc );
       string		fileout, smode = "ge";
-      float			t1 = 0, t2 = 0, bg = 0;
+      float			t1 = 0, t2 = 0, bg = 0, fg = 32767;
       bool			binary = false;
       bool			percentage = false;
       threshold_t		mode;
@@ -164,6 +166,8 @@ int main( int argc, const char **argv )
                      "returns a short binary data [default: false]", true );
       app.addOption( bg, "--bg", "background value set on thresholded out " 
                      "voxels in non-binary mode [default: 0]", true );
+      app.addOption( fg, "--fg", "foreground value set on thresholded in " 
+                     "voxels in binary mode [default: 32767]", true );
       app.alias( "--input", "-i" );
       app.alias( "--output", "-o" );
       app.alias( "--mode", "-m" );
@@ -196,6 +200,7 @@ int main( int argc, const char **argv )
       proc.t2 = t2;
       proc.bin = binary;
       proc.bg = bg;
+      proc.fg = fg;
       proc.percentage = percentage;
       proc.execute( filein.filename );
       if ( verbose ) cout << "done\n";

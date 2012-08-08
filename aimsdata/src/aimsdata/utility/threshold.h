@@ -95,9 +95,10 @@ public:
       \param level first threshold
       \param level2 second threshold [default=0]
       \param backgd value for voxels cut out by the thresholding
+      \param foregd value for voxels cut in by the thresholding
   */
   inline AimsThreshold( threshold_t type,T level,T level2 = 0, 
-                        T backgd = 0 );
+                        T backgd = 0, float foregd = 32767  );
   virtual ~AimsThreshold() {}
 
   /// Return the multi-level thresholded image
@@ -113,6 +114,7 @@ protected:
   /// Upper level
   T    _level2;
   T    _backgd;
+  float    _foregd;
 };
 
 template <class T,class U>
@@ -145,8 +147,8 @@ protected:
 
 template <class T,class U> inline
 AimsThreshold<T,U>::AimsThreshold( threshold_t type, T level, T level2, 
-                                   T backgd )
-  : _type( type ), _level( level ), _level2( level2 ), _backgd( backgd )
+                                   T backgd, float foregd )
+  : _type( type ), _level( level ), _level2( level2 ), _backgd( backgd ), _foregd( foregd )
 {
 }
 
@@ -365,63 +367,63 @@ AimsData<U> AimsThreshold<T,U>::bin(const AimsData<T> &sqv)
 
   typename AimsData<U>::iterator       it1;
   typename AimsData<T>::const_iterator it2;
-
+  
   switch (_type)
   { case AIMS_LOWER_THAN : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level ? 32767 : 0);
+        *it1 = (*it2 < _level ? _foregd : 0);
       break;
     case AIMS_LOWER_OR_EQUAL_TO : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 <= _level ? 32767 : 0);
+        *it1 = (*it2 <= _level ? _foregd : 0);
       break;
     case AIMS_GREATER_THAN : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level ? 32767 : 0);
+        *it1 = (*it2 > _level ? _foregd : 0);
       break;
     case AIMS_GREATER_OR_EQUAL_TO : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level ? 32767 : 0);
+        *it1 = (*it2 >= _level ? _foregd : 0);
       break;
     case AIMS_EQUAL_TO : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 == _level ? 32767 : 0);
+        *it1 = (*it2 == _level ? _foregd : 0);
       break;
     case AIMS_DIFFER : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 != _level ? 32767 : 0);
+        *it1 = (*it2 != _level ? _foregd : 0);
       break;
     case AIMS_BETWEEN :
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level && *it2 <= _level2 ? 32767 : 0);
+        *it1 = (*it2 >= _level && *it2 <= _level2 ? _foregd : 0);
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level && *it2 <= _level2 ? 32767 : 0);
+        *it1 = (*it2 > _level && *it2 <= _level2 ? _foregd : 0);
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level && *it2 < _level2 ? 32767 : 0);
+        *it1 = (*it2 >= _level && *it2 < _level2 ? _foregd : 0);
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level && *it2 < _level2 ? 32767 : 0);
+        *it1 = (*it2 > _level && *it2 < _level2 ? _foregd : 0);
       break;
     case AIMS_OUTSIDE : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level || *it2 > _level2 ? 32767 : 0);
+        *it1 = (*it2 < _level || *it2 > _level2 ? _foregd : 0);
       break;
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 <= _level || *it2 > _level2 ? 32767 : 0);
+        *it1 = (*it2 <= _level || *it2 > _level2 ? _foregd : 0);
       break;
     case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level || *it2 >= _level2 ? 32767 : 0);
+        *it1 = (*it2 < _level || *it2 >= _level2 ? _foregd : 0);
       break;
     case AIMS_OUTSIDE_INCLUDE_BOUNDS : 
       for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 <= _level || *it2 >= _level2 ? 32767 : 0);
+        *it1 = (*it2 <= _level || *it2 >= _level2 ? _foregd : 0);
       break;
   }
 
