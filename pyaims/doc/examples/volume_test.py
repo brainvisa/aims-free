@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -37,7 +38,12 @@ app = aims.AimsApplication( sys.argv, 'Volume test in python' )
 
 app.initialize()
 
-vol = aims.read( '/home/riviere/data/irm.ima' )
+infile = aims.carto.Paths.findResourceFile( \
+  'doc/pyanatomist-%s/examples/irm.ima' \
+    % '.'.join( [ str(x) for x in aims.version() ] ) )
+if not infile:
+  infile = 'irm.ima'
+vol = aims.read( infile )
 print 'vol:', vol
 h = vol.header()
 print 'header:', h

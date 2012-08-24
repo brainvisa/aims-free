@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -40,7 +41,7 @@
 
 from soma import aims
 from numpy import *
-v = aims.read('/home/riviere/data/ra_head.mesh')
+v = aims.read('/home/dr144257/data/ra_head.mesh')
 
 def getFromMesh(v, t):
     vertex = array(v.vertex(t))
