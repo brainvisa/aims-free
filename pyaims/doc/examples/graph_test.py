@@ -34,7 +34,12 @@
 from soma import aims
 import sys
 
-graph = aims.read( '/neurospin/lnao/Panabase/data/diffusion/chaos/t1mri/default_acquisition/default_analysis/folds/3.0/base2005_manual/Rchaos_base2005_manual.arg' )
+infile = aims.carto.Paths.findResourceFile( \
+  'doc/pyanatomist-%s/examples/Rbase.arg' \
+    % '.'.join( [ str(x) for x in aims.version() ] ) )
+if not infile:
+  infile = 'Rbase.arg'
+graph = aims.read( infile )
 print 'graph:', graph
 print 'global properties:', graph.keys()
 print 'nodes:', graph.order()

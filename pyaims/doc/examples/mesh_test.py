@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -33,7 +34,7 @@
 from soma import aims
 import sys
 
-mesh = aims.read( '/home/riviere/data/ra_head.mesh' )
+mesh = aims.read( '/home/dr144257/data/ra_head.mesh' )
 print 'mesh:', mesh
 h = mesh.header()
 print 'header:', h

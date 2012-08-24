@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -40,7 +41,12 @@ app.initialize()
 reader = aims.Reader()
 # read volumes as AimsData
 reader.mapType( 'Volume', 'AimsData' )
-data = reader.read( '/home/riviere/data/irm.ima' )
+infile = aims.carto.Paths.findResourceFile( \
+  'doc/pyanatomist-%s/examples/irm.ima' \
+    % '.'.join( [ str(x) for x in aims.version() ] ) )
+if not infile:
+  infile = 'irm.ima'
+data = reader.read( infile )
 print 'data:', data
 h = data.header()
 print 'header:', h
