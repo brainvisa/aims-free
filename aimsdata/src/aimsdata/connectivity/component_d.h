@@ -49,12 +49,13 @@
 namespace aims
 {
 
-  template<typename T>
-  void AimsConnectedComponent( AimsData<T>& data, 
-                               Connectivity::Type connectivity, 
-                               std::map<T, size_t>& valids, 
-                               const T & backg, bool bin, size_t minSize, 
-                               size_t numMax, bool verbose )
+  template<typename T, typename O>
+  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected( AimsData<T>& data, 
+                                                                       AimsData<O>& out,
+                                                                       Connectivity::Type connectivity, 
+                                                                       std::map<O, size_t>& valids, 
+                                                                       const T & backg, bool bin, size_t minSize, 
+                                                                       size_t numMax, bool verbose )
   {
     std::multimap<size_t, size_t> compSize;
     int x=0, y=0, z=0, t=0, n=0;
@@ -63,13 +64,10 @@ namespace aims
     int dimZ = data.dimZ();
     int dimT = data.dimT() ;
 
-
-
-
     for( t = 0 ; t < dimT ; ++t ){
 
 
-      AimsData<T> cc( dimX, dimY, dimZ );
+      AimsData<O> cc( dimX, dimY, dimZ );
 
       cc = 0;
 
@@ -88,11 +86,11 @@ namespace aims
       //Connectivity cf( flag.oLine(), flag.oSlice(), connectivity );
 
 
-      size_t		label = 1;
-      Point3d		pos,newpos;
-      std::queue<Point3d>	que;
-      T			val;
-      size_t		sz;
+      size_t    label = 1;
+      Point3d   pos,newpos;
+      std::queue<Point3d> que;
+      T     val;
+      size_t    sz;
 
 
 
@@ -154,7 +152,7 @@ namespace aims
         } 
 
 
-      //	filter small comps
+      //  filter small comps
 
       std::multimap<size_t, size_t>::reverse_iterator 
         im, em = compSize.rend();
@@ -179,12 +177,12 @@ namespace aims
       if( verbose )
         std::cout << "filtering...\n";
 
-      ForEach3d( data, x, y, z )
-        data(x, y, z, t) = 0 ;
+      ForEach3d( out, x, y, z )
+        out(x, y, z, t) = 0 ;
 
 
 
-      typename std::map<T, size_t>::iterator	is, es = valids.end();
+      typename std::map<O, size_t>::iterator  is, es = valids.end();
 
 
 
@@ -192,7 +190,7 @@ namespace aims
         {
           is = valids.find( cc( x, y, z ) );
           if( is != es )
-            data( x, y, z, t ) = (T) is->second; // RISK OF OVERFLOW on char types
+            out( x, y, z, t ) = (O) is->second; // RISK OF OVERFLOW on char types
         }
 
       if( verbose )
@@ -200,23 +198,7 @@ namespace aims
 
     }
   }
-
-  template<typename T>
-  void AimsConnectedComponent( AimsData<T>& data, 
-                               Connectivity::Type connectivity, 
-                               const T & backg, bool bin, size_t minSize, 
-                               size_t numMax, bool verbose )
-  {
-      std::map<T, size_t>	valids;
-    
-      AimsConnectedComponent( data, 
-                               connectivity, 
-                               valids, 
-                               backg, bin, minSize, 
-                               numMax, verbose );
-  }
-
-
+  
   template <typename T> 
   void AimsConnectedComponent( AimsBucket<Void>& components,
                                const AimsData<T>& data,

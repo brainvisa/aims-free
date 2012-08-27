@@ -44,23 +44,93 @@ template <typename T> class AimsData;
 
 namespace aims
 {
-
+  
   template <typename T> class BucketMap;
+  
+  template <typename T, typename O>
+  class ConnectedComponentEngine {
+
+    public :
+      ConnectedComponentEngine();
+  };
+  
+  // Specialization
+  template <typename T, typename O>
+  class ConnectedComponentEngine<AimsData<T>, AimsData<O> > {
+
+    public :
+      ConnectedComponentEngine();
+    
+      static void connected( AimsData<T>& data, 
+                             AimsData<O>& out, 
+                             aims::Connectivity::Type connectivity,
+                             std::map<O, size_t>& valids, 
+                             const T & backgrnd = 0, bool bin = true, 
+                             size_t minSize = 0, size_t numMax = 0, 
+                             bool verbose = true );
+                             
+    
+      static void connected( AimsData<T>& data, 
+                             AimsData<O>& out, 
+                             aims::Connectivity::Type connectivity,
+                             const T & backgrnd = 0, bool bin = true, 
+                             size_t minSize = 0, size_t numMax = 0, 
+                             bool verbose = true );
+                                  
+  };
+         
+  template<typename T, typename O>
+  inline
+  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected( AimsData<T>& data, 
+                                                                       AimsData<O>& out, 
+                                                                       aims::Connectivity::Type connectivity,
+                                                                       const T & backgrnd, bool bin, 
+                                                                       size_t minSize, size_t numMax, 
+                                                                       bool verbose )
+  {
+    std::map<O, size_t> valids;
+    ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected(data, 
+                                                                   out,
+                                                                   connectivity, 
+                                                                   valids, 
+                                                                   backgrnd, bin, minSize, 
+                                                                   numMax, verbose);
+  }
 
   template<typename T>
+  inline
   void AimsConnectedComponent( AimsData<T>& data, 
                                aims::Connectivity::Type connectivity,
                                std::map<T, size_t>& valids, 
                                const T & backgrnd = 0, bool bin = true, 
                                size_t minSize = 0, size_t numMax = 0, 
-                               bool verbose = true );
+                               bool verbose = true )
+  {
+    ConnectedComponentEngine<AimsData<T>, AimsData<T> >::connected(data, 
+                                              data,
+                                              connectivity, 
+                                              valids, 
+                                              backgrnd, bin, minSize, 
+                                              numMax, verbose);
+  }
 
   template<typename T>
+  inline
   void AimsConnectedComponent( AimsData<T>& data,
                                aims::Connectivity::Type connectivity,
                                const T & backgrnd = 0, bool bin = true, 
                                size_t minSize = 0, size_t numMax = 0, 
-                               bool verbose = true );
+                               bool verbose = true )
+  {
+      std::map<T, size_t> valids;
+    
+      ConnectedComponentEngine<AimsData<T>, AimsData<T> >::connected(data, 
+                                                data,
+                                                connectivity, 
+                                                valids, 
+                                                backgrnd, bin, minSize, 
+                                                numMax, verbose);
+  }
 
   template<typename T>
   void AimsConnectedComponent( BucketMap<T>& data,
@@ -84,7 +154,7 @@ namespace aims
                                const T & backgrnd = 0, bool bin = true, 
                                size_t minsize = 0, size_t maxcomp = 0, 
                                bool verbose = true );
-
+                               
   template <typename T>
   AimsData<int16_t> AimsLabeledConnectedComponent( AimsBucket<Void>& component,
                                                    const AimsData<T>& data,

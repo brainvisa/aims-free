@@ -42,28 +42,79 @@ using namespace std;
 
 namespace aims
 {
-  template void 
-  AimsConnectedComponent( AimsData<uint8_t>&, Connectivity::Type, 
-                          std::map<uint8_t, size_t> &, const uint8_t &, 
-                          bool, size_t, size_t, bool );
-  template void 
-  AimsConnectedComponent( AimsData<int16_t>&, Connectivity::Type, 
-                          std::map<int16_t, size_t> &, const int16_t &, 
-                          bool, size_t, size_t, bool );
-  template void 
-  AimsConnectedComponent( AimsData<float>&, Connectivity::Type, 
-                          std::map<float, size_t> &, const float &, 
-                          bool, size_t, size_t, bool );
+  
+  template class ConnectedComponentEngine<AimsData<uint8_t>, AimsData<uint8_t> >;
+  template class ConnectedComponentEngine<AimsData<uint8_t>, AimsData<int8_t> >;
+  template class ConnectedComponentEngine<AimsData<uint8_t>, AimsData<uint16_t> >;
+  template class ConnectedComponentEngine<AimsData<uint8_t>, AimsData<int16_t> >;
+  template class ConnectedComponentEngine<AimsData<uint8_t>, AimsData<uint32_t> >;
+  template class ConnectedComponentEngine<AimsData<uint8_t>, AimsData<int32_t> >;
+  template class ConnectedComponentEngine<AimsData<uint8_t>, AimsData<float> >;
+  template class ConnectedComponentEngine<AimsData<uint8_t>, AimsData<double> >;
+  
+  template class ConnectedComponentEngine<AimsData<int8_t>, AimsData<uint8_t> >;
+  template class ConnectedComponentEngine<AimsData<int8_t>, AimsData<int8_t> >;
+  template class ConnectedComponentEngine<AimsData<int8_t>, AimsData<uint16_t> >;
+  template class ConnectedComponentEngine<AimsData<int8_t>, AimsData<int16_t> >;
+  template class ConnectedComponentEngine<AimsData<int8_t>, AimsData<uint32_t> >;
+  template class ConnectedComponentEngine<AimsData<int8_t>, AimsData<int32_t> >;
+  template class ConnectedComponentEngine<AimsData<int8_t>, AimsData<float> >;
+  template class ConnectedComponentEngine<AimsData<int8_t>, AimsData<double> >;
 
-  template void 
-  AimsConnectedComponent( AimsData<uint8_t>&, Connectivity::Type, 
-                          const uint8_t &, bool, size_t, size_t, bool );
-  template void 
-  AimsConnectedComponent( AimsData<int16_t>&, Connectivity::Type, 
-                          const int16_t &, bool, size_t, size_t, bool );
-  template void 
-  AimsConnectedComponent( AimsData<float>&, Connectivity::Type, 
-                          const float &, bool, size_t, size_t, bool );
+  template class ConnectedComponentEngine<AimsData<uint16_t>, AimsData<uint8_t> >;
+  template class ConnectedComponentEngine<AimsData<uint16_t>, AimsData<int8_t> >;
+  template class ConnectedComponentEngine<AimsData<uint16_t>, AimsData<uint16_t> >;
+  template class ConnectedComponentEngine<AimsData<uint16_t>, AimsData<int16_t> >;
+  template class ConnectedComponentEngine<AimsData<uint16_t>, AimsData<uint32_t> >;
+  template class ConnectedComponentEngine<AimsData<uint16_t>, AimsData<int32_t> >;
+  template class ConnectedComponentEngine<AimsData<uint16_t>, AimsData<float> >;
+  template class ConnectedComponentEngine<AimsData<uint16_t>, AimsData<double> >;
+
+  template class ConnectedComponentEngine<AimsData<int16_t>, AimsData<uint8_t> >;
+  template class ConnectedComponentEngine<AimsData<int16_t>, AimsData<int8_t> >;
+  template class ConnectedComponentEngine<AimsData<int16_t>, AimsData<uint16_t> >;
+  template class ConnectedComponentEngine<AimsData<int16_t>, AimsData<int16_t> >;
+  template class ConnectedComponentEngine<AimsData<int16_t>, AimsData<uint32_t> >;
+  template class ConnectedComponentEngine<AimsData<int16_t>, AimsData<int32_t> >;
+  template class ConnectedComponentEngine<AimsData<int16_t>, AimsData<float> >;
+  template class ConnectedComponentEngine<AimsData<int16_t>, AimsData<double> >;
+
+  template class ConnectedComponentEngine<AimsData<uint32_t>, AimsData<uint8_t> >;
+  template class ConnectedComponentEngine<AimsData<uint32_t>, AimsData<int8_t> >;
+  template class ConnectedComponentEngine<AimsData<uint32_t>, AimsData<uint16_t> >;
+  template class ConnectedComponentEngine<AimsData<uint32_t>, AimsData<int16_t> >;
+  template class ConnectedComponentEngine<AimsData<uint32_t>, AimsData<uint32_t> >;
+  template class ConnectedComponentEngine<AimsData<uint32_t>, AimsData<int32_t> >;
+  template class ConnectedComponentEngine<AimsData<uint32_t>, AimsData<float> >;
+  template class ConnectedComponentEngine<AimsData<uint32_t>, AimsData<double> >;
+
+  template class ConnectedComponentEngine<AimsData<int32_t>, AimsData<uint8_t> >;
+  template class ConnectedComponentEngine<AimsData<int32_t>, AimsData<int8_t> >;
+  template class ConnectedComponentEngine<AimsData<int32_t>, AimsData<uint16_t> >;
+  template class ConnectedComponentEngine<AimsData<int32_t>, AimsData<int16_t> >;
+  template class ConnectedComponentEngine<AimsData<int32_t>, AimsData<uint32_t> >;
+  template class ConnectedComponentEngine<AimsData<int32_t>, AimsData<int32_t> >;
+  template class ConnectedComponentEngine<AimsData<int32_t>, AimsData<float> >;
+  template class ConnectedComponentEngine<AimsData<int32_t>, AimsData<double> >;
+
+  template class ConnectedComponentEngine<AimsData<float>, AimsData<uint8_t> >;
+  template class ConnectedComponentEngine<AimsData<float>, AimsData<int8_t> >;
+  template class ConnectedComponentEngine<AimsData<float>, AimsData<uint16_t> >;
+  template class ConnectedComponentEngine<AimsData<float>, AimsData<int16_t> >;
+  template class ConnectedComponentEngine<AimsData<float>, AimsData<uint32_t> >;
+  template class ConnectedComponentEngine<AimsData<float>, AimsData<int32_t> >;
+  template class ConnectedComponentEngine<AimsData<float>, AimsData<float> >;
+  template class ConnectedComponentEngine<AimsData<float>, AimsData<double> >;
+
+  template class ConnectedComponentEngine<AimsData<double>, AimsData<uint8_t> >;
+  template class ConnectedComponentEngine<AimsData<double>, AimsData<int8_t> >;
+  template class ConnectedComponentEngine<AimsData<double>, AimsData<uint16_t> >;
+  template class ConnectedComponentEngine<AimsData<double>, AimsData<int16_t> >;
+  template class ConnectedComponentEngine<AimsData<double>, AimsData<uint32_t> >;
+  template class ConnectedComponentEngine<AimsData<double>, AimsData<int32_t> >;
+  template class ConnectedComponentEngine<AimsData<double>, AimsData<float> >;
+  template class ConnectedComponentEngine<AimsData<double>, AimsData<double> >;
+
   template void 
   AimsConnectedComponent( BucketMap<Void>&, Connectivity::Type, 
                           const Void &, bool, size_t, size_t, bool );
@@ -76,7 +127,6 @@ namespace aims
   template void 
   AimsConnectedComponent( BucketMap<float>&, Connectivity::Type, 
                           const float &, bool, size_t, size_t, bool );
-
 
   template void 
   AimsConnectedComponent( AimsBucket<Void> &, const AimsData<uint8_t> &,
