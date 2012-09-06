@@ -47,7 +47,7 @@ typedef AimsVector<%Template1%, %Template2%>
           0, SIP_NO_CONVERTORS, 0, sipIsErr );
       return 0;
     }
-  if( PySequence_Check( sipPy ) )
+  if( PySequence_Check( sipPy ) && PySequence_Size( sipPy ) == %Template2% )
   {
     *sipCppPtr = new AimsVector_%Template1typecode%_%Template2typecode%;
     PyObject	*pyitem;
@@ -70,11 +70,7 @@ typedef AimsVector<%Template1%, %Template2%>
                            %Template1CFromPy%( pyitem );
       Py_DECREF(pyitem);
     }
-#if SIP_VERSION >= 0x040400
     return sipGetState( sipTransferObj );
-#else
-    return 1;
-#endif
   }
   *sipCppPtr = 
     (AimsVector_%Template1typecode%_%Template2typecode% *) 
