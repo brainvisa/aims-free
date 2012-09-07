@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -34,7 +35,7 @@ from soma import aims
 import math
 
 # Read regions of interests from sys.argv[ 1 ]
-roiIterator = aims.getRoiIterator( sys.argv[ 1 ] ).get()
+roiIterator = aims.getRoiIterator( sys.argv[ 1 ] )
 
 
 # Read image from sys.argv[ 2 ]
@@ -78,7 +79,10 @@ while roiIterator.isValid():
   print '  invalid points:', invalid
   if valid:
     mean = sum / float( valid )
-    stddev = math.sqrt( sqsum / ( valid + 1 ) - mean * mean )
+    if valid >= 2:
+      stddev = math.sqrt( ( sqsum - mean * mean ) / ( valid - 1 ) )
+    else:
+      stddev = math.sqrt( ( sqsum - mean * mean ) / valid )
   else:
     mean = 'N/A'
     stddev = 'N/A'
