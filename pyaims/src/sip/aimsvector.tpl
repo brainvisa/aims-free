@@ -209,8 +209,10 @@ public:
  double dnorm2() const;
 
  %Template1% dot( AimsVector_%Template1typecode%_%Template2typecode% & );
- AimsVector_%Template1typecode%_3 & 
-   crossed( const AimsVector_%Template1typecode%_%Template2typecode% & );
+
+ AimsVector_%Template1typecode%_3 *
+   crossed( const AimsVector_%Template1typecode%_%Template2typecode% & )
+   /Factory/;
 %MethodCode
   sipRes = new AimsVector_%Template1typecode%_3(crossed(*sipCpp, *a0));
 %End
