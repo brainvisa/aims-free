@@ -43,6 +43,7 @@
 #include <aims/io/motionW.h>
 #include <aims/io/fileFormat.h>
 #include <cartobase/stream/fileutil.h>
+#include <iomanip>
 
 using namespace aims;
 using namespace carto;
