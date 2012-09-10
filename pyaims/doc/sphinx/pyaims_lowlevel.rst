@@ -44,7 +44,13 @@ Neuroimaging data structures
 Volumes
 :::::::
 
-.. autoclass:: soma.aims.Volume_FLOAT
+
+
+.. class:: soma.aims.Volume_S16
+.. class:: soma.aims.Volume_U32
+.. class:: soma.aims.Volume_RGBA
+.. class:: soma.aims.Volume_DOUBLE
+.. class:: soma.aims.Volume_FLOAT
 
   See the :cartoddox:`Volume C++ documentation <classcarto_1_1Volume.html>`
   
@@ -61,7 +67,7 @@ Volumes
     
       The array conversion is currently only supported for scalar volumes, and is not present on volumes of types RGB or RGBA.
 
-  .. method:: at( posx, posy = 0, posz = 0, post = 0 )
+  .. method:: at( posx[, posy = 0, posz = 0, post = 0] )
   
   .. method:: fill( value )
   
@@ -75,11 +81,11 @@ Volumes
   
   .. method:: header()
 
-  .. method:: setValue( value, posx, posy = 0, posz = 0, post = 0 )
+  .. method:: setValue( value, posx, [posy = 0, posz = 0, post = 0] )
 
-  .. method:: value( posx, posy = 0, posz = 0, post = 0 )
+  .. method:: value( posx[, posy = 0, posz = 0, post = 0] )
   
-    value() is an alias to at().
+    value is an alias to :py:meth:`at`.
     
 
 .. autoclass:: soma.aims.AimsData_FLOAT

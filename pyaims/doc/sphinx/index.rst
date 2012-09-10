@@ -1,9 +1,7 @@
-.. toctree::
-   :maxdepth: 3
-
-
+********************************
 PyAims programming documentation
---------------------------------
+********************************
+
 
 Overview
 ++++++++
@@ -14,22 +12,15 @@ Overview
 Contents
 ++++++++
 
-- :doc:`pyaims_highlevel`
+.. toctree::
+  :titlesonly:
 
-- :doc:`pyaims_lowlevel`
-
-- :doc:`pyaims_algo`
-
-- :doc:`pyaims_examples`
-
-- :doc:`pyaims_examples_advanced`
-
-- :doc:`pyaims_aimsalgo`
-
-- :doc:`pyaims_aimsalgo_examples`
-
-
-Tutorial
-++++++++
-
-The :aimsdata:`tutorial is accessible here <aims_training/en/html/ch10.html>`.
+  pyaims_tutorial
+  pyaims_highlevel
+  pyaims_lowlevel
+  pyaims_algo
+  pyaims_examples
+  pyaims_examples_advanced
+  pyaims_aimsalgo
+  pyaims_aimsalgo_examples
+  
