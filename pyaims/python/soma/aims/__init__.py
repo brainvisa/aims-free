@@ -551,7 +551,7 @@ def __fixsipclasses__( classes ):
         y.__str__ = __fixsipclasses__.proxystr
         y.__nonzero__ = __fixsipclasses__.proxynonzero
         y._getAttributeNames = __fixsipclasses__.getAttributeNames
-        #y.get = lambda self: self._get() # to maintain compatibiity with pyaims 3.x
+        y.get = lambda self: self._get() # to maintain compatibiity with pyaims 3.x
       else:
         if hasattr( y, '__objiter__' ):
           y.__iter__ = __fixsipclasses__.newiter
