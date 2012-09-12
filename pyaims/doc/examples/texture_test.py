@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -33,7 +34,7 @@
 from soma import aims
 import sys
 
-tex = aims.read( '/home/riviere/data/texture2d.tex' )
+tex = aims.read( '/home/dr144257/data/texture2d.tex' )
 print 'texture:', tex
 h = tex.header()
 print 'header:', h

@@ -748,7 +748,7 @@ Edges are also dictionary-like properties sets.
 [ { '__syntax__' : 'roi_link' } ]
 >>> # get vertices linked by this edge
 >>> print e.vertices()
-({ '__syntax__' : 'roi', 'name' : 'new ROI' }, { '__syntax__' : 'roi', 'roi_label' : 8, 'name' : 'Pallidum_gauche', ...
+({ '__syntax__' : 'roi', 'name' : 'new ROI' }, { '__syntax__' : 'roi', 'roi_label' : ...
 
 
 Adding meshes or buckets in a graph vertex or relation
