@@ -236,11 +236,19 @@ public:
 
   SIP_PYOBJECT __getitem__( int ) const;
 %MethodCode
+  if( a0 < 0 )
+    a0 = %Template2% + a0;
+  if( a0 >= %Template2% )
+    throw std::runtime_error( "Index out of range" );
   sipRes = %Template1pyFromC%( %Template1address%(*sipCpp)[ a0 ] );
 %End
 
   void __setitem__( int, %Template1%%Template1deref% );
 %MethodCode
+  if( a0 < 0 )
+    a0 = %Template2% + a0;
+  if( a0 >= %Template2% )
+    throw std::runtime_error( "Index out of range" );
   (*sipCpp)[ a0 ] = %Template1deref%a1;
 %End
 
