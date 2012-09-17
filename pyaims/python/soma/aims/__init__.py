@@ -533,8 +533,32 @@ def rcptr_getAttributeNames( self ):
     l += filter( lambda x: x not in done, cl )
   return m
 
-# scan classes and modify some of them
+def __getslice__vec__( self, s, e=None, step=1 ):
+  return [self.__getitem__(x) for x in range(s, e)]
 
+def __getitem_vec__( self, s ):
+  if isinstance( s, slice ):
+    if s.step is None:
+      return [ self.__oldgetitem__(x) for x in xrange(s.start, s.stop) ]
+    else:
+      return [ self.__oldgetitem__(x) for x in \
+        xrange(s.start, s.stop, s.step) ]
+  else:
+    return self.__oldgetitem__( s )
+
+def __setitem_vec__( self, s, val ):
+  if isinstance( s, slice ):
+    if s.step is None:
+      return [ self.__oldsetitem__(x, v) for x,v in \
+        zip(xrange(s.start, s.stop),val) ]
+    else:
+      return [ self.__oldsetitem__(x, v) for x,v in \
+        zip(xrange(s.start, s.stop, s.step),val) ]
+  else:
+    return self.__oldsetitem__( s, val )
+
+
+# scan classes and modify some of them
 def __fixsipclasses__( classes ):
   '''Fix some classes methods which Sip doesn't correctly bind'''
   for x, y in classes:
@@ -563,8 +587,11 @@ def __fixsipclasses__( classes ):
           y.__iter__ = lambda self: self.__iterclass__( self )
         if y.__name__.startswith( 'vector_' ) \
           or y.__name__.startswith( 'AimsVector_' ):
-          y.__getslice__ = lambda self, s, e : \
-                          [self.__getitem__(x) for x in range(s, e)]
+          y.__getslice__ = __fixsipclasses__.__getslice__vec__
+          y.__oldgetitem__ = y.__getitem__
+          y.__getitem__ = __fixsipclasses__.__getitem_vec__
+          y.__oldsetitem__ = y.__setitem__
+          y.__setitem__ = __fixsipclasses__.__setitem_vec__
         if y.__name__.startswith( 'BucketMap_' ):
           y.Bucket.__iterclass__ = BckIter
           y.Bucket.__iteritemclass__ = BckIterItem
@@ -585,9 +612,14 @@ __fixsipclasses__.proxydelitem = proxydelitem
 __fixsipclasses__.proxystr = proxystr
 __fixsipclasses__.proxynonzero = proxynonzero
 __fixsipclasses__.getAttributeNames = rcptr_getAttributeNames
+__fixsipclasses__.__getitem_vec__ = __getitem_vec__
+__fixsipclasses__.__getslice__vec__ = __getslice__vec__
+__fixsipclasses__.__setitem_vec__ = __setitem_vec__
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
+del __getitem_vec__, __getslice__vec__
+del __setitem_vec__
 
 __fixsipclasses__( globals().items() + carto.__dict__.items() )
 
