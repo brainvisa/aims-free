@@ -115,19 +115,20 @@ public:
 
 %If ( CARTODATA )
 
-  Volume_%Template2typecode% * operator () ( const Volume_%Template1typecode% & ) const /Factory/;
+  rc_ptr_Volume_%Template2typecode% operator () ( const Volume_%Template1typecode% & ) const;
 %MethodCode
   carto::rc_ptr<Volume_%Template1typecode%>	r( const_cast<Volume_%Template1typecode% *>( a0 ) );
   carto::rc_ptr<Volume_%Template2typecode%>	resvol;
   {
     AimsData_%Template1typecode% dat( r );
-    AimsData_%Template2typecode% *d = (*sipCpp)( r );
-    resvol = d->volume(); // refcount should be 2 now.
+    AimsData_%Template2typecode% *d = (*sipCpp)( dat );
+    /* we build a rc_ptr here to handle cases where the result is
+       actually the input data */
+    sipRes = new carto::rc_ptr<Volume_%Template2typecode%>( d->volume() );
+    // refcount should be 2 now.
     delete d; // refcount should be 1 now
   }
   r.release();
-  sipRes = resvol.get();
-  resvol.release(); // refcount back to 0
 %End
 
   void convert( const Volume_%Template1typecode% &, Volume_%Template2typecode% & ) const;
