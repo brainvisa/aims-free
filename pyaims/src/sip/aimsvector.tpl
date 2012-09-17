@@ -234,7 +234,7 @@ public:
 	sipCpp->operator= (*a0);
 %End
 
-  SIP_PYOBJECT __getitem__( int ) const;
+  SIP_PYOBJECT __getitem__( int ) const throw();
 %MethodCode
   if( a0 < 0 )
     a0 = %Template2% + a0;
@@ -243,7 +243,7 @@ public:
   sipRes = %Template1pyFromC%( %Template1address%(*sipCpp)[ a0 ] );
 %End
 
-  void __setitem__( int, %Template1%%Template1deref% );
+  void __setitem__( int, %Template1%%Template1deref% ) throw();
 %MethodCode
   if( a0 < 0 )
     a0 = %Template2% + a0;
