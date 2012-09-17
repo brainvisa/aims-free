@@ -533,9 +533,6 @@ def rcptr_getAttributeNames( self ):
     l += filter( lambda x: x not in done, cl )
   return m
 
-def __getslice__vec__( self, s, e=None, step=1 ):
-  return [self.__getitem__(x) for x in range(s, e)]
-
 def __getitem_vec__( self, s ):
   if isinstance( s, slice ):
     if s.step is None:
@@ -587,7 +584,6 @@ def __fixsipclasses__( classes ):
           y.__iter__ = lambda self: self.__iterclass__( self )
         if y.__name__.startswith( 'vector_' ) \
           or y.__name__.startswith( 'AimsVector_' ):
-          y.__getslice__ = __fixsipclasses__.__getslice__vec__
           y.__oldgetitem__ = y.__getitem__
           y.__getitem__ = __fixsipclasses__.__getitem_vec__
           y.__oldsetitem__ = y.__setitem__
@@ -613,13 +609,11 @@ __fixsipclasses__.proxystr = proxystr
 __fixsipclasses__.proxynonzero = proxynonzero
 __fixsipclasses__.getAttributeNames = rcptr_getAttributeNames
 __fixsipclasses__.__getitem_vec__ = __getitem_vec__
-__fixsipclasses__.__getslice__vec__ = __getslice__vec__
 __fixsipclasses__.__setitem_vec__ = __setitem_vec__
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
-del __getitem_vec__, __getslice__vec__
-del __setitem_vec__
+del __getitem_vec__, __setitem_vec__
 
 __fixsipclasses__( globals().items() + carto.__dict__.items() )
 
