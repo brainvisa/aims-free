@@ -92,13 +92,14 @@ Main classes:
 __docformat__ = 'restructuredtext en'
 
 
+import collections
 import types
 import sip
 import os
 
 # check for share dir, and set the BRAINVISA_SHARE environment var if it is not
 # already set
-if not os.environ.has_key( 'BRAINVISA_SHARE' ):
+if 'BRAINVISA_SHARE' not in os.environ:
   sharepath = os.path.join( os.path.dirname( os.path.dirname( os.path.dirname( \
     os.path.dirname( __file__ ) ) ) ), 'share' )
   os.environ[ 'BRAINVISA_SHARE' ] = sharepath
@@ -810,7 +811,7 @@ del toObject, ptrToObject, rcToObject
 # Objects and concrete types
 class _proxy:
   def retvalue( x ):
-    if callable( x ):
+    if isinstance( x, collections.Callable ):
       if isinstance( x, carto.GenericObject._proxy ):
         return x
       return carto.GenericObject._proxy(x)
@@ -1000,7 +1001,7 @@ def _parseTypeInArgs( *args, **kwargs ):
     dtype = kwargs.get( 'default_dtype', None )
   if dtype is None:
     raise KeyError( 'data type not specified' )
-  if kwargs.has_key( 'default_dtype' ):
+  if 'default_dtype' in kwargs:
     del kwargs[ 'default_dtype' ]
   dtype = typeCode( dtype )
   return ( dtype, args, kwargs )
