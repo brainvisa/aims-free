@@ -535,25 +535,16 @@ def rcptr_getAttributeNames( self ):
 
 def __getitem_vec__( self, s ):
   if isinstance( s, slice ):
-    if s.step is None:
-      if s.start is None:
-        return [ self.__oldgetitem__(x) for x in xrange(s.stop) ]
-      else:
-        return [ self.__oldgetitem__(x) for x in xrange(s.start, s.stop) ]
-    else:
-      return [ self.__oldgetitem__(x) for x in \
-        xrange(s.start, s.stop, s.step) ]
+    start, stop, step = s.indices(len(self))
+    return [ self.__oldgetitem__(x) for x in xrange(start, stop, step) ]
   else:
     return self.__oldgetitem__( s )
 
 def __setitem_vec__( self, s, val ):
   if isinstance( s, slice ):
-    if s.step is None:
-      return [ self.__oldsetitem__(x, v) for x,v in \
-        zip(xrange(s.start, s.stop),val) ]
-    else:
-      return [ self.__oldsetitem__(x, v) for x,v in \
-        zip(xrange(s.start, s.stop, s.step),val) ]
+    start, stop, step = s.indices(len(self))
+    return [ self.__oldsetitem__(x, v) for x, v in
+             zip(xrange(start, stop, step), val) ]
   else:
     return self.__oldsetitem__( s, val )
 
