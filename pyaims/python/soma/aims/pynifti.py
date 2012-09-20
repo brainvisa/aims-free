@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -625,7 +626,7 @@ class NiftiImage( object ):
       self._aims = aimsvolume
       self.filename = filename
     elif type( aimsvolume ).__name__.startswith( 'AimsData_' ):
-      aimsvolume = aimsvolume.volume().get()
+      aimsvolume = aimsvolume.volume()._get()
       self._aims = aimsvolume
       self.filename = ''
     elif type( aimsvolume ).__name__.startswith( 'Volume_' ):

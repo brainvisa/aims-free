@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -45,7 +46,7 @@ class Moment :
 		invariantMoment = MomentInvariant_S16( triangulationMoment )
 		
 		if ( isinstance( object, aims.rc_ptr_AimsTimeSurface_3 ) ) :
-			invariantMoment.doit( object.get() )
+			invariantMoment.doit( object._get() )
 			result = invariantMoment
 
 		return result

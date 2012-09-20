@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -53,7 +54,7 @@ def meshSplit(mesh,tex,graph):
     label_int = round(label*num_labels)
     v['name']=str(label_int)
     sub_mesh = aims.SurfaceManip.meshExtract( mesh, tex2, label_int )
-    aims.GraphManip.storeAims( graph, v.get(),'roi_mesh',  aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]))
+    aims.GraphManip.storeAims( graph, v._get(),'roi_mesh',  aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]))
   return graph
 
 def meshSplit2(mesh, tex, graph, voxel_size):
@@ -82,7 +83,7 @@ def meshSplit2(mesh, tex, graph, voxel_size):
     v['name']=str(label)
     v['roi_label'] = label
     sub_mesh = aims.SurfaceManip.meshExtract( mesh, tex, label )
-    aims.GraphManip.storeAims( graph, v.get(),'roi_mesh',  aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]) )
+    aims.GraphManip.storeAims( graph, v._get(),'roi_mesh',  aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]) )
     #associated bucket creation:
     bucketMap = aims.BucketMap_VOID()
     bucket = bucketMap[0]
@@ -99,5 +100,5 @@ def meshSplit2(mesh, tex, graph, voxel_size):
       bucketMap.setSizeXYZT(voxel_size[0],voxel_size[1], voxel_size[2],1)
     else:
       bucketMap.setSizeXYZT(1,1,1,1)
-    aims.GraphManip.storeAims( graph, v.get(),'aims_roi', aims.rc_ptr_BucketMap_VOID(bucketMap) )
+    aims.GraphManip.storeAims( graph, v._get(),'aims_roi', aims.rc_ptr_BucketMap_VOID(bucketMap) )
 

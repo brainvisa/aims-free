@@ -84,7 +84,7 @@ w.write(graph_out, options.output_graph_name)
 if options.output_mid_interface_name:
   mid=fd.mid_interface
   print "mid : " ,type(mid), mid.getSizeX()
-  w.write(mid.get(), options.output_mid_interface_name)
+  w.write(mid._get(), options.output_mid_interface_name)
 
 if options.output_lcr_grey_white_name:
   w.write(vol, options.output_lcr_grey_white_name)

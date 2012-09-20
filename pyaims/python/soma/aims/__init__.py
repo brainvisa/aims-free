@@ -92,13 +92,14 @@ Main classes:
 __docformat__ = 'restructuredtext en'
 
 
+import collections
 import types
 import sip
 import os
 
 # check for share dir, and set the BRAINVISA_SHARE environment var if it is not
 # already set
-if not os.environ.has_key( 'BRAINVISA_SHARE' ):
+if 'BRAINVISA_SHARE' not in os.environ:
   sharepath = os.path.join( os.path.dirname( os.path.dirname( os.path.dirname( \
     os.path.dirname( __file__ ) ) ) ), 'share' )
   os.environ[ 'BRAINVISA_SHARE' ] = sharepath
@@ -535,25 +536,16 @@ def rcptr_getAttributeNames( self ):
 
 def __getitem_vec__( self, s ):
   if isinstance( s, slice ):
-    if s.step is None:
-      if s.start is None:
-        return [ self.__oldgetitem__(x) for x in xrange(s.stop) ]
-      else:
-        return [ self.__oldgetitem__(x) for x in xrange(s.start, s.stop) ]
-    else:
-      return [ self.__oldgetitem__(x) for x in \
-        xrange(s.start, s.stop, s.step) ]
+    start, stop, step = s.indices(len(self))
+    return [ self.__oldgetitem__(x) for x in xrange(start, stop, step) ]
   else:
     return self.__oldgetitem__( s )
 
 def __setitem_vec__( self, s, val ):
   if isinstance( s, slice ):
-    if s.step is None:
-      return [ self.__oldsetitem__(x, v) for x,v in \
-        zip(xrange(s.start, s.stop),val) ]
-    else:
-      return [ self.__oldsetitem__(x, v) for x,v in \
-        zip(xrange(s.start, s.stop, s.step),val) ]
+    start, stop, step = s.indices(len(self))
+    return [ self.__oldsetitem__(x, v) for x, v in
+             zip(xrange(start, stop, step), val) ]
   else:
     return self.__oldsetitem__( s, val )
 
@@ -578,7 +570,7 @@ def __fixsipclasses__( classes ):
         y.get = lambda self: self._get() # to maintain compatibiity with pyaims 3.x
       elif y.__name__.startswith( 'ShallowConverter_' ):
         y.__oldcall__ = y.__call__
-        y.__call__ = lambda self, obj: self.__oldcall__( obj ).get()
+        y.__call__ = lambda self, obj: self.__oldcall__( obj )._get()
       else:
         if hasattr( y, '__objiter__' ):
           y.__iter__ = __fixsipclasses__.newiter
@@ -819,7 +811,7 @@ del toObject, ptrToObject, rcToObject
 # Objects and concrete types
 class _proxy:
   def retvalue( x ):
-    if callable( x ):
+    if isinstance( x, collections.Callable ):
       if isinstance( x, carto.GenericObject._proxy ):
         return x
       return carto.GenericObject._proxy(x)
@@ -1009,7 +1001,7 @@ def _parseTypeInArgs( *args, **kwargs ):
     dtype = kwargs.get( 'default_dtype', None )
   if dtype is None:
     raise KeyError( 'data type not specified' )
-  if kwargs.has_key( 'default_dtype' ):
+  if 'default_dtype' in kwargs:
     del kwargs[ 'default_dtype' ]
   dtype = typeCode( dtype )
   return ( dtype, args, kwargs )
