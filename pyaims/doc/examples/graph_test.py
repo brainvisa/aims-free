@@ -61,7 +61,6 @@ for v in graph.vertices():
     try:
         # access mesh in attribute 'aims_Tmtktri'
         mesh = v[ 'aims_Tmtktri' ]
-        #mesh = aims.AimsSurfaceTriangle.fromObject( m.get() )
         print 'mesh:', mesh, ', polygons:', mesh.polygon().size()
     except:
         pass

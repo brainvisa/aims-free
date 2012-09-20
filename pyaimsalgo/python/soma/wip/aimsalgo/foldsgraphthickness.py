@@ -53,7 +53,7 @@ class FoldsGraphThickness:
 
     def printbucket( bck, vol, value ):
       c = aims.RawConverter_BucketMap_VOID_AimsData_S16( False, True, value )
-      c.printToVolume( bck.get(), vol )
+      c.printToVolume( bck._get(), vol )
 
     if self.voronoi_vol is None:
       seed = - self.lgw_vol

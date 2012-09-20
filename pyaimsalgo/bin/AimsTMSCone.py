@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -181,9 +182,9 @@ if options.stimzone:
   sampler = aimsalgo.BucketMapSampler_FLOAT_3()
   zonespl = sampler.sample( cs, bmin, bmax - bmin, vs[:3] ).getPython()
   if options.cortexvalue is None:
-    stzone = aims.maskWithVolume( zonespl.get(), brain )
+    stzone = aims.maskWithVolume( zonespl._get(), brain )
   else:
-    stzone = aims.maskWithVolume( zonespl.get(), brain, options.cortexvalue,
+    stzone = aims.maskWithVolume( zonespl._get(), brain, options.cortexvalue,
       True )
 
   zone = stzone[0]

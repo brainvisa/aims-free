@@ -44,7 +44,7 @@ voxel_size = lgw_vol.header()["voxel_size"]
 
 def printbucket( bck, vol, value ):
   c = aims.RawConverter_BucketMap_VOID_AimsData_S16( False, True, value )
-  c.printToVolume( bck.get(), vol )
+  c.printToVolume( bck._get(), vol )
 
 seed_label_list = []
 for v in fold_graph.vertices():

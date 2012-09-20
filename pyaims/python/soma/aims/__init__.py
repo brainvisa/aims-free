@@ -570,7 +570,7 @@ def __fixsipclasses__( classes ):
         y.get = lambda self: self._get() # to maintain compatibiity with pyaims 3.x
       elif y.__name__.startswith( 'ShallowConverter_' ):
         y.__oldcall__ = y.__call__
-        y.__call__ = lambda self, obj: self.__oldcall__( obj ).get()
+        y.__call__ = lambda self, obj: self.__oldcall__( obj )._get()
       else:
         if hasattr( y, '__objiter__' ):
           y.__iter__ = __fixsipclasses__.newiter
