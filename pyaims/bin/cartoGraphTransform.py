@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -63,11 +64,11 @@ def graphTransform2( g, motions, tmpg ):
 
 def graphTransform( g, motions ):
   ks = motions.keys()
-  vs = map( lambda x: x.getScalar(), g[ 'voxel_size' ] )
+  vs = g[ 'voxel_size' ]
   print 'voxel size:', vs
   for v in g.vertices():
-    l = v[ 'name' ].getString()
-    b = aims.BucketMap_VOID.fromObject( v[ 'aims_roi' ].get() )
+    l = v[ 'name' ]
+    b = v[ 'aims_roi' ]
     if l in ks:
       mot = motions[ l ]
       print 'transform', l
@@ -84,7 +85,7 @@ def graphTransform( g, motions ):
         #print p.item(0), p.item(1), p.item(2), '->', poi.item(0), poi.item(1), poi.item(2)
         bo[ poi ] = 0
       # store bucket
-      b.get()[0] = bo
+      b._get()[0] = bo
 
 
 def parseOpts( argv ):
