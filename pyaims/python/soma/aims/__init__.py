@@ -811,7 +811,7 @@ del toObject, ptrToObject, rcToObject
 # Objects and concrete types
 class _proxy:
   def retvalue( x ):
-    if isinstance( x, collections.Callable ):
+    if callable( x ):
       if isinstance( x, carto.GenericObject._proxy ):
         return x
       return carto.GenericObject._proxy(x)
