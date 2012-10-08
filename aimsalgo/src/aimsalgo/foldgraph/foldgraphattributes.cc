@@ -475,6 +475,7 @@ namespace
                                 true );
         AimsBucket<Void>::iterator	icc, ecc = cc.end();
         list<AimsBucketItem<Void> >::iterator	iicc, eicc;
+        // distance maps in each connected component
         for( icc=cc.begin(); icc!=ecc; ++icc )
           {
             float tdmaxf, tndmaxf = 0;
@@ -488,6 +489,8 @@ namespace
                  iicc!=eicc; ++iicc )
               bd[ iicc->location() ] = 1.F;
             bd.begin()->second = 0.F;
+            /* 1st distance map from any point, to find one extremity
+               (point of max distance from this arbitrary first one) */
             AimsDistanceFrontPropagation( bdist, 1.F, -1.F, 3, 3, 3, 50.F, 
                                           false );
             tdmaxf = -1.F;
@@ -501,6 +504,8 @@ namespace
                 ibd->second = 1.F;
               }
             bd[ pmax ] = 0.F;
+            /* 2nd distance map to find the other extremity: point with the
+               higher distance from the first one */
             AimsDistanceFrontPropagation( bdist, 1.F, -1.F, 3, 3, 3, 50.F, 
                                           false );
             tdmaxf = -1.F;
@@ -522,9 +527,10 @@ namespace
               }
             dmaxf += tdmaxf;
             ndmaxf += tndmaxf;
-            dmaxf /= 50.F;
-            ndmaxf /= 50.F;
           }
+        // (all distances are multipied by 50, distance map factor)
+        dmaxf /= 50.F;
+        ndmaxf /= 50.F;
       }
 
     return dmaxf;
