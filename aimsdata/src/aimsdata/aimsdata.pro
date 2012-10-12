@@ -80,6 +80,7 @@ HEADERS=  bucket/bucket_g.h	\
     io/bckMapR.h		\
     io/bckMapW.h		\
     io/byteswap.h		\
+    io/channelR.h    \
     io/coarseR.h		\
     io/cmapR.h			\
     io/cmapW.h			\
@@ -240,6 +241,7 @@ SOURCES = \
     io/argR.cc			\
     io/argW.cc			\
     io/bckheader.cc		\
+    io/channelR.cc    \
     io/coarseR.cc		\
     io/cmapR.cc			\
     io/cmapW.cc			\

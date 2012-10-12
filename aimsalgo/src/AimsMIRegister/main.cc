@@ -38,7 +38,7 @@
 #include <aims/data/data_g.h>
 #include <aims/io/io_g.h>
 #include <aims/io/motionW.h>
-#include <aims/io/coarseR.h>
+#include <aims/io/channelR.h>
 #include <aims/math/math_g.h>
 #include <aims/io/datatypecode.h>
 #include <aims/utility/utility_g.h>
@@ -69,54 +69,54 @@ const float TEST_RATIO = 0.1;
 
 
 void WriteCurrentDepInFile(
-		     AimsVector<float,6>& p,
-		     ObjFunc             *objfunc,
-		     const string        &direct,
-		     const string        &inverse,
-		     int                  notFirstCall)
+          AimsVector<float,6>& p,
+          ObjFunc             *objfunc,
+          const string        &direct,
+          const string        &inverse,
+          int                  notFirstCall)
 {
   // Infer deplacement from p and gravity centers stored in objfunc
   Motion depl    = objfunc->getDepl( p );
   Motion invdepl = depl.inverse();
-  
+
   cout << "Direct FileName " << direct << endl;
   cout << "Inverse FileName " << inverse << endl;
 
   // Write ref_TO_test transform matrix
   MotionWriter motionWDir(direct,
-			  (notFirstCall? ios::app : ios::out) );
+        (notFirstCall? ios::app : ios::out) );
   MotionWriter motionWRev(inverse,
-			  (notFirstCall? ios::app : ios::out) );
-  
+        (notFirstCall? ios::app : ios::out) );
+
   motionWDir << depl;
   motionWRev << invdepl;
-  
-  
+
+
   // Write current parameters for plotting
 
   // Pour enregistrer les fichiers dans le repertoire de "direct" en commencant leur nom par "inputtest_TO_inputref_":
   string courbe_path = FileUtil::dirname(direct) + FileUtil::separator() + "courbe" ;
 
   ofstream courbe(courbe_path.c_str(),
-		  (notFirstCall ? ios::app : ios::out) );
+      (notFirstCall ? ios::app : ios::out) );
   if (!notFirstCall)
-    {
-      courbe << "  Tx  " << "\t" << "  Ty  " << "\t" << "  Tz  " 
-	     << "  Rx  " << "\t" << "  Ry  " << "\t" << "  Rz  " << endl;
-    }
+  {
+    courbe << "  Tx  " << "\t" << "  Ty  " << "\t" << "  Tz  " 
+      << "  Rx  " << "\t" << "  Ry  " << "\t" << "  Rz  " << endl;
+  }
   courbe << depl.translation().item(0) << "\t" 
-	 << depl.translation().item(1) << "\t"
-	 << depl.translation().item(2) << "\t"
-	 << p[4] << "\t" << p[5] << "\t" << p[2] <<endl;
+    << depl.translation().item(1) << "\t"
+    << depl.translation().item(2) << "\t"
+    << p[4] << "\t" << p[5] << "\t" << p[2] <<endl;
   courbe.close();
 }
 
 void WriteCurrentDep(
-		     AimsVector<float,6>& p,
-		     ObjFunc             *objfunc,
-		     const string        &ftest,
-		     const string        &fref,
-		     int                 notFirstCall)
+          AimsVector<float,6>& p,
+          ObjFunc             *objfunc,
+          const string        &ftest,
+          const string        &fref,
+          int                 notFirstCall)
 {
   // Build canonical name
   string from = string(ftest), to = string( fref );
@@ -143,6 +143,7 @@ int main( int argc, const char** argv )
   //
   // Default values
   //
+  int refchannel = -1, testchannel = -1; // Default is the norm channel
   string c_interpolator      = "linear";
   string c_optimizer         = "powell";
   string c_pdf               = "pv";
@@ -168,17 +169,30 @@ int main( int argc, const char** argv )
 
   int rsp = 0, rep = 0, tsp = 0, tep = 0;
 
-  Reader<AimsData<int16_t> > refread;
-  Reader<AimsData<int16_t> > testread;
+  string fileTest, fileRef;
   string fileLog;
   Writer<Motion> directTrans, inverseTrans;
 
   AimsApplication app( argc, argv,
                        "Registration according to Mutual Information Method" );
-  app.addOption( refread, "-r", "source S16 reference volume" );
+  app.addOption( fileRef, "-r", "source reference volume" );
   app.alias( "--reference", "-r" );
-  app.addOption( testread, "-t", "source S16 test volume to register)" );
+  app.addOption( fileTest, "-t", "source test volume to register)" );
   app.alias( "--test", "-t" );
+  app.addOption( refchannel, "-cr",  "Channel of multi-channel reference image to use during registration estimation\n"
+                                      "Possible types and values:\n"
+                                      "type : RGB or RGBA\n"
+                                      "values: 0=red, 1=green, 2=blue, 3=alpha, 4=norm\n\n"
+                                      "type : HSV\n"
+                                      "values: 0=hue, 1=saturation, 2=value, 4=norm\n\n"
+                                      "[default is set to norm]\n\n", true);
+  app.addOption( testchannel, "-ct",  "Channel of multi-channel test image to use during registration estimation\n"
+                                      "Possible types and values:\n"
+                                      "type : RGB or RGBA\n"
+                                      "values: 0=red, 1=green, 2=blue, 3=alpha, 4=norm\n\n"
+                                      "type : HSV\n"
+                                      "values: 0=hue, 1=saturation, 2=value, 4=norm\n\n"
+                                      "[default is set to same value as reference channel]\n\n", true);
   app.addOption( directTrans, "--dir",
                  "test_TO_ref: output transfomation filename "
                  "[default=<test>_TO_<ref>.trm]", true );
@@ -268,304 +282,296 @@ int main( int argc, const char** argv )
   {
     app.initialize();
 
-  // 
-  // Log file management
-  //
-  if( !fileLog.empty() )
-  {
-    mycout.open( fileLog.c_str() );
-  }
+    // 
+    // Log file management
+    //
+    if( !fileLog.empty() )
+    {
+      mycout.open( fileLog.c_str() );
+    }
 
+    //
+    // choice of interpolation
+    //
+    Resampler<short>* interpolator = NULL;
+    Sampler<short>*           comb = NULL;
 
-
-  //
-  // choice of interpolation
-  //
-  Resampler<short>* interpolator = NULL;
-  Sampler<short>*           comb = NULL;
-
-  ASSERT( c_pdf == "direct" || c_pdf == "pv" );
-  if( c_pdf == "direct" )
-  {
-    if( !c_interpolator.empty() )
-      {
-        ASSERT( c_interpolator == "nearest" ||
-                c_interpolator == "linear"  ||
-                c_interpolator == "spline"    );
-        if( c_interpolator == "nearest" )
+    ASSERT( c_pdf == "direct" || c_pdf == "pv" );
+    if( c_pdf == "direct" )
+    {
+      if( !c_interpolator.empty() )
+        {
+          ASSERT( c_interpolator == "nearest" ||
+                  c_interpolator == "linear"  ||
+                  c_interpolator == "spline"    );
+          if( c_interpolator == "nearest" )
           {
             //       interpolator = new NNInterpolator;
             cout << "interpolator : " << c_interpolator << endl;
             cout << "Not implemented yet" << endl;
           }
-        else if( c_interpolator == "linear" )
+          else if( c_interpolator == "linear" )
           {
             interpolator = new MaskLinearResampler<short>;
             cout << "interpolator    : " << c_interpolator << endl;
           }
-        else if( c_interpolator == "spline" )
+          else if( c_interpolator == "spline" )
           {
             //       interpolator = new SplineInterpolator;
             cout << "interpolator     : " << c_interpolator << endl;
             cout << "Not implemented yet" << endl;
           }
-      }
-  }
-  else
-  {
-    comb = new Sampler<short>;
-  }
-
-
-
-  //
-  // choice of index to be minimized
-  //
-  ObjFunc* objfunc = NULL;
-  if( !c_objfunc.empty() )
-  {
-    ASSERT( c_objfunc == "mi" ||
-            c_objfunc == "cr"   );
-    if( c_objfunc == "mi" )
-    {
-      objfunc = new MutualInfoFunc( numLevel, interpolator, comb, maskSize );
-      cout << "objective function   : mutual information" << endl;
+        }
     }
-    else if( c_objfunc == "cr" )
+    else
     {
-      objfunc = new CorRatioFunc( numLevel, interpolator, comb, maskSize );
-      cout << "objective function   : correlation ratio" << endl;
+      comb = new Sampler<short>;
     }
-  }
 
-
-  //
-  // choice of optimizer
-  //
-  Optimizer<float,6>* optimizer = NULL;
-  if( !c_optimizer.empty() )
-  {
-    ASSERT( c_optimizer == "powell" ||
-            c_optimizer == "random" ||
-            c_optimizer == "single"    );
-    if( c_optimizer == "powell" )
+    //
+    // choice of index to be minimized
+    //
+    ObjFunc* objfunc = NULL;
+    if( !c_objfunc.empty() )
     {
-      optimizer = new PowellOptimizer<float,6>( *objfunc, error );
-      cout << "optimizer            : powell" << endl;
-    }
-    else if( c_optimizer == "random" )
-    {
-      optimizer = new DetermOptimizer<float,6>( *objfunc, error, 10000, 100, 
-						true );
-      cout << "optimizer            : deterministic" << endl;
-    }
-    else if( c_optimizer == "single" )
-    {
-      optimizer = new SingleOptimizer<float,6>( *objfunc );
-      cout << "optimizer            : singleoptimizer" << endl;
-    }
-  }
-
-
-
-  //
-  // Equiped with probe
-  //
-//   OptimizerProbe<float, 6> * probe = 
-//     new MIRegistrationProbe<float, 6>( numLevel, 200, verbosity ) ;
-//   optimizer->setProbe( probe ) ;
-
-
-
-
-
-  //
-  //Read data
-  //   - read ref data completely: assumed to be one frame
-  //   - get info from header to manage test data on a frame by frame basis.
-  //-------- Data are read as short int (float data are scaled !!!!)
-  string fileTest = testread.fileName(), fileRef = refread.fileName();
-  Finder testFinder;
-  AimsData<short>    test;
-  CoarseReader*    testR = new CoarseReader( fileTest );
-  AimsData<short>    ref;
-  CoarseReader*    refR = new CoarseReader( fileRef );
-
-  refR->read( ref, 0, 0, 0 ); //frameRead( ref, 0, 0L );
-
-
-  if( ! testFinder.check( fileTest ) )
-  {
-    cerr << "could not load " << fileTest << endl;
-    return EXIT_FAILURE;
-  }
-  const Header	*h = testFinder.header();
-  const PythonHeader *ph = dynamic_cast<const PythonHeader *>( h );
-  if( !ph )
-  {
-    cerr << "Can't get info for "<< fileTest << endl;
-    return EXIT_FAILURE;
-  }
-  vector< int > v;
-  int sizeT = 1;
-  if ( ph->getProperty("volume_dimension", v ) )
-  {
-    if( v.size() >= 4 )
-      sizeT = v[3];
-  }
-
-
-
-
-
-  //
-  //Get gravity centers if the ref image
-  //
-  float KeepGC_x=0.0, KeepGC_y=0.0, KeepGC_z=0.0;
-
-  {
-    float gx, gy, gz;
-    int gn;
-    int x, y, z;
-    AimsThreshold<short,short> thresh( AIMS_GREATER_THAN,
-                                       (short)( refratio * ref.maximum() ),
-                                        0 );
-    AimsData<short> *tmp = new AimsData<short>;
-
-    *tmp = thresh.bin( ref );
-    gx = gy = gz = 0.0; gn = 0;
-    ForEach3d((*tmp), x, y, z)
+      ASSERT( c_objfunc == "mi" ||
+              c_objfunc == "cr"   );
+      if( c_objfunc == "mi" )
       {
-	if ( (*tmp)( x, y, z ))
-	  {
-	    gx += x; gy += y; gz += z; gn++;
-	  }
+        objfunc = new MutualInfoFunc( numLevel, interpolator, comb, maskSize );
+        cout << "objective function   : mutual information" << endl;
       }
-    gx = (gx/gn) * ref.sizeX();
-    gy = (gy/gn) * ref.sizeY();
-    gz = (gz/gn) * ref.sizeZ();
-    objfunc->setGcRef(gx, gy, gz);
-#ifdef DEBUG
-    cout << "DEBUG:MAIN>>"  << "refgx " << gx << "refgy " << gy << "refgz "
-        << gz << endl;
-#endif
-    delete tmp;
-   if (string( c_gc ) != "yes")
-   {
-       KeepGC_x = gx; KeepGC_y = gy; KeepGC_z = gz;
-   }
-  }
+      else if( c_objfunc == "cr" )
+      {
+        objfunc = new CorRatioFunc( numLevel, interpolator, comb, maskSize );
+        cout << "objective function   : correlation ratio" << endl;
+      }
+    }
+
+
+    //
+    // choice of optimizer
+    //
+    Optimizer<float,6>* optimizer = NULL;
+    if( !c_optimizer.empty() )
+    {
+      ASSERT( c_optimizer == "powell" ||
+              c_optimizer == "random" ||
+              c_optimizer == "single"    );
+      if( c_optimizer == "powell" )
+      {
+        optimizer = new PowellOptimizer<float,6>( *objfunc, error );
+        cout << "optimizer            : powell" << endl;
+      }
+      else if( c_optimizer == "random" )
+      {
+        optimizer = new DetermOptimizer<float,6>( *objfunc, error, 10000, 100, 
+              true );
+        cout << "optimizer            : deterministic" << endl;
+      }
+      else if( c_optimizer == "single" )
+      {
+        optimizer = new SingleOptimizer<float,6>( *objfunc );
+        cout << "optimizer            : singleoptimizer" << endl;
+      }
+    }
+
+    //
+    // Equiped with probe
+    //
+  //   OptimizerProbe<float, 6> * probe = 
+  //     new MIRegistrationProbe<float, 6>( numLevel, 200, verbosity ) ;
+  //   optimizer->setProbe( probe ) ;
 
 
 
-  //
-  // Infer pyramid range from the following heuristics
-  //
-  rspLevel = (rsp ? rsp : rspLevel);
-  repLevel = (rep ? rep : rspLevel);
-  ASSERT( (repLevel == rspLevel) ); // Pour la ref il n'y a qu'un niveau d'ech
-  tspLevel = (tsp ? tsp : tspLevel);
-  tepLevel = (tep ? tep : tspLevel);
-  ASSERT( (tepLevel <= tspLevel) );
 
 
-  //
-  // State of input data.
-  //
-  cout << "Reference Image       : " << fileRef << endl;
-  cout << "         Pyramid range: " << rspLevel << " - " << repLevel << endl;
-  if ( sn > 0)
+    //
+    //Read data
+    //   - read ref data completely: assumed to be one frame
+    //   - get info from header to manage test data on a frame by frame basis.
+    //-------- Data are read as short int (float data are scaled !!!!)
+    Finder testFinder;
+    AimsData<short>    test;
+    AimsData<short>    ref;
+    
+    ChannelReader< AimsData<short> > rdref(fileRef);
+    ChannelReader< AimsData<short> > rdtest(fileTest);
+    cout << "Reading channel " << carto::toString(refchannel) << " of reference image" << endl << flush;
+    rdref.read(ref, refchannel, 0, 0, 0 );
+
+    if( ! testFinder.check( fileTest ) )
+    {
+      cerr << "could not load " << fileTest << endl;
+      return EXIT_FAILURE;
+    }
+    
+    const Header	*h = testFinder.header();
+    const PythonHeader *ph = dynamic_cast<const PythonHeader *>( h );
+    if( !ph )
+    {
+      cerr << "Can't get info for "<< fileTest << endl;
+      return EXIT_FAILURE;
+    }
+    
+    vector< int > v;
+    int sizeT = 1;
+    if ( ph->getProperty("volume_dimension", v ) )
+    {
+      if( v.size() >= 4 )
+        sizeT = v[3];
+    }
+
+    //
+    //Get gravity centers if the ref image
+    //
+    float KeepGC_x=0.0, KeepGC_y=0.0, KeepGC_z=0.0;
+
+    {
+      float gx, gy, gz;
+      int gn;
+      int x, y, z;
+      AimsThreshold<short,short> thresh( AIMS_GREATER_THAN,
+                                        (short)( refratio * ref.maximum() ),
+                                          0 );
+      AimsData<short> *tmp = new AimsData<short>;
+
+      *tmp = thresh.bin( ref );
+      gx = gy = gz = 0.0; gn = 0;
+      ForEach3d((*tmp), x, y, z)
+      {
+        if ( (*tmp)( x, y, z ))
+        {
+          gx += x; gy += y; gz += z; gn++;
+        }
+      }
+      gx = (gx/gn) * ref.sizeX();
+      gy = (gy/gn) * ref.sizeY();
+      gz = (gz/gn) * ref.sizeZ();
+      objfunc->setGcRef(gx, gy, gz);
+  #ifdef DEBUG
+      cout << "DEBUG:MAIN>>"  << "refgx " << gx << "refgy " << gy << "refgz "
+          << gz << endl;
+  #endif
+      delete tmp;
+      
+      if (string( c_gc ) != "yes")
+      {
+          KeepGC_x = gx; KeepGC_y = gy; KeepGC_z = gz;
+      }
+    }
+
+
+
+    //
+    // Infer pyramid range from the following heuristics
+    //
+    rspLevel = (rsp ? rsp : rspLevel);
+    repLevel = (rep ? rep : rspLevel);
+    ASSERT( (repLevel == rspLevel) ); // Pour la ref il n'y a qu'un niveau d'ech
+    tspLevel = (tsp ? tsp : tspLevel);
+    tepLevel = (tep ? tep : tspLevel);
+    ASSERT( (tepLevel <= tspLevel) );
+
+    //
+    // State of input data.
+    //
+    cout << "Reference Image       : " << fileRef << endl;
+    cout << "         Pyramid range: " << rspLevel << " - " << repLevel << endl;
+    if ( sn > 0)
     {
       cout << "Frame seled from serie: " << sn << endl;
     }
-  cout << "Test      Image       : " << fileTest << endl;
-  cout << "         Pyramid range: " << tspLevel << " - " << tepLevel << endl;
-  cout << "Number of Level       : " << numLevel << endl;
-  cout << "Parzen Mask Size      : " << maskSize << endl;
-  cout << "Error (Stop Criterion): " <<  error << endl;
-  cout << "Ref Threshold  ratio  : " <<  refratio << endl;
-  cout << "Test Threshold ratio  : " <<  testratio << endl;
-  cout << "initial parameter     : " << param << endl;
-  cout << "parameter variations  : " << deltaP << endl;
+    cout << "Test      Image       : " << fileTest << endl;
+    cout << "         Pyramid range: " << tspLevel << " - " << tepLevel << endl;
+    cout << "Number of Level       : " << numLevel << endl;
+    cout << "Parzen Mask Size      : " << maskSize << endl;
+    cout << "Error (Stop Criterion): " <<  error << endl;
+    cout << "Ref Threshold  ratio  : " <<  refratio << endl;
+    cout << "Test Threshold ratio  : " <<  testratio << endl;
+    cout << "initial parameter     : " << param << endl;
+    cout << "parameter variations  : " << deltaP << endl;
 
 
 
-  //  
-  // Start the job.
-  //     1. Init ObectiveFunction Ref Images.
-  //     2. Loop on time dimension (with init Test image).
-  //
+    //  
+    // Start the job.
+    //     1. Init ObectiveFunction Ref Images.
+    //     2. Loop on time dimension (with init Test image).
+    //
 
-  
+    
 
-   pyramidfunc = new MedianPyramidFunc<short>();
-  //   pyramidfunc = new MeanPyramidFunc<short>();
-  Pref = new Pyramid<short>(*pyramidfunc);
-  Pref->setRef( ref );
-  Pref->setLevel( rspLevel );
+    pyramidfunc = new MedianPyramidFunc<short>();
+    //   pyramidfunc = new MeanPyramidFunc<short>();
+    Pref = new Pyramid<short>(*pyramidfunc);
+    Pref->setRef( ref );
+    Pref->setLevel( rspLevel );
 
-  objfunc->setRef( Pref->item( rspLevel ) );
-  
+    objfunc->setRef( Pref->item( rspLevel ) );
+    
 
-  AimsVector<float,6> p;
-  for (int i=0; i<sizeT; i++) //- - - - - - - - - - - - -  - - - Loop on frames
+    AimsVector<float,6> p;
+    for (int i=0; i<sizeT; i++) //- - - - - - - - - - - - -  - - - Loop on frames
     {
-                                                       // Direct Frame reading
-                             // ----------------------------------------------
+                                                      // Direct Frame reading
+                            // ----------------------------------------------
       string f = testFinder.format();
-      testR->read( test, 0, &f , i );
+      rdtest.read( test, testchannel, 0, &f , i );
 
-                                   // Find and Set Grav Center of Test Volume
-                             // ----------------------------------------------
+                                  // Find and Set Grav Center of Test Volume
+                            // ----------------------------------------------
       if (string(c_gc) != "yes")
-	{
-	  objfunc->setGcTest(KeepGC_x, KeepGC_y, KeepGC_z);
-	}
+      {
+        objfunc->setGcTest(KeepGC_x, KeepGC_y, KeepGC_z);
+      }
       else
-	{
-	  float gx, gy, gz;
-	  int gn;
-	  int x, y, z;
-	  
-	  AimsThreshold<short,short>
-              thresh( AIMS_GREATER_THAN,
-                      (short)( testratio *  test.maximum() ), 0 );
-	  AimsData<short> *tmp = new AimsData<short>;
-	  
-	  
-	  *tmp = thresh.bin( test );
-	  gx = gy = gz = 0.0; gn = 0;
-	  ForEach3d((*tmp), x, y, z)
-	    {
-	      if ( (*tmp)( x, y, z ))
-		{
-		  gx += x; gy += y; gz += z; gn++;
-		}
-	    }
-	  gx = (gx/gn) * test.sizeX();
-	  gy = (gy/gn) * test.sizeY();
-	  gz = (gz/gn) * test.sizeZ();
-	  
-	  objfunc->setGcTest(gx, gy, gz);
-#ifdef DEBUG
-	  cout << "DEBUG:MAIN>>" << "testgx " << gx << "testgy " << gy
-              << "testgz " << gz << endl;
-#endif
-	  delete tmp;
-	}
+      {
+        float gx, gy, gz;
+        int gn;
+        int x, y, z;
+        
+        AimsThreshold<short,short>
+                  thresh( AIMS_GREATER_THAN,
+                          (short)( testratio *  test.maximum() ), 0 );
+        AimsData<short> *tmp = new AimsData<short>;
+        
+        
+        *tmp = thresh.bin( test );
+        gx = gy = gz = 0.0; gn = 0;
+        ForEach3d((*tmp), x, y, z)
+        {
+          if ( (*tmp)( x, y, z ))
+          {
+            gx += x; gy += y; gz += z; gn++;
+          }
+        }
+        
+        gx = (gx/gn) * test.sizeX();
+        gy = (gy/gn) * test.sizeY();
+        gz = (gz/gn) * test.sizeZ();
+        
+        objfunc->setGcTest(gx, gy, gz);
+    #ifdef DEBUG
+        cout << "DEBUG:MAIN>>" << "testgx " << gx << "testgy " << gy
+                  << "testgz " << gz << endl;
+    #endif
+        delete tmp;
+      }
       
       
       // Infer deltas from the following heuristics
       // ----------------------------------------------
       if ( deltaP == float(0.0) )
-	{
-	  deltaP[0] = test.sizeX() / 2.0;
-	  deltaP[1] = test.sizeY() / 2.0;
-	  deltaP[3] = test.sizeZ() / 2.0;
-	  deltaP[2] = 180.0/ 3.14159 / test.dimX();
-	  deltaP[4] = 180.0/ 3.14159 / test.dimZ();
-	  deltaP[5] = 180.0/ 3.14159 / test.dimZ();   //<-----  ????!!!!!
-	}
+      {
+        deltaP[0] = test.sizeX() / 2.0;
+        deltaP[1] = test.sizeY() / 2.0;
+        deltaP[3] = test.sizeZ() / 2.0;
+        deltaP[2] = 180.0/ 3.14159 / test.dimX();
+        deltaP[4] = 180.0/ 3.14159 / test.dimZ();
+        deltaP[5] = 180.0/ 3.14159 / test.dimZ();   //<-----  ????!!!!!
+      }
       
       // Coarse to fine
       // ----------------------------------------------
@@ -576,22 +582,22 @@ int main( int argc, const char** argv )
       deltaP *= float(pow( (double)2, (double)(tspLevel)));
       int level;
       for (level=tspLevel; level >=tepLevel; level--)
-	{
-	  objfunc->setTest( Ptest->item( level ) );
-	  cout << "Processing Plevel " << level << param << deltaP << endl;
+      {
+        objfunc->setTest( Ptest->item( level ) );
+        cout << "Processing Plevel " << level << param << deltaP << endl;
 
-	  clock_t start = clock();  
-	  p = optimizer->doit( param, deltaP );
-	  clock_t finish = clock();
-	  cout << finish - start << " ticks" << endl;
-	  
-	  cout << "Niveau : " << level << " Popt " << p << endl;
+        clock_t start = clock();  
+        p = optimizer->doit( param, deltaP );
+        clock_t finish = clock();
+        cout << finish - start << " ticks" << endl;
+        
+        cout << "Niveau : " << level << " Popt " << p << endl;
 
-	  deltaP /=2.0;
-	  param = p;
-	}
-                                                               // dump results
-                           // ----------------------------------------------
+        deltaP /=2.0;
+        param = p;
+      }
+      // dump results
+      // ----------------------------------------------
 
       cout << "Volume " << i << "Popt " << p << endl;
       cout <<             " -Tx " << p[0];
@@ -604,17 +610,15 @@ int main( int argc, const char** argv )
         WriteCurrentDepInFile(p, objfunc, directTrans.fileName(),
                               inverseTrans.fileName(), i);
       else
-	WriteCurrentDep(p, objfunc, fileTest, fileRef, i);
+        WriteCurrentDep(p, objfunc, fileTest, fileRef, i);
     }                            // - - - - - - - - - - - - -End loop on frame
 
+    if( !fileLog.empty() )
+    {
+      mycout.close( );
+    }
 
-
-  if( !fileLog.empty() )
-  {
-    mycout.close( );
-  }
-
-  return EXIT_SUCCESS; 
+    return EXIT_SUCCESS; 
   }
   catch( user_interruption & ) {}
   catch( exception & e )
