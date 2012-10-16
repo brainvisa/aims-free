@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "rply.h"
 
@@ -1268,13 +1269,13 @@ static int obinary_uint16(p_ply ply, double value) {
 }
 
 static int obinary_int32(p_ply ply, double value) {
-    long int32 = (long) value;
+    int32_t int32 = (long) value;
     if (value > LONG_MAX || value < LONG_MIN) return 0;
     return ply->odriver->ochunk(ply, &int32, sizeof(int32));
 }
 
 static int obinary_uint32(p_ply ply, double value) {
-    unsigned long uint32 = (unsigned long) value;
+    uint32_t uint32 = (unsigned long) value;
     if (value > ULONG_MAX || value < 0) return 0;
     return ply->odriver->ochunk(ply, &uint32, sizeof(uint32));
 }
@@ -1385,14 +1386,14 @@ static int ibinary_uint16(p_ply ply, double *value) {
 }
 
 static int ibinary_int32(p_ply ply, double *value) {
-    long int32;
+    int32_t int32;
     if (!ply->idriver->ichunk(ply, &int32, sizeof(int32))) return 0;
     *value = int32;
     return 1;
 }
 
 static int ibinary_uint32(p_ply ply, double *value) {
-    unsigned long uint32;
+    uint32_t uint32;
     if (!ply->idriver->ichunk(ply, &uint32, sizeof(uint32))) return 0;
     *value = uint32;
     return 1;

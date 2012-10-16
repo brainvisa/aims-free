@@ -152,10 +152,10 @@ namespace aims
       }
     for( i=0; i<np; ++i )
       {
-        if( !ply_write( ply, D ) )
+        if( !ply_write( ply, rint( D ) ) )
           carto::io_error::launchErrnoExcept( fname );
         for( j=0; j<D; ++j )
-          if( !ply_write( ply, poly[i][j] ) )
+          if( !ply_write( ply, rint( poly[i][j] ) ) )
             carto::io_error::launchErrnoExcept( fname );
       }
 
