@@ -142,12 +142,12 @@ namespace aims
     if( value_index == 0 )
       {
         AimsVector<uint,D>	v;
-        v[0] = (uint) ply_get_argument_value(argument);
+        v[0] = (uint) rint( ply_get_argument_value(argument) );
         mesh->begin()->second.polygon().push_back( v );
       }
     else if( value_index > 0 && value_index < D )
       mesh->begin()->second.polygon().back()[ value_index ] 
-        = (uint) ply_get_argument_value(argument);
+        = (uint) rint( ply_get_argument_value(argument) );
     else if( value_index > 0 )
       std::cerr << "polygon with too many items: " << value_index << "\n";
     return 1;
@@ -226,6 +226,7 @@ namespace aims
                   broken = true;
                   std::cerr << "Broken mesh: polygon pointing to a " 
                             << "vertex out of range" << std::endl;
+                  std::cerr << pol[j] << " >= " << nvertices << std::endl;
                 }
               poly.erase( ip );
               --ip;
