@@ -29,7 +29,7 @@ static int face_cb(p_ply_argument argument) {
 
 int main(void) {
     long nvertices, ntriangles;
-    p_ply ply = ply_open("input.ply", NULL);
+    p_ply ply = ply_open("input.ply", NULL, 0, NULL);
     if (!ply) return 1;
     if (!ply_read_header(ply)) return 1;
     nvertices = ply_set_read_cb(ply, "vertex", "x", vertex_cb, NULL, 0);
