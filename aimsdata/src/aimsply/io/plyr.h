@@ -166,7 +166,7 @@ namespace aims
     hdr.read();
 
     long nvertices, ntriangles;
-    p_ply ply = ply_open( _name.c_str(), NULL, 0, NULL);
+    p_ply ply = ply_open( _name.c_str(), NULL, 0, 0 );
     if (!ply)
       throw carto::wrong_format_error( _name );
     if (!ply_read_header(ply))

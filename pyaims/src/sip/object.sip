@@ -315,6 +315,14 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %MethodCode
     try
       {
+        if( sipCpp->isArray() )
+        {
+          unsigned long n = sipCpp->size();
+          if( a0 < 0 )
+            a0 += n;
+          if( a0 < 0 || a0 >= n )
+            throw std::runtime_error( "key error: out of range" );
+        }
         carto::Object o = sipCpp->getArrayItem( a0 );
         sipRes = new carto::Object( o );
       }

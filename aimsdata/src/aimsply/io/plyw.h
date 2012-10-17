@@ -102,7 +102,7 @@ namespace aims
     e_ply_storage_mode	mode = PLY_LITTLE_ENDIAN;
     if( _ascii )
       mode = PLY_ASCII;
-    p_ply	ply = ply_create( fname.c_str(), mode, NULL, 0, NULL);
+    p_ply	ply = ply_create( fname.c_str(), mode, 0, 0, 0 );
     if( !ply )
       carto::io_error::launchErrnoExcept( fname );
 
