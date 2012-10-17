@@ -94,7 +94,7 @@ bool PlyHeader::read( uint32_t* )
   if( FileUtil::fileStat( filename() ).empty() )
     return false;	// file not found
   long nvertices = 0, ntriangles = 0;
-  p_ply ply = ply_open( filename().c_str(), NULL);
+  p_ply ply = ply_open( filename().c_str(), NULL, 0, NULL);
   int	polysize = 3;
   if (!ply) return false;
   if (!ply_read_header(ply)) return false;
