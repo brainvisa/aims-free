@@ -64,6 +64,7 @@ class DataTypeInfo
 
   public:
     static inline uint8_t samples();
+    static inline uint8_t depth();
 };
 
 
@@ -71,6 +72,12 @@ template<typename T>
 inline uint8_t DataTypeInfo<T>::samples()
 { 
   return 1;
+}
+
+template<typename T>
+inline uint8_t DataTypeInfo<T>::depth()
+{ 
+  return sizeof(T) / samples();
 }
 
 //	specializations
@@ -105,10 +112,11 @@ class ChannelSelector \
       ChannelSelector() {} \
       virtual ~ChannelSelector() {} \
 \
-      U select( T input, uint8_t channel ); \
-      void set( T & input, uint8_t channel, U value ); \
+      U select( const T& input, const uint8_t channel ); \
+      void set( T& input, const uint8_t channel, const U& value ); \
 \
     private: \
+      carto::ShallowConverter<U, C> channelconvset; \
       carto::ShallowConverter<C, U> channelconv; \
       carto::ShallowConverter<T, U> dataconv; \
 }; \
@@ -140,19 +148,19 @@ DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsHSV )
 
 
 template <class T, class U, class C> inline
-U ChannelSelector< T, U, C >::select( T input, uint8_t )
+U ChannelSelector< T, U, C >::select( const T& input, const uint8_t )
 {
   return input;
 }
 
 template <class T, class U, class C> inline
-void ChannelSelector< T, U, C >::set( T& input, uint8_t, U value )
+void ChannelSelector< T, U, C >::set( T& input, const uint8_t, const U& value )
 {
   input = value;
 }
 
 template <class U> inline
-U ChannelSelector< AimsRGB, U >::select( AimsRGB input, uint8_t channel )
+U ChannelSelector< AimsRGB, U >::select( const AimsRGB& input, const uint8_t channel )
 {
   U output;
 
@@ -173,23 +181,23 @@ U ChannelSelector< AimsRGB, U >::select( AimsRGB input, uint8_t channel )
 }
 
 template <class U> inline
-void ChannelSelector< AimsRGB, U >::set( AimsRGB& input, uint8_t channel, U value )
+void ChannelSelector< AimsRGB, U >::set( AimsRGB& input, const uint8_t channel, const U& value )
 {
   switch(channel) {
     case RedChannel :
-      channelconv.convert( value, input.red() );
+      channelconvset.convert( value, input.red() );
       break;
     case GreenChannel :
-      channelconv.convert( value, input.green() );
+      channelconvset.convert( value, input.green() );
       break;
     case BlueChannel :
-      channelconv.convert( value, input.blue() );
+      channelconvset.convert( value, input.blue() );
       break;
   }
 }
 
 template <class U> inline
-U ChannelSelector< AimsRGBA, U >::select( AimsRGBA input, uint8_t channel )
+U ChannelSelector< AimsRGBA, U >::select( const AimsRGBA& input, const uint8_t channel )
 {
   U output;
 
@@ -214,26 +222,26 @@ U ChannelSelector< AimsRGBA, U >::select( AimsRGBA input, uint8_t channel )
 }
 
 template <class U> inline
-void ChannelSelector< AimsRGBA, U >::set( AimsRGBA& input, uint8_t channel, U value )
+void ChannelSelector< AimsRGBA, U >::set( AimsRGBA& input, const uint8_t channel, const U& value )
 {
   switch(channel) {
     case RedChannel :
-      channelconv.convert( value, input.red() );
+      channelconvset.convert( value, input.red() );
       break;
     case GreenChannel :
-      channelconv.convert( value, input.green() );
+      channelconvset.convert( value, input.green() );
       break;
     case BlueChannel :
-      channelconv.convert( value, input.blue() );
+      channelconvset.convert( value, input.blue() );
       break;
     case AlphaChannel :
-      dataconv.convert( value, input.alpha() );
+      channelconvset.convert( value, input.alpha() );
       break;
   }
 }
 
 template <class U> inline
-U ChannelSelector< AimsHSV, U >::select( AimsHSV input, uint8_t channel )
+U ChannelSelector< AimsHSV, U >::select( const AimsHSV& input, const uint8_t channel )
 {
   U output;
 
@@ -257,25 +265,25 @@ U ChannelSelector< AimsHSV, U >::select( AimsHSV input, uint8_t channel )
 
 
 template <class U> inline
-void ChannelSelector< AimsHSV, U >::set( AimsHSV& input, uint8_t channel, U value )
+void ChannelSelector< AimsHSV, U >::set( AimsHSV& input, const uint8_t channel, const U& value )
 {
   U output;
 
   switch(channel) {
     case HueChannel :
-      channelconv.convert( value, input.hue() );
+      channelconvset.convert( value, input.hue() );
       break;
     case SaturationChannel :
-      channelconv.convert( value, input.saturation() );
+      channelconvset.convert( value, input.saturation() );
       break;
     case ValueChannel :
-      channelconv.convert( value, input.value() );
+      channelconvset.convert( value, input.value() );
       break;
   }
 }
 
 template<class T, class U> inline
-AimsData< U > ChannelSelector< AimsData< T >, AimsData< U > >::select( AimsData< T > input, uint8_t channel )
+AimsData< U > ChannelSelector< AimsData< T >, AimsData< U > >::select( const AimsData< T >& input, const uint8_t channel )
 {
   ChannelSelector< T, U > selector;
   int	x, y, z, t, 
@@ -311,7 +319,7 @@ AimsData< U > ChannelSelector< AimsData< T >, AimsData< U > >::select( AimsData<
 
 
 template<class T, class U> inline
-void ChannelSelector< AimsData< T >, AimsData< U > >::set( AimsData< T >& input, uint8_t channel, AimsData< U > value )
+void ChannelSelector< AimsData< T >, AimsData< U > >::set( AimsData< T >& input, const uint8_t channel, const AimsData< U >& value )
 {
   ChannelSelector< T, U > selector;
 
