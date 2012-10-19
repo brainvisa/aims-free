@@ -281,7 +281,11 @@ int main( int argc, const char** argv )
   try
   {
     app.initialize();
-
+    
+    if (testchannel == -1) {
+      testchannel = refchannel;
+    }
+    
     // 
     // Log file management
     //
