@@ -14,6 +14,7 @@ module(aimsply)  :SUBDIRS	+= aimsply
 module(aimsnifti):SUBDIRS	+= aimsnifti
 module(aimsgifti):SUBDIRS      += aimsgifti
 module(aimsfdf):SUBDIRS   += aimsfdf
+#module(aimsndp):SUBDIRS   += aimsndp
 
 darwin-module(aimsdicom):PSUBDIRS	+= bundle_aimsdicom
 darwin-module(aimsecat):PSUBDIRS	+= bundle_aimsecat
@@ -25,11 +26,13 @@ darwin-module(aimsply):PSUBDIRS         += bundle_aimsply
 darwin-module(aimsnifti):PSUBDIRS       += bundle_aimsnifti
 # darwin-module(aimsgifti):PSUBDIRS       += bundle_aimsgifti
 darwin-module(aimsfdf):PSUBDIRS       += bundle_aimsfdf
+#darwin-module(aimsndp):PSUBDIRS       += bundle_aimsndp
 
 PSUBDIRS += \
     AimsAverage	\
     AimsComposeTransformation \
     AimsConnectedComp \
+    AimsChannelExtract \
     AimsFileConvert \
     AimsFileInfo \
     AimsFlip \

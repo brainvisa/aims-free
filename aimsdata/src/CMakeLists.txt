@@ -100,6 +100,7 @@ foreach( _command
           AimsMeshArea
           AimsGraphConvert
           AimsTex2Graph
+          AimsChannelExtract
           AimsSplitRgb )
   if( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
     file( GLOB _pro "${CMAKE_CURRENT_SOURCE_DIR}/${_command}/*.pro" )
