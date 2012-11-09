@@ -111,32 +111,32 @@ void WriteCurrentDepInFile(
   courbe.close();
 }
 
-void WriteCurrentDep(
-          AimsVector<float,6>& p,
-          ObjFunc             *objfunc,
-          const string        &ftest,
-          const string        &fref,
-          int                 notFirstCall)
-{
-  // Build canonical name
-  string from = string(ftest), to = string( fref );
-  if ( from.rfind('/') != string::npos ) 
-    from = from.substr( from.rfind('/')+1, from.size() );
-  if ( from.rfind('.') != string::npos ) 
-    from = from.substr( 0, from.rfind('.') );
-  if ( to.rfind('/') != string::npos ) 
-    to = to.substr( to.rfind('/')+1, to.size() );
-  if ( to.rfind('.') != string::npos ) 
-    to = to.substr( 0, to.rfind('.') );
-
-  // Pour enregistrer les fichiers dans le repertoire de "ftest" en commencant leur nom par "inputtest_TO_inputref_":
-  string transfo_path = FileUtil::dirname(string (ftest)) + FileUtil::separator() ;
-
-  string direct = transfo_path + from + "_TO_" + to;
-  string inverse= transfo_path + to + "_TO_" + from;
-
-  WriteCurrentDepInFile(p, objfunc, direct, inverse, notFirstCall);
-}
+// void WriteCurrentDep(
+//           AimsVector<float,6>& p,
+//           ObjFunc             *objfunc,
+//           const string        &ftest,
+//           const string        &fref,
+//           int                 notFirstCall)
+// {
+//   // Build canonical name
+//   string from = string(ftest), to = string( fref );
+//   if ( from.rfind('/') != string::npos ) 
+//     from = from.substr( from.rfind('/')+1, from.size() );
+//   if ( from.rfind('.') != string::npos ) 
+//     from = from.substr( 0, from.rfind('.') );
+//   if ( to.rfind('/') != string::npos ) 
+//     to = to.substr( to.rfind('/')+1, to.size() );
+//   if ( to.rfind('.') != string::npos ) 
+//     to = to.substr( 0, to.rfind('.') );
+// 
+//   // Pour enregistrer les fichiers dans le repertoire de "ftest" en commencant leur nom par "inputtest_TO_inputref_":
+//   string transfo_path = FileUtil::dirname(string (ftest)) + FileUtil::separator() ;
+// 
+//   string direct = transfo_path + from + "_TO_" + to;
+//   string inverse = transfo_path + to + "_TO_" + from;
+// 
+//   WriteCurrentDepInFile(p, objfunc, direct, inverse, notFirstCall);
+// }
 
 int main( int argc, const char** argv )
 {
@@ -610,11 +610,27 @@ int main( int argc, const char** argv )
       cout <<             " -Rx " << p[4];
       cout <<             " -Ry " << p[5];
       cout <<             " -Rz " << p[2] << endl;
-      if( !directTrans.fileName().empty() && !inverseTrans.fileName().empty() )
-        WriteCurrentDepInFile(p, objfunc, directTrans.fileName(),
-                              inverseTrans.fileName(), i);
-      else
-        WriteCurrentDep(p, objfunc, fileTest, fileRef, i);
+      
+      
+      if( directTrans.fileName().empty() ) {
+        // Get default file name
+        string transfo_path = FileUtil::dirname(fileTest);
+        string from = FileUtil::removeExtension(FileUtil::basename(fileTest));
+        string to = FileUtil::removeExtension(FileUtil::basename(fileRef));
+        directTrans.setFileName(transfo_path + FileUtil::separator() + from + "_TO_" + to + ".trm");
+      }
+        
+      if ( inverseTrans.fileName().empty() ) {
+        // Get default file name
+        string transfo_path = FileUtil::dirname(fileTest);
+        string from = FileUtil::removeExtension(FileUtil::basename(fileTest));
+        string to = FileUtil::removeExtension(FileUtil::basename(fileRef));
+        inverseTrans.setFileName(transfo_path + FileUtil::separator() + to + "_TO_" + from + ".trm");
+      }
+
+      WriteCurrentDepInFile(p, objfunc, directTrans.fileName(),
+                            inverseTrans.fileName(), i);
+//       WriteCurrentDep(p, objfunc, fileTest, fileRef, i);
     }                            // - - - - - - - - - - - - -End loop on frame
 
     if( !fileLog.empty() )
