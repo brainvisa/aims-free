@@ -314,6 +314,8 @@ namespace
   void addCovariance( const BucketMap<Void> & bck, AimsData<float> & covar, 
                       const Motion* motion )
   {
+    if( bck.empty() )
+      return;
     const BucketMap<Void>::Bucket		& bk = bck.begin()->second;
     BucketMap<Void>::Bucket::const_iterator	i, e = bk.end();
     Point3df					p;
