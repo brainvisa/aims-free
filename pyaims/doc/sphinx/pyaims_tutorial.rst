@@ -955,7 +955,7 @@ nearest-neighbour (order 0), linear (order 1), spline resampling with order 2 to
 >>> print resampled.header()[ 'referentials' ]
 [ 'Scanner-based anatomical coordinates', 'Talairach-MNI template-SPM' ]
 >>> print resampled.header()[ 'transformations' ]
-[ [ -0.92388, -0.382683, 0, 193.254, 0.382683, -0.92388, 0, 34.6002, 0, 0, -1, 73.1996, 0, 0, 0, 1 ], ...
+[ [ -0.923879504203796, -0.382683455944061, 0, 193.253814697266, ...
 >>> aims.write( resampled, 'resampled.nii' )
 
 Load the original image and the resampled in Anatomist. 
