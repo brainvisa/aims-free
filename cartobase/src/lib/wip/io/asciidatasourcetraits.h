@@ -42,6 +42,7 @@
 #include <cartobase/type/limits.h>
 #include <cstring>
 #include <iostream>
+#include <limits>
 
 namespace carto
 {
@@ -475,7 +476,7 @@ namespace carto
           {
             if( !sign && i == expo && ( c == '-' || c == '+' ) )
               sign = i+1;
-            else if( !dot && c == 'x' && !hex && i == sign+1 
+            else if( !dot && c == 'x' && !hex && i == sign+1
                      && num[sign] == '0' )
               hex = true;
             else if( !dot && !hex && c == '.' )
@@ -508,9 +509,11 @@ namespace carto
     bool AsciiFloatReadTraits<T>::write( DataSource & ds, const T & item )
     {
       std::ostringstream	ss;
+      ss.precision(std::numeric_limits< double >::digits10);
       ss << item;
       return AsciiDataSourceTraits<std::string>::write( ds, ss.str() );
     }
+
 
   } // namespace internal
 
