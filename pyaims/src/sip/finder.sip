@@ -16,6 +16,29 @@ public:
   std::string dataType() const;
   std::string format() const;
   carto::Object headerObject() const /PyName=header, ReleaseGIL/;
+  static SIP_PYLIST extensions( const std::string & );
+%MethodCode
+  std::set<std::string> extensions = aims::Finder::extensions(*a0);
+  std::set<std::string>::const_iterator	it, et;
+  unsigned int i;
+
+  if( (sipRes = PyList_New(extensions.size())) == NULL )
+    return NULL;
+
+  for (i=0, it = extensions.begin(), et = extensions.end();
+						it != et; ++it, ++i)
+  {
+    PyObject *extension_py = PyString_FromString((*it).c_str());
+    if (PyList_SetItem(sipRes, i, extension_py) < 0)
+    {
+      Py_DECREF(sipRes);
+      sipIsErr = 1;
+      sipRes = 0;
+      PyErr_SetString( PyExc_TypeError, "string insertion failed" );
+      break;
+    }
+  }
+%End
 };
 
 };
