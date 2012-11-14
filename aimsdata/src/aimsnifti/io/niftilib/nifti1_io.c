@@ -2839,6 +2839,12 @@ char * nifti_findimgname(const char* fname , int nifti_type)
    char *ext;
    int   first;  /* first extension to use */
 
+   /* *WARNING* patch by Denis Riviere, 2012/11/14:
+      if both *.nii and *.nii.gz, use the one specified in fname first, if
+      it exists. Otherwise it systematically opened the .nii variant !
+   */
+   if (nifti_fileexists(fname)) { return strdup( fname ); }
+
    /* check input file(s) for sanity */
    if( !nifti_validfilename(fname) ) return NULL;
 
