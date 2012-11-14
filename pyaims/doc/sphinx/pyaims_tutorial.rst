@@ -719,12 +719,13 @@ Vertices
 
 Vertices (or nodes) can be accessed via the vertices() method. Each vertex is also a dictionary-like properties set.
 
->>> for v in graph.vertices():
-...   print v['name']
+>>> for v_name in sorted([ v['name'] for v in graph.vertices() ]):
+...   print v_name
 Caude_droit
-Pallidum_gauche
-Striatum_ventral_gauche
-Striatum_ventral_droit
+Caude_gauche
+Corps_caude_droit
+Corps_caude_gauche
+Pallidum_droit
 ...
 
 To insert a new vertex, the :py:meth:`soma.aims.Graph.addVertex()` method should be used:
