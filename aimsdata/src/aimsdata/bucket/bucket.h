@@ -109,9 +109,9 @@ public:
   { return  find( n )->second; }
   inline std::list< AimsBucketItem<T> >& operator [] ( const key_type& n )
   { return  
-      (*((insert
-	  (typename std::map< int, std::list< AimsBucketItem<T> > >::value_type
-	   (n, std::list< AimsBucketItem<T> >()))).first)).second; }
+      (*((this->insert
+        (typename std::map< int, std::list< AimsBucketItem<T> > >::value_type
+        (n, std::list< AimsBucketItem<T> >()))).first)).second; }
 
   /// returns the X resolution in mm
   inline float  sizeX()     const;

@@ -492,8 +492,8 @@ EcatSinoHeader::setHeader( const vector<PythonHeader>& subHeaders )
     subHeaders[i].getProperty( "ecat_gate_duration", gt ) ;
     gts.push_back(gt);
     subHeaders[i].getProperty( "ecat_uncor_singles", us ) ;
-    int i;
-    for(i=0;i< 128; ++i) uss.push_back(us[i]);
+    int j;
+    for(j=0;j< 128; ++j) uss.push_back(us[j]);
     subHeaders[i].getProperty( "ecat_scan_min", smin ) ;
     smins.push_back(smin);
     subHeaders[i].getProperty( "ecat_scan_max", smax ) ;
