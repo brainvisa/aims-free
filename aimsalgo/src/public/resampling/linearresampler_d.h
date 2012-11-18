@@ -126,12 +126,12 @@ void LinearResampler< T >::doResample(
 
     }
     weightY0 = getBSplineWeight( y, normalizedInLocation[1] );
-    foldY0 = getFold( y, inVolume.dimY() ) * inVolume.dimX();
+    foldY0 = this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
     // second y contribution
     ++ y;
     weightY1 = getBSplineWeight( y, normalizedInLocation[1] );
-    foldY1 = getFold( y, inVolume.dimY() ) * inVolume.dimX();
+    foldY1 = this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
     // first x contribution
     normalizedInLocation[0] -= 0.5;
@@ -144,12 +144,12 @@ void LinearResampler< T >::doResample(
 
     }
     weightX0 = getBSplineWeight( x, normalizedInLocation[0] );
-    foldX0 = getFold( x, inVolume.dimX() );
+    foldX0 = this->getFold( x, inVolume.dimX() );
 
     // second x contribution
     ++ x;
     weightX1 = getBSplineWeight( x, normalizedInLocation[0] );
-    foldX1 = getFold( x, inVolume.dimX() );
+    foldX1 = this->getFold( x, inVolume.dimX() );
 
     if ( inVolume.dimZ() == 1 )
     {
@@ -179,7 +179,7 @@ void LinearResampler< T >::doResample(
         -- z;
 
       }
-      pj = i + getFold( z, inVolume.dimZ() ) * inVolume.dimX() *
+      pj = i + this->getFold( z, inVolume.dimZ() ) * inVolume.dimX() *
            inVolume.dimY();
       pi = pj + foldY0;
       qi = weightX0 * ( double )*( pi + foldX0 );
@@ -193,7 +193,7 @@ void LinearResampler< T >::doResample(
 
       // first z contribution
       ++ z;
-      pj = i + getFold( z, inVolume.dimZ() ) * inVolume.dimX() *
+      pj = i + this->getFold( z, inVolume.dimZ() ) * inVolume.dimX() *
            inVolume.dimY();
       pi = pj + foldY0;
       qi = weightX0 * ( double )*( pi + foldX0 );

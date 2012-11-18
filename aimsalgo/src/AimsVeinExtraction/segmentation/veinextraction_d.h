@@ -42,6 +42,11 @@ static float distance2d( int x1, int y1, int x2, int y2 )
   return ::sqrt( (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) ) ;
 }
 
+inline static float distance2( float x1, float y1, float z1, float x2, float y2, float z2 )
+{
+  return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2) ;
+}
+
 template <typename T>
 VeinExtraction<T>::VeinExtraction( Volume<T>* image, 
 				   const Point3d& initialPoint, 
@@ -706,11 +711,6 @@ VeinExtraction<T>::getExtractedVein( )
     ++iter ; 
   }
    return *segmentedVein_ ;
-}
-
-inline static float distance2( float x1, float y1, float z1, float x2, float y2, float z2 )
-{
-  return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2) ;
 }
 
 /* template class VeinExtraction<short> ; */
