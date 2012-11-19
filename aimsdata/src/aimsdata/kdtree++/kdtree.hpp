@@ -43,6 +43,11 @@
  *    This has no real effect on erase()s, a < test is good enough to keep consistency.
  */
 
+/* Changes from the official version:
+ * Denis Riviere: 2012/11/18, use this->_M_construct_node(),
+ * this->_M_deallocate_node(), this->_M_destroy_node(), to adapt to gcc 4.7
+ */
+
 #ifndef INCLUDE_KDTREE_KDTREE_HPP
 #define INCLUDE_KDTREE_KDTREE_HPP
 
@@ -1163,7 +1168,7 @@ namespace KDTree
       {
          typename _Base::NoLeakAlloc noleak(this);
          _Link_type new_node = noleak.get();
-         _M_construct_node(new_node, __V, __PARENT, __LEFT, __RIGHT);
+         this->_M_construct_node(new_node, __V, __PARENT, __LEFT, __RIGHT);
          noleak.disconnect();
          return new_node;
       }
@@ -1181,8 +1186,8 @@ namespace KDTree
       void
       _M_delete_node(_Link_type __p)
       {
-        _M_destroy_node(__p);
-        _M_deallocate_node(__p);
+        this->_M_destroy_node(__p);
+        this->_M_deallocate_node(__p);
       }
 
       _Link_type _M_root;

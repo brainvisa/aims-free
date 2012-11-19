@@ -62,9 +62,9 @@ namespace aims
     ASSERT( thing.dimT() == 1 && thing.dimZ() == 1 );
 
     // allocate the new thing
-    AimsData<T> m( min( thing.dimX(), thing.dimY() ) , 1 );
+    AimsData<T> m( std::min( thing.dimX(), thing.dimY() ) , 1 );
     // do the operations
-    for ( int x = 0; x < min( thing.dimX(), thing.dimY() ); x++ )
+    for ( int x = 0; x < std::min( thing.dimX(), thing.dimY() ); x++ )
       m( x, 0 ) = thing( x, x );
 
     return m;

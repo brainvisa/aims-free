@@ -34,6 +34,14 @@
 #include <cstdlib>
 #include <cartobase/config/cartobase_config.h>
 #ifndef CARTO_NO_BOOST
+
+namespace boost
+{
+
+  template <typename T> void intrusive_ptr_add_ref( T *rc );
+  template <typename T> void intrusive_ptr_release( T *rc );
+}
+
 #include <boost/smart_ptr.hpp>
 using namespace boost;
 #include <cartobase/smart/rcptrtrick.h>
@@ -86,6 +94,24 @@ public:
 };
 
 #ifndef CARTO_NO_BOOST
+namespace boost
+{
+
+  template <>
+  inline void intrusive_ptr_add_ref( RcType *rc )
+  {
+    ++rc_ptr_trick::refCount( *rc );
+  }
+
+  template <>
+  inline void intrusive_ptr_release( RcType *rc )
+  {
+    if( !--rc_ptr_trick::refCount( *rc ) )
+      delete rc;
+  }
+
+}
+
 template <typename T> class rcptr_type<boost::shared_ptr<T> >
 {
 public:
@@ -104,28 +130,6 @@ public:
   { return rc_ptr_trick::refCount( *x.get() ); }
   static void reset( type & x ) { x = 0; }
 };
-
-
-namespace boost
-{
-
-  template <typename T> void intrusive_ptr_add_ref( T *rc );
-  template <typename T> void intrusive_ptr_release( T *rc );
-
-  template <> 
-  inline void intrusive_ptr_add_ref( RcType *rc )
-  {
-    ++rc_ptr_trick::refCount( *rc );
-  }
-
-  template <>
-  inline void intrusive_ptr_release( RcType *rc )
-  {
-    if( !--rc_ptr_trick::refCount( *rc ) )
-      delete rc;
-  }
-
-}
 #endif
 
 
