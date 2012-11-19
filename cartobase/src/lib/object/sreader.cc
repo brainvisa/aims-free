@@ -64,8 +64,11 @@ SyntaxReader::~SyntaxReader()
 void
 SyntaxReader::skipWhile(const string& s)
 {
+        if( _stream.eof() )
+                return;
 	int c = _stream.get();
-	while (c != EOF && s.find_first_of(c) != string::npos)
+	while( !_stream.eof() && c != EOF
+                && s.find_first_of(c) != string::npos )
 	{
 		c = _stream.get();
 	}
@@ -78,8 +81,11 @@ SyntaxReader::readUntil(const string& s)
 {
 	string token;
 
+        if( _stream.eof() )
+                return token;
 	int c = _stream.get();
-	while (c != EOF && s.find_first_of(c) == string::npos)
+	while( !_stream.eof() && c != EOF
+                && s.find_first_of(c) == string::npos )
 	{
 		token += static_cast<char>(c);
 		c = _stream.get();
@@ -97,7 +103,7 @@ SyntaxReader::nextToken()
 	return readUntil(" \t\n");
 }
 
-
+#include <iostream>
 void
 SyntaxReader::read(SyntaxSet& rules)
 {
@@ -106,7 +112,12 @@ SyntaxReader::read(SyntaxSet& rules)
 	while (1)
 	{
 		token = nextToken();
-		if (_stream.eof() && token == "")
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 7
+                // on gcc 4.7, eof() doesn't show (?)
+		if (token == "")
+#else
+                if (_stream.eof() && token == "")
+#endif
 			break;
 		if (token != Lexicon::begin())
 			throw parse_error(Lexicon::begin(), token, \
