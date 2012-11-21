@@ -300,7 +300,9 @@ AimsData< U > ChannelSelector< AimsData< T >, AimsData< U > >::select( const Aim
                       input.sizeT() );
 
   if( input.header() )
-    output.setHeader( input.header()->cloneHeader( true ) );
+    output.volume()->header() = input.volume()->header();
+    output.volume()->header().setProperty("data_type", carto::DataTypeCode<U>::name());
+//     output.setHeader( input.header()->cloneHeader( true ) );
 
   for( t=0; t<dt; ++t )
     {
