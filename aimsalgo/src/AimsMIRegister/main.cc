@@ -73,7 +73,8 @@ void WriteCurrentDepInFile(
           ObjFunc             *objfunc,
           const string        &direct,
           const string        &inverse,
-          int                  notFirstCall)
+          int                  notFirstCall,
+          bool                 generatecurve)
 {
   // Infer deplacement from p and gravity centers stored in objfunc
   Motion depl    = objfunc->getDepl( p );
@@ -92,23 +93,26 @@ void WriteCurrentDepInFile(
   motionWRev << invdepl;
 
 
-  // Write current parameters for plotting
+  if (generatecurve) {
+    // Write current parameters for plotting
 
-  // Pour enregistrer les fichiers dans le repertoire de "direct" en commencant leur nom par "inputtest_TO_inputref_":
-  string courbe_path = FileUtil::dirname(direct) + FileUtil::separator() + "courbe" ;
+    // Pour enregistrer les fichiers dans le repertoire de "direct" en commencant leur nom par "inputtest_TO_inputref_":
+    string courbe_path = FileUtil::dirname(direct) + FileUtil::separator() + "courbe" ;
 
-  ofstream courbe(courbe_path.c_str(),
-      (notFirstCall ? ios::app : ios::out) );
-  if (!notFirstCall)
-  {
-    courbe << "  Tx  " << "\t" << "  Ty  " << "\t" << "  Tz  " 
-      << "  Rx  " << "\t" << "  Ry  " << "\t" << "  Rz  " << endl;
+    ofstream courbe(courbe_path.c_str(),
+        (notFirstCall ? ios::app : ios::out) );
+    if (!notFirstCall)
+    {
+      courbe << "  Tx  " << "\t" << "  Ty  " << "\t" << "  Tz  " 
+        << "  Rx  " << "\t" << "  Ry  " << "\t" << "  Rz  " << endl;
+    }
+    courbe << depl.translation().item(0) << "\t" 
+      << depl.translation().item(1) << "\t"
+      << depl.translation().item(2) << "\t"
+      << p[4] << "\t" << p[5] << "\t" << p[2] <<endl;
+    courbe.close();
   }
-  courbe << depl.translation().item(0) << "\t" 
-    << depl.translation().item(1) << "\t"
-    << depl.translation().item(2) << "\t"
-    << p[4] << "\t" << p[5] << "\t" << p[2] <<endl;
-  courbe.close();
+  
 }
 
 // void WriteCurrentDep(
@@ -163,6 +167,7 @@ int main( int argc, const char** argv )
   int  energySize           = 0;
   float testratio           = TEST_RATIO;
   float refratio            = REF_RATIO;
+  bool generatecurve        = true;
   Pyramid<short>      *Pref = NULL,  *Ptest=NULL;
   PyramidFunc<short> *pyramidfunc = NULL;
   ofstream           mycout;
@@ -277,6 +282,10 @@ int main( int argc, const char** argv )
                  "relative thresh applied prior to grav cent estimation",
                  true );
   app.alias( "--seuiltest", "--threshtest" );
+  app.addOption( generatecurve, "--generatecurve",
+                 "generate curve file with default name 'courbe' [default=true]",
+                 true );
+  app.alias( "-g", "--generatecurve" );
 
   try
   {
@@ -629,7 +638,7 @@ int main( int argc, const char** argv )
       }
 
       WriteCurrentDepInFile(p, objfunc, directTrans.fileName(),
-                            inverseTrans.fileName(), i);
+                            inverseTrans.fileName(), i, generatecurve);
 //       WriteCurrentDep(p, objfunc, fileTest, fileRef, i);
     }                            // - - - - - - - - - - - - -End loop on frame
 
