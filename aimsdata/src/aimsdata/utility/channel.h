@@ -176,7 +176,7 @@ DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsHSV )
 template <class T, class U, class C> inline
 U ChannelSelector< T, U, C >::select( const T& input, const uint8_t )
 {
-  return input;
+  return (U)input;
 }
 
 template <class T, class U, class C> inline
