@@ -35,6 +35,7 @@
 #define AIMS_UTILITY_CHANNEL_H
 
 #include <iomanip>
+#include <cartobase/type/types.h>
 #include <cartobase/type/string_conversion.h>
 #include <aims/data/data_g.h>
 #include <aims/utility/converter_g.h>
@@ -65,6 +66,7 @@ class DataTypeInfo
   public:
     static inline uint8_t samples();
     static inline uint8_t depth();
+    static inline std::string channelType();
 };
 
 
@@ -80,11 +82,23 @@ inline uint8_t DataTypeInfo<T>::depth()
   return sizeof(T) / samples();
 }
 
+template<typename T>
+inline std::string DataTypeInfo<T>::channelType()
+{ 
+  return carto::DataTypeCode<T>::dataType();
+}
+
 //	specializations
 template<>
 inline uint8_t DataTypeInfo<AimsRGB>::samples()
 {
   return 3;
+}
+
+template<>
+inline std::string DataTypeInfo<AimsRGB>::channelType()
+{ 
+  return carto::DataTypeCode<uint8_t>::dataType();
 }
 
 //---------------------------------------------------------------------------
@@ -94,11 +108,23 @@ inline uint8_t DataTypeInfo<AimsRGBA>::samples()
   return 4;
 }
 
+template<>
+inline std::string DataTypeInfo<AimsRGBA>::channelType()
+{ 
+  return carto::DataTypeCode<uint8_t>::dataType();
+}
+
 //---------------------------------------------------------------------------
 template<>
 inline uint8_t DataTypeInfo<AimsHSV>::samples()
 {
   return 3;
+}
+
+template<>
+inline std::string DataTypeInfo<AimsHSV>::channelType()
+{ 
+  return carto::DataTypeCode<uint8_t>::dataType();
 }
 
 

@@ -70,7 +70,7 @@ public:
 };
 
 ChannelExtractInput::ChannelExtractInput()
-  : Process(), datatype("U8"), appendsuffix(true)
+  : Process(), appendsuffix(true)
 {
   // Register input types
   registerProcessType( "Volume", "U8", &select<uint8_t> );
@@ -121,8 +121,9 @@ bool select( Process & p, const string & filename, Finder & f )
 
   Finder    f2;
   f2.setObjectType( "Volume" );
-  if( t.datatype.empty() )
-    f2.setDataType( "U8" );
+  if( t.datatype.empty() ) {
+    f2.setDataType( DataTypeInfo<INP>::channelType() );
+  }
   else
     f2.setDataType( t.datatype );
 
@@ -247,7 +248,6 @@ int main( int argc, const char **argv )
   }
   catch( user_interruption &e )
   {
-
   }
   catch( std::exception &e )
   {
