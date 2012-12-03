@@ -1059,5 +1059,7 @@ It is also possible to interact on objects created within Anatomist:
 
 At the end, close Anatomist:
 
+>>> # remove python references to anatomist objects before closing
+>>> del anacutsubmesh, cutsubmesh, cutmesh, win2, anavol, anamesh, win
 >>> a.close()
 
