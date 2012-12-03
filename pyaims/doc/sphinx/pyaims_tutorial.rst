@@ -743,13 +743,14 @@ An edge, or relation, links nodes together. Up to now we have always used binary
 They can be added using the :py:meth:`soma.aims.Graph.addEdge()` method. 
 Edges are also dictionary-like properties sets.
 
->>> v2 = graph.vertices().list()[1]
+>>> v2 = [ x for x in graph.vertices() if x[ 'name' ] == 'Pallidum_gauche' ][0]
+>>> del x
 >>> e = graph.addEdge( v, v2, 'roi_link' )
 >>> print graph.edges()
 [ { '__syntax__' : 'roi_link' } ]
 >>> # get vertices linked by this edge
->>> print e.vertices()
-({ '__syntax__' : 'roi', 'name' : 'new ROI' }, { '__syntax__' : 'roi', 'roi_label' : ...
+>>> print sorted( [ x['name'] for x in e.vertices() ] )
+['Pallidum_gauche', 'new ROI']
 
 
 Adding meshes or buckets in a graph vertex or relation
