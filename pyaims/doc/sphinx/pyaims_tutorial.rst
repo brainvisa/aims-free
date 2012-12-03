@@ -719,12 +719,13 @@ Vertices
 
 Vertices (or nodes) can be accessed via the vertices() method. Each vertex is also a dictionary-like properties set.
 
->>> for v in graph.vertices():
-...   print v['name']
+>>> for v_name in sorted([ v['name'] for v in graph.vertices() ]):
+...   print v_name
 Caude_droit
-Pallidum_gauche
-Striatum_ventral_gauche
-Striatum_ventral_droit
+Caude_gauche
+Corps_caude_droit
+Corps_caude_gauche
+Pallidum_droit
 ...
 
 To insert a new vertex, the :py:meth:`soma.aims.Graph.addVertex()` method should be used:
@@ -742,13 +743,14 @@ An edge, or relation, links nodes together. Up to now we have always used binary
 They can be added using the :py:meth:`soma.aims.Graph.addEdge()` method. 
 Edges are also dictionary-like properties sets.
 
->>> v2 = graph.vertices().list()[1]
+>>> v2 = [ x for x in graph.vertices() if x[ 'name' ] == 'Pallidum_gauche' ][0]
+>>> del x
 >>> e = graph.addEdge( v, v2, 'roi_link' )
 >>> print graph.edges()
 [ { '__syntax__' : 'roi_link' } ]
 >>> # get vertices linked by this edge
->>> print e.vertices()
-({ '__syntax__' : 'roi', 'name' : 'new ROI' }, { '__syntax__' : 'roi', 'roi_label' : ...
+>>> print sorted( [ x['name'] for x in e.vertices() ] )
+['Pallidum_gauche', 'new ROI']
 
 
 Adding meshes or buckets in a graph vertex or relation
@@ -955,7 +957,7 @@ nearest-neighbour (order 0), linear (order 1), spline resampling with order 2 to
 >>> print resampled.header()[ 'referentials' ]
 [ 'Scanner-based anatomical coordinates', 'Talairach-MNI template-SPM' ]
 >>> print resampled.header()[ 'transformations' ]
-[ [ -0.92388, -0.382683, 0, 193.254, 0.382683, -0.92388, 0, 34.6002, 0, 0, -1, 73.1996, 0, 0, 0, 1 ], ...
+[ [ -0.923879504203796, -0.382683455944061, 0, 193.253814697266, ...
 >>> aims.write( resampled, 'resampled.nii' )
 
 Load the original image and the resampled in Anatomist. 
