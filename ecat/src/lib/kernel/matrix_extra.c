@@ -501,7 +501,7 @@ MatrixFile *matrix_open(fname, fmode, mtype)
 
 	/* read and store the matrix file directory.  */
 	mptr->dirlist = mat_read_directory(mptr);
-	if( (int)mptr->dirlist == 0 || (int)mptr->dirlist == -1 ) {
+	if( ! mptr->dirlist) {
 		free_matrix_file( mptr );
 		return( NULL );
 	}
@@ -599,17 +599,22 @@ MatrixFile     *matrix_create(const char *fname, int fmode, Main_header * proto_
 int matrix_close(mptr)
   MatrixFile *mptr ;
 {
-	int status = OK;
-	matrix_errno = MAT_OK;
-	if (mptr->fname) strcpy(matrix_errtxt,mptr->fname);
-	else matrix_errtxt[0] = '\0';
-	if (mptr == NULL) return status;
-	if (mptr->mhptr != NULL) free(mptr->mhptr) ;
-	if (mptr->dirlist != NULL) matrix_freelist(mptr->dirlist) ;
-	if (mptr->fptr) status = fclose(mptr->fptr);
-	if (mptr->fname) free(mptr->fname);
-	free(mptr);
-	return status;
+  int status = OK;
+  matrix_errno = MAT_OK;
+  if (mptr == NULL) return status;
+  if (mptr->fname)
+  {
+    strncpy(matrix_errtxt,mptr->fname, sizeof(matrix_errtxt));
+  }
+  else {
+    matrix_errtxt[0] = '\0';
+  }
+  if (mptr->mhptr != NULL) free(mptr->mhptr) ;
+  if (mptr->dirlist != NULL) matrix_freelist(mptr->dirlist) ;
+  if (mptr->fptr) status = fclose(mptr->fptr);
+  if (mptr->fname) free(mptr->fname);
+  free(mptr);
+  return status;
 }
 
 MatrixData *matrix_read(mptr, matnum, dtype)
