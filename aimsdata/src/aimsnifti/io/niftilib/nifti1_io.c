@@ -336,9 +336,12 @@ static char * gni_history[] =
   "   - fixed znzread/write, noting example by M Adler\n"
   "   - changed nifti_swap_* routines/calls to take size_t (6)\n"
   "1.43 07 Jul 2010 [rickr]: fixed znzR/W to again return nmembers\n",
+  "x.xx 08 Dec 2012, D. Riviere\n",
+  "   - avoid a mixup between .nii and .nii.gz files in the same directory\n",
+  "   - fixed nifti_read_collapsed_image() freeing buffer on read failure\n",
   "----------------------------------------------------------------------\n"
 };
-static char gni_version[] = "nifti library version 1.43 (7 July, 2010)";
+static char gni_version[] = "nifti library version 1.44 (8 Dec, 2012)";
 
 /*! global nifti options structure - init with defaults */
 static nifti_global_options g_opts = { 
@@ -6751,6 +6754,7 @@ int nifti_read_collapsed_image( nifti_image * nim, const int dims [8],
    znzFile fp;
    int     pivots[8], prods[8], nprods; /* sizes are bounded by dims[], so 8 */
    int     c, bytes;
+   int     did_alloc; /* did we malloc the buffer *data here ? */
 
    /** - check pointers for sanity */
    if( !nim || !dims || !data ){
@@ -6785,19 +6789,36 @@ int nifti_read_collapsed_image( nifti_image * nim, const int dims [8],
    /** - prepare pivot list - pivots are fixed indices */
    if( make_pivot_list(nim, dims, pivots, prods, &nprods) < 0 ) return -1;
 
+   did_alloc = (*data == NULL);
    bytes = rci_alloc_mem(data, prods, nprods, nim->nbyper);
    if( bytes < 0 ) return -1;
 
    /** - open the image file for reading at the appropriate offset */
    fp = nifti_image_load_prep( nim );
-   if( ! fp ){ free(*data);  *data = NULL;  return -1; }     /* failure */
+   if( ! fp ){
+     if( did_alloc ){
+       /* only free the data buffer if we have allocated here ourselves,
+        * otherwise we cannot dcide to free it, nor how */
+       free(*data);
+       *data = NULL;
+     }
+     return -1;
+   }     /* failure */
 
    /** - call the recursive reading function, passing nim, the pivot info,
          location to store memory, and file pointer and position */
    c = rci_read_data(nim, pivots,prods,nprods,dims,
                      (char *)*data, fp, znztell(fp));
    znzclose(fp);   /* in any case, close the file */
-   if( c < 0 ){ free(*data);  *data = NULL;  return -1; }    /* failure */
+   if( c < 0 ){
+     if( did_alloc ){
+       /* only free the data buffer if we have allocated here ourselves,
+        * otherwise we cannot dcide to free it, nor how */
+      free(*data);
+      *data = NULL;
+     }
+     return -1;
+   }    /* failure */
 
    if( g_opts.debug > 1 )
       fprintf(stderr,"+d read %d bytes of collapsed image from %s\n",
@@ -6954,8 +6975,8 @@ int nifti_read_subregion_image( nifti_image * nim,
     if(g_opts.debug > 1)
       {
       fprintf(stderr,"allocation of %d bytes failed\n",total_alloc_size);
-      return -1;
       }
+    return -1;
     }
 
   /* point to start of data buffer as char * */
