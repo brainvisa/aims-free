@@ -351,7 +351,8 @@ namespace aims
     std::string dt;
     hdr->getProperty( "disk_data_type", dt );
     f2.setDataType( dt );
-    proc.execute( f2, "" );
+    if( !proc.execute( f2, "" ) )
+      throw carto::corrupt_stream_error( _name );
   }
 
 }
