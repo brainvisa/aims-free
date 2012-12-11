@@ -694,6 +694,17 @@ bool NiftiHeader::fillNim( bool allow4d )
   if(getProperty( "storage_to_memory", storage_to_memory ))
   {
     s2m = storage_to_memory;
+    // fix s2m dims if needed (happens in case image dims have changed)
+    Point3df p( dims[0], dims[1], dims[2] ), pp( 0. );
+    p = s2m.transform( p ) - s2m.transform( Point3df( 0. ) );
+    if( p[0] < 0 )
+      pp[0] = -p[0] - 1;
+    if( p[1] < 0 )
+      pp[1] = -p[1] - 1;
+    if( p[2] < 0 )
+      pp[2] = -p[2] - 1;
+    s2m.setTranslation( -s2m.translation() ); // erase initial translation
+    s2m.setTranslation( pp );
   }
   else
   {
