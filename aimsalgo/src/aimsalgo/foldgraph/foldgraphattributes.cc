@@ -1968,7 +1968,7 @@ AimsData<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
   fm.doit( seedvol.volume(), work, seeds );
   VolumeRef<int16_t> voronoi = fm.voronoiVol();
 
-  cout << "clear cortical relatinons...\n";
+  cout << "clear cortical relations...\n";
   // clear existing cortical relations in graph
   ie=_graph.edges().begin();
   while( ie != ee )
