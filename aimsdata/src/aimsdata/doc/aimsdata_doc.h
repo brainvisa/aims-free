@@ -86,7 +86,7 @@
   - for backwards compatibility, if \c $BRAINVISA_SHARE is not set, then
     \c $SHFJ_SHARED_PATH is used instead. But it is deprecated, please do not
     use it any longer
-  - normally \c SHFH_SHARED_PATH is enough. But if AIMS-specific shared
+  - normally \c BRAINVISA_SHARE is enough. But if AIMS-specific shared
     data are not located in the standard
     \c $BRAINVISA_SHARE/aims-\<aims_version\>
     or \c $BRAINVISA_SHARE/aims directory, then an additional \c AIMS_PATH
