@@ -959,7 +959,7 @@ nearest-neighbour (order 0), linear (order 1), spline resampling with order 2 to
 >>> import numpy
 >>> numpy.set_printoptions( precision=4 )
 >>> for t in resampled.header()[ 'transformations' ]:
->>>     print  aims.AffineTransformation3d( t )
+...   print  aims.AffineTransformation3d( t )
 [[  -0.9239   -0.3827    0.      193.2538]
  [   0.3827   -0.9239    0.       34.6002]
  [   0.        0.       -1.       73.1996]
