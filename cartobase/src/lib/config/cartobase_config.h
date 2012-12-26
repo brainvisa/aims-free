@@ -156,6 +156,8 @@ using std::isinf;
 #define CARTO_BROKEN_EXTERN_TEMPLATES
 #endif
 
+#include <cartobase/config/config.h>
+
 #endif // CARTOBASE_CONFIG_CARTOBASE_CONFIG_H
 
 
