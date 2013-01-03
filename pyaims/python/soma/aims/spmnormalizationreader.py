@@ -39,10 +39,11 @@ __docformat__ = 'restructuredtext en'
 
 def readSpmNormalization( matfilename, source=None, destref=None, srcref=None ):
   '''
-  Read a SPM \*_sn.mat normalization file and converts it to an Aims Motion.
-  The converted transformation has for source the AIMS referential of the source
-  image, and for destination the template referential of the SPM .mat file. All
-  coordinates are in millimeters.
+  Read a SPM \*_sn.mat normalization file and converts it to an Aims
+  AffineTransformation3d.
+  The converted transformation has for source the AIMS referential of the
+  source image, and for destination the template referential of the SPM .mat
+  file. All coordinates are in millimeters.
 
   The source image information may be provided either as its filename, its
   header object, or the image itself. It should carry the needed
@@ -107,29 +108,34 @@ def readSpmNormalization( matfilename, source=None, destref=None, srcref=None ):
   else:
     hdr = source
   try:
-    vsA = aims.Motion( numpy.diag( hdr[ 'voxel_size' ][:3] + [ 1. ] ) )
+    vsA = aims.AffineTransformation3d( numpy.diag( hdr[ 'voxel_size' ][:3] \
+      + [ 1. ] ) )
   except:
     raise RuntimeError( 'Source image header information could not be ' \
       'accessed.' )
   try:
-    s2m = aims.Motion( hdr[ 'storage_to_memory' ] )
+    s2m = aims.AffineTransformation3d( hdr[ 'storage_to_memory' ] )
   except:
-    s2m = aims.Motion()
+    s2m = aims.AffineTransformation3d()
   sn3d = scipy.io.loadmat( matfilename )
-  Affine = aims.Motion( sn3d[ 'Affine' ] )
+  Affine = aims.AffineTransformation3d( sn3d[ 'Affine' ] )
   if sn3d.has_key( 'VG' ):
     # SPM >= 2
     VG = sn3d[ 'VG' ]
-    if [ int(x) for x in scipy.version.version.split('.')[:2] ] >= [ 0, 7 ]:
+    scipyversion = [ int(x) for x in scipy.version.version.split('.')[:2] ]
+    if scipyversion >= [ 0, 7 ]:
       VG = VG[0,0]
-    MT = aims.Motion( VG.mat )
+    if scipyversion >= [ 0, 9 ]:
+      MT = aims.AffineTransformation3d( VG[2] )
+    else:
+        MT = aims.AffineTransformation3d( VG.mat )
   else: # spm99
-    MT = aims.Motion( sn3d[ 'MG' ] )
+    MT = aims.AffineTransformation3d( sn3d[ 'MG' ] )
   # At is the compensation for Affine being used between Matlab arrays
   # indices, starting at 1, not 0
   At = numpy.mat( numpy.diag( [1.,1.,1.,1.] ) )
   At[:3,3] = numpy.transpose( numpy.mat( [-1.,-1.,-1.] ) )
-  At = aims.Motion( At )
+  At = aims.AffineTransformation3d( At )
   # AtoT is Aims (mm) to Template (SPM mm) and is the output if
   # no normalized_volume is specified
   AtoT = MT * ( vsA * s2m * At * Affine ).inverse()
