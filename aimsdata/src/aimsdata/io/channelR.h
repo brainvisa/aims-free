@@ -45,14 +45,11 @@
 #include <aims/utility/channel.h>
 #include <string>
 
-using namespace aims;
-using namespace carto;
-using namespace std;
 
 namespace {
 
     template<class OUTP>
-    class InternalConverter : public Process
+    class InternalConverter : public aims::Process
     {
     public:
       InternalConverter( uint8_t c, int b, int frm, OUTP & d )
@@ -71,7 +68,8 @@ namespace aims
 {
 
   template<class INP, class OUTP>
-  static bool internalconvert( Process & p, const string & fname, Finder & f );
+  static bool internalconvert( aims::Process & p, const std::string & fname,
+                               aims::Finder & f );
 
   ///	Reads a AimsData, with conversion if needed
   template<class OUTP>
@@ -86,10 +84,12 @@ namespace aims
                        int border = 0, 
 		       const std::string* format = 0, 
                        int frame = -1 );
+    void setAllowedInputDataTypes(
+      const std::map<std::string, std::set<std::string> > & );
 
   private:
     std::string	_filename;
-
+    std::map<std::string, std::set<std::string> > _allowedTypes;
   };
 
 }

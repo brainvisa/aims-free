@@ -39,6 +39,10 @@
 #include <aims/io/reader.h>
 #include <aims/io/channelR.h>
 
+using namespace aims;
+using namespace carto;
+using namespace std;
+
 namespace aims
 {
   template<class INP, class OUTP>
@@ -61,37 +65,90 @@ namespace aims
 
     return( true );
   }
-  
+
   template<class OUTP>
   ChannelReader<OUTP>::ChannelReader( const std::string & f )
     : _filename( f )
   {
+    setAllowedInputDataTypes( map<string, set<string> >() );
   }
-  
+
   template<class OUTP>
   ChannelReader<OUTP>::~ChannelReader()
   {
   }
-  
+
   template<class OUTP>
   void ChannelReader<OUTP>::read( OUTP & data, uint8_t channel, int border, 
                                    const std::string*, int frame )
   {
     InternalConverter<OUTP>	ic( channel, border, frame, data );
 
-    ic.registerProcessType( "Volume", "S8", &internalconvert< AimsData<int8_t>, OUTP > );
-    ic.registerProcessType( "Volume", "U8", &internalconvert< AimsData<uint8_t>, OUTP > );
-    ic.registerProcessType( "Volume", "S16", &internalconvert< AimsData<int16_t>, OUTP > );
-    ic.registerProcessType( "Volume", "U16", &internalconvert< AimsData<uint16_t>, OUTP > );
-    ic.registerProcessType( "Volume", "S32", &internalconvert< AimsData<int32_t>, OUTP > );
-    ic.registerProcessType( "Volume", "U32", &internalconvert< AimsData<uint32_t>, OUTP > );
-    ic.registerProcessType( "Volume", "FLOAT", &internalconvert< AimsData<float>, OUTP > );
-    ic.registerProcessType( "Volume", "DOUBLE", &internalconvert< AimsData<double>, OUTP > );
-    ic.registerProcessType( "Volume", "RGB", &internalconvert< AimsData<AimsRGB>, OUTP > );
-    ic.registerProcessType( "Volume", "RGBA", &internalconvert< AimsData<AimsRGBA>, OUTP > );
-    ic.registerProcessType( "Volume", "HSV", &internalconvert< AimsData<AimsHSV>, OUTP > );
-  
+    map<std::string, set<string> >::const_iterator idt
+      = _allowedTypes.find( "Volume" );
+    if( idt != _allowedTypes.end() )
+    {
+      const set<string> &vt = idt->second;
+      set<string>::const_iterator e = vt.end();
+      if( vt.find( "S8" ) != e )
+        ic.registerProcessType( "Volume", "S8",
+                                &internalconvert< AimsData<int8_t>, OUTP > );
+      if( vt.find( "U8" ) != e )
+        ic.registerProcessType( "Volume", "U8",
+                                &internalconvert< AimsData<uint8_t>, OUTP > );
+      if( vt.find( "S16" ) != e )
+        ic.registerProcessType( "Volume", "S16",
+                                &internalconvert< AimsData<int16_t>, OUTP > );
+      if( vt.find( "U16" ) != e )
+        ic.registerProcessType( "Volume", "U16",
+                                &internalconvert< AimsData<uint16_t>, OUTP > );
+      if( vt.find( "S32" ) != e )
+        ic.registerProcessType( "Volume", "S32",
+                                &internalconvert< AimsData<int32_t>, OUTP > );
+      if( vt.find( "U32" ) != e )
+        ic.registerProcessType( "Volume", "U32",
+                                &internalconvert< AimsData<uint32_t>, OUTP > );
+      if( vt.find( "FLOAT" ) != e )
+        ic.registerProcessType( "Volume", "FLOAT",
+                                &internalconvert< AimsData<float>, OUTP > );
+      if( vt.find( "DOUBLE" ) != e )
+        ic.registerProcessType( "Volume", "DOUBLE",
+                                &internalconvert< AimsData<double>, OUTP > );
+      if( vt.find( "RGB" ) != e )
+        ic.registerProcessType( "Volume", "RGB",
+                                &internalconvert< AimsData<AimsRGB>, OUTP > );
+      if( vt.find( "RGBA" ) != e )
+        ic.registerProcessType( "Volume", "RGBA",
+                                &internalconvert< AimsData<AimsRGBA>, OUTP > );
+      if( vt.find( "HSV" ) != e )
+        ic.registerProcessType( "Volume", "HSV",
+                                &internalconvert< AimsData<AimsHSV>, OUTP > );
+    }
+
     ic.execute( _filename );
+  }
+
+  template <typename OUTP>
+  void ChannelReader<OUTP>::setAllowedInputDataTypes(
+    const map<std::string, set<string> > & types )
+  {
+    _allowedTypes = types;
+    if( _allowedTypes.empty() )
+    {
+      // fill in standard data types
+      set<string> & vt = _allowedTypes[ "Volume" ];
+      vt.insert( "S8" );
+      vt.insert( "U8" );
+      vt.insert( "S16" );
+      vt.insert( "U16" );
+      vt.insert( "S32" );
+      vt.insert( "U32" );
+      vt.insert( "FLOAT" );
+      vt.insert( "DOUBLE" );
+      vt.insert( "RGB" );
+      vt.insert( "RGBA" );
+      vt.insert( "HSV" );
+    }
   }
 
   // Instanciates classes

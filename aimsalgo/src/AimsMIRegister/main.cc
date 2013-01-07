@@ -412,6 +412,18 @@ int main( int argc, const char** argv )
     ChannelReader< AimsData<short> > rdref(fileRef);
     ChannelReader< AimsData<short> > rdtest(fileTest);
     cout << "Reading channel " << carto::toString(refchannel) << " of reference image" << endl << flush;
+    map<std::string, set<string> > allowedtypes;
+    set<string> & voltypes = allowedtypes[ "Volume" ];
+    voltypes.insert( "S8" );
+    voltypes.insert( "U8" );
+    voltypes.insert( "S16" );
+    voltypes.insert( "U16" );
+    voltypes.insert( "S32" );
+    voltypes.insert( "U32" );
+    voltypes.insert( "RGB" );
+    voltypes.insert( "RGBA" );
+    voltypes.insert( "HSV" );
+    rdref.setAllowedInputDataTypes( allowedtypes );
     rdref.read(ref, refchannel, 0, 0, 0 );
 
     if( ! testFinder.check( fileTest ) )
