@@ -17,6 +17,7 @@ class GeodesicPath
      ~GeodesicPath();
 
     vector_U32 shortestPath_1_1_ind(unsigned source, unsigned target);
+    vector_U32 shortestPath_1_1_ind(unsigned source, unsigned target, TimeTexture_S16 subset);
 
     vector_U32 shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target);
     void shortestPath_1_N_ind(unsigned source, vector_U32 targets, unsigned *target, double *length);
