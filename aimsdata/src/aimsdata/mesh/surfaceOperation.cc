@@ -2945,6 +2945,107 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
   return nmesh;
 }
 
+//--------------------------------------------------------------
+bool SurfaceManip::checkMeshIntersect( const AimsSurfaceTriangle & surf1,
+                                       const AimsSurfaceTriangle & surf2 )
+{
+	const float eps = 1e-6;
+
+	// Get vertices, polygons and normals from both surfaces
+    const vector<Point3df> & vert1 = surf1.vertex();
+    const vector<AimsVector<uint, 3> > & poly1 = surf1.polygon();
+    const vector<Point3df> & vert2 = surf2.vertex();
+    const vector<Point3df> & norm2 = surf2.normal();
+    const vector<AimsVector<uint, 3> > & poly2 = surf2.polygon();
+
+    vector<AimsVector<uint, 3> >::const_iterator it1;
+    vector<AimsVector<uint, 3> >::const_iterator it1End = poly1.end();
+    vector<AimsVector<uint, 3> >::const_iterator it2;
+    vector<AimsVector<uint, 3> >::const_iterator it2End = poly2.end();
+    for ( it1 = poly1.begin(); it1 != it1End; ++it1 )
+    {
+    	// Get the first two points of the current triangle of surf1
+        const Point3df & p11 = vert1[ (*it1)[0] ];
+        const Point3df & p12 = vert1[ (*it1)[1] ];
+        Point3df p11p12 = p12 - p11;
+
+        for ( it2 = poly2.begin(); it2 != it2End; ++it2 )
+        {
+        	// Get the points of the current triangle of surf2
+			const Point3df & p21 = vert2[ (*it2)[0] ];
+			const Point3df & p22 = vert2[ (*it2)[1] ];
+			const Point3df & p23 = vert2[ (*it2)[2] ];
+
+			// Get the p21 normal
+			Point3df p21Norm = norm2[ (*it2)[0] ];
+			if ( p21Norm == Point3df( 0., 0., 0. ) )
+			{
+				// The triangle is a segment or a point...
+				continue;
+			}
+
+			Point3df p21p11 = p11 - p21;
+			float a = -1 * p21Norm.dot( p21p11 );
+			float b = p21Norm.dot( p11p12 );
+			if ( fabs( b ) < eps )
+			{
+				// The p11p12 ray is parallel to the triangle plane
+				if ( a == 0. )
+				{
+					// The ray is on the triangle plane => intersection
+					return true;
+				}
+				else
+				{
+					// The ray is not on the triangle plane
+					continue;
+				}
+			}
+
+			float r = a/b;
+			if ( r < 0. || r > 1. )
+			{
+				// r < 0 => The ray direction is not the good one...
+				// r > 1 => The segment does not intersect
+				continue;
+			}
+
+			// Get the intersection (ray X triangle plane) point
+			Point3df interPt = p11 + r * p11p12;
+
+			// Check if the intersection point is inside the triangle
+			Point3df u = p22 - p21;
+			Point3df v = p23 - p21;
+			Point3df w = interPt - p21;
+			float uu, uv, vv, wu, wv, D;
+			uu = u.dot( u );
+			uv = u.dot( v );
+			vv = v.dot( v );
+			wu = w.dot( u );
+			wv = w.dot( v );
+			D = uv * uv - uu * vv;
+
+			float s = ( uv * wv - vv * wu ) / D;
+			if ( s < 0. || s > 1. )
+			{
+				// The intersection point is outside the triangle
+				continue;
+			}
+			float t = ( uv * wu - uu *wv ) / D;
+			if ( t < 0. || ( s + t ) > 1. )
+			{
+				// The intersection point is outside the triangle
+				continue;
+			}
+
+			// Intersection !
+			return true;
+        }
+    }
+
+    // No intersection has been found
+    return false;
+}
 
 // ---
 

@@ -155,6 +155,11 @@ namespace aims
     /// Calculate a mesh density: inverse of the average edges distance
     template <int D, typename T>
     static TimeTexture<float>* meshDensity( const AimsTimeSurface<D,T> & mesh );
+
+    //! Checks if two meshes intersect
+    static bool checkMeshIntersect( const AimsSurfaceTriangle &,
+                                    const AimsSurfaceTriangle & );
+
   };
 
 }

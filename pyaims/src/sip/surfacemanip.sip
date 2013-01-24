@@ -54,6 +54,8 @@ public:
     const AimsSurfaceTriangle & mesh ) /Factory/;
   static TimeTexture_FLOAT* meshDensity( const AimsSurfaceTriangle & mesh )
     /Factory/;
+  static bool checkMeshIntersect( const AimsSurfaceTriangle &,
+                                  const AimsSurfaceTriangle & );
 };
 
 };
