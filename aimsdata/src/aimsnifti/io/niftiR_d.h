@@ -157,10 +157,8 @@ namespace aims
     int ii;
     size_t yoff = idims[0];
     size_t zoff = yoff * idims[1];
-//     size_t toff = zoff * idims[2];
-//     long offmax = (long) toff * data.dimT();
-    long offmax = (long) zoff * idims[ 2 ];
-    long off;
+    long minc;
+    U* psrc, *pmax = &src[src.size()], *pmin = &src[0];
     bool fail = false;
     int t2, nt = np._nt;
     int subbb0[7] = { 0, 0, 0, 0, 0, 0, 0 },
@@ -192,13 +190,15 @@ namespace aims
             d0f = m2s.transform( Point3df( 0, y, z ) );
             d0 = Point3d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
                           int16_t( rint( d0f[2] ) ) );
+            // increment as pointer
+            minc = zoff * inc[2] + yoff * inc[1] + inc[0];
+            psrc = pmin + zoff * d0[2] + yoff * d0[1] + d0[0];
             d = &data( 0, y, z, t2 );
 
-            for( int x=0; x<dx; ++x, d0+=inc )
+            for( int x=0; x<dx; ++x, psrc += minc )
             {
-              off = /* toff * t + */ zoff * d0[2] + yoff * d0[1] + d0[0];
-              if( off >= 0 && off < offmax )
-                *d++ = (T) ( ((T) src[ off ] ) * s[0] + s[1] );
+              if( psrc >= pmin && psrc < pmax )
+                *d++ = (T) ( ((T) *psrc ) * s[0] + s[1] );
               else
               {
                 *d++ = 0;
@@ -228,11 +228,13 @@ namespace aims
             d0 = Point3d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
                           int16_t( rint( d0f[2] ) ) );
             d = &data( 0, y, z, t2 );
-            for( int x=0; x<dx; ++x, d0+=inc )
+            // increment as pointer
+            minc = zoff * inc[2] + yoff * inc[1] + inc[0];
+            psrc = pmin + zoff * d0[2] + yoff * d0[1] + d0[0];
+            for( int x=0; x<dx; ++x, psrc += minc )
             {
-              off = /* toff * t + */ zoff * d0[2] + yoff * d0[1] + d0[0];
-              if( off >= 0 && off < offmax )
-                *d++ = (T) src[ off ];
+              if( psrc >= pmin && psrc < pmax )
+                *d++ = (T) *psrc;
               else
               {
                 *d++ = 0;
