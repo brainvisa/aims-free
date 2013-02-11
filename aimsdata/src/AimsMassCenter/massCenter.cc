@@ -32,13 +32,15 @@
  */
 
 
-#include <cstdlib>
+#include <cartobase/config/verbose.h>
 #include <aims/data/data_g.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>
 #include <aims/io/reader.h>
 #include <aims/io/finder.h>
 #include <aims/io/process.h>
+#include <aims/roi/roiIterator.h>
+#include <aims/utility/masscenter.h>
 
 using namespace aims;
 using namespace carto;
@@ -50,19 +52,23 @@ static bool masscenter( Process &, const string &, Finder & );
 class MassCenter : public Process
 {
 public:
-  MassCenter( bool bin = false );
+  MassCenter( bool bin = false, const string & roi = "" );
   virtual ~MassCenter();
 
-  bool	binary;
+  bool   binary;
+  string roi;
 };
 
-
-MassCenter::MassCenter( bool bin ) : binary( bin )
+MassCenter::MassCenter( bool bin, const string & roi ) : binary( bin ), roi(roi)
 {
   registerProcessType( "Volume", "S8", &masscenter<int8_t> );
   registerProcessType( "Volume", "U8", &masscenter<uint8_t> );
   registerProcessType( "Volume", "S16", &masscenter<int16_t> );
+  registerProcessType( "Volume", "U16", &masscenter<int16_t> );
+  registerProcessType( "Volume", "S32", &masscenter<int32_t> );
+  registerProcessType( "Volume", "U32", &masscenter<int32_t> );
   registerProcessType( "Volume", "FLOAT", &masscenter<float> );
+  registerProcessType( "Volume", "DOUBLE", &masscenter<double> );
 }
 
 
@@ -70,77 +76,58 @@ MassCenter::~MassCenter()
 {
 }
 
-
 template<typename T>
 bool masscenter( Process & p, const string & filein, Finder & f )
 {
-  AimsData<T>		data;
-  Reader<AimsData<T> >	r( filein );
-  string		format = f.format();
+  AimsData<T>   data;
+  Reader<AimsData<T> >  r( filein );
+  string    format = f.format();
   r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly, 
                                            DataSource::none(), false, 0.01 ) );
   r.read( data, 0, &format );
-  bool			bin = ((MassCenter &) p).binary;
-
-  int	x, y, z, t;
-  double	sum, val, totsum = 0, np, totnp = 0;
-  double	vol = data.sizeX() * data.sizeY() * data.sizeZ();
-  Point3df	pos, totpos = Point3df( 0, 0, 0 );
-  for( t=0; t<data.dimT(); ++t )
-    {
-      sum = 0;
-      np = 0;
-      pos = Point3df( 0, 0, 0 );
-      ForEach3d( data, x, y, z )
-	{
-	  if( bin )
-	    {
-	      if( data( x, y, z, t ) == 0 )
-		val = 0;
-	      else
-		val = 1;
-	    }
-	  else
-	    val = (double) data( x, y, z, t );
-	  sum += val;
-	  if( val > 0 )
-	    ++np;
-	  pos += Point3df( val * x, val * y, val * z );
-	}
-      totpos += pos;
-      pos /= sum;
-      cout << t << "\t\t" << pos[0] << "\t" << pos[1] << "\t" << pos[2] 
-	   << "\tMass: " << vol * sum << "\tVol: " << vol * np << endl;
-      totsum += sum;
-      totnp += np;
-    }
-  totpos /= totsum;
-  cout << "---\nGeneral:\t" << totpos[0] << "\t" << totpos[1] << "\t" 
-       << totpos[2] << "\tMass: " << vol * totsum << "\tVol: " << vol * totnp 
-       << endl;
+  
+  MassCenter & m = ((MassCenter &) p);
+  bool   bin = m.binary;
+  string roi = m.roi;
+  
+  if (!roi.empty()) {
+      rc_ptr<RoiIterator> roiIterator = getRoiIterator( roi );
+      MassCenters<T>(data, 
+                     roiIterator, 
+                     bin).doit();
+  }
+  else {
+    MassCenters<T>(data, 
+                   bin).doit();
+  }
   return( true );
 }
 
-
 int main( int argc, const char **argv )
 {
-  bool		bin = false;
-  MassCenter	proc;
-  ProcessInput	filein( proc );
+  verbose = true;
+  bool bin = false;
+  string  roi = "";
+  MassCenter proc;
+  ProcessInput filein( proc );
 
   AimsApplication	app( argc, argv, "Computes position of the mass "
-			     "center of the image" );
+                                   "center of the image" );
   app.addOption( filein, "-i", "input data" );
   app.alias( "--input", "-i" );
   app.addOption( bin, "-b", "consider input image as binary data", true );
   app.alias( "--binary", "-b" );
+  app.addOption( roi, "-r", "input ROI file (either ROI graph or image)", true );
+  app.alias( "--roi", "-r" );
+  app.alias( "-v", "--verbose" );
 
   try
     {
       app.initialize();
       proc.binary = bin;
+      proc.roi = roi;
       if( !proc.execute( filein.filename ) )
-	cout << "Couldn't process file - aborted\n";
+        cout << "Couldn't process file - aborted\n";
     }
   catch( user_interruption &e )
     {
