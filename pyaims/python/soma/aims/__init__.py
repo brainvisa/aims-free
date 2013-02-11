@@ -359,15 +359,16 @@ class Writer:
 
 # simple IO functions
 
-def read( filename, border = 0, frame = -1, dtype=None ):
+def read( filename, border=0, frame=-1, dtype=None, allocmode=None,
+    options=None ):
   '''Equivalent to:
 
   .. code-block:: python
 
-    r = Reader()
+    r = Reader( allocmode=allocmode, options=options )
     return r.read( filename, border=border, frame=frame, dtype=dtype )
   '''
-  r = Reader()
+  r = Reader( allocmode=allocmode, options=options )
   return r.read( filename, border=border, frame=frame, dtype=dtype )
 
 def write( obj, filename, format=None, options={} ):
