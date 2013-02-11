@@ -169,6 +169,7 @@ int main(int argc, const char *argv[])
         mesher.setSplitting();
 
       mesher.setMinFacetNumber( minFacetNumber );
+      mesher.setMinSurface( minSurf );
 
       if ( ascii )
         mesher.doit( data, fout, "ascii" );
