@@ -198,6 +198,7 @@ HEADERS=  bucket/bucket_g.h	\
     utility/converter_texture.h  \
     utility/converter_volume.h  \
     utility/clock.h      \
+    utility/emthreshold.h    \
     utility/flip.h      \
     utility/linearcomb.h    \
     utility/merge.h      \
