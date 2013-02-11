@@ -201,6 +201,7 @@ HEADERS=  bucket/bucket_g.h	\
     utility/emthreshold.h    \
     utility/flip.h      \
     utility/linearcomb.h    \
+    utility/masscenter.h    \
     utility/merge.h      \
     utility/minmax.h \
     utility/threshold.h    \
@@ -326,6 +327,7 @@ SOURCES = \
     transformation/affinetransformation3d.cc \
     utility/boundingbox.cc \
     utility/clock.cc \
+    utility/masscenter.cc    \
     vector/vector.cc
 
 
