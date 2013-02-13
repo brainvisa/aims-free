@@ -69,6 +69,10 @@ namespace
     Point4d inc = Point4d( int16_t( rint( incf[0] ) ),
                            int16_t( rint( incf[1] ) ),
                            int16_t( rint( incf[2] ) ), 0 );
+    long pinc = inc[2] * ( &thing(0,0,1) - &thing(0) )
+      + inc[1] * ( &thing(0,1,0) - &thing(0) )
+      + inc[0] * ( &thing(1) - &thing(0) );
+    const T *p0;
     bool scalef;
     std::vector<float> s(2);
     if( hdr.getProperty( "scale_factor_applied", scalef ) && scalef
@@ -86,8 +90,10 @@ namespace
         d0 = Point4d( int16_t( rint( d0f[0] ) ), int16_t( rint( d0f[1] ) ),
                       int16_t( rint( d0f[2] ) ), t );
         d = &buf[0];
-        for( int x=0; x<nim->nx; ++x, d0+=inc )
-          *d++ = (int16_t) rint( (thing(d0) - s[1]) / s[0] );
+        p0 = &thing(d0);
+        for( int x=0; x<nim->nx; ++x, p0 += pinc )
+          *d++ = (int16_t) rint( (*p0 - s[1]) / s[0] );
+
         ss = znzwrite( (void*) &buf[0] , 1 , numbytes , zfp );
         if( ss != numbytes )
         {
@@ -423,6 +429,10 @@ namespace
                              (int) rint( incf[1] ),
                              (int) rint( incf[2] ), 0 );
 
+      long pinc = inc[2] * ( &thing(0,0,1) - &thing(0) )
+        + inc[1] * ( &thing(0,1,0) - &thing(0) )
+        + inc[0] * ( &thing(1) - &thing(0) );
+      const T *p0;
       size_t numbytes = nim->nx * sizeof( T ), ss;
       std::vector<T> buf( nim->nx );
       T *d = 0;
@@ -435,9 +445,10 @@ namespace
             d0 = AimsVector<int,4>( (int) rint( d0f[0] ),
                                     (int) rint( d0f[1] ),
                                     (int) rint( d0f[2] ), t );
+            p0 = &thing(d0[0], d0[1], d0[2], d0[3]);
             d = &buf[0];
-            for( int x=0; x<nim->nx; ++x, d0+=inc )
-              *d++ = thing(d0[0], d0[1], d0[2], d0[3]);
+            for( int x=0; x<nim->nx; ++x, p0 += pinc )
+              *d++ = *p0;
             ss = znzwrite( (void*) &buf[0] , 1 , numbytes , zfp );
             if( ss != numbytes )
             {
