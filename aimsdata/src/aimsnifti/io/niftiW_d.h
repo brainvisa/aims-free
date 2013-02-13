@@ -69,8 +69,9 @@ namespace
     Point4d inc = Point4d( int16_t( rint( incf[0] ) ),
                            int16_t( rint( incf[1] ) ),
                            int16_t( rint( incf[2] ) ), 0 );
-    long pinc = inc[2] * ( &thing(0,1,0) - &thing(0) )
-      + inc[1] * ( &thing(1) - &thing(0) ) + inc[0];
+    long pinc = inc[2] * ( &thing(0,0,1) - &thing(0) )
+      + inc[1] * ( &thing(0,1,0) - &thing(0) )
+      + inc[0] * ( &thing(1) - &thing(0) );
     const T *p0;
     bool scalef;
     std::vector<float> s(2);
@@ -428,8 +429,9 @@ namespace
                              (int) rint( incf[1] ),
                              (int) rint( incf[2] ), 0 );
 
-      long pinc = inc[2] * ( &thing(0,1,0) - &thing(0) )
-        + inc[1] * ( &thing(1) - &thing(0) ) + inc[0];
+      long pinc = inc[2] * ( &thing(0,0,1) - &thing(0) )
+        + inc[1] * ( &thing(0,1,0) - &thing(0) )
+        + inc[0] * ( &thing(1) - &thing(0) );
       const T *p0;
       size_t numbytes = nim->nx * sizeof( T ), ss;
       std::vector<T> buf( nim->nx );
