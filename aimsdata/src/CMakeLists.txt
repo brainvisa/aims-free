@@ -101,7 +101,8 @@ foreach( _command
           AimsGraphConvert
           AimsTex2Graph
           AimsChannelExtract
-          AimsSplitRgb )
+          AimsSplitRgb
+          AimsTest )
   if( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
     file( GLOB _pro "${CMAKE_CURRENT_SOURCE_DIR}/${_command}/*.pro" )
     BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"
