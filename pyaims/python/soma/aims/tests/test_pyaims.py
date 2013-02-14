@@ -6,6 +6,7 @@ try:
 except:
   import zipfile
 import os
+from shutil import rmtree
 import tempfile
 from PyQt4.QtGui import QApplication 
 import sys
@@ -19,9 +20,12 @@ def setup_doctest(test):
   if not os.path.exists("demo_data.zip"):
     print "Download ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip to ", tests_dir
     urllib.urlretrieve("ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip", "demo_data.zip")
-  if not os.path.exists("data_for_anatomist"):
-    zf = zipfile.ZipFile("demo_data.zip")
-    zf.extractall()
+  if os.path.exists("data_for_anatomist"):
+    rmtree("data_for_anatomist")
+  if os.path.exists("data_unprocessed"):
+    rmtree("data_unprocessed")
+  zf = zipfile.ZipFile("demo_data.zip")
+  zf.extractall()
   # must create a QApplication for PyAnatomist
   test.globs['qapp']=QApplication(sys.argv)
 
@@ -30,7 +34,11 @@ def teardown_doctest(test):
   
 def test_suite():
   suite = unittest.TestSuite()
-  doctest_suite = unittest.TestSuite(doctest.DocFileSuite("pyaims_tutorial.rst", globs={'curdir' : os.path.abspath(os.curdir)}, setUp=setup_doctest, tearDown=teardown_doctest, optionflags=doctest.ELLIPSIS))
+  doctest_suite = unittest.TestSuite(doctest.DocFileSuite("pyaims_tutorial.rst", 
+                                                          globs={'curdir' : os.path.abspath(os.curdir)}, 
+                                                          setUp=setup_doctest, 
+                                                          tearDown=teardown_doctest, 
+                                                          optionflags=doctest.ELLIPSIS))
   suite.addTest(doctest_suite)
   return suite
 
