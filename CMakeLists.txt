@@ -89,7 +89,7 @@ BRAINVISA_DEPENDENCY( DEV RECOMMENDS zlib DEV )
 
 find_package( LibKDTree QUIET )
 
-set( AIMS_DEFINITIONS ) #"-D_REENTRANT -DAIMS" )
+set( AIMS_DEFINITIONS "-D_REENTRANT" ) # -DAIMS" )
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" OR "${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel" )
 #   set( AIMS_DEFINITIONS "${AIMS_DEFINITIONS} -DCARTO_DEBUGMODE=\"release\"" )
   set( CARTO_DEBUGMODE "release" )
@@ -150,7 +150,7 @@ if( LIBKDTREE_FOUND )
   # else it will be done in aimsdata lib cmakelist
 endif()
 
-# add_definitions( ${AIMS_DEFINITIONS} )
+add_definitions( ${AIMS_DEFINITIONS} )
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
 set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase "${LIBXML2_LIBRARIES}" )
