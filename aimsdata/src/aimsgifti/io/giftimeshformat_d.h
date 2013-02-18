@@ -167,6 +167,7 @@ namespace aims
       carto::io_error::launchErrnoExcept(hdr.name());
 
     gifti_image *gim = gifti_read_image(hdr.name().c_str(), 1);
+
     if (!gim)
     {
       throw carto::format_error("could not re-read GIFTI file", hdr.name());
@@ -177,7 +178,11 @@ namespace aims
     for (i = 0; i < nda; ++i) 
     {
       giiDataArray *da = gim->darray[i];
-
+      if( !da )
+      {
+        gifti_free_image(gim);
+        throw carto::parse_error( "no data arrays", "", hdr.name(), 0 );
+      }
       switch (da->intent) 
       {
       case NIFTI_INTENT_POINTSET: 
@@ -262,6 +267,11 @@ namespace aims
           std::vector<AimsVector<unsigned, D> > & poly = vol[tpoly].polygon();
           poly.clear();
           poly.reserve(vnum);
+          if( !da->data )
+          {
+            gifti_free_image( gim );
+            throw carto::parse_error( "no data array", "", hdr.name(), 0 );
+          }
 
           if (da->ind_ord == GIFTI_IND_ORD_ROW_MAJOR || da->ind_ord == GIFTI_IND_ORD_UNDEF)
             for (j = 0; j < vnum; ++j)
