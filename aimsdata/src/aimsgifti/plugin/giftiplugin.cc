@@ -92,6 +92,7 @@ GiftiPlugin::GiftiPlugin() : Plugin()
                                                                df7, ext );
 
   Finder::registerFormat( "GIFTI", new FinderGiftiFormat, ext );
+  GiftiHeader::giftiMutex(); // force creating it now.
 }
 
 

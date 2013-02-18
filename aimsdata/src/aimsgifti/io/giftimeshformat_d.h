@@ -41,6 +41,7 @@
 #include <aims/io/finder.h>
 #include <aims/io/writer.h>
 #include <aims/io/reader.h>
+#include <cartobase/thread/mutex.h>
 extern "C" {
 #include <gifti_io.h>
 }
@@ -166,7 +167,9 @@ namespace aims
     if (!hdr.read())
       carto::io_error::launchErrnoExcept(hdr.name());
 
+    GiftiHeader::giftiMutex().lock();
     gifti_image *gim = gifti_read_image(hdr.name().c_str(), 1);
+    GiftiHeader::giftiMutex().unlock();
 
     if (!gim)
     {
@@ -642,7 +645,9 @@ namespace aims
         }
       }
 
+      GiftiHeader::giftiMutex().lock();
       gifti_write_image( gim, fname.c_str(), 1 );
+      GiftiHeader::giftiMutex().unlock();
 
       gifti_free_image( gim );
       // .minf header

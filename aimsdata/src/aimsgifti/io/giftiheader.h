@@ -45,6 +45,10 @@ extern "C"
 
 template <typename T> class TimeTexture;
 
+namespace carto
+{
+  class Mutex;
+}
 
 namespace aims
 {
@@ -69,6 +73,7 @@ namespace aims
 
     bool read();
     static std::string niftiRefFromAimsString( const std::string & space );
+    static carto::Mutex & giftiMutex();
 
   private:
     template <int D, typename T>

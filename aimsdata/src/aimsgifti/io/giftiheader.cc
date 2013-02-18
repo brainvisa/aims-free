@@ -38,6 +38,7 @@
 #include <cartobase/stream/fdinhibitor.h>
 #include <aims/resampling/standardreferentials.h>
 #include <aims/mesh/texture.h>
+#include <cartobase/thread/mutex.h>
 
 using namespace aims;
 using namespace carto;
@@ -52,6 +53,14 @@ GiftiHeader::GiftiHeader( const string & name ) :
 
 GiftiHeader::~GiftiHeader()
 {
+}
+
+
+Mutex & GiftiHeader::giftiMutex()
+{
+  // Must be initialized (generally in main thread) before using concurrently
+  static Mutex mutex( Mutex::Recursive );
+  return mutex;
 }
 
 
@@ -100,7 +109,9 @@ bool GiftiHeader::read()
     // avoid printing anything from gitficlib
     fdinhibitor   fdi( STDERR_FILENO );
     fdi.close();
+    giftiMutex().lock();
     gim = gifti_read_image( fname.c_str(), 0 );
+    giftiMutex().unlock();
     fdi.open();
   }
   if( !gim && fname.substr( fname.length()-4, 4 ) != ".gii" )
@@ -111,7 +122,9 @@ bool GiftiHeader::read()
     // avoid printing anything from gitficlib
     fdinhibitor   fdi( STDERR_FILENO );
     fdi.close();
+    giftiMutex().lock();
     gim = gifti_read_image( fname.c_str(), 0 );
+    giftiMutex().unlock();
     fdi.open();
   }
   if( !gim )

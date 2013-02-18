@@ -37,6 +37,7 @@
 #include <aims/io/giftiformat.h>
 #include <aims/io/giftiheader.h>
 #include <aims/io/giftiutil.h>
+#include <cartobase/thread/mutex.h>
 extern "C"
 {
 #include <gifti_io.h>
@@ -63,7 +64,9 @@ namespace aims
     if( !hdr.read() )
       carto::io_error::launchErrnoExcept( hdr.name() );
 
+    GiftiHeader::giftiMutex().lock();
     gifti_image *gim = gifti_read_image( hdr.name().c_str(), 1 );
+    GiftiHeader::giftiMutex().unlock();
     if( !gim )
     {
       throw carto::format_error( "could not re-read GIFTI file", hdr.name() );
@@ -161,7 +164,9 @@ namespace aims
       hdr.giftiAddLabelTable( gim );
 
       // write all
+      GiftiHeader::giftiMutex().lock();
       gifti_write_image( gim, fname.c_str(), 1 );
+      GiftiHeader::giftiMutex().unlock();
       gifti_free_image( gim );
       // .minf header
       if( hdr.hasProperty( "GIFTI_metadata") )
