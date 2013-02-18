@@ -419,12 +419,15 @@ int DicomHeader::read()
 
       vector<float> vs ;
       getProperty("voxel_size", vs ) ;
+
       if( vs[2] < 1e-6 )
       {
-        if( abs( *(dZs.rbegin()) - *(dZs.begin()) ) > 0.0001 ){
+        if( abs( *(dZs.rbegin()) - *(dZs.begin()) ) > 0.0001 )
+	{
           if( dimT == 1 )
           {
-            cerr << "Non homogeneous voxel size ! missing slices, maxZVoxSize " << maxZVoxSize<<" minZVoxSize delta "<<minZVoxSize<<endl ;
+            cout << "Non homogeneous voxel size ! missing slices, maxZVoxSize " << maxZVoxSize<<" minZVoxSize delta "<<minZVoxSize<<endl ;
+
             map< int, FileElement >::const_iterator idxSlice = _slices.begin();            
             float prevSliveLoc= i->second.location() ;
             while( idxSlice!= _slices.end() )
@@ -440,10 +443,17 @@ int DicomHeader::read()
             int n = 0 ;
             for( std::multiset<float>::iterator it = dZs.begin() ; it != dZs.end() ; ++it, ++n )
               if( n == int( dZs.size() / 2 ) )
+		{
                 vs[2] = *it ;
+		break;
+		}
           } 
    
-	} else vs[2] = (minZVoxSize + maxZVoxSize) / 2 ;
+	}
+	else
+	{
+	  vs[2] = (minZVoxSize + maxZVoxSize) / 2 ;
+	}
 	setProperty("voxel_size", vs ) ;
       }
 
@@ -734,7 +744,7 @@ int DicomHeader::readFirst()
     }
 
   if ( spaceSlice > 0.0f )  voxSize.push_back( (float)spaceSlice );
-  else if ( ( ( modality == "PT" ) || ( modality == "NM" ) ) &&
+  else if ( ( modality != "PT" ) && ( modality != "CT" ) && ( modality != "NM" ) && //thickness must never be used for PET(-CT) (for Siemens cameras at least)
             ( thickness > 0.0f ) )
     voxSize.push_back( (float)thickness );
   else  voxSize.push_back( 0.0f ); // to determine Z resolution in read()
