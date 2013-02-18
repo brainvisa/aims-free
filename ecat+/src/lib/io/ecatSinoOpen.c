@@ -29,6 +29,12 @@
  *
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
+ *
+ *--------------------|--------------|---------------------------------------
+ *                    |              |
+ *       15/01/2013   | RASTELLO.F   |   Use V72 for version value when ecat7
+ *                    |              |   format, for biograph reads
+ *                    |              |
  */
 #include <unistd.h>
 #include <string.h>
@@ -431,7 +437,8 @@ UnifiedEcatSinoInfo* EcatSinoOpen( char *fname, char *mode  )
     case 'w' :
       /*{{{  open new file*/
       mh = (Main_header*) calloc(1,sizeof(Main_header));
-      mh->sw_version = V7;
+      //FR: V7 -> V72 for biograph reads
+      mh->sw_version = V72;
       //mh->file_type = Short3dSinogram ;
       if ((mptr = matrix_create(fname,MAT_CREATE,mh)) == NULL) {
 	printf("EcatSinoOpen : Can't open new file %s\n", fname);

@@ -55,6 +55,11 @@
  *                    |              |   ecatWrite.c :
  *                    |              |                 EcatWriteVolume_S16
  *                    |              |                 EcatWriteVolume_FLOAT
+ *--------------------|--------------|---------------------------------------
+ *                    |              |
+ *       15/01/2013   | RASTELLO.F   |   Use V72 for version value when ecat7
+ *                    |              |   format, for biograph reads
+ *                    |              |
  ****************************************************************************/
 #ifndef ECATSHFJ_IO_IO_H
 #define ECATSHFJ_IO_IO_H
@@ -62,6 +67,8 @@
 
 #include <ecat+/io/general.h>
 
+//for biograph reads, use version 7.2 for ecat7 format
+#define V72 72
 
 #ifdef __cplusplus
   extern "C" {

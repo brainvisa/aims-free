@@ -217,8 +217,9 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
 		matnum,mptr->fname);
 	return ECATSHFJ_FAIL;
       }
-      if (sh->data_type != SunShort) {
-	printf("EcatReadVolume_S16 : image in %s is not SunShort (%0d)\n",mptr->fname,sh->data_type);
+      if (sh->data_type != SunShort && sh->data_type != VAX_Ix2) {
+	printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %°0d are currently supported)\n",
+	       mptr->fname,sh->data_type,SunShort,VAX_Ix2);
 	return ECATSHFJ_FAIL;
       }
       file_pos = matdir.strtblk*MatBLKSIZE;
@@ -254,8 +255,9 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
 		  matnum,mptr->fname);
 	  return ECATSHFJ_FAIL;
 	}
-	if (sh->data_type != SunShort) {
-	  printf("EcatReadVolume_S16 : image in %s is not SunShort (%0d)\n",mptr->fname,sh->data_type);
+	if (sh->data_type != SunShort && sh->data_type != VAX_Ix2) {
+	  printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %°0d are currently supported)\n",
+	         mptr->fname,sh->data_type,SunShort,VAX_Ix2);
 	  return ECATSHFJ_FAIL;
 	}
 	file_pos = matdir.strtblk*MatBLKSIZE;
@@ -378,8 +380,9 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
 	  free(fdata); free(sdata); free(sdata_bed);
 	  return ECATSHFJ_FAIL;
 	}
-	if (sh->data_type != SunShort) {
-	  printf("EcatReadVolume_S16 : image in %s is not SunShort (%0d)\n",mptr->fname,sh->data_type);
+	if (sh->data_type != SunShort && sh->data_type != VAX_Ix2) {
+	  printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %°0d are currently supported)\n",
+	         mptr->fname,sh->data_type,SunShort,VAX_Ix2);
 	  free(fdata); free(sdata); free(sdata_bed);
 	  return ECATSHFJ_FAIL;
 	} else if (sh->x_dimension != uei->size.x || sh->y_dimension != uei->size.y || sh->z_dimension != mptr->mhptr->num_planes) {
@@ -444,8 +447,9 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
 		    matnum,mptr->fname);
 	    return ECATSHFJ_FAIL;
 	  }
-	  if (sh->data_type != SunShort) {
-	    printf("EcatReadVolume_S16 : image in %s is not SunShort (%0d)\n",mptr->fname,sh->data_type);
+	  if (sh->data_type != SunShort && sh->data_type != VAX_Ix2) {
+	    printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %°0d are currently supported)\n",
+	           mptr->fname,sh->data_type,SunShort,VAX_Ix2);
 	    return ECATSHFJ_FAIL;
 	  }
 	  file_pos = matdir.strtblk*MatBLKSIZE;

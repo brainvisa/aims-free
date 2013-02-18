@@ -93,6 +93,16 @@
  *       18/07/2001   | COMTAT.C     |   Remove error message if opened file
  *                    |              |   doesn't exist
  *                    |              |
+ *--------------------|--------------|---------------------------------------
+ *                    |              |
+ *       29/11/2012   | COMTAT.C     |   Image can be in VAX_Ix2 mode,
+ *                    |              |   for ecat6 images (ECAT 953B)
+ *                    |              |
+ *--------------------|--------------|---------------------------------------
+ *                    |              |
+ *       15/01/2013   | RASTELLO.F   |   Use V72 for version value when ecat7
+ *                    |              |   format, for biograph reads
+ *                    |              |
  ****************************************************************************/
 /*}}}  */
 
@@ -255,7 +265,8 @@ int EcatClose( UnifiedEcatInfo *uei )
 	}
       }
       /* Update some fields of the main header */
-      mh->sw_version = V7;
+      //FR: V7 -> V72 for biograph reads
+      mh->sw_version = V72;
       suffixe = strrchr(uei->fname,'.');
       if (suffixe) {
 	suffixe++;
@@ -378,7 +389,8 @@ UnifiedEcatInfo *EcatOpen( char *fname, char *mode )
       case 'w' :
 	/*{{{  open new file*/
 	mh = (Main_header*) calloc(1,sizeof(Main_header));
-	mh->sw_version = V7;
+	//FR: V7 -> V72 for biograph reads
+	mh->sw_version = V72;
 	mh->file_type = PetVolume;
 	if ((mptr = matrix_create(fname,MAT_CREATE,mh)) == NULL) {
 	  /* printf("EcatOpen : Can't open new file %s\n", fname); */
@@ -464,9 +476,9 @@ UnifiedEcatInfo *EcatOpen( char *fname, char *mode )
 	  free( uei->fname );
 	  free(uei);
 	  return ECATSHFJ_FAIL;
-	} else if (sh->data_type != SunShort) {
-	  printf("EcatOpen : data type of matrix %0d is %0d\n",
-		 matnode->matnum,sh->data_type);
+	} else if (sh->data_type != SunShort && sh->data_type != VAX_Ix2) {
+	  printf("EcatOpen : unsuported data type for matrix %0d: %0d (only %0d and %0d are currently supported)\n",
+		 matnode->matnum,sh->data_type,SunShort,VAX_Ix2);
 	  free(sh);
 	  matrix_close(mptr);
 	  free( uei->fname );
