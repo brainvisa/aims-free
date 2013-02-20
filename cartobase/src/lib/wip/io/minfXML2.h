@@ -75,6 +75,10 @@ void readDictionaryMinfXML( const std::string &fileName, Object &dictionary,
                             rc_ptr<SyntaxSet> syntax = rc_ptr<SyntaxSet>() );
 void readDictionaryMinfXML( DataSource &source, Object &dictionary, 
                             rc_ptr<SyntaxSet> syntax = rc_ptr<SyntaxSet>() );
+/** just to force initializing libxml2, needs to be called once from the
+    main thread in a multi-threaded environment. Called from PluginLoader::load
+*/
+void init_libXML();
 
 
 //-----------------------------------------------------------------------------

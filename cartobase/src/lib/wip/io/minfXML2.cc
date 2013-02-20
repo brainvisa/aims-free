@@ -668,6 +668,13 @@ void MinfXMLReader::read( DataSource &ds )
 //   cout << indent << "reference : " << identifier << endl;
 // }
 
+void init_libXML()
+{
+  const char* text = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><toto></toto>";
+  xmlTextReaderPtr reader;
+  reader = xmlReaderForMemory( text, 52, "", 0, 0 );
+  xmlFreeTextReader( reader );
+}
 
 
 } // namespace carto

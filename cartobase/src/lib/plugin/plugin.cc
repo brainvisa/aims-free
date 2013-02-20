@@ -35,6 +35,7 @@
 #include <cartobase/object/pythonreader.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/config/verbose.h>
+#include <cartobase/wip/io/minfXML2.h>
 #include <iostream>
 #ifndef CARTO_NO_DLOPEN
 #ifdef _WIN32
@@ -280,6 +281,9 @@ void PluginLoader::load( int verbose, bool forcereload )
 {
 /*  if( !forcereload && pluginLoaderStatic().loaded )
     return;*/
+  if( !pluginLoaderStatic().loaded )
+    // force initializinf libxml in main thread
+    carto::init_libXML();
   pluginLoaderStatic().loaded = true;
   if( verbose < 0 )
     verbose = carto::debugMessageLevel;
