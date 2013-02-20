@@ -39,6 +39,7 @@
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/fdinhibitor.h>
+#include <cartobase/thread/mutex.h>
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -83,6 +84,15 @@ set<string> MincHeader::extensions() const
   exts.insert( ".mnc.gz" );
   return exts;
 }
+
+
+Mutex & MincHeader::mincMutex()
+{
+  // Must be initialized (generally in main thread) before using concurrently
+  static Mutex mutex( Mutex::Recursive );
+  return mutex;
+}
+
 
 // Reads a MINC attribute and writes it as an AIMS attribute.
 // A MINC attribute is always associated to a MINC variable.
@@ -398,6 +408,9 @@ void MincHeader::read()
   fdinhibitor	fdi( STDERR_FILENO );
   fdi.close();
   int   status = 0;
+  mincMutex().lock();
+  try
+  {
   status = start_volume_input( fileName, 0, dim_names,
                                MI_ORIGINAL_TYPE, TRUE,
                                0.0, 0.0, TRUE, &volume,
@@ -720,9 +733,6 @@ void MincHeader::read()
   readMincAttribute(sx, mincid, "processing", "transformation0-filedata", "MINC_processing:transformation0-filedata");
 
 
-
-
-
   readMincHistory(mincid);
 
   readMinf( removeExtension( _name ) + extension() + ".minf" );
@@ -735,8 +745,14 @@ void MincHeader::read()
   delete_string(dim_names[2]);
   delete_string(dim_names[3]);
   delete_general_transform(gt);
-  
+  }
+  catch( ... )
+  {
+    mincMutex().unlock();
+    throw;
+  }
 
+  mincMutex().unlock();
 }
 
 

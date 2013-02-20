@@ -63,6 +63,7 @@ extern "C" {
 #include <cartobase/exception/file.h>
 #include <cartobase/exception/format.h>
 #include <cartobase/datasource/filedatasource.h>
+#include <cartobase/thread/mutex.h>
 
 #include <aims/io/mincheader.h>
 
@@ -215,10 +216,13 @@ namespace aims
 	  }
 
 	  std::cout << "n_dimensions: " << n_dimensions << "\n";*/
-	if( input_volume( fileName, 0, dim_names,
-			  MI_ORIGINAL_TYPE, TRUE,
-			  0.0, 0.0, TRUE, &volume,
-			  (minc_input_options *) NULL ) != OK )
+        MincHeader::mincMutex().lock();
+        int res = input_volume( fileName, 0, dim_names,
+                          MI_ORIGINAL_TYPE, TRUE,
+                          0.0, 0.0, TRUE, &volume,
+                          (minc_input_options *) NULL );
+        MincHeader::mincMutex().unlock();
+	if( res != OK )
 	  return;
 
 

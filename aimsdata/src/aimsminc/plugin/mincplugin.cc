@@ -242,6 +242,7 @@ MincPlugin::MincPlugin() : Plugin()
   (sx)[ "MINC_processing:transformation0-filename" ] = Semantic( "string" );
   (sx)[ "MINC_processing:transformation0-filedata" ] = Semantic( "string" );
 
+  MincHeader::mincMutex(); // force creating it now.
 }
 
 

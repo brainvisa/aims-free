@@ -44,6 +44,11 @@ extern "C" {
 #include <volume_io.h>
 }
 
+namespace carto
+{
+  class Mutex;
+}
+
 namespace aims
 {
 
@@ -131,6 +136,7 @@ namespace aims
 
     /// mute output function
     static void my_empty_print_error(char *message);
+    static carto::Mutex & mincMutex();
 
   private:
     /**@name Data*/
