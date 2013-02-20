@@ -66,8 +66,8 @@ namespace carto
     header->setProperty( "sizeZ", obj.getSizeZ() );
     header->setProperty( "sizeT", obj.getSizeT() );
     const PropertySet	& ps = obj.header();
-    header->setProperty( "volume_dimension", 
-                         ps.getProperty( "volume_dimension" ) );
+    header->setProperty( "voxel_size",
+                         ps.getProperty( "voxel_size" ) );
     Object	x;
     if( options )
       try
@@ -104,7 +104,7 @@ namespace carto
               }
             if( fname != ds->url() )
               {
-                if( FileUtil::fileStat( fname ).find( '+' ) 
+                if( FileUtil::fileStat( fname ).find( '+' )
                     != std::string::npos )
                   {
                     vds = new VolumeDataSource<T>
@@ -156,8 +156,10 @@ namespace carto
       for( z=0; z<dz; ++z )
         for( y=0; y<dy; ++y )
           {
-            vds->at( ( sx * ( sy * ( sz * ( t + ot ) + z + oz ) 
-                              + y + oy ) + ox ) * sizeof(T) );
+            vds->at( ( sz * sy * sx * ( t + ot ) + sy * sx * ( z + oz )
+                      + sx * ( y + oy ) + ox ) * sizeof(T) );
+//             vds->at( ( sx * ( sy * ( sz * ( t + ot ) + z + oz ) 
+//                               + y + oy ) + ox ) * sizeof(T) );
             if( vds->writeBlock( (char *) &obj( 0, y, z, t ), len ) 
                 != (long) len )
               io_error::launchErrnoExcept( vds->url() );

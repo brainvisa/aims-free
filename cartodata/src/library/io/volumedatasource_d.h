@@ -138,6 +138,11 @@ namespace carto
   template <typename T> 
   long VolumeDataSource<T>::writeBlock( const char * data, unsigned long len )
   {
+    if( !_itemw.get() )
+    {
+      DefaultItemWriter<T>      diw;
+      _itemw.reset( diw.writer( _binary, _byteswap ) );
+    }
     unsigned long	nitems = len / sizeof( T );
     return _itemw->write( *source(), (const T *) data, nitems ) 
       * sizeof( T );

@@ -86,6 +86,8 @@ void printheader( Object hdr )
 template <typename T>
 void write( T & obj, const string & fname )
 {
+  cout << "Writing volume to " << fname << endl;
+  cout << "WARNING: Writing is not completely implemented !" << endl;
   Writer<T>	w( fname );
   w.write( obj );
 }
@@ -183,10 +185,7 @@ bool IOTest<Volume<T> >::iotest( ReaderAlgorithm & algo, Object hdr,
        << zM << "," << tM << ")" << endl;
 
   if( !ralgo.output.empty() )
-    {
-      Writer<Volume<T> >	w( ralgo.output );
-      w.write( *vol );
-    }
+    write( *vol, ralgo.output );
 
   if( ralgo.partialtest )
     {
