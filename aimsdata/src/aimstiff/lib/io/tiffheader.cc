@@ -55,8 +55,8 @@ set<string> TiffHeader::extensions() const
 {
   set<string>	exts;
   exts.insert( ".tif" );
-  exts.insert( ".Tif" );
   exts.insert( ".tiff" );
+  exts.insert( ".Tif" );
   exts.insert( ".Tiff" );
   return exts;
 }

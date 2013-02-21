@@ -61,8 +61,10 @@ namespace
 TiffPlugin::TiffPlugin() : Plugin()
 {
   vector<string>	ext;
-  ext.push_back( "tif" ); ext.push_back( "Tif" );
-  ext.push_back( "tiff" ); ext.push_back( "Tiff" );
+  ext.push_back( "tif" );
+  ext.push_back( "tiff" );
+  ext.push_back( "Tif" );
+  ext.push_back( "Tiff" );
 
 
   TiffFormat<uint8_t>  *tf8 = new TiffFormat<uint8_t>;

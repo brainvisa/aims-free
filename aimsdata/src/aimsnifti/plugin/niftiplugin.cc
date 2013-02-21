@@ -58,12 +58,12 @@ namespace
 NiftiPlugin::NiftiPlugin() : Plugin()
 {
   vector<string> ext;
+  ext.push_back( "nii" );
+  ext.push_back( "nii.gz" );
   ext.push_back( "hdr" );
   ext.push_back( "hdr.gz" );
   ext.push_back( "img" );
   ext.push_back( "img.gz" );
-  ext.push_back( "nii" );
-  ext.push_back( "nii.gz" );
 
   NiftiFormat<int8_t>	*df1 = new NiftiFormat<int8_t>; 
   FileFormatDictionary<AimsData<int8_t> >::registerFormat( "NIFTI1", df1, ext,

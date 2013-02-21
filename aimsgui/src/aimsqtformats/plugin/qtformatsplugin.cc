@@ -91,7 +91,6 @@ QtFormatsPlugin::QtFormatsPlugin() : Plugin()
   set<QString>	fset;
   set<QString>::iterator	is, es = fset.end();
 
-#if QT_VERSION >= 0x040000
   QList<QByteArray>	iform = QImageReader::supportedImageFormats();
   QList<QByteArray>	oform = QImageWriter::supportedImageFormats();
   QList<QByteArray>::iterator	c, ce = iform.end();
@@ -100,17 +99,6 @@ QtFormatsPlugin::QtFormatsPlugin() : Plugin()
     fset.insert( QString( *c ).upper().utf8().data() );
   for( c=oform.begin(),ce=oform.end(); c!=ce; ++c )
     fset.insert( QString( *c ).upper().utf8().data() );
-
-#else
-  QStrList	formats = QImageIO::outputFormats();
-  QStrList	iform = QImageIO::inputFormats();
-  char		*c;
-
-  for( c=iform.first(); c; c=iform.next() )
-    fset.insert( c );
-  for( c=formats.first(); c; c=formats.next() )
-    fset.insert( c );
-#endif
 
   QtFormats<int8_t>	*df1 = new QtFormats<int8_t>;
   QtFormats<uint8_t>	*df2 = new QtFormats<uint8_t>;
@@ -138,16 +126,17 @@ QtFormatsPlugin::QtFormatsPlugin() : Plugin()
         {
           fmt = "JPEG(Qt)";
           ext.push_back( "jpg" );
+          ext.push_back( "jpeg" );
           exts.push_back( "jpg" );
         }
       else
         {
-          if( fmt == "TIF" )
-            fmt = "TIFF";
+          if( fmt == "TIF" || fmt == "TIFF" )
+            fmt = "TIFF(Qt)";
           ext.push_back( e.lower().utf8().data() );
           exts.push_back( e.lower().utf8().data() );
-          if( format == "QtFormats" )
-            format = fmt;
+//           if( format == "QtFormats" )
+//             format = fmt;
         }
       if( !FileFormatDictionary<AimsData<int8_t> >::fileFormat( fmt ) )
       {
@@ -236,8 +225,9 @@ QtFormatsPlugin::QtFormatsPlugin() : Plugin()
         VolumeFormat<char>	*vf10 = new VolumeFormat<char>( fmt );
         FileFormatDictionary<Volume<char> >::registerFormat( fmt, vf10, ext );
       }
+      Finder::registerFormat( fmt, new FinderQtFormats, ext );
     }
-  Finder::registerFormat( format, new FinderQtFormats, exts );
+//   Finder::registerFormat( format, new FinderQtFormats, exts );
   QtFormatsHeader::qformatsMutex(); // force creating it now.
 }
 
