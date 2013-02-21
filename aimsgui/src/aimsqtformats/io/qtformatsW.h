@@ -43,6 +43,7 @@
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/type/string_conversion.h>
 #include <qimage.h>
+#include <qapplication.h>
 
 
 namespace aims
@@ -82,6 +83,11 @@ namespace aims
   inline
   void QtFormatsWriter<T>::write( const AimsData<T>& thing )
   {
+    std::string fmt = format();
+//     std::cout << "QtFormatsWriter<T>::write, format: " << fmt << std::endl;
+    if( !qApp && ( fmt == "EPS" || fmt == "EPSF" || fmt == "EPSI" ) )
+      throw carto::format_error( fmt + " format needs a QApplication",
+                                 _name );
     unsigned	t, z, dt = thing.dimT(), dz = thing.dimZ();
     QtFormatsHeader	hdr( _name, carto::DataTypeCode<T>().dataType(), 
                              thing.dimX(), thing.dimY(), thing.dimZ(), 
@@ -129,7 +135,7 @@ namespace aims
                                        unsigned z, unsigned t )
   {
     int		x, y, dx = thing.dimX(), dy = thing.dimY();
-    QImage	im( dx, dy, 32, 0 );
+    QImage	im( dx, dy, QImage::Format_ARGB32 );
     if( carto::DataTypeCode<T>::name()
         == carto::DataTypeCode<AimsRGBA>::name() )
       im.setAlphaBuffer( true );
@@ -152,7 +158,7 @@ namespace aims
                                              unsigned z, unsigned t )
   {
     int		x, y, dx = thing.dimX(), dy = thing.dimY();
-    QImage	im( dx, dy, 8, 256 );
+    QImage	im( dx, dy, QImage::Format_Indexed8 );
     im.setDotsPerMeterX( (int) rint( 1000 / thing.sizeX() ) );
     im.setDotsPerMeterY( (int) rint( 1000 / thing.sizeY() ) );
     for( x=0; x<256; ++x )

@@ -127,6 +127,9 @@ namespace aims
       writer = FileFormatDictionary<T>::fileFormat( *format );
       if( writer )
       {
+#ifdef AIMS_DEBUG_IO
+        std::cout << "1. try writer " << *format << std::endl;
+#endif
         try
         {
           if( writer->write( _filename, obj, options ) )
@@ -189,6 +192,9 @@ namespace aims
             writer = FileFormatDictionary<T>::fileFormat( defformat );
             if( writer )
             {
+#ifdef AIMS_DEBUG_IO
+              std::cout << "2. try writer " << defformat << std::endl;
+#endif
               try
               {
                 if( writer->write( _filename, obj, options ) )
@@ -228,6 +234,9 @@ namespace aims
           writer = FileFormatDictionary<T>::fileFormat( *ie );
           if( writer )
           {
+#ifdef AIMS_DEBUG_IO
+            std::cout << "3. try writer " << *ie << std::endl;
+#endif
             try
             {
               if( writer->write( _filename, obj, options ) )
@@ -238,6 +247,10 @@ namespace aims
             }
             catch( std::exception & e )
             {
+#ifdef AIMS_DEBUG_IO
+              std::cout << "3. failed for " << *ie << ": " << e.what()
+                << std::endl;
+#endif
               if( exactformat )
                 throw;
               carto::io_error::keepExceptionPriority( e, excp, exct,
@@ -259,6 +272,9 @@ namespace aims
             writer = FileFormatDictionary<T>::fileFormat( *ie );
             if( writer )
             {
+#ifdef AIMS_DEBUG_IO
+              std::cout << "4. try writer " << *ie << std::endl;
+#endif
               try
               {
                 if( writer->write( _filename, obj, options ) )
@@ -287,6 +303,9 @@ namespace aims
           writer = FileFormatDictionary<T>::fileFormat( *ie );
           if( writer )
           {
+#ifdef AIMS_DEBUG_IO
+            std::cout << "5. try writer " << *ie << std::endl;
+#endif
             try
             {
               if( writer->write( _filename, obj, options ) )

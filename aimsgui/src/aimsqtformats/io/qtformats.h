@@ -43,11 +43,11 @@ namespace aims
   template<typename T>
   class QtFormats : public FileFormat<AimsData<T> >
   {
-    virtual bool read( const std::string & filename, AimsData<T> & vol, 
-                       const carto::AllocatorContext & context, 
+    virtual bool read( const std::string & filename, AimsData<T> & vol,
+                       const carto::AllocatorContext & context,
                        carto::Object options );
-    virtual bool write( const std::string & filename, const AimsData<T> & vol, 
-			bool ascii = false );
+    virtual bool write( const std::string & filename, const AimsData<T> & vol,
+                        carto::Object options=carto::none() );
   };
 
 }

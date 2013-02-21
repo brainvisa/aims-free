@@ -41,12 +41,11 @@
 #include <cartobase/thread/mutex.h>
 #include <qimage.h>
 #include <regex.h>
-#if QT_VERSION >= 0x040000
 #include <QString>
 #include <QImageReader>
 #include <QImageWriter>
 typedef QImageReader QImageIO;
-#endif
+#include <qapplication.h>
 
 using namespace aims;
 using namespace carto;
@@ -155,6 +154,9 @@ void QtFormatsHeader::read()
   if( fmt.isNull() )
     throw format_error( _name );
 
+  if( !qApp && ( fmt == "eps" || fmt == "epsf" || fmt == "epsi" ) )
+    throw format_error( string( fmt.data() ) + " format needs a QApplication",
+                        _name );
   QImageReader	qio( fname.c_str(), fmt );
   d->qimage = qio.read();
 
@@ -271,7 +273,12 @@ void QtFormatsHeader::read()
     setProperty( "possible_data_types", pdt );
 
   setProperty( "object_type", string( "Volume" ) );
-  setProperty( "file_type", string( fmt.data() ) );
+  QString sfmt = QString( fmt ).upper();
+  if( sfmt == "JPG" )
+    fmt = "JPEG(Qt)";
+  else if( fmt == "TIF" || fmt == "TIFF" )
+    fmt = "TIFF(Qt)";
+  setProperty( "file_type", string( sfmt.utf8().data() ) );
 
   d->hasread = true;
 

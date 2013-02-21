@@ -438,8 +438,7 @@ bool read( Process & p, T & data, const string & filename, const Finder & f,
     return( false );
 
   cout << "reading done\n";
-  cout << "orient: " << orient << endl;
-  cout << "header: " << getHeader( data ).get() << endl;
+//   cout << "orient: " << orient << endl;
   if( !orient.empty() )
     setOrientationInformation( getHeader( data ), orient );
   return( true );
@@ -676,8 +675,6 @@ int main( int argc, const char **argv )
 	  app.initialize();
 
       setlocale(LC_ALL,"C");
-
-      cout << "fileTestGifti  : " << endl;
 
       //	Our specific process
       cout << "filein  : " << pi.filename << endl;

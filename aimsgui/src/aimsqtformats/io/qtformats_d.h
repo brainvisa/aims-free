@@ -53,17 +53,17 @@ namespace aims
 
   template<class T>
   bool QtFormats<T>::write( const std::string & filename, 
-                            const AimsData<T> & vol, bool )
+                            const AimsData<T> & vol, carto::Object )
   {
     try
-      {
-	QtFormatsWriter<T>	r( filename );
-	r.write( vol );
-      }
+    {
+      QtFormatsWriter<T>	r( filename );
+      r.write( vol );
+    }
     catch( std::exception & e )
-      {
-	return false;
-      }
+    {
+      return false;
+    }
 
     return true;
   }
