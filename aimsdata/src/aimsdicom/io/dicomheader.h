@@ -39,6 +39,10 @@
 #include <string>
 #include <map>
 
+namespace carto
+{
+  class Mutex;
+}
 
 namespace aims
 {
@@ -88,6 +92,7 @@ namespace aims
     float sizeT() const;
 
     int read();
+    static carto::Mutex & dicomMutex();
 
   private:
 

@@ -48,6 +48,7 @@
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/directory.h>
 #include <cartobase/stream/fdinhibitor.h>
+#include <cartobase/thread/mutex.h>
 #include <vector>
 
 #ifndef HAVE_CONFIG_H
@@ -103,6 +104,14 @@ DicomHeader::DicomHeader( const string& name ) :
 
 DicomHeader::~DicomHeader()
 {
+}
+
+
+Mutex & DicomHeader::dicomMutex()
+{
+  // Must be initialized (generally in main thread) before using concurrently
+  static Mutex mutex( Mutex::Recursive );
+  return mutex;
 }
 
 
@@ -270,7 +279,19 @@ bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
 
 int DicomHeader::read()
 {
-  int slice1 = readFirst();
+  int slice1;
+  dicomMutex().lock();
+  try
+  {
+    slice1 = readFirst();
+    dicomMutex().unlock();
+  }
+  catch( ... )
+  {
+    dicomMutex().unlock();
+    return -1;
+  }
+
   if ( slice1 < 0 )  return -1;
 
   // file name elements
@@ -285,7 +306,11 @@ int DicomHeader::read()
   char		sep = FileUtil::separator();
   std::vector< std::string > fileVector;
   bool status;
+  int dimZ, dimT;
 
+  dicomMutex().lock();
+  try
+  {
   for( is=files.begin(); is!=es; ++is )
     {
       const string	&s = *is;
@@ -327,7 +352,6 @@ int DicomHeader::read()
   if( moda != "PT" && moda != "CT" )
     setProperty( "filenames", fileVector2 );
 
-  int dimZ, dimT;
   if ( moda == "NM" )
   {
     getProperty( "number_of_frames", dimZ );
@@ -514,6 +538,14 @@ int DicomHeader::read()
         setProperty( "duration_time", durationTimes ) ;
       }
     }
+  }
+  dicomMutex().unlock();
+
+  }
+  catch( ... )
+  {
+    dicomMutex().unlock();
+    throw;
   }
 
   vector< int > volDim;

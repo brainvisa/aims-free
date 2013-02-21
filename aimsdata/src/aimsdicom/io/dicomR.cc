@@ -56,7 +56,7 @@ namespace aims
                                  const carto::AllocatorContext & context, 
                                  carto::Object options )
     {
-      std::cout << "Reading image" << std::endl ;
+      // std::cout << "Reading image" << std::endl ;
       int	frame = -1, borderWidth = 0;
       options->getProperty( "frame", frame );
       options->getProperty( "border", borderWidth );
@@ -74,7 +74,7 @@ namespace aims
         }
 
       // load the header of the first file
-      std::auto_ptr<aims::DicomHeader> hdr 
+      std::auto_ptr<aims::DicomHeader> hdr
         = std::auto_ptr<aims::DicomHeader>( new aims::DicomHeader( _name ) );
       int num = hdr->read();
 
@@ -119,13 +119,13 @@ namespace aims
       for ( std::map< int, aims::DicomHeader::FileElement >::const_iterator i =
               hdr->slices().begin(); i != hdr->slices().end(); ++i )
         {
-          std::cerr << "DICOM: readData: slice = " << slice
-               << " instance_number = "  << i->first << std::endl;
+//           std::cerr << "DICOM: readData: slice = " << slice
+//                << " instance_number = "  << i->first << std::endl;
           readData( i->second.name(), data, slice, hdr.get() );
           ++slice;
         }
+        thing = data;
 
-      thing = data;
       thing.setHeader( hdr.release() );
     }
 
