@@ -308,9 +308,6 @@ int DicomHeader::read()
   bool status;
   int dimZ, dimT;
 
-  dicomMutex().lock();
-  try
-  {
   for( is=files.begin(); is!=es; ++is )
     {
       const string	&s = *is;
@@ -332,7 +329,7 @@ int DicomHeader::read()
       _slices[ slice.instance() ] = slice;
       fileVector.push_back( s );
     }
- 
+
   // save file name list into header properties
   std::vector< Object > fileVector2;
   int n_files = fileVector.size();
@@ -538,14 +535,6 @@ int DicomHeader::read()
         setProperty( "duration_time", durationTimes ) ;
       }
     }
-  }
-  dicomMutex().unlock();
-
-  }
-  catch( ... )
-  {
-    dicomMutex().unlock();
-    throw;
   }
 
   vector< int > volDim;
