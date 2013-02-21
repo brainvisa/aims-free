@@ -4,14 +4,52 @@ import threading
 from soma import aims
 import os, sys
 from optparse import OptionParser
+import threading
+
+
+def aims_test_thread_read( filenames ):
+  class Loadfile( object ):
+      def __init__( self, filename, lock, objlist ):
+          self._filename = filename
+          self.lock = lock
+          self.objlist = objlist
+      def __call__( self ):
+          print 'reading %s...' % self._filename
+          obj = aims.read( self._filename )
+          print 'read %s: %s' % ( self._filename, str(type(obj)) )
+          self.lock.acquire()
+          self.objlist.append( obj )
+          self.lock.release()
+
+  aims.carto.PluginLoader.load() # do this once in main thread
+
+  threads = []
+  lock = threading.RLock()
+  objlist = []
+
+  for fname in filenames:
+    thread = threading.Thread( target=Loadfile( fname, lock, objlist ) )
+    thread.start()
+    threads.append( thread )
+
+  for thread in threads:
+    thread.join()
+
+  print 'finished. Read %d / %d objects.' % \
+    ( len( objlist ), len( filenames ) )
+  nmissing = len( filenames ) - len( objlist )
+  if nmissing != 0:
+    print 'Not all objects were loaded, %d missing.' % nmissing
+    raise RuntimeError( 'Not all objects were loaded, %d missing.' % nmissing )
+
 
 if __name__ == '__main__':
 
-  num = 30
-
   parser = OptionParser( description='Perform tests of threaded concurrent loading of aims objects in pyaims' )
-  parser.add_option( '-i', '--input', dest='infiles', help='files to be read concurrently', action='append', default=[] )
-  parser.add_option( '-n', '--number', dest='number', help='number of times each file should be read at the same time. Default: 30 if one input filename, 1 otherwise', default=0 )
+  parser.add_option( '-i', '--input', dest='infiles',
+    help='files to be read concurrently', action='append', default=[] )
+  parser.add_option( '-n', '--number', dest='number',
+    help='number of times each file should be read at the same time. Default: 30 if one input filename, 1 otherwise', default=0 )
 
   options, args = parser.parse_args()
 
@@ -34,23 +72,5 @@ if __name__ == '__main__':
   #p = xml.parsers.expat.ParserCreate()
   #p.ParseFile( open( '/tmp/xml.xml' ) )
 
-  aims.carto.PluginLoader.load() # do this once in main thread
+  aims_test_thread_read( filenames )
 
-  class Loadfile( object ):
-      def __init__( self, filename ):
-          self._filename = filename
-      def __call__( self ):
-          print 'reading %s...' % self._filename
-          obj = aims.read( self._filename )
-          print 'read %s: %s' % ( self._filename, str(type(obj)) )
-
-  threads = []
-  for fname in filenames:
-    thread = threading.Thread( target=Loadfile( fname ) )
-    thread.start()
-    threads.append( thread )
-
-  for thread in threads:
-    thread.join()
-
-  print 'finished.'
