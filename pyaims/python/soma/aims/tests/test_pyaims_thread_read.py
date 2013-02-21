@@ -166,6 +166,10 @@ if __name__ == '__main__':
             print 'safe formats:'
             print safe_formats
             raise RuntimeError( 'Some tests failed.' )
+        else:
+            print 'OK.'
+            print 'safe formats:'
+            print safe_formats
     else:
         filenames = filenames * num
         aims_test_thread_read( filenames )
