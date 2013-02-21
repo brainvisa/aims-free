@@ -38,6 +38,7 @@
 #include <aims/io/fileFormat_d.h>
 #include <aims/io/baseFormats_graph.h>
 #include <aims/io/baseFormats_syntax.h>
+#include <aims/io/argR.h>
 #include <graph/graph/graph.h>
 
 
@@ -56,20 +57,23 @@ namespace aims
   & FileFormatDictionary<Graph>::extensions()
   {
     init();
-    map<string, list<string> >	& ext = _extensions();
+    map<string, list<string> > & ext = _extensions();
     const map<string, list<string> >
       & volext = FileFormatDictionary<AimsData<short> >::extensions();
     map<string, list<string> >::const_iterator	ive, eve = volext.end();
     list<string>::const_iterator                ie, ee;
 
+    mutex().lock();
     for( ive=volext.begin(); ive!=eve; ++ive )
     {
-      for( ie=ive->second.begin(), ee=ive->second.end(); ie!=ee; ++ie )
+      list<string> & gext = ext[ ive->first ];
+      for( ie=gext.begin(), ee=gext.end(); ie!=ee; ++ie )
         if( *ie == "GraphVolume" )
           break;
       if( ie == ee )
-        ext[ ive->first ].push_back( "GraphVolume" );
+        gext.push_back( "GraphVolume" );
     }
+    mutex().unlock();
 
     return ext;
   }
@@ -106,6 +110,7 @@ static bool _graphdic()
 {
   FileFormatDictionary<Graph>::init();
   FileFormatDictionary<SyntaxSet>::init();
+  ArgReader::initLowLevelReaders();
   return true;
 }
 

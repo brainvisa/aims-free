@@ -46,6 +46,11 @@
 #include <set>
 
 
+namespace carto
+{
+  class Mutex;
+}
+
 namespace aims
 {
   class Finder;
@@ -166,6 +171,7 @@ namespace aims
     static std::map<std::string, FileFormat<T>*>	& _formats();
     static std::map<std::string, std::list<std::string> > &
         _extensions();
+    static carto::Mutex & mutex();
   };
 
 

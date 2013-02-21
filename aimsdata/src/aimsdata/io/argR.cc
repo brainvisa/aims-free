@@ -88,6 +88,12 @@ ArgReader::~ArgReader()
 }
 
 
+void ArgReader::initLowLevelReaders()
+{
+  staticPrivate();
+}
+
+
 void ArgReader::registerReader( const string & syntax, 
 				LowLevelArgReader *reader )
 {

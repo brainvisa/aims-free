@@ -36,6 +36,7 @@
 
 
 #include <aims/io/fileFormat.h>
+#include <cartobase/thread/mutex.h>
 
 namespace aims
 {
@@ -88,6 +89,16 @@ namespace aims
     return ext;
   }
 
+
+  template<class T>
+  carto::Mutex & FileFormatDictionary<T>::mutex()
+  {
+    // Must be initialized (generally in main thread) before using concurrently
+    static carto::Mutex mutex( carto::Mutex::Recursive );
+    return mutex;
+  }
+
+
   template<class T>
       const std::map<std::string, std::list<std::string> > &
   FileFormatDictionary<T>::extensions()
@@ -101,13 +112,13 @@ namespace aims
   {
     static bool initialized = false;
     if( !initialized )
-      {
-	initialized = true;
-	carto::DataTypeCode<T>	dtc;
-	IOObjectTypesDictionary::registerType( dtc.objectType(), 
-					       dtc.dataType(), &formats );
-	registerBaseFormats();
-      }
+    {
+      initialized = true;
+      carto::DataTypeCode<T>	dtc;
+      IOObjectTypesDictionary::registerType( dtc.objectType(),
+                                              dtc.dataType(), &formats );
+      registerBaseFormats();
+    }
   }
 
 

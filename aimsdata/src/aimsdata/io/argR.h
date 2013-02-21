@@ -74,6 +74,8 @@ namespace aims
     /// removes and deletes a reader
     static void deleteReader( const std::string & syntax );
     static std::set<std::string> readers();
+    /// called once from the main thread first at init time.
+    static void initLowLevelReaders();
 
   private:
     struct StaticPrivate;
