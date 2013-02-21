@@ -42,6 +42,7 @@
 #include <cartobase/exception/file.h>
 #include <cartobase/exception/format.h>
 #include <cartobase/datasource/filedatasource.h>
+#include <cartobase/thread/mutex.h>
 #include <aims/qtcompat/qimageio.h>
 #include <qcolor.h>
 
@@ -176,9 +177,7 @@ namespace aims
   {
     // std::cout << "readFrame: " << name << ", z: " << z << ", t: " << t << "\n";
     const QImage	*imp = 0;
-#if QT_VERSION >= 0x040000
     QImage		ima;
-#endif
     QImageIO		qio;
 
     if( hdr->filename() == name && hdr->hasRead() )
@@ -189,18 +188,18 @@ namespace aims
         hdr->getProperty( "file_type", format );
         qio.setFileName( name.c_str() );
         qio.setFormat( format.c_str() );
-#if QT_VERSION >= 0x040000
+        bool lock = false;
+        if( format == "JP2" )
+        {
+          lock = true;
+          QtFormatsHeader::qformatsMutex().lock();
+        }
         ima = qio.read();
+        if( lock )
+          QtFormatsHeader::qformatsMutex().unlock();
         if( ima.isNull() )
           throw carto::format_mismatch_error( name );
         imp = &ima;
-#else // QT 3
-        bool	ok = qio.read();
-        if( !ok )
-          throw carto::format_mismatch_error( name );
-
-        imp = &qio.image();
-#endif
       }
 
     const QImage	& im = *imp;

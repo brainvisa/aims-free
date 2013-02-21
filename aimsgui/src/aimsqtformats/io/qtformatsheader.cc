@@ -139,7 +139,13 @@ void QtFormatsHeader::read()
     return;
 
   string	fname = _name;
+  bool lock = false;
+  qformatsMutex().lock();
   QByteArray fmt = QImageReader::imageFormat( fname.c_str() );
+  qformatsMutex().unlock();
+  if( fmt == "jp2" )
+    lock = true;
+
   if( fmt.isNull() )
   {
     set<string>		exts = extensions();
@@ -148,7 +154,11 @@ void QtFormatsHeader::read()
     for( ie=exts.begin(); ie!=ee && fmt.isNull(); ++ie )
     {
       fname = removeExtension( _name ) + '.' + *ie;
+      if( lock )
+        qformatsMutex().lock();
       fmt = QImageReader::imageFormat( fname.c_str() );
+      if( lock )
+        qformatsMutex().unlock();
     }
   }
   if( fmt.isNull() )
@@ -158,7 +168,11 @@ void QtFormatsHeader::read()
     throw format_error( string( fmt.data() ) + " format needs a QApplication",
                         _name );
   QImageReader	qio( fname.c_str(), fmt );
+  if( lock )
+    qformatsMutex().lock();
   d->qimage = qio.read();
+  if( lock )
+    qformatsMutex().unlock();
 
   if( d->qimage.isNull() )
   {
