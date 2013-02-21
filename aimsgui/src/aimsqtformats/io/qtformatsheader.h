@@ -41,6 +41,11 @@
 
 class QImage;
 
+namespace carto
+{
+  class Mutex;
+}
+
 namespace aims
 {
   template<typename T> class QtFormatsReader;
@@ -81,6 +86,7 @@ namespace aims
     void reset();
     bool hasRead() const;
     virtual std::string removeExtension( const std::string & ) const;
+    static carto::Mutex & qformatsMutex();
 
   private:
     template<typename T> friend class QtFormatsReader;

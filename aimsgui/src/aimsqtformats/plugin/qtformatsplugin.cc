@@ -238,6 +238,7 @@ QtFormatsPlugin::QtFormatsPlugin() : Plugin()
       }
     }
   Finder::registerFormat( format, new FinderQtFormats, exts );
+  QtFormatsHeader::qformatsMutex(); // force creating it now.
 }
 
 

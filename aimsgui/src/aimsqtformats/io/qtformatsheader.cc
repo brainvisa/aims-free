@@ -38,6 +38,7 @@
 #include <cartobase/stream/directory.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/type/string_conversion.h>
+#include <cartobase/thread/mutex.h>
 #include <qimage.h>
 #include <regex.h>
 #if QT_VERSION >= 0x040000
@@ -87,6 +88,14 @@ QtFormatsHeader::~QtFormatsHeader()
 }
 
 
+Mutex & QtFormatsHeader::qformatsMutex()
+{
+  // Must be initialized (generally in main thread) before using concurrently
+  static Mutex mutex( Mutex::Recursive );
+  return mutex;
+}
+
+
 string QtFormatsHeader::extension() const
 {
   string	bname = FileUtil::basename( _name );
@@ -100,9 +109,9 @@ string QtFormatsHeader::extension() const
 set<string> QtFormatsHeader::extensions() const
 {
   static set<string>	exts;
+  qformatsMutex().lock();
   if( exts.empty() )
     {
-#if QT_VERSION >= 0x040000
       QList<QByteArray>	iform = QImageReader::supportedImageFormats();
       QList<QByteArray>	oform = QImageWriter::supportedImageFormats();
       QList<QByteArray>::iterator	c, ce = iform.end();
@@ -111,19 +120,9 @@ set<string> QtFormatsHeader::extensions() const
         exts.insert( QString( *c ).upper().utf8().data() );
       for( c=oform.begin(),ce=oform.end(); c!=ce; ++c )
         exts.insert( QString( *c ).upper().utf8().data() );
-
-#else
-      QStrList	iform = QImageIO::inputFormats();
-      QStrList	oform = QImageIO::outputFormats();
-      char	*c;
-
-      for( c=iform.first(); c; c=iform.next() )
-        exts.insert( QString( c ).upper().utf8().data() );
-      for( c=oform.first(); c; c=oform.next() )
-        exts.insert( QString( c ).upper().utf8().data() );
-#endif
     }
 
+  qformatsMutex().unlock();
   return exts;
 }
 
