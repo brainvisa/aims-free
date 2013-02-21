@@ -7,6 +7,7 @@ from optparse import OptionParser
 import threading
 import tempfile
 import shutil
+import subprocess
 
 
 def aims_test_thread_read( filenames, verbose=True ):
@@ -96,7 +97,7 @@ def _convertFileFormat( aimsobj, directory, prefix, format ):
     return None
 
 
-def test_all_formats( filename, number=30 ):
+def test_all_formats( filename, number=30, separate_process=False ):
     f = aims.Finder()
     if not f.check( filename ):
         raise IOError( '%f is not readable' % filename )
@@ -119,8 +120,13 @@ def test_all_formats( filename, number=30 ):
                 continue
             print 'testing read on %s...' % newfilename
             try:
-                aims_test_thread_read( [ newfilename ] * number,
-                    verbose=False )
+                if separate_process:
+                    subprocess.check_call( [ sys.executable, '-m',
+                      'soma.aims.tests.test_pyaims_thread_read', '-i',
+                      newfilename, '-n', str(number), '--silent' ] )
+                else:
+                    aims_test_thread_read( [ newfilename ] * number,
+                        verbose=False )
                 print 'Passed.'
                 safe_formats.append( format )
                 #shutil.rmtree( directory )
@@ -141,11 +147,17 @@ if __name__ == '__main__':
     parser = OptionParser( description='Perform tests of threaded concurrent loading of aims objects in pyaims' )
     parser.add_option( '-i', '--input', dest='infiles',
         help='files to be read concurrently', action='append', default=[] )
-    parser.add_option( '-n', '--number', dest='number',
+    parser.add_option( '-n', '--number', dest='number', type='int',
         help='number of times each file should be read at the same time. Default: 30 if one input filename, 1 otherwise', default=0 )
     parser.add_option( '-a', '--all', dest='all', action='store_true',
         default=False,
         help='test all possible formats for each input file (convert to all of them and test)' )
+    parser.add_option( '-s', '--subprocess', dest='subprocess',
+        action='store_true', default=False,
+        help='use subprocesses to run formats tests (with -a option). By default, they run in a single process, so a thread-related crash will end all tests (but will be easier to trace with a debugger).' )
+    parser.add_option( '--silent', dest='silent', action='store_true',
+        default=False,
+        help='be less verbose in per-file tests (no -a option)' )
 
     options, args = parser.parse_args()
 
@@ -158,6 +170,8 @@ if __name__ == '__main__':
             num = 30
         else:
             num = 1
+    else:
+        num = options.number
 
     #import libxml2
     #libxml2.newTextReaderFilename( '/tmp/ra_head.gii.minf' )
@@ -170,7 +184,8 @@ if __name__ == '__main__':
         unsafe_formats = {}
         safe_formats = {}
         for filename in filenames:
-            tested_formats = test_all_formats( filename, num )
+            tested_formats = test_all_formats( filename, num,
+                separate_process=options.subprocess )
             unsafe_formats.update( tested_formats[0] )
             safe_formats.update( tested_formats[1] )
         if len( unsafe_formats ) != 0:
@@ -186,5 +201,5 @@ if __name__ == '__main__':
             print safe_formats
     else:
         filenames = filenames * num
-        aims_test_thread_read( filenames )
+        aims_test_thread_read( filenames, verbose=not options.silent )
 
