@@ -51,6 +51,51 @@ def aims_test_thread_read( filenames, verbose=True ):
             % nmissing )
 
 
+def _convertFileFormat( aimsobj, directory, prefix, format ):
+    exts = aims.Finder.extensions( format )
+    if len( exts ) == 0:
+        return None
+    exts2 = [ x for x in exts if x != '' ]
+    if len( exts ) != len( exts2 ):
+        exts2.append( '' )
+    exts = exts2
+    del exts2
+    formatok = False
+    for ext in exts:
+        if ext == '':
+            newfilename = os.path.join( directory, prefix )
+        else:
+            newfilename = os.path.join( directory,
+                '.'.join( ( prefix, ext ) ) )
+        try:
+            aims.write( aimsobj, newfilename, format=format )
+            if not os.path.exists( newfilename ):
+                for f in os.listdir( directory ):
+                    if not f.endswith( '.minf' ) \
+                            and ( ext == '' or f.endswith( '.' + ext ) ):
+                        newfilename = os.path.join( directory, f )
+                        break
+                else:
+                    shutil.rmtree( directory )
+                    os.mkdir( directory )
+                    continue
+            f = aims.Finder()
+            if f.check( newfilename ) and f.format() == format:
+                formatok = True
+                break
+            else:
+                #print 'could not read', newfilename
+                shutil.rmtree( directory )
+                os.mkdir( directory )
+        except:
+            shutil.rmtree( directory )
+            os.mkdir( directory )
+            continue
+    if formatok:
+        return newfilename
+    return None
+
+
 def test_all_formats( filename, number=30 ):
     f = aims.Finder()
     if not f.check( filename ):
@@ -63,59 +108,28 @@ def test_all_formats( filename, number=30 ):
     safe_formats = []
     for format in formats:
         #if format in ( 'DICOM' ): continue
-        exts = aims.Finder.extensions( format )
-        if len( exts ) != 0:
-            if len( exts ) != 1:
-                exts2 = [ x for x in exts if x != '' ]
-                if len( exts ) != len( exts2 ):
-                    exts2.append( '' )
-                exts = exts2
-                del exts2
-            print 'testing: %s / %s, format: %s' % ( ot[0], ot[1], format )
+        print 'testing: %s / %s, format: %s' % ( ot[0], ot[1], format )
+        try:
             directory = tempfile.mkdtemp( prefix='aims_thread_test' )
+            newfilename = _convertFileFormat( aimsobj, directory, 'aims_test',
+                format )
+            if not newfilename:
+                print 'could not generate format', format
+                #shutil.rmtree( directory )
+                continue
+            print 'testing read on %s...' % newfilename
             try:
-                formatok = False
-                for ext in exts:
-                    if ext == '':
-                        newfilename = os.path.join( directory, 'aimsobject' )
-                    else:
-                        newfilename = os.path.join( directory,
-                            '.'.join( ( 'aimsobject', ext ) ) )
-                    try:
-                        aims.write( aimsobj, newfilename, format=format )
-                        if not os.path.exists( newfilename ):
-                            for f in os.listdir( directory ):
-                                if not f.endswith( '.minf' ):
-                                    newfilename = os.path.join( directory, f )
-                                    break
-                            else:
-                                shutil.rmtree( directory )
-                                os.mkdir( directory )
-                                continue
-                        f = aims.Finder()
-                        if f.check( newfilename ) and f.format() == format:
-                            formatok = True
-                            break
-                        #else:
-                            #print 'could not read', newfilename
-                    except:
-                        continue
-                if not formatok:
-                    print 'could not generate format', format
-                    #shutil.rmtree( directory )
-                    continue
-                try:
-                    print 'testing read on %s...' % newfilename
-                    aims_test_thread_read( [ newfilename ] * number, verbose=False )
-                    print 'Passed.'
-                    safe_formats.append( format )
-                    #shutil.rmtree( directory )
-                except:
-                    print 'format %s is unsafe.' % format
-                    success = False
-                    unsafe_formats.append( format )
-            finally:
-                shutil.rmtree( directory )
+                aims_test_thread_read( [ newfilename ] * number,
+                    verbose=False )
+                print 'Passed.'
+                safe_formats.append( format )
+                #shutil.rmtree( directory )
+            except:
+                print 'format %s is unsafe.' % format
+                success = False
+                unsafe_formats.append( format )
+        finally:
+            shutil.rmtree( directory )
     print 'All done for %s / %s. Success =' % ot, success
     if not success:
         return { ot : unsafe_formats }, { ot : safe_formats }
