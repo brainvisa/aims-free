@@ -160,8 +160,8 @@ namespace aims
                              const carto::AllocatorContext & /*context*/, 
                              carto::Object /*options*/ )
   {
-    std::cout << "PlyReader<" << D << ", " << carto::DataTypeCode<T>::name() 
-              << ">\n";
+    /* std::cout << "PlyReader<" << D << ", " << carto::DataTypeCode<T>::name() 
+              << ">\n"; */
     PlyHeader hdr( _name );
     hdr.read();
 
@@ -234,12 +234,9 @@ namespace aims
             }
       }
     if( thing.normal().size() != thing.vertex().size() )
-      { std::cout << "generating normals: " << thing.normal().size() 
-                  << " instead of " << thing.vertex().size() << "\n";
       thing.updateNormals();
-      } else std::cout << "normals read\n";
 
-    std::cout << "PLY read OK\n";
+    // std::cout << "PLY read OK\n";
 
     if( hdr.hasProperty( "filenames" ) )
       hdr.removeProperty( "filenames" );
