@@ -51,7 +51,7 @@ class MassCenters {
     MassCenters(const AimsData<T> & data, 
                 bool bin = false);
     MassCenters(const AimsData<T> & data, 
-                carto::rc_ptr<aims::RoiIterator> & roiIterator, 
+                const carto::rc_ptr<aims::RoiIterator> & roiIterator, 
                 bool bin = false);
     void doit(bool force = false);
     RoiMassCenterInfo infos();

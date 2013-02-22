@@ -223,6 +223,7 @@ HEADERS = \
     talairach/talBox.h    \
     talairach/talVolume.h    \
     talairach/talBoundingBoxPoints.h \
+    threshold/emthreshold.h  \
     topology/adjacency.h    \
     topology/cc18adjacent.h    \
     topology/cc26adjacent.h    \

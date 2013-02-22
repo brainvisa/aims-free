@@ -54,17 +54,37 @@ namespace aims
   template <class T>
   std::ostream& operator << (std::ostream& out, const BucketMap<T>& thing);
 
-  ///	Helper class for ordering Point3d by their z, y, x coordinates
-  struct BucketMapLess : public std::binary_function<Point3d, Point3d, bool>
+
+  /// Helper class for ordering Coordinates by their z, y, x coordinates
+  template <class T, int D>
+  struct CoordinatesLess
+  {};
+
+  // Specialization
+  template <class T>
+  struct CoordinatesLess<T, 3>: public std::binary_function<T, T, bool>
   {
-    bool operator () ( const Point3d & p1, const Point3d & p2 ) const
+    bool operator () ( const T & p1, const T & p2 ) const
     {
       return p1[2] < p2[2] 
-	      || ( p1[2] == p2[2] 
-		   && ( p1[1] < p2[1] 
-			|| ( p1[1] == p2[1] && ( p1[0] < p2[0] ) ) ) );
+        || ( p1[2] == p2[2] 
+        && ( p1[1] < p2[1] 
+      || ( p1[1] == p2[1] && ( p1[0] < p2[0] ) ) ) );
     }
   };
+
+  typedef CoordinatesLess<Point3d, 3> BucketMapLess;
+//  ///	Helper class for ordering Point3d by their z, y, x coordinates
+//   struct BucketMapLess : public std::binary_function<Point3d, Point3d, bool>
+//   {
+//     bool operator () ( const Point3d & p1, const Point3d & p2 ) const
+//     {
+//       return p1[2] < p2[2] 
+// 	      || ( p1[2] == p2[2] 
+// 		   && ( p1[1] < p2[1] 
+// 			|| ( p1[1] == p2[1] && ( p1[0] < p2[0] ) ) ) );
+//     }
+//   };
 
 
   /** An alternate, ordered, representation for buckets (voxels lists).

@@ -50,7 +50,7 @@ namespace aims
   template <typename T, typename O>
   class ConnectedComponentEngine {
 
-    public :
+    private :
       ConnectedComponentEngine();
   };
   
@@ -59,9 +59,21 @@ namespace aims
   class ConnectedComponentEngine<AimsData<T>, AimsData<O> > {
 
     public :
-      ConnectedComponentEngine();
-    
-      static void connected( AimsData<T>& data, 
+      static void filterInFrame( const AimsData<T>& cc, 
+                                 AimsData<O>& out,
+                                 std::map<O, size_t>& valids,
+                                 int t,
+                                 bool verbose = true );
+                                 
+      static void connectedInFrame( const AimsData<T>& data, 
+                                    AimsData<O>& out,
+                                    Connectivity::Type connectivity, 
+                                    std::multimap<size_t, O>& compSizes, 
+                                    int t,
+                                    const T & backgrnd = 0, bool bin = true, 
+                                    bool verbose = true );
+                                                                              
+      static void connected( const AimsData<T>& data, 
                              AimsData<O>& out, 
                              aims::Connectivity::Type connectivity,
                              std::map<O, size_t>& valids, 
@@ -70,18 +82,20 @@ namespace aims
                              bool verbose = true );
                              
     
-      static void connected( AimsData<T>& data, 
+      static void connected( const AimsData<T>& data, 
                              AimsData<O>& out, 
                              aims::Connectivity::Type connectivity,
                              const T & backgrnd = 0, bool bin = true, 
                              size_t minSize = 0, size_t numMax = 0, 
                              bool verbose = true );
                                   
+    private:
+      ConnectedComponentEngine();
   };
          
   template<typename T, typename O>
   inline
-  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected( AimsData<T>& data, 
+  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected( const AimsData<T>& data, 
                                                                        AimsData<O>& out, 
                                                                        aims::Connectivity::Type connectivity,
                                                                        const T & backgrnd, bool bin, 

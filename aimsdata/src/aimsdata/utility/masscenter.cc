@@ -46,7 +46,7 @@ MassCenters<T>::MassCenters(const AimsData<T> & data,
 
 template <class T>
 MassCenters<T>::MassCenters(const AimsData<T> & data, 
-                            carto::rc_ptr<aims::RoiIterator> & roiIterator, 
+                            const carto::rc_ptr<aims::RoiIterator> & roiIterator, 
                             bool bin)
 : _init(false), 
   _data(data), 

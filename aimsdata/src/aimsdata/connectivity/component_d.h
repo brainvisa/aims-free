@@ -49,15 +49,138 @@
 namespace aims
 {
 
+    
+//   template<typename T, typename O>
+//   std::map<O, size_t> ConnectedComponentEngine<AimsData<T>, AimsData<O> >::sizes( AimsData<T>& data, bool verbose )
+//   {
+//   }
   template<typename T, typename O>
-  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected( AimsData<T>& data, 
+  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::filterInFrame( const AimsData<T>& cc, 
+                                                                           AimsData<O>& out,
+                                                                           std::map<O, size_t>& valids,
+                                                                           int t,
+                                                                           bool verbose )
+  {
+    int x = 0, y = 0, z = 0;
+    
+    if( verbose )
+      std::cout << "filtering...\n";
+
+    ForEach3d( out, x, y, z )
+      out(x, y, z, t) = 0 ;
+
+    typename std::map<O, size_t>::iterator  is, es = valids.end();
+
+    ForEach3d( cc, x, y, z )
+    {
+      is = valids.find( cc( x, y, z ) );
+      if( is != es )
+        out( x, y, z, t ) = (O) is->second; // RISK OF OVERFLOW on char types
+    }
+  }
+  
+  template<typename T, typename O>
+  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connectedInFrame( const AimsData<T>& data, 
+                                                                              AimsData<O>& out,
+                                                                              Connectivity::Type connectivity, 
+                                                                              std::multimap<size_t, O>& compSizes, 
+                                                                              int t,
+                                                                              const T & backg, 
+                                                                              bool bin, 
+                                                                              bool verbose )
+  {
+    int x = 0, y = 0, z = 0, n = 0;
+    int dimX = data.dimX();
+    int dimY = data.dimY();
+    int dimZ = data.dimZ();
+
+    out = 0;
+
+    //
+    // boolean volume to say if a voxel is already used
+    //
+
+    AimsData<byte> flag( dimX, dimY, dimZ );
+
+    flag = false;
+    ForEach3d( flag, x, y, z )
+      if ( data( x, y, z, t ) == backg )
+        flag( x, y, z ) = true;
+
+    Connectivity cd( data.oLine(), data.oSlice(), connectivity );
+    //Connectivity cf( flag.oLine(), flag.oSlice(), connectivity );
+
+
+    O    label = 1;
+    Point3d   pos, newpos;
+    std::queue<Point3d> que;
+    T     val;
+    size_t    sz;
+
+    //
+    // track connected components
+    //
+    for ( z = 0; z < dimZ; ++z )
+    {
+      if( verbose )
+        std::cout << "\rz: " << z << std::flush;
+
+      for ( y = 0; y < dimY; ++y )
+        for ( x = 0; x < dimX; ++x )
+          if( !flag( x, y, z ) )
+          {
+            val = data( x, y, z, t );
+            que.push( Point3d( x, y, z ) );
+            flag( x, y, z ) = true;
+            sz = 0;
+            while ( !que.empty() )
+            {
+              pos = que.front();
+              que.pop();
+              out( pos ) = label; // RISK of overflow in char types
+              ++sz;
+              for ( n = 0; n < cd.nbNeighbors(); n++ )
+              {
+                newpos = pos + cd.xyzOffset( n );
+                if ( newpos[0] >= 0   &&
+                      newpos[0] < dimX &&
+                      newpos[1] >= 0   &&
+                      newpos[1] < dimY &&
+                      newpos[2] >= 0   &&
+                      newpos[2] < dimZ   )
+            
+                  if ( !flag( newpos ) 
+                        && ( bin || data( newpos[0], newpos[1], newpos[2], t ) == val ) )
+                  {
+                    flag( newpos ) = true;
+                    que.push( newpos );
+                  }
+              }
+            }
+            /*std::cout << "comp. " << label << ", val: " << val << " (" 
+              << sz << " voxels)\n";*/
+
+            compSizes.insert( std::pair<size_t, O>( sz, label ) );
+            ++label;
+          }
+    }
+
+    if( verbose )
+    {
+      std::cout << std::endl;
+      std::cout << label << " components" << std::endl;
+    } 
+  }
+  
+  template<typename T, typename O>
+  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected( const AimsData<T>& data, 
                                                                        AimsData<O>& out,
                                                                        Connectivity::Type connectivity, 
                                                                        std::map<O, size_t>& valids, 
                                                                        const T & backg, bool bin, size_t minSize, 
                                                                        size_t numMax, bool verbose )
   {
-    std::multimap<size_t, size_t> compSize;
+    std::multimap<size_t, size_t> compSizes;
     int x=0, y=0, z=0, t=0, n=0;
     int dimX = data.dimX();
     int dimY = data.dimY();
@@ -65,133 +188,42 @@ namespace aims
     int dimT = data.dimT() ;
 
     for( t = 0 ; t < dimT ; ++t ){
+      
+      // Get AimsData of size_t to avoid risk of overflow in char types
+      // before filtering
+      AimsData<size_t> cc( dimX, dimY, dimZ );
+      
+      ConnectedComponentEngine<AimsData<T>, AimsData<size_t> >
+        ::connectedInFrame( data, 
+                            cc, 
+                            connectivity, 
+                            compSizes,
+                            t,
+                            backg,
+                            bin,
+                            verbose );
 
-
-      AimsData<O> cc( dimX, dimY, dimZ );
-
-      cc = 0;
-
-      //
-      // boolean volume to say if a voxel is already used
-      //
-
-      AimsData<byte> flag( dimX, dimY, dimZ );
-
-      flag = false;
-      ForEach3d( flag, x, y, z )
-        if ( data( x, y, z, t ) == backg )
-          flag( x, y, z ) = true;
-
-      Connectivity cd( data.oLine(), data.oSlice(), connectivity );
-      //Connectivity cf( flag.oLine(), flag.oSlice(), connectivity );
-
-
-      size_t    label = 1;
-      Point3d   pos,newpos;
-      std::queue<Point3d> que;
-      T     val;
-      size_t    sz;
-
-
-
-      //
-      // track connected components
-      //
-      for ( z = 0; z < dimZ; ++z )
-
-      {
-        if( verbose )
-
-          std::cout << "\rz: " << z << std::flush;
-
-        for ( y = 0; y < dimY; ++y )
-          for ( x = 0; x < dimX; ++x )
-            if( !flag( x, y, z ) )
-              {
-                val = data( x, y, z, t );
-                que.push( Point3d( x, y, z ) );
-                flag( x, y, z ) = true;
-                sz = 0;
-                while ( !que.empty() )
-                  {
-                    pos = que.front();
-                    que.pop();
-                    cc( pos ) = label;
-                    ++sz;
-                    for ( n = 0; n < cd.nbNeighbors(); n++ )
-                      {
-                        newpos = pos + cd.xyzOffset( n );
-                        if ( newpos[0] >= 0   &&
-                             newpos[0] < dimX &&
-                             newpos[1] >= 0   &&
-                             newpos[1] < dimY &&
-                             newpos[2] >= 0   &&
-                             newpos[2] < dimZ   )
-                   
-                          if ( !flag( newpos ) 
-                               && ( bin || data( newpos[0], newpos[1], newpos[2], t ) == val ) )
-                            {
-                              flag( newpos ) = true;
-                              que.push( newpos );
-                            }
-                      }
-                  }
-                /*std::cout << "comp. " << label << ", val: " << val << " (" 
-                  << sz << " voxels)\n";*/
-
-                compSize.insert( std::pair<size_t,size_t>( sz, label ) );
-                ++label;
-              }
-      }
-
-      if( verbose )
-        {
-          std::cout << std::endl;
-
-          std::cout << label << " components\n";
-        } 
-
-
-      //  filter small comps
-
+      // Filter small comps
       std::multimap<size_t, size_t>::reverse_iterator 
-        im, em = compSize.rend();
+        im, em = compSizes.rend();
 
-      label = 1;
+      O label = 1;
 
-      for( im = compSize.rbegin(); 
+      for( im = compSizes.rbegin(); 
            im != em && im->first >= minSize 
              && ( numMax == 0 || label <= numMax ); ++im )
+      {
 
-        {
+        if( verbose )
+          std::cout << "component " << std::setw( 4 ) << im->second 
+                    << " : " << std::setw( 8 ) << im->first 
+                    << " points" << std::endl;
 
-          if( verbose )
-            std::cout << "component " << std::setw( 4 ) << im->second 
-                      << " : " << std::setw( 8 ) << im->first 
-                      << " points" << std::endl;
+        valids[ im->second ] = label++;
+      }
 
-          valids[ im->second ] = label++;
-        }
-
-
-      if( verbose )
-        std::cout << "filtering...\n";
-
-      ForEach3d( out, x, y, z )
-        out(x, y, z, t) = 0 ;
-
-
-
-      typename std::map<O, size_t>::iterator  is, es = valids.end();
-
-
-
-      ForEach3d( cc, x, y, z )
-        {
-          is = valids.find( cc( x, y, z ) );
-          if( is != es )
-            out( x, y, z, t ) = (O) is->second; // RISK OF OVERFLOW on char types
-        }
+      ConnectedComponentEngine<AimsData<size_t>, AimsData<O> >
+        ::filterInFrame( cc, out, valids, t, verbose );
 
       if( verbose )
         std::cout << "after filtering: " << valids.size() << " components\n";
