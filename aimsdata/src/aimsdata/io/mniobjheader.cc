@@ -35,7 +35,7 @@
 #include <aims/def/general.h>
 #include <aims/io/byteswap.h>
 #include <cartobase/exception/ioexcept.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 #include <cartobase/datasource/streamdatasource.h>
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/stream/fileutil.h>

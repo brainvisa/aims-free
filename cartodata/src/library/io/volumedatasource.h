@@ -37,8 +37,8 @@
 #include <cartodata/volume/volumeproxy.h>
 #include <cartobase/datasource/chaindatasource.h>
 #include <cartobase/object/object.h>
-#include <cartobase/wip/io/itemreader.h>
-#include <cartobase/wip/io/itemwriter.h>
+#include <cartobase/io/itemreader.h>
+#include <cartobase/io/itemwriter.h>
 #include <memory>
 
 namespace carto

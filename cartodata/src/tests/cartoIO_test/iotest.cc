@@ -32,15 +32,15 @@
  */
 
 #include <cstdlib>
-#include <cartobase/wip/io/datasourceinfo.h>
+#include <cartobase/io/datasourceinfo.h>
 #include <cartobase/type/limits.h>
 #include <cartobase/datasource/filedatasource.h>
 #include <cartobase/object/object.h>
 #include <cartobase/object/pythonwriter.h>
-#include <cartobase/wip/io/readeralgorithm.h>
-#include <cartobase/wip/io/reader.h>
-#include <cartobase/wip/io/writer.h>
-#include <cartobase/wip/io/formatdictionary.h>
+#include <cartobase/io/readeralgorithm.h>
+#include <cartobase/io/reader.h>
+#include <cartobase/io/writer.h>
+#include <cartobase/io/formatdictionary.h>
 #include <cartodata/volume/volumeview.h>
 #include <cartobase/getopt/getopt.h>
 #include <cartobase/config/verbose.h>

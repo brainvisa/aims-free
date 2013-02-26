@@ -34,7 +34,7 @@
 #include <graph/graph/gwriter_python.h>
 #include <graph/graph/graph.h>
 #include <graph/tree/tree.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 #include <iostream>
 
 using namespace carto;

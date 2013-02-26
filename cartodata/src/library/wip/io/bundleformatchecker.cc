@@ -33,8 +33,8 @@
 
 #include <cartodata/wip/io/bundleformatchecker.h>
 #include <cartobase/object/pythonreader.h>
-#include <cartobase/wip/io/minfXML2.h>
-#include <cartobase/wip/io/datasourceinfo.h>
+#include <cartobase/io/minfXML2.h>
+#include <cartobase/io/datasourceinfo.h>
 #include <cartobase/object/property.h>
 #include <cartobase/datasource/datasource.h>
 

@@ -32,7 +32,7 @@
  */
 
 #include <aims/io/baseFormats_genericobject.h>
-#include <cartobase/wip/io/reader.h>
+#include <cartobase/io/reader.h>
 #include <cartobase/object/pythonwriter.h>
 
 

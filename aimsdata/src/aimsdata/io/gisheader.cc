@@ -37,7 +37,7 @@
 #include <aims/io/gisheader.h>
 #include <aims/def/general.h>
 #include <cartobase/exception/ioexcept.h>
-#include <cartobase/wip/io/datasourceinfo.h>
+#include <cartobase/io/datasourceinfo.h>
 #include <cartobase/datasource/filedatasource.h>
 #include <cartodata/io/gisformatchecker.h>
 #include <cartodata/io/carto2aimsheadertranslator.h>

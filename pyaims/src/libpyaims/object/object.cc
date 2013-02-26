@@ -33,7 +33,7 @@
 
 #include <pyaims/object/object.h>
 #include <cartobase/object/object_d.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 #include <cartobase/object/pythonwriter.h>
 
 using namespace std;

@@ -42,7 +42,7 @@
 #include <cartobase/object/pythonwriter.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/uuid/uuid.h>
-#include <cartobase/wip/io/datasourceinfo.h>
+#include <cartobase/io/datasourceinfo.h>
 
 using namespace aims;
 using namespace aims::internal;

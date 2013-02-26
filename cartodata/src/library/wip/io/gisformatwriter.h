@@ -34,7 +34,7 @@
 #ifndef CARTODATA_IO_GISFORMATWRITER_H
 #define CARTODATA_IO_GISFORMATWRITER_H
 
-#include <cartobase/wip/io/formatwriter.h>
+#include <cartobase/io/formatwriter.h>
 
 namespace carto
 {

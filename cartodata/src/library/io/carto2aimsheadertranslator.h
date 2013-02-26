@@ -34,7 +34,7 @@
 #ifndef CARTODATA_IO_CARTO2AIMSHEADERTRANSLATOR_H
 #define CARTODATA_IO_CARTO2AIMSHEADERTRANSLATOR_H
 
-#include <cartobase/wip/io/headertranslator.h>
+#include <cartobase/io/headertranslator.h>
 
 namespace carto
 {

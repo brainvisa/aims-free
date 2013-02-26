@@ -36,7 +36,7 @@
 #include <aims/def/path.h>
 #include <cartobase/stream/fileutil.h>
 //#include <cartobase/object/pythonreader.h>
-#include <cartobase/wip/io/reader.h>
+#include <cartobase/io/reader.h>
 
 //debug
 #include <iostream>

@@ -42,7 +42,7 @@
 #include <aims/bucket/bucket.h>
 #include <aims/io/bckheader.h>
 #include <cartobase/exception/ioexcept.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 
 
 namespace aims

@@ -35,7 +35,7 @@
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/datasource/filedatasource.h>
 #include <cartobase/datasource/bufferdatasource.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 
 using namespace aims;
 using namespace carto;

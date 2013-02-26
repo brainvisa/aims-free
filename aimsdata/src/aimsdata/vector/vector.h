@@ -39,7 +39,7 @@
 
 #include <aims/def/assert.h>
 #include <aims/def/general.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 #include <cartobase/type/types.h>
 #include <fstream>
 #include <math.h>

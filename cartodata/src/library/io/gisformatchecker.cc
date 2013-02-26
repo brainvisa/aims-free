@@ -35,9 +35,9 @@
 #include <cartobase/datasource/filedatasource.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/smart/scopedptr.h>
-#include <cartobase/wip/io/itemreader.h>
-#include <cartobase/wip/io/datasourceinfo.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/itemreader.h>
+#include <cartobase/io/datasourceinfo.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 #include <cartobase/object/object.h>
 #include <cartobase/object/property.h>
 #include <stdio.h>

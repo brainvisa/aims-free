@@ -31,8 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <cartobase/wip/io/writer_d.h>
-#include <cartobase/wip/io/formatdictionary_d.h>
+#include <cartobase/io/writer_d.h>
+#include <cartobase/io/formatdictionary_d.h>
 #include <cartodata/volume/volume.h>
 
 using namespace carto;

@@ -39,7 +39,7 @@
 #include <graph/tree/tfactory.h>
 #include <cartobase/exception/parse.h>
 #include <cartobase/datasource/filteringdatasource.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 
 using namespace carto;
 using namespace std;

@@ -37,7 +37,7 @@
 #include <cartobase/object/lexicon.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/datasource/filteringdatasource.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 
 using namespace std;
 using namespace carto;

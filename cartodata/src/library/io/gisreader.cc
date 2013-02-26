@@ -32,7 +32,7 @@
  */
 
 #include <cartodata/io/gisreader_d.h>
-#include <cartobase/wip/io/formatdictionary.h>
+#include <cartobase/io/formatdictionary.h>
 
 using namespace carto;
 using namespace std;

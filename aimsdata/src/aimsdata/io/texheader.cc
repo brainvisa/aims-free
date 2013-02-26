@@ -40,7 +40,7 @@
 #include <aims/io/defaultItemW.h>
 #include <cartobase/exception/format.h>
 #include <cartobase/exception/file.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 #include <cartobase/stream/fileutil.h>
 #include <fstream>
 #include <memory>

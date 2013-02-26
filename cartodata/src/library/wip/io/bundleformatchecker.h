@@ -34,7 +34,7 @@
 #ifndef CARTODATA_IO_BUNDLEFORMATCHECKER_H
 #define CARTODATA_IO_BUNDLEFORMATCHECKER_H
 
-#include <cartobase/wip/io/formatchecker.h>
+#include <cartobase/io/formatchecker.h>
 
 namespace carto
 {

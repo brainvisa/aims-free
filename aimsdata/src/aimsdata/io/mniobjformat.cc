@@ -33,7 +33,7 @@
 
 #include <aims/io/mniobjheader.h>
 #include <aims/io/baseFormats_mesh.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 #include <cartobase/datasource/streamdatasource.h>
 #include <cartobase/datasource/filedatasource.h>
 #include <cartobase/type/string_conversion.h>

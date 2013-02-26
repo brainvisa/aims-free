@@ -42,7 +42,7 @@
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/type/typetraits.h>
-#include <cartobase/wip/io/datasourceinfo.h>
+#include <cartobase/io/datasourceinfo.h>
 #include <cartobase/datasource/filedatasource.h>
 #include <cartodata/io/carto2aimsheadertranslator.h>
 #include <map>

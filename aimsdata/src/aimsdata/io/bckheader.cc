@@ -39,7 +39,7 @@
 #include <aims/io/defaultItemR.h>
 #include <aims/io/defaultItemW.h>
 #include <cartobase/exception/ioexcept.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 
 using namespace aims;
 using namespace carto;

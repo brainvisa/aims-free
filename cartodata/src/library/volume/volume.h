@@ -38,7 +38,7 @@
 #include <cartodata/volume/volumeproxy.h>
 #include <cartobase/containers/allocatedvector.h>
 #include <cartobase/type/types.h>
-#include <cartobase/wip/io/creator.h>
+#include <cartobase/io/creator.h>
 
 #ifdef CARTO_USE_BLITZ
 #ifdef _WIN32

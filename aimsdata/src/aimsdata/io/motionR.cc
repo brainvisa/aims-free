@@ -34,7 +34,7 @@
 
 #include <aims/io/motionR.h>
 #include <aims/data/pheader.h>
-#include <cartobase/wip/io/asciidatasourcetraits.h>
+#include <cartobase/io/asciidatasourcetraits.h>
 #include <cartobase/datasource/filedatasource.h>
 
 using namespace aims;

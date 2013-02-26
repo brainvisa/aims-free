@@ -34,7 +34,7 @@
 #ifndef CARTODATA_IO_VOLUMEFORMATREADER_H
 #define CARTODATA_IO_VOLUMEFORMATREADER_H
 
-#include <cartobase/wip/io/formatreader.h>
+#include <cartobase/io/formatreader.h>
 
 namespace carto
 {

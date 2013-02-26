@@ -35,7 +35,7 @@
 #define CARTODATA_ROI_SITEITERATOR_H
 
 #include <cartobase/object/object.h>
-#include <cartobase/wip/io/reader.h>
+#include <cartobase/io/reader.h>
 #include <cartodata/volume/volume.h>
 #include <vector>
 #include <iostream>
