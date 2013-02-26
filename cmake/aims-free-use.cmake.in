@@ -6,3 +6,4 @@ if( @PROJECT_NAME_UPPER@_INCLUDE_DIRS )
 endif()
 
 include( "${SOMA-BASE_USE_FILE}" )
+include( "${SOMA-IO_USE_FILE}" )

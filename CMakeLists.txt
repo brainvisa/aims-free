@@ -5,21 +5,13 @@ enable_testing()
 
 BRAINVISA_DEPENDENCY( DEV DEPENDS "${BRAINVISA_PACKAGE_NAME}" RUN "= ${${BRAINVISA_PACKAGE_NAME}_VERSION}" )
 
+BRAINVISA_FIND_PACKAGE( soma-io REQUIRED )
+include( "${SOMA-IO_USE_FILE}" )
 BRAINVISA_FIND_PACKAGE( soma-base REQUIRED )
 math( EXPR result "${soma-base_VERSION_MINOR}+1" )
 BRAINVISA_DEPENDENCY( DEV DEPENDS "soma-base" DEV ">= ${soma-base_VERSION};<< ${soma-base_VERSION_MAJOR}.${result}" )
 include( "${SOMA-BASE_USE_FILE}" )
 
-find_package( Sigc++2 REQUIRED )
-BRAINVISA_DEPENDENCY( RUN DEPENDS libsigc++2 RUN 2.0-0c2a )
-BRAINVISA_DEPENDENCY( DEV DEPENDS libsigc++2 DEV 2.0 )
-
-find_package( LibXml2 REQUIRED )
-BRAINVISA_DEPENDENCY( RUN DEPENDS libxml2 RUN )
-BRAINVISA_DEPENDENCY( DEV DEPENDS libxml2 DEV )
-
-find_package( Boost REQUIRED )
-BRAINVISA_DEPENDENCY( DEV DEPENDS libboost DEV )
 
 find_package( Blitz )
 if( BLITZ_FOUND )
@@ -89,28 +81,14 @@ BRAINVISA_DEPENDENCY( DEV RECOMMENDS zlib DEV )
 
 find_package( LibKDTree QUIET )
 
-set( AIMS_DEFINITIONS "-D_REENTRANT" ) # -DAIMS" )
-if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" OR "${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel" )
-#   set( AIMS_DEFINITIONS "${AIMS_DEFINITIONS} -DCARTO_DEBUGMODE=\"release\"" )
-  set( CARTO_DEBUGMODE "release" )
-else()
-  if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
-#     set( AIMS_DEFINITIONS "${AIMS_DEFINITIONS} -DCARTO_DEBUGMODE=\"debug\"" )
-    set( CARTO_DEBUGMODE "debug" )
-  else()
-#     set( AIMS_DEFINITIONS "${AIMS_DEFINITIONS} -DCARTO_DEBUGMODE=\"default\"" )
-    set( CARTO_DEBUGMODE "default" )
-  endif()
-endif()
+
+
 if( BLITZ_FOUND )
-#   set( AIMS_DEFINITIONS "${AIMS_DEFINITIONS} -DCARTO_USE_BLITZ" )
   set( CARTO_USE_BLITZ "True" )
 endif()
 
 set( AIMS_INCLUDE_DIRS 
-     ${Sigc++2_INCLUDE_DIRS} 
-     "${LIBXML2_INCLUDE_DIR}"
-     ${Boost_INCLUDE_DIRS} )
+     ${SOMA-IO_INCLUDE_DIRS} )
 if( BLITZ_FOUND )
   set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS} 
        "${BLITZ_INCLUDE_DIRS}" )
@@ -144,20 +122,17 @@ if( TIFF_FOUND )
        "${TIFF_INCLUDE_DIR}" )
 endif()
 
-# set( AIMS_DEFINITIONS "${AIMS_DEFINITIONS} -DCARTO_USE_KDTREE" )
 if( LIBKDTREE_FOUND )
   set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS} ${LIBKDTREE_INCLUDE_DIR} )
   # else it will be done in aimsdata lib cmakelist
 endif()
 
-add_definitions( ${AIMS_DEFINITIONS} )
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
 set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase "${LIBXML2_LIBRARIES}" )
 set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}" )
 
 
-add_subdirectory( cartobase )
 add_subdirectory( cartodata )
 add_subdirectory( graph )
 add_subdirectory( ecat )
