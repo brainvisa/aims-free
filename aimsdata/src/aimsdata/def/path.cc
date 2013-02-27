@@ -110,6 +110,13 @@ Path::Path()
 
 #if USE_SHARE_CONFIG
   _nomenclature = _shared + s + BRAINVISA_SHARE_DIRECTORY + s + "nomenclature";
+  static bool firsttime = true;
+  if( firsttime )
+  {
+    firsttime = false;
+    Paths::addResourceSearchPath( Paths::globalShared()
+      + BRAINVISA_SHARE_DIRECTORY );
+  }
 #else
   _nomenclature = Paths::shfjShared() + s + "nomenclature";
 #endif
