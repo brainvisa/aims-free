@@ -34,13 +34,16 @@ template <class T, class U>
                      float foregd = 32767,
                      int classes = 2,
                      int levelindex = 0, /* Level expressed as index */
-                     int level2index = 1 /* Level expressed as index */ );
+                     int level2index = 1, /* Level expressed as index */ 
+                     int bins = 0,
+                     int binstart = 0, /* First bin considered during thresholding process */
+                     int binend = 0 /* Last bin considered during thresholding process */
+                   );
 
     virtual ~AimsEMThreshold() {}
 
     inline
-    std::vector<T> processEMThresholds(const AimsData<T> &image,
-                                       int bins = 0);
+    std::vector<T> processEMThresholds(const AimsData<T> &image);
 
     /// Return the multi-level thresholded image
     inline AimsData<T> operator () (const AimsData<T> &image);
@@ -53,16 +56,25 @@ template <class T, class U>
     int _classes;
     int _levelindex;
     int _level2index;
+    int _bins;
+    int _binstart;
+    int _binend;
 };
 
 template <class T, class U> inline
     AimsEMThreshold<T, U>::AimsEMThreshold( threshold_t type,
                                             T backgd, float foregd,
                                             int classes,
-                                            int levelindex, int levelindex2 )
+                                            int levelindex, int levelindex2,
+                                            int bins,
+                                            int binstart,
+                                            int binend )
   : _classes(classes), 
     _levelindex(levelindex),
     _level2index(levelindex2), 
+    _bins(bins),
+    _binstart(binstart),
+    _binend(binend),
     AimsThreshold<T, U>( type, 0, 0, backgd, foregd )
 {
   if (carto::verbose)
@@ -73,17 +85,26 @@ template <class T, class U> inline
     std::cout << "Classes " << carto::toString(_classes) << " ..." << std::endl << std::flush;
     std::cout << "Level index " << carto::toString(_levelindex) << " ..." << std::endl << std::flush;
     std::cout << "Level 2 index " << carto::toString(_level2index) << " ..." << std::endl << std::flush;
+//     std::cout << "Bins " << carto::toString(_bins) << " ..." << std::endl << std::flush;
   }
 }
 // EM
 template <class T, class U> inline
-    std::vector<T> AimsEMThreshold<T, U>::processEMThresholds(const AimsData<T> &image,
-                                                              int bins)
+    std::vector<T> AimsEMThreshold<T, U>::processEMThresholds(const AimsData<T> &image)
 {
   std::vector<T> thresholds, thresholds_mu;
+  int bins = _bins;
+  int binend;
+
   
+  T maxi = image.maximum(), mini = image.minimum();
   if ( bins <= 0 )
-    bins = int(image.maximum() - image.minimum());
+    bins = int(maxi - mini);
+  
+  if (!_binend)
+    binend = bins;
+  else
+    binend = _binend + 1;
   
   if (carto::verbose)
     std::cout << "Bins " << carto::toString(bins) << " ..." << std::endl << std::flush;
@@ -101,13 +122,16 @@ template <class T, class U> inline
   int n, i, j;
   
   // Initialisation of the EM algorithm
+  double scl = (double) bins / (double)( maxi - mini );
+//   std::cout << "scl : " << carto::toString(scl) << std::endl << std::flush;
   double points_count = 0.;
-  for (n = 0; n < bins; ++n)
+  for (n = _binstart; n < binend; ++n)
     points_count += his.data()(n);
-  
+
+//   std::cout << "points_count : " << carto::toString(points_count) << std::endl << std::flush;
   // Same number of points for each EM class
   double class_points_count = 0.;
-  for (n = 0; n < bins; ++n)
+  for (n = _binstart; n < binend; ++n)
   {
     class_points_count += his.data()(n);
     for (i = 0; i < _classes; ++i)
@@ -132,7 +156,7 @@ template <class T, class U> inline
     if (count > 1)
     {
       th_tau = 0.;
-      for (n = 0; n < bins; ++n)
+      for (n = _binstart; n < binend; ++n)
       {
         for (i = 0; i < _classes; ++i)
         {
@@ -140,7 +164,7 @@ template <class T, class U> inline
           sum_aux = 0.;
           for (j = 0; j < _classes; ++j)
           {
-            aux(j) = th_pi(j) * (1 / sqrt(2 * 3.1415926 * th_sigma(j))) 
+            aux(j) = th_pi(j) * (1 / sqrt(2 * M_PI * th_sigma(j))) 
                      * exp(-(1 / (2 * th_sigma(j))) * (n - th_mu(j)) * (n - th_mu(j)));
             sum_aux += aux(j);
           }
@@ -158,20 +182,20 @@ template <class T, class U> inline
       sum1 = 0.;
       sum2 = 0.;
       sum = 0.;
-      for (n = 0; n < bins; ++n) {
+      for (n = _binstart; n < binend; ++n) {
         sum += th_tau(n, j) * his.data()(n);
         sum1 += th_tau(n, j) * n * his.data()(n);
       }
       th_mu(j) = sum1 / sum;
 
-      for (n = 0; n < bins; ++n)
+      for (n = _binstart; n < binend; ++n)
         sum2 += th_tau(n, j) * (n - th_mu(j)) * (n - th_mu(j)) * his.data()(n);
       th_sigma(j) = sum2 / sum;
     
       // Classifying variable pi
       sum1 = 0.;
       sum = 0.;
-      for (n = 0; n < bins; ++n)
+      for (n = _binstart; n < binend; ++n)
       {
         sum1 += th_tau(n, j) * his.data()(n);
         sum += his.data()(n);  
@@ -181,16 +205,16 @@ template <class T, class U> inline
   }
   
   // Compute thresholds
-  int level;
+  T level;
   for (j = 0; j < _classes; ++j)
   {
-    level = (int)th_mu(j);
+    level = (T)th_mu(j);
     
     if (level < 0)
       level = 0;
     
-    else if (level > (bins - 1))
-      level = bins - 1;
+    else if (level > (binend - 1))
+      level = binend - 1;
     
     thresholds_mu.push_back(level);
   }
@@ -203,7 +227,7 @@ template <class T, class U> inline
     for (i = 0; i < _classes; ++i)
     {
       // Search for last minimum between class means
-      std::cout << carto::toString((thresholds_mu[i] * (his.maxDataValue() - his.minDataValue() + 1) / bins) + his.minDataValue());
+      std::cout << carto::toString((T)(thresholds_mu[i] / scl) + mini);
       if (i <  (_classes - 1))
         std::cout << ", ";
     }
@@ -223,7 +247,7 @@ template <class T, class U> inline
         level = j;
     }
     
-    thresholds.push_back((level * (his.maxDataValue() - his.minDataValue() + 1) / bins) + his.minDataValue());
+    thresholds.push_back(((T)(level / scl) + mini));
     
     if (carto::verbose) {
       std::cout << carto::toString(thresholds[i]);
