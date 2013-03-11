@@ -25,6 +25,7 @@ HEADERS=	\
 		math/gaussj.h			\
 		math/geometry.h			\
 		math/gradient.h			\
+    math/harris.h    \
 		math/householder.h		\
 		math/hqr.h			\
 		math/hypergeometric.h		\
@@ -38,6 +39,7 @@ HEADERS=	\
 		math/ppca_d.h			\
 		math/bspline2.h                 \
 		math/bspline3.h                 \
+    math/sobel.h    \
 		math/tensorMatrix.h		\
 		math/tqli.h			\
 		optimization/covsrt.h			\
@@ -110,6 +112,7 @@ SOURCES = \
 		math/eltran.cc			\
 		math/gaussj.cc			\
 		math/geometry.cc		\
+    math/harris.cc    \
 		math/householder.cc		\
 		math/hqr.cc			\
 		math/hypergeometric.cc		\
@@ -122,6 +125,7 @@ SOURCES = \
 		math/svd.cc			\
 		math/pca.cc			\
 		math/ppca.cc			\
+    math/sobel.cc    \
 		math/tensorMatrix.cc		\
 		math/toeplitz.cc		\
 		math/tqli.cc			\
