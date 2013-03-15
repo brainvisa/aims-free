@@ -44,6 +44,7 @@
 #include <cartobase/type/typetraits.h>
 #include <cartobase/io/datasourceinfo.h>
 #include <cartobase/datasource/filedatasource.h>
+#include <cartobase/thread/mutex.h>
 #include <cartodata/io/carto2aimsheadertranslator.h>
 #include <map>
 #include <set>
@@ -84,8 +85,15 @@ Finder_Private::~Finder_Private()
 auto_ptr<Finder_Private>	Finder::pd( 0 );
 
 
+namespace
+{
+  Mutex _finder_mutex( Mutex::Recursive );
+}
+
+
 void Finder::initPrivate()
 {
+  _finder_mutex.lock();
   if( !pd.get() )
     {
       pd.reset( new Finder_Private );
@@ -151,6 +159,7 @@ void Finder::initPrivate()
       registerFormat( "DICOM", new FinderDicomFormat, ext );
 #endif
     }
+  _finder_mutex.unlock();
 }
 
 

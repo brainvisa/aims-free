@@ -158,6 +158,8 @@ if __name__ == '__main__':
     parser.add_option( '--silent', dest='silent', action='store_true',
         default=False,
         help='be less verbose in per-file tests (no -a option)' )
+    parser.add_option( '-l', '--loop', dest='loop',
+        action='store_true', help='loop the execution endlessly (until it crashes). Useful for debugging rare crashes' )
 
     options, args = parser.parse_args()
 
@@ -180,26 +182,31 @@ if __name__ == '__main__':
     #p = xml.parsers.expat.ParserCreate()
     #p.ParseFile( open( '/tmp/xml.xml' ) )
 
-    if options.all:
-        unsafe_formats = {}
-        safe_formats = {}
-        for filename in filenames:
-            tested_formats = test_all_formats( filename, num,
-                separate_process=options.subprocess )
-            unsafe_formats.update( tested_formats[0] )
-            safe_formats.update( tested_formats[1] )
-        if len( unsafe_formats ) != 0:
-            print 'Results:'
-            print 'unsafe formats:'
-            print unsafe_formats
-            print 'safe formats:'
-            print safe_formats
-            raise RuntimeError( 'Some tests failed.' )
+    doit = True
+    while doit:
+        if options.all:
+            unsafe_formats = {}
+            safe_formats = {}
+            for filename in filenames:
+                tested_formats = test_all_formats( filename, num,
+                    separate_process=options.subprocess )
+                unsafe_formats.update( tested_formats[0] )
+                safe_formats.update( tested_formats[1] )
+            if len( unsafe_formats ) != 0:
+                print 'Results:'
+                print 'unsafe formats:'
+                print unsafe_formats
+                print 'safe formats:'
+                print safe_formats
+                raise RuntimeError( 'Some tests failed.' )
+            else:
+                print 'OK.'
+                print 'safe formats:'
+                print safe_formats
         else:
-            print 'OK.'
-            print 'safe formats:'
-            print safe_formats
-    else:
-        filenames = filenames * num
-        aims_test_thread_read( filenames, verbose=not options.silent )
+            filenames = filenames * num
+            aims_test_thread_read( filenames, verbose=not options.silent )
+
+        if not options.loop:
+            doit = False
 
