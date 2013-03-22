@@ -990,22 +990,45 @@ Texture<float> AimsRegularizeTexture(const Texture<float> & tex,
 }
 
 
-/*
 namespace aims
 {
 
-  LaplacianWeights* sparseMult( const LaplacianWeights* in1,
-                                const LaplacianWeights* in2,
+  LaplacianWeights* sparseMult( const LaplacianWeights & in1,
+                                const LaplacianWeights & in2,
                                 LaplacianWeights* out )
   {
     if( out == 0 )
       out = new LaplacianWeights;
 
-    
+    // out(i,j) = S_k( in1(i,k) * in2(k,j) )
+
+    LaplacianWeights::const_iterator iin1, ein1 = in1.end(), iin2, ein2 = in2.end();
+    unsigned j, n = in1.size();
+    set<pair<unsigned int, float> >::const_iterator ik, ek, ik2, ek2;
+
+    for( iin1=in1.begin(); iin1!=ein1; ++iin1 )
+    {
+      set<pair<unsigned int, float> > & oline = (*out)[iin1->first]; // i
+      for( j=0; j<n; ++j )
+      { // not optimal iterating on j here...
+        float oij = 0;
+        for( ik=iin1->second.begin(), ek=iin1->second.end(); ik!=ek; ++ik )
+        {
+          iin2 = in2.find( ik->first );
+          if( iin2 != ein2 )
+          {
+            ik2 = iin2->second.lower_bound( make_pair( j, -FLT_MAX ) );
+            if( ik2 != iin2->second.end() && ik2->first == j )
+              oij += ik->second * ik2->second;
+          }
+        }
+        oline.insert( make_pair( j, oij ) );
+      }
+    }
+
     return out;
   }
 
 }
-*/
 
 

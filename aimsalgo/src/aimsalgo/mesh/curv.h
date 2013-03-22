@@ -129,10 +129,10 @@ namespace aims
 {
   typedef std::map<unsigned, std::set< std::pair<unsigned,float> > >
     LaplacianWeights;
-  
-//   LaplacianWeights* sparseMult( const LaplacianWeights* in1,
-//                                 const LaplacianWeights* in2,
-//                                 LaplacianWeights* out = 0 );
+
+  LaplacianWeights* sparseMult( const LaplacianWeights & in1,
+                                const LaplacianWeights & in2,
+                                LaplacianWeights* out = 0 );
 }
 
 #endif
