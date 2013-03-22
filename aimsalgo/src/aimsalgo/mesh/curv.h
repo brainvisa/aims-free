@@ -115,9 +115,24 @@ Texture<float> AimsMeshLaplacian( const Texture<float> &inittex,
 				  std::set< std::pair<unsigned,
 				  float> > > &lapl);
 
+template <typename T>
+void AimsMeshLaplacian( const std::vector<T> &inittex,
+                        std::vector<T> & outtex,
+                        const std::map<unsigned,
+                          std::set< std::pair<unsigned,float> > > &lapl);
+
 
 std::map<unsigned, std::set< std::pair<unsigned,float> > >  AimsMeshWeightFiniteElementLaplacian( const AimsSurface<3,Void> & mesh, 
 					       const float Wmax);
 
+namespace aims
+{
+  typedef std::map<unsigned, std::set< std::pair<unsigned,float> > >
+    LaplacianWeights;
+  
+//   LaplacianWeights* sparseMult( const LaplacianWeights* in1,
+//                                 const LaplacianWeights* in2,
+//                                 LaplacianWeights* out = 0 );
+}
 
 #endif

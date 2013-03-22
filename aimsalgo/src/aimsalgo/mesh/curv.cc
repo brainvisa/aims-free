@@ -646,30 +646,49 @@ Texture<float> AimsMeshLaplacian( const Texture<float> &inittex,
 {
   unsigned					neigh,node, n =inittex.nItem();
   Texture<float>				tex(n);
-  map<unsigned, set< pair<unsigned,float> > >::const_iterator il,el;
-  set< pair<unsigned,float> >::iterator      ip,ep;
-  float                                        L,weight;
-  ASSERT ( lapl.size() == n);
-  
-  for (il = lapl.begin(), el = lapl.end(); il != el; ++il)
-    {
-      node = il->first;
-      L = 0;
-
-      //Weighted sum on the neighbour of the node
-      for ( ip = (il->second).begin(), ep = (il->second).end(); ip != ep; ++ip    ) 
-	{
-	  neigh = ip->first;
-	  weight = ip->second;
-	  L += weight * (- inittex.item(node) + inittex.item(neigh));
-	}
-      tex.item(node) = L;
-    }
+  AimsMeshLaplacian( inittex.data(), tex.data(), lapl );
 
   return(tex);
 }
 
 
+template <typename T>
+void AimsMeshLaplacian( const vector<T> &inittex, vector<T> & outtex,
+                        const map<unsigned, set< pair<unsigned,float> > > &lapl)
+{
+  unsigned neigh,node, n =inittex.size();
+  map<unsigned, set< pair<unsigned,float> > >::const_iterator il,el;
+  set< pair<unsigned,float> >::iterator      ip,ep;
+  float                                        L,weight;
+  ASSERT ( lapl.size() == n);
+  // resize/clear output texture
+  if( outtex.size() != n )
+    outtex.resize( n );
+
+  for (il = lapl.begin(), node=0, el = lapl.end(); il != el; ++il)
+    {
+      node = il->first;
+      L = 0;
+
+      //Weighted sum on the neighbour of the node
+      for ( ip = (il->second).begin(), ep = (il->second).end(); ip != ep; ++ip    )
+        {
+          neigh = ip->first;
+          weight = ip->second;
+          L += weight * (- inittex[node] + inittex[neigh]);
+        }
+        
+      outtex[node] = L;
+    }
+}
+
+
+template void AimsMeshLaplacian( const vector<float> &inittex,
+  vector<float> & outtex,
+  const map<unsigned, set< pair<unsigned,float> > > &lapl);
+template void AimsMeshLaplacian( const vector<double> &inittex,
+  vector<double> & outtex,
+  const map<unsigned, set< pair<unsigned,float> > > &lapl);
 
 
 
@@ -969,3 +988,24 @@ Texture<float> AimsRegularizeTexture(const Texture<float> & tex,
 
   return(otex);
 }
+
+
+/*
+namespace aims
+{
+
+  LaplacianWeights* sparseMult( const LaplacianWeights* in1,
+                                const LaplacianWeights* in2,
+                                LaplacianWeights* out )
+  {
+    if( out == 0 )
+      out = new LaplacianWeights;
+
+    
+    return out;
+  }
+
+}
+*/
+
+
