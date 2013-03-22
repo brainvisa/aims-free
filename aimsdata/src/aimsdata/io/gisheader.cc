@@ -34,6 +34,7 @@
 /*
  *  Gis header class members
  */
+#include <limits>
 #include <aims/io/gisheader.h>
 #include <aims/def/general.h>
 #include <cartobase/exception/ioexcept.h>
@@ -148,7 +149,9 @@ void GisHeader::write()
 
   if( !os )
     io_error::launchErrnoExcept( fileName );
-
+  
+  // Fix to homogenize precision with minf writer
+  os.precision(std::numeric_limits< double >::digits10);
   os << _dimX << " " << _dimY << " " << _dimZ << " " << _dimT << endl;
   os << "-type " << _type << endl;
   os << "-dx " << _sizeX << " -dy " << _sizeY << " -dz " << _sizeZ
