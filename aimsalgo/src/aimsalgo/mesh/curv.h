@@ -130,9 +130,31 @@ namespace aims
   typedef std::map<unsigned, std::set< std::pair<unsigned,float> > >
     LaplacianWeights;
 
+  void makeLaplacianMatrix( const LaplacianWeights & weights,
+                            LaplacianWeights & lmat, float dt );
+
   LaplacianWeights* sparseMult( const LaplacianWeights & in1,
                                 const LaplacianWeights & in2,
-                                LaplacianWeights* out = 0 );
+                                float sparseThresh=0 );
+
+  template <typename T>
+  void applyLaplacianMatrix( const std::vector<T> &inittex,
+                             std::vector<T> & outtex,
+                             const LaplacianWeights &lapl );
+
+  void laplacianMatrixThreshold( LaplacianWeights & lmat, float threshold );
+
+  /** Compute Laplacian smoothing coefficients matrix for niter smoothing
+      iterations.
+      Input weights should be the output of
+      AimsMeshWeightFiniteElementLaplacian().
+      sparseThresh can be used to threshold the weights of the sparse matrix
+      at each smoothing iteration, to reduce the sparse matrix size.
+   */
+  LaplacianWeights* makeLaplacianSmoothingCoefficients(
+    const LaplacianWeights & weights, unsigned niter, float dt,
+    float sparseThresh=0 );
+
 }
 
 #endif

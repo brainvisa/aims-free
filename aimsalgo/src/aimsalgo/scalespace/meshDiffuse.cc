@@ -552,13 +552,27 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
   // unsigned inc = 0;
 
   if (dur != -1)
+  {
+// #define use_matpow
+// use_matpow: for test only: for a single textures it is far slower than the
+// normal version.
+#ifdef use_matpow
+    LaplacianWeights *weightLaplPow
+      = makeLaplacianSmoothingCoefficients( weightLapl, rint(dur/dt), dt,
+                                            0.01 );
+    cout << "apply smoothing coefs...\n";
+    applyLaplacianMatrix( inittex.data(), smooth.data(), *weightLaplPow );
+    delete weightLaplPow;
+
+#else
+
     for (t=0; t< rint(dur/dt); ++t)
       {
-	//if (t%10 == 0)
-	{
-	  cout << "                ";
-	  cout << "\r" << rint(100*t*dt/dur) << "%" << flush;
-	}
+        //if (t%10 == 0)
+        {
+          cout << "                ";
+          cout << "\r" << rint(100*t*dt/dur) << "%" << flush;
+        }
 	lapl =  AimsMeshLaplacian(smooth,weightLapl);
 	for ( i=0; i<n; ++i)
 	  {
@@ -571,7 +585,8 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
 	      else
 		smooth.item(i) = s;
 	  }
-/*	if (t%2 == 0)
+
+	  /*	if (t%2 == 0)
 	  {
 	  for ( i=0; i<n; ++i)
 	    temp[inc].push_back( smooth.item(i) );
@@ -579,6 +594,8 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
 	  }
 */
       }
+#endif
+  }
   else
     {
       cout << "Estimation of the Laplacian of the texture\n";

@@ -993,41 +993,258 @@ Texture<float> AimsRegularizeTexture(const Texture<float> & tex,
 namespace aims
 {
 
+  void makeLaplacianMatrix( const LaplacianWeights & weights,
+                            LaplacianWeights & lmat, float dt )
+  {
+    /* make weights matrix A = I + dt * W
+       W diagonal being substracted the sum of weights of its line.
+       so that applying the laplacian smoothing is a matricial operation:
+       X(t+1) = A.X(t)
+       and X(t) = W^t.X(0)
+    */
+    cout << "makeLaplacianMatrix...\n";
+    float w = 0;
+    unsigned i, j;
+    LaplacianWeights::const_iterator iw, ew = weights.end();
+
+    for( iw=weights.begin(); iw!=ew; ++iw )
+    {
+      set<pair<unsigned int, float> >::const_iterator
+        ij, ej = iw->second.end();
+      w = 0;
+      i = iw->first;
+      set<pair<unsigned int, float> > & ow = lmat[ i ];
+
+      for( ij=iw->second.begin(); ij!=ej; ++ij )
+      {
+        j = ij->first;
+        if( i == j )
+        {
+          cout << "problem: ii found: " << i << endl;
+        }
+        else
+        {
+          w += ij->second;
+          ow.insert( make_pair( j, ij->second * dt ) );
+        }
+      }
+      ow.insert( make_pair( i, 1. - dt * w ) );
+    }
+    cout << "makeLaplacianMatrix done.\n";
+  }
+
+
+  void laplacianMatrixThreshold( LaplacianWeights & lmat, float threshold )
+  {
+    /* remove weights under threshold (in absolute value) on non-diagonal
+       coefs, and re-norm diagonal to ensure conservation of the total weight
+    */
+    cout << "laplacianMatrixThreshold...\n";
+    float w = 0, t;
+    unsigned i, j;
+    LaplacianWeights::iterator iw, ew = lmat.end();
+
+    for( iw=lmat.begin(); iw!=ew; ++iw )
+    {
+      set<pair<unsigned int, float> > & line = iw->second;
+      set<pair<unsigned int, float> >::const_iterator
+        ij = line.begin(), ej = line.end(), ti, ii = ej;
+      w = 0;
+      i = iw->first;
+      while( ij!=ej )
+      {
+        j = ij->first;
+        if( i == j )
+        {
+          ii = ij;
+          ++ij;
+        }
+        else
+        {
+          t = ij->second;
+          if( fabs( t ) <= threshold )
+          {
+            ti = ij;
+            ++ij;
+            // remove matrix entry here
+            line.erase( ti );
+          }
+          else
+          {
+            w += t;
+            ++ij;
+          }
+        }
+      }
+      // diagonal coef: 1 - sum( line weights )
+      if( ii != ej )
+        line.erase( ii );
+      line.insert( make_pair( i, 1. - w ) );
+    }
+    cout << "laplacianMatrixThreshold done.\n";
+  }
+
+
   LaplacianWeights* sparseMult( const LaplacianWeights & in1,
                                 const LaplacianWeights & in2,
-                                LaplacianWeights* out )
+                                float sparseThresh )
   {
-    if( out == 0 )
-      out = new LaplacianWeights;
+    cout << "sparseMult...\n";
+    LaplacianWeights *out = new LaplacianWeights;
+
+    vector<map<unsigned, float> > lin2( in2.size() );
+    LaplacianWeights::const_iterator iin1, ein1 = in1.end(),
+      iin2, ein2 = in2.end();
+    set<pair<unsigned int, float> >::const_iterator ik, ek, ik2, ek2;
+    unsigned i, j, k, n = in1.size();
+    map<unsigned, float>::iterator ic, ec;
+    unsigned ncoef = 0; // debug
+
+    // transpose in2 for faster access
+    for( iin2=in2.begin(); iin2!=ein2; ++iin2 )
+    {
+      i = iin2->first;
+      for( ik2=iin2->second.begin(), ek2=iin2->second.end(); ik2!=ek2;
+          ++ik2 )
+        lin2[ ik2->first ][ i ] = ik2->second;
+    }
+    cout << "transposition done.\n";
 
     // out(i,j) = S_k( in1(i,k) * in2(k,j) )
-
-    LaplacianWeights::const_iterator iin1, ein1 = in1.end(), iin2, ein2 = in2.end();
-    unsigned j, n = in1.size();
-    set<pair<unsigned int, float> >::const_iterator ik, ek, ik2, ek2;
+    // with in2(k,j) = lin2(j,k)
 
     for( iin1=in1.begin(); iin1!=ein1; ++iin1 )
     {
-      set<pair<unsigned int, float> > & oline = (*out)[iin1->first]; // i
+      i = iin1->first;
+      if( i % 1000 == 0 )
+        cout << "\rline: " << i << flush;
+      set<pair<unsigned int, float> > & oline = (*out)[i];
+      const set<pair<unsigned int, float> > & iline = iin1->second;
+      ek = iline.end();
+
       for( j=0; j<n; ++j )
-      { // not optimal iterating on j here...
-        float oij = 0;
-        for( ik=iin1->second.begin(), ek=iin1->second.end(); ik!=ek; ++ik )
+      {
+        map<unsigned, float> & col2 = lin2[j];
+        ec = col2.end();
+        float oij = 0.F;
+        if( col2.size() <= iline.size() )
         {
-          iin2 = in2.find( ik->first );
-          if( iin2 != ein2 )
+          // iterate on in2 cols
+          for( ic=col2.begin(), ec=col2.end(); ic!=ec; ++ic )
           {
-            ik2 = iin2->second.lower_bound( make_pair( j, -FLT_MAX ) );
-            if( ik2 != iin2->second.end() && ik2->first == j )
-              oij += ik->second * ik2->second;
+            k = ic->first;
+            ik = iline.lower_bound( make_pair( k, -FLT_MAX ) );
+            if( ik != ek && ik->first == k )
+              oij += ik->second * ic->second;
           }
         }
-        oline.insert( make_pair( j, oij ) );
+        else
+        {
+          // iterate on in1 lines
+          ic = col2.begin();
+          for( ik=iline.begin(); ik!=ek; ++ik )
+          {
+            k = ik->first;
+            while( ic != ec && ic->first < k )
+              ++ic;
+            if( ic != ec && ic->first == k )
+            {
+              oij += ik->second * ic->second;
+            }
+          }
+        }
+//         for( ic=col2.begin(), ec=col2.end(); ic!=ec; ++ic )
+//         {
+//           iin2 = in2.find( ik->first );
+//           if( iin2 != ein2 )
+//           {
+//             ik2 = iin2->second.lower_bound( make_pair( j, -FLT_MAX ) );
+//             if( ik2 != iin2->second.end() && ik2->first == j )
+//               oij += ik->second * ik2->second;
+//           }
+//         }
+        if( fabs( oij ) > sparseThresh )
+        {
+          oline.insert( make_pair( j, oij ) );
+          ++ncoef;
+        }
       }
     }
 
+    cout << "\nsparseMult done, weights num: " << ncoef << endl;
     return out;
   }
+
+
+  LaplacianWeights*
+    makeLaplacianSmoothingCoefficients( const LaplacianWeights & weights,
+                                        unsigned niter, float dt,
+                                        float sparseThresh )
+
+  {
+    LaplacianWeights weightLaplMat;
+    makeLaplacianMatrix( weights, weightLaplMat, dt ); // matricial representation
+    laplacianMatrixThreshold( weightLaplMat, sparseThresh );
+    LaplacianWeights *weightLaplPow = &weightLaplMat, *weightLapl2;
+
+    unsigned t;
+
+    for( t=0; t<niter; ++t )
+      {
+        //if (t%10 == 0)
+        {
+          cout << "                ";
+          cout << "\r" << rint(100*t/niter) << "%" << flush;
+        }
+        // multiply the weights matrix to power niter
+        weightLapl2 = sparseMult( *weightLaplPow, weightLaplMat,
+                                  sparseThresh );
+        // renormalize diagonal
+        laplacianMatrixThreshold( *weightLapl2, sparseThresh );
+        if( t != 0 )
+          delete weightLaplPow;
+        weightLaplPow = weightLapl2;
+      }
+    return weightLaplPow;
+  }
+
+
+  template <typename T>
+  void applyLaplacianMatrix( const vector<T> &inittex, vector<T> & outtex,
+                             const LaplacianWeights &lapl )
+  {
+    unsigned neigh,node, n =inittex.size();
+    map<unsigned, set< pair<unsigned,float> > >::const_iterator il,el;
+    set< pair<unsigned,float> >::iterator      ip,ep;
+    float                                      L,weight;
+    ASSERT ( lapl.size() == n);
+    // resize/clear output texture
+    if( outtex.size() != n )
+      outtex.resize( n );
+
+    for (il = lapl.begin(), node=0, el = lapl.end(); il != el; ++il)
+    {
+      node = il->first;
+      L = 0;
+
+      //Weighted sum on the neighbour of the node
+      for( ip = (il->second).begin(), ep = (il->second).end(); ip != ep;
+           ++ip )
+      {
+        neigh = ip->first;
+        weight = ip->second;
+        L += weight * inittex[neigh];
+      }
+
+      outtex[node] = L;
+    }
+  }
+
+
+  template void applyLaplacianMatrix( const vector<float> &inittex,
+    vector<float> & outtex, const LaplacianWeights &lapl);
+  template void applyLaplacianMatrix( const vector<double> &inittex,
+    vector<double> & outtex, const LaplacianWeights &lapl);
 
 }
 
