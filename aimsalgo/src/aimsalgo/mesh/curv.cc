@@ -1331,28 +1331,55 @@ namespace aims
     laplacianMatrixThreshold( weightLaplMat, sparseThresh );
     boost::numeric::ublas::mapped_matrix<float>
       *weightLaplPow = &weightLaplMat,
-      *weightLapl2;
+      *weightLapl2, *weightLapl3 = 0;
 
-    unsigned t;
-    cout << "size: " << weightLaplMat.size1() << " x " << weightLaplMat.size2() << endl;
+    unsigned t, iterbin = niter;
+    cout << "size: " << weightLaplMat.size1() << " x " << weightLaplMat.size2() << ", niter: " << niter << endl;
 
-    for( t=0; t<niter; ++t )
+    if( iterbin & 1 ) // small bit is set: keep weightLaplMat
+    {
+      weightLapl3 = &weightLaplMat;
+      cout << "WL3 = W^1\n";
+    }
+    iterbin = iterbin >> 1;
+
+    for( t=0; iterbin!=0; ++t, iterbin=iterbin>>1 )
     {
       //if (t%10 == 0)
       {
         cout << "                ";
-        cout << "\r" << rint(100*t/niter) << "%" << flush;
+        cout << "\r" << rint(100.*t/log(float(niter))*log(2.)) << "%" << flush;
       }
+      cout << "iterbin: WLP*=WLP " << iterbin << endl;
       weightLapl2 = new boost::numeric::ublas::mapped_matrix<float>(
         weightLaplMat.size1(), weightLaplMat.size2() );
       // multiply the weights matrix to power niter
-      sparse_prod( *weightLaplPow, weightLaplMat, *weightLapl2 );
+      sparse_prod( *weightLaplPow, *weightLaplPow, *weightLapl2 );
       // renormalize diagonal
       laplacianMatrixThreshold( *weightLapl2, sparseThresh );
-      if( t != 0 )
+      if( weightLaplPow != & weightLaplMat && weightLaplPow != weightLapl3 )
         delete weightLaplPow;
       weightLaplPow = weightLapl2;
+      // weightLapl2 is weightLaplMat ^ (2^t)
+      if( iterbin & 1 )
+      {
+        // keep weightLaplPow * weightLapl3 in weightLapl3
+        cout << "WL3 *= WLP, t= " << t << endl;
+        if( weightLapl3 )
+        {
+          weightLapl2 = weightLapl3;
+          weightLapl3 = new boost::numeric::ublas::mapped_matrix<float>(
+          weightLaplMat.size1(), weightLaplMat.size2() );
+          sparse_prod( *weightLaplPow, *weightLapl2, *weightLapl3 );
+          if( weightLapl2 != & weightLaplMat )
+            delete weightLapl2;
+          laplacianMatrixThreshold( *weightLapl3, sparseThresh );
+        }
+        else
+          weightLapl3 = weightLaplPow;
+      }
     }
+    weightLaplPow = weightLapl3; // result
 
     // convert to LaplacianWeights type
     LaplacianWeights *weightLaplPowL = new LaplacianWeights;
@@ -1367,7 +1394,8 @@ namespace aims
         line.insert( make_pair( ic.index2(), *ic ) );
     }
     cout << "makeLaplacianSmoothingCoefficients done, size: " << weightLaplPow->size1() << " x " << weightLaplPow->size2() << endl;
-    delete weightLaplPow;
+    if( weightLaplPow != &weightLaplMat )
+      delete weightLaplPow;
     return weightLaplPowL;
 
 #else
