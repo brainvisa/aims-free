@@ -559,7 +559,7 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
 #ifdef use_matpow
     LaplacianWeights *weightLaplPow
       = makeLaplacianSmoothingCoefficients( weightLapl, rint(dur/dt), dt,
-                                            0.01 );
+                                            0.0 );
     cout << "apply smoothing coefs...\n";
     applyLaplacianMatrix( inittex.data(), smooth.data(), *weightLaplPow );
     delete weightLaplPow;

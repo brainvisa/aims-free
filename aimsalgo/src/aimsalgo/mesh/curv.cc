@@ -38,6 +38,13 @@
 #include <set>
 #include <algorithm>
 #include <float.h>
+#define use_boost
+#ifdef use_boost
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/numeric/ublas/operation_sparse.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#endif
 
 using namespace std;
 
@@ -1034,6 +1041,48 @@ namespace aims
   }
 
 
+  void makeLaplacianMatrix( const LaplacianWeights & weights,
+                            boost::numeric::ublas::mapped_matrix<float> & lmat,
+                            float dt )
+  {
+    /* make weights matrix A = I + dt * W
+       W diagonal being substracted the sum of weights of its line.
+       so that applying the laplacian smoothing is a matricial operation:
+       X(t+1) = A.X(t)
+       and X(t) = W^t.X(0)
+    */
+    cout << "makeLaplacianMatrix... " << weights.size() << endl;
+    float w = 0;
+    unsigned i, j;
+    lmat.resize( weights.size(), weights.size() );
+    LaplacianWeights::const_iterator iw, ew = weights.end();
+
+    for( iw=weights.begin(); iw!=ew; ++iw )
+    {
+      set<pair<unsigned int, float> >::const_iterator
+        ij, ej = iw->second.end();
+      w = 0;
+      i = iw->first;
+
+      for( ij=iw->second.begin(); ij!=ej; ++ij )
+      {
+        j = ij->first;
+        if( i == j )
+        {
+          cout << "problem: ii found: " << i << endl;
+        }
+        else
+        {
+          w += ij->second;
+          lmat( i, j ) = ij->second * dt;
+        }
+      }
+      lmat( i, i ) = 1. - dt * w;
+    }
+    cout << "makeLaplacianMatrix done: " << lmat.size1() << " x " << lmat.size2() << endl;
+  }
+
+
   void laplacianMatrixThreshold( LaplacianWeights & lmat, float threshold )
   {
     /* remove weights under threshold (in absolute value) on non-diagonal
@@ -1085,12 +1134,106 @@ namespace aims
   }
 
 
+  void laplacianMatrixThreshold(
+    boost::numeric::ublas::mapped_matrix<float> & lmat, float threshold )
+  {
+    /* remove weights under threshold (in absolute value) on non-diagonal
+       coefs, and re-norm diagonal to ensure conservation of the total weight
+    */
+    cout << "laplacianMatrixThreshold...\n";
+    float w = 0, t;
+    unsigned i, j;
+    boost::numeric::ublas::mapped_matrix<float>::iterator1
+      iw, ew = lmat.end1();
+    boost::numeric::ublas::mapped_matrix<float>::iterator2 jw, ejw;
+
+    for( iw=lmat.begin1(); iw!=ew; ++iw )
+    {
+      boost::numeric::ublas::mapped_matrix<float>::iterator2
+        ij = iw.begin(), ej = iw.end();
+      w = 0;
+      i = iw.index1();
+      while( ij!=ej )
+      {
+        j = ij.index2();
+        if( i == j )
+          ++ij;
+        else
+        {
+          t = *ij;
+          if( fabs( t ) <= threshold )
+          {
+            ++ij;
+            // remove matrix entry here
+            lmat.erase_element( i, j );
+          }
+          else
+          {
+            w += t;
+            ++ij;
+          }
+        }
+      }
+      // diagonal coef: 1 - sum( line weights )
+      lmat( i, i ) =1. - w;
+    }
+    cout << "laplacianMatrixThreshold done.\n";
+  }
+
+
+#ifdef use_boost
   LaplacianWeights* sparseMult( const LaplacianWeights & in1,
                                 const LaplacianWeights & in2,
                                 float sparseThresh )
   {
     cout << "sparseMult...\n";
     LaplacianWeights *out = new LaplacianWeights;
+    unsigned ncoef = 0; // debug
+
+    LaplacianWeights::const_iterator iin1, ein1 = in1.end(),
+      iin2, ein2 = in2.end();
+    set<pair<unsigned int, float> >::const_iterator ik, ek, ik2, ek2;
+    cout << "convert to boost sparse matrix...\n";
+    boost::numeric::ublas::mapped_matrix< float > mat1( in1.size(), in1.size() ), mat2( in2.size(), in2.size() );
+    unsigned i;
+    for( iin1=in1.begin(); iin1!=ein1; ++iin1 )
+    {
+      i = iin1->first;
+      for( ik=iin1->second.begin(), ek=iin1->second.end(); ik!=ek; ++ik )
+        mat1( i, ik->first ) = ik->second;
+    }
+    for( iin2=in2.begin(); iin2!=ein2; ++iin2 )
+    {
+      i = iin2->first;
+      for( ik=iin2->second.begin(), ek=iin2->second.end(); ik!=ek; ++ik )
+        mat2( i, ik->first ) = ik->second;
+    }
+    cout << "convert done. Sizes: " << mat1.size1() << " x " << mat1.size2()
+      << ", " << mat2.size1() << " x " << mat1.size2() << endl;
+    boost::numeric::ublas::mapped_matrix< float > mat3( mat1.size1(), mat2.size2() );
+    boost::numeric::ublas::sparse_prod( mat1, mat2, mat3 );
+    cout << "mult done. converting back...\n";
+    boost::numeric::ublas::mapped_matrix< float >::iterator1 il, el = mat3.end1();
+    boost::numeric::ublas::mapped_matrix< float >::iterator2 ic, ec;
+    for( il=mat3.begin1(); il!=el; ++il )
+    {
+      set<pair<unsigned int, float> > & line = (*out)[ il.index1() ];
+      for( ic=il.begin(), ec=il.end(); ic!=ec; ++ic )
+      {
+        line.insert( make_pair( ic.index2(), *ic ) );
+        ++ncoef;
+      }
+    }
+
+    cout << "out size: " << mat3.size1() << " x " << mat3.size2() << " / " << out->size() << endl;
+    cout << "\nsparseMult done, weights num: " << ncoef << endl;
+    return out;
+
+#else
+
+    cout << "sparseMult...\n";
+    LaplacianWeights *out = new LaplacianWeights;
+    unsigned ncoef = 0; // debug
 
     vector<map<unsigned, float> > lin2( in2.size() );
     LaplacianWeights::const_iterator iin1, ein1 = in1.end(),
@@ -1098,7 +1241,6 @@ namespace aims
     set<pair<unsigned int, float> >::const_iterator ik, ek, ik2, ek2;
     unsigned i, j, k, n = in1.size();
     map<unsigned, float>::iterator ic, ec;
-    unsigned ncoef = 0; // debug
 
     // transpose in2 for faster access
     for( iin2=in2.begin(); iin2!=ein2; ++iin2 )
@@ -1173,6 +1315,7 @@ namespace aims
 
     cout << "\nsparseMult done, weights num: " << ncoef << endl;
     return out;
+#endif
   }
 
 
@@ -1182,6 +1325,53 @@ namespace aims
                                         float sparseThresh )
 
   {
+#ifdef use_boost
+    boost::numeric::ublas::mapped_matrix<float> weightLaplMat;
+    makeLaplacianMatrix( weights, weightLaplMat, dt ); // matricial representation
+    laplacianMatrixThreshold( weightLaplMat, sparseThresh );
+    boost::numeric::ublas::mapped_matrix<float>
+      *weightLaplPow = &weightLaplMat,
+      *weightLapl2;
+
+    unsigned t;
+    cout << "size: " << weightLaplMat.size1() << " x " << weightLaplMat.size2() << endl;
+
+    for( t=0; t<niter; ++t )
+    {
+      //if (t%10 == 0)
+      {
+        cout << "                ";
+        cout << "\r" << rint(100*t/niter) << "%" << flush;
+      }
+      weightLapl2 = new boost::numeric::ublas::mapped_matrix<float>(
+        weightLaplMat.size1(), weightLaplMat.size2() );
+      // multiply the weights matrix to power niter
+      sparse_prod( *weightLaplPow, weightLaplMat, *weightLapl2 );
+      // renormalize diagonal
+      laplacianMatrixThreshold( *weightLapl2, sparseThresh );
+      if( t != 0 )
+        delete weightLaplPow;
+      weightLaplPow = weightLapl2;
+    }
+
+    // convert to LaplacianWeights type
+    LaplacianWeights *weightLaplPowL = new LaplacianWeights;
+    boost::numeric::ublas::mapped_matrix< float >::iterator1
+      il, el = weightLaplPow->end1();
+    boost::numeric::ublas::mapped_matrix< float >::iterator2 ic, ec;
+    for( il=weightLaplPow->begin1(); il!=el; ++il )
+    {
+      set<pair<unsigned int, float> >
+        & line = (*weightLaplPowL)[ il.index1() ];
+      for( ic=il.begin(), ec=il.end(); ic!=ec; ++ic )
+        line.insert( make_pair( ic.index2(), *ic ) );
+    }
+    cout << "makeLaplacianSmoothingCoefficients done, size: " << weightLaplPow->size1() << " x " << weightLaplPow->size2() << endl;
+    delete weightLaplPow;
+    return weightLaplPowL;
+
+#else
+
     LaplacianWeights weightLaplMat;
     makeLaplacianMatrix( weights, weightLaplMat, dt ); // matricial representation
     laplacianMatrixThreshold( weightLaplMat, sparseThresh );
@@ -1190,22 +1380,23 @@ namespace aims
     unsigned t;
 
     for( t=0; t<niter; ++t )
+    {
+      //if (t%10 == 0)
       {
-        //if (t%10 == 0)
-        {
-          cout << "                ";
-          cout << "\r" << rint(100*t/niter) << "%" << flush;
-        }
-        // multiply the weights matrix to power niter
-        weightLapl2 = sparseMult( *weightLaplPow, weightLaplMat,
-                                  sparseThresh );
-        // renormalize diagonal
-        laplacianMatrixThreshold( *weightLapl2, sparseThresh );
-        if( t != 0 )
-          delete weightLaplPow;
-        weightLaplPow = weightLapl2;
+        cout << "                ";
+        cout << "\r" << rint(100*t/niter) << "%" << flush;
       }
+      // multiply the weights matrix to power niter
+      weightLapl2 = sparseMult( *weightLaplPow, weightLaplMat,
+                                sparseThresh );
+      // renormalize diagonal
+      laplacianMatrixThreshold( *weightLapl2, sparseThresh );
+      if( t != 0 )
+        delete weightLaplPow;
+      weightLaplPow = weightLapl2;
+    }
     return weightLaplPow;
+#endif
   }
 
 
