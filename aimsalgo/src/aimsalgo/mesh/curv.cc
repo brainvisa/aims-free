@@ -1339,7 +1339,6 @@ namespace aims
     if( iterbin & 1 ) // small bit is set: keep weightLaplMat
     {
       weightLapl3 = &weightLaplMat;
-      cout << "WL3 = W^1\n";
     }
     iterbin = iterbin >> 1;
 
@@ -1350,7 +1349,6 @@ namespace aims
         cout << "                ";
         cout << "\r" << rint(100.*t/log(float(niter))*log(2.)) << "%" << flush;
       }
-      cout << "iterbin: WLP*=WLP " << iterbin << endl;
       weightLapl2 = new boost::numeric::ublas::mapped_matrix<float>(
         weightLaplMat.size1(), weightLaplMat.size2() );
       // multiply the weights matrix to power niter
@@ -1364,7 +1362,6 @@ namespace aims
       if( iterbin & 1 )
       {
         // keep weightLaplPow * weightLapl3 in weightLapl3
-        cout << "WL3 *= WLP, t= " << t << endl;
         if( weightLapl3 )
         {
           weightLapl2 = weightLapl3;
@@ -1380,6 +1377,8 @@ namespace aims
       }
     }
     weightLaplPow = weightLapl3; // result
+    if( !weightLaplPow ) // zero iterations
+      weightLaplPow = &weightLaplMat; // take initial matrix
 
     // convert to LaplacianWeights type
     LaplacianWeights *weightLaplPowL = new LaplacianWeights;
