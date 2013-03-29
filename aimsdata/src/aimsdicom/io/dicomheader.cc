@@ -765,7 +765,7 @@ int DicomHeader::readFirst()
     }
 
   if ( spaceSlice > 0.0f )  voxSize.push_back( (float)spaceSlice );
-  else if ( ( modality != "PT" ) && ( modality != "CT" ) && ( modality != "NM" ) && //thickness must never be used for PET(-CT) (for Siemens cameras at least)
+  else if ( ( modality != "PT" ) && ( modality != "CT" ) && //thickness must never be used for PET(-CT) (for Siemens cameras at least)
             ( thickness > 0.0f ) )
     voxSize.push_back( (float)thickness );
   else  voxSize.push_back( 0.0f ); // to determine Z resolution in read()
