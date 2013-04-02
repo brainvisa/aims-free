@@ -119,10 +119,16 @@ class AimsData : public carto::RCObject, public aims::Border
 				size_type z = 0, size_type t = 0 ) const;
   reference operator () ( const Point4d& pt );
   const_reference operator () ( const Point4d& pt ) const;
+  reference operator () ( const Point4dl& pt );
+  const_reference operator () ( const Point4dl& pt ) const;
   reference operator () ( const Point3d& pt );
   const_reference operator () ( const Point3d& pt ) const;
+  reference operator () ( const Point3dl& pt );
+  const_reference operator () ( const Point3dl& pt ) const;
   reference operator () ( const Point2d& pt );
   const_reference operator () ( const Point2d& pt ) const;
+  reference operator () ( const Point2dl& pt );
+  const_reference operator () ( const Point2dl& pt ) const;
 
   T minimum() const;
   T maximum() const;
@@ -872,6 +878,24 @@ AimsData<T>::operator () ( const Point4d & pt ) const
 
 template < typename T >
 inline
+typename AimsData<T>::reference
+AimsData<T>::operator () ( const Point4dl & pt )
+{
+  return (*this)( pt[0], pt[1], pt[2], pt[3] );
+}
+
+
+template < typename T >
+inline
+typename AimsData<T>::const_reference
+AimsData<T>::operator () ( const Point4dl & pt ) const
+{
+  return (*this)( pt[0], pt[1], pt[2], pt[3] );
+}
+
+
+template < typename T >
+inline
 typename AimsData<T>::reference 
 AimsData<T>::operator () ( const Point3d & pt )
 {
@@ -890,6 +914,24 @@ AimsData<T>::operator () ( const Point3d & pt ) const
 
 template < typename T >
 inline
+typename AimsData<T>::reference
+AimsData<T>::operator () ( const Point3dl & pt )
+{
+  return (*this)( pt[0], pt[1], pt[2] );
+}
+
+
+template < typename T >
+inline
+typename AimsData<T>::const_reference
+AimsData<T>::operator () ( const Point3dl & pt ) const
+{
+  return (*this)( pt[0], pt[1], pt[2] );
+}
+
+
+template < typename T >
+inline
 typename AimsData<T>::reference 
 AimsData<T>::operator () ( const Point2d & pt )
 {
@@ -901,6 +943,24 @@ template < typename T >
 inline
 typename AimsData<T>::const_reference 
 AimsData<T>::operator () ( const Point2d & pt ) const
+{
+  return (*this)( pt[0], pt[1] );
+}
+
+
+template < typename T >
+inline
+typename AimsData<T>::reference
+AimsData<T>::operator () ( const Point2dl & pt )
+{
+  return (*this)( pt[0], pt[1] );
+}
+
+
+template < typename T >
+inline
+typename AimsData<T>::const_reference
+AimsData<T>::operator () ( const Point2dl & pt ) const
 {
   return (*this)( pt[0], pt[1] );
 }
