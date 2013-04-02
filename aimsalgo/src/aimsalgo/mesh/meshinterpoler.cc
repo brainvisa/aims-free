@@ -55,8 +55,15 @@ MeshInterpoler::MeshInterpoler( const AimsSurfaceTriangle & source, const
   AimsSurfaceTriangle & dest )
   : d( new Private )
 {
+  cout << "MeshInterpoler source: " << &source << endl;
   d->source = &source;
   d->dest = &dest;
+}
+
+
+MeshInterpoler::MeshInterpoler()
+  : d( new Private )
+{
 }
 
 
@@ -141,13 +148,18 @@ namespace
 
 void MeshInterpoler::findNeighbours()
 {
+  cout << "MeshInterpoler::findNeighbours()\n";
   d->projTriangles.clear();
   if( d->sourceVert )
   {
+    cout << "sourceVert: " << d->sourceVert << endl;
     findNeighbours_timestep( d->sourceVert, d->sourcePoly, d->nSourcePolygon,
                              d->destVertex, d->nDestVertex, 0 );
     return;
   }
+  cout << "source: " << d->source << endl;
+  cout << "src vertices: " << d->source->vertex().size() << endl;
+  cout << "dst vertices: " << d->dest->vertex().size() << endl;
 
   AimsSurfaceTriangle::const_iterator its, itd, ets = d->source->end();
   for( its=d->source->begin(); its!=ets; ++its )
@@ -469,6 +481,105 @@ void MeshInterpoler::reloadProjectionParams(
   d->projCoord1 = projTriCoord1;
   d->projCoord2 = projTriCoord2;
   d->projCoord3 = projTriCoord3;
+}
+
+
+void MeshInterpoler::setMeshes( const AimsSurfaceTriangle & source,
+  const AimsSurfaceTriangle & dest )
+{
+  d->source = &source;
+  d->dest = &dest;
+  d->projTriangles.clear();
+  d->projCoord1.clear();
+  d->projCoord2.clear();
+  d->projCoord3.clear();
+}
+
+
+// ---
+
+struct CoordinatesFieldMeshInterpoler::Private
+{
+  Private( const AimsSurfaceTriangle & source,
+           const AimsSurfaceTriangle & dest,
+           const TimeTexture<float> & srccoord1,
+           const TimeTexture<float> & srccoord2,
+           const TimeTexture<float> & dstcoord1,
+           const TimeTexture<float> & dstcoord2 );
+  ~Private() {}
+
+  AimsSurfaceTriangle srcmesh;
+  AimsSurfaceTriangle dstmesh;
+};
+
+
+#include <aims/io/writer.h> // DEBUG FIXME
+CoordinatesFieldMeshInterpoler::Private::Private(
+  const AimsSurfaceTriangle & source,
+  const AimsSurfaceTriangle & dest,
+  const TimeTexture<float> & srccoord1,
+  const TimeTexture<float> & srccoord2,
+  const TimeTexture<float> & dstcoord1,
+  const TimeTexture<float> & dstcoord2 )
+{
+  // transform meshes
+  AimsSurfaceTriangle::const_iterator im, em = source.end();
+  TimeTexture<float>::const_iterator it1, it2, et1 = srccoord1.end(),
+    et2 = srccoord2.end();
+  vector<float>::const_iterator ist1, est1, ist2, est2;
+  unsigned i;
+
+  for( im=source.begin(), it1=srccoord1.begin(), it2=srccoord2.begin();
+      im!=em && it1!=et1 && it2!=et2; ++em, ++it1, ++it2 )
+  {
+    AimsSurface<3, Void> & s = srcmesh[im->first];
+    s.polygon() = im->second.polygon();
+    vector<Point3df> & vert = s.vertex();
+    vert.resize( min( it1->second.nItem(), it2->second.nItem() ) );
+    for( ist1=it1->second.data().begin(), est1=it1->second.data().end(),
+      ist2=it2->second.data().begin(), est2=it2->second.data().end(), i=0;
+      ist1!=est1 && ist2!=est2; ++ist1, ++ist2, ++i )
+      vert[i] = Point3df( *ist1, *ist2, 0. );
+  }
+
+  for( im=dest.begin(), it1=dstcoord1.begin(), it2=dstcoord2.begin(),
+      em=dest.end(), et1=dstcoord1.end(), et2 = dstcoord2.end();
+      im!=em && it1!=et1 && it2!=et2; ++em, ++it1, ++it2 )
+  {
+    AimsSurface<3, Void> & s = dstmesh[im->first];
+    s.polygon() = im->second.polygon();
+    vector<Point3df> & vert = s.vertex();
+    vert.resize( min( it1->second.nItem(), it2->second.nItem() ) );
+    for( ist1=it1->second.data().begin(), est1=it1->second.data().end(),
+      ist2=it2->second.data().begin(), est2=it2->second.data().end(), i=0;
+      ist1!=est1 && ist2!=est2; ++ist1, ++ist2, ++i )
+      vert[i] = Point3df( *ist1, *ist2, 0. );
+  }
+
+  Writer<AimsSurfaceTriangle> w1( "/tmp/rmesh1.gii" );
+  w1.write( srcmesh );
+  Writer<AimsSurfaceTriangle> w2( "/tmp/rmesh2.gii" );
+  w2.write( dstmesh );
+}
+
+
+CoordinatesFieldMeshInterpoler::CoordinatesFieldMeshInterpoler(
+  const AimsSurfaceTriangle & source, const AimsSurfaceTriangle & dest,
+  const TimeTexture<float> & srccoord1,
+  const TimeTexture<float> & srccoord2,
+  const TimeTexture<float> & dstcoord1,
+  const TimeTexture<float> & dstcoord2 )
+  : MeshInterpoler(),
+    d2( new Private( source, dest, srccoord1, srccoord2, dstcoord1,
+                     dstcoord2 ) )
+{
+  setMeshes( d2->srcmesh, d2->dstmesh );
+}
+
+
+CoordinatesFieldMeshInterpoler::~CoordinatesFieldMeshInterpoler()
+{
+  delete d2;
 }
 
 

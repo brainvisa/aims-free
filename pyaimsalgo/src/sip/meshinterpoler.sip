@@ -11,7 +11,7 @@ class MeshInterpoler
   public:
     MeshInterpoler( const AimsSurfaceTriangle & source, const
       AimsSurfaceTriangle & dest );
-    ~MeshInterpoler();
+    virtual ~MeshInterpoler();
 
     void project();
     AimsSurfaceTriangle *resampleMesh(
@@ -29,7 +29,25 @@ class MeshInterpoler
       const TimeTexture_FLOAT & projTriCoord1,
       const TimeTexture_FLOAT & projTriCoord2,
       const TimeTexture_FLOAT & projTriCoord3 );
+    void setMeshes( const AimsSurfaceTriangle & source,
+      const AimsSurfaceTriangle & dest );
 };
+
+  class CoordinatesFieldMeshInterpoler : aims::MeshInterpoler
+  {
+%TypeHeaderCode
+  #include <aims/mesh/meshinterpoler.h>
+%End
+
+  public:
+    CoordinatesFieldMeshInterpoler( const AimsSurfaceTriangle & source,
+                                    const AimsSurfaceTriangle & dest,
+                                    const TimeTexture_FLOAT & srccoord1,
+                                    const TimeTexture_FLOAT & srccoord2,
+                                    const TimeTexture_FLOAT & dstcoord1,
+                                    const TimeTexture_FLOAT & dstcoord2 );
+    virtual ~CoordinatesFieldMeshInterpoler();
+  };
 
 };
 

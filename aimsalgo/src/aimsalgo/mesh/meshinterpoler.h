@@ -70,7 +70,7 @@ namespace aims
                     uint nSourcePolygon, const Point3df* destVertex,
                     const AimsVector<uint,3>* destPolygon, uint nDestVertex,
                     uint nDestPolygon );
-    ~MeshInterpoler();
+    virtual ~MeshInterpoler();
 
     /** Main projection function.
         This function has to be called before the various resample*() functions
@@ -103,8 +103,11 @@ namespace aims
       const TimeTexture<float> & projTriCoord1,
       const TimeTexture<float> & projTriCoord2,
       const TimeTexture<float> & projTriCoord3 );
+    void setMeshes( const AimsSurfaceTriangle & source, const
+      AimsSurfaceTriangle & dest );
 
   protected:
+    MeshInterpoler();
     /// sub-step 1 of project(): calculates projectedTriangles
     void findNeighbours();
     /// sub-step 2 of project(): calculates projectedTriCoord*
@@ -118,6 +121,23 @@ namespace aims
   private:
     struct Private;
     Private *d;
+  };
+
+
+  class CoordinatesFieldMeshInterpoler : public MeshInterpoler
+  {
+  public:
+    CoordinatesFieldMeshInterpoler( const AimsSurfaceTriangle & source,
+                                    const AimsSurfaceTriangle & dest,
+                                    const TimeTexture<float> & srccoord1,
+                                    const TimeTexture<float> & srccoord2,
+                                    const TimeTexture<float> & dstcoord1,
+                                    const TimeTexture<float> & dstcoord2 );
+    virtual ~CoordinatesFieldMeshInterpoler();
+
+  private:
+    struct Private;
+    Private *d2;
   };
 
 }
