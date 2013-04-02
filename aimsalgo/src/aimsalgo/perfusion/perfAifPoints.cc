@@ -45,7 +45,7 @@ using namespace aims;
 using namespace std;
 
 
-list< Point4d > PerfusionAifPoints::search( AimsData< short >& d, 
+list< Point4dl > PerfusionAifPoints::search( AimsData< short >& d, 
                                             BucketMap< Void >& mask,
                                             PerfusionParameters& params )
 {
@@ -100,7 +100,7 @@ list< Point4d > PerfusionAifPoints::search( AimsData< short >& d,
 			  Connectivity::CONNECTIVITY_26_XYZ );
 
   // Look for the maximum amplitude variations of each connected component
-  multimap< short, Point4d, greater< short > > md;
+  multimap< short, Point4dl, greater< short > > md;
   int bestT;
   BucketMap<Void>	bmap = Vcompo;
   BucketMap<Void>::Bucket::iterator itb;
@@ -138,27 +138,27 @@ list< Point4d > PerfusionAifPoints::search( AimsData< short >& d,
 
       if ( bestT > 0 ) //< dt / 2 )
 	{
-	  Point4d pt4( bPt[0], bPt[1], bPt[2], bestT );
-	  md.insert( pair< short, Point4d >( best, pt4 ) );
+	  Point4dl pt4( bPt[0], bPt[1], bPt[2], bestT );
+	  md.insert( pair< short, Point4dl >( best, pt4 ) );
 	}
     }
 
   // Get the nAIF best values and sort them in ascending time
-  multimap< short, Point4d > ml;
-  multimap< short, Point4d, greater< short > >::iterator imd = md.begin();
+  multimap< short, Point4dl > ml;
+  multimap< short, Point4dl, greater< short > >::iterator imd = md.begin();
   int n = 0;
   while( n < nAif && imd != md.end() )
     {
-      Point4d p = imd->second;
-      ml.insert( pair< short, Point4d >( p[3], p ) );
+      Point4dl p = imd->second;
+      ml.insert( pair< short, Point4dl >( p[3], p ) );
 
       ++imd;
       n++;
     }
 
   // Construct a set from the multimap of selected points
-  list< Point4d > sl;
-  multimap< short, Point4d >::iterator iml = ml.begin();
+  list< Point4dl > sl;
+  multimap< short, Point4dl >::iterator iml = ml.begin();
   while( iml != ml.end() )
     {
       sl.push_back( iml->second );

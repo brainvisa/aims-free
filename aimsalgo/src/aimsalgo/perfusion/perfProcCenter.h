@@ -82,10 +82,10 @@ namespace aims
 
     void saveMaps( const std::string& );
 
-    void setSelection( std::list< Point4d >& sel ) { aifSelected = sel; }
+    void setSelection( std::list< Point4dl >& sel ) { aifSelected = sel; }
 
     aims::BucketMap< Void >& bucketMask() { return maskBck; }
-    std::list< Point4d >& aifPointList() { return aifPoints; }
+    std::list< Point4dl >& aifPointList() { return aifPoints; }
     AimsData< float >& quantifiedData() { return dataQuantif; }
     AimsData< float >& aif() { return aifCurve; }
     AimsData< float >& fittedAif() { return aifFit; }
@@ -108,11 +108,11 @@ namespace aims
     std::map< Point3d, LMGamma< float >, bestPoint3d > mFit;
   
     AimsData< short > *_dataIn;
-    std::list< Point4d > aifSelected;
+    std::list< Point4dl > aifSelected;
     LMGamma< float > aifParam;
 
     aims::BucketMap< Void > maskBck;
-    std::list< Point4d > aifPoints;
+    std::list< Point4dl > aifPoints;
     AimsData< float > dataQuantif;
     AimsData< float > aifCurve;
     AimsData< float > aifFit;

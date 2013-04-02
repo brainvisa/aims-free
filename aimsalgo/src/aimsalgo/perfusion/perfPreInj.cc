@@ -38,16 +38,16 @@
 using namespace std;
 using namespace aims;
 
-int PerfusionPreInjection::value( AimsData< short >& d, list< Point4d >& sl,
+int PerfusionPreInjection::value( AimsData< short >& d, list< Point4dl >& sl,
                                   PerfusionParameters& params )
 {
   int t, bestT = d.dimT(), skip = params.skip();
   short max10;
 
-  list< Point4d >::iterator it = sl.begin();
+  list< Point4dl >::iterator it = sl.begin();
   while( it != sl.end() )
     {
-      Point4d pt = *it;
+      Point4dl pt = *it;
       max10 = ( 9 * d( pt[0], pt[1], pt[2], skip + 1 ) + d( pt ) ) / 10;
       t = pt[ 3 ];
       while( d( pt[0], pt[1], pt[2], t ) < max10 && t > skip )  t--;

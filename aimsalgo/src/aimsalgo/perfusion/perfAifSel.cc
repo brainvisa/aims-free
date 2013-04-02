@@ -39,25 +39,25 @@ using namespace std;
 using namespace aims;
 
 AimsData< float > PerfusionAifSelection::doit( AimsData< float >& d, 
-                                               list< Point4d >&,
-					       list< Point4d >& sel, int )
+                                               list< Point4dl >&,
+					       list< Point4dl >& sel, int )
 {
   int t, dt = d.dimT(), n = sel.size();
-  list< Point4d >::iterator it = sel.begin();
+  list< Point4dl >::iterator it = sel.begin();
     
   AimsData< float > res( dt );
   res.setSizeX( d.sizeT() );
 
   if ( n < 2 )
     {
-      Point4d pt = *it;
+      Point4dl pt = *it;
       for ( t=0; t<dt; t++ )  res( t ) = d( pt[0], pt[1], pt[2], t );
     }
   else 
     {
       while( it != sel.end() )
         {
-	  Point4d pt = *it;
+	  Point4dl pt = *it;
 	  for ( t=0; t<dt; t++ )  res( t ) += d( pt[0], pt[1], pt[2], t );
 	  ++it;
 	}

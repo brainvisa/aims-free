@@ -39,11 +39,11 @@ using namespace std;
 using namespace aims;
 
 AimsData< float > PerfusionAifAverage::doit( AimsData< float >& d, 
-                                             list< Point4d >& lst,
-					     list< Point4d >&, int n )
+                                             list< Point4dl >& lst,
+					     list< Point4dl >&, int n )
 {
   int t, dt = d.dimT();
-  list< Point4d >::iterator it = lst.begin();
+  list< Point4dl >::iterator it = lst.begin();
   
   ASSERT( n <= (int)lst.size() );
   
@@ -52,7 +52,7 @@ AimsData< float > PerfusionAifAverage::doit( AimsData< float >& d,
 
   if ( n < 2 )
     {
-      Point4d pt = *it;  
+      Point4dl pt = *it;  
       for ( t=0; t<dt; t++ )  res( t ) = d( pt[0], pt[1], pt[2], t );
     }
   else 
@@ -60,7 +60,7 @@ AimsData< float > PerfusionAifAverage::doit( AimsData< float >& d,
       int bcl = n;
       while( it != lst.end() && bcl-- )
         {
-	  Point4d pt = *it;
+	  Point4dl pt = *it;
 	  for ( t=0; t<dt; t++ )  res( t ) += d( pt[0], pt[1], pt[2], t );
 	  ++it;
 	}

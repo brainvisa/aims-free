@@ -39,11 +39,11 @@ using namespace std;
 using namespace aims;
 
 AimsData< float > PerfusionAifBest::doit( AimsData< float >& d, 
-                                          list< Point4d >& lst,
-					  list< Point4d >&, int )
+                                          list< Point4dl >& lst,
+					  list< Point4dl >&, int )
 {
   int t, dt = d.dimT();
-  Point4d pt = *lst.begin();
+  Point4dl pt = *lst.begin();
   
   AimsData< float > res( dt );
   res.setSizeX( d.sizeT() );

@@ -51,8 +51,8 @@ namespace aims
     PerfusionAifStrategy() { }
     virtual ~PerfusionAifStrategy() { }
   
-    virtual AimsData< float > doit( AimsData< float >&, std::list< Point4d >&,
-				    std::list< Point4d >&, int )
+    virtual AimsData< float > doit( AimsData< float >&, std::list< Point4dl >&,
+				    std::list< Point4dl >&, int )
     { return AimsData< float >(); }
   };
 

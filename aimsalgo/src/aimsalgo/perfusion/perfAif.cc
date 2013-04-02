@@ -56,8 +56,8 @@ void PerfusionAif::setAifType( AifType id )
 
 
 AimsData< float > PerfusionAif::doit( AimsData< float >& d,
-		                      list< Point4d >& lst,
-				      list< Point4d >& sel, 
+		                      list< Point4dl >& lst,
+				      list< Point4dl >& sel, 
 				      PerfusionParameters& pp )
 {
   AimsData< float > aif = stgy->doit( d, lst, sel, pp.nAvg() );

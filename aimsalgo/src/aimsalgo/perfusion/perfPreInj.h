@@ -74,7 +74,7 @@ namespace aims
       \param l is the possible AIF(s) point to scan along t
       \return the number of frames
     */
-    int value( AimsData< short >& d, std::list<Point4d>& sl, 
+    int value( AimsData< short >& d, std::list<Point4dl>& sl, 
 	       PerfusionParameters& );
   };
 

@@ -48,8 +48,8 @@ namespace aims
 
     PerfusionAifBest() : PerfusionAifStrategy() { }
   
-    AimsData< float > doit( AimsData< float >&, std::list< Point4d >&,
-			    std::list< Point4d >&, int );
+    AimsData< float > doit( AimsData< float >&, std::list< Point4dl >&,
+			    std::list< Point4dl >&, int );
   };
 
 }

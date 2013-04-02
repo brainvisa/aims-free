@@ -68,8 +68,8 @@ namespace aims
 
     void setAifType( AifType );
 
-    AimsData< float > doit( AimsData< float >&, std::list< Point4d >&,
-			    std::list< Point4d >&, PerfusionParameters& );
+    AimsData< float > doit( AimsData< float >&, std::list< Point4dl >&,
+			    std::list< Point4dl >&, PerfusionParameters& );
 			  
   private:
 

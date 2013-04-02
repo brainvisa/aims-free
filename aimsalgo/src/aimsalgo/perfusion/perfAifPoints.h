@@ -80,7 +80,7 @@ namespace aims
       \param mask is the brain mask computed by PerfusionMask
       \return the list of possible AIF points
     */
-    std::list< Point4d > search( AimsData< short >& d, 
+    std::list< Point4dl > search( AimsData< short >& d, 
 				 aims::BucketMap< Void >& mask,
 				 PerfusionParameters& );
   };
