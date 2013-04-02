@@ -513,7 +513,6 @@ struct CoordinatesFieldMeshInterpoler::Private
 };
 
 
-#include <aims/io/writer.h> // DEBUG FIXME
 CoordinatesFieldMeshInterpoler::Private::Private(
   const AimsSurfaceTriangle & source,
   const AimsSurfaceTriangle & dest,
@@ -555,11 +554,6 @@ CoordinatesFieldMeshInterpoler::Private::Private(
       ist1!=est1 && ist2!=est2; ++ist1, ++ist2, ++i )
       vert[i] = Point3df( *ist1, *ist2, 0. );
   }
-
-  Writer<AimsSurfaceTriangle> w1( "/tmp/rmesh1.gii" );
-  w1.write( srcmesh );
-  Writer<AimsSurfaceTriangle> w2( "/tmp/rmesh2.gii" );
-  w2.write( dstmesh );
 }
 
 
