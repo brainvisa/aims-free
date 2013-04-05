@@ -82,6 +82,11 @@ namespace aims
                             TimeTexture<double> & height,
                             TimeTexture<int> & father,
                             TimeTexture<int> & label, double th );
+
+  void blobsHeights( const AimsSurfaceTriangle & mesh,
+                     const std::vector<double> & field,
+                     const std::vector<int> & watershedlabels,
+                     std::vector<int> & junctions );
 }
 
 #endif

@@ -32,6 +32,7 @@
  */
 
 #include <aims/mesh/meshwatershed.h>
+#include <float.h>
 
 using namespace aims;
 using namespace std;
@@ -470,6 +471,70 @@ namespace aims
     return meshBlobsBifurcation( mesh, field.begin()->second.data(),
                                  idx[0].data(), height[0].data(),
                                  father[0].data(), label[0].data(), th );
+  }
+
+}
+
+
+namespace
+{
+
+  inline void checkMaximumBlobHeight( uint p1, uint p2, int label1, int label2,
+                                      vector<double> & blobheights,
+                                      const std::vector<double> & field,
+                                      std::vector<int> & junctions )
+  {
+    if( label1 != label2 )
+    {
+      if( label1 != -1 && field[p1] > blobheights[label1] )
+      {
+        blobheights[label1] = field[p1];
+        junctions[label1] = p1;
+      }
+      if( label2 != -1 && field[p2] > blobheights[label2] )
+      {
+        blobheights[label2] = field[p2];
+        junctions[label2] = p2;
+      }
+    }
+  }
+
+}
+
+
+namespace aims
+{
+
+  void blobsHeights( const AimsSurfaceTriangle & mesh,
+                     const std::vector<double> & field,
+                     const std::vector<int> & watershedlabels,
+                     std::vector<int> & junctions )
+  {
+    const vector<AimsVector<uint, 3> > & poly = mesh.polygon();
+    vector<AimsVector<uint, 3> >::const_iterator ip, ep = poly.end();
+    vector<int>::const_iterator il, el = watershedlabels.end();
+    int nlabels = 0;
+    for( il=watershedlabels.begin(); il!=el; ++il )
+      if( *il > nlabels )
+        nlabels = *il;
+    ++nlabels;
+    junctions.resize( nlabels );
+    vector<double> blobheights( nlabels, -FLT_MAX );
+
+    for( ip=poly.begin(); ip!=ep; ++ip )
+    {
+      uint p1 = (*ip)[0];
+      uint p2 = (*ip)[1];
+      uint p3 = (*ip)[2];
+
+      int label1 = watershedlabels[p1];
+      int label2 = watershedlabels[p2];
+      int label3 = watershedlabels[p3];
+
+      checkMaximumBlobHeight( p1, p2, label1, label2, blobheights, field, junctions );
+      checkMaximumBlobHeight( p1, p3, label1, label3, blobheights, field, junctions );
+      checkMaximumBlobHeight( p2, p3, label2, label3, blobheights, field, junctions );
+    }
   }
 
 }
