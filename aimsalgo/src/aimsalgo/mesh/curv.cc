@@ -44,6 +44,11 @@
 #include <boost/numeric/ublas/operation_sparse.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
+#if BOOST_VERSION < 103300
+typedef boost::numeric::ublas::sparse_matrix<float> boost_sparse_matrix;
+#else
+typedef boost::numeric::ublas::mapped_matrix<float> boost_sparse_matrix;
+#endif
 #endif
 
 using namespace std;
@@ -1042,7 +1047,7 @@ namespace aims
 
 
   void makeLaplacianMatrix( const LaplacianWeights & weights,
-                            boost::numeric::ublas::mapped_matrix<float> & lmat,
+                            boost_sparse_matrix & lmat,
                             float dt )
   {
     /* make weights matrix A = I + dt * W
@@ -1134,8 +1139,7 @@ namespace aims
   }
 
 
-  void laplacianMatrixThreshold(
-    boost::numeric::ublas::mapped_matrix<float> & lmat, float threshold )
+  void laplacianMatrixThreshold( boost_sparse_matrix & lmat, float threshold )
   {
     /* remove weights under threshold (in absolute value) on non-diagonal
        coefs, and re-norm diagonal to ensure conservation of the total weight
@@ -1143,13 +1147,12 @@ namespace aims
     cout << "laplacianMatrixThreshold...\n";
     float w = 0, t;
     unsigned i, j;
-    boost::numeric::ublas::mapped_matrix<float>::iterator1
-      iw, ew = lmat.end1();
-    boost::numeric::ublas::mapped_matrix<float>::iterator2 jw, ejw;
+    boost_sparse_matrix::iterator1 iw, ew = lmat.end1();
+    boost_sparse_matrix::iterator2 jw, ejw;
 
     for( iw=lmat.begin1(); iw!=ew; ++iw )
     {
-      boost::numeric::ublas::mapped_matrix<float>::iterator2
+      boost_sparse_matrix::iterator2
         ij = iw.begin(), ej = iw.end();
       w = 0;
       i = iw.index1();
@@ -1194,7 +1197,8 @@ namespace aims
       iin2, ein2 = in2.end();
     set<pair<unsigned int, float> >::const_iterator ik, ek, ik2, ek2;
     cout << "convert to boost sparse matrix...\n";
-    boost::numeric::ublas::mapped_matrix< float > mat1( in1.size(), in1.size() ), mat2( in2.size(), in2.size() );
+    boost_sparse_matrix
+      mat1( in1.size(), in1.size() ), mat2( in2.size(), in2.size() );
     unsigned i;
     for( iin1=in1.begin(); iin1!=ein1; ++iin1 )
     {
@@ -1210,11 +1214,11 @@ namespace aims
     }
     cout << "convert done. Sizes: " << mat1.size1() << " x " << mat1.size2()
       << ", " << mat2.size1() << " x " << mat1.size2() << endl;
-    boost::numeric::ublas::mapped_matrix< float > mat3( mat1.size1(), mat2.size2() );
+    boost_sparse_matrix mat3( mat1.size1(), mat2.size2() );
     boost::numeric::ublas::sparse_prod( mat1, mat2, mat3 );
     cout << "mult done. converting back...\n";
-    boost::numeric::ublas::mapped_matrix< float >::iterator1 il, el = mat3.end1();
-    boost::numeric::ublas::mapped_matrix< float >::iterator2 ic, ec;
+    boost_sparse_matrix::iterator1 il, el = mat3.end1();
+    boost_sparse_matrix::iterator2 ic, ec;
     for( il=mat3.begin1(); il!=el; ++il )
     {
       set<pair<unsigned int, float> > & line = (*out)[ il.index1() ];
@@ -1326,10 +1330,10 @@ namespace aims
 
   {
 #ifdef use_boost
-    boost::numeric::ublas::mapped_matrix<float> weightLaplMat;
+    boost_sparse_matrix weightLaplMat;
     makeLaplacianMatrix( weights, weightLaplMat, dt ); // matricial representation
     laplacianMatrixThreshold( weightLaplMat, sparseThresh );
-    boost::numeric::ublas::mapped_matrix<float>
+    boost_sparse_matrix
       *weightLaplPow = &weightLaplMat,
       *weightLapl2, *weightLapl3 = 0;
 
@@ -1349,7 +1353,7 @@ namespace aims
         cout << "                ";
         cout << "\r" << rint(100.*t/log(float(niter))*log(2.)) << "%" << flush;
       }
-      weightLapl2 = new boost::numeric::ublas::mapped_matrix<float>(
+      weightLapl2 = new boost_sparse_matrix(
         weightLaplMat.size1(), weightLaplMat.size2() );
       // multiply the weights matrix to power niter
       sparse_prod( *weightLaplPow, *weightLaplPow, *weightLapl2 );
@@ -1365,7 +1369,7 @@ namespace aims
         if( weightLapl3 )
         {
           weightLapl2 = weightLapl3;
-          weightLapl3 = new boost::numeric::ublas::mapped_matrix<float>(
+          weightLapl3 = new boost_sparse_matrix(
           weightLaplMat.size1(), weightLaplMat.size2() );
           sparse_prod( *weightLaplPow, *weightLapl2, *weightLapl3 );
           if( weightLapl2 != & weightLaplMat )
@@ -1382,9 +1386,8 @@ namespace aims
 
     // convert to LaplacianWeights type
     LaplacianWeights *weightLaplPowL = new LaplacianWeights;
-    boost::numeric::ublas::mapped_matrix< float >::iterator1
-      il, el = weightLaplPow->end1();
-    boost::numeric::ublas::mapped_matrix< float >::iterator2 ic, ec;
+    boost_sparse_matrix::iterator1 il, el = weightLaplPow->end1();
+    boost_sparse_matrix::iterator2 ic, ec;
     for( il=weightLaplPow->begin1(); il!=el; ++il )
     {
       set<pair<unsigned int, float> >
