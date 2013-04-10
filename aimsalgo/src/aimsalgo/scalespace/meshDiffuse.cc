@@ -554,12 +554,12 @@ Texture<float> TextureSmoothing::FiniteElementSmoothing( const Texture<float> &i
   if (dur != -1)
   {
 // #define use_matpow
-// use_matpow: for test only: for a single textures it is far slower than the
+// use_matpow: for test only: for a single texture it is far slower than the
 // normal version.
 #ifdef use_matpow
     LaplacianWeights *weightLaplPow
       = makeLaplacianSmoothingCoefficients( weightLapl, rint(dur/dt), dt,
-                                            0.0 );
+                                            0.0001 );
     cout << "apply smoothing coefs...\n";
     applyLaplacianMatrix( inittex.data(), smooth.data(), *weightLaplPow );
     delete weightLaplPow;
