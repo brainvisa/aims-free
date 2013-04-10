@@ -1168,7 +1168,11 @@ namespace aims
           {
             ++ij;
             // remove matrix entry here
+#if BOOST_VERSION < 103300
+            lmat.erase( i, j );
+#else
             lmat.erase_element( i, j );
+#endif
           }
           else
           {
