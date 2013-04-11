@@ -98,7 +98,7 @@ public:
       \param foregd value for voxels cut in by the thresholding
   */
   inline AimsThreshold( threshold_t type,T level,T level2 = 0, 
-                        T backgd = 0, float foregd = 32767  );
+                        T backgd = 0, U foregd = 32767  );
   virtual ~AimsThreshold() {}
 
   /// Return the multi-level thresholded image
@@ -114,7 +114,7 @@ protected:
   /// Upper level
   T    _level2;
   T    _backgd;
-  float    _foregd;
+  U    _foregd;
 };
 
 template <class T,class U>
@@ -147,7 +147,7 @@ protected:
 
 template <class T,class U> inline
 AimsThreshold<T,U>::AimsThreshold( threshold_t type, T level, T level2, 
-                                   T backgd, float foregd )
+                                   T backgd, U foregd )
   : _type( type ), _level( level ), _level2( level2 ), _backgd( backgd ), _foregd( foregd )
 {
 }
