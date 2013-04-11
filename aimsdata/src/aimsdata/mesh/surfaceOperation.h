@@ -111,6 +111,15 @@ namespace aims
                AimsSurfaceTriangle & planemesh,
                AimsTimeSurface<2, Void> & borderline,
                bool meshplane, bool checkplane );
+    /// This variant only computes the border line
+    static void cutMesh( const AimsSurfaceTriangle & insurf,
+                         const Point4df & plane,
+                         AimsTimeSurface<2, Void> & borderline,
+                         int timestep = 0 );
+    /// This variant only computes the border line
+    static void cutMesh( const AimsSurface<3, Void> & insurf,
+                         const Point4df & plane,
+                         AimsTimeSurface<2, Void> & borderline );
     static void meshPlanarPolygon( const Point4df & plane,
                                    const AimsTimeSurface<2, Void> & border,
                                    AimsSurfaceTriangle & outmesh );

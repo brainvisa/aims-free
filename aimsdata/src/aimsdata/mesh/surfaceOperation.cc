@@ -2267,7 +2267,125 @@ void SurfaceManip::cutMesh( const vector<const AimsSurfaceTriangle *> & insurf,
     meshPlane2( plane, borderline, pmesh, checkplane );
 }
 
-#include <aims/io/writer.h>
+
+void SurfaceManip::cutMesh( const AimsSurfaceTriangle & insurf,
+                            const Point4df & plane,
+                            AimsTimeSurface<2, Void> & borderline,
+                            int timestep )
+{
+  AimsSurfaceTriangle::const_iterator i = insurf.find( timestep );
+  if( i != insurf.end() )
+    cutMesh( i->second, plane, borderline );
+}
+
+
+void SurfaceManip::cutMesh( const AimsSurface<3, Void> & insurf,
+                            const Point4df & plane,
+                            AimsTimeSurface<2, Void> & borderline )
+{
+  const vector<Point3df> & ivert = insurf.vertex();
+  const vector<AimsVector<uint, 3> > & ipoly = insurf.polygon();
+  vector<Point3df> & overt = borderline.vertex();
+  vector<AimsVector<uint, 2> > & opoly = borderline.polygon();
+  vector<AimsVector<uint, 3> >::const_iterator ip, ep = ipoly.end();
+  float p0, p1, p2, p01, p02, scal, x;
+  Point3df norm = Point3df( plane[0], plane[1], plane[2] );
+  Point3df op[2];
+  int nop;
+  size_t novert = 0;
+
+  for( ip=ipoly.begin(); ip!=ep; ++ip )
+  {
+    const AimsVector<uint, 3> & pol = *ip;
+    const Point3df & pv0 = ivert[ pol[0] ];
+    const Point3df & pv1 = ivert[ pol[1] ];
+    const Point3df & pv2 = ivert[ pol[2] ];
+
+    /* compare to plane */
+    p0 = plane[0] * pv0[0] + plane[1] * pv0[1] + plane[2] * pv0[2] + plane[3];
+    p1 = plane[0] * pv1[0] + plane[1] * pv1[1] + plane[2] * pv1[2] + plane[3];
+    p2 = plane[0] * pv2[0] + plane[1] * pv2[1] + plane[2] * pv2[2] + plane[3];
+
+    p01 = p0 * p1;
+    p02 = p0 * p2;
+    nop = 0; // 0 intersection points found
+
+    if( p01 <= 0 || p02 <= 0 ) // polygon intersects plane
+    {
+      if( p01 <= 0 ) // pv0 - pv1 cuts the plane
+      {
+        Point3df pv01 = pv1 - pv0;
+        scal = pv01.dot( norm );
+        if( scal == 0 ) // pv0 and p1 are on the plane
+        {
+          // both point are found
+          op[0] = pv0;
+          op[1] = pv1;
+          nop = 2;
+        }
+        else
+        {
+          x = - ( plane[3] + pv0.dot( norm ) ) / scal; // position of intersection point
+          op[nop] = pv0 + pv01 * x;
+          ++nop;
+        }
+      }
+
+      if( nop < 2 && p02 <= 0 ) // pv0 - pv2 cuts the plane
+      {
+        Point3df pv02 = pv2 - pv0;
+        scal = pv02.dot( norm );
+        if( scal == 0 ) // pv0 and p2 are on the plane
+        {
+          // both point are found
+          op[0] = pv0;
+          op[1] = pv2;
+          nop = 2;
+        }
+        else
+        {
+          x = - ( plane[3] + pv0.dot( norm ) ) / scal; // position of intersection point
+          op[nop] = pv0 + pv02 * x;
+          ++nop;
+        }
+      }
+
+      if( nop < 2 ) // pv1 - pv2 cuts the plane
+      {
+        Point3df pv12 = pv2 - pv1;
+        scal = pv12.dot( norm );
+        if( scal == 0 ) // pv1 and p2 are on the plane
+        {
+          // both point are found
+          op[0] = pv1;
+          op[1] = pv2;
+          nop = 2;
+        }
+        else
+        {
+          x = - ( plane[3] + pv1.dot( norm ) ) / scal; // position of intersection point
+          op[nop] = pv1 + pv12 * x;
+          ++nop;
+        }
+      }
+
+      if( op[0] != op[1] )
+      {
+        // append 2 vertices and a polygon
+        // note: the final polygon is completely topologically disconnected
+        // (no shared vertex)
+        overt.push_back( op[0] );
+        overt.push_back( op[1] );
+        opoly.push_back( AimsVector<uint, 2>( novert, novert+1 ) );
+        novert += 2;
+      }
+
+    }
+
+  }
+}
+
+
 bool SurfaceManip::checkMesh( const AimsSurfaceTriangle & insurf, 
 			      AimsSurfaceTriangle *outsurf )
 {
@@ -2663,12 +2781,6 @@ bool SurfaceManip::checkMesh( const AimsSurfaceTriangle & insurf,
 
       for( ip=ptodel.rbegin(); ip!=ep; ++ip )
 	opoly.erase( opoly.begin() + *ip );
-    }
-
-  if( outsurf && copied )
-    {
-      Writer<AimsSurfaceTriangle> w( "/tmp/cleanmesh.mesh" );
-      w.write( *outsurf );
     }
 
   return clean;
