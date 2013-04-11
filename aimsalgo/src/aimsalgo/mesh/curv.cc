@@ -1447,7 +1447,7 @@ namespace aims
     if( outtex.size() != n )
       outtex.resize( n );
 
-    for (il = lapl.begin(), node=0, el = lapl.end(); il != el; ++il)
+    for( il = lapl.begin(), el = lapl.end(); il != el; ++il )
     {
       node = il->first;
       L = 0;
