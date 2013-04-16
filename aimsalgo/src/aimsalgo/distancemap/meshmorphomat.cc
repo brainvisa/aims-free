@@ -242,5 +242,10 @@ namespace aims
 				   const short & Back, const short & For,
 				   unsigned & min, unsigned & max, unsigned nbDil);  
 
+    template Texture<int16_t>
+    MeshSkeletization( const AimsSurface<3,Void> & mesh,
+                       const Texture<int16_t> & inittex,
+                       int16_t label, int16_t Back,
+                       const std::vector<std::list<unsigned> >  & neigho );
   }
 }
