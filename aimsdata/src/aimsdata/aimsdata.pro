@@ -164,6 +164,7 @@ HEADERS=  bucket/bucket_g.h	\
     mesh/surfaceOperation_d.h  \
     mesh/surfacegen.h	\
     mesh/texture.h      \
+    mesh/texturetools.h      \
     mesh/tex2graph.h    \
     mesh/tex2graph_d.h    \
     meshprojection/meshprojection.h  \
@@ -309,6 +310,7 @@ SOURCES = \
     mesh/surfaceOperation.cc	\
     mesh/tex2graph.cc    \
     mesh/texture.cc    \
+    mesh/texturetools.cc      \
     meshprojection/meshprojection.cc    \
     resampling/mask.cc \
     resampling/motion.cc    \
