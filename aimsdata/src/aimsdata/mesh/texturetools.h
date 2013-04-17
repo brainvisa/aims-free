@@ -7,8 +7,7 @@
 
 namespace aims
 {
-    size_t textureMax( const TimeTexture<short> & intex,
-                       const AimsSurfaceTriangle & inAimsMesh );
+    size_t textureMax( const TimeTexture<short> & intex );
 
     std::vector< size_t > * labelsHistogram(
       const TimeTexture<short> & intex, size_t labels_nb, bool verbose );

@@ -4,8 +4,7 @@
 
 namespace aims
 {
-  size_t textureMax( const TimeTexture_S16 & intex,
-                     const AimsSurfaceTriangle & inAimsMesh );
+  size_t textureMax( const TimeTexture_S16 & intex );
 
 /*
   vector_?< size_t > * labelsHistogram(

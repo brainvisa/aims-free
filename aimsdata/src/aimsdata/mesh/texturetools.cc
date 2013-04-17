@@ -6,17 +6,10 @@ using namespace aims;
 namespace aims
 {
 
-  std::size_t textureMax( const TimeTexture<short> & intex,
-                          const AimsSurfaceTriangle & inAimsMesh )
+  std::size_t textureMax( const TimeTexture<short> & intex )
   {
     const Texture<short> & intex0 = intex.begin()->second;
-    const vector<Point3df> & vert = inAimsMesh.vertex();
-    unsigned n_inmeshvertex = vert.size();
     unsigned n_intexvertex = intex0.nItem();
-    if (n_intexvertex!= n_inmeshvertex)
-    {
-      std::cout << "texture and mesh have different dimensions" << std::endl;
-    }
     int max = 0;
     for (unsigned i = 0; i < n_intexvertex; ++i)
     {
