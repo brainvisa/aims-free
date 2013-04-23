@@ -642,6 +642,11 @@ vector< list<unsigned> > AimsMeshOrderTriangle(const AimsSurface<3,Void> & mesh)
 		  //cout << *inei << " ";
 		}
 	    }
+          if( !stopLoop )
+          {
+            cout << "warning, mesh is not closed.\n";
+            tmpNodes.clear();
+          }
 	}
       // cout << endl;
     } 
