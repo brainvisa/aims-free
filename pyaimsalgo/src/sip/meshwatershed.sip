@@ -105,3 +105,12 @@ void meshBlobsBifurcation( const AimsSurfaceTriangle & mesh,
 %End
 
 
+  void blobsHeights( const AimsSurfaceTriangle & mesh,
+                     const vector_DOUBLE & field,
+                     const vector_S32 & watershedlabels,
+                     vector_S32 **junctions );
+%MethodCode
+  a3 = new vector_S32;
+  aims::blobsHeights( *a0, *a1, *a2, *a3 );
+%End
+
