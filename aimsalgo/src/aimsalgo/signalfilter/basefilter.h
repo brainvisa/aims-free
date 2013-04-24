@@ -109,6 +109,7 @@ AimsData< T > BaseSmoothing< T, F >::doit( const AimsData< T >& ref )
   dz = _win_size_z / 2 ;
  
   AimsData<T> out(ref.dimX(), ref.dimY(), ref.dimZ(), ref.dimT());
+  out = ref.clone();
   if( ref.header() ) {
     out.setHeader( ref.header()->cloneHeader( true ) );
   }
