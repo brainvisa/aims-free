@@ -128,6 +128,8 @@ void AimsInflationStep(const AimsSurfaceTriangle &surf1, AimsSurfaceTriangle &su
 	    ecart = diff.norm();                                  // Distance avec voisin
 	    ecart0=(*itress).second;                              // Distance originale
 	    signe = ((ress=(ecart0 - ecart)) > 0.0 ? -1.0 : 1.0); // Signe de la force
+            if( ecart0 == 0. ) // identical points at beginning
+              ecart0 = 1.;
 	    force2 += (signe * ress*ress/(ecart0))*diff;          // Force
 	  }
 	  force /= (double)itneigh->size();
