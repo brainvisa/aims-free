@@ -74,6 +74,7 @@ PSUBDIRS = \
     AimsMeshBlobExtract       \
     AimsMeshBrain             \
     AimsMeshCC2Arg            \
+    AimsMeshCheckClosed            \
     AimsMeshConnectedComp          \
     AimsMeshCurvature              \
     AimsMeshDecimation             \
