@@ -37,6 +37,36 @@ public:
 
   void reserve( unsigned );
   void push_back( const %Template1PyType% & );
+%MethodCode
+  sipCpp->data().push_back( %Template1deref% a0 );
+  int dims = sipCpp->data().size();
+  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(sipCpp->data())[0] );
+%End
+
+  void push_back( unsigned, const %Template1PyType% & );
+%MethodCode
+  sipCpp->data().insert( sipCpp->data().end(), a0,
+    static_cast<const vector_%Template1typecode%::value_type &>(
+      const_cast<%Template1PyType% &>( %Template1deref%a1 ) ) );
+  int dims = sipCpp->data().size();
+  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(sipCpp->data())[0] );
+%End
+
+  void resize( unsigned );
+%MethodCode
+  sipCpp->data().resize( a0 );
+  int dims = sipCpp->data().size();
+  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(sipCpp->data())[0] );
+%End
+
+  void resize( unsigned, const %Template1PyType% & );
+%MethodCode
+  sipCpp->data().resize( a0,
+    static_cast<const vector_%Template1typecode%::value_type &>(
+      const_cast<%Template1PyType% &>( %Template1deref%a1 ) )  );
+  int dims = sipCpp->data().size();
+  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(sipCpp->data())[0] );
+%End
 
 // const vector_%Template1typecode% & data() const;
   vector_%Template1typecode% & data();

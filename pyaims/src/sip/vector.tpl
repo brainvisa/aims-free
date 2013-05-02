@@ -192,6 +192,30 @@ public:
   aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(*sipCpp)[0] );
 %End
 
+  void resize( unsigned );
+%MethodCode
+  sipCpp->resize( a0 );
+  int dims = sipCpp->size();
+  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(*sipCpp)[0] );
+%End
+
+  void resize( unsigned, const %Template1PyType% & );
+%MethodCode
+  sipCpp->resize( a0,
+    static_cast<const vector_%Template1typecode%::value_type &>(
+      const_cast<%Template1PyType% &>( %Template1deref%a1 ) )  );
+  int dims = sipCpp->size();
+  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(*sipCpp)[0] );
+%End
+
+  void append( unsigned, const %Template1PyType% & );
+%MethodCode
+  sipCpp->insert( sipCpp->end(), a0,
+    static_cast<const vector_%Template1typecode%::value_type &>(
+      const_cast<%Template1PyType% &>( %Template1deref%a1 ) ) );
+  int dims = sipCpp->size();
+  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(*sipCpp)[0] );
+%End
 
   bool operator == ( const vector_%Template1typecode% & ) const;
 %MethodCode
