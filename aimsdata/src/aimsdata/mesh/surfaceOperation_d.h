@@ -333,8 +333,10 @@ namespace aims
         }
       }
       ++ti;
-      ++jmt;
-      ++jtt;
+      if( jmt != emt )
+        ++jmt;
+      if( jtt != ett )
+        ++jtt;
     }
     return omesh;
   }
