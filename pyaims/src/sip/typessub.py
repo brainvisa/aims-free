@@ -2348,6 +2348,10 @@ typessub = { 'signed char' : \
              'carto::PluginLoader::PluginFile' : \
                 classInNamespace( 'cartobase/plugin/plugin.h',
                 'PluginFile', 'carto_PluginLoader', 'carto::PluginLoader' ),
+
+             'aims::SparseMatrix' : \
+                classInAimsNamespace( 'aims/sparsematrix/sparseMatrix.h',
+                  'SparseMatrix' ),
              }
 
 completeTypesSub( typessub )

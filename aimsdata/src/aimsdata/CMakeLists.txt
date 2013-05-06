@@ -59,6 +59,7 @@ set( _headers
     io/baseFormats_mesh.h
     io/baseFormats_mesh_d.h
     io/baseFormats_motion.h
+    io/baseFormats_sparsematrix.h
     io/baseFormats_syntax.h
     io/baseFormats_texture.h
     io/baseFormats_texture_d.h
@@ -94,6 +95,7 @@ set( _headers
     io/gisR.h
     io/gisW.h
     io/hieR.h
+    io/imasparseheader.h
     io/io_g.h
     io/iooptions.h
     io/itemR.h
@@ -238,6 +240,13 @@ set( _sources
     io/argheader.cc
     io/argR.cc
     io/argW.cc
+    io/baseFormats_genericobject.cc
+    io/baseFormats_graph.cc
+    io/baseFormats_hierarchy.cc
+    io/baseFormats_mesh.cc
+    io/baseFormats_motion.cc
+    io/baseFormats_sparsematrix.cc
+    io/baseFormats_syntax.cc
     io/bckheader.cc
     io/channelR.cc
     io/coarseR.cc
@@ -245,31 +254,6 @@ set( _sources
     io/cmapW.cc
     io/dtitensorItemR.cc
     io/dtitensorItemW.cc
-    io/genesisheader.cc
-    io/gisheader.cc
-    io/hieR.cc
-    io/iooptions.cc
-    io/labelR.cc
-    io/motionR.cc
-    io/motionW.cc
-    io/readerasobject.cc
-    io/spmheader.cc
-    io/spmR.cc
-    io/spmW.cc
-    io/spmattribconverter.cc
-    io/texheader.cc
-    io/triW.cc
-    io/finder.cc
-    io/finderFormats.cc
-    io/triederItemR.cc
-    io/triederItemW.cc
-    io/tensorItemR.cc
-    io/tensorItemW.cc
-    io/reader.cc
-    io/baseFormats_genericobject.cc
-    io/baseFormats_graph.cc
-    io/baseFormats_mesh.cc
-    io/baseFormats_motion.cc
     io/fileFormat.cc
     io/fileFormat_genericobject.cc
     io/fileFormat_mesh.cc
@@ -277,23 +261,44 @@ set( _sources
     io/fileFormat_texture.cc
     io/fileFormat_bucket.cc
     io/fileFormat_graph.cc
-    io/baseFormats_hierarchy.cc
     io/fileFormat_hierarchy.cc
-    io/baseFormats_syntax.cc
+    io/fileFormat_sparsematrix.cc
     io/fileFormat_volume.cc
     io/fileFormat_volumeVec.cc
-    io/writer.cc
+    io/finder.cc
+    io/finderFormats.cc
+    io/genesisheader.cc
+    io/gisheader.cc
+    io/hieR.cc
+    io/iooptions.cc
+    io/imasparseheader.cc
+    io/labelR.cc
+    io/motionR.cc
+    io/motionW.cc
     io/meshheader.cc
     io/mniobjformat.cc
     io/mniobjheader.cc
+    io/process.cc
+    io/reader.cc
+    io/readerasobject.cc
     io/roiR.cc
     io/scaledcoding.cc
     io/selectionr.cc
     io/selectionw.cc
+    io/spmheader.cc
+    io/spmR.cc
+    io/spmW.cc
+    io/spmattribconverter.cc
+    io/tensorItemR.cc
+    io/tensorItemW.cc
+    io/texheader.cc
+    io/triederItemR.cc
+    io/triederItemW.cc
     io/triheader.cc
     io/triR.cc
+    io/triW.cc
     io/trmheader.cc
-    io/process.cc
+    io/writer.cc
     math/gausslu.cc
     math/mathelem.cc
     math/romberg.cc

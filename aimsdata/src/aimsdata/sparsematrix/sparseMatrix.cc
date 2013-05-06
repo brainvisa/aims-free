@@ -1438,3 +1438,9 @@ bool std::operator == ( const aims::SparseMatrix& thing1,
 }
 
 
+void SparseMatrix::setHeader( const PythonHeader & ph )
+{
+  _header = ph;
+}
+
+

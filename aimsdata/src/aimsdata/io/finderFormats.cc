@@ -55,6 +55,7 @@
 #include <aims/io/argheader.h>
 #include <aims/io/trmheader.h>
 #include <aims/io/mniobjheader.h>
+#include <aims/io/imasparseheader.h>
 #include <aims/io/byteswap.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/cuifstream.h>
@@ -563,6 +564,35 @@ bool FinderHieFormat::check( const string & filename, Finder & f ) const
   f.setPossibleDataTypes( vt );
   f.setFormat( "HIE" );
   f.setHeader( ph );
+  return true;
+}
+
+
+bool FinderImasFormat::check( const string & filename, Finder & f ) const
+{
+  ImasHeader  *hdr = new ImasHeader( filename );
+  try
+  {
+    if( !hdr->read() )
+    {
+      delete hdr;
+      return false;
+    }
+  }
+  catch( exception & )
+  {
+    delete hdr;
+    throw;
+  }
+
+  f.setHeader( hdr );
+  f.setObjectType( "SparseMatrix" );
+  int ps = 0;
+  string  type;
+  hdr->getProperty( "data_type", type );
+  f.setDataType( type );
+  f.setFormat( "IMASPARSE" );
+
   return true;
 }
 

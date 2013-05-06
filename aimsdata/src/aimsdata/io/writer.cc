@@ -50,6 +50,7 @@
 #include <graph/graph/graph.h>
 #include <aims/resampling/motion.h>
 #include <aims/roi/hie.h>
+#include <aims/sparsematrix/sparseMatrix.h>
 
 using namespace std;
 using namespace carto;
@@ -167,6 +168,7 @@ template class Writer<Hierarchy>;
 template class Writer<Motion>;
 template class Writer<GenericObject>;
 template class Writer<Object>;
+template class Writer<SparseMatrix>;
 
 
 template bool 
@@ -359,3 +361,6 @@ GenericWriter::write< GenericObject >( const GenericObject &,
 template bool
 GenericWriter::write< Object >( const Object &,
                                 bool, const string * );
+template bool
+GenericWriter::write< SparseMatrix >( const SparseMatrix &,
+                                      bool, const string * );

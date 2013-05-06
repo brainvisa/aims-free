@@ -1,7 +1,7 @@
 namespace aims
 {
 
-  class SparseMatrix
+  class SparseMatrix : carto::RCObject
   {
 
 %TypeHeaderCode
@@ -51,8 +51,6 @@ namespace aims
 
       vector_DOUBLE getRow( int i ) const;
       vector_DOUBLE getColumn( int j ) const;
-//      til::SparseVector<double> getSparseRow( int i ) const;
-//      til::SparseVector<double> getSparseColumn( int j ) const;
       void erase_element( int i, int j );
 
       void read( const std::string& filename,
@@ -62,6 +60,7 @@ namespace aims
                   const std::string & openmode = "binar",
                   bool bswap = false ) const;
 
+      carto::GenericObject & header();
   };
 
 };

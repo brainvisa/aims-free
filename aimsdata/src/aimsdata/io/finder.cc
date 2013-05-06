@@ -158,6 +158,9 @@ void Finder::initPrivate()
       ext.push_back( "" );
       registerFormat( "DICOM", new FinderDicomFormat, ext );
 #endif
+      ext.clear();
+      ext.push_back( "imas" );
+      registerFormat( "IMASPARSE", new FinderImasFormat, ext );
     }
   _finder_mutex.unlock();
 }

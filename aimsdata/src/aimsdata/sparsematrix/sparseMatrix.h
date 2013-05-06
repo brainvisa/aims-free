@@ -1,13 +1,12 @@
 #ifndef AIMS_SPARSEMATRIX_SPARSEMATRIX_H
 #define AIMS_SPARSEMATRIX_SPARSEMATRIX_H
 
+#include <aims/data/pheader.h>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/vector_sparse.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/version.hpp>
 #include <string>
-
-// #include <cathier/SparseVector.h>
 
 namespace aims
 {
@@ -22,7 +21,7 @@ namespace aims
 #endif
 
 
-  class SparseMatrix
+  class SparseMatrix : public virtual carto::RCObject
   {
 
     public:
@@ -97,10 +96,7 @@ namespace aims
 
       std::vector<double> getRow( int32_t i ) const;
       std::vector<double> getColumn( int32_t j ) const;
-// #ifdef SPARSEVECTOR_H_
-//       til::SparseVector<double> getSparseRow( int32_t i ) const;
-//       til::SparseVector<double> getSparseColumn( int32_t j ) const;
-// #endif
+
       template <typename VectorType>
         VectorType getSparseRow( int32_t i ) const;
       template <typename VectorType>
@@ -127,9 +123,14 @@ namespace aims
       boost_sparse_matrix & boostMatrix() { return _matrix; }
       const boost_sparse_matrix & boostMatrix() const { return _matrix; }
 
+      aims::PythonHeader & header() { return _header; }
+      const aims::PythonHeader & header() const { return _header; }
+      void setHeader( const aims::PythonHeader & ph );
+
     protected:
 
       boost_sparse_matrix _matrix;
+      aims::PythonHeader  _header;
 
   };
 
@@ -264,6 +265,29 @@ namespace std
                      const aims::SparseMatrix& thing2 );
 
 }
+
+
+#ifndef DOXYGEN_HIDE_INTERNAL_CLASSES
+
+namespace carto
+{
+
+  template<> class DataTypeCode<aims::SparseMatrix>
+  {
+  public:
+    static std::string objectType()
+    { return "SparseMatrix"; }
+    static std::string dataType()
+    { return "DOUBLE"; }
+    static std::string name()
+    {
+      return std::string("SparseMatrix_") + dataType();
+    }
+  };
+
+}
+
+#endif // DOXYGEN_HIDE_INTERNAL_CLASSES
 
 
 #endif
