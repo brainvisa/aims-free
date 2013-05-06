@@ -176,6 +176,9 @@ set( _headers
     roi/voxelSampling.h
     selection/selection.h
     selection/selector.h
+    sparsematrix/sparseMatrix.h
+    sparsematrix/sparseMatrixItemR.h
+    sparsematrix/sparseMatrixItemW.h
     texdata/texdata.h
     transformation/transformation.h
     transformation/affinetransformation3d.h
@@ -317,6 +320,9 @@ set( _sources
     roi/voxelSampling.cc
     selection/selection.cc
     selection/selector.cc
+    sparsematrix/sparseMatrix.cc
+    sparsematrix/sparseMatrixItemR.cc
+    sparsematrix/sparseMatrixItemW.cc
     transformation/transformation.cc
     transformation/affinetransformation3d.cc
     utility/boundingbox.cc
