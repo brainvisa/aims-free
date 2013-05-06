@@ -59,7 +59,8 @@ ImasHeader::~ImasHeader()
 namespace
 {
 
-  bool testBinFormat( const string & fname )
+  bool testBinFormat( const string & fname, uint32_t & lines, uint32_t & cols,
+    uint32_t & count )
   {
     ifstream  is( fname.c_str(), ios::in | ios::binary );
     if( !is )
@@ -90,11 +91,15 @@ namespace
     if( nonZeroElementCount > size1 * size2
         || nonZeroElementCount * 16 != e - p )
       return false;
+    lines = size1;
+    cols = size2;
+    count = nonZeroElementCount;
     return true;
   }
 
 
-  bool testBswapFormat( const string & fname )
+  bool testBswapFormat( const string & fname, uint32_t & lines,
+                        uint32_t & cols, uint32_t & count )
   {
     ifstream  is( fname.c_str(), ios::in | ios::binary );
     if( !is )
@@ -125,11 +130,15 @@ namespace
     if( nonZeroElementCount > size1 * size2
         || nonZeroElementCount * 16 != e - p )
       return false;
+    lines = size1;
+    cols = size2;
+    count = nonZeroElementCount;
     return true;
   }
 
 
-  bool testAsciiFormat( const string & fname )
+  bool testAsciiFormat( const string & fname, uint32_t & lines,
+                        uint32_t & cols, uint32_t & count )
   {
     ifstream  is( fname.c_str(), ios::in | ios::binary );
     if( !is )
@@ -160,6 +169,9 @@ namespace
     if( nonZeroElementCount > size1 * size2
         || nonZeroElementCount * 16 != e - p )
       return false;
+    lines = size1;
+    cols = size2;
+    count = nonZeroElementCount;
     return true;
   }
 
@@ -175,18 +187,19 @@ bool ImasHeader::read( uint32_t* )
 
   bool ascii = false;
   bool bswap = false;
+  uint32_t lines = 0, cols = 0, count = 0;
 
-  if( testBinFormat( fname ) )
+  if( testBinFormat( fname, lines, cols, count ) )
   {
     ascii = false;
     bswap = false;
   }
-  else if( testBswapFormat( fname ) )
+  else if( testBswapFormat( fname, lines, cols, count ) )
   {
     ascii = false;
     bswap = true;
   }
-  else if( testAsciiFormat( fname ) )
+  else if( testAsciiFormat( fname, lines, cols, count ) )
   {
     ascii = true;
     bswap = false;
@@ -201,6 +214,11 @@ bool ImasHeader::read( uint32_t* )
   setProperty( "ascii", (int) ascii );
   if( !ascii )
     setProperty( "byte_swapping", (int) bswap );
+  vector<int> dims(2);
+  dims[0] = (int) lines;
+  dims[1] = (int) cols;
+  setProperty( "dimensions", dims );
+  setProperty( "non_zero_elements", (int) count );
 
   // add meta-info to header
   readMinf( removeExtension( fname ) + extension() + ".minf" );
