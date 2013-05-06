@@ -71,37 +71,39 @@ set(HEADERS ${HEADERS} PARENT_SCOPE)
 # Build targets for commands
 #------------------------------------------------------------------------------
 foreach( _command 
-          AimsMeshTransform
-          AimsGraphMerge
-          AimsThreshold
-          AimsSelectLabel
           AimsAverage
-          AimsSubVolume
-          AimsInvertTransformation
-          AimsMerge2Rgb
-          AimsVectorFieldToMesh
-          AimsConnectedComp
-          AimsMeshGenerate
-          AimsRemoveNaN
-          AimsMassCenter
-          AimsGraphComplete
-          AimsGraphExtractTransformation
-          AimsMergeLabel
-          AimsRoiFeatures
-          AimsFlip
-          AimsTCat
-          AimsMeshCut
+          AimsChannelExtract
           AimsComposeTransformation
-          AimsOverVolume
-          AimsSetMinf
-          AimsMeshes2Graph
+          AimsConnectedComp
           AimsFileConvert
           AimsFileInfo
-          AimsMeshArea
+          AimsFlip
+          AimsGraphComplete
           AimsGraphConvert
+          AimsGraphExtractTransformation
+          AimsGraphMerge
+          AimsInvertTransformation
+          AimsMassCenter
+          AimsMerge2Rgb
+          AimsMergeLabel
+          AimsMeshArea
+          AimsMeshCut
+          AimsMeshes2Graph
+          AimsMeshGenerate
+          AimsMeshTransform
+          AimsOverVolume
+          AimsRemoveNaN
+          AimsRoiFeatures
+          AimsSelectLabel
+          AimsSetMinf
+          AimsSplitRgb
+          AimsSubVolume
+          AimsSumSparseMatrix
+          AimsTCat
           AimsTex2Graph
-          AimsChannelExtract
-          AimsSplitRgb )
+          AimsThreshold
+          AimsVectorFieldToMesh
+)
   if( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
     file( GLOB _pro "${CMAKE_CURRENT_SOURCE_DIR}/${_command}/*.pro" )
     BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"

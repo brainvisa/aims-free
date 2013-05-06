@@ -179,6 +179,7 @@ typedef unsigned short uint16_t;
 %Include rcptr_SiteIterator.sip
 %Include interpolation.sip
 %Include rcptr_Interpolator.sip
+%Include sparsematrix.sip
 
 typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include surfacegenerator.sip
