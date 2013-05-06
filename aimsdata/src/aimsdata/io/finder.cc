@@ -132,7 +132,7 @@ void Finder::initPrivate()
       registerFormat( "TRI", new FinderTriFormat, ext );
       ext.clear();
       ext.push_back( "obj" );
-      registerFormat( "MNI OBJ", new FinderMniObjFormat, ext );
+      registerFormat( "MNI_OBJ", new FinderMniObjFormat, ext );
       ext.clear();
       ext.push_back( "tex" );
       registerFormat( "TEX", new FinderTexFormat, ext );

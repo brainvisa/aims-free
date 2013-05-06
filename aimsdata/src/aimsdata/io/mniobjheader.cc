@@ -114,7 +114,7 @@ bool MniObjHeader::read( uint32_t* offset )
   if ( offset )
     *offset = is.tellg();
   is.close();
-  setProperty( "file_type", string( "MNI OBJ" ) );
+  setProperty( "file_type", string( "MNI_OBJ" ) );
   setProperty( "data_type", "VOID" );
   setProperty( "ascii", (int) ascii );
 /*  if( !ascii )

@@ -402,7 +402,7 @@ bool FinderMniObjFormat::check( const string & filename, Finder & f ) const
   vector<string>  vt;
   vt.push_back( type );
   f.setPossibleDataTypes( vt );
-  f.setFormat( "MNI OBJ" );
+  f.setFormat( "MNI_OBJ" );
 
   return true;
 }

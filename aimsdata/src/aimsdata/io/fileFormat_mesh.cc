@@ -74,7 +74,7 @@ FileFormatDictionary<AimsSurfaceTriangle>::registerBaseFormats()
 
   ext.push_back( "obj" );
   MniObjFormat *fo = new MniObjFormat;
-  registerFormat( "MNI OBJ", fo, ext );
+  registerFormat( "MNI_OBJ", fo, ext );
   ext.clear();
 }
 
