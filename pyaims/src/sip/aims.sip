@@ -221,6 +221,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include reader_AimsData_CDOUBLE.sip
 
 %Include rawconverter_bucket_S16.sip
+%Include rcptr_SparseMatrix.sip
 %Include reader_SparseMatrix.sip
 
 %Include aimsgraphreader.sip
