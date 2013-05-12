@@ -2352,6 +2352,10 @@ typessub = { 'signed char' : \
              'aims::SparseMatrix' : \
                 classInAimsNamespace( 'aims/sparsematrix/sparseMatrix.h',
                   'SparseMatrix' ),
-             }
+ 
+             'aims::SparseOrDenseMatrix' : \
+                classInAimsNamespace( 'aims/sparsematrix/sparseordensematrix.h',
+                  'SparseOrDenseMatrix' ),
+            }
 
 completeTypesSub( typessub )

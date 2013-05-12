@@ -60,7 +60,8 @@ namespace aims
                   const std::string & openmode = "binar",
                   bool bswap = false ) const;
 
-      carto::GenericObject & header();
+      carto::Object header();
+
   };
 
 };

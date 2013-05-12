@@ -79,6 +79,18 @@ namespace aims
                        carto::Object options );
   };
 
+
+  template <typename T>
+  class ImasVolFormat : public FileFormat<AimsData<T> >
+  {
+    virtual bool read( const std::string & filename, AimsData<T> & obj,
+                       const carto::AllocatorContext & context,
+                       carto::Object options );
+    virtual bool write( const std::string & filename,
+                        const AimsData<T> & obj,
+                        carto::Object options = carto::none() );
+  };
+
 }
 
 

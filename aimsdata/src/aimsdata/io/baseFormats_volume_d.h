@@ -41,6 +41,7 @@
 #include <aims/io/spmR.h>
 #include <aims/io/spmW.h>
 #include <aims/io/genesisR.h>
+#include <aims/io/imasparseheader.h>
 
 
 namespace aims
@@ -132,6 +133,141 @@ namespace aims
     GenesisReader<T>	r( filename );
     r.read( vol,context, options );
     return( true );
+  }
+
+
+  // IMAS (sparse)
+
+  template <typename T>
+  bool ImasVolFormat<T>::read( const std::string & filename, 
+                               AimsData<T> & obj, 
+                               const carto::AllocatorContext & context, 
+                               carto::Object options )
+  {
+    ImasHeader *hdr = new ImasHeader( filename );
+    if( !hdr->read() )
+    {
+      delete hdr;
+      return false;
+    }
+
+    int ascii = false, bswap = false;
+    hdr->getProperty( "ascii", ascii );
+    hdr->getProperty( "byte_swapping", bswap );
+
+    std::ifstream is( filename.c_str() );
+
+    ItemReader<uint32_t> *itemR1 = DefaultItemReader<uint32_t>().reader(
+      ascii ? "ascii" : "binar", bswap );
+    ItemReader<double> *itemR2 = DefaultItemReader<double>().reader(
+      ascii ? "ascii" : "binar", bswap );
+
+    uint32_t size1 = 0U;
+    uint32_t size2 = 0U;
+    uint32_t nonZeroElementCount = 0U;
+    uint32_t k, s1, s2;
+    double value;
+
+    itemR1->read( is, size1 );
+    itemR1->read( is, size2 );
+    itemR1->read( is, nonZeroElementCount );
+
+    std::streampos p = is.tellg(), e;
+    is.seekg( 0, std::ios_base::end );
+    e = is.tellg();
+    is.seekg( p, std::ios_base::beg );
+    if( nonZeroElementCount > size1 * size2
+        || nonZeroElementCount * 16 != e - p )
+      throw carto::wrong_format_error( 
+        "Wrong format or corrupted .imas format", filename );
+
+    carto::Volume<T> *vol = new carto::Volume<T>( size2, size1 );
+    vol->fill( 0 );
+
+    for ( k = 0; k < nonZeroElementCount; k++ )
+    {
+      itemR1->read( is, s1 );
+      itemR1->read( is, s2 );
+      itemR2->read( is, value );
+      vol->at( s2, s1 ) = value;
+    }
+
+    obj = carto::rc_ptr<carto::Volume<T> >( vol );
+
+    is.close();
+
+    delete itemR1;
+    delete itemR2;
+
+    obj.setHeader( hdr );
+    return true;
+  }
+
+
+  template<class T>
+  bool ImasVolFormat<T>::write( const std::string & filename, 
+                                const AimsData<T> & obj, 
+                                carto::Object options )
+  {
+    bool ascii = false;
+    try
+    {
+      if( !options.isNull() )
+      {
+        carto::Object aso = options->getProperty( "ascii" );
+        if( !aso.isNull() )
+          ascii = (bool) aso->getScalar();
+      }
+    }
+    catch( ... )
+    {
+    }
+
+    std::ofstream os( filename.c_str() );
+
+    ItemWriter<uint32_t> *itemW1 = DefaultItemWriter<uint32_t>().writer(
+      ascii ? "ascii" : "binar", false );
+    ItemWriter<double> *itemW2 = DefaultItemWriter<double>().writer(
+      ascii ? "ascii" : "binar", false );
+
+    unsigned x, y, nx = obj.dimX(), ny = obj.dimY();
+    unsigned /*long*/ count = 0;
+
+    for( y=0; y<ny; ++y )
+    {
+      const T* buf = &obj( 0, y );
+      long inc = &obj( 1, y ) - buf;
+
+      for( x=0; x<nx; ++x, buf+=inc )
+        if( *buf != 0 )
+          ++count;
+    }
+
+    itemW1->write( os, obj.dimY() );
+    itemW1->write( os, obj.dimX() );
+    itemW1->write( os, count ); // WARNING should be 64 bits !
+
+    for( y=0; y<ny; ++y )
+    {
+      const T* buf = &obj( 0, y );
+      long inc = &obj( 1, y ) - buf;
+
+      for( x=0; x<nx; ++x, buf+=inc )
+        if( *buf != 0 )
+        {
+          itemW1->write( os, y );
+          itemW1->write( os, x );
+          itemW2->write( os, *buf );
+        }
+
+    }
+
+    os.close();
+    delete itemW1;
+    delete itemW2;
+
+    obj.header()->writeMinf( filename + ".minf" );
+    return true;
   }
 
 }

@@ -181,6 +181,7 @@ set( _headers
     sparsematrix/sparseMatrix.h
     sparsematrix/sparseMatrixItemR.h
     sparsematrix/sparseMatrixItemW.h
+    sparsematrix/sparseordensematrix.h
     texdata/texdata.h
     transformation/transformation.h
     transformation/affinetransformation3d.h
@@ -328,6 +329,7 @@ set( _sources
     sparsematrix/sparseMatrix.cc
     sparsematrix/sparseMatrixItemR.cc
     sparsematrix/sparseMatrixItemW.cc
+    sparsematrix/sparseordensematrix.cc
     transformation/transformation.cc
     transformation/affinetransformation3d.cc
     utility/boundingbox.cc

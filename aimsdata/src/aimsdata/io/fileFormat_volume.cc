@@ -630,6 +630,14 @@ FileFormatDictionary<AimsData<double> >::registerBaseFormats()
   vvf = new VolumeFormat<double>( "DICOM" );
   FileFormatDictionary<Volume<double> >::registerFormat( "DICOM", vvf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "imas" );
+  ImasVolFormat<double>     *svf = new ImasVolFormat<double>;
+  registerFormat( "IMASPARSE", svf, ext );
+  vvf = new VolumeFormat<double>( "IMASPARSE" );
+  FileFormatDictionary<Volume<double> >::registerFormat( "IMASPARSE", vvf, 
+                                                         ext );
 }
 
 template<> void 

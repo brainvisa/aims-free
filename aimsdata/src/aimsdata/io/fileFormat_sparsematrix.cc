@@ -57,14 +57,27 @@ FileFormatDictionary<SparseMatrix>::registerBaseFormats()
   registerFormat( "IMASPARSE", fm, ext );
 }
 
+
+template<> void
+FileFormatDictionary<SparseOrDenseMatrix>::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "imas" );
+  ImasSorDFormat      *fm = new ImasSorDFormat;
+  registerFormat( "IMASPARSE", fm, ext );
+}
+
 }
 
 template class FileFormatDictionary<SparseMatrix>;
 template class FileFormat<SparseMatrix>;
+template class FileFormatDictionary<SparseOrDenseMatrix>;
+template class FileFormat<SparseOrDenseMatrix>;
 
 static bool _sparsematdic()
 {
   FileFormatDictionary<SparseMatrix>::init();
+  FileFormatDictionary<SparseOrDenseMatrix>::init();
   return true;
 }
 

@@ -180,6 +180,7 @@ typedef unsigned short uint16_t;
 %Include interpolation.sip
 %Include rcptr_Interpolator.sip
 %Include sparsematrix.sip
+%Include sparseordensematrix.sip
 
 typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include surfacegenerator.sip
@@ -222,7 +223,9 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 
 %Include rawconverter_bucket_S16.sip
 %Include rcptr_SparseMatrix.sip
+%Include rcptr_SparseOrDenseMatrix.sip
 %Include reader_SparseMatrix.sip
+%Include reader_SparseOrDenseMatrix.sip
 
 %Include aimsgraphreader.sip
 %Include iotypes.sip

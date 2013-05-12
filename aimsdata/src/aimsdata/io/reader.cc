@@ -49,7 +49,7 @@
 #include <aims/resampling/motion.h>
 #include <graph/graph/graph.h>
 #include <aims/roi/hie.h>
-#include <aims/sparsematrix/sparseMatrix.h>
+#include <aims/sparsematrix/sparseordensematrix.h>
 
 using namespace aims;
 using namespace carto;
@@ -168,4 +168,5 @@ template class Reader<Motion>;
 template class Reader<GenericObject>;
 template class Reader<Object>;
 template class Reader<SparseMatrix>;
+template class Reader<SparseOrDenseMatrix>;
 

@@ -53,7 +53,7 @@ namespace aims
     hdr.getProperty( "byte_swapping", bswap );
     obj.read( filename, ascii ? "ascii" : "binar", bswap );
 
-    obj.setHeader( hdr );
+    obj.setHeader( Object::value( hdr.getValue() ) );
     return true;
   }
 
@@ -75,7 +75,28 @@ namespace aims
     {
     }
     obj.write( filename, ascii ? "ascii" : "binar" );
-    obj.header().writeMinf( filename + ".minf" );
+    PythonHeader( PointerObject<PropertySet>( 
+      obj.header()->value<PropertySet>(), false ) ).writeMinf( 
+        filename + ".minf" );
+    return true;
+  }
+
+
+  bool ImasSorDFormat::read( const std::string & filename, 
+                             SparseOrDenseMatrix & obj,
+                             const carto::AllocatorContext & /*context*/,
+                             carto::Object /* options */ )
+  {
+    obj.read( filename );
+    return true;
+  }
+
+
+  bool ImasSorDFormat::write( const std::string & filename,
+                              const SparseOrDenseMatrix & obj, 
+                              carto::Object options )
+  {
+    obj.write( filename, options );
     return true;
   }
 
