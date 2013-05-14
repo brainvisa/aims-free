@@ -92,6 +92,24 @@ namespace aims
       const carto::Object header() const;
       void setHeader( carto::Object ph );
 
+      /// get a shallow or deep copy in sparse shape
+      SparseMatrixType asSparse( bool copy=false ) const;
+      /// get a shallow or deep copy in dense shape
+      DenseMatrixType asDense( bool copy=false ) const;
+      void muteToDense();
+      void muteToSparse();
+      /// mute to sparse or dense according to the less memory consuming
+      void muteToOptimalShape();
+
+      SparseOrDenseMatrix &
+        operator += ( const SparseOrDenseMatrix& thing );
+      SparseOrDenseMatrix &
+        operator -= ( const SparseOrDenseMatrix& thing );
+      SparseOrDenseMatrix &
+        operator *= ( double x );
+      SparseOrDenseMatrix &
+        operator /= ( double x );
+
     protected:
 
       SparseMatrixType _sparsematrix;
@@ -101,6 +119,26 @@ namespace aims
   };
 
 }
+
+
+aims::SparseOrDenseMatrix
+  operator - ( const aims::SparseOrDenseMatrix & thing );
+
+aims::SparseOrDenseMatrix
+  operator + ( const aims::SparseOrDenseMatrix & thing1,
+               const aims::SparseOrDenseMatrix & thing2 );
+
+aims::SparseOrDenseMatrix
+  operator - ( const aims::SparseOrDenseMatrix & thing1,
+               const aims::SparseOrDenseMatrix & thing2 );
+
+aims::SparseOrDenseMatrix
+  operator * ( const aims::SparseOrDenseMatrix& thing1,
+               const double& thing2 );
+
+aims::SparseOrDenseMatrix
+  operator / ( const aims::SparseOrDenseMatrix & thing1,
+               const double& thing2 );
 
 
 #ifndef DOXYGEN_HIDE_INTERNAL_CLASSES

@@ -50,7 +50,40 @@ namespace aims
       carto::Object header();
       void setHeader( carto::Object ph );
 
+      SparseMatrixType asSparse( bool copy=false ) const;
+      DenseMatrixType asDense( bool copy=false ) const;
+      void muteToDense();
+      void muteToSparse();
+      void muteToOptimalShape();
+
+      aims::SparseOrDenseMatrix &
+        operator += ( const aims::SparseOrDenseMatrix& thing );
+      aims::SparseOrDenseMatrix &
+        operator -= ( const aims::SparseOrDenseMatrix& thing );
+      aims::SparseOrDenseMatrix &
+        operator *= ( double x );
+      aims::SparseOrDenseMatrix &
+        operator /= ( double x );
   };
 
 };
 
+
+aims::SparseOrDenseMatrix
+  operator - ( const aims::SparseOrDenseMatrix & thing );
+
+aims::SparseOrDenseMatrix
+  operator + ( const aims::SparseOrDenseMatrix & thing1,
+               const aims::SparseOrDenseMatrix & thing2 );
+
+aims::SparseOrDenseMatrix
+  operator - ( const aims::SparseOrDenseMatrix & thing1,
+               const aims::SparseOrDenseMatrix & thing2 );
+
+aims::SparseOrDenseMatrix
+  operator * ( const aims::SparseOrDenseMatrix& thing1,
+               const double& thing2 );
+
+aims::SparseOrDenseMatrix
+  operator / ( const aims::SparseOrDenseMatrix & thing1,
+               const double& thing2 );

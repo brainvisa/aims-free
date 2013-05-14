@@ -62,8 +62,43 @@ namespace aims
 
       carto::Object header();
 
+      aims::SparseMatrix &
+        operator += ( const aims::SparseMatrix& thing );
+      aims::SparseMatrix &
+        operator -= ( const aims::SparseMatrix& thing );
+      aims::SparseMatrix &
+        operator *= ( double x );
+      aims::SparseMatrix &
+        operator /= ( double x );
   };
 
 };
 
+
+aims::SparseMatrix 
+    operator - ( const aims::SparseMatrix& thing );
+
+aims::SparseMatrix
+    operator + ( const aims::SparseMatrix& thing1,
+                 const aims::SparseMatrix& thing2 );
+
+aims::SparseMatrix
+    operator - ( const aims::SparseMatrix& thing1,
+                 const aims::SparseMatrix& thing2 );
+
+aims::SparseMatrix
+    operator * ( const aims::SparseMatrix& thing1,
+                 const aims::SparseMatrix& thing2 );
+
+vector_DOUBLE
+    operator * ( const aims::SparseMatrix& thing1,
+                 const vector_DOUBLE & thing2 );
+
+aims::SparseMatrix
+    operator * ( const aims::SparseMatrix& thing1,
+                 const double& thing2 );
+
+aims::SparseMatrix
+    operator / ( const aims::SparseMatrix& thing1,
+                 const double& thing2 );
 

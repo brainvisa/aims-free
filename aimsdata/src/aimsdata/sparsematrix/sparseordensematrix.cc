@@ -35,6 +35,7 @@
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <aims/io/finder.h>
+#include <cartodata/volume/volumeoperators.h>
 #include <cartobase/object/object_d.h>
 
 using namespace aims;
@@ -120,10 +121,11 @@ int32_t SparseOrDenseMatrix::getNonZeroElementCount() const
     long inc;
     unsigned long count = 0;
 
-    for( y=0; y<ny; ++ny )
+    inc = &denseMatrix()->at( 1, 0 ) - &denseMatrix()->at( 0, 0 );
+
+    for( y=0; y<ny; ++y )
     {
       buf = &denseMatrix()->at( 0, y );
-      inc = &denseMatrix()->at( 1, y ) - buf;
       for( x=0; x<nx; ++x, buf += inc )
         if( *buf != 0 )
           ++count;
@@ -339,6 +341,235 @@ void SparseOrDenseMatrix::setHeader( Object ph )
     sparseMatrix()->header() = ph;
 }
 
+
+// mutations
+
+SparseOrDenseMatrix::SparseMatrixType SparseOrDenseMatrix::asSparse( 
+  bool copy ) const
+{
+  if( !isDense() )
+  {
+    if( copy )
+      return SparseMatrixType( new SparseMatrix( *sparseMatrix() ) );
+    else
+      return sparseMatrix();
+  }
+
+  unsigned l, c, nl = _densematrix->getSizeY(), nc = _densematrix->getSizeX();
+  SparseMatrixType sparse( new SparseMatrix( nl, nc ) );
+  double *ptr;
+  long inc;
+
+  inc = &_densematrix->at( 1, 0 ) - &_densematrix->at( 0, 0 );
+
+  for( l=0; l<nl; ++l )
+  {
+    ptr = &_densematrix->at( 0, l );
+    for( c=0; c<nc; ++c, ptr += inc )
+      if( *ptr != 0 )
+        (*sparse)( l, c ) = *ptr;
+  }
+
+  return sparse;
+}
+
+
+SparseOrDenseMatrix::DenseMatrixType SparseOrDenseMatrix::asDense( 
+  bool copy ) const
+{
+  if( isDense() )
+  {
+    if( copy )
+      return DenseMatrixType( new Volume<double>( *denseMatrix() ) );
+    else
+      return denseMatrix();
+  }
+
+  DenseMatrixType dense( _sparsematrix->getSize2(), 
+                         _sparsematrix->getSize1() );
+  dense.fill( 0 );
+  SparseMatrix::const_iterator1 i, e = _sparsematrix->end1();
+  SparseMatrix::const_iterator2 j, ej;
+
+  for( i=_sparsematrix->begin1(); i!=e; ++i )
+    for( j=i.begin(), ej=i.end(); j!=ej; ++j )
+      dense->at( j.index2(), j.index1() ) = *j;
+
+  return dense;
+}
+
+
+void SparseOrDenseMatrix::muteToDense()
+{
+  DenseMatrixType dense = asDense();
+  setMatrix( dense );
+}
+
+
+void SparseOrDenseMatrix::muteToSparse()
+{
+  SparseMatrixType sparse = asSparse();
+  setMatrix( sparse );
+}
+
+
+void SparseOrDenseMatrix::muteToOptimalShape()
+{
+  if( getNonZeroElementCount() * 8 < getSize1() * getSize2() )
+    muteToSparse();
+  else
+    muteToDense();
+}
+
+
+// operators
+
+SparseOrDenseMatrix &
+  SparseOrDenseMatrix::operator += ( const SparseOrDenseMatrix& thing )
+{
+  if( !isDense() && thing.isDense() )
+    muteToDense();
+
+  if( isDense() )
+  {
+    if( thing.isDense() )
+      _densematrix += thing.denseMatrix();
+    else // dense + sparse
+    {
+      SparseMatrix::const_iterator1 il, el = thing.sparseMatrix()->end1();
+      SparseMatrix::const_iterator2 ic, ec;
+      for( il=thing.sparseMatrix()->begin1(); il!=el; ++il )
+        for( ic=il.begin(), ec=il.end(); ic!=ec; ++ic )
+          _densematrix->at( ic.index2(), ic.index1() ) += *ic;
+    }
+  }
+  else // sparse case
+    *_sparsematrix += *thing.sparseMatrix();
+
+  return *this;
+}
+
+
+SparseOrDenseMatrix &
+  SparseOrDenseMatrix::operator -= ( const SparseOrDenseMatrix& thing )
+{
+  if( !isDense() && thing.isDense() )
+    muteToDense();
+
+  if( isDense() )
+  {
+    if( thing.isDense() )
+      _densematrix -= thing.denseMatrix();
+    else // dense - sparse
+    {
+      SparseMatrix::const_iterator1 il, el = thing.sparseMatrix()->end1();
+      SparseMatrix::const_iterator2 ic, ec;
+      for( il=thing.sparseMatrix()->begin1(); il!=el; ++il )
+        for( ic=il.begin(), ec=il.end(); ic!=ec; ++ic )
+          _densematrix->at( ic.index2(), ic.index1() ) += *ic;
+    }
+  }
+  else // sparse case
+    *_sparsematrix -= *thing.sparseMatrix();
+
+  return *this;
+}
+
+
+SparseOrDenseMatrix &
+  SparseOrDenseMatrix::operator *= ( double x )
+{
+  if( isDense() )
+    _densematrix *= x;
+  else
+    *sparseMatrix() *= x;
+
+  return *this;
+}
+
+
+SparseOrDenseMatrix &
+  SparseOrDenseMatrix::operator /= ( double x )
+{
+  if( isDense() )
+    _densematrix /= x;
+  else
+    *sparseMatrix() /= x;
+
+  return *this;
+}
+
+
+SparseOrDenseMatrix
+  operator - ( const SparseOrDenseMatrix & thing )
+{
+  SparseOrDenseMatrix copy( thing );
+  copy *= -1;
+  return copy;
+}
+
+
+SparseOrDenseMatrix
+  operator + ( const SparseOrDenseMatrix & thing1,
+               const SparseOrDenseMatrix & thing2 )
+{
+  if( thing1.isDense() || !thing2.isDense() )
+  {
+    // force dense copy of thing1
+    SparseOrDenseMatrix copy;
+    copy.setMatrix( thing1.asDense( true ) );
+    copy += thing2;
+    return copy;
+  }
+  // thing2 is dense
+  SparseOrDenseMatrix copy( thing2 );
+  copy += thing1;
+  return copy;
+}
+
+
+SparseOrDenseMatrix
+  operator - ( const SparseOrDenseMatrix & thing1,
+               const SparseOrDenseMatrix & thing2 )
+{
+  if( thing1.isDense() || thing2.isDense() )
+  {
+    // force dense copy of thing1
+    SparseOrDenseMatrix copy;
+    copy.setMatrix( thing1.asDense( true ) );
+    copy -= thing2;
+    return copy;
+  }
+  // thing2 is dense
+  SparseOrDenseMatrix copy( thing2 );
+  copy *= -1; // FIXME: sub-optimal...
+  copy += thing1;
+  return copy;
+
+}
+
+
+SparseOrDenseMatrix
+  operator * ( const SparseOrDenseMatrix& thing1,
+               const double& thing2 )
+{
+  SparseOrDenseMatrix copy( thing1 );
+  copy *= thing2;
+  return copy;
+}
+
+
+SparseOrDenseMatrix
+  operator / ( const SparseOrDenseMatrix & thing1,
+               const double& thing2 )
+{
+  SparseOrDenseMatrix copy( thing1 );
+  copy *= thing2;
+  return copy;
+}
+
+
+// ---
 
 namespace carto 
 {

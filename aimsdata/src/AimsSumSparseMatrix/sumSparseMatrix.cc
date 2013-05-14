@@ -1,5 +1,5 @@
 #include <aims/getopt/getopt2.h>
-#include <aims/sparsematrix/sparseMatrix.h>
+#include <aims/sparsematrix/sparseordensematrix.h>
 
 using namespace aims;
 using namespace carto;
@@ -17,7 +17,7 @@ int main( int argc, const char* argv[] )
     AimsApplication app( argc, argv, "Sum Sparse Matrices" );
     app.addOptionSeries(sparseMatrixFileNames, "-i", "input sparse matrices filenames");
     app.addOption(outputSumSparseMatrixFileName, "-o", "output sparse matrix: sum of the input matrices");
-    app.addOption(matrixFormat, "-fmt", "input sparse format: binary or ascii, default = binar", true);
+    app.addOption(matrixFormat, "-fmt", "output sparse format: binary or ascii, default = binar", true);
     app.addOption( verbose, "-verbose", "show as much information as possible", true );
     app.initialize();
 
@@ -27,8 +27,10 @@ int main( int argc, const char* argv[] )
     {
       throw std::runtime_error( "Not input matrices...");
     }
-    aims::SparseMatrix sumSparseMatrix;
-    sumSparseMatrix.read( sparseMatrixFileNames[0], matrixFormat );
+
+    aims::SparseOrDenseMatrix sumSparseMatrix;
+    Reader<SparseOrDenseMatrix>( sparseMatrixFileNames[0] ).read( 
+      sumSparseMatrix );
 
     if( verbose ) cout << " done.\n";
 
@@ -37,23 +39,28 @@ int main( int argc, const char* argv[] )
     uint n = sparseMatrixFileNames.size();
     for (uint mat = 1; mat < n; ++mat)
     {
-      aims::SparseMatrix currentSparseMatrix;
+      aims::SparseOrDenseMatrix currentSparseMatrix;
       if( verbose )
         cout << "reading matrix " << mat+1 << " / " << n << "..." << flush;
-      currentSparseMatrix.read( sparseMatrixFileNames[mat], matrixFormat );
+      Reader<SparseOrDenseMatrix>( sparseMatrixFileNames[mat] ).read( 
+        currentSparseMatrix );
       if( verbose ) cout << " done.\n";
       if( currentSparseMatrix.getSize1()==size1
           and currentSparseMatrix.getSize2() == size2 )
       {
         sumSparseMatrix += currentSparseMatrix;
         if( verbose ) cout << "Added.\n";
+        sumSparseMatrix.muteToOptimalShape();
+        if( verbose ) cout << "(reshaped).\n";
       }
       else
       {
         throw std::runtime_error( "matrices of different sizes" );
       }
     }
-    sumSparseMatrix.write( outputSumSparseMatrixFileName, matrixFormat );
+
+    Writer<SparseOrDenseMatrix>( outputSumSparseMatrixFileName ).write( 
+      sumSparseMatrix, matrixFormat == "ascii" );
 
     return EXIT_SUCCESS;
   }
