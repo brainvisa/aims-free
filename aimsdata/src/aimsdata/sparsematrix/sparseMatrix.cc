@@ -36,6 +36,7 @@
 #include <aims/sparsematrix/sparseMatrixItemW.h>
 #include <cartobase/object/object_d.h>
 #include <fstream>
+#include <boost/numeric/ublas/matrix.hpp>
 
 using namespace aims;
 using namespace carto;
