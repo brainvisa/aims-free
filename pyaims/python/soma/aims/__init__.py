@@ -210,15 +210,15 @@ class Reader:
                         'Segments' : \
                         { 'VOID' : 'AimsTimeSurface_2',
                           'default_object_type' : 'AimsTimeSurface_2',
-                          },
+                        },
                         'Mesh' : \
                         { 'VOID' : 'AimsTimeSurface_3',
                           'default_object_type' : 'AimsTimeSurface_3',
-                          },
+                        },
                         'Mesh4' : \
                         { 'VOID' : 'AimsTimeSurface_4',
                           'default_object_type' : 'AimsTimeSurface_4',
-                          },
+                        },
                         'Graph' : { 'VOID' : 'Graph', },
                         'AffineTransformation3d' : \
                         { 'VOID' : 'AffineTransformation3d', },
@@ -227,7 +227,9 @@ class Reader:
                         'Tree' : { 'hierarchy' : 'Hierarchy' },
                         'genericobject' : { 'any' : 'Object' },
                         'SparseMatrix' : { 'DOUBLE' : 'SparseMatrix' },
-                        }
+                        'SparseOrDenseMatrix' : { 'DOUBLE' : 
+                                                  'SparseOrDenseMatrix' },
+                      }
     else:
       self._typemap = typemap
     if allocmode is None:
