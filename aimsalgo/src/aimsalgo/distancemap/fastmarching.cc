@@ -221,7 +221,8 @@ namespace
 
 
   template <typename T>
-  float update( int x, int y, int z, int seed_front,
+  float update( int x, int y, int z,
+                typename StorageTrait<T>::VoxelType seed_front,
                 const FastMarchingPrivateStruct<T> & fps )
   {
     vector<float> delta_ux(2);
@@ -522,13 +523,13 @@ namespace
     }
     ++iter;
     float u;
-    int16_t seed_front = fps.seed.at( pos_min );
+    typename StorageTrait<T>::VoxelType seed_front = fps.seed.at( pos_min );
     front.erase(itmap);
     status.setValue( active, pos_min );
 
     bool mid = false;
     float dist_neighbour = FLT_MAX;
-    int16_t seed_neighbour = 0;
+    typename StorageTrait<T>::VoxelType seed_neighbour = 0;
     float dist_tmp;
 
     for(i = 0;i < n; ++i)
