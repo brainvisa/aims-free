@@ -33,23 +33,28 @@
 
 #include <aims/qtcompat/qtoolbutton.h>
 #include <qtoolbar.h>
+#include <qaction.h>
 
 
-#if QT_VERSION >= 0x040000
-Q34ToolButton::Q34ToolButton( const QIcon & s, 
-                              const QString & textLabel, 
-                              const QString & grouptext, QObject * receiver, 
-                              const char * slot, QToolBar * parent, 
-                              const char * name ) 
-  : QToolButton( s, textLabel, grouptext, receiver, slot, parent, name )
+QAToolButton::QAToolButton( const QIcon & s,
+                            const QString & textLabel, 
+                            const QString & grouptext, QObject * receiver, 
+                            const char * slot, QToolBar * parent, 
+                            const char * name ) 
+  : QToolButton( parent )
 {
   // taken fom QToolBar code
   // there is apparently no simple way to do this in Qt 4...
   setAutoRaise( true );
   setFocusPolicy( Qt::NoFocus );
+  setObjectName( name );
+  QAction *ac = new QAction( s, textLabel, this );
+  ac->setToolTip( grouptext );
+  setIconSize( parent->iconSize() );
+  setDefaultAction( ac );
+  setCheckable( true );
   if( parent )
   {
-    setIconSize( parent->iconSize() );
     setToolButtonStyle( parent->toolButtonStyle() );
     connect( parent, SIGNAL( iconSizeChanged( QSize ) ),
             this, SLOT( setIconSize( QSize ) ) );
@@ -57,10 +62,12 @@ Q34ToolButton::Q34ToolButton( const QIcon & s,
             this, SLOT( setToolButtonStyle( Qt::ToolButtonStyle ) ) );
     parent->addWidget( this );
   }
+  if( receiver && slot )
+    connect( defaultAction(), SIGNAL( triggered() ), receiver, slot );
 }
 
 
-Q34ToolButton::Q34ToolButton( QToolBar * parent )
+QAToolButton::QAToolButton( QToolBar * parent )
   : QToolButton( parent )
 {
   // taken fom QToolBar code
@@ -79,39 +86,19 @@ Q34ToolButton::Q34ToolButton( QToolBar * parent )
   }
 }
 
-#else // Qt 3
 
-Q34ToolButton::Q34ToolButton( const QIconSet & s, 
-                              const QString & textLabel, 
-                              const QString & grouptext, QObject * receiver, 
-                              const char * slot, QToolBar * parent, 
-                              const char * name ) 
-  : QToolButton( s, textLabel, grouptext, receiver, slot, parent, name )
-{
-}
-
-
-Q34ToolButton::Q34ToolButton( QToolBar * parent )
-  : QToolButton( parent )
-{
-}
-
-#endif
-
-
-Q34ToolButton::~Q34ToolButton()
+QAToolButton::~QAToolButton()
 {
 }
 
 // -----
 
-#if QT_VERSION >= 0x040000
 QToolButtonInt::QToolButtonInt( int par, const QIcon & s, 
 				const QString & textLabel, 
 				const QString & grouptext, QObject * receiver, 
 				const char * slot, QToolBar * parent, 
 				const char * name ) 
-  : Q34ToolButton( s, textLabel, grouptext, 0, 0, parent, name ), param( par )
+  : QAToolButton( s, textLabel, grouptext, 0, 0, parent, name ), param( par )
 {
   connect( this, SIGNAL( clicked() ), this, SLOT( propagateSignal() ) );
   if( receiver && slot )
@@ -120,7 +107,7 @@ QToolButtonInt::QToolButtonInt( int par, const QIcon & s,
 
 
 QToolButtonInt::QToolButtonInt( int par, QToolBar * parent )
-  : Q34ToolButton( parent ), param( par )
+  : QAToolButton( parent ), param( par )
 {
   connect( this, SIGNAL( clicked() ), this, SLOT( propagateSignal() ) );
   // taken fom QToolBar code
@@ -138,29 +125,6 @@ QToolButtonInt::QToolButtonInt( int par, QToolBar * parent )
   }
 }
 
-#else // Qt 3
-
-QToolButtonInt::QToolButtonInt( int par, const QIconSet & s, 
-				const QString & textLabel, 
-				const QString & grouptext, QObject * receiver, 
-				const char * slot, QToolBar * parent, 
-				const char * name ) 
-  : Q34ToolButton( s, textLabel, grouptext, 0, 0, parent, name ), param( par )
-{
-  connect( this, SIGNAL( clicked() ), this, SLOT( propagateSignal() ) );
-  if( receiver && slot )
-    connect( this, SIGNAL( activated( int ) ), receiver, slot );
-}
-
-
-QToolButtonInt::QToolButtonInt( int par, QToolBar * parent )
-  : Q34ToolButton( parent ), param( par )
-{
-  connect( this, SIGNAL( clicked() ), this, SLOT( propagateSignal() ) );
-}
-
-#endif
-
 
 QToolButtonInt::~QToolButtonInt()
 {
@@ -170,21 +134,21 @@ QToolButtonInt::~QToolButtonInt()
 void QToolButtonInt::dragEnterEvent( QDragEnterEvent* ev )
 {
   // cout << "QToolButtonInt::dragEnterEvent\n";
-  emit( dragEntered( param, ev ) );
+  emit dragEntered( param, ev );
 }
 
 
 void QToolButtonInt::dragMoveEvent( QDragMoveEvent* ev )
 {
   // cout << "QToolButtonInt::dragMoveEvent\n";
-  emit( dragMoved( param, ev ) );
+  emit dragMoved( param, ev );
 }
 
 
 void QToolButtonInt::dropEvent( QDropEvent* ev )
 {
   // cout << "QToolButtonInt::dropEvent\n";
-  emit( dropped( param, ev ) );
+  emit dropped( param, ev );
 }
 
 

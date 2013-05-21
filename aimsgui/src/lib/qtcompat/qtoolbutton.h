@@ -42,49 +42,35 @@ class QToolBar;
 /** A QToolButton that behaves like the QToolButton of Qt3: it inserts 
     nicely and automatically in a QToolbar, which Qt4 doen't provide
  */
-class Q34ToolButton : public QToolButton
+class QAToolButton : public QToolButton
 {
   Q_OBJECT
 
 public:
-#if QT_VERSION >= 0x040000
-  Q34ToolButton( const QIcon & s, const QString & textLabel, 
-                 const QString & grouptext, QObject * receiver, 
-                 const char * slot, QToolBar * parent, 
-                 const char * name = 0 );
-#else
-  Q34ToolButton( const QIconSet & s, const QString & textLabel, 
-                 const QString & grouptext, QObject * receiver, 
-                 const char * slot, QToolBar * parent, 
-                 const char * name = 0 );
-#endif
+  QAToolButton( const QIcon & s, const QString & textLabel,
+                const QString & grouptext, QObject * receiver,
+                const char * slot, QToolBar * parent,
+                const char * name = 0 );
   /// This constructor conforms to Qt4's ToolButton
-  Q34ToolButton( QToolBar * parent );
-  virtual ~Q34ToolButton();
+  QAToolButton( QToolBar * parent );
+  virtual ~QAToolButton();
 };
 
 
 /** A variant of Qt's QToolButton that allows to store an int identifier, 
     and provides signal / slot support for drag & drop
  */
-class QToolButtonInt : public Q34ToolButton
+class QToolButtonInt : public QAToolButton
 {
   Q_OBJECT
 
 public:
   typedef void (*callback)( int, QDropEvent* );
 
-#if QT_VERSION >= 0x040000
   QToolButtonInt( int par, const QIcon & s, const QString & textLabel, 
-		  const QString & grouptext, QObject * receiver, 
-		  const char * slot, QToolBar * parent, 
-		  const char * name = 0 );
-#else
-  QToolButtonInt( int par, const QIconSet & s, const QString & textLabel, 
-		  const QString & grouptext, QObject * receiver, 
-		  const char * slot, QToolBar * parent, 
-		  const char * name = 0 );
-#endif
+                  const QString & grouptext, QObject * receiver,
+                  const char * slot, QToolBar * parent,
+                  const char * name = 0 );
   /// This constructor conforms to Qt4's ToolButton
   QToolButtonInt( int par, QToolBar * parent );
   virtual ~QToolButtonInt();
