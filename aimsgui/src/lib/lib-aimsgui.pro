@@ -10,6 +10,7 @@ HEADERS = selection/labelselector.h \
     listview/editablelistviewitem.h \
     listview/orderinglist.h \
     listview/qalistview.h \
+    listview/qatreewidget.h \
     listview/qpython.h \
     attributedview/attributedview.h \
     graph/qsqlgraphdatabase.h \
@@ -50,6 +51,7 @@ SOURCES = graph/qsqlgraphdatabase.cc \
     listview/editablelistviewitem.cc \
     listview/orderinglist.cc \
     listview/qalistview.cc \
+    listview/qatreewidget.cc \
     listview/qpython.cc \
     attributedview/attributedview.cc \
     plugin/plugin.cc \
