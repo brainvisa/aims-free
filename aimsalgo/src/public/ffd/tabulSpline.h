@@ -40,7 +40,7 @@
 #include <aims/data/data_g.h>
 #include <aims/math/bspline3.h>
 #include <aims/math/bspline2.h>
-using namespace aims;
+// using namespace aims;
 
 
 
@@ -48,50 +48,78 @@ using namespace aims;
 class TabulSpline
 {
  public:
-               TabulSpline( std::string name, int  order=3, int length=65537);
-  virtual     ~TabulSpline() ;
-
-  float        spline3( double ) const ;
-  float        spline3derivative( double ) const ;
+               TabulSpline( std::string name, int  order = 3, int length = 65537, int factor = 2);
+  virtual     ~TabulSpline();
+  
+  int          index( double u ) const;
+  bool         isvalid( int index ) const;
+  int          getFactor() const;
+  int          getTabLength() const;
+  float        spline3( double ) const;
+  float        spline3derivative( double ) const;
   float        dump( int i ) const {return _splineCoef[i];}
 
  private:
   std::string _name;
 
+  int                     _factor;
   int                     _splineTabLength;
   float                   *_splineCoef;
   float                   *_derivatedSplineCoef ;  
 };
 
+inline int 
+TabulSpline::getTabLength() const
+{
+  return _splineTabLength;
+}
+
+inline int 
+TabulSpline::getFactor() const
+{
+  return _factor;
+}
+
+inline int 
+TabulSpline::index( double u ) const
+{
+  return (int)( fabs(u) * (_splineTabLength - 1) / _factor );
+}
+
+inline bool
+TabulSpline::isvalid( int index ) const
+{
+  return ( index >= 0 && index < _splineTabLength );
+}
 
 inline float 
 TabulSpline::spline3( double u ) const
 {
-/*   if ((u>2) || (u < -2)) */
-/*     cout << "valeur de u " << u << endl; */
-  int index = static_cast<int>( 0.25*fabs(u)*(_splineTabLength-1) ) ;
-  
-  if( index < 0 || index >= _splineTabLength ){
-     //std::cerr << "Spline3 : Index " << index << " corresponding to parameter " << u << " out of tabulspline : " << _splineTabLength << std::endl ;
+  int i = index(u);
+  if ( !isvalid( i ) ){
+     std::cerr << "Spline3 : Index " << carto::toString(i) 
+               << " corresponding to parameter " << carto::toString(u) 
+               << " out of tabulspline : " << _splineTabLength << std::endl;
      return 0. ;
   }
-  return _splineCoef[ index ] ;
+  return _splineCoef[ i ] ;
 }
 
 
 inline float 
-TabulSpline::spline3derivative( double u) const
+TabulSpline::spline3derivative( double u ) const
 {
-  int index = static_cast<int>(0.25*fabs(u)*(_splineTabLength-1 ) ) ;
-
-  if( index < 0 || index >= _splineTabLength ){
-     //std::cerr << "Spline3 derivatives : Index " << index << " corresponding to parameter " << u << " out of tabulspline" << _splineTabLength << std::endl ;
+  int i = index(u);
+  if ( !isvalid( i ) ) {
+     std::cerr << "Spline3 derivatives : Index " << carto::toString(i) 
+               << " corresponding to parameter " << carto::toString(u) 
+               << " out of tabulspline" << _splineTabLength << std::endl;
      return 0. ;
   }
   
   if (u > 0.0)
-    return _derivatedSplineCoef[ index ];
+    return _derivatedSplineCoef[ i ];
   else
-    return(- _derivatedSplineCoef[ index ]);
+    return(- _derivatedSplineCoef[ i ]);
 }
 #endif

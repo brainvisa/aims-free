@@ -40,22 +40,22 @@
 using namespace std;
 
 
-TabulSpline::TabulSpline( string name, int  order, int length) :
-  _name (name ),_splineTabLength( length+1 ) 
+TabulSpline::TabulSpline( string name, int  order, int length, int factor) :
+  _name(name), _splineTabLength(length + 1), _factor(factor)
 {
   if (order != 3)
     {
       cerr << "Only cubic spline are tabulated. Stop." << endl;
       exit(1);
     }
-
+    
+  float parameter;
   _splineCoef          = new float[ _splineTabLength ] ;
   _derivatedSplineCoef = new float[ _splineTabLength ] ;
   
   for(int i=0; i < _splineTabLength; i++)
     {
-      float parameter = 4.0 * (float) i / (_splineTabLength -1) ;
-
+      parameter = (float) i * _factor / (_splineTabLength - 1) ;
       _splineCoef[i] = betaSpline3( parameter );
       _derivatedSplineCoef[i] = betaSpline2( parameter + 0.5 ) -
                                 betaSpline2( parameter - 0.5 ) ;
