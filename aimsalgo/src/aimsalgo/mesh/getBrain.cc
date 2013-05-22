@@ -146,8 +146,8 @@ void Mesher::getWhite( const AimsData<short>& thing,
   cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
 
   // smoothes the vertex coordinates
-  //  getSmoothedVertices( vfac, surface.vertex(), 180.0, 5, 0.4, 0.4, 0.4 );
-  //  getSmoothedVertices( vfac, surface.vertex(), 180.0, 5, 0.4, 0.4, 0.4 );
+  //  getSmoothedVertices( vfac, surface, 0.4 );
+  //  getSmoothedVertices( vfac, surface, 0.4 );
 
   // decimates the mesh
   float initialMeshSize = (float)vfac.size();
@@ -162,8 +162,8 @@ void Mesher::getWhite( const AimsData<short>& thing,
   float finalMeshSize = (float)vfac.size();
 
   // smoothes the vertex coordinates
-  //  getSmoothedVertices( vfac, surface.vertex(), 180.0, 3, 0.2, 0.2, 0.2 );
-  //  getSmoothedVertices( vfac, surface.vertex(), 180.0, 5, 0.2, 0.2, 0.2 );
+  //  getSmoothedVertices( vfac, surface, 0.2 );
+  //  getSmoothedVertices( vfac, surface, 0.2 );
 
   // gets the normals by taking the average of all the 
   // normals of the neighbors of a facet
