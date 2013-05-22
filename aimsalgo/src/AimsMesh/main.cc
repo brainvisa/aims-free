@@ -52,9 +52,12 @@ int main(int argc, const char *argv[])
       int labelInf = 1, labelSup = 32767;
       float minSurf = 0.0;
       bool smoothFlag = false;
+      Mesher::SmoothingType smoothType = Mesher::LOWPASS;
+      string smoothTypeStr = "lowpass";
       int smoothIt = 10;
       float smoothRate = 0.2;
       float smoothAngle = 180.0;
+      float smoothForce = 0.2;
       int deciFlag = 0;
       float	deciReductionRate = 99.0;
       float	deciMaxClearance = 10.0;
@@ -64,8 +67,11 @@ int main(int argc, const char *argv[])
       bool ascii = false;
       int minFacetNumber = 50;
 
-      AimsApplication	app( argc, argv, "Extracts triangulation in a label " 
-                             "short volume" );
+      //
+      // parse options
+      //
+      AimsApplication app( argc, argv, "Extracts triangulation in a label " 
+                           "short volume" );
       app.addOption( fileIn, "-i", "input short volume label (level 0 is " 
                      "assumed to be the background)" );
       app.alias( "--input", "-i" );
@@ -88,13 +94,20 @@ int main(int argc, const char *argv[])
       app.alias( "-Surface", "-S" );
       app.addOption( smoothFlag, "--smooth", "smoothes the mesh [default=no " 
                      "smoothing]", true );
+      app.addOption( smoothTypeStr, "--smoothType", "smoothing alorithm's type : " 
+                     "laplacian, simplespring, polygonspring or lowpass " 
+                     "[default=lowpass]", true );
       app.addOption( smoothIt, "--smoothIt", "smoothing number of iterations " 
                      "[default=10]", true );
       app.addOption( smoothRate, "--smoothRate", "smoothing moving factor at " 
                      "each iteration [default=0.2]", true );
-      app.addOption( smoothAngle, "--smoothAngle", "smoothing feature angle " 
-                     "in degrees between 0 and 180 degrees, [default=180]", 
-                     true );
+      app.addOption( smoothAngle, "--smoothAngle", 
+                     "smoothing feature angle (in degrees) below which the vertex "
+                     "is not moved, only for the Laplacian algorithm, between 0 and 180 "
+                     "degree [default=0]", true );
+      app.addOption( smoothForce, "--smoothForce", "smoothing restoring force for "
+                     "the Simple Spring and Polygon Spring algorithm, between 0 and 1 "
+                     "[default=0.2]", true );
       app.addOption( deciFlag, "--decimation", "decimate the mesh " 
                      "[default=no decimation]", true );
       app.addOption( deciReductionRate, "--deciReductionRate", 
@@ -117,15 +130,28 @@ int main(int argc, const char *argv[])
 
       app.initialize();
 
+      //
+      // chek options
+      //
       ASSERT( labelInf >= 0 && labelInf <= labelSup && labelSup <= 32767);
       ASSERT( minSurf >= 0.0 );
       ASSERT( smoothIt > 0 );
       ASSERT( smoothAngle >= 0.0 && smoothAngle <= 180.0 );
+      ASSERT( smoothForce >= 0.0 && smoothForce <= 1.0 );
       ASSERT( smoothRate >= 0.0 && smoothRate <= 1.0 );
       ASSERT( deciReductionRate >= 0.0 && deciReductionRate <= 100.0 );
       ASSERT( deciMaxClearance >= 0.0 );
       ASSERT( deciMaxError >= 0.0 );
       ASSERT( deciAngle >= 0.0 && deciAngle <= 180.0 );
+      
+      if( smoothTypeStr == "laplacian" )
+        smoothType = Mesher::LAPLACIAN;
+      else if ( smoothTypeStr == "lowpass" )
+        smoothType = Mesher::LOWPASS;
+      else if ( smoothTypeStr == "simplespring" )
+        smoothType = Mesher::SIMPLESPRING;
+      else if ( smoothTypeStr == "polygonspring" )
+        smoothType = Mesher::POLYGONSPRING;
 
       if ( fout.empty() )
         {
@@ -160,8 +186,13 @@ int main(int argc, const char *argv[])
       cout << "label superior     : " << labelSup << endl;
 
       if ( smoothFlag )
-        mesher.setSmoothing( smoothAngle, smoothIt, 
-                             smoothRate, smoothRate, smoothRate );
+      {
+        mesher.setSmoothing( smoothType, smoothIt, smoothRate );
+        if ( smoothType == Mesher::LAPLACIAN )
+          mesher.setSmoothingLaplacian( smoothAngle );
+        if ( smoothType == Mesher::SIMPLESPRING or smoothType == Mesher::POLYGONSPRING )
+          mesher.setSmoothingSpring( smoothForce );
+      }
       if ( deciFlag )
         mesher.setDecimation( deciReductionRate, deciMaxClearance,
                               deciMaxError, deciAngle );
