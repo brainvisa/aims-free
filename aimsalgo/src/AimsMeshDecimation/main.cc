@@ -47,9 +47,12 @@ int main( int argc, const char** argv )
 { 
   // char *fileIn = NULL, *fileOut = NULL;
   int smoothFlag = 0;
+  Mesher::SmoothingType smoothType = Mesher::LOWPASS;
+  string smoothTypeStr = "lowpass";
   int smoothIt = 10;
   float smoothRate = 0.2;
   float smoothAngle = 180.0;
+  float smoothForce = 0.2;
   float deciReductionRate = 99.0;
   float deciMaxClearance = 10.0;
   float deciMaxError = 10.0 ;
@@ -73,14 +76,21 @@ int main( int argc, const char** argv )
   app.alias( "--output", "-o" );
   app.addOption( smoothFlag, "--smooth",
                  "smoothes the mesh [default is no smoothing]", true );
+  app.addOption( smoothTypeStr, "--smoothType", "smoothing alorithm's type : "
+                 "laplacian, simplespring, polygonspring or lowpass "
+                 "[default=lowpass]", true );
   app.addOption( smoothIt, "--smoothIt",
                  "smoothing number of iterations [default=10]", true );
   app.addOption( smoothRate, "--smoothRate",
                  "smoothing moving factor at each iteration [default=0.2]",
                  true );
   app.addOption( smoothAngle, "--smoothAngle",
-                 "smoothing feature angle in degrees, between 0 and 180 "
-                 "degree, [default=180]", true );
+                 "smoothing feature angle (in degrees) below which the vertex "
+                 "is not moved, only for the Laplacian algorithm, between 0 and 180 "
+                 "degree [default=0]", true );
+  app.addOption( smoothForce, "--smoothForce", "smoothing restoring force for "
+                 "the Simple Spring and Polygon Spring algorithm, between 0 and 1 "
+                 "[default=0.2]", true );
   app.addOption( deciReductionRate, "--deciReductionRate",
                  "decimation reduction rate expected in % [default=99%]",
                  true );
@@ -122,12 +132,21 @@ int main( int argc, const char** argv )
     //
     ASSERT( smoothIt > 0 );
     ASSERT( smoothAngle >= 0.0 && smoothAngle <= 180.0 );
+    ASSERT( smoothForce >= 0.0 && smoothForce <= 1.0 );
     ASSERT( smoothRate >= 0.0 && smoothRate <= 1.0 );
     ASSERT( deciReductionRate >= 0.0 && deciReductionRate <= 100.0 );
     ASSERT( deciMaxClearance >= 0.0 );
     ASSERT( deciMaxError >= 0.0 );
     ASSERT( deciAngle >= 0.0 && deciAngle <= 180.0 );
-
+    
+    if( smoothTypeStr == "laplacian" )
+      smoothType = Mesher::LAPLACIAN;
+    else if ( smoothTypeStr == "lowpass" )
+      smoothType = Mesher::LOWPASS;
+    else if ( smoothTypeStr == "simplespring" )
+      smoothType = Mesher::SIMPLESPRING;
+    else if ( smoothTypeStr == "polygonspring" )
+      smoothType = Mesher::POLYGONSPRING;
 
     if ( triW.fileName().empty() )
       triW.setFileName( triR.fileName() );
@@ -156,8 +175,13 @@ int main( int argc, const char** argv )
     cout << "decimating mesh             : " << flush;
     Mesher mesher;
     if ( smoothFlag )
-      mesher.setSmoothing( smoothAngle, smoothIt,
-                          smoothRate, smoothRate, smoothRate );
+    {
+      mesher.setSmoothing( smoothType, smoothIt, smoothRate );
+      if ( smoothType == Mesher::LAPLACIAN )
+        mesher.setSmoothingLaplacian( smoothAngle );
+      if ( smoothType == Mesher::SIMPLESPRING or smoothType == Mesher::POLYGONSPRING )
+        mesher.setSmoothingSpring( smoothForce );
+    }
     mesher.setDecimation( deciReductionRate, deciMaxClearance,
                           deciMaxError, deciAngle );
     mesher.setMinFacetNumber( minFacetNumber );
@@ -179,6 +203,7 @@ int main( int argc, const char** argv )
   }
   catch( user_interruption & )
   {
+    return EXIT_FAILURE;
   }
   catch( exception & e )
   {
