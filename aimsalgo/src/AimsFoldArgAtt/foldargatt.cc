@@ -54,13 +54,16 @@ int main( int argc, const char** argv )
 {
   try
     {
-      Reader<AimsData<int16_t> >	skelr;
-      Reader<Graph>			graphr;
-      Writer<Graph>			graphw;
-      string				motionfname, apcfilename;
-      int16_t				inside = 0, outside = 11;
-      bool				nomesh = false;
-      string                            gver;
+      Reader<AimsData<int16_t> > skelr;
+      Reader<Graph> graphr;
+      Writer<Graph> graphw;
+      Mesher::SmoothingType smoothType = Mesher::LOWPASS;
+      string smoothTypeStr = "lowpass";
+      string motionfname, apcfilename;
+      int16_t inside = 0, outside = 11;
+      bool nomesh = false;
+      string gver;
+      
 #ifdef _WIN32
       // on windows, disable threading because something is going wrong in it
       int  nthreads = 1;
@@ -68,8 +71,8 @@ int main( int argc, const char** argv )
       int  nthreads = 0;
 #endif
 
-      AimsApplication	app( argc, argv, "Builds cortical folds graph " 
-                             "attributes - replaces VipFoldArgAtt" );
+      AimsApplication app( argc, argv, "Builds cortical folds graph " 
+                           "attributes - replaces VipFoldArgAtt" );
       app.addOption( skelr, "-i", "skeleton image" );
       app.addOption( graphr, "-g", "fold graph" );
       app.addOption( graphw, "-o", "output fold graph [default: input]", 
@@ -78,6 +81,9 @@ int main( int argc, const char** argv )
                      "[default: none]", true );
       app.addOption( nomesh, "-n", "don't generate meshes", true );
       app.alias( "--nomesh", "-n" );
+      app.addOption( smoothTypeStr, "--smoothType", "mesh smoothing alorithm's type "
+                     "(if meshes are generated) : laplacian, simplespring, polygonspring "
+                     "or lowpass [default=lowpass]", true );
       app.addOption( apcfilename, "--apc", "set AC/PC/IH points in graph "
                      "from a .APC file [default: don't set them]", true );
       app.addOption( inside, "-li", "'inside' label on skeleton image " 
@@ -86,7 +92,7 @@ int main( int argc, const char** argv )
                      "[default: 11]", true );
       app.addOption( gver, "--graphversion",
                      "output graph version [default: "
-                         + cartobaseShortVersion() + "]", true );
+                     + cartobaseShortVersion() + "]", true );
       app.addOption( nthreads, "--threads", string( "limit threads usage. " \
         "code: 0: one thread per CPU; 1: mono-threaded; n>0: use exactly n " \
         "threads; -n: use one thread per CPU, up to n max. Default: " ) 
@@ -99,6 +105,15 @@ int main( int argc, const char** argv )
       nthreads = 1;
 #endif
 
+      if( smoothTypeStr == "laplacian" )
+        smoothType = Mesher::LAPLACIAN;
+      else if ( smoothTypeStr == "lowpass" )
+        smoothType = Mesher::LOWPASS;
+      else if ( smoothTypeStr == "simplespring" )
+        smoothType = Mesher::SIMPLESPRING;
+      else if ( smoothTypeStr == "polygonspring" )
+        smoothType = Mesher::POLYGONSPRING;
+      
       if( graphw.fileName().empty() )
         graphw.setFileName( graphr.fileName() );
 
@@ -184,6 +199,7 @@ int main( int argc, const char** argv )
       FoldGraphAttributes	fatt( skel, graph, motion.get(), inside, 
                                       outside, !nomesh, gversion );
       fatt.setMaxThreads( nthreads );
+      fatt.mesher().setSmoothing( smoothType, 5, 0.4 );
       fatt.doAll();
 
       if( graphw.fileName() != graphr.fileName() )
