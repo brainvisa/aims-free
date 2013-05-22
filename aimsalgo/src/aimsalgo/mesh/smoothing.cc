@@ -40,102 +40,332 @@
 using namespace std;
 
 void Mesher::getSmoothedVertices( const vector< Facet* >& vfac,
-                                  vector< Point3df >& vertex,
-                                  float featureAngle,
-                                  int nIteration,
-                                  float xDeplFactor,
-                                  float yDeplFactor,
-                                  float zDeplFactor )
+                                  AimsSurfaceTriangle& surface,
+                                  float deplFactor )
 {
 
-  if( _verbose )
-    cout << "smoothing "<< flush;
-
-  ASSERT( xDeplFactor >= 0.0 && xDeplFactor <= 1.0 &&
-          yDeplFactor >= 0.0 && yDeplFactor <= 1.0 &&
-          zDeplFactor >= 0.0 && zDeplFactor <= 1.0 );
-
-  float cosFeatureAngle = cos( featureAngle * M_PI / 180.0 );
-
-  //
-  // If  [i] is not a feature vertex, the displacement of [i] is the average
-  // position of his neighboors ponderated by deplFactor :
-  // -------->                         -------->                    -------->
-  // vertex[i][0] = (1- xDeplfactor) * vertex[i][0] + xDeplfactor * neighb[i][0]
-  // ...
-  // If  [i] is a feature, vertex [i] is not moved.
-  //
-  uint id;
-  int n, size = (int)vfac.size();
-  bool okToMove;
-  Facet* facet = NULL, *f1 = NULL, *f2 = NULL, *f3 = NULL;
-  Point3df a1, a2, a3, n1, n2;
-
-  vector< Point3df > smoothed( size );
-
-  if( _verbose )
-    cout << " iteration " << setw(5) << 0 << flush;
-  for ( int i = 0; i < nIteration; i++ )
-  {
     if( _verbose )
-      cout << "\b\b\b\b\b" << setw(5) << i + 1 << flush;
-    for ( n = 0; n != size; n++ )
-    { 
-      okToMove = true;
-      facet = vfac[ n ];
-      id = facet->id();
+        cout << "smoothing "<< flush;
 
-      if ( featureAngle != 180.0 )
-        for ( int v = 0; v < facet->nNeighbor(); v++ )
-        { 
-          // computing feature angle for edge between
-          // ith facet and its (v+1)th neighbor
-          f1 = facet->pNeighbor( v );
-          f2 = facet->pNeighbor( ( v + 1 ) % facet->nNeighbor() );
-          f3 = facet->pNeighbor( ( v + 2 ) % facet->nNeighbor() );
-          a1 = vertex[ f1->id() ] - vertex[ f2->id() ];
-          a2 = vertex[ id ] - vertex[ f2->id() ];
-          a3 = vertex[ f3->id() ] - vertex[ f2->id() ];
-          n1 = crossed( a1, a2 );
-          n2 = crossed( a2, a3 );
-
-          // comparing computed angle with given feature angle
-          if ( n1.dot( n2 ) / sqrt( norm( n1 ) * norm( n2 ) ) 
-               <=  cosFeatureAngle )
-          {
-            okToMove = false;
-            break;
-          }
-        }
-
-      if (okToMove)
-      {
-        smoothed[ id ] = Point3df(0,0,0);
-        for ( int v = 0; v < facet->nNeighbor(); v++ )
-          smoothed[ id ] += vertex[ facet->pNeighbor( v )->id() ];
-        smoothed[ id ] /= (float)facet->nNeighbor();
-
-	smoothed[ id ][ 0 ] = ( 1 - xDeplFactor ) * vertex[ id ][ 0 ] +
-		              xDeplFactor * smoothed[ id ][ 0 ];
-	smoothed[ id ][ 1 ] = ( 1 - yDeplFactor ) * vertex[ id ][ 1 ] +
-		              yDeplFactor * smoothed[ id ][ 1 ];
-	smoothed[ id ][ 2 ] = ( 1 - zDeplFactor ) * vertex[ id ][ 2 ] +
-		              zDeplFactor * smoothed[ id ][ 2 ];
-      }
-      else
-        smoothed[ id ] = vertex[ id ];
-    }
-    swap( smoothed, vertex );
-  }
-
-  if( _verbose )
+    ASSERT( deplFactor >= 0.0 && deplFactor <= 1.0 );
+    
+    switch(_smoothType)
     {
-      cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"<< flush;
-      cout << "               "<< flush;
-      cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"<< flush;
+        case LAPLACIAN:
+            getSmoothedLaplacian( vfac, surface, _featureAngle, _nIteration, deplFactor );
+            break;
+        case SIMPLESPRING:
+            getSmoothedSimpleSpring( vfac, surface, _smoothForce, _nIteration, deplFactor );
+            break;
+        case POLYGONSPRING:
+            getSmoothedPolygonSpring( vfac, surface, _smoothForce, _nIteration, deplFactor );
+            break;
+        case LOWPASS:
+            getSmoothedLowPassFilter( vfac, surface, _nIteration, deplFactor );
+            break;
+        default:
+            cout << "This smoothing type does not exist."<< endl;
+            break;
+    }
+    
+    if( _verbose )
+    {
+        cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"<< flush;
+        cout << "               "<< flush;
+        cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"<< flush;
 
-      cout << "\b\b\b\b\b\b\b\b\b\b\b"<<flush;
-      cout << "           "<<flush;
-      cout << "\b\b\b\b\b\b\b\b\b\b\b"<<flush;
+        cout << "\b\b\b\b\b\b\b\b\b\b\b"<<flush;
+        cout << "           "<<flush;
+        cout << "\b\b\b\b\b\b\b\b\b\b\b"<<flush;
+    }
+}
+
+void Mesher::getSmoothedLaplacian( const vector< Facet* >& vfac,
+                                   AimsSurfaceTriangle& surface,
+                                   float featureAngle,
+                                   int nIteration,
+                                   float deplFactor )
+{
+    uint id;
+    int n, size = (int)vfac.size();
+    float alpha, beta, force;
+    float curv, curv_mean;
+    bool okToMove;
+    
+    Facet* facet = NULL, *f1 = NULL, *f2 = NULL, *f3 = NULL;
+    Point3df a1, a2, a3, n1, n2;
+    
+    vector< Point3df >& vertex = surface.vertex();
+    vector< Point3df > bary( size );
+    vector< Point3df > smoothed( size );
+    
+    float cosFeatureAngle = cos( featureAngle * M_PI / 180.0 );
+    
+    //
+    // If  [i] is not a feature vertex, the displacement of [i] is the average
+    // position of his neighboors ponderated by deplFactor :
+    // -------->                      -------->                -------->
+    // vertex[i] = (1 - deplfactor) * vertex[i] + deplfactor * neighb[i]
+    //
+    // If  [i] is a feature, vertex [i] is not moved.
+    //
+    
+    cout << " laplacian algo " << endl;
+    if( _verbose )
+        cout << " iteration " << setw(5) << 0 << flush;
+    
+    for ( int i = 0; i < nIteration; i++ )
+    {
+        if( _verbose )
+        cout << "\b\b\b\b\b" << setw(5) << i + 1 << flush;
+        
+        for ( n = 0; n != size; n++ )
+        {
+            okToMove = true;
+            facet = vfac[ n ];
+            id = facet->id();
+
+            if ( featureAngle != 180.0 )
+                for ( int v = 0; v < facet->nNeighbor(); v++ )
+                {
+                    // computing feature angle for edge between
+                    // the facet and its (v+1)th neighbor
+                    f1 = facet->pNeighbor( v );
+                    f2 = facet->pNeighbor( ( v + 1 ) % facet->nNeighbor() );
+                    f3 = facet->pNeighbor( ( v + 2 ) % facet->nNeighbor() );
+                    a1 = vertex[ f1->id() ] - vertex[ f2->id() ];
+                    a2 = vertex[ id ] - vertex[ f2->id() ];
+                    a3 = vertex[ f3->id() ] - vertex[ f2->id() ];
+                    n1 = crossed( a1, a2 );
+                    n2 = crossed( a2, a3 );
+
+                    // comparing computed angle with given feature angle
+                    if ( n1.dot( n2 ) / sqrt( norm( n1 ) * norm( n2 ) ) 
+                        <=  cosFeatureAngle )
+                    {
+                        okToMove = false;
+                        break;
+                    }
+                }
+            
+            if (okToMove)
+            {
+                smoothed[ id ] = Point3df(0,0,0);
+                bary[ id ] = Point3df(0,0,0);
+                for ( int v = 0; v < facet->nNeighbor(); v++ )
+                    bary[ id ] += vertex[ facet->pNeighbor( v )->id() ];
+                bary[ id ] /= (float)facet->nNeighbor();
+
+                smoothed[ id ] = ( 1 - deplFactor ) * vertex[ id ] + deplFactor * bary[ id ];
+            }
+            else
+                smoothed[ id ] = vertex[ id ];
+        }
+        swap( smoothed, vertex );
+    }
+}
+
+void Mesher::getSmoothedSimpleSpring( const vector< Facet* >& vfac,
+                                      AimsSurfaceTriangle& surface,
+                                      float force,
+                                      int nIteration,
+                                      float deplFactor )
+{
+    uint id;
+    int n, size = (int)vfac.size();
+    Facet* facet = NULL;
+    
+    vector< Point3df >& vertex = surface.vertex();
+    vector< Point3df > bary( size );
+    vector< Point3df > smoothed( size );
+    vector< Point3df > original( size );
+    
+    for ( n = 0; n != size; n++ )
+    {
+        original[ vfac[ n ]->id() ] = vertex[ vfac[ n ]->id() ];
+    }
+    
+    //
+    // The displacement of [i] is the average position of his neighboors
+    // ponderated by deplFactor plus a restoring force dependent on the initial position :
+    // -------->                      -------->                -------->
+    // vertex[i] = (1 - deplfactor) * vertex[i] + deplfactor * neighb[i] -
+    //                                   -------->   ------>
+    //             force * deplfactor * (vertex[i] - orig[i])
+    //
+    
+    cout << " simple spring algo " << endl;
+    if( _verbose )
+        cout << " iteration " << setw(5) << 0 << flush;
+    
+    for ( int i = 0; i < nIteration; i++ )
+    {
+        if( _verbose )
+        cout << "\b\b\b\b\b" << setw(5) << i + 1 << flush;
+        
+        for ( n = 0; n != size; n++ )
+        {
+            facet = vfac[ n ];
+            id = facet->id();
+            
+            smoothed[ id ] = Point3df(0,0,0);
+            bary[ id ] = Point3df(0,0,0);
+            for ( int v = 0; v < facet->nNeighbor(); v++ )
+                bary[ id ] += vertex[ facet->pNeighbor( v )->id() ];
+            bary[ id ] /= (float)facet->nNeighbor();
+
+            smoothed[ id ] = ( 1 - deplFactor ) * vertex[ id ] + deplFactor * bary[ id ] -
+                               force * deplFactor * (vertex[ id ] - original[ id ]);
+        }
+        swap( smoothed, vertex );
+    }
+}
+
+void Mesher::getSmoothedPolygonSpring( const vector< Facet* >& vfac,
+                                       AimsSurfaceTriangle& surface,
+                                       float force,
+                                       int nIteration,
+                                       float deplFactor )
+{
+    uint id;
+    int n, size = (int)vfac.size();
+    Facet* facet = NULL;
+    
+    Point3df vec1, vec2, b;
+    Point3df Normal, Normal_min;
+    int k1, k2;
+    float d, dist, dist_min;
+    
+    vector< Point3df >& vertex = surface.vertex();
+    vector< Point3df > bary( size );
+    vector< Point3df > smoothed( size );
+    vector< Point3df > original( size );
+    vector< Point3df > movedorig( size );
+    Point3df movedbary;
+    
+    for ( n = 0; n != size; n++ )
+    {
+        original[ vfac[ n ]->id() ] = vertex[ vfac[ n ]->id() ];
+    }
+    
+    //
+    // The displacement of [i] is the average position of his neighboors
+    // ponderated by deplFactor plus a restoring force dependent on the nearest
+    // initial polygon :
+    // -------->                      -------->                -------->
+    // vertex[i] = (1 - deplfactor) * vertex[i] + deplfactor * neighb[i] -
+    //                                   -------->   --------->
+    //             force * deplfactor * (vertex[i] - neworig[i])
+    //
+    
+    cout << " polygon spring algo " << endl;
+    if( _verbose )
+        cout << " iteration " << setw(5) << 0 << flush;
+    
+    for ( int i = 0; i < nIteration; i++ )
+    {
+        if( _verbose )
+        cout << "\b\b\b\b\b" << setw(5) << i + 1 << flush;
+        
+        for ( n = 0; n != size; n++ )
+        {
+            facet = vfac[ n ];
+            id = facet->id();
+            dist_min = 1000.;
+            
+            smoothed[ id ] = Point3df(0,0,0);
+            bary[ id ] = Point3df(0,0,0);
+            for ( int v = 0; v < facet->nNeighbor(); v++ )
+                bary[ id ] += vertex[ facet->pNeighbor( v )->id() ];
+            bary[ id ] /= (float)facet->nNeighbor();
+            
+            movedbary = ( 1 - deplFactor ) * vertex[ id ] + deplFactor * bary[ id ];
+            
+            for ( int v = 0; v < facet->nNeighbor(); v++ )
+            {
+                k1 = facet->pNeighbor( v )->id();
+                k2 = facet->pNeighbor( ( v + 1 ) % facet->nNeighbor() )->id();
+                vec1 = original[ k2 ] - original[ k1 ];
+                vec2 = original[ k1 ] - original[ id ];
+                b  = crossed( vec1, vec2 );
+                Normal = -b/norm( b );
+
+                d = - Normal.dot( original[ id ] );
+                dist = Normal.dot( movedbary ) + d;
+
+                if ( fabs(dist) < dist_min )
+                {
+                    dist_min = dist;
+                    Normal_min = Normal;
+                }
+            }
+            movedorig[ id ] = - dist_min * Normal_min + movedbary;
+
+            smoothed[ id ] = movedbary - force * deplFactor * (vertex[ id ] - movedorig[ id ]);
+        }
+        swap( smoothed, vertex );
+    }
+}
+
+void Mesher::getSmoothedLowPassFilter( const vector< Facet* >& vfac,
+                                       AimsSurfaceTriangle& surface,
+                                       int nIteration,
+                                       float deplFactor )
+{
+    uint id;
+    int n, size = (int)vfac.size();
+    Facet* facet = NULL;
+    float newDeplFactor;
+    
+    vector< Point3df >& vertex = surface.vertex();
+    vector< Point3df > bary( size );
+    vector< Point3df > smoothed( size );
+    
+    //
+    // The displacement of [i] is the average position of his neighboors
+    // ponderated by deplFactor then ponderated by -1.02 * deplFactor (Taubin's Method) :
+    // -------->                     -------->                -------->
+    // vertex[i] = (1 - deplfactor) * vertex[i] + deplfactor * neighb[i]
+    // ----------->                               ----------->                          ----------->
+    // newvertex[i] = (1 - (-1.02 * deplfactor) * newvertex[i] + (-1.02 * deplfactor) * newneighb[i]
+    //
+    
+    cout << " lowpass algo " << endl;
+    if( _verbose )
+        cout << " iteration " << setw(5) << 0 << flush;
+    
+    for ( int i = 0; i < nIteration; i++ )
+    {
+        if( _verbose )
+        cout << "\b\b\b\b\b" << setw(5) << i + 1 << flush;
+        
+        for ( n = 0; n != size; n++ )
+        {
+            facet = vfac[ n ];
+            id = facet->id();
+
+            smoothed[ id ] = Point3df(0,0,0);
+            bary[ id ] = Point3df(0,0,0);
+            for ( int v = 0; v < facet->nNeighbor(); v++ )
+                bary[ id ] += vertex[ facet->pNeighbor( v )->id() ];
+            bary[ id ] /= (float)facet->nNeighbor();
+
+            smoothed[ id ] = ( 1 - deplFactor ) * vertex[ id ] + deplFactor * bary[ id ];
+        }
+        swap( smoothed, vertex );
+        for ( n = 0; n != size; n++ )
+        {
+            facet = vfac[ n ];
+            id = facet->id();
+            newDeplFactor = -1.02*deplFactor;
+            
+            bary[ id ] = Point3df(0,0,0);
+            for ( int v = 0; v < facet->nNeighbor(); v++ )
+                bary[ id ] += vertex[ facet->pNeighbor( v )->id() ];
+            bary[ id ] /= (float)facet->nNeighbor();
+
+            smoothed[ id ] = ( 1 - newDeplFactor ) * vertex[ id ] + newDeplFactor * bary[ id ];
+        }
+        swap( smoothed, vertex );
     }
 }
