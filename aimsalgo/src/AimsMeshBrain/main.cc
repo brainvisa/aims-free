@@ -49,10 +49,13 @@ using namespace std;
 int main( int argc, const char** argv )
 {
   try
-    {
+  {
     string fileIn, fileOut;
+    Mesher::SmoothingType smoothType = Mesher::LOWPASS;
+    string smoothTypeStr = "lowpass"; // Ne garder que l'ancien type et le nouveau ?
+    float smoothFactor = 0.2; // A garder ?
     float deciMaxClearance = 5.0;
-    float	deciMaxError = 3.0;
+    float deciMaxError = 3.0;
     uint minFacetNumber = 50;
     bool asciiFlag = false;
     bool intinterface = false;
@@ -60,37 +63,50 @@ int main( int argc, const char** argv )
     AimsApplication app( argc, argv, "Computes the brain surface from a "
       "segmented image and saves it in a triangles mesh format file" );
     app.addOption( fileIn, "-i", "input volume label (short int data), "
-      "level 0 is assumed to be the back" );
+                   "level 0 is assumed to be the back" );
     app.alias( "--input", "-i" );
     app.alias( "-input", "-i" );
     app.addOption( fileOut, "-o", "output file name for the mesh "
-      "[default: same basename as input]", true );
+                   "[default: same basename as input]", true );
     app.alias( "--output", "-o" );
     app.alias( "-output", "-o" );
-    app.addOption( deciMaxClearance, "--deciMaxClearance",
-      "maximum clearance expected in the resulting mesh, in mm [default= 5]",
-      true );
-    app.addOption( deciMaxError, "--deciMaxError",
-      "maximum error distance from the original data, in mm [default = 3]",
-      true );
-    app.addOption( minFacetNumber, "--minFacetNumber",
-      "minimum number of facets to allow decimation [default=50]", true );
-    app.addOption( intinterface, "--internalinterface",
-      "mesh the internal interface of the main object [default=false]", true );
+    app.addOption( smoothTypeStr, "--smoothType", "smoothing alorithm's type : "
+                   "laplacian, simplespring, polygonspring or lowpass "
+                   "[default=lowpass]", true );
+    app.addOption( smoothFactor, "--smoothFactor", "smoothing moving "
+                   "factor at each iteration [default=0.2]", true );
+    app.addOption( deciMaxClearance, "--deciMaxClearance", "maximum clearance "
+                   "expected in the resulting mesh, in mm [default= 5]", true );
+    app.addOption( deciMaxError, "--deciMaxError", "maximum error distance "
+                   "from the original data, in mm [default = 3]", true );
+    app.addOption( minFacetNumber, "--minFacetNumber", "minimum number "
+                   "of facets to allow decimation [default=50]", true );
+    app.addOption( intinterface, "--internalinterface", "mesh the internal "
+                   "interface of the main object [default=false]", true );
     app.addOption( asciiFlag, "--ascii", "write file in ASCII mode if the "
-      "format supports it [default=binary]", true );
+                   "format supports it [default=binary]", true );
 
     app.initialize();
 
+    ASSERT( smoothFactor >= 0.0 && smoothFactor <= 1.0 );
     ASSERT( deciMaxClearance >= 0.0 );
     ASSERT( deciMaxError >= 0.0 );
 
-    string	fout;
+    if( smoothTypeStr == "laplacian" )
+      smoothType = Mesher::LAPLACIAN;
+    else if ( smoothTypeStr == "lowpass" )
+      smoothType = Mesher::LOWPASS;
+    else if ( smoothTypeStr == "simplespring" )
+      smoothType = Mesher::SIMPLESPRING;
+    else if ( smoothTypeStr == "polygonspring" )
+      smoothType = Mesher::POLYGONSPRING;
+    
+    string fout;
     if ( fileOut.empty() )
     {
       fout = fileIn;
-      string::size_type	pos = fout.rfind( '.' );
-      string::size_type	pos2 = fout.rfind( '/' );
+      string::size_type pos = fout.rfind( '.' );
+      string::size_type pos2 = fout.rfind( '/' );
       if( pos != string::npos && ( pos2 == string::npos || pos2 < pos ) )
         fout.erase( pos, fout.length() - pos );
     }
@@ -113,6 +129,10 @@ int main( int argc, const char** argv )
     data.fillBorder(-1);
 
     Mesher mesher;
+    if( smoothType == Mesher::LAPLACIAN )
+        mesher.setSmoothing( smoothType, 5, 0.4 );
+    else if ( smoothType == Mesher::LOWPASS )
+        mesher.setSmoothing( smoothType, 30, 0.4 );
     mesher.setDecimation( 100.0, deciMaxClearance, deciMaxError, 180.0 );
     mesher.setMinFacetNumber( minFacetNumber );
     AimsSurfaceTriangle surface;
