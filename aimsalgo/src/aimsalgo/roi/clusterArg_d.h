@@ -318,7 +318,8 @@ namespace aims
         Mesher	mesher;
         mesher.setDecimation( 100.0, _deciMaxClearance, _deciMaxError, 120.0 );
         mesher.setMinFacetNumber( _minFacetNumber );
-        mesher.setSmoothing( 180, 5, 0.4, 0.4, 0.4 );
+        mesher.setSmoothing( Mesher::LAPLACIAN, 5, 0.4 );
+        mesher.setSmoothingLaplacian( 180. );
         mesher.doit( datac, meshl );
         std::cout << "done\n";
         //if( onenode )
