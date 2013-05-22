@@ -51,8 +51,20 @@ template <typename T> class TimeTexture;
 class AIMSALGO_API Mesher
 {
   public:
+    enum SmoothingType
+    {
+      LAPLACIAN,
+      SIMPLESPRING,
+      POLYGONSPRING,
+      LOWPASS,
+    };
 
     Mesher() : _smoothFlag( false ),
+               _featureAngle( 180. ),
+               _nIteration( 5 ),
+               _factor( 0.2 ),
+               _smoothForce( 0.2 ),
+               _smoothType( LOWPASS ),
                _deciFlag( false ),
                _splittingFlag( false ),
                _labelInf( 1 ),
@@ -89,11 +101,13 @@ class AIMSALGO_API Mesher
 
     // SMOOTHING
     // =========
-    // default : featureAngle = 180.0 deg
+    // default : smoothtype = LOWPASS
+    //           featureAngle = 180.0 deg
     //           nIteration = 5
-    //           (x/y/z)Factor in [0.0;1.0] (instance : 0.2)
-    void setSmoothing( float featureAngle, int nIteration,
-                       float xFactor, float yFactor, float zFactor );
+    //           factor in [0.0;1.0] (instance : 0.2)
+    void setSmoothing( SmoothingType smoothType, int nIteration, float factor );
+    void setSmoothingLaplacian( float featureAngle );
+    void setSmoothingSpring( float smoothForce );
     void unsetSmoothing();
     void smooth( AimsSurfaceTriangle& surface );
 
@@ -158,9 +172,9 @@ class AIMSALGO_API Mesher
     bool _smoothFlag;
     float _featureAngle;
     int _nIteration;
-    float _xFactor;
-    float _yFactor;
-    float _zFactor;
+    float _factor;
+    float _smoothForce;
+    SmoothingType _smoothType;
 
     bool _deciFlag;
     float _deciReductionRate;
@@ -188,11 +202,27 @@ class AIMSALGO_API Mesher
                       std::vector< Point3df >& vertex,
                       float sizeX, float sizeY, float sizeZ );
     void getSmoothedVertices( const std::vector< Facet* >& vfac,
-                              std::vector< Point3df >& vertex,
-                              float featureAngle, int nIteration,
-                              float xDeplFactor,
-                              float yDeplFactor,
-                              float zDeplFactor );
+                              AimsSurfaceTriangle& surface,
+                              float deplFactor );
+    void getSmoothedLaplacian( const std::vector< Facet* >& vfac,
+                               AimsSurfaceTriangle& surface,
+                               float featureAngle,
+                               int nIteration,
+                               float deplFactor );
+    void getSmoothedSimpleSpring( const std::vector< Facet* >& vfac,
+                                  AimsSurfaceTriangle& surface,
+                                  float force,
+                                  int nIteration,
+                                  float deplFactor );
+    void getSmoothedPolygonSpring( const std::vector< Facet* >& vfac,
+                                   AimsSurfaceTriangle& surface,
+                                   float force,
+                                   int nIteration,
+                                   float deplFactor );
+    void getSmoothedLowPassFilter( const std::vector< Facet* >& vfac,
+                                   AimsSurfaceTriangle& surface,
+                                   int nIteration,
+                                   float deplFactor );
     void getDecimatedVertices( std::vector< Facet* >& vfac,
                                std::vector< Point3df >& vertex,
                                float reductionRatePercent,
