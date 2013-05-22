@@ -67,7 +67,7 @@ bool meshIt( carto::AttributedObject* ao, const vector<string> & meshatt,
 
   mesher.setDecimation( 99, deciMaxClearance, deciMaxError, 120.0 );
   mesher.setMinFacetNumber( minFacetNumber );
-  mesher.setSmoothing( 180, 5, 0.4, 0.4, 0.4 );
+  mesher.setSmoothing( Mesher::LOWPASS, 50, 0.4 );
 
   Point3d				bmax( 0, 0, 0 );
   BucketMap<Void>::Bucket::iterator	ibm, ebm;
