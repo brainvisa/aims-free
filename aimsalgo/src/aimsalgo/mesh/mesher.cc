@@ -45,15 +45,22 @@ using namespace carto;
 using namespace std;
 
 
-void Mesher::setSmoothing( float featureAngle, int nIteration,
-                           float xFactor, float yFactor, float zFactor )
+void Mesher::setSmoothing( SmoothingType smoothType, int nIteration, float factor )
 {
   _smoothFlag = true;
-  _featureAngle = featureAngle;
+  _smoothType = smoothType;
   _nIteration = nIteration;
-  _xFactor = xFactor;
-  _yFactor = yFactor;
-  _zFactor = zFactor;
+  _factor = factor;
+}
+
+void Mesher::setSmoothingLaplacian( float featureAngle )
+{
+  _featureAngle = featureAngle;
+}
+
+void Mesher::setSmoothingSpring( float smoothForce )
+{
+  _smoothForce = smoothForce;
 }
 
 
@@ -164,8 +171,7 @@ void Mesher::doit( const AimsData<short>& thing,
 
         // smoothes the vertex coordinates
         if ( _smoothFlag )
-          getSmoothedVertices( vfac, surface.vertex(), _featureAngle,
-                               _nIteration, _xFactor, _yFactor, _zFactor );
+          getSmoothedVertices( vfac, surface, _factor );
 
         // decimates the mesh
         if ( _deciFlag && vfac.size() > _minFacetNumber )
@@ -324,8 +330,7 @@ void Mesher::doit( const AimsData<short>& thing,
 
         // smoothes the vertex coordinates
         if ( _smoothFlag )
-          getSmoothedVertices( vfac, current.vertex(), _featureAngle,
-                               _nIteration, _xFactor, _yFactor, _zFactor );
+          getSmoothedVertices( vfac, current, _factor );
 
         // decimates the mesh
         if ( _deciFlag && vfac.size() > _minFacetNumber )
@@ -420,8 +425,7 @@ void Mesher::doit( const AimsData<short>& thing,
 
         // smoothes the vertex coordinates
         if ( _smoothFlag )
-          getSmoothedVertices( vfac, theSurface.vertex(), _featureAngle,
-                               _nIteration, _xFactor, _yFactor, _zFactor );
+          getSmoothedVertices( vfac, theSurface, _factor );
 
         // decimates the mesh
         if ( _deciFlag && vfac.size() > _minFacetNumber )
@@ -502,12 +506,12 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
       if( _verbose )
         cout << "vertices             " << flush;
       getVertices( vfac, surface.vertex(), 
-                   thing.sizeX(), thing.sizeY(), thing.sizeZ() );        
+                   thing.sizeX(), thing.sizeY(), thing.sizeZ() );
       if( _verbose )
         cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
 
       // smoothes the vertex coordinates
-      getSmoothedVertices( vfac, surface.vertex(), 180.0, 5, 0.4, 0.4, 0.4 );
+      getSmoothedVertices( vfac, surface, 0.4 );
 
       // decimates the mesh
       float initialMeshSize = (float)vfac.size();
@@ -526,7 +530,7 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
       float finalMeshSize = (float)vfac.size();
 
       // smoothes the vertex coordinates
-      getSmoothedVertices( vfac, surface.vertex(), 180.0, 5, 0.2, 0.2, 0.2 );
+      getSmoothedVertices( vfac, surface, 0.2 );
 
       // gets the normals by taking the average of all the 
       // normals of the neighbors of a facet
@@ -583,12 +587,11 @@ void Mesher::smooth( AimsSurfaceTriangle& surface )
   surface.normal().clear();
   surface.polygon().clear();
 
-  getSmoothedVertices( vfac, surface.vertex(), _featureAngle,
-                       _nIteration, _xFactor, _yFactor, _zFactor );
+  getSmoothedVertices( vfac, surface, _factor );
 
   if( _verbose )
     cout << "normals              " << flush;
-  getNormals( vfac, surface.vertex(), surface.normal() );        
+  getNormals( vfac, surface.vertex(), surface.normal() );
   if( _verbose )
     {
       cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" << flush;
@@ -635,8 +638,7 @@ float Mesher::decimate( AimsSurfaceTriangle& surface,
   surface.polygon().clear();
 
   if ( _smoothFlag )
-    getSmoothedVertices( vfac, surface.vertex(), _featureAngle,
-                         _nIteration, _xFactor, _yFactor, _zFactor );
+    getSmoothedVertices( vfac, surface, _factor );
 
   if ( vfac.size() > _minFacetNumber ) 
     getDecimatedVertices( vfac, surface.vertex(), _deciReductionRate,
