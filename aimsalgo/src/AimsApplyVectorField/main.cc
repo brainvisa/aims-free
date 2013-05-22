@@ -113,7 +113,7 @@ void transformGraphObject( AttributedObject* v, rc_ptr<GraphElementTable> get,
                                                 fieldz, vs );
               }
             Mesher m;
-            m.setSmoothing( 180., 1, 0.1, 0.1, 0.1 );
+            m.setSmoothing( Mesher::LOWPASS, 20, 0.1 );
             m.smooth( *mesh );
           }
       }
@@ -258,7 +258,7 @@ int main(int argc,const char **argv)
             }
  
           Mesher m;
-          m.setSmoothing( 180., 1, 0.1, 0.1, 0.1 );
+          m.setSmoothing( Mesher::LOWPASS, 20, 0.1 );
           m.smooth( surface );
 
           cout << "done" << endl;
