@@ -71,8 +71,12 @@ FoldGraphAttributes::FoldGraphAttributes( const AimsData<int16_t> & skel,
                                           bool withmeshes,
                                           const vector<int> & gver )
   : _skel( skel ), _graph( graph ), _inside( inside ), _outside( outside ), 
-    _motion( motion ), _domeshes( withmeshes ), _graphversion( gver )
+    _motion( motion ), _domeshes( withmeshes ), _graphversion( gver ),
+    _mesher()
 {
+  _mesher.setVerbose( false );
+  _mesher.setDecimation( 100.0, 5, 3, 180.0 );
+  _mesher.setMinFacetNumber( 50 );
 }
 
 
@@ -207,9 +211,9 @@ namespace
   public:
     typedef void (*DoVertex)( Graph &, Vertex *, NodeContext &, int, int );
 
-    NodeContext( Graph & g, DoVertex func )
+    NodeContext( Graph & g, DoVertex func, Mesher & mesher )
       : LoopContext(), graph( g ), vertices( g.begin(), g.end() ), 
-        vertexFunc( func )
+        vertexFunc( func ), mesher( mesher )
     {}
 
     virtual ~NodeContext() { }
@@ -223,6 +227,7 @@ namespace
     Graph		& graph;
     vector<Vertex *>	vertices;
     DoVertex		vertexFunc;
+    Mesher              & mesher;
   };
 
 
@@ -365,7 +370,7 @@ namespace
 
 
   rc_ptr<AimsSurfaceTriangle> 
-  meshBuckets( const list<rc_ptr<BucketMap<Void> > > & bks )
+  meshBuckets( const list<rc_ptr<BucketMap<Void> > > & bks, Mesher & mesher )
   {
     list<rc_ptr<BucketMap<Void> > >::const_iterator	i, e = bks.end();
 
@@ -398,10 +403,6 @@ namespace
     // cout << "after AimsConnectedComponent, thread " << pthread_self() << endl;
 
     // mesh
-    Mesher	mesher;
-    mesher.setVerbose( false );
-    mesher.setDecimation( 100.0, 5, 3, 180.0 );
-    mesher.setMinFacetNumber( 50 );
     vol.fillBorder( -1 );
     rc_ptr<AimsSurfaceTriangle> surface( new AimsSurfaceTriangle );
     mesher.getBrain( vol, *surface );
@@ -447,7 +448,7 @@ namespace
         context.lock();
         cout << "meshing node " << i+1 << " / " << n << "..." << endl;
         context.unlock();
-        mesh = meshBuckets( bks );
+        mesh = meshBuckets( bks, context.mesher );
         // lock a mutex since storeAims() is not thread-safe
         context.lock();
         GraphManip::storeAims( graph, v, "aims_Tmtktri", mesh );
@@ -812,7 +813,7 @@ void FoldGraphAttributes::makeMeshes()
 {
   cout << "Making meshes...\n";
 
-  NodeContext	nc( _graph, &meshVertex );
+  NodeContext	nc( _graph, &meshVertex, _mesher );
   float tpcpu = threadsByCpu( maxThreads() );
   ThreadedLoop	tl( &nc, 1, 0, _graph.order(), tpcpu );
   tl.launch();
