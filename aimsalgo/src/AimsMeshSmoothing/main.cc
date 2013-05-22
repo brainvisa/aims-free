@@ -33,130 +33,123 @@
 
 
 #include <cstdlib>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/utility/utility_g.h>
 #include <aims/mesh/mesh_g.h>
 #include <aims/io/io_g.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
-BEGIN_USAGE( usage )
-  "--------------------------------------------------------------------------",
-  "AimsMeshSmoothing  -i[nput]  <filein>                                     ",
-  "                  [-o[utput] <fileout>]                                   ",
-  "                  [-n[Iteration] <niter>]                                 ",
-  "                  [-I[sotropic]]                                          ",
-  "                  [-r[ate] <rate>]                                        ",
-  "                  [-x[rate] <rate>]                                       ",
-  "                  [-y[rate] <rate>]                                       ",
-  "                  [-z[rate] <rate>]                                       ",
-  "                  [-f[eatureAngle] <angle>]                               ",
-  "                  [--tri]                                                 ",
-  "                  [--ascii]                                               ",
-  "                  [-h[elp]]                                               ",
-  "--------------------------------------------------------------------------",
-  " Smoothes a triangulation                                                 ",
-  "--------------------------------------------------------------------------",
-  "-i[nput]            : prefix name for input triangulation is <filein>     ",
-  "-o[utput]           : prefix name for output triangulation is <fileout>   ",
-  "                      [default=filein]                                    ",
-  "-n[Iteration]       : number of iterations is <nb> [default=10]           ",
-  "-I[sotropic]        : type of smoothing is isotropic [default=anisotropic]",
-  "-r[ate]             : moving factor at each iteration for isotropic       ",
-  "                      smoothing is <rate> [default=0.2]                   ",
-  "-x[rate]            : moving factor on x axis is <rate> [default=0.2]     ",
-  "-y[rate]            : moving factor on y axis is <rate> [default=0.2]     ",
-  "-z[rate]            : moving factor on z axis is <rate> [default=0.2]     ",
-  "-f[eatureAngle]     : feature angle is <angle> degree, between 0 and 180  ",
-  "                      [default=180]                                       ",
-  "--tri               : *.tri file format [default=*.mesh]                  ",
-  "--ascii             : write *.mesh in ASCII [default=binar]               ",
-  "-h[elp]             : display the current help message                    ",
-  "--------------------------------------------------------------------------",
-END_USAGE
 
-
-void Usage( void )
+int main( int argc, const char** argv )
 {
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char* argv[] )
-{ 
-  char *fileIn = NULL, *fileOut = NULL;
+  
+  Mesher::SmoothingType algoType = Mesher::LOWPASS;
+  string algoTypeStr = "lowpass";
   int nIteration = 10;
-  int isotropic = 0;
   float rate = 0.2;
-  float xRate = 0.2;
-  float yRate = 0.2;
-  float zRate = 0.2;
   float featureAngle = 180.0;
-  int triFlag = 0;
+  float springForce = 0.2;
   int asciiFlag = 0;
-
-  AimsOption opt[] = {
-  { 'h',"help"      ,AIMS_OPT_FLAG  ,( void* )Usage           ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input"     ,AIMS_OPT_STRING,&fileIn         ,0                ,1},
-  { 'o',"output"    ,AIMS_OPT_STRING,&fileOut        ,0                ,0},
-  { 'n',"nIteration",AIMS_OPT_INT   ,&nIteration     ,0                ,0},
-  { 'I',"Isotropic" ,AIMS_OPT_FLAG  ,&isotropic      ,0	              ,0},
-  { 'r',"rate"      ,AIMS_OPT_FLOAT ,&rate           ,0                ,0},
-  { 'x',"xRate"     ,AIMS_OPT_FLOAT ,&xRate	        ,0                ,0},
-  { 'y',"yRate"     ,AIMS_OPT_FLOAT ,&yRate	        ,0                ,0},
-  { 'z',"zRate"     ,AIMS_OPT_FLOAT ,&zRate	        ,0                ,0},
-  { 'f',"feature"   ,AIMS_OPT_FLOAT ,&featureAngle   ,0                ,0},
-  { ' ',"tri"       ,AIMS_OPT_FLAG  ,&triFlag        ,0                ,0},
-  { ' ',"ascii"     ,AIMS_OPT_FLAG  ,&asciiFlag      ,0                ,0},
-  { 0  ,0           ,AIMS_OPT_END   ,0               ,0                ,0}};
-
-  AimsParseOptions( &argc, argv, opt, usage );
+  Reader<AimsSurfaceTriangle> triR;
+  Writer<AimsSurfaceTriangle> triW;
 
   //
-  // chek options
+  // parse options
   //
-  ASSERT( nIteration > 0 );
-  ASSERT( featureAngle >= 0.0 && featureAngle <= 180.0 );
-  ASSERT( rate >= 0.0 && rate <= 1.0 );
-  ASSERT( xRate >= 0.0 && xRate <= 1.0 );
-  ASSERT( yRate >= 0.0 && yRate <= 1.0 );
-  ASSERT( zRate >= 0.0 && zRate <= 1.0 );
+  AimsApplication app( argc, argv, "Smoothes a triangulation" );
+  app.addOption( triR, "-i", "input triangulation" );
+  app.alias( "--input", "-i" );
+  app.addOption( triW, "-o", "output triangulation", true );
+  app.alias( "--output", "-o" );
+  app.addOption( algoTypeStr, "--algoType", "alorithm's type : "
+                 "laplacian, simplespring, polygonspring or lowpass "
+                 "[default=lowpass]", true );
+  app.addOption( nIteration, "--nIteration",
+                 "number of iterations [default=10]", true );
+  app.addOption( rate, "--rate",
+                 "moving factor at each iteration [default=0.2]",
+                 true );
+  app.addOption( featureAngle, "--featureAngle",
+                 "feature angle (in degrees) below which the vertex is not "
+                 "moved, only for the Laplacian algorithm, between 0 and 180 "
+                 "degree [default=0]", true );
+  app.addOption( springForce, "--springForce", "restoring force for the Simple "
+                 "Spring and Polygon Spring algorithm, between 0 and 1 "
+                 "[default=0.2]", true );
+  app.addOption( asciiFlag, "--ascii",
+                 "write *.mesh in ASCII [default=binar]", true );
+  
+  try
+  {
+    app.initialize();
+  
+    //
+    // chek options
+    //
+    ASSERT( nIteration > 0 );
+    ASSERT( featureAngle >= 0.0 && featureAngle <= 180.0 );
+    ASSERT( springForce >= 0.0 && springForce <= 1.0 );
+    ASSERT( rate >= 0.0 && rate <= 1.0 );
+    
+    if( algoTypeStr == "laplacian" )
+      algoType = Mesher::LAPLACIAN;
+    else if ( algoTypeStr == "lowpass" )
+      algoType = Mesher::LOWPASS;
+    else if ( algoTypeStr == "simplespring" )
+      algoType = Mesher::SIMPLESPRING;
+    else if ( algoTypeStr == "polygonspring" )
+      algoType = Mesher::POLYGONSPRING;
+    
+    if ( triW.fileName().empty() )
+      triW.setFileName( triR.fileName() );
 
-  if ( fileOut == NULL )
-    fileOut = fileIn;
+    cout << endl;
 
-  cout << endl;
+    //
+    // read triangulation
+    //
+    cout << "reading triangulation   : " << flush;
+    AimsSurfaceTriangle surface;
+    triR >> surface;
+    cout << "done" << endl;
 
-  //
-  // read triangulation
-  //
-  cout << "reading triangulation   : " << flush;
-  AimsSurfaceTriangle surface;
-  Reader<AimsSurfaceTriangle> triR( fileIn );
-  triR >> surface;
-  cout << "done" << endl;
-
-  //
-  // smooth mesh
-  //
-  cout << "smoothing mesh          : " << flush;
-  Mesher mesher;
-  if ( isotropic )
-    mesher.setSmoothing( featureAngle, nIteration, rate, rate, rate );
-  else
-    mesher.setSmoothing( featureAngle, nIteration, xRate, yRate, zRate );
-  mesher.smooth( surface );
-  cout << "done" << endl;
-
-
-  //
-  // save triangulation
-  //
-  cout << "saving triangulation    : " << flush;
-  Writer<AimsSurfaceTriangle> triW( fileOut );
-  triW << surface;
-  cout << "done" << endl;
+    //
+    // smooth mesh
+    //
+    cout << "smoothing mesh          : " << flush;
+    Mesher mesher;
+    
+    mesher.setSmoothing( algoType, nIteration, rate );
+    if ( algoType == Mesher::LAPLACIAN )
+      mesher.setSmoothingLaplacian( featureAngle );
+    if ( algoType == Mesher::SIMPLESPRING or algoType == Mesher::POLYGONSPRING )
+      mesher.setSmoothingSpring( springForce );
+    
+    mesher.smooth( surface );
+    cout << "done" << endl;
+    
+    
+    //
+    // save triangulation
+    //
+//     cout << "saving triangulation    : " << flush;
+    triW.write( surface, asciiFlag );
+    cout << "done" << endl;
+    
+    
+  }
+  catch( user_interruption & )
+  {
+    return EXIT_FAILURE;
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return( EXIT_FAILURE );
+  }
 
   return EXIT_SUCCESS;
 }
