@@ -36,6 +36,8 @@
 #define AIMS_FOLDGRAPH_FOLDGRAPHATTRIBUTES
 
 #include <aims/data/data.h>
+#include <aims/mesh/mesher.h>
+
 class Graph;
 
 namespace aims
@@ -108,6 +110,7 @@ namespace aims
     */
     void setMaxThreads( int mt );
     int maxThreads() const { return _maxthreads; }
+    Mesher & mesher() { return _mesher; }
 
   private:
     class DistanceMapThreadContext;
@@ -150,6 +153,7 @@ namespace aims
     bool		_domeshes;
     std::vector<int>    _graphversion;
     int                 _maxthreads;
+    Mesher              _mesher;
   };
 
 }
