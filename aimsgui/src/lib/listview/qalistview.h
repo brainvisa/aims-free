@@ -66,7 +66,8 @@ namespace gui
     void unselectInvisibleItems();
 
   signals:
-    void dragStart( Q3ListViewItem*, Qt::ButtonState state );
+    void dragStart( Q3ListViewItem*, Qt::MouseButtons state, 
+                    Qt::KeyboardModifiers );
     /** notifies the beginning of a child renaming.
         Warning: this signal is only emitted for QEditableListViewItem
         children

@@ -33,11 +33,7 @@
 
 
 #include <aims/listview/qalistview.h>
-#if QT_VERSION >= 0x040000
 #include <q3header.h>
-#else
-#include <qheader.h>
-#endif
 #include <iostream>
 
 using namespace aims::gui;
@@ -102,13 +98,8 @@ void QAListView::contentsMousePressEvent( QMouseEvent* mev )
   //}
   /*cout << "contentsMousePressEvent - dragpossible : " << d->dragpossible 
     << endl;*/
-#if QT_VERSION > 0x040000
   d->buttons = mev->buttons();
   d->deadkeys = mev->modifiers();
-#else
-  d->buttons = mev->button();
-  d->deadkeys = mev->state();
-#endif
   Q3ListView::contentsMousePressEvent( mev );
 }
 
@@ -140,7 +131,7 @@ void QAListView::contentsMouseMoveEvent( QMouseEvent* mev )
           if( item && item->isSelected() )
             {
               d->dragpossible = false;
-              emit dragStart( item, mev->state() );
+              emit dragStart( item, mev->buttons(), mev->modifiers() );
               mev->ignore();
               return;
             }
