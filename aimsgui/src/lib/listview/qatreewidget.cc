@@ -132,7 +132,7 @@ void QATreeWidget::mouseMoveEvent( QMouseEvent* event )
       if( item && item->isSelected() )
       {
         d->dragpossible = false;
-        emit dragStart( item, event->state() );
+        emit dragStart( item, event->buttons(), event->modifiers() );
         event->ignore();
         return;
       }

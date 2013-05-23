@@ -57,7 +57,8 @@ namespace gui
 
   signals:
     void itemRightPressed( QTreeWidgetItem *item, const QPoint & pos );
-    void dragStart( QTreeWidgetItem*, Qt::ButtonState state );
+    void dragStart( QTreeWidgetItem*, Qt::MouseButtons state,
+      Qt::KeyboardModifiers mod );
     /** emitted when the mouse cursor moves over a different element.
         Needs so set mouse tracking on the QListView before it works.
     */
