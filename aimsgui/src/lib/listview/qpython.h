@@ -37,15 +37,10 @@
 #include <cartobase/object/object.h>
 #include <cartobase/object/syntax.h>
 #include <qglobal.h>
-#if QT_VERSION >= 0x040000
 class Q3ListView;
 class Q3ListViewItem;
-#else
-class QListView;
-class QListViewItem;
-typedef QListView Q3ListView;
-typedef QListViewItem Q3ListViewItem;
-#endif
+class QTreeWidget;
+class QTreeWidgetItem;
 class QString;
 
 
@@ -56,7 +51,7 @@ namespace gui
 {
 
   /**	Prints elements and attributes of a GenericObject (Python-like) object 
-	into a QListView tree
+	into a QTreeWidget tree
   */
   class QPythonPrinter
   {
@@ -101,6 +96,55 @@ namespace gui
     int			_valcol;
     int			_attcol;
     int			_typcol;
+  };
+
+
+  /**   Prints elements and attributes of a GenericObject (Python-like) object 
+        into a QTreeWidget tree
+  */
+  class QPythonPrinterT
+  {
+  public:
+    typedef QTreeWidgetItem* (*Helper)( const carto::GenericObject & obj, 
+                                       QTreeWidgetItem* parent, 
+                                       QPythonPrinterT & qp, 
+                                       const QString & attname, 
+                                       const QString & attype, 
+                                       bool viewinternal );
+    typedef std::map<std::string, Helper>       HelperSet;
+
+    QPythonPrinterT( QTreeWidgetItem* parent, 
+                    const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
+                    const HelperSet & helpers = HelperSet() );
+    QPythonPrinterT( QTreeWidget* parent, 
+                    const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
+                    const HelperSet & helpers = HelperSet() );
+    virtual ~QPythonPrinterT();
+
+    virtual QTreeWidgetItem* write( const carto::GenericObject & object, 
+                                   bool writeInternals = false );
+    virtual void write( const carto::GenericObject & object, 
+                        QTreeWidgetItem* parent, const std::string & syntax, 
+                        const std::string & semantic, bool writeInternals );
+    bool isInternal( const std::string & syntax, 
+                     const std::string & semantic );
+    int valueColumn() const { return( _valcol ); }
+    int attributeColumn() const { return( _attcol ); }
+    int typeColumn() const { return( _typcol ); }
+    void setValueColumn( int c ) { _valcol = c; }
+    void setPropertyColumn( int c ) { _attcol = c; }
+    void setTypeColumn( int c ) { _typcol = c; }
+
+  protected:
+    virtual void initHelpers();
+
+    carto::SyntaxSet    _rules;
+    HelperSet           _helpers;
+    QTreeWidget          *_lview;
+    QTreeWidgetItem      *_lvitem;
+    int                 _valcol;
+    int                 _attcol;
+    int                 _typcol;
   };
 
 }
