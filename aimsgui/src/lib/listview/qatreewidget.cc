@@ -157,3 +157,15 @@ void QATreeWidget::leaveEvent( QEvent* ev )
 }
 
 
+Qt::MouseButtons QATreeWidget::buttonsAtLastEvent() const
+{
+  return d->buttons;
+}
+
+
+Qt::KeyboardModifiers QATreeWidget::deadKeysStateAtLastEvent() const
+{
+  return d->deadkeys;
+}
+
+
