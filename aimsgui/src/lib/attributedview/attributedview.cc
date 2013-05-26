@@ -151,7 +151,7 @@ void AttributedView::loadObject( const QString & filename )
         }
     }
 
-  QPythonPrinterT	pp( listview );
+  QPythonPrinter	pp( listview );
   //  QTreeWidgetItem	*item = pp.write( *go, true );
   QTreeWidgetItem	*item = pp.write( *obj.get(), true );
   if( item->childCount() != 0 )

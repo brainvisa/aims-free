@@ -37,8 +37,6 @@
 #include <cartobase/object/object.h>
 #include <cartobase/object/syntax.h>
 #include <qglobal.h>
-class Q3ListView;
-class Q3ListViewItem;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QString;
@@ -50,76 +48,27 @@ namespace aims
 namespace gui
 {
 
-  /**	Prints elements and attributes of a GenericObject (Python-like) object 
-	into a QTreeWidget tree
+  /**   Prints elements and attributes of a GenericObject (Python-like) object 
+        into a QTreeWidget tree
   */
   class QPythonPrinter
   {
   public:
-    typedef Q3ListViewItem* (*Helper)( const carto::GenericObject & obj, 
-				       Q3ListViewItem* parent, 
-				       QPythonPrinter & qp, 
-				       const QString & attname, 
-				       const QString & attype, 
-				       bool viewinternal );
-    typedef std::map<std::string, Helper>	HelperSet;
-
-    QPythonPrinter( Q3ListViewItem* parent, 
-		    const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
-		    const HelperSet & helpers = HelperSet() );
-    QPythonPrinter( Q3ListView* parent, 
-		    const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
-		    const HelperSet & helpers = HelperSet() );
-    virtual ~QPythonPrinter();
-
-    virtual Q3ListViewItem* write( const carto::GenericObject & object, 
-				   bool writeInternals = false );
-    virtual void write( const carto::GenericObject & object, 
-			Q3ListViewItem* parent, const std::string & syntax, 
-			const std::string & semantic, bool writeInternals );
-    bool isInternal( const std::string & syntax, 
-		     const std::string & semantic );
-    int valueColumn() const { return( _valcol ); }
-    int attributeColumn() const { return( _attcol ); }
-    int typeColumn() const { return( _typcol ); }
-    void setValueColumn( int c ) { _valcol = c; }
-    void setPropertyColumn( int c ) { _attcol = c; }
-    void setTypeColumn( int c ) { _typcol = c; }
-
-  protected:
-    virtual void initHelpers();
-
-    carto::SyntaxSet	_rules;
-    HelperSet		_helpers;
-    Q3ListView		*_lview;
-    Q3ListViewItem	*_lvitem;
-    int			_valcol;
-    int			_attcol;
-    int			_typcol;
-  };
-
-
-  /**   Prints elements and attributes of a GenericObject (Python-like) object 
-        into a QTreeWidget tree
-  */
-  class QPythonPrinterT
-  {
-  public:
     typedef QTreeWidgetItem* (*Helper)( const carto::GenericObject & obj, 
                                        QTreeWidgetItem* parent, 
-                                       QPythonPrinterT & qp, 
+                                       QPythonPrinter & qp, 
                                        const QString & attname, 
                                        const QString & attype, 
                                        bool viewinternal );
     typedef std::map<std::string, Helper>       HelperSet;
 
-    QPythonPrinterT( QTreeWidgetItem* parent, 
+    QPythonPrinter( QTreeWidgetItem* parent, 
                     const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
                     const HelperSet & helpers = HelperSet() );
-    QPythonPrinterT( QTreeWidget* parent, 
+    QPythonPrinter( QTreeWidget* parent, 
                     const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
                     const HelperSet & helpers = HelperSet() );
-    virtual ~QPythonPrinterT();
+    virtual ~QPythonPrinter();
 
     virtual QTreeWidgetItem* write( const carto::GenericObject & object, 
                                    bool writeInternals = false );
