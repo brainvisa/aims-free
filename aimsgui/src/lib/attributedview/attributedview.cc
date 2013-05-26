@@ -87,7 +87,7 @@ void AttributedView::loadObject( const QString & filename )
   try
     {
       // try direct python format first
-      PythonReader	pr( filename.utf8().data() );
+      PythonReader	pr( filename.toStdString() );
       obj = Object( pr.read() );
 ////      go = obj.get();
     }
@@ -95,7 +95,7 @@ void AttributedView::loadObject( const QString & filename )
     {
       // try Finder
       Finder	f;
-      if( !f.check( filename.utf8().data() ) )
+      if( !f.check( filename.toStdString() ) )
         {
           cerr << e.what() << endl;
           return;
@@ -110,7 +110,7 @@ void AttributedView::loadObject( const QString & filename )
           if( f.objectType() == "genericobject" && type == "any" )
             try
             {
-              Reader<GenericObject>  r( filename.utf8().data() );
+              Reader<GenericObject>  r( filename.toStdString() );
               obj.reset( r.read() );
               done = true;
             }
