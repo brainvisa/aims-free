@@ -43,8 +43,10 @@
 #include <cartobase/exception/format.h>
 #include <cartobase/datasource/filedatasource.h>
 #include <cartobase/thread/mutex.h>
-#include <aims/qtcompat/qimageio.h>
 #include <qcolor.h>
+#include <QImage>
+#include <QImageReader>
+#include <QImageWriter>
 
 namespace aims
 {
@@ -178,7 +180,7 @@ namespace aims
     // std::cout << "readFrame: " << name << ", z: " << z << ", t: " << t << "\n";
     const QImage	*imp = 0;
     QImage		ima;
-    QImageIO		qio;
+    QImageReader	qio;
 
     if( hdr->filename() == name && hdr->hasRead() )
       imp = &hdr->qimage();

@@ -35,7 +35,6 @@
 #define AIMS_LISTVIEW_ORDERINGLIST_H
 
 #include <qglobal.h>
-#include <aims/qtcompat/qhbox.h>
 #include <aims/qtcompat/qlistbox.h>
 
 namespace aims
@@ -46,7 +45,7 @@ namespace aims
 
     /**	List box with ordering edition capabilities
     */
-    class QOrderingListBox : public QHBox
+    class QOrderingListBox : public QWidget
     {
       Q_OBJECT
 

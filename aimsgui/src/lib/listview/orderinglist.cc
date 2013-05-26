@@ -34,7 +34,7 @@
 #include <aims/listview/orderinglist.h>
 #include <qpushbutton.h>
 #include <aims/qtcompat/qlistbox.h>
-#include <aims/qtcompat/qvbox.h>
+#include <QBoxLayout>
 
 using namespace aims;
 using namespace aims::gui;
@@ -47,14 +47,25 @@ struct QOrderingListBox::Private
 
 QOrderingListBox::QOrderingListBox( QWidget* parent, const char* name, 
                                     Qt::WFlags f )
-  : QHBox( parent, name, f ), d( new Private )
+  : QWidget( parent, f ), d( new Private )
 {
-  setSpacing( 10 );
+  QHBoxLayout *lay = new QHBoxLayout( this );
+  setLayout( lay );
+  lay->setMargin( 0 );
+  lay->setSpacing( 10 );
+  setObjectName( name );
   d->listbox = new QListBox( this );
+  lay->addWidget( d->listbox );
   d->listbox->setSelectionMode( QListBox::Single );
-  QVBox	*vb = new QVBox( this );
+  QWidget *vb = new QWidget( this );
+  lay->addWidget( vb );
+  QVBoxLayout *vlay = new QVBoxLayout( vb );
+  vb->setLayout( vlay );
+  vlay->setMargin( 0 );
   QPushButton	*pbu = new QPushButton( tr( "Up" ), vb );
+  vlay->addWidget( pbu );
   QPushButton	*pbd = new QPushButton( tr( "Down" ), vb );
+  vlay->addWidget( pbd );
 
   connect( pbu, SIGNAL( clicked() ), SLOT( up() ) );
   connect( pbd, SIGNAL( clicked() ), SLOT( down() ) );
