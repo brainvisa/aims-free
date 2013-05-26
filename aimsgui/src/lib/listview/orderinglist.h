@@ -35,7 +35,9 @@
 #define AIMS_LISTVIEW_ORDERINGLIST_H
 
 #include <qglobal.h>
-#include <aims/qtcompat/qlistbox.h>
+#include <QWidget>
+
+class QListWidget;
 
 namespace aims
 {
@@ -45,17 +47,17 @@ namespace aims
 
     /**	List box with ordering edition capabilities
     */
-    class QOrderingListBox : public QWidget
+    class QOrderingListWidget : public QWidget
     {
       Q_OBJECT
 
     public:
-      QOrderingListBox( QWidget* parent = 0, const char* name = 0, 
+      QOrderingListWidget( QWidget* parent = 0, const char* name = 0, 
                         Qt::WFlags f = 0 );
-      virtual ~QOrderingListBox();
+      virtual ~QOrderingListWidget();
 
-      QListBox *qListBox();
-      const QListBox *qListBox() const;
+      QListWidget *qListWidget();
+      const QListWidget *qListWidget() const;
 
     public slots:
       void up();

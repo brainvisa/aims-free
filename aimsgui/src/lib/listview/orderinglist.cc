@@ -33,19 +33,20 @@
 
 #include <aims/listview/orderinglist.h>
 #include <qpushbutton.h>
-#include <aims/qtcompat/qlistbox.h>
 #include <QBoxLayout>
+#include <QListWidget>
+#include <QListWidgetItem>
 
 using namespace aims;
 using namespace aims::gui;
 
-struct QOrderingListBox::Private
+struct QOrderingListWidget::Private
 {
-  QListBox	*listbox;
+  QListWidget	*listwidget;
 };
 
 
-QOrderingListBox::QOrderingListBox( QWidget* parent, const char* name, 
+QOrderingListWidget::QOrderingListWidget( QWidget* parent, const char* name, 
                                     Qt::WFlags f )
   : QWidget( parent, f ), d( new Private )
 {
@@ -54,9 +55,9 @@ QOrderingListBox::QOrderingListBox( QWidget* parent, const char* name,
   lay->setMargin( 0 );
   lay->setSpacing( 10 );
   setObjectName( name );
-  d->listbox = new QListBox( this );
-  lay->addWidget( d->listbox );
-  d->listbox->setSelectionMode( QListBox::Single );
+  d->listwidget = new QListWidget( this );
+  lay->addWidget( d->listwidget );
+  d->listwidget->setSelectionMode( QListWidget::SingleSelection );
   QWidget *vb = new QWidget( this );
   lay->addWidget( vb );
   QVBoxLayout *vlay = new QVBoxLayout( vb );
@@ -72,68 +73,66 @@ QOrderingListBox::QOrderingListBox( QWidget* parent, const char* name,
 }
 
 
-QOrderingListBox::~QOrderingListBox()
+QOrderingListWidget::~QOrderingListWidget()
 {
   delete d;
 }
 
 
-QListBox *QOrderingListBox::qListBox()
+QListWidget *QOrderingListWidget::qListWidget()
 {
-  return d->listbox;
+  return d->listwidget;
 }
 
 
-const QListBox *QOrderingListBox::qListBox() const
+const QListWidget *QOrderingListWidget::qListWidget() const
 {
-  return d->listbox;
+  return d->listwidget;
 }
 
 
-void QOrderingListBox::up()
+void QOrderingListWidget::up()
 {
-  unsigned	i, n = d->listbox->count();
-  QListBoxItem	*sel = 0;
+  unsigned	i, n = d->listwidget->count(), ind = -1;
+  QListWidgetItem	*sel = 0;
   for( i=0; i<n; ++i )
-    if( d->listbox->isSelected( i ) )
-      {
-        sel = d->listbox->item( i );
-        break;
-      }
-  if( sel )
+    if( d->listwidget->item(i)->isSelected() )
     {
-      int	ind = d->listbox->index( sel );
-      if( ind > 0 )
-        {
-          d->listbox->setSelected( sel, false );
-          d->listbox->takeItem( sel );
-          d->listbox->insertItem( sel, ind - 1 );
-          d->listbox->setSelected( sel, true );
-        }
+      sel = d->listwidget->item( i );
+      ind = i;
+      break;
     }
+  if( sel )
+  {
+    if( ind > 0 )
+    {
+      d->listwidget->takeItem( ind );
+      d->listwidget->insertItem( ind - 1, sel );
+      sel->setSelected( true );
+    }
+  }
 }
 
-void QOrderingListBox::down()
+void QOrderingListWidget::down()
 {
-  unsigned	i, n = d->listbox->count();
-  QListBoxItem	*sel = 0;
+  unsigned	i, n = d->listwidget->count(), ind = -1;
+  QListWidgetItem	*sel = 0;
   for( i=0; i<n; ++i )
-    if( d->listbox->isSelected( i ) )
-      {
-        sel = d->listbox->item( i );
-        break;
-      }
-  if( sel )
+    if( d->listwidget->item(i)->isSelected() )
     {
-      int	ind = d->listbox->index( sel );
-      if( (unsigned) ind < d->listbox->count() )
-        {
-          d->listbox->setSelected( sel, false );
-          d->listbox->takeItem( sel );
-          d->listbox->insertItem( sel, ind + 1 );
-          d->listbox->setSelected( sel, true );
-        }
+      sel = d->listwidget->item( i );
+      ind = i;
+      break;
     }
+  if( sel )
+  {
+    if( ind < d->listwidget->count() )
+    {
+      d->listwidget->takeItem( ind );
+      d->listwidget->insertItem( ind + 1, sel );
+      sel->setSelected( true );
+    }
+  }
 }
 
 
