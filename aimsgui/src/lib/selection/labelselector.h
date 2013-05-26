@@ -38,11 +38,11 @@
 #include <aims/selection/selection.h>
 #include <qdialog.h>
 #include <iostream>
-#include <aims/qtcompat/qlistview.h>
-#include <aims/qtcompat/qlistbox.h>
 
 class SelectBox;
 class Graph;
+class QTreeWidgetItem;
+class QListWidgetItem;
 
 namespace aims
 {
@@ -59,6 +59,7 @@ namespace aims
 
       struct LabelSelector_private;
       friend class ::SelectBox;
+      class ModelBox;
 
     public:
       LabelSelector( QWidget* parent = 0, const char* name = 0, 
@@ -77,7 +78,7 @@ namespace aims
       void activatePreselection();
       void activateAddPreselection();
       void loadHierarchy();
-      /** Tries to makes/activates a selection from whatever is available 
+      /** Tries to make/activate a selection from whatever is available 
           (model/hierarchy/preselection) */
       void autoActivate();
       void check();
@@ -90,12 +91,10 @@ namespace aims
 
     private slots:
       void updateHierarchyView();
-      void startDrag( Q3ListViewItem*, Qt::ButtonState state );
-#if QT_VERSION >= 0x040000
-      void startDragModel( Q3ListBoxItem * );
-#else
-      void startDragModel( QListBoxItem* );
-#endif
+      void startDrag( QTreeWidgetItem*, Qt::MouseButtons,
+                      Qt::KeyboardModifiers );
+      void startDragModel( QListWidgetItem *, Qt::MouseButtons,
+                           Qt::KeyboardModifiers );
 
     private:
       LabelSelector_private	*d;

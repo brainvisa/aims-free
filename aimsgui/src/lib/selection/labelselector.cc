@@ -35,14 +35,10 @@
 #include <aims/selection/selector.h>
 #include <aims/io/selectionr.h>
 #include <aims/io/selectionw.h>
-#include <aims/listview/qalistview.h>
 #include <aims/roi/hie.h>
 #include <aims/io/reader.h>
 #include <graph/graph/graph.h>
-#include <aims/qtcompat/qvbox.h>
-#include <aims/qtcompat/qhbox.h>
-#include <aims/qtcompat/qdragobject.h>
-#include <aims/qtcompat/qpopupmenu.h>
+#include <aims/listview/qatreewidget.h>
 #include <qlayout.h>
 #include <qtabbar.h>
 #include <qtabwidget.h>
@@ -52,13 +48,16 @@
 #include <qfiledialog.h>
 #include <qapplication.h>
 #include <qsplitter.h>
+#include <QMenu>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QTreeWidgetItemIterator>
+#include <QListWidget>
 #include <graph/tree/treader.h>
 #include <cartobase/stream/sstream.h>
 #include <iostream>
 #include <vector>
-#if QT_VERSION >= 0x040000
 using namespace Qt;
-#endif
 
 using namespace aims;
 using namespace aims::gui;
@@ -115,127 +114,151 @@ namespace
 }
 
 
-SelectBox::SelectBox( LabelSelector* ls, QWidget * parent, const char * name, 
-                      Qt::WFlags f )
-  : Q3ListView( parent, name, f ), _labelsel( ls )
+SelectBox::SelectBox( LabelSelector* ls, QWidget * parent, const char * name )
+  : QATreeWidget( parent ), _labelsel( ls )
 {
-  addColumn( "Label" );
+  setObjectName( name );
+
+  setColumnCount( 1 );
+  QTreeWidgetItem* hdr = new QTreeWidgetItem;
+  setHeaderItem( hdr );
+  hdr->setText( 0, tr( "Label" ) );
+
   setRootIsDecorated( true );
-  setSelectionMode( Q3ListView::Extended );
+  setSelectionMode( QTreeWidget::ExtendedSelection );
+  setItemsExpandable( true );
+  setAllColumnsShowFocus( true );
+
   setAcceptDrops( true );
-#if QT_VERSION >= 0x040000
   connect( this, 
-           SIGNAL( rightButtonPressed( Q3ListViewItem*, const QPoint &, int ) ),
-	   SLOT( rightButtonPressed( Q3ListViewItem*, const QPoint &, int ) ));
-#else
-  connect( this, 
-           SIGNAL( rightButtonPressed( QListViewItem*, const QPoint &, int ) ),
-	   SLOT( rightButtonPressed( QListViewItem*, const QPoint &, int ) ));
-#endif
+           SIGNAL( itemRightPressed( QTreeWidgetItem*, const QPoint & ) ),
+            SLOT( rightButtonPressed( QTreeWidgetItem*, const QPoint & ) ));
 }
+
 
 SelectBox::~SelectBox()
 {
 }
 
+
 void SelectBox::dragEnterEvent( QDragEnterEvent* event )
 {
-  //cout << "dragEnterEvent\n";
-  event->accept( QTextDrag::canDecode( event ) );
+  if( event->mimeData()->hasFormat( "text/plain" ) )
+    event->acceptProposedAction();
 }
+
+
+void SelectBox::dragMoveEvent( QDragMoveEvent* event )
+{
+  if( event->mimeData()->hasFormat( "text/plain" ) )
+    event->acceptProposedAction();
+}
+
 
 void SelectBox::dropEvent( QDropEvent* event )
 {
-  //cout << "dropEvent\n";
-  QString		txt;
+  // cout << "dropEvent\n";
+  QString		txt = event->mimeData()->text();
 
-  if( QTextDrag::decode( event, txt ) )
-    {
-      //cout << "dropped!\n";
-      //cout << txt << endl;
+  if( !txt.isEmpty() )
+  {
+    // cout << "dropped!\n";
+    // cout << txt.toStdString() << endl;
 
-      QPoint p( viewport()->mapFromParent( event->pos() ) );
-      Q3ListViewItem	*item = itemAt( p );
-      QString		gname;
-      bool		rootsel = !item;
+    event->acceptProposedAction();
+    QTreeWidgetItem	*item = itemAt( event->pos() );
+    QString		gname;
+    bool		rootsel = !item;
 
-      if( item && item->parent() )
-	item = item->parent();
-      if( item )
-	item->setOpen( true );
+    if( item && item->parent() )
+      item = item->parent();
+    if( item )
+      item->setExpanded( true );
 
-      SelectionSet	ss;
-      istringstream	istr( txt.utf8().data() );
-      SelectionReader	sr( istr );
-      try
-        {
-          sr.read( ss );
-          if( rootsel )
-            mergeSelection( ss );
-          else
-            addSelection( ss, item->text(0).utf8().data() );
-        }
-      catch( exception & e )
-        {
-          cerr << e.what() << endl;
-        }
-    }
+    SelectionSet	ss;
+    istringstream	istr( txt.toStdString() );
+    SelectionReader	sr( istr );
+    try
+      {
+        sr.read( ss );
+        if( rootsel )
+          mergeSelection( ss );
+        else
+          addSelection( ss, item->text(0).toStdString() );
+      }
+    catch( exception & e )
+      {
+        cerr << e.what() << endl;
+      }
+  }
   else
-    event->accept( false );
+    event->ignore();
 }
 
 
-void SelectBox::insertUniqueItem( Q3ListViewItem* parent, const QString & txt )
+void SelectBox::insertUniqueItem( QTreeWidgetItem* parent, 
+                                  const QString & txt )
 {
-  Q3ListViewItem	*li;
+  QTreeWidgetItem	*li;
+  unsigned i, n;
   if( parent )
-    li = parent->firstChild();
-  else
-    li = firstChild();
-
-  while( li )
+  {
+    for( i=0, n=parent->childCount(); i<n; ++i )
     {
+      li = parent->child( i );
       if( li->text(0) == txt )
-	return;
-      li = li->nextSibling();
+        return;
     }
-
-  if( parent )
-    new Q3ListViewItem( parent, txt );
+  }
   else
-    new Q3ListViewItem( this, txt );
+  {
+    for( i=0, n=topLevelItemCount(); i<n; ++i )
+    {
+      li = topLevelItem( i );
+      if( li->text(0) == txt )
+        return;
+    }
+  }
+
+  QTreeWidgetItem * newitem = new QTreeWidgetItem;
+  newitem->setText( 0, txt );
+  if( parent )
+    parent->addChild( newitem );
+  else
+    addTopLevelItem( newitem );
 }
 
 
 SelectionSet SelectBox::selection() const
 {
-  Q3ListViewItem	*li = firstChild(), *sli;
+  QTreeWidgetItem	*li, *sli;
+  unsigned i, n = topLevelItemCount(), j, m;
   SelectionSet	ss;
 
-  while( li )
+  for( i=0; i<n; ++i )
+  {
+    li = topLevelItem( i );
+    m = li->childCount();
+    Selection s( li->text( 0 ).toStdString() );
+    for( j=0; j<m; ++j )
     {
-      sli = li->firstChild();
-      Selection		s( li->text( 0 ).utf8().data() );
-      while( sli )
-	{
-	  s.select( sli->text( 0 ).utf8().data() );
-	  sli = sli->nextSibling();
-	}
-      ss.addSelection( s );
-      li = li->nextSibling();
+      sli = li->child( j );
+      s.select( sli->text( 0 ).toStdString() );
     }
+    ss.addSelection( s );
+  }
 
-  return( ss );
+  return ss;
 }
 
 
-void SelectBox::rightButtonPressed( Q3ListViewItem*, const QPoint & pos, int )
+void SelectBox::rightButtonPressed( QTreeWidgetItem*, const QPoint & pos )
 {
-  QPopupMenu	pop( 0, "right-click" );
-  pop.insertItem( tr( "Delete selected items" ), this, 
+  QMenu	pop( "right-click" );
+  pop.addAction( tr( "Delete selected items" ), this, 
                   SLOT( deleteSelection() ) );
-  pop.insertItem( tr( "Clear selection" ), this, SLOT( clearAll() ) );
-  pop.exec( pos, 0 );
+  pop.addAction( tr( "Clear selection" ), this, SLOT( clearAll() ) );
+  pop.exec( mapToGlobal( pos ) );
 }
 
 
@@ -247,31 +270,28 @@ void SelectBox::clearAll()
 
 void SelectBox::deleteSelection()
 {
-  Q3ListViewItem	*item = firstChild(), *parent = 0;
-  set<Q3ListViewItem *>	todel;
+  QTreeWidgetItem	*item, *item2;
+  set<QTreeWidgetItem *>	todel;
+  unsigned i, n = topLevelItemCount(), j, m;
 
-  while( item )
+  for( i=0; i<n; ++i )
+  {
+    item = topLevelItem( i );
+    if( item->isSelected() )
+      todel.insert( item );
+    else
     {
-      //cout << "item: " << item->text(0).utf8().data() << endl;
-      if( item->isSelected() )
-        {
-          todel.insert( item );
-          item = item->nextSibling();
-        }
-      else
-        {
-          parent = item;
-          item = item->firstChild();
-        }
-      while( !item && parent )
-        {
-          item = parent;
-          parent = parent->parent();
-          item = item->nextSibling();
-        }
+      m = item->childCount();
+      for( j=0; j<m; ++j )
+      {
+        item2 = item->child( j );
+        if( item2->isSelected() )
+          todel.insert( item2 );
+      }
     }
+  }
 
-  set<Q3ListViewItem *>::iterator	is, es = todel.end();
+  set<QTreeWidgetItem *>::iterator	is, es = todel.end();
   for( is=todel.begin(); is!=es; ++is )
     delete *is;
 }
@@ -281,18 +301,24 @@ void SelectBox::addSelection( const SelectionSet & sel )
 {
   SelectionSet::const_iterator	is, es = sel.end();
   Selection::const_iterator	iss, ess;
-  Q3ListViewItem			*item;
+  QTreeWidgetItem		*item, *item2;
   string			name;
 
   for( is=sel.begin(); is!=es; ++is )
+  {
+    name = is->name();
+    if( name.empty() )
+      name = newSelectionName( sel );
+    item = new QTreeWidgetItem;
+    item->setText( 0, name.c_str() );
+    addTopLevelItem( item );
+    for( iss=is->begin(), ess=is->end(); iss!=ess; ++iss )
     {
-      name = is->name();
-      if( name.empty() )
-        name = newSelectionName( sel );
-      item = new Q3ListViewItem( this, name.c_str() );
-      for( iss=is->begin(), ess=is->end(); iss!=ess; ++iss )
-        new Q3ListViewItem( item, iss->c_str() );
+      item2 = new QTreeWidgetItem;
+      item2->setText( 0, iss->c_str() );
+      item->addChild( item2 );
     }
+  }
 }
 
 
@@ -313,27 +339,38 @@ void SelectBox::addSelection( const SelectionSet & sel, const string & parent )
       mergeSelection( nsel );
 
       // find parent
-      Q3ListViewItem			*pitem;
+      QTreeWidgetItem			*pitem;
+      unsigned i, n = topLevelItemCount();
 
-      for( pitem=firstChild(); pitem && pitem->text(0)!=parent.c_str(); 
-           pitem=pitem->nextSibling() ) {}
+      for( i=0; i<n; ++i )
+      {
+        pitem = topLevelItem( i );
+        if( pitem->text( 0 ) == parent.c_str() )
+          break;
+      }
       if( pitem )
-        pitem->setOpen( true );
+        pitem->setExpanded( true );
       return;
     }
 
   // just in case our parent is not a LabelSelector
 
   // find parent
-  Q3ListViewItem			*pitem;
+  QTreeWidgetItem *pitem = 0;
+  unsigned i, n = topLevelItemCount();
 
-  for( pitem=firstChild(); pitem && pitem->text(0)!=parent.c_str(); 
-       pitem=pitem->nextSibling() ) {}
+  for( i=0; i<n; ++i )
+  {
+    pitem = topLevelItem( i );
+    if( pitem->text(0) == parent.c_str() )
+      break;
+  }
+
   if( !pitem )
-    {
-      addSelection( sel );
-      return;
-    }
+  {
+    addSelection( sel );
+    return;
+  }
 
   // find top parent
   while( pitem->parent() )
@@ -367,10 +404,11 @@ void SelectBox::mergeSelection( const SelectionSet & sel )
   // just in case our parent is not a LabelSelector
   SelectionSet::const_iterator	is, es = sel.end();
   Selection::const_iterator	iss, ess;
-  Q3ListViewItem			*item;
+  QTreeWidgetItem		*item;
   string			name;
-  map<string, Q3ListViewItem *>	items;
-  map<string, Q3ListViewItem *>::iterator	ii, ei = items.end();
+  map<string, QTreeWidgetItem *>	items;
+  map<string, QTreeWidgetItem *>::iterator	ii, ei = items.end();
+  unsigned i, n = topLevelItemCount();
 
   for( is=sel.begin(); is!=es; ++is )
     {
@@ -380,10 +418,19 @@ void SelectBox::mergeSelection( const SelectionSet & sel )
       ii = items.find( name );
       if( ii == ei )
         {
-          for( item=firstChild(); item && item->text(0)!=name.c_str(); 
-               item=item->nextSibling() ) {}
+          item = 0;
+          for( i=0; i<n; ++i )
+          {
+            item = topLevelItem( i );
+            if( item->text(0) == name.c_str() )
+              break;
+          }
           if( !item )
-            item = new Q3ListViewItem( this, name.c_str() );
+          {
+            item = new QTreeWidgetItem;
+            item->setText( 0, name.c_str() );
+            addTopLevelItem( item );
+          }
           items[ name ] = item;
         }
       else
@@ -401,7 +448,7 @@ struct LabelSelector::LabelSelector_private
 
   QComboBox		*presels;
   QComboBox		*hierarchies;
-  Q3ListView		*hieview;
+  QTreeWidget		*hieview;
   QLabel		*modellabel;
   SelectBox		*selection;
   vector<Hierarchy *>	hie;
@@ -409,7 +456,7 @@ struct LabelSelector::LabelSelector_private
   Graph			*model;
   QPushButton		*modelsel;
   QPushButton		*modelselbysel;
-  QListBox		*modelbox;
+  QListWidget		*modelbox;
   QTabWidget		*tabs;
   SelectionExpander	expander;
 };
@@ -417,9 +464,12 @@ struct LabelSelector::LabelSelector_private
 
 LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal, 
 			      Qt::WFlags f )
-  : QDialog( parent, name, modal, f ), d( new LabelSelector_private )
+  : QDialog( parent, f ), d( new LabelSelector_private )
 {
-  setCaption( tr( "Labels selector" ) );
+  setWindowTitle( tr( "Labels selector" ) );
+  setObjectName( name );
+  if( modal )
+    setWindowModality( Qt::WindowModal );
   QVBoxLayout	*lay = new QVBoxLayout( this );
   QSplitter *hsplit = new QSplitter( Qt::Vertical, this );
   lay->addWidget( hsplit );
@@ -430,83 +480,132 @@ LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal,
 
   // preselection panel
 
-  QVBox	*presel = new QVBox( tabs );
+  QWidget	*presel = new QWidget;
+  QVBoxLayout *vlay = new QVBoxLayout( presel );
+  presel->setLayout( vlay );
   tabs->addTab( presel, tr( "Pre-selections" ) );
-  presel->setSpacing( 10 );
-  presel->setMargin( 10 );
-  QHBox	*hb = new QHBox( presel );
-  hb->setSpacing( 10 );
+  vlay->setSpacing( 10 );
+  vlay->setMargin( 10 );
+  QWidget *hb = new QWidget( presel );
+  vlay->addWidget( hb );
+  QHBoxLayout *hlay = new QHBoxLayout( hb );
+  hb->setLayout( hlay );
+  hlay->setSpacing( 10 );
+  hlay->setMargin( 0 );
   d->presels = new QComboBox( hb );
+  hlay->addWidget( d->presels );
   QPushButton	*pb = new QPushButton( "...", hb );
+  hlay->addWidget( pb );
   pb->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
   connect( pb, SIGNAL( clicked() ), this, SLOT( loadPreselection() ) );
-  hb = new QHBox( presel );
+  hb = new QWidget( presel );
+  vlay->addWidget( hb );
+  hlay = new QHBoxLayout( hb );
+  hb->setLayout( hlay );
   pb = new QPushButton( tr( "Select" ), hb );
+  hlay->addWidget( pb );
   pb->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
   connect( pb, SIGNAL( clicked() ), this, SLOT( activatePreselection() ) );
   pb = new QPushButton( tr( "+ Select" ), hb );
+  hlay->addWidget( pb );
   pb->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
   connect( pb, SIGNAL( clicked() ), this, SLOT( activateAddPreselection() ) );
 
   // hierarchy panel
 
-  QVBox	*hier = new QVBox( tabs );
+  QWidget *hier = new QWidget( tabs );
   tabs->addTab( hier, tr( "By hierarchy" ) );
-  hier->setSpacing( 10 );
-  hier->setMargin( 10 );
-  QHBox	*hhb = new QHBox( hier );
-  hhb->setSpacing( 10 );
+  vlay = new QVBoxLayout( hier );
+  hier->setLayout( vlay );
+  vlay->setSpacing( 10 );
+  vlay->setMargin( 10 );
+  QWidget *hhb = new QWidget( hier );
+  vlay->addWidget( hhb );
+  hlay = new QHBoxLayout( hhb );
+  hhb->setLayout( hlay );
+  hlay->setSpacing( 10 );
+  hlay->setMargin( 0 );
   QLabel	*hl = new QLabel( tr( "Hierarchy :" ), hhb );
+  hlay->addWidget( hl );
   hl->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
   d->hierarchies = new QComboBox( hhb );
+  hlay->addWidget( d->hierarchies );
   QPushButton	*hlb = new QPushButton( "...", hhb );
+  hlay->addWidget( hlb );
   hlb->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
-  d->hieview = new QAListView( hier );
-  d->hieview->addColumn( "Label" );
+
+  d->hieview = new QATreeWidget( hier );
+  vlay->addWidget( d->hieview );
+  d->hieview->setColumnCount( 1 );
+  QTreeWidgetItem* hdr = new QTreeWidgetItem;
+  d->hieview->setHeaderItem( hdr );
+  hdr->setText( 0, tr( "Label" ) );
+  d->hieview->setDragEnabled( true );
+  // disable "natural" treewidget drag&drop: we overload it.
+  d->hieview->setDragDropMode( QAbstractItemView::NoDragDrop );
+
   d->hieview->setRootIsDecorated( true );
-  d->hieview->setSelectionMode( Q3ListView::Extended );
+  d->hieview->setSelectionMode( QTreeWidget::ExtendedSelection );
+  d->hieview->setItemsExpandable( true );
+  d->hieview->setAllColumnsShowFocus( true );
+
   d->hieview->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, 
-					  QSizePolicy::Expanding ) );
+                                          QSizePolicy::Expanding ) );
   connect( hlb, SIGNAL( clicked() ), this, SLOT( loadHierarchy() ) );
   connect( d->hierarchies, SIGNAL( activated( int ) ), this, 
-	   SLOT( updateHierarchyView() ) );
-  connect( d->hieview, SIGNAL( dragStart( Q3ListViewItem*, Qt::ButtonState ) ), 
-	   this, SLOT( startDrag( Q3ListViewItem*, Qt::ButtonState ) ) );
+           SLOT( updateHierarchyView() ) );
+  connect( d->hieview, SIGNAL( dragStart( QTreeWidgetItem*, Qt::MouseButtons,
+                                          Qt::KeyboardModifiers ) ), 
+           this, SLOT( startDrag( QTreeWidgetItem*, Qt::MouseButtons,
+                                  Qt::KeyboardModifiers ) ) );
 
   // model panel
 
-  QVBox	*model = new QVBox( tabs );
+  QWidget *model = new QWidget( tabs );
   tabs->addTab( model, tr( "Model" ) );
-  model->setSpacing( 10 );
-  model->setMargin( 10 );
-  hb = new QHBox( model );
-  hb->setSpacing( 10 );
+  vlay = new QVBoxLayout( model );
+  model->setLayout( vlay );
+  vlay->setSpacing( 10 );
+  vlay->setMargin( 10 );
+  hb = new QWidget( model );
+  vlay->addWidget( hb );
+  hlay = new QHBoxLayout( hb );
+  hb->setLayout( hlay );
+  hlay->setSpacing( 10 );
+  hlay->setMargin( 0 );
   d->modellabel = new QLabel( hb );
+  hlay->addWidget( d->modellabel );
   d->modellabel->setFrameStyle( QFrame::Panel | QFrame::Sunken );
   pb = new QPushButton( "...", hb );
+  hlay->addWidget( pb );
   pb->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
   connect( pb, SIGNAL( clicked() ), this, SLOT( loadModel() ) );
-  hb = new QHBox( model );
-  hb->setSpacing( 10 );
+  hb = new QWidget( model );
+  vlay->addWidget( hb );
+  hlay = new QHBoxLayout( hb );
+  hb->setLayout( hlay );
+  hlay->setSpacing( 10 );
+  hlay->setMargin( 0 );
   pb = new QPushButton( tr( "Select (model + hierarchy)" ), hb );
+  hlay->addWidget( pb );
   pb->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
   connect( pb, SIGNAL( clicked() ), this, SLOT( selectModel() ) );
   d->modelsel = pb;
   pb->setEnabled( false );
   pb = new QPushButton( tr( "Select (model + selection)" ), hb );
+  hlay->addWidget( pb );
   pb->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
   connect( pb, SIGNAL( clicked() ), this, SLOT( selectModelPlusSel() ) );
   d->modelselbysel = pb;
   pb->setEnabled( false );
-  d->modelbox = new QListBox( model );
-  d->modelbox->setSelectionMode( QListBox::Extended );
-#if QT_VERSION >= 0x040000
-  connect( d->modelbox, SIGNAL( pressed( Q3ListBoxItem* ) ), this,
-           SLOT( startDragModel( Q3ListBoxItem* )) );
-#else
-  connect( d->modelbox, SIGNAL( pressed( QListBoxItem* ) ), this, 
-           SLOT( startDragModel( QListBoxItem* )) );
-#endif
+  d->modelbox = new ModelBox( model );
+  vlay->addWidget( d->modelbox );
+  d->modelbox->setSelectionMode( QListWidget::ExtendedSelection );
+  connect( d->modelbox, SIGNAL( dragStart( QListWidgetItem*, Qt::MouseButtons, 
+                                           Qt::KeyboardModifiers ) ), 
+           this,
+           SLOT( startDragModel( QListWidgetItem*, Qt::MouseButtons, 
+                                 Qt::KeyboardModifiers )) );
 
   // custom panel
   QLabel	*custom = new QLabel( tr( "Not currently available\n"
@@ -514,26 +613,37 @@ LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal,
   tabs->addTab( custom, tr( "Custom" ) );
 
   // selection panel
-  QVBox	*hsel = new QVBox( hsplit );
-  hsel->setSpacing( 10 );
-  hsel->setMargin( 10 );
-  new QLabel( tr( "Selection :" ), hsel );
-  new QLabel( tr( "If you don't understand what all this is about, just " 
-                  "click \"accept\", it will be OK in most cases" ), hsel );
+  QWidget	*hsel = new QWidget( hsplit );
+  vlay = new QVBoxLayout( hsel );
+  hsel->setLayout( vlay );
+  vlay->setSpacing( 10 );
+  vlay->setMargin( 10 );
+  vlay->addWidget( new QLabel( tr( "Selection :" ), hsel ) );
+  vlay->addWidget(
+    new QLabel( tr( "If you don't understand what all this is about, just " 
+                  "click \"accept\", it will be OK in most cases" ), hsel ) );
   d->selection = new SelectBox( this, hsel );
+  vlay->addWidget( d->selection );
   d->selection->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, 
 					    QSizePolicy::Expanding ) );
 
   // common OK/cancel
-  QHBox		*dial = new QHBox( this );
-  dial->setMargin( 10 );
-  dial->setSpacing( 10 );
+  QWidget *dial = new QWidget( this );
   lay->addWidget( dial );
+  hlay = new QHBoxLayout( dial );
+  dial->setLayout( hlay );
+  hlay->setMargin( 10 );
+  hlay->setSpacing( 10 );
   QPushButton	*acc = new QPushButton( tr( "Accept" ), dial );
+  hlay->addWidget( acc );
   QPushButton	*can = new QPushButton( tr( "Cancel" ), dial );
+  hlay->addWidget( can );
   QPushButton	*aut = new QPushButton( tr( "Auto" ), dial );
+  hlay->addWidget( aut );
   QPushButton	*chk = new QPushButton( tr( "Check" ), dial );
+  hlay->addWidget( chk );
   QPushButton	*clr = new QPushButton( tr( "Clear" ), dial );
+  hlay->addWidget( clr );
   acc->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
   can->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
   aut->setSizePolicy( QSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed ) );
@@ -563,8 +673,8 @@ LabelSelector::~LabelSelector()
 void LabelSelector::loadPreselection()
 {
   QString	fname 
-    = QFileDialog::getOpenFileName( QString::null, "*.sel;;*", this, 
-				    tr( "Open a pre-selection" ) );
+    = QFileDialog::getOpenFileName( this, tr( "Open a pre-selection" ), 
+                                    QString(), "Selections (*.sel)" );
   if( fname != QString::null )
     loadPreselection( fname );
 }
@@ -574,22 +684,18 @@ void LabelSelector::loadPreselection( const QString & filename )
 {
   //cout << "loadPreselection " << filename << endl;
   int	i, n = d->presels->count();
-  for( i=0; i<n && d->presels->text(i)!=filename; ++i ) {}
+  for( i=0; i<n && d->presels->itemText(i)!=filename; ++i ) {}
   if( i == n )
-    d->presels->insertItem( filename );
-#if QT_VERSION >= 300
-  d->presels->setCurrentText( filename );
-#else
-  d->presels->setCurrentItem( n );
-#endif
+    d->presels->addItem( filename );
+  d->presels->setItemText( d->presels->currentIndex(), filename );
 }
 
 
 void LabelSelector::loadHierarchy()
 {
   QString	fname 
-    = QFileDialog::getOpenFileName( QString::null, "*.hie;;*", this, 
-				    tr( "Select a hierarchy" ) );
+    = QFileDialog::getOpenFileName( this, tr( "Select a hierarchy" ), 
+                                    QString::null, "Hierarchies (*.hie)" );
   if( fname != QString::null )
     loadHierarchy( fname );
 }
@@ -602,11 +708,11 @@ void LabelSelector::loadHierarchy( const QString & filename )
   try
     {
       h = new Hierarchy;
-      TreeReader	tr( filename.utf8().data(), h->syntax() );
+      TreeReader	tr( filename.toStdString(), h->syntax() );
       tr >> *h;
       d->hie.push_back( h );
-      d->hierarchies->insertItem( filename );
-      d->hierarchies->setCurrentItem( d->hierarchies->count() - 1 );
+      d->hierarchies->addItem( filename );
+      d->hierarchies->setCurrentIndex( d->hierarchies->count() - 1 );
       updateHierarchyView();
     }
   catch( exception & e )
@@ -617,17 +723,19 @@ void LabelSelector::loadHierarchy( const QString & filename )
 }
 
 
-static void appendHierarchy( Q3ListView* lv, Q3ListViewItem* li, const Tree* t )
+static void appendHierarchy( QTreeWidget* lv, QTreeWidgetItem* li, const Tree* t )
 {
-  Q3ListViewItem	*item = 0;
+  QTreeWidgetItem	*item = 0;
   string	name;
   if( t->getProperty( "name", name ) )
-    {
-      if( li )
-	item = new Q3ListViewItem( li, name.c_str() );
-      else
-	item = new Q3ListViewItem( lv, name.c_str() );
-    }
+  {
+    item = new QTreeWidgetItem;
+    item->setText( 0, name.c_str() );
+    if( li )
+      li->addChild( item );
+    else
+      lv->addTopLevelItem( item );
+  }
 
   Tree::const_iterator	it, et = t->end();
 
@@ -639,7 +747,7 @@ static void appendHierarchy( Q3ListView* lv, Q3ListViewItem* li, const Tree* t )
 void LabelSelector::updateHierarchyView()
 {
   //cout << "updateHierarchyView\n";
-  int	item = d->hierarchies->currentItem();
+  int	item = d->hierarchies->currentIndex();
   if( item == d->currentHierarchy )
     return;
   d->currentHierarchy = item;
@@ -650,80 +758,91 @@ void LabelSelector::updateHierarchyView()
 }
 
 
-void LabelSelector::startDrag( Q3ListViewItem* item, ButtonState state )
+void LabelSelector::startDrag( QTreeWidgetItem* item, Qt::MouseButtons,
+                               Qt::KeyboardModifiers state )
 {
   //cout << "startDrag\n";
   if( item && item->isSelected() )
     {
-      Q3ListViewItem	*li = d->hieview->firstChild();
+      QTreeWidgetItem	*li;
+      QTreeWidgetItemIterator il( d->hieview );
+      unsigned i, n = d->hieview->topLevelItemCount();
       SelectionSet	ss;
       Selection		s;
-      bool		deep = !(state & ShiftButton);
+      bool		deep = !(state & Qt::ShiftModifier);
 
-      while( li )
-	{
-	  if( li->isSelected() )
-	    {
-	      if( deep )
-		{
-		  Selection	s2( li->text( 0 ).utf8().data() );
-		  s2.select( li->text( 0 ).utf8().data() );
-		  ss.addSelection( s2 );
-		}
-	      else
-		s.select( li->text( 0 ).utf8().data() );
-	      //cout << "select " << li->text( 0 ) << endl;
-	    }
-	  li = li->itemBelow();
-	}
+      while( *il )
+      {
+        li = *il;
+        if( li->isSelected() )
+        {
+          if( deep )
+          {
+            Selection	s2( li->text( 0 ).toStdString() );
+            s2.select( li->text( 0 ).toStdString() );
+            ss.addSelection( s2 );
+          }
+          else
+            s.select( li->text( 0 ).toStdString() );
+          //cout << "select " << li->text( 0 ) << endl;
+        }
+        ++il;
+      }
 
       if( !deep )
-	ss.addSelection( s );
+        ss.addSelection( s );
 
-      ss = d->expander.query( ss, *d->hie[ d->hierarchies->currentItem() ] );
+      ss = d->expander.query( ss, *d->hie[ d->hierarchies->currentIndex() ] );
 
       // encode as string
       ostringstream	ostr;
       SelectionWriter	sw( ostr );
       sw.write( ss );
 
-      QTextDrag	*dg = new QTextDrag( ostr.str().c_str(), this, 
-                                     "selectiondrag" );
-      dg->dragCopy();
+      QDrag *drag = new QDrag( this );
+      QMimeData *mimeData = new QMimeData;
+      mimeData->setText( ostr.str().c_str() );
+      drag->setMimeData( mimeData );
+      Qt::DropAction dropAction = drag->exec( Qt::CopyAction );
     }
 }
 
 
-void LabelSelector::startDragModel( QListBoxItem* )
+void LabelSelector::startDragModel( QListWidgetItem*, Qt::MouseButtons, 
+                                    Qt::KeyboardModifiers )
 {
   //cout << "startDragModel\n";
   int		i, n = d->modelbox->count();
   SelectionSet	sel;
   string	label;
+  QListWidgetItem *item;
 
   for( i=0; i<n; ++i )
-    if( d->modelbox->isSelected( i ) )
-      {
-        label = d->modelbox->text( i ).utf8().data();
-        Selection	s( label );
-        s.select( label );
-        sel.addSelection( s );
-      }
+  {
+    item = d->modelbox->item( i );
+    if( item->isSelected() )
+    {
+      label = item->text().toStdString();
+      Selection	s( label );
+      s.select( label );
+      sel.addSelection( s );
+    }
+  }
 
   Hierarchy	*h = currentHierarchy();
   if( h )
-    {
-      sel = d->expander.query( sel, *h );
-    }
+    sel = d->expander.query( sel, *h );
 
   // encode as string
   ostringstream	ostr;
   SelectionWriter	sw( ostr );
   sw.write( sel );
 
-  QTextDrag	*dg = new QTextDrag( ostr.str().c_str(), this, 
-                                     "selectiondrag" );
-  dg->dragCopy();
+  QDrag *drag = new QDrag( this );
+  QMimeData *mimeData = new QMimeData;
+  mimeData->setText( ostr.str().c_str() );
+  drag->setMimeData( mimeData );
+  Qt::DropAction dropAction = drag->exec( Qt::CopyAction );
 }
 
 
@@ -756,7 +875,7 @@ void LabelSelector::activatePreselection()
   SelectionSet		ss;
   try
     {
-      SelectionReader	sr( d->presels->currentText().utf8().data() );
+      SelectionReader	sr( d->presels->currentText().toStdString() );
       bool		tmp = false;
       if( d->presels->currentText() == "-" )
         {
@@ -767,7 +886,7 @@ void LabelSelector::activatePreselection()
       d->selection->clear();
       d->selection->addSelection( ss );
       if( tmp )
-        d->presels->removeItem( d->presels->currentItem() );
+        d->presels->removeItem( d->presels->currentIndex() );
     }
   catch( exception & e )
     {
@@ -784,7 +903,7 @@ void LabelSelector::activateAddPreselection()
   SelectionSet	ss;
   try
     {
-      SelectionReader	sr( d->presels->currentText().utf8().data() );
+      SelectionReader	sr( d->presels->currentText().toStdString() );
       sr.read( ss );
       d->selection->mergeSelection( ss );
     }
@@ -798,8 +917,8 @@ void LabelSelector::activateAddPreselection()
 void LabelSelector::loadModel()
 {
   QString	fname
-    = QFileDialog::getOpenFileName( QString::null, "*.arg;;*", this, 
-				    tr( "Select a model" ) );
+    = QFileDialog::getOpenFileName( this, tr( "Select a model" ), 
+                                    QString::null, "Model graphs (*.arg)" );
   if( fname != QString::null )
     loadModel( fname );
 }
@@ -809,22 +928,22 @@ void LabelSelector::loadModel( const QString & filename )
 {
   Graph		*g;
   try
+  {
+    Reader<Graph>	rg( filename.toStdString() );
+    g = rg.read( 0 );
+    if( g )
     {
-      Reader<Graph>	rg( filename.utf8().data() );
-      g = rg.read( 0 );
-      if( g )
-        {
-          delete d->model;
-          d->model = g;
-          d->modellabel->setText( filename );
-          updateModelCaps();
-        }
+      delete d->model;
+      d->model = g;
+      d->modellabel->setText( filename );
+      updateModelCaps();
     }
+  }
   catch( exception & e )
-    {
-      cerr << e.what() << endl;
-      return;
-    }
+  {
+    cerr << e.what() << endl;
+    return;
+  }
 
   // model box
 
@@ -835,7 +954,7 @@ void LabelSelector::loadModel( const QString & filename )
   for( iv=g->begin(); iv!=ev; ++iv )
     if( (*iv)->getProperty( "label", label ) && label != "any" 
         && label != "generic" && label != "*" )
-      d->modelbox->insertItem( label.c_str() );
+      d->modelbox->addItem( label.c_str() );
 }
 
 
@@ -843,22 +962,22 @@ void LabelSelector::selectModel()
 {
   if( d->model && d->currentHierarchy >= 0 
       && (int) d->hie.size() > d->currentHierarchy )
-    {
-      Hierarchy	*h = currentHierarchy();
-      SelectionSet	ss = d->expander.query( *d->model, *h );
-      d->selection->addSelection( ss );
-    }
+  {
+    Hierarchy	*h = currentHierarchy();
+    SelectionSet	ss = d->expander.query( *d->model, *h );
+    d->selection->addSelection( ss );
+  }
 }
 
 
 void LabelSelector::selectModelPlusSel()
 {
   if( d->model )
-    {
-      SelectionSet	ss = d->expander.query( *d->model, selection() );
-      d->selection->clearAll();
-      d->selection->addSelection( ss );
-    }
+  {
+    SelectionSet	ss = d->expander.query( *d->model, selection() );
+    d->selection->clearAll();
+    d->selection->addSelection( ss );
+  }
 }
 
 
@@ -918,7 +1037,7 @@ void LabelSelector::showTab( const string & t )
     }
   map<string, int>::iterator	it = tabs.find( t );
   if( it != tabs.end() )
-    d->tabs->setCurrentPage( it->second );
+    d->tabs->setCurrentIndex( it->second );
 }
 
 
@@ -931,6 +1050,98 @@ Graph* LabelSelector::model()
 const SelectionExpander & LabelSelector::expander() const
 {
   return d->expander;
+}
+
+
+// ------
+
+struct LabelSelector::ModelBox::Private
+{
+  Private();
+  bool          dragpossible;
+  QPoint        dragstartpos;
+  Qt::MouseButtons buttons;
+  Qt::KeyboardModifiers deadkeys;
+};
+
+
+LabelSelector::ModelBox::Private::Private() : dragpossible( false )
+{
+}
+
+
+LabelSelector::ModelBox::ModelBox( QWidget* parent )
+  : QListWidget( parent ), d( new Private )
+{
+}
+
+
+LabelSelector::ModelBox::~ModelBox()
+{
+  delete d;
+}
+
+
+void LabelSelector::ModelBox::mousePressEvent( QMouseEvent* event )
+{
+  if( event->button() == Qt::RightButton )
+  {
+//     event->accept();
+//     QTreeWidgetItem* item = itemAt( event->pos() );
+//     if( item )
+//       emit itemRightPressed( item, event->pos() );
+  }
+  else
+  {
+    d->dragpossible = false;
+    QListWidgetItem *item = itemAt( event->pos() );
+    if( item && item->isSelected() )
+    {
+      d->dragpossible = true;
+      d->dragstartpos = event->pos();
+    }
+    d->buttons = event->buttons();
+    d->deadkeys = event->modifiers();
+  }
+
+  if( !d->dragpossible )
+    QListWidget::mousePressEvent( event );
+}
+
+
+void LabelSelector::ModelBox::mouseMoveEvent( QMouseEvent* event )
+{
+  QPoint p = event->pos();
+  QListWidgetItem *item = itemAt( p );
+
+  if( d->dragpossible )
+  {
+    QPoint    pd = event->pos() - d->dragstartpos;
+    if( pd.x() * pd.x() + pd.y() * pd.y() >= 10 )
+    {
+      QListWidgetItem *item = itemAt( p );
+      if( item && item->isSelected() )
+      {
+        d->dragpossible = false;
+        emit dragStart( item, event->buttons(), event->modifiers() );
+        event->accept();
+        return;
+      }
+      d->dragpossible = false;
+      QListWidget::mousePressEvent( event );
+    }
+  }
+  if( !d->dragpossible )
+    QListWidget::mouseMoveEvent( event );
+}
+
+
+void LabelSelector::ModelBox::mouseReleaseEvent( QMouseEvent* event )
+{
+  if( d->dragpossible )
+    QListWidget::mousePressEvent( event );
+  d->dragpossible = false;
+  QListWidget::mouseReleaseEvent( event );
 }
 
 
