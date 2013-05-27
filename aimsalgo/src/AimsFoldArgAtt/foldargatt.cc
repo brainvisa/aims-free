@@ -82,8 +82,8 @@ int main( int argc, const char** argv )
       app.addOption( nomesh, "-n", "don't generate meshes", true );
       app.alias( "--nomesh", "-n" );
       app.addOption( smoothTypeStr, "--smoothType", "mesh smoothing alorithm's type "
-                     "(if meshes are generated) : laplacian, simplespring, polygonspring "
-                     "or lowpass [default=lowpass]", true );
+                     "(if meshes are generated) : laplacian or lowpass  "
+                     "[default=lowpass]", true );
       app.addOption( apcfilename, "--apc", "set AC/PC/IH points in graph "
                      "from a .APC file [default: don't set them]", true );
       app.addOption( inside, "-li", "'inside' label on skeleton image " 
@@ -109,10 +109,6 @@ int main( int argc, const char** argv )
         smoothType = Mesher::LAPLACIAN;
       else if ( smoothTypeStr == "lowpass" )
         smoothType = Mesher::LOWPASS;
-      else if ( smoothTypeStr == "simplespring" )
-        smoothType = Mesher::SIMPLESPRING;
-      else if ( smoothTypeStr == "polygonspring" )
-        smoothType = Mesher::POLYGONSPRING;
       
       if( graphw.fileName().empty() )
         graphw.setFileName( graphr.fileName() );
@@ -199,7 +195,10 @@ int main( int argc, const char** argv )
       FoldGraphAttributes	fatt( skel, graph, motion.get(), inside, 
                                       outside, !nomesh, gversion );
       fatt.setMaxThreads( nthreads );
-      fatt.mesher().setSmoothing( smoothType, 5, 0.4 );
+      if( smoothType == Mesher::LAPLACIAN )
+        fatt.mesher().setSmoothing( smoothType, 5, 0.4 );
+      else if ( smoothType == Mesher::LOWPASS )
+        fatt.mesher().setSmoothing( smoothType, 30, 0.4 );
       fatt.doAll();
 
       if( graphw.fileName() != graphr.fileName() )
