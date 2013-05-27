@@ -49,8 +49,8 @@ int main( int argc, const char** argv )
   int smoothFlag = 0;
   Mesher::SmoothingType smoothType = Mesher::LOWPASS;
   string smoothTypeStr = "lowpass";
-  int smoothIt = 10;
-  float smoothRate = 0.2;
+  int smoothIt = 30;
+  float smoothRate = 0.4;
   float smoothAngle = 180.0;
   float smoothForce = 0.2;
   float deciReductionRate = 99.0;
