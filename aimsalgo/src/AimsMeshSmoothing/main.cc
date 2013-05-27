@@ -48,8 +48,8 @@ int main( int argc, const char** argv )
   
   Mesher::SmoothingType algoType = Mesher::LOWPASS;
   string algoTypeStr = "lowpass";
-  int nIteration = 10;
-  float rate = 0.2;
+  int nIteration = 30;
+  float rate = 0.4;
   float featureAngle = 180.0;
   float springForce = 0.2;
   int asciiFlag = 0;
