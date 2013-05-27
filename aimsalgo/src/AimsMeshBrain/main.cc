@@ -88,7 +88,7 @@ int main( int argc, const char** argv )
 
     app.initialize();
 
-    ASSERT( smoothFactor >= 0.0 && smoothFactor <= 1.0 );
+//     ASSERT( smoothFactor >= 0.0 && smoothFactor <= 1.0 );
     ASSERT( deciMaxClearance >= 0.0 );
     ASSERT( deciMaxError >= 0.0 );
 
