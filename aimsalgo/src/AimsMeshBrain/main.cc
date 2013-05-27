@@ -53,7 +53,7 @@ int main( int argc, const char** argv )
     string fileIn, fileOut;
     Mesher::SmoothingType smoothType = Mesher::LOWPASS;
     string smoothTypeStr = "lowpass"; // Ne garder que l'ancien type et le nouveau ?
-    float smoothFactor = 0.2; // A garder ?
+//     float smoothFactor = 0.2; // A garder ?
     float deciMaxClearance = 5.0;
     float deciMaxError = 3.0;
     uint minFacetNumber = 50;
@@ -73,8 +73,8 @@ int main( int argc, const char** argv )
     app.addOption( smoothTypeStr, "--smoothType", "smoothing alorithm's type : "
                    "laplacian, simplespring, polygonspring or lowpass "
                    "[default=lowpass]", true );
-    app.addOption( smoothFactor, "--smoothFactor", "smoothing moving "
-                   "factor at each iteration [default=0.2]", true );
+//     app.addOption( smoothFactor, "--smoothFactor", "smoothing moving "
+//                    "factor at each iteration [default=0.2]", true );
     app.addOption( deciMaxClearance, "--deciMaxClearance", "maximum clearance "
                    "expected in the resulting mesh, in mm [default= 5]", true );
     app.addOption( deciMaxError, "--deciMaxError", "maximum error distance "
