@@ -109,6 +109,11 @@ int main( int argc, const char** argv )
         smoothType = Mesher::LAPLACIAN;
       else if ( smoothTypeStr == "lowpass" )
         smoothType = Mesher::LOWPASS;
+      else
+      {
+        cout << "This smoothing type doesn't exist, check if it is correctly written or look at the command's help." << endl;
+        return EXIT_FAILURE;
+      }
       
       if( graphw.fileName().empty() )
         graphw.setFileName( graphr.fileName() );
@@ -198,7 +203,8 @@ int main( int argc, const char** argv )
       if( smoothType == Mesher::LAPLACIAN )
         fatt.mesher().setSmoothing( smoothType, 5, 0.4 );
       else if ( smoothType == Mesher::LOWPASS )
-        fatt.mesher().setSmoothing( smoothType, 30, 0.4 );
+        fatt.mesher().setSmoothing( smoothType, 50, 0.4 );
+        fatt.mesher().setDecimation( 100., 2., 3., 180.0);
       fatt.doAll();
 
       if( graphw.fileName() != graphr.fileName() )
