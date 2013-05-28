@@ -45,24 +45,23 @@ using namespace carto;
 using namespace std;
 
 
-void Mesher::setSmoothing( SmoothingType smoothType, int nIteration, float factor )
+void Mesher::setSmoothing( SmoothingType smoothType, int smoothIt, float smoothRate )
 {
   _smoothFlag = true;
   _smoothType = smoothType;
-  _nIteration = nIteration;
-  _factor = factor;
+  _smoothIt = smoothIt;
+  _smoothRate = smoothRate;
 }
 
-void Mesher::setSmoothingLaplacian( float featureAngle )
+void Mesher::setSmoothingLaplacian( float smoothFeatureAngle )
 {
-  _featureAngle = featureAngle;
+  _smoothFeatureAngle = smoothFeatureAngle;
 }
 
 void Mesher::setSmoothingSpring( float smoothForce )
 {
   _smoothForce = smoothForce;
 }
-
 
 void Mesher::unsetSmoothing()
 {
@@ -171,7 +170,7 @@ void Mesher::doit( const AimsData<short>& thing,
 
         // smoothes the vertex coordinates
         if ( _smoothFlag )
-          getSmoothedVertices( vfac, surface, _factor );
+          getSmoothedVertices( vfac, surface, _smoothRate );
 
         // decimates the mesh
         if ( _deciFlag && vfac.size() > _minFacetNumber )
@@ -330,7 +329,7 @@ void Mesher::doit( const AimsData<short>& thing,
 
         // smoothes the vertex coordinates
         if ( _smoothFlag )
-          getSmoothedVertices( vfac, current, _factor );
+          getSmoothedVertices( vfac, current, _smoothRate );
 
         // decimates the mesh
         if ( _deciFlag && vfac.size() > _minFacetNumber )
@@ -425,7 +424,7 @@ void Mesher::doit( const AimsData<short>& thing,
 
         // smoothes the vertex coordinates
         if ( _smoothFlag )
-          getSmoothedVertices( vfac, theSurface, _factor );
+          getSmoothedVertices( vfac, theSurface, _smoothRate );
 
         // decimates the mesh
         if ( _deciFlag && vfac.size() > _minFacetNumber )
@@ -511,7 +510,7 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
         cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\v" << flush;
 
       // smoothes the vertex coordinates
-      getSmoothedVertices( vfac, surface, 0.4 );
+      getSmoothedVertices( vfac, surface, _smoothRate );
 
       // decimates the mesh
       float initialMeshSize = (float)vfac.size();
@@ -530,7 +529,7 @@ void	Mesher::getMeshFromMapOfFacet(const AimsData<short>& thing,
       float finalMeshSize = (float)vfac.size();
 
       // smoothes the vertex coordinates
-      getSmoothedVertices( vfac, surface, 0.2 );
+      getSmoothedVertices( vfac, surface, _smoothRate/2. );
 
       // gets the normals by taking the average of all the 
       // normals of the neighbors of a facet
@@ -587,7 +586,7 @@ void Mesher::smooth( AimsSurfaceTriangle& surface )
   surface.normal().clear();
   surface.polygon().clear();
 
-  getSmoothedVertices( vfac, surface, _factor );
+  getSmoothedVertices( vfac, surface, _smoothRate );
 
   if( _verbose )
     cout << "normals              " << flush;
@@ -638,7 +637,7 @@ float Mesher::decimate( AimsSurfaceTriangle& surface,
   surface.polygon().clear();
 
   if ( _smoothFlag )
-    getSmoothedVertices( vfac, surface, _factor );
+    getSmoothedVertices( vfac, surface, _smoothRate );
 
   if ( vfac.size() > _minFacetNumber ) 
     getDecimatedVertices( vfac, surface.vertex(), _deciReductionRate,
