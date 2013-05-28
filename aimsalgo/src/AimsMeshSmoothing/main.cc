@@ -68,9 +68,9 @@ int main( int argc, const char** argv )
                  "laplacian, simplespring, polygonspring or lowpass "
                  "[default=lowpass]", true );
   app.addOption( nIteration, "--nIteration",
-                 "number of iterations [default=10]", true );
+                 "number of iterations [default=30]", true );
   app.addOption( rate, "--rate",
-                 "moving factor at each iteration [default=0.2]",
+                 "moving rate at each iteration [default=0.4]",
                  true );
   app.addOption( featureAngle, "--featureAngle",
                  "feature angle (in degrees) below which the vertex is not "
@@ -102,6 +102,11 @@ int main( int argc, const char** argv )
       algoType = Mesher::SIMPLESPRING;
     else if ( algoTypeStr == "polygonspring" )
       algoType = Mesher::POLYGONSPRING;
+    else
+    {
+      cout << "This smoothing type doesn't exist, check if it is correctly written or look at the command's help." << endl;
+      return EXIT_FAILURE;
+    }
     
     if ( triW.fileName().empty() )
       triW.setFileName( triR.fileName() );
