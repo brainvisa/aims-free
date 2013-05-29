@@ -1,4 +1,5 @@
 if( @PROJECT_NAME_UPPER@_DEFINITIONS )
+  message( "aims-use: ${@PROJECT_NAME_UPPER@_DEFINITIONS}" )
   add_definitions(  ${@PROJECT_NAME_UPPER@_DEFINITIONS} )
 endif()
 if( @PROJECT_NAME_UPPER@_INCLUDE_DIRS )

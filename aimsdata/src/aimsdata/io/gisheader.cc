@@ -42,9 +42,11 @@
 #include <cartobase/datasource/filedatasource.h>
 #include <cartodata/io/gisformatchecker.h>
 #include <cartodata/io/carto2aimsheadertranslator.h>
+#include <cartobase/plugin/plugin.h>                            // loads plugins
 #include <fstream>
 #include <vector>
 #include <errno.h>
+#include <iostream>
 
 using namespace aims;
 using namespace carto;
@@ -103,12 +105,21 @@ static void inVecHelper( GisHeader & object, const string& semantic,
 void GisHeader::read()
 {
   // cout << "GisHGeader::read - new style: " << _name << endl;
-  GisFormatChecker	fc;
-  DataSourceInfo	dsi;
-  FileDataSource	ds( _name );
-  Object		h = fc.check( ds, dsi );
-  if( h.isNone() )
-    dsi.launchException();
+  #ifdef USE_SOMA_IO
+    rc_ptr<DataSource> ds( new FileDataSource( _name ) );
+    DataSourceInfoLoader dsil;
+    DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ) );
+    Object h = dsi.header();
+    if( h.isNone() )
+      dsil.launchException();
+  #else
+    GisFormatChecker	fc;
+    DataSourceInfo	dsi;
+    FileDataSource	ds( _name );
+    Object		h = fc.check( ds, dsi );
+    if( h.isNone() )
+      dsi.launchException();
+  #endif
 
   // fill in specific fields
   h->getProperty( "sizeX", _dimX );

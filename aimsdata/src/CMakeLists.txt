@@ -65,6 +65,11 @@ IF(EXPAT_FOUND)
   set(HEADERS ${HEADERS} ${AIMSGIFTI_HEADERS})
 ENDIF(EXPAT_FOUND)
 
+IF(USE_SOMA_IO)
+  add_subdirectory(aimsgis)
+  set(HEADERS ${HEADERS} ${AIMSGIS_HEADERS})
+ENDIF(USE_SOMA_IO)
+
 # list of header files for doxygen
 set(HEADERS ${HEADERS} PARENT_SCOPE)
 #------------------------------------------------------------------------------

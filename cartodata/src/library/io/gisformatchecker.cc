@@ -30,6 +30,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+#ifndef USE_SOMA_IO
 
 #include <cartodata/io/gisformatchecker.h>
 #include <cartobase/datasource/filedatasource.h>
@@ -325,3 +326,4 @@ Object GisFormatChecker::check( DataSource & ds, DataSourceInfo & ) const
 }
 
 
+#endif // USE_SOMA_IO

@@ -49,7 +49,7 @@
 #include <map>
 #include <set>
 #include <iostream>
-
+//#define AIMS_DEBUG_IO
 using namespace aims;
 using namespace carto;
 using namespace std;
@@ -220,7 +220,7 @@ FinderFormat* Finder::finderFormat( const string & format )
 bool Finder::check( const string& filename )
 {
 #ifdef AIMS_DEBUG_IO
-  cout << "Finder::check( " << filename << " )\n";
+  cout << "FINDER:: check( " << filename << " )\n";
 #endif
   static bool plugs = false;
   if( !plugs )
@@ -233,9 +233,23 @@ bool Finder::check( const string& filename )
   _state = Unchecked;
 
   // try using DataSourceInfo first (new system 2005)
-  DataSourceInfo	dsi;
-  FileDataSource	ds( filename );
-  Object		h = dsi.check( ds );
+  #ifdef AIMS_DEBUG_IO
+  cout << "FINDER:: trying check through DataSourceInfoLoader... " << endl;
+  #endif
+  #ifdef USE_SOMA_IO
+    Object h;
+    try {
+      DataSourceInfoLoader dsil;
+      rc_ptr<DataSource> ds( new FileDataSource( filename ) );
+      DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ) );
+      h = dsi.header();
+    } catch( ... ) {
+    }
+  #else
+    DataSourceInfo	dsi;
+    FileDataSource	ds( filename );
+    Object		h = dsi.check( ds );
+  #endif
   bool dsok = !h.isNone();
   if( dsok )
     {
@@ -262,11 +276,16 @@ bool Finder::check( const string& filename )
       ph->copyProperties( h );
       setHeader( ph );
 
-      // cout << "DataSourceInfo worked\n";
+      #ifdef AIMS_DEBUG_IO
+      cout << "FINDER:: DataSourceInfo worked" << endl;
+      #endif
       if( filename.substr( filename.length() - 4, 4 ) != ".gii" )
         // bidouille to let the gifti reader work (it's both gifti and XML)
         return true;
     }
+  #ifdef AIMS_DEBUG_IO
+  cout << "FINDER:: DataSourceInfo didn't work, trying through Finder... " << endl;
+  #endif
 
   _errorcode = -1;
   _errormsg = "";
@@ -282,7 +301,7 @@ bool Finder::check( const string& filename )
     ext = filename.substr( dlen+pos+1, filename.length() - pos - 1 );
 
 #ifdef AIMS_DEBUG_IO
-  cout << "ext : " << ext << endl;
+  cout << "FINDER:: ext : " << ext << endl;
 #endif
   //	Check compatible formats
   set<string>			tried;
@@ -306,7 +325,7 @@ bool Finder::check( const string& filename )
       if( tried.find( *ie ) == notyet )
         {
 #ifdef AIMS_DEBUG_IO
-          cout << "trying " << *ie << "...\n";
+          cout << "FINDER:: trying " << *ie << "...\n";
 #endif
           reader = finderFormat( *ie );
           if( reader )
@@ -331,7 +350,7 @@ bool Finder::check( const string& filename )
   }
 
 #ifdef AIMS_DEBUG_IO
-  cout << "not found yet... pass2...\n";
+  cout << "FINDER:: not found yet... pass2...\n";
 #endif
   if( !ext.empty() )
     {
@@ -343,7 +362,7 @@ bool Finder::check( const string& filename )
           if( tried.find( *ie ) == notyet )
             {
 #ifdef AIMS_DEBUG_IO
-              cout << "pass2, trying " << *ie << "...\n";
+              cout << "FINDER:: pass2, trying " << *ie << "...\n";
 #endif
               reader = finderFormat( *ie );
               if( reader )
@@ -368,7 +387,7 @@ bool Finder::check( const string& filename )
     }
 
 #ifdef AIMS_DEBUG_IO
-  cout << "not found yet... pass3...\n";
+  cout << "FINDER:: not found yet... pass3...\n";
 #endif
   // still not found ? well, try EVERY format this time...
   for( iext=pd->extensions.begin(); iext!=eext; ++iext )
@@ -379,7 +398,7 @@ bool Finder::check( const string& filename )
         if( reader )
           {
 #ifdef AIMS_DEBUG_IO
-            cout << "pass3, trying " << *ie << "...\n";
+            cout << "FINDER:: pass3, trying " << *ie << "...\n";
 #endif
             try
               {
@@ -400,7 +419,7 @@ bool Finder::check( const string& filename )
       }
 
 #ifdef AIMS_DEBUG_IO
-  cout << "not found at all, giving up\n";
+  cout << "FINDER:: not found at all, giving up\n";
 #endif
   // still not succeeded, it's hopeless...
 

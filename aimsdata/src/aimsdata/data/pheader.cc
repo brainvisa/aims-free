@@ -134,7 +134,11 @@ const char* PythonHeader::id() const
 
 carto::SyntaxSet* PythonHeader::syntax()
 {
-  return &DataSourceInfo::minfSyntax();
+  #ifdef USE_SOMA_IO
+    return &DataSourceInfoLoader::minfSyntax();
+  #else
+    return &DataSourceInfo::minfSyntax();
+  #endif
 }
 
 

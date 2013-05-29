@@ -30,27 +30,24 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
+//--- aims ---------------------------------------------------------------------
 #ifdef USE_SOMA_IO
-  #include <aims/io/gisformatchecker.h>
+  #include <aims/io/gisimagereader_d.h>
 #else
+  #include <soma-io/plugingis/gisimagereader_d.h>
+#endif
+//--- soma-io ------------------------------------------------------------------
+#include <soma-io/config/soma_config.h>
+//------------------------------------------------------------------------------
 
-#ifndef CARTODATA_IO_GISFORMATCHECKER_H
-#define CARTODATA_IO_GISFORMATCHECKER_H
+using namespace soma;
 
-#include <cartobase/io/formatchecker.h>
-
-namespace carto
-{
-
-  class GisFormatChecker : public FormatChecker
-  {
-  public:
-    virtual Object check( DataSource & ds, DataSourceInfo & f ) const;
-    virtual ~GisFormatChecker();
-  };
-
-}
-
-#endif // CARTODATA_IO_GISFORMATCHECKER_H
-
-#endif // USE_SOMA_IO
+template class GisImageReader<int8_t>;
+template class GisImageReader<int16_t>;
+template class GisImageReader<int32_t>;
+template class GisImageReader<uint8_t>;
+template class GisImageReader<uint16_t>;
+template class GisImageReader<uint32_t>;
+template class GisImageReader<float>;
+template class GisImageReader<double>;

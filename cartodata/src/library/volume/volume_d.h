@@ -53,7 +53,7 @@ namespace carto
   template < typename T >
   Volume< T >::Volume( int sizeX, int sizeY, int sizeZ, int sizeT,
                        const AllocatorContext& allocatorContext, 
-		       bool allocated )
+                       bool allocated )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
       _items( 0U, allocatorContext )
 #ifndef CARTO_USE_BLITZ
@@ -262,7 +262,7 @@ namespace carto
                               int oldSizeY,
                               int oldSizeZ,
                               int oldSizeT, 
-			      bool allocate, 
+                              bool allocate, 
                               const AllocatorContext& ac )
   {
 

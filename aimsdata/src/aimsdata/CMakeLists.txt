@@ -338,6 +338,13 @@ set( _sources
     vector/vector.cc
 )
 
+IF(USE_SOMA_IO)
+  set( _sources
+    "${_sources}"
+    io/somaio_declare.cc
+  )
+ENDIF(USE_SOMA_IO)
+
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
 if( NOT LIBKDTREE_FOUND )
   # copy internal headers for libkdtree+

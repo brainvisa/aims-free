@@ -5,6 +5,9 @@ add_library( graph SHARED ${_sources} )
 add_dependencies( graph ${headersTarget} )
 set_property( TARGET graph PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 target_link_libraries( graph cartobase )
+if( USE_SOMA_IO )
+  target_link_libraries( graph soma-io )
+endif( USE_SOMA_IO )
 BRAINVISA_INSTALL( TARGETS graph
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
