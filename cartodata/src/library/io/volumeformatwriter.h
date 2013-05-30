@@ -45,7 +45,7 @@
 #include <vector>
 //------------------------------------------------------------------------------
 
-namespace moncartodata
+namespace carto
 {
   template<typename T> class Volume;
   template<typename T> class VolumeRef;
@@ -60,7 +60,7 @@ namespace soma
   //============================================================================
   /// \todo doc
   template <typename T>
-  class VolumeFormatWriter : public FormatWriter<moncartodata::Volume<T> >
+  class VolumeFormatWriter : public FormatWriter<carto::Volume<T> >
   {
     public:
       virtual ~VolumeFormatWriter();
@@ -68,7 +68,7 @@ namespace soma
       /// FormatWriter derived function
       /// This method understands a volume and calls appropriate ImageWriter
       /// methods
-      virtual bool write( const moncartodata::Volume<T> & obj, 
+      virtual bool write( const carto::Volume<T> & obj, 
                           carto::rc_ptr<DataSourceInfo> dsi,
                           carto::Object options );
       
@@ -86,7 +86,7 @@ namespace soma
   /// \todo doc
   template<typename T>
   class VolumeRefFormatWriter : 
-  public FormatWriter<moncartodata::VolumeRef<T> >
+  public FormatWriter<carto::VolumeRef<T> >
   {
     public:
       virtual ~VolumeRefFormatWriter();
@@ -94,7 +94,7 @@ namespace soma
       /// FormatWriter derived function
       /// This method understands a volume and calls appropriate ImageWriter
       /// methods
-      virtual bool write( const moncartodata::VolumeRef<T> & obj, 
+      virtual bool write( const carto::VolumeRef<T> & obj, 
                           carto::rc_ptr<DataSourceInfo> dsi,
                           carto::Object options );
       

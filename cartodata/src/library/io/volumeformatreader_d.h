@@ -34,13 +34,8 @@
 #ifndef VOLUMEFORMATREADER_D_H
 #define VOLUMEFORMATREADER_D_H
 //--- cartodata ----------------------------------------------------------------
-#ifdef USE_SOMA_IO
-  #include <cartodata/io/volumeformatreader.h>
-  #include <cartodata/volume/volumeview.h>
-#else
-  #include <soma-io/cartodata/volumeformatreader.h>
-  #include <soma-io/cartodata/volumeview.h>
-#endif
+#include <cartodata/io/volumeformatreader.h>
+#include <cartodata/volume/volumeview.h>
 //--- soma io ------------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasourceinfo/datasourceinfo.h>
@@ -79,7 +74,7 @@ namespace soma
    * declared in FormatReader but only defined here.
    */
   template <typename T>
-  void VolumeFormatReader<T>::read( moncartodata::Volume<T> & obj, 
+  void VolumeFormatReader<T>::read( carto::Volume<T> & obj, 
                                     carto::rc_ptr<DataSourceInfo> dsi, 
                                     const AllocatorContext & context, 
                                     carto::Object options )
@@ -125,10 +120,10 @@ namespace soma
       
       // region's origine
       std::vector<int>  pos ( 4 , 0 );
-      moncartodata::VolumeView<T> *vv 
-        = dynamic_cast<moncartodata::VolumeView<T> *>( &obj );
+      carto::rc_ptr::VolumeView<T> *vv 
+        = dynamic_cast<carto::VolumeView<T> *>( &obj );
       if( vv ) {
-        const typename moncartodata::VolumeView<T>::Position4Di & p 
+        const typename carto::VolumeView<T>::Position4Di & p 
           = vv->posInRefVolume();
         pos[ 0 ] = p[ 0 ];
         pos[ 1 ] = p[ 1 ];
@@ -192,7 +187,7 @@ namespace soma
    * declared in FormatReader but only defined here.
    */
   template <typename T>
-  void VolumeRefFormatReader<T>::read( moncartodata::VolumeRef<T> & obj, 
+  void VolumeRefFormatReader<T>::read( carto::VolumeRef<T> & obj, 
                                        carto::rc_ptr<DataSourceInfo> dsi, 
                                        const AllocatorContext & context, 
                                        carto::Object options )

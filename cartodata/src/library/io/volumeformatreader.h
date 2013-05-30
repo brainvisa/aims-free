@@ -45,7 +45,7 @@
 #include <vector>
 //------------------------------------------------------------------------------
 
-namespace moncartodata
+namespace carto
 {
   template<typename T> class Volume;
   template<typename T> class VolumeRef;
@@ -60,7 +60,7 @@ namespace soma
   //============================================================================
   /// \todo doc
   template<typename T>
-  class VolumeFormatReader : public FormatReader<moncartodata::Volume<T> >
+  class VolumeFormatReader : public FormatReader<carto::Volume<T> >
   {
     public:
       virtual ~VolumeFormatReader();
@@ -71,7 +71,7 @@ namespace soma
       /// FormatReader derived function
       /// This method understands a volume and calls read( buffer ) with
       /// appropriate arguments
-      virtual void read( moncartodata::Volume<T> & obj, 
+      virtual void read( carto::Volume<T> & obj, 
                          carto::rc_ptr<DataSourceInfo> dsi, 
                          const AllocatorContext & context, 
                          carto::Object options = carto::none() );
@@ -114,7 +114,7 @@ namespace soma
   /// \todo doc
   template<typename T>
   class VolumeRefFormatReader : 
-  public FormatReader<moncartodata::VolumeRef<T> >
+  public FormatReader<carto::VolumeRef<T> >
   {
     public:
       virtual ~VolumeRefFormatReader();
@@ -125,7 +125,7 @@ namespace soma
       /// FormatReader derived function
       /// This method understands a volume and calls read( buffer ) with
       /// appropriate arguments
-      virtual void read( moncartodata::VolumeRef<T> & obj, 
+      virtual void read( carto::VolumeRef<T> & obj, 
                          carto::rc_ptr<DataSourceInfo> dsi, 
                          const AllocatorContext & context, 
                          carto::Object options = carto::none() );

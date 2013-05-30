@@ -34,15 +34,9 @@
 #ifndef VOLUMEFORMATWRITER_D_H
 #define VOLUMEFORMATWRITER_D_H
 //--- cartodata ----------------------------------------------------------------
-#ifdef USE_SOMA_IO
-  #include <cartodata/io/volumeformatwriter.h>              // class declaration
-  #include <cartodata/volume/volume.h>                       // manipulate sizes
-  #include <cartodata/volume/volumeview.h>                   // manipulate sizes
-#else
-  #include <soma-io/cartodata/volumeformatwriter.h>
-  #include <soma-io/cartodata/volume.h>
-  #include <soma-io/cartodata/volumeview.h>
-#endif
+#include <cartodata/io/volumeformatwriter.h>              // class declaration
+#include <cartodata/volume/volume.h>                       // manipulate sizes
+#include <cartodata/volume/volumeview.h>                   // manipulate sizes
 //--- soma-io ------------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasourceinfo/datasourceinfo.h>        // function's argument
@@ -74,7 +68,7 @@ namespace soma
   //   W R I T E   M E T H O D S
   //============================================================================
   template <typename T>
-  bool VolumeFormatWriter<T>::write( const moncartodata::Volume<T> & obj, 
+  bool VolumeFormatWriter<T>::write( const carto::Volume<T> & obj, 
                                      carto::rc_ptr<DataSourceInfo> dsi,
                                      carto::Object options )
   {
@@ -97,8 +91,8 @@ namespace soma
     std::vector<int> size( 4, 0 );
     
     //=== checking if obj is a view ============================================
-    const moncartodata::VolumeView<T> *vv 
-        = dynamic_cast<const moncartodata::VolumeView<T> *>( &obj );
+    const carto::VolumeView<T> *vv 
+        = dynamic_cast<const carto::VolumeView<T> *>( &obj );
     if( vv ) {
       // obj is a VolumeView
       size[ 0 ] = vv->refVolume()->getSizeX();
@@ -191,7 +185,7 @@ namespace soma
   }
   
   template <typename T>
-  bool VolumeRefFormatWriter<T>::write( const moncartodata::VolumeRef<T> & obj, 
+  bool VolumeRefFormatWriter<T>::write( const carto::VolumeRef<T> & obj, 
                                         carto::rc_ptr<DataSourceInfo> dsi,
                                         carto::Object options )
   {
