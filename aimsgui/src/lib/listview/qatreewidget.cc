@@ -47,6 +47,7 @@ struct QATreeWidget::Private
   Qt::MouseButtons buttons;
   Qt::KeyboardModifiers deadkeys;
   QTreeWidgetItem *itemUnderCursor;
+  QList<QTreeWidgetItem *> selected;
 };
 
 
@@ -103,6 +104,7 @@ void QATreeWidget::mousePressEvent( QMouseEvent* event )
 //         {
           d->dragpossible = true;
           d->dragstartpos = event->pos();
+          d->selected = selectedItems();
 //         }
     }
     d->buttons = event->buttons();
@@ -111,7 +113,6 @@ void QATreeWidget::mousePressEvent( QMouseEvent* event )
     QTreeWidget::mousePressEvent( event );
   }
 }
-
 
 void QATreeWidget::mouseMoveEvent( QMouseEvent* event )
 {
@@ -132,8 +133,15 @@ void QATreeWidget::mouseMoveEvent( QMouseEvent* event )
       if( item && item->isSelected() )
       {
         d->dragpossible = false;
+        // use mouseRelease to finish any started action
+        QTreeWidget::mouseReleaseEvent( event );
+        // reset selection to saved selected items
+        QList<QTreeWidgetItem *>::iterator it, et = d->selected.end();
+        for( it=d->selected.begin(); it!=et; ++it )
+          (*it)->setSelected( true );
         emit dragStart( item, event->buttons(), event->modifiers() );
-        event->ignore();
+        event->accept();
+        d->selected.clear();
         return;
       }
       d->dragpossible = false;
@@ -146,6 +154,7 @@ void QATreeWidget::mouseMoveEvent( QMouseEvent* event )
 void QATreeWidget::mouseReleaseEvent( QMouseEvent* event )
 {
   d->dragpossible = false;
+  d->selected.clear();
   QTreeWidget::mouseReleaseEvent( event );
 }
 
