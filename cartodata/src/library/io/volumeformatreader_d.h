@@ -120,7 +120,7 @@ namespace soma
       
       // region's origine
       std::vector<int>  pos ( 4 , 0 );
-      carto::rc_ptr::VolumeView<T> *vv 
+      carto::VolumeView<T> *vv 
         = dynamic_cast<carto::VolumeView<T> *>( &obj );
       if( vv ) {
         const typename carto::VolumeView<T>::Position4Di & p 
