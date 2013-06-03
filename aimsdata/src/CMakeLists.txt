@@ -66,6 +66,11 @@ IF(EXPAT_FOUND)
 ENDIF(EXPAT_FOUND)
 
 IF(USE_SOMA_IO)
+  #IF( OPENSLIDE_FOUND )
+  #  add_subdirectory(aimsopenslide)
+  #  set(HEADERS ${HEADERS} ${AIMSOPENSLIDE_HEADERS})
+  #ENDIF( OPENSLIDE_FOUND )
+
   add_subdirectory(aimsgis)
   set(HEADERS ${HEADERS} ${AIMSGIS_HEADERS})
 ENDIF(USE_SOMA_IO)
@@ -125,3 +130,5 @@ foreach( _command
                   COMPONENT ${PROJECT_NAME} )
   endif( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
 endforeach( _command )
+
+add_subdirectory( tests )

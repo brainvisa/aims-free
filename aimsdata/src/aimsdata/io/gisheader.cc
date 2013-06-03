@@ -38,8 +38,13 @@
 #include <aims/io/gisheader.h>
 #include <aims/def/general.h>
 #include <cartobase/exception/ioexcept.h>
-#include <cartobase/io/datasourceinfo.h>
-#include <cartobase/datasource/filedatasource.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasourceinfo/datasourceinfoloader.h>
+  #include <soma-io/datasource/filedatasource.h>
+#else
+  #include <cartobase/io/datasourceinfo.h>
+  #include <cartobase/datasource/filedatasource.h>
+#endif
 #include <cartodata/io/gisformatchecker.h>
 #include <cartodata/io/carto2aimsheadertranslator.h>
 #include <cartobase/plugin/plugin.h>                            // loads plugins

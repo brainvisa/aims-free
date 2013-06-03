@@ -42,9 +42,15 @@
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/type/typetraits.h>
-#include <cartobase/io/datasourceinfo.h>
-#include <cartobase/datasource/filedatasource.h>
 #include <cartobase/thread/mutex.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasourceinfo/datasourceinfoloader.h>
+  #include <soma-io/datasourceinfo/datasourceinfo.h>
+  #include <soma-io/datasource/filedatasource.h>
+#else
+  #include <cartobase/io/datasourceinfo.h>
+  #include <cartobase/datasource/filedatasource.h>
+#endif
 #include <cartodata/io/carto2aimsheadertranslator.h>
 #include <map>
 #include <set>

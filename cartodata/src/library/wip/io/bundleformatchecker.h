@@ -34,6 +34,9 @@
 #ifndef CARTODATA_IO_BUNDLEFORMATCHECKER_H
 #define CARTODATA_IO_BUNDLEFORMATCHECKER_H
 
+#ifdef USE_SOMA_IO
+  ERROR_SHOULDNT_BE_INCLUDED;
+#endif
 #include <cartobase/io/formatchecker.h>
 
 namespace carto

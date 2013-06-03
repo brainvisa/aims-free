@@ -37,7 +37,6 @@
 #ifndef AIMS_RGB_RGB_H
 #define AIMS_RGB_RGB_H
 
-
 #include <aims/config/aimsdata_config.h>
 #include <aims/def/general.h>
 #include <aims/def/assert.h>
@@ -803,6 +802,4 @@ inline byte & AimsRGBA::operator [] ( unsigned x )
     }
 }
 
-#endif
-
-
+#endif // AIMS_RGB_RGB_H

@@ -34,6 +34,10 @@
 #ifndef CARTODATA_IO_VOLUMEFORMATREADER_H
 #define CARTODATA_IO_VOLUMEFORMATREADER_H
 
+#ifdef USE_SOMA_IO
+  ERROR_SHOULDNT_BE_INCLUDED;
+#endif
+
 #include <cartobase/io/formatreader.h>
 
 namespace carto

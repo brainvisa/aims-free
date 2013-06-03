@@ -38,8 +38,13 @@
 #include <graph/tree/tree.h>
 #include <graph/tree/tfactory.h>
 #include <cartobase/exception/parse.h>
-#include <cartobase/datasource/filteringdatasource.h>
-#include <cartobase/io/asciidatasourcetraits.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasource/filteringdatasource.h>
+  #include <soma-io/utilities/asciidatasourcetraits.h>
+#else
+  #include <cartobase/datasource/filteringdatasource.h>
+  #include <cartobase/io/asciidatasourcetraits.h>
+#endif
 
 using namespace carto;
 using namespace std;

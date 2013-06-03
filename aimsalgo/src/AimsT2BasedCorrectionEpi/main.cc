@@ -38,7 +38,11 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/data/data_g.h>
 #include <aims/io/io_g.h>
-#include <cartobase/allocator/mappingcopy.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/mappingcopy.h>
+#else
+  #include <cartobase/allocator/mappingcopy.h>
+#endif
 #include <cartobase/thread/thread_g.h>
 #include <string>
 #include <iostream>

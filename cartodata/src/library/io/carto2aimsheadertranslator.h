@@ -34,7 +34,11 @@
 #ifndef CARTODATA_IO_CARTO2AIMSHEADERTRANSLATOR_H
 #define CARTODATA_IO_CARTO2AIMSHEADERTRANSLATOR_H
 
-#include <cartobase/io/headertranslator.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/utilities/headertranslator.h>
+#else
+  #include <cartobase/io/headertranslator.h>
+#endif
 
 namespace carto
 {

@@ -37,6 +37,8 @@
 #include <aims/io/gisimagewriter_d.h>
 #include <aims/io/gisformatchecker.h>
 #include <aims/io/baseFormats_cartovolume.h>
+#include <aims/rgb/rgb.h>
+#include <aims/hsv/hsv.h>
 //--- cartodata ----------------------------------------------------------------
 #include <cartodata/io/volumeformatreader_d.h>
 #include <cartodata/io/volumeformatwriter_d.h>
@@ -126,6 +128,20 @@ GisPlugin::GisPlugin() : Plugin()
     vfrd->attach( rc_ptr<ImageReader<double> >( new GisImageReader<double> ) );
     FormatDictionary<Volume<double> >::registerFormat( "GIS", vfrd, exts );
     
+    //--- RGB ------------------------------------------------------------------
+    
+    //VolumeFormatReader<AimsRGB> *vfr_rgb = new VolumeFormatReader<AimsRGB>;
+    //vfr_rgb->attach( rc_ptr<ImageReader<AimsRGB> >( new GisImageReader<AimsRGB> ) );
+    //FormatDictionary<Volume<AimsRGB> >::registerFormat( "GIS", vfr_rgb, exts );
+    
+    //VolumeFormatReader<AimsRGBA> *vfr_rgba = new VolumeFormatReader<AimsRGBA>;
+    //vfr_rgba->attach( rc_ptr<ImageReader<AimsRGBA> >( new GisImageReader<AimsRGBA> ) );
+    //FormatDictionary<Volume<AimsRGBA> >::registerFormat( "GIS", vfr_rgba, exts );
+    
+    //VolumeFormatReader<AimsHSV> *vfr_hsv = new VolumeFormatReader<AimsHSV>;
+    //vfr_hsv->attach( rc_ptr<ImageReader<AimsHSV> >( new GisImageReader<AimsHSV> ) );
+    //FormatDictionary<Volume<AimsHSV> >::registerFormat( "GIS", vfr_hsv, exts );
+    
     //==========================================================================
     //   V O L U M E   R E F
     //==========================================================================
@@ -167,6 +183,20 @@ GisPlugin::GisPlugin() : Plugin()
     VolumeRefFormatReader<double> *rfrd = new VolumeRefFormatReader<double>;
     rfrd->attach( rc_ptr<ImageReader<double> >( new GisImageReader<double> ) );
     FormatDictionary<VolumeRef<double> >::registerFormat( "GIS", rfrd, exts );
+    
+    //--- RGB ------------------------------------------------------------------
+    
+    //VolumeRefFormatReader<AimsRGB> *rfr_rgb = new VolumeRefFormatReader<AimsRGB>;
+    //rfr_rgb->attach( rc_ptr<ImageReader<AimsRGB> >( new GisImageReader<AimsRGB> ) );
+    //FormatDictionary<VolumeRef<AimsRGB> >::registerFormat( "GIS", rfr_rgb, exts );
+    
+    //VolumeRefFormatReader<AimsRGBA> *rfr_rgba = new VolumeRefFormatReader<AimsRGBA>;
+    //rfr_rgba->attach( rc_ptr<ImageReader<AimsRGBA> >( new GisImageReader<AimsRGBA> ) );
+    //FormatDictionary<VolumeRef<AimsRGBA> >::registerFormat( "GIS", rfr_rgba, exts );
+    
+    //VolumeRefFormatReader<AimsHSV> *rfr_hsv = new VolumeRefFormatReader<AimsHSV>;
+    //rfr_hsv->attach( rc_ptr<ImageReader<AimsHSV> >( new GisImageReader<AimsHSV> ) );
+    //FormatDictionary<VolumeRef<AimsHSV> >::registerFormat( "GIS", rfr_hsv, exts );
     
     ////////////////////////////////////////////////////////////////////////////
     ////                           W R I T E R                              ////
@@ -214,6 +244,20 @@ GisPlugin::GisPlugin() : Plugin()
     vfwd->attach( rc_ptr<ImageWriter<double> >( new GisImageWriter<double> ) );
     FormatDictionary<Volume<double> >::registerFormat( "GIS", vfwd, exts );
     
+    //--- RGB ------------------------------------------------------------------
+    
+    //VolumeFormatWriter<AimsRGB> *vfwf = new VolumeFormatWriter<AimsRGB>;
+    //vfwf->attach( rc_ptr<ImageWriter<AimsRGB> >( new GisImageWriter<AimsRGB> ) );
+    //FormatDictionary<Volume<AimsRGB> >::registerFormat( "GIS", vfwf, exts );
+    
+    //VolumeFormatWriter<AimsRGBA> *vfwf = new VolumeFormatWriter<AimsRGBA>;
+    //vfwf->attach( rc_ptr<ImageWriter<AimsRGBA> >( new GisImageWriter<AimsRGBA> ) );
+    //FormatDictionary<Volume<AimsRGBA> >::registerFormat( "GIS", vfwf, exts );
+    
+    //VolumeFormatWriter<AimsHSV> *vfwf = new VolumeFormatWriter<AimsHSV>;
+    //vfwf->attach( rc_ptr<ImageWriter<AimsHSV> >( new GisImageWriter<AimsHSV> ) );
+    //FormatDictionary<Volume<AimsHSV> >::registerFormat( "GIS", vfwf, exts );
+    
     //==========================================================================
     //   V O L U M E   R E F
     //==========================================================================
@@ -255,6 +299,20 @@ GisPlugin::GisPlugin() : Plugin()
     VolumeRefFormatWriter<double> *rfwd = new VolumeRefFormatWriter<double>;
     rfwd->attach( rc_ptr<ImageWriter<double> >( new GisImageWriter<double> ) );
     FormatDictionary<VolumeRef<double> >::registerFormat( "GIS", rfwd, exts );
+    
+    //--- RGB ----------------------------------------------------------------
+    
+    //VolumeRefFormatWriter<AimsRGB> *rfwf = new VolumeRefFormatWriter<AimsRGB>;
+    //rfwf->attach( rc_ptr<ImageWriter<AimsRGB> >( new GisImageWriter<AimsRGB> ) );
+    //FormatDictionary<VolumeRef<AimsRGB> >::registerFormat( "GIS", rfwf, exts );
+    
+    //VolumeRefFormatWriter<AimsRGBA> *rfwd = new VolumeRefFormatWriter<AimsRGBA>;
+    //rfwd->attach( rc_ptr<ImageWriter<AimsRGBA> >( new GisImageWriter<AimsRGBA> ) );
+    //FormatDictionary<VolumeRef<AimsRGBA> >::registerFormat( "GIS", rfwd, exts );
+    
+    //VolumeRefFormatWriter<AimsHSV> *rfwd = new VolumeRefFormatWriter<AimsHSV>;
+    //rfwd->attach( rc_ptr<ImageWriter<AimsHSV> >( new GisImageWriter<AimsHSV> ) );
+    //FormatDictionary<VolumeRef<AimsHSV> >::registerFormat( "GIS", rfwd, exts );
 }
 
 

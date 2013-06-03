@@ -37,7 +37,11 @@
 #include <cartodata/wip/io/volumeformatreader.h>
 #include <cartodata/volume/volumeview.h>
 #include <cartodata/io/volumedatasource.h>
-#include <cartobase/datasource/filedatasource.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasource/filedatasource.h>
+#else
+  #include <cartobase/datasource/filedatasource.h>
+#endif
 #include <cartobase/stream/fileutil.h>
 
 namespace carto

@@ -33,9 +33,15 @@
 
 #include <aims/io/mniobjheader.h>
 #include <aims/io/baseFormats_mesh.h>
-#include <cartobase/io/asciidatasourcetraits.h>
-#include <cartobase/datasource/streamdatasource.h>
-#include <cartobase/datasource/filedatasource.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/utilities/asciidatasourcetraits.h>
+  #include <soma-io/datasource/streamdatasource.h>
+  #include <soma-io/datasource/filedatasource.h>
+#else
+  #include <cartobase/io/asciidatasourcetraits.h>
+  #include <cartobase/datasource/streamdatasource.h>
+  #include <cartobase/datasource/filedatasource.h>
+#endif
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/exception/ioexcept.h>
 

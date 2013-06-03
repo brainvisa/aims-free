@@ -31,6 +31,10 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#ifdef USE_SOMA_IO
+  ERROR_SHOULDNT_BE_INCLUDED;
+#endif
+
 #include <cartobase/io/writer_d.h>
 #include <cartobase/io/formatdictionary_d.h>
 #include <cartodata/volume/volume.h>

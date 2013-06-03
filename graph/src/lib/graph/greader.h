@@ -41,7 +41,11 @@
 
 
 #include <graph/config/graph_config.h>
-#include <cartobase/object/areader.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/reader/areader.h>
+#else
+  #include <cartobase/object/areader.h>
+#endif
 
 
 //=============================================================================

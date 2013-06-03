@@ -39,7 +39,11 @@
 #include <aims/vector/vector.h>
 #include <aims/border/border.h>
 #include <cartobase/smart/rcptr.h>
-#include <cartobase/allocator/allocator.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/allocator.h>
+#else
+  #include <cartobase/allocator/allocator.h>
+#endif
 #include <aims/data/pheader.h>
 
 

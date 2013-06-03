@@ -39,7 +39,11 @@
 #include <aims/io/io_g.h>
 #include <aims/utility/utility_g.h>
 #include <aims/math/math_g.h>
-#include <cartobase/allocator/mappingcopy.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/mappingcopy.h>
+#else
+  #include <cartobase/allocator/mappingcopy.h>
+#endif
 #include <iomanip>
 
 using namespace aims;

@@ -58,4 +58,6 @@ SOURCES_NO_USE_SOMA_IO =            \
   wip/io/volumeformatreader.cc      \
 
 SOURCES_USE_SOMA_IO =               \
+  io/somaio_declare.cc              \
+
 

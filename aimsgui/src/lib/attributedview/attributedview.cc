@@ -37,7 +37,11 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/io/finder.h>
 #include <aims/data/pheader.h>
-#include <cartobase/object/pythonreader.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/reader/pythonreader.h>
+#else
+  #include <cartobase/object/pythonreader.h>
+#endif
 #include <qmenubar.h>
 #include <qfiledialog.h>
 #include <qapplication.h>

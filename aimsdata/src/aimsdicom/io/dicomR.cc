@@ -38,12 +38,19 @@
 #include <aims/io/dicomR.h>
 #include <aims/config/aimsdata_config.h>
 #include <cartobase/exception/assert.h>
-#include <cartobase/allocator/mappingcopy.h>
-#include <cartobase/allocator/mappingro.h>
-#include <cartobase/allocator/mappingrw.h>
 #include <cartobase/exception/format.h>
 #include <cartobase/exception/ioexcept.h>
-#include <cartobase/datasource/filedatasource.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/mappingcopy.h>
+  #include <soma-io/allocator/mappingro.h>
+  #include <soma-io/allocator/mappingrw.h>
+  #include <soma-io/datasource/filedatasource.h>
+#else
+  #include <cartobase/allocator/mappingcopy.h>
+  #include <cartobase/allocator/mappingro.h>
+  #include <cartobase/allocator/mappingrw.h>
+  #include <cartobase/datasource/filedatasource.h>
+#endif
 #include <memory>
 #include <dcerror.h>
 

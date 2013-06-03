@@ -35,7 +35,11 @@
 #define CARTODATA_ROI_SITEITERATOR_H
 
 #include <cartobase/object/object.h>
-#include <cartobase/io/reader.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/io/reader.h>
+#else
+  #include <cartobase/io/reader.h>
+#endif
 #include <cartodata/volume/volume.h>
 #include <vector>
 #include <iostream>

@@ -33,8 +33,12 @@
 
 #include <aims/listview/qpython.h>
 #include <cartobase/stream/sstream.h>
-#include <cartobase/object/pythonwriter.h>
 #include <cartobase/object/property.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/writer/pythonwriter.h>
+#else
+  #include <cartobase/object/pythonwriter.h>
+#endif
 #include <iomanip>
 #include <math.h>
 #include <aims/qtcompat/qlistview.h>

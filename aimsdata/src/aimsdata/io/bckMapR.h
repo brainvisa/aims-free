@@ -42,7 +42,11 @@
 #include <aims/io/bckheader.h>
 #include <aims/io/defaultItemR.h>
 #include <cartobase/exception/ioexcept.h>
-#include <cartobase/io/asciidatasourcetraits.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/utilities/asciidatasourcetraits.h>
+#else
+  #include <cartobase/io/asciidatasourcetraits.h>
+#endif
 
 
 namespace aims

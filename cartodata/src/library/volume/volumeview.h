@@ -35,7 +35,11 @@
 #define CARTODATA_VOLUME_VOLUMEVIEW_H
 
 #include <cartodata/volume/volume.h>
-#include <cartobase/datasource/bufferdatasource.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasource/bufferdatasource.h>
+#else
+  #include <cartobase/datasource/bufferdatasource.h>
+#endif
 
 namespace carto
 {

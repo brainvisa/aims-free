@@ -35,7 +35,11 @@
 #define GRAPH_GRAPH_GWRITER_PYTHON_H
 
 #include <graph/config/graph_config.h>
-#include <cartobase/object/pythonwriter.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/writer/pythonwriter.h>
+#else
+  #include <cartobase/object/pythonwriter.h>
+#endif
 
 class Graph;
 

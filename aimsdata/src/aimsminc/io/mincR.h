@@ -57,13 +57,20 @@ extern "C" {
 #include <aims/io/defaultItemR.h>
 #include <aims/io/datatypecode.h>
 #include <aims/data/data.h>
-#include <cartobase/allocator/mappingcopy.h>
-#include <cartobase/allocator/mappingro.h>
-#include <cartobase/allocator/mappingrw.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/exception/format.h>
-#include <cartobase/datasource/filedatasource.h>
 #include <cartobase/thread/mutex.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/mappingcopy.h>
+  #include <soma-io/allocator/mappingro.h>
+  #include <soma-io/allocator/mappingrw.h>
+  #include <soma-io/datasource/filedatasource.h>
+#else
+  #include <cartobase/allocator/mappingcopy.h>
+  #include <cartobase/allocator/mappingro.h>
+  #include <cartobase/allocator/mappingrw.h>
+  #include <cartobase/datasource/filedatasource.h>
+#endif
 
 #include <aims/io/mincheader.h>
 

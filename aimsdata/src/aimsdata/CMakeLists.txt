@@ -207,6 +207,13 @@ set( _headers
     vector/vector.h
 )
 
+IF(USE_SOMA_IO)
+  set( _headers
+    "${_headers}"
+    rgb/rgb2.h
+  )
+ENDIF(USE_SOMA_IO)
+
 set( _sources
     bucket/bucketMap.cc
     bucket/bucketgen.cc

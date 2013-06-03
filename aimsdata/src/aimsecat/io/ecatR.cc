@@ -38,8 +38,13 @@
 #include <cartobase/exception/assert.h>
 #include <ecat+/io/io.h>
 #include <cartobase/exception/format.h>
-#include <cartobase/allocator/mappingcopy.h>
-#include <cartobase/datasource/filedatasource.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/mappingcopy.h>
+  #include <soma-io/datasource/filedatasource.h>
+#else
+  #include <cartobase/allocator/mappingcopy.h>
+  #include <cartobase/datasource/filedatasource.h>
+#endif
 #include <vector>
 #include <iostream>
 

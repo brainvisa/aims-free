@@ -36,7 +36,9 @@
 
 #include <graph/config/graph_config.h>
 #include <graph/graph/gparser.h>
-#include <cartobase/object/pythonreader.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/reader/pythonreader.h>
+#endif
 
 class Vertex;
 class Tree;

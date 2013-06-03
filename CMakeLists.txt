@@ -79,6 +79,12 @@ if( ZLIB_FOUND )
 endif()
 BRAINVISA_DEPENDENCY( DEV RECOMMENDS zlib DEV )
 
+find_package( OpenSlide )
+if( OPENSLIDE_FOUND )
+  BRAINVISA_DEPENDENCY( RUN DEPENDS libopenslide RUN )
+endif()
+BRAINVISA_DEPENDENCY( DEV RECOMMENDS libopenslide DEV )
+
 find_package( LibKDTree QUIET )
 
 
@@ -121,6 +127,11 @@ if( TIFF_FOUND )
        "${TIFF_INCLUDE_DIR}" )
 endif()
 
+if( OPENSLIDE_FOUND )
+  set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
+       "${OPENSLIDE_INCLUDE_DIR}" )
+endif()
+
 if( LIBKDTREE_FOUND )
   set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS} ${LIBKDTREE_INCLUDE_DIR} )
   # else it will be done in aimsdata lib cmakelist
@@ -133,9 +144,6 @@ if( USE_SOMA_IO )
   set( AIMS_AIMSDATA_LIBRARIES ${AIMS_AIMSDATA_LIBRARIES} soma-io )
 endif( USE_SOMA_IO )
 set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}" )
-
-MESSAGE( "aims-free: ${AIMS-FREE_DEFINITIONS}" )
-MESSAGE( "aims: ${AIMS_DEFINITIONS}" )
 
 add_subdirectory( cartodata )
 add_subdirectory( graph )
