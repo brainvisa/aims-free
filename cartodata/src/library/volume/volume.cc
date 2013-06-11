@@ -34,8 +34,12 @@
 #include <cartobase/object/object_d.h>
 #include <cartodata/volume/volume_d.h>
 #include <cartodata/volume/volumeutil_d.h>
+#include <soma-io/image/voxelrgb_d.h>
+#include <soma-io/image/voxelrgba_d.h>
+#include <soma-io/image/voxelhsv.h>
 #include <functional>
 
+using namespace soma;
 using namespace carto;
 
 template class VolumeProxy< int8_t >;
@@ -55,7 +59,9 @@ template class VolumeProxy< double >;
 template class VolumeProxy< cfloat >;
 template class VolumeProxy< cdouble >;
 template class VolumeProxy< std::map<int, float> >;
-
+template class VolumeProxy< VoxelRGB >;
+template class VolumeProxy< VoxelRGBA >;
+template class VolumeProxy< VoxelHSV >;
 
 template class Volume< int8_t >;
 template class Volume< uint8_t >;
@@ -74,6 +80,9 @@ template class Volume< double >;
 template class Volume< cfloat >;
 template class Volume< cdouble >;
 template class Volume< std::map<int, float> >;
+template class Volume< VoxelRGB >;
+template class Volume< VoxelRGBA >;
+template class Volume< VoxelHSV >;
 
 template class Creator<Volume< int8_t > >;
 template class Creator<Volume< uint8_t > >;
@@ -92,6 +101,9 @@ template class Creator<Volume< double > >;
 template class Creator<Volume< cfloat > >;
 template class Creator<Volume< cdouble > >;
 template class Creator<Volume< std::map<int, float> > >;
+template class Creator< Volume< VoxelRGB > >;
+template class Creator< Volume< VoxelRGBA > >;
+template class Creator< Volume< VoxelHSV > >;
 
 // utilities
 

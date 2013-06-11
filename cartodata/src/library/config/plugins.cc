@@ -30,27 +30,31 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-#ifdef USE_SOMA_IO
-  //#include <aims/io/gisformatchecker.h>
-#else
 
-#ifndef CARTODATA_IO_GISFORMATCHECKER_H
-#define CARTODATA_IO_GISFORMATCHECKER_H
+#include <cartobase/config/version.h>
+#include <cartobase/plugin/plugin.h>
+#include <cartobase/config/paths.h>
+#include <list>
+#include <string>
 
-#include <cartobase/io/formatchecker.h>
+using namespace carto;
+using namespace std;
 
-namespace carto
+namespace
 {
 
-  class GisFormatChecker : public FormatChecker
+  bool addCartodataPlugins()
   {
-  public:
-    virtual Object check( DataSource & ds, DataSourceInfo & f ) const;
-    virtual ~GisFormatChecker();
-  };
+    list<PluginLoader::PluginFile> & plugins = PluginLoader::pluginFiles();
+    string cartoplugins = Paths::findResourceFile( "plugins/cartodata.plugins", "aims" );
+    if( !cartoplugins.empty() ) {
+      plugins.push_back( PluginLoader::PluginFile( cartoplugins, cartobaseVersionString() ) );
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bool dummy = addCartodataPlugins();
 
 }
-
-#endif // CARTODATA_IO_GISFORMATCHECKER_H
-
-#endif // USE_SOMA_IO

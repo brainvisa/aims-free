@@ -48,9 +48,7 @@
 #include <cartobase/stream/fileutil.h>               // to manipulate file names
 #include <cartobase/config/verbose.h>                 // to write debug messages
 //--- system -------------------------------------------------------------------
-extern "C" {
-  #include <openslide.h>
-}
+#include <openslide.h>
 #include <stdio.h>
 #include <iostream>
 #define SOMAIO_BYTE_ORDER 0x41424344  //"ABCD" in ascii
@@ -95,12 +93,12 @@ void OSFormatChecker::_buildDSList( DataSourceList & dsl ) const
 }
 
 //--- BUILDING HEADER ----------------------------------------------------------
-Object GisFormatChecker::_buildHeader( DataSource* hds, Object options ) const
+Object OSFormatChecker::_buildHeader( DataSource* hds, Object options ) const
 {
   string  fname = hds->url();
   
   openslide_t *osimage;
-  if( !osimage = openslide_open( fname.c_str() ) ) {
+  if( !( osimage = openslide_open( fname.c_str() ) ) ) {
     #ifdef SOMA_IO_DEBUG
       cout << "OSFORMATCHECKER:: Not a OpenSlide header: " << fname << endl;
     #endif
@@ -110,7 +108,8 @@ Object GisFormatChecker::_buildHeader( DataSource* hds, Object options ) const
   Object  hdr = Object::value( PropertySet() );  // header
   int32_t resolution = 0;
   try {
-    options->getProperty( "resolution_level", resolution );
+    if( options.get() )
+      resolution = options->getProperty( "resolution_level" )->getScalar();
   } catch( ... ) {
   }
   int32_t i;
@@ -119,17 +118,17 @@ Object GisFormatChecker::_buildHeader( DataSource* hds, Object options ) const
   int32_t rcount = openslide_get_level_count( osimage );
   vector<vector<int64_t> > rsizes( rcount, vector<int64_t>( 4, 1 ) );
   for( i=0; i<rcount; i++ )
-    openslide_get_level_dimensions( osimage, i, &rsizes[i][0], &rsize[i][1] );
+    openslide_get_level_dimensions( osimage, i, &rsizes[i][0], &rsizes[i][1] );
   
   // chosen resolution's downsampling
   float ds = rsizes[0][0]/rsizes[resolution][0];
   
   // chosen resolution's voxel size
   vector<float>  vs(4, 1.);
-  string mppx( openslide_get_property_value( osimage, "openslide.mpp-x" );
-  string mppy( openslide_get_property_value( osimage, "openslide.mpp-y" );
-  vs[0] = atoi( mppx.c_str() )/1000/ds;
-  vs[1] = atoi( mppy.c_str() )/1000/ds;
+  string mppx( openslide_get_property_value( osimage, "openslide.mpp-x" ) );
+  string mppy( openslide_get_property_value( osimage, "openslide.mpp-y" ) );
+  vs[0] = atof( mppx.c_str() )/1000/ds;
+  vs[1] = atof( mppy.c_str() )/1000/ds;
   
   openslide_close( osimage );
   
@@ -152,13 +151,13 @@ Object GisFormatChecker::_buildHeader( DataSource* hds, Object options ) const
 //   P U B L I C   M E T H O D S
 //==============================================================================/
 
-GisFormatChecker::~GisFormatChecker()
+OSFormatChecker::~OSFormatChecker()
 {
 }
 
-DataSourceInfo GisFormatChecker::check( DataSourceInfo dsi, 
-                                        DataSourceInfoLoader & /* f */,
-                                        Object options ) const
+DataSourceInfo OSFormatChecker::check( DataSourceInfo dsi, 
+                                       DataSourceInfoLoader & /* f */,
+                                       Object options ) const
 {
   bool doread = dsi.header().isNone() ;
   bool dolist = dsi.list().nbTypes() == 1 ;

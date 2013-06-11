@@ -65,15 +65,15 @@ IF(EXPAT_FOUND)
   set(HEADERS ${HEADERS} ${AIMSGIFTI_HEADERS})
 ENDIF(EXPAT_FOUND)
 
-IF(USE_SOMA_IO)
-  #IF( OPENSLIDE_FOUND )
-  #  add_subdirectory(aimsopenslide)
-  #  set(HEADERS ${HEADERS} ${AIMSOPENSLIDE_HEADERS})
-  #ENDIF( OPENSLIDE_FOUND )
-
-  add_subdirectory(aimsgis)
-  set(HEADERS ${HEADERS} ${AIMSGIS_HEADERS})
-ENDIF(USE_SOMA_IO)
+# IF(USE_SOMA_IO)
+#   IF( OPENSLIDE_FOUND )
+#     add_subdirectory(aimsopenslide)
+#     set(HEADERS ${HEADERS} ${AIMSOPENSLIDE_HEADERS})
+#   ENDIF( OPENSLIDE_FOUND )
+# 
+#   add_subdirectory(aimsgis)
+#   set(HEADERS ${HEADERS} ${AIMSGIS_HEADERS})
+# ENDIF(USE_SOMA_IO)
 
 # list of header files for doxygen
 set(HEADERS ${HEADERS} PARENT_SCOPE)

@@ -524,7 +524,7 @@ namespace carto
     obj->header().copyProperties( header );
     // restore original sizes : temporary too...
     obj->blockSignals( false );
-
+    
     return obj;
   }
 

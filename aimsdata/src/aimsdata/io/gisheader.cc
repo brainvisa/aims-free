@@ -42,10 +42,10 @@
   #include <soma-io/datasourceinfo/datasourceinfoloader.h>
   #include <soma-io/datasource/filedatasource.h>
 #else
+  #include <cartodata/io/gisformatchecker.h>
   #include <cartobase/io/datasourceinfo.h>
   #include <cartobase/datasource/filedatasource.h>
 #endif
-#include <cartodata/io/gisformatchecker.h>
 #include <cartodata/io/carto2aimsheadertranslator.h>
 #include <cartobase/plugin/plugin.h>                            // loads plugins
 #include <fstream>

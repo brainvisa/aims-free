@@ -34,67 +34,11 @@
 #ifndef AIMS_RGB_RGB2_H
 #define AIMS_RGB_RGB2_H
 //--- soma-io ------------------------------------------------------------------
-#include <soma-io/image/voxelvalue_d.h>
+#include <soma-io/image/rgb.h>
 //--- cartobase ----------------------------------------------------------------
-#include <cartobase/type/types.h>
 //--- system -------------------------------------------------------------------
-#define AIMS_DEBUG_RGB
-#ifdef AIMS_DEBUG_RGB
-  #include <iostream>
-#endif
 //------------------------------------------------------------------------------
 
-//class AimsRGBA;
-
-class AimsRGB : public soma::VoxelValue<uint8_t,3>
-{
-  public:
-    AimsRGB( const soma::VoxelValue<uint8_t,3> &other ) : soma::VoxelValue<uint8_t,3>( other ) { }
-    AimsRGB( const uint8_t &r = 0, const uint8_t &g = 0, const uint8_t &b = 0 )
-    : soma::VoxelValue<uint8_t,3>()
-    {
-      #ifdef AIMS_DEBUG_RGB
-        std::cout << "AIMSRGB:: constructor( " 
-                  << (int) r << ", "
-                  << (int) g << ", "
-                  << (int) b << " )" << std::endl;
-      #endif
-      (*this)[0] = r;
-      (*this)[1] = g;
-      (*this)[2] = b;
-    }
-    AimsRGB( const AimsRGB &other ) : soma::VoxelValue<uint8_t,3>( other ) { }
-    ~AimsRGB() {};
-    
-    AimsRGB & operator = ( const AimsRGB & other )
-    {
-      #ifdef AIMS_DEBUG_RGB
-        std::cout << "AIMSRGB:: operator=( other )" << std::endl;
-      #endif
-      (*this)[0] = other[0];
-      (*this)[1] = other[1];
-      (*this)[2] = other[2];
-      return *this;
-    }
-    
-    AimsRGB & operator = ( const uint8_t & value )
-    {
-      #ifdef AIMS_DEBUG_RGB
-        std::cout << "AIMSRGB:: operator=( " 
-                  << (int) value << " )" << std::endl;
-      #endif
-      (*this)[0] = (uint8_t) value;
-      (*this)[1] = (uint8_t) value;
-      (*this)[2] = (uint8_t) value;
-      return *this;
-    }
-    
-    const uint8_t& red  () const { return (*this)[0]; }
-    const uint8_t& green() const { return (*this)[1]; }
-    const uint8_t& blue () const { return (*this)[2]; }
-          uint8_t& red  ()       { return (*this)[0]; }
-          uint8_t& green()       { return (*this)[1]; }
-          uint8_t& blue ()       { return (*this)[2]; }
-};
+typedef AimsRGB soma::VoxelRGB;
 
 #endif

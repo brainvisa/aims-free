@@ -207,13 +207,6 @@ set( _headers
     vector/vector.h
 )
 
-IF(USE_SOMA_IO)
-  set( _headers
-    "${_headers}"
-    rgb/rgb2.h
-  )
-ENDIF(USE_SOMA_IO)
-
 set( _sources
     bucket/bucketMap.cc
     bucket/bucketgen.cc
@@ -344,13 +337,6 @@ set( _sources
     utility/masscenter.cc
     vector/vector.cc
 )
-
-IF(USE_SOMA_IO)
-  set( _sources
-    "${_sources}"
-    io/somaio_declare.cc
-  )
-ENDIF(USE_SOMA_IO)
 
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
 if( NOT LIBKDTREE_FOUND )

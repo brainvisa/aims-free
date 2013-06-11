@@ -37,6 +37,13 @@
 #ifndef AIMS_HSV_HSV_H
 #define AIMS_HSV_HSV_H
 
+#ifdef USE_SOMA_IO
+
+  #include <soma-io/image/voxelhsv.h>
+
+  typedef soma::VoxelHSV AimsHSV;
+
+#else // USE_SOMA_IO
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/def/general.h>
@@ -411,6 +418,6 @@ inline byte & AimsHSV::operator [] ( unsigned x )
     }
 }
 
-#endif
+#endif // USE_SOMA_IO
 
-
+#endif // AIMS_HSV_HSV_H

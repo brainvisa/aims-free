@@ -4,6 +4,7 @@ set(AIMSJPEG_HEADERS ${_headers} PARENT_SCOPE)
 add_library( aimsjpeg SHARED ${_sources} )
 add_dependencies( aimsjpeg ${headersTarget} )
 set_property( TARGET aimsjpeg PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
+message("${JPEG_LIBRARIES}")
 target_link_libraries( aimsjpeg aimsdata ${JPEG_LIBRARIES} )
 BRAINVISA_INSTALL( TARGETS aimsjpeg
               DESTINATION lib

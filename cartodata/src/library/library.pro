@@ -9,7 +9,6 @@ darwin:LIBS      += -framework CoreServices
 HEADERS =                           \
   doc/cartodata_doc.h               \
   io/carto2aimsheadertranslator.h   \
-  io/gisformatchecker.h             \
   volume/volume.h                   \
   volume/volume_d.h                 \
   volume/volumeoperators.h          \
@@ -23,6 +22,7 @@ HEADERS =                           \
   wip/roi/doi.h                     \ 
 
 HEADERS_NO_USE_SOMA_IO =            \
+  io/gisformatchecker.h             \
   io/gisreader.h                    \
   io/gisreader_d.h                  \
   io/volumedatasource.h             \
@@ -59,5 +59,6 @@ SOURCES_NO_USE_SOMA_IO =            \
 
 SOURCES_USE_SOMA_IO =               \
   io/somaio_declare.cc              \
+  config/plugins.cc                 \
 
 

@@ -31,18 +31,14 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-//--- aims ---------------------------------------------------------------------
-#include <aims/plugin/osplugin.h>
-#include <aims/io/osimagereader_d.h>
-#include <aims/io/osformatchecker.h>
-#include <aims/io/baseFormats_cartovolume.h>
-#include <aims/rgb/rgb.h>
+//--- plugin -------------------------------------------------------------------
+#include <cartodata/plugin/osplugin.h>
+#include <soma-io/image/osimagereader_d.h>
 //--- cartodata ----------------------------------------------------------------
 #include <cartodata/io/volumeformatreader_d.h>
 //--- soma-io ------------------------------------------------------------------
 #include <soma-io/io/formatdictionary_d.h>
-#include <soma-io/datasourceinfo/datasourceinfoloader.h>
-#include <soma-io/image/imagereader_d.h>
+#include <soma-io/image/voxelrgba_d.h>
 //--- cartobase ----------------------------------------------------------------
 #include <cartobase/type/types.h>
 //--- system -------------------------------------------------------------------
@@ -50,7 +46,7 @@
 #include <string>
 //------------------------------------------------------------------------------
 
-using namespace aims;
+using namespace cartodata;
 using namespace soma;
 using namespace carto;
 using namespace std;
@@ -68,8 +64,6 @@ namespace
 
 }
 
-template class ImageReader<AimsRGBA>;
-
 OSPlugin::OSPlugin() : Plugin()
 {
     vector<string>  exts(7);
@@ -80,12 +74,6 @@ OSPlugin::OSPlugin() : Plugin()
     exts[4] = "vmu";    // Hamamatsu
     exts[5] = "scn";    // Leica
     exts[6] = "mrxs";   // MIRAX
-    
-    ////////////////////////////////////////////////////////////////////////////
-    ////                          C H E C K E R                             ////
-    ////////////////////////////////////////////////////////////////////////////
-    
-    DataSourceInfoLoader::registerFormat( "OpenSlide", new OSFormatChecker, exts );
     
     ////////////////////////////////////////////////////////////////////////////
     ////                           R E A D E R                              ////
@@ -101,9 +89,9 @@ OSPlugin::OSPlugin() : Plugin()
     //vfr_rgb->attach( rc_ptr<ImageReader<AimsRGB> >( new GisImageReader<AimsRGB> ) );
     //FormatDictionary<Volume<AimsRGB> >::registerFormat( "GIS", vfr_rgb, exts );
     
-    VolumeFormatReader<AimsRGBA> *vfr_rgba = new VolumeFormatReader<AimsRGBA>;
-    vfr_rgba->attach( rc_ptr<ImageReader<AimsRGBA> >( new OSImageReader<AimsRGBA> ) );
-    FormatDictionary<Volume<AimsRGBA> >::registerFormat( "OpenSlide", vfr_rgba, exts );
+    VolumeFormatReader<VoxelRGBA> *vfr_rgba = new VolumeFormatReader<VoxelRGBA>;
+    vfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new OSImageReader<VoxelRGBA> ) );
+    FormatDictionary<Volume<VoxelRGBA> >::registerFormat( "OpenSlide", vfr_rgba, exts );
     
     //VolumeFormatReader<AimsHSV> *vfr_hsv = new VolumeFormatReader<AimsHSV>;
     //vfr_hsv->attach( rc_ptr<ImageReader<AimsHSV> >( new GisImageReader<AimsHSV> ) );
@@ -119,9 +107,9 @@ OSPlugin::OSPlugin() : Plugin()
     //rfr_rgb->attach( rc_ptr<ImageReader<AimsRGB> >( new GisImageReader<AimsRGB> ) );
     //FormatDictionary<VolumeRef<AimsRGB> >::registerFormat( "GIS", rfr_rgb, exts );
     
-    VolumeRefFormatReader<AimsRGBA> *rfr_rgba = new VolumeRefFormatReader<AimsRGBA>;
-    rfr_rgba->attach( rc_ptr<ImageReader<AimsRGBA> >( new OSImageReader<AimsRGBA> ) );
-    FormatDictionary<VolumeRef<AimsRGBA> >::registerFormat( "OpenSlide", rfr_rgba, exts );
+    VolumeRefFormatReader<VoxelRGBA> *rfr_rgba = new VolumeRefFormatReader<VoxelRGBA>;
+    rfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new OSImageReader<VoxelRGBA> ) );
+    FormatDictionary<VolumeRef<VoxelRGBA> >::registerFormat( "OpenSlide", rfr_rgba, exts );
     
     //VolumeRefFormatReader<AimsHSV> *rfr_hsv = new VolumeRefFormatReader<AimsHSV>;
     //rfr_hsv->attach( rc_ptr<ImageReader<AimsHSV> >( new GisImageReader<AimsHSV> ) );
@@ -137,7 +125,7 @@ OSPlugin::~OSPlugin()
 
 string OSPlugin::name() const
 {
-  return string("OpenSlide IO");
+  return string("OpenSlide CARTO");
 }
 
 

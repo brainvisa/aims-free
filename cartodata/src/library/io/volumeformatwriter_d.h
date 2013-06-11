@@ -144,7 +144,7 @@ namespace soma
     //=== writing image ========================================================
     if( obj.allocatorContext().isAllocated() ) {
       // case without borders
-      _imw->write( (T*) &obj(0,0,0,0), *dsi, position, view, level, options );
+      _imw->write( (T*) &obj(0,0,0,0), *dsi, position, view, options );
     } else if( vv ) {
       int y, z, t;
       std::vector<int> posline ( position );
@@ -157,7 +157,7 @@ namespace soma
             posline[ 2 ] = position[ 2 ] + z;
             posline[ 3 ] = position[ 3 ] + t;
             _imw->write( (T*) &obj(0,y,z,t), *dsi, posline, 
-                         sizeline, level, options );
+                         sizeline, options );
           }
     }
     // else we just needed to write the header and reserve file space

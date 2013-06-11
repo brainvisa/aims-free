@@ -40,4 +40,4 @@
 
 using namespace soma;
 
-template class GisImageReader<AimsRGBA>;
+template class OSImageReader<AimsRGBA>;

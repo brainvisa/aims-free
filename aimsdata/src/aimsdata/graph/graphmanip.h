@@ -34,6 +34,7 @@
 #ifndef AIMS_GRAPH_GRAPHMANIP_H
 #define AIMS_GRAPH_GRAPHMANIP_H
 
+#include <aims/rgb/rgb.h>
 #include <cartobase/object/object.h>
 #include <cartobase/type/types.h>
 #include <cartobase/object/property.h>
@@ -47,8 +48,6 @@ class AffineTransformation3d;
 typedef aims::AffineTransformation3d Motion;
 class Void;
 template<typename T> class AimsData;
-class AimsRGB;
-class AimsRGBA;
 
 namespace aims
 {

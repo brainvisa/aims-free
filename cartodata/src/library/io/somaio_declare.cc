@@ -41,6 +41,9 @@
 #include <soma-io/io/writer_d.h>
 #include <soma-io/io/formatdictionary_d.h>
 #include <soma-io/reader/formatreader_d.h>
+#include <soma-io/image/voxelrgb_d.h>
+#include <soma-io/image/voxelrgba_d.h>
+#include <soma-io/image/voxelhsv.h>
 //--- cartobase ----------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>
 //------------------------------------------------------------------------------
@@ -64,6 +67,9 @@ template class Reader<Volume<uint16_t> >;
 template class Reader<Volume<uint32_t> >;
 template class Reader<Volume<float> >;
 template class Reader<Volume<double> >;
+template class Reader<Volume<VoxelRGB> >;
+template class Reader<Volume<VoxelRGBA> >;
+template class Reader<Volume<VoxelHSV> >;
 
 //=== READER<VOLUMEREF> ========================================================
 
@@ -75,6 +81,9 @@ template class Reader<VolumeRef<uint16_t> >;
 template class Reader<VolumeRef<uint32_t> >;
 template class Reader<VolumeRef<float> >;
 template class Reader<VolumeRef<double> >;
+template class Reader<VolumeRef<VoxelRGB> >;
+template class Reader<VolumeRef<VoxelRGBA> >;
+template class Reader<VolumeRef<VoxelHSV> >;
 
 //==============================================================================
 //   W R I T E R
@@ -90,6 +99,9 @@ template class Writer<Volume<uint16_t> >;
 template class Writer<Volume<uint32_t> >;
 template class Writer<Volume<float> >;
 template class Writer<Volume<double> >;
+template class Writer<Volume<VoxelRGB> >;
+template class Writer<Volume<VoxelRGBA> >;
+template class Writer<Volume<VoxelHSV> >;
 
 //=== WRITER<VOLUMEREF> ========================================================
 
@@ -101,6 +113,9 @@ template class Writer<VolumeRef<uint16_t> >;
 template class Writer<VolumeRef<uint32_t> >;
 template class Writer<VolumeRef<float> >;
 template class Writer<VolumeRef<double> >;
+template class Writer<VolumeRef<VoxelRGB> >;
+template class Writer<VolumeRef<VoxelRGBA> >;
+template class Writer<VolumeRef<VoxelHSV> >;
 
 //==============================================================================
 //   F O R M A T D I C T I O N A R Y
@@ -116,6 +131,9 @@ template class FormatDictionary<Volume<uint16_t> >;
 template class FormatDictionary<Volume<uint32_t> >;
 template class FormatDictionary<Volume<float> >;
 template class FormatDictionary<Volume<double> >;
+template class FormatDictionary<Volume<VoxelRGB> >;
+template class FormatDictionary<Volume<VoxelRGBA> >;
+template class FormatDictionary<Volume<VoxelHSV> >;
 
 //=== FORMATDICTIONARY<VOLUMEREF> ==============================================
 
@@ -127,6 +145,9 @@ template class FormatDictionary<VolumeRef<uint16_t> >;
 template class FormatDictionary<VolumeRef<uint32_t> >;
 template class FormatDictionary<VolumeRef<float> >;
 template class FormatDictionary<VolumeRef<double> >;
+template class FormatDictionary<VolumeRef<VoxelRGB> >;
+template class FormatDictionary<VolumeRef<VoxelRGBA> >;
+template class FormatDictionary<VolumeRef<VoxelHSV> >;
 
 //==============================================================================
 //   F O R M A T R E A D E R 
@@ -142,6 +163,9 @@ template class FormatReader<Volume<uint16_t> >;
 template class FormatReader<Volume<uint32_t> >;
 template class FormatReader<Volume<float> >;
 template class FormatReader<Volume<double> >;
+template class FormatReader<Volume<VoxelRGB> >;
+template class FormatReader<Volume<VoxelRGBA> >;
+template class FormatReader<Volume<VoxelHSV> >;
 
 //=== FORMATREADER<VOLUMEREF> ==================================================
 
@@ -153,6 +177,9 @@ template class FormatReader<VolumeRef<uint16_t> >;
 template class FormatReader<VolumeRef<uint32_t> >;
 template class FormatReader<VolumeRef<float> >;
 template class FormatReader<VolumeRef<double> >;
+template class FormatReader<VolumeRef<VoxelRGB> >;
+template class FormatReader<VolumeRef<VoxelRGBA> >;
+template class FormatReader<VolumeRef<VoxelHSV> >;
 
 //=== VOLUMEFORMATREADER =======================================================
 
@@ -164,6 +191,9 @@ template class VolumeFormatReader<uint16_t>;
 template class VolumeFormatReader<uint32_t>;
 template class VolumeFormatReader<float>;
 template class VolumeFormatReader<double>;
+template class VolumeFormatReader<VoxelRGB>;
+template class VolumeFormatReader<VoxelRGBA>;
+template class VolumeFormatReader<VoxelHSV>;
 
 //=== VOLUMEREFFORMATREADER ====================================================
 
@@ -175,6 +205,9 @@ template class VolumeRefFormatReader<uint16_t>;
 template class VolumeRefFormatReader<uint32_t>;
 template class VolumeRefFormatReader<float>;
 template class VolumeRefFormatReader<double>;
+template class VolumeRefFormatReader<VoxelRGB>;
+template class VolumeRefFormatReader<VoxelRGBA>;
+template class VolumeRefFormatReader<VoxelHSV>;
 
 //==============================================================================
 //   F O R M A T R E A D E R 
@@ -190,6 +223,9 @@ template class VolumeFormatWriter<uint16_t>;
 template class VolumeFormatWriter<uint32_t>;
 template class VolumeFormatWriter<float>;
 template class VolumeFormatWriter<double>;
+template class VolumeFormatWriter<VoxelRGB>;
+template class VolumeFormatWriter<VoxelRGBA>;
+template class VolumeFormatWriter<VoxelHSV>;
 
 //=== VOLUMEREFFORMATWRITER ====================================================
 
@@ -201,5 +237,8 @@ template class VolumeRefFormatWriter<uint16_t>;
 template class VolumeRefFormatWriter<uint32_t>;
 template class VolumeRefFormatWriter<float>;
 template class VolumeRefFormatWriter<double>;
+template class VolumeRefFormatWriter<VoxelRGB>;
+template class VolumeRefFormatWriter<VoxelRGBA>;
+template class VolumeRefFormatWriter<VoxelHSV>;
 
 }

@@ -49,6 +49,9 @@
 #include <cartobase/exception/ioexcept.h>
 //--- system -------------------------------------------------------------------
 #include <vector>
+#ifdef SOMA_IO_DEBUG
+  #include <iostream>
+#endif
 //------------------------------------------------------------------------------
 
 namespace soma
@@ -79,81 +82,174 @@ namespace soma
                                     const AllocatorContext & context, 
                                     carto::Object options )
   {
-    // multiresolution level
+    #ifdef SOMA_IO_DEBUG
+      std::cout << "VOLUMEFORMATREADER:: Reading object ( "
+                << dsi->list().dataSource( "default", 0 )->url() 
+                << " )" << std::endl;
+    #endif
+    
+    //--- test for memory mapping ----------------------------------------------
+    if( obj.allocatorContext().allocatorType() 
+        == AllocatorStrategy::ReadOnlyMap )
+    {
+      #ifdef SOMA_IO_DEBUG
+      std::cout << "VOLUMEFORMATREADER:: Nothing to read -> Memory Mapping" 
+                << std::endl;
+      #endif
+      return;
+    }
+    
+    //--- volume is a view ? ---------------------------------------------------
+    carto::VolumeView<T> *vv = dynamic_cast<carto::VolumeView<T> *>( &obj );
+    carto::Volume<T> *parent1;
+    carto::Volume<T> *parent2;
+    if( vv ) {
+      parent1 = vv->refVolume().get();
+      carto::VolumeView<T> *parent1vv = dynamic_cast<carto::VolumeView<T> *>( parent1 );
+      if( parent1vv )
+        parent2 = parent1vv->refVolume().get();
+    } else if( !vv && !obj.allocatorContext().isAllocated() ) {
+      #ifdef SOMA_IO_DEBUG
+      std::cout << "VOLUMEFORMATREADER:: Nothing to read -> Unallocated volume" 
+                << std::endl;
+      #endif
+      return;
+    }
+    
+    //--- view size ------------------------------------------------------------
+    std::vector<int>  viewsize( 4, 0 );
+    viewsize[ 0 ] = obj.getSizeX();
+    viewsize[ 1 ] = obj.getSizeY();
+    viewsize[ 2 ] = obj.getSizeZ();
+    viewsize[ 3 ] = obj.getSizeT();
+    #ifdef SOMA_IO_DEBUG
+      std::cout << "VOLUMEFORMATREADER:: View Size ( "
+                << viewsize[ 0 ] << ", "
+                << viewsize[ 1 ] << ", "
+                << viewsize[ 2 ] << ", "
+                << viewsize[ 3 ] << " )"
+                << std::endl;
+    #endif
+    
+    //-- multiresolution level -------------------------------------------------
     int level = 0;
     if( options->hasProperty( "resolution_level" ) )
       options->getProperty( "resolution_level", level );
     
-    if( obj.allocatorContext().isAllocated() 
-        && obj.allocatorContext().allocatorType() 
-           != AllocatorStrategy::ReadOnlyMap ) 
-    {
-    
-      // view size
-      std::vector<int>  viewsize( 4, 0 );
-      viewsize[ 0 ] = obj.getSizeX();
-      viewsize[ 1 ] = obj.getSizeY();
-      viewsize[ 2 ] = obj.getSizeZ();
-      viewsize[ 3 ] = obj.getSizeT();
-    
-      // volume on disk size
-      // we know size[XYZT] contain the dimensions of the chosen resolution level
-      std::vector<int>  imagesize( 4, 0 );
-      dsi->header()->getProperty( "sizeX", imagesize[ 0 ] );
-      dsi->header()->getProperty( "sizeY", imagesize[ 1 ] );
-      dsi->header()->getProperty( "sizeZ", imagesize[ 2 ] );
-      dsi->header()->getProperty( "sizeT", imagesize[ 3 ] );
-      
-      // possibilities : with borders, partial reading, ...
-      std::vector<int>  diff( 4, 0 );
-      diff[ 0 ] = imagesize[ 0 ] - viewsize[ 0 ];
-      diff[ 1 ] = imagesize[ 1 ] - viewsize[ 1 ];
-      diff[ 2 ] = imagesize[ 2 ] - viewsize[ 2 ];
-      diff[ 3 ] = imagesize[ 3 ] - viewsize[ 3 ];
-      
-      bool withborders = diff[0]<0 || diff[1]<0 || diff[2]<0 || diff[3]<0;
-      bool partialreading = diff[0]>0 || diff[1]>0 || diff[2]>0 || diff[3]>0;
-      
-      // TODO strides
-      // for now we don't use them
-      std::vector<int> strides;
-      
-      // region's origine
-      std::vector<int>  pos ( 4 , 0 );
-      carto::VolumeView<T> *vv 
-        = dynamic_cast<carto::VolumeView<T> *>( &obj );
-      if( vv ) {
-        const typename carto::VolumeView<T>::Position4Di & p 
-          = vv->posInRefVolume();
-        pos[ 0 ] = p[ 0 ];
-        pos[ 1 ] = p[ 1 ];
-        pos[ 2 ] = p[ 2 ];
-        pos[ 3 ] = p[ 3 ];
+    //--- full volume size -----------------------------------------------------
+    std::vector<int>  imagesize( 4, 0 );
+    try {
+      // first we look for "resolutions_dimension" property
+      imagesize[ 0 ] = dsi->header()->getProperty( "resolutions_dimension" )
+                          ->getArrayItem( level )->getArrayItem( 0 )
+                          ->getScalar();
+      imagesize[ 1 ] = dsi->header()->getProperty( "resolutions_dimension" )
+                          ->getArrayItem( level )->getArrayItem( 1 )
+                          ->getScalar();
+      imagesize[ 2 ] = dsi->header()->getProperty( "resolutions_dimension" )
+                          ->getArrayItem( level )->getArrayItem( 2 )
+                          ->getScalar();
+      imagesize[ 3 ] = dsi->header()->getProperty( "resolutions_dimension" )
+                          ->getArrayItem( level )->getArrayItem( 3 )
+                          ->getScalar();
+    } catch( ... ) {
+      try {
+        // if it doesn't work, we look for "volume_dimension"
+        imagesize[ 0 ] = dsi->header()->getProperty( "volume_dimension" )
+                            ->getArrayItem( 0 )->getScalar();
+        imagesize[ 1 ] = dsi->header()->getProperty( "volume_dimension" )
+                            ->getArrayItem( 1 )->getScalar();
+        imagesize[ 2 ] = dsi->header()->getProperty( "volume_dimension" )
+                            ->getArrayItem( 2 )->getScalar();
+        imagesize[ 3 ] = dsi->header()->getProperty( "volume_dimension" )
+                            ->getArrayItem( 3 )->getScalar();
+      } catch( ... ) {
+        // if still nothing, we look for parent volumes
+        if( parent1 && !parent1->allocatorContext().isAllocated() ) {
+          imagesize[ 0 ] = parent1->getSizeX();
+          imagesize[ 1 ] = parent1->getSizeY();
+          imagesize[ 2 ] = parent1->getSizeZ();
+          imagesize[ 3 ] = parent1->getSizeT();
+        } else if( parent2 ) {
+          imagesize[ 0 ] = parent2->getSizeX();
+          imagesize[ 1 ] = parent2->getSizeY();
+          imagesize[ 2 ] = parent2->getSizeZ();
+          imagesize[ 3 ] = parent2->getSizeT();
+        } else
+          imagesize = viewsize;
       }
-      
-      int y, z, t;
-      if ( !withborders ) {
-        // we can read the volume/region into a contiguous buffer
-        _imr->read( ( T * ) &obj(0,0,0,0), *dsi, pos, 
-                    viewsize, strides, level, options );
-      } else {
-        // we are in a "border" context. The volume/region must be read
-        // line by line
-        std::vector<int> posline ( pos );
-        std::vector<int> sizeline ( 4, 1 );
-        sizeline[ 0 ] = viewsize[ 0 ];
-        for ( t=0; t<viewsize[ 3 ]; ++t )
-          for ( z=0; z<viewsize[ 2 ]; ++z )
-            for ( y=0; y<viewsize[ 1 ]; ++y ) {
-              posline[ 1 ] = pos[ 1 ] + y;
-              posline[ 2 ] = pos[ 2 ] + z;
-              posline[ 3 ] = pos[ 3 ] + t;
-              _imr->read( ( T * ) &obj(0,y,z,t), *dsi, posline, 
-                          sizeline, strides, level, options );
-            }
-      }
-    
     }
+    #ifdef SOMA_IO_DEBUG
+      std::cout << "VOLUMEFORMATREADER:: View Size ( "
+                << viewsize[ 0 ] << ", "
+                << viewsize[ 1 ] << ", "
+                << viewsize[ 2 ] << ", "
+                << viewsize[ 3 ] << " )"
+                << std::endl;
+    #endif
+
+    //--- strides --------------------------------------------------------------
+    // TODO - for now we don't use them
+    std::vector<int> strides;
+
+    //--- region's origine -----------------------------------------------------
+    std::vector<int>  pos ( 4 , 0 );
+    if( vv ) {
+      const typename carto::VolumeView<T>::Position4Di & p 
+        = vv->posInRefVolume();
+      pos[ 0 ] = p[ 0 ];
+      pos[ 1 ] = p[ 1 ];
+      pos[ 2 ] = p[ 2 ];
+      pos[ 3 ] = p[ 3 ];
+    }
+    #ifdef SOMA_IO_DEBUG
+      std::cout << "VOLUMEFORMATREADER:: View Position ( "
+                << pos[ 0 ] << ", "
+                << pos[ 1 ] << ", "
+                << pos[ 2 ] << ", "
+                << pos[ 3 ] << " )"
+                << std::endl;
+    #endif
+
+    //--- possibilities : with borders, partial reading ------------------------
+    std::vector<int>  diff( 4, 0 );
+    diff[ 0 ] = imagesize[ 0 ] - viewsize[ 0 ];
+    diff[ 1 ] = imagesize[ 1 ] - viewsize[ 1 ];
+    diff[ 2 ] = imagesize[ 2 ] - viewsize[ 2 ];
+    diff[ 3 ] = imagesize[ 3 ] - viewsize[ 3 ];
+
+    bool withborders = diff[0]<0 || diff[1]<0 || diff[2]<0 || diff[3]<0;
+    bool partialreading = diff[0]>0 || diff[1]>0 || diff[2]>0 || diff[3]>0;
+    #ifdef SOMA_IO_DEBUG
+      std::cout << "VOLUMEFORMATREADER:: With Borders ? ( "
+                << withborders << " )" << std::endl;
+      std::cout << "VOLUMEFORMATREADER:: Partial Reading ? ( "
+                << partialreading << " )" << std::endl;
+    #endif
+
+    //--- reading volume -------------------------------------------------------
+    int y, z, t;
+    if ( !withborders ) {
+      // we can read the volume/region into a contiguous buffer
+      _imr->read( ( T * ) &obj(0,0,0,0), *dsi, pos, 
+                  viewsize, strides, options );
+    } else {
+      // we are in a "border" context. The volume/region must be read
+      // line by line
+      std::vector<int> posline ( pos );
+      std::vector<int> sizeline ( 4, 1 );
+      sizeline[ 0 ] = viewsize[ 0 ];
+      for ( t=0; t<viewsize[ 3 ]; ++t )
+        for ( z=0; z<viewsize[ 2 ]; ++z )
+          for ( y=0; y<viewsize[ 1 ]; ++y ) {
+            posline[ 1 ] = pos[ 1 ] + y;
+            posline[ 2 ] = pos[ 2 ] + z;
+            posline[ 3 ] = pos[ 3 ] + t;
+            _imr->read( ( T * ) &obj(0,y,z,t), *dsi, posline, 
+                        sizeline, strides, options );
+          }
+    }
+    
     // we reset at 0 the ImageReader's members (sizes, binary, ...) so that 
     // they are recomputed at the next reading.
     _imr->resetParams();

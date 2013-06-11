@@ -44,12 +44,11 @@
 //--- cartobase ----------------------------------------------------------------
 #include <cartobase/object/object.h>                          // header, options
 //--- system -------------------------------------------------------------------
-extern "C" {
-  #include <openslide.h>
-}
+#include <openslide.h>
 #include <memory>
 #include <vector>
 #include <iostream>
+#include <string>
 //------------------------------------------------------------------------------
 //#define SOMA_IO_DEBUG
 
@@ -104,9 +103,9 @@ namespace soma {
     if( ImageReader<T>::_sizes.empty() )
       updateParams( dsi );
     
-    string fname = dsi.list().dataSource( "ima", 0 );
+    std::string fname = dsi.list().dataSource( "ima", 0 )->url();
     openslide_t *osimage;
-    if( !osimage = openslide_open( fname.c_str() ) )
+    if( !( osimage = openslide_open( fname.c_str() ) ) )
       throw carto::open_error( "data source not available", fname );
     
     openslide_read_region( osimage, (uint32_t *) dest, pos[ 0 ], pos[ 1 ],

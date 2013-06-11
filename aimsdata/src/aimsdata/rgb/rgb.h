@@ -37,6 +37,15 @@
 #ifndef AIMS_RGB_RGB_H
 #define AIMS_RGB_RGB_H
 
+#ifdef USE_SOMA_IO
+  #include <soma-io/image/voxelrgb_d.h>
+  #include <soma-io/image/voxelrgba_d.h>
+
+  typedef soma::VoxelRGB AimsRGB;
+  typedef soma::VoxelRGBA AimsRGBA;
+
+#else // USE_SOMA_IO
+
 #include <aims/config/aimsdata_config.h>
 #include <aims/def/general.h>
 #include <aims/def/assert.h>
@@ -801,5 +810,7 @@ inline byte & AimsRGBA::operator [] ( unsigned x )
       return _red;
     }
 }
+
+#endif // USE_SOMA_IO
 
 #endif // AIMS_RGB_RGB_H
