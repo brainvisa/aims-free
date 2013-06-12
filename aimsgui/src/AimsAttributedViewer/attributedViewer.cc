@@ -37,7 +37,6 @@
 #include <aims/io/finder.h>
 #include <qmainwindow.h>
 #include <qapplication.h>
-#include <aims/qtcompat/qlistview.h>
 
 using namespace aims;
 using namespace carto;

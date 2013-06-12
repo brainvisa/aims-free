@@ -45,11 +45,10 @@
 #include <qmenubar.h>
 #include <qfiledialog.h>
 #include <qapplication.h>
-#include <aims/qtcompat/qlistview.h>
-#include <aims/qtcompat/qpopupmenu.h>
-#if QT_VERSION >= 0x040000
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QMenu>
 #include <QCloseEvent>
-#endif
 
 using namespace aims;
 using namespace aims::gui;
@@ -59,23 +58,30 @@ using namespace std;
 AttributedView::AttributedView() 
   : QMainWindow(), initialized(false)
 {
-  this->listview = new Q3ListView( this );
-  
-  QPopupMenu	*pop = new QPopupMenu;
-  pop->insertItem( "Open...", this, SLOT( loadObject() ), 
+  this->listview = new QTreeWidget( this );
+
+  QMenu	*pop = new QMenu( tr( "File" ) );
+  pop->addAction( tr( "Open..." ), this, SLOT( loadObject() ), 
                     Qt::CTRL + Qt::Key_O );
-  pop->insertItem( "Quit", this, SLOT( close() ), Qt::CTRL + Qt::Key_Q );
-  this->menuBar()->insertItem( "File", pop );
+  pop->addAction( tr( "Quit" ), this, SLOT( close() ), Qt::CTRL + Qt::Key_Q );
+  this->menuBar()->addMenu( pop );
 
-  pop = new QPopupMenu;
-  pop->insertItem( "Clear view", this->listview, SLOT( clear() ), 
+  pop = new QMenu( tr( "View" ) );
+  pop->addAction( tr( "Clear view" ), this->listview, SLOT( clear() ), 
                     Qt::CTRL + Qt::Key_C );
-  this->menuBar()->insertItem( "View", pop );
+  this->menuBar()->addMenu( pop );
 
-  this->listview->addColumn( "attribute/object" );
-  this->listview->addColumn( "type" );
-  this->listview->addColumn( "value" );
+  listview->setColumnCount( 3 );
+  QTreeWidgetItem* hdr = new QTreeWidgetItem;
+  listview->setHeaderItem( hdr );
+  hdr->setText( 0, tr( "attribute/object" ) );
+  hdr->setText( 1, tr( "type" ) );
+  hdr->setText( 2, tr( "value" ) );
+
   this->listview->setRootIsDecorated( true );
+  listview->setSelectionMode( QTreeWidget::ExtendedSelection );
+  listview->setItemsExpandable( true );
+  listview->setAllColumnsShowFocus( true );
 }
 
 void AttributedView::loadObject( const QString & filename )
@@ -85,7 +91,7 @@ void AttributedView::loadObject( const QString & filename )
   try
     {
       // try direct python format first
-      PythonReader	pr( filename.utf8().data() );
+      PythonReader	pr( filename.toStdString() );
       obj = Object( pr.read() );
 ////      go = obj.get();
     }
@@ -93,7 +99,7 @@ void AttributedView::loadObject( const QString & filename )
     {
       // try Finder
       Finder	f;
-      if( !f.check( filename.utf8().data() ) )
+      if( !f.check( filename.toStdString() ) )
         {
           cerr << e.what() << endl;
           return;
@@ -108,7 +114,7 @@ void AttributedView::loadObject( const QString & filename )
           if( f.objectType() == "genericobject" && type == "any" )
             try
             {
-              Reader<GenericObject>  r( filename.utf8().data() );
+              Reader<GenericObject>  r( filename.toStdString() );
               obj.reset( r.read() );
               done = true;
             }
@@ -150,18 +156,17 @@ void AttributedView::loadObject( const QString & filename )
     }
 
   QPythonPrinter	pp( listview );
-  //  Q3ListViewItem	*item = pp.write( *go, true );
-  Q3ListViewItem	*item = pp.write( *obj.get(), true );
-  Q3ListViewItem	*item2 = item->firstChild();
-  if( item2 )
-    {
-      item->takeItem( item2 );
-      delete item;
-      listview->insertItem( item2 );
-      item = item2;
-    }
+  //  QTreeWidgetItem	*item = pp.write( *go, true );
+  QTreeWidgetItem	*item = pp.write( *obj.get(), true );
+  if( item->childCount() != 0 )
+  {
+    QTreeWidgetItem     *item2 = item->takeChild( 0 );
+    delete item;
+    listview->addTopLevelItem( item2 );
+    item = item2;
+  }
   item->setText( 0, filename );
-  item->setOpen( true );
+  item->setExpanded( true );
 }
 
 void AttributedView::closeEvent ( QCloseEvent * e ) {

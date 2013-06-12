@@ -54,15 +54,15 @@ int main(int argc, const char *argv[])
       bool smoothFlag = false;
       Mesher::SmoothingType smoothType = Mesher::LOWPASS;
       string smoothTypeStr = "lowpass";
-      int smoothIt = 10;
-      float smoothRate = 0.2;
+      int smoothIt = 30;
+      float smoothRate = 0.4;
       float smoothAngle = 180.0;
       float smoothForce = 0.2;
-      int deciFlag = 0;
-      float	deciReductionRate = 99.0;
-      float	deciMaxClearance = 10.0;
-      float	deciMaxError = 10.0;
-      float	deciAngle = 180.0;
+      bool deciFlag = false;
+      float deciReductionRate = 99.0;
+      float deciMaxClearance = 3.0;
+      float deciMaxError = 1.0;
+      float deciAngle = 180.0;
       bool splitFlag = false;
       bool ascii = false;
       int minFacetNumber = 50;
@@ -98,9 +98,9 @@ int main(int argc, const char *argv[])
                      "laplacian, simplespring, polygonspring or lowpass " 
                      "[default=lowpass]", true );
       app.addOption( smoothIt, "--smoothIt", "smoothing number of iterations " 
-                     "[default=10]", true );
-      app.addOption( smoothRate, "--smoothRate", "smoothing moving factor at " 
-                     "each iteration [default=0.2]", true );
+                     "[default=30]", true );
+      app.addOption( smoothRate, "--smoothRate", "smoothing moving rate at " 
+                     "each iteration [default=0.4]", true );
       app.addOption( smoothAngle, "--smoothAngle", 
                      "smoothing feature angle (in degrees) below which the vertex "
                      "is not moved, only for the Laplacian algorithm, between 0 and 180 "
@@ -114,10 +114,10 @@ int main(int argc, const char *argv[])
                      "expected % decimation reduction rate [default=99%]", 
                      true );
       app.addOption( deciMaxClearance, "--deciMaxClearance", 
-                     "maximum clearance of the deci", true );
+                     "maximum clearance of the decimation [default=3.0]", true );
       app.addOption( deciMaxError, "--deciMaxError", 
                      "maximum error distance from the original mesh (mm) " 
-                     " [default=10.0]", true );
+                     " [default=1.0]", true );
       app.addOption( deciAngle, "--deciAngle", "feature angle (degrees), " 
                      "between 0 and 180 [default=180]", true );
       app.addOption( splitFlag, "--split", "split the surface corresponding " 
@@ -152,6 +152,11 @@ int main(int argc, const char *argv[])
         smoothType = Mesher::SIMPLESPRING;
       else if ( smoothTypeStr == "polygonspring" )
         smoothType = Mesher::POLYGONSPRING;
+      else
+      {
+        cout << "This smoothing type doesn't exist, check if it is correctly written or look at the command's help." << endl;
+        return EXIT_FAILURE;
+      }
 
       if ( fout.empty() )
         {

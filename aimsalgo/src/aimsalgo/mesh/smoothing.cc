@@ -41,27 +41,27 @@ using namespace std;
 
 void Mesher::getSmoothedVertices( const vector< Facet* >& vfac,
                                   AimsSurfaceTriangle& surface,
-                                  float deplFactor )
+                                  float rate )
 {
 
     if( _verbose )
         cout << "smoothing "<< flush;
 
-    ASSERT( deplFactor >= 0.0 && deplFactor <= 1.0 );
+    ASSERT( rate >= 0.0 && rate <= 1.0 );
     
     switch(_smoothType)
     {
         case LAPLACIAN:
-            getSmoothedLaplacian( vfac, surface, _featureAngle, _nIteration, deplFactor );
+            getSmoothedLaplacian( vfac, surface, _smoothFeatureAngle, _smoothIt, rate );
             break;
         case SIMPLESPRING:
-            getSmoothedSimpleSpring( vfac, surface, _smoothForce, _nIteration, deplFactor );
+            getSmoothedSimpleSpring( vfac, surface, _smoothForce, _smoothIt, rate );
             break;
         case POLYGONSPRING:
-            getSmoothedPolygonSpring( vfac, surface, _smoothForce, _nIteration, deplFactor );
+            getSmoothedPolygonSpring( vfac, surface, _smoothForce, _smoothIt, rate );
             break;
         case LOWPASS:
-            getSmoothedLowPassFilter( vfac, surface, _nIteration, deplFactor );
+            getSmoothedLowPassFilter( vfac, surface, _smoothIt, rate );
             break;
         default:
             cout << "This smoothing type does not exist."<< endl;
@@ -84,7 +84,7 @@ void Mesher::getSmoothedLaplacian( const vector< Facet* >& vfac,
                                    AimsSurfaceTriangle& surface,
                                    float featureAngle,
                                    int nIteration,
-                                   float deplFactor )
+                                   float rate )
 {
     uint id;
     int n, size = (int)vfac.size();
@@ -103,9 +103,9 @@ void Mesher::getSmoothedLaplacian( const vector< Facet* >& vfac,
     
     //
     // If  [i] is not a feature vertex, the displacement of [i] is the average
-    // position of his neighboors ponderated by deplFactor :
+    // position of his neighboors ponderated by "rate" :
     // -------->                      -------->                -------->
-    // vertex[i] = (1 - deplfactor) * vertex[i] + deplfactor * neighb[i]
+    // vertex[i] = (1 - rate) * vertex[i] + rate * neighb[i]
     //
     // If  [i] is a feature, vertex [i] is not moved.
     //
@@ -156,7 +156,7 @@ void Mesher::getSmoothedLaplacian( const vector< Facet* >& vfac,
                     bary[ id ] += vertex[ facet->pNeighbor( v )->id() ];
                 bary[ id ] /= (float)facet->nNeighbor();
 
-                smoothed[ id ] = ( 1 - deplFactor ) * vertex[ id ] + deplFactor * bary[ id ];
+                smoothed[ id ] = ( 1 - rate ) * vertex[ id ] + rate * bary[ id ];
             }
             else
                 smoothed[ id ] = vertex[ id ];
@@ -169,7 +169,7 @@ void Mesher::getSmoothedSimpleSpring( const vector< Facet* >& vfac,
                                       AimsSurfaceTriangle& surface,
                                       float force,
                                       int nIteration,
-                                      float deplFactor )
+                                      float rate )
 {
     uint id;
     int n, size = (int)vfac.size();
@@ -187,11 +187,11 @@ void Mesher::getSmoothedSimpleSpring( const vector< Facet* >& vfac,
     
     //
     // The displacement of [i] is the average position of his neighboors
-    // ponderated by deplFactor plus a restoring force dependent on the initial position :
+    // ponderated by "rate" plus a restoring force dependent on the initial position :
     // -------->                      -------->                -------->
-    // vertex[i] = (1 - deplfactor) * vertex[i] + deplfactor * neighb[i] -
+    // vertex[i] = (1 - rate) * vertex[i] + rate * neighb[i] -
     //                                   -------->   ------>
-    //             force * deplfactor * (vertex[i] - orig[i])
+    //             force * rate * (vertex[i] - orig[i])
     //
     
     cout << " simple spring algo " << endl;
@@ -214,8 +214,8 @@ void Mesher::getSmoothedSimpleSpring( const vector< Facet* >& vfac,
                 bary[ id ] += vertex[ facet->pNeighbor( v )->id() ];
             bary[ id ] /= (float)facet->nNeighbor();
 
-            smoothed[ id ] = ( 1 - deplFactor ) * vertex[ id ] + deplFactor * bary[ id ] -
-                               force * deplFactor * (vertex[ id ] - original[ id ]);
+            smoothed[ id ] = ( 1 - rate ) * vertex[ id ] + rate * bary[ id ] -
+                               force * rate * (vertex[ id ] - original[ id ]);
         }
         swap( smoothed, vertex );
     }
@@ -225,7 +225,7 @@ void Mesher::getSmoothedPolygonSpring( const vector< Facet* >& vfac,
                                        AimsSurfaceTriangle& surface,
                                        float force,
                                        int nIteration,
-                                       float deplFactor )
+                                       float rate )
 {
     uint id;
     int n, size = (int)vfac.size();
@@ -250,12 +250,12 @@ void Mesher::getSmoothedPolygonSpring( const vector< Facet* >& vfac,
     
     //
     // The displacement of [i] is the average position of his neighboors
-    // ponderated by deplFactor plus a restoring force dependent on the nearest
+    // ponderated by "rate" plus a restoring force dependent on the nearest
     // initial polygon :
     // -------->                      -------->                -------->
-    // vertex[i] = (1 - deplfactor) * vertex[i] + deplfactor * neighb[i] -
+    // vertex[i] = (1 - rate) * vertex[i] + rate * neighb[i] -
     //                                   -------->   --------->
-    //             force * deplfactor * (vertex[i] - neworig[i])
+    //             force * rate * (vertex[i] - neworig[i])
     //
     
     cout << " polygon spring algo " << endl;
@@ -279,7 +279,7 @@ void Mesher::getSmoothedPolygonSpring( const vector< Facet* >& vfac,
                 bary[ id ] += vertex[ facet->pNeighbor( v )->id() ];
             bary[ id ] /= (float)facet->nNeighbor();
             
-            movedbary = ( 1 - deplFactor ) * vertex[ id ] + deplFactor * bary[ id ];
+            movedbary = ( 1 - rate ) * vertex[ id ] + rate * bary[ id ];
             
             for ( int v = 0; v < facet->nNeighbor(); v++ )
             {
@@ -301,7 +301,7 @@ void Mesher::getSmoothedPolygonSpring( const vector< Facet* >& vfac,
             }
             movedorig[ id ] = - dist_min * Normal_min + movedbary;
 
-            smoothed[ id ] = movedbary - force * deplFactor * (vertex[ id ] - movedorig[ id ]);
+            smoothed[ id ] = movedbary - force * rate * (vertex[ id ] - movedorig[ id ]);
         }
         swap( smoothed, vertex );
     }
@@ -310,7 +310,7 @@ void Mesher::getSmoothedPolygonSpring( const vector< Facet* >& vfac,
 void Mesher::getSmoothedLowPassFilter( const vector< Facet* >& vfac,
                                        AimsSurfaceTriangle& surface,
                                        int nIteration,
-                                       float deplFactor )
+                                       float rate )
 {
     uint id;
     int n, size = (int)vfac.size();
@@ -323,11 +323,11 @@ void Mesher::getSmoothedLowPassFilter( const vector< Facet* >& vfac,
     
     //
     // The displacement of [i] is the average position of his neighboors
-    // ponderated by deplFactor then ponderated by -1.02 * deplFactor (Taubin's Method) :
+    // ponderated by "rate" then ponderated by "-1.02 * rate" (Taubin's Method) :
     // -------->                     -------->                -------->
-    // vertex[i] = (1 - deplfactor) * vertex[i] + deplfactor * neighb[i]
+    // vertex[i] = (1 - rate) * vertex[i] + rate * neighb[i]
     // ----------->                               ----------->                          ----------->
-    // newvertex[i] = (1 - (-1.02 * deplfactor) * newvertex[i] + (-1.02 * deplfactor) * newneighb[i]
+    // newvertex[i] = (1 - (-1.02 * rate) * newvertex[i] + (-1.02 * rate) * newneighb[i]
     //
     
     cout << " lowpass algo " << endl;
@@ -350,14 +350,14 @@ void Mesher::getSmoothedLowPassFilter( const vector< Facet* >& vfac,
                 bary[ id ] += vertex[ facet->pNeighbor( v )->id() ];
             bary[ id ] /= (float)facet->nNeighbor();
 
-            smoothed[ id ] = ( 1 - deplFactor ) * vertex[ id ] + deplFactor * bary[ id ];
+            smoothed[ id ] = ( 1 - rate ) * vertex[ id ] + rate * bary[ id ];
         }
         swap( smoothed, vertex );
         for ( n = 0; n != size; n++ )
         {
             facet = vfac[ n ];
             id = facet->id();
-            newDeplFactor = -1.02*deplFactor;
+            newDeplFactor = -1.02*rate;
             
             bary[ id ] = Point3df(0,0,0);
             for ( int v = 0; v < facet->nNeighbor(); v++ )

@@ -36,12 +36,7 @@
 
 #include <qobject.h>
 #include <qmainwindow.h>
-#if QT_VERSION >= 0x040000
-class Q3ListView;
-#else
-class QListView;
-typedef QListView Q3ListView;
-#endif
+class QTreeWidget;
 
 
 class AttributedView : public QMainWindow
@@ -49,7 +44,7 @@ class AttributedView : public QMainWindow
   Q_OBJECT
 
 public:
-  Q3ListView	*listview;
+  QTreeWidget *listview;
   AttributedView();
   void loadObject( const QString & filename );
   void load( std::string filename );

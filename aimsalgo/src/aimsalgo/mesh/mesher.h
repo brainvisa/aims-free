@@ -60,9 +60,9 @@ class AIMSALGO_API Mesher
     };
 
     Mesher() : _smoothFlag( false ),
-               _featureAngle( 180. ),
-               _nIteration( 5 ),
-               _factor( 0.2 ),
+               _smoothIt( 30 ),
+               _smoothRate( 0.4 ),
+               _smoothFeatureAngle( 180. ),
                _smoothForce( 0.2 ),
                _smoothType( LOWPASS ),
                _deciFlag( false ),
@@ -101,12 +101,13 @@ class AIMSALGO_API Mesher
 
     // SMOOTHING
     // =========
-    // default : smoothtype = LOWPASS
-    //           featureAngle = 180.0 deg
-    //           nIteration = 5
-    //           factor in [0.0;1.0] (instance : 0.2)
-    void setSmoothing( SmoothingType smoothType, int nIteration, float factor );
-    void setSmoothingLaplacian( float featureAngle );
+    // default : smoothType = LOWPASS
+    //           smoothIt = 30
+    //           smoothRate in [0.0;1.0] (instance : 0.4)
+    //           smoothFeatureAngle = 180.0 deg
+    //           smoothForce in [0.0;1.0] (instance : 0.2)
+    void setSmoothing( SmoothingType smoothType, int smoothIt, float smoothRate );
+    void setSmoothingLaplacian( float smoothFeatureAngle );
     void setSmoothingSpring( float smoothForce );
     void unsetSmoothing();
     void smooth( AimsSurfaceTriangle& surface );
@@ -116,7 +117,7 @@ class AIMSALGO_API Mesher
     // default : deciReductionRate = 100.0 %
     //           deciMaxClearance = 5.0
     //           deciMaxError = 0.003
-    //           deciFeatureAngle = 120.0
+    //           deciFeatureAngle = 120.0 deg
     void setDecimation( float deciReductionRate,
                         float deciMaxClearance,
                         float deciMaxError,
@@ -170,9 +171,9 @@ class AIMSALGO_API Mesher
   protected:
 
     bool _smoothFlag;
-    float _featureAngle;
-    int _nIteration;
-    float _factor;
+    int _smoothIt;
+    float _smoothRate;
+    float _smoothFeatureAngle;
     float _smoothForce;
     SmoothingType _smoothType;
 
@@ -203,26 +204,26 @@ class AIMSALGO_API Mesher
                       float sizeX, float sizeY, float sizeZ );
     void getSmoothedVertices( const std::vector< Facet* >& vfac,
                               AimsSurfaceTriangle& surface,
-                              float deplFactor );
+                              float rate );
     void getSmoothedLaplacian( const std::vector< Facet* >& vfac,
                                AimsSurfaceTriangle& surface,
                                float featureAngle,
                                int nIteration,
-                               float deplFactor );
+                               float rate );
     void getSmoothedSimpleSpring( const std::vector< Facet* >& vfac,
                                   AimsSurfaceTriangle& surface,
                                   float force,
                                   int nIteration,
-                                  float deplFactor );
+                                  float rate );
     void getSmoothedPolygonSpring( const std::vector< Facet* >& vfac,
                                    AimsSurfaceTriangle& surface,
                                    float force,
                                    int nIteration,
-                                   float deplFactor );
+                                   float rate );
     void getSmoothedLowPassFilter( const std::vector< Facet* >& vfac,
                                    AimsSurfaceTriangle& surface,
                                    int nIteration,
-                                   float deplFactor );
+                                   float rate );
     void getDecimatedVertices( std::vector< Facet* >& vfac,
                                std::vector< Point3df >& vertex,
                                float reductionRatePercent,

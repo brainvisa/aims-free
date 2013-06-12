@@ -37,15 +37,8 @@
 #include <cartobase/object/object.h>
 #include <cartobase/object/syntax.h>
 #include <qglobal.h>
-#if QT_VERSION >= 0x040000
-class Q3ListView;
-class Q3ListViewItem;
-#else
-class QListView;
-class QListViewItem;
-typedef QListView Q3ListView;
-typedef QListViewItem Q3ListViewItem;
-#endif
+class QTreeWidget;
+class QTreeWidgetItem;
 class QString;
 
 
@@ -55,35 +48,35 @@ namespace aims
 namespace gui
 {
 
-  /**	Prints elements and attributes of a GenericObject (Python-like) object 
-	into a QListView tree
+  /**   Prints elements and attributes of a GenericObject (Python-like) object 
+        into a QTreeWidget tree
   */
   class QPythonPrinter
   {
   public:
-    typedef Q3ListViewItem* (*Helper)( const carto::GenericObject & obj, 
-				       Q3ListViewItem* parent, 
-				       QPythonPrinter & qp, 
-				       const QString & attname, 
-				       const QString & attype, 
-				       bool viewinternal );
-    typedef std::map<std::string, Helper>	HelperSet;
+    typedef QTreeWidgetItem* (*Helper)( const carto::GenericObject & obj, 
+                                       QTreeWidgetItem* parent, 
+                                       QPythonPrinter & qp, 
+                                       const QString & attname, 
+                                       const QString & attype, 
+                                       bool viewinternal );
+    typedef std::map<std::string, Helper>       HelperSet;
 
-    QPythonPrinter( Q3ListViewItem* parent, 
-		    const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
-		    const HelperSet & helpers = HelperSet() );
-    QPythonPrinter( Q3ListView* parent, 
-		    const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
-		    const HelperSet & helpers = HelperSet() );
+    QPythonPrinter( QTreeWidgetItem* parent, 
+                    const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
+                    const HelperSet & helpers = HelperSet() );
+    QPythonPrinter( QTreeWidget* parent, 
+                    const carto::SyntaxSet & syntax = carto::SyntaxSet(), 
+                    const HelperSet & helpers = HelperSet() );
     virtual ~QPythonPrinter();
 
-    virtual Q3ListViewItem* write( const carto::GenericObject & object, 
-				   bool writeInternals = false );
+    virtual QTreeWidgetItem* write( const carto::GenericObject & object, 
+                                   bool writeInternals = false );
     virtual void write( const carto::GenericObject & object, 
-			Q3ListViewItem* parent, const std::string & syntax, 
-			const std::string & semantic, bool writeInternals );
+                        QTreeWidgetItem* parent, const std::string & syntax, 
+                        const std::string & semantic, bool writeInternals );
     bool isInternal( const std::string & syntax, 
-		     const std::string & semantic );
+                     const std::string & semantic );
     int valueColumn() const { return( _valcol ); }
     int attributeColumn() const { return( _attcol ); }
     int typeColumn() const { return( _typcol ); }
@@ -94,13 +87,13 @@ namespace gui
   protected:
     virtual void initHelpers();
 
-    carto::SyntaxSet	_rules;
-    HelperSet		_helpers;
-    Q3ListView		*_lview;
-    Q3ListViewItem	*_lvitem;
-    int			_valcol;
-    int			_attcol;
-    int			_typcol;
+    carto::SyntaxSet    _rules;
+    HelperSet           _helpers;
+    QTreeWidget          *_lview;
+    QTreeWidgetItem      *_lvitem;
+    int                 _valcol;
+    int                 _attcol;
+    int                 _typcol;
   };
 
 }

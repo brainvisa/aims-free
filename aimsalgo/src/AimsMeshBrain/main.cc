@@ -52,10 +52,11 @@ int main( int argc, const char** argv )
   {
     string fileIn, fileOut;
     Mesher::SmoothingType smoothType = Mesher::LOWPASS;
-    string smoothTypeStr = "lowpass"; // Ne garder que l'ancien type et le nouveau ?
-    float smoothFactor = 0.2; // A garder ?
-    float deciMaxClearance = 5.0;
-    float deciMaxError = 3.0;
+    string smoothTypeStr = "lowpass";
+    int smoothIt = 30;
+    float smoothRate = 0.4;
+    float deciMaxClearance = 1.8;
+    float deciMaxError = 1.0;
     uint minFacetNumber = 50;
     bool asciiFlag = false;
     bool intinterface = false;
@@ -73,12 +74,14 @@ int main( int argc, const char** argv )
     app.addOption( smoothTypeStr, "--smoothType", "smoothing alorithm's type : "
                    "laplacian, simplespring, polygonspring or lowpass "
                    "[default=lowpass]", true );
-    app.addOption( smoothFactor, "--smoothFactor", "smoothing moving "
-                   "factor at each iteration [default=0.2]", true );
+    app.addOption( smoothIt, "--smoothIt", "smoothing number of iterations " 
+                   "[default=30]", true );
+    app.addOption( smoothRate, "--smoothRate", "smoothing moving "
+                   "rate at each iteration [default=0.4]", true );
     app.addOption( deciMaxClearance, "--deciMaxClearance", "maximum clearance "
-                   "expected in the resulting mesh, in mm [default= 5]", true );
+                   "expected in the resulting mesh, in mm [default= 1.8]", true );
     app.addOption( deciMaxError, "--deciMaxError", "maximum error distance "
-                   "from the original data, in mm [default = 3]", true );
+                   "from the original data, in mm [default = 1.0]", true );
     app.addOption( minFacetNumber, "--minFacetNumber", "minimum number "
                    "of facets to allow decimation [default=50]", true );
     app.addOption( intinterface, "--internalinterface", "mesh the internal "
@@ -88,7 +91,7 @@ int main( int argc, const char** argv )
 
     app.initialize();
 
-    ASSERT( smoothFactor >= 0.0 && smoothFactor <= 1.0 );
+    ASSERT( smoothRate >= 0.0 && smoothRate <= 1.0 );
     ASSERT( deciMaxClearance >= 0.0 );
     ASSERT( deciMaxError >= 0.0 );
 
@@ -100,6 +103,11 @@ int main( int argc, const char** argv )
       smoothType = Mesher::SIMPLESPRING;
     else if ( smoothTypeStr == "polygonspring" )
       smoothType = Mesher::POLYGONSPRING;
+    else
+    {
+      cout << "This smoothing type doesn't exist, check if it is correctly written or look at the command's help." << endl;
+      return EXIT_FAILURE;
+    }
     
     string fout;
     if ( fileOut.empty() )
@@ -129,10 +137,7 @@ int main( int argc, const char** argv )
     data.fillBorder(-1);
 
     Mesher mesher;
-    if( smoothType == Mesher::LAPLACIAN )
-        mesher.setSmoothing( smoothType, 5, 0.4 );
-    else if ( smoothType == Mesher::LOWPASS )
-        mesher.setSmoothing( smoothType, 30, 0.4 );
+    mesher.setSmoothing( smoothType, smoothIt, smoothRate );
     mesher.setDecimation( 100.0, deciMaxClearance, deciMaxError, 180.0 );
     mesher.setMinFacetNumber( minFacetNumber );
     AimsSurfaceTriangle surface;

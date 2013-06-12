@@ -41,15 +41,17 @@
 #endif
 #include <iomanip>
 #include <math.h>
-#include <aims/qtcompat/qlistview.h>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 using namespace aims::gui;
 using namespace carto;
 using namespace std;
 
-QPythonPrinter::QPythonPrinter( Q3ListViewItem* parent, 
-				const SyntaxSet & syntax, 
-				const HelperSet & helpers )
+
+QPythonPrinter::QPythonPrinter( QTreeWidgetItem* parent, 
+                                const SyntaxSet & syntax, 
+                                const HelperSet & helpers )
   : _rules( syntax ), _helpers( helpers ), _lview( 0 ), _lvitem( parent ), 
     _valcol( 2 ), _attcol( 0 ), _typcol( 1 )
 {
@@ -57,9 +59,9 @@ QPythonPrinter::QPythonPrinter( Q3ListViewItem* parent,
 }
 
 
-QPythonPrinter::QPythonPrinter( Q3ListView* parent, 
-				const SyntaxSet & syntax, 
-				const HelperSet & helpers )
+QPythonPrinter::QPythonPrinter( QTreeWidget* parent, 
+                                const SyntaxSet & syntax, 
+                                const HelperSet & helpers )
   : _rules( syntax ), _helpers( helpers ), _lview( parent ), _lvitem( 0 ), 
     _valcol( 2 ), _attcol( 0 ), _typcol( 1 )
 {
@@ -82,22 +84,6 @@ namespace
   }
 
 
-#if QT_VERSION < 0x030300
-  template<>
-  inline QString tostring( const long long & x )
-  {
-    return( QString::number( (long) x ) );
-  }
-
-
-  template<>
-  inline QString tostring( const unsigned long long & x )
-  {
-    return( QString::number( (unsigned long) x ) );
-  }
-#endif
-
-
   template<>
   inline QString tostring( const string & x )
   {
@@ -117,8 +103,8 @@ namespace
   template<>
   inline QString tostring( const Object & x )
   {
-    ostringstream	s;
-    PythonWriter	pw;
+    ostringstream       s;
+    PythonWriter        pw;
     pw.attach( s );
     pw.setSingleLineMode( true );
     pw.write( *x, false, false );
@@ -127,37 +113,37 @@ namespace
 
 
   template<typename T> 
-  Q3ListViewItem* 
-  genericHelper( const GenericObject & obj, Q3ListViewItem* parent, 
-		 QPythonPrinter & p, const QString & attname, 
-		 const QString & attype, bool )
+  QTreeWidgetItem* 
+  genericHelperT( const GenericObject & obj, QTreeWidgetItem* parent, 
+                 QPythonPrinter & p, const QString & attname, 
+                 const QString & attype, bool )
   {
-    Q3ListViewItem	*item = new Q3ListViewItem( parent );
+    QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
     item->setText( p.typeColumn(), attype );
 
     try
       {
-	// using GenericObject:: avoids a bug in gcc-2.96
-        const T	& x = obj.GenericObject::value<T>();
+        // using GenericObject:: avoids a bug in gcc-2.96
+        const T & x = obj.GenericObject::value<T>();
         item->setText( p.valueColumn(), tostring( x ) );
       }
     catch( exception & e )
       {
-	item->setText( p.valueColumn(), QString(  "<error: " ) + e.what() 
-		       + ">" );
+        item->setText( p.valueColumn(), QString(  "<error: " ) + e.what() 
+                       + ">" );
       }
     return( item );
   }
 
 
   template<> 
-  Q3ListViewItem* 
-  genericHelper<string>( const GenericObject & obj, Q3ListViewItem* parent, 
+  QTreeWidgetItem* 
+  genericHelperT<string>( const GenericObject & obj, QTreeWidgetItem* parent, 
                          QPythonPrinter & p, const QString & attname,
                          const QString & attype, bool )
   {
-    Q3ListViewItem      *item = new Q3ListViewItem( parent );
+    QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
     item->setText( p.typeColumn(), attype );
 
@@ -177,34 +163,34 @@ namespace
 
 
   template<typename T> 
-  Q3ListViewItem* 
-  genericSequenceHelper( const GenericObject & obj, Q3ListViewItem* parent, 
-			 QPythonPrinter & p, const QString & attname, 
-			 const QString & attype, bool )
+  QTreeWidgetItem* 
+  genericSequenceHelperT( const GenericObject & obj, QTreeWidgetItem* parent, 
+                         QPythonPrinter & p, const QString & attname, 
+                         const QString & attype, bool )
   {
-    QString			str;
-    Q3ListViewItem	*item = new Q3ListViewItem( parent );
+    QString                     str;
+    QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
     item->setText( p.typeColumn(), attype );
 
     try
       {
-	// using GenericObject:: avoids a bug in gcc-2.96
-	const T				& x = obj.GenericObject::value<T>();
-	typename T::const_iterator	ix;
-	typename T::const_iterator	ex = x.end();
-	bool				first = true;
+        // using GenericObject:: avoids a bug in gcc-2.96
+        const T                         & x = obj.GenericObject::value<T>();
+        typename T::const_iterator      ix;
+        typename T::const_iterator      ex = x.end();
+        bool                            first = true;
 
-	str = "[ ";
-	for( ix=x.begin(); ix!=ex; ++ix )
-	  {
-	    if( first )
-	      {
-		first = false;
-		str += ' ';
-	      }
-	    else
-	      str += ", ";
+        str = "[ ";
+        for( ix=x.begin(); ix!=ex; ++ix )
+          {
+            if( first )
+              {
+                first = false;
+                str += ' ';
+              }
+            else
+              str += ", ";
             try
               {
                 str += tostring( *ix );
@@ -213,12 +199,12 @@ namespace
               {
                 str += QString( "<error: " ) + e.what() + ">";
               }
-	  }
-	str += " ]";
+          }
+        str += " ]";
       }
     catch( exception & e )
       {
-	str = QString( "<error: " ) + e.what() + ">";
+        str = QString( "<error: " ) + e.what() + ">";
       }
     item->setText( p.valueColumn(), str );
     return( item );
@@ -226,16 +212,16 @@ namespace
 
 
   template<typename T> 
-  Q3ListViewItem* dictHelper( const GenericObject & obj, 
-			     Q3ListViewItem* parent, QPythonPrinter & p, 
-			     const QString & attname, 
-			     const QString & attype, bool writeInternals )
+  QTreeWidgetItem* dictHelper( const GenericObject & obj, 
+                             QTreeWidgetItem* parent, QPythonPrinter & p, 
+                             const QString & attname, 
+                             const QString & attype, bool writeInternals )
   {
     typedef map<T, Object> U;
-    const U			& x = obj.GenericObject::value<U>();
-    typename U::const_iterator	im, em = x.end();
+    const U                     & x = obj.GenericObject::value<U>();
+    typename U::const_iterator  im, em = x.end();
 
-    Q3ListViewItem	*item = new Q3ListViewItem( parent );
+    QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
     if( attype == QString::null )
       item->setText( p.typeColumn(), "dictionary" );
@@ -244,8 +230,8 @@ namespace
 
     for( im=x.begin(); im!=em; ++im )
       {
-        stringstream	id;
-        PythonWriter	pw;
+        stringstream    id;
+        PythonWriter    pw;
         pw.attach( id );
         pw.write( *Object::value( im->first ), writeInternals, false );
 
@@ -256,40 +242,40 @@ namespace
 
 
   template<> 
-  Q3ListViewItem* 
+  QTreeWidgetItem* 
   dictHelper<string>( const GenericObject & obj, 
-                      Q3ListViewItem* parent, QPythonPrinter & p, 
+                      QTreeWidgetItem* parent, QPythonPrinter & p, 
                       const QString & attname, 
                       const QString & attype, bool writeInternals )
   {
-    Q3ListViewItem	*item = new Q3ListViewItem( parent );
+    QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
     if( attype == QString::null )
       item->setText( p.typeColumn(), "dictionary" );
     else
       item->setText( p.typeColumn(), attype );
 
-    Object	im;
+    Object      im;
     for( im=obj.objectIterator(); im->isValid(); im->next() )
       if( writeInternals || !p.isInternal( "", im->key() ) )
-	p.write( *im->currentValue(), item, "", im->key(), writeInternals );
+        p.write( *im->currentValue(), item, "", im->key(), writeInternals );
 
     return( item );
   }
 
 
   template<>
-  Q3ListViewItem* 
+  QTreeWidgetItem* 
   dictHelper<Object>( const GenericObject & obj, 
-                      Q3ListViewItem* parent, QPythonPrinter & p, 
+                      QTreeWidgetItem* parent, QPythonPrinter & p, 
                       const QString & attname, 
                       const QString & attype, bool writeInternals )
   {
     typedef map<Object, Object> U;
-    const U		& x = obj.GenericObject::value<U>();
-    U::const_iterator	im, em = x.end();
+    const U             & x = obj.GenericObject::value<U>();
+    U::const_iterator   im, em = x.end();
 
-    Q3ListViewItem	*item = new Q3ListViewItem( parent );
+    QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
     if( attype == QString::null )
       item->setText( p.typeColumn(), "dictionary" );
@@ -298,8 +284,8 @@ namespace
 
     for( im=x.begin(); im!=em; ++im )
       {
-        stringstream	id;
-        PythonWriter	pw;
+        stringstream    id;
+        PythonWriter    pw;
         pw.attach( id );
         pw.write( *im->first, writeInternals, false );
 
@@ -309,15 +295,15 @@ namespace
   }
 
 
-  Q3ListViewItem* listHelper( const GenericObject & obj, 
-			     Q3ListViewItem* parent, 
-			     QPythonPrinter & p, const QString & attname, 
-			     const QString & attype, bool writeInternals )
+  QTreeWidgetItem* listHelper( const GenericObject & obj, 
+                             QTreeWidgetItem* parent, 
+                             QPythonPrinter & p, const QString & attname, 
+                             const QString & attype, bool writeInternals )
   {
-    const ObjectVector		& x = obj.value<ObjectVector>();
-    ObjectVector::const_iterator	im, em = x.end();
+    const ObjectVector          & x = obj.value<ObjectVector>();
+    ObjectVector::const_iterator        im, em = x.end();
 
-    Q3ListViewItem	*item = new Q3ListViewItem( parent );
+    QTreeWidgetItem      *item = new QTreeWidgetItem( parent );
     item->setText( p.attributeColumn(), attname );
     if( attype == QString::null )
       item->setText( p.typeColumn(), "list" );
@@ -340,282 +326,285 @@ namespace
 void QPythonPrinter::initHelpers()
 {
   if( _helpers.find( "double" ) == _helpers.end() )
-    _helpers[ "double" ] = &genericHelper<double>;
+    _helpers[ "double" ] = &genericHelperT<double>;
   {
-    ValueObject<double>	x;
+    ValueObject<double> x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<double>;
+      _helpers[ x.type() ] = &genericHelperT<double>;
   }
   if( _helpers.find( "float" ) == _helpers.end() )
-    _helpers[ "float" ] = &genericHelper<float>;
+    _helpers[ "float" ] = &genericHelperT<float>;
   {
-    ValueObject<float>	x;
+    ValueObject<float>  x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<float>;
+      _helpers[ x.type() ] = &genericHelperT<float>;
   }
   if( _helpers.find( "int" ) == _helpers.end() )
-    _helpers[ "int" ] = &genericHelper<int>;
+    _helpers[ "int" ] = &genericHelperT<int>;
   {
-    ValueObject<int>	x;
+    ValueObject<int>    x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<int>;
+      _helpers[ x.type() ] = &genericHelperT<int>;
   }
   if( _helpers.find( "uint" ) == _helpers.end() )
-    _helpers[ "uint" ] = &genericHelper<unsigned>;
+    _helpers[ "uint" ] = &genericHelperT<unsigned>;
   {
-    ValueObject<unsigned>	x;
+    ValueObject<unsigned>       x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<unsigned>;
+      _helpers[ x.type() ] = &genericHelperT<unsigned>;
   }
   if( _helpers.find( "short" ) == _helpers.end() )
-    _helpers[ "short" ] = &genericHelper<short>;
+    _helpers[ "short" ] = &genericHelperT<short>;
   {
-    ValueObject<short>	x;
+    ValueObject<short>  x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<short>;
+      _helpers[ x.type() ] = &genericHelperT<short>;
   }
   if( _helpers.find( "ushort" ) == _helpers.end() )
-    _helpers[ "ushort" ] = &genericHelper<unsigned short>;
+    _helpers[ "ushort" ] = &genericHelperT<unsigned short>;
   {
-    ValueObject<unsigned short>	x;
+    ValueObject<unsigned short> x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<unsigned short>;
+      _helpers[ x.type() ] = &genericHelperT<unsigned short>;
   }
   if( _helpers.find( "long" ) == _helpers.end() )
-    _helpers[ "long" ] = &genericHelper<long>;
+    _helpers[ "long" ] = &genericHelperT<long>;
   {
-    ValueObject<long>	x;
+    ValueObject<long>   x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<long>;
+      _helpers[ x.type() ] = &genericHelperT<long>;
   }
   if( _helpers.find( "ulong" ) == _helpers.end() )
-    _helpers[ "ulong" ] = &genericHelper<unsigned long>;
+    _helpers[ "ulong" ] = &genericHelperT<unsigned long>;
   {
-    ValueObject<unsigned long>	x;
+    ValueObject<unsigned long>  x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<unsigned long>;
+      _helpers[ x.type() ] = &genericHelperT<unsigned long>;
   }
   if( _helpers.find( "longlong" ) == _helpers.end() )
-    _helpers[ "longlong" ] = &genericHelper<long long>;
+    _helpers[ "longlong" ] = &genericHelperT<long long>;
   {
-    ValueObject<long long>	x;
+    ValueObject<long long>      x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<long long>;
+      _helpers[ x.type() ] = &genericHelperT<long long>;
   }
   if( _helpers.find( "ulonglong" ) == _helpers.end() )
     _helpers[ "ulonglong" ] 
-      = &genericHelper<unsigned long long>;
+      = &genericHelperT<unsigned long long>;
   {
-    ValueObject<unsigned long long>	x;
+    ValueObject<unsigned long long>     x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<unsigned long long>;
+      _helpers[ x.type() ] = &genericHelperT<unsigned long long>;
   }
   if( _helpers.find( "char" ) == _helpers.end() )
-    _helpers[ "char" ] = &genericHelper<char>;
+    _helpers[ "char" ] = &genericHelperT<char>;
   {
-    ValueObject<char>	x;
+    ValueObject<char>   x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<char>;
+      _helpers[ x.type() ] = &genericHelperT<char>;
   }
   if( _helpers.find( "uchar" ) == _helpers.end() )
-    _helpers[ "uchar" ] = &genericHelper<unsigned char>;
+    _helpers[ "uchar" ] = &genericHelperT<unsigned char>;
   {
-    ValueObject<unsigned char>	x;
+    ValueObject<unsigned char>  x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<unsigned char>;
+      _helpers[ x.type() ] = &genericHelperT<unsigned char>;
   }
   if( _helpers.find( "schar" ) == _helpers.end() )
-    _helpers[ "schar" ] = &genericHelper<signed char>;
+    _helpers[ "schar" ] = &genericHelperT<signed char>;
   {
-    ValueObject<signed char>	x;
+    ValueObject<signed char>    x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<signed char>;
+      _helpers[ x.type() ] = &genericHelperT<signed char>;
   }
   if( _helpers.find( "bool" ) == _helpers.end() )
-    _helpers[ "bool" ] = &genericHelper<bool>;
+    _helpers[ "bool" ] = &genericHelperT<bool>;
   {
-    ValueObject<bool>	x;
+    ValueObject<bool>   x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<bool>;
+      _helpers[ x.type() ] = &genericHelperT<bool>;
   }
   if( _helpers.find( "string" ) == _helpers.end() )
-    _helpers[ "string" ] = &genericHelper<string>;
+    _helpers[ "string" ] = &genericHelperT<string>;
   {
-    ValueObject<string>	x;
+    ValueObject<string> x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericHelper<string>;
+      _helpers[ x.type() ] = &genericHelperT<string>;
   }
   if( _helpers.find( "dictionary" ) == _helpers.end() )
     _helpers[ "dictionary" ] = &dictHelper<string>;
   {
-    ValueObject<Dictionary>	x;
+    ValueObject<Dictionary>     x;
     if( _helpers.find( x.type() ) == _helpers.end() )
       _helpers[ x.type() ] = &dictHelper<string>;
   }
   {
-    ValueObject<PropertySet>	x;
+    ValueObject<PropertySet>    x;
     if( _helpers.find( x.type() ) == _helpers.end() )
       _helpers[ x.type() ] = &dictHelper<string>;
   }
   {
-    ValueObject<map<int, Object> >	x;
+    ValueObject<map<int, Object> >      x;
     if( _helpers.find( x.type() ) == _helpers.end() )
       _helpers[ x.type() ] = &dictHelper<int>;
   }
   {
-    ValueObject<map<float, Object> >	x;
+    ValueObject<map<float, Object> >    x;
     if( _helpers.find( x.type() ) == _helpers.end() )
       _helpers[ x.type() ] = &dictHelper<float>;
   }
   {
-    ValueObject<map<Object, Object> >	x;
+    ValueObject<map<Object, Object> >   x;
     if( _helpers.find( x.type() ) == _helpers.end() )
       _helpers[ x.type() ] = &dictHelper<Object>;
   }
   if( _helpers.find( "list" ) == _helpers.end() )
     _helpers[ "list" ] = &listHelper;
   {
-    ValueObject<ObjectVector>	x;
+    ValueObject<ObjectVector>   x;
     if( _helpers.find( x.type() ) == _helpers.end() )
       _helpers[ x.type() ] = &listHelper;
   }
   if( _helpers.find( "int_vector" ) == _helpers.end() )
-    _helpers[ "int_vector" ] = &genericSequenceHelper<vector<int> >;
+    _helpers[ "int_vector" ] = &genericSequenceHelperT<vector<int> >;
   {
-    ValueObject<vector<int> >	x;
+    ValueObject<vector<int> >   x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericSequenceHelper<vector<int> >;
+      _helpers[ x.type() ] = &genericSequenceHelperT<vector<int> >;
   }
   if( _helpers.find( "float_vector" ) == _helpers.end() )
-    _helpers[ "float_vector" ] = &genericSequenceHelper<vector<float> >;
+    _helpers[ "float_vector" ] = &genericSequenceHelperT<vector<float> >;
   {
-    ValueObject<vector<float> >	x;
+    ValueObject<vector<float> > x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericSequenceHelper<vector<float> >;
+      _helpers[ x.type() ] = &genericSequenceHelperT<vector<float> >;
   }
   if( _helpers.find( "string_vector" ) == _helpers.end() )
-    _helpers[ "string_vector" ] = &genericSequenceHelper<vector<string> >;
+    _helpers[ "string_vector" ] = &genericSequenceHelperT<vector<string> >;
   {
-    ValueObject<vector<string> >	x;
+    ValueObject<vector<string> >        x;
     if( _helpers.find( x.type() ) == _helpers.end() )
-      _helpers[ x.type() ] = &genericSequenceHelper<vector<string> >;
+      _helpers[ x.type() ] = &genericSequenceHelperT<vector<string> >;
   }
 }
 
 
-Q3ListViewItem* QPythonPrinter::write( const GenericObject & object, 
-				      bool writeInternals )
+QTreeWidgetItem* QPythonPrinter::write( const GenericObject & object, 
+                                      bool writeInternals )
 {
-  Q3ListViewItem	*item;
+  QTreeWidgetItem        *item;
   if( _lview )
-    item = new Q3ListViewItem( _lview, "Python object" );
+  {
+    item = new QTreeWidgetItem( _lview );
+    item->setText( 0, "Python object" );
+  }
   else
-    item = _lvitem; // new Q3ListViewItem( _lvitem );
+    item = _lvitem; // new QTreeWidgetItem( _lvitem );
   write( object, item, "", "attributes", writeInternals );
   return( item );
 }
 
 
 void QPythonPrinter::write( const GenericObject & object, 
-			    Q3ListViewItem* parent, const string & syntax, 
-			    const string & semantic, bool writeInternals )
+                            QTreeWidgetItem* parent, const string & syntax, 
+                            const string & semantic, bool writeInternals )
 {
-  string	type = object.type();
-  bool		spectype = false;
+  string        type = object.type();
+  bool          spectype = false;
 
-  //	try to find type in syntax if semantic / syntaxic atts are provided
+  //    try to find type in syntax if semantic / syntaxic atts are provided
   if( !semantic.empty() )
     {
-      SyntaxSet::const_iterator	is;
+      SyntaxSet::const_iterator is;
       if( syntax.empty() )
-	is = _rules.find( "generic" );
+        is = _rules.find( "generic" );
       else
-	is = _rules.find( syntax );
+        is = _rules.find( syntax );
       if( is != _rules.end() )
-	{
-	  Syntax::const_iterator	ie = is->second.find( semantic );
-	  if( ie != is->second.end() )
-	    {
-	      /*cout << "syntax found, syntax: " << syntax << ", semantic: " 
-		<< semantic << " -> " << type << endl;*/
-	      type = ie->second.type;
-	      spectype = true;
-	    }
-	}
+        {
+          Syntax::const_iterator        ie = is->second.find( semantic );
+          if( ie != is->second.end() )
+            {
+              /*cout << "syntax found, syntax: " << syntax << ", semantic: " 
+                << semantic << " -> " << type << endl;*/
+              type = ie->second.type;
+              spectype = true;
+            }
+        }
     }
 
-  //	try to find type in helpers
-  HelperSet::const_iterator	ih = _helpers.find( type );
+  //    try to find type in helpers
+  HelperSet::const_iterator     ih = _helpers.find( type );
   if( ih != _helpers.end() )
     {
-      QString	t = QString::null;
+      QString   t = QString::null;
       if( spectype )
-	t = type.c_str();
+        t = type.c_str();
       else
-	{
-	  static	map<string, QString>	ttrans;
-	  if( ttrans.empty() )
-	    {
-	      {
-		ValueObject<double>	x;
-		ttrans[ x.type() ] = "double";
-	      }
-	      {
-		ValueObject<float>	x;
-		ttrans[ x.type() ] = "float";
-	      }
-	      {
-		ValueObject<int>	x;
-		ttrans[ x.type() ] = "int";
-	      }
-	      {
-		ValueObject<unsigned>	x;
-		ttrans[ x.type() ] = "uint";
-	      }
-	      {
-		ValueObject<short>	x;
-		ttrans[ x.type() ] = "short";
-	      }
-	      {
-		ValueObject<unsigned short>	x;
-		ttrans[ x.type() ] = "ushort";
-	      }
-	      {
-		ValueObject<char>	x;
-		ttrans[ x.type() ] = "char";
-	      }
-	      {
-		ValueObject<unsigned char>	x;
-		ttrans[ x.type() ] = "uchar";
-	      }
-	      {
-		ValueObject<bool>	x;
-		ttrans[ x.type() ] = "bool";
-	      }
-	      {
-		ValueObject<string>	x;
-		ttrans[ x.type() ] = "string";
-	      }
-	      {
-		ValueObject<vector<int> >	x;
-		ttrans[ x.type() ] = "int_vector";
-	      }
-	      {
-		ValueObject<vector<float> >	x;
-		ttrans[ x.type() ] = "float_vector";
-	      }
-	      {
-		ValueObject<vector<string> >	x;
-		ttrans[ x.type() ] = "string_vector";
-	      }
-	    }
-	  map<string,QString>::iterator	it = ttrans.find( type );
-	  if( it != ttrans.end() )
-	    t = it->second;
-	}
+        {
+          static        map<string, QString>    ttrans;
+          if( ttrans.empty() )
+            {
+              {
+                ValueObject<double>     x;
+                ttrans[ x.type() ] = "double";
+              }
+              {
+                ValueObject<float>      x;
+                ttrans[ x.type() ] = "float";
+              }
+              {
+                ValueObject<int>        x;
+                ttrans[ x.type() ] = "int";
+              }
+              {
+                ValueObject<unsigned>   x;
+                ttrans[ x.type() ] = "uint";
+              }
+              {
+                ValueObject<short>      x;
+                ttrans[ x.type() ] = "short";
+              }
+              {
+                ValueObject<unsigned short>     x;
+                ttrans[ x.type() ] = "ushort";
+              }
+              {
+                ValueObject<char>       x;
+                ttrans[ x.type() ] = "char";
+              }
+              {
+                ValueObject<unsigned char>      x;
+                ttrans[ x.type() ] = "uchar";
+              }
+              {
+                ValueObject<bool>       x;
+                ttrans[ x.type() ] = "bool";
+              }
+              {
+                ValueObject<string>     x;
+                ttrans[ x.type() ] = "string";
+              }
+              {
+                ValueObject<vector<int> >       x;
+                ttrans[ x.type() ] = "int_vector";
+              }
+              {
+                ValueObject<vector<float> >     x;
+                ttrans[ x.type() ] = "float_vector";
+              }
+              {
+                ValueObject<vector<string> >    x;
+                ttrans[ x.type() ] = "string_vector";
+              }
+            }
+          map<string,QString>::iterator it = ttrans.find( type );
+          if( it != ttrans.end() )
+            t = it->second;
+        }
       (ih->second)( object, parent, *this, semantic.c_str(), t, 
-		    writeInternals );
-      return;	// OK
+                    writeInternals );
+      return;   // OK
     }
 
   // no helper found
@@ -636,7 +625,7 @@ void QPythonPrinter::write( const GenericObject & object,
   }
 
   // really no helper at all
-  Q3ListViewItem	*item = new Q3ListViewItem( parent );
+  QTreeWidgetItem        *item = new QTreeWidgetItem( parent );
   item->setText( attributeColumn(), semantic.c_str() );
   if( spectype )
     item->setText( typeColumn(), type.c_str() );
@@ -645,22 +634,22 @@ void QPythonPrinter::write( const GenericObject & object,
 
 
 bool QPythonPrinter::isInternal( const string & syntax, 
-				 const string & semantic )
+                                 const string & semantic )
 {
   if( !semantic.empty() )
     {
-      SyntaxSet::const_iterator	is;
+      SyntaxSet::const_iterator is;
       if( syntax.empty() )
-	is = _rules.find( "generic" );
+        is = _rules.find( "generic" );
       else
-	is = _rules.find( syntax );
+        is = _rules.find( syntax );
       if( is != _rules.end() )
-	{
-	  Syntax::const_iterator	ie = is->second.find( semantic );
-	  if( ie != is->second.end() 
-	      && ie->second.internal )
-	    return( true );
-	}
+        {
+          Syntax::const_iterator        ie = is->second.find( semantic );
+          if( ie != is->second.end() 
+              && ie->second.internal )
+            return( true );
+        }
     }
   return( false );
 }

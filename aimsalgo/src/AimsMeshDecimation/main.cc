@@ -49,8 +49,8 @@ int main( int argc, const char** argv )
   int smoothFlag = 0;
   Mesher::SmoothingType smoothType = Mesher::LOWPASS;
   string smoothTypeStr = "lowpass";
-  int smoothIt = 10;
-  float smoothRate = 0.2;
+  int smoothIt = 30;
+  float smoothRate = 0.4;
   float smoothAngle = 180.0;
   float smoothForce = 0.2;
   float deciReductionRate = 99.0;
@@ -80,9 +80,9 @@ int main( int argc, const char** argv )
                  "laplacian, simplespring, polygonspring or lowpass "
                  "[default=lowpass]", true );
   app.addOption( smoothIt, "--smoothIt",
-                 "smoothing number of iterations [default=10]", true );
+                 "smoothing number of iterations [default=30]", true );
   app.addOption( smoothRate, "--smoothRate",
-                 "smoothing moving factor at each iteration [default=0.2]",
+                 "smoothing moving rate at each iteration [default=0.4]",
                  true );
   app.addOption( smoothAngle, "--smoothAngle",
                  "smoothing feature angle (in degrees) below which the vertex "
@@ -147,6 +147,11 @@ int main( int argc, const char** argv )
       smoothType = Mesher::SIMPLESPRING;
     else if ( smoothTypeStr == "polygonspring" )
       smoothType = Mesher::POLYGONSPRING;
+    else
+    {
+      cout << "This smoothing type doesn't exist, check if it is correctly written or look at the command's help." << endl;
+      return EXIT_FAILURE;
+    }
 
     if ( triW.fileName().empty() )
       triW.setFileName( triR.fileName() );

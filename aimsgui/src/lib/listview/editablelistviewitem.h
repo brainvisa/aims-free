@@ -35,6 +35,7 @@
 #ifndef AIMSGUI_LISTVIEW_EDITABLELISTVIEWITEM_H
 #define AIMSGUI_LISTVIEW_EDITABLELISTVIEWITEM_H
 
+#ifdef QT3_SUPPORT // no interest if using Qt4 QTreeWidget
 
 #include <aims/qtcompat/qlistview.h>
 
@@ -101,5 +102,6 @@ protected:
 
 }
 
+#endif
 #endif
 

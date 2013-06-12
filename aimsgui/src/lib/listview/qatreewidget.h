@@ -55,9 +55,15 @@ namespace gui
     QATreeWidget( QWidget* parent );
     virtual ~QATreeWidget();
 
+    /// mouse buttons pressed at last event. Qt doesn't provide it
+    Qt::MouseButtons buttonsAtLastEvent() const;
+    /// dead keys pressed at last event. Qt doesn't provide it
+    Qt::KeyboardModifiers deadKeysStateAtLastEvent() const;
+
   signals:
     void itemRightPressed( QTreeWidgetItem *item, const QPoint & pos );
-    void dragStart( QTreeWidgetItem*, Qt::ButtonState state );
+    void dragStart( QTreeWidgetItem*, Qt::MouseButtons state,
+      Qt::KeyboardModifiers mod );
     /** emitted when the mouse cursor moves over a different element.
         Needs so set mouse tracking on the QListView before it works.
     */

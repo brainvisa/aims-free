@@ -36,6 +36,8 @@
 
 
 #include <aims/selection/labelselector.h>
+#include <aims/listview/qatreewidget.h>
+#include <QListWidget>
 
 namespace aims
 {
@@ -46,20 +48,16 @@ namespace aims
 }
 
 
-#if QT_VERSION >= 0x040000
-  class Q3ListViewItem;
-#else
-  class QListViewItem;
-#endif
+class QTreeWidgetItem;
 
 
-class SelectBox : public Q3ListView
+class SelectBox : public aims::gui::QATreeWidget
 {
   Q_OBJECT
 
 public:
   SelectBox( aims::gui::LabelSelector* ls, QWidget * parent=0, 
-             const char * name=0, Qt::WFlags f=0 );
+             const char * name=0 );
   virtual ~SelectBox();
 
   aims::SelectionSet selection() const;
@@ -72,19 +70,40 @@ public slots:
 
 protected:
   virtual void dragEnterEvent( QDragEnterEvent* event );
+  virtual void dragMoveEvent( QDragMoveEvent* event );
   virtual void dropEvent( QDropEvent* event );
-  void insertUniqueItem( Q3ListViewItem* parent, const QString & text );
+  void insertUniqueItem( QTreeWidgetItem* parent, const QString & text );
 
 protected slots:
   void deleteSelection();
-#if QT_VERSION >= 0x040000
-  void rightButtonPressed( Q3ListViewItem*, const QPoint & pos, int );
-#else
-  void rightButtonPressed( QListViewItem*, const QPoint & pos, int );
-#endif
+  void rightButtonPressed( QTreeWidgetItem*, const QPoint & pos );
 
 private:
   aims::gui::LabelSelector	*_labelsel;
+};
+
+
+class aims::gui::LabelSelector::ModelBox : public QListWidget
+{
+  Q_OBJECT
+
+public:
+  ModelBox( QWidget* parent = 0 );
+  virtual ~ModelBox();
+
+signals:
+//   void itemRightPressed( QTreeWidgetItem *item, const QPoint & pos );
+  void dragStart( QListWidgetItem*, Qt::MouseButtons state,
+    Qt::KeyboardModifiers mod );
+
+protected:
+  virtual void mousePressEvent( QMouseEvent* event );
+  virtual void mouseMoveEvent( QMouseEvent* event );
+  virtual void mouseReleaseEvent( QMouseEvent* event );
+
+private:
+  struct Private;
+  Private *d;
 };
 
 #endif

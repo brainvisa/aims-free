@@ -31,6 +31,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
+#ifdef QT3_SUPPORT
 
 #include <aims/listview/editablelistviewitem.h>
 #include <aims/listview/qalistview.h>
@@ -126,4 +127,6 @@ void QEditableListViewItem::cancelRename( int col )
   if( parent )
     parent->_itemCancelsRename( this, col );
 }
+
+#endif
 
