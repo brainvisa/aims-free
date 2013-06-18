@@ -85,17 +85,9 @@ OSPlugin::OSPlugin() : Plugin()
     
     //--- RGB ------------------------------------------------------------------
     
-    //VolumeFormatReader<AimsRGB> *vfr_rgb = new VolumeFormatReader<AimsRGB>;
-    //vfr_rgb->attach( rc_ptr<ImageReader<AimsRGB> >( new GisImageReader<AimsRGB> ) );
-    //FormatDictionary<Volume<AimsRGB> >::registerFormat( "GIS", vfr_rgb, exts );
-    
     VolumeFormatReader<VoxelRGBA> *vfr_rgba = new VolumeFormatReader<VoxelRGBA>;
     vfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new OSImageReader<VoxelRGBA> ) );
     FormatDictionary<Volume<VoxelRGBA> >::registerFormat( "OpenSlide", vfr_rgba, exts );
-    
-    //VolumeFormatReader<AimsHSV> *vfr_hsv = new VolumeFormatReader<AimsHSV>;
-    //vfr_hsv->attach( rc_ptr<ImageReader<AimsHSV> >( new GisImageReader<AimsHSV> ) );
-    //FormatDictionary<Volume<AimsHSV> >::registerFormat( "GIS", vfr_hsv, exts );
     
     //==========================================================================
     //   V O L U M E   R E F
@@ -103,17 +95,9 @@ OSPlugin::OSPlugin() : Plugin()
     
     //--- RGB ------------------------------------------------------------------
     
-    //VolumeRefFormatReader<AimsRGB> *rfr_rgb = new VolumeRefFormatReader<AimsRGB>;
-    //rfr_rgb->attach( rc_ptr<ImageReader<AimsRGB> >( new GisImageReader<AimsRGB> ) );
-    //FormatDictionary<VolumeRef<AimsRGB> >::registerFormat( "GIS", rfr_rgb, exts );
-    
     VolumeRefFormatReader<VoxelRGBA> *rfr_rgba = new VolumeRefFormatReader<VoxelRGBA>;
     rfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new OSImageReader<VoxelRGBA> ) );
     FormatDictionary<VolumeRef<VoxelRGBA> >::registerFormat( "OpenSlide", rfr_rgba, exts );
-    
-    //VolumeRefFormatReader<AimsHSV> *rfr_hsv = new VolumeRefFormatReader<AimsHSV>;
-    //rfr_hsv->attach( rc_ptr<ImageReader<AimsHSV> >( new GisImageReader<AimsHSV> ) );
-    //FormatDictionary<VolumeRef<AimsHSV> >::registerFormat( "GIS", rfr_hsv, exts );
     
 }
 

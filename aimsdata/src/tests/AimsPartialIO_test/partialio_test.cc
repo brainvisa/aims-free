@@ -33,6 +33,7 @@
 
 //--- aims ---------------------------------------------------------------------
 #include <aims/rgb/rgb.h>
+#include <aims/data/partialio_managevolumes.h>
 //--- soma-io ------------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/io/reader.h>
@@ -85,9 +86,11 @@ class PartialIOAlgo : public ReaderAlgorithm
     void setByteSwapping( bool in )          { byte_swapping = in; }
     void setNoCreate( bool in )              { no_create = in; }
     void setLevel( int in )                  { level = in; }
+    void setBorders( const vector<int> & in ){ border = in; }
 
     vector<int>  origin;
     vector<int>  frame;
+    vector<int>  border;
     string       ofname;
     bool         partial_writing;
     bool         byte_swapping;
@@ -107,78 +110,19 @@ template <typename T>
 bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
 {
   PartialIOAlgo & ma = (PartialIOAlgo &) a;
-  
-  //=== DECLARE VARIABLES ======================================================
   Object options;
-  typename VolumeView<T>::Position4Di origin( ma.origin[0], ma.origin[1], ma.origin[2], ma.origin[3] );
-  typename VolumeView<T>::Position4Di frame( ma.frame[0], ma.frame[1], ma.frame[2], ma.frame[3] );
+  
+  VolumeRef<T> view = partialio::read<T>( src->url(), ma.frame, ma.origin, ma.border, ma.level );
+  Volume<T> *isvolume = view.get();
+  VolumeView<T> *isview = 0;
+  while( isview = dynamic_cast<carto::VolumeView<T> *>( isvolume ) ) {
+    isvolume = isview->refVolume().get();
+    isview = 0;
+  }
+  VolumeRef<T> vol( isvolume );
 
-  //=== SET UNALLOCATED VOLUME =================================================
-  cout << "=== READING UNALLOCATED VOLUME ======================================" << endl;
-  Reader<Volume<T> > rVol( src->url() );
-  cout << "filename: " << rVol.dataSource()->url() << endl;
-  options = Object::value( PropertySet() );
-  options->setProperty( "unallocated", true );
-  options->setProperty( "resolution_level", ma.level );
-  rVol.setOptions( options );
-  cout << "reading unallocated volume..." << endl;
-  VolumeRef<T>  vol( rVol.read() );
-  cout << "done" << endl;
-  
-  //=== SET FRAME IF NOT INITIALIZED ===========================================
-  cout << "reading size from header..." << endl;
-  typename VolumeView<T>::Position4Di size;
-  size[ 0 ] = vol->getSizeX();
-  size[ 1 ] = vol->getSizeY();
-  size[ 2 ] = vol->getSizeZ();
-  size[ 3 ] = vol->getSizeT();
-  if( frame[ 0 ] == 0 )
-    frame[ 0 ] = size[ 0 ];
-  if( frame[ 1 ] == 0 )
-    frame[ 1 ] = size[ 1 ];
-  if( frame[ 2 ] == 0 )
-    frame[ 2 ] = size[ 2 ];
-  if( frame[ 3 ] == 0 )
-    frame[ 3 ] = size[ 3 ];
-  cout << "done" << endl;
-  cout << "=====================================================================" << endl;
-  cout << "=== HEADER ==========================================================" << endl;
-  cout << "Volume's :" << endl;
-  printheader( Object::value( vol->header() ) );
-  cout << "Reader's :" << endl;
-  printheader( rVol.dataSourceInfo()->header() );
-  cout << "Volume size : ( " << size[0] << ", " << size[1] << ", "
-       << size[2] << ", " << size[3] << " )" << endl;
-  cout << "=====================================================================" << endl;
-  
-  //=== SET ALLOCATED VOLUME VIEW ==============================================
-  cout << "=== READING VIEW ====================================================" << endl;
-  Reader<Volume<T> > rView( rVol.dataSourceInfo() );
-  options = Object::value( PropertySet() );
-  options->setProperty( "partial_reading", true );
-  options->setProperty( "resolution_level", ma.level );
-  rView.setOptions( options );
-  VolumeRef<T> view( new VolumeView<T>( vol, origin, frame ) );
-  
-  cout << "reading partial volume..." << endl;
-  rView.read( *view );
-  frame[ 0 ] = view->getSizeX();
-  frame[ 1 ] = view->getSizeY();
-  frame[ 2 ] = view->getSizeZ();
-  frame[ 3 ] = view->getSizeT();
-  cout << "done" << endl;
-  cout << "=====================================================================" << endl;
-  cout << "=== HEADER ==========================================================" << endl;
-  cout << "Volume's :" << endl;
-  printheader( Object::value( view->header() ) );
-  cout << view->header().getProperty( "sizeX" )->getScalar() << endl;
-  cout << "Reader's :" << endl;
-  printheader( rView.dataSourceInfo()->header() );
-  cout << "View size : ( " << frame[0] << ", " << frame[1] << ", "
-       << frame[2] << ", " << frame[3] << " )" << endl;
-  cout << "=====================================================================" << endl;
-  
   if( !ma.ofname.empty() ) {
+    cout << endl;
     cout << "=== WRITE VOLUME ====================================================" << endl;
     Writer<VolumeRef<T> > vfw( ma.ofname );
     options = Object::value( PropertySet() );
@@ -206,6 +150,7 @@ int main( int argc, const char** argv )
     //=== APPLICATION ==========================================================
     vector<int>  origin( 4, 0 );
     vector<int>  frame( 4, 0 );
+    vector<int>  border( 3 , 0 );
     string       ofname;
     int level = 0;
     bool partial_writing=false, byte_swapping=false, no_create=false;
@@ -226,12 +171,16 @@ int main( int argc, const char** argv )
     app.addOption( no_create, "-nc", "if partial writing, does not create" 
     " an empty volume (warning: it must then already exist)\n", true );
     app.addOption( level, "-res", "resolution level\n", true );
+    app.addOption( border[0], "-bx", "border size (x comp )\n", true );
+    app.addOption( border[1], "-by", "border size (y comp )\n", true );
+    app.addOption( border[2], "-bz", "border size (z comp )\n", true );
     app.alias( "-v", "--verbose" );
 
     app.initialize();
     
     //=== SHOW PARAMETERS ======================================================
-    cout << "=== PARAMETERS ======================================================" << endl;
+    cout << endl;
+    cout << "=== PARTIALIO_TEST PARAMETERS =======================================" << endl;
     cout << "Input filename: " << fname << endl;
     cout << "Output filename: " << ofname << endl;
     cout << "Origin: " << origin[0] << ", " << origin[1] << ", "
@@ -239,6 +188,8 @@ int main( int argc, const char** argv )
     cout << "Frame: " << frame[0] << ", " << frame[1] << ", "
                       << frame[2] << ", " << frame[3] << endl;
     cout << "Resolution level: " << level << endl;
+    cout << "Border: " << border[0] << ", " << border[1] << ", "
+                       << border[2] << endl;
     cout << "Force byte swapping at writing: " << byte_swapping << endl;
     cout << "Enable partial writing: " << partial_writing << endl;
     cout << "Create global volume for partial writing: " << !no_create << endl;
@@ -253,6 +204,7 @@ int main( int argc, const char** argv )
     palgo.setByteSwapping( byte_swapping );
     palgo.setNoCreate( no_create );
     palgo.setLevel( level );
+    palgo.setBorders( border );
     
     //=== RUN ALGORITHM ========================================================
     if( !palgo.execute( fname ) ){

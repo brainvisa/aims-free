@@ -207,6 +207,13 @@ set( _headers
     vector/vector.h
 )
 
+if( USE_SOMA_IO)
+ set( _headers
+    "${_headers}"
+    data/partialio_managevolumes.h
+  )
+endif()
+
 set( _sources
     bucket/bucketMap.cc
     bucket/bucketgen.cc

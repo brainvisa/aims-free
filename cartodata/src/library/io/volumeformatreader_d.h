@@ -47,11 +47,10 @@
 #include <cartobase/object/object.h>
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/exception/ioexcept.h>
+#include <cartobase/config/verbose.h>                         // verbosity level
 //--- system -------------------------------------------------------------------
 #include <vector>
-#ifdef SOMA_IO_DEBUG
-  #include <iostream>
-#endif
+#include <iostream>
 //------------------------------------------------------------------------------
 
 namespace soma
@@ -82,61 +81,90 @@ namespace soma
                                     const AllocatorContext & context, 
                                     carto::Object options )
   {
-    #ifdef SOMA_IO_DEBUG
+    if( carto::debugMessageLevel > 3 )
       std::cout << "VOLUMEFORMATREADER:: Reading object ( "
                 << dsi->list().dataSource( "default", 0 )->url() 
                 << " )" << std::endl;
-    #endif
     
-    //--- test for memory mapping ----------------------------------------------
+    //=== test for memory mapping ==============================================
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: checking for memory mapping..." 
+                << std::endl;
     if( obj.allocatorContext().allocatorType() 
         == AllocatorStrategy::ReadOnlyMap )
     {
-      #ifdef SOMA_IO_DEBUG
+      if( carto::debugMessageLevel > 3 )
       std::cout << "VOLUMEFORMATREADER:: Nothing to read -> Memory Mapping" 
                 << std::endl;
-      #endif
       return;
     }
     
-    //--- volume is a view ? ---------------------------------------------------
+    //=== volume is a view ? ===================================================
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: checking if object is a view..." 
+                << std::endl;
     carto::VolumeView<T> *vv = dynamic_cast<carto::VolumeView<T> *>( &obj );
-    carto::Volume<T> *parent1;
-    carto::Volume<T> *parent2;
+    carto::VolumeView<T> *p1vv = 0;
+    carto::Volume<T> *parent1 = 0;
+    carto::Volume<T> *parent2 = 0;
     if( vv ) {
       parent1 = vv->refVolume().get();
-      carto::VolumeView<T> *parent1vv = dynamic_cast<carto::VolumeView<T> *>( parent1 );
-      if( parent1vv )
-        parent2 = parent1vv->refVolume().get();
+      p1vv = dynamic_cast<carto::VolumeView<T> *>( parent1 );
+      if( p1vv )
+        parent2 = p1vv->refVolume().get();
     } else if( !vv && !obj.allocatorContext().isAllocated() ) {
-      #ifdef SOMA_IO_DEBUG
+      if( carto::debugMessageLevel > 3 )
       std::cout << "VOLUMEFORMATREADER:: Nothing to read -> Unallocated volume" 
                 << std::endl;
-      #endif
       return;
     }
+    if( carto::debugMessageLevel > 3 ) {
+      std::cout << "VOLUMEFORMATREADER:: -> object "
+                << ( vv ? "is" : "isn't" ) << " a view and "
+                << ( obj.allocatorContext().isAllocated() ? "is" : "isn't" )
+                << " allocated." << std::endl;
+      if( parent1 )
+        std::cout << "VOLUMEFORMATREADER:: -> parent exists and " 
+                  << ( parent1->allocatorContext().isAllocated() ? "is" : "isn't" )
+                  << " allocated." << std::endl;
+      if( parent2 )
+        std::cout << "VOLUMEFORMATREADER:: -> grandparent exists and " 
+                  << ( parent2->allocatorContext().isAllocated() ? "is" : "isn't" )
+                  << " allocated." << std::endl;
+    }
     
-    //--- view size ------------------------------------------------------------
+    //=== view size ============================================================
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: reading view size..." 
+                << std::endl;
     std::vector<int>  viewsize( 4, 0 );
     viewsize[ 0 ] = obj.getSizeX();
     viewsize[ 1 ] = obj.getSizeY();
     viewsize[ 2 ] = obj.getSizeZ();
     viewsize[ 3 ] = obj.getSizeT();
-    #ifdef SOMA_IO_DEBUG
-      std::cout << "VOLUMEFORMATREADER:: View Size ( "
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: -> view size ( "
                 << viewsize[ 0 ] << ", "
                 << viewsize[ 1 ] << ", "
                 << viewsize[ 2 ] << ", "
                 << viewsize[ 3 ] << " )"
                 << std::endl;
-    #endif
     
-    //-- multiresolution level -------------------------------------------------
+    //=== multiresolution level ================================================
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: reading multiresolution level..." 
+                << std::endl;
     int level = 0;
     if( options->hasProperty( "resolution_level" ) )
       options->getProperty( "resolution_level", level );
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: -> level to read : " 
+                << level << std::endl;
     
-    //--- full volume size -----------------------------------------------------
+    //=== full volume size =====================================================
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: reading full volume size..." 
+                << std::endl;
     std::vector<int>  imagesize( 4, 0 );
     try {
       // first we look for "resolutions_dimension" property
@@ -152,6 +180,9 @@ namespace soma
       imagesize[ 3 ] = dsi->header()->getProperty( "resolutions_dimension" )
                           ->getArrayItem( level )->getArrayItem( 3 )
                           ->getScalar();
+      if( carto::debugMessageLevel > 3 )
+        std::cout << "VOLUMEFORMATREADER:: -> found \"resolutions_dimension\"." 
+                  << std::endl;
     } catch( ... ) {
       try {
         // if it doesn't work, we look for "volume_dimension"
@@ -163,6 +194,9 @@ namespace soma
                             ->getArrayItem( 2 )->getScalar();
         imagesize[ 3 ] = dsi->header()->getProperty( "volume_dimension" )
                             ->getArrayItem( 3 )->getScalar();
+        if( carto::debugMessageLevel > 3 )
+          std::cout << "VOLUMEFORMATREADER:: -> found \"volume_dimension\"." 
+                    << std::endl;
       } catch( ... ) {
         // if still nothing, we look for parent volumes
         if( parent1 && !parent1->allocatorContext().isAllocated() ) {
@@ -170,64 +204,118 @@ namespace soma
           imagesize[ 1 ] = parent1->getSizeY();
           imagesize[ 2 ] = parent1->getSizeZ();
           imagesize[ 3 ] = parent1->getSizeT();
+          if( carto::debugMessageLevel > 3 )
+            std::cout << "VOLUMEFORMATREADER:: -> found unallocated parent." 
+                      << std::endl;
         } else if( parent2 ) {
           imagesize[ 0 ] = parent2->getSizeX();
           imagesize[ 1 ] = parent2->getSizeY();
           imagesize[ 2 ] = parent2->getSizeZ();
           imagesize[ 3 ] = parent2->getSizeT();
-        } else
+          if( carto::debugMessageLevel > 3 )
+            std::cout << "VOLUMEFORMATREADER:: -> found grandparent." 
+                      << std::endl;
+        } else {
           imagesize = viewsize;
+          if( carto::debugMessageLevel > 3 )
+            std::cout << "VOLUMEFORMATREADER:: -> full volume is self." 
+                      << std::endl;
+        }
       }
     }
-    #ifdef SOMA_IO_DEBUG
-      std::cout << "VOLUMEFORMATREADER:: View Size ( "
-                << viewsize[ 0 ] << ", "
-                << viewsize[ 1 ] << ", "
-                << viewsize[ 2 ] << ", "
-                << viewsize[ 3 ] << " )"
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: -> full volume size ( "
+                << imagesize[ 0 ] << ", "
+                << imagesize[ 1 ] << ", "
+                << imagesize[ 2 ] << ", "
+                << imagesize[ 3 ] << " )"
                 << std::endl;
-    #endif
+    
+    //--- allocated volume size ------------------------------------------------
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: reading allocated size..." 
+                << std::endl;
+    std::vector<int> allocsize( 4, 0 );
+    if( !vv ) {
+      allocsize = viewsize;
+      if( carto::debugMessageLevel > 3 )
+        std::cout << "VOLUMEFORMATREADER:: "
+                  << "-> allocated volume is self (full volume)." 
+                  << std::endl;
+    } else if( !parent1->allocatorContext().isAllocated() ) {
+      allocsize = viewsize;
+      if( carto::debugMessageLevel > 3 )
+        std::cout << "VOLUMEFORMATREADER:: "
+                  << "-> allocated volume is self (partial volume)." 
+                  << std::endl;
+    } else if( parent1 && parent1->allocatorContext().isAllocated() ) {
+      allocsize[0] = parent1->getSizeX();
+      allocsize[1] = parent1->getSizeY();
+      allocsize[2] = parent1->getSizeZ();
+      allocsize[3] = parent1->getSizeT();
+      if( carto::debugMessageLevel > 3 )
+        std::cout << "VOLUMEFORMATREADER:: "
+                  << "-> allocated volume is parent "
+                  << "(borders or partially loading in full volume)." 
+                  << std::endl;
+    }
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: -> allocated volume size ( "
+                << allocsize[ 0 ] << ", "
+                << allocsize[ 1 ] << ", "
+                << allocsize[ 2 ] << ", "
+                << allocsize[ 3 ] << " )"
+                << std::endl;
 
     //--- strides --------------------------------------------------------------
     // TODO - for now we don't use them
     std::vector<int> strides;
 
     //--- region's origine -----------------------------------------------------
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: reading view position in reference to full volume..." 
+                << std::endl;
     std::vector<int>  pos ( 4 , 0 );
-    if( vv ) {
-      const typename carto::VolumeView<T>::Position4Di & p 
-        = vv->posInRefVolume();
-      pos[ 0 ] = p[ 0 ];
-      pos[ 1 ] = p[ 1 ];
-      pos[ 2 ] = p[ 2 ];
-      pos[ 3 ] = p[ 3 ];
+    if( parent1 && !parent1->allocatorContext().isAllocated() ) {
+      pos[ 0 ] = vv->posInRefVolume()[ 0 ];
+      pos[ 1 ] = vv->posInRefVolume()[ 1 ];
+      pos[ 2 ] = vv->posInRefVolume()[ 2 ];
+      pos[ 3 ] = vv->posInRefVolume()[ 3 ];
+    } else if( parent2 ) {
+      pos[ 0 ] = vv->posInRefVolume()[ 0 ] + p1vv->posInRefVolume()[ 0 ];
+      pos[ 1 ] = vv->posInRefVolume()[ 1 ] + p1vv->posInRefVolume()[ 1 ];
+      pos[ 2 ] = vv->posInRefVolume()[ 2 ] + p1vv->posInRefVolume()[ 2 ];
+      pos[ 3 ] = vv->posInRefVolume()[ 3 ] + p1vv->posInRefVolume()[ 3 ];
     }
-    #ifdef SOMA_IO_DEBUG
-      std::cout << "VOLUMEFORMATREADER:: View Position ( "
+    
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: -> view position ( "
                 << pos[ 0 ] << ", "
                 << pos[ 1 ] << ", "
                 << pos[ 2 ] << ", "
                 << pos[ 3 ] << " )"
                 << std::endl;
-    #endif
 
     //--- possibilities : with borders, partial reading ------------------------
-    std::vector<int>  diff( 4, 0 );
-    diff[ 0 ] = imagesize[ 0 ] - viewsize[ 0 ];
-    diff[ 1 ] = imagesize[ 1 ] - viewsize[ 1 ];
-    diff[ 2 ] = imagesize[ 2 ] - viewsize[ 2 ];
-    diff[ 3 ] = imagesize[ 3 ] - viewsize[ 3 ];
-
-    bool withborders = diff[0]<0 || diff[1]<0 || diff[2]<0 || diff[3]<0;
-    bool partialreading = diff[0]>0 || diff[1]>0 || diff[2]>0 || diff[3]>0;
-    #ifdef SOMA_IO_DEBUG
-      std::cout << "VOLUMEFORMATREADER:: With Borders ? ( "
-                << withborders << " )" << std::endl;
-      std::cout << "VOLUMEFORMATREADER:: Partial Reading ? ( "
-                << partialreading << " )" << std::endl;
-    #endif
+    bool withborders = allocsize[0] > viewsize[0] ||
+                       allocsize[1] > viewsize[1] ||
+                       allocsize[2] > viewsize[2] ||
+                       allocsize[3] > viewsize[3];
+    bool partialreading = imagesize[0] > viewsize[0] ||
+                          imagesize[1] > viewsize[1] ||
+                          imagesize[2] > viewsize[2] ||
+                          imagesize[3] > viewsize[3];
+    if( carto::debugMessageLevel > 3 ) {
+      std::cout << "VOLUMEFORMATREADER:: With Borders : "
+                << ( withborders ? "yes" : "no" ) << std::endl;
+      std::cout << "VOLUMEFORMATREADER:: Partial Reading : "
+                << ( partialreading ? "yes" : "no" ) << std::endl;
+    }
 
     //--- reading volume -------------------------------------------------------
+    if( carto::debugMessageLevel > 3 )
+      std::cout << "VOLUMEFORMATREADER:: reading volume..." 
+                << std::endl;
     int y, z, t;
     if ( !withborders ) {
       // we can read the volume/region into a contiguous buffer
