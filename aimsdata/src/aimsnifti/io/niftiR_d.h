@@ -150,11 +150,11 @@ namespace aims
     Point3df d0f;
     Point3d d0;
 
-    std::vector<U> src( dx * dy * dz );
+    std::vector<U> src( ((size_t)dx) * dy * dz );
     T *d = 0;
     void *buf = &src[0];
-    size_t ntot = dx * dy * dz * sizeof(U);
-    int ii;
+    size_t ntot = ((size_t)dx) * dy * dz * sizeof(U);
+    long ii;
     size_t yoff = idims[0];
     size_t zoff = yoff * idims[1];
     long minc;
