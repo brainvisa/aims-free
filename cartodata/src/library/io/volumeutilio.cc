@@ -31,38 +31,30 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef PLUGINGIS_GISFORMATCHECKER_H
-#define PLUGINGIS_GISFORMATCHECKER_H
+//--- cartodata ----------------------------------------------------------------
+#include <cartodata/io/volumeutilio_d.h>
 //--- soma-io ------------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
-#include <soma-io/checker/formatchecker.h>
-//--- cartobase ----------------------------------------------------------------
-#include <cartobase/object/object.h>
+#include <soma-io/image/voxelrgb_d.h>
+#include <soma-io/image/voxelrgba_d.h>
+#include <soma-io/image/voxelhsv.h>
 //------------------------------------------------------------------------------
 
-namespace soma
-{
-  class DataSource;
-  class DataSourceList;
-  class DataSourceInfoLoader;
-  class DataSourceInfo;
-  
-  /// \todo doc
-  class GisFormatChecker : public FormatChecker
-  {
-    public:
-      virtual DataSourceInfo check( DataSourceInfo dsi, 
-                                    DataSourceInfoLoader & f,
-                                    carto::Object options = carto::none() )
-                                    const;
-      virtual ~GisFormatChecker();
-      
-    protected:
-      void  _buildDSList( DataSourceList & dsl ) const;
-      carto::Object   _buildHeader( DataSource * hds ) const;
-  };
+using namespace soma;
+using namespace carto;
+
+namespace soma {
+
+template class VolumeUtilIO<int8_t>;
+template class VolumeUtilIO<int16_t>;
+template class VolumeUtilIO<int32_t>;
+template class VolumeUtilIO<uint8_t>;
+template class VolumeUtilIO<uint16_t>;
+template class VolumeUtilIO<uint32_t>;
+template class VolumeUtilIO<float>;
+template class VolumeUtilIO<double>;
+template class VolumeUtilIO<VoxelRGB>;
+template class VolumeUtilIO<VoxelRGBA>;
+template class VolumeUtilIO<VoxelHSV>;
 
 }
-
-#endif
-

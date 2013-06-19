@@ -58,7 +58,25 @@ namespace soma
   //============================================================================
   //   R E A D E R   O F   V O L U M E
   //============================================================================
-  /// \todo doc
+  /// FormatReader specialized for 4D Volume.
+  /// 
+  /// A such VolumeFormatReader needs to be linked to a specialized ImageReader 
+  /// before being registered into a FormatDictionary.\n
+  /// It understands the Volume and detects specific cases (borders, partial 
+  /// reading, ...) before performing the reading through its linked 
+  /// ImageReader.\n
+  /// The parameters for partial reading or borders may be given through the 
+  /// filename, at creation of the Reader.
+  /// \see Reader FileUtil
+  /// \note Parameters currently availables (GIS or OpenSlide) are :
+  /// - (int) ox, oy, oz, ot : top left position of partial frame.
+  /// - (int) sx, sy, sz, st : size of partial frame.
+  /// - (int) bx, by, bz : size of borders.
+  /// \note Is also possible to give any classical option as : 
+  /// - (int) resolution_level : level to read (OpenSlide).
+  /// - (bool) unallocated : if volume shouldn't be allocated.
+  /// - (bool) partial_reading : if view is an allocated partial view to an
+  ///   unallocated volume (GIS or OpenSlide).
   template<typename T>
   class VolumeFormatReader : public FormatReader<carto::Volume<T> >
   {
@@ -75,35 +93,17 @@ namespace soma
                          carto::rc_ptr<DataSourceInfo> dsi, 
                          const AllocatorContext & context, 
                          carto::Object options = carto::none() );
-      
+
       /// Linking to a ImageReader
       /// Allows us to declare only once the ImageReader
       void attach( carto::rc_ptr<ImageReader<T> > imr );
-      
-      /*
-      //========================================================================
-      //   O L D   M E T H O D S
-      //========================================================================
-      /// \deprecated
-      /// Specialization of DataSource functions are implemented in
-      /// corresponding ImageReader
-      virtual carto::rc_ptr<DataSource> 
-      getDataSource( carto::Object header, 
-                     carto::rc_ptr<DataSource> source, 
-                     carto::Object options );
-      /// \deprecated
-      virtual AllocatorContext 
-      getAllocatorContext( carto::Object header, 
-                           carto::rc_ptr<DataSource> decoder, 
-                           const AllocatorContext & basecontext, 
-                           carto::Object options );
-      /// \deprecated
-      /// use a DataSourceInfo instead
-      virtual void read( carto::Volume<T> & obj, 
-                         carto::Object header, 
-                         const AllocatorContext & context, 
-                         carto::Object options );
-      */
+
+      /// \brief Factory mode: creates an object and reads it.
+      /// The returned object belongs to the calling layer and may be deleted by 
+      /// the standard \c delete
+      virtual Volume<T>* createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
+                                        const AllocatorContext & context,
+                                        carto::Object options );
     protected:
       carto::rc_ptr<ImageReader<T> > _imr;
   };
@@ -111,14 +111,16 @@ namespace soma
   //============================================================================
   //   R E A D E R   O F   P O I N T E R   T O   V O L U M E
   //============================================================================
-  /// \todo doc
+  /// FormatReader specialized for reference to 4D Volume.
+  ///
+  /// \see VolumeFormatReader
   template<typename T>
   class VolumeRefFormatReader : 
   public FormatReader<carto::VolumeRef<T> >
   {
     public:
       virtual ~VolumeRefFormatReader();
-      
+
       //========================================================================
       //   N E W   M E T H O D S
       //========================================================================
@@ -129,30 +131,11 @@ namespace soma
                          carto::rc_ptr<DataSourceInfo> dsi, 
                          const AllocatorContext & context, 
                          carto::Object options = carto::none() );
-      
+
       /// Linking to a ImageReader
       /// Allows us to declare only once the ImageReader
       void attach( carto::rc_ptr<ImageReader<T> > imr );
-      /*
-      //========================================================================
-      //   O L D   M E T H O D S
-      //========================================================================
-      virtual carto::rc_ptr<DataSource> 
-      getDataSource( carto::Object header, 
-                     carto::rc_ptr<DataSource> source, 
-                     carto::Object options );
-      
-      virtual AllocatorContext 
-      getAllocatorContext( carto::Object header, 
-                           carto::rc_ptr<DataSource> decoder, 
-                           const AllocatorContext & basecontext, 
-                           carto::Object options );
-      
-      virtual void read( carto::rc_ptr<carto::Volume<T> > & obj, 
-                         carto::Object header, 
-                         const AllocatorContext & context, 
-                         carto::Object options );
-    */
+
     protected:
       carto::rc_ptr<ImageReader<T> > _imr;
   };

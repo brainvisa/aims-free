@@ -38,6 +38,8 @@ HEADERS_USE_SOMA_IO =               \
   io/volumeformatreader_d.h         \
   io/volumeformatwriter.h           \
   io/volumeformatwriter_d.h         \
+  io/volumeutilio.h                 \
+  io/volumeutilio_d.h               \
 
 SOURCES =                           \
   io/carto2aimsheadertranslator.cc  \
@@ -60,5 +62,6 @@ SOURCES_NO_USE_SOMA_IO =            \
 SOURCES_USE_SOMA_IO =               \
   io/somaio_declare.cc              \
   config/plugins.cc                 \
+  io/volumeutilio.cc                \
 
 

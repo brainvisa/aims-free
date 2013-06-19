@@ -33,27 +33,23 @@
 
 //--- aims ---------------------------------------------------------------------
 #include <aims/rgb/rgb.h>
-#include <aims/data/partialio_managevolumes.h>
+//--- cartodata ----------------------------------------------------------------
+#include <cartodata/volume/volumeview.h>
 //--- soma-io ------------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/io/reader.h>
 #include <soma-io/io/writer.h>
-#include <soma-io/io/formatdictionary.h>
 #include <soma-io/io/readeralgorithm.h>
-#include <soma-io/datasource/filedatasource.h>                    // catch error
-#include <soma-io/datasourceinfo/datasourceinfo.h>
-#include <soma-io/datasourceinfo/datasourceinfoloader.h>
-#include <soma-io/writer/pythonwriter.h>
-//--- cartodata ----------------------------------------------------------------
-#include <cartodata/volume/volumeview.h>
+#include <soma-io/writer/pythonwriter.h>                   // if catch exception
+#include <soma-io/datasourceinfo/datasourceinfo.h>         // if catch exception
+#include <soma-io/datasourceinfo/datasourceinfoloader.h>   // if catch exception
 //--- cartobase ----------------------------------------------------------------
-#include <cartobase/object/object.h>
-#include <cartobase/getopt/getopt.h>
+#include <cartobase/object/object.h>                                  // options
+#include <cartobase/getopt/getopt.h>                       // create application
 #include <cartobase/config/verbose.h>
+#include <cartobase/stream/fileutil.h>  // read uri to check for partial writing
 //--- system -------------------------------------------------------------------
 #include <iostream>
-#include <cstdlib>
-#include <limits>
 //------------------------------------------------------------------------------
 
 using namespace soma;
@@ -66,7 +62,7 @@ bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src );
 class PartialIOAlgo : public ReaderAlgorithm
 {
   public:
-    PartialIOAlgo() : ReaderAlgorithm( "PartialIO" )
+    PartialIOAlgo() : ReaderAlgorithm( "PartialIO" ), create( true )
     {
       registerAlgorithmType( "Volume of S8",     &readPartial<int8_t> );
       registerAlgorithmType( "Volume of U8",     &readPartial<uint8_t> );
@@ -79,23 +75,9 @@ class PartialIOAlgo : public ReaderAlgorithm
       registerAlgorithmType( "Volume of RGB",    &readPartial<AimsRGB> );
       registerAlgorithmType( "Volume of RGBA",   &readPartial<AimsRGBA> );
     }
-    void setOrigin( const vector<int> & in ) { origin = in; }
-    void setFrame( const vector<int> & in )  { frame = in; }
-    void setFileOut( const string & in )     { ofname = in; }
-    void setPartialWriting( bool in )        { partial_writing = in; }
-    void setByteSwapping( bool in )          { byte_swapping = in; }
-    void setNoCreate( bool in )              { no_create = in; }
-    void setLevel( int in )                  { level = in; }
-    void setBorders( const vector<int> & in ){ border = in; }
 
-    vector<int>  origin;
-    vector<int>  frame;
-    vector<int>  border;
-    string       ofname;
-    bool         partial_writing;
-    bool         byte_swapping;
-    bool         no_create;
-    int          level;
+    string ofname;
+    bool   create;
 };
 
 void printheader( Object hdr )
@@ -110,9 +92,15 @@ template <typename T>
 bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
 {
   PartialIOAlgo & ma = (PartialIOAlgo &) a;
-  Object options;
+  Object options, urioptions;
+  bool   partial_writing = false;
+  string fullname;
   
-  VolumeRef<T> view = partialio::read<T>( src->url(), ma.frame, ma.origin, ma.border, ma.level );
+  //=== READ VOLUME ============================================================
+  Reader<Volume<T> > rVol( src );
+  
+  //=== FIND FULL VOLUME =======================================================
+  VolumeRef<T> view( rVol.read() );
   Volume<T> *isvolume = view.get();
   VolumeView<T> *isview = 0;
   while( isview = dynamic_cast<carto::VolumeView<T> *>( isvolume ) ) {
@@ -120,21 +108,26 @@ bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
     isview = 0;
   }
   VolumeRef<T> vol( isvolume );
-
+  
+  //=== WRITE VOLUME ===========================================================
   if( !ma.ofname.empty() ) {
     cout << endl;
     cout << "=== WRITE VOLUME ====================================================" << endl;
-    Writer<VolumeRef<T> > vfw( ma.ofname );
-    options = Object::value( PropertySet() );
-    if( ma.byte_swapping )
-      options->setProperty( "byte_swapping", true );
-    if( ma.partial_writing ) {
-      if( !ma.no_create )
-        vfw.write( vol, options );
+    urioptions = FileUtil::uriOptions( ma.ofname );
+    fullname  = FileUtil::uriFilename( ma.ofname );
+    try {
+      partial_writing = (bool) urioptions->getProperty( "partial_writing" )->getScalar();
+    } catch( ... ) {}
+    Writer<VolumeRef<T> > vfw( fullname );
+    
+    if( partial_writing && ma.create) {
       options = Object::value( PropertySet() );
-      options->setProperty( "partial_writing", true );
-      vfw.attach( ma.ofname );
+      cout << "writing empty full volume..." << endl;
+      vfw.write( vol, options );
     }
+    options = Object::value( PropertySet() );
+    vfw.attach( ma.ofname );
+    cout << "writing view..." << endl;
     vfw.write( view, options );
     cout << "=====================================================================" << endl;
   }
@@ -148,63 +141,22 @@ int main( int argc, const char** argv )
   try
   {
     //=== APPLICATION ==========================================================
-    vector<int>  origin( 4, 0 );
-    vector<int>  frame( 4, 0 );
-    vector<int>  border( 3 , 0 );
-    string       ofname;
-    int level = 0;
-    bool partial_writing=false, byte_swapping=false, no_create=false;
+    string  ofname;
+    bool    create = true;
 
-    CartoApplication  app( argc, argv, "Test for soma partial reading" );
+    CartoApplication  app( argc, argv, "Test for soma partial reading/writing" );
     app.addOption( fname, "-i", "input filename to be read\n" );
     app.addOption( ofname, "-o", "output filename to be written\n", true );
-    app.addOption( origin[ 0 ], "-ox", "frame origin (x comp)\n", true );
-    app.addOption( origin[ 1 ], "-oy", "frame origin (y comp)\n", true );
-    app.addOption( origin[ 2 ], "-oz", "frame origin (z comp)\n", true );
-    app.addOption( origin[ 3 ], "-ot", "frame origin (t comp)\n", true );
-    app.addOption( frame[ 0 ], "-sx", "frame size (x comp)\n", true );
-    app.addOption( frame[ 1 ], "-sy", "frame size (y comp)\n", true );
-    app.addOption( frame[ 2 ], "-sz", "frame size (z comp)\n", true );
-    app.addOption( frame[ 3 ], "-st", "frame size (t comp)\n", true );
-    app.addOption( byte_swapping, "-bs", "force byte swapping for writing\n", true );
-    app.addOption( partial_writing, "-pw", "partial writing of volume\n", true );
-    app.addOption( no_create, "-nc", "if partial writing, does not create" 
-    " an empty volume (warning: it must then already exist)\n", true );
-    app.addOption( level, "-res", "resolution level\n", true );
-    app.addOption( border[0], "-bx", "border size (x comp )\n", true );
-    app.addOption( border[1], "-by", "border size (y comp )\n", true );
-    app.addOption( border[2], "-bz", "border size (z comp )\n", true );
+    app.addOption( create, "-c", "if partial writing enabled, create" 
+    " an empty volume (warning: if false, volume must already exist)\n", true );
     app.alias( "-v", "--verbose" );
 
     app.initialize();
     
-    //=== SHOW PARAMETERS ======================================================
-    cout << endl;
-    cout << "=== PARTIALIO_TEST PARAMETERS =======================================" << endl;
-    cout << "Input filename: " << fname << endl;
-    cout << "Output filename: " << ofname << endl;
-    cout << "Origin: " << origin[0] << ", " << origin[1] << ", "
-                       << origin[2] << ", " << origin[3] << endl;
-    cout << "Frame: " << frame[0] << ", " << frame[1] << ", "
-                      << frame[2] << ", " << frame[3] << endl;
-    cout << "Resolution level: " << level << endl;
-    cout << "Border: " << border[0] << ", " << border[1] << ", "
-                       << border[2] << endl;
-    cout << "Force byte swapping at writing: " << byte_swapping << endl;
-    cout << "Enable partial writing: " << partial_writing << endl;
-    cout << "Create global volume for partial writing: " << !no_create << endl;
-    cout << "=====================================================================" << endl;
-    
     //=== INITIALIZE ALGORITHM =================================================
     PartialIOAlgo  palgo;
-    palgo.setOrigin( origin );
-    palgo.setFrame( frame );
-    palgo.setFileOut( ofname );
-    palgo.setPartialWriting( partial_writing );
-    palgo.setByteSwapping( byte_swapping );
-    palgo.setNoCreate( no_create );
-    palgo.setLevel( level );
-    palgo.setBorders( border );
+    palgo.create =  create;
+    palgo.ofname =  ofname;
     
     //=== RUN ALGORITHM ========================================================
     if( !palgo.execute( fname ) ){
@@ -220,7 +172,7 @@ int main( int argc, const char** argv )
   catch( datatype_format_error & e )
   {
     DataSourceInfoLoader  f;
-    DataSourceInfo dsi( rc_ptr<DataSource>( new FileDataSource( fname ) ) );
+    DataSourceInfo dsi( fname );
     dsi = f.check( dsi );
     if( !dsi.header().isNone() )
       printheader( dsi.header() );

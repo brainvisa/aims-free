@@ -58,7 +58,20 @@ namespace soma
   //============================================================================
   //   W R I T E R   O F   V O L U M E
   //============================================================================
-  /// \todo doc
+  /// FormatWriter specialized for 4D Volume.
+  /// 
+  /// A such VolumeFormatWriter needs to be linked to a specialized ImageWriter 
+  /// before being registered into a FormatDictionary.\n
+  /// It understands the Volume and detects specific cases (borders, partial 
+  /// reading, ...) before performing the writing through its linked 
+  /// ImageWriter.\n
+  /// Options may be given through the filename, at creation of the Reader.
+  /// \see Reader FileUtil
+  /// \note Options currently available are : 
+  /// - (bool) partial_writing : if view should be partially written into an
+  ///          existing full volume (GIS).
+  /// - (bool) byte_swapping : if data should be byte swapped (GIS).
+  /// - (bool) ascii : if data should be written in ASCII (GIS).
   template <typename T>
   class VolumeFormatWriter : public FormatWriter<carto::Volume<T> >
   {
@@ -83,7 +96,9 @@ namespace soma
   //============================================================================
   //   W R I T E R   O F   R E F E R E N C E   T O   V O L U M E
   //============================================================================
-  /// \todo doc
+  /// FormatWriter specialized for reference to 4D Volume.
+  ///
+  /// \see VolumeFormatWriter
   template<typename T>
   class VolumeRefFormatWriter : 
   public FormatWriter<carto::VolumeRef<T> >

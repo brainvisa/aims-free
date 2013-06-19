@@ -36,10 +36,12 @@
 //--- cartodata ----------------------------------------------------------------
 #include <cartodata/io/volumeformatreader.h>
 #include <cartodata/volume/volumeview.h>
+#include <cartodata/io/volumeutilio.h>
 //--- soma io ------------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasourceinfo/datasourceinfo.h>
 #include <soma-io/datasource/datasource.h> 
+#include <soma-io/datasource/filedatasource.h> 
 #include <soma-io/image/imagereader.h>
 #include <soma-io/reader/formatreader.h>
 #include <soma-io/allocator/allocator.h>
@@ -48,6 +50,7 @@
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/config/verbose.h>                         // verbosity level
+#include <cartobase/stream/fileutil.h>
 //--- system -------------------------------------------------------------------
 #include <vector>
 #include <iostream>
@@ -58,7 +61,7 @@ namespace soma
 ////////////////////////////////////////////////////////////////////////////////
 ////                V O L U M E F O R M A T R E A D E R                     ////
 ////////////////////////////////////////////////////////////////////////////////
-  
+
   //============================================================================
   //   C O N S T R U C T O R S
   //============================================================================
@@ -66,7 +69,50 @@ namespace soma
   VolumeFormatReader<T>::~VolumeFormatReader()
   {
   }
-  
+
+  //============================================================================
+  //   U R I   O P T I O N S
+  //============================================================================
+
+//   template <typename T> void 
+//   VolumeFormatReader<T>::setupAndRead( Volume<T> & obj, 
+//                                        carto::rc_ptr<DataSourceInfo> dsi,
+//                                        const AllocatorContext & context,
+//                                        carto::Object options )
+//   {
+//   }
+
+  template <typename T> Volume<T>* 
+  VolumeFormatReader<T>::createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
+                                        const AllocatorContext & context,
+                                        carto::Object options )
+  {
+    //// Reading URI ///////////////////////////////////////////////////////////
+    std::string uri = dsi->list().dataSource( "default", 0 )->url();
+    std::string url = FileUtil::uriFilename( uri );
+    carto::Object urioptions = FileUtil::uriOptions( uri );
+    if( urioptions.get() ) {
+      if( !options.get() )
+        options = carto::Object::value( carto::PropertySet() );
+      options->copyProperties( urioptions );
+      dsi->list().dataSource( "default", 0 ).reset( new FileDataSource(  url ) );
+    }
+    
+    if( !options.get() )
+      return FormatReader<Volume<T> >::createAndRead( dsi, context, options );
+    
+    std::set<std::string> prop = VolumeUtilIO<T>::listReadProperties();
+    typename std::set<std::string>::iterator p;
+    typename std::set<std::string>::iterator plast = prop.end();
+    for( p = prop.begin(); p != prop.end(); ++p )
+    {
+      if( options->hasProperty( *p ) )
+        return VolumeUtilIO<T>::read( dsi, options );
+    }
+    
+    return FormatReader<Volume<T> >::createAndRead( dsi, context, options );
+  }
+
   //============================================================================
   //   N E W   M E T H O D S
   //============================================================================
@@ -156,7 +202,7 @@ namespace soma
                 << std::endl;
     int level = 0;
     if( options->hasProperty( "resolution_level" ) )
-      options->getProperty( "resolution_level", level );
+        options->getProperty( "resolution_level", level );
     if( carto::debugMessageLevel > 3 )
       std::cout << "VOLUMEFORMATREADER:: -> level to read : " 
                 << level << std::endl;
