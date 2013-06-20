@@ -62,7 +62,7 @@ bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src );
 class PartialIOAlgo : public ReaderAlgorithm
 {
   public:
-    PartialIOAlgo() : ReaderAlgorithm( "PartialIO" ), create( true )
+    PartialIOAlgo() : ReaderAlgorithm( "PartialIO" )
     {
       registerAlgorithmType( "Volume of S8",     &readPartial<int8_t> );
       registerAlgorithmType( "Volume of U8",     &readPartial<uint8_t> );
@@ -77,7 +77,7 @@ class PartialIOAlgo : public ReaderAlgorithm
     }
 
     string ofname;
-    bool   create;
+    string cfname;
 };
 
 void printheader( Object hdr )
@@ -98,9 +98,9 @@ bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
   
   //=== READ VOLUME ============================================================
   Reader<Volume<T> > rVol( src );
+  VolumeRef<T> view( rVol.read() );
   
   //=== FIND FULL VOLUME =======================================================
-  VolumeRef<T> view( rVol.read() );
   Volume<T> *isvolume = view.get();
   VolumeView<T> *isview = 0;
   while( isview = dynamic_cast<carto::VolumeView<T> *>( isvolume ) ) {
@@ -110,27 +110,22 @@ bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
   VolumeRef<T> vol( isvolume );
   
   //=== WRITE VOLUME ===========================================================
+  cout << endl;
+  cout << "=== WRITE VOLUME ====================================================" << endl;
+  Writer<VolumeRef<T> > vfw( "" );
+  if( !ma.cfname.empty() ) {
+    vfw.attach( ma.cfname );
+    options = Object::value( PropertySet() );
+    cout << "writing empty full volume..." << endl;
+    vfw.write( vol, options );
+  }
   if( !ma.ofname.empty() ) {
-    cout << endl;
-    cout << "=== WRITE VOLUME ====================================================" << endl;
-    urioptions = FileUtil::uriOptions( ma.ofname );
-    fullname  = FileUtil::uriFilename( ma.ofname );
-    try {
-      partial_writing = (bool) urioptions->getProperty( "partial_writing" )->getScalar();
-    } catch( ... ) {}
-    Writer<VolumeRef<T> > vfw( fullname );
-    
-    if( partial_writing && ma.create) {
-      options = Object::value( PropertySet() );
-      cout << "writing empty full volume..." << endl;
-      vfw.write( vol, options );
-    }
     options = Object::value( PropertySet() );
     vfw.attach( ma.ofname );
     cout << "writing view..." << endl;
     vfw.write( view, options );
-    cout << "=====================================================================" << endl;
   }
+  cout << "=====================================================================" << endl;
   
   return true;
 }
@@ -141,22 +136,22 @@ int main( int argc, const char** argv )
   try
   {
     //=== APPLICATION ==========================================================
-    string  ofname;
-    bool    create = true;
+    string  ofname, cfname;
 
     CartoApplication  app( argc, argv, "Test for soma partial reading/writing" );
     app.addOption( fname, "-i", "input filename to be read\n" );
-    app.addOption( ofname, "-o", "output filename to be written\n", true );
-    app.addOption( create, "-c", "if partial writing enabled, create" 
-    " an empty volume (warning: if false, volume must already exist)\n", true );
+    app.addOption( ofname, "-o", "output filename to be written.\n"
+                   "Warning: if partial_writing option is given, you need "
+                   "either an existing full volume, or to use -c option.\n", true );
+    app.addOption( cfname, "-c", "output filename of empty full volume.\n", true );
     app.alias( "-v", "--verbose" );
 
     app.initialize();
     
     //=== INITIALIZE ALGORITHM =================================================
     PartialIOAlgo  palgo;
-    palgo.create =  create;
     palgo.ofname =  ofname;
+    palgo.cfname =  cfname;
     
     //=== RUN ALGORITHM ========================================================
     if( !palgo.execute( fname ) ){
