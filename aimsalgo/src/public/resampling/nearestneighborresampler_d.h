@@ -46,9 +46,19 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
                                          T &outValue, int t )
 {
 
-  Point3df normalizedInLocation;
-  normalizedInLocation = invTransform3d.transform( outLocation );
+  Point3df inLocation = invTransform3d.transform( outLocation );
 
+  doResample(inVolume, inLocation, outBackground, outValue, t);
+}
+
+template <class T>
+void 
+NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume, 
+                                         const Point3df &inLocation, 
+                                         const T &outBackground, 
+                                         T &outValue, int t )
+{
+  Point3df normalizedInLocation = inLocation;
   normalizedInLocation[0] += 0.5;
   normalizedInLocation[1] += 0.5;
   normalizedInLocation[2] += 0.5;
@@ -78,7 +88,7 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
     -- z;
 
   }
-
+    
   if ( ( x >= 0 ) && ( x < inVolume.dimX() ) &&
        ( y >= 0 ) && ( y < inVolume.dimY() ) &&
        ( z >= 0 ) && ( z < inVolume.dimZ() ) )
@@ -95,7 +105,6 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
   }
 
 }
-
 
 #endif
 

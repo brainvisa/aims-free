@@ -336,12 +336,15 @@ static char * gni_history[] =
   "   - fixed znzread/write, noting example by M Adler\n"
   "   - changed nifti_swap_* routines/calls to take size_t (6)\n"
   "1.43 07 Jul 2010 [rickr]: fixed znzR/W to again return nmembers\n",
-  "x.xx 08 Dec 2012, D. Riviere\n",
+  "1.44 08 Dec 2012, D. Riviere\n",
   "   - avoid a mixup between .nii and .nii.gz files in the same directory\n",
   "   - fixed nifti_read_collapsed_image() freeing buffer on read failure\n",
+  "1.45 19 Jun 2013, D. Riviere, N. Souedet\n",
+  "   - fixed nifti_read_collapsed_image() and nifti_read_subregion_image()\n",
+  "     to support images larger than 2GB\n"
   "----------------------------------------------------------------------\n"
 };
-static char gni_version[] = "nifti library version 1.44 (8 Dec, 2012)";
+static char gni_version[] = "nifti library version 1.45 (19 Jun, 2013)";
 
 /*! global nifti options structure - init with defaults */
 static nifti_global_options g_opts = { 
@@ -422,8 +425,8 @@ static int  nifti_NBL_matches_nim(const nifti_image *nim,
 
 /* for nifti_read_collapsed_image: */
 static int  rci_read_data(nifti_image *nim, int *pivots, int *prods, int nprods,
-                  const int dims[], char *data, znzFile fp, size_t base_offset);
-static int  rci_alloc_mem(void ** data, int prods[8], int nprods, int nbyper );
+                          const int dims[], char *data, znzFile fp, size_t base_offset);
+static long int  rci_alloc_mem(void ** data, int prods[8], int nprods, int nbyper );
 static int  make_pivot_list(nifti_image * nim, const int dims[], int pivots[],
                             int prods[], int * nprods );
 
@@ -6748,13 +6751,13 @@ int nifti_nim_has_valid_dims(nifti_image * nim, int complain)
     \sa nifti_image_read, nifti_image_free, nifti_image_read_bricks
         nifti_image_load
 *//*-------------------------------------------------------------------------*/
-int nifti_read_collapsed_image( nifti_image * nim, const int dims [8],
-                                void ** data )
+long int nifti_read_collapsed_image( nifti_image * nim, const int dims [8],
+                                     void ** data )
 {
    znzFile fp;
-   int     pivots[8], prods[8], nprods; /* sizes are bounded by dims[], so 8 */
-   int     c, bytes;
-   int     did_alloc; /* did we malloc the buffer *data here ? */
+   int          pivots[8], prods[8], nprods; /* sizes are bounded by dims[], so 8 */
+   long int     c, bytes;
+   int          did_alloc; /* did we malloc the buffer *data here ? */
 
    /** - check pointers for sanity */
    if( !nim || !dims || !data ){
@@ -6780,7 +6783,7 @@ int nifti_read_collapsed_image( nifti_image * nim, const int dims [8],
    /** - verify that dims[] makes sense for this dataset */
    for( c = 1; c <= nim->dim[0]; c++ ){
       if( dims[c] >= nim->dim[c] ){
-         fprintf(stderr,"** nifti_RCI: dims[%d] >= nim->dim[%d] (%d,%d)\n",
+         fprintf(stderr,"** nifti_RCI: dims[%ld] >= nim->dim[%ld] (%d,%d)\n",
                  c, c, dims[c], nim->dim[c]);
          return -1;
       }
@@ -6821,7 +6824,7 @@ int nifti_read_collapsed_image( nifti_image * nim, const int dims [8],
    }    /* failure */
 
    if( g_opts.debug > 1 )
-      fprintf(stderr,"+d read %d bytes of collapsed image from %s\n",
+      fprintf(stderr,"+d read %ld bytes of collapsed image from %s\n",
               bytes, nim->fname);
 
    return bytes;
@@ -6871,15 +6874,15 @@ compute_strides(int *strides,const int *size,int nbyper)
     \sa nifti_image_read, nifti_image_free, nifti_image_read_bricks
         nifti_image_load, nifti_read_collapsed_image
 *//*-------------------------------------------------------------------------*/
-int nifti_read_subregion_image( nifti_image * nim,
-                                int *start_index,
-                                int *region_size,
-                                void ** data )
+long int nifti_read_subregion_image( nifti_image * nim,
+                                    int *start_index,
+                                    int *region_size,
+                                    void ** data )
 {
   znzFile fp;                   /* file to read */
   int i,j,k,l,m,n;              /* indices for dims */
   long int bytes = 0;           /* total # bytes read */
-  int total_alloc_size;         /* size of buffer allocation */
+  long int total_alloc_size;    /* size of buffer allocation */
   char *readptr;                /* where in *data to read next */
   int strides[7];               /* strides between dimensions */
   int collapsed_dims[8];        /* for read_collapsed_image */
@@ -6974,7 +6977,7 @@ int nifti_read_subregion_image( nifti_image * nim,
     {
     if(g_opts.debug > 1)
       {
-      fprintf(stderr,"allocation of %d bytes failed\n",total_alloc_size);
+      fprintf(stderr,"allocation of %ld bytes failed\n",total_alloc_size);
       }
     return -1;
     }
@@ -7111,7 +7114,7 @@ static int rci_read_data(nifti_image * nim, int * pivots, int * prods,
 
       /* now read the next level down, adding this offset */
       if( rci_read_data(nim, pivots+1, prods+1, nprods-1, dims,
-                    data + c * read_size, fp, base_offset + offset) < 0 )
+                    data + ((size_t)c) * read_size, fp, base_offset + offset) < 0 )
          return -1;
    }
 
@@ -7126,9 +7129,9 @@ static int rci_read_data(nifti_image * nim, int * pivots, int * prods,
 
    return total size on success, and < 0 on failure
 */
-static int rci_alloc_mem(void ** data, int prods[8], int nprods, int nbyper )
+static long int rci_alloc_mem(void ** data, int prods[8], int nprods, int nbyper )
 {
-   int size, index;
+   long int size, index;
 
    if( nbyper < 0 || nprods < 1 || nprods > 8 ){
       fprintf(stderr,"** rci_am: bad params, %d, %d\n", nbyper, nprods);
@@ -7142,16 +7145,16 @@ static int rci_alloc_mem(void ** data, int prods[8], int nprods, int nbyper )
 
    if( ! *data ){   /* then allocate what is needed */
       if( g_opts.debug > 1 )
-         fprintf(stderr,"+d alloc %d (= %d x %d) bytes for collapsed image\n",
+         fprintf(stderr,"+d alloc %ld (= %ld x %d) bytes for collapsed image\n",
                  size, size/nbyper, nbyper);
 
       *data = malloc(size);   /* actually allocate the memory */
       if( ! *data ){
-         fprintf(stderr,"** rci_am: failed to alloc %d bytes for data\n", size);
+         fprintf(stderr,"** rci_am: failed to alloc %ld bytes for data\n", size);
          return -1;
       }
    } else if( g_opts.debug > 1 )
-      fprintf(stderr,"-d rci_am: *data already set, need %d (%d x %d) bytes\n",
+      fprintf(stderr,"-d rci_am: *data already set, need %ld (%ld x %d) bytes\n",
               size, size/nbyper, nbyper);
 
    return size;

@@ -291,10 +291,10 @@ int          nifti_image_load    ( nifti_image *nim ) ;
 void         nifti_image_unload  ( nifti_image *nim ) ;
 void         nifti_image_free    ( nifti_image *nim ) ;
 
-int          nifti_read_collapsed_image( nifti_image * nim, const int dims [8],
+long int     nifti_read_collapsed_image( nifti_image * nim, const int dims [8],
                                          void ** data );
 
-int          nifti_read_subregion_image( nifti_image * nim, 
+long int     nifti_read_subregion_image( nifti_image * nim, 
                                          int *start_index, int *region_size,
                                          void ** data );
 
