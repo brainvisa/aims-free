@@ -36,6 +36,7 @@
 #ifndef AIMS_FFD_TABULSPLINE_H
 #define AIMS_FFD_TABULSPLINE_H
 #include <cstdlib>
+#include <cartobase/config/verbose.h>
 #include <aims/vector/vector.h>
 #include <aims/data/data_g.h>
 #include <aims/math/bspline3.h>
@@ -96,10 +97,11 @@ inline float
 TabulSpline::spline3( double u ) const
 {
   int i = index(u);
+
   if ( !isvalid( i ) ){
-     std::cerr << "Spline3 : Index " << carto::toString(i) 
-               << " corresponding to parameter " << carto::toString(u) 
-               << " out of tabulspline : " << _splineTabLength << std::endl;
+     cartoDbgMsg( 1,  "Spline3 : Index " + carto::toString(i)
+                    + " corresponding to parameter " + carto::toString(u)
+                    + " out of tabulspline : " + carto::toString(_splineTabLength));
      return 0. ;
   }
   return _splineCoef[ i ] ;
@@ -111,9 +113,9 @@ TabulSpline::spline3derivative( double u ) const
 {
   int i = index(u);
   if ( !isvalid( i ) ) {
-     std::cerr << "Spline3 derivatives : Index " << carto::toString(i) 
-               << " corresponding to parameter " << carto::toString(u) 
-               << " out of tabulspline" << _splineTabLength << std::endl;
+     cartoDbgMsg( 1, "Spline3 derivatives : Index " + carto::toString(i)
+                   + " corresponding to parameter " + carto::toString(u)
+                   + " out of tabulspline : " + carto::toString(_splineTabLength));
      return 0. ;
   }
   
@@ -122,4 +124,5 @@ TabulSpline::spline3derivative( double u ) const
   else
     return(- _derivatedSplineCoef[ i ]);
 }
+
 #endif
