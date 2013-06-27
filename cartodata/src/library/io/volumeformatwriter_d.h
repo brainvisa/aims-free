@@ -31,8 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef VOLUMEFORMATWRITER_D_H
-#define VOLUMEFORMATWRITER_D_H
+#ifndef CARTODATA_IO_VOLUMEFORMATWRITER_D_H
+#define CARTODATA_IO_VOLUMEFORMATWRITER_D_H
 //--- cartodata ----------------------------------------------------------------
 #include <cartodata/io/volumeformatwriter.h>              // class declaration
 #include <cartodata/volume/volume.h>                       // manipulate sizes
@@ -46,10 +46,14 @@
 #include <cartobase/object/object.h>                         // header & options
 #include <cartobase/object/property.h>                       // header & options
 #include <cartobase/exception/ioexcept.h>                          // exceptions
-#include <cartobase/config/verbose.h>                         // verbosity level
 //--- system -------------------------------------------------------------------
 #include <vector>
 #include <iostream>
+#include <string>
+//--- debug --------------------------------------------------------------------
+#include <cartobase/config/verbose.h>
+#define localMsg( message ) cartoCondMsg( 4, message, "VOLUMEFORMATWRITER" )
+// localMsg must be undef at end of file
 //------------------------------------------------------------------------------
 
 namespace soma
@@ -75,39 +79,31 @@ namespace soma
                                      carto::Object options )
   {
     //=== memory mapping =======================================================
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: checking for memory mapping..." 
-                << std::endl;
+    localMsg( "checking for memory mapping..." );
     if( obj.allocatorContext().allocatorType() == AllocatorStrategy::ReadWriteMap )
       return true;
     
     //=== multiresolution level ================================================
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: reading resolution level..." 
-                << std::endl;
+    localMsg( "reading resolution level..." );
     int level = 0;
     if( options->hasProperty( "resolution_level" ) )
       options->getProperty( "resolution_level", level );
+    localMsg( " -> level to write : " + carto::toString( level ) );
     
     //=== partial reading ======================================================
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: checking for partial reading..." 
-                << std::endl;
+    localMsg( "checking for partial reading..." );
     bool partial = false;
     if( options->hasProperty( "partial_writing" ) )
       partial = true;
-    if( carto::debugMessageLevel > 3 && partial ) {
-      std::cout << "VOLUMEFORMATWRITER:: partial writing enabled" << std::endl;
-    }
+    if( partial )
+      localMsg( " -> partial writing enabled." );
     
     std::vector<int> position( 4, 0 );
     std::vector<int> view( 4, 0 );
     std::vector<int> size( 4, 0 );
     
     //=== checking if obj is a view ============================================
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: checking if object is a view..." 
-                << std::endl;
+    localMsg( "checking if object is a view..." );
     const carto::VolumeView<T> *vv 
       = dynamic_cast<const carto::VolumeView<T> *>( &obj );
     carto::VolumeView<T> *p1vv;
@@ -119,34 +115,27 @@ namespace soma
       if( p1vv )
         parent2 = p1vv->refVolume().get();
     }
-    if( carto::debugMessageLevel > 3 ) {
-      std::cout << "VOLUMEFORMATWRITER:: object "
-                << ( vv ? "is" : "isn't" ) << " a view and "
-                << ( obj.allocatorContext().isAllocated() ? "is" : "isn't" )
-                << " allocated." << std::endl;
-      if( parent1 )
-        std::cout << "VOLUMEFORMATWRITER:: parent1 exists and " 
-                  << ( parent1->allocatorContext().isAllocated() ? "is" : "isn't" )
-                  << " allocated." << std::endl;
-      if( parent2 )
-        std::cout << "VOLUMEFORMATWRITER:: parent2 exists and " 
-                  << ( parent2->allocatorContext().isAllocated() ? "is" : "isn't" )
-                  << " allocated." << std::endl;
-    }
+    localMsg( std::string("object ") + ( vv ? "is" : "isn't" ) + " a view and "
+              + ( obj.allocatorContext().isAllocated() ? "is" : "isn't" )
+              + " allocated." );
+    if( parent1 )
+      localMsg( std::string("parent1 exists and ")
+                + ( parent1->allocatorContext().isAllocated() ? "is" : "isn't" )
+                + " allocated." );
+    if( parent2 )
+      localMsg( std::string("parent2 exists and ")
+                + ( parent2->allocatorContext().isAllocated() ? "is" : "isn't" )
+                + " allocated." );
 
     //=== view size ============================================================
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: reading view size..." 
-                << std::endl;
+    localMsg( "reading view size..." );
     view[ 0 ] = obj.getSizeX();
     view[ 1 ] = obj.getSizeY();
     view[ 2 ] = obj.getSizeZ();
     view[ 3 ] = obj.getSizeT();
 
     //=== full volume size =====================================================
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: reading full volume size and view position..." 
-                << std::endl;
+    localMsg( "reading full volume size and view position..." );
     if( parent1 && !parent1->allocatorContext().isAllocated() ) {
       size[ 0 ] = parent1->getSizeX();
       size[ 1 ] = parent1->getSizeY();
@@ -175,42 +164,31 @@ namespace soma
       position = std::vector<int>( 4, 0 );
     }
     
-    if( carto::debugMessageLevel > 3 ) {
-      std::cout << "VOLUMEFORMATWRITER:: Full volume size : ( "
-                << size[0] << ", "
-                << size[1] << ", "
-                << size[2] << ", "
-                << size[3] << " )"
-                << std::endl;
-      std::cout << "VOLUMEFORMATWRITER:: View size : ( "
-                << view[0] << ", "
-                << view[1] << ", "
-                << view[2] << ", "
-                << view[3] << " )"
-                << std::endl;
-      std::cout << "VOLUMEFORMATWRITER:: View position : ( "
-                << position[0] << ", "
-                << position[1] << ", "
-                << position[2] << ", "
-                << position[3] << " )"
-                << std::endl;
-    }
+    localMsg( " -> Full volume size : ( "
+              + carto::toString( size[0] ) + ", "
+              + carto::toString( size[1] ) + ", "
+              + carto::toString( size[2] ) + ", "
+              + carto::toString( size[3] ) + " )" );
+    localMsg( " -> View size : ( "
+              + carto::toString( view[0] ) + ", "
+              + carto::toString( view[1] ) + ", "
+              + carto::toString( view[2] ) + ", "
+              + carto::toString( view[3] ) + " )" );
+    localMsg( " -> View position : ( "
+              + carto::toString( position[0] ) + ", "
+              + carto::toString( position[1] ) + ", "
+              + carto::toString( position[2] ) + ", "
+              + carto::toString( position[3] ) + " )" );
     
     //=== checking for borders =================================================
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: checking for borders..." << std::endl;
+    localMsg( "checking for borders..." );
     bool withborders = false;
     if( parent1 && parent1->allocatorContext().isAllocated() )
       withborders = true;
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: " 
-                << ( withborders ? "with borders" : "without borders" ) 
-                << std::endl;
+    localMsg( std::string(" -> ") + ( withborders ? "with borders" : "without borders" ) );
     
     //=== header info ==========================================================
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: setting header..." 
-                << std::endl;
+    localMsg( "setting header..." );
     if( !options )
       options = carto::Object::value( carto::PropertySet() );
     if( !vv && !obj.allocatorContext().isAllocated() )
@@ -231,16 +209,11 @@ namespace soma
 
     
     //=== writing header & creating files ======================================
-    // TODO how to test ?
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: writing header..." 
-                << std::endl;
+    localMsg( "writing header..." );
     *dsi = _imw->writeHeader( *dsi, options );
     
     //=== writing image ========================================================
-    if( carto::debugMessageLevel > 3 )
-      std::cout << "VOLUMEFORMATWRITER:: writing volume..." 
-                << std::endl;
+    localMsg( "writing volume..." );
     if( vv || obj.allocatorContext().isAllocated() ) 
     {
       if( !withborders ) {
@@ -303,4 +276,5 @@ namespace soma
   
 }
 
+#undef localMsg
 #endif

@@ -38,6 +38,8 @@
 #include <graph/graph/gparser.h>
 #ifdef USE_SOMA_IO
   #include <soma-io/reader/pythonreader.h>
+#else
+  #include <cartobase/object/pythonreader.h>
 #endif
 
 class Vertex;

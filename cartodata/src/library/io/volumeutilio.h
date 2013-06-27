@@ -36,14 +36,14 @@
 //--- cartodata ----------------------------------------------------------------
 #include <cartodata/volume/volume.h>
 //--- soma-io ------------------------------------------------------------------
-#include <soma-io/config/soma_config.h>
-#include <soma-io/writer/pythonwriter.h>
+#include <soma-io/config/soma_config.h>                          // #define soma
+#include <soma-io/writer/pythonwriter.h>                         // print header
 //--- cartobase ----------------------------------------------------------------
-#include <cartobase/config/verbose.h>
+#include <cartobase/config/verbose.h>                             // printheader
 #include <cartobase/object/object.h>
 //--- system -------------------------------------------------------------------
-#include <iostream>
-#include <vector>
+#include <iostream>                                               // printheader
+#include <vector>                                                  // 4D vectors
 //------------------------------------------------------------------------------
 
 namespace soma {
@@ -61,19 +61,23 @@ namespace soma {
       /// This method is called from VolumeFormatReader::createAndRead(). 
       /// It reads all the parameters from options' properties and 
       /// removes them afterwards. It then performs necessary allocation
-      /// and reading and returns a fully usable VolumeView.
+      /// and reading and returns obj as a fully usable VolumeView.
       static carto::Volume<T>*
-      read( carto::rc_ptr<DataSourceInfo> dsi, carto::Object options );
+      read( //carto::Volume<T>* obj,
+            carto::rc_ptr<DataSourceInfo> dsi,
+            carto::Object options );
 
       /// Worker for partial reading case
       static carto::Volume<T>* 
-      readPartial( carto::rc_ptr<DataSourceInfo> dsi, 
-                  std::vector<int> position, std::vector<int> frame,
-                  std::vector<int> borders, carto::Object options );
+      readPartial( //carto::Volume<T>* obj, 
+                   carto::rc_ptr<DataSourceInfo> dsi,
+                   std::vector<int> position, std::vector<int> frame,
+                   std::vector<int> borders, carto::Object options );
 
       /// Worker for full reading case
       static carto::Volume<T>* 
-      readFull( carto::rc_ptr<DataSourceInfo> dsi, 
+      readFull( //carto::Volume<T>* obj,
+                carto::rc_ptr<DataSourceInfo> dsi,
                 std::vector<int> borders, carto::Object options );
   };
 
@@ -83,43 +87,12 @@ namespace soma {
   // to be moved/deleted
 
   inline void
-  printheader( carto::Object hdr )
+  printheader( int verbose, carto::Object hdr )
   {
-    soma::PythonWriter  pw;
-    pw.attach( std::cout );
-    pw.write( hdr );
-  }
-
-  inline void
-  printTitle( const std::string & title, int verbosity = 0, char symb = '=' )
-  {
-    if( carto::debugMessageLevel >= verbosity ) {
-      int title_size = title.size();
-      int col_size = 80;
-      int symb_1_count = ( col_size - title_size - 2 ) / 2;
-      int symb_2_count = col_size - symb_1_count - title_size - 2;
-      std::string out( symb_1_count, symb );
-      out += ( " " + title + " " );
-      if( symb_2_count > 0 )
-        out += std::string( symb_2_count, symb );
-      std::cout << std::endl << out << std::endl;
-    }
-  }
-
-  inline void
-  printMessage( const std::string & message, int verbosity = 0 )
-  {
-    if( carto::debugMessageLevel >= verbosity ) {
-      std::cout << message << std::endl;
-    }
-  }
-
-  inline void
-  printEnd( int verbosity = 0, char symb = '=' )
-  {
-    if( carto::debugMessageLevel >= verbosity ) {
-      int col_size = 80;
-      std::cout << std::string( col_size, symb ) << std::endl;
+    if( verbose <= carto::debugMessageLevel ) {
+      soma::PythonWriter  pw;
+      pw.attach( std::cout );
+      pw.write( hdr );
     }
   }
 }

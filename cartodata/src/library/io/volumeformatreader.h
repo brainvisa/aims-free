@@ -31,8 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef VOLUMEFORMATREADER_H
-#define VOLUMEFORMATREADER_H
+#ifndef CARTODATA_IO_VOLUMEFORMATREADER_H
+#define CARTODATA_IO_VOLUMEFORMATREADER_H
 //--- soma io ------------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasource/datasource.h>
@@ -104,6 +104,12 @@ namespace soma
       virtual Volume<T>* createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
                                         const AllocatorContext & context,
                                         carto::Object options );
+
+      /// Full reading procedure, for an already existing object
+      virtual void setupAndRead( Volume<T> & obj,
+                                 carto::rc_ptr<DataSourceInfo> dsi,
+                                 const AllocatorContext & context,
+                                 carto::Object options );
     protected:
       carto::rc_ptr<ImageReader<T> > _imr;
   };
@@ -115,8 +121,7 @@ namespace soma
   ///
   /// \see VolumeFormatReader
   template<typename T>
-  class VolumeRefFormatReader : 
-  public FormatReader<carto::VolumeRef<T> >
+  class VolumeRefFormatReader : public FormatReader<carto::VolumeRef<T> >
   {
     public:
       virtual ~VolumeRefFormatReader();
@@ -135,6 +140,19 @@ namespace soma
       /// Linking to a ImageReader
       /// Allows us to declare only once the ImageReader
       void attach( carto::rc_ptr<ImageReader<T> > imr );
+      
+      /// \brief Factory mode: creates an object and reads it.
+      /// The returned object belongs to the calling layer and may be deleted by 
+      /// the standard \c delete
+      virtual VolumeRef<T>* createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
+                                        const AllocatorContext & context,
+                                        carto::Object options );
+
+      /// Full reading procedure, for an already existing object
+      virtual void setupAndRead( VolumeRef<T> & obj,
+                                 carto::rc_ptr<DataSourceInfo> dsi,
+                                 const AllocatorContext & context,
+                                 carto::Object options );
 
     protected:
       carto::rc_ptr<ImageReader<T> > _imr;

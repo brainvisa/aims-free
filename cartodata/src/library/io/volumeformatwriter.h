@@ -31,8 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef VOLUMEFORMATWRITER_H
-#define VOLUMEFORMATWRITER_H
+#ifndef CARTODATA_IO_VOLUMEFORMATWRITER_H
+#define CARTODATA_IO_VOLUMEFORMATWRITER_H
 //--- soma io ------------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasource/datasource.h>

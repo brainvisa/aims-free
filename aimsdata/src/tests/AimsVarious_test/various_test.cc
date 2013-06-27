@@ -32,9 +32,9 @@
 */
 
 //--- aims ---------------------------------------------------------------------
-#include <aims/data/partialio_managevolumes.h>
 //--- soma-io ------------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
+#include <soma-io/io/reader.h>
 #include <soma-io/io/writer.h>
 #include <soma-io/writer/pythonwriter.h>
 #include <soma-io/image/voxelrgba_d.h>
@@ -45,13 +45,11 @@
 #include <cartobase/object/object.h>
 #include <cartobase/getopt/getopt.h>
 #include <cartobase/config/verbose.h>
+#include <cartobase/type/string_conversion.h>
 //--- system -------------------------------------------------------------------
 #include <iostream>
-#include <cstdlib>
-#include <limits>
 //------------------------------------------------------------------------------
 
-using namespace partialio;
 using namespace soma;
 using namespace carto;
 using namespace std;
@@ -67,11 +65,11 @@ template <typename T>
 void printVolume( const VolumeRef<T> & vol )
 {
   int x, y, z, t;
-  printEnd( 0, '-' );
+  cartoMsg( 0, "-----", "" );
   for( t=0; t<vol->getSizeT(); ++t ) {
-    printTitle( "T = "+itos( t ), 0, ' ' );
+    cartoMsg( 0, "=== T = "+toString( t ), "" );
     for( z=0; z<vol->getSizeZ(); ++z ) {
-      printEnd( 0, '-' );
+      cartoMsg( 0, "-----", "" );
       for( y=0; y<vol->getSizeY(); ++y ) {
         for( x=0; x<vol->getSizeX(); ++x ) {
           cout << vol( x, y, z, t ) << "\t";
@@ -80,45 +78,46 @@ void printVolume( const VolumeRef<T> & vol )
       }
     }
   }
-  printEnd( 0, '-' );
+  cartoMsg( 0, "-----", "" );
 }
 
 bool testVolumeBorders()
 {
-  printTitle( "VOLUME BORDERS" );
+  cartoMsg( 0, "=== VOLUME BORDERS", "testVolumeBorders" );
   int x, y, val = 0;
-  printMessage( "creating allocatedVolume..." );
-  printMessage( "-> size = ( 10, 10, 1, 1 )" );
+  cartoMsg( 0, "creating allocatedVolume...", "testVolumeBorders" );
+  cartoMsg( 0, "-> size = ( 10, 10, 1, 1 )", "testVolumeBorders" );
   VolumeRef<int16_t>  allocatedVolume( new Volume<int16_t>( 10, 10, 1, 1 ) );
-  printMessage( "filling allocated volume..." );
+  cartoMsg( 0, "filling allocated volume...", "testVolumeBorders" );
   for( x=0; x<10; ++x ) {
     for( y=0; y<10; ++y ) {
       allocatedVolume( x, y, 0, 0 ) = val++;
     }
   }
-  printMessage( "printing allocatedVolume..." );
+  cartoMsg( 0, "printing allocatedVolume...", "testVolumeBorders" );
   printVolume( allocatedVolume );
   
   VolumeView<int16_t>::Position4Di pos( 2, 2, 0, 0 );
   VolumeView<int16_t>::Position4Di size( 6, 6, 1, 1 );
-  printMessage( "creating viewVolume..." );
-  printMessage( "-> father = allocatedVolume" );
-  printMessage( "-> pos = ( 2, 2, 0, 0 )" );
-  printMessage( "-> size = ( 6, 6, 1, 1 )" );
+  cartoMsg( 0, "creating viewVolume...", "testVolumeBorders" );
+  cartoMsg( 0, "-> father = allocatedVolume", "testVolumeBorders" );
+  cartoMsg( 0, "-> pos = ( 2, 2, 0, 0 )", "testVolumeBorders" );
+  cartoMsg( 0, "-> size = ( 6, 6, 1, 1 )", "testVolumeBorders" );
   VolumeRef<int16_t> viewVolume( new VolumeView<int16_t>( allocatedVolume, pos, size ) );
-  printMessage( "printing viewVolume..." );
+  cartoMsg( 0, "printing viewVolume...", "testVolumeBorders" );
   printVolume( viewVolume );
-  printEnd();
+  cartoMsg(0, "===", "testVolumeBorders");
   return true;
 }
 
-bool testCreateVolume( string fname, int sx = 1, int sy = 1, 
+bool testCreateVolume( const string & fname, 
+                       int sx = 1, int sy = 1, 
                        int sz = 1, int st = 1 )
 {
-  printTitle( "CREATE NUMBERED VOLUME" );
-  printMessage( "creating volume..." );
+  cartoMsg( 0, "=== CREATE NUMBERED VOLUME", "testCreateVolume" );
+  cartoMsg( 0, "creating volume...", "testCreateVolume" );
   VolumeRef<VoxelRGBA> vol( new Volume<VoxelRGBA>( sx, sy, sz, st ) );
-  printMessage( "filling volume..." );
+  cartoMsg( 0, "filling volume...", "testCreateVolume" );
   int x, y, z, t, val = 0;
   for( t=0; t<st; ++t )
     for( z=0; z<sz; ++z )
@@ -127,13 +126,23 @@ bool testCreateVolume( string fname, int sx = 1, int sy = 1,
           vol( x, y, z, t ) = VoxelRGBA(val,val,val,255);
           val++;
         }
-  printMessage( "writing volume..." );
+  cartoMsg( 0, "writing volume...", "testCreateVolume" );
   Writer<VolumeRef<VoxelRGBA> > wVol( fname );
   wVol.write( vol );
-  printEnd();
+  cartoMsg( 0, "===", "testCreateVolume");
   
   return true;
 }
+
+bool testReadVolumeRef( const string & fname )
+{
+  Reader<VolumeRef<VoxelRGBA> > reader( fname );
+  VolumeRef<VoxelRGBA> volref;
+  reader >> volref;
+  
+  return true;
+}
+  
 
 int main( int argc, const char** argv )
 {
@@ -142,19 +151,25 @@ int main( int argc, const char** argv )
     //=== APPLICATION ==========================================================
     bool volumeBorders = false;
     bool createVolume = false;
+    bool readVolumeRef = false;
     string ofname = "/tmp/volume.ima";
+    string ifname = "";
     int sx = 1, sy = 1, sz = 1, st = 1;
     CartoApplication  app( argc, argv, "Various tests" );
     app.addOption( volumeBorders, "volumeBorders", "Views to an allocated"
-                   "Volume and indexes\n", true );
+                   "Volume and indexes.\n", true );
     app.addOption( createVolume, "createVolume", "Creates a volume. Depends on"
-                   "-o -sx -sy -sz -st options\n", true );
-    app.addOption( ofname, "-o", "Out filename\n", true );
-    app.addOption( sx, "-sx", "Size (comp x)\n", true );
-    app.addOption( sy, "-sy", "Size (comp y)\n", true );
-    app.addOption( sz, "-sz", "Size (comp z)\n", true );
-    app.addOption( st, "-st", "Size (comp t)\n", true );
+                   "-o -sx -sy -sz -st options.\n", true );
+    app.addOption( readVolumeRef, "readVolumeRef", "Apply Reader directly to "
+                   "a reference.\n", true );
+    app.addOption( ifname, "-i", "In filename.\n", true );
+    app.addOption( ofname, "-o", "Out filename.\n", true );
+    app.addOption( sx, "-sx", "Size (comp x).\n", true );
+    app.addOption( sy, "-sy", "Size (comp y).\n", true );
+    app.addOption( sz, "-sz", "Size (comp z).\n", true );
+    app.addOption( st, "-st", "Size (comp t).\n", true );
     app.alias( "-v", "--verbose" );
+    app.alias( "-d", "--debugLevel" );
     app.initialize();
     
     //=== RUN ALGORITHM ========================================================
@@ -162,6 +177,8 @@ int main( int argc, const char** argv )
       testVolumeBorders();
     if( createVolume )
       testCreateVolume( ofname, sx, sy, sz, st );
+    if( readVolumeRef )
+      testReadVolumeRef( ifname );
     
   }
   catch( user_interruption & )

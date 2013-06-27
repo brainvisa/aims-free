@@ -34,26 +34,25 @@
 #define CARTODATA_IO_VOLUMEUTILIO_D_H
 
 //--- cartodata ----------------------------------------------------------------
-#include <cartodata/io/volumeutilio.h>
+#include <cartodata/io/volumeutilio.h>                       // class definition
 #include <cartodata/volume/volume.h>
 #include <cartodata/volume/volumeview.h>
 //--- soma-io ------------------------------------------------------------------
-#include <soma-io/config/soma_config.h>
+#include <soma-io/config/soma_config.h>                        // (#define soma)
 #include <soma-io/io/reader.h>
 #include <soma-io/datasourceinfo/datasourceinfoloader.h>
 #include <soma-io/datasourceinfo/datasourceinfo.h>
-#include <soma-io/datasource/filedatasource.h>
-#include <soma-io/writer/pythonwriter.h>
 //--- cartobase ----------------------------------------------------------------
-#include <cartobase/config/verbose.h>
-#include <cartobase/object/object.h>
-#include <cartobase/object/property.h>
-#include <cartobase/stream/fileutil.h>
+#include <cartobase/config/verbose.h>        // verbosity level and cartoCondMsg
+#include <cartobase/type/string_conversion.h>
+#include <cartobase/object/object.h>                          // header, options
+#include <cartobase/object/property.h>                        // header, options
 //--- system -------------------------------------------------------------------
-#include <iostream>
-#include <vector>
+#include <iostream>                                                     // debug
+#include <vector>                                                  // 4D vectors
+#include <set>                                                // properties list
 //------------------------------------------------------------------------------
-#define VOLUMEUTILIO_VERBOSITY 3
+#define VIO_V 3                                               // verbosity level
 
 namespace soma {
 
@@ -72,6 +71,7 @@ namespace soma {
     properties.insert( "bx" );
     properties.insert( "by" );
     properties.insert( "bz" );
+    properties.insert( "border" );
     return properties;
   }
 
@@ -80,7 +80,9 @@ namespace soma {
   //============================================================================
 
   template <typename T> carto::Volume<T>*
-  VolumeUtilIO<T>::read( carto::rc_ptr<DataSourceInfo> dsi, carto::Object options )
+  VolumeUtilIO<T>::read( //carto::Volume<T> *             obj,
+                         carto::rc_ptr<DataSourceInfo>  dsi,
+                         carto::Object                  options )
   {
     std::vector<int> position( 4, 0 );
     std::vector<int> frame( 4, 0 );
@@ -118,6 +120,12 @@ namespace soma {
       options->removeProperty( "st" );
     } catch( ... ) {}
     try {
+      borders[0] = options->getProperty( "border" )->getScalar();
+      borders[1] = options->getProperty( "border" )->getScalar();
+      borders[2] = options->getProperty( "border" )->getScalar();
+      options->removeProperty( "border" );
+    } catch( ... ) {}
+    try {
       borders[0] = options->getProperty( "bx" )->getScalar();
       options->removeProperty( "bx" );
     } catch( ... ) {}
@@ -138,10 +146,13 @@ namespace soma {
       return readFull( dsi, borders, options );
   }
 
-  template <typename T> carto::Volume<T>* 
-  VolumeUtilIO<T>::readFull( carto::rc_ptr<DataSourceInfo> dsi, 
-                          std::vector<int> borders, carto::Object options )
+  template <typename T> carto::Volume<T>*
+  VolumeUtilIO<T>::readFull( //carto::Volume<T> *             obj,
+                             carto::rc_ptr<DataSourceInfo>  dsi,
+                             std::vector<int>               borders, 
+                             carto::Object                  options )
   {
+    //=== VARIABLES ============================================================
     int verbose = carto::debugMessageLevel;
     carto::Object newoptions;
     soma::Reader<carto::Volume<T> > rVol;
@@ -154,124 +165,130 @@ namespace soma {
 
     if( borders[0] !=0 || borders[1] !=0 || borders[2] !=0 )
     {
-
-      printTitle( "READING FULL VOLUME SIZE", VOLUMEUTILIO_VERBOSITY );
+      //=== CHECK FULL VOLUME ==================================================
+      cartoCondMsg( VIO_V, "=== READING FULL VOLUME SIZE", "VOLUMEUTILIO" );
       newoptions = carto::Object::value( carto::PropertySet() );
       newoptions->copyProperties( options );
-      printMessage( "checking full volume...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "checking full volume...", "VOLUMEUTILIO" );
       *dsi = dsil.check( *dsi, options );
-      printMessage( "reading size...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "reading size...", "VOLUMEUTILIO" );
       fullsize[0] = dsi->header()->getProperty( "sizeX" )->getScalar();
       fullsize[1] = dsi->header()->getProperty( "sizeY" )->getScalar();
       fullsize[2] = dsi->header()->getProperty( "sizeZ" )->getScalar();
       fullsize[3] = dsi->header()->getProperty( "sizeT" )->getScalar();
-      printMessage( "-> size =  ( "
-                    + carto::FileUtil::itos( fullsize[0] ) + ", "
-                    + carto::FileUtil::itos( fullsize[1] ) + ", "
-                    + carto::FileUtil::itos( fullsize[2] ) + ", "
-                    + carto::FileUtil::itos( fullsize[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
-      printEnd( VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "-> size =  ( "
+                + carto::toString( fullsize[0] ) + ", "
+                + carto::toString( fullsize[1] ) + ", "
+                + carto::toString( fullsize[2] ) + ", "
+                + carto::toString( fullsize[3] ) + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "===", "VOLUMEUTILIO" );
 
-      printTitle( "ALLOCATED BORDERS VOLUME", VOLUMEUTILIO_VERBOSITY );
-      printMessage( "computing sizes...", VOLUMEUTILIO_VERBOSITY );
+      //=== BORDERS VOLUME =====================================================
+      cartoCondMsg( VIO_V, "=== ALLOCATED BORDERS VOLUME", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "computing sizes...", "VOLUMEUTILIO" );
       bordersize[0] = fullsize[0] + 2*borders[0];
       bordersize[1] = fullsize[1] + 2*borders[1];
       bordersize[2] = fullsize[2] + 2*borders[2];
       bordersize[3] = fullsize[3];
-      printMessage( "creating allocated volume...", VOLUMEUTILIO_VERBOSITY );
-      printMessage( "-> with size ( "
-                    + carto::FileUtil::itos( bordersize[0] ) + ", "
-                    + carto::FileUtil::itos( bordersize[1] ) + ", "
-                    + carto::FileUtil::itos( bordersize[2] ) + ", "
-                    + carto::FileUtil::itos( bordersize[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "creating allocated volume...", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "-> with size ( "
+                + carto::toString( bordersize[0] ) + ", "
+                + carto::toString( bordersize[1] ) + ", "
+                + carto::toString( bordersize[2] ) + ", "
+                + carto::toString( bordersize[3] ) + " )"
+                , "VOLUMEUTILIO" );
       bordersVolume = carto::VolumeRef<T>( new carto::Volume<T>( bordersize[0], bordersize[1], bordersize[2], bordersize[3] ) );
-      printEnd( VOLUMEUTILIO_VERBOSITY );
-      
-      printTitle( "HEADER", VOLUMEUTILIO_VERBOSITY+1 );
-      if( verbose >= 2 ) {
-        std::cout << "Volume size : ( " 
-                  << bordersVolume->header().getProperty( "sizeX" )->getScalar() << ", " 
-                  << bordersVolume->header().getProperty( "sizeY" )->getScalar() << ", "
-                  << bordersVolume->header().getProperty( "sizeZ" )->getScalar() << ", "
-                  << bordersVolume->header().getProperty( "sizeT" )->getScalar() << " )"
-                  << std::endl;
-      }
-      printEnd( VOLUMEUTILIO_VERBOSITY+1 );
+      cartoCondMsg( VIO_V, "===", "VOLUMEUTILIO" );
 
-      printTitle( "UNALLOCATED FULL VIEW", VOLUMEUTILIO_VERBOSITY );
+      //--- HEADER -------------------------------------------------------------
+      cartoCondMsg( VIO_V+1, "=== HEADER", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Volume size : ( "
+                + bordersVolume->header().getProperty( "sizeX" )->getString() + ", " 
+                + bordersVolume->header().getProperty( "sizeY" )->getString() + ", "
+                + bordersVolume->header().getProperty( "sizeZ" )->getString() + ", "
+                + bordersVolume->header().getProperty( "sizeT" )->getString() + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "===", "VOLUMEUTILIO" );
+      //------------------------------------------------------------------------
+
+      //=== READ FULL VOLUME ===================================================
+      cartoCondMsg( VIO_V, "=== UNALLOCATED FULL VIEW", "VOLUMEUTILIO" );
       rVol = soma::Reader< carto::Volume<T> >( dsi );
       newoptions = carto::Object::value( carto::PropertySet() );
       newoptions->copyProperties( options );
       rVol.setOptions( newoptions );
-      printMessage( "creating volume view...", VOLUMEUTILIO_VERBOSITY );
-      printMessage( "-> with pos ( "
-                    + carto::FileUtil::itos( volumepos[0] ) + ", "
-                    + carto::FileUtil::itos( volumepos[1] ) + ", "
-                    + carto::FileUtil::itos( volumepos[2] ) + ", "
-                    + carto::FileUtil::itos( volumepos[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
-      printMessage( "-> with size ( "
-                    + carto::FileUtil::itos( fullsize[0] ) + ", "
-                    + carto::FileUtil::itos( fullsize[1] ) + ", "
-                    + carto::FileUtil::itos( fullsize[2] ) + ", "
-                    + carto::FileUtil::itos( fullsize[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "creating volume view...", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "-> with pos ( "
+                + carto::toString( volumepos[0] ) + ", "
+                + carto::toString( volumepos[1] ) + ", "
+                + carto::toString( volumepos[2] ) + ", "
+                + carto::toString( volumepos[3] ) + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "-> with size ( "
+                + carto::toString( fullsize[0] ) + ", "
+                + carto::toString( fullsize[1] ) + ", "
+                + carto::toString( fullsize[2] ) + ", "
+                + carto::toString( fullsize[3] ) + " )"
+                , "VOLUMEUTILIO" );
       fullVolume = new carto::VolumeView<T>( bordersVolume, volumepos, fullsize );
-      printMessage( "reading unallocated volume...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "reading unallocated volume...", "VOLUMEUTILIO" );
       rVol.read( *fullVolume );
-      printEnd( VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "===", "VOLUMEUTILIO" );
 
-      printTitle( "HEADER", VOLUMEUTILIO_VERBOSITY+1 );
-      if( verbose >= VOLUMEUTILIO_VERBOSITY+1 ) {
-        printMessage( "Volume's :", VOLUMEUTILIO_VERBOSITY+1 );
-        printheader( carto::Object::value( fullVolume->header() ) );
-        std::cout << "Volume size : ( " 
-                  << fullVolume->header().getProperty( "sizeX" )->getScalar() << ", " 
-                  << fullVolume->header().getProperty( "sizeY" )->getScalar() << ", "
-                  << fullVolume->header().getProperty( "sizeZ" )->getScalar() << ", "
-                  << fullVolume->header().getProperty( "sizeT" )->getScalar() << " )"
-                  << std::endl;
-        printMessage( "Reader's :", VOLUMEUTILIO_VERBOSITY+1 );
-        printheader( rVol.dataSourceInfo()->header() );
-      }
-      printEnd( VOLUMEUTILIO_VERBOSITY+1 );
+      //--- HEADER -------------------------------------------------------------
+      cartoCondMsg( VIO_V+1, "=== HEADER", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Volume's :", "VOLUMEUTILIO" );
+      printheader( VIO_V+1, carto::Object::value( fullVolume->header() ) );
+      cartoCondMsg( VIO_V+1, "Volume size : ( "
+                + fullVolume->header().getProperty( "sizeX" )->getString() + ", " 
+                + fullVolume->header().getProperty( "sizeY" )->getString() + ", "
+                + fullVolume->header().getProperty( "sizeZ" )->getString() + ", "
+                + fullVolume->header().getProperty( "sizeT" )->getString() + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Reader's :", "VOLUMEUTILIO" );
+      printheader( VIO_V+1, rVol.dataSourceInfo()->header() );
+      cartoCondMsg( VIO_V+1, "===", "VOLUMEUTILIO" );
+      //------------------------------------------------------------------------
     }
     else
     {
-      printTitle( "ALLOCATED FULL VIEW", VOLUMEUTILIO_VERBOSITY );
+      //=== FULL VOLUME ========================================================
+      cartoCondMsg( VIO_V, "=== ALLOCATED FULL VIEW", "VOLUMEUTILIO" );
       rVol = soma::Reader< carto::Volume<T> >( dsi );
       newoptions = carto::Object::value( carto::PropertySet() );
       newoptions->copyProperties( options );
       rVol.setOptions( newoptions );
-      printMessage( "reading volume...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "reading volume...", "VOLUMEUTILIO" );
       fullVolume = rVol.read();
-      printEnd( VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "===", "VOLUMEUTILIO" );
 
-      printTitle( "HEADER", VOLUMEUTILIO_VERBOSITY+1 );
-      if( verbose >= VOLUMEUTILIO_VERBOSITY+1 ) {
-        printMessage( "Volume's :", VOLUMEUTILIO_VERBOSITY+1 );
-        printheader( carto::Object::value( fullVolume->header() ) );
-        std::cout << "Volume size : ( " 
-                  << fullVolume->header().getProperty( "sizeX" )->getScalar() << ", " 
-                  << fullVolume->header().getProperty( "sizeY" )->getScalar() << ", "
-                  << fullVolume->header().getProperty( "sizeZ" )->getScalar() << ", "
-                  << fullVolume->header().getProperty( "sizeT" )->getScalar() << " )"
-                  << std::endl;
-        printMessage( "Reader's :", VOLUMEUTILIO_VERBOSITY+1 );
-        printheader( rVol.dataSourceInfo()->header() );
-      }
-      printEnd( VOLUMEUTILIO_VERBOSITY+1 );
+      //--- HEADER -------------------------------------------------------------
+      cartoCondMsg( VIO_V+1, "=== HEADER", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Volume's :", "VOLUMEUTILIO" );
+      printheader( VIO_V+1, carto::Object::value( fullVolume->header() ) );
+      cartoCondMsg( VIO_V+1, "Volume size : ( "
+                + fullVolume->header().getProperty( "sizeX" )->getString() + ", " 
+                + fullVolume->header().getProperty( "sizeY" )->getString() + ", "
+                + fullVolume->header().getProperty( "sizeZ" )->getString() + ", "
+                + fullVolume->header().getProperty( "sizeT" )->getString() + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Reader's :", "VOLUMEUTILIO" );
+      printheader( VIO_V+1, rVol.dataSourceInfo()->header() );
+      cartoCondMsg( VIO_V+1, "===", "VOLUMEUTILIO" );
+      //------------------------------------------------------------------------
     }
 
     return fullVolume;
   }
 
   template <typename T> carto::Volume<T>* 
-  VolumeUtilIO<T>::readPartial( carto::rc_ptr<DataSourceInfo> dsi, 
-                               std::vector<int> position, std::vector<int> frame,
-                               std::vector<int> borders, carto::Object options )
+  VolumeUtilIO<T>::readPartial( //carto::Volume<T> *             obj,
+                                carto::rc_ptr<DataSourceInfo>  dsi,
+                                std::vector<int>               position, 
+                                std::vector<int>               frame,
+                                std::vector<int>               borders, 
+                                carto::Object                  options )
   {
     //=== VARIABLES ============================================================
     int verbose = carto::debugMessageLevel;
@@ -292,16 +309,15 @@ namespace soma {
     carto::Volume<T>* viewVolume;
 
     //=== UNALLOCATED FULL VOLUME ==============================================
-
-    printTitle( "UNALLOCATED FULL VOLUME", VOLUMEUTILIO_VERBOSITY );
+    cartoCondMsg( VIO_V, "=== UNALLOCATED FULL VOLUME", "VOLUMEUTILIO" );
     rVol = soma::Reader<carto::Volume<T> >( dsi );
     newoptions = carto::Object::value( carto::PropertySet() );
     newoptions->setProperty( "unallocated", true );
     newoptions->copyProperties( options );
     rVol.setOptions( newoptions );
-    printMessage( "reading unallocated volume...", VOLUMEUTILIO_VERBOSITY );
+    cartoCondMsg( VIO_V, "reading unallocated volume...", "VOLUMEUTILIO" );
     fullVolume = carto::VolumeRef<T>( rVol.read() );
-    printMessage( "reading size from volume...", VOLUMEUTILIO_VERBOSITY );
+    cartoCondMsg( VIO_V, "reading size from volume...", "VOLUMEUTILIO" );
     fullsize[ 0 ] = fullVolume->getSizeX();
     fullsize[ 1 ] = fullVolume->getSizeY();
     fullsize[ 2 ] = fullVolume->getSizeZ();
@@ -314,28 +330,28 @@ namespace soma {
       viewframe[ 2 ] = fullsize[ 2 ];
     if( viewframe[ 3 ] == 0 )
       viewframe[ 3 ] = fullsize[ 3 ];
-    printEnd( 1 );
-    
-    printTitle( "HEADER", VOLUMEUTILIO_VERBOSITY+1 );
-    if( verbose >= VOLUMEUTILIO_VERBOSITY+1 ) {
-      printMessage( "Volume's :", VOLUMEUTILIO_VERBOSITY+1 );
-      printheader( carto::Object::value( fullVolume->header() ) );
-      std::cout << "Volume size : ( " 
-                << fullVolume->header().getProperty( "sizeX" )->getScalar() << ", " 
-                << fullVolume->header().getProperty( "sizeY" )->getScalar() << ", "
-                << fullVolume->header().getProperty( "sizeZ" )->getScalar() << ", "
-                << fullVolume->header().getProperty( "sizeT" )->getScalar() << " )"
-                << std::endl;
-      printMessage( "Reader's :", VOLUMEUTILIO_VERBOSITY+1 );
-      printheader( rVol.dataSourceInfo()->header() );
-    }
-    printEnd( VOLUMEUTILIO_VERBOSITY+1 );
+    cartoCondMsg( VIO_V, "===", "VOLUMEUTILIO" );
 
-    if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 ) {
+    //--- HEADER ---------------------------------------------------------------
+    cartoCondMsg( VIO_V+1, "=== HEADER", "VOLUMEUTILIO" );
+    cartoCondMsg( VIO_V+1, "Volume's :", "VOLUMEUTILIO" );
+    printheader( VIO_V+1, carto::Object::value( fullVolume->header() ) );
+    cartoCondMsg( VIO_V+1, "Volume size : ( "
+              + fullVolume->header().getProperty( "sizeX" )->getString() + ", " 
+              + fullVolume->header().getProperty( "sizeY" )->getString() + ", "
+              + fullVolume->header().getProperty( "sizeZ" )->getString() + ", "
+              + fullVolume->header().getProperty( "sizeT" )->getString() + " )"
+              , "VOLUMEUTILIO" );
+    cartoCondMsg( VIO_V+1, "Reader's :", "VOLUMEUTILIO" );
+    printheader( VIO_V+1, rVol.dataSourceInfo()->header() );
+    cartoCondMsg( VIO_V+1, "===", "VOLUMEUTILIO" );
+    //--------------------------------------------------------------------------
+
+    if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 ) 
+    {
       //=== ALLOCATED BORDERS VOLUME ===========================================
-      
-      printTitle( "ALLOCATED BORDERS VOLUME", VOLUMEUTILIO_VERBOSITY );
-      printMessage( "computing borders...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "=== ALLOCATED BORDERS VOLUME", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "computing borders...", "VOLUMEUTILIO" );
       // setting "bordersVolume" position / "fullVolume"
       borderpos = viewpos;
       borderpos[0] -= borders[0];
@@ -345,37 +361,36 @@ namespace soma {
       borderframe[0] += 2*borders[0];
       borderframe[1] += 2*borders[1];
       borderframe[2] += 2*borders[2];
-      printMessage( "creating volume...", VOLUMEUTILIO_VERBOSITY );
-      printMessage( "with frame size ( "
-                    + carto::FileUtil::itos( borderframe[0] ) + ", "
-                    + carto::FileUtil::itos( borderframe[1] ) + ", "
-                    + carto::FileUtil::itos( borderframe[2] ) + ", "
-                    + carto::FileUtil::itos( borderframe[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
-      printMessage( "with frame pos ( "
-                    + carto::FileUtil::itos( borderpos[0] ) + ", "
-                    + carto::FileUtil::itos( borderpos[1] ) + ", "
-                    + carto::FileUtil::itos( borderpos[2] ) + ", "
-                    + carto::FileUtil::itos( borderpos[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "creating volume...", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "-> with frame size ( "
+                + carto::toString( borderframe[0] ) + ", "
+                + carto::toString( borderframe[1] ) + ", "
+                + carto::toString( borderframe[2] ) + ", "
+                + carto::toString( borderframe[3] ) + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "-> with frame pos ( "
+                + carto::toString( borderpos[0] ) + ", "
+                + carto::toString( borderpos[1] ) + ", "
+                + carto::toString( borderpos[2] ) + ", "
+                + carto::toString( borderpos[3] ) + " )"
+                , "VOLUMEUTILIO" );
       bordersVolume = carto::VolumeRef<T>( new carto::VolumeView<T>( fullVolume, borderpos, borderframe ) );
-      printEnd( VOLUMEUTILIO_VERBOSITY );
-      
-      printTitle( "HEADER", VOLUMEUTILIO_VERBOSITY+1 );
-      if( verbose >= VOLUMEUTILIO_VERBOSITY+1 ) {
-        std::cout << "Volume size : ( " 
-                  << bordersVolume->header().getProperty( "sizeX" )->getScalar() << ", " 
-                  << bordersVolume->header().getProperty( "sizeY" )->getScalar() << ", "
-                  << bordersVolume->header().getProperty( "sizeZ" )->getScalar() << ", "
-                  << bordersVolume->header().getProperty( "sizeT" )->getScalar() << " )"
-                  << std::endl;
-      }
-      printEnd( VOLUMEUTILIO_VERBOSITY+1 );
+      cartoCondMsg( VIO_V, "===", "VOLUMEUTILIO" );
+
+      //--- HEADER -------------------------------------------------------------
+      cartoCondMsg( VIO_V+1, "HEADER", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Volume size : ( "
+                + bordersVolume->header().getProperty( "sizeX" )->getString() + ", " 
+                + bordersVolume->header().getProperty( "sizeY" )->getString() + ", "
+                + bordersVolume->header().getProperty( "sizeZ" )->getString() + ", "
+                + bordersVolume->header().getProperty( "sizeT" )->getString() + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "===", "VOLUMEUTILIO" );
+      //------------------------------------------------------------------------
 
       //=== UNALLOCATED READ VIEW ==============================================
-
-      printTitle( "UNALLOCATED READ VIEW", VOLUMEUTILIO_VERBOSITY );
-      printMessage( "computing read frame...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "=== UNALLOCATED READ VIEW", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "computing read frame...", "VOLUMEUTILIO" );
       // setting "readVolume" position / "bordersVolume"
       readpos[0] = ( borderpos[0] < 0 ? borders[0] : 0 );
       readpos[1] = ( borderpos[1] < 0 ? borders[1] : 0 );
@@ -397,63 +412,62 @@ namespace soma {
       newoptions->setProperty( "partial_reading", true );
       newoptions->copyProperties( options );
       rView.setOptions( newoptions );
-      printMessage( "creating volume...", VOLUMEUTILIO_VERBOSITY );
-      printMessage( "with frame size ( "
-                    + carto::FileUtil::itos( readframe[0] ) + ", "
-                    + carto::FileUtil::itos( readframe[1] ) + ", "
-                    + carto::FileUtil::itos( readframe[2] ) + ", "
-                    + carto::FileUtil::itos( readframe[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
-      printMessage( "with frame pos ( "
-                    + carto::FileUtil::itos( readpos[0] ) + ", "
-                    + carto::FileUtil::itos( readpos[1] ) + ", "
-                    + carto::FileUtil::itos( readpos[2] ) + ", "
-                    + carto::FileUtil::itos( readpos[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "creating volume...", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "-> with frame size ( "
+                + carto::toString( readframe[0] ) + ", "
+                + carto::toString( readframe[1] ) + ", "
+                + carto::toString( readframe[2] ) + ", "
+                + carto::toString( readframe[3] ) + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "-> with frame pos ( "
+                + carto::toString( readpos[0] ) + ", "
+                + carto::toString( readpos[1] ) + ", "
+                + carto::toString( readpos[2] ) + ", "
+                + carto::toString( readpos[3] ) + " )"
+                , "VOLUMEUTILIO" );
       readVolume = carto::VolumeRef<T>( new carto::VolumeView<T>( bordersVolume, readpos, readframe ) );
-      printMessage( "reading frame...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "reading frame...", "VOLUMEUTILIO" );
       rView.read( *readVolume );
-      printEnd( VOLUMEUTILIO_VERBOSITY );
-      
-      printTitle( "HEADER", VOLUMEUTILIO_VERBOSITY+1 );
-      if( verbose >= VOLUMEUTILIO_VERBOSITY+1 ) {
-        printMessage( "Volume's :", VOLUMEUTILIO_VERBOSITY+1 );
-        printheader( carto::Object::value( readVolume->header() ) );
-        std::cout << "Volume size : ( " 
-                  << readVolume->header().getProperty( "sizeX" )->getScalar() << ", " 
-                  << readVolume->header().getProperty( "sizeY" )->getScalar() << ", "
-                  << readVolume->header().getProperty( "sizeZ" )->getScalar() << ", "
-                  << readVolume->header().getProperty( "sizeT" )->getScalar() << " )"
-                  << std::endl;
-        printMessage( "Reader's :", VOLUMEUTILIO_VERBOSITY+1 );
-        printheader( rView.dataSourceInfo()->header() );
-      }
-      printEnd( VOLUMEUTILIO_VERBOSITY+1 );
-      
+      cartoCondMsg( VIO_V, "===", "VOLUMEUTILIO" );
+
+      //--- HEADER -------------------------------------------------------------
+      cartoCondMsg( VIO_V+1, "=== HEADER", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Volume's :", "VOLUMEUTILIO" );
+      printheader( VIO_V+1, carto::Object::value( readVolume->header() ) );
+      cartoCondMsg( VIO_V+1, "Volume size : ( "
+                + readVolume->header().getProperty( "sizeX" )->getString() + ", " 
+                + readVolume->header().getProperty( "sizeY" )->getString() + ", "
+                + readVolume->header().getProperty( "sizeZ" )->getString() + ", "
+                + readVolume->header().getProperty( "sizeT" )->getString() + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Reader's :", "VOLUMEUTILIO" );
+      printheader( VIO_V+1, rView.dataSourceInfo()->header() );
+      cartoCondMsg( VIO_V+1, "===", "VOLUMEUTILIO" );
+      //------------------------------------------------------------------------
+
       //=== UNALLOCATED PROCCESSED VOLUME ======================================
-      
-      printTitle( "UNALLOCATED PROCCESSED VOLUME", VOLUMEUTILIO_VERBOSITY );
-      printMessage( "computing view frame...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "=== UNALLOCATED PROCCESSED VOLUME", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "computing view frame...", "VOLUMEUTILIO" );
       // setting "viewVolume" position / "bordersVolume"
       viewpos[0] = borders[0];
       viewpos[1] = borders[1];
       viewpos[2] = borders[2];
       viewpos[3] = 0;
-      printMessage( "creating volume...", VOLUMEUTILIO_VERBOSITY );
-      printMessage( "with frame size ( "
-                    + carto::FileUtil::itos( viewframe[0] ) + ", "
-                    + carto::FileUtil::itos( viewframe[1] ) + ", "
-                    + carto::FileUtil::itos( viewframe[2] ) + ", "
-                    + carto::FileUtil::itos( viewframe[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
-      printMessage( "with frame pos ( "
-                    + carto::FileUtil::itos( viewpos[0] ) + ", "
-                    + carto::FileUtil::itos( viewpos[1] ) + ", "
-                    + carto::FileUtil::itos( viewpos[2] ) + ", "
-                    + carto::FileUtil::itos( viewpos[3] ) + " )"
-                    , VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "creating volume...", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "-> with frame size ( "
+                + carto::toString( viewframe[0] ) + ", "
+                + carto::toString( viewframe[1] ) + ", "
+                + carto::toString( viewframe[2] ) + ", "
+                + carto::toString( viewframe[3] ) + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V, "-> with frame pos ( "
+                + carto::toString( viewpos[0] ) + ", "
+                + carto::toString( viewpos[1] ) + ", "
+                + carto::toString( viewpos[2] ) + ", "
+                + carto::toString( viewpos[3] ) + " )"
+                , "VOLUMEUTILIO" );
       viewVolume = new carto::VolumeView<T>( bordersVolume, viewpos, viewframe );
-      printMessage( "copying header...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "copying header...", "VOLUMEUTILIO" );
       viewVolume->blockSignals( true );
       viewVolume->header().copyProperties( carto::Object::value( readVolume->header() ) );
       carto::PropertySet & ps = viewVolume->header();
@@ -462,51 +476,50 @@ namespace soma {
       ps.setProperty( "sizeZ", viewframe[2] );
       ps.setProperty( "sizeT", viewframe[3] );
       viewVolume->blockSignals( false );
-      printEnd( VOLUMEUTILIO_VERBOSITY );
-      
-      printTitle( "HEADER", VOLUMEUTILIO_VERBOSITY+1 );
-      if( verbose >= VOLUMEUTILIO_VERBOSITY+1 ) {
-        printMessage( "Volume's :", VOLUMEUTILIO_VERBOSITY+1 );
-        printheader( carto::Object::value( viewVolume->header() ) );
-        std::cout << "Volume size : ( " 
-                  << viewVolume->header().getProperty( "sizeX" )->getScalar() << ", " 
-                  << viewVolume->header().getProperty( "sizeY" )->getScalar() << ", "
-                  << viewVolume->header().getProperty( "sizeZ" )->getScalar() << ", "
-                  << viewVolume->header().getProperty( "sizeT" )->getScalar() << " )"
-                  << std::endl;
-      }
-      printEnd( VOLUMEUTILIO_VERBOSITY+1 );
+      cartoCondMsg( VIO_V, "===", "VOLUMEUTILIO" );
+
+      //--- HEADER -------------------------------------------------------------
+      cartoCondMsg( VIO_V+1, "=== HEADER", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Volume's :", "VOLUMEUTILIO" );
+      printheader( VIO_V+1, carto::Object::value( viewVolume->header() ) );
+      cartoCondMsg( VIO_V+1, "Volume size : ( "
+                + viewVolume->header().getProperty( "sizeX" )->getString() + ", " 
+                + viewVolume->header().getProperty( "sizeY" )->getString() + ", "
+                + viewVolume->header().getProperty( "sizeZ" )->getString() + ", "
+                + viewVolume->header().getProperty( "sizeT" )->getString() + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "===", "VOLUMEUTILIO" );
+      //------------------------------------------------------------------------
     }
     else 
     {
       //=== ALLOCATED PROCESSED VOLUME =========================================
-      
-      printTitle( "ALLOCATED PROCESSED VOLUME", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "=== ALLOCATED PROCESSED VOLUME", "VOLUMEUTILIO" );
       rView = soma::Reader<carto::Volume<T> >( rVol.dataSourceInfo() );
       newoptions = carto::Object::value( carto::PropertySet() );
       newoptions->setProperty( "partial_reading", true );
       newoptions->copyProperties( options );
       rView.setOptions( newoptions );
-      printMessage( "creating volume...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "creating volume...", "VOLUMEUTILIO" );
       viewVolume = new carto::VolumeView<T>( fullVolume, viewpos, viewframe );
-      printMessage( "reading partial volume...", VOLUMEUTILIO_VERBOSITY );
+      cartoCondMsg( VIO_V, "reading partial volume...", "VOLUMEUTILIO" );
       rView.read( *viewVolume );
-      printEnd( VOLUMEUTILIO_VERBOSITY );
-      
-      printTitle( "HEADER", VOLUMEUTILIO_VERBOSITY+1 );
-      if( verbose >= VOLUMEUTILIO_VERBOSITY+1 ) {
-        printMessage( "Volume's :", VOLUMEUTILIO_VERBOSITY+1 );;
-        printheader( carto::Object::value( viewVolume->header() ) );
-        std::cout << "Volume size : ( " 
-                  << viewVolume->header().getProperty( "sizeX" )->getScalar() << ", " 
-                  << viewVolume->header().getProperty( "sizeY" )->getScalar() << ", "
-                  << viewVolume->header().getProperty( "sizeZ" )->getScalar() << ", "
-                  << viewVolume->header().getProperty( "sizeT" )->getScalar() << " )"
-                  << std::endl;
-        printMessage( "Reader's :", VOLUMEUTILIO_VERBOSITY+1 );
-        printheader( rView.dataSourceInfo()->header() );
-      }
-      printEnd( VOLUMEUTILIO_VERBOSITY+1 );
+      cartoCondMsg( VIO_V, "===", "VOLUMEUTILIO" );
+
+      //--- HEADER -------------------------------------------------------------
+      cartoCondMsg( VIO_V+1, "=== HEADER", "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Volume's :", "VOLUMEUTILIO" );;
+      printheader( VIO_V+1, carto::Object::value( viewVolume->header() ) );
+      cartoCondMsg( VIO_V+1, "Volume size : ( "
+                + viewVolume->header().getProperty( "sizeX" )->getString() + ", " 
+                + viewVolume->header().getProperty( "sizeY" )->getString() + ", "
+                + viewVolume->header().getProperty( "sizeZ" )->getString() + ", "
+                + viewVolume->header().getProperty( "sizeT" )->getString() + " )"
+                , "VOLUMEUTILIO" );
+      cartoCondMsg( VIO_V+1, "Reader's :", "VOLUMEUTILIO" );
+      printheader( VIO_V+1, rView.dataSourceInfo()->header() );
+      cartoCondMsg( VIO_V+1, "===", "VOLUMEUTILIO" );
+      //------------------------------------------------------------------------
     }
     
     return viewVolume;
@@ -514,6 +527,6 @@ namespace soma {
 
 }
 
-#undef VERBOSITY
+#undef VIO_V
 
 #endif

@@ -46,6 +46,38 @@
 #include <cartobase/plugin/plugin.h>
 #include <set>
 
+#ifdef USE_SOMA_IO
+  #include <soma-io/io/writer_d.h>
+  #include <soma-io/io/formatdictionary_d.h>
+  #define AIMS_INSTANTIATE_WRITER( T ) \
+    namespace aims { \
+      template class aims::Writer< T >; \
+      template bool \
+      GenericWriter::write< T >( const T &, bool, const string * ); \
+    } \
+    namespace soma { \
+      template class soma::Writer< T >; \
+    }
+  #define AIMS_INSTANTIATE_ONLY_WRITER( T ) \
+    namespace aims { \
+      template class aims::Writer< T >; \
+    } \
+    namespace soma { \
+      template class soma::Writer< T >; \
+    }
+#else
+  #define AIMS_INSTANTIATE_WRITER( T ) \
+    namespace aims { \
+      template class aims::Writer< T >; \
+      template bool \
+      GenericWriter::write< T >( const T &, bool, const string * ); \
+    }
+  #define AIMS_INSTANTIATE_ONLY_WRITER( T ) \
+    namespace aims { \
+      template class aims::Writer< T >; \
+    }
+#endif
+
 #include <iostream>
 
 
@@ -94,6 +126,26 @@ namespace aims
   template<class T>
   bool Writer<T>::write( const T & obj, bool ascii, const std::string* format )
   {
+#ifdef USE_SOMA_IO
+    // try first soma-io writer (since 2013)
+    try{
+      // building uri
+      std::string uri = _filename;
+      if( ascii || format )
+        uri += "?";
+      if( ascii )
+        uri += "ascii";
+      if( ascii && format )
+        uri += "&";
+      if ( format )
+        uri += ( "format=" + *format );
+
+      soma::Writer<T> writer( uri );
+      return writer.write( obj, _options );
+    } catch( ... ) {}
+    // if it failed, continue with aims reader.
+#endif
+
     // force loading plugins if it has not been done already
     carto::PluginLoader::load();
 

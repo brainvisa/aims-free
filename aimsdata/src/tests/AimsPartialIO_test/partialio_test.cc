@@ -33,11 +33,11 @@
 
 //--- aims ---------------------------------------------------------------------
 #include <aims/rgb/rgb.h>
+#include <aims/io/reader.h>
 //--- cartodata ----------------------------------------------------------------
 #include <cartodata/volume/volumeview.h>
 //--- soma-io ------------------------------------------------------------------
-#include <soma-io/config/soma_config.h>
-#include <soma-io/io/reader.h>
+//#include <soma-io/io/reader.h>
 #include <soma-io/io/writer.h>
 #include <soma-io/io/readeralgorithm.h>
 #include <soma-io/writer/pythonwriter.h>                   // if catch exception
@@ -46,12 +46,12 @@
 //--- cartobase ----------------------------------------------------------------
 #include <cartobase/object/object.h>                                  // options
 #include <cartobase/getopt/getopt.h>                       // create application
-#include <cartobase/config/verbose.h>
-#include <cartobase/stream/fileutil.h>  // read uri to check for partial writing
+#include <cartobase/config/verbose.h>            // verbosity level and cartoMsg
 //--- system -------------------------------------------------------------------
 #include <iostream>
 //------------------------------------------------------------------------------
 
+using namespace aims;
 using namespace soma;
 using namespace carto;
 using namespace std;
@@ -97,10 +97,12 @@ bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
   string fullname;
   
   //=== READ VOLUME ============================================================
-  Reader<Volume<T> > rVol( src );
+  cartoMsg( 1, "reading volume...", "PARTIALIO_TEST" );
+  Reader<Volume<T> > rVol( src->url() );
   VolumeRef<T> view( rVol.read() );
   
   //=== FIND FULL VOLUME =======================================================
+  cartoMsg( 1, "finding parent volume...", "PARTIALIO_TEST" );
   Volume<T> *isvolume = view.get();
   VolumeView<T> *isview = 0;
   while( isview = dynamic_cast<carto::VolumeView<T> *>( isvolume ) ) {
@@ -110,22 +112,19 @@ bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
   VolumeRef<T> vol( isvolume );
   
   //=== WRITE VOLUME ===========================================================
-  cout << endl;
-  cout << "=== WRITE VOLUME ====================================================" << endl;
   Writer<VolumeRef<T> > vfw( "" );
   if( !ma.cfname.empty() ) {
     vfw.attach( ma.cfname );
     options = Object::value( PropertySet() );
-    cout << "writing empty full volume..." << endl;
+    cartoMsg( 1, "writing empty full volume...", "PARTIALIO_TEST" );
     vfw.write( vol, options );
   }
   if( !ma.ofname.empty() ) {
     options = Object::value( PropertySet() );
     vfw.attach( ma.ofname );
-    cout << "writing view..." << endl;
+    cartoMsg( 1, "writing view...", "PARTIALIO_TEST" );
     vfw.write( view, options );
   }
-  cout << "=====================================================================" << endl;
   
   return true;
 }
@@ -158,7 +157,7 @@ int main( int argc, const char** argv )
       cerr << "couldn't process file " << fname << endl;
       return EXIT_FAILURE;
     }
-    cout << "OK\n";
+    cartoMsg( 1, "OK", "PARTIALIO_TEST" );
     
   }
   catch( user_interruption & )

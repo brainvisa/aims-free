@@ -35,11 +35,11 @@
 #define CARTODATA_VOLUME_VOLUMEVIEW_H
 
 #include <cartodata/volume/volume.h>
-#include <soma-io/image/voxelrgb_d.h>
-#include <soma-io/image/voxelrgba_d.h>
-#include <soma-io/image/voxelhsv.h>
 #ifdef USE_SOMA_IO
   #include <soma-io/datasource/bufferdatasource.h>
+  #include <soma-io/image/voxelrgb_d.h>
+  #include <soma-io/image/voxelrgba_d.h>
+  #include <soma-io/image/voxelhsv.h>
 #else
   #include <cartobase/datasource/bufferdatasource.h>
 #endif
@@ -180,9 +180,11 @@ namespace carto
   extern template class VolumeView<double>;
   extern template class VolumeView<cfloat>;
   extern template class VolumeView<cdouble>;
+#ifdef USE_SOMA_IO
   extern template class VolumeView<soma::VoxelRGB>;
   extern template class VolumeView<soma::VoxelRGBA>;
   extern template class VolumeView<soma::VoxelHSV>;
+#endif
 
   
 } // namespace carto

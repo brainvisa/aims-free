@@ -39,9 +39,12 @@
 #include <cartobase/containers/allocatedvector.h>
 #include <cartobase/type/types.h>
 #include <cartobase/io/creator.h>
-#include <soma-io/image/voxelrgb_d.h>
-#include <soma-io/image/voxelrgba_d.h>
-#include <soma-io/image/voxelhsv.h>
+
+#ifdef USE_SOMA_IO
+  #include <soma-io/image/voxelrgb_d.h>
+  #include <soma-io/image/voxelrgba_d.h>
+  #include <soma-io/image/voxelhsv.h>
+#endif
 
 #ifdef CARTO_USE_BLITZ
 #ifdef _WIN32
@@ -492,9 +495,11 @@ namespace carto
   extern template class Volume<cfloat>;
   extern template class Volume<cdouble>;
   extern template class Volume< std::map<int, float> >;
+#ifdef USE_SOMA_IO
   extern template class Volume< soma::VoxelRGB >;
   extern template class Volume< soma::VoxelRGBA >;
   extern template class Volume< soma::VoxelHSV >;
+#endif
 
   extern template class Creator<Volume<int8_t> >;
   extern template class Creator<Volume<uint8_t> >;
@@ -513,9 +518,11 @@ namespace carto
   extern template class Creator<Volume<cfloat> >;
   extern template class Creator<Volume<cdouble> >;
   extern template class Creator<Volume< std::map<int, float> > >;
+#ifdef USE_SOMA_IO
   extern template class Creator< soma::VoxelRGB >;
   extern template class Creator< soma::VoxelRGBA >;
   extern template class Creator< soma::VoxelHSV >;
+#endif
 
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< uint8_t > )
