@@ -33,72 +33,103 @@
 
 
 #include <cstdlib>
-#include <aims/io/io_g.h>
-#include <aims/data/data_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+#include <aims/data/data.h>
+#include <aims/io/process.h>
+#include <aims/io/finder.h>
+#include <aims/getopt/getopt2.h>
+// #include <aims/getopt/getoptProcess.h>
 #include <aims/utility/utility_g.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
-
-
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsMerge -i[nput] <filein>                                     ",
-  "          -M[ask] <mask>                                        ",
-  "          -o[utput] <fileout>                                   ",
-  "          -m[ode] <mm>                                          ",
-  "          [-l[abel] <label>]                                    ",
-  "          [-v[alue] <value>]                                    ",
-  "          [-h[elp]]                                             ",
-  "----------------------------------------------------------------",
-  "Merge a data and a byte label data                              ",
-  "----------------------------------------------------------------",
-  "     filein    : origin file                                    ",
-  "     fileout   : output file                                    ",
-  "     mask      : label  file                                    ",
-  "     mm        : mode that can be                               ",
-  "                   sv --> same values                           ",
-  "                   oo --> one to one                            ",
-  "                   ao --> all to one                            ",
-  "                   om --> one to maximum plus 1                 ",
-  "                   am --> all to maximum plus 1                 ",
-  "     label      : only label to get into account                ",
-  "     value      : replacement value                             ",
-  "----------------------------------------------------------------",
-END_USAGE
-
-
-void Usage( void )
-{
-  AimsUsage( usage );
-}
 
 
 template<class T>
 static bool doit( Process &, const string &, Finder & );
 
+template<typename T, typename U>
+static bool doit2( Process &, const string &, Finder & );
+
+class Merger;
+
+template <typename T>
+class Merger2 : public Process
+{
+public:
+  Merger2( Merger &, const string & );
+
+//   template <typename U>
+//   friend /*template <typename T, typename U>*/ bool doit2( Process &, const string &, Finder & );
+
+  Merger & merger;
+  string format;
+};
+
 
 class Merger : public Process
 {
 public:
-  Merger( const string & fout, float val, byte lab, merge_t m, AimsData<byte> & msk );
+  Merger( const string & fout, double val, int lab, merge_t m,
+          const string & msk );
 
 private:
-  template<class T>
-  friend bool doit( Process &, const string &, Finder & );
+  template<typename T>
+  friend class Merger2;
 
-  string		fileout;
-  float			value;
-  byte			label;
-  merge_t		mode;
-  AimsData<byte>	& mask;
+  template<typename T>
+  friend bool doit( Process &, const string &, Finder & );
+  template<typename T, typename U>
+  friend bool doit2( Process &, const string &, Finder & );
+
+  string                fileout;
+  double                value;
+  int                   label;
+  merge_t               mode;
+  string                mask;
 };
 
 
-Merger::Merger( const string & fout, float val, byte lab, merge_t m, 
-        AimsData<byte> & msk ) 
-  : Process(), fileout( fout ), value( val ), label( lab ), mode( m ), 
+template <typename T>
+Merger2<T>::Merger2( Merger & merger, const string & format )
+  : merger( merger ), format( format )
+{
+  registerProcessType( "Volume", "S8", &doit2<T, int8_t> );
+  registerProcessType( "Volume", "U8", &doit2<T, uint8_t> );
+  registerProcessType( "Volume", "S16", &doit2<T, int16_t> );
+  registerProcessType( "Volume", "U16", &doit2<T, uint16_t> );
+  registerProcessType( "Volume", "S32", &doit2<T, int32_t> );
+  registerProcessType( "Volume", "U32", &doit2<T, uint32_t> );
+}
+
+
+template<typename T, typename U>
+bool doit2( Process & p, const string & fname, Finder & f )
+{
+  Merger2<T>            & mp = (Merger2<T> &) p;
+  Merger                & m = mp.merger;
+  string                format = mp.format;
+  Reader<AimsData<T> >  r( fname );
+  AimsData<T>           in;
+
+  if( !r.read( in, 0, &format ) )
+    return false;
+
+  AimsData<U> mask;
+  Reader<AimsData<U> > mreader( m.mask );
+  mreader.read( mask );
+
+  AimsMerge<T,U> merge( m.mode, (T) m.value, (U) m.label );
+  Writer<AimsData<T> > writer( m.fileout );
+  return writer.write( merge( in, mask ) );
+}
+
+
+Merger::Merger( const string & fout, double val, int lab, merge_t m,
+        const string & msk )
+  : Process(), fileout( fout ), value( val ), label( lab ), mode( m ),
     mask( msk )
 {
   registerProcessType( "Volume", "S8", &doit<int8_t> );
@@ -117,54 +148,62 @@ bool doit( Process & p, const string & fname, Finder & f )
 {
   Merger		& mp = (Merger &) p;
   string		format = f.format();
-  Reader<AimsData<T> >	r( fname );
-  AimsData<T>		in;
 
-  if( !r.read( in, 0, &format ) )
-    return false;
-
-  AimsMerge<T,byte> merge( mp.mode, (char)mp.value, mp.label );
-  Writer<AimsData<T> > writer( mp.fileout );
-  return writer.write( merge( in, mp.mask ) );
+  Merger2<T> m2( mp, format );
+  return m2.execute( mp.mask );
 }
 
 
-int main( int argc, char **argv )
+int main( int argc, const char **argv )
 {
-  char *filein = NULL, *fileout = NULL, *smask = NULL, *smode = NULL;
-  float value = 0;
-  byte label = 0;
+  string filein, fileout, smask, smode;
+  double value = 0;
+  int label = 0;
   merge_t mode;
 
-  AimsOption opt[] = {
-  { 'h',"help"  ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0,},
-  { 'i',"input" ,AIMS_OPT_STRING,&filein     ,0                ,1},
-  { 'o',"output",AIMS_OPT_STRING,&fileout    ,0                ,1},
-  { 'M',"Mask"  ,AIMS_OPT_STRING,&smask      ,0                ,1},
-  { 'm',"mode"  ,AIMS_OPT_STRING,&smode      ,0                ,1},
-  { 'l',"label" ,AIMS_OPT_BYTE  ,&label      ,0                ,0},
-  { 'v',"value" ,AIMS_OPT_FLOAT ,&value      ,0                ,0},
-  { 0  ,0       ,AIMS_OPT_END   ,0           ,0                ,0}};
+  AimsApplication app( argc, argv, "Merge a volume and a byte label volume" );
+  app.addOption( filein, "-i", "origin file" );
+  app.alias( "--input", "-i" );
+  app.addOption( fileout, "-o", "output file" );
+  app.alias( "--output", "-o" );
+  app.addOption( smask, "-M", "mask file (int voxel type)" );
+  app.alias( "--Mask", "-M" );
+  app.addOption( smode, "-m", "mode that can be:\nsv --> same values\n"
+    "oo --> one to one\n"
+    "ao --> all to one\n"
+    "om --> one to maximum plus 1\n"
+    "am --> all to maximum plus 1" );
+  app.alias( "--mode", "-m" );
+  app.addOption( label, "-l", "only label to get into account", true );
+  app.alias( "--label", "-l" );
+  app.addOption( value, "-v", "replacement value", true );
+  app.alias( "--value", "-v" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
 
-  if      (string(smode)=="sv" ) mode = AIMS_MERGE_SAME_VALUES;
-  else if (string(smode)=="oo" ) mode = AIMS_MERGE_ONE_TO_ONE;
-  else if (string(smode)=="ao" ) mode = AIMS_MERGE_ALL_TO_ONE;
-  else if (string(smode)=="om" ) mode = AIMS_MERGE_ONE_TO_MAXP1;
-  else if (string(smode)=="am" ) mode = AIMS_MERGE_ALL_TO_MAXP1;
-  else
-    AimsError("AimsMerge : bad mode" );
+    if      (smode=="sv" ) mode = AIMS_MERGE_SAME_VALUES;
+    else if (smode=="oo" ) mode = AIMS_MERGE_ONE_TO_ONE;
+    else if (smode=="ao" ) mode = AIMS_MERGE_ALL_TO_ONE;
+    else if (smode=="om" ) mode = AIMS_MERGE_ONE_TO_MAXP1;
+    else if (smode=="am" ) mode = AIMS_MERGE_ALL_TO_MAXP1;
+    else
+      AimsError("AimsMerge : bad mode" );
 
-  AimsData<byte> mask;
-  Reader<AimsData<byte> > mreader( smask );
-  mreader >> mask;
+    Merger	proc( fileout, value, label, mode, smask );
+    if( !proc.execute( filein ) )
+      throw runtime_error( "couldn't process" );
 
-  Merger	proc( fileout, value, label, mode, mask );
-  if( !proc.execute( filein ) )
-    {
-      cerr << "couldn't process\n";
-      Usage();
-    }
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+
+  return EXIT_FAILURE;
 }
