@@ -201,10 +201,10 @@ bool printExtrema ( VolumeRef<T> & vol, const string & filename,
        << endl;
   */
 
-try
+  try
   {
-    //vol.reset( r.read( 0, &format ) );
-    if( !r.read( vol, 0, &format ) )
+    vol = *r.read( 0, &format );
+    if( !vol.get() )
       return false;
   }
  catch( exception & e )
@@ -214,9 +214,9 @@ try
      throw;
    }
 
-/*
+  /*
   cout << "extrema - vol read OK, header now: " 
-       << dynamic_cast<PythonHeader *>( vol.header() ) 
+       << dynamic_cast<PythonHeader *>( &vol->header() ) 
        << vol.get() 
        << endl;
   */
@@ -268,7 +268,7 @@ try
        << "(" << xmax << "," << ymax << "," 
        << zmax << "," << tmax << ")" << endl;
   cout   << "mean : " 
-       << sum / ( vol.getSizeX() * vol.getSizeY() * vol.getSizeZ() 
+       << sum / ( long( vol.getSizeX() ) * vol.getSizeY() * vol.getSizeZ() 
                   * vol.getSizeT() ) << endl;
 
   return true;
