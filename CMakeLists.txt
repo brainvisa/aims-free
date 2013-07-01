@@ -116,6 +116,9 @@ endif()
 if( MINC_FOUND )
   set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
        "${MINC_INCLUDE_DIRS}" )
+  if( MINC2_FOUND )
+    set( AIMS_HAS_MINC2 "1" )
+  endif()
 endif()
 if( TIFF_FOUND )
   set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
@@ -132,6 +135,9 @@ include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase "${LIBXML2_LIBRARIES}" )
 set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}" )
 
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/cartodata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/cartodata/config/config.h" @ONLY )
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/config.h" @ONLY )
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/src/aimsminc/config/aimsminc_config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/aimsminc_config.h" @ONLY )
 
 add_subdirectory( cartodata )
 add_subdirectory( graph )

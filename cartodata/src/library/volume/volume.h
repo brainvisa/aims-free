@@ -34,6 +34,7 @@
 #ifndef CARTODATA_VOLUME_VOLUME_H
 #define CARTODATA_VOLUME_VOLUME_H
 
+#include <cartodata/config/config.h>
 #include <cartobase/object/object.h>
 #include <cartodata/volume/volumeproxy.h>
 #include <cartobase/containers/allocatedvector.h>

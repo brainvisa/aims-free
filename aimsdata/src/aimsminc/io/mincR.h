@@ -34,6 +34,8 @@
 #ifndef AIMS_IO_MINCR_H
 #define AIMS_IO_MINCR_H
 
+#include <aims/config/aimsminc_config.h>
+
 //MINC I/O support
 extern "C" {
 /* redefine some stupid macros that conflict with 
@@ -45,7 +47,9 @@ extern "C" {
 #define SHORT MINC_SHORT
 #include <cstdlib>
 #include <volume_io.h>
+#ifdef AIMS_HAS_MINC2
 #include <minc2.h>
+#endif
 #undef SHORT
 #undef DOUBLE
 #undef FLOAT
@@ -110,8 +114,10 @@ namespace aims
 
   private:
     void readMinc1( AimsData<T> & data, int tmin, int dimt );
+#ifdef AIMS_HAS_MINC2
     void readMinc2( AimsData<T> & data, int tmin, int dimt );
     static mitype_t minc2TypeCode();
+#endif
 
     std::string		_name;
     std::string         _read_mode;
@@ -119,6 +125,7 @@ namespace aims
   };
 
 
+#ifdef AIMS_HAS_MINC2
   template <> inline mitype_t MincReader<int8_t>::minc2TypeCode()
   {
     return MI_TYPE_BYTE;
@@ -177,6 +184,7 @@ namespace aims
   {
     return MI_TYPE_DCOMPLEX;
   }
+#endif
 
 
   template <class T>
@@ -314,6 +322,7 @@ namespace aims
   }
 
 
+#ifdef AIMS_HAS_MINC2
   template <class T>
   inline
   void MincReader<T>::readMinc2( AimsData<T>& data, int tmin, int dimt )
@@ -484,6 +493,7 @@ namespace aims
     }
     miclose_volume( minc_volume );
   }
+#endif
 
 
   template <class T>
@@ -553,6 +563,7 @@ namespace aims
     {
       // std::cout << "reading...\n";
 
+#ifdef AIMS_HAS_MINC2
       try
       {
         readMinc2( data, tmin, dimt );
@@ -562,6 +573,10 @@ namespace aims
         // std::cout << "Minc2 read failed, using volume_io\n";
         readMinc1( data, tmin, dimt );
       }
+#else
+      // only Minc1 available
+      readMinc1( data, tmin, dimt );
+#endif
     }
 
     thing = data;
