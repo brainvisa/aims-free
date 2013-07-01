@@ -34,7 +34,7 @@
 #ifndef AIMSDATA_AIMSMINC_CONFIG_H
 #define AIMSDATA_AIMSMINC_CONFIG_H
 
-#include <aimsdata/config/config.h>
+#include <aims/config/config.h>
 
 #ifndef AIMS_HAS_MINC2
 #cmakedefine AIMS_HAS_MINC2
