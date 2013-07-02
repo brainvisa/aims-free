@@ -37,9 +37,9 @@
 #include <cartodata/volume/volume.h>
 #ifdef USE_SOMA_IO
   #include <soma-io/datasource/bufferdatasource.h>
-  #include <soma-io/image/voxelrgb_d.h>
-  #include <soma-io/image/voxelrgba_d.h>
-  #include <soma-io/image/voxelhsv.h>
+  #include <cartobase/type/voxelrgb_d.h>
+  #include <cartobase/type/voxelrgba_d.h>
+  #include <cartobase/type/voxelhsv.h>
 #else
   #include <cartobase/datasource/bufferdatasource.h>
 #endif
@@ -52,7 +52,9 @@ namespace carto
   template<typename T> class Writer;
   */
 
-
+  /// View into a Volume
+  /// \deprecated
+  /// Do not use anymore. Use Volume, which now manages views, instead.
   template <typename T>
   class VolumeView : public Volume<T>
   {
@@ -181,9 +183,9 @@ namespace carto
   extern template class VolumeView<cfloat>;
   extern template class VolumeView<cdouble>;
 #ifdef USE_SOMA_IO
-  extern template class VolumeView<soma::VoxelRGB>;
-  extern template class VolumeView<soma::VoxelRGBA>;
-  extern template class VolumeView<soma::VoxelHSV>;
+  extern template class VolumeView<VoxelRGB>;
+  extern template class VolumeView<VoxelRGBA>;
+  extern template class VolumeView<VoxelHSV>;
 #endif
 
   

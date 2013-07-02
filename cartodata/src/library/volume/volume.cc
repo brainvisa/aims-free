@@ -37,10 +37,9 @@
 #include <functional>
 
 #ifdef USE_SOMA_IO
-  #include <soma-io/image/voxelrgb_d.h>
-  #include <soma-io/image/voxelrgba_d.h>
-  #include <soma-io/image/voxelhsv.h>
-  using namespace soma;
+  #include <cartobase/type/voxelrgb.h>
+  #include <cartobase/type/voxelrgba.h>
+  #include <cartobase/type/voxelhsv.h>
 #endif
 
 using namespace carto;

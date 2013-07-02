@@ -576,6 +576,7 @@ Volume_%Template1typecode% * operator * ( long, Volume_%Template1typecode% & ) /
 
 %#endif%
 
+/*
 class VolumeView_%Template1typecode% : Volume_%Template1typecode%
 {
 %TypeHeaderCode
@@ -603,7 +604,7 @@ public:
   rc_ptr_Volume_%Template1typecode% refVolume() const;
   VolumeView_%Template1typecode%::Position4Di posInRefVolume() const;
 };
-
+*/
 
 %#undef PyAims_Volume_%Template1typecode%_defined%
 

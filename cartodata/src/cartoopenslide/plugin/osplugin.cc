@@ -38,9 +38,9 @@
 #include <cartodata/io/volumeformatreader_d.h>
 //--- soma-io ------------------------------------------------------------------
 #include <soma-io/io/formatdictionary_d.h>
-#include <soma-io/image/voxelrgba_d.h>
 //--- cartobase ----------------------------------------------------------------
 #include <cartobase/type/types.h>
+// #include <cartobase/type/voxelrgba.h>
 //--- system -------------------------------------------------------------------
 #include <vector>
 #include <string>
@@ -50,6 +50,11 @@ using namespace cartodata;
 using namespace soma;
 using namespace carto;
 using namespace std;
+
+
+namespace carto {
+  class VoxelRGBA;
+}
 
 namespace
 {

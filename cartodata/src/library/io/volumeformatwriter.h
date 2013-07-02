@@ -33,17 +33,17 @@
 
 #ifndef CARTODATA_IO_VOLUMEFORMATWRITER_H
 #define CARTODATA_IO_VOLUMEFORMATWRITER_H
-//--- soma io ------------------------------------------------------------------
+//--- soma io ----------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasource/datasource.h>
 #include <soma-io/image/imagewriter.h>
 #include <soma-io/writer/formatwriter.h>
-//--- cartobase ----------------------------------------------------------------
-#include <cartobase/object/object.h>                             // using none()
-#include <cartobase/smart/rcptr.h>                                     // member
-//--- system -------------------------------------------------------------------
+//--- cartobase --------------------------------------------------------------
+#include <cartobase/object/object.h>                           // using none()
+#include <cartobase/smart/rcptr.h>                                   // member
+//--- system -----------------------------------------------------------------
 #include <vector>
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 namespace carto
 {
@@ -55,13 +55,13 @@ namespace soma
 {
   class DataSourceInfo;
   
-  //============================================================================
+  //==========================================================================
   //   W R I T E R   O F   V O L U M E
-  //============================================================================
+  //==========================================================================
   /// FormatWriter specialized for 4D Volume.
   /// 
-  /// A such VolumeFormatWriter needs to be linked to a specialized ImageWriter 
-  /// before being registered into a FormatDictionary.\n
+  /// A such VolumeFormatWriter needs to be linked to a specialized 
+  /// ImageWriter before being registered into a FormatDictionary.\n
   /// It understands the Volume and detects specific cases (borders, partial 
   /// reading, ...) before performing the writing through its linked 
   /// ImageWriter.\n
@@ -93,9 +93,9 @@ namespace soma
       carto::rc_ptr<ImageWriter<T> > _imw;
   };
   
-  //============================================================================
+  //==========================================================================
   //   W R I T E R   O F   R E F E R E N C E   T O   V O L U M E
-  //============================================================================
+  //==========================================================================
   /// FormatWriter specialized for reference to 4D Volume.
   ///
   /// \see VolumeFormatWriter

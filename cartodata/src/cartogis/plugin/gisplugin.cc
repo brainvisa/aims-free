@@ -31,39 +31,46 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-//--- plugin ---------------------------------------------------------------------
+//--- plugin -----------------------------------------------------------------
 #include <cartodata/plugin/gisplugin.h>
 #include <soma-io/image/gisimagereader_d.h>
 #include <soma-io/image/gisimagewriter_d.h>
-//--- cartodata ----------------------------------------------------------------
+//--- cartodata --------------------------------------------------------------
 #include <cartodata/io/volumeformatreader_d.h>
 #include <cartodata/io/volumeformatwriter_d.h>
-//--- soma-io ------------------------------------------------------------------
+//--- soma-io ----------------------------------------------------------------
 #include <soma-io/io/formatdictionary_d.h>
-#include <soma-io/image/voxelrgb_d.h>
-#include <soma-io/image/voxelrgba_d.h>
-#include <soma-io/image/voxelhsv.h>
-//--- cartobase ----------------------------------------------------------------
+//--- cartobase --------------------------------------------------------------
 #include <cartobase/type/types.h>
-//--- system -------------------------------------------------------------------
+// #include <cartobase/type/voxelrgb.h>
+// #include <cartobase/type/voxelrgba.h>
+// #include <cartobase/type/voxelhsv.h>
+//--- system -----------------------------------------------------------------
 #include <vector>
 #include <string>
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 using namespace cartodata;
 using namespace soma;
 using namespace carto;
 using namespace std;
 
-namespace cartodata {
-  namespace {
-    bool initgis()
-    {
-      new GisPlugin;
-      return true;
-    }
-    bool gisinit = initgis();
+namespace carto {
+  class VoxelRGB;
+  class VoxelRGBA;
+  class VoxelHSV;
+}
+
+namespace {
+
+  bool initgis()
+  {
+    new GisPlugin;
+    return true;
   }
+
+  bool gisinit = initgis();
+
 }
 
 GisPlugin::GisPlugin() : Plugin()

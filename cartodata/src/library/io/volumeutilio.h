@@ -33,18 +33,15 @@
 #ifndef CARTODATA_IO_VOLUMEUTILIO_H
 #define CARTODATA_IO_VOLUMEUTILIO_H
 
-//--- cartodata ----------------------------------------------------------------
+//--- cartodata --------------------------------------------------------------
 #include <cartodata/volume/volume.h>
-//--- soma-io ------------------------------------------------------------------
-#include <soma-io/config/soma_config.h>                          // #define soma
-#include <soma-io/writer/pythonwriter.h>                         // print header
-//--- cartobase ----------------------------------------------------------------
-#include <cartobase/config/verbose.h>                             // printheader
+//--- soma-io ----------------------------------------------------------------
+#include <soma-io/config/soma_config.h>                        // #define soma
+//--- cartobase --------------------------------------------------------------
 #include <cartobase/object/object.h>
-//--- system -------------------------------------------------------------------
-#include <iostream>                                               // printheader
-#include <vector>                                                  // 4D vectors
-//------------------------------------------------------------------------------
+//--- system -----------------------------------------------------------------
+#include <vector>                                                // 4D vectors
+//----------------------------------------------------------------------------
 
 namespace soma {
 
@@ -52,49 +49,44 @@ namespace soma {
   class VolumeUtilIO
   {
     public:
-      //=== READ ===============================================================
+      //=== READ =============================================================
       /// list of properties triggering partial reading and/or borders
       static std::set<std::string> listReadProperties();
 
-      /// Manages all the volumes necessary and returns the final VolumeView
+      /// Manages all the volumes necessary and returns the final Volume.
       /// 
-      /// This method is called from VolumeFormatReader::createAndRead(). 
-      /// It reads all the parameters from options' properties and 
-      /// removes them afterwards. It then performs necessary allocation
-      /// and reading and returns obj as a fully usable VolumeView.
+      /// This method is called from VolumeFormatReader::createAndRead() or
+      /// VolumeFormatReader::setupAndRead(). It reads all the parameters
+      /// from options and removes them afterwards. It then performs
+      /// necessary allocation and reading.
+      ///
+      /// In setup case, use \c obj as a pointer to the Volume to setup.
+      /// In create case, give a null pointer. The method then allocates and
+      /// returns a new Volume.
+      ///
+      /// \note For now, no real setup is done : previous volume is replaced
+      /// by a new one. It would be interesting to perform a real setup
+      /// here but several cases have to be managed ( which volume is
+      /// allocated, etc )
       static carto::Volume<T>*
-      read( //carto::Volume<T>* obj,
+      read( carto::Volume<T>* obj,
             carto::rc_ptr<DataSourceInfo> dsi,
             carto::Object options );
 
       /// Worker for partial reading case
-      static carto::Volume<T>* 
-      readPartial( //carto::Volume<T>* obj, 
+      static carto::Volume<T>*
+      readPartial( carto::Volume<T>* obj,
                    carto::rc_ptr<DataSourceInfo> dsi,
                    std::vector<int> position, std::vector<int> frame,
                    std::vector<int> borders, carto::Object options );
 
       /// Worker for full reading case
-      static carto::Volume<T>* 
-      readFull( //carto::Volume<T>* obj,
+      static carto::Volume<T>*
+      readFull( carto::Volume<T>* obj,
                 carto::rc_ptr<DataSourceInfo> dsi,
                 std::vector<int> borders, carto::Object options );
   };
 
-  //============================================================================
-  //   U T I L I T I E S
-  //============================================================================
-  // to be moved/deleted
-
-  inline void
-  printheader( int verbose, carto::Object hdr )
-  {
-    if( verbose <= carto::debugMessageLevel ) {
-      soma::PythonWriter  pw;
-      pw.attach( std::cout );
-      pw.write( hdr );
-    }
-  }
 }
 
 #endif

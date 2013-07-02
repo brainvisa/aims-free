@@ -31,25 +31,25 @@
 * knowledge of the CeCILL-B license and that you accept its terms.
 */
 
-//--- aims ---------------------------------------------------------------------
+//--- aims -------------------------------------------------------------------
 #include <aims/rgb/rgb.h>
 #include <aims/io/reader.h>
-//--- cartodata ----------------------------------------------------------------
+//--- cartodata --------------------------------------------------------------
 #include <cartodata/volume/volumeview.h>
-//--- soma-io ------------------------------------------------------------------
+//--- soma-io ----------------------------------------------------------------
 //#include <soma-io/io/reader.h>
 #include <soma-io/io/writer.h>
 #include <soma-io/io/readeralgorithm.h>
-#include <soma-io/writer/pythonwriter.h>                   // if catch exception
-#include <soma-io/datasourceinfo/datasourceinfo.h>         // if catch exception
-#include <soma-io/datasourceinfo/datasourceinfoloader.h>   // if catch exception
-//--- cartobase ----------------------------------------------------------------
-#include <cartobase/object/object.h>                                  // options
-#include <cartobase/getopt/getopt.h>                       // create application
-#include <cartobase/config/verbose.h>            // verbosity level and cartoMsg
-//--- system -------------------------------------------------------------------
+#include <soma-io/writer/pythonwriter.h>                 // if catch exception
+#include <soma-io/datasourceinfo/datasourceinfo.h>       // if catch exception
+#include <soma-io/datasourceinfo/datasourceinfoloader.h> // if catch exception
+//--- cartobase --------------------------------------------------------------
+#include <cartobase/object/object.h>                                // options
+#include <cartobase/getopt/getopt.h>                     // create application
+#include <cartobase/config/verbose.h>          // verbosity level and cartoMsg
+//--- system -----------------------------------------------------------------
 #include <iostream>
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 using namespace aims;
 using namespace soma;
@@ -96,22 +96,26 @@ bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
   bool   partial_writing = false;
   string fullname;
   
-  //=== READ VOLUME ============================================================
+  //=== READ VOLUME ==========================================================
   cartoMsg( 1, "reading volume...", "PARTIALIO_TEST" );
-  Reader<Volume<T> > rVol( src->url() );
-  VolumeRef<T> view( rVol.read() );
+  Reader<VolumeRef<T> > rVol( src->url() );
+  VolumeRef<T> view;
+  rVol >> view;
   
-  //=== FIND FULL VOLUME =======================================================
+  //=== FIND FULL VOLUME =====================================================
   cartoMsg( 1, "finding parent volume...", "PARTIALIO_TEST" );
   Volume<T> *isvolume = view.get();
-  VolumeView<T> *isview = 0;
-  while( isview = dynamic_cast<carto::VolumeView<T> *>( isvolume ) ) {
-    isvolume = isview->refVolume().get();
+  Volume<T> *isview = 0;
+  int cnt = 0;
+  while( isview = isvolume->refVolume().get() ) {
+    cnt++;
+    cartoMsg( 1, " -> parent" + carto::toString( cnt ) + " found.", "PARTIALIO_TEST" );
+    isvolume = isview;
     isview = 0;
   }
   VolumeRef<T> vol( isvolume );
   
-  //=== WRITE VOLUME ===========================================================
+  //=== WRITE VOLUME =========================================================
   Writer<VolumeRef<T> > vfw( "" );
   if( !ma.cfname.empty() ) {
     vfw.attach( ma.cfname );
@@ -134,7 +138,7 @@ int main( int argc, const char** argv )
   string  fname;
   try
   {
-    //=== APPLICATION ==========================================================
+    //=== APPLICATION ========================================================
     string  ofname, cfname;
 
     CartoApplication  app( argc, argv, "Test for soma partial reading/writing" );
@@ -144,15 +148,16 @@ int main( int argc, const char** argv )
                    "either an existing full volume, or to use -c option.\n", true );
     app.addOption( cfname, "-c", "output filename of empty full volume.\n", true );
     app.alias( "-v", "--verbose" );
+    app.alias( "-d", "--debugLevel" );
 
     app.initialize();
     
-    //=== INITIALIZE ALGORITHM =================================================
+    //=== INITIALIZE ALGORITHM ===============================================
     PartialIOAlgo  palgo;
     palgo.ofname =  ofname;
     palgo.cfname =  cfname;
     
-    //=== RUN ALGORITHM ========================================================
+    //=== RUN ALGORITHM ======================================================
     if( !palgo.execute( fname ) ){
       cerr << "couldn't process file " << fname << endl;
       return EXIT_FAILURE;
@@ -179,4 +184,3 @@ int main( int argc, const char** argv )
 
   return EXIT_SUCCESS;
 }
-

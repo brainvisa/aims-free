@@ -38,11 +38,11 @@
 #define AIMS_RGB_RGB_H
 
 #ifdef USE_SOMA_IO
-  #include <soma-io/image/voxelrgb_d.h>
-  #include <soma-io/image/voxelrgba_d.h>
+  #include <cartobase/type/voxelrgb.h>
+  #include <cartobase/type/voxelrgba.h>
 
-  typedef soma::VoxelRGB AimsRGB;
-  typedef soma::VoxelRGBA AimsRGBA;
+  typedef carto::VoxelRGB AimsRGB;
+  typedef carto::VoxelRGBA AimsRGBA;
 
 #else // USE_SOMA_IO
 

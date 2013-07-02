@@ -33,70 +33,95 @@
 
 #ifndef CARTODATA_VOLUME_VOLUME_H
 #define CARTODATA_VOLUME_VOLUME_H
-
-#include <cartobase/object/object.h>
+//--- cartodata --------------------------------------------------------------
 #include <cartodata/volume/volumeproxy.h>
-#include <cartobase/containers/allocatedvector.h>
-#include <cartobase/type/types.h>
-#include <cartobase/io/creator.h>
-
+//--- soma-io ----------------------------------------------------------------
 #ifdef USE_SOMA_IO
-  #include <soma-io/image/voxelrgb_d.h>
-  #include <soma-io/image/voxelrgba_d.h>
-  #include <soma-io/image/voxelhsv.h>
+  #include <cartobase/type/voxelrgb_d.h>
+  #include <cartobase/type/voxelrgba_d.h>
+  #include <cartobase/type/voxelhsv.h>
 #endif
-
+//--- moved to soma-io -------------------------------------------------------
+#include <cartobase/containers/allocatedvector.h>
+#include <cartobase/io/creator.h>
+//--- cartobase --------------------------------------------------------------
+#include <cartobase/object/object.h>
+#include <cartobase/type/types.h>
+//--- blitz ------------------------------------------------------------------
 #ifdef CARTO_USE_BLITZ
-#ifdef _WIN32
-// disable thread-safe operations in blitz++ on windows since it uses pthread
-#ifdef _REENTRANT
-#define CARTO_REENTRANT_MEMO
-#undef _REENTRANT
-#endif
-#include <blitz/blitz.h>
-#ifdef CARTO_REENTRANT_MEMO
-#define _REENTRANT
-#undef CARTO_REENTRANT_MEMO
-#endif
-#endif
-
-#include <blitz/array.h>
+  #ifdef _WIN32
+    // disable thread-safe operations in blitz++ on windows since it uses pthread
+    #ifdef _REENTRANT
+      #define CARTO_REENTRANT_MEMO
+      #undef _REENTRANT
+    #endif
+    #include <blitz/blitz.h>
+    #ifdef CARTO_REENTRANT_MEMO
+      #define _REENTRANT
+      #undef CARTO_REENTRANT_MEMO
+    #endif
+  #endif
+  #include <blitz/array.h>
 #endif
 
 #define CARTO_VOLUME_AUTO_DEREFERENCE
+//----------------------------------------------------------------------------
 
 namespace carto
 {
-
-  /** 4D Volume main class
-
-  Volume is the normal class for volumes. VolumeView is a view into a Volume 
-  and allows for instance to handle borders.
-
-  Volumes should generally be used via reference-counting pointers (rc_ptr): 
-  there is a (slightly) specialized rc_ptr for Volume subclasses: VolumeRef.
-
-  \sa \ref cartovolumes
-
-  To use Volume classes on "standard" types (numeric types, on which the 
-  Volume class has already been compiled in the libraries), just include 
-  <cartodata/volume/volume.h>. If you need to use them on other non-standard 
-  types (if you get a link error about missing symbols), you will need to 
-  recompile the Volume template class on these types: in this case you should 
-  include <cartodata/volume/volume_d.h>, and force the compilation:
-
-  \code
-  #include <cartodata/volume/volume_d.h>
-
-  template class carto::Volume<MyType>;
-  \endcode
-  This should be done only once (in one source file) for each type.
-  */
+//============================================================================
+//   V O L U M E
+//============================================================================
+  /// 4D Volume main class
+  ///
+  /// Since 2013 release, Volume and VolumeView are merged into a single
+  /// class. Every Volume can be a view into an other volume. If it is not,
+  /// its parent volume is NULL. This allows to deal the same way with classic
+  /// volumes, volumes with borders or partially read volumes.
+  ///
+  /// Volumes should generally be used via reference-counting pointers
+  /// (rc_ptr): there is a (slightly) specialized rc_ptr for Volume
+  /// subclasses: VolumeRef.
+  ///
+  /// \sa \ref cartovolumes
+  ///
+  /// To use Volume classes on "standard" types (numeric types, on which the
+  /// Volume class has already been compiled in the libraries), just include
+  /// <cartodata/volume/volume.h>. If you need to use them on other
+  /// non-standard types (if you get a link error about missing symbols), you
+  /// will need to recompile the Volume template class on these types: in this
+  /// case you should include <cartodata/volume/volume_d.h>, and force the
+  /// compilation:
+  /// \code
+  /// #include <cartodata/volume/volume_d.h>
+  ///
+  /// template class carto::Volume<MyType>;
+  /// \endcode
+  /// This should be done only once (in one source file) for each type.
   template < typename T >
   class Volume : public VolumeProxy< T >
   {
-
   public:
+    //========================================================================
+    //   P O S I T I O N   4 D
+    //========================================================================
+    /// 4D int position, used to declare a view to a volume.
+    class Position4Di
+    {
+    public:
+      Position4Di( int x = 0, int y = 0, int z = 0, int t = 0 ) : _coords( 4 )
+      {
+        _coords[0] = x;
+        _coords[1] = y;
+        _coords[2] = z;
+        _coords[3] = t;
+      }
+      ~Position4Di() {}
+            int & operator [] ( int coord )       { return _coords[ coord ]; }
+      const int & operator [] ( int coord ) const { return _coords[ coord ]; }
+    private:
+      std::vector<int>  _coords;
+    };
 
 #ifdef CARTO_USE_BLITZ
     typedef typename blitz::Array<T,4>::iterator iterator;
@@ -106,45 +131,59 @@ namespace carto
     typedef typename AllocatedVector<T>::const_iterator const_iterator;
 #endif
 
-    /** Volume construction and allocation
-	\param sizeX number of voxels
-	\param sizeY number of voxels
-	\param sizeZ number of voxels
-	\param sizeT number of voxels
-	\param allocatorContext information about how to allocate the volume: 
-	it can be a bit complex to do really optimal things, but the default 
-	value (default constructor of AllocatorContext) is OK in most cases.
-	\param allocated normally left to \c true, it can exceptionnally be 
-	set to \c false for "virtual" volumes that must not be actually 
-	allocated but are only sources for a VolumeView.
-     */
+    //========================================================================
+    //   C ON S T R U C T O R S
+    //========================================================================
+    /// Volume construction and allocation
+    /// \param sizeX number of voxels
+    /// \param sizeY number of voxels
+    /// \param sizeZ number of voxels
+    /// \param sizeT number of voxels
+    /// \param allocatorContext information about how to allocate the volume: 
+    /// it can be a bit complex to do really optimal things, but the default
+    /// value (default constructor of AllocatorContext) is OK in most cases.
+    /// \param allocated normally left to \c true, it can exceptionnally be 
+    /// set to \c false for "virtual" volumes that must not be actually 
+    /// allocated but are only sources for a VolumeView.
     Volume( int sizeX = 1, int sizeY = 1, int sizeZ = 1, int sizeT = 1,
             const AllocatorContext& allocatorContext = AllocatorContext(), 
-	    bool allocated = true );
-    /** This constructor builds a Volume on an already allocated buffer. 
-        The Volume is not owner of the underlying data.
-    */
+            bool allocated = true );
+    /// This constructor builds a Volume on an already allocated buffer.
+    /// The Volume is not owner of the underlying data.
     Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer );
+    /// This is the volume view constructor.
+    /// Beware not to mix it up with the copy constructor ( it takes a pointer
+    /// to volume instead of a volume )
+    /// If parent volume is allocated, view points to its data and doesn't own
+    /// it. Else, it allocates \c size and owns it.
+    Volume( rc_ptr<Volume<T> > other,
+            const Position4Di & pos = Position4Di( 0, 0, 0, 0 ),
+            const Position4Di & size = Position4Di( -1, -1, -1, -1 ),
+            const AllocatorContext & allocContext = AllocatorContext() );
+    /// Copy constructor
     Volume( const Volume< T >& other );
     virtual ~Volume();
 
     Volume< T >& operator=( const Volume< T >& other );
 
+    //========================================================================
+    //   M E T H O D S
+    //========================================================================
+    /// Fills the volume with a given value.
     void fill( const T& value );
 
-    /** Iterators returned here are the most "basic" (and fastest) iterators: 
-	they go from the first voxel linerarly in memory, not taking care of 
-	offsets when in a VolumeView. Taking care of splitting loops 
-	line-by-line is the responsability of programmers using such iterators.
-     */
+    /// Iterators returned here are the most "basic" (and fastest) iterators:
+    /// they go from the first voxel linerarly in memory, not taking care of
+    /// offsets when in a VolumeView. Taking care of splitting loops
+    /// line-by-line is the responsability of programmers using such
+    /// iterators.
     iterator begin();
     iterator end();
     const_iterator begin() const;
     const_iterator end() const;
 
-    /** Warning: this operator is not virtual, so may not have the expected 
-	result on inherited classes (see VolumeView)
-    */
+    /// Warning: this operator is not virtual, so may not have the expected
+    /// result on inherited classes (see VolumeView)
     const T& operator()( long x, long y = 0, long z = 0, long t = 0 ) const;
     T& operator() ( long x, long y = 0, long z = 0, long t = 0 );
     const T& at( long x, long y = 0, long z = 0, long t = 0 ) const;
@@ -170,26 +209,30 @@ namespace carto
                           const blitz::Range & r2, 
                           const blitz::Range & r3 ) const;
 #endif
-
+    /// Initializes header info.
     virtual void initialize();
+    /// returns volume's AllocatorContext
     const AllocatorContext & allocatorContext() const;
-    /** This function is only useful in the particular context of an 
-	unallocated Volume, when the constructor has been used with the 
-	\c allocated flag to \c false.
-	Calling allocate() afterwards will actually allocate the memory. 
-	Otherwise it will do nothing.
-    */
+    /// This function is only useful in the particular context of an
+    /// unallocated Volume, when the constructor has been used with the 
+    /// \c allocated flag to \c false.
+    /// Calling allocate() afterwards will actually allocate the memory. 
+    /// Otherwise it will do nothing.
     void allocate();
     /// allows resizing and changing allocator
     virtual void reallocate( int sizeX = 1, int sizeY = 1, int sizeZ = 1, 
                              int sizeT = 1, bool keepcontents = false, 
                              const AllocatorContext& allocatorContext 
                              = AllocatorContext(), bool allocate = true );
+    /// Get parent volume
+    rc_ptr<Volume<T> > refVolume() const;
+    /// Get position in parent volume
+    Position4Di posInRefVolume() const;
 
   protected:
 
     void allocate( int oldSizeX, int oldSizeY, int oldSizeZ, int oldSizeT, 
-		   bool allocate, const AllocatorContext& allocatorContext );
+                   bool allocate, const AllocatorContext& allocatorContext );
     void slotSizeChanged( const PropertyFilter& propertyFilter );
 
     AllocatedVector<T> _items;
@@ -200,12 +243,15 @@ namespace carto
     size_t	_sliceoffset;
     size_t	_volumeoffset;
 #endif
+    rc_ptr<Volume<T> >  _refvol;
+    Position4Di         _pos;
   };
 
-
-  /** Convenient handle for a Volume - this is normally the entry point 
-      for all volumes handling
-  */
+//============================================================================
+//   V O L U M E   R E F
+//============================================================================
+  /// Convenient handle for a Volume - this is normally the entry point
+  /// for all volumes handling
   template<typename T>
   class VolumeRef : public rc_ptr<Volume<T> >
   {
@@ -229,20 +275,18 @@ namespace carto
     int getSizeY() const { return (*this)->getSizeY(); }
     int getSizeZ() const { return (*this)->getSizeZ(); }
     int getSizeT() const { return (*this)->getSizeT(); }
-    const PropertySet& header() const
-    { return (*this)->header(); }
-    PropertySet& header() { return (*this)->header(); }
+    const PropertySet& header() const { return (*this)->header(); }
+          PropertySet& header()       { return (*this)->header(); }
     /// Obsolete. still here for compatibility purpose. Use header() instead.
-    const PropertySet& getPropertySet() const
-    { return (*this)->header(); }
+    const PropertySet& getPropertySet() const { return (*this)->header(); }
     /// Obsolete. still here for compatibility purpose. Use header() instead.
-    PropertySet& getPropertySet() { return (*this)->header(); }
+          PropertySet& getPropertySet()       { return (*this)->header(); }
 
-    void fill( const T& value ) { (*this)->fill( value ); }
-    iterator begin() { return (*this)->begin(); }
-    iterator end() { return (*this)->end(); }
-    const_iterator begin() const { return (*this)->begin(); }
-    const_iterator end() const { return (*this)->end(); }
+    void fill( const T& value )   { (*this)->fill( value ); }
+    iterator       begin()        { return (*this)->begin(); }
+    iterator       end()          { return (*this)->end(); }
+    const_iterator begin()  const { return (*this)->begin(); }
+    const_iterator end()    const { return (*this)->end(); }
 
     const T& operator()( long x, long y = 0, long z = 0, long t = 0 ) const
     { return (**this)( x, y, z, t ); }
@@ -255,7 +299,9 @@ namespace carto
 #endif
   };
 
-
+//============================================================================
+//   U T I L I T I E S
+//============================================================================
 #ifndef DOXYGEN_HIDE_INTERNAL_CLASSES
 
   template <typename T>
@@ -298,7 +344,9 @@ namespace carto
 
 #endif
 
-
+//============================================================================
+//   D E F I N I T I O N S
+//============================================================================
   template < typename T >
   inline
   const T& Volume< T >::at( long x, long y, long z, long t ) const
@@ -476,7 +524,9 @@ namespace carto
     return Object::reference( obj->header() );
   }
 
- //  instanciations
+//============================================================================
+//   I N S T A N C I A T I O N
+//============================================================================
 
   extern template class Volume<int8_t>;
   extern template class Volume<uint8_t>;
@@ -556,8 +606,6 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cfloat > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cdouble > > )
 
+} // namespace carto
 
-}
-
-
-#endif
+#endif //CARTODATA_VOLUME_VOLUME_H

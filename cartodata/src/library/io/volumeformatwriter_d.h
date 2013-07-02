@@ -33,65 +33,64 @@
 
 #ifndef CARTODATA_IO_VOLUMEFORMATWRITER_D_H
 #define CARTODATA_IO_VOLUMEFORMATWRITER_D_H
-//--- cartodata ----------------------------------------------------------------
+//--- cartodata --------------------------------------------------------------
 #include <cartodata/io/volumeformatwriter.h>              // class declaration
 #include <cartodata/volume/volume.h>                       // manipulate sizes
-#include <cartodata/volume/volumeview.h>                   // manipulate sizes
-//--- soma-io ------------------------------------------------------------------
+//--- soma-io ----------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
-#include <soma-io/datasourceinfo/datasourceinfo.h>        // function's argument
-#include <soma-io/image/imagewriter.h>                // use of member functions
-//--- cartobase ----------------------------------------------------------------
+#include <soma-io/datasourceinfo/datasourceinfo.h>      // function's argument
+#include <soma-io/image/imagewriter.h>              // use of member functions
+//--- cartobase --------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>
-#include <cartobase/object/object.h>                         // header & options
-#include <cartobase/object/property.h>                       // header & options
-#include <cartobase/exception/ioexcept.h>                          // exceptions
-//--- system -------------------------------------------------------------------
+#include <cartobase/object/object.h>                       // header & options
+#include <cartobase/object/property.h>                     // header & options
+#include <cartobase/exception/ioexcept.h>                        // exceptions
+//--- system -----------------------------------------------------------------
 #include <vector>
 #include <iostream>
 #include <string>
-//--- debug --------------------------------------------------------------------
+//--- debug ------------------------------------------------------------------
 #include <cartobase/config/verbose.h>
 #define localMsg( message ) cartoCondMsg( 4, message, "VOLUMEFORMATWRITER" )
 // localMsg must be undef at end of file
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 namespace soma
 {
-////////////////////////////////////////////////////////////////////////////////
-////                V O L U M E F O R M A T W R I T E R                     ////
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+////               V O L U M E F O R M A T W R I T E R                    ////
+//////////////////////////////////////////////////////////////////////////////
 
-  //============================================================================
+  //==========================================================================
   //   C O N S T R U C T O R S
-  //============================================================================
+  //==========================================================================
   template <typename T>
   VolumeFormatWriter<T>::~VolumeFormatWriter()
   {
   }
   
-  //============================================================================
+  //==========================================================================
   //   W R I T E   M E T H O D S
-  //============================================================================
+  //==========================================================================
   template <typename T>
   bool VolumeFormatWriter<T>::write( const carto::Volume<T> & obj, 
                                      carto::rc_ptr<DataSourceInfo> dsi,
                                      carto::Object options )
   {
-    //=== memory mapping =======================================================
+    //=== memory mapping =====================================================
     localMsg( "checking for memory mapping..." );
     if( obj.allocatorContext().allocatorType() == AllocatorStrategy::ReadWriteMap )
       return true;
     
-    //=== multiresolution level ================================================
+    //=== multiresolution level ==============================================
     localMsg( "reading resolution level..." );
     int level = 0;
     if( options->hasProperty( "resolution_level" ) )
       options->getProperty( "resolution_level", level );
     localMsg( " -> level to write : " + carto::toString( level ) );
     
-    //=== partial reading ======================================================
-    localMsg( "checking for partial reading..." );
+    //=== partial reading ====================================================
+    localMsg( "checking for partial writing..." );
     bool partial = false;
     if( options->hasProperty( "partial_writing" ) )
       partial = true;
@@ -102,20 +101,14 @@ namespace soma
     std::vector<int> view( 4, 0 );
     std::vector<int> size( 4, 0 );
     
-    //=== checking if obj is a view ============================================
+    //=== checking if obj is a view ==========================================
     localMsg( "checking if object is a view..." );
-    const carto::VolumeView<T> *vv 
-      = dynamic_cast<const carto::VolumeView<T> *>( &obj );
-    carto::VolumeView<T> *p1vv;
     carto::Volume<T> *parent1 = 0;
     carto::Volume<T> *parent2 = 0;
-    if( vv ) {
-      parent1 = vv->refVolume().get();
-      p1vv = dynamic_cast<carto::VolumeView<T> *>( parent1 );
-      if( p1vv )
-        parent2 = p1vv->refVolume().get();
-    }
-    localMsg( std::string("object ") + ( vv ? "is" : "isn't" ) + " a view and "
+    parent1 = obj.refVolume().get();
+    if( parent1 )
+      parent2 = parent1->refVolume().get();
+    localMsg( std::string("object ") + ( parent1 ? "is" : "isn't" ) + " a view and "
               + ( obj.allocatorContext().isAllocated() ? "is" : "isn't" )
               + " allocated." );
     if( parent1 )
@@ -127,33 +120,33 @@ namespace soma
                 + ( parent2->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
 
-    //=== view size ============================================================
+    //=== view size ==========================================================
     localMsg( "reading view size..." );
     view[ 0 ] = obj.getSizeX();
     view[ 1 ] = obj.getSizeY();
     view[ 2 ] = obj.getSizeZ();
     view[ 3 ] = obj.getSizeT();
 
-    //=== full volume size =====================================================
+    //=== full volume size ===================================================
     localMsg( "reading full volume size and view position..." );
     if( parent1 && !parent1->allocatorContext().isAllocated() ) {
       size[ 0 ] = parent1->getSizeX();
       size[ 1 ] = parent1->getSizeY();
       size[ 2 ] = parent1->getSizeZ();
       size[ 3 ] = parent1->getSizeT();
-      position[ 0 ] = vv->posInRefVolume()[ 0 ];
-      position[ 1 ] = vv->posInRefVolume()[ 1 ];
-      position[ 2 ] = vv->posInRefVolume()[ 2 ];
-      position[ 3 ] = vv->posInRefVolume()[ 3 ];
+      position[ 0 ] = obj.posInRefVolume()[ 0 ];
+      position[ 1 ] = obj.posInRefVolume()[ 1 ];
+      position[ 2 ] = obj.posInRefVolume()[ 2 ];
+      position[ 3 ] = obj.posInRefVolume()[ 3 ];
     } else if( parent2 ) {
       size[ 0 ] = parent2->getSizeX();
       size[ 1 ] = parent2->getSizeY();
       size[ 2 ] = parent2->getSizeZ();
       size[ 3 ] = parent2->getSizeT();
-      position[ 0 ] = vv->posInRefVolume()[ 0 ] + p1vv->posInRefVolume()[ 0 ];
-      position[ 1 ] = vv->posInRefVolume()[ 1 ] + p1vv->posInRefVolume()[ 1 ];
-      position[ 2 ] = vv->posInRefVolume()[ 2 ] + p1vv->posInRefVolume()[ 2 ];
-      position[ 3 ] = vv->posInRefVolume()[ 3 ] + p1vv->posInRefVolume()[ 3 ];
+      position[ 0 ] = obj.posInRefVolume()[ 0 ] + parent1->posInRefVolume()[ 0 ];
+      position[ 1 ] = obj.posInRefVolume()[ 1 ] + parent1->posInRefVolume()[ 1 ];
+      position[ 2 ] = obj.posInRefVolume()[ 2 ] + parent1->posInRefVolume()[ 2 ];
+      position[ 3 ] = obj.posInRefVolume()[ 3 ] + parent1->posInRefVolume()[ 3 ];
     } else {
       size = view;
     }
@@ -180,18 +173,18 @@ namespace soma
               + carto::toString( position[2] ) + ", "
               + carto::toString( position[3] ) + " )" );
     
-    //=== checking for borders =================================================
+    //=== checking for borders ===============================================
     localMsg( "checking for borders..." );
     bool withborders = false;
     if( parent1 && parent1->allocatorContext().isAllocated() )
       withborders = true;
     localMsg( std::string(" -> ") + ( withborders ? "with borders" : "without borders" ) );
     
-    //=== header info ==========================================================
+    //=== header info ========================================================
     localMsg( "setting header..." );
     if( !options )
       options = carto::Object::value( carto::PropertySet() );
-    if( !vv && !obj.allocatorContext().isAllocated() )
+    if( !parent1 && !obj.allocatorContext().isAllocated() )
       options->setProperty( "unallocated", true );
     if( !dsi->header() )
       dsi->header() = carto::Object::value( carto::PropertySet() );
@@ -208,13 +201,13 @@ namespace soma
     }
 
     
-    //=== writing header & creating files ======================================
+    //=== writing header & creating files ====================================
     localMsg( "writing header..." );
     *dsi = _imw->writeHeader( *dsi, options );
     
-    //=== writing image ========================================================
+    //=== writing image ======================================================
     localMsg( "writing volume..." );
-    if( vv || obj.allocatorContext().isAllocated() ) 
+    if( parent1 || obj.allocatorContext().isAllocated() )
     {
       if( !withborders ) {
         _imw->write( (T*) &obj(0,0,0,0), *dsi, position, view, options );
@@ -249,9 +242,9 @@ namespace soma
     _imw = imw;
   }
   
-////////////////////////////////////////////////////////////////////////////////
-////             V O L U M E R E F F O R M A T W R I T E R                  ////
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+////            V O L U M E R E F F O R M A T W R I T E R                 ////
+//////////////////////////////////////////////////////////////////////////////
 
   template <typename T>
   VolumeRefFormatWriter<T>::~VolumeRefFormatWriter()

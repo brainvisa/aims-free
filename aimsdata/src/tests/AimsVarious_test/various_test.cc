@@ -37,7 +37,6 @@
 #include <soma-io/io/reader.h>
 #include <soma-io/io/writer.h>
 #include <soma-io/writer/pythonwriter.h>
-#include <soma-io/image/voxelrgba_d.h>
 //--- cartodata ----------------------------------------------------------------
 #include <cartodata/volume/volume.h>
 #include <cartodata/volume/volumeview.h>
@@ -46,6 +45,7 @@
 #include <cartobase/getopt/getopt.h>
 #include <cartobase/config/verbose.h>
 #include <cartobase/type/string_conversion.h>
+#include <cartobase/type/voxelrgba_d.h>
 //--- system -------------------------------------------------------------------
 #include <iostream>
 //------------------------------------------------------------------------------

@@ -39,9 +39,9 @@
 
 #ifdef USE_SOMA_IO
 
-  #include <soma-io/image/voxelhsv.h>
+  #include <cartobase/type/voxelhsv.h>
 
-  typedef soma::VoxelHSV AimsHSV;
+  typedef carto::VoxelHSV AimsHSV;
 
 #else // USE_SOMA_IO
 
