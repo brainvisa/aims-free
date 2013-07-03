@@ -3,6 +3,7 @@
 from soma import aims, aimsalgo
 import exceptions
 import numpy
+import os
 
 def mergeLabelsFromTexture( tex, labels_list, new_label ):
   """
@@ -65,9 +66,11 @@ def connectedComponents( mesh, tex, areas_mode = 0 ):
     labelsList.remove(-1)
   print 'Labels list: ', labelsList
 
+  dtex = tex[0].arraydata()
+  otex = aims.TimeTexture( dtype='S16' )
   cctex = aims.TimeTexture_S16()
   for label in labelsList:
-    otex = aimsalgo.AimsTextureThreshold( tex, 'eq', threshold = label, binarize = True )
+    otex[0].assign( ( dtex == label ).astype( 'int16' ) )
     labelcctex = aimsalgo.AimsMeshLabelConnectedComponent( mesh, otex, 0, 0 )
     if areas_mode:
       ccNb = labelcctex[0].arraydata().max()
