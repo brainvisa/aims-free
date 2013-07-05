@@ -245,9 +245,11 @@ bool Finder::check( const string& filename )
   #ifdef USE_SOMA_IO
     Object h;
     try {
+      // try first 2 passes
       DataSourceInfoLoader dsil;
       rc_ptr<DataSource> ds( new FileDataSource( filename ) );
-      DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ) );
+      DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ),
+                                       carto::none(), 1, 2 );
       h = dsi.header();
     } catch( ... ) {
     }
@@ -423,6 +425,51 @@ bool Finder::check( const string& filename )
             tried.insert( *ie );
           }
       }
+
+#ifdef USE_SOMA_IO
+  // try pass 3
+  try {
+    Object h;
+    DataSourceInfoLoader dsil;
+    rc_ptr<DataSource> ds( new FileDataSource( filename ) );
+    DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ),
+                                     carto::none(), 3, 3 );
+    h = dsi.header();
+    bool dsok = !h.isNone();
+    if( dsok )
+    {
+      _state = Ok;
+
+      Carto2AimsHeaderTranslator  t;
+      t.translate( h );
+
+      string  x;
+      h->getProperty( "object_type", x );
+      setObjectType( x );
+      x.clear();
+      h->getProperty( "data_type", x );
+      setDataType( x );
+      vector<string>  vt;
+      vt.push_back( x );
+      h->getProperty( "possible_data_types", vt );
+      setPossibleDataTypes( vt );
+      x.clear();
+      h->getProperty( "file_type", x );
+      setFormat( x );
+
+      PythonHeader  *ph = new PythonHeader;
+      ph->copyProperties( h );
+      setHeader( ph );
+
+      #ifdef AIMS_DEBUG_IO
+      cout << "FINDER:: DataSourceInfo worked" << endl;
+      #endif
+      if( filename.substr( filename.length() - 4, 4 ) != ".gii" )
+        // bidouille to let the gifti reader work (it's both gifti and XML)
+        return true;
+    }
+  } catch( ... ) {}
+#endif
 
 #ifdef AIMS_DEBUG_IO
   cout << "FINDER:: not found at all, giving up\n";

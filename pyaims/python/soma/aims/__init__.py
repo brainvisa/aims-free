@@ -518,6 +518,12 @@ def proxystr( self ):
     return 'None'
   return self._get().__str__()
 
+def proxyiter( self ):
+  if self.isNull():
+    raise AttributeError( "'%s' object has no attributes '__iter__'" \
+      % self.__class__ )
+  return self._get().__iter__()
+
 def rcptr_getAttributeNames( self ):
   '''IPython completion feature...'''
   m = []
@@ -572,6 +578,7 @@ def __fixsipclasses__( classes ):
         y.__nonzero__ = __fixsipclasses__.proxynonzero
         y._getAttributeNames = __fixsipclasses__.getAttributeNames
         y.get = lambda self: self._get() # to maintain compatibiity with pyaims 3.x
+        y.__iter__ = __fixsipclasses__.proxyiter
       elif y.__name__.startswith( 'ShallowConverter_' ):
         y.__oldcall__ = y.__call__
         y.__call__ = lambda self, obj: self.__oldcall__( obj )._get()
@@ -612,6 +619,7 @@ __fixsipclasses__.proxynonzero = proxynonzero
 __fixsipclasses__.getAttributeNames = rcptr_getAttributeNames
 __fixsipclasses__.__getitem_vec__ = __getitem_vec__
 __fixsipclasses__.__setitem_vec__ = __setitem_vec__
+__fixsipclasses__.proxyiter = proxyiter
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames

@@ -55,11 +55,12 @@ namespace aims
 //   {
 //   }
   template<typename T, typename O>
-  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::filterInFrame( const AimsData<T>& cc, 
-                                                                           AimsData<O>& out,
-                                                                           std::map<O, size_t>& valids,
-                                                                           int t,
-                                                                           bool verbose )
+  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::filterInFrame(
+    const AimsData<T>& cc,
+    AimsData<O>& out,
+    std::map<O, size_t>& valids,
+    int t,
+    bool verbose )
   {
     int x = 0, y = 0, z = 0;
     
@@ -73,21 +74,22 @@ namespace aims
 
     ForEach3d( cc, x, y, z )
     {
-      is = valids.find( cc( x, y, z ) );
+      is = valids.find( (O) cc( x, y, z ) );
       if( is != es )
         out( x, y, z, t ) = (O) is->second; // RISK OF OVERFLOW on char types
     }
   }
   
   template<typename T, typename O>
-  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connectedInFrame( const AimsData<T>& data, 
-                                                                              AimsData<O>& out,
-                                                                              Connectivity::Type connectivity, 
-                                                                              std::multimap<size_t, O>& compSizes, 
-                                                                              int t,
-                                                                              const T & backg, 
-                                                                              bool bin, 
-                                                                              bool verbose )
+  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connectedInFrame(
+    const AimsData<T>& data,
+    AimsData<O>& out,
+    Connectivity::Type connectivity,
+    std::multimap<size_t, O>& compSizes,
+    int t,
+    const T & backg,
+    bool bin,
+    bool verbose )
   {
     int x = 0, y = 0, z = 0, n = 0;
     int dimX = data.dimX();
@@ -171,14 +173,16 @@ namespace aims
       std::cout << label << " components" << std::endl;
     } 
   }
-  
+
+
   template<typename T, typename O>
-  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected( const AimsData<T>& data, 
-                                                                       AimsData<O>& out,
-                                                                       Connectivity::Type connectivity, 
-                                                                       std::map<O, size_t>& valids, 
-                                                                       const T & backg, bool bin, size_t minSize, 
-                                                                       size_t numMax, bool verbose )
+  void ConnectedComponentEngine<AimsData<T>, AimsData<O> >::connected(
+    const AimsData<T>& data,
+    AimsData<O>& out,
+    Connectivity::Type connectivity,
+    std::map<O, size_t>& valids,
+    const T & backg, bool bin, size_t minSize,
+    size_t numMax, bool verbose )
   {
     std::multimap<size_t, size_t> compSizes;
     int x=0, y=0, z=0, t=0, n=0;
@@ -187,12 +191,12 @@ namespace aims
     int dimZ = data.dimZ();
     int dimT = data.dimT() ;
 
-    for( t = 0 ; t < dimT ; ++t ){
-      
+    for( t = 0 ; t < dimT ; ++t )
+    {
       // Get AimsData of size_t to avoid risk of overflow in char types
       // before filtering
       AimsData<size_t> cc( dimX, dimY, dimZ );
-      
+
       ConnectedComponentEngine<AimsData<T>, AimsData<size_t> >
         ::connectedInFrame( data, 
                             cc, 
@@ -219,7 +223,7 @@ namespace aims
                     << " : " << std::setw( 8 ) << im->first 
                     << " points" << std::endl;
 
-        valids[ im->second ] = label++;
+        valids[ im->second ] = (size_t) label++;
       }
 
       ConnectedComponentEngine<AimsData<size_t>, AimsData<O> >

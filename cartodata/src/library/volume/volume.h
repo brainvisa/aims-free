@@ -34,6 +34,7 @@
 #ifndef CARTODATA_VOLUME_VOLUME_H
 #define CARTODATA_VOLUME_VOLUME_H
 //--- cartodata --------------------------------------------------------------
+#include <cartodata/config/config.h>
 #include <cartodata/volume/volumeproxy.h>
 //--- soma-io ----------------------------------------------------------------
 #ifdef USE_SOMA_IO
@@ -342,6 +343,14 @@ namespace carto
     static void setup( Volume<T> &, Object, const AllocatorContext &, Object );
   };
 
+  template <typename T>
+  class Creator<VolumeRef<T> >
+  {
+  public:
+    static VolumeRef<T>* create( Object, const AllocatorContext &, Object );
+    static void setup( VolumeRef<T> &, Object, const AllocatorContext &, Object );
+  };
+
 #endif
 
 //============================================================================
@@ -569,9 +578,32 @@ namespace carto
   extern template class Creator<Volume<cdouble> >;
   extern template class Creator<Volume< std::map<int, float> > >;
 #ifdef USE_SOMA_IO
-  extern template class Creator< soma::VoxelRGB >;
-  extern template class Creator< soma::VoxelRGBA >;
-  extern template class Creator< soma::VoxelHSV >;
+  extern template class Creator<Volume<soma::VoxelRGB> >;
+  extern template class Creator<Volume<soma::VoxelRGBA> >;
+  extern template class Creator<Volume<soma::VoxelHSV> >;
+#endif
+
+  extern template class Creator<VolumeRef<int8_t> >;
+  extern template class Creator<VolumeRef<uint8_t> >;
+  // ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+  extern template class Creator<VolumeRef<char> >;
+#endif
+  extern template class Creator<VolumeRef<int16_t> >;
+  extern template class Creator<VolumeRef<uint16_t> >;
+  extern template class Creator<VolumeRef<int32_t> >;
+  extern template class Creator<VolumeRef<uint32_t> >;
+  extern template class Creator<VolumeRef<long> >;
+  extern template class Creator<VolumeRef<unsigned long> >;
+  extern template class Creator<VolumeRef<float> >;
+  extern template class Creator<VolumeRef<double> >;
+  extern template class Creator<VolumeRef<cfloat> >;
+  extern template class Creator<VolumeRef<cdouble> >;
+  extern template class Creator<VolumeRef< std::map<int, float> > >;
+#ifdef USE_SOMA_IO
+  extern template class Creator<VolumeRef<soma::VoxelRGB> >;
+  extern template class Creator<VolumeRef<soma::VoxelRGBA> >;
+  extern template class Creator<VolumeRef<soma::VoxelHSV> >;
 #endif
 
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )

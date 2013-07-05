@@ -128,6 +128,7 @@ namespace aims
   {
 #ifdef USE_SOMA_IO
     // try first soma-io writer (since 2013)
+    // try first 3 passes
     try{
       // building uri
       std::string uri = _filename;
@@ -141,7 +142,7 @@ namespace aims
         uri += ( "format=" + *format );
 
       soma::Writer<T> writer( uri );
-      return writer.write( obj, _options );
+      return writer.write( obj, _options, 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
 #endif
@@ -376,6 +377,27 @@ namespace aims
             tried.insert( *ie );
           }
         }
+
+#ifdef USE_SOMA_IO
+    // try first soma-io writer (since 2013)
+    // try pass 4
+    try{
+      // building uri
+      std::string uri = _filename;
+      if( ascii || format )
+        uri += "?";
+      if( ascii )
+        uri += "ascii";
+      if( ascii && format )
+        uri += "&";
+      if ( format )
+        uri += ( "format=" + *format );
+
+      soma::Writer<T> writer( uri );
+      return writer.write( obj, _options, 4, 4 );
+    } catch( ... ) {}
+    // if it failed, it's hopeless
+#endif
 
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm,

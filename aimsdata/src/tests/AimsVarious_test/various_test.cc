@@ -45,7 +45,8 @@
 #include <cartobase/getopt/getopt.h>
 #include <cartobase/config/verbose.h>
 #include <cartobase/type/string_conversion.h>
-#include <cartobase/type/voxelrgba_d.h>
+#include <cartobase/type/voxelrgba.h>
+#include <cartobase/type/voxelrgb.h>
 //--- system -------------------------------------------------------------------
 #include <iostream>
 //------------------------------------------------------------------------------
@@ -116,18 +117,18 @@ bool testCreateVolume( const string & fname,
 {
   cartoMsg( 0, "=== CREATE NUMBERED VOLUME", "testCreateVolume" );
   cartoMsg( 0, "creating volume...", "testCreateVolume" );
-  VolumeRef<VoxelRGBA> vol( new Volume<VoxelRGBA>( sx, sy, sz, st ) );
+  VolumeRef<VoxelRGB> vol( new Volume<VoxelRGB>( sx, sy, sz, st ) );
   cartoMsg( 0, "filling volume...", "testCreateVolume" );
   int x, y, z, t, val = 0;
   for( t=0; t<st; ++t )
     for( z=0; z<sz; ++z )
       for( y=0; y<sy; ++y ) 
         for( x=0; x<sx; ++x ) {
-          vol( x, y, z, t ) = VoxelRGBA(val,val,val,255);
+          vol( x, y, z, t ) = VoxelRGB(val,val,val);
           val++;
         }
   cartoMsg( 0, "writing volume...", "testCreateVolume" );
-  Writer<VolumeRef<VoxelRGBA> > wVol( fname );
+  Writer<VolumeRef<VoxelRGB> > wVol( fname );
   wVol.write( vol );
   cartoMsg( 0, "===", "testCreateVolume");
   

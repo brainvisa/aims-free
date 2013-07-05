@@ -113,6 +113,29 @@ template class Creator< Volume< VoxelRGBA > >;
 template class Creator< Volume< VoxelHSV > >;
 #endif
 
+template class Creator<VolumeRef< int8_t > >;
+template class Creator<VolumeRef< uint8_t > >;
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template class Creator<VolumeRef< char > >;
+#endif
+template class Creator<VolumeRef< int16_t > >;
+template class Creator<VolumeRef< uint16_t > >;
+template class Creator<VolumeRef< int32_t > >;
+template class Creator<VolumeRef< uint32_t > >;
+template class Creator<VolumeRef< long > >;
+template class Creator<VolumeRef< unsigned long > >;
+template class Creator<VolumeRef< float > >;
+template class Creator<VolumeRef< double > >;
+template class Creator<VolumeRef< cfloat > >;
+template class Creator<VolumeRef< cdouble > >;
+template class Creator<VolumeRef< std::map<int, float> > >;
+#ifdef USE_SOMA_IO
+template class Creator< VolumeRef< VoxelRGB > >;
+template class Creator< VolumeRef< VoxelRGBA > >;
+template class Creator< VolumeRef< VoxelHSV > >;
+#endif
+
 // utilities
 
 #define instantiate_volutil( T ) \

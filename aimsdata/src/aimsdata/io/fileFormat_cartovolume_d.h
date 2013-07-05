@@ -200,7 +200,13 @@ namespace aims
                                  const carto::AllocatorContext & context, 
                                  carto::Object options )
   {
-    return _volformat.read( filename, *vol, context, options );
+    carto::Volume<T> *vref = _volformat.read( filename, context, options );
+    if( vref )
+    {
+      vol.reset( vref );
+      return true;
+    }
+    return false;
   }
 
 

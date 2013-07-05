@@ -143,6 +143,7 @@ namespace aims
   {
 #ifdef USE_SOMA_IO
     // try first soma-io reader (since 2013)
+    // try first 3 passes
     try{
       // building uri
       std::string uri = _filename;
@@ -157,7 +158,7 @@ namespace aims
       
       soma::Reader<T> reader( uri );
       reader.setOptions( _options );
-      return reader.read( obj, carto::none() );
+      return reader.read( obj, carto::none(), 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
 #endif
@@ -362,6 +363,28 @@ namespace aims
           }
         }
 
+#ifdef USE_SOMA_IO
+    // try first soma-io reader (since 2013)
+    // try pass 4
+    try{
+      // building uri
+      std::string uri = _filename;
+      if( border != 0 || frame != -1 )
+        uri += "?";
+      if( border != 0 )
+        uri += ( "border=" + carto::toString( border ) );
+      if( border != 0 && frame != -1 )
+        uri += "&";
+      if ( frame != -1 )
+        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+
+      soma::Reader<T> reader( uri );
+      reader.setOptions( _options );
+      return reader.read( obj, carto::none(), 4, 4 );
+    } catch( ... ) {}
+    // if it failed, it's hopeless.
+#endif
+
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm, 
 				   _filename + " : no matching format" );
@@ -374,6 +397,7 @@ namespace aims
   {
 #ifdef USE_SOMA_IO
     // try first soma-io reader (since 2013)
+    // try first 3 passes
     try{
       // building uri
       std::string uri = _filename;
@@ -388,7 +412,7 @@ namespace aims
       
       soma::Reader<T> reader( uri );
       reader.setOptions( _options );
-      return reader.read();
+      return reader.read( carto::none(), 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
 #endif
@@ -542,6 +566,28 @@ namespace aims
             triedf.insert( reader );
           }
         }
+
+#ifdef USE_SOMA_IO
+    // try first soma-io reader (since 2013)
+    // try pass 4
+    try{
+      // building uri
+      std::string uri = _filename;
+      if( border != 0 || frame != -1 )
+        uri += "?";
+      if( border != 0 )
+        uri += ( "border=" + carto::toString( border ) );
+      if( border != 0 && frame != -1 )
+        uri += "&";
+      if ( frame != -1 )
+        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+
+      soma::Reader<T> reader( uri );
+      reader.setOptions( _options );
+      return reader.read( carto::none(), 4, 4 );
+    } catch( ... ) {}
+    // if it failed, it's hopeless
+#endif
 
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm, 

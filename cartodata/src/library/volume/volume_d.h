@@ -140,7 +140,10 @@ namespace carto
         _blitz.reference
           ( blitz::Array<T,4>
             ( &_items[0],
-              blitz::shape( getSizeX(), getSizeY(), getSizeZ(), getSizeT() ),
+              blitz::shape( VolumeProxy<T>::getSizeX(),
+                            VolumeProxy<T>::getSizeY(),
+                            VolumeProxy<T>::getSizeZ(),
+                            VolumeProxy<T>::getSizeT() ),
               blitz::shape( 1, &(*other)( 0, 1, 0 ) - &(*other)( 0, 0, 0 ),
                             &(*other)( 0, 0, 1 ) - &(*other)( 0, 0, 0 ),
                             &(*other)( 0, 0, 0, 1 ) - &(*other)( 0, 0, 0 ) ),
@@ -607,6 +610,8 @@ namespace carto
     header->getProperty( "sizeY", sizey );
     header->getProperty( "sizeZ", sizez );
     header->getProperty( "sizeT", sizet );
+    std::cout << "VOLUMECREATE:: ( " << sizex << ", " << sizey << ", "
+              << sizez << ", " << sizet << " )" << std::endl;
     options->getProperty( "unallocated", unalloc );
     Volume<T>	*obj = new Volume<T>( sizex, sizey, sizez, sizet, context, 
                                       !unalloc );
@@ -633,6 +638,8 @@ namespace carto
         header->getProperty( "sizeY", sizey );
         header->getProperty( "sizeZ", sizez );
         header->getProperty( "sizeT", sizet );
+        std::cout << "VOLUMESETUP:: ( " << sizex << ", " << sizey << ", "
+                  << sizez << ", " << sizet << " )" << std::endl;
         options->getProperty( "unallocated", unalloc );
         obj.reallocate( sizex, sizey, sizez, sizet, false, context, !unalloc );
       }
@@ -658,6 +665,24 @@ namespace carto
         ps.setProperty( "sizeT", sizet );
       }
     obj.blockSignals( false );
+  }
+
+  template <typename T>
+  void Creator<VolumeRef<T> >::setup( VolumeRef<T> & obj, Object header,
+                                   const AllocatorContext & context,
+                                   Object options )
+  {
+    std::cout << "VOLUMEREFSETUP" << std::endl;
+    Creator<Volume<T> >::setup( *obj, header, context, options );
+  }
+
+  template <typename T>
+  VolumeRef<T>* Creator<VolumeRef<T> >::create( Object header,
+                                   const AllocatorContext & context,
+                                   Object options )
+  {
+    std::cout << "VOLUMEREFCREATE" << std::endl;
+    return new VolumeRef<T>;
   }
 
 }
