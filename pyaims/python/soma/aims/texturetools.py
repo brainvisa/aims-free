@@ -57,8 +57,8 @@ def connectedComponents( mesh, tex, areas_mode = 0 ):
   if ( meshVertexNb != tex.nItem() ):
     raise exceptions.ValueError( 'mesh and input texture have not the same dimension...' )
 
-  tex_ar = tex[0].arraydata()
-  labels = numpy.unique( tex_ar )
+  dtex = tex[0].arraydata()
+  labels = numpy.unique( dtex )
   labelsList = labels.tolist()
   if labelsList.count(0)!=0:
     labelsList.remove(0)
