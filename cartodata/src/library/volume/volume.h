@@ -38,8 +38,8 @@
 #include <cartodata/volume/volumeproxy.h>
 //--- soma-io ----------------------------------------------------------------
 #ifdef USE_SOMA_IO
-  #include <cartobase/type/voxelrgb_d.h>
-  #include <cartobase/type/voxelrgba_d.h>
+  #include <cartobase/type/voxelrgb.h>
+  #include <cartobase/type/voxelrgba.h>
   #include <cartobase/type/voxelhsv.h>
 #endif
 //--- moved to soma-io -------------------------------------------------------

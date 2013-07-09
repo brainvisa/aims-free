@@ -443,7 +443,7 @@ template <class T,int D>
 inline
 AimsVector<T,D>::AimsVector(const T& x, const T& y)
 {
-  internal::fill_aimsvector2<T,D>::doit( _value, x, y );
+  ::internal::fill_aimsvector2<T,D>::doit( _value, x, y );
 }
 
 
@@ -451,7 +451,7 @@ template <class T,int D>
 inline
 AimsVector<T,D>::AimsVector(const T& x, const T& y, const T& z)
 {
-  internal::fill_aimsvector3<T,D>::doit( _value, x, y, z );
+  ::internal::fill_aimsvector3<T,D>::doit( _value, x, y, z );
 }
 
 
@@ -459,7 +459,7 @@ template <class T,int D>
 inline
 AimsVector<T,D>::AimsVector(const T& x, const T& y, const T& z, const T& t)
 {
-  internal::fill_aimsvector4<T,D>::doit( _value, x, y, z, t );
+  ::internal::fill_aimsvector4<T,D>::doit( _value, x, y, z, t );
 }
 
 

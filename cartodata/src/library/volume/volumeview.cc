@@ -33,8 +33,8 @@
 
 #include <cartodata/volume/volumeview.h>
 #ifdef USE_SOMA_IO
-  #include <cartobase/type/voxelrgb_d.h>
-  #include <cartobase/type/voxelrgba_d.h>
+  #include <cartobase/type/voxelrgb.h>
+  #include <cartobase/type/voxelrgba.h>
   #include <cartobase/type/voxelhsv.h>
 #endif
 
