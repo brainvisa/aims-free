@@ -37,8 +37,8 @@
 #include <cartodata/volume/volume.h>
 #ifdef USE_SOMA_IO
   #include <soma-io/datasource/bufferdatasource.h>
-  #include <cartobase/type/voxelrgb_d.h>
-  #include <cartobase/type/voxelrgba_d.h>
+  #include <cartobase/type/voxelrgb.h>
+  #include <cartobase/type/voxelrgba.h>
   #include <cartobase/type/voxelhsv.h>
 #else
   #include <cartobase/datasource/bufferdatasource.h>
