@@ -123,7 +123,6 @@ bool doit2( Process & p, const string & fname, Finder & f )
   Reader<AimsData<U> > mreader( m.mask );
   mreader.read( mask );
 
-  cout << "merge, T: " << DataTypeCode<T>().name() << ", U: " << DataTypeCode<U>().name() << ", mode: " << m.mode << ", value: " << (T) m.value << ", label: " << (U) m.label << endl;
   AimsMerge<T,U> merge( m.mode, (T) m.value, (U) m.label );
   Writer<AimsData<T> > writer( m.fileout );
   return writer.write( merge( in, mask ) );
