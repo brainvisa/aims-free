@@ -59,13 +59,14 @@ template <typename T>
 class Merger2 : public Process
 {
 public:
-  Merger2( Merger &, const string & );
+  Merger2( Merger &, const string &, const string & );
 
 //   template <typename U>
 //   friend /*template <typename T, typename U>*/ bool doit2( Process &, const string &, Finder & );
 
   Merger & merger;
   string format;
+  string fname;
 };
 
 
@@ -93,8 +94,9 @@ private:
 
 
 template <typename T>
-Merger2<T>::Merger2( Merger & merger, const string & format )
-  : merger( merger ), format( format )
+Merger2<T>::Merger2( Merger & merger, const string & format,
+                     const string & fname )
+  : merger( merger ), format( format ), fname( fname )
 {
   registerProcessType( "Volume", "S8", &doit2<T, int8_t> );
   registerProcessType( "Volume", "U8", &doit2<T, uint8_t> );
@@ -111,7 +113,7 @@ bool doit2( Process & p, const string & fname, Finder & f )
   Merger2<T>            & mp = (Merger2<T> &) p;
   Merger                & m = mp.merger;
   string                format = mp.format;
-  Reader<AimsData<T> >  r( fname );
+  Reader<AimsData<T> >  r( mp.fname );
   AimsData<T>           in;
 
   if( !r.read( in, 0, &format ) )
@@ -149,7 +151,7 @@ bool doit( Process & p, const string & fname, Finder & f )
   Merger		& mp = (Merger &) p;
   string		format = f.format();
 
-  Merger2<T> m2( mp, format );
+  Merger2<T> m2( mp, format, fname );
   return m2.execute( mp.mask );
 }
 
