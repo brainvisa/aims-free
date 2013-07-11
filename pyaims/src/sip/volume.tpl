@@ -28,7 +28,7 @@ typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
 public:
     Volume_%Template1typecode%( int = 1, int = 1, int = 1, int = 1,
       const carto::AllocatorContext& allocatorContext
-        = carto::AllocatorContext() ) /ReleaseGIL/;
+        = carto::AllocatorContext(), bool = true ) /ReleaseGIL/;
     Volume_%Template1typecode%( const Volume_%Template1typecode% & )
       /ReleaseGIL/;
     virtual ~Volume_%Template1typecode%() /ReleaseGIL/;

@@ -130,6 +130,7 @@ namespace soma
     //=== full volume size ===================================================
     localMsg( "reading full volume size and view position..." );
     if( parent1 && !parent1->allocatorContext().isAllocated() ) {
+      localMsg( " -> from parent1" )
       size[ 0 ] = parent1->getSizeX();
       size[ 1 ] = parent1->getSizeY();
       size[ 2 ] = parent1->getSizeZ();
@@ -139,6 +140,7 @@ namespace soma
       position[ 2 ] = obj.posInRefVolume()[ 2 ];
       position[ 3 ] = obj.posInRefVolume()[ 3 ];
     } else if( parent2 ) {
+      localMsg( " -> from parent2" )
       size[ 0 ] = parent2->getSizeX();
       size[ 1 ] = parent2->getSizeY();
       size[ 2 ] = parent2->getSizeZ();
@@ -148,11 +150,13 @@ namespace soma
       position[ 2 ] = obj.posInRefVolume()[ 2 ] + parent1->posInRefVolume()[ 2 ];
       position[ 3 ] = obj.posInRefVolume()[ 3 ] + parent1->posInRefVolume()[ 3 ];
     } else {
+      localMsg( " -> from self" )
       size = view;
     }
     
     if( !partial ) {
       // we treat the view as a pure Volume
+      localMsg( " -> from self (no partial writing)" )
       size = view;
       position = std::vector<int>( 4, 0 );
     }

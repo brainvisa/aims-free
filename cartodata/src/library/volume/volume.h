@@ -227,8 +227,16 @@ namespace carto
                              = AllocatorContext(), bool allocate = true );
     /// Get parent volume
     rc_ptr<Volume<T> > refVolume() const;
+    // I dropped the const so that it is possible to write
+    // an existing volume as a partial view (we then need to link
+    // the volume to a parent without losing the data)
+    rc_ptr<Volume<T> > & refVolume();
     /// Get position in parent volume
     Position4Di posInRefVolume() const;
+    // I dropped the const so that it is possible to write
+    // an existing volume as a partial view (we then need to link
+    // the volume to a parent without losing the data)
+    Position4Di & posInRefVolume();
 
   protected:
 

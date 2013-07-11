@@ -205,9 +205,20 @@ namespace carto
     return _refvol;
   }
 
+  template <typename T> inline
+  rc_ptr<Volume<T> > & Volume<T>::refVolume()
+  {
+    return _refvol;
+  }
 
   template <typename T> inline
   typename Volume<T>::Position4Di Volume<T>::posInRefVolume() const
+  {
+    return _pos;
+  }
+
+  template <typename T> inline
+  typename Volume<T>::Position4Di & Volume<T>::posInRefVolume()
   {
     return _pos;
   }
