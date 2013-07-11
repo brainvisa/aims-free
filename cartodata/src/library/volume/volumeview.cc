@@ -32,6 +32,11 @@
  */
 
 #include <cartodata/volume/volumeview.h>
+#ifdef USE_SOMA_IO
+  #include <cartobase/type/voxelrgb.h>
+  #include <cartobase/type/voxelrgba.h>
+  #include <cartobase/type/voxelhsv.h>
+#endif
 
 namespace carto
 {
@@ -56,5 +61,10 @@ template class VolumeView< float >;
 template class VolumeView< double >;
 template class VolumeView< cfloat >;
 template class VolumeView< cdouble >;
+#ifdef USE_SOMA_IO
+template class VolumeView< carto::VoxelRGB >;
+template class VolumeView< carto::VoxelRGBA >;
+template class VolumeView< carto::VoxelHSV >;
+#endif
 
 } // namespace carto

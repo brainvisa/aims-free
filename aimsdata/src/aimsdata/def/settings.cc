@@ -35,8 +35,13 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/def/path.h>
 #include <cartobase/stream/fileutil.h>
-//#include <cartobase/object/pythonreader.h>
-#include <cartobase/io/reader.h>
+#ifdef USE_SOMA_IO
+  //#include <soma-io/reader/pythonreader.h>
+  #include <soma-io/io/reader.h>
+#else
+  //#include <cartobase/object/pythonreader.h>
+  #include <cartobase/io/reader.h>
+#endif
 
 //debug
 #include <iostream>

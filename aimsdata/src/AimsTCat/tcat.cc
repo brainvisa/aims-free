@@ -43,7 +43,11 @@
 #include <aims/mesh/surface.h>
 #include <aims/bucket/bucket.h>
 #include <aims/mesh/texture.h>
-#include <cartobase/allocator/mappingcopy.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/mappingcopy.h>
+#else
+  #include <cartobase/allocator/mappingcopy.h>
+#endif
 
 using namespace aims;
 using namespace carto;

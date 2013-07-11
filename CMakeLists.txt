@@ -82,7 +82,6 @@ BRAINVISA_DEPENDENCY( DEV RECOMMENDS zlib DEV )
 find_package( LibKDTree QUIET )
 
 
-
 if( BLITZ_FOUND )
   set( CARTO_USE_BLITZ "True" )
 endif()
@@ -133,12 +132,14 @@ endif()
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
 set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase "${LIBXML2_LIBRARIES}" )
+if( USE_SOMA_IO )
+  set( AIMS_AIMSDATA_LIBRARIES ${AIMS_AIMSDATA_LIBRARIES} soma-io )
+endif( USE_SOMA_IO )
 set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}" )
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/cartodata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/cartodata/config/config.h" @ONLY )
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/config.h" @ONLY )
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/src/aimsminc/config/aimsminc_config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/aimsminc_config.h" @ONLY )
-
 add_subdirectory( cartodata )
 add_subdirectory( graph )
 add_subdirectory( ecat )

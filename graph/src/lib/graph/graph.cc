@@ -40,8 +40,12 @@
 #include <graph/graph/uedge.h>
 #include <graph/graph/dedge.h>
 #include <cartobase/object/syntax.h>
-#include <cartobase/object/achecker.h>
 #include <cartobase/smart/rcptrtrick.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/checker/achecker.h>
+#else
+  #include <cartobase/object/achecker.h>
+#endif
 #include <vector>
 
 using namespace carto;
@@ -182,7 +186,7 @@ Graph::randomVertex() const
 	{
 		return 0;
 	}
-	// la ligne ci-dessous est fondamentalement boguée
+	// la ligne ci-dessous est fondamentalement boguÃ©e
 	n = rand() % n;
 	VSet::const_iterator v = _vertices.begin();
 	for (size_t i = 0; i < n; ++i)

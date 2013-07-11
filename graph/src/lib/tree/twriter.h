@@ -38,7 +38,11 @@
 //--- header files ------------------------------------------------------------
 
 #include <graph/config/graph_config.h>
-#include <cartobase/object/awriter.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/writer/awriter.h>
+#else
+  #include <cartobase/object/awriter.h>
+#endif
 #include <graph/tree/tvisitor.h>
 
 

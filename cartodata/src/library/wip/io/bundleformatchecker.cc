@@ -31,12 +31,16 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#ifdef USE_SOMA_IO
+  ERROR_FILE_SHOULDNT_BE_INCLUDED;
+#endif
+
 #include <cartodata/wip/io/bundleformatchecker.h>
 #include <cartobase/object/pythonreader.h>
 #include <cartobase/io/minfXML2.h>
 #include <cartobase/io/datasourceinfo.h>
-#include <cartobase/object/property.h>
 #include <cartobase/datasource/datasource.h>
+#include <cartobase/object/property.h>
 
 using namespace carto;
 using namespace std;

@@ -120,3 +120,5 @@ foreach( _command
                   COMPONENT ${PROJECT_NAME} )
   endif( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
 endforeach( _command )
+
+add_subdirectory( tests )

@@ -36,6 +36,12 @@
 #include <cartodata/volume/volumeutil_d.h>
 #include <functional>
 
+#ifdef USE_SOMA_IO
+  #include <cartobase/type/voxelrgb.h>
+  #include <cartobase/type/voxelrgba.h>
+  #include <cartobase/type/voxelhsv.h>
+#endif
+
 using namespace carto;
 
 template class VolumeProxy< int8_t >;
@@ -55,7 +61,11 @@ template class VolumeProxy< double >;
 template class VolumeProxy< cfloat >;
 template class VolumeProxy< cdouble >;
 template class VolumeProxy< std::map<int, float> >;
-
+#ifdef USE_SOMA_IO
+template class VolumeProxy< VoxelRGB >;
+template class VolumeProxy< VoxelRGBA >;
+template class VolumeProxy< VoxelHSV >;
+#endif
 
 template class Volume< int8_t >;
 template class Volume< uint8_t >;
@@ -74,6 +84,11 @@ template class Volume< double >;
 template class Volume< cfloat >;
 template class Volume< cdouble >;
 template class Volume< std::map<int, float> >;
+#ifdef USE_SOMA_IO
+template class Volume< VoxelRGB >;
+template class Volume< VoxelRGBA >;
+template class Volume< VoxelHSV >;
+#endif
 
 template class Creator<Volume< int8_t > >;
 template class Creator<Volume< uint8_t > >;
@@ -92,6 +107,34 @@ template class Creator<Volume< double > >;
 template class Creator<Volume< cfloat > >;
 template class Creator<Volume< cdouble > >;
 template class Creator<Volume< std::map<int, float> > >;
+#ifdef USE_SOMA_IO
+template class Creator< Volume< VoxelRGB > >;
+template class Creator< Volume< VoxelRGBA > >;
+template class Creator< Volume< VoxelHSV > >;
+#endif
+
+template class Creator<VolumeRef< int8_t > >;
+template class Creator<VolumeRef< uint8_t > >;
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template class Creator<VolumeRef< char > >;
+#endif
+template class Creator<VolumeRef< int16_t > >;
+template class Creator<VolumeRef< uint16_t > >;
+template class Creator<VolumeRef< int32_t > >;
+template class Creator<VolumeRef< uint32_t > >;
+template class Creator<VolumeRef< long > >;
+template class Creator<VolumeRef< unsigned long > >;
+template class Creator<VolumeRef< float > >;
+template class Creator<VolumeRef< double > >;
+template class Creator<VolumeRef< cfloat > >;
+template class Creator<VolumeRef< cdouble > >;
+template class Creator<VolumeRef< std::map<int, float> > >;
+#ifdef USE_SOMA_IO
+template class Creator< VolumeRef< VoxelRGB > >;
+template class Creator< VolumeRef< VoxelRGBA > >;
+template class Creator< VolumeRef< VoxelHSV > >;
+#endif
 
 // utilities
 

@@ -30,16 +30,24 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+#ifndef USE_SOMA_IO
 
 #include <cartodata/io/gisformatchecker.h>
-#include <cartobase/datasource/filedatasource.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/smart/scopedptr.h>
-#include <cartobase/io/itemreader.h>
-#include <cartobase/io/datasourceinfo.h>
-#include <cartobase/io/asciidatasourcetraits.h>
 #include <cartobase/object/object.h>
 #include <cartobase/object/property.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasource/filedatasource.h>
+  #include <soma-io/reader/itemreader.h>
+  #include <soma-io/datasourceinfo/datasourceinfo.h>
+  #include <soma-io/utilities/asciidatasourcetraits.h>
+#else
+  #include <cartobase/datasource/filedatasource.h>
+  #include <cartobase/io/itemreader.h>
+  #include <cartobase/io/datasourceinfo.h>
+  #include <cartobase/io/asciidatasourcetraits.h>
+#endif
 #include <stdio.h>
 
 using namespace carto;
@@ -325,3 +333,4 @@ Object GisFormatChecker::check( DataSource & ds, DataSourceInfo & ) const
 }
 
 
+#endif // USE_SOMA_IO

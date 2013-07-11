@@ -38,7 +38,11 @@
 #include <aims/io/fileFormat.h>
 #include <aims/io/argR.h>
 #include <cartobase/plugin/plugin.h>
-#include <cartobase/object/pythonwriter.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/writer/pythonwriter.h>
+#else
+  #include <cartobase/object/pythonwriter.h>
+#endif
 #include <algorithm>
 
 using namespace aims;

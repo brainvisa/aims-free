@@ -39,7 +39,11 @@
 #include <aims/io/aimsGraphW.h>
 #include <aims/def/path.h>
 #include <graph/graph/graph.h>
-#include <cartobase/object/pythonwriter.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/writer/pythonwriter.h>
+#else
+  #include <cartobase/object/pythonwriter.h>
+#endif
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/directory.h>
 #include <cartobase/uuid/uuid.h>

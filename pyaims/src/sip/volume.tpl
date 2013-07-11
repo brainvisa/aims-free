@@ -28,7 +28,7 @@ typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
 public:
     Volume_%Template1typecode%( int = 1, int = 1, int = 1, int = 1,
       const carto::AllocatorContext& allocatorContext
-        = carto::AllocatorContext() ) /ReleaseGIL/;
+        = carto::AllocatorContext(), bool = true ) /ReleaseGIL/;
     Volume_%Template1typecode%( const Volume_%Template1typecode% & )
       /ReleaseGIL/;
     virtual ~Volume_%Template1typecode%() /ReleaseGIL/;
@@ -576,6 +576,7 @@ Volume_%Template1typecode% * operator * ( long, Volume_%Template1typecode% & ) /
 
 %#endif%
 
+/*
 class VolumeView_%Template1typecode% : Volume_%Template1typecode%
 {
 %TypeHeaderCode
@@ -603,7 +604,7 @@ public:
   rc_ptr_Volume_%Template1typecode% refVolume() const;
   VolumeView_%Template1typecode%::Position4Di posInRefVolume() const;
 };
-
+*/
 
 %#undef PyAims_Volume_%Template1typecode%_defined%
 

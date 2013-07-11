@@ -35,10 +35,16 @@
 #define CARTODATA_IO_VOLUMEDATASOURCE_H
 
 #include <cartodata/volume/volumeproxy.h>
-#include <cartobase/datasource/chaindatasource.h>
 #include <cartobase/object/object.h>
-#include <cartobase/io/itemreader.h>
-#include <cartobase/io/itemwriter.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasource/chaindatasource.h>
+  #include <soma-io/reader/itemreader.h>
+  #include <soma-io/writer/itemwriter.h>
+#else
+  #include <cartobase/datasource/chaindatasource.h>
+  #include <cartobase/io/itemreader.h>
+  #include <cartobase/io/itemwriter.h>
+#endif
 #include <memory>
 
 namespace carto

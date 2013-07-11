@@ -37,8 +37,11 @@
 #ifndef AIMS_ALLOCATOR_ALLOCATOR_H
 #define AIMS_ALLOCATOR_ALLOCATOR_H
 
-#include <cartobase/allocator/allocator.h>
-
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/allocator.h>
+#else
+  #include <cartobase/allocator/allocator.h>
+#endif
 
 // COMPATIBILITY CODE : TEMPORARY
 

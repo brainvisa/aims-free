@@ -39,7 +39,6 @@
 #include <cartobase/object/object.h>
 #include <string>
 
-
 namespace aims
 {
 

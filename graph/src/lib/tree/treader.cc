@@ -38,8 +38,13 @@
 #include <graph/tree/tparser_python.h>
 #include <graph/tree/tfactory.h>
 #include <cartobase/exception/ioexcept.h>
-#include <cartobase/datasource/filedatasource.h>
-#include <cartobase/datasource/streamdatasource.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasource/filedatasource.h>
+  #include <soma-io/datasource/streamdatasource.h>
+#else
+  #include <cartobase/datasource/filedatasource.h>
+  #include <cartobase/datasource/streamdatasource.h>
+#endif
 #include <memory>
 #include <fstream>
 

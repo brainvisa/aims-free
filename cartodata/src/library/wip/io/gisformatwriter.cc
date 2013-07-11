@@ -31,6 +31,10 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#ifdef USE_SOMA_IO
+  ERROR_SHOULDNT_BE_INCLUDED;
+#endif
+
 #include <cartodata/wip/io/gisformatwriter_d.h>
 #include <cartobase/io/formatdictionary.h>
 

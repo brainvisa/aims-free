@@ -39,10 +39,15 @@
 #include <aims/io/iooptions.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
-#include <cartobase/object/pythonwriter.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/uuid/uuid.h>
-#include <cartobase/io/datasourceinfo.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasourceinfo/datasourceinfoloader.h>
+  #include <soma-io/writer/pythonwriter.h>
+#else
+  #include <cartobase/io/datasourceinfo.h>
+  #include <cartobase/object/pythonwriter.h>
+#endif
 
 using namespace aims;
 using namespace aims::internal;
@@ -134,7 +139,11 @@ const char* PythonHeader::id() const
 
 carto::SyntaxSet* PythonHeader::syntax()
 {
-  return &DataSourceInfo::minfSyntax();
+  #ifdef USE_SOMA_IO
+    return &DataSourceInfoLoader::minfSyntax();
+  #else
+    return &DataSourceInfo::minfSyntax();
+  #endif
 }
 
 

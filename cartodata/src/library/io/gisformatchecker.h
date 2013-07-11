@@ -30,6 +30,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+#ifdef USE_SOMA_IO
+  //#include <aims/io/gisformatchecker.h>
+#else
 
 #ifndef CARTODATA_IO_GISFORMATCHECKER_H
 #define CARTODATA_IO_GISFORMATCHECKER_H
@@ -48,5 +51,6 @@ namespace carto
 
 }
 
-#endif
+#endif // CARTODATA_IO_GISFORMATCHECKER_H
 
+#endif // USE_SOMA_IO

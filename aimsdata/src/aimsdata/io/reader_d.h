@@ -37,9 +37,28 @@
 #include <aims/io/reader.h>
 #include <aims/io/fileFormat.h>
 #include <aims/io/finder.h>
+#include <cartobase/type/string_conversion.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
 #include <set>
+
+#ifdef USE_SOMA_IO
+  #include <soma-io/io/reader_d.h>
+  #include <soma-io/io/formatdictionary_d.h>
+  #define AIMS_INSTANTIATE_READER( T ) \
+    namespace aims { \
+      template class aims::Reader< T >; \
+    } \
+    namespace soma { \
+      template class soma::FormatDictionary< T >; \
+      template class soma::Reader< T >; \
+    }
+#else
+  #define AIMS_INSTANTIATE_READER( T ) \
+    namespace aims { \
+      template class aims::Reader< T >; \
+    }
+#endif
 
 namespace aims
 {
@@ -122,6 +141,28 @@ namespace aims
   bool Reader<T>::read( T & obj, int border, const std::string* format, 
 			int frame )
   {
+#ifdef USE_SOMA_IO
+    // try first soma-io reader (since 2013)
+    // try first 3 passes
+    try{
+      // building uri
+      std::string uri = _filename;
+      if( border != 0 || frame != -1 )
+        uri += "?";
+      if( border != 0 )
+        uri += ( "border=" + carto::toString( border ) );
+      if( border != 0 && frame != -1 )
+        uri += "&";
+      if ( frame != -1 )
+        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+      
+      soma::Reader<T> reader( uri );
+      reader.setOptions( _options );
+      return reader.read( obj, carto::none(), 1, 3 );
+    } catch( ... ) {}
+    // if it failed, continue with aims reader.
+#endif
+    
 #ifdef AIMS_DEBUG_IO
     std::cout << "Reader<" << carto::DataTypeCode<T>::name() << ">\n";
 #endif
@@ -322,6 +363,28 @@ namespace aims
           }
         }
 
+#ifdef USE_SOMA_IO
+    // try first soma-io reader (since 2013)
+    // try pass 4
+    try{
+      // building uri
+      std::string uri = _filename;
+      if( border != 0 || frame != -1 )
+        uri += "?";
+      if( border != 0 )
+        uri += ( "border=" + carto::toString( border ) );
+      if( border != 0 && frame != -1 )
+        uri += "&";
+      if ( frame != -1 )
+        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+
+      soma::Reader<T> reader( uri );
+      reader.setOptions( _options );
+      return reader.read( obj, carto::none(), 4, 4 );
+    } catch( ... ) {}
+    // if it failed, it's hopeless.
+#endif
+
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm, 
 				   _filename + " : no matching format" );
@@ -332,6 +395,28 @@ namespace aims
   template<class T>
   T* Reader<T>::read( int border, const std::string* format, int frame )
   {
+#ifdef USE_SOMA_IO
+    // try first soma-io reader (since 2013)
+    // try first 3 passes
+    try{
+      // building uri
+      std::string uri = _filename;
+      if( border != 0 || frame != -1 )
+        uri += "?";
+      if( border != 0 )
+        uri += ( "border=" + carto::toString( border ) );
+      if( border != 0 && frame != -1 )
+        uri += "&";
+      if ( frame != -1 )
+        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+      
+      soma::Reader<T> reader( uri );
+      reader.setOptions( _options );
+      return reader.read( carto::none(), 1, 3 );
+    } catch( ... ) {}
+    // if it failed, continue with aims reader.
+#endif
+    
     // take care of old-style options
     if( !_options.get() )
       _options = carto::Object::value( carto::PropertySet() );
@@ -481,6 +566,28 @@ namespace aims
             triedf.insert( reader );
           }
         }
+
+#ifdef USE_SOMA_IO
+    // try first soma-io reader (since 2013)
+    // try pass 4
+    try{
+      // building uri
+      std::string uri = _filename;
+      if( border != 0 || frame != -1 )
+        uri += "?";
+      if( border != 0 )
+        uri += ( "border=" + carto::toString( border ) );
+      if( border != 0 && frame != -1 )
+        uri += "&";
+      if ( frame != -1 )
+        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+
+      soma::Reader<T> reader( uri );
+      reader.setOptions( _options );
+      return reader.read( carto::none(), 4, 4 );
+    } catch( ... ) {}
+    // if it failed, it's hopeless
+#endif
 
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm, 

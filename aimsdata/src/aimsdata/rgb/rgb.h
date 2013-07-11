@@ -37,6 +37,14 @@
 #ifndef AIMS_RGB_RGB_H
 #define AIMS_RGB_RGB_H
 
+#ifdef USE_SOMA_IO
+  #include <cartobase/type/voxelrgb.h>
+  #include <cartobase/type/voxelrgba.h>
+
+  typedef carto::VoxelRGB AimsRGB;
+  typedef carto::VoxelRGBA AimsRGBA;
+
+#else // USE_SOMA_IO
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/def/general.h>
@@ -803,6 +811,6 @@ inline byte & AimsRGBA::operator [] ( unsigned x )
     }
 }
 
-#endif
+#endif // USE_SOMA_IO
 
-
+#endif // AIMS_RGB_RGB_H

@@ -56,315 +56,119 @@ using namespace std;
 using namespace carto;
 using namespace aims;
 
-template class Writer<AimsData<int8_t> >;
-template class Writer<AimsData<uint8_t> >;
-template class Writer<AimsData<int16_t> >;
-template class Writer<AimsData<uint16_t> >;
-template class Writer<AimsData<int32_t> >;
-template class Writer<AimsData<uint32_t> >;
-template class Writer<AimsData<float> >;
-template class Writer<AimsData<double> >;
-template class Writer<AimsData<cfloat> >;
-template class Writer<AimsData<cdouble> >;
-template class Writer<AimsData<AimsRGB> >;
-template class Writer<AimsData<AimsRGBA> >;
-template class Writer<AimsData<AimsHSV> >;
-template class Writer<AimsData<Point3df> >;
-template class Writer<AimsData<Point3d> >;
-template class Writer<AimsData<AimsVector<float,6> > >;
+#define COMMA ,
+
+AIMS_INSTANTIATE_WRITER( AimsData<int8_t> );
+AIMS_INSTANTIATE_WRITER( AimsData<uint8_t> );
+AIMS_INSTANTIATE_WRITER( AimsData<int16_t> );
+AIMS_INSTANTIATE_WRITER( AimsData<uint16_t> );
+AIMS_INSTANTIATE_WRITER( AimsData<int32_t> );
+AIMS_INSTANTIATE_WRITER( AimsData<uint32_t> );
+AIMS_INSTANTIATE_WRITER( AimsData<float> );
+AIMS_INSTANTIATE_WRITER( AimsData<double> );
+AIMS_INSTANTIATE_WRITER( AimsData<cfloat> );
+AIMS_INSTANTIATE_WRITER( AimsData<cdouble> );
+AIMS_INSTANTIATE_WRITER( AimsData<AimsRGB> );
+AIMS_INSTANTIATE_WRITER( AimsData<AimsRGBA> );
+AIMS_INSTANTIATE_WRITER( AimsData<AimsHSV> );
+AIMS_INSTANTIATE_WRITER( AimsData<Point3df> );
+AIMS_INSTANTIATE_WRITER( AimsData<Point3d> );
+AIMS_INSTANTIATE_WRITER( AimsData<AimsVector<float COMMA 6> > );
 
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template class Writer<AimsData<char> >;
+AIMS_INSTANTIATE_WRITER( AimsData<char> );
 #endif
-template class Writer<AimsData<long> >;
-template class Writer<AimsData<unsigned long> >;
+AIMS_INSTANTIATE_WRITER( AimsData<long> );
+AIMS_INSTANTIATE_WRITER( AimsData<unsigned long> );
 
-template class Writer<Volume<int8_t> >;
-template class Writer<Volume<uint8_t> >;
-template class Writer<Volume<int16_t> >;
-template class Writer<Volume<uint16_t> >;
-template class Writer<Volume<int32_t> >;
-template class Writer<Volume<uint32_t> >;
-template class Writer<Volume<float> >;
-template class Writer<Volume<double> >;
-template class Writer<Volume<cfloat> >;
-template class Writer<Volume<cdouble> >;
-template class Writer<Volume<AimsRGB> >;
-template class Writer<Volume<AimsRGBA> >;
-template class Writer<Volume<AimsHSV> >;
-template class Writer<Volume<Point3df> >;
-template class Writer<Volume<Point3d> >;
-template class Writer<Volume<AimsVector<float,6> > >;
+AIMS_INSTANTIATE_WRITER( Volume<int8_t> );
+AIMS_INSTANTIATE_WRITER( Volume<uint8_t> );
+AIMS_INSTANTIATE_WRITER( Volume<int16_t> );
+AIMS_INSTANTIATE_WRITER( Volume<uint16_t> );
+AIMS_INSTANTIATE_WRITER( Volume<int32_t> );
+AIMS_INSTANTIATE_WRITER( Volume<uint32_t> );
+AIMS_INSTANTIATE_WRITER( Volume<float> );
+AIMS_INSTANTIATE_WRITER( Volume<double> );
+AIMS_INSTANTIATE_WRITER( Volume<cfloat> );
+AIMS_INSTANTIATE_WRITER( Volume<cdouble> );
+AIMS_INSTANTIATE_WRITER( Volume<AimsRGB> );
+AIMS_INSTANTIATE_WRITER( Volume<AimsRGBA> );
+AIMS_INSTANTIATE_WRITER( Volume<AimsHSV> );
+AIMS_INSTANTIATE_WRITER( Volume<Point3df> );
+AIMS_INSTANTIATE_WRITER( Volume<Point3d> );
+AIMS_INSTANTIATE_WRITER( Volume<AimsVector<float COMMA 6> > );
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template class Writer<Volume<char> >;
+AIMS_INSTANTIATE_WRITER( Volume<char> );
 #endif
-template class Writer<Volume<long> >;
-template class Writer<Volume<unsigned long> >;
+AIMS_INSTANTIATE_WRITER( Volume<long> );
+AIMS_INSTANTIATE_WRITER( Volume<unsigned long> );
 
-template class Writer<VolumeRef<int8_t> >;
-template class Writer<VolumeRef<uint8_t> >;
-template class Writer<VolumeRef<int16_t> >;
-template class Writer<VolumeRef<uint16_t> >;
-template class Writer<VolumeRef<int32_t> >;
-template class Writer<VolumeRef<uint32_t> >;
-template class Writer<VolumeRef<float> >;
-template class Writer<VolumeRef<double> >;
-template class Writer<VolumeRef<cfloat> >;
-template class Writer<VolumeRef<cdouble> >;
-template class Writer<VolumeRef<AimsRGB> >;
-template class Writer<VolumeRef<AimsRGBA> >;
-template class Writer<VolumeRef<AimsHSV> >;
-template class Writer<VolumeRef<Point3df> >;
-template class Writer<VolumeRef<Point3d> >;
-template class Writer<VolumeRef<AimsVector<float,6> > >;
+AIMS_INSTANTIATE_WRITER( VolumeRef<int8_t> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<uint8_t> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<int16_t> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<uint16_t> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<int32_t> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<uint32_t> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<float> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<double> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<cfloat> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<cdouble> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<AimsRGB> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<AimsRGBA> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<AimsHSV> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<Point3df> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<Point3d> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<AimsVector<float COMMA 6> > );
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template class Writer<VolumeRef<char> >;
+AIMS_INSTANTIATE_WRITER( VolumeRef<char> );
 #endif
-template class Writer<VolumeRef<long> >;
-template class Writer<VolumeRef<unsigned long> >;
+AIMS_INSTANTIATE_WRITER( VolumeRef<long> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<unsigned long> );
 
-template class Writer<AimsBucket<Void> >;
-template class Writer<BucketMap<Void> >;
-template class Writer<AimsBucket<short> >;
-template class Writer<BucketMap<short> >;
-template class Writer<AimsBucket<uint16_t> >;
-template class Writer<BucketMap<uint16_t> >;
-template class Writer<AimsBucket<int32_t> >;
-template class Writer<BucketMap<int32_t> >;
-template class Writer<AimsBucket<uint32_t> >;
-template class Writer<BucketMap<uint32_t> >;
-template class Writer<AimsBucket<vector<int8_t> > >;
-template class Writer<AimsBucket<vector<uint8_t> > >;
-template class Writer<AimsBucket<vector<int16_t> > >;
-template class Writer<AimsBucket<vector<uint16_t> > >;
-template class Writer<AimsBucket<vector<int32_t> > >;
-template class Writer<AimsBucket<vector<uint32_t> > >;
-template class Writer<AimsBucket<vector<float> > >;
-template class Writer<AimsBucket<vector<double> > >;
-template class Writer<AimsBucket<float> >;
-template class Writer<BucketMap<float> >;
-template class Writer<AimsBucket<double> >;
-template class Writer<BucketMap<double> >;
-template class Writer<AimsBucket<DtiTensor> >;
-template class Writer<BucketMap<DtiTensor> >;
+AIMS_INSTANTIATE_WRITER( AimsBucket<Void> );
+AIMS_INSTANTIATE_WRITER( BucketMap<Void> );
+AIMS_INSTANTIATE_WRITER( AimsBucket<short> );
+AIMS_INSTANTIATE_WRITER( BucketMap<short> );
+AIMS_INSTANTIATE_WRITER( AimsBucket<uint16_t> );
+AIMS_INSTANTIATE_WRITER( BucketMap<uint16_t> );
+AIMS_INSTANTIATE_WRITER( AimsBucket<int32_t> );
+AIMS_INSTANTIATE_WRITER( BucketMap<int32_t> );
+AIMS_INSTANTIATE_WRITER( AimsBucket<uint32_t> );
+AIMS_INSTANTIATE_WRITER( BucketMap<uint32_t> );
+AIMS_INSTANTIATE_WRITER( AimsBucket<vector<int8_t> > );
+AIMS_INSTANTIATE_WRITER( AimsBucket<vector<uint8_t> > );
+AIMS_INSTANTIATE_WRITER( AimsBucket<vector<int16_t> > );
+AIMS_INSTANTIATE_WRITER( AimsBucket<vector<uint16_t> > );
+AIMS_INSTANTIATE_WRITER( AimsBucket<vector<int32_t> > );
+AIMS_INSTANTIATE_WRITER( AimsBucket<vector<uint32_t> > );
+AIMS_INSTANTIATE_WRITER( AimsBucket<vector<float> > );
+AIMS_INSTANTIATE_WRITER( AimsBucket<vector<double> > );
+AIMS_INSTANTIATE_WRITER( AimsBucket<float> );
+AIMS_INSTANTIATE_WRITER( BucketMap<float> );
+AIMS_INSTANTIATE_WRITER( AimsBucket<double> );
+AIMS_INSTANTIATE_WRITER( BucketMap<double> );
+AIMS_INSTANTIATE_WRITER( AimsBucket<DtiTensor> );
+AIMS_INSTANTIATE_WRITER( BucketMap<DtiTensor> );
 
-template class Writer<AimsTimeSurface<2,Void> >;
-template class Writer<AimsSurfaceTriangle>;
-template class Writer<AimsSurfaceFacet>;
+AIMS_INSTANTIATE_WRITER( AimsTimeSurface<2 COMMA Void> );
+AIMS_INSTANTIATE_WRITER( AimsSurfaceTriangle);
+AIMS_INSTANTIATE_WRITER( AimsSurfaceFacet);
 
-template class Writer<Texture1d>;
-template class Writer<Texture2d>;
-template class Writer<TimeTexture<double> >;
-template class Writer<TimeTexture<short> >;
-template class Writer<TimeTexture<int> >;
-template class Writer<TimeTexture<unsigned int> >;
-template class Writer<TimeTexture<Point2d> >;
+AIMS_INSTANTIATE_WRITER( Texture1d);
+AIMS_INSTANTIATE_WRITER( Texture2d);
+AIMS_INSTANTIATE_WRITER( TimeTexture<double> );
+AIMS_INSTANTIATE_WRITER( TimeTexture<short> );
+AIMS_INSTANTIATE_WRITER( TimeTexture<int> );
+AIMS_INSTANTIATE_WRITER( TimeTexture<unsigned int> );
+AIMS_INSTANTIATE_WRITER( TimeTexture<Point2d> );
 
-template class Writer<Graph>;
-template class Writer<Hierarchy>;
-template class Writer<Motion>;
-template class Writer<GenericObject>;
-template class Writer<Object>;
-template class Writer<SparseMatrix>;
-template class Writer<SparseOrDenseMatrix>;
-
-
-template bool 
-GenericWriter::write< AimsData<int8_t> >( const AimsData<int8_t> &, 
-					bool, const string * );
-template bool 
-GenericWriter::write< AimsData<uint8_t> >( const AimsData<uint8_t> &, 
-					bool, const string * );
-template bool 
-GenericWriter::write< AimsData<int16_t> >( const AimsData<int16_t> &, 
-					 bool, const string * );
-template bool 
-GenericWriter::write< AimsData<uint16_t> >( const AimsData<uint16_t> &, 
-					  bool, const string * );
-template bool 
-GenericWriter::write< AimsData<int32_t> >( const AimsData<int32_t> &, 
-					bool, const string * );
-template bool 
-GenericWriter::write< AimsData<uint32_t> >( const AimsData<uint32_t> &, 
-					 bool, const string * );
-template bool 
-GenericWriter::write< AimsData<float> >( const AimsData<float> &, 
-					 bool, const string * );
-template bool 
-GenericWriter::write< AimsData<double> >( const AimsData<double> &, 
-					  bool, const string * );
-template bool 
-GenericWriter::write< AimsData<cfloat> >( const AimsData<cfloat> &, 
-					  bool, const string * );
-template bool 
-GenericWriter::write< AimsData<cdouble> >( const AimsData<cdouble> &, 
-					   bool, const string * );
-template bool 
-GenericWriter::write< AimsData<AimsRGB> >( const AimsData<AimsRGB> &, 
-					   bool, const string * );
-template bool 
-GenericWriter::write< AimsData<AimsRGBA> >( const AimsData<AimsRGBA> &, 
-					    bool, const string * );
-template bool 
-GenericWriter::write< AimsData<AimsHSV> >( const AimsData<AimsHSV> &, 
-					   bool, const string * );
-template bool 
-GenericWriter::write< AimsData<Point3df> >( const AimsData<Point3df> &, 
-					    bool, const string * );
-template bool 
-GenericWriter::write< AimsData< AimsVector<float,6> > >( const AimsData< AimsVector<float,6> > &, 
-							 bool, const string * );
-
-// to be removed after everything has been moved to intN_t/uintN_t
-#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template bool
-GenericWriter::write< AimsData<char> >( const AimsData<char> &, 
-					bool, const string * );
-#endif
-template bool
-GenericWriter::write< AimsData<long> >( const AimsData<long> &, 
-					bool, const string * );
-template bool
-GenericWriter::write< AimsData<unsigned long> >
-( const AimsData<unsigned long> &, bool, const string * );
-
-
-template bool
-GenericWriter::write< Volume<int8_t> >( const Volume<int8_t> &, 
-					bool, const string * );
-template bool 
-GenericWriter::write< Volume<uint8_t> >( const Volume<uint8_t> &, 
-                                         bool, const string * );
-template bool 
-GenericWriter::write< Volume<int16_t> >( const Volume<int16_t> &, 
-					 bool, const string * );
-template bool 
-GenericWriter::write< Volume<uint16_t> >( const Volume<uint16_t> &, 
-					  bool, const string * );
-template bool 
-GenericWriter::write< Volume<int32_t> >( const Volume<int32_t> &, 
-                                         bool, const string * );
-template bool 
-GenericWriter::write< Volume<uint32_t> >( const Volume<uint32_t> &, 
-                                          bool, const string * );
-template bool 
-GenericWriter::write< Volume<float> >( const Volume<float> &, 
-                                       bool, const string * );
-template bool 
-GenericWriter::write< Volume<double> >( const Volume<double> &, 
-                                        bool, const string * );
-template bool 
-GenericWriter::write< Volume<cfloat> >( const Volume<cfloat> &, 
-                                        bool, const string * );
-template bool 
-GenericWriter::write< Volume<cdouble> >( const Volume<cdouble> &, 
-                                         bool, const string * );
-template bool 
-GenericWriter::write< Volume<AimsRGB> >( const Volume<AimsRGB> &, 
-                                         bool, const string * );
-template bool 
-GenericWriter::write< Volume<AimsRGBA> >( const Volume<AimsRGBA> &, 
-                                          bool, const string * );
-template bool 
-GenericWriter::write< Volume<AimsHSV> >( const Volume<AimsHSV> &, 
-                                         bool, const string * );
-template bool 
-GenericWriter::write< Volume<Point3df> >( const Volume<Point3df> &, 
-                                          bool, const string * );
-template bool 
-GenericWriter::write< Volume< AimsVector<float,6> > >
-( const Volume< AimsVector<float,6> > &, bool, const string * );
-
-// to be removed after everything has been moved to intN_t/uintN_t
-#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-template bool
-GenericWriter::write< Volume<char> >( const Volume<char> &, 
-                                      bool, const string * );
-#endif
-template bool
-GenericWriter::write< Volume<long> >( const Volume<long> &, 
-                                      bool, const string * );
-template bool
-GenericWriter::write< Volume<unsigned long> >( const Volume<unsigned long> &, 
-                                               bool, const string * );
-
-
-template bool 
-GenericWriter::write< AimsBucket<Void> >( const AimsBucket<Void> &, 
-					  bool, const string * );
-template bool 
-GenericWriter::write< BucketMap<Void> >( const BucketMap<Void> &, 
-					 bool, const string * );
-template bool 
-GenericWriter::write< AimsBucket<short> >( const AimsBucket<short> &, 
-					   bool, const string * );
-template bool 
-GenericWriter::write< BucketMap<short> >( const BucketMap<short> &, 
-					  bool, const string * );
-template bool 
-GenericWriter::write< AimsBucket<float> >( const AimsBucket<float> &, 
-					   bool, const string * );
-template bool 
-GenericWriter::write< BucketMap<float> >( const BucketMap<float> &, 
-					  bool, const string * );
-template bool 
-GenericWriter::write< AimsBucket<DtiTensor> >( const AimsBucket<DtiTensor> &, 
-					       bool, const string * );
-template bool 
-GenericWriter::write< BucketMap<DtiTensor> >( const BucketMap<DtiTensor> &, 
-					      bool, const string * );
-
-
-template bool
-GenericWriter::write< AimsTimeSurface<2,Void> >
-( const AimsTimeSurface<2,Void> &, bool, const string * );
-template bool
-GenericWriter::write< AimsSurfaceTriangle >( const AimsSurfaceTriangle &, 
-					     bool, const string * );
-template bool
-GenericWriter::write< AimsSurfaceFacet >( const AimsSurfaceFacet &, 
-                                          bool, const string * );
-
-template bool
-GenericWriter::write< Texture1d >( const Texture1d &, 
-				   bool, const string * );
-template bool
-GenericWriter::write< Texture2d >( const Texture2d &, 
-				   bool, const string * );
-template bool
-GenericWriter::write< TimeTexture<short> >( const TimeTexture<short> &, 
-					    bool, const string * );
-template bool
-GenericWriter::write< TimeTexture<int> >( const TimeTexture<int> &, 
-					  bool, const string * );
-template bool
-GenericWriter::write< TimeTexture<unsigned int> >( const TimeTexture<unsigned int> &,
-					       bool, const string * );
-template bool
-GenericWriter::write< TimeTexture<Point2d> >( const TimeTexture<Point2d> &, 
-					      bool, const string * );
-
-template bool
-GenericWriter::write< Graph >( const Graph &, 
-			       bool, const string * );
-template bool
-    GenericWriter::write< Hierarchy >( const Hierarchy &,
-                                       bool, const string * );
-template bool
-GenericWriter::write< Motion >( const Motion &, 
-                                bool, const string * );
-template bool
-GenericWriter::write< GenericObject >( const GenericObject &,
-                                       bool, const string * );
-template bool
-GenericWriter::write< Object >( const Object &,
-                                bool, const string * );
-template bool
-GenericWriter::write< SparseMatrix >( const SparseMatrix &,
-                                      bool, const string * );
-template bool
-GenericWriter::write< SparseOrDenseMatrix >( const SparseOrDenseMatrix &,
-                                             bool, const string * );
+AIMS_INSTANTIATE_WRITER( Graph);
+AIMS_INSTANTIATE_WRITER( Hierarchy);
+AIMS_INSTANTIATE_WRITER( Motion);
+AIMS_INSTANTIATE_WRITER( GenericObject);
+AIMS_INSTANTIATE_WRITER( Object);
+AIMS_INSTANTIATE_WRITER( SparseMatrix);
+AIMS_INSTANTIATE_WRITER( SparseOrDenseMatrix);

@@ -37,10 +37,15 @@
 #include <cartodata/wip/io/gisformatwriter.h>
 #include <cartodata/io/volumedatasource.h>
 #include <cartodata/volume/volumeview.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/allocator.h>
+  #include <soma-io/datasource/filedatasource.h>
+#else
+  #include <cartobase/allocator/allocator.h>
+  #include <cartobase/datasource/filedatasource.h>
+#endif
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/ioexcept.h>
-#include <cartobase/allocator/allocator.h>
-#include <cartobase/datasource/filedatasource.h>
 
 namespace carto
 {

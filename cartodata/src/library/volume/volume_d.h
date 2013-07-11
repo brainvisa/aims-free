@@ -48,12 +48,17 @@
 
 namespace carto
 {
+//============================================================================
+//   C O N S T R U C T O R S
+//============================================================================
 
-
+  /***************************************************************************
+   * Default Constructor
+   **************************************************************************/
   template < typename T >
   Volume< T >::Volume( int sizeX, int sizeY, int sizeZ, int sizeT,
                        const AllocatorContext& allocatorContext, 
-		       bool allocated )
+                       bool allocated )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
       _items( 0U, allocatorContext )
 #ifndef CARTO_USE_BLITZ
@@ -68,7 +73,9 @@ namespace carto
 
   }
 
-
+  /***************************************************************************
+   * Buffer Constructor
+   **************************************************************************/
   template < typename T >
   Volume< T >::Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
@@ -85,7 +92,74 @@ namespace carto
 
   }
 
+  /***************************************************************************
+   * View Constructor
+   **************************************************************************/
+  template<typename T> inline
+  Volume<T>::Volume( rc_ptr<Volume<T> > other,
+                     const Position4Di & pos, const Position4Di & size,
+                     const AllocatorContext & allocContext )
+    : VolumeProxy<T>( size[0] >= 0 ? size[0] :
+          other->allocatorContext().isAllocated() ? other->getSizeX() : 1,
+        size[1] >= 0 ? size[1] :
+          other->allocatorContext().isAllocated() ? other->getSizeY() : 1,
+        size[2] >= 0 ? size[2] :
+          other->allocatorContext().isAllocated() ? other->getSizeZ() : 1,
+        size[3] >= 0 ? size[3] :
+          other->allocatorContext().isAllocated() ? other->getSizeT() : 1 ),
+      _items( 0U,
+              other->allocatorContext().isAllocated()
+                ? AllocatorContext( AllocatorStrategy::NotOwner,
+                                    rc_ptr<DataSource>( new BufferDataSource
+                                      ( (char *) &(*other)( pos[0], pos[1],
+                                                            pos[2], pos[3] ),
+                                        size[0] * size[1] * size[2] * size[3]
+                                        * sizeof(T) ) ) )
+                : allocContext ),
+      _refvol( other ),
+      _pos( pos )
+#ifndef CARTO_USE_BLITZ
+    ,
+      _lineoffset( 0 ),
+      _sliceoffset( 0 ),
+      _volumeoffset( 0 )
+#endif
+  {
+    allocate( -1, -1, -1, -1, true, other->allocatorContext().isAllocated()
+                ? AllocatorContext( AllocatorStrategy::NotOwner,
+                                    rc_ptr<DataSource>( new BufferDataSource
+                                      ( (char *) &(*other)( pos[0], pos[1],
+                                                            pos[2], pos[3] ),
+                                        size[0] * size[1] * size[2] * size[3]
+                                        * sizeof(T) ) ) )
+                : allocContext );
+    if( other->allocatorContext().isAllocated() )
+      {
+        // fix offsets
+#ifdef CARTO_USE_BLITZ
+        _blitz.reference
+          ( blitz::Array<T,4>
+            ( &_items[0],
+              blitz::shape( VolumeProxy<T>::getSizeX(),
+                            VolumeProxy<T>::getSizeY(),
+                            VolumeProxy<T>::getSizeZ(),
+                            VolumeProxy<T>::getSizeT() ),
+              blitz::shape( 1, &(*other)( 0, 1, 0 ) - &(*other)( 0, 0, 0 ),
+                            &(*other)( 0, 0, 1 ) - &(*other)( 0, 0, 0 ),
+                            &(*other)( 0, 0, 0, 1 ) - &(*other)( 0, 0, 0 ) ),
+              blitz::GeneralArrayStorage<4>
+              ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+#else
+        _lineoffset = &(*other)( 0, 1, 0 ) - &(*other)( 0, 0, 0 );
+        _sliceoffset = &(*other)( 0, 0, 1 ) - &(*other)( 0, 0, 0 );
+        _volumeoffset = &(*other)( 0, 0, 0, 1 ) - &(*other)( 0, 0, 0 );
+#endif
+      }
+  }
 
+  /***************************************************************************
+   * Copy Constructor
+   **************************************************************************/
   template < typename T >
   Volume< T >::Volume( const Volume< T >& other )
     : RCObject(), 
@@ -115,11 +189,38 @@ namespace carto
   {
   }
 
+//============================================================================
+//   M E T H O D S
+//============================================================================
 
   template < typename T > inline
   const AllocatorContext& Volume<T>::allocatorContext() const
   {
     return _items.allocatorContext();
+  }
+
+  template <typename T> inline
+  rc_ptr<Volume<T> > Volume<T>::refVolume() const
+  {
+    return _refvol;
+  }
+
+  template <typename T> inline
+  rc_ptr<Volume<T> > & Volume<T>::refVolume()
+  {
+    return _refvol;
+  }
+
+  template <typename T> inline
+  typename Volume<T>::Position4Di Volume<T>::posInRefVolume() const
+  {
+    return _pos;
+  }
+
+  template <typename T> inline
+  typename Volume<T>::Position4Di & Volume<T>::posInRefVolume()
+  {
+    return _pos;
   }
 
   template < typename T >
@@ -150,6 +251,8 @@ namespace carto
     _sliceoffset = other._sliceoffset;
     _volumeoffset = other._volumeoffset;
 #endif
+    _refvol = other._refvol;
+    _pos = other._pos;
 
     initialize();
 
@@ -262,7 +365,7 @@ namespace carto
                               int oldSizeY,
                               int oldSizeZ,
                               int oldSizeT, 
-			      bool allocate, 
+                              bool allocate, 
                               const AllocatorContext& ac )
   {
 
@@ -426,7 +529,8 @@ namespace carto
   void Volume< T >::slotSizeChanged( const PropertyFilter& propertyFilter )
   {
 
-    std::cout << "Volume< " << DataTypeCode<T>::name() << " >::slotSizeChanged"
+    std::cout << "Volume< " << DataTypeCode<T>::name()
+              << " >::slotSizeChanged"
               << std::endl;
 
     int oldSizeX = VolumeProxy<T>::_sizeX;
@@ -517,6 +621,8 @@ namespace carto
     header->getProperty( "sizeY", sizey );
     header->getProperty( "sizeZ", sizez );
     header->getProperty( "sizeT", sizet );
+    std::cout << "VOLUMECREATE:: ( " << sizex << ", " << sizey << ", "
+              << sizez << ", " << sizet << " )" << std::endl;
     options->getProperty( "unallocated", unalloc );
     Volume<T>	*obj = new Volume<T>( sizex, sizey, sizez, sizet, context, 
                                       !unalloc );
@@ -524,7 +630,7 @@ namespace carto
     obj->header().copyProperties( header );
     // restore original sizes : temporary too...
     obj->blockSignals( false );
-
+    
     return obj;
   }
 
@@ -543,6 +649,8 @@ namespace carto
         header->getProperty( "sizeY", sizey );
         header->getProperty( "sizeZ", sizez );
         header->getProperty( "sizeT", sizet );
+        std::cout << "VOLUMESETUP:: ( " << sizex << ", " << sizey << ", "
+                  << sizez << ", " << sizet << " )" << std::endl;
         options->getProperty( "unallocated", unalloc );
         obj.reallocate( sizex, sizey, sizez, sizet, false, context, !unalloc );
       }
@@ -568,6 +676,24 @@ namespace carto
         ps.setProperty( "sizeT", sizet );
       }
     obj.blockSignals( false );
+  }
+
+  template <typename T>
+  void Creator<VolumeRef<T> >::setup( VolumeRef<T> & obj, Object header,
+                                   const AllocatorContext & context,
+                                   Object options )
+  {
+    std::cout << "VOLUMEREFSETUP" << std::endl;
+    Creator<Volume<T> >::setup( *obj, header, context, options );
+  }
+
+  template <typename T>
+  VolumeRef<T>* Creator<VolumeRef<T> >::create( Object header,
+                                   const AllocatorContext & context,
+                                   Object options )
+  {
+    std::cout << "VOLUMEREFCREATE" << std::endl;
+    return new VolumeRef<T>;
   }
 
 }

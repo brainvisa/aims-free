@@ -42,14 +42,20 @@
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/type/typetraits.h>
-#include <cartobase/io/datasourceinfo.h>
-#include <cartobase/datasource/filedatasource.h>
 #include <cartobase/thread/mutex.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/datasourceinfo/datasourceinfoloader.h>
+  #include <soma-io/datasourceinfo/datasourceinfo.h>
+  #include <soma-io/datasource/filedatasource.h>
+#else
+  #include <cartobase/io/datasourceinfo.h>
+  #include <cartobase/datasource/filedatasource.h>
+#endif
 #include <cartodata/io/carto2aimsheadertranslator.h>
 #include <map>
 #include <set>
 #include <iostream>
-
+//#define AIMS_DEBUG_IO
 using namespace aims;
 using namespace carto;
 using namespace std;
@@ -220,7 +226,7 @@ FinderFormat* Finder::finderFormat( const string & format )
 bool Finder::check( const string& filename )
 {
 #ifdef AIMS_DEBUG_IO
-  cout << "Finder::check( " << filename << " )\n";
+  cout << "FINDER:: check( " << filename << " )\n";
 #endif
   static bool plugs = false;
   if( !plugs )
@@ -233,9 +239,25 @@ bool Finder::check( const string& filename )
   _state = Unchecked;
 
   // try using DataSourceInfo first (new system 2005)
-  DataSourceInfo	dsi;
-  FileDataSource	ds( filename );
-  Object		h = dsi.check( ds );
+  #ifdef AIMS_DEBUG_IO
+  cout << "FINDER:: trying check through DataSourceInfoLoader... " << endl;
+  #endif
+  #ifdef USE_SOMA_IO
+    Object h;
+    try {
+      // try first 2 passes
+      DataSourceInfoLoader dsil;
+      rc_ptr<DataSource> ds( new FileDataSource( filename ) );
+      DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ),
+                                       carto::none(), 1, 2 );
+      h = dsi.header();
+    } catch( ... ) {
+    }
+  #else
+    DataSourceInfo	dsi;
+    FileDataSource	ds( filename );
+    Object		h = dsi.check( ds );
+  #endif
   bool dsok = !h.isNone();
   if( dsok )
     {
@@ -262,11 +284,16 @@ bool Finder::check( const string& filename )
       ph->copyProperties( h );
       setHeader( ph );
 
-      // cout << "DataSourceInfo worked\n";
+      #ifdef AIMS_DEBUG_IO
+      cout << "FINDER:: DataSourceInfo worked" << endl;
+      #endif
       if( filename.substr( filename.length() - 4, 4 ) != ".gii" )
         // bidouille to let the gifti reader work (it's both gifti and XML)
         return true;
     }
+  #ifdef AIMS_DEBUG_IO
+  cout << "FINDER:: DataSourceInfo didn't work, trying through Finder... " << endl;
+  #endif
 
   _errorcode = -1;
   _errormsg = "";
@@ -282,7 +309,7 @@ bool Finder::check( const string& filename )
     ext = filename.substr( dlen+pos+1, filename.length() - pos - 1 );
 
 #ifdef AIMS_DEBUG_IO
-  cout << "ext : " << ext << endl;
+  cout << "FINDER:: ext : " << ext << endl;
 #endif
   //	Check compatible formats
   set<string>			tried;
@@ -306,7 +333,7 @@ bool Finder::check( const string& filename )
       if( tried.find( *ie ) == notyet )
         {
 #ifdef AIMS_DEBUG_IO
-          cout << "trying " << *ie << "...\n";
+          cout << "FINDER:: trying " << *ie << "...\n";
 #endif
           reader = finderFormat( *ie );
           if( reader )
@@ -331,7 +358,7 @@ bool Finder::check( const string& filename )
   }
 
 #ifdef AIMS_DEBUG_IO
-  cout << "not found yet... pass2...\n";
+  cout << "FINDER:: not found yet... pass2...\n";
 #endif
   if( !ext.empty() )
     {
@@ -343,7 +370,7 @@ bool Finder::check( const string& filename )
           if( tried.find( *ie ) == notyet )
             {
 #ifdef AIMS_DEBUG_IO
-              cout << "pass2, trying " << *ie << "...\n";
+              cout << "FINDER:: pass2, trying " << *ie << "...\n";
 #endif
               reader = finderFormat( *ie );
               if( reader )
@@ -368,7 +395,7 @@ bool Finder::check( const string& filename )
     }
 
 #ifdef AIMS_DEBUG_IO
-  cout << "not found yet... pass3...\n";
+  cout << "FINDER:: not found yet... pass3...\n";
 #endif
   // still not found ? well, try EVERY format this time...
   for( iext=pd->extensions.begin(); iext!=eext; ++iext )
@@ -379,7 +406,7 @@ bool Finder::check( const string& filename )
         if( reader )
           {
 #ifdef AIMS_DEBUG_IO
-            cout << "pass3, trying " << *ie << "...\n";
+            cout << "FINDER:: pass3, trying " << *ie << "...\n";
 #endif
             try
               {
@@ -399,8 +426,53 @@ bool Finder::check( const string& filename )
           }
       }
 
+#ifdef USE_SOMA_IO
+  // try pass 3
+  try {
+    Object h;
+    DataSourceInfoLoader dsil;
+    rc_ptr<DataSource> ds( new FileDataSource( filename ) );
+    DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ),
+                                     carto::none(), 3, 3 );
+    h = dsi.header();
+    bool dsok = !h.isNone();
+    if( dsok )
+    {
+      _state = Ok;
+
+      Carto2AimsHeaderTranslator  t;
+      t.translate( h );
+
+      string  x;
+      h->getProperty( "object_type", x );
+      setObjectType( x );
+      x.clear();
+      h->getProperty( "data_type", x );
+      setDataType( x );
+      vector<string>  vt;
+      vt.push_back( x );
+      h->getProperty( "possible_data_types", vt );
+      setPossibleDataTypes( vt );
+      x.clear();
+      h->getProperty( "file_type", x );
+      setFormat( x );
+
+      PythonHeader  *ph = new PythonHeader;
+      ph->copyProperties( h );
+      setHeader( ph );
+
+      #ifdef AIMS_DEBUG_IO
+      cout << "FINDER:: DataSourceInfo worked" << endl;
+      #endif
+      if( filename.substr( filename.length() - 4, 4 ) != ".gii" )
+        // bidouille to let the gifti reader work (it's both gifti and XML)
+        return true;
+    }
+  } catch( ... ) {}
+#endif
+
 #ifdef AIMS_DEBUG_IO
-  cout << "not found at all, giving up\n";
+  cout << "FINDER:: not found at all, giving up\n";
 #endif
   // still not succeeded, it's hopeless...
 

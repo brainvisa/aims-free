@@ -39,7 +39,11 @@
 
 #include <aims/io/niftiheader.h>
 #include <aims/data/data.h>
-#include <cartobase/allocator/mappingcopy.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/mappingcopy.h>
+#else
+  #include <cartobase/allocator/mappingcopy.h>
+#endif
 
 template <class T> class AimsData;
 

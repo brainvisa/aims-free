@@ -38,8 +38,13 @@
 #include <cartodata/volume/volumeoperators.h>
 #include <aims/vector/vector.h>
 #include <aims/border/border.h>
+#include <aims/rgb/rgb.h>
 #include <cartobase/smart/rcptr.h>
-#include <cartobase/allocator/allocator.h>
+#ifdef USE_SOMA_IO
+  #include <soma-io/allocator/allocator.h>
+#else
+  #include <cartobase/allocator/allocator.h>
+#endif
 #include <aims/data/pheader.h>
 
 
@@ -1290,8 +1295,6 @@ AimsData<T> operator * ( const AimsData<T>& firstThing, float scale )
   for ( x = 0; x < thing->dimX(); x++ )
 
 
-class AimsRGB;
-class AimsRGBA;
 class DtiTensor;
 
 namespace carto
