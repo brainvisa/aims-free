@@ -20,8 +20,18 @@ public:
 
   static AimsSurfaceTriangle* generate( const carto::GenericObject & )
     throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
+
+  static AimsTimeSurface_2* generate_wireframe( carto::Object )
+    throw( std::runtime_error, std::invalid_argument ) /Factory/;
+
+  static AimsTimeSurface_2* generate_wireframe( 
+    const carto::GenericObject & )
+    throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
+
   static carto::Object description();
   static void printDescription();
+  static carto::Object description_wireframe();
+  static void printDescription_wireframe();
 
   static AimsSurfaceTriangle* cube( const carto::GenericObject & ) /Factory/;
 %Docstring
@@ -122,6 +132,14 @@ See the description() and printDescription() methods for more information.
 static icosphere( Point3df center, float radius, unsigned nfaces=320 )
 
 Compared to sphere() which performs meridian / parallels tesselation, icosphere over-segments an icosahedron to get equal, equilateral triangles.
+%End
+
+  static AimsTimeSurface_2*
+  parallelepiped_wireframe( const carto::GenericObject & params ) /Factory/;
+  static AimsTimeSurface_2* parallelepiped_wireframe(
+    const Point3df & boundingbox_min, const Point3df & boundingbox_max ) /Factory/;
+%Docstring
+static parallelepiped_wireframe( Point3df boundingbox_min, Point3df boundingbox_max )
 %End
 };
 

@@ -107,6 +107,15 @@ namespace
   };
 
 
+  struct ParallelepipedGen_wireframe 
+    : public SurfaceGenerator::Generator_wireframe
+  {
+    virtual AimsTimeSurface<2,Void>*
+    generator( const carto::GenericObject & ) const;
+    virtual Object parameters() const;
+  };
+
+
   map<string, rc_ptr<SurfaceGenerator::Generator> > & generators()
   {
     static map<string,rc_ptr<SurfaceGenerator::Generator> >	functs;
@@ -131,6 +140,22 @@ namespace
       }
     return functs;
   }
+
+
+  map<string, rc_ptr<SurfaceGenerator::Generator_wireframe> > & 
+    generators_wireframe()
+  {
+    static map<string,rc_ptr<SurfaceGenerator::Generator_wireframe> >
+      functs;
+    if( functs.empty() )
+    {
+      functs[ "parallelepiped" ] 
+        = rc_ptr<SurfaceGenerator::Generator_wireframe>( 
+          new ParallelepipedGen_wireframe );
+    }
+    return functs;
+  }
+
 
   AimsSurfaceTriangle* 
   CubeGen::generator( const carto::GenericObject & x ) const
@@ -332,6 +357,27 @@ namespace
     return d;
   }
 
+
+  AimsTimeSurface<2,Void>* 
+  ParallelepipedGen_wireframe::generator( 
+    const carto::GenericObject & x ) const
+  {
+    return SurfaceGenerator::parallelepiped_wireframe( x );
+  }
+
+
+  Object ParallelepipedGen_wireframe::parameters() const
+  {
+    Object              d = Object::value( Dictionary() );
+    Dictionary  & p = d->value<Dictionary>();
+    p[ "boundingbox_min" ] = Object::value( string( 
+      "3D position of the lower bounding box" ) );
+    p[ "boundingbox_max" ] = Object::value( string( 
+      "3D position of the higher bounding box" ) );
+    return d;
+  }
+
+
 }
 
 
@@ -357,6 +403,35 @@ SurfaceGenerator::generate( const GenericObject & params )
     {
       cerr << "SurfaceGenerator::generate: unknown shape type " << type 
 	   << endl;
+      throw runtime_error( string( "can't generate mesh of type " ) + type  );
+    }
+  return 0;
+}
+
+
+AimsTimeSurface<2,Void>* 
+SurfaceGenerator::generate_wireframe( const Object params )
+{
+  return generate_wireframe( *params );
+}
+
+
+AimsTimeSurface<2,Void>* 
+SurfaceGenerator::generate_wireframe( const GenericObject & params )
+{
+  string        type = params.getProperty( "type" )->getString();
+
+  const map<string,rc_ptr<Generator_wireframe> >  & 
+    functs = generators_wireframe();
+
+  map<string,rc_ptr<Generator_wireframe> >::const_iterator 
+    ifn = functs.find( type );
+  if( ifn != functs.end() )
+    return ifn->second->generator( params );
+  else
+    {
+      cerr << "SurfaceGenerator::generate_wireframe: unknown shape type " 
+        << type << endl;
       throw runtime_error( string( "can't generate mesh of type " ) + type  );
     }
   return 0;
@@ -391,6 +466,49 @@ Object SurfaceGenerator::description()
 void SurfaceGenerator::printDescription( ostream & ostr )
 {
   Object                pardesc = description();
+  ObjectVector          & pdl = pardesc->value<ObjectVector>();
+  ObjectVector::iterator        ipd, epd = pdl.end();
+  for( ipd=pdl.begin(); ipd!=epd; ++ipd )
+  {
+    Dictionary        & d = (*ipd)->value<Dictionary>();
+    ostr << "\ntype : " << d[ "type" ]->getString() << endl;
+    Dictionary::iterator      id, ed = d.end();
+    for( id=d.begin(); id!=ed; ++id )
+      if( id->first != "type" )
+        ostr << id->first << " : " << id->second->getString() << endl;
+  }
+}
+
+
+Object SurfaceGenerator::description_wireframe()
+{
+  const map<string,rc_ptr<Generator_wireframe> >  & 
+    functs = generators_wireframe();
+  map<string,rc_ptr<Generator_wireframe> >::const_iterator 
+    ifn, efn = functs.end();
+  Object                                desc = Object::value( ObjectVector() );
+  ObjectVector                          & l = desc->value<ObjectVector>();
+  Dictionary::const_iterator    id, ed;
+
+  for( ifn=functs.begin(); ifn!=efn; ++ifn )
+  {
+    Object    o = Object::value( Dictionary() );
+    Dictionary        & d = o->value<Dictionary>();
+    l.push_back( o );
+    d[ "type" ] = Object::value( ifn->first );
+
+    Object            dx = ifn->second->parameters();
+    Dictionary        & p = dx->value<Dictionary>();
+    for( id=p.begin(), ed=p.end(); id!=ed; ++id )
+      d[ id->first ] = id->second;
+  }
+  return desc;
+}
+
+
+void SurfaceGenerator::printDescription_wireframe( ostream & ostr )
+{
+  Object                pardesc = description_wireframe();
   ObjectVector          & pdl = pardesc->value<ObjectVector>();
   ObjectVector::iterator        ipd, epd = pdl.end();
   for( ipd=pdl.begin(); ipd!=epd; ++ipd )
@@ -1353,6 +1471,67 @@ AimsSurfaceTriangle* SurfaceGenerator::icosphere( const Point3df & p1,
     *iv = p1 + p2 / p2.norm() * radius;
   }
   return ico;
+}
+
+
+AimsTimeSurface<2,Void>* SurfaceGenerator::parallelepiped_wireframe(
+  const carto::GenericObject & params )
+{
+  Object        vp1;
+  Point3df      corner1, corner2;
+
+  vp1 = params.getProperty( "boundingbox_min" );
+
+  int i = 0;
+  Object it;
+  for( it=vp1->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
+    corner1[i] = it->currentValue()->getScalar();
+  if( i != 3 )
+    cerr << "parallelepiped_wireframe needs 3 coords in boundingbox_min\n";
+
+  vp1 = params.getProperty( "boundingbox_max" );
+  for( it=vp1->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
+    corner2[i] = it->currentValue()->getScalar();
+  if( i != 3 )
+    cerr << "parallelepiped_wireframe needs 3 coords in boundingbox_max\n";
+
+  return parallelepiped_wireframe( corner1, corner2 );
+}
+
+
+AimsTimeSurface<2,Void>* SurfaceGenerator::parallelepiped_wireframe(
+  const Point3df & corner1, const Point3df & corner2 )
+{
+  AimsTimeSurface<2,Void> *mesh = new AimsTimeSurface<2,Void>;
+  AimsSurface<2,Void> & surf = (*mesh)[0];
+
+  vector<Point3df> & vert = surf.vertex();
+  vert.reserve( 8 );
+  vert.push_back( corner1 );
+  vert.push_back( Point3df( corner2[0], corner1[1], corner1[2] ) );
+  vert.push_back( Point3df( corner1[0], corner2[1], corner1[2] ) );
+  vert.push_back( Point3df( corner1[0], corner1[1], corner2[2] ) );
+  vert.push_back( Point3df( corner2[0], corner2[1], corner1[2] ) );
+  vert.push_back( Point3df( corner2[0], corner1[1], corner2[2] ) );
+  vert.push_back( Point3df( corner1[0], corner2[1], corner2[2] ) );
+  vert.push_back( corner2 );
+
+  vector<AimsVector<uint32_t, 2> > & pol = surf.polygon();
+  pol.reserve( 12 );
+  pol.push_back( AimsVector<uint32_t, 2>( 0, 1 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 0, 2 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 1, 4 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 2, 4 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 0, 3 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 1, 5 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 2, 6 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 4, 7 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 3, 5 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 3, 6 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 5, 7 ) );
+  pol.push_back( AimsVector<uint32_t, 2>( 6, 7 ) );
+
+  return mesh;
 }
 
 

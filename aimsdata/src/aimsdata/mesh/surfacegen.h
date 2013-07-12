@@ -47,6 +47,8 @@ namespace aims
   public:
     typedef AimsSurfaceTriangle* 
     (*GenFunction)( const carto::GenericObject & );
+    typedef AimsTimeSurface<2,Void>* 
+    (*GenFunction_wireframe)( const carto::GenericObject & );
 
     struct Generator
     {
@@ -57,40 +59,55 @@ namespace aims
       virtual carto::Object parameters() const = 0;
     };
 
+    struct Generator_wireframe
+    {
+      virtual ~Generator_wireframe() {}
+
+      virtual AimsTimeSurface<2,Void>* 
+      generator( const carto::GenericObject & ) const = 0;
+      virtual carto::Object parameters() const = 0;
+    };
+
     /// generic factory function (calls lower-level functions)
     static AimsSurfaceTriangle* 
     generate( const carto::GenericObject & params );
     /// generic factory function (calls lower-level functions)
     static AimsSurfaceTriangle* generate( carto::Object params );
+    static AimsTimeSurface<2,Void>* 
+    generate_wireframe( const carto::GenericObject & params );
+    /// generic factory function (calls lower-level functions)
+    static AimsTimeSurface<2,Void>* generate_wireframe( carto::Object params );
 
     /// description of known shapes and parameters (vector of dicts)
     static carto::Object description();
+    static carto::Object description_wireframe();
     /// outputs the description() dictionary in a more huma-readable way
     static void printDescription( std::ostream & s = std::cout );
+    static void printDescription_wireframe( std::ostream & s = std::cout );
 
     static AimsSurfaceTriangle* cube( const carto::GenericObject & params );
     static AimsSurfaceTriangle* cube( const Point3df & center, float radius, 
-				      bool smoothnormal = false );
+                                      bool smoothnormal = false );
 
     static AimsSurfaceTriangle* 
     cylinder( const carto::GenericObject & params );
     static AimsSurfaceTriangle* cylinder( const Point3df & p1, 
-					  const Point3df & p2, float radius, 
-					  float radius2, unsigned nfacets, 
-					  bool closed, bool smooth = false );
+                                          const Point3df & p2, float radius, 
+                                          float radius2, unsigned nfacets, 
+                                          bool closed, bool smooth = false );
 
     static AimsSurfaceTriangle* cone( const carto::GenericObject & params );
     static AimsSurfaceTriangle* cone( const Point3df & arrow, 
-				      const Point3df & base, float radius, 
-				      unsigned nfacets, bool closed, 
-				      bool smooth = false );
+                                      const Point3df & base, float radius, 
+                                      unsigned nfacets, bool closed, 
+                                      bool smooth = false );
 
     static AimsSurfaceTriangle* 
     arrow( const carto::GenericObject & params );
     static AimsSurfaceTriangle* arrow( const Point3df & arrow, 
-				       const Point3df & base, float radius, 
-				       float arrowradius, unsigned nfacets, 
-				       float arrowlengthfract );
+                                        const Point3df & base, float radius, 
+                                        float arrowradius, unsigned nfacets, 
+                                        float arrowlengthfract );
 
     /** Sphere generation functions by Manik Bhattacharjee (CNRS UPR640 - LENA)
 
@@ -123,6 +140,11 @@ attributes = {
     icosphere( const carto::GenericObject & params );
     static AimsSurfaceTriangle* icosphere( const Point3df & center,
                                            float radius, unsigned nfacets );
+
+    static AimsTimeSurface<2,Void>*
+    parallelepiped_wireframe( const carto::GenericObject & params );
+    static AimsTimeSurface<2,Void>* parallelepiped_wireframe( 
+      const Point3df & boundingbox_min, const Point3df & boundingbox_max );
   };
 
 }
