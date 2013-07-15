@@ -19,9 +19,9 @@ add_library( cartodata SHARED ${_sources} )
 
 add_dependencies( cartodata ${headersTarget} )
 set_property( TARGET cartodata PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-target_link_libraries( cartodata cartobase )
+target_link_libraries( cartodata ${SOMA_CARTOBASE_LIBRARIES} )
 if( USE_SOMA_IO )
-  target_link_libraries( cartodata soma-io )
+  target_link_libraries( cartodata ${SOMA-IO_LIBRARIES} )
 endif( USE_SOMA_IO )
 BRAINVISA_INSTALL( TARGETS cartodata
                    DESTINATION lib
