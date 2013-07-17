@@ -49,7 +49,8 @@ namespace
         otype.erase( pos, otype.length() - pos );
       }
     else
-      dtype = otype;
+      if( dtype.empty() )
+        dtype = otype;
   }
 
 }
@@ -93,6 +94,7 @@ void Carto2AimsHeaderTranslator::translate( Object srcheader,
   if( !dstheader->hasProperty( "data_type" ) 
       && dstheader->getProperty( "object_type", otype ) )
     {
+      cout << "no data_type\n";
       objdatatype( otype, dtype );
       dstheader->setProperty( "object_type", otype );
       dstheader->setProperty( "data_type", dtype );
