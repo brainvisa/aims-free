@@ -105,6 +105,7 @@ namespace aims
       void muteToSparse();
       /// mute to sparse or dense according to the less memory consuming
       void muteToOptimalShape();
+      bool isOptimalShape() const;
 
       SparseOrDenseMatrix &
         operator += ( const SparseOrDenseMatrix& thing );

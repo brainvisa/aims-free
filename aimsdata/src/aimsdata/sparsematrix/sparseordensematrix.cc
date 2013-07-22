@@ -413,9 +413,19 @@ void SparseOrDenseMatrix::muteToSparse()
 }
 
 
+bool SparseOrDenseMatrix::isOptimalShape() const
+{
+  bool shouldBeSparse = getNonZeroElementCount() * 8 < getSize1() * getSize2();
+  if( ( isDense() && !shouldBeSparse ) || ( !isDense() && shouldBeSparse ) )
+    return true;
+  return false;
+}
+
 void SparseOrDenseMatrix::muteToOptimalShape()
 {
-  if( getNonZeroElementCount() * 8 < getSize1() * getSize2() )
+  if( isOptimalShape() )
+    return;
+  if( isDense() )
     muteToSparse();
   else
     muteToDense();
