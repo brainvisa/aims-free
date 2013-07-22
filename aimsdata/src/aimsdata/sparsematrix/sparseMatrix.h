@@ -175,6 +175,7 @@ namespace aims
 
 
   template <typename VectorType>
+  inline
   VectorType aims::SparseMatrix::getSparseRow( int32_t i ) const
   {
 
@@ -206,6 +207,7 @@ namespace aims
 
 
   template <typename VectorType>
+  inline
   VectorType aims::SparseMatrix::getSparseColumn( int32_t j ) const
   {
 
