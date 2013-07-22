@@ -74,6 +74,11 @@ namespace aims
       std::vector<double> getRow( int32_t i ) const;
       std::vector<double> getColumn( int32_t j ) const;
 
+      template <typename VectorType>
+        VectorType getSparseRow( int32_t i ) const;
+      template <typename VectorType>
+        VectorType getSparseColumn( int32_t i ) const;
+
       void read( const std::string& filename );
       void write( const std::string& filename, 
                   carto::Object options=carto::none() ) const;
@@ -118,7 +123,46 @@ namespace aims
 
   };
 
+
+  template <typename VectorType>
+  inline
+  VectorType SparseOrDenseMatrix::getSparseRow( int32_t i ) const
+  {
+    if( !isDense() )
+      return sparseMatrix()->getSparseRow<VectorType>( i );
+
+    // dense case
+    VectorType row( denseMatrix()->getSizeX() );
+    const double *buf = &denseMatrix().at( 0, i ), *end = &denseMatrix().at( denseMatrix()->getSizeX(), i );
+    long inc = &denseMatrix().at( 1, i ) - buf;
+    int x;
+    for( x=0; buf != end; buf += inc, ++x )
+      if( *buf != 0 )
+        row[x] = *buf;
+    return row;
+  }
+
+
+  template <typename VectorType>
+  inline
+  VectorType SparseOrDenseMatrix::getSparseColumn( int32_t i ) const
+  {
+    if( !isDense() )
+      return sparseMatrix()->getSparseColumn<VectorType>( i );
+
+    // dense case
+    VectorType column( denseMatrix()->getSizeY() );
+    const double *buf = &denseMatrix().at( i, 0 ), *end = &denseMatrix().at( i, denseMatrix()->getSizeY() );
+    long inc = &denseMatrix().at( i, 1 ) - buf;
+    int x;
+    for( x=0; buf != end; buf += inc, ++x )
+      if( *buf != 0 )
+        column[x] = *buf;
+    return column;
+  }
+
 }
+
 
 
 aims::SparseOrDenseMatrix
