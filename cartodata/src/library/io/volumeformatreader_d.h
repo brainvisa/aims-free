@@ -92,10 +92,6 @@ namespace soma
                                        const AllocatorContext & context,
                                        carto::Object options )
   {
-    std::cout << "SETUPANDREAD:: ( " << dsi->header()->getProperty( "sizeX" )->getScalar() << ", "
-    << dsi->header()->getProperty( "sizeY" )->getScalar() << ", "
-    << dsi->header()->getProperty( "sizeZ" )->getScalar() << ", "
-    << dsi->header()->getProperty( "sizeT" )->getScalar() << ") " << std::endl;
     //=== Reading URI ========================================================
     std::string uri = dsi->list().dataSource()->url();
     std::string url = FileUtil::uriFilename( uri );
@@ -137,10 +133,6 @@ namespace soma
                                         const AllocatorContext & context,
                                         carto::Object options )
   {
-    std::cout << "CREATEANDREAD:: ( " << dsi->header()->getProperty( "sizeX" )->getScalar() << ", "
-    << dsi->header()->getProperty( "sizeY" )->getScalar() << ", "
-    << dsi->header()->getProperty( "sizeZ" )->getScalar() << ", "
-    << dsi->header()->getProperty( "sizeT" )->getScalar() << ") " << std::endl;
     //=== Reading URI ========================================================
     std::string uri = dsi->list().dataSource()->url();
     std::string url = FileUtil::uriFilename( uri );
@@ -417,10 +409,6 @@ namespace soma
                                        const AllocatorContext & context,
                                        carto::Object options )
   {
-    std::cout << "VREF::SETUPANDREAD:: ( " << dsi->header()->getProperty( "sizeX" )->getScalar() << ", "
-    << dsi->header()->getProperty( "sizeY" )->getScalar() << ", "
-    << dsi->header()->getProperty( "sizeZ" )->getScalar() << ", "
-    << dsi->header()->getProperty( "sizeT" )->getScalar() << ") " << std::endl;
     //=== Reading URI ========================================================
     std::string uri = dsi->list().dataSource()->url();
     std::string url = FileUtil::uriFilename( uri );

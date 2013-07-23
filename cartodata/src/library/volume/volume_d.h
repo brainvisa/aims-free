@@ -621,8 +621,6 @@ namespace carto
     header->getProperty( "sizeY", sizey );
     header->getProperty( "sizeZ", sizez );
     header->getProperty( "sizeT", sizet );
-    std::cout << "VOLUMECREATE:: ( " << sizex << ", " << sizey << ", "
-              << sizez << ", " << sizet << " )" << std::endl;
     options->getProperty( "unallocated", unalloc );
     Volume<T>	*obj = new Volume<T>( sizex, sizey, sizez, sizet, context, 
                                       !unalloc );
@@ -649,8 +647,6 @@ namespace carto
         header->getProperty( "sizeY", sizey );
         header->getProperty( "sizeZ", sizez );
         header->getProperty( "sizeT", sizet );
-        std::cout << "VOLUMESETUP:: ( " << sizex << ", " << sizey << ", "
-                  << sizez << ", " << sizet << " )" << std::endl;
         options->getProperty( "unallocated", unalloc );
         obj.reallocate( sizex, sizey, sizez, sizet, false, context, !unalloc );
       }
@@ -683,7 +679,6 @@ namespace carto
                                    const AllocatorContext & context,
                                    Object options )
   {
-    std::cout << "VOLUMEREFSETUP" << std::endl;
     Creator<Volume<T> >::setup( *obj, header, context, options );
   }
 
@@ -692,7 +687,6 @@ namespace carto
                                    const AllocatorContext & context,
                                    Object options )
   {
-    std::cout << "VOLUMEREFCREATE" << std::endl;
     return new VolumeRef<T>;
   }
 
