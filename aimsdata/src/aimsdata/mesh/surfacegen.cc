@@ -116,6 +116,15 @@ namespace
   };
 
 
+  struct CircleGen_wireframe
+    : public SurfaceGenerator::Generator_wireframe
+  {
+    virtual AimsTimeSurface<2,Void>*
+    generator( const carto::GenericObject & ) const;
+    virtual Object parameters() const;
+  };
+
+
   map<string, rc_ptr<SurfaceGenerator::Generator> > & generators()
   {
     static map<string,rc_ptr<SurfaceGenerator::Generator> >	functs;
@@ -152,6 +161,9 @@ namespace
       functs[ "parallelepiped" ] 
         = rc_ptr<SurfaceGenerator::Generator_wireframe>( 
           new ParallelepipedGen_wireframe );
+      functs[ "circle" ]
+        = rc_ptr<SurfaceGenerator::Generator_wireframe>(
+          new CircleGen_wireframe );
     }
     return functs;
   }
@@ -377,6 +389,34 @@ namespace
     return d;
   }
 
+
+  AimsTimeSurface<2,Void>*
+  CircleGen_wireframe::generator(
+    const carto::GenericObject & x ) const
+  {
+    return SurfaceGenerator::circle_wireframe( x );
+  }
+
+
+  Object CircleGen_wireframe::parameters() const
+  {
+    Object              d = Object::value( Dictionary() );
+    Dictionary  & p = d->value<Dictionary>();
+    p[ "center" ] = Object::value( string( "3D position of the center" ) );
+    p[ "radius" ] = Object::value( string( "radius of the circle" ) );
+    p[ "segments" ] = Object::value( string(
+      "(optional) number of segments in the circle polygon (default: 20)" ) );
+    p[ "normal" ] = Object::value( string(
+      "(optional) normal vector to the circle plane (default: (0, 0, 1))" ) );
+    p[ "start_direction" ] = Object::value( string(
+      "(optional) vector in the circle plane determining the beginning of "
+      "angles (circle ray) (default: (1, 0, 0))" ) );
+    p[ "start_angle" ] = Object::value( string(
+      "(optional) start angle for incomplete circle (default: 0)" ) );
+    p[ "stop_angle" ] = Object::value( string(
+      "(default) stop angle for incomplete circle (default: 2*pi)" ) );
+    return d;
+  }
 
 }
 
@@ -1530,6 +1570,151 @@ AimsTimeSurface<2,Void>* SurfaceGenerator::parallelepiped_wireframe(
   pol.push_back( AimsVector<uint32_t, 2>( 3, 6 ) );
   pol.push_back( AimsVector<uint32_t, 2>( 5, 7 ) );
   pol.push_back( AimsVector<uint32_t, 2>( 6, 7 ) );
+
+  return mesh;
+}
+
+
+AimsTimeSurface<2,Void>*
+SurfaceGenerator::circle_wireframe( const GenericObject & params )
+{
+  Object        oc, on, od;
+  Point3df      center, normal = Point3df( 0, 0, 1 ),
+    startdir = Point3df( 1, 0, 0 );
+  float         radius, startangle = 0, stopangle = M_PI * 2;
+  unsigned      nseg = 20;
+
+  oc = params.getProperty( "center" );
+
+  int i;
+  Object it;
+  for( i=0, it=oc->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
+    center[i] = (float) it->currentValue()->getScalar();
+  if( i != 3 )
+  {
+    cerr << "circle_wireframe needs 3 coords in center\n";
+    throw runtime_error( "circle_wireframe needs 3 coords in center" );
+  }
+
+  radius = (float) params.getProperty( "radius" )->getScalar();
+
+  try
+  {
+    on = params.getProperty( "normal" );
+    for( i=0, it=on->objectIterator(); it->isValid() && i < 3;
+        ++i, it->next() )
+      normal[i] = (float) it->currentValue()->getScalar();
+  }
+  catch( ... )
+  {
+  }
+  if( !on.isNull() && i != 3 )
+  {
+    cerr << "circle_wireframe needs 3 coords in normal\n";
+    throw runtime_error( "circle_wireframe needs 3 coords in normal" );
+  }
+
+  try
+  {
+    nseg = (unsigned) params.getProperty( "segments" )->getScalar();
+  }
+  catch( ... )
+  {
+  }
+
+  try
+  {
+    on = params.getProperty( "start_direction" );
+    for( i=0, it=on->objectIterator(); it->isValid() && i < 3;
+        ++i, it->next() )
+      startdir[i] = (float) it->currentValue()->getScalar();
+  }
+  catch( ... )
+  {
+  }
+  if( !on.isNull() && i != 3 )
+  {
+    cerr << "circle_wireframe needs 3 coords in start_direction\n";
+    throw runtime_error(
+      "circle_wireframe needs 3 coords in start_direction" );
+  }
+
+  try
+  {
+    startangle = (unsigned) params.getProperty( "start_angle" )->getScalar();
+  }
+  catch( ... )
+  {
+  }
+
+  try
+  {
+    stopangle = (unsigned) params.getProperty( "stop_angle" )->getScalar();
+  }
+  catch( ... )
+  {
+  }
+
+  return circle_wireframe( center, radius, nseg, normal, startdir, startangle,
+    stopangle );
+}
+
+
+AimsTimeSurface<2,Void>* SurfaceGenerator::circle_wireframe(
+  const Point3df & center, float radius, unsigned nseg,
+  const Point3df & normal, const Point3df & startdir, float startangle,
+  float stopangle )
+{
+  AimsTimeSurface<2,Void> *mesh = new AimsTimeSurface<2,Void>;
+  AimsSurface<2, Void> & mesh0 = (*mesh)[0];
+  vector<Point3df> & vert = mesh0.vertex();
+  vector<AimsVector<uint32_t, 2> > & poly = mesh0.polygon();
+  Point3df stdir = startdir;
+  stdir.normalize();
+
+  Point3df v3 = crossed( normal, stdir );
+  if( v3.norm2() < 1e-5 ) // normal and startdir are the same direction
+  {
+    stdir = Point3df( 1, 0, 0 );
+    v3 = crossed( normal, stdir );
+    if( v3.norm2() < 1e-5 )
+    {
+      stdir = Point3df( 0, 1, 0 );
+      v3 = crossed( normal, stdir );
+    }
+  }
+  stdir = crossed( v3, normal );
+  stdir.normalize();
+  v3.normalize();
+
+  float step = ( stopangle - startangle ) / nseg;
+  if( step < 0 )
+  {
+    step *= -1;
+    float tmp = startangle;
+    startangle = stopangle;
+    stopangle = tmp;
+  }
+
+  vert.reserve( nseg + 1 );
+  poly.reserve( nseg );
+
+  float angle;
+  unsigned i = 0;
+  for( angle=startangle; angle<stopangle; angle+=step, ++i )
+  {
+    vert.push_back( center + stdir * radius * cos( angle )
+      + v3 * radius * sin( angle ) );
+    poly.push_back( AimsVector<uint32_t, 2>( i, i+1 ) );
+  }
+  Point3df lastver = center + stdir * radius * cos( stopangle )
+    + v3 * radius * sin( stopangle );
+  if( ( lastver - vert[0] ).norm2() < 1e-5 ) // closed circle
+  {
+    poly[nseg-1][1] = 0; // last segment loops to 1st point
+  }
+  else
+    vert.push_back( lastver ); // open circle
 
   return mesh;
 }

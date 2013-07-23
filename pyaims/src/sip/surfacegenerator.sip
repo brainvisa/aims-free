@@ -141,6 +141,23 @@ Compared to sphere() which performs meridian / parallels tesselation, icosphere 
 %Docstring
 static parallelepiped_wireframe( Point3df boundingbox_min, Point3df boundingbox_max )
 %End
+
+  static AimsTimeSurface_2*
+  circle_wireframe( const carto::GenericObject & params ) /Factory/;
+  static AimsTimeSurface_2* circle_wireframe(
+    const Point3df & center, float radius, unsigned nseg=20,
+    const Point3df & normal = Point3df( 0, 0, 1 ),
+    const Point3df & startdir = Point3df( 1, 0, 0 ), float startangle = 0,
+    float stopangle = M_PI*2 ) /Factory/;
+%Docstring
+Circle, or part of circle.
+  center, radius are classical.
+  nseg is the number of segments in the circle polygon
+  normal is a normal vector to the circle plane.
+  startdir is a vector in the circle plane determining the beginning
+  of angles (circle ray).
+  startangle, stopangle are meant to make parts of circle
+%End
 };
 
 };

@@ -145,6 +145,22 @@ attributes = {
     parallelepiped_wireframe( const carto::GenericObject & params );
     static AimsTimeSurface<2,Void>* parallelepiped_wireframe( 
       const Point3df & boundingbox_min, const Point3df & boundingbox_max );
+
+    static AimsTimeSurface<2,Void>*
+    circle_wireframe( const carto::GenericObject & params );
+    /** Circle, or part of circle.
+     center, radius are classical.
+     nseg is the number of segments in the circle polygon
+     normal is a normal vector to the circle plane.
+     startdir is a vector in the circle plane determining the beginning
+     of angles (circle ray).
+     startangle, stopangle are meant to make parts of circle
+    */
+    static AimsTimeSurface<2,Void>* circle_wireframe(
+      const Point3df & center, float radius, unsigned nseg=20,
+      const Point3df & normal = Point3df( 0, 0, 1 ),
+      const Point3df & startdir = Point3df( 1, 0, 0 ), float startangle = 0,
+      float stopangle = M_PI*2 );
   };
 
 }
