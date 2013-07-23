@@ -106,6 +106,8 @@ namespace aims
       /// mute to sparse or dense according to the less memory consuming
       void muteToOptimalShape();
       bool isOptimalShape() const;
+      /// below this number of non-nul elements, the optimal shape is sparse
+      unsigned long optimalShapeThreshold() const;
 
       SparseOrDenseMatrix &
         operator += ( const SparseOrDenseMatrix& thing );

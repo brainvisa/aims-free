@@ -48,6 +48,7 @@ SparseOrDenseMatrix::SparseOrDenseMatrix(
   : _sparsematrix( new SparseMatrix( size1, size2 ) ),
   _fakeheader( 0 )
 {
+  _densematrix.reset( 0 );
 }
 
 
@@ -420,6 +421,13 @@ bool SparseOrDenseMatrix::isOptimalShape() const
     return true;
   return false;
 }
+
+
+unsigned long SparseOrDenseMatrix::optimalShapeThreshold() const
+{
+  return getSize1() * getSize2() / 8;
+}
+
 
 void SparseOrDenseMatrix::muteToOptimalShape()
 {
