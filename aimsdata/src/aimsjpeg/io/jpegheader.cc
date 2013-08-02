@@ -86,7 +86,9 @@ namespace
 
 void JpegHeader::read()
 {
-  string fileName = removeExtension(_name) + ".jpg";
+  string fileName = _name;
+  if( FileUtil::fileStat( fileName ).find( '+' ) == string::npos )
+    fileName = removeExtension(_name) + ".jpg";
 
   struct jpeg_decompress_struct	cinfo;
   struct private_jpeg_error_mgr	jerr;
