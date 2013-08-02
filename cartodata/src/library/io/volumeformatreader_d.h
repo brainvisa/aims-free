@@ -174,9 +174,34 @@ namespace soma
                                     const AllocatorContext & context, 
                                     carto::Object options )
   {
-    localMsg( "Reading object ( "
-              + dsi->list().dataSource( "default", 0 )->url() + " )" );
-    
+    localMsg( "Reading object ( " + dsi->url() + " )" );
+
+    //=== Test data compability ==============================================
+    std::string otype = dsi->header()->getProperty( "object_type" )->getString();
+    std::string dtype = dsi->header()->getProperty( "data_type" )->getString();
+    std::string ttype = DataTypeCode<T>::dataType();
+    if( otype != "Volume" )
+      throw datatype_format_error( "unsupported data type - " + otype + " != Volume", dsi->url() );
+    if( dtype != ttype )
+    {
+      if( dsi->header()->hasProperty( "possible_data_types" ) )
+      {
+        int i;
+        for( i=0;
+            i<dsi->header()->getProperty( "possible_data_types" )->size();
+            ++i )
+        {
+          if( dsi->header()->getProperty( "possible_data_types" )
+              ->getArrayItem( i )->getString()
+              == ttype )
+            break;
+        }
+        if( i == dsi->header()->getProperty( "possible_data_types" )->size() )
+          throw datatype_format_error( dsi->url() );
+      } else
+        throw datatype_format_error( "unsupported data type - " + dtype + " != " + ttype, dsi->url() );
+    }
+
     //=== test for memory mapping ============================================
     localMsg( "checking for memory mapping..." );
     if( obj.allocatorContext().allocatorType() 
