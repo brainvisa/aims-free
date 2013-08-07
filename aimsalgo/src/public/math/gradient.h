@@ -461,6 +461,7 @@ AimsData<C> AimsGradient<C>::X(const AimsData<C> &data)
                    data.borderWidth());
   grad = (C)0;
   grad.fillBorder(0);
+  grad.setHeader(data.header()->cloneHeader());
 
   switch (_type)
   { case AIMS_GRADIENT_CENTRAL : beginx = 1;endx = data.dimX()-1;
@@ -489,6 +490,7 @@ AimsData<C> AimsGradient<C>::Y(const AimsData<C> &data)
                      data.borderWidth());
   grad = (C)0;
   grad.fillBorder(0);
+  grad.setHeader(data.header()->cloneHeader());
 
   switch (_type)
   { case AIMS_GRADIENT_CENTRAL : beginy = 1;endy = data.dimY()-1;
@@ -517,6 +519,7 @@ AimsData<C> AimsGradient<C>::Z(const AimsData<C> &data)
                      data.borderWidth());
   grad = (C)0;
   grad.fillBorder(0);
+  grad.setHeader(data.header()->cloneHeader());
 
   switch (_type)
   { case AIMS_GRADIENT_CENTRAL : beginz = 1;endz = data.dimZ()-1;
@@ -545,6 +548,7 @@ AimsData<C> AimsGradient<C>::T(const AimsData<C> &data)
                      data.borderWidth());
   grad = (C)0;
   grad.fillBorder(0);
+  grad.setHeader(data.header()->cloneHeader());
 
   switch (_type)
   { case AIMS_GRADIENT_CENTRAL : begint = 1;endt = data.dimY()-1;
