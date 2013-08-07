@@ -126,7 +126,7 @@ int main( int argc, const char **argv )
         if ( outputFileName.size() > 4 ) { 
           string ext = outputFileName.substr( outputFileName.size()-4, 4 );
           transform( ext.begin(), ext.end(), ext.begin(), ::tolower );
-          if ( ext == ".csv" ) outputFormat = "csv";
+          if ( ext == ".csv" || ext == ".tsv" || ext == ".tab" ) outputFormat = "csv";
         }
       }
     } else {
