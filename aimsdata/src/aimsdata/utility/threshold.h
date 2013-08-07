@@ -37,6 +37,8 @@
 #ifndef AIMS_UTILITY_THRESHOLD_H
 #define AIMS_UTILITY_THRESHOLD_H
 
+#include <iostream>
+
 #include <aims/config/aimsdata_config.h>
 #include <aims/data/data.h>
 #include <aims/data/pheader.h>
@@ -84,7 +86,7 @@ enum threshold_t
     - AIMS_OUTSIDE_INCLUDE_BOUNDS
 
     If bin is set to true, the threshold returns a binary short image
-    with levels 0 and 32767.
+    with levels 0 and foregd (32767 by default).
 */ 
 template <class T,class U>
 class AimsThreshold
@@ -103,6 +105,9 @@ public:
 
   /// Return the multi-level thresholded image
   inline AimsData<T> operator () (const AimsData<T> &sqv);
+  /// Return the multi-level thresholded image with clipped values (backgd
+  /// ignored)
+  inline AimsData<T> clip(const AimsData<T> &sqv);
   /// Return the binary thresholded image
   inline AimsData<U> bin(const AimsData<T> &sqv);
 
@@ -244,6 +249,77 @@ AimsData<T> AimsThreshold<T,U>::operator () (const AimsData<T> &sqv)
   return(res);
 }
 
+template <class T,class U> inline
+AimsData<T> AimsThreshold<T,U>::clip (const AimsData<T> &sqv)
+{
+  AimsData<T> res(sqv.dimX(),sqv.dimY(),sqv.dimZ(),sqv.dimT(),
+                    sqv.borderWidth());
+  res.setSizeX(sqv.sizeX());
+  res.setSizeY(sqv.sizeY());
+  res.setSizeZ(sqv.sizeZ());
+  res.setSizeT(sqv.sizeT());
+
+  res = T( 0 );
+
+  typename AimsData<T>::iterator       it1;
+  typename AimsData<T>::const_iterator it2;
+
+  switch (_type)
+  { case AIMS_LOWER_THAN :
+      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
+        *it1 = (*it2 < _level ? *it2 : _level);
+      break;
+    case AIMS_LOWER_OR_EQUAL_TO :
+      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
+        *it1 = (*it2 <= _level ? *it2 : _level);
+      break;
+    case AIMS_GREATER_THAN :
+      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
+        *it1 = (*it2 > _level ? *it2 : _level);
+      break;
+    case AIMS_GREATER_OR_EQUAL_TO :
+      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
+        *it1 = (*it2 >= _level ? *it2 : _level);
+      break;
+    case AIMS_BETWEEN :
+      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
+        *it1 = (*it2 >= _level ? (*it2 <= _level2 ? *it2 : _level2) : _level);
+      break;
+    case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
+      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
+        *it1 = (*it2 > _level ? ( *it2 <= _level2 ? *it2 : _level2 ) : _level);
+      break;
+    case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
+      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
+        *it1 = (*it2 >= _level ? ( *it2 < _level2 ? *it2 : _level2 ) : _level);
+      break;
+    case AIMS_BETWEEN_EXCLUDE_BOUNDS :
+      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
+        *it1 = (*it2 > _level ? ( *it2 < _level2 ? *it2 : _level2 ) : _level);
+      break;
+    case AIMS_OUTSIDE :
+    case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND :
+    case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND :
+    case AIMS_OUTSIDE_INCLUDE_BOUNDS :
+    case AIMS_EQUAL_TO :
+    case AIMS_DIFFER :
+      // Clipping has no real meaning in those cases, thus we do standard
+      // thresholding instead.
+      std::cerr << "Warning: AimsThreshold cannot use clipping with this mode, "
+        "using standard clipping instead." << std::endl;
+      return (*this)(sqv);
+  }
+
+  if( sqv.header() )
+    {
+      res.setHeader( sqv.header()->cloneHeader() );
+      aims::PythonHeader	*ph 
+        = dynamic_cast<aims::PythonHeader *>( res.header() );
+      if( ph && ph->hasProperty( "data_type" ) )
+        ph->removeProperty( "data_type" );
+    }
+  return(res);
+}
 
 template <class T,class U> inline
 TimeTexture<T> AimsTexThreshold<T,U>::operator () (const TimeTexture<T> &sqv)

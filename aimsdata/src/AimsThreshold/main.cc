@@ -63,6 +63,7 @@ public:
   float		t1;
   float		t2;
   bool		bin;
+  bool		clip;
   bool    	percentage;
   float		bg;
   float		fg;
@@ -118,6 +119,11 @@ doit( Process & p, const string & fname, Finder & f )
       Writer<AimsData<short> > writer( tc.fout );
       return( writer.write( thresh.bin( data ) ) );
     }
+  else if( tc.clip )
+    {
+      Writer<AimsData<T> > writer( tc.fout );
+      return( writer.write( thresh.clip( data ) ) );
+    }
   else
     {
       Writer<AimsData<T> > writer( tc.fout );
@@ -136,6 +142,7 @@ int main( int argc, const char **argv )
       string		fileout, smode = "ge";
       float			t1 = 0, t2 = 0, bg = 0, fg = 32767;
       bool			binary = false;
+      bool			clip = false;
       bool			percentage = false;
       threshold_t		mode;
 
@@ -168,6 +175,8 @@ int main( int argc, const char **argv )
                      "voxels in non-binary mode [default: 0]", true );
       app.addOption( fg, "--fg", "foreground value set on thresholded in " 
                      "voxels in binary mode [default: 32767]", true );
+      app.addOption( clip, "--clip",
+                     "clip thresholded-out values [default: false]", true );
       app.alias( "--input", "-i" );
       app.alias( "--output", "-o" );
       app.alias( "--mode", "-m" );
@@ -194,11 +203,15 @@ int main( int argc, const char **argv )
       else
         AimsError("AimsThreshold : bad mode" );
 
+      if(binary && clip)
+        AimsError("AimsThreshold: --binary and --clip cannot be used together");
+
       proc.mode = mode;
       proc.fout = fileout;
       proc.t1 = t1;
       proc.t2 = t2;
       proc.bin = binary;
+      proc.clip = clip;
       proc.bg = bg;
       proc.fg = fg;
       proc.percentage = percentage;
