@@ -10,11 +10,13 @@ public:
   GradientAdvection();
   ~GradientAdvection();
 
-  void doit(const rc_ptr_Volume_S16 &vol, const AimsData_FLOAT &gradX,
-	const AimsData_FLOAT &gradY, const AimsData_FLOAT &gradZ,
+  void setVerbose();
+
+  void doit(const rc_ptr_Volume_S16 &vol, const rc_ptr_Volume_FLOAT &gradX,
+	const rc_ptr_Volume_FLOAT &gradY, const rc_ptr_Volume_FLOAT &gradZ,
 	const set_S16 & seedlabels) /ReleaseGIL/;
-  void doit(const rc_ptr_Volume_S16 &vol, const AimsData_FLOAT &gradX,
-	const AimsData_FLOAT &gradY, const AimsData_FLOAT &gradZ,
+  void doit(const rc_ptr_Volume_S16 &vol, const rc_ptr_Volume_FLOAT &gradX,
+	const rc_ptr_Volume_FLOAT &gradY, const rc_ptr_Volume_FLOAT &gradZ,
 	int seedlabel) /ReleaseGIL/;
 };
 

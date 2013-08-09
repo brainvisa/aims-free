@@ -42,24 +42,30 @@
 namespace aims
 {
 
+  // TODO document this class and its members
   /** Classe de test pour propager des labels le long d'un champs vectoriel.
     */
   class GradientAdvection
   {
   public:
-    GradientAdvection( );
+    GradientAdvection();
     ~GradientAdvection();
-    void doit(const carto::VolumeRef<int16_t>  & vol,
-			const AimsData<float> &gradX,
-			const AimsData<float> &gradY,
-			const AimsData<float> &gradZ,
-			const std::set<int16_t> &seeds);
-    void doit(const carto::VolumeRef<int16_t>  & vol,
-			const AimsData<float> &gradX,
-			const AimsData<float> &gradY,
-			const AimsData<float> &gradZ, int seed);
+
+    void setVerbose(bool = true);
+
+    void doit(const carto::VolumeRef<int16_t> &vol,
+              const carto::VolumeRef<float> &gradX,
+              const carto::VolumeRef<float> &gradY,
+              const carto::VolumeRef<float> &gradZ,
+              const std::set<int16_t> &seeds);
+    void doit(const carto::VolumeRef<int16_t> &vol,
+              const carto::VolumeRef<float> &gradX,
+              const carto::VolumeRef<float> &gradY,
+              const carto::VolumeRef<float> &gradZ,
+              int seed);
+  private:
+    bool _verbose;
   };
 };
 
 #endif
-
