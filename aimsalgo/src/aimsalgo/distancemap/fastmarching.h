@@ -70,9 +70,9 @@ namespace aims
     typedef typename internal::fastmarching::StorageTrait<FloatType>::RCType
         RCFloatType;
 
-    /* The connectivity type is only used to build the interfaces between
-       the work region and the seeds: the fast marching itself only uses
-       6-connectivity.
+    /** The connectivity type is only used to build the interfaces between
+        the work region and the seeds: the fast marching itself only uses
+        6-connectivity.
     */
     FastMarching( Connectivity::Type c = Connectivity::CONNECTIVITY_26_XYZ,
                   bool mid_interface = false );
