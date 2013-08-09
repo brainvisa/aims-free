@@ -146,9 +146,9 @@ namespace carto
     /// \param allocated normally left to \c true, it can exceptionnally be 
     /// set to \c false for "virtual" volumes that must not be actually 
     /// allocated but are only sources for a VolumeView.
-    Volume( int sizeX = 1, int sizeY = 1, int sizeZ = 1, int sizeT = 1,
-            const AllocatorContext& allocatorContext = AllocatorContext(), 
-            bool allocated = true );
+    explicit Volume( int sizeX = 1, int sizeY = 1, int sizeZ = 1, int sizeT = 1,
+                     const AllocatorContext& allocatorContext = AllocatorContext(), 
+                     bool allocated = true );
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
     Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer );
