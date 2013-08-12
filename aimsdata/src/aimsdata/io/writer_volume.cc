@@ -43,14 +43,6 @@
 #include <aims/data/data.h>
 #include <aims/rgb/rgb.h>
 #include <aims/hsv/hsv.h>
-#include <aims/bucket/bucket.h>
-#include <aims/math/dtitensor.h>
-#include <aims/mesh/surface.h>
-#include <aims/mesh/texture.h>
-#include <graph/graph/graph.h>
-#include <aims/resampling/motion.h>
-#include <aims/roi/hie.h>
-#include <aims/sparsematrix/sparseordensematrix.h>
 
 using namespace std;
 using namespace carto;
@@ -127,48 +119,3 @@ AIMS_INSTANTIATE_WRITER( VolumeRef<char> );
 #endif
 AIMS_INSTANTIATE_WRITER( VolumeRef<long> );
 AIMS_INSTANTIATE_WRITER( VolumeRef<unsigned long> );
-
-AIMS_INSTANTIATE_WRITER( AimsBucket<Void> );
-AIMS_INSTANTIATE_WRITER( BucketMap<Void> );
-AIMS_INSTANTIATE_WRITER( AimsBucket<short> );
-AIMS_INSTANTIATE_WRITER( BucketMap<short> );
-AIMS_INSTANTIATE_WRITER( AimsBucket<uint16_t> );
-AIMS_INSTANTIATE_WRITER( BucketMap<uint16_t> );
-AIMS_INSTANTIATE_WRITER( AimsBucket<int32_t> );
-AIMS_INSTANTIATE_WRITER( BucketMap<int32_t> );
-AIMS_INSTANTIATE_WRITER( AimsBucket<uint32_t> );
-AIMS_INSTANTIATE_WRITER( BucketMap<uint32_t> );
-AIMS_INSTANTIATE_WRITER( AimsBucket<vector<int8_t> > );
-AIMS_INSTANTIATE_WRITER( AimsBucket<vector<uint8_t> > );
-AIMS_INSTANTIATE_WRITER( AimsBucket<vector<int16_t> > );
-AIMS_INSTANTIATE_WRITER( AimsBucket<vector<uint16_t> > );
-AIMS_INSTANTIATE_WRITER( AimsBucket<vector<int32_t> > );
-AIMS_INSTANTIATE_WRITER( AimsBucket<vector<uint32_t> > );
-AIMS_INSTANTIATE_WRITER( AimsBucket<vector<float> > );
-AIMS_INSTANTIATE_WRITER( AimsBucket<vector<double> > );
-AIMS_INSTANTIATE_WRITER( AimsBucket<float> );
-AIMS_INSTANTIATE_WRITER( BucketMap<float> );
-AIMS_INSTANTIATE_WRITER( AimsBucket<double> );
-AIMS_INSTANTIATE_WRITER( BucketMap<double> );
-AIMS_INSTANTIATE_WRITER( AimsBucket<DtiTensor> );
-AIMS_INSTANTIATE_WRITER( BucketMap<DtiTensor> );
-
-AIMS_INSTANTIATE_WRITER( AimsTimeSurface<2 COMMA Void> );
-AIMS_INSTANTIATE_WRITER( AimsSurfaceTriangle);
-AIMS_INSTANTIATE_WRITER( AimsSurfaceFacet);
-
-AIMS_INSTANTIATE_WRITER( Texture1d);
-AIMS_INSTANTIATE_WRITER( Texture2d);
-AIMS_INSTANTIATE_WRITER( TimeTexture<double> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<short> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<int> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<unsigned int> );
-AIMS_INSTANTIATE_WRITER( TimeTexture<Point2d> );
-
-AIMS_INSTANTIATE_WRITER( Graph);
-AIMS_INSTANTIATE_WRITER( Hierarchy);
-AIMS_INSTANTIATE_WRITER( Motion);
-AIMS_INSTANTIATE_WRITER( GenericObject);
-AIMS_INSTANTIATE_WRITER( Object);
-AIMS_INSTANTIATE_WRITER( SparseMatrix);
-AIMS_INSTANTIATE_WRITER( SparseOrDenseMatrix);

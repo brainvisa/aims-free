@@ -38,6 +38,8 @@
 #include <cartobase/type/types.h>
 #include <cartobase/type/string_conversion.h>
 #include <aims/data/data_g.h>
+#include <aims/rgb/rgb.h>
+#include <aims/hsv/hsv.h>
 #include <aims/utility/converter_g.h>
 
 enum AimsRGBAChannel

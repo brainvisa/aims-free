@@ -280,7 +280,15 @@ set( _sources
     io/mniobjformat.cc
     io/mniobjheader.cc
     io/process.cc
-    io/reader.cc
+    io/reader_bucket.cc
+    io/reader_genericobject.cc
+    io/reader_graph.cc
+    io/reader_hierarchy.cc
+    io/reader_mesh.cc
+    io/reader_motion.cc
+    io/reader_sparsematrix.cc
+    io/reader_texture.cc
+    io/reader_volume.cc
     io/readerasobject.cc
     io/roiR.cc
     io/scaledcoding.cc
@@ -299,7 +307,15 @@ set( _sources
     io/triR.cc
     io/triW.cc
     io/trmheader.cc
-    io/writer.cc
+    io/writer_bucket.cc
+    io/writer_genericobject.cc
+    io/writer_graph.cc
+    io/writer_hierarchy.cc
+    io/writer_mesh.cc
+    io/writer_motion.cc
+    io/writer_sparsematrix.cc
+    io/writer_texture.cc
+    io/writer_volume.cc
     math/gausslu.cc
     math/mathelem.cc
     math/romberg.cc

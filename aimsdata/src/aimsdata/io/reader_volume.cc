@@ -42,14 +42,6 @@
 #include <aims/data/data.h>
 #include <aims/rgb/rgb.h>
 #include <aims/hsv/hsv.h>
-#include <aims/bucket/bucket.h>
-#include <aims/math/dtitensor.h>
-#include <aims/mesh/surface.h>
-#include <aims/mesh/texture.h>
-#include <aims/resampling/motion.h>
-#include <graph/graph/graph.h>
-#include <aims/roi/hie.h>
-#include <aims/sparsematrix/sparseordensematrix.h>
 
 using namespace aims;
 using namespace carto;
@@ -126,48 +118,3 @@ AIMS_INSTANTIATE_READER( VolumeRef<char> );
 #endif
 AIMS_INSTANTIATE_READER( VolumeRef<long> );
 AIMS_INSTANTIATE_READER( VolumeRef<unsigned long> );
-
-AIMS_INSTANTIATE_READER( AimsBucket<Void> );
-AIMS_INSTANTIATE_READER( BucketMap<Void> );
-AIMS_INSTANTIATE_READER( AimsBucket<short> );
-AIMS_INSTANTIATE_READER( BucketMap<short> );
-AIMS_INSTANTIATE_READER( AimsBucket<uint16_t> );
-AIMS_INSTANTIATE_READER( BucketMap<uint16_t> );
-AIMS_INSTANTIATE_READER( AimsBucket<int32_t> );
-AIMS_INSTANTIATE_READER( BucketMap<int32_t> );
-AIMS_INSTANTIATE_READER( AimsBucket<uint32_t> );
-AIMS_INSTANTIATE_READER( BucketMap<uint32_t> );
-AIMS_INSTANTIATE_READER( AimsBucket<vector<int8_t> > );
-AIMS_INSTANTIATE_READER( AimsBucket<vector<uint8_t> > );
-AIMS_INSTANTIATE_READER( AimsBucket<vector<int16_t> > );
-AIMS_INSTANTIATE_READER( AimsBucket<vector<uint16_t> > );
-AIMS_INSTANTIATE_READER( AimsBucket<vector<int32_t> > );
-AIMS_INSTANTIATE_READER( AimsBucket<vector<uint32_t> > );
-AIMS_INSTANTIATE_READER( AimsBucket<vector<float> > );
-AIMS_INSTANTIATE_READER( AimsBucket<vector<double> > );
-AIMS_INSTANTIATE_READER( AimsBucket<float> );
-AIMS_INSTANTIATE_READER( BucketMap<float> );
-AIMS_INSTANTIATE_READER( AimsBucket<double> );
-AIMS_INSTANTIATE_READER( BucketMap<double> );
-AIMS_INSTANTIATE_READER( AimsBucket<DtiTensor> );
-AIMS_INSTANTIATE_READER( BucketMap<DtiTensor> );
-
-AIMS_INSTANTIATE_READER( AimsTimeSurface<2 COMMA Void> );
-AIMS_INSTANTIATE_READER( AimsSurfaceTriangle);
-AIMS_INSTANTIATE_READER( AimsSurfaceFacet);
-
-AIMS_INSTANTIATE_READER( Texture1d);
-AIMS_INSTANTIATE_READER( Texture2d);
-AIMS_INSTANTIATE_READER( TimeTexture<double> );
-AIMS_INSTANTIATE_READER( TimeTexture<short> );
-AIMS_INSTANTIATE_READER( TimeTexture<unsigned> );
-AIMS_INSTANTIATE_READER( TimeTexture<int> );
-AIMS_INSTANTIATE_READER( TimeTexture<Point2d> );
-
-AIMS_INSTANTIATE_READER( Graph);
-AIMS_INSTANTIATE_READER( Hierarchy);
-AIMS_INSTANTIATE_READER( Motion);
-AIMS_INSTANTIATE_READER( GenericObject);
-AIMS_INSTANTIATE_READER( Object);
-AIMS_INSTANTIATE_READER( SparseMatrix);
-AIMS_INSTANTIATE_READER( SparseOrDenseMatrix);
