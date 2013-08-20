@@ -273,10 +273,10 @@ namespace carto
     typedef typename Volume<T>::iterator iterator;
     typedef typename Volume<T>::const_iterator const_iterator;
 
-    VolumeRef( int sizeX, int sizeY = 1, int sizeZ = 1, int sizeT = 1,
-               const AllocatorContext& allocatorContext = AllocatorContext(), 
-               bool allocated = true )
-      : rc_ptr<Volume<T> >( new Volume<T>( sizeX, sizeY, sizeZ, sizeT, 
+    explicit VolumeRef( int sizeX, int sizeY = 1, int sizeZ = 1, int sizeT = 1,
+                        const AllocatorContext& allocatorContext = AllocatorContext(),
+                        bool allocated = true )
+      : rc_ptr<Volume<T> >( new Volume<T>( sizeX, sizeY, sizeZ, sizeT,
                                            allocatorContext, allocated ) )
     {}
 
