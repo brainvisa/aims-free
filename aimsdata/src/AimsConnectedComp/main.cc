@@ -300,7 +300,7 @@ int main( int argc, const char **argv )
       else if ( connect == "26" )
         proc.connectivity = Connectivity::CONNECTIVITY_26_XYZ;
       else
-        throw invalid_number( "Invalid connectivity value" );
+        throw invalid_number( "Invalid connectivity value " + connect );
 
       proc.in = pi.filename;
       
