@@ -170,11 +170,12 @@ int main( int argc, const char **argv )
   app.alias( "--output", "-o" );
   app.addOption( smask, "-M", "mask file (int voxel type)" );
   app.alias( "--Mask", "-M" );
-  app.addOption( smode, "-m", "mode that can be:\nsv --> same values\n"
-    "oo --> one to one\n"
-    "ao --> all to one\n"
-    "om --> one to maximum plus 1\n"
-    "am --> all to maximum plus 1" );
+  app.addOption( smode, "-m", "mode that can be:\n"
+    "sv --> same values, put value of the mask where the mask is non-zero;\n"
+    "oo --> one to one, put `-v' where the mask is `-l';\n"
+    "ao --> all to one, put `-v' where the mask is non-zero;\n"
+    "om --> one to maximum plus 1, put max(input)+1 where mask is `-l';\n"
+    "am --> all to maximum plus 1, put max(input)+1 where mask is non-zero." );
   app.alias( "--mode", "-m" );
   app.addOption( label, "-l", "only label to get into account", true );
   app.alias( "--label", "-l" );
