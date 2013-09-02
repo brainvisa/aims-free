@@ -241,7 +241,7 @@ string JpegHeader::extension() const
   string ext = FileUtil::extension( _name );
   set<string> exts = extensions();
   if( !ext.empty() && exts.find( string( "." ) + ext ) != exts.end() )
-    return ext;
+    return string( "." ) + ext;
   return ".jpg";
 }
 
