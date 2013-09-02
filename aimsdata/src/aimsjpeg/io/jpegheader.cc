@@ -239,11 +239,9 @@ void JpegHeader::setType( const string & t )
 string JpegHeader::extension() const
 {
   string ext = FileUtil::extension( _name );
-  cout << "ext: " << ext << endl;
   set<string> exts = extensions();
   if( !ext.empty() && exts.find( string( "." ) + ext ) != exts.end() )
     return ext;
-  cout << "not found.\n";
   return ".jpg";
 }
 
