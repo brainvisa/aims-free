@@ -73,7 +73,7 @@ namespace aims
     /// Get the file name of the header
     std::vector<std::string> possibleDataTypes() const;
 
-    virtual std::string extension() const { return( ".jpg" ); }
+    virtual std::string extension() const;
     virtual std::set<std::string> extensions() const;
     void read();
 

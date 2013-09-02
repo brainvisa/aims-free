@@ -62,6 +62,9 @@ JpegPlugin::JpegPlugin() : Plugin()
 {
   vector<string>	ext;
   ext.push_back( "jpg" );
+  ext.push_back( "JPG" );
+  ext.push_back( "jpeg" );
+  ext.push_back( "JPEG" );
   JpegFormat<uint8_t>	*df2 = new JpegFormat<uint8_t>;
   FileFormatDictionary<AimsData<uint8_t> >::registerFormat( "JPEG", df2, ext );
   VolumeFormat<uint8_t>	*vf2 = new VolumeFormat<uint8_t>( "JPEG" );
