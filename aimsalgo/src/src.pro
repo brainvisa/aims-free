@@ -31,6 +31,7 @@ PSUBDIRS = \
     AimsDistordDti            \
     AimsDivide                \
     AimsDtiBck2Vol            \
+    AimsElevationMap \
     AimsErosion              \
 #    AimsExtractRegionMasks \
     AimsFoldArgAtt            \
