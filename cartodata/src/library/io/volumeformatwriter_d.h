@@ -204,11 +204,35 @@ namespace soma
       dsi->header()->setProperty( "voxel_size", voxel_size );
     }
 
-    
+
+    //=== use optional parameters for partial writing ========================
+    if( partial ) {
+      try {
+        position[0] = options->getProperty( "ox" )->getScalar();
+//         localMsg( "override ox : " + carto::toString(position[0]) );
+        std::cout << "override ox : " + carto::toString(position[0]) << std::endl;
+      } catch( ... ) {}
+      try {
+        position[1] = options->getProperty( "oy" )->getScalar();
+//         localMsg( "override oy : " + carto::toString(position[1]) );
+        std::cout << "override oy : " + carto::toString(position[1]) << std::endl;
+      } catch( ... ) {}
+      try {
+        position[2] = options->getProperty( "oz" )->getScalar();
+//         localMsg( "override oz : " + carto::toString(position[2]) );
+        std::cout << "override oz : " + carto::toString(position[2]) << std::endl;
+      } catch( ... ) {}
+      try {
+        position[3] = options->getProperty( "ot" )->getScalar();
+//         localMsg( "override ot : " + carto::toString(position[3]) );
+        std::cout << "override ot : " + carto::toString(position[3]) << std::endl;
+      } catch( ... ) {}
+    }
+
     //=== writing header & creating files ====================================
     localMsg( "writing header..." );
     *dsi = _imw->writeHeader( *dsi, options );
-    
+
     //=== writing image ======================================================
     localMsg( "writing volume..." );
     if( parent1 || obj.allocatorContext().isAllocated() )
