@@ -8,16 +8,26 @@ class GradientAdvection
 %End
 public:
   GradientAdvection();
-  ~GradientAdvection();
+  virtual ~GradientAdvection();
 
-  void setVerbose();
+  void setVerbose(bool = true);
+  void setPropagationThreshold(float);
 
-  void doit(const rc_ptr_Volume_S16 &vol, const rc_ptr_Volume_FLOAT &gradX,
-	const rc_ptr_Volume_FLOAT &gradY, const rc_ptr_Volume_FLOAT &gradZ,
-	const set_S16 & seedlabels) /ReleaseGIL/;
-  void doit(const rc_ptr_Volume_S16 &vol, const rc_ptr_Volume_FLOAT &gradX,
-	const rc_ptr_Volume_FLOAT &gradY, const rc_ptr_Volume_FLOAT &gradZ,
-	int seedlabel) /ReleaseGIL/;
+  rc_ptr_Volume_S16 doit(const rc_ptr_Volume_S16 &label_vol,
+                         const rc_ptr_Volume_FLOAT &gradX,
+                         const rc_ptr_Volume_FLOAT &gradY,
+                         const rc_ptr_Volume_FLOAT &gradZ,
+                         int seedlabel) /ReleaseGIL/;
+
+  rc_ptr_Volume_S16 propagate_all_labels(
+    const rc_ptr_Volume_S16 &seeds,
+    const rc_ptr_Volume_FLOAT &fieldx,
+    const rc_ptr_Volume_FLOAT &fieldy,
+    const rc_ptr_Volume_FLOAT &fieldz) /ReleaseGIL/;
+
+  rc_ptr_Volume_S16 descend_scalar_field(
+    const rc_ptr_Volume_S16 &seeds,
+    const rc_ptr_Volume_FLOAT &field) /ReleaseGIL/;
 };
 
 };
