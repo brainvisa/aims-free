@@ -103,7 +103,7 @@ namespace aims
     descend_scalar_field(const carto::VolumeRef<int16_t> &seeds,
                          const carto::VolumeRef<float> &field);
 
-    static const float default_propagation_threshold = 0.3f;
+    static const float default_propagation_threshold;
 
   private:
     bool _verbose;

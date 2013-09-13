@@ -54,6 +54,8 @@ namespace {
   const int debug_output = 0;
 }
 
+const float aims::GradientAdvection::default_propagation_threshold = 0.3f;
+
 aims::GradientAdvection::GradientAdvection()
   : _verbose(debug_output),
     _propagation_threshold(default_propagation_threshold)
