@@ -176,8 +176,8 @@ void AimsSurface<D,T>::erase()
 template <int D,class T> inline
 void AimsSurface<D,T>::updateNormals()
 {
-	/// Pour le cas general, pas de methode pour calculer les normales
-	/// Voir la specialisation avec D=3 et T=Void
+  // No general method to calculate normals
+  // see specialization for D=3 and T=Void
 }
 
 template <> inline
@@ -192,18 +192,23 @@ void AimsSurface<3,Void>::updateNormals()
   if (_normal.size() != nVert)
     _normal.resize(nVert);
 
-  /// construction d'un vecteur de set(numero de polygone)
+  // build vector of set(poly id)
   for (i=0; i<nPoly; ++i)
     for (Polygons::size_type j=0; j<3; j++)
       polyVert[_polygon[i][j]].insert(i);
 
-  /// remplissage du vecteur de normales
-  for (i=0; i<nVert; ++i) {
-    norm=Point3df(0.0);  /// pour chaque point, parcours des normales
+  // fill normals 
+  for (i=0; i<nVert; ++i)
+  {
+    norm=Point3df(0.0);  // for each point, run through polygons it belongs
     std::set<uint>::const_iterator it;
-    for  (it= polyVert[i].begin(); it != polyVert[i].end(); it++) {
-      /// Pour chaque polygone auquel appartient le point on calcule aire.Normale=0.5.(ABxAC)
-      norm+= crossed( (_vertex[_polygon[(*it)][1]]-_vertex[_polygon[(*it)][0]]), (_vertex[_polygon[(*it)][2]]-_vertex[_polygon[(*it)][0]]) ) * float(0.5);
+    for (it= polyVert[i].begin(); it != polyVert[i].end(); it++)
+    {
+      /* For each polygon which the point belongs to,
+         calculate area.Normal=0.5.(ABxAC) */
+      norm += crossed(
+        (_vertex[_polygon[(*it)][1]]-_vertex[_polygon[(*it)][0]]),
+        (_vertex[_polygon[(*it)][2]]-_vertex[_polygon[(*it)][0]]) ) * 0.5F;
     }
     norm.normalize();
     _normal[i]=norm;
@@ -421,8 +426,8 @@ void AimsTimeSurface<D,T>::erase()
 template <int D,class T> inline
 void AimsTimeSurface<D,T>::updateNormals()
 {
-	/// Pour le cas g��al, pas de m�hode pour calculer les normales
-	/// Voir la sp�ialisation avec D=3 et T=Void
+  // No general method to calculate normals
+  // see specialization for D=3 and T=Void
 }
 
 
