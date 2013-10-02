@@ -37,6 +37,7 @@
 #include <cartodata/io/volumeformatreader.h>
 #include <cartodata/io/volumeutilio.h>
 #include <cartodata/volume/volume.h>
+#include <cartodata/io/carto2aimsheadertranslator.h>
 //--- soma io ----------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasourceinfo/datasourceinfo.h>
@@ -114,6 +115,13 @@ namespace soma
     {
       if( options->hasProperty( *p ) ) {
         VolumeUtilIO<T>::read( &obj, dsi, options );
+        bool convert = false;
+        options->getProperty( "convert_to_aims", convert );
+        if( convert )
+        {
+          carto::Carto2AimsHeaderTranslator translator;
+          translator.translate( carto::Object::reference( obj.header() ) );
+        }
         return;
       }
       // for now it's juste unalloc/realloc.
@@ -150,14 +158,28 @@ namespace soma
     std::set<std::string> prop = VolumeUtilIO<T>::listReadProperties();
     typename std::set<std::string>::iterator p;
     typename std::set<std::string>::iterator plast = prop.end();
+    Volume<T> *volume = 0;
     for( p = prop.begin(); p != prop.end(); ++p )
     {
       if( options->hasProperty( *p ) ) {
-        return VolumeUtilIO<T>::read( 0, dsi, options );
+        volume = VolumeUtilIO<T>::read( 0, dsi, options );
       }
     }
     //=== if no known property -> classic reading ============================
-    return FormatReader<Volume<T> >::createAndRead( dsi, context, options );
+    if( !volume )
+      volume = FormatReader<Volume<T> >::createAndRead(
+        dsi, context, options );
+    if( volume )
+    {
+      bool convert = false;
+      options->getProperty( "convert_to_aims", convert );
+      if( convert )
+      {
+        carto::Carto2AimsHeaderTranslator translator;
+        translator.translate( carto::Object::reference( volume->header() ) );
+      }
+    }
+    return volume;
   }
 
   //==========================================================================
@@ -457,7 +479,14 @@ namespace soma
       if( options->hasProperty( *p ) ) {
         VolumeFormatReader<T> vrf;  
         vrf.attach( _imr );
-        return vrf.setupAndRead( *obj, dsi, context, options );
+        vrf.setupAndRead( *obj, dsi, context, options );
+        bool convert = false;
+        options->getProperty( "convert_to_aims", convert );
+        if( convert )
+        {
+          carto::Carto2AimsHeaderTranslator translator;
+          translator.translate( carto::Object::reference( obj->header() ) );
+        }
       }
     }
     //=== if no known property -> classic reading ============================
