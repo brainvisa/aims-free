@@ -87,3 +87,47 @@ def connectedComponents( mesh, tex, areas_mode = 0 ):
     return cctex, areas_measures
   else:
     return cctex
+
+
+def meshDiceIndex( mesh, texture1, texture2, timestep1=0, 
+                   timestep2=0, labels_table1=None, labels_table2=None ):
+  """
+  """
+  tex1 = texture1[timestep1].arraydata()
+  tex2 = texture2[timestep2].arraydata()
+  if labels_table1 is not None:
+    tex1 = numpy.array( [ labels_table1[ x ] for x in tex1 ] )
+  if labels_table2 is not None:
+    tex2 = numpy.array( [ labels_table2[ x ] for x in tex2 ] )
+  regions = max( numpy.max( tex1 ), numpy.max( tex2 ) ) + 1
+  areas1 = numpy.zeros( ( regions, ) )
+  areas2 = numpy.zeros( ( regions, ) )
+  inter = numpy.zeros( ( regions, ) )
+  vertices = mesh.vertex()
+  polygons = mesh.polygon()
+  for poly in polygons:
+    p = vertices[poly[0]]
+    u1 = vertices[poly[1]] - p
+    u2 = vertices[poly[2]] - p
+    area = u1.crossed( u2 ).norm() / 6 # 1/3 area for each vertex
+    l1 = tex1[poly[0]]
+    l2 = tex2[poly[0]]
+    areas1[l1] += area
+    areas2[l2] += area
+    if l1 == l2: # intersection
+      inter[l1] += area
+    l1 = tex1[poly[1]]
+    l2 = tex2[poly[1]]
+    areas1[l1] += area
+    areas2[l2] += area
+    if l1 == l2: # intersection
+      inter[l1] += area
+    l1 = tex1[poly[2]]
+    l2 = tex2[poly[2]]
+    areas1[l1] += area
+    areas2[l2] += area
+    if l1 == l2: # intersection
+      inter[l1] += area
+  dice = inter * 2 / ( areas1 + areas2 )
+  return dice, areas1, areas2, inter
+

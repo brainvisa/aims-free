@@ -155,9 +155,14 @@ namespace aims
         uri += "&";
       if ( frame != -1 )
         uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
-      
+
       soma::Reader<T> reader( uri );
-      reader.setOptions( _options );
+      // set conversion option to invoque Carto2AimsHeaderTranslator
+      carto::Object options = _options;
+      if( options.isNull() )
+        options = carto::Object::value( carto::Dictionary() );
+      options->setProperty( "convert_to_aims", true );
+      reader.setOptions( options );
       return reader.read( obj, carto::none(), 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
@@ -409,9 +414,14 @@ namespace aims
         uri += "&";
       if ( frame != -1 )
         uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
-      
+
       soma::Reader<T> reader( uri );
-      reader.setOptions( _options );
+      // set conversion option to invoque Carto2AimsHeaderTranslator
+      carto::Object options = _options;
+      if( options.isNull() )
+        options = carto::Object::value( carto::Dictionary() );
+      options->setProperty( "convert_to_aims", true );
+      reader.setOptions( options );
       return reader.read( carto::none(), 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
