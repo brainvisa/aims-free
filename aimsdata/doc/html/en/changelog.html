@@ -15,8 +15,9 @@
  </center>
 
 <hr width="100%"> <br>
- 
- <b><a href="#version-4.3.0">Version 4.3.1</a></b><br>
+
+ <b><a href="#version-4.4.0">Version 4.4.0</a></b><br>
+ <b><a href="#version-4.3.1">Version 4.3.1</a></b><br>
  <b><a href="#version-4.3.0">Version 4.3.0</a></b><br>
  <b><a href="#version-4.2.1">Version 4.2.1</a></b><br>
  <b><a href="#version-4.2.0">Version 4.2.0</a></b><br>
@@ -40,8 +41,16 @@
  <b><a href="#version-2.12">Version 2.12</a></b><br>
  <b><a href="#version-2.11">Version 2.11</a></b><br>
  <b><a href="#version-2.10">Version 2.10</a></b><br>
- &nbsp;
- 
+
+
+<!-- -->
+<h4> <a name="version-4.4.0"></a>Oct 8th, 2013, Version 4.4.0</h4>
+
+<ul>
+<li>Changes in the IO system: a new IO system (based on the former cartobase one) has been separated in the (new) soma-io library. This lib is meant to be independent from Aims, cartodata and their data structures, to allow stream/array access to IO data in a way which can be independent from actual data structures. Moreover when opossible this infrastructures allows random access for partial IO. Such indepedent implementations will be coded in soma-io, while structure-dependent ones will use them in higher-level layers (cartodata). GIS and OpenSlide formats have been implemented in this new framework. Other formats ares till in the older Aims one for now.
+</li>
+</ul>
+
 <!-- -->
 <h4> <a name="version-4.3.1"></a>Oct 8th, 2012, Version 4.3.1</h4>
 
