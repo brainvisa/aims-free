@@ -201,10 +201,15 @@ int main( int argc, const char** argv )
                                       outside, !nomesh, gversion );
       fatt.setMaxThreads( nthreads );
       if( smoothType == Mesher::LAPLACIAN )
+      {
         fatt.mesher().setSmoothing( smoothType, 5, 0.4 );
+        fatt.mesher().setDecimation( 100., 5., 3., 180.0);
+      }
       else if ( smoothType == Mesher::LOWPASS )
+      {
         fatt.mesher().setSmoothing( smoothType, 50, 0.4 );
         fatt.mesher().setDecimation( 100., 2., 3., 180.0);
+      }
       fatt.doAll();
 
       if( graphw.fileName() != graphr.fileName() )
