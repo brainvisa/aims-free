@@ -139,11 +139,8 @@ class LinearInterpolatorFactory;
 template <typename T>
 class LinearInterpolator : public Interpolator
 {
-  friend class LinearInterpolatorFactory;
 
-  template <typename U> friend carto::rc_ptr< Interpolator > 
-  getLinearInterpolator( const AimsData<U> & );
-
+public:
   LinearInterpolator( const AimsData<T> & image );
   virtual ~LinearInterpolator();
 
@@ -154,9 +151,8 @@ class LinearInterpolator : public Interpolator
 
   virtual const carto::PropertySet &header() const;
 
-  const AimsData<T> _image;
-
 private:
+  const AimsData<T> _image;
 
   inline static
   void _interpolationCoefficients( Coordinate_t xx,
