@@ -101,6 +101,7 @@ namespace aims
       public std::map< int , std::map< Point3d, T, BucketMapLess > >
   {
   public:
+    typedef std::map< int , std::map< Point3d, T, BucketMapLess > > BaseMap;
     typedef std::map< Point3d, T, BucketMapLess > Bucket;
     typedef typename std::map<int, Bucket >::iterator iterator;
     typedef typename std::map<int, Bucket >::const_iterator const_iterator;
@@ -119,7 +120,12 @@ namespace aims
     inline void insert( const Point3d & pos, const T & item );
     /// Function redefined to omit time, looks more like STL maps
     inline void insert( const std::pair<const Point3d,T> & item );
+    using BaseMap::insert; // make overloads from std::map visible
+
+    /// Function redefined to omit time.
     inline void erase( const Point3d & pos );
+    using BaseMap::erase; // make overloads from std::map visible
+
     inline void merge( const BucketMap<T> & );
 
     /// returns the X resolution in mm
