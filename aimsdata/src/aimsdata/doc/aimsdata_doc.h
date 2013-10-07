@@ -112,7 +112,7 @@
     - fixed size vectors: AimsVector
     - transformations: Motion
   - \ref input_output, currently in the process of being rewritten in 
-    cartobase: see \ref carto_io
+    soma-io: see \ref soma_io
   - commandline parsing: \link aims::AimsApplication AimsApplication\endlink
   - miscelaneous utilities: \c utility package and 
     \link carto::Converter Converter\endlink
