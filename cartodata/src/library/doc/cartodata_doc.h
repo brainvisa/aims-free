@@ -52,8 +52,8 @@ namespace carto
 
   \section cartodata_requirements Requirements
 
-  CartoData relies on \ref cartobase "CartoBase" and so needs its 
-  requirements.
+  CartoData relies on \ref somaio "Soma-IO" and \ref cartobase "CartoBase" and
+  so needs their requirements.
 
   Optionally, cartodata may make use of the following libraries if available:
   - blitz++: http://www.oonumerics.org/blitz/ for efficient volume accessors
@@ -75,7 +75,7 @@ namespace carto
   It is still a work in progress: what I'm talking about here has not been 
   implemented at the moment.
 
-  Volumes rely on the allocator system of cartobase: see \ref allocators.
+  Volumes rely on the allocator system of somaio: see \ref allocators.
 
   First, a Volume is built using any allocator method. This means a DataSource 
   and an AllocatorContext are provided to it. It can remain unallocated (no 

@@ -15,8 +15,9 @@
  </center>
 
 <hr width="100%"> <br>
- 
- <b><a href="#version-4.3.0">Version 4.3.1</a></b><br>
+
+ <b><a href="#version-4.4.0">Version 4.4.0</a></b><br>
+ <b><a href="#version-4.3.1">Version 4.3.1</a></b><br>
  <b><a href="#version-4.3.0">Version 4.3.0</a></b><br>
  <b><a href="#version-4.2.1">Version 4.2.1</a></b><br>
  <b><a href="#version-4.2.0">Version 4.2.0</a></b><br>
@@ -40,8 +41,29 @@
  <b><a href="#version-2.12">Version 2.12</a></b><br>
  <b><a href="#version-2.11">Version 2.11</a></b><br>
  <b><a href="#version-2.10">Version 2.10</a></b><br>
- &nbsp;
- 
+
+
+<!-- -->
+<h4> <a name="version-4.4.0"></a>Oct 8th, 2013, Version 4.4.0</h4>
+
+<ul>
+<li><b>Libraries organization changes:</b> A new library, <b>soma-io</b> has been created as a new IO system for AIMS and possibly other libraries. Libs dependencies are now as follows:<br/>
+  <ul>
+    <li><tt>cartobase</tt> is now part of the soma-io subproject. It is still the lowest-level of our libraries. Thus, it has moved from the aims-free subproject to the soma-io subproject.
+    </li>
+    <li><tt>soma-io</tt> depends on <tt>cartobase</tt>.</li>
+    <li><tt>cartodata</tt> depends on <tt>soma-io</tt>, and is still in the aims-free subproject.</li>
+    <li><tt>aimsdata</tt> depends on <tt>cartodata</tt>.</li>
+    <li><tt>aimsalgo</tt> depends on <tt>aimsdata</tt>.</li>
+  </ul>
+  This new organization is meant to allow other libraries (PTK for instance) to use <tt>cartobase</tt> and <tt>soma-io</tt> without depending on <tt>cartodata</tt> and/or <tt>aimsdata</tt>, which define specific data structures, whereas <tt>soma-io</tt> does not.
+</li>
+<li>Changes in the IO system: a new IO system (based on the former cartobase one) has been separated in the (new) soma-io library. This lib is meant to be independent from Aims, cartodata and their data structures, to allow stream/array access to IO data in a way which can be independent from actual data structures. Moreover when opossible this infrastructures allows random access for partial IO. Such indepedent implementations will be coded in soma-io, while structure-dependent ones will use them in higher-level layers (cartodata). GIS and OpenSlide formats have been implemented in this new framework. Other formats ares till in the older Aims one for now.
+</li>
+<li>AimsRGB and AimsRGBA classes have been moved to the soma-io library, with new names: carto::VoxelRGB and carto::VoxelRGBA. Old classes are still available as typedefs.
+</li>
+</ul>
+
 <!-- -->
 <h4> <a name="version-4.3.1"></a>Oct 8th, 2012, Version 4.3.1</h4>
 

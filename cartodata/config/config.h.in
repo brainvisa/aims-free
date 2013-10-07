@@ -34,7 +34,7 @@
 #ifndef CARTODATA_CONFIG_CONFIG_H
 #define CARTODATA_CONFIG_CONFIG_H
 
-#include <cartobase/config/config.h>
+#include <soma-io/config/config.h>
 
 #ifndef CARTO_USE_BLITZ
 #cmakedefine CARTO_USE_BLITZ
