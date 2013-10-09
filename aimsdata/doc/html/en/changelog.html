@@ -44,7 +44,7 @@
 
 
 <!-- -->
-<h4> <a name="version-4.4.0"></a>Oct 8th, 2013, Version 4.4.0</h4>
+<h4> <a name="version-4.4.0"></a>Oct 9th, 2013, Version 4.4.0</h4>
 
 <ul>
 <li><b>Libraries organization changes:</b> A new library, <b>soma-io</b> has been created as a new IO system for AIMS and possibly other libraries. Libs dependencies are now as follows:<br/>
@@ -62,6 +62,19 @@
 </li>
 <li>AimsRGB and AimsRGBA classes have been moved to the soma-io library, with new names: carto::VoxelRGB and carto::VoxelRGBA. Old classes are still available as typedefs.
 </li>
+<li>The AimsElevationMap has been moved from the private bioprocessing project to the open-source aims project.</li>
+<li>added a wireframe section in SurfaceGenerator to produce segments meshes. Implemented a parallelepiped.</li>
+<li>Fix in AimsMerge: it was reading the mask as the merged volume.</li>
+<li>new SparseMatrix and SparseOrDenseMatrix classes, with IO, based on boost sparse matrices. Python bindings for such classes.</li>
+<li>Support for Minc2 volumes in the Minc IO plugin.</li>
+<li>Mesher smoothing can use a panel of different algorithms, and the default one is much more accurate than the former.</li>
+<li>IO in Aims have been made "almost" thread-safe. Unfortunately some race conditions still exist and programs sometimes crash when used intensively. It doesn't happen very often, but it happens...</li>
+<li>Some volume IO have been significantly optimized to decrease read/write time. Especially GIS and NIFTI formats are much faster than in aims 4.3.
+</li>
+<li>pyaims : added possibility do use unallocated volumes.</li>
+<li>pyaims: added access to IO types and formats in Python.</li>
+<li>new command: AimsVolumeToTexture.py, performs the same as anatomist Fusion3D, in the most basic mode (for now).</li>
+<li>And many other fixes...</li>
 </ul>
 
 <!-- -->
