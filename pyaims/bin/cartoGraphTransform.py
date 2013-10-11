@@ -66,11 +66,18 @@ def graphTransform( g, motions ):
   ks = motions.keys()
   vs = g[ 'voxel_size' ]
   print 'voxel size:', vs
+  globalmot = None
+  if None in ks:
+    globalmot = motions[None]
   for v in g.vertices():
     l = v[ 'name' ]
     b = v[ 'aims_roi' ]
+    mot = None
     if l in ks:
       mot = motions[ l ]
+    elif globalmot:
+      mot = globalmot
+    if mot:
       print 'transform', l
       b2 = aims.BucketMap_VOID()
       bi = b[0]
@@ -102,11 +109,13 @@ def parseOpts( argv ):
   parser.add_option( '-o', '--output', dest='output', 
                      help='output graph [default: <INPUT>]' )
   parser.add_option( '-t', "--transformation", dest="transfo", action='append', 
-                     help="transformation file. Any -t option must correspond " 
-                     "to a -n option" )
+                     help="transformation file. Transformations may "
+                     "correspond to ROIs, using -n options" )
   parser.add_option( '-n', "--name", dest="name", action='append', 
                      help="ROI name to apply transformation to. Any -n option " 
-                     "must correspond to a -t option" )
+                     "must correspond to a -t option. If no -n option is "
+                     "specified, a global, single -t transformation may be "
+                     "applied." )
   (options, args) = parser.parse_args()
   if args and not options.input:
     options.input = args[0]
@@ -120,12 +129,17 @@ def parseOpts( argv ):
     options.transfo = []
   if not options.name:
     options.name = []
-  if len( args ) > 0 or len( options.transfo ) != len( options.name ) \
-    or not options.input:
+  if len( args ) > 0 or ( len( options.transfo ) != len( options.name ) \
+        and ( len( options.name ) != 0 or len( options.transfo ) != 1 ) ) \
+      or not options.input:
     parser.parse_args( [ '-h' ] )
   motions = {}
-  for i in xrange( len( options.transfo ) ):
-    motions[ options.name[i] ] = options.transfo[i]
+  if len( options.name ) == 0 and len( options.transfo ) == 1:
+    # special case of a single, global, transformation
+    motions[ None ] = options.transfo[0]
+  else:
+    for i in xrange( len( options.transfo ) ):
+      motions[ options.name[i] ] = options.transfo[i]
   return ( options.input, options.output, motions )
 
 
@@ -141,14 +155,12 @@ if __name__ == '__main__':
   print 'output:', outname
   print 'transfos:', motnames
 
-  r = aims.Reader()
-  g = r.read( gname )
+  g = aims.read( gname )
   motions = {}
   for l, m in motnames.items():
     print 'read transform', m
-    motions[ l ] = r.read( m )
+    motions[ l ] = aims.read( m )
 
   graphTransform( g, motions )
   g[ 'filename_base' ] = '*'
-  w = aims.Writer()
-  w.write( g, outname )
+  aims.write( g, outname )
