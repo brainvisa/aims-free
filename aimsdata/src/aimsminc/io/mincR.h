@@ -565,6 +565,10 @@ namespace aims
     data.setSizeT( hdr->sizeT() );
     data.setHeader( hdr );
 
+    if( al.allocatorType() == carto::AllocatorStrategy::Unallocated
+        && !data.volume()->refVolume().isNull() )
+      al = data.volume()->refVolume()->allocatorContext();
+
     if( al.allocatorType() != carto::AllocatorStrategy::ReadOnlyMap
         && al.allocatorType() != carto::AllocatorStrategy::ReadWriteMap )
     {

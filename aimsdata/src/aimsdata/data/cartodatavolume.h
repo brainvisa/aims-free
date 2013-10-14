@@ -81,7 +81,7 @@ class AimsData : public carto::RCObject, public aims::Border
   AimsData( int dimx, int dimy, int dimz, int dimt,
 	    int borderw, const carto::AllocatorContext & al );
   AimsData( const AimsData<T>& other );
-  AimsData( const AimsData<T>& other, int borderw);
+  AimsData( const AimsData<T>& other, int borderw );
   virtual ~AimsData();
 
   // conversions with carto::Volume
@@ -219,6 +219,11 @@ template<typename T>
 inline
 int AimsData<T>::Private::borderWidth( carto::rc_ptr<carto::Volume<T> > vol )
 {
+  if( !vol->refVolume().isNull() ) // is a view to another volume
+  {
+    // this is only the border in X direction, but we can't be more precise.
+    return ( vol->refVolume()->getSizeX() - vol->getSizeX() ) / 2;
+  }
   try
     {
       carto::Object 
@@ -307,6 +312,11 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt, int borderw )
                                    dimz + borderw * 2, dimt ) ), 
     d( new Private )
 {
+  if( borderw != 0 )
+    _volume.reset( new carto::Volume<T>(
+      _volume,
+      typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
+      typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ) ) );
   d->header = new aims::PythonHeader( *_volume );
   if( borderw != 0 )
     _volume->header().setProperty( "_borderWidth", borderw );
@@ -319,9 +329,14 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt,
 		       int borderw, const carto::AllocatorContext & al )
   : carto::RCObject(), aims::Border( dimx, dimy, dimz, borderw ), 
     _volume( new carto::Volume<T>( dimx + borderw * 2, dimy + borderw * 2, 
-                                   dimz + borderw * 2, dimt, al ) ), 
+                                   dimz + borderw * 2, dimt/*, al*/ ) ), 
     d( new Private )
 {
+  if( borderw != 0 )
+    _volume.reset( new carto::Volume<T>(
+      _volume,
+      typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
+      typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ), al ) );
   d->header = new aims::PythonHeader( *_volume );
   if( borderw != 0 )
     _volume->header().setProperty( "_borderWidth", borderw );
@@ -344,12 +359,18 @@ AimsData<T>::AimsData( const AimsData<T>& other )
 
 template < typename T >
 inline 
-AimsData<T>::AimsData( const AimsData<T>& other, int borderw)
+AimsData<T>::AimsData( const AimsData<T>& other, int borderw )
   : carto::RCObject(), aims::Border( other.dimX(), other.dimY(), other.dimZ(),
   borderw ), _volume( new carto::Volume<T>( other.dimX() + borderw * 2,
   other.dimY() + borderw * 2, other.dimZ() + borderw * 2, other.dimT() ) ), 
     d( new Private )
 {
+  if( borderw != 0 )
+    _volume.reset( new carto::Volume<T>(
+      _volume,
+      typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
+      typename carto::Volume<T>::Position4Di( other.dimX(), other.dimY(),
+                                              other.dimZ(), other.dimT() ) ) );
   long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
   for ( t = 0; t < tm; t++ )
     for ( z = 0; z < zm; z++ )
@@ -359,6 +380,8 @@ AimsData<T>::AimsData( const AimsData<T>& other, int borderw)
   d->header = new aims::PythonHeader( *_volume );
   if( borderw != 0 )
     _volume->header().setProperty( "_borderWidth", borderw );
+  else if( _volume->header().hasProperty( "_borderWidth" ) )
+    _volume->header().removeProperty( "_borderWidth" );
 }
 
 
@@ -374,10 +397,10 @@ template < typename T >
 inline 
 AimsData<T>::AimsData( carto::rc_ptr<carto::Volume<T> > vol )
   : carto::RCObject(), 
-    aims::Border( vol->getSizeX() - Private::borderWidth( vol ) * 2, 
-                  vol->getSizeY() - Private::borderWidth( vol ) * 2, 
-                  vol->getSizeZ() - Private::borderWidth( vol ) * 2, 
-                  Private::borderWidth( vol ) ), 
+    aims::Border( vol->getSizeX(),
+                  vol->getSizeY(),
+                  vol->getSizeZ(),
+                  Private::borderWidth( vol ) ),
     _volume( vol ), 
     d( new Private )
 {
@@ -393,8 +416,8 @@ AimsData<T> & AimsData<T>::operator = ( carto::rc_ptr<carto::Volume<T> > vol )
     return *this;
 
   int	border = Private::borderWidth( vol );
-  _setBorder( vol->getSizeX() - border * 2, vol->getSizeY() - border * 2, 
-              vol->getSizeZ() - border * 2, border );
+  _setBorder( vol->getSizeX(), vol->getSizeY(),
+              vol->getSizeZ(), border );
   delete d->header;
   _volume = vol;
   d->header = new aims::PythonHeader( *_volume );
@@ -464,7 +487,7 @@ template<typename T>
 inline
 int AimsData<T>::dimX() const
 {
-  return _volume->getSizeX() - borderWidth() * 2;
+  return _volume->getSizeX();
 }
 
 
@@ -472,7 +495,7 @@ template<typename T>
 inline
 int AimsData<T>::dimY() const
 {
-  return _volume->getSizeY() - borderWidth() * 2;
+  return _volume->getSizeY();
 }
 
 
@@ -480,7 +503,7 @@ template<typename T>
 inline
 int AimsData<T>::dimZ() const
 {
-  return _volume->getSizeZ() - borderWidth() * 2;
+  return _volume->getSizeZ();
 }
 
 
@@ -846,8 +869,7 @@ typename AimsData<T>::reference
 AimsData<T>::operator () ( AimsData<T>::size_type x, AimsData<T>::size_type y, 
                            AimsData<T>::size_type z, AimsData<T>::size_type t )
 {
-  return (*_volume)( x + borderWidth(), y + borderWidth(), z + borderWidth(), 
-                     t );
+  return (*_volume)( x, y, z, t );
 }
 
 
@@ -858,8 +880,7 @@ AimsData<T>::operator () ( AimsData<T>::size_type x, AimsData<T>::size_type y,
                            AimsData<T>::size_type z, 
                            AimsData<T>::size_type t ) const
 {
-  return (*_volume)( x + borderWidth(), y + borderWidth(), z + borderWidth(), 
-                     t );
+  return (*_volume)( x, y, z, t );
 }
 
 
@@ -1137,13 +1158,18 @@ template < typename T >
 inline
 void AimsData<T>::fillBorder( const T& val )
 {
-  iterator	it;
+  carto::VolumeRef<T> bigger = _volume->refVolume();
+  if( bigger.isNull() )
+    return;
+  T *it;
   long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
-  long of = oFirstPoint(), op = oPointBetweenLine(), ol = oLineBetweenSlice();
+  long of = &_volume->at( 0, 0, 0, 0 ) - &bigger->at( 0, 0, 0, 0 ),
+    op = &_volume->at( 0, 1, 0, 0 ) - &_volume->at( xm, 0, 0, 0 ),
+    ol = &_volume->at( 0, 0, 1, 0 ) - &_volume->at( 0, ym, 0, 0 );
 
   for ( t = 0; t < tm; t++ )
   {
-    it = begin() + t * oVolume();
+    it = &bigger->at( 0, 0, 0, t );
     for ( x = 0; x < of; x++ )
       *it++ = val;
     for ( z = 0; z < zm; z++ )

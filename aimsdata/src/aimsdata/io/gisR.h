@@ -157,6 +157,10 @@ namespace aims
 
     carto::AllocatorStrategy::MappingMode 
       mode = data.allocator().allocatorType();
+    // if there is a border, the allocated volume is the "parent" volume.
+    if( mode == carto::AllocatorStrategy::Unallocated
+        && !data.volume()->refVolume().isNull() )
+      mode = data.volume()->refVolume()->allocatorContext().allocatorType();
 
     if( mode == carto::AllocatorStrategy::Memory 
         || mode == carto::AllocatorStrategy::CopyMap 
