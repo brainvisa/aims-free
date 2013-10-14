@@ -26,11 +26,26 @@ typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
 
 
 public:
+    class Position4Di
+    {
+    public:
+      Position4Di( int x = 0, int y = 0, int z = 0, int t = 0 );
+      ~Position4Di();
+      int operator [] ( int coord ) const;
+    };
+
     Volume_%Template1typecode%( int = 1, int = 1, int = 1, int = 1,
       const carto::AllocatorContext& allocatorContext
         = carto::AllocatorContext(), bool = true ) /ReleaseGIL/;
     Volume_%Template1typecode%( const Volume_%Template1typecode% & )
       /ReleaseGIL/;
+    Volume_%Template1typecode%( rc_ptr_Volume_%Template1typecode% other,
+      const Volume_%Template1typecode%::Position4Di & pos
+        = Volume_%Template1typecode%::Position4Di( 0, 0, 0, 0 ),
+      const Volume_%Template1typecode%::Position4Di & size
+        = Volume_%Template1typecode%::Position4Di( -1, -1, -1, -1 ),
+      const carto::AllocatorContext & allocContext
+        = carto::AllocatorContext() );
     virtual ~Volume_%Template1typecode%() /ReleaseGIL/;
 
     int getSizeX() const;
@@ -39,6 +54,9 @@ public:
     int getSizeT() const;
     const carto::AllocatorContext & allocatorContext() const;
     void fill( const %Template1% & value ) /ReleaseGIL/;
+
+    rc_ptr_Volume_%Template1typecode% refVolume() const;
+    Volume_%Template1typecode%::Position4Di posInRefVolume() const;
 
   %Template1PyType% at( long, long = 0, long = 0, long = 0 ) const;
 
