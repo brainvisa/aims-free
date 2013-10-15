@@ -178,11 +178,3 @@ template class carto::Volume< std::set<float> >;
 template class carto::VolumeProxy< std::map<int, float> >;
 template class carto::Volume< std::map<int, float> >;
 
-// VolumeView on RGB types
-
-template <typename T>
-VolumeView<T>::~VolumeView() {};
-
-template class VolumeView< AimsRGB >;
-template class VolumeView< AimsRGBA >;
-

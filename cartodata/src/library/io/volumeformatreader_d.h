@@ -163,6 +163,7 @@ namespace soma
     {
       if( options->hasProperty( *p ) ) {
         volume = VolumeUtilIO<T>::read( 0, dsi, options );
+        break;
       }
     }
     //=== if no known property -> classic reading ============================

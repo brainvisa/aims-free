@@ -136,6 +136,10 @@ void VidaReader< int16_t >::frameRead(AimsData<int16_t>& thing,
   AllocatorStrategy::MappingMode 
     mode = data.allocator().allocatorType();
 
+  if( mode == AllocatorStrategy::Unallocated
+      && !data.volume()->refVolume().isNull() )
+    mode = data.volume()->refVolume()->allocatorContext().allocatorType();
+
   if( mode == AllocatorStrategy::Memory || mode == AllocatorStrategy::CopyMap 
       || mode == AllocatorStrategy::MAP 
       || mode == AllocatorStrategy::Unallocated )
@@ -219,6 +223,10 @@ void VidaReader< float >::frameRead(AimsData<float>& thing,
 
   AllocatorStrategy::MappingMode 
     mode = data.allocator().allocatorType();
+
+  if( mode == AllocatorStrategy::Unallocated
+      && !data.volume()->refVolume().isNull() )
+    mode = data.volume()->refVolume()->allocatorContext().allocatorType();
 
   if( mode == AllocatorStrategy::Memory || mode == AllocatorStrategy::CopyMap 
       || mode == AllocatorStrategy::MAP 

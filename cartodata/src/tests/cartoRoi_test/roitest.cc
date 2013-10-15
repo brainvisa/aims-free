@@ -32,7 +32,7 @@
  */
 
 #include <cstdlib>
-#include <cartodata/volume/volumeview.h>
+#include <cartodata/volume/volume.h>
 #include <cartodata/roi/siteIterator.h>
 #include <iostream>
 #include <vector>
@@ -50,10 +50,10 @@ int main( int /*argc*/, char** /*argv*/ )
 
   cout << "-- Test 2: volume view: vol2 ( 6, 6, 6 ) in vol1 --" << endl;
   VolumeRef<int16_t>	vol2
-    ( new VolumeView<int16_t>( vol1, 
-                               VolumeView<int16_t>::Position4Di( 2, 2, 2 ), 
-                               VolumeView<int16_t>::Position4Di( 6, 6, 6, 1 ) 
-                               ) );
+    ( new Volume<int16_t>( vol1,
+                           Volume<int16_t>::Position4Di( 2, 2, 2 ),
+                           Volume<int16_t>::Position4Di( 6, 6, 6, 1 )
+                          ) );
   vol2->fill( 1 );
  
   SiteIteratorOf< Volume<int16_t> >  it(vol1);

@@ -32,7 +32,6 @@
  */
 
 #include <cstdlib>
-#include <cartodata/volume/volumeview.h>
 #include <cartodata/volume/volumeoperators.h>
 #include <cstdlib>
 #include <iostream>
@@ -65,10 +64,10 @@ int main( int /*argc*/, char** /*argv*/ )
 
   cout << "-- Test 2: volume view: vol2 ( 6, 6, 6 ) in vol1 --" << endl;
   VolumeRef<int16_t>	vol2
-    ( new VolumeView<int16_t>( vol1, 
-                               VolumeView<int16_t>::Position4Di( 2, 2, 2 ), 
-                               VolumeView<int16_t>::Position4Di( 6, 6, 6, 1 ) 
-                               ) );
+    ( new Volume<int16_t>( vol1,
+                           Volume<int16_t>::Position4Di( 2, 2, 2 ),
+                           Volume<int16_t>::Position4Di( 6, 6, 6, 1 )
+                          ) );
   cout << "vol2, view in vol1: allocated" << endl;
   cout << "status: isAllocated() : " << vol2->allocatorContext().isAllocated()
        << endl;
@@ -147,10 +146,10 @@ int main( int /*argc*/, char** /*argv*/ )
 
   cout << "-- Test 4: volume view: vol4 ( 6, 6, 6 ) in vol3 --" << endl;
   VolumeRef<int16_t>	vol4
-    ( new VolumeView<int16_t>( vol3, 
-                               VolumeView<int16_t>::Position4Di( 2, 2, 2 ), 
-                               VolumeView<int16_t>::Position4Di( 6, 6, 6, 1 ) 
-                               ) );
+    ( new Volume<int16_t>( vol3,
+                           Volume<int16_t>::Position4Di( 2, 2, 2 ),
+                           Volume<int16_t>::Position4Di( 6, 6, 6, 1 )
+                          ) );
   cout << "status: isAllocated() : " << vol4->allocatorContext().isAllocated()
        << endl;
   cout << "pointer 1st voxel : " << &(*vol4)( 0 ) << endl;
@@ -224,6 +223,10 @@ int main( int /*argc*/, char** /*argv*/ )
   ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
   cout << nn << " x 8M voxels in " << ck2 
        << "s : " << sz * nn / ck2 << " vox/s" << endl;
+
+  cout << "===========\n";
+  cout << "Overall result: "
+    << ( result == EXIT_SUCCESS ? "OK\n" : "FAILED\n" );
 
   return result;
 }

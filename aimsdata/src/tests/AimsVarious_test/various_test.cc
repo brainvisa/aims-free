@@ -39,7 +39,6 @@
 #include <soma-io/writer/pythonwriter.h>
 //--- cartodata ----------------------------------------------------------------
 #include <cartodata/volume/volume.h>
-#include <cartodata/volume/volumeview.h>
 //--- cartobase ----------------------------------------------------------------
 #include <cartobase/object/object.h>
 #include <cartobase/getopt/getopt.h>
@@ -98,13 +97,13 @@ bool testVolumeBorders()
   cartoMsg( 0, "printing allocatedVolume...", "testVolumeBorders" );
   printVolume( allocatedVolume );
   
-  VolumeView<int16_t>::Position4Di pos( 2, 2, 0, 0 );
-  VolumeView<int16_t>::Position4Di size( 6, 6, 1, 1 );
+  Volume<int16_t>::Position4Di pos( 2, 2, 0, 0 );
+  Volume<int16_t>::Position4Di size( 6, 6, 1, 1 );
   cartoMsg( 0, "creating viewVolume...", "testVolumeBorders" );
   cartoMsg( 0, "-> father = allocatedVolume", "testVolumeBorders" );
   cartoMsg( 0, "-> pos = ( 2, 2, 0, 0 )", "testVolumeBorders" );
   cartoMsg( 0, "-> size = ( 6, 6, 1, 1 )", "testVolumeBorders" );
-  VolumeRef<int16_t> viewVolume( new VolumeView<int16_t>( allocatedVolume, pos, size ) );
+  VolumeRef<int16_t> viewVolume( new Volume<int16_t>( allocatedVolume, pos, size ) );
   cartoMsg( 0, "printing viewVolume...", "testVolumeBorders" );
   printVolume( viewVolume );
   cartoMsg(0, "===", "testVolumeBorders");

@@ -75,10 +75,10 @@ namespace carto
 //============================================================================
   /// 4D Volume main class
   ///
-  /// Since 2013 release, Volume and VolumeView are merged into a single
-  /// class. Every Volume can be a view into an other volume. If it is not,
-  /// its parent volume is NULL. This allows to deal the same way with classic
-  /// volumes, volumes with borders or partially read volumes.
+  /// Since 2013 release (version 4.4), Volume and VolumeView are merged into
+  /// a singleclass. Every Volume can be a view into an other volume. If it is
+  /// not, its parent volume is NULL. This allows to deal the same way with
+  /// classic volumes, volumes with borders or partially read volumes.
   ///
   /// Volumes should generally be used via reference-counting pointers
   /// (rc_ptr): there is a (slightly) specialized rc_ptr for Volume
@@ -145,9 +145,11 @@ namespace carto
     /// value (default constructor of AllocatorContext) is OK in most cases.
     /// \param allocated normally left to \c true, it can exceptionnally be 
     /// set to \c false for "virtual" volumes that must not be actually 
-    /// allocated but are only sources for a VolumeView.
-    explicit Volume( int sizeX = 1, int sizeY = 1, int sizeZ = 1, int sizeT = 1,
-                     const AllocatorContext& allocatorContext = AllocatorContext(), 
+    /// allocated but are only sources for a view Volume.
+    explicit Volume( int sizeX = 1, int sizeY = 1, int sizeZ = 1,
+                     int sizeT = 1,
+                     const AllocatorContext& allocatorContext
+                      = AllocatorContext(), 
                      bool allocated = true );
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
@@ -175,7 +177,7 @@ namespace carto
 
     /// Iterators returned here are the most "basic" (and fastest) iterators:
     /// they go from the first voxel linerarly in memory, not taking care of
-    /// offsets when in a VolumeView. Taking care of splitting loops
+    /// offsets when in a Volume view. Taking care of splitting loops
     /// line-by-line is the responsability of programmers using such
     /// iterators.
     iterator begin();
@@ -184,7 +186,7 @@ namespace carto
     const_iterator end() const;
 
     /// Warning: this operator is not virtual, so may not have the expected
-    /// result on inherited classes (see VolumeView)
+    /// result on inherited classes (see old VolumeView)
     const T& operator()( long x, long y = 0, long z = 0, long t = 0 ) const;
     T& operator() ( long x, long y = 0, long z = 0, long t = 0 );
     const T& at( long x, long y = 0, long z = 0, long t = 0 ) const;
