@@ -224,16 +224,6 @@ int AimsData<T>::Private::borderWidth( carto::rc_ptr<carto::Volume<T> > vol )
     // this is only the border in X direction, but we can't be more precise.
     return ( vol->refVolume()->getSizeX() - vol->getSizeX() ) / 2;
   }
-  try
-    {
-      carto::Object 
-        o = vol->header().getProperty( "_borderWidth" );
-      if( o.get() )
-        return (int) rint( o->getScalar() );
-    }
-  catch( ... )
-    {
-    }
   return 0;
 }
 
@@ -326,8 +316,6 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt, int borderw )
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ) ) );
   d->header = new aims::PythonHeader( *_volume );
-  if( borderw != 0 )
-    _volume->header().setProperty( "_borderWidth", borderw );
 }
 
 
@@ -346,8 +334,6 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt,
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ), al ) );
   d->header = new aims::PythonHeader( *_volume );
-  if( borderw != 0 )
-    _volume->header().setProperty( "_borderWidth", borderw );
 }
 
 
@@ -360,8 +346,6 @@ AimsData<T>::AimsData( const AimsData<T>& other )
     d( new Private )
 {
   d->header = new aims::PythonHeader( *_volume );
-  if( borderWidth() != 0 )
-    _volume->header().setProperty( "_borderWidth", borderWidth() );
 }
 
 
@@ -386,10 +370,6 @@ AimsData<T>::AimsData( const AimsData<T>& other, int borderw )
         for ( x = 0; x < xm; x++ )
           (*this)( x, y, z, t ) = other( x, y, z, t );
   d->header = new aims::PythonHeader( *_volume );
-  if( borderw != 0 )
-    _volume->header().setProperty( "_borderWidth", borderw );
-  else if( _volume->header().hasProperty( "_borderWidth" ) )
-    _volume->header().removeProperty( "_borderWidth" );
 }
 
 
@@ -1201,7 +1181,19 @@ template<typename T>
 AimsData<T> AimsData<T>::clone() const
 {
   AimsData<T>	dat( *this );
-  dat._volume.reset( new carto::Volume<T>( *_volume ) );
+  if( !_volume->refVolume().isNull() )
+  {
+    // border has to be copied
+    carto::rc_ptr<carto::Volume<T> > rvol(
+      new carto::Volume<T>( *_volume->refVolume() ) );
+    dat._volume.reset( new carto::Volume<T>( rvol, _volume->posInRefVolume(),
+      typename carto::Volume<T>::Position4Di( _volume->getSizeX(),
+                                              _volume->getSizeY(),
+                                              _volume->getSizeZ(),
+                                              _volume->getSizeT() ) ) );
+  }
+  else
+    dat._volume.reset( new carto::Volume<T>( *_volume ) );
   delete dat.d->header;
   dat.d->header = new aims::PythonHeader( *dat._volume );
   return dat;

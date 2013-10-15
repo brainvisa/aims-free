@@ -86,8 +86,6 @@ namespace aims
       vol = *d.volume(); // #####
     }
     ptr.release(); // don't destroy vol !
-    if( border != 0 )
-      vol.header().setProperty( "_borderWidth", border );
     return true;
   }
 
@@ -118,8 +116,6 @@ namespace aims
       ptr = d.volume();
     }
     carto::Volume<T>	*vol = ptr.release(); // don't destroy vol !
-    if( border != 0 )
-      vol->header().setProperty( "_borderWidth", border );
     return vol;
   }
 
