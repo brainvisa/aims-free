@@ -258,7 +258,9 @@ template<typename T>
 inline
 typename AimsData<T>::iterator AimsData<T>::begin()
 {
-  return &*_volume->begin();
+  return _volume->refVolume().isNull() ?
+    &*_volume->begin() :
+    &*_volume->refVolume()->begin(); // pointer to the border
 }
 
 
@@ -266,7 +268,9 @@ template<typename T>
 inline
 typename AimsData<T>::const_iterator AimsData<T>::begin() const
 {
-  return &*_volume->begin();
+  return _volume->refVolume().isNull() ?
+    &*_volume->begin() :
+    &*_volume->refVolume()->begin(); // pointer to the border
 }
 
 
@@ -274,9 +278,11 @@ template<typename T>
 inline
 typename AimsData<T>::iterator AimsData<T>::end()
 {
+  carto::Volume<T> *vol = _volume->refVolume().isNull() ?
+    _volume.get() : _volume->refVolume().get();
 #ifdef CARTO_USE_BLITZ
-  return &*_volume->begin() + long(_volume->getSizeX()) * _volume->getSizeY()
-      * _volume->getSizeZ() * _volume->getSizeT();
+  return &*vol->begin() + long(vol->getSizeX()) * vol->getSizeY()
+      * vol->getSizeZ() * vol->getSizeT();
 #else
   return &*_volume->end();
 #endif
@@ -287,9 +293,11 @@ template<typename T>
 inline
 typename AimsData<T>::const_iterator AimsData<T>::end() const
 {
+  carto::Volume<T> *vol = _volume->refVolume().isNull() ?
+    _volume.get() : _volume->refVolume().get();
 #ifdef CARTO_USE_BLITZ
-  return &*_volume->begin() + long(_volume->getSizeX()) * _volume->getSizeY()
-      * _volume->getSizeZ() * _volume->getSizeT();
+  return &*vol->begin() + long(vol->getSizeX()) * vol->getSizeY()
+      * vol->getSizeZ() * vol->getSizeT();
 #else
   return &*_volume->end();
 #endif
