@@ -35,7 +35,7 @@
 #define CARTODATA_IO_VOLUMEFORMATREADER_D_H
 
 #include <cartodata/wip/io/volumeformatreader.h>
-#include <cartodata/volume/volumeview.h>
+#include <cartodata/volume/volume.h>
 #include <cartodata/io/volumedatasource.h>
 #ifdef USE_SOMA_IO
   #include <soma-io/datasource/filedatasource.h>
@@ -144,16 +144,12 @@ namespace carto
         int		dt = std::min( vt, st );
         int		y, z, t, ox = 0, oy = 0, oz = 0, ot = 0;
         offset_t	len = dx * sizeof( T );
-        VolumeView<T>	*vv = dynamic_cast<VolumeView<T> *>( &obj );
-        if( vv )
-          {
-            const typename VolumeView<T>::Position4Di 
-              & p = vv->posInRefVolume();
-            ox = p[0];
-            oy = p[1];
-            oz = p[2];
-            ot = p[3];
-          }
+        const typename Volume<T>::Position4Di
+          & p = obj.posInRefVolume();
+        ox = p[0];
+        oy = p[1];
+        oz = p[2];
+        ot = p[3];
         if( !vds->open( DataSource::Read ) )
           throw open_error( "data source not available", vds->url() );
         /*

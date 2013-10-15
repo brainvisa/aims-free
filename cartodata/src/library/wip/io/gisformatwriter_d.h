@@ -36,7 +36,7 @@
 
 #include <cartodata/wip/io/gisformatwriter.h>
 #include <cartodata/io/volumedatasource.h>
-#include <cartodata/volume/volumeview.h>
+#include <cartodata/volume/volume.h>
 #ifdef USE_SOMA_IO
   #include <soma-io/allocator/allocator.h>
   #include <soma-io/datasource/filedatasource.h>
@@ -145,16 +145,12 @@ namespace carto
     int		dt = std::min( vt, st );
     int		y, z, t, ox = 0, oy = 0, oz = 0, ot = 0;
     offset_t	len = dx * sizeof( T );
-    const VolumeView<T>	*vv = dynamic_cast<const VolumeView<T> *>( &obj );
-    if( vv )
-      {
-        const typename VolumeView<T>::Position4Di 
-          & p = vv->posInRefVolume();
-        ox = p[0];
-        oy = p[1];
-        oz = p[2];
-        ot = p[3];
-      }
+    const typename Volume<T>::Position4Di
+      & p = obj.posInRefVolume();
+    ox = p[0];
+    oy = p[1];
+    oz = p[2];
+    ot = p[3];
     if( !vds->open( DataSource::Write ) )
       throw open_error( "cannot open for writing", vds->url() );
     for( t=0; t<dt; ++t )

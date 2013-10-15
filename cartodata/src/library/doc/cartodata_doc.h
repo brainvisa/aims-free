@@ -82,42 +82,48 @@ namespace carto
   data buffer) if it is not used directly, but its data values should not be 
   accessed until it is allocated.
 
-  A subvolume, or VolumeView, can be opened into an existing volume. This 
-  view is used either to operate on smaller data blocks than the whole volume 
+  A subvolume can be opened into an existing volume. This used to be a
+  separate class, VolumeView, up to aims-4.3, but has been merged with
+  the regular Volume class in aims-4.4.
+  A view is used either to operate on smaller data blocks than the whole volume
   itself, or to simulate the "volume with borders" concept, or to "paste" a 
-  volume (buffer or file) into a larger one. Depending on the AllocatorContext 
-  and DataSource used for both the bigger volume and the VolumeView, 
-  different behaviours can be achieved:
+  volume (buffer or file) into a larger one. Access to views is granted from
+  one (view) volume into another one, using the Volume::refVolume(),
+  and Volume::posInRefVolume() methods.
+  Depending on the AllocatorContext and DataSource used for both the bigger
+  volume and the view, different behaviours can be achieved.
+  In the following we name "Volume" the "larger" volume, and "View" the view
+  in the former.
 
   - Volume allocated and linked to an existing DataSource (file or filled 
-    buffer), and VolumeView with no DataSource:\n
+    buffer), and View with no DataSource:\n
     This is the classical subvolume (region) case. All data for the whole 
-    volume are allocated (possibly using memory mapping), and the VolumeView 
+    volume are allocated (possibly using memory mapping), and the View
     is only useful to work on a restriced portion of the data, or to write / 
-    copy the VolumeView to another file or buffer.\n
-    The AllocationContext of the VolumeView is not used in this case, the data 
+    copy the View to another file or buffer.\n
+    The AllocationContext of the View is not used in this case, the data
     block always belongs to the bigger Volume.
 
-  - Volume allocated with no DataSource, and VolumeView linked to an existing 
+  - Volume allocated with no DataSource, and View linked to an existing
     DataSource:\n
     This case is the "volume with borders" case: the buffer is allocated with 
     borders included in the bigger Volume, and data are loaded directly in 
-    the VolumeView window. Work can be done in the VolumeView with no care of 
+    the View window. Work can be done in the View with no care of
     going in the borders (when borders are large enough).\n
     Another use of this is loading blocks of different files into a bigger 
     volume without allocating nor copying a second volume.\n
-    The AllocationContext of the VolumeView is not used in this case, the data 
+    The AllocationContext of the View is not used in this case, the data
     block always belongs to the bigger Volume.
 
-  - Volume allocated and linked to an existing a DataSource, and VolumeView 
+  - Volume allocated and linked to an existing a DataSource, and View
     also linked to an existing DataSource:\n
-    In this case the DataSource of the VolumeView will be used to load data 
+    In this case the DataSource of the View will be used to load data
     into it and replace data from the original Volume (the Volume must be 
     allocated in read/write mode). This case only differs from the previous 
     one (borders) in that the "borders" are filled by the contents of another 
     data source.
 
-  - Volume unallocated but linked to an existing DataSource, and VolumeView 
+  - Volume unallocated but linked to an existing DataSource, and View
     allocated with no DataSource:\n
     This is used to allocate and load only a part of a file: only the view 
     is allocated (using its own AllocatorContext) and loaded from the bigger 
@@ -126,34 +132,34 @@ namespace carto
     also affect the file. Otherwise, saving the whole modified volume is 
     not possible at present.\n
     We may think about using the same trick for writing: writing from the 
-    VolumeView, but using the output DataSource of the Volume, would save 
+    View, but using the output DataSource of the Volume, would save
     only the viewed part, or copy the original file outside of it. But this 
     will not be implemented at the beginning.\n
-    \warning As buffers are actually held in the VolumeView, several views 
+    \warning As buffers are actually held in the View, several views
     into the same unallocated Volume will not share data: this means that 
     overlaps will be duplicated and independent in each view. This is not the 
     case when using views on an allocated Volume.
 
   - Volume unallocated with no DataSource:\n
     Whatever the SubVolume in it, I think this configuration is useless. The 
-    VolumeView will act as a full Volume, the bigger one won't be used.
+    View will act as a full Volume, the bigger one won't be used.
 
-  Here I am speaking of Volume and VolumeView implemented as two separate 
+  Here I am speaking of Volume and View implemented as two separate
   classes, but they might be implemented in the same class: a Volume would 
   be a view into another if it holds a reference to another (bigger) Volume.
 
-  In any case, a VolumeView is a complete Volume and has all functionalities 
+  In any case, a View is a complete Volume and has all functionalities
   of a Volume. This includes the capability to allow other views into it.
 
-  A VolumeView holds a reference-counting pointer to the Volume it is open on. 
-  So the original bigger Volume cannot be deleted while a VolumeView looking 
+  A View holds a reference-counting pointer to the Volume it is open on.
+  So the original bigger Volume cannot be deleted while a View looking
   into it is still living.
 
   Using cleverly the different combinations of allocators and DataSource on 
-  Volumes and VolumeViews allows to implement every memory-saving operations 
+  Volumes and Views allows to implement every memory-saving operations
   on very large files: memory mapping, block-by-block sequential reading, etc.
 
-  \attention What will a VolumeView become if the Volume it views in resizes 
+  \attention What will a View become if the Volume it views in resizes
   or is reallocated ?
 
 */

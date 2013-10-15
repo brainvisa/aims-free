@@ -44,7 +44,6 @@ HEADERS_USE_SOMA_IO =               \
 SOURCES =                           \
   io/carto2aimsheadertranslator.cc  \
   volume/volume.cc                  \
-  volume/volumeview.cc              \
   wip/roi/siteIterator.cc           \
   wip/roi/roi.cc                    \
   wip/roi/doi.cc                    \

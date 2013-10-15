@@ -41,7 +41,7 @@
 #include <soma-io/io/reader.h>
 #include <soma-io/io/writer.h>
 #include <soma-io/io/formatdictionary.h>
-#include <cartodata/volume/volumeview.h>
+#include <cartodata/volume/volume.h>
 #include <soma-io/getopt/getopt.h>
 #include <cartobase/config/verbose.h>
 #include <iostream>
@@ -215,17 +215,17 @@ bool IOTest<Volume<T> >::iotest( ReaderAlgorithm & algo, Object hdr,
       options->setProperty( "partial_reading", true );
       r3.setOptions( options );
       VolumeRef<T>	vol3
-        ( new VolumeView<T>( vol2, 
-                             typename VolumeView<T>::Position4Di
-                             ( vol2->getSizeX() / 4, 
-                               vol2->getSizeY() / 4, 
-                               vol2->getSizeZ() / 4, 0 ), 
-                             typename VolumeView<T>::Position4Di
-                             ( vol2->getSizeX() / 2, 
-                               vol2->getSizeY() / 2, 
-                               vol2->getSizeZ() / 2, 1 )
-                             ) );
-      /* std::cout << "view size: " << vol3->getSizeX() << ", " 
+        ( new Volume<T>( vol2,
+                         typename Volume<T>::Position4Di
+                         ( vol2->getSizeX() / 4,
+                           vol2->getSizeY() / 4,
+                           vol2->getSizeZ() / 4, 0 ),
+                         typename Volume<T>::Position4Di
+                         ( vol2->getSizeX() / 2,
+                           vol2->getSizeY() / 2,
+                           vol2->getSizeZ() / 2, 1 )
+                        ) );
+      /* std::cout << "view size: " << vol3->getSizeX() << ", "
          << vol3->getSizeY() << ", " << vol3->getSizeZ() << ", " 
          << vol3->getSizeT() << endl; */
       cout << "reading subvolume..." << endl;
@@ -276,8 +276,7 @@ bool IOTest<Volume<T> >::iotest( ReaderAlgorithm & algo, Object hdr,
       cout << "min: " << m << " (" << xm << "," << ym << "," << zm << "," 
            << tm << "), max: " << M << " (" << xM << "," << yM << "," 
            << zM << "," << tM << ")" << endl;
-      typename VolumeView<T>::Position4Di 
-        p = static_cast<VolumeView<T> *>( vol3.get() )->posInRefVolume();
+      typename Volume<T>::Position4Di p = vol3->posInRefVolume();
       if( M == vol->at( xM + p[0], yM + p[1], zM + p[2], tM + p[3] ) )
         cout << "maximums match." << endl;
       else
