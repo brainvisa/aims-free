@@ -330,7 +330,6 @@ void Mesher::getSmoothedLowPassFilter( const vector< Facet* >& vfac,
     // newvertex[i] = (1 - (-1.02 * rate) * newvertex[i] + (-1.02 * rate) * newneighb[i]
     //
     
-    cout << " lowpass algo " << endl;
     if( _verbose )
         cout << " iteration " << setw(5) << 0 << flush;
     

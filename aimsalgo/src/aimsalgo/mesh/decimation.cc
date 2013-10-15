@@ -676,7 +676,7 @@ void Mesher::getDecimatedVertices( vector< Facet* >& vfac,
   if( _verbose )
     cout << "decimating " << flush;
 
-  cout << "angle: " << minFeatureEdgeAngleDegree << endl;
+  // cout << "angle: " << minFeatureEdgeAngleDegree << endl;
 
   // flags and constants initialization
   int n, size = (int)vfac.size();
