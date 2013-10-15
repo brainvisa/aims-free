@@ -91,7 +91,12 @@ def connectedComponents( mesh, tex, areas_mode = 0 ):
 
 def meshDiceIndex( mesh, texture1, texture2, timestep1=0, 
                    timestep2=0, labels_table1=None, labels_table2=None ):
-  """
+  """DICE index calculation between two sets of regions defined by label textures on a common mesh.
+  texture1, texture2: aims.TimeTexture instances, should be int (labels).
+  timestep1, timestep2: timestep to use in texture1 and texture2.
+  labels_table1, labels_table2: optional labels translation tables (dicts or arrays) to translate values of texture1 and/or texture2.
+  
+  return 
   """
   tex1 = texture1[timestep1].arraydata()
   tex2 = texture2[timestep2].arraydata()
