@@ -207,6 +207,7 @@ namespace soma {
       rVol = soma::Reader< carto::Volume<T> >( dsi );
       newoptions = carto::Object::value( carto::PropertySet() );
       newoptions->copyProperties( options );
+      newoptions->setProperty( "keep_allocation", true );
       rVol.setOptions( newoptions );
       localMsg( "creating volume view..." );
       localMsg( "-> with pos ( "
@@ -226,6 +227,7 @@ namespace soma {
       else
         obj = new carto::Volume<T>( bordersVolume, volumepos, fullsize );
       localMsg( "reading unallocated volume..." );
+      rVol.setAllocatorContext( obj->allocatorContext() );
       rVol.read( *obj );
 
     }

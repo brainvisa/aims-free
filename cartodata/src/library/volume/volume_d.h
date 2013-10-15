@@ -388,8 +388,7 @@ namespace carto
 
       }
 
-
-    if ( !allocate 
+    if ( !allocate // why !allocate ?
 	 || !_items.allocatorContext().isAllocated() 
 	 || ( ( oldSizeX == -1 ) &&
 	      ( oldSizeY == -1 ) &&
@@ -401,7 +400,6 @@ namespace carto
         _items.free();
 	if( allocate )
 	  _items.allocate( ( size_t )sizeXYZT, ac );
-  
       }
     else if ( ( oldSizeX != VolumeProxy<T>::_sizeX ) ||
               ( oldSizeY != VolumeProxy<T>::_sizeY ) ||
@@ -639,7 +637,7 @@ namespace carto
                                    Object options )
   {
     int		sizex = 1, sizey = 1, sizez = 1, sizet = 1;
-    bool	unalloc = false, partial = false;
+    bool	unalloc = false, partial = false, keep_allocation = false;
     options->getProperty( "partial_reading", partial );
     if( !partial )
       {
@@ -648,7 +646,10 @@ namespace carto
         header->getProperty( "sizeZ", sizez );
         header->getProperty( "sizeT", sizet );
         options->getProperty( "unallocated", unalloc );
-        obj.reallocate( sizex, sizey, sizez, sizet, false, context, !unalloc );
+        options->getProperty( "keep_allocation", keep_allocation );
+        if( !keep_allocation || !obj.allocatorContext().isAllocated() )
+          obj.reallocate( sizex, sizey, sizez, sizet, false, context, 
+                          !unalloc );
       }
     else
       {

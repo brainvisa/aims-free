@@ -30,21 +30,19 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-#ifdef USE_SOMA_IO
-  ERROR_FILE_SHOULDNT_BE_INCLUDED;
-#endif
 #include <cstdlib>
-#include <cartobase/io/datasourceinfo.h>
+#include <soma-io/datasourceinfo/datasourceinfo.h>
+#include <soma-io/datasourceinfo/datasourceinfoloader.h>
 #include <cartobase/type/limits.h>
-#include <cartobase/datasource/filedatasource.h>
+#include <soma-io/datasource/filedatasource.h>
 #include <cartobase/object/object.h>
-#include <cartobase/object/pythonwriter.h>
-#include <cartobase/io/readeralgorithm.h>
-#include <cartobase/io/reader.h>
-#include <cartobase/io/writer.h>
-#include <cartobase/io/formatdictionary.h>
+#include <soma-io/writer/pythonwriter.h>
+#include <soma-io/io/readeralgorithm.h>
+#include <soma-io/io/reader.h>
+#include <soma-io/io/writer.h>
+#include <soma-io/io/formatdictionary.h>
 #include <cartodata/volume/volumeview.h>
-#include <cartobase/getopt/getopt.h>
+#include <soma-io/getopt/getopt.h>
 #include <cartobase/config/verbose.h>
 #include <iostream>
 
@@ -145,10 +143,19 @@ bool IOTest<Volume<T> >::iotest( ReaderAlgorithm & algo, Object hdr,
        << endl;
   Readalgo	& ralgo = (Readalgo &) algo;
 
-  Reader<Volume<T> >	r( source );
+  Reader<Volume<T> >	r( source->url() );
   r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly ) );
   VolumeRef<T>		vol;
-  vol.reset( r.read( hdr ) );
+  try
+  {
+    vol.reset( r.read() );
+//     vol.reset( r.read( hdr ) );
+  }
+  catch( exception & e )
+  {
+    cerr << "exception: " << e.what() << endl;
+    throw;
+  }
   cout << "volume read\n";
 
   T	M = -numeric_limits<T>::max(), m = numeric_limits<T>::max();
@@ -299,6 +306,7 @@ Readalgo::Readalgo( const string & ofname, bool partial )
   : ReaderAlgorithm( "IO test" ), output( ofname ), partialtest( partial )
 {
   registerAlgorithmType( "Volume of S16", &fileinfo<Volume<int16_t> > );
+  registerAlgorithmType( "carto_volume of S16", &fileinfo<Volume<int16_t> > );
   registerAlgorithmType( DataTypeCode<GenericObject>::name(), 
                          &fileinfo<GenericObject> );
 }
@@ -329,9 +337,11 @@ int main( int argc, const char** argv )
     }
   catch( datatype_format_error & e )
     {
-      DataSourceInfo		f;
       rc_ptr<DataSource>	ds( new FileDataSource( fname ) );
-      Object			hdr = f.check( *ds );
+      DataSourceInfo            f( ds );
+      DataSourceInfoLoader      dsil;
+      DataSourceInfo            f2 = dsil.check( f );
+      Object			hdr = f2.header();
       if( !hdr.isNone() )
         printheader( hdr );
     }
