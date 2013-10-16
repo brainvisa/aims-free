@@ -424,12 +424,13 @@ advol2.value( 4, 8, 11, 3 ): 12
 >>> advol.fill( 0 )
 >>> advol.setValue( 15, 100, 100, 60 )
 >>> vol = advol.volume()
->>> # then vol is 4 voxels wider in each direction, and shifted:
->>> print 'vol.value( 100, 100, 60 ):', vol.value( 100, 100, 60 )
-vol.value( 100, 100, 60 ): 0
+>>> refvol = vol.refVolume()
+>>> # the underlying refvol is 4 voxels wider in each direction, and shifted:
+>>> print 'refvol.value( 100, 100, 60 ):', refvol.value( 100, 100, 60 )
+refvol.value( 100, 100, 60 ): 0
 >>> # ... it is 0, not 15...
->>> print 'vol.value( 102, 102, 62 ):', vol.value( 102, 102, 62 )
-vol.value( 102, 102, 62 ): 15
+>>> print 'refvol.value( 102, 102, 62 ):', refvol.value( 102, 102, 62 )
+refvol.value( 102, 102, 62 ): 15
 >>> # here we get 15
 >>> # some algorithms require this border to exist, otherwise fail or crash...
 >>> from soma import aimsalgo
