@@ -19,6 +19,16 @@ class MeshInterpoler
     TimeTexture_FLOAT *resampleTexture( const TimeTexture_FLOAT & ) const
       /Factory/;
     void resampleTexture( const Texture_FLOAT &, Texture_FLOAT &, int=0 ) const;
+    TimeTexture_S16 *resampleTexture( const TimeTexture_S16 & ) const
+      /Factory/;
+    void resampleTexture( const Texture_S16 &, Texture_S16 &, int=0 ) const;
+    TimeTexture_S32 *resampleTexture( const TimeTexture_S32 & ) const
+      /Factory/;
+    void resampleTexture( const Texture_S32 &, Texture_S32 &, int=0 ) const;
+    TimeTexture_POINT2DF *resampleTexture( const TimeTexture_POINT2DF & ) const
+      /Factory/;
+    void resampleTexture( const Texture_POINT2DF &, Texture_POINT2DF &, 
+      int=0 ) const;
 
     const TimeTexture_U32 & projectedTriangles() const /Transfer/;
     const TimeTexture_FLOAT & projectedTriCoord1() const /Transfer/;
