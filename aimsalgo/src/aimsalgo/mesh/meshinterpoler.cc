@@ -586,6 +586,20 @@ template void MeshInterpoler::resampleTexture(
 template void
   MeshInterpoler::resampleTexture( const float *, float *, int ) const;
 
+template TimeTexture<int16_t> *
+  MeshInterpoler::resampleTexture( const TimeTexture<int16_t> & ) const;
+template void MeshInterpoler::resampleTexture(
+  const Texture<int16_t> &, Texture<int16_t> &, int ) const;
+template void
+  MeshInterpoler::resampleTexture( const int16_t *, int16_t *, int ) const;
+
+template TimeTexture<int32_t> *
+  MeshInterpoler::resampleTexture( const TimeTexture<int32_t> & ) const;
+template void MeshInterpoler::resampleTexture(
+  const Texture<int32_t> &, Texture<int32_t> &, int ) const;
+template void
+  MeshInterpoler::resampleTexture( const int32_t *, int32_t *, int ) const;
+
 template TimeTexture<Point2df> *
   MeshInterpoler::resampleTexture( const TimeTexture<Point2df> & ) const;
 template void MeshInterpoler::resampleTexture(
