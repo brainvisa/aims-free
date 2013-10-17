@@ -1191,6 +1191,8 @@ AimsData<T> AimsData<T>::clone() const
                                               _volume->getSizeY(),
                                               _volume->getSizeZ(),
                                               _volume->getSizeT() ) ) );
+    dat._volume->header().copyProperties(
+      carto::Object::reference( _volume->header() ) );
   }
   else
     dat._volume.reset( new carto::Volume<T>( *_volume ) );
