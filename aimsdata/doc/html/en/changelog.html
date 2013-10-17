@@ -62,7 +62,7 @@
 </li>
 <li>AimsRGB and AimsRGBA classes have been moved to the soma-io library, with new names: carto::VoxelRGB and carto::VoxelRGBA. Old classes are still available as typedefs.
 </li>
-<li>The AimsElevationMap has been moved from the private bioprocessing project to the open-source aims project.</li>
+<li>The AimsElevationMap command has been moved from the private bioprocessing project to the open-source aims project.</li>
 <li>added a wireframe section in SurfaceGenerator to produce segments meshes. Implemented a parallelepiped.</li>
 <li>Fix in AimsMerge: it was reading the mask as the merged volume.</li>
 <li>new SparseMatrix and SparseOrDenseMatrix classes, with IO, based on boost sparse matrices. Python bindings for such classes.</li>
@@ -71,6 +71,7 @@
 <li>IO in Aims have been made "almost" thread-safe. Unfortunately some race conditions still exist and programs sometimes crash when used intensively. It doesn't happen very often, but it happens...</li>
 <li>Some volume IO have been significantly optimized to decrease read/write time. Especially GIS and NIFTI formats are much faster than in aims 4.3.
 </li>
+<li>Volume with borders handling has changed: it is now using the views system (subvolume in a larger volume) instead of a trick using a _borderWidth attribute in the header.</li>
 <li>pyaims : added possibility do use unallocated volumes.</li>
 <li>pyaims: added access to IO types and formats in Python.</li>
 <li>new command: AimsVolumeToTexture.py, performs the same as anatomist Fusion3D, in the most basic mode (for now).</li>
