@@ -477,8 +477,9 @@ namespace soma
     typename std::set<std::string>::iterator plast = prop.end();
     for( p = prop.begin(); p != prop.end(); ++p )
     {
-      if( options->hasProperty( *p ) ) {
-        VolumeFormatReader<T> vrf;  
+      if( options->hasProperty( *p ) )
+      {
+        VolumeFormatReader<T> vrf;
         vrf.attach( _imr );
         vrf.setupAndRead( *obj, dsi, context, options );
         bool convert = false;
@@ -488,6 +489,7 @@ namespace soma
           carto::Carto2AimsHeaderTranslator translator;
           translator.translate( carto::Object::reference( obj->header() ) );
         }
+        return; // return as soon as one read prop has been found.
       }
     }
     //=== if no known property -> classic reading ============================

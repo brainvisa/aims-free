@@ -155,6 +155,25 @@ namespace carto
         _volumeoffset = &(*other)( 0, 0, 0, 1 ) - &(*other)( 0, 0, 0 );
 #endif
       }
+
+    /* copy voxel_size from underlying volume, if any.
+       This should probably be more general, but cannot be applied to all
+       header properties (size, transformations...).
+       WARNING: Moreover here we do not guarantee to keep both voxel_size
+       unique: we point to the same vector of values for now, but it can be
+       replaced (thus, duplicated) by a setProperty().
+       We could use a addBuiltinProperty(), but then the voxel size has to be
+       stored in a fixed location somewhere.
+    */
+    try
+    {
+      carto::Object vs = other->header().getProperty( "voxel_size" );
+      this->header().setProperty( "voxel_size", vs );
+    }
+    catch( ... )
+    {
+      // never mind.
+    }
   }
 
   /***************************************************************************
