@@ -209,8 +209,8 @@ bool IOTest<Volume<T> >::iotest( ReaderAlgorithm & algo, Object hdr,
       std::cout << "size: " << vol2->getSizeX() << ", " 
                 << vol2->getSizeY() << "," << vol2->getSizeZ() << ", " 
                 << vol2->getSizeT() << endl;
-      
-      Reader<Volume<T> > r3( vol2->allocatorContext().dataSource() );
+      cout << "r3 datasource: " << vol2->allocatorContext().dataSource().get() << endl;
+      Reader<Volume<T> > r3( source );
       options = Object::value( PropertySet() );
       options->setProperty( "partial_reading", true );
       r3.setOptions( options );
