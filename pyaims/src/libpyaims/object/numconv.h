@@ -34,6 +34,7 @@
 #ifndef PYAIMS_VECTOR_NUMCONV_H
 #define PYAIMS_VECTOR_NUMCONV_H
 
+#include <stdint.h>
 #include <Python.h>
 
 namespace carto

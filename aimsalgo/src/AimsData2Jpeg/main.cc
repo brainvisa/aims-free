@@ -31,7 +31,6 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-
 #include <cstdlib>
 #include "postscript.h"
 #include <aims/getopt/getopt.h>
@@ -44,6 +43,10 @@
 #include <fstream>
 #include <string>
 #include <stdio.h> // for JPEG
+#ifdef WIN32
+  #include <windows.h>
+#endif
+
 extern "C"
 {
 #include <jpeglib.h>

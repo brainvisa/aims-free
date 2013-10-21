@@ -34,6 +34,10 @@
 #ifndef AIMS_IO_JPEGHEADER_H
 #define AIMS_IO_JPEGHEADER_H
 
+#ifdef WIN32
+  #include <windows.h>
+#endif
+
 #include <aims/data/sliceformatheader.h>
 #include <aims/def/general.h>
 #include <string>

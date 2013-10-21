@@ -3,16 +3,8 @@
 
 #include <stdio.h>
 
-#ifdef WIN32
-#include <gmon.h>
-static unsigned short ntohs(unsigned short us) {
-	u_char *p =  (unsigned char*)&us;
-	return ((unsigned short)p[1] + (p[0] << 8));
-}
-static unsigned long ntohl(unsigned long ul) {
-	unsigned char *p = (u_char*)&ul;
-	return ((unsigned long)p[3] + (p[2] << 8) + (p[1] << 16) + (p[0] << 24));
-}
+#if defined(WIN32) || defined(WIN64)
+#include <winsock2.h>
 #endif
 
 #if defined(__cplusplus)
