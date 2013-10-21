@@ -61,6 +61,12 @@ namespace aims
   class MeshInterpoler
   {
   public:
+    enum InterpolationType
+    {
+      Linear,
+      NearestNeighbour,
+    };
+
     MeshInterpoler( const AimsSurfaceTriangle & source, const
       AimsSurfaceTriangle & dest );
     /** This constructor is used when meshes are low-level raw arrays.
@@ -86,13 +92,15 @@ namespace aims
     AimsSurfaceTriangle *resampleMesh( const AimsSurfaceTriangle & sourceshape
       ) const;
     template <typename T> TimeTexture<T> *
-      resampleTexture( const TimeTexture<T> & ) const;
+      resampleTexture( const TimeTexture<T> &,
+                       InterpolationType = Linear ) const;
     template <typename T> void
       resampleTexture( const Texture<T> & source, Texture<T> & dest,
-                       int timestep = 0 ) const;
+                       int timestep = 0, InterpolationType = Linear ) const;
     /// low level texture resampling, working on preallocated buffers
     template <typename T> void
-      resampleTexture( const T *source, T *dest, int timestep = 0 ) const;
+      resampleTexture( const T *source, T *dest, int timestep = 0,
+                       InterpolationType = Linear ) const;
 
     const TimeTexture<uint> & projectedTriangles() const;
     const TimeTexture<float> & projectedTriCoord1() const;

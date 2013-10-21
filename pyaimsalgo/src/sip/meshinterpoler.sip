@@ -9,6 +9,12 @@ class MeshInterpoler
 %End
 
   public:
+    enum InterpolationType
+    {
+      Linear,
+      NearestNeighbour,
+    };
+
     MeshInterpoler( const AimsSurfaceTriangle & source, const
       AimsSurfaceTriangle & dest );
     virtual ~MeshInterpoler();
@@ -16,19 +22,30 @@ class MeshInterpoler
     void project();
     AimsSurfaceTriangle *resampleMesh(
       const AimsSurfaceTriangle & sourceshape ) const /Factory/;
-    TimeTexture_FLOAT *resampleTexture( const TimeTexture_FLOAT & ) const
-      /Factory/;
-    void resampleTexture( const Texture_FLOAT &, Texture_FLOAT &, int=0 ) const;
-    TimeTexture_S16 *resampleTexture( const TimeTexture_S16 & ) const
-      /Factory/;
-    void resampleTexture( const Texture_S16 &, Texture_S16 &, int=0 ) const;
-    TimeTexture_S32 *resampleTexture( const TimeTexture_S32 & ) const
-      /Factory/;
-    void resampleTexture( const Texture_S32 &, Texture_S32 &, int=0 ) const;
-    TimeTexture_POINT2DF *resampleTexture( const TimeTexture_POINT2DF & ) const
-      /Factory/;
-    void resampleTexture( const Texture_POINT2DF &, Texture_POINT2DF &, 
-      int=0 ) const;
+    TimeTexture_FLOAT *resampleTexture( const TimeTexture_FLOAT &,
+      aims::MeshInterpoler::InterpolationType
+        = aims::MeshInterpoler::Linear ) const /Factory/;
+    void resampleTexture( const Texture_FLOAT &, Texture_FLOAT &, int=0,
+      aims::MeshInterpoler::InterpolationType
+        = aims::MeshInterpoler::Linear ) const;
+    TimeTexture_S16 *resampleTexture( const TimeTexture_S16 &,
+      aims::MeshInterpoler::InterpolationType
+        = aims::MeshInterpoler::Linear ) const /Factory/;
+    void resampleTexture( const Texture_S16 &, Texture_S16 &, int=0,
+      aims::MeshInterpoler::InterpolationType
+        = aims::MeshInterpoler::Linear ) const;
+    TimeTexture_S32 *resampleTexture( const TimeTexture_S32 &,
+      aims::MeshInterpoler::InterpolationType
+        = aims::MeshInterpoler::Linear ) const /Factory/;
+    void resampleTexture( const Texture_S32 &, Texture_S32 &, int=0,
+      aims::MeshInterpoler::InterpolationType
+        = aims::MeshInterpoler::Linear ) const;
+    TimeTexture_POINT2DF *resampleTexture( const TimeTexture_POINT2DF &,
+      aims::MeshInterpoler::InterpolationType
+        = aims::MeshInterpoler::Linear ) const /Factory/;
+    void resampleTexture( const Texture_POINT2DF &, Texture_POINT2DF &, int=0,
+      aims::MeshInterpoler::InterpolationType
+        = aims::MeshInterpoler::Linear ) const;
 
     const TimeTexture_U32 & projectedTriangles() const /Transfer/;
     const TimeTexture_FLOAT & projectedTriCoord1() const /Transfer/;
