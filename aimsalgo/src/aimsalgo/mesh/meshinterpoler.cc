@@ -351,6 +351,7 @@ void MeshInterpoler::processCoordinates_timestep( const Point3df *vert1,
 
     d2 = ( x1 + a * x2 ) * l1;
     d3 = ( b * x2 ) * l2;
+
     xxfar = false;
 
     if( d2 < 0 )
@@ -580,30 +581,42 @@ CoordinatesFieldMeshInterpoler::~CoordinatesFieldMeshInterpoler()
 // ---
 
 template TimeTexture<float> *
-  MeshInterpoler::resampleTexture( const TimeTexture<float> & ) const;
+  MeshInterpoler::resampleTexture( const TimeTexture<float> &,
+                                   InterpolationType = Linear ) const;
 template void MeshInterpoler::resampleTexture(
-  const Texture<float> &, Texture<float> &, int ) const;
+  const Texture<float> &, Texture<float> &, int,
+  InterpolationType = Linear ) const;
 template void
-  MeshInterpoler::resampleTexture( const float *, float *, int ) const;
+  MeshInterpoler::resampleTexture( const float *, float *, int,
+                                   InterpolationType = Linear ) const;
 
 template TimeTexture<int16_t> *
-  MeshInterpoler::resampleTexture( const TimeTexture<int16_t> & ) const;
+  MeshInterpoler::resampleTexture( const TimeTexture<int16_t> &,
+                                   InterpolationType = Linear ) const;
 template void MeshInterpoler::resampleTexture(
-  const Texture<int16_t> &, Texture<int16_t> &, int ) const;
+  const Texture<int16_t> &, Texture<int16_t> &, int,
+  InterpolationType = Linear ) const;
 template void
-  MeshInterpoler::resampleTexture( const int16_t *, int16_t *, int ) const;
+  MeshInterpoler::resampleTexture( const int16_t *, int16_t *, int,
+                                   InterpolationType = Linear ) const;
 
 template TimeTexture<int32_t> *
-  MeshInterpoler::resampleTexture( const TimeTexture<int32_t> & ) const;
+  MeshInterpoler::resampleTexture( const TimeTexture<int32_t> &,
+                                   InterpolationType = Linear ) const;
 template void MeshInterpoler::resampleTexture(
-  const Texture<int32_t> &, Texture<int32_t> &, int ) const;
+  const Texture<int32_t> &, Texture<int32_t> &, int,
+  InterpolationType = Linear ) const;
 template void
-  MeshInterpoler::resampleTexture( const int32_t *, int32_t *, int ) const;
+  MeshInterpoler::resampleTexture( const int32_t *, int32_t *, int,
+                                   InterpolationType = Linear ) const;
 
 template TimeTexture<Point2df> *
-  MeshInterpoler::resampleTexture( const TimeTexture<Point2df> & ) const;
+  MeshInterpoler::resampleTexture( const TimeTexture<Point2df> &,
+                                   InterpolationType = Linear ) const;
 template void MeshInterpoler::resampleTexture(
-  const Texture<Point2df> &, Texture<Point2df> &, int ) const;
+  const Texture<Point2df> &, Texture<Point2df> &, int,
+  InterpolationType = Linear ) const;
 template void
-  MeshInterpoler::resampleTexture( const Point2df *, Point2df *, int ) const;
+  MeshInterpoler::resampleTexture( const Point2df *, Point2df *, int,
+                                   InterpolationType = Linear ) const;
 

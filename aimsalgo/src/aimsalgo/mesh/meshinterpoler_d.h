@@ -41,12 +41,13 @@ namespace aims
 {
 
   template <typename T> TimeTexture<T> *
-    MeshInterpoler::resampleTexture( const TimeTexture<T> & stex ) const
+    MeshInterpoler::resampleTexture( const TimeTexture<T> & stex,
+                                     InterpolationType inttype ) const
   {
     TimeTexture<T> *tex = new TimeTexture<T>;
     typename TimeTexture<T>::const_iterator it, et = stex.end();
     for( it=stex.begin(); it!=et; ++it )
-      resampleTexture( it->second, (*tex)[ it->first ], it->first );
+      resampleTexture( it->second, (*tex)[ it->first ], it->first, inttype );
 
     return tex;
   }
@@ -54,7 +55,8 @@ namespace aims
 
   template <typename T> void
     MeshInterpoler::resampleTexture( const Texture<T> & source,
-                                     Texture<T> & dest, int timestep ) const
+                                     Texture<T> & dest, int timestep,
+                                     InterpolationType inttype ) const
   {
     int stimestep;
 
@@ -75,13 +77,14 @@ namespace aims
     tx.clear();
     tx.reserve( n );
     tx.insert( tx.end(), n, T() );
-    resampleTexture( &source.data()[0], &tx[0], timestep );
+    resampleTexture( &source.data()[0], &tx[0], timestep, inttype );
   }
 
 
   template <typename T> void
     MeshInterpoler::resampleTexture( const T *source, T *dest,
-                                     int timestep ) const
+                                     int timestep,
+                                     InterpolationType inttype ) const
   {
     int stimestep;
     const AimsVector<uint,3> *poly1;
@@ -109,14 +112,38 @@ namespace aims
       = d->projTriangles[stimestep].data();
     size_t                        i, n = triCorresp.size();
 
-    for( i=0; i<n; ++i )
+    switch( inttype )
     {
-      const AimsVector<uint,3> & tri = poly1[ triCorresp[i] ];
-      const T & v1 = source[ tri[0] ];
-      const T & v2 = source[ tri[1] ];
-      const T & v3 = source[ tri[2] ];
-      float a = coord1[i], b = coord2[i], c = coord3[i];
-      dest[i] = v1 * a + v2 * b + v3 * c;
+    case Linear:
+      for( i=0; i<n; ++i )
+      {
+        const AimsVector<uint,3> & tri = poly1[ triCorresp[i] ];
+        const T & v1 = source[ tri[0] ];
+        const T & v2 = source[ tri[1] ];
+        const T & v3 = source[ tri[2] ];
+        float a = coord1[i], b = coord2[i], c = coord3[i];
+        dest[i] = v1 * a + v2 * b + v3 * c;
+      }
+      break;
+    case NearestNeighbour:
+      for( i=0; i<n; ++i )
+      {
+        const AimsVector<uint,3> & tri = poly1[ triCorresp[i] ];
+        const T & v1 = source[ tri[0] ];
+        const T & v2 = source[ tri[1] ];
+        const T & v3 = source[ tri[2] ];
+        float a = fabs( coord1[i] ), b = fabs( coord2[i] ),
+          c = fabs( coord3[i] );
+        if( a >= b && a >= c )
+          dest[i] = v1;
+        else if( b >= a && b >= c )
+          dest[i] = v2;
+        else
+          dest[i] = v3;
+      }
+      break;
+    default:
+      break;
     }
   }
 
