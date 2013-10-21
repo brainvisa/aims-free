@@ -7,7 +7,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#if !defined(__sun) || defined(__SVR4)       /* solaris 2.x*/
+#if (!defined(WIN32) && !defined(WIN64) && !defined(__sun)) || defined(__SVR4)       /* solaris 2.x*/
 
 static void sincos(theta, sintheta, costheta)
 double theta, *sintheta, *costheta;
