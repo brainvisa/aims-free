@@ -3,6 +3,7 @@ BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers ecat headersTarget )
 add_library( ecat SHARED ${_sources} )
 add_dependencies( ecat ${headersTarget} )
 set_property( TARGET ecat PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
+target_link_libraries( ecat "m" )
 BRAINVISA_INSTALL( TARGETS ecat
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
