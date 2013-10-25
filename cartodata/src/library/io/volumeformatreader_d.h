@@ -159,7 +159,7 @@ namespace soma
     typename std::set<std::string>::iterator p;
     typename std::set<std::string>::iterator plast = prop.end();
     Volume<T> *volume = 0;
-    for( p = prop.begin(); p != prop.end(); ++p )
+    for( p = prop.begin(); p != plast; ++p )
     {
       if( options->hasProperty( *p ) ) {
         volume = VolumeUtilIO<T>::read( 0, dsi, options );
@@ -475,7 +475,7 @@ namespace soma
     std::set<std::string> prop = VolumeUtilIO<T>::listReadProperties();
     typename std::set<std::string>::iterator p;
     typename std::set<std::string>::iterator plast = prop.end();
-    for( p = prop.begin(); p != prop.end(); ++p )
+    for( p = prop.begin(); p != plast; ++p )
     {
       if( options->hasProperty( *p ) )
       {
