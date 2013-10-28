@@ -35,6 +35,7 @@
 #ifndef AIMSALGO_SIGNALFILTER_BASESMOOTHING_H
 #define AIMSALGO_SIGNALFILTER_BASESMOOTHING_H
 
+#include <cartobase/config/verbose.h>
 #include <aims/signalfilter/nonlin_filt-func.h>
 #include <aims/signalfilter/multichannelfilter.h>
 
@@ -125,7 +126,11 @@ AimsData< T > BaseSmoothing< T, F >::doit( const AimsData< T >& ref )
   bx = (ref.dimX() - dx);
   
   for ( t = 0; t < ref.dimT(); t++ )
-    for ( z = dz; z < bz; z++ )
+    for ( z = dz; z < bz; z++ ) {
+      if (carto::verbose) {
+        if( z > 0 ) std::cout << "\b\b\b\b\b" << std::setw(3) << ( 100 * (z+1) / ref.dimZ() ) << " %" << std::flush;
+        else std::cout << "Progress: " << std::setw(3) << ( 100 * (z+1) / ref.dimZ() ) << " %" << std::flush;
+      }
       for ( y = dy; y < by; y++ )
         for ( x = dx; x < bx; x++ )
         {
@@ -139,6 +144,7 @@ AimsData< T > BaseSmoothing< T, F >::doit( const AimsData< T >& ref )
               }
           out( x, y, z, t ) = _func.doit( tab );
         }
+    }
 
   return( out );
 
