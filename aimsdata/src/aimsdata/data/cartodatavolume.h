@@ -325,7 +325,7 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt,
 		       int borderw, const carto::AllocatorContext & al )
   : carto::RCObject(), aims::Border( dimx, dimy, dimz, borderw ), 
     _volume( new carto::Volume<T>( dimx + borderw * 2, dimy + borderw * 2, 
-                                   dimz + borderw * 2, dimt/*, al*/ ) ), 
+                                   dimz + borderw * 2, dimt, al ) ),
     d( new Private )
 {
   if( borderw != 0 )

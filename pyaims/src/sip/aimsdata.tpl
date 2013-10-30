@@ -84,6 +84,8 @@ typedef AimsData<%Template1% > AimsData_%Template1typecode%;
 public:
   AimsData_%Template1typecode%( int = 1, int = 1, int = 1, int = 1, int = 0 )
     /ReleaseGIL/;
+  AimsData_%Template1typecode%( int, int, int, int, int,
+    const carto::AllocatorContext &) /ReleaseGIL/;
   AimsData_%Template1typecode%( const AimsData_%Template1typecode% & )
     /ReleaseGIL/;
   AimsData_%Template1typecode%( const AimsData_%Template1typecode% &, int )
