@@ -296,7 +296,7 @@ bool Finder::check( const string& filename )
   #endif
 
   _errorcode = -1;
-  _errormsg = "";
+  _errormsg.clear();
 
   //	find filename extension
   string                bname = FileUtil::basename( filename );
