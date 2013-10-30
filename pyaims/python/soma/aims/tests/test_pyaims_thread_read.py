@@ -110,7 +110,8 @@ def test_all_formats( filename, number=30, separate_process=False ):
     unsafe_formats = []
     safe_formats = []
     for format in formats:
-        #if format in ( 'DICOM' ): continue
+        # JP2 writer in Qt (4.8.1 at least) systematically crashes.
+        if format in ( 'JP2' ): continue
         print 'testing: %s / %s, format: %s' % ( ot[0], ot[1], format )
         try:
             directory = tempfile.mkdtemp( prefix='aims_thread_test' )

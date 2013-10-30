@@ -341,7 +341,10 @@ namespace aims
     int result, i;
     double voxel;
 
+    MincHeader::mincMutex().lock();
     result = miopen_volume( _name.c_str(), MI2_OPEN_READ, &minc_volume);
+    MincHeader::mincMutex().unlock();
+
     if (result != MI_NOERROR)
     {
       std::cerr << "Error opening input file: " << result << std::endl;
