@@ -423,7 +423,16 @@ namespace soma
     // they are recomputed at the next reading.
     _imr->resetParams();
   }
-  
+
+
+  template <typename T>
+  FormatReader<carto::Volume<T> >* VolumeFormatReader<T>::clone() const
+  {
+    VolumeFormatReader<T> *reader = new VolumeFormatReader<T>;
+    reader->attach( carto::rc_ptr<ImageReader<T> >( _imr->cloneReader() ) );
+    return reader;
+  }
+
   /***************************************************************************
    * Attaching a specific ImageReader to the FormatReader
    **************************************************************************/
@@ -536,6 +545,16 @@ namespace soma
   void VolumeRefFormatReader<T>::attach( carto::rc_ptr<ImageReader<T> > imr )
   {
     _imr = imr;
+  }
+
+
+  template <typename T>
+  FormatReader<carto::VolumeRef<T> >*
+  VolumeRefFormatReader<T>::clone() const
+  {
+    VolumeRefFormatReader<T> *reader = new VolumeRefFormatReader<T>;
+    reader->attach( carto::rc_ptr<ImageReader<T> >( _imr->cloneReader() ) );
+    return reader;
   }
 
 }

@@ -13,10 +13,10 @@ import subprocess
 def aims_test_thread_read( filenames, verbose=True ):
 
     class Loadfile( object ):
-        def __init__( self, filename, lock, objlist, verbose ):
+        def __init__( self, filename, lock, objnum, verbose ):
             self._filename = filename
             self.lock = lock
-            self.objlist = objlist
+            self.objnum = objnum
             self.verbose = verbose
         def __call__( self ):
             if self.verbose:
@@ -25,18 +25,20 @@ def aims_test_thread_read( filenames, verbose=True ):
             if self.verbose:
                 print 'read %s: %s' % ( self._filename, str(type(obj)) )
             self.lock.acquire()
-            self.objlist.append( obj )
+            self.objnum[0] += 1
             self.lock.release()
 
     aims.carto.PluginLoader.load() # do this once in main thread
 
     threads = []
     lock = threading.RLock()
-    objlist = []
+    # objnum is a list, not an int, because the counter has to be shared
+    # between all threads: a list is, an int is not
+    objnum = [ 0 ]
 
     for fname in filenames:
         thread = threading.Thread(
-            target=Loadfile( fname, lock, objlist, verbose ) )
+            target=Loadfile( fname, lock, objnum, verbose ) )
         thread.start()
         threads.append( thread )
 
@@ -44,8 +46,8 @@ def aims_test_thread_read( filenames, verbose=True ):
         thread.join()
 
     print 'finished. Read %d / %d objects.' % \
-        ( len( objlist ), len( filenames ) )
-    nmissing = len( filenames ) - len( objlist )
+        ( objnum[0], len( filenames ) )
+    nmissing = len( filenames ) - objnum[0]
     if nmissing != 0:
         print 'Not all objects were loaded, %d missing.' % nmissing
         raise RuntimeError( 'Not all objects were loaded, %d missing.' \

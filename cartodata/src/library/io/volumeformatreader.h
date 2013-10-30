@@ -110,6 +110,9 @@ namespace soma
                                  carto::rc_ptr<DataSourceInfo> dsi,
                                  const AllocatorContext & context,
                                  carto::Object options );
+
+      virtual FormatReader<carto::Volume<T> >* clone() const;
+
     protected:
       carto::rc_ptr<ImageReader<T> > _imr;
   };
@@ -140,7 +143,7 @@ namespace soma
       /// Linking to a ImageReader
       /// Allows us to declare only once the ImageReader
       void attach( carto::rc_ptr<ImageReader<T> > imr );
-      
+
       /// \brief Factory mode: creates an object and reads it.
       /// The returned object belongs to the calling layer and may be deleted
       /// by the standard \c delete
@@ -153,6 +156,8 @@ namespace soma
                                  carto::rc_ptr<DataSourceInfo> dsi,
                                  const AllocatorContext & context,
                                  carto::Object options );
+
+      virtual FormatReader<carto::VolumeRef<T> >* clone() const;
 
     protected:
       carto::rc_ptr<ImageReader<T> > _imr;
