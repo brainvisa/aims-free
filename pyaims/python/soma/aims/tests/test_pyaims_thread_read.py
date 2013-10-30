@@ -8,6 +8,7 @@ import threading
 import tempfile
 import shutil
 import subprocess
+import time
 
 
 def aims_test_thread_read( filenames, verbose=True ):
@@ -36,6 +37,7 @@ def aims_test_thread_read( filenames, verbose=True ):
     # between all threads: a list is, an int is not
     objnum = [ 0 ]
 
+    starttime = time.time()
     for fname in filenames:
         thread = threading.Thread(
             target=Loadfile( fname, lock, objnum, verbose ) )
@@ -45,8 +47,9 @@ def aims_test_thread_read( filenames, verbose=True ):
     for thread in threads:
         thread.join()
 
-    print 'finished. Read %d / %d objects.' % \
-        ( objnum[0], len( filenames ) )
+    duration = time.time() - starttime
+    print 'finished. Read %d / %d objects in %.3f seconds.' % \
+        ( objnum[0], len( filenames ), duration )
     nmissing = len( filenames ) - objnum[0]
     if nmissing != 0:
         print 'Not all objects were loaded, %d missing.' % nmissing
