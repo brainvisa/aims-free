@@ -277,7 +277,7 @@ namespace aims
     //Use the read mode "real" (i.e. read real values using the function "get_volume_real_value"
     if(_read_mode=="real")
     {
-      std::cout << "minc read\n";
+      // std::cout << "minc read\n";
       //If the output type is integer, "round" the values to the nearest integer (mostly necessary for label volumes)
       if ( (dtc.dataType()=="U8") || (dtc.dataType()=="S8")  || (dtc.dataType()=="U16") || (dtc.dataType()=="S16") || (dtc.dataType()=="U32") || (dtc.dataType()=="S32"))
       {
@@ -341,7 +341,10 @@ namespace aims
     int result, i;
     double voxel;
 
+    MincHeader::mincMutex().lock();
     result = miopen_volume( _name.c_str(), MI2_OPEN_READ, &minc_volume);
+    MincHeader::mincMutex().unlock();
+
     if (result != MI_NOERROR)
     {
       std::cerr << "Error opening input file: " << result << std::endl;
