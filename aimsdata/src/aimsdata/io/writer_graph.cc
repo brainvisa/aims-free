@@ -39,6 +39,8 @@
 // of the most useful Writer templates
 
 #include <aims/config/aimsdata_config.h>
+#include <soma-io/io/writer_d.h>
+#include <soma-io/io/formatdictionary_d.h>
 #include <aims/io/writer_d.h>
 #include <graph/graph/graph.h>
 

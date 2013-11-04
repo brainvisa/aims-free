@@ -47,13 +47,13 @@
 #include <set>
 
 #ifdef USE_SOMA_IO
-  #include <soma-io/io/writer_d.h>
-  #include <soma-io/io/formatdictionary_d.h>
+  #include <soma-io/io/writer.h>
+  #include <soma-io/io/formatdictionary.h>
   #define AIMS_INSTANTIATE_WRITER( T ) \
     namespace aims { \
       template class aims::Writer< T >; \
       template bool \
-      GenericWriter::write< T >( const T &, bool, const string * ); \
+      GenericWriter::write< T >( const T &, bool, const std::string * ); \
     } \
     namespace soma { \
       template class soma::Writer< T >; \
@@ -70,7 +70,7 @@
     namespace aims { \
       template class aims::Writer< T >; \
       template bool \
-      GenericWriter::write< T >( const T &, bool, const string * ); \
+      GenericWriter::write< T >( const T &, bool, const std::string * ); \
     }
   #define AIMS_INSTANTIATE_ONLY_WRITER( T ) \
     namespace aims { \
