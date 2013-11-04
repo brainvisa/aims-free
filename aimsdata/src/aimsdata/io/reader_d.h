@@ -43,8 +43,8 @@
 #include <set>
 
 #ifdef USE_SOMA_IO
-  #include <soma-io/io/reader_d.h>
-  #include <soma-io/io/formatdictionary_d.h>
+  #include <soma-io/io/reader.h>
+  #include <soma-io/io/formatdictionary.h>
   #define AIMS_INSTANTIATE_READER( T ) \
     namespace aims { \
       template class aims::Reader< T >; \
@@ -163,11 +163,12 @@ namespace aims
         options = carto::Object::value( carto::Dictionary() );
       options->setProperty( "convert_to_aims", true );
       reader.setOptions( options );
+      reader.setAllocatorContext( allocatorContext() );
       return reader.read( obj, carto::none(), 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
 #endif
-    
+
 #ifdef AIMS_DEBUG_IO
     std::cout << "Reader<" << carto::DataTypeCode<T>::name() << ">\n";
 #endif
@@ -422,6 +423,7 @@ namespace aims
         options = carto::Object::value( carto::Dictionary() );
       options->setProperty( "convert_to_aims", true );
       reader.setOptions( options );
+      reader.setAllocatorContext( allocatorContext() );
       return reader.read( carto::none(), 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
