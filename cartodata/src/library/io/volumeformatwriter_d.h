@@ -208,22 +208,22 @@ namespace soma
     //=== use optional parameters for partial writing ========================
     if( partial ) {
       try {
-        position[0] = options->getProperty( "ox" )->getScalar();
+        position[0] = (int) rint( options->getProperty( "ox" )->getScalar() );
 //         localMsg( "override ox : " + carto::toString(position[0]) );
         std::cout << "override ox : " + carto::toString(position[0]) << std::endl;
       } catch( ... ) {}
       try {
-        position[1] = options->getProperty( "oy" )->getScalar();
+        position[1] = (int) rint( options->getProperty( "oy" )->getScalar() );
 //         localMsg( "override oy : " + carto::toString(position[1]) );
         std::cout << "override oy : " + carto::toString(position[1]) << std::endl;
       } catch( ... ) {}
       try {
-        position[2] = options->getProperty( "oz" )->getScalar();
+        position[2] = (int) rint( options->getProperty( "oz" )->getScalar() );
 //         localMsg( "override oz : " + carto::toString(position[2]) );
         std::cout << "override oz : " + carto::toString(position[2]) << std::endl;
       } catch( ... ) {}
       try {
-        position[3] = options->getProperty( "ot" )->getScalar();
+        position[3] = (int) rint( options->getProperty( "ot" )->getScalar() );
 //         localMsg( "override ot : " + carto::toString(position[3]) );
         std::cout << "override ot : " + carto::toString(position[3]) << std::endl;
       } catch( ... ) {}
