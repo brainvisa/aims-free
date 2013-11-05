@@ -54,8 +54,8 @@ template class VolumeProxy< int16_t >;
 template class VolumeProxy< uint16_t >;
 template class VolumeProxy< int32_t >;
 template class VolumeProxy< uint32_t >;
-template class VolumeProxy< long >;
-template class VolumeProxy< unsigned long >;
+template class VolumeProxy< int64_t >;
+template class VolumeProxy< uint64_t >;
 template class VolumeProxy< float >;
 template class VolumeProxy< double >;
 template class VolumeProxy< cfloat >;
@@ -77,8 +77,8 @@ template class Volume< int16_t >;
 template class Volume< uint16_t >;
 template class Volume< int32_t >;
 template class Volume< uint32_t >;
-template class Volume< long >;
-template class Volume< unsigned long >;
+template class Volume< int64_t >;
+template class Volume< uint64_t >;
 template class Volume< float >;
 template class Volume< double >;
 template class Volume< cfloat >;
@@ -100,8 +100,8 @@ template class Creator<Volume< int16_t > >;
 template class Creator<Volume< uint16_t > >;
 template class Creator<Volume< int32_t > >;
 template class Creator<Volume< uint32_t > >;
-template class Creator<Volume< long > >;
-template class Creator<Volume< unsigned long > >;
+template class Creator<Volume< int64_t> >;
+template class Creator<Volume< uint64_t > >;
 template class Creator<Volume< float > >;
 template class Creator<Volume< double > >;
 template class Creator<Volume< cfloat > >;
@@ -123,8 +123,8 @@ template class Creator<VolumeRef< int16_t > >;
 template class Creator<VolumeRef< uint16_t > >;
 template class Creator<VolumeRef< int32_t > >;
 template class Creator<VolumeRef< uint32_t > >;
-template class Creator<VolumeRef< long > >;
-template class Creator<VolumeRef< unsigned long > >;
+template class Creator<VolumeRef< int64_t > >;
+template class Creator<VolumeRef< uint64_t > >;
 template class Creator<VolumeRef< float > >;
 template class Creator<VolumeRef< double > >;
 template class Creator<VolumeRef< cfloat > >;
@@ -229,17 +229,17 @@ instantiate_volutil2( uint32_t, std::minus<uint32_t> )
 instantiate_volutil2( uint32_t, std::multiplies<uint32_t> )
 instantiate_volutil2( uint32_t, std::divides<uint32_t> )
 
-instantiate_volutil( long )
-instantiate_volutil2( long, std::plus<long> )
-instantiate_volutil2( long, std::minus<long> )
-instantiate_volutil2( long, std::multiplies<long> )
-instantiate_volutil2( long, std::divides<long> )
+instantiate_volutil( int64_t )
+instantiate_volutil2( int64_t, std::plus<int64_t> )
+instantiate_volutil2( int64_t, std::minus<int64_t> )
+instantiate_volutil2( int64_t, std::multiplies<int64_t> )
+instantiate_volutil2( int64_t, std::divides<int64_t> )
 
-instantiate_volutil( unsigned long )
-instantiate_volutil2( unsigned long, std::plus<unsigned long> )
-instantiate_volutil2( unsigned long, std::minus<unsigned long> )
-instantiate_volutil2( unsigned long, std::multiplies<unsigned long> )
-instantiate_volutil2( unsigned long, std::divides<unsigned long> )
+instantiate_volutil( uint64_t )
+instantiate_volutil2( uint64_t, std::plus<uint64_t> )
+instantiate_volutil2( uint64_t, std::minus<uint64_t> )
+instantiate_volutil2( uint64_t, std::multiplies<uint64_t> )
+instantiate_volutil2( uint64_t, std::divides<uint64_t> )
 
 instantiate_volutil( float )
 instantiate_volutil2( float, std::plus<float> )
@@ -276,8 +276,8 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< uint16_t > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< int32_t > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< uint32_t > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< int64_t > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< uint64_t > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< float > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< double > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< cfloat > )
@@ -292,8 +292,8 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint16_t > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int32_t > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint32_t > > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int64_t > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint64_t > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< float > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< double > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cfloat > > )
