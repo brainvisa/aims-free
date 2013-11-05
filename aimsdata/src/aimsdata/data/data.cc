@@ -55,6 +55,10 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<Point3df> )
 #define _TMP_ AimsData< AimsVector<float, 6> > 
 INSTANTIATE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
+#ifndef __LP64__
+INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<long> )
+INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<size_t> )
+#endif
 
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<int8_t> > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<uint8_t> > )
@@ -75,5 +79,9 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<Point3df> > )
 #define _TMP_ rc_ptr< AimsData< AimsVector<float, 6> > >
 INSTANTIATE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
+#ifndef __LP64__
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<long> > )
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<size_t> > )
+#endif
 
 } // namespace carto

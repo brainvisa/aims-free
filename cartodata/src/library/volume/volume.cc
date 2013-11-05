@@ -61,10 +61,12 @@ template class VolumeProxy< double >;
 template class VolumeProxy< cfloat >;
 template class VolumeProxy< cdouble >;
 template class VolumeProxy< std::map<int, float> >;
-#ifdef USE_SOMA_IO
 template class VolumeProxy< VoxelRGB >;
 template class VolumeProxy< VoxelRGBA >;
 template class VolumeProxy< VoxelHSV >;
+#ifndef __LP64__
+template class VolumeProxy< long >;
+template class VolumeProxy< size_t >;
 #endif
 
 template class Volume< int8_t >;
@@ -84,10 +86,12 @@ template class Volume< double >;
 template class Volume< cfloat >;
 template class Volume< cdouble >;
 template class Volume< std::map<int, float> >;
-#ifdef USE_SOMA_IO
 template class Volume< VoxelRGB >;
 template class Volume< VoxelRGBA >;
 template class Volume< VoxelHSV >;
+#ifndef __LP64__
+template class Volume< long >;
+template class Volume< size_t >;
 #endif
 
 template class Creator<Volume< int8_t > >;
@@ -107,10 +111,12 @@ template class Creator<Volume< double > >;
 template class Creator<Volume< cfloat > >;
 template class Creator<Volume< cdouble > >;
 template class Creator<Volume< std::map<int, float> > >;
-#ifdef USE_SOMA_IO
 template class Creator< Volume< VoxelRGB > >;
 template class Creator< Volume< VoxelRGBA > >;
 template class Creator< Volume< VoxelHSV > >;
+#ifndef __LP64__
+template class Creator< Volume< long > >;
+template class Creator< Volume< size_t > >;
 #endif
 
 template class Creator<VolumeRef< int8_t > >;
@@ -130,10 +136,12 @@ template class Creator<VolumeRef< double > >;
 template class Creator<VolumeRef< cfloat > >;
 template class Creator<VolumeRef< cdouble > >;
 template class Creator<VolumeRef< std::map<int, float> > >;
-#ifdef USE_SOMA_IO
 template class Creator< VolumeRef< VoxelRGB > >;
 template class Creator< VolumeRef< VoxelRGBA > >;
 template class Creator< VolumeRef< VoxelHSV > >;
+#ifndef __LP64__
+template class Creator<VolumeRef< long > >;
+template class Creator<VolumeRef< size_t > >;
 #endif
 
 // utilities
@@ -241,6 +249,20 @@ instantiate_volutil2( uint64_t, std::minus<uint64_t> )
 instantiate_volutil2( uint64_t, std::multiplies<uint64_t> )
 instantiate_volutil2( uint64_t, std::divides<uint64_t> )
 
+#ifndef __LP64__
+instantiate_volutil( long )
+instantiate_volutil2( long, std::plus<long> )
+instantiate_volutil2( long, std::minus<long> )
+instantiate_volutil2( long, std::multiplies<long> )
+instantiate_volutil2( long, std::divides<long> )
+
+instantiate_volutil( size_t )
+instantiate_volutil2( size_t, std::plus<size_t> )
+instantiate_volutil2( size_t, std::minus<size_t> )
+instantiate_volutil2( size_t, std::multiplies<size_t> )
+instantiate_volutil2( size_t, std::divides<size_t> )
+#endif
+
 instantiate_volutil( float )
 instantiate_volutil2( float, std::plus<float> )
 instantiate_volutil2( float, std::minus<float> )
@@ -282,6 +304,10 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< double > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< cfloat > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< cdouble > )
+#ifndef __LP64__
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< size_t > )
+#endif
 
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int8_t > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint8_t > > )
@@ -298,6 +324,10 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< double > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cfloat > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cdouble > > )
+#ifndef __LP64__
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< size_t > > )
+#endif
 
 
 } // namespace carto

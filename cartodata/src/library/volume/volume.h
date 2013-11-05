@@ -564,10 +564,12 @@ namespace carto
   extern template class Volume<cfloat>;
   extern template class Volume<cdouble>;
   extern template class Volume< std::map<int, float> >;
-#ifdef USE_SOMA_IO
   extern template class Volume< soma::VoxelRGB >;
   extern template class Volume< soma::VoxelRGBA >;
   extern template class Volume< soma::VoxelHSV >;
+#ifndef __LP64__
+  extern template class Volume<long>;
+  extern template class Volume<size_t>;
 #endif
 
   extern template class Creator<Volume<int8_t> >;
@@ -587,10 +589,12 @@ namespace carto
   extern template class Creator<Volume<cfloat> >;
   extern template class Creator<Volume<cdouble> >;
   extern template class Creator<Volume< std::map<int, float> > >;
-#ifdef USE_SOMA_IO
   extern template class Creator<Volume<soma::VoxelRGB> >;
   extern template class Creator<Volume<soma::VoxelRGBA> >;
   extern template class Creator<Volume<soma::VoxelHSV> >;
+#ifndef __LP64__
+  extern template class Creator<Volume<long> >;
+  extern template class Creator<Volume<size_t> >;
 #endif
 
   extern template class Creator<VolumeRef<int8_t> >;
@@ -610,10 +614,12 @@ namespace carto
   extern template class Creator<VolumeRef<cfloat> >;
   extern template class Creator<VolumeRef<cdouble> >;
   extern template class Creator<VolumeRef< std::map<int, float> > >;
-#ifdef USE_SOMA_IO
   extern template class Creator<VolumeRef<soma::VoxelRGB> >;
   extern template class Creator<VolumeRef<soma::VoxelRGBA> >;
   extern template class Creator<VolumeRef<soma::VoxelHSV> >;
+#ifndef __LP64__
+  extern template class Creator<VolumeRef<long> >;
+  extern template class Creator<VolumeRef<size_t> >;
 #endif
 
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )
@@ -631,6 +637,10 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< double > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< cfloat > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< cdouble > )
+#ifndef __LP64__
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< size_t > )
+#endif
 
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int8_t > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint8_t > > )
@@ -647,6 +657,10 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< double > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cfloat > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cdouble > > )
+#ifndef __LP64__
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< size_t > > )
+#endif
 
 } // namespace carto
 
