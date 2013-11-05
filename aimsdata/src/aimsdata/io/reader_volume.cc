@@ -72,8 +72,8 @@ AIMS_INSTANTIATE_READER( AimsData<AimsVector<float COMMA 6> > );
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 AIMS_INSTANTIATE_READER( AimsData<char> );
 #endif
-AIMS_INSTANTIATE_READER( AimsData<long> );
-AIMS_INSTANTIATE_READER( AimsData<unsigned long> );
+AIMS_INSTANTIATE_READER( AimsData<int64_t> );
+AIMS_INSTANTIATE_READER( AimsData<uint64_t> );
 
 AIMS_INSTANTIATE_READER( Volume<Point3df> );
 AIMS_INSTANTIATE_READER( Volume<Point3d> );

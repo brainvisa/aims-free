@@ -73,8 +73,8 @@ AIMS_INSTANTIATE_WRITER( AimsData<AimsVector<float COMMA 6> > );
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 AIMS_INSTANTIATE_WRITER( AimsData<char> );
 #endif
-AIMS_INSTANTIATE_WRITER( AimsData<long> );
-AIMS_INSTANTIATE_WRITER( AimsData<unsigned long> );
+AIMS_INSTANTIATE_WRITER( AimsData<int64_t> );
+AIMS_INSTANTIATE_WRITER( AimsData<uint64_t> );
 
 AIMS_INSTANTIATE_WRITER( Volume<Point3df> );
 AIMS_INSTANTIATE_WRITER( Volume<Point3d> );
