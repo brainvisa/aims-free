@@ -557,8 +557,8 @@ namespace carto
   extern template class Volume<uint16_t>;
   extern template class Volume<int32_t>;
   extern template class Volume<uint32_t>;
-  extern template class Volume<long>;
-  extern template class Volume<unsigned long>;
+  extern template class Volume<int64_t>;
+  extern template class Volume<uint64_t>;
   extern template class Volume<float>;
   extern template class Volume<double>;
   extern template class Volume<cfloat>;
@@ -580,8 +580,8 @@ namespace carto
   extern template class Creator<Volume<uint16_t> >;
   extern template class Creator<Volume<int32_t> >;
   extern template class Creator<Volume<uint32_t> >;
-  extern template class Creator<Volume<long> >;
-  extern template class Creator<Volume<unsigned long> >;
+  extern template class Creator<Volume<int64_t> >;
+  extern template class Creator<Volume<uint64_t> >;
   extern template class Creator<Volume<float> >;
   extern template class Creator<Volume<double> >;
   extern template class Creator<Volume<cfloat> >;
@@ -603,8 +603,8 @@ namespace carto
   extern template class Creator<VolumeRef<uint16_t> >;
   extern template class Creator<VolumeRef<int32_t> >;
   extern template class Creator<VolumeRef<uint32_t> >;
-  extern template class Creator<VolumeRef<long> >;
-  extern template class Creator<VolumeRef<unsigned long> >;
+  extern template class Creator<VolumeRef<int64_t> >;
+  extern template class Creator<VolumeRef<uint64_t> >;
   extern template class Creator<VolumeRef<float> >;
   extern template class Creator<VolumeRef<double> >;
   extern template class Creator<VolumeRef<cfloat> >;
@@ -625,8 +625,8 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< uint16_t > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int32_t > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< uint32_t > )
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int64_t > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< uint64_t > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< float > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< double > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< cfloat > )
@@ -641,8 +641,8 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint16_t > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int32_t > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint32_t > > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int64_t > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint64_t > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< float > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< double > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cfloat > > )
