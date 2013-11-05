@@ -64,8 +64,8 @@ AIMS_INSTANTIATE_AIMS_READER( Volume<AimsHSV> );
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 AIMS_INSTANTIATE_AIMS_READER( Volume<char> );
 #endif
-AIMS_INSTANTIATE_AIMS_READER( Volume<long> );
-AIMS_INSTANTIATE_AIMS_READER( Volume<unsigned long> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<int64_t> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<uint64_t> );
 
 AIMS_INSTANTIATE_AIMS_READER( VolumeRef<int8_t> );
 AIMS_INSTANTIATE_AIMS_READER( VolumeRef<uint8_t> );
@@ -84,6 +84,6 @@ AIMS_INSTANTIATE_AIMS_READER( VolumeRef<AimsHSV> );
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 AIMS_INSTANTIATE_AIMS_READER( VolumeRef<char> );
 #endif
-AIMS_INSTANTIATE_AIMS_READER( VolumeRef<long> );
-AIMS_INSTANTIATE_AIMS_READER( VolumeRef<unsigned long> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<int64_t> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<uint64_t> );
 

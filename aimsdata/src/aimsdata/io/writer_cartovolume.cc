@@ -65,8 +65,8 @@ AIMS_INSTANTIATE_WRITER( Volume<AimsHSV> );
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 AIMS_INSTANTIATE_WRITER( Volume<char> );
 #endif
-AIMS_INSTANTIATE_WRITER( Volume<long> );
-AIMS_INSTANTIATE_WRITER( Volume<unsigned long> );
+AIMS_INSTANTIATE_WRITER( Volume<int64_t> );
+AIMS_INSTANTIATE_WRITER( Volume<uint64_t> );
 
 AIMS_INSTANTIATE_WRITER( VolumeRef<int8_t> );
 AIMS_INSTANTIATE_WRITER( VolumeRef<uint8_t> );
@@ -85,6 +85,6 @@ AIMS_INSTANTIATE_WRITER( VolumeRef<AimsHSV> );
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 AIMS_INSTANTIATE_WRITER( VolumeRef<char> );
 #endif
-AIMS_INSTANTIATE_WRITER( VolumeRef<long> );
-AIMS_INSTANTIATE_WRITER( VolumeRef<unsigned long> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<int64_t> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<uint64_t> );
 
