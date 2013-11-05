@@ -151,31 +151,31 @@ FileFormatDictionary<VolumeRef<uint32_t> >::registerBaseFormats()
 }
 
 template<> void 
-FileFormatDictionary<Volume<long> >::registerBaseFormats()
+FileFormatDictionary<Volume<int64_t> >::registerBaseFormats()
 {
 }
 
 template<> void 
-FileFormatDictionary<VolumeRef<long> >::registerBaseFormats()
+FileFormatDictionary<VolumeRef<int64_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
   ext.push_back( "" );
-  VolumeRefFormat<long>	*f = new VolumeRefFormat<long>;
+  VolumeRefFormat<int64_t>	*f = new VolumeRefFormat<int64_t>;
   registerFormat( "ALLVOLUMES", f, ext );
 }
 
 template<> void 
-FileFormatDictionary<Volume<unsigned long> >::registerBaseFormats()
+FileFormatDictionary<Volume<uint64_t> >::registerBaseFormats()
 {
 }
 
 template<> void 
-FileFormatDictionary<VolumeRef<unsigned long> >::registerBaseFormats()
+FileFormatDictionary<VolumeRef<uint64_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
   ext.push_back( "" );
-  VolumeRefFormat<unsigned long> 
-    *f = new VolumeRefFormat<unsigned long>;
+  VolumeRefFormat<uint64_t> 
+    *f = new VolumeRefFormat<uint64_t>;
   registerFormat( "ALLVOLUMES", f, ext );
 }
 
@@ -491,65 +491,63 @@ FileFormatDictionary<AimsData<uint32_t> >::registerBaseFormats()
 #endif
 }
 
-// ### remove after everything has been moved to intN_t/uintN_t
-template<> void FileFormatDictionary<AimsData<long> >::registerBaseFormats()
+template<> void FileFormatDictionary<AimsData<int64_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
   ext.push_back( "ima" );
   ext.push_back( "dim" );
-  GisFormat<long>	*gf = new GisFormat<long>;
+  GisFormat<int64_t>	*gf = new GisFormat<int64_t>;
   registerFormat( "GIS", gf, ext );
-  VolumeFormat<long>	*vvf = new VolumeFormat<long>( "GIS" );
-  FileFormatDictionary<Volume<long> >::registerFormat( "GIS", vvf, ext );
+  VolumeFormat<int64_t>	*vvf = new VolumeFormat<int64_t>( "GIS" );
+  FileFormatDictionary<Volume<int64_t> >::registerFormat( "GIS", vvf, ext );
 
   ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
-  SpmFormat<long>	*sf = new SpmFormat<long>;
+  SpmFormat<int64_t>	*sf = new SpmFormat<int64_t>;
   registerFormat( "SPM", sf, ext );
-  vvf = new VolumeFormat<long>( "SPM" );
-  FileFormatDictionary<Volume<long> >::registerFormat( "SPM", vvf, ext );
+  vvf = new VolumeFormat<int64_t>( "SPM" );
+  FileFormatDictionary<Volume<int64_t> >::registerFormat( "SPM", vvf, ext );
 
 #ifdef DICOM_LIB
   ext.clear();
   ext.push_back( "" );
-  DicomFormat<long>	*df = new DicomFormat<long>;
+  DicomFormat<int64_t>	*df = new DicomFormat<int64_t>;
   registerFormat( "DICOM", df, ext );
-  vvf = new VolumeFormat<long>( "DICOM" );
-  FileFormatDictionary<Volume<long> >::registerFormat( "DIcOM", vvf, ext );
+  vvf = new VolumeFormat<int64_t>( "DICOM" );
+  FileFormatDictionary<Volume<int64_t> >::registerFormat( "DIcOM", vvf, ext );
 #endif
 }
 
-// ### remove after everything has been moved to intN_t/uintN_t
 template<> 
-void FileFormatDictionary<AimsData<unsigned long> >::registerBaseFormats()
+void FileFormatDictionary<AimsData<uint64_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
   ext.push_back( "ima" );
   ext.push_back( "dim" );
-  GisFormat<unsigned long>	*gf = new GisFormat<unsigned long>;
+  GisFormat<uint64_t>	*gf = new GisFormat<uint64_t>;
   registerFormat( "GIS", gf, ext );
-  VolumeFormat<unsigned long>	*vvf
-    = new VolumeFormat<unsigned long>( "GIS" );
-  FileFormatDictionary<Volume<unsigned long> >::registerFormat( "GIS", vvf, 
+  VolumeFormat<uint64_t>	*vvf
+    = new VolumeFormat<uint64_t>( "GIS" );
+  FileFormatDictionary<Volume<uint64_t> >::registerFormat( "GIS", vvf, 
                                                                 ext );
 
   ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
-  SpmFormat<unsigned long>	*sf = new SpmFormat<unsigned long>;
+  SpmFormat<uint64_t>	*sf = new SpmFormat<uint64_t>;
   registerFormat( "SPM", sf, ext );
-  vvf = new VolumeFormat<unsigned long>( "SPM" );
-  FileFormatDictionary<Volume<unsigned long> >::registerFormat( "SPM", vvf, 
+  vvf = new VolumeFormat<uint64_t>( "SPM" );
+  FileFormatDictionary<Volume<uint64_t> >::registerFormat( "SPM", vvf, 
                                                                 ext );
 
 #ifdef DICOM_LIB
   ext.clear();
   ext.push_back( "" );
-  DicomFormat<unsigned long>	*df = new DicomFormat<unsigned long>;
+  DicomFormat<uint64_t>	*df = new DicomFormat<uint64_t>;
   registerFormat( "DICOM", df, ext );
-  vvf = new VolumeFormat<unsigned long>( "DICOM" );
-  FileFormatDictionary<Volume<unsigned long> >::registerFormat( "DICOM", vvf, 
+  vvf = new VolumeFormat<uint64_t>( "DICOM" );
+  FileFormatDictionary<Volume<uint64_t> >::registerFormat( "DICOM", vvf, 
                                                                 ext );
 #endif
 }
@@ -681,8 +679,8 @@ template class FileFormatDictionary<AimsData<cdouble> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class FileFormatDictionary<AimsData<char> >;
 #endif
-template class FileFormatDictionary<AimsData<long> >;
-template class FileFormatDictionary<AimsData<unsigned long> >;
+template class FileFormatDictionary<AimsData<int64_t> >;
+template class FileFormatDictionary<AimsData<uint64_t> >;
 
 
 template class FileFormatDictionary<Volume<int8_t> >;
@@ -695,8 +693,8 @@ template class FileFormatDictionary<Volume<float> >;
 template class FileFormatDictionary<Volume<double> >;
 template class FileFormatDictionary<Volume<cfloat> >;
 template class FileFormatDictionary<Volume<cdouble> >;
-template class FileFormatDictionary<Volume<long> >;
-template class FileFormatDictionary<Volume<unsigned long> >;
+template class FileFormatDictionary<Volume<int64_t> >;
+template class FileFormatDictionary<Volume<uint64_t> >;
 
 template class FileFormatDictionary<VolumeRef<int8_t> >;
 template class FileFormatDictionary<VolumeRef<uint8_t> >;
@@ -708,8 +706,8 @@ template class FileFormatDictionary<VolumeRef<float> >;
 template class FileFormatDictionary<VolumeRef<double> >;
 template class FileFormatDictionary<VolumeRef<cfloat> >;
 template class FileFormatDictionary<VolumeRef<cdouble> >;
-template class FileFormatDictionary<VolumeRef<long> >;
-template class FileFormatDictionary<VolumeRef<unsigned long> >;
+template class FileFormatDictionary<VolumeRef<int64_t> >;
+template class FileFormatDictionary<VolumeRef<uint64_t> >;
 
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
@@ -733,8 +731,8 @@ template class FileFormat<AimsData<cdouble> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class FileFormat<AimsData<char> >;
 #endif
-template class FileFormat<AimsData<long> >;
-template class FileFormat<AimsData<unsigned long> >;
+template class FileFormat<AimsData<int64_t> >;
+template class FileFormat<AimsData<uint64_t> >;
 
 template class FileFormat<Volume<int8_t> >;
 template class FileFormat<Volume<uint8_t> >;
@@ -750,8 +748,8 @@ template class FileFormat<Volume<cdouble> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class FileFormat<Volume<char> >;
 #endif
-template class FileFormat<Volume<long> >;
-template class FileFormat<Volume<unsigned long> >;
+template class FileFormat<Volume<int64_t> >;
+template class FileFormat<Volume<uint64_t> >;
 
 template class VolumeFormat<int8_t>;
 template class VolumeFormat<uint8_t>;
@@ -767,8 +765,8 @@ template class VolumeFormat<cdouble>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class VolumeFormat<char>;
 #endif
-template class VolumeFormat<long>;
-template class VolumeFormat<unsigned long>;
+template class VolumeFormat<int64_t>;
+template class VolumeFormat<uint64_t>;
 
 template class FileFormat<VolumeRef<int8_t> >;
 template class FileFormat<VolumeRef<uint8_t> >;
@@ -784,8 +782,8 @@ template class FileFormat<VolumeRef<cdouble> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class FileFormat<VolumeRef<char> >;
 #endif
-template class FileFormat<VolumeRef<long> >;
-template class FileFormat<VolumeRef<unsigned long> >;
+template class FileFormat<VolumeRef<int64_t> >;
+template class FileFormat<VolumeRef<uint64_t> >;
 
 template class VolumeRefFormat<int8_t>;
 template class VolumeRefFormat<uint8_t>;
@@ -801,8 +799,8 @@ template class VolumeRefFormat<cdouble>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class VolumeRefFormat<char>;
 #endif
-template class VolumeRefFormat<long>;
-template class VolumeRefFormat<unsigned long>;
+template class VolumeRefFormat<int64_t>;
+template class VolumeRefFormat<uint64_t>;
 
 
 #if __GNUC__ < 3
@@ -832,8 +830,8 @@ namespace
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
     FileFormatDictionary<AimsData<char> >::init();
 #endif
-    FileFormatDictionary<AimsData<long> >::init();
-    FileFormatDictionary<AimsData<unsigned long> >::init();
+    FileFormatDictionary<AimsData<int64_t> >::init();
+    FileFormatDictionary<AimsData<uint64_t> >::init();
 
     FileFormatDictionary<Volume<int8_t> >::init();
     FileFormatDictionary<Volume<uint8_t> >::init();
@@ -850,8 +848,8 @@ namespace
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
     FileFormatDictionary<Volume<char> >::init();
 #endif
-    FileFormatDictionary<Volume<long> >::init();
-    FileFormatDictionary<Volume<unsigned long> >::init();
+    FileFormatDictionary<Volume<int64_t> >::init();
+    FileFormatDictionary<Volume<uint64_t> >::init();
 
     FileFormatDictionary<VolumeRef<int8_t> >::init();
     FileFormatDictionary<VolumeRef<uint8_t> >::init();
@@ -868,8 +866,8 @@ namespace
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
     FileFormatDictionary<VolumeRef<char> >::init();
 #endif
-    FileFormatDictionary<VolumeRef<long> >::init();
-    FileFormatDictionary<VolumeRef<unsigned long> >::init();
+    FileFormatDictionary<VolumeRef<int64_t> >::init();
+    FileFormatDictionary<VolumeRef<uint64_t> >::init();
 
     return true;
   }

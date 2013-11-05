@@ -47,8 +47,8 @@ template void DiscriminantAnalysisElement::doIt<double>(const AimsData<double>&)
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template void DiscriminantAnalysisElement::doIt<char>(const AimsData<char>&) ;
 #endif
-template void DiscriminantAnalysisElement::doIt<long>(const AimsData<long>&) ;
-template void DiscriminantAnalysisElement::doIt<unsigned long>(const AimsData<unsigned long>&) ;
+template void DiscriminantAnalysisElement::doIt<int64_t>(const AimsData<int64_t>&) ;
+template void DiscriminantAnalysisElement::doIt<uint64_t>(const AimsData<uint64_t>&) ;
 
 
 template void DiscriminantAnalysisElement::doIt<int8_t>(const std::list< Point3d>&, const AimsData<int8_t>&) ;
@@ -64,8 +64,8 @@ template void DiscriminantAnalysisElement::doIt<double>(const std::list< Point3d
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template void DiscriminantAnalysisElement::doIt<char>(const std::list< Point3d>&, const AimsData<char>&) ;
 #endif
-template void DiscriminantAnalysisElement::doIt<long>(const std::list< Point3d>&, const AimsData<long>&) ;
-template void DiscriminantAnalysisElement::doIt<unsigned long>(const std::list< Point3d>&, const AimsData<unsigned long>&) ;
+template void DiscriminantAnalysisElement::doIt<int64_t>(const std::list< Point3d>&, const AimsData<int64_t>&) ;
+template void DiscriminantAnalysisElement::doIt<uint64_t>(const std::list< Point3d>&, const AimsData<uint64_t>&) ;
 
 
 template class DiscriminantAnalysis<int8_t> ;
@@ -81,5 +81,5 @@ template class DiscriminantAnalysis<double> ;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class DiscriminantAnalysis<char> ;
 #endif
-template class DiscriminantAnalysis<long> ;
-template class DiscriminantAnalysis<unsigned long> ;
+template class DiscriminantAnalysis<int64_t> ;
+template class DiscriminantAnalysis<uint64_t> ;
