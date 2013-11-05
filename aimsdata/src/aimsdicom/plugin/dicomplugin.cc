@@ -118,17 +118,17 @@ DicomPlugin::DicomPlugin() : Plugin()
   VolumeFormat<char>	*vf10 = new VolumeFormat<char>( "DICOM" );
   FileFormatDictionary<Volume<char> >::registerFormat( "DICOM", vf10, ext );
 
-  DicomFormat<long>	*df11 = new DicomFormat<long>;
-  FileFormatDictionary<AimsData<long> >::registerFormat( "DICOM", df11, ext );
-  VolumeFormat<long>	*vf11 = new VolumeFormat<long>( "DICOM" );
-  FileFormatDictionary<Volume<long> >::registerFormat( "DICOM", vf11, ext );
+  DicomFormat<int64_t>	*df11 = new DicomFormat<int64_t>;
+  FileFormatDictionary<AimsData<int64_t> >::registerFormat( "DICOM", df11, ext );
+  VolumeFormat<int64_t>	*vf11 = new VolumeFormat<int64_t>( "DICOM" );
+  FileFormatDictionary<Volume<int64_t> >::registerFormat( "DICOM", vf11, ext );
 
-  DicomFormat<unsigned long>	*df12 = new DicomFormat<unsigned long>;
-  FileFormatDictionary<AimsData<unsigned long> >::registerFormat( "DICOM", 
+  DicomFormat<uint64_t>	*df12 = new DicomFormat<uint64_t>;
+  FileFormatDictionary<AimsData<uint64_t> >::registerFormat( "DICOM", 
                                                                   df12, ext );
-  VolumeFormat<unsigned long>	*vf12
-    = new VolumeFormat<unsigned long>( "DICOM" );
-  FileFormatDictionary<Volume<unsigned long> >::registerFormat( "DICOM", vf12, 
+  VolumeFormat<uint64_t>	*vf12
+    = new VolumeFormat<uint64_t>( "DICOM" );
+  FileFormatDictionary<Volume<uint64_t> >::registerFormat( "DICOM", vf12, 
                                                                 ext );
 
   Finder::registerFormat( "DICOM", new FinderDicomFormat, ext );

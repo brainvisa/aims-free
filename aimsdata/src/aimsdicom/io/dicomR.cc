@@ -452,9 +452,7 @@ namespace aims
   template class DicomReader< int32_t >;
   template class DicomReader< float >;
   template class DicomReader< double >;
-  
-  // ### remove after everything has been moved to intN_t/uintN_t
+  template class DicomReader< int64_t >;
+  template class DicomReader< uint64_t >;
   template class DicomReader< char >;
-  template class DicomReader< long >;
-  template class DicomReader< unsigned long >;
 }

@@ -48,5 +48,5 @@ template class SpmReader<double> ;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class SpmReader<char> ;
 #endif
-template class SpmReader<long> ;
-template class SpmReader<unsigned long> ;
+template class SpmReader<int64_t> ;
+template class SpmReader<uint64_t> ;
