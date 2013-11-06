@@ -75,8 +75,9 @@ public:
   */
   AimsData< T > doit( AimsData< T >&, AimsData< T > *wi = NULL );
 
-  /// Sort the eigenvalues and eigenvectors in decreasing order.
-  void sort( AimsData< T >&, AimsData< T >&, AimsData< T > *wi = NULL );
+  /// Sort the eigenvectors and eigenvalues in decreasing order.
+  void sort( AimsData< T >& eigenvectors, AimsData< T >& eigenvalues,
+             AimsData< T > *wi = NULL );
 
 private:
 
