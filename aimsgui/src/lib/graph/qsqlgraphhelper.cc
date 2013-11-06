@@ -32,11 +32,7 @@
 */
 
 #include <aims/graph/qsqlgraphhelper.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/reader/pythonreader.h>
-#else
-  #include <cartobase/object/pythonreader.h>
-#endif
+#include <soma-io/reader/pythonreader.h>
 #include <qsqlquery.h>
 
 using namespace aims;

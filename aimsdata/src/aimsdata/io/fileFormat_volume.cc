@@ -670,6 +670,8 @@ template class FileFormatDictionary<AimsData<int16_t> >;
 template class FileFormatDictionary<AimsData<uint16_t> >;
 template class FileFormatDictionary<AimsData<int32_t> >;
 template class FileFormatDictionary<AimsData<uint32_t> >;
+template class FileFormatDictionary<AimsData<int64_t> >;
+template class FileFormatDictionary<AimsData<uint64_t> >;
 template class FileFormatDictionary<AimsData<float> >;
 template class FileFormatDictionary<AimsData<double> >;
 template class FileFormatDictionary<AimsData<cfloat> >;
@@ -679,8 +681,6 @@ template class FileFormatDictionary<AimsData<cdouble> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class FileFormatDictionary<AimsData<char> >;
 #endif
-template class FileFormatDictionary<AimsData<int64_t> >;
-template class FileFormatDictionary<AimsData<uint64_t> >;
 
 
 template class FileFormatDictionary<Volume<int8_t> >;
@@ -722,6 +722,8 @@ template class FileFormat<AimsData<int16_t> >;
 template class FileFormat<AimsData<uint16_t> >;
 template class FileFormat<AimsData<int32_t> >;
 template class FileFormat<AimsData<uint32_t> >;
+template class FileFormat<AimsData<int64_t> >;
+template class FileFormat<AimsData<uint64_t> >;
 template class FileFormat<AimsData<float> >;
 template class FileFormat<AimsData<double> >;
 template class FileFormat<AimsData<cfloat> >;
@@ -731,8 +733,6 @@ template class FileFormat<AimsData<cdouble> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class FileFormat<AimsData<char> >;
 #endif
-template class FileFormat<AimsData<int64_t> >;
-template class FileFormat<AimsData<uint64_t> >;
 
 template class FileFormat<Volume<int8_t> >;
 template class FileFormat<Volume<uint8_t> >;
@@ -740,6 +740,8 @@ template class FileFormat<Volume<int16_t> >;
 template class FileFormat<Volume<uint16_t> >;
 template class FileFormat<Volume<int32_t> >;
 template class FileFormat<Volume<uint32_t> >;
+template class FileFormat<Volume<int64_t> >;
+template class FileFormat<Volume<uint64_t> >;
 template class FileFormat<Volume<float> >;
 template class FileFormat<Volume<double> >;
 template class FileFormat<Volume<cfloat> >;
@@ -748,8 +750,6 @@ template class FileFormat<Volume<cdouble> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class FileFormat<Volume<char> >;
 #endif
-template class FileFormat<Volume<int64_t> >;
-template class FileFormat<Volume<uint64_t> >;
 
 template class VolumeFormat<int8_t>;
 template class VolumeFormat<uint8_t>;
@@ -757,6 +757,8 @@ template class VolumeFormat<int16_t>;
 template class VolumeFormat<uint16_t>;
 template class VolumeFormat<int32_t>;
 template class VolumeFormat<uint32_t>;
+template class VolumeFormat<int64_t>;
+template class VolumeFormat<uint64_t>;
 template class VolumeFormat<float>;
 template class VolumeFormat<double>;
 template class VolumeFormat<cfloat>;
@@ -765,8 +767,6 @@ template class VolumeFormat<cdouble>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class VolumeFormat<char>;
 #endif
-template class VolumeFormat<int64_t>;
-template class VolumeFormat<uint64_t>;
 
 template class FileFormat<VolumeRef<int8_t> >;
 template class FileFormat<VolumeRef<uint8_t> >;
@@ -774,6 +774,8 @@ template class FileFormat<VolumeRef<int16_t> >;
 template class FileFormat<VolumeRef<uint16_t> >;
 template class FileFormat<VolumeRef<int32_t> >;
 template class FileFormat<VolumeRef<uint32_t> >;
+template class FileFormat<VolumeRef<int64_t> >;
+template class FileFormat<VolumeRef<uint64_t> >;
 template class FileFormat<VolumeRef<float> >;
 template class FileFormat<VolumeRef<double> >;
 template class FileFormat<VolumeRef<cfloat> >;
@@ -782,8 +784,6 @@ template class FileFormat<VolumeRef<cdouble> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class FileFormat<VolumeRef<char> >;
 #endif
-template class FileFormat<VolumeRef<int64_t> >;
-template class FileFormat<VolumeRef<uint64_t> >;
 
 template class VolumeRefFormat<int8_t>;
 template class VolumeRefFormat<uint8_t>;
@@ -791,6 +791,8 @@ template class VolumeRefFormat<int16_t>;
 template class VolumeRefFormat<uint16_t>;
 template class VolumeRefFormat<int32_t>;
 template class VolumeRefFormat<uint32_t>;
+template class VolumeRefFormat<int64_t>;
+template class VolumeRefFormat<uint64_t>;
 template class VolumeRefFormat<float>;
 template class VolumeRefFormat<double>;
 template class VolumeRefFormat<cfloat>;
@@ -799,8 +801,6 @@ template class VolumeRefFormat<cdouble>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class VolumeRefFormat<char>;
 #endif
-template class VolumeRefFormat<int64_t>;
-template class VolumeRefFormat<uint64_t>;
 
 
 #if __GNUC__ < 3
@@ -821,6 +821,8 @@ namespace
     FileFormatDictionary<AimsData<uint16_t> >::init();
     FileFormatDictionary<AimsData<int32_t> >::init();
     FileFormatDictionary<AimsData<uint32_t> >::init();
+    FileFormatDictionary<AimsData<int64_t> >::init();
+    FileFormatDictionary<AimsData<uint64_t> >::init();
     FileFormatDictionary<AimsData<float> >::init();
     FileFormatDictionary<AimsData<double> >::init();
     FileFormatDictionary<AimsData<cfloat> >::init();
@@ -830,8 +832,6 @@ namespace
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
     FileFormatDictionary<AimsData<char> >::init();
 #endif
-    FileFormatDictionary<AimsData<int64_t> >::init();
-    FileFormatDictionary<AimsData<uint64_t> >::init();
 
     FileFormatDictionary<Volume<int8_t> >::init();
     FileFormatDictionary<Volume<uint8_t> >::init();
@@ -839,6 +839,8 @@ namespace
     FileFormatDictionary<Volume<uint16_t> >::init();
     FileFormatDictionary<Volume<int32_t> >::init();
     FileFormatDictionary<Volume<uint32_t> >::init();
+    FileFormatDictionary<Volume<int64_t> >::init();
+    FileFormatDictionary<Volume<uint64_t> >::init();
     FileFormatDictionary<Volume<float> >::init();
     FileFormatDictionary<Volume<double> >::init();
     FileFormatDictionary<Volume<cfloat> >::init();
@@ -848,8 +850,6 @@ namespace
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
     FileFormatDictionary<Volume<char> >::init();
 #endif
-    FileFormatDictionary<Volume<int64_t> >::init();
-    FileFormatDictionary<Volume<uint64_t> >::init();
 
     FileFormatDictionary<VolumeRef<int8_t> >::init();
     FileFormatDictionary<VolumeRef<uint8_t> >::init();
@@ -857,6 +857,8 @@ namespace
     FileFormatDictionary<VolumeRef<uint16_t> >::init();
     FileFormatDictionary<VolumeRef<int32_t> >::init();
     FileFormatDictionary<VolumeRef<uint32_t> >::init();
+    FileFormatDictionary<VolumeRef<int64_t> >::init();
+    FileFormatDictionary<VolumeRef<uint64_t> >::init();
     FileFormatDictionary<VolumeRef<float> >::init();
     FileFormatDictionary<VolumeRef<double> >::init();
     FileFormatDictionary<VolumeRef<cfloat> >::init();
@@ -866,8 +868,6 @@ namespace
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
     FileFormatDictionary<VolumeRef<char> >::init();
 #endif
-    FileFormatDictionary<VolumeRef<int64_t> >::init();
-    FileFormatDictionary<VolumeRef<uint64_t> >::init();
 
     return true;
   }

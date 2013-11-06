@@ -37,7 +37,7 @@
 #ifdef USE_SOMA_IO
   ERROR_SHOULDNT_BE_INCLUDED;
 #endif
-#include <cartobase/io/formatchecker.h>
+#include <soma-io/checker/formatchecker.h>
 
 namespace carto
 {

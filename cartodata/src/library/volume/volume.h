@@ -37,14 +37,11 @@
 #include <cartodata/config/config.h>
 #include <cartodata/volume/volumeproxy.h>
 //--- soma-io ----------------------------------------------------------------
-#ifdef USE_SOMA_IO
-  #include <cartobase/type/voxelrgb.h>
-  #include <cartobase/type/voxelrgba.h>
-  #include <cartobase/type/voxelhsv.h>
-#endif
-//--- moved to soma-io -------------------------------------------------------
-#include <cartobase/containers/allocatedvector.h>
-#include <cartobase/io/creator.h>
+#include <cartobase/type/voxelrgb.h>
+#include <cartobase/type/voxelrgba.h>
+#include <cartobase/type/voxelhsv.h>
+#include <soma-io/utilities/allocatedvector.h>
+#include <soma-io/utilities/creator.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/object/object.h>
 #include <cartobase/type/types.h>

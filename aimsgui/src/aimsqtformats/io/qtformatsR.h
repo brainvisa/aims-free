@@ -41,11 +41,7 @@
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/exception/format.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasource/filedatasource.h>
-#else
-  #include <cartobase/datasource/filedatasource.h>
-#endif
+#include <soma-io/datasource/filedatasource.h>
 #include <cartobase/thread/mutex.h>
 #include <qcolor.h>
 #include <QImage>

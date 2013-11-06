@@ -40,11 +40,7 @@
 #include <aims/border/border.h>
 #include <aims/rgb/rgb.h>
 #include <cartobase/smart/rcptr.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/allocator/allocator.h>
-#else
-  #include <cartobase/allocator/allocator.h>
-#endif
+#include <soma-io/allocator/allocator.h>
 #include <aims/data/pheader.h>
 
 

@@ -32,11 +32,7 @@
  */
 
 #include <graph/tree/tparser.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasource/streamdatasource.h>
-#else
-  #include <cartobase/datasource/streamdatasource.h>
-#endif
+#include <soma-io/datasource/streamdatasource.h>
 
 using namespace carto;
 using namespace std;

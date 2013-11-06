@@ -42,13 +42,8 @@
 #include <graph/graph/graph.h>
 #include <cartobase/object/lexicon.h>
 #include <cartobase/exception/parse.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasource/streamdatasource.h>
-  #include <soma-io/datasource/filedatasource.h>
-#else
-  #include <cartobase/datasource/streamdatasource.h>
-  #include <cartobase/datasource/filedatasource.h>
-#endif
+#include <soma-io/datasource/streamdatasource.h>
+#include <soma-io/datasource/filedatasource.h>
 
 using namespace carto;
 using namespace std;

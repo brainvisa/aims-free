@@ -35,11 +35,7 @@
 #define AIMS_DATA_FASTALLOCATIONDATA_H
 
 #include <aims/data/data.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/allocator/allocator.h>
-#else
-  #include <cartobase/allocator/allocator.h>
-#endif
+#include <soma-io/allocator/allocator.h>
 
 namespace aims {
 

@@ -35,12 +35,9 @@
 #include <cartodata/volume/volume_d.h>
 #include <cartodata/volume/volumeutil_d.h>
 #include <functional>
-
-#ifdef USE_SOMA_IO
-  #include <cartobase/type/voxelrgb.h>
-  #include <cartobase/type/voxelrgba.h>
-  #include <cartobase/type/voxelhsv.h>
-#endif
+#include <cartobase/type/voxelrgb.h>
+#include <cartobase/type/voxelrgba.h>
+#include <cartobase/type/voxelhsv.h>
 
 using namespace carto;
 

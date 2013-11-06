@@ -35,11 +35,7 @@
 #define GRAPH_GRAPH_GPARSER_H
 
 #include <graph/config/graph_config.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasource/datasource.h>
-#else
-  #include <cartobase/datasource/datasource.h>
-#endif
+#include <soma-io/datasource/datasource.h>
 #include <iostream>
 
 class Graph;
