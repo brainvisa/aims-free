@@ -295,7 +295,7 @@ namespace soma
         dsi->header()->getProperty( "resolutions_dimension" )
                           ->getArrayItem( level )->getArrayItem( 2 )
                           ->getScalar() );
-      imagesize[ 3 ] = (INT) RINT(
+      imagesize[ 3 ] = (int) RINT(
         dsi->header()->getProperty( "resolutions_dimension" )
                           ->getArrayItem( level )->getArrayItem( 3 )
                           ->getScalar() );
