@@ -566,7 +566,7 @@ namespace carto
   extern template class Volume< soma::VoxelHSV >;
 #ifndef __LP64__
   extern template class Volume<long>;
-  extern template class Volume<size_t>;
+  extern template class Volume<unsigned long>;
 #endif
 
   extern template class Creator<Volume<int8_t> >;
@@ -591,7 +591,7 @@ namespace carto
   extern template class Creator<Volume<soma::VoxelHSV> >;
 #ifndef __LP64__
   extern template class Creator<Volume<long> >;
-  extern template class Creator<Volume<size_t> >;
+  extern template class Creator<Volume<unsigned long> >;
 #endif
 
   extern template class Creator<VolumeRef<int8_t> >;
@@ -616,7 +616,7 @@ namespace carto
   extern template class Creator<VolumeRef<soma::VoxelHSV> >;
 #ifndef __LP64__
   extern template class Creator<VolumeRef<long> >;
-  extern template class Creator<VolumeRef<size_t> >;
+  extern template class Creator<VolumeRef<unsigned long> >;
 #endif
 
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )
@@ -636,7 +636,7 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< cdouble > )
 #ifndef __LP64__
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< size_t > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
 #endif
 
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int8_t > > )
@@ -656,7 +656,7 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cdouble > > )
 #ifndef __LP64__
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< size_t > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
 #endif
 
 } // namespace carto

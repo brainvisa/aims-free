@@ -63,7 +63,7 @@ template class VolumeProxy< VoxelRGBA >;
 template class VolumeProxy< VoxelHSV >;
 #ifndef __LP64__
 template class VolumeProxy< long >;
-template class VolumeProxy< size_t >;
+template class VolumeProxy< unsigned long >;
 #endif
 
 template class Volume< int8_t >;
@@ -88,7 +88,7 @@ template class Volume< VoxelRGBA >;
 template class Volume< VoxelHSV >;
 #ifndef __LP64__
 template class Volume< long >;
-template class Volume< size_t >;
+template class Volume< unsigned long >;
 #endif
 
 template class Creator<Volume< int8_t > >;
@@ -113,7 +113,7 @@ template class Creator< Volume< VoxelRGBA > >;
 template class Creator< Volume< VoxelHSV > >;
 #ifndef __LP64__
 template class Creator< Volume< long > >;
-template class Creator< Volume< size_t > >;
+template class Creator< Volume< unsigned long > >;
 #endif
 
 template class Creator<VolumeRef< int8_t > >;
@@ -138,7 +138,7 @@ template class Creator< VolumeRef< VoxelRGBA > >;
 template class Creator< VolumeRef< VoxelHSV > >;
 #ifndef __LP64__
 template class Creator<VolumeRef< long > >;
-template class Creator<VolumeRef< size_t > >;
+template class Creator<VolumeRef< unsigned long > >;
 #endif
 
 // utilities
@@ -253,11 +253,11 @@ instantiate_volutil2( long, std::minus<long> )
 instantiate_volutil2( long, std::multiplies<long> )
 instantiate_volutil2( long, std::divides<long> )
 
-instantiate_volutil( size_t )
-instantiate_volutil2( size_t, std::plus<size_t> )
-instantiate_volutil2( size_t, std::minus<size_t> )
-instantiate_volutil2( size_t, std::multiplies<size_t> )
-instantiate_volutil2( size_t, std::divides<size_t> )
+instantiate_volutil( unsigned long )
+instantiate_volutil2( unsigned long, std::plus<unsigned long> )
+instantiate_volutil2( unsigned long, std::minus<unsigned long> )
+instantiate_volutil2( unsigned long, std::multiplies<unsigned long> )
+instantiate_volutil2( unsigned long, std::divides<unsigned long> )
 #endif
 
 instantiate_volutil( float )
@@ -303,7 +303,7 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< cdouble > )
 #ifndef __LP64__
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< size_t > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
 #endif
 
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int8_t > > )
@@ -323,7 +323,7 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cdouble > > )
 #ifndef __LP64__
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< size_t > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
 #endif
 
 

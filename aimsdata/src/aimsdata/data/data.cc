@@ -57,7 +57,7 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
 #ifndef __LP64__
 INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<long> )
-INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<size_t> )
+INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<unsigned long> )
 #endif
 
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<int8_t> > )
@@ -81,7 +81,7 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
 #ifndef __LP64__
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<long> > )
-INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<size_t> > )
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<unsigned long> > )
 #endif
 
 } // namespace carto

@@ -68,7 +68,7 @@ DECLARE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
 #ifndef __LP64__
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<long> )
-DECLARE_GENERIC_OBJECT_TYPE( AimsData<size_t> )
+DECLARE_GENERIC_OBJECT_TYPE( AimsData<unsigned long> )
 #endif
 
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<int8_t> > )
@@ -93,7 +93,7 @@ DECLARE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
 #ifndef __LP64__
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<long> > )
-DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<size_t> > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<unsigned long> > )
 #endif
 
 } // namespace carto
