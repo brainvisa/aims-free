@@ -41,6 +41,8 @@ template class NiftiReader<int16_t> ;
 template class NiftiReader<uint16_t> ;
 template class NiftiReader<int32_t> ;
 template class NiftiReader<uint32_t> ;
+template class NiftiReader<int64_t> ;
+template class NiftiReader<uint64_t> ;
 template class NiftiReader<float> ;
 template class NiftiReader<double> ;
 template class NiftiReader<AimsRGB>;
@@ -50,5 +52,8 @@ template class NiftiReader<AimsRGBA>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class NiftiReader<char> ;
 #endif
+#ifndef __LP64__
 template class NiftiReader<long> ;
 template class NiftiReader<unsigned long> ;
+#endif
+
