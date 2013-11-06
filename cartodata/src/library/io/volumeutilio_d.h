@@ -173,10 +173,14 @@ namespace soma {
       localMsg( "checking full volume..." );
       *dsi = dsil.check( *dsi, options );
       localMsg( "reading size..." );
-      fullsize[0] = dsi->header()->getProperty( "sizeX" )->getScalar();
-      fullsize[1] = dsi->header()->getProperty( "sizeY" )->getScalar();
-      fullsize[2] = dsi->header()->getProperty( "sizeZ" )->getScalar();
-      fullsize[3] = dsi->header()->getProperty( "sizeT" )->getScalar();
+      fullsize[0] = (int) rint(
+        dsi->header()->getProperty( "sizeX" )->getScalar() );
+      fullsize[1] = (int) rint(
+        dsi->header()->getProperty( "sizeY" )->getScalar() );
+      fullsize[2] = (int) rint(
+          dsi->header()->getProperty( "sizeZ" )->getScalar() );
+      fullsize[3] = (int) rint(
+          dsi->header()->getProperty( "sizeT" )->getScalar() );
       localMsg( "-> size =  ( "
                 + carto::toString( fullsize[0] ) + ", "
                 + carto::toString( fullsize[1] ) + ", "
