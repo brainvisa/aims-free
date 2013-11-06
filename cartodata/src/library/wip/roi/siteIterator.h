@@ -35,16 +35,13 @@
 #define CARTODATA_ROI_SITEITERATOR_H
 
 #include <cartobase/object/object.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/io/reader.h>
-#else
-  #include <cartobase/io/reader.h>
-#endif
+#include <soma-io/io/reader.h>
 #include <cartodata/volume/volume.h>
 #include <vector>
 #include <iostream>
 
-namespace carto {
+namespace carto 
+{
 
 class Site : virtual public RCObject
 {
