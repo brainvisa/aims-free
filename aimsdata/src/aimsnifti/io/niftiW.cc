@@ -52,8 +52,4 @@ template class NiftiWriter<AimsRGBA>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class NiftiWriter<char> ;
 #endif
-#ifndef __LP64__
-template class NiftiWriter<long> ;
-template class NiftiWriter<unsigned long> ;
-#endif
 

@@ -52,8 +52,4 @@ template class NiftiReader<AimsRGBA>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class NiftiReader<char> ;
 #endif
-#ifndef __LP64__
-template class NiftiReader<long> ;
-template class NiftiReader<unsigned long> ;
-#endif
 
