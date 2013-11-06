@@ -60,6 +60,8 @@ template void  ProbabilisticPcaElement::doIt<int16_t>(const AimsData<int16_t>&, 
 template void  ProbabilisticPcaElement::doIt<uint16_t>(const AimsData<uint16_t>&, double) ;
 template void  ProbabilisticPcaElement::doIt<int32_t>(const AimsData<int32_t>&, double) ;
 template void  ProbabilisticPcaElement::doIt<uint32_t>(const AimsData<uint32_t>&, double) ;
+template void  ProbabilisticPcaElement::doIt<int64_t>(const AimsData<int64_t>&, double) ;
+template void  ProbabilisticPcaElement::doIt<uint64_t>(const AimsData<uint64_t>&, double) ;
 template void  ProbabilisticPcaElement::doIt<float>(const AimsData<float>&, double) ;
 template void  ProbabilisticPcaElement::doIt<double>(const AimsData<double>&, double) ;
 
@@ -67,8 +69,10 @@ template void  ProbabilisticPcaElement::doIt<double>(const AimsData<double>&, do
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template void  ProbabilisticPcaElement::doIt<char>(const AimsData<char>&, double) ;
 #endif
-template void  ProbabilisticPcaElement::doIt<int64_t>(const AimsData<int64_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint64_t>(const AimsData<uint64_t>&, double) ;
+#ifndef __LP64__
+template void  ProbabilisticPcaElement::doIt<long>(const AimsData<long>&, double) ;
+template void  ProbabilisticPcaElement::doIt<unsigned long>(const AimsData<unsigned long>&, double) ;
+#endif
 
 template double  ProbabilisticPcaElement::noiseVariance<int8_t>(const AimsData<int8_t>&, double &) const ;
 template double  ProbabilisticPcaElement::noiseVariance<uint8_t>(const AimsData<uint8_t>&, double &) const ;
@@ -76,6 +80,8 @@ template double  ProbabilisticPcaElement::noiseVariance<int16_t>(const AimsData<
 template double  ProbabilisticPcaElement::noiseVariance<uint16_t>(const AimsData<uint16_t>&, double &) const ;
 template double  ProbabilisticPcaElement::noiseVariance<int32_t>(const AimsData<int32_t>&, double &) const ;
 template double  ProbabilisticPcaElement::noiseVariance<uint32_t>(const AimsData<uint32_t>&, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<int64_t>(const AimsData<int64_t>&, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<uint64_t>(const AimsData<uint64_t>&, double &) const ;
 template double  ProbabilisticPcaElement::noiseVariance<float>(const AimsData<float>&, double &) const ;
 template double  ProbabilisticPcaElement::noiseVariance<double>(const AimsData<double>&, double &) const ;
 
@@ -83,8 +89,10 @@ template double  ProbabilisticPcaElement::noiseVariance<double>(const AimsData<d
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template double  ProbabilisticPcaElement::noiseVariance<char>(const AimsData<char>&, double &) const ;
 #endif
-template double  ProbabilisticPcaElement::noiseVariance<int64_t>(const AimsData<int64_t>&, double &) const ;
-template double  ProbabilisticPcaElement::noiseVariance<uint64_t>(const AimsData<uint64_t>&, double &) const ;
+#ifndef __LP64__
+template double  ProbabilisticPcaElement::noiseVariance<long>(const AimsData<long>&, double &) const ;
+template double  ProbabilisticPcaElement::noiseVariance<unsigned long>(const AimsData<unsigned long>&, double &) const ;
+#endif
 
 template void  ProbabilisticPcaElement::doIt<int8_t>(const std::list< Point3d>&, const AimsData<int8_t>&, double) ;
 template void  ProbabilisticPcaElement::doIt<uint8_t>(const std::list< Point3d>&, const AimsData<uint8_t>&, double) ;
@@ -92,6 +100,8 @@ template void  ProbabilisticPcaElement::doIt<int16_t>(const std::list< Point3d>&
 template void  ProbabilisticPcaElement::doIt<uint16_t>(const std::list< Point3d>&, const AimsData<uint16_t>&, double) ;
 template void  ProbabilisticPcaElement::doIt<int32_t>(const std::list< Point3d>&, const AimsData<int32_t>&, double) ;
 template void  ProbabilisticPcaElement::doIt<uint32_t>(const std::list< Point3d>&, const AimsData<uint32_t>&, double) ;
+template void  ProbabilisticPcaElement::doIt<int64_t>(const std::list< Point3d>&, const AimsData<int64_t>&, double) ;
+template void  ProbabilisticPcaElement::doIt<uint64_t>(const std::list< Point3d>&, const AimsData<uint64_t>&, double) ;
 template void  ProbabilisticPcaElement::doIt<float>(const std::list< Point3d>&, const AimsData<float>&, double) ;
 template void  ProbabilisticPcaElement::doIt<double>(const std::list< Point3d>&, const AimsData<double>&, double) ;
 
@@ -99,8 +109,10 @@ template void  ProbabilisticPcaElement::doIt<double>(const std::list< Point3d>&,
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template void  ProbabilisticPcaElement::doIt<char>(const std::list< Point3d>&, const AimsData<char>&, double) ;
 #endif
-template void  ProbabilisticPcaElement::doIt<int64_t>(const std::list< Point3d>&, const AimsData<int64_t>&, double) ;
-template void  ProbabilisticPcaElement::doIt<uint64_t>(const std::list< Point3d>&, const AimsData<uint64_t>&, double) ;
+#ifndef __LP64__
+template void  ProbabilisticPcaElement::doIt<long>(const std::list< Point3d>&, const AimsData<long>&, double) ;
+template void  ProbabilisticPcaElement::doIt<unsigned long>(const std::list< Point3d>&, const AimsData<unsigned long>&, double) ;
+#endif
 
 
 template class  ProbabilisticPca<int8_t> ;
@@ -109,6 +121,8 @@ template class  ProbabilisticPca<int16_t> ;
 template class  ProbabilisticPca<uint16_t> ;
 template class  ProbabilisticPca<int32_t> ;
 template class  ProbabilisticPca<uint32_t> ;
+template class  ProbabilisticPca<int64_t> ;
+template class  ProbabilisticPca<uint64_t> ;
 template class  ProbabilisticPca<float> ;
 template class  ProbabilisticPca<double> ;
 
@@ -116,5 +130,7 @@ template class  ProbabilisticPca<double> ;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class  ProbabilisticPca<char> ;
 #endif
-template class  ProbabilisticPca<int64_t> ;
-template class  ProbabilisticPca<uint64_t> ;
+#ifndef __LP64__
+template class  ProbabilisticPca<long> ;
+template class  ProbabilisticPca<unsigned long> ;
+#endif
