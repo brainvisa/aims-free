@@ -113,8 +113,8 @@ void CoarseReader::read( AimsData<int16_t> & data, int border,
 
   // ### remove after everything has been moved to intN_t/uintN_t
   p.registerProcessType( "Volume", "S8", &convert<AimsData<char> > );
-  p.registerProcessType( "Volume", "S32", &convert<AimsData<long> > );
-  p.registerProcessType( "Volume", "U32", &convert<AimsData<unsigned long> > );
+  p.registerProcessType( "Volume", "S64", &convert<AimsData<int64_t> > );
+  p.registerProcessType( "Volume", "U64", &convert<AimsData<uint64_t> > );
 
   p.execute( _filename );
 }

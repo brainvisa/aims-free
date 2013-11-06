@@ -411,5 +411,5 @@ template class MincWriter<double> ;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class MincWriter<char> ;
 #endif
-template class MincWriter<long> ;
-template class MincWriter<unsigned long> ;
+template class MincWriter<int64_t> ;
+template class MincWriter<uint64_t> ;

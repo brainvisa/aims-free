@@ -281,6 +281,7 @@ set( _sources
     io/mniobjheader.cc
     io/process.cc
     io/reader_bucket.cc
+    io/reader_cartovolume.cc
     io/reader_genericobject.cc
     io/reader_graph.cc
     io/reader_hierarchy.cc
@@ -308,6 +309,7 @@ set( _sources
     io/triW.cc
     io/trmheader.cc
     io/writer_bucket.cc
+    io/writer_cartovolume.cc
     io/writer_genericobject.cc
     io/writer_graph.cc
     io/writer_hierarchy.cc

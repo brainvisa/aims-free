@@ -37,11 +37,7 @@
 
 #include <aims/io/vidaheader.h>
 #include <aims/data/data.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/allocator/mappingcopy.h>
-#else
-  #include <cartobase/allocator/mappingcopy.h>
-#endif
+#include <soma-io/allocator/mappingcopy.h>
 
 template <class T> class AimsData;
 

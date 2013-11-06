@@ -41,6 +41,8 @@ template class NiftiWriter<int16_t> ;
 template class NiftiWriter<uint16_t> ;
 template class NiftiWriter<int32_t> ;
 template class NiftiWriter<uint32_t> ;
+template class NiftiWriter<int64_t> ;
+template class NiftiWriter<uint64_t> ;
 template class NiftiWriter<float> ;
 template class NiftiWriter<double> ;
 template class NiftiWriter<AimsRGB>;
@@ -50,5 +52,4 @@ template class NiftiWriter<AimsRGBA>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class NiftiWriter<char> ;
 #endif
-template class NiftiWriter<long> ;
-template class NiftiWriter<unsigned long> ;
+

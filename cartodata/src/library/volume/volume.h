@@ -37,14 +37,11 @@
 #include <cartodata/config/config.h>
 #include <cartodata/volume/volumeproxy.h>
 //--- soma-io ----------------------------------------------------------------
-#ifdef USE_SOMA_IO
-  #include <cartobase/type/voxelrgb.h>
-  #include <cartobase/type/voxelrgba.h>
-  #include <cartobase/type/voxelhsv.h>
-#endif
-//--- moved to soma-io -------------------------------------------------------
-#include <cartobase/containers/allocatedvector.h>
-#include <cartobase/io/creator.h>
+#include <cartobase/type/voxelrgb.h>
+#include <cartobase/type/voxelrgba.h>
+#include <cartobase/type/voxelhsv.h>
+#include <soma-io/utilities/allocatedvector.h>
+#include <soma-io/utilities/creator.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/object/object.h>
 #include <cartobase/type/types.h>
@@ -557,17 +554,19 @@ namespace carto
   extern template class Volume<uint16_t>;
   extern template class Volume<int32_t>;
   extern template class Volume<uint32_t>;
-  extern template class Volume<long>;
-  extern template class Volume<unsigned long>;
+  extern template class Volume<int64_t>;
+  extern template class Volume<uint64_t>;
   extern template class Volume<float>;
   extern template class Volume<double>;
   extern template class Volume<cfloat>;
   extern template class Volume<cdouble>;
   extern template class Volume< std::map<int, float> >;
-#ifdef USE_SOMA_IO
   extern template class Volume< soma::VoxelRGB >;
   extern template class Volume< soma::VoxelRGBA >;
   extern template class Volume< soma::VoxelHSV >;
+#ifndef __LP64__
+  extern template class Volume<long>;
+  extern template class Volume<unsigned long>;
 #endif
 
   extern template class Creator<Volume<int8_t> >;
@@ -580,17 +579,19 @@ namespace carto
   extern template class Creator<Volume<uint16_t> >;
   extern template class Creator<Volume<int32_t> >;
   extern template class Creator<Volume<uint32_t> >;
-  extern template class Creator<Volume<long> >;
-  extern template class Creator<Volume<unsigned long> >;
+  extern template class Creator<Volume<int64_t> >;
+  extern template class Creator<Volume<uint64_t> >;
   extern template class Creator<Volume<float> >;
   extern template class Creator<Volume<double> >;
   extern template class Creator<Volume<cfloat> >;
   extern template class Creator<Volume<cdouble> >;
   extern template class Creator<Volume< std::map<int, float> > >;
-#ifdef USE_SOMA_IO
   extern template class Creator<Volume<soma::VoxelRGB> >;
   extern template class Creator<Volume<soma::VoxelRGBA> >;
   extern template class Creator<Volume<soma::VoxelHSV> >;
+#ifndef __LP64__
+  extern template class Creator<Volume<long> >;
+  extern template class Creator<Volume<unsigned long> >;
 #endif
 
   extern template class Creator<VolumeRef<int8_t> >;
@@ -603,17 +604,19 @@ namespace carto
   extern template class Creator<VolumeRef<uint16_t> >;
   extern template class Creator<VolumeRef<int32_t> >;
   extern template class Creator<VolumeRef<uint32_t> >;
-  extern template class Creator<VolumeRef<long> >;
-  extern template class Creator<VolumeRef<unsigned long> >;
+  extern template class Creator<VolumeRef<int64_t> >;
+  extern template class Creator<VolumeRef<uint64_t> >;
   extern template class Creator<VolumeRef<float> >;
   extern template class Creator<VolumeRef<double> >;
   extern template class Creator<VolumeRef<cfloat> >;
   extern template class Creator<VolumeRef<cdouble> >;
   extern template class Creator<VolumeRef< std::map<int, float> > >;
-#ifdef USE_SOMA_IO
   extern template class Creator<VolumeRef<soma::VoxelRGB> >;
   extern template class Creator<VolumeRef<soma::VoxelRGBA> >;
   extern template class Creator<VolumeRef<soma::VoxelHSV> >;
+#ifndef __LP64__
+  extern template class Creator<VolumeRef<long> >;
+  extern template class Creator<VolumeRef<unsigned long> >;
 #endif
 
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )
@@ -625,12 +628,16 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< uint16_t > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int32_t > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< uint32_t > )
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< int64_t > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< uint64_t > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< float > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< double > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< cfloat > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< cdouble > )
+#ifndef __LP64__
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
+#endif
 
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int8_t > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint8_t > > )
@@ -641,12 +648,16 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint16_t > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int32_t > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint32_t > > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< int64_t > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< uint64_t > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< float > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< double > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cfloat > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cdouble > > )
+#ifndef __LP64__
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
+#endif
 
 } // namespace carto
 

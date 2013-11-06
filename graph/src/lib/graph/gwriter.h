@@ -40,11 +40,7 @@
 //=============================================================================
 
 #include <graph/config/graph_config.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/writer/awriter.h>
-#else
-  #include <cartobase/object/awriter.h>
-#endif
+#include <soma-io/writer/awriter.h>
 
 
 //=============================================================================

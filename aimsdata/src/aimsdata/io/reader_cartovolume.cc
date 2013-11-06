@@ -38,8 +38,6 @@
 // of the most useful Reader templates
 
 #include <aims/config/aimsdata_config.h>
-#include <soma-io/io/reader_d.h>
-#include <soma-io/io/formatdictionary_d.h>
 #include <aims/io/reader_d.h>
 #include <aims/data/data.h>
 #include <aims/rgb/rgb.h>
@@ -49,37 +47,43 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-#define COMMA ,
-
-AIMS_INSTANTIATE_READER( AimsData<int8_t> );
-AIMS_INSTANTIATE_READER( AimsData<uint8_t> );
-AIMS_INSTANTIATE_READER( AimsData<int16_t> );
-AIMS_INSTANTIATE_READER( AimsData<uint16_t> );
-AIMS_INSTANTIATE_READER( AimsData<int32_t> );
-AIMS_INSTANTIATE_READER( AimsData<uint32_t> );
-AIMS_INSTANTIATE_READER( AimsData<float> );
-AIMS_INSTANTIATE_READER( AimsData<double> );
-AIMS_INSTANTIATE_READER( AimsData<cfloat> );
-AIMS_INSTANTIATE_READER( AimsData<cdouble> );
-AIMS_INSTANTIATE_READER( AimsData<AimsRGB> );
-AIMS_INSTANTIATE_READER( AimsData<AimsRGBA> );
-AIMS_INSTANTIATE_READER( AimsData<AimsHSV> );
-AIMS_INSTANTIATE_READER( AimsData<Point3df> );
-AIMS_INSTANTIATE_READER( AimsData<Point3d> );
-AIMS_INSTANTIATE_READER( AimsData<AimsVector<float COMMA 6> > );
-
+AIMS_INSTANTIATE_AIMS_READER( Volume<int8_t> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<uint8_t> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<int16_t> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<uint16_t> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<int32_t> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<uint32_t> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<float> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<double> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<cfloat> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<cdouble> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<AimsRGB> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<AimsRGBA> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<AimsHSV> );
 // ### remove after everything has been moved to intN_t/uintN_t
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
-AIMS_INSTANTIATE_READER( AimsData<char> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<char> );
 #endif
-AIMS_INSTANTIATE_READER( AimsData<int64_t> );
-AIMS_INSTANTIATE_READER( AimsData<uint64_t> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<int64_t> );
+AIMS_INSTANTIATE_AIMS_READER( Volume<uint64_t> );
 
-AIMS_INSTANTIATE_READER( Volume<Point3df> );
-AIMS_INSTANTIATE_READER( Volume<Point3d> );
-AIMS_INSTANTIATE_READER( Volume<AimsVector<float COMMA 6> > );
-
-AIMS_INSTANTIATE_READER( VolumeRef<Point3df> );
-AIMS_INSTANTIATE_READER( VolumeRef<Point3d> );
-AIMS_INSTANTIATE_READER( VolumeRef<AimsVector<float COMMA 6> > );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<int8_t> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<uint8_t> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<int16_t> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<uint16_t> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<int32_t> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<uint32_t> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<float> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<double> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<cfloat> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<cdouble> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<AimsRGB> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<AimsRGBA> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<AimsHSV> );
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<char> );
+#endif
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<int64_t> );
+AIMS_INSTANTIATE_AIMS_READER( VolumeRef<uint64_t> );
 

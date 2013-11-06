@@ -117,6 +117,21 @@ NiftiPlugin::NiftiPlugin() : Plugin()
   FileFormatDictionary<Volume<uint32_t> >::registerFormat( "NIFTI1", vf6, ext,
       "SPM" );
 
+  NiftiFormat<int64_t>  *df64 = new NiftiFormat<int64_t>;
+  FileFormatDictionary<AimsData<int64_t> >::registerFormat( "NIFTI1", df64,
+      ext , "SPM");
+  VolumeFormat<int64_t> *vf64 = new VolumeFormat<int64_t>( "NIFTI1" );
+  FileFormatDictionary<Volume<int64_t> >::registerFormat( "NIFTI1", vf64, ext,
+      "SPM" );
+
+  NiftiFormat<uint64_t> *dfu64 = new NiftiFormat<uint64_t>;
+  FileFormatDictionary<AimsData<uint64_t> >::registerFormat( "NIFTI1", dfu64,
+      ext, "SPM" );
+  VolumeFormat<uint64_t>        *vfu64 = new VolumeFormat<uint64_t>( 
+      "NIFTI1" );
+  FileFormatDictionary<Volume<uint64_t> >::registerFormat( "NIFTI1", vfu64, 
+      ext, "SPM" );
+
   NiftiFormat<float>	*df7 = new NiftiFormat<float>;
   FileFormatDictionary<AimsData<float> >::registerFormat( "NIFTI1", df7, ext,
       "SPM" );

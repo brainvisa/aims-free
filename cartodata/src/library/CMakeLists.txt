@@ -1,29 +1,14 @@
 BRAINVISA_GET_FILE_LIST_FROM_PRO( ${CMAKE_CURRENT_SOURCE_DIR}/library.pro 
                                   "HEADERS" _headers 
-                                  "HEADERS_NO_USE_SOMA_IO" _headers_no_use 
-                                  "HEADERS_USE_SOMA_IO" _headers_use
                                   "SOURCES" _sources
-                                  "SOURCES_NO_USE_SOMA_IO" _sources_no_use 
-                                  "SOURCES_USE_SOMA_IO" _sources_use 
                                 )
 
-if( USE_SOMA_IO )
-  set( _headers "${_headers}" "${_headers_use}" )
-  set( _sources "${_sources}" "${_sources_use}" )
-else()
-  set( _headers "${_headers}" "${_headers_no_use}" )
-  set( _sources "${_sources}" "${_sources_no_use}" )
-endif()
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers cartodata headersTarget )
 add_library( cartodata SHARED ${_sources} )
 
 add_dependencies( cartodata ${headersTarget} )
 set_property( TARGET cartodata PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-if( USE_SOMA_IO )
-  target_link_libraries( cartodata ${SOMA-IO_LIBRARIES} )
-else()
-  target_link_libraries( cartodata ${SOMA_CARTOBASE_LIBRARIES} )
-endif( USE_SOMA_IO )
+target_link_libraries( cartodata ${SOMA-IO_LIBRARIES} )
 BRAINVISA_INSTALL( TARGETS cartodata
                    DESTINATION lib
                    COMPONENT ${PROJECT_NAME} )

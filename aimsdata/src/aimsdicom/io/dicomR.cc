@@ -40,17 +40,7 @@
 #include <cartobase/exception/assert.h>
 #include <cartobase/exception/format.h>
 #include <cartobase/exception/ioexcept.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/allocator/mappingcopy.h>
-  #include <soma-io/allocator/mappingro.h>
-  #include <soma-io/allocator/mappingrw.h>
-  #include <soma-io/datasource/filedatasource.h>
-#else
-  #include <cartobase/allocator/mappingcopy.h>
-  #include <cartobase/allocator/mappingro.h>
-  #include <cartobase/allocator/mappingrw.h>
-  #include <cartobase/datasource/filedatasource.h>
-#endif
+#include <soma-io/datasource/filedatasource.h>
 #include <memory>
 #include <dcerror.h>
 
@@ -452,9 +442,7 @@ namespace aims
   template class DicomReader< int32_t >;
   template class DicomReader< float >;
   template class DicomReader< double >;
-  
-  // ### remove after everything has been moved to intN_t/uintN_t
+  template class DicomReader< int64_t >;
+  template class DicomReader< uint64_t >;
   template class DicomReader< char >;
-  template class DicomReader< long >;
-  template class DicomReader< unsigned long >;
 }

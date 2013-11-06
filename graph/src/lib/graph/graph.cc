@@ -41,11 +41,7 @@
 #include <graph/graph/dedge.h>
 #include <cartobase/object/syntax.h>
 #include <cartobase/smart/rcptrtrick.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/checker/achecker.h>
-#else
-  #include <cartobase/object/achecker.h>
-#endif
+#include <soma-io/checker/achecker.h>
 #include <vector>
 
 using namespace carto;

@@ -35,11 +35,7 @@
 
 #include <graph/tree/tree.h>
 #include <graph/tree/tvisitor.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/checker/achecker.h>
-#else
-  #include <cartobase/object/achecker.h>
-#endif
+#include <soma-io/checker/achecker.h>
 
 using namespace carto;
 using namespace std;

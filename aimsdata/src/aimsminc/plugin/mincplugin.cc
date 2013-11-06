@@ -128,21 +128,20 @@ MincPlugin::MincPlugin() : Plugin()
   FileFormatDictionary<carto::Volume<char> >::registerFormat( "MINC", vf10, 
                                                               ext );
 
-  MincFormat<long>	*df11 = new MincFormat<long>;
-  FileFormatDictionary<AimsData<long> >::registerFormat( "MINC", 
+  MincFormat<int64_t>	*df11 = new MincFormat<int64_t>;
+  FileFormatDictionary<AimsData<int64_t> >::registerFormat( "MINC", 
                                                          df11, ext );
-  VolumeFormat<long>	*vf11 = new VolumeFormat<long>( "MINC" );
-  FileFormatDictionary<carto::Volume<long> >::registerFormat( "MINC", vf11, 
+  VolumeFormat<int64_t>	*vf11 = new VolumeFormat<int64_t>( "MINC" );
+  FileFormatDictionary<carto::Volume<int64_t> >::registerFormat( "MINC", vf11, 
                                                               ext );
 
-  MincFormat<unsigned long>	*df12 = new MincFormat<unsigned long>;
-  FileFormatDictionary<AimsData<unsigned long> >::registerFormat( "MINC", 
+  MincFormat<uint64_t>	*df12 = new MincFormat<uint64_t>;
+  FileFormatDictionary<AimsData<uint64_t> >::registerFormat( "MINC", 
                                                                   df12, ext );
-  VolumeFormat<unsigned long>	*vf12
-    = new VolumeFormat<unsigned long>( "MINC" );
-  FileFormatDictionary<carto::Volume<unsigned long> >::registerFormat( "MINC", 
-                                                                       vf12, 
-                                                                       ext );
+  VolumeFormat<uint64_t>	*vf12
+    = new VolumeFormat<uint64_t>( "MINC" );
+  FileFormatDictionary<carto::Volume<uint64_t> >::registerFormat( "MINC", 
+                                                                  vf12, ext );
 
   Finder::registerFormat( "MINC", new FinderMincFormat, ext );
 

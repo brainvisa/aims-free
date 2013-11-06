@@ -36,10 +36,10 @@
 #endif
 
 #include <cartodata/wip/io/bundleformatchecker.h>
-#include <cartobase/object/pythonreader.h>
-#include <cartobase/io/minfXML2.h>
-#include <cartobase/io/datasourceinfo.h>
-#include <cartobase/datasource/datasource.h>
+#include <soma-io/object/pythonreader.h>
+#include <soma-io/io/minfXML2.h>
+#include <soma-io/io/datasourceinfo.h>
+#include <soma-io/datasource/datasource.h>
 #include <cartobase/object/property.h>
 
 using namespace carto;

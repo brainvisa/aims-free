@@ -87,53 +87,61 @@ namespace soma {
     std::vector<int> frame( 4, 0 );
     std::vector<int> borders( 4, 0 );
     try {
-      position[0] = options->getProperty( "ox" )->getScalar();
+      position[0] = (int) rint(
+        options->getProperty( "ox" )->getScalar() );
       options->removeProperty( "ox" );
     } catch( ... ) {}
     try {
-      position[1] = options->getProperty( "oy" )->getScalar();
+      position[1] = (int) rint(
+        options->getProperty( "oy" )->getScalar() );
       options->removeProperty( "oy" );
     } catch( ... ) {}
     try {
-      position[2] = options->getProperty( "oz" )->getScalar();
+      position[2] = (int) rint(
+        options->getProperty( "oz" )->getScalar() );
       options->removeProperty( "oz" );
     } catch( ... ) {}
     try {
-      position[3] = options->getProperty( "ot" )->getScalar();
+      position[3] = (int) rint(
+        options->getProperty( "ot" )->getScalar() );
       options->removeProperty( "ot" );
     } catch( ... ) {}
     try {
-      frame[0] = options->getProperty( "sx" )->getScalar();
+      frame[0] = (int) rint(
+        options->getProperty( "sx" )->getScalar() );
       options->removeProperty( "sx" );
     } catch( ... ) {}
     try {
-      frame[1] = options->getProperty( "sy" )->getScalar();
+      frame[1] = (int) rint(
+        options->getProperty( "sy" )->getScalar() );
       options->removeProperty( "sy" );
     } catch( ... ) {}
     try {
-      frame[2] = options->getProperty( "sz" )->getScalar();
+      frame[2] = (int) rint(
+        options->getProperty( "sz" )->getScalar() );
       options->removeProperty( "sz" );
     } catch( ... ) {}
     try {
-      frame[3] = options->getProperty( "st" )->getScalar();
+      frame[3] = (int) rint(
+        options->getProperty( "st" )->getScalar() );
       options->removeProperty( "st" );
     } catch( ... ) {}
     try {
-      borders[0] = options->getProperty( "border" )->getScalar();
-      borders[1] = options->getProperty( "border" )->getScalar();
-      borders[2] = options->getProperty( "border" )->getScalar();
+      borders[0] = (int) rint( options->getProperty( "border" )->getScalar() );
+      borders[1] = (int) rint( options->getProperty( "border" )->getScalar() );
+      borders[2] = (int) rint( options->getProperty( "border" )->getScalar() );
       options->removeProperty( "border" );
     } catch( ... ) {}
     try {
-      borders[0] = options->getProperty( "bx" )->getScalar();
+      borders[0] = (int) rint( options->getProperty( "bx" )->getScalar() );
       options->removeProperty( "bx" );
     } catch( ... ) {}
     try {
-      borders[1] = options->getProperty( "by" )->getScalar();
+      borders[1] = (int) rint( options->getProperty( "by" )->getScalar() );
       options->removeProperty( "by" );
     } catch( ... ) {}
     try {
-      borders[2] = options->getProperty( "bz" )->getScalar();
+      borders[2] = (int) rint( options->getProperty( "bz" )->getScalar() );
       options->removeProperty( "bz" );
     } catch( ... ) {}
 
@@ -173,10 +181,14 @@ namespace soma {
       localMsg( "checking full volume..." );
       *dsi = dsil.check( *dsi, options );
       localMsg( "reading size..." );
-      fullsize[0] = dsi->header()->getProperty( "sizeX" )->getScalar();
-      fullsize[1] = dsi->header()->getProperty( "sizeY" )->getScalar();
-      fullsize[2] = dsi->header()->getProperty( "sizeZ" )->getScalar();
-      fullsize[3] = dsi->header()->getProperty( "sizeT" )->getScalar();
+      fullsize[0] = (int) rint(
+        dsi->header()->getProperty( "sizeX" )->getScalar() );
+      fullsize[1] = (int) rint(
+        dsi->header()->getProperty( "sizeY" )->getScalar() );
+      fullsize[2] = (int) rint(
+          dsi->header()->getProperty( "sizeZ" )->getScalar() );
+      fullsize[3] = (int) rint(
+          dsi->header()->getProperty( "sizeT" )->getScalar() );
       localMsg( "-> size =  ( "
                 + carto::toString( fullsize[0] ) + ", "
                 + carto::toString( fullsize[1] ) + ", "

@@ -48,5 +48,5 @@ template class SpmWriter<double> ;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class SpmWriter<char> ;
 #endif
-template class SpmWriter<long> ;
-template class SpmWriter<unsigned long> ;
+template class SpmWriter<int64_t> ;
+template class SpmWriter<uint64_t> ;

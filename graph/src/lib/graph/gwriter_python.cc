@@ -34,11 +34,7 @@
 #include <graph/graph/gwriter_python.h>
 #include <graph/graph/graph.h>
 #include <graph/tree/tree.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/utilities/asciidatasourcetraits.h>
-#else
-  #include <cartobase/io/asciidatasourcetraits.h>
-#endif
+#include <soma-io/utilities/asciidatasourcetraits.h>
 #include <iostream>
 
 using namespace carto;

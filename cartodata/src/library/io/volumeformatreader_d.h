@@ -283,30 +283,38 @@ namespace soma
     std::vector<int>  imagesize( 4, 0 );
     try {
       // first we look for "resolutions_dimension" property
-      imagesize[ 0 ] = dsi->header()->getProperty( "resolutions_dimension" )
+      imagesize[ 0 ] = (int) rint(
+        dsi->header()->getProperty( "resolutions_dimension" )
                           ->getArrayItem( level )->getArrayItem( 0 )
-                          ->getScalar();
-      imagesize[ 1 ] = dsi->header()->getProperty( "resolutions_dimension" )
+                          ->getScalar() );
+      imagesize[ 1 ] = (int) rint(
+        dsi->header()->getProperty( "resolutions_dimension" )
                           ->getArrayItem( level )->getArrayItem( 1 )
-                          ->getScalar();
-      imagesize[ 2 ] = dsi->header()->getProperty( "resolutions_dimension" )
+                          ->getScalar() );
+      imagesize[ 2 ] = (int) rint(
+        dsi->header()->getProperty( "resolutions_dimension" )
                           ->getArrayItem( level )->getArrayItem( 2 )
-                          ->getScalar();
-      imagesize[ 3 ] = dsi->header()->getProperty( "resolutions_dimension" )
+                          ->getScalar() );
+      imagesize[ 3 ] = (int) rint(
+        dsi->header()->getProperty( "resolutions_dimension" )
                           ->getArrayItem( level )->getArrayItem( 3 )
-                          ->getScalar();
+                          ->getScalar() );
       localMsg( " -> found \"resolutions_dimension\"." );
     } catch( ... ) {
       try {
         // if it doesn't work, we look for "volume_dimension"
-        imagesize[ 0 ] = dsi->header()->getProperty( "volume_dimension" )
-                            ->getArrayItem( 0 )->getScalar();
-        imagesize[ 1 ] = dsi->header()->getProperty( "volume_dimension" )
-                            ->getArrayItem( 1 )->getScalar();
-        imagesize[ 2 ] = dsi->header()->getProperty( "volume_dimension" )
-                            ->getArrayItem( 2 )->getScalar();
-        imagesize[ 3 ] = dsi->header()->getProperty( "volume_dimension" )
-                            ->getArrayItem( 3 )->getScalar();
+        imagesize[ 0 ] = (int) rint(
+          dsi->header()->getProperty( "volume_dimension" )
+                            ->getArrayItem( 0 )->getScalar() );
+        imagesize[ 1 ] = (int) rint(
+          dsi->header()->getProperty( "volume_dimension" )
+                            ->getArrayItem( 1 )->getScalar() );
+        imagesize[ 2 ] = (int) rint(
+          dsi->header()->getProperty( "volume_dimension" )
+                            ->getArrayItem( 2 )->getScalar() );
+        imagesize[ 3 ] = (int) rint(
+            dsi->header()->getProperty( "volume_dimension" )
+                            ->getArrayItem( 3 )->getScalar() );
         localMsg( " -> found \"volume_dimension\"." );
       } catch( ... ) {
         // if still nothing, we look for parent volumes

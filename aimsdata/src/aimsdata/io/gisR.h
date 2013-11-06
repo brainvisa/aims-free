@@ -41,17 +41,10 @@
 #include <aims/data/data.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/exception/format.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasource/filedatasource.h>
-  #include <soma-io/allocator/mappingcopy.h>
-  #include <soma-io/allocator/mappingro.h>
-  #include <soma-io/allocator/mappingrw.h>
-#else
-  #include <cartobase/datasource/filedatasource.h>
-  #include <cartobase/allocator/mappingcopy.h>
-  #include <cartobase/allocator/mappingro.h>
-  #include <cartobase/allocator/mappingrw.h>
-#endif
+#include <soma-io/datasource/filedatasource.h>
+#include <soma-io/allocator/mappingcopy.h>
+#include <soma-io/allocator/mappingro.h>
+#include <soma-io/allocator/mappingrw.h>
 // protection against MacOS macros
 #ifdef MAP_COPY
 #undef MAP_COPY

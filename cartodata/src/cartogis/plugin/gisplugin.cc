@@ -88,33 +88,41 @@ GisPlugin::GisPlugin() : Plugin()
     //==========================================================================
     
     //--- INT ------------------------------------------------------------------
-    
+
     VolumeFormatReader<int8_t> *vfr8 = new VolumeFormatReader<int8_t>;
     vfr8->attach( rc_ptr<ImageReader<int8_t> >( new GisImageReader<int8_t> ) );
     FormatDictionary<Volume<int8_t> >::registerFormat( "GIS", vfr8, exts );
-    
+
     VolumeFormatReader<int16_t> *vfr16 = new VolumeFormatReader<int16_t>;
     vfr16->attach( rc_ptr<ImageReader<int16_t> >( new GisImageReader<int16_t> ) );
     FormatDictionary<Volume<int16_t> >::registerFormat( "GIS", vfr16, exts );
-    
+
     VolumeFormatReader<int32_t> *vfr32 = new VolumeFormatReader<int32_t>;
     vfr32->attach( rc_ptr<ImageReader<int32_t> >( new GisImageReader<int32_t> ) );
     FormatDictionary<Volume<int32_t> >::registerFormat( "GIS", vfr32, exts );
-    
+
+    VolumeFormatReader<int64_t> *vfr64 = new VolumeFormatReader<int64_t>;
+    vfr64->attach( rc_ptr<ImageReader<int64_t> >( new GisImageReader<int64_t> ) );
+    FormatDictionary<Volume<int64_t> >::registerFormat( "GIS", vfr64, exts );
+
     //--- UINT -----------------------------------------------------------------
-    
+
     VolumeFormatReader<uint8_t> *vfru8 = new VolumeFormatReader<uint8_t>;
     vfru8->attach( rc_ptr<ImageReader<uint8_t> >( new GisImageReader<uint8_t> ) );
     FormatDictionary<Volume<uint8_t> >::registerFormat( "GIS", vfru8, exts );
-    
+
     VolumeFormatReader<uint16_t> *vfru16 = new VolumeFormatReader<uint16_t>;
     vfru16->attach( rc_ptr<ImageReader<uint16_t> >( new GisImageReader<uint16_t> ) );
     FormatDictionary<Volume<uint16_t> >::registerFormat( "GIS", vfru16, exts );
-    
+
     VolumeFormatReader<uint32_t> *vfru32 = new VolumeFormatReader<uint32_t>;
     vfru32->attach( rc_ptr<ImageReader<uint32_t> >( new GisImageReader<uint32_t> ) );
     FormatDictionary<Volume<uint32_t> >::registerFormat( "GIS", vfru32, exts );
-    
+
+    VolumeFormatReader<uint64_t> *vfru64 = new VolumeFormatReader<uint64_t>;
+    vfru64->attach( rc_ptr<ImageReader<uint64_t> >( new GisImageReader<uint64_t> ) );
+    FormatDictionary<Volume<uint64_t> >::registerFormat( "GIS", vfru64, exts );
+
     //--- FLOAT ----------------------------------------------------------------
     
     VolumeFormatReader<float> *vfrf = new VolumeFormatReader<float>;
@@ -139,38 +147,57 @@ GisPlugin::GisPlugin() : Plugin()
     vfr_hsv->attach( rc_ptr<ImageReader<VoxelHSV> >( new GisImageReader<VoxelHSV> ) );
     FormatDictionary<Volume<VoxelHSV> >::registerFormat( "GIS", vfr_hsv, exts );
     
+    //--- COMPLEX -------------------------------------------------------------
+/* complex needs AsciiDataSourceTraits to be defined on complex types
+
+    VolumeFormatReader<std::complex<float> > *vfr_cf = new VolumeFormatReader<std::complex<float> >;
+    vfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >( new GisImageReader<std::complex<float> > ) );
+    FormatDictionary<Volume<std::complex<float> > >::registerFormat( "GIS", vfr_cf, exts );
+
+    VolumeFormatReader<std::complex<double> > *vfr_cd = new VolumeFormatReader<std::complex<double> >;
+    vfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new GisImageReader<std::complex<double> > ) );
+    FormatDictionary<Volume<std::complex<double> > >::registerFormat( "GIS", vfr_cd, exts );
+*/
     //==========================================================================
     //   V O L U M E   R E F
     //==========================================================================
     
     //--- INT ------------------------------------------------------------------
-    
+
     VolumeRefFormatReader<int8_t> *rfr8 = new VolumeRefFormatReader<int8_t>;
     rfr8->attach( rc_ptr<ImageReader<int8_t> >( new GisImageReader<int8_t> ) );
     FormatDictionary<VolumeRef<int8_t> >::registerFormat( "GIS", rfr8, exts );
-    
+
     VolumeRefFormatReader<int16_t> *rfr16 = new VolumeRefFormatReader<int16_t>;
     rfr16->attach( rc_ptr<ImageReader<int16_t> >( new GisImageReader<int16_t> ) );
     FormatDictionary<VolumeRef<int16_t> >::registerFormat( "GIS", rfr16, exts );
-    
+
     VolumeRefFormatReader<int32_t> *rfr32 = new VolumeRefFormatReader<int32_t>;
     rfr32->attach( rc_ptr<ImageReader<int32_t> >( new GisImageReader<int32_t> ) );
     FormatDictionary<VolumeRef<int32_t> >::registerFormat( "GIS", rfr32, exts );
-    
+
+    VolumeRefFormatReader<int64_t> *rfr64 = new VolumeRefFormatReader<int64_t>;
+    rfr64->attach( rc_ptr<ImageReader<int64_t> >( new GisImageReader<int64_t> ) );
+    FormatDictionary<VolumeRef<int64_t> >::registerFormat( "GIS", rfr64, exts );
+
     //--- UINT -----------------------------------------------------------------
-    
+
     VolumeRefFormatReader<uint8_t> *rfru8 = new VolumeRefFormatReader<uint8_t>;
     rfru8->attach( rc_ptr<ImageReader<uint8_t> >( new GisImageReader<uint8_t> ) );
     FormatDictionary<VolumeRef<uint8_t> >::registerFormat( "GIS", rfru8, exts );
-    
+
     VolumeRefFormatReader<uint16_t> *rfru16 = new VolumeRefFormatReader<uint16_t>;
     rfru16->attach( rc_ptr<ImageReader<uint16_t> >( new GisImageReader<uint16_t> ) );
     FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "GIS", rfru16, exts );
-    
+
     VolumeRefFormatReader<uint32_t> *rfru32 = new VolumeRefFormatReader<uint32_t>;
     rfru32->attach( rc_ptr<ImageReader<uint32_t> >( new GisImageReader<uint32_t> ) );
     FormatDictionary<VolumeRef<uint32_t> >::registerFormat( "GIS", rfru32, exts );
-    
+
+    VolumeRefFormatReader<uint64_t> *rfru64 = new VolumeRefFormatReader<uint64_t>;
+    rfru64->attach( rc_ptr<ImageReader<uint64_t> >( new GisImageReader<uint64_t> ) );
+    FormatDictionary<VolumeRef<uint64_t> >::registerFormat( "GIS", rfru64, exts );
+
     //--- FLOAT ----------------------------------------------------------------
     
     VolumeRefFormatReader<float> *rfrf = new VolumeRefFormatReader<float>;
@@ -195,6 +222,17 @@ GisPlugin::GisPlugin() : Plugin()
     rfr_hsv->attach( rc_ptr<ImageReader<VoxelHSV> >( new GisImageReader<VoxelHSV> ) );
     FormatDictionary<VolumeRef<VoxelHSV> >::registerFormat( "GIS", rfr_hsv, exts );
     
+    //--- COMPLEX -------------------------------------------------------------
+/*
+    VolumeRefFormatReader<std::complex<float> > *rfr_cf = new VolumeRefFormatReader<std::complex<float> >;
+    rfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >( new GisImageReader<std::complex<float> > ) );
+    FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat( "GIS", rfr_cf, exts );
+
+    VolumeRefFormatReader<std::complex<double> > *rfr_cd = new VolumeRefFormatReader<std::complex<double> >;
+    rfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new GisImageReader<std::complex<double> > ) );
+    FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "GIS", rfr_cd, exts );
+*/
+
     ////////////////////////////////////////////////////////////////////////////
     ////                           W R I T E R                              ////
     ////////////////////////////////////////////////////////////////////////////
@@ -204,33 +242,41 @@ GisPlugin::GisPlugin() : Plugin()
     //==========================================================================
     
     //--- INT ------------------------------------------------------------------
-    
+
     VolumeFormatWriter<int8_t> *vfw8 = new VolumeFormatWriter<int8_t>;
     vfw8->attach( rc_ptr<ImageWriter<int8_t> >( new GisImageWriter<int8_t> ) );
     FormatDictionary<Volume<int8_t> >::registerFormat( "GIS", vfw8, exts );
-    
+
     VolumeFormatWriter<int16_t> *vfw16 = new VolumeFormatWriter<int16_t>;
     vfw16->attach( rc_ptr<ImageWriter<int16_t> >( new GisImageWriter<int16_t> ) );
     FormatDictionary<Volume<int16_t> >::registerFormat( "GIS", vfw16, exts );
-    
+
     VolumeFormatWriter<int32_t> *vfw32 = new VolumeFormatWriter<int32_t>;
     vfw32->attach( rc_ptr<ImageWriter<int32_t> >( new GisImageWriter<int32_t> ) );
     FormatDictionary<Volume<int32_t> >::registerFormat( "GIS", vfw32, exts );
-    
+
+    VolumeFormatWriter<int64_t> *vfw64 = new VolumeFormatWriter<int64_t>;
+    vfw64->attach( rc_ptr<ImageWriter<int64_t> >( new GisImageWriter<int64_t> ) );
+    FormatDictionary<Volume<int64_t> >::registerFormat( "GIS", vfw64, exts );
+
     //--- UINT -----------------------------------------------------------------
-    
+
     VolumeFormatWriter<uint8_t> *vfwu8 = new VolumeFormatWriter<uint8_t>;
     vfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new GisImageWriter<uint8_t> ) );
     FormatDictionary<Volume<uint8_t> >::registerFormat( "GIS", vfwu8, exts );
-    
+
     VolumeFormatWriter<uint16_t> *vfwu16 = new VolumeFormatWriter<uint16_t>;
     vfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new GisImageWriter<uint16_t> ) );
     FormatDictionary<Volume<uint16_t> >::registerFormat( "GIS", vfwu16, exts );
-    
+
     VolumeFormatWriter<uint32_t> *vfwu32 = new VolumeFormatWriter<uint32_t>;
     vfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new GisImageWriter<uint32_t> ) );
     FormatDictionary<Volume<uint32_t> >::registerFormat( "GIS", vfwu32, exts );
-    
+
+    VolumeFormatWriter<uint64_t> *vfwu64 = new VolumeFormatWriter<uint64_t>;
+    vfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new GisImageWriter<uint64_t> ) );
+    FormatDictionary<Volume<uint64_t> >::registerFormat( "GIS", vfwu64, exts );
+
     //--- FLOAT ----------------------------------------------------------------
     
     VolumeFormatWriter<float> *vfwf = new VolumeFormatWriter<float>;
@@ -255,38 +301,56 @@ GisPlugin::GisPlugin() : Plugin()
     vfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new GisImageWriter<VoxelHSV> ) );
     FormatDictionary<Volume<VoxelHSV> >::registerFormat( "GIS", vfw_hsv, exts );
     
+    //--- COMPLEX -------------------------------------------------------------
+/*
+    VolumeFormatWriter<std::complex<float> > *vfw_cf = new VolumeFormatWriter<std::complex<float> >;
+    vfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new GisImageWriter<std::complex<float> > ) );
+    FormatDictionary<Volume<std::complex<float> > >::registerFormat( "GIS", vfw_cf, exts );
+
+    VolumeFormatWriter<std::complex<double> > *vfw_cd = new VolumeFormatWriter<std::complex<double> >;
+    vfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new GisImageWriter<std::complex<double> > ) );
+    FormatDictionary<Volume<std::complex<double> > >::registerFormat( "GIS", vfw_cd, exts );
+*/
     //==========================================================================
     //   V O L U M E   R E F
     //==========================================================================
     
     //--- INT ------------------------------------------------------------------
-    
+
     VolumeRefFormatWriter<int8_t> *rfw8 = new VolumeRefFormatWriter<int8_t>;
     rfw8->attach( rc_ptr<ImageWriter<int8_t> >( new GisImageWriter<int8_t> ) );
     FormatDictionary<VolumeRef<int8_t> >::registerFormat( "GIS", rfw8, exts );
-    
+
     VolumeRefFormatWriter<int16_t> *rfw16 = new VolumeRefFormatWriter<int16_t>;
     rfw16->attach( rc_ptr<ImageWriter<int16_t> >( new GisImageWriter<int16_t> ) );
     FormatDictionary<VolumeRef<int16_t> >::registerFormat( "GIS", rfw16, exts );
-    
+
     VolumeRefFormatWriter<int32_t> *rfw32 = new VolumeRefFormatWriter<int32_t>;
     rfw32->attach( rc_ptr<ImageWriter<int32_t> >( new GisImageWriter<int32_t> ) );
     FormatDictionary<VolumeRef<int32_t> >::registerFormat( "GIS", rfw32, exts );
-    
+
+    VolumeRefFormatWriter<int64_t> *rfw64 = new VolumeRefFormatWriter<int64_t>;
+    rfw64->attach( rc_ptr<ImageWriter<int64_t> >( new GisImageWriter<int64_t> ) );
+    FormatDictionary<VolumeRef<int64_t> >::registerFormat( "GIS", rfw64, exts );
+
     //--- UINT -----------------------------------------------------------------
-    
+
     VolumeRefFormatWriter<uint8_t> *rfwu8 = new VolumeRefFormatWriter<uint8_t>;
     rfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new GisImageWriter<uint8_t> ) );
     FormatDictionary<VolumeRef<uint8_t> >::registerFormat( "GIS", rfwu8, exts );
-    
+
     VolumeRefFormatWriter<uint16_t> *rfwu16 = new VolumeRefFormatWriter<uint16_t>;
     rfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new GisImageWriter<uint16_t> ) );
     FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "GIS", rfwu16, exts );
-    
+
     VolumeRefFormatWriter<uint32_t> *rfwu32 = new VolumeRefFormatWriter<uint32_t>;
     rfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new GisImageWriter<uint32_t> ) );
     FormatDictionary<VolumeRef<uint32_t> >::registerFormat( "GIS", rfwu32, exts );
-    
+
+    VolumeRefFormatWriter<uint64_t> *rfwu64 = new VolumeRefFormatWriter<uint64_t>;
+    rfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new GisImageWriter<uint64_t> ) );
+    FormatDictionary<VolumeRef<uint64_t> >::registerFormat( "GIS", rfwu64, exts );
+
     //--- FLOAT ----------------------------------------------------------------
     
     VolumeRefFormatWriter<float> *rfwf = new VolumeRefFormatWriter<float>;
@@ -310,6 +374,17 @@ GisPlugin::GisPlugin() : Plugin()
     VolumeRefFormatWriter<VoxelHSV> *rfw_hsv = new VolumeRefFormatWriter<VoxelHSV>;
     rfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new GisImageWriter<VoxelHSV> ) );
     FormatDictionary<VolumeRef<VoxelHSV> >::registerFormat( "GIS", rfw_hsv, exts );
+
+    //--- COMPLEX -------------------------------------------------------------
+/*
+    VolumeRefFormatWriter<std::complex<float> > *rfw_cf = new VolumeRefFormatWriter<std::complex<float> >;
+    rfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new GisImageWriter<std::complex<float> > ) );
+    FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat( "GIS", rfw_cf, exts );
+
+    VolumeRefFormatWriter<std::complex<double> > *rfw_cd = new VolumeRefFormatWriter<std::complex<double> >;
+    rfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new GisImageWriter<std::complex<double> > ) );
+    FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "GIS", rfw_cd, exts );
+*/
 }
 
 

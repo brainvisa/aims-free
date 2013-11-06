@@ -39,11 +39,7 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <cartobase/type/types.h>
-#ifdef USE_SOMA_IO
-  //#include <soma-io/allocator/allocator.h>
-#else
-  //#include <cartobase/allocator/allocator.h>
-#endif
+//#include <soma-io/allocator/allocator.h>
 #include <aims/memmap/allocator.h>
 
 namespace aims

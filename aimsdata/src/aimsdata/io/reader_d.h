@@ -53,6 +53,10 @@
       template class soma::FormatDictionary< T >; \
       template class soma::Reader< T >; \
     }
+  #define AIMS_INSTANTIATE_AIMS_READER( T ) \
+    namespace aims { \
+      template class aims::Reader< T >; \
+    }
 #else
   #define AIMS_INSTANTIATE_READER( T ) \
     namespace aims { \
