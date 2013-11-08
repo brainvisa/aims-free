@@ -57,7 +57,9 @@ string aims::aimsVersion()
 
 void AimsClear()
 {
-  system("clear");
+  if( system("clear") != 0 )
+    // error, what do we do exactly ?
+    return;
 }
 
 void AimsPrintVersion(void)
