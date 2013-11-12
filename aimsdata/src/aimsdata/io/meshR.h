@@ -110,6 +110,15 @@ namespace aims
     uint32_t	buf;
     if ( !hdr.read( &buf ) )
       carto::io_error::launchErrnoExcept( hdr.filename() );
+    int polydim = D;
+    hdr.getProperty( "polygon_dimension", polydim );
+    if( polydim != D )
+    {
+      std::stringstream msg;
+      msg << "Wrong polygon dimension, " << polydim << ", should be " << D 
+        << ".";
+      throw carto::datatype_format_error( msg.str(), hdr.filename() );
+    }
     std::ifstream::off_type offset = buf; // ## does not support large files!
 
     std::ios::openmode	omd = std::ios::in;
