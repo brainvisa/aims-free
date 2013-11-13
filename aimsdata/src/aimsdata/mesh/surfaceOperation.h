@@ -58,6 +58,9 @@ namespace aims
   {
   public:
     template<int D, class T> static std::vector<std::set<uint> >
+      surfaceNeighbours( const AimsSurface<D,T> & surf );
+
+    template<int D, class T> static std::vector<std::set<uint> >
       surfaceNeighbours( const AimsTimeSurface<D,T> & surf );
 
     template<int D, class T> static std::vector<std::set<uint> >

@@ -42,6 +42,22 @@ namespace aims
 {
 
   template<int D, class T> std::vector<std::set<uint> >
+  SurfaceManip::surfaceNeighbours( const AimsSurface<D,T> & surf )
+  {
+    const std::vector< AimsVector<uint,D> >	& poly = surf.polygon();
+    uint					n = poly.size();
+    std::vector<std::set<uint> >		neigh( surf.vertex().size() );
+
+    for ( uint i=0; i<n; ++i )
+      for ( uint j=0; j<D; ++j )
+	for ( uint k=0; k<D; ++k )
+	  if ( j != k )
+	    neigh[poly[i][j]].insert( poly[i][k] );
+
+    return neigh;
+  }
+
+  template<int D, class T> std::vector<std::set<uint> >
   SurfaceManip::surfaceNeighbours( const AimsTimeSurface<D,T> & surf )
   {
     const std::vector< AimsVector<uint,D> >	& poly = surf.polygon();

@@ -49,6 +49,8 @@ using namespace std;
 template std::vector<std::set<uint> >
 SurfaceManip::surfaceNeighbours( const AimsTimeSurface<2, Void> & surf );
 template std::vector<std::set<uint> >
+SurfaceManip::surfaceNeighbours( const AimsSurface<3, Void> & surf );
+template std::vector<std::set<uint> >
 SurfaceManip::surfaceNeighbours( const AimsSurfaceTriangle & surf );
 template std::vector<std::set<uint> >
 SurfaceManip::surfaceNeighbours( const AimsSurfaceFacet & surf );
