@@ -101,6 +101,7 @@ void carto::setOrientationInformation( Object hdr, const string & orient )
   spaces.insert( ',' );
   spaces.insert( ';' );
   set<char>::const_iterator nospace = spaces.end();
+  bool absolute = false;
 
   for( pos=0; pos<np; ++pos )
   {
@@ -110,10 +111,38 @@ void carto::setOrientationInformation( Object hdr, const string & orient )
     {
       sorient.push_back( orient.substr( pos0, pos-pos0 ) );
       pos0 = pos;
+      if( sorient.size() == 1 && sorient[0].length() >= 4
+        && sorient[0].substr( 0, 4 ) == "abs:" )
+      {
+        // absolute mode
+        absolute = true;
+        if( sorient[0].length() == 4 )
+          sorient.clear();
+        else
+          sorient[0].erase( 0, 4 );
+      }
     }
   }
   if( pos0 != pos && spaces.find( orient[ pos0 ] ) == nospace )
+  {
     sorient.push_back( orient.substr( pos0, pos-pos0 ) );
+    if( sorient.size() == 1 && sorient[0].length() >= 4
+      && sorient[0].substr( 0, 4 ) == "abs:" )
+    {
+      // absolute mode
+      absolute = true;
+      if( sorient[0].length() == 4 )
+        sorient.clear();
+      else
+        sorient[0].erase( 0, 4 );
+    }
+  }
+
+  if( absolute )
+  {
+    // absolute mode: start with ID matrix
+    stom.setToIdentity();
+  }
 
   // output matrix to convolve
   AffineTransformation3d omatrix;
