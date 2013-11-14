@@ -564,7 +564,7 @@ namespace carto
   extern template class Volume< soma::VoxelRGB >;
   extern template class Volume< soma::VoxelRGBA >;
   extern template class Volume< soma::VoxelHSV >;
-#ifndef __LP64__
+#ifdef CARTO_LONG_IS_DISTINCT
   extern template class Volume<long>;
   extern template class Volume<unsigned long>;
 #endif
@@ -589,7 +589,7 @@ namespace carto
   extern template class Creator<Volume<soma::VoxelRGB> >;
   extern template class Creator<Volume<soma::VoxelRGBA> >;
   extern template class Creator<Volume<soma::VoxelHSV> >;
-#ifndef __LP64__
+#ifdef CARTO_LONG_IS_DISTINCT
   extern template class Creator<Volume<long> >;
   extern template class Creator<Volume<unsigned long> >;
 #endif
@@ -614,7 +614,7 @@ namespace carto
   extern template class Creator<VolumeRef<soma::VoxelRGB> >;
   extern template class Creator<VolumeRef<soma::VoxelRGBA> >;
   extern template class Creator<VolumeRef<soma::VoxelHSV> >;
-#ifndef __LP64__
+#ifdef CARTO_LONG_IS_DISTINCT
   extern template class Creator<VolumeRef<long> >;
   extern template class Creator<VolumeRef<unsigned long> >;
 #endif
@@ -634,7 +634,7 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< double > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< cfloat > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< cdouble > )
-#ifndef __LP64__
+#ifdef CARTO_LONG_IS_DISTINCT
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
 #endif
@@ -654,7 +654,7 @@ namespace carto
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< double > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cfloat > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cdouble > > )
-#ifndef __LP64__
+#ifdef CARTO_LONG_IS_DISTINCT
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
 #endif

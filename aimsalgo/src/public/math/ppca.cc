@@ -69,7 +69,7 @@ template void  ProbabilisticPcaElement::doIt<double>(const AimsData<double>&, do
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template void  ProbabilisticPcaElement::doIt<char>(const AimsData<char>&, double) ;
 #endif
-#ifndef __LP64__
+#ifdef CARTO_LONG_IS_DISTINCT
 template void  ProbabilisticPcaElement::doIt<long>(const AimsData<long>&, double) ;
 template void  ProbabilisticPcaElement::doIt<unsigned long>(const AimsData<unsigned long>&, double) ;
 #endif
@@ -89,7 +89,7 @@ template double  ProbabilisticPcaElement::noiseVariance<double>(const AimsData<d
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template double  ProbabilisticPcaElement::noiseVariance<char>(const AimsData<char>&, double &) const ;
 #endif
-#ifndef __LP64__
+#ifdef CARTO_LONG_IS_DISTINCT
 template double  ProbabilisticPcaElement::noiseVariance<long>(const AimsData<long>&, double &) const ;
 template double  ProbabilisticPcaElement::noiseVariance<unsigned long>(const AimsData<unsigned long>&, double &) const ;
 #endif
@@ -109,7 +109,7 @@ template void  ProbabilisticPcaElement::doIt<double>(const std::list< Point3d>&,
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template void  ProbabilisticPcaElement::doIt<char>(const std::list< Point3d>&, const AimsData<char>&, double) ;
 #endif
-#ifndef __LP64__
+#ifdef CARTO_LONG_IS_DISTINCT
 template void  ProbabilisticPcaElement::doIt<long>(const std::list< Point3d>&, const AimsData<long>&, double) ;
 template void  ProbabilisticPcaElement::doIt<unsigned long>(const std::list< Point3d>&, const AimsData<unsigned long>&, double) ;
 #endif
@@ -130,7 +130,7 @@ template class  ProbabilisticPca<double> ;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class  ProbabilisticPca<char> ;
 #endif
-#ifndef __LP64__
+#ifdef CARTO_LONG_IS_DISTINCT
 template class  ProbabilisticPca<long> ;
 template class  ProbabilisticPca<unsigned long> ;
 #endif
