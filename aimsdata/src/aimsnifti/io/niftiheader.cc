@@ -689,13 +689,14 @@ bool NiftiHeader::fillNim( bool allow4d )
   for( i=dims.size(); i<4; ++i )
     dims.push_back( 1 );
 
-  vector <float > storage_to_memory;
   Motion s2m;
-  if(getProperty( "storage_to_memory", storage_to_memory ))
+  try
   {
+    Object storage_to_memory;
+    storage_to_memory = getProperty( "storage_to_memory" );
     s2m = storage_to_memory;
   }
-  else
+  catch( ... )
   {
     // cout << "Saving in neurological orientation: ";
     /* TODO */ // Should use 'spm_force_output_convention' and 'spm_output_radio_convention'

@@ -438,7 +438,6 @@ bool read( Process & p, T & data, const string & filename, const Finder & f,
     return( false );
 
   cout << "reading done\n";
-//   cout << "orient: " << orient << endl;
   if( !orient.empty() )
     setOrientationInformation( getHeader( data ), orient );
   return( true );
@@ -600,21 +599,23 @@ int main( int argc, const char **argv )
 //  unsigned	xdim = 0, ydim = 0, zdim = 0;
 
   AimsApplication	app( argc, argv, 
-			     "Performs file format and data conversion" );
+                             "Performs file format and data conversion" );
   app.addOption( pi, "-i", "input data filename to convert" );
   app.alias( "--input", "-i" );
   app.addOption( proc.file, "-o", "output filename" );
   app.alias( "--output", "-o" );
 
-  app.addOption( proc.encoding, "-e", "set the data encoding for any output file.\n"
-		  "0 : Binary (default)\n"
-		  "1 : ASCII \n"
-		  "2 : Base64 binary (for gifti format only)\n"
-		   "3 : Base64 compressed binary (for gifti format only)\n", true );
+  app.addOption( proc.encoding, "-e",
+                 "set the data encoding for any output file.\n"
+                 "0 : Binary (default)\n"
+                 "1 : ASCII \n"
+                 "2 : Base64 binary (for gifti format only)\n"
+                 "3 : Base64 compressed binary (for gifti format only)\n",
+                 true );
   app.alias( "--encoding", "-e" );
   app.addOption( proc.normal, "-n", "write normal in output file",
                  true );
-    app.alias( "--normal", "-n" );
+  app.alias( "--normal", "-n" );
   app.addOption( proc.rescale, "-r", "rescale output values to amplitude of " 
                  "output format (if output format is an integer variant)", 
                  true );
@@ -626,35 +627,36 @@ int main( int argc, const char **argv )
                  "specify input maximum value for rescaling.",
                  true );
   app.addOption( proc.info.omin, "--omin",
-				 "specify output minimum value for rescaling.",
-				 true );
+                 "specify output minimum value for rescaling.", true );
   app.addOption( proc.info.omax, "--omax",
-				 "specify output maximum value for rescaling.",
-				 true );
+                 "specify output maximum value for rescaling.", true );
   app.addOption( proc.info.usevtypelimits, "--itypelimits",
-				 "uses input type limits instead of dynamic min max to rescale data dynamic.",
-				 true );
+                 "uses input type limits instead of dynamic min max to "
+                 "rescale data dynamic.", true );
   app.addOption( proc.form, "-f", "force a specific output format (GIS, "
-		 "VIDA, ...) (default: guessed by the output filename " 
-		 "extension)", true );
+                 "NIFTI1, ...) (default: guessed by the output filename "
+                 "extension)", true );
   app.alias( "--format", "-f" );
-  app.addOption( proc.type, "-t", "output data type (only applicable to " 
-				 "volumes or textures of scalars, default: same as input)",
-				 true );
+  app.addOption( proc.type, "-t",
+                 "output data type (only applicable to volumes or textures of "
+                 "scalars, default: same as input)", true );
   app.alias( "--type", "-t" );
-  app.addOption( proc.otype, "-c", "change object type in addition to data " 
-				 "type, currently only applicable to Bucket of VOID <-> "
-				 "Volume", true );
+  app.addOption( proc.otype, "-c",
+                 "change object type in addition to data type, currently only "
+                 "applicable to Bucket of VOID <-> Volume", true );
   app.alias( "--change", "-c" );
   app.alias( "--otype", "-c" );
-  app.addOption( proc.xdim, "-x", "(for output volumes only) forces output " 
-				 "volume dimension", true );
+  app.addOption( proc.xdim, "-x",
+                 "(for output volumes only) forces output volume dimension",
+                 true );
   app.alias( "--xdim", "-x" );
-  app.addOption( proc.ydim, "-y", "(for output volumes only) forces output " 
-				 "volume dimension", true );
+  app.addOption( proc.ydim, "-y",
+                 "(for output volumes only) forces output volume dimension",
+                 true );
   app.alias( "--ydim", "-y" );
-  app.addOption( proc.zdim, "-z", "(for output volumes only) forces output " 
-				 "volume dimension", true );
+  app.addOption( proc.zdim, "-z",
+                 "(for output volumes only) forces output volume dimension",
+                 true );
   app.alias( "--zdim", "-z" );
   app.addOption( proc.orient, "--orient", "change/force output volume voxels "
       "orientation on disk (if the output format supports it), with different "
@@ -668,61 +670,74 @@ int main( int argc, const char **argv )
       "--orient \"-1 0 0  0 1 0  0 0 -1\": same by specifying the full "
       "rotation matrix.\n"
       "--orient \"-1 0 0 255  0 1 0 0  0 0 -1 123  0 0 0 1\": same by "
-      "specifying the full 4x4 matrix.", true );
+      "specifying the full 4x4 matrix.\n"
+      "By default, all orientation matrices are applied relatively to the "
+      "current voxels orientation. To set absolute matrices (from the AIMS "
+      "conventional orientation), specify \"abs:\" before the matrix. Ex:\n"
+      "--orient \"abs: -1 1 -1\"\n"
+      "--orient \"abs: -1 0 0 255  0 1 0 0  0 0 -1 123  0 0 0 1\"", true );
 
   try
-    {
-	  app.initialize();
+  {
+    app.initialize();
 
-      setlocale(LC_ALL,"C");
+    setlocale(LC_ALL,"C");
 
-      //	Our specific process
-      cout << "filein  : " << pi.filename << endl;
-      cout << "fileout : " << proc.file << endl;
-      if (proc.encoding == 0)
-    	  cout << "encoding: " << "Binary"  << endl;
-      if (proc.encoding == 1)
-          cout << "encoding: " << "ASCII"  << endl;
-      if (proc.encoding == 2)
-          cout << "encoding: " << "Base64 binary"  << endl;
-      if (proc.encoding == 3)
-          cout << "encoding: " << "Base64 compressed binary"  << endl;
+    //	Our specific process
+    cout << "filein  : " << pi.filename << endl;
+    cout << "fileout : " << proc.file << endl;
+    if (proc.encoding == 0)
+      cout << "encoding: " << "Binary"  << endl;
+    if (proc.encoding == 1)
+      cout << "encoding: " << "ASCII"  << endl;
+    if (proc.encoding == 2)
+      cout << "encoding: " << "Base64 binary"  << endl;
+    if (proc.encoding == 3)
+      cout << "encoding: " << "Base64 compressed binary"  << endl;
 
-      cout << "normal  : " << proc.normal << endl;
-      cout << "rescale : " << proc.rescale << endl;
-      cout << "format  : " << proc.form << endl;
-      cout << "type    : " << proc.type << endl;
-      cout << "objtype : " << proc.otype << endl;
-      cout << "xdim    : " << proc.xdim << endl;
-      cout << "ydim    : " << proc.ydim << endl;
-      cout << "zdim    : " << proc.zdim << endl;
-      ostringstream vminstream;
-      vminstream << (double)proc.info.vmin;
-      cout << "imin    : " << (isnan<double>( proc.info.vmin ) ? "default" : vminstream.str()) << endl;
-      ostringstream vmaxstream;
-      vmaxstream << (double)proc.info.vmax;
-      cout << "imax    : " << (isnan<double>( proc.info.vmax ) ? "default" : vmaxstream.str()) << endl;
-      ostringstream ominstream;
-      ominstream << (double)proc.info.omin;
-      cout << "omin    : " << (isnan<double>( proc.info.omin ) ? "default" : ominstream.str()) << endl;
-      ostringstream omaxstream;
-      omaxstream << (double)proc.info.omax;
-      cout << "omax    : " << (isnan<double>( proc.info.omax ) ? "default" : omaxstream.str()) << endl;
+    cout << "normal  : " << proc.normal << endl;
+    cout << "rescale : " << proc.rescale << endl;
+    cout << "format  : " << proc.form << endl;
+    cout << "type    : " << proc.type << endl;
+    cout << "objtype : " << proc.otype << endl;
+    cout << "xdim    : " << proc.xdim << endl;
+    cout << "ydim    : " << proc.ydim << endl;
+    cout << "zdim    : " << proc.zdim << endl;
+    ostringstream vminstream;
+    vminstream << (double)proc.info.vmin;
+    cout << "imin    : "
+      << (isnan<double>( proc.info.vmin ) ? "default" : vminstream.str())
+      << endl;
+    ostringstream vmaxstream;
+    vmaxstream << (double)proc.info.vmax;
+    cout << "imax    : "
+      << (isnan<double>( proc.info.vmax ) ? "default" : vmaxstream.str())
+      << endl;
+    ostringstream ominstream;
+    ominstream << (double)proc.info.omin;
+    cout << "omin    : "
+      << (isnan<double>( proc.info.omin ) ? "default" : ominstream.str())
+      << endl;
+    ostringstream omaxstream;
+    omaxstream << (double)proc.info.omax;
+    cout << "omax    : "
+      << (isnan<double>( proc.info.omax ) ? "default" : omaxstream.str())
+      << endl;
 
-      //	Use the Process mechanism to switch on types
-      //cout << "filename process  : " << pi.filename << endl;
+    //	Use the Process mechanism to switch on types
+    //cout << "filename process  : " << pi.filename << endl;
 
-      if( !proc.execute( pi.filename ) )
-	cout << "Couldn't convert file - aborted";
-    }
+    if( !proc.execute( pi.filename ) )
+      cout << "Couldn't convert file - aborted";
+  }
   catch( user_interruption &e )
-    {
-    }
+  {
+  }
   catch( exception & e )
-    {
-      cerr << argv[ 0 ] << ": " << e.what() << endl;
-      return EXIT_FAILURE;
-    }
+  {
+    cerr << argv[ 0 ] << ": " << e.what() << endl;
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }
