@@ -35,6 +35,7 @@
 #include <aims/io/qsqlgraphformat.h>
 #include <aims/io/finder.h>
 #include <qsqldatabase.h>
+#include <QCoreApplication>
 
 using namespace aims;
 using namespace carto;
@@ -85,6 +86,14 @@ QSqlGraphPlugin::QSqlGraphPlugin() : Plugin()
   string                format = "QSqlGraph";
   exts.push_back( "sqlite" );
   // TODO: add other database formats
+
+  if( !QCoreApplication::instance() )
+  {
+    static int argc;
+    static char * argv[] = { (char *) "aims", (char *) 0 };
+    // WARNING: should maybe in the main thread / with a Mutex
+    new QCoreApplication( argc, argv );
+  }
 
   FileFormatDictionary<Graph>::registerFormat( format, df1, exts );
   Finder::registerFormat( format, new FinderQSqlGraphFormat, exts );

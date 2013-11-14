@@ -45,7 +45,7 @@
 #include <QImageReader>
 #include <QImageWriter>
 typedef QImageReader QImageIO;
-#include <qapplication.h>
+#include <qcoreapplication.h>
 
 using namespace aims;
 using namespace carto;
@@ -78,6 +78,15 @@ QtFormatsHeader::QtFormatsHeader( const string & name, const string & type,
   _sizeX(sx), _sizeY(sy), _sizeZ(sz), _sizeT(st), 
   d( new QtFormatsHeader::Private )
 {
+  qformatsMutex().lock();
+  if( !QCoreApplication::instance() )
+  {
+    static int argc;
+    static char * argv[] = { (char *) "aims", (char *) 0 };
+    // WARNING: should maybe in the main thread
+    new QCoreApplication( argc, argv );
+  }
+  qformatsMutex().unlock();
 }
 
 
@@ -164,9 +173,10 @@ void QtFormatsHeader::read()
   if( fmt.isNull() )
     throw format_error( _name );
 
-  if( !qApp && ( fmt == "eps" || fmt == "epsf" || fmt == "epsi" ) )
-    throw format_error( string( fmt.data() ) + " format needs a QApplication",
-                        _name );
+  if( !QCoreApplication::instance()
+      && ( fmt == "eps" || fmt == "epsf" || fmt == "epsi" ) )
+    throw format_error( string( fmt.data() )
+      + " format needs a QCoreApplication", _name );
   QImageReader	qio( fname.c_str(), fmt );
   if( lock )
     qformatsMutex().lock();
