@@ -373,10 +373,11 @@ namespace
   void dataTOnim( nifti_image *nim, aims::NiftiHeader& hdr,
                   const AimsData<T>& thing, int tt, znzFile zfp )
   {
-    std::vector< float > storage_to_memory;
     Motion m;
-    if( hdr.getProperty( "storage_to_memory", storage_to_memory ) )
+    try
     {
+      carto::Object storage_to_memory;
+      storage_to_memory = hdr.getProperty( "storage_to_memory" );
       m = storage_to_memory;
       /* adjust translations so that they fit (in case the vol size has
          changed) */
@@ -395,9 +396,8 @@ namespace
       dataTOnim_checks2m( m, p, tp, 2, 0 );
       dataTOnim_checks2m( m, p, tp, 2, 1 );
       dataTOnim_checks2m( m, p, tp, 2, 2 );
-      hdr.setProperty( "storage_to_memory", m.toVector() );
     }
-    else
+    catch( ... )
     {
       m.translation()[0] = nim->nx - 1;
       m.translation()[1] = nim->ny - 1;
@@ -406,6 +406,7 @@ namespace
       m.rotation()(1,1) = -1.0;
       m.rotation()(2,2) = -1.0;
     }
+    hdr.setProperty( "storage_to_memory", m.toVector() );
 
     int tmin, tmax;
     if(tt < 0)
