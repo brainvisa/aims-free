@@ -47,6 +47,7 @@
 #include <qsqlquery.h>
 #include <qsqlerror.h>
 #include <qvariant.h>
+#include <QCoreApplication>
 
 using namespace aims;
 using namespace carto;
@@ -55,6 +56,14 @@ using namespace std;
 
 bool FinderQSqlGraphFormat::check( const string & filename, Finder & f ) const
 {
+  if( !QCoreApplication::instance() )
+  {
+    static int argc;
+    static char * argv[] = { (char *) "aims", (char *) 0 };
+    // WARNING: should maybe in the main thread / with a Mutex
+    new QCoreApplication( argc, argv );
+  }
+
   QSqlGraphFormatHeader *hdr = new QSqlGraphFormatHeader( filename );
   try
     {
