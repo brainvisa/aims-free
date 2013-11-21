@@ -137,9 +137,16 @@ void aims::spmAttributesConverter( GenericObject & hdr )
     if( !hasorg )
       return;
     // SPM-like origin
-    mot.translation()[0] = -origin[0] * vs[0];
-    mot.translation()[1] = -origin[1] * vs[1];
-    mot.translation()[2] = -origin[2] * vs[2];
+    mot.rotation()( 0, 0 ) = -1.;
+    mot.rotation()( 1, 1 ) = -1.;
+    mot.rotation()( 2, 2 ) = -1.;
+    vector<int> dims;
+    hdr.getProperty( "volume_dimension", dims );
+    while( dims.size() < 3 )
+      dims.push_back( 1 );
+    mot.translation()[0] = ( dims[0] - origin[0] ) * vs[0];
+    mot.translation()[1] = ( dims[1] - origin[1] ) * vs[1];
+    mot.translation()[2] = ( dims[2] - origin[2] ) * vs[2];
     refs.push_back( "other_referential" );
   }
   hdr.setProperty( "referentials", refs );

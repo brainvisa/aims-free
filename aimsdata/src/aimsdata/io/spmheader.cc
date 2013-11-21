@@ -648,15 +648,15 @@ bool SpmHeader::read()
 
       if( !radio )
         {
-          origin[0] = dims[0] - origin[0];
-          origin[1] = dims[1] - origin[1];
-          origin[2] = dims[2] - origin[2];
+          origin[0] = dims[0] - origin[0] + 1;
+          origin[1] = dims[1] - origin[1] + 1;
+          origin[2] = dims[2] - origin[2] + 1;
         }
       else
         {
           --origin[0];	// spm starts at 1...
-          origin[1] = dims[1] - origin[1];
-          origin[2] = dims[2] - origin[2];
+          origin[1] = dims[1] - origin[1] + 1;
+          origin[2] = dims[2] - origin[2] + 1;
         }
 
       setProperty( "origin", origin );
@@ -701,47 +701,64 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
 
   if( getProperty( "referentials", refs ) && !refs.empty() )
   {
-    vector<vector<float> > trans;
-    if( getProperty( "transformations" , trans ) && !trans.empty() )
+    Object trans;
+    try
     {
-      unsigned  i, n = refs.size(), iref = 0;
-      if( trans.size() < n )
-        n = trans.size();
-      Motion m;
-      m.rotation()(0,0) = -1.;
-      m.rotation()(1,1) = -1.;
-      m.rotation()(2,2) = -1.;
-      hasorg = true;
-      for( i=0; i<n; ++i )
-        if( refs[i] == StandardReferentials::mniTemplateReferential() )
+      trans = getProperty( "transformations" );
+      if( !trans.isNull() )
+      {
+        unsigned  i, n = refs.size();
+        if( trans->size() < n )
+          n = trans->size();
+        Motion m;
+        m.rotation()(0,0) = -1.;
+        m.rotation()(1,1) = -1.;
+        m.rotation()(2,2) = -1.;
+        hasorg = true;
+        Object titer = trans->objectIterator(), reftrans;
+        for( i=0; i<n; ++i, titer->next() )
         {
-          cout << "convert MNI -> SPM\n";
-          Motion  mm( trans[i] );
-          origin = mm.translation();
-          cout << "origin: " << origin << endl;
-          mm.translation() = Point3df( 0, 0, 0 );
-          if( mm == m )
+          if( refs[i] == StandardReferentials::mniTemplateReferential() )
           {
-            iref = i;
-            normalized = true;
-            origin = Point3df( rint( origin[0] / vs[0] ),
-                               rint( origin[1] / vs[1] ),
-                               rint( origin[2] / vs[2] ) );
-            setProperty( "spm_normalized", true );
-            break;
+            cout << "convert MNI -> SPM\n";
+            Motion  mm( titer->currentValue() );
+            origin = mm.translation();
+            // cout << "origin: " << origin << endl;
+            mm.translation() = Point3df( 0, 0, 0 );
+            if( mm == m )
+            {
+              reftrans = titer->currentValue();
+              normalized = true;
+              origin = Point3df( rint( origin[0] / vs[0] ),
+                                rint( origin[1] / vs[1] ),
+                                rint( origin[2] / vs[2] ) );
+              setProperty( "spm_normalized", true );
+              break;
+            }
+          }
+          else if( i == 0 )
+          {
+            reftrans = titer->currentValue();
+            Motion  mm( titer->currentValue() );
           }
         }
-      if( !normalized )
-      {
-        if( hasProperty( "spm_normalized" ) )
-          removeProperty( "spm_normalized" );
-        iref = 0;
-        Motion  mm( trans[iref] );
-        origin = - mm.translation();
-        origin = Point3df( rint( origin[0] / vs[0] ),
-                           rint( origin[1] / vs[1] ),
-                           rint( origin[2] / vs[2] ) );
+        if( !normalized )
+        {
+          if( hasProperty( "spm_normalized" ) )
+            removeProperty( "spm_normalized" );
+          reftrans = trans->objectIterator()->currentValue();
+          Motion  mm( reftrans );
+          origin = mm.inverse().transform( Point3df( 0, 0, 0 ) );
+          // cout << "origin: " << origin << endl;
+          origin = Point3df( rint( origin[0] / vs[0] ),
+                              rint( origin[1] / vs[1] ),
+                              rint( origin[2] / vs[2] ) );
+          // cout << "origin2: " << origin << endl;
+        }
       }
+    }
+    catch( ... )
+    {
     }
   }
   if( !hasorg )
@@ -1004,17 +1021,17 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
   if( hasorg )
   {
     if( normalized )
-      {
-	origin[0] = dims[0] - origin[0];
-	origin[1] = dims[1] - origin[1];
-	origin[2] = dims[2] - origin[2];
-      }
+    {
+      origin[0] = dims[0] - origin[0];
+      origin[1] = dims[1] - origin[1];
+      origin[2] = dims[2] - origin[2];
+    }
     else
-      {
-	origin[0] += 1;
-	origin[1] = dims[1] - origin[1];
-	origin[2] = dims[2] - origin[2];
-      }
+    {
+      origin[0] += 1;
+      origin[1] = dims[1] - origin[1] + 1;
+      origin[2] = dims[2] - origin[2] + 1;
+    }
     orig = (short) origin[0];
   }
   else
