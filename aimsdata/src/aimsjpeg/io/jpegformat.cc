@@ -42,14 +42,14 @@ bool FinderJpegFormat::check( const string & filename, Finder & f ) const
 {
   JpegHeader *hdr = new JpegHeader( filename );
   try
-    {
-      hdr->read();
-    }
+  {
+    hdr->read();
+  }
   catch( exception & e )
-    {
-      delete hdr;
-      return( false );
-    }
+  {
+    delete hdr;
+    throw;
+  }
   f.setObjectType( "Volume" );
   f.setFormat( "JPEG" );
   f.setDataType( hdr->dataType() );

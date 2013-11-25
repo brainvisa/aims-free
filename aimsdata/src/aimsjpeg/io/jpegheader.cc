@@ -72,6 +72,7 @@ namespace
   {
     struct jpeg_error_mgr pub;	/* "public" fields */
     jmp_buf setjmp_buffer;	/* for return to caller */
+    FILE *fp;
   };
 
   METHODDEF(void)
@@ -79,6 +80,9 @@ namespace
   {
     /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
     private_jpeg_error_mgr *myerr = (private_jpeg_error_mgr *) cinfo->err;
+    // close the file
+    if( myerr->fp )
+      fclose( myerr->fp );
 
     /* Return control to the setjmp point */
     longjmp(myerr->setjmp_buffer, 1);
@@ -99,57 +103,61 @@ void JpegHeader::read()
 
   cinfo.err = jpeg_std_error( &jerr.pub );
   jerr.pub.error_exit = private_jpeg_error_exit;
+  jerr.fp = 0;
   /* Establish the setjmp return context for my_error_exit to use. */
   if (setjmp(jerr.setjmp_buffer))
-    {
-      /* If we get here, the JPEG code has signaled an error.
-       * We need to clean up the JPEG object, close the input file, and return.
-       */
-      jpeg_destroy_decompress(&cinfo);
-      throw carto::file_error( "JPEG lib failure : corrupt file or not JPEG " 
-                               "format", fileName );
-    }
+  {
+    /* If we get here, the JPEG code has signaled an error.
+      * We need to clean up the JPEG object, close the input file, and return.
+      */
+    jpeg_destroy_decompress(&cinfo);
+    throw carto::file_error( "JPEG lib failure : corrupt file or not JPEG "
+                              "format", fileName );
+  }
   jpeg_create_decompress( &cinfo );
 
   fp = fopen( fileName.c_str(), "rb" );
+  jerr.fp = fp;
   if( !fp )
-    {
-      jpeg_destroy_decompress( &cinfo );
-      throw carto::file_error( "JPEG reader : can't open file", fileName );
-    }
+  {
+    jpeg_destroy_decompress( &cinfo );
+    throw carto::file_error( "JPEG reader : can't open file", fileName );
+  }
 
   jpeg_stdio_src( &cinfo, fp );
   if( jpeg_read_header( &cinfo, true ) != 1 )
-    {
-      jpeg_destroy_decompress( &cinfo );
-      throw carto::file_error( "JPEG header error : corrupt data or not JPEG "
-			       "file", fileName );
-    }
+  {
+    jpeg_destroy_decompress( &cinfo );
+    fclose( fp );
+    throw carto::file_error( "JPEG header error : corrupt data or not JPEG "
+                              "file", fileName );
+  }
   fclose( fp );
+  jerr.fp = 0;
   jpeg_destroy_decompress( &cinfo );
 
   vector<string>	pt;
 
   if( cinfo.num_components == 1 )
     switch( cinfo.data_precision )
-      {
-      case 16:
-	_type = "U16";
-	pt.push_back( "U16" );
-	pt.push_back( "RGB" );
-	break;
-      default:
-	_type = "U8";
-	pt.push_back( "U8" );
-	pt.push_back( "RGB" );
-	break;
-      }
-  else
     {
-      _type = "RGB";
+    case 16:
+      _type = "U16";
+      pt.push_back( "U16" );
       pt.push_back( "RGB" );
+      break;
+    default:
+      _type = "U8";
       pt.push_back( "U8" );
+      pt.push_back( "RGB" );
+      break;
     }
+  else
+  {
+    _type = "RGB";
+    pt.push_back( "RGB" );
+    pt.push_back( "U8" );
+  }
 
   _dimX = cinfo.image_width;
   _dimY = cinfo.image_height;
@@ -193,21 +201,21 @@ void JpegHeader::read()
   // if .minf has been modified
   if( getProperty( "volume_dimension", dims ) )
     if( dims.size() >= 1 )
+    {
+      _dimX = dims[0];
+      if( dims.size() >= 2 )
       {
-        _dimX = dims[0];
-        if( dims.size() >= 2 )
+        _dimY = dims[1];
+        if( dims.size() >= 3 )
+        {
+          _dimZ = dims[2];
+          if( dims.size() >= 4 )
           {
-            _dimY = dims[1];
-            if( dims.size() >= 3 )
-              {
-                _dimZ = dims[2];
-                if( dims.size() >= 4 )
-                  {
-                    _dimT = dims[3];
-                  }
-              }
+            _dimT = dims[3];
           }
+        }
       }
+    }
 
   getProperty( "voxel_size", vs );
   if( vs.size() >= 3 )
