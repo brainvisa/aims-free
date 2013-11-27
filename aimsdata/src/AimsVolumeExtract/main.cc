@@ -674,7 +674,7 @@ void executeOverVolume( string        ifname,
     throw runtime_error( "Input header lacks \"data_type\" : " + ifname );
   if( outputInfo.header.get() && !outputInfo.header->hasProperty( "data_type" ) )
     throw runtime_error( "Input header lacks \"data_type\" : " + ofname );
-  if( inputInfo.header.get() 
+  if( !extract && inputInfo.header.get() 
       && outputInfo.header.get() && sizeout == vector<int>(4,0)
       && ( inputInfo.header->getProperty( "data_type" ) != 
            outputInfo.header->getProperty( "data_type" ) ) )
