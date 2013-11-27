@@ -103,6 +103,7 @@ foreach( _command
           AimsTex2Graph
           AimsThreshold
           AimsVectorFieldToMesh
+          AimsVolumeExtract
 )
   if( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
     file( GLOB _pro "${CMAKE_CURRENT_SOURCE_DIR}/${_command}/*.pro" )
