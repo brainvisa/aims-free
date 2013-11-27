@@ -1050,11 +1050,11 @@ bool NiftiHeader::fillNim( bool allow4d )
   {
     /* cout << "add s2m\n";
     cout << s2m << endl; */
-    Motion NIs2m;
-    NIs2m.rotation()( 0, 0 ) = -1; // invert all axes
-    NIs2m.rotation()( 1, 1 ) = -1;
-    NIs2m.rotation()( 2, 2 ) = -1;
-    NIs2m = s2m * NIs2m;
+    AffineTransformation3d NIs2m_aims;
+    NIs2m_aims.rotation()( 0, 0 ) = -1; // invert all axes
+    NIs2m_aims.rotation()( 1, 1 ) = -1;
+    NIs2m_aims.rotation()( 2, 2 ) = -1;
+    AffineTransformation3d NIs2m = s2m * NIs2m_aims;
     /* if( NIs2m.rotation()(0,0) == 1 && NIs2m.rotation()(1,1) == 1
       && NIs2m.rotation()(2,2) == 1)
     {
@@ -1075,6 +1075,12 @@ bool NiftiHeader::fillNim( bool allow4d )
     nim->qoffset_x = -(nim->nx / 2.0 - 1.0) * nim->dx;
     nim->qoffset_y = -(nim->ny / 2.0) * nim->dy;
     nim->qoffset_z = -(nim->nz / 2.0) * nim->dz;
+
+    NIs2m_aims.translation() = Point3df(
+      dims[0] * vs[0] / 2, ( dims[1] - 2 ) * vs[1] / 2,
+      ( dims[2] - 2 ) * vs[2] / 2 );
+    t2.insert( t2.begin(), NIs2m_aims.toVector() );
+    r2.insert( r2.begin(), NiftiReferential( NIFTI_XFORM_SCANNER_ANAT ) );
   }
 
   if( !t2.empty() )
