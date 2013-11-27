@@ -58,11 +58,10 @@ namespace aims
     void setName( const std::string & fname ) { _name = fname; }
 
     virtual std::string extension() const;
-	virtual std::string basename() const;
+    virtual std::string basename() const;
     virtual std::set<std::string> extensions() const;
-	
-	
-	nifti_image* niftiNim() { return _nim; }
+
+    nifti_image* niftiNim() { return _nim; }
 
     int dimX()  const;
     int dimY()  const;
@@ -75,12 +74,11 @@ namespace aims
 
     bool read();
     bool write( bool writeminf = true );
-	
-	bool fillNim( bool allow4d = true );
+    bool fillNim( bool allow4d = true );
 
   private:
     std::string _name;
-	nifti_image *_nim;
+    nifti_image *_nim;
   };
 
 }
