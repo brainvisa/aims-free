@@ -683,12 +683,18 @@ void executeOverVolume( string        ifname,
   //--- filling missing parameters -------------------------------------------
   for( i=0; i<4; ++i )
   {
+    string champ = ( i==0 ? "sizeX" : 
+                     ( i==1 ? "sizeY" : 
+                       ( i==2 ? "sizeZ" :
+                         ( i==3 ? "sizeT" : "" ))));
     if( inputInfo.header.get() && inputInfo.header->hasProperty( "volume_dimension") )
     {
       sizein[i] = (int) rint( 
         inputInfo.header->getProperty( "volume_dimension" )
                         ->getArrayItem( i )->getScalar()
       );
+    } else if( inputInfo.header.get() && inputInfo.header->hasProperty( champ ) ) {
+      sizein[i] = (int) rint( inputInfo.header->getProperty( champ )->getScalar() );
     }
     if( regionin[i] == 0 )
       regionin[i] = sizein[i];
