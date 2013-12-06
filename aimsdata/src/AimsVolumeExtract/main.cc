@@ -676,8 +676,8 @@ void executeOverVolume( string        ifname,
     throw runtime_error( "Input header lacks \"data_type\" : " + ofname );
   if( !extract && inputInfo.header.get() 
       && outputInfo.header.get() && sizeout == vector<int>(4,0)
-      && ( inputInfo.header->getProperty( "data_type" ) != 
-           outputInfo.header->getProperty( "data_type" ) ) )
+      && ( inputInfo.header->getProperty( "data_type" )->getString() != 
+           outputInfo.header->getProperty( "data_type" )->getString() ) )
     throw runtime_error( "Input and output data types must be consistent" );
 
   //--- filling missing parameters -------------------------------------------
@@ -809,9 +809,9 @@ void executeOverVolume( string        ifname,
   // empty volumes
   if( !overwriteOutput && needWritePartial && !canWritePartial )
     runtime_error( "Cannot write partially as asked. Check format capabilities." );
-  if( outputInfo.somaWritable && ( ifname.empty() || needWritePartial ) )
+  if( overwriteOutput && outputInfo.somaWritable && ( ifname.empty() || needWritePartial ) )
     somaWriteEmptyVolume[ datatype ]( sizeout, voxelout, ofname );
-  if( outputInfo.aimsWritable && ifname.empty() )
+  if( overwriteOutput && outputInfo.aimsWritable && ifname.empty() )
     aimsWriteEmptyVolume[ datatype ]( sizeout, voxelout, ofname );
   if( ifname.empty() )
     return;
