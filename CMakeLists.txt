@@ -8,17 +8,22 @@ BRAINVISA_DEPENDENCY( DEV DEPENDS "${BRAINVISA_PACKAGE_NAME}" RUN "= ${${BRAINVI
 BRAINVISA_FIND_PACKAGE( soma-io REQUIRED )
 include( "${SOMA-IO_USE_FILE}" )
 BRAINVISA_FIND_PACKAGE( soma-base REQUIRED )
+math( EXPR result "${soma-io_VERSION_MINOR}+1" )
+BRAINVISA_DEPENDENCY( RUN DEPENDS "soma-io" RUN ">= ${soma-io_VERSION};<< ${soma-io_VERSION_MAJOR}.${result}" )
+BRAINVISA_DEPENDENCY( DEV DEPENDS "soma-io" DEV ">= ${soma-io_VERSION};<< ${soma-io_VERSION_MAJOR}.${result}" )
 math( EXPR result "${soma-base_VERSION_MINOR}+1" )
 BRAINVISA_DEPENDENCY( DEV DEPENDS "soma-base" DEV ">= ${soma-base_VERSION};<< ${soma-base_VERSION_MAJOR}.${result}" )
 include( "${SOMA-BASE_USE_FILE}" )
+BRAINVISA_DEPENDENCY( RUN DEPENDS "soma-base" RUN ">= ${soma-base_VERSION};<< ${soma-base_VERSION_MAJOR}.${result}" )
+BRAINVISA_DEPENDENCY( RUN RECOMMENDS brainvisa-share RUN ">= ${brainvisa-share_VERSION}" )
 
 
 find_package( Blitz )
 if( BLITZ_FOUND )
   BRAINVISA_DEPENDENCY( RUN DEPENDS blitz++ RUN )
   set( BLITZ_FIND_PACKAGE "find_package( Blitz REQUIRED )" )
+  BRAINVISA_DEPENDENCY( DEV DEPENDS blitz++ DEV )
 endif()
-BRAINVISA_DEPENDENCY( DEV RECOMMENDS blitz++ DEV )
 
 if( NOT DESIRED_QT_VERSION )
   find_package( Qt )
