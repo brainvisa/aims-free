@@ -145,6 +145,15 @@ set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}"
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/cartodata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/cartodata/config/config.h" @ONLY )
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/config.h" @ONLY )
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/src/aimsminc/config/aimsminc_config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/aimsminc_config.h" @ONLY )
+BRAINVISA_INSTALL( FILES "${CMAKE_BINARY_DIR}/include/cartodata/config/config.h"
+                   DESTINATION "include/cartodata/config"
+                   COMPONENT ${PROJECT_NAME}-dev )
+BRAINVISA_INSTALL( FILES "${CMAKE_BINARY_DIR}/include/aims/config/config.h"
+                   DESTINATION "include/aims/config"
+                   COMPONENT ${PROJECT_NAME}-dev )
+BRAINVISA_INSTALL( FILES "${CMAKE_BINARY_DIR}/include/aims/config/aimsminc_config.h"
+                   DESTINATION "include/aims/config"
+                   COMPONENT ${PROJECT_NAME}-dev )
 add_subdirectory( cartodata )
 add_subdirectory( graph )
 add_subdirectory( ecat )
