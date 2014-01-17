@@ -50,6 +50,7 @@ namespace aims
 }
 typedef aims::AffineTransformation3d Motion;
 template<typename T> class TimeTexture;
+template<typename T> class Texture;
 
 namespace aims
 {
@@ -147,6 +148,22 @@ namespace aims
         meshExtract( const AimsTimeSurface<D,T> & mesh,
                      const TimeTexture<int16_t> & tex, int16_t value,
                      std::vector<size_t> ** overtIndex = 0 );
+    /** Extracts the boundary of region of value <region> of the input texture,
+        on the mesh. If region is negative, take boundaries of all regions.
+        The input texture is a label texture.
+    */
+    template <typename T>
+    static AimsSurface<2,Void> *
+        meshTextureBoundary( const AimsSurface<3,Void> & mesh,
+          const Texture<T> & tex, T region );
+    /** Extracts the boundary of region of value <region> of the input texture,
+        on the mesh. If region is negative, take boundaries of all regions.
+        The input texture is a label texture.
+    */
+    template <typename T>
+    static AimsTimeSurface<2,Void> *
+        meshTextureBoundary( const AimsSurfaceTriangle & mesh,
+          const TimeTexture<T> & tex, T region );
     /** computes the position of the point in the mesh nearest to the given 
         position, averaging across the nneighbours nearest vertices.
         The optional index parameter will contain, when given, the index of 

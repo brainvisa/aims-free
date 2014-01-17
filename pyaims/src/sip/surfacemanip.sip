@@ -40,6 +40,16 @@ public:
                    const TimeTexture_S16 & tex, short value,
                    vector_SIZE_T ** overtex = 0 ) /Factory/;
 
+  static AimsTimeSurface_2 *
+      meshTextureBoundary( const AimsSurfaceTriangle & mesh,
+        const TimeTexture_S16 & tex, short region ) /Factory/;
+  static AimsTimeSurface_2 *
+    meshTextureBoundary( const AimsSurfaceTriangle & mesh,
+      const TimeTexture_S32 & tex, int region ) /Factory/;
+  static AimsTimeSurface_2 *
+    meshTextureBoundary( const AimsSurfaceTriangle & mesh,
+      const TimeTexture_FLOAT & tex, float region ) /Factory/;
+
   static void cutMesh( const AimsSurfaceTriangle & insurf,
                        const Point4df & plane, AimsSurfaceTriangle & cut,
                        AimsTimeSurface_2 & borderline );
