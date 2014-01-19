@@ -411,6 +411,188 @@ namespace aims
     return tex;
   }
 
+
+  namespace internal
+  {
+    inline uint take_mid_point_and_insert(
+      std::map<std::pair<uint,uint>, uint> & segments,
+      uint i, uint j,
+      const std::vector<Point3df> & vert,
+      std::vector<Point3df> & overt )
+    {
+      std::pair<uint,uint> seg = std::make_pair( i, j );
+      std::map<std::pair<uint,uint>, uint>::const_iterator
+        iseg = segments.find( seg );
+      uint iout;
+      if( iseg == segments.end() )
+      {
+        Point3df p = ( vert[i] + vert[j] ) / 2;
+        iout = overt.size();
+        overt.push_back( p );
+        segments[ seg ] = iout;
+      }
+      else
+        iout = iseg->second;
+      return iout;
+    }
+
+  }
+
+
+  template <typename T>
+  AimsSurface<2,Void> *
+  SurfaceManip::meshTextureBoundary( const AimsSurface<3,Void> & mesh,
+    const Texture<T> & tex, T region )
+  {
+    const std::vector<Point3df> & vert = mesh.vertex();
+    const std::vector<AimsVector<uint,3> > & poly = mesh.polygon();
+    AimsSurface<2,Void> *outmesh = new AimsSurface<2,Void>;
+    std::map<std::pair<uint,uint>, uint> segments;
+    std::vector<AimsVector<uint,3> >::const_iterator ip, ep = poly.end();
+    uint i, j, k;
+    bool ii, jj, kk;
+    std::vector<Point3df> & overt = outmesh->vertex();
+    std::vector<AimsVector<uint,2> > & opoly = outmesh->polygon();
+
+    for( ip=poly.begin(); ip!=ep; ++ip )
+    {
+      bool done = false;
+      i = (*ip)[0];
+      j = (*ip)[1];
+      k = (*ip)[2];
+      // order indices
+      if( i > j )
+      {
+        i = j;
+        j = (*ip)[0];
+      }
+      if( i > k )
+      {
+        k = i;
+        i = (*ip)[2];
+      }
+      if( j > k )
+      {
+        uint w = k;
+        k = j;
+        j = w;
+      }
+      // find boundaries in triangle
+      if( region >= 0 )
+      {
+        if( tex[i] == region )
+          ii = true;
+        else
+          ii = false;
+        if( tex[j] == region )
+          jj = true;
+        else
+          jj = false;
+        if( tex[k] == region )
+          kk = true;
+        else
+          kk = false;
+      }
+      else
+      {
+        if( tex[i] != tex[j] && tex[i] != tex[k] && tex[j] != tex[k] )
+        {
+          // all different
+          Point3df center = ( vert[i] + vert[j] + vert[k] ) / 3.;
+          uint iop = overt.size();
+          overt.push_back( center );
+          uint iout = internal::take_mid_point_and_insert( segments, i, j, vert,
+                                                           overt );
+          opoly.push_back( AimsVector<uint,2>( iout, iop ) );
+          iout = internal::take_mid_point_and_insert( segments, i, k, vert,
+                                                           overt );
+          opoly.push_back( AimsVector<uint,2>( iout, iop ) );
+          iout = internal::take_mid_point_and_insert( segments, j, k, vert,
+                                                           overt );
+          opoly.push_back( AimsVector<uint,2>( iout, iop ) );
+          done = true;
+        }
+        else
+        {
+          ii = false;
+          if( tex[i] == tex[j] )
+            jj = false;
+          else
+            jj = true;
+          if( tex[i] == tex[k] )
+            kk = false;
+          else
+            kk = true;
+        }
+      }
+
+      if( !done && ( ii != jj || ii != kk ) )
+      {
+        std::vector<uint> ipts;
+        if( ii != jj )
+          ipts.push_back( internal::take_mid_point_and_insert( segments, i, j,
+                                                               vert, overt ) );
+        if( ii != kk )
+          ipts.push_back( internal::take_mid_point_and_insert( segments, i, k,
+                                                               vert, overt ) );
+        if( jj != kk )
+          ipts.push_back( internal::take_mid_point_and_insert( segments, j, k,
+                                                               vert, overt ) );
+        opoly.push_back( AimsVector<uint,2>( ipts[0], ipts[1] ) );
+      }
+    }
+    return outmesh;
+  }
+
+
+  template <typename T>
+  AimsTimeSurface<2,Void> *
+  SurfaceManip::meshTextureBoundary( const AimsSurfaceTriangle & mesh,
+    const TimeTexture<T> & tex, T region )
+  {
+    AimsSurfaceTriangle::const_iterator imesh, jmesh, emesh = mesh.end();
+    imesh = mesh.begin();
+    jmesh = imesh;
+    if( jmesh != emesh )
+      ++jmesh;
+    typename TimeTexture<T>::const_iterator
+      itex = tex.begin(), jtex=itex, etex = tex.end();
+    if( jtex != etex )
+      ++jtex;
+    AimsTimeSurface<2,Void> *outmesh = new AimsTimeSurface<2,Void>;
+    while( imesh != emesh && itex != etex )
+    {
+      unsigned mtimestep = imesh->first;
+      unsigned ttimestep = itex->first;
+      AimsSurface<2, Void> *tmesh = meshTextureBoundary( imesh->second,
+                                                         itex->second, region );
+      (*outmesh)[ std::max( mtimestep, ttimestep ) ] = *tmesh;
+      delete tmesh;
+      if( jmesh->first < jtex->first )
+      {
+        imesh = jmesh;
+        if( jmesh != emesh )
+          ++jmesh;
+      }
+      else if( jmesh->first > jtex->first )
+      {
+        itex = jtex;
+        if( jtex != etex )
+          ++jtex;
+      }
+      else
+      {
+        imesh = jmesh;
+        if( jmesh != emesh )
+          ++jmesh;
+        itex = jtex;
+        if( jtex != etex )
+          ++jtex;
+      }
+    }
+    return outmesh;
+  }
+
 }
 
 #endif

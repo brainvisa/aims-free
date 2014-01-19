@@ -3192,3 +3192,22 @@ template AimsTimeSurface<3,Void> *
 template TimeTexture<float>*
   SurfaceManip::meshDensity( const AimsTimeSurface<3,Void> & );
 
+template AimsSurface<2,Void> *
+  SurfaceManip::meshTextureBoundary( const AimsSurface<3,Void> & mesh,
+      const Texture<int16_t> & tex, int16_t region );
+template AimsTimeSurface<2,Void> *
+  SurfaceManip::meshTextureBoundary( const AimsSurfaceTriangle & mesh,
+    const TimeTexture<int16_t> & tex, int16_t region );
+template AimsSurface<2,Void> *
+  SurfaceManip::meshTextureBoundary( const AimsSurface<3,Void> & mesh,
+      const Texture<int32_t> & tex, int32_t region );
+template AimsTimeSurface<2,Void> *
+  SurfaceManip::meshTextureBoundary( const AimsSurfaceTriangle & mesh,
+    const TimeTexture<int32_t> & tex, int32_t region );
+template AimsSurface<2,Void> *
+  SurfaceManip::meshTextureBoundary( const AimsSurface<3,Void> & mesh,
+      const Texture<float> & tex, float region );
+template AimsTimeSurface<2,Void> *
+  SurfaceManip::meshTextureBoundary( const AimsSurfaceTriangle & mesh,
+    const TimeTexture<float> & tex, float region );
+
