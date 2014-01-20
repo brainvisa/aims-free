@@ -156,13 +156,13 @@ void LinearResampler< T >::doResample(
 
       //summing contributions
       pj = i;
-      pi = pj + foldY0;
-      qi = weightX0 * ( double )*( pi + foldX0 );
-      qi += weightX1 * ( double )*( pi + foldX1 );
+      pi = pj + (size_t)(foldY0);
+      qi = weightX0 * ( double )*( pi + (size_t)(foldX0) );
+      qi += weightX1 * ( double )*( pi + size_t(foldX1) );
       qj = weightY0 * qi;
       pi = pj + foldY1;
-      qi = weightX0 * ( double )*( pi + foldX0 );
-      qi += weightX1 * ( double )*( pi + foldX1 );
+      qi = weightX0 * ( double )*( pi + (size_t)(foldX0) );
+      qi += weightX1 * ( double )*( pi + (size_t)(foldX1) );
       intensity = qj + weightY1 * qi;
 
     }
@@ -179,29 +179,29 @@ void LinearResampler< T >::doResample(
         -- z;
 
       }
-      pj = i + this->getFold( z, inVolume.dimZ() ) * inVolume.dimX() *
+      pj = i + (size_t)(this->getFold( z, inVolume.dimZ() )) * inVolume.dimX() *
            inVolume.dimY();
-      pi = pj + foldY0;
-      qi = weightX0 * ( double )*( pi + foldX0 );
-      qi += weightX1 * ( double )*( pi + foldX1 );
+      pi = pj + (size_t)(foldY0);
+      qi = weightX0 * ( double )*( pi + (size_t)(foldX0) );
+      qi += weightX1 * ( double )*( pi + (size_t)(foldX1) );
       qj = weightY0 * qi;
-      pi = pj + foldY1;
-      qi = weightX0 * ( double )*( pi + foldX0 );
-      qi += weightX1 * ( double )*( pi + foldX1 );
+      pi = pj + (size_t)foldY1;
+      qi = weightX0 * ( double )*( pi + (size_t)(foldX0) );
+      qi += weightX1 * ( double )*( pi + (size_t)(foldX1) );
       qj += weightY1 * qi;
       intensity = getBSplineWeight( z, normalizedInLocation[2] ) * qj;
 
       // first z contribution
       ++ z;
-      pj = i + this->getFold( z, inVolume.dimZ() ) * inVolume.dimX() *
+      pj = i + (size_t)(this->getFold( z, inVolume.dimZ() )) * inVolume.dimX() *
            inVolume.dimY();
-      pi = pj + foldY0;
-      qi = weightX0 * ( double )*( pi + foldX0 );
-      qi += weightX1 * ( double )*( pi + foldX1 );
+      pi = pj + (size_t)(foldY0);
+      qi = weightX0 * ( double )*( pi + (size_t)(foldX0) );
+      qi += weightX1 * ( double )*( pi + (size_t)(foldX1) );
       qj = weightY0 * qi;
-      pi = pj + foldY1;
-      qi = weightX0 * ( double )*( pi + foldX0 );
-      qi += weightX1 * ( double )*( pi + foldX1 );
+      pi = pj + (size_t)(foldY1);
+      qi = weightX0 * ( double )*( pi + (size_t)(foldX0) );
+      qi += weightX1 * ( double )*( pi + (size_t)(foldX1) );
       qj += weightY1 * qi;
       intensity += getBSplineWeight( z, normalizedInLocation[2] ) * qj;
     }
