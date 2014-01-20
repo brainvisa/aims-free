@@ -136,3 +136,27 @@ def meshDiceIndex( mesh, texture1, texture2, timestep1=0,
   dice = inter * 2 / ( areas1 + areas2 )
   return dice, areas1, areas2, inter
 
+def average_texture( output, inputs ):
+  """
+  Create average gyri texture from a group of subject.
+  """
+  # read textures
+  tex = []
+  for fname in inputs:
+    tex.append( aims.read( fname ) )
+  # make a 2D array from a series of textures
+  ar = numpy.vstack( [ t[0].arraydata() for t in tex ] )
+  # count occurrences
+  N = numpy.max(ar)
+  def bin_resized( x ):
+    y = numpy.bincount(x)
+    y.resize( N+1 ) # labels: 1 to 72
+    return y
+  cnt = numpy.apply_along_axis( bin_resized, 0, ar )
+  # get max of occurrences in each vertex
+  maj = numpy.argmax( cnt, axis=0 )
+  # make an aims texture from result (numpy array)
+  otex = aims.TimeTexture( 'S16' )
+  otex[0].assign( maj )
+
+  aims.write( otex, output )
