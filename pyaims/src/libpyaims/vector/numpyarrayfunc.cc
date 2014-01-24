@@ -66,7 +66,8 @@ namespace aims
 {
 
   PyObject* initNumpyArray( PyObject* sipSelf, NPY_TYPES numType, int ndim,
-                            int* dims, char* buffer, bool xyzorder )
+                            int* dims, char* buffer, bool xyzorder,
+                            size_t *strides )
   {
     PyObject *sipRes = 0;
     // if the object has been built from an existing array, just return it
@@ -106,6 +107,14 @@ namespace aims
       //sipRes = PyArray_FromDimsAndData( ndim, dims, numType, buffer );
       if( sipRes )
       {
+        if( strides )
+        {
+          // if strides are specified, force them (volume views...)
+          PyArray_STRIDES( sipRes )[0] = strides[0];
+          PyArray_STRIDES( sipRes )[1] = strides[1];
+          PyArray_STRIDES( sipRes )[2] = strides[2];
+          PyArray_STRIDES( sipRes )[3] = strides[3];
+        }
         sipRes = PyArray_Return( (PyArrayObject *) sipRes );
         // make a weakref to the array with a deletion callback
         PyObject *cbk = PyObject_GetAttrString( sipSelf,
@@ -145,7 +154,8 @@ namespace aims
   }
 
 
-  void resizeNumpyArray( PyObject* sipSelf, int ndim, int* dims, char* buffer )
+  void resizeNumpyArray( PyObject* sipSelf, int ndim, int* dims, char* buffer,
+    size_t *strides )
   {
     if( !PyObject_HasAttrString( sipSelf, "_arrayref" ) )
       return;
@@ -156,7 +166,7 @@ namespace aims
     if( !PyArray_Check( o ) )
       return;
     PyArrayObject *arr = (PyArrayObject *) o;
-    PyArray_NDIM( arr ) = ndim;
+    // PyArray_NDIM( arr ) = ndim;
     PyArray_BYTES( arr ) = buffer;
     if( PyArray_NDIM( arr ) != ndim )
     {
@@ -165,13 +175,24 @@ namespace aims
       PyArray_DIMS( arr ) = PyDimMem_RENEW( PyArray_DIMS( arr ), ndim*2 );
     }
     int i;
-    for( i=ndim-1; i>=0; --i )
+    if( strides )
     {
-      PyArray_DIMS( arr )[i] = dims[i];
-      if( i == ndim-1 )
-        PyArray_STRIDES( arr )[i] = PyArray_ITEMSIZE( arr );
-      else
-        PyArray_STRIDES( arr )[i] = PyArray_STRIDES( arr )[i+1] * dims[i+1];
+      for( i=0; i<ndim; ++i )
+      {
+        PyArray_DIMS( arr )[i] = dims[i];
+        PyArray_STRIDES( arr )[i] = strides[i];
+      }
+    }
+    else
+    {
+      for( i=ndim-1; i>=0; --i )
+      {
+        PyArray_DIMS( arr )[i] = dims[i];
+        if( i == ndim-1 )
+          PyArray_STRIDES( arr )[i] = PyArray_ITEMSIZE( arr );
+        else
+          PyArray_STRIDES( arr )[i] = PyArray_STRIDES( arr )[i+1] * dims[i+1];
+      }
     }
   }
 

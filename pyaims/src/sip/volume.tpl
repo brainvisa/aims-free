@@ -512,8 +512,23 @@ public:
   dims[2] = sipCpp->getSizeY();
   dims[1] = sipCpp->getSizeZ();
   dims[0] = sipCpp->getSizeT();
+  size_t strides[4];
+  strides[3] = sizeof( %Template1% );
+  carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
+  if( ref.get() )
+  {
+    strides[2] = strides[3] * ref->getSizeX();
+    strides[1] = strides[2] * ref->getSizeY();
+    strides[0] = strides[1] * ref->getSizeZ();
+  }
+  else
+  {
+    strides[2] = strides[3] * dims[3];
+    strides[1] = strides[2] * dims[2];
+    strides[0] = strides[1] * dims[1];
+  }
   sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
-                                 (char *) &sipCpp->at( 0 ) );
+                                 (char *) &sipCpp->at( 0 ), false, strides );
 %End
 
   SIP_PYOBJECT __array__() /Factory/;
@@ -523,8 +538,23 @@ public:
   dims[2] = sipCpp->getSizeY();
   dims[1] = sipCpp->getSizeZ();
   dims[0] = sipCpp->getSizeT();
+  size_t strides[4];
+  strides[3] = sizeof( %Template1% );
+  carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
+  if( ref.get() )
+  {
+    strides[2] = strides[3] * ref->getSizeX();
+    strides[1] = strides[2] * ref->getSizeY();
+    strides[0] = strides[1] * ref->getSizeZ();
+  }
+  else
+  {
+    strides[2] = strides[3] * dims[3];
+    strides[1] = strides[2] * dims[2];
+    strides[0] = strides[1] * dims[1];
+  }
   sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
-                                 (char *) &sipCpp->at( 0 ), true );
+                                 (char *) &sipCpp->at( 0 ), true, strides );
 %End
 
   void checkResize();
@@ -534,7 +564,23 @@ public:
   dims[2] = sipCpp->getSizeY();
   dims[1] = sipCpp->getSizeZ();
   dims[0] = sipCpp->getSizeT();
-  aims::resizeNumpyArray( sipSelf, 4, &dims[0], (char *) &sipCpp->at( 0 ) );
+  size_t strides[4];
+  strides[3] = sizeof( %Template1% );
+  carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
+  if( ref.get() )
+  {
+    strides[2] = strides[3] * ref->getSizeX();
+    strides[1] = strides[2] * ref->getSizeY();
+    strides[0] = strides[1] * ref->getSizeZ();
+  }
+  else
+  {
+    strides[2] = strides[3] * dims[3];
+    strides[1] = strides[2] * dims[2];
+    strides[0] = strides[1] * dims[1];
+  }
+  aims::resizeNumpyArray( sipSelf, 4, &dims[0], (char *) &sipCpp->at( 0 ),
+    strides );
 %End
 
   void _arrayDestroyedCallback( SIP_PYOBJECT );
