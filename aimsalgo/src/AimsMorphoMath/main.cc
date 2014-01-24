@@ -178,7 +178,7 @@ AimsData< T > Morpho::doErosion( AimsData< T >& dataIn, float & radius )
     for(int z = 0; z < dim[2]; ++z)
       {
 	//	float pct = float(z*100./dim[2]);
-	// 	cout << "Pourcentage effectue : " << pct << " %\t";
+	// 	cout << "\rPourcentage effectue : " << pct << flush";
 	for(int y = 0; y < dim[1]; ++y)
 	  for(int x = 0; x < dim[0]; ++x)
 	    {
@@ -233,7 +233,7 @@ AimsData< T > Morpho::doDilation( AimsData< T >& dataIn, float & radius )
     for(int z = 0; z < dim[2]; ++z)
       {
 	float pct = float(z*100./dim[2]);
-	cout << "Pourcentage effectue : " << pct << " %\t";
+	cout << "\rPourcentage effectue : " << pct << flush;
 	for(int y = 0; y < dim[1]; ++y)
 	  for(int x = 0; x < dim[0]; ++x)
 	    {
