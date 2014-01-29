@@ -48,16 +48,72 @@ import numpy, types, os
 def fslMatToTrm( matfile, srcimage, dstimage ):
   '''
   As far as I have understood:
-  
+
   A FSL transformation goes from the disk referential of the source image
   to the disk referential of the destination image.
-  
+
   BUT:
-  
+
   if the qform of an image (disk -> "real world") implies a flip (goes from a
   direct referential to an indirect one or the contrary), then a flip along X
   axis is inserted in the matrix, since FSL flirt doesn't allow flipping.
   '''
+  # The FSL transform (mat) goes from the potentially flipped disk-oriented,
+  # referential of the 1st image, in millimeters (R_FDflipmm1) to the same
+  # ref of the 2nd image (R_FDflipmm2) (see figure)
+  #
+  # We want: the Aims transform (trm) from the Aims referential of the 1st
+  # image, in mm (R_AIMSmm1) to the same one for the 2nd image (R_AIMSmm2)
+  # see:
+  #   http://brainvisa.info/doc/aimsdata/aims_training/en/html/ch06.html
+  #   http://brainvisa.info/doc/anatomist/anatomist_referentials.pdf)
+  #
+  # Figure:
+  #                       ----------------
+  #   Referentials are in | square boxes |
+  #                       ----------------
+  #   Transforms are in (round parentheses) and correspond to code variables
+  #   Arrows show transform orientations
+  #
+  # For one image:
+  #
+  #   ---------------                     ---------------
+  #   | R_FDflipmm1 |  ----> (mat) ---->  | R_FDflipmm2 |
+  #   ---------------                     ---------------
+  #       /\
+  #       |  (flip1)    X axis flip, with disk orientation if needed, or id.
+  #       |
+  #   -----------
+  #   | R_FDmm1 |       flipped ref used by FSL
+  #   -----------
+  #       /\
+  #       |  (vsd1)     voxels size transform (homothetic), in disk space
+  #       |
+  #   ----------------
+  #   | R_NIFTI_Dvox |  NIFTI ref, disk oriented, in voxels
+  #   ----------------
+  #       |
+  #       |  (s2m1)     storage_to_memory: disk to Aims, in voxels
+  #      \/
+  #   -------------
+  #   | R_AIMSvox |     Aims orientation, still in voxels
+  #   -------------
+  #       |
+  #       |  (vsm1)    voxels size transform (homothetic), in Aims space
+  #      \/
+  #   -------------                              -------------
+  #   | R_AIMSmm1 |    Aims orientation, in mm   | R_AIMSmm2 |
+  #   -------------                              -------------
+  #       |                                          /\
+  #       |                  (trm)                   |
+  #       --------------------------------------------
+  #
+  # Thus, the final transform chain, for the 1st image, is:
+  #   flip1 * vsd1 * inv(s2m1) * inv(vsm1)
+  # The same chain is also applied on the other side, and inverted:
+  #   vsm2 * s2m2 * inv(vsd2) * inv(flip2)
+  # with mot between both parts.
+
   if type( srcimage ) in types.StringTypes:
     f = aims.Finder()
     f.check( srcimage )
