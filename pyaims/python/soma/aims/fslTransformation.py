@@ -124,10 +124,10 @@ def fslMatToTrm( matfile, srcimage, dstimage ):
   flip2 = aims.Motion()
   if not s2m1.isDirect():
     flip1.rotation().setValue( -1., 0,0 )
-    flip1.translation()[0] = vs1[0] * ( dimd1[0] - 1 )
+    flip1.translation()[0] = vsd1.rotation().value(0,0) *  ( dimd1[0] - 1 )
   if not s2m2.isDirect():
     flip2.rotation().setValue( -1., 0,0 )
-    flip2.translation()[0] = vs2[0] * ( dimd2[0] - 1 )
+    flip2.translation()[0] = vsd2.rotation().value(0,0) * ( dimd2[0] - 1 )
 
   mat = [ x.split() for x in open( matfile ).readlines() ]
   mot = aims.Motion()
