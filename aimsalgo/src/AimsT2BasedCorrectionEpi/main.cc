@@ -244,7 +244,7 @@ int main( int argc, const char* argv[] )
         }
 
         context.setLocation( t2Images, l );
-        ThreadedLoop loop( &context, 1, 0, numT2 - 1, 1 );
+        ThreadedLoop loop( &context, 0, numT2 - 1 );
         loop.launch();
 
       }

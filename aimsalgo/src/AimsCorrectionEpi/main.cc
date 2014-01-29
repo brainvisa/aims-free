@@ -262,7 +262,7 @@ int main( int argc, const char* argv[] )
         }
 
         context.setLocation( t2Image, dwImages, outImages, l );
-        ThreadedLoop loop( &context, 1, 0, nOrientation, 1 );
+        ThreadedLoop loop( &context, 0, nOrientation );
         loop.launch();
 
       }

@@ -736,11 +736,11 @@ void FoldGraphAttributes::prepareDepthMap()
     verbose = 0;
   DistanceMapThreadContext   dc( *this, th );
   float tpcpu = threadsByCpu( maxThreads() );
-  ThreadedLoop  tl( &dc, 1, 0, 4, tpcpu );
+  ThreadedLoop  tl( &dc, 0, 4, 0, tpcpu );
   tl.launch();
   cout << "done." << endl;
   cout << "calculating gradients..." << endl;
-  ThreadedLoop  tl2( &dc, 1, 4, 6, tpcpu );
+  ThreadedLoop  tl2( &dc, 4, 6, 0, tpcpu );
   tl2.launch();
   cout << "done." << endl;
   verbose = verb;
@@ -815,7 +815,7 @@ void FoldGraphAttributes::makeMeshes()
 
   NodeContext	nc( _graph, &meshVertex, _mesher );
   float tpcpu = threadsByCpu( maxThreads() );
-  ThreadedLoop	tl( &nc, 1, 0, _graph.order(), tpcpu );
+  ThreadedLoop	tl( &nc, 0, _graph.order(), 0, tpcpu );
   tl.launch();
 
   cout << "\nDone: meshes\n";
