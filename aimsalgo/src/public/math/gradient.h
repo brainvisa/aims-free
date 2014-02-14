@@ -455,7 +455,9 @@ class AimsGradient
 
 template <class C> inline
 AimsData<C> AimsGradient<C>::X(const AimsData<C> &data)
-{ int    beginx=0,endx=0,offx1=0,offx2=0,divx=0;
+{
+  int    beginx=0,endx=0,offx1=0,offx2=0;
+  float  divx=0;
 
   aims::AimsFastAllocationData<C> grad(data.dimX(),data.dimY(),data.dimZ(),data.dimT(),
                    data.borderWidth());
@@ -464,12 +466,22 @@ AimsData<C> AimsGradient<C>::X(const AimsData<C> &data)
   grad.setHeader(data.header()->cloneHeader());
 
   switch (_type)
-  { case AIMS_GRADIENT_CENTRAL : beginx = 1;endx = data.dimX()-1;
-                                 offx1=1;offx2=1;divx=2;break;
-    case AIMS_GRADIENT_DMINUS  : beginx = 1;endx = data.dimX()  ;
-                                 offx1=1;offx2=0;divx=1;break;
-    case AIMS_GRADIENT_DPLUS   : beginx = 0;endx = data.dimX()-1;
-                                 offx1=0;offx2=1;divx=1;break;
+  {
+  case AIMS_GRADIENT_CENTRAL :
+    beginx = 1;endx = data.dimX()-1;
+    offx1=1;offx2=1;
+    divx=2 * data.sizeX();
+    break;
+  case AIMS_GRADIENT_DMINUS  :
+    beginx = 1;endx = data.dimX()  ;
+    offx1=1;offx2=0;
+    divx=data.sizeX();
+    break;
+  case AIMS_GRADIENT_DPLUS   :
+    beginx = 0;endx = data.dimX()-1;
+    offx1=0;offx2=data.sizeX();
+    divx=1;
+    break;
   }
 
   for (int t=0;t<data.dimT();t++)
@@ -484,7 +496,9 @@ AimsData<C> AimsGradient<C>::X(const AimsData<C> &data)
 
 template <class C> inline
 AimsData<C> AimsGradient<C>::Y(const AimsData<C> &data)
-{ int    beginy=0,endy=0,offy1=0,offy2=0,divy=0;
+{
+  int    beginy=0,endy=0,offy1=0,offy2=0;
+  float  divy=0;
 
   aims::AimsFastAllocationData<C> grad(data.dimX(),data.dimY(),data.dimZ(),data.dimT(),
                      data.borderWidth());
@@ -494,11 +508,11 @@ AimsData<C> AimsGradient<C>::Y(const AimsData<C> &data)
 
   switch (_type)
   { case AIMS_GRADIENT_CENTRAL : beginy = 1;endy = data.dimY()-1;
-                                 offy1=1;offy2=1;divy=2;break;
+                                 offy1=1;offy2=1;divy=2 * data.sizeY();break;
     case AIMS_GRADIENT_DMINUS  : beginy = 1;endy = data.dimY()  ;
-                                 offy1=1;offy2=0;divy=1;break;
+                                 offy1=1;offy2=0;divy=data.sizeY();break;
     case AIMS_GRADIENT_DPLUS   : beginy = 0;endy = data.dimY()-1;
-                                 offy1=0;offy2=1;divy=1;break;
+                                 offy1=0;offy2=1;divy=data.sizeY();break;
   }
 
   for (int t=0;t<data.dimT();t++)
@@ -513,7 +527,9 @@ AimsData<C> AimsGradient<C>::Y(const AimsData<C> &data)
 
 template <class C> inline
 AimsData<C> AimsGradient<C>::Z(const AimsData<C> &data)
-{ int    beginz=0,endz=0,offz1=0,offz2=0,divz=0;
+{
+  int    beginz=0,endz=0,offz1=0,offz2=0;
+  float  divz=0;
 
   aims::AimsFastAllocationData<C> grad(data.dimX(),data.dimY(),data.dimZ(),data.dimT(),
                      data.borderWidth());
@@ -523,11 +539,11 @@ AimsData<C> AimsGradient<C>::Z(const AimsData<C> &data)
 
   switch (_type)
   { case AIMS_GRADIENT_CENTRAL : beginz = 1;endz = data.dimZ()-1;
-                                 offz1=1;offz2=1;divz=2;break;
+                                 offz1=1;offz2=1;divz=2 * data.sizeZ();break;
     case AIMS_GRADIENT_DMINUS  : beginz = 1;endz = data.dimZ()  ;
-                                 offz1=1;offz2=0;divz=1;break;
+                                 offz1=1;offz2=0;divz=data.sizeZ();break;
     case AIMS_GRADIENT_DPLUS   : beginz = 0;endz = data.dimZ()-1;
-                                 offz1=0;offz2=1;divz=1;break;
+                                 offz1=0;offz2=1;divz=data.sizeZ();break;
   }
 
   for (int t=0;t<data.dimT();t++)
@@ -542,7 +558,9 @@ AimsData<C> AimsGradient<C>::Z(const AimsData<C> &data)
 
 template <class C> inline
 AimsData<C> AimsGradient<C>::T(const AimsData<C> &data)
-{ int    begint=0,endt=0,offt1=0,offt2=0,divt=0;
+{
+  int    begint=0,endt=0,offt1=0,offt2=0;
+  float  divt=0;
 
   aims::AimsFastAllocationData<C> grad(data.dimX(),data.dimY(),data.dimZ(),data.dimT(),
                      data.borderWidth());
@@ -552,11 +570,11 @@ AimsData<C> AimsGradient<C>::T(const AimsData<C> &data)
 
   switch (_type)
   { case AIMS_GRADIENT_CENTRAL : begint = 1;endt = data.dimY()-1;
-                                 offt1=1;offt2=1;divt=2;break;
+                                 offt1=1;offt2=1;divt=2 * data.sizeT();break;
     case AIMS_GRADIENT_DMINUS  : begint = 1;endt = data.dimY()  ;
-                                 offt1=1;offt2=0;divt=1;break;
+                                 offt1=1;offt2=0;divt=data.sizeT();break;
     case AIMS_GRADIENT_DPLUS   : begint = 0;endt = data.dimY()-1;
-                                 offt1=0;offt2=1;divt=1;break;
+                                 offt1=0;offt2=1;divt=data.sizeT();break;
   }
 
   for (int t=begint;t<endt;t++)

@@ -156,14 +156,16 @@ namespace aims
                            const std::string & attribute, 
                            carto::rc_ptr<T> obj );
     /// builds a ROI graph from a volume of labels
-    static Graph* graphFromVolume( const AimsData<short> & vol, 
-				   short background = 0, 
-				   std::map<short,std::string> *trans = 0 );
+    template <typename T>
+    static Graph* graphFromVolume( const AimsData<T> & vol,
+                                   T background = 0,
+                                   std::map<T, std::string> *trans = 0 );
     /// builds a ROI graph from a volume of labels
-    static void graphFromVolume( const AimsData<short> & vol , Graph & g, 
-				 short background = 0, 
-				 std::map<short,std::string> *trans = 0,
-				 bool automaticBackgroundSearch = true );
+    template <typename T>
+    static void graphFromVolume( const AimsData<T> & vol , Graph & g,
+                                 T background = 0,
+                                 std::map<T,std::string> *trans = 0,
+                                 bool automaticBackgroundSearch = true );
     static void setAttributeColor( Graph & graph, const std::string & att,
                                    const AimsRGB & );
     static void setAttributeColor( Graph & graph, const std::string & att,

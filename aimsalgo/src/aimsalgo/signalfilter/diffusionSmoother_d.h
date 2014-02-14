@@ -40,6 +40,7 @@
 #include <aims/signalfilter/diffusionSmoother.h>
 #include <aims/signalfilter/convol.h>
 #include <aims/utility/converter_volume.h>
+#include <aims/data/volumemanip.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
@@ -63,9 +64,21 @@ AimsData<T> DiffusionSmoother<T>::doSmoothing(const AimsData<T> & ima,
 {
 	this->check(maxiter);
 	AimsData<float> kernel = DiffusionSmoother<T>::laplacian.clone();
+        // rebuild the kernel accounting for possibly anisotropic voxel size
+        kernel(0,1,1) = kernel(2,1,1) = this->_dt / ( ima.sizeX() * ima.sizeX() );
+        kernel(1,0,1) = kernel(1,2,1) = this->_dt / ( ima.sizeY() * ima.sizeY() );
+        kernel(1,1,0) = kernel(1,1,2) = this->_dt / ( ima.sizeZ() * ima.sizeZ() );
+        kernel(1,1,1) = -this->_dt * (2. / (ima.sizeX() * ima.sizeX())
+          + 2. / (ima.sizeY() * ima.sizeY())
+          + 2. / (ima.sizeZ() * ima.sizeZ()) );
+        //
+        // 1 (center) + kernel * dt
+        kernel(1,1,1) = 1. + kernel(1,1,1);
+        /*
 	kernel(1,1,1) = 1. + kernel(1,1,1) * this->_dt;
 	kernel(1,1,0) = kernel(1,0,1) = kernel(0,1,1) =
 		kernel(2,1,1) = kernel(1,2,1) = kernel(1,1,2) = 0.5 * this->_dt;
+        */
 
 	AimsData<float> *tmp1, *tmp2, *swap;
 	AimsConvolution<float> convolution;

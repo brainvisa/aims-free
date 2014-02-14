@@ -716,7 +716,7 @@ template void AimsMeshLaplacian( const vector<double> &inittex,
 
 
 map<unsigned, set< pair<unsigned,float> > >  AimsMeshWeightFiniteElementLaplacian( const AimsSurface<3,Void> & mesh, 
-					       const float Wmax)
+                                      const float Wmax)
 
 {
   unsigned					neigh,i, n =mesh.vertex().size();
@@ -730,7 +730,7 @@ map<unsigned, set< pair<unsigned,float> > >  AimsMeshWeightFiniteElementLaplacia
   vector< list<float> > THETA;
   vector< list<float> >  SURFACE;
   set<float> values;
-	
+
   cout << "Node ordering..." << flush;
   neighbourso = AimsMeshOrderNode(mesh);
   cout << "done \n";
@@ -739,95 +739,94 @@ map<unsigned, set< pair<unsigned,float> > >  AimsMeshWeightFiniteElementLaplacia
   PHI = AimsMeshFiniteElementPhi(mesh,neighbourso,SURFACE);
   THETA = AimsMeshFiniteElementTheta(mesh,neighbourso,SURFACE);
   cout << "done \n";
-    
+
   for (i=0; i<n; ++i)
+  {
+    s = SURFACE[i].size()  ;
+    p = PHI[i].size();
+    t = THETA[i].size();
+    if ( !( s == p && s == t && p==t ) )
     {
-      s = SURFACE[i].size()  ;
-      p = PHI[i].size();
-      t = THETA[i].size();
-      if ( !( s == p && s == t && p==t ) )
-	{
-	  cout << "Problem with the mesh features..." << endl;
-	  ASSERT(0);
-	}
-      elist =  neighbourso[i].end();
-      ilist = neighbourso[i].begin();
-      iphi = PHI[i].begin();
-      isurf = SURFACE[i].begin();
-      esurf = SURFACE[i].end();      
-      itheta = THETA[i].begin();
-      L = 0;
-      surface = 0;
-      while ( isurf != esurf )
-	{
-	  surface += *isurf;
-	  ++isurf;
-	}
-      
-      while ( ilist != elist )
-	{
-	  neigh = *ilist;
+      cout << "Problem with the mesh features..." << endl;
+      ASSERT(0);
+    }
+    elist =  neighbourso[i].end();
+    ilist = neighbourso[i].begin();
+    iphi = PHI[i].begin();
+    isurf = SURFACE[i].begin();
+    esurf = SURFACE[i].end();
+    itheta = THETA[i].begin();
+    L = 0;
+    surface = 0;
+    while ( isurf != esurf )
+    {
+      surface += *isurf;
+      ++isurf;
+    }
 
-	  if (surface != 0 )
-	    weight = (*iphi + *itheta) / surface;
-	  else
-	    {
-	      cerr << "Triangle with null surface\n";
-	      ASSERT (0);
-	    }
+    while ( ilist != elist )
+    {
+      neigh = *ilist;
 
-	  values.insert(weight);
-	  lapl[i].insert( pair<unsigned,float>(neigh,weight) );
-	  ++ ilist;
-	  ++iphi;
-	  ++itheta;
-	}
-    }      
+      if (surface != 0 )
+        weight = (*iphi + *itheta) / surface;
+      else
+      {
+        cerr << "Triangle with null surface\n";
+        ASSERT (0);
+      }
 
-      //Threshold definition
-      set<float>::iterator iv;
-      set<float>::reverse_iterator riv;
-      unsigned   nbValues,inc = 0 ;
-      set< pair<unsigned,float> >::iterator isp,esp;
-      float Wm, WM;
-      nbValues = (unsigned) rint ( (1 - Wmax) * values.size() );
-      cout << "Thresholding  " << 100*(1 - Wmax) << "% of the Laplacian weights (" << nbValues << "/" <<  values.size() << ")" << endl;
-      iv = values.begin();
-      riv = values.rbegin();
-      cout << "Weights:" << endl << "Before: min: " << *iv << " max: " << *riv << endl; 
-      while ( inc < nbValues)
-	{
-	  ++inc;
-	  ++iv;
-	}
-      Wm = *iv;
-      inc = 0;
-      while ( inc < nbValues)
-	{
-	  ++inc;
-	  ++riv;
-	}
-      WM = *riv;
-      cout << "After: min: " << Wm << " max: " << WM << endl; 
-      for (il = lapl.begin(), el = lapl.end(); il != el; ++il)
-	for ( isp = (il->second).begin(), esp = (il->second).end(); isp != esp; ++isp)   
-	  {
-	    neigh = isp->first;
-	    weight = isp->second;
-	    if (weight > WM)
-	      {
-		il->second.erase(pair<unsigned,float>(neigh,weight) );
-		il->second.insert(pair<unsigned,float>(neigh,WM) );
-	      }
-	    else
-	      if (weight < Wm)
-		{
-		  il->second.erase(pair<unsigned,float>(neigh,weight) );
-		  il->second.insert(pair<unsigned,float>(neigh,Wm) );
-		}
-	  }
-		  
-   
+      values.insert(weight);
+      lapl[i].insert( pair<unsigned,float>(neigh,weight) );
+      ++ ilist;
+      ++iphi;
+      ++itheta;
+    }
+  }
+
+  //Threshold definition
+  set<float>::iterator iv;
+  set<float>::reverse_iterator riv;
+  unsigned   nbValues,inc = 0 ;
+  set< pair<unsigned,float> >::iterator isp,esp;
+  float Wm, WM;
+  nbValues = (unsigned) rint ( (1 - Wmax) * values.size() );
+  cout << "Thresholding  " << 100*(1 - Wmax) << "% of the Laplacian weights (" << nbValues << "/" <<  values.size() << ")" << endl;
+  iv = values.begin();
+  riv = values.rbegin();
+  cout << "Weights:" << endl << "Before: min: " << *iv << " max: " << *riv << endl;
+  while ( inc < nbValues)
+  {
+    ++inc;
+    ++iv;
+  }
+  Wm = *iv;
+  inc = 0;
+  while ( inc < nbValues)
+  {
+    ++inc;
+    ++riv;
+  }
+  WM = *riv;
+  cout << "After: min: " << Wm << " max: " << WM << endl;
+  for (il = lapl.begin(), el = lapl.end(); il != el; ++il)
+    for ( isp = (il->second).begin(), esp = (il->second).end(); isp != esp; ++isp)
+    {
+      neigh = isp->first;
+      weight = isp->second;
+      if (weight > WM)
+      {
+        il->second.erase(pair<unsigned,float>(neigh,weight) );
+        il->second.insert(pair<unsigned,float>(neigh,WM) );
+      }
+      else
+        if (weight < Wm)
+        {
+          il->second.erase(pair<unsigned,float>(neigh,weight) );
+          il->second.insert(pair<unsigned,float>(neigh,Wm) );
+        }
+    }
+
   return(lapl);
 }
 

@@ -74,6 +74,12 @@ namespace aims
   {
     return( new ObjectWrapper<AimsData<short> >( 0 ) );
   }
+
+  template<> AimsGraphReader::Wrapper *
+  AimsGraphReader::ObjectWrapper<AimsData<int32_t> >::extract( int )
+  {
+    return( new ObjectWrapper<AimsData<int32_t> >( 0 ) );
+  }
 }
 
 
@@ -84,25 +90,29 @@ static void AimsGraphReader_construct( AimsGraphReader & gr )
   string	seg = DataTypeCode<AimsTimeSurface<2, Void> >().objectType();
   string	msh = DataTypeCode<AimsSurfaceTriangle>().objectType();
   string	vol = DataTypeCode<AimsData<short> >().objectType();
+  string        vol32 = DataTypeCode<AimsData<int32_t> >().objectType();
   string	tex = DataTypeCode<Texture1d>().objectType();
   string	p2f = DataTypeCode<Point2df>::name();
   string	vod = DataTypeCode<Void>::name();
   string	flt = DataTypeCode<float>::name();
   string	s16 = DataTypeCode<int16_t>::name();
-  gr.registerProcessType( bck, vod, 
-			  &AimsGraphReader::read<BucketMap<Void> > );
-  gr.registerProcessType( msh, vod, 
-			  &AimsGraphReader::read<AimsSurfaceTriangle> );
-  gr.registerProcessType( seg, vod, 
-			  &AimsGraphReader::read<AimsTimeSurface<2, Void> > );
-  gr.registerProcessType( tex, flt, 
-			  &AimsGraphReader::read<Texture1d> );
-  gr.registerProcessType( tex, s16, 
-			  &AimsGraphReader::read<TimeTexture<short> > );
-  gr.registerProcessType( tex, p2f, 
-			  &AimsGraphReader::read<Texture2d> );
-  gr.registerProcessType( vol, s16, 
-			  &AimsGraphReader::read<AimsData<short> > );
+  string        s32 = DataTypeCode<int32_t>::name();
+  gr.registerProcessType( bck, vod,
+                          &AimsGraphReader::read<BucketMap<Void> > );
+  gr.registerProcessType( msh, vod,
+                          &AimsGraphReader::read<AimsSurfaceTriangle> );
+  gr.registerProcessType( seg, vod,
+                          &AimsGraphReader::read<AimsTimeSurface<2, Void> > );
+  gr.registerProcessType( tex, flt,
+                          &AimsGraphReader::read<Texture1d> );
+  gr.registerProcessType( tex, s16,
+                          &AimsGraphReader::read<TimeTexture<short> > );
+  gr.registerProcessType( tex, p2f,
+                          &AimsGraphReader::read<Texture2d> );
+  gr.registerProcessType( vol, s16,
+                          &AimsGraphReader::read<AimsData<short> > );
+  gr.registerProcessType( vol32, s32,
+                          &AimsGraphReader::read<AimsData<int32_t> > );
 }
 #endif
 
@@ -114,11 +124,13 @@ AimsGraphReader::AimsGraphReader( const string & fname )
   string	seg = DataTypeCode<AimsTimeSurface<2, Void> >().objectType();
   string	msh = DataTypeCode<AimsSurfaceTriangle>().objectType();
   string	vol = DataTypeCode<AimsData<short> >().objectType();
+  string        vol32 = DataTypeCode<AimsData<int32_t> >().objectType();
   string	tex = DataTypeCode<Texture1d>().objectType();
   string	p2f = DataTypeCode<Point2df>::name();
   string	vod = DataTypeCode<Void>::name();
   string	flt = DataTypeCode<float>::name();
   string	s16 = DataTypeCode<int16_t>::name();
+  string        s32 = DataTypeCode<int32_t>::name();
 
 #if ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 == 95 )
   // workaround bug in gcc-2.95
@@ -132,6 +144,7 @@ AimsGraphReader::AimsGraphReader( const string & fname )
   registerProcessType( tex, s16, &read<TimeTexture<short> > );
   registerProcessType( tex, p2f, &read<Texture2d> );
   registerProcessType( vol, s16, &read<AimsData<short> > );
+  registerProcessType( vol32, s32, &read<AimsData<int32_t> > );
 #else
   registerProcessType( bck, vod, &AimsGraphReader::read<BucketMap<Void> > );
   registerProcessType( msh, vod, &AimsGraphReader::read<AimsSurfaceTriangle> );
@@ -141,6 +154,7 @@ AimsGraphReader::AimsGraphReader( const string & fname )
   registerProcessType( tex, s16, &AimsGraphReader::read<TimeTexture<short> > );
   registerProcessType( tex, p2f, &AimsGraphReader::read<Texture2d> );
   registerProcessType( vol, s16, &AimsGraphReader::read<AimsData<short> > );
+  registerProcessType( vol32, s32, &AimsGraphReader::read<AimsData<int32_t> > );
 #endif
 }
 

@@ -142,6 +142,13 @@ namespace aims
       x.setSizeXYZT( y.sizeX(), y.sizeY(), y.sizeZ(), y.sizeT() );
     }
 
+    template<>
+    void adjustVoxelSize( AimsData<int32_t> & x, const AimsData<int32_t> & y )
+    {
+      x.setSizeXYZT( y.sizeX(), y.sizeY(), y.sizeZ(), y.sizeT() );
+    }
+
+
     template<typename T> void 
     insertElement( T & dest, int index, const T & src )
     {
@@ -151,20 +158,38 @@ namespace aims
 	dest[ index ] = src.begin()->second;
     }
 
-    template<> void 
-    insertElement( AimsData<short> & dest, int index, 
-		   const AimsData<short> & src )
+    template<> void
+    insertElement( AimsData<short> & dest, int index,
+                  const AimsData<short> & src )
     {
       if( &dest == &src )
-	return;
+        return;
       short x, y, z;
       ForEach3d( src, x, y, z )
-	if( src( x, y, z ) >= 0 )
-	  dest( x, y, z ) = index;
+        if( src( x, y, z ) >= 0 )
+          dest( x, y, z ) = index;
+    }
+
+    template<> void
+    insertElement( AimsData<int32_t> & dest, int index,
+                   const AimsData<int32_t> & src )
+    {
+      if( &dest == &src )
+        return;
+      short x, y, z;
+      ForEach3d( src, x, y, z )
+        if( src( x, y, z ) >= 0 )
+          dest( x, y, z ) = index;
     }
 
 
     template <> inline PropertySet & getHeader( AimsData<short> & obj )
+    {
+      return obj.volume()->header();
+    }
+
+
+    template <> inline PropertySet & getHeader( AimsData<int32_t> & obj )
     {
       return obj.volume()->header();
     }
@@ -231,22 +256,23 @@ namespace aims
     }
 
     // compilation
-    template void insertElement( BucketMap<Void> & dest, int index, 
-				 const BucketMap<Void> & src );
-    template void insertElement( Texture1d & dest, int index, 
-				 const Texture1d & src );
-    template void insertElement( Texture2d & dest, int index, 
-				 const Texture2d & src );
-    template void insertElement( TimeTexture<short> & dest, int index, 
-				 const TimeTexture<short> & src );
-    template void insertElement( AimsSurfaceTriangle & dest, int index, 
-				 const AimsSurfaceTriangle & src );
-    template void insertElement( AimsTimeSurface<2, Void> & dest, int index, 
-				 const AimsTimeSurface<2, Void> & src );
-    template void insertElement( AimsSurfaceFacet & dest, int index, 
-				 const AimsSurfaceFacet & src );
+    template void insertElement( BucketMap<Void> & dest, int index,
+                                const BucketMap<Void> & src );
+    template void insertElement( Texture1d & dest, int index,
+                                const Texture1d & src );
+    template void insertElement( Texture2d & dest, int index,
+                                const Texture2d & src );
+    template void insertElement( TimeTexture<short> & dest, int index,
+                                const TimeTexture<short> & src );
+    template void insertElement( AimsSurfaceTriangle & dest, int index,
+                                const AimsSurfaceTriangle & src );
+    template void insertElement( AimsTimeSurface<2, Void> & dest, int index,
+                                const AimsTimeSurface<2, Void> & src );
+    template void insertElement( AimsSurfaceFacet & dest, int index,
+                                const AimsSurfaceFacet & src );
 
     template PropertySet & getHeader( AimsData<short> & );
+    template PropertySet & getHeader( AimsData<int32_t> & );
     template PropertySet & getHeader( BucketMap<Void> & );
     template PropertySet & getHeader( AimsSurfaceTriangle & );
     template PropertySet & getHeader( AimsTimeSurface<2, Void> & );
@@ -256,6 +282,7 @@ namespace aims
     template PropertySet & getHeader( TimeTexture<short> & );
 
     template void setHeaderInfo( AimsData<short> &, const GenericObject & );
+    template void setHeaderInfo( AimsData<int32_t> &, const GenericObject & );
     template void setHeaderInfo( BucketMap<Void> &, const GenericObject & );
     template void setHeaderInfo( AimsSurfaceTriangle &,
                                  const GenericObject & );
@@ -897,8 +924,9 @@ GraphManip::graphElementCodeByAtt( Graph & g, const string & syntax,
 }
 
 
-Graph* GraphManip::graphFromVolume( const AimsData<short> & vol,
-				    short background  , map<short,string> *trans)
+template <typename T>
+Graph* GraphManip::graphFromVolume( const AimsData<T> & vol,
+                                    T background, map<T, string> *trans )
 {
   Graph	*g = new Graph( "RoiArg" );
   graphFromVolume( vol, *g, background , trans);
@@ -906,8 +934,10 @@ Graph* GraphManip::graphFromVolume( const AimsData<short> & vol,
 }
 
 
-void GraphManip::graphFromVolume( const AimsData<short> & vol, Graph & g, 
-				  short background,  map<short,string> *trans , bool automaticBackgroundSearch )
+template <typename T>
+void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
+                                  T background,  map<T, string> *trans ,
+                                  bool automaticBackgroundSearch )
 {
   g.setSyntax( "RoiArg" );
   // global attributes
@@ -929,7 +959,7 @@ void GraphManip::graphFromVolume( const AimsData<short> & vol, Graph & g,
   rc_ptr<GraphElementTable>	mgec( new GraphElementTable );
   GraphElementCode	& gec = (*mgec)[ "roi" ][ "roi" ];
   g.setProperty( "aims_objects_table", mgec );
-  DataTypeCode<AimsData<short> >	dtcv;
+  DataTypeCode<AimsData<T> >	dtcv;
   gec.id = "roi";
   gec.attribute = "aims_roi";
   gec.objectType = dtcv.objectType();
@@ -941,51 +971,49 @@ void GraphManip::graphFromVolume( const AimsData<short> & vol, Graph & g,
   gec.global_index_attribute = "roi_label";
   gec.syntax = "roi";
 
-  rc_ptr<AimsData<short> >	volume( new AimsData<short>( vol ) );
+  rc_ptr<AimsData<T> >	volume( new AimsData<T>( vol ) );
   if( vol.header() )
     volume->setHeader( vol.header()->cloneHeader() );
   g.setProperty( gec.global_attribute, volume );
-  map<short,string>::iterator im, em ;
-  
+  typename map<T, string>::iterator im, em ;
+
   if (trans != NULL)
     em = (*trans).end(); 
-  
+
   // build nodes
-  int			x, y, z;
-  map<short, Vertex *>	nodes;
-  short			label;
+  int                   x, y, z;
+  map<T, Vertex *>      nodes;
+  T                     label;
   if( automaticBackgroundSearch )
      background = vol.minimum() ;
   ForEach3d( vol, x, y, z )
+  {
+    label = vol( x, y, z );
+    if( label != background )
     {
-      label = vol( x, y, z );
-      if( label != background )
-	{
-	  Vertex	*& v = nodes[ label ];
-	  if( !v )
-	    {
-	      v = g.addVertex( "roi" );
-	      if (trans == NULL)
-		v->setProperty( "name", string( "label_" ) + 
-				 toString( label ) );      
-	      else
-		{
-		  im = (*trans).find(label);
-		  if (im == em)
-		    {
-		      cout << "The label " << label << 
-			" does not have a corresponding (string) name \n";
-		      v->setProperty( "name", string( "label_" ) +
-				       toString( label ) ); 
-		    }
-		  else
-		      v->setProperty( "name", im->second );
-		   
-		}
-	      v->setProperty( "roi_label", (int) label );
-	    }
-	}
+      Vertex	*& v = nodes[ label ];
+      if( !v )
+      {
+        v = g.addVertex( "roi" );
+        if (trans == NULL)
+          v->setProperty( "name", string( "label_" ) + toString( label ) );
+        else
+        {
+          im = (*trans).find(label);
+          if (im == em)
+          {
+            cout << "The label " << label <<
+              " does not have a corresponding (string) name \n";
+            v->setProperty( "name", string( "label_" ) + toString( label ) );
+          }
+          else
+            v->setProperty( "name", im->second );
+
+        }
+        v->setProperty( "roi_label", (int) label );
+      }
     }
+  }
 }
 
 
@@ -1473,6 +1501,24 @@ template void GraphManip::storeAims( Graph &, GraphObject*, const string &,
                                      rc_ptr<AimsSurfaceFacet> );
 template void GraphManip::storeAims( Graph &, GraphObject*, const string &, 
                                      rc_ptr<BucketMap<Void> > );
+template Graph*
+GraphManip::graphFromVolume( const AimsData<int16_t> & vol,
+                             int16_t background = 0,
+                             map<int16_t, string> *trans = 0 );
+template void
+GraphManip::graphFromVolume( const AimsData<int16_t> & vol , Graph & g,
+                             int16_t background = 0,
+                             map<int16_t, string> *trans = 0,
+                             bool automaticBackgroundSearch = true );
+template Graph*
+GraphManip::graphFromVolume( const AimsData<int32_t> & vol,
+                             int32_t background = 0,
+                             map<int32_t, string> *trans = 0 );
+template void
+GraphManip::graphFromVolume( const AimsData<int32_t> & vol , Graph & g,
+                             int32_t background = 0,
+                             map<int32_t, string> *trans = 0,
+                             bool automaticBackgroundSearch = true );
 
 
   #define _TMP_ rc_ptr<std::map<std::string,std::map<std::string,aims::GraphElementCode> > > 

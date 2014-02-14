@@ -90,30 +90,51 @@ namespace aims
     return( (int) n );
   }
 
+
+  template<> int
+  AimsGraphWriter::ObjectWrapper<AimsData<int32_t> >::freeindex() const
+  {
+    // extremely not optimal...
+    short       x, y, z;
+    set<int32_t>  values;
+    ForEach3d( (*data), x, y, z )
+      values.insert( (*data)( x, y, z ) );
+
+    set<int32_t>::const_iterator  i = values.begin(), e = values.end();
+    short       n = 1;
+    if( i != e && *i == 0 )
+      n = 0;
+    for( ; i!=e && *i==n; ++i, ++n ) {}
+    return( (int) n );
+  }
+
 }
 
 #if ( __GNUC__-0 >= 3 ) || ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 >= 95 )
 static void AimsGraphWriter_construct( AimsGraphWriter & gw )
 {
-  gw.registerProcessType( "Bucket", "VOID", 
-			  &AimsGraphWriter::defaultTakeObject<BucketMap<Void> >
-			  );
-  gw.registerProcessType( "Mesh", "VOID", 
-			  &AimsGraphWriter::defaultTakeObject
-			  <AimsSurfaceTriangle> );
-  gw.registerProcessType( "Segments", "VOID", 
-			  &AimsGraphWriter::defaultTakeObject
-			  <AimsTimeSurface<2, Void> > );
-  gw.registerProcessType( "Texture", "FLOAT", 
-			  &AimsGraphWriter::defaultTakeObject<Texture1d> );
-  gw.registerProcessType( "Texture", "S16", 
-			  &AimsGraphWriter::defaultTakeObject
-			  <TimeTexture<short> > );
-  gw.registerProcessType( "Texture", "POINT2DF", 
-			  &AimsGraphWriter::defaultTakeObject<Texture2d> );
-  gw.registerProcessType( "Volume", "S16", 
-			  &AimsGraphWriter::defaultTakeObject<AimsData<short> >
-			  );
+  gw.registerProcessType( "Bucket", "VOID",
+                          &AimsGraphWriter::defaultTakeObject<BucketMap<Void> >
+                          );
+  gw.registerProcessType( "Mesh", "VOID",
+                          &AimsGraphWriter::defaultTakeObject
+                          <AimsSurfaceTriangle> );
+  gw.registerProcessType( "Segments", "VOID",
+                          &AimsGraphWriter::defaultTakeObject
+                          <AimsTimeSurface<2, Void> > );
+  gw.registerProcessType( "Texture", "FLOAT",
+                          &AimsGraphWriter::defaultTakeObject<Texture1d> );
+  gw.registerProcessType( "Texture", "S16",
+                          &AimsGraphWriter::defaultTakeObject
+                          <TimeTexture<short> > );
+  gw.registerProcessType( "Texture", "POINT2DF",
+                          &AimsGraphWriter::defaultTakeObject<Texture2d> );
+  gw.registerProcessType( "Volume", "S16",
+                          &AimsGraphWriter::defaultTakeObject<AimsData<short> >
+                          );
+  gw.registerProcessType( "Volume", "S32",
+      &AimsGraphWriter::defaultTakeObject<AimsData<int32_t> >
+    );
 }
 #endif
 
@@ -127,19 +148,21 @@ AimsGraphWriter::AimsGraphWriter( const string & fname )
   AimsGraphWriter_construct( *this );
 #else	// ( __GNUC__-0 == 2 && __GNUC_MINOR__-0 <= 91 )
   registerProcessType( string( "Bucket" ), string( "VOID" ), 
-		       &defaultTakeObject<BucketMap<Void> > );
-  registerProcessType( string( "Mesh" ), string( "VOID" ), 
-		       &defaultTakeObject<AimsSurfaceTriangle> );
-  registerProcessType( string( "Segments" ), string( "VOID" ), 
-		       &defaultTakeObject<AimsTimeSurface<2, Void> > );
-  registerProcessType( "Texture", "FLOAT", 
-		       &defaultTakeObject<Texture1d> );
-  registerProcessType( "Texture", "S16", 
-		       &defaultTakeObject<TimeTexture<short> > );
-  registerProcessType( "Texture", "POINT2DF", 
-		       &defaultTakeObject<Texture2d> );
-  registerProcessType( "Volume", "S16", 
-		       &defaultTakeObject<AimsData<short> > );
+                      &defaultTakeObject<BucketMap<Void> > );
+  registerProcessType( string( "Mesh" ), string( "VOID" ),
+                      &defaultTakeObject<AimsSurfaceTriangle> );
+  registerProcessType( string( "Segments" ), string( "VOID" ),
+                      &defaultTakeObject<AimsTimeSurface<2, Void> > );
+  registerProcessType( "Texture", "FLOAT",
+                      &defaultTakeObject<Texture1d> );
+  registerProcessType( "Texture", "S16",
+                      &defaultTakeObject<TimeTexture<short> > );
+  registerProcessType( "Texture", "POINT2DF",
+                      &defaultTakeObject<Texture2d> );
+  registerProcessType( "Volume", "S16",
+                      &defaultTakeObject<AimsData<short> > );
+  registerProcessType( "Volume", "S32",
+                      &defaultTakeObject<AimsData<int32_t> > );
 #endif
 }
 

@@ -35,6 +35,7 @@
 #include <aims/io/argR.h>
 #include <aims/io/argW.h>
 #include <aims/io/reader.h>
+#include <aims/io/process.h>
 #include <aims/data/data.h>
 #include <aims/def/path.h>
 #include <aims/graph/graphmanip.h>
@@ -130,17 +131,64 @@ GraphVolumeFormat::~GraphVolumeFormat()
 }
 
 
-bool GraphVolumeFormat::read( const string & filename, Graph & obj, 
-			      const AllocatorContext & context, 
+namespace
+{
+
+  class GraphVolumeFormat_VolReader : public Process
+  {
+  public:
+    GraphVolumeFormat_VolReader( const AllocatorContext &, Object,
+                                 Graph *graph = 0 );
+    virtual ~GraphVolumeFormat_VolReader();
+    template <typename T>
+    static bool read( Process &, const string &, Finder & );
+
+    Graph *graph;
+    const AllocatorContext & context;
+    Object options;
+  };
+
+  GraphVolumeFormat_VolReader::GraphVolumeFormat_VolReader(
+    const AllocatorContext &, Object options, Graph *graph )
+    : Process(), graph( graph ), context( context ), options( options )
+  {
+    registerProcessType( "Volume", "S16", &read<int16_t> );
+    registerProcessType( "Volume", "S32", &read<int32_t> );
+  }
+
+
+  GraphVolumeFormat_VolReader::~GraphVolumeFormat_VolReader()
+  {
+  }
+
+
+  template <typename T>
+  bool GraphVolumeFormat_VolReader::read( Process & p, const string & filename,
+                                          Finder & )
+  {
+    GraphVolumeFormat_VolReader
+      & gvr = static_cast<GraphVolumeFormat_VolReader &>( p );
+    Reader<AimsData<T> >      r( filename );
+    r.setOptions( gvr.options );
+    r.setAllocatorContext( gvr.context );
+    AimsData<T> data;
+    r.read( data );
+    if( gvr.graph )
+      GraphManip::graphFromVolume( data, *gvr.graph );
+    else
+      gvr.graph = GraphManip::graphFromVolume( data );
+    return true;
+  }
+
+}
+
+
+bool GraphVolumeFormat::read( const string & filename, Graph & obj,
+                              const AllocatorContext & context,
                               Object options )
 {
-  Reader<AimsData<short> >	r( filename );
-  r.setOptions( options );
-  r.setAllocatorContext( context );
-  AimsData<short>		data;
-  r.read( data );
-  GraphManip::graphFromVolume( data, obj );
-  return( true );
+  GraphVolumeFormat_VolReader p( context, options, &obj );
+  return p.execute( filename );
 }
 
 
@@ -148,10 +196,8 @@ Graph* GraphVolumeFormat::read( const string & filename,
                                 const carto::AllocatorContext & context, 
                                 carto::Object options )
 {
-  Reader<AimsData<short> >	r( filename );
-  AimsData<short>		data;
-  r.setOptions( options );
-  r.setAllocatorContext( context );
-  r.read( data );
-  return GraphManip::graphFromVolume( data );
+  GraphVolumeFormat_VolReader p( context, options );
+  if( !p.execute( filename ) )
+    return 0;
+  return p.graph;
 }
