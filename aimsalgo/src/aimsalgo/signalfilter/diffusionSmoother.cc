@@ -43,32 +43,34 @@ template class MaskedDiffusionSmoother<float, std::vector<Point3df> >;
 template class MaskedDiffusionSmoother<int16_t, AimsData<short> >;
 template class MaskedDiffusionSmoother<float, AimsData<short> >;
 
-namespace aims {
+namespace aims
+{
+
 template <>
 AimsData<float> BaseDiffusionSmoother<float>::laplacian = 
-	BaseDiffusionSmoother<float>::init_laplacian();
+  BaseDiffusionSmoother<float>::init_laplacian();
 
 template <>
 AimsData<float> BaseDiffusionSmoother<int16_t>::laplacian = 
-	BaseDiffusionSmoother<float>::init_laplacian();
+  BaseDiffusionSmoother<float>::init_laplacian();
 
 template<typename T>
 AimsData<float> BaseDiffusionSmoother<T>::init_laplacian(void)
 {
-      AimsData<float>	laplacian(3, 3, 3, 1);
-      laplacian = 0.;
-      /* WARNING: this kernel is only suitable for isotropic, 1mm voxels.
-         Moreover I don't explain the 1/2 factor on the whole kernel
-         (I would expect coefs 1 -6 1 instead of 0.5 -3 0.5)
-         Anyway, this kernel is now completely rebuilt in doSmoothing() to
-         take into account voxel size, so it is not used as is.
-         (Denis, 2014/02/14)
-      */
-      laplacian(1,1,0) = laplacian(1,0,1) = laplacian(0,1,1) =
-	      laplacian(2,1,1) = laplacian(1,2,1) = laplacian(1,1,2) = 0.5;
-      laplacian(1,1,1) = -3;
+  AimsData<float>	laplacian(3, 3, 3, 1);
+  laplacian = 0.;
+  /* WARNING: this kernel is only suitable for isotropic, 1mm voxels.
+     Moreover I don't explain the 1/2 factor on the whole kernel
+     (I would expect coefs 1 -6 1 instead of 0.5 -3 0.5)
+     Anyway, this kernel is now completely rebuilt in doSmoothing() to
+     take into account voxel size, so it is not used as is.
+     (Denis, 2014/02/14)
+  */
+  laplacian(1,1,0) = laplacian(1,0,1) = laplacian(0,1,1) =
+    laplacian(2,1,1) = laplacian(1,2,1) = laplacian(1,1,2) = 0.5;
+  laplacian(1,1,1) = -3;
 
-      return laplacian;
+  return laplacian;
 }
 
 };
