@@ -479,8 +479,8 @@ AimsData<C> AimsGradient<C>::X(const AimsData<C> &data)
     break;
   case AIMS_GRADIENT_DPLUS   :
     beginx = 0;endx = data.dimX()-1;
-    offx1=0;offx2=data.sizeX();
-    divx=1;
+    offx1=0;offx2=1;
+    divx=data.sizeX();
     break;
   }
 
@@ -488,8 +488,8 @@ AimsData<C> AimsGradient<C>::X(const AimsData<C> &data)
     for (int z=0;z<data.dimZ();z++)
       for (int y=0;y<data.dimY();y++)
         for (int x=beginx;x<endx;x++)
-          grad(x,y,z,t) = (C)( ((float)data(x+offx2,y,z,t) - 
-                                (float)data(x-offx1,y,z,t)) / (float)divx);
+          grad(x,y,z,t) = (C)( ((float)data(x+offx2,y,z,t) -
+                                (float)data(x-offx1,y,z,t)) / divx);
   return(grad);
 }
 
@@ -519,8 +519,8 @@ AimsData<C> AimsGradient<C>::Y(const AimsData<C> &data)
     for (int z=0;z<data.dimZ();z++)
       for (int y=beginy;y<endy;y++)
         for (int x=0;x<data.dimX();x++)
-          grad(x,y,z,t) = (C)(((float)data(x,y+offy2,z,t) - 
-                               (float)data(x,y-offy1,z,t)) / (float)divy);
+          grad(x,y,z,t) = (C)(((float)data(x,y+offy2,z,t) -
+                               (float)data(x,y-offy1,z,t)) / divy);
   return(grad);
 }
 
@@ -550,8 +550,8 @@ AimsData<C> AimsGradient<C>::Z(const AimsData<C> &data)
     for (int z=beginz;z<endz;z++)
       for (int y=0;y<data.dimY();y++)
         for (int x=0;x<data.dimX();x++)
-          grad(x,y,z,t) = (C)(((float)data(x,y,z+offz2,t) - 
-                               (float)data(x,y,z-offz1,t)) / (float)divz);
+          grad(x,y,z,t) = (C)(((float)data(x,y,z+offz2,t) -
+                               (float)data(x,y,z-offz1,t)) / divz);
   return(grad);
 }
 
@@ -581,8 +581,8 @@ AimsData<C> AimsGradient<C>::T(const AimsData<C> &data)
     for (int z=0;z<data.dimZ();z++)
       for (int y=0;y<data.dimY();y++)
         for (int x=0;x<data.dimX();x++)
-          grad(x,y,z,t) = (C)(((float)data(x,y,z,t+offt2) - 
-                               (float)data(x,y,z,t-offt1)) / (float)divt);
+          grad(x,y,z,t) = (C)(((float)data(x,y,z,t+offt2) -
+                               (float)data(x,y,z,t-offt1)) / divt);
   return(grad);
 }
 
