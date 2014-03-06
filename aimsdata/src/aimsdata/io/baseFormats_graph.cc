@@ -149,7 +149,7 @@ namespace
   };
 
   GraphVolumeFormat_VolReader::GraphVolumeFormat_VolReader(
-    const AllocatorContext &, Object options, Graph *graph )
+    const AllocatorContext & context, Object options, Graph *graph )
     : Process(), graph( graph ), context( context ), options( options )
   {
     registerProcessType( "Volume", "S16", &read<int16_t> );
