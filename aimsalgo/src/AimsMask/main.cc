@@ -137,12 +137,11 @@ doit( Process & p, const string & fname, Finder & f )
 // Maskage...
   ForEach4d( data ,x ,y ,z ,t ) {
     int minT = min( t, mask.dimT()-1 );
-    if ( x<mask.dimX() &&
-         y<mask.dimY() &&
-         z<mask.dimZ() &&
-         mask(x,y,z,minT) == 0  
-         )
-      data( x, y, z, t ) = dv; 
+    if( x<mask.dimX() && y<mask.dimY() && z<mask.dimZ() ) {
+      if( mask(x,y,z,minT) == 0 )
+        data( x, y, z, t ) = dv;
+    } else if( !mp.getdoInverse() )
+      data( x, y, z, t ) = dv;
   }
 
   Writer<AimsData<T> > writer( mp.fileout );
