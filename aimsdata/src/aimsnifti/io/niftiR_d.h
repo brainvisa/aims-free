@@ -283,7 +283,7 @@ namespace aims
     bool series = false;
     std::vector<carto::Object>	fnames;
     std::string bname;
-    if( dims[3] > 1 )
+    if( dims.size() >= 4 && dims[3] > 1 )
     {
       series = hdr->getProperty( "series_filenames", fnames );
       if( series)
