@@ -60,7 +60,6 @@ public:
   string _fileout;
 };
 
-
 SubSample::SubSample( int nb, const string & fileout ) 
           : _nb( nb ), _fileout( fileout )
 {
@@ -71,56 +70,51 @@ SubSample::SubSample( int nb, const string & fileout )
   registerProcessType( "Volume", "FLOAT", &subsample<float> );
 }
 
-
 SubSample::~SubSample()
 {
 }
-
 
 template<typename T>
 bool subsample( Process & p, const string & filein, Finder & f )
 {
 
-  SubSample&   ss = (SubSample &)p;
+  SubSample& ss = (SubSample &)p;
 
+  AimsData<T> datar;
+  Reader< AimsData<T> > r( filein );
+  string format = f.format();
 
-  AimsData<T>		datar;
-  Reader< AimsData<T> >	r( filein );
-  string		format = f.format();
-
-
-  r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly, 
+  r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly,
                                            DataSource::none(), false, 0.1 ) );
   r.read( datar, 0, &format );
 
-  int	nb    = ss._nb;
-  string fileout = ss._fileout; 
+  int nb = ss._nb;
+  string fileout = ss._fileout;
   assert ( datar.dimX() % nb == 0 || datar.dimY() % nb == 0);
-  AimsData< T > data( datar.dimX()/nb, datar.dimY()/nb,datar.dimZ() );
-  data.setSizeZ(datar.sizeZ()); 
-  data.setSizeX(datar.sizeX()*nb); 
-  data.setSizeY(datar.sizeY()*nb); 
- 
- int x, y, z, w, v;
- float datatemp;
- 
- for ( z = 0; z < datar.dimZ(); ++z )
-   for ( y = 0; y < datar.dimY(); y+=nb )
-     for ( x = 0; x < datar.dimX(); x+=nb )
-       {
-	 datatemp = 0;
-	 for (w = 0; w < nb; ++w)
-	   for (v = 0; v < nb; ++v) 
-	     datatemp += datar(x+w,y+w,z);
-	 data( int(x/nb), int(y/nb), z ) = (T) (datatemp/(nb*nb)) ;
-       }
+  AimsData< T > data( datar.dimX() / nb,
+                      datar.dimY() / nb,
+                      datar.dimZ() );
+  data.setSizeZ(datar.sizeZ());
+  data.setSizeX(datar.sizeX() * nb);
+  data.setSizeY(datar.sizeY() * nb);
 
+  int x, y, z, w, v;
+  float datatemp;
 
- //if( datar.header() )
- //   data.setHeader( datar.header()->cloneHeader() );
-    Writer< AimsData<T> > wd(fileout);
-    wd << (data);
+  for ( z = 0; z < datar.dimZ(); ++z )
+    for ( y = 0; y < datar.dimY(); y += nb )
+      for ( x = 0; x < datar.dimX(); x += nb )
+      {
+        datatemp = 0;
+        for (w = 0; w < nb; ++w)
+          for (v = 0; v < nb; ++v) 
+            datatemp += datar(x + w, y + w, z);
+        
+        data( int(x / nb), int(y / nb), z ) = (T)(datatemp / (nb * nb));
+      }
 
+  Writer< AimsData<T> > wd(fileout);
+  wd << (data);
 
   return true;
 }
@@ -129,34 +123,32 @@ int main( int argc, const char **argv )
 {
   string  filein;
   string  fileout = "subsampled";
-  int   nb=2;
-  
+  int   nb = 2;
 
-  AimsApplication	app( argc, argv, "Perform Image subsampling,"
-	         			     "using average operator" );
+  AimsApplication app( argc, argv, "Perform Image subsampling,"
+                                   "using average operator" );
   app.addOption( filein, "-i", "input data" );
   app.alias( "--input", "-i" );
   app.addOption( fileout, "-o", "output data");
-  app.alias( "--output", "-o" );  
+  app.alias( "--output", "-o" );
   app.addOption( nb, "-n", "number of voxels [default = 2 voxels in x and y"
-                           " directions]",true);
-
+                           " directions]", true);
 
   try
-    {
-      app.initialize();
-      SubSample proc( nb, fileout );
-      if( !proc.execute( filein ) )
-	cout << "Couldn't process file - aborted\n";
-    }
+  {
+    app.initialize();
+    SubSample proc( nb, fileout );
+    if( !proc.execute( filein ) )
+      cout << "Couldn't process file - aborted\n";
+  }
   catch( user_interruption &e )
-    {
-    }
+  {
+  }
   catch( exception & e )
-    {
-      cerr << e.what() << endl;
-      return 1;
-    }
+  {
+    cerr << e.what() << endl;
+    return 1;
+  }
 
   return EXIT_SUCCESS;
 }
