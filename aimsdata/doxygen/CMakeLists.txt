@@ -1,6 +1,14 @@
 IF ( DOXYGEN_FOUND )
   SET( DOXYFILE_HTML_HEADER "\"${CMAKE_CURRENT_SOURCE_DIR}/head_aims.html\"" )
   set( _doxygenInput ${HEADERS} "config/config.h" )
+  # remove some embedded external libs headers, some of which causing problems
+  # to some doxygen versions (Ubuntu 13.10-14.04)
+  list( REMOVE_ITEM _doxygenInput 
+    "io/znzlib/znzlib.h"
+    "io/niftilib/nifti1.h"
+    "io/niftilib/nifti1_io.h"
+    "io/gifticlib/gifti_io.h"
+    "io/gifticlib/gifti_xml.h" )
   get_filename_component(cur_dir "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
   get_filename_component(component_name ${cur_dir} NAME)
   # generate docs in a "standard config", where blitz and kdtree are used.
