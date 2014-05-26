@@ -37,6 +37,8 @@
 #include <iomanip>
 #include <cartobase/type/types.h>
 #include <cartobase/type/string_conversion.h>
+#include <cartobase/type/datatypetraits.h>
+#include <cartobase/type/datatypeinfo.h>
 #include <aims/data/data_g.h>
 #include <aims/rgb/rgb.h>
 #include <aims/hsv/hsv.h>
@@ -56,79 +58,6 @@ enum AimsHSVChannel
   SaturationChannel = 1,
   ValueChannel = 2
 };
-
-
-/**	This class is just a hint to get data type information */
-template<class T>
-class DataTypeInfo
-{
-  public:
-    DataTypeInfo() {};
-
-  public:
-    static inline uint8_t samples();
-    static inline uint8_t depth();
-    static inline std::string channelType();
-};
-
-
-template<typename T>
-inline uint8_t DataTypeInfo<T>::samples()
-{ 
-  return 1;
-}
-
-template<typename T>
-inline uint8_t DataTypeInfo<T>::depth()
-{ 
-  return sizeof(T) / samples();
-}
-
-template<typename T>
-inline std::string DataTypeInfo<T>::channelType()
-{ 
-  return carto::DataTypeCode<T>::dataType();
-}
-
-//	specializations
-template<>
-inline uint8_t DataTypeInfo<AimsRGB>::samples()
-{
-  return 3;
-}
-
-template<>
-inline std::string DataTypeInfo<AimsRGB>::channelType()
-{ 
-  return carto::DataTypeCode<uint8_t>::dataType();
-}
-
-//---------------------------------------------------------------------------
-template<>
-inline uint8_t DataTypeInfo<AimsRGBA>::samples()
-{
-  return 4;
-}
-
-template<>
-inline std::string DataTypeInfo<AimsRGBA>::channelType()
-{ 
-  return carto::DataTypeCode<uint8_t>::dataType();
-}
-
-//---------------------------------------------------------------------------
-template<>
-inline uint8_t DataTypeInfo<AimsHSV>::samples()
-{
-  return 3;
-}
-
-template<>
-inline std::string DataTypeInfo<AimsHSV>::channelType()
-{ 
-  return carto::DataTypeCode<uint8_t>::dataType();
-}
-
 
 #define DECLARE_CHANNEL_SELECTOR_NAME() \
 class ChannelSelector \

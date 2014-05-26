@@ -51,9 +51,6 @@ namespace aims
   template <class T> class BucketMap;
   //typedef BucketMap<short> BucketMapShort ;
 
-  template <class T>
-  std::ostream& operator << (std::ostream& out, const BucketMap<T>& thing);
-
 
   /// Helper class for ordering Coordinates by their z, y, x coordinates
   template <class T, int D>
@@ -347,29 +344,27 @@ namespace aims
   }
 
 
-  template <class T> inline
-  std::ostream& operator << (std::ostream& out, const BucketMap<T> & thing)
-  {
-    out << "{"; 
-
-    typename BucketMap<T>::const_iterator it1, e1 = thing.end();
-
-    for ( it1=thing.begin(); it1!=e1; ++it1 )
-      {
-	typename BucketMap<T>::Bucket::const_iterator it2 , e2 = it1->second.end();
-	out << "{";
-	out << "t=" << (*it1).first << ",";
-	for ( it2=it1->second.begin(); it2!=e2; ++it2 )
-	  out << *it2 << ",";
-	out << "NULL},";
-      }
-
-    return out << "NULL}" << std::flush;
-  }
-
-
 }
 
+template <class T> inline
+std::ostream& operator << (std::ostream& out, const aims::BucketMap<T> & thing)
+{
+  out << "{"; 
+
+  typename aims::BucketMap<T>::const_iterator it1, e1 = thing.end();
+
+  for ( it1=thing.begin(); it1!=e1; ++it1 )
+  {
+    typename aims::BucketMap<T>::Bucket::const_iterator it2 , e2 = it1->second.end();
+    out << "{";
+    out << "t=" << (*it1).first << ",";
+    for ( it2=it1->second.begin(); it2!=e2; ++it2 )
+      out << *it2 << ",";
+    out << "NULL},";
+  }
+
+  return out << "NULL}" << std::flush;
+}
 
 // Implementation of some AimsBucket conversion functions
 

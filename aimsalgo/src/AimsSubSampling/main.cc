@@ -1,154 +1,260 @@
-/* This software and supporting documentation are distributed by
- *     Institut Federatif de Recherche 49
- *     CEA/NeuroSpin, Batiment 145,
- *     91191 Gif-sur-Yvette cedex
+/* Copyright (C) 2000-2013 CEA
+ *
+ * This software and supporting documentation were developed by
+ *     bioPICSEL
+ *     CEA/DSV/I²BM/MIRCen/LMN, Batiment 61,
+ *     18, route du Panorama
+ *     92265 Fontenay-aux-Roses
  *     France
- *
- * This software is governed by the CeCILL-B license under
- * French law and abiding by the rules of distribution of free software.
- * You can  use, modify and/or redistribute the software under the
- * terms of the CeCILL-B license as circulated by CEA, CNRS
- * and INRIA at the following URL "http://www.cecill.info".
- *
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability.
- *
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or
- * data to be ensured and,  more generally, to use and operate it in the
- * same conditions as regards security.
- *
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-
-#include <cstdlib>
-#include <aims/data/data_g.h>
+#include <iomanip>
+#include <cartobase/config/verbose.h>
+#include <cartobase/smart/rcptr.h>
 #include <aims/getopt/getopt2.h>
+#include <aims/data/data_g.h>
+#include <aims/io/io_g.h>
+#include <aims/data/data.h>
+#include <aims/io/writer.h>
 #include <aims/io/reader.h>
-#include <aims/io/finder.h>
-#include <aims/io/process.h>
-#include <iostream>
-#include <stdlib.h>
-#include <assert.h>
+#include <aims/utility/utility_g.h>
+#include <aims/utility/progress.h>
+#include <aims/math/math_g.h>
+#include <aims/resampling/subsamplingimagealgorithm.h>
+#include <aims/resampling/mediansubsampling.h>
+#include <aims/resampling/meansubsampling.h>
+#include <aims/resampling/minsubsampling.h>
+#include <aims/resampling/maxsubsampling.h>
+#include <aims/resampling/majoritysubsampling.h>
 
-using namespace aims;
-using namespace carto;
 using namespace std;
+using namespace carto;
+using namespace aims;
 
+// Processing class, with template operation function
+template<class T>
+static bool doit( Process &, const string &, Finder & );
 
-template<typename T>
-static bool subsample( Process &, const string &, Finder & );
+class SubSampling : public Process {
+    public:
+        SubSampling( const string & fout, unsigned rx, unsigned ry, unsigned rz, unsigned type );
+        
+        template<class T>
+        friend bool doit( Process &, const string &, Finder & );
+        
+        unsigned getRX() const { return _rx; }
+        unsigned getRY() const { return _ry; }
+        unsigned getRZ() const { return _rz; }
+        unsigned getType() const { return _type; }
 
-class SubSample : public Process
-{
-public:
-  SubSample(int nb, const string & fileout );
-  virtual ~SubSample();
-
-  int   _nb;
-  string _fileout;
+    private:
+        string _fout;
+        unsigned _rx;
+        unsigned _ry;
+        unsigned _rz;
+        unsigned _type;
 };
 
-SubSample::SubSample( int nb, const string & fileout ) 
-          : _nb( nb ), _fileout( fileout )
+SubSampling::SubSampling( const string & fout,
+                          unsigned rx,
+                          unsigned ry,
+                          unsigned rz,
+                          unsigned type )
+  : Process(),
+    _fout( fout ),
+    _rx(rx),
+    _ry(ry),
+    _rz(rz),
+    _type(type)
 {
-  registerProcessType( "Volume", "S8", &subsample<char> );
-  registerProcessType( "Volume", "U8", &subsample<byte> );
-  registerProcessType( "Volume", "S16", &subsample<short> );
-  registerProcessType( "Volume", "U16", &subsample<unsigned short> );
-  registerProcessType( "Volume", "FLOAT", &subsample<float> );
+    registerProcessType( "Volume", "S8", &doit<int8_t> );
+    registerProcessType( "Volume", "U8", &doit<uint8_t> );
+    registerProcessType( "Volume", "S16", &doit<int16_t> );
+    registerProcessType( "Volume", "U16", &doit<uint16_t> );
+    registerProcessType( "Volume", "S32", &doit<int32_t> );
+    registerProcessType( "Volume", "U32", &doit<uint32_t> );
+    registerProcessType( "Volume", "FLOAT", &doit<float> );
+    registerProcessType( "Volume", "DOUBLE", &doit<double> );
+    registerProcessType( "Volume", "RGB", &doit<AimsRGB> );
+    registerProcessType( "Volume", "RGBA", &doit<AimsRGBA> );
 }
 
-SubSample::~SubSample()
-{
+template <class VoxelType>
+const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlgorithm( const unsigned type,
+                                                                                        const unsigned win_size_x,
+                                                                                        const unsigned win_size_y,
+                                                                                        const unsigned win_size_z ) {
+  switch(type) {
+    
+    case 0:
+      return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
+                new MedianSubSampling<VoxelType>( win_size_x, 
+                                                  win_size_y,
+                                                  win_size_z )
+             );
+      break;
+      
+    //Mean computation
+    case 1:
+      return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
+                new MeanSubSampling<VoxelType>( win_size_x, 
+                                                win_size_y,
+                                                win_size_z )
+             );
+    break;
+    
+    // Min computation
+    case 2:
+      return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
+                new MinSubSampling<VoxelType>( win_size_x, 
+                                               win_size_y,
+                                               win_size_z )
+             );
+    break;
+    
+    // Max computation
+    case 3:
+      return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
+                new MaxSubSampling<VoxelType>( win_size_x, 
+                                               win_size_y,
+                                               win_size_z )
+             );
+    break;
+    
+    // Majority computation
+    case 4:
+      return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
+                new MajoritySubSampling<VoxelType>( win_size_x, 
+                                                    win_size_y,
+                                                    win_size_z )
+             );
+    break;
+    
+//     // Difference computation
+//     case 5:
+//       return rc_ptr<NonLinFilterFunc<T> >(
+//                new ExtremaDifferenceFilterFunc<T>
+//              );
+//     break;
+    
+    // Median computation
+    default:
+      throw std::invalid_argument( "Invalid subsampling type: " + carto::toString(type) );
+      break;
+  }
 }
 
-template<typename T>
-bool subsample( Process & p, const string & filein, Finder & f )
-{
+template<class T> bool 
+doit( Process & p, const string & fname, Finder & f ) {
 
-  SubSample& ss = (SubSample &)p;
-
-  AimsData<T> datar;
-  Reader< AimsData<T> > r( filein );
-  string format = f.format();
-
-  r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly,
-                                           DataSource::none(), false, 0.1 ) );
-  r.read( datar, 0, &format );
-
-  int nb = ss._nb;
-  string fileout = ss._fileout;
-  assert ( datar.dimX() % nb == 0 || datar.dimY() % nb == 0);
-  AimsData< T > data( datar.dimX() / nb,
-                      datar.dimY() / nb,
-                      datar.dimZ() );
-  data.setSizeZ(datar.sizeZ());
-  data.setSizeX(datar.sizeX() * nb);
-  data.setSizeY(datar.sizeY() * nb);
-
-  int x, y, z, w, v;
-  float datatemp;
-
-  for ( z = 0; z < datar.dimZ(); ++z )
-    for ( y = 0; y < datar.dimY(); y += nb )
-      for ( x = 0; x < datar.dimX(); x += nb )
-      {
-        datatemp = 0;
-        for (w = 0; w < nb; ++w)
-          for (v = 0; v < nb; ++v) 
-            datatemp += datar(x + w, y + w, z);
-        
-        data( int(x / nb), int(y / nb), z ) = (T)(datatemp / (nb * nb));
-      }
-
-  Writer< AimsData<T> > wd(fileout);
-  wd << (data);
-
-  return true;
+    SubSampling & sp = (SubSampling &) p;
+    AimsData<T> dataIn;
+    string format = f.format();
+    Reader<AimsData<T> > r( fname );
+    
+    cout << "Reading volume...";
+    if( !r.read( dataIn, 0, &format ) )
+        return( false );
+    cout << " done" << endl;
+    
+    if (verbose) {
+      cout << "Subsampling size: rx = " << sp._rx << "\t"
+                                "ry = " << sp._ry << "\t"
+                                "rz = " << sp._rz << endl 
+           << "Subsampling type: " << sp._type << endl;
+    }
+    
+    const rc_ptr<aims::ImageAlgorithmInterface< T > > & algo = getSubsamplingImageAlgorithm<T>( sp._type, 
+                                                                                                sp._rx,
+                                                                                                sp._ry,
+                                                                                                sp._rz );
+    AimsData<T> dataOut = algo->execute(dataIn);
+    
+    // File Writing
+    cout << "Writing volume...";
+    Writer<AimsData<T> > writer( sp._fout );
+    int result = writer.write( dataOut );
+    cout << " done" << endl;
+    return result;
 }
 
 int main( int argc, const char **argv )
 {
-  string  filein;
-  string  fileout = "subsampled";
-  int   nb = 2;
+    int result = EXIT_SUCCESS;
+    try {
+        // Default values
+        int32_t rx = 1, ry = 1, rz = 1, rxy = 0;
+        string filein = "", fileout = "", type = "0";
 
-  AimsApplication app( argc, argv, "Perform Image subsampling,"
-                                   "using average operator" );
-  app.addOption( filein, "-i", "input data" );
-  app.alias( "--input", "-i" );
-  app.addOption( fileout, "-o", "output data");
-  app.alias( "--output", "-o" );
-  app.addOption( nb, "-n", "number of voxels [default = 2 voxels in x and y"
-                           " directions]", true);
+        // Collect arguments
+        AimsApplication application( argc, argv, "Image subsampling" );
+        application.addOption( filein, "-i", "Input image to subsample" );
+        application.addOption( rx, "-rx", "X number of voxels to aggregate [default = 1]", true );
+        application.addOption( ry, "-ry", "Y number of voxels to aggregate [default = 1]", true );
+        application.addOption( rz, "-rz", "Z number of voxels to aggregate [default = 1]", true );
+        application.addOption( rxy, "-n", "Number of voxels to aggregate in X and Y directions [default = 2]"
+                                         "(this option is obsolete and only provided for compatibility purpose)", true);
+        application.addOption( type, "-t", "Subsampling type : med[ian], mea[n], min[imum], max[imum], \n"
+                                           "maj[ority] (not available for RGB and RGBA images), \n"
+                                           "dif[ference] [default = mean]. Modes may also be\n"
+                                           "specified as order number: 0=median, 1=mean, etc.", true);
+        application.addOption( fileout, "-o", "Output subsampled image" );
+        
+        application.alias( "--input", "-i" );
+        application.alias( "--output", "-o" );
+        application.initialize();
+        
+        //  Test parameters
+        //
+        if (rx < 1) rx = 1;
+        if (ry < 1) ry = 1;
+        if (rz < 1) rz = 1;
+        if (rxy > 0) {
+          rx = ry = rxy;
+        }
 
-  try
-  {
-    app.initialize();
-    SubSample proc( nb, fileout );
-    if( !proc.execute( filein ) )
-      cout << "Couldn't process file - aborted\n";
-  }
-  catch( user_interruption &e )
-  {
-  }
-  catch( exception & e )
-  {
-    cerr << e.what() << endl;
-    return 1;
-  }
+        // Subsampling types map
+        map<string, unsigned>  types;
+        types[ "med" ] = 0;
+        types[ "median" ] = 0;
+        types[ "0" ] = 0;
+        types[ "mea" ] = 1;
+        types[ "mean" ] = 1;
+        types[ "1" ] = 1;
+        types[ "min" ] = 2;
+        types[ "minimum" ] = 2;
+        types[ "2" ] = 2;
+        types[ "max" ] = 3;
+        types[ "maximum" ] = 3;
+        types[ "3" ] = 3;
+        types[ "maj" ] = 4;
+        types[ "majority" ] = 4;
+        types[ "4" ] = 4;
+        types[ "dif" ] = 5;
+        types[ "difference" ] = 5;
+        types[ "5" ] = 5;
 
-  return EXIT_SUCCESS;
+        map<string, unsigned>::iterator it = types.find( type );
+          
+        if( it == types.end() )
+          throw invalid_argument( "Invalid subsampling type: " + type );
+
+        SubSampling proc( fileout,
+                          (unsigned)rx,
+                          (unsigned)ry,
+                          (unsigned)rz,
+                          it->second );
+        if( !proc.execute( filein ) )
+        {
+          cerr << "Could not process\n";
+          return( 1 );
+        }
+    }
+    catch( user_interruption &e ) {}
+    catch( std::exception &e )
+    {
+        cerr << argv[ 0 ] << ": " << e.what() << endl;
+        result = EXIT_FAILURE;
+    }
+    return result;
 }

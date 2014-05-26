@@ -32,28 +32,28 @@
  */
 
 
-#ifndef AIMS_SIGNALFILTER_MAXSMOOTH_H
-#define AIMS_SIGNALFILTER_MAXSMOOTH_H
+#ifndef AIMS_RESAMPLING_MEANSUBSAMPLING_H
+#define AIMS_RESAMPLING_MEANSUBSAMPLING_H
 
 #include <cartobase/type/datatypetraits.h>
 #include <aims/signalfilter/nonlin_filt-func.h>
-#include <aims/signalfilter/filteringimagealgorithm.h>
+#include <aims/resampling/subsamplingimagealgorithm.h>
 
 template <class VoxelType>
-class MaxSmoothing : 
-  public aims::FilteringImageAlgorithm<VoxelType, 
-           MaxFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
+class MeanSubSampling : 
+  public aims::SubSamplingImageAlgorithm<VoxelType, 
+           MeanFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
     
   public:
-    typedef aims::FilteringImageAlgorithm<VoxelType, 
-           MaxFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
-           FilteringImageAlgorithmType;
+    typedef aims::SubSamplingImageAlgorithm<VoxelType, 
+           MeanFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
+           SubSamplingImageAlgorithmType;
            
-    typedef typename FilteringImageAlgorithmType::FilterFuncType 
+    typedef typename SubSamplingImageAlgorithmType::FilterFuncType 
            FilterFuncType;
     
-    MaxSmoothing( int sx = 3, int sy = 3, int sz = 1 )
-      : FilteringImageAlgorithmType(sx, sy, sz) {}
+    MeanSubSampling( int sx = 3, int sy = 3, int sz = 1 )
+      : SubSamplingImageAlgorithmType(sx, sy, sz) {}
 };
 
 #endif

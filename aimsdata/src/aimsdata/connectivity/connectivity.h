@@ -75,6 +75,10 @@ namespace aims
         CONNECTIVITY_5_YplusZ,
         CONNECTIVITY_5_YZminus,
         CONNECTIVITY_5_YZplus,
+        CONNECTIVITY_8_XYZ,
+        CONNECTIVITY_4_XYdiag,
+        CONNECTIVITY_4_XZdiag,
+        CONNECTIVITY_4_YZdiag,
       };
 
     Connectivity( int oline, int oslice, Type type);

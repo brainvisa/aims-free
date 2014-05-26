@@ -35,13 +35,25 @@
 #ifndef AIMS_SIGNALFILTER_MEANSMOOTH_H
 #define AIMS_SIGNALFILTER_MEANSMOOTH_H
 
+#include <cartobase/type/datatypetraits.h>
 #include <aims/signalfilter/nonlin_filt-func.h>
-#include <aims/signalfilter/basefilter.h>
+#include <aims/signalfilter/filteringimagealgorithm.h>
 
-AIMSALGO_SIGNALFILTER_DECLARE_FILTER(MeanSmoothing, T, MeanFilterFunc<T>)
-
-AIMSALGO_SIGNALFILTER_SPECIALIZE_FILTER(MeanSmoothing, AimsRGB, MeanFilterFunc<uint8_t>)
-
-AIMSALGO_SIGNALFILTER_SPECIALIZE_FILTER(MeanSmoothing, AimsRGBA, MeanFilterFunc<uint8_t>)
+template <class VoxelType>
+class MeanSmoothing : 
+  public aims::FilteringImageAlgorithm<VoxelType, 
+           MeanFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
+    
+  public:
+    typedef aims::FilteringImageAlgorithm<VoxelType, 
+           MeanFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
+           FilteringImageAlgorithmType;
+           
+    typedef typename FilteringImageAlgorithmType::FilterFuncType 
+           FilterFuncType;
+    
+    MeanSmoothing( int sx = 3, int sy = 3, int sz = 1 )
+      : FilteringImageAlgorithmType(sx, sy, sz) {}
+};
 
 #endif

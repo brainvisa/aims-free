@@ -142,6 +142,10 @@ if( USE_SOMA_IO )
 endif( USE_SOMA_IO )
 set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}" )
 
+# Copy python directory for aims tests
+BRAINVISA_COPY_PYTHON_DIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}/python"
+                                 ${PROJECT_NAME} )
+
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/cartodata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/cartodata/config/config.h" @ONLY )
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/config.h" @ONLY )
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/src/aimsminc/config/aimsminc_config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/aimsminc_config.h" @ONLY )
@@ -173,7 +177,6 @@ if( PYTHON_FOUND AND NUMPY_FOUND AND SIP_FOUND )
 else()
   message( "WARNING: Not building pyaims and pyaimsalgo due to missing dependency:\n  PYTHON_FOUND=${PYTHON_FOUND}\n  NUMPY_FOUND=${NUMPY_FOUND}\n  SIP_FOUND=${SIP_FOUND}" )
 endif()
-
 
 set( AIMS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" )
 set( AIMS_BINARY_DIR "${CMAKE_BINARY_DIR}" )

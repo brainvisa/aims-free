@@ -13,6 +13,7 @@ set( _headers
     connectivity/connectivity_g.h
     connectivity/component.h
     connectivity/component_d.h
+    connectivity/structuring_element.h
     curve/curve.h
     data/cartodatavolume.h
     data/data.h
@@ -146,6 +147,7 @@ set( _headers
     math/integrator.h
     math/lagrange.h
     math/mathelem.h
+    math/mathelemrgb.h
     math/romberg.h
     math/rombergitg.h
     math/tensor.h
@@ -170,6 +172,7 @@ set( _headers
     resampling/quaternion.h
     resampling/standardreferentials.h
     rgb/rgb.h
+    rgb/rgbnorm.h
     roi/hie.h
     roi/roi_g.h
     roi/maskIterator.h
@@ -202,6 +205,7 @@ set( _headers
     utility/masscenter.h
     utility/merge.h
     utility/minmax.h
+    utility/progress.h
     utility/threshold.h
     utility/utility_g.h
     vector/vector.h
@@ -214,6 +218,7 @@ set( _sources
     color/colormap.cc
     connectivity/component.cc
     connectivity/connectivity.cc
+    connectivity/structuring_element.cc
     curve/curve.cc
     data/cartodatavolume.cc
     data/data.cc
@@ -353,6 +358,7 @@ set( _sources
     utility/boundingbox.cc
     utility/clock.cc
     utility/masscenter.cc
+    utility/progress.cc
     vector/vector.cc
 )
 

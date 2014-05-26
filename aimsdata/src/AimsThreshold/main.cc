@@ -103,12 +103,12 @@ doit( Process & p, const string & fname, Finder & f )
     tc.t1 = mini + ( maxi - mini ) * ( tc.t1 / 100 );
     tc.t2 = mini + ( maxi - mini ) * ( tc.t2 / 100 );
     if ( verbose ) {
-      cout << "  minimum = " << mini << endl
-           << "  maximum = " << maxi << endl
-           << "  threshold1 = " << tc.t1 << endl
-           << "  threshold2 = " << tc.t2 << endl
-           << "  background = " << tc.bg << endl
-           << "  foreground = " << tc.fg << endl;
+      cout << "  minimum = " << carto::toString(mini) << endl
+           << "  maximum = " << carto::toString(maxi) << endl
+           << "  threshold1 = " << carto::toString(tc.t1) << endl
+           << "  threshold2 = " << carto::toString(tc.t2) << endl
+           << "  background = " << carto::toString(tc.bg) << endl
+           << "  foreground = " << carto::toString(tc.fg) << endl;
     }
   }
   

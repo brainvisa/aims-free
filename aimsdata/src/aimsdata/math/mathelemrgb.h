@@ -31,29 +31,55 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+/*
+ *  Elementary math functions.
+ */
+#ifndef AIMS_MATH_MATHELEM_RGB_H
+#define AIMS_MATH_MATHELEM_RGB_H
 
-#ifndef AIMS_SIGNALFILTER_MAXSMOOTH_H
-#define AIMS_SIGNALFILTER_MAXSMOOTH_H
+#include <cstdlib>
+#include <math.h>
+#include <aims/math/mathelem.h>
+#include <aims/rgb/rgb.h>
+#include <cartobase/type/datatypeinfo.h>
 
-#include <cartobase/type/datatypetraits.h>
-#include <aims/signalfilter/nonlin_filt-func.h>
-#include <aims/signalfilter/filteringimagealgorithm.h>
+namespace aims
+{
 
-template <class VoxelType>
-class MaxSmoothing : 
-  public aims::FilteringImageAlgorithm<VoxelType, 
-           MaxFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
+  /**@name Useful math functions for RGB, RGBA types
+   */
+  //@{
+  
+  /// Get the absolute difference between 2 \c AimsRGB
+  /// ie AimsRGB(abs(Rx - Ry), 
+  ///            abs(Gx - Gy),
+  ///            abs(Bx - By))
+  inline AimsRGB absdiff( const AimsRGB& x, 
+                          const AimsRGB& y ) {
+    AimsRGB r;
     
-  public:
-    typedef aims::FilteringImageAlgorithm<VoxelType, 
-           MaxFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
-           FilteringImageAlgorithmType;
-           
-    typedef typename FilteringImageAlgorithmType::FilterFuncType 
-           FilterFuncType;
+    for ( unsigned int i = 0; i < DataTypeInfo<AimsRGB>::samples(); ++i )
+      r[i] = absdiff( x[i], y[i] );
     
-    MaxSmoothing( int sx = 3, int sy = 3, int sz = 1 )
-      : FilteringImageAlgorithmType(sx, sy, sz) {}
-};
+    return r;
+  }
+  
+  /// Get the absolute difference between 2 \c AimsRGBA
+  /// ie AimsRGBA(abs(Rx - Ry), 
+  ///             abs(Gx - Gy),
+  ///             abs(Bx - By),
+  ///             abs(Ax - Ay))
+  inline AimsRGBA absdiff( const AimsRGBA& x, 
+                           const AimsRGBA& y ) {
+    AimsRGBA r;
+    
+    for ( unsigned int i = 0; i < DataTypeInfo<AimsRGBA>::samples(); ++i )
+      r[i] = absdiff( x[i], y[i] );
+    
+    return r;
+  }
+    
+  //@}
+}
 
 #endif

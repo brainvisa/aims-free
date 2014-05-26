@@ -8,6 +8,7 @@ INCBDIR = aims
 LIBS = $(LIBS_FOR_AIMSALGO)
 
 HEADERS = \
+    algorithm/imagealgorithm.h \
     classification/individuals.h \
     classification/individuals_d.h \
     classification/classifstrategy_d.h \
@@ -188,11 +189,11 @@ HEADERS = \
     scalespace/bucketblob_d.h \
     scalespace/meshBlob.h    \
     scalespace/meshDiffuse.h  \
-    signalfilter/basefilter.h    \
     signalfilter/signalfilter_g.h  \
     signalfilter/convol.h    \
     signalfilter/diffusionSmoother_d.h \
     signalfilter/diffusionSmoother.h \
+    signalfilter/filteringimagealgorithm.h \
     signalfilter/firfilter.h  \
     signalfilter/g2dsmooth.h  \
     signalfilter/g3dsmooth.h  \
@@ -212,8 +213,8 @@ HEADERS = \
     signalfilter/meanfilter.h  \
     signalfilter/minfilter.h  \
     signalfilter/majorityfilter.h  \
-    signalfilter/multichannelfilter.h  \
     signalfilter/nonlin_filt-func.h \
+    signalfilter/nonlin_filt-func-rgb.h \
     spam/spam.h \
     talairach/cramer.h    \
     talairach/talPoints.h    \
@@ -258,6 +259,7 @@ HEADERS = \
     geodesicpath/geodesicPath.h
 
 SOURCES = \
+    algorithm/imagealgorithm.h \
     classification/individuals.cc	\
     classification/classifstrategy.cc \
     classification/distance.cc \

@@ -81,6 +81,11 @@ HEADERS=	\
 		resampling/resampler_d.h		\
 		resampling/resamplerfactory.h		\
 		resampling/resamplerfactory_d.h	\
+    resampling/majoritysubsampling.h  \
+    resampling/maxsubsampling.h  \
+    resampling/meansubsampling.h  \
+    resampling/mediansubsampling.h  \
+    resampling/minsubsampling.h  \
 		resampling/multichannelresampler.h	\
 		resampling/samplable.h	\
 		resampling/samplable_cone.h	\
@@ -92,6 +97,7 @@ HEADERS=	\
 		resampling/seventhorderresampler_d.h	\
 		resampling/splineresampler.h		\
 		resampling/splineresampler_d.h		\
+    resampling/subsamplingimagealgorithm.h \
 		resampling/polynomial.h
 
 
@@ -136,3 +142,4 @@ SOURCES = \
 		resampling/resamplers.cc	\
 		resampling/samplable.cc	\
 		resampling/polynomial.cc
+

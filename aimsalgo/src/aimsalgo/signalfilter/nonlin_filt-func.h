@@ -36,8 +36,10 @@
 #define AIMS_SIGNALFILTER_NONLINFILT_FUNC_H
 
 #include <map>
-#include <aims/data/data.h>
 #include <algorithm>
+#include <aims/data/data.h>
+#include <aims/math/mathelem.h>
+#include <aims/utility/minmax.h>
 
 template <class T> class AimsData;
 
@@ -88,7 +90,7 @@ class MedianFilterFunc : public NonLinFilterFunc< T >
 template <class T> inline
 T MedianFilterFunc<T>::doit( AimsData<T>& data ) const
 {
-  std::sort( data.begin(), data.end());
+  incSorting(data);
   return data( data.dimX() / 2 );
 }
 
@@ -124,14 +126,14 @@ class MeanFilterFunc : public NonLinFilterFunc< T >
 template <class T> inline
 T MeanFilterFunc<T>::doit( AimsData<T>& data ) const
 {
-  double sum = 0;
+  T sum=0;
   uint32_t count = 0;
   typename AimsData<T>::iterator it;
 
   // Goes through the data and count number of values for each class
   for (it = data.begin(); it != data.end(); it++)
   {
-    sum += (T)(*it);
+    sum = sum + (T)(*it);
     count ++;
   }
 
@@ -181,6 +183,24 @@ T MajorityFilterFunc<T>::doit( AimsData<T>& data ) const
   }
 
   return majorityclass;
+}
+
+template <class T>
+class ExtremaDifferenceFilterFunc : public NonLinFilterFunc< T >
+{
+  public:
+    ExtremaDifferenceFilterFunc () { }
+    virtual ~ExtremaDifferenceFilterFunc () { }
+
+    T doit( AimsData<T>& data ) const; 
+};
+ 
+template <class T> inline
+T ExtremaDifferenceFilterFunc<T>::doit( AimsData<T>& data ) const
+{
+  T min, max;
+  aims::minmax<T>( data, min, max );
+  return aims::absdiff<T>(max, min);
 }
 
 #endif

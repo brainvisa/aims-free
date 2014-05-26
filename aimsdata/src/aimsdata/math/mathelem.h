@@ -64,6 +64,16 @@ namespace aims
   {
     return x < 0 ? -1.0f : +1.0f;
   }
+  
+  /// Get the absolute difference between 2 values
+  /// without having to take care of used type
+  /// this is particularly useful for unsigned types
+  template <typename T>
+  inline T absdiff( const T& x, const T& y )
+  {
+    return (T)abs(double(y) - double(x));
+  }
+  
   //@}
 }
 
