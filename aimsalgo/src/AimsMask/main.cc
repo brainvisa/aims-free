@@ -33,12 +33,14 @@
 
 
 #include <cstdlib>
+#include <cartobase/config/verbose.h>
 #include <aims/io/io_g.h>
 #include <aims/data/data_g.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/utility/utility_g.h>
 #include <aims/rgb/rgb.h>
 #include <aims/resampling/resampling_g.h>
+#include <aims/utility/progress.h>
 
 using namespace aims;
 using namespace carto;
@@ -105,37 +107,46 @@ doit( Process & p, const string & fname, Finder & f )
   int x,y,z,t;
   if( mp.getdoInverse() )
   {
-  		ForEach4d( mask ,x ,y ,z ,t )
-		{
-    		if ( mask(x,y,z,t) == 0 )	mask(x,y,z,t) = 1;
-      	else mask(x,y,z,t) = 0;
-		}
-  }   
-
-
-// Resampling if differences of voxels sizes
-  if( data.sizeX()!=mask.sizeX() ||
-		data.sizeY()!=mask.sizeY() ||
-		data.sizeZ()!=mask.sizeZ() ||
-		data.sizeT()!=mask.sizeT() )
-  {
-		unsigned dimz = 1;
-		if( data.dimZ()!=1 || mask.dimZ()!=1 ) 
-		dimz = unsigned(mask.dimZ()*mask.sizeZ()/(1.0*data.sizeZ()) + .5);
-		Motion identity;
-		identity.setToIdentity();
-		LinearResampler<short> reech;
-	  	reech.setRef( mask );
-	  	mask = reech.doit( identity, 
-								 unsigned (mask.dimX()*mask.sizeX()/(1.0*data.sizeX()) + .5),
-								 unsigned (mask.dimY()*mask.sizeY()/(1.0*data.sizeY()) + .5),
-								 dimz,
- 				      		 Point3df(data.sizeX(),data.sizeY(),data.sizeZ()));
+    ForEach4d( mask ,x ,y ,z ,t )
+    {
+      if ( mask(x,y,z,t) == 0 ) mask(x,y,z,t) = 1;
+      else mask(x,y,z,t) = 0;
+    }
   }
 
+  // Resampling if differences of voxels sizes
+  if( data.sizeX()!=mask.sizeX() ||
+      data.sizeY()!=mask.sizeY() ||
+      data.sizeZ()!=mask.sizeZ() ||
+      data.sizeT()!=mask.sizeT() )
+  {
+    unsigned dimz = 1;
+    if( data.dimZ()!=1 || mask.dimZ()!=1 ) 
+      dimz = unsigned(mask.dimZ()*mask.sizeZ()/(1.0*data.sizeZ()) + .5);
 
-// Maskage...
+    Motion identity;
+    identity.setToIdentity();
+    LinearResampler<short> reech;
+    reech.setRef( mask );
+    mask = reech.doit( identity, 
+                       unsigned (mask.dimX()*mask.sizeX()/(1.0*data.sizeX()) + .5),
+                       unsigned (mask.dimY()*mask.sizeY()/(1.0*data.sizeY()) + .5),
+                       dimz,
+                       Point3df(data.sizeX(),data.sizeY(),data.sizeZ()));
+  }
+
+  // Maskage
+  aims::Progression progress(data.dimT() * data.dimZ() * data.dimY() * data.dimX() - 1);
+  
+  if (carto::verbose)
+    std::cout << std::endl << "Masking progress: ";
+  
   ForEach4d( data ,x ,y ,z ,t ) {
+    if (carto::verbose){
+      ++progress;
+      // Display progression
+      std::cout << progress << std::flush;
+    }
     int minT = min( t, mask.dimT()-1 );
     if( x<mask.dimX() && y<mask.dimY() && z<mask.dimZ() ) {
       if( mask(x,y,z,minT) == 0 )
@@ -143,6 +154,9 @@ doit( Process & p, const string & fname, Finder & f )
     } else if( !mp.getdoInverse() )
       data( x, y, z, t ) = dv;
   }
+
+  if (carto::verbose)
+    std::cout << std::endl;
 
   Writer<AimsData<T> > writer( mp.fileout );
   return( writer.write( data ) );

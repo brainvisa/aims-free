@@ -76,6 +76,14 @@ namespace aims {
           return dims;
         }
         
+        /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageVoxelSize method implementation.
+        /// Returns the output voxel size based on an input voxel size.
+        /// \param Point4d voxelsize voxel size of the input image.
+        /// \return \c Point4d voxel size of the output image.
+        virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) {
+          return voxelsize;
+        }
+        
         /// \c ImageAlgorithmInterface<VoxelType>::execute method implementation.
         /// Execute the filtering algorithm on the input image using the \c FilteringFunctionType
         /// \param in Input image to filter

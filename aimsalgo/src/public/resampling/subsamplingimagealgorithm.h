@@ -70,13 +70,25 @@ namespace aims {
         virtual ~SubSamplingImageAlgorithm() { }
 
         /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageDimensions method implementation.
-        /// Get the output dimensions for Point4d original dimension.
-        /// \return Point4d output dimension of the subsampled image.
+        /// Returns the output dimensions based on an input dimensions.
+        /// \return \c Point4d output dimensions of the subsampled image.
         virtual const Point4d getOutputImageDimensions( const Point4d & dims ) {
           return Point4d( dims[0] / _win_size_x,
                           dims[1] / _win_size_y,
                           dims[2] / _win_size_z,
                           dims[3] );
+        
+        }
+        
+        /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageVoxelSize method implementation.
+        /// Returns the output voxel size based on an input voxel size.
+        /// \param Point4d voxelsize voxel size of the input image.
+        /// \return \c Point4d voxel size of the output image.
+        virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) {
+          return Point4df( voxelsize[0] * _win_size_x,
+                           voxelsize[1] * _win_size_y,
+                           voxelsize[2] * _win_size_z,
+                           voxelsize[3] );
         }
       
         /// \c ImageAlgorithmInterface<VoxelType>::execute method implementation.

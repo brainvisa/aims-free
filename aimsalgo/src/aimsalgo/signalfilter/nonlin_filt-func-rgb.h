@@ -196,5 +196,36 @@ class MajorityFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
     }
 };
 
+// Specialization RGB for extrema difference filtering
+template <>
+class ExtremaDifferenceFilterFunc< AimsRGB > : public NonLinFilterFunc< AimsRGB >
+{
+  public:
+    ExtremaDifferenceFilterFunc () { }
+    virtual ~ExtremaDifferenceFilterFunc () { }
+
+    inline AimsRGB doit( AimsData<AimsRGB>& data ) const
+    {
+      ExtremaDifferenceFilterFunc<uint8_t> m;
+      return multichannelfiltervalues<AimsRGB>(m, data);
+    }
+  
+};
+
+// Specialization RGBA for extrema difference filtering
+template <>
+class ExtremaDifferenceFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
+{
+  public:
+    ExtremaDifferenceFilterFunc () { }
+    virtual ~ExtremaDifferenceFilterFunc () { }
+
+    inline AimsRGBA doit( AimsData<AimsRGBA>& data ) const
+    {
+      ExtremaDifferenceFilterFunc<uint8_t> m;
+      return multichannelfiltervalues<AimsRGBA>(m, data);
+    }
+};
+
 #endif
 

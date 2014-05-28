@@ -126,14 +126,15 @@ class MeanFilterFunc : public NonLinFilterFunc< T >
 template <class T> inline
 T MeanFilterFunc<T>::doit( AimsData<T>& data ) const
 {
-  T sum=0;
+  // Sum is declared as double to avoid overflow issue
+  double sum = 0.; 
   uint32_t count = 0;
   typename AimsData<T>::iterator it;
 
   // Goes through the data and count number of values for each class
   for (it = data.begin(); it != data.end(); it++)
   {
-    sum = sum + (T)(*it);
+    sum = sum + (double)(*it);
     count ++;
   }
 

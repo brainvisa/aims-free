@@ -21,6 +21,7 @@
 #include <aims/utility/progress.h>
 #include <aims/math/math_g.h>
 #include <aims/resampling/subsamplingimagealgorithm.h>
+#include <aims/resampling/extremadifferencesubsampling.h>
 #include <aims/resampling/mediansubsampling.h>
 #include <aims/resampling/meansubsampling.h>
 #include <aims/resampling/minsubsampling.h>
@@ -130,12 +131,14 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
              );
     break;
     
-//     // Difference computation
-//     case 5:
-//       return rc_ptr<NonLinFilterFunc<T> >(
-//                new ExtremaDifferenceFilterFunc<T>
-//              );
-//     break;
+    // Difference computation
+    case 5:
+      return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
+                new ExtremaDifferenceSubSampling<VoxelType>( win_size_x, 
+                                                             win_size_y,
+                                                             win_size_z )
+             );
+    break;
     
     // Median computation
     default:
@@ -195,9 +198,8 @@ int main( int argc, const char **argv )
         application.addOption( rxy, "-n", "Number of voxels to aggregate in X and Y directions [default = 2]"
                                          "(this option is obsolete and only provided for compatibility purpose)", true);
         application.addOption( type, "-t", "Subsampling type : med[ian], mea[n], min[imum], max[imum], \n"
-                                           "maj[ority] (not available for RGB and RGBA images), \n"
-                                           "dif[ference] [default = mean]. Modes may also be\n"
-                                           "specified as order number: 0=median, 1=mean, etc.", true);
+                                           "maj[ority], dif[ference] [default = median]. Modes may also\n"
+                                           "be specified as order number: 0=median, 1=mean, etc.", true);
         application.addOption( fileout, "-o", "Output subsampled image" );
         
         application.alias( "--input", "-i" );

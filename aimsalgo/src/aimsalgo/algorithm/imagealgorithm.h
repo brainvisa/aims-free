@@ -57,11 +57,18 @@ namespace aims
   class ImageAlgorithmInterface {
     public :
       /// \c ImageAlgorithmInterface<VoxelType> Pure virtual method.
-      /// Returns the output dimensions of the processed image. This can be useful when output
-      /// image does not have the same dimensions as input image.
+      /// Returns the output dimensions of the processed image. This is used
+      /// when output image does not have the same dimensions as input image.
       /// \param Point4d dims dimensions of the input image.
       /// \return \c Point4d dimensions of the output image.
       virtual const Point4d getOutputImageDimensions( const Point4d & dims ) = 0;
+
+      /// \c ImageAlgorithmInterface<VoxelType> Pure virtual method.
+      /// Returns the output voxel size of the processed image. This is used
+      /// when output image does not have the same voxel size as input image.
+      /// \param Point4d voxelsize voxel size of the input image.
+      /// \return \c Point4d voxel size of the output image.
+      virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) = 0;
       
       /// \c ImageAlgorithmInterface<VoxelType> Pure virtual method.
       /// Returns the image processed by an algorithm on the input image.
@@ -141,9 +148,13 @@ namespace aims
 
         ChannelSelector< AimsData<VoxelType>, AimsData<typename VoxelType::ChannelType> > selector;
         Point4d dims = algo.getOutputImageDimensions( Point4d( in.dimX(),
-                                                                in.dimY(),
-                                                                in.dimZ(),
-                                                                in.dimT() ) );
+                                                               in.dimY(),
+                                                               in.dimZ(),
+                                                               in.dimT() ) );
+        Point4df vs = algo.getOutputImageVoxelSize( Point4df( in.sizeX(),
+                                                              in.sizeY(),
+                                                              in.sizeZ(),
+                                                              in.sizeT() ) );
 
         AimsData<VoxelType> out( dims[0],
                                  dims[1],
@@ -152,6 +163,10 @@ namespace aims
         if( in.header() ) {
           out.setHeader( in.header()->cloneHeader( true ) );
         }
+        out.setSizeXYZT( vs[0],
+                         vs[1],
+                         vs[2],
+                         vs[3] );
 
         for (uint8_t channel = 0; channel < DataTypeInfo< VoxelType >::samples(); channel++) {
           if (carto::verbose)
@@ -204,11 +219,20 @@ namespace aims
       }      
       
       /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageDimensions method implementation.
-      /// Get the output dimensions for Point4d original dimension. This is can be useful when output
-      /// file has not the same dimension as input image (for example : doing subsampling).
-      /// \return Point4d output dimension of the filtered image.
+      /// Returns the output dimensions based on input dimensions. This is used 
+      /// when output image has not the same dimensions as input image.
+      /// \return \c Point4d dimension of the output image.
       virtual const Point4d getOutputImageDimensions( const Point4d & dims ) {
         return _algo.getOutputImageDimensions(dims);
+      }
+      
+              
+      /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageVoxelSize method implementation.
+      /// Returns the output voxel size based on an input voxel size.
+      /// \param Point4d voxelsize voxel size of the input image.
+      /// \return \c Point4d voxel size of the output image.
+      virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) {
+        return _algo.getOutputImageVoxelSize(voxelsize);
       }
 
     protected:

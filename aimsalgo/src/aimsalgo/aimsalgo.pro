@@ -259,7 +259,6 @@ HEADERS = \
     geodesicpath/geodesicPath.h
 
 SOURCES = \
-    algorithm/imagealgorithm.h \
     classification/individuals.cc	\
     classification/classifstrategy.cc \
     classification/distance.cc \
