@@ -38,7 +38,7 @@
 #include <string>
 
 namespace aims {
-  
+
   /** The template class used to display progression in text mode.
   /// Here is an example of how to use the Progression class:
   ///
@@ -56,14 +56,14 @@ namespace aims {
       usleep(1000);
       std::cout << progress << std::flush;
     }
-    
+
     std::cout << std::endl;
   }
   /// \endcode
   */
   template <class T1 = double, class T2 = double>
   class ProgressInfo {
-    
+
     public:
       /**@name Constructor and Destructor*/
       //@{
@@ -74,18 +74,18 @@ namespace aims {
       /// \param progressmax maximum displayed value [default=100]
       /// \param unit unit of the displayed value
       /// \param width number of charecters used to display the value
-      ProgressInfo( const T1 min, 
+      ProgressInfo( const T1 min,
                     const T1 max,
                     const T2 progressmin = (T2)0,
                     const T2 progressmax = (T2)100,
                     const std::string unit = "%",
                     const int width = 3 );
-      
+
       /// Constructor of the class
       /// \param max maximum value of the progression
       ProgressInfo( const T1 max );
       //@}
-      
+
       /**@name Methods*/
       //@{
       /// Current value
@@ -114,7 +114,7 @@ namespace aims {
       /// Compound assignement operator to increment internal value
       ProgressInfo<T1, T2>& operator+= (const T1& r); // Compound assignment
       //@}
-      
+
     protected:
       int _displayed, _width;
       double _scale;
@@ -122,21 +122,48 @@ namespace aims {
       T2 _progressprec, _progressmin, _progressmax;
       std::string _unit;
   };
-  
+
   typedef aims::ProgressInfo<double, double> Progression;
-  
+
 }
 
 template <class T1, class T2>
-inline std::ostream& operator<< (std::ostream &out, aims::ProgressInfo<T1, T2> &progression)
+inline std::ostream& operator<< (
+  std::ostream &out, aims::ProgressInfo<T1, T2> &progression)
 {
   std::string p = progression.render();
-  
+
   if ( !p.empty() )
     out << p;
-  
+
   return out;
 }
+
+
+#if defined( __GNUC__ ) && ( __GNUC__ < 4 ) \
+  || ( __GNUC__ == 4 && __GNUC_MINOR__ == 0 )
+/* a bug in gcc <= 4.0 makes it necessary to redeclare the << operator in
+   the std namespace */
+
+namespace std
+{
+
+  template <class T1, class T2>
+  inline std::ostream& operator<< (
+    std::ostream &out, aims::ProgressInfo<T1, T2> &progression)
+  {
+    std::string p = progression.render();
+
+    if ( !p.empty() )
+      out << p;
+
+    return out;
+  }
+
+}
+
+#endif
+
 
 // Comparison operators
 template <class T1, class T2>
