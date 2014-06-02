@@ -81,7 +81,7 @@ HEADERS=	\
 		resampling/resampler_d.h		\
 		resampling/resamplerfactory.h		\
 		resampling/resamplerfactory_d.h	\
-#    resampling/extremadifferencesubsampling.h  \
+    resampling/extremadifferencesubsampling.h  \
     resampling/majoritysubsampling.h  \
     resampling/maxsubsampling.h  \
     resampling/meansubsampling.h  \

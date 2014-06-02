@@ -119,7 +119,7 @@ PSUBDIRS = \
     AimsSphereDistribution         \
     AimsSplitArray    \
 #    AimsSplitHemispheres \
-#    AimsSubSampling                 \
+    AimsSubSampling                 \
     AimsSubTensor             \
     AimsSulcusSPAM              \
     AimsSumFrame              \
