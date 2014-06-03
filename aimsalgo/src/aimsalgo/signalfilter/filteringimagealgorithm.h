@@ -148,7 +148,12 @@ namespace aims {
           for ( y = dy; y < by; ++y, ++progress ) {
             if (carto::verbose) {
               // Display progression
-              std::cout << progress << std::flush;
+              /* The "normal" operator << should be as:
+                 std::cout << progress << std::flush;
+                 but it doesn't work in gcc 4.0, there is a namespace
+                 confusion, so we have to specify ::operator <<
+              */
+              ::operator << ( std::cout, progress ) << std::flush;
             }
             for ( x = dx; x < bx; ++x )
             {

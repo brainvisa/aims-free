@@ -140,31 +140,6 @@ inline std::ostream& operator<< (
 }
 
 
-#if defined( __GNUC__ ) && ( __GNUC__ < 4 ) \
-  || ( __GNUC__ == 4 && __GNUC_MINOR__ == 0 )
-/* a bug in gcc <= 4.0 makes it necessary to redeclare the << operator in
-   the std namespace */
-
-namespace std
-{
-
-  template <class T1, class T2>
-  inline std::ostream& operator<< (
-    std::ostream &out, aims::ProgressInfo<T1, T2> &progression)
-  {
-    std::string p = progression.render();
-
-    if ( !p.empty() )
-      out << p;
-
-    return out;
-  }
-
-}
-
-#endif
-
-
 // Comparison operators
 template <class T1, class T2>
 inline bool operator< (const aims::ProgressInfo<T1, T2>& l, const T1& r){return (l.current() < r);}
