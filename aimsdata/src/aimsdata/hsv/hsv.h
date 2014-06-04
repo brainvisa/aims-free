@@ -111,52 +111,43 @@ public:
   return(*this);
   }
   AimsHSV& operator  = (const byte &val)
-  { _hue      = val;
-  _saturation = val;
+  { _hue      = 0;
+  _saturation = 0;
   _value      = val;
   return(*this);
   }
   AimsHSV& operator /= (const byte &val)
   {
     ASSERT(val != 0);
-    _hue        /= val;
-    _saturation /= val;
     _value      /= val;
     return(*this); 
   }
   AimsHSV& operator /= (const long &val)
   {
     ASSERT(val != 0);
-    _hue        /= val;
-    _saturation /= val;
     _value      /= val;
     return(*this);
   }
   AimsHSV& operator /= (const double &val)
   {
     ASSERT(val != 0);
-    _hue        = (byte)(_hue / val);
-    _saturation = (byte)(_saturation / val);
     _value      = (byte)(_value / val);
     return(*this);
   }
   AimsHSV& operator *= (const byte &val)
-  { _hue        *= val;
-    _saturation *= val;
+  {
     _value      *= val;
-  return(*this); 
+    return(*this); 
   }
   AimsHSV& operator *= (const long &val)
-  { _hue        *= val;
-    _saturation *= val;
+  {
     _value      *= val;
-  return(*this);
+    return(*this);
   }
   AimsHSV& operator *= (const double &val)
-  { _hue        = (byte)(_hue * val);
-    _saturation = (byte)(_saturation * val);
+  {
     _value      = (byte)(_value * val);
-  return(*this);
+    return(*this);
   }
   //@}
 
@@ -285,40 +276,40 @@ AimsHSV operator - (const AimsHSV &aa,
 inline
 AimsHSV operator * (const AimsHSV  &aa,
                     const byte &bb)
-{ return(AimsHSV(aa.value()      * bb,
-                 aa.saturation() * bb,
+{ return(AimsHSV(aa.value(),
+                 aa.saturation(),
                  aa.value()      * bb));
 }
 
 inline
 AimsHSV operator * (const AimsHSV  &aa,
                     const long &bb)
-{ return(AimsHSV(aa.value()      * bb,
-                 aa.saturation() * bb,
+{ return(AimsHSV(aa.value(),
+                 aa.saturation(),
                  aa.value()      * bb));
 }
 
 inline
 AimsHSV operator * (const AimsHSV  &aa,
                     const double &bb)
-{ return(AimsHSV((byte) (aa.hue()        * bb),
-                 (byte) (aa.saturation() * bb),
+{ return(AimsHSV((byte) (aa.hue()),
+                 (byte) (aa.saturation()),
                  (byte) (aa.value()      * bb)));
 }
 
 inline
 AimsHSV operator * (const byte &aa,
                     const AimsHSV  &bb)
-{ return(AimsHSV(bb.hue()        * aa,
-                 bb.saturation() * aa,
+{ return(AimsHSV(bb.hue(),
+                 bb.saturation(),
                  bb.value()      * aa));
 }
 
 inline
 AimsHSV operator * (const long &aa,
                     const AimsHSV  &bb)
-{ return(AimsHSV(bb.hue()        * aa,
-                 bb.saturation() * aa,
+{ return(AimsHSV(bb.hue(),
+                 bb.saturation(),
                  bb.value()      * aa));
 }
 
@@ -326,8 +317,8 @@ AimsHSV operator * (const long &aa,
 inline
 AimsHSV operator * (const double &aa,
                     const AimsHSV  &bb)
-{ return(AimsHSV((byte) (bb.hue()        * aa),
-                 (byte) (bb.saturation() * aa),
+{ return(AimsHSV((byte) (bb.hue()),
+                 (byte) (bb.saturation()),
                  (byte) (bb.value()      * aa)));
 }
 
@@ -335,8 +326,8 @@ inline
 AimsHSV operator / (const AimsHSV  &aa,
                     const byte &bb)
 { ASSERT(bb != 0);
-  return(AimsHSV(aa.hue()        / bb,
-                 aa.saturation() / bb,
+  return(AimsHSV(aa.hue(),
+                 aa.saturation(),
                  aa.value()      / bb));
 }
 
@@ -344,8 +335,8 @@ inline
 AimsHSV operator / (const AimsHSV  &aa,
                     const long &bb)
 { ASSERT(bb != 0);
-  return(AimsHSV(aa.hue()        / bb,
-                 aa.saturation() / bb,
+  return(AimsHSV(aa.hue(),
+                 aa.saturation(),
                  aa.value()      / bb));
 }
 
@@ -353,8 +344,8 @@ inline
 AimsHSV operator / (const AimsHSV  &aa,
                     const double &bb)
 { ASSERT(bb != 0);
-  return(AimsHSV((byte) (aa.hue()        / bb),
-                 (byte) (aa.saturation() / bb),
+  return(AimsHSV((byte) (aa.hue()),
+                 (byte) (aa.saturation()),
                  (byte) (aa.value()      / bb) ));
 }
 
@@ -381,8 +372,8 @@ bool operator != (const AimsHSV &aa,
 inline
 bool operator == (const AimsHSV  &aa,
                   const byte &bb)
-{ return((aa.hue()        == bb)  && 
-         (aa.saturation() == bb)  &&
+{ return((aa.hue()        == 0)  &&
+         (aa.saturation() == 0)  &&
          (aa.value()      == bb)   );
 }
 

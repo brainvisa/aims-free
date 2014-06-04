@@ -5,6 +5,7 @@ class Converter_Volume_%Template1typecode%_Volume_%Template2typecode%
 #include <aims/utility/converter_volume.h>
 #include <pyaims/data/data.h>
 #include <aims/utility/converter_rgb.h>
+#include <aims/utility/converter_hsv.h>
 typedef carto::Converter<AimsData<%Template1%>, AimsData<%Template2%> > 
   Converter_Volume_%Template1typecode%_Volume_%Template2typecode%;
 %End
@@ -105,6 +106,7 @@ class ShallowConverter_Volume_%Template1typecode%_Volume_%Template2typecode%
 #include <aims/utility/converter_volume.h>
 #include <pyaims/data/data.h>
 #include <aims/utility/converter_rgb.h>
+#include <aims/utility/converter_hsv.h>
 typedef carto::ShallowConverter<AimsData<%Template1%>, AimsData<%Template2%> > 
   ShallowConverter_Volume_%Template1typecode%_Volume_%Template2typecode%;
 %End

@@ -466,6 +466,32 @@ typessub = { 'signed char' : \
                'compareElement' : '',
                },
 
+             'AimsHSV' : \
+             { 'typecode' : 'HSV',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new AimsHSV',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'AimsHSV',
+               'sipClass' : 'AimsHSV',
+               'typeinclude' : '#include <aims/hsv/hsv.h>',
+               'sipinclude' : '#ifndef PYAIMS_HSV_DEFINED\n'
+               '#define PYAIMS_HSV_DEFINED\n'
+               'inline int pyaimsHSV_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsHSV, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsHSV_Check',
+               'compareElement' : '',
+               },
+
              'Point2df' : \
              { 'typecode' : 'POINT2DF',
                'pyFromC' : 'pyaimsConvertFrom_AimsVector',
@@ -1092,6 +1118,31 @@ typessub = { 'signed char' : \
                'module' : 'aims', 
                'testPyType' : 'pyaimsAimsData_RGBA_Check', 
                },
+             'AimsData<AimsHSV>' : \
+             { 'typecode' : 'AimsData_HSV',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new AimsData<AimsHSV>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'AimsData_HSV',
+               'sipClass' : 'AimsData_HSV',
+               'typeinclude' : \
+               '#include <aims/data/data.h>\n#include <aims/hsv/hsv.h>',
+               'sipinclude' : '#ifndef PYAIMS_AIMSDATA_HSV_CHECK_DEFINED\n'
+               '#define PYAIMS_AIMSDATA_HSV_CHECK_DEFINED\n'
+               'inline int pyaimsAimsData_HSV_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_HSV, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsAimsData_HSV_Check',
+               },
              'AimsData<cfloat>' : \
              { 'typecode' : 'AimsData_CFLOAT',
                'pyFromC' : '',
@@ -1416,6 +1467,32 @@ typessub = { 'signed char' : \
                '#endif', 
                'module' : 'aims', 
                'testPyType' : 'pyaimsVolume_RGBA_Check', 
+               },
+             'carto::Volume<AimsHSV>' : \
+             { 'typecode' : 'Volume_HSV',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new carto::Volume<AimsHSV>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'Volume_HSV',
+               'sipClass' : 'Volume_HSV',
+               'typeinclude' : \
+               '#include <cartodata/volume/volume.h>\n' \
+               '#include <aims/hsv/hsv.h>',
+               'sipinclude' : '#ifndef PYAIMS_VOLUME_HSV_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_HSV_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_HSV_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_HSV, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsVolume_HSV_Check',
                },
              'carto::Volume<cfloat>' : \
              { 'typecode' : 'Volume_CFLOAT',

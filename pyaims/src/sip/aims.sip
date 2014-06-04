@@ -165,6 +165,7 @@ typedef unsigned short uint16_t;
 %Include aimsdata_DOUBLE.sip
 %Include aimsdata_RGB.sip
 %Include aimsdata_RGBA.sip
+%Include aimsdata_HSV.sip
 %Include aimsdata_CFLOAT.sip
 %Include aimsdata_CDOUBLE.sip
 
@@ -206,6 +207,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include rcptr_AimsData_DOUBLE.sip
 %Include rcptr_AimsData_RGB.sip
 %Include rcptr_AimsData_RGBA.sip
+%Include rcptr_AimsData_HSV.sip
 %Include rcptr_AimsData_CFLOAT.sip
 %Include rcptr_AimsData_CDOUBLE.sip
 
@@ -218,6 +220,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include reader_AimsData_DOUBLE.sip
 %Include reader_AimsData_RGB.sip
 %Include reader_AimsData_RGBA.sip
+%Include reader_AimsData_HSV.sip
 %Include reader_AimsData_CFLOAT.sip
 %Include reader_AimsData_CDOUBLE.sip
 
@@ -241,6 +244,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include volume_DOUBLE.sip
 %Include volume_RGB.sip
 %Include volume_RGBA.sip
+%Include volume_HSV.sip
 %Include volume_CFLOAT.sip
 %Include volume_CDOUBLE.sip
 
@@ -255,6 +259,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include rcptr_Volume_DOUBLE.sip
 %Include rcptr_Volume_RGB.sip
 %Include rcptr_Volume_RGBA.sip
+%Include rcptr_Volume_HSV.sip
 %Include rcptr_Volume_CFLOAT.sip
 %Include rcptr_Volume_CDOUBLE.sip
 
@@ -267,6 +272,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include reader_Volume_DOUBLE.sip
 %Include reader_Volume_RGB.sip
 %Include reader_Volume_RGBA.sip
+%Include reader_Volume_HSV.sip
 %Include reader_Volume_CFLOAT.sip
 %Include reader_Volume_CDOUBLE.sip
 
@@ -274,6 +280,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include converter_Volume_DOUBLE_FLOAT.sip
 %Include converter_Volume_DOUBLE_RGBA.sip
 %Include converter_Volume_DOUBLE_RGB.sip
+%Include converter_Volume_DOUBLE_HSV.sip
 %Include converter_Volume_DOUBLE_S16.sip
 %Include converter_Volume_DOUBLE_S32.sip
 %Include converter_Volume_DOUBLE_U16.sip
@@ -283,6 +290,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include converter_Volume_FLOAT_FLOAT.sip
 %Include converter_Volume_FLOAT_RGBA.sip
 %Include converter_Volume_FLOAT_RGB.sip
+%Include converter_Volume_FLOAT_HSV.sip
 %Include converter_Volume_FLOAT_S16.sip
 %Include converter_Volume_FLOAT_S32.sip
 %Include converter_Volume_FLOAT_U16.sip
@@ -292,6 +300,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include converter_Volume_RGBA_FLOAT.sip
 %Include converter_Volume_RGBA_RGBA.sip
 %Include converter_Volume_RGBA_RGB.sip
+%Include converter_Volume_RGBA_HSV.sip
 %Include converter_Volume_RGBA_S16.sip
 %Include converter_Volume_RGBA_S32.sip
 %Include converter_Volume_RGBA_U16.sip
@@ -301,15 +310,27 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include converter_Volume_RGB_FLOAT.sip
 %Include converter_Volume_RGB_RGBA.sip
 %Include converter_Volume_RGB_RGB.sip
+%Include converter_Volume_RGB_HSV.sip
 %Include converter_Volume_RGB_S16.sip
 %Include converter_Volume_RGB_S32.sip
 %Include converter_Volume_RGB_U16.sip
 %Include converter_Volume_RGB_U32.sip
 %Include converter_Volume_RGB_U8.sip
+%Include converter_Volume_HSV_DOUBLE.sip
+%Include converter_Volume_HSV_FLOAT.sip
+%Include converter_Volume_HSV_RGBA.sip
+%Include converter_Volume_HSV_RGB.sip
+%Include converter_Volume_HSV_HSV.sip
+%Include converter_Volume_HSV_S16.sip
+%Include converter_Volume_HSV_S32.sip
+%Include converter_Volume_HSV_U16.sip
+%Include converter_Volume_HSV_U32.sip
+%Include converter_Volume_HSV_U8.sip
 %Include converter_Volume_S16_DOUBLE.sip
 %Include converter_Volume_S16_FLOAT.sip
 %Include converter_Volume_S16_RGBA.sip
 %Include converter_Volume_S16_RGB.sip
+%Include converter_Volume_S16_HSV.sip
 %Include converter_Volume_S16_S16.sip
 %Include converter_Volume_S16_S32.sip
 %Include converter_Volume_S16_U16.sip
@@ -319,6 +340,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include converter_Volume_S32_FLOAT.sip
 %Include converter_Volume_S32_RGBA.sip
 %Include converter_Volume_S32_RGB.sip
+%Include converter_Volume_S32_HSV.sip
 %Include converter_Volume_S32_S16.sip
 %Include converter_Volume_S32_S32.sip
 %Include converter_Volume_S32_U16.sip
@@ -328,6 +350,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include converter_Volume_U16_FLOAT.sip
 %Include converter_Volume_U16_RGBA.sip
 %Include converter_Volume_U16_RGB.sip
+%Include converter_Volume_U16_HSV.sip
 %Include converter_Volume_U16_S16.sip
 %Include converter_Volume_U16_S32.sip
 %Include converter_Volume_U16_U16.sip
@@ -337,6 +360,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include converter_Volume_U32_FLOAT.sip
 %Include converter_Volume_U32_RGBA.sip
 %Include converter_Volume_U32_RGB.sip
+%Include converter_Volume_U32_HSV.sip
 %Include converter_Volume_U32_S16.sip
 %Include converter_Volume_U32_S32.sip
 %Include converter_Volume_U32_U16.sip
@@ -346,6 +370,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include converter_Volume_U8_FLOAT.sip
 %Include converter_Volume_U8_RGBA.sip
 %Include converter_Volume_U8_RGB.sip
+%Include converter_Volume_U8_HSV.sip
 %Include converter_Volume_U8_S16.sip
 %Include converter_Volume_U8_S32.sip
 %Include converter_Volume_U8_U16.sip
