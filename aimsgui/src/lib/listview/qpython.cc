@@ -34,11 +34,7 @@
 #include <aims/listview/qpython.h>
 #include <cartobase/stream/sstream.h>
 #include <cartobase/object/property.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/writer/pythonwriter.h>
-#else
-  #include <cartobase/object/pythonwriter.h>
-#endif
+#include <soma-io/writer/pythonwriter.h>
 #include <iomanip>
 #include <math.h>
 #include <QTreeWidget>

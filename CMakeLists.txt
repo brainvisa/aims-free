@@ -136,10 +136,7 @@ endif()
 
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
-set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase "${LIBXML2_LIBRARIES}" )
-if( USE_SOMA_IO )
-  set( AIMS_AIMSDATA_LIBRARIES ${AIMS_AIMSDATA_LIBRARIES} soma-io )
-endif( USE_SOMA_IO )
+set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase soma-io "${LIBXML2_LIBRARIES}" )
 set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}" )
 
 # Copy python directory for aims tests

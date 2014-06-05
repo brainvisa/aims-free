@@ -34,13 +34,8 @@
 
 #include <aims/io/motionR.h>
 #include <aims/data/pheader.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/utilities/asciidatasourcetraits.h>
-  #include <soma-io/datasource/filedatasource.h>
-#else
-  #include <cartobase/io/asciidatasourcetraits.h>
-  #include <cartobase/datasource/filedatasource.h>
-#endif
+#include <soma-io/utilities/asciidatasourcetraits.h>
+#include <soma-io/datasource/filedatasource.h>
 
 using namespace aims;
 using namespace carto;

@@ -45,38 +45,24 @@
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/plugin/plugin.h>
 #include <set>
-
-#ifdef USE_SOMA_IO
-  #include <soma-io/io/writer.h>
-  #include <soma-io/io/formatdictionary.h>
-  #define AIMS_INSTANTIATE_WRITER( T ) \
-    namespace aims { \
-      template class aims::Writer< T >; \
-      template bool \
-      GenericWriter::write< T >( const T &, bool, const std::string * ); \
-    } \
-    namespace soma { \
-      template class soma::Writer< T >; \
-    }
-  #define AIMS_INSTANTIATE_ONLY_WRITER( T ) \
-    namespace aims { \
-      template class aims::Writer< T >; \
-    } \
-    namespace soma { \
-      template class soma::Writer< T >; \
-    }
-#else
-  #define AIMS_INSTANTIATE_WRITER( T ) \
-    namespace aims { \
-      template class aims::Writer< T >; \
-      template bool \
-      GenericWriter::write< T >( const T &, bool, const std::string * ); \
-    }
-  #define AIMS_INSTANTIATE_ONLY_WRITER( T ) \
-    namespace aims { \
-      template class aims::Writer< T >; \
-    }
-#endif
+#include <soma-io/io/writer.h>
+#include <soma-io/io/formatdictionary.h>
+#define AIMS_INSTANTIATE_WRITER( T ) \
+  namespace aims { \
+    template class aims::Writer< T >; \
+    template bool \
+    GenericWriter::write< T >( const T &, bool, const std::string * ); \
+  } \
+  namespace soma { \
+    template class soma::Writer< T >; \
+  }
+#define AIMS_INSTANTIATE_ONLY_WRITER( T ) \
+  namespace aims { \
+    template class aims::Writer< T >; \
+  } \
+  namespace soma { \
+    template class soma::Writer< T >; \
+  }
 
 #include <iostream>
 
@@ -126,7 +112,6 @@ namespace aims
   template<class T>
   bool Writer<T>::write( const T & obj, bool ascii, const std::string* format )
   {
-#ifdef USE_SOMA_IO
     // try first soma-io writer (since 2013)
     // try first 3 passes
     try{
@@ -144,8 +129,7 @@ namespace aims
       soma::Writer<T> writer( uri );
       return writer.write( obj, _options, 1, 3 );
     } catch( ... ) {}
-    // if it failed, continue with aims reader.
-#endif
+    // if it failed, continue with aims writer.
 
     // force loading plugins if it has not been done already
     carto::PluginLoader::load();
@@ -378,7 +362,6 @@ namespace aims
           }
         }
 
-#ifdef USE_SOMA_IO
     // try first soma-io writer (since 2013)
     // try pass 4
     try{
@@ -397,7 +380,6 @@ namespace aims
       return writer.write( obj, _options, 4, 4 );
     } catch( ... ) {}
     // if it failed, it's hopeless
-#endif
 
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm,

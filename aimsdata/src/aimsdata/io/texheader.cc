@@ -41,11 +41,7 @@
 #include <cartobase/exception/format.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/stream/fileutil.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/utilities/asciidatasourcetraits.h>
-#else
-  #include <cartobase/io/asciidatasourcetraits.h>
-#endif
+#include <soma-io/utilities/asciidatasourcetraits.h>
 #include <fstream>
 #include <memory>
 

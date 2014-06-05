@@ -40,11 +40,7 @@
 #include <aims/io/reader.h>
 #include <aims/io/finder.h>
 #include <aims/io/process.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/writer/pythonwriter.h>
-#else
-  #include <cartobase/object/pythonwriter.h>
-#endif
+#include <soma-io/writer/pythonwriter.h>
 
 using namespace aims;
 using namespace carto;

@@ -36,11 +36,7 @@
 #include <aims/io/defaultItemR.h>
 #include <aims/io/defaultItemW.h>
 #include <cartobase/exception/ioexcept.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasource/streamdatasource.h>
-#else
-  #include <cartobase/datasource/streamdatasource.h>
-#endif
+#include <soma-io/datasource/streamdatasource.h>
 
 using namespace aims;
 using namespace carto;

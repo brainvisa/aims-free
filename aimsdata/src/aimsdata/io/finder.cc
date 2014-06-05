@@ -43,14 +43,9 @@
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/type/typetraits.h>
 #include <cartobase/thread/mutex.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasourceinfo/datasourceinfoloader.h>
-  #include <soma-io/datasourceinfo/datasourceinfo.h>
-  #include <soma-io/datasource/filedatasource.h>
-#else
-  #include <cartobase/io/datasourceinfo.h>
-  #include <cartobase/datasource/filedatasource.h>
-#endif
+#include <soma-io/datasourceinfo/datasourceinfoloader.h>
+#include <soma-io/datasourceinfo/datasourceinfo.h>
+#include <soma-io/datasource/filedatasource.h>
 #include <cartodata/io/carto2aimsheadertranslator.h>
 #include <map>
 #include <set>
@@ -242,22 +237,16 @@ bool Finder::check( const string& filename )
   #ifdef AIMS_DEBUG_IO
   cout << "FINDER:: trying check through DataSourceInfoLoader... " << endl;
   #endif
-  #ifdef USE_SOMA_IO
-    Object h;
-    try {
-      // try first 2 passes
-      DataSourceInfoLoader dsil;
-      rc_ptr<DataSource> ds( new FileDataSource( filename ) );
-      DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ),
-                                       carto::none(), 1, 2 );
-      h = dsi.header();
-    } catch( ... ) {
-    }
-  #else
-    DataSourceInfo	dsi;
-    FileDataSource	ds( filename );
-    Object		h = dsi.check( ds );
-  #endif
+  Object h;
+  try {
+    // try first 2 passes
+    DataSourceInfoLoader dsil;
+    rc_ptr<DataSource> ds( new FileDataSource( filename ) );
+    DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ),
+                                      carto::none(), 1, 2 );
+    h = dsi.header();
+  } catch( ... ) {
+  }
   bool dsok = !h.isNone();
   if( dsok )
     {
@@ -426,7 +415,6 @@ bool Finder::check( const string& filename )
           }
       }
 
-#ifdef USE_SOMA_IO
   // try pass 3
   try {
     Object h;
@@ -469,7 +457,6 @@ bool Finder::check( const string& filename )
         return true;
     }
   } catch( ... ) {}
-#endif
 
 #ifdef AIMS_DEBUG_IO
   cout << "FINDER:: not found at all, giving up\n";

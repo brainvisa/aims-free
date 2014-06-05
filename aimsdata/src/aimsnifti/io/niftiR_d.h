@@ -48,11 +48,7 @@
 #include <aims/utility/flip.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasource/filedatasource.h>
-#else
-  #include <cartobase/datasource/filedatasource.h>
-#endif
+#include <soma-io/datasource/filedatasource.h>
 
 namespace aims
 {

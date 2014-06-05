@@ -35,13 +35,8 @@
 #include <aims/def/general.h>
 #include <aims/io/byteswap.h>
 #include <cartobase/exception/ioexcept.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/utilities/asciidatasourcetraits.h>
-  #include <soma-io/datasource/streamdatasource.h>
-#else
-  #include <cartobase/io/asciidatasourcetraits.h>
-  #include <cartobase/datasource/streamdatasource.h>
-#endif
+#include <soma-io/utilities/asciidatasourcetraits.h>
+#include <soma-io/datasource/streamdatasource.h>
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/stream/fileutil.h>
 #include <fstream>

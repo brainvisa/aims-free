@@ -33,15 +33,9 @@
 
 #include <aims/io/apcreader.h>
 #include <cartobase/exception/ioexcept.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasource/filedatasource.h>
-  #include <soma-io/datasource/bufferdatasource.h>
-  #include <soma-io/utilities/asciidatasourcetraits.h>
-#else
-  #include <cartobase/datasource/filedatasource.h>
-  #include <cartobase/datasource/bufferdatasource.h>
-  #include <cartobase/io/asciidatasourcetraits.h>
-#endif
+#include <soma-io/datasource/filedatasource.h>
+#include <soma-io/datasource/bufferdatasource.h>
+#include <soma-io/utilities/asciidatasourcetraits.h>
 
 using namespace aims;
 using namespace carto;

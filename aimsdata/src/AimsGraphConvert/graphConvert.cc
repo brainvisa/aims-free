@@ -42,11 +42,7 @@
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/object/sreader.h>
 #include <cartobase/stream/fileutil.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/reader/pythonreader.h>
-#else
-  #include <cartobase/object/pythonreader.h>
-#endif
+#include <soma-io/reader/pythonreader.h>
 
 using namespace carto;
 using namespace aims;

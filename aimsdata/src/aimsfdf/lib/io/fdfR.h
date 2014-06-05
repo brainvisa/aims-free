@@ -45,11 +45,7 @@
 #include <cartobase/exception/format.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/type/byte_order.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/datasource/filedatasource.h>
-#else
-  #include <cartobase/datasource/filedatasource.h>
-#endif
+#include <soma-io/datasource/filedatasource.h>
 #include <stdio.h>
 
 using namespace std;

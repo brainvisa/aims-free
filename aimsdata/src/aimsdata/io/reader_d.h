@@ -41,28 +41,20 @@
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
 #include <set>
-
-#ifdef USE_SOMA_IO
-  #include <soma-io/io/reader.h>
-  #include <soma-io/io/formatdictionary.h>
-  #define AIMS_INSTANTIATE_READER( T ) \
-    namespace aims { \
-      template class aims::Reader< T >; \
-    } \
-    namespace soma { \
-      template class soma::FormatDictionary< T >; \
-      template class soma::Reader< T >; \
-    }
-  #define AIMS_INSTANTIATE_AIMS_READER( T ) \
-    namespace aims { \
-      template class aims::Reader< T >; \
-    }
-#else
-  #define AIMS_INSTANTIATE_READER( T ) \
-    namespace aims { \
-      template class aims::Reader< T >; \
-    }
-#endif
+#include <soma-io/io/reader.h>
+#include <soma-io/io/formatdictionary.h>
+#define AIMS_INSTANTIATE_READER( T ) \
+  namespace aims { \
+    template class aims::Reader< T >; \
+  } \
+  namespace soma { \
+    template class soma::FormatDictionary< T >; \
+    template class soma::Reader< T >; \
+  }
+#define AIMS_INSTANTIATE_AIMS_READER( T ) \
+  namespace aims { \
+    template class aims::Reader< T >; \
+  }
 
 namespace aims
 {
@@ -143,9 +135,9 @@ namespace aims
 
   template<class T>
   bool Reader<T>::read( T & obj, int border, const std::string* format, 
-			int frame )
+                        int frame )
   {
-#ifdef USE_SOMA_IO
+
     // try first soma-io reader (since 2013)
     // try first 3 passes
     try{
@@ -168,10 +160,10 @@ namespace aims
       options->setProperty( "convert_to_aims", true );
       reader.setOptions( options );
       reader.setAllocatorContext( allocatorContext() );
-      return reader.read( obj, carto::none(), 1, 3 );
+      const carto::Object & n = carto::none();
+      return reader.read( obj, n, 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
-#endif
 
 #ifdef AIMS_DEBUG_IO
     std::cout << "Reader<" << carto::DataTypeCode<T>::name() << ">\n";
@@ -373,7 +365,6 @@ namespace aims
           }
         }
 
-#ifdef USE_SOMA_IO
     // try first soma-io reader (since 2013)
     // try pass 4
     try{
@@ -390,14 +381,14 @@ namespace aims
 
       soma::Reader<T> reader( uri );
       reader.setOptions( _options );
-      return reader.read( obj, carto::none(), 4, 4 );
+      const carto::Object & n = carto::none();
+      return reader.read( obj, n, 4, 4 );
     } catch( ... ) {}
     // if it failed, it's hopeless.
-#endif
 
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm, 
-				   _filename + " : no matching format" );
+                                   _filename + " : no matching format" );
     return( false );
   }
 
@@ -405,7 +396,6 @@ namespace aims
   template<class T>
   T* Reader<T>::read( int border, const std::string* format, int frame )
   {
-#ifdef USE_SOMA_IO
     // try first soma-io reader (since 2013)
     // try first 3 passes
     try{
@@ -431,7 +421,6 @@ namespace aims
       return reader.read( carto::none(), 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
-#endif
     
     // take care of old-style options
     if( !_options.get() )
@@ -583,7 +572,6 @@ namespace aims
           }
         }
 
-#ifdef USE_SOMA_IO
     // try first soma-io reader (since 2013)
     // try pass 4
     try{
@@ -603,7 +591,6 @@ namespace aims
       return reader.read( carto::none(), 4, 4 );
     } catch( ... ) {}
     // if it failed, it's hopeless
-#endif
 
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm, 

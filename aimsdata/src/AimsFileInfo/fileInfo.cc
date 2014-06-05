@@ -50,11 +50,7 @@
 #include <aims/bucket/bucket.h>
 #include <aims/mesh/texture.h>
 #include <aims/resampling/motion.h>
-#ifdef USE_SOMA_IO
-  #include <soma-io/writer/pythonwriter.h>
-#else
-  #include <cartobase/object/pythonwriter.h>
-#endif
+#include <soma-io/writer/pythonwriter.h>
 #include <cartobase/object/attributed.h>
 #include <cartobase/stream/sstream.h>
 #include <time.h>
