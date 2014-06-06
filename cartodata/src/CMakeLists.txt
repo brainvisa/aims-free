@@ -1,6 +1,7 @@
 ADD_SUBDIRECTORY(library)
 ADD_SUBDIRECTORY(tests)
 ADD_SUBDIRECTORY( cartogis )
+ADD_SUBDIRECTORY( cartonifti )
 IF( OPENSLIDE_FOUND )
   ADD_SUBDIRECTORY( cartoopenslide )
 ENDIF()
