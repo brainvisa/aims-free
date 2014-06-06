@@ -1,6 +1,7 @@
 attributes = {
   'release_plugins' : [
     'libcartoopenslide.so',
-    'libcartogis.so'
+    'libcartogis.so',
+#    'libcartonifti.so',
   ], 
 }

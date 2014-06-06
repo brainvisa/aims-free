@@ -6,6 +6,9 @@ set( _sources
   plugin/niftiplugin.cc
 )
 
+add_definitions( "-DHAVE_ZLIB" )
+include_directories( "${CMAKE_BINARY_DIR}/include/soma-io/nifticlib/znzlib" "${CMAKE_BINARY_DIR}/include/soma-io/nifticlib/niftilib" )
+
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers cartodata headersTarget )
 set(CARTONIFTI_HEADERS ${_headers} PARENT_SCOPE)
 add_library( cartonifti MODULE ${_sources} )
@@ -17,7 +20,7 @@ if( NOT APPLE )
 else()
   set_property( TARGET cartonifti PROPERTY OUTPUT_NAME cartonifti.${${PROJECT_NAME}_VERSION} )
 endif()
-target_link_libraries( cartonifti cartodata )
+target_link_libraries( cartonifti cartodata somanifti )
 BRAINVISA_INSTALL( TARGETS cartonifti
                    DESTINATION lib
                    COMPONENT ${PROJECT_NAME} )
