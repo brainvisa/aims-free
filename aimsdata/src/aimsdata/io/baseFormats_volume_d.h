@@ -42,7 +42,8 @@
 #include <aims/io/spmW.h>
 #include <aims/io/genesisR.h>
 #include <aims/io/imasparseheader.h>
-
+#include <soma-io/io/reader.h>
+#include <soma-io/io/writer.h>
 
 namespace aims
 {
@@ -268,6 +269,112 @@ namespace aims
 
     obj.header()->writeMinf( filename + ".minf" );
     return true;
+  }
+
+
+  //    SomaIO / carto Volume
+
+  template<typename T>
+  SomaIOAimsDataFormat<T>::~SomaIOAimsDataFormat()
+  {
+  }
+
+
+  template<typename T>
+  bool SomaIOAimsDataFormat<T>::read( const std::string & filename,
+                           AimsData<T> & vol, 
+                           const carto::AllocatorContext & context,
+                           carto::Object options )
+  {
+    // avoid recursive call through aims / carto IO redirections
+    std::vector<std::string> excluded;
+    if( options.isNull() )
+      options = carto::Object::value( carto::PropertySet() );
+    else
+    {
+      if( options->getProperty( "aims_excluded_formats", excluded ) )
+      {
+        std::vector<std::string>::const_iterator i, e = excluded.end();
+        for( i=excluded.begin(); i!=e; ++i )
+          if( *i == "SOMAIO_VOLUMES" )
+            // we are in the excluded formats: give up
+            return false;
+      }
+    }
+    excluded.push_back( "SOMAIO_VOLUMES" );
+    options->setProperty( "aims_excluded_formats", excluded );
+
+    carto::Reader<carto::Volume<T> > r( filename );
+    r.setAllocatorContext( context );
+    r.setOptions( options );
+    carto::Volume<T> *cvol =  r.read();
+    if( cvol )
+    {
+      vol = carto::rc_ptr<carto::Volume<T> >( cvol );
+      return true;
+    }
+    return false;
+  }
+
+
+  template<typename T>
+  AimsData<T>* SomaIOAimsDataFormat<T>::read( const std::string & filename, 
+                     const carto::AllocatorContext & context, 
+                     carto::Object options )
+  {
+    // avoid recursive call through aims / carto IO redirections
+    std::vector<std::string> excluded;
+    if( options.isNull() )
+      options = carto::Object::value( carto::PropertySet() );
+    else
+    {
+      if( options->getProperty( "aims_excluded_formats", excluded ) )
+      {
+        std::vector<std::string>::const_iterator i, e = excluded.end();
+        for( i=excluded.begin(); i!=e; ++i )
+          if( *i == "SOMAIO_VOLUMES" )
+            // we are in the excluded formats: give up
+            return 0;
+      }
+    }
+    excluded.push_back( "SOMAIO_VOLUMES" );
+    options->setProperty( "aims_excluded_formats", excluded );
+
+    carto::Reader<carto::Volume<T> > r( filename );
+    r.setAllocatorContext( context );
+    r.setOptions( options );
+    carto::Volume<T> *cvol =  r.read();
+    if( cvol )
+      return new AimsData<T>( carto::rc_ptr<carto::Volume<T> >( cvol ) );
+    return 0;
+  }
+
+
+  template<class T>
+  bool SomaIOAimsDataFormat<T>::write( const std::string & filename, 
+                            const AimsData<T> & vol, carto::Object options )
+  {
+    std::cout << "SomaIOAimsDataFormat::read\n";
+    // avoid recursive call through aims / carto IO redirections
+    std::vector<std::string> excluded;
+    if( options.isNull() )
+      options = carto::Object::value( carto::PropertySet() );
+    else
+    {
+      if( options->getProperty( "aims_excluded_formats", excluded ) )
+      {
+        std::vector<std::string>::const_iterator i, e = excluded.end();
+        for( i=excluded.begin(); i!=e; ++i )
+          if( *i == "SOMAIO_VOLUMES" )
+            // we are in the excluded formats: give up
+            return false;
+      }
+    }
+    excluded.push_back( "SOMAIO_VOLUMES" );
+    options->setProperty( "aims_excluded_formats", excluded );
+
+    carto::Writer<carto::Volume<T> > w( filename );
+    return w.write( *vol.volume(), options );
   }
 
 }

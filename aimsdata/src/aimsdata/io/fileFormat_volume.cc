@@ -269,6 +269,14 @@ template<> void FileFormatDictionary<AimsData<int8_t> >::registerBaseFormats()
   vf = new VolumeFormat<int8_t>( "DICOM" );
   FileFormatDictionary<Volume<int8_t> >::registerFormat( "DICOM", vf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<int8_t>  *df = new SomaIOAimsDataFormat<int8_t>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vf = new VolumeFormat<int8_t>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<int8_t> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                          vf, ext );
 }
 
 template<> void FileFormatDictionary<AimsData<uint8_t> >::registerBaseFormats()
@@ -306,6 +314,14 @@ template<> void FileFormatDictionary<AimsData<uint8_t> >::registerBaseFormats()
   vf = new VolumeFormat<uint8_t>( "DICOM" );
   FileFormatDictionary<Volume<uint8_t> >::registerFormat( "DICOM", vf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<uint8_t>  *df = new SomaIOAimsDataFormat<uint8_t>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vf = new VolumeFormat<uint8_t>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<uint8_t> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                          vf, ext );
 }
 
 
@@ -344,6 +360,14 @@ template<> void FileFormatDictionary<AimsData<char> >::registerBaseFormats()
   vf = new VolumeFormat<char>( "DICOM" );
   FileFormatDictionary<Volume<char> >::registerFormat( "DICOM", vf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<char>  *df = new SomaIOAimsDataFormat<char>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vf = new VolumeFormat<char>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<char> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                       vf, ext );
 }
 #endif
 
@@ -403,10 +427,18 @@ template<> void FileFormatDictionary<AimsData<int16_t> >::registerBaseFormats()
   vvf = new VolumeFormat<int16_t>( "DICOM" );
   FileFormatDictionary<Volume<int16_t> >::registerFormat( "DICOM", vvf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<int16_t>  *df = new SomaIOAimsDataFormat<int16_t>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<int16_t>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<int16_t> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                          vvf, ext );
 }
 
 template<> void 
-FileFormatDictionary<AimsData<ushort> >::registerBaseFormats()
+FileFormatDictionary<AimsData<uint16_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
   ext.push_back( "ima" );
@@ -432,6 +464,14 @@ FileFormatDictionary<AimsData<ushort> >::registerBaseFormats()
   vvf = new VolumeFormat<uint16_t>( "DICOM" );
   FileFormatDictionary<Volume<uint16_t> >::registerFormat( "DICOM", vvf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<uint16_t>  *df = new SomaIOAimsDataFormat<uint16_t>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<uint16_t>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<uint16_t> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                           vvf, ext );
 }
 
 template<> void FileFormatDictionary<AimsData<int32_t> >::registerBaseFormats()
@@ -460,6 +500,14 @@ template<> void FileFormatDictionary<AimsData<int32_t> >::registerBaseFormats()
   vvf = new VolumeFormat<int32_t>( "DICOM" );
   FileFormatDictionary<Volume<int32_t> >::registerFormat( "DICOM", vvf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<int32_t>  *df = new SomaIOAimsDataFormat<int32_t>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<int32_t>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<int32_t> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                          vvf, ext );
 }
 
 template<> void 
@@ -489,6 +537,14 @@ FileFormatDictionary<AimsData<uint32_t> >::registerBaseFormats()
   vvf = new VolumeFormat<uint32_t>( "DICOM" );
   FileFormatDictionary<Volume<uint32_t> >::registerFormat( "DICOM", vvf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<uint32_t>  *df = new SomaIOAimsDataFormat<uint32_t>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<uint32_t>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<uint32_t> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                           vvf, ext );
 }
 
 template<> void FileFormatDictionary<AimsData<int64_t> >::registerBaseFormats()
@@ -517,6 +573,14 @@ template<> void FileFormatDictionary<AimsData<int64_t> >::registerBaseFormats()
   vvf = new VolumeFormat<int64_t>( "DICOM" );
   FileFormatDictionary<Volume<int64_t> >::registerFormat( "DIcOM", vvf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<int64_t>  *df = new SomaIOAimsDataFormat<int64_t>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<int64_t>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<int64_t> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                          vvf, ext );
 }
 
 template<> 
@@ -550,6 +614,14 @@ void FileFormatDictionary<AimsData<uint64_t> >::registerBaseFormats()
   FileFormatDictionary<Volume<uint64_t> >::registerFormat( "DICOM", vvf, 
                                                                 ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<uint64_t>  *df = new SomaIOAimsDataFormat<uint64_t>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<uint64_t>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<uint64_t> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                           vvf, ext );
 }
 
 template<> void FileFormatDictionary<AimsData<float> >::registerBaseFormats()
@@ -599,6 +671,14 @@ template<> void FileFormatDictionary<AimsData<float> >::registerBaseFormats()
   vvf = new VolumeFormat<float>( "DICOM" );
   FileFormatDictionary<Volume<float> >::registerFormat( "DICOM", vvf, ext );
 #endif
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<float>  *df = new SomaIOAimsDataFormat<float>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<float>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<float> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                        vvf, ext );
 }
 
 template<> void 
@@ -636,6 +716,14 @@ FileFormatDictionary<AimsData<double> >::registerBaseFormats()
   vvf = new VolumeFormat<double>( "IMASPARSE" );
   FileFormatDictionary<Volume<double> >::registerFormat( "IMASPARSE", vvf, 
                                                          ext );
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<double>  *df = new SomaIOAimsDataFormat<double>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<double>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<double> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                         vvf, ext );
 }
 
 template<> void 
@@ -648,6 +736,14 @@ FileFormatDictionary<AimsData<cfloat> >::registerBaseFormats()
   registerFormat( "GIS", gf, ext );
   VolumeFormat<cfloat>	*vvf = new VolumeFormat<cfloat>( "GIS" );
   FileFormatDictionary<Volume<cfloat> >::registerFormat( "GIS", vvf, ext );
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<cfloat>  *df = new SomaIOAimsDataFormat<cfloat>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<cfloat>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<cfloat> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                         vvf, ext );
 }
 
 template<> void 
@@ -660,6 +756,14 @@ FileFormatDictionary<AimsData<cdouble> >::registerBaseFormats()
   registerFormat( "GIS", gf, ext );
   VolumeFormat<cdouble>	*vvf = new VolumeFormat<cdouble>( "GIS" );
   FileFormatDictionary<Volume<cdouble> >::registerFormat( "GIS", vvf, ext );
+
+  ext.clear();
+  ext.push_back( "" );
+  SomaIOAimsDataFormat<cdouble>  *df = new SomaIOAimsDataFormat<cdouble>;
+  registerFormat( "SOMAIO_VOLUMES", df, ext );
+  vvf = new VolumeFormat<cdouble>( "SOMAIO_VOLUMES" );
+  FileFormatDictionary<Volume<cdouble> >::registerFormat( "SOMAIO_VOLUMES", 
+                                                          vvf, ext );
 }
 
 }

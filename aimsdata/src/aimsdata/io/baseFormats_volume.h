@@ -83,9 +83,27 @@ namespace aims
   template <typename T>
   class ImasVolFormat : public FileFormat<AimsData<T> >
   {
+  public:
     virtual bool read( const std::string & filename, AimsData<T> & obj,
                        const carto::AllocatorContext & context,
                        carto::Object options );
+    virtual bool write( const std::string & filename,
+                        const AimsData<T> & obj,
+                        carto::Object options = carto::none() );
+  };
+
+
+  template <typename T>
+  class SomaIOAimsDataFormat : public FileFormat<AimsData<T> >
+  {
+  public:
+    virtual ~SomaIOAimsDataFormat();
+    virtual bool read( const std::string & filename, AimsData<T> & obj,
+                       const carto::AllocatorContext & context,
+                       carto::Object options );
+    virtual AimsData<T>* read( const std::string & filename, 
+                     const carto::AllocatorContext & context, 
+                     carto::Object options );
     virtual bool write( const std::string & filename,
                         const AimsData<T> & obj,
                         carto::Object options = carto::none() );
