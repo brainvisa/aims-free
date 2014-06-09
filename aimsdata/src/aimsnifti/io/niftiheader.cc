@@ -50,25 +50,25 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-NiftiHeader::NiftiHeader( int dimx, int dimy, int dimz, int dimt, float sx, 
-		      float sy, float sz, float st, const string & name ) :
-  PythonHeader(), 
+NiftiHeader::NiftiHeader( int dimx, int dimy, int dimz, int dimt, float sx,
+                      float sy, float sz, float st, const string & name ) :
+  PythonHeader(),
   _name( name )
 {
-  vector<int>	dims( 4 );
+  vector<int>        dims( 4 );
   dims[0] = dimx;
   dims[1] = dimy;
   dims[2] = dimz;
   dims[3] = dimt;
   setProperty( "volume_dimension", dims );
-  
-  vector<float>	vs( 4 );
+
+  vector<float>        vs( 4 );
   vs[0] = sx;
   vs[1] = sy;
   vs[2] = sz;
   vs[3] = st;
   setProperty( "voxel_size", vs );
-  
+
   _nim = NULL;
   /*
   _nim = nifti_simple_init_nim( );
@@ -95,7 +95,7 @@ NiftiHeader::NiftiHeader( int dimx, int dimy, int dimz, int dimt, float sx,
 
 
 NiftiHeader::NiftiHeader( const string & name ) :
-  PythonHeader(), 
+  PythonHeader(),
   _name( name )
 {
   _nim = NULL;
@@ -135,7 +135,7 @@ string NiftiHeader::basename() const
 
 set<string> NiftiHeader::extensions() const
 {
-  set<string>	exts;
+  set<string>        exts;
   exts.insert( ".hdr" );
   exts.insert( ".hdr.gz" );
   exts.insert( ".img" );
@@ -220,42 +220,42 @@ float NiftiHeader::sizeT() const
 namespace {
   string NiftiReferential(int xform_code)
   {
-	switch ( xform_code ){
+        switch ( xform_code ){
       case NIFTI_XFORM_UNKNOWN:
-    	// No transformation is provided, this should never be returned.
-    	return "Arbitrary coordinates";
-    	break;
-	  case NIFTI_XFORM_SCANNER_ANAT: 
-    	return "Scanner-based anatomical coordinates";
-    	break;
-	  case NIFTI_XFORM_ALIGNED_ANAT: 
-    	return "Coordinates aligned to another file or to anatomical truth";
-    	break;
-	  case NIFTI_XFORM_TALAIRACH: 
-    	return StandardReferentials::talairachReferential();
-    	break;
-	  case NIFTI_XFORM_MNI_152: 
-    	return StandardReferentials::mniTemplateReferential();
-    	break;
-	  default: 
-    	// A transformation is provided but its target referential is unknown.
-    	return "Unknown transformation";
-    	break;
-	}
+           // No transformation is provided, this should never be returned.
+           return "Arbitrary coordinates";
+           break;
+          case NIFTI_XFORM_SCANNER_ANAT:
+           return "Scanner-based anatomical coordinates";
+           break;
+          case NIFTI_XFORM_ALIGNED_ANAT:
+           return "Coordinates aligned to another file or to anatomical truth";
+           break;
+          case NIFTI_XFORM_TALAIRACH:
+           return StandardReferentials::talairachReferential();
+           break;
+          case NIFTI_XFORM_MNI_152:
+           return StandardReferentials::mniTemplateReferential();
+           break;
+          default:
+           // A transformation is provided but its target referential is unknown.
+           return "Unknown transformation";
+           break;
+        }
   }
-  
+
   int NiftiReferential(string ref)
   {
     if (ref == "Scanner-based anatomical coordinates")
-	  return NIFTI_XFORM_SCANNER_ANAT;
-	else if (ref == "Coordinates aligned to another file or to anatomical truth")
-	  return NIFTI_XFORM_ALIGNED_ANAT;
-	else if (ref == StandardReferentials::acPcReferential())
+          return NIFTI_XFORM_SCANNER_ANAT;
+        else if (ref == "Coordinates aligned to another file or to anatomical truth")
+          return NIFTI_XFORM_ALIGNED_ANAT;
+        else if (ref == StandardReferentials::acPcReferential())
       return NIFTI_XFORM_TALAIRACH;
-	else if (ref == StandardReferentials::mniTemplateReferential())
-	  return NIFTI_XFORM_MNI_152;
-	else
-	  return NIFTI_XFORM_UNKNOWN;
+        else if (ref == StandardReferentials::mniTemplateReferential())
+          return NIFTI_XFORM_MNI_152;
+        else
+          return NIFTI_XFORM_UNKNOWN;
   }
 }
 
@@ -265,12 +265,12 @@ bool NiftiHeader::read()
   string      fileName( _name );
 
   // niftilib's global debug level for status reporting
-  nifti_set_debug_level( 0 ); 
-  
+  nifti_set_debug_level( 0 );
+
   // check that given file is NIFTI and not ANALYZE
   if( is_nifti_file(fileName.c_str()) <= 0 )
     throw wrong_format_error( fileName );
-  
+
   // read header using niftilib without loading data
   nim = nifti_image_read( fileName.c_str() , 0 );
   if( !nim )
@@ -282,7 +282,7 @@ bool NiftiHeader::read()
   /***********************/
   /* DATA DIMENSIONALITY */
   /***********************/
-  
+
   /* Dimensions of grid array */
   vector< int > dims;
   for (int i=1;i<=nim->ndim;++i)
@@ -291,7 +291,7 @@ bool NiftiHeader::read()
     dims.push_back( 1 );
   // space: x,y,z, time: t and 3 extra
   // dim[8]: dim[0]=ndim, dim[1]=nx, etc.
-  
+
   /* Grid spacings */
   vector< float > vs;
   vs.reserve( nim->ndim >= 3 ? nim->ndim : 3 );
@@ -301,14 +301,14 @@ bool NiftiHeader::read()
     vs.push_back( 1. );
   // space: x,y,z, time: t and 3 extra; index 0 is used for qfac
   // pixdim[8]: pixdim[1]=dx, etc.
-  
+
   /****************/
   /* TYPE OF DATA */
   /****************/
-  
+
   /* Type of data in voxels: DT_* code */
   string type;
-  short	 sz = 0;
+  short         sz = 0;
   switch( nim->datatype )
   {
   case DT_INT8:
@@ -357,14 +357,14 @@ bool NiftiHeader::read()
   }
   setProperty( "disk_data_type", type );
   setProperty( "bits_allocated", (int) sz );
-  
+
   if ( sz != nim->nbyper * 8 )
     cerr << "Number of bytes per voxel doesn't match datatype in NIFTI file \"" << fileName << "\"" << endl;
 
   /******************************/
   /* DATA SCALING and DATA_TYPE */
   /******************************/
-  
+
   /* Scaling parameter: slope, intercept */
   string dt = type;
   if( (nim->scl_slope != 0.0)
@@ -416,11 +416,11 @@ bool NiftiHeader::read()
   /**********************************************/
   vector< string > referentials;
   vector< vector < float > > transformations;
-  
+
   /* Transformation from NIFTI (i,j,k) indexes to AIMS (x,y,z) indexes */
   /* NIFTI transformations are +x=Right, +y=Anterior, +z=Superior while */
   /* AIMS coordinates are +x=Left, +y=Posterior, +z=Inferior */
-  
+
   int idir, jdir, kdir;
   vector< float > storage_to_memory( 16 );
   if ( nim->qform_code > NIFTI_XFORM_UNKNOWN ) {
@@ -439,73 +439,73 @@ bool NiftiHeader::read()
   if (idir == NIFTI_R2L || idir == NIFTI_L2R)
   {
     storage_to_memory[0] = (idir == NIFTI_R2L) ? 1 : -1;
-	storage_to_memory[3] = (idir == NIFTI_R2L) ? 0 : nim->dim[1]-1;
-	if (jdir == NIFTI_A2P || jdir == NIFTI_P2A)
-	{
-	  // simplest case: no axe swapping
-	  // i -> x, j -> y, k -> z
-	  storage_to_memory[5]  = (jdir == NIFTI_A2P) ? 1 : -1;
-	  storage_to_memory[7]  = (jdir == NIFTI_A2P) ? 0 : nim->dim[2]-1;
-	  storage_to_memory[10] = (kdir == NIFTI_S2I) ? 1 : -1;
-	  storage_to_memory[11] = (kdir == NIFTI_S2I) ? 0 : nim->dim[3]-1;
-	}
-	else
-	{
-	  // i -> x, j -> z, k -> y
-	  storage_to_memory[6]  = (kdir == NIFTI_A2P) ? 1 : -1;
-	  storage_to_memory[7]  = (kdir == NIFTI_A2P) ? 0 : nim->dim[3]-1;
-	  storage_to_memory[9]  = (jdir == NIFTI_S2I) ? 1 : -1;
-	  storage_to_memory[11] = (jdir == NIFTI_S2I) ? 0 : nim->dim[2]-1;
-	}
+        storage_to_memory[3] = (idir == NIFTI_R2L) ? 0 : nim->dim[1]-1;
+        if (jdir == NIFTI_A2P || jdir == NIFTI_P2A)
+        {
+          // simplest case: no axe swapping
+          // i -> x, j -> y, k -> z
+          storage_to_memory[5]  = (jdir == NIFTI_A2P) ? 1 : -1;
+          storage_to_memory[7]  = (jdir == NIFTI_A2P) ? 0 : nim->dim[2]-1;
+          storage_to_memory[10] = (kdir == NIFTI_S2I) ? 1 : -1;
+          storage_to_memory[11] = (kdir == NIFTI_S2I) ? 0 : nim->dim[3]-1;
+        }
+        else
+        {
+          // i -> x, j -> z, k -> y
+          storage_to_memory[6]  = (kdir == NIFTI_A2P) ? 1 : -1;
+          storage_to_memory[7]  = (kdir == NIFTI_A2P) ? 0 : nim->dim[3]-1;
+          storage_to_memory[9]  = (jdir == NIFTI_S2I) ? 1 : -1;
+          storage_to_memory[11] = (jdir == NIFTI_S2I) ? 0 : nim->dim[2]-1;
+        }
   }
   else
   {
     if (jdir == NIFTI_A2P || jdir == NIFTI_P2A)
-	{
-	  // i -> z, j -> y, k -> x
-	  storage_to_memory[2]  = (kdir == NIFTI_R2L) ? 1 : -1;
-	  storage_to_memory[3]  = (kdir == NIFTI_R2L) ? 0 : nim->dim[3]-1;
-	  storage_to_memory[5]  = (jdir == NIFTI_A2P) ? 1 : -1;
-	  storage_to_memory[7]  = (jdir == NIFTI_A2P) ? 0 : nim->dim[2]-1;
-	  storage_to_memory[8]  = (idir == NIFTI_S2I) ? 1 : -1;
-	  storage_to_memory[11] = (idir == NIFTI_S2I) ? 0 : nim->dim[1]-1;
-	}
-	else
-	{
-	  if (kdir == NIFTI_S2I || kdir == NIFTI_I2S)
-	  {
-	    // i -> y, j -> x, k -> z
-		storage_to_memory[1]  = (jdir == NIFTI_R2L) ? 1 : -1;
-	    storage_to_memory[3]  = (jdir == NIFTI_R2L) ? 0 : nim->dim[2]-1;
-	    storage_to_memory[4]  = (idir == NIFTI_A2P) ? 1 : -1;
-	    storage_to_memory[7]  = (idir == NIFTI_A2P) ? 0 : nim->dim[1]-1;
-		storage_to_memory[10] = (kdir == NIFTI_S2I) ? 1 : -1;
-	    storage_to_memory[11] = (kdir == NIFTI_S2I) ? 0 : nim->dim[3]-1;
+        {
+          // i -> z, j -> y, k -> x
+          storage_to_memory[2]  = (kdir == NIFTI_R2L) ? 1 : -1;
+          storage_to_memory[3]  = (kdir == NIFTI_R2L) ? 0 : nim->dim[3]-1;
+          storage_to_memory[5]  = (jdir == NIFTI_A2P) ? 1 : -1;
+          storage_to_memory[7]  = (jdir == NIFTI_A2P) ? 0 : nim->dim[2]-1;
+          storage_to_memory[8]  = (idir == NIFTI_S2I) ? 1 : -1;
+          storage_to_memory[11] = (idir == NIFTI_S2I) ? 0 : nim->dim[1]-1;
+        }
+        else
+        {
+          if (kdir == NIFTI_S2I || kdir == NIFTI_I2S)
+          {
+            // i -> y, j -> x, k -> z
+                storage_to_memory[1]  = (jdir == NIFTI_R2L) ? 1 : -1;
+            storage_to_memory[3]  = (jdir == NIFTI_R2L) ? 0 : nim->dim[2]-1;
+            storage_to_memory[4]  = (idir == NIFTI_A2P) ? 1 : -1;
+            storage_to_memory[7]  = (idir == NIFTI_A2P) ? 0 : nim->dim[1]-1;
+                storage_to_memory[10] = (kdir == NIFTI_S2I) ? 1 : -1;
+            storage_to_memory[11] = (kdir == NIFTI_S2I) ? 0 : nim->dim[3]-1;
       }
-	  else
-	  {
-	    if (idir == NIFTI_A2P || idir == NIFTI_P2A)
-		{
-		  // i -> y, j -> z, k-> x
-		  storage_to_memory[2]  = (kdir == NIFTI_R2L) ? 1 : -1;
-	      storage_to_memory[3]  = (kdir == NIFTI_R2L) ? 0 : nim->dim[3]-1;
-		  storage_to_memory[4]  = (idir == NIFTI_A2P) ? 1 : -1;
-	      storage_to_memory[7]  = (idir == NIFTI_A2P) ? 0 : nim->dim[1]-1;
-		  storage_to_memory[9]  = (jdir == NIFTI_S2I) ? 1 : -1;
-	      storage_to_memory[11] = (jdir == NIFTI_S2I) ? 0 : nim->dim[2]-1;
-		}
-		else
-		{
-		  // i -> z, j -> x, k -> y
-		  storage_to_memory[1]  = (jdir == NIFTI_R2L) ? 1 : -1;
-	      storage_to_memory[3]  = (jdir == NIFTI_R2L) ? 0 : nim->dim[2]-1;
-		  storage_to_memory[6]  = (kdir == NIFTI_A2P) ? 1 : -1;
-	      storage_to_memory[7]  = (kdir == NIFTI_A2P) ? 0 : nim->dim[3]-1;
-		  storage_to_memory[8]  = (idir == NIFTI_S2I) ? 1 : -1;
-	      storage_to_memory[11] = (idir == NIFTI_S2I) ? 0 : nim->dim[1]-1;
-		}
-	  }
-	}
+          else
+          {
+            if (idir == NIFTI_A2P || idir == NIFTI_P2A)
+                {
+                  // i -> y, j -> z, k-> x
+                  storage_to_memory[2]  = (kdir == NIFTI_R2L) ? 1 : -1;
+              storage_to_memory[3]  = (kdir == NIFTI_R2L) ? 0 : nim->dim[3]-1;
+                  storage_to_memory[4]  = (idir == NIFTI_A2P) ? 1 : -1;
+              storage_to_memory[7]  = (idir == NIFTI_A2P) ? 0 : nim->dim[1]-1;
+                  storage_to_memory[9]  = (jdir == NIFTI_S2I) ? 1 : -1;
+              storage_to_memory[11] = (jdir == NIFTI_S2I) ? 0 : nim->dim[2]-1;
+                }
+                else
+                {
+                  // i -> z, j -> x, k -> y
+                  storage_to_memory[1]  = (jdir == NIFTI_R2L) ? 1 : -1;
+              storage_to_memory[3]  = (jdir == NIFTI_R2L) ? 0 : nim->dim[2]-1;
+                  storage_to_memory[6]  = (kdir == NIFTI_A2P) ? 1 : -1;
+              storage_to_memory[7]  = (kdir == NIFTI_A2P) ? 0 : nim->dim[3]-1;
+                  storage_to_memory[8]  = (idir == NIFTI_S2I) ? 1 : -1;
+              storage_to_memory[11] = (idir == NIFTI_S2I) ? 0 : nim->dim[1]-1;
+                }
+          }
+        }
   }
   Motion s2m( storage_to_memory );
   setProperty( "storage_to_memory", s2m.toVector() );
@@ -564,26 +564,26 @@ bool NiftiHeader::read()
     sto_xyz = sto_xyz  * ( vsM * s2m ).inverse();
     transformations.push_back( sto_xyz.toVector() );
   }
-  
+
   setProperty( "referentials", referentials );
   setProperty( "transformations", transformations );
 
   /********************************************/
   /* UNITS OF SPATIAL AND TEMPORAL DIMENSIONS */
   /********************************************/
-  
+
   /* Time coordinate offset */
   setProperty( "toffset", (float) nim->toffset );
-  
+
   /* dx,dy,dz units: NIFTI_UNITS_* code */
   setProperty( "xyz_units", (int) nim->xyz_units );
   /* dt       units: NIFTI_UNITS_* code */
   setProperty( "time_units", (int) nim->time_units );
-  
+
   /********************************/
   /* INTERPRETATION OF VOXEL DATA */
   /********************************/
-  
+
   if( nim->intent_code > NIFTI_INTENT_NONE ) {
     /* Statistic type (or something) */
     setProperty( "intent_code", (int) nim->intent_code );
@@ -598,16 +598,16 @@ bool NiftiHeader::read()
   /**********************************/
   /* DESCRIPTION AND AUXILIARY FILE */
   /**********************************/
-  
+
   /* Optional text to describe dataset */
   setProperty( "descrip", string( nim->descrip ) );
   /* Auxiliary filename */
   setProperty( "aux_file", string( nim->aux_file ) );
-  
+
   /*************************************/
   /* INTERNAL HEADERS (TO BE REMOVED)? */
   /*************************************/
-  
+
   /* Header filename (.hdr or .nii) */
   /* setProperty( "fname", string( nim->fname ) ); */
   /* Image filename  (.img or .nii) */
@@ -620,25 +620,25 @@ bool NiftiHeader::read()
   //setProperty( "byteorder", (int) nim->byteorder );
   /* ANALYZE (0), NIFTI-1 1 file (1), NIFTI-1 2 files (2), NIFTI-ASCII (3) */
   setProperty( "nifti_type", (int) nim->nifti_type );
-  
+
   /*********************/
   /* HEADER EXTENSIONS */
   /*********************/
 
   if( nim->num_ext ) {
     vector < int > extcode( nim->num_ext );
-	vector < vector < char > > extdata( nim->num_ext );
+        vector < vector < char > > extdata( nim->num_ext );
     cerr << "NIFTI-1 extensions are present in header but will be ignored: \"" << fileName << "\"" << endl;
     for (int i=0; i<nim->num_ext;++i) {
-	  extcode.push_back(nim->ext_list[i].ecode);
-	  vector < char > edata(nim->ext_list[i].esize);
-	  memcpy(&edata[0],nim->ext_list[i].edata,nim->ext_list[i].esize);
-	  extdata.push_back(edata);
-	}
-	setProperty( "extcode", extcode );
-	setProperty( "extdata", extdata );
+          extcode.push_back(nim->ext_list[i].ecode);
+          vector < char > edata(nim->ext_list[i].esize);
+          memcpy(&edata[0],nim->ext_list[i].edata,nim->ext_list[i].esize);
+          extdata.push_back(edata);
+        }
+        setProperty( "extcode", extcode );
+        setProperty( "extdata", extdata );
   }
-  
+
   /* free the nifti structure and assign private one to current*/
   freeNiftiStruct();
   _nim = nim;
@@ -675,9 +675,9 @@ bool NiftiHeader::fillNim( bool allow4d )
 {
   /* initialization of a nifti image struct */
   nifti_image *nim = nifti_simple_init_nim( );
-  
-  // cf nifti_convert_nim2nhdr() to know which fields need to be filled 
-  
+
+  // cf nifti_convert_nim2nhdr() to know which fields need to be filled
+
   /***********************/
   /* DATA DIMENSIONALITY */
   /***********************/
@@ -717,7 +717,7 @@ bool NiftiHeader::fillNim( bool allow4d )
                  short( rint( fabs( df[2] ) ) ), dims[3] );
   // fix s2m dims if needed (happens in case image dims have changed)
   s2m.setTranslation( -s2m.translation() ); // erase initial translation
-  Point3df p = s2m.transform( Point3df( tdims[0], tdims[1], tdims[2] ) ), 
+  Point3df p = s2m.transform( Point3df( tdims[0], tdims[1], tdims[2] ) ),
     pp( 0. );
   if( p[0] < 0 )
     pp[0] = -p[0] - 1;
@@ -726,7 +726,7 @@ bool NiftiHeader::fillNim( bool allow4d )
   if( p[2] < 0 )
     pp[2] = -p[2] - 1;
   s2m.setTranslation( pp );
-  
+
   nim->ndim = nim->dim[0] = dims.size();
   nim->dim[1] = tdims[0];
   nim->dim[2] = tdims[1];
@@ -743,17 +743,17 @@ bool NiftiHeader::fillNim( bool allow4d )
   nim->nw = nim->dim[7];
   if(nim->dim[dims.size()] == 1)
     nim->ndim = nim->dim[0] -= 1;
-  
+
   if (!allow4d)
   {
     nim->nt = nim->nu = nim->nv = nim->nw = 1;
     nim->dim[4] = nim->dim[5] = nim->dim[6] = nim->dim[7] = 1;
-	nim->ndim = nim->dim[0] = (dims.size() >= 4)? 3 : dims.size();
+    nim->ndim = nim->dim[0] = (dims.size() >= 4)? 3 : dims.size();
   }
-  
+
   nim->nvox =  nim->nx * nim->ny * nim->nz
              * nim->nt * nim->nu * nim->nv * nim->nw ;
-  
+
   /* Grid spacings */
   vector< float > vs;
   getProperty( "voxel_size", vs );
@@ -761,7 +761,7 @@ bool NiftiHeader::fillNim( bool allow4d )
     vs.push_back( 1. );
   df = m2s.transform( Point3df( vs[0], vs[1], vs[2] ) )
       - m2s.transform( Point3df( 0, 0, 0 ) );
-  Point4df tvs = Point4df( fabs( df[0] ), fabs( df[1] ), fabs( df[2] ), 
+  Point4df tvs = Point4df( fabs( df[0] ), fabs( df[1] ), fabs( df[2] ),
         vs[3] );
 
   nim->pixdim[0] = 0;
@@ -778,11 +778,11 @@ bool NiftiHeader::fillNim( bool allow4d )
   nim->du = nim->pixdim[5];
   nim->dv = nim->pixdim[6];
   nim->dw = nim->pixdim[7];
-  
+
   if (!allow4d)
   {
     nim->dt = nim->du = nim->dv = nim->dw = 1.0;
-	nim->pixdim[4] = nim->pixdim[5] = nim->pixdim[6] = nim->pixdim[7] = 1.0;
+    nim->pixdim[4] = nim->pixdim[5] = nim->pixdim[6] = nim->pixdim[7] = 1.0;
   }
 
   /****************/
@@ -846,59 +846,59 @@ bool NiftiHeader::fillNim( bool allow4d )
     nim->cal_min = cal_min;
   else
     nim->cal_min = 0.0;
-  
+
   float cal_max = 0.0;
   if( getProperty( "cal_max", cal_max ) )
     nim->cal_max = cal_max;
   else
     nim->cal_max = 0.0;
-  
+
   /*************************************************/
   /* MRI-SPECIFIC SPATIAL AND TEMPORAL INFORMATION */
   /*************************************************/
-  
+
   int freq_dim = 0;
   if( getProperty( "freq_dim", freq_dim ) )
     nim->freq_dim = freq_dim;
   else
     nim->freq_dim = 0;
-  
+
   int phase_dim = 0;
   if( getProperty( "phase_dim", phase_dim ) )
     nim->phase_dim = phase_dim;
   else
     nim->phase_dim = 0;
-	
+
   int slice_dim = 0;
   if( getProperty( "slice_dim", slice_dim ) )
     nim->slice_dim = slice_dim;
   else
     nim->slice_dim = 0; /* TODO */ // should be nim->nz ?
-  
+
   int slice_code = 0;
   if( getProperty( "slice_code", slice_code ) )
     nim->slice_code = slice_code;
   else
     nim->slice_code = 0;
-  
+
   int slice_start = 0;
   if( getProperty( "slice_start", slice_start ) )
     nim->slice_start = slice_start;
   else
-    nim->slice_start = 0; 
-	
+    nim->slice_start = 0;
+
   int slice_end = 0;
   if( getProperty( "slice_end", slice_end ) )
     nim->slice_end = slice_end;
   else
     nim->slice_end = 0;
-  
+
   float slice_duration = 0.0;
   if( getProperty( "slice_duration", slice_duration ) )
     nim->slice_duration = slice_duration;
   else
     nim->slice_duration = 0.0; /* TODO */ // should be tr?
-  
+
    /**********************************************/
   /* 3D IMAGE ORIENTATION AND LOCATION IN SPACE */
   /**********************************************/
@@ -1093,66 +1093,66 @@ bool NiftiHeader::fillNim( bool allow4d )
   /********************************************/
   /* UNITS OF SPATIAL AND TEMPORAL DIMENSIONS */
   /********************************************/
-  
+
   float toffset = 0.0;
   if( getProperty( "toffset", toffset ) )
     nim->toffset = toffset;
   else
     nim->toffset = 0.0;
-  
+
   int xyz_units = 0;
   if( getProperty( "xyz_units", xyz_units ) )
     nim->xyz_units = xyz_units;
   else
     nim->xyz_units = 0;
-  
+
   int time_units = 0;
   if( getProperty( "time_units", time_units ) )
     nim->time_units = time_units;
   else
     nim->time_units = 0;
-  
+
   /********************************/
   /* INTERPRETATION OF VOXEL DATA */
   /********************************/
-  
+
   int intent_code = NIFTI_INTENT_NONE;
   if( getProperty( "intent_code", intent_code ) )
     nim->intent_code = intent_code;
   else
     nim->intent_code = NIFTI_INTENT_NONE;
-  
+
   float intent_p1 = 0.0;
   if( getProperty( "intent_p1", intent_p1 ) )
     nim->intent_p1 = intent_p1;
   else
     nim->intent_p1 = 0.0;
-  
+
   float intent_p2 = 0.0;
   if( getProperty( "intent_p2", intent_p2 ) )
     nim->intent_p2 = intent_p2;
   else
     nim->intent_p2 = 0.0;
-	
+
   float intent_p3 = 0.0;
   if( getProperty( "intent_p3", intent_p3 ) )
     nim->intent_p3 = intent_p3;
   else
     nim->intent_p3 = 0.0;
-  
+
   string intent_name;
   if( getProperty( "intent_name", intent_name ) )
   {
     nim->intent_name[15] = '\0';
     strncpy(nim->intent_name, intent_name.c_str(), 15);
   }
-  else 
+  else
     nim->intent_name[0] = '\0';
-  
+
   /**********************************/
   /* DESCRIPTION AND AUXILIARY FILE */
   /**********************************/
-  
+
   strcpy(nim->descrip, "Written with A.I.M.S.\0"); /* yeah baby! */
   string descrip;
   if( getProperty( "descrip", descrip ) )
@@ -1160,22 +1160,22 @@ bool NiftiHeader::fillNim( bool allow4d )
     nim->descrip[79] = '\0';
     strncpy(nim->descrip, descrip.c_str(), 79);
   }
-  else 
+  else
     nim->descrip[0] = '\0';
-  
+
   string aux_file;
   if( getProperty( "aux_file", aux_file ) )
   {
     nim->aux_file[23] = '\0';
     strncpy(nim->aux_file, aux_file.c_str(), 23);
   }
-  else 
-    nim->aux_file[0] = '\0'; 
-  
+  else
+    nim->aux_file[0] = '\0';
+
   /*********************/
   /* HEADER EXTENSIONS */
   /*********************/
-  
+
   vector < int > extcode;
   if( getProperty( "extcode", extcode ) )
   {
@@ -1193,13 +1193,13 @@ bool NiftiHeader::fillNim( bool allow4d )
 
   /* Set Nifti type from given extension (default is Nifti 1 file) */
   string Extension = extension( );
-  if((Extension == ".hdr") || (Extension == ".hdr.gz") || 
+  if((Extension == ".hdr") || (Extension == ".hdr.gz") ||
      (Extension == ".img") || (Extension == ".img.gz"))
     nim->nifti_type = NIFTI_FTYPE_NIFTI1_2;
   else
     nim->nifti_type = NIFTI_FTYPE_NIFTI1_1;
   /* set fname, iname, byteorder from filenames or nifti_type */
-  nifti_set_filenames( nim, _name.c_str(), 0, 1 ); 
+  nifti_set_filenames( nim, _name.c_str(), 0, 1 );
   /* set nifti_type from  */
   //nifti_set_type_from_names( nim );
   /* set iname_offset from nifti_type */

@@ -33,10 +33,8 @@
 
 //--- plugin -----------------------------------------------------------------
 #include <cartodata/plugin/niftiplugin.h>
-#include <soma-io/image/nifti1imagereader_d.h>
-#if 0
-#include <soma-io/image/niftiimagewriter_d.h>
-#endif
+#include <soma-io/image/nifti1imagereader.h>
+#include <soma-io/image/nifti1imagewriter.h>
 //--- cartodata --------------------------------------------------------------
 #include <cartodata/io/volumeformatreader_d.h>
 #include <cartodata/io/volumeformatwriter_d.h>
@@ -44,9 +42,6 @@
 #include <soma-io/io/formatdictionary_d.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/type/types.h>
-// #include <cartobase/type/voxelrgb.h>
-// #include <cartobase/type/voxelrgba.h>
-// #include <cartobase/type/voxelhsv.h>
 //--- system -----------------------------------------------------------------
 #include <vector>
 #include <string>
@@ -57,7 +52,8 @@ using namespace soma;
 using namespace carto;
 using namespace std;
 
-namespace carto {
+namespace carto
+{
   class VoxelRGB;
   class VoxelRGBA;
   class VoxelHSV;
@@ -237,7 +233,6 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "NIFTI-1", rfr_cd, exts );
 */
 
-#if 0
     ////////////////////////////////////////////////////////////////////////////
     ////                           W R I T E R                              ////
     ////////////////////////////////////////////////////////////////////////////
@@ -249,6 +244,8 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     //--- INT ------------------------------------------------------------------
 
     VolumeFormatWriter<int8_t> *vfw8 = new VolumeFormatWriter<int8_t>;
+    rc_ptr<ImageWriter<int8_t> > toto;
+    toto.reset( new Nifti1ImageWriter<int8_t> );
     vfw8->attach( rc_ptr<ImageWriter<int8_t> >( new Nifti1ImageWriter<int8_t> ) );
     FormatDictionary<Volume<int8_t> >::registerFormat( "NIFTI-1", vfw8, exts );
 
@@ -390,8 +387,6 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     rfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new Nifti1ImageWriter<std::complex<double> > ) );
     FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "NIFTI-1", rfw_cd, exts );
 */
-
-#endif
 }
 
 

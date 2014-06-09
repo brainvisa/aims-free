@@ -354,7 +354,7 @@ namespace aims
   bool SomaIOAimsDataFormat<T>::write( const std::string & filename, 
                             const AimsData<T> & vol, carto::Object options )
   {
-    std::cout << "SomaIOAimsDataFormat::read\n";
+    std::cout << "SomaIOAimsDataFormat::write\n";
     // avoid recursive call through aims / carto IO redirections
     std::vector<std::string> excluded;
     if( options.isNull() )
