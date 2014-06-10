@@ -5,3 +5,7 @@ ADD_SUBDIRECTORY( cartonifti )
 IF( OPENSLIDE_FOUND )
   ADD_SUBDIRECTORY( cartoopenslide )
 ENDIF()
+IF( DCMTK_FOUND )
+  ADD_SUBDIRECTORY( cartodicom )
+ENDIF()
+
