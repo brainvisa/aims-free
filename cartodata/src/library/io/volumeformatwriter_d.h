@@ -191,15 +191,17 @@ namespace soma
     if( !parent1 && !obj.allocatorContext().isAllocated() )
       options->setProperty( "unallocated", true );
     if( !dsi->header() )
+    {
       dsi->header() = carto::Object::value( carto::PropertySet() );
+      dsi->header()->copyProperties(
+        carto::Object::reference( obj.header() ) );
+    }
     dsi->header()->setProperty( "sizeX", size[ 0 ] );
     dsi->header()->setProperty( "sizeY", size[ 1 ] );
     dsi->header()->setProperty( "sizeZ", size[ 2 ] );
     dsi->header()->setProperty( "sizeT", size[ 3 ] );
-    try {
-      const carto::PropertySet & ps = obj.header();
-      dsi->header()->setProperty( "voxel_size", ps.getProperty( "voxel_size" ) );
-    } catch( ... ) {
+    if( !dsi->header()->hasProperty( "voxel_size" ) )
+    {
       std::vector<float> voxel_size( 4, 1. );
       dsi->header()->setProperty( "voxel_size", voxel_size );
     }
