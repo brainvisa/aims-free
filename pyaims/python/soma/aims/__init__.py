@@ -1060,6 +1060,20 @@ def Volume( *args, **kwargs ):
   return _createObject( 'Volume', default_dtype='FLOAT', *args, **kwargs )
 
 
+def VolumeView( volume, position, size ):
+  '''Create a view in an existing volume. The returned volume is of the same type and shares data with its "parent".
+  '''
+  volclass = type( volume )
+  if volclass.__name__.startswith( 'Volume_' ):
+    return volclass( volume, position, size )
+  elif volclass.__name__.startswith( 'AimsData_' ):
+    volclass = type( volume.volume() )
+    return volclass( volume.volume(), position, size )
+  elif volclass.__name__.startswith( 'rc_ptr_' ):
+    volclass = type( volume.get() )
+    return volclass( volume, position, size )
+
+
 def AimsData( *args, **kwargs ):
   '''Create an instance of the older Aims volumes (AimsData_<type>) from a type
   parameter, which may be specified as the dtype keyword argument, or as one of
