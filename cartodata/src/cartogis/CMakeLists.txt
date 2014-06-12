@@ -10,7 +10,7 @@ if( NOT APPLE )
 else()
   set_property( TARGET cartogis PROPERTY OUTPUT_NAME cartogis.${${PROJECT_NAME}_VERSION} )
 endif()
-target_link_libraries( cartogis cartodata )
+target_link_libraries( cartogis cartodata somagis )
 BRAINVISA_INSTALL( TARGETS cartogis
                    DESTINATION lib
                    COMPONENT ${PROJECT_NAME} )

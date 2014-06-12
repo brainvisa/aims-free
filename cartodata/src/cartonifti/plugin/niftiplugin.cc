@@ -36,10 +36,10 @@
 #include <soma-io/image/nifti1imagereader.h>
 #include <soma-io/image/nifti1imagewriter.h>
 //--- cartodata --------------------------------------------------------------
-#include <cartodata/io/volumeformatreader_d.h>
-#include <cartodata/io/volumeformatwriter_d.h>
+#include <cartodata/io/volumeformatreader.h>
+#include <cartodata/io/volumeformatwriter.h>
 //--- soma-io ----------------------------------------------------------------
-#include <soma-io/io/formatdictionary_d.h>
+#include <soma-io/io/formatdictionary.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/type/types.h>
 //--- system -----------------------------------------------------------------

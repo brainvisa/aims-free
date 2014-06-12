@@ -33,11 +33,11 @@
 
 //--- plugin -------------------------------------------------------------------
 #include <cartodata/plugin/osplugin.h>
-#include <soma-io/image/osimagereader_d.h>
+#include <soma-io/image/osimagereader.h>
 //--- cartodata ----------------------------------------------------------------
-#include <cartodata/io/volumeformatreader_d.h>
+#include <cartodata/io/volumeformatreader.h>
 //--- soma-io ------------------------------------------------------------------
-#include <soma-io/io/formatdictionary_d.h>
+#include <soma-io/io/formatdictionary.h>
 //--- cartobase ----------------------------------------------------------------
 #include <cartobase/type/types.h>
 // #include <cartobase/type/voxelrgba.h>

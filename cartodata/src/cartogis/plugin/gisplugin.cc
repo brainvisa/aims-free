@@ -33,13 +33,13 @@
 
 //--- plugin -----------------------------------------------------------------
 #include <cartodata/plugin/gisplugin.h>
-#include <soma-io/image/gisimagereader_d.h>
-#include <soma-io/image/gisimagewriter_d.h>
+#include <soma-io/image/gisimagereader.h>
+#include <soma-io/image/gisimagewriter.h>
 //--- cartodata --------------------------------------------------------------
-#include <cartodata/io/volumeformatreader_d.h>
-#include <cartodata/io/volumeformatwriter_d.h>
+#include <cartodata/io/volumeformatreader.h>
+#include <cartodata/io/volumeformatwriter.h>
 //--- soma-io ----------------------------------------------------------------
-#include <soma-io/io/formatdictionary_d.h>
+#include <soma-io/io/formatdictionary.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/type/types.h>
 // #include <cartobase/type/voxelrgb.h>
