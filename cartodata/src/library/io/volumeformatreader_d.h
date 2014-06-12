@@ -41,8 +41,8 @@
 //--- soma io ----------------------------------------------------------------
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasourceinfo/datasourceinfo.h>
-#include <soma-io/datasource/datasource.h> 
-#include <soma-io/datasource/filedatasource.h> 
+#include <soma-io/datasource/datasource.h>
+#include <soma-io/datasource/filedatasource.h>
 #include <soma-io/image/imagereader.h>
 #include <soma-io/reader/formatreader.h>
 #include <soma-io/allocator/allocator.h>
@@ -79,7 +79,7 @@ namespace soma
   //==========================================================================
   //   U R I   O P T I O N S
   //==========================================================================
-  
+
   /**** setupAndRead *********************************************************
    * Usually it is not necessary to redefine this method, but in the case of
    * volumes the use of partial reading or borders triggers multiple volume
@@ -87,8 +87,8 @@ namespace soma
    * managed in VolumeUtilIO and setupAndRead/createAndRead must call them
    * when needed.
    **************************************************************************/
-  template <typename T> void 
-  VolumeFormatReader<T>::setupAndRead( Volume<T> & obj, 
+  template <typename T> void
+  VolumeFormatReader<T>::setupAndRead( Volume<T> & obj,
                                        carto::rc_ptr<DataSourceInfo> dsi,
                                        const AllocatorContext & context,
                                        carto::Object options )
@@ -136,7 +136,7 @@ namespace soma
   /**** createAndRead ********************************************************
    * See setupAndRead
    **************************************************************************/
-  template <typename T> Volume<T>* 
+  template <typename T> Volume<T>*
   VolumeFormatReader<T>::createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
                                         const AllocatorContext & context,
                                         carto::Object options )
@@ -192,9 +192,9 @@ namespace soma
    * declared in FormatReader but only defined here.
    **************************************************************************/
   template <typename T>
-  void VolumeFormatReader<T>::read( carto::Volume<T> & obj, 
-                                    carto::rc_ptr<DataSourceInfo> dsi, 
-                                    const AllocatorContext & context, 
+  void VolumeFormatReader<T>::read( carto::Volume<T> & obj,
+                                    carto::rc_ptr<DataSourceInfo> dsi,
+                                    const AllocatorContext & context,
                                     carto::Object options )
   {
     localMsg( "Reading object ( " + dsi->url() + " )" );
@@ -227,13 +227,13 @@ namespace soma
 
     //=== test for memory mapping ============================================
     localMsg( "checking for memory mapping..." );
-    if( obj.allocatorContext().allocatorType() 
+    if( obj.allocatorContext().allocatorType()
         == AllocatorStrategy::ReadOnlyMap )
     {
       localMsg( " -> Memory Mapping : nothing to read." );
       return;
     }
-    
+
     //=== volume is a view ? =================================================
     localMsg( "checking if object is a view..." );
     carto::Volume<T>* parent1( 0 );
@@ -257,7 +257,7 @@ namespace soma
       localMsg( std::string(" -> grandparent exists and ")
                 + ( parent2->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
-    
+
     //=== view size ==========================================================
     localMsg( "reading view size..." );
     std::vector<int>  viewsize( 4, 0 );
@@ -270,14 +270,14 @@ namespace soma
               + carto::toString( viewsize[ 1 ] ) + ", "
               + carto::toString( viewsize[ 2 ] ) + ", "
               + carto::toString( viewsize[ 3 ] ) + " )" );
-    
+
     //=== multiresolution level ==============================================
     localMsg( "reading multiresolution level..." );
     int level = 0;
     if( options->hasProperty( "resolution_level" ) )
       options->getProperty( "resolution_level", level );
     localMsg( " -> level to read : " + carto::toString( level ) );
-    
+
     //=== full volume size ===================================================
     localMsg( "reading full volume size..." );
     std::vector<int>  imagesize( 4, 0 );
@@ -341,7 +341,7 @@ namespace soma
               + carto::toString( imagesize[ 1 ] ) + ", "
               + carto::toString( imagesize[ 2 ] ) + ", "
               + carto::toString( imagesize[ 3 ] ) + " )" );
-    
+
     //=== allocated volume size ==============================================
     localMsg( "reading allocated size..." );
     std::vector<int> allocsize( 4, 0 );
@@ -366,8 +366,11 @@ namespace soma
               + carto::toString( allocsize[ 3 ] ) + " )" );
 
     //=== strides ============================================================
-    // TODO - for now we don't use them
-    std::vector<int> strides;
+    std::vector<long> strides(4);
+    strides[0] = &obj(1,0,0,0) - &obj(0,0,0,0);
+    strides[1] = &obj(0,1,0,0) - &obj(0,0,0,0);
+    strides[2] = &obj(0,0,1,0) - &obj(0,0,0,0);
+    strides[3] = &obj(0,0,0,1) - &obj(0,0,0,0);
 
     //=== region's origine ===================================================
     localMsg( "reading view position in reference to full volume..." );
@@ -406,11 +409,14 @@ namespace soma
     //=== reading volume =====================================================
     localMsg( "reading volume..." );
     int y, z, t;
-    if ( !withborders ) {
+    if( !withborders || dsi->capabilities().canHandleStrides() )
+    {
       // we can read the volume/region into a contiguous buffer
-      _imr->read( ( T * ) &obj(0,0,0,0), *dsi, pos, 
+      _imr->read( ( T * ) &obj(0,0,0,0), *dsi, pos,
                   viewsize, strides, options );
-    } else {
+    }
+    else
+    {
       // we are in a "border" context. The volume/region must be read
       // line by line
       std::vector<int> posline ( pos );
@@ -422,12 +428,12 @@ namespace soma
             posline[ 1 ] = pos[ 1 ] + y;
             posline[ 2 ] = pos[ 2 ] + z;
             posline[ 3 ] = pos[ 3 ] + t;
-            _imr->read( ( T * ) &obj(0,y,z,t), *dsi, posline, 
+            _imr->read( ( T * ) &obj(0,y,z,t), *dsi, posline,
                         sizeline, strides, options );
           }
     }
-    
-    // we reset at 0 the ImageReader's members (sizes, binary, ...) so that 
+
+    // we reset at 0 the ImageReader's members (sizes, binary, ...) so that
     // they are recomputed at the next reading.
     _imr->resetParams();
   }
@@ -449,7 +455,7 @@ namespace soma
   {
     _imr = imr;
   }
-  
+
 //////////////////////////////////////////////////////////////////////////////
 ////            V O L U M E R E F F O R M A T R E A D E R                 ////
 //////////////////////////////////////////////////////////////////////////////
@@ -468,8 +474,8 @@ namespace soma
   /*** setupAndRead **********************************************************
    * see VolumeFormatReader
    **************************************************************************/
-  template <typename T> void 
-  VolumeRefFormatReader<T>::setupAndRead( VolumeRef<T> & obj, 
+  template <typename T> void
+  VolumeRefFormatReader<T>::setupAndRead( VolumeRef<T> & obj,
                                        carto::rc_ptr<DataSourceInfo> dsi,
                                        const AllocatorContext & context,
                                        carto::Object options )
@@ -517,7 +523,7 @@ namespace soma
   /*** createAndRead *********************************************************
    * see VolumeFormatReader
    **************************************************************************/
-  template <typename T> VolumeRef<T>* 
+  template <typename T> VolumeRef<T>*
   VolumeRefFormatReader<T>::createAndRead( carto::rc_ptr<DataSourceInfo> dsi,
                                         const AllocatorContext & context,
                                         carto::Object options )
@@ -536,16 +542,16 @@ namespace soma
    * declared in FormatReader but only defined here.
    **************************************************************************/
   template <typename T>
-  void VolumeRefFormatReader<T>::read( carto::VolumeRef<T> & obj, 
-                                       carto::rc_ptr<DataSourceInfo> dsi, 
-                                       const AllocatorContext & context, 
+  void VolumeRefFormatReader<T>::read( carto::VolumeRef<T> & obj,
+                                       carto::rc_ptr<DataSourceInfo> dsi,
+                                       const AllocatorContext & context,
                                        carto::Object options )
   {
     VolumeFormatReader<T> vrf;
     vrf.attach( _imr );
     vrf.read( *obj, dsi, context, options );
   }
-  
+
   /***************************************************************************
    * Attaching a specific ImageReader to the FormatReader
    **************************************************************************/
