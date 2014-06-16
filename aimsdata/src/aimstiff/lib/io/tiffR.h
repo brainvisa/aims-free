@@ -189,8 +189,8 @@ namespace aims
   template<class T>
   inline
   void TiffReader<T>::readFrame( AimsData<T> & data, 
-				 const std::string & name, int zframe, 
-				 unsigned tframe )
+                                 const std::string & name, int zframe, 
+                                 unsigned tframe )
   {
     int tiled, stripSize, rowsPerStrip, i, s;
     uint zmin, zmax;

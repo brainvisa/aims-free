@@ -27,6 +27,7 @@
 #include <aims/resampling/minsubsampling.h>
 #include <aims/resampling/maxsubsampling.h>
 #include <aims/resampling/majoritysubsampling.h>
+#include <aims/resampling/sumsubsampling.h>
 
 using namespace std;
 using namespace carto;
@@ -140,7 +141,15 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
              );
     break;
     
-    // Median computation
+    // Sum computation
+    case 6:
+      return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
+                new SumSubSampling<VoxelType>( win_size_x, 
+                                               win_size_y,
+                                               win_size_z )
+             );
+    break;
+    
     default:
       throw std::invalid_argument( "Invalid subsampling type: " + carto::toString(type) );
       break;
@@ -198,7 +207,7 @@ int main( int argc, const char **argv )
         application.addOption( rxy, "-n", "Number of voxels to aggregate in X and Y directions [default = 2]"
                                          "(this option is obsolete and only provided for compatibility purpose)", true);
         application.addOption( type, "-t", "Subsampling type : med[ian], mea[n], min[imum], max[imum], \n"
-                                           "maj[ority], dif[ference] [default = median]. Modes may also\n"
+                                           "maj[ority], dif[ference], sum [default = median]. Modes may also\n"
                                            "be specified as order number: 0=median, 1=mean, etc.", true);
         application.addOption( fileout, "-o", "Output subsampled image" );
         
@@ -235,7 +244,8 @@ int main( int argc, const char **argv )
         types[ "dif" ] = 5;
         types[ "difference" ] = 5;
         types[ "5" ] = 5;
-
+        types[ "sum" ] = 6;
+        types[ "6" ] = 6;
         map<string, unsigned>::iterator it = types.find( type );
           
         if( it == types.end() )

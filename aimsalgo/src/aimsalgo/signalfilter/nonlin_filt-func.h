@@ -204,5 +204,29 @@ T ExtremaDifferenceFilterFunc<T>::doit( AimsData<T>& data ) const
   return aims::absdiff<T>(max, min);
 }
 
+
+template <class T>
+class SumFilterFunc : public NonLinFilterFunc< T >
+{
+  public:
+    SumFilterFunc () { }
+    virtual ~SumFilterFunc () { }
+
+    T doit( AimsData<T>& data ) const; 
+};
+ 
+template <class T> inline
+T SumFilterFunc<T>::doit( AimsData<T>& data ) const
+{
+  T sum = (T)0;
+  typename AimsData<T>::iterator it;
+
+  // Goes through the data and sum values
+  for (it = data.begin(); it != data.end(); it++)
+    sum += (*it);
+  
+  return sum;
+}
+
 #endif
 
