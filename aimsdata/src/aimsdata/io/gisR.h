@@ -91,7 +91,7 @@ namespace aims
     GisHeader	*hdr = new GisHeader( _name );
     try
     {
-      hdr->read();
+      hdr->read( options );
     }
     catch( std::exception & e )
     {

@@ -161,8 +161,20 @@ namespace aims
       reader.setOptions( options );
       reader.setAllocatorContext( allocatorContext() );
       const carto::Object & n = carto::none();
+#ifdef AIMS_DEBUG_IO
+    std::cout << "0. Try soma::Reader ..." << std::endl ;
+#endif
       return reader.read( obj, n, 1, 3 );
-    } catch( ... ) {}
+    }
+#ifdef AIMS_DEBUG_IO
+    catch( std::exception & e )
+    {
+      std::cout << "0. soma::Reader failed: " << e.what() << std::endl;
+    }
+#else
+    catch( ... ) {}
+#endif
+
     // if it failed, continue with aims reader.
 
 #ifdef AIMS_DEBUG_IO

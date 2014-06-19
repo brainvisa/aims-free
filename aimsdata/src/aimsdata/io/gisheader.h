@@ -120,9 +120,9 @@ namespace aims
     virtual std::set<std::string> extensions() const;
 
     /// Read the header
-    void read();
+    void read( carto::Object options = carto::none() );
     /// Write the header
-    void write();
+    void write( carto::Object options = carto::none() );
     //@}
 
   private:

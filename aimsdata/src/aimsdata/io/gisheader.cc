@@ -101,12 +101,12 @@ static void inVecHelper( GisHeader & object, const string& semantic,
 }
 
 
-void GisHeader::read()
+void GisHeader::read( carto::Object options )
 {
   // cout << "GisHGeader::read - new style: " << _name << endl;
   rc_ptr<DataSource> ds( new FileDataSource( _name ) );
   DataSourceInfoLoader dsil;
-  DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ) );
+  DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ), options );
   Object h = dsi.header();
   if( h.isNone() )
     dsil.launchException();
@@ -143,7 +143,7 @@ void GisHeader::read()
 
 
 
-void GisHeader::write()
+void GisHeader::write( carto::Object )
 {
   string fileName = removeExtension(_name) + ".dim";
   ofstream os( fileName.c_str() );
