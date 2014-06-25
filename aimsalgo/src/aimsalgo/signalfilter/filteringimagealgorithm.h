@@ -52,11 +52,11 @@ namespace aims {
   /**
    *  \brief aims::singlechannel::FilteringImageAlgorithm is the algorithm to apply filter on single channel image.
    *
-   *  The \c aims::FilteringImageAlgorithm class is used 
+   *  The \c aims::FilteringImageAlgorithm class is used
    *  to filter single channel image.
    *  \tparam VoxelType type of voxel that will be filtered.
    *  \tparam FilteringFunctionType type of filtering to use (\c MeanFilterFunc, \c MedianFilterFunc, \c MinFilterFunc, \c MaxFilterFunc, ... ).
-   * 
+   *
    *  \sa MeanFilterFunc, MedianFilterFunc, MinFilterFunc, MaxFilterFunc, MajorityFilterFunc
    */
     template< class VoxelType, class FilteringFunctionType >
@@ -75,7 +75,7 @@ namespace aims {
         virtual const Point4d getOutputImageDimensions( const Point4d & dims ) {
           return dims;
         }
-        
+
         /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageVoxelSize method implementation.
         /// Returns the output voxel size based on an input voxel size.
         /// \param Point4d voxelsize voxel size of the input image.
@@ -83,7 +83,7 @@ namespace aims {
         virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) {
           return voxelsize;
         }
-        
+
         /// \c ImageAlgorithmInterface<VoxelType>::execute method implementation.
         /// Execute the filtering algorithm on the input image using the \c FilteringFunctionType
         /// \param in Input image to filter
@@ -100,30 +100,29 @@ namespace aims {
 
     template< class VoxelType, class FilteringFunctionType >
     inline
-    FilteringImageAlgorithm<VoxelType, FilteringFunctionType>::FilteringImageAlgorithm( int sx, int sy, int sz ) 
-          : _win_size_x(sx), 
+    FilteringImageAlgorithm<VoxelType, FilteringFunctionType>::FilteringImageAlgorithm( int sx, int sy, int sz )
+          : _win_size_x(sx),
             _win_size_y(sy),
             _win_size_z(sz)
     {
     }
-        
+
     template< class VoxelType, class FilteringFunctionType >
     inline
-    AimsData< VoxelType > FilteringImageAlgorithm<VoxelType, FilteringFunctionType>::execute( const AimsData<VoxelType>& in ) {
-
+    AimsData< VoxelType > FilteringImageAlgorithm<VoxelType, FilteringFunctionType>::execute( const AimsData<VoxelType>& in )
+    {
       int x, y, z, t, nx, ny, nz, n;
       short dx, dy, dz, bz, by, bx;
 
       dx = _win_size_x / 2 ;
       dy = _win_size_y / 2 ;
       dz = _win_size_z / 2 ;
-    
-      AimsData<VoxelType> out(in.dimX(), in.dimY(), in.dimZ(), in.dimT());
-      out = in.clone();
+
+      AimsData<VoxelType> out = in.clone();
       if( in.header() ) {
         out.setHeader( in.header()->cloneHeader( true ) );
       }
-    
+
       // Update mask dims since it is always an odd number
       _win_size_x = dx * 2 + 1;
       _win_size_y = dy * 2 + 1;
@@ -131,18 +130,18 @@ namespace aims {
 
       if (carto::verbose)
         std::cout << "Window size : " << carto::toString( Point3d( _win_size_x,
-                                                                  _win_size_y, 
+                                                                  _win_size_y,
                                                                   _win_size_z ) ) << std::endl;
-                                                                
+
       AimsData<VoxelType> win( _win_size_x * _win_size_y * _win_size_z );
       bz = (out.dimZ() - dz);
       by = (out.dimY() - dy);
       bx = (out.dimX() - dx);
-      
+
       aims::Progression progress(out.dimT() * out.dimZ() * out.dimY() - 1);
       if (carto::verbose)
         std::cout << "Filtering progress: ";
-        
+
       for ( t = 0; t < in.dimT(); ++t )
         for ( z = dz; z < bz; ++z )
           for ( y = dy; y < by; ++y, ++progress ) {
@@ -163,54 +162,54 @@ namespace aims {
                 for ( ny = -dy; ny <= dy; ++ny )
                   for ( nx = -dx; nx <= dx; ++nx, ++n )
                     win(n) = in(nx + x, ny + y, nz + z, t);
-                  
+
               out( x, y, z, t ) = _func.doit( win );
             }
           }
-        
+
       if (carto::verbose)
         std::cout << std::endl;
 
       return( out );
 
     }
-        
+
   }
 
   /**
    *  \brief aims::FilteringImageAlgorithm is the algorithm to apply filter on image.
    *
-   *  The \c aims::FilteringImageAlgorithm class is used 
+   *  The \c aims::FilteringImageAlgorithm class is used
    *  to filter both single and multi channel image.
    */
   template <class VoxelType, class FilterType>
   class FilteringImageAlgorithm :
-    public ImageAlgorithm<VoxelType,  
+    public ImageAlgorithm<VoxelType,
               aims::singlechannel::FilteringImageAlgorithm<
-                typename carto::DataTypeTraits<VoxelType>::ChannelType, 
-                FilterType > 
+                typename carto::DataTypeTraits<VoxelType>::ChannelType,
+                FilterType >
               >
   {
     public:
-      typedef ImageAlgorithm<VoxelType,  
+      typedef ImageAlgorithm<VoxelType,
               aims::singlechannel::FilteringImageAlgorithm<
-                typename carto::DataTypeTraits<VoxelType>::ChannelType, 
-                FilterType > 
+                typename carto::DataTypeTraits<VoxelType>::ChannelType,
+                FilterType >
               >
               ImageAlgorithmType;
-              
-      typedef typename ImageAlgorithmType::SingleChannelImageAlgorithmType 
+
+      typedef typename ImageAlgorithmType::SingleChannelImageAlgorithmType
               SingleChannelImageAlgorithmType;
-              
+
       typedef FilterType FilterFuncType;
-      
+
       FilteringImageAlgorithm( int sx = 3, int sy = 3, int sz = 1 )
         : ImageAlgorithmType(
             SingleChannelImageAlgorithmType(sx, sy, sz)
           )
       {
       }
-      
+
       virtual ~FilteringImageAlgorithm() { }
   };
 

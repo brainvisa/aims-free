@@ -54,7 +54,7 @@ class NonLinFilterFunc
     NonLinFilterFunc() { }
     virtual ~NonLinFilterFunc() { }
 
-    virtual T doit( AimsData<T>& data ) const = 0;    
+    virtual T doit( AimsData<T>& data ) const = 0;
 };
 
 
@@ -65,10 +65,10 @@ class MaxFilterFunc : public NonLinFilterFunc< T >
     MaxFilterFunc () { }
     virtual ~MaxFilterFunc () { }
 
-    T doit( AimsData<T>& data ) const; 
-  
+    T doit( AimsData<T>& data ) const;
+
 };
- 
+
 template <class T> inline
 T MaxFilterFunc<T>::doit( AimsData<T>& data ) const
 {
@@ -83,10 +83,10 @@ class MedianFilterFunc : public NonLinFilterFunc< T >
     MedianFilterFunc () { }
     virtual ~MedianFilterFunc () { }
 
-    T doit( AimsData<T>& data ) const; 
-  
+    T doit( AimsData<T>& data ) const;
+
 };
- 
+
 template <class T> inline
 T MedianFilterFunc<T>::doit( AimsData<T>& data ) const
 {
@@ -102,10 +102,10 @@ class MinFilterFunc : public NonLinFilterFunc< T >
     MinFilterFunc () { }
     virtual ~MinFilterFunc () { }
 
-    T doit( AimsData<T>& data ) const; 
-  
+    T doit( AimsData<T>& data ) const;
+
 };
- 
+
 template <class T> inline
 T MinFilterFunc<T>::doit( AimsData<T>& data ) const
 {
@@ -119,15 +119,15 @@ class MeanFilterFunc : public NonLinFilterFunc< T >
     MeanFilterFunc () { }
     virtual ~MeanFilterFunc () { }
 
-    T doit( AimsData<T>& data ) const; 
-  
+    T doit( AimsData<T>& data ) const;
+
 };
- 
+
 template <class T> inline
 T MeanFilterFunc<T>::doit( AimsData<T>& data ) const
 {
   // Sum is declared as double to avoid overflow issue
-  double sum = 0.; 
+  double sum = 0.;
   uint32_t count = 0;
   typename AimsData<T>::iterator it;
 
@@ -193,9 +193,9 @@ class ExtremaDifferenceFilterFunc : public NonLinFilterFunc< T >
     ExtremaDifferenceFilterFunc () { }
     virtual ~ExtremaDifferenceFilterFunc () { }
 
-    T doit( AimsData<T>& data ) const; 
+    T doit( AimsData<T>& data ) const;
 };
- 
+
 template <class T> inline
 T ExtremaDifferenceFilterFunc<T>::doit( AimsData<T>& data ) const
 {
@@ -212,9 +212,9 @@ class SumFilterFunc : public NonLinFilterFunc< T >
     SumFilterFunc () { }
     virtual ~SumFilterFunc () { }
 
-    T doit( AimsData<T>& data ) const; 
+    T doit( AimsData<T>& data ) const;
 };
- 
+
 template <class T> inline
 T SumFilterFunc<T>::doit( AimsData<T>& data ) const
 {
@@ -224,7 +224,7 @@ T SumFilterFunc<T>::doit( AimsData<T>& data ) const
   // Goes through the data and sum values
   for (it = data.begin(); it != data.end(); it++)
     sum += (*it);
-  
+
   return sum;
 }
 

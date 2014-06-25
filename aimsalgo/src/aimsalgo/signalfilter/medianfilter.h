@@ -42,17 +42,18 @@
 template <class VoxelType>
 class MedianSmoothing : 
   public aims::FilteringImageAlgorithm<VoxelType, 
-           MedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
-    
+           MedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> >
+{
+
   public:
     typedef aims::FilteringImageAlgorithm<VoxelType, 
            MedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
            FilteringImageAlgorithmType;
-           
+
     typedef typename FilteringImageAlgorithmType::FilterFuncType 
            FilterFuncType;
-    
-    MedianSmoothing( int sx = 3, int sy = 3, int sz = 1 )
+
+    MedianSmoothing( int sx = 3, int sy = 3, int sz = 3 )
       : FilteringImageAlgorithmType(sx, sy, sz) {}
 };
 

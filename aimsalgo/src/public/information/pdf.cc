@@ -36,7 +36,6 @@
 #include <aims/math/mathelem.h>
 #include <aims/data/data.h>
 #include <aims/bucket/bucketMap.h>
-#include <aims/resampling/sampler.h>
 #include <iostream>
 #include <list>
 #include <math.h>

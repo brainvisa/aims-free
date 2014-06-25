@@ -34,80 +34,103 @@
 
 #include <cstdlib>
 #include <aims/data/data_g.h>
-#include <aims/io/io_g.h>
+#include <aims/io/reader.h>
 #include <aims/io/writer.h> 
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getoptProcess.h>
 #include <aims/math/math_g.h>
 #include <aims/utility/utility_g.h>
 #include <aims/signalfilter/medianfilter.h>
 
-using namespace aims;   
-using namespace std;   
-
-BEGIN_USAGE(usage)
-  "---------------------------------------------------------------------------",
-  "AimsMedianSmoothing   -i[nput]   < input file Image SHORT >                ",
-  "                      -o[output] < fileout (NO EXTENSION) >                ",
-  "                      --dx[dimemsion]  < X direction >   [default=3]       ",
-  "                      --dy[dimemsion]  < Y direction >   [default=3]       ",
-  "                      --dz[dimemsion]  < Z direction >   [default=1]       ",
-  "                      [-h[elp]]                                            ",
-  "                                                                           ",
-  "---------------------------------------------------------------------------",
-  "                       Filtering inline command                            ",
-  "---------------------------------------------------------------------------",
-  "                                                                           ",
-  "        dx, dy, dz    : mask form   (2/3 dimensions)   ODD NUMBER !!!      ",
-  "                                                                           ",
-  "---------------------------------------------------------------------------",
-END_USAGE
+using namespace aims;
+using namespace carto;
+using namespace std;
 
 
-void Usage( void )
+class Algo : public Process
 {
-  AimsUsage( usage );
+public:
+  Algo();
+
+  template<typename T>
+  static bool doit( Process &, const string &, Finder & );
+
+  string        fileout;
+  Point3d t;
+};
+
+
+Algo::Algo()
+  : Process(), t( 3, 3, 3 )
+{
+  registerProcessType( "Volume", "S8", &doit<int8_t> );
+  registerProcessType( "Volume", "U8", &doit<uint8_t> );
+  registerProcessType( "Volume", "S16", &doit<int16_t> );
+  registerProcessType( "Volume", "U16", &doit<uint16_t> );
+  registerProcessType( "Volume", "S32", &doit<int32_t> );
+  registerProcessType( "Volume", "U32", &doit<uint32_t> );
+  registerProcessType( "Volume", "FLOAT", &doit<float> );
+  registerProcessType( "Volume", "DOUBLE", &doit<double> );
+  registerProcessType( "Volume", "RGB", &doit<AimsRGB> );
+  registerProcessType( "Volume", "RGBA", &doit<AimsRGBA> );
 }
 
-int main( int argc, char **argv )
+
+template<typename T> bool
+Algo::doit( Process & p, const string & fname, Finder & f )
 {
-  char *fileIn = NULL, *fileOut = NULL;
-  Point3d t=3;
+  Algo                & mp = (Algo &) p;
+  Reader<AimsData<T> > reader( fname );
+  AimsData<T> in, out;
+  reader.read( in );
 
-  AimsOption opt[] = {
-  { 'h',"help"             ,AIMS_OPT_FLAG                    ,( void* )Usage  ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input"            ,AIMS_OPT_STRING,&fileIn          ,0               ,1},
-  { 'o',"output"           ,AIMS_OPT_STRING,&fileOut         ,0               ,1},
-  { ' ',"dx"               ,AIMS_OPT_SHORT ,&t[0]            ,0               ,0},
-  { ' ',"dy"               ,AIMS_OPT_SHORT ,&t[1]            ,0               ,0},
-  { ' ',"dz"               ,AIMS_OPT_SHORT ,&t[2]            ,0               ,0},
-  { 0  ,0                  ,AIMS_OPT_END                     ,0               ,0                 ,0}};
-
-  AimsParseOptions( &argc, argv, opt, usage ); 
-    
-  //  Lecture image
-  AimsData<short> in, out;
-  try
-    {
-      Reader<AimsData<short> > dataR( fileIn ); 
-      dataR.read( in );
-    }
-  catch( exception & e )
-    {
-      cerr << e.what() << endl;
-      exit( 1 );
-    }   
-     
-  MedianSmoothing< short > ms(t[0], t[1], (in.dimZ() > 1 ? t[2] : 1) ); 
+  MedianSmoothing<T> ms( mp.t[0], mp.t[1], (in.dimZ() > 1 ? mp.t[2] : 1) );
   out = ms.doit( in );
 
-  // 
-  //   Ecriture de l'image des voxels sélectionnés
-  //
   out.setHeader( in.header()->cloneHeader() );
-  Writer< AimsData<short> > dataWtr( fileOut );
-  dataWtr << out;
-
-
-  return EXIT_SUCCESS; 
+  Writer<AimsData<T> > writer( mp.fileout );
+  writer.write( out );
 }
- 
+
+
+int main( int argc, const char **argv )
+{
+  Algo proc;
+  ProcessInput filein( proc );
+  string fileout;
+
+  AimsApplication       app( argc, argv, "Median filter smoothing" );
+
+  app.addOption( filein, "-i", "source volume" );
+  app.addOption( fileout, "-o", "destination volume" );
+  app.addOption( proc.t[0], "-x", "X size of the filter mask [default=3]",
+                 true );
+  app.addOption( proc.t[1], "-y", "Y size of the filter mask [default=3]",
+                 true );
+  app.addOption( proc.t[2], "-z", "Z size of the filter mask [default=3]",
+                 true );
+
+  app.alias( "--input", "-i" );
+  app.alias( "--output", "-o" );
+  app.alias( "--dx", "-x" );
+  app.alias( "--dy", "-y" );
+  app.alias( "--dz", "-z" );
+
+  try
+  {
+    app.initialize();
+
+    proc.fileout = fileout;
+    proc.execute( filein.filename );
+
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
+}
+
