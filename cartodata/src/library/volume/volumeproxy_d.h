@@ -69,6 +69,15 @@ namespace carto
       _sizeT( other._sizeT )
   {
 
+    if( header().hasProperty( "sizeX" ) )
+      header().removeProperty( "sizeX" );
+    if( header().hasProperty( "sizeY" ) )
+      header().removeProperty( "sizeY" );
+    if( header().hasProperty( "sizeZ" ) )
+      header().removeProperty( "sizeZ" );
+    if( header().hasProperty( "sizeT" ) )
+      header().removeProperty( "sizeT" );
+
     header().addBuiltinProperty( "sizeX", _sizeX );
     header().addBuiltinProperty( "sizeY", _sizeY );
     header().addBuiltinProperty( "sizeZ", _sizeZ );
