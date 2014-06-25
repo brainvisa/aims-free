@@ -16,7 +16,9 @@
 %Include meshresampler_BucketMap_VOID.sip
 %Include meshinterpoler.sip
 %Include resampler_S16.sip
+%Include resampler_U16.sip
 %Include resampler_FLOAT.sip
+%Include resampler_DOUBLE.sip
 %Include sampler_FLOAT_3.sip
 %Include samplable_objects.sip
 %Include polynomial_FLOAT_3.sip
