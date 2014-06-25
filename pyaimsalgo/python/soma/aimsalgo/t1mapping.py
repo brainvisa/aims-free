@@ -228,9 +228,16 @@ def t1mapping_VFA(flip_angle_factor, GRE_data):
     cA1 = np.cos(A1)
     cA2 = np.cos(A2)
     p = (S2 * sA1 - S1 * sA2) / (S2 * sA1 * cA2 - S1 * sA2 * cA1)
+    print 'negative p:', p[p<=0]
+    epsilon = 1e-3
+    p[p<=0] = epsilon
     T1 = np.real(-GRE_data.repetition_time / np.log(p))
     # zero out non-finite T1 values (necessary?)
     # zero out non-real T1 values (necessary?)
     # mask out result (necessary?)
+    #T1[T1<0] = 0
     # threshold out values outside [0, 10000ms]
+    #sup_bound = 10000
+    #T1[T1>sup_bound] = sup_bound
+    #T1[np.isnan(T1)] = 0
     return T1
