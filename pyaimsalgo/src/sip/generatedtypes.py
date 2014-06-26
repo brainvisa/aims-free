@@ -38,16 +38,17 @@ for z in [ map( lambda y: (x,y), basetypes ) for x in basetypes ]:
   matrix += z
 
 todo = {
-  'moment' : numtypes,
-  'resampler' : numtypes, #[ ('short'), ('unsigned short'), ('float'), ('double'), ],
-  'meshresampler' : [ 'AimsData<uint32_t>',
-          'aims::BucketMap<Void>'],
-  'sampler' : [ ( 'float', '3' ) ],
-  'polynomial' : [ ( 'float', '3' ) ],
   'distancemap' : [ 'short', 'float' ],
   'diffusionsmoother' : [ 'short', 'float' ],
-  'smoothing' : numtypes,
   'gradient' : [ 'float'],
+  'meshresampler' : [ 'AimsData<uint32_t>',
+          'aims::BucketMap<Void>'],
+  'moment' : numtypes,
+  'morphomath' : numtypes,
+  'polynomial' : [ ( 'float', '3' ) ],
+  'resampler' : numtypes,
+  'sampler' : [ ( 'float', '3' ) ],
+  'smoothing' : numtypes,
   'histogram' : numtypes,
 }
 

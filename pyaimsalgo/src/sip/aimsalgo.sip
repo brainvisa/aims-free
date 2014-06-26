@@ -11,6 +11,13 @@
 %Include moment_U32.sip
 %Include moment.sip
 %Include morphomath.sip
+%Include morphomath_U8.sip
+%Include morphomath_S16.sip
+%Include morphomath_U16.sip
+%Include morphomath_S32.sip
+%Include morphomath_U32.sip
+%Include morphomath_FLOAT.sip
+%Include morphomath_DOUBLE.sip
 %Include meshresampler.sip
 %Include meshresampler_AimsData_U32.sip
 %Include meshresampler_BucketMap_VOID.sip

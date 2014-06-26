@@ -86,22 +86,38 @@ aims.write(B1map_volume, "/tmp/b1map.nii.gz")
 # extrapolate / smooth and resample the B1 map
 
 if options.smooth_type == 'dilated':
-    subprocess.check_call(['AimsMorphoMath', '-i', '/tmp/b1map.nii.gz',
-        '-o', '/tmp/b1map_dil.nii.gz', '-m', 'dil',
-        '-r', str(max(BAFI_amplitude.header()['voxel_size'][:3])*2)])
-    B1map_volume = aims.read('/tmp/b1map_dil.nii.gz')
+    morpho = getattr(aimsalgo,
+        'MorphoGreyLevel_' + aims.typeCode(B1map_volume.at(0)))()
+    B1map_volume = morpho.doDilation(
+        B1map_volume,
+        max(BAFI_amplitude.header()['voxel_size'][:3])*2)
+    #subprocess.check_call(['AimsMorphoMath', '-i', '/tmp/b1map.nii.gz',
+        #'-o', '/tmp/b1map_dil.nii.gz', '-m', 'dil',
+        #'-r', str(max(BAFI_amplitude.header()['voxel_size'][:3])*2)])
+    #B1map_volume = aims.read('/tmp/b1map_dil.nii.gz')
 elif options.smooth_type == 'median':
     median = getattr( aimsalgo,
         'MedianSmoothing_' + aims.typeCode(B1map_volume.at(0)))
     B1map_volume_med = median().doit(B1map_volume).volume()
+    np.asarray(B1map_volume_med)[np.isnan(np.asarray(B1map_volume_med))] = 0
+    print 'med:', np.max(np.asarray(B1map_volume_med)), np.where(np.isinf(np.asarray(B1map_volume_med)))
     aims.write(B1map_volume_med, '/tmp/b1map_median.nii.gz')
     #subprocess.check_call(['AimsMedianSmoothing', '-i', '/tmp/b1map.nii.gz',
     #'-o', '/tmp/b1map_median.nii.gz'])
-    #B1map_volume_med = aims.read('/tmp/b1map_median.nii.gz')
-    subprocess.check_call(['AimsMorphoMath', '-i', '/tmp/b1map_median.nii.gz',
-        '-o', '/tmp/b1map_dil.nii.gz', '-m', 'dil',
-        '-r', str(max(BAFI_amplitude.header()['voxel_size'][:3])*4)])
-    B1map_volume = aims.read('/tmp/b1map_dil.nii.gz')
+    B1map_volume_med2 = aims.read('/tmp/b1map_median.nii.gz')
+    print np.asarray(B1map_volume_med2) == np.asarray(B1map_volume_med)
+    print np.max(np.abs(np.asarray(B1map_volume_med2)-np.asarray(B1map_volume_med)))
+    morpho = getattr(aimsalgo,
+        'MorphoGreyLevel_' + aims.typeCode(B1map_volume.at(0)))()
+    B1map_volume = morpho.doDilation(
+        B1map_volume_med2,
+        max(BAFI_amplitude.header()['voxel_size'][:3])*4)
+    print 'dil:', np.max(np.asarray(B1map_volume)), np.asarray(B1map_volume).dtype
+    aims.write(B1map_volume, '/tmp/b1map_dil.nii.gz')
+    #subprocess.check_call(['AimsMorphoMath', '-i', '/tmp/b1map_median.nii.gz',
+        #'-o', '/tmp/b1map_dil.nii.gz', '-m', 'dil',
+        #'-r', str(max(BAFI_amplitude.header()['voxel_size'][:3])*4)])
+    #B1map_volume = aims.read('/tmp/b1map_dil.nii.gz')
     B1map_ar = np.asarray(B1map_volume_med)
     np.asarray(B1map_volume)[B1map_ar>1e-2] = B1map_ar[B1map_ar>1e-2]
 aims.write(B1map_volume, "/tmp/b1map_final.nii.gz")
