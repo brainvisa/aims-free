@@ -98,6 +98,7 @@ HEADERS = \
     moment/moment.h      \
     moment/moment_g.h    \
     moment/triMoment.h    \
+    morphology/morphogreylevel_d.h \
     morphology/morphology_g.h  \
     morphology/operatormorpho.h  \
     neuralnet/multilayerperceptron.h\
@@ -321,6 +322,7 @@ SOURCES = \
     morphology/morphoclose.cc  \
     morphology/morphodilate.cc  \
     morphology/morphoerode.cc  \
+    morphology/morphogreylevel.cc \
     morphology/morphoopen.cc  \
     neuralnet/multilayerperceptron.cc\
     neuralnet/selforganizingmap.cc  \

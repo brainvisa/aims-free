@@ -55,31 +55,31 @@ enum AimsMorphoMode
 /**@name Erosion*/
 //@{
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoErosion(AimsData<short> &vol,
-                                  float size,
-                                  AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D);
+AIMSALGO_API
+AimsData<short> AimsMorphoErosion(
+  AimsData<short> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 
-AIMSALGO_API 
-AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(AimsData<short> &initvol,float size,
-							      Connectivity::Type connectivity);
+AIMSALGO_API
+AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
+  AimsData<short> &initvol, float size, Connectivity::Type connectivity );
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoChamferErosion(AimsData<short> &vol,
-                                         float size,
-                                         int xmask=3,
-                                         int ymask=3,
-                                         int zmask=3,
-                                         float mult_fact=50);
-///
-AIMSALGO_API 
-AimsData<short> AimsMorphoConnectivityChamferErosion(AimsData<short> &vol,
-						     float size,
-						     Connectivity::Type type);
+AIMSALGO_API
+AimsData<short> AimsMorphoChamferErosion(
+  AimsData<short> &vol,
+  float size,
+  int xmask=3,
+  int ymask=3,
+  int zmask=3,
+  float mult_fact=50 );
 
-AIMSALGO_API 
-AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(AimsData<short> &initvol,float size,
-						       Connectivity::Type connectivity);
+///
+AIMSALGO_API
+AimsData<short> AimsMorphoConnectivityChamferErosion(
+  AimsData<short> &vol, float size, Connectivity::Type type );
+
+AIMSALGO_API
+AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
+  AimsData<short> &initvol, float size, Connectivity::Type connectivity );
 
 //@}
 
@@ -87,71 +87,98 @@ AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(AimsData<short> &i
 /**@name Dilation*/
 //@{
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoDilation(AimsData<short> &vol,
-                                   float size,
-                                   AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D);
+AIMSALGO_API
+AimsData<short> AimsMorphoDilation(
+  AimsData<short> &vol,
+  float size,
+  AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
+
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoChamferDilation(AimsData<short> &vol,
-                                          float size,
-                                          int xmask=3,
-                                          int ymask=3,
-                                          int zmask=3,
-                                          float mult_fact=50);
+AIMSALGO_API
+AimsData<short> AimsMorphoChamferDilation(
+  AimsData<short> &vol,
+  float size,
+  int xmask=3,
+  int ymask=3,
+  int zmask=3,
+  float mult_fact=50 );
+
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoConnectivityChamferDilation(AimsData<short> &vol,
-						     float size,
-						     Connectivity::Type type);
+AIMSALGO_API
+AimsData<short> AimsMorphoConnectivityChamferDilation(
+  AimsData<short> &vol, float size, Connectivity::Type type);
 //@}
 
 
 /**@name Closing*/
 //@{
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoClosing(AimsData<short> &vol,
-                                  float size,
-                                  AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D);
+AIMSALGO_API
+AimsData<short> AimsMorphoClosing(
+  AimsData<short> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoChamferClosing(AimsData<short> &vol,
-                                         float size,
-                                         int xmask=3,
-                                         int ymask=3,
-                                         int zmask=3,
-                                         float mult_fact=50);
+AIMSALGO_API
+AimsData<short> AimsMorphoChamferClosing(
+  AimsData<short> &vol,
+  float size,
+  int xmask=3,
+  int ymask=3,
+  int zmask=3,
+  float mult_fact=50 );
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoConnectivityChamferClosing(AimsData<short> &vol,
-						     float size,
-						     Connectivity::Type type);
+AIMSALGO_API
+AimsData<short> AimsMorphoConnectivityChamferClosing(
+  AimsData<short> &vol, float size, Connectivity::Type type );
 //@}
 
 
 /**@name Opening*/
 //@{
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoOpening(AimsData<short> &vol,
-                                  float size,
-                                  AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D);
+AIMSALGO_API
+AimsData<short> AimsMorphoOpening(
+  AimsData<short> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoChamferOpening(AimsData<short> &vol,
-                                         float size,
-                                         int xmask=3,
-                                         int ymask=3,
-                                         int zmask=3,
-                                         float mult_fact=50);
+AIMSALGO_API
+AimsData<short> AimsMorphoChamferOpening(
+  AimsData<short> &vol,
+  float size,
+  int xmask=3,
+  int ymask=3,
+  int zmask=3,
+  float mult_fact=50 );
 
 ///
-AIMSALGO_API 
-AimsData<short> AimsMorphoConnectivityChamferOpening(AimsData<short> &vol,
-						     float size,
-						     Connectivity::Type type);
+AIMSALGO_API
+AimsData<short> AimsMorphoConnectivityChamferOpening(
+  AimsData<short> &vol, float size, Connectivity::Type type );
 //@}
 
+namespace aims
+{
+
+  template <typename T>
+  class MorphoGreyLevel
+  {
+  public:
+    MorphoGreyLevel();
+    virtual ~MorphoGreyLevel();
+
+    AimsData<T> doErosion( const AimsData<T>& dataIn, float radius );
+    AimsData<T> doDilation( const AimsData<T>& dataIn, float radius );
+    AimsData<T> doClosing( const AimsData<T>& dataIn, float radius );
+    AimsData<T> doOpening( const AimsData<T>& dataIn, float radius );
+
+  private:
+    std::vector<Point3d> doStructElement( float radius,
+                                          const Point4df & voxelsize );
+    Point3d computeIntRadius( float radius, const Point4df & voxelsize);
+
+    float radius;
+    Point3d int_radius;
+    std::vector<Point3d> list;
+  };
+
+}
 
 #endif
