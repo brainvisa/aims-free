@@ -39,40 +39,14 @@
 #include <aims/io/finder.h>
 #include <aims/data/data_g.h>
 #include <aims/data/pheader.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getoptProcess.h>
 #include <aims/utility/utility_g.h>
 #include <aims/signalfilter/signalfilter_g.h>
 #include <cstdlib>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
-
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsGaussianSmoothing -i[nput] <filein>                         ",
-  "                      -o[utput] <fileout>                       ",
-  "                      [-x[sigma] <sigmaX>]                      ",
-  "                      [-y[sigma] <sigmaY>]                      ",
-  "                      [-z[sigma] <sigmaZ>]                      ",
-  "                      [-h[elp]]                                 ",
-  "----------------------------------------------------------------",
-  "3D Deriche's recursive gaussian smoothing filter                ",
-  "----------------------------------------------------------------",
-  "     filein    : origin file                                    ",
-  "     fileout   : output file                                    ",
-  "     sigmaX    : X standard deviation of the gaussian function  ",
-  "                                   [default=largest voxel size] ",
-  "     sigmaY    : Y standard deviation  [default=same as sigmaX] ",
-  "     sigmaZ    : Z standard deviation  [default=same as sigmaX] ",
-  "		    for a 2D image, set zsigmat to 0		   ",
-  "----------------------------------------------------------------",
-END_USAGE
-
-
-static void Usage()
-{
-  AimsUsage( usage );
-}
 
 
 template<class T>
@@ -82,18 +56,18 @@ static bool gauss( Process & p, const string & filename, Finder & f );
 class GaussFilt : public Process
 {
 public:
-  GaussFilt( const string & fout, float xs, float ys, float zs );
+  GaussFilt( const string & fout="", float xs=0., float ys=0., float zs=0. );
 
   template<class T>
   friend bool gauss( Process & p, const string & filename, Finder & f );
   template<class T>
-  bool gauss_m( AimsData<T> & data, const string & filename, aims::Finder & f );
+  bool gauss_m( AimsData<T> & data, const string & filename,
+                aims::Finder & f );
 
-private:
-  string	fileout;
-  float		xsigma;
-  float		ysigma;
-  float		zsigma;
+  string fileout;
+  float xsigma;
+  float ysigma;
+  float zsigma;
 };
 
 
@@ -122,9 +96,9 @@ bool gauss( Process & p, const string & filename, Finder & f )
 
 template<class T> 
 bool GaussFilt::gauss_m( AimsData<T> & data, const string & filename, 
-			 aims::Finder & f )
+                         aims::Finder & f )
 {
-  const Header			*h = f.header();
+  const Header		*h = f.header();
   const PythonHeader	*hdr 
     = dynamic_cast<const PythonHeader *>( h );
 
@@ -142,7 +116,7 @@ bool GaussFilt::gauss_m( AimsData<T> & data, const string & filename,
       vs.push_back( 1 );
       vs.push_back( 1 );
     }
-  
+
   float	stmp = ( vs[0] > vs[1] ) ? vs[0] : vs[1];
   stmp = ( vs[2] > stmp ) ? vs[2] : stmp;
 
@@ -155,42 +129,63 @@ bool GaussFilt::gauss_m( AimsData<T> & data, const string & filename,
   if( !reader.read( data, 0, &format ) )
     return( false );
 
-  AimsData<T>			out;
-  if( data.dimZ() != 1 ){
-  	Gaussian3DSmoothing<T>	g3ds( xsigma, ysigma, zsigma );
-  	out = g3ds.doit( data );
-  } else {
-  	Gaussian2DSmoothing<T>	g2ds( xsigma, ysigma );
-  	out = g2ds.doit( data );	
-  }	
-  	
+  AimsData<T> out;
+  if( data.dimZ() != 1 )
+  {
+    Gaussian3DSmoothing<T>	g3ds( xsigma, ysigma, zsigma );
+    out = g3ds.doit( data );
+  }
+  else
+  {
+    Gaussian2DSmoothing<T>	g2ds( xsigma, ysigma );
+    out = g2ds.doit( data );
+  }
+
   Writer<AimsData<T> >	writer( fileout );
   return( writer.write( out ) );
 }
 
 
-int main( int argc, char **argv )
+int main( int argc, const char **argv )
 {
-  char  *filein = NULL, *fileout = NULL;
-  float xsigma = 0.0f, ysigma = 0.0f, zsigma = 0.0f;
+  GaussFilt     proc;
+  ProcessInput filein( proc );
 
-  AimsOption opt[] = {
-  { 'h',"help"  ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0,},
-  { 'i',"input" ,AIMS_OPT_STRING,&filein     ,0                ,1},
-  { 'o',"output",AIMS_OPT_STRING,&fileout    ,0                ,1},
-  { 'x',"xsigma",AIMS_OPT_FLOAT ,&xsigma     ,0                ,0},
-  { 'y',"ysigma",AIMS_OPT_FLOAT ,&ysigma     ,0                ,0},
-  { 'z',"zsigma",AIMS_OPT_FLOAT ,&zsigma     ,0                ,0},
-  { 0  ,0       ,AIMS_OPT_END   ,0           ,0                ,0}};
+  AimsApplication app( argc, argv,
+    "3D Deriche's recursive gaussian smoothing filter" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  app.addOption( filein, "-i", "source volume" );
+  app.addOption( proc.fileout, "-o", "destination volume" );
+  app.addOption( proc.xsigma, "-x",
+    "X standard deviation of the gaussian filter [default=largest voxel size]",
+    true );
+  app.addOption( proc.ysigma, "-y",
+    "Y standard deviation of the gaussian filter [default=largest voxel size]",
+    true );
+  app.addOption( proc.zsigma, "-z",
+    "Z standard deviation of the gaussian filter [default=largest voxel size]",
+    true );
 
-  GaussFilt	proc( fileout, xsigma, ysigma, zsigma );
-  if( !proc.execute( filein ) )
-    {
-      cerr << "Couldn't process\n";
-      return( 1 );
-    }
+  app.alias( "--input", "-i" );
+  app.alias( "--output", "-o" );
+  app.alias( "--xsigma", "-x" );
+  app.alias( "--ysigma", "-y" );
+  app.alias( "--zsigma", "-z" );
 
-  return( EXIT_SUCCESS );
+  try
+  {
+    app.initialize();
+
+    proc.execute( filein.filename );
+
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
 }
