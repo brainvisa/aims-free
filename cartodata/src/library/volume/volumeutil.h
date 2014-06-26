@@ -183,8 +183,10 @@ namespace carto
         value as second argument. The voxel result is used for other voxels
         function calls.
         Useful for min/max for instance:
-        min = VolumeUtil::accumulate( std::min, volume, FLT_MAX );
-        max = VolumeUtil::accumulate( std::max, volume, -FLT_MAX );
+        min = VolumeUtil<T>::accumulate( std::min<T>, volume,
+          std::numeric_limits<T>::max() );
+        max = VolumeUtil::accumulate( std::max<T>, volume,
+          -std::numeric_limits<T>::max() );
         May be used also for sum etc.
     */
     template <class BinaryFunction> static
