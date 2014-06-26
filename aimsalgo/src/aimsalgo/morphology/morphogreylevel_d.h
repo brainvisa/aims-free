@@ -36,7 +36,7 @@
 #define AIMS_MORPHOLOGY_MORPHOGREYLEVEL_D_H
 
 #include <aims/morphology/operatormorpho.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volumeutil_d.h>
 #include <aims/math/mathelem.h>
 
 namespace aims
@@ -58,9 +58,9 @@ namespace aims
   Point3d MorphoGreyLevel<T>::computeIntRadius( float radius,
                                                 const Point4df & voxelsize )
   {
-    int_radius[0] = int(rint( radius/voxelsize[0] ));
-    int_radius[1] = int(rint( radius/voxelsize[1] ));
-    int_radius[2] = int(rint( radius/voxelsize[2] ));
+    int_radius[0] = int(ceil( radius/voxelsize[0] ));
+    int_radius[1] = int(ceil( radius/voxelsize[1] ));
+    int_radius[2] = int(ceil( radius/voxelsize[2] ));
 
     std::cout << "Radius = " << radius << " mm" << std::endl;
     std::cout << "Voxel size = " << voxelsize << " mm" << std::endl;
@@ -76,7 +76,7 @@ namespace aims
     if( (int_radius[0]==1) || (int_radius[1]==1) || (int_radius[2]==1) )
       {
         std::cout << "WARNING: Radius generate a single voxel !!! STOP.\n" << std::endl;
-        exit(2);
+//         exit(2);
       }
 
     return int_radius;
@@ -98,15 +98,16 @@ namespace aims
 
     //   Test if list have been already created
     //   List of the voxel of the strust elem
+    float sqradius = radius * radius;
     if( !list.size() )
       {
-        for(int u = 0; u < 2*int_radius[0]-1; ++u)
-          for(int v = 0; v < 2*int_radius[1]-1; ++v)
-            for(int w = 0; w < 2*int_radius[2]-1; ++w)
+        for(int u = -int_radius[0]; u <= int_radius[0]; ++u)
+          for(int v = -int_radius[1]; v <= int_radius[1]; ++v)
+            for(int w = -int_radius[2]; w <= int_radius[2]; ++w)
               {
-                if( sqrt(  sqr( float(u - (int_radius[0]-1)) * voxelsize[0] ) +
-                          sqr( float(v - (int_radius[1]-1)) * voxelsize[1] ) +
-                          sqr( float(w - (int_radius[2]-1)) * voxelsize[2] )) <= radius )
+                if( sqr( float(u) * voxelsize[0] ) +
+                    sqr( float(v) * voxelsize[1] ) +
+                    sqr( float(w) * voxelsize[2] ) <= sqradius )
                   {
                     list.push_back( Point3d(u, v, w) );
                     //               sphere(u, v, w) = 1;
@@ -122,26 +123,51 @@ namespace aims
 
 
   template<typename T>
-  AimsData<T> MorphoGreyLevel<T>::doErosion( const AimsData< T >& dataIn,
-                                             float radius )
+  carto::VolumeRef<T> MorphoGreyLevel<T>::doErosion(
+    const carto::Volume< T >& dataIn, float radius )
   {
     std::cout << "EROSION" << std::endl;
-    T value;
-    value = dataIn.maximum();
+    T value = carto::VolumeUtil<T>::accumulate(
+      std::max<T>, dataIn, -std::numeric_limits<T>::max() );
 
-    Point4df voxelsize( dataIn.sizeX(),
-                        dataIn.sizeY(),
-                        dataIn.sizeZ(),
-                        dataIn.sizeT() );
+    Point4df voxelsize( 1, 1, 1, 1 );
+    carto::Object vso;
+    try
+    {
+      vso = dataIn.header().getProperty( "voxel_size" );
+      if( !vso.isNull() )
+      {
+        carto::Object it = vso->objectIterator();
+        if( it->isValid() )
+        {
+          voxelsize[0] = it->currentValue()->getScalar();
+          it->next();
+          if( it->isValid() )
+          {
+            voxelsize[1] = it->currentValue()->getScalar();
+            it->next();
+            if( it->isValid() )
+            {
+              voxelsize[2] = it->currentValue()->getScalar();
+              it->next();
+              if( it->isValid() )
+                voxelsize[3] = it->currentValue()->getScalar();
+            }
+          }
+        }
+      }
+    }
+    catch( std::exception & )
+    {
+    }
 
-    Point4d dim( dataIn.dimX(),
-                dataIn.dimY(),
-                dataIn.dimZ(),
-                dataIn.dimT() );
+    Point4d dim( dataIn.getSizeX(),
+                dataIn.getSizeY(),
+                dataIn.getSizeZ(),
+                dataIn.getSizeT() );
 
-    AimsData< T > dataOut;
-    dataOut = dataIn.clone();
-    dataOut = T(0);
+    carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
+    dataOut->fill( T(0) );
 
     int_radius = computeIntRadius( radius, voxelsize );
     list = doStructElement( radius, voxelsize );
@@ -157,9 +183,9 @@ namespace aims
                 T min = value, tmp;
                 for(int l = 0; l < int(list.size()); ++l)
                   {
-                    Point3d coord( x + list[l][0] - (int_radius[0]-1),
-                                  y + list[l][1] - (int_radius[1]-1),
-                                  z + list[l][2] - (int_radius[2]-1) );
+                    Point3d coord( x + list[l][0],
+                                   y + list[l][1],
+                                   z + list[l][2] );
 
                     if( (coord[0]>=0) && (coord[0]<dim[0] )
                         && (coord[1]>=0) && (coord[1]<dim[1] )
@@ -169,7 +195,7 @@ namespace aims
                         if( tmp < min ) min = tmp;
                       }
                   }
-                dataOut(x, y, z, t) = min;
+                dataOut->at( x, y, z, t ) = min;
               }
         }
     std::cout << std::endl;
@@ -178,26 +204,51 @@ namespace aims
 
 
   template<typename T>
-  AimsData<T> MorphoGreyLevel<T>::doDilation( const AimsData< T >& dataIn,
-                                              float radius )
+  carto::VolumeRef<T> MorphoGreyLevel<T>::doDilation(
+    const carto::Volume< T >& dataIn, float radius )
   {
     std::cout << "DILATION" << std::endl;
-    T value;
-    value = dataIn.minimum();
+    T value = carto::VolumeUtil<T>::accumulate(
+      std::min<T>, dataIn, std::numeric_limits<T>::max() );
 
-    Point4df voxelsize( dataIn.sizeX(),
-                        dataIn.sizeY(),
-                        dataIn.sizeZ(),
-                        dataIn.sizeT() );
+    Point4df voxelsize( 1, 1, 1, 1 );
+    carto::Object vso;
+    try
+    {
+      vso = dataIn.header().getProperty( "voxel_size" );
+      if( !vso.isNull() )
+      {
+        carto::Object it = vso->objectIterator();
+        if( it->isValid() )
+        {
+          voxelsize[0] = it->currentValue()->getScalar();
+          it->next();
+          if( it->isValid() )
+          {
+            voxelsize[1] = it->currentValue()->getScalar();
+            it->next();
+            if( it->isValid() )
+            {
+              voxelsize[2] = it->currentValue()->getScalar();
+              it->next();
+              if( it->isValid() )
+                voxelsize[3] = it->currentValue()->getScalar();
+            }
+          }
+        }
+      }
+    }
+    catch( std::exception & )
+    {
+    }
 
-    Point4d dim( dataIn.dimX(),
-                dataIn.dimY(),
-                dataIn.dimZ(),
-                dataIn.dimT() );
+    Point4d dim( dataIn.getSizeX(),
+                dataIn.getSizeY(),
+                dataIn.getSizeZ(),
+                dataIn.getSizeT() );
 
-    AimsData< T > dataOut( dim[0], dim[1], dim[2], dim[3] );
-    dataOut = dataIn.clone();
-    dataOut = T(0);
+    carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
+    dataOut->fill( T(0) );
 
     int_radius = computeIntRadius( radius, voxelsize );
     list = doStructElement( radius, voxelsize );
@@ -213,19 +264,19 @@ namespace aims
                 T max = value, tmp;
                 for(int l = 0; l < int(list.size()); ++l)
                   {
-                    Point3d coord( x + list[l][0] - (int_radius[0]-1),
-                                  y + list[l][1] - (int_radius[1]-1),
-                                  z + list[l][2] - (int_radius[2]-1) );
+                    Point3d coord( x + list[l][0],
+                                   y + list[l][1],
+                                   z + list[l][2] );
 
                     if( (coord[0]>=0) && (coord[0]<dim[0] )
                         && (coord[1]>=0) && (coord[1]<dim[1] )
                         && (coord[2]>=0) && (coord[2]<dim[2] ) )
                       {
-                        tmp = dataIn( coord[0], coord[1], coord[2] );
+                        tmp = dataIn.at( coord[0], coord[1], coord[2] );
                         if( tmp > max ) max = tmp;
                       }
                   }
-                dataOut(x, y, z, t) = max;
+                dataOut->at( x, y, z, t ) = max;
               }
         }
     std::cout << std::endl;
@@ -234,24 +285,24 @@ namespace aims
 
 
   template<typename T>
-  AimsData<T> MorphoGreyLevel<T>::doClosing( const AimsData<T>& dataIn,
-                                             float radius )
+  carto::VolumeRef<T> MorphoGreyLevel<T>::doClosing(
+    const carto::Volume<T>& dataIn, float radius )
   {
-    AimsData< T > dataOut;
+    carto::VolumeRef< T > dataOut;
     dataOut = doDilation( dataIn, radius );
-    dataOut = doErosion( dataOut, radius );
+    dataOut = doErosion( *dataOut, radius );
 
     return dataOut;
   }
 
 
   template<typename T>
-  AimsData<T> MorphoGreyLevel<T>::doOpening( const AimsData<T>& dataIn,
-                                             float radius )
+  carto::VolumeRef<T> MorphoGreyLevel<T>::doOpening(
+    const carto::Volume<T>& dataIn, float radius )
   {
-    AimsData< T > dataOut;
+    carto::VolumeRef< T > dataOut;
     dataOut = doErosion( dataIn, radius );
-    dataOut = doDilation( dataOut, radius );
+    dataOut = doDilation( *dataOut, radius );
 
     return dataOut;
   }

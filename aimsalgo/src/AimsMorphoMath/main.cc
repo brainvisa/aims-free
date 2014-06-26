@@ -85,20 +85,10 @@ bool Morpho::morpho( Process & p, const string & fileIn, Finder & f )
 {
   Morpho &m = (Morpho &) p;
 
-  AimsData<T>                dataIn, dataOut;
-  Reader< AimsData<T> >        r( fileIn );
+  carto::VolumeRef<T> dataIn, dataOut;
+  Reader< carto::Volume<T> > r( fileIn );
   string                format = f.format();
-  r.read( dataIn, 0, &format );
-
-  Point4df voxelsize( dataIn.sizeX(),
-                      dataIn.sizeY(),
-                      dataIn.sizeZ(),
-                      dataIn.sizeT() );
-
-  Point4d dim = ( dataIn.dimX(),
-                  dataIn.dimY(),
-                  dataIn.dimZ(),
-                  dataIn.dimT() );
+  dataIn.reset( r.read( 0, &format ) );
 
   // Specific operation
   int choice;
@@ -113,22 +103,22 @@ bool Morpho::morpho( Process & p, const string & fileIn, Finder & f )
     {
     case 0 :
       cout << "\nMorphological operator: EROSION" << endl << endl;
-      dataOut = mgl.doErosion( dataIn, m.radius );
+      dataOut = mgl.doErosion( *dataIn, m.radius );
       break;
 
     case 1 :
       cout << "\nMorphological operator: DILATION" << endl << endl;
-      dataOut = mgl.doDilation( dataIn, m.radius );
+      dataOut = mgl.doDilation( *dataIn, m.radius );
       break;
 
     case 2 :
       cout << "\nMorphological operator: CLOSING" << endl << endl;
-      dataOut = mgl.doClosing( dataIn, m.radius );
+      dataOut = mgl.doClosing( *dataIn, m.radius );
       break;
 
     case 3 :
       cout << "\nMorphological operator: OPENING" << endl << endl;
-      dataOut = mgl.doOpening( dataIn, m.radius );
+      dataOut = mgl.doOpening( *dataIn, m.radius );
       break;
     }
 

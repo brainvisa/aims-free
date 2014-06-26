@@ -40,7 +40,12 @@
 
 using aims::Connectivity;
 
-template <class T> class AimsData;
+template <typename T> class AimsData;
+namespace carto
+{
+  template <typename T> class Volume;
+  template <typename T> class VolumeRef;
+}
 
 /** Morphological and chamfer defined modes*/
 enum AimsMorphoMode
@@ -164,10 +169,14 @@ namespace aims
     MorphoGreyLevel();
     virtual ~MorphoGreyLevel();
 
-    AimsData<T> doErosion( const AimsData<T>& dataIn, float radius );
-    AimsData<T> doDilation( const AimsData<T>& dataIn, float radius );
-    AimsData<T> doClosing( const AimsData<T>& dataIn, float radius );
-    AimsData<T> doOpening( const AimsData<T>& dataIn, float radius );
+    carto::VolumeRef<T>
+      doErosion( const carto::Volume<T>& dataIn, float radius );
+    carto::VolumeRef<T>
+      doDilation( const carto::Volume<T>& dataIn, float radius );
+    carto::VolumeRef<T>
+      doClosing( const carto::Volume<T>& dataIn, float radius );
+    carto::VolumeRef<T>
+      doOpening( const carto::Volume<T>& dataIn, float radius );
 
   private:
     std::vector<Point3d> doStructElement( float radius,
