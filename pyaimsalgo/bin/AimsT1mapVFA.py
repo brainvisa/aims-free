@@ -62,6 +62,9 @@ parser.add_option( '--inv', dest='inv', action='store_true',
 
 BAFI_amplitude = aims.read(options.bafi_ampl)
 BAFI_phase = aims.read(options.bafi_phase)
+# temporary fix for voxel size bug
+#BAFI_amplitude.header()['voxel_size'][0] = 4.
+#BAFI_phase.header()['voxel_size'][0] = 4.
 
 BAFI_data = t1mapping.BAFIData(BAFI_amplitude, BAFI_phase)
 BAFI_data.prescribed_flip_angle = 60.0  # degrees
@@ -98,18 +101,21 @@ elif options.smooth_type == 'median':
 aims.write(B1map_volume, "/tmp/b1map_final.nii.gz")
 subprocess.check_call(['AimsGaussianSmoothing',
     '-i', '/tmp/b1map_final.nii.gz',
-    '-o', '/tmp/b1map_smooth.nii.gz', '-x', '20'])
+    '-o', '/tmp/b1map_smooth.nii.gz', '-x', '10'])
 B1map_volume = aims.read('/tmp/b1map_smooth.nii.gz')
 
 
 GRE_5deg = aims.read(options.t1_lowangle)
 GRE_20deg = aims.read(options.t1_highangle)
+# temporary fix for voxel size bug
+#GRE_5deg.header()['voxel_size'][0] = 1.
+#GRE_20deg.header()['voxel_size'][0] = 1.
 
 B1map_vs = np.array(B1map_volume.header()['voxel_size'][:3])
 print 'B1map_vs:', B1map_vs
 GRE_vs = np.array(GRE_5deg.header()['voxel_size'][:3])
 
-translation = -(B1map_vs - GRE_vs) / 2
+translation = (B1map_vs - GRE_vs) / 2
 transform = aims.AffineTransformation3d()
 transform.setTranslation(translation)
 
