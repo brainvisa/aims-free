@@ -15,8 +15,11 @@
 %Include meshresampler_AimsData_U32.sip
 %Include meshresampler_BucketMap_VOID.sip
 %Include meshinterpoler.sip
+%Include resampler_U8.sip
 %Include resampler_S16.sip
 %Include resampler_U16.sip
+%Include resampler_S32.sip
+%Include resampler_U32.sip
 %Include resampler_FLOAT.sip
 %Include resampler_DOUBLE.sip
 %Include sampler_FLOAT_3.sip
@@ -26,6 +29,11 @@
 %Include distancemap_FLOAT.sip
 %Include diffusionsmoother_S16.sip
 %Include diffusionsmoother_FLOAT.sip
+%Include smoothing_U8.sip
+%Include smoothing_S16.sip
+%Include smoothing_U16.sip
+%Include smoothing_S32.sip
+%Include smoothing_U32.sip
 %Include smoothing_FLOAT.sip
 %Include smoothing_DOUBLE.sip
 %Include mesher.sip

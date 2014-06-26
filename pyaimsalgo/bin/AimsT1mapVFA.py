@@ -43,19 +43,21 @@ import subprocess
 
 parser = OptionParser(description= \
     'Processing of Cortical thickness attributes in Cortical Folds Graph')
-parser.add_option( '-t', '--t1_low', dest='t1_lowangle',
-    help='first GRE T1 with lower angle' )
-parser.add_option( '-u', '--t1_high', dest='t1_highangle',
-    help='second GRE T1 with higher angle' )
-parser.add_option( '-a', '--bafi_amplitude', dest='bafi_ampl',
-    help='BAFI, amplitude map' )
-parser.add_option( '-p', '--bafi_phase', dest='bafi_phase',
-    help='BAFI, phase map' )
-parser.add_option( '-o', '--output', dest='output_t1map',
-    help='output T1 mapping image' )
-parser.add_option( '-s', '--smoothtype', dest='smooth_type', default='linear',
+parser.add_option('-t', '--t1_low', dest='t1_lowangle',
+    help='first GRE T1 with lower angle')
+parser.add_option('-u', '--t1_high', dest='t1_highangle',
+    help='second GRE T1 with higher angle')
+parser.add_option('-a', '--bafi_amplitude', dest='bafi_ampl',
+    help='BAFI, amplitude map')
+parser.add_option('-p', '--bafi_phase', dest='bafi_phase',
+    help='BAFI, phase map')
+parser.add_option('-o', '--output', dest='output_t1map',
+    help='output T1 mapping image')
+parser.add_option('-s', '--smoothtype', dest='smooth_type', default='linear',
     help='extrapolation / smoothing type for B1 map. allowed values: nearest, linear, masked_linear, polynomial, median, dilated. default: linear')
-parser.add_option( '--inv', dest='inv', action='store_true',
+parser.add_option('-g', '--gaussian', dest='gaussian', default=0., type=float,
+    help='additional gaussian smoothing for the B1 correction map. default: 0mm: not applied')
+parser.add_option('--inv', dest='inv', action='store_true',
     help='invert T1 map image to look like a T1-weighted')
 
 (options, args) = parser.parse_args()
@@ -89,9 +91,13 @@ if options.smooth_type == 'dilated':
         '-r', str(max(BAFI_amplitude.header()['voxel_size'][:3])*2)])
     B1map_volume = aims.read('/tmp/b1map_dil.nii.gz')
 elif options.smooth_type == 'median':
-    subprocess.check_call(['AimsMedianSmoothing', '-i', '/tmp/b1map.nii.gz',
-    '-o', '/tmp/b1map_median.nii.gz'])
-    B1map_volume_med = aims.read('/tmp/b1map_median.nii.gz')
+    median = getattr( aimsalgo,
+        'MedianSmoothing_' + aims.typeCode(B1map_volume.at(0)))
+    B1map_volume_med = median().doit(B1map_volume).volume()
+    aims.write(B1map_volume_med, '/tmp/b1map_median.nii.gz')
+    #subprocess.check_call(['AimsMedianSmoothing', '-i', '/tmp/b1map.nii.gz',
+    #'-o', '/tmp/b1map_median.nii.gz'])
+    #B1map_volume_med = aims.read('/tmp/b1map_median.nii.gz')
     subprocess.check_call(['AimsMorphoMath', '-i', '/tmp/b1map_median.nii.gz',
         '-o', '/tmp/b1map_dil.nii.gz', '-m', 'dil',
         '-r', str(max(BAFI_amplitude.header()['voxel_size'][:3])*4)])
@@ -99,10 +105,12 @@ elif options.smooth_type == 'median':
     B1map_ar = np.asarray(B1map_volume_med)
     np.asarray(B1map_volume)[B1map_ar>1e-2] = B1map_ar[B1map_ar>1e-2]
 aims.write(B1map_volume, "/tmp/b1map_final.nii.gz")
-subprocess.check_call(['AimsGaussianSmoothing',
-    '-i', '/tmp/b1map_final.nii.gz',
-    '-o', '/tmp/b1map_smooth.nii.gz', '-x', '10'])
-B1map_volume = aims.read('/tmp/b1map_smooth.nii.gz')
+if options.gaussian != 0:
+    gsmooth = getattr( aimsalgo,
+        'Gaussian3DSmoothing_' + aims.typeCode(B1map_volume.at(0)))
+    B1map_volume = gsmooth(options.gaussian, options.gaussian,
+        options.gaussian).doit(B1map_volume).volume()
+    aims.write(B1map_volume, "/tmp/b1map_smooth.nii.gz")
 
 
 GRE_5deg = aims.read(options.t1_lowangle)

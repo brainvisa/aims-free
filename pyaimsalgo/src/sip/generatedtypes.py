@@ -39,14 +39,14 @@ for z in [ map( lambda y: (x,y), basetypes ) for x in basetypes ]:
 
 todo = {
   'moment' : numtypes,
-  'resampler' : [ ('short'), ('unsigned short'), ('float'), ('double'), ],
+  'resampler' : numtypes, #[ ('short'), ('unsigned short'), ('float'), ('double'), ],
   'meshresampler' : [ 'AimsData<uint32_t>',
           'aims::BucketMap<Void>'],
   'sampler' : [ ( 'float', '3' ) ],
   'polynomial' : [ ( 'float', '3' ) ],
   'distancemap' : [ 'short', 'float' ],
   'diffusionsmoother' : [ 'short', 'float' ],
-  'smoothing' : [ 'float', 'double' ],
+  'smoothing' : numtypes,
   'gradient' : [ 'float'],
   'histogram' : numtypes,
 }
