@@ -88,17 +88,17 @@ class MeanFilterFunc< AimsRGB > : public NonLinFilterFunc< AimsRGB >
   
 };
 
-// Specialization RGBA for mean filtering
+// Specialization RGBA for not null mean filtering
 template <>
-class MeanFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
+class NotNullMeanFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
 {
   public:
-    MeanFilterFunc () { }
-    virtual ~MeanFilterFunc () { }
+    NotNullMeanFilterFunc () { }
+    virtual ~NotNullMeanFilterFunc () { }
 
     inline AimsRGBA doit( AimsData<AimsRGBA>& data ) const
     {
-      MeanFilterFunc<uint8_t> m;
+      NotNullMeanFilterFunc<uint8_t> m;
       return multichannelfiltervalues<AimsRGBA>(m, data);
     }
 };

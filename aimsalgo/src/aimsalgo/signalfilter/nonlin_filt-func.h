@@ -138,7 +138,38 @@ T MeanFilterFunc<T>::doit( AimsData<T>& data ) const
     count ++;
   }
 
-  return (T)( sum / count );
+  return (count != 0 ? (T)( sum / count ) : (T)0);
+}
+
+template <class T>
+class NotNullMeanFilterFunc : public NonLinFilterFunc< T >
+{
+  public:
+    NotNullMeanFilterFunc () { }
+    virtual ~NotNullMeanFilterFunc () { }
+
+    T doit( AimsData<T>& data ) const;
+
+};
+
+template <class T> inline
+T NotNullMeanFilterFunc<T>::doit( AimsData<T>& data ) const
+{
+  // Sum is declared as double to avoid overflow issue
+  double sum = 0.;
+  uint32_t count = 0;
+  typename AimsData<T>::iterator it;
+
+  // Goes through the data and count number of values for each class
+  for (it = data.begin(); it != data.end(); it++)
+  {
+    if ((double)(*it) != 0.) {
+      sum = sum + (double)(*it);
+      count ++;
+    }
+  }
+
+  return (count != 0 ? (T)( sum / count ) : (T)0);
 }
 
 template <class T>

@@ -214,6 +214,7 @@ HEADERS = \
     signalfilter/meanfilter.h  \
     signalfilter/minfilter.h  \
     signalfilter/majorityfilter.h  \
+    signalfilter/notnullmeanfilter.h  \
     signalfilter/nonlin_filt-func.h \
     signalfilter/nonlin_filt-func-rgb.h \
     spam/spam.h \
