@@ -292,6 +292,28 @@ namespace carto
           }
   }
 
+
+  template <typename T> template <class BinaryFunction>
+  T VolumeUtil<T>::accumulate( BinaryFunction f,
+                               const Volume<T> & o, T initial )
+  {
+    T res = initial;
+
+    unsigned    x, nx = o.getSizeX(), y, ny = o.getSizeY(),
+      z, nz = o.getSizeZ(), t, nt = o.getSizeT();
+    const T   *op;
+    for( t=0; t<nt; ++t )
+      for( z=0; z<nz; ++z )
+        for( y=0; y<ny; ++y )
+          {
+            op = &o.at( 0, y, z, t );
+            for( x=0; x<nx; ++x )
+              res = f( *op++, res );
+          }
+    return res;
+  }
+
+
 }
 
 #endif

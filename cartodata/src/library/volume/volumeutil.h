@@ -179,6 +179,19 @@ namespace carto
     template <class BinaryFunction> static 
     void selfApply( BinaryFunction f, VolumeRef<T> & o1, 
                     const VolumeRef<T> & o2 );
+    /** Apply a binary function to each voxel of the volume, with a "current"
+        value as second argument. The voxel result is used for other voxels
+        function calls.
+        Useful for min/max for instance:
+        min = VolumeUtil::accumulate( std::min, volume, FLT_MAX );
+        max = VolumeUtil::accumulate( std::max, volume, -FLT_MAX );
+        May be used also for sum etc.
+    */
+    template <class BinaryFunction> static
+    T accumulate( BinaryFunction f, const VolumeRef<T> & o2, T initial )
+    { return accumulate( f, *o2, initial ); }
+    template <class BinaryFunction> static
+    T accumulate( BinaryFunction f, const Volume<T> & o2, T initial );
   };
 
 }
