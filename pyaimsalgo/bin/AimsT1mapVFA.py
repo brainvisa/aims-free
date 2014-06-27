@@ -39,7 +39,6 @@ import numpy as np
 from soma import aims, aimsalgo
 from soma.aimsalgo import t1mapping
 from optparse import OptionParser
-import subprocess
 
 parser = OptionParser(description= \
     'Processing of Cortical thickness attributes in Cortical Folds Graph')
