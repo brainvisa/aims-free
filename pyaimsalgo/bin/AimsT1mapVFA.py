@@ -62,11 +62,10 @@ parser.add_option('--inv', dest='inv', action='store_true',
 
 (options, args) = parser.parse_args()
 
+# build B1 correction map from BAFI data
+
 BAFI_amplitude = aims.read(options.bafi_ampl)
 BAFI_phase = aims.read(options.bafi_phase)
-# temporary fix for voxel size bug
-#BAFI_amplitude.header()['voxel_size'][0] = 4.
-#BAFI_phase.header()['voxel_size'][0] = 4.
 
 BAFI_data = t1mapping.BAFIData(BAFI_amplitude, BAFI_phase)
 BAFI_data.prescribed_flip_angle = 60.0  # degrees
@@ -79,7 +78,6 @@ B1map_farray = np.asfortranarray(B1map_array)
 B1map_volume = aims.Volume(B1map_farray)
 #B1map_volume.header().update(BAFI_amplitude.header())
 B1map_volume.header()['voxel_size'] = BAFI_amplitude.header()['voxel_size']
-print 'B1map done.'
 #B1map_farray[np.asarray(BAFI_amplitude)[:,:,:,0]<50] = 1.
 aims.write(B1map_volume, "/tmp/b1map.nii.gz")
 
@@ -91,33 +89,44 @@ if options.smooth_type == 'dilated':
     B1map_volume = morpho.doDilation(
         B1map_volume,
         max(BAFI_amplitude.header()['voxel_size'][:3])*2)
-    #subprocess.check_call(['AimsMorphoMath', '-i', '/tmp/b1map.nii.gz',
-        #'-o', '/tmp/b1map_dil.nii.gz', '-m', 'dil',
-        #'-r', str(max(BAFI_amplitude.header()['voxel_size'][:3])*2)])
-    #B1map_volume = aims.read('/tmp/b1map_dil.nii.gz')
 elif options.smooth_type == 'median':
+    # median filtering is meant to fill small holes in the B1 map
+    # use a larger volume (border) to get it done in the border layer
+    volume_type = B1map_volume.__class__
+    vol_border = volume_type(B1map_volume.getSizeX() + 2,
+        B1map_volume.getSizeY() + 2,
+        B1map_volume.getSizeZ() + 2,
+        B1map_volume.getSizeT())
+    vol_border.fill(0)
+    p = dict([(x,y) for x,y in B1map_volume.header().iteritems() \
+        if x not in ('sizeX', 'sizeY', 'sizeZ', 'sizeT', 'volume_dimension')])
+    vol_border.header().update(p)
+    vol_border2 = volume_type(
+        vol_border, vol_border.Position4Di(1,1,1,0),
+        vol_border.Position4Di(B1map_volume.getSizeX(),
+        B1map_volume.getSizeY(), B1map_volume.getSizeZ(),
+        B1map_volume.getSizeT()))
+    np.asarray(vol_border2)[:,:,:,0] = np.asarray(B1map_volume)
     median = getattr( aimsalgo,
         'MedianSmoothing_' + aims.typeCode(B1map_volume.at(0)))
-    B1map_volume_med = median().doit(B1map_volume).volume()
-    np.asarray(B1map_volume_med)[np.isnan(np.asarray(B1map_volume_med))] = 0
-    print 'med:', np.max(np.asarray(B1map_volume_med)), np.where(np.isinf(np.asarray(B1map_volume_med)))
+    B1map_volume_med = median().doit(vol_border).volume()
+    # get the smaller view
+    B1map_volume_med = volume_type(B1map_volume_med,
+        vol_border.Position4Di(1,1,1,0),
+        vol_border.Position4Di(B1map_volume_med.getSizeX()-2,
+        B1map_volume_med.getSizeY()-2, B1map_volume_med.getSizeZ()-2,
+        B1map_volume.getSizeT()))
+    B1map_volume_med_arr = np.asarray(B1map_volume_med)
+    B1map_volume_med_arr[np.isnan(B1map_volume_med_arr)] = 0
     aims.write(B1map_volume_med, '/tmp/b1map_median.nii.gz')
-    #subprocess.check_call(['AimsMedianSmoothing', '-i', '/tmp/b1map.nii.gz',
-    #'-o', '/tmp/b1map_median.nii.gz'])
-    B1map_volume_med2 = aims.read('/tmp/b1map_median.nii.gz')
-    print np.asarray(B1map_volume_med2) == np.asarray(B1map_volume_med)
-    print np.max(np.abs(np.asarray(B1map_volume_med2)-np.asarray(B1map_volume_med)))
+    # dilate the map to extrapolate outside the brain
     morpho = getattr(aimsalgo,
         'MorphoGreyLevel_' + aims.typeCode(B1map_volume.at(0)))()
     B1map_volume = morpho.doDilation(
-        B1map_volume_med2,
+        B1map_volume_med,
         max(BAFI_amplitude.header()['voxel_size'][:3])*4)
-    print 'dil:', np.max(np.asarray(B1map_volume)), np.asarray(B1map_volume).dtype
     aims.write(B1map_volume, '/tmp/b1map_dil.nii.gz')
-    #subprocess.check_call(['AimsMorphoMath', '-i', '/tmp/b1map_median.nii.gz',
-        #'-o', '/tmp/b1map_dil.nii.gz', '-m', 'dil',
-        #'-r', str(max(BAFI_amplitude.header()['voxel_size'][:3])*4)])
-    #B1map_volume = aims.read('/tmp/b1map_dil.nii.gz')
+    # "un-filter" the part which already had valid data
     B1map_ar = np.asarray(B1map_volume_med)
     np.asarray(B1map_volume)[B1map_ar>1e-2] = B1map_ar[B1map_ar>1e-2]
 aims.write(B1map_volume, "/tmp/b1map_final.nii.gz")
@@ -131,12 +140,8 @@ if options.gaussian != 0:
 
 GRE_5deg = aims.read(options.t1_lowangle)
 GRE_20deg = aims.read(options.t1_highangle)
-# temporary fix for voxel size bug
-#GRE_5deg.header()['voxel_size'][0] = 1.
-#GRE_20deg.header()['voxel_size'][0] = 1.
 
 B1map_vs = np.array(B1map_volume.header()['voxel_size'][:3])
-print 'B1map_vs:', B1map_vs
 GRE_vs = np.array(GRE_5deg.header()['voxel_size'][:3])
 
 translation = (B1map_vs - GRE_vs) / 2
@@ -182,7 +187,6 @@ T1map[np.isnan(T1map)] = sup_bound
 if options.inv:
     T1_max = np.max(T1map)
     T1map = T1_max - T1map
-    print 'T1_max:', T1_max, ', now:', np.max(T1map)
     # threshold from T1-weighted
     #T1map[np.asarray(GRE_5deg)<=40] *= 0.1
     gre_arr = np.asarray(GRE_5deg).astype(float)
