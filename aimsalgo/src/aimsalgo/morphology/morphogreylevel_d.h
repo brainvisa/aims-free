@@ -115,7 +115,7 @@ namespace aims
               }
         //   Writer< AimsData< int16_t > > ws( "sphere.ima" );
         //   ws.write( sphere );
-        std::cout << "Number of voxels in the list = " << list.size() << std::endl << std::endl;
+        std::cout << "Number of voxels in the structuring element = " << list.size() << std::endl << std::endl;
         return list;
       }
     else return list;
@@ -166,8 +166,12 @@ namespace aims
                 dataIn.getSizeZ(),
                 dataIn.getSizeT() );
 
-    carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
+    // FIXME: this copy sometimes gets a shared buffer. WHY ?
+    // carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
+    carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn.getSizeX(), dataIn.getSizeY(), dataIn.getSizeZ(), dataIn.getSizeT() ) );
     dataOut->fill( T(0) );
+    dataOut->header().copyProperties(
+      carto::Object::reference( dataIn.header() ) );
 
     int_radius = computeIntRadius( radius, voxelsize );
     list = doStructElement( radius, voxelsize );
@@ -176,7 +180,7 @@ namespace aims
       for(int z = 0; z < dim[2]; ++z)
         {
           //        float pct = float(z*100./dim[2]);
-          //         std::cout << "\rPourcentage effectue : " << pct << std::flush";
+          //         std::cout << "\rPercent done : " << pct << std::flush";
           for(int y = 0; y < dim[1]; ++y)
             for(int x = 0; x < dim[0]; ++x)
               {
@@ -247,38 +251,42 @@ namespace aims
                 dataIn.getSizeZ(),
                 dataIn.getSizeT() );
 
-    carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
+    // FIXME: this copy sometimes gets a shared buffer. WHY ?
+    // carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
+    carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn.getSizeX(), dataIn.getSizeY(), dataIn.getSizeZ(), dataIn.getSizeT() ) );
     dataOut->fill( T(0) );
+    dataOut->header().copyProperties(
+      carto::Object::reference( dataIn.header() ) );
 
     int_radius = computeIntRadius( radius, voxelsize );
     list = doStructElement( radius, voxelsize );
 
     for(int t = 0; t < dim[3]; ++t)
       for(int z = 0; z < dim[2]; ++z)
-        {
-          float pct = float(z*100./dim[2]);
-          std::cout << "\rPourcentage effectue : " << pct << std::flush;
-          for(int y = 0; y < dim[1]; ++y)
-            for(int x = 0; x < dim[0]; ++x)
-              {
-                T max = value, tmp;
-                for(int l = 0; l < int(list.size()); ++l)
-                  {
-                    Point3d coord( x + list[l][0],
-                                   y + list[l][1],
-                                   z + list[l][2] );
+      {
+        float pct = float(z*100./dim[2]);
+        std::cout << "\rPercent done : " << pct << std::flush;
+        for(int y = 0; y < dim[1]; ++y)
+          for(int x = 0; x < dim[0]; ++x)
+          {
+            T max = value, tmp;
+            for(int l = 0; l < int(list.size()); ++l)
+            {
+              Point3d coord( x + list[l][0],
+                              y + list[l][1],
+                              z + list[l][2] );
 
-                    if( (coord[0]>=0) && (coord[0]<dim[0] )
-                        && (coord[1]>=0) && (coord[1]<dim[1] )
-                        && (coord[2]>=0) && (coord[2]<dim[2] ) )
-                      {
-                        tmp = dataIn.at( coord[0], coord[1], coord[2] );
-                        if( tmp > max ) max = tmp;
-                      }
-                  }
-                dataOut->at( x, y, z, t ) = max;
+              if( (coord[0]>=0) && (coord[0]<dim[0] )
+                  && (coord[1]>=0) && (coord[1]<dim[1] )
+                  && (coord[2]>=0) && (coord[2]<dim[2] ) )
+              {
+                tmp = dataIn.at( coord[0], coord[1], coord[2] );
+                if( tmp > max ) max = tmp;
               }
-        }
+            }
+            dataOut->at( x, y, z, t ) = max;
+          }
+      }
     std::cout << std::endl;
     return dataOut;
   }
