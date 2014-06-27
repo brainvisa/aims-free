@@ -316,13 +316,13 @@ namespace soma {
     fullsize[ 2 ] = fullVolume->getSizeZ();
     fullsize[ 3 ] = fullVolume->getSizeT();
     if( viewframe[ 0 ] == 0 )
-      viewframe[ 0 ] = fullsize[ 0 ];
+      viewframe[ 0 ] = (fullsize[ 0 ] - position[ 0 ]);
     if( viewframe[ 1 ] == 0 )
-      viewframe[ 1 ] = fullsize[ 1 ];
+      viewframe[ 1 ] = (fullsize[ 1 ] - position[ 1 ]);
     if( viewframe[ 2 ] == 0 )
-      viewframe[ 2 ] = fullsize[ 2 ];
+      viewframe[ 2 ] = (fullsize[ 2 ] - position[ 2 ]);
     if( viewframe[ 3 ] == 0 )
-      viewframe[ 3 ] = fullsize[ 3 ];
+      viewframe[ 3 ] = (fullsize[ 3 ] - position[ 3 ]);
     localMsg( "===" );
 
     if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 ) 
