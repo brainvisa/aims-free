@@ -42,13 +42,14 @@ namespace carto
 {
 
 
+  /** VolumeProxy is the base class for volumes. It handles the management of
+      the volume size, but not its contents (it has no data block).
+  */
   template < typename T >
   class VolumeProxy : public Headered
   {
 
   public:
-
-    
 
     VolumeProxy( int sizeX = 1, int sizeY = 1, int sizeZ = 1, int sizeT = 1 );
     VolumeProxy( const VolumeProxy< T >& other );
@@ -58,6 +59,11 @@ namespace carto
     int getSizeY() const;
     int getSizeZ() const;
     int getSizeT() const;
+    /// get the 4 dimensions in a vector
+    std::vector<int> getSize() const;
+    /** get the voxel size from the header,
+       with 4 values defaulting to 1.mm if not present */
+    std::vector<float> getVoxelSize() const;
 
     VolumeProxy< T >& operator=( const VolumeProxy< T >& other );
 
@@ -107,6 +113,21 @@ namespace carto
   {
 
     return _sizeT;
+
+  }
+
+
+  template < typename T >
+  inline
+  std::vector<int> VolumeProxy< T >::getSize() const
+  {
+
+    std::vector<int> size(4);
+    size[0] = _sizeX;
+    size[1] = _sizeY;
+    size[2] = _sizeZ;
+    size[3] = _sizeT;
+    return size;
 
   }
 

@@ -110,6 +110,46 @@ namespace carto
 
   }
 
+
+  template < typename T >
+  std::vector<float> VolumeProxy< T >::getVoxelSize() const
+  {
+
+    std::vector<float> voxelsize(4, 1.);
+    carto::Object vso;
+    try
+    {
+      vso = header().getProperty( "voxel_size" );
+      if( !vso.isNull() )
+      {
+        carto::Object it = vso->objectIterator();
+        if( it->isValid() )
+        {
+          voxelsize[0] = it->currentValue()->getScalar();
+          it->next();
+          if( it->isValid() )
+          {
+            voxelsize[1] = it->currentValue()->getScalar();
+            it->next();
+            if( it->isValid() )
+            {
+              voxelsize[2] = it->currentValue()->getScalar();
+              it->next();
+              if( it->isValid() )
+                voxelsize[3] = it->currentValue()->getScalar();
+            }
+          }
+        }
+      }
+    }
+    catch( std::exception & )
+    {
+    }
+
+    return voxelsize;
+
+  }
+
 }
 
 #endif

@@ -73,6 +73,72 @@ namespace carto
 
   }
 
+
+  /***************************************************************************
+   * Constructor with border
+   **************************************************************************/
+  template < typename T >
+  Volume< T >::Volume( int sizeX, int sizeY, int sizeZ,
+                       int sizeT, int bordersize,
+                       const AllocatorContext& allocatorContext,
+                       bool allocated )
+    : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
+      _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
+        DataSource::none() ) )
+#ifndef CARTO_USE_BLITZ
+    ,
+      _lineoffset( 0 ),
+      _sliceoffset( 0 ),
+      _volumeoffset( 0 )
+#endif
+  {
+    if( bordersize != 0 )
+    {
+      _refvol.reset( new Volume<T>( sizeX + bordersize*2,
+        sizeY + bordersize*2,
+        sizeZ + bordersize*2,
+        sizeT, allocatorContext, allocated ) );
+
+      allocate( -1, -1, -1, -1, true,
+        _refvol->allocatorContext().isAllocated()
+          ? AllocatorContext( AllocatorStrategy::NotOwner,
+                              rc_ptr<DataSource>( new BufferDataSource
+                                ( (char *) &(*_refvol)( bordersize, bordersize,
+                                                bordersize, 0 ),
+                                  sizeX * sizeY * sizeZ * sizeT
+                                  * sizeof(T) ) ) )
+          : allocatorContext );
+      if( _refvol->allocatorContext().isAllocated() )
+      {
+        // fix offsets
+#ifdef CARTO_USE_BLITZ
+        _blitz.reference
+          ( blitz::Array<T,4>
+            ( &_items[0],
+              blitz::shape( VolumeProxy<T>::getSizeX(),
+                            VolumeProxy<T>::getSizeY(),
+                            VolumeProxy<T>::getSizeZ(),
+                            VolumeProxy<T>::getSizeT() ),
+              blitz::shape( 1, &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 ),
+                            &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 ),
+                            &(*_refvol)( 0, 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 )
+                          ),
+              blitz::GeneralArrayStorage<4>
+              ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+#else
+        _lineoffset = &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 );
+        _sliceoffset = &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 );
+        _volumeoffset = &(*_refvol)( 0, 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 );
+#endif
+      }
+    }
+    else // no border
+    {
+      allocate( -1, -1, -1, -1, allocated, allocatorContext );
+    }
+
+  }
+
   /***************************************************************************
    * Buffer Constructor
    **************************************************************************/
@@ -408,25 +474,25 @@ namespace carto
       }
 
     if ( !allocate // why !allocate ?
-	 || !_items.allocatorContext().isAllocated() 
-	 || ( ( oldSizeX == -1 ) &&
-	      ( oldSizeY == -1 ) &&
-	      ( oldSizeZ == -1 ) &&
-	      ( oldSizeT == -1 ) ) )
-      {
-  
-        // allocating memory space
-        _items.free();
-	if( allocate )
-	  _items.allocate( ( size_t )sizeXYZT, ac );
-      }
+          || !_items.allocatorContext().isAllocated()
+          || ( ( oldSizeX == -1 ) &&
+              ( oldSizeY == -1 ) &&
+              ( oldSizeZ == -1 ) &&
+              ( oldSizeT == -1 ) ) )
+    {
+
+      // allocating memory space
+      _items.free();
+      if( allocate )
+        _items.allocate( ( size_t )sizeXYZT, ac );
+    }
     else if ( ( oldSizeX != VolumeProxy<T>::_sizeX ) ||
               ( oldSizeY != VolumeProxy<T>::_sizeY ) ||
               ( oldSizeZ != VolumeProxy<T>::_sizeZ ) ||
-              ( oldSizeT != VolumeProxy<T>::_sizeT ) 
+              ( oldSizeT != VolumeProxy<T>::_sizeT )
               || &ac != &_items.allocatorContext() )
       {
-       
+
         // allocating a new memory space
         AllocatedVector<T> newItems( ( size_t )sizeXYZT, ac );
 

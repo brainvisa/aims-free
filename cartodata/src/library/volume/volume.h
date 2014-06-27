@@ -148,6 +148,15 @@ namespace carto
                      const AllocatorContext& allocatorContext
                       = AllocatorContext(), 
                      bool allocated = true );
+    /// Volume construction and allocation
+    /// Same as the above constructor,but allows to specify a border size.
+    /// Border is handled as a larger volume, with a view in it. The current
+    /// volume is this view.
+    explicit Volume( int sizeX, int sizeY, int sizeZ,
+                     int sizeT, int bordersize,
+                     const AllocatorContext& allocatorContext
+                      = AllocatorContext(),
+                     bool allocated = true );
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
     Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer );
