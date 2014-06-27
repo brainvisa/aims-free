@@ -30,6 +30,7 @@ public:
     {
     public:
       Position4Di( int x = 0, int y = 0, int z = 0, int t = 0 );
+      Position4Di( const Volume_%Template1typecode%::Position4Di & );
       ~Position4Di();
       int operator [] ( int coord ) const;
     };
@@ -37,6 +38,10 @@ public:
     Volume_%Template1typecode%( int = 1, int = 1, int = 1, int = 1,
       const carto::AllocatorContext& allocatorContext
         = carto::AllocatorContext(), bool = true ) /ReleaseGIL/;
+    Volume_%Template1typecode%( int sizeX, int sizeY, int sizeZ,
+      int sizeT, int bordersize,
+      const carto::AllocatorContext& allocatorContext
+      = carto::AllocatorContext(), bool allocated = true ) /ReleaseGIL/;
     Volume_%Template1typecode%( const Volume_%Template1typecode% & )
       /ReleaseGIL/;
     Volume_%Template1typecode%( rc_ptr_Volume_%Template1typecode% other,
@@ -52,6 +57,9 @@ public:
     int getSizeY() const;
     int getSizeZ() const;
     int getSizeT() const;
+    vector_S32 getSize() const;
+    vector_FLOAT getVoxelSize() const;
+
     const carto::AllocatorContext & allocatorContext() const;
     void fill( const %Template1% & value ) /ReleaseGIL/;
 

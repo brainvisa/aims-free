@@ -114,6 +114,10 @@ namespace carto
         _coords[2] = z;
         _coords[3] = t;
       }
+      Position4Di( const Position4Di & pos ) : _coords( pos._coords )
+      {
+      }
+
       ~Position4Di() {}
             int & operator [] ( int coord )       { return _coords[ coord ]; }
       const int & operator [] ( int coord ) const { return _coords[ coord ]; }
@@ -170,6 +174,9 @@ namespace carto
             const Position4Di & size = Position4Di( -1, -1, -1, -1 ),
             const AllocatorContext & allocContext = AllocatorContext() );
     /// Copy constructor
+    /// The copy constructors actually duplicates data buffers. In the case
+    /// of a volume view, the underlying volume is also duplicated, so the
+    /// new volume will be a view in a new duplicate bigger volume.
     Volume( const Volume< T >& other );
     virtual ~Volume();
 

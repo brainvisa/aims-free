@@ -130,36 +130,8 @@ namespace aims
     T value = carto::VolumeUtil<T>::accumulate(
       std::max<T>, dataIn, -std::numeric_limits<T>::max() );
 
-    Point4df voxelsize( 1, 1, 1, 1 );
-    carto::Object vso;
-    try
-    {
-      vso = dataIn.header().getProperty( "voxel_size" );
-      if( !vso.isNull() )
-      {
-        carto::Object it = vso->objectIterator();
-        if( it->isValid() )
-        {
-          voxelsize[0] = it->currentValue()->getScalar();
-          it->next();
-          if( it->isValid() )
-          {
-            voxelsize[1] = it->currentValue()->getScalar();
-            it->next();
-            if( it->isValid() )
-            {
-              voxelsize[2] = it->currentValue()->getScalar();
-              it->next();
-              if( it->isValid() )
-                voxelsize[3] = it->currentValue()->getScalar();
-            }
-          }
-        }
-      }
-    }
-    catch( std::exception & )
-    {
-    }
+    std::vector<float> vs = dataIn.getVoxelSize();
+    Point4df voxelsize( vs[0], vs[1], vs[2], vs[3] );
 
     Point4d dim( dataIn.getSizeX(),
                 dataIn.getSizeY(),
@@ -215,36 +187,8 @@ namespace aims
     T value = carto::VolumeUtil<T>::accumulate(
       std::min<T>, dataIn, std::numeric_limits<T>::max() );
 
-    Point4df voxelsize( 1, 1, 1, 1 );
-    carto::Object vso;
-    try
-    {
-      vso = dataIn.header().getProperty( "voxel_size" );
-      if( !vso.isNull() )
-      {
-        carto::Object it = vso->objectIterator();
-        if( it->isValid() )
-        {
-          voxelsize[0] = it->currentValue()->getScalar();
-          it->next();
-          if( it->isValid() )
-          {
-            voxelsize[1] = it->currentValue()->getScalar();
-            it->next();
-            if( it->isValid() )
-            {
-              voxelsize[2] = it->currentValue()->getScalar();
-              it->next();
-              if( it->isValid() )
-                voxelsize[3] = it->currentValue()->getScalar();
-            }
-          }
-        }
-      }
-    }
-    catch( std::exception & )
-    {
-    }
+    std::vector<float> vs = dataIn.getVoxelSize();
+    Point4df voxelsize( vs[0], vs[1], vs[2], vs[3] );
 
     Point4d dim( dataIn.getSizeX(),
                 dataIn.getSizeY(),
@@ -252,7 +196,7 @@ namespace aims
                 dataIn.getSizeT() );
 
     // FIXME: this copy sometimes gets a shared buffer. WHY ?
-    // carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
+//     carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
     carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn.getSizeX(), dataIn.getSizeY(), dataIn.getSizeZ(), dataIn.getSizeT() ) );
     dataOut->fill( T(0) );
     dataOut->header().copyProperties(

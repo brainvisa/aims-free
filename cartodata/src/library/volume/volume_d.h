@@ -84,13 +84,14 @@ namespace carto
                        bool allocated )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
       _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
-        DataSource::none() ) )
+        DataSource::none() ) ),
 #ifndef CARTO_USE_BLITZ
     ,
       _lineoffset( 0 ),
       _sliceoffset( 0 ),
-      _volumeoffset( 0 )
+      _volumeoffset( 0 ),
 #endif
+      _pos( bordersize, bordersize, bordersize, 0 )
   {
     if( bordersize != 0 )
     {
@@ -249,23 +250,61 @@ namespace carto
   Volume< T >::Volume( const Volume< T >& other )
     : RCObject(), 
       VolumeProxy< T >( other ),
-      _items( other._items ), 
+      _items( other._items ),
 #ifdef CARTO_USE_BLITZ
       // TODO: test blitz ownership / strides
       // _blitz = other.blitz;
       _blitz( &_items[0], 
-              blitz::shape( VolumeProxy<T>::_sizeX, 
-                            VolumeProxy<T>::_sizeY, 
-                            VolumeProxy<T>::_sizeZ, 
-                            VolumeProxy<T>::_sizeT ), 
+              blitz::shape( VolumeProxy<T>::_sizeX,
+                            VolumeProxy<T>::_sizeY,
+                            VolumeProxy<T>::_sizeZ,
+                            VolumeProxy<T>::_sizeT ),
               blitz::GeneralArrayStorage<4>
-              ( blitz::shape( 0, 1, 2, 3 ), true ) )
+              ( blitz::shape( 0, 1, 2, 3 ), true ) ),
 #else
       _lineoffset( other._lineoffset ), 
       _sliceoffset( other._sliceoffset ), 
-      _volumeoffset( other._volumeoffset )
+      _volumeoffset( other._volumeoffset ),
 #endif
+      _refvol( other.refVolume().get() ?
+        new Volume<T>( *other.refVolume() ) : 0 ),
+      _pos( other.posInRefVolume() )
   {
+    if( _refvol.get() ) // view case: the underlying volume is copied.
+    {
+      Position4Di pos = other.posInRefVolume();
+      allocate( -1, -1, -1, -1, true, _refvol->allocatorContext().isAllocated()
+                ? AllocatorContext( AllocatorStrategy::NotOwner,
+                    rc_ptr<DataSource>( new BufferDataSource
+                      ( (char *) &(*_refvol)( pos[0], pos[1], pos[2], pos[3] ),
+                      VolumeProxy<T>::getSizeX() * VolumeProxy<T>::getSizeY()
+                        * VolumeProxy<T>::getSizeZ()
+                        * VolumeProxy<T>::getSizeT()
+                        * sizeof(T) ) ) )
+                : AllocatorContext( other.allocatorContext() ) );
+      if( _refvol->allocatorContext().isAllocated() )
+      {
+        // fix offsets
+#ifdef CARTO_USE_BLITZ
+        _blitz.reference
+          ( blitz::Array<T,4>
+            ( &_items[0],
+              blitz::shape( VolumeProxy<T>::getSizeX(),
+                            VolumeProxy<T>::getSizeY(),
+                            VolumeProxy<T>::getSizeZ(),
+                            VolumeProxy<T>::getSizeT() ),
+              blitz::shape( 1, &other( 0, 1, 0 ) - &other( 0, 0, 0 ),
+                            &other( 0, 0, 1 ) - &other( 0, 0, 0 ),
+                            &other( 0, 0, 0, 1 ) - &other( 0, 0, 0 ) ),
+              blitz::GeneralArrayStorage<4>
+              ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+#else
+        _lineoffset = &other( 0, 1, 0 ) - &other( 0, 0, 0 );
+        _sliceoffset = &other( 0, 0, 1 ) - &other( 0, 0, 0 );
+        _volumeoffset = &other( 0, 0, 0, 1 ) - &other( 0, 0, 0 );
+#endif
+      }
+    }
   }
 
 
