@@ -163,7 +163,7 @@ T NotNullMeanFilterFunc<T>::doit( AimsData<T>& data ) const
   // Goes through the data and count number of values for each class
   for (it = data.begin(); it != data.end(); it++)
   {
-    if ((double)(*it) != 0.) {
+    if ((*it) != (T)0) {
       sum = sum + (double)(*it);
       count ++;
     }
