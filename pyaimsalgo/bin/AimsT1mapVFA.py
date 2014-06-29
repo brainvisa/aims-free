@@ -58,6 +58,13 @@ parser.add_option('-g', '--gaussian', dest='gaussian', default=0., type=float,
     help='additional gaussian smoothing for the B1 correction map. default: 0mm: not applied')
 parser.add_option('--inv', dest='inv', action='store_true',
     help='invert T1 map image to look like a T1-weighted')
+parser.add_option('--out_b1map_raw', dest='out_b1map_raw',
+    help='output the raw B1 map in the specified file')
+parser.add_option('--out_b1map_median', dest='out_b1map_median',
+    help='output the B1 map with median filter in the specified file '
+    '(if median option is used)')
+parser.add_option('--out_b1map', dest='out_b1map',
+    help='output the final B1 map in the specified file')
 
 (options, args) = parser.parse_args()
 
@@ -78,7 +85,8 @@ B1map_volume = aims.Volume(B1map_farray)
 #B1map_volume.header().update(BAFI_amplitude.header())
 B1map_volume.header()['voxel_size'] = BAFI_amplitude.header()['voxel_size']
 #B1map_farray[np.asarray(BAFI_amplitude)[:,:,:,0]<50] = 1.
-aims.write(B1map_volume, "/tmp/b1map.nii.gz")
+if options.out_b1map_raw:
+    aims.write(B1map_volume, options.out_b1map_raw)
 
 # extrapolate / smooth and resample the B1 map
 
@@ -91,14 +99,12 @@ if options.smooth_type == 'dilated':
 elif options.smooth_type == 'median':
     # median filtering is meant to fill small holes in the B1 map
     # use a larger volume (border) to get it done in the border layer
-    print '*** MEDIAN ***'
     volume_type = B1map_volume.__class__
     vol_border = volume_type(B1map_volume.getSizeX(),
         B1map_volume.getSizeY(),
         B1map_volume.getSizeZ(),
         B1map_volume.getSizeT(), 1)
     np.asarray(vol_border)[:,:,:,0] = np.asarray(B1map_volume)
-    print 'bordered vol:', vol_border.getSize(), ' / ', vol_border.refVolume().getSize()
     vol_border.copyHeaderFrom(B1map_volume.header())
     vol_border.refVolume().copyHeaderFrom(B1map_volume.header())
     median = getattr( aimsalgo,
@@ -110,33 +116,28 @@ elif options.smooth_type == 'median':
     B1map_volume_med = volume_type(B1map_volume_med_border, 
         volume_type.Position4Di(1,1,1,0), 
         volume_type.Position4Di(*B1map_volume.getSize()))
-    print 'median:', B1map_volume_med.getSize(), ' / ', B1map_volume_med.refVolume().getSize()
     B1map_volume_med_arr = np.asarray(B1map_volume_med)
     B1map_volume_med_arr[np.isnan(B1map_volume_med_arr)] = 0
-    print 'writing median.'
-    aims.write(B1map_volume_med, '/tmp/b1map_median.nii.gz')
+    if options.out_b1map_median:
+        print 'writing median.'
+        aims.write(B1map_volume_med, options.out_b1map_median)
     print 'median done.'
     # dilate the map to extrapolate outside the brain
     morpho = getattr(aimsalgo,
         'MorphoGreyLevel_' + aims.typeCode(B1map_volume.at(0)))()
-    print '*** DILATION ***'
     B1map_volume = morpho.doDilation(
         B1map_volume_med,
         max(BAFI_amplitude.header()['voxel_size'][:3])*4)
-    #print 'after dil, vol ref:', B1map_volume.refVolume().get()
-    aims.write(B1map_volume, '/tmp/b1map_dil.nii.gz')
-    print 'written. stop.'
-    #sys.exit(1)
     # "un-filter" the part which already had valid data
     B1map_ar = np.asarray(B1map_volume_med)
     np.asarray(B1map_volume)[B1map_ar>1e-2] = B1map_ar[B1map_ar>1e-2]
-aims.write(B1map_volume, "/tmp/b1map_final.nii.gz")
 if options.gaussian != 0:
     gsmooth = getattr( aimsalgo,
         'Gaussian3DSmoothing_' + aims.typeCode(B1map_volume.at(0)))
     B1map_volume = gsmooth(options.gaussian, options.gaussian,
         options.gaussian).doit(B1map_volume).volume()
-    aims.write(B1map_volume, "/tmp/b1map_smooth.nii.gz")
+if options.out_b1map:
+    aims.write(B1map_volume, out_b1map)
 
 
 GRE_5deg = aims.read(options.t1_lowangle)
@@ -170,7 +171,6 @@ B1map = resampler.doit(transform, GRE_5deg.getSizeX(), GRE_5deg.getSizeY(),
     GRE_5deg.getSizeZ(), GRE_vs).volume()
 B1map_ar = np.asarray(B1map)
 B1map_ar[B1map_ar<0] = 0
-aims.write(B1map, '/tmp/resampled_b1map.nii.gz')
 
 GRE_data = t1mapping.GREData2FlipAngles(GRE_5deg, GRE_20deg)
 GRE_data.flip_angles = [5, 20]  # degrees
