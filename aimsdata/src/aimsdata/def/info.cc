@@ -82,6 +82,7 @@ void AimsDataInfo::printPaths( ostream & out )
 
 void AimsDataInfo::printBuiltins( ostream & out )
 {
+#if 0 // builtin plugins is completely obsolete.
   out << "VIDA IO           : ";
 #ifdef VIDA_LIB
   out << "yes" << endl;
@@ -105,6 +106,7 @@ void AimsDataInfo::printBuiltins( ostream & out )
   out << "yes" << endl;
 #else
   out << "no" << endl;
+#endif
 #endif
 }
 

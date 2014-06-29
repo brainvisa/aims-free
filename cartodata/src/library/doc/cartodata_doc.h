@@ -72,9 +72,6 @@ namespace carto
 
 /*! \page cartovolumes Volumes concept philiosophy
 
-  It is still a work in progress: what I'm talking about here has not been 
-  implemented at the moment.
-
   Volumes rely on the allocator system of somaio: see \ref allocators.
 
   First, a Volume is built using any allocator method. This means a DataSource 
@@ -164,4 +161,27 @@ namespace carto
 
 */
 
+/*! \page cartovolumes Volumes IO in CartoData
+
+  Soma-IO provides a new IO system: soma::Reader, soma::Writer etc.
+  Their implementation for volumes support partial reading/writing featuree
+  (depending on the format).
+
+  These partial IO may be speficied in options, or in the file name URL, in
+  the following manner:
+
+  Reading:
+
+  "finemane.nii.gz?ox=30&sx=50&oy=40&sy=100" reads a view in the NIFTI file finemane.nii.gz, with the origin (in AIMS coordinates) at (30, 40, 0, 0),
+  with the view size (50, 100, ?, ?) (? being the whole volume size).
+
+  Writing:
+
+  "filename.ima?partial_writing=1&ox=30&oy=40" will write the 
+  volume in memory as a part of a larger, existing file, filename.ima, at
+  position (30, 40, 0, 0) in it.
+
+  To save a part of the volume in memory, you have to make a view in it (as a
+  secondary volume) and save this view.
+*/
 }

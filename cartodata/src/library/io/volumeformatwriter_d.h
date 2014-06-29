@@ -68,12 +68,12 @@ namespace soma
   VolumeFormatWriter<T>::~VolumeFormatWriter()
   {
   }
-  
+
   //==========================================================================
   //   W R I T E   M E T H O D S
   //==========================================================================
   template <typename T>
-  bool VolumeFormatWriter<T>::write( const carto::Volume<T> & obj, 
+  bool VolumeFormatWriter<T>::write( const carto::Volume<T> & obj,
                                      carto::rc_ptr<DataSourceInfo> dsi,
                                      carto::Object options )
   {
@@ -81,14 +81,14 @@ namespace soma
     localMsg( "checking for memory mapping..." );
     if( obj.allocatorContext().allocatorType() == AllocatorStrategy::ReadWriteMap )
       return true;
-    
+
     //=== multiresolution level ==============================================
     localMsg( "reading resolution level..." );
     int level = 0;
     if( options->hasProperty( "resolution_level" ) )
       options->getProperty( "resolution_level", level );
     localMsg( " -> level to write : " + carto::toString( level ) );
-    
+
     //=== partial reading ====================================================
     localMsg( "checking for partial writing..." );
     bool partial = false;
@@ -96,11 +96,11 @@ namespace soma
       partial = true;
     if( partial )
       localMsg( " -> partial writing enabled." );
-    
+
     std::vector<int> position( 4, 0 );
     std::vector<int> view( 4, 0 );
     std::vector<int> size( 4, 0 );
-    
+
     //=== checking if obj is a view ==========================================
     localMsg( "checking if object is a view..." );
     carto::Volume<T> *parent1 = 0;
@@ -153,14 +153,14 @@ namespace soma
       localMsg( " -> from self" )
       size = view;
     }
-    
+
     if( !partial ) {
       // we treat the view as a pure Volume
       localMsg( " -> from self (no partial writing)" )
       size = view;
       position = std::vector<int>( 4, 0 );
     }
-    
+
     localMsg( " -> Full volume size : ( "
               + carto::toString( size[0] ) + ", "
               + carto::toString( size[1] ) + ", "
@@ -176,14 +176,14 @@ namespace soma
               + carto::toString( position[1] ) + ", "
               + carto::toString( position[2] ) + ", "
               + carto::toString( position[3] ) + " )" );
-    
+
     //=== checking for borders ===============================================
     localMsg( "checking for borders..." );
     bool withborders = false;
     if( parent1 && parent1->allocatorContext().isAllocated() )
       withborders = true;
     localMsg( std::string(" -> ") + ( withborders ? "with borders" : "without borders" ) );
-    
+
     //=== header info ========================================================
     localMsg( "setting header..." );
     if( !options )
@@ -239,39 +239,45 @@ namespace soma
     localMsg( "writing volume..." );
     if( parent1 || obj.allocatorContext().isAllocated() )
     {
-      if( !withborders ) {
-        _imw->write( (T*) &obj(0,0,0,0), *dsi, position, view, options );
-      } else {
-        int y, z, t;
-        std::vector<int> posline ( position );
-        std::vector<int> sizeline ( 4, 1 );
-        sizeline[ 0 ] = view[ 0 ];
-        for( t=0; t<view[3]; ++t )
-          for( z=0; z<view[2]; ++z )
-            for( y=0; y<view[1]; ++y ) {
-              posline[ 1 ] = position[ 1 ] + y;
-              posline[ 2 ] = position[ 2 ] + z;
-              posline[ 3 ] = position[ 3 ] + t;
-              _imw->write( (T*) &obj(0,y,z,t), *dsi, posline, 
-                          sizeline, options );
-            }
-      }
+      std::vector<long> strides(4);
+      strides[0] = &obj(1,0,0,0) - &obj(0,0,0,0);
+      strides[1] = &obj(0,1,0,0) - &obj(0,0,0,0);
+      strides[2] = &obj(0,0,1,0) - &obj(0,0,0,0);
+      strides[3] = &obj(0,0,0,1) - &obj(0,0,0,0);
+//       if( !withborders ) {
+        _imw->write( (T*) &obj(0,0,0,0), *dsi, position, view, strides,
+                     options );
+//       } else {
+//         int y, z, t;
+//         std::vector<int> posline ( position );
+//         std::vector<int> sizeline ( 4, 1 );
+//         sizeline[ 0 ] = view[ 0 ];
+//         for( t=0; t<view[3]; ++t )
+//           for( z=0; z<view[2]; ++z )
+//             for( y=0; y<view[1]; ++y ) {
+//               posline[ 1 ] = position[ 1 ] + y;
+//               posline[ 2 ] = position[ 2 ] + z;
+//               posline[ 3 ] = position[ 3 ] + t;
+//               _imw->write( (T*) &obj(0,y,z,t), *dsi, posline,
+//                           sizeline, options );
+//             }
+//       }
     }
     // else we just needed to write the header and reserve file space
     // no image to write
-    
-    // we reset at 0 the ImageWriter's members (sizes, binary, ...) so that 
+
+    // we reset at 0 the ImageWriter's members (sizes, binary, ...) so that
     // they are recomputed at the next writing.
     _imw->resetParams();
     return true;
   }
-  
+
   template <typename T>
   void VolumeFormatWriter<T>::attach( carto::rc_ptr<ImageWriter<T> > imw )
   {
     _imw = imw;
   }
-  
+
 //////////////////////////////////////////////////////////////////////////////
 ////            V O L U M E R E F F O R M A T W R I T E R                 ////
 //////////////////////////////////////////////////////////////////////////////
@@ -280,9 +286,9 @@ namespace soma
   VolumeRefFormatWriter<T>::~VolumeRefFormatWriter()
   {
   }
-  
+
   template <typename T>
-  bool VolumeRefFormatWriter<T>::write( const carto::VolumeRef<T> & obj, 
+  bool VolumeRefFormatWriter<T>::write( const carto::VolumeRef<T> & obj,
                                         carto::rc_ptr<DataSourceInfo> dsi,
                                         carto::Object options )
   {
@@ -290,13 +296,13 @@ namespace soma
     vfw.attach( _imw );
     return vfw.write( *obj, dsi, options );
   }
-  
+
   template <typename T>
   void VolumeRefFormatWriter<T>::attach( carto::rc_ptr<ImageWriter<T> > imw )
   {
     _imw = imw;
   }
-  
+
 }
 
 #undef localMsg
