@@ -91,40 +91,42 @@ if options.smooth_type == 'dilated':
 elif options.smooth_type == 'median':
     # median filtering is meant to fill small holes in the B1 map
     # use a larger volume (border) to get it done in the border layer
+    print '*** MEDIAN ***'
     volume_type = B1map_volume.__class__
-    vol_border = volume_type(B1map_volume.getSizeX() + 2,
-        B1map_volume.getSizeY() + 2,
-        B1map_volume.getSizeZ() + 2,
-        B1map_volume.getSizeT())
-    vol_border.fill(0)
-    p = dict([(x,y) for x,y in B1map_volume.header().iteritems() \
-        if x not in ('sizeX', 'sizeY', 'sizeZ', 'sizeT', 'volume_dimension')])
-    vol_border.header().update(p)
-    vol_border2 = volume_type(
-        vol_border, vol_border.Position4Di(1,1,1,0),
-        vol_border.Position4Di(B1map_volume.getSizeX(),
-        B1map_volume.getSizeY(), B1map_volume.getSizeZ(),
-        B1map_volume.getSizeT()))
-    np.asarray(vol_border2)[:,:,:,0] = np.asarray(B1map_volume)
+    vol_border = volume_type(B1map_volume.getSizeX(),
+        B1map_volume.getSizeY(),
+        B1map_volume.getSizeZ(),
+        B1map_volume.getSizeT(), 1)
+    np.asarray(vol_border)[:,:,:,0] = np.asarray(B1map_volume)
+    print 'bordered vol:', vol_border.getSize(), ' / ', vol_border.refVolume().getSize()
+    vol_border.copyHeaderFrom(B1map_volume.header())
+    vol_border.refVolume().copyHeaderFrom(B1map_volume.header())
     median = getattr( aimsalgo,
         'MedianSmoothing_' + aims.typeCode(B1map_volume.at(0)))
-    B1map_volume_med = median().doit(vol_border).volume()
-    # get the smaller view
-    B1map_volume_med = volume_type(B1map_volume_med,
-        vol_border.Position4Di(1,1,1,0),
-        vol_border.Position4Di(B1map_volume_med.getSizeX()-2,
-        B1map_volume_med.getSizeY()-2, B1map_volume_med.getSizeZ()-2,
-        B1map_volume.getSizeT()))
+    # apply the filter on the larger image since the filter actually only 
+    # applies to the interior limited by the mask size
+    B1map_volume_med_border = median().doit(vol_border.refVolume()).volume()
+    # get a smaller view in the result
+    B1map_volume_med = volume_type(B1map_volume_med_border, 
+        volume_type.Position4Di(1,1,1,0), 
+        volume_type.Position4Di(*B1map_volume.getSize()))
+    print 'median:', B1map_volume_med.getSize(), ' / ', B1map_volume_med.refVolume().getSize()
     B1map_volume_med_arr = np.asarray(B1map_volume_med)
     B1map_volume_med_arr[np.isnan(B1map_volume_med_arr)] = 0
+    print 'writing median.'
     aims.write(B1map_volume_med, '/tmp/b1map_median.nii.gz')
+    print 'median done.'
     # dilate the map to extrapolate outside the brain
     morpho = getattr(aimsalgo,
         'MorphoGreyLevel_' + aims.typeCode(B1map_volume.at(0)))()
+    print '*** DILATION ***'
     B1map_volume = morpho.doDilation(
         B1map_volume_med,
         max(BAFI_amplitude.header()['voxel_size'][:3])*4)
+    #print 'after dil, vol ref:', B1map_volume.refVolume().get()
     aims.write(B1map_volume, '/tmp/b1map_dil.nii.gz')
+    print 'written. stop.'
+    #sys.exit(1)
     # "un-filter" the part which already had valid data
     B1map_ar = np.asarray(B1map_volume_med)
     np.asarray(B1map_volume)[B1map_ar>1e-2] = B1map_ar[B1map_ar>1e-2]
