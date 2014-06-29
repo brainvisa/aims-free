@@ -56,7 +56,7 @@ namespace carto
   so needs their requirements.
 
   Optionally, cartodata may make use of the following libraries if available:
-  - blitz++: http://www.oonumerics.org/blitz/ for efficient volume accessors
+  - blitz++: http://blitz.sourceforge.net/ for efficient volume accessors
     and array API
 
 
