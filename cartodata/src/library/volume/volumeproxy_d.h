@@ -150,6 +150,31 @@ namespace carto
 
   }
 
+
+  template < typename T >
+  void VolumeProxy< T >::copyHeaderFrom( const Object & other )
+  {
+    if( other.isNull() )
+      return;
+
+    std::set<std::string> forbidden;
+    forbidden.insert( "sizeX" );
+    forbidden.insert( "sizeY" );
+    forbidden.insert( "sizeZ" );
+    forbidden.insert( "sizeT" );
+    forbidden.insert( "volume_dimension" );
+
+    PropertySet & hdr = header();
+
+    Object it = other->objectIterator();
+    while( it->isValid() )
+    {
+      if( forbidden.find( it->key() ) == forbidden.end() )
+        hdr.setProperty( it->key(), it->currentValue() );
+      it->next();
+    }
+  }
+
 }
 
 #endif

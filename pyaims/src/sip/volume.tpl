@@ -60,6 +60,9 @@ public:
     vector_S32 getSize() const;
     vector_FLOAT getVoxelSize() const;
 
+    virtual void copyHeaderFrom( const carto::PropertySet & other );
+    virtual void copyHeaderFrom( const carto::Object & other );
+
     const carto::AllocatorContext & allocatorContext() const;
     void fill( const %Template1% & value ) /ReleaseGIL/;
 

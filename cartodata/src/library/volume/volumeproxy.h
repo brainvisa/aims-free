@@ -67,6 +67,12 @@ namespace carto
 
     VolumeProxy< T >& operator=( const VolumeProxy< T >& other );
 
+    /** copy properties from other to this, avoiding forbidden
+        properties like size.
+    */
+    virtual void copyHeaderFrom( const PropertySet & other );
+    virtual void copyHeaderFrom( const Object & other );
+
   protected:
 
     int _sizeX;
@@ -130,6 +136,15 @@ namespace carto
     return size;
 
   }
+
+
+  template < typename T >
+  inline
+  void VolumeProxy< T >::copyHeaderFrom( const PropertySet & other )
+  {
+    copyHeaderFrom( Object::reference( other ) );
+  }
+
 
  //  instanciations
 
