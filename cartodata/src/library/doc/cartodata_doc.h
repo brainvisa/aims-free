@@ -63,7 +63,7 @@ namespace carto
   \section cartodata_maincontents Main contents
 
   - <b>\ref cartovolumes</b>
-  - IO types and formats implementations on volumes (under development)
+  - \ref cartovolumes_io : IO types and formats implementations on volumes
 
   - <b><a href="changelog.html">Change Log</a></b>
 
@@ -161,21 +161,21 @@ namespace carto
 
 */
 
-/*! \page cartovolumes Volumes IO in CartoData
+/*! \page cartovolumes_io Volumes IO in CartoData
 
   Soma-IO provides a new IO system: soma::Reader, soma::Writer etc.
-  Their implementation for volumes support partial reading/writing featuree
+  Their implementation for volumes support partial reading/writing features
   (depending on the format).
 
   These partial IO may be speficied in options, or in the file name URL, in
   the following manner:
 
-  Reading:
+  \b Reading:
 
-  "finemane.nii.gz?ox=30&sx=50&oy=40&sy=100" reads a view in the NIFTI file finemane.nii.gz, with the origin (in AIMS coordinates) at (30, 40, 0, 0),
+  "filename.nii.gz?ox=30&sx=50&oy=40&sy=100" reads a view in the NIFTI file filename.nii.gz, with the origin (in AIMS coordinates) at (30, 40, 0, 0),
   with the view size (50, 100, ?, ?) (? being the whole volume size).
 
-  Writing:
+  \b Writing:
 
   "filename.ima?partial_writing=1&ox=30&oy=40" will write the 
   volume in memory as a part of a larger, existing file, filename.ima, at
@@ -183,5 +183,18 @@ namespace carto
 
   To save a part of the volume in memory, you have to make a view in it (as a
   secondary volume) and save this view.
+
+  Such URL syntax is supported in the Soma-IO system implementation for 
+  volumes, so will be used for every format. Some formats may or may not use
+  these options, however.
+
+  In AIMS, Soma-IO is used alternately, and in addition to the former AIMS IO
+  system, which does not support such URL options. So the result will actually
+  depend on whether the IO format is implemented in the Soma-IO or the AIMS
+  layer.
+
+  For formats implemented in the Soma-IO layer, such options will be available
+  with every reader/writer or progrem: anatomist, AimsFileConvert, or the
+  AIMS python API (aims.read() etc).
 */
 }
