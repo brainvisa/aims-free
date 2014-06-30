@@ -52,7 +52,7 @@ class BAFIData:
         r[invalid_mask] = 0
         # The next line is equivalent to
         #G = np.abs(np.angle(r)) > np.pi / 2;signed_r = (1 - 2 * G) * np.abs(r)
-        signed_r = np.copysign(np.abs(r), r.imag < 0)
+        signed_r = np.copysign(np.abs(r), r.real < 0)
         # r[np.isnan(r)] = 1  # necessary?
         alphaAFI = np.arccos((signed_r * self.TR_factor - 1) / (self.TR_factor - signed_r))
         if B0_correction:
