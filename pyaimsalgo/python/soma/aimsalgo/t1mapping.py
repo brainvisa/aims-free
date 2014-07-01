@@ -101,12 +101,12 @@ class BAFIData:
         %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0 and B1)
         """
         BAFI_amplitude = np.asarray(self.amplitude_volume)
-        BAFI_phase = np.asarray(self.phase_volume)
         signal_echo1 = BAFI_amplitude[:, :, :, 0]
         signal_echo2 = BAFI_amplitude[:, :, :, 1]
         abs_r = signal_echo2 / signal_echo1
-        abs_r[abs_r >= 1] = 0
-        return np.arccos((abs_r * self.TR_factor - 1) / (self.TR_factor - abs_r))
+        fa = np.arccos((abs_r * self.TR_factor - 1) / (self.TR_factor - abs_r))
+        fa[abs_r >= 1] = 0
+        return fa
 
     def make_B0_map(self):
         """Build a map of B0 in Hz from BAFI data.
