@@ -122,13 +122,37 @@ namespace aims
   }
 
 
+#if defined(__GNUC__) && ((__GNUC__<4) || ((__GNUC__==4) && (__GNUC_MINOR__<=2)))
+  /* bug in gcc 4.2, accumulate doesn't accept std::max<T> or std::min<T> as
+     argument, but accepts a function without a namespace */
+
+  namespace
+  {
+   template <typename T>
+    inline
+    T my_max( const T x, const T y )
+    { return std::max<T>( x, y ); }
+
+    template <typename T>
+    inline
+    T my_min( const T x, const T y )
+    { return std::min<T>( x, y ); }
+  }
+#endif
+
+
   template<typename T>
   carto::VolumeRef<T> MorphoGreyLevel<T>::doErosion(
     const carto::Volume< T >& dataIn, float radius )
   {
     std::cout << "EROSION" << std::endl;
+#if defined(__GNUC__) && ((__GNUC__<4) || ((__GNUC__==4) && (__GNUC_MINOR__<=2)))
+    T value = carto::VolumeUtil<T>::accumulate(
+      my_max<T>, dataIn, -std::numeric_limits<T>::max() );
+#else
     T value = carto::VolumeUtil<T>::accumulate(
       std::max<T>, dataIn, -std::numeric_limits<T>::max() );
+#endif
 
     std::vector<float> vs = dataIn.getVoxelSize();
     Point4df voxelsize( vs[0], vs[1], vs[2], vs[3] );
@@ -184,8 +208,13 @@ namespace aims
     const carto::Volume< T >& dataIn, float radius )
   {
     std::cout << "DILATION" << std::endl;
+#if defined(__GNUC__) && ((__GNUC__<4) || ((__GNUC__==4) && (__GNUC_MINOR__<=2)))
+    T value = carto::VolumeUtil<T>::accumulate(
+      my_min<T>, dataIn, std::numeric_limits<T>::max() );
+#else
     T value = carto::VolumeUtil<T>::accumulate(
       std::min<T>, dataIn, std::numeric_limits<T>::max() );
+#endif
 
     std::vector<float> vs = dataIn.getVoxelSize();
     Point4df voxelsize( vs[0], vs[1], vs[2], vs[3] );
