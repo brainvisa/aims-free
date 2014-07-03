@@ -59,15 +59,15 @@ namespace aims
       /// \c ImageAlgorithmInterface<VoxelType> Pure virtual method.
       /// Returns the output dimensions of the processed image. This is used
       /// when output image does not have the same dimensions as input image.
-      /// \param Point4d dims dimensions of the input image.
-      /// \return \c Point4d dimensions of the output image.
-      virtual const Point4d getOutputImageDimensions( const Point4d & dims ) = 0;
+      /// \param Point4dl dims dimensions of the input image.
+      /// \return \c Point4dl dimensions of the output image.
+      virtual const Point4dl getOutputImageDimensions( const Point4dl & dims ) = 0;
 
       /// \c ImageAlgorithmInterface<VoxelType> Pure virtual method.
       /// Returns the output voxel size of the processed image. This is used
       /// when output image does not have the same voxel size as input image.
-      /// \param Point4d voxelsize voxel size of the input image.
-      /// \return \c Point4d voxel size of the output image.
+      /// \param Point4df voxelsize voxel size of the input image.
+      /// \return \c Point4df voxel size of the output image.
       virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) = 0;
       
       /// \c ImageAlgorithmInterface<VoxelType> Pure virtual method.
@@ -147,10 +147,10 @@ namespace aims
     //                   << "ImageAlgorithm is multi channel" << std::endl;
 
         ChannelSelector< AimsData<VoxelType>, AimsData<typename VoxelType::ChannelType> > selector;
-        Point4d dims = algo.getOutputImageDimensions( Point4d( in.dimX(),
-                                                               in.dimY(),
-                                                               in.dimZ(),
-                                                               in.dimT() ) );
+        Point4dl dims = algo.getOutputImageDimensions( Point4dl( in.dimX(),
+                                                                 in.dimY(),
+                                                                 in.dimZ(),
+                                                                 in.dimT() ) );
         Point4df vs = algo.getOutputImageVoxelSize( Point4df( in.sizeX(),
                                                               in.sizeY(),
                                                               in.sizeZ(),
@@ -221,8 +221,8 @@ namespace aims
       /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageDimensions method implementation.
       /// Returns the output dimensions based on input dimensions. This is used 
       /// when output image has not the same dimensions as input image.
-      /// \return \c Point4d dimension of the output image.
-      virtual const Point4d getOutputImageDimensions( const Point4d & dims ) {
+      /// \return \c Point4dl dimension of the output image.
+      virtual const Point4dl getOutputImageDimensions( const Point4dl & dims ) {
         return _algo.getOutputImageDimensions(dims);
       }
       

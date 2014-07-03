@@ -72,11 +72,11 @@ namespace aims {
         /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageDimensions method implementation.
         /// Returns the output dimensions based on an input dimensions.
         /// \return \c Point4d output dimensions of the subsampled image.
-        virtual const Point4d getOutputImageDimensions( const Point4d & dims ) {
-          return Point4d( dims[0] / _win_size_x,
-                          dims[1] / _win_size_y,
-                          dims[2] / _win_size_z,
-                          dims[3] );
+        virtual const Point4dl getOutputImageDimensions( const Point4dl & dims ) {
+          return Point4dl( dims[0] / _win_size_x,
+                           dims[1] / _win_size_y,
+                           dims[2] / _win_size_z,
+                           dims[3] );
         
         }
         
@@ -120,10 +120,26 @@ namespace aims {
     inline
     AimsData< VoxelType > SubSamplingImageAlgorithm< VoxelType, FilteringFunctionType >::execute( const AimsData< VoxelType >& in )
     {
-      Point4d dim = getOutputImageDimensions( Point4d( in.dimX(),
-                                                       in.dimY(),
-                                                       in.dimZ(),
-                                                       in.dimT() ) );
+//       std::cout << "Input dim: [" << carto::toString(in.dimX()) << ", "
+//                                   << carto::toString(in.dimY()) << ", "
+//                                   << carto::toString(in.dimZ()) << ", "
+//                                   << carto::toString(in.dimT()) << "]" << std::endl;
+//       std::cout << "Window dim: [" << carto::toString(_win_size_x) << ", "
+//                                    << carto::toString(_win_size_y) << ", "
+//                                    << carto::toString(_win_size_z) << "]" << std::endl;
+//       std::cout << "Output dim: [" << carto::toString(in.dimX() / _win_size_x) << ", "
+//                                    << carto::toString(in.dimY() / _win_size_y) << ", "
+//                                    << carto::toString(in.dimZ() / _win_size_z) << "]" << std::endl;
+      Point4dl dim = getOutputImageDimensions( Point4dl( in.dimX(),
+                                                         in.dimY(),
+                                                         in.dimZ(),
+                                                         in.dimT() ) );
+/*                                                       
+      std::cout << "Output dim: [" << carto::toString(dim[0]) << ", "
+                                   << carto::toString(dim[1]) << ", "
+                                   << carto::toString(dim[2]) << ", "
+                                   << carto::toString(dim[3]) << "]" << std::endl;*/
+      
       Point3df size;
           
       size[0] = in.sizeX() * _win_size_x;

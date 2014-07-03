@@ -72,7 +72,7 @@ namespace aims {
         /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageDimensions method implementation.
         /// Get the output dimensions for Point4d original dimension.
         /// \return Point4d output dimension of the filtered image.
-        virtual const Point4d getOutputImageDimensions( const Point4d & dims ) {
+        virtual const Point4dl getOutputImageDimensions( const Point4dl & dims ) {
           return dims;
         }
 
