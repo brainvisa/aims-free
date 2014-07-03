@@ -145,9 +145,11 @@ namespace soma
     std::string uri = dsi->list().dataSource()->url();
     std::string url = FileUtil::uriFilename( uri );
     carto::Object urioptions = FileUtil::uriOptions( uri );
+    if( !options.get() )
+      options = carto::Object::value( carto::PropertySet() );
+    else
+      options = options->clone();
     if( urioptions.get() ) {
-      if( !options.get() )
-        options = carto::Object::value( carto::PropertySet() );
       options->copyProperties( urioptions );
       dsi->list().dataSource().reset( new FileDataSource(  url ) );
     }

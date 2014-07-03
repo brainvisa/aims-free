@@ -166,11 +166,11 @@ namespace soma {
     soma::DataSourceInfoLoader dsil;
     carto::VolumeRef<T> bordersVolume;
 //     carto::Volume<T>* fullVolume;
-  typename carto::Volume<T>::Position4Di fullsize;
-  typename carto::Volume<T>::Position4Di bordersize;
-  typename carto::Volume<T>::Position4Di volumepos( borders[0],
-                                                    borders[1],
-                                                    borders[2], 0 );
+    typename carto::Volume<T>::Position4Di fullsize;
+    typename carto::Volume<T>::Position4Di bordersize;
+    typename carto::Volume<T>::Position4Di volumepos( borders[0],
+                                                      borders[1],
+                                                      borders[2], 0 );
 
     if( borders[0] !=0 || borders[1] !=0 || borders[2] !=0 )
     {
