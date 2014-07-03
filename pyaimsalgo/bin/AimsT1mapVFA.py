@@ -79,12 +79,14 @@ BAFI_data.echo_times = [3.061, 3.061, 4.5, 7.0]  # milliseconds
 BAFI_data.TR_factor = 5.0
 BAFI_data.tau = 1.2e-3  # RF pulse duration in seconds TODO check real value!!
 
-B1map_array = np.abs(BAFI_data.make_B1_map())
+#B1map_array = np.abs(BAFI_data.make_B1_map())
+B1map_array = np.abs(BAFI_data.make_flip_angle_map())
 B1map_farray = np.asfortranarray(B1map_array)
 B1map_volume = aims.Volume(B1map_farray)
 #B1map_volume.header().update(BAFI_amplitude.header())
 B1map_volume.header()['voxel_size'] = BAFI_amplitude.header()['voxel_size']
 #B1map_farray[np.asarray(BAFI_amplitude)[:,:,:,0]<50] = 1.
+B1map_farray[B1map_farray>1.77] = 0
 if options.out_b1map_raw:
     aims.write(B1map_volume, options.out_b1map_raw)
 
@@ -137,7 +139,7 @@ if options.gaussian != 0:
     B1map_volume = gsmooth(options.gaussian, options.gaussian,
         options.gaussian).doit(B1map_volume).volume()
 if options.out_b1map:
-    aims.write(B1map_volume, out_b1map)
+    aims.write(B1map_volume, options.out_b1map)
 
 
 GRE_5deg = aims.read(options.t1_lowangle)
