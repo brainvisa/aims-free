@@ -20,5 +20,8 @@ namespace carto
 	}
 %End
 
+  int verbose;
+  int debugMessageLevel;
+
 };
 
