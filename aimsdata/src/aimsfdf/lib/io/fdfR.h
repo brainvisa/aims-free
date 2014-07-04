@@ -102,10 +102,10 @@ namespace aims
         = std::auto_ptr<aims::FdfHeader>( new aims::FdfHeader( _name ) );
       hdr->read();
 
-      int rank = hdr->getProperty( "rank" )->getScalar();
+      int rank = (int)hdr->getProperty( "rank" )->getScalar();
 
       // check if data type is compatible with type T
-      int bits_allocated = hdr->getProperty( "bits_allocated" )->getScalar();
+      int bits_allocated = (int)hdr->getProperty( "bits_allocated" )->getScalar();
       if ( ( bits_allocated / 8 ) > (int)sizeof( T ) )
       {
         throw carto::format_error( _name );
@@ -149,9 +149,9 @@ namespace aims
     {
       std::vector< int > dims;
       hdr->getProperty( "volume_dimension", dims );
-      int bits_allocated = hdr->getProperty( "bits_allocated" )->getScalar();
-      int byte_swapping = hdr->getProperty( "byte_swapping" )->getScalar();
-      int rank = hdr->getProperty( "rank" )->getScalar();
+      int bits_allocated = (int)hdr->getProperty( "bits_allocated" )->getScalar();
+      int byte_swapping = (int)hdr->getProperty( "byte_swapping" )->getScalar();
+      int rank = (int)hdr->getProperty( "rank" )->getScalar();
 //       uint byte_order;
 //       if (byte_swapping) {
 //         byte_order = stringToByteOrder( "DCBA" );

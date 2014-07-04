@@ -224,8 +224,8 @@ bool getStartAndDurationTimes( const string & filename, int& st, int& dt )
       OFString time ;
       object->getOFString( time, 0 ) ;
       string timeStr(time.c_str()) ;
-      st = 1000. * ( atof(timeStr.substr(0,2).c_str() ) * 60 * 60 + atof(timeStr.substr(2,2).c_str() ) * 60 + atof(timeStr.substr(4,2).c_str() ) ) 
-	+ atof(timeStr.substr(7, timeStr.size() - 7 - 1).c_str() ) / 1000 ;
+      st = (int)(1000. * ( atof(timeStr.substr(0,2).c_str() ) * 60 * 60 + atof(timeStr.substr(2,2).c_str() ) * 60 + atof(timeStr.substr(4,2).c_str() ) ) 
+	+ atof(timeStr.substr(7, timeStr.size() - 7 - 1).c_str() ) / 1000) ;
     } else return false;
   
   if ( header.search( DCM_ActualFrameDuration, stack ) == EC_Normal )

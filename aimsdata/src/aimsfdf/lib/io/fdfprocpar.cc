@@ -45,7 +45,7 @@ namespace aims {
 
     string FdfProcPar::search( ifstream & file, string param ) {
         string line = "";
-        uint space_found;
+        size_t space_found;
     
         while (getline(file, line, '\n')) {
             space_found = line.find_first_of(" ");

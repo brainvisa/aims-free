@@ -179,7 +179,7 @@ void BaseHarrisDetector<T>::filter(int minDistance) {
       
       for(it2 = this->_corners[t].begin(); it2 != ie; ++it2) {
         if (ir->first != it2->first) {
-          dist = (ir->first - it2->first).norm();
+          dist = (int)(ir->first - it2->first).norm();
           if (dist <= minDistance)
             if (ir->second <= it2->second) {
               this->_corners[t].erase(ir);

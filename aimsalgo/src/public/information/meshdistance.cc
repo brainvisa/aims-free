@@ -79,7 +79,7 @@ float AimsMeshDistance( const AimsData< float > & refMap,
 					break;
 				}
 				else {
-					floorPixCoords[d] = floor( pixCoord );
+					floorPixCoords[d] = (int16_t)floor( pixCoord );
 					Weights[d] = 1 - ( pixCoord - floorPixCoords[d] );
 				}
 			}
@@ -108,7 +108,7 @@ float AimsMeshDistance( const AimsData< float > & refMap,
 					break;
 				}
 				else {
-					floorPixCoords[d] = floor( pixCoord );
+					floorPixCoords[d] = (int16_t)floor( pixCoord );
 					Weights[d] = 1 - ( pixCoord - floorPixCoords[d] );
 				}
 			}

@@ -146,9 +146,9 @@ namespace aims{
                                                                     const bool usecenter ){
     std::vector<Point3d> se;
     
-    for (int k = - amplitude; k <= amplitude; ++k)
-      for (int j = - amplitude; j <= amplitude; ++j)
-        for (int i = - amplitude; i <= amplitude; ++i)
+    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
+      for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
+        for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
           if ( ( i != 0) || (j != 0 ) || (k != 0 ) || usecenter )
             se.push_back(Point3d(i, j, k) + origin);
           
@@ -161,8 +161,8 @@ namespace aims{
                                                                          const bool usecenter ){
     std::vector<Point3d> se;
     
-    for (int j = - amplitude; j <= amplitude; ++j)
-      for (int i = - amplitude; i <= amplitude; ++i)
+    for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
+      for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
         if ( ( i != 0) || (j != 0 ) || usecenter )
           se.push_back(Point3d(i, j, 0) + origin);
           
@@ -175,8 +175,8 @@ namespace aims{
                                                                          const bool usecenter ){
     std::vector<Point3d> se;
     
-    for (int k = - amplitude; k <= amplitude; ++k)
-      for (int i = - amplitude; i <= amplitude; ++i)
+    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
+      for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
         if ( ( i != 0) || (k != 0 ) || usecenter )
           se.push_back(Point3d(i, 0, k) + origin);
           
@@ -189,8 +189,8 @@ namespace aims{
                                                                          const bool usecenter ){
     std::vector<Point3d> se;
     
-    for (int k = - amplitude; k <= amplitude; ++k)
-      for (int j = - amplitude; j <= amplitude; ++j)
+    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
+      for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
         if ( ( j != 0) || (k != 0 ) || usecenter )
           se.push_back(Point3d(0, j, k) + origin);
           
@@ -203,9 +203,9 @@ namespace aims{
                                                                       const bool usecenter ){
     std::vector<Point3d> se;
     
-    for (int k = - amplitude; k <= amplitude; ++k)
-      for (int j = - amplitude; j <= amplitude; ++j)
-        for (int i = - amplitude; i <= amplitude; ++i)
+    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
+      for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
+        for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
           if ( ( ( i != 0) || (j != 0 ) || (k != 0 ) || usecenter )
               && (sqrt(pow((double)i, 2) + pow((double)j, 2) + pow((double)k, 2)) <= amplitude ) )
             se.push_back(Point3d(i, j, k) + origin);
@@ -218,8 +218,8 @@ namespace aims{
                                                                        const double amplitude,
                                                                        const bool usecenter ){
     std::vector<Point3d> se;
-    for (int j = - amplitude; j <= amplitude; ++j)
-      for (int i = - amplitude; i <= amplitude; ++i)
+    for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
+      for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
         if ( ( ( i != 0) || (j != 0 ) || usecenter )
               && (sqrt(pow((double)i, 2) + pow((double)j, 2)) <= amplitude ) )
             se.push_back(Point3d(i, j, 0) + origin );
@@ -232,8 +232,8 @@ namespace aims{
                                                                        const double amplitude,
                                                                        const bool usecenter ){
     std::vector<Point3d> se;
-    for (int k = - amplitude; k <= amplitude; ++k)
-      for (int i = - amplitude; i <= amplitude; ++i)
+    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
+      for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
         if ( ( ( i != 0) || (k != 0 ) || usecenter )
               && (sqrt(pow((double)i, 2) + pow((double)k, 2)) <= amplitude ) )
             se.push_back(Point3d(i, 0, k) + origin );
@@ -246,8 +246,8 @@ namespace aims{
                                                                        const double amplitude,
                                                                        const bool usecenter ){
     std::vector<Point3d> se;
-    for (int k = - amplitude; k <= amplitude; ++k)
-      for (int j = - amplitude; j <= amplitude; ++j)
+    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
+      for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
         if ( ( ( j != 0) || (k != 0 ) || usecenter )
               && (sqrt(pow((double)j, 2) + pow((double)k, 2)) <= amplitude ) )
             se.push_back(Point3d(0, j, k) + origin );

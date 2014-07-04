@@ -113,7 +113,7 @@ doit( Process & p, const string & fname, Finder & f )
   }
   
   if ( verbose ) cout << "thresholding...\n";
-  AimsThreshold<T,short> thresh( tc.mode, (T) tc.t1, (T) tc.t2, (T) tc.bg, (T) tc.fg );
+  AimsThreshold<T,short> thresh( tc.mode, (T) tc.t1, (T) tc.t2, (T) tc.bg, (short) tc.fg );
   if( tc.bin )
     {
       Writer<AimsData<short> > writer( tc.fout );

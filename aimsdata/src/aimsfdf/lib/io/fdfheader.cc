@@ -374,7 +374,7 @@ void FdfHeader::read()
   readMinf( removeExtension( _name ) + extension() + ".minf" );
 
   // check if rank have changed
-  rank = getProperty( "rank" )->getScalar();
+  rank = (int)getProperty( "rank" )->getScalar();
 
   string pattern;
   if (rank < 3) {

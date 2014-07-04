@@ -78,9 +78,9 @@ int main( int argc, const char** argv )
                                                                                        amplitude),
                                                                                amplitude );
 
-    AimsData<int16_t> out( 2 * amplitude + 1,
-                           2 * amplitude + 1,
-                           2 * amplitude + 1 );
+    AimsData<int16_t> out( (int)(2 * amplitude + 1),
+                           (int)(2 * amplitude + 1),
+                           (int)(2 * amplitude + 1) );
     out = 0;
     
     aims::StructuringElement::iterator ic, ie = se.end();
