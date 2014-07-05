@@ -354,7 +354,7 @@ namespace carto
     if( &other == this )
       return *this;
 
-    bool	b = Headered::signalsBlocked();
+    bool        b = Headered::signalsBlocked();
     if( !b )
       Headered::blockSignals( true );
     this->VolumeProxy< T >::operator=( other );
@@ -392,10 +392,10 @@ namespace carto
   void Volume< T >::fill( const T& value )
   {
 
-    int	x, y, z, t, nx = VolumeProxy< T >::getSizeX(),
+    int        x, y, z, t, nx = VolumeProxy< T >::getSizeX(),
       ny = VolumeProxy< T >::getSizeY(), nz = VolumeProxy< T >::getSizeZ(),
       nt = VolumeProxy< T >::getSizeT();
-    T	*p;
+    T        *p;
     for( t=0; t<nt; ++t )
       for( z=0; z<nz; ++z )
         for( y=0; y<ny; ++y )
@@ -642,7 +642,7 @@ namespace carto
   {
     if( !allocatorContext().isAllocated() )
       allocate( VolumeProxy<T>::getSizeX(), VolumeProxy<T>::getSizeY(),
-		VolumeProxy<T>::getSizeZ(), VolumeProxy<T>::getSizeT(), true,
+                VolumeProxy<T>::getSizeZ(), VolumeProxy<T>::getSizeT(), true,
                 allocatorContext() );
   }
 
@@ -699,7 +699,7 @@ namespace carto
               << VolumeProxy<T>::_sizeZ << ", " << VolumeProxy<T>::_sizeT
               << std::endl;
     allocate( oldSizeX, oldSizeY, oldSizeZ, oldSizeT,
-	      _items.allocatorContext().isAllocated(), allocatorContext() );
+              _items.allocatorContext().isAllocated(), allocatorContext() );
 
   }
 
@@ -714,9 +714,9 @@ namespace carto
                                 bool alloc )
   {
     int oldx = VolumeProxy<T>::_sizeX;
-    int	oldy = VolumeProxy<T>::_sizeY;
-    int	oldz = VolumeProxy<T>::_sizeZ;
-    int	oldt = VolumeProxy<T>::_sizeT;
+    int oldy = VolumeProxy<T>::_sizeY;
+    int oldz = VolumeProxy<T>::_sizeZ;
+    int oldt = VolumeProxy<T>::_sizeT;
     VolumeProxy<T>::_sizeX = sizeX;
     VolumeProxy<T>::_sizeY = sizeY;
     VolumeProxy<T>::_sizeZ = sizeZ;
@@ -737,8 +737,8 @@ namespace carto
                                           const AllocatorContext & context,
                                           Object options )
   {
-    int		sizex = 1, sizey = 1, sizez = 1, sizet = 1;
-    bool	unalloc = false;
+    int                sizex = 1, sizey = 1, sizez = 1, sizet = 1;
+    bool        unalloc = false;
     header->getProperty( "sizeX", sizex );
     header->getProperty( "sizeY", sizey );
     header->getProperty( "sizeZ", sizez );
@@ -759,7 +759,7 @@ namespace carto
     try {
       borders[2] = (int) rint( options->getProperty( "bz" )->getScalar() );
     } catch( ... ) {}
-    Volume<T>	*obj;
+    Volume<T>        *obj;
     if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 )
     {
       obj = new Volume<T>( sizex + borders[0] * 2,
@@ -790,8 +790,8 @@ namespace carto
                                    const AllocatorContext & context,
                                    Object options )
   {
-    int		sizex = 1, sizey = 1, sizez = 1, sizet = 1;
-    bool	unalloc = false, partial = false, keep_allocation = false;
+    int                sizex = 1, sizey = 1, sizez = 1, sizet = 1;
+    bool        unalloc = false, partial = false, keep_allocation = false;
     options->getProperty( "partial_reading", partial );
     if( !partial )
       {
@@ -820,7 +820,7 @@ namespace carto
     if( partial )
       {
         // restore dimensions
-        PropertySet	& ps = obj.header();
+        PropertySet        & ps = obj.header();
         ps.setProperty( "sizeX", sizex );
         ps.setProperty( "sizeY", sizey );
         ps.setProperty( "sizeZ", sizez );
