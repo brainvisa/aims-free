@@ -236,6 +236,7 @@ intersphinx_mapping = {
   'somaqtgui': ( os.path.join( docpath, 'soma-qtgui-' + version + '/sphinx' ), None ),
   'pyaims': ( os.path.join( docpath, 'pyaims-' + version + '/sphinx' ), None ),
   'pyana': ( os.path.join( docpath, 'pyanatomist-' + version + '/sphinx' ), None ),
+  'aims': ( os.path.join( docpath, 'aimsdata-' + version ), None ),
   'python': ('http://docs.python.org/2.7', None),
 }
 

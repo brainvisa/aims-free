@@ -2,6 +2,8 @@
 PyAims programming documentation
 ********************************
 
+.. contents:: index
+   :local:
 
 Overview
 ++++++++
