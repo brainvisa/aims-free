@@ -1,4 +1,10 @@
 
+.. default-domain:: py
+
+.. highlight: py
+
+.. currentmodule:: soma.aims
+
 PyAims high-level functions and classes
 =======================================
 
@@ -8,9 +14,9 @@ This section is the "useful" part, what you need to know first.
 IO system
 +++++++++
 
-.. autofunction:: soma.aims.read
+.. autofunction:: read
 
-.. autofunction:: soma.aims.write
+.. autofunction:: write
 
 
 Neuroimaging data structures
@@ -85,4 +91,19 @@ Conversion classes and functions
 .. autofunction:: soma.aims.Converter
 
 .. autofunction:: soma.aims.ShallowConverter
+
+
+Graphs and ROIs
++++++++++++++++
+
+.. autoclass:: GraphManip
+  :members:
+
+  Graph manipulation, which make things easier than the direct use of :class:`Graph`.
+  See the :aimsdox:`GraphManip C++ documentation <classaims_1_1GraphManip.html>`
+
+.. autoclass:: soma.aims.RoiIterator
+
+.. autoclass:: soma.aims.MaskIterator
+
 
