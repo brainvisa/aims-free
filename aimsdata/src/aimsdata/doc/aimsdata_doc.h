@@ -39,9 +39,12 @@
 
   \anchor aimsdata
 
-  AIMS is currently under deep changes. Many things are moving, or are being 
+  AIMS is constantly under changes. Many things are moving, or are being 
   rewritten in a cleaner and more modern way into \ref cartobase or 
-  \ref cartodata, our new library for medical imaging structures.
+  \ref cartodata, our newer library for medical imaging structures.
+
+  A very incomplete <a href="../dev/index.html">developer documentation can 
+  also be read here.</a>
 
 
   \section aims_meaning What does AIMS mean ?
