@@ -854,6 +854,7 @@ namespace aims
         float max_int, mean_int, max_cont, mean_cont, area, areamoy, areavar, tvalue, tv2;
         BlobMeasurements *measurements;
         GreyLevelBlob<Site> *glBlob, *glBlob1, *glBlob2;
+        int res;
 
        // Computing SSBlob measurements
        // statM contains all the stats for normalizing GLBlobs measurements
@@ -871,11 +872,11 @@ namespace aims
             cout << "Found stat file, reading it" << endl;
             while (!feof(fileStats))
             {
-                fscanf(fileStats, "%f\n", &t); // !!! this defines the stat file format (simple)
-                fscanf(fileStats, "%f %f %f %f %f", &max_int, &mean_int, &max_cont, &mean_cont, &area);
+                res = fscanf(fileStats, "%f\n", &t); // !!! this defines the stat file format (simple)
+                res = fscanf(fileStats, "%f %f %f %f %f", &max_int, &mean_int, &max_cont, &mean_cont, &area);
                 measurements=new BlobMeasurements(max_int, mean_int, max_cont, mean_cont, area);
                 statsM.insert(std::pair<float, BlobMeasurements>(t, *measurements));
-                fscanf(fileStats, "%f %f %f %f %f", &max_int, &mean_int, &max_cont, &mean_cont, &area);
+                res = fscanf(fileStats, "%f %f %f %f %f", &max_int, &mean_int, &max_cont, &mean_cont, &area);
                 measurements=new BlobMeasurements(max_int, mean_int, max_cont, mean_cont, area);
                 statsSD.insert(std::pair<float, BlobMeasurements>(t, *measurements));
             }

@@ -73,10 +73,10 @@ int main( int argc, const char** argv )
     app.initialize();
     
     StructuringElement se = StructuringElement::getStructuringElement( type, 
-                                                                               Point3d(amplitude, 
-                                                                                       amplitude, 
-                                                                                       amplitude),
-                                                                               amplitude );
+                                                                       Point3d((int16_t)amplitude, 
+                                                                               (int16_t)amplitude, 
+                                                                               (int16_t)amplitude),
+                                                                       amplitude );
 
     AimsData<int16_t> out( (int)(2 * amplitude + 1),
                            (int)(2 * amplitude + 1),

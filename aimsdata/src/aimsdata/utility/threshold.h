@@ -38,6 +38,7 @@
 #define AIMS_UTILITY_THRESHOLD_H
 
 #include <iostream>
+#include <limits>
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/data/data.h>
@@ -100,7 +101,10 @@ public:
       \param foregd value for voxels cut in by the thresholding
   */
   inline AimsThreshold( threshold_t type,T level,T level2 = 0, 
-                        T backgd = 0, U foregd = 32767  );
+                        T backgd = 0, 
+                        U foregd = (U)(!std::numeric_limits<U>::is_specialized 
+                                      || (std::numeric_limits<U>::max() >= 32767)
+                                      ? 32767 : std::numeric_limits<U>::max() ) );
   virtual ~AimsThreshold() {}
 
   /// Return the multi-level thresholded image
