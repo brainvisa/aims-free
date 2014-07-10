@@ -105,16 +105,16 @@ PrimalSketch<AimsSurface<3,Void>, Texture<float> > filterPS2(PrimalSketch<AimsSu
   std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* > blobList(sketch.BlobSet());
   std::list< ScaleSpaceBlob<SiteType<AimsSurface<3, Void> >::type>* >::iterator itSSBlobs=blobList.begin();
 
-  printf("\n\n%d", sketch.BlobSet().size());
+  printf("\n\n%lu", (unsigned long)sketch.BlobSet().size());
   PrimalSketch<AimsSurface<3, Void>, Texture<float> > outsketch(sketch.Subject(), sketch.scaleSpace(), SURFACE);
 
-  printf("\n\n%d", outsketch.BlobSet().size());
+  printf("\n\n%lu", (unsigned long)outsketch.BlobSet().size());
   for (itSSBlobs=blobList.begin();itSSBlobs!=blobList.end();itSSBlobs++){
     cout << (*itSSBlobs)->GetMeasurements().tValue << " ";
     if ((*itSSBlobs)->GetMeasurements().tValue > threshold)
       outsketch.AddBlob(*itSSBlobs);
   }
-  printf("\n\n%d", outsketch.BlobSet().size());
+  printf("\n\n%lu", (unsigned long)outsketch.BlobSet().size());
   return outsketch;
 }
     
@@ -158,14 +158,14 @@ PrimalSketch<AimsSurface<3,Void>, Texture<float> > filterPS(PrimalSketch<AimsSur
       }
     }
   }
-  printf("\n\n%d", sketch.BlobSet().size());
+  printf("\n\n%lu", (unsigned long)sketch.BlobSet().size());
   PrimalSketch<AimsSurface<3, Void>, Texture<float> > outsketch(sketch.Subject(), sketch.scaleSpace(), SURFACE);
 
-  printf("\n\n%d", outsketch.BlobSet().size());
+  printf("\n\n%lu", (unsigned long)outsketch.BlobSet().size());
   for (mapit = blobmap.begin();mapit!=blobmap.end();mapit++){
     outsketch.AddBlob((*mapit).second);
   }
-  printf("\n\n%d", outsketch.BlobSet().size());
+  printf("\n\n%lu", (unsigned long)outsketch.BlobSet().size());
   return outsketch;
 }
 
