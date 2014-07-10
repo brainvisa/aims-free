@@ -152,7 +152,7 @@ namespace aims {
         out.setHeader( in.header()->cloneHeader( true ) );
       }
       out.setSizeXYZT( size[0], size[1], size[2], in.sizeT() );
-      
+
 //       if (carto::verbose) {
 //         std::cout << "Input volume dimensions: [" << in.dimX() << ", "
 //                                                   << in.dimY() << ", "
@@ -173,7 +173,20 @@ namespace aims {
 
       if (out.dimT() * out.dimZ() * out.dimY() > 0) {
         // Window used to process
-        AimsData< VoxelType > win( _win_size_x * _win_size_y * _win_size_z );
+//         AimsData< VoxelType > win( _win_size_x * _win_size_y * _win_size_z );
+
+        // Creates a view in the AimsData that has windows dimensions
+        // and that 
+        carto::VolumeRef<VoxelType> win(
+          new carto::Volume<VoxelType>(
+            in.volume(), 
+            typename carto::Volume<VoxelType>::Position4Di( 0, 0, 0, 0 ),
+            typename carto::Volume<VoxelType>::Position4Di( _win_size_x, 
+                                                            _win_size_y, 
+                                                            _win_size_z,
+                                                            1 )
+          )
+        );
         
         int32_t i, j, k, t;
         unsigned m, n, l;
@@ -196,12 +209,21 @@ namespace aims {
               }
 
               for( i = 0; i < (int32_t)out.dimX(); ++i ) {
-                for( l = 0; l < _win_size_z; ++l )
-                  for( n = 0; n < _win_size_y; ++n )
-                    for( m = 0; m < _win_size_x; ++m ) {
-                      win( l * _win_size_x * _win_size_y + n * _win_size_x + m ) = in( i * _win_size_x + m , j * _win_size_y + n, k * _win_size_z + l, t );
-                    }
+//                 for( l = 0; l < _win_size_z; ++l )
+//                   for( n = 0; n < _win_size_y; ++n )
+//                     for( m = 0; m < _win_size_x; ++m ) {
+//                       win( l * _win_size_x * _win_size_y + n * _win_size_x + m ) = in( i * _win_size_x + m , j * _win_size_y + n, k * _win_size_z + l, t );
+//                     }
                     
+//                 out( i, j, k, t ) = _func.doit(carto::VolumeRef<VoxelType>(win.volume()));
+
+                // Set view position in the volume
+                win->setPosInRefVolume( typename carto::Volume<VoxelType>::Position4Di(i * _win_size_x,
+                                                                                       j * _win_size_y,
+                                                                                       k * _win_size_z, 
+                                                                                       t) );
+      
+
                 out( i, j, k, t ) = _func.doit(win);
               }
             }

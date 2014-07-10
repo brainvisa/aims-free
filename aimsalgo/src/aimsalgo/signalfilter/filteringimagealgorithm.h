@@ -112,7 +112,7 @@ namespace aims {
     AimsData< VoxelType > FilteringImageAlgorithm<VoxelType, FilteringFunctionType>::execute( const AimsData<VoxelType>& in )
     {
       int x, y, z, t, nx, ny, nz, n;
-      short dx, dy, dz, bz, by, bx;
+      int dx, dy, dz, sz, sy, sx, ez, ey, ex;
 
       dx = _win_size_x / 2 ;
       dy = _win_size_y / 2 ;
@@ -130,21 +130,46 @@ namespace aims {
 
       if (carto::verbose)
         std::cout << "Window size : " << carto::toString( Point3d( _win_size_x,
-                                                                  _win_size_y,
-                                                                  _win_size_z ) ) << std::endl;
+                                                                   _win_size_y,
+                                                                   _win_size_z ) ) << std::endl;
 
-      AimsData<VoxelType> win( _win_size_x * _win_size_y * _win_size_z );
-      bz = (out.dimZ() - dz);
-      by = (out.dimY() - dy);
-      bx = (out.dimX() - dx);
+      
+      // Creates a view in the AimsData
+      carto::VolumeRef<VoxelType> win(
+        new carto::Volume<VoxelType>(
+          in.volume(), 
+          typename carto::Volume<VoxelType>::Position4Di( 0, 0, 0, 0),
+          typename carto::Volume<VoxelType>::Position4Di( _win_size_x, 
+                                                          _win_size_y, 
+                                                          _win_size_z,
+                                                          0 )
+        )
+      );
+      
+      // Get borders for the volume
+      const std::vector<int> & borders = in.volume()->getBorders();
+      if (carto::verbose) {
+        std::cout << "Processing with borders: [" << carto::toString(borders[0]);
+        for(int i = 1; i < 8; ++i)
+          std::cout << ", " << carto::toString(borders[i]);
+        std::cout << "]" << std::endl;
+      }
+      
+      // When volume has borders, it is possible to use it to process filtering
+      sz = dz - borders[4];
+      sy = dy - borders[2];
+      sx = dx - borders[0];
+      ez = out.dimZ() - dz + borders[5];
+      ey = out.dimY() - dy + borders[3];
+      ex = out.dimX() - dx + borders[1];
 
       aims::Progression progress(out.dimT() * out.dimZ() * out.dimY() - 1);
       if (carto::verbose)
         std::cout << "Filtering progress: ";
 
       for ( t = 0; t < in.dimT(); ++t )
-        for ( z = dz; z < bz; ++z )
-          for ( y = dy; y < by; ++y, ++progress ) {
+        for ( z = sz; z < ez; ++z )
+          for ( y = sy; y < ey; ++y, ++progress ) {
             if (carto::verbose) {
               // Display progression
               /* The "normal" operator << should be as:
@@ -154,15 +179,13 @@ namespace aims {
               */
               ::operator << ( std::cout, progress ) << std::flush;
             }
-            for ( x = dx; x < bx; ++x )
+            for ( x = sx; x < ex; ++x )
             {
               // Processes window to use for filtering
               n = 0;
-              for ( nz = -dz; nz <= dz; ++nz )
-                for ( ny = -dy; ny <= dy; ++ny )
-                  for ( nx = -dx; nx <= dx; ++nx, ++n )
-                    win(n) = in(nx + x, ny + y, nz + z, t);
-
+              
+              // Set view position in the volume
+              win->setPosInRefVolume( typename carto::Volume<VoxelType>::Position4Di(x, y, z, t) );
               out( x, y, z, t ) = _func.doit( win );
             }
           }
