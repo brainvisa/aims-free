@@ -86,7 +86,6 @@ namespace carto
       _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
         DataSource::none() ) ),
 #ifndef CARTO_USE_BLITZ
-    ,
       _lineoffset( 0 ),
       _sliceoffset( 0 ),
       _volumeoffset( 0 ),
