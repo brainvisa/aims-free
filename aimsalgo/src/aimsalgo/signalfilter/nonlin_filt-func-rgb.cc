@@ -30,68 +30,32 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+// #include <aims/signalfilter/nonlin_filt-func_d.h>
+#include <aims/signalfilter/nonlin_filt-func-rgb_d.h>
 
-/*
- *  Data reader class
- */
-#ifndef AIMSDATA_IO_CHANNELR_H
-#define AIMSDATA_IO_CHANNELR_H
+template class NonLinFilterFunc<AimsRGB>;
+template class NonLinFilterFunc<AimsRGBA>;
 
-#include <aims/data/data.h>
-#include <aims/io/process.h>
-#include <aims/utility/converter_rgb.h>
-#include <aims/utility/converter_hsv.h>
-#include <aims/utility/converter_volume.h>
-#include <aims/utility/channel.h>
-#include <string>
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MedianFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MedianFilterFunc, AimsRGBA)
 
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MeanFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MeanFilterFunc, AimsRGBA)
 
-namespace {
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(NotNullMeanFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(NotNullMeanFilterFunc, AimsRGBA)
 
-    template<class OUTP>
-    class InternalConverter : public aims::Process
-    {
-    public:
-      InternalConverter( uint8_t c, int b, int frm, OUTP & d )
-        : Process(), channel(c), border( b ), frame( frm ), data( d ) {}
-      virtual ~InternalConverter() {}
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MinFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MinFilterFunc, AimsRGBA)
 
-      uint8_t           channel;
-      int               border;
-      int               frame;
-      OUTP            & data;
-    };
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MaxFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MaxFilterFunc, AimsRGBA)
 
-}
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MajorityFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MajorityFilterFunc, AimsRGBA)
 
-namespace aims
-{
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(ExtremaDifferenceFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(ExtremaDifferenceFilterFunc, AimsRGBA)
 
-  template<class INP, class OUTP>
-  static bool internalconvert( aims::Process & p, const std::string & fname,
-                               aims::Finder & f );
-
-  /// Reads a AimsData, with conversion if needed
-  template<class OUTP>
-  class ChannelReader
-  {
-  public:
-    ChannelReader( const std::string & f );
-    virtual ~ChannelReader();
-
-    virtual void read( OUTP & data, 
-                       uint8_t channel = 4,
-                       int border = 0, 
-                       const std::string* format = 0, 
-                       int frame = -1 );
-    void setAllowedInputDataTypes(
-                       const std::map<std::string, std::set<std::string> > & );
-
-  private:
-    std::string _filename;
-    std::map<std::string, std::set<std::string> > _allowedTypes;
-  };
-
-}
-
-#endif
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(SumFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(SumFilterFunc, AimsRGBA)

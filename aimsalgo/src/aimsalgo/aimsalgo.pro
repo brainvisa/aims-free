@@ -216,7 +216,9 @@ HEADERS = \
     signalfilter/majorityfilter.h  \
     signalfilter/notnullmeanfilter.h  \
     signalfilter/nonlin_filt-func.h \
+    signalfilter/nonlin_filt-func_d.h \
     signalfilter/nonlin_filt-func-rgb.h \
+    signalfilter/nonlin_filt-func-rgb_d.h \
     spam/spam.h \
     talairach/cramer.h    \
     talairach/talPoints.h    \
@@ -369,6 +371,8 @@ SOURCES = \
     perfusion/perfTTP.cc    \
     resampling/harmonicCageResampler.cc \
     resampling/meshToVoxelsResampler.cc \
+    signalfilter/nonlin_filt-func.cc \
+    signalfilter/nonlin_filt-func-rgb.cc \
     roi/clusterArg.cc     \
     roi/roigtm.cc      \
     roi/roistat.cc      \

@@ -13,10 +13,31 @@
 #define AIMSALGO_SIGNALFILTER_NONLINFILT_FUNC_RGB_H
 
 #include <aims/data/data_g.h>
-#include <aims/math/mathelemrgb.h>
 #include <aims/signalfilter/nonlin_filt-func.h>
-#include <aims/utility/channel.h>
-  
+
+#define AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE( NONLINFILT_FUNC, VOXELTYPE ) \
+template <> \
+class NONLINFILT_FUNC< VOXELTYPE > : public NonLinFilterFunc< VOXELTYPE > \
+{ \
+  public: \
+    NONLINFILT_FUNC(); \
+    virtual ~NONLINFILT_FUNC(); \
+    virtual VOXELTYPE execute( const carto::VolumeRef<VOXELTYPE>& volume ) const; \
+}; \
+
+
+#define AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE( NONLINFILT_FUNC, VOXELTYPE ) \
+NONLINFILT_FUNC<VOXELTYPE>::NONLINFILT_FUNC(): NonLinFilterFunc<VOXELTYPE>() {} \
+\
+NONLINFILT_FUNC<VOXELTYPE>::~NONLINFILT_FUNC() {} \
+\
+VOXELTYPE NONLINFILT_FUNC<VOXELTYPE>::execute( const carto::VolumeRef<VOXELTYPE>& volume ) const \
+{ \
+  NONLINFILT_FUNC<VOXELTYPE::ChannelType> m; \
+  return multichannelfiltervalues<VOXELTYPE>(m, volume); \
+} \
+
+
 /// Templated function to process filter on multichannel data (AimsRGB, AimsRGBA, ...)
 /// This function does not filter image but only apply filter on set of multichannel data,
 /// commonly the neighborhood of a voxel.
@@ -25,238 +46,31 @@
 /// \return result of the filter on data
 template< typename VoxelType >
 inline VoxelType multichannelfiltervalues( NonLinFilterFunc< typename VoxelType::ChannelType > & f, 
-                                            AimsData< VoxelType > &data )
-{
-  ChannelSelector< AimsData<VoxelType>, AimsData<typename VoxelType::ChannelType > > selector;
-  VoxelType r;
-  int32_t samples = DataTypeInfo<VoxelType>::samples();
+                                           const carto::VolumeRef< VoxelType > &volume );
 
-  /* Split data and process filter on each channel */
-  for ( int32_t s = 0; s < samples; s++ )
-  {
-    AimsData<typename VoxelType::ChannelType> c = selector.select( data, s );
-    r[s] = f.doit( c );
-  }
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MedianFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MedianFilterFunc, AimsRGBA)
 
-  return r;
-}
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MeanFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MeanFilterFunc, AimsRGBA)
 
-// Specialization RGB for median filtering
-template <>
-class MedianFilterFunc< AimsRGB > : public NonLinFilterFunc< AimsRGB >
-{
-  public:
-    MedianFilterFunc () { }
-    virtual ~MedianFilterFunc () { }
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(NotNullMeanFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(NotNullMeanFilterFunc, AimsRGBA)
 
-    inline AimsRGB doit( AimsData<AimsRGB>& data ) const
-    {
-      MedianFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGB>(m, data);
-    }
-  
-};
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MinFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MinFilterFunc, AimsRGBA)
 
-// Specialization RGBA for median filtering
-template <>
-class MedianFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
-{
-  public:
-    MedianFilterFunc () { }
-    virtual ~MedianFilterFunc () { }
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MaxFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MaxFilterFunc, AimsRGBA)
 
-    inline AimsRGBA doit( AimsData<AimsRGBA>& data ) const
-    {
-      MedianFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGBA>(m, data);
-    }
-};
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MajorityFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(MajorityFilterFunc, AimsRGBA)
 
-// Specialization RGB for mean filtering
-template <>
-class MeanFilterFunc< AimsRGB > : public NonLinFilterFunc< AimsRGB >
-{
-  public:
-    MeanFilterFunc () { }
-    virtual ~MeanFilterFunc () { }
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(ExtremaDifferenceFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(ExtremaDifferenceFilterFunc, AimsRGBA)
 
-    inline AimsRGB doit( AimsData<AimsRGB>& data ) const
-    {
-      MeanFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGB>(m, data);
-    }
-  
-};
-
-// Specialization RGBA for mean filtering
-template <>
-class MeanFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
-{
-  public:
-    MeanFilterFunc () { }
-    virtual ~MeanFilterFunc () { }
-
-    inline AimsRGBA doit( AimsData<AimsRGBA>& data ) const
-    {
-      MeanFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGBA>(m, data);
-    }
-  
-};
-
-// Specialization RGB for not null mean filtering
-template <>
-class NotNullMeanFilterFunc< AimsRGB > : public NonLinFilterFunc< AimsRGB >
-{
-  public:
-    NotNullMeanFilterFunc () { }
-    virtual ~NotNullMeanFilterFunc () { }
-
-    inline AimsRGB doit( AimsData<AimsRGB>& data ) const
-    {
-      NotNullMeanFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGB>(m, data);
-    }
-};
-
-// Specialization RGBA for not null mean filtering
-template <>
-class NotNullMeanFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
-{
-  public:
-    NotNullMeanFilterFunc () { }
-    virtual ~NotNullMeanFilterFunc () { }
-
-    inline AimsRGBA doit( AimsData<AimsRGBA>& data ) const
-    {
-      NotNullMeanFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGBA>(m, data);
-    }
-};
-
-// Specialization RGB for min filtering
-template <>
-class MinFilterFunc< AimsRGB > : public NonLinFilterFunc< AimsRGB >
-{
-  public:
-    MinFilterFunc () { }
-    virtual ~MinFilterFunc () { }
-
-    inline AimsRGB doit( AimsData<AimsRGB>& data ) const
-    {
-      MinFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGB>(m, data);
-    }
-  
-};
-
-// Specialization RGBA for min filtering
-template <>
-class MinFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
-{
-  public:
-    MinFilterFunc () { }
-    virtual ~MinFilterFunc () { }
-
-    inline AimsRGBA doit( AimsData<AimsRGBA>& data ) const
-    {
-      MinFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGBA>(m, data);
-    }
-};
-
-// Specialization RGB for max filtering
-template <>
-class MaxFilterFunc< AimsRGB > : public NonLinFilterFunc< AimsRGB >
-{
-  public:
-    MaxFilterFunc () { }
-    virtual ~MaxFilterFunc () { }
-
-    inline AimsRGB doit( AimsData<AimsRGB>& data ) const
-    {
-      MaxFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGB>(m, data);
-    }
-  
-};
-
-// Specialization RGBA for max filtering
-template <>
-class MaxFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
-{
-  public:
-    MaxFilterFunc () { }
-    virtual ~MaxFilterFunc () { }
-
-    inline AimsRGBA doit( AimsData<AimsRGBA>& data ) const
-    {
-      MaxFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGBA>(m, data);
-    }
-};
-
-// Specialization RGB for majority filtering
-template <>
-class MajorityFilterFunc< AimsRGB > : public NonLinFilterFunc< AimsRGB >
-{
-  public:
-    MajorityFilterFunc () { }
-    virtual ~MajorityFilterFunc () { }
-
-    inline AimsRGB doit( AimsData<AimsRGB>& data ) const
-    {
-      MajorityFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGB>(m, data);
-    }
-  
-};
-
-// Specialization RGBA for majority filtering
-template <>
-class MajorityFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
-{
-  public:
-    MajorityFilterFunc () { }
-    virtual ~MajorityFilterFunc () { }
-
-    inline AimsRGBA doit( AimsData<AimsRGBA>& data ) const
-    {
-      MajorityFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGBA>(m, data);
-    }
-};
-
-// Specialization RGB for extrema difference filtering
-template <>
-class ExtremaDifferenceFilterFunc< AimsRGB > : public NonLinFilterFunc< AimsRGB >
-{
-  public:
-    ExtremaDifferenceFilterFunc () { }
-    virtual ~ExtremaDifferenceFilterFunc () { }
-
-    inline AimsRGB doit( AimsData<AimsRGB>& data ) const
-    {
-      ExtremaDifferenceFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGB>(m, data);
-    }
-  
-};
-
-// Specialization RGBA for extrema difference filtering
-template <>
-class ExtremaDifferenceFilterFunc< AimsRGBA > : public NonLinFilterFunc< AimsRGBA >
-{
-  public:
-    ExtremaDifferenceFilterFunc () { }
-    virtual ~ExtremaDifferenceFilterFunc () { }
-
-    inline AimsRGBA doit( AimsData<AimsRGBA>& data ) const
-    {
-      ExtremaDifferenceFilterFunc<uint8_t> m;
-      return multichannelfiltervalues<AimsRGBA>(m, data);
-    }
-};
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(SumFilterFunc, AimsRGB)
+AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_DECLARE(SumFilterFunc, AimsRGBA)
 
 #endif
 

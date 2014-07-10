@@ -93,12 +93,19 @@ DECLARE_CHANNEL_SELECTOR_SPEC( T, U, byte ) \
 
 #define DECLARE_CHANNEL_SELECTOR_VOLUME_SPECIALIZED() \
 template <class T, class U> \
+DECLARE_CHANNEL_SELECTOR_NAME() < carto::VolumeRef<T>, carto::VolumeRef<U> > \
+DECLARE_CHANNEL_SELECTOR_SPEC( carto::VolumeRef<T>, carto::VolumeRef<U>, Void ) \
+
+
+#define DECLARE_CHANNEL_SELECTOR_AIMSDATA_SPECIALIZED() \
+template <class T, class U> \
 DECLARE_CHANNEL_SELECTOR_NAME() < AimsData<T>, AimsData<U> > \
 DECLARE_CHANNEL_SELECTOR_SPEC( AimsData<T>, AimsData<U>, Void ) \
 
 
 DECLARE_CHANNEL_SELECTOR_CLASS()
 DECLARE_CHANNEL_SELECTOR_VOLUME_SPECIALIZED()
+DECLARE_CHANNEL_SELECTOR_AIMSDATA_SPECIALIZED()
 DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsRGB )
 DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsRGBA )
 DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsHSV )
@@ -240,26 +247,24 @@ void ChannelSelector< AimsHSV, U >::set( AimsHSV& input, const uint8_t channel, 
 }
 
 template<class T, class U> inline
-AimsData< U > ChannelSelector< AimsData< T >, AimsData< U > >::select( const AimsData< T >& input, const uint8_t channel )
+carto::VolumeRef<U> 
+ChannelSelector< carto::VolumeRef<T>, 
+                 carto::VolumeRef<U> >::select( const carto::VolumeRef<T>& input, 
+                                                const uint8_t channel )
 {
   ChannelSelector< T, U > selector;
-  int	x, y, z, t, 
-        dx = input.dimX(), 
-        dy = input.dimY(), 
-        dz = input.dimZ(), 
-        dt = input.dimT();
+  int x, y, z, t, 
+        dx = input.getSizeX(), 
+        dy = input.getSizeY(), 
+        dz = input.getSizeZ(), 
+        dt = input.getSizeT();
 
-  AimsData< U > output = AimsData< U >( dx, dy, dz, dt );
+  carto::VolumeRef<U> output(
+    new carto::Volume<U>( dx, dy, dz, dt )
+  );
 
-  output.setSizeXYZT( input.sizeX(), 
-                      input.sizeY(), 
-                      input.sizeZ(),
-                      input.sizeT() );
-
-  if( input.header() )
-    output.volume()->header() = input.volume()->header();
-    output.volume()->header().setProperty("data_type", carto::DataTypeCode<U>::name());
-//     output.setHeader( input.header()->cloneHeader( true ) );
+  output->copyHeaderFrom( input.header() );
+  output.header().setProperty( "data_type", carto::DataTypeCode<U>::name() );
 
   for( t=0; t<dt; ++t )
     {
@@ -276,17 +281,38 @@ AimsData< U > ChannelSelector< AimsData< T >, AimsData< U > >::select( const Aim
   return output;
 }
 
+template<class T, class U> inline
+AimsData< U > ChannelSelector< AimsData< T >, 
+                               AimsData< U > >::select( const AimsData< T >& input, 
+                                                        const uint8_t channel )
+{
+  ChannelSelector< carto::VolumeRef<T>, carto::VolumeRef<U> > selector;
+
+  // Call volume channel selector
+  carto::VolumeRef<U> outputvolume = selector.select(input.volume(), channel);
+  AimsData<U> output = AimsData< U >( outputvolume );
+  output.setSizeXYZT( input.sizeX(), 
+                      input.sizeY(), 
+                      input.sizeZ(),
+                      input.sizeT() );
+
+  return output;
+}
+
 
 template<class T, class U> inline
-void ChannelSelector< AimsData< T >, AimsData< U > >::set( AimsData< T >& input, const uint8_t channel, const AimsData< U >& value )
+void ChannelSelector< carto::VolumeRef<T>, 
+                      carto::VolumeRef<U> >::set( carto::VolumeRef<T>& input,
+                                                  const uint8_t channel,
+                                                  const carto::VolumeRef<U>& value )
 {
-  ChannelSelector< T, U > selector;
+  ChannelSelector<T, U> selector;
 
-  int	x, y, z, t, 
-        dx = input.dimX(), 
-        dy = input.dimY(), 
-        dz = input.dimZ(), 
-        dt = input.dimT();
+  int x, y, z, t, 
+        dx = input.getSizeX(), 
+        dy = input.getSizeY(), 
+        dz = input.getSizeZ(), 
+        dt = input.getSizeT();
 
   for( t=0; t<dt; ++t )
     {
@@ -295,10 +321,29 @@ void ChannelSelector< AimsData< T >, AimsData< U > >::set( AimsData< T >& input,
           for( y=0; y<dy; ++y )
             {
               for( x=0; x<dx; ++x )
-                 selector.set( input( x, y, z, t ), channel, value( x, y, z, t ) );
+                 selector.set( input( x, y, z, t ), 
+                               channel, 
+                               value( x, y, z, t ) );
             }
         }
     }
+}
+
+template<class T, class U> inline
+void ChannelSelector< AimsData<T>, 
+                      AimsData<U> >::set( AimsData<T>& input,
+                                          const uint8_t channel,
+                                          const AimsData<U>& value )
+{
+  ChannelSelector< carto::VolumeRef<T>,
+                   carto::VolumeRef<U> > selector;
+
+  carto::VolumeRef<T> volumeref(input.volume());
+  const carto::VolumeRef<U> valueref(value.volume());
+  selector.set( volumeref, 
+                channel, 
+                valueref );
+
 }
 
 

@@ -35,13 +35,9 @@
 #ifndef AIMS_SIGNALFILTER_NONLINFILT_FUNC_H
 #define AIMS_SIGNALFILTER_NONLINFILT_FUNC_H
 
-#include <map>
-#include <algorithm>
 #include <aims/data/data.h>
-#include <aims/math/mathelem.h>
-#include <aims/utility/minmax.h>
 
-template <class T> class AimsData;
+// template <class T> class AimsData;
 
 //
 // class FilterFunc
@@ -51,213 +47,85 @@ class NonLinFilterFunc
 {
   public:
 
-    NonLinFilterFunc() { }
-    virtual ~NonLinFilterFunc() { }
-
-    virtual T doit( AimsData<T>& data ) const = 0;
+    NonLinFilterFunc();
+    virtual ~NonLinFilterFunc();
+    T doit( const AimsData<T>& data ) const;
+    T doit( const carto::VolumeRef<T>& volume ) const;
+    virtual T execute( const carto::VolumeRef<T>& volume ) const = 0;
 };
 
 
 template <class T>
-class MaxFilterFunc : public NonLinFilterFunc< T >
+class MaxFilterFunc: public NonLinFilterFunc<T>
 {
   public:
-    MaxFilterFunc () { }
-    virtual ~MaxFilterFunc () { }
-
-    T doit( AimsData<T>& data ) const;
-
+    MaxFilterFunc();
+    virtual ~MaxFilterFunc();
+    virtual T execute( const carto::VolumeRef<T>& volume ) const;
 };
-
-template <class T> inline
-T MaxFilterFunc<T>::doit( AimsData<T>& data ) const
-{
-  return data.maximum();
-}
-
 
 template <class T>
-class MedianFilterFunc : public NonLinFilterFunc< T >
+class MedianFilterFunc: public NonLinFilterFunc<T>
 {
   public:
-    MedianFilterFunc () { }
-    virtual ~MedianFilterFunc () { }
-
-    T doit( AimsData<T>& data ) const;
-
+    MedianFilterFunc();
+    virtual ~MedianFilterFunc();
+    virtual T execute( const carto::VolumeRef<T>& volume ) const;
 };
-
-template <class T> inline
-T MedianFilterFunc<T>::doit( AimsData<T>& data ) const
-{
-  incSorting(data);
-  return data( data.dimX() / 2 );
-}
-
 
 template <class T>
-class MinFilterFunc : public NonLinFilterFunc< T >
+class MinFilterFunc: public NonLinFilterFunc<T>
 {
   public:
-    MinFilterFunc () { }
-    virtual ~MinFilterFunc () { }
-
-    T doit( AimsData<T>& data ) const;
-
+    MinFilterFunc();
+    virtual ~MinFilterFunc();
+    virtual T execute( const carto::VolumeRef<T>& volume ) const;
 };
-
-template <class T> inline
-T MinFilterFunc<T>::doit( AimsData<T>& data ) const
-{
-  return data.minimum();
-}
 
 template <class T>
-class MeanFilterFunc : public NonLinFilterFunc< T >
+class MeanFilterFunc: public NonLinFilterFunc<T>
 {
   public:
-    MeanFilterFunc () { }
-    virtual ~MeanFilterFunc () { }
-
-    T doit( AimsData<T>& data ) const;
-
+    MeanFilterFunc();
+    virtual ~MeanFilterFunc();
+    virtual T execute( const carto::VolumeRef<T>& volume ) const;
 };
-
-template <class T> inline
-T MeanFilterFunc<T>::doit( AimsData<T>& data ) const
-{
-  // Sum is declared as double to avoid overflow issue
-  double sum = 0.;
-  uint32_t count = 0;
-  typename AimsData<T>::iterator it;
-
-  // Goes through the data and count number of values for each class
-  for (it = data.begin(); it != data.end(); it++)
-  {
-    sum = sum + (double)(*it);
-    count ++;
-  }
-
-  return (count != 0 ? (T)( sum / count ) : (T)0);
-}
 
 template <class T>
-class NotNullMeanFilterFunc : public NonLinFilterFunc< T >
+class NotNullMeanFilterFunc: public NonLinFilterFunc<T>
 {
   public:
-    NotNullMeanFilterFunc () { }
-    virtual ~NotNullMeanFilterFunc () { }
-
-    T doit( AimsData<T>& data ) const;
-
+    NotNullMeanFilterFunc();
+    virtual ~NotNullMeanFilterFunc();
+    virtual T execute( const carto::VolumeRef<T>& volume ) const;
 };
-
-template <class T> inline
-T NotNullMeanFilterFunc<T>::doit( AimsData<T>& data ) const
-{
-  // Sum is declared as double to avoid overflow issue
-  double sum = 0.;
-  uint32_t count = 0;
-  typename AimsData<T>::iterator it;
-
-  // Goes through the data and count number of values for each class
-  for (it = data.begin(); it != data.end(); it++)
-  {
-    if ((*it) != (T)0) {
-      sum = sum + (double)(*it);
-      count ++;
-    }
-  }
-
-  return (count != 0 ? (T)( sum / count ) : (T)0);
-}
 
 template <class T>
-class MajorityFilterFunc : public NonLinFilterFunc< T >
+class MajorityFilterFunc: public NonLinFilterFunc<T>
 {
   public:
-    MajorityFilterFunc() { }
-    virtual ~MajorityFilterFunc() {}
-
-    T doit( AimsData<T>& data ) const;
+    MajorityFilterFunc();
+    virtual ~MajorityFilterFunc();
+    virtual T execute( const carto::VolumeRef<T>& volume ) const;
 };
-
-template <class T> inline
-T MajorityFilterFunc<T>::doit( AimsData<T>& data ) const
-{
-  T currentclass, majorityclass = 0;
-  uint32_t currentclasscases = 0, majoritycases = 0;
-  std::map<T, uint32_t> classcases;
-  typename AimsData<T>::iterator it;
-
-  // Goes through the data and count number of values for each class
-  for (it = data.begin(); it != data.end(); it++)
-  {
-    currentclass = (T)(*it);
-
-    if ( !classcases[currentclass] )
-    {
-        classcases[ currentclass ] = 1;
-        currentclasscases = 1;
-    }
-    else
-    {
-        currentclasscases = classcases[ currentclass ] + 1;
-        classcases[ currentclass ] = currentclasscases;
-    }
-
-    if (currentclasscases > majoritycases)
-    {
-        // Set the new majority cases and class for which it occurs
-        majorityclass = currentclass;
-        majoritycases = currentclasscases;
-    }
-  }
-
-  return majorityclass;
-}
 
 template <class T>
-class ExtremaDifferenceFilterFunc : public NonLinFilterFunc< T >
+class ExtremaDifferenceFilterFunc: public NonLinFilterFunc<T>
 {
   public:
-    ExtremaDifferenceFilterFunc () { }
-    virtual ~ExtremaDifferenceFilterFunc () { }
-
-    T doit( AimsData<T>& data ) const;
+    ExtremaDifferenceFilterFunc();
+    virtual ~ExtremaDifferenceFilterFunc();
+    virtual T execute( const carto::VolumeRef<T>& volume ) const;
 };
-
-template <class T> inline
-T ExtremaDifferenceFilterFunc<T>::doit( AimsData<T>& data ) const
-{
-  T min, max;
-  aims::minmax<T>( data, min, max );
-  return aims::absdiff<T>(max, min);
-}
-
 
 template <class T>
-class SumFilterFunc : public NonLinFilterFunc< T >
+class SumFilterFunc: public NonLinFilterFunc<T>
 {
   public:
-    SumFilterFunc () { }
-    virtual ~SumFilterFunc () { }
-
-    T doit( AimsData<T>& data ) const;
+    SumFilterFunc();
+    virtual ~SumFilterFunc();
+    virtual T execute( const carto::VolumeRef<T>& volume ) const;
 };
-
-template <class T> inline
-T SumFilterFunc<T>::doit( AimsData<T>& data ) const
-{
-  T sum = (T)0;
-  typename AimsData<T>::iterator it;
-
-  // Goes through the data and sum values
-  for (it = data.begin(); it != data.end(); it++)
-    sum += (*it);
-
-  return sum;
-}
 
 #endif
 
