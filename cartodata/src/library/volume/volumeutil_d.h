@@ -35,6 +35,27 @@
 #define CARTODATA_VOLUME_VOLUMEUTIL_D_H
 
 #include <cartodata/volume/volumeutil.h>
+#include <cartobase/type/datatypetraits.h>
+#include <limits>
+
+#if defined(__GNUC__) && ((__GNUC__<4) || ((__GNUC__==4) && (__GNUC_MINOR__<=2)))
+/* bug in gcc 4.2, accumulate doesn't accept std::max<T> or std::min<T> as
+    argument, but accepts a function without a namespace */
+
+namespace
+{
+  template <typename T>
+  inline
+  T internal_max( const T x, const T y )
+  { return std::max<T>( x, y ); }
+
+  template <typename T>
+  inline
+  T internal_min( const T x, const T y )
+  { return std::min<T>( x, y ); }
+}
+  
+#endif
 
 namespace carto
 {
@@ -313,7 +334,30 @@ namespace carto
     return res;
   }
 
-
+  template <typename T>
+  T VolumeUtilBase<T, true>::min( const Volume<T> & o )
+  {
+#if defined(__GNUC__) && ((__GNUC__<4) || ((__GNUC__==4) && (__GNUC_MINOR__<=2)))
+    return carto::VolumeUtil<T>::accumulate(
+              internal_min<T>, o, std::numeric_limits<T>::max() );
+#else
+    return carto::VolumeUtil<T>::accumulate(
+              std::min<T>, o, std::numeric_limits<T>::max() );
+#endif
+  }
+  
+  template <typename T>
+  T VolumeUtilBase<T, true>::max( const Volume<T> & o )
+  {
+#if defined(__GNUC__) && ((__GNUC__<4) || ((__GNUC__==4) && (__GNUC_MINOR__<=2)))
+    return carto::VolumeUtil<T>::accumulate(
+              internal_max<T>, o, -std::numeric_limits<T>::max() );
+#else
+    return carto::VolumeUtil<T>::accumulate(
+              std::max<T>, o, -std::numeric_limits<T>::max() );
+#endif
+  }
+  
 }
 
 #endif

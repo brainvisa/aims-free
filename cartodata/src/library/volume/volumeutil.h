@@ -34,6 +34,7 @@
 #ifndef CARTODATA_VOLUME_VOLUMEUTIL_H
 #define CARTODATA_VOLUME_VOLUMEUTIL_H
 
+#include <cartobase/type/datatypetraits.h>
 #include <cartodata/volume/volume.h>
 
 
@@ -157,10 +158,31 @@ namespace carto
     return x * (double) ( 1. / divisor );
   }
 
+  template <typename T, bool Scalar>
+  class VolumeUtilBase {
+  };
+
+  /// Volume utilities base class for scalar types
+  template <typename T>
+  class VolumeUtilBase<T, true> {
+    public :
+      /** Get the minimum voxel value of a volume.
+      */
+      static T min( const Volume<T> & o );
+      
+      /** Get the maximum voxel value of a volume.
+      */
+      static T max( const Volume<T> & o );
+  };
+
+  /// Volume utilities base class for non scalar types
+  template <typename T>
+  class VolumeUtilBase<T, false> {
+  };
 
   /// Volume utilities classes
   template <typename T>
-  class VolumeUtil
+  class VolumeUtil: public carto::VolumeUtilBase<T, carto::DataTypeTraits<T>::is_scalar>
   {
   public:
     /// applies a unary function to each voxel of a volume
