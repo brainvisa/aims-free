@@ -121,6 +121,12 @@ namespace carto
       ~Position4Di() {}
             int & operator [] ( int coord )       { return _coords[ coord ]; }
       const int & operator [] ( int coord ) const { return _coords[ coord ]; }
+      const bool operator==(const Position4Di& p) const { return ( _coords[0] == p._coords[0]
+                                                                 && _coords[1] == p._coords[1]
+                                                                 && _coords[2] == p._coords[2]
+                                                                 && _coords[3] == p._coords[3] ); }
+      const bool operator!=(const Position4Di& p) const { return !(this->operator ==(p)); }
+      
     private:
       std::vector<int>  _coords;
     };
@@ -242,22 +248,35 @@ namespace carto
                              = AllocatorContext(), bool allocate = true );
     /// Get parent volume
     rc_ptr<Volume<T> > refVolume() const;
-    // I dropped the const so that it is possible to write
-    // an existing volume as a partial view (we then need to link
-    // the volume to a parent without losing the data)
-    rc_ptr<Volume<T> > & refVolume();
+
+    /// Set parent volume
+    void setRefVolume(const rc_ptr<Volume<T> > & refvol);
+    
     /// Get position in parent volume
-    Position4Di posInRefVolume() const;
-    // I dropped the const so that it is possible to write
-    // an existing volume as a partial view (we then need to link
-    // the volume to a parent without losing the data)
-    Position4Di & posInRefVolume();
+    const Position4Di posInRefVolume() const;
+
+    /// Set position in parent volume
+    void setPosInRefVolume(const Position4Di & pos);
+    
+    /// Get borders for the volume. A volume that can have borders is a volume \n
+    /// that references another volume. It can be understood as a view in the reference volume.
+    /// \return std::vector<uint16_t> that contains the borders availables for the volume.
+    ///         vector[0]: low border in x direction
+    ///         vector[1]: high border in x direction
+    ///         vector[2]: low border in y direction
+    ///         vector[3]: high border in y direction
+    ///         vector[4]: low border in z direction
+    ///         vector[5]: high border in z direction
+    ///         vector[6]: low border in t direction
+    ///         vector[7]: high border in t direction
+    std::vector<int> getBorders() const;
 
   protected:
 
     void allocate( int oldSizeX, int oldSizeY, int oldSizeZ, int oldSizeT, 
                    bool allocate, const AllocatorContext& allocatorContext );
     void slotSizeChanged( const PropertyFilter& propertyFilter );
+    void updateItemsBuffer();
 
     AllocatedVector<T> _items;
 #ifdef CARTO_USE_BLITZ

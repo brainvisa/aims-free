@@ -329,21 +329,114 @@ namespace carto
   }
 
   template <typename T> inline
-  rc_ptr<Volume<T> > & Volume<T>::refVolume()
-  {
-    return _refvol;
-  }
-
-  template <typename T> inline
-  typename Volume<T>::Position4Di Volume<T>::posInRefVolume() const
+  const typename Volume<T>::Position4Di Volume<T>::posInRefVolume() const
   {
     return _pos;
   }
 
   template <typename T> inline
-  typename Volume<T>::Position4Di & Volume<T>::posInRefVolume()
+  void Volume<T>::updateItemsBuffer() {
+
+    if ( !allocatorContext().isAllocated()
+         || (allocatorContext().accessMode() == AllocatorStrategy::NotOwner) ) {
+      
+      // Free old buffer
+      _items.free();
+      
+      if (_refvol.get()) {
+        // Recreate items buffer that reference volume
+        // using correct sizes and position
+        _items = AllocatedVector<T>( 0U,
+                    _refvol->allocatorContext().isAllocated()
+                    ? AllocatorContext( AllocatorStrategy::NotOwner,
+                                        rc_ptr<DataSource>( new BufferDataSource
+                                          ( (char *) &(*(_refvol))( _pos[0], _pos[1],
+                                                                    _pos[2], _pos[3] ),
+                                            VolumeProxy<T>::_sizeX 
+                                            * VolumeProxy<T>::_sizeY 
+                                            * VolumeProxy<T>::_sizeZ 
+                                            * VolumeProxy<T>::_sizeT
+                                            * sizeof(T) ) ) )
+                    : allocatorContext() );
+                    
+        if ( _refvol->allocatorContext().isAllocated() )
+        {
+          // fix offsets
+#ifdef CARTO_USE_BLITZ
+          _blitz.reference
+            ( blitz::Array<T,4>
+              ( &_items[0],
+                blitz::shape( VolumeProxy<T>::getSizeX(),
+                              VolumeProxy<T>::getSizeY(),
+                              VolumeProxy<T>::getSizeZ(),
+                              VolumeProxy<T>::getSizeT() ),
+                blitz::shape( 1, &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 ),
+                                 &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 ),
+                                 &(*_refvol)( 0, 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 ) ),
+                blitz::GeneralArrayStorage<4>
+                ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+#else
+          _lineoffset = &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 );
+          _sliceoffset = &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 );
+          _volumeoffset = &(*_refvol)( 0, 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 );
+#endif
+        }
+
+        /* copy voxel_size from underlying volume, if any.
+          This should probably be more general, but cannot be applied to all
+          header properties (size, transformations...).
+          WARNING: Moreover here we do not guarantee to keep both voxel_size
+          unique: we point to the same vector of values for now, but it can be
+          replaced (thus, duplicated) by a setProperty().
+          We could use a addBuiltinProperty(), but then the voxel size has to be
+          stored in a fixed location somewhere.
+        */
+        try
+        {
+          carto::Object vs = _refvol->header().getProperty( "voxel_size" );
+          this->header().setProperty( "voxel_size", vs );
+        }
+        catch( ... )
+        {
+          // never mind.
+        }
+      }
+    }
+  }
+  
+  template <typename T> inline
+  void Volume<T>::setPosInRefVolume( const Position4Di & pos ) {
+    if (pos != _pos) {
+      _pos = pos;
+      updateItemsBuffer();
+    }
+  }
+  
+  template <typename T> inline
+  void Volume<T>::setRefVolume( const rc_ptr<Volume<T> > & refvol) {
+    if (refvol.get() != _refvol.get()) {
+      _refvol = refvol;
+      updateItemsBuffer();
+    }
+  }
+  
+  template <typename T> inline
+  std::vector<int> Volume<T>::getBorders() const
   {
-    return _pos;
+    std::vector<int> borders(8, 0);
+    if (_refvol.get())
+    {
+      borders[0] = _pos[0];
+      borders[1] = _refvol->_sizeX - VolumeProxy<T>::_sizeX - _pos[0];
+      borders[2] = _pos[1];
+      borders[3] = _refvol->_sizeY - VolumeProxy<T>::_sizeY - _pos[1];
+      borders[4] = _pos[2];
+      borders[5] = _refvol->_sizeZ - VolumeProxy<T>::_sizeZ - _pos[2];
+      borders[6] = _pos[3];
+      borders[7] = _refvol->_sizeT - VolumeProxy<T>::_sizeT - _pos[3];
+    }
+    
+    return borders;
   }
 
   template < typename T >

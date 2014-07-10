@@ -452,11 +452,14 @@ void somaReadSomaWrite_f( const string       & ifname,
     writeoptions->setProperty( "partial_writing", true );
     VolumeRef<T> fullvol( new Volume<T>( sizeout[0], sizeout[1], sizeout[2], sizeout[3],
                           AllocatorContext(), false ) );
-    readvol->refVolume() = fullvol;
-    readvol->posInRefVolume()[0] = ( outputInfo.canWriteVoxel  ? posout[0] : 0 );
-    readvol->posInRefVolume()[1] = ( outputInfo.canWriteLine   ? posout[1] : 0 );
-    readvol->posInRefVolume()[2] = ( outputInfo.canWriteSlice  ? posout[2] : 0 );
-    readvol->posInRefVolume()[3] = ( outputInfo.canWriteVolume ? posout[3] : 0 );
+    readvol->setRefVolume(fullvol);
+    readvol->setPosInRefVolume(
+      typename carto::Volume<T>::Position4Di( 
+        outputInfo.canWriteVoxel  ? posout[0] : 0,
+        outputInfo.canWriteLine   ? posout[1] : 0,
+        outputInfo.canWriteSlice  ? posout[2] : 0,
+        outputInfo.canWriteVolume ? posout[3] : 0 )
+    );
   }
   writer.write( *readvol, writeoptions );
 }
