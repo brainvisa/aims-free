@@ -197,7 +197,7 @@ namespace aims {
               n = 0;
               
               // Set view position in the volume
-              win->setPosInRefVolume( typename carto::Volume<VoxelType>::Position4Di(x, y, z, t) );
+              win->setPosInRefVolume( typename carto::Volume<VoxelType>::Position4Di(x - dx, y - dy, z - dz, t) );
               out( x, y, z, t ) = _func.doit( win );
             }
           }
