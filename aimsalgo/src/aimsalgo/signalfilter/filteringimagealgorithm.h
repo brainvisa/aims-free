@@ -142,18 +142,12 @@ namespace aims {
           typename carto::Volume<VoxelType>::Position4Di( _win_size_x, 
                                                           _win_size_y, 
                                                           _win_size_z,
-                                                          0 )
+                                                          1 )
         )
       );
       
       // Get borders for the volume
       const std::vector<int> & borders = in.volume()->getBorders();
-      if (carto::verbose) {
-        std::cout << "Processing with borders: [" << carto::toString(borders[0]);
-        for(int i = 1; i < 8; ++i)
-          std::cout << ", " << carto::toString(borders[i]);
-        std::cout << "]" << std::endl;
-      }
       
       // When volume has borders, it is possible to use it to process filtering
       sz = dz - borders[4];
@@ -162,8 +156,26 @@ namespace aims {
       ez = out.dimZ() - dz + borders[5];
       ey = out.dimY() - dy + borders[3];
       ex = out.dimX() - dx + borders[1];
-
-      aims::Progression progress(out.dimT() * out.dimZ() * out.dimY() - 1);
+      
+      if (carto::verbose) {
+        std::cout << "Processing with borders: [" << carto::toString(borders[0]);
+        for(int i = 1; i < 8; ++i)
+          std::cout << ", " << carto::toString(borders[i]);
+        std::cout << "]" << std::endl;
+        
+        std::cout << "Start: [" << carto::toString(sx) << ", "
+                                << carto::toString(sy) << ", "
+                                << carto::toString(sz) << "]" << std::endl;
+        
+        std::cout << "End: [" << carto::toString(ex) << ", "
+                              << carto::toString(ey) << ", "
+                              << carto::toString(ez) << "]" << std::endl;
+      }
+      
+      aims::Progression progress( (out.dimT())
+                                * (ez - sz)
+                                * (ey - sy)
+                                - 1 );
       if (carto::verbose)
         std::cout << "Filtering progress: ";
 
