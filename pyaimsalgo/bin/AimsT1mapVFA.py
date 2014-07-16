@@ -189,7 +189,9 @@ T1map[T1map<inf_bound] = inf_bound
 T1map[np.isnan(T1map)] = sup_bound
 if options.inv:
     T1_max = np.max(T1map)
-    T1map = T1_max - T1map
+    #T1map = T1_max - T1map
+    # invert map, in a softer way than max - T1map
+    T1map = np.exp(-T1map/1000.)*8000 / (1. + np.exp(-T1map/1000.))
     # threshold from T1-weighted
     #T1map[np.asarray(GRE_5deg)<=40] *= 0.1
     gre_arr = np.asarray(GRE_5deg).astype(float)
