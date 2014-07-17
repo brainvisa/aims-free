@@ -88,6 +88,7 @@ HEADERS=	\
     resampling/mediansubsampling.h  \
     resampling/minsubsampling.h  \
     resampling/notnullmeansubsampling.h  \
+    resampling/notnullmediansubsampling.h  \
     resampling/sumsubsampling.h  \
     resampling/multichannelresampler.h	\
     resampling/samplable.h	\

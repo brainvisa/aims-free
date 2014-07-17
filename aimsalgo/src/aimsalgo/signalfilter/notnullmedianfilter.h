@@ -32,27 +32,28 @@
  */
 
 
-#ifndef AIMS_SIGNALFILTER_MAJORITYSMOOTH_H
-#define AIMS_SIGNALFILTER_MAJORITYSMOOTH_H
+#ifndef AIMS_SIGNALFILTER_NOTNULLMEDIANSMOOTH_H
+#define AIMS_SIGNALFILTER_NOTNULLMEDIANSMOOTH_H
 
 #include <cartobase/type/datatypetraits.h>
 #include <aims/signalfilter/nonlin_filt-func.h>
 #include <aims/signalfilter/filteringimagealgorithm.h>
 
 template <class VoxelType>
-class MajoritySmoothing : 
+class NotNullMedianSmoothing : 
   public aims::FilteringImageAlgorithm<VoxelType, 
-           MajorityFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
-    
+           NotNullMedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> >
+{
+
   public:
     typedef aims::FilteringImageAlgorithm<VoxelType, 
-           MajorityFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
+           NotNullMedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
            FilteringImageAlgorithmType;
-           
+
     typedef typename FilteringImageAlgorithmType::FilterFuncType 
            FilterFuncType;
-    
-    MajoritySmoothing( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+
+    NotNullMedianSmoothing( int sx = 3, int sy = 3, int sz = 3, carto::Object options = carto::none() )
       : FilteringImageAlgorithmType(sx, sy, sz, options) {}
 };
 

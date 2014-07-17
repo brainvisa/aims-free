@@ -52,8 +52,8 @@ class SumSubSampling :
     typedef typename SubSamplingImageAlgorithmType::FilterFuncType 
            FilterFuncType;
     
-    SumSubSampling( int sx = 3, int sy = 3, int sz = 1 )
-      : SubSamplingImageAlgorithmType(sx, sy, sz) {}
+    SumSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+      : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
 };
 
 #endif

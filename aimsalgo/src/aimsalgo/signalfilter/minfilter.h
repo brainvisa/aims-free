@@ -52,8 +52,8 @@ class MinSmoothing :
     typedef typename FilteringImageAlgorithmType::FilterFuncType 
            FilterFuncType;
     
-    MinSmoothing( int sx = 3, int sy = 3, int sz = 1 )
-      : FilteringImageAlgorithmType(sx, sy, sz) {}
+    MinSmoothing( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+      : FilteringImageAlgorithmType(sx, sy, sz, options) {}
 };
 
 #endif

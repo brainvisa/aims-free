@@ -52,7 +52,7 @@ class MedianSubSampling :
     typedef typename SubSamplingImageAlgorithmType::FilterFuncType 
            FilterFuncType;
     
-    MedianSubSampling( int sx = 3, int sy = 3, int sz = 1 )
-      : SubSamplingImageAlgorithmType(sx, sy, sz) {}
+    MedianSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+      : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
 };
 #endif

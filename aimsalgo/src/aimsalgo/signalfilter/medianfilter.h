@@ -53,8 +53,8 @@ class MedianSmoothing :
     typedef typename FilteringImageAlgorithmType::FilterFuncType 
            FilterFuncType;
 
-    MedianSmoothing( int sx = 3, int sy = 3, int sz = 3 )
-      : FilteringImageAlgorithmType(sx, sy, sz) {}
+    MedianSmoothing( int sx = 3, int sy = 3, int sz = 3, carto::Object options = carto::none() )
+      : FilteringImageAlgorithmType(sx, sy, sz, options) {}
 };
 
 #endif

@@ -52,8 +52,8 @@ class NotNullMeanSmoothing :
     typedef typename FilteringImageAlgorithmType::FilterFuncType 
            FilterFuncType;
     
-    notNullMeanSmoothing( int sx = 3, int sy = 3, int sz = 1 )
-      : FilteringImageAlgorithmType(sx, sy, sz) {}
+    notNullMeanSmoothing( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+      : FilteringImageAlgorithmType(sx, sy, sz, options) {}
 };
 
 #endif

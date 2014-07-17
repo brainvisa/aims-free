@@ -37,7 +37,24 @@
 
 #include <aims/data/data.h>
 
-// template <class T> class AimsData;
+// class Filter
+class Filter {
+  public:
+    
+    // Enumeration filter functions
+    enum Type {
+      MEDIAN = 0,
+      MEAN,
+      MIN,
+      MAX,
+      MAJORITY,
+      EXTREMA_DIFFERENCE,
+      SUM,
+      NOT_NULL_MEAN,
+      NOT_NULL_MEDIAN
+    };
+};
+
 
 //
 // class FilterFunc
@@ -46,7 +63,6 @@ template <class T>
 class NonLinFilterFunc
 {
   public:
-
     NonLinFilterFunc();
     virtual ~NonLinFilterFunc();
     T doit( const AimsData<T>& data ) const;
@@ -70,6 +86,15 @@ class MedianFilterFunc: public NonLinFilterFunc<T>
   public:
     MedianFilterFunc();
     virtual ~MedianFilterFunc();
+    virtual T execute( const carto::VolumeRef<T>& volume ) const;
+};
+
+template <class T>
+class NotNullMedianFilterFunc: public NonLinFilterFunc<T>
+{
+  public:
+    NotNullMedianFilterFunc();
+    virtual ~NotNullMedianFilterFunc();
     virtual T execute( const carto::VolumeRef<T>& volume ) const;
 };
 

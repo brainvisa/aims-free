@@ -28,6 +28,7 @@
 #include <aims/resampling/maxsubsampling.h>
 #include <aims/resampling/majoritysubsampling.h>
 #include <aims/resampling/notnullmeansubsampling.h>
+#include <aims/resampling/notnullmediansubsampling.h>
 #include <aims/resampling/sumsubsampling.h>
 
 using namespace std;
@@ -40,7 +41,7 @@ static bool doit( Process &, const string &, Finder & );
 
 class SubSampling : public Process {
     public:
-        SubSampling( const string & fout, unsigned rx, unsigned ry, unsigned rz, unsigned type );
+        SubSampling( const string & fout, unsigned rx, unsigned ry, unsigned rz, Filter::Type type );
         
         template<class T>
         friend bool doit( Process &, const string &, Finder & );
@@ -48,21 +49,21 @@ class SubSampling : public Process {
         unsigned getRX() const { return _rx; }
         unsigned getRY() const { return _ry; }
         unsigned getRZ() const { return _rz; }
-        unsigned getType() const { return _type; }
+        Filter::Type getType() const { return _type; }
 
     private:
         string _fout;
         unsigned _rx;
         unsigned _ry;
         unsigned _rz;
-        unsigned _type;
+        Filter::Type _type;
 };
 
 SubSampling::SubSampling( const string & fout,
                           unsigned rx,
                           unsigned ry,
                           unsigned rz,
-                          unsigned type )
+                          Filter::Type type )
   : Process(),
     _fout( fout ),
     _rx(rx),
@@ -83,13 +84,13 @@ SubSampling::SubSampling( const string & fout,
 }
 
 template <class VoxelType>
-const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlgorithm( const unsigned type,
+const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlgorithm( const Filter::Type type,
                                                                                         const unsigned win_size_x,
                                                                                         const unsigned win_size_y,
                                                                                         const unsigned win_size_z ) {
   switch(type) {
     
-    case 0:
+    case Filter::MEDIAN:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
                 new MedianSubSampling<VoxelType>( win_size_x, 
                                                   win_size_y,
@@ -98,7 +99,7 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
       break;
       
     //Mean computation
-    case 1:
+    case Filter::MEAN:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
                 new MeanSubSampling<VoxelType>( win_size_x, 
                                                 win_size_y,
@@ -107,7 +108,7 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
     break;
     
     // Min computation
-    case 2:
+    case Filter::MIN:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
                 new MinSubSampling<VoxelType>( win_size_x, 
                                                win_size_y,
@@ -116,7 +117,7 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
     break;
     
     // Max computation
-    case 3:
+    case Filter::MAX:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
                 new MaxSubSampling<VoxelType>( win_size_x, 
                                                win_size_y,
@@ -125,7 +126,7 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
     break;
     
     // Majority computation
-    case 4:
+    case Filter::MAJORITY:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
                 new MajoritySubSampling<VoxelType>( win_size_x, 
                                                     win_size_y,
@@ -134,7 +135,7 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
     break;
     
     // Difference computation
-    case 5:
+    case Filter::EXTREMA_DIFFERENCE:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
                 new ExtremaDifferenceSubSampling<VoxelType>( win_size_x, 
                                                              win_size_y,
@@ -143,7 +144,7 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
     break;
     
     // Sum computation
-    case 6:
+    case Filter::SUM:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
                 new SumSubSampling<VoxelType>( win_size_x, 
                                                win_size_y,
@@ -152,11 +153,20 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
     break;
     
     // Mean computation on not null voxels
-    case 7:
+    case Filter::NOT_NULL_MEAN:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
                 new NotNullMeanSubSampling<VoxelType>( win_size_x, 
                                                        win_size_y,
                                                        win_size_z )
+             );
+    break;
+    
+    // Median computation on not null voxels
+    case Filter::NOT_NULL_MEDIAN:
+      return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
+                new NotNullMedianSubSampling<VoxelType>( win_size_x, 
+                                                         win_size_y,
+                                                         win_size_z )
              );
     break;
     
@@ -180,10 +190,10 @@ doit( Process & p, const string & fname, Finder & f ) {
     cout << " done" << endl;
     
     if (verbose) {
-      cout << "Subsampling size: rx = " << sp._rx << "\t"
-                                "ry = " << sp._ry << "\t"
-                                "rz = " << sp._rz << endl 
-           << "Subsampling type: " << sp._type << endl;
+      cout << "Subsampling size: rx = " << carto::toString(sp._rx) << "\t"
+                                "ry = " << carto::toString(sp._ry) << "\t"
+                                "rz = " << carto::toString(sp._rz) << endl 
+           << "Subsampling type: " << carto::toString(sp._type) << endl;
     }
     
     const rc_ptr<aims::ImageAlgorithmInterface< T > > & algo = getSubsamplingImageAlgorithm<T>( sp._type, 
@@ -217,7 +227,7 @@ int main( int argc, const char **argv )
         application.addOption( rxy, "-n", "Number of voxels to aggregate in X and Y directions [default = 2]"
                                          "(this option is obsolete and only provided for compatibility purpose)", true);
         application.addOption( type, "-t", "Subsampling type : med[ian], mea[n], min[imum], max[imum], \n"
-                                           "maj[ority], dif[ference], sum, notnullmean [default = median]. Modes may also\n"
+                                           "maj[ority], dif[ference], sum, notnullmean, notnullmedian [default = median]. Modes may also\n"
                                            "be specified as order number: 0=median, 1=mean, etc.", true);
         application.addOption( fileout, "-o", "Output subsampled image" );
         
@@ -235,30 +245,42 @@ int main( int argc, const char **argv )
         }
 
         // Subsampling types map
-        map<string, unsigned>  types;
-        types[ "med" ] = 0;
-        types[ "median" ] = 0;
-        types[ "0" ] = 0;
-        types[ "mea" ] = 1;
-        types[ "mean" ] = 1;
-        types[ "1" ] = 1;
-        types[ "min" ] = 2;
-        types[ "minimum" ] = 2;
-        types[ "2" ] = 2;
-        types[ "max" ] = 3;
-        types[ "maximum" ] = 3;
-        types[ "3" ] = 3;
-        types[ "maj" ] = 4;
-        types[ "majority" ] = 4;
-        types[ "4" ] = 4;
-        types[ "dif" ] = 5;
-        types[ "difference" ] = 5;
-        types[ "5" ] = 5;
-        types[ "sum" ] = 6;
-        types[ "6" ] = 6;
-        types[ "notnullmean" ] = 7;
-        types[ "7" ] = 7;
-        map<string, unsigned>::iterator it = types.find( type );
+        map<string, Filter::Type>  types;
+        
+        types[ "med" ] = Filter::MEDIAN;
+        types[ "median" ] = Filter::MEDIAN;
+        types[ carto::toString(Filter::MEDIAN) ] = Filter::MEDIAN;
+        
+        types[ "mea" ] = Filter::MEAN;
+        types[ "mean" ] = Filter::MEAN;
+        types[ carto::toString(Filter::MEAN) ] = Filter::MEAN;
+        
+        types[ "min" ] = Filter::MIN;
+        types[ "minimum" ] = Filter::MIN;
+        types[ carto::toString(Filter::MIN) ] = Filter::MIN;
+        
+        types[ "max" ] = Filter::MAX;
+        types[ "maximum" ] = Filter::MAX;
+        types[ carto::toString(Filter::MAX) ] = Filter::MAX;
+        
+        types[ "maj" ] = Filter::MAJORITY;
+        types[ "majority" ] = Filter::MAJORITY;
+        types[ carto::toString(Filter::MAJORITY) ] = Filter::MAJORITY;
+        
+        types[ "dif" ] = Filter::EXTREMA_DIFFERENCE;
+        types[ "difference" ] = Filter::EXTREMA_DIFFERENCE;
+        types[ carto::toString(Filter::EXTREMA_DIFFERENCE) ] = Filter::EXTREMA_DIFFERENCE;
+        
+        types[ "sum" ] = Filter::SUM;
+        types[ carto::toString(Filter::SUM) ] = Filter::SUM;
+        
+        types[ "notnullmean" ] = Filter::NOT_NULL_MEAN;
+        types[ carto::toString(Filter::NOT_NULL_MEAN) ] = Filter::NOT_NULL_MEAN;
+
+        types[ "notnullmedian" ] = Filter::NOT_NULL_MEDIAN;
+        types[ carto::toString(Filter::NOT_NULL_MEDIAN) ] = Filter::NOT_NULL_MEDIAN;
+        
+        map<string, Filter::Type>::iterator it = types.find( type );
           
         if( it == types.end() )
           throw invalid_argument( "Invalid subsampling type: " + type );

@@ -52,8 +52,8 @@ class MinSubSampling :
     typedef typename SubSamplingImageAlgorithmType::FilterFuncType 
            FilterFuncType;
     
-    MinSubSampling( int sx = 3, int sy = 3, int sz = 1 )
-      : SubSamplingImageAlgorithmType(sx, sy, sz) {}
+    MinSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+      : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
 };
 
 #endif

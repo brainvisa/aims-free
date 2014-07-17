@@ -52,8 +52,8 @@ class ExtremaDifferenceSubSampling :
     typedef typename SubSamplingImageAlgorithmType::FilterFuncType 
            FilterFuncType;
     
-    ExtremaDifferenceSubSampling( int sx = 3, int sy = 3, int sz = 1 )
-      : SubSamplingImageAlgorithmType(sx, sy, sz) {}
+    ExtremaDifferenceSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+      : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
 };
 
 #endif

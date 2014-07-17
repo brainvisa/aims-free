@@ -50,6 +50,15 @@ template class MedianFilterFunc<int32_t>;
 template class MedianFilterFunc<float>;
 template class MedianFilterFunc<double>;
 
+template class NotNullMedianFilterFunc<uint8_t>;
+template class NotNullMedianFilterFunc<int8_t>;
+template class NotNullMedianFilterFunc<uint16_t>;
+template class NotNullMedianFilterFunc<int16_t>;
+template class NotNullMedianFilterFunc<uint32_t>;
+template class NotNullMedianFilterFunc<int32_t>;
+template class NotNullMedianFilterFunc<float>;
+template class NotNullMedianFilterFunc<double>;
+
 template class MeanFilterFunc<uint8_t>;
 template class MeanFilterFunc<int8_t>;
 template class MeanFilterFunc<uint16_t>;

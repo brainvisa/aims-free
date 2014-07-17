@@ -32,28 +32,28 @@
  */
 
 
-#ifndef AIMS_SIGNALFILTER_MAJORITYSMOOTH_H
-#define AIMS_SIGNALFILTER_MAJORITYSMOOTH_H
+#ifndef AIMS_RESAMPLING_NOTNULLMEDIANSUBSAMPLING_H
+#define AIMS_RESAMPLING_NOTNULLMEDIANSUBSAMPLING_H
 
 #include <cartobase/type/datatypetraits.h>
 #include <aims/signalfilter/nonlin_filt-func.h>
-#include <aims/signalfilter/filteringimagealgorithm.h>
+#include <aims/resampling/subsamplingimagealgorithm.h>
 
 template <class VoxelType>
-class MajoritySmoothing : 
-  public aims::FilteringImageAlgorithm<VoxelType, 
-           MajorityFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
+class NotNullMedianSubSampling : 
+  public aims::SubSamplingImageAlgorithm<VoxelType, 
+           NotNullMedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
     
   public:
-    typedef aims::FilteringImageAlgorithm<VoxelType, 
-           MajorityFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
-           FilteringImageAlgorithmType;
+    typedef aims::SubSamplingImageAlgorithm<VoxelType, 
+           NotNullMedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
+           SubSamplingImageAlgorithmType;
            
-    typedef typename FilteringImageAlgorithmType::FilterFuncType 
+    typedef typename SubSamplingImageAlgorithmType::FilterFuncType 
            FilterFuncType;
     
-    MajoritySmoothing( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
-      : FilteringImageAlgorithmType(sx, sy, sz, options) {}
+    NotNullMedianSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+      : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
 };
 
 #endif

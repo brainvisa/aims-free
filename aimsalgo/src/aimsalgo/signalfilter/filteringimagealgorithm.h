@@ -65,7 +65,7 @@ namespace aims {
     {
       public:
 
-        FilteringImageAlgorithm( int sx = 3, int sy = 3, int sz = 1 );
+        FilteringImageAlgorithm( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() );
 
         virtual ~FilteringImageAlgorithm() { }
 
@@ -96,14 +96,16 @@ namespace aims {
         int                         _win_size_y;
         int                         _win_size_z;
         const FilteringFunctionType _func;
+        carto::Object               _options;
     };
 
     template< class VoxelType, class FilteringFunctionType >
     inline
-    FilteringImageAlgorithm<VoxelType, FilteringFunctionType>::FilteringImageAlgorithm( int sx, int sy, int sz )
+    FilteringImageAlgorithm<VoxelType, FilteringFunctionType>::FilteringImageAlgorithm( int sx, int sy, int sz, carto::Object options )
           : _win_size_x(sx),
             _win_size_y(sy),
-            _win_size_z(sz)
+            _win_size_z(sz),
+            _options(options)
     {
     }
 
@@ -238,9 +240,9 @@ namespace aims {
 
       typedef FilterType FilterFuncType;
 
-      FilteringImageAlgorithm( int sx = 3, int sy = 3, int sz = 1 )
+      FilteringImageAlgorithm( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
         : ImageAlgorithmType(
-            SingleChannelImageAlgorithmType(sx, sy, sz)
+            SingleChannelImageAlgorithmType(sx, sy, sz, options)
           )
       {
       }

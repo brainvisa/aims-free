@@ -52,8 +52,8 @@ class MeanSmoothing :
     typedef typename FilteringImageAlgorithmType::FilterFuncType 
            FilterFuncType;
     
-    MeanSmoothing( int sx = 3, int sy = 3, int sz = 1 )
-      : FilteringImageAlgorithmType(sx, sy, sz) {}
+    MeanSmoothing( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+      : FilteringImageAlgorithmType(sx, sy, sz, options) {}
 };
 
 #endif

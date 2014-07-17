@@ -106,6 +106,36 @@ T MedianFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
 }
 
 //
+// Definitions for class NotNullMedianFilterFunc
+//
+template <class T>
+NotNullMedianFilterFunc<T>::NotNullMedianFilterFunc(): NonLinFilterFunc<T>() {}
+
+template <class T>
+NotNullMedianFilterFunc<T>::~NotNullMedianFilterFunc() {}
+
+template <class T> inline
+T NotNullMedianFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+{
+  std::vector<T> values;
+  typename carto::VolumeRef<T>::const_iterator it, ie = volume.end();
+
+  // Copy volume window to a vector of values
+  for (it = volume.begin(); it != ie; ++it) {
+    if ((*it) != (T)0)
+      values.push_back(*it);
+  }
+  
+  // Sort values
+  std::sort( values.begin(), values.end() );
+  
+  if (values.size() > 0)
+    return values[ values.size() / 2 ];
+  else
+    return (T)0;
+}
+
+//
 // Definitions for class MinFilterFunc
 //
 template <class T>

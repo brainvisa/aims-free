@@ -66,7 +66,7 @@ namespace aims {
     {
       public:
 
-        SubSamplingImageAlgorithm( int sx = 3, int sy = 3, int sz = 1 );
+        SubSamplingImageAlgorithm( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() );
         virtual ~SubSamplingImageAlgorithm() { }
 
         /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageDimensions method implementation.
@@ -103,15 +103,17 @@ namespace aims {
       int                         _win_size_y;
       int                         _win_size_z;
       const FilteringFunctionType _func;
+      carto::Object               _options;
     };
 
 
     template< class VoxelType, class FilteringFunctionType >
     inline 
-    SubSamplingImageAlgorithm< VoxelType, FilteringFunctionType >::SubSamplingImageAlgorithm(int sx, int sy, int sz )
+    SubSamplingImageAlgorithm< VoxelType, FilteringFunctionType >::SubSamplingImageAlgorithm(int sx, int sy, int sz, carto::Object options )
       : _win_size_x(sx), 
         _win_size_y(sy),
-        _win_size_z(sz)
+        _win_size_z(sz),
+        _options(options)
     {
     }
 
@@ -264,9 +266,9 @@ namespace aims {
               
       typedef FilterType FilterFuncType;
       
-      SubSamplingImageAlgorithm( int sx = 3, int sy = 3, int sz = 1 )
+      SubSamplingImageAlgorithm( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
         : ImageAlgorithmType(
-            SingleChannelImageAlgorithmType(sx, sy, sz)
+            SingleChannelImageAlgorithmType(sx, sy, sz, options)
           )
       {
       }
