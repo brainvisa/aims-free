@@ -54,7 +54,7 @@
 */
 
 #include <cstdlib>
-#include <aims/data/data_g.h>
+#include <cartodata/volume/volume.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>
 #include <aims/io/reader.h>
@@ -111,58 +111,58 @@ FileConvert::FileConvert()
   : Process(), encoding( 0 ), normal( false ), rescale( false ), xdim( 0 ),
     ydim( 0 ), zdim( 0 ), info()
 {
-  registerProcessType( "Volume", "S8", &convert<AimsData<int8_t> > );
-  registerProcessType( "Volume", "U8", &convert<AimsData<uint8_t> > );
-  registerProcessType( "Volume", "S16", &convert<AimsData<int16_t> > );
-  registerProcessType( "Volume", "U16", &convert<AimsData<uint16_t> > );
-  registerProcessType( "Volume", "S32", &convert<AimsData<int32_t> > );
-  registerProcessType( "Volume", "U32", &convert<AimsData<uint32_t> > );
-  registerProcessType( "Volume", "FLOAT", &convert<AimsData<float> > );
-  registerProcessType( "Volume", "DOUBLE", &convert<AimsData<double> > );
-  registerProcessType( "Volume", "CFLOAT", 
-		       &readAndWrite<AimsData<cfloat> > );
-  registerProcessType( "Volume", "CDOUBLE", 
-		       &readAndWrite<AimsData<cdouble> > );
-  registerProcessType( "Volume", "RGB", 
-		       &convert<AimsData<AimsRGB> > );
-  registerProcessType( "Volume", "RGBA", 
-		       &convert<AimsData<AimsRGBA> > );
-  registerProcessType( "Volume", "HSV", 
-		       &convert<AimsData<AimsHSV> > );
-  registerProcessType( "Volume", "POINT3DF", 
-		       &readAndWrite<AimsData<Point3df> > );
-  registerProcessType( "Volume", "VECTOR_OF_3_SHORT", 
-		       &readAndWrite<AimsData<Point3d> > );
-  registerProcessType( "Volume", "VECTOR_OF_6_FLOAT", 
-		       &readAndWrite<AimsData<AimsVector<float,6> > > );
-  registerProcessType( "Mesh", "VOID", 
-		       &readAndWrite<AimsSurfaceTriangle> );
-  registerProcessType( "Segments", "VOID", 
-		       &readAndWrite<AimsTimeSurface<2, Void> > );
-  registerProcessType( "Mesh4", "VOID", 
-		       &readAndWrite<AimsSurfaceFacet> );
-  registerProcessType( "Bucket", "VOID", 
-		       &convert<BucketMap<Void> > );
-  registerProcessType( "Bucket", "S16", 
-		       &convert<BucketMap<int16_t> > );
+  registerProcessType( "Volume", "S8", &convert<VolumeRef<int8_t> > );
+  registerProcessType( "Volume", "U8", &convert<VolumeRef<uint8_t> > );
+  registerProcessType( "Volume", "S16", &convert<VolumeRef<int16_t> > );
+  registerProcessType( "Volume", "U16", &convert<VolumeRef<uint16_t> > );
+  registerProcessType( "Volume", "S32", &convert<VolumeRef<int32_t> > );
+  registerProcessType( "Volume", "U32", &convert<VolumeRef<uint32_t> > );
+  registerProcessType( "Volume", "FLOAT", &convert<VolumeRef<float> > );
+  registerProcessType( "Volume", "DOUBLE", &convert<VolumeRef<double> > );
+  registerProcessType( "Volume", "CFLOAT",
+                      &readAndWrite<VolumeRef<cfloat> > );
+  registerProcessType( "Volume", "CDOUBLE",
+                      &readAndWrite<VolumeRef<cdouble> > );
+  registerProcessType( "Volume", "RGB",
+                      &convert<VolumeRef<AimsRGB> > );
+  registerProcessType( "Volume", "RGBA",
+                      &convert<VolumeRef<AimsRGBA> > );
+  registerProcessType( "Volume", "HSV",
+                      &convert<VolumeRef<AimsHSV> > );
+  registerProcessType( "Volume", "POINT3DF",
+                      &readAndWrite<VolumeRef<Point3df> > );
+  registerProcessType( "Volume", "VECTOR_OF_3_SHORT",
+                      &readAndWrite<VolumeRef<Point3d> > );
+  registerProcessType( "Volume", "VECTOR_OF_6_FLOAT",
+                      &readAndWrite<VolumeRef<AimsVector<float,6> > > );
+  registerProcessType( "Mesh", "VOID",
+                      &readAndWrite<AimsSurfaceTriangle> );
+  registerProcessType( "Segments", "VOID",
+                      &readAndWrite<AimsTimeSurface<2, Void> > );
+  registerProcessType( "Mesh4", "VOID",
+                      &readAndWrite<AimsSurfaceFacet> );
+  registerProcessType( "Bucket", "VOID",
+                      &convert<BucketMap<Void> > );
+  registerProcessType( "Bucket", "S16",
+                      &convert<BucketMap<int16_t> > );
   registerProcessType( "Bucket", "S32",
-                       &convert<BucketMap<int32_t> > );
+                      &convert<BucketMap<int32_t> > );
   registerProcessType( "Bucket", "U16",
-                       &convert<BucketMap<uint16_t> > );
+                      &convert<BucketMap<uint16_t> > );
   registerProcessType( "Bucket", "U32",
-                       &convert<BucketMap<uint32_t> > );
+                      &convert<BucketMap<uint32_t> > );
   registerProcessType( "Bucket", "FLOAT",
-                       &convert<BucketMap<float> > );
+                      &convert<BucketMap<float> > );
   registerProcessType( "Bucket", "DOUBLE",
-                       &convert<BucketMap<double> > );
-  registerProcessType( "Bucket", "DTITENSOR", 
-		       &readAndWrite<BucketMap<DtiTensor> > );
+                      &convert<BucketMap<double> > );
+  registerProcessType( "Bucket", "DTITENSOR",
+                      &readAndWrite<BucketMap<DtiTensor> > );
   registerProcessType( "Texture", "FLOAT", &convert<Texture1d> );
   registerProcessType( "Texture", "DOUBLE", &convert<TimeTexture<double> > );
   registerProcessType( "Texture", "S16", &convert<TimeTexture<short> > );
   registerProcessType( "Texture", "S32", &convert<TimeTexture<int> > );
-  registerProcessType( "Texture", "unsigned integer", 
-		       &convert<TimeTexture<unsigned> > );
+  registerProcessType( "Texture", "unsigned integer",
+                      &convert<TimeTexture<unsigned> > );
   registerProcessType( "Texture", "U32", &convert<TimeTexture<uint32_t> > );
   registerProcessType( "Texture", "POINT2DF", &readAndWrite<Texture2d> );
   registerProcessType( "Motion", "VOID", &readAndWrite<Motion> );
@@ -178,8 +178,8 @@ class DataConverter : public Process
 {
 public:
   DataConverter( T & dat, const string & fileout, bool a, bool n,
-		 const string & format, bool resc, unsigned dx, unsigned dy, 
-		 unsigned dz, RescalerInfo & info );
+                 const string & format, bool resc, unsigned dx, unsigned dy,
+                 unsigned dz, RescalerInfo & info );
 
   template<class T1, class U>
   friend bool convData( Process&, const string &, Finder & );
@@ -210,18 +210,18 @@ bool DataConverter<T>::noConvert( Process & p, const string &, Finder & )
 // partial specializations
 
 template<class T>
-class DataConverter<AimsData<T> > : public Process
+class DataConverter<VolumeRef<T> > : public Process
 {
 public:
-  DataConverter( AimsData<T> & dat, const string & fileout, int enc, bool n,
-		 const string & format, bool resc, unsigned dx, unsigned dy, 
-		 unsigned dz, RescalerInfo & info );
+  DataConverter( VolumeRef<T> & dat, const string & fileout, int enc, bool n,
+                 const string & format, bool resc, unsigned dx, unsigned dy,
+                 unsigned dz, RescalerInfo & info );
 
   template<class T1, class U>
   friend bool convData( Process&, const string &, Finder & );
 
  private:
-  AimsData<T>	& data;
+  VolumeRef<T>	& data;
   string	file;
   int		encoding;
   bool      normal;
@@ -238,8 +238,8 @@ class DataConverter<TimeTexture<T> > : public Process
 {
 public:
   DataConverter( TimeTexture<T> & dat, const string & fileout, int enc, bool n,
-		 const string & format, bool resc, unsigned dx, unsigned dy, 
-		 unsigned dz, RescalerInfo & info );
+                 const string & format, bool resc, unsigned dx, unsigned dy,
+                 unsigned dz, RescalerInfo & info );
 
   template<class T1, class U>
   friend bool convData( Process&, const string &, Finder & );
@@ -263,8 +263,8 @@ class DataConverter<BucketMap<T> > : public Process
 {
 public:
   DataConverter( BucketMap<T> & dat, const string & fileout, int enc, bool n,
-		 const string & format, bool resc, unsigned dx, unsigned dy, 
-		 unsigned dz, RescalerInfo  & info );
+                 const string & format, bool resc, unsigned dx, unsigned dy,
+                 unsigned dz, RescalerInfo  & info );
 
   template<class T1, class U>
   friend bool convData( Process&, const string &, Finder & );
@@ -286,114 +286,120 @@ public:
 //	definitions
 
 template<class T>
-DataConverter<AimsData<T> >::DataConverter( AimsData<T> & dat, 
-					    const string & fileout,
-					    int enc, bool n, const string & format,
-					    bool resc, unsigned dx, 
-					    unsigned dy, unsigned dz, RescalerInfo & info )
+DataConverter<VolumeRef<T> >::DataConverter( VolumeRef<T> & dat,
+                                             const string & fileout,
+                                             int enc, bool n,
+                                             const string & format,
+                                             bool resc, unsigned dx,
+                                             unsigned dy, unsigned dz,
+                                             RescalerInfo & info )
   : Process(), data( dat ), file( fileout ), encoding( enc ), normal(n), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info(info)
 {
-  registerProcessType( "Volume", "S8", 
-		       &convData<AimsData<T>,AimsData<int8_t> > );
-  registerProcessType( "Volume", "U8", 
-		       &convData<AimsData<T>,AimsData<uint8_t> > );
-  registerProcessType( "Volume", "S16", 
-		       &convData<AimsData<T>,AimsData<int16_t> > );
-  registerProcessType( "Volume", "U16", 
-		       &convData<AimsData<T>,AimsData<uint16_t> > );
-  registerProcessType( "Volume", "S32", 
-		       &convData<AimsData<T>,AimsData<int32_t> > );
-  registerProcessType( "Volume", "U32", 
-		       &convData<AimsData<T>,AimsData<uint32_t> > );
-  registerProcessType( "Volume", "FLOAT", 
-		       &convData<AimsData<T>,AimsData<float> > );
-  registerProcessType( "Volume", "DOUBLE", 
-		       &convData<AimsData<T>,AimsData<double> > );
-  registerProcessType( "Volume", "RGB", 
-		       &convData<AimsData<T>,AimsData<AimsRGB> > );
-  registerProcessType( "Volume", "RGBA", 
-		       &convData<AimsData<T>,AimsData<AimsRGBA> > );
-  registerProcessType( "Volume", "HSV", 
-		       &convData<AimsData<T>,AimsData<AimsHSV> > );
-  registerProcessType( "Bucket", "VOID", 
-		       &convData<AimsData<T>,BucketMap<Void> > );
-  registerProcessType( "Bucket", "S16", 
-		       &convData<AimsData<T>,BucketMap<int16_t> > );
+  registerProcessType( "Volume", "S8",
+                      &convData<VolumeRef<T>, VolumeRef<int8_t> > );
+  registerProcessType( "Volume", "U8",
+                      &convData<VolumeRef<T>, VolumeRef<uint8_t> > );
+  registerProcessType( "Volume", "S16",
+                      &convData<VolumeRef<T>, VolumeRef<int16_t> > );
+  registerProcessType( "Volume", "U16",
+                      &convData<VolumeRef<T>, VolumeRef<uint16_t> > );
+  registerProcessType( "Volume", "S32",
+                      &convData<VolumeRef<T>, VolumeRef<int32_t> > );
+  registerProcessType( "Volume", "U32",
+                      &convData<VolumeRef<T>, VolumeRef<uint32_t> > );
+  registerProcessType( "Volume", "FLOAT",
+                      &convData<VolumeRef<T>, VolumeRef<float> > );
+  registerProcessType( "Volume", "DOUBLE",
+                      &convData<VolumeRef<T>, VolumeRef<double> > );
+  registerProcessType( "Volume", "RGB",
+                      &convData<VolumeRef<T>, VolumeRef<AimsRGB> > );
+  registerProcessType( "Volume", "RGBA",
+                      &convData<VolumeRef<T>, VolumeRef<AimsRGBA> > );
+  registerProcessType( "Volume", "HSV",
+                      &convData<VolumeRef<T>, VolumeRef<AimsHSV> > );
+  registerProcessType( "Bucket", "VOID",
+                      &convData<VolumeRef<T>, BucketMap<Void> > );
+  registerProcessType( "Bucket", "S16",
+                      &convData<VolumeRef<T>, BucketMap<int16_t> > );
   registerProcessType( "Bucket", "U16",
-                       &convData<AimsData<T>,BucketMap<uint16_t> > );
+                      &convData<VolumeRef<T>, BucketMap<uint16_t> > );
   registerProcessType( "Bucket", "S32",
-                       &convData<AimsData<T>,BucketMap<int32_t> > );
+                      &convData<VolumeRef<T>, BucketMap<int32_t> > );
   registerProcessType( "Bucket", "U32",
-                       &convData<AimsData<T>,BucketMap<uint32_t> > );
+                      &convData<VolumeRef<T>, BucketMap<uint32_t> > );
   registerProcessType( "Bucket", "FLOAT",
-                       &convData<AimsData<T>,BucketMap<float> > );
+                      &convData<VolumeRef<T>, BucketMap<float> > );
   registerProcessType( "Bucket", "DOUBLE",
-                       &convData<AimsData<T>,BucketMap<double> > );
+                      &convData<VolumeRef<T>, BucketMap<double> > );
 }
 
 
 template<class T>
 DataConverter<TimeTexture<T> >::DataConverter( TimeTexture<T> & dat, 
-					       const string & fileout,
-					       int enc, bool n, const string & format,
-					       bool resc, unsigned dx, 
-					       unsigned dy, unsigned dz, RescalerInfo & info )
+                                               const string & fileout,
+                                               int enc, bool n,
+                                               const string & format,
+                                               bool resc, unsigned dx,
+                                               unsigned dy, unsigned dz,
+                                               RescalerInfo & info )
   : Process(), data( dat ), file( fileout ), encoding( enc ), normal( n ), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info( info )
 {
-  registerProcessType( "Texture", "S16", 
-		       &convData<TimeTexture<T>,TimeTexture<short> > );
+  registerProcessType( "Texture", "S16",
+                      &convData<TimeTexture<T>, TimeTexture<short> > );
   registerProcessType( "Texture", "S32",
-  		       &convData<TimeTexture<T>,TimeTexture<int> > );
-  registerProcessType( "Texture", "integer", 
-		       &convData<TimeTexture<T>,TimeTexture<int> > );
-  registerProcessType( "Texture", "unsigned integer", 
-		       &convData<TimeTexture<T>,TimeTexture<unsigned> > );
-  registerProcessType( "Texture", "U32", 
-		       &convData<TimeTexture<T>,TimeTexture<uint32_t> > );
-  registerProcessType( "Texture", "FLOAT", 
-		       &convData<TimeTexture<T>,TimeTexture<float> > );
+                      &convData<TimeTexture<T>, TimeTexture<int> > );
+  registerProcessType( "Texture", "integer",
+                      &convData<TimeTexture<T>, TimeTexture<int> > );
+  registerProcessType( "Texture", "unsigned integer",
+                      &convData<TimeTexture<T>, TimeTexture<unsigned> > );
+  registerProcessType( "Texture", "U32",
+                      &convData<TimeTexture<T>, TimeTexture<uint32_t> > );
+  registerProcessType( "Texture", "FLOAT",
+                      &convData<TimeTexture<T>, TimeTexture<float> > );
   registerProcessType( "Texture", "DOUBLE",
-                       &convData<TimeTexture<T>,TimeTexture<double> > );
+                      &convData<TimeTexture<T>, TimeTexture<double> > );
 }
 
 
 template<typename T>
 DataConverter<BucketMap<T> >::DataConverter( BucketMap<T> & dat, 
                                              const string & fileout,
-                                             int enc, bool n, const string & format,
+                                             int enc, bool n,
+                                             const string & format,
                                              bool resc, unsigned dx, 
-                                             unsigned dy, unsigned dz, RescalerInfo & info )
+                                             unsigned dy, unsigned dz,
+                                             RescalerInfo & info )
   : Process(), data( dat ), file( fileout ), encoding( enc ), normal ( n ), form( format ),
     rescale( resc ), xdim( dx ), ydim( dy ), zdim( dz ), info( info )
 {
-  registerProcessType( "Volume", "S16", 
-		       &convData<BucketMap<T>,AimsData<short> > );
+  registerProcessType( "Volume", "S16",
+                      &convData<BucketMap<T>, VolumeRef<short> > );
   registerProcessType( "Volume", "U16",
-                       &convData<BucketMap<T>,AimsData<uint16_t> > );
+                      &convData<BucketMap<T>, VolumeRef<uint16_t> > );
   registerProcessType( "Volume", "S32",
-                       &convData<BucketMap<T>,AimsData<int32_t> > );
+                      &convData<BucketMap<T>, VolumeRef<int32_t> > );
   registerProcessType( "Volume", "U32",
-                       &convData<BucketMap<T>,AimsData<uint32_t> > );
+                      &convData<BucketMap<T>, VolumeRef<uint32_t> > );
   registerProcessType( "Volume", "FLOAT",
-                       &convData<BucketMap<T>,AimsData<float> > );
+                      &convData<BucketMap<T>, VolumeRef<float> > );
   registerProcessType( "Volume", "DOUBLE",
-                       &convData<BucketMap<T>,AimsData<double> > );
-  registerProcessType( "Bucket", "VOID", 
-                       &convData<BucketMap<T>,BucketMap<Void> > );
-  registerProcessType( "Bucket", "S16", 
-                       &convData<BucketMap<T>,BucketMap<int16_t> > );
+                      &convData<BucketMap<T>, VolumeRef<double> > );
+  registerProcessType( "Bucket", "VOID",
+                      &convData<BucketMap<T>, BucketMap<Void> > );
+  registerProcessType( "Bucket", "S16",
+                      &convData<BucketMap<T>, BucketMap<int16_t> > );
   registerProcessType( "Bucket", "U16",
-                       &convData<BucketMap<T>,BucketMap<uint16_t> > );
+                      &convData<BucketMap<T>, BucketMap<uint16_t> > );
   registerProcessType( "Bucket", "S32",
-                       &convData<BucketMap<T>,BucketMap<int32_t> > );
+                      &convData<BucketMap<T>, BucketMap<int32_t> > );
   registerProcessType( "Bucket", "U32",
-                       &convData<BucketMap<T>,BucketMap<uint32_t> > );
+                      &convData<BucketMap<T>, BucketMap<uint32_t> > );
   registerProcessType( "Bucket", "FLOAT",
-                       &convData<BucketMap<T>,BucketMap<float> > );
+                      &convData<BucketMap<T>, BucketMap<float> > );
   registerProcessType( "Bucket", "DOUBLE",
-                       &convData<BucketMap<T>,BucketMap<double> > );
+                      &convData<BucketMap<T>, BucketMap<double> > );
 }
 
 
@@ -404,9 +410,9 @@ Object getHeader( T & )
 }
 
 template <typename T>
-Object getHeader( AimsData<T> & data )
+Object getHeader( VolumeRef<T> & data )
 {
-  return Object::reference( *dynamic_cast<GenericObject *>( data.header() ) );
+  return Object::reference( data->header() );
 }
 
 
@@ -530,22 +536,65 @@ unsigned sizeT( T & )
 }
 
 
-template<class T> static 
-void allocThing( AimsData<T> *& obj, unsigned xdim, unsigned ydim, 
-		 unsigned zdim, unsigned tdim )
+template<class T> static
+unsigned sizeX( T & )
 {
-  obj = new AimsData<T>( xdim, ydim, zdim, tdim );
+  return 1;
+}
+
+
+template<class T> static
+unsigned sizeY( T & )
+{
+  return 1;
+}
+
+
+template<class T> static
+unsigned sizeZ( T & )
+{
+  return 1;
+}
+
+
+template<class T> static
+void allocThing( VolumeRef<T> *& obj, unsigned xdim, unsigned ydim,
+                 unsigned zdim, unsigned tdim )
+{
+  cout << "allocThing " << xdim << endl;
+  obj = new VolumeRef<T>( xdim, ydim, zdim, tdim );
 }
 
 
 template<class T> static 
-unsigned sizeT( AimsData<T> & obj )
+unsigned sizeX( VolumeRef<T> & obj )
 {
-  return( obj.dimT() );
+  return( obj->getSizeX() );
 }
 
 
-template<class T> static 
+template<class T> static
+unsigned sizeY( VolumeRef<T> & obj )
+{
+  return( obj->getSizeY() );
+}
+
+
+template<class T> static
+unsigned sizeZ( VolumeRef<T> & obj )
+{
+  return( obj->getSizeZ() );
+}
+
+
+template<class T> static
+unsigned sizeT( VolumeRef<T> & obj )
+{
+  return( obj->getSizeT() );
+}
+
+
+template<class T> static
 unsigned sizeT( BucketMap<T> & obj )
 {
   return( obj.size() );
@@ -572,17 +621,27 @@ bool convData( Process & p, const string &, Finder & )
   DataConverter<T>	& dc = (DataConverter<T> &) p;
   cout << "converting data...\n";
 
+  cout << "data sizeT: " << sizeT(dc.data) << ", dim: " << dc.xdim << ", " << dc.ydim << ", " << dc.zdim << endl;
+
   ShallowConverter<T,U>	conv( dc.rescale, dc.info );
   auto_ptr<U>		vol2;
-  if( dc.xdim != 0 && dc.ydim != 0 && dc.zdim != 0 )
+  if( dc.xdim != 0 || dc.ydim != 0 || dc.zdim != 0 )
     {
+      if( dc.xdim == 0 )
+        dc.xdim = sizeX(dc.data);
+      if( dc.ydim == 0 )
+        dc.ydim = sizeY(dc.data);
+      if( dc.zdim == 0 )
+        dc.zdim = sizeZ(dc.data);
       U		*data;
       allocThing( data, dc.xdim, dc.ydim, dc.zdim, sizeT( dc.data ) );
       vol2.reset( data );
+      cout << "alloc, sizeT: " << sizeT( *data ) << endl;
       conv.convert( dc.data, *vol2 );
     }
   else
     vol2.reset( conv( dc.data ) );
+  cout << "converted, sizeT: " << sizeT( *vol2 ) << endl;
 
   cout << "convert done\n";
 
