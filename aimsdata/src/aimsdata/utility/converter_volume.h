@@ -116,6 +116,18 @@ namespace carto
 
 
   template <typename INP>
+  class RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
+  {
+  public:
+    RawConverter( bool shallowcopy = false ) : _shallowcopy( shallowcopy ) {}
+    void convert( const carto::VolumeRef<INP> &in, carto::VolumeRef<INP> & out ) const;
+
+  private:
+    bool _shallowcopy;
+  };
+
+
+  template <typename INP>
   class ShallowConverter<AimsData<INP>, AimsData<INP> >
     : public Converter<AimsData<INP>, AimsData<INP> >
   {
@@ -125,6 +137,18 @@ namespace carto
     ShallowConverter( bool rescale, const RescalerInfo & info )
       : Converter<AimsData<INP>, AimsData<INP> >( rescale, info ) {}
     virtual void convert( const AimsData<INP> &in, AimsData<INP> & out ) const;
+  };
+
+  template <typename INP>
+  class ShallowConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
+    : public Converter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
+  {
+  public:
+    ShallowConverter( bool rescale = false )
+      : Converter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >( rescale ) {}
+    ShallowConverter( bool rescale, const RescalerInfo & info )
+      : Converter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >( rescale, info ) {}
+    virtual void convert( const carto::VolumeRef<INP> &in, carto::VolumeRef<INP> & out ) const;
   };
 
   template <class INP,class OUTP>
@@ -421,6 +445,18 @@ namespace carto
 
 
   template<typename INP>
+  class ConverterSwitch<carto::VolumeRef<INP>,carto::VolumeRef<INP>,false>
+    : public RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >
+  {
+  public:
+    ConverterSwitch( bool shallowcopy = false )
+      : RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >( shallowcopy ) {}
+    ConverterSwitch( const RescalerInfo&,  bool shallowcopy = false )
+      : RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >( shallowcopy ) {}
+  };
+
+
+  template<typename INP>
   class ConverterSwitch<AimsData<INP>,AimsData<INP>,true>
     : public Rescaler<AimsData<INP>,AimsData<INP> >
   {
@@ -429,6 +465,18 @@ namespace carto
       : Rescaler<AimsData<INP>,AimsData<INP> >() {}
     ConverterSwitch( const RescalerInfo& info, bool )
       : Rescaler<AimsData<INP>,AimsData<INP> >(info) {}
+  };
+
+
+  template<typename INP>
+  class ConverterSwitch<carto::VolumeRef<INP>,carto::VolumeRef<INP>,true>
+    : public Rescaler<carto::VolumeRef<INP>,carto::VolumeRef<INP> >
+  {
+  public:
+    ConverterSwitch( bool = false )
+      : Rescaler<carto::VolumeRef<INP>,carto::VolumeRef<INP> >() {}
+    ConverterSwitch( const RescalerInfo& info, bool )
+      : Rescaler<carto::VolumeRef<INP>,carto::VolumeRef<INP> >(info) {}
   };
 
 
@@ -445,6 +493,24 @@ namespace carto
           && std::numeric_limits<INP>::is_bounded >( shallowcopy ) {}
     SmartConverter( const RescalerInfo& info, bool shallowcopy = false )
       : ConverterSwitch<AimsData<INP>, AimsData<INP>,
+          std::numeric_limits<INP>::is_specialized
+          && std::numeric_limits<INP>::is_bounded >( info, shallowcopy ) {}
+  };
+
+
+  template<typename INP>
+  class SmartConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >
+    : public ConverterSwitch<carto::VolumeRef<INP>, carto::VolumeRef<INP>,
+                             std::numeric_limits<INP>::is_specialized
+  && std::numeric_limits<INP>::is_bounded >
+  {
+  public:
+    SmartConverter( bool shallowcopy = false )
+      : ConverterSwitch<carto::VolumeRef<INP>, carto::VolumeRef<INP>,
+          std::numeric_limits<INP>::is_specialized
+          && std::numeric_limits<INP>::is_bounded >( shallowcopy ) {}
+    SmartConverter( const RescalerInfo& info, bool shallowcopy = false )
+      : ConverterSwitch<carto::VolumeRef<INP>, carto::VolumeRef<INP>,
           std::numeric_limits<INP>::is_specialized
           && std::numeric_limits<INP>::is_bounded >( info, shallowcopy ) {}
   };
@@ -470,6 +536,25 @@ namespace carto
 
   // VolumeRef implementation
 
+  template<class INP>
+  inline void
+  ShallowConverter<carto::VolumeRef<INP>, carto::VolumeRef<INP> >::convert
+  ( const carto::VolumeRef<INP> &in, carto::VolumeRef<INP> & out ) const
+  {
+    if( this->_rescale )
+    {
+      SmartConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >
+        sc( this->_info, true );
+      sc.convert( in, out );
+    }
+    else
+    {
+      RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> > rc( true );
+        rc.convert( in, out );
+    }
+  }
+
+
   template <typename INP,typename OUTP>
   void RawConverter<carto::VolumeRef<INP>, carto::VolumeRef<OUTP> >::convert
     ( const carto::VolumeRef<INP> &in, carto::VolumeRef<OUTP> & out ) const
@@ -477,6 +562,7 @@ namespace carto
     AimsData<OUTP> data( out );
     RawConverter<AimsData<INP>, AimsData<OUTP> > c;
     c.convert( in, data );
+    out = data.volume(); // vol in data may have changed
   }
 
 
@@ -502,6 +588,7 @@ namespace carto
     AimsData<OUTP> data( out );
     Rescaler<AimsData<INP>,AimsData<OUTP> > c( _info );
     c.convert( in, data );
+    out = data.volume(); // vol in data may have changed
   }
 
   template <class INP,class OUTP>
@@ -520,6 +607,18 @@ namespace carto
       ( const carto::VolumeRef<INP> & )
   {
     return new carto::VolumeRef<INP>( 0 );
+  }
+
+
+  template<class INP> inline
+  void RawConverter<carto::VolumeRef<INP>,carto::VolumeRef<INP> >::convert
+  ( const carto::VolumeRef<INP> &in, carto::VolumeRef<INP> &out ) const
+  {
+    AimsData<INP> datain( in );
+    AimsData<INP> dataout( out );
+    RawConverter<AimsData<INP>, AimsData<INP> > conv( _shallowcopy );
+    conv.convert( datain, dataout );
+    out = dataout.volume(); // vol in dataout may have changed
   }
 
 }
