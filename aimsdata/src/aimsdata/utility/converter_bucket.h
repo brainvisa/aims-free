@@ -579,8 +579,9 @@ namespace carto
   void RawConverter<VolumeRef<INP>,aims::BucketMap<OUTP> >::convert
   ( const VolumeRef<INP> &in, aims::BucketMap<OUTP> &out ) const
   {
-    RawConverter<AimsData<OUTP>, aims::BucketMap<INP> > c;
-    c.convert( in, out );
+    RawConverter<AimsData<INP>, aims::BucketMap<OUTP> > c;
+    AimsData<INP> data( in );
+    c.convert( data, out );
   }
 
 
@@ -589,7 +590,8 @@ namespace carto
   ( const VolumeRef<INP> &in, aims::BucketMap<Void> &out ) const
   {
     RawConverter<AimsData<INP>, aims::BucketMap<Void> > c( _timeIsLabel );
-    c.convert( in, out );
+    AimsData<INP> data( in );
+    c.convert( data, out );
   }
 
 }
