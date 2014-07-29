@@ -45,7 +45,7 @@ namespace carto
 
   class PythonWriter;
 
-  /// only needed in bidings of GenericObject and subclasses
+  /// only needed in bindings of GenericObject and subclasses
   void _objectStrCatchFunction( PythonWriter &, std::exception &,
                                 const carto::GenericObject & );
 

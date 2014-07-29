@@ -121,6 +121,8 @@ namespace carto
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
     bool x = PyString_Check( _value );
+    if( !x )
+      x = PyUnicode_Check( _value );
     PyGILState_Release(gstate);
     return x;
   }
@@ -260,6 +262,8 @@ namespace carto
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
         bool x = PyString_Check( po.getValue() );
+        if( !x )
+          x = PyUnicode_Check( po.getValue() );
         PyGILState_Release(gstate);
         return x;
       }
