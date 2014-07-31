@@ -51,8 +51,8 @@ namespace aims
   RoiSelectorReader& operator >> ( RoiSelectorReader&, Tree& );
 
 
-  class AIMSALGO_API RoiSelectorReader : public TreeReader
-  { 
+  class AIMSALGO_API RoiSelectorReader
+  {
   public:
 
     RoiSelectorReader( const std::string& name, const carto::SyntaxSet& stx );
