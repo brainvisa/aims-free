@@ -80,6 +80,20 @@ void SelectionReader::open( istream & istr )
 namespace
 {
 
+  const SyntaxSet & selectionSyntax()
+  {
+    static SyntaxSet    ss;
+    if( ss.empty() )
+      {
+        ss[ "selector" ][ "graph_syntax" ].type = "string";
+        Syntax  & s = ss[ "subset" ];
+        s[ "surname" ].type = "string";
+        s[ "nomenName" ].type = "string";
+      }
+    return ss;
+  }
+
+
   void convertFromSel( Object gen, SelectionSet & select )
   {
     Object contents = gen->getProperty( "__children__" );
@@ -121,6 +135,37 @@ namespace
     }
   }
 
+
+  void readAsTree( SelectionSet & select, istream *stream )
+  {
+    // 1. read as Tree
+
+    const SyntaxSet       & ss = selectionSyntax();
+    Tree                  t( true, "selector" );
+    TreeReader            tr( ss );
+    tr.attach( *stream );
+    tr.read( t );
+    tr.detach();
+
+    // 2. convert to SelectionSet
+
+    Tree::const_iterator  it, et = t.end(), it2, et2;
+    string                name;
+    Tree                  *t2;
+
+    for( it=t.begin(); it!=et; ++it )
+      {
+        t2 = (Tree *) *it;
+        if( !t2->getProperty( "surname", name ) )
+          name = "";
+        select.addSelection( Selection( name ) );
+        Selection & sel = *select.rbegin();
+        for( it2=t2->begin(), et2=t2->end(); it2!=et2; ++it2 )
+          if( ((Tree *) *it2)->getProperty( "nomenName", name ) )
+            sel.select( name );
+      }
+  }
+
 }
 
 
@@ -135,14 +180,31 @@ void SelectionReader::read( SelectionSet & select )
   // 1. read as dict Object
 
   carto::Reader<GenericObject> read( ds );
-  Object gen( read.read() );
+  try
+  {
+    Object gen( read.read() );
 
-  // 2. convert to SelectionSet, 2 cases
-  if( gen->size() == 1 && gen->hasProperty( "__children__" ) )
-    // older .sel (.minf / Tree) case
-    convertFromSel( gen, select );
-  else // newer json (Atlas Viewer) case
-    convertFromJson( gen, select );
+    // 2. convert to SelectionSet, 2 cases
+    if( gen->size() == 1 && gen->hasProperty( "__children__" ) )
+      // older .sel (.minf / Tree) case
+      convertFromSel( gen, select );
+    else // newer json (Atlas Viewer) case
+      convertFromJson( gen, select );
+  }
+  catch( ... )
+  {
+    // maybe an old Tree format ?
+    auto_ptr<istream>     s2;
+    istream       *stream;
+    if( _stream )
+      stream = _stream;
+    else
+    {
+      s2.reset( new ifstream( _filename.c_str() ) );
+      stream = s2.get();
+    }
+    readAsTree( select, stream );
+  }
 }
 
 
