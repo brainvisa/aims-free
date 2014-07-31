@@ -97,19 +97,19 @@ def meshSplit2(mesh, tex, graph, voxel_size, tex_time_step=None):
             aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]))
 
         # (2) aims_roi
-        bucketMap = aims.BucketMap_VOID()
-        sub_mesh_vertex = sub_mesh[0].vertex()
+        #bucketMap = aims.BucketMap_VOID()
+        #sub_mesh_vertex = sub_mesh[0].vertex()
 
-        for vertex in sub_mesh_vertex:
-            px = round(vertex[0] / voxel_size[0])
-            py = round(vertex[1] / voxel_size[1])
-            pz = round(vertex[2] / voxel_size[2])
-            p3d = aims.Point3d(px, py, pz)
-            bucketMap[0][p3d] = 1
+        #for vertex in sub_mesh_vertex:
+            #px = round(vertex[0] / voxel_size[0])
+            #py = round(vertex[1] / voxel_size[1])
+            #pz = round(vertex[2] / voxel_size[2])
+            #p3d = aims.Point3d(px, py, pz)
+            #bucketMap[0][p3d] = 1
 
-        if len(voxel_size) >= 3:
-            bucketMap.setSizeXYZT(voxel_size[0],voxel_size[1], voxel_size[2], 1)
-        else:
-            bucketMap.setSizeXYZT(1, 1, 1, 1)
-        aims.GraphManip.storeAims(graph, v._get(), 'aims_roi', aims.rc_ptr_BucketMap_VOID(bucketMap))
+        #if len(voxel_size) >= 3:
+            #bucketMap.setSizeXYZT(voxel_size[0],voxel_size[1], voxel_size[2], 1)
+        #else:
+            #bucketMap.setSizeXYZT(1, 1, 1, 1)
+        #aims.GraphManip.storeAims(graph, v._get(), 'aims_roi', aims.rc_ptr_BucketMap_VOID(bucketMap))
 
