@@ -57,15 +57,24 @@ def meshSplit(mesh, tex, graph, tex_time_step=0):
         aims.GraphManip.storeAims(graph, v._get(), 'roi_mesh', aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]))
     return graph
 
-def meshSplit2(mesh, tex, graph, voxel_size, tex_time_step=None):
+def meshSplit2(mesh, tex, graph, voxel_size=None, tex_time_step=None):
     """
-    inputs:
-        - mesh : cortex mesh for example
-        - tex: texture of labels (parcellation of the mesh, labels between 1 and nb_labels, background = 0), type : aims.TimeTexture_S16
-        - graph: :py:class:`soma.aims.Graph`, __syntax__:'roi'
+    Parameters
+    ----------
+    mesh: cortex mesh for example
+    tex: aims.TimeTexture_S16
+        texture of labels (parcellation of the mesh, labels between 1 and nb_labels, background = 0)
+    graph: :py:class:`soma.aims.Graph`, __syntax__:'roi'
+    voxel_size: (optional)
+        if a voxel size is given, a bucket will be built with the specified
+        voxel size to follow the mesh. Otherwise there will be no bucket.
+    tex_time_step: int (optional)
+        time step to be used in the texture for regions split. default: 0
 
-    outputs:
-        - None: modify the input graph: add vertex : submeshes (one per texture
+    Outputs
+    -------
+    None:
+        modify the input graph: add vertex : submeshes (one per texture
         label) and associated buckets add vertex "others" : void
     """
 
@@ -81,7 +90,10 @@ def meshSplit2(mesh, tex, graph, voxel_size, tex_time_step=None):
         labels.remove(0)
 
     # 3D resolution: replace 0 by 1
-    voxel_size = [1 if x == 0 else x for x in voxel_size]
+    if voxel_size is not None:
+        voxel_size = [1. if x == 0 else x for x in voxel_size]
+        while len(voxel_size) < 3:
+            voxel_size.append(1.)
 
     # for each label, roi_mesh and aims_roi are added in graph
 
@@ -97,19 +109,22 @@ def meshSplit2(mesh, tex, graph, voxel_size, tex_time_step=None):
             aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]))
 
         # (2) aims_roi
-        #bucketMap = aims.BucketMap_VOID()
-        #sub_mesh_vertex = sub_mesh[0].vertex()
+        if voxel_size is not None:
+            bucketMap = aims.BucketMap_VOID()
+            sub_mesh_vertex = sub_mesh[0].vertex()
 
-        #for vertex in sub_mesh_vertex:
-            #px = round(vertex[0] / voxel_size[0])
-            #py = round(vertex[1] / voxel_size[1])
-            #pz = round(vertex[2] / voxel_size[2])
-            #p3d = aims.Point3d(px, py, pz)
-            #bucketMap[0][p3d] = 1
+            for vertex in sub_mesh_vertex:
+                px = round(vertex[0] / voxel_size[0])
+                py = round(vertex[1] / voxel_size[1])
+                pz = round(vertex[2] / voxel_size[2])
+                p3d = aims.Point3d(px, py, pz)
+                bucketMap[0][p3d] = 1
 
-        #if len(voxel_size) >= 3:
-            #bucketMap.setSizeXYZT(voxel_size[0],voxel_size[1], voxel_size[2], 1)
-        #else:
-            #bucketMap.setSizeXYZT(1, 1, 1, 1)
-        #aims.GraphManip.storeAims(graph, v._get(), 'aims_roi', aims.rc_ptr_BucketMap_VOID(bucketMap))
+            if len(voxel_size) >= 3:
+                bucketMap.setSizeXYZT(voxel_size[0], voxel_size[1],
+                    voxel_size[2], 1)
+            else:
+                bucketMap.setSizeXYZT(1, 1, 1, 1)
+            aims.GraphManip.storeAims(graph, v._get(), 'aims_roi',
+                aims.rc_ptr_BucketMap_VOID(bucketMap))
 
