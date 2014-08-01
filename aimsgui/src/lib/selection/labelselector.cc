@@ -952,8 +952,9 @@ void LabelSelector::loadModel( const QString & filename )
 
   d->modelbox->clear();
   for( iv=g->begin(); iv!=ev; ++iv )
-    if( (*iv)->getProperty( "label", label ) && label != "any" 
-        && label != "generic" && label != "*" )
+    if( ( (*iv)->getProperty( "label", label )
+          || (*iv)->getProperty( "name", label ) )
+        && label != "any" && label != "generic" && label != "*" )
       d->modelbox->addItem( label.c_str() );
 }
 

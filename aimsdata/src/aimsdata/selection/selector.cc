@@ -48,12 +48,15 @@ using namespace std;
 
 struct Selector::Private
 {
-  Private() : ownhie( true ), ownmodel( true ), hie( 0 ), model( 0 ) {}
+  Private() : ownhie( true ), ownmodel( true ), hie( 0 ), model( 0 ), modelLabelProperty( "label" )
+  {}
   ~Private();
+
   bool ownhie;
   bool ownmodel;
   Hierarchy *hie;
   Graph     *model;
+  string modelLabelProperty;
   SelectionSet presel;
 };
 
@@ -157,12 +160,30 @@ const Graph* Selector::model() const
 }
 
 
+namespace
+{
+
+  string modelLabelProperty( const Graph & model )
+  {
+    Graph::const_iterator iv = model.begin();
+    if( iv != model.end() )
+      if( (*iv)->hasProperty( "label" ) )
+        return "label";
+      else if( (*iv)->hasProperty( "name" ) )
+        return "name";
+    return "label";
+  }
+
+}
+
+
 void Selector::setModel( Graph* model, bool setowner )
 {
   if( d->ownmodel && model != d->model )
     delete d->model;
   d->ownmodel = setowner;
   d->model = model;
+  d->modelLabelProperty = modelLabelProperty( *d->model );
 }
 
 
@@ -184,6 +205,7 @@ void Selector::loadModel( const string & filename )
   {
     cerr << e.what() << endl;
   }
+  d->modelLabelProperty = modelLabelProperty( *d->model );
 }
 
 
@@ -269,9 +291,11 @@ SelectionSet SelectionExpander::query( const Graph & model ) const
   SelectionSet				out;
   string				label;
 
+  string labelprop = modelLabelProperty( model );
+
   for( iv=model.begin(); iv!=ev; ++iv )
-    if( (*iv)->getProperty( "label", label ) && label != "any" 
-        && label != "generic" && label != "*" )
+    if( (*iv)->getProperty( labelprop, label )
+        && label != "any" && label != "generic" && label != "*" )
       {
         Selection	s( label );
         s.select( label );
@@ -292,8 +316,10 @@ SelectionSet SelectionExpander::query( const Graph & model,
   Tree					*t;
   bool					hasgen = false;
 
+  string labelprop = modelLabelProperty( model );
+
   for( iv=model.begin(); iv!=ev; ++iv )
-    if( (*iv)->getProperty( "label", label ) )
+    if( (*iv)->getProperty( labelprop, label ) )
     {
       if( label == "any" || label == "generic" || label == "*" )
         hasgen = true;
@@ -350,22 +376,25 @@ SelectionSet SelectionExpander::query( const Graph & model,
   SelectionSet::const_iterator	is, es = sel.end();
   SelectionSet			out;
 
-  /* check for generic model element. If there are some, output selection 
+  string labelprop = modelLabelProperty( model );
+
+  /* check for generic model element. If there are some, output selection
      will just be the input selection with no modification */
-  set<Vertex *>	vert = model.getVerticesWith( "label", string( "any" ) );
+  set<Vertex *>	vert = model.getVerticesWith( labelprop,
+                                              string( "any" ) );
   if( !vert.empty() )
     return sel;
-  vert = model.getVerticesWith( "label", string( "generic" ) );
+  vert = model.getVerticesWith( labelprop, string( "generic" ) );
   if( !vert.empty() )
     return sel;
-  vert = model.getVerticesWith( "label", string( "*" ) );
+  vert = model.getVerticesWith( labelprop, string( "*" ) );
   if( !vert.empty() )
     return sel;
 
   // if all model elements are labelled, selections names must match
   for( is=sel.begin(); is!=es; ++is )
     {
-      vert = model.getVerticesWith( "label", is->name() );
+      vert = model.getVerticesWith( labelprop, is->name() );
       if( !vert.empty() )
         out.addSelection( *is );
     }
