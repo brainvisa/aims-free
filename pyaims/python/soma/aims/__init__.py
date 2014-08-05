@@ -100,15 +100,15 @@ import os
 # check for share dir, and set the BRAINVISA_SHARE environment var if it is not
 # already set
 if 'BRAINVISA_SHARE' not in os.environ:
-  sharepath = os.path.join( os.path.dirname( os.path.dirname( os.path.dirname( \
-    os.path.dirname( __file__ ) ) ) ), 'share' )
-  os.environ[ 'BRAINVISA_SHARE' ] = sharepath
-  os.putenv( 'BRAINVISA_SHARE', sharepath ) # environ[] and putenv() seem to
-  # have slightly different scopes...
+    sharepath = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.dirname(__file__)))), 'share')
+    os.environ['BRAINVISA_SHARE'] = sharepath
+    os.putenv('BRAINVISA_SHARE', sharepath)  # environ[] and putenv() seem to
+    # have slightly different scopes...
 del os
 
 from soma.aims import aimssip
-#from soma.functiontools import partial
+# from soma.functiontools import partial
 from soma.importer import ExtendedImporter, GenericHandlers
 
 # Rename sip modules and reorganize namespaces using the Importer class
@@ -116,56 +116,59 @@ from soma.importer import ExtendedImporter, GenericHandlers
 # for example the import of aimsalgo module modifies the aims module. The
 # Importer class manages the rules to apply and applies all rules after each
 # module import.
-ExtendedImporter().importInModule( '', globals(), locals(), 'aimssip' )
-ExtendedImporter().importInModule( '', globals(), locals(), 'aimssip', [],
-  [GenericHandlers.removeChildren], ['Reader_', 'Writer_']  )
-ExtendedImporter().importInModule( '', globals(), locals(), 'aimssip',
-  ['aimssip.aims'] )
+ExtendedImporter().importInModule('', globals(), locals(), 'aimssip')
+ExtendedImporter().importInModule(
+  '', globals(), locals(), 'aimssip', [],
+  [GenericHandlers.removeChildren], ['Reader_', 'Writer_'])
+ExtendedImporter().importInModule('', globals(), locals(), 'aimssip',
+                                  ['aimssip.aims'])
 # move Object out of carto namespace
 Object = carto.Object
 
 del aims, ExtendedImporter
 
 from soma.aims import hierarchy
-del hierarchy # init has been done, get rid of it...
+del hierarchy  # init has been done, get rid of it...
 try:
-  from soma.aims.spmnormalizationreader import *
+    from soma.aims.spmnormalizationreader import *
 except:
-  pass # probably cannot import scipy.io
+    pass  # probably cannot import scipy.io
 
 # typedefs
 
 try:
-  AimsSurfaceTriangle = AimsTimeSurface_3
+    AimsSurfaceTriangle = AimsTimeSurface_3
 except:
-  pass # no surface support
+    pass  # no surface support
 
 # RCObject constructor / destructor
 
-def RCObject_init( self, *args ):
-  # print 'RCObject init'
-  carto.RCObject.__oldinit__( self, *args )
-  carto.RCObject._setupRC( self )
 
-def RCObject_del( self ):
-  # print 'RCObject_del', self
-  # Prevent a corner case when an object is created in python side and
-  # deleted within C++ side. Thus, the sip wrapper doesn't contain its
-  # wrapped C++ object any more, so all deleting works are commited to C++.
-  if sip.isdeleted( self ):
-    # print 'already deleted'
-    return
-  carto.RCObject._releaseRC( self )
-  if hasattr( self, '_dontdel' ):
-    del self._dontdel
-  else:
-    if getattr( carto.RCObject, '__olddel__', None ):
-      carto.RCObject.__olddel__( self )
+def RCObject_init(self, *args):
+    # print 'RCObject init'
+    carto.RCObject.__oldinit__(self, *args)
+    carto.RCObject._setupRC(self)
+
+
+def RCObject_del(self):
+    # print 'RCObject_del', self
+    # Prevent a corner case when an object is created in python side and
+    # deleted within C++ side. Thus, the sip wrapper doesn't contain its
+    # wrapped C++ object any more, so all deleting works are commited to C++.
+    if sip.isdeleted(self):
+        # print 'already deleted'
+        return
+    carto.RCObject._releaseRC(self)
+    if hasattr(self, '_dontdel'):
+        del self._dontdel
+    else:
+        if getattr(carto.RCObject, '__olddel__', None):
+            carto.RCObject.__olddel__(self)
 
 carto.RCObject.__oldinit__ = carto.RCObject.__init__
 carto.RCObject.__init__ = RCObject_init
-if getattr( carto.RCObject, '__del__', None ):
-  carto.RCObject.__olddel__ = carto.RCObject.__del__
+if getattr(carto.RCObject, '__del__', None):
+    carto.RCObject.__olddel__ = carto.RCObject.__del__
 carto.RCObject.__del__ = RCObject_del
 
 del RCObject_init, RCObject_del
@@ -174,436 +177,484 @@ del RCObject_init, RCObject_del
 # generic Reader class
 
 class Reader:
-  '''
-  Generic reader that can theorerically load any SIP-mapped AIMS or
-  Cartograph object. A translation table can be provided to correctly map
-  readers and objects.
-  For quick and simple operations, you can also use the gloabl
-  :py:func:`soma.aims.read` and :py:func:`soma.aims.write` functions, which use
-  a Reader object internally.
-  '''
-  def __init__( self, typemap = None, allocmode = None, options = None ):
+
     '''
-    typemap can be provided to specify which reader may
-    be used to load objects whose type has been read. A default internal map
-    is present but can be replaced.
-
-    The map has 2 modes:
-
-    - object_type : object_type (ex: ``{'Volume' : 'AimsData'}`` )
-    - object_type : dict( data_type : full_type )
-      (ex: ``'Mesh' : { 'VOID' : 'AimsSurfaceTriangle' }`` )
-
-      A default object_type can be specified if the data_type is not
-      found:
-
-      .. code-block:: python
-
-        'Mesh' : { 'VOID' : 'AimsSurfaceTriangle',
-                    'default_object_type' : 'AimsTimeSurface_3' }
-
-      (and this example corresponds to the default internal map if none is
-      specified)
+    Generic reader that can theorerically load any SIP-mapped AIMS or
+    Cartograph object. A translation table can be provided to correctly map
+    readers and objects.
+    For quick and simple operations, you can also use the gloabl
+    :py:func:`soma.aims.read` and :py:func:`soma.aims.write` functions, which
+    use a Reader object internally.
     '''
-    if typemap is None:
-      self._typemap = { #'Volume' : 'AimsData', \
-                        'Segments' : \
-                        { 'VOID' : 'AimsTimeSurface_2',
-                          'default_object_type' : 'AimsTimeSurface_2',
-                        },
-                        'Mesh' : \
-                        { 'VOID' : 'AimsTimeSurface_3',
-                          'default_object_type' : 'AimsTimeSurface_3',
-                        },
-                        'Mesh4' : \
-                        { 'VOID' : 'AimsTimeSurface_4',
-                          'default_object_type' : 'AimsTimeSurface_4',
-                        },
-                        'Graph' : { 'VOID' : 'Graph', },
-                        'AffineTransformation3d' : \
-                        { 'VOID' : 'AffineTransformation3d', },
-                        'Bucket' : 'BucketMap',
-                        'Texture' : 'TimeTexture',
-                        'Tree' : { 'hierarchy' : 'Hierarchy' },
-                        'genericobject' : { 'any' : 'Object' },
-                        'SparseMatrix' : { 'DOUBLE' : 'SparseMatrix' },
-                        'SparseOrDenseMatrix' : { 'DOUBLE' : 
-                                                  'SparseOrDenseMatrix' },
-                      }
-    else:
-      self._typemap = typemap
-    if allocmode is None:
-      self.allocmode = None
-    elif isinstance( allocmode, carto.AllocatorContext ):
-      self.allocmode = allocmode
-    elif isinstance( allocmode, carto.AllocatorStrategy.DataAccess ):
-      self.allocmode = carto.AllocatorContext( allocmode )
-    else:
-      raise TypeError( 'allocmode argument (2) must be either a ' \
-        'aims.carto.AllocatorContext or a carto.AllocatorStrategy.DataAccess' )
-    self.options = options
 
-  def read( self, filename, border = 0, frame = -1, dtype=None ):
-    '''Reads the object contained in the file <filename>, whatever the type
-    of the contents of the file. All objects types supported by Aims IO system
-    can be read. A border width and a frame number may be specified and will
-    be only used by formats that support them.
-    If <dtype> is specified, the corresponding object/data type is forced. It
-    may be useful to force reading a volume with float voxels for instance.
-    It is only supported by a few formats. <dtype> may contain a string or
-    a type object, as accepted by :py:func:`soma.aims.typeCode`.
-    The read function may follow other object/data types rules, allocators and
-    options, as specified in the Reader constructor.
-    '''
-    f = Finder()
-    if not f.check( filename ):
-      open(filename).close() # "file not found"-case raising first
-      raise IOError( 'Unknown file format or missing meta-file(s): ' \
-        + filename )
-    if dtype is not None:
-      finaltype = typeCode( dtype )
-    else:
-      otype = f.objectType()
-      dtype = f.dataType()
-      otype2 = self._typemap.get( otype, otype )
-      if type( otype2 ) is types.StringType:
-        finaltype = otype2 + '_' + dtype
-        otype = otype2
-      else:
-        finaltype = otype2.get( dtype )
-        if finaltype is None:
-          otype2 = otype2.get( 'default_object_type' )
-          if otype2 is not None:
-            finaltype = otype2 + '_' + dtype
-          else:
-            finaltype = otype + '_' + dtype
-    rdr = 'Reader_' + finaltype
-    r = getattr( aimssip, rdr, None )
-    if r is None:
-      raise IOError( 'Unsupported object type: ' + finaltype )
-    r = r( filename )
-    if self.allocmode is not None:
-      r.setAllocatorContext( self.allocmode )
-    if self.options:
-      r.setOptions( self.options )
-    return r.read( border, f.format(), frame )
+    def __init__(self, typemap=None, allocmode=None, options=None):
+        '''
+        typemap can be provided to specify which reader may
+        be used to load objects whose type has been read. A default internal map
+        is present but can be replaced.
 
-  def mapType( self, iotype, aimstype ):
-    self._typemap[ iotype ] = aimstype
+        The map has 2 modes:
+
+        - object_type : object_type (ex: ``{'Volume' : 'AimsData'}`` )
+        - object_type : dict( data_type : full_type )
+          (ex: ``'Mesh' : { 'VOID' : 'AimsSurfaceTriangle' }`` )
+
+          A default object_type can be specified if the data_type is not
+          found:
+
+          .. code-block:: python
+
+            'Mesh' : { 'VOID' : 'AimsSurfaceTriangle',
+                        'default_object_type' : 'AimsTimeSurface_3' }
+
+          (and this example corresponds to the default internal map if none is
+          specified)
+        '''
+        if typemap is None:
+            self._typemap = {  # 'Volume' : 'AimsData',
+                'Segments':
+                {'VOID': 'AimsTimeSurface_2',
+                 'default_object_type': 'AimsTimeSurface_2',
+                 },
+                'Mesh':
+                {'VOID': 'AimsTimeSurface_3',
+                 'default_object_type': 'AimsTimeSurface_3',
+                 },
+                'Mesh4':
+                {'VOID': 'AimsTimeSurface_4',
+                 'default_object_type': 'AimsTimeSurface_4',
+                 },
+                'Graph': {'VOID': 'Graph', },
+                'AffineTransformation3d':
+                {'VOID': 'AffineTransformation3d', },
+                'Bucket': 'BucketMap',
+                'Texture': 'TimeTexture',
+                'Tree': {'hierarchy': 'Hierarchy'},
+                'genericobject': {'any': 'Object'},
+                'SparseMatrix': {'DOUBLE': 'SparseMatrix'},
+                'SparseOrDenseMatrix': {'DOUBLE':
+                                        'SparseOrDenseMatrix'},
+            }
+        else:
+            self._typemap = typemap
+        if allocmode is None:
+            self.allocmode = None
+        elif isinstance(allocmode, carto.AllocatorContext):
+            self.allocmode = allocmode
+        elif isinstance(allocmode, carto.AllocatorStrategy.DataAccess):
+            self.allocmode = carto.AllocatorContext(allocmode)
+        else:
+            raise TypeError(
+              'allocmode argument (2) must be either a '
+              'aims.carto.AllocatorContext or a '
+              'carto.AllocatorStrategy.DataAccess')
+        self.options = options
+
+    def read(self, filename, border=0, frame=-1, dtype=None):
+        '''Reads the object contained in the file <filename>, whatever the type
+        of the contents of the file. All objects types supported by Aims IO
+        system can be read. A border width and a frame number may be specified
+        and will be only used by formats that support them.
+        If <dtype> is specified, the corresponding object/data type is forced.
+        It may be useful to force reading a volume with float voxels for
+        instance. It is only supported by a few formats. <dtype> may contain a
+        string or a type object, as accepted by :py:func:`soma.aims.typeCode`.
+        The read function may follow other object/data types rules, allocators
+        and options, as specified in the Reader constructor.
+        '''
+        f = Finder()
+        if not f.check(filename):
+            open(filename).close()  # "file not found"-case raising first
+            raise IOError('Unknown file format or missing meta-file(s): '
+                          + filename)
+        if dtype is not None:
+            finaltype = typeCode(dtype)
+        else:
+            otype = f.objectType()
+            dtype = f.dataType()
+            otype2 = self._typemap.get(otype, otype)
+            if isinstance(otype2, bytes):
+                finaltype = otype2 + '_' + dtype
+                otype = otype2
+            else:
+                finaltype = otype2.get(dtype)
+                if finaltype is None:
+                    otype2 = otype2.get('default_object_type')
+                    if otype2 is not None:
+                        finaltype = otype2 + '_' + dtype
+                    else:
+                        finaltype = otype + '_' + dtype
+        rdr = 'Reader_' + finaltype
+        r = getattr(aimssip, rdr, None)
+        if r is None:
+            raise IOError('Unsupported object type: ' + finaltype)
+        r = r(filename)
+        if self.allocmode is not None:
+            r.setAllocatorContext(self.allocmode)
+        if self.options:
+            r.setOptions(self.options)
+        return r.read(border, f.format(), frame)
+
+    def mapType(self, iotype, aimstype):
+        self._typemap[iotype] = aimstype
 
 
 # generic Writer class
 
 class Writer:
-  def __init__( self ):
-    self._objectType = None
-    self._dataType = None
-    self._fullType = None
-    pass
 
-  def write( self, obj, filename, format=None, options={} ):
-    '''Writes the object <obj> in a file named <filename>, whatever the type of
-    <obj>, as format <format>.
-    All objects types and formats supported by the Aims IO system can be used.
-    <obj> may be a reference-counter to an object type supported by the IO
-    system.
-    Additional specific options may be passed to the underlying IO system in an
-    optional <options> dictionary.
-    '''
-    c = obj.__class__.__name__.split( '.' )[ -1 ]
-    wr = 'Writer_' + c
-    self._objectType = None
-    self._dataType = None
-    self._fullType = None
-    try:
-      W = getattr( aimssip, wr )
-    except:
-      if c.startswith( 'rc_ptr_' ):
-        obj = obj._get()
-        # build a list of parent classes, so that we can try a more
-        # generic writer if the exact type of the object does not have a
-        # specific Writer in C++
-        tryclass = [ obj.__class__ ]
-      else:
-        tryclass = list( obj.__class__.__bases__ )
-      tried = set()
-      W = None
-      while len( tryclass ) != 0:
-        ocl = tryclass[0]
-        del tryclass[0]
-        wr = 'Writer_' + ocl.__name__.split( '.' )[ -1 ]
-        W = getattr( aimssip, wr, None )
-        if W is None:
-          tried.add( ocl )
-          tryclass += [ x for x in ocl.__bases__ if x not in tried ]
-        else:
-          break
-      if W is None:
-        raise AttributeError( 'no Writer for type ' + \
-          obj.__class__.__name__ )
-    w = W( filename, options )
-    w.write( obj, False, format )
-    try:
-      self._objectType = w.writtenObjectType()
-      self._dataType = w.writtenObjectDataType()
-      self._fullType = w.writtenObjectFullType()
-    except:
-      raise #'Unsupported object type: ' + obj.__class__.__name__
+    def __init__(self):
+        self._objectType = None
+        self._dataType = None
+        self._fullType = None
+        pass
 
-  def writtenObjectType( self ):
-    return self._objectType
+    def write(self, obj, filename, format=None, options={}):
+        '''Writes the object <obj> in a file named <filename>, whatever the type
+        of <obj>, as format <format>.
+        All objects types and formats supported by the Aims IO system can be
+        used. <obj> may be a reference-counter to an object type supported by
+        the IO system.
+        Additional specific options may be passed to the underlying IO system in
+        an optional <options> dictionary.
+        '''
+        c = obj.__class__.__name__.split('.')[-1]
+        wr = 'Writer_' + c
+        self._objectType = None
+        self._dataType = None
+        self._fullType = None
+        try:
+            W = getattr(aimssip, wr)
+        except:
+            if c.startswith('rc_ptr_'):
+                obj = obj._get()
+                # build a list of parent classes, so that we can try a more
+                # generic writer if the exact type of the object does not have a
+                # specific Writer in C++
+                tryclass = [obj.__class__]
+            else:
+                tryclass = list(obj.__class__.__bases__)
+            tried = set()
+            W = None
+            while len(tryclass) != 0:
+                ocl = tryclass[0]
+                del tryclass[0]
+                wr = 'Writer_' + ocl.__name__.split('.')[-1]
+                W = getattr(aimssip, wr, None)
+                if W is None:
+                    tried.add(ocl)
+                    tryclass += [x for x in ocl.__bases__ if x not in tried]
+                else:
+                    break
+            if W is None:
+                raise AttributeError('no Writer for type ' +
+                                     obj.__class__.__name__)
+        w = W(filename, options)
+        w.write(obj, False, format)
+        try:
+            self._objectType = w.writtenObjectType()
+            self._dataType = w.writtenObjectDataType()
+            self._fullType = w.writtenObjectFullType()
+        except:
+            raise  # 'Unsupported object type: ' + obj.__class__.__name__
 
-  def writtenObjectDataType( self ):
-    return self._dataType
+    def writtenObjectType(self):
+        return self._objectType
 
-  def writtenObjectFullType( self ):
-    return self._fullType
+    def writtenObjectDataType(self):
+        return self._dataType
+
+    def writtenObjectFullType(self):
+        return self._fullType
 
 
 # simple IO functions
 
-def read( filename, border=0, frame=-1, dtype=None, allocmode=None,
-    options=None ):
-  '''Equivalent to:
+def read(filename, border=0, frame=-1, dtype=None, allocmode=None,
+         options=None):
+    '''Equivalent to:
 
-  .. code-block:: python
+    .. code-block:: python
 
-    r = Reader( allocmode=allocmode, options=options )
-    return r.read( filename, border=border, frame=frame, dtype=dtype )
-  '''
-  r = Reader( allocmode=allocmode, options=options )
-  return r.read( filename, border=border, frame=frame, dtype=dtype )
+      r = Reader( allocmode=allocmode, options=options )
+      return r.read( filename, border=border, frame=frame, dtype=dtype )
+    '''
+    r = Reader(allocmode=allocmode, options=options)
+    return r.read(filename, border=border, frame=frame, dtype=dtype)
 
-def write( obj, filename, format=None, options={} ):
-  '''Equivalent to:
 
-  .. code-block:: python
+def write(obj, filename, format=None, options={}):
+    '''Equivalent to:
 
+    .. code-block:: python
+
+      w = Writer()
+      w.write( obj, filename, format=format, options=options )
+    '''
     w = Writer()
-    w.write( obj, filename, format=format, options=options )
-  '''
-  w = Writer()
-  w.write( obj, filename, format=format, options=options )
+    w.write(obj, filename, format=format, options=options)
 
 
 # vector-like iterator
 
 class VecIter:
-  '''iterator class for some aims containers (AimsVector)'''
-  def __init__( self, vec ):
-    self._vector = vec
-    self._index = 0
-  def __iter__( self ):
-    return self
-  def next( self ):
-    if self._index >= len( self._vector ):
-      raise StopIteration( 'iterator outside bounds' )
-    val = self._vector[ self._index ]
-    self._index += 1
-    return val
+
+    '''iterator class for some aims containers (AimsVector)'''
+
+    def __init__(self, vec):
+        self._vector = vec
+        self._index = 0
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self._index >= len(self._vector):
+            raise StopIteration('iterator outside bounds')
+        val = self._vector[self._index]
+        self._index += 1
+        return val
 
 # Iterator (doesn't work when implemented in SIP so far)
-def newiter( self ):
-  return self.__objiter__()
 
-def newnext( self ):
-  return self.__objnext__()
 
-def objiter( self ):
-  return self._get().__iter__()
+def newiter(self):
+    return self.__objiter__()
 
-def objnext( self ):
-  return self._get().next()
 
-def objiteritems( self ):
-  class iterator( object ):
-    def __init__( self, it ):
-      self.iterator = it
-    def __iter__( self ):
-      return self
-    def next( self ):
-      if not self.iterator.isValid():
-        raise StopIteration( "iterator outside bounds" )
-      res = ( self.iterator.key(), self.iterator.currentValue() )
-      self.iterator.next()
-      return res
-  return iterator( self.objectIterator() )
+def newnext(self):
+    return self.__objnext__()
 
-def objitervalues( self ):
-  class iterator( object ):
-    def __init__( self, it ):
-      self.iterator = it
-    def __iter__( self ):
-      return self
-    def next( self ):
-      if not self.iterator.isValid():
-        raise StopIteration( "iterator outside bounds" )
-      res = self.iterator.currentValue()
-      self.iterator.next()
-      return res
-  return iterator( self.objectIterator() )
+
+def objiter(self):
+    return self._get().__iter__()
+
+
+def objnext(self):
+    return self._get().next()
+
+
+def objiteritems(self):
+    class iterator(object):
+
+        def __init__(self, it):
+            self.iterator = it
+
+        def __iter__(self):
+            return self
+
+        def next(self):
+            if not self.iterator.isValid():
+                raise StopIteration("iterator outside bounds")
+            res = (self.iterator.key(), self.iterator.currentValue())
+            self.iterator.next()
+            return res
+    return iterator(self.objectIterator())
+
+
+def objitervalues(self):
+    class iterator(object):
+
+        def __init__(self, it):
+            self.iterator = it
+
+        def __iter__(self):
+            return self
+
+        def next(self):
+            if not self.iterator.isValid():
+                raise StopIteration("iterator outside bounds")
+            res = self.iterator.currentValue()
+            self.iterator.next()
+            return res
+    return iterator(self.objectIterator())
+
 
 class BckIter:
-  '''iterator class for bucket containers'''
-  def __init__( self, bucket ):
-    self._bck = bucket
-    self._iter = None
-  def __iter__( self ):
-    return self
-  def next( self ):
-    if self._iter is None:
-      self._iter = iter( self._bck.keys() )
-    elem = self._iter.next()
-    return self._bck[ elem ]
+
+    '''iterator class for bucket containers'''
+
+    def __init__(self, bucket):
+        self._bck = bucket
+        self._iter = None
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self._iter is None:
+            self._iter = iter(self._bck.keys())
+        elem = self._iter.next()
+        return self._bck[elem]
+
 
 class BckIterItem:
-  '''item iterator class for bucket containers'''
-  def __init__( self, bucket ):
-    self._bck = bucket
-    self._iter = None
-  def __iter__( self ):
-    return self
-  def next( self ):
-    if self._iter is None:
-      self._iter = iter( self._bck.keys() )
-    elem = self._iter.next()
-    return elem, self._bck[ elem ]
+
+    '''item iterator class for bucket containers'''
+
+    def __init__(self, bucket):
+        self._bck = bucket
+        self._iter = None
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self._iter is None:
+            self._iter = iter(self._bck.keys())
+        elem = self._iter.next()
+        return elem, self._bck[elem]
 
 # automatic rc_ptr dereferencing
-def proxygetattr( self, attr ):
-  try:
-    return self.__getattribute__( attr )
-  except:
-    if self.__getattribute__( 'isNull' )():
-      raise RuntimeError( 'Null object called' )
-    return getattr( self._get(), attr )
 
-def proxylen( self ):
-  if self.isNull():
-    raise TypeError( "object of type 'Object' has no len()" )
-  return self._get().__len__()
 
-def proxygetitem( self, attr ):
-  if self.isNull():
-    raise RuntimeError( 'Null object called' )
-  return self._get().__getitem__( attr )
-
-def proxysetitem( self, attr, value ):
-  try:
-    return __setitem__( self, attr, value )
-  except:
-    return self._get().__setitem__( attr, value )
-
-def proxydelitem( self, attr ):
-  try:
-    return self.__delitem__( attr )
-  except:
-    if self.isNull():
-      raise RuntimeError( 'Null object called' )
-    return self._get().__delitem__( attr )
-
-def proxynonzero( self ):
-  if self.isNull():
-    return False
-  try:
-    return self._get().__nonzero__()
-  except:
+def proxygetattr(self, attr):
     try:
-      return len( self._get() )
+        return self.__getattribute__(attr)
     except:
-      return True
+        if self.__getattribute__('isNull')():
+            raise RuntimeError('Null object called')
+        return getattr(self._get(), attr)
 
-def proxystr( self ):
-  if self.isNull():
-    return 'None'
-  return self._get().__str__()
 
-def proxyiter( self ):
-  if self.isNull():
-    raise AttributeError( "'%s' object has no attributes '__iter__'" \
-      % self.__class__ )
-  return self._get().__iter__()
+def proxylen(self):
+    if self.isNull():
+        raise TypeError("object of type 'Object' has no len()")
+    return self._get().__len__()
 
-def rcptr_getAttributeNames( self ):
-  '''IPython completion feature...'''
-  m = []
-  l = [ self._get(), self ]
-  done = set()
-  while l:
-    c = l.pop()
-    done.add( c )
-    m += filter( lambda x: not x.startswith( '_' ) and x not in m,
-      c.__dict__.keys() )
-    cl = getattr( c, '__bases__', None )
-    if not cl:
-      cl = getattr( c, '__class__', None )
-      if cl is None:
-        continue
-      else:
-        cl = [ cl ]
-    l += filter( lambda x: x not in done, cl )
-  return m
 
-def __getitem_vec__( self, s ):
-  if isinstance( s, slice ):
-    start, stop, step = s.indices(len(self))
-    return [ self.__oldgetitem__(x) for x in xrange(start, stop, step) ]
-  else:
-    return self.__oldgetitem__( s )
+def proxygetitem(self, attr):
+    if self.isNull():
+        raise RuntimeError('Null object called')
+    return self._get().__getitem__(attr)
 
-def __setitem_vec__( self, s, val ):
-  if isinstance( s, slice ):
-    start, stop, step = s.indices(len(self))
-    return [ self.__oldsetitem__(x, v) for x, v in
-             zip(xrange(start, stop, step), val) ]
-  else:
-    return self.__oldsetitem__( s, val )
+
+def proxysetitem(self, attr, value):
+    try:
+        return __setitem__(self, attr, value)
+    except:
+        return self._get().__setitem__(attr, value)
+
+
+def proxydelitem(self, attr):
+    try:
+        return self.__delitem__(attr)
+    except:
+        if self.isNull():
+            raise RuntimeError('Null object called')
+        return self._get().__delitem__(attr)
+
+
+def proxynonzero(self):
+    if self.isNull():
+        return False
+    try:
+        return self._get().__nonzero__()
+    except:
+        try:
+            return len(self._get())
+        except:
+            return True
+
+
+def proxystr(self):
+    if self.isNull():
+        return 'None'
+    return self._get().__str__()
+
+
+def proxyiter(self):
+    if self.isNull():
+        raise AttributeError("'%s' object has no attributes '__iter__'"
+                             % self.__class__)
+    return self._get().__iter__()
+
+
+def rcptr_getAttributeNames(self):
+    '''IPython completion feature...'''
+    m = []
+    l = [self._get(), self]
+    done = set()
+    while l:
+        c = l.pop()
+        done.add(c)
+        m += filter(lambda x: not x.startswith('_') and x not in m,
+                    c.__dict__.keys())
+        cl = getattr(c, '__bases__', None)
+        if not cl:
+            cl = getattr(c, '__class__', None)
+            if cl is None:
+                continue
+            else:
+                cl = [cl]
+        l += filter(lambda x: x not in done, cl)
+    return m
+
+
+def __getitem_vec__(self, s):
+    if isinstance(s, slice):
+        start, stop, step = s.indices(len(self))
+        return [self.__oldgetitem__(x) for x in xrange(start, stop, step)]
+    else:
+        return self.__oldgetitem__(s)
+
+
+def __setitem_vec__(self, s, val):
+    if isinstance(s, slice):
+        start, stop, step = s.indices(len(self))
+        return [self.__oldsetitem__(x, v) for x, v in
+                zip(xrange(start, stop, step), val)]
+    else:
+        return self.__oldsetitem__(s, val)
 
 
 # scan classes and modify some of them
-def __fixsipclasses__( classes ):
-  '''Fix some classes methods which Sip doesn't correctly bind'''
-  for x, y in classes:
-    try:
-      if y.__name__.startswith( 'rc_ptr_' ) \
-        or y.__name__.startswith( 'weak_shared_ptr_' ) \
-        or y.__name__.startswith( 'weak_ptr_' ):
-        # add __getattr__ method
-        y.__len__ = __fixsipclasses__.proxylen
-        y.__getattr__ = __fixsipclasses__.proxygetattr
-        y.__getitem__ = __fixsipclasses__.proxygetitem
-        # y.__setitem__ = __fixsipclasses__.proxysetitem
-        y.__delitem__ = __fixsipclasses__.proxydelitem
-        y.__str__ = __fixsipclasses__.proxystr
-        y.__nonzero__ = __fixsipclasses__.proxynonzero
-        y._getAttributeNames = __fixsipclasses__.getAttributeNames
-        y.get = lambda self: self._get() # to maintain compatibiity with pyaims 3.x
-        y.__iter__ = __fixsipclasses__.proxyiter
-      elif y.__name__.startswith( 'ShallowConverter_' ):
-        y.__oldcall__ = y.__call__
-        y.__call__ = lambda self, obj: self.__oldcall__( obj )._get()
-      else:
-        if hasattr( y, '__objiter__' ):
-          y.__iter__ = __fixsipclasses__.newiter
-        if hasattr( y, '__objnext__' ):
-          y.next = __fixsipclasses__.newnext
-        elif y.__name__.startswith( 'AimsVector_' ) \
-          or y.__name__.startswith( 'Texture_' ):
-          y.__iterclass__ = VecIter
-          y.__iter__ = lambda self: self.__iterclass__( self )
-        if y.__name__.startswith( 'vector_' ) \
-          or y.__name__.startswith( 'AimsVector_' ):
-          y.__oldgetitem__ = y.__getitem__
-          y.__getitem__ = __fixsipclasses__.__getitem_vec__
-          y.__oldsetitem__ = y.__setitem__
-          y.__setitem__ = __fixsipclasses__.__setitem_vec__
-        if y.__name__.startswith( 'BucketMap_' ):
-          y.Bucket.__iterclass__ = BckIter
-          y.Bucket.__iteritemclass__ = BckIterItem
-          y.Bucket.__iter__ = lambda self: self.__iterclass__( self )
-          y.Bucket.iteritems = lambda self: self.__iteritemclass__( self )
-    except:
-      pass
+def __fixsipclasses__(classes):
+    '''Fix some classes methods which Sip doesn't correctly bind'''
+    for x, y in classes:
+        try:
+            if y.__name__.startswith( 'rc_ptr_' ) \
+                or y.__name__.startswith( 'weak_shared_ptr_' ) \
+                    or y.__name__.startswith('weak_ptr_'):
+                # add __getattr__ method
+                y.__len__ = __fixsipclasses__.proxylen
+                y.__getattr__ = __fixsipclasses__.proxygetattr
+                y.__getitem__ = __fixsipclasses__.proxygetitem
+                # y.__setitem__ = __fixsipclasses__.proxysetitem
+                y.__delitem__ = __fixsipclasses__.proxydelitem
+                y.__str__ = __fixsipclasses__.proxystr
+                y.__nonzero__ = __fixsipclasses__.proxynonzero
+                y._getAttributeNames = __fixsipclasses__.getAttributeNames
+                y.get = lambda self: self._get()
+                                               # to maintain compatibiity with
+                                               # pyaims 3.x
+                y.__iter__ = __fixsipclasses__.proxyiter
+            elif y.__name__.startswith('ShallowConverter_'):
+                y.__oldcall__ = y.__call__
+                y.__call__ = lambda self, obj: self.__oldcall__(obj)._get()
+            else:
+                if hasattr(y, '__objiter__'):
+                    y.__iter__ = __fixsipclasses__.newiter
+                if hasattr(y, '__objnext__'):
+                    y.next = __fixsipclasses__.newnext
+                elif y.__name__.startswith( 'AimsVector_' ) \
+                        or y.__name__.startswith('Texture_'):
+                    y.__iterclass__ = VecIter
+                    y.__iter__ = lambda self: self.__iterclass__(self)
+                if y.__name__.startswith( 'vector_' ) \
+                        or y.__name__.startswith('AimsVector_'):
+                    y.__oldgetitem__ = y.__getitem__
+                    y.__getitem__ = __fixsipclasses__.__getitem_vec__
+                    y.__oldsetitem__ = y.__setitem__
+                    y.__setitem__ = __fixsipclasses__.__setitem_vec__
+                if y.__name__.startswith('BucketMap_'):
+                    y.Bucket.__iterclass__ = BckIter
+                    y.Bucket.__iteritemclass__ = BckIterItem
+                    y.Bucket.__iter__ = lambda self: self.__iterclass__(self)
+                    y.Bucket.iteritems = lambda self: self.__iteritemclass__(
+                        self)
+        except:
+            pass
 
 __fixsipclasses__.newiter = newiter
 __fixsipclasses__.newnext = newnext
@@ -625,7 +676,7 @@ del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
 del __getitem_vec__, __setitem_vec__
 
-__fixsipclasses__( globals().items() + carto.__dict__.items() )
+__fixsipclasses__(globals().items() + carto.__dict__.items())
 
 Object.__iter__ = __fixsipclasses__.objiter
 Object.next = __fixsipclasses__.objnext
@@ -634,7 +685,8 @@ Object._getAttributeNames = __fixsipclasses__.getAttributeNames
 
 del BckIter, BckIterItem, VecIter
 
-__fixsipclasses__.fakerepr = lambda a : "<%s.%s object at 0x%x>" % (a.__class__.__module__, a.__class__.__name__, id(a))
+__fixsipclasses__.fakerepr = lambda a: "<%s.%s object at 0x%x>" % (
+    a.__class__.__module__, a.__class__.__name__, id(a))
 
 # added aimssip.Point3df attributes/methods
 Point4d = AimsVector_S16_4
@@ -654,34 +706,44 @@ use the method items() to get a tuple out of it
 use setItems(Point3df) to affect new values"""
 
 Point4d.__repr__ = Point4du.__repr__ = Point4df.__repr__ = Point4dd.__repr__ \
-= Point3d.__repr__ = Point3du.__repr__ = Point3df.__repr__ = Point3dd.__repr__\
-= Point2d.__repr__ = Point2du.__repr__ = Point2df.__repr__ = Point2dd.__repr__\
-= lambda self: __fixsipclasses__.fakerepr(self) + "\n" + str(self.items())
+    = Point3d.__repr__ = Point3du.__repr__ = Point3df.__repr__ \
+    = Point3dd.__repr__ = Point2d.__repr__ = Point2du.__repr__ \
+    = Point2df.__repr__ = Point2dd.__repr__ \
+    = lambda self: __fixsipclasses__.fakerepr(self) + "\n" + str(self.items())
 
 
 import numpy
+
+
 def __toMatrix(s):
     """ This function return a copy of the transformation matrix """
     m = numpy.identity(4)
     t, r = s.translation(), s.rotation()
-    m[0:3,0:3].transpose().flat = [r.value(x) for x in xrange(9)]
-    m[0:3,3].flat = t.items()
+    m[0:3, 0:3].transpose().flat = [r.value(x) for x in xrange(9)]
+    m[0:3, 3].flat = t.items()
     return m
+
+
 def __AffineTransformation3dFromMatrix(self, value):
-  self.rotation().volume().arraydata().reshape(3,3).transpose()[:,:] \
-    = value[ 0:3, 0:3 ]
-  self.translation().arraydata()[:] = value[ 0:3, 3 ].flatten()
-def __AffineTransformation3d__init__( self, *args ):
-  if len( args ) != 0 and isinstance( args[0], numpy.ndarray ) \
-    and args[0].shape == ( 4, 4 ):
-    self.__oldinit__()
-    self.fromMatrix( args[0] )
-  else:
-    self.__oldinit__( *args )
+    self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
+        = value[0:3, 0:3]
+    self.translation().arraydata()[:] = value[0:3, 3].flatten()
+
+
+def __AffineTransformation3d__init__(self, *args):
+    if len( args ) != 0 and isinstance( args[0], numpy.ndarray ) \
+            and args[0].shape == (4, 4):
+        self.__oldinit__()
+        self.fromMatrix(args[0])
+    else:
+        self.__oldinit__(*args)
+
+
 def __AffineTransformation3d__header(self):
-  h = AffineTransformation3d.__oldheader__(self)
-  h.__motion=self
-  return h
+    h = AffineTransformation3d.__oldheader__(self)
+    h.__motion = self
+    return h
+
 AffineTransformation3d.toMatrix = __toMatrix
 AffineTransformation3d.fromMatrix = __AffineTransformation3dFromMatrix
 AffineTransformation3d.__oldinit__ = AffineTransformation3d.__init__
@@ -689,119 +751,123 @@ AffineTransformation3d.__init__ = __AffineTransformation3d__init__
 AffineTransformation3d.__oldheader__ = AffineTransformation3d.header
 AffineTransformation3d.header = __AffineTransformation3d__header
 del __toMatrix, __AffineTransformation3dFromMatrix, \
-  __AffineTransformation3d__init__, __AffineTransformation3d__header
+    __AffineTransformation3d__init__, __AffineTransformation3d__header
 # backward compatibility
 Motion = AffineTransformation3d
 
-AffineTransformation3d.__repr__ = lambda self : __fixsipclasses__.fakerepr(self) + "\n"+str(self.toMatrix())
+AffineTransformation3d.__repr__ = lambda self: __fixsipclasses__.fakerepr(
+    self) + "\n" + str(self.toMatrix())
 AffineTransformation3d.__str__ = lambda self: self.toMatrix().__str__()
 
 # This one add support for += in 3D mesh
-AimsTimeSurface_3.__iadd__ = lambda s, o : SurfaceManip.meshMerge(s, o) or s
+AimsTimeSurface_3.__iadd__ = lambda s, o: SurfaceManip.meshMerge(s, o) or s
 
 # conversions from GenericObject
 convertersObjectToPython = {
-  'PyObject' : carto.PyObjectfromObject,
-  'rc_ptr of bucket of VOID' : BucketMap_VOID.fromObject,
-  'rc_ptr of bucket of S16' : BucketMap_S16.fromObject,
-  'rc_ptr of bucket of U16' : BucketMap_U16.fromObject,
-  'rc_ptr of bucket of S32' : BucketMap_S32.fromObject,
-  'rc_ptr of bucket of U32' : BucketMap_U32.fromObject,
-  'rc_ptr of bucket of FLOAT' : BucketMap_FLOAT.fromObject,
-  'rc_ptr of bucket of DOUBLE' : BucketMap_DOUBLE.fromObject,
-  'rc_ptr of mesh of VOID' : AimsSurfaceTriangle.fromObject,
-  'rc_ptr of Mesh4 of VOID' : AimsTimeSurface_4.fromObject,
-  'rc_ptr of Segments of VOID' : AimsTimeSurface_2.fromObject,
-  'rc_ptr of texture of S16' : TimeTexture_S16.fromObject,
-  'rc_ptr of texture of S32' : TimeTexture_S32.fromObject,
-  'rc_ptr of texture of U32' : TimeTexture_U32.fromObject,
-  'rc_ptr of texture of FLOAT' : TimeTexture_FLOAT.fromObject,
-  'rc_ptr of texture of POINT2DF' : TimeTexture_POINT2DF.fromObject,
-  'POINT2DF' : Point2df.fromObject,
-  'POINT3DF' : Point3df.fromObject,
-  'POINT4DF' : Point4df.fromObject,
-  'S16' : carto.NumericGenericObjectConverter.asInt,
-  'U16' : carto.NumericGenericObjectConverter.asInt,
-  'S32' : carto.NumericGenericObjectConverter.asInt,
-  'U32' : carto.NumericGenericObjectConverter.asInt,
-  'boolean' : carto.NumericGenericObjectConverter.asBool,
-  'string' : lambda x: x.getString(),
+    'PyObject': carto.PyObjectfromObject,
+    'rc_ptr of bucket of VOID': BucketMap_VOID.fromObject,
+    'rc_ptr of bucket of S16': BucketMap_S16.fromObject,
+    'rc_ptr of bucket of U16': BucketMap_U16.fromObject,
+    'rc_ptr of bucket of S32': BucketMap_S32.fromObject,
+    'rc_ptr of bucket of U32': BucketMap_U32.fromObject,
+    'rc_ptr of bucket of FLOAT': BucketMap_FLOAT.fromObject,
+    'rc_ptr of bucket of DOUBLE': BucketMap_DOUBLE.fromObject,
+    'rc_ptr of mesh of VOID': AimsSurfaceTriangle.fromObject,
+    'rc_ptr of Mesh4 of VOID': AimsTimeSurface_4.fromObject,
+    'rc_ptr of Segments of VOID': AimsTimeSurface_2.fromObject,
+    'rc_ptr of texture of S16': TimeTexture_S16.fromObject,
+    'rc_ptr of texture of S32': TimeTexture_S32.fromObject,
+    'rc_ptr of texture of U32': TimeTexture_U32.fromObject,
+    'rc_ptr of texture of FLOAT': TimeTexture_FLOAT.fromObject,
+    'rc_ptr of texture of POINT2DF': TimeTexture_POINT2DF.fromObject,
+    'POINT2DF': Point2df.fromObject,
+    'POINT3DF': Point3df.fromObject,
+    'POINT4DF': Point4df.fromObject,
+    'S16': carto.NumericGenericObjectConverter.asInt,
+    'U16': carto.NumericGenericObjectConverter.asInt,
+    'S32': carto.NumericGenericObjectConverter.asInt,
+    'U32': carto.NumericGenericObjectConverter.asInt,
+    'boolean': carto.NumericGenericObjectConverter.asBool,
+    'string': lambda x: x.getString(),
 }
 
-def getPython( self ):
-  """
-  Conversion to python types: extracts what is in the Object (when
-  possible). The global dictionary
-  :py:data:`soma.aims.convertersObjectToPython` stores
-  converters
-  """
-  t = self.type()
-  cv = convertersObjectToPython.get( t )
-  res = None
-  gen = self._get()
-  if cv is not None:
-    res = cv( gen )
+
+def getPython(self):
+    """
+    Conversion to python types: extracts what is in the Object (when
+    possible). The global dictionary
+    :py:data:`soma.aims.convertersObjectToPython` stores
+    converters
+    """
+    t = self.type()
+    cv = convertersObjectToPython.get(t)
+    res = None
+    gen = self._get()
+    if cv is not None:
+        res = cv(gen)
+        try:
+            res.__genericobject__ = gen
+        except:
+            # here we lose the GenericObject because we cannot store it
+            # so the object will be copied each time it is put in a generic
+            # object again
+            pass
+        return res
     try:
-      res.__genericobject__ = gen
+        return self.getScalar()
     except:
-      # here we lose the GenericObject because we cannot store it
-      # so the object will be copied each time it is put in a generic
-      # object again
-      pass
-    return res
-  try:
-    return self.getScalar()
-  except:
-    pass
-  try:
-    return self.getString()
-  except:
-    pass
-  if t.find( 'volume' ) >= 0:
-    dt = t.split()[-1]
+        pass
     try:
-      res = eval( 'AimsData_' + dt ).fromObject( gen )
-      res.__genericobject__ = gen
-      return res
+        return self.getString()
     except:
-      pass
-  if t.startswith( 'vector of' ):
-    dt = t.split()[-1]
-    try:
-      vectype = eval( 'vector_' + dt )
-      res = vectype.fromObject( gen )
-      res.__genericobject__ = gen
-      return res
-    except:
-      pass
-  if t.startswith( 'VECTOR_OF_' ):
-    try:
-      dt = t[ 10: ]
-      vectype = eval( 'AimsVector_' + dt )
-      res = vectype.fromObject( gen )
-      res.__genericobject__ = gen
-      return res
-    except:
-      pass
+        pass
+    if t.find('volume') >= 0:
+        dt = t.split()[-1]
+        try:
+            res = eval('AimsData_' + dt).fromObject(gen)
+            res.__genericobject__ = gen
+            return res
+        except:
+            pass
+    if t.startswith('vector of'):
+        dt = t.split()[-1]
+        try:
+            vectype = eval('vector_' + dt)
+            res = vectype.fromObject(gen)
+            res.__genericobject__ = gen
+            return res
+        except:
+            pass
+    if t.startswith('VECTOR_OF_'):
+        try:
+            dt = t[10:]
+            vectype = eval('AimsVector_' + dt)
+            res = vectype.fromObject(gen)
+            res.__genericobject__ = gen
+            return res
+        except:
+            pass
 
-  raise RuntimeError( 'No conversion to python object possible from type ' \
-    + t )
+    raise RuntimeError('No conversion to python object possible from type '
+                       + t)
 
-def toObject( x ):
-  if hasattr( x, 'toObject' ):
-    return x.toObject()
-  return Object( x )
 
-def ptrToObject( x ):
-  if hasattr( x, 'ptrToObject' ):
-    return x.ptrToObject()
-  return Object( x )
+def toObject(x):
+    if hasattr(x, 'toObject'):
+        return x.toObject()
+    return Object(x)
 
-def rcToObject( x ):
-  if hasattr( x, 'rcToObject' ):
-    return x.rcToObject()
-  return Object( x )
 
+def ptrToObject(x):
+    if hasattr(x, 'ptrToObject'):
+        return x.ptrToObject()
+    return Object(x)
+
+
+def rcToObject(x):
+    if hasattr(x, 'rcToObject'):
+        return x.rcToObject()
+    return Object(x)
 
 
 Object.__len__ = __fixsipclasses__.proxylen
@@ -811,9 +877,9 @@ Object.__setitem__ = __fixsipclasses__.proxysetitem
 Object.__str__ = __fixsipclasses__.proxystr
 Object.__repr__ = Object.__str__
 Object.getPython = getPython
-Object.toObject = staticmethod( toObject )
-Object.ptrToObject = staticmethod( ptrToObject )
-Object.rcToObject = staticmethod( rcToObject )
+Object.toObject = staticmethod(toObject)
+Object.ptrToObject = staticmethod(ptrToObject)
+Object.rcToObject = staticmethod(rcToObject)
 
 del getPython
 del toObject, ptrToObject, rcToObject
@@ -822,101 +888,110 @@ del toObject, ptrToObject, rcToObject
 # customize GenericObject to get automatic conversions between
 # Objects and concrete types
 class _proxy:
-  def retvalue( x ):
-    if callable( x ):
-      if isinstance( x, carto.GenericObject._proxy ):
+
+    def retvalue(x):
+        if callable(x):
+            if isinstance(x, carto.GenericObject._proxy):
+                return x
+            return carto.GenericObject._proxy(x)
+        if isinstance(x, Object):
+            try:
+                return x.getPython()
+            except:
+                return x
+        elif isinstance(x, carto.GenericObject):
+            try:
+                return Object.getPython(x)
+            except:
+                return Object(x)
         return x
-      return carto.GenericObject._proxy(x)
-    if isinstance( x, Object ):
-      try:
-        return x.getPython()
-      except:
+    retvalue = staticmethod(retvalue)
+
+    def __init__(self, x):
+        if isinstance(x, carto.GenericObject._proxy):
+            self._x = x._x
+        else:
+            self._x = x
+
+    def __call__(self, *args, **kwargs):
+        r = self._x
+        obj = getattr(r, '__self__', None)
+        if obj is not None:
+            # determine if we were called recursively.
+            # We need to detect this because SIP methods may call the proxy and
+            # keep no other access to the C method
+            import traceback
+            sf = traceback.extract_stack()[-2]
+            if sf[-2] == '__call__' and \
+                sf[-1] == 'return carto.GenericObject._proxy.retvalue(' \
+                    'r(*args, **kwargs))':
+                # compare sf[0] and __file__, after removing .py/.pyc extension
+                # which may make the comparison not to match
+                f1 = sf[0]
+                if f1.endswith('.py'):
+                    f1 = f1[:-3]
+                elif f1.endswith('.pyc'):
+                    f1 = f1[:-4]
+                f2 = __file__
+                if f2.endswith('.py'):
+                    f2 = f2[:-3]
+                elif f2.endswith('.pyc'):
+                    f2 = f2[:-4]
+                if f1 == f2:
+                    # try to call with selfWasArg=True (class unound method)
+                    cl = object.__getattribute__(obj, '__class__')
+                    return getattr(cl, r.__name__)(obj, *args, **kwargs)
+        return carto.GenericObject._proxy.retvalue(r(*args, **kwargs))
+
+
+def genobj__getattribute__(self, attr):
+    ga = object.__getattribute__(self, '__oldgetattribute__')
+    x = ga(attr)
+    if(attr.startswith('__')) or attr == '_proxy':
         return x
-    elif isinstance( x, carto.GenericObject ):
-      try:
-        return Object.getPython( x )
-      except:
-        return Object( x )
-    return x
-  retvalue = staticmethod( retvalue )
+    return ga('_proxy').retvalue(x)
 
-  def __init__(self,x):
-    if isinstance( x, carto.GenericObject._proxy ):
-      self._x = x._x
-    else:
-      self._x = x
-  def __call__( self, *args, **kwargs ):
-    r = self._x
-    obj = getattr( r, '__self__', None )
-    if obj is not None:
-      # determine if we were called recursively.
-      # We need to detect this because SIP methods may call the proxy and
-      # keep no other access to the C method
-      import traceback
-      sf = traceback.extract_stack()[-2]
-      if sf[-2] == '__call__' and \
-        sf[-1] == 'return carto.GenericObject._proxy.retvalue( r( *args, ' \
-          '**kwargs ) )':
-        # compare sf[0] and __file__, after removing .py/.pyc extension
-        # which may make the comparison not to match
-        f1 = sf[0]
-        if f1.endswith( '.py' ):
-          f1 = f1[:-3]
-        elif f1.endswith( '.pyc' ):
-          f1 = f1[:-4]
-        f2 = __file__
-        if f2.endswith( '.py' ):
-          f2 = f2[:-3]
-        elif f2.endswith( '.pyc' ):
-          f2 = f2[:-4]
-        if f1 == f2:
-          # try to call with selfWasArg=True (class unound method)
-          cl = object.__getattribute__( obj, '__class__' )
-          return getattr( cl, r.__name__ )( obj, *args, **kwargs )
-    return carto.GenericObject._proxy.retvalue( r( *args, **kwargs ) )
 
-def genobj__getattribute__( self, attr ):
-  ga = object.__getattribute__( self, '__oldgetattribute__' )
-  x = ga( attr )
-  if( attr.startswith( '__' ) ) or attr == '_proxy':
-    return x
-  return ga( '_proxy' ).retvalue( x )
+def genobj__getitem__(self, item):
+    try:
+        x = Object.getPython(self)
+        return x.__getitem__(item)
+    except:
+        return carto.GenericObject._proxy.retvalue(
+            self.__oldgetitem__(item))
 
-def genobj__getitem__( self, item ):
-  try:
-    x = Object.getPython( self )
-    return x.__getitem__( item )
-  except:
-    return carto.GenericObject._proxy.retvalue( \
-      self.__oldgetitem__( item ) )
 
-def genobj__new__( cls, *args, **kwargs ):
-  if cls != carto.GenericObject \
-    and cls.__getitem__ != carto.GenericObject.__getitem__:
-    # modify __getitem__ on subclasses of GenericObject
-    cls.__oldgetitem__ = cls.__getitem__
-    cls.__getitem__ = carto.GenericObject.__getitem__
-    if cls.__getattribute__ != carto.GenericObject.__getattribute__:
-      cls.__oldgetattribute__ = cls.__getattribute__
-      cls.__getattribute__ = carto.GenericObject.__getattribute__
-  return carto.GenericObject.__oldnew__( cls, *args, **kwargs )
+def genobj__new__(cls, *args, **kwargs):
+    if cls != carto.GenericObject \
+            and cls.__getitem__ != carto.GenericObject.__getitem__:
+        # modify __getitem__ on subclasses of GenericObject
+        cls.__oldgetitem__ = cls.__getitem__
+        cls.__getitem__ = carto.GenericObject.__getitem__
+        if cls.__getattribute__ != carto.GenericObject.__getattribute__:
+            cls.__oldgetattribute__ = cls.__getattribute__
+            cls.__getattribute__ = carto.GenericObject.__getattribute__
+    return carto.GenericObject.__oldnew__(cls, *args, **kwargs)
 
-def genobj__update__( self, x ):
-  if not self.isDictionary():
-    raise ValueError( 'Generic object is not a dictionary-compatible object' )
-  for x,y in x.iteritems():
-    self[x] = y
 
-def genobj__iadd__( self, x ):
-  if not self.isDynArray():
-    raise ValueError( 'Generic object is not a list-compatible object' )
-  for y in x:
-    self.append( y )
-  return self
+def genobj__update__(self, x):
+    if not self.isDictionary():
+        raise ValueError(
+            'Generic object is not a dictionary-compatible object')
+    for x, y in x.iteritems():
+        self[x] = y
 
-def obj__iadd__( self, x ):
-  self._get().__iadd__( x )
-  return self
+
+def genobj__iadd__(self, x):
+    if not self.isDynArray():
+        raise ValueError('Generic object is not a list-compatible object')
+    for y in x:
+        self.append(y)
+    return self
+
+
+def obj__iadd__(self, x):
+    self._get().__iadd__(x)
+    return self
 
 carto.GenericObject.__repr__ = carto.GenericObject.__str__
 carto.GenericObject._proxy = _proxy
@@ -924,7 +999,7 @@ del _proxy
 carto.GenericObject.__oldgetitem__ = carto.GenericObject.__getitem__
 carto.GenericObject.__getitem__ = genobj__getitem__
 carto.GenericObject.__oldnew__ = carto.GenericObject.__new__
-carto.GenericObject.__new__ = staticmethod( genobj__new__ )
+carto.GenericObject.__new__ = staticmethod(genobj__new__)
 carto.GenericObject.__oldgetattribute__ = carto.GenericObject.__getattribute__
 carto.GenericObject.__getattribute__ = genobj__getattribute__
 carto.GenericObject.update = genobj__update__
@@ -946,12 +1021,14 @@ from new import instancemethod
 import weakref
 Point3df.__refParent = weakref.ref(Point3df)
 Point3df.__oldgetattr__ = Point3df.__getattribute__
+
+
 def __getattribute__(self, name):
-  g = object.__getattribute__(self, "__oldgetattr__")
-  if g("__refParent")():
-    return g(name)
-  else:
-    raise "Underlying C++ object has been deleted"
+    g = object.__getattribute__(self, "__oldgetattr__")
+    if g("__refParent")():
+        return g(name)
+    else:
+        raise "Underlying C++ object has been deleted"
 Point3df.__getattribute__ = __getattribute__
 del __getattribute__
 
@@ -960,332 +1037,371 @@ Quaternion.compose = Quaternion.__mul__
 
 # templates / types helpers
 
-def typeCode( data ):
-  '''returns the AIMS type code for the given input data. data may be a string
-  code, a python/numpy numeric type, an AIMS type, or an instance of such a
-  type.
-'''
-  dmap = { 'int' : 'S32', 'int32' : 'S32', 'uint' : 'U32', 'uint32' : 'U32',
-    'int64' : 'S64', 'uint64' : 'U64', 'int16' : 'S16', 'uint16' : 'U16',
-    'char' : 'S8', 'uchar' : 'U8', 'float' : 'DOUBLE', 'float32' : 'FLOAT',
-    'float64' : 'DOUBLE',
-    numpy.int8 : 'S8', numpy.uint8 : 'U8',
-    numpy.int16 : 'S16', numpy.uint16 : 'U16',
-    numpy.int32 : 'S32', numpy.uint32 : 'U32',
-    numpy.int64 : 'S64', numpy.uint64 : 'U64',
-    numpy.float32 : 'FLOAT', numpy.float64 : 'DOUBLE',
-    complex : 'CDOUBLE', numpy.complex64 : 'CFLOAT',
-    numpy.complex128 : 'CDOUBLE', 'complex' : 'CDOUBLE',
-  }
-  dt = dmap.get( data, None )
-  if dt is not None:
-    return dt
-  if type( data ) in types.StringTypes:
-    return data
-  dtn = getattr( data, '__name__', None )
-  if dtn is not None: # if data is a type class
-    dt = dmap.get( dtn, None )
+
+def typeCode(data):
+    '''returns the AIMS type code for the given input data. data may be a string
+    code, a python/numpy numeric type, an AIMS type, or an instance of such a
+    type.
+    '''
+    dmap = {'int': 'S32', 'int32': 'S32', 'uint': 'U32', 'uint32': 'U32',
+            'int64': 'S64', 'uint64': 'U64', 'int16': 'S16', 'uint16': 'U16',
+            'char': 'S8', 'uchar': 'U8', 'float': 'DOUBLE', 'float32': 'FLOAT',
+            'float64': 'DOUBLE',
+            numpy.int8: 'S8', numpy.uint8: 'U8',
+            numpy.int16: 'S16', numpy.uint16: 'U16',
+            numpy.int32: 'S32', numpy.uint32: 'U32',
+            numpy.int64: 'S64', numpy.uint64: 'U64',
+            numpy.float32: 'FLOAT', numpy.float64: 'DOUBLE',
+            complex: 'CDOUBLE', numpy.complex64: 'CFLOAT',
+            numpy.complex128: 'CDOUBLE', 'complex': 'CDOUBLE',
+            }
+    dt = dmap.get(data, None)
     if dt is not None:
-      return dt
-  dtn2 = type( data ).__name__ # instance
-  dt = dmap.get( dtn2, None )
-  if dt is not None:
-    return dt
-  if dtn is not None:
-    return dtn
-  return dtn2
+        return dt
+    if type(data) in str:
+        return data
+    dtn = getattr(data, '__name__', None)
+    if dtn is not None:  # if data is a type class
+        dt = dmap.get(dtn, None)
+        if dt is not None:
+            return dt
+    dtn2 = type(data).__name__  # instance
+    dt = dmap.get(dtn2, None)
+    if dt is not None:
+        return dt
+    if dtn is not None:
+        return dtn
+    return dtn2
 
 
-def somaio_typeCode( data ):
-  '''returns the Soma-IO type code (as in
-  soma.carto.IOObjectTypesDictionary.readTypes() dict keys) for the given input
-  type.
+def somaio_typeCode(data):
+    '''returns the Soma-IO type code (as in
+    soma.carto.IOObjectTypesDictionary.readTypes() dict keys) for the given
+    input type.
 
-  Parameters
-  ----------
-  data: string or type or instance, or 2-tuple
-      If type or instance, get the type code for the given object.
-      If string, try to translate AIMS IO to soma-IO codes.
-      If 2-tuple, translate AIMS object type / data type couple
-  '''
-  def _somaio_objecttype( data ):
-    if data == 'Volume':
-      return 'carto_volume'
+    Parameters
+    ----------
+    data: string or type or instance, or 2-tuple
+        If type or instance, get the type code for the given object.
+        If string, try to translate AIMS IO to soma-IO codes.
+        If 2-tuple, translate AIMS object type / data type couple
+    '''
+    def _somaio_objecttype(data):
+        if data == 'Volume':
+            return 'carto_volume'
+        elif data == 'GenericObject':
+            return 'genericobject'
+        else:
+            return data
+    if isinstance(data, tuple):
+        return '%s of %s' % (_somaio_objecttype(data[0]), data[1])
+    if not isinstance(data, str) and not isinstance(data, unicode):
+        if hasattr(data, '__name__'):
+            data = data.__name__
+        else:
+            data = data.__class__.__name__
+    objtype, dtype = data.split('_')
+    return '%s of %s' % (_somaio_objecttype(objtype), dtype)
+
+
+def _parseTypeInArgs(*args, **kwargs):
+    dtype = kwargs.get('dtype', None)
+    # print '_parseTypeInArgs:', dtype
+    if dtype is not None:
+        # kwargs = dict( kwargs )
+        del kwargs['dtype']
     else:
-      return data
-  if isinstance( data, tuple ):
-    return '%s of %s' % ( _somaio_objecttype( data[0] ), data[1] )
-  if not isinstance( data, str ) and not isinstance( data, unicode ):
-    if hasattr( data, '__name__' ):
-      data = data.__name__
-    else:
-      data = data.__class__.__name__
-  objtype, dtype = data.split('_')
-  return '%s of %s' % ( _somaio_objecttype( objtype ), dtype )
+        y = [i for i, x in enumerate(args)
+             if type(x) in str or hasattr(x, '__name__')]
+        if len(y) != 0:
+            i = y[0]
+            dtype = args[y[0]]
+            args = args[:i] + args[i + 1:]
+    if dtype is None:
+        dtype = kwargs.get('default_dtype', None)
+    if dtype is None:
+        raise KeyError('data type not specified')
+    if 'default_dtype' in kwargs:
+        del kwargs['default_dtype']
+    dtype = typeCode(dtype)
+    return (dtype, args, kwargs)
 
 
-def _parseTypeInArgs( *args, **kwargs ):
-  dtype = kwargs.get( 'dtype', None )
-  # print '_parseTypeInArgs:', dtype
-  if dtype is not None:
-    # kwargs = dict( kwargs )
-    del kwargs[ 'dtype' ]
-  else:
-    y = [ i for i, x in enumerate( args ) \
-      if type(x) in types.StringTypes or hasattr( x, '__name__' ) ]
-    if len( y ) != 0:
-      i = y[0]
-      dtype = args[ y[0] ]
-      args = args[:i] + args[i+1:]
-  if dtype is None:
-    dtype = kwargs.get( 'default_dtype', None )
-  if dtype is None:
-    raise KeyError( 'data type not specified' )
-  if 'default_dtype' in kwargs:
-    del kwargs[ 'default_dtype' ]
-  dtype = typeCode( dtype )
-  return ( dtype, args, kwargs )
-
-
-def _parse2TypesInArgs( *args, **kwargs ):
-  dtype1 = kwargs.get( 'intype' )
-  dtype2 = kwargs.get( 'outtype' )
-  dtypeg = kwargs.get( 'dtype' )
-  if dtype1 is not None:
-    kwargs[ 'dtype' ] = dtype1
-    del kwargs[ 'intype' ]
-  intype, args2, kwargs2 = _parseTypeInArgs( *args, **kwargs )
-  if dtype2 is not None:
-    kwargs[ 'dtype' ] = dtype2
-    del kwargs[ 'outtype' ]
-  try:
-    outtype, args3, kwargs3 = _parseTypeInArgs( *args2, **kwargs )
-  except:
-    outtype, args3, kwargs3 = _parseTypeInArgs( *args, **kwargs )
-  return ( intype, outtype, args3, kwargs3 )
-
-
-def _createObject( objtype, *args, **kwargs ):
-  dtype, args, kwargs = _parseTypeInArgs( *args, **kwargs )
-  return getattr( aimssip, objtype + '_' + dtype )( *args, **kwargs )
-
-
-def Volume( *args, **kwargs ):
-  '''Create an instance of Aims Volume (Volume_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
-  The default type is 'FLOAT'.
-  Type definitions should match those accepted by typeCode().
-  Volume may also use a numpy array, or another Volume or AimsData_* as unique argument.
-  Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a copy of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* ) share the input data.
-  '''
-  if len( args ) == 1 and len( kwargs ) == 0:
-    arg = args[0]
-    if isinstance( arg, numpy.ndarray ):
-      return _createObject( 'Volume', arg, dtype=arg.dtype.type )
-    elif type( arg ).__name__.startswith( 'Volume_' ):
-      return type( arg )( arg )
-    elif type( arg ).__name__.startswith( 'AimsData_' ):
-      return type( arg )( arg.volume() )
-  return _createObject( 'Volume', default_dtype='FLOAT', *args, **kwargs )
-
-
-def VolumeView( volume, position, size ):
-  '''Create a view in an existing volume. The returned volume is of the same type and shares data with its "parent".
-  '''
-  volclass = type( volume )
-  if volclass.__name__.startswith( 'Volume_' ):
-    return volclass( volume, position, size )
-  elif volclass.__name__.startswith( 'AimsData_' ):
-    volclass = type( volume.volume() )
-    return volclass( volume.volume(), position, size )
-  elif volclass.__name__.startswith( 'rc_ptr_' ):
-    volclass = type( volume.get() )
-    return volclass( volume, position, size )
-
-
-def AimsData( *args, **kwargs ):
-  '''Create an instance of the older Aims volumes (AimsData_<type>) from a type
-  parameter, which may be specified as the dtype keyword argument, or as one of
-  the arguments if one is identitied as a type.
-  The default type is 'FLOAT'.
-  Type definitions should match those accepted by typeCode().
-  AimsData may also use a numpy array, or another Volume or AimsData_* as
-  unique argument.
-  Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a copy
-  of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* ) share the
-  input data.
-  '''
-  if len( args ) == 1 and len( kwargs ) == 0:
-    arg = args[0]
-    if isinstance( arg, numpy.ndarray ):
-      vol = _createObject( 'Volume', arg, dtype=arg.dtype.type )
-      return AimsData( vol )
-    elif type( arg ).__name__.startswith( 'Volume_' ):
-      return getattr( aimssip, 'AimsData_' + type( arg ).__name__[ 7:] )( arg )
-    elif type( arg ).__name__.startswith( 'AimsData_' ):
-      return type( arg )( arg.volume() )
-  return _createObject( 'AimsData', default_dtype='FLOAT', *args, **kwargs )
-
-
-def TimeTexture( *args, **kwargs ):
-  '''Create an instance of Aims texture (TimeTexture_<type>) from a type
-  parameter, which may be specified as the dtype keyword argument, or as one of
-  the arguments if one is identitied as a type.
-  The default type is 'FLOAT'.
-  Type definitions should match those accepted by typeCode().
-  TimeTexture may also use a numpy array, or another TimeTexture_* or Textrue_*
-  as unique argument.
-  Building from a numpy arrays uses the 1st dimension as vertex, the 2nd as
-  time (if any).
-  '''
-  if len( args ) == 1 and len( kwargs ) == 0:
-    arg = args[0]
-    if isinstance( args[0], numpy.ndarray ):
-      tex = _createObject( 'TimeTexture', dtype=arg.dtype.type )
-      if len( arg.shape ) == 1:
-        tex[0].assign( arg )
-      else:
-        for i in xrange( arg.shape[1] ):
-          tex[i].assign( arg[:,i] )
-      return tex
-    if type( arg ).__name__.startswith( 'TimeTexture_' ):
-      return type( arg )( arg )
-    elif type( arg ).__name__.startswith( 'Texture_' ):
-      tex = getattr( aimssip, 'TimeTexture_' + type( arg ).__name__[ 8:] )()
-      tex[0] = arg
-      return tex
-  return _createObject( 'TimeTexture', default_dtype='FLOAT', *args, **kwargs )
-
-
-def Texture( *args, **kwargs ):
-  '''Create an instance of Aims low-level texture (Texture_<type>) from a type
-  parameter, which may be specified as the dtype keyword argument, or as one of
-  the arguments if one is identitied as a type.
-  The default type is 'FLOAT'.
-  Type definitions should match those accepted by typeCode().
-  Texture may also use a numpy array, or another Textrue_* as unique argument.
-  '''
-  if len( args ) == 1 and len( kwargs ) == 0:
-    arg = args[0]
-    if isinstance( args[0], numpy.ndarray ):
-      return _createObject( 'Texture', arg, dtype=arg.dtype.type )
-    if type( arg ).__name__.startswith( 'Texture_' ):
-      return type( arg )( arg )
-  return _createObject( 'Texture', default_dtype='FLOAT', *args, **kwargs )
-
-
-def BucketMap( *args, **kwargs ):
-  '''Create an instance of Aims bucket (BucketMap_<type>) from a type
-  parameter, which may be specified as the dtype keyword argument, or as one of
-  the arguments if one is identitied as a type.
-  The default type is 'VOID'.
-  Type definitions should match those accepted by typeCode().
-  '''
-  return _createObject( 'BucketMap', default_dtype='VOID', *args, **kwargs )
-
-
-def Converter( *args, **kwargs ):
-  '''Create a Converter instance from input and output types. Types may be
-  passed as keyword arguments intype and outtype, or dtype if both are the same
-  (not very useful for a converter). Otherwise the arguments are parsed to find
-  types arguments.
-  Types may be specified as allowed by typeCode().
-  '''
-  intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
-  return getattr( aimssip, 'Converter_' + intype + '_' + outtype )( *args )
-
-
-def ShallowConverter( *args, **kwargs ):
-  '''Create a ShallowConverter instance from input and output types. Types may
-  be passed as keyword arguments intype and outtype, or dtype if both are the
-  same (not very useful for a converter). Otherwise the arguments are parsed to
-  find types arguments.
-  Types may be specified as allowed by typeCode().
-  '''
-  intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
-  return getattr( aimssip, 'ShallowConverter_' + intype + '_' + outtype ) \
-    ( *args )
-
-
-def TimeSurface( dim=3 ):
-  '''same as AimsTimeSurface( dim )'''
-  return AimsTimeSurface( dim )
-
-
-def AimsTimeSurface( dim=3 ):
-  '''Create an instance of Aims mesh (AimsTimeSurface_<dim>) from a dimension
-  parameter'''
-  return getattr( aimssip, 'AimsTimeSurface_' + str( dim ) )()
-
-
-def AimsThreshold( *args, **kwargs ):
-  '''Create a AimsThreshold instance from input and output types. Types may be
-  passed as keyword arguments intype and outtype, or dtype if both are the
-  same. Otherwise the arguments are parsed to find types arguments.
-  Types may be specified as allowed by typeCode().
-  '''
-  intype, outtype, args, kwargs = _parse2TypesInArgs( *args, **kwargs )
-  if intype.startswith( 'Volume_' ):
-    intype = intype[ 7: ]
-  elif intype.startswith( 'AimsData_' ):
-    intype = intype[ 9: ]
-  if outtype.startswith( 'Volume_' ):
-    outtype = outtype[ 7: ]
-  elif outtype.startswith( 'AimsData_' ):
-    outtype = outtype[ 9: ]
-  return getattr( aimssip, 'AimsThreshold_' + intype + '_' + outtype )( *args )
-
-
-def AimsVector( *args, **kwargs ):
-  '''Create an AimsVector instance from type and dimension arguments. Types may be passed as the keyword argument dtype. Otherwise the arguments are parsed to find types arguments. Dimension should be passed as the keyword argument dim, or is guessed from the input value(s).
-  Types may be specified as allowed by typeCode().
-  If unspecified, type is guessed from the 1st element of the vector data.
-  '''
-  dim = kwargs.get( 'dim', None )
-  if dim is not None:
-    del kwargs[ 'dim' ]
-  elif len( args ) == 1 and hasattr( args[0], '__len__' ):
-      dim = len( args[0] )
-  else:
-    dim = len( args )
-  try:
-    dtype, args, kwargs = _parseTypeInArgs( *args, **kwargs )
-  except KeyError, e:
+def _parse2TypesInArgs(*args, **kwargs):
+    dtype1 = kwargs.get('intype')
+    dtype2 = kwargs.get('outtype')
+    dtypeg = kwargs.get('dtype')
+    if dtype1 is not None:
+        kwargs['dtype'] = dtype1
+        del kwargs['intype']
+    intype, args2, kwargs2 = _parseTypeInArgs(*args, **kwargs)
+    if dtype2 is not None:
+        kwargs['dtype'] = dtype2
+        del kwargs['outtype']
     try:
-      if hasattr( args[0], '__len__' ) and len( args[0] ) != 0:
-        dtype = _parseTypeInArgs( dtype=args[0][0] )[0]
-      else:
-        dtype = _parseTypeInArgs( dtype=args[0] )[0]
+        outtype, args3, kwargs3 = _parseTypeInArgs(*args2, **kwargs)
     except:
-      raise e
-  return getattr( aimssip, 'AimsVector_' + dtype + '_' + str(dim) )( *args )
+        outtype, args3, kwargs3 = _parseTypeInArgs(*args, **kwargs)
+    return (intype, outtype, args3, kwargs3)
 
 
-def stdVector( *args, **kwargs ):
-  '''Create an instance of STL C++ vector (vector_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
-  Type definitions should match those accepted by typeCode().
-  '''
-  return _createObject( 'vector', *args, **kwargs )
+def _createObject(objtype, *args, **kwargs):
+    dtype, args, kwargs = _parseTypeInArgs(*args, **kwargs)
+    return getattr(aimssip, objtype + '_' + dtype)(*args, **kwargs)
 
 
-def stdSet( *args, **kwargs ):
-  '''Create an instance of STL C++ set (set_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
-  Type definitions should match those accepted by typeCode().
-  '''
-  return _createObject( 'set', *args, **kwargs )
+def Volume(*args, **kwargs):
+    '''Create an instance of Aims Volume (Volume_<type>) from a type parameter,
+    which may be specified as the dtype keyword argument, or as one of the
+    arguments if one is identitied as a type.
+    The default type is 'FLOAT'.
+    Type definitions should match those accepted by typeCode().
+    Volume may also use a numpy array, or another Volume or AimsData_* as unique
+    argument.
+
+    Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a
+    copy of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* )
+    share the input data.
+    '''
+    if len(args) == 1 and len(kwargs) == 0:
+        arg = args[0]
+        if isinstance(arg, numpy.ndarray):
+            return _createObject('Volume', arg, dtype=arg.dtype.type)
+        elif type(arg).__name__.startswith('Volume_'):
+            return type(arg)(arg)
+        elif type(arg).__name__.startswith('AimsData_'):
+            return type(arg)(arg.volume())
+    return _createObject('Volume', default_dtype='FLOAT', *args, **kwargs)
 
 
-def stdList( *args, **kwargs ):
-  '''Create an instance of STL C++ list (list_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
-  Type definitions should match those accepted by typeCode().
-  '''
-  return _createObject( 'list', *args, **kwargs )
+def VolumeView(volume, position, size):
+    '''Create a view in an existing volume. The returned volume is of the same
+    type and shares data with its "parent".
+    '''
+    volclass = type(volume)
+    if volclass.__name__.startswith('Volume_'):
+        return volclass(volume, position, size)
+    elif volclass.__name__.startswith('AimsData_'):
+        volclass = type(volume.volume())
+        return volclass(volume.volume(), position, size)
+    elif volclass.__name__.startswith('rc_ptr_'):
+        volclass = type(volume.get())
+        return volclass(volume, position, size)
 
 
-def rc_ptr( *args, **kwargs ):
-  '''Create an instance of aims reference-counting object (rc_ptr_<type>) from a type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
-  Type definitions should match those accepted by typeCode().
-  '''
-  return _createObject( 'rc_ptr', *args, **kwargs )
+def AimsData(*args, **kwargs):
+    '''Create an instance of the older Aims volumes (AimsData_<type>) from a
+    type parameter, which may be specified as the dtype keyword argument, or as one of the arguments if one is identitied as a type.
+
+    The default type is 'FLOAT'.
+
+    Type definitions should match those accepted by typeCode().
+    AimsData may also use a numpy array, or another Volume or AimsData_* as
+    unique argument.
+
+    Note that Volume( Volume_* ) or Volume( AimsData_* ) actually performs a
+    copy of the data, whereas AimsData( Volume_* ) or AimsData( AimsData_* )
+    share the input data.
+    '''
+    if len(args) == 1 and len(kwargs) == 0:
+        arg = args[0]
+        if isinstance(arg, numpy.ndarray):
+            vol = _createObject('Volume', arg, dtype=arg.dtype.type)
+            return AimsData(vol)
+        elif type(arg).__name__.startswith('Volume_'):
+            return getattr(aimssip, 'AimsData_' + type(arg).__name__[7:])(arg)
+        elif type(arg).__name__.startswith('AimsData_'):
+            return type(arg)(arg.volume())
+    return _createObject('AimsData', default_dtype='FLOAT', *args, **kwargs)
+
+
+def TimeTexture(*args, **kwargs):
+    '''Create an instance of Aims texture (TimeTexture_<type>) from a type
+    parameter, which may be specified as the dtype keyword argument, or as one
+    of the arguments if one is identitied as a type.
+
+    The default type is 'FLOAT'.
+
+    Type definitions should match those accepted by typeCode().
+    TimeTexture may also use a numpy array, or another TimeTexture_* or
+    Textrue_* as unique argument.
+
+    Building from a numpy arrays uses the 1st dimension as vertex, the 2nd as
+    time (if any).
+    '''
+    if len(args) == 1 and len(kwargs) == 0:
+        arg = args[0]
+        if isinstance(args[0], numpy.ndarray):
+            tex = _createObject('TimeTexture', dtype=arg.dtype.type)
+            if len(arg.shape) == 1:
+                tex[0].assign(arg)
+            else:
+                for i in xrange(arg.shape[1]):
+                    tex[i].assign(arg[:, i])
+            return tex
+        if type(arg).__name__.startswith('TimeTexture_'):
+            return type(arg)(arg)
+        elif type(arg).__name__.startswith('Texture_'):
+            tex = getattr(aimssip, 'TimeTexture_' + type(arg).__name__[8:])()
+            tex[0] = arg
+            return tex
+    return _createObject('TimeTexture', default_dtype='FLOAT', *args, **kwargs)
+
+
+def Texture(*args, **kwargs):
+    '''Create an instance of Aims low-level texture (Texture_<type>) from a type
+    parameter, which may be specified as the dtype keyword argument, or as one
+    of the arguments if one is identitied as a type.
+
+    The default type is 'FLOAT'.
+
+    Type definitions should match those accepted by typeCode().
+
+    Texture may also use a numpy array, or another Textrue_* as unique argument.
+    '''
+    if len(args) == 1 and len(kwargs) == 0:
+        arg = args[0]
+        if isinstance(args[0], numpy.ndarray):
+            return _createObject('Texture', arg, dtype=arg.dtype.type)
+        if type(arg).__name__.startswith('Texture_'):
+            return type(arg)(arg)
+    return _createObject('Texture', default_dtype='FLOAT', *args, **kwargs)
+
+
+def BucketMap(*args, **kwargs):
+    '''Create an instance of Aims bucket (BucketMap_<type>) from a type
+    parameter, which may be specified as the dtype keyword argument, or as one
+    of the arguments if one is identitied as a type.
+
+    The default type is 'VOID'.
+
+    Type definitions should match those accepted by typeCode().
+    '''
+    return _createObject('BucketMap', default_dtype='VOID', *args, **kwargs)
+
+
+def Converter(*args, **kwargs):
+    '''Create a Converter instance from input and output types. Types may be
+    passed as keyword arguments intype and outtype, or dtype if both are the
+    same (not very useful for a converter). Otherwise the arguments are parsed
+    to find types arguments.
+
+    Types may be specified as allowed by typeCode().
+    '''
+    intype, outtype, args, kwargs = _parse2TypesInArgs(*args, **kwargs)
+    return getattr(aimssip, 'Converter_' + intype + '_' + outtype)(*args)
+
+
+def ShallowConverter(*args, **kwargs):
+    '''Create a ShallowConverter instance from input and output types. Types may
+    be passed as keyword arguments intype and outtype, or dtype if both are the
+    same (not very useful for a converter). Otherwise the arguments are parsed
+    to find types arguments.
+
+    Types may be specified as allowed by typeCode().
+    '''
+    intype, outtype, args, kwargs = _parse2TypesInArgs(*args, **kwargs)
+    return getattr( aimssip, 'ShallowConverter_' + intype + '_' + outtype ) \
+        (*args)
+
+
+def TimeSurface(dim=3):
+    '''same as AimsTimeSurface( dim )'''
+    return AimsTimeSurface(dim)
+
+
+def AimsTimeSurface(dim=3):
+    '''Create an instance of Aims mesh (AimsTimeSurface_<dim>) from a dimension
+    parameter'''
+    return getattr(aimssip, 'AimsTimeSurface_' + str(dim))()
+
+
+def AimsThreshold(*args, **kwargs):
+    '''Create a AimsThreshold instance from input and output types. Types may be
+    passed as keyword arguments intype and outtype, or dtype if both are the
+    same. Otherwise the arguments are parsed to find types arguments.
+    Types may be specified as allowed by typeCode().
+    '''
+    intype, outtype, args, kwargs = _parse2TypesInArgs(*args, **kwargs)
+    if intype.startswith('Volume_'):
+        intype = intype[7:]
+    elif intype.startswith('AimsData_'):
+        intype = intype[9:]
+    if outtype.startswith('Volume_'):
+        outtype = outtype[7:]
+    elif outtype.startswith('AimsData_'):
+        outtype = outtype[9:]
+    return getattr(aimssip, 'AimsThreshold_' + intype + '_' + outtype)(*args)
+
+
+def AimsVector(*args, **kwargs):
+    '''Create an AimsVector instance from type and dimension arguments. Types
+    may be passed as the keyword argument dtype. Otherwise the arguments are
+    parsed to find types arguments. Dimension should be passed as the keyword
+    argument dim, or is guessed from the input value(s).
+
+    Types may be specified as allowed by typeCode().
+
+    If unspecified, type is guessed from the 1st element of the vector data.
+    '''
+    dim = kwargs.get('dim', None)
+    if dim is not None:
+        del kwargs['dim']
+    elif len(args) == 1 and hasattr(args[0], '__len__'):
+        dim = len(args[0])
+    else:
+        dim = len(args)
+    try:
+        dtype, args, kwargs = _parseTypeInArgs(*args, **kwargs)
+    except KeyError as e:
+        try:
+            if hasattr(args[0], '__len__') and len(args[0]) != 0:
+                dtype = _parseTypeInArgs(dtype=args[0][0])[0]
+            else:
+                dtype = _parseTypeInArgs(dtype=args[0])[0]
+        except:
+            raise e
+    return getattr(aimssip, 'AimsVector_' + dtype + '_' + str(dim))(*args)
+
+
+def stdVector(*args, **kwargs):
+    '''Create an instance of STL C++ vector (vector_<type>) from a type
+    parameter, which may be specified as the dtype keyword argument, or as one
+    of the arguments if one is identitied as a type.
+
+    Type definitions should match those accepted by typeCode().
+    '''
+    return _createObject('vector', *args, **kwargs)
+
+
+def stdSet(*args, **kwargs):
+    '''Create an instance of STL C++ set (set_<type>) from a type parameter,
+    which may be specified as the dtype keyword argument, or as one of the
+    arguments if one is identitied as a type.
+
+    Type definitions should match those accepted by typeCode().
+    '''
+    return _createObject('set', *args, **kwargs)
+
+
+def stdList(*args, **kwargs):
+    '''Create an instance of STL C++ list (list_<type>) from a type parameter,
+    which may be specified as the dtype keyword argument, or as one of the
+    arguments if one is identitied as a type.
+
+    Type definitions should match those accepted by typeCode().
+    '''
+    return _createObject('list', *args, **kwargs)
+
+
+def rc_ptr(*args, **kwargs):
+    '''Create an instance of aims reference-counting object (rc_ptr_<type>) from
+    a type parameter, which may be specified as the dtype keyword argument, or
+    as one of the arguments if one is identitied as a type.
+
+    Type definitions should match those accepted by typeCode().
+    '''
+    return _createObject('rc_ptr', *args, **kwargs)
 
 
 # documentation
@@ -1615,11 +1731,11 @@ to the ``Volume`` constructor.
 In all cases the voxels memory block is shared.
 '''
 
-for x,y in locals().items():
-  if x.startswith('Volume_'):
-    y.__doc__ = _volumedoc
-  elif x.startswith('AimsData_'):
-    y.__doc__ = _aimsdatadoc
+for x, y in locals().items():
+    if x.startswith('Volume_'):
+        y.__doc__ = _volumedoc
+    elif x.startswith('AimsData_'):
+        y.__doc__ = _aimsdatadoc
 del x, y
 
 del _volumedoc, _aimsdatadoc
@@ -1658,11 +1774,10 @@ This doc might not be up-to-date, use the :py:meth:`printDescription` method
 for more info.
 """
 
-private = [ 'private', 'aimssip', 'aimsguisip', 'numpy', 'sip', 'types',
-  'weakref' ]
+private = ['private', 'aimssip', 'aimsguisip', 'numpy', 'sip', 'types',
+           'weakref']
 __all__ = []
 for x in dir():
-  if not x.startswith( '_' ) and x not in private:
-    __all__.append(x)
+    if not x.startswith('_') and x not in private:
+        __all__.append(x)
 del x, private
-
