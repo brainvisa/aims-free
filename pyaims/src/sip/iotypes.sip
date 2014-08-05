@@ -58,3 +58,62 @@ public:
 
 };
 
+// --- SOMA IO ---
+
+namespace carto // FIXME: will become soma
+{
+
+  class IOObjectTypesDictionary
+  {
+%TypeHeaderCode
+#include <soma-io/io/formatdictionary.h>
+%End
+
+%TypeCode
+#include <cartobase/plugin/plugin.h>
+%End
+
+  public:
+    static bool hasReadType( const std::string & datatype );
+    static bool hasWriteType( const std::string & datatype );
+
+    static SIP_PYDICT readTypes();
+%MethodCode
+  carto::PluginLoader::load();
+  sipRes = PyDict_New();
+  std::map<std::string, soma::IOObjectTypesDictionary::FormatInfo>::const_iterator i, e \
+    = soma::IOObjectTypesDictionary::readTypes().end();
+  std::set<std::string>::const_iterator iot, eot;
+  int u = 0;
+  for( i=soma::IOObjectTypesDictionary::readTypes().begin(); i!=e; ++i )
+  {
+    const std::set<std::string> & iset = i->second();
+    PyObject *p = PyTuple_New( iset.size() );
+    for( u=0, iot=iset.begin(), eot=iset.end(); iot!=eot; ++iot, ++u )
+      PyTuple_SetItem( p, u, PyString_FromString( iot->c_str() ) );
+    PyDict_SetItem( sipRes, PyString_FromString( i->first.c_str() ), p );
+  }
+%End
+
+    static SIP_PYDICT writeTypes();
+%MethodCode
+  carto::PluginLoader::load();
+  sipRes = PyDict_New();
+  std::map<std::string, soma::IOObjectTypesDictionary::FormatInfo>::const_iterator i, e \
+    = soma::IOObjectTypesDictionary::writeTypes().end();
+  std::set<std::string>::const_iterator iot, eot;
+  int u = 0;
+  for( i=soma::IOObjectTypesDictionary::writeTypes().begin(); i!=e; ++i )
+  {
+    const std::set<std::string> & iset = i->second();
+    PyObject *p = PyTuple_New( iset.size() );
+    for( u=0, iot=iset.begin(), eot=iset.end(); iot!=eot; ++iot, ++u )
+      PyTuple_SetItem( p, u, PyString_FromString( iot->c_str() ) );
+    PyDict_SetItem( sipRes, PyString_FromString( i->first.c_str() ), p );
+  }
+%End
+
+  };
+
+};
+

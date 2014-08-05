@@ -996,6 +996,34 @@ def typeCode( data ):
   return dtn2
 
 
+def somaio_typeCode( data ):
+  '''returns the Soma-IO type code (as in
+  soma.carto.IOObjectTypesDictionary.readTypes() dict keys) for the given input
+  type.
+
+  Parameters
+  ----------
+  data: string or type or instance, or 2-tuple
+      If type or instance, get the type code for the given object.
+      If string, try to translate AIMS IO to soma-IO codes.
+      If 2-tuple, translate AIMS object type / data type couple
+  '''
+  def _somaio_objecttype( data ):
+    if data == 'Volume':
+      return 'carto_volume'
+    else:
+      return data
+  if isinstance( data, tuple ):
+    return '%s of %s' % ( _somaio_objecttype( data[0] ), data[1] )
+  if not isinstance( data, str ) and not isinstance( data, unicode ):
+    if hasattr( data, '__name__' ):
+      data = data.__name__
+    else:
+      data = data.__class__.__name__
+  objtype, dtype = data.split('_')
+  return '%s of %s' % ( _somaio_objecttype( objtype ), dtype )
+
+
 def _parseTypeInArgs( *args, **kwargs ):
   dtype = kwargs.get( 'dtype', None )
   # print '_parseTypeInArgs:', dtype
