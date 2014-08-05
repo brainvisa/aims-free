@@ -233,17 +233,18 @@ namespace soma
 
     //=== writing header & creating files ====================================
     localMsg( "writing header..." );
-    *dsi = _imw->writeHeader( *dsi, options );
+    std::vector<long> strides(4);
+    strides[0] = &obj(1,0,0,0) - &obj(0,0,0,0);
+    strides[1] = &obj(0,1,0,0) - &obj(0,0,0,0);
+    strides[2] = &obj(0,0,1,0) - &obj(0,0,0,0);
+    strides[3] = &obj(0,0,0,1) - &obj(0,0,0,0);
+    *dsi = _imw->writeHeader( *dsi, (T*) &obj(0,0,0,0), position, view,
+                              strides, options );
 
     //=== writing image ======================================================
     localMsg( "writing volume..." );
     if( parent1 || obj.allocatorContext().isAllocated() )
     {
-      std::vector<long> strides(4);
-      strides[0] = &obj(1,0,0,0) - &obj(0,0,0,0);
-      strides[1] = &obj(0,1,0,0) - &obj(0,0,0,0);
-      strides[2] = &obj(0,0,1,0) - &obj(0,0,0,0);
-      strides[3] = &obj(0,0,0,1) - &obj(0,0,0,0);
 //       if( !withborders ) {
         _imw->write( (T*) &obj(0,0,0,0), *dsi, position, view, strides,
                      options );
