@@ -57,8 +57,11 @@ def aims_test_thread_read( filenames, verbose=True ):
             % nmissing )
 
 
-def _convertFileFormat( aimsobj, directory, prefix, format ):
-    exts = aims.Finder.extensions( format )
+def _convertFileFormat( aimsobj, directory, prefix, format, is_soma=False ):
+    if is_soma:
+        exts = somaio_extensions( aimsobj, format )
+    else:
+        exts = aims.Finder.extensions( format )
     if len( exts ) == 0:
         return None
     exts2 = [ x for x in exts if x != '' ]
@@ -102,6 +105,39 @@ def _convertFileFormat( aimsobj, directory, prefix, format ):
     return None
 
 
+def somaio_formats( aimsobj ):
+    try:
+        fclass = getattr( aims.carto,
+            'FormatDictionary_%s' % aims.typeCode( aimsobj ) )
+    except:
+        if isinstance( aimsobj, aims.carto.GenericObject ):
+            fclass = aims.carto.FormatDictionary_Object
+        else:
+            return
+    formats = fclass.writeFormats()
+    exts = fclass.writeExtensions()
+    ext_by_format = dict([(f, []) for f in formats])
+    for ext, flist in exts.iteritems():
+        for f in flist:
+            ext_by_format[f].append(ext)
+    return ext_by_format
+
+
+def somaio_extensions( aimsobj, format ):
+    try:
+        fclass = getattr( aims.carto,
+            'FormatDictionary_%s' % aims.typeCode( aimsobj ) )
+    except:
+        if isinstance( aimsobj, aims.carto.GenericObject ):
+            fclass = aims.carto.FormatDictionary_Object
+        else:
+            return []
+    exts = fclass.writeExtensions()
+    exts_for_format = [ext for ext, formats in exts.iteritems() \
+        if format in formats]
+    return exts_for_format
+
+
 def test_all_formats( filename, number=30, separate_process=False ):
     f = aims.Finder()
     if not f.check( filename ):
@@ -109,17 +145,20 @@ def test_all_formats( filename, number=30, separate_process=False ):
     ot = f.objectType(), f.dataType()
     aimsobj = aims.read( filename )
     formats = aims.IOObjectTypesDictionary.formats( *ot )
+    soma_io_formats = somaio_formats( aimsobj )
     success = True
     unsafe_formats = []
     safe_formats = []
-    for format in formats:
+    all_formats = zip(formats, [False]*len(formats)) \
+        + [(f, True) for f in soma_io_formats]
+    for format, is_soma in all_formats:
         # JP2 writer in Qt (4.8.1 at least) systematically crashes.
         if format in ( 'JP2' ): continue
         print 'testing: %s / %s, format: %s' % ( ot[0], ot[1], format )
         try:
             directory = tempfile.mkdtemp( prefix='aims_thread_test' )
             newfilename = _convertFileFormat( aimsobj, directory, 'aims_test',
-                format )
+                format, is_soma )
             if not newfilename:
                 print 'could not generate format', format
                 #shutil.rmtree( directory )
