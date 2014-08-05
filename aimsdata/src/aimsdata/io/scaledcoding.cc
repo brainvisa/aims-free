@@ -41,139 +41,6 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-namespace
-{
-
-template <typename T>
-bool canencode( const carto::Volume<T> & thing, float & slope,
-                float & offset, bool enableoffset, double *maxerr )
-{
-  int y, z, x, f, dx = thing.getSizeX(), dy = thing.getSizeY(),
-    dz = thing.getSizeZ(), dt = thing.getSizeT();
-  T       val, vmin = thing( 0 ), vmax = thing( 0 );
-  typedef std::set<double> hset;
-  hset    values;
-  double  maxm = 0;
-  double  off = 0, intv = 1;
-  if( maxerr )
-    *maxerr = 0;
-
-  if( !enableoffset )
-    values.insert( 0 ); // 0 must be a valid value if no offset is allowed
-  // std::cout << "searching values\n";
-  for( f=0; f<dt; ++f )
-    for( z=0; z<dz; ++z )
-      for( y=0; y<dy; ++y )
-        for( x=0; x<dx; ++x )
-        {
-          val = thing.at( x, y, z, f );
-          if( isnan( val ) || isinf( val ) )
-            return false;
-          if( val < vmin )
-            vmin = val;
-          if( val > vmax )
-            vmax = val;
-          values.insert( val );
-          if( values.size() > 65536 )
-            return false;
-        }
-
-  if( !enableoffset )
-  {
-    if( vmin > 0 )
-      vmin = 0;
-    if( vmax < 0 )
-      vmax = 0;
-  }
-  if( values.size() < 2 )
-  {
-    if( enableoffset )
-    {
-      slope = 1.;
-      offset = *values.begin();
-    }
-    else
-    {
-      slope = *values.begin();
-      offset = 0;
-    }
-    return true;
-  }
-
-  // find minimum interval
-  std::set<double>::iterator  iv = values.begin(), ev = values.end();
-  double      v, intv2;
-  // interval list
-  std::set<double>    intvl;
-  intv = 0;
-  off = *iv;
-  for( ++iv; iv!=ev; ++iv )
-  {
-    v = *iv - off;
-    //std::cout << v << "  ";
-    if( intv == 0 || v < intv )
-    {
-      intv = v;
-      intvl.insert( v );
-    }
-    if( ::fabs( ( v / intv ) - rint( v / intv ) ) > 1e-5 )
-      intvl.insert( v );
-    off = *iv;
-  }
-
-
-  iv = intvl.begin();
-  ev = intvl.end();
-  double span = double( vmax - vmin );
-
-  while( iv != ev )
-    for( iv=intvl.begin(); iv!=ev; ++iv )
-    {
-      intv2 = *iv;
-      if( span / intv2 >= 65535.1 )
-      {
-        if( span / intv2 <= 65536.5 )
-          intv2 = span / 65535.; // fix rounding error
-        else
-          // no hope
-          return false;
-      }
-      v = ::fabs( intv2 - rint( intv2 / intv ) * intv );
-      if( v > 0 ) //intv * 1e-3 )
-      {
-        if( span / v < 65536.5 )
-        {
-          if( span / v > 65535. )
-            v = span / 65535.; // fix rounding error
-          intv = v;     // use smaller interval
-          break;
-        }
-      }
-    }
-  intv2 = rint( span / intv );
-  if( intv2 > 65535. )
-    intv2 = 65535.;
-  intv = span / intv2;
-
-  for( iv=intvl.begin(); iv!=ev; ++iv )
-  {
-    v = ::fabs( *iv / intv - rint( *iv / intv ) );
-    if( v > maxm )
-    {
-      maxm = v;
-      if( v > 1e-2 )
-        return false;
-    }
-  }
-  slope = intv;
-  offset = 32768. * slope + vmin;
-  if( maxerr )
-    *maxerr = maxm;
-  return true;
-}
-
-}
-
 namespace aims
 {
 
@@ -182,7 +49,13 @@ namespace aims
                              float & offset, bool enableoffset,
                              double *maxerr )
   {
-    return canencode( vol, slope, offset, enableoffset, maxerr );
+    vector<long> strides(4);
+    strides[0] = &vol.at(1) - &vol.at(0);
+    strides[1] = &vol.at(0, 1) - &vol.at(0);
+    strides[2] = &vol.at(0, 0, 1) - &vol.at(0);
+    strides[3] = &vol.at(0, 0, 0, 1) - &vol.at(0);
+    return soma::canEncodeAsScaledS16( &vol.at(0), slope, offset, strides,
+                                       vol.getSize(), enableoffset, maxerr );
   }
 
 
@@ -191,176 +64,41 @@ namespace aims
                              float & offset, bool enableoffset,
                              double *maxerr )
   {
-    return canencode( vol, slope, offset, enableoffset, maxerr );
+    vector<long> strides(4);
+    strides[0] = &vol.at(1) - &vol.at(0);
+    strides[1] = &vol.at(0, 1) - &vol.at(0);
+    strides[2] = &vol.at(0, 0, 1) - &vol.at(0);
+    strides[3] = &vol.at(0, 0, 0, 1) - &vol.at(0);
+    return soma::canEncodeAsScaledS16( &vol.at(0), slope, offset, strides,
+                                       vol.getSize(), enableoffset, maxerr );
   }
 
 
   template <typename INP, typename OUTP> 
-  ScaledEncodingInfo ScaledEncoding<INP, OUTP>::info( const AimsData<INP> & thing )
+  soma::ScaledEncodingInfo ScaledEncoding<INP, OUTP>::info(
+    const AimsData<INP> & vol )
   {
-    ScaledEncodingInfo sei;
-    double slope, offset, maxerr = 0;
-    int y, z, x, f, dx = thing.dimX(), dy = thing.dimY(),
-                    dz = thing.dimZ(), dt = thing.dimT();
-    INP val, vmin = thing( 0 ), vmax = thing( 0 );
-  
-    double minlim = (double)numeric_limits<OUTP>::min(), maxlim = (double)numeric_limits<OUTP>::max();
-    double dynsize = maxlim - minlim + 1;
-    double minintv = 0, intv, intv2, v1, err;
-    bool isexact = true;
-    std::set<double> values;
-    std::set<double> intvl;
-  
-    // Get values to be scaled
-    for( f=0; f<dt; ++f )
-      for( z=0; z<dz; ++z )
-        for( y=0; y<dy; ++y )
-          for( x=0; x<dx; ++x )
-          {
-            val = thing( x, y, z, f );
-            if( isnan( val ) || isinf( val ) )
-            {
-              maxerr = val;
-            }
-            else
-            {
-              if( val < vmin )
-                vmin = val;
-              if( val > vmax )
-                vmax = val;
-
-              if (isexact)
-              {
-                if (values.size() < dynsize)
-                  values.insert( val );
-                else
-                  isexact = false;
-              }
-            }
-          }
-
-    // Initialize offset and slope
-    if( values.size() < 2 )
-    {
-      if( values.size() == 0 )
-      {
-        slope = 1.;
-        offset = 0;
-      }
-      else
-      {
-        slope = 1.;
-        offset = *values.begin();
-      }
-    }
-    else 
-    {
-      offset = vmin;
-
-      if (isexact)
-      {
-        // Find minimum interval of values and not dividable intervals
-        std::set<double>::iterator  iv, ev = values.end();
-    
-        iv = values.begin(); 
-        v1 = *iv;
-        
-        while( ++iv != ev )
-        {
-          intv = fabs(*iv - v1);
-          if( minintv == 0 || intv < minintv )
-          {
-            minintv = intv;
-            intvl.insert( intv );
-          }
-          else if( fabs( ( intv / minintv ) - rint( intv / minintv ) ) > numeric_limits<double>::epsilon() )
-          {
-            intvl.insert( intv );
-          }
-    
-          v1 = *iv;
-        }
-    
-        // Subdivide intervals
-        iv = intvl.begin();
-        ev = intvl.end();
-    
-        while( iv != ev )
-          for( iv = intvl.begin(); iv != ev; ++iv )
-          {
-            intv2 = *iv;
-            if ( ( ( vmax - vmin ) / intv2) > maxlim )
-            {
-              // Scaling won't be exact but we can not store more intervals
-              // so we stop the loop
-              iv = ev;
-              isexact = false;
-              break;
-            }
-  
-            // Subdivide the interval
-            intv = fabs( intv2 - rint( intv2 / minintv ) * minintv );
-            if( intv > 0 )
-            {
-              if ( ( ( vmax - vmin ) / intv ) < maxlim )
-              {
-                minintv = intv;     // use smaller interval
-                break;
-              }
-            }
-          }
-      }
-  
-      // Process the slope
-      intv = (vmax - vmin);
-      if (isexact)
-      {
-        slope = intv / rint( intv / minintv );
-      }
-      else
-      {
-        // We get a simple approximation
-        slope = intv / (maxlim - minlim);
-      }
-    }
-
-    // Find the maximum error
-    if ( maxerr == 0 )
-    {
-      for( f=0; f<dt; ++f )
-        for( z=0; z<dz; ++z )
-          for( y=0; y<dy; ++y )
-            for( x=0; x<dx; ++x )
-            {
-              val = thing( x, y, z, f );
-              err = fabs( (double)val / slope - rint( (double)val / slope ) );
-              if (err > maxerr)
-                maxerr = err;
-            }
-    }
-
-    sei.offset() = offset;
-    sei.slope() = slope;
-    sei.maxerr() = maxerr;
-
-    return sei;
+    vector<long> strides(4);
+    strides[0] = &vol(1) - &vol(0);
+    strides[1] = &vol(0, 1) - &vol(0);
+    strides[2] = &vol(0, 0, 1) - &vol(0);
+    strides[3] = &vol(0, 0, 0, 1) - &vol(0);
+    soma::ScaledEncoding<INP, OUTP> ssenc;
+    return ssenc.info( &vol(0), strides, vol.volume()->getSize() );
   }
 
-  template <typename INP, typename OUTP> 
-  ScaledEncodingInfo ScaledEncoding<INP, OUTP>::rescale( const AimsData<INP> & in, 
-                                                         AimsData<OUTP> & out )
-  {
-    ScaledEncodingInfo sei;
-    sei = ScaledEncoding<INP, OUTP>::info( in );
-    RescalerInfo ri;
-    ri.vmin = sei.offset();
-    ri.vmax = in.maximum();
-    ri.omin = numeric_limits<OUTP>::min();
-    ri.omax = (ri.vmax - ri.vmin) / sei.slope() + ri.omin;
-    Rescaler< AimsData< INP >, AimsData< OUTP > > rescaler( ri );
-    rescaler.convert( in, out );
 
-    return sei;
+  template <typename INP, typename OUTP> 
+  soma::ScaledEncodingInfo ScaledEncoding<INP, OUTP>::rescale(
+    const AimsData<INP> & in, AimsData<OUTP> & out )
+  {
+    soma::ScaledEncoding<INP, OUTP> ssenc;
+    vector<long> strides(4);
+    strides[0] = &in(1) - &in(0);
+    strides[1] = &in(0, 1) - &in(0);
+    strides[2] = &in(0, 0, 1) - &in(0);
+    strides[3] = &in(0, 0, 0, 1) - &in(0);
+    return ssenc.rescale( &in(0), strides, in.volume()->getSize(), &out(0) );
   }
 
 

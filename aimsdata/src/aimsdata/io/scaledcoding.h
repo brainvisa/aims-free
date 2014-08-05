@@ -34,6 +34,8 @@
 #ifndef AIMS_IO_SCALEDCODING_H
 #define AIMS_IO_SCALEDCODING_H
 
+#include <soma-io/io/scaledcoding.h>
+
 namespace carto
 {
   template <typename T> class Volume;
@@ -70,24 +72,6 @@ namespace aims
     return false;
   }
 
-  class ScaledEncodingInfo
-  {
-    public :
-      ScaledEncodingInfo() : 
-        _slope(1), _offset(0), _maxerr(0) {}
-
-      virtual ~ScaledEncodingInfo() {}
-
-      double & slope() { return _slope; }
-      double & offset() { return _offset; }
-      double & maxerr() { return _maxerr; }
-      
-    private :
-      double _slope;
-      double _offset;
-      double _maxerr;
-  };
-
   template <typename INP, typename OUTP>
   class ScaledEncoding
   {
@@ -96,10 +80,10 @@ namespace aims
       /** Get the slope, offset and maximum error to encode a volume of float or double 
           using an integer type.
       */
-      static ScaledEncodingInfo info( const AimsData<INP> & thing );
+      static soma::ScaledEncodingInfo info( const AimsData<INP> & thing );
 
-      static ScaledEncodingInfo rescale( const AimsData<INP> & in, 
-                                         AimsData<OUTP> & out );
+      static soma::ScaledEncodingInfo rescale( const AimsData<INP> & in,
+                                               AimsData<OUTP> & out );
   };
 }
 
