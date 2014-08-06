@@ -150,7 +150,6 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     FormatDictionary<Volume<VoxelHSV> >::registerFormat( "NIFTI-1", vfr_hsv, exts );
     
     //--- COMPLEX -------------------------------------------------------------
-/* complex needs AsciiDataSourceTraits to be defined on complex types
 
     VolumeFormatReader<std::complex<float> > *vfr_cf = new VolumeFormatReader<std::complex<float> >;
     vfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >( new Nifti1ImageReader<std::complex<float> > ) );
@@ -159,11 +158,11 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     VolumeFormatReader<std::complex<double> > *vfr_cd = new VolumeFormatReader<std::complex<double> >;
     vfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new Nifti1ImageReader<std::complex<double> > ) );
     FormatDictionary<Volume<std::complex<double> > >::registerFormat( "NIFTI-1", vfr_cd, exts );
-*/
+
     //==========================================================================
     //   V O L U M E   R E F
     //==========================================================================
-    
+
     //--- INT ------------------------------------------------------------------
 
     VolumeRefFormatReader<int8_t> *rfr8 = new VolumeRefFormatReader<int8_t>;
@@ -225,7 +224,7 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     FormatDictionary<VolumeRef<VoxelHSV> >::registerFormat( "NIFTI-1", rfr_hsv, exts );
     
     //--- COMPLEX -------------------------------------------------------------
-/*
+
     VolumeRefFormatReader<std::complex<float> > *rfr_cf = new VolumeRefFormatReader<std::complex<float> >;
     rfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >( new Nifti1ImageReader<std::complex<float> > ) );
     FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat( "NIFTI-1", rfr_cf, exts );
@@ -233,7 +232,7 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     VolumeRefFormatReader<std::complex<double> > *rfr_cd = new VolumeRefFormatReader<std::complex<double> >;
     rfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new Nifti1ImageReader<std::complex<double> > ) );
     FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "NIFTI-1", rfr_cd, exts );
-*/
+
 
     ////////////////////////////////////////////////////////////////////////////
     ////                           W R I T E R                              ////
@@ -242,7 +241,7 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     //==========================================================================
     //   V O L U M E
     //==========================================================================
-    
+
     //--- INT ------------------------------------------------------------------
 
     VolumeFormatWriter<int8_t> *vfw8 = new VolumeFormatWriter<int8_t>;
@@ -306,7 +305,7 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     FormatDictionary<Volume<VoxelHSV> >::registerFormat( "NIFTI-1", vfw_hsv, exts );
     
     //--- COMPLEX -------------------------------------------------------------
-/*
+
     VolumeFormatWriter<std::complex<float> > *vfw_cf = new VolumeFormatWriter<std::complex<float> >;
     vfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new Nifti1ImageWriter<std::complex<float> > ) );
     FormatDictionary<Volume<std::complex<float> > >::registerFormat( "NIFTI-1", vfw_cf, exts );
@@ -314,7 +313,7 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     VolumeFormatWriter<std::complex<double> > *vfw_cd = new VolumeFormatWriter<std::complex<double> >;
     vfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new Nifti1ImageWriter<std::complex<double> > ) );
     FormatDictionary<Volume<std::complex<double> > >::registerFormat( "NIFTI-1", vfw_cd, exts );
-*/
+
     //==========================================================================
     //   V O L U M E   R E F
     //==========================================================================
@@ -380,7 +379,7 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     FormatDictionary<VolumeRef<VoxelHSV> >::registerFormat( "NIFTI-1", rfw_hsv, exts );
 
     //--- COMPLEX -------------------------------------------------------------
-/*
+
     VolumeRefFormatWriter<std::complex<float> > *rfw_cf = new VolumeRefFormatWriter<std::complex<float> >;
     rfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new Nifti1ImageWriter<std::complex<float> > ) );
     FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat( "NIFTI-1", rfw_cf, exts );
@@ -388,7 +387,7 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     VolumeRefFormatWriter<std::complex<double> > *rfw_cd = new VolumeRefFormatWriter<std::complex<double> >;
     rfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new Nifti1ImageWriter<std::complex<double> > ) );
     FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "NIFTI-1", rfw_cd, exts );
-*/
+
 }
 
 
