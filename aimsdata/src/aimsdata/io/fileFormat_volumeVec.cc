@@ -140,12 +140,7 @@ template<> void
 FileFormatDictionary<AimsData<AimsRGB> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<AimsRGB>	*gf = new GisFormat<AimsRGB>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<AimsRGB>	*vf = new VolumeFormat<AimsRGB>( "GIS" );
-  FileFormatDictionary<Volume<AimsRGB> >::registerFormat( "GIS", vf, ext );
+  VolumeFormat<AimsRGB> *vf;
 
 #ifdef AIMS_JPEG
   ext.clear();
@@ -169,18 +164,11 @@ template<> void
 FileFormatDictionary<AimsData<AimsRGBA> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<AimsRGBA>	*gf = new GisFormat<AimsRGBA>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<AimsRGBA>	*vf = new VolumeFormat<AimsRGBA>( "GIS" );
-  FileFormatDictionary<Volume<AimsRGBA> >::registerFormat( "GIS", vf, ext );
 
-  ext.clear();
   ext.push_back( "" );
   SomaIOAimsDataFormat<AimsRGBA>  *df = new SomaIOAimsDataFormat<AimsRGBA>;
   registerFormat( "SOMAIO_VOLUMES", df, ext );
-  vf = new VolumeFormat<AimsRGBA>( "SOMAIO_VOLUMES" );
+  VolumeFormat<AimsRGBA> *vf = new VolumeFormat<AimsRGBA>( "SOMAIO_VOLUMES" );
   FileFormatDictionary<Volume<AimsRGBA> >::registerFormat( "SOMAIO_VOLUMES", 
                                                            vf, ext );
 }
@@ -189,18 +177,10 @@ template<> void
 FileFormatDictionary<AimsData<AimsHSV> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<AimsHSV>	*gf = new GisFormat<AimsHSV>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<AimsHSV>	*vf = new VolumeFormat<AimsHSV>( "GIS" );
-  FileFormatDictionary<Volume<AimsHSV> >::registerFormat( "GIS", vf, ext );
-
-  ext.clear();
   ext.push_back( "" );
   SomaIOAimsDataFormat<AimsHSV>  *df = new SomaIOAimsDataFormat<AimsHSV>;
   registerFormat( "SOMAIO_VOLUMES", df, ext );
-  vf = new VolumeFormat<AimsHSV>( "SOMAIO_VOLUMES" );
+  VolumeFormat<AimsHSV> *vf = new VolumeFormat<AimsHSV>( "SOMAIO_VOLUMES" );
   FileFormatDictionary<Volume<AimsHSV> >::registerFormat( "SOMAIO_VOLUMES", 
                                                           vf, ext );
 }

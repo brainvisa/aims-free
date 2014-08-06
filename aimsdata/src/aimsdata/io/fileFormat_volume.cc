@@ -239,19 +239,11 @@ FileFormatDictionary<VolumeRef<cdouble> >::registerBaseFormats()
 template<> void FileFormatDictionary<AimsData<int8_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<int8_t>	*gf = new GisFormat<int8_t>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<int8_t>	*vf = new VolumeFormat<int8_t>( "GIS" );
-  FileFormatDictionary<Volume<int8_t> >::registerFormat( "GIS", vf, ext );
-
-  ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
   SpmFormat<int8_t>	*sf = new SpmFormat<int8_t>;
   registerFormat( "SPM", sf, ext );
-  vf = new VolumeFormat<int8_t>( "SPM" );
+  VolumeFormat<int8_t> *vf = new VolumeFormat<int8_t>( "SPM" );
   FileFormatDictionary<Volume<int8_t> >::registerFormat( "SPM", vf, ext );
 
   ext.clear();
@@ -282,19 +274,11 @@ template<> void FileFormatDictionary<AimsData<int8_t> >::registerBaseFormats()
 template<> void FileFormatDictionary<AimsData<uint8_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<uint8_t>	*gf = new GisFormat<uint8_t>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<uint8_t>	*vf = new VolumeFormat<uint8_t>( "GIS" );
-  FileFormatDictionary<Volume<uint8_t> >::registerFormat( "GIS", vf, ext );
-
-  ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
   SpmFormat<uint8_t>	*sf = new SpmFormat<uint8_t>;
   registerFormat( "SPM", sf, ext );
-  vf = new VolumeFormat<uint8_t>( "SPM" );
+  VolumeFormat<uint8_t> *vf = new VolumeFormat<uint8_t>( "SPM" );
   FileFormatDictionary<Volume<uint8_t> >::registerFormat( "SPM", vf, ext );
 
 #ifdef AIMS_JPEG
@@ -330,19 +314,11 @@ template<> void FileFormatDictionary<AimsData<uint8_t> >::registerBaseFormats()
 template<> void FileFormatDictionary<AimsData<char> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<char>	*gf = new GisFormat<char>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<char>	*vf = new VolumeFormat<char>( "GIS" );
-  FileFormatDictionary<Volume<char> >::registerFormat( "GIS", vf, ext );
-
-  ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
   SpmFormat<char>	*sf = new SpmFormat<char>;
   registerFormat( "SPM", sf, ext );
-  vf = new VolumeFormat<char>( "SPM" );
+  VolumeFormat<char> *vf = new VolumeFormat<char>( "SPM" );
   FileFormatDictionary<Volume<char> >::registerFormat( "SPM", vf, ext );
 
   ext.clear();
@@ -376,12 +352,7 @@ template<> void FileFormatDictionary<AimsData<char> >::registerBaseFormats()
 template<> void FileFormatDictionary<AimsData<int16_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<int16_t>	*gf = new GisFormat<int16_t>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<int16_t>	*vvf = new VolumeFormat<int16_t>( "GIS" );
-  FileFormatDictionary<Volume<int16_t> >::registerFormat( "GIS", vvf, ext );
+  VolumeFormat<int16_t> *vvf;
 
 #ifdef VIDA_LIB
   ext.clear();
@@ -441,19 +412,11 @@ template<> void
 FileFormatDictionary<AimsData<uint16_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<uint16_t>	*gf = new GisFormat<uint16_t>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<uint16_t>	*vvf = new VolumeFormat<uint16_t>( "GIS" );
-  FileFormatDictionary<Volume<uint16_t> >::registerFormat( "GIS", vvf, ext );
-
-  ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
   SpmFormat<uint16_t>	*sf = new SpmFormat<uint16_t>;
   registerFormat( "SPM", sf, ext );
-  vvf = new VolumeFormat<uint16_t>( "SPM" );
+  VolumeFormat<uint16_t> *vvf = new VolumeFormat<uint16_t>( "SPM" );
   FileFormatDictionary<Volume<uint16_t> >::registerFormat( "SPM", vvf, ext );
 
 #ifdef DICOM_LIB
@@ -477,19 +440,11 @@ FileFormatDictionary<AimsData<uint16_t> >::registerBaseFormats()
 template<> void FileFormatDictionary<AimsData<int32_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<int32_t>	*gf = new GisFormat<int32_t>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<int32_t>	*vvf = new VolumeFormat<int32_t>( "GIS" );
-  FileFormatDictionary<Volume<int32_t> >::registerFormat( "GIS", vvf, ext );
-
-  ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
   SpmFormat<int32_t>	*sf = new SpmFormat<int32_t>;
   registerFormat( "SPM", sf, ext );
-  vvf = new VolumeFormat<int32_t>( "SPM" );
+  VolumeFormat<int32_t> *vvf = new VolumeFormat<int32_t>( "SPM" );
   FileFormatDictionary<Volume<int32_t> >::registerFormat( "SPM", vvf, ext );
 
 #ifdef DICOM_LIB
@@ -514,19 +469,11 @@ template<> void
 FileFormatDictionary<AimsData<uint32_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<uint32_t>	*gf = new GisFormat<uint32_t>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<uint32_t>	*vvf = new VolumeFormat<uint32_t>( "GIS" );
-  FileFormatDictionary<Volume<uint32_t> >::registerFormat( "GIS", vvf, ext );
-
-  ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
   SpmFormat<uint32_t>	*sf = new SpmFormat<uint32_t>;
   registerFormat( "SPM", sf, ext );
-  vvf = new VolumeFormat<uint32_t>( "SPM" );
+  VolumeFormat<uint32_t> *vvf = new VolumeFormat<uint32_t>( "SPM" );
   FileFormatDictionary<Volume<uint32_t> >::registerFormat( "SPM", vvf, ext );
 
 #ifdef DICOM_LIB
@@ -550,19 +497,11 @@ FileFormatDictionary<AimsData<uint32_t> >::registerBaseFormats()
 template<> void FileFormatDictionary<AimsData<int64_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<int64_t>	*gf = new GisFormat<int64_t>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<int64_t>	*vvf = new VolumeFormat<int64_t>( "GIS" );
-  FileFormatDictionary<Volume<int64_t> >::registerFormat( "GIS", vvf, ext );
-
-  ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
   SpmFormat<int64_t>	*sf = new SpmFormat<int64_t>;
   registerFormat( "SPM", sf, ext );
-  vvf = new VolumeFormat<int64_t>( "SPM" );
+  VolumeFormat<int64_t> *vvf = new VolumeFormat<int64_t>( "SPM" );
   FileFormatDictionary<Volume<int64_t> >::registerFormat( "SPM", vvf, ext );
 
 #ifdef DICOM_LIB
@@ -587,21 +526,11 @@ template<>
 void FileFormatDictionary<AimsData<uint64_t> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<uint64_t>	*gf = new GisFormat<uint64_t>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<uint64_t>	*vvf
-    = new VolumeFormat<uint64_t>( "GIS" );
-  FileFormatDictionary<Volume<uint64_t> >::registerFormat( "GIS", vvf, 
-                                                                ext );
-
-  ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
   SpmFormat<uint64_t>	*sf = new SpmFormat<uint64_t>;
   registerFormat( "SPM", sf, ext );
-  vvf = new VolumeFormat<uint64_t>( "SPM" );
+  VolumeFormat<uint64_t> *vvf = new VolumeFormat<uint64_t>( "SPM" );
   FileFormatDictionary<Volume<uint64_t> >::registerFormat( "SPM", vvf, 
                                                                 ext );
 
@@ -627,12 +556,7 @@ void FileFormatDictionary<AimsData<uint64_t> >::registerBaseFormats()
 template<> void FileFormatDictionary<AimsData<float> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<float>	*gf = new GisFormat<float>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<float>	*vvf = new VolumeFormat<float>( "GIS" );
-  FileFormatDictionary<Volume<float> >::registerFormat( "GIS", vvf, ext );
+  VolumeFormat<float> *vvf;
 
 #ifdef VIDA_LIB
   ext.clear();
@@ -685,19 +609,11 @@ template<> void
 FileFormatDictionary<AimsData<double> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<double>	*gf = new GisFormat<double>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<double>	*vvf = new VolumeFormat<double>( "GIS" );
-  FileFormatDictionary<Volume<double> >::registerFormat( "GIS", vvf, ext );
-
-  ext.clear();
   ext.push_back( "img" );
   ext.push_back( "hdr" );
   SpmFormat<double>	*sf = new SpmFormat<double>;
   registerFormat( "SPM", sf, ext );
-  vvf = new VolumeFormat<double>( "SPM" );
+  VolumeFormat<double> *vvf = new VolumeFormat<double>( "SPM" );
   FileFormatDictionary<Volume<double> >::registerFormat( "SPM", vvf, ext );
 
 #ifdef DICOM_LIB
