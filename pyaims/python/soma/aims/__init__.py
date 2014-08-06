@@ -1058,7 +1058,7 @@ def typeCode(data):
     dt = dmap.get(data, None)
     if dt is not None:
         return dt
-    if type(data) in str:
+    if type(data) in (str, unicode):
         return data
     dtn = getattr(data, '__name__', None)
     if dtn is not None:  # if data is a type class
