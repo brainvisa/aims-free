@@ -16,6 +16,7 @@
 
 <hr width="100%"> <br>
 
+ <b><a href="#version-4.5.0">Version 4.5.0</a></b><br>
  <b><a href="#version-4.4.0">Version 4.4.0</a></b><br>
  <b><a href="#version-4.3.1">Version 4.3.1</a></b><br>
  <b><a href="#version-4.3.0">Version 4.3.0</a></b><br>
@@ -42,6 +43,26 @@
  <b><a href="#version-2.11">Version 2.11</a></b><br>
  <b><a href="#version-2.10">Version 2.10</a></b><br>
 
+
+<!-- -->
+<h4> <a name="version-4.5.0"></a>Aug. 6th, 2014, Version 4.5.0</h4>
+
+<ul>
+<li>Major changes in IO system: Soma-IO is being used instead of AIMS IO for major image formats:
+  <ul>
+    <li>The Soma-IO system has been slightly modified and improved, with a few API changes
+    </li>
+    <li>The older AimsData volume classes now get their IO in AIMS via the Volume classes ones, and thus may make use of Soma-IO, which was not the case in AIMS 4.4.</li>
+    <li>GIS and NIFTI-1 formats are now primarily handled by Soma-IO. NIFTI has been completely removed from AIMS, whereas GIS is still present at the moment for custom, rare, volume types (volumes of vectors...).
+    </li>
+    <li>Formats using Soma-IO now benefit from partial IO, which may be specified in the files URL.
+    </li>
+  </ul>
+</li>
+<li>Volume classes have been added a few convenience methods to make things easier.</li>
+<li>More python bindings in pyaims</li>
+<li>And many many other fixes...</li>
+</ul>
 
 <!-- -->
 <h4> <a name="version-4.4.0"></a>Oct 9th, 2013, Version 4.4.0</h4>
