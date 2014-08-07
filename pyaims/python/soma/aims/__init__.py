@@ -1112,7 +1112,7 @@ def _parseTypeInArgs(*args, **kwargs):
         del kwargs['dtype']
     else:
         y = [i for i, x in enumerate(args)
-             if type(x) in str or hasattr(x, '__name__')]
+             if type(x) in (str, unicode) or hasattr(x, '__name__')]
         if len(y) != 0:
             i = y[0]
             dtype = args[y[0]]

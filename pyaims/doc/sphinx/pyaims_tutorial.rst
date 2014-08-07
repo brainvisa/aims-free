@@ -231,7 +231,7 @@ Accessing numpy arrays to AIMS volume voxels is supported:
 
 >>> import numpy
 >>> vol.fill( 0 )
->>> arr = numpy.array( vol, copy=False )
+>>> arr = numpy.asarray( vol )
 >>> # set value 100 in a whole sub-volume
 >>> arr[60:120, 60:120, 40:80] = 100
 >>> # note that arr is a shared view to the volume contents,
@@ -252,7 +252,7 @@ Now we can re-write the thresholding example using numpy:
 
 >>> from soma import aims
 >>> vol = aims.read( 'data_for_anatomist/subject01/Audio-Video_T_map.nii' )
->>> arr = numpy.array( vol, copy=False )
+>>> arr = numpy.asarray( vol )
 >>> arr[ numpy.where( arr < 3. ) ] = 0.
 >>> vol.value(20,20,20)
 0.0
