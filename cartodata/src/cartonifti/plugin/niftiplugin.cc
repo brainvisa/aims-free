@@ -335,72 +335,117 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     //--- INT ------------------------------------------------------------------
 
     VolumeFormatWriter<int8_t> *vfw8 = new VolumeFormatWriter<int8_t>;
-    vfw8->attach( rc_ptr<ImageWriter<int8_t> >( new NiftiImageWriter<int8_t> ) );
+    vfw8->attach( rc_ptr<ImageWriter<int8_t> >( new Nifti1ImageWriter<int8_t> ) );
     FormatDictionary<Volume<int8_t> >::registerFormat( "NIFTI-1", vfw8, exts );
+    vfw8 = new VolumeFormatWriter<int8_t>;
+    vfw8->attach( rc_ptr<ImageWriter<int8_t> >( new Nifti2ImageWriter<int8_t> ) );
+    FormatDictionary<Volume<int8_t> >::registerFormat( "NIFTI-2", vfw8, exts );
 
     VolumeFormatWriter<int16_t> *vfw16 = new VolumeFormatWriter<int16_t>;
-    vfw16->attach( rc_ptr<ImageWriter<int16_t> >( new NiftiImageWriter<int16_t> ) );
+    vfw16->attach( rc_ptr<ImageWriter<int16_t> >( new Nifti1ImageWriter<int16_t> ) );
     FormatDictionary<Volume<int16_t> >::registerFormat( "NIFTI-1", vfw16, exts );
+    vfw16 = new VolumeFormatWriter<int16_t>;
+    vfw16->attach( rc_ptr<ImageWriter<int16_t> >( new Nifti2ImageWriter<int16_t> ) );
+    FormatDictionary<Volume<int16_t> >::registerFormat( "NIFTI-2", vfw16, exts );
 
     VolumeFormatWriter<int32_t> *vfw32 = new VolumeFormatWriter<int32_t>;
-    vfw32->attach( rc_ptr<ImageWriter<int32_t> >( new NiftiImageWriter<int32_t> ) );
+    vfw32->attach( rc_ptr<ImageWriter<int32_t> >( new Nifti1ImageWriter<int32_t> ) );
     FormatDictionary<Volume<int32_t> >::registerFormat( "NIFTI-1", vfw32, exts );
+    vfw32 = new VolumeFormatWriter<int32_t>;
+    vfw32->attach( rc_ptr<ImageWriter<int32_t> >( new Nifti2ImageWriter<int32_t> ) );
+    FormatDictionary<Volume<int32_t> >::registerFormat( "NIFTI-2", vfw32, exts );
 
     VolumeFormatWriter<int64_t> *vfw64 = new VolumeFormatWriter<int64_t>;
-    vfw64->attach( rc_ptr<ImageWriter<int64_t> >( new NiftiImageWriter<int64_t> ) );
+    vfw64->attach( rc_ptr<ImageWriter<int64_t> >( new Nifti1ImageWriter<int64_t> ) );
     FormatDictionary<Volume<int64_t> >::registerFormat( "NIFTI-1", vfw64, exts );
+    vfw64 = new VolumeFormatWriter<int64_t>;
+    vfw64->attach( rc_ptr<ImageWriter<int64_t> >( new Nifti2ImageWriter<int64_t> ) );
+    FormatDictionary<Volume<int64_t> >::registerFormat( "NIFTI-2", vfw64, exts );
 
     //--- UINT -----------------------------------------------------------------
 
     VolumeFormatWriter<uint8_t> *vfwu8 = new VolumeFormatWriter<uint8_t>;
-    vfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new NiftiImageWriter<uint8_t> ) );
+    vfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new Nifti1ImageWriter<uint8_t> ) );
     FormatDictionary<Volume<uint8_t> >::registerFormat( "NIFTI-1", vfwu8, exts );
+    vfwu8 = new VolumeFormatWriter<uint8_t>;
+    vfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new Nifti2ImageWriter<uint8_t> ) );
+    FormatDictionary<Volume<uint8_t> >::registerFormat( "NIFTI-2", vfwu8, exts );
 
     VolumeFormatWriter<uint16_t> *vfwu16 = new VolumeFormatWriter<uint16_t>;
-    vfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new NiftiImageWriter<uint16_t> ) );
+    vfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new Nifti1ImageWriter<uint16_t> ) );
     FormatDictionary<Volume<uint16_t> >::registerFormat( "NIFTI-1", vfwu16, exts );
+    vfwu16 = new VolumeFormatWriter<uint16_t>;
+    vfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new Nifti2ImageWriter<uint16_t> ) );
+    FormatDictionary<Volume<uint16_t> >::registerFormat( "NIFTI-2", vfwu16, exts );
 
     VolumeFormatWriter<uint32_t> *vfwu32 = new VolumeFormatWriter<uint32_t>;
-    vfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new NiftiImageWriter<uint32_t> ) );
+    vfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new Nifti1ImageWriter<uint32_t> ) );
     FormatDictionary<Volume<uint32_t> >::registerFormat( "NIFTI-1", vfwu32, exts );
+    vfwu32 = new VolumeFormatWriter<uint32_t>;
+    vfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new Nifti2ImageWriter<uint32_t> ) );
+    FormatDictionary<Volume<uint32_t> >::registerFormat( "NIFTI-2", vfwu32, exts );
 
     VolumeFormatWriter<uint64_t> *vfwu64 = new VolumeFormatWriter<uint64_t>;
-    vfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new NiftiImageWriter<uint64_t> ) );
+    vfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new Nifti1ImageWriter<uint64_t> ) );
     FormatDictionary<Volume<uint64_t> >::registerFormat( "NIFTI-1", vfwu64, exts );
+    vfwu64 = new VolumeFormatWriter<uint64_t>;
+    vfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new Nifti2ImageWriter<uint64_t> ) );
+    FormatDictionary<Volume<uint64_t> >::registerFormat( "NIFTI-2", vfwu64, exts );
 
     //--- FLOAT ----------------------------------------------------------------
 
     VolumeFormatWriter<float> *vfwf = new VolumeFormatWriter<float>;
-    vfwf->attach( rc_ptr<ImageWriter<float> >( new NiftiImageWriter<float> ) );
+    vfwf->attach( rc_ptr<ImageWriter<float> >( new Nifti1ImageWriter<float> ) );
     FormatDictionary<Volume<float> >::registerFormat( "NIFTI-1", vfwf, exts );
+    vfwf = new VolumeFormatWriter<float>;
+    vfwf->attach( rc_ptr<ImageWriter<float> >( new Nifti2ImageWriter<float> ) );
+    FormatDictionary<Volume<float> >::registerFormat( "NIFTI-2", vfwf, exts );
 
     VolumeFormatWriter<double> *vfwd = new VolumeFormatWriter<double>;
-    vfwd->attach( rc_ptr<ImageWriter<double> >( new NiftiImageWriter<double> ) );
+    vfwd->attach( rc_ptr<ImageWriter<double> >( new Nifti1ImageWriter<double> ) );
     FormatDictionary<Volume<double> >::registerFormat( "NIFTI-1", vfwd, exts );
+    vfwd = new VolumeFormatWriter<double>;
+    vfwd->attach( rc_ptr<ImageWriter<double> >( new Nifti2ImageWriter<double> ) );
+    FormatDictionary<Volume<double> >::registerFormat( "NIFTI-2", vfwd, exts );
 
     //--- RGB ------------------------------------------------------------------
 
     VolumeFormatWriter<VoxelRGB> *vfw_rgb = new VolumeFormatWriter<VoxelRGB>;
-    vfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new NiftiImageWriter<VoxelRGB> ) );
+    vfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new Nifti1ImageWriter<VoxelRGB> ) );
     FormatDictionary<Volume<VoxelRGB> >::registerFormat( "NIFTI-1", vfw_rgb, exts );
+    vfw_rgb = new VolumeFormatWriter<VoxelRGB>;
+    vfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new Nifti2ImageWriter<VoxelRGB> ) );
+    FormatDictionary<Volume<VoxelRGB> >::registerFormat( "NIFTI-2", vfw_rgb, exts );
 
     VolumeFormatWriter<VoxelRGBA> *vfw_rgba = new VolumeFormatWriter<VoxelRGBA>;
-    vfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >( new NiftiImageWriter<VoxelRGBA> ) );
+    vfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >( new Nifti1ImageWriter<VoxelRGBA> ) );
     FormatDictionary<Volume<VoxelRGBA> >::registerFormat( "NIFTI-1", vfw_rgba, exts );
+    vfw_rgba = new VolumeFormatWriter<VoxelRGBA>;
+    vfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >( new Nifti2ImageWriter<VoxelRGBA> ) );
+    FormatDictionary<Volume<VoxelRGBA> >::registerFormat( "NIFTI-2", vfw_rgba, exts );
 
     VolumeFormatWriter<VoxelHSV> *vfw_hsv = new VolumeFormatWriter<VoxelHSV>;
-    vfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new NiftiImageWriter<VoxelHSV> ) );
+    vfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new Nifti1ImageWriter<VoxelHSV> ) );
     FormatDictionary<Volume<VoxelHSV> >::registerFormat( "NIFTI-1", vfw_hsv, exts );
+    vfw_hsv = new VolumeFormatWriter<VoxelHSV>;
+    vfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new Nifti2ImageWriter<VoxelHSV> ) );
+    FormatDictionary<Volume<VoxelHSV> >::registerFormat( "NIFTI-2", vfw_hsv, exts );
 
     //--- COMPLEX -------------------------------------------------------------
 
     VolumeFormatWriter<std::complex<float> > *vfw_cf = new VolumeFormatWriter<std::complex<float> >;
-    vfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new NiftiImageWriter<std::complex<float> > ) );
+    vfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new Nifti1ImageWriter<std::complex<float> > ) );
     FormatDictionary<Volume<std::complex<float> > >::registerFormat( "NIFTI-1", vfw_cf, exts );
+    vfw_cf = new VolumeFormatWriter<std::complex<float> >;
+    vfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new Nifti2ImageWriter<std::complex<float> > ) );
+    FormatDictionary<Volume<std::complex<float> > >::registerFormat( "NIFTI-2", vfw_cf, exts );
 
     VolumeFormatWriter<std::complex<double> > *vfw_cd = new VolumeFormatWriter<std::complex<double> >;
-    vfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new NiftiImageWriter<std::complex<double> > ) );
+    vfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new Nifti1ImageWriter<std::complex<double> > ) );
     FormatDictionary<Volume<std::complex<double> > >::registerFormat( "NIFTI-1", vfw_cd, exts );
+    vfw_cd = new VolumeFormatWriter<std::complex<double> >;
+    vfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new Nifti2ImageWriter<std::complex<double> > ) );
+    FormatDictionary<Volume<std::complex<double> > >::registerFormat( "NIFTI-2", vfw_cd, exts );
 
     //==========================================================================
     //   V O L U M E   R E F
@@ -409,72 +454,117 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     //--- INT ------------------------------------------------------------------
 
     VolumeRefFormatWriter<int8_t> *rfw8 = new VolumeRefFormatWriter<int8_t>;
-    rfw8->attach( rc_ptr<ImageWriter<int8_t> >( new NiftiImageWriter<int8_t> ) );
+    rfw8->attach( rc_ptr<ImageWriter<int8_t> >( new Nifti1ImageWriter<int8_t> ) );
     FormatDictionary<VolumeRef<int8_t> >::registerFormat( "NIFTI-1", rfw8, exts );
+    rfw8 = new VolumeRefFormatWriter<int8_t>;
+    rfw8->attach( rc_ptr<ImageWriter<int8_t> >( new Nifti2ImageWriter<int8_t> ) );
+    FormatDictionary<VolumeRef<int8_t> >::registerFormat( "NIFTI-2", rfw8, exts );
 
     VolumeRefFormatWriter<int16_t> *rfw16 = new VolumeRefFormatWriter<int16_t>;
-    rfw16->attach( rc_ptr<ImageWriter<int16_t> >( new NiftiImageWriter<int16_t> ) );
+    rfw16->attach( rc_ptr<ImageWriter<int16_t> >( new Nifti1ImageWriter<int16_t> ) );
     FormatDictionary<VolumeRef<int16_t> >::registerFormat( "NIFTI-1", rfw16, exts );
+    rfw16 = new VolumeRefFormatWriter<int16_t>;
+    rfw16->attach( rc_ptr<ImageWriter<int16_t> >( new Nifti2ImageWriter<int16_t> ) );
+    FormatDictionary<VolumeRef<int16_t> >::registerFormat( "NIFTI-2", rfw16, exts );
 
     VolumeRefFormatWriter<int32_t> *rfw32 = new VolumeRefFormatWriter<int32_t>;
-    rfw32->attach( rc_ptr<ImageWriter<int32_t> >( new NiftiImageWriter<int32_t> ) );
+    rfw32->attach( rc_ptr<ImageWriter<int32_t> >( new Nifti1ImageWriter<int32_t> ) );
     FormatDictionary<VolumeRef<int32_t> >::registerFormat( "NIFTI-1", rfw32, exts );
+    rfw32 = new VolumeRefFormatWriter<int32_t>;
+    rfw32->attach( rc_ptr<ImageWriter<int32_t> >( new Nifti2ImageWriter<int32_t> ) );
+    FormatDictionary<VolumeRef<int32_t> >::registerFormat( "NIFTI-2", rfw32, exts );
 
     VolumeRefFormatWriter<int64_t> *rfw64 = new VolumeRefFormatWriter<int64_t>;
-    rfw64->attach( rc_ptr<ImageWriter<int64_t> >( new NiftiImageWriter<int64_t> ) );
+    rfw64->attach( rc_ptr<ImageWriter<int64_t> >( new Nifti1ImageWriter<int64_t> ) );
     FormatDictionary<VolumeRef<int64_t> >::registerFormat( "NIFTI-1", rfw64, exts );
+    rfw64 = new VolumeRefFormatWriter<int64_t>;
+    rfw64->attach( rc_ptr<ImageWriter<int64_t> >( new Nifti2ImageWriter<int64_t> ) );
+    FormatDictionary<VolumeRef<int64_t> >::registerFormat( "NIFTI-2", rfw64, exts );
 
     //--- UINT -----------------------------------------------------------------
 
     VolumeRefFormatWriter<uint8_t> *rfwu8 = new VolumeRefFormatWriter<uint8_t>;
-    rfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new NiftiImageWriter<uint8_t> ) );
+    rfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new Nifti1ImageWriter<uint8_t> ) );
     FormatDictionary<VolumeRef<uint8_t> >::registerFormat( "NIFTI-1", rfwu8, exts );
+    rfwu8 = new VolumeRefFormatWriter<uint8_t>;
+    rfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new Nifti2ImageWriter<uint8_t> ) );
+    FormatDictionary<VolumeRef<uint8_t> >::registerFormat( "NIFTI-2", rfwu8, exts );
 
     VolumeRefFormatWriter<uint16_t> *rfwu16 = new VolumeRefFormatWriter<uint16_t>;
-    rfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new NiftiImageWriter<uint16_t> ) );
+    rfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new Nifti1ImageWriter<uint16_t> ) );
     FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "NIFTI-1", rfwu16, exts );
+    rfwu16 = new VolumeRefFormatWriter<uint16_t>;
+    rfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new Nifti2ImageWriter<uint16_t> ) );
+    FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "NIFTI-2", rfwu16, exts );
 
     VolumeRefFormatWriter<uint32_t> *rfwu32 = new VolumeRefFormatWriter<uint32_t>;
-    rfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new NiftiImageWriter<uint32_t> ) );
+    rfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new Nifti1ImageWriter<uint32_t> ) );
     FormatDictionary<VolumeRef<uint32_t> >::registerFormat( "NIFTI-1", rfwu32, exts );
+    rfwu32 = new VolumeRefFormatWriter<uint32_t>;
+    rfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new Nifti2ImageWriter<uint32_t> ) );
+    FormatDictionary<VolumeRef<uint32_t> >::registerFormat( "NIFTI-2", rfwu32, exts );
 
     VolumeRefFormatWriter<uint64_t> *rfwu64 = new VolumeRefFormatWriter<uint64_t>;
-    rfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new NiftiImageWriter<uint64_t> ) );
+    rfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new Nifti1ImageWriter<uint64_t> ) );
     FormatDictionary<VolumeRef<uint64_t> >::registerFormat( "NIFTI-1", rfwu64, exts );
+    rfwu64 = new VolumeRefFormatWriter<uint64_t>;
+    rfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new Nifti2ImageWriter<uint64_t> ) );
+    FormatDictionary<VolumeRef<uint64_t> >::registerFormat( "NIFTI-2", rfwu64, exts );
 
     //--- FLOAT ----------------------------------------------------------------
 
     VolumeRefFormatWriter<float> *rfwf = new VolumeRefFormatWriter<float>;
-    rfwf->attach( rc_ptr<ImageWriter<float> >( new NiftiImageWriter<float> ) );
+    rfwf->attach( rc_ptr<ImageWriter<float> >( new Nifti1ImageWriter<float> ) );
     FormatDictionary<VolumeRef<float> >::registerFormat( "NIFTI-1", rfwf, exts );
+    rfwf = new VolumeRefFormatWriter<float>;
+    rfwf->attach( rc_ptr<ImageWriter<float> >( new Nifti2ImageWriter<float> ) );
+    FormatDictionary<VolumeRef<float> >::registerFormat( "NIFTI-2", rfwf, exts );
 
     VolumeRefFormatWriter<double> *rfwd = new VolumeRefFormatWriter<double>;
-    rfwd->attach( rc_ptr<ImageWriter<double> >( new NiftiImageWriter<double> ) );
+    rfwd->attach( rc_ptr<ImageWriter<double> >( new Nifti1ImageWriter<double> ) );
     FormatDictionary<VolumeRef<double> >::registerFormat( "NIFTI-1", rfwd, exts );
+    rfwd = new VolumeRefFormatWriter<double>;
+    rfwd->attach( rc_ptr<ImageWriter<double> >( new Nifti2ImageWriter<double> ) );
+    FormatDictionary<VolumeRef<double> >::registerFormat( "NIFTI-2", rfwd, exts );
 
     //--- RGB ----------------------------------------------------------------
 
     VolumeRefFormatWriter<VoxelRGB> *rfw_rgb = new VolumeRefFormatWriter<VoxelRGB>;
-    rfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new NiftiImageWriter<VoxelRGB> ) );
+    rfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new Nifti1ImageWriter<VoxelRGB> ) );
     FormatDictionary<VolumeRef<VoxelRGB> >::registerFormat( "NIFTI-1", rfw_rgb, exts );
+    rfw_rgb = new VolumeRefFormatWriter<VoxelRGB>;
+    rfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new Nifti2ImageWriter<VoxelRGB> ) );
+    FormatDictionary<VolumeRef<VoxelRGB> >::registerFormat( "NIFTI-2", rfw_rgb, exts );
 
     VolumeRefFormatWriter<VoxelRGBA> *rfw_rgba = new VolumeRefFormatWriter<VoxelRGBA>;
-    rfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >( new NiftiImageWriter<VoxelRGBA> ) );
+    rfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >( new Nifti1ImageWriter<VoxelRGBA> ) );
     FormatDictionary<VolumeRef<VoxelRGBA> >::registerFormat( "NIFTI-1", rfw_rgba, exts );
+    rfw_rgba = new VolumeRefFormatWriter<VoxelRGBA>;
+    rfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >( new Nifti2ImageWriter<VoxelRGBA> ) );
+    FormatDictionary<VolumeRef<VoxelRGBA> >::registerFormat( "NIFTI-2", rfw_rgba, exts );
 
     VolumeRefFormatWriter<VoxelHSV> *rfw_hsv = new VolumeRefFormatWriter<VoxelHSV>;
-    rfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new NiftiImageWriter<VoxelHSV> ) );
+    rfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new Nifti1ImageWriter<VoxelHSV> ) );
     FormatDictionary<VolumeRef<VoxelHSV> >::registerFormat( "NIFTI-1", rfw_hsv, exts );
+    rfw_hsv = new VolumeRefFormatWriter<VoxelHSV>;
+    rfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new Nifti2ImageWriter<VoxelHSV> ) );
+    FormatDictionary<VolumeRef<VoxelHSV> >::registerFormat( "NIFTI-2", rfw_hsv, exts );
 
     //--- COMPLEX -------------------------------------------------------------
 
     VolumeRefFormatWriter<std::complex<float> > *rfw_cf = new VolumeRefFormatWriter<std::complex<float> >;
-    rfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new NiftiImageWriter<std::complex<float> > ) );
+    rfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new Nifti1ImageWriter<std::complex<float> > ) );
     FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat( "NIFTI-1", rfw_cf, exts );
+    rfw_cf = new VolumeRefFormatWriter<std::complex<float> >;
+    rfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new Nifti2ImageWriter<std::complex<float> > ) );
+    FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat( "NIFTI-2", rfw_cf, exts );
 
     VolumeRefFormatWriter<std::complex<double> > *rfw_cd = new VolumeRefFormatWriter<std::complex<double> >;
-    rfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new NiftiImageWriter<std::complex<double> > ) );
+    rfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new Nifti1ImageWriter<std::complex<double> > ) );
     FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "NIFTI-1", rfw_cd, exts );
+    rfw_cd = new VolumeRefFormatWriter<std::complex<double> >;
+    rfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new Nifti2ImageWriter<std::complex<double> > ) );
+    FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "NIFTI-2", rfw_cd, exts );
 
 }
 

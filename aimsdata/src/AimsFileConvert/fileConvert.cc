@@ -517,7 +517,7 @@ bool convert( Process & p, const string & filename, Finder & f )
     f2.setDataType( fc.type );
   //if( !fc.otype.empty() || !fc.type.empty() )
   cout << "convert to " << f2.objectType() << " / " << f2.dataType() << "\n";
-  bool x = proc.execute( f2, "toto" );
+  bool x = proc.execute( f2, fc.file );
   return( x );
 }
 
@@ -561,7 +561,6 @@ template<class T> static
 void allocThing( VolumeRef<T> *& obj, unsigned xdim, unsigned ydim,
                  unsigned zdim, unsigned tdim )
 {
-  cout << "allocThing " << xdim << endl;
   obj = new VolumeRef<T>( xdim, ydim, zdim, tdim );
 }
 
@@ -621,8 +620,6 @@ bool convData( Process & p, const string &, Finder & )
   DataConverter<T>	& dc = (DataConverter<T> &) p;
   cout << "converting data...\n";
 
-  cout << "data sizeT: " << sizeT(dc.data) << ", dim: " << dc.xdim << ", " << dc.ydim << ", " << dc.zdim << endl;
-
   ShallowConverter<T,U>	conv( dc.rescale, dc.info );
   auto_ptr<U>		vol2;
   if( dc.xdim != 0 || dc.ydim != 0 || dc.zdim != 0 )
@@ -636,12 +633,10 @@ bool convData( Process & p, const string &, Finder & )
       U		*data;
       allocThing( data, dc.xdim, dc.ydim, dc.zdim, sizeT( dc.data ) );
       vol2.reset( data );
-      cout << "alloc, sizeT: " << sizeT( *data ) << endl;
       conv.convert( dc.data, *vol2 );
     }
   else
     vol2.reset( conv( dc.data ) );
-  cout << "converted, sizeT: " << sizeT( *vol2 ) << endl;
 
   cout << "convert done\n";
 
