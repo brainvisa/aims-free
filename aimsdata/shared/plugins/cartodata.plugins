@@ -3,6 +3,6 @@ attributes = {
     'libcartoopenslide.so',
     'libcartogis.so',
     'libcartonifti.so',
-    'libcartodicom.so'
+#    'libcartodicom.so'
   ], 
 }
