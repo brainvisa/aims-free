@@ -1006,7 +1006,7 @@ Then, in IPython, start Anatomist in direct mode:
 
 >>> import anatomist.direct.api as ana
 >>> a = ana.Anatomist()
-Starting Anatomist ...
+global modules: ...
 
 Now Anatomist main window is here.
 
