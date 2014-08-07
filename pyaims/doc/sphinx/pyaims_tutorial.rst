@@ -269,7 +269,7 @@ The distance example, using numpy, would like the following:
 >>> vol.header()[ 'voxel_size' ] = [ 0.9, 0.9, 1.2, 1. ]
 >>> vs = vol.header()[ 'voxel_size' ]
 >>> pos0 = ( 100 * vs[0], 100 * vs[1], 60 * vs[2] ) # in millimeters
->>> arr = numpy.array( vol, copy=False )
+>>> arr = numpy.asarray( vol )
 >>> # build arrays of coordinates for x, y, z
 >>> x, y, z = numpy.ogrid[ 0.:vol.getSizeX(), 0.:vol.getSizeY(), 0.:vol.getSizeZ() ]
 >>> # get coords in millimeters
@@ -1001,12 +1001,12 @@ With IPython version < 0.11::
 With IPython version >= 0.11:: 
 	
 	ipython --pylab=qt
-        
+
 Then, in IPython, start Anatomist in direct mode:
 
 >>> import anatomist.direct.api as ana
 >>> a = ana.Anatomist()
-global modules: ...
+Starting Anatomist.....
 
 Now Anatomist main window is here.
 
