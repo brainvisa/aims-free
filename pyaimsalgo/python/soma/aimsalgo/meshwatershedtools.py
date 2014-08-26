@@ -1,107 +1,162 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#! /usr/bin/env python
+############################################################################
+# This software and supporting documentation are distributed by
+# CEA/NeuroSpin, Batiment 145, 91191 Gif-sur-Yvette cedex, France.
+# This software is governed by the CeCILL license version 2 under
+# French law and abiding by the rules of distribution of free software.
+# You can  use, modify and/or redistribute the software under the
+# terms of the CeCILL license version 2 as circulated by CEA, CNRS
+# and INRIA at the following URL "http://www.cecill.info".
+############################################################################
+
+# import system
+import numpy
+
+# soma import
 from soma import aims, aimsalgo
-import numpy as N
 
 
-def _clean_after_merge( labels, parents, valid ):
+def _clean_after_merge(labels, parents, valid):
+    """ Remove the non-valid compnents and reorder the ROI list.append
+    
+    Parameters
+    ----------
+    labels:
+        labels of basins of watershed (after merge)
+    parents:
+        parent local according to local maximum (after merge)
+    valid:
+        measured criteria validating the basins
+        
+    Returns
+    -------
+    labels:
+        clean labels of basins of watershed
+    parents:
+        clean parent local according to local maximum 
     """
-    remove the non-valid compnents and reorder the ROI list
-    """
-    # taken from nipy
-    k = N.size(valid)
+    k = numpy.size(valid)
     if k != 0:
         ## remove invalid null components
-        for j in range( k ):
-            if not valid[ parents[j] ]:
-                parents[ j ] = j
+        for j in range(k):
+            if not valid[parents[j]]:
+                parents[j] = j
 
-        iconvert = N.nonzero( valid )
-        iconvert = N.reshape( iconvert, N.size(iconvert) )
-        convert = -N.ones( k ).astype('i')
-        aux = ( N.cumsum( valid.astype('i') ) - 1 ).astype('i')
-        convert[ valid ] = aux[ valid ]
-        k = N.size( iconvert )
+        iconvert = numpy.nonzero(valid)
+        iconvert = numpy.reshape(iconvert, numpy.size(iconvert))
+        convert = -numpy.ones(k).astype('i')
+        aux = (numpy.cumsum(valid.astype('i')) - 1).astype('i')
+        convert[valid] = aux[valid]
+        k = numpy.size(iconvert)
 
-        q = N.nonzero( labels > -1 )
-        q = N.reshape( q, N.size(q) )
-        labels[q] = convert[ labels[q] ]
-        parents = convert[ parents[iconvert] ]
+        q = numpy.nonzero(labels > -1)
+        q = numpy.reshape(q, numpy.size(q))
+        labels[q] = convert[labels[q]]
+        parents = convert[parents[iconvert]]
         parents = parents[:k]
 
         return labels, parents
 
 
-def _merge_ascending( labels, parents, valid ):
+def _merge_ascending(labels, parents, valid):
+    """Remove the non-valid items by including them in their parents when 
+    it exists.
+    
+    Parameters
+    ----------
+    labels:
+        labels of basins of watershed
+    parents:
+        parent local according to local maximum
+    valid:
+        measured criteria validating the basins
+        
+    Returns
+    -------
+    labels:
+        clean labels of basins of watershed
+    parents:
+        clean parents according to local maximum
     """
-    _merge_ascending(valid)
-    Remove the non-valid items by including them in
-    their parents when it exists
-    """
-    # taken from nipy
-    labels = N.copy( labels )
-    parents = N.copy( parents )
-    for j in xrange( len( valid ) ):
+    labels = numpy.copy(labels)
+    parents = numpy.copy(parents)
+    for j in xrange(len(valid)):
         if valid[j] == 0:
             fj =  parents[j]
             if fj != j:
-                parents[ parents==j ] = fj
-                labels[ labels==j ] = fj
+                parents[parents == j] = fj
+                labels[labels == j] = fj
             else:
                 valid[j] = 1
 
-    labels, parents = _clean_after_merge( labels, parents, valid )
+    labels, parents = _clean_after_merge(labels, parents, valid)
 
     return labels, parents
 
 
 def watershedWithBasinsMerging(
-        tex, mesh, size_min=0, depth_min=0, tex_threshold=0.01, mode = "and" ):
-    """
-    inputs:
-            tex : texture of boundaries between regions
-            mesh : associated mesh
-            k_size : number of basins > size_min (rough)
-            k_depth : number of basins > depth_min (rough)
-            tex_threshold : threshold on the input intensity texture
-            mode = "and": merge basins with its parent if size < k_size and depth < k_depth
-                  "or": merge basins with its parent if size < k_size or depth < k_depth
-    output:
-            parcellated texture : watershed results according to the thresholds indicated by k_size and k_depth
-    """
+        tex, mesh, size_min=0, depth_min=0, tex_threshold=0.01, mode = "and"):
+    """Generate a texture of merged basins: watershed texture.
 
-    data = tex[0].arraydata()
-
+    The basins are merged according to two criteria:
+        (1) the size of basins
+        (2) the depth of basins
+    
+    Parameters
+    ----------
+    tex: (TimeTexture_S16)
+        texture of boundaries between regions
+    mesh: (aimsTimeSurface_3)
+        associated mesh
+    size_min: (int)
+        number of basins > size_min
+    depth_min: (float)
+        number of basins > depth_min
+    tex_threshold: (float)
+        threshold on the input intensity texture
+    mode: (str)
+        two cases:
+            (1) and --> merge basins with its parent 
+                        if size < k_size and depth < k_depth
+            (2) or --> merge basins with its parent 
+                       if size < k_size or depth < k_depth
+    Result
+    ------
+    output_tex: (TimeTexture_S16)
+        watershed results according to the thresholds 
+        indicated by k_size and k_depth
+    """
     ## Watershed:
-    idxWt, depthWt, majorWt, labelWt = aimsalgo.meshWatershed( mesh, tex,
-        tex_threshold )
-    #   idxWt: array of shape ( nbasins ) indices of the vertices that are local maxima
+    idxWt, depthWt, majorWt, labelWt = aimsalgo.meshWatershed(mesh, tex,
+        tex_threshold)
+    # idxWt  : array of shape (nbasins) indices of the vertices that are 
+    #          local maxima
     # depthWt: array of shape (nbasins) topological the depth of the basins
-    #          depth[ idx[i] ] = q means that idx[i] is a q-order maximum
-    #          This is also the diameter of the basins associated with local maxima
-    # majorWt: array of shape ( nbasins )
+    #          depth[idx[i]] = q means that idx[i] is a q-order maximum
+    #          This is also the diameter of the basins associated 
+    #          with local maxima
+    # majorWt: array of shape (nbasins)
     #          label of the maximum which dominates each local maximum
     #          i.e. it describes the hierarchy of the local maxima
-    # labelWt: array of shape ( number of vertices )
+    # labelWt: array of shape (number of vertices)
     #          labelling of the vertices according to their basin
-
+    
+    data = tex[0].arraydata()
     idxW = idxWt[0].data().arraydata()
-    depthW = depthWt[0].data().arraydata()
     majorW = majorWt[0].data().arraydata()
     labelW = labelWt[0].data().arraydata()
-    kW=idxW.size
 
     if size_min != 0 or depth_min != 0:
-        size = N.asarray( [ len( N.where( labelW == x )[0] ) \
-            for x in xrange( kW ) ] )
+        size = numpy.asarray([len(numpy.where(labelW == x)[0]) \
+            for x in xrange(idxW.size)])
 
         # Blobs
-        blobindices = aimsalgo.blobsHeights( mesh, tex[0].data(),
-            labelWt[0].data() )
-        blobheights = data[ blobindices.arraydata() ]
-        blobdepths = data[ idxW ] - blobheights
+        blobindices = aimsalgo.blobsHeights(
+            mesh, tex[0].data(), labelWt[0].data())
+        blobheights = data[blobindices.arraydata()]
+        blobdepths = data[idxW] - blobheights
 
-        #Criteria to regroup basins
+        # criteria to regroup basins
         valid_size = size > size_min
         valid_depth = blobdepths > depth_min
         if mode == "or":
@@ -109,15 +164,14 @@ def watershedWithBasinsMerging(
         elif mode == "and":
             valid = valid_size + valid_depth
         else:
-            raise ValueError( 'invalid mode' )
-        labelW, majorW = _merge_ascending( labelW, majorW, valid )
+            raise ValueError('invalid mode')
+        
+        # Remove the non-valid items by including them in their parents when 
+        # it exists.
+        labelW, majorW = _merge_ascending(labelW, majorW, valid)
 
+    # create the final texture with the items valid
     output_tex = aims.TimeTexture_S16()
-    output_text = output_tex[0]
-    output_text.assign( labelW + 1 )
-
-    label_list = N.unique( labelW + 1 )
-    print 'Final number of labels: ', len( label_list )
+    output_tex.assign(labelW + 1)
+ 
     return output_tex
-
-
