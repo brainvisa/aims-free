@@ -464,7 +464,10 @@ bool write( Process & p, T & data, const string & file, int encoding, const stri
   Writer<T>	w( file, options );
   const string	*wf = 0;
   if( !form.empty() )
+  {
+    options->setProperty( "format", form );
     wf = &form;
+  }
 
   w.setOptions(options);
 
