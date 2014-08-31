@@ -328,6 +328,13 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     ////                           W R I T E R                              ////
     ////////////////////////////////////////////////////////////////////////////
 
+    // we explicitely don't support .img / .hdr extensions to avoid
+    // confusion with SPM/Analyze format.
+    exts.resize(3);
+    exts[0] = "nii";
+    exts[1] = "nii.gz";
+    exts[2] = "gz";
+
     //==========================================================================
     //   V O L U M E
     //==========================================================================
