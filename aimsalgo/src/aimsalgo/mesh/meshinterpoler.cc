@@ -46,7 +46,7 @@ MeshInterpoler::Private::Private()
   : source( 0 ), dest( 0 ), sourceVert( 0 ), /*sourceNormal( 0 ),*/
   sourcePoly( 0 ), /*nSourceVertex( 0 ),*/ nSourcePolygon( 0 ),
   destVertex( 0 ), /*destNormal( 0 ),*/ destPolygon( 0 ), /*nDestVertex( 0 ),*/
-  nDestPolygon( 0 )
+  nDestPolygon( 0 ), xthresh( 0 ), ythresh( 0 ), zthresh( 0 )
 {
 }
 
@@ -146,6 +146,15 @@ namespace
 #endif
 
 
+void MeshInterpoler::setDiscontinuityThresholds( float xthresh, float ythresh,
+                                                 float zthresh )
+{
+  d->xthresh = xthresh;
+  d->ythresh = ythresh;
+  d->zthresh = zthresh;
+}
+
+
 void MeshInterpoler::findNeighbours()
 {
   cout << "MeshInterpoler::findNeighbours()\n";
@@ -205,6 +214,17 @@ void MeshInterpoler::findNeighbours_timestep( const Point3df *vert1,
     const Point3df                & p2 = vert1[ tri[1] ];
     const Point3df                & p3 = vert1[ tri[2] ];
 
+    if( ( d->xthresh != 0. && ( fabs( p2[0] - p1[0] ) >= d->xthresh
+        || fabs( p3[0] - p1[0] ) >= d->xthresh
+        || fabs( p3[0] - p2[0] ) >= d->xthresh ) )
+      || ( d->ythresh != 0. && ( fabs( p2[1] - p1[1] ) >= d->ythresh
+        || fabs( p3[1] - p1[1] ) >= d->ythresh
+        || fabs( p3[1] - p2[1] ) >= d->ythresh ) )
+      || ( d->zthresh != 0. && ( fabs( p2[2] - p1[2] ) >= d->zthresh
+        || fabs( p3[2] - p1[2] ) >= d->zthresh
+        || fabs( p3[2] - p2[2] ) >= d->zthresh ) )
+    )
+      continue; // don't keep this triangle for projection
     // center of the triangle
     bary = ( p1 + p2 + p3 ) * 0.33333;
 

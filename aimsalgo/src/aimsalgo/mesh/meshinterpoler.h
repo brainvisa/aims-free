@@ -78,6 +78,16 @@ namespace aims
                     uint nDestPolygon );
     virtual ~MeshInterpoler();
 
+    /** Discontinuities may occur in some meshes, on their vertices coordinates
+        (especially when built from coordinates fields). In this case triangles
+        which present coordinates differences on their edges larger than the
+        given thresholds are discarded from the projection correspondance map,
+        so that no vertex is projected directly on them.
+        Thresholds of 0 means that no thresholding is applied for the
+        corresponding coordinates.
+    */
+    void setDiscontinuityThresholds( float xthresh, float ythresh,
+                                     float zthresh );
     /** Main projection function.
         This function has to be called before the various resample*() functions
         are used. It calculates the projectedTriangles and projectedTriCoord*

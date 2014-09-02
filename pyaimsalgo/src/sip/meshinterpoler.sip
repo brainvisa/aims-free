@@ -19,6 +19,8 @@ class MeshInterpoler
       AimsSurfaceTriangle & dest );
     virtual ~MeshInterpoler();
 
+    void setDiscontinuityThresholds( float xthresh, float ythresh,
+                                     float zthresh );
     void project();
     AimsSurfaceTriangle *resampleMesh(
       const AimsSurfaceTriangle & sourceshape ) const /Factory/;

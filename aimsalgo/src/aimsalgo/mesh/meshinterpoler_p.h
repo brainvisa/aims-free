@@ -57,6 +57,9 @@ namespace aims
     const AimsVector<uint,3> *destPolygon;
     uint nDestVertex;
     uint nDestPolygon;
+    float xthresh;
+    float ythresh;
+    float zthresh;
   };
 
 }
