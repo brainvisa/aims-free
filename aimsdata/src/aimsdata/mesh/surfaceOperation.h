@@ -177,7 +177,10 @@ namespace aims
                                         unsigned nneighbours = 1, 
                                         unsigned* index = 0 );
 
-    /** Refine a mesh by subdivising every triangle into 4 smaller ones
+    /** Refine a mesh by subdivising every triangle into 4 smaller ones.
+        If selectedPolygons is specified (non-empty), it should contain polygons
+        indices which must specifically be refined, the remaining ones will stay
+        unchanged.
     */
     static AimsSurfaceTriangle* refineMeshTri4(
       const AimsSurfaceTriangle & mesh,
