@@ -77,7 +77,10 @@ def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
     #  ...
     interpoler = aims.CoordinatesFieldMeshInterpoler(
         mesh, sphere, latitude, longitude, slat_tex, slon_tex)
-        
+
+    # set interpoler discontinuity thresholds to handle 0/360 and 0/180 deg
+    # gaps
+    interpoler.setDiscontinuityThresholds( 200, 100, 0 )
     # the main operation is project(), which calculates the correspondances
     # between the source and destination mesh
     interpoler.project()
