@@ -180,10 +180,15 @@ namespace aims
     /** Refine a mesh by subdivising every triangle into 4 smaller ones
     */
     static AimsSurfaceTriangle* refineMeshTri4(
-      const AimsSurfaceTriangle & mesh );
-    /// Calculate a mesh density: inverse of the average edges distance
+      const AimsSurfaceTriangle & mesh,
+      const std::vector<uint> & selectedPolygons = std::vector<uint>() );
+    /** Calculate a mesh density: inverse of the average edges distance
+        If asDistance is true, then the average distance is returned instead of
+        the density
+    */
     template <int D, typename T>
-    static TimeTexture<float>* meshDensity( const AimsTimeSurface<D,T> & mesh );
+    static TimeTexture<float>* meshDensity( const AimsTimeSurface<D,T> & mesh,
+      bool asDistance = false );
 
     //! Checks if two meshes intersect
     static bool checkMeshIntersect( const AimsSurfaceTriangle &,

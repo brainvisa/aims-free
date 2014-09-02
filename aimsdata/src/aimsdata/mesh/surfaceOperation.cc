@@ -2938,7 +2938,7 @@ Point3df SurfaceManip::nearestPointToMesh( const Point3df & target,
 
 
 AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
-  const AimsSurfaceTriangle & mesh )
+  const AimsSurfaceTriangle & mesh, const std::vector<uint> & selectedPolygons )
 {
   AimsSurfaceTriangle *nmesh = new AimsSurfaceTriangle;
 
@@ -2956,16 +2956,24 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
     bool hasnorm = !inorm.empty();
 
     // reserve 4 times the number of triangles
-    opoly.reserve( ipoly.size() * 4 );
-    opoly.insert( opoly.end(), ipoly.size() * 4,
-                  AimsVector<uint, 3>( 0,0,0 ) );
+    size_t split_polys = selectedPolygons.empty() ?
+      ipoly.size() : selectedPolygons.size();
+    size_t nopoly = ipoly.size() + split_polys * 3;
+    opoly.reserve( nopoly );
+    opoly.insert( opoly.end(), nopoly, AimsVector<uint, 3>( 0,0,0 ) );
     // build the list of edges and new vertices indices
     map<pair<uint, uint>, uint > edges;
     map<pair<uint, uint>, uint >::iterator ie, ee = edges.end();
     vector<AimsVector<uint, 3> >::const_iterator ip, ep = ipoly.end();
     uint vid = ivert.size(); // index of current new vertex
-    for( ip=ipoly.begin(); ip!=ep; ++ip )
+    vector<uint>::const_iterator isel = selectedPolygons.begin(),
+      esel = selectedPolygons.end();
+    bool do_select = !selectedPolygons.empty();
+    size_t i = 0;
+    for( ip=ipoly.begin(); ip!=ep; ++ip, ++i )
     {
+      if( do_select && *isel != i )
+        continue; // skip this unselected polygon
       const AimsVector<uint, 3> & p = *ip;
       // identify edge with sorted vert indices
       pair<uint, uint> e( min( p[0], p[1] ), max( p[0], p[1] ) );
@@ -2977,6 +2985,12 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
       e = make_pair( min( p[2], p[0] ), max( p[2], p[0] ) );
       if( edges.find( e ) == ee )
         edges[ e ] = vid++;
+      if( do_select )
+      {
+        ++isel;
+        if( isel == esel )
+          break;
+      }
     }
     // reserve final vertices/normals space
     overt.reserve( vid );
@@ -3004,8 +3018,21 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
     // remake triangles
     vector<AimsVector<uint, 3> >::iterator iop = opoly.begin();
     uint a, b, c;
-    for( ip=ipoly.begin(); ip!=ep; ++ip )
+    isel = selectedPolygons.begin();
+    cout << "BLOP!\n";
+    for( ip=ipoly.begin(), i=0; ip!=ep; ++ip, ++i )
     {
+      if( do_select )
+      {
+        if( isel == esel || *isel != i )
+        {
+          *iop = *ip;
+          ++iop;
+          continue; // keep this unselected polygon as is
+        }
+        else if( isel != esel )
+          ++isel;
+      }
       const AimsVector<uint, 3> & p = *ip;
       // get triangle edges and mid-vertices
       pair<uint, uint> e( min( p[0], p[1] ), max( p[0], p[1] ) );
@@ -3190,7 +3217,7 @@ template AimsTimeSurface<3,Void> *
                              vector<size_t> ** overtIndex);
 
 template TimeTexture<float>*
-  SurfaceManip::meshDensity( const AimsTimeSurface<3,Void> & );
+  SurfaceManip::meshDensity( const AimsTimeSurface<3,Void> &, bool );
 
 template AimsSurface<2,Void> *
   SurfaceManip::meshTextureBoundary( const AimsSurface<3,Void> & mesh,

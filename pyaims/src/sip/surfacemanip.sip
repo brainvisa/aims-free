@@ -61,9 +61,10 @@ public:
   static vector_set_U32
     surfaceNeighbours( const AimsSurfaceTriangle & surf );
   static AimsSurfaceTriangle* refineMeshTri4(
-    const AimsSurfaceTriangle & mesh ) /Factory/;
-  static TimeTexture_FLOAT* meshDensity( const AimsSurfaceTriangle & mesh )
-    /Factory/;
+    const AimsSurfaceTriangle & mesh,
+    const vector_U32 & selectedPolygons = vector_U32() ) /Factory/;
+  static TimeTexture_FLOAT* meshDensity( const AimsSurfaceTriangle & mesh,
+    bool asDistance = false ) /Factory/;
   static bool checkMeshIntersect( const AimsSurfaceTriangle &,
                                   const AimsSurfaceTriangle & );
 };

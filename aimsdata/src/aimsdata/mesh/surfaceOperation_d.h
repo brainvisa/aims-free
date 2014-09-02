@@ -360,7 +360,8 @@ namespace aims
 
   template <int D, typename T>
   TimeTexture<float>*
-    SurfaceManip::meshDensity( const AimsTimeSurface<D,T> & mesh )
+    SurfaceManip::meshDensity( const AimsTimeSurface<D,T> & mesh,
+                               bool asDistance )
   {
     TimeTexture<float> *tex = new TimeTexture<float>;
     typename AimsTimeSurface<D,T>::const_iterator is, es = mesh.end();
@@ -404,8 +405,12 @@ namespace aims
       // now average distances, and invert them to get a density
       std::vector<float>::iterator          it, et = tx.end();
       std::vector<unsigned>::const_iterator itc;
-      for( it=tx.begin(), itc=counts.begin(); it!=et; ++it, ++itc )
-        *it = float( *itc ) / *it;
+      if( asDistance )
+        for( it=tx.begin(), itc=counts.begin(); it!=et; ++it, ++itc )
+          *it /= float( *itc );
+      else
+        for( it=tx.begin(), itc=counts.begin(); it!=et; ++it, ++itc )
+          *it = float( *itc ) / *it;
     }
 
     return tex;
