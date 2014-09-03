@@ -3016,10 +3016,10 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
       }
     }
     // remake triangles
+    // FIXME / TODO: unmodified triangles should not all be unmodified...
     vector<AimsVector<uint, 3> >::iterator iop = opoly.begin();
     uint a, b, c;
     isel = selectedPolygons.begin();
-    cout << "BLOP!\n";
     for( ip=ipoly.begin(), i=0; ip!=ep; ++ip, ++i )
     {
       if( do_select )

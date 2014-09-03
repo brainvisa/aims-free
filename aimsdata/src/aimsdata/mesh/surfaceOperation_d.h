@@ -407,7 +407,10 @@ namespace aims
       std::vector<unsigned>::const_iterator itc;
       if( asDistance )
         for( it=tx.begin(), itc=counts.begin(); it!=et; ++it, ++itc )
-          *it /= float( *itc );
+          if( *itc != 0. )
+            *it /= float( *itc );
+          else
+            *it = 0.; // to avoid NaN
       else
         for( it=tx.begin(), itc=counts.begin(); it!=et; ++it, ++itc )
           *it = float( *itc ) / *it;
