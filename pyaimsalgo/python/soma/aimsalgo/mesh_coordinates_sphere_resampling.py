@@ -114,7 +114,22 @@ def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
 
 
 def texture_by_polygon(mesh, texture):
-    """
+    """Averages a texture (classically, by vertex) on polygons.
+
+    Used by refine_sphere_mesh() and spere_mesh_from_distance_map()
+
+    Parameters
+    ----------
+    mesh: (aimsTimeSurface_3)
+        a mesh providing trianglar struture
+    texture: (TimeTexture_FLOAT)
+        texture data
+
+    Return
+    ------
+    poly_tex: (nupy array)
+        texture averaged on polygons
+
     """
     poly = numpy.asarray(mesh.polygon())
     tex = numpy.asarray(texture[0])
@@ -123,7 +138,18 @@ def texture_by_polygon(mesh, texture):
 
 
 def polygon_average_sizes(mesh):
-    """
+    """Return the average edge length for each triangle of a mesh
+
+    Used by refine_sphere_mesh() and spere_mesh_from_distance_map()
+
+    Parameters
+    ----------
+    mesh: (aimsTimeSurface_3)
+        a mesh providing trianglar struture
+
+    Return:
+    lengths: (numpy array)
+        average size for each polygon
     """
     poly = numpy.asarray(mesh.polygon())
     vert = numpy.asarray(mesh.vertex())
@@ -138,7 +164,27 @@ def polygon_average_sizes(mesh):
 
 def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
     target_avg_dist, init_sphere_coords=None, current_sphere_coords=None):
-    """
+    """Adaptively refine polygons of a sphere mesh according to an average
+    distance map (genrally calculated in a different space), and a target
+    length.
+
+    This is one single step if the iterative spere_mesh_from_distance_map().
+
+    Polygons where the average distance map value is "too high" are oversampled
+    (divided in 4).
+
+    Parameters
+    ----------
+    init_sphere: (aimsTimeSurface_3)
+    avg_dist_texture: (TimeTexture_FLOAT)
+    current_sphere: (aimsTimeSurface_3)
+    target_avg_dist: (float)
+    init_sphere_coords: (tuple of 2 textures) (optional)
+    current_sphere_coords: (tuple of 2 textures) (optional)
+
+    Returns
+    -------
+    refined_sphere: (aimsTimeSurface_3)
     """
     if init_sphere_coords is not None:
         init_lon, init_lat = init_sphere_coords
@@ -158,19 +204,61 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
     resampled_dist_tex = interpoler.resampleTexture(avg_dist_texture)
     polygon_dist = texture_by_polygon(current_sphere, resampled_dist_tex)
     polygon_sizes = polygon_average_sizes(current_sphere)
-    polygon_dist /= polygon_sizes / init_sphere_dist
-    next_sphere = aims.SurfaceManip.refineMeshTri4(
-        current_sphere,
-        numpy.where(numpy.asarray(polygon_dist) >= target_avg_dist)[0])
+    polygon_dist *= polygon_sizes / init_sphere_dist
+    refined_poly = numpy.where(numpy.asarray(polygon_dist)
+                               >= target_avg_dist)[0]
+    if refined_poly.shape[0] != 0:
+        refined_sphere = aims.SurfaceManip.refineMeshTri4(
+            current_sphere, refined_poly)
+    else:
+        return current_sphere
 
     # snap vertices to sphere
     vert2 = numpy.square(numpy.asarray(current_sphere.vertex()))
     dist = numpy.sqrt(numpy.sum(vert2, axis=1))
     radius = numpy.average(dist)
-    next_vert = numpy.asarray(next_sphere.vertex())
+    next_vert = numpy.asarray(refined_sphere.vertex())
     next_vert2 = numpy.square(next_vert)
     next_dist = numpy.sqrt(numpy.sum(next_vert2, axis=1))
     next_vert = next_vert * radius / next_dist.reshape((next_vert.shape[0], 1))
-    next_sphere.vertex().assign([aims.Point3df(x) for x in next_vert])
+    refined_sphere.vertex().assign([aims.Point3df(x) for x in next_vert])
+    return refined_sphere
+
+
+def spere_mesh_from_distance_map(init_sphere, avg_dist_texture,
+        target_avg_dist):
+    """Builds a sphere mesh with vertices density driven by an average distance
+    map, coming with another initial sphere mesh, (genrally calculated in a
+    different space), and a target length.
+
+    Starting from an icosahedron, this procedure iterates calls to
+    refine_sphere_mesh() until the target_avg_dist criterion is reached
+    everywhere on the mesh.
+
+    Parameters
+    ----------
+
+    Return
+    ------
+    refined_sphere
+    """
+    vert2 = numpy.square(numpy.asarray(init_sphere.vertex()))
+    dist = numpy.sqrt(numpy.sum(vert2, axis=1))
+    radius = numpy.average(dist)
+    init_sphere_coords = sphere_coordinates(init_sphere)
+
+    current_sphere = aims.SurfaceGenerator.icosahedron((0, 0, 0), radius)
+
+    next_sphere = None
+    step = 0
+    while next_sphere is not current_sphere:
+        if next_sphere is not None:
+            current_sphere = next_sphere
+        print 'step:', step
+        step += 1
+        next_sphere = refine_sphere_mesh(
+            init_sphere, avg_dist_texture, current_sphere, target_avg_dist,
+            init_sphere_coords)
+
     return next_sphere
 
