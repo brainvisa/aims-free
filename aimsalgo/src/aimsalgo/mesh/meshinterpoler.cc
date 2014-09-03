@@ -214,6 +214,19 @@ void MeshInterpoler::findNeighbours_timestep( const Point3df *vert1,
     const Point3df                & p2 = vert1[ tri[1] ];
     const Point3df                & p3 = vert1[ tri[2] ];
 
+    Point3df v1 = p2 - p1, v2 = p3 - p1, v3 = p3 - p2;
+    float n1 = v1.norm(), n2 = v2.norm(), n3 = v3.norm();
+    if( n1 == 0. || n2 == 0. || n3 == 0. )
+      continue; // skip degenerated triangles with duplicate points
+    if( fabs( v1.dot( v2 ) ) >= n1*n2
+      || fabs( v1.dot( v3 ) ) >= n1*n3
+      || fabs( v2.dot( v3 ) ) >= n2*n3 )
+    {
+      cout << "flat triangle skipped: " << t << endl;
+      continue; // skip degenerated flat triangles
+    }
+    float dotprod = ( p2 - p1 ).dot( p3 - p1 );
+
     if( ( d->xthresh != 0. && ( fabs( p2[0] - p1[0] ) >= d->xthresh
         || fabs( p3[0] - p1[0] ) >= d->xthresh
         || fabs( p3[0] - p2[0] ) >= d->xthresh ) )
@@ -259,6 +272,17 @@ void MeshInterpoler::findNeighbours_timestep( const Point3df *vert1,
       const Point3df                & p2 = vert1[ tri[1] ];
       const Point3df                & p3 = vert1[ tri[2] ];
 
+      if( ( d->xthresh != 0. && ( fabs( p2[0] - p1[0] ) >= d->xthresh
+          || fabs( p3[0] - p1[0] ) >= d->xthresh
+          || fabs( p3[0] - p2[0] ) >= d->xthresh ) )
+        || ( d->ythresh != 0. && ( fabs( p2[1] - p1[1] ) >= d->ythresh
+          || fabs( p3[1] - p1[1] ) >= d->ythresh
+          || fabs( p3[1] - p2[1] ) >= d->ythresh ) )
+        || ( d->zthresh != 0. && ( fabs( p2[2] - p1[2] ) >= d->zthresh
+          || fabs( p3[2] - p1[2] ) >= d->zthresh
+          || fabs( p3[2] - p2[2] ) >= d->zthresh ) )
+      )
+        continue; // don't keep this triangle for projection
       // distance to the center of the triangle
       // (we assume there is no need to project onto it)
       bary = ( p1 + p2 + p3 ) * 0.33333 - pt;
@@ -348,17 +372,51 @@ void MeshInterpoler::processCoordinates_timestep( const Point3df *vert1,
     vec1 = pt - p1;
 
     vec2 = p2 - p1;
-    l1 = 1. / vec2.norm();
-    vec2 *= l1;
+    if( vec2.norm() == 0 )
+    {
+      cout << "null norm p2-p1: " << p1 << endl;
+      l1 = 0.;
+    }
+    else
+    {
+      l1 = 1. / vec2.norm();
+      vec2 *= l1;
+    }
 
     vec3 = p3 - p1;
-    l2 = 1. / vec3.norm();
-    vec3 *= l2;
+    if( vec3.norm() == 0 )
+    {
+      cout << "null vec3: " << j1 << ", " << j3 << endl;
+      l2 = 0.;
+    }
+    else
+    {
+      l2 = 1. / vec3.norm();
+      vec3 *= l2;
+    }
 
     // make an orthogonal referential
 
     a = - vec2.dot( vec3 );
+    if( fabs(a) >= 1. )
+    {
+      cout << "a inf: " << a << endl;
+      cout << "vec1: " << vec1 << ", vec3: " << vec3 << endl;
+      cout << "poly: " << tri << endl;
+    }
     b = 1. / sqrt( 1. - a * a );
+    if( isinf(b) )
+    {
+      cout << "b inf: " << b << endl;
+      cout << "a: " << a << endl;
+      cout << "vec1: " << vec1 << ", vec3: " << vec3 << endl;
+      cout << "poly: " << tri << endl;
+      cout << "p1: " << p1 << "\np2: " << p2 << "\np3: " << p3 << "\npt: " << pt
+        << endl;
+      a = 0.;
+      b = 1.;
+    }
+
     a *= b;
     vec4 = a * vec2 + b * vec3;
 
@@ -477,6 +535,12 @@ AimsSurfaceTriangle *MeshInterpoler::resampleMesh(
       const Point3df & v2 = vert1[ tri[1] ];
       const Point3df & v3 = vert1[ tri[2] ];
       float a = coord1[i], b = coord2[i], c = coord3[i];
+      if( isnan(a) )
+        a = 0.33;
+      if( isnan(b) )
+        b = 0.33;
+      if( isnan(c) )
+        c = 0.33;
       vert[i] = v1 * a + v2 * b + v3 * c;
       if( hasnormals )
       {
