@@ -2937,6 +2937,166 @@ Point3df SurfaceManip::nearestPointToMesh( const Point3df & target,
 }
 
 
+namespace
+{
+
+  inline
+  void split_tri_1( vector<AimsVector<uint, 3> > &opoly,
+                    AimsVector<uint, 3> & op,
+                    const AimsVector<uint, 3> & p,
+                    uint a, uint b, uint c, bool hasa, bool hasb, bool hasc )
+  {
+    // triangle cut on 1 edge
+    /*       p[0]
+              /\
+              / |\
+            /  | \
+            /   |  \
+          /___ |___\
+      p[1]     b   p[2]
+    */
+    const uint *p0 , *p1, *p2, *p3;
+    if( hasa )
+    {
+      p0 = &p[2];
+      p1 = &p[0];
+      p2 = &a;
+      p3 = &p[1];
+    }
+    else if( hasb )
+    {
+      p0 = &p[0];
+      p1 = &p[1];
+      p2 = &b;
+      p3 = &p[2];
+    }
+    else // hasc
+    {
+      p0 = &p[1];
+      p1 = &p[2];
+      p2 = &c;
+      p3 = &p[0];
+    }
+    {
+      op[0] = *p0;
+      op[1] = *p1;
+      op[2] = *p2;
+      opoly.push_back( op );
+    }
+    {
+      op[0] = *p0;
+      op[1] = *p2;
+      op[2] = *p3;
+      opoly.push_back( op );
+    }
+  }
+
+
+  inline
+  void split_tri_2( vector<AimsVector<uint, 3> > &opoly,
+                    AimsVector<uint, 3> & op,
+                    const AimsVector<uint, 3> & p,
+                    uint a, uint b, uint c, bool hasa, bool hasb, bool hasc )
+  {
+    // triangle cut on 2 edges
+    /*       p[0]
+              /\
+              /  \
+          a  ------  c
+            /\____ \
+          /______\_\
+      p[1]         p[2]
+    */
+    const uint *p0 , *p1, *p2, *p3, *p4;
+    if( !hasa )
+    {
+      p0 = &p[2];
+      p1 = &c;
+      p2 = &p[0];
+      p3 = &p[1];
+      p4 = &b;
+    }
+    else if( !hasb )
+    {
+      p0 = &p[0];
+      p1 = &a;
+      p2 = &p[1];
+      p3 = &p[2];
+      p4 = &c;
+    }
+    else // !hasc
+    {
+      p0 = &p[1];
+      p1 = &b;
+      p2 = &p[2];
+      p3 = &p[0];
+      p4 = &a;
+    }
+    {
+      op[0] = *p0;
+      op[1] = *p1;
+      op[2] = *p4;
+      opoly.push_back( op );
+    }
+    {
+      op[0] = *p1;
+      op[1] = *p2;
+      op[2] = *p3;
+      opoly.push_back( op );
+    }
+    {
+      op[0] = *p3;
+      op[1] = *p4;
+      op[2] = *p1;
+      opoly.push_back( op );
+    }
+  }
+
+
+  inline
+  void split_tri_3( vector<AimsVector<uint, 3> > &opoly,
+                    AimsVector<uint, 3> & op,
+                    const AimsVector<uint, 3> & p,
+                    uint a, uint b, uint c, bool hasa, bool hasb, bool hasc )
+  {
+    // triangle split "normally" with 3 edges cut
+    /*       p[0]
+              /\
+              /  \
+          a  ------  c
+            / \  / \
+          /___\/___\
+      p[1]    b    p[2]
+    */
+    {
+      op[0] = p[0];
+      op[1] = a;
+      op[2] = c;
+      opoly.push_back( op );
+    }
+    {
+      op[0] = a;
+      op[1] = p[1];
+      op[2] = b;
+      opoly.push_back( op );
+    }
+    {
+      op[0] = b;
+      op[1] = c;
+      op[2] = a;
+      opoly.push_back( op );
+    }
+    {
+      op[0] = b;
+      op[1] = p[2];
+      op[2] = c;
+      opoly.push_back( op );
+    }
+  }
+
+}
+
+
 AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
   const AimsSurfaceTriangle & mesh, const std::vector<uint> & selectedPolygons )
 {
@@ -2955,12 +3115,12 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
     vector<AimsVector<uint, 3> > & opoly = nsurf.polygon();
     bool hasnorm = !inorm.empty();
 
+    /* at this moment we do not know the exact final number of polygons:
+       max is ipoly.size() * 4 (if every poly is split in 4)
+       but some may be partially split.
+    */
     // reserve 4 times the number of triangles
-    size_t split_polys = selectedPolygons.empty() ?
-      ipoly.size() : selectedPolygons.size();
-    size_t nopoly = ipoly.size() + split_polys * 3;
-    opoly.reserve( nopoly );
-    opoly.insert( opoly.end(), nopoly, AimsVector<uint, 3>( 0,0,0 ) );
+    opoly.reserve( ipoly.size() * 4 );
     // build the list of edges and new vertices indices
     map<pair<uint, uint>, uint > edges;
     map<pair<uint, uint>, uint >::iterator ie, ee = edges.end();
@@ -3016,70 +3176,91 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
       }
     }
     // remake triangles
-    // FIXME / TODO: unmodified triangles should not all be unmodified...
-    vector<AimsVector<uint, 3> >::iterator iop = opoly.begin();
     uint a, b, c;
+    bool hasa, hasb, hasc;
+    int nedges;
     isel = selectedPolygons.begin();
+    AimsVector<uint, 3> op;
     for( ip=ipoly.begin(), i=0; ip!=ep; ++ip, ++i )
     {
-      if( do_select )
-      {
-        if( isel == esel || *isel != i )
-        {
-          *iop = *ip;
-          ++iop;
-          continue; // keep this unselected polygon as is
-        }
-        else if( isel != esel )
-          ++isel;
-      }
       const AimsVector<uint, 3> & p = *ip;
       // get triangle edges and mid-vertices
+      nedges = 0;
+      hasa = false;
+      hasb = false;
+      hasc = false;
       pair<uint, uint> e( min( p[0], p[1] ), max( p[0], p[1] ) );
       ie = edges.find( e );
-      a = ie->second;
+      if( ie != ee )
+      {
+        ++nedges;
+        a = ie->second;
+        hasa = true;
+      }
       e = make_pair( min( p[1], p[2] ), max( p[1], p[2] ) );
       ie = edges.find( e );
-      b = ie->second;
+      if( ie != ee )
+      {
+        b = ie->second;
+        ++nedges;
+        hasb = true;
+      }
       e = make_pair( min( p[2], p[0] ), max( p[2], p[0] ) );
       ie = edges.find( e );
-      c = ie->second;
-      /*       p[0]
-                /\
-               /  \
-            a  ----  c
-             / \  / \
-            /___\/___\
-         p[1]    b    p[2]
-      */
+      if( ie != ee )
       {
-        AimsVector<uint, 3> & op = *iop;
-        op[0] = p[0];
-        op[1] = a;
-        op[2] = c;
-        ++iop;
+        c = ie->second;
+        ++nedges;
+        hasc = true;
       }
+
+      switch( nedges )
       {
-        AimsVector<uint, 3> & op = *iop;
-        op[0] = a;
-        op[1] = p[1];
-        op[2] = b;
-        ++iop;
+      case 3:
+        // triangle split "normally" with 3 edges cut
+        /*       p[0]
+                  /\
+                  /  \
+              a  ------  c
+                / \  / \
+              /___\/___\
+          p[1]    b    p[2]
+        */
+        split_tri_3( opoly, op, p, a, b, c, hasa, hasb, hasc );
+        break;
+
+      case 2:
+        // triangle cut on 2 edges
+        /*       p[0]
+                  /\
+                 /  \
+             a  ------  c
+               /\____ \
+              /______\_\
+          p[1]         p[2]
+        */
+        split_tri_2( opoly, op, p, a, b, c, hasa, hasb, hasc );
+        break;
+
+      case 1:
+        // triangle cut on 1 edge
+        /*       p[0]
+                  /\
+                 / |\
+                /  | \
+               /   |  \
+              /___ |___\
+          p[1]     b   p[2]
+        */
+        split_tri_1( opoly, op, p, a, b, c, hasa, hasb, hasc );
+        break;
+
+      default: // nedges == 0
+        // keep this unselected polygon as is
+        opoly.push_back( *ip );
+        break;
       }
-      {
-        AimsVector<uint, 3> & op = *iop;
-        op[0] = b;
-        op[1] = c;
-        op[2] = a;
-        ++iop;
-      }
-      {
-        AimsVector<uint, 3> & op = *iop;
-        op[0] = b;
-        op[1] = p[2];
-        op[2] = c;
-        ++iop;
-      }
+
     }
   }
 
