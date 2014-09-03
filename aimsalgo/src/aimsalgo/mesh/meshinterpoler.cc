@@ -225,17 +225,17 @@ void MeshInterpoler::findNeighbours_timestep( const Point3df *vert1,
       cout << "flat triangle skipped: " << t << endl;
       continue; // skip degenerated flat triangles
     }
-    float dotprod = ( p2 - p1 ).dot( p3 - p1 );
 
-    if( ( d->xthresh != 0. && ( fabs( p2[0] - p1[0] ) >= d->xthresh
-        || fabs( p3[0] - p1[0] ) >= d->xthresh
-        || fabs( p3[0] - p2[0] ) >= d->xthresh ) )
-      || ( d->ythresh != 0. && ( fabs( p2[1] - p1[1] ) >= d->ythresh
-        || fabs( p3[1] - p1[1] ) >= d->ythresh
-        || fabs( p3[1] - p2[1] ) >= d->ythresh ) )
-      || ( d->zthresh != 0. && ( fabs( p2[2] - p1[2] ) >= d->zthresh
-        || fabs( p3[2] - p1[2] ) >= d->zthresh
-        || fabs( p3[2] - p2[2] ) >= d->zthresh ) )
+    // test discontinuity thresholding
+    if( ( d->xthresh != 0. && ( fabs( v1[0] ) >= d->xthresh
+        || fabs( v2[0] ) >= d->xthresh
+        || fabs( v3[0] ) >= d->xthresh ) )
+      || ( d->ythresh != 0. && ( fabs( v1[1] ) >= d->ythresh
+        || fabs( v2[1] ) >= d->ythresh
+        || fabs( v3[1] ) >= d->ythresh ) )
+      || ( d->zthresh != 0. && ( fabs( v1[2] ) >= d->zthresh
+        || fabs( v2[2] ) >= d->zthresh
+        || fabs( v3[2] ) >= d->zthresh ) )
     )
       continue; // don't keep this triangle for projection
     // center of the triangle
@@ -272,15 +272,28 @@ void MeshInterpoler::findNeighbours_timestep( const Point3df *vert1,
       const Point3df                & p2 = vert1[ tri[1] ];
       const Point3df                & p3 = vert1[ tri[2] ];
 
-      if( ( d->xthresh != 0. && ( fabs( p2[0] - p1[0] ) >= d->xthresh
-          || fabs( p3[0] - p1[0] ) >= d->xthresh
-          || fabs( p3[0] - p2[0] ) >= d->xthresh ) )
-        || ( d->ythresh != 0. && ( fabs( p2[1] - p1[1] ) >= d->ythresh
-          || fabs( p3[1] - p1[1] ) >= d->ythresh
-          || fabs( p3[1] - p2[1] ) >= d->ythresh ) )
-        || ( d->zthresh != 0. && ( fabs( p2[2] - p1[2] ) >= d->zthresh
-          || fabs( p3[2] - p1[2] ) >= d->zthresh
-          || fabs( p3[2] - p2[2] ) >= d->zthresh ) )
+      Point3df v1 = p2 - p1, v2 = p3 - p1, v3 = p3 - p2;
+      float n1 = v1.norm(), n2 = v2.norm(), n3 = v3.norm();
+      if( n1 == 0. || n2 == 0. || n3 == 0. )
+        continue; // skip degenerated triangles with duplicate points
+      if( fabs( v1.dot( v2 ) ) >= n1*n2
+        || fabs( v1.dot( v3 ) ) >= n1*n3
+        || fabs( v2.dot( v3 ) ) >= n2*n3 )
+      {
+        cout << "flat triangle skipped: " << t << endl;
+        continue; // skip degenerated flat triangles
+      }
+
+      // test discontinuity thresholding
+      if( ( d->xthresh != 0. && ( fabs( v1[0] ) >= d->xthresh
+          || fabs( v2[0] ) >= d->xthresh
+          || fabs( v3[0] ) >= d->xthresh ) )
+        || ( d->ythresh != 0. && ( fabs( v1[1] ) >= d->ythresh
+          || fabs( v2[1] ) >= d->ythresh
+          || fabs( v3[1] ) >= d->ythresh ) )
+        || ( d->zthresh != 0. && ( fabs( v1[2] ) >= d->zthresh
+          || fabs( v2[2] ) >= d->zthresh
+          || fabs( v3[2] ) >= d->zthresh ) )
       )
         continue; // don't keep this triangle for projection
       // distance to the center of the triangle
