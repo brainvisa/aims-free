@@ -192,6 +192,13 @@ namespace aims
     template <int D, typename T>
     static TimeTexture<float>* meshDensity( const AimsTimeSurface<D,T> & mesh,
       bool asDistance = false );
+    /** Calculate an edge length ratio in edges of two meshes with the same
+        topology. Length ratios are averaged on each vertex
+    */
+    template <int D, typename T>
+    static TimeTexture<float>* meshEdgeLengthRatioTexture(
+      const AimsTimeSurface<D,T> & nummesh,
+      const AimsTimeSurface<D,T> & denommesh );
 
     //! Checks if two meshes intersect
     static bool checkMeshIntersect( const AimsSurfaceTriangle &,

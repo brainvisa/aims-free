@@ -3399,6 +3399,9 @@ template AimsTimeSurface<3,Void> *
 
 template TimeTexture<float>*
   SurfaceManip::meshDensity( const AimsTimeSurface<3,Void> &, bool );
+template TimeTexture<float>*
+  SurfaceManip::meshEdgeLengthRatioTexture( const AimsTimeSurface<3,Void> &,
+    const AimsTimeSurface<3,Void> & );
 
 template AimsSurface<2,Void> *
   SurfaceManip::meshTextureBoundary( const AimsSurface<3,Void> & mesh,

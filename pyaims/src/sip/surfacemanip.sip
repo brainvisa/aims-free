@@ -65,7 +65,11 @@ public:
     const vector_U32 & selectedPolygons = vector_U32() ) /Factory/;
   static TimeTexture_FLOAT* meshDensity( const AimsSurfaceTriangle & mesh,
     bool asDistance = false ) /Factory/;
-  static bool checkMeshIntersect( const AimsSurfaceTriangle &,
+  static TimeTexture_FLOAT* meshEdgeLengthRatioTexture(
+    const AimsSurfaceTriangle & nummesh,
+    const AimsSurfaceTriangle & denommesh ) /Factory/;
+
+ static bool checkMeshIntersect( const AimsSurfaceTriangle &,
                                   const AimsSurfaceTriangle & );
 };
 
