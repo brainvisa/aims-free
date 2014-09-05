@@ -37,25 +37,17 @@ def sphere_coordinates(sphere):
     #########################################################################
     #                         A latitude texture                            #
     #########################################################################
-    ray = numpy.sqrt(numpy.square(nvert[:, 0]) + numpy.square(nvert[:, 1]))
-    sphere_lat = numpy.arctan(nvert[:, 2] / ray)
-    z = numpy.where(ray == 0)[0]
-    sphere_lat[z] = -numpy.pi / 2
-    sphere_lat[z[nvert[z, 2] >= 0]] = numpy.pi / 2
-    sphere_lat += numpy.pi / 2
-    sphere_lat *= 180. / numpy.pi
+    radius = numpy.sqrt(numpy.square(nvert[:, 0]) + numpy.square(nvert[:, 1]))
+    sphere_lat = numpy.arctan2(radius, nvert[:, 2])
+    sphere_lat *= -180. / numpy.pi
     slat_tex = aims.TimeTexture(sphere_lat.astype(numpy.float32))
 
     #########################################################################
     #                         A longitude texture                           #
     #########################################################################
-    sphere_lon = numpy.arctan(nvert[:, 1] / nvert[:, 0])
-    z = numpy.where(nvert[:, 0] == 0)[0]
-    sphere_lon[z] = -numpy.pi / 2
-    sphere_lon[z[nvert[z, 1] >= 0]] = numpy.pi / 2
-    sphere_lon[nvert[:, 0] < 0] += numpy.pi
-    sphere_lon[sphere_lon < 0] += numpy.pi * 2
+    sphere_lon = numpy.arctan2(nvert[:, 1], nvert[:, 0])
     sphere_lon *= 180. / numpy.pi
+    sphere_lon += 180.
     slon_tex = aims.TimeTexture(sphere_lon.astype(numpy.float32))
 
     return slon_tex, slat_tex
@@ -163,7 +155,8 @@ def polygon_average_sizes(mesh):
 
 
 def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
-    target_avg_dist, init_sphere_coords=None, current_sphere_coords=None):
+    target_avg_dist, init_sphere_coords=None, current_sphere_coords=None,
+    dist_texture_is_scaled=True):
     """Adaptively refine polygons of a sphere mesh according to an average
     distance map (genrally calculated in a different space), and a target
     length.
@@ -195,8 +188,11 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
     else:
         current_lon, current_lat = sphere_coordinates(current_sphere)
 
-    init_sphere_dist = (init_sphere.vertex()[init_sphere.polygon()[0][1]]
-        - init_sphere.vertex()[init_sphere.polygon()[0][0]]).norm()
+    if dist_texture_is_scaled:
+        init_sphere_dist = 1
+    else:
+        init_sphere_dist = (init_sphere.vertex()[init_sphere.polygon()[0][1]]
+            - init_sphere.vertex()[init_sphere.polygon()[0][0]]).norm()
     interpoler = aims.CoordinatesFieldMeshInterpoler(
       init_sphere, current_sphere, init_lat, init_lon, current_lat, current_lon)
     interpoler.setDiscontinuityThresholds(200, 100, 0)
@@ -226,7 +222,7 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
 
 
 def spere_mesh_from_distance_map(init_sphere, avg_dist_texture,
-        target_avg_dist):
+        target_avg_dist, dist_texture_is_scaled=True):
     """Builds a sphere mesh with vertices density driven by an average distance
     map, coming with another initial sphere mesh, (genrally calculated in a
     different space), and a target length.
@@ -258,7 +254,7 @@ def spere_mesh_from_distance_map(init_sphere, avg_dist_texture,
         step += 1
         next_sphere = refine_sphere_mesh(
             init_sphere, avg_dist_texture, current_sphere, target_avg_dist,
-            init_sphere_coords)
+            init_sphere_coords, dist_texture_is_scaled=dist_texture_is_scaled)
 
     return next_sphere
 
