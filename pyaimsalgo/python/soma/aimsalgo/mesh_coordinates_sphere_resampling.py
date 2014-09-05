@@ -39,7 +39,7 @@ def sphere_coordinates(sphere):
     #########################################################################
     radius = numpy.sqrt(numpy.square(nvert[:, 0]) + numpy.square(nvert[:, 1]))
     sphere_lat = numpy.arctan2(radius, nvert[:, 2])
-    sphere_lat *= -180. / numpy.pi
+    sphere_lat = -sphere_lat * 180. / numpy.pi + 180.
     slat_tex = aims.TimeTexture(sphere_lat.astype(numpy.float32))
 
     #########################################################################
