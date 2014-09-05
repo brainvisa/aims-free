@@ -22,7 +22,7 @@ def sphere_coordinates(sphere):
 
     Parameters
     ----------
-    sphere: (aimsTimeSurface_3)
+    sphere: (AimsTimeSurface_3)
         a sphere mesh: vertices must be on a sphere with center 0.
 
     Return
@@ -58,9 +58,9 @@ def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
 
     Parameters
     ----------
-    mesh: (aimsTimeSurface_3)
+    mesh: (AimsTimeSurface_3)
         a spherical triangulation of cortical hemisphere of the subject
-    sphere: (aimsTimeSurface_3)
+    sphere: (AimsTimeSurface_3)
         a sphere mesh with center 0.
         For example, a spherical mesh of size 100 located in standard
         BrainVISA directory can be used.
@@ -75,7 +75,7 @@ def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
 
     Return
     ------
-    resampled: (aimsTimeSurface_3)
+    resampled: (AimsTimeSurface_3)
 
     """
     # get spherical coordinates textures on the sphere
@@ -112,7 +112,7 @@ def texture_by_polygon(mesh, texture):
 
     Parameters
     ----------
-    mesh: (aimsTimeSurface_3)
+    mesh: (AimsTimeSurface_3)
         a mesh providing trianglar struture
     texture: (TimeTexture_FLOAT)
         texture data
@@ -136,7 +136,7 @@ def polygon_average_sizes(mesh):
 
     Parameters
     ----------
-    mesh: (aimsTimeSurface_3)
+    mesh: (AimsTimeSurface_3)
         a mesh providing trianglar struture
 
     Return:
@@ -168,16 +168,16 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
 
     Parameters
     ----------
-    init_sphere: (aimsTimeSurface_3)
+    init_sphere: (AimsTimeSurface_3)
     avg_dist_texture: (TimeTexture_FLOAT)
-    current_sphere: (aimsTimeSurface_3)
+    current_sphere: (AimsTimeSurface_3)
     target_avg_dist: (float)
     init_sphere_coords: (tuple of 2 textures) (optional)
     current_sphere_coords: (tuple of 2 textures) (optional)
 
     Returns
     -------
-    refined_sphere: (aimsTimeSurface_3)
+    refined_sphere: (AimsTimeSurface_3)
     """
     if init_sphere_coords is not None:
         init_lon, init_lat = init_sphere_coords
@@ -231,12 +231,33 @@ def spere_mesh_from_distance_map(init_sphere, avg_dist_texture,
     refine_sphere_mesh() until the target_avg_dist criterion is reached
     everywhere on the mesh.
 
+    The initial avg_dist_texture can be (and, has better be) scaled according
+    to the edges length of the init_sphere mesh polygons. In this case it is
+    the ratio of post / pre deformation edges lengths.
+
+    Use case:
+    - get an initial sphere mesh (typically an icosphere)
+    - get subjects mesh (typically grey/white brain interfaces), which have
+      also coordinates maps (output of the Hip Hop toolbox for BrainVISA)
+    - resample subjects mesh to the initial sphere. Obtained meshes will be
+      very inhomogen
+    - build a edges legth map from these subjects resampled meshes
+    - use spere_mesh_from_distance_map to build an adapted template sphere
+
     Parameters
     ----------
+    init_sphere: (AimsTimeSurface_3)
+    avg_dist_texture: (TimeTexture_FLOAT)
+    target_avg_dist: (float)
+    dist_texture_is_scaled: (bool) (optional)
+        If True, the avg_dist_texture is considered to be scaled according to
+        the inital sphere triangles edges
+        (see aims.SurfaceManip.meshEdgeLengthRatioTexture).
+        Default: True
 
     Return
     ------
-    refined_sphere
+    refined_sphere: (AimsTimeSurface_3)
     """
     vert2 = numpy.square(numpy.asarray(init_sphere.vertex()))
     dist = numpy.sqrt(numpy.sum(vert2, axis=1))
