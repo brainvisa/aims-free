@@ -91,7 +91,7 @@ def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
 
     # set interpoler discontinuity thresholds to handle 0/360 and 0/180 deg
     # gaps
-    interpoler.setDiscontinuityThresholds(200, 100, 0)
+    interpoler.setDiscontinuityThresholds(100, 200, 0)
     # the main operation is project(), which calculates the correspondances
     # between the source and destination mesh
     interpoler.project()
@@ -125,8 +125,11 @@ def texture_by_polygon(mesh, texture):
     """
     poly = numpy.asarray(mesh.polygon())
     tex = numpy.asarray(texture[0])
-    poly_tex = tex[poly[:,0]] + tex[poly[:,1]] + tex[poly[:,2]]
-    return poly_tex / 3
+    poly_tex = numpy.max((tex[poly[:,0]], tex[poly[:,1]], tex[poly[:,2]]),
+                         axis=0)
+    return poly_tex
+    #poly_tex = tex[poly[:,0]] + tex[poly[:,1]] + tex[poly[:,2]]
+    #return poly_tex / 3
 
 
 def polygon_average_sizes(mesh):
@@ -152,6 +155,31 @@ def polygon_average_sizes(mesh):
     d2 = numpy.sqrt(numpy.sum(numpy.square(p3 - p2), axis=1))
     d3 = numpy.sqrt(numpy.sum(numpy.square(p1 - p3), axis=1))
     return (d1 + d2 + d3) / 3
+
+
+def polygon_max_sizes(mesh):
+    """Return the max edge length for each triangle of a mesh
+
+    Used by refine_sphere_mesh() and spere_mesh_from_distance_map()
+
+    Parameters
+    ----------
+    mesh: (AimsTimeSurface_3)
+        a mesh providing trianglar struture
+
+    Return:
+    lengths: (numpy array)
+        average size for each polygon
+    """
+    poly = numpy.asarray(mesh.polygon())
+    vert = numpy.asarray(mesh.vertex())
+    p1 = vert[poly[:,0]]
+    p2 = vert[poly[:,1]]
+    p3 = vert[poly[:,2]]
+    d1 = numpy.sqrt(numpy.sum(numpy.square(p2 - p1), axis=1))
+    d2 = numpy.sqrt(numpy.sum(numpy.square(p3 - p2), axis=1))
+    d3 = numpy.sqrt(numpy.sum(numpy.square(p1 - p3), axis=1))
+    return numpy.max((d1, d2, d3), axis=0)
 
 
 def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
@@ -199,7 +227,7 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
     interpoler.project()
     resampled_dist_tex = interpoler.resampleTexture(avg_dist_texture)
     polygon_dist = texture_by_polygon(current_sphere, resampled_dist_tex)
-    polygon_sizes = polygon_average_sizes(current_sphere)
+    polygon_sizes = polygon_max_sizes(current_sphere)
     polygon_dist *= polygon_sizes / init_sphere_dist
     refined_poly = numpy.where(numpy.asarray(polygon_dist)
                                >= target_avg_dist)[0]

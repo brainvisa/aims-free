@@ -193,7 +193,7 @@ namespace aims
     static TimeTexture<float>* meshDensity( const AimsTimeSurface<D,T> & mesh,
       bool asDistance = false );
     /** Calculate an edge length ratio in edges of two meshes with the same
-        topology. Length ratios are averaged on each vertex
+        topology. The max length ratios of edges is kept for each vertex
     */
     template <int D, typename T>
     static TimeTexture<float>* meshEdgeLengthRatioTexture(

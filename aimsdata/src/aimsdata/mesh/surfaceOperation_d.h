@@ -465,15 +465,16 @@ namespace aims
             n = 1.; // what to do else ? (leave inf ?)
           else
             n /= dn;
-          tx[ vi ] += n;
-          tx[ vj ] += n;
+          tx[ vi ] = std::max( tx[ vi ], n );
+          tx[ vj ] = std::max( tx[ vj ], n );
           // count
           ++counts[ vi ];
           ++counts[ vj ];
         }
       }
 
-      // now average distances, and invert them to get a density
+      /*
+      // now average distances
       std::vector<float>::iterator          it, et = tx.end();
       std::vector<unsigned>::const_iterator itc;
       for( it=tx.begin(), itc=counts.begin(); it!=et; ++it, ++itc )
@@ -481,6 +482,7 @@ namespace aims
           *it /= float( *itc );
         else
           *it = 0.; // to avoid NaN
+          */
     }
 
     return tex;
