@@ -50,6 +50,20 @@ namespace std
   public:
   };
 
+
+  template<typename _Tp>
+  struct numeric_limits<carto::Volume<_Tp> > : public numeric_limits<_Tp>
+  {
+  public:
+  };
+
+
+  template<typename _Tp>
+  struct numeric_limits<carto::VolumeRef<_Tp> > : public numeric_limits<_Tp>
+  {
+  public:
+  };
+
 }
 
 namespace carto
