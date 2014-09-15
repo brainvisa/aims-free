@@ -15,6 +15,65 @@ import numpy
 # Soma import
 from soma import aims
 
+def draw_sphere(mesh, longitude, latitude):
+    """Draw a sphere
+    
+    Parameters
+    ----------
+    mesh: (AimsTimeSurface_3)
+        a spherical triangulation of cortical hemisphere of the subject
+    longitude: (TimeTexture_FLOAT)
+        a longitude texture from HipHop mapping that go with the white_mesh
+        of the subject. This texture indicates the spherical coordinates
+        at each point.
+    latitude: (TimeTexture_FLOAT)
+        a latitude texture from HipHop mapping that go with the white_mesh
+        of the subject. This texture indicates the spherical coordinates
+        at each point.
+    
+    Return
+    ------
+    sphere_mesh: (AimsTimeSurface_3)
+        a spherical triangulation of the subject of its cortical hemisphere,
+        projected on a sphere
+    """
+    lon = longitude[0].arraydata()
+    lat = latitude[0].arraydata()  
+    
+    nmesh = numpy.asarray(mesh.vertex())
+    radius = numpy.sqrt(numpy.square(nmesh[:, 0]) + numpy.square(nmesh[:, 1]))
+    
+    # generate all x, y, z for each vertex (list)
+    list_coord = []
+    for index, coord in enumerate(nmesh):
+        x, y, z = sphere((lon[index]*numpy.pi / 180) + numpy.pi, 
+                         (lat[index]*numpy.pi / 180) - numpy.pi / 2)
+        list_coord.append([x, y, z])
+
+    # replace the polar coordinates with the news coordinates
+    mesh.vertex().assign([aims.Point3df(x) for x in list_coord])
+    
+    return mesh
+
+
+def sphere(v, u):
+    """Generate a sphere from polar coordinates to spheric coordinates.
+    
+    Parameters
+    ----------
+    radius: (float)
+        around of 100
+    u: (float)
+        angle phi (latitude) WARNING: radian
+    v: (float)
+        angle theta (longitude) WARNING: radian
+    """
+    z = 100 * numpy.sin(u)
+    x = 100 * numpy.cos(u) * numpy.cos(v)
+    y = 100 * numpy.cos(u) * numpy.sin(v)
+    
+    return x, y, z
+    
 
 def sphere_coordinates(sphere):
     """
@@ -66,11 +125,11 @@ def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
         BrainVISA directory can be used.
     longitude: (TimeTexture_FLOAT)
         a longitude texture from HipHop mapping that go with the white_mesh
-        of the subject. This texture indicates the sperical coordinates
+        of the subject. This texture indicates the spherical coordinates
         at each point.
     latitude: (TimeTexture_FLOAT)
         a latitude texture from HipHop mapping that go with the white_mesh
-        of the subject. This texture indicates the sperical coordinates
+        of the subject. This texture indicates the spherical coordinates
         at each point.
 
     Return
@@ -86,12 +145,15 @@ def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
     #########################################################################
 
     #  ...
+    # multiply latitudes by 2 to get same amplitude on both coords
+    latitude = aims.TimeTexture(latitude[0].arraydata() * 2)
+    slat_tex = aims.TimeTexture(slat_tex[0].arraydata() * 2)
     interpoler = aims.CoordinatesFieldMeshInterpoler(
         mesh, sphere, latitude, longitude, slat_tex, slon_tex)
 
     # set interpoler discontinuity thresholds to handle 0/360 and 0/180 deg
     # gaps
-    interpoler.setDiscontinuityThresholds(100, 200, 0)
+    interpoler.setDiscontinuityThresholds(200, 200, 0)
     # the main operation is project(), which calculates the correspondances
     # between the source and destination mesh
     interpoler.project()
@@ -221,9 +283,12 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
     else:
         init_sphere_dist = (init_sphere.vertex()[init_sphere.polygon()[0][1]]
             - init_sphere.vertex()[init_sphere.polygon()[0][0]]).norm()
+    
+    init_lat = aims.TimeTexture(init_lat[0].arraydata() * 2)
+    current_lat = aims.TimeTexture(current_lat[0].arraydata() * 2)
     interpoler = aims.CoordinatesFieldMeshInterpoler(
       init_sphere, current_sphere, init_lat, init_lon, current_lat, current_lon)
-    interpoler.setDiscontinuityThresholds(200, 100, 0)
+    interpoler.setDiscontinuityThresholds(200, 200, 0)
     interpoler.project()
     resampled_dist_tex = interpoler.resampleTexture(avg_dist_texture)
     polygon_dist = texture_by_polygon(current_sphere, resampled_dist_tex)
@@ -300,10 +365,15 @@ def spere_mesh_from_distance_map(init_sphere, avg_dist_texture,
         if next_sphere is not None:
             current_sphere = next_sphere
         print 'step:', step
-        step += 1
         next_sphere = refine_sphere_mesh(
             init_sphere, avg_dist_texture, current_sphere, target_avg_dist,
             init_sphere_coords, dist_texture_is_scaled=dist_texture_is_scaled)
+        aims.write(next_sphere, '/tmp/next_sphere' + str(step) + '.gii')
+        step += 1
+#        if step >= 10:
+#            print 'break OK'
+#            break
+            
 
     return next_sphere
 
