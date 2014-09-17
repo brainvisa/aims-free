@@ -38,12 +38,15 @@
 #include <aims/data/data_g.h>
 #include <aims/vector/vector.h>
 #include <aims/io/io_g.h>
+//--- cartodata --------------------------------------------------------------
+#include <cartodata/volume/volume.h>                 // volume/volumeref
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/object/object.h>                 // options
 #include <cartobase/config/verbose.h>                // verbosity level and cartoMsg
 //--- system -----------------------------------------------------------------
 #include <iostream>
 #include <vector>
+#include <exception>
 //----------------------------------------------------------------------------
 
 using namespace carto;
@@ -58,44 +61,84 @@ int main( int argc, const char** argv )
     string fileOut;
     string type = "26";
     bool usecenter = false;
-    double amplitude = 1.;
-    
-    
-    //=== APPLICATION ========================================================
+    vector<double> amplitude(3,1.);
+
+    //--- APPLICATION --------------------------------------------------------
     AimsApplication  app( argc, argv, "Test for structuring elements" );
-    app.addOption( type, "-c", "structuring element connectivity 4xy / 4xz / 4yz / 6 / 8xy / 8xz / 8yz / 18 / 26 / cube / sphere [default: 26]", true );
-    app.addOption( usecenter, "-u", "uses the element himself in the structuring element [default: false]", true );
-    app.addOption( amplitude, "-a", "structuring element amplitude (number of voxels) [default: 1]", true );
+    app.addOption( type, "-c", "structuring element connectivity "
+                   "( 4xy / 4xz / 4yz / 6 / 8xy / 8xz / 8yz / 18 / 26 / ... ) "
+                   "or shape ( cube / sphere / cross / ... ) "
+                   "[default: 26]", true );
+    app.addOption( usecenter, "-u", "uses the element himself in the "
+                   "structuring element [default: false]", true );
+    app.addOptionSeries( amplitude, "-a", "shape amplitude in voxels "
+                         " (unused with connectivity) [default: 1 1 1]",
+                         0, 3 );
     app.addOption( fileOut, "-o", "output image" );
     app.alias( "-v", "--verbose" );
     app.alias( "-d", "--debugLevel" );
-
     app.initialize();
-    
-    StructuringElement se = StructuringElement::getStructuringElement( type, 
-                                                                       Point3d((int16_t)amplitude, 
-                                                                               (int16_t)amplitude, 
-                                                                               (int16_t)amplitude),
-                                                                       amplitude );
+    //------------------------------------------------------------------------
 
-    AimsData<int16_t> out( (int)(2 * amplitude + 1),
-                           (int)(2 * amplitude + 1),
-                           (int)(2 * amplitude + 1) );
-    out = 0;
-    
-    aims::StructuringElement::iterator ic, ie = se.end();
-    
-    for (ic = se.begin(); ic != ie; ++ic){
-      if (verbose)
-        std::cout << "Add point :" << *ic << std::endl;
-      out(*ic) = 1;
+    //--- STREL IMAGE GENERATION ---------------------------------------------
+    Point3d center( (int16_t) amplitude[0],
+                    (int16_t) amplitude[1],
+                    (int16_t) amplitude[2] );
+
+    rc_ptr<StructuringElement> se;
+    se.reset( strel::ShapeFactory::create(type,center,amplitude,usecenter) );
+    if( !se.get() ) {
+      se.reset( strel::ConnectivityFactory::create(type,center,usecenter) );
     }
-    
-    Writer<AimsData<int16_t> > w(fileOut);
-    w << out;
+    if( !se.get() ) {
+      cout << type << " not found" << endl;
+    } else {
+      AimsData<int16_t> out( (int)(2 * amplitude[0] + 1),
+                             (int)(2 * amplitude[1] + 1),
+                             (int)(2 * amplitude[2] + 1) );
+      out = 0;
+
+      aims::StructuringElement::iterator ic, ie = se->end();
+      
+      for (ic = se->begin(); ic != ie; ++ic){
+        if (verbose)
+          std::cout << "Add point :" << *ic << std::endl;
+        out(*ic) = 1;
+      }
+
+      Writer<AimsData<int16_t> > w(fileOut);
+      w << out;
+    }
+    //------------------------------------------------------------------------
+
+#if 0
+    //--- STRUCTUREDVOLUME ---------------------------------------------------
+    if( verbose )
+      cout << "Testing StructuredVolume..." << endl;
+    VolumeRef<int16_t> vol( new Volume<int16_t>(3,3,3) );
+    VolumeRef<int16_t> win( new Volume<int16_t>(
+      vol,
+      Volume<int16_t>::Position4Di(1,1,1),
+      Volume<int16_t>::Position4Di(1,1,1) ) );
+    vol->fill( 0 );
+    win->at(1,0,0) = 1;
+    win->at(-1,0,0) = 1;
+    win->at(0,1,0) = 1;
+    win->at(0,-1,0) = 1;
+    win->at(0,0,1) = 1;
+    win->at(0,0,-1) = 1;
+    StructuringElementRef con( strel::ConnectivityFactory::create("6") );
+    StructuredVolume<int16_t> svol( win, *con );
+    StructuredVolume<int16_t>::const_iterator i, e = svol.end();
+    for( i=svol.begin(); i!=e; ++i ) {
+      if( *i != 1 ) throw logic_error( "Bad iteration in structured volume" );
+    }
+    if( verbose)
+      cout << "ok" << endl;
+    //------------------------------------------------------------------------
+#endif
 
     cartoMsg( 1, "OK", "STRUCTURINGELEMENT_TEST" );
-    
   }
   catch( user_interruption & )
   {

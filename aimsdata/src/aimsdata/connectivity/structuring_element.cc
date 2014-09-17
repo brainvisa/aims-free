@@ -31,938 +31,1076 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  StructuringElement class
- */
-
-#include <map>
-#include <cartobase/config/verbose.h>
+//--- aims -------------------------------------------------------------------
 #include <aims/connectivity/structuring_element.h>
-namespace aims{
-  
-  // Constructors
-  
-  // Constructor for Connectivity::Type
-  StructuringElement::StructuringElement( 
-                      const Connectivity::Type connectivity,
-                      const Point3d origin,
-                      const double amplitude,
-                      const bool usecenter )
-                      : _type(connectivity),
-                        _origin(origin),
-                        _amplitude(amplitude),
-                        _usecenter(usecenter),
-                        _useconnectivity(true) {
-    _vector = StructuringElement::get_vector( _type.connectivity,
-                                              _origin,
-                                              _amplitude,
-                                              _usecenter );
-  }
-  
-  StructuringElement::StructuringElement( 
-                      const Connectivity::Type connectivity,
-                      const double amplitude,
-                      const bool usecenter )
-                      : _type(connectivity),
-                        _origin(Point3d(0, 0, 0)),
-                        _amplitude(amplitude),
-                        _usecenter(usecenter),
-                        _useconnectivity(true) {
-    _vector = StructuringElement::get_vector( _type.connectivity,
-                                              _origin,
-                                              _amplitude,
-                                              _usecenter );
-  }
-  
-  // Constructor for Shape::Type
-  StructuringElement::StructuringElement( 
-                      const Shape::Type shape,
-                      const Point3d origin,
-                      const double amplitude,
-                      const bool usecenter )
-                      : _type(shape),
-                        _origin(origin),
-                        _amplitude(amplitude),
-                        _usecenter(usecenter),
-                        _useconnectivity(false) {
-    _vector = StructuringElement::get_vector( _type.shape,
-                                              _origin,
-                                              _amplitude,
-                                              _usecenter );
-  }
-  
-  StructuringElement::StructuringElement(
-                      const Shape::Type shape,
-                      const double amplitude,
-                      const bool usecenter )
-                      : _type(shape),
-                        _origin(Point3d(0, 0, 0)),
-                        _amplitude(amplitude),
-                        _usecenter(usecenter),
-                        _useconnectivity(false) {
-    _vector = StructuringElement::get_vector( _type.shape,
-                                              _origin,
-                                              _amplitude,
-                                              _usecenter );
-  }
-  
-  // Static members
-  std::vector<Point3d> StructuringElement::get_vector( StructuringElement::Matrix3x3x3Const matrix,
-                                                      const Point3d origin,
-                                                      const double amplitude,
-                                                      const bool usecenter ) {
-    std::vector<Point3d> se;
-    for (int z = 0; z < 3; ++z)
-      for (int y = 0; y < 3; ++y)
-        for (int x = 0; x < 3; ++x)
-          if ( (x == 1) && (y == 1) && (z == 1) ) {
-            if ( (matrix[z][y][x]) || usecenter )
-              se.push_back(origin);
-          }
-          else if (matrix[z][y][x]) {
-            for (int a = 1; a <= amplitude; ++a)
-              se.push_back(Point3d(a * (x - 1), a * (y - 1), a * (z - 1)) + origin);
-          }
-            
-    return se;
-  }
+#include <aims/vector/vector.h>                                     // Point3d
+//--- carto ------------------------------------------------------------------
+#include <cartobase/smart/rcptr.h>                           // smart pointers
+//--- std --------------------------------------------------------------------
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <cmath>
+//----------------------------------------------------------------------------
 
-  std::vector<Point3d> StructuringElement::get_vector( const Connectivity::Type connectivity,
-                                                       const Point3d origin,
-                                                       const double amplitude,
-                                                       const bool usecenter ) {
+using namespace aims;
+using namespace aims::strel;
+using namespace carto;
+using namespace std;
 
-    return StructuringElement::get_vector( 
-            get_matrix(connectivity), 
-            origin, 
-            amplitude, 
-            usecenter );
-  }
-  
-  /// StructuringElement shapes
-  template <>
-  std::vector<Point3d> StructuringElement::get_vector<Shape::CUBE>( const Point3d origin,
-                                                                    const double amplitude,
-                                                                    const bool usecenter ){
-    std::vector<Point3d> se;
-    
-    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
-      for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
-        for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
-          if ( ( i != 0) || (j != 0 ) || (k != 0 ) || usecenter )
-            se.push_back(Point3d(i, j, k) + origin);
-          
-    return se;
-  }
-  
-  template <>
-  std::vector<Point3d> StructuringElement::get_vector<Shape::SQUARE_XY>( const Point3d origin,
-                                                                         const double amplitude,
-                                                                         const bool usecenter ){
-    std::vector<Point3d> se;
-    
-    for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
-      for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
-        if ( ( i != 0) || (j != 0 ) || usecenter )
-          se.push_back(Point3d(i, j, 0) + origin);
-          
-    return se;
-  }
-  
-  template <>
-  std::vector<Point3d> StructuringElement::get_vector<Shape::SQUARE_XZ>( const Point3d origin,
-                                                                         const double amplitude,
-                                                                         const bool usecenter ){
-    std::vector<Point3d> se;
-    
-    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
-      for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
-        if ( ( i != 0) || (k != 0 ) || usecenter )
-          se.push_back(Point3d(i, 0, k) + origin);
-          
-    return se;
-  }
-  
-  template <>
-  std::vector<Point3d> StructuringElement::get_vector<Shape::SQUARE_YZ>( const Point3d origin,
-                                                                         const double amplitude,
-                                                                         const bool usecenter ){
-    std::vector<Point3d> se;
-    
-    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
-      for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
-        if ( ( j != 0) || (k != 0 ) || usecenter )
-          se.push_back(Point3d(0, j, k) + origin);
-          
-    return se;
-  }
-  
-  template <>
-  std::vector<Point3d> StructuringElement::get_vector<Shape::SPHERE>( const Point3d origin,
-                                                                      const double amplitude,
-                                                                      const bool usecenter ){
-    std::vector<Point3d> se;
-    
-    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
-      for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
-        for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
-          if ( ( ( i != 0) || (j != 0 ) || (k != 0 ) || usecenter )
-              && (sqrt(pow((double)i, 2) + pow((double)j, 2) + pow((double)k, 2)) <= amplitude ) )
-            se.push_back(Point3d(i, j, k) + origin);
-          
-    return se;
-  }
-  
-  template <>
-  std::vector<Point3d> StructuringElement::get_vector<Shape::DISK_XY>( const Point3d origin,
-                                                                       const double amplitude,
-                                                                       const bool usecenter ){
-    std::vector<Point3d> se;
-    for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
-      for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
-        if ( ( ( i != 0) || (j != 0 ) || usecenter )
-              && (sqrt(pow((double)i, 2) + pow((double)j, 2)) <= amplitude ) )
-            se.push_back(Point3d(i, j, 0) + origin );
-    
-    return se;
-  }
-    
-  template <>
-  std::vector<Point3d> StructuringElement::get_vector<Shape::DISK_XZ>( const Point3d origin,
-                                                                       const double amplitude,
-                                                                       const bool usecenter ){
-    std::vector<Point3d> se;
-    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
-      for (int i = - (int)amplitude; i <= (int)amplitude; ++i)
-        if ( ( ( i != 0) || (k != 0 ) || usecenter )
-              && (sqrt(pow((double)i, 2) + pow((double)k, 2)) <= amplitude ) )
-            se.push_back(Point3d(i, 0, k) + origin );
-    
-    return se;
-  }
-      
-  template <>
-  std::vector<Point3d> StructuringElement::get_vector<Shape::DISK_YZ>( const Point3d origin,
-                                                                       const double amplitude,
-                                                                       const bool usecenter ){
-    std::vector<Point3d> se;
-    for (int k = - (int)amplitude; k <= (int)amplitude; ++k)
-      for (int j = - (int)amplitude; j <= (int)amplitude; ++j)
-        if ( ( ( j != 0) || (k != 0 ) || usecenter )
-              && (sqrt(pow((double)j, 2) + pow((double)k, 2)) <= amplitude ) )
-            se.push_back(Point3d(0, j, k) + origin );
-    
-    return se;
-  }
-  
-  /// StructuringElement connectivity matrices
-  
-  // 4-connex matrices
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_XY>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 1, 0, 1 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
+//============================================================================
+// STRUCTURING ELEMENT: BASE CLASS
+//============================================================================
 
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_XZ>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 0, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_YZ>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_XYdiag>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 1, 0, 1 },
-                                       { 0, 0, 0 },
-                                       { 1, 0, 1 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_XZdiag>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 1, 0, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 0, 1 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_YZdiag>(){
-    static const bool m[3][3][3] = { { { 0, 1, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 1, 0 } } };
-    return m;
-  }
-  
-  // 6-connex matrices
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_6_XYZ>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 1, 0, 1 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-
-  // 8-connex matrices
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_8_XY>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 1, 1, 1 },
-                                       { 1, 0, 1 },
-                                       { 1, 1, 1 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_8_XZ>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 1, 1, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 0, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 1, 1 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_8_YZ>(){
-    static const bool m[3][3][3] = { { { 0, 1, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 1, 0 } } };
-    return m;
-  }
-
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_8_XYZ>(){
-    static const bool m[3][3][3] = { { { 1, 0, 1 },
-                                       { 0, 0, 0 },
-                                       { 1, 0, 1 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 1, 0, 1 },
-                                       { 0, 0, 0 },
-                                       { 1, 0, 1 } } };
-    return m;
-  }
-
-  // 18-connex matrices
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_18_XYZ>(){
-    static const bool m[3][3][3] = { { { 0, 1, 0 },
-                                       { 1, 1, 1 },
-                                       { 0, 1, 0 } },
-                                     { { 1, 1, 1 },
-                                       { 1, 0, 1 },
-                                       { 1, 1, 1 } },
-                                     { { 0, 1, 0 },
-                                       { 1, 1, 1 },
-                                       { 0, 1, 0 } } };
-    return m;
-  }
-
-  // 26-connex matrices
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_26_XYZ>(){
-    static const bool m[3][3][3] = { { { 1, 1, 1 },
-                                       { 1, 1, 1 },
-                                       { 1, 1, 1 } },
-                                     { { 1, 1, 1 },
-                                       { 1, 0, 1 },
-                                       { 1, 1, 1 } },
-                                     { { 1, 1, 1 },
-                                       { 1, 1, 1 },
-                                       { 1, 1, 1 } } };
-    return m;
-  }
-
-  // 9-connex matrices
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_XY_Zminus>(){
-    static const bool m[3][3][3] = { { { 1, 1, 1 },
-                                       { 1, 1, 1 },
-                                       { 1, 1, 1 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_XY_Zplus>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 1, 1, 1 },
-                                       { 1, 1, 1 },
-                                       { 1, 1, 1 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_XZ_Yminus>(){
-    static const bool m[3][3][3] = { { { 1, 1, 1 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 1, 1, 1 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 1, 1, 1 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_XZ_Yplus>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 1, 1, 1 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 1, 1, 1 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 1, 1, 1 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_YZ_Xminus>(){
-    static const bool m[3][3][3] = { { { 1, 0, 0 },
-                                       { 1, 0, 0 },
-                                       { 1, 0, 0 } },
-                                     { { 1, 0, 0 },
-                                       { 1, 0, 0 },
-                                       { 1, 0, 0 } },
-                                     { { 1, 0, 0 },
-                                       { 1, 0, 0 },
-                                       { 1, 0, 0 } } };
-    return m;
-  }
-
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_YZ_Xplus>(){
-    static const bool m[3][3][3] = { { { 0, 0, 1 },
-                                       { 0, 0, 1 },
-                                       { 0, 0, 1 } },
-                                     { { 0, 0, 1 },
-                                       { 0, 0, 1 },
-                                       { 0, 0, 1 } },
-                                     { { 0, 0, 1 },
-                                       { 0, 0, 1 },
-                                       { 0, 0, 1 } } };
-    return m;
-  }
-  
-  // 5-connex matrices
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XminusY>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 1, 1, 0 },
-                                       { 1, 0, 0 },
-                                       { 1, 1, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XplusY>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 1, 1 },
-                                       { 0, 0, 1 },
-                                       { 0, 1, 1 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XYminus>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 1, 1, 1 },
-                                       { 1, 0, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XYplus>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 0, 1 },
-                                       { 1, 1, 1 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XminusZ>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 1, 1, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 1, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XplusZ>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 1, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 1, 1 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XZminus>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 1, 1, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 0, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XZplus>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 0, 1 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 1, 1, 1 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_YminusZ>(){
-    static const bool m[3][3][3] = { { { 0, 1, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_YplusZ>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 1, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_YZminus>(){
-    static const bool m[3][3][3] = { { { 0, 1, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } } };
-    return m;
-  }
-  
-  template <>
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_YZplus>(){
-    static const bool m[3][3][3] = { { { 0, 0, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 0, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 0, 0, 0 },
-                                       { 0, 1, 0 } },
-                                     { { 0, 1, 0 },
-                                       { 0, 1, 0 },
-                                       { 0, 1, 0 } } };
-    return m;
-  }
-  
-  // Matrix switch method
-  StructuringElement::Matrix3x3x3Const StructuringElement::get_matrix(Connectivity::Type connectivity)
+vector<int> StructuringElement::getAmplitude(
+  const Point3d & origin
+) const
+{
+  const_iterator i, e = end();
+  vector<int> amplitude(6,0);
+  for( i=begin(); i!=e; ++i )
   {
-    switch(connectivity) {
-      case Connectivity::CONNECTIVITY_4_XY :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_XY>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_4_XZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_XZ>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_4_YZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_YZ>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_4_XYdiag :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_XYdiag>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_4_XZdiag :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_XZdiag>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_4_YZdiag :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_4_YZdiag>();
-        break;
-
-      case Connectivity::CONNECTIVITY_6_XYZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_6_XYZ>();
-        break;
-
-      case Connectivity::CONNECTIVITY_8_XY :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_8_XY>();
-        break;
-
-      case Connectivity::CONNECTIVITY_8_XZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_8_XZ>();
-        break;
-
-      case Connectivity::CONNECTIVITY_8_YZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_8_YZ>();
-        break;
-
-      case Connectivity::CONNECTIVITY_8_XYZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_8_XYZ>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_18_XYZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_18_XYZ>();
-        break;
-
-      case Connectivity::CONNECTIVITY_26_XYZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_26_XYZ>();
-        break;
-
-      case Connectivity::CONNECTIVITY_9_XY_Zminus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_XY_Zminus>();
-        break;
-
-      case Connectivity::CONNECTIVITY_9_XY_Zplus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_XY_Zplus>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_9_XZ_Yminus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_XZ_Yminus>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_9_XZ_Yplus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_XZ_Yplus>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_9_YZ_Xminus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_YZ_Xminus>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_9_YZ_Xplus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_9_YZ_Xplus>();
-        break;
-
-      case Connectivity::CONNECTIVITY_5_XminusY :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XminusY>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_XplusY :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XplusY>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_XYminus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XYminus>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_XYplus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XYplus>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_XminusZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XminusZ>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_XplusZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XplusZ>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_XZminus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XZminus>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_XZplus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_XZplus>();
-        break;
-
-      case Connectivity::CONNECTIVITY_5_YminusZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_YminusZ>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_YplusZ :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_YplusZ>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_YZminus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_YZminus>();
-        break;
-        
-      case Connectivity::CONNECTIVITY_5_YZplus :
-        return StructuringElement::get_matrix<Connectivity::CONNECTIVITY_5_YZplus>();
-        break;
-        
-      default:
-        throw std::runtime_error( 
-              "connectivity matrix does not exists for the connectivity type " 
-              + carto::toString((int)connectivity) );
-        break;
-    }
+    amplitude[0] = abs( min( -amplitude[0], origin[0] + (*i)[0] ) );
+    amplitude[1] = abs( max(  amplitude[1], origin[0] + (*i)[0] ) );
+    amplitude[2] = abs( min( -amplitude[2], origin[1] + (*i)[1] ) );
+    amplitude[3] = abs( max(  amplitude[3], origin[1] + (*i)[1] ) );
+    amplitude[4] = abs( min( -amplitude[4], origin[2] + (*i)[2] ) );
+    amplitude[5] = abs( max(  amplitude[5], origin[2] + (*i)[2] ) );
   }
-  
-  
-  std::vector<Point3d> StructuringElement::get_vector( const Shape::Type shape,
-                                                       const Point3d origin,
-                                                       const double amplitude,
-                                                       const bool usecenter ) {
+  return amplitude;
+}
 
-    switch(shape) {
-      case Shape::CUBE:
-        return StructuringElement::get_vector<Shape::CUBE>( origin, amplitude, usecenter);
-        break;
-        
-      case Shape::SQUARE_XY:
-        return StructuringElement::get_vector<Shape::SQUARE_XY>( origin, amplitude, usecenter);
-        break;
-        
-      case Shape::SQUARE_XZ:
-        return StructuringElement::get_vector<Shape::SQUARE_XZ>( origin, amplitude, usecenter);
-        break;
-        
-      case Shape::SQUARE_YZ:
-        return StructuringElement::get_vector<Shape::SQUARE_YZ>( origin, amplitude, usecenter);
-        break;
-        
-      case Shape::SPHERE:
-        return StructuringElement::get_vector<Shape::SPHERE>( origin, amplitude, usecenter);
-        break;
-        
-      case Shape::DISK_XY:
-        return StructuringElement::get_vector<Shape::DISK_XY>( origin, amplitude, usecenter);
-        break;
-
-      case Shape::DISK_XZ:
-        return StructuringElement::get_vector<Shape::DISK_XZ>( origin, amplitude, usecenter);
-        break;
-        
-      case Shape::DISK_YZ:
-        return StructuringElement::get_vector<Shape::DISK_YZ>( origin, amplitude, usecenter);
-        break;
-        
-      default:
-        throw std::runtime_error( 
-              "shape does not exists for the shape type " 
-              + carto::toString((int)shape) );
-        break;
-    }
-  }
-
-  aims::StructuringElement StructuringElement::getStructuringElement( 
-                                                            const std::string type,
-                                                            const Point3d origin,
-                                                            const double amplitude,
-                                                            const bool usecenter ) {
-    // Structuring element types map
-    std::map<std::string, Connectivity::Type>  connectivities;
-    connectivities[ "4xy" ] = Connectivity::CONNECTIVITY_4_XY;
-    connectivities[ "4xz" ] = Connectivity::CONNECTIVITY_4_XZ;
-    connectivities[ "4yz" ] = Connectivity::CONNECTIVITY_4_YZ;
-    connectivities[ "4xydiag" ] = Connectivity::CONNECTIVITY_4_XYdiag;
-    connectivities[ "4xzdiag" ] = Connectivity::CONNECTIVITY_4_XZdiag;
-    connectivities[ "4yzdiag" ] = Connectivity::CONNECTIVITY_4_YZdiag;
-    connectivities[ "6" ] = Connectivity::CONNECTIVITY_6_XYZ;
-    connectivities[ "8xy" ] = Connectivity::CONNECTIVITY_8_XY;
-    connectivities[ "8xz" ] = Connectivity::CONNECTIVITY_8_XZ;
-    connectivities[ "8yz" ] = Connectivity::CONNECTIVITY_8_YZ;
-    connectivities[ "8xyz" ] = Connectivity::CONNECTIVITY_8_XYZ;
-    connectivities[ "18" ] = Connectivity::CONNECTIVITY_18_XYZ;
-    connectivities[ "26" ] = Connectivity::CONNECTIVITY_26_XYZ;
-    connectivities[ "9xyz-" ] = Connectivity::CONNECTIVITY_9_XY_Zminus;
-    connectivities[ "9xyz+" ] = Connectivity::CONNECTIVITY_9_XY_Zplus;
-    connectivities[ "9xzy-" ] = Connectivity::CONNECTIVITY_9_XZ_Yminus;
-    connectivities[ "9xzy+" ] = Connectivity::CONNECTIVITY_9_XZ_Yplus;
-    connectivities[ "9yzx-" ] = Connectivity::CONNECTIVITY_9_YZ_Xminus;
-    connectivities[ "9yzx+" ] = Connectivity::CONNECTIVITY_9_YZ_Xplus;
-    connectivities[ "5x-y" ] = Connectivity::CONNECTIVITY_5_XminusY;
-    connectivities[ "5x+y" ] = Connectivity::CONNECTIVITY_5_XplusY;
-    connectivities[ "5xy-" ] = Connectivity::CONNECTIVITY_5_XYminus;
-    connectivities[ "5xy+" ] = Connectivity::CONNECTIVITY_5_XYplus;
-    connectivities[ "5x-z" ] = Connectivity::CONNECTIVITY_5_XminusZ;
-    connectivities[ "5x+z" ] = Connectivity::CONNECTIVITY_5_XplusZ;
-    connectivities[ "5xz-" ] = Connectivity::CONNECTIVITY_5_XZminus;
-    connectivities[ "5xz+" ] = Connectivity::CONNECTIVITY_5_XZplus;
-    connectivities[ "5y-z" ] = Connectivity::CONNECTIVITY_5_YminusZ;
-    connectivities[ "5y+z" ] = Connectivity::CONNECTIVITY_5_YplusZ;
-    connectivities[ "5yz-" ] = Connectivity::CONNECTIVITY_5_YZminus;
-    connectivities[ "5yz+" ] = Connectivity::CONNECTIVITY_5_YZplus;
-
-    std::map<std::string, Connectivity::Type>::iterator cit = connectivities.find( type );
-
-    std::map<std::string, Shape::Type> shapes;
-    shapes[ "sphere" ] = Shape::SPHERE;
-    shapes[ "cube" ] = Shape::CUBE;
-    shapes[ "diskxy" ] = Shape::DISK_XY;
-    shapes[ "diskxz" ] = Shape::DISK_XZ;
-    shapes[ "diskyz" ] = Shape::DISK_YZ;
-    shapes[ "squarexy" ] = Shape::SQUARE_XY;
-    shapes[ "squarexz" ] = Shape::SQUARE_XZ;
-    shapes[ "squareyz" ] = Shape::SQUARE_YZ;
-
-    std::map<std::string, Shape::Type>::iterator sit = shapes.find( type );
-
-    if ( cit != connectivities.end() ) {
-      if (carto::verbose)
-        std::cout << "Found structuring element using connectivity" << std::endl;
-      aims::StructuringElement se( cit->second, 
-                                   origin,
-                                   amplitude,
-                                   usecenter );
+namespace aims {
+  namespace strel {
+    StructuringElementRef none()
+    {
+      static StructuringElementRef se;
       return se;
     }
-    else if ( sit != shapes.end() ) {
-      if (carto::verbose)
-        std::cout << "Found structuring element using shape" << std::endl;
-      sit = shapes.find( type );
-      
-      aims::StructuringElement se( sit->second, 
-                                   origin,
-                                   amplitude,
-                                   usecenter );
-      return se;
-    }
-    else
-      throw std::invalid_argument( "Invalid structuring element type: " + type );
+  }
+}
 
+//============================================================================
+// SHAPE: INTERFACE
+//============================================================================
+
+void Shape::setParameters(
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  Point3d origin(0,0,0);
+  setParameters( origin, amplitude, usecenter );
+}
+
+void Shape::setParameters(
+  const Point3d & origin,
+  const double amplitude,
+  const bool usecenter
+)
+{
+  vector<double> vamplitude(3, amplitude);
+  setParameters( origin, vamplitude, usecenter );
+}
+
+void Shape::setParameters(
+  const double amplitude,
+  const bool usecenter
+)
+{
+  Point3d origin(0,0,0);
+  vector<double> vamplitude(3, amplitude);
+  setParameters( origin, vamplitude, usecenter );
+}
+
+
+//============================================================================
+// SHAPE: FACTORY
+//============================================================================
+
+void ShapeFactory::init()
+{
+  static bool initialized = false;
+  if( !initialized )
+  {
+    initialized = true;
+    registerShape( "cube", Cube() );
+    registerShape( "squarexy", SquareXY() );
+    registerShape( "squarexz", SquareXZ() );
+    registerShape( "squareyz", SquareYZ() );
+    registerShape( "sphere", Sphere() );
+    registerShape( "diskxy", DiskXY() );
+    registerShape( "diskxz", DiskXZ() );
+    registerShape( "diskyz", DiskYZ() );
+    registerShape( "cross", Cross() );
+    registerShape( "crossxy", CrossXY() );
+    registerShape( "crossxz", CrossXZ() );
+    registerShape( "crossyz", CrossYZ() );
+    registerShape( "diagonalcross", DiagonalCross() );
+    registerShape( "diagonalcrossxy", DiagonalCrossXY() );
+    registerShape( "diagonalcrossxz", DiagonalCrossXZ() );
+    registerShape( "diagonalcrossyz", DiagonalCrossYZ() );
   }
-  
-  aims::StructuringElement StructuringElement::getStructuringElement( 
-                                                            const std::string type,
-                                                            const double amplitude,
-                                                            const bool usecenter ) {
-    return StructuringElement::getStructuringElement( type, amplitude, usecenter );
+}
+
+map<string,rc_ptr<Shape> > & ShapeFactory::_map()
+{
+  static map<string,rc_ptr<Shape> > m;
+  return m;
+}
+
+void ShapeFactory::registerShape(
+  const string & type,
+  const Shape & strel
+)
+{
+  init();
+  _map()[ type ] = rc_ptr<Shape>( strel.clone() );
+}
+
+set<string> ShapeFactory::shapes()
+{
+  init();
+  set<string> s;
+  map<string,rc_ptr<Shape> >::const_iterator i, e = _map().end();
+  for( i=_map().begin(); i!=e; ++i )
+    s.insert( i->first );
+  return( s );
+}
+
+Shape* ShapeFactory::create(
+  const string & type,
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  init();
+  map<string,rc_ptr<Shape> >::const_iterator i;
+  i = _map().find( type );
+  if( i == _map().end() )
+    return( 0 );
+  Shape * new_shape = i->second->clone();
+  new_shape->setParameters( origin, amplitude, usecenter );
+  return new_shape;
+}
+
+Shape* ShapeFactory::create(
+  const string & type,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  Point3d origin(0,0,0);
+  return create( type, origin, amplitude, usecenter );
+}
+
+Shape* ShapeFactory::create(
+  const string & type,
+  const Point3d & origin,
+  const double amplitude,
+  const bool usecenter
+)
+{
+  vector<double> vamplitude( 3, amplitude );
+  return create( type, origin, vamplitude, usecenter );
+}
+
+Shape* ShapeFactory::create(
+  const string & type,
+  const double amplitude,
+  const bool usecenter
+)
+{
+  Point3d origin(0,0,0);
+  vector<double> vamplitude( 3, amplitude );
+  return create( type, origin, vamplitude, usecenter );
+}
+
+//============================================================================
+// CONNECTIVITY: INTERFACE
+//============================================================================
+
+void Connectivity::setVectorFromMatrix(
+  const Point3d & origin,
+  const bool usecenter
+)
+{
+  Connectivity::Matrix3x3x3Const m = getMatrix();
+  _vector.clear();
+  for( int z=0; z<3; ++z )
+    for( int y=0; y<3; ++y )
+      for( int x=0; x<3; ++x )
+          if( (m[z][y][x]) )
+            _vector.push_back( origin + Point3d( x-1, y-1, z-1 ) );
+  if( usecenter )
+    _vector.push_back( origin );
+}
+
+//============================================================================
+// CONNECTIVITY: FACTORY
+//============================================================================
+
+void ConnectivityFactory::init()
+{
+  static bool initialized = false;
+  if( !initialized )
+  {
+    initialized = true;
+    registerConnectivity( "4xy", Connectivity4XY() );
+    registerConnectivity( "4xz", Connectivity4XZ() );
+    registerConnectivity( "4yz", Connectivity4YZ() );
+    registerConnectivity( "4xydiag", Connectivity4XYDiag() );
+    registerConnectivity( "4xzdiag", Connectivity4XZDiag() );
+    registerConnectivity( "4yzdiag", Connectivity4YZDiag() );
+    registerConnectivity( "6", Connectivity6XYZ() );
+    registerConnectivity( "8xy", Connectivity8XY() );
+    registerConnectivity( "8xz", Connectivity8XZ() );
+    registerConnectivity( "8yz", Connectivity8YZ() );
+    registerConnectivity( "8xyz", Connectivity8XYZ() );
+    registerConnectivity( "18", Connectivity18XYZ() );
+    registerConnectivity( "26", Connectivity26XYZ() );
+    registerConnectivity( "9xyz-", Connectivity9XYZMinus() );
+    registerConnectivity( "9xyz+", Connectivity9XYZPlus() );
+    registerConnectivity( "9xzy-", Connectivity9XZYMinus() );
+    registerConnectivity( "9xzy+", Connectivity9XZYPlus() );
+    registerConnectivity( "9yzx-", Connectivity9YZXMinus() );
+    registerConnectivity( "9yzx+", Connectivity9YZXPlus() );
+    registerConnectivity( "5x-y", Connectivity5XMinusY() );
+    registerConnectivity( "5x+y", Connectivity5XPlusY() );
+    registerConnectivity( "5xy-", Connectivity5XYMinus() );
+    registerConnectivity( "5xy+", Connectivity5XYPlus() );
+    registerConnectivity( "5x-z", Connectivity5XMinusZ() );
+    registerConnectivity( "5x+z", Connectivity5XPlusZ() );
+    registerConnectivity( "5xz-", Connectivity5XZMinus() );
+    registerConnectivity( "5xz+", Connectivity5XZPlus() );
+    registerConnectivity( "5y-z", Connectivity5YMinusZ() );
+    registerConnectivity( "5y+z", Connectivity5YPlusZ() );
+    registerConnectivity( "5yz-", Connectivity5YZMinus() );
+    registerConnectivity( "5yz+", Connectivity5YZPlus() );
   }
+}
+
+map<string,rc_ptr<Connectivity> > & ConnectivityFactory::_map()
+{
+  static map<string,rc_ptr<Connectivity> > m;
+  return m;
+}
+
+void ConnectivityFactory::registerConnectivity(
+  const string & type,
+  const Connectivity & strel
+)
+{
+  init();
+  _map()[ type ] = rc_ptr<Connectivity>( strel.clone() );
+}
+
+set<string> ConnectivityFactory::connectivities()
+{
+  init();
+  set<string> s;
+  map<string,rc_ptr<Connectivity> >::const_iterator i, e = _map().end();
+  for( i=_map().begin(); i!=e; ++i )
+    s.insert( i->first );
+  return( s );
+}
+
+Connectivity* ConnectivityFactory::create(
+  const string & type,
+  const Point3d & origin,
+  const bool usecenter
+)
+{
+  init();
+  map<string,rc_ptr<Connectivity> >::const_iterator i;
+  i = _map().find( type );
+  if( i == _map().end() )
+    return( 0 );
+  Connectivity * new_con = i->second->clone();
+  new_con->setVectorFromMatrix( origin, usecenter );
+  return new_con;
+}
+
+Connectivity* ConnectivityFactory::create(
+  const string & type,
+  const bool usecenter
+)
+{
+  return create( type, Point3d(0,0,0), usecenter );
+}
+
+//============================================================================
+// SHAPE: DERIVED CLASSES
+//============================================================================
+void Cube::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+  if( vamplitude.size() < 3 )
+    vamplitude.push_back( vamplitude[1] );
+
+  for(int k = - (int)amplitude[2]; k <= (int)amplitude[2]; ++k)
+    for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
+      for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+        if( usecenter || ( i != 0 ) || ( j != 0 ) || ( k != 0 ) )
+          _vector.push_back( Point3d(i, j, k) + origin );
+}
+
+void SquareXY::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
+    for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+      if( usecenter || ( i != 0 ) || ( j != 0 ) )
+        _vector.push_back( Point3d(i, j, 0) + origin );
+}
+
+void SquareXZ::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
+    for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+      if( usecenter || ( i != 0 ) || ( k != 0 ) )
+        _vector.push_back( Point3d(i, 0, k) + origin );
+}
+
+void SquareYZ::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
+    for(int j = - (int)amplitude[0]; j <= (int)amplitude[0]; ++j)
+      if( usecenter || ( j != 0 ) || ( k != 0 ) )
+        _vector.push_back( Point3d(0, j, k) + origin );
+}
+
+void Sphere::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+  if( vamplitude.size() < 3 )
+    vamplitude.push_back( vamplitude[1] );
+
+  for(int k = - (int)amplitude[2]; k <= (int)amplitude[2]; ++k)
+    for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
+      for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+        if( ( usecenter || ( i != 0 ) || ( j != 0 ) || ( k != 0 ) ) &&
+            sqrt( pow(i,2)/pow(amplitude[0],2) + 
+                  pow(j,2)/pow(amplitude[1],2) + 
+                  pow(k,2)/pow(amplitude[2],2) ) <= 1 )
+          _vector.push_back( Point3d(i, j, k) + origin );
+}
+
+void DiskXY::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
+    for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+      if( ( usecenter || ( i != 0 ) || ( j != 0 ) ) &&
+          sqrt( pow(i,2)/pow(amplitude[0],2) + 
+                pow(j,2)/pow(amplitude[1],2) ) <= 1 )
+        _vector.push_back( Point3d(i, j, 0) + origin );
+}
+
+void DiskXZ::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
+    for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+      if( ( usecenter || ( i != 0 ) || ( k != 0 ) ) &&
+          sqrt( pow(i,2)/pow(amplitude[0],2) + 
+                pow(k,2)/pow(amplitude[1],2) ) <= 1 )
+        _vector.push_back( Point3d(i, 0, k) + origin );
+}
+
+void DiskYZ::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
+    for(int j = - (int)amplitude[0]; j <= (int)amplitude[0]; ++j)
+      if( ( usecenter || ( j != 0 ) || ( k != 0 ) ) &&
+          sqrt( pow(j,2)/pow(amplitude[0],2) + 
+                pow(k,2)/pow(amplitude[1],2) ) <= 1 )
+        _vector.push_back( Point3d(0, j, k) + origin );
+}
+
+void Cross::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+  if( vamplitude.size() < 3 )
+    vamplitude.push_back( vamplitude[1] );
+
+  for(int k = - (int)amplitude[2]; k <= (int)amplitude[2]; ++k)
+    for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
+      for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+        if( ( ( i == 0 ) && ( ( j == 0 ) || ( k == 0 ) ) ) || 
+            ( ( j == 0 ) && ( k == 0 ) ) )
+          if( usecenter || ( i != 0 ) || ( j != 0 ) || ( k != 0 ) )
+            _vector.push_back( Point3d(i, j, k) + origin );
+}
+
+void CrossXY::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
+    for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+      if( ( i == 0 ) || ( j == 0 ) )
+        if( usecenter || ( i != 0 ) || ( j != 0 ) )
+          _vector.push_back( Point3d(i, j, 0) + origin );
+}
+
+void CrossXZ::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
+    for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+      if( ( i == 0 ) || ( k == 0 ) )
+        if( usecenter || ( i != 0 ) || ( k != 0 ) )
+          _vector.push_back( Point3d(i, 0, k) + origin );
+}
+
+void CrossYZ::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
+    for(int j = - (int)amplitude[0]; j <= (int)amplitude[0]; ++j)
+      if( ( j == 0 ) || ( k == 0 ) )
+        if( usecenter || ( j != 0 ) || ( k != 0 ) )
+          _vector.push_back( Point3d(0, j, k) + origin );
+}
+
+void DiagonalCross::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+  if( vamplitude.size() < 3 )
+    vamplitude.push_back( vamplitude[1] );
+
+  for(int k = - (int)amplitude[2]; k <= (int)amplitude[2]; ++k)
+    for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
+      for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+        if( ( abs(i) == abs(j) ) && ( abs(i) == abs(k) ) )
+          if( usecenter || ( i != 0 ) || ( j != 0 ) || ( k != 0 ) )
+            _vector.push_back( Point3d(i, j, k) + origin );
+}
+
+void DiagonalCrossXY::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+    for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
+      for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+        if( abs(i) == abs(j) )
+          if( usecenter || ( i != 0 ) || ( j != 0 ) )
+            _vector.push_back( Point3d(i, j, 0) + origin );
+}
+
+void DiagonalCrossXZ::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+    for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
+      for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+        if( abs(i) == abs(k) )
+          if( usecenter || ( i != 0 ) || ( k != 0 ) )
+            _vector.push_back( Point3d(i, 0, k) + origin );
+}
+
+void DiagonalCrossYZ::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+    for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
+      for(int j = - (int)amplitude[0]; j <= (int)amplitude[0]; ++j)
+        if( abs(j) == abs(k) )
+          if( usecenter || ( j != 0 ) || ( k != 0 ) )
+            _vector.push_back( Point3d(0, j, k) + origin );
+}
+
+//============================================================================
+// CONNECTIVITY: DERIVED CLASSES
+//============================================================================
+Connectivity::Matrix3x3x3Const Connectivity4XY::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 1, 0, 1 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity4XZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 0, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity4YZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity4XYDiag::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 1, 0, 1 },
+                                     { 0, 0, 0 },
+                                     { 1, 0, 1 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity4XZDiag::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 1, 0, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 0, 1 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity4YZDiag::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 1, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 1, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity6XYZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 1, 0, 1 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity8XY::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 1, 1, 1 },
+                                     { 1, 0, 1 },
+                                     { 1, 1, 1 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity8XZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 1, 1, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 0, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 1, 1 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity8YZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 1, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 1, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity8XYZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 1, 0, 1 },
+                                     { 0, 0, 0 },
+                                     { 1, 0, 1 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 1, 0, 1 },
+                                     { 0, 0, 0 },
+                                     { 1, 0, 1 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity18XYZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 1, 0 },
+                                     { 1, 1, 1 },
+                                     { 0, 1, 0 } },
+                                   { { 1, 1, 1 },
+                                     { 1, 0, 1 },
+                                     { 1, 1, 1 } },
+                                   { { 0, 1, 0 },
+                                     { 1, 1, 1 },
+                                     { 0, 1, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity26XYZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 1, 1, 1 },
+                                     { 1, 1, 1 },
+                                     { 1, 1, 1 } },
+                                   { { 1, 1, 1 },
+                                     { 1, 0, 1 },
+                                     { 1, 1, 1 } },
+                                   { { 1, 1, 1 },
+                                     { 1, 1, 1 },
+                                     { 1, 1, 1 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity9XYZMinus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 1, 1, 1 },
+                                     { 1, 1, 1 },
+                                     { 1, 1, 1 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity9XYZPlus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 1, 1, 1 },
+                                     { 1, 1, 1 },
+                                     { 1, 1, 1 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity9XZYMinus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 1, 1, 1 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 1, 1, 1 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 1, 1, 1 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity9XZYPlus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 1, 1, 1 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 1, 1, 1 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 1, 1, 1 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity9YZXMinus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 1, 0, 0 },
+                                     { 1, 0, 0 },
+                                     { 1, 0, 0 } },
+                                   { { 1, 0, 0 },
+                                     { 1, 0, 0 },
+                                     { 1, 0, 0 } },
+                                   { { 1, 0, 0 },
+                                     { 1, 0, 0 },
+                                     { 1, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity9YZXPlus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 1 },
+                                     { 0, 0, 1 },
+                                     { 0, 0, 1 } },
+                                   { { 0, 0, 1 },
+                                     { 0, 0, 1 },
+                                     { 0, 0, 1 } },
+                                   { { 0, 0, 1 },
+                                     { 0, 0, 1 },
+                                     { 0, 0, 1 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5XMinusY::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 1, 1, 0 },
+                                     { 1, 0, 0 },
+                                     { 1, 1, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5XPlusY::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 1, 1 },
+                                     { 0, 0, 1 },
+                                     { 0, 1, 1 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5XYMinus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 1, 1, 1 },
+                                     { 1, 0, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5XYPlus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 0, 1 },
+                                     { 1, 1, 1 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5XMinusZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 1, 1, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 1, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5XPlusZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 1, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 1, 1 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5XZMinus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 1, 1, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 0, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5XZPlus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 0, 1 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 1, 1, 1 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5YMinusZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 1, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5YPlusZ::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 1, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5YZMinus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 1, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } } };
+  return m;
+}
+
+Connectivity::Matrix3x3x3Const Connectivity5YZPlus::getMatrix() const
+{
+  static const bool m[3][3][3] = { { { 0, 0, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 0, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 0, 0, 0 },
+                                     { 0, 1, 0 } },
+                                   { { 0, 1, 0 },
+                                     { 0, 1, 0 },
+                                     { 0, 1, 0 } } };
+  return m;
 }
