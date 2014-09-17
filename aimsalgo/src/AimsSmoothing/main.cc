@@ -65,6 +65,7 @@ class FilterProcess : public Process
     string unit;
     Object options;
     int32_t dx, dy, dz;
+    string bv;
 
     FilterProcess():
       fileOut(""),
@@ -75,7 +76,8 @@ class FilterProcess : public Process
       options(carto::none()),
       dx(1),
       dy(1),
-      dz(1)
+      dz(1),
+      bv("")
     {
       registerProcessType( "Volume", "S8",      &doit<int8_t> );
       registerProcessType( "Volume", "U8",      &doit<uint8_t> );
@@ -102,6 +104,11 @@ doit( Process & p, const string & fname, Finder & )
   if( !dataR.read( in ) )
       return( false );
   cout << " done" << endl;
+
+  // bg value
+  T defaultval;
+  carto::stringTo( proc.bv, defaultval );
+  in.fillBorder( defaultval );
 
   // Compatibility with old parameters
   if( proc.dx > 1 || proc.dy > 1 || proc.dz > 1 ) {
