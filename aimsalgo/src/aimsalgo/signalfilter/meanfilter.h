@@ -35,25 +35,65 @@
 #ifndef AIMS_SIGNALFILTER_MEANSMOOTH_H
 #define AIMS_SIGNALFILTER_MEANSMOOTH_H
 
-#include <cartobase/type/datatypetraits.h>
-#include <aims/signalfilter/nonlin_filt-func.h>
-#include <aims/signalfilter/filteringimagealgorithm.h>
+#include <aims/signalfilter/filter_nonlinear.h>
+#include <aims/connectivity/structuring_element.h>
+#include <aims/data/data_g.h>
+#include <vector>
 
-template <class VoxelType>
-class MeanSmoothing : 
-  public aims::FilteringImageAlgorithm<VoxelType, 
-           MeanFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
-    
+//============================================================================
+//   Backward compatibility bindings
+//============================================================================
+
+template <typename T>
+class MeanSmoothing
+{
   public:
-    typedef aims::FilteringImageAlgorithm<VoxelType, 
-           MeanFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
-           FilteringImageAlgorithmType;
-           
-    typedef typename FilteringImageAlgorithmType::FilterFuncType 
-           FilterFuncType;
-    
-    MeanSmoothing( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
-      : FilteringImageAlgorithmType(sx, sy, sz, options) {}
+    MeanSmoothing( int sx = 3, int sy = 3, int sz = 3 );
+    virtual ~MeanSmoothing();
+    virtual AimsData<T> doit( const AimsData<T>& in );
+  private:
+    MeanSmoothing<T> & operator = ( const MeanSmoothing<T> & );
+    int _sx;
+    int _sy;
+    int _sz;
 };
+
+//----------------------------------------------------------------------------
+//   DEFINITIONS
+//----------------------------------------------------------------------------
+
+template <typename T>
+MeanSmoothing<T>::MeanSmoothing( int sx, int sy, int sz ):
+  _sx(sx), _sy(sy), _sz(sz)
+{}
+
+template <typename T>
+MeanSmoothing<T>::~MeanSmoothing()
+{}
+
+template <typename T>
+MeanSmoothing<T> & MeanSmoothing<T>::operator= (
+  const MeanSmoothing<T> & other
+)
+{
+  _sx = other._sx;
+  _sy = other._sy;
+  _sz = other._sz;
+  return (*this);
+}
+
+#include <iostream>
+template <typename T>
+AimsData<T> MeanSmoothing<T>::doit( const AimsData<T>& in )
+{
+  std::vector<double> amplitude(3,0.);
+  amplitude[0] = .5 * (double)_sx;
+  amplitude[1] = .5 * (double)_sy;
+  amplitude[2] = .5 * (double)_sz;
+  aims::strel::Cube se( amplitude, true );
+  aims::MeanFilter<T> f( se );
+  return f.execute( in );
+}
+
 
 #endif

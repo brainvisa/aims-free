@@ -31,147 +31,179 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-
+//--- aims -------------------------------------------------------------------
+#include <aims/data/data_g.h>                                      // AimsData
+#include <aims/io/io_g.h>                             // Reader Writer Process
+#include <aims/getopt/getopt2.h>                            // AimsApplication
+#include <aims/getopt/getoptProcess.h>     // AimsApplication: possible inputs
+#include <aims/rgb/rgb.h>                                           // AimsRGB
+#include <aims/signalfilter/filter_linear.h>               // LinFilterFactory
+#include <aims/signalfilter/filter_nonlinear.h>         // NonLinFilterFactory
+#include <aims/connectivity/structuring_element.h>             // ShapeFactory
+//--- carto ------------------------------------------------------------------
+#include <cartobase/object/object.h>
+#include <cartobase/object/property.h>
+//--- std --------------------------------------------------------------------
 #include <cstdlib>
 #include <string>
-#include <aims/data/data_g.h>
-#include <aims/io/io_g.h>
-#include <aims/io/writer.h> 
-#include <aims/getopt/getopt2.h>
-#include <aims/getopt/getoptProcess.h>
-#include <aims/math/math_g.h>
-#include <aims/utility/utility_g.h>
-#include <aims/rgb/rgb.h>
-#include <aims/signalfilter/maxfilter.h>
-#include <aims/signalfilter/minfilter.h>
-#include <aims/signalfilter/medianfilter.h>
-#include <aims/signalfilter/majorityfilter.h>
-#include <aims/signalfilter/meanfilter.h>
+//----------------------------------------------------------------------------
 
+using namespace aims::strel;
 using namespace aims;
 using namespace carto;
 using namespace std;
 
-class AimsFilter : public Process {
-    public:
-      string fileIn;
-      string fileOut;
-      int32_t dx, dy, dz;
-      string type;
-    
-      AimsFilter();
+template <typename T> bool doit( Process &, const string &, Finder & );
+
+class FilterProcess : public Process
+{
+  public:
+    string fileOut;
+    string type;
+    string shape;
+    vector<double> amplitude;
+    string unit;
+    Object options;
+    int32_t dx, dy, dz;
+
+    FilterProcess():
+      fileOut(""),
+      type("majority"),
+      shape("cube"),
+      amplitude(3,1.),
+      unit("v"),
+      options(carto::none()),
+      dx(1),
+      dy(1),
+      dz(1)
+    {
+      registerProcessType( "Volume", "S8",      &doit<int8_t> );
+      registerProcessType( "Volume", "U8",      &doit<uint8_t> );
+      registerProcessType( "Volume", "S16",     &doit<int16_t> );
+      registerProcessType( "Volume", "U16",     &doit<uint16_t> );
+      registerProcessType( "Volume", "S32",     &doit<int32_t> );
+      registerProcessType( "Volume", "U32",     &doit<uint32_t> );
+      registerProcessType( "Volume", "FLOAT",   &doit<float> );
+      registerProcessType( "Volume", "DOUBLE",  &doit<double> );
+      registerProcessType( "Volume", "RGB",     &doit<AimsRGB> );
+      registerProcessType( "Volume", "RGBA",    &doit<AimsRGBA> );
+    }
 };
 
-template<class T> bool 
-filter( Process & p, const string &, Finder & ) {
-  AimsFilter & proc = (AimsFilter &)p;
-
-  // Lecture image
-  AimsData<T> in, out;
-  Reader< AimsData<T> > dataR( proc.fileIn );
-  dataR.read( in );
-
-  // Check dimensions of filter
-  proc.dx = (proc.dx > 1 ? proc.dx : 1 );
-  proc.dy = (proc.dy > 1 ? proc.dy : 1 );
-  proc.dz = (proc.dz > 1 ? proc.dz : 1 );
-
-  if ( proc.dz > in.dimZ() )
-  {
-     cerr << "Image Z dimension can not be lower than filter Z dimension\n";
-     return( 1 );
-  }
-  else if ( proc.dy > in.dimY() )
-  {
-     cerr << "Image Y dimension can not be lower than filter Y dimension\n";
-     return( 1 );
-  }
-  else if ( proc.dx > in.dimX() )
-  {
-     cerr << "Image X dimension can not be lower than filter X dimension\n";
-     return( 1 );
-  }
-
-  if ( (proc.type == "mean") 
-       || (proc.type == "mea") )
-  {
-    MeanSmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
-    out = smoothing.doit( in );
-  }
-  else if ( (proc.type == "median") 
-            || (proc.type == "med") )
-  {
-    MedianSmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
-    out = smoothing.doit( in );
-  }
-  else if ( (proc.type == "minimum") 
-            || (proc.type == "min") )
-  {
-    MinSmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
-    out = smoothing.doit( in );
-  }
-  else if ( (proc.type == "maximum") 
-            || (proc.type == "max") )
-  {
-    MaxSmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
-    out = smoothing.doit( in );
-  }
-  else
-  {
-    MajoritySmoothing< T > smoothing( proc.dx, proc.dy, proc.dz );
-    out = smoothing.doit( in );
-  }
-
-  // 
-  //   Writing smoothed image
-  //
-  out.setHeader( in.header()->cloneHeader() );
-  Writer< AimsData<T> > dataW( proc.fileOut );
-  dataW << out;
-
-  return true;
-}
-
-AimsFilter::AimsFilter() 
-  : Process(), dx(1), dy(1), dz(1)
-               
+template <typename T> bool
+doit( Process & p, const string & fname, Finder & )
 {
-  registerProcessType( "Volume", "S8", &filter<int8_t> );
-  registerProcessType( "Volume", "U8", &filter<uint8_t> );
-  registerProcessType( "Volume", "S16", &filter<int16_t> );
-  registerProcessType( "Volume", "U16", &filter<uint16_t> );
-  registerProcessType( "Volume", "S32", &filter<int32_t> );
-  registerProcessType( "Volume", "U32", &filter<uint32_t> );
-  registerProcessType( "Volume", "FLOAT", &filter<float> );
-  registerProcessType( "Volume", "DOUBLE", &filter<double> );
-  registerProcessType( "Volume", "RGB", &filter<AimsRGB> );
-  registerProcessType( "Volume", "RGBA", &filter<AimsRGBA> );
+  FilterProcess & proc = (FilterProcess &) p;
+
+  // Read image
+  AimsData<T> in, out;
+  Reader< AimsData<T> > dataR( fname );
+  cout << "Reading volume...";
+  if( !dataR.read( in ) )
+      return( false );
+  cout << " done" << endl;
+
+  // Compatibility with old parameters
+  if( proc.dx > 1 || proc.dy > 1 || proc.dz > 1 ) {
+    proc.amplitude[0] = ( proc.dx > 1 ? (double) proc.dx : 1. ) / 2.;
+    proc.amplitude[1] = ( proc.dy > 1 ? (double) proc.dy : 1. ) / 2.;
+    proc.amplitude[2] = ( proc.dz > 1 ? (double) proc.dz : 1. ) / 2.;
+  }
+  if( proc.unit[0] == 'm' ) {
+    proc.amplitude[0] /= (double) in.sizeX();
+    proc.amplitude[1] /= (double) in.sizeY();
+    proc.amplitude[2] /= (double) in.sizeZ();
+  }
+
+  // Load StructuringElement
+  StructuringElementRef shape( ShapeFactory::create( proc.shape, proc.amplitude, true ) );
+  if( !shape ) {
+    cerr << "Unknown shape " << proc.shape << endl;
+    return false;
+  }
+
+  // Load Filter
+  rc_ptr<ImageAlgorithmInterface<T> > algo(0);
+  algo.reset( NonLinFilterFactory<T>::create( proc.type, *shape, proc.options ) );
+  if( !algo )
+    algo.reset( LinFilterFactory<T>::create( proc.type, *shape, proc.options ) );
+  if( !algo ) {
+    cerr << "Unknown filter " << proc.type << endl;
+    return false;
+  }
+
+  // Do processing
+  out = algo->execute(in);
+
+  // File Writing
+  cout << "Writing volume...";
+  Writer<AimsData<T> > dataW( proc.fileOut );
+  int result = dataW.write( out );
+  cout << " done" << endl;
+  return result;
 }
 
 int main( int argc, const char **argv )
 {
-  try {
-    AimsFilter proc;
-    string  filein, fileout, motionfile, type = "majority";
+  try
+  {
+    FilterProcess proc;
+    ProcessInput  pi( proc );
+    double  gabSigma = 1.0, gabTheta = 0.0, gabLambda = 1.0,
+            gabPsi = 0.0, gabGamma = 1.0;
+    bool    gabReal = true;
 
-    AimsApplication app( argc, argv, "Applies a smoothing filter " 
-                          "to a volume.");
-    app.addOption( proc.fileIn, "-i", "source volume" );
+    AimsApplication app( argc, argv, "Image filtering\n"
+      "This command allows one to apply a range of filtering "
+      "algorithms. The user should choose a filter type, "
+      "a structuring element (in non-linear cases), and eventually "
+      "filter-specific options.\n" );
+    app.addOption( pi, "-i", "source volume" );
     app.addOption( proc.fileOut, "-o", "destination volume" );
-    app.addOption( proc.dx, "--dx", "x dimension of the filter to apply", true );
-    app.addOption( proc.dy, "--dy", "y dimension of the filter to apply", true );
-    app.addOption( proc.dz, "--dz", "z dimension of the filter to apply", true );
-    app.addOption( proc.type, "-t",
-                    "Smoothing filter type: mea[n], med[ian], min[imum], "
-                    "max[imum], maj[ority] (default = majority)",
-                    true );
+    app.addOption( proc.type, "-t", "Smoothing filter type: "
+      "mea[n], med[ian], min[imum], max[imum], maj[ority], gab[or] "
+      "(default = majority)",
+      true );
+    app.addOption( proc.shape, "-s", "Structuring element type [default:cube]", true );
+    app.addOptionSeries( proc.amplitude, "-a", "Structuring element amplitude [default:1.]", 0, 3 );
+    app.addOption( proc.unit, "-u", "Amplitude unit: v[oxel], m[m] [default:v]", true );
+    app.addOption( gabSigma, "--gabSigma", "Gabor Filter: standard deviation of the gaussian function (mm)", true );
+    app.addOption( gabTheta, "--gabTheta", "Gabor Filter: rotation of the referential (deg)", true );
+    app.addOption( gabLambda, "--gabLambda", "Gabor Filter: wavelength of the sinusoidal function (mm)", true );
+    app.addOption( gabPsi, "--gabPsi", "Gabor Filter: phase offset of the sinusoidal function (rad)", true );
+    app.addOption( gabGamma, "--gabGamma", "Gabor Filter: aspect ratio of the referential", true );
+    app.addOption( gabReal, "--gabReal", "Gabor Filter: if true returns the real part, else immaginary", true );
+    app.addOption( proc.bv, "--bv", "Background value to use", true );
+    app.addOption( proc.dx, "--dx", "x dimension of the filter to apply (voxels) (deprecated)", true );
+    app.addOption( proc.dy, "--dy", "y dimension of the filter to apply (voxels) (deprecated)", true );
+    app.addOption( proc.dz, "--dz", "z dimension of the filter to apply (voxels) (deprecated)", true );
     app.alias( "--input", "-i" );
     app.alias( "--output", "-o" );
     app.alias( "--type", "-t" );
+    app.alias( "--amplitude", "-a" );
+    app.alias( "--unit", "-u" );
+    app.alias( "--strelement", "-s" );
 
     app.initialize();
 
-    if( !proc.execute( proc.fileIn ) )
+    proc.options = Object::value( PropertySet() );
+    if( proc.type == "gab" || proc.type == "gabor" )
+    {
+      proc.options->setProperty( "sigma", gabSigma );
+      proc.options->setProperty( "theta", gabTheta );
+      proc.options->setProperty( "lambda", gabLambda );
+      proc.options->setProperty( "psi", gabPsi );
+      proc.options->setProperty( "gamma", gabGamma );
+      proc.options->setProperty( "real", gabReal );
+    }
+    if( proc.amplitude[0] < 0 )
+      proc.amplitude[0] = 1.;
+    if( proc.amplitude[1] < 0 )
+      proc.amplitude[1] = proc.amplitude[0];
+    if( proc.amplitude[2] < 0 )
+      proc.amplitude[2] = proc.amplitude[1];
+
+    if( !proc.execute( pi.filename ) )
     {
         cerr << "Could not process\n";
         return( EXIT_FAILURE );
@@ -187,6 +219,6 @@ int main( int argc, const char **argv )
     return( EXIT_FAILURE );
   }
 
-  return EXIT_SUCCESS; 
+  return EXIT_SUCCESS;
 }
- 
+

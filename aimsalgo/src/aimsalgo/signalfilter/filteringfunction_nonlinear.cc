@@ -31,30 +31,30 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#include <aims/signalfilter/filteringfunction_nonlinear_d.h>
 
-#ifndef AIMS_SIGNALFILTER_NOTNULLMEDIANSMOOTH_H
-#define AIMS_SIGNALFILTER_NOTNULLMEDIANSMOOTH_H
+#define AIMS_TEMPLATE_NONLIN_FILTERFUNC( NAME )                              \
+  template class NAME<int8_t>;                                               \
+  template class NAME<uint8_t>;                                              \
+  template class NAME<int16_t>;                                              \
+  template class NAME<uint16_t>;                                             \
+  template class NAME<int32_t>;                                              \
+  template class NAME<uint32_t>;                                             \
+  template class NAME<int64_t>;                                              \
+  template class NAME<uint64_t>;                                             \
+  template class NAME<float>;                                                \
+  template class NAME<double>
 
-#include <cartobase/type/datatypetraits.h>
-#include <aims/signalfilter/nonlin_filt-func.h>
-#include <aims/signalfilter/filteringimagealgorithm.h>
-
-template <class VoxelType>
-class NotNullMedianSmoothing : 
-  public aims::FilteringImageAlgorithm<VoxelType, 
-           NotNullMedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> >
-{
-
-  public:
-    typedef aims::FilteringImageAlgorithm<VoxelType, 
-           NotNullMedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
-           FilteringImageAlgorithmType;
-
-    typedef typename FilteringImageAlgorithmType::FilterFuncType 
-           FilterFuncType;
-
-    NotNullMedianSmoothing( int sx = 3, int sy = 3, int sz = 3, carto::Object options = carto::none() )
-      : FilteringImageAlgorithmType(sx, sy, sz, options) {}
-};
-
-#endif
+namespace aims {
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(NonLinFilterFunc);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(NonLinFilterFuncFactory);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(MedianFilterFunc);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(NotNullMedianFilterFunc);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(MeanFilterFunc);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(NotNullMeanFilterFunc);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(MinFilterFunc);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(MaxFilterFunc);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(MajorityFilterFunc);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(SumFilterFunc);
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(ExtremaDifferenceFilterFunc);
+}

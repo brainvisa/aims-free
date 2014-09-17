@@ -35,25 +35,65 @@
 #ifndef AIMS_SIGNALFILTER_MAXSMOOTH_H
 #define AIMS_SIGNALFILTER_MAXSMOOTH_H
 
-#include <cartobase/type/datatypetraits.h>
-#include <aims/signalfilter/nonlin_filt-func.h>
-#include <aims/signalfilter/filteringimagealgorithm.h>
+#include <aims/signalfilter/filter_nonlinear.h>
+#include <aims/connectivity/structuring_element.h>
+#include <aims/data/data_g.h>
+#include <vector>
 
-template <class VoxelType>
-class MaxSmoothing : 
-  public aims::FilteringImageAlgorithm<VoxelType, 
-           MaxFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
-    
+//============================================================================
+//   Backward compatibility bindings
+//============================================================================
+
+template <typename T>
+class MaxSmoothing
+{
   public:
-    typedef aims::FilteringImageAlgorithm<VoxelType, 
-           MaxFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
-           FilteringImageAlgorithmType;
-           
-    typedef typename FilteringImageAlgorithmType::FilterFuncType 
-           FilterFuncType;
-    
-    MaxSmoothing( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
-      : FilteringImageAlgorithmType(sx, sy, sz, options) {}
+    MaxSmoothing( int sx = 3, int sy = 3, int sz = 3 );
+    virtual ~MaxSmoothing();
+    virtual AimsData<T> doit( const AimsData<T>& in );
+  private:
+    MaxSmoothing<T> & operator = ( const MaxSmoothing<T> & );
+    int _sx;
+    int _sy;
+    int _sz;
 };
+
+//----------------------------------------------------------------------------
+//   DEFINITIONS
+//----------------------------------------------------------------------------
+
+template <typename T>
+MaxSmoothing<T>::MaxSmoothing( int sx, int sy, int sz ):
+  _sx(sx), _sy(sy), _sz(sz)
+{}
+
+template <typename T>
+MaxSmoothing<T>::~MaxSmoothing()
+{}
+
+template <typename T>
+MaxSmoothing<T> & MaxSmoothing<T>::operator= (
+  const MaxSmoothing<T> & other
+)
+{
+  _sx = other._sx;
+  _sy = other._sy;
+  _sz = other._sz;
+  return (*this);
+}
+
+#include <iostream>
+template <typename T>
+AimsData<T> MaxSmoothing<T>::doit( const AimsData<T>& in )
+{
+  std::vector<double> amplitude(3,0.);
+  amplitude[0] = .5 * (double)_sx;
+  amplitude[1] = .5 * (double)_sy;
+  amplitude[2] = .5 * (double)_sz;
+  aims::strel::Cube se( amplitude, true );
+  aims::MaxFilter<T> f( se );
+  return f.execute( in );
+}
+
 
 #endif

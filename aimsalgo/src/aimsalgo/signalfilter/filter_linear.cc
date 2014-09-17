@@ -30,35 +30,24 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-// #include <aims/signalfilter/nonlin_filt-func_d.h>
-#include <aims/signalfilter/nonlin_filt-func-rgb_d.h>
 
-template class NonLinFilterFunc<AimsRGB>;
-template class NonLinFilterFunc<AimsRGBA>;
+#include <aims/signalfilter/filter_linear_d.h>
+#include <aims/rgb/rgb.h>
 
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MedianFilterFunc, AimsRGB)
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MedianFilterFunc, AimsRGBA)
+#define AIMS_TEMPLATE_LIN_FILTERFUNC( NAME )                                 \
+  template class NAME<int8_t>;                                               \
+  template class NAME<uint8_t>;                                              \
+  template class NAME<int16_t>;                                              \
+  template class NAME<uint16_t>;                                             \
+  template class NAME<int32_t>;                                              \
+  template class NAME<uint32_t>;                                             \
+  template class NAME<int64_t>;                                              \
+  template class NAME<uint64_t>;                                             \
+  template class NAME<float>;                                                \
+  template class NAME<double>;                                               \
+  template class NAME<AimsRGB>;                                              \
+  template class NAME<AimsRGBA>
 
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(NotNullMedianFilterFunc, AimsRGB)
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(NotNullMedianFilterFunc, AimsRGBA)
-
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MeanFilterFunc, AimsRGB)
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MeanFilterFunc, AimsRGBA)
-
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(NotNullMeanFilterFunc, AimsRGB)
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(NotNullMeanFilterFunc, AimsRGBA)
-
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MinFilterFunc, AimsRGB)
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MinFilterFunc, AimsRGBA)
-
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MaxFilterFunc, AimsRGB)
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MaxFilterFunc, AimsRGBA)
-
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MajorityFilterFunc, AimsRGB)
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(MajorityFilterFunc, AimsRGBA)
-
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(ExtremaDifferenceFilterFunc, AimsRGB)
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(ExtremaDifferenceFilterFunc, AimsRGBA)
-
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(SumFilterFunc, AimsRGB)
-AIMSALGO_NONLINFILT_FUNC_MULTICHANNEL_SPECIALIZE(SumFilterFunc, AimsRGBA)
+namespace aims {
+  AIMS_TEMPLATE_LIN_FILTERFUNC(LinFilterFactory);
+}

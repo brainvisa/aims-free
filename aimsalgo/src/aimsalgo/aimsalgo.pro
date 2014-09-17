@@ -194,7 +194,6 @@ HEADERS = \
     signalfilter/convol.h    \
     signalfilter/diffusionSmoother_d.h \
     signalfilter/diffusionSmoother.h \
-    signalfilter/filteringimagealgorithm.h \
     signalfilter/firfilter.h  \
     signalfilter/g2dsmooth.h  \
     signalfilter/g3dsmooth.h  \
@@ -209,17 +208,25 @@ HEADERS = \
     signalfilter/ggradient.h  \
     signalfilter/gframes.h    \
     signalfilter/vfilter.h    \
-    signalfilter/maxfilter.h  \
     signalfilter/medianfilter.h  \
     signalfilter/meanfilter.h  \
     signalfilter/minfilter.h  \
+    signalfilter/maxfilter.h  \
     signalfilter/majorityfilter.h  \
-    signalfilter/notnullmeanfilter.h  \
-    signalfilter/notnullmedianfilter.h  \
-    signalfilter/nonlin_filt-func.h \
-    signalfilter/nonlin_filt-func_d.h \
-    signalfilter/nonlin_filt-func-rgb.h \
-    signalfilter/nonlin_filt-func-rgb_d.h \
+    signalfilter/filteringfunction.h \
+    signalfilter/filteringfunction_linear.h \
+    signalfilter/filteringfunction_linear_d.h \
+    signalfilter/filteringfunction_linear_rgb.h \
+    signalfilter/filteringfunction_linear_rgb_d.h \
+    signalfilter/filteringfunction_nonlinear.h \
+    signalfilter/filteringfunction_nonlinear_d.h \
+    signalfilter/filteringfunction_nonlinear_rgb.h \
+    signalfilter/filteringfunction_nonlinear_rgb_d.h \
+    signalfilter/filteringimagealgorithm.h \
+    signalfilter/filter_nonlinear.h \
+    signalfilter/filter_nonlinear_d.h \
+    signalfilter/filter_linear.h \
+    signalfilter/filter_linear_d.h \
     spam/spam.h \
     talairach/cramer.h    \
     talairach/talPoints.h    \
@@ -372,8 +379,6 @@ SOURCES = \
     perfusion/perfTTP.cc    \
     resampling/harmonicCageResampler.cc \
     resampling/meshToVoxelsResampler.cc \
-    signalfilter/nonlin_filt-func.cc \
-    signalfilter/nonlin_filt-func-rgb.cc \
     roi/clusterArg.cc     \
     roi/roigtm.cc      \
     roi/roistat.cc      \
@@ -390,6 +395,12 @@ SOURCES = \
     signalfilter/gslices.cc    \
     signalfilter/parity.cc    \
     signalfilter/gframes.cc    \
+    signalfilter/filteringfunction_linear.cc \
+    signalfilter/filteringfunction_linear_rgb.cc \
+    signalfilter/filteringfunction_nonlinear.cc \
+    signalfilter/filteringfunction_nonlinear_rgb.cc \
+    signalfilter/filter_nonlinear.cc \
+    signalfilter/filter_linear.cc \
     spam/spam.cc \
     talairach/cramer.cc    \
     talairach/talPoints.cc    \
@@ -409,7 +420,7 @@ SOURCES = \
     transform/fft1d.cc    \
     transform/hilbert1d.cc    \
     transform/xcor1d.cc    \
-    transform/rigidestimation.cc  
+    transform/rigidestimation.cc
 
 
 

@@ -31,33 +31,23 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#include <aims/signalfilter/filter_nonlinear_d.h>
+#include <aims/rgb/rgb.h>
 
-#ifndef AIMS_RESAMPLING_MEANSUBSAMPLING_H
-#define AIMS_RESAMPLING_MEANSUBSAMPLING_H
-
-#include <cartobase/type/datatypetraits.h>
-#include <aims/signalfilter/filteringfunction_nonlinear.h>
-#include <aims/resampling/subsamplingimagealgorithm.h>
+#define AIMS_TEMPLATE_NONLIN_FILTERFUNC( NAME )                              \
+  template class NAME<int8_t>;                                               \
+  template class NAME<uint8_t>;                                              \
+  template class NAME<int16_t>;                                              \
+  template class NAME<uint16_t>;                                             \
+  template class NAME<int32_t>;                                              \
+  template class NAME<uint32_t>;                                             \
+  template class NAME<int64_t>;                                              \
+  template class NAME<uint64_t>;                                             \
+  template class NAME<float>;                                                \
+  template class NAME<double>;                                               \
+  template class NAME<AimsRGB>;                                              \
+  template class NAME<AimsRGBA>
 
 namespace aims {
-
-  template <class VoxelType>
-  class MeanSubSampling :
-    public aims::SubSamplingImageAlgorithm<VoxelType,
-             MeanFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
-
-    public:
-      typedef aims::SubSamplingImageAlgorithm<VoxelType,
-             MeanFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> >
-             SubSamplingImageAlgorithmType;
-
-      typedef typename SubSamplingImageAlgorithmType::FilterFuncType
-             FilterFuncType;
-
-      MeanSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
-        : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
-  };
-
+  AIMS_TEMPLATE_NONLIN_FILTERFUNC(NonLinFilterFactory);
 }
-
-#endif

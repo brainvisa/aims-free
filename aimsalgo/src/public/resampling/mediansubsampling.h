@@ -36,23 +36,28 @@
 #define AIMS_RESAMPLING_MEDIANSUBSAMPLING_H
 
 #include <cartobase/type/datatypetraits.h>
-#include <aims/signalfilter/nonlin_filt-func.h>
+#include <aims/signalfilter/filteringfunction_nonlinear.h>
 #include <aims/resampling/subsamplingimagealgorithm.h>
 
-template <class VoxelType>
-class MedianSubSampling : 
-  public aims::SubSamplingImageAlgorithm<VoxelType, 
-           MedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
-    
-  public:
-    typedef aims::SubSamplingImageAlgorithm<VoxelType, 
-           MedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > 
-           SubSamplingImageAlgorithmType;
-           
-    typedef typename SubSamplingImageAlgorithmType::FilterFuncType 
-           FilterFuncType;
-    
-    MedianSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
-      : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
-};
+namespace aims {
+
+  template <class VoxelType>
+  class MedianSubSampling :
+    public aims::SubSamplingImageAlgorithm<VoxelType,
+             MedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
+
+    public:
+      typedef aims::SubSamplingImageAlgorithm<VoxelType,
+             MedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> >
+             SubSamplingImageAlgorithmType;
+
+      typedef typename SubSamplingImageAlgorithmType::FilterFuncType
+             FilterFuncType;
+
+      MedianSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
+        : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
+  };
+
+}
+
 #endif
