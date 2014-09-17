@@ -166,7 +166,6 @@ void MeshInterpoler::findNeighbours()
                              d->destVertex, d->nDestVertex, 0 );
     return;
   }
-  cout << "source: " << d->source << endl;
   cout << "src vertices: " << d->source->vertex().size() << endl;
   cout << "dst vertices: " << d->dest->vertex().size() << endl;
 
@@ -222,7 +221,6 @@ void MeshInterpoler::findNeighbours_timestep( const Point3df *vert1,
       || fabs( v1.dot( v3 ) ) >= n1*n3
       || fabs( v2.dot( v3 ) ) >= n2*n3 )
     {
-      cout << "flat triangle skipped: " << t << endl;
       continue; // skip degenerated flat triangles
     }
 
@@ -445,6 +443,7 @@ void MeshInterpoler::processCoordinates_timestep( const Point3df *vert1,
 
     xxfar = false;
 
+
     if( d2 < 0 )
     {
       if( d2 < -1 )
@@ -469,6 +468,7 @@ void MeshInterpoler::processCoordinates_timestep( const Point3df *vert1,
         xxfar = true;
       d3 = 1. - d2;
     }
+
 
     d1 = 1. - d2 - d3;
     coord1.push_back( d1 );
