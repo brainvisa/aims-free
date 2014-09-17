@@ -126,7 +126,7 @@ doit( Process & p, const string & fname, Finder & f )
 
     Motion identity;
     identity.setToIdentity();
-    LinearResampler<short> reech;
+		NearestNeighborResampler<short> reech;
     reech.setRef( mask );
     mask = reech.doit( identity, 
                        unsigned (mask.dimX()*mask.sizeX()/(1.0*data.sizeX()) + .5),
