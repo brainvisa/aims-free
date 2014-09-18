@@ -278,7 +278,6 @@ void MeshInterpoler::findNeighbours_timestep( const Point3df *vert1,
         || fabs( v1.dot( v3 ) ) >= n1*n3
         || fabs( v2.dot( v3 ) ) >= n2*n3 )
       {
-        cout << "flat triangle skipped: " << t << endl;
         continue; // skip degenerated flat triangles
       }
 
