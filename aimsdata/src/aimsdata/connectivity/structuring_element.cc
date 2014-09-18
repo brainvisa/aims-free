@@ -432,9 +432,9 @@ void Sphere::setParameters(
     for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
       for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
         if( ( usecenter || ( i != 0 ) || ( j != 0 ) || ( k != 0 ) ) &&
-            sqrt( pow(i,2)/pow(amplitude[0],2) + 
-                  pow(j,2)/pow(amplitude[1],2) + 
-                  pow(k,2)/pow(amplitude[2],2) ) <= 1 )
+            sqrt( pow((float)i,2)/pow((float)amplitude[0],2) + 
+                  pow((float)j,2)/pow((float)amplitude[1],2) + 
+                  pow((float)k,2)/pow((float)amplitude[2],2) ) <= 1 )
           _vector.push_back( Point3d(i, j, k) + origin );
 }
 
@@ -454,8 +454,8 @@ void DiskXY::setParameters(
   for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
     for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
       if( ( usecenter || ( i != 0 ) || ( j != 0 ) ) &&
-          sqrt( pow(i,2)/pow(amplitude[0],2) + 
-                pow(j,2)/pow(amplitude[1],2) ) <= 1 )
+          sqrt( pow((float)i, 2) / pow((float)amplitude[0], 2) + 
+                pow((float)j, 2) / pow((float)amplitude[1], 2) ) <= 1 )
         _vector.push_back( Point3d(i, j, 0) + origin );
 }
 
@@ -475,8 +475,8 @@ void DiskXZ::setParameters(
   for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
     for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
       if( ( usecenter || ( i != 0 ) || ( k != 0 ) ) &&
-          sqrt( pow(i,2)/pow(amplitude[0],2) + 
-                pow(k,2)/pow(amplitude[1],2) ) <= 1 )
+          sqrt( pow((float)i, 2) / pow((float)amplitude[0], 2) + 
+                pow((float)k, 2) / pow((float)amplitude[1], 2) ) <= 1 )
         _vector.push_back( Point3d(i, 0, k) + origin );
 }
 
@@ -496,8 +496,8 @@ void DiskYZ::setParameters(
   for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
     for(int j = - (int)amplitude[0]; j <= (int)amplitude[0]; ++j)
       if( ( usecenter || ( j != 0 ) || ( k != 0 ) ) &&
-          sqrt( pow(j,2)/pow(amplitude[0],2) + 
-                pow(k,2)/pow(amplitude[1],2) ) <= 1 )
+          sqrt( pow((float)j, 2) / pow((float)amplitude[0], 2) + 
+                pow((float)k, 2) / pow((float)amplitude[1], 2) ) <= 1 )
         _vector.push_back( Point3d(0, j, k) + origin );
 }
 
