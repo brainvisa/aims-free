@@ -15,9 +15,10 @@ import numpy
 # Soma import
 from soma import aims
 
+
 def draw_sphere(mesh, longitude, latitude):
     """Draw a sphere
-    
+
     Parameters
     ----------
     mesh: (AimsTimeSurface_3)
@@ -30,7 +31,7 @@ def draw_sphere(mesh, longitude, latitude):
         a latitude texture from HipHop mapping that go with the white_mesh
         of the subject. This texture indicates the spherical coordinates
         at each point.
-    
+
     Return
     ------
     sphere_mesh: (AimsTimeSurface_3)
@@ -38,27 +39,26 @@ def draw_sphere(mesh, longitude, latitude):
         projected on a sphere
     """
     lon = longitude[0].arraydata()
-    lat = latitude[0].arraydata()  
-    
+    lat = latitude[0].arraydata()
+
     nmesh = numpy.asarray(mesh.vertex())
-    radius = numpy.sqrt(numpy.square(nmesh[:, 0]) + numpy.square(nmesh[:, 1]))
-    
+
     # generate all x, y, z for each vertex (list)
     list_coord = []
     for index, coord in enumerate(nmesh):
-        x, y, z = sphere((lon[index]*numpy.pi / 180) + numpy.pi, 
+        x, y, z = sphere((lon[index]*numpy.pi / 180) + numpy.pi,
                          (lat[index]*numpy.pi / 180) - numpy.pi / 2)
         list_coord.append([x, y, z])
 
     # replace the polar coordinates with the news coordinates
     mesh.vertex().assign([aims.Point3df(x) for x in list_coord])
-    
+
     return mesh
 
 
 def sphere(v, u):
     """Generate a sphere from polar coordinates to spheric coordinates.
-    
+
     Parameters
     ----------
     radius: (float)
@@ -68,14 +68,14 @@ def sphere(v, u):
     v: (float)
         angle theta (longitude) WARNING: radian
     """
-    z = 100 * numpy.sin(u)
     x = 100 * numpy.cos(u) * numpy.cos(v)
     y = 100 * numpy.cos(u) * numpy.sin(v)
-    
-    return x, y, z
-    
+    z = 100 * -numpy.sin(u)
 
-def sphere_coordinates(sphere):
+    return x, y, z
+
+
+def sphere_coordinates(sphere, inversion=False):
     """
     Compute spherical coordinates (longitude, latitude) on a sphere.
 
@@ -106,13 +106,17 @@ def sphere_coordinates(sphere):
     #########################################################################
     sphere_lon = numpy.arctan2(nvert[:, 1], nvert[:, 0])
     sphere_lon *= 180. / numpy.pi
-    sphere_lon += 180.
+    sphere_lon += 180
+    print 'inversion: ', inversion
+    if inversion == "True":
+        print "il y a inversion", inversion
+        sphere_lon = 360 - sphere_lon
     slon_tex = aims.TimeTexture(sphere_lon.astype(numpy.float32))
-
     return slon_tex, slat_tex
 
 
-def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
+def resample_mesh_to_sphere(
+    mesh, sphere, longitude, latitude, inversion=False):
     """Resample a mesh to the sphere.
 
     Parameters
@@ -138,7 +142,7 @@ def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
 
     """
     # get spherical coordinates textures on the sphere
-    slon_tex, slat_tex = sphere_coordinates(sphere)
+    slon_tex, slat_tex = sphere_coordinates(sphere, inversion)
 
     #########################################################################
     #                         Mesh interpoler                               #
@@ -170,7 +174,7 @@ def resample_mesh_to_sphere(mesh, sphere, longitude, latitude):
 def texture_by_polygon(mesh, texture):
     """Averages a texture (classically, by vertex) on polygons.
 
-    Used by refine_sphere_mesh() and spere_mesh_from_distance_map()
+    Used by refine_sphere_mesh() and sphere_mesh_from_distance_map()
 
     Parameters
     ----------
@@ -187,17 +191,15 @@ def texture_by_polygon(mesh, texture):
     """
     poly = numpy.asarray(mesh.polygon())
     tex = numpy.asarray(texture[0])
-    poly_tex = numpy.max((tex[poly[:,0]], tex[poly[:,1]], tex[poly[:,2]]),
-                         axis=0)
+    poly_tex = numpy.max(
+        (tex[poly[:, 0]], tex[poly[:, 1]], tex[poly[:, 2]]), axis=0)
     return poly_tex
-    #poly_tex = tex[poly[:,0]] + tex[poly[:,1]] + tex[poly[:,2]]
-    #return poly_tex / 3
 
 
 def polygon_average_sizes(mesh):
     """Return the average edge length for each triangle of a mesh
 
-    Used by refine_sphere_mesh() and spere_mesh_from_distance_map()
+    Used by refine_sphere_mesh() and sphere_mesh_from_distance_map()
 
     Parameters
     ----------
@@ -210,9 +212,9 @@ def polygon_average_sizes(mesh):
     """
     poly = numpy.asarray(mesh.polygon())
     vert = numpy.asarray(mesh.vertex())
-    p1 = vert[poly[:,0]]
-    p2 = vert[poly[:,1]]
-    p3 = vert[poly[:,2]]
+    p1 = vert[poly[:, 0]]
+    p2 = vert[poly[:, 1]]
+    p3 = vert[poly[:, 2]]
     d1 = numpy.sqrt(numpy.sum(numpy.square(p2 - p1), axis=1))
     d2 = numpy.sqrt(numpy.sum(numpy.square(p3 - p2), axis=1))
     d3 = numpy.sqrt(numpy.sum(numpy.square(p1 - p3), axis=1))
@@ -222,7 +224,7 @@ def polygon_average_sizes(mesh):
 def polygon_max_sizes(mesh):
     """Return the max edge length for each triangle of a mesh
 
-    Used by refine_sphere_mesh() and spere_mesh_from_distance_map()
+    Used by refine_sphere_mesh() and sphere_mesh_from_distance_map()
 
     Parameters
     ----------
@@ -235,9 +237,9 @@ def polygon_max_sizes(mesh):
     """
     poly = numpy.asarray(mesh.polygon())
     vert = numpy.asarray(mesh.vertex())
-    p1 = vert[poly[:,0]]
-    p2 = vert[poly[:,1]]
-    p3 = vert[poly[:,2]]
+    p1 = vert[poly[:, 0]]
+    p2 = vert[poly[:, 1]]
+    p3 = vert[poly[:, 2]]
     d1 = numpy.sqrt(numpy.sum(numpy.square(p2 - p1), axis=1))
     d2 = numpy.sqrt(numpy.sum(numpy.square(p3 - p2), axis=1))
     d3 = numpy.sqrt(numpy.sum(numpy.square(p1 - p3), axis=1))
@@ -245,13 +247,14 @@ def polygon_max_sizes(mesh):
 
 
 def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
-    target_avg_dist, init_sphere_coords=None, current_sphere_coords=None,
-    dist_texture_is_scaled=True):
+                       target_avg_dist, inversion=False,
+                       init_sphere_coords=None, current_sphere_coords=None,
+                       dist_texture_is_scaled=True):
     """Adaptively refine polygons of a sphere mesh according to an average
     distance map (genrally calculated in a different space), and a target
     length.
 
-    This is one single step if the iterative spere_mesh_from_distance_map().
+    This is one single step if the iterative sphere_mesh_from_distance_map().
 
     Polygons where the average distance map value is "too high" are oversampled
     (divided in 4).
@@ -272,22 +275,27 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
     if init_sphere_coords is not None:
         init_lon, init_lat = init_sphere_coords
     else:
-        init_lon, init_lat = sphere_coordinates(init_sphere)
+        init_lon, init_lat = sphere_coordinates(init_sphere, inversion)
     if current_sphere_coords is not None:
         current_lon, current_lat = current_sphere_coords
     else:
-        current_lon, current_lat = sphere_coordinates(current_sphere)
+        current_lon, current_lat = sphere_coordinates(current_sphere, inversion)
 
     if dist_texture_is_scaled:
         init_sphere_dist = 1
     else:
         init_sphere_dist = (init_sphere.vertex()[init_sphere.polygon()[0][1]]
-            - init_sphere.vertex()[init_sphere.polygon()[0][0]]).norm()
-    
+                            - init_sphere.vertex()[
+                            init_sphere.polygon()[0][0]]).norm()
+
     init_lat = aims.TimeTexture(init_lat[0].arraydata() * 2)
     current_lat = aims.TimeTexture(current_lat[0].arraydata() * 2)
-    interpoler = aims.CoordinatesFieldMeshInterpoler(
-      init_sphere, current_sphere, init_lat, init_lon, current_lat, current_lon)
+    interpoler = aims.CoordinatesFieldMeshInterpoler(init_sphere,
+                                                     current_sphere,
+                                                     init_lat,
+                                                     init_lon,
+                                                     current_lat,
+                                                     current_lon)
     interpoler.setDiscontinuityThresholds(200, 200, 0)
     interpoler.project()
     resampled_dist_tex = interpoler.resampleTexture(avg_dist_texture)
@@ -314,8 +322,10 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
     return refined_sphere
 
 
-def spere_mesh_from_distance_map(init_sphere, avg_dist_texture,
-        target_avg_dist, dist_texture_is_scaled=True):
+def sphere_mesh_from_distance_map(init_sphere, avg_dist_texture,
+                                  target_avg_dist,
+                                  inversion=False,
+                                  dist_texture_is_scaled=True):
     """Builds a sphere mesh with vertices density driven by an average distance
     map, coming with another initial sphere mesh, (genrally calculated in a
     different space), and a target length.
@@ -335,7 +345,7 @@ def spere_mesh_from_distance_map(init_sphere, avg_dist_texture,
     - resample subjects mesh to the initial sphere. Obtained meshes will be
       very inhomogen
     - build a edges legth map from these subjects resampled meshes
-    - use spere_mesh_from_distance_map to build an adapted template sphere
+    - use sphere_mesh_from_distance_map to build an adapted template sphere
 
     Parameters
     ----------
@@ -355,7 +365,7 @@ def spere_mesh_from_distance_map(init_sphere, avg_dist_texture,
     vert2 = numpy.square(numpy.asarray(init_sphere.vertex()))
     dist = numpy.sqrt(numpy.sum(vert2, axis=1))
     radius = numpy.average(dist)
-    init_sphere_coords = sphere_coordinates(init_sphere)
+    init_sphere_coords = sphere_coordinates(init_sphere, inversion)
 
     current_sphere = aims.SurfaceGenerator.icosahedron((0, 0, 0), radius)
 
@@ -367,13 +377,8 @@ def spere_mesh_from_distance_map(init_sphere, avg_dist_texture,
         print 'step:', step
         next_sphere = refine_sphere_mesh(
             init_sphere, avg_dist_texture, current_sphere, target_avg_dist,
-            init_sphere_coords, dist_texture_is_scaled=dist_texture_is_scaled)
-        aims.write(next_sphere, '/tmp/next_sphere' + str(step) + '.gii')
+            inversion, init_sphere_coords,
+            dist_texture_is_scaled=dist_texture_is_scaled)
         step += 1
-#        if step >= 10:
-#            print 'break OK'
-#            break
-            
 
     return next_sphere
-
