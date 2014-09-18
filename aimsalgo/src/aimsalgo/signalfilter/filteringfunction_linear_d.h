@@ -199,8 +199,8 @@ namespace aims {
              ( (double)y-offsety ) * vs[1] * std::sin( _theta*pi/180. );
         yp = ( -(double)x+offsetx ) * vs[0] * std::sin( _theta*pi/180. ) +
              ( (double)y-offsety ) * vs[1] * std::cos( _theta*pi/180. );
-        gabor = std::exp( ( std::pow(xp,2) + std::pow(_gamma,2) * std::pow(yp,2) ) /
-                          ( -2 * std::pow(_sigma,2) ) );
+        gabor = std::exp( ( std::pow((float)xp,2) + std::pow((float)_gamma,2) * std::pow((float)yp,2) ) /
+                          ( -2 * std::pow((float)_sigma,2) ) );
         if( _real )
           gabor *= std::cos( 2 * pi * xp / _lambda + _psi*pi/180 );
         else
@@ -234,8 +234,8 @@ namespace aims {
            ( (double)(*i)[1] ) * vs[1] * std::sin( _theta*pi/180. );
       yp = ( -(double)(*i)[0] ) * vs[0] * std::sin( _theta*pi/180. ) +
            ( (double)(*i)[1] ) * vs[1] * std::cos( _theta*pi/180. );
-      gabor = std::exp( ( std::pow(xp,2) + std::pow(_gamma,2) * std::pow(yp,2) ) /
-                        ( -2 * std::pow(_sigma,2) ) );
+      gabor = std::exp( ( std::pow((float)xp,2) + std::pow((float)_gamma,2) * std::pow((float)yp,2) ) /
+                        ( -2 * std::pow((float)_sigma,2) ) );
       if( _real )
         gabor *= std::cos( 2 * pi * xp / _lambda + _psi*pi/180 );
       else
