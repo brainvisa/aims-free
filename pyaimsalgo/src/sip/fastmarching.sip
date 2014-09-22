@@ -21,7 +21,7 @@ sipCpp = new aims::FastMarching_Volume_S16(
     a1);
 %End
 
-    FastMarching_Volume_S16(bool = false);
+    FastMarching_Volume_S16(bool);
 %MethodCode
 sipIsErr = PyErr_Warn(PyExc_DeprecationWarning,
                       "the constructor aims.FastMarching(bool) is deprecated, "
