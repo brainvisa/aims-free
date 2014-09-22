@@ -109,7 +109,7 @@ class FoldsGraphThickness:
     self.gm_wm_tex = vorTexCreation(self.gm_wm_mesh)
     self.gm_lcr_tex = vorTexCreation(self.gm_lcr_mesh)
     print 'making thickness map'
-    f1 = aims.FastMarching(True)
+    f1 = aims.FastMarching('26', True)
     dist = f1.doit(self.lgw_vol, [self.GM_label], [self.WM_label, self.LCR_label])
     self.mid_interface_bck = f1.midInterface(self.WM_label, self.LCR_label)
     self.mid_interface = f1.midInterfaceVol(self.WM_label, self.LCR_label)
