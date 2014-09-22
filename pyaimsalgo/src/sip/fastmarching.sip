@@ -13,9 +13,22 @@ namespace aims
 %End
 
   public:
+    FastMarching_Volume_S16(const std::string &connectivity="26",
+                            bool mid_interface=false);
+%MethodCode
+sipCpp = new aims::FastMarching_Volume_S16(
+    aims::Connectivity::type_from_string(*a0),
+    a1);
+%End
+
     FastMarching_Volume_S16(bool = false);
 %MethodCode
-sipCpp = new aims::FastMarching_Volume_S16( aims::Connectivity::CONNECTIVITY_26_XYZ, a0 );
+sipIsErr = PyErr_Warn(PyExc_DeprecationWarning,
+                      "the constructor aims.FastMarching(bool) is deprecated, "
+                      "use aims.FastMarching(\"26\", bool) instead.");
+if(!sipIsErr) {
+  sipCpp = new aims::FastMarching_Volume_S16( aims::Connectivity::CONNECTIVITY_26_XYZ, a0 );
+ }
 %End
 
     ~FastMarching_Volume_S16();
@@ -53,7 +66,6 @@ sipCpp = new aims::FastMarching_Volume_S16( aims::Connectivity::CONNECTIVITY_26_
   }
 %End
   };
-
 
   class FastMarching_BucketMap_S16
   {

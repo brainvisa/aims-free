@@ -69,6 +69,68 @@ Connectivity::~Connectivity()
 }
 
 
+Connectivity::Type Connectivity::type_from_string(const std::string &str)
+{
+  const int number = std::atoi(str.c_str());
+  switch(number) {
+  case 6:
+    return CONNECTIVITY_6_XYZ;
+  case 18:
+    return CONNECTIVITY_18_XYZ;
+  case 26:
+    return CONNECTIVITY_26_XYZ;
+  case 4:
+  case 5:
+  case 8:
+  case 9:
+    AimsError("Connectivity::type_from_string(): "
+              "connectivity not implemented");
+  default:
+    AimsError("Connectivity::type_from_string(): "
+              "not a valid connectivity string");
+  };
+  return CONNECTIVITY_26_XYZ;  // return dummy value to prevent chaos
+}
+
+
+std::string Connectivity::type_to_string(Connectivity::Type type)
+{
+  switch(type) {
+  case CONNECTIVITY_4_XY        : return "4XY";
+  case CONNECTIVITY_4_XZ        : return "4XZ";
+  case CONNECTIVITY_4_YZ        : return "4YZ";
+  case CONNECTIVITY_6_XYZ       : return "6";
+  case CONNECTIVITY_8_XY        : return "8XY";
+  case CONNECTIVITY_8_XZ        : return "8XZ";
+  case CONNECTIVITY_8_YZ        : return "8YZ";
+  case CONNECTIVITY_18_XYZ      : return "18";
+  case CONNECTIVITY_26_XYZ      : return "26";
+  case CONNECTIVITY_9_XY_Zminus : return "9XYZ-";
+  case CONNECTIVITY_9_XY_Zplus  : return "9XYZ+";
+  case CONNECTIVITY_9_XZ_Yminus : return "9XZY-";
+  case CONNECTIVITY_9_XZ_Yplus  : return "9XZY+";
+  case CONNECTIVITY_9_YZ_Xminus : return "9YZX-";
+  case CONNECTIVITY_9_YZ_Xplus  : return "9YZX+";
+  case CONNECTIVITY_5_XminusY   : return "5X-Y";
+  case CONNECTIVITY_5_XplusY    : return "5X+Y";
+  case CONNECTIVITY_5_XYminus   : return "5XY-";
+  case CONNECTIVITY_5_XYplus    : return "5XY+";
+  case CONNECTIVITY_5_XminusZ   : return "5X-Z";
+  case CONNECTIVITY_5_XplusZ    : return "5X+Z";
+  case CONNECTIVITY_5_XZminus   : return "5XZ-";
+  case CONNECTIVITY_5_XZplus    : return "5XZ+";
+  case CONNECTIVITY_5_YminusZ   : return "5Y-Z";
+  case CONNECTIVITY_5_YplusZ    : return "5Y+Z";
+  case CONNECTIVITY_5_YZminus   : return "5YZ-";
+  case CONNECTIVITY_5_YZplus    : return "5YZ+";
+  default:
+    AimsError("Connectivity::type_to_string: "
+              "not a valid connectivity");
+  };
+  return "";
+}
+
+
 void Connectivity::setConnectivity()
 {
   if( _xyzOffset ){

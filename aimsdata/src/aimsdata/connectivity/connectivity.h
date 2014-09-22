@@ -34,6 +34,8 @@
 #ifndef AIMS_CONNECTIVITY_CONNECTCLASS_H
 #define AIMS_CONNECTIVITY_CONNECTCLASS_H
 
+#include <string>
+
 #include <aims/config/aimsdata_config.h>
 #include <aims/vector/vector.h>
 
@@ -81,11 +83,16 @@ namespace aims
         CONNECTIVITY_4_YZdiag,
       };
 
+    static Type type_from_string(const std::string &);
+    static std::string type_to_string(Type);
+
     Connectivity( int oline, int oslice, Type type);
     virtual ~Connectivity();
     
     /// Get the type of the connectivity
     Type type() const { return _type; }
+    /// Get the type of the connectivity
+    std::string type_string() const { return type_to_string(_type); }
     /// Get the number of neighbors for that connectivity
     int nbNeighbors() const { return _nbNeighbors; }
     /// Get the linear offset of the nth element
