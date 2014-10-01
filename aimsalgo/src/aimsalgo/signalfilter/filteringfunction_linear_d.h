@@ -166,12 +166,12 @@ namespace aims {
     std::vector<double> amplitude(2,0.);
     double nstds = 3.; // should keep 99% of the filter
     amplitude[0] = std::max(
-      std::fabs( nstds * _sigma * std::cos(_theta) ),
-      std::fabs( nstds * _sigma/_gamma * std::sin(_theta) )
+      std::fabs( nstds * _sigma * std::cos(_theta*pi/180 ) ),
+      std::fabs( nstds * _sigma/_gamma * std::sin(_theta*pi/180 ) )
     );
     amplitude[1] = std::max(
-      std::fabs( nstds * _sigma * std::sin(_theta) ),
-      std::fabs( nstds * _sigma/_gamma * std::cos(_theta) )
+      std::fabs( nstds * _sigma * std::sin(_theta*pi/180 ) ),
+      std::fabs( nstds * _sigma/_gamma * std::cos(_theta*pi/180 ) )
     );
     amplitude[0] /= voxel_size[0];
     amplitude[1] /= voxel_size[1];

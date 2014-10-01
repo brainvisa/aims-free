@@ -177,7 +177,7 @@ int main( int argc, const char **argv )
     app.addOption( gabSigma, "--gabSigma", "Gabor Filter: standard deviation of the gaussian function (mm)", true );
     app.addOption( gabTheta, "--gabTheta", "Gabor Filter: rotation of the referential (deg)", true );
     app.addOption( gabLambda, "--gabLambda", "Gabor Filter: wavelength of the sinusoidal function (mm)", true );
-    app.addOption( gabPsi, "--gabPsi", "Gabor Filter: phase offset of the sinusoidal function (rad)", true );
+    app.addOption( gabPsi, "--gabPsi", "Gabor Filter: phase offset of the sinusoidal function (deg)", true );
     app.addOption( gabGamma, "--gabGamma", "Gabor Filter: aspect ratio of the referential", true );
     app.addOption( gabReal, "--gabReal", "Gabor Filter: if true returns the real part, else immaginary", true );
     app.addOption( proc.bv, "--bv", "Background value to use", true );
