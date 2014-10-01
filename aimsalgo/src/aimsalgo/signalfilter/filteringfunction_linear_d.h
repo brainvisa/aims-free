@@ -163,15 +163,16 @@ namespace aims {
     const std::vector<double> & voxel_size
   ) const
   {
+    double pi = 3.1415926535897;
     std::vector<double> amplitude(2,0.);
     double nstds = 3.; // should keep 99% of the filter
     amplitude[0] = std::max(
-      std::fabs( nstds * _sigma * std::cos(_theta*pi/180 ) ),
-      std::fabs( nstds * _sigma/_gamma * std::sin(_theta*pi/180 ) )
+      std::fabs( nstds * _sigma * std::cos(_theta*pi/180. ) ),
+      std::fabs( nstds * _sigma/_gamma * std::sin(_theta*pi/180. ) )
     );
     amplitude[1] = std::max(
-      std::fabs( nstds * _sigma * std::sin(_theta*pi/180 ) ),
-      std::fabs( nstds * _sigma/_gamma * std::cos(_theta*pi/180 ) )
+      std::fabs( nstds * _sigma * std::sin(_theta*pi/180. ) ),
+      std::fabs( nstds * _sigma/_gamma * std::cos(_theta*pi/180. ) )
     );
     amplitude[0] /= voxel_size[0];
     amplitude[1] /= voxel_size[1];
@@ -200,11 +201,11 @@ namespace aims {
         yp = ( -(double)x+offsetx ) * vs[0] * std::sin( _theta*pi/180. ) +
              ( (double)y-offsety ) * vs[1] * std::cos( _theta*pi/180. );
         gabor = std::exp( ( std::pow((float)xp,2) + std::pow((float)_gamma,2) * std::pow((float)yp,2) ) /
-                          ( -2 * std::pow((float)_sigma,2) ) );
+                          ( -2. * std::pow((float)_sigma,2) ) );
         if( _real )
-          gabor *= std::cos( 2 * pi * xp / _lambda + _psi*pi/180 );
+          gabor *= std::cos( 2. * pi * xp / _lambda + _psi*pi/180. );
         else
-          gabor *= std::sin( 2 * pi * xp / _lambda + _psi*pi/180 );
+          gabor *= std::sin( 2. * pi * xp / _lambda + _psi*pi/180. );
         result += gabor * volume(x,y,0,0);
       }
 
@@ -235,11 +236,11 @@ namespace aims {
       yp = ( -(double)(*i)[0] ) * vs[0] * std::sin( _theta*pi/180. ) +
            ( (double)(*i)[1] ) * vs[1] * std::cos( _theta*pi/180. );
       gabor = std::exp( ( std::pow((float)xp,2) + std::pow((float)_gamma,2) * std::pow((float)yp,2) ) /
-                        ( -2 * std::pow((float)_sigma,2) ) );
+                        ( -2. * std::pow((float)_sigma,2) ) );
       if( _real )
-        gabor *= std::cos( 2 * pi * xp / _lambda + _psi*pi/180 );
+        gabor *= std::cos( 2. * pi * xp / _lambda + _psi*pi/180. );
       else
-        gabor *= std::sin( 2 * pi * xp / _lambda + _psi*pi/180 );
+        gabor *= std::sin( 2. * pi * xp / _lambda + _psi*pi/180. );
       result += gabor * volume((*i)[0],(*i)[1],0,0);
     }
 
