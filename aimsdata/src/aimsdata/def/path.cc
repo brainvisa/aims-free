@@ -114,7 +114,7 @@ Path::Path()
   if( firsttime )
   {
     firsttime = false;
-    Paths::addResourceSearchPath( Paths::globalShared()
+    Paths::addResourceSearchPath( Paths::globalShared() + FileUtil::separator()
       + BRAINVISA_SHARE_DIRECTORY );
   }
 #else
