@@ -173,8 +173,8 @@ namespace aims {
       std::fabs( nstds * _sigma * std::sin(_theta) ),
       std::fabs( nstds * _sigma/_gamma * std::cos(_theta) )
     );
-    amplitude[0] *= voxel_size[0];
-    amplitude[1] *= voxel_size[1];
+    amplitude[0] /= voxel_size[0];
+    amplitude[1] /= voxel_size[1];
     return StructuringElementRef( new strel::SquareXY( amplitude ) );
   }
 
