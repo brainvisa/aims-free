@@ -120,6 +120,8 @@ namespace aims {
   AIMS_DECLARE_FILTER_NONLINEAR( MajorityFilter, MajorityFilterFunc, strel::Cube(1.) );
   AIMS_DECLARE_FILTER_NONLINEAR( ExtremaDifferenceFilter, ExtremaDifferenceFilterFunc, strel::Cube(1.) );
   AIMS_DECLARE_FILTER_NONLINEAR( SumFilter, SumFilterFunc, strel::Cube(1.) );
+  AIMS_DECLARE_FILTER_NONLINEAR( VarFilter, VarFilterFunc, strel::Cube(1.) );
+  AIMS_DECLARE_FILTER_NONLINEAR( StDevFilter, StDevFilterFunc, strel::Cube(1.) );
 }
 
 #endif

@@ -143,9 +143,9 @@ namespace aims {
         virtual void setParameters( const StructuringElement & strel,
                                     carto::Object options )
         {
-          _strel = StructuringElementRef( strel.clone() );
+          _strel = strel.clone();
           _options = options;
-          _func = FilteringFunctionType( options );
+          _func.setOptions( options );
         }
 
         /// Implement interface: clone

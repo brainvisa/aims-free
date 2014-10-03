@@ -69,6 +69,8 @@ namespace aims {
       static FilteringImageAlgorithmInterface<T> * create( const std::string & name,
                                                            const StructuringElement & strel,
                                                            carto::Object options = carto::none() );
+      static FilteringImageAlgorithmInterface<T> * create( const std::string & name,
+                                                           carto::Object options = carto::none() );
       static void registerFilter( const std::string & name,
                                   const FilteringImageAlgorithmInterface<T> & func );
       static std::set<std::string> names();
@@ -97,6 +99,8 @@ namespace aims {
       NAME( const StructuringElement & strel = STREL,                        \
             carto::Object options = carto::none() )                          \
         : FilteringImageAlgorithmType( strel, options ) {}                   \
+      NAME( carto::Object options )                                          \
+        : FilteringImageAlgorithmType( STREL, options ) {}                   \
   }
 
 namespace aims {

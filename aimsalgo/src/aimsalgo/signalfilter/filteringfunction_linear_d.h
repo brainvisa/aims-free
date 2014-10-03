@@ -142,7 +142,7 @@ namespace aims {
       if( options->hasProperty( "gamma" ) )
         _gamma = (double)options->getProperty( "gamma" )->getScalar();
       if( options->hasProperty( "real" ) )
-        _real = (double)options->getProperty( "real" )->getScalar();
+        _real = (bool)options->getProperty( "real" )->getScalar();
     }
 
     if( carto::verbose )
@@ -203,9 +203,9 @@ namespace aims {
         gabor = std::exp( ( std::pow((float)xp,2) + std::pow((float)_gamma,2) * std::pow((float)yp,2) ) /
                           ( -2. * std::pow((float)_sigma,2) ) );
         if( _real )
-          gabor *= std::cos( 2. * pi * xp / _lambda + _psi*pi/180. );
+          gabor *= std::cos( 2. * pi * xp / _lambda + _psi * pi / 180. );
         else
-          gabor *= std::sin( 2. * pi * xp / _lambda + _psi*pi/180. );
+          gabor *= std::sin( 2. * pi * xp / _lambda + _psi * pi / 180. );
         result += gabor * volume(x,y,0,0);
       }
 
@@ -221,7 +221,7 @@ namespace aims {
     ASSERT( se != strel::none() );
     double offsetx = (double)(volume->getSizeX())/2;
     double offsety = (double)(volume->getSizeY())/2;
-    double result = 0;
+    double result = 0.0;
     double gabor;
     int32_t xp, yp;
     double pi = 3.1415926535897;
@@ -238,12 +238,14 @@ namespace aims {
       gabor = std::exp( ( std::pow((float)xp,2) + std::pow((float)_gamma,2) * std::pow((float)yp,2) ) /
                         ( -2. * std::pow((float)_sigma,2) ) );
       if( _real )
-        gabor *= std::cos( 2. * pi * xp / _lambda + _psi*pi/180. );
+        gabor *= std::cos( 2. * pi * xp / _lambda + _psi * pi / 180. );
       else
-        gabor *= std::sin( 2. * pi * xp / _lambda + _psi*pi/180. );
+        gabor *= std::sin( 2. * pi * xp / _lambda + _psi * pi / 180. );
       result += gabor * volume((*i)[0],(*i)[1],0,0);
     }
 
+    // if( result != 0.0)
+      // std::cout << result << " -> " << (T) result << std::endl;
     return (T) result;
   }
 } // namespace aims

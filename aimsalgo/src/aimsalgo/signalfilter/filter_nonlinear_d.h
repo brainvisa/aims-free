@@ -73,6 +73,9 @@ namespace aims {
       registerFilter( "dif", ExtremaDifferenceFilter<T>() );
       registerFilter( "difference", ExtremaDifferenceFilter<T>() );
       registerFilter( "sum", SumFilter<T>() );
+      registerFilter( "var", VarFilter<T>() );
+      registerFilter( "variance", VarFilter<T>() );
+      registerFilter( "sd", StDevFilter<T>() );
     }
   }
 

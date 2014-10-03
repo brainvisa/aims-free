@@ -110,6 +110,15 @@ namespace aims {
     return new_func;
   }
 
+  template <typename T>
+  FilteringImageAlgorithmInterface<T>* LinFilterFactory<T>::create(
+    const std::string & name,
+    carto::Object options
+  )
+  {
+    return create( name, strel::Cube(), options );
+  }
+
 } // namespace aims
 
 #endif

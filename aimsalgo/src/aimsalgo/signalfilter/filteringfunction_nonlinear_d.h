@@ -80,6 +80,9 @@ namespace aims {
       registerFunction( "dif", ExtremaDifferenceFilterFunc<T>() );
       registerFunction( "difference", ExtremaDifferenceFilterFunc<T>() );
       registerFunction( "sum", SumFilterFunc<T>() );
+      registerFunction( "var", VarFilterFunc<T>() );
+      registerFunction( "variance", VarFilterFunc<T>() );
+      registerFunction( "sd", StDevFilterFunc<T>() );
     }
   }
 
@@ -433,12 +436,12 @@ namespace aims {
     T sum( Iterator b, Iterator e, T init )
     {
       Iterator i;
-      double accumumate = (double) init;
+      double accumulate = (double) init;
 
       // Goes through the data and sum values
       for( i=b; i!=e; ++i )
-        accumumate += (double)(*i);
-      return (T)accumumate;
+        accumulate += (double)(*i);
+      return (T)accumulate;
     }
   } // namespace
 
@@ -456,6 +459,88 @@ namespace aims {
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return sum( volse.begin(), volse.end(), (T)0 );
+  }
+
+  //--------------------------------------------------------------------------
+  // VarFilterFunc
+  //--------------------------------------------------------------------------
+  namespace {
+    template <typename Iterator, typename T>
+    T variance( Iterator b, Iterator e, T init )
+    {
+      Iterator i;
+      double accumulate = (double) init;
+      double accumulateSq = (double) init;
+      uint32_t count = 0;
+
+      for( i=b; i!=e; ++i ) {
+        accumulate += (double)(*i);
+        accumulateSq += ( (double)(*i) * (double)(*i) );
+        ++count;
+      }
+
+      double dcount = (double) count;
+      return (T)  ( accumulateSq / dcount -
+                    ( accumulate / dcount ) *
+                    ( accumulate / dcount ) );
+    }
+  } // namespace
+
+  template <class T> inline
+  T VarFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  {
+    return variance( volume.begin(), volume.end(), (T) 0 );
+  }
+
+  template <class T> inline
+  T VarFilterFunc<T>::execute(
+    const carto::VolumeRef<T> & volume,
+    const StructuringElementRef & se
+  ) const
+  {
+    StructuredConstVolume<T> volse( *volume, *se );
+    return variance( volse.begin(), volse.end(), (T)0 );
+  }
+
+  //--------------------------------------------------------------------------
+  // StDevFilterFunc
+  //--------------------------------------------------------------------------
+  namespace {
+    template <typename Iterator, typename T>
+    T stdev( Iterator b, Iterator e, T init )
+    {
+      Iterator i;
+      double accumulate = (double) init;
+      double accumulateSq = (double) init;
+      uint32_t count = 0;
+
+      for( i=b; i!=e; ++i ) {
+        accumulate += (double)(*i);
+        accumulateSq += ( (double)(*i) * (double)(*i) );
+        ++count;
+      }
+
+      double dcount = (double) count;
+      return (T) std::sqrt( accumulateSq / dcount -
+                            ( accumulate / dcount ) *
+                            ( accumulate / dcount ) );
+    }
+  } // namespace
+
+  template <class T> inline
+  T StDevFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  {
+    return stdev( volume.begin(), volume.end(), (T) 0 );
+  }
+
+  template <class T> inline
+  T StDevFilterFunc<T>::execute(
+    const carto::VolumeRef<T> & volume,
+    const StructuringElementRef & se
+  ) const
+  {
+    StructuredConstVolume<T> volse( *volume, *se );
+    return stdev( volse.begin(), volse.end(), (T)0 );
   }
 
 } // namespace aims

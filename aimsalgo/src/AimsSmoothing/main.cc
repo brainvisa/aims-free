@@ -71,7 +71,7 @@ class FilterProcess : public Process
       fileOut(""),
       type("majority"),
       shape("cube"),
-      amplitude(3,1.),
+      amplitude(3,-1),
       unit("v"),
       options(carto::none()),
       dx(1),
@@ -133,7 +133,7 @@ doit( Process & p, const string & fname, Finder & )
   rc_ptr<ImageAlgorithmInterface<T> > algo(0);
   algo.reset( NonLinFilterFactory<T>::create( proc.type, *shape, proc.options ) );
   if( !algo )
-    algo.reset( LinFilterFactory<T>::create( proc.type, *shape, proc.options ) );
+    algo.reset( LinFilterFactory<T>::create( proc.type, proc.options ) );
   if( !algo ) {
     cerr << "Unknown filter " << proc.type << endl;
     return false;
@@ -168,18 +168,19 @@ int main( int argc, const char **argv )
     app.addOption( pi, "-i", "source volume" );
     app.addOption( proc.fileOut, "-o", "destination volume" );
     app.addOption( proc.type, "-t", "Smoothing filter type: "
-      "mea[n], med[ian], min[imum], max[imum], maj[ority], gab[or] "
+      "mea[n], med[ian], min[imum], max[imum], maj[ority], "
+      "sum, var[iance], sd, gab[or] "
       "(default = majority)",
       true );
     app.addOption( proc.shape, "-s", "Structuring element type [default:cube]", true );
     app.addOptionSeries( proc.amplitude, "-a", "Structuring element amplitude [default:1.]", 0, 3 );
     app.addOption( proc.unit, "-u", "Amplitude unit: v[oxel], m[m] [default:v]", true );
-    app.addOption( gabSigma, "--gabSigma", "Gabor Filter: standard deviation of the gaussian function (mm)", true );
-    app.addOption( gabTheta, "--gabTheta", "Gabor Filter: rotation of the referential (deg)", true );
-    app.addOption( gabLambda, "--gabLambda", "Gabor Filter: wavelength of the sinusoidal function (mm)", true );
-    app.addOption( gabPsi, "--gabPsi", "Gabor Filter: phase offset of the sinusoidal function (deg)", true );
-    app.addOption( gabGamma, "--gabGamma", "Gabor Filter: aspect ratio of the referential", true );
-    app.addOption( gabReal, "--gabReal", "Gabor Filter: if true returns the real part, else immaginary", true );
+    app.addOption( gabSigma, "--gabSigma", "Gabor Filter: standard deviation of the gaussian function (mm) [default:1.0]", true );
+    app.addOption( gabTheta, "--gabTheta", "Gabor Filter: rotation of the referential (deg) [default:0.0]", true );
+    app.addOption( gabLambda, "--gabLambda", "Gabor Filter: wavelength of the sinusoidal function (mm) [default:1.0]", true );
+    app.addOption( gabPsi, "--gabPsi", "Gabor Filter: phase offset of the sinusoidal function (deg) [default:0.0]", true );
+    app.addOption( gabGamma, "--gabGamma", "Gabor Filter: aspect ratio of the referential [default:1.0]", true );
+    app.addOption( gabReal, "--gabReal", "Gabor Filter: if true returns the real part, else immaginary [default:true]", true );
     app.addOption( proc.bv, "--bv", "Background value to use", true );
     app.addOption( proc.dx, "--dx", "x dimension of the filter to apply (voxels) (deprecated)", true );
     app.addOption( proc.dy, "--dy", "y dimension of the filter to apply (voxels) (deprecated)", true );
