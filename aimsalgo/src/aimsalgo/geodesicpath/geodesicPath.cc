@@ -10,6 +10,8 @@
 
 #include <aims/geodesicpath/geodesicPath.h>
 
+using namespace aims;
+using namespace geodesic;
 using namespace std;
 
 GeodesicPath::GeodesicPath( const AimsSurfaceTriangle & surface, int method,
@@ -480,7 +482,9 @@ void GeodesicPath::longestPath_1_N_ind(unsigned source, vector<unsigned> targets
   delete(dijkstra_algorithm);
 }
 
-vector<vect_ui> GeodesicPath::longestPath_1_N_len(unsigned source, vector<unsigned> targets, vector<double> &length, int type_distance)
+vector<GeodesicPath::vect_ui>
+GeodesicPath::longestPath_1_N_len(unsigned source, vector<unsigned> targets,
+                                  vector<double> &length, int type_distance)
 {
   double distance_temp;
   double max_distance_temp = 0.0;

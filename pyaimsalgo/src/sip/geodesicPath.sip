@@ -1,4 +1,7 @@
 
+namespace aims
+{
+
 class GeodesicPath
 {
 %TypeHeaderCode
@@ -29,6 +32,7 @@ class GeodesicPath
     void longestPath_1_N_ind(unsigned source, vector_U32 targets, unsigned *target, double *length, int type_distance);
     vector_U32 longestPath_N_N_ind(vector_U32 points, int* s, int *d, double *length, int type_distance);
     void distanceMap_1_N_ind(unsigned source, vector_FLOAT &distanceMap,double *length, int type_distance);
- };
+};
 
+};
 
