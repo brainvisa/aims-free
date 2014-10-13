@@ -61,7 +61,7 @@ bool doitBucket( Process &, const string &, Finder & );
 class ZCat : public Process
 {
 public:
-  ZCat( const list<string> & names, const string & out, 
+  ZCat( const list<string> & names, const string & out,
 	const vector<int> & dim, const vector<float> voxs );
 
 private:
@@ -83,9 +83,9 @@ private:
 };
 
 
-ZCat::ZCat( const list<string> & names, const string & out, 
+ZCat::ZCat( const list<string> & names, const string & out,
 	const vector<int> & dim, const vector<float> voxs )
-    : Process(), listName( names ), fileOut( out ), 
+    : Process(), listName( names ), fileOut( out ),
       dims( dim ), vs( voxs )
 {
   registerProcessType( "Volume", "S8", &doit<int8_t> );
@@ -149,19 +149,19 @@ template<class T> bool ZCat::cat( AimsData<T> & out )
   list<string>::const_iterator	it;
   unsigned n = 0;
   bool copy_header = true;
-  
+
   for ( it = listName.begin() ; it != listName.end(); it++, ++n )
     {
       cout << n << " : adding " << *it << "..." << endl;
       Reader<AimsData<T> > dataR( *it );
       dataR.setAllocatorContext( AllocatorContext
-                                 ( AllocatorStrategy::ReadOnly, 
+                                 ( AllocatorStrategy::ReadOnly,
                                    DataSource::none(), false, 0.1 ) );
       AimsData<T> in;
       dataR >> in;
 
       if ( copy_header ) {
-        out.volume()->header() = in.volume()->header();
+        out.volume()->copyHeaderFrom( in.volume()->header() );
         copy_header = false;
       }
 
@@ -241,27 +241,27 @@ bool doitBucket( Process & p, const string &, Finder & )
 
 
 int main( int argc, const char** argv )
-{ 
+{
   int result = EXIT_SUCCESS;
- 
+
   try {
     list< string > listName;
     string fileOut;
     bool memmap = false;
     bool nocheckvs = false;
-    Point3df voxelsize(0.,0.,0.);  
+    Point3df voxelsize(0.,0.,0.);
 
     AimsApplication application( argc, argv,
-                                 "concatenates volumes (along Z axis), " 
+                                 "concatenates volumes (along Z axis), "
                                  "meshes or buckets" );
     application.addOptionSeries( listName, "-i",
                                  "input files (1 minimum)", 1 );
     application.addOption( fileOut, "-o",
                            "Output file name" );
-    application.addOption( memmap, "--memmap", 
-                           "read in Memory Mapping mode (obsolete, " 
+    application.addOption( memmap, "--memmap",
+                           "read in Memory Mapping mode (obsolete, "
                            "automatic)", true );
-    application.addOption( nocheckvs, "--nocheckvs", "Don't check if voxel " 
+    application.addOption( nocheckvs, "--nocheckvs", "Don't check if voxel "
                            "sizes of all volumes to concatenate match", true );
     application.addOption( voxelsize[0], "--vsx", "Force voxelsize X value", true );
     application.addOption( voxelsize[1], "--vsy", "Force voxelsize Y value", true );
@@ -273,20 +273,20 @@ int main( int argc, const char** argv )
     //
     list<string>::const_iterator it = listName.begin();
     Finder	f;
-    
+
     cout << "check homogeneity of sizes...\n0" << flush;
     ASSERT( f.check( *it ) );
-    const PythonHeader	*hdr 
+    const PythonHeader	*hdr
       = dynamic_cast<const PythonHeader *>( f.header() );
     if( !hdr )
       {
 	cerr << "Could not read header of " << *it << endl;
 	return EXIT_FAILURE;
       }
-    
+
     string	otype = f.objectType();
     string	dtype = f.dataType();
-    
+
     vector<int>	dims, dims2;
     vector<float> vs, vs2;
     if ( otype == "Volume" ) {
@@ -298,17 +298,17 @@ int main( int argc, const char** argv )
 
       while( vs.size() < 4 )
 	vs.push_back( 1 );
-      
+
       for(int i=0; i<3; ++i)
       if( voxelsize[i] != 0 )
         {
           vs[i] = voxelsize[i];
           nocheckvs = 1;
         }
-      
+
       int dimZ = dims[2];
       unsigned	n = 1;
-      
+
       for ( ++it; it != listName.end(); ++it, ++n ) {
         cout << "\rn" << flush;
         ASSERT( f.check( *it ) );
@@ -321,15 +321,15 @@ int main( int argc, const char** argv )
         ASSERT( hdr->getProperty( "voxel_size", vs2 ) );
         ASSERT( f.objectType() == otype );
         ASSERT( f.dataType() == dtype );
-        ASSERT( dims[0] == dims2[0] && dims[1] == dims2[1] 
-          && ( ( dims2.size() < 4 && dims[3] == 1 ) 
+        ASSERT( dims[0] == dims2[0] && dims[1] == dims2[1]
+          && ( ( dims2.size() < 4 && dims[3] == 1 )
               || ( dims2.size() == 4 &&  dims[3] == dims2[3] ) ) );
         dimZ += dims2[2];
               if( !nocheckvs )
           ASSERT( vs[0] == vs2[0] && vs[1] == vs2[1] && vs[2] == vs2[2] );
       }
       cout << endl << dimZ << " slices\n";
-      
+
       dims[2] = dimZ;
     }
     ZCat proc( listName, fileOut, dims, vs );
@@ -344,6 +344,6 @@ int main( int argc, const char** argv )
   catch( std::exception &e ) {
     cerr << argv[ 0 ] << ": " << e.what() << endl;
     result = EXIT_FAILURE;
-  }    
+  }
   return result;
 }
