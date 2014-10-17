@@ -157,7 +157,7 @@ namespace aims {
       //           << carto::toString(dim[2]) << ", "
       //           << carto::toString(dim[3]) << "]"
       //           << std::endl;
-      std::vector<double> vsv( 4, 1. );
+      std::vector<float> vsv( 4, 1. );
       in->header().getProperty( "voxel_size", vsv );
       vsv[0] *= _win_size_x;
       vsv[1] *= _win_size_y;
