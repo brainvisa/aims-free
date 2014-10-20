@@ -272,7 +272,7 @@ class AimsStructuringElementTests(CommandsTestManager) :
                     command = [ 'AimsStructuringElement_test',
                                   '-o', 'elem_sphere_a5.ima',
                                   '-c', 'sphere',
-                                  '-a', '5' ],
+                                  '-a', '5', '-a', '5', '-a', '5' ],
                     run_files = [ 'elem_sphere_a5.ima' ] ),
 
              # Test connectivity cube amplitude 5
@@ -280,7 +280,7 @@ class AimsStructuringElementTests(CommandsTestManager) :
                     command = [ 'AimsStructuringElement_test',
                                   '-o', 'elem_cube_a5.ima',
                                   '-c', 'cube',
-                                  '-a', '5' ],
+                                  '-a', '5', '-a', '5', '-a', '5' ],
                     run_files = [ 'elem_cube_a5.ima' ] ),
 
              # Test connectivity diskxy amplitude 5
@@ -288,7 +288,7 @@ class AimsStructuringElementTests(CommandsTestManager) :
                     command = [ 'AimsStructuringElement_test',
                                   '-o', 'elem_diskxy_a5.ima',
                                   '-c', 'diskxy',
-                                  '-a', '5' ],
+                                  '-a', '5', '-a', '5', '-a', '5' ],
                     run_files = [ 'elem_diskxy_a5.ima' ] ),
 
              # Test connectivity diskxz amplitude 5
@@ -296,7 +296,7 @@ class AimsStructuringElementTests(CommandsTestManager) :
                     command = [ 'AimsStructuringElement_test',
                                   '-o', 'elem_diskxz_a5.ima',
                                   '-c', 'diskxz',
-                                  '-a', '5' ],
+                                  '-a', '5', '-a', '5', '-a', '5' ],
                     run_files = [ 'elem_diskxz_a5.ima' ] ),
 
              # Test connectivity diskyz amplitude 5
@@ -304,7 +304,7 @@ class AimsStructuringElementTests(CommandsTestManager) :
                     command = [ 'AimsStructuringElement_test',
                                   '-o', 'elem_diskyz_a5.ima',
                                   '-c', 'diskyz',
-                                  '-a', '5' ],
+                                  '-a', '5', '-a', '5', '-a', '5' ],
                     run_files = [ 'elem_diskyz_a5.ima' ] ),
 
              # Test connectivity squarexy amplitude 5
@@ -312,7 +312,7 @@ class AimsStructuringElementTests(CommandsTestManager) :
                     command = [ 'AimsStructuringElement_test',
                                   '-o', 'elem_squarexy_a5.ima',
                                   '-c', 'squarexy',
-                                  '-a', '5' ],
+                                  '-a', '5', '-a', '5', '-a', '5' ],
                     run_files = [ 'elem_squarexy_a5.ima' ] ),
 
              # Test connectivity squarexz amplitude 5
@@ -320,7 +320,7 @@ class AimsStructuringElementTests(CommandsTestManager) :
                     command = [ 'AimsStructuringElement_test',
                                   '-o', 'elem_squarexz_a5.ima',
                                   '-c', 'squarexz',
-                                  '-a', '5' ],
+                                  '-a', '5', '-a', '5', '-a', '5' ],
                     run_files = [ 'elem_squarexz_a5.ima' ] ),
 
              # Test connectivity squareyz amplitude 5
@@ -328,7 +328,7 @@ class AimsStructuringElementTests(CommandsTestManager) :
                     command = [ 'AimsStructuringElement_test',
                                   '-o', 'elem_squareyz_a5.ima',
                                   '-c', 'squareyz',
-                                  '-a', '5' ],
+                                  '-a', '5', '-a', '5', '-a', '5' ],
                     run_files = [ 'elem_squareyz_a5.ima' ] ),
 
   )
