@@ -65,6 +65,7 @@ public:
                          const Point3df& outLocation,
                          T& outValue, int time );
 
+  // seems to be the volume to be resampled... (what a crappy API...)
   void setRef( const AimsData<T>& ref ) { _ref = &ref; }
   void setDefaultValue( T val ) { _defval = val; }
 
