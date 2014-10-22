@@ -35,7 +35,7 @@
 #define AIMS_IO_GIFTIUTIL_H
 
 #include <aims/vector/vector.h>
-#include <nifti2_io.h>
+#include <nifti2_io.h> // should always be included before <gifti_io.h>
 extern "C"
 {
 #include <gifti_io.h>

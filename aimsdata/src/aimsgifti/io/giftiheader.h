@@ -37,6 +37,7 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/data/pheader.h>
+#include <nifti2_io.h> // should always be included before <gifti_io.h>
 extern "C"
 {
   #include <gifti_io.h>

@@ -42,6 +42,7 @@
 #include <aims/io/writer.h>
 #include <aims/io/reader.h>
 #include <cartobase/thread/mutex.h>
+#include <nifti2_io.h> // should always be included before <gifti_io.h>
 extern "C" {
 #include <gifti_io.h>
 }
