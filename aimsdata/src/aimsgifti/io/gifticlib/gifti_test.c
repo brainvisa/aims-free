@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "gifti_io.h"
+#include <aims/io/gifti.h>
 #include "gifti_test.h"
 
 int show_help()

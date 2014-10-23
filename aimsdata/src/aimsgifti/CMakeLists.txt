@@ -1,4 +1,24 @@
-BRAINVISA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/gifti.pro "HEADERS" _headers "SOURCES" _sources )
+set( _headers
+    io/gifticlib/gifti_io.h
+    io/gifticlib/gifti_xml.h
+    io/gifti.h
+    io/giftiformat.h
+    io/giftimeshformat_d.h
+    io/giftitextureformat_d.h
+    io/giftiheader.h
+    io/giftifinderformat.h
+    io/giftiutil.h
+    plugin/giftiplugin.h
+)
+
+set( _sources
+    io/gifti.c
+    io/giftiformat.cc
+    io/giftiheader.cc
+    io/giftiutil.cc
+    plugin/giftiplugin.cc
+)
+
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
 set(AIMSGIFTI_HEADERS ${_headers} PARENT_SCOPE)
 include_directories( "${CMAKE_BINARY_DIR}/include/aims/io/gifticlib" "${CMAKE_BINARY_DIR}/include/soma-io/nifticlib/niftilib" "${CMAKE_BINARY_DIR}/include/soma-io/nifticlib/znzlib" ${EXPAT_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} )
