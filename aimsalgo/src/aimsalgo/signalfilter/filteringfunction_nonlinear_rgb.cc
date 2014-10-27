@@ -44,14 +44,14 @@
   }                                                                          \
   VOXELTYPE NAME< VOXELTYPE >::execute(                                      \
     const carto::VolumeRef< VOXELTYPE > & volume                             \
-  ) const                                                                    \
+  )                                                                          \
   {                                                                          \
     return multichannelfiltervalues_nonlin< VOXELTYPE >( _m, volume );       \
   }                                                                          \
   VOXELTYPE NAME< VOXELTYPE >::execute(                                      \
     const carto::VolumeRef< VOXELTYPE > & volume,                            \
     const StructuringElementRef & se                                         \
-  ) const                                                                    \
+  )                                                                          \
   {                                                                          \
     return multichannelfiltervalues_nonlin< VOXELTYPE >( _m, volume, se );   \
   }                                                                          \

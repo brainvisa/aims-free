@@ -60,14 +60,14 @@ namespace aims {
       virtual void setOptions( carto::Object options ) = 0;
       /// Processing function used by aims::SubSamplingImageAlgorithm.
       /// The filtering function is applied to the full window
-      virtual T execute( const carto::VolumeRef<T> & volume ) const = 0;
+      virtual T execute( const carto::VolumeRef<T> & volume ) = 0;
       /// Processing function used by aims::FilteringImageAlgorithm.
       /// The window should be of size one voxel. The structuring element
       /// should contain offsets to the voxels included in the filtering
       /// function. Border must be large enough so that using the
       /// structuring element is safe.
       virtual T execute( const carto::VolumeRef<T> & volume,
-                         const StructuringElementRef & se ) const = 0;
+                         const StructuringElementRef & se ) = 0;
       /// Differentiate linear and non linear functions
       virtual bool isLinear() const = 0;
       /// In linear case, the structuring element size depends on the filter
@@ -75,8 +75,8 @@ namespace aims {
       /// element. In cases were such a StrEl does not exist (in the non
       /// linear case for example) strel::none() is returned.
       virtual StructuringElementRef getStructuringElement(
-        const std::vector<double> & voxel_size = std::vector<double>(4,1.)
-      ) const
+        const std::vector<float> & voxel_size = std::vector<float>(4,1.)
+      )
       {
         return strel::none();
       }

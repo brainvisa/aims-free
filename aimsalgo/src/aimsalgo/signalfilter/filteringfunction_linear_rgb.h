@@ -34,12 +34,15 @@ namespace aims {
       NAME( carto::Object options = carto::none() );                         \
       virtual ~NAME();                                                       \
       virtual void setOptions( carto::Object );                              \
-      virtual T execute( const carto::VolumeRef< T > & volume ) const ;      \
+      virtual T execute( const carto::VolumeRef< T > & volume ) ;            \
       virtual T execute( const carto::VolumeRef< T > & volume,               \
-                         const StructuringElementRef & se ) const;           \
+                         const StructuringElementRef & se );                 \
       virtual StructuringElementRef getStructuringElement(                   \
-        const std::vector<double> & voxel_size = std::vector<double>(4,1.)   \
-      ) const;                                                               \
+        const std::vector<float> & voxel_size = std::vector<float>(4,1.)     \
+      );                                                                     \
+      virtual void setKernel(                                                \
+        const std::vector<float> & voxel_size = std::vector<float>(4,1.)     \
+      );                                                                     \
       virtual NAME * clone() const;                                          \
     protected:                                                               \
       NAME< T::ChannelType > _m;                                             \

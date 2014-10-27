@@ -156,7 +156,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T MaxFilterFunc<T>::execute( const carto::VolumeRef<T> & volume ) const
+  T MaxFilterFunc<T>::execute( const carto::VolumeRef<T> & volume )
   {
     return carto::VolumeUtil<T>::max(volume);
   }
@@ -165,7 +165,7 @@ namespace aims {
   T MaxFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return max_iterate( volse.begin(), volse.end(), std::numeric_limits<T>::max() );
@@ -188,7 +188,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T MinFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  T MinFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
   {
     return carto::VolumeUtil<T>::min(volume);
   }
@@ -197,7 +197,7 @@ namespace aims {
   T MinFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return min_iterate( volse.begin(), volse.end(), std::numeric_limits<T>::max() );
@@ -223,7 +223,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T MedianFilterFunc<T>::execute( const carto::VolumeRef<T> & volume ) const
+  T MedianFilterFunc<T>::execute( const carto::VolumeRef<T> & volume )
   {
     return median( volume.begin(), volume.end(), (T)0 );
   }
@@ -232,7 +232,7 @@ namespace aims {
   T MedianFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return median( volse.begin(), volse.end(), (T)0 );
@@ -259,7 +259,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T NotNullMedianFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  T NotNullMedianFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
   {
     return notNullMedian( volume.begin(), volume.end(), (T)0 );
   }
@@ -268,7 +268,7 @@ namespace aims {
   T NotNullMedianFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return notNullMedian( volse.begin(), volse.end(), (T)0 );
@@ -295,7 +295,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T MeanFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  T MeanFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
   {
     return mean( volume.begin(), volume.end(), (T)0 );
   }
@@ -304,7 +304,7 @@ namespace aims {
   T MeanFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return mean( volse.begin(), volse.end(), (T)0 );
@@ -332,7 +332,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T NotNullMeanFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  T NotNullMeanFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
   {
     return notNullMean( volume.begin(), volume.end(), (T)0 );
   }
@@ -341,7 +341,7 @@ namespace aims {
   T NotNullMeanFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return notNullMean( volse.begin(), volse.end(), (T)0 );
@@ -388,7 +388,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T MajorityFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  T MajorityFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
   {
     return majority( volume.begin(), volume.end(), (T)0 );
   }
@@ -397,7 +397,7 @@ namespace aims {
   T MajorityFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return majority( volse.begin(), volse.end(), (T)0 );
@@ -407,7 +407,7 @@ namespace aims {
   // ExtremaDifferenceFilterFunc
   //--------------------------------------------------------------------------
   template <class T> inline
-  T ExtremaDifferenceFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  T ExtremaDifferenceFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
   {
     T min, max;
     min = carto::VolumeUtil<T>::min( volume );
@@ -419,7 +419,7 @@ namespace aims {
   T ExtremaDifferenceFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     T min, max;
     StructuredConstVolume<T> volse( *volume, *se );
@@ -446,7 +446,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T SumFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  T SumFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
   {
     return sum( volume.begin(), volume.end(), (T) 0 );
   }
@@ -455,7 +455,7 @@ namespace aims {
   T SumFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return sum( volse.begin(), volse.end(), (T)0 );
@@ -487,7 +487,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T VarFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  T VarFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
   {
     return variance( volume.begin(), volume.end(), (T) 0 );
   }
@@ -496,7 +496,7 @@ namespace aims {
   T VarFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return variance( volse.begin(), volse.end(), (T)0 );
@@ -528,7 +528,7 @@ namespace aims {
   } // namespace
 
   template <class T> inline
-  T StDevFilterFunc<T>::execute( const carto::VolumeRef<T>& volume ) const
+  T StDevFilterFunc<T>::execute( const carto::VolumeRef<T>& volume )
   {
     return stdev( volume.begin(), volume.end(), (T) 0 );
   }
@@ -537,7 +537,7 @@ namespace aims {
   T StDevFilterFunc<T>::execute(
     const carto::VolumeRef<T> & volume,
     const StructuringElementRef & se
-  ) const
+  )
   {
     StructuredConstVolume<T> volse( *volume, *se );
     return stdev( volse.begin(), volse.end(), (T)0 );

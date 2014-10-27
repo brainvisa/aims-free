@@ -38,6 +38,7 @@
 //--- aims -------------------------------------------------------------------
 #include <aims/signalfilter/filteringfunction_linear.h>
 #include <aims/connectivity/structuring_element.h> // aims::StructuringElement
+#include <aims/io/writer.h>
 //--- cartodata --------------------------------------------------------------
 #include <cartodata/volume/volume.h>                       // carto::VolumeRef
 //--- cartobase --------------------------------------------------------------
@@ -122,12 +123,15 @@ namespace aims {
   template <typename T>
   void GaborFilterFunc<T>::setOptions( carto::Object options )
   {
+    _init = false;
     _sigma = 1.0;
     _theta = 0.0;
     _lambda = 1.0;
     _psi = 0.0;
     _gamma = 1.0;
     _real = true;
+    _nstd = 2;
+    _voxelsize = std::vector<float>(4,1.0);
 
     if( options )
     {
@@ -143,6 +147,8 @@ namespace aims {
         _gamma = (double)options->getProperty( "gamma" )->getScalar();
       if( options->hasProperty( "real" ) )
         _real = (bool)options->getProperty( "real" )->getScalar();
+      if( options->hasProperty( "nstd" ) )
+        _real = (int)options->getProperty( "nstd" )->getScalar();
     }
 
     if( carto::verbose )
@@ -153,99 +159,124 @@ namespace aims {
                 << "- lambda: " << _lambda << " mm" << std::endl
                 << "- psi: "    << _psi    << "°"   << std::endl
                 << "- gamma: "  << _gamma           << std::endl
-                << "- return "  << ( _real ? "real part" : "imaginary part" )
+                << "- return "  << ( _real ? "real part" : "imaginary part" ) << std::endl
+                << "- nstd: "   << _nstd            << std::endl
                 << std::endl;
     }
   }
 
   template <typename T>
   StructuringElementRef GaborFilterFunc<T>::getStructuringElement(
-    const std::vector<double> & voxel_size
-  ) const
+    const std::vector<float> & voxel_size
+  )
   {
-    double pi = 3.1415926535897;
-    std::vector<double> amplitude(2,0.);
-    double nstds = 3.; // should keep 99% of the filter
-    amplitude[0] = std::max(
-      std::fabs( nstds * _sigma * std::cos(_theta*pi/180. ) ),
-      std::fabs( nstds * _sigma/_gamma * std::sin(_theta*pi/180. ) )
-    );
-    amplitude[1] = std::max(
-      std::fabs( nstds * _sigma * std::sin(_theta*pi/180. ) ),
-      std::fabs( nstds * _sigma/_gamma * std::cos(_theta*pi/180. ) )
-    );
-    amplitude[0] /= voxel_size[0];
-    amplitude[1] /= voxel_size[1];
-    return StructuringElementRef( new strel::SquareXY( amplitude ) );
+    if( voxel_size[0] != _voxelsize[0] ||
+        voxel_size[1] != _voxelsize[1] ||
+        !_init )
+      setKernel( voxel_size );
+
+    return StructuringElementRef( new strel::SquareXY( _amplitude ) );
   }
 
   template <typename T> inline
-  T GaborFilterFunc<T>::execute( const carto::VolumeRef<T> & volume ) const
+  void GaborFilterFunc<T>::setKernel(
+    const std::vector<float> & voxel_size
+  )
+  {
+    std::cout << "setKernel" << std::endl;
+    _voxelsize = voxel_size;
+    std::cout << "- voxel size: "
+              << _voxelsize[0] << ", "
+              << _voxelsize[1] << std::endl;
+
+    double pi = 3.1415926535897;
+    _amplitude = std::vector<double>(2,0.);
+    _amplitude[0] = std::max(
+      std::fabs( _nstd * _sigma * std::cos(_theta*pi/180. ) ),
+      std::fabs( _nstd * _sigma/_gamma * std::sin(_theta*pi/180. ) )
+    );
+    _amplitude[1] = std::max(
+      std::fabs( _nstd * _sigma * std::sin(_theta*pi/180. ) ),
+      std::fabs( _nstd * _sigma/_gamma * std::cos(_theta*pi/180. ) )
+    );
+    _amplitude[0] /= _voxelsize[0];
+    _amplitude[1] /= _voxelsize[1];
+    _kernel = carto::VolumeRef<double>( (int)_amplitude[0] * 2 + 1, (int)_amplitude[1] * 2 + 1 );
+    std::cout << "- amplitude: "
+              << _amplitude[0] << ", "
+              << _amplitude[1] << std::endl;
+
+
+    double offsetx = (double)(_kernel->getSizeX())/2;
+    double offsety = (double)(_kernel->getSizeY())/2;
+    double xp, yp;
+    for( int32_t y=0; y<_kernel->getSizeY(); ++y )
+      for( int32_t x=0; x<_kernel->getSizeX(); ++x )
+      {
+        xp = ( (double)x-offsetx ) * _voxelsize[0] * std::cos( _theta*pi/180. ) +
+             ( (double)y-offsety ) * _voxelsize[1] * std::sin( _theta*pi/180. );
+        yp = ( -(double)x+offsetx ) * _voxelsize[0] * std::sin( _theta*pi/180. ) +
+             ( (double)y-offsety ) * _voxelsize[1] * std::cos( _theta*pi/180. );
+        _kernel(x,y) = std::exp( ( std::pow(xp,2) +
+                                   std::pow(_gamma,2) *
+                                   std::pow(yp,2) ) /
+                       ( -2. * std::pow(_sigma,2) ) );
+        if( _real )
+          _kernel(x,y) *= std::cos( 2. * pi * xp / _lambda + _psi * pi / 180. );
+        else
+          _kernel(x,y) *= std::sin( 2. * pi * xp / _lambda + _psi * pi / 180. );
+      }
+
+    _init = true;
+    Writer<carto::Volume<double> > writer("kernel.ima");
+    writer << *_kernel;
+  }
+
+  template <typename T> inline
+  T GaborFilterFunc<T>::execute( const carto::VolumeRef<T> & volume )
   {
     ASSERT( volume->getSizeZ() == 1 );
     ASSERT( volume->getSizeT() == 1 );
-    double offsetx = (double)(volume->getSizeX())/2;
-    double offsety = (double)(volume->getSizeY())/2;
     double result = 0;
-    double gabor;
-    int32_t xp, yp;
-    double pi = 3.1415926535897;
-    std::vector<double> vs(4,1.0);
-    volume->header().getProperty( "voxel_size", vs );
+    std::vector<float> voxel_size(4,1.0);
+    volume->header().getProperty( "voxel_size", voxel_size );
+    if( voxel_size[0] != _voxelsize[0] ||
+        voxel_size[1] != _voxelsize[1] ||
+        !_init )
+      setKernel( voxel_size );
 
     for( int32_t y=0; y<volume->getSizeY(); ++y )
       for( int32_t x=0; x<volume->getSizeX(); ++x )
-      {
-        xp = ( (double)x-offsetx ) * vs[0] * std::cos( _theta*pi/180. ) +
-             ( (double)y-offsety ) * vs[1] * std::sin( _theta*pi/180. );
-        yp = ( -(double)x+offsetx ) * vs[0] * std::sin( _theta*pi/180. ) +
-             ( (double)y-offsety ) * vs[1] * std::cos( _theta*pi/180. );
-        gabor = std::exp( ( std::pow((float)xp,2) + std::pow((float)_gamma,2) * std::pow((float)yp,2) ) /
-                          ( -2. * std::pow((float)_sigma,2) ) );
-        if( _real )
-          gabor *= std::cos( 2. * pi * xp / _lambda + _psi * pi / 180. );
-        else
-          gabor *= std::sin( 2. * pi * xp / _lambda + _psi * pi / 180. );
-        result += gabor * volume(x,y,0,0);
-      }
+        result += _kernel(x,y) * volume(x,y);
 
     return (T) result;
   }
 
   template <typename T> inline
   T GaborFilterFunc<T>::execute( const carto::VolumeRef<T> & volume,
-                                 const StructuringElementRef & se ) const
+                                 const StructuringElementRef & se )
   {
     ASSERT( volume->getSizeZ() == 1 );
     ASSERT( volume->getSizeT() == 1 );
     ASSERT( se != strel::none() );
-    double offsetx = (double)(volume->getSizeX())/2;
-    double offsety = (double)(volume->getSizeY())/2;
-    double result = 0.0;
-    double gabor;
-    int32_t xp, yp;
-    double pi = 3.1415926535897;
-    std::vector<double> vs(4,1.0);
-    volume->header().getProperty( "voxel_size", vs );
+    int x, y;
+    double result;
+    std::vector<float> voxel_size(4,1.0);
+    volume->header().getProperty( "voxel_size", voxel_size );
+    if( voxel_size[0] != _voxelsize[0] ||
+        voxel_size[1] != _voxelsize[1] ||
+        !_init )
+      setKernel( voxel_size );
     StructuringElement::const_iterator i, e = se->end();
 
-    for( i=se->begin(); i!=e; ++i )
-    {
-      xp = ( (double)(*i)[0] ) * vs[0] * std::cos( _theta*pi/180. ) +
-           ( (double)(*i)[1] ) * vs[1] * std::sin( _theta*pi/180. );
-      yp = ( -(double)(*i)[0] ) * vs[0] * std::sin( _theta*pi/180. ) +
-           ( (double)(*i)[1] ) * vs[1] * std::cos( _theta*pi/180. );
-      gabor = std::exp( ( std::pow((float)xp,2) + std::pow((float)_gamma,2) * std::pow((float)yp,2) ) /
-                        ( -2. * std::pow((float)_sigma,2) ) );
-      if( _real )
-        gabor *= std::cos( 2. * pi * xp / _lambda + _psi * pi / 180. );
-      else
-        gabor *= std::sin( 2. * pi * xp / _lambda + _psi * pi / 180. );
-      result += gabor * volume((*i)[0],(*i)[1],0,0);
+    for( i=se->begin(); i!=e; ++i ) {
+      x = (*i)[0];
+      y = (*i)[1];
+      result += _kernel( x + std::floor((double)(_kernel->getSizeX())/2),
+                         y + std::floor((double)(_kernel->getSizeY())/2) )
+                * volume(x,y);
     }
 
-    // if( result != 0.0)
-      // std::cout << result << " -> " << (T) result << std::endl;
     return (T) result;
   }
 } // namespace aims

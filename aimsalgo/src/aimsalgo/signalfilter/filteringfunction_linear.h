@@ -37,6 +37,8 @@
 
 //--- aims -------------------------------------------------------------------
 #include <aims/signalfilter/filteringfunction.h>    // aims::FilteringFunction
+//--- cartodata --------------------------------------------------------------
+#include <cartodata/volume/volume.h>
 //--- std --------------------------------------------------------------------
 #include <set>
 #include <string>
@@ -44,7 +46,6 @@
 #include <vector>
 //--- forward declarations ---------------------------------------------------
 namespace carto {
-  template <typename T> class VolumeRef;
   class Object;
   Object none();
 }
@@ -69,8 +70,8 @@ namespace aims {
       virtual ~LinFilterFunc() {};
       virtual bool isLinear() const { return true; }
       virtual StructuringElementRef getStructuringElement(
-        const std::vector<double> & voxel_size = std::vector<double>(4,1.)
-      ) const = 0;
+        const std::vector<float> & voxel_size = std::vector<float>(4,1.)
+      ) = 0;
       virtual LinFilterFunc<T> * clone() const = 0;
   };
 
@@ -106,19 +107,24 @@ namespace aims {
         { setOptions( options ); }                                           \
       virtual ~NAME() {};                                                    \
       virtual void setOptions( carto::Object );                              \
-      virtual T execute( const carto::VolumeRef<T> & volume ) const ;        \
+      virtual T execute( const carto::VolumeRef<T> & volume ) ;              \
       virtual T execute( const carto::VolumeRef<T> & volume,                 \
-                         const StructuringElementRef & se ) const;           \
+                         const StructuringElementRef & se );                 \
       virtual StructuringElementRef getStructuringElement(                   \
-        const std::vector<double> & voxel_size = std::vector<double>(4,1.)   \
-      ) const;                                                               \
+        const std::vector<float> & voxel_size = std::vector<float>(4,1.)     \
+      );                                                                     \
+      virtual void setKernel(                                                \
+        const std::vector<float> & voxel_size = std::vector<float>(4,1.)     \
+      );                                                                     \
       virtual NAME<T> * clone() const { return new NAME<T>(); }
 
 #define AIMS_DECLARE_LINFILTERFUNC_BASIC( NAME )                             \
   AIMS_DECLARE_LINFILTERUNC_CUSTOMIZED(NAME)                                 \
   };                                                                         \
   template <typename T>                                                      \
-  NAME<T>::setOptions( carto::Object ) {}                                    \
+  void NAME<T>::setOptions( carto::Object ) {}                               \
+  template <typename T>                                                      \
+  void NAME<T>::setKernel( const std::vector<float> & ) {}                   \
   (void)0
 
 
@@ -132,6 +138,11 @@ namespace aims
       double _psi;
       double _gamma;
       bool   _real;
+      int    _nstd;
+      bool   _init;
+      std::vector<double>       _amplitude;
+      std::vector<float>        _voxelsize;
+      carto::VolumeRef<double>  _kernel;
   };
 }
 

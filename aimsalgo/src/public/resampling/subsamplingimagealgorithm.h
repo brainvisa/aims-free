@@ -98,7 +98,7 @@ namespace aims {
         /// Execute the subsampling algorithm on the input image using the \c FilteringFunctionType
         /// \param in AimsData<VoxelType> input image to subsample
         /// \return AimsData< VoxelType > subsampled image
-        virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in ) const;
+        virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in );
 
         /// NOT IMPLEMENTED
         /// For now, returns default constructor
@@ -109,7 +109,7 @@ namespace aims {
         int                         _win_size_x;
         int                         _win_size_y;
         int                         _win_size_z;
-        const FilteringFunctionType _func;
+        FilteringFunctionType       _func;
         carto::Object               _options;
     };
 
@@ -131,7 +131,7 @@ namespace aims {
     inline
     carto::VolumeRef<VoxelType> SubSamplingImageAlgorithm<VoxelType, FilteringFunctionType>::execute(
       const carto::VolumeRef< VoxelType >& in
-    ) const
+    )
     {
       // std::cout << "Input dim: [" << carto::toString(in.dimX()) << ", "
       //                             << carto::toString(in.dimY()) << ", "

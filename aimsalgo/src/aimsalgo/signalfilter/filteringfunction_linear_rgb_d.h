@@ -27,18 +27,18 @@ namespace aims {
   /// Templated function to process filter on multichannel data
   /// (AimsRGB, AimsRGBA, ...)
   ///
-  /// This function does not filter image but only apply filter on set of 
+  /// This function does not filter image but only apply filter on set of
   /// multichannel data, commonly the neighborhood of a voxel.
   /// \param f       function to use (must derive from \c NonLinFilterFunc)
   /// \param volume  data to evaluate filter on
   /// \return        result of the filter on data
   template <typename VoxelType>
   inline VoxelType multichannelfiltervalues_lin(
-    const LinFilterFunc<typename VoxelType::ChannelType> & f,
+    LinFilterFunc<typename VoxelType::ChannelType> & f,
     const carto::VolumeRef<VoxelType> &volume
   )
   {
-    ChannelSelector< carto::VolumeRef<VoxelType>, 
+    ChannelSelector< carto::VolumeRef<VoxelType>,
                      carto::VolumeRef<typename VoxelType::ChannelType>
                    > selector;
     VoxelType r;
@@ -57,7 +57,7 @@ namespace aims {
   /// Templated function to process filter on multichannel data
   /// (AimsRGB, AimsRGBA, ...)
   ///
-  /// This function does not filter image but only apply filter on set of 
+  /// This function does not filter image but only apply filter on set of
   /// multichannel data, commonly the neighborhood of a voxel.
   /// \param f      function to use (must derive from \c NonLinFilterFunc)
   /// \param volume data to evaluate filter on
@@ -65,12 +65,12 @@ namespace aims {
   /// \return result of the filter on data
   template <typename VoxelType>
   inline VoxelType multichannelfiltervalues_lin(
-    const LinFilterFunc<typename VoxelType::ChannelType> & f, 
+    LinFilterFunc<typename VoxelType::ChannelType> & f,
     const carto::VolumeRef<VoxelType> &volume,
     const StructuringElementRef & se
   )
   {
-    ChannelSelector< carto::VolumeRef<VoxelType>, 
+    ChannelSelector< carto::VolumeRef<VoxelType>,
                      carto::VolumeRef<typename VoxelType::ChannelType>
                    > selector;
     VoxelType r;

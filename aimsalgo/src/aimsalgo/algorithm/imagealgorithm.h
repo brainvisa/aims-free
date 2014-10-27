@@ -81,13 +81,13 @@ namespace aims
       /// Returns the image processed by an algorithm on the input image.
       /// \param in Input image to process
       /// \return VolumeRef< VoxelType > processed image
-      virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in ) const = 0;
+      virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in ) = 0;
 
       /// \c ImageAlgorithmInterface<VoxelType>
       /// Returns the image processed by an algorithm on the input image.
       /// \param in Input image to process
       /// \return AimsData< VoxelType > processed image
-      AimsData<VoxelType> execute( const AimsData<VoxelType> & in ) const
+      AimsData<VoxelType> execute( const AimsData<VoxelType> & in )
       {
         return AimsData<VoxelType>( execute( carto::VolumeRef<VoxelType>( in.volume() ) ) );
       }
@@ -134,7 +134,7 @@ namespace aims
       /// \param in Input image to filter
       /// \return \c AimsData<VoxelType> Filtered image
       static AimsData<VoxelType> execute(
-        const ImageAlgorithmInterface<VoxelType> & algo,
+        ImageAlgorithmInterface<VoxelType> & algo,
         const AimsData<VoxelType> & in )
       {
         // std::cout << "VoxelType :" << carto::DataTypeCode<VoxelType>::name() << std::endl
@@ -150,7 +150,7 @@ namespace aims
       /// \param in Input image to filter
       /// \return \c VolumeRef<VoxelType> Filtered image
       static carto::VolumeRef<VoxelType> execute(
-        const ImageAlgorithmInterface<VoxelType> & algo,
+        ImageAlgorithmInterface<VoxelType> & algo,
         const carto::VolumeRef<VoxelType> & in )
       {
         return algo.execute( in );
@@ -175,7 +175,7 @@ namespace aims
       /// \param in Input image to filter
       /// \return \c VolumeRef< VoxelType > Filtered image
       static carto::VolumeRef<VoxelType> execute(
-        const ImageAlgorithmInterface<typename VoxelType::ChannelType> & algo,
+        ImageAlgorithmInterface<typename VoxelType::ChannelType> & algo,
         const carto::VolumeRef<VoxelType> & in )
       {
 
@@ -190,13 +190,13 @@ namespace aims
                        > selector;
         Point4dl dims = algo.getOutputImageDimensions(
           Point4dl( in->getSizeX(), in->getSizeY(), in->getSizeZ(), in->getSizeT() ) );
-        std::vector<double> vsv( 4, 1. );
+        std::vector<float> vsv( 4, 1. );
         carto::Object vso = in->header().getProperty("voxel_size");
         if( !vso.isNull() ) {
-          vsv[0] = (double) vso->getArrayItem(0)->getScalar();
-          vsv[1] = (double) vso->getArrayItem(1)->getScalar();
-          vsv[2] = (double) vso->getArrayItem(2)->getScalar();
-          vsv[3] = (double) vso->getArrayItem(3)->getScalar();
+          vsv[0] = (float) vso->getArrayItem(0)->getScalar();
+          vsv[1] = (float) vso->getArrayItem(1)->getScalar();
+          vsv[2] = (float) vso->getArrayItem(2)->getScalar();
+          vsv[3] = (float) vso->getArrayItem(3)->getScalar();
         }
         Point4df vs = algo.getOutputImageVoxelSize( Point4df( vsv[0], vsv[1], vsv[2], vsv[3] ) );
         vsv[0] = vs[0];
@@ -231,7 +231,7 @@ namespace aims
       /// \param in Input image to filter
       /// \return \c AimsData< VoxelType > Filtered image
       static AimsData<VoxelType> execute(
-        const ImageAlgorithmInterface<typename VoxelType::ChannelType> & algo,
+        ImageAlgorithmInterface<typename VoxelType::ChannelType> & algo,
         const AimsData<VoxelType> & in )
       {
         return AimsData<VoxelType>( execute( algo, carto::VolumeRef<VoxelType>( in.volume() ) ) );
@@ -265,12 +265,12 @@ namespace aims
       /// Execute the algorithm on the input image.
       /// \param in Input image to process
       /// \return Processed image
-      virtual AimsData<VoxelType> execute( const AimsData<VoxelType> & in ) const
+      virtual AimsData<VoxelType> execute( const AimsData<VoxelType> & in )
       {
         return ImageAlgorithmSwitch<VoxelType,carto::DataTypeTraits<VoxelType>::is_multichannel>::execute(_algo, in);
       }
 
-      virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in ) const
+      virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in )
       {
         return ImageAlgorithmSwitch<VoxelType,carto::DataTypeTraits<VoxelType>::is_multichannel>::execute(_algo, in);
       }
@@ -279,7 +279,7 @@ namespace aims
       /// Please prefer the execute() method
       /// \param in Input image to process
       /// \return Processed image
-      virtual AimsData< VoxelType > doit( const AimsData<VoxelType>& in ) const
+      virtual AimsData< VoxelType > doit( const AimsData<VoxelType>& in )
       {
         return execute( in );
       }

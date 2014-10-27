@@ -137,7 +137,7 @@ namespace aims {
         /// \c FilteringFunctionType
         /// \param in Input image to filter
         /// \return AimsData< VoxelType > Filtered image
-        virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in ) const;
+        virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in );
 
         /// Implement interface: change member values
         virtual void setParameters( const StructuringElement & strel,
@@ -162,7 +162,7 @@ namespace aims {
     template <typename VoxelType, class FilteringFunctionType>
     inline
     carto::VolumeRef<VoxelType> FilteringImageAlgorithm<VoxelType, FilteringFunctionType>::execute(
-      const carto::VolumeRef<VoxelType> & in ) const
+      const carto::VolumeRef<VoxelType> & in )
     {
       int x, y, z, t, nx, ny, nz, n;
       int sz, sy, sx, ez, ey, ex;
@@ -183,7 +183,7 @@ namespace aims {
       StructuringElementRef strel = _strel;
       if( _func.isLinear() )
       {
-        std::vector<double> vs(4,1.0);
+        std::vector<float> vs(4,1.0);
         in->header().getProperty( "voxel_size", vs );
         StructuringElementRef se = _func.getStructuringElement( vs );
         if( se != strel::none() )

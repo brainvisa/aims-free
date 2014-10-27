@@ -106,8 +106,9 @@ doit( Process & p, const string & fname, Finder & )
   cout << " done" << endl;
 
   // bg value
-  T defaultval;
-  carto::stringTo( proc.bv, defaultval );
+  T defaultval = (T)0;
+  if( !proc.bv.empty() )
+    carto::stringTo( proc.bv, defaultval );
   in.fillBorder( defaultval );
 
   // Compatibility with old parameters

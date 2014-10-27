@@ -102,9 +102,9 @@ namespace aims {
         { setOptions( options ); }                                           \
       virtual ~NAME() {};                                                    \
       virtual void setOptions( carto::Object ) {}                            \
-      virtual T execute( const carto::VolumeRef<T> & volume ) const ;        \
+      virtual T execute( const carto::VolumeRef<T> & volume ) ;              \
       virtual T execute( const carto::VolumeRef<T> & volume,                 \
-                         const StructuringElementRef & se ) const;           \
+                         const StructuringElementRef & se );                 \
       virtual NAME<T> * clone() const { return new NAME<T>(); }              \
   }
 

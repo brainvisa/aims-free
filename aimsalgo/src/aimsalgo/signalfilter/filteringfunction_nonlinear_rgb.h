@@ -34,9 +34,9 @@ namespace aims {
       NAME( carto::Object options = carto::none() );                         \
       virtual ~NAME();                                                       \
       virtual void setOptions( carto::Object );                              \
-      virtual VOXELTYPE execute( const carto::VolumeRef< VOXELTYPE > & volume ) const ; \
+      virtual VOXELTYPE execute( const carto::VolumeRef< VOXELTYPE > & volume ); \
       virtual VOXELTYPE execute( const carto::VolumeRef< VOXELTYPE > & volume,          \
-                         const StructuringElementRef & se ) const;           \
+                         const StructuringElementRef & se );                 \
       virtual NAME * clone() const;                                          \
     protected:                                                               \
       NAME< VOXELTYPE::ChannelType > _m;                                     \

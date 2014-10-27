@@ -44,22 +44,28 @@
   }                                                                          \
   VOXELTYPE NAME< VOXELTYPE >::execute(                                      \
     const carto::VolumeRef< VOXELTYPE > & volume                             \
-  ) const                                                                    \
+  )                                                                          \
   {                                                                          \
     return multichannelfiltervalues_lin< VOXELTYPE >( _m, volume );          \
   }                                                                          \
   VOXELTYPE NAME< VOXELTYPE >::execute(                                      \
     const carto::VolumeRef< VOXELTYPE > & volume,                            \
     const StructuringElementRef & se                                         \
-  ) const                                                                    \
+  )                                                                          \
   {                                                                          \
     return multichannelfiltervalues_lin< VOXELTYPE >( _m, volume, se );      \
   }                                                                          \
   StructuringElementRef NAME< VOXELTYPE >::getStructuringElement(            \
-    const std::vector<double> & voxel_size                                   \
-  ) const                                                                    \
+    const std::vector<float> & voxel_size                                    \
+  )                                                                          \
   {                                                                          \
     return _m.getStructuringElement( voxel_size );                           \
+  }                                                                          \
+  void NAME< VOXELTYPE >::setKernel(                                         \
+    const std::vector<float> & voxel_size                                    \
+  )                                                                          \
+  {                                                                          \
+    return _m.setKernel( voxel_size );                                       \
   }                                                                          \
   NAME< VOXELTYPE > * NAME< VOXELTYPE >::clone() const                       \
   {                                                                          \
