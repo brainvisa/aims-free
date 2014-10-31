@@ -76,6 +76,7 @@ foreach( _command
           AimsGraphExtractTransformation
           AimsGraphMerge
           AimsInvertTransformation
+          AimsLabels2Tex
           AimsMassCenter
           AimsMerge2Rgb
           AimsMergeLabel
@@ -94,6 +95,7 @@ foreach( _command
           AimsSumSparseMatrix
           AimsTCat
           AimsTex2Graph
+          AimsTex2Vol
           AimsThreshold
           AimsVectorFieldToMesh
           AimsVolumeExtract
