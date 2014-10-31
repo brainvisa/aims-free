@@ -126,7 +126,11 @@ def readSpmNormalization( matfilename, source=None, destref=None, srcref=None ):
     if scipyversion >= [ 0, 7 ]:
       VG = VG[0,0]
     if scipyversion >= [ 0, 9 ]:
-      MT = aims.AffineTransformation3d( VG[2] )
+      if VG[2].shape != (4, 4):
+        # SPM12 has this matrix in VG[4] where it was VG[2] in SPM8...
+        MT = aims.AffineTransformation3d( VG[4] )
+      else:
+        MT = aims.AffineTransformation3d( VG[2] )
     else:
         MT = aims.AffineTransformation3d( VG.mat )
   else: # spm99
