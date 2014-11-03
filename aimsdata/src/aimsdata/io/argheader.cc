@@ -50,6 +50,9 @@ string ArgHeader::filename() const
   if( _name.length() >= 8 && 
       _name.substr( _name.length() - 8, 8 ) == ".bundles" )
     return( _name );
+  if( _name.length() >= 4 &&
+      _name.substr( _name.length() - 4, 4 ) == ".trk" )
+    return( _name );
   return( _name + ".arg" );
 }
 
@@ -65,6 +68,15 @@ void ArgHeader::read( size_t * )
     setProperty( "data_type", string( "VOID" ) );
     // Read bundles header
     readMinf( fileName );
+    // add meta-info to header
+    readMinf( fileName + ".minf" );
+  }
+  else if(fileName.length() >= 4 &&
+      fileName.substr( _name.length() - 4, 4 ) == ".trk" )
+  {
+    setProperty( "file_type", string( "BUNDLES" ) );
+    setProperty( "object_type", string( "Graph" ) );
+    setProperty( "data_type", string( "VOID" ) );
     // add meta-info to header
     readMinf( fileName + ".minf" );
   }
@@ -134,5 +146,6 @@ set<string> ArgHeader::extensions() const
   set<string>	exts;
   exts.insert( ".arg" );
   exts.insert( ".bundles" );
+  exts.insert( ".trk" );
   return exts;
 }
