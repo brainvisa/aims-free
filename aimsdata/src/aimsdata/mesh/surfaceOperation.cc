@@ -3369,6 +3369,37 @@ bool SurfaceManip::checkMeshIntersect( const AimsSurfaceTriangle & surf1,
     return false;
 }
 
+
+vector<Point3df>* SurfaceManip::lineDirections(
+  const AimsTimeSurface<2, Void> & mesh )
+{
+  vector<int> counts( mesh.vertex().size(), 0 );
+  vector<Point3df> *dirs = new vector<Point3df>( mesh.vertex().size(),
+                                                 Point3df( 0, 0, 0 ) );
+  vector<AimsVector<uint, 2> >::const_iterator ip, ep = mesh.polygon().end();
+  const vector<Point3df> & vert = mesh.vertex();
+  Point3df dir;
+
+  for( ip=mesh.polygon().begin(); ip!=ep; ++ip )
+  {
+    dir = vert[ (*ip)[1] ] - vert[ (*ip)[0] ];
+    dir.normalize();
+    dir /= 2;
+    (*dirs)[ (*ip)[0] ] += dir;
+    (*dirs)[ (*ip)[1] ] += dir;
+    ++counts[ (*ip)[0] ];
+    ++counts[ (*ip)[1] ];
+  }
+
+  long i, n = vert.size();
+  for( i=0; i<n; ++i )
+    if( counts[i] < 2 )
+      (*dirs)[i] *= 2;
+
+  return dirs;
+}
+
+
 // ---
 
 template void SurfaceManip::meshMerge( AimsTimeSurface<2, Void> &,

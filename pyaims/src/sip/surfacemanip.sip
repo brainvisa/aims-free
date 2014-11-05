@@ -69,8 +69,10 @@ public:
     const AimsSurfaceTriangle & nummesh,
     const AimsSurfaceTriangle & denommesh ) /Factory/;
 
- static bool checkMeshIntersect( const AimsSurfaceTriangle &,
+  static bool checkMeshIntersect( const AimsSurfaceTriangle &,
                                   const AimsSurfaceTriangle & );
+  static vector_POINT3DF * lineDirections(
+    const AimsTimeSurface_2 & ) /Factorty/;
 };
 
 };

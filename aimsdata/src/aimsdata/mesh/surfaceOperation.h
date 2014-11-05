@@ -204,6 +204,10 @@ namespace aims
     static bool checkMeshIntersect( const AimsSurfaceTriangle &,
                                     const AimsSurfaceTriangle & );
 
+    /// calculate directions of a line mesh, fora each vertex
+    static std::vector<Point3df>* lineDirections(
+      const AimsTimeSurface<2, Void> & );
+
   };
 
 }
