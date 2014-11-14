@@ -66,13 +66,86 @@ using namespace carto;
 using namespace aims;
 
 
-namespace comist {
+namespace aims
+{
+
+
+  //----------------------//
+ //  AttributedFileName  //
+//----------------------//
+
+// WARNING : This class has nothing to do here. It should be somewhere else
+//           in aimsdata (io ?) or cartobase (attributed ?)
+
+class AttributedFileName
+{
+public:
+
+  inline AttributedFileName();
+  inline AttributedFileName( const std::string &,
+                             const carto::SyntaxSet & = carto::SyntaxSet() );
+
+  void reset( const std::string &,
+              const carto::SyntaxSet & = carto::SyntaxSet() );
+
+  inline const std::string &fileName() const;
+  inline const carto::Object &attributes() const;
+
+private:
+
+  std::string _fileName;
+  carto::Object _attributes;
+};
+
+
+
+  //-------------------------//
+ //  fileNameAndParameters  //
+//-------------------------//
+
+// WARNING : This function has nothing to do here. It should be somewhere else
+//           in aimsdata (io ?) or cartobase (attributed ?)
+
+std::string fileNameAndParameters( const std::string &,
+                                   carto::Object );
 
 
 
   //----------------------//
  //  AttributedFileName  //
 //----------------------//
+
+
+//-----------------------------------------------------------------------------
+inline AttributedFileName::AttributedFileName() :
+  _attributes( carto::Object::value( carto::Dictionary() ) )
+{
+}
+
+
+//-----------------------------------------------------------------------------
+inline AttributedFileName::AttributedFileName( const std::string &fileString,
+                                               const carto::SyntaxSet &syntax
+                                               ) :
+  _attributes( carto::Object::value( carto::Dictionary() ) )
+{
+  reset( fileString, syntax );
+}
+
+
+//-----------------------------------------------------------------------------
+inline const std::string &AttributedFileName::fileName() const
+{
+  return _fileName;
+}
+
+
+//-----------------------------------------------------------------------------
+inline const carto::Object &
+AttributedFileName::attributes() const
+{
+  return _attributes;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -1706,4 +1779,4 @@ void CurveOrientation::noMoreBundle( const BundleProducer & )
 
 
 
-} // namespace comist
+} // namespace aims

@@ -72,7 +72,7 @@ public:
   static bool checkMeshIntersect( const AimsSurfaceTriangle &,
                                   const AimsSurfaceTriangle & );
   static vector_POINT3DF * lineDirections(
-    const AimsTimeSurface_2 & ) /Factorty/;
+    const AimsTimeSurface_2 & ) /Factory/;
 };
 
 };

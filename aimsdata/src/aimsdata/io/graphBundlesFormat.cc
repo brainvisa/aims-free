@@ -39,7 +39,6 @@
 using namespace std;
 using namespace carto;
 using namespace aims;
-using namespace comist;
 
 GraphBundlesFormat::~GraphBundlesFormat()
 {

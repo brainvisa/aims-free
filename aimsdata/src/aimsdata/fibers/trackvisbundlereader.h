@@ -41,7 +41,7 @@
 namespace aims
 {
 
-  class TrackvisBundleReader : public comist::BundleFormatReader
+  class TrackvisBundleReader : public BundleFormatReader
   {
   public:
 

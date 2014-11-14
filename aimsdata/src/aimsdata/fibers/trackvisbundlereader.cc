@@ -38,7 +38,6 @@
 #include <aims/transformation/affinetransformation3d.h>
 
 using namespace aims;
-using namespace comist;
 using namespace carto;
 using namespace std;
 

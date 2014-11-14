@@ -196,6 +196,8 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include merge_S16_S16.sip
 %Include texturetools.sip
 
+%Include bundles.sip
+
 %Include reader_Object.sip
 
 %Include rcptr_AimsData_U8.sip
