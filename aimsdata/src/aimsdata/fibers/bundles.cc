@@ -66,7 +66,7 @@ using namespace carto;
 using namespace aims;
 
 
-namespace aims
+namespace
 {
 
 
@@ -227,6 +227,11 @@ inline sorted_pair<T>::sorted_pair( const T &a, const T& b ) {
   }
 }
 
+} // namespace ""
+
+
+namespace aims
+{
 
   //------------------//
  //  BundleProducer  //
