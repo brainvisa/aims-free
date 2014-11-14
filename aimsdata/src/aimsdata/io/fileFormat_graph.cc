@@ -37,6 +37,7 @@
 
 #include <aims/io/fileFormat_d.h>
 #include <aims/io/baseFormats_graph.h>
+#include <aims/io/graphBundlesFormat.h>
 #include <aims/io/baseFormats_syntax.h>
 #include <aims/io/argR.h>
 #include <graph/graph/graph.h>
@@ -86,6 +87,11 @@ namespace aims
     ArgFormat		*af = new ArgFormat;
     registerFormat( "ARG", af, ext );
     _formats()[ "GraphVolume" ] = new GraphVolumeFormat;
+
+    ext.clear();
+    ext.push_back( "bundles" );
+    ext.push_back( "trk" );
+    registerFormat( "BUNDLES", new GraphBundlesFormat, ext );
   }
 
 

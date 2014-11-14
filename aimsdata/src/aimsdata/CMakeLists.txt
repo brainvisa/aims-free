@@ -35,6 +35,8 @@ set( _headers
     features/scalar_set_features.h
     features/point_set_features.h
     features/roi_features.h
+    fibers/bundles.h
+    fibers/trackvisbundlereader.h
     getopt/getopt.h
     getopt/getopt2.h
     getopt/getoptProcess.h
@@ -95,6 +97,7 @@ set( _headers
     io/gisheader.h
     io/gisR.h
     io/gisW.h
+    io/graphBundlesFormat.h
     io/hieR.h
     io/imasparseheader.h
     io/io_g.h
@@ -237,6 +240,8 @@ set( _sources
     features/scalar_set_features.cc
     features/point_set_features.cc
     features/roi_features.cc
+    fibers/bundles.cc
+    fibers/trackvisbundlereader.cc
     getopt/getopt.cc
     getopt/getopt2.cc
     graph/graphiterator.cc
@@ -276,6 +281,7 @@ set( _sources
     io/finderFormats.cc
     io/genesisheader.cc
     io/gisheader.cc
+    io/graphBundlesFormat.cc
     io/hieR.cc
     io/iooptions.cc
     io/imasparseheader.cc
