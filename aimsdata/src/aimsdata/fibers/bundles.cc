@@ -285,6 +285,19 @@ void BundleProducer::terminateFiber( const BundleInfo &bundleInfo,
 }
 
 //-----------------------------------------------------------------------------
+void BundleProducer::terminateFiber( const BundleInfo &bundleInfo,
+                                     const FiberInfo &fiberInfo,
+                                     FiberPoint* fiber,
+                                     int &fiberSize )
+{
+
+  for( BundleListenerList::iterator i = _bundleListeners.begin();
+       i != _bundleListeners.end(); ++i ) {
+    (*i)->fiberTerminated( *this, bundleInfo, fiberInfo, fiber, fiberSize );
+  }
+}
+
+//-----------------------------------------------------------------------------
 void BundleProducer::addFiberPoint( const BundleInfo &bundleInfo, 
                                     const FiberInfo &fiberInfo,
                                     const FiberPoint &fiberPoint )
@@ -342,6 +355,13 @@ void BundleListener::fiberTerminated( const BundleProducer &, const BundleInfo &
 {
 }
 
+
+//-----------------------------------------------------------------------------
+void BundleListener::fiberTerminated( const BundleProducer &, const BundleInfo &,
+                                      const FiberInfo & ,
+                                      FiberPoint * , int & )
+{
+}
 
 //-----------------------------------------------------------------------------
 void BundleListener::newFiberPoint( const BundleProducer &, const BundleInfo &,
@@ -489,6 +509,43 @@ void BundleWriter::checkStreams()
   if ( ! _dataFile.good() ) throw runtime_error( "Error while writing data file" );
 }
 
+//-----------------------------------------------------------------------------
+void BundleWriter::addFiber( const BundleProducer&, const BundleInfo &,const FiberInfo & ,  FiberPoint *fiber, int &fiberSize)
+{
+
+  checkStreams();
+
+  if ( fiberSize > 0 ) {
+    ++_writtenFibersCount;
+    if ( _ascii ) {
+      _dataFile << fiberSize << " ";
+    } else {
+      _dataFile.write( reinterpret_cast< char * >( &fiberSize ),
+                       sizeof( fiberSize ) );
+    }
+
+    checkStreams();
+
+    if ( _ascii )
+    {
+      for( int i = 0; i < fiberSize; i++ )
+      {
+        _dataFile << fiber[ i ][ 0 ] << " " << fiber[ i ][ 1 ]
+                  << " " << fiber[ i ][ 2 ];
+      }
+    }
+    else
+    {
+      _dataFile.write( reinterpret_cast< char * >( &fiber[ 0 ] ),
+                        sizeof( FiberPoint ) *fiberSize );
+    }
+  delete []fiber;
+  if ( _ascii ) _dataFile << endl;
+  }
+  checkStreams();
+
+}
+
 
 
   //---------------------//
@@ -500,6 +557,12 @@ BundleReader::BundleReader( const string &fileName )
   : BundleProducer(), BundleListener()
 {
   _fileName = fileName;
+}
+
+
+//-----------------------------------------------------------------------------
+BundleReader::~BundleReader()
+{
 }
 
 
@@ -543,12 +606,6 @@ void BundleReader::newFiberPoint( const BundleProducer &,
 void BundleReader::noMoreBundle( const BundleProducer & )
 {
   BundleProducer::noMoreBundle();
-}
-
-
-//-----------------------------------------------------------------------------
-BundleReader::~BundleReader()
-{
 }
 
 
@@ -641,7 +698,7 @@ void ConnectomistBundlesReader::read()
   header = Object::value( Dictionary() );
   PythonReader out( _fileName + ".bundles" );
   out.read( *header );
-  
+
   // Check format
   const string format = header->getProperty( "format" )->value<string>();
   if ( format != "bundles_1.0" ) {
@@ -687,7 +744,9 @@ void ConnectomistBundlesReader::read()
 
   Object bundlesObj = header->getProperty( "bundles" );
   ObjectVector &bundles = bundlesObj->value<ObjectVector>();
-  if ( bundles.empty() ) {
+  // it should not be a problem to read empty bundles.
+  if ( bundles.empty() )
+  {
     noMoreBundle();
     return;
     // throw runtime_error( "Bundles required in format bundles_1.0" );
@@ -743,7 +802,6 @@ void ConnectomistBundlesReader::read()
               throw runtime_error( "syntax error in bundles data file" );
             }
           }
-          
         }
         addFiberPoint( currentBundle, fiberInfo, point );
         --fiberSize;
@@ -751,7 +809,7 @@ void ConnectomistBundlesReader::read()
       terminateFiber( currentBundle, fiberInfo );
       ++fiberRead;
     }
-    
+
     terminateBundle( currentBundle );
     currentBundle = BundleInfo( bundleCount++, bundleName );
   } while( dataFile.good() && fiberRead < fiberCount );
@@ -759,6 +817,7 @@ void ConnectomistBundlesReader::read()
 }
 
 
+//-----------------------------------------------------------------------------
 Object ConnectomistBundlesReader::readHeader()
 {
   Object header;

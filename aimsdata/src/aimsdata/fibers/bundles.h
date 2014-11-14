@@ -145,6 +145,8 @@ protected:
                              const FiberInfo & );
   virtual void fiberTerminated( const BundleProducer &, const BundleInfo &,
                                 const FiberInfo & );
+  virtual void fiberTerminated( const BundleProducer &, const BundleInfo &,
+                                const FiberInfo &,  FiberPoint *,int & );
   virtual void newFiberPoint( const BundleProducer &, const BundleInfo &,
                               const FiberInfo &, const FiberPoint & );
   virtual void noMoreBundle( const BundleProducer & );
@@ -170,6 +172,7 @@ protected:
   void terminateBundle( const BundleInfo & );
   void startFiber( const BundleInfo &, const FiberInfo & );
   void terminateFiber( const BundleInfo &, const FiberInfo & );
+  void terminateFiber( const BundleInfo &, const FiberInfo &,  FiberPoint* ,int &);
   void addFiberPoint( const BundleInfo &, const FiberInfo &,
                       const FiberPoint & );
   void noMoreBundle();
@@ -199,8 +202,6 @@ public:
 
   typedef std::vector< FiberPoint > FiberPoints;
 
-protected:
-
   virtual void bundleStarted( const BundleProducer &, const BundleInfo & );
   virtual void bundleTerminated( const BundleProducer &, const BundleInfo & );
   virtual void fiberStarted( const BundleProducer &, const BundleInfo &,
@@ -211,7 +212,10 @@ protected:
                       const FiberInfo &, const FiberPoint & );
   virtual void noMoreBundle( const BundleProducer & );
   virtual void checkStreams();
+  virtual void addFiber( const BundleProducer &, const BundleInfo &,
+                         const FiberInfo &,  FiberPoint*, int &);
 
+protected:
   int _ascii;
   std::string _fileName;
   carto::Object _header;
