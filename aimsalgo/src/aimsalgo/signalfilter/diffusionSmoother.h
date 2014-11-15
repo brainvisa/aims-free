@@ -38,7 +38,8 @@
 #include <cstdlib>
 #include <aims/primalsketch/imageSmoother.h>
 
-namespace aims {
+namespace aims
+{
 
 /** Base class for Heat diffusion */
 template<typename T>

@@ -62,7 +62,7 @@ namespace aims
           typedef typename SiteType<Geom>::type Site;
           typedef typename TexType<Text>::type Val;
 
-          string _subject;
+          std::string _subject;
 
           ScaleSpace<Geom, Text>   *_scaleSpace;
           std::list<Bifurcation<Site>*> bifurcationList;
@@ -82,42 +82,54 @@ namespace aims
      public:
 
           PrimalSketch() : _scaleSpace(NULL), _mask(NULL) {}
-          PrimalSketch(string subject,  int type) : _subject(subject) , _scaleSpace(NULL), labelMax(0),_mask(NULL), _type(type) {}
-          PrimalSketch(string subject, ScaleSpace<Geom, Text> *scaleSpace, int type)
-                    : _subject(subject) , _scaleSpace(scaleSpace), labelMax(0), _mask(NULL), _type(type)  {SetMinDt();}
-          PrimalSketch(string subject, ScaleSpace<Geom, Text> *scaleSpace, TexturedData<Geom, Text> *mask, int type)
-                    : _subject(subject) , _scaleSpace(scaleSpace), labelMax(0), _mask(mask), _type(type)  {SetMinDt();}
+          PrimalSketch( const std::string & subject,  int type )
+            : _subject(subject) , _scaleSpace(NULL), labelMax(0),_mask(NULL), _type(type) {}
+          PrimalSketch( const std::string & subject,
+                        ScaleSpace<Geom, Text> *scaleSpace, int type)
+            : _subject(subject) , _scaleSpace(scaleSpace), labelMax(0), _mask(NULL), _type(type)
+          { SetMinDt(); }
+          PrimalSketch( const std::string & subject,
+                        ScaleSpace<Geom, Text> *scaleSpace,
+                        TexturedData<Geom, Text> *mask, int type)
+            : _subject(subject) , _scaleSpace(scaleSpace), labelMax(0), _mask(mask), _type(type)
+          { SetMinDt(); }
 
-          string Subject() {return _subject;}
-          int Type() {return _type;}
-          void setType(int t){_type = t; }
+          std::string Subject() { return _subject; }
+          int Type() { return _type; }
+          void setType( int t ) { _type = t; }
 
-          void SetMinDt() {
+          void SetMinDt()
+          {
               if (!_scaleSpace->smoother()->optimal())
                   min_delta_t=0.5;
               else
                   min_delta_t=_scaleSpace->smoother()->dt();
           }
-          void SetScaleSpace(ScaleSpace<Geom, Text> *scaleSpace)
-                                                  {
+          void SetScaleSpace( ScaleSpace<Geom, Text> *scaleSpace )
+          { _scaleSpace = scaleSpace; SetMinDt(); }
+          std::list<Bifurcation<Site>*> BifurcationList()
+          { return bifurcationList; }
+          std::list<ScaleSpaceBlob<Site>*> BlobSet() { return blobList; }
+          ScaleSpace<Geom, Text> *scaleSpace() { return _scaleSpace; }
 
-              _scaleSpace=scaleSpace;   SetMinDt();}
-          std::list<Bifurcation<Site>*> BifurcationList() {return bifurcationList;}
-          std::list<ScaleSpaceBlob<Site>*> BlobSet() {return blobList;}
-          ScaleSpace<Geom, Text>   *scaleSpace() {return _scaleSpace;}
+          void AddBlob( ScaleSpaceBlob<Site> *blob )
+          { blobList.push_back(blob); }
+          void AddBifurcation( Bifurcation<Site> *bifurcation )
+          { bifurcationList.push_back(bifurcation); }
 
-          void AddBlob(ScaleSpaceBlob<Site> *blob) {blobList.push_back(blob);}
-          void AddBifurcation(Bifurcation<Site> *bifurcation ) {bifurcationList.push_back(bifurcation);}
+          ScaleSpaceBlob<Site> *Blob( int label );
 
-          ScaleSpaceBlob<Site>     *Blob(int label);
+          void ComputePrimalSketch( float tmin, float tMax,
+                                    const std::string & statFile="",
+                                    uint intersection_param=10 );
 
-          void ComputePrimalSketch(float tmin, float tMax, string statFile="", uint intersection_param=10);
+          void MatchScaleLevels( float t_up, float t_down,
+                                 uint intersection_param );
 
-          void MatchScaleLevels(float t_up, float t_down, uint intersection_param );
+          void ComputeBlobMeasurements( const std::string & statName="" );
 
-          void ComputeBlobMeasurements(string statName="");
-
-          ScaleSpaceBlob<Site>     *GetSSBlobFromGLBlob(GreyLevelBlob<Site> *glBlob);
+          ScaleSpaceBlob<Site> *GetSSBlobFromGLBlob(
+            GreyLevelBlob<Site> *glBlob );
 
      };
 
@@ -165,7 +177,10 @@ namespace aims
      //---------------------------------------------------------------------
 
      template<typename Geom, typename Text>
-     void PrimalSketch<Geom,Text>::ComputePrimalSketch(float tmin, float tmax, string statFile, uint intersection_param) {
+     void PrimalSketch<Geom,Text>::ComputePrimalSketch(
+       float tmin, float tmax, const std::string & statFile,
+       uint intersection_param )
+     {
          // Algo : On part del'echelle la plus haute et on descend vers l'image originale
          // A chaque niveau : on regarde vers le niveau en dessous et on applique
          //                                           MatchScaleLevels();
@@ -452,7 +467,7 @@ namespace aims
         //cout << "MERGECOUNT:" << merge_count << endl;
 
         // blob updates
-        cout << "ssblobs après : " << blobList.size() << endl;
+        std::cout << "ssblobs après : " << blobList.size() << std::endl;
 
         for (itBlob=blobList.begin(); itBlob != blobList.end(); ++itBlob) {
             (*itBlob)->ComputeLifeTime();
@@ -845,7 +860,8 @@ namespace aims
      //---------------------------------------------------------------------
 
      template<typename Geom, typename Text>
-     void PrimalSketch<Geom,Text>::ComputeBlobMeasurements(string statName)
+     void PrimalSketch<Geom,Text>::ComputeBlobMeasurements(
+       const std::string & statName )
     {
         ScaleSpaceBlob<Site> *ssBlob;
         std::map<float, BlobMeasurements > statsM, statsSD;
@@ -860,16 +876,18 @@ namespace aims
        // statM contains all the stats for normalizing GLBlobs measurements
        // before integration across scales.
 
-       cout << "Computing multiscale measurements for SSBlobs" << std::endl;
+       std::cout << "Computing multiscale measurements for SSBlobs"
+        << std::endl;
 
         if (statName.length()>0)
         {
             if ((fileStats=fopen(statName.c_str(), "r"))==NULL)
             {
-               cerr << "Problem : cannot open stat file " << statName << endl;
+               std::cerr << "Problem : cannot open stat file " << statName
+                  << std::endl;
                exit(EXIT_FAILURE);
             }
-            cout << "Found stat file, reading it" << endl;
+            std::cout << "Found stat file, reading it" << std::endl;
             while (!feof(fileStats))
             {
                 res = fscanf(fileStats, "%f\n", &t); // !!! this defines the stat file format (simple)
@@ -882,7 +900,7 @@ namespace aims
             }
             fclose(fileStats);
             typename std::list<ScaleSpaceBlob<Site>*>::iterator itSSBlobs=blobList.begin();
-            cout << "processing GLblobs for normalisation" << std::endl;
+            std::cout << "processing GLblobs for normalisation" << std::endl;
             for (; itSSBlobs!=blobList.end(); ++itSSBlobs)
             {
                 ssBlob=*itSSBlobs;
@@ -930,7 +948,7 @@ namespace aims
             }
         }
         typename std::list< ScaleSpaceBlob<Site>* >::iterator itSSBlobs=blobList.begin();
-        cout << "Computing multi-scale measurements" << std::endl;
+        std::cout << "Computing multi-scale measurements" << std::endl;
 
         for (; itSSBlobs!=blobList.end(); ++itSSBlobs)
         {

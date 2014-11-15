@@ -42,9 +42,6 @@
 #include <list>
 #include <utility>
 
-using namespace aims;
-using namespace std;
-
 namespace aims
 {
   enum PrimalSketchEvents
@@ -98,7 +95,7 @@ namespace aims
 
      protected:
 
-          string _subject;
+          std::string _subject;
           int _label;
           //std::list<GreyLevelBlob<T>*> glBlobs;
           float scaleMin;
@@ -117,13 +114,22 @@ namespace aims
 
      public:
 
-          ScaleSpaceBlob() {glBlobs=std::list<GreyLevelBlob<T>*>();}
-          ScaleSpaceBlob(string subject) {_subject=subject;glBlobs=std::list<GreyLevelBlob<T>*>();}
-          ScaleSpaceBlob(string subject, int label) {_subject=subject; _label=label;glBlobs=std::list<GreyLevelBlob<T>*>();}
-          void SetLabel(int label) {label=_label;}
-          int Label() {return _label;}
+          ScaleSpaceBlob() { glBlobs = std::list<GreyLevelBlob<T>*>(); }
+          ScaleSpaceBlob( const std::string & subject )
+          {
+            _subject = subject;
+            glBlobs = std::list<GreyLevelBlob<T>*>();
+          }
+          ScaleSpaceBlob( const std::string & subject, int label )
+          {
+            _subject = subject;
+            _label = label;
+            glBlobs = std::list<GreyLevelBlob<T>*>();
+          }
+          void SetLabel( int label ) { label = _label; }
+          int Label() { return _label; }
 
-        // test
+          // test
           std::list<GreyLevelBlob<T>*> glBlobs;
 
           void SetScaleMin(float t) {scaleMin=t;}

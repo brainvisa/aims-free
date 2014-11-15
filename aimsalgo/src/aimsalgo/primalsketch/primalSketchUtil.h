@@ -135,7 +135,7 @@ namespace aims
 		SiteIterator<AimsSurface<D,Void> > itSite=textBlob->siteBegin();
 
 
-                set<float> scale= sketch->scaleSpace()->GetScaleList();
+                std::set<float> scale= sketch->scaleSpace()->GetScaleList();
                
 
                 TimeTexture<float> tex(scale.size(),sketch->scaleSpace()->Mesh()->vertex().size());
@@ -144,7 +144,7 @@ namespace aims
                     tex[i].item(j)=0;
                   
                 float sc;
-                set<float>::iterator it;
+                std::set<float>::iterator it;
                 uint test=0;
                 uint i=0;
                 for (; itBlob!=ssBlobList.end(); ++itBlob)
@@ -160,17 +160,12 @@ namespace aims
                             points=(*glit)->GetListePoints();
                             itPoints=points.begin();
                             sc = (*glit)->GetScale();
-//                             cout << "sc:" << sc  << endl;
                             for (i=0,it=scale.begin();
                               *it != sc && it!=scale.end();it++,i++) {}
 
                             for (; itPoints!=points.end(); ++itPoints)
                             {
                               tex[i].item((*itPoints).second)= (*itBlob)->GetMeasurements().t;  //100+test*10;
-//                               if (test == 0) {cout << " :" << (*itPoints).second << endl;
-//                                 cout << GetScaleImage
-//                               }
-                              
                             }
                           }
                           test++;
@@ -187,9 +182,6 @@ namespace aims
 //                         cout << "sc:" << sc << " ";
                         for (i=0,it=scale.begin();*it != sc && it!=scale.end();
                           it++,i++) {}
-//                         cout << "i:" << i << endl;
-
-//                           
 
                 }
 
@@ -259,19 +251,19 @@ namespace aims
 		meshBlob=new AimsSurfaceTriangle();
                 (*mesh)[0].updateNormals();
 
-                cout << "==============================" << endl;
+                std::cout << "==============================" << std::endl;
 		for (; ssblobit!=ssBlobList.end(); ++ssblobit ) { //  ON PARCOURT LES SSBLOBS
                   oneMesh=AimsSurfaceTriangle();
                   label=(*ssblobit)->Label();
 
-                  cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bssb n°" << label << "("<< count2++ <<"/" << ssBlobList.size()<<") " << flush;
+                  std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bssb n°" << label << "("<< count2++ <<"/" << ssBlobList.size()<<") " << std::flush;
 
-                  list<GreyLevelBlob<Site>*>::iterator glblobit=(*ssblobit)->glBlobs.begin();
-                  map<float,GreyLevelBlob<Site>*> glblobmap;
+                  std::list<GreyLevelBlob<Site>*>::iterator glblobit=(*ssblobit)->glBlobs.begin();
+                  std::map<float,GreyLevelBlob<Site>*> glblobmap;
                   for (;glblobit != (*ssblobit)->glBlobs.end();glblobit++){
                     glblobmap[(*glblobit)->GetScale()] = *glblobit;
                   }
-                  map<float,GreyLevelBlob<Site>*>::iterator mapit=glblobmap.begin();
+                  std::map<float,GreyLevelBlob<Site>*>::iterator mapit=glblobmap.begin();
 
                   for (count = 0;count<1 && count <glblobmap.size();count++,mapit++){ // ON PARCOURT LES GLBLOBS DU SSB 
                       tempMesh=AimsSurfaceTriangle();
@@ -281,7 +273,7 @@ namespace aims
                       points=(*mapit).second->GetListePoints();
                       points=(*ssblobit)->GlBlobRep()->GetListePoints();
                       std::set<Site,ltstr_p3d<Site> >::iterator itPoints=points.begin();
-                      set<uint> auxpts;
+                      std::set<uint> auxpts;
                       for (; itPoints!=points.end(); ++itPoints){				    
                         index=(*itPoints).second;
                         auxpts.insert(index);
@@ -339,11 +331,10 @@ namespace aims
                     (*meshBlob)[label].polygon()=(*msh).polygon();
                     (*meshBlob)[label].vertex()=(*msh).vertex();
                     (*meshBlob)[label].updateNormals();
-//                     cout <<  << endl;
                   }
 
 		}
-                cout << "FIN" << endl;
+                std::cout << "END" << std::endl;
 
 		return meshBlob;
 	}
@@ -372,9 +363,6 @@ namespace aims
 	//------------------------------------------------------------------------------------------
 	template<typename Geom, typename Text> 	void AddBlobsToPSGraph(PrimalSketch<Geom,Text> *sketch, Graph *graph)
 	{
-// ne pas inclure <iostream> dans les *.h (sauf pour istream/ostream/ifstream/ofstream)
-//		cerr << "Function AddBlobToPSGraph only implemented for types image or mesh+surface" << endl;
-//		cerr << "Not doing anything" << endl;
 	}
 
 
@@ -455,8 +443,8 @@ namespace aims
                 
           for (uint i=0;i<(*mesh)[0].vertex().size();i++)
             for (uint z=0;z<3;z++){
-            mini[z] = min((*mesh)[0].vertex()[i][z], mini[z]);
-            maxi[z] = max((*mesh)[0].vertex()[i][z], maxi[z]);
+            mini[z] = std::min((*mesh)[0].vertex()[i][z], mini[z]);
+            maxi[z] = std::max((*mesh)[0].vertex()[i][z], maxi[z]);
             }
 
           resolution.push_back(1);
@@ -526,10 +514,10 @@ namespace aims
   		//for (itMesh==blobMesh->begin();itMesh!=blobMesh->end();++itMesh)
   		for (t=0; t<blobMesh->size(); t++)
 		{
- 			const vector<Point3df>  vert = (*blobMesh)[t].vertex();
-  			const vector<AimsVector<uint,3> >  poly = (*blobMesh)[t].polygon();
-			map<pair<unsigned, unsigned>, unsigned> edges;
-  			map<pair<unsigned, unsigned>, unsigned>::iterator ie, eie = edges.end();
+ 			const std::vector<Point3df>  vert = (*blobMesh)[t].vertex();
+  			const std::vector<AimsVector<uint,3> >  poly = (*blobMesh)[t].polygon();
+			std::map<std::pair<unsigned, unsigned>, unsigned> edges;
+  			std::map<std::pair<unsigned, unsigned>, unsigned>::iterator ie, eie = edges.end();
 			p = poly.size();
 
   			for( i=0; i<p; ++i )
@@ -539,17 +527,17 @@ namespace aims
       			t3 = poly[i][2];
 
 				if( t1 < t2 )
-					++edges[ pair<unsigned, unsigned>( t1, t2 ) ];
+					++edges[ std::pair<unsigned, unsigned>( t1, t2 ) ];
       			else
-					++edges[ pair<unsigned, unsigned>( t2, t1 ) ];
+					++edges[ std::pair<unsigned, unsigned>( t2, t1 ) ];
       			if( t1 < t3 )
-					++edges[ pair<unsigned, unsigned>( t1, t3 ) ];
+					++edges[ std::pair<unsigned, unsigned>( t1, t3 ) ];
       			else
-					++edges[ pair<unsigned, unsigned>( t3, t1 ) ];
+					++edges[ std::pair<unsigned, unsigned>( t3, t1 ) ];
       			if( t2 < t3 )
-					++edges[ pair<unsigned, unsigned>( t2, t3 ) ];
+					++edges[ std::pair<unsigned, unsigned>( t2, t3 ) ];
       			else
-				++edges[ pair<unsigned, unsigned>( t3, t2 ) ];
+				++edges[ std::pair<unsigned, unsigned>( t3, t2 ) ];
     		}
 
 			tmpMesh=new AimsSurfaceTriangle;

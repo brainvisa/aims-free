@@ -35,34 +35,41 @@
 #ifndef AIMS_PRIMALSKETCH_DERICHESMOOTHER_D_H
 #define AIMS_PRIMALSKETCH_DERICHESMOOTHER_D_H
 
-#include <cstdlib>
 #include <aims/primalsketch/dericheSmoother.h>
-#include <stdlib.h>
+#include <iostream>
 
-template<class T> AimsData<T> DericheSmoother<T>::doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose) {
+namespace aims
+{
 
-  if (maxiter >= 0)
+  template<class T> AimsData<T> DericheSmoother<T>::doSmoothing(
+    const AimsData<T> & ima, int maxiter, bool verbose)
+  {
+
+    if (maxiter >= 0)
     {
-			if ((ima.sizeX()==ima.sizeY()) && (ima.sizeX()==ima.sizeZ()))
-			{
-				AimsData<T> ima2=ima.clone(); // this is to avoid problem caused by
-											// copy constructor that just makes a reference
-				float sigma=sqrt(maxiter*ima.sizeX()*ima.sizeX());
-		      	std::cout << "sigma=" << sigma << std::endl;
-      			Gaussian3DSmoothing<T> gaussSmooth(sigma, sigma, sigma);
-      			return gaussSmooth.doit(ima2);
-			}
-			else
-			{
-				std::cerr << "Anisotropic images not supported (yet) for scale-space applications..." << std::endl;
-				exit(EXIT_FAILURE);
-			}
+      if ((ima.sizeX()==ima.sizeY()) && (ima.sizeX()==ima.sizeZ()))
+      {
+        AimsData<T> ima2=ima.clone(); // this is to avoid problem caused by
+        // copy constructor that just makes a reference
+        float sigma=sqrt(maxiter*ima.sizeX()*ima.sizeX());
+        std::cout << "sigma=" << sigma << std::endl;
+        Gaussian3DSmoothing<T> gaussSmooth(sigma, sigma, sigma);
+        return gaussSmooth.doit(ima2);
+      }
+      else
+      {
+        std::cerr << "Anisotropic images not supported (yet) for scale-space applications..." << std::endl;
+        exit( EXIT_FAILURE );
+      }
     }
-  else
+    else
     {
-      std::cerr << "DericheRecursiveConvolution Smoother: must have tIn < tOut" << std::endl;
-      exit(EXIT_FAILURE);
+      std::cerr << "DericheRecursiveConvolution Smoother: must have tIn < tOut"
+        << std::endl;
+      exit( EXIT_FAILURE );
     }
+  }
+
 }
 
 #endif

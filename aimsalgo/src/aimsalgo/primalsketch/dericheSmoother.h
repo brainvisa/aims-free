@@ -39,16 +39,17 @@
 #include <aims/primalsketch/imageSmoother.h>
 
 
-namespace aims {
+namespace aims
+{
 
   template<class T> class DericheSmoother : public Smoother<AimsData<T>, AimsData<T> > {
 
   public:
 
     AimsData<T> doSmoothing( const AimsData<T> & ima, int maxiter,
-		    			bool verbose=false);
+                             bool verbose=false);
 
-		float dt() {return 0.0;}
+    float dt() {return 0.0;}
     bool optimal() {return false;}
 
   };

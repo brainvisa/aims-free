@@ -37,6 +37,8 @@
 #include <aims/utility/threshold.h>
 #include <aims/utility/converter_volume.h>
 
+using namespace aims;
+using namespace std;
 
 aims::HarmonicCageMeshResampler::HarmonicCageMeshResampler(
 const AimsSurfaceTriangle &cage, float spacing)

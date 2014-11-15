@@ -35,17 +35,9 @@
 #ifndef AIMS_PRIMALSKETCH_IMAGESMOOTHER_H
 #define AIMS_PRIMALSKETCH_IMAGESMOOTHER_H
 
-#include <aims/config/aimsalgo_config.h>
 #include <aims/primalsketch/smoother.h>
 #include <aims/mesh/surface.h>
 #include <aims/mesh/texture.h>
-#include <aims/data/data.h>
-#include <iostream>
-#include <set>
-#include <map>
-
-using namespace aims;
-using namespace std;
 
 namespace aims
 {

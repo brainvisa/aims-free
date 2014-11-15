@@ -42,9 +42,11 @@
 
 #include <aims/config/aimsalgo_config.h>
 
-namespace aims {
+namespace aims
+{
 
-  template<typename Geom, typename Text> class Smoother {
+  template<typename Geom, typename Text> class Smoother
+  {
 
   protected:
 
