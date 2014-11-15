@@ -58,11 +58,8 @@
 #include <iterator>
 #include <algorithm>
 
-using namespace aims;
-using namespace carto;
-using namespace std;
-
-namespace aims {
+namespace aims
+{
 
     template< class T >
     inline int FdfParType<T>::getFdfType() { return 1; }
@@ -74,28 +71,28 @@ namespace aims {
     inline char FdfParType<T>::getFdfSeparator() { return ' '; }
 
     template<>
-    inline int FdfParType<string>::getFdfType() { return 2; }
+    inline int FdfParType<std::string>::getFdfType() { return 2; }
 
     template<>
-    inline string FdfParType<string>::getFdfDefaultValue() { return ""; }
+    inline std::string FdfParType<std::string>::getFdfDefaultValue() { return ""; }
 
     template<>
-    inline char FdfParType<string>::getFdfSeparator() { return '\n'; }
+    inline char FdfParType<std::string>::getFdfSeparator() { return '\n'; }
 
     template< class T >
-    vector<T> FdfProcPar::values(string param) {
+    std::vector<T> FdfProcPar::values(std::string param) {
         uint   start, end;
         int    count;
         int    fdftype;
-        vector<T> values;
+        std::vector<T> values;
         T value;
-        string line;
+        std::string line;
         
         // Open file to read
-        ifstream file( _name.c_str(), ios::in | ios::binary );
+        std::ifstream file( _name.c_str(), std::ios::in | std::ios::binary );
         
         if (!file) {
-            io_error::launchErrnoExcept( _name );
+            carto::io_error::launchErrnoExcept( _name );
         }
         fdftype = FdfParType<T>::getFdfType();
 
@@ -119,7 +116,7 @@ namespace aims {
             }
             line = line.substr( start, end - start + 1 );
             try {
-                stringTo(line, value);
+                carto::stringTo(line, value);
                 values.push_back(value);
             }
             catch(...) {
@@ -132,8 +129,8 @@ namespace aims {
     }
 
     template< class T >
-    T FdfProcPar::value(string param, T defaultvalue) {
-        vector<T> foundvalues = values<T>( param );
+    T FdfProcPar::value(std::string param, T defaultvalue) {
+        std::vector<T> foundvalues = values<T>( param );
 
         if ( foundvalues.size() > 0 ) {
             return foundvalues[0];
@@ -144,7 +141,7 @@ namespace aims {
     }
     
     template< class T >
-    T FdfProcPar::value(string param) {
+    T FdfProcPar::value(std::string param) {
         T defaultvalue = FdfParType<T>::getFdfDefaultValue();
         return value<T>(param, defaultvalue);
     }

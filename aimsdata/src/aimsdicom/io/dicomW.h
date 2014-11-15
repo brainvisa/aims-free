@@ -40,7 +40,6 @@
 #include <aims/io/scaledcoding.h>
 #include <string>
 
-using namespace carto;
 
 namespace aims
 {
@@ -311,7 +310,7 @@ namespace aims
   {
     try
     {
-        ScaledEncodingInfo info;
+        soma::ScaledEncodingInfo info;
         AimsData<int16_t> dcmdata( thing.dimX(), 
                                    thing.dimY(),
                                    thing.dimZ(),

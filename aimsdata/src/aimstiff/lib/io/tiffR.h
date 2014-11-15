@@ -47,9 +47,6 @@ extern "C"
 #include <tiffio.h>
 }
 
-using namespace std;
-using namespace carto;
-
 
 namespace aims
 {
@@ -61,11 +58,11 @@ namespace aims
     TiffReader( const std::string& name ) : _name( name ) {}
     ~TiffReader() {}
 
-    void read( AimsData<T>& thing, const carto::AllocatorContext & context, 
+    void read( AimsData<T>& thing, const carto::AllocatorContext & context,
                carto::Object options );
-    /**	called by read(), but you can call it for single frame reading 
+    /**	called by read(), but you can call it for single frame reading
 	(axial slice) */
-    void readFrame( AimsData<T> & thing, const std::string & filename, 
+    void readFrame( AimsData<T> & thing, const std::string & filename,
 		    int zframe, unsigned tframe );
 
   private:
@@ -74,10 +71,10 @@ namespace aims
 
 
   template <class T>
-  inline TiffReader<T> & 
+  inline TiffReader<T> &
   operator >> ( TiffReader<T> & reader, AimsData<T> & thing )
   {
-    reader.read( thing, thing.allocator(), 
+    reader.read( thing, thing.allocator(),
                  carto::Object::value( carto::PropertySet() ) );
     return reader;
   }
@@ -85,8 +82,8 @@ namespace aims
 
   template <class T>
   inline
-  void TiffReader<T>::read( AimsData<T>& thing, 
-                            const carto::AllocatorContext & context, 
+  void TiffReader<T>::read( AimsData<T>& thing,
+                            const carto::AllocatorContext & context,
                             carto::Object options )
   {
     TiffHeader *hdr = new TiffHeader( _name );
@@ -126,7 +123,7 @@ namespace aims
             throw std::domain_error( "frame higher than file dimT" );
           }
         if( (unsigned) frame < tmax )
-          files.erase( files.begin() + ( frame + 1 ) * hdr->dimZ(), 
+          files.erase( files.begin() + ( frame + 1 ) * hdr->dimZ(),
                        files.end() );
         if( frame > 0 )
           files.erase( files.begin(), files.begin() + frame * hdr->dimZ() );
@@ -134,14 +131,14 @@ namespace aims
         tmax = frame;
       }
 
-    carto::AllocatorContext	al 
-      ( context.accessMode(), 
+    carto::AllocatorContext	al
+      ( context.accessMode(),
         carto::rc_ptr<carto::DataSource>
-        ( new carto::FileDataSource( *files.begin(), 0, 
-                                     carto::DataSource::Read ) ), 
+        ( new carto::FileDataSource( *files.begin(), 0,
+                                     carto::DataSource::Read ) ),
         false, context.useFactor() );
 
-    AimsData<T> data( hdr->dimX(), hdr->dimY(), hdr->dimZ(), 
+    AimsData<T> data( hdr->dimX(), hdr->dimY(), hdr->dimZ(),
                       tmax - tmin + 1, border, al );
     data.setSizeX( hdr->sizeX() );
     data.setSizeY( hdr->sizeY() );
@@ -188,8 +185,8 @@ namespace aims
 
   template<class T>
   inline
-  void TiffReader<T>::readFrame( AimsData<T> & data, 
-                                 const std::string & name, int zframe, 
+  void TiffReader<T>::readFrame( AimsData<T> & data,
+                                 const std::string & name, int zframe,
                                  unsigned tframe )
   {
     int tiled, stripSize, rowsPerStrip, i, s;
@@ -201,7 +198,7 @@ namespace aims
     if (tif) {
       tiled = TIFFIsTiled(tif);
       if (tiled) {
-        throw carto::invalid_format_error( "Not a tiled TIFF image : " 
+        throw carto::invalid_format_error( "Not a tiled TIFF image : "
                           "can't read" );
       }
       else {
@@ -218,7 +215,7 @@ namespace aims
         for ( uint z = zmin; z < zmax; z++ ) {
             TIFFSetDirectory(tif,  z );
             stripSize = TIFFStripSize(tif);
-    
+
             // Read tif frame properties
             TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rowsPerStrip);
             TIFFGetFieldDefaulted(tif, TIFFTAG_PHOTOMETRIC, &photometric);
@@ -239,7 +236,7 @@ namespace aims
                     }
                 }
             }
-            else if ( DataTypeCode<T>().dataType() == DataTypeCode<AimsRGBA>().dataType() ) {
+            else if ( carto::DataTypeCode<T>().dataType() == carto::DataTypeCode<AimsRGBA>().dataType() ) {
                 // Indexed images can only be read as RGBA data
                 uint32 * rgba_data = (uint32 *)&data(0, 0, z, tframe);
                 TIFFReadRGBAImageOriented(tif, data.dimX(), data.dimY(), rgba_data, ORIENTATION_TOPLEFT);

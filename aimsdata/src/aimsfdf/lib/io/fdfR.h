@@ -48,10 +48,6 @@
 #include <soma-io/datasource/filedatasource.h>
 #include <stdio.h>
 
-using namespace std;
-using namespace carto;
-using namespace aims;
-
 namespace aims
 {
   template< class T > class FdfReader;
@@ -75,7 +71,8 @@ namespace aims
 
       std::string	_name;
 
-      void readFrame( AimsData< T >& thing, string file, uint slice, const aims::FdfHeader *hdr );
+      void readFrame( AimsData< T >& thing, const std::string & file,
+                      uint slice, const aims::FdfHeader *hdr );
     };
 
 
@@ -111,14 +108,14 @@ namespace aims
         throw carto::format_error( _name );
       }
 
-      string		dir = FileUtil::dirname( _name );
-      vector<string>	files;
+      std::string		dir = carto::FileUtil::dirname( _name );
+      std::vector<std::string>	files;
 
       if ( rank == 2 ) {
         files = hdr->inputFilenames();
       }
       else {
-        files.push_back( FileUtil::basename( _name ) );
+        files.push_back( carto::FileUtil::basename( _name ) );
       }
 
       // create an AimsData
@@ -135,8 +132,8 @@ namespace aims
 
       // Read frames
       for( uint slice=0; slice < files.size(); slice++ ) {
-          if ( ! FileUtil::fileStat( dir + FileUtil::separator() + files[slice] ).empty() ) {
-            readFrame( data, dir + FileUtil::separator() + files[slice], slice, hdr.get() );
+          if ( ! carto::FileUtil::fileStat( dir + carto::FileUtil::separator() + files[slice] ).empty() ) {
+            readFrame( data, dir + carto::FileUtil::separator() + files[slice], slice, hdr.get() );
           }
       }
 
@@ -145,7 +142,9 @@ namespace aims
     }
 
   template< class T > inline
-    void FdfReader< T >::readFrame( AimsData< T >& thing, string filename, uint slice, const aims::FdfHeader *hdr )
+    void FdfReader< T >::readFrame( AimsData< T >& thing,
+                                    const std::string & filename, uint slice,
+                                    const aims::FdfHeader *hdr )
     {
       std::vector< int > dims;
       hdr->getProperty( "volume_dimension", dims );
