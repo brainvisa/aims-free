@@ -45,15 +45,18 @@
 #include <set>
 #include <float.h>
 
-using namespace aims::meshdistance;
+namespace aims
+{
+  namespace meshdistance
+  {
 
 // Select the gyrus seeds
 template <class T>
 Texture<std::set<T> > 
-aims::meshdistance::gyrusSeedDefinition( const AimsSurface<3,Void> & mesh, 
-							   const Texture<T> & inittex,
-							   const std::set<T> & setBack, const std::set<T> & setFor,
-							   const std::set<std::set<T> > & labelAllowed)
+gyrusSeedDefinition( const AimsSurface<3,Void> & mesh,
+                      const Texture<T> & inittex,
+                      const std::set<T> & setBack, const std::set<T> & setFor,
+                      const std::set<std::set<T> > & labelAllowed)
 {
 
   const std::vector<Point3df>		& vert = mesh.vertex();
@@ -199,11 +202,11 @@ aims::meshdistance::gyrusSeedDefinition( const AimsSurface<3,Void> & mesh,
 // in the SKIZ
 template <class T>
 Texture<T> 
-aims::meshdistance::gyrusSeedDilationInSKIZ( const AimsSurface<3,Void> & mesh, 
-                       const Texture<T> & seed, 
-                       const Texture<T> & skiz,
-                       const T & Back, 
-                       const T & For)
+gyrusSeedDilationInSKIZ( const AimsSurface<3,Void> & mesh,
+                          const Texture<T> & seed,
+                          const Texture<T> & skiz,
+                          const T & Back,
+                          const T & For)
 {
 
   const std::vector<Point3df>		& vert = mesh.vertex();
@@ -229,12 +232,12 @@ aims::meshdistance::gyrusSeedDilationInSKIZ( const AimsSurface<3,Void> & mesh,
 } 
 
 
-// Extract the point of the frontier of a parcellisation 
+// Extract the point of the border of a parcellisation
 template <class T>
 Texture<std::set<T> > 
-aims::meshdistance::MeshFrontiereVoronoi( const AimsSurface<3,Void> & mesh, 
-                                          const Texture<T> & inittex,
-                                          const std::set<T> & setBack, const std::set<T> & setFor)
+MeshBorderVoronoi( const AimsSurface<3,Void> & mesh,
+                   const Texture<T> & inittex,
+                   const std::set<T> & setBack, const std::set<T> & setFor )
 {
 
   const std::vector<Point3df>		& vert = mesh.vertex();
@@ -287,9 +290,9 @@ aims::meshdistance::MeshFrontiereVoronoi( const AimsSurface<3,Void> & mesh,
 // Convert the texture of set to a texture of short labels
 template <class T>
 Texture<short> 
-aims::meshdistance::Frontiere2Texture( const Texture<std::set<T> > &tex,
-						      const AimsSurface<3,Void> & mesh,
-						      const std::set<T> & setBack, const std::set<T> & setFor)
+border2Texture( const Texture<std::set<T> > &tex,
+                const AimsSurface<3,Void> & mesh,
+                const std::set<T> & setBack, const std::set<T> & setFor)
 {
   const std::vector<Point3df>		& vert = mesh.vertex();
   unsigned 				i, n = vert.size();;
@@ -343,9 +346,9 @@ aims::meshdistance::Frontiere2Texture( const Texture<std::set<T> > &tex,
 
 template<class T, class U>
 Texture<short> 
-aims::meshdistance::Voronoi2toTexture(const Texture<std::set<T> > & vor, 
-						     const AimsSurface<3,Void> & mesh,
-						     const std::set<T> & setBack, const std::set<T> & setFor)
+Voronoi2toTexture( const Texture<std::set<T> > & vor,
+                   const AimsSurface<3,Void> & mesh,
+                   const std::set<T> & setBack, const std::set<T> & setFor )
 {
   std::set<std::set<U>,SetCompare<U> >	lab_front_sulci;
   typename std::set<std::set<U>,SetCompare<U> >::iterator il,el;
@@ -400,8 +403,7 @@ aims::meshdistance::Voronoi2toTexture(const Texture<std::set<T> > & vor,
 
 template<class T>
 std::map<T,float> 
-aims::meshdistance::SurfaceParcel( const Texture<T> & tex,
-                                   const AimsSurface<3,Void> & mesh )
+SurfaceParcel( const Texture<T> & tex, const AimsSurface<3,Void> & mesh )
 {
   
   std::map<T,float>				stat;
@@ -451,7 +453,7 @@ aims::meshdistance::SurfaceParcel( const Texture<T> & tex,
 
 template<class T>
 std::map<T,float> 
-aims::meshdistance::VolumeParcel( const AimsData<T> & vol )
+VolumeParcel( const AimsData<T> & vol )
 {
   
   std::map<T,float>			stat;
@@ -472,6 +474,9 @@ aims::meshdistance::VolumeParcel( const AimsData<T> & vol )
 
 
   return(stat);
+}
+
+  }
 }
 
 #endif

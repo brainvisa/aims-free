@@ -55,33 +55,33 @@ namespace aims
 	i.e. compute the skiz */
     template <class T>
     Texture<std::set<T> > 
-    MeshFrontiereVoronoi( const AimsSurface<3,Void> & mesh, 
-			  const Texture<T> & inittex, 
-			  const std::set<T> & setBack, 
-			  const std::set<T> & setFor);
+    MeshBorderVoronoi( const AimsSurface<3,Void> & mesh,
+                       const Texture<T> & inittex,
+                       const std::set<T> & setBack,
+                       const std::set<T> & setFor);
 
     /** Define the gyrus seed from the SKIZ */
     template <class T>
     Texture<std::set<T> > 
     gyrusSeedDefinition( const AimsSurface<3,Void> & mesh, 
-			  const Texture<T> & inittex, 
-			  const std::set<T> & setBack, 
-			  const std::set<T> & setFor,
-			  const std::set<std::set<T> > & labelAllowed);
+                         const Texture<T> & inittex,
+                         const std::set<T> & setBack,
+                         const std::set<T> & setFor,
+                         const std::set<std::set<T> > & labelAllowed);
     template <class T>
     Texture<T> 
     gyrusSeedDilationInSKIZ( const AimsSurface<3,Void> & mesh, 
-                       const Texture<T> & seed, 
-                       const Texture<T> & skiz,
-                       const T & Back, 
-                       const T & For );
+                             const Texture<T> & seed,
+                             const Texture<T> & skiz,
+                             const T & Back,
+                             const T & For );
 
     /// Convert a multidimensional boundary map to a texture of short
     template <class T>
-    Texture<short> Frontiere2Texture( const Texture<std::set<T> > &tex,
-				      const AimsSurface<3,Void> & mesh,
-				      const std::set<T> & setBack, 
-				      const std::set<T> & setFor);
+    Texture<short> border2Texture( const Texture<std::set<T> > &tex,
+                                   const AimsSurface<3,Void> & mesh,
+                                   const std::set<T> & setBack,
+                                   const std::set<T> & setFor);
   
   
     Texture<std::set<short> > 

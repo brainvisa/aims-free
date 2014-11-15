@@ -560,7 +560,7 @@ namespace aims
 						      const set<set<short> > & labelAllowed);
 
     template
-    Texture<set<short> > MeshFrontiereVoronoi<short>( const AimsSurface<3,Void> & mesh, 
+    Texture<set<short> > MeshBorderVoronoi<short>( const AimsSurface<3,Void> & mesh,
 						      const Texture<short> & inittex,
 						      const set<short> & setBack, const set<short> & setFor);
     template
@@ -572,7 +572,7 @@ namespace aims
                              const std::set<short> & For);
 
     template
-    Texture<short> Frontiere2Texture<short> ( const Texture<set<short> > &tex,
+    Texture<short> border2Texture<short> ( const Texture<set<short> > &tex,
 					      const AimsSurface<3,Void> & mesh,
 					      const set<short> & setBack, const set<short> & setFor);
 

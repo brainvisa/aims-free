@@ -51,9 +51,13 @@
 #include <math.h>
 #include <aims/math/random.h>
 
-using namespace std;
-using namespace aims;
-using namespace carto;
+/* This code seems to be used... nowhere...
+   Anyway it is not currently working: namespace problems will prevent
+   compiling.
+*/
+
+namespace aims
+{
 
 double * PpcaAnalyserElement::_exp = 0 ;
 
@@ -1200,6 +1204,8 @@ MixtureOfPPCA<T>::getRni()
   }  
 
   return RnAll ;
+}
+
 }
 
 #endif

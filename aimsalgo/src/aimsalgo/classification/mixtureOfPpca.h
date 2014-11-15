@@ -40,6 +40,13 @@
 #include <vector>
 #include <string.h>
 
+/* This code seems to be used... nowhere...
+   Anyway it is not currently working: namespace problems will prevent
+   compiling.
+*/
+
+namespace aims
+{
 
 class PpcaAnalyserElement 
 {
@@ -139,5 +146,7 @@ class MixtureOfPPCA
 
   int _itToUseOnlyCorrelatedIndiv ;
 } ;
+
+}
 
 #endif

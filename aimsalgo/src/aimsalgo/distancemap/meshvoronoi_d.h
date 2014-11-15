@@ -45,7 +45,10 @@
 #include <stack>
 #include <set>
 
-using namespace aims::meshdistance;
+namespace aims
+{
+  namespace meshdistance
+  {
 
 // Compute a geodesic voronoi diagram (dist = MAX_FLOAT,object=true ) of objects defined in inittex. 
 // The background has the label 0 and the objects have a positive label 
@@ -53,7 +56,7 @@ using namespace aims::meshdistance;
 // This function can as well be used for dilation(object=true)/erosion(object=false) 
 // using the dist parameter as the size of the structuring element
 template <class T>
-Texture<T> aims::meshdistance::MeshVoronoiT ( const AimsSurface<3,Void> & mesh, 
+Texture<T> MeshVoronoiT ( const AimsSurface<3,Void> & mesh,
 					      const Texture<T> & inittex, 
 					      const T & Back, const T & For, 
 					      float dist, bool connexity,bool object)
@@ -189,6 +192,8 @@ Texture<T> aims::meshdistance::MeshVoronoiT ( const AimsSurface<3,Void> & mesh,
 
 }
 
+  }
+}
 
 
 #endif
