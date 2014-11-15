@@ -55,22 +55,22 @@ namespace aims
                         int strain, double sigmo);
 
     public :
-      vector<unsigned> shortestPath_1_1_ind(unsigned source, unsigned target);
-      vector<unsigned> shortestPath_1_1_ind(unsigned source, unsigned target, TimeTexture<short> subset);
-      vector<unsigned> shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target);
-      void shortestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length);
-      vector<Point3df> shortestPath_1_1_xyz(unsigned source, unsigned target);
+      std::vector<unsigned> shortestPath_1_1_ind(unsigned source, unsigned target);
+      std::vector<unsigned> shortestPath_1_1_ind(unsigned source, unsigned target, TimeTexture<short> subset);
+      std::vector<unsigned> shortestPath_1_1_1_ind(unsigned source, unsigned middle, unsigned target);
+      void shortestPath_1_N_ind(unsigned source, std::vector<unsigned> targets, unsigned *target, double *length);
+      std::vector<Point3df> shortestPath_1_1_xyz(unsigned source, unsigned target);
       void shortestPath_1_1_ind_xyz(unsigned source, unsigned target, std::vector<unsigned>& indice, std::vector<Point3df>& coord3D);
       void shortestPath_1_1_tex(unsigned source, unsigned target, float texturevalue, TimeTexture<float> &tex);
       double shortestPath_1_1_len(unsigned source, unsigned target);
-      void shortestPath_1_N_All_ind(unsigned sources, vector<unsigned> targets, vector<vector<unsigned> >&indices);
+      void shortestPath_1_N_All_ind(unsigned sources, std::vector<unsigned> targets, std::vector<std::vector<unsigned> >&indices);
 
-      void longestPath_1_N_ind(unsigned source, vector<unsigned> targets, unsigned *target, double *length, int type_distance);
-      vector<vect_ui> longestPath_1_N_len(unsigned source, vector<unsigned> targets, vector<double> &length, int type_distance);
+      void longestPath_1_N_ind(unsigned source, std::vector<unsigned> targets, unsigned *target, double *length, int type_distance);
+      std::vector<vect_ui> longestPath_1_N_len(unsigned source, std::vector<unsigned> targets, std::vector<double> &length, int type_distance);
 
 
-      vector<unsigned> longestPath_N_N_ind(vector<unsigned> points, int* s, int *d, double *length, int type_distance);
-      void distanceMap_1_N_ind(unsigned source, vector<float> &distanceMap,double *length, int type_distance);
+      std::vector<unsigned> longestPath_N_N_ind(std::vector<unsigned> points, int* s, int *d, double *length, int type_distance);
+      void distanceMap_1_N_ind(unsigned source, std::vector<float> &distanceMap,double *length, int type_distance);
   };
 
 }

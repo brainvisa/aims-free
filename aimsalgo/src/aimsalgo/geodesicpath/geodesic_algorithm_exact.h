@@ -13,9 +13,8 @@
 #include <memory>
 #include <cstring>
 
-using namespace std;
-
-namespace geodesic{
+namespace geodesic
+{
 
 class GeodesicAlgorithmExact : public GeodesicAlgorithmBase
 {
