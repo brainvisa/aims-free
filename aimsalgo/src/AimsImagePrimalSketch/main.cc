@@ -40,6 +40,9 @@
 #include <aims/primalsketch/primalSketch2graph.h>
 #include <aims/primalsketch/primalSketchUtil.h>
 
+using namespace aims;
+using namespace carto;
+using namespace std;
 
 
 int DoImagePrimalSketch ( std::string fileIn, 

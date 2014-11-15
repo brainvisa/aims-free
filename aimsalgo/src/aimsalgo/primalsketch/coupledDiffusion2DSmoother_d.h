@@ -54,7 +54,8 @@
 // heat sources. So, not much use for anybody but me...
 //
 
-namespace aims {
+namespace aims
+{
 
 template<class T> std::pair<AimsData<T>, AimsData<T> >
 CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData<T> > & ima, const std::pair<AimsData<T>, AimsData<T> > & constraints, int maxiter, bool verbose)
@@ -70,13 +71,16 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
 
         if ((ima.first.dimZ()>1) || (ima.second.dimZ()>1))
         {
-            cerr << "coupledDiffusion2DSmoother: only for 2D images !!" << endl; exit(1);
+            std::cerr << "coupledDiffusion2DSmoother: only for 2D images !!"
+              << std::endl;
+            exit(1);
         }
         if ((!hasSameDim(ima.first, ima.second))
             || (!hasSameDim(ima.first, constraints.first))
             || (!hasSameDim(ima.first, constraints.second)))
         {
-            cerr << "coupledDiffusion2DSmoother: images do not all have the same size..." << endl; exit(1);
+            std::cerr << "coupledDiffusion2DSmoother: images do not all have the same size..." << std::endl;
+            exit(1);
         }
 
         int sx=ima.first.dimX(), sy=ima.first.dimY(), x, y;
@@ -100,7 +104,7 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
         tmp1_1=&imaF1; tmp1_2=&imaB1;
         tmp2_1=&imaF2; tmp2_2=&imaB2;
 
-        cout << "Initalizing images  with constraints" << endl;
+        std::cout << "Initalizing images  with constraints" << std::endl;
 
         for (y=0; y<sy; y++)
             for (x=0; x<sx; x++)
@@ -125,7 +129,8 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
 //         for (pt2=vcont2.begin(); pt2!=vcont2.end(); ++pt2)
 //             cout << "(" << (*pt2).first << "," << (*pt2).second << ") "; fflush(stdout);
 //         cout << endl;
-        cout << "Starting " << maxiter << " iterations of diffusion process" << endl;
+        std::cout << "Starting " << maxiter
+          << " iterations of diffusion process" << std::endl;
 
         int sz=(maxiter/PAS) + 1;
         AimsData<T> debug1(sx, sy, sz), debug2(sx, sy, sz);
@@ -145,7 +150,8 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
          {
             if ((i%1)==0) //100
             {
-                std::cout << "(t=" << i*_dt << ") -> diff=(" << diffMax1 << "," << diffMax2 << ") - "<< endl;;
+                std::cout << "(t=" << i*_dt << ") -> diff=(" << diffMax1 << ","
+                  << diffMax2 << ") - "<< std::endl;;
             }
 //             std::cout << "(G"; fflush(stdout);
             diffMax1=diffMax2=0.0;
@@ -317,7 +323,7 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
             }
         }
 
-        cout << "Finished" << endl;
+        std::cout << "Finished" << std::endl;
         carto::Converter< AimsData<float>, AimsData<T> > conv2;
         AimsData<T>  out1( sx, sy), out2(sx,sy);
         conv2.convert( (*tmp1_1),out1);
@@ -325,7 +331,7 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
 
         //Pour debug : evolution des iso-contours
 
-        cout << "Computing and writing iso-contours" << endl;
+        std::cout << "Computing and writing iso-contours" << std::endl;
         AimsData<uint8_t>  iso( sx, sy, sz);
         for (z=0; z<sz; z++)
              for (y=0; y<sy-1; y++)
@@ -373,7 +379,9 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
     }
     else
     {
-        cerr << "coupledDiffusion2DSmoother: must have tIn < tOut" << endl; exit(1);
+        std::cerr << "coupledDiffusion2DSmoother: must have tIn < tOut"
+          << std::endl;
+        exit(1);
     }
 
 }

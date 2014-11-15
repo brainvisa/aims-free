@@ -41,9 +41,6 @@
 #include <aims/data/data_g.h>
 #include <aims/math/bspline3.h>
 #include <aims/math/bspline2.h>
-// using namespace aims;
-
-
 
 
 class TabulSpline

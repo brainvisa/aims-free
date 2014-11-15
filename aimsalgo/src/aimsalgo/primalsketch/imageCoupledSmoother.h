@@ -37,25 +37,18 @@
 #ifndef AIMS_IMAGECOUPLEDSMOOTHER_H
 #define AIMS_IMAGECOUPLEDSMOOTHER_H
 
-#include <aims/config/aimsalgo_config.h>
 #include <aims/primalsketch/coupledSmoother.h>
-#include <aims/mesh/surface.h>
-#include <aims/mesh/texture.h>
 #include <aims/data/data.h>
-#include <set>
-#include <map>
 
-using namespace aims;
-using namespace std;
-
-namespace aims {
-
+namespace aims
+{
 
   // REM: surface smoothing is geometry dependent, therefore 
   // smoother contains the geometry it is specialised for
   // It can then smooth any texture based on that geometry (mesh)
 
-  template<typename T> class CoupledSmoother<AimsData<T>, AimsData<T> > {
+  template<typename T> class CoupledSmoother<AimsData<T>, AimsData<T> >
+  {
 
   protected:
 

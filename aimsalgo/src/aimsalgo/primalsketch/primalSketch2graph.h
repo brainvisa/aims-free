@@ -43,7 +43,6 @@
 #include <aims/graph/graphmanip.h>
 #include <aims/resampling/motion.h>
 #include <graph/graph/graph.h>
-#include <aims/bucket/bucket.h>
 
 
 #include <set>
@@ -51,11 +50,8 @@
 #include <list>
 #include <utility>
 
-using namespace aims;
-using namespace std;
-using namespace carto;
-
-
+namespace aims
+{
 
     struct ltstr_blob // ranking criteria for blobs
     {
@@ -98,7 +94,11 @@ using namespace carto;
      public:
 
           Primalsketch2graph(PrimalSketch<Geom,Text> *primalSketch) : _primalSketch(primalSketch), _motion( 0 )
-              { cout << "construc : " << primalSketch->BifurcationList().size() << endl; _graph=new Graph("PrimalSketchArg");}
+          {
+            std::cout << "construc : " << primalSketch->BifurcationList().size()
+              << std::endl;
+            _graph = new Graph("PrimalSketchArg");
+          }
           ~Primalsketch2graph()
           {
             delete _motion;
@@ -251,5 +251,6 @@ using namespace carto;
           AddBlobsToPSGraph(_primalSketch, _graph);
      }
 
+}
 
 #endif
