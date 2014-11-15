@@ -40,11 +40,8 @@
 #include <aims/math/discriminantanalysis.h>
 #include <aims/io/writer.h>
 
-
-using namespace std;
-using namespace aims;
-using namespace carto;
-
+namespace aims
+{
 
 DiscriminantAnalysisElement::DiscriminantAnalysisElement( int significantEV, double PIj ) : 
   _significantEV(significantEV), _computed(false), _dataScaleFactor(1.), 
@@ -56,15 +53,15 @@ DiscriminantAnalysisElement::DiscriminantAnalysisElement( int significantEV, dou
 
 template <typename T>
 void
-DiscriminantAnalysisElement::doIt( const list< Point3d >& selectedPoints, 
+DiscriminantAnalysisElement::doIt( const std::list< Point3d >& selectedPoints,
 				   const AimsData<T>& data )
 {
-  aims::AimsFastAllocationData<T> individuals( max(int(selectedPoints.size()), 1), data.dimT() ) ;
+  aims::AimsFastAllocationData<T> individuals( std::max(int(selectedPoints.size()), 1), data.dimT() ) ;
   int i = 0 ;
-  list< Point3d >::const_iterator iter( selectedPoints.begin() ), last( selectedPoints.end() ) ; 
+  std::list< Point3d >::const_iterator iter( selectedPoints.begin() ), last( selectedPoints.end() ) ;
   Point3df mean ;
   
-  _indivPosition = vector<Point3d>( selectedPoints.size() ) ;
+  _indivPosition = std::vector<Point3d>( selectedPoints.size() ) ;
   while( iter != last ){
     _indivPosition[ i ] = *iter ;
     for(int t = 0 ; t < data.dimT() ; ++t )
@@ -139,7 +136,7 @@ DiscriminantAnalysisElement::doIt( const AimsData<T>& individuals )
   }
   sig2 /= w.dimX() - _significantEV ;
   
-  cout << "signif EV = " << _significantEV << " sig2 = " << sig2 << endl ;
+  std::cout << "signif EV = " << _significantEV << " sig2 = " << sig2 << std::endl ;
   
   double lnSig2 = log(sig2) ;
   double sqrtSig2 = sqrt(sig2) ;
@@ -187,8 +184,8 @@ DiscriminantAnalysisElement::doIt( const AimsData<T>& individuals )
 	_invVarCov(x1, y1) = _invVarCov(y1, x1) = val ;
       }
   } else{ 
-    cerr << "Bad var cov matrix !" << endl ;
-    throw runtime_error( "Bad var cov matrix !") ;
+    std::cerr << "Bad var cov matrix !" << std::endl ;
+    throw std::runtime_error( "Bad var cov matrix !") ;
   }
 }
 
@@ -197,9 +194,10 @@ DiscriminantAnalysisElement::posteriorProbability( const AimsData<double>& x,
 						   double ) const
 { 
   if( ! _computed ){
-    cerr << "You must doIt first, parameter not yet computed !" << endl ;
+    std::cerr << "You must doIt first, parameter not yet computed !"
+      << std::endl ;
     
-    throw runtime_error( "You must doIt first, parameter not yet computed !") ;
+    throw std::runtime_error( "You must doIt first, parameter not yet computed !") ;
   }
 //   aims::AimsFastAllocationData<double> xCentered(x.dimX()) ;
 //   for( int t = 0 ; t < x.dimX() ; ++t )
@@ -222,8 +220,9 @@ double
 DiscriminantAnalysisElement::distance( const AimsData<double>& x ) const
 {
   if( ! _computed ){
-    cerr <<"You must doIt first, parameter not yet computed !" << endl ;
-    throw runtime_error( "You must doIt first, parameter not yet computed !") ;
+    std::cerr <<"You must doIt first, parameter not yet computed !"
+      << std::endl ;
+    throw std::runtime_error( "You must doIt first, parameter not yet computed !") ;
   }  
 //   cout << "DiscriminantAnalysisElement::distance " << endl ;
 //   cout << "inv var cov size = " << _invVarCov.dimX() << " , " <<  _invVarCov.dimY() << endl ;
@@ -247,8 +246,9 @@ double
 DiscriminantAnalysisElement::lnPosteriorProbability( const AimsData<double>& x ) const
 {
   if( ! _computed ){
-    cerr << "You must doIt first, parameter not yet computed !" << endl ;
-    throw runtime_error( "You must doIt first, parameter not yet computed !") ;
+    std::cerr << "You must doIt first, parameter not yet computed !"
+      << std::endl ;
+    throw std::runtime_error( "You must doIt first, parameter not yet computed !") ;
   }
   double distance = 0. ;
   for(int i = 0 ; i < x.dimX() ; ++i ){
@@ -286,24 +286,28 @@ const AimsData<double>&
 DiscriminantAnalysisElement::mean() const
 {
   if( ! _computed ){
-    cerr <<"You must doIt first, parameter not yet computed !" << endl ;
-    throw runtime_error( "You must doIt first, parameter not yet computed !") ;
+    std::cerr <<"You must doIt first, parameter not yet computed !"
+      << std::endl ;
+    throw std::runtime_error( "You must doIt first, parameter not yet computed !") ;
   }
   return _mean ;
 }
 
 template <class T>
-DiscriminantAnalysis<T>::DiscriminantAnalysis( const AimsData<T>& data, const vector< list< Point3d > >& classes, 
-					       int significantEV, const vector<double>& PIj ) :
-  _significantEV(significantEV <= 0 ? data.dimT() : significantEV), _classes(classes), _data(data), _PIj(PIj)
+DiscriminantAnalysis<T>::DiscriminantAnalysis(
+  const AimsData<T>& data,
+  const std::vector< std::list< Point3d > >& classes,
+  int significantEV, const std::vector<double>& PIj )
+  : _significantEV(significantEV <= 0 ? data.dimT() : significantEV),
+    _classes(classes), _data(data), _PIj(PIj)
 {
   if( PIj.size() != 0 )
     if( PIj.size() == classes.size() )
       _PIj = PIj ;
     else{
-      cerr << "Inconsistant data : number of classes and number of classes prior probabilities are different !" << endl ;
+      std::cerr << "Inconsistant data : number of classes and number of classes prior probabilities are different !" << std::endl ;
 
-      throw runtime_error("Inconsistant data : number of classes and number of classes prior probabilities are different !") ;
+      throw std::runtime_error("Inconsistant data : number of classes and number of classes prior probabilities are different !") ;
     }
   else{
     _PIj.reserve( _classes.size() ) ;
@@ -326,28 +330,28 @@ DiscriminantAnalysis<T>::DiscriminantAnalysis( const AimsData<T>& data, const ve
     el.doIt( _classes[c], _data ) ;
 /*     el.doIt( indiv ) ; */
     
-    cout << "Class " << c << " done !" << endl ;
+    std::cout << "Class " << c << " done !" << std::endl ;
     
     _discrElements.push_back( el ) ;
   }
-  cout << "Discriminant analysis initization completed" << endl ;
+  std::cout << "Discriminant analysis initization completed" << std::endl ;
 }
 
 template <class T>
-vector<double> 
+std::vector<double>
 DiscriminantAnalysis<T>::posteriorProbabilities( const AimsData<double>& x, double pX )
 {
-  vector<double> res( _classes.size() ) ;
+  std::vector<double> res( _classes.size() ) ;
   for( unsigned int c = 0 ; c < _classes.size() ; ++c )
     res[c] = _discrElements[c].posteriorProbability( x, pX ) ;
   return res ;
 }
 
 template <class T>
-vector<double> 
+std::vector<double>
 DiscriminantAnalysis<T>::andersonScores( const AimsData<double>& x )
 {
-  vector<double> res( _classes.size() ) ;
+  std::vector<double> res( _classes.size() ) ;
   double sum = 0. ;
   for( unsigned int c = 0 ; c < _classes.size() ; ++c ){
     res[c] = _discrElements[c].posteriorProbability( x, 1. ) ;
@@ -399,14 +403,14 @@ DiscriminantAnalysis<T>::classification( const AimsData<T>& dynamicImage,
   aims::AimsFastAllocationData<double> indiv( dynamicImage.dimT() ) ;
   ForEach3d( dynamicImage, x, y, z ){
     if( mask(x, y, z) ) {
-      cout << "x : " << x << ", y : " << y << ", z : " << z << endl ;
+      std::cout << "x : " << x << ", y : " << y << ", z : " << z << std::endl ;
       for( int t = 0 ; t < _data.dimT() ; ++t )
 	indiv(t) = dynamicImage(x, y, z, t ) ;
       segmented(x, y, z) = affectedTo( indiv ) ;
     }
   }
   
-  cout << "Discriminant analysis classification completed" << endl ;
+  std::cout << "Discriminant analysis classification completed" << std::endl ;
 
   return true ;
 }
@@ -447,7 +451,7 @@ DiscriminantAnalysis<T>::fuzzyClassification( const AimsData<T>& dynamicImage,
                                   1.0 ) ;
     }
   
-  vector<double> probabilityRepartition ;
+  std::vector<double> probabilityRepartition ;
   aims::AimsFastAllocationData<double> indiv( dynamicImage.dimT() ) ;
   ForEach3d( dynamicImage, x, y, z ){
     if( mask(x, y, z) ) {
@@ -462,7 +466,12 @@ DiscriminantAnalysis<T>::fuzzyClassification( const AimsData<T>& dynamicImage,
     }
   }
   
-  cout << "Discriminant analysis : fuzzy classification completed" << endl ;
+  std::cout << "Discriminant analysis : fuzzy classification completed"
+    << std::endl ;
   
   return true ;
 }
+
+}
+
+
