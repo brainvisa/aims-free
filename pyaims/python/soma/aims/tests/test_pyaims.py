@@ -8,7 +8,9 @@ except:
 import os
 from shutil import rmtree
 import tempfile
-from PyQt4.QtGui import QApplication
+from soma.qt_gui import qt_backend
+qt_backend.set_qt_backend('PyQt4')
+from soma.qt_gui.qt_backend.QtGui import QApplication
 import sys
 
 
