@@ -60,9 +60,11 @@ class ImageFileComparison:
           testcase.fail(msg)
           #print >> sys.stderr, 'ERROR: image (%s, %s) content is not the same' % (image1, image2)
 
-        # Process differences between headers
-        testcase.assertDictEqual(h1, h2, msg)
-        #print >> sys.stderr, 'ERROR: image (%s, %s) header is not the same' % (image1, image2)
+        # testunit 1.63 for python 2.6 (installed on MacOS) does not have assertDictEqual method
+        if hasattr(testcase, 'assertDictEqual'):
+          # Process differences between headers
+          testcase.assertDictEqual(h1, h2, msg)
+          #print >> sys.stderr, 'ERROR: image (%s, %s) header is not the same' % (image1, image2)
           
         i1 = None
         i2 = None
