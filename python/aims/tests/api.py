@@ -36,23 +36,36 @@ class ImageFileComparison:
         import numpy
 
         if os.path.exists(image1):
-            i1 = soma.aims.read(image1).arraydata()
+            d1 = soma.aims.read(image1)
+            h1 = dict(d1.header())
+            i1 = d1.arraydata()
         else:
+            h1 = dict()
             i1 = numpy.array([])
 
 
         if os.path.exists(image2):
-            i2 = soma.aims.read(image2).arraydata()
+            d2 = soma.aims.read(image2)
+            h2 = dict(d2.header())
+            i2 = d2.arraydata()
         else:
+            h2 = dict()
             i2 = numpy.array([])
-
-        eq = numpy.array_equal(i1, i2)
-
-        i1 = None
-        i2 = None
+            
         if ((i1 == numpy.array([])) and (i2 == numpy.array([]))):
           print >> sys.stderr, 'WARNING: image file comparison of empty images (%s, %s)' % (image1, image2)
-        testcase.assertTrue(eq, msg)
+
+        # Process differences between pixels
+        if not numpy.array_equal(i1, i2) :
+          testcase.fail(msg)
+          #print >> sys.stderr, 'ERROR: image (%s, %s) content is not the same' % (image1, image2)
+
+        # Process differences between headers
+        testcase.assertDictEqual(h1, h2, msg)
+        #print >> sys.stderr, 'ERROR: image (%s, %s) header is not the same' % (image1, image2)
+          
+        i1 = None
+        i2 = None
 
 
 class TextFileComparison:
