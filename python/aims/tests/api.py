@@ -36,20 +36,22 @@ class ImageFileComparison:
         import numpy
 
         if os.path.exists(image1):
-            i1 = soma.aims.read(image1)
+            i1 = soma.aims.read(image1).arraydata()
         else:
             i1 = numpy.array([])
 
 
         if os.path.exists(image2):
-            i2 = soma.aims.read(image2)
+            i2 = soma.aims.read(image2).arraydata()
         else:
             i2 = numpy.array([])
 
-        eq = numpy.array_equal(i1.arraydata(), i2.arraydata())
+        eq = numpy.array_equal(i1, i2)
 
         i1 = None
         i2 = None
+        if ((i1 == numpy.array([])) and (i2 == numpy.array([]))):
+          print >> sys.stderr, 'WARNING: image file comparison of empty images (%s, %s)' % (image1, image2)
         testcase.assertTrue(eq, msg)
 
 
