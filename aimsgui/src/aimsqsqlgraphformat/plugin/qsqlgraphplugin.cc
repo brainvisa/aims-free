@@ -87,13 +87,13 @@ QSqlGraphPlugin::QSqlGraphPlugin() : Plugin()
   exts.push_back( "sqlite" );
   // TODO: add other database formats
 
-  if( !QCoreApplication::instance() )
-  {
-    static int argc;
-    static char * argv[] = { (char *) "aims", (char *) 0 };
-    // WARNING: should maybe in the main thread / with a Mutex
-    new QCoreApplication( argc, argv );
-  }
+//   if( !QCoreApplication::instance() )
+//   {
+//     static int argc = 1;
+//     static char * argv[] = { (char *) "aims", (char *) 0 };
+//     // WARNING: should maybe in the main thread / with a Mutex
+//     new QCoreApplication( argc, argv );
+//   }
 
   FileFormatDictionary<Graph>::registerFormat( format, df1, exts );
   Finder::registerFormat( format, new FinderQSqlGraphFormat, exts );

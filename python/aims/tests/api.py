@@ -8,7 +8,6 @@ import subprocess
 import sys
 import types
 
-
 class ImageFileComparison:
 
     """ Class to compare test command output image files.
@@ -36,9 +35,19 @@ class ImageFileComparison:
         import soma.aims
         import numpy
 
-        i1 = soma.aims.read(image1)
-        i2 = soma.aims.read(image2)
+        if os.path.exists(image1):
+            i1 = soma.aims.read(image1)
+        else:
+            i1 = numpy.array([])
+
+
+        if os.path.exists(image2):
+            i2 = soma.aims.read(image2)
+        else:
+            i2 = numpy.array([])
+
         eq = numpy.array_equal(i1.arraydata(), i2.arraydata())
+
         i1 = None
         i2 = None
         testcase.assertTrue(eq, msg)
@@ -194,6 +203,12 @@ class CommandTest:
 
         fout = open(outfile, 'w+')
         ferr = open(errfile, 'w+')
+
+        if not os.path.exists(run_directory):
+            raise RuntimeError(
+                'Command exited because run directory \'%s\' does not exists.'
+                % (run_directory,))
+
         retcode = subprocess.call(self.__command,
                                   stdout=fout,
                                   stderr=ferr,
@@ -241,6 +256,13 @@ class CommandTest:
         """
 
         return self.__run_files
+
+    def __str__(self):
+        return ' '.join(self.__command) + \
+               ' run in \'%(last_run_directory)s\'. [output => \'%(outfile)s\', error =>\'%(errfile)s\']' \
+                % { 'last_run_directory': self.__last_run_directory, 
+                    'outfile': self.__outfile,
+                    'errfile': self.__errfile }
 
 
 class CommandsTestManager(unittest.TestCase):
@@ -446,6 +468,7 @@ class CommandsTestManager(unittest.TestCase):
             # Run the test in the test run directory
             try:
                 c.execute(self.get_run_directory(c))
+                #print >> sys.stdout, 'command run normally:', c
 
                 # Compare each produced run file with its matching reference
                 ref_files = self.get_ref_files(c)
@@ -454,7 +477,7 @@ class CommandsTestManager(unittest.TestCase):
                 for ref_file, run_file in zip(ref_files, run_files):
                     FileComparison.assertEqual(self, run_file, ref_file)
             except Exception, e:
-                print 'Test failure:', e
+                print 'Test failure:', e, 'while running:', c
                 n_failed += 1
         if n_failed != 0:
             raise RuntimeError('%d / %d tests failed.'
@@ -464,7 +487,6 @@ class CommandsTestManager(unittest.TestCase):
         """
         Remove last run directories for registered TestCommand.
         """
-
         for c in self.test_cases:
             # Remove run directory
             self.remove_run_directory(c)
