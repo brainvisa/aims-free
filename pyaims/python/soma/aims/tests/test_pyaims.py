@@ -8,7 +8,6 @@ except:
 import os
 from shutil import rmtree
 import tempfile
-from PyQt4.QtGui import QApplication 
 import sys
 
 
@@ -29,8 +28,6 @@ def setup_doctest(test):
         rmtree("data_unprocessed")
     zf = zipfile.ZipFile("demo_data.zip")
     zf.extractall()
-    # must create a QApplication for PyAnatomist
-    test.globs['qapp'] = QApplication(sys.argv)
 
 
 def teardown_doctest(test):
