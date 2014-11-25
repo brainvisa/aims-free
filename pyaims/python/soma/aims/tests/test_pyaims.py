@@ -8,9 +8,6 @@ except:
 import os
 from shutil import rmtree
 import tempfile
-from soma.qt_gui import qt_backend
-qt_backend.set_qt_backend('PyQt4')
-from soma.qt_gui.qt_backend.QtGui import QApplication
 import sys
 
 
@@ -31,8 +28,6 @@ def setup_doctest(test):
         rmtree("data_unprocessed")
     zf = zipfile.ZipFile("demo_data.zip")
     zf.extractall()
-    # must create a QApplication for PyAnatomist
-    test.globs['qapp'] = QApplication(sys.argv)
 
 
 def teardown_doctest(test):
