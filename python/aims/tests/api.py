@@ -492,6 +492,7 @@ class CommandsTestManager(unittest.TestCase):
                 run_files = self.get_run_files(c)
 
                 for ref_file, run_file in zip(ref_files, run_files):
+                    sys.stderr.write('compare files: %s / %s\n' % (ref,file, run_file)
                     FileComparison.assertEqual(self, run_file, ref_file)
             except Exception, e:
                 print 'Test failure:', e, 'while running:', c
