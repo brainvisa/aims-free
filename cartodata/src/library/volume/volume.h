@@ -167,6 +167,14 @@ namespace carto
                      const AllocatorContext& allocatorContext
                       = AllocatorContext(),
                      bool allocated = true );
+    /// Volume construction and allocation
+    /// Same as the above constructor, but allows to specify a border size
+    /// in each dimension
+    explicit Volume( int sizeX, int sizeY, int sizeZ, int sizeT,
+                     const Position4Di & border,
+                     const AllocatorContext& allocatorContext
+                      = AllocatorContext(),
+                     bool allocated = true );
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
     Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer );
@@ -313,6 +321,22 @@ namespace carto
       : rc_ptr<Volume<T> >( new Volume<T>( sizeX, sizeY, sizeZ, sizeT,
                                            allocatorContext, allocated ) )
     {}
+    explicit VolumeRef( int sizeX, int sizeY, int sizeZ, int sizeT,
+                        int border,
+                        const AllocatorContext& allocatorContext
+                         = AllocatorContext(),
+                        bool allocated = true )
+      : rc_ptr<Volume<T> >( new Volume<T>( sizeX, sizeY, sizeZ, sizeT, border,
+                                           allocatorContext, allocated ) )
+    {}
+    explicit VolumeRef( int sizeX, int sizeY, int sizeZ, int sizeT,
+                        const typename Volume<T>::Position4Di & border,
+                        const AllocatorContext& allocatorContext
+                         = AllocatorContext(),
+                        bool allocated = true )
+      : rc_ptr<Volume<T> >( new Volume<T>( sizeX, sizeY, sizeZ, sizeT, border,
+                                           allocatorContext, allocated ) )
+    {}
 
     int getSizeX() const { return (*this)->getSizeX(); }
     int getSizeY() const { return (*this)->getSizeY(); }
@@ -324,6 +348,7 @@ namespace carto
     const PropertySet& getPropertySet() const { return (*this)->header(); }
     /// Obsolete. still here for compatibility purpose. Use header() instead.
           PropertySet& getPropertySet()       { return (*this)->header(); }
+    std::vector<float> getVoxelSize() const { return (*this)->getVoxelSize(); }
 
     void fill( const T& value )   { (*this)->fill( value ); }
     iterator       begin()        { return (*this)->begin(); }
@@ -339,6 +364,8 @@ namespace carto
     { return (*this)->at( x, y, z, t ); }
     T& at( long x, long y = 0, long z = 0, long t = 0 )
     { return (*this)->at( x, y, z, t ); }
+    
+    std::vector<int> getBorders() const { return (*this)->getBorders(); }
 #endif
   };
 

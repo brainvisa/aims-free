@@ -78,6 +78,71 @@ namespace carto
    * Constructor with border
    **************************************************************************/
   template < typename T >
+  Volume< T >::Volume( int sizeX, int sizeY, int sizeZ, int sizeT,
+                       const Position4Di & bordersize,
+                       const AllocatorContext& allocatorContext,
+                       bool allocated )
+    : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
+      _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
+        DataSource::none() ) ),
+#ifndef CARTO_USE_BLITZ
+      _lineoffset( 0 ),
+      _sliceoffset( 0 ),
+      _volumeoffset( 0 ),
+#endif
+      _pos( bordersize[0], bordersize[1], bordersize[2], bordersize[3] )
+  {
+    if( bordersize != Position4Di() )
+    {
+      _refvol.reset( new Volume<T>( sizeX + bordersize[0]*2,
+        sizeY + bordersize[1]*2,
+        sizeZ + bordersize[2]*2,
+        sizeT + bordersize[3]*2, allocatorContext, allocated ) );
+
+      allocate( -1, -1, -1, -1, true,
+        _refvol->allocatorContext().isAllocated()
+          ? AllocatorContext( AllocatorStrategy::NotOwner,
+                              rc_ptr<DataSource>( new BufferDataSource
+                                ( (char *) &(*_refvol)( bordersize[0], bordersize[1],
+                                                bordersize[2], bordersize[3] ),
+                                  sizeX * sizeY * sizeZ * sizeT
+                                  * sizeof(T) ) ) )
+          : allocatorContext );
+      if( _refvol->allocatorContext().isAllocated() )
+      {
+        // fix offsets
+#ifdef CARTO_USE_BLITZ
+        _blitz.reference
+          ( blitz::Array<T,4>
+            ( &_items[0],
+              blitz::shape( VolumeProxy<T>::getSizeX(),
+                            VolumeProxy<T>::getSizeY(),
+                            VolumeProxy<T>::getSizeZ(),
+                            VolumeProxy<T>::getSizeT() ),
+              blitz::shape( 1, &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 ),
+                               &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 ),
+                               &(*_refvol)( 0, 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 )
+                          ),
+              blitz::GeneralArrayStorage<4>
+              ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+#else
+        _lineoffset = &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 );
+        _sliceoffset = &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 );
+        _volumeoffset = &(*_refvol)( 0, 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 );
+#endif
+      }
+    }
+    else // no border
+    {
+      allocate( -1, -1, -1, -1, allocated, allocatorContext );
+    }
+
+  }
+
+  /***************************************************************************
+   * Constructor with border
+   **************************************************************************/
+  template < typename T >
   Volume< T >::Volume( int sizeX, int sizeY, int sizeZ,
                        int sizeT, int bordersize,
                        const AllocatorContext& allocatorContext,
