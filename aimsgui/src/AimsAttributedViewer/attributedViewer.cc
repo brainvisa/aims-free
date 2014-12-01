@@ -46,30 +46,38 @@ using namespace std;
 
 int main( int argc, char** argv )
 {
-  QApplication		app( argc, argv );
   AimsApplication	aapp( argc, (const char**) argv, 
-			      "Displays attributed objects (.minf...) in a " 
+                              "Displays attributed objects (.minf...) in a "
                               "list view. AimsAttributedViewer can also " 
                               "show any file header supported by AIMS IO " 
                               "system, just like AimsFileInfo" );
-  string		filename;
+  string filename;
 
   aapp.addOption( filename, "-i", "file to display", true );
   try
-    {
-      aapp.initialize();
-      AttributedView *mw = new AttributedView();
-      mw->load( filename );
-      app.setMainWidget( mw );
-      return( app.exec() );
-    }
+  {
+    aapp.initialize();
+    /* AimsApplication may instantiate a QCoreApplication for Qt plugins.
+       But if we instantiate a QApplication without deleting the existing
+       QCoreApplication, graphical events are not processed, and display does
+       not happen.
+    */
+    if( QCoreApplication::instance() )
+      delete QCoreApplication::instance();
+    QApplication          app( argc, argv );
+    AttributedView mw;
+    mw.load( filename );
+    app.setMainWidget( &mw );
+    mw.show();
+    return app.exec();
+  }
   catch( user_interruption &e )
-    {
-    }
+  {
+  }
   catch( exception & e )
-    {
-      cerr << argv[ 0 ] << ": " << e.what() << endl;
-    }
+  {
+    cerr << argv[ 0 ] << ": " << e.what() << endl;
+  }
   return EXIT_FAILURE;
 }
 

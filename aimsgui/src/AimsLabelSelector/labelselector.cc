@@ -46,13 +46,12 @@ using namespace std;
 
 int main( int argc, char** argv )
 {
-  QApplication          app( argc, argv );
-  AimsApplication	aapp( argc, (const char**) argv, 
-			      "Selects ROI labels from a nomenclature\n"
-			      "(to be used as input for ROI and morphometry "
-			      "commands)" );
-  string		model, hier, presel;
-  bool			batch = false;
+  AimsApplication       aapp( argc, (const char**) argv,
+                              "Selects ROI labels from a nomenclature\n"
+                              "(to be used as input for ROI and morphometry "
+                              "commands)" );
+  string                model, hier, presel;
+  bool                  batch = false;
 
   aapp.addOption( model, "-m", "Load a model", true );
   aapp.addOption( hier, "-n", "Load a nomenclature hierarchy", true );
@@ -84,6 +83,14 @@ int main( int argc, char** argv )
         return EXIT_SUCCESS;
       }
 
+      /* AimsApplication may instantiate a QCoreApplication for Qt plugins.
+        But if we instantiate a QApplication without deleting the existing
+        QCoreApplication, graphical events are not processed, and display does
+        not happen.
+      */
+      if( QCoreApplication::instance() )
+        delete QCoreApplication::instance();
+      QApplication          app( argc, argv );
       LabelSelector
         *ls = new LabelSelector( 0, "LabelSelector", false );
       ls->resize( ls->sizeHint() );
@@ -105,6 +112,7 @@ int main( int argc, char** argv )
         ls->showTab( "hierarchy" );
       if( ls->exec() )
         ls->printSelection();
+      return EXIT_SUCCESS;
     }
   catch( user_interruption &e )
     {
