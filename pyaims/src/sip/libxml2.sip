@@ -12,4 +12,4 @@ void xmlInitParser();
     PyErr_SetString( PyExc_RuntimeError, e.what() );
   }
 %End
-    
+
