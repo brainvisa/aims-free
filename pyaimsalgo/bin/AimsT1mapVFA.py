@@ -203,6 +203,7 @@ T1map[np.isnan(T1map)] = 0
 #T1map_volume = aims.Volume(np.asfortranarray(T1map))
 T1map_volume = aims.Volume(T1map)
 T1map_volume.header()['voxel_size'] = GRE_5deg.header()['voxel_size']
+T1map_volume.copyHeaderFrom(GRE_5deg.header())
 
 aims.write(T1map_volume, options.output_t1map)
 
