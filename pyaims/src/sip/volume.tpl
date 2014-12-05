@@ -28,6 +28,9 @@ typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
 public:
     class Position4Di
     {
+%Docstring
+4 ints for position or size, used for Volume views.
+%End
     public:
       Position4Di( int x = 0, int y = 0, int z = 0, int t = 0 );
       Position4Di( const Volume_%Template1typecode%::Position4Di & );
@@ -51,6 +54,7 @@ public:
         = Volume_%Template1typecode%::Position4Di( -1, -1, -1, -1 ),
       const carto::AllocatorContext & allocContext
         = carto::AllocatorContext() );
+
     virtual ~Volume_%Template1typecode%() /ReleaseGIL/;
 
     int getSizeX() const;
@@ -58,7 +62,14 @@ public:
     int getSizeZ() const;
     int getSizeT() const;
     vector_S32 getSize() const;
+%Docstring
+Number of voxels in each dimension (list of 4 ints)
+%End
+
     vector_FLOAT getVoxelSize() const;
+%Docstring
+Voxel sizes in mm (list of 4 floats)
+%End
 
     virtual void copyHeaderFrom( const carto::PropertySet & other );
     virtual void copyHeaderFrom( const carto::Object & other );
@@ -67,30 +78,52 @@ public:
     void fill( const %Template1% & value ) /ReleaseGIL/;
 
     rc_ptr_Volume_%Template1typecode% refVolume() const;
+%Docstring
+If the volume is a view into another (larger) one, this returns the "parent" one.
+%End
+
     Volume_%Template1typecode%::Position4Di posInRefVolume() const;
+%Docstring
+If the volume is a view into another (larger) one, this returns the position in "parent" one.
+%End
 
   %Template1PyType% at( long, long = 0, long = 0, long = 0 ) const;
+%Docstring
+Get a voxel at given position
+%End
 
   %Template1PyType% value( long, long = 0, long = 0,
                            long = 0 ) const;
+%Docstring
+Get a voxel at given position
+%End
 %MethodCode
  sipRes = %Template1new%( sipCpp->at( a0, a1, a2, a3 ) );
 %End
 
  void setValue( %Template1%, long, long = 0, long = 0,
                 long = 0 );
+%Docstring
+Set a voxel value at given position
+%End
 %MethodCode
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
 %End
 
 %#ifdef PyAims_Volume_U8_defined%
  void setValue( int, long, long = 0, long = 0, long = 0 );
+%Docstring
+Set a voxel value at given position
+%End
 %MethodCode
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
 %End
 %#endif%
 
   SIP_PYOBJECT header() /Factory/;
+%Docstring
+The header contains all meta-data.
+%End
 %MethodCode
   carto::PropertySet	& ps = sipCpp->header();
   carto::Object* h = new carto::Object( carto::Object::reference( ps ) );
