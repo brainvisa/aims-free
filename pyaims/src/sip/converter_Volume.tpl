@@ -1,6 +1,22 @@
 
 class Converter_Volume_%Template1typecode%_Volume_%Template2typecode%
 {
+%Docstring
+Converter classes can be used using the convert() method, or as a callable object:
+
+result = converter(input_data)
+
+Parameters
+----------
+input_data: Volume_%Template1typecode%
+    data to be converted
+
+Returns
+-------
+output data: Volume_%Template2typecode%
+    converted data
+%End
+
 %TypeHeaderCode
 #include <aims/utility/converter_volume.h>
 #include <pyaims/data/data.h>
@@ -81,6 +97,22 @@ public:
 %End
 
   void convert( const Volume_%Template1typecode% &, Volume_%Template2typecode% & ) const;
+%Docstring
+converter.convert(input_data, output_data)
+
+In-place converson inside existing allocated data
+
+Parameters
+----------
+input_data: Volume_%Template1typecode%
+    data to be converted
+output_data: Volume_%Template2typecode%
+    conversion output will be done into this data
+
+Returns
+-------
+None
+%End
 %MethodCode
   carto::rc_ptr<Volume_%Template1typecode%> r1( const_cast<Volume_%Template1typecode% *>( a0 ) );
   carto::rc_ptr<Volume_%Template2typecode%> r2( a1 );

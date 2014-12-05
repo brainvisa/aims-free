@@ -1,6 +1,22 @@
 
 class Converter_%Template1typecode%_%Template2typecode%
 {
+%Docstring
+Converter classes can be used using the convert() method, or as a callable object:
+
+result = converter(input_data)
+
+Parameters
+----------
+input_data: %Template1typecode%
+    data to be converted
+
+Returns
+-------
+output data: %Template2typecode%
+    converted data
+%End
+
 %TypeHeaderCode
 #include <aims/utility/converter_g.h>
 #include <pyaims/data/data.h>
@@ -14,7 +30,24 @@ public:
 
   %Template2typecode%* operator ()
     ( const %Template1typecode% & ) const /Factory/;
+
   void convert( const %Template1typecode% &, %Template2typecode% & ) const;
+%Docstring
+converter.convert(input_data, output_data)
+
+In-place converson inside existing allocated data
+
+Parameters
+----------
+input_data: %Template1typecode%
+    data to be converted
+output_data: %Template2typecode%
+    conversion output will be done into this data
+
+Returns
+-------
+None
+%End
 };
 
 

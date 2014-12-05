@@ -41,6 +41,13 @@
 #include <aims/resampling/motion.h>
 
 
+/** Resampler resamples an input data to build or fill an output data, using an affine transformation.
+
+Normally the input data should be set in the resampler using setRef().
+
+Resampling is done using the doit() methods.
+resample() methods also provide alternatives.
+*/
 template <class T>
 class Resampler
 {
@@ -49,31 +56,81 @@ public:
   Resampler() : _ref( 0 ), _defval( 0 ) { }
   virtual ~Resampler() { }
 
-  virtual void doit( const Motion& motion, AimsData<T>& thing );
-  virtual AimsData<T> doit( const Motion& motion, int dimX, int dimY, 
-                            int dimZ, const Point3df& resolution );
+  /** Resample the reference input data (set via setRef()) into an existing
+      output data.
 
-  virtual void resample( const AimsData< T >& inVolume,
-                         const Motion& transform3d,
-                         const T& outBackground,
-                         AimsData< T >& outVolume,
+      Parameters:
+
+      transform: AffineTransformation3d
+          transformation to apply
+      output_data: AimsData<T>
+          resampled data will fill this existing output data
+  */
+  virtual void doit( const aims::AffineTransformation3d& transform,
+                     AimsData<T>& output_data );
+
+  /** Resample the reference input data (set via setRef()) into a new output
+      data.
+
+      Parameters:
+
+      transform: transformation to apply
+      dimx, dimy, dimz: number of voxels in 3 dimensions
+      voxel_size: voxel size of the output data
+
+      Returns the output resampled volume
+  */
+  virtual AimsData<T> doit( const aims::AffineTransformation3d& transform,
+                            int dimX, int dimY,
+                            int dimZ, const Point3df& voxel_size );
+
+  /** Resample the input data into an existing output data.
+
+      Parameters:
+
+      input_data: data to be resampled
+      transform: transformation to apply
+      background: value set in output regions which are outside of the
+          transformation space of the input volume
+      output_data: resampled data will fill this existing output data
+      verbose: print more things during resampling
+  */
+  virtual void resample( const AimsData< T >& input_data,
+                         const aims::AffineTransformation3d& transform,
+                         const T& background,
+                         AimsData< T >& output_data,
                          bool verbose = false );
 
-  virtual void resample( const AimsData< T >& inVolume,
-                         const Motion& transform3d,
-                         const T& outBackground,
-                         const Point3df& outLocation,
-                         T& outValue, int time );
+  /** Resample a single voxel of the input data at a given specified output
+      location, and set the output value.
 
-  // seems to be the volume to be resampled... (what a crappy API...)
+      Parameters:
+
+      input_data: data to be resampled
+      transform: transformation to apply
+      background: value set in output regions which are outside of the
+          transformation space of the input volume
+      output_location: position in the output space (warning, this is actually
+          an input)
+      output_value: resampled output value
+      timestep: for 4D volume, time step to be used
+  */
+  virtual void resample( const AimsData< T >& input_data,
+                         const aims::AffineTransformation3d& transform,
+                         const T& background,
+                         const Point3df& output_location,
+                         T& output_value, int timestep );
+
+  /// set the input data to be resampled
   void setRef( const AimsData<T>& ref ) { _ref = &ref; }
+  /// set the default background value
   void setDefaultValue( T val ) { _defval = val; }
 
 protected:
 
   virtual void 
   doResample( const AimsData< T > &inVolume, 
-              const Motion &invTransform3d, 
+              const aims::AffineTransformation3d &invTransform3d,
               const T &outBackground, const Point3df &outLocation, 
               T &outValue, int time ) = 0;
 
