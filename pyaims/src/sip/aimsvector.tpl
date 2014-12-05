@@ -322,7 +322,7 @@ public:
 
  AimsVector_%Template1typecode%_%Template2typecode% & operator += ( double );
 %MethodCode
-  *sipCpp += AimsVector_%Template1typecode%_%Template2typecode%( a0 );
+  *sipCpp += AimsVector_%Template1typecode%_%Template2typecode%( (%Template1%)a0 );
 %End
 
   AimsVector_%Template1typecode%_%Template2typecode% &
@@ -330,7 +330,7 @@ public:
 
  AimsVector_%Template1typecode%_%Template2typecode% & operator -= ( double );
 %MethodCode
-  *sipCpp -= AimsVector_%Template1typecode%_%Template2typecode%( a0 );
+  *sipCpp -= AimsVector_%Template1typecode%_%Template2typecode%( (%Template1%)a0 );
 %End
 
   AimsVector_%Template1typecode%_%Template2typecode% &
