@@ -414,7 +414,7 @@ int main(int argc, const char **argv)
                  "volume or slice numbers to process. ex: 2-20,24,26 "
                  "(no space between numbers)", true );
   app.addOptionSeries( filein, "-i", "input volumes", 1 );
-  app.alias( "--output", "-i" );
+  app.alias( "--output", "-o" );
   app.alias( "--type", "-t" );
   app.alias( "--dir", "-d" );
   app.alias( "--num", "-n" );
