@@ -3,6 +3,21 @@ namespace aims
 
 class SurfaceManip
 {
+%Docstring
+Surface Manipulation Object. Available Methods are :
+
+* meshMerge(AimsTimeSurface_3, AimsTimeSurface_3) : concatenate two 3D
+  meshes into the first. Also the += operator of meshes
+
+* meshTransform(aims.AimsTimeSurface_3 mesh,
+  aims.AffineTransformation3d trans) : apply a
+  transformation *in-place* to a mesh.
+
+* meshPlanarPolygon
+
+This doc might not be up-to-date, check sources for more info.
+%End
+
 %TypeHeaderCode
 #include <pyaims/vector/stdvector.h>
 #include <aims/mesh/surfaceOperation.h>
@@ -29,16 +44,63 @@ public:
   static void invertSurfacePolygons( AimsTimeSurface_3 & surface );
 
   static void meshMerge( AimsTimeSurface_3 &, const AimsTimeSurface_3 & );
+%Docstring
+meshMerge(input_output_mesh, input_mesh)
+
+Concatenates the second mesh to the first one. The first argument will be modified.
+
+Parameters
+----------
+input_output_mesh: AimsTimeSurface_3
+    first mesh. Will be modified to be the output.
+input_mesh: AimsTimeSurface_3
+    second mesh to be appended to the first one.
+
+Returns
+-------
+None
+%End
+
   static void meshTransform( AimsTimeSurface_3 &, const Motion & );
+%Docstring
+meshTransform(mesh, transformation)
+
+Apply linear coordinates transformation to a mesh. The input mesh will be modified in-place.
+
+Parameters
+----------
+mesh: AimsTimeSurface_3 or AimsTimeSurface_2
+    mesh to be transformed. Will be modified.
+transformation: AffineTransformation3d
+    Linear transformation matrix
+
+Returns
+-------
+None
+%End
+
   static void meshTransform( AimsTimeSurface_2 &, const Motion & );
 
   static float meshArea( const AimsSurfaceTriangle & surf );
+%Docstring
+Surface area of a triangular mesh, in mm^2
+%End
+
   static float meshVolume( const AimsSurfaceTriangle & surf );
+%Docstring
+Volume inside a triangular mesh, in mm^3.
+The mesh must enclode a closed volume, with no holes, otherwise the volume processing will "leak" and will be wrong.
+%End
 
   static AimsTimeSurface_3 *
       meshExtract( const AimsTimeSurface_3 & mesh,
                    const TimeTexture_S16 & tex, short value,
                    vector_SIZE_T ** overtex = 0 ) /Factory/;
+%Docstring
+meshExtract(mesh, texture, label_value, out_vertices_map)
+
+Extracts a sub-mesh defined by a texture label value.
+%End
 
   static AimsTimeSurface_2 *
       meshTextureBoundary( const AimsSurfaceTriangle & mesh,
