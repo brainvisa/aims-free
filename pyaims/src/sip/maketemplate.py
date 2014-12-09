@@ -134,6 +134,9 @@ def makeTemplate( infile, outfile, types, templates = {}, cpp = 'cpp -C', moc=No
     #cppout = p.communicate()[0]
     fo2.close()
     for line in cppout.xreadlines():
+      # This is necessary to remove CR LF on windows
+      if len(line) >= 2 and line[-2] == '\r':
+        line = line[:-2] + '\n'
       lo = line
       if removeprere.match( lo ):
         lo = ''
