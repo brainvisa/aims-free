@@ -206,21 +206,53 @@ None
     const AimsSurfaceTriangle & mesh,
     const vector_U32 & selectedPolygons = vector_U32() ) /Factory/;
 %Docstring
-refineMeshTri4(mesh)
+refineMeshTri4(mesh, selected_polygons=None)
 
 Refine a mesh by subdivising every triangle into 4 smaller ones.
+
+Parameters
+----------
+mesh: AimsSurfaceTriangle
+    mesh to be refined
+selected_polygons: vector_U32
+    optional list of polygons indices to be selectively refined. Others will not be changed, unless they are at the border of a refined one, in which case they have to be split in some way.
+
+Returns
+-------
+refined_mesh: AimsSurfaceTriangle
+    refined mesh
 %End
 
   static TimeTexture_FLOAT* meshEdgeLengthRatioTexture(
     const AimsSurfaceTriangle & nummesh,
     const AimsSurfaceTriangle & denommesh ) /Factory/;
+%Docstring
+meshEdgeLengthRatioTexture(numerator_mesh, denominator_mesh)
+
+Calculate an edge length ratio in edges of two meshes with the same topology. The max length ratios of edges is kept for each vertex.
+
+Parameters
+----------
+numerator_mesh: AimsSurfaceTriangle
+denominator_mesh: AimsSurfaceTriangle
+
+Returns
+-------
+ratio_texture: TimeTexture_FLOAT
+%End
 
   static TimeTexture_FLOAT* meshDensity( const AimsSurfaceTriangle & mesh,
     bool asDistance = false ) /Factory/;
 %Docstring
-meshDensity(mesh)
+meshDensity(mesh, as_distance=False)
 
 Calculate a mesh density: inverse of the average edges distance.
+
+Parameters
+----------
+mesh: AimsSurfaceTriangle
+as_distance: bool (optional)
+    if True, the average distance is not inverted, thus the output is an average distance map.
 
 Returns
 -------
@@ -229,8 +261,22 @@ density_texture: TimeTexture_FLOAT
 
   static bool checkMeshIntersect( const AimsSurfaceTriangle &,
                                   const AimsSurfaceTriangle & );
+
   static vector_POINT3DF * lineDirections(
     const AimsTimeSurface_2 & ) /Factory/;
+%Docstring
+lineDirections(segments_mesh)
+
+calculate directions of a line mesh, for each vertex
+
+Parameters
+----------
+segments_mesh: AimsTimeSurface_2
+
+Returns
+-------
+directions: vector_POINT3DF
+%End
 };
 
 };
