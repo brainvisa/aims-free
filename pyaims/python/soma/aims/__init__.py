@@ -1653,8 +1653,7 @@ There are exceptions to this behaviour:
 '''
 
 _volumedoc = '''
-The various Volume_<type> classes are bindings to the C++ template classes
-carto::Volume<T>. It represents a 4D volume (1D to 4D, actually) storing a
+The various Volume_<type> classes are bindings to the :cartoddox:`C++ template classes carto::Volume <classcarto_1_1Volume.html>`. It represents a 4D volume (1D to 4D, actually) storing a
 specific type of data: for instance S16 is signed 16 bit short ints, FLOAT is
 32 bit floats,
 etc.
@@ -1718,7 +1717,7 @@ The converter can also be called using type arguments:
 
 _aimsdatadoc = '''
 ``AimsData_<type>`` classes correspond to the python bindings of C++
-template classes ``AimsData<T>``. They are planned to be obsolete, and
+template classes :aimsdox:`AimsData <classAimsData.html>`. They are planned to be obsolete, and
 replaced with the Volume_<type> classes. Try avoiding using them unless
 using functions that work on ``AimsData_<type>``.
 

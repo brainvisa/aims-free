@@ -46,52 +46,32 @@ Volumes
 
 
 
+.. class:: soma.aims.Volume_U8
 .. class:: soma.aims.Volume_S16
+.. class:: soma.aims.Volume_U16
+.. class:: soma.aims.Volume_S32
 .. class:: soma.aims.Volume_U32
+.. class:: soma.aims.Volume_RGB
 .. class:: soma.aims.Volume_RGBA
 .. class:: soma.aims.Volume_DOUBLE
-.. class:: soma.aims.Volume_FLOAT
+.. class:: soma.aims.Volume_CDOUBLE
+.. class:: soma.aims.Volume_CFLOAT
+.. autoclass:: soma.aims.Volume_FLOAT
+  :members:
 
-  See the :cartoddox:`Volume C++ documentation <classcarto_1_1Volume.html>`
-  
-  .. method:: arraydata()
-  
-    .. note::
-    
-      `arraydata()` returns a numpy array to the internal memory block, without strides. Given the internal ordering of Aims Volumes, the resulting numpy array is indexed as [t][z][y][x].
-      If you need the inverse, more natural, [x][y][z][t] ordering, use the following:
-      
-      >>> volarray = numpy.array( volume, copy=False )
-      
-    .. note::
-    
-      The array conversion is currently only supported for scalar volumes, and is not present on volumes of types RGB or RGBA.
-
-  .. method:: at( posx[, posy = 0, posz = 0, post = 0] )
-  
-  .. method:: fill( value )
-  
-  .. method:: getSizeT()
-  
-  .. method:: getSizeX()
-  
-  .. method:: getSizeY()
-  
-  .. method:: getSizeZ()
-  
-  .. method:: header()
-
-  .. method:: setValue( value, posx, [posy = 0, posz = 0, post = 0] )
-
-  .. method:: value( posx[, posy = 0, posz = 0, post = 0] )
-  
-    value is an alias to :py:meth:`at`.
-    
-
+.. class:: soma.aims.AimsData_U8
+.. class:: soma.aims.AimsData_S16
+.. class:: soma.aims.AimsData_U16
+.. class:: soma.aims.AimsData_S32
+.. class:: soma.aims.AimsData_U32
+.. class:: soma.aims.AimsData_RGB
+.. class:: soma.aims.AimsData_RGBA
+.. class:: soma.aims.AimsData_DOUBLE
+.. class:: soma.aims.AimsData_CDOUBLE
+.. class:: soma.aims.AimsData_CFLOAT
 .. autoclass:: soma.aims.AimsData_FLOAT
+  :members:
 
-  See the :aimsdox:`AimsData C++ documentation <classAimsData.html>`
-  
   .. method:: clone()
 
   .. method:: dimT()

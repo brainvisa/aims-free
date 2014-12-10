@@ -89,14 +89,19 @@ If the volume is a view into another (larger) one, this returns the position in 
 
   %Template1PyType% at( long, long = 0, long = 0, long = 0 ) const;
 %Docstring
-Get a voxel at given position
+at(posx, posy=0, posz=0, post=0)
+
+Returns the volume value for the selected voxel.
 %End
 
   %Template1PyType% value( long, long = 0, long = 0,
                            long = 0 ) const;
 %Docstring
-Get a voxel at given position
+value(posx, posy=0, posz=0, post=0)
+
+value is an alias to :py:meth:`at`: returns the volume value for the selected voxel.
 %End
+
 %MethodCode
  sipRes = %Template1new%( sipCpp->at( a0, a1, a2, a3 ) );
 %End
@@ -104,8 +109,11 @@ Get a voxel at given position
  void setValue( %Template1%, long, long = 0, long = 0,
                 long = 0 );
 %Docstring
-Set a voxel value at given position
+setValue(value, x, y=0, z=0, t=0)
+
+Set the voxel value at the given position.
 %End
+
 %MethodCode
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
 %End
@@ -550,6 +558,23 @@ The header contains all meta-data.
 %End
 
   SIP_PYOBJECT arraydata() /Factory/;
+%Docstring
+.. note::
+
+    *arraydata()* returns a numpy array to the internal memory block, without strides. Given the internal ordering of Aims Volumes, the resulting numpy array is indexed as [t][z][y][x]. This order corresponds to the numpy "fortran" order: ``order='F'``
+    If you need the inverse, more natural, [x][y][z][t] ordering, use the following:
+
+    >>> volarray = numpy.array(volume, copy=False)
+
+    or:
+
+    >>> volarray = numpy.asarray(volume)
+
+.. note::
+
+    The array conversion is currently only supported for scalar volumes, and is not present on volumes of types RGB or RGBA.
+%End
+
 %MethodCode
   std::vector<int> dims(4);
   dims[3] = sipCpp->getSizeX();
