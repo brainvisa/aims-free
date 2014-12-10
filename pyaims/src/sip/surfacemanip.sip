@@ -127,9 +127,16 @@ The mesh must enclode a closed volume, with no holes, otherwise the volume proce
                    const TimeTexture_S16 & tex, short value,
                    vector_SIZE_T ** overtex = 0 ) /Factory/;
 %Docstring
-meshExtract(mesh, texture, label_value, out_vertices_map)
+meshExtract(mesh, texture, label_value)
 
 Extracts a sub-mesh defined by a texture label value.
+
+Returns
+-------
+sub_mesh: AimsTimeSurface_3
+    extracted sub-mesh
+vertices: vector_ULONG
+    indices of extracted vertices
 %End
 
   static AimsTimeSurface_2 *
