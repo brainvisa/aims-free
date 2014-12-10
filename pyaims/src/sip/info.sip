@@ -4,6 +4,10 @@
 %End
 
 SIP_PYTUPLE version();
+%Docstring
+AIMS / Cartobase version, as a 2-digit tuple
+%End
+
 %MethodCode
   std::string v = carto::cartobaseShortVersion();
   std::string::size_type n = v.find( '.' );
@@ -17,6 +21,10 @@ SIP_PYTUPLE version();
 
 
 std::string versionString();
+%Docstring
+AIMS / Cartobase full version, as a string
+%End
+
 %MethodCode
   sipRes = new std::string( carto::cartobaseVersionString() );
 %End
@@ -35,15 +43,43 @@ typedef std::vector<carto::Info*> vector_InfoPtr;
 #endif
 %End
 
+%Docstring
+Information class, which provides information about the AIMS / Cartobase libraries, such as libraries versions, plugins, data paths, etc.
+
+May be used in 2 ways:
+* use static methods: Info.printVersions(), Info.printInfos() to directly output info on the standard output
+* get a list of Info objects using Info.infos() then use the specific methods on the Info objects. There may be several Info objects since higher-level libraries and applications may add their own ones.
+%End
+
   public:
     virtual ~Info();
     virtual void printPaths();
+%Docstring
+Print on the standard output configured data paths.
+%End
+
     virtual void printBuiltins();
+%Docstring
+Print on the standard output buitin optional features, selected when the library has been built.
+%End
+
     virtual void printOtherInfo();
+%Docstring
+Print on the standard output additional information (such as IO properties, settings options, etc).
+%End
+
     virtual void printVersion();
+%Docstring
+Print on the standard output the library version.
+%End
+
 
     // static vector_InfoPtr & infos();
     static SIP_PYTUPLE infos();
+%Docstring
+Static method. Get a list of Info objects, each library may provide one (or several).
+%End
+
 %MethodCode
     std::vector<carto::Info *> & inf = carto::Info::infos();
     unsigned i, n = inf.size();
@@ -52,8 +88,16 @@ typedef std::vector<carto::Info*> vector_InfoPtr;
       PyTuple_SetItem( sipRes, i, sipConvertFromInstance( inf[i],
         sipClass_carto_Info, 0 ) );
 %End
+
     static void print() /PyName=printInfos/;
+%Docstring
+Static method. Print all information on the standard output.
+%End
+
     static void printVersions();
+%Docstring
+Static method. Print versions of libraries
+%End
 
   private:
     Info();
