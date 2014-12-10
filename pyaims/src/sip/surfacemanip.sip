@@ -4,18 +4,22 @@ namespace aims
 class SurfaceManip
 {
 %Docstring
-Surface Manipulation Object. Available Methods are :
+Surface Manipulation Object. All mehtods are static in this class, it is just a means of grouping functions.
 
-* meshMerge(AimsTimeSurface_3, AimsTimeSurface_3) : concatenate two 3D
-  meshes into the first. Also the += operator of meshes
-
-* meshTransform(aims.AimsTimeSurface_3 mesh,
-  aims.AffineTransformation3d trans) : apply a
-  transformation *in-place* to a mesh.
-
+Methods
+-------
+* meshMerge
+    concatenate two 3D meshes into the first. Also the += operator of meshes
+* meshTransform
+    apply a transformation *in-place* to a mesh.
+* cutMesh
 * meshPlanarPolygon
-
-This doc might not be up-to-date, check sources for more info.
+* meshArea
+* meshVolume
+* meshExtract
+    Extract a sub-mesh
+* meshTextureBoundary
+* invertSurfacePolygons
 %End
 
 %TypeHeaderCode
@@ -35,6 +39,24 @@ public:
   static AimsSurfaceTriangle* meshPlanarPolygon( const Point4df &,
                                                  const AimsTimeSurface_2 & )
                                                 /Factory/;
+%Docstring
+meshPlanarPolygon(plane, polygon)
+
+Tesselate a planar polygon to fill it by a triangular mesh
+
+Parameters
+----------
+plane: Point4df
+    plane equation
+polygon: AimsTimeSurface_2
+    planar polygon to tesselate. Typically, the output of cutMesh()
+
+Returns
+-------
+planar_mesh: AimsSurfaceTriangle
+    the mesh filling the polygon
+%End
+
 %MethodCode
   AimsSurfaceTriangle *pm = new AimsSurfaceTriangle;
   aims::SurfaceManip::meshPlanarPolygon( *a0, *a1, *pm );
@@ -42,6 +64,12 @@ public:
 %End
 
   static void invertSurfacePolygons( AimsTimeSurface_3 & surface );
+%Docstring
+invertSurfacePolygons(mesh)
+
+Invert polygons order (flips 2 vertex indices in each triangle) to flip its interior / exterior notions (used by OpenGL rendering).
+The input mesh is modified in-place.
+%End
 
   static void meshMerge( AimsTimeSurface_3 &, const AimsTimeSurface_3 & );
 %Docstring
@@ -88,6 +116,8 @@ Surface area of a triangular mesh, in mm^2
 
   static float meshVolume( const AimsSurfaceTriangle & surf );
 %Docstring
+meshVolume(mesh)
+
 Volume inside a triangular mesh, in mm^3.
 The mesh must enclode a closed volume, with no holes, otherwise the volume processing will "leak" and will be wrong.
 %End
@@ -105,6 +135,28 @@ Extracts a sub-mesh defined by a texture label value.
   static AimsTimeSurface_2 *
       meshTextureBoundary( const AimsSurfaceTriangle & mesh,
         const TimeTexture_S16 & tex, short region ) /Factory/;
+%Docstring
+meshTextureBoundary(mesh, label_texture, region_value)
+
+Extracts the boundary of region of value <region_value> of the input texture, on the mesh.
+
+If region_value is negative, take boundaries of all regions. The input texture is a label texture.
+
+Parameters
+----------
+mesh: AimsSurfaceTriangle
+    input mesh to extract boundary on
+label_texture: TimeTexture_S16, TimeTexture_S32, or TimeTexture_FLOAT
+    label texture defining regions on the mesh
+region_value: int16, int32 or float
+    label of the desired region
+
+Returns
+-------
+boundary: AimsTimeSurface_2
+    output segments mesh (filar mesh) for the boundary
+%End
+
   static AimsTimeSurface_2 *
     meshTextureBoundary( const AimsSurfaceTriangle & mesh,
       const TimeTexture_S32 & tex, int region ) /Factory/;
@@ -115,6 +167,26 @@ Extracts a sub-mesh defined by a texture label value.
   static void cutMesh( const AimsSurfaceTriangle & insurf,
                        const Point4df & plane, AimsSurfaceTriangle & cut,
                        AimsTimeSurface_2 & borderline );
+%Docstring
+cutMesh(in_mesh, plane, cut_mesh, border_line)
+
+Cut a mesh by a plane
+
+Parameters
+----------
+in_mesh: AimsSurfaceTriangle
+    Triangular mesh to be cut.
+plane: Point4df
+    cut plane equation (4 coefs)
+cut_mesh: AimsSurfaceTriangle
+    output cut mesh (the part satisfying the plane equation). Polygons crossing the plane will be cut into smaller ones.
+border_line: AimsTimeSurface_2
+    output cut section polygon
+
+Returns
+-------
+None
+%End
 
   static Point3df nearestPointToMesh( const Point3df & pos, 
                                       const AimsSurfaceTriangle & mesh, 
@@ -122,10 +194,27 @@ Extracts a sub-mesh defined by a texture label value.
                                       unsigned* index = 0 );
   static vector_set_U32
     surfaceNeighbours( const AimsSurfaceTriangle & surf );
+
   static AimsSurfaceTriangle* refineMeshTri4(
     const AimsSurfaceTriangle & mesh ) /Factory/;
+%Docstring
+refineMeshTri4(mesh)
+
+Refine a mesh by subdivising every triangle into 4 smaller ones.
+%End
+
   static TimeTexture_FLOAT* meshDensity( const AimsSurfaceTriangle & mesh )
     /Factory/;
+%Docstring
+meshDensity(mesh)
+
+Calculate a mesh density: inverse of the average edges distance.
+
+Returns
+-------
+density_texture: TimeTexture_FLOAT
+%End
+
   static bool checkMeshIntersect( const AimsSurfaceTriangle &,
                                   const AimsSurfaceTriangle & );
 };
