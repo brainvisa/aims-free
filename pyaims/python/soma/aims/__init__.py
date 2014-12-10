@@ -34,12 +34,12 @@
 '''
 The aims module allows access to the AIMS library in python.
 
-- organization: `NeuroSpin <http://www.neurospin.org>`_ and `IFR 49 <http://www.ifr49.org>`_
+- organization: `NeuroSpin <http://www.neurospin.org>`_ and former IFR 49
 
 - license: `CeCILL-B <http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html>`_ (a free licence comparable to BSD)
 
 Most of it is a set of direct bindings to the
-`C++ library <../../aimsdata-4.1/doxygen/index.html>`_ API. But a few
+:aimsdox:`AIMS C++ library <index.html>` API. But a few
 classes have been customized or specially written to make easy links to the
 python world.
 
