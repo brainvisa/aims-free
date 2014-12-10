@@ -41,6 +41,10 @@
 namespace aims
 {
 
+  /** Trackvis .trk format reader
+
+      This is a low-level reader class, normally only used through BundleReader. You should not need to use it directly.
+  */
   class TrackvisBundleReader : public BundleFormatReader
   {
   public:

@@ -133,6 +133,22 @@ protected:
  //  BundleListener  //
 //------------------//
 
+/** Serial processing of bundles.
+
+    BundleListener listens events from a BundleProducer object, typically emitted when a new bundle starts or ends, a fiber starts or ends etc.
+
+    To use it, BundleListener has to be subclassed and some of the following methods overloaded:
+    - bundleStarted
+    - bundleTerminated
+    - fiberStarted
+    - fiberTerminated
+    - newFiberPoint
+    - noMoreBundle
+
+    To connect the listener to a producer, use BundleProducer::addBundleListener.
+
+    Inherited classes may inherit both BundleListener and BundleProducer, if they are part of a processing chain.
+*/
 class BundleListener
 {
 protected:
@@ -160,6 +176,14 @@ public:
  //  BundleProducer  //
 //------------------//
 
+/** Serial processing of bundles.
+
+    BundleProducer emits events to a BundleListener object while walking through a bundles set structure (or a bundles file), typically when a new bundle starts or ends, a fiber starts or ends etc.
+
+    To connect the listener to a producer, use BundleProducer::addBundleListener.
+
+    Inherited classes may inherit both BundleListener and BundleProducer, if they are part of a processing chain.
+*/
 class BundleProducer
 {
 public:
@@ -192,11 +216,18 @@ private:
 // WARNING : This class should be a real writer in aimsdata but I prefer to
 //           keep it here until the format is a bit more stable.
 
+/** Writes bundles information to a bundles file.
+
+    BundleWriter is a BundleListener, thus must be connected to a BundleProducer, and is fed by it.
+
+    It will write the .bundles format.
+*/
 class BundleWriter : public virtual BundleListener, public carto::PropertySet
 {
 public:
 
   BundleWriter();
+  /// set the output file name
   void setFileString( const std::string &fileName );
   virtual ~BundleWriter();
 
@@ -234,6 +265,13 @@ protected:
 // WARNING : This class should be a real writer in aimsdata but I prefer to
 //           keep it here until the format is a bit more stable.
 
+/** Reads a bundles file, and emits events while walking through its data.
+
+    BundleReader is a BundleProducer, so can be listened by any BundleListener.
+    It may read several bundles/fibers formats, using a lower-level BundleProducer dedicated to a specific format.
+
+    Currently .bundles (AIMS/Connectomist) and .trk (Trackvis) formats are supported.
+*/
 class BundleReader : public BundleProducer, public BundleListener
 {
 public:
@@ -241,6 +279,8 @@ public:
   BundleReader( const std::string &fileName );
   virtual ~BundleReader();
 
+  /** read() is the entry point to fibers processing, and triggers the producer machinery.
+  */
   void read();
   virtual carto::Object readHeader();
 
@@ -269,6 +309,8 @@ private:
 // WARNING : This class should be a real writer in aimsdata but I prefer to
 //           keep it here until the format is a bit more stable.
 
+/** Virtual base class for bundles/fibers file formats support
+*/
 class BundleFormatReader : public BundleProducer
 {
 public:
@@ -285,6 +327,10 @@ private:
 };
 
 
+/** Connectomist .bundles format reader
+
+    This is a low-level reader class, normally only used through BundleReader. You should not need to use it directly.
+*/
 class ConnectomistBundlesReader : public BundleFormatReader
 {
 public:
@@ -305,6 +351,14 @@ private:
  //  BundleToGraph  //
 //-----------------//
 
+/** Bundles structure building as a Graph
+
+    The Graph structure is used to represent bundles and fibers when we need to keep their complete structure in memory. This structure is especially used for 3D rendering in Anatomist.
+
+    BundleToGraph is a BundleListener, thus has to be connected to a BundleProducer to work (typically, a BundleReader).
+
+    Note that the BundleProducer / BundleListener system work as processing chains, and allows to keep only a small set of data in memory at one time. The Graph structure, on the contrary, keeps all information in memory, so may need a large amount of memory.
+*/
 class BundleToGraph : public BundleListener, 
                       virtual public carto::PropertySet
 {

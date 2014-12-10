@@ -4,6 +4,7 @@ PyAims low-level classes and functions
 
 You will look at this part only when needed, dont't look at it at the beginning. The useful part is accessed via the :doc:`pyaims_highlevel`.
 
+.. currentmodule:: soma.aims
 
 IO system
 +++++++++
@@ -225,6 +226,25 @@ RGB
   :members:
 
 .. autoclass:: soma.aims.AimsRGBA
+  :members:
+
+
+Fibers and Bundles handling
++++++++++++++++++++++++++++
+
+.. autoclass:: BundleListener
+  :members:
+
+.. autoclass:: BundleProducer
+  :members:
+
+.. autoclass:: BundleReader
+  :members:
+
+.. autoclass:: BundleWriter
+  :members:
+
+.. autoclass:: BundleToGraph
   :members:
 
 
