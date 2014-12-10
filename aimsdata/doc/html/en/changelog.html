@@ -45,7 +45,7 @@
 
 
 <!-- -->
-<h4> <a name="version-4.5.0"></a>Nov. 14th, 2014, Version 4.5.0</h4>
+<h4> <a name="version-4.5.0"></a>Dec. 10th, 2014, Version 4.5.0</h4>
 
 <ul>
 <li>Major changes in IO system: Soma-IO is being used instead of AIMS IO for major image formats:
@@ -60,6 +60,8 @@
   </ul>
 </li>
 <li>Basic support for NIFTI-2 images (in soma-IO).</li>
+<li>Experimental support for bvec / bval files coming with NIFTI files converted by dicom2nii (at least). May need coordinates system adjustments.
+</li>
 <li>Volume classes have been added a few convenience methods to make things easier to handle.</li>
 <li>Some fibers/bundles utility classes and IO (BundleProducer, BundleListener, BundleReader and bundle/graph conversion) have moved from the old connectomist project to aimsdata. Fibers IO are thus now builtin in aims/anatomist and do not depend on other libs and plugins.</li>
 <li>Support for Trackvis fibers format (for reading).</li>
