@@ -5,21 +5,6 @@ class SurfaceManip
 {
 %Docstring
 Surface Manipulation Object. All mehtods are static in this class, it is just a means of grouping functions.
-
-Methods
--------
-* meshMerge
-    concatenate two 3D meshes into the first. Also the += operator of meshes
-* meshTransform
-    apply a transformation *in-place* to a mesh.
-* cutMesh
-* meshPlanarPolygon
-* meshArea
-* meshVolume
-* meshExtract
-    Extract a sub-mesh
-* meshTextureBoundary
-* invertSurfacePolygons
 %End
 
 %TypeHeaderCode
