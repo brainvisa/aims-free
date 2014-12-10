@@ -191,11 +191,8 @@ Generic object
 
   This class represents the carto C++ namespace. It is rather used like a module, not as a class.
 
-  .. py:class:: carto.GenericObject
+  .. autoclass:: soma.aims.carto.GenericObject
 
-    .. method:: getScalar
-
-    .. method:: getString
 
     See the :cartobdox:`GenericObject C++ documentation <classcarto_1_1GenericObject.html>`
 
