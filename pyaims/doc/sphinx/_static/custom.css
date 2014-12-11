@@ -72,3 +72,9 @@ dl.data dt {
     border-top: none;
 }
 
+dl.attribute dt {
+    background-color: #ffffff;
+    border-bottom: none;
+    border-top: none;
+}
+
