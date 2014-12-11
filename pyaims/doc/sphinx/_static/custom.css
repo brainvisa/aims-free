@@ -60,3 +60,15 @@ dl.docutils dt {
     border-top: none;
 }
 
+dl.staticmethod dt {
+    background-color: #ffffff;
+    border-bottom: none;
+    border-top: none;
+}
+
+dl.data dt {
+    background-color: #ffffff;
+    border-bottom: none;
+    border-top: none;
+}
+
