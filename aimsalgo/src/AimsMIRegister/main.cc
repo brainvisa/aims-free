@@ -420,6 +420,8 @@ int main( int argc, const char** argv )
     voltypes.insert( "U16" );
     voltypes.insert( "S32" );
     voltypes.insert( "U32" );
+    voltypes.insert( "FLOAT" );
+    voltypes.insert( "DOUBLE" );
     voltypes.insert( "RGB" );
     voltypes.insert( "RGBA" );
     voltypes.insert( "HSV" );
