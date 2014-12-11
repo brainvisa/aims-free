@@ -17,19 +17,26 @@ In soma.aims module
 .. autoclass:: soma.aims.ResamplerFactory_FLOAT
   :members:
 
-.. py:class:: soma.aims.FastMarching
+.. autoclass:: soma.aims.FastMarching
+  :members:
 
-.. py:class:: soma.aims.FastMarching_BucketMap_S16
+.. autoclass:: soma.aims.FastMarching_BucketMap_S16
+  :members:
 
-.. py:class:: soma.aims.FoldArgOverSegment
+.. autoclass:: soma.aims.FoldArgOverSegment
+  :members:
 
-.. py:class:: soma.aims.FoldGraphAttributes
+.. autoclass:: soma.aims.FoldGraphAttributes
+  :members:
 
-.. py:class:: soma.aims.GradientAdvection
+.. autoclass:: soma.aims.GradientAdvection
+  :members:
 
-.. py:class:: soma.aims.MeshInterpoler
+.. autoclasss:: soma.aims.MeshInterpoler
+  :members:
 
-.. py:class:: soma.aims.RegularBinnedHistogram_FLOAT
+.. autoclass:: soma.aims.RegularBinnedHistogram_FLOAT
+  :members:
 
 .. py:function:: soma.aims.meshdistance.MeshDilation
 
@@ -41,11 +48,14 @@ In soma.aims module
 
 .. py:function:: soma.aims.meshdistance.MeshVoronoiStepbyStep
 
-.. py:class:: soma.aims.Spam
+.. autoclass:: soma.aims.Spam
+  :members:
 
-.. py:class:: soma.aims.SpamBase
+.. autoclass:: soma.aims.SpamBase
+  :members:
 
-.. py:class:: soma.aims.SpamFromLikelihood
+.. autoclass:: soma.aims.SpamFromLikelihood
+  :members:
 
 
 soma.aimsalgo module

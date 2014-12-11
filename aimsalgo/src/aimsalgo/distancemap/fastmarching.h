@@ -60,6 +60,22 @@ namespace aims
     }
   }
 
+  /** Fast marching algorithm implementation, for images or buckets.
+
+      The fast marching is a propagation algorithm which is typically used to
+      perform distance maps. It may use a speed map to locally change the
+      propagation speed and distance. It may also be used to perform a Voronoi
+      diagam, and to get Voronoi regions boundaries.
+
+      It is used the following way:
+      * instantiate a FastMarching object, with specified connectivity
+      * if needed, set the speed map (or inverse speed map) using setSpeedMap()
+        or setInvSpeedMap()
+      * propagate using one of the doit() methods. It will return the distanc
+        map.
+      * Voronoi and boundaries can then be retreived using voronoiVol(),
+        midInterface() or midInterfaceVol()
+  */
   template <typename T>
   class FastMarching
   {
@@ -73,25 +89,56 @@ namespace aims
     /** The connectivity type is only used to build the interfaces between
         the work region and the seeds: the fast marching itself only uses
         6-connectivity.
+
+        If mid_interface is false (the default), voronoi boundaries will not be
+        available after propagation.
     */
     FastMarching( Connectivity::Type c = Connectivity::CONNECTIVITY_26_XYZ,
                   bool mid_interface = false );
     ~FastMarching();
     void setVerbose( bool x );
     bool verbose() const;
+    /** Perform fast marching propagation from a label image "vol".
+
+        This is a simplified interface to the other, more general, doit()
+        method.
+
+        Propagation will take place in the region "worklabel", from seeds
+        "inlabel" and "outlabel".
+    */
     RCFloatType doit( const RCType & vol,
       int16_t worklabel, int16_t inlabel, int16_t outlabel);
+    /** Perform fast marching propagation from a label image "vol".
+
+        Propagation will take place in the regions listed in "worklabels", from
+        all seeds in the "seedlabels" list.
+    */
     RCFloatType doit( const RCType & vol,
       const std::set<int16_t> & worklabels,
       const std::set<int16_t> & seedlabels);
     /* RCFloatType doit( const RCType & vol,
       const BucketMap<Void> & workbucket,
       const std::map<int16_t,BucketMap<Void>*> & seedbuckets ); */
+    /** get the interface between Voronoi regions label1 and label2, as a bucket
+
+        the mid_interface option must have been used when instantiating the
+        FastMarching object, and propagation maust have taken place.
+    */
     const BucketMap<float> & midInterface( int16_t label1,
                                            int16_t label2 ) const;
+    /** get the interface between Voronoi regions label1 and label2, as a volume
+
+        The mid_interface option must have been used when instantiating the
+        FastMarching object, and propagation maust have taken place.
+    */
     carto::VolumeRef<float> midInterfaceVol( int16_t label1,
                                              int16_t label2 ) const;
+    /** Voronoi interfaces labels
+
+        Given as a vector of pairs of labels
+    */
     std::vector<std::pair<int16_t,int16_t> > midInterfaceLabels () const;
+    /// get the resulting Voronoi regions (after propagation)
     RCType voronoiVol() const;
     /** sets an initialized speed map.
     The inverse speed will be deduced from it. */
