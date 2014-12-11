@@ -53,3 +53,10 @@ dl.method dt {
     border-bottom: none;
     border-top: none;
 }
+
+dl.docutils dt {
+    background-color: #ffffff;
+    border-bottom: none;
+    border-top: none;
+}
+
