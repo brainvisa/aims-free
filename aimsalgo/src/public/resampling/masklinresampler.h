@@ -196,7 +196,7 @@ void MaskLinearResampler<T>::_sliceResamp( AimsData<T>& resamp,
 	    *(it + incr_vois[6]) == -32768 ||
 	    *(it + incr_vois[7]) == -32768 )
 	  {
-	    *out++ = -32768;
+	    *out++ = (T) -32768;
 	  }
 	else
 	  {
