@@ -78,3 +78,27 @@ dl.attribute dt {
     border-top: none;
 }
 
+dl.class dt:target, .highlighted {
+    background-color: #fbe54e;
+}
+
+dl.method dt:target, .highlighted {
+    background-color: #fbe54e;
+}
+
+dl.docutils dt:target, .highlighted {
+    background-color: #fbe54e;
+}
+
+dl.staticmethod dt:target, .highlighted {
+    background-color: #fbe54e;
+}
+
+dl.data dt:target, .highlighted {
+    background-color: #fbe54e;
+}
+
+dl.attribute dt:target, .highlighted {
+    background-color: #fbe54e;
+}
+
