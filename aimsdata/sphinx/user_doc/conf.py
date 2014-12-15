@@ -218,6 +218,7 @@ latex_documents = [
 #latex_use_modindex = True
 
 autoclass_content = "both"
+aimstil_version = '1.2' # FIXME: find this automatically
 
 extlinks = {
   'axon': ('../../axon-' + version + '/%s', 'axon '),
@@ -232,6 +233,9 @@ extlinks = {
   'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
     'aimsdox '),
   'aimsdata' : ('../../aimsdata-' + version + '/%s', 'aimsdata '),
+  'aimsalgo' : ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo '),
+  'aimsgui': ('../../aimsgui-' + version + '/doxygen/%s', 'aimsgui '),
+  'aimstil': ('../../aimstil-' + aimstil_version + '/doxygen/%s', 'aimstil '),
   'pyaims': ('../../pyaims-' + version + '/%s', 'pyaims '),
   'pyaimsdev': ('../../pyaims-' + version + '/sphinx/%s', 'pyaims '),
   'cartobdox' : ('../../cartobase-' + version + '/doxygen/%s',
@@ -240,6 +244,8 @@ extlinks = {
   'cartoddox '),
   'graphdox' : ('../../graph-' + version + '/doxygen/%s',
   'graphdox '),
+  'somabase': ('../../soma-base-' + version + '/%s', 'soma-base '),
+  'somaio': ('../../soma-io-' + version + '/%s', 'soma-io ' ),
   'anatomist': ('../../anatomist-' + version + '/%s', 'anatomist '),
   'pyanatomist': ('../../pyanatomist-' + version + '/sphinx/%s',
     'pyanatomist '),
