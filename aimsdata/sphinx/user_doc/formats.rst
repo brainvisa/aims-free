@@ -3,6 +3,16 @@
 AIMS-specific file formats
 ==========================
 
+.. _gis_format:
+
+``.ima`` GIS volume format
+==========================
+
+.. todo::
+
+  to be continued...
+
+
 .. _mesh_format:
 
 ``.mesh`` surfacic mesh format
@@ -337,6 +347,39 @@ The field **dataType** defines the type of value associated to each **coordinate
 
 Here should be an example of an *ascii* bucket file.
 
-To be continued...
+.. todo::
+
+  To be continued...
+
+
+.. _arg_format:
+
+``.arg`` graph format
+=====================
+
+.. todo::
+
+  To be continued...
+
+
+.. _hie_format:
+
+``.hie`` tree format
+====================
+
+.. todo::
+
+  To be continued...
+
+
+.. _bundles_format:
+
+``.bundles`` bundles / fibers format
+====================================
+
+.. todo::
+
+  To be continued...
+
 
 
