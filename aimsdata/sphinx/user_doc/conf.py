@@ -242,6 +242,7 @@ extlinks = {
   'pyanatomist': ('../../pyanatomist-' + version + '/sphinx/%s',
     'pyanatomist '),
   'cmds': ('../../index_commands.html', 'commands '),
+  'documents': ('../../documents-' + version + '/%s', 'documents '),
 }
 
 import soma

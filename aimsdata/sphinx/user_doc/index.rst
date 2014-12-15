@@ -14,6 +14,8 @@ General
 
 * :doc:`AIMS configuration file documentation <aims_config>`
 
+* :cmds:`List of all executable programs with help <>`
+
 Tutorial
 ========
 
@@ -36,7 +38,8 @@ PyAIMS: in Python
 Miscelaneous
 ============
 
-:doc:`Old notes about SPM/Analyze format handling <spm_format>` across AIMS history
+* Documentation about :doc:`some of the AIMS specific data formats <formats>`
+* :doc:`Old notes about SPM/Analyze format handling <spm_format>` across AIMS history
 
 .. toctree::
   :hidden:
@@ -44,5 +47,6 @@ Miscelaneous
   changelog
   aims_config
   tutorial
+  formats
   spm_format
 
