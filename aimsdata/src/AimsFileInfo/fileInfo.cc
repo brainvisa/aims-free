@@ -203,7 +203,9 @@ bool printExtrema ( VolumeRef<T> & vol, const string & filename,
 
   try
   {
-    vol = *r.read( 0, &format );
+    VolumeRef<T> *pv = r.read( 0, &format );
+    vol = *pv;
+    delete pv;
     if( !vol.get() )
       return false;
   }
