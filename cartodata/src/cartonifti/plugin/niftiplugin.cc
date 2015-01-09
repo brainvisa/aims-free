@@ -95,28 +95,32 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfr8->attach( rc_ptr<ImageReader<int8_t> >( new NiftiImageReader<int8_t> ) );
     FormatDictionary<Volume<int8_t> >::registerFormat( "NIFTI-1", vfr8, exts );
     vfr8 = new VolumeFormatReader<int8_t>;
-    vfr8->attach( rc_ptr<ImageReader<int8_t> >( new NiftiImageReader<int8_t> ) );
+    vfr8->attach( rc_ptr<ImageReader<int8_t> >( new NiftiImageReader<int8_t>(
+      "NIFTI-2" ) ) );
     FormatDictionary<Volume<int8_t> >::registerFormat( "NIFTI-2", vfr8, exts );
 
     VolumeFormatReader<int16_t> *vfr16 = new VolumeFormatReader<int16_t>;
     vfr16->attach( rc_ptr<ImageReader<int16_t> >( new NiftiImageReader<int16_t> ) );
     FormatDictionary<Volume<int16_t> >::registerFormat( "NIFTI-1", vfr16, exts );
     vfr16 = new VolumeFormatReader<int16_t>;
-    vfr16->attach( rc_ptr<ImageReader<int16_t> >( new NiftiImageReader<int16_t> ) );
+    vfr16->attach( rc_ptr<ImageReader<int16_t> >( new NiftiImageReader<int16_t>(
+      "NIFTI-2" ) ) );
     FormatDictionary<Volume<int16_t> >::registerFormat( "NIFTI-2", vfr16, exts );
 
     VolumeFormatReader<int32_t> *vfr32 = new VolumeFormatReader<int32_t>;
     vfr32->attach( rc_ptr<ImageReader<int32_t> >( new NiftiImageReader<int32_t> ) );
     FormatDictionary<Volume<int32_t> >::registerFormat( "NIFTI-1", vfr32, exts );
     vfr32 = new VolumeFormatReader<int32_t>;
-    vfr32->attach( rc_ptr<ImageReader<int32_t> >( new NiftiImageReader<int32_t> ) );
+    vfr32->attach( rc_ptr<ImageReader<int32_t> >(
+      new NiftiImageReader<int32_t>( "NIFTI-2" ) ) );
     FormatDictionary<Volume<int32_t> >::registerFormat( "NIFTI-2", vfr32, exts );
 
     VolumeFormatReader<int64_t> *vfr64 = new VolumeFormatReader<int64_t>;
     vfr64->attach( rc_ptr<ImageReader<int64_t> >( new NiftiImageReader<int64_t> ) );
     FormatDictionary<Volume<int64_t> >::registerFormat( "NIFTI-1", vfr64, exts );
     vfr64 = new VolumeFormatReader<int64_t>;
-    vfr64->attach( rc_ptr<ImageReader<int64_t> >( new NiftiImageReader<int64_t> ) );
+    vfr64->attach( rc_ptr<ImageReader<int64_t> >(
+      new NiftiImageReader<int64_t>( "NIFTI-2" ) ) );
     FormatDictionary<Volume<int64_t> >::registerFormat( "NIFTI-2", vfr64, exts );
 
     //--- UINT -----------------------------------------------------------------
@@ -125,28 +129,29 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfru8->attach( rc_ptr<ImageReader<uint8_t> >( new NiftiImageReader<uint8_t> ) );
     FormatDictionary<Volume<uint8_t> >::registerFormat( "NIFTI-1", vfru8, exts );
     vfru8 = new VolumeFormatReader<uint8_t>;
-    vfru8->attach( rc_ptr<ImageReader<uint8_t> >( new NiftiImageReader<uint8_t> ) );
+    vfru8->attach( rc_ptr<ImageReader<uint8_t> >(
+      new NiftiImageReader<uint8_t>( "NIFTI-2" ) ) );
     FormatDictionary<Volume<uint8_t> >::registerFormat( "NIFTI-2", vfru8, exts );
 
     VolumeFormatReader<uint16_t> *vfru16 = new VolumeFormatReader<uint16_t>;
     vfru16->attach( rc_ptr<ImageReader<uint16_t> >( new NiftiImageReader<uint16_t> ) );
     FormatDictionary<Volume<uint16_t> >::registerFormat( "NIFTI-1", vfru16, exts );
     vfru16 = new VolumeFormatReader<uint16_t>;
-    vfru16->attach( rc_ptr<ImageReader<uint16_t> >( new NiftiImageReader<uint16_t> ) );
+    vfru16->attach( rc_ptr<ImageReader<uint16_t> >( new NiftiImageReader<uint16_t>( "NIFTI-2" ) ) );
     FormatDictionary<Volume<uint16_t> >::registerFormat( "NIFTI-2", vfru16, exts );
 
     VolumeFormatReader<uint32_t> *vfru32 = new VolumeFormatReader<uint32_t>;
     vfru32->attach( rc_ptr<ImageReader<uint32_t> >( new NiftiImageReader<uint32_t> ) );
     FormatDictionary<Volume<uint32_t> >::registerFormat( "NIFTI-1", vfru32, exts );
     vfru32 = new VolumeFormatReader<uint32_t>;
-    vfru32->attach( rc_ptr<ImageReader<uint32_t> >( new NiftiImageReader<uint32_t> ) );
+    vfru32->attach( rc_ptr<ImageReader<uint32_t> >( new NiftiImageReader<uint32_t>( "NIFTI-2" ) ) );
     FormatDictionary<Volume<uint32_t> >::registerFormat( "NIFTI-2", vfru32, exts );
 
     VolumeFormatReader<uint64_t> *vfru64 = new VolumeFormatReader<uint64_t>;
     vfru64->attach( rc_ptr<ImageReader<uint64_t> >( new NiftiImageReader<uint64_t> ) );
     FormatDictionary<Volume<uint64_t> >::registerFormat( "NIFTI-1", vfru64, exts );
     vfru64 = new VolumeFormatReader<uint64_t>;
-    vfru64->attach( rc_ptr<ImageReader<uint64_t> >( new NiftiImageReader<uint64_t> ) );
+    vfru64->attach( rc_ptr<ImageReader<uint64_t> >( new NiftiImageReader<uint64_t>( "NIFTI-2" ) ) );
     FormatDictionary<Volume<uint64_t> >::registerFormat( "NIFTI-2", vfru64, exts );
 
     //--- FLOAT ----------------------------------------------------------------
@@ -155,14 +160,16 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfrf->attach( rc_ptr<ImageReader<float> >( new NiftiImageReader<float> ) );
     FormatDictionary<Volume<float> >::registerFormat( "NIFTI-1", vfrf, exts );
     vfrf = new VolumeFormatReader<float>;
-    vfrf->attach( rc_ptr<ImageReader<float> >( new NiftiImageReader<float> ) );
+    vfrf->attach( rc_ptr<ImageReader<float> >( new NiftiImageReader<float>(
+      "NIFTI-2" ) ) );
     FormatDictionary<Volume<float> >::registerFormat( "NIFTI-2", vfrf, exts );
 
     VolumeFormatReader<double> *vfrd = new VolumeFormatReader<double>;
     vfrd->attach( rc_ptr<ImageReader<double> >( new NiftiImageReader<double> ) );
     FormatDictionary<Volume<double> >::registerFormat( "NIFTI-1", vfrd, exts );
     vfrd = new VolumeFormatReader<double>;
-    vfrd->attach( rc_ptr<ImageReader<double> >( new NiftiImageReader<double> ) );
+    vfrd->attach( rc_ptr<ImageReader<double> >( new NiftiImageReader<double>(
+      "NIFTI-2" ) ) );
     FormatDictionary<Volume<double> >::registerFormat( "NIFTI-2", vfrd, exts );
 
     //--- RGB ------------------------------------------------------------------
@@ -171,21 +178,21 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfr_rgb->attach( rc_ptr<ImageReader<VoxelRGB> >( new NiftiImageReader<VoxelRGB> ) );
     FormatDictionary<Volume<VoxelRGB> >::registerFormat( "NIFTI-1", vfr_rgb, exts );
     vfr_rgb = new VolumeFormatReader<VoxelRGB>;
-    vfr_rgb->attach( rc_ptr<ImageReader<VoxelRGB> >( new NiftiImageReader<VoxelRGB> ) );
+    vfr_rgb->attach( rc_ptr<ImageReader<VoxelRGB> >( new NiftiImageReader<VoxelRGB>( "NIFTI-2" ) ) );
     FormatDictionary<Volume<VoxelRGB> >::registerFormat( "NIFTI-2", vfr_rgb, exts );
 
     VolumeFormatReader<VoxelRGBA> *vfr_rgba = new VolumeFormatReader<VoxelRGBA>;
     vfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new NiftiImageReader<VoxelRGBA> ) );
     FormatDictionary<Volume<VoxelRGBA> >::registerFormat( "NIFTI-1", vfr_rgba, exts );
     vfr_rgba = new VolumeFormatReader<VoxelRGBA>;
-    vfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new NiftiImageReader<VoxelRGBA> ) );
+    vfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new NiftiImageReader<VoxelRGBA>( "NIFTI-2" ) ) );
     FormatDictionary<Volume<VoxelRGBA> >::registerFormat( "NIFTI-2", vfr_rgba, exts );
 
     VolumeFormatReader<VoxelHSV> *vfr_hsv = new VolumeFormatReader<VoxelHSV>;
     vfr_hsv->attach( rc_ptr<ImageReader<VoxelHSV> >( new NiftiImageReader<VoxelHSV> ) );
     FormatDictionary<Volume<VoxelHSV> >::registerFormat( "NIFTI-1", vfr_hsv, exts );
     vfr_hsv = new VolumeFormatReader<VoxelHSV>;
-    vfr_hsv->attach( rc_ptr<ImageReader<VoxelHSV> >( new NiftiImageReader<VoxelHSV> ) );
+    vfr_hsv->attach( rc_ptr<ImageReader<VoxelHSV> >( new NiftiImageReader<VoxelHSV>( "NIFTI-2" ) ) );
     FormatDictionary<Volume<VoxelHSV> >::registerFormat( "NIFTI-2", vfr_hsv, exts );
 
     //--- COMPLEX -------------------------------------------------------------
@@ -194,14 +201,14 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >( new NiftiImageReader<std::complex<float> > ) );
     FormatDictionary<Volume<std::complex<float> > >::registerFormat( "NIFTI-1", vfr_cf, exts );
     vfr_cf = new VolumeFormatReader<std::complex<float> >;
-    vfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >( new NiftiImageReader<std::complex<float> > ) );
+    vfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >( new NiftiImageReader<std::complex<float> >( "NIFTI-2" ) ) );
     FormatDictionary<Volume<std::complex<float> > >::registerFormat( "NIFTI-2", vfr_cf, exts );
 
     VolumeFormatReader<std::complex<double> > *vfr_cd = new VolumeFormatReader<std::complex<double> >;
     vfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new NiftiImageReader<std::complex<double> > ) );
     FormatDictionary<Volume<std::complex<double> > >::registerFormat( "NIFTI-1", vfr_cd, exts );
     vfr_cd = new VolumeFormatReader<std::complex<double> >;
-    vfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new NiftiImageReader<std::complex<double> > ) );
+    vfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new NiftiImageReader<std::complex<double> >( "NIFTI-2" ) ) );
     FormatDictionary<Volume<std::complex<double> > >::registerFormat( "NIFTI-2", vfr_cd, exts );
 
     //==========================================================================
@@ -214,28 +221,32 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     rfr8->attach( rc_ptr<ImageReader<int8_t> >( new NiftiImageReader<int8_t> ) );
     FormatDictionary<VolumeRef<int8_t> >::registerFormat( "NIFTI-1", rfr8, exts );
     rfr8 = new VolumeRefFormatReader<int8_t>;
-    rfr8->attach( rc_ptr<ImageReader<int8_t> >( new NiftiImageReader<int8_t> ) );
+    rfr8->attach( rc_ptr<ImageReader<int8_t> >( new NiftiImageReader<int8_t>(
+      "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<int8_t> >::registerFormat( "NIFTI-2", rfr8, exts );
 
     VolumeRefFormatReader<int16_t> *rfr16 = new VolumeRefFormatReader<int16_t>;
     rfr16->attach( rc_ptr<ImageReader<int16_t> >( new NiftiImageReader<int16_t> ) );
     FormatDictionary<VolumeRef<int16_t> >::registerFormat( "NIFTI-1", rfr16, exts );
     rfr16 = new VolumeRefFormatReader<int16_t>;
-    rfr16->attach( rc_ptr<ImageReader<int16_t> >( new NiftiImageReader<int16_t> ) );
+    rfr16->attach( rc_ptr<ImageReader<int16_t> >(
+      new NiftiImageReader<int16_t>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<int16_t> >::registerFormat( "NIFTI-2", rfr16, exts );
 
     VolumeRefFormatReader<int32_t> *rfr32 = new VolumeRefFormatReader<int32_t>;
     rfr32->attach( rc_ptr<ImageReader<int32_t> >( new NiftiImageReader<int32_t> ) );
     FormatDictionary<VolumeRef<int32_t> >::registerFormat( "NIFTI-1", rfr32, exts );
     rfr32 = new VolumeRefFormatReader<int32_t>;
-    rfr32->attach( rc_ptr<ImageReader<int32_t> >( new NiftiImageReader<int32_t> ) );
+    rfr32->attach( rc_ptr<ImageReader<int32_t> >(
+      new NiftiImageReader<int32_t>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<int32_t> >::registerFormat( "NIFTI-2", rfr32, exts );
 
     VolumeRefFormatReader<int64_t> *rfr64 = new VolumeRefFormatReader<int64_t>;
     rfr64->attach( rc_ptr<ImageReader<int64_t> >( new NiftiImageReader<int64_t> ) );
     FormatDictionary<VolumeRef<int64_t> >::registerFormat( "NIFTI-1", rfr64, exts );
     rfr64 = new VolumeRefFormatReader<int64_t>;
-    rfr64->attach( rc_ptr<ImageReader<int64_t> >( new NiftiImageReader<int64_t> ) );
+    rfr64->attach( rc_ptr<ImageReader<int64_t> >(
+      new NiftiImageReader<int64_t>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<int64_t> >::registerFormat( "NIFTI-2", rfr64, exts );
 
     //--- UINT -----------------------------------------------------------------
@@ -244,28 +255,32 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     rfru8->attach( rc_ptr<ImageReader<uint8_t> >( new NiftiImageReader<uint8_t> ) );
     FormatDictionary<VolumeRef<uint8_t> >::registerFormat( "NIFTI-1", rfru8, exts );
     rfru8 = new VolumeRefFormatReader<uint8_t>;
-    rfru8->attach( rc_ptr<ImageReader<uint8_t> >( new NiftiImageReader<uint8_t> ) );
+    rfru8->attach( rc_ptr<ImageReader<uint8_t> >(
+      new NiftiImageReader<uint8_t>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<uint8_t> >::registerFormat( "NIFTI-2", rfru8, exts );
 
     VolumeRefFormatReader<uint16_t> *rfru16 = new VolumeRefFormatReader<uint16_t>;
     rfru16->attach( rc_ptr<ImageReader<uint16_t> >( new NiftiImageReader<uint16_t> ) );
     FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "NIFTI-1", rfru16, exts );
     rfru16 = new VolumeRefFormatReader<uint16_t>;
-    rfru16->attach( rc_ptr<ImageReader<uint16_t> >( new NiftiImageReader<uint16_t> ) );
+    rfru16->attach( rc_ptr<ImageReader<uint16_t> >(
+      new NiftiImageReader<uint16_t>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "NIFTI-2", rfru16, exts );
 
     VolumeRefFormatReader<uint32_t> *rfru32 = new VolumeRefFormatReader<uint32_t>;
     rfru32->attach( rc_ptr<ImageReader<uint32_t> >( new NiftiImageReader<uint32_t> ) );
     FormatDictionary<VolumeRef<uint32_t> >::registerFormat( "NIFTI-1", rfru32, exts );
     rfru32 = new VolumeRefFormatReader<uint32_t>;
-    rfru32->attach( rc_ptr<ImageReader<uint32_t> >( new NiftiImageReader<uint32_t> ) );
+    rfru32->attach( rc_ptr<ImageReader<uint32_t> >(
+      new NiftiImageReader<uint32_t>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<uint32_t> >::registerFormat( "NIFTI-2", rfru32, exts );
 
     VolumeRefFormatReader<uint64_t> *rfru64 = new VolumeRefFormatReader<uint64_t>;
     rfru64->attach( rc_ptr<ImageReader<uint64_t> >( new NiftiImageReader<uint64_t> ) );
     FormatDictionary<VolumeRef<uint64_t> >::registerFormat( "NIFTI-1", rfru64, exts );
     rfru64 = new VolumeRefFormatReader<uint64_t>;
-    rfru64->attach( rc_ptr<ImageReader<uint64_t> >( new NiftiImageReader<uint64_t> ) );
+    rfru64->attach( rc_ptr<ImageReader<uint64_t> >(
+      new NiftiImageReader<uint64_t>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<uint64_t> >::registerFormat( "NIFTI-2", rfru64, exts );
 
     //--- FLOAT ----------------------------------------------------------------
@@ -274,14 +289,16 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     rfrf->attach( rc_ptr<ImageReader<float> >( new NiftiImageReader<float> ) );
     FormatDictionary<VolumeRef<float> >::registerFormat( "NIFTI-1", rfrf, exts );
     rfrf = new VolumeRefFormatReader<float>;
-    rfrf->attach( rc_ptr<ImageReader<float> >( new NiftiImageReader<float> ) );
+    rfrf->attach( rc_ptr<ImageReader<float> >(
+      new NiftiImageReader<float>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<float> >::registerFormat( "NIFTI-2", rfrf, exts );
 
     VolumeRefFormatReader<double> *rfrd = new VolumeRefFormatReader<double>;
     rfrd->attach( rc_ptr<ImageReader<double> >( new NiftiImageReader<double> ) );
     FormatDictionary<VolumeRef<double> >::registerFormat( "NIFTI-1", rfrd, exts );
     rfrd = new VolumeRefFormatReader<double>;
-    rfrd->attach( rc_ptr<ImageReader<double> >( new NiftiImageReader<double> ) );
+    rfrd->attach( rc_ptr<ImageReader<double> >(
+      new NiftiImageReader<double>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<double> >::registerFormat( "NIFTI-2", rfrd, exts );
 
     //--- RGB ------------------------------------------------------------------
@@ -290,38 +307,47 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     rfr_rgb->attach( rc_ptr<ImageReader<VoxelRGB> >( new NiftiImageReader<VoxelRGB> ) );
     FormatDictionary<VolumeRef<VoxelRGB> >::registerFormat( "NIFTI-1", rfr_rgb, exts );
     rfr_rgb = new VolumeRefFormatReader<VoxelRGB>;
-    rfr_rgb->attach( rc_ptr<ImageReader<VoxelRGB> >( new NiftiImageReader<VoxelRGB> ) );
+    rfr_rgb->attach( rc_ptr<ImageReader<VoxelRGB> >(
+      new NiftiImageReader<VoxelRGB>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<VoxelRGB> >::registerFormat( "NIFTI-2", rfr_rgb, exts );
 
     VolumeRefFormatReader<VoxelRGBA> *rfr_rgba = new VolumeRefFormatReader<VoxelRGBA>;
     rfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new NiftiImageReader<VoxelRGBA> ) );
     FormatDictionary<VolumeRef<VoxelRGBA> >::registerFormat( "NIFTI-1", rfr_rgba, exts );
     rfr_rgba = new VolumeRefFormatReader<VoxelRGBA>;
-    rfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >( new NiftiImageReader<VoxelRGBA> ) );
+    rfr_rgba->attach( rc_ptr<ImageReader<VoxelRGBA> >(
+      new NiftiImageReader<VoxelRGBA>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<VoxelRGBA> >::registerFormat( "NIFTI-2", rfr_rgba, exts );
 
     VolumeRefFormatReader<VoxelHSV> *rfr_hsv = new VolumeRefFormatReader<VoxelHSV>;
     rfr_hsv->attach( rc_ptr<ImageReader<VoxelHSV> >( new NiftiImageReader<VoxelHSV> ) );
     FormatDictionary<VolumeRef<VoxelHSV> >::registerFormat( "NIFTI-1", rfr_hsv, exts );
     rfr_hsv = new VolumeRefFormatReader<VoxelHSV>;
-    rfr_hsv->attach( rc_ptr<ImageReader<VoxelHSV> >( new NiftiImageReader<VoxelHSV> ) );
+    rfr_hsv->attach( rc_ptr<ImageReader<VoxelHSV> >(
+      new NiftiImageReader<VoxelHSV>( "NIFTI-2" ) ) );
     FormatDictionary<VolumeRef<VoxelHSV> >::registerFormat( "NIFTI-2", rfr_hsv, exts );
 
     //--- COMPLEX -------------------------------------------------------------
 
     VolumeRefFormatReader<std::complex<float> > *rfr_cf = new VolumeRefFormatReader<std::complex<float> >;
     rfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >( new NiftiImageReader<std::complex<float> > ) );
-    FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat( "NIFTI-1", rfr_cf, exts );
+    FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat(
+      "NIFTI-1", rfr_cf, exts );
     rfr_cf = new VolumeRefFormatReader<std::complex<float> >;
-    rfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >( new NiftiImageReader<std::complex<float> > ) );
-    FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat( "NIFTI-2", rfr_cf, exts );
+    rfr_cf->attach( rc_ptr<ImageReader<std::complex<float> > >(
+      new NiftiImageReader<std::complex<float> >( "NIFTI-2" ) ) );
+    FormatDictionary<VolumeRef<std::complex<float> > >::registerFormat(
+      "NIFTI-2", rfr_cf, exts );
 
     VolumeRefFormatReader<std::complex<double> > *rfr_cd = new VolumeRefFormatReader<std::complex<double> >;
     rfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new NiftiImageReader<std::complex<double> > ) );
-    FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "NIFTI-1", rfr_cd, exts );
+    FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat(
+      "NIFTI-1", rfr_cd, exts );
     rfr_cd = new VolumeRefFormatReader<std::complex<double> >;
-    rfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new NiftiImageReader<std::complex<double> > ) );
-    FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "NIFTI-2", rfr_cd, exts );
+    rfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >(
+      new NiftiImageReader<std::complex<double> >( "NIFTI-2" ) ) );
+    FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat(
+      "NIFTI-2", rfr_cd, exts );
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -345,28 +371,32 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfw8->attach( rc_ptr<ImageWriter<int8_t> >( new Nifti1ImageWriter<int8_t> ) );
     FormatDictionary<Volume<int8_t> >::registerFormat( "NIFTI-1", vfw8, exts );
     vfw8 = new VolumeFormatWriter<int8_t>;
-    vfw8->attach( rc_ptr<ImageWriter<int8_t> >( new Nifti2ImageWriter<int8_t> ) );
+    vfw8->attach( rc_ptr<ImageWriter<int8_t> >(
+      new Nifti2ImageWriter<int8_t> ) );
     FormatDictionary<Volume<int8_t> >::registerFormat( "NIFTI-2", vfw8, exts );
 
     VolumeFormatWriter<int16_t> *vfw16 = new VolumeFormatWriter<int16_t>;
     vfw16->attach( rc_ptr<ImageWriter<int16_t> >( new Nifti1ImageWriter<int16_t> ) );
     FormatDictionary<Volume<int16_t> >::registerFormat( "NIFTI-1", vfw16, exts );
     vfw16 = new VolumeFormatWriter<int16_t>;
-    vfw16->attach( rc_ptr<ImageWriter<int16_t> >( new Nifti2ImageWriter<int16_t> ) );
+    vfw16->attach( rc_ptr<ImageWriter<int16_t> >(
+      new Nifti2ImageWriter<int16_t> ) );
     FormatDictionary<Volume<int16_t> >::registerFormat( "NIFTI-2", vfw16, exts );
 
     VolumeFormatWriter<int32_t> *vfw32 = new VolumeFormatWriter<int32_t>;
     vfw32->attach( rc_ptr<ImageWriter<int32_t> >( new Nifti1ImageWriter<int32_t> ) );
     FormatDictionary<Volume<int32_t> >::registerFormat( "NIFTI-1", vfw32, exts );
     vfw32 = new VolumeFormatWriter<int32_t>;
-    vfw32->attach( rc_ptr<ImageWriter<int32_t> >( new Nifti2ImageWriter<int32_t> ) );
+    vfw32->attach( rc_ptr<ImageWriter<int32_t> >(
+      new Nifti2ImageWriter<int32_t> ) );
     FormatDictionary<Volume<int32_t> >::registerFormat( "NIFTI-2", vfw32, exts );
 
     VolumeFormatWriter<int64_t> *vfw64 = new VolumeFormatWriter<int64_t>;
     vfw64->attach( rc_ptr<ImageWriter<int64_t> >( new Nifti1ImageWriter<int64_t> ) );
     FormatDictionary<Volume<int64_t> >::registerFormat( "NIFTI-1", vfw64, exts );
     vfw64 = new VolumeFormatWriter<int64_t>;
-    vfw64->attach( rc_ptr<ImageWriter<int64_t> >( new Nifti2ImageWriter<int64_t> ) );
+    vfw64->attach( rc_ptr<ImageWriter<int64_t> >(
+      new Nifti2ImageWriter<int64_t> ) );
     FormatDictionary<Volume<int64_t> >::registerFormat( "NIFTI-2", vfw64, exts );
 
     //--- UINT -----------------------------------------------------------------
@@ -375,28 +405,32 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new Nifti1ImageWriter<uint8_t> ) );
     FormatDictionary<Volume<uint8_t> >::registerFormat( "NIFTI-1", vfwu8, exts );
     vfwu8 = new VolumeFormatWriter<uint8_t>;
-    vfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new Nifti2ImageWriter<uint8_t> ) );
+    vfwu8->attach( rc_ptr<ImageWriter<uint8_t> >(
+      new Nifti2ImageWriter<uint8_t> ) );
     FormatDictionary<Volume<uint8_t> >::registerFormat( "NIFTI-2", vfwu8, exts );
 
     VolumeFormatWriter<uint16_t> *vfwu16 = new VolumeFormatWriter<uint16_t>;
     vfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new Nifti1ImageWriter<uint16_t> ) );
     FormatDictionary<Volume<uint16_t> >::registerFormat( "NIFTI-1", vfwu16, exts );
     vfwu16 = new VolumeFormatWriter<uint16_t>;
-    vfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new Nifti2ImageWriter<uint16_t> ) );
+    vfwu16->attach( rc_ptr<ImageWriter<uint16_t> >(
+      new Nifti2ImageWriter<uint16_t> ) );
     FormatDictionary<Volume<uint16_t> >::registerFormat( "NIFTI-2", vfwu16, exts );
 
     VolumeFormatWriter<uint32_t> *vfwu32 = new VolumeFormatWriter<uint32_t>;
     vfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new Nifti1ImageWriter<uint32_t> ) );
     FormatDictionary<Volume<uint32_t> >::registerFormat( "NIFTI-1", vfwu32, exts );
     vfwu32 = new VolumeFormatWriter<uint32_t>;
-    vfwu32->attach( rc_ptr<ImageWriter<uint32_t> >( new Nifti2ImageWriter<uint32_t> ) );
+    vfwu32->attach( rc_ptr<ImageWriter<uint32_t> >(
+      new Nifti2ImageWriter<uint32_t> ) );
     FormatDictionary<Volume<uint32_t> >::registerFormat( "NIFTI-2", vfwu32, exts );
 
     VolumeFormatWriter<uint64_t> *vfwu64 = new VolumeFormatWriter<uint64_t>;
     vfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new Nifti1ImageWriter<uint64_t> ) );
     FormatDictionary<Volume<uint64_t> >::registerFormat( "NIFTI-1", vfwu64, exts );
     vfwu64 = new VolumeFormatWriter<uint64_t>;
-    vfwu64->attach( rc_ptr<ImageWriter<uint64_t> >( new Nifti2ImageWriter<uint64_t> ) );
+    vfwu64->attach( rc_ptr<ImageWriter<uint64_t> >(
+      new Nifti2ImageWriter<uint64_t> ) );
     FormatDictionary<Volume<uint64_t> >::registerFormat( "NIFTI-2", vfwu64, exts );
 
     //--- FLOAT ----------------------------------------------------------------
@@ -405,14 +439,16 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfwf->attach( rc_ptr<ImageWriter<float> >( new Nifti1ImageWriter<float> ) );
     FormatDictionary<Volume<float> >::registerFormat( "NIFTI-1", vfwf, exts );
     vfwf = new VolumeFormatWriter<float>;
-    vfwf->attach( rc_ptr<ImageWriter<float> >( new Nifti2ImageWriter<float> ) );
+    vfwf->attach( rc_ptr<ImageWriter<float> >(
+      new Nifti2ImageWriter<float> ) );
     FormatDictionary<Volume<float> >::registerFormat( "NIFTI-2", vfwf, exts );
 
     VolumeFormatWriter<double> *vfwd = new VolumeFormatWriter<double>;
     vfwd->attach( rc_ptr<ImageWriter<double> >( new Nifti1ImageWriter<double> ) );
     FormatDictionary<Volume<double> >::registerFormat( "NIFTI-1", vfwd, exts );
     vfwd = new VolumeFormatWriter<double>;
-    vfwd->attach( rc_ptr<ImageWriter<double> >( new Nifti2ImageWriter<double> ) );
+    vfwd->attach( rc_ptr<ImageWriter<double> >(
+      new Nifti2ImageWriter<double> ) );
     FormatDictionary<Volume<double> >::registerFormat( "NIFTI-2", vfwd, exts );
 
     //--- RGB ------------------------------------------------------------------
@@ -421,21 +457,24 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new Nifti1ImageWriter<VoxelRGB> ) );
     FormatDictionary<Volume<VoxelRGB> >::registerFormat( "NIFTI-1", vfw_rgb, exts );
     vfw_rgb = new VolumeFormatWriter<VoxelRGB>;
-    vfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new Nifti2ImageWriter<VoxelRGB> ) );
+    vfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >(
+      new Nifti2ImageWriter<VoxelRGB> ) );
     FormatDictionary<Volume<VoxelRGB> >::registerFormat( "NIFTI-2", vfw_rgb, exts );
 
     VolumeFormatWriter<VoxelRGBA> *vfw_rgba = new VolumeFormatWriter<VoxelRGBA>;
     vfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >( new Nifti1ImageWriter<VoxelRGBA> ) );
     FormatDictionary<Volume<VoxelRGBA> >::registerFormat( "NIFTI-1", vfw_rgba, exts );
     vfw_rgba = new VolumeFormatWriter<VoxelRGBA>;
-    vfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >( new Nifti2ImageWriter<VoxelRGBA> ) );
+    vfw_rgba->attach( rc_ptr<ImageWriter<VoxelRGBA> >(
+      new Nifti2ImageWriter<VoxelRGBA> ) );
     FormatDictionary<Volume<VoxelRGBA> >::registerFormat( "NIFTI-2", vfw_rgba, exts );
 
     VolumeFormatWriter<VoxelHSV> *vfw_hsv = new VolumeFormatWriter<VoxelHSV>;
     vfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new Nifti1ImageWriter<VoxelHSV> ) );
     FormatDictionary<Volume<VoxelHSV> >::registerFormat( "NIFTI-1", vfw_hsv, exts );
     vfw_hsv = new VolumeFormatWriter<VoxelHSV>;
-    vfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >( new Nifti2ImageWriter<VoxelHSV> ) );
+    vfw_hsv->attach( rc_ptr<ImageWriter<VoxelHSV> >(
+      new Nifti2ImageWriter<VoxelHSV> ) );
     FormatDictionary<Volume<VoxelHSV> >::registerFormat( "NIFTI-2", vfw_hsv, exts );
 
     //--- COMPLEX -------------------------------------------------------------
@@ -444,14 +483,16 @@ NiftiPlugin::NiftiPlugin() : Plugin()
     vfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new Nifti1ImageWriter<std::complex<float> > ) );
     FormatDictionary<Volume<std::complex<float> > >::registerFormat( "NIFTI-1", vfw_cf, exts );
     vfw_cf = new VolumeFormatWriter<std::complex<float> >;
-    vfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >( new Nifti2ImageWriter<std::complex<float> > ) );
+    vfw_cf->attach( rc_ptr<ImageWriter<std::complex<float> > >(
+      new Nifti2ImageWriter<std::complex<float> > ) );
     FormatDictionary<Volume<std::complex<float> > >::registerFormat( "NIFTI-2", vfw_cf, exts );
 
     VolumeFormatWriter<std::complex<double> > *vfw_cd = new VolumeFormatWriter<std::complex<double> >;
     vfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new Nifti1ImageWriter<std::complex<double> > ) );
     FormatDictionary<Volume<std::complex<double> > >::registerFormat( "NIFTI-1", vfw_cd, exts );
     vfw_cd = new VolumeFormatWriter<std::complex<double> >;
-    vfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new Nifti2ImageWriter<std::complex<double> > ) );
+    vfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >(
+      new Nifti2ImageWriter<std::complex<double> > ) );
     FormatDictionary<Volume<std::complex<double> > >::registerFormat( "NIFTI-2", vfw_cd, exts );
 
     //==========================================================================
