@@ -458,6 +458,16 @@ namespace soma
     _imr = imr;
   }
 
+
+  template <typename T>
+  std::string VolumeFormatReader<T>::formatID() const
+  {
+    // delegate to ImageReader
+    if( !_imr )
+      return "";
+    return _imr->formatID();
+  }
+
 //////////////////////////////////////////////////////////////////////////////
 ////            V O L U M E R E F F O R M A T R E A D E R                 ////
 //////////////////////////////////////////////////////////////////////////////
@@ -571,6 +581,16 @@ namespace soma
     VolumeRefFormatReader<T> *reader = new VolumeRefFormatReader<T>;
     reader->attach( carto::rc_ptr<ImageReader<T> >( _imr->cloneReader() ) );
     return reader;
+  }
+
+
+  template <typename T>
+  std::string VolumeRefFormatReader<T>::formatID() const
+  {
+    // delegate to ImageReader
+    if( !_imr )
+      return "";
+    return _imr->formatID();
   }
 
 }

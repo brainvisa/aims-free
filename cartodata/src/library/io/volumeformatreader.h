@@ -113,6 +113,8 @@ namespace soma
 
       virtual FormatReader<carto::Volume<T> >* clone() const;
 
+      virtual std::string formatID() const;
+
     protected:
       carto::rc_ptr<ImageReader<T> > _imr;
   };
@@ -158,6 +160,7 @@ namespace soma
                                  carto::Object options );
 
       virtual FormatReader<carto::VolumeRef<T> >* clone() const;
+      virtual std::string formatID() const;
 
     protected:
       carto::rc_ptr<ImageReader<T> > _imr;
