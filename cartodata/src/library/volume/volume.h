@@ -126,7 +126,7 @@ namespace carto
                                                              && _coords[2] == p._coords[2]
                                                              && _coords[3] == p._coords[3] ); }
       bool operator!=(const Position4Di& p) const { return !(this->operator ==(p)); }
-      
+
     private:
       std::vector<int>  _coords;
     };
@@ -147,16 +147,16 @@ namespace carto
     /// \param sizeY number of voxels
     /// \param sizeZ number of voxels
     /// \param sizeT number of voxels
-    /// \param allocatorContext information about how to allocate the volume: 
+    /// \param allocatorContext information about how to allocate the volume:
     /// it can be a bit complex to do really optimal things, but the default
     /// value (default constructor of AllocatorContext) is OK in most cases.
-    /// \param allocated normally left to \c true, it can exceptionnally be 
-    /// set to \c false for "virtual" volumes that must not be actually 
+    /// \param allocated normally left to \c true, it can exceptionnally be
+    /// set to \c false for "virtual" volumes that must not be actually
     /// allocated but are only sources for a view Volume.
     explicit Volume( int sizeX = 1, int sizeY = 1, int sizeZ = 1,
                      int sizeT = 1,
                      const AllocatorContext& allocatorContext
-                      = AllocatorContext(), 
+                      = AllocatorContext(),
                      bool allocated = true );
     /// Volume construction and allocation
     /// Same as the above constructor,but allows to specify a border size.
@@ -231,12 +231,12 @@ namespace carto
     blitz::Array<T,4> at( const blitz::RectDomain<4> & subdomain ) const;
     blitz::Array<T,4> at( const blitz::StridedDomain<4> & subdomain ) const;
     blitz::Array<T,4> at( const blitz::Range & r0 ) const;
-    blitz::Array<T,4> at( const blitz::Range & r0, 
+    blitz::Array<T,4> at( const blitz::Range & r0,
                           const blitz::Range & r1 ) const;
-    blitz::Array<T,4> at( const blitz::Range & r0, const blitz::Range & r1, 
+    blitz::Array<T,4> at( const blitz::Range & r0, const blitz::Range & r1,
                           const blitz::Range & r2 ) const;
-    blitz::Array<T,4> at( const blitz::Range & r0, const blitz::Range & r1, 
-                          const blitz::Range & r2, 
+    blitz::Array<T,4> at( const blitz::Range & r0, const blitz::Range & r1,
+                          const blitz::Range & r2,
                           const blitz::Range & r3 ) const;
 #endif
     /// Initializes header info.
@@ -244,28 +244,28 @@ namespace carto
     /// returns volume's AllocatorContext
     const AllocatorContext & allocatorContext() const;
     /// This function is only useful in the particular context of an
-    /// unallocated Volume, when the constructor has been used with the 
+    /// unallocated Volume, when the constructor has been used with the
     /// \c allocated flag to \c false.
-    /// Calling allocate() afterwards will actually allocate the memory. 
+    /// Calling allocate() afterwards will actually allocate the memory.
     /// Otherwise it will do nothing.
     void allocate();
     /// allows resizing and changing allocator
-    virtual void reallocate( int sizeX = 1, int sizeY = 1, int sizeZ = 1, 
-                             int sizeT = 1, bool keepcontents = false, 
-                             const AllocatorContext& allocatorContext 
+    virtual void reallocate( int sizeX = 1, int sizeY = 1, int sizeZ = 1,
+                             int sizeT = 1, bool keepcontents = false,
+                             const AllocatorContext& allocatorContext
                              = AllocatorContext(), bool allocate = true );
     /// Get parent volume
     rc_ptr<Volume<T> > refVolume() const;
 
     /// Set parent volume
     void setRefVolume(const rc_ptr<Volume<T> > & refvol);
-    
+
     /// Get position in parent volume
     const Position4Di posInRefVolume() const;
 
     /// Set position in parent volume
     void setPosInRefVolume(const Position4Di & pos);
-    
+
     /// Get borders for the volume. A volume that can have borders is a volume \n
     /// that references another volume. It can be understood as a view in the reference volume.
     /// \return std::vector<uint16_t> that contains the borders availables for the volume.
@@ -281,7 +281,7 @@ namespace carto
 
   protected:
 
-    void allocate( int oldSizeX, int oldSizeY, int oldSizeZ, int oldSizeT, 
+    void allocate( int oldSizeX, int oldSizeY, int oldSizeZ, int oldSizeT,
                    bool allocate, const AllocatorContext& allocatorContext );
     void slotSizeChanged( const PropertyFilter& propertyFilter );
     void updateItemsBuffer();
@@ -312,6 +312,7 @@ namespace carto
     VolumeRef( const rc_ptr<Volume<T> > & x );
 
 #ifdef CARTO_VOLUME_AUTO_DEREFERENCE
+    typedef typename Volume<T>::Position4Di Position4Di;
     typedef typename Volume<T>::iterator iterator;
     typedef typename Volume<T>::const_iterator const_iterator;
 
@@ -364,7 +365,7 @@ namespace carto
     { return (*this)->at( x, y, z, t ); }
     T& at( long x, long y = 0, long z = 0, long t = 0 )
     { return (*this)->at( x, y, z, t ); }
-    
+
     std::vector<int> getBorders() const { return (*this)->getBorders(); }
 #endif
   };
@@ -382,9 +383,9 @@ namespace carto
     { return "CartoVolume"; }
     static std::string dataType()
     { return DataTypeCode<T>::dataType(); }
-    static std::string name() 
-    { 
-      return std::string("carto_volume of ") + DataTypeCode< T >::name(); 
+    static std::string name()
+    {
+      return std::string("carto_volume of ") + DataTypeCode< T >::name();
     }
   };
 
@@ -397,9 +398,9 @@ namespace carto
     { return "VolumeRef"; }
     static std::string dataType()
     { return DataTypeCode<T>::dataType(); }
-    static std::string name() 
-    { 
-      return std::string("VolumeRef of ") + DataTypeCode< T >::name(); 
+    static std::string name()
+    {
+      return std::string("VolumeRef of ") + DataTypeCode< T >::name();
     }
   };
 
@@ -472,93 +473,93 @@ namespace carto
 
 
 #ifdef CARTO_USE_BLITZ
-  template < typename T > inline 
+  template < typename T > inline
   const T & Volume< T >::at( const blitz::TinyVector<int,1> & index ) const
   {
     return _blitz( index );
   }
 
-  template < typename T > inline 
+  template < typename T > inline
   T & Volume< T >::at( const blitz::TinyVector<int,1> & index )
   {
     return _blitz( index );
   }
 
-  template < typename T > inline 
+  template < typename T > inline
   const T & Volume< T >::at( const blitz::TinyVector<int,2> & index ) const
   {
     return _blitz( index );
   }
 
-  template < typename T > inline 
+  template < typename T > inline
   T & Volume< T >::at( const blitz::TinyVector<int,2> & index )
   {
     return _blitz( index );
   }
 
-  template < typename T > inline 
+  template < typename T > inline
   const T & Volume< T >::at( const blitz::TinyVector<int,3> & index ) const
   {
     return _blitz( index );
   }
 
-  template < typename T > inline 
+  template < typename T > inline
   T & Volume< T >::at( const blitz::TinyVector<int,3> & index )
   {
     return _blitz( index );
   }
 
-  template < typename T > inline 
+  template < typename T > inline
   const T & Volume< T >::at( const blitz::TinyVector<int,4> & index ) const
   {
     return _blitz( index );
   }
 
-  template < typename T > inline 
+  template < typename T > inline
   T & Volume< T >::at( const blitz::TinyVector<int,4> & index )
   {
     return _blitz( index );
   }
 
-  template < typename T > inline 
-  blitz::Array<T,4> 
+  template < typename T > inline
+  blitz::Array<T,4>
   Volume< T >::at( const blitz::RectDomain<4> & subdomain ) const
   {
     return _blitz( subdomain );
   }
 
-  template < typename T > inline 
-  blitz::Array<T,4> 
+  template < typename T > inline
+  blitz::Array<T,4>
   Volume< T >::at( const blitz::StridedDomain<4> & subdomain ) const
   {
     return _blitz( subdomain );
   }
 
-  template < typename T > inline 
-  blitz::Array<T,4> 
+  template < typename T > inline
+  blitz::Array<T,4>
   Volume< T >::at( const blitz::Range & r0 ) const
   {
     return _blitz( r0 );
   }
 
-  template < typename T > inline 
-  blitz::Array<T,4> 
+  template < typename T > inline
+  blitz::Array<T,4>
   Volume< T >::at( const blitz::Range & r0, const blitz::Range & r1 ) const
   {
     return _blitz( r0, r1 );
   }
 
-  template < typename T > inline 
-  blitz::Array<T,4> 
-  Volume< T >::at( const blitz::Range & r0, const blitz::Range & r1, 
+  template < typename T > inline
+  blitz::Array<T,4>
+  Volume< T >::at( const blitz::Range & r0, const blitz::Range & r1,
                    const blitz::Range & r2 ) const
   {
     return _blitz( r0, r1, r2 );
   }
 
-  template < typename T > inline 
-  blitz::Array<T,4> 
-  Volume< T >::at( const blitz::Range & r0, const blitz::Range & r1, 
+  template < typename T > inline
+  blitz::Array<T,4>
+  Volume< T >::at( const blitz::Range & r0, const blitz::Range & r1,
                    const blitz::Range & r2, const blitz::Range & r3 ) const
   {
     return _blitz( r0, r1, r2, r3 );
@@ -567,7 +568,7 @@ namespace carto
 
 
   template <typename T>
-  inline 
+  inline
   VolumeRef<T>::VolumeRef()
     : rc_ptr<Volume<T> >( new Volume<T> )
   {
@@ -575,7 +576,7 @@ namespace carto
 
 
   template <typename T>
-  inline 
+  inline
   VolumeRef<T>::VolumeRef( Volume<T>* x )
     : rc_ptr<Volume<T> >( x )
   {
@@ -583,7 +584,7 @@ namespace carto
 
 
   template <typename T>
-  inline 
+  inline
   VolumeRef<T>::VolumeRef( const rc_ptr<Volume<T> > & x )
     : rc_ptr<Volume<T> >( x )
   {

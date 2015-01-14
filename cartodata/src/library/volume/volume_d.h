@@ -371,7 +371,6 @@ namespace carto
     }
   }
 
-
   template < typename T >
   Volume< T >::~Volume()
   {
@@ -404,10 +403,10 @@ namespace carto
 
     if ( !allocatorContext().isAllocated()
          || (allocatorContext().accessMode() == AllocatorStrategy::NotOwner) ) {
-      
+
       // Free old buffer
       _items.free();
-      
+
       if (_refvol.get()) {
         // Recreate items buffer that reference volume
         // using correct sizes and position
@@ -417,13 +416,13 @@ namespace carto
                                         rc_ptr<DataSource>( new BufferDataSource
                                           ( (char *) &(*(_refvol))( _pos[0], _pos[1],
                                                                     _pos[2], _pos[3] ),
-                                            VolumeProxy<T>::_sizeX 
-                                            * VolumeProxy<T>::_sizeY 
-                                            * VolumeProxy<T>::_sizeZ 
+                                            VolumeProxy<T>::_sizeX
+                                            * VolumeProxy<T>::_sizeY
+                                            * VolumeProxy<T>::_sizeZ
                                             * VolumeProxy<T>::_sizeT
                                             * sizeof(T) ) ) )
                     : allocatorContext() );
-                    
+
         if ( _refvol->allocatorContext().isAllocated() )
         {
           // fix offsets
@@ -468,7 +467,7 @@ namespace carto
       }
     }
   }
-  
+
   template <typename T> inline
   void Volume<T>::setPosInRefVolume( const Position4Di & pos ) {
     if (pos != _pos) {
@@ -476,7 +475,7 @@ namespace carto
       updateItemsBuffer();
     }
   }
-  
+
   template <typename T> inline
   void Volume<T>::setRefVolume( const rc_ptr<Volume<T> > & refvol) {
     if (refvol.get() != _refvol.get()) {
@@ -484,7 +483,7 @@ namespace carto
       updateItemsBuffer();
     }
   }
-  
+
   template <typename T> inline
   std::vector<int> Volume<T>::getBorders() const
   {
@@ -500,7 +499,7 @@ namespace carto
       borders[6] = _pos[3];
       borders[7] = _refvol->_sizeT - VolumeProxy<T>::_sizeT - _pos[3];
     }
-    
+
     return borders;
   }
 
