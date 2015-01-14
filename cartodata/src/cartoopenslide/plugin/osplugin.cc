@@ -71,14 +71,15 @@ namespace
 
 OSPlugin::OSPlugin() : Plugin()
 {
-    vector<string>  exts(7);
+    vector<string>  exts(8);
     exts[0] = "tif";    // Aperio, Trestle, Generic TIFF
     exts[1] = "tiff";   // Aperio, Trestle, Generic TIFF
     exts[2] = "svs";    // Aperio
     exts[3] = "vms";    // Hamamatsu
     exts[4] = "vmu";    // Hamamatsu
-    exts[5] = "scn";    // Leica
-    exts[6] = "mrxs";   // MIRAX
+    exts[5] = "ndpi";   // Hamamatsu
+    exts[6] = "scn";    // Leica
+    exts[7] = "mrxs";   // MIRAX
     
     ////////////////////////////////////////////////////////////////////////////
     ////                           R E A D E R                              ////
