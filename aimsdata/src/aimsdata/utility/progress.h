@@ -123,7 +123,7 @@ namespace aims {
       std::string _unit;
   };
 
-  typedef aims::ProgressInfo<double, double> Progression;
+  typedef ProgressInfo<double, double> Progression;
 
 }
 
