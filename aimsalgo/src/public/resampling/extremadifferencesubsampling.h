@@ -35,27 +35,25 @@
 #ifndef AIMS_RESAMPLING_EXTREMADIFFERENCESUBSAMPLING_H
 #define AIMS_RESAMPLING_EXTREMADIFFERENCESUBSAMPLING_H
 
-#include <cartobase/type/datatypetraits.h>
-#include <aims/signalfilter/filteringfunction_nonlinear.h>
+#include <aims/signalfilter/filteringfunction_element.h>
 #include <aims/resampling/subsamplingimagealgorithm.h>
+#include <cartobase/type/datatypetraits.h>
 
 namespace aims {
 
-  template <class VoxelType>
-  class ExtremaDifferenceSubSampling :
-    public aims::SubSamplingImageAlgorithm<VoxelType,
-             ExtremaDifferenceFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
-
+  template <typename T>
+  class ExtremaDifferenceSubSampling: public SubSamplingImageAlgorithm<T>
+  {
     public:
-      typedef aims::SubSamplingImageAlgorithm<VoxelType,
-             ExtremaDifferenceFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> >
-             SubSamplingImageAlgorithmType;
+      typedef T VoxelType;
+      typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+      typedef ExtremaDifferenceFilterFunc<ChannelType> FilterFuncType;
 
-      typedef typename SubSamplingImageAlgorithmType::FilterFuncType
-             FilterFuncType;
+      ExtremaDifferenceSubSampling( int sx = 3, int sy = 3, int sz = 1 ):
+        SubSamplingImageAlgorithm<T>(sx, sy, sz, FilterFuncType())
+      {}
 
-      ExtremaDifferenceSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
-        : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
+      ~ExtremaDifferenceSubSampling() {}
   };
 
 }

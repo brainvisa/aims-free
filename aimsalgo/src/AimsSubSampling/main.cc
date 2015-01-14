@@ -41,10 +41,10 @@ static bool doit( Process &, const string &, Finder & );
 class SubSampling : public Process {
     public:
         SubSampling( const string & fout, unsigned rx, unsigned ry, unsigned rz, unsigned type );
-        
+
         template<class T>
         friend bool doit( Process &, const string &, Finder & );
-        
+
         unsigned getRX() const { return _rx; }
         unsigned getRY() const { return _ry; }
         unsigned getRZ() const { return _rz; }
@@ -88,110 +88,110 @@ const rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > getSubsamplingImageAlg
                                                                                         const unsigned win_size_y,
                                                                                         const unsigned win_size_z ) {
   switch(type) {
-    
+
     case 0:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
-                new MedianSubSampling<VoxelType>( win_size_x, 
+                new MedianSubSampling<VoxelType>( win_size_x,
                                                   win_size_y,
                                                   win_size_z )
              );
       break;
-      
+
     //Mean computation
     case 1:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
-                new MeanSubSampling<VoxelType>( win_size_x, 
+                new MeanSubSampling<VoxelType>( win_size_x,
                                                 win_size_y,
                                                 win_size_z )
              );
     break;
-    
+
     // Min computation
     case 2:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
-                new MinSubSampling<VoxelType>( win_size_x, 
+                new MinSubSampling<VoxelType>( win_size_x,
                                                win_size_y,
                                                win_size_z )
              );
     break;
-    
+
     // Max computation
     case 3:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
-                new MaxSubSampling<VoxelType>( win_size_x, 
+                new MaxSubSampling<VoxelType>( win_size_x,
                                                win_size_y,
                                                win_size_z )
              );
     break;
-    
+
     // Majority computation
     case 4:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
-                new MajoritySubSampling<VoxelType>( win_size_x, 
+                new MajoritySubSampling<VoxelType>( win_size_x,
                                                     win_size_y,
                                                     win_size_z )
              );
     break;
-    
+
     // Difference computation
     case 5:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
-                new ExtremaDifferenceSubSampling<VoxelType>( win_size_x, 
+                new ExtremaDifferenceSubSampling<VoxelType>( win_size_x,
                                                              win_size_y,
                                                              win_size_z )
              );
     break;
-    
+
     // Sum computation
     case 6:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
-                new SumSubSampling<VoxelType>( win_size_x, 
+                new SumSubSampling<VoxelType>( win_size_x,
                                                win_size_y,
                                                win_size_z )
              );
     break;
-    
+
     // Mean computation on not null voxels
     case 7:
       return rc_ptr<aims::ImageAlgorithmInterface< VoxelType > > (
-                new NotNullMeanSubSampling<VoxelType>( win_size_x, 
+                new NotNullMeanSubSampling<VoxelType>( win_size_x,
                                                        win_size_y,
                                                        win_size_z )
              );
     break;
-    
+
     default:
       throw std::invalid_argument( "Invalid subsampling type: " + carto::toString(type) );
       break;
   }
 }
 
-template<class T> bool 
+template<class T> bool
 doit( Process & p, const string & fname, Finder & f ) {
 
     SubSampling & sp = (SubSampling &) p;
     AimsData<T> dataIn;
     string format = f.format();
     Reader<AimsData<T> > r( fname );
-    
+
     cout << "Reading volume...";
     if( !r.read( dataIn, 0, &format ) )
         return( false );
     cout << " done" << endl;
-    
+
     if (verbose) {
       cout << "Subsampling size: rx = " << sp._rx << "\t"
                                 "ry = " << sp._ry << "\t"
-                                "rz = " << sp._rz << endl 
+                                "rz = " << sp._rz << endl
            << "Subsampling type: " << sp._type << endl;
     }
-    
-    const rc_ptr<aims::ImageAlgorithmInterface< T > > & algo = getSubsamplingImageAlgorithm<T>( sp._type, 
+
+    const rc_ptr<aims::ImageAlgorithmInterface< T > > & algo = getSubsamplingImageAlgorithm<T>( sp._type,
                                                                                                 sp._rx,
                                                                                                 sp._ry,
                                                                                                 sp._rz );
     AimsData<T> dataOut = algo->execute(dataIn);
-    
+
     // File Writing
     cout << "Writing volume...";
     Writer<AimsData<T> > writer( sp._fout );
@@ -220,11 +220,11 @@ int main( int argc, const char **argv )
                                            "maj[ority], dif[ference], sum, notnullmean [default = median]. Modes may also\n"
                                            "be specified as order number: 0=median, 1=mean, etc.", true);
         application.addOption( fileout, "-o", "Output subsampled image" );
-        
+
         application.alias( "--input", "-i" );
         application.alias( "--output", "-o" );
         application.initialize();
-        
+
         //  Test parameters
         //
         if (rx < 1) rx = 1;
@@ -259,7 +259,7 @@ int main( int argc, const char **argv )
         types[ "notnullmean" ] = 7;
         types[ "7" ] = 7;
         map<string, unsigned>::iterator it = types.find( type );
-          
+
         if( it == types.end() )
           throw invalid_argument( "Invalid subsampling type: " + type );
 

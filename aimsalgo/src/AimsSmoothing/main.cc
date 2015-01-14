@@ -37,8 +37,8 @@
 #include <aims/getopt/getopt2.h>                            // AimsApplication
 #include <aims/getopt/getoptProcess.h>     // AimsApplication: possible inputs
 #include <aims/rgb/rgb.h>                                           // AimsRGB
-#include <aims/signalfilter/filter_linear.h>               // LinFilterFactory
-#include <aims/signalfilter/filter_nonlinear.h>         // NonLinFilterFactory
+#include <aims/signalfilter/linearfilterfactory.h>      // LinearFilterFactory
+#include <aims/signalfilter/elementfilterfactory.h>    // ElementFilterFactory
 #include <aims/connectivity/structuring_element.h>             // ShapeFactory
 //--- carto ------------------------------------------------------------------
 #include <cartobase/object/object.h>
@@ -123,6 +123,11 @@ doit( Process & p, const string & fname, Finder & )
     proc.amplitude[2] /= (double) in.sizeZ();
   }
 
+  // set voxel size option
+  PropertySet inh = in.volume()->header();
+  if( inh.hasProperty( "voxel_size" ) )
+    proc.options->setProperty( "voxel_size", inh.getProperty( "voxel_size" ) );
+
   // Load StructuringElement
   StructuringElementRef shape( ShapeFactory::create( proc.shape, proc.amplitude, true ) );
   if( !shape ) {
@@ -132,9 +137,9 @@ doit( Process & p, const string & fname, Finder & )
 
   // Load Filter
   rc_ptr<ImageAlgorithmInterface<T> > algo(0);
-  algo.reset( NonLinFilterFactory<T>::create( proc.type, *shape, proc.options ) );
+  algo.reset( ElementFilterFactory<T>::create( proc.type, *shape, proc.options ) );
   if( !algo )
-    algo.reset( LinFilterFactory<T>::create( proc.type, proc.options ) );
+    algo.reset( LinearFilterFactory<T>::create( proc.type, proc.options ) );
   if( !algo ) {
     cerr << "Unknown filter " << proc.type << endl;
     return false;

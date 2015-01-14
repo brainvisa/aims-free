@@ -34,169 +34,175 @@
 #ifndef AIMSALGO_RESAMPLING_SUBSAMPLINGIMAGEALGORITHM_H
 #define AIMSALGO_RESAMPLING_SUBSAMPLINGIMAGEALGORITHM_H
 
-#include <iostream>
-#include <cartobase/config/verbose.h>
+//--- aims -------------------------------------------------------------------
+#include <aims/algorithm/imagealgorithm.h>
+#include <aims/signalfilter/filteringfunction.h>
+#include <aims/data/data.h>
+#include <aims/utility/progress.h>
+#include <aims/vector/vector.h>
+//--- cartobase --------------------------------------------------------------
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/type/types.h>
 #include <cartobase/type/datatypetraits.h>
 #include <cartobase/type/datatypeinfo.h>
-#include <aims/algorithm/imagealgorithm.h>
-#include <aims/data/data.h>
-#include <aims/utility/progress.h>
-#include <aims/vector/vector.h>
+#include <cartobase/smart/rcptr.h>
+//--- std --------------------------------------------------------------------
+#include <iostream>
+//----------------------------------------------------------------------------
 
 namespace aims {
 
-  namespace singlechannel {
+  template <typename T> class SubSamplingImageAlgorithm;
+  namespace singlechannel { template <typename T> class SubSamplingImageAlgorithm; }
 
-  /// \brief aims::singlechannel::SubSamplingImageAlgorithm is the algorithm
-  ///        to apply subsampling on single channel image.
+  //==========================================================================
+  // SUBSAMPLING IMAGE ALGORITHM
+  //==========================================================================
+  /// \brief aims::SubSamplingImageAlgorithm is the algorithm to subsample
+  /// image.
   ///
   /// The \c aims::SubSamplingImageAlgorithm class is used
-  /// to subsample a single channel image.
-  ///
-  /// \tparam VoxelType type of voxel that will be subsampled.
-  /// \tparam FilteringFunctionType type of subsampling to use
-  /// (\c MeanFilterFunc, \c MedianFilterFunc, \c MinFilterFunc,
-  /// \c MaxFilterFunc, ... ).
-  ///
-  /// \sa MeanFilterFunc, MedianFilterFunc, MinFilterFunc, MaxFilterFunc,
-  /// MajorityFilterFunc
-    template <class VoxelType, class FilteringFunctionType>
-    class SubSamplingImageAlgorithm: public ImageAlgorithmInterface<VoxelType>
+  /// to subsample both single and multi channel image.
+  template <typename T>
+  class SubSamplingImageAlgorithm: public ImageAlgorithm<T>
+  {
+    public:
+      //----------------------------------------------------------------------
+      // types
+      //----------------------------------------------------------------------
+      typedef T VoxelType;
+      typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+      typedef singlechannel::SubSamplingImageAlgorithm<ChannelType> SingleChannelImageAlgorithmType;
+
+      //----------------------------------------------------------------------
+      // image algorithm interface: implementation
+      //----------------------------------------------------------------------
+      virtual SubSamplingImageAlgorithm<T> *clone() const
+      {
+        return new SubSamplingImageAlgorithm<T>(*this);
+      }
+
+      //----------------------------------------------------------------------
+      //   constructor (default+copy) & destructor
+      //----------------------------------------------------------------------
+    protected:
+      SubSamplingImageAlgorithm();
+      SubSamplingImageAlgorithm( int sx, int sy, int sz,
+                                 const FilteringFunctionInterface<ChannelType> & f ):
+        ImageAlgorithm<T>( SingleChannelImageAlgorithmType(sx, sy, sz, f) )
+      {}
+
+      SubSamplingImageAlgorithm( const SubSamplingImageAlgorithm & other ):
+        ImageAlgorithm<T>( other )
+      {}
+
+      SubSamplingImageAlgorithm & operator= ( const SubSamplingImageAlgorithm & other )
+      {
+        ASSERT( typeid(other) == typeid(*this) );
+        if( &other != this )
+          ImageAlgorithm<T>::operator=( other );
+        return *this;
+      }
+
+    public:
+      virtual ~SubSamplingImageAlgorithm() {}
+  };
+
+  namespace singlechannel {
+
+    //========================================================================
+    // SUBSAMPLING IMAGE ALGORITHM: SINGLE CHANNEL PROCESSING
+    //========================================================================
+    /// \brief aims::singlechannel::SubSamplingImageAlgorithm is the algorithm
+    ///        to apply subsampling on single channel image.
+    ///
+    /// The \c aims::SubSamplingImageAlgorithm class is used
+    /// to subsample a single channel image.
+    ///
+    /// \tparam T type of voxel that will be subsampled.
+    template <typename T>
+    class SubSamplingImageAlgorithm: public ImageAlgorithmInterface<T>
     {
       public:
-        SubSamplingImageAlgorithm( int sx = 3, int sy = 3, int sz = 1,
-                                   carto::Object options = carto::none() );
-        virtual ~SubSamplingImageAlgorithm() {}
+        //--------------------------------------------------------------------
+        // types
+        //--------------------------------------------------------------------
+        typedef T VoxelType;
 
-        /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageDimensions
-        /// method implementation.
-        /// Returns the output dimensions based on an input dimensions.
-        /// \return \c Point4d output dimensions of the subsampled image.
-        virtual const Point4dl getOutputImageDimensions( const Point4dl & dims ) const {
+        //--------------------------------------------------------------------
+        // image algorithm interface: implementation
+        //--------------------------------------------------------------------
+        virtual void execute( const carto::VolumeRef<T> & in,
+                                    carto::VolumeRef<T> & out ) const;
+
+        virtual Point4dl getOutputImageDimensions( const Point4dl & dims ) const {
           return Point4dl( dims[0] / _win_size_x,
                            dims[1] / _win_size_y,
                            dims[2] / _win_size_z,
                            dims[3] );
-
         }
 
-        /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageVoxelSize
-        /// method implementation.
-        /// Returns the output voxel size based on an input voxel size.
-        /// \param Point4d voxelsize voxel size of the input image.
-        /// \return \c Point4d voxel size of the output image.
-        virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) const {
+        virtual Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) const {
           return Point4df( voxelsize[0] * _win_size_x,
                            voxelsize[1] * _win_size_y,
                            voxelsize[2] * _win_size_z,
                            voxelsize[3] );
         }
 
-        /// \c ImageAlgorithmInterface<VoxelType>::execute method implementation.
-        /// Execute the subsampling algorithm on the input image using the \c FilteringFunctionType
-        /// \param in AimsData<VoxelType> input image to subsample
-        /// \return AimsData< VoxelType > subsampled image
-        virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in );
-
-        /// NOT IMPLEMENTED
-        /// For now, returns default constructor
-        virtual SubSamplingImageAlgorithm<VoxelType, FilteringFunctionType> * clone() const {
-          return new SubSamplingImageAlgorithm<VoxelType, FilteringFunctionType>();
+        virtual SubSamplingImageAlgorithm<T> *clone() const
+        {
+          return new SubSamplingImageAlgorithm<T>(*this);
         }
+
+        //--------------------------------------------------------------------
+        //   constructor (default+copy) & destructor
+        //--------------------------------------------------------------------
+        SubSamplingImageAlgorithm( int sx, int sy, int sz,
+                                   const FilteringFunctionInterface<T> & f ):
+          _win_size_x( sx ),
+          _win_size_y( sy ),
+          _win_size_z( sz ),
+          _func( f.clone() )
+        {}
+
+        SubSamplingImageAlgorithm( const SubSamplingImageAlgorithm & other ):
+          _win_size_x( other._win_size_x ),
+          _win_size_y( other._win_size_y ),
+          _win_size_z( other._win_size_z ),
+          _func( other._func->clone() )
+        {}
+
+        SubSamplingImageAlgorithm<T> & operator= ( const SubSamplingImageAlgorithm & other )
+        {
+          ASSERT( typeid(other) == typeid(*this) );
+          if( &other != this ) {
+            _win_size_x = other._win_size_x;
+            _win_size_y = other._win_size_y;
+            _win_size_z = other._win_size_z;
+            _func.reset( other._func->clone() );
+          }
+          return *this;
+        }
+
+        virtual ~SubSamplingImageAlgorithm() {}
+
       protected:
-        int                         _win_size_x;
-        int                         _win_size_y;
-        int                         _win_size_z;
-        FilteringFunctionType       _func;
-        carto::Object               _options;
+        int  _win_size_x;
+        int  _win_size_y;
+        int  _win_size_z;
+        carto::rc_ptr<FilteringFunctionInterface<T> >  _func;
     };
 
 
-    template <class VoxelType, class FilteringFunctionType>
-    inline
-    SubSamplingImageAlgorithm<VoxelType, FilteringFunctionType>::SubSamplingImageAlgorithm(
-      int sx, int sy, int sz, carto::Object options
-    ):
-      _win_size_x(sx),
-      _win_size_y(sy),
-      _win_size_z(sz),
-      _options(options)
+    template <typename T> inline
+    void SubSamplingImageAlgorithm<T>::execute(
+      const carto::VolumeRef<T> & in,
+            carto::VolumeRef<T> & out
+    ) const
     {
-    }
-
-
-    template <class VoxelType, class FilteringFunctionType>
-    inline
-    carto::VolumeRef<VoxelType> SubSamplingImageAlgorithm<VoxelType, FilteringFunctionType>::execute(
-      const carto::VolumeRef< VoxelType >& in
-    )
-    {
-      // std::cout << "Input dim: [" << carto::toString(in.dimX()) << ", "
-      //                             << carto::toString(in.dimY()) << ", "
-      //                             << carto::toString(in.dimZ()) << ", "
-      //                             << carto::toString(in.dimT()) << "]"
-      //                             << std::endl;
-      // std::cout << "Window dim: [" << carto::toString(_win_size_x) << ", "
-      //                              << carto::toString(_win_size_y) << ", "
-      //                              << carto::toString(_win_size_z) << "]"
-      //                              << std::endl;
-      // std::cout << "Output dim: [" << carto::toString(in.dimX() / _win_size_x) << ", "
-      //                              << carto::toString(in.dimY() / _win_size_y) << ", "
-      //                              << carto::toString(in.dimZ() / _win_size_z) << "]"
-      //                              << std::endl;
-      Point4dl dim = getOutputImageDimensions( Point4dl( in->getSizeX(),
-                                                         in->getSizeY(),
-                                                         in->getSizeZ(),
-                                                         in->getSizeT() ) );
-
-      // std::cout << "Output dim: ["
-      //           << carto::toString(dim[0]) << ", "
-      //           << carto::toString(dim[1]) << ", "
-      //           << carto::toString(dim[2]) << ", "
-      //           << carto::toString(dim[3]) << "]"
-      //           << std::endl;
-      std::vector<float> vsv( 4, 1. );
-      in->header().getProperty( "voxel_size", vsv );
-      vsv[0] *= _win_size_x;
-      vsv[1] *= _win_size_y;
-      vsv[2] *= _win_size_z;
-
-      // Data OUT
-      carto::VolumeRef<VoxelType> out( dim[0], dim[1], dim[2], dim[3] );
-      out->copyHeaderFrom( in->header() );
-      out->header().setProperty( "voxel_size", vsv );
-
-      // if (carto::verbose) {
-      //   std::cout << "Input volume dimensions: ["
-      //             << in.dimX() << ", "
-      //             << in.dimY() << ", "
-      //             << in.dimZ() << "]"
-      //             << std::endl
-      //             << "Subsampled volume dimensions: ["
-      //             << out.dimX() << ", "
-      //             << out.dimY() << ", "
-      //             << out.dimZ() << "]"
-      //             << std::endl
-      //             << "Input voxel size: ["
-      //             << in.sizeX() << ", "
-      //             << in.sizeY() << ", "
-      //             << in.sizeZ() << "]"
-      //             << std::endl
-      //             << "Subsampled voxel size: ["
-      //             << out.sizeX() << ", "
-      //             << out.sizeY() << ", "
-      //             << out.sizeZ() << "]"
-      //             << std::endl;
-      // }
-
-      if( out->getSizeT() * out->getSizeZ() * out->getSizeY() > 0 ) {
-        // Window used to process
-        // AimsData< VoxelType > win( _win_size_x * _win_size_y * _win_size_z );
-
-        // Creates a view in the AimsData that has windows dimensions
-        // and that
+      if( out->getSizeT() * out->getSizeZ() * out->getSizeY() > 0 )
+      {
+        // Creates a view in the input volume that has windows dimensions
         carto::VolumeRef<VoxelType> win(
           new carto::Volume<VoxelType>(
             in,
@@ -210,9 +216,11 @@ namespace aims {
 
         int32_t i, j, k, t;
         unsigned m, n, l;
-        aims::Progression progress(out->getSizeT() * out->getSizeZ() * out->getSizeY() - 1);
+        aims::Progression progress( out->getSizeT() *
+                                    out->getSizeZ() *
+                                    out->getSizeY() - 1 );
 
-        if (carto::verbose)
+        if( this->_verbose > 0 )
           std::cout << "Subsampling progress: ";
 
         for( t = 0; t < (int32_t)out->getSizeT(); ++t )
@@ -224,67 +232,24 @@ namespace aims {
               // std::cout << progress << std::flush;
               // but it doesn't work in gcc 4.0, there is a namespace
               // confusion, so we have to specify ::operator <<
-              if (carto::verbose)
+              if( ImageAlgorithmInterface<T>::_verbose > 0 )
                 ::operator << ( std::cout, progress ) << std::flush;
 
               for( i = 0; i < (int32_t)out->getSizeX(); ++i ) {
                 // Set view position in the volume
                 win->setPosInRefVolume( typename carto::Volume<VoxelType>::Position4Di(
                   i * _win_size_x, j * _win_size_y, k * _win_size_z, t) );
-                (*out)( i, j, k, t ) = _func.execute(win);
+                (*out)( i, j, k, t ) = _func->execute(win);
               }
             }
 
-        if (carto::verbose)
+        if( this->_verbose > 0 )
           std::cout << std::endl;
       }
 
-      return out;
-    }
+    } // internal::SubSamplingImageAlgorithm::execute()
 
-  }
-
-  /// \brief aims::SubSamplingImageAlgorithm is the algorithm to subsample
-  ///        image.
-  ///
-  /// The \c aims::SubSamplingImageAlgorithm class is used
-  /// to subsample both single and multi channel image.
-  template <class VoxelType, class FilterType>
-  class SubSamplingImageAlgorithm :
-    public ImageAlgorithm<VoxelType,
-              aims::singlechannel::SubSamplingImageAlgorithm<
-                typename carto::DataTypeTraits<VoxelType>::ChannelType,
-                FilterType >
-              >
-  {
-    public:
-      typedef ImageAlgorithm<VoxelType,
-              aims::singlechannel::SubSamplingImageAlgorithm<
-                typename carto::DataTypeTraits<VoxelType>::ChannelType,
-                FilterType >
-              >
-              ImageAlgorithmType;
-
-      typedef typename ImageAlgorithmType::SingleChannelImageAlgorithmType
-              SingleChannelImageAlgorithmType;
-
-      typedef FilterType FilterFuncType;
-
-      SubSamplingImageAlgorithm( int sx = 3, int sy = 3, int sz = 1,
-                                 carto::Object options = carto::none() )
-        : ImageAlgorithmType(
-            SingleChannelImageAlgorithmType(sx, sy, sz, options)
-          )
-      {
-      }
-      virtual ~SubSamplingImageAlgorithm() { }
-
-      /// NOT IMPLEMENTED
-      /// For now, returns default constructor
-      virtual SubSamplingImageAlgorithm<VoxelType, FilterType> * clone() const {
-        return new SubSamplingImageAlgorithm<VoxelType, FilterType>();
-      }
-  };
+  } // namespace internal
 
 }
 

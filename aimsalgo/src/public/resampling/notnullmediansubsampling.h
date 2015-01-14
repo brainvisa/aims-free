@@ -35,27 +35,25 @@
 #ifndef AIMS_RESAMPLING_NOTNULLMEDIANSUBSAMPLING_H
 #define AIMS_RESAMPLING_NOTNULLMEDIANSUBSAMPLING_H
 
-#include <cartobase/type/datatypetraits.h>
-#include <aims/signalfilter/filteringfunction_nonlinear.h>
 #include <aims/resampling/subsamplingimagealgorithm.h>
+#include <aims/signalfilter/filteringfunction_element.h>
+#include <cartobase/type/datatypetraits.h>
 
 namespace aims {
 
-  template <class VoxelType>
-  class NotNullMedianSubSampling :
-    public aims::SubSamplingImageAlgorithm<VoxelType,
-             NotNullMedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
-
+  template <typename T>
+  class NotNullMedianSubSampling: public SubSamplingImageAlgorithm<T>
+  {
     public:
-      typedef aims::SubSamplingImageAlgorithm<VoxelType,
-             NotNullMedianFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> >
-             SubSamplingImageAlgorithmType;
+      typedef T VoxelType;
+      typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+      typedef NotNullMedianFilterFunc<ChannelType> FilterFuncType;
 
-      typedef typename SubSamplingImageAlgorithmType::FilterFuncType
-             FilterFuncType;
+      NotNullMedianSubSampling( int sx = 3, int sy = 3, int sz = 1 ):
+        SubSamplingImageAlgorithm<T>(sx, sy, sz, FilterFuncType())
+      {}
 
-      NotNullMedianSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
-        : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
+      ~NotNullMedianSubSampling() {}
   };
 
 }

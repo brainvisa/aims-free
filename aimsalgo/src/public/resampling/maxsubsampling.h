@@ -35,27 +35,25 @@
 #ifndef AIMS_RESAMPLING_MAXSUBSAMPLING_H
 #define AIMS_RESAMPLING_MAXSUBSAMPLING_H
 
-#include <cartobase/type/datatypetraits.h>
-#include <aims/signalfilter/filteringfunction_nonlinear.h>
 #include <aims/resampling/subsamplingimagealgorithm.h>
+#include <aims/signalfilter/filteringfunction_element.h>
+#include <cartobase/type/datatypetraits.h>
 
 namespace aims {
 
-  template <class VoxelType>
-  class MaxSubSampling :
-    public aims::SubSamplingImageAlgorithm<VoxelType,
-             MaxFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> > {
-
+  template <typename T>
+  class MaxSubSampling: public SubSamplingImageAlgorithm<T>
+  {
     public:
-      typedef aims::SubSamplingImageAlgorithm<VoxelType,
-             MaxFilterFunc<typename carto::DataTypeTraits<VoxelType>::ChannelType> >
-             SubSamplingImageAlgorithmType;
+      typedef T VoxelType;
+      typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+      typedef MaxFilterFunc<ChannelType> FilterFuncType;
 
-      typedef typename SubSamplingImageAlgorithmType::FilterFuncType
-             FilterFuncType;
+      MaxSubSampling( int sx = 3, int sy = 3, int sz = 1 ):
+        SubSamplingImageAlgorithm<T>(sx, sy, sz, FilterFuncType())
+      {}
 
-      MaxSubSampling( int sx = 3, int sy = 3, int sz = 1, carto::Object options = carto::none() )
-        : SubSamplingImageAlgorithmType(sx, sy, sz, options) {}
+      ~MaxSubSampling() {}
   };
 
 }
