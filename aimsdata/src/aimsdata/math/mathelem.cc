@@ -55,5 +55,5 @@ AIMSDATA_API double AimsSigmoid(double x)
   if (x<-80.0)
     return 0.0;
   else
-    return 1.0 / (1.0 + exp(-x));
+    return 1.0 / (1.0 + std::exp(-x));
 }
