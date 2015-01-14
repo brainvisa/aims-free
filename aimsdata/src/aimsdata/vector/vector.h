@@ -52,7 +52,7 @@ template <class T,int D>
 bool operator == (const AimsVector<T,D>& v1,
 		  const AimsVector<T,D>& v2);
 
-template <class T,int D> 
+template <class T,int D>
 bool operator == (const AimsVector<T,D>& v1,
 		  const T& val);
 
@@ -65,60 +65,60 @@ bool operator != (const AimsVector<T,D>& v1,
 }
 
 /// should be defined implicitely, but fails with some compilers (Intel)
-template <class T,int D> 
+template <class T,int D>
 bool operator != (const AimsVector<T,D>& v1,
 		  const T& val)
 {
   return !( v1 == val );
 }
 
-template <class T,int D> 
+template <class T,int D>
 AimsVector<T,D> operator + (const AimsVector<T,D>& v1,
                             const AimsVector<T,D>& v2);
 
-template <class T,int D> 
+template <class T,int D>
 AimsVector<T,D> operator - (const AimsVector<T,D>& v1,
                             const AimsVector<T,D>& v2);
 
-template <class T,int D> 
+template <class T,int D>
 AimsVector<T,D> operator * (const AimsVector<T,D>& v1,
                             double value );
 
-template <class T,int D> 
+template <class T,int D>
 AimsVector<T,D> operator * (double value,
                             const AimsVector<T,D>& v1);
 
-template <class T,int D> 
+template <class T,int D>
 AimsVector<T,D> operator / (const AimsVector<T,D>& v1,
                             double value);
 
-template <class T,int D> 
+template <class T,int D>
 AimsVector<T,D> operator + (const AimsVector<T,D>& v1);
 
-template <class T,int D> 
+template <class T,int D>
 AimsVector<T,D> operator - (const AimsVector<T,D>& v1);
 
-template <class T,int D> 
+template <class T,int D>
 AimsVector<T,3> crossed(const AimsVector<T,D>& v1,
                         const AimsVector<T,D>& v2);
 
-template <class T,int D> 
+template <class T,int D>
 float norm(const AimsVector<T,D>& v1);
 
-template <class T,int D> 
+template <class T,int D>
 float norm2(const AimsVector<T,D>& v1);
 
-template <class T,int D> 
+template <class T,int D>
 double dnorm(const AimsVector<T,D>& v1);
 
-template <class T,int D> 
+template <class T,int D>
 double dnorm2(const AimsVector<T,D>& v1);
 
 template <class T,int D>
 std::ostream& operator << (std::ostream& out,
 			   const AimsVector<T,D>& thing);
 
-template <class T,int D> 
+template <class T,int D>
 std::istream& operator >> (std::istream& in,
 			   AimsVector<T,D>& thing);
 
@@ -170,6 +170,7 @@ class AimsVector
     /// Get a const reference to the dth item
     T& operator[](int d);
 
+    int size() const;
     /// Test if the vector is the null vector
     bool isNull() const;
     /// Return the magnitude of the vector
@@ -274,11 +275,11 @@ DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4dd> )
     {
       char	num[10];
       sprintf( num, "%d", (int) D );
-      return( std::string( "VECTOR_OF_" ) + num + "_" + 
+      return( std::string( "VECTOR_OF_" ) + num + "_" +
               DataTypeCode<T>::dataType() );
     }
-    static std::string name() 
-    { 
+    static std::string name()
+    {
       return DataTypeCode<AimsVector<T,D> >::dataType();
     }
   };
@@ -302,7 +303,7 @@ DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4dd> )
 // Members of class AimsVector<T,D>
 //
 template <class T,int D>
-inline 
+inline
 AimsVector<T,D>::AimsVector()
 {
 }
@@ -570,6 +571,12 @@ T& AimsVector<T,D>::operator[](int d)
   return _value[d];
 }
 
+template <class T,int D>
+inline
+int AimsVector<T,D>::size() const
+{
+  return D;
+}
 
 template <class T,int D>
 inline
@@ -949,7 +956,7 @@ AimsVector<T,3> vectProduct( const AimsVector<T,3> & v1,
                              const AimsVector<T,3> & v2 )
 {
   return AimsVector<T,3>( v1[1] * v2[2] - v1[2] * v2[1],
-        	   v1[2] * v2[0] - v1[0] * v2[2], 
+        	   v1[2] * v2[0] - v1[0] * v2[2],
         	   v1[0] * v2[1] - v1[1] * v2[0] );
 }
 
