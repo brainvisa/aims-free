@@ -31,22 +31,45 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <aims/signalfilter/filteringfunction_linear_d.h>
+#ifndef AIMS_SIGNALFILTER_LINEARFILTERFACTORY_H
+#define AIMS_SIGNALFILTER_LINEARFILTERFACTORY_H
 
-#define AIMS_TEMPLATE_LIN_FILTERFUNC( NAME )                                 \
-  template class NAME<int8_t>;                                               \
-  template class NAME<uint8_t>;                                              \
-  template class NAME<int16_t>;                                              \
-  template class NAME<uint16_t>;                                             \
-  template class NAME<int32_t>;                                              \
-  template class NAME<uint32_t>;                                             \
-  template class NAME<int64_t>;                                              \
-  template class NAME<uint64_t>;                                             \
-  template class NAME<float>;                                                \
-  template class NAME<double>
+//--- aims -------------------------------------------------------------------
+#include <aims/signalfilter/filteringimagealgorithm.h>
+//--- cartobase --------------------------------------------------------------
+#include <cartobase/object/object.h>
+#include <cartobase/smart/rcptr.h>
+//--- aims -------------------------------------------------------------------
+#include <map>
+#include <set>
+#include <string>
+//----------------------------------------------------------------------------
 
 namespace aims {
-  AIMS_TEMPLATE_LIN_FILTERFUNC(LinearFilteringFunction);
-  AIMS_TEMPLATE_LIN_FILTERFUNC(LinearFilteringFunctionFactory);
-  AIMS_TEMPLATE_LIN_FILTERFUNC(GaborFilterFunc);
+
+  //==========================================================================
+  // LINEAR FILTERING ALGORITHM: FACTORY
+  //==========================================================================
+  /// Factory class for linear filtering image algorithms
+  /// Here are the registered algorithms:
+  /// \code
+  /// registerFilter( "gab", GaborFilter<T>() );
+  /// registerFilter( "gabor", GaborFilter<T>() );
+  /// \code
+  template <typename T>
+  class LinearFilterFactory
+  {
+    public:
+      static LinearFilteringImageAlgorithm<T> * create( const std::string & name,
+                                                        carto::Object options = carto::none() );
+      static void registerFilter( const std::string & name,
+                                  const LinearFilteringImageAlgorithm<T> & func );
+      static std::set<std::string> names();
+    protected:
+      static void init();
+      static std::map<std::string,carto::rc_ptr<LinearFilteringImageAlgorithm<T> > > & _map();
+  };
+
 }
+
+#endif

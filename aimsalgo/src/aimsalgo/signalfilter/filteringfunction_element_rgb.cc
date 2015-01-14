@@ -31,12 +31,12 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <aims/signalfilter/filteringfunction_linear_rgb_d.h>
-#include <aims/signalfilter/filteringfunction_linear_d.h>
+#include <aims/signalfilter/filteringfunction_element_rgb_d.h>
+#include <aims/signalfilter/filteringfunction_element_d.h>
 
 
-#define AIMS_LIN_FILTERFUNC_MULTICHANNEL_SPECIALIZE( NAME, VOXELTYPE )       \
-  NAME< VOXELTYPE >::NAME( carto::Object options ): _m(options) {}          \
+#define AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE( NAME, VOXELTYPE )   \
+  NAME< VOXELTYPE >::NAME( carto::Object options ): _m(options) {}           \
   NAME< VOXELTYPE >::NAME( const NAME< VOXELTYPE > & other ):                \
     _m(other._m) {}                                                          \
   NAME< VOXELTYPE >::~NAME() {}                                              \
@@ -52,29 +52,52 @@
   {                                                                          \
     _m.updateOptions( options );                                             \
   }                                                                          \
-  const std::vector<int> & NAME< VOXELTYPE >::getAmplitude() const           \
-  {                                                                          \
-    return _m.getAmplitude();                                                \
-  }                                                                          \
   VOXELTYPE NAME< VOXELTYPE >::execute(                                      \
     const carto::VolumeRef< VOXELTYPE > & volume                             \
   ) const                                                                    \
   {                                                                          \
-    return multichannelfiltervalues_lin< VOXELTYPE >( _m, volume );          \
+    return multichannelfiltervalues_nonlin< VOXELTYPE >( _m, volume );       \
+  }                                                                          \
+  VOXELTYPE NAME< VOXELTYPE >::execute(                                      \
+    const carto::VolumeRef< VOXELTYPE > & volume,                            \
+    const carto::rc_ptr<StructuringElement> & se                             \
+  ) const                                                                    \
+  {                                                                          \
+    return multichannelfiltervalues_nonlin< VOXELTYPE >( _m, volume, se );   \
   }                                                                          \
   NAME< VOXELTYPE > * NAME< VOXELTYPE >::clone() const                       \
   {                                                                          \
-    return new NAME< VOXELTYPE > (*this);                                    \
+    return new NAME< VOXELTYPE >(*this);                                     \
   }
 
 namespace aims {
 
-  template class LinearFilteringFunction<AimsRGB>;
-  template class LinearFilteringFunction<AimsRGBA>;
-  template class LinearFilteringFunctionFactory<AimsRGB>;
-  template class LinearFilteringFunctionFactory<AimsRGBA>;
+  template class ElementFilteringFunction<AimsRGB>;
+  template class ElementFilteringFunction<AimsRGBA>;
+  template class ElementFilteringFunctionFactory<AimsRGB>;
+  template class ElementFilteringFunctionFactory<AimsRGBA>;
 
-  AIMS_LIN_FILTERFUNC_MULTICHANNEL_SPECIALIZE(GaborFilterFunc, AimsRGB)
-  AIMS_LIN_FILTERFUNC_MULTICHANNEL_SPECIALIZE(GaborFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MedianFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MedianFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(NotNullMedianFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(NotNullMedianFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MeanFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MeanFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(NotNullMeanFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(NotNullMeanFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MinFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MinFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MaxFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MaxFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MajorityFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(MajorityFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(ExtremaDifferenceFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(ExtremaDifferenceFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(SumFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(SumFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(VarFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(VarFilterFunc, AimsRGBA)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(StDevFilterFunc, AimsRGB)
+  AIMS_ELEMENT_FILTERFUNC_MULTICHANNEL_SPECIALIZE(StDevFilterFunc, AimsRGBA)
 
 } // namespace aims

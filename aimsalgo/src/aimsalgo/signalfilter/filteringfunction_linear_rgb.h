@@ -28,22 +28,18 @@ namespace aims {
 
 #define AIMS_LIN_FILTERFUNC_MULTICHANNEL_DECLARE( NAME, T )                  \
   template <>                                                                \
-  class NAME< T >: public LinFilterFunc< T >                                 \
+  class NAME< T >: public LinearFilteringFunction< T >                       \
   {                                                                          \
     public:                                                                  \
       NAME( carto::Object options = carto::none() );                         \
+      NAME( const NAME< T > & other );                                       \
       virtual ~NAME();                                                       \
-      virtual void setOptions( carto::Object );                              \
-      virtual T execute( const carto::VolumeRef< T > & volume ) ;            \
-      virtual T execute( const carto::VolumeRef< T > & volume,               \
-                         const StructuringElementRef & se );                 \
-      virtual StructuringElementRef getStructuringElement(                   \
-        const std::vector<float> & voxel_size = std::vector<float>(4,1.)     \
-      );                                                                     \
-      virtual void setKernel(                                                \
-        const std::vector<float> & voxel_size = std::vector<float>(4,1.)     \
-      );                                                                     \
+      NAME<T> & operator=( const NAME< T > & other );                        \
       virtual NAME * clone() const;                                          \
+      virtual void setOptions( const carto::Object & options );              \
+      virtual void updateOptions( const carto::Object & options );           \
+      const std::vector<int> & getAmplitude() const;                         \
+      virtual T execute( const carto::VolumeRef<T> & in ) const;             \
     protected:                                                               \
       NAME< T::ChannelType > _m;                                             \
   }
@@ -51,6 +47,6 @@ namespace aims {
 namespace aims {
   AIMS_LIN_FILTERFUNC_MULTICHANNEL_DECLARE(GaborFilterFunc, AimsRGB);
   AIMS_LIN_FILTERFUNC_MULTICHANNEL_DECLARE(GaborFilterFunc, AimsRGBA);
-} // namepsace aims
+} // namespace aims
 
 #endif

@@ -29,12 +29,12 @@ namespace aims {
   ///
   /// This function does not filter image but only apply filter on set of
   /// multichannel data, commonly the neighborhood of a voxel.
-  /// \param f       function to use (must derive from \c NonLinFilterFunc)
+  /// \param f       function to use (must derive from \c LinearFilteringFunction)
   /// \param volume  data to evaluate filter on
   /// \return        result of the filter on data
   template <typename VoxelType>
   inline VoxelType multichannelfiltervalues_lin(
-    LinFilterFunc<typename VoxelType::ChannelType> & f,
+    const LinearFilteringFunction<typename VoxelType::ChannelType> & f,
     const carto::VolumeRef<VoxelType> &volume
   )
   {
@@ -49,38 +49,6 @@ namespace aims {
     {
       carto::VolumeRef<typename VoxelType::ChannelType> c = selector.select( volume, s );
       r[s] = f.execute( c );
-    }
-
-    return r;
-  }
-
-  /// Templated function to process filter on multichannel data
-  /// (AimsRGB, AimsRGBA, ...)
-  ///
-  /// This function does not filter image but only apply filter on set of
-  /// multichannel data, commonly the neighborhood of a voxel.
-  /// \param f      function to use (must derive from \c NonLinFilterFunc)
-  /// \param volume data to evaluate filter on
-  /// \param se     structuring element to evaluate filter on
-  /// \return result of the filter on data
-  template <typename VoxelType>
-  inline VoxelType multichannelfiltervalues_lin(
-    LinFilterFunc<typename VoxelType::ChannelType> & f,
-    const carto::VolumeRef<VoxelType> &volume,
-    const StructuringElementRef & se
-  )
-  {
-    ChannelSelector< carto::VolumeRef<VoxelType>,
-                     carto::VolumeRef<typename VoxelType::ChannelType>
-                   > selector;
-    VoxelType r;
-    int32_t samples = DataTypeInfo<VoxelType>::samples();
-
-    // Split data and process filter on each channel
-    for( int32_t s = 0; s < samples; s++ )
-    {
-      carto::VolumeRef<typename VoxelType::ChannelType> c = selector.select( volume, s );
-      r[s] = f.execute( c, se );
     }
 
     return r;

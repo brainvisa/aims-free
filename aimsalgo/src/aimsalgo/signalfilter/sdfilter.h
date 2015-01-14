@@ -32,8 +32,8 @@
  */
 
 
-#ifndef AIMS_SIGNALFILTER_MAXFILTER_H
-#define AIMS_SIGNALFILTER_MAXFILTER_H
+#ifndef AIMS_SIGNALFILTER_SDFILTER_H
+#define AIMS_SIGNALFILTER_SDFILTER_H
 
 #include <aims/signalfilter/filteringimagealgorithm.h>
 #include <aims/signalfilter/filteringfunction_element.h>
@@ -42,89 +42,31 @@
 namespace aims {
 
   template <typename T>
-  class MaxFilter: public ElementFilteringImageAlgorithm<T>
+  class StDevFilter: public ElementFilteringImageAlgorithm<T>
   {
   public:
     typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
-    MaxFilter( const StructuringElement & se = strel::Cube(1.0),
+    StDevFilter( const StructuringElement & se = strel::Cube(1.0),
                     const carto::Object & options = carto::none() ):
-      ElementFilteringImageAlgorithm<T>( MaxFilterFunc<ChannelType>( options ),
-                                         se )
+      ElementFilteringImageAlgorithm<T>( StDevFilterFunc<ChannelType>( options ),
+                                      se )
     {}
-    MaxFilter( const carto::Object & options ):
-      ElementFilteringImageAlgorithm<T>( MaxFilterFunc<ChannelType>( options ),
-                                         strel::Cube(1.0) )
+    StDevFilter( const carto::Object & options ):
+      ElementFilteringImageAlgorithm<T>( StDevFilterFunc<ChannelType>( options ),
+                                      strel::Cube(1.0) )
     {}
-    MaxFilter( const MaxFilter<T> & other ):
+    StDevFilter( const StDevFilter<T> & other ):
       ElementFilteringImageAlgorithm<T>( other )
     {}
-    ~MaxFilter() {}
-    MaxFilter<T> & operator=( const MaxFilter<T> & other )
+    ~StDevFilter() {}
+    StDevFilter<T> & operator=( const StDevFilter<T> & other )
     {
       ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
       return *this;
     }
-    MaxFilter<T> *clone() { return new MaxFilter<T>(*this); }
+    StDevFilter<T> *clone() { return new StDevFilter<T>(*this); }
   };
 
 } // namespace aims
-
-//============================================================================
-//   Backward compatibility bindings
-//============================================================================
-
-#include <aims/data/data_g.h>
-#include <vector>
-
-template <typename T>
-class MaxSmoothing
-{
-  public:
-    MaxSmoothing( int sx = 3, int sy = 3, int sz = 3 );
-    virtual ~MaxSmoothing();
-    virtual AimsData<T> doit( const AimsData<T>& in );
-  private:
-    MaxSmoothing<T> & operator = ( const MaxSmoothing<T> & );
-    int _sx;
-    int _sy;
-    int _sz;
-};
-
-//----------------------------------------------------------------------------
-//   DEFINITIONS
-//----------------------------------------------------------------------------
-
-template <typename T>
-MaxSmoothing<T>::MaxSmoothing( int sx, int sy, int sz ):
-  _sx(sx), _sy(sy), _sz(sz)
-{}
-
-template <typename T>
-MaxSmoothing<T>::~MaxSmoothing()
-{}
-
-template <typename T>
-MaxSmoothing<T> & MaxSmoothing<T>::operator= (
-  const MaxSmoothing<T> & other
-)
-{
-  _sx = other._sx;
-  _sy = other._sy;
-  _sz = other._sz;
-  return (*this);
-}
-
-template <typename T>
-AimsData<T> MaxSmoothing<T>::doit( const AimsData<T>& in )
-{
-  std::vector<double> amplitude(3,0.);
-  amplitude[0] = .5 * (double)_sx;
-  amplitude[1] = .5 * (double)_sy;
-  amplitude[2] = .5 * (double)_sz;
-  aims::strel::Cube se( amplitude, true );
-  aims::MaxFilter<T> f( se );
-  return f.execute( in );
-}
-
 
 #endif

@@ -55,16 +55,16 @@ namespace aims {
   //==========================================================================
   // STRUCTURING ELEMENT: BASE CLASS
   //==========================================================================
-  /// \brief aims::StructuringElement class representing a 3D structuring 
+  /// \brief aims::StructuringElement class representing a 3D structuring
   /// element.
   ///
-  /// The aims::StructuringElement class is used  to get neighbors of a 
+  /// The aims::StructuringElement class is used  to get neighbors of a
   /// coordinate in a 3D grid.
   ///
-  /// Each type of structuring element is a class deriving from 
-  /// aims::StructuringElement. There are currently two intermediate 
-  /// interface classes which are aims::strel::Shape and 
-  /// aims::strel::Connectivity. Two factory classes are also there 
+  /// Each type of structuring element is a class deriving from
+  /// aims::StructuringElement. There are currently two intermediate
+  /// interface classes which are aims::strel::Shape and
+  /// aims::strel::Connectivity. Two factory classes are also there
   /// to get specific structuring elements from string identifiers.
   ///
   /// \code
@@ -84,7 +84,7 @@ namespace aims {
   ///     cout << "Structuring element point: " << *ic << endl;
   /// \endcode
   ///
-  /// \sa aims::strel::Shape aims::strel::ShapeFactory, 
+  /// \sa aims::strel::Shape aims::strel::ShapeFactory,
   ///     aims::strel::Connectivity aims::strel::ConnectivityFactory
   class StructuringElement {
     public:
@@ -93,7 +93,7 @@ namespace aims {
       //----------------------------------------------------------------------
       /// \typedef iterator over Point3d of the aims::StructuringElement.
       typedef std::vector<Point3d>::iterator iterator;
-      /// \typedef const_iterator over Point3d of the 
+      /// \typedef const_iterator over Point3d of the
       ///          const aims::StructuringElement.
       typedef std::vector<Point3d>::const_iterator const_iterator;
 
@@ -119,11 +119,11 @@ namespace aims {
       /// \brief Return iterator to end
       StructuringElement::iterator end() { return _vector.end(); }
       /// \brief Return const_iterator to beginning
-      /// \return aims::StructuringElement::const_iterator that points to 
+      /// \return aims::StructuringElement::const_iterator that points to
       ///         the beginning Point3d
       StructuringElement::const_iterator begin() const { return _vector.begin(); }
       /// \brief Return const_iterator to end
-      /// \return aims::StructuringElement::const_iterator that points to 
+      /// \return aims::StructuringElement::const_iterator that points to
       ///         the element past the end
       StructuringElement::const_iterator end() const { return _vector.end(); }
 
@@ -131,12 +131,12 @@ namespace aims {
       // ACCESSOR
       //----------------------------------------------------------------------
       /// \brief Return std::vector<Point3d>
-      /// \return std::vector<Point3d> that contains 3d positions of the 
+      /// \return std::vector<Point3d> that contains 3d positions of the
       ///         structuring element
       const std::vector<Point3d> & getVector() const { return _vector; }
       /// \brief Maximum distance to \c origin in each direction.
       /// Warning: it is computed at each call.
-      /// \return std::vector<uint16_t> that contains the borders availables 
+      /// \return std::vector<uint16_t> that contains the borders availables
       ///         for the volume.
       ///         vector[0]: amplitude in low x direction
       ///         vector[1]: amplitude in high x direction
@@ -155,7 +155,7 @@ namespace aims {
   //==========================================================================
   // STRUCTURED VOLUME
   //==========================================================================
-  /// Class giving access to an iterator over the voxels of a volume inside 
+  /// Class giving access to an iterator over the voxels of a volume inside
   /// of a structuring element.
   template <typename T>
   class StructuredVolume
@@ -225,21 +225,22 @@ namespace aims {
     //========================================================================
     // STRUCTURING ELEMENT: SHAPE INTERFACE
     //========================================================================
-    /// \brief aims::strel::Shape pure abstract class representing a "shape" 
+    /// \brief aims::strel::Shape pure abstract class representing a "shape"
     /// 3D structuring element.
     ///
     /// Shapes are defined by an origin and an amplitude.
     /// They can be generated from a keyword using aims::strel::ShapeFactory
-    /// 
+    ///
     /// \sa aims::strel::Cube aims::strel::SquareXY
     ///     aims::strel::SquareXZ aims::strel::SquareYZ
-    ///     aims::strel::Sphere aims::strel::DiskXY 
+    ///     aims::strel::Sphere aims::strel::DiskXY
     ///     aims::strel::DiskXZ aims::strel::DiskYZ
     class Shape: public StructuringElement
     {
       friend class ShapeFactory;
       public:
         virtual ~Shape() {};
+        virtual Shape* clone() const = 0;
       protected:
         // Defined methods
         void setParameters( const double amplitude = 1.,
@@ -253,7 +254,6 @@ namespace aims {
         virtual void setParameters( const Point3d & origin,
                                     const std::vector<double> & amplitude,
                                     const bool usecenter = false ) = 0;
-        virtual Shape* clone() const = 0;
     };
 
     //========================================================================
@@ -308,37 +308,37 @@ namespace aims {
     //========================================================================
     // STRUCTURING ELEMENT: CONNECTIVITY INTERFACE
     //========================================================================
-    /// \brief aims::strel::Connectivity pure abstract class representing 
+    /// \brief aims::strel::Connectivity pure abstract class representing
     /// a "connectivity" 3D structuring element.
     ///
     /// Connectivities are defined by a 3x3x3 boolean matrix.
-    /// They can be generated from a keyword using 
+    /// They can be generated from a keyword using
     /// aims::strel::ConnectivityFactory
     ///
-    /// \sa aims::strel::Connectivity4XY 
+    /// \sa aims::strel::Connectivity4XY
     class Connectivity: public StructuringElement
     {
       friend class ConnectivityFactory;
       public:
         virtual ~Connectivity() {};
+        virtual Connectivity* clone() const = 0;
         //--------------------------------------------------------------------
         // TYPEDEF
         //--------------------------------------------------------------------
-        /// \typedef bool matrix 3x3x3 elements that describe a 3D 
+        /// \typedef bool matrix 3x3x3 elements that describe a 3D
         ///          structuring element.
         typedef const bool (&Matrix3x3x3Const)[3][3][3];
         //--------------------------------------------------------------------
         // METHODS
         //--------------------------------------------------------------------
-         /// \brief return the Matrix3x3x3Const representing a structuring 
+         /// \brief return the Matrix3x3x3Const representing a structuring
          ///        element.
-         /// \tparam ConnectivityType Connectivity::Type used to get the 
+         /// \tparam ConnectivityType Connectivity::Type used to get the
          ///         Matrix3x3x3Const.
-         /// \return Matrix3x3x3Const that contains \c bool set to \c true 
+         /// \return Matrix3x3x3Const that contains \c bool set to \c true
          ///         for the structuring element.
         virtual Matrix3x3x3Const getMatrix() const = 0;
       protected:
-        virtual Connectivity* clone() const = 0;
         void setVectorFromMatrix( const Point3d & origin = Point3d(0,0,0),
                                   const bool usecenter = false );
     };

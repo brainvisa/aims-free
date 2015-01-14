@@ -31,7 +31,6 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-
 #ifndef AIMS_SIGNALFILTER_FILTERINGFUNCTION_LINEAR_D_H
 #define AIMS_SIGNALFILTER_FILTERINGFUNCTION_LINEAR_D_H
 
@@ -59,7 +58,7 @@ namespace aims {
 //============================================================================
 
   template <typename T>
-  void LinFilterFuncFactory<T>::init()
+  void LinearFilteringFunctionFactory<T>::init()
   {
     static bool initialized = false;
     if( !initialized )
@@ -71,45 +70,46 @@ namespace aims {
   }
 
   template <typename T>
-  std::map<std::string,carto::rc_ptr<LinFilterFunc<T> > > & LinFilterFuncFactory<T>::_map()
+  std::map<std::string,carto::rc_ptr<LinearFilteringFunction<T> > > &
+  LinearFilteringFunctionFactory<T>::_map()
   {
-    static std::map<std::string,carto::rc_ptr<LinFilterFunc<T> > > m;
+    static std::map<std::string,carto::rc_ptr<LinearFilteringFunction<T> > > m;
     return m;
   }
 
   template <typename T>
-  void LinFilterFuncFactory<T>::registerFunction(
+  void LinearFilteringFunctionFactory<T>::registerFunction(
     const std::string & name,
-    const LinFilterFunc<T> & func
+    const LinearFilteringFunction<T> & func
   )
   {
     init();
-    _map()[ name ] = carto::rc_ptr<LinFilterFunc<T> >( func.clone() );
+    _map()[ name ] = carto::rc_ptr<LinearFilteringFunction<T> >( func.clone() );
   }
 
   template <typename T>
-  std::set<std::string> LinFilterFuncFactory<T>::names()
+  std::set<std::string> LinearFilteringFunctionFactory<T>::names()
   {
     init();
     std::set<std::string> s;
-    typename std::map<std::string,carto::rc_ptr<LinFilterFunc<T> > >::const_iterator i, e = _map().end();
+    typename std::map<std::string,carto::rc_ptr<LinearFilteringFunction<T> > >::const_iterator i, e = _map().end();
     for( i=_map().begin(); i!=e; ++i )
       s.insert( i->first );
     return( s );
   }
 
   template <typename T>
-  LinFilterFunc<T>* LinFilterFuncFactory<T>::create(
+  LinearFilteringFunction<T>* LinearFilteringFunctionFactory<T>::create(
     const std::string & name,
     carto::Object options
   )
   {
     init();
-    typename std::map<std::string,carto::rc_ptr<LinFilterFunc<T> > >::const_iterator i;
+    typename std::map<std::string,carto::rc_ptr<LinearFilteringFunction<T> > >::const_iterator i;
     i = _map().find( name );
     if( i == _map().end() )
       return( 0 );
-    LinFilterFunc<T> * new_func = i->second->clone();
+    LinearFilteringFunction<T> * new_func = i->second->clone();
     new_func->setOptions( options );
     return new_func;
   }
@@ -120,8 +120,44 @@ namespace aims {
   //--------------------------------------------------------------------------
   // GaborFilterFunc
   //--------------------------------------------------------------------------
+
   template <typename T>
-  void GaborFilterFunc<T>::setOptions( carto::Object options )
+  GaborFilterFunc<T>::GaborFilterFunc( const GaborFilterFunc<T> & other ):
+    _init(other._init ),
+    _sigma(other._sigma),
+    _theta(other._theta),
+    _lambda(other._lambda),
+    _psi(other._psi),
+    _gamma(other._gamma),
+    _real(other._real),
+    _nstd(other._nstd),
+    _voxelsize(other._voxelsize),
+    _amplitude(other._amplitude),
+    _kernel(new carto::Volume<double>( *(other._kernel) ))
+  {}
+
+  template <typename T>
+  GaborFilterFunc<T>::~GaborFilterFunc()
+  {}
+
+  template <typename T>
+  GaborFilterFunc<T> & GaborFilterFunc<T>::operator=( const GaborFilterFunc<T> & other )
+  {
+    _init = other._init ;
+    _sigma = other._sigma;
+    _theta = other._theta;
+    _lambda = other._lambda;
+    _psi = other._psi;
+    _gamma = other._gamma;
+    _real = other._real;
+    _nstd = other._nstd;
+    _voxelsize = other._voxelsize;
+    _amplitude = other._amplitude;
+    _kernel = carto::VolumeRef<double>( new carto::Volume<double>( *(other._kernel) ) );
+  }
+
+  template <typename T>
+  void GaborFilterFunc<T>::setOptions( const carto::Object & options )
   {
     _init = false;
     _sigma = 1.0;
@@ -131,7 +167,8 @@ namespace aims {
     _gamma = 1.0;
     _real = true;
     _nstd = 2;
-    _voxelsize = std::vector<float>(4,1.0);
+    _voxelsize = std::vector<float>( 4, 1. );
+    _amplitude = std::vector<int>( 6, 0 );
 
     if( options )
     {
@@ -148,7 +185,9 @@ namespace aims {
       if( options->hasProperty( "real" ) )
         _real = (bool)options->getProperty( "real" )->getScalar();
       if( options->hasProperty( "nstd" ) )
-        _real = (int)options->getProperty( "nstd" )->getScalar();
+        _nstd = (int)options->getProperty( "nstd" )->getScalar();
+      if( options->hasProperty( "voxel_size" ) )
+        options->getProperty( "voxel_size", _voxelsize );
     }
 
     if( carto::verbose )
@@ -163,48 +202,128 @@ namespace aims {
                 << "- nstd: "   << _nstd            << std::endl
                 << std::endl;
     }
+
+    setKernel();
   }
 
   template <typename T>
-  StructuringElementRef GaborFilterFunc<T>::getStructuringElement(
-    const std::vector<float> & voxel_size
-  )
+  void GaborFilterFunc<T>::updateOptions( const carto::Object & options )
   {
-    if( voxel_size[0] != _voxelsize[0] ||
-        voxel_size[1] != _voxelsize[1] ||
-        !_init )
-      setKernel( voxel_size );
+    bool   changed = false;
+    double oldd;
+    bool   oldb;
+    int    oldi;
+    std::vector<float> oldv;
 
-    return StructuringElementRef( new strel::SquareXY( _amplitude ) );
+    if( options )
+    {
+      if( options->hasProperty( "sigma" ) ) {
+        oldd = _sigma;
+        _sigma = (double)options->getProperty( "sigma" )->getScalar();
+        if( oldd != _sigma )
+          changed = true;
+      }
+      if( options->hasProperty( "theta" ) ) {
+        oldd = _theta;
+        _theta = (double)options->getProperty( "theta" )->getScalar();
+        if( oldd != _theta )
+          changed = true;
+      }
+      if( options->hasProperty( "lambda" ) ) {
+        oldd = _lambda;
+        _lambda = (double)options->getProperty( "lambda" )->getScalar();
+        if( oldd != _lambda )
+          changed = true;
+      }
+      if( options->hasProperty( "psi" ) ) {
+        oldd = _psi;
+        _psi = (double)options->getProperty( "psi" )->getScalar();
+        if( oldd != _psi )
+          changed = true;
+      }
+      if( options->hasProperty( "gamma" ) ) {
+        oldd = _gamma;
+        _gamma = (double)options->getProperty( "gamma" )->getScalar();
+        if( oldd != _gamma )
+          changed = true;
+      }
+      if( options->hasProperty( "real" ) ) {
+        oldb = _real;
+        _real = (bool)options->getProperty( "real" )->getScalar();
+        if( oldb != _real )
+          changed = true;
+      }
+      if( options->hasProperty( "nstd" ) ) {
+        oldi = _nstd;
+        _nstd = (int)options->getProperty( "nstd" )->getScalar();
+        if( oldi != _nstd )
+          changed = true;
+      }
+      if( options->hasProperty( "voxel_size" ) ) {
+        oldv = _voxelsize;
+        options->getProperty( "voxel_size", _voxelsize );
+        if( oldv != _voxelsize )
+          changed = true;
+      }
+    }
+
+    if( changed )
+    {
+      if( carto::verbose )
+        std::cout << "Gabor Filter updated with parameters:" << std::endl
+                  << "- sigma: "  << _sigma  << " mm" << std::endl
+                  << "- theta: "  << _theta  << "°"   << std::endl
+                  << "- lambda: " << _lambda << " mm" << std::endl
+                  << "- psi: "    << _psi    << "°"   << std::endl
+                  << "- gamma: "  << _gamma           << std::endl
+                  << "- return "  << ( _real ? "real part" : "imaginary part" ) << std::endl
+                  << "- nstd: "   << _nstd            << std::endl
+                  << std::endl;
+      setKernel();
+    }
+  }
+
+  template <typename T>
+  const std::vector<int> & GaborFilterFunc<T>::getAmplitude() const
+  {
+    return _amplitude;
   }
 
   template <typename T> inline
-  void GaborFilterFunc<T>::setKernel(
-    const std::vector<float> & voxel_size
-  )
+  void GaborFilterFunc<T>::setKernel()
   {
-    std::cout << "setKernel" << std::endl;
-    _voxelsize = voxel_size;
-    std::cout << "- voxel size: "
-              << _voxelsize[0] << ", "
-              << _voxelsize[1] << std::endl;
+    if( carto::verbose )
+      std::cout << "setKernel" << std::endl
+                << "- voxel size: "
+                << _voxelsize[0] << ", "
+                << _voxelsize[1] << std::endl;
 
     double pi = 3.1415926535897;
-    _amplitude = std::vector<double>(2,0.);
-    _amplitude[0] = std::max(
+    std::vector<float> famplitude(2,0.);
+    famplitude[0] = std::max(
       std::fabs( _nstd * _sigma * std::cos(_theta*pi/180. ) ),
       std::fabs( _nstd * _sigma/_gamma * std::sin(_theta*pi/180. ) )
     );
-    _amplitude[1] = std::max(
+    famplitude[1] = std::max(
       std::fabs( _nstd * _sigma * std::sin(_theta*pi/180. ) ),
       std::fabs( _nstd * _sigma/_gamma * std::cos(_theta*pi/180. ) )
     );
-    _amplitude[0] /= _voxelsize[0];
-    _amplitude[1] /= _voxelsize[1];
-    _kernel = carto::VolumeRef<double>( (int)_amplitude[0] * 2 + 1, (int)_amplitude[1] * 2 + 1 );
-    std::cout << "- amplitude: "
-              << _amplitude[0] << ", "
-              << _amplitude[1] << std::endl;
+    famplitude[0] /= _voxelsize[0];
+    famplitude[1] /= _voxelsize[1];
+    _amplitude[0] = (int) famplitude[0];
+    _amplitude[1] = (int) famplitude[0];
+    _amplitude[2] = (int) famplitude[1];
+    _amplitude[3] = (int) famplitude[1];
+    _kernel = carto::VolumeRef<double>( _amplitude[0] + _amplitude[1] + 1,
+                                        _amplitude[2] + _amplitude[3] + 1 );
+    if( carto::verbose )
+      std::cout << "- amplitude: "
+                << _amplitude[0] << ", "
+                << _amplitude[1] << ", "
+                << _amplitude[2] << ", "
+                << _amplitude[3] << ", "
+                << _amplitude[4] << ", "
+                << _amplitude[5] << std::endl;
 
 
     double offsetx = (double)(_kernel->getSizeX())/2;
@@ -228,22 +347,14 @@ namespace aims {
       }
 
     _init = true;
-    Writer<carto::Volume<double> > writer("kernel.ima");
-    writer << *_kernel;
   }
 
   template <typename T> inline
-  T GaborFilterFunc<T>::execute( const carto::VolumeRef<T> & volume )
+  T GaborFilterFunc<T>::execute( const carto::VolumeRef<T> & volume ) const
   {
     ASSERT( volume->getSizeZ() == 1 );
     ASSERT( volume->getSizeT() == 1 );
     double result = 0;
-    std::vector<float> voxel_size(4,1.0);
-    volume->header().getProperty( "voxel_size", voxel_size );
-    if( voxel_size[0] != _voxelsize[0] ||
-        voxel_size[1] != _voxelsize[1] ||
-        !_init )
-      setKernel( voxel_size );
 
     for( int32_t y=0; y<volume->getSizeY(); ++y )
       for( int32_t x=0; x<volume->getSizeX(); ++x )
@@ -252,33 +363,6 @@ namespace aims {
     return (T) result;
   }
 
-  template <typename T> inline
-  T GaborFilterFunc<T>::execute( const carto::VolumeRef<T> & volume,
-                                 const StructuringElementRef & se )
-  {
-    ASSERT( volume->getSizeZ() == 1 );
-    ASSERT( volume->getSizeT() == 1 );
-    ASSERT( se != strel::none() );
-    int x, y;
-    double result;
-    std::vector<float> voxel_size(4,1.0);
-    volume->header().getProperty( "voxel_size", voxel_size );
-    if( voxel_size[0] != _voxelsize[0] ||
-        voxel_size[1] != _voxelsize[1] ||
-        !_init )
-      setKernel( voxel_size );
-    StructuringElement::const_iterator i, e = se->end();
-
-    for( i=se->begin(); i!=e; ++i ) {
-      x = (*i)[0];
-      y = (*i)[1];
-      result += _kernel( x + std::floor((double)(_kernel->getSizeX())/2),
-                         y + std::floor((double)(_kernel->getSizeY())/2) )
-                * volume(x,y);
-    }
-
-    return (T) result;
-  }
 } // namespace aims
 
 #endif

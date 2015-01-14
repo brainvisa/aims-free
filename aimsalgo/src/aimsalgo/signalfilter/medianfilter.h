@@ -32,17 +32,75 @@
  */
 
 
-#ifndef AIMS_SIGNALFILTER_MEDIANSMOOTH_H
-#define AIMS_SIGNALFILTER_MEDIANSMOOTH_H
+#ifndef AIMS_SIGNALFILTER_MEDIANFILTER_H
+#define AIMS_SIGNALFILTER_MEDIANFILTER_H
 
-#include <aims/signalfilter/filter_nonlinear.h>
+#include <aims/signalfilter/filteringimagealgorithm.h>
+#include <aims/signalfilter/filteringfunction_element.h>
 #include <aims/connectivity/structuring_element.h>
-#include <aims/data/data_g.h>
-#include <vector>
+
+namespace aims {
+
+  template <typename T>
+  class MedianFilter: public ElementFilteringImageAlgorithm<T>
+  {
+  public:
+    typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+    MedianFilter( const StructuringElement & se = strel::Cube(1.0),
+                    const carto::Object & options = carto::none() ):
+      ElementFilteringImageAlgorithm<T>( MedianFilterFunc<ChannelType>( options ),
+                                      se )
+    {}
+    MedianFilter( const carto::Object & options ):
+      ElementFilteringImageAlgorithm<T>( MedianFilterFunc<ChannelType>( options ),
+                                      strel::Cube(1.0) )
+    {}
+    MedianFilter( const MedianFilter<T> & other ):
+      ElementFilteringImageAlgorithm<T>( other )
+    {}
+    ~MedianFilter() {}
+    MedianFilter<T> & operator=( const MedianFilter<T> & other )
+    {
+      ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
+      return *this;
+    }
+    MedianFilter<T> *clone() { return new MedianFilter<T>(*this); }
+  };
+
+  template <typename T>
+  class NotNullMedianFilter: public ElementFilteringImageAlgorithm<T>
+  {
+  public:
+    typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+    NotNullMedianFilter( const StructuringElement & se = strel::Cube(1.0),
+                    const carto::Object & options = carto::none() ):
+      ElementFilteringImageAlgorithm<T>( NotNullMedianFilterFunc<ChannelType>( options ),
+                                      se )
+    {}
+    NotNullMedianFilter( const carto::Object & options ):
+      ElementFilteringImageAlgorithm<T>( NotNullMedianFilterFunc<ChannelType>( options ),
+                                      strel::Cube(1.0) )
+    {}
+    NotNullMedianFilter<T>( const NotNullMedianFilter<T> & other ):
+      ElementFilteringImageAlgorithm<T>( other )
+    {}
+    ~NotNullMedianFilter() {}
+    NotNullMedianFilter<T> & operator=( const NotNullMedianFilter<T> & other )
+    {
+      ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
+      return *this;
+    }
+    NotNullMedianFilter<T> *clone() { return new NotNullMedianFilter<T>(*this); }
+  };
+
+} // namespace aims
 
 //============================================================================
 //   Backward compatibility bindings
 //============================================================================
+
+#include <aims/data/data_g.h>
+#include <vector>
 
 template <typename T>
 class MedianSmoothing
@@ -50,7 +108,7 @@ class MedianSmoothing
   public:
     MedianSmoothing( int sx = 3, int sy = 3, int sz = 3 );
     virtual ~MedianSmoothing();
-    virtual AimsData<T> doit( const AimsData<T>& in );
+    virtual AimsData<T> doit( const AimsData<T>& in ) const;
   private:
     MedianSmoothing<T> & operator = ( const MedianSmoothing<T> & );
     int _sx;
@@ -82,9 +140,8 @@ MedianSmoothing<T> & MedianSmoothing<T>::operator= (
   return (*this);
 }
 
-#include <iostream>
 template <typename T>
-AimsData<T> MedianSmoothing<T>::doit( const AimsData<T>& in )
+AimsData<T> MedianSmoothing<T>::doit( const AimsData<T>& in ) const
 {
   std::vector<double> amplitude(3,0.);
   amplitude[0] = .5 * (double)_sx;

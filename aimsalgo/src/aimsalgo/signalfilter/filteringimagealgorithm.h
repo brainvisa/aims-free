@@ -42,194 +42,284 @@
 //--- cartodata --------------------------------------------------------------
 #include <cartodata/volume/volume.h>
 //--- cartobase --------------------------------------------------------------
-#include <cartobase/config/verbose.h>
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/type/types.h>
 #include <cartobase/type/datatypetraits.h>
 #include <cartobase/type/datatypeinfo.h>
+#include <cartobase/object/object.h>
 //--- std --------------------------------------------------------------------
 #include <iostream>
 //----------------------------------------------------------------------------
 
 namespace aims {
+  template <typename T> class FilteringImageAlgorithmInterface;
+  template <typename T> class LinearFilteringImageAlgorithm;
+  template <typename T> class LinearFilteringFunction;
+  template <typename T> class ElementFilteringImageAlgorithm;
+  template <typename T> class ElementFilteringFunction;
+  namespace singlechannel {
+    template <typename T> class LinearFilteringImageAlgorithm;
+    template <typename T> class ElementFilteringImageAlgorithm;
+  }
 
   //==========================================================================
-  //   FILTERING IMAGE ALGORITHM: INTERFACE
+  //   LINEAR FILTERING IMAGE ALGORITHM: MULTI CHANNELS
   //==========================================================================
-  /// Pure abstract class: interface for filtering image algorithms
   template <typename T>
-  class FilteringImageAlgorithmInterface:
-    virtual public ImageAlgorithmInterface<T>
+  class LinearFilteringImageAlgorithm: public ImageAlgorithm<T>
   {
     public:
-      virtual ~FilteringImageAlgorithmInterface() {};
-      virtual FilteringImageAlgorithmInterface<T> * clone() const = 0;
-      virtual void setParameters( const StructuringElement & strel,
-                                  carto::Object options ) = 0;
+      //----------------------------------------------------------------------
+      //   typedef
+      //----------------------------------------------------------------------
+      typedef T VoxelType;
+      typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+      typedef singlechannel::LinearFilteringImageAlgorithm<ChannelType> SingleChannelImageAlgorithmType;
+
+      //----------------------------------------------------------------------
+      //   image algorithm interface: implementation
+      //----------------------------------------------------------------------
+      virtual void setOptions( const carto::Object & options )
+      {
+        _lalgo->setOptions( options );
+      }
+
+      virtual void updateOptions( const carto::Object & options )
+      {
+        _lalgo->updateOptions( options );
+      }
+
+      virtual LinearFilteringImageAlgorithm<T> *clone() const
+      {
+        return new LinearFilteringImageAlgorithm<T>(*this);
+      }
+
+      //----------------------------------------------------------------------
+      //   constructor (default+copy) & destructor
+      //----------------------------------------------------------------------
+    protected:
+      LinearFilteringImageAlgorithm();
+      LinearFilteringImageAlgorithm( const LinearFilteringFunction<ChannelType> & f ):
+        ImageAlgorithm<T>(),
+        _lalgo( SingleChannelImageAlgorithmType( f ).clone() )
+      {
+        ImageAlgorithm<T>::_algo.reset( _lalgo );
+      }
+      LinearFilteringImageAlgorithm( const LinearFilteringImageAlgorithm<T> & other ):
+        ImageAlgorithm<T>(),
+        _lalgo( other._lalgo->clone() )
+      {
+        ImageAlgorithm<T>::_algo.reset( _lalgo );
+      }
+      LinearFilteringImageAlgorithm & operator= ( LinearFilteringImageAlgorithm & other )
+      {
+        _lalgo = other._lalgo->clone();
+        ImageAlgorithm<T>::_algo.reset( _lalgo );
+        return *this;
+      }
+    public:
+      virtual ~LinearFilteringImageAlgorithm() {}
+
+      //----------------------------------------------------------------------
+      //   member
+      //----------------------------------------------------------------------
+    protected:
+      SingleChannelImageAlgorithmType * _lalgo;
+
+  };
+
+  //==========================================================================
+  //   ELEMENT FILTERING IMAGE ALGORITHM: MULTI CHANNELS
+  //==========================================================================
+  template <typename T>
+  class ElementFilteringImageAlgorithm: public ImageAlgorithm<T>
+  {
+    public:
+      //----------------------------------------------------------------------
+      //   typedef
+      //----------------------------------------------------------------------
+      typedef T VoxelType;
+      typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+      typedef singlechannel::ElementFilteringImageAlgorithm<ChannelType> SingleChannelImageAlgorithmType;
+
+      //----------------------------------------------------------------------
+      //   image algorithm interface: implementation
+      //----------------------------------------------------------------------
+      virtual void setOptions( const carto::Object & options )
+      {
+        _ealgo->setOptions( options );
+      }
+
+      virtual void updateOptions( const carto::Object & options )
+      {
+        _ealgo->updateOptions( options );
+      }
+
+      virtual ElementFilteringImageAlgorithm<T> *clone() const {
+        return new ElementFilteringImageAlgorithm<T>(*this);
+      }
+
+      //----------------------------------------------------------------------
+      //   member method
+      //----------------------------------------------------------------------
+      virtual void setStructuringElement( const StructuringElement & se )
+      {
+        _ealgo->setStructuringElement( se );
+      }
+
+      //----------------------------------------------------------------------
+      //   constructor (default+copy) & destructor
+      //----------------------------------------------------------------------
+    protected:
+      ElementFilteringImageAlgorithm(
+        const ElementFilteringFunction<ChannelType> & f,
+        const StructuringElement & se = strel::Cube(1.)
+      ):
+        ImageAlgorithm<T>(),
+        _ealgo( SingleChannelImageAlgorithmType( f, se ).clone() )
+      {
+        ImageAlgorithm<T>::_algo.reset( _ealgo );
+      }
+      ElementFilteringImageAlgorithm( const ElementFilteringImageAlgorithm<T> & other ):
+        ImageAlgorithm<T>(),
+        _ealgo(other._ealgo->clone())
+      {
+        ImageAlgorithm<T>::_algo.reset( _ealgo );
+      }
+      ElementFilteringImageAlgorithm & operator= ( ElementFilteringImageAlgorithm & other )
+      {
+        _ealgo = other._ealgo->clone();
+        ImageAlgorithm<T>::_algo.reset( _ealgo );
+        return *this;
+      }
+    public:
+      virtual ~ElementFilteringImageAlgorithm() {}
+
+      //----------------------------------------------------------------------
+      //   member
+      //----------------------------------------------------------------------
+    protected:
+      SingleChannelImageAlgorithmType * _ealgo;
   };
 
   namespace singlechannel {
 
     //========================================================================
-    //   FILTERING IMAGE ALGORITHM: SINGLE CHANNEL
+    //   LINEAR FILTERING IMAGE ALGORITHM: SINGLE CHANNEL
     //========================================================================
-    /**
-     *  \brief aims::singlechannel::FilteringImageAlgorithm is the algorithm
-     *  to apply filter on single channel image.
-     *
-     *  The \c aims::FilteringImageAlgorithm class is used
-     *  to filter single channel image.
-     *
-     *  \tparam VoxelType type of voxel that will be filtered.
-     *  \tparam FilteringFunctionType type of filtering to use
-     *          (\c MeanFilterFunc, \c MedianFilterFunc, \c MinFilterFunc,
-     *          \c MaxFilterFunc, ... ).
-     *
-     *  \sa MeanFilterFunc, MedianFilterFunc, MinFilterFunc, MaxFilterFunc,
-     *      MajorityFilterFunc
-     */
-    template <typename VoxelType, class FilteringFunctionType>
-    class FilteringImageAlgorithm:
-      public FilteringImageAlgorithmInterface<VoxelType>
+    template <typename T>
+    class LinearFilteringImageAlgorithm: public ImageAlgorithmInterface<T>
     {
       public:
+        //--------------------------------------------------------------------
+        //   image algorithm interface: implementation
+        //--------------------------------------------------------------------
+        virtual void execute( const carto::VolumeRef<T> & in,
+                                    carto::VolumeRef<T> & out ) const;
 
-        /// \param strel Structuring element that gives the offset to each
-        ///              point to be included in the filtering of a iven
-        ///              voxel.
-        /// \param options Options dictionary. Allows calling filtering
-        ///                functions with specific parameters.
-        FilteringImageAlgorithm( const StructuringElement & strel = strel::Cube( 1. ),
-                                 carto::Object options = carto::none() ):
-          _strel(strel.clone()),
-          _options(options),
-          _func(options)
-        {}
-
-        /// Copy constructor
-        FilteringImageAlgorithm( const FilteringImageAlgorithm<VoxelType,FilteringFunctionType> & f ):
-          _strel(f._strel->clone()),
-          _options(f._options),
-          _func(f._func)
-        {}
-
-        virtual ~FilteringImageAlgorithm() {}
-
-        /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageDimensions
-        /// method implementation.
-        /// Get the output dimensions for Point4d original dimension.
-        /// \return Point4d output dimension of the filtered image.
-        virtual const Point4dl getOutputImageDimensions( const Point4dl & dims ) const {
-          return dims;
-        }
-
-        /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageVoxelSize
-        /// method implementation.
-        /// Returns the output voxel size based on an input voxel size.
-        /// \param Point4d voxelsize voxel size of the input image.
-        /// \return \c Point4d voxel size of the output image.
-        virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) const {
-          return voxelsize;
-        }
-
-        /// \c ImageAlgorithmInterface<VoxelType>::execute method implementation.
-        /// Execute the filtering algorithm on the input image using the
-        /// \c FilteringFunctionType
-        /// \param in Input image to filter
-        /// \return AimsData< VoxelType > Filtered image
-        virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in );
-
-        /// Implement interface: change member values
-        virtual void setParameters( const StructuringElement & strel,
-                                    carto::Object options )
+        virtual void setOptions( const carto::Object & options )
         {
-          _strel = strel.clone();
-          _options = options;
-          _func.setOptions( options );
+          _func->setOptions( options );
         }
 
-        /// Implement interface: clone
-        virtual FilteringImageAlgorithm<VoxelType,FilteringFunctionType> * clone() const {
-          return new FilteringImageAlgorithm<VoxelType,FilteringFunctionType>(*this);
+        virtual void updateOptions( const carto::Object & options )
+        {
+          _func->updateOptions( options );
         }
 
+        virtual ::aims::singlechannel::LinearFilteringImageAlgorithm<T> * clone() const {
+          return new ::aims::singlechannel::LinearFilteringImageAlgorithm<T>(*this);
+        }
+
+        //--------------------------------------------------------------------
+        //   constructor (default+copy) & destructor
+        //--------------------------------------------------------------------
       protected:
-        StructuringElementRef        _strel;
-        carto::Object                _options;
-        FilteringFunctionType        _func;
+        LinearFilteringImageAlgorithm();
+
+      public:
+        LinearFilteringImageAlgorithm( const LinearFilteringFunction<T> & f ):
+          _func(f.clone())
+        {}
+
+        LinearFilteringImageAlgorithm( const ::aims::singlechannel::LinearFilteringImageAlgorithm<T> & other ):
+          _func(other._func->clone())
+        {}
+
+        LinearFilteringImageAlgorithm & operator= (
+          const LinearFilteringImageAlgorithm & other )
+        {
+          assert( typeid(other) == typeid(*this) );
+          if( this != &other )
+            _func.reset( other._func->clone() );
+          return *this;
+        }
+
+        virtual ~LinearFilteringImageAlgorithm() {}
+
+        //--------------------------------------------------------------------
+        //   member
+        //--------------------------------------------------------------------
+      protected:
+        carto::rc_ptr<LinearFilteringFunction<T> > _func;
     };
 
-    template <typename VoxelType, class FilteringFunctionType>
+    template <typename T>
     inline
-    carto::VolumeRef<VoxelType> FilteringImageAlgorithm<VoxelType, FilteringFunctionType>::execute(
-      const carto::VolumeRef<VoxelType> & in )
+    void LinearFilteringImageAlgorithm<T>::execute(
+      const carto::VolumeRef<T> & in,
+            carto::VolumeRef<T> & out ) const
     {
-      int x, y, z, t, nx, ny, nz, n;
-      int sz, sy, sx, ez, ey, ex;
+      int sx, sy, sz, ex, ey, ez, x, y, z, t;
+      typename carto::Volume<T>::Position4Di pos(0,0,0,0), size(1,1,1,1);
 
-      carto::VolumeRef<VoxelType> out( new carto::Volume<VoxelType>( *in ) );
-      out->copyHeaderFrom( in->header() );
-      out->fill( 0 );
-
-      carto::VolumeRef<VoxelType> win(
-        new carto::Volume<VoxelType>(
-          in,
-          typename carto::Volume<VoxelType>::Position4Di( 0, 0, 0, 0 ),
-          typename carto::Volume<VoxelType>::Position4Di( 1, 1, 1, 1 )
-        )
-      );
-
-      // In linear case, compute structuring element
-      StructuringElementRef strel = _strel;
-      if( _func.isLinear() )
-      {
-        std::vector<float> vs(4,1.0);
-        in->header().getProperty( "voxel_size", vs );
-        StructuringElementRef se = _func.getStructuringElement( vs );
-        if( se != strel::none() )
-          strel = se;
-      }
+      // set voxel size
+      carto::Object vs = carto::Object::value( carto::PropertySet() );
+      vs->setProperty( "voxel_size", in.header().getProperty( "voxel_size" ) );
+      _func->updateOptions( vs );
 
       // Manage borders / structuring element size
-      const std::vector<int> & borders = in->getBorders();
-      const std::vector<int> & amplitude = strel->getAmplitude();
+      const std::vector<int> & border = in->getBorders();
+      const std::vector<int> & amplitude = _func->getAmplitude();
 
       // When volume has borders, it is possible to use it to process filtering
-      sz = amplitude[4] - borders[4];
-      sy = amplitude[2] - borders[2];
-      sx = amplitude[0] - borders[0];
-      ez = in->getSizeZ() - amplitude[5] + borders[5];
-      ey = in->getSizeY() - amplitude[3] + borders[3];
-      ex = in->getSizeX() - amplitude[1] + borders[1];
+      sz = amplitude[4] - border[4];
+      sy = amplitude[2] - border[2];
+      sx = amplitude[0] - border[0];
+      ez = in->getSizeZ() - amplitude[5] + border[5];
+      ey = in->getSizeY() - amplitude[3] + border[3];
+      ex = in->getSizeX() - amplitude[1] + border[1];
 
-      if( carto::verbose ) {
-        std::cout << "Structuring element amplitude: [ ";
+      if( ImageAlgorithmInterface<T>::_verbose > 1 ) {
+        std::cout << "Filter amplitude (voxels): [ ";
         for(int i = 0; i < 6; ++i)
           std::cout << carto::toString(amplitude[i]) << ( i==8 ? " " : ", ");
         std::cout << "]" << std::endl;
-
-        std::cout << "Processing with borders: [ ";
+        std::cout << "Processing with borders (voxels): [ ";
         for(int i = 0; i < 8; ++i)
-          std::cout << carto::toString(borders[i]) << ( i==8 ? " " : ", ");
+          std::cout << carto::toString(border[i]) << ( i==8 ? " " : ", ");
         std::cout << "]" << std::endl;
-
         std::cout << "Start: [" << carto::toString(sx) << ", "
                                 << carto::toString(sy) << ", "
                                 << carto::toString(sz) << "]" << std::endl;
-
         std::cout << "End: [" << carto::toString(ex) << ", "
                               << carto::toString(ey) << ", "
                               << carto::toString(ez) << "]" << std::endl;
       }
 
+      size[0] = amplitude[0] + amplitude[1] + 1;
+      size[1] = amplitude[2] + amplitude[2] + 1;
+      size[2] = amplitude[4] + amplitude[5] + 1;
+      carto::VolumeRef<T> win( new carto::Volume<T>( in, pos, size ) );
+
       aims::Progression progress( out->getSizeT() * (ez - sz) * (ey - sy) - 1 );
-      if (carto::verbose)
+      if( ImageAlgorithmInterface<T>::_verbose > 0 )
         std::cout << "Filtering progress: ";
 
       for( t = 0; t < in->getSizeT(); ++t )
         for( z = sz; z < ez; ++z )
           for( y = sy; y < ey; ++y, ++progress ) {
-            if( carto::verbose ) {
+            if( ImageAlgorithmInterface<T>::_verbose > 0 ) {
               // Display progression
               // The "normal" operator << should be as:
               // std::cout << progress << std::flush;
@@ -239,74 +329,169 @@ namespace aims {
             }
             for( x = sx; x < ex; ++x )
             {
-              // Processes window to use for filtering
-              n = 0;
-
               // Set view position in the volume
-              win->setPosInRefVolume( typename carto::Volume<VoxelType>::Position4Di(x,y,z,t) );
-              (*out)( x, y, z, t ) = _func.execute( win, strel );
+              pos[0] = x - amplitude[0];
+              pos[1] = y - amplitude[2];
+              pos[2] = z - amplitude[4];
+              pos[3] = t;
+              win->setPosInRefVolume( pos );
+              (*out)( x, y, z, t ) = _func->execute( win );
             }
           }
 
-      if (carto::verbose)
+      if( ImageAlgorithmInterface<T>::_verbose > 0 )
         std::cout << std::endl;
+    }
 
-      return( out );
+
+    //========================================================================
+    //   ELEMENT FILTERING IMAGE ALGORITHM: SINGLE CHANNEL
+    //========================================================================
+    template <typename T>
+    class ElementFilteringImageAlgorithm: public ImageAlgorithmInterface<T>
+    {
+      public:
+        //--------------------------------------------------------------------
+        //   image algorithm interface: implementation
+        //--------------------------------------------------------------------
+        virtual void execute( const carto::VolumeRef<T> & in,
+                                    carto::VolumeRef<T> & out ) const;
+
+        virtual void setOptions( const carto::Object & options )
+        {
+          _func->setOptions( options );
+        }
+
+        virtual void updateOptions( const carto::Object & options )
+        {
+          _func->updateOptions( options );
+        }
+
+        virtual ::aims::singlechannel::ElementFilteringImageAlgorithm<T> * clone() const {
+          return new ::aims::singlechannel::ElementFilteringImageAlgorithm<T>(*this);
+        }
+
+        //--------------------------------------------------------------------
+        //   member method
+        //--------------------------------------------------------------------
+        virtual void setStructuringElement( const StructuringElement & se )
+        {
+          _strel.reset( se.clone() );
+        }
+
+        //--------------------------------------------------------------------
+        //   constructor (default+copy) & destructor
+        //--------------------------------------------------------------------
+      protected:
+        ElementFilteringImageAlgorithm();
+
+      public:
+        ElementFilteringImageAlgorithm( const ElementFilteringFunction<T> & f,
+                                        const StructuringElement & se = strel::Cube(1.) ):
+          _func(f.clone()),
+          _strel(se.clone())
+        {}
+
+        ElementFilteringImageAlgorithm( const ::aims::singlechannel::ElementFilteringImageAlgorithm<T> & other ):
+          _func(other._func->clone()),
+          _strel(other._strel->clone())
+        {}
+
+        ::aims::singlechannel::ElementFilteringImageAlgorithm<T> & operator=(
+          const ::aims::singlechannel::ElementFilteringImageAlgorithm<T> & other )
+        {
+          assert( typeid(other) == typeid(*this) );
+          if( *this != other )
+          {
+            _func.reset( other._func->clone() );
+            _strel.reset( other._strel->clone() );
+          }
+          return *this;
+        }
+
+        virtual ~ElementFilteringImageAlgorithm() {}
+
+        //--------------------------------------------------------------------
+        //   members
+        //--------------------------------------------------------------------
+      protected:
+        carto::rc_ptr<ElementFilteringFunction<T> > _func;
+        carto::rc_ptr<StructuringElement>           _strel;
+    };
+
+    template <typename T>
+    inline
+    void ElementFilteringImageAlgorithm<T>::execute(
+      const carto::VolumeRef<T> & in,
+            carto::VolumeRef<T> & out
+    ) const
+    {
+      int sx, sy, sz, ex, ey, ez, x, y, z, t;
+      typename carto::Volume<T>::Position4Di pos(0,0,0), size(1,1,1);
+
+      // Manage borders / structuring element size
+      const std::vector<int> & border = in->getBorders();
+      const std::vector<int> amplitude = _strel->getAmplitude();
+
+      // When volume has borders, it is possible to use it to process filtering
+      sz = amplitude[4] - border[4];
+      sy = amplitude[2] - border[2];
+      sx = amplitude[0] - border[0];
+      ez = in->getSizeZ() - amplitude[5] + border[5];
+      ey = in->getSizeY() - amplitude[3] + border[3];
+      ex = in->getSizeX() - amplitude[1] + border[1];
+
+      if( ImageAlgorithmInterface<T>::_verbose > 1 ) {
+        std::cout << "Filter amplitude (voxels): [ ";
+        for(int i = 0; i < 6; ++i)
+          std::cout << carto::toString(amplitude[i]) << ( i==8 ? " " : ", ");
+        std::cout << "]" << std::endl;
+        std::cout << "Processing with borders (voxels): [ ";
+        for(int i = 0; i < 8; ++i)
+          std::cout << carto::toString(border[i]) << ( i==8 ? " " : ", ");
+        std::cout << "]" << std::endl;
+        std::cout << "Start: [" << carto::toString(sx) << ", "
+                                << carto::toString(sy) << ", "
+                                << carto::toString(sz) << "]" << std::endl;
+        std::cout << "End: [" << carto::toString(ex) << ", "
+                              << carto::toString(ey) << ", "
+                              << carto::toString(ez) << "]" << std::endl;
+      }
+
+      carto::VolumeRef<T> win( new carto::Volume<T>( in, pos, size ) );
+
+      aims::Progression progress( out->getSizeT() * (ez - sz) * (ey - sy) - 1 );
+      if( ImageAlgorithmInterface<T>::_verbose > 0 )
+        std::cout << "Filtering progress: ";
+
+      for( t = 0; t < in->getSizeT(); ++t )
+        for( z = sz; z < ez; ++z )
+          for( y = sy; y < ey; ++y, ++progress ) {
+            if( ImageAlgorithmInterface<T>::_verbose > 0 ) {
+              // Display progression
+              // The "normal" operator << should be as:
+              // std::cout << progress << std::flush;
+              // but it doesn't work in gcc 4.0, there is a namespace
+              // confusion, so we have to specify ::operator <<
+              ::operator << ( std::cout, progress ) << std::flush;
+            }
+            for( x = sx; x < ex; ++x )
+            {
+              // Set view position in the volume
+              pos[0] = x;
+              pos[1] = y;
+              pos[2] = z;
+              pos[3] = t;
+              win->setPosInRefVolume( pos );
+              (*out)( x, y, z, t ) = _func->execute( win, _strel );
+            }
+          }
+
+      if( ImageAlgorithmInterface<T>::_verbose > 0 )
+        std::cout << std::endl;
     }
 
   } // namespace singlechannel
-
-  //==========================================================================
-  //   FILTERING IMAGE ALGORITHM: MULTI CHANNELS
-  //==========================================================================
-  /// \brief aims::FilteringImageAlgorithm is the algorithm to apply filter on image.
-  ///
-  /// The \c aims::FilteringImageAlgorithm class is used
-  /// to filter both single and multi channel image.
-  ///
-  /// \tparam T Voxel type
-  /// \tparam F Filtering function class
-  template <typename T, class F>
-  class FilteringImageAlgorithm :
-    virtual public ImageAlgorithmInterface<T>,
-    public FilteringImageAlgorithmInterface<T>,
-    public ImageAlgorithm<T,
-              singlechannel::FilteringImageAlgorithm<
-                typename carto::DataTypeTraits<T>::ChannelType,
-                F >
-              >
-  {
-    public:
-      typedef T VoxelType;
-      typedef F FilterFuncType;
-      typedef ImageAlgorithm<VoxelType,
-                singlechannel::FilteringImageAlgorithm<
-                  typename carto::DataTypeTraits<VoxelType>::ChannelType,
-                  FilterFuncType >
-                >
-              ImageAlgorithmType;
-      typedef typename ImageAlgorithmType::SingleChannelImageAlgorithmType
-              SingleChannelImageAlgorithmType;
-
-      FilteringImageAlgorithm( const StructuringElement & strel = strel::Cube( 1. ),
-                               carto::Object options = carto::none() ):
-        ImageAlgorithmType( SingleChannelImageAlgorithmType( strel, options ) )
-      {}
-
-      virtual ~FilteringImageAlgorithm() {}
-
-      /// Implement interface: change member values
-      virtual void setParameters( const StructuringElement & strel,
-                                  carto::Object options )
-      {
-        ImageAlgorithmType::_algo.setParameters( strel, options );
-      }
-
-      /// Implement interface: clone
-      virtual FilteringImageAlgorithm<T,F> * clone() const {
-        return new FilteringImageAlgorithm<T,F>(*this);
-      }
-  };
 
 } // namespace aims
 

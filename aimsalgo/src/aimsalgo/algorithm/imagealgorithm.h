@@ -46,197 +46,149 @@
 #include <cartobase/type/types.h>
 #include <cartobase/type/datatypetraits.h>
 #include <cartobase/type/datatypeinfo.h>
+#include <cartobase/smart/rcptr.h>
 //--- std --------------------------------------------------------------------
 #include <iostream>
 //----------------------------------------------------------------------------
 
 namespace aims
 {
+  template <typename T> class ImageAlgorithmInterface;
+  template <typename T> class ImageAlgorithm;
+  template <typename T, bool M> class ImageAlgorithmSwitch;
+
   //==========================================================================
   //   IMAGE ALGORITHM INTERFACE
   //==========================================================================
   /// \brief aims::ImageAlgorithmInterface is the interface for an image
-  ///        algorithm.
+  ///  processing algorithm.
   ///
-  /// The \c aims::ImageAlgorithmInterface class is used
-  /// as a base class for image processing algorithm implementation.
-  template <typename VoxelType>
+  /// Image processing algorithms take volumes as input and output.
+  /// Output dimensions and voxel size may differ from input ones.
+  template <typename T>
   class ImageAlgorithmInterface {
     public:
-      /// \c ImageAlgorithmInterface<VoxelType> Pure virtual method.
+      //----------------------------------------------------------------------
+      // types
+      //----------------------------------------------------------------------
+      typedef T VoxelType;
+
+      //----------------------------------------------------------------------
+      // interface (needs implementation in derived classes)
+      //----------------------------------------------------------------------
       /// Returns the output dimensions of the processed image. This is used
       /// when output image does not have the same dimensions as input image.
       /// \param Point4dl dims dimensions of the input image.
-      /// \return \c Point4dl dimensions of the output image.
-      virtual const Point4dl getOutputImageDimensions( const Point4dl & dims ) const = 0;
+      /// \return \c Point4dl  dimensions of the output image.
+      ///
+      /// The default implementation returns same dimensions as input.
+      virtual Point4dl getOutputImageDimensions( const Point4dl & dims ) const
+      {
+        return Point4dl( dims );
+      }
 
-      /// \c ImageAlgorithmInterface<VoxelType> Pure virtual method.
       /// Returns the output voxel size of the processed image. This is used
       /// when output image does not have the same voxel size as input image.
       /// \param Point4df voxelsize voxel size of the input image.
-      /// \return \c Point4df voxel size of the output image.
-      virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) const = 0;
-
-      /// \c ImageAlgorithmInterface<VoxelType> Pure virtual method.
-      /// Returns the image processed by an algorithm on the input image.
-      /// \param in Input image to process
-      /// \return VolumeRef< VoxelType > processed image
-      virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in ) = 0;
-
-      /// \c ImageAlgorithmInterface<VoxelType>
-      /// Returns the image processed by an algorithm on the input image.
-      /// \param in Input image to process
-      /// \return AimsData< VoxelType > processed image
-      AimsData<VoxelType> execute( const AimsData<VoxelType> & in )
+      /// \return \c Point4df  voxel size of the output image.
+      ///
+      /// The default implementation returns same voxel size as input.
+      virtual Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) const
       {
-        return AimsData<VoxelType>( execute( carto::VolumeRef<VoxelType>( in.volume() ) ) );
+        return Point4df( voxelsize );
       }
 
-      /// Clone
-      virtual ImageAlgorithmInterface<VoxelType> * clone() const = 0;
-  };
+      /// \c ImageAlgorithmInterface<T> Pure virtual method.
+      ///
+      /// Returns the image processed by an algorithm on the input image into
+      /// an already allocated output volume.
+      ///
+      /// \param in   Input image to process
+      /// \param out  Output image processed
+      virtual void execute( const carto::VolumeRef<T> & in,
+                                  carto::VolumeRef<T> & out ) const = 0;
 
-  //==========================================================================
-  //   IMAGE ALGORITHM SWITCH
-  //==========================================================================
-  /// \brief aims::ImageAlgorithmSwitch switches between multichannel and
-  ///        monochannel \c ImageAlgorithmInterface
-  ///
-  /// \c aims::ImageAlgorithmSwitch is the base class to switch between
-  /// multichannel and monochannel \c ImageAlgorithmInterface implementations.
-  ///
-  /// \tparam VoxelType    type of voxel that will be processed by
-  ///                      \c ImageAlgorithmInterface
-  /// \tparam MultiChannel bool that specify wether derived
-  ///                      \c ImageAlgorithmInterface
-  ///                      is monochannel or multichannel
-  template <typename VoxelType, bool MultiChannel>
-  class ImageAlgorithmSwitch {
-    public:
-      ImageAlgorithmSwitch(){}
-  };
+      virtual void setOptions( const carto::Object & options ) {};
+      virtual void updateOptions( const carto::Object & options ) {};
 
-  /// \brief aims::ImageAlgorithmSwitch switch specialization for
-  ///        mono-channel \c ImageAlgorithmInterface
-  ///
-  /// \c aims::ImageAlgorithmSwitch is the specialized class for mono-channel
-  /// \c ImageAlgorithmInterface implementations.
-  ///
-  /// \tparam VoxelType type of voxel that will be processed by
-  ///                   \c ImageAlgorithmInterface
-  template <typename VoxelType>
-  class ImageAlgorithmSwitch<VoxelType,false> {
-    public:
-      ImageAlgorithmSwitch(){}
+      /// \c ImageAlgorithmInterface<T> Pure virtual method.
+      /// Clone the object
+      virtual ImageAlgorithmInterface *clone() const = 0;
 
-      /// Execute \c ImageAlgorithmInterface<VoxelType> on
-      /// \c AimsData<VoxelType>.
-      /// \param in Input image to filter
-      /// \return \c AimsData<VoxelType> Filtered image
-      static AimsData<VoxelType> execute(
-        ImageAlgorithmInterface<VoxelType> & algo,
-        const AimsData<VoxelType> & in )
+      //----------------------------------------------------------------------
+      // utility method
+      //----------------------------------------------------------------------
+      /// \sa getOutputImageDimensions( const Point4dl & )
+      virtual Point4dl getOutputImageDimensions( const long & dx = 1,
+                                                 const long & dy = 1,
+                                                 const long & dz = 1,
+                                                 const long & dt = 1 ) const
       {
-        // std::cout << "VoxelType :" << carto::DataTypeCode<VoxelType>::name() << std::endl
-        //           << "VoxelType::ChannelType :"
-        //           << carto::toString(carto::DataTypeCode<VoxelType>::name()) << std::endl
-        //           << "ImageAlgorithm is NOT multi channel" << std::endl;
-        // std::cout << "Processing channel 0" << std::endl;
-        return algo.execute( in );
+        return getOutputImageDimensions( Point4dl( dx, dy, dz, dt ) );
       }
 
-      /// Execute \c ImageAlgorithmInterface<VoxelType> on
-      /// \c VolumeRef<VoxelType>.
-      /// \param in Input image to filter
-      /// \return \c VolumeRef<VoxelType> Filtered image
-      static carto::VolumeRef<VoxelType> execute(
-        ImageAlgorithmInterface<VoxelType> & algo,
-        const carto::VolumeRef<VoxelType> & in )
+      /// \sa getOutputImageVoxelSize( const Point4df & )
+      virtual Point4df getOutputImageVoxelSize( const float & vx = 1.0,
+                                                const float & vy = 1.0,
+                                                const float & vz = 1.0,
+                                                const float & vt = 1.0 ) const
       {
-        return algo.execute( in );
+        return getOutputImageVoxelSize( Point4df( vx, vy, vz, vt ) );
       }
-  };
 
-  /// \brief aims::ImageAlgorithmSwitch switch specialization for
-  ///        multi-channel \c ImageAlgorithmInterface
-  ///
-  /// \c aims::ImageAlgorithmSwitch is the specialized class for
-  /// multi-channel \c ImageAlgorithmInterface implementation.
-  ///
-  /// \tparam VoxelType type of voxel that will be processed by
-  ///                   \c ImageAlgorithmInterface
-  template <typename VoxelType>
-  class ImageAlgorithmSwitch<VoxelType,true> {
-    public:
-      ImageAlgorithmSwitch(){}
-
-      /// Execute \c ImageAlgorithmInterface<VoxelType> on
-      /// \c VolumeRef<VoxelType>.
-      /// \param in Input image to filter
-      /// \return \c VolumeRef< VoxelType > Filtered image
-      static carto::VolumeRef<VoxelType> execute(
-        ImageAlgorithmInterface<typename VoxelType::ChannelType> & algo,
-        const carto::VolumeRef<VoxelType> & in )
+      /// \sa execute( const carto::VolumeRef<T> &, const carto::VolumeRef(<T> )
+      virtual carto::VolumeRef<T> execute( const carto::VolumeRef<T> & in ) const
       {
+        Point4dl dims( in.getSizeX(), in.getSizeY(), in.getSizeZ(), in.getSizeT() );
+        std::vector<float> voxelsize(4,1.);
+        in.header().getProperty( "voxel_size", voxelsize );
+        Point4df voxel( voxelsize[0], voxelsize[1], voxelsize[2], voxelsize[3] );
+        dims = getOutputImageDimensions( dims );
+        voxel = getOutputImageVoxelSize( voxel );
+        voxelsize[0] = voxel[0];
+        voxelsize[1] = voxel[1];
+        voxelsize[2] = voxel[2];
+        voxelsize[3] = voxel[3];
 
-        // std::cout << "VoxelType :"
-        //           << carto::DataTypeCode<VoxelType>::name() << std::endl
-        //           << "VoxelType::ChannelType :"
-        //           << carto::toString(carto::DataTypeCode<typename VoxelType::ChannelType>::name()) << std::endl
-        //           << "ImageAlgorithm is multi channel" << std::endl;
-
-        ChannelSelector< carto::VolumeRef<VoxelType>,
-                         carto::VolumeRef<typename VoxelType::ChannelType>
-                       > selector;
-        Point4dl dims = algo.getOutputImageDimensions(
-          Point4dl( in->getSizeX(), in->getSizeY(), in->getSizeZ(), in->getSizeT() ) );
-        std::vector<float> vsv( 4, 1. );
-        carto::Object vso = in->header().getProperty("voxel_size");
-        if( !vso.isNull() ) {
-          vsv[0] = (float) vso->getArrayItem(0)->getScalar();
-          vsv[1] = (float) vso->getArrayItem(1)->getScalar();
-          vsv[2] = (float) vso->getArrayItem(2)->getScalar();
-          vsv[3] = (float) vso->getArrayItem(3)->getScalar();
-        }
-        Point4df vs = algo.getOutputImageVoxelSize( Point4df( vsv[0], vsv[1], vsv[2], vsv[3] ) );
-        vsv[0] = vs[0];
-        vsv[1] = vs[1];
-        vsv[2] = vs[2];
-        vsv[3] = vs[3];
-
-        carto::VolumeRef<VoxelType> out( dims[0], dims[1], dims[2], dims[3] );
-        out->copyHeaderFrom( in->header() );
-        out->header().setProperty( "voxel_size", vsv );
-
-        for( uint8_t channel = 0;
-            channel < DataTypeInfo<VoxelType>::samples();
-            channel++)
-        {
-          if( carto::verbose )
-            std::cout << "Processing channel :"
-                      << carto::toString(channel)
-                      << std::endl;
-
-          // Split the data and process filter on each component
-          const carto::VolumeRef<typename VoxelType::ChannelType> & inChannel = selector.select( in, channel );
-          const carto::VolumeRef<typename VoxelType::ChannelType> & outChannel = algo.execute( inChannel );
-          selector.set( out, channel, outChannel );
-        }
+        carto::VolumeRef<T> out( dims[0], dims[1], dims[2], dims[3] );
+        out->copyHeaderFrom( in.header() );
+        out.header().setProperty( "voxel_size", voxelsize );
+        execute( in, out );
 
         return out;
       }
 
-      /// Execute \c ImageAlgorithmInterface<VoxelType> on
-      /// \c AimsData<VoxelType>.
-      /// \param in Input image to filter
-      /// \return \c AimsData< VoxelType > Filtered image
-      static AimsData<VoxelType> execute(
-        ImageAlgorithmInterface<typename VoxelType::ChannelType> & algo,
-        const AimsData<VoxelType> & in )
+      /// \sa execute( const carto::VolumeRef<T> &, const carto::VolumeRef<T> & )
+      virtual AimsData<T> execute( const AimsData<T> & in ) const
       {
-        return AimsData<VoxelType>( execute( algo, carto::VolumeRef<VoxelType>( in.volume() ) ) );
+        return AimsData<T>( execute( carto::VolumeRef<T>( in.volume() ) ) );
+      }
+
+      //----------------------------------------------------------------------
+      // verbose
+      //----------------------------------------------------------------------
+    public:
+      virtual void setVerbose( int level ) { _verbose = level; }
+      virtual void setQuiet() { setVerbose(0); }
+    protected:
+      int _verbose;
+
+      //----------------------------------------------------------------------
+      // polymorphism
+      //----------------------------------------------------------------------
+    public:
+      virtual ~ImageAlgorithmInterface() {}
+    protected:
+      ImageAlgorithmInterface(): _verbose(carto::verbose) {}
+      ImageAlgorithmInterface( const ImageAlgorithmInterface & other ):
+        _verbose(other._verbose)
+      {}
+      ImageAlgorithmInterface & operator=( const ImageAlgorithmInterface & other )
+      {
+        _verbose = other._verbose;
       }
   };
+
 
   //==========================================================================
   //   IMAGE ALGORITHM
@@ -245,71 +197,198 @@ namespace aims
   ///
   /// \c aims::ImageAlgorithm is a base class that allows to not take care
   /// about multi-channel management. When a multi-channel image is
-  /// processed, the c SingleChannelAlgorithmType will be applied to each
+  /// processed, the c ImageAlgorithmInterface will be applied to each
   /// channel separately.
   ///
-  /// \tparam VoxelType type of voxel that will be processed by
-  ///                   \c ImageAlgorithmInterface
-  /// \tparam SingleChannelAlgorithmType algorithm that will be used during
-  ///                                    processing.
-  template <typename T, class A>
-  class ImageAlgorithm: virtual public ImageAlgorithmInterface<T>
+  /// \tparam T  type of voxel that will be processed by
+  ///            \c ImageAlgorithmInterface
+  template <typename T>
+  class ImageAlgorithm: public ImageAlgorithmInterface<T>
   {
     public:
+      //----------------------------------------------------------------------
+      // types
+      //----------------------------------------------------------------------
       typedef T VoxelType;
-      typedef A SingleChannelImageAlgorithmType;
+      typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
 
-      ImageAlgorithm( SingleChannelImageAlgorithmType algo ): _algo(algo) {}
-
-      /// \c ImageAlgorithmInterface<VoxelType>::execute method implementation
-      /// Execute the algorithm on the input image.
-      /// \param in Input image to process
-      /// \return Processed image
-      virtual AimsData<VoxelType> execute( const AimsData<VoxelType> & in )
+      //----------------------------------------------------------------------
+      // interface implementation
+      //----------------------------------------------------------------------
+      virtual void execute( const carto::VolumeRef<T> & in,
+                                  carto::VolumeRef<T> & out ) const
       {
-        return ImageAlgorithmSwitch<VoxelType,carto::DataTypeTraits<VoxelType>::is_multichannel>::execute(_algo, in);
+        typedef ImageAlgorithmSwitch<T,carto::DataTypeTraits<T>::is_multichannel> S;
+        S::execute( *_algo, in, out, this->_verbose );
       }
 
-      virtual carto::VolumeRef<VoxelType> execute( const carto::VolumeRef<VoxelType> & in )
-      {
-        return ImageAlgorithmSwitch<VoxelType,carto::DataTypeTraits<VoxelType>::is_multichannel>::execute(_algo, in);
+      virtual Point4dl getOutputImageDimensions( const Point4dl & dims ) const {
+        return _algo->getOutputImageDimensions( dims );
       }
 
+      virtual Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) const {
+        return _algo->getOutputImageVoxelSize( voxelsize );
+      }
+
+      // I need this line to unhide all the "execute" method since the
+      // overloading of one hid all the others.
+      using ImageAlgorithmInterface<T>::execute;
+      using ImageAlgorithmInterface<T>::getOutputImageDimensions;
+      using ImageAlgorithmInterface<T>::getOutputImageVoxelSize;
+
+      virtual ImageAlgorithm<T> *clone() const {
+        return new ImageAlgorithm<T>( *this );
+      }
+
+      virtual void setVerbose( int level )
+      {
+        ImageAlgorithmInterface<T>::setVerbose( level );
+        _algo->setVerbose( level );
+      }
+
+      //----------------------------------------------------------------------
+      // member method (backward compability)
+      //----------------------------------------------------------------------
       /// Convenience method that execute the algorithm on the input image.
       /// Please prefer the execute() method
       /// \param in Input image to process
       /// \return Processed image
-      virtual AimsData< VoxelType > doit( const AimsData<VoxelType>& in )
+      virtual AimsData< T > doit( const AimsData<T>& in )
       {
-        return execute( in );
+        return ImageAlgorithmInterface<T>::execute( in );
       }
 
-      /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageDimensions
-      /// method implementation.
-      /// Returns the output dimensions based on input dimensions. This is
-      /// used when output image has not the same dimensions as input image.
-      /// \return \c Point4dl dimension of the output image.
-      virtual const Point4dl getOutputImageDimensions( const Point4dl & dims ) const {
-        return _algo.getOutputImageDimensions(dims);
-      }
-
-      /// \c ImageAlgorithmInterface<VoxelType>::getOutputImageVoxelSize
-      /// method implementation.
-      /// Returns the output voxel size based on an input voxel size.
-      /// \param Point4d voxelsize voxel size of the input image.
-      /// \return \c Point4d voxel size of the output image.
-      virtual const Point4df getOutputImageVoxelSize( const Point4df & voxelsize ) const {
-        return _algo.getOutputImageVoxelSize(voxelsize);
-      }
-
-      /// Clone
-      virtual ImageAlgorithm<T,A> * clone() const {
-        return new ImageAlgorithm<T,A>(*this);
-      }
-
+      //----------------------------------------------------------------------
+      // polymorphism
+      //----------------------------------------------------------------------
+    public:
+      virtual ~ImageAlgorithm() {}
     protected:
-      /// Single channel
-      SingleChannelImageAlgorithmType _algo;
+      ImageAlgorithm() {}
+      ImageAlgorithm( const ImageAlgorithmInterface<ChannelType> & algo ):
+        ImageAlgorithmInterface<T>(),
+        _algo(algo.clone())
+      {}
+      ImageAlgorithm( ImageAlgorithmInterface<ChannelType> * algo, bool deepcopy = true ):
+        ImageAlgorithmInterface<T>(),
+        _algo( (deepcopy ? algo->clone() : algo ) )
+      {}
+      ImageAlgorithm( const ImageAlgorithm & other ):
+        ImageAlgorithmInterface<T>(other),
+        _algo(other._algo->clone())
+      {}
+      ImageAlgorithm & operator= ( const ImageAlgorithm & other )
+      {
+        ASSERT( typeid(other) == typeid(*this) );
+        if( &other != this ) {
+          ImageAlgorithmInterface<T>::operator=( other );
+          _algo.reset( other._algo->clone() );
+        }
+        return *this;
+      }
+
+      //----------------------------------------------------------------------
+      // member
+      //----------------------------------------------------------------------
+    protected:
+      carto::rc_ptr<ImageAlgorithmInterface<ChannelType> > _algo;
+  };
+
+  //==========================================================================
+  //   IMAGE ALGORITHM SWITCH
+  //==========================================================================
+  /// \brief aims::ImageAlgorithmSwitch switches between multichannel and
+  /// monochannel \c ImageAlgorithmInterface
+  ///
+  /// \c aims::ImageAlgorithmSwitch is the base class to switch between
+  /// multichannel and monochannel \c ImageAlgorithmInterface implementations.
+  ///
+  /// \tparam T    type of voxel that will be processed by
+  ///              \c ImageAlgorithmInterface
+  /// \tparam M    bool that specify wether derived \c ImageAlgorithmInterface
+  ///              is monochannel or multichannel
+  template <typename T, bool M>
+  class ImageAlgorithmSwitch {
+    public:
+      typedef T VoxelType;
+      ImageAlgorithmSwitch() {}
+  };
+
+  //--------------------------------------------------------------------------
+  // specialization: single channel
+  //--------------------------------------------------------------------------
+  /// \brief aims::ImageAlgorithmSwitch switch specialization for
+  /// mono-channel \c ImageAlgorithmInterface
+  ///
+  /// \c aims::ImageAlgorithmSwitch is the specialized class for mono-channel
+  /// \c ImageAlgorithmInterface implementations.
+  ///
+  /// \tparam T   type of voxel that will be processed by
+  ///             \c ImageAlgorithmInterface
+  template <typename T>
+  class ImageAlgorithmSwitch<T,false> {
+    public:
+      ImageAlgorithmSwitch() {}
+
+      /// Execute \c ImageAlgorithmInterface<T> on \c VolumeRef<T>.
+      /// \param algo Processing algorithm to run
+      /// \param in   Input image to filter
+      /// \param out  Filtered image (must be already allocated)
+      static void execute( ImageAlgorithmInterface<T> & algo,
+                           const carto::VolumeRef<T> & in,
+                                 carto::VolumeRef<T> & out,
+                           int verbose = carto::verbose )
+      {
+        return algo.execute( in, out );
+      }
+  };
+
+  //--------------------------------------------------------------------------
+  // specialization: multi channel
+  //--------------------------------------------------------------------------
+  /// \brief aims::ImageAlgorithmSwitch switch specialization for
+  /// multi-channel \c ImageAlgorithmInterface
+  ///
+  /// \c aims::ImageAlgorithmSwitch is the specialized class for
+  /// multi-channel \c ImageAlgorithmInterface implementation.
+  ///
+  /// \tparam T  type of voxel that will be processed by
+  ///            \c ImageAlgorithmInterface
+  template <typename T>
+  class ImageAlgorithmSwitch<T,true> {
+    public:
+      typedef typename T::ChannelType ChannelType;
+      ImageAlgorithmSwitch() {}
+
+      /// Execute \c ImageAlgorithmInterface<T> on \c VolumeRef<T>.
+      /// \param algo Processing algorithm to run
+      /// \param in   Input image to filter
+      /// \param out  Filtered image (must be already allocated)
+      static void execute(
+        ImageAlgorithmInterface<ChannelType> & algo,
+        const carto::VolumeRef<T> & in,
+              carto::VolumeRef<T> & out,
+        int verbose )
+      {
+        ChannelSelector< carto::VolumeRef<T>,
+                         carto::VolumeRef<ChannelType>
+                       > selector;
+
+        for( uint8_t channel = 0;
+                     channel < DataTypeInfo<T>::samples();
+                     channel++ )
+        {
+          if( verbose )
+            std::cout << "Processing channel :"
+                      << carto::toString(channel)
+                      << std::endl;
+
+          // Split the data and process filter on each component
+          const carto::VolumeRef<ChannelType> & inChannel = selector.select( in, channel );
+          const carto::VolumeRef<ChannelType> & outChannel = algo.execute( inChannel );
+          selector.set( out, channel, outChannel );
+        }
+      }
   };
 
 }

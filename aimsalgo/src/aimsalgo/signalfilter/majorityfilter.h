@@ -32,17 +32,49 @@
  */
 
 
-#ifndef AIMS_SIGNALFILTER_MAJORITYSMOOTH_H
-#define AIMS_SIGNALFILTER_MAJORITYSMOOTH_H
+#ifndef AIMS_SIGNALFILTER_MAJORITYFILTER_H
+#define AIMS_SIGNALFILTER_MAJORITYFILTER_H
 
-#include <aims/signalfilter/filter_nonlinear.h>
+#include <aims/signalfilter/filteringimagealgorithm.h>
+#include <aims/signalfilter/filteringfunction_element.h>
 #include <aims/connectivity/structuring_element.h>
-#include <aims/data/data_g.h>
-#include <vector>
+
+namespace aims {
+
+  template <typename T>
+  class MajorityFilter: public ElementFilteringImageAlgorithm<T>
+  {
+  public:
+    typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+    MajorityFilter( const StructuringElement & se = strel::Cube(1.0),
+                    const carto::Object & options = carto::none() ):
+      ElementFilteringImageAlgorithm<T>( MajorityFilterFunc<ChannelType>( options ),
+                                      se )
+    {}
+    MajorityFilter( const carto::Object & options ):
+      ElementFilteringImageAlgorithm<T>( MajorityFilterFunc<ChannelType>( options ),
+                                      strel::Cube(1.0) )
+    {}
+    MajorityFilter( const MajorityFilter<T> & other ):
+      ElementFilteringImageAlgorithm<T>( other )
+    {}
+    ~MajorityFilter() {}
+    MajorityFilter<T> & operator=( const MajorityFilter<T> & other )
+    {
+      ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
+      return *this;
+    }
+    MajorityFilter<T> *clone() { return new MajorityFilter<T>(*this); }
+  };
+
+} // namespace aims
 
 //============================================================================
 //   Backward compatibility bindings
 //============================================================================
+
+#include <aims/data/data_g.h>
+#include <vector>
 
 template <typename T>
 class MajoritySmoothing
@@ -82,7 +114,6 @@ MajoritySmoothing<T> & MajoritySmoothing<T>::operator= (
   return (*this);
 }
 
-#include <iostream>
 template <typename T>
 AimsData<T> MajoritySmoothing<T>::doit( const AimsData<T>& in )
 {

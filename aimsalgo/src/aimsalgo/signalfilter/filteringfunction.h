@@ -34,8 +34,6 @@
 #ifndef AIMS_SIGNALFILTER_FILTERFUNCTION_H
 #define AIMS_SIGNALFILTER_FILTERFUNCTION_H
 
-//--- aims -------------------------------------------------------------------
-#include <aims/connectivity/structuring_element.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/object/object.h>                          // carto::Object
 //--- std --------------------------------------------------------------------
@@ -49,48 +47,53 @@ template <typename T> class AimsData;
 
 namespace aims {
 
+  //==========================================================================
+  // FILTERING FUNCTON INTERFACE
+  //==========================================================================
   /// \brief Pure virtual class: interface for filtering functions
   ///        called by aims::FilteringImageAlgorithm and
   ///        aims::SubSamplingImageAlgorithm
   template <typename T>
-  class FilteringFunction
+  class FilteringFunctionInterface
   {
     public:
-      virtual ~FilteringFunction() {};
-      virtual void setOptions( carto::Object options ) = 0;
-      /// Processing function used by aims::SubSamplingImageAlgorithm.
-      /// The filtering function is applied to the full window
-      virtual T execute( const carto::VolumeRef<T> & volume ) = 0;
-      /// Processing function used by aims::FilteringImageAlgorithm.
-      /// The window should be of size one voxel. The structuring element
-      /// should contain offsets to the voxels included in the filtering
-      /// function. Border must be large enough so that using the
-      /// structuring element is safe.
-      virtual T execute( const carto::VolumeRef<T> & volume,
-                         const StructuringElementRef & se ) = 0;
-      /// Differentiate linear and non linear functions
-      virtual bool isLinear() const = 0;
-      /// In linear case, the structuring element size depends on the filter
-      /// type and its parameters. This method returns this structuring
-      /// element. In cases were such a StrEl does not exist (in the non
-      /// linear case for example) strel::none() is returned.
-      virtual StructuringElementRef getStructuringElement(
-        const std::vector<float> & voxel_size = std::vector<float>(4,1.)
-      )
-      {
-        return strel::none();
-      }
-      /// Clone
-      virtual FilteringFunction * clone() const = 0;
+      virtual ~FilteringFunctionInterface() {};
+      //----------------------------------------------------------------------
+      // interface
+      //----------------------------------------------------------------------
+      /// Basic execute method that all derived class must implement (in
+      /// the case where more parameters are needed, this methods runs
+      /// with their default value)
+      virtual T execute( const carto::VolumeRef<T> & in ) const = 0;
+      /// Set the parameters of the filters
+      /// If a parameter value is not set in the options object, a default
+      /// value must be assigned.
+      /// This method may do nothing if no options are available.
+      virtual void setOptions( const carto::Object & options ) {}
+      /// Update the parameters of the filters
+      /// If a parameter value is not set in the options object, the current
+      /// value must be kept.
+      /// This method may do nothing if no options are available.
+      virtual void updateOptions( const carto::Object & options ) {}
+      /// clone method. It is better to implement it using a copy constructor.
+      virtual FilteringFunctionInterface *clone() const = 0;
 
       //----------------------------------------------------------------------
-      //   Bindings
+      // backward compability
       //----------------------------------------------------------------------
-      /// Backward compability
+      /// \deprecated
       T doit( const AimsData<T> & in )
       {
         return execute( in.volume() );
       }
+
+    protected:
+      //----------------------------------------------------------------------
+      //   magic 3
+      //----------------------------------------------------------------------
+      FilteringFunctionInterface() {}
+      FilteringFunctionInterface( const FilteringFunctionInterface<T> & );
+      FilteringFunctionInterface<T> & operator= ( const FilteringFunctionInterface<T> & );
   };
 
 } // namespace aims

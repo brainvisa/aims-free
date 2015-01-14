@@ -213,20 +213,29 @@ HEADERS = \
     signalfilter/minfilter.h  \
     signalfilter/maxfilter.h  \
     signalfilter/majorityfilter.h  \
+    signalfilter/differencefilter.h  \
+    signalfilter/sumfilter.h  \
+    signalfilter/variancefilter.h  \
+    signalfilter/sdfilter.h  \
+    signalfilter/gaborfilter.h  \
     signalfilter/filteringfunction.h \
     signalfilter/filteringfunction_linear.h \
     signalfilter/filteringfunction_linear_d.h \
+    signalfilter/filteringfunction_element.h \
+    signalfilter/filteringfunction_element_d.h \
+    signalfilter/filteringimagealgorithm.h \
+    signalfilter/linearfilterfactory.h \
+    signalfilter/linearfilterfactory_d.h \
+    signalfilter/elementfilterfactory.h \
+    signalfilter/elementfilterfactory_d.h \
+    signalfilter/filteringfunction_element_rgb.h \
+    signalfilter/filteringfunction_element_rgb_d.h \
     signalfilter/filteringfunction_linear_rgb.h \
     signalfilter/filteringfunction_linear_rgb_d.h \
-    signalfilter/filteringfunction_nonlinear.h \
-    signalfilter/filteringfunction_nonlinear_d.h \
-    signalfilter/filteringfunction_nonlinear_rgb.h \
-    signalfilter/filteringfunction_nonlinear_rgb_d.h \
-    signalfilter/filteringimagealgorithm.h \
-    signalfilter/filter_nonlinear.h \
-    signalfilter/filter_nonlinear_d.h \
-    signalfilter/filter_linear.h \
-    signalfilter/filter_linear_d.h \
+#    signalfilter/filter_nonlinear.h \
+#    signalfilter/filter_nonlinear_d.h \
+#    signalfilter/filter_linear.h \
+#    signalfilter/filter_linear_d.h \
     spam/spam.h \
     talairach/cramer.h    \
     talairach/talPoints.h    \
@@ -396,11 +405,13 @@ SOURCES = \
     signalfilter/parity.cc    \
     signalfilter/gframes.cc    \
     signalfilter/filteringfunction_linear.cc \
+    signalfilter/filteringfunction_element.cc \
+    signalfilter/linearfilterfactory.cc \
+    signalfilter/elementfilterfactory.cc \
     signalfilter/filteringfunction_linear_rgb.cc \
-    signalfilter/filteringfunction_nonlinear.cc \
-    signalfilter/filteringfunction_nonlinear_rgb.cc \
-    signalfilter/filter_nonlinear.cc \
-    signalfilter/filter_linear.cc \
+    signalfilter/filteringfunction_element_rgb.cc \
+#    signalfilter/filter_nonlinear.cc \
+#    signalfilter/filter_linear.cc \
     spam/spam.cc \
     talairach/cramer.cc    \
     talairach/talPoints.cc    \

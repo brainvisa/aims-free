@@ -31,22 +31,34 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <aims/signalfilter/filteringfunction_linear_d.h>
+#ifndef AIMS_SIGNALFILTER_GABORFILTER_H
+#define AIMS_SIGNALFILTER_GABORFILTER_H
 
-#define AIMS_TEMPLATE_LIN_FILTERFUNC( NAME )                                 \
-  template class NAME<int8_t>;                                               \
-  template class NAME<uint8_t>;                                              \
-  template class NAME<int16_t>;                                              \
-  template class NAME<uint16_t>;                                             \
-  template class NAME<int32_t>;                                              \
-  template class NAME<uint32_t>;                                             \
-  template class NAME<int64_t>;                                              \
-  template class NAME<uint64_t>;                                             \
-  template class NAME<float>;                                                \
-  template class NAME<double>
+#include <aims/signalfilter/filteringimagealgorithm.h>
+#include <aims/signalfilter/filteringfunction_linear.h>
 
 namespace aims {
-  AIMS_TEMPLATE_LIN_FILTERFUNC(LinearFilteringFunction);
-  AIMS_TEMPLATE_LIN_FILTERFUNC(LinearFilteringFunctionFactory);
-  AIMS_TEMPLATE_LIN_FILTERFUNC(GaborFilterFunc);
+
+  template <typename T>
+  class GaborFilter: public LinearFilteringImageAlgorithm<T>
+  {
+  public:
+    typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+    GaborFilter( const carto::Object & options = carto::none() ):
+      LinearFilteringImageAlgorithm<T>( GaborFilterFunc<ChannelType>( options ) )
+    {}
+    GaborFilter( const GaborFilter<T> & other ):
+      LinearFilteringImageAlgorithm<T>( other )
+    {}
+    ~GaborFilter() {}
+    GaborFilter<T> & operator=( const GaborFilter<T> & other )
+    {
+      LinearFilteringImageAlgorithm<T>::operator=( (LinearFilteringImageAlgorithm<T>&)other );
+      return *this;
+    }
+    GaborFilter<T> *clone() { return new GaborFilter<T>(*this); }
+  };
+
 }
+
+#endif
