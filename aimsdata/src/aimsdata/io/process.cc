@@ -38,6 +38,7 @@
 #include <aims/io/finder.h>
 #include <cartobase/exception/format.h>
 #include <iostream>
+#include <algorithm>
 
 using namespace aims;
 using namespace carto;
@@ -80,20 +81,40 @@ bool Process::execute( Finder & f, const string & filename )
   string	otype = f.objectType();
   string	dtype = f.dataType();
 
-  map<string, map<string, ProcFunc> >::const_iterator	
+  vector<string>    posstypes = f.possibleDataTypes();
+  unsigned          i, n = posstypes.size();
+
+  if( _options )
+    try
+    {
+      Object pdt = _options->getProperty( "preferred_data_type" );
+      if( pdt )
+      {
+        string pdts = pdt->getString();
+        vector<string>::const_iterator ipt
+          = find( posstypes.begin(), posstypes.end(), pdts );
+        if( ipt != posstypes.end() )
+          // preferred_data_type is available: try to use it first.
+          dtype = pdts;
+      }
+    }
+    catch( ... )
+    {
+    }
+
+  map<string, map<string, ProcFunc> >::const_iterator
     ip = _execs.find( otype );
   if( ip == _execs.end() )
-    {
-      throw datatype_format_error( string( "unsupported data type " ) 
-					  + otype + " / " + dtype, filename );
-      return( false );
-    }
+  {
+    throw datatype_format_error( string( "unsupported data type " )
+                                          + otype + " / " + dtype, filename );
+    return( false );
+  }
+
   map<string, ProcFunc>::const_iterator  ip2 = (*ip).second.find( dtype );
   if( ip2 == (*ip).second.end() )
     {
       // Try alternate data types
-      vector<string>	posstypes = f.possibleDataTypes();
-      unsigned		i, n = posstypes.size();
 
       for( i=0; i<n; ++i )
 	if( posstypes[i] != dtype )
