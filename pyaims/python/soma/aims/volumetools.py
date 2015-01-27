@@ -36,7 +36,7 @@ __docformat__ = 'restructuredtext en'
 from soma import aims
 import numpy as np
 
-def crop_volume(vol, minValue=0, border=0):
+def crop_volume(vol, threshold=0, border=0):
     '''
     Crop the input volume, removing slices filled with values under a
     given threshold, and keeping a given border.
@@ -50,7 +50,7 @@ def crop_volume(vol, minValue=0, border=0):
     ----------
     vol: aims Volume
         volume to be cropped
-    minValue: volume value, optional
+    threshold: volume value, optional
         Minimum value over which a slice cannot be cropped (is supposed to
         contain real data). The default is 0: only value <= 0 is croppable
     border: int, optional
@@ -66,7 +66,7 @@ def crop_volume(vol, minValue=0, border=0):
     zeroslice = -1
     for z in xrange(vol.getSizeZ()):
         slicevol = arr[:,:,z,:]
-        if np.all(slicevol <= minValue):
+        if np.all(slicevol <= threshold):
             zeroslice = z
         else:
             break
@@ -77,7 +77,7 @@ def crop_volume(vol, minValue=0, border=0):
     if z != -1:
         for z in xrange(vol.getSizeZ()-1, 0, -1):
             slicevol = arr[:,:,z,:]
-            if np.all(slicevol <= minValue):
+            if np.all(slicevol <= threshold):
                 zeroslice = z
             else:
                 break
@@ -86,7 +86,7 @@ def crop_volume(vol, minValue=0, border=0):
     zeroslice = -1
     for y in xrange(vol.getSizeY()):
         slicevol = arr[:,y,:,:]
-        if np.all(slicevol <= minValue):
+        if np.all(slicevol <= threshold):
             zeroslice = y
         else:
             break
@@ -97,7 +97,7 @@ def crop_volume(vol, minValue=0, border=0):
     if y != -1:
         for y in xrange(vol.getSizeY()-1, 0, -1):
             slicevol = arr[:,y,:,:]
-            if np.all(slicevol <= minValue):
+            if np.all(slicevol <= threshold):
                 zeroslice = y
             else:
                 break
@@ -106,7 +106,7 @@ def crop_volume(vol, minValue=0, border=0):
     zeroslice = -1
     for x in xrange(vol.getSizeX()):
         slicevol = arr[x,:,:,:]
-        if np.all(slicevol <= minValue):
+        if np.all(slicevol <= threshold):
             zeroslice = x
         else:
             break
@@ -117,7 +117,7 @@ def crop_volume(vol, minValue=0, border=0):
     if x != -1:
         for x in xrange(vol.getSizeX()-1, 0, -1):
             slicevol = arr[x,:,:,:]
-            if np.all(slicevol <= minValue):
+            if np.all(slicevol <= threshold):
                 zeroslice = x
             else:
                 break
