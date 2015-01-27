@@ -44,15 +44,15 @@ soma.aims.meshSplit module
 .. automodule:: soma.aims.meshSplit
   :members:
 
+soma.aims.volumetools module
+-----------------------------
+
+.. automodule:: soma.aims.volumetools
+  :members:
+
 soma.aims.texturetools module
 -----------------------------
 
 .. automodule:: soma.aims.texturetools
-  :members:
-
-soma.aims.pynifti module
-------------------------
-
-.. automodule:: soma.aims.pynifti
   :members:
 
