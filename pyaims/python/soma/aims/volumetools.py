@@ -42,7 +42,8 @@ def crop_volume(vol, threshold=0, border=0):
     given threshold, and keeping a given border.
 
     If no crop actually takes place, the input volume is returned without
-    duplication.
+    duplication. If crop is actually performed, then a view into the original
+    volume is returned, sharing the same data block which is not copied.
 
     Transformations in the header are adapted accordingly.
 
@@ -127,8 +128,9 @@ def crop_volume(vol, threshold=0, border=0):
             and ymin == 0 and yup == vol.getSizeY() \
             and zmin == 0 and zup == vol.getSizeZ():
         return vol
-    cropped_vol = aims.Volume(np.array(arr[xmin:xup, ymin:yup, zmin:zup],
-                                       order='F'))
+    cropped_vol = aims.VolumeView(
+        vol, vol.Position4Di(xmin, ymin, zmin, 0),
+        vol.Position4Di(xup - xmin, yup - ymin, zup - zmin, vol.getSizeT()))
     cropped_vol.copyHeaderFrom(vol.header())
     transl = aims.AffineTransformation3d()
     if cropped_vol.header().has_key('referential'):
@@ -137,8 +139,9 @@ def crop_volume(vol, threshold=0, border=0):
         del cropped_vol.header()['uuid']
     vs = vol.getVoxelSize()
     transl.setTranslation((xmin * vs[0], ymin * vs[1], zmin * vs[2]))
-    if cropped_vol.header().has_key('transformations'):
-        trans_list = cropped_vol.header()['transformations']
+    if vol.header().has_key('transformations') \
+            and vol.header().has_key('referentials'):
+        trans_list = vol.header()['transformations']
         ctrans_list = []
         for trans_v in trans_list:
             trans = aims.AffineTransformation3d(trans_v)
