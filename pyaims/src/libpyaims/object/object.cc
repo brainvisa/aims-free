@@ -376,7 +376,7 @@ namespace carto
         PyObject	*po = value->value<PyObject *>();
         if( !po )
           throw std::runtime_error
-            ( std::string( "Cannot (yet?) set non-python element " )
+            ( std::string( "Cannot (²?) set non-python element " )
               + value->type() + " in python sequence" );
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
@@ -558,6 +558,17 @@ namespace carto
         if( !po )
         {
           //sipConvertFromInstance( &value, sipClass_carto_Object, 0 );
+          /* The following does not work because sipFindType() is only defined
+           * in sip-generated modules (sipAPIaimssip.h) which are not built
+           * yet and need this library. It could be done via a small
+           * registration mechanism which would be completed by the sipaims
+           * part.
+          Object *obj2 = new Object( value );
+          cout << "type: " << sipFindType( "carto_Object" ) << endl;
+          po = sipConvertFromType( obj2, sipFindType( "carto_Object" ),
+                                   Py_None );
+          */
+
           PyErr_Clear();
           PyGILState_Release(gstate);
           throw std::runtime_error
