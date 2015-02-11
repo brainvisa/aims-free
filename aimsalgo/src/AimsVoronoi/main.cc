@@ -42,6 +42,74 @@
 using namespace aims;
 using namespace std;
 
+
+template<class T>
+static bool doit( Process &, const string &, Finder & );
+
+class Voronoi : public Process
+{
+public:
+  Voronoi( string filein,
+           string fileout,
+           int xmask,
+           int ymask,
+           int zmask,
+           float factor,
+           double val_domain,
+           double val_outside ) :
+    Process(),
+    _filein(filein),
+    _fileout(fileout),
+    _xmask(xmask),
+    _ymask(ymask),
+    _zmask(zmask),
+    _factor(factor),
+    _val_domain(val_domain),
+    _val_outside(val_outside)
+  {
+    registerProcessType( "Volume", "S8", &doit<int8_t> );
+    registerProcessType( "Volume", "U8", &doit<uint8_t> );
+    registerProcessType( "Volume", "S16", &doit<int16_t> );
+    registerProcessType( "Volume", "U16", &doit<uint16_t> );
+    registerProcessType( "Volume", "S32", &doit<int32_t> );
+    registerProcessType( "Volume", "U32", &doit<uint32_t> );
+  }
+
+  template<class T>
+  friend bool doit( Process &, const string &, Finder & );
+
+
+private:
+  string _filein, _fileout;
+  int _xmask, _ymask, _zmask;
+  float _factor;
+  double _val_domain, _val_outside;
+
+};
+
+template <class T>
+bool doit( Process & p, const string &, Finder & ) {
+
+  Voronoi & v = (Voronoi &)p;
+  AimsData<T> seed;
+  Reader<AimsData<T> > dataR( v._filein );
+  cout << "reading seed " << v._filein << endl;
+  if( !dataR.read( seed ) )
+    {
+      cerr << "could not read " << v._filein << endl;
+      return( 1 );
+    }
+
+  AimsData<T> label;
+  label = AimsVoronoiFrontPropagation( seed, (T)v._val_domain, (T)v._val_outside,
+                                       v._xmask, v._ymask, v._zmask, v._factor );
+
+  Writer<AimsData<T> > dataW( v._fileout );
+  dataW << label;
+
+  return true;
+}
+
 BEGIN_USAGE(usage)
   "--------------------------------------------------------------------------",
   "AimsVoronoi -i[nput]   <filein>                                           ",
@@ -77,7 +145,7 @@ int main( int argc, char* argv[] )
   char *filein = NULL, *fileout = NULL;
   int xmask = 3, ymask = 3, zmask = 3;
   float factor = 50;
-  short val_domain = 0, val_outside = -1;
+  double val_domain = 0, val_outside = -1;
 
   //
   // Getting options
@@ -96,21 +164,18 @@ int main( int argc, char* argv[] )
 
   AimsParseOptions( &argc, argv, opt, usage );
 
-  AimsData<int16_t> seed;
-  Reader<AimsData<int16_t> > dataR( filein );
-  cout << "reading seed " << filein << endl;
-  if( !dataR.read( seed ) )
-    {
-      cerr << "could not read " << filein << endl;
-      return( 1 );
-    }
+  Voronoi p( string(filein),
+             string(fileout),
+             xmask,
+             ymask,
+             zmask,
+             factor,
+             val_domain,
+             val_outside );
 
-  AimsData<int16_t> label;
-  label = AimsVoronoiFrontPropagation( seed, val_domain, val_outside,
-                                       xmask, ymask, zmask, factor );
-
-  Writer<AimsData< int16_t> > dataW( fileout );
-  dataW << label;
+  if( !p.execute( string(filein) ) ) {
+      return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }

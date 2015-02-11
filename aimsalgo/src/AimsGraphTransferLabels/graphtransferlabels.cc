@@ -239,7 +239,7 @@ int main( int argc, const char** argv )
 
       // voronoi
       cout << "computing voronoi map..." << endl;
-      voro = AimsVoronoiFrontPropagation( voro, -10, -11, 3, 3, 3, 50 );
+      voro = AimsVoronoiFrontPropagation( voro, (short)-10, (short)-11, 3, 3, 3, 50 );
 
       if( !wv.fileName().empty() )
         wv.write( voro );
