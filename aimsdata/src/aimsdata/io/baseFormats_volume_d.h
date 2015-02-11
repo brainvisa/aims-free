@@ -301,6 +301,12 @@ namespace aims
             return false;
       }
     }
+    
+    // Add SOMAIO_VOLUMES in excluded formats
+    // to avoid recursive calls
+    std::vector<std::string>::iterator ei;
+    bool success;
+    
     excluded.push_back( "SOMAIO_VOLUMES" );
     options->setProperty( "aims_excluded_formats", excluded );
 
@@ -311,9 +317,28 @@ namespace aims
     if( cvol )
     {
       vol = carto::rc_ptr<carto::Volume<T> >( cvol );
-      return true;
+      success = true;
     }
-    return false;
+    else
+      success = false;
+    
+    // Remove previously added excluded format
+    options = r.options();
+    if( options->getProperty( "aims_excluded_formats", excluded ) )
+    {
+      ei = std::find( excluded.begin(),
+                      excluded.end(),
+                      "SOMAIO_VOLUMES" );
+      
+      if (ei != excluded.end()) {
+        excluded.erase( ei );
+        options->setProperty( "aims_excluded_formats", excluded );
+      }
+      
+      r.setOptions( options );
+    }
+    
+    return success;
   }
 
 
