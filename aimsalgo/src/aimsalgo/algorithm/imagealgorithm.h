@@ -136,11 +136,12 @@ namespace aims
         return getOutputImageVoxelSize( Point4df( vx, vy, vz, vt ) );
       }
 
-      /// \sa execute( const carto::VolumeRef<T> &, const carto::VolumeRef(<T> )
+      /// \sa execute( const carto::VolumeRef<T> & )
       virtual carto::VolumeRef<T> execute( const carto::VolumeRef<T> & in ) const
       {
         Point4dl dims( in.getSizeX(), in.getSizeY(), in.getSizeZ(), in.getSizeT() );
-        std::vector<float> voxelsize(4,1.);
+        std::vector<float> voxelsize(4, 1.);
+        
         in.header().getProperty( "voxel_size", voxelsize );
         Point4df voxel( voxelsize[0], voxelsize[1], voxelsize[2], voxelsize[3] );
         dims = getOutputImageDimensions( dims );
@@ -158,7 +159,7 @@ namespace aims
         return out;
       }
 
-      /// \sa execute( const carto::VolumeRef<T> &, const carto::VolumeRef<T> & )
+      /// \sa execute( const carto::AimsData<T> & )
       virtual AimsData<T> execute( const AimsData<T> & in ) const
       {
         return AimsData<T>( execute( carto::VolumeRef<T>( in.volume() ) ) );

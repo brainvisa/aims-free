@@ -275,9 +275,11 @@ namespace aims {
       typename carto::Volume<T>::Position4Di pos(0,0,0,0), size(1,1,1,1);
 
       // set voxel size
-      carto::Object vs = carto::Object::value( carto::PropertySet() );
-      vs->setProperty( "voxel_size", in.header().getProperty( "voxel_size" ) );
-      _func->updateOptions( vs );
+      carto::Object options = carto::Object::value( carto::PropertySet() );
+      std::vector<float> vs(4, 1.);
+      in.header().getProperty( "voxel_size", vs );
+      options->setProperty( "voxel_size", vs );
+      _func->updateOptions( options );
 
       // Manage borders / structuring element size
       const std::vector<int> & border = in->getBorders();
