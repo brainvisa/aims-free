@@ -311,7 +311,7 @@ namespace aims {
       }
 
       size[0] = amplitude[0] + amplitude[1] + 1;
-      size[1] = amplitude[2] + amplitude[2] + 1;
+      size[1] = amplitude[2] + amplitude[3] + 1;
       size[2] = amplitude[4] + amplitude[5] + 1;
       carto::VolumeRef<T> win( new carto::Volume<T>( in, pos, size ) );
 
@@ -437,12 +437,12 @@ namespace aims {
       const std::vector<int> amplitude = _strel->getAmplitude();
 
       // When volume has borders, it is possible to use it to process filtering
-      sz = amplitude[4] - border[4];
-      sy = amplitude[2] - border[2];
-      sx = amplitude[0] - border[0];
-      ez = in->getSizeZ() - amplitude[5] + border[5];
-      ey = in->getSizeY() - amplitude[3] + border[3];
-      ex = in->getSizeX() - amplitude[1] + border[1];
+      sz = (amplitude[4] < border[4]) ? 0 : amplitude[4] - border[4];
+      sy = (amplitude[2] < border[2]) ? 0 : amplitude[2] - border[2];
+      sx = (amplitude[0] < border[0]) ? 0 : amplitude[0] - border[0];
+      ez = (amplitude[5] < border[5]) ? in->getSizeZ() : in->getSizeZ() - amplitude[5] + border[5];
+      ey = (amplitude[3] < border[3]) ? in->getSizeY() : in->getSizeY() - amplitude[3] + border[3];
+      ex = (amplitude[1] < border[1]) ? in->getSizeX() : in->getSizeX() - amplitude[1] + border[1];
 
       if( ImageAlgorithmInterface<T>::_verbose > 1 ) {
         std::cout << "Filter amplitude (voxels): [ ";
