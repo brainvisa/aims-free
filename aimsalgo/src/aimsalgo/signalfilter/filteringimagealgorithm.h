@@ -287,7 +287,7 @@ namespace aims {
 
       // When volume has borders, it is possible to use it to process filtering
       sz = (amplitude[4] < border[4]) ? 0 : amplitude[4] - border[4];
-      sy = (amplitude[0] < border[2]) ? 0 : amplitude[2] - border[2];
+      sy = (amplitude[2] < border[2]) ? 0 : amplitude[2] - border[2];
       sx = (amplitude[0] < border[0]) ? 0 : amplitude[0] - border[0];
       ez = (amplitude[5] < border[5]) ? in->getSizeZ() : in->getSizeZ() - amplitude[5] + border[5];
       ey = (amplitude[3] < border[3]) ? in->getSizeY() : in->getSizeY() - amplitude[3] + border[3];
