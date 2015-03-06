@@ -1055,6 +1055,8 @@ def typeCode(data):
             complex: 'CDOUBLE', numpy.complex64: 'CFLOAT',
             numpy.complex128: 'CDOUBLE', 'complex': 'CDOUBLE',
             }
+    if isinstance(data, numpy.dtype):
+        data = str(data)
     dt = dmap.get(data, None)
     if dt is not None:
         return dt

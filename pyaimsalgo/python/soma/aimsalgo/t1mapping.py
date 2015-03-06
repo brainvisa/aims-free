@@ -268,6 +268,7 @@ class BAFIData:
             B1map_volume = gsmooth(gaussian, gaussian,
                 gaussian).doit(B1map_volume).volume()
 
+        B1map_volume.copyHeaderFrom(b1map.header())
         if output_median and smooth_type == 'median':
             return B1map_volume, B1map_volume_med
         else:
@@ -317,3 +318,41 @@ def t1mapping_VFA(flip_angle_factor, GRE_data):
     #T1[T1>sup_bound] = sup_bound
     #T1[np.isnan(T1)] = 0
     return T1
+
+
+def correct_bias(biased_vol, b1map, dp_gre_low_contrast):
+    tr_bias = aims.AffineTransformation3d(biased_vol.header()[
+        'transformations'][0])
+    tr_b1map = aims.AffineTransformation3d(b1map.header()[
+        'transformations'][0])
+    tr_dp_gre = aims.AffineTransformation3d(dp_gre_low_contrast.header()[
+        'transformations'][0])
+    b1_to_bias = tr_bias.inverse() * tr_b1map
+    dp_to_bias = tr_bias.inverse() * tr_dp_gre
+    rsp1 = getattr( aims, 'ResamplerFactory_' \
+        + aims.typeCode(np.asarray(b1map).dtype))().getResampler(1)
+    rsp1.setRef(b1map)
+    b1map_resamp = rsp1.doit(b1_to_bias, biased_vol.getSizeX(),
+        biased_vol.getSizeY(), biased_vol.getSizeZ(),
+        biased_vol.getVoxelSize()[:3])
+    dp_gre_type = aims.typeCode(np.asarray(
+            dp_gre_low_contrast).dtype)
+    smoother = getattr(aimsalgo, 'Gaussian3DSmoothing_' + dp_gre_type)(
+        8., 8., 8.)
+    dp_gre_smooth = smoother.doit(dp_gre_low_contrast)
+    rsp2 = getattr( aims, 'ResamplerFactory_' + dp_gre_type)().getResampler(1)
+    rsp2.setRef(dp_gre_smooth)
+    dp_gre_resamp = rsp2.doit(dp_to_bias, biased_vol.getSizeX(),
+        biased_vol.getSizeY(), biased_vol.getSizeZ(),
+        biased_vol.getVoxelSize()[:3])
+    conv = aims.Converter(intype=b1map_resamp.volume().get(),
+                          outtype=aims.Volume_FLOAT)
+    field = conv(b1map_resamp).volume()
+    field_arr = np.asarray(field)
+    field_arr /= np.asarray(conv(dp_gre_resamp).volume())
+    unbiased_vol = conv(biased_vol) * field
+    return unbiased_vol
+
+
+
+
