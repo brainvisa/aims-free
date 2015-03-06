@@ -9,6 +9,8 @@ import itertools
 import math
 import numpy as np
 
+from soma import aims, aimsalgo
+
 twopi = 2 * np.pi
 
 
@@ -196,6 +198,80 @@ class BAFIData:
         return (M0 * math.sin(flip_angle) *
                 (1 - E1 + (1 - E2) * E1 * math.cos(flip_angle)) /
                 (1 - E1 * E2 * np.cos(flip_angle) ** 2))
+
+    def fix_b1_map(self, b1map, smooth_type='median', gaussian=False,
+                   output_median=False):
+        '''Fix/improve the B1 map by filling holes, smoothing, and extending it
+        a little bit spacially so as to use it on the complete whole brain.
+
+        Parameters
+        ----------
+        b1map: volume
+            the B1 map to be corrected, may be the output of
+            self.make_flip_angle_map()
+        smooth_type: str (optional)
+            smoothing correction type. default: 'median'
+            median:
+            dilated:
+        gaussian: float (optional)
+            default: 0 (not applied)
+            perform an additional gaussian filtering of given stdev
+        output_median: bool (optional)
+            if set, the output will be a tuple including a 2nd volume:
+            the median-filtered B1 map. Only valid if smooth_type is 'median'.
+
+        Returns
+        -------
+        The corrected B1 map.
+        If output_median is set, the return value is a tuple
+        (corrected B1 map, median-filtered B1 map)
+        '''
+        B1map_volume = b1map
+        voxel_size = B1map_volume.getVoxelSize()[:3]
+        data_type = aims.typeCode(str(np.asarray(B1map_volume).dtype))
+        if smooth_type == 'dilated':
+            morpho = getattr(aimsalgo, 'MorphoGreyLevel_' + data_type)()
+            B1map_volume = morpho.doDilation(
+                B1map_volume, max(voxel_size)*2)
+        elif smooth_type == 'median':
+            # median filtering is meant to fill small holes in the B1 map
+            # use a larger volume (border) to get it done in the border layer
+            volume_type = B1map_volume.__class__
+            vol_border = volume_type(B1map_volume.getSizeX(),
+                B1map_volume.getSizeY(),
+                B1map_volume.getSizeZ(),
+                B1map_volume.getSizeT(), 1)
+            np.asarray(vol_border)[:,:,:,0] = np.asarray(B1map_volume)[:,:,:,0]
+            vol_border.copyHeaderFrom(B1map_volume.header())
+            vol_border.refVolume().copyHeaderFrom(B1map_volume.header())
+            median = getattr( aimsalgo, 'MedianSmoothing_' + data_type)
+            # apply the filter on the larger image since the filter actually only
+            # applies to the interior limited by the mask size
+            B1map_volume_med_border \
+                = median().doit(vol_border.refVolume()).volume()
+            # get a smaller view in the result
+            B1map_volume_med = volume_type(B1map_volume_med_border,
+                volume_type.Position4Di(1,1,1,0),
+                volume_type.Position4Di(*B1map_volume.getSize()))
+            B1map_volume_med_arr = np.asarray(B1map_volume_med)
+            B1map_volume_med_arr[np.isnan(B1map_volume_med_arr)] = 0
+            # dilate the map to extrapolate outside the brain
+            morpho = getattr(aimsalgo, 'MorphoGreyLevel_' + data_type)()
+            B1map_volume_old = B1map_volume
+            B1map_volume = morpho.doDilation(
+                B1map_volume_med, max(voxel_size)*4)
+            # "un-filter" the part which already had valid data
+            B1map_ar = np.asarray(B1map_volume_old)
+            np.asarray(B1map_volume)[B1map_ar>1e-2] = B1map_ar[B1map_ar>1e-2]
+        if gaussian != 0:
+            gsmooth = getattr( aimsalgo, 'Gaussian3DSmoothing_' + data_type)
+            B1map_volume = gsmooth(gaussian, gaussian,
+                gaussian).doit(B1map_volume).volume()
+
+        if output_median and smooth_type == 'median':
+            return B1map_volume, B1map_volume_med
+        else:
+            return B1map_volume
 
 
 class GREData2FlipAngles:

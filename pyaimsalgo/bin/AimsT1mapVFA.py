@@ -81,7 +81,7 @@ BAFI_data.tau = 1.2e-3  # RF pulse duration in seconds TODO check real value!!
 
 #B1map_array = np.abs(BAFI_data.make_B1_map())
 B1map_array = np.abs(BAFI_data.make_flip_angle_map())
-B1map_farray = np.asfortranarray(B1map_array)
+B1map_farray = np.asfortranarray(B1map_array.reshape(B1map_array.shape + (1,)))
 B1map_volume = aims.Volume(B1map_farray)
 #B1map_volume.header().update(BAFI_amplitude.header())
 B1map_volume.header()['voxel_size'] = BAFI_amplitude.header()['voxel_size']
@@ -92,52 +92,21 @@ if options.out_b1map_raw:
 
 # extrapolate / smooth and resample the B1 map
 
-if options.smooth_type == 'dilated':
-    morpho = getattr(aimsalgo,
-        'MorphoGreyLevel_' + aims.typeCode(B1map_volume.at(0)))()
-    B1map_volume = morpho.doDilation(
-        B1map_volume,
-        max(BAFI_amplitude.header()['voxel_size'][:3])*2)
-elif options.smooth_type == 'median':
-    # median filtering is meant to fill small holes in the B1 map
-    # use a larger volume (border) to get it done in the border layer
-    volume_type = B1map_volume.__class__
-    vol_border = volume_type(B1map_volume.getSizeX(),
-        B1map_volume.getSizeY(),
-        B1map_volume.getSizeZ(),
-        B1map_volume.getSizeT(), 1)
-    np.asarray(vol_border)[:,:,:,0] = np.asarray(B1map_volume)
-    vol_border.copyHeaderFrom(B1map_volume.header())
-    vol_border.refVolume().copyHeaderFrom(B1map_volume.header())
-    median = getattr( aimsalgo,
-        'MedianSmoothing_' + aims.typeCode(B1map_volume.at(0)))
-    # apply the filter on the larger image since the filter actually only 
-    # applies to the interior limited by the mask size
-    B1map_volume_med_border = median().doit(vol_border.refVolume()).volume()
-    # get a smaller view in the result
-    B1map_volume_med = volume_type(B1map_volume_med_border, 
-        volume_type.Position4Di(1,1,1,0), 
-        volume_type.Position4Di(*B1map_volume.getSize()))
-    B1map_volume_med_arr = np.asarray(B1map_volume_med)
-    B1map_volume_med_arr[np.isnan(B1map_volume_med_arr)] = 0
-    if options.out_b1map_median:
-        print 'writing median.'
-        aims.write(B1map_volume_med, options.out_b1map_median)
-    print 'median done.'
-    # dilate the map to extrapolate outside the brain
-    morpho = getattr(aimsalgo,
-        'MorphoGreyLevel_' + aims.typeCode(B1map_volume.at(0)))()
-    B1map_volume = morpho.doDilation(
-        B1map_volume_med,
-        max(BAFI_amplitude.header()['voxel_size'][:3])*4)
-    # "un-filter" the part which already had valid data
-    B1map_ar = np.asarray(B1map_volume_med)
-    np.asarray(B1map_volume)[B1map_ar>1e-2] = B1map_ar[B1map_ar>1e-2]
-if options.gaussian != 0:
-    gsmooth = getattr( aimsalgo,
-        'Gaussian3DSmoothing_' + aims.typeCode(B1map_volume.at(0)))
-    B1map_volume = gsmooth(options.gaussian, options.gaussian,
-        options.gaussian).doit(B1map_volume).volume()
+print B1map_volume
+print B1map_volume.getSize()
+print np.asarray(B1map_volume).shape
+output_median = False
+if options.out_b1map_median and options.smooth_type == 'median':
+    output_median=True
+B1map_volume_corr = BAFI_data.fix_b1_map(
+    B1map_volume, smooth_type=options.smooth_type, gaussian=options.gaussian,
+    output_median=output_median)
+if output_median:
+    print 'writing median.'
+    aims.write(B1map_volume_corr[1], options.out_b1map_median)
+    B1map_volume = B1map_volume_corr[0]
+else:
+    B1map_volume = B1map_volume_corr
 if options.out_b1map:
     aims.write(B1map_volume, options.out_b1map)
 
