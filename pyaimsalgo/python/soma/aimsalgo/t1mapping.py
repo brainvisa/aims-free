@@ -377,6 +377,13 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
             biased_vol.getVoxelSize()[:3])
         field_arr /= np.asarray(conv(dp_gre_resamp).volume())
     else:
+        small_values = np.where(field_arr < 100)
+        print 'small_values:', small_values[0].shape, small_values
+        nonnull_small = np.where(field_arr[small_values] != 0)
+        print 'nonnull_small:', nonnull_small[0].shape, nonnull_small
+        small_locs = [x[nonnull_small] for x in small_values]
+        print 'small_locs:', small_locs[0].shape, small_locs
+        field_arr[small_locs] = 100 # don't divide too much
         field_arr[:,:,:,:] = 1. / field_arr
 
     field_arr[1./field_arr == 0] = 0.
