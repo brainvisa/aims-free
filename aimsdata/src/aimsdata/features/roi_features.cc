@@ -47,15 +47,15 @@ namespace aims {
  //  RoiFeatures  //
 //---------------//
 
-
 //-----------------------------------------------------------------------------
 void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
 {
-  const vector< string > &featureNames = 
+  const vector< string > &featureNames =
     _scalarSetFeatures.scalarFeatureNames();
   _result = Object::value( PropertySet() );
   while( roiIterator->isValid() ) {
     const Point3df &voxelSize = roiIterator->voxelSize();
+    float voxelVolume = roiIterator->voxelVolume();
     Object features;
     _result->getProperty( roiIterator->regionName(), features );
     if ( features.isNull() ) {
@@ -65,7 +65,7 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
     }
 
     vector< ScalarFeaturesProvider::Scalar_t > featureValues;
-    
+
     rc_ptr< MaskIterator > maskIterator = roiIterator->maskIterator();
     size_t point_count = 0;
     while ( maskIterator->isValid() ) {
@@ -73,8 +73,7 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
       maskIterator->next();
     }
     features->setProperty( "point_count", point_count );
-    features->setProperty( "volume", point_count * voxelSize[ 0 ] *
-                           voxelSize[ 1 ] * voxelSize[ 2 ] );
+    features->setProperty( "volume", (float)((double)point_count * (double)voxelVolume) );
     if ( ! _images.empty() ) {
       for( Images_t::const_iterator it = _images.begin();
            it != _images.end(); ++it ) {
@@ -103,25 +102,25 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
             allValues.push_back( *interpolated.begin() );
           }
         }
-      
+
         Object o;
         features->getProperty( it->first, o );
         if ( o.isNull() ) {
           features->setProperty( it->first, PropertySet() );
           o = features->getProperty( it->first );
         }
-        
+
         vector<int> v;
         v.resize( 3 );
         v[ 0 ] = 1;
         v[ 1 ] = 2;
         v[ 2 ] = 3;
         const PropertySet &header = interpolator->header();
-        
+
         _scalarSetFeatures.setValues( allValues );
         _scalarSetFeatures.scalarFeatureValues( interpolated );
         for( size_t iName = 0; iName < featureNames.size(); ++iName ) {
-          o->setProperty( featureNames[ iName ], 
+          o->setProperty( featureNames[ iName ],
                                 interpolated[ iName ] );
         }
         if ( ! timesValues.empty() ) {
@@ -136,10 +135,10 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
             o->setProperty( it->first, PropertySet() );
             o2 = o->getProperty( it->first );
           }
-          o2->setProperty( "abscissa", 
+          o2->setProperty( "abscissa",
                            vector< ScalarFeaturesProvider::Scalar_t >() );
           for( size_t iName = 0; iName < featureNames.size(); ++iName ) {
-            o2->setProperty( featureNames[ iName ], 
+            o2->setProperty( featureNames[ iName ],
                              vector< ScalarFeaturesProvider::Scalar_t >() );
           }
           if ( header.hasProperty( "start_time" ) ) {
@@ -170,7 +169,7 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
 
 //-----------------------------------------------------------------------------
 void RoiFeatures::
-addImageStatistics( const std::string &prefix, 
+addImageStatistics( const std::string &prefix,
                     const std::string &filename )
 {
   if ( _images.find( prefix ) == _images.end() ) {
@@ -181,7 +180,7 @@ addImageStatistics( const std::string &prefix,
 }
 
 //-----------------------------------------------------------------------------
-static void writeFeatures( const Object &features, ostream &out, 
+static void writeFeatures( const Object &features, ostream &out,
                            const string &indent )
 {
   for( Object it = features->objectIterator(); it->isValid(); it->next() ) {
@@ -252,7 +251,7 @@ void RoiFeatures::writeCSV( ostream &out ) const
 
   csvHeader.push_back( "ROI_label" );
   bool image_label = false;
-  
+
   for( Object itRoi = _result->objectIterator(); itRoi->isValid(); itRoi->next() ) {
     const string roiName( itRoi->key() );
     if ( roiName == "format" || roiName == "content_type" ) continue;
@@ -333,7 +332,7 @@ void RoiFeatures::writeCSV( ostream &out ) const
       cerr << "Cannot write features in CSV format for ROI " << roiName << " because it contains data of type " << features->type() << endl;
     }
   }
-  
+
   bool first = true;
   for( list< string >::const_iterator itH = csvHeader.begin(); itH != csvHeader.end(); ++itH ) {
     if ( first ) {

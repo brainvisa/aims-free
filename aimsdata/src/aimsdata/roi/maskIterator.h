@@ -70,6 +70,11 @@ namespace aims
 
     // Get voxel size
     virtual const Point3df voxelSize() const = 0;
+    // Get voxel volume.
+    // - In cases with a motion, returns the volume of a transform voxel
+    // (which is a parallelepiped in the most general case)
+    // - In other cases, returns vs[0]*vs[1]*vs[2]
+    virtual float voxelVolume() const = 0;
     // Check if a point (in voxel referential) belongs to the mask
     virtual bool contains( const Point3d & ) const = 0;
     // Check if a point (in millimeter graph/image) belongs to the mask
@@ -95,6 +100,7 @@ namespace aims
     virtual void restart();
 
     virtual const Point3df voxelSize() const;
+    virtual float voxelVolume() const;
     virtual bool contains( const Point3d & ) const;
     virtual bool contains( const Point3df & ) const;
     virtual const Point3d volumeDimension() const;
@@ -103,7 +109,7 @@ namespace aims
   protected:
     carto::rc_ptr< MaskIterator > _maskIterator;
     Motion _motion;
-    Motion _inverseMotion;    
+    Motion _inverseMotion;
   };
 
   //---------------------------------------------------------------------------
@@ -167,14 +173,14 @@ namespace aims
     std::auto_ptr< NodeFilter > _nodeFilter;
     carto::rc_ptr< VoxelSampler > _voxelSampler;
 
-    static void 
+    static void
     _findBucketAttributeNames( const Graph &graph,
 			       const Vertex &node,
 			       std::list<std::string> &attributeNames );
 
     Point3df _voxelSize;
     void _getRequiredAttributes();
-    
+
   public:
 
     MaskIteratorOf( const Graph &roi,
@@ -208,6 +214,7 @@ namespace aims
     virtual ~MaskIteratorOf();
 
     virtual const Point3df voxelSize() const { return _voxelSize; }
+    virtual float voxelVolume() const { return _voxelSize[0]*_voxelSize[1]*_voxelSize[2]; }
     virtual const Point3d &value() const;
     virtual const Point3df valueMillimeters() const;
     virtual void next();
@@ -259,6 +266,10 @@ namespace aims
     virtual const Point3df voxelSize() const
     {
       return Point3df( _data->sizeX(), _data->sizeY(), _data->sizeZ() );
+    }
+    virtual float voxelVolume() const
+    {
+      return _data->sizeX() * _data->sizeY() * _data->sizeZ();
     }
     virtual const Point3d &value() const;
     virtual const Point3df valueMillimeters() const;
@@ -405,19 +416,19 @@ namespace aims
       (!_useLabel && (*_data)( _current  ) ) )
     {
       // Next sample in voxel
-      if ( ! _voxelSampler.isNull() ) 
+      if ( ! _voxelSampler.isNull() )
       {
         _voxelSampler->next();
-        if ( _voxelSampler->isValid() ) 
+        if ( _voxelSampler->isValid() )
           return;
       }
     }
-    
+
     if ( ! _voxelSampler.isNull() )
     {
       _voxelSampler->restart();
     }
-    
+
     if ( _current == _lastPoint ) // (to make it not valid )
     {
       _current[ 0 ] = _data->dimX();
@@ -435,7 +446,7 @@ namespace aims
           ++_current[ 2 ];
         }
       }
-    } while( isValid() && ( _useLabel ? 
+    } while( isValid() && ( _useLabel ?
                             (*_data)( _current ) != (T) _label :
                             ! (*_data)( _current  ) ) );
   }
@@ -452,17 +463,17 @@ namespace aims
   template <class T>
   void MaskIteratorOf< AimsData<T> >::restart()
   {
-    if ( ! _voxelSampler.isNull() ) 
+    if ( ! _voxelSampler.isNull() )
     {
       _voxelSampler->restart();
     }
-    
+
     _current[ 0 ] = _current[ 1 ] = _current[ 2 ] = 0;
     _lastPoint[ 0 ] = _data->dimX()-1;
     _lastPoint[ 1 ] = _data->dimY()-1;
     _lastPoint[ 2 ] = _data->dimZ()-1;
 
-    if ( isValid() &&  ( _useLabel ? 
+    if ( isValid() &&  ( _useLabel ?
                          (*_data)( _current ) != (T) _label :
                          ! (*_data)( _current  ) ) ) next();
   }
@@ -471,11 +482,11 @@ namespace aims
   template <class T>
   void MaskIteratorOf< AimsData<T> >::restart( const T &label )
   {
-    if ( ! _voxelSampler.isNull() ) 
+    if ( ! _voxelSampler.isNull() )
     {
       _voxelSampler->restart();
     }
-    
+
     _label = label;
     _useLabel = true;
     _current[ 0 ] = _current[ 1 ] = _current[ 2 ] = 0;
@@ -484,7 +495,7 @@ namespace aims
     _lastPoint[ 2 ] = _data->dimZ()-1;
 
     if ( isValid() && (  (*_data)( _current ) != _label ) )
-    { 
+    {
       next();
     }
   }
@@ -493,11 +504,11 @@ namespace aims
   template <class T>
   void MaskIteratorOf< AimsData<T> >::restart( const specifiedLabels &labels )
   {
-    if ( ! _voxelSampler.isNull() ) 
+    if ( ! _voxelSampler.isNull() )
     {
       _voxelSampler->restart();
     }
-    
+
     _label = (*_data)( labels.firstPoint );
     _current = labels.firstPoint;
     _lastPoint = labels.lastPoint;
@@ -555,7 +566,7 @@ namespace aims
   carto::rc_ptr< MaskIterator > getMaskIterator( const std::string &fileName );
 
   //---------------------------------------------------------------------------
-  carto::rc_ptr< MaskIterator > 
+  carto::rc_ptr< MaskIterator >
   getMaskIterator( const std::string &fileName,
                    carto::rc_ptr< VoxelSampler > voxelSampler );
 
@@ -604,7 +615,7 @@ namespace aims
                    const Motion &motion )
   {
     return carto::rc_ptr< MaskIterator >
-      ( new MotionedMaskIterator( getMaskIterator( data, voxelSampler ), 
+      ( new MotionedMaskIterator( getMaskIterator( data, voxelSampler ),
                                   motion ) );
   }
 

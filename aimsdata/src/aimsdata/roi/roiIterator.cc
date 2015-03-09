@@ -185,7 +185,7 @@ rc_ptr< ROILabelMap > MotionedRoiIterator::createLabelMap()
                       voxelSize[ 2 ] );
   volume = 0UL;
 
-  rc_ptr< ROILabelMap > 
+  rc_ptr< ROILabelMap >
     result( new MotionedVolumeROILabelMap( volume, _motion.inverse() ) );
   result->roiNames.push_back( "background" );
   for( restart(); isValid(); next() ) {
@@ -305,7 +305,7 @@ static bool buildFromGraph( Process &p, const string &filename, Finder & );
 
 class RoiIteratorFactory : public Process
 {
-  friend rc_ptr< RoiIterator > 
+  friend rc_ptr< RoiIterator >
   getRoiIterator( const string &,
                   carto::rc_ptr< VoxelSampler > );
 
@@ -314,12 +314,12 @@ class RoiIteratorFactory : public Process
   void _registerBuildFunctions();
 
   template <class T>
-  friend 
+  friend
   bool buildFromVolume( Process &p, const string &filename,
                         Finder &finder );
   friend bool buildFromGraph( Process &p, const string &filename,
                               Finder &finder );
-  
+
   rc_ptr< RoiIterator > roiIterator;
   rc_ptr< VoxelSampler > voxelSampler;
 };
@@ -334,7 +334,7 @@ bool buildFromVolume
   Finder & )
 {
   RoiIteratorFactory &rif = static_cast< RoiIteratorFactory & >( p );
-  rif.roiIterator = 
+  rif.roiIterator =
     rc_ptr< RoiIterator>( new RoiIteratorOf< AimsData<T> >( filename,
                                                           rif.voxelSampler ) );
   return true;
@@ -347,8 +347,8 @@ bool buildFromGraph
   Finder & )
 {
   RoiIteratorFactory &rif = static_cast< RoiIteratorFactory & >( p );
-  rif.roiIterator = 
-    rc_ptr< RoiIterator>( new RoiIteratorOf< Graph >( filename, 
+  rif.roiIterator =
+    rc_ptr< RoiIterator>( new RoiIteratorOf< Graph >( filename,
                                                       rif.voxelSampler ) );
   return true;
 }
@@ -400,7 +400,7 @@ void RoiIteratorFactory::_registerBuildFunctions()
 
 
 //----------------------------------------------------------------------------
-rc_ptr< RoiIterator > 
+rc_ptr< RoiIterator >
 getRoiIterator( const string &fileName,
                 carto::rc_ptr< VoxelSampler > voxelSampler )
 {
@@ -412,9 +412,9 @@ getRoiIterator( const string &fileName,
 }
 
 //---------------------------------------------------------------------------
-carto::rc_ptr< RoiIterator > 
+carto::rc_ptr< RoiIterator >
 getRoiIterator( const Graph &data,
-                carto::rc_ptr< VoxelSampler > voxelSampler ) 
+                carto::rc_ptr< VoxelSampler > voxelSampler )
 {
   return carto::rc_ptr< RoiIterator >
     ( new RoiIteratorOf< Graph >( data, voxelSampler ) );
@@ -433,12 +433,12 @@ carto::rc_ptr< RoiIterator > getRoiIterator( const Graph &data,
                                              const Motion &motion )
 {
   return carto::
-    rc_ptr< RoiIterator >( new MotionedRoiIterator( getRoiIterator( data ), 
+    rc_ptr< RoiIterator >( new MotionedRoiIterator( getRoiIterator( data ),
                                                     motion ) );
 }
 
 //----------------------------------------------------------------------------
-rc_ptr< RoiIterator > 
+rc_ptr< RoiIterator >
 getRoiIterator( const string &fileName,
                 carto::rc_ptr< VoxelSampler > voxelSampler,
                 const Motion &motion )
@@ -449,14 +449,14 @@ getRoiIterator( const string &fileName,
 }
 
 //---------------------------------------------------------------------------
-carto::rc_ptr< RoiIterator > 
+carto::rc_ptr< RoiIterator >
 getRoiIterator( const Graph &data,
                 carto::rc_ptr< VoxelSampler > voxelSampler,
                  const Motion &motion )
 {
   return carto::
     rc_ptr< RoiIterator >
-    ( new MotionedRoiIterator( getRoiIterator( data, voxelSampler ), 
+    ( new MotionedRoiIterator( getRoiIterator( data, voxelSampler ),
                                motion ) );
 }
 

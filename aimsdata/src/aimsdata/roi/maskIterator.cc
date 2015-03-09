@@ -39,6 +39,7 @@
 #include <aims/graph/graphmanip.h>
 #include <exception>
 #include <cartobase/type/string_conversion.h>
+#include <cmath>
 
 using namespace std;
 using namespace carto;
@@ -97,6 +98,23 @@ const Point3df MotionedMaskIterator::voxelSize() const
   return Point3df( ( _motion.transform( Point3df( vs[0], 0, 0 ) - _motion.transform( Point3df( 0, 0, 0 ) ) ) ).norm(),
 		   ( _motion.transform( Point3df( 0, vs[1], 0 ) - _motion.transform( Point3df( 0, 0, 0 ) ) ) ).norm(),
 		   (_motion.transform( Point3df( 0, 0, vs[2] ) - _motion.transform( Point3df( 0, 0, 0 ) ) ) ).norm() );
+}
+
+//----------------------------------------------------------------------------
+// abs( det( [ m([vs[0], 0, 0]), m([0, vs[1], 0]), m([0, 0, vs2]) ] ) )
+float MotionedMaskIterator::voxelVolume() const
+{
+  Point3df vs = _maskIterator->voxelSize();
+  Point3df o = _motion.transform( Point3df( 0, 0, 0 ) );
+  Point3df t0 = _motion.transform( Point3df( vs[0], 0, 0 ) ) - o;
+  Point3df t1 = _motion.transform( Point3df( 0, vs[1], 0 ) ) - o;
+  Point3df t2 = _motion.transform( Point3df( 0, 0, vs[2] ) ) - o;
+  return (float) std::abs( (double) t0[0] * (double) t1[1] * (double) t2[2] +
+                           (double) t0[1] * (double) t1[2] * (double) t2[0] +
+                           (double) t0[2] * (double) t1[0] * (double) t2[1] -
+                           (double) t0[0] * (double) t1[2] * (double) t2[1] -
+                           (double) t0[1] * (double) t1[0] * (double) t2[2] -
+                           (double) t0[2] * (double) t1[1] * (double) t2[0] );
 }
 
 //----------------------------------------------------------------------------
@@ -314,11 +332,11 @@ const Point3df MaskIteratorOf<Graph>::valueMillimeters() const
                        _itPoints->first[2] * _voxelSize[2] );
   } else {
     const Point3df &voxelSample = _voxelSampler->value();
-    return  Point3df(  ( _itPoints->first[0] + voxelSample[ 0 ] ) * 
+    return  Point3df(  ( _itPoints->first[0] + voxelSample[ 0 ] ) *
                        _voxelSize[0],
-                       ( _itPoints->first[1] + voxelSample[ 1 ] ) * 
+                       ( _itPoints->first[1] + voxelSample[ 1 ] ) *
                        _voxelSize[1],
-                       ( _itPoints->first[2] + voxelSample[ 2 ] ) * 
+                       ( _itPoints->first[2] + voxelSample[ 2 ] ) *
                        _voxelSize[2] );
   }
 }
@@ -333,10 +351,10 @@ _findBucketAttributeNames( const Graph &graph,
   attributeNames.clear();
   rc_ptr<GraphElementTable> elementTable;
   if ( graph.getProperty( "aims_objects_table", elementTable ) ) {
-    GraphElementTable::const_iterator itElementTable = 
+    GraphElementTable::const_iterator itElementTable =
       elementTable->find( node.getSyntax() );
     if ( itElementTable != elementTable->end() ) {
-      for( map<string,GraphElementCode>::const_iterator it = 
+      for( map<string,GraphElementCode>::const_iterator it =
 	     itElementTable->second.begin();
 	   it != itElementTable->second.end();
 	   ++it ) {
@@ -399,7 +417,7 @@ void MaskIteratorOf<Graph>::next()
 bool MaskIteratorOf<Graph>::isValid() const
 {
   return _itRoi != _roi->end();
-  
+
 }
 
 //----------------------------------------------------------------------------
@@ -440,7 +458,7 @@ bool MaskIteratorOf<Graph>::contains( const Point3d &p ) const
     if ( ! _nodeFilter->filter( **itRoi ) ) continue;
     _findBucketAttributeNames( *_roi, **itRoi, attributeNames );
     if ( attributeNames.empty() ) continue;
-    for( list<string>::const_iterator itAttributeNames = 
+    for( list<string>::const_iterator itAttributeNames =
            attributeNames.begin();
          itAttributeNames != attributeNames.end();
          ++itAttributeNames ) {
@@ -448,7 +466,7 @@ bool MaskIteratorOf<Graph>::contains( const Point3d &p ) const
       rc_ptr< BucketMap<Void> > bucketMap;
       if ( (*itRoi)->getProperty( *itAttributeNames, bucketMap ) ) {
         if ( bucketMap->empty() ) continue;
-        return bucketMap->begin()->second.find( p ) != 
+        return bucketMap->begin()->second.find( p ) !=
           bucketMap->begin()->second.end();
       }
     }
@@ -458,7 +476,7 @@ bool MaskIteratorOf<Graph>::contains( const Point3d &p ) const
 
 
 //----------------------------------------------------------------------------
-bool MaskIteratorOf<Graph>::contains( const Point3df &p ) 
+bool MaskIteratorOf<Graph>::contains( const Point3df &p )
   const
 {
   const Point3d pixel( (short) rint( p[ 0 ] / _voxelSize[ 0 ] ),
@@ -499,7 +517,7 @@ static bool buildFromGraph( Process &p, const string &filename, Finder & );
 class MaskIteratorFactory : public Process
 {
   friend rc_ptr< MaskIterator > aims::getMaskIterator( const string & );
-  friend rc_ptr< MaskIterator > 
+  friend rc_ptr< MaskIterator >
   aims::getMaskIterator( const string &,
                          carto::rc_ptr< VoxelSampler > );
 
@@ -508,12 +526,12 @@ class MaskIteratorFactory : public Process
   void _registerBuildFunctions();
 
   template <class T>
-  friend 
+  friend
   bool buildFromVolume( Process &p, const string &filename,
 			Finder &finder );
   friend bool buildFromGraph( Process &p, const string &filename,
 			      Finder &finder );
-  
+
   rc_ptr< MaskIterator > maskIterator;
   rc_ptr< VoxelSampler > voxelSampler;
 };
@@ -528,7 +546,7 @@ bool buildFromVolume
   Finder & )
 {
   MaskIteratorFactory &mif = static_cast< MaskIteratorFactory & >( p );
-  mif.maskIterator = 
+  mif.maskIterator =
     rc_ptr< MaskIterator>( new MaskIteratorOf< AimsData<T> >( filename,
                                                               mif.
                                                               voxelSampler ) );
@@ -542,7 +560,7 @@ bool buildFromGraph
   Finder & )
 {
   MaskIteratorFactory &mif = static_cast< MaskIteratorFactory & >( p );
-  mif.maskIterator = 
+  mif.maskIterator =
     rc_ptr< MaskIterator>( new MaskIteratorOf< Graph >( filename,
                                                         mif.voxelSampler ) );
   return true;
@@ -604,7 +622,7 @@ rc_ptr< MaskIterator > aims::getMaskIterator( const string &fileName )
 }
 
 //----------------------------------------------------------------------------
-rc_ptr< MaskIterator > 
+rc_ptr< MaskIterator >
 aims::getMaskIterator( const string &fileName,
                        carto::rc_ptr< VoxelSampler > voxelSampler )
 {
