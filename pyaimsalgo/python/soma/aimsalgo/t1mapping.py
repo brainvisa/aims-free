@@ -320,37 +320,65 @@ def t1mapping_VFA(flip_angle_factor, GRE_data):
     return T1
 
 
-def correct_bias(biased_vol, b1map, dp_gre_low_contrast):
+def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
     tr_bias = aims.AffineTransformation3d(biased_vol.header()[
         'transformations'][0])
     tr_b1map = aims.AffineTransformation3d(b1map.header()[
         'transformations'][0])
-    tr_dp_gre = aims.AffineTransformation3d(dp_gre_low_contrast.header()[
-        'transformations'][0])
     b1_to_bias = tr_bias.inverse() * tr_b1map
-    dp_to_bias = tr_bias.inverse() * tr_dp_gre
     rsp1 = getattr( aims, 'ResamplerFactory_' \
         + aims.typeCode(np.asarray(b1map).dtype))().getResampler(1)
     rsp1.setRef(b1map)
     b1map_resamp = rsp1.doit(b1_to_bias, biased_vol.getSizeX(),
         biased_vol.getSizeY(), biased_vol.getSizeZ(),
         biased_vol.getVoxelSize()[:3])
-    dp_gre_type = aims.typeCode(np.asarray(
-            dp_gre_low_contrast).dtype)
-    smoother = getattr(aimsalgo, 'Gaussian3DSmoothing_' + dp_gre_type)(
-        8., 8., 8.)
-    dp_gre_smooth = smoother.doit(dp_gre_low_contrast)
-    rsp2 = getattr( aims, 'ResamplerFactory_' + dp_gre_type)().getResampler(1)
-    rsp2.setRef(dp_gre_smooth)
-    dp_gre_resamp = rsp2.doit(dp_to_bias, biased_vol.getSizeX(),
-        biased_vol.getSizeY(), biased_vol.getSizeZ(),
-        biased_vol.getVoxelSize()[:3])
     conv = aims.Converter(intype=b1map_resamp.volume().get(),
                           outtype=aims.Volume_FLOAT)
     field = conv(b1map_resamp).volume()
     field_arr = np.asarray(field)
-    field_arr /= np.asarray(conv(dp_gre_resamp).volume())
+    if dp_gre_low_contrast:
+        tr_dp_gre = aims.AffineTransformation3d(dp_gre_low_contrast.header()[
+            'transformations'][0])
+        dp_to_bias = tr_bias.inverse() * tr_dp_gre
+        dp_gre_type = aims.typeCode(np.asarray(
+                dp_gre_low_contrast).dtype)
+        smoother = getattr(aimsalgo, 'Gaussian3DSmoothing_' + dp_gre_type)(
+            8., 8., 8.)
+        dp_gre_smooth = smoother.doit(dp_gre_low_contrast)
+        rsp2 = getattr(aims,
+                       'ResamplerFactory_' + dp_gre_type)().getResampler(1)
+        rsp2.setRef(dp_gre_smooth)
+        dp_gre_resamp = rsp2.doit(dp_to_bias, biased_vol.getSizeX(),
+            biased_vol.getSizeY(), biased_vol.getSizeZ(),
+            biased_vol.getVoxelSize()[:3])
+        field_arr /= np.asarray(conv(dp_gre_resamp).volume())
+    else:
+        field_arr[:,:,:,:] = 1. / field_arr
+
+    field_arr[1./field_arr == 0] = 0.
+
     unbiased_vol = conv(biased_vol) * field
+
+    # set back volume values to more or less equivalent as whet they were
+    # before correction
+    biased_arr = np.asarray(biased_vol)
+    biased_max = np.max(biased_arr)
+    biased_avg = np.average(biased_arr[biased_arr >= biased_max/20.])
+    #print 'biased avg:', biased_avg
+    unbiased_arr = np.asarray(unbiased_vol)
+    large_vals = np.where(biased_arr >= biased_max/20.)
+    real_vals = np.where(unbiased_arr[large_vals] != 0)
+    real_locs = [x[real_vals] for x in large_vals]
+    unbiased_avg = np.average(unbiased_arr[real_locs])
+    #print 'unbiased avg:', unbiased_avg
+    corr_factor = biased_avg / unbiased_avg
+    unbiased_vol *= corr_factor
+
+    # re-convert to initial data type
+    conv2 = aims.Converter(intype=aims.Volume_FLOAT,
+                           outtype=biased_vol)
+    unbiased_vol = conv2(unbiased_vol)
+
     return unbiased_vol
 
 
