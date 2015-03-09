@@ -321,6 +321,30 @@ def t1mapping_VFA(flip_angle_factor, GRE_data):
 
 
 def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
+
+    def _check_max(corr_factor, vol_max, dtype):
+        if dtype == np.dtype(np.float32):
+            tmax = 1e38
+        elif dtype == np.dtype(np.float):
+            return corr_factor
+        elif dtype == np.dtype(np.int16):
+            tmax = 32767
+        elif dtype == np.dtype(np.uint16):
+            tmax = 65535
+        elif dtype == np.dtype(np.int32):
+            tmax = 0x7fffffff
+        elif dtype == np.dtype(np.uint32):
+            tmax = 0xffffffff
+        elif dtype == np.dtype(np.int8):
+            tmax = 127
+        elif dtype == np.dtype(np.uint8):
+            tmax = 255
+        else:
+            return corr_factor
+        if vol_max * corr_factor > tmax:
+            return float(tmax) / vol_max
+        return corr_factor
+
     tr_bias = aims.AffineTransformation3d(biased_vol.header()[
         'transformations'][0])
     tr_b1map = aims.AffineTransformation3d(b1map.header()[
@@ -372,6 +396,8 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
     unbiased_avg = np.average(unbiased_arr[real_locs])
     #print 'unbiased avg:', unbiased_avg
     corr_factor = biased_avg / unbiased_avg
+    corr_factor = _check_max(corr_factor, np.max(unbiased_arr),
+                             biased_arr.dtype)
     unbiased_vol *= corr_factor
 
     # re-convert to initial data type
