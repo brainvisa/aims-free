@@ -42,7 +42,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.extlinks',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.autosummary',
-              'numpy_ext.numpydoc']
+              'sphinx.ext.pngmath',
+              'numpy_ext.numpydoc',]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

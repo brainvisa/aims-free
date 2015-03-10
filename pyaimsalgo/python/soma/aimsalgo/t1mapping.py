@@ -1,6 +1,7 @@
 """Reconstruct magnetic resonance parametres.
 
-This is mainly a re-implementation of scripts provided by Alexandre Vignaud.
+This is mainly a re-implementation of scripts provided by Alexandre Vignaud,
+plus a few improvements functions (such as mask and B1 map holes filling).
 """
 
 from __future__ import division
@@ -15,11 +16,13 @@ twopi = 2 * np.pi
 
 
 class BAFIData:
-    def __init__(self, amplitude_volume, phase_volume):
-        """Pass the BAFI data as two amplitude-phase 4D AIMS volumes.
+    ''' B1 map reconstruction class using the VFA (Variable Flip Angle) method.
 
-        The last dimension of both arrays represents the different echos.
-        """
+    Pass the BAFI data as two amplitude-phase 4D AIMS volumes.
+
+    The last dimension of both arrays represents the different echos.
+    '''
+    def __init__(self, amplitude_volume, phase_volume):
         self.amplitude_volume = amplitude_volume
         self.phase_volume = phase_volume
         self.reference_amplitude = None
@@ -28,17 +31,20 @@ class BAFIData:
         self.prescribed_flip_angle = 60.0  # degrees
         self.echo_times = [3.061, 3.061, 4.5, 7.0]  # milliseconds
         self.TR_factor = 5.0
-        self.tau = 1.2e-3  # RF pulse duration in seconds TODO check real value!!
+        # RF pulse duration in seconds TODO check real value!!
+        self.tau = 1.2e-3
 
     def make_B1_map(self, B0_correction=False):
         """Build a map of B1 (in radians) from BAFI data.
 
         Return a numpy array of complex type.
 
-        This is a re-implementation of BAFI2B1map.m, courtesy of Alexandre Vignaud.
+        This is a re-implementation of BAFI2B1map.m, courtesy of
+        Alexandre Vignaud.
 
         %% The method is Yarnykh's (MRM 57:192-200 (2007)) +
-        %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0 and B1)
+        %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
+        and B1)
         """
         BAFI_amplitude = np.asarray(self.amplitude_volume)
         BAFI_phase = np.asarray(self.phase_volume)
@@ -56,7 +62,8 @@ class BAFIData:
         #G = np.abs(np.angle(r)) > np.pi / 2;signed_r = (1 - 2 * G) * np.abs(r)
         signed_r = np.copysign(np.abs(r), r.real)
         # r[np.isnan(r)] = 1  # necessary?
-        alphaAFI = np.arccos((signed_r * self.TR_factor - 1) / (self.TR_factor - signed_r))
+        alphaAFI = np.arccos((signed_r * self.TR_factor - 1)
+                             / (self.TR_factor - signed_r))
         if B0_correction:
             B0_map = self.make_B0_map()
             B1Mat = self._correctB0(alphaAFI, np.angle(r), B0_map)
@@ -70,10 +77,12 @@ class BAFIData:
 
         Return a numpy array of complex type.
 
-        This is a re-implementation of BAFI2FAmap.m, courtesy of Alexandre Vignaud.
+        This is a re-implementation of BAFI2FAmap.m, courtesy of
+        Alexandre Vignaud.
 
         %% The method is Yarnykh's (MRM 57:192-200 (2007)) +
-        %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0 and B1)
+        %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
+        and B1)
         """
         BAFI_amplitude = np.asarray(self.amplitude_volume)
         BAFI_phase = np.asarray(self.phase_volume)
@@ -88,7 +97,8 @@ class BAFIData:
         invalid_mask = np.abs(r) >= 1
         #r[invalid_mask] = 0
         # r[np.isnan(r)] = 1  # necessary?
-        alphaAFI = np.arccos((np.abs(r) * self.TR_factor - 1) / (self.TR_factor - np.abs(r)))
+        alphaAFI = np.arccos((np.abs(r) * self.TR_factor - 1)
+                             / (self.TR_factor - np.abs(r)))
         B1Mat = alphaAFI * (r / np.abs(r))
         #B1Mat[invalid_mask] = 0  # necessary?
         return B1Mat
@@ -96,11 +106,13 @@ class BAFIData:
     def make_flip_angle_map(self):
         """Build a map of actual flip angle (in radians) from BAFI data.
 
-        This is a re-implementation of BAFI2FAmap.m (courtesy of Alexandre Vignaud)
+        This is a re-implementation of BAFI2FAmap.m (courtesy of
+        Alexandre Vignaud)
         modified to return only the real flip angle (omitting the phase).
 
         %% The method is Yarnykh's (MRM 57:192-200 (2007)) +
-        %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0 and B1)
+        %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
+        and B1)
         """
         BAFI_amplitude = np.asarray(self.amplitude_volume)
         signal_echo1 = BAFI_amplitude[:, :, :, 0]
@@ -115,7 +127,8 @@ class BAFIData:
 
         Return the map as a numpy array.
 
-        This is a re-implementation of Phase2B0Map.m, courtesy of Alexandre Vignaud.
+        This is a re-implementation of Phase2B0Map.m, courtesy of
+        Alexandre Vignaud.
         """
         BAFI_amplitude = np.asarray(self.amplitude_volume)
         BAFI_phase = np.asarray(self.phase_volume)
@@ -150,7 +163,8 @@ class BAFIData:
     def _correctB0(self, FA_map, FA_phase, B0_map):
         """Apply B0 correction to a B1 map.
 
-        This is a re-implementation of correctB0.m, courtesy of Alexandre Vignaud.
+        This is a re-implementation of correctB0.m, courtesy of
+        Alexandre Vignaud.
         """
         return self.correctB0(FA_map, FA_phase, B0_map,
                               self.tau, self.echo_times[0])
@@ -159,14 +173,17 @@ class BAFIData:
     def correctB0(FA_map, FA_phase, B0_map, tau, echo_time):
         """Apply B0 correction to a B1 map.
 
-        This is a re-implementation of correctB0.m, courtesy of Alexandre Vignaud.
+        This is a re-implementation of correctB0.m, courtesy of
+        Alexandre Vignaud.
         """
         d = twopi * tau * B0_map
         a = d ** 2 / 240
         b = np.sqrt(((2 - 2 * np.cos(d)) / (d ** 2)))
         # b[np.isnan(b)] = 0  # necessary?
-        FAcor = FA_map / b + a * (FA_map ** 3) / (b ** 4 - 3 * a * b * (FA_map ** 2))
-        # make FAcor finite by replacing with FA values where not finite, seems necessary
+        FAcor = FA_map / b + a * (FA_map ** 3) \
+            / (b ** 4 - 3 * a * b * (FA_map ** 2))
+        # make FAcor finite by replacing with FA values where not finite,
+        # seems necessary
         notfinite = ~np.isfinite(FAcor)
         FAcor[notfinite] = FA_map[notfinite]
         if FA_phase is not None:
@@ -241,17 +258,18 @@ class BAFIData:
                 B1map_volume.getSizeY(),
                 B1map_volume.getSizeZ(),
                 B1map_volume.getSizeT(), 1)
-            np.asarray(vol_border)[:,:,:,0] = np.asarray(B1map_volume)[:,:,:,0]
+            np.asarray(vol_border)[:, :, :, 0] \
+                = np.asarray(B1map_volume)[:, :, :, 0]
             vol_border.copyHeaderFrom(B1map_volume.header())
             vol_border.refVolume().copyHeaderFrom(B1map_volume.header())
-            median = getattr( aimsalgo, 'MedianSmoothing_' + data_type)
-            # apply the filter on the larger image since the filter actually only
-            # applies to the interior limited by the mask size
+            median = getattr(aimsalgo, 'MedianSmoothing_' + data_type)
+            # apply the filter on the larger image since the filter
+            # actually only applies to the interior limited by the mask size
             B1map_volume_med_border \
                 = median().doit(vol_border.refVolume()).volume()
             # get a smaller view in the result
             B1map_volume_med = volume_type(B1map_volume_med_border,
-                volume_type.Position4Di(1,1,1,0),
+                volume_type.Position4Di(1, 1, 1, 0),
                 volume_type.Position4Di(*B1map_volume.getSize()))
             B1map_volume_med_arr = np.asarray(B1map_volume_med)
             B1map_volume_med_arr[np.isnan(B1map_volume_med_arr)] = 0
@@ -262,9 +280,10 @@ class BAFIData:
                 B1map_volume_med, max(voxel_size)*4)
             # "un-filter" the part which already had valid data
             B1map_ar = np.asarray(B1map_volume_old)
-            np.asarray(B1map_volume)[B1map_ar>1e-2] = B1map_ar[B1map_ar>1e-2]
+            np.asarray(B1map_volume)[B1map_ar > 1e-2] \
+                = B1map_ar[B1map_ar > 1e-2]
         if gaussian != 0:
-            gsmooth = getattr( aimsalgo, 'Gaussian3DSmoothing_' + data_type)
+            gsmooth = getattr(aimsalgo, 'Gaussian3DSmoothing_' + data_type)
             B1map_volume = gsmooth(gaussian, gaussian,
                 gaussian).doit(B1map_volume).volume()
 
@@ -276,6 +295,8 @@ class BAFIData:
 
 
 class GREData2FlipAngles:
+    ''' GREData2FlipAngles
+    '''
     def __init__(self, min_FA_volume, max_FA_volume):
         self.volumes = [min_FA_volume, max_FA_volume]
         self.reference_amplitude = None
@@ -305,9 +326,9 @@ def t1mapping_VFA(flip_angle_factor, GRE_data):
     cA1 = np.cos(A1)
     cA2 = np.cos(A2)
     p = (S2 * sA1 - S1 * sA2) / (S2 * sA1 * cA2 - S1 * sA2 * cA1)
-    print 'negative p:', p[p<=0]
+    print 'negative p:', p[p <= 0]
     epsilon = 1e-3
-    p[p<=0] = epsilon
+    p[p <= 0] = epsilon
     T1 = np.real(-GRE_data.repetition_time / np.log(p))
     # zero out non-finite T1 values (necessary?)
     # zero out non-real T1 values (necessary?)
@@ -321,8 +342,62 @@ def t1mapping_VFA(flip_angle_factor, GRE_data):
 
 
 def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
+    ''' Apply bias correction on biased_vol according to the B1 map, and
+    possibly a GRE low contrast image.
+
+    Without dp_gre_low_contrast image:
+
+    .. math::
+
+        unbiased_vol = biased\_vol / b1map
+
+    (plus improvements)
+
+    With dp_gre_low_contrast image:
+
+    .. math::
+
+        unbiased\_vol = biased\_vol * lowpass(dp\_gre\_low\_contrast) / b1map
+
+    (roughly)
+
+    :math:`lowpass` is currently a gaussian filter with ``sigma=8mm``.
+
+    method: courtesy of Alexandre Vignaud.
+
+    ref: ISMRM abstract Mauconduit et al.
+
+    All input images are expected to contain transformation information to a
+    common space in their header (1st transformation, normally to the
+    scanner-based referential).
+    They are thus not expected to have the same field of view or voxel size,
+    all are resampled to the biased_vol space.
+
+    Parameters
+    ----------
+    biased_vol: volume
+        volume to be corrected
+    b1map: volume
+        B1 map as flip angles in degrees, generally returned by
+        BAFIData.make_flip_angle_map. May be improved (holes filled, dilated)
+        using BAFIData.fix_b1_map() which is generally better.
+    dp_gre_low_contrast: volume (optional)
+        GRE low contrast image
+
+    Returns
+    -------
+    unbiased_vol: volume
+        according to the calculations explained above. The returned image
+        has the same voxel type as the input one (althrough calculations are
+        performed in float in the function), and the grey levels are roughly
+        adjusted to the level of input data (unless it produces overflow, in
+        which case the max value is adjusted to fit in the voxel type).
+    '''
 
     def _check_max(corr_factor, vol_max, dtype):
+        ''' avoid overflows for the given data type, and fix the scaling factor
+        if needed.
+        '''
         if dtype == np.dtype(np.float32):
             tmax = 1e38
         elif dtype == np.dtype(np.float):
@@ -350,7 +425,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
     tr_b1map = aims.AffineTransformation3d(b1map.header()[
         'transformations'][0])
     b1_to_bias = tr_bias.inverse() * tr_b1map
-    rsp1 = getattr( aims, 'ResamplerFactory_' \
+    rsp1 = getattr(aims, 'ResamplerFactory_'
         + aims.typeCode(np.asarray(b1map).dtype))().getResampler(1)
     rsp1.setRef(b1map)
     b1map_resamp = rsp1.doit(b1_to_bias, biased_vol.getSizeX(),
@@ -365,7 +440,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
             'transformations'][0])
         dp_to_bias = tr_bias.inverse() * tr_dp_gre
         dp_gre_type = aims.typeCode(np.asarray(
-                dp_gre_low_contrast).dtype)
+            dp_gre_low_contrast).dtype)
         smoother = getattr(aimsalgo, 'Gaussian3DSmoothing_' + dp_gre_type)(
             8., 8., 8.)
         dp_gre_smooth = smoother.doit(dp_gre_low_contrast)
@@ -377,14 +452,13 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
             biased_vol.getVoxelSize()[:3])
         field_arr /= np.asarray(conv(dp_gre_resamp).volume())
     else:
+        # clamp values under 100 (10 degrees) and non-null to avoid
+        # dividing too much and generating spurious very high values
         small_values = np.where(field_arr < 100)
-        print 'small_values:', small_values[0].shape, small_values
         nonnull_small = np.where(field_arr[small_values] != 0)
-        print 'nonnull_small:', nonnull_small[0].shape, nonnull_small
         small_locs = [x[nonnull_small] for x in small_values]
-        print 'small_locs:', small_locs[0].shape, small_locs
-        field_arr[small_locs] = 100 # don't divide too much
-        field_arr[:,:,:,:] = 1. / field_arr
+        field_arr[small_locs] = 100  # don't divide too much
+        field_arr[:, :, :, :] = 1. / field_arr
 
     field_arr[1./field_arr == 0] = 0.
 
@@ -413,7 +487,5 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
     unbiased_vol = conv2(unbiased_vol)
 
     return unbiased_vol
-
-
 
 

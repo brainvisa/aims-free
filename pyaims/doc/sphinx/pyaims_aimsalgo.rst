@@ -107,6 +107,13 @@ soma.aimsalgo module
   .. py:class:: Resampler_FLOAT
 
 
+soma.aimsalgo.t1mapping module
+------------------------------
+
+.. automodule:: soma.aimsalgo.t1mapping
+  :members:
+
+
 soma.wip.aimsalgo module
 ------------------------
 
