@@ -341,7 +341,8 @@ def t1mapping_VFA(flip_angle_factor, GRE_data):
     return T1
 
 
-def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
+def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
+                 field_threshold=None):
     ''' Apply bias correction on biased_vol according to the B1 map, and
     possibly a GRE low contrast image.
 
@@ -357,7 +358,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
 
     .. math::
 
-        unbiased\_vol = biased\_vol * lowpass(dp\_gre\_low\_contrast) / b1map
+        unbiased\_vol = biased\_vol / (lowpass(dp\_gre\_low\_contrast) * b1map)
 
     (roughly)
 
@@ -373,6 +374,9 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
     They are thus not expected to have the same field of view or voxel size,
     all are resampled to the biased_vol space.
 
+    The returned value is a tuple containing 2 images: the corrected image,
+    and the multiplicative correction field.
+
     Parameters
     ----------
     biased_vol: volume
@@ -383,6 +387,13 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
         using BAFIData.fix_b1_map() which is generally better.
     dp_gre_low_contrast: volume (optional)
         GRE low contrast image
+    field_threshold: float (optional)
+        Threshold for the corrective field before inversion: the biased image
+        will be divided by this field. To avoid too high values, field values
+        under this threshold are clamped. Null values are masked out, so the
+        threshold applies only to non-null values.
+        If not specified, the threshold is 100 if the dp_gre_low_contrast is
+        not provided, and 3000 when dp_gre_low_contrast is used.
 
     Returns
     -------
@@ -392,6 +403,8 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
         performed in float in the function), and the grey levels are roughly
         adjusted to the level of input data (unless it produces overflow, in
         which case the max value is adjusted to fit in the voxel type).
+    field: volume
+        The correction field applied to the image (multiplicatively)
     '''
 
     def _check_max(corr_factor, vol_max, dtype):
@@ -450,16 +463,24 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
         dp_gre_resamp = rsp2.doit(dp_to_bias, biased_vol.getSizeX(),
             biased_vol.getSizeY(), biased_vol.getSizeZ(),
             biased_vol.getVoxelSize()[:3])
-        field_arr /= np.asarray(conv(dp_gre_resamp).volume())
+        field_arr *= np.asarray(conv(dp_gre_resamp).volume())
+        if field_threshold is None:
+            # default threshold is 3000
+            field_threshold = 3000
     else:
-        # clamp values under 100 (10 degrees) and non-null to avoid
-        # dividing too much and generating spurious very high values
-        small_values = np.where(field_arr < 100)
-        nonnull_small = np.where(field_arr[small_values] != 0)
-        small_locs = [x[nonnull_small] for x in small_values]
-        field_arr[small_locs] = 100  # don't divide too much
-        field_arr[:, :, :, :] = 1. / field_arr
+        if field_threshold is None:
+            # defaul threshold is 100 (10 degrees)
+            field_threshold = 100
 
+    # clamp values under field_threshold and non-null to avoid
+    # dividing too much and generating spurious very high values
+    small_values = np.where(field_arr < field_threshold)
+    nonnull_small = np.where(field_arr[small_values] != 0)
+    small_locs = [x[nonnull_small] for x in small_values]
+    field_arr[small_locs] = field_threshold  # don't divide too much
+    field_arr[:, :, :, :] = 1. / field_arr
+
+    # now invert the field
     field_arr[1./field_arr == 0] = 0.
 
     unbiased_vol = conv(biased_vol) * field
@@ -486,6 +507,6 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None):
                            outtype=biased_vol)
     unbiased_vol = conv2(unbiased_vol)
 
-    return unbiased_vol
+    return unbiased_vol, field
 
 
