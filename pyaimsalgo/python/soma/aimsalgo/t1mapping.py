@@ -394,6 +394,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
         threshold applies only to non-null values.
         If not specified, the threshold is 100 if the dp_gre_low_contrast is
         not provided, and 3000 when dp_gre_low_contrast is used.
+        If field_threshold is 0, then no thresholding is applied.
 
     Returns
     -------
@@ -463,7 +464,10 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
         dp_gre_resamp = rsp2.doit(dp_to_bias, biased_vol.getSizeX(),
             biased_vol.getSizeY(), biased_vol.getSizeZ(),
             biased_vol.getVoxelSize()[:3])
-        field_arr *= np.asarray(conv(dp_gre_resamp).volume())
+        dp_conv = aims.Converter(intype=dp_gre_resamp.volume().get(),
+                                 outtype=aims.Volume_FLOAT)
+        #field_arr[:, :, :, :] = 1. / field_arr
+        field_arr *= np.asarray(dp_conv(dp_gre_resamp).volume())
         if field_threshold is None:
             # default threshold is 3000
             field_threshold = 3000
@@ -472,18 +476,21 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
             # defaul threshold is 100 (10 degrees)
             field_threshold = 100
 
-    # clamp values under field_threshold and non-null to avoid
-    # dividing too much and generating spurious very high values
-    small_values = np.where(field_arr < field_threshold)
-    nonnull_small = np.where(field_arr[small_values] != 0)
-    small_locs = [x[nonnull_small] for x in small_values]
-    field_arr[small_locs] = field_threshold  # don't divide too much
-    field_arr[:, :, :, :] = 1. / field_arr
+    if field_threshold != 0:
+        # clamp values under field_threshold and non-null to avoid
+        # dividing too much and generating spurious very high values
+        small_values = np.where(field_arr < field_threshold)
+        nonnull_small = np.where(field_arr[small_values] != 0)
+        small_locs = [x[nonnull_small] for x in small_values]
+        field_arr[small_locs] = field_threshold  # don't divide too much
 
     # now invert the field
+    field_arr[:, :, :, :] = 1. / field_arr
     field_arr[1./field_arr == 0] = 0.
 
-    unbiased_vol = conv(biased_vol) * field
+    bias_conv = aims.Converter(intype=biased_vol,
+                               outtype=aims.Volume_FLOAT)
+    unbiased_vol = bias_conv(biased_vol) * field
 
     # set back volume values to more or less equivalent as whet they were
     # before correction
