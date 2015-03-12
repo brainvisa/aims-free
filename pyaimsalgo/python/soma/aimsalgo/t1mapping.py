@@ -245,7 +245,7 @@ class BAFIData:
         '''
         B1map_volume = b1map
         voxel_size = B1map_volume.getVoxelSize()[:3]
-        data_type = aims.typeCode(str(np.asarray(B1map_volume).dtype))
+        data_type = aims.voxelTypeCode(B1map_volume)
         if smooth_type == 'dilated':
             morpho = getattr(aimsalgo, 'MorphoGreyLevel_' + data_type)()
             B1map_volume = morpho.doDilation(
@@ -440,7 +440,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
         'transformations'][0])
     b1_to_bias = tr_bias.inverse() * tr_b1map
     rsp1 = getattr(aims, 'ResamplerFactory_'
-        + aims.typeCode(np.asarray(b1map).dtype))().getResampler(1)
+        + aims.voxelTypeCode(b1map)().getResampler(1)
     rsp1.setRef(b1map)
     b1map_resamp = rsp1.doit(b1_to_bias, biased_vol.getSizeX(),
         biased_vol.getSizeY(), biased_vol.getSizeZ(),
@@ -453,8 +453,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
         tr_dp_gre = aims.AffineTransformation3d(dp_gre_low_contrast.header()[
             'transformations'][0])
         dp_to_bias = tr_bias.inverse() * tr_dp_gre
-        dp_gre_type = aims.typeCode(np.asarray(
-            dp_gre_low_contrast).dtype)
+        dp_gre_type = aims.voxelTypeCode(dp_gre_low_contrast)
         smoother = getattr(aimsalgo, 'Gaussian3DSmoothing_' + dp_gre_type)(
             8., 8., 8.)
         dp_gre_smooth = smoother.doit(dp_gre_low_contrast)

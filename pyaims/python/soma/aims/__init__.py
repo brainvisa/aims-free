@@ -1063,17 +1063,63 @@ def typeCode(data):
     if type(data) in (str, unicode):
         return data
     dtn = getattr(data, '__name__', None)
+    if dtn.startswith('rc_ptr_'):
+        try:
+            dtn = getattr(data.get(), '__name__', None)
+        except AttributeError:
+            pass
     if dtn is not None:  # if data is a type class
         dt = dmap.get(dtn, None)
         if dt is not None:
             return dt
     dtn2 = type(data).__name__  # instance
+    if dtn2.startswith('rc_ptr_'):
+        try:
+            dtn2 = type(data.get()).__name__
+        except AttributeError:
+            pass
     dt = dmap.get(dtn2, None)
     if dt is not None:
         return dt
     if dtn is not None:
         return dtn
     return dtn2
+
+
+def voxelTypeCode(data):
+    '''returns the AIMS type code for the given input data voxel type.
+    For instance, for a volume of 16 bit ints, it will be 'S16', whereas
+    typeCode() would return 'Volume_S16'.
+
+    Input data may be a type or an instance of a container type.
+    '''
+    if not hasattr(data, '__name__'):
+        tdata = type(data)
+    else:
+        tdata = data
+    if tdata is numpy.ndarray:
+        return typeCode(data.dtype)
+    name = tdata.__name__
+    if name.startswith('rc_ptr_'):
+        name = name[7:]
+    container_types = ['Volume_', 'AimsData_', 'BucketMap_', 'vector_', 'set_',
+                       'list_', 'TimeTexture_', 'Texture_',
+                       'ResamplerFactory_', 'RegularBinnedHistogram_',
+                       'Gaussian2DSmoothing_',
+                       'Gaussian3DSmoothing_', 'GeometricMoment_',
+                       'Histogram_', 'LinearResampler_',
+                       'MaskedDiffusionSmoother_', 'MaskLinearResampler_',
+                       'MedianSmoothing_', 'MomentInvariant_', 'Moment_',
+                       'MorphoGreyLevel_', 'NearestNeighborResampler_',
+                       'QuarticResampler_', 'QuinticResampler_', 'Resampler_',
+                       'SeventhOrderResampler_', 'SixthOrderResampler_',
+                       'SplineResampler_']
+    for container in container_types:
+        if name.startswith(container):
+            return name[len(container):]
+    if name.startswith('AimsVector_'):
+        return '_'.join(name[11:].split('_')[:-1])
+    return None
 
 
 def somaio_typeCode(data):
