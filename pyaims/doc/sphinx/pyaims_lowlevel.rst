@@ -38,6 +38,10 @@ IO system
 
 .. autofunction:: soma.aims.typeCode
 
+.. autofunction:: soma.aims.voxelTypeCode
+
+.. autofunction:: soma.aims.somaio_typeCode
+
 
 Neuroimaging data structures
 ++++++++++++++++++++++++++++
