@@ -1063,7 +1063,7 @@ def typeCode(data):
     if type(data) in (str, unicode):
         return data
     dtn = getattr(data, '__name__', None)
-    if dtn.startswith('rc_ptr_'):
+    if dtn is not None and dtn.startswith('rc_ptr_'):
         try:
             dtn = getattr(data.get(), '__name__', None)
         except AttributeError:
