@@ -440,7 +440,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
         'transformations'][0])
     b1_to_bias = tr_bias.inverse() * tr_b1map
     rsp1 = getattr(aims, 'ResamplerFactory_'
-        + aims.voxelTypeCode(b1map)().getResampler(1)
+        + aims.voxelTypeCode(b1map))().getResampler(1)
     rsp1.setRef(b1map)
     b1map_resamp = rsp1.doit(b1_to_bias, biased_vol.getSizeX(),
         biased_vol.getSizeY(), biased_vol.getSizeZ(),
