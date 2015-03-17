@@ -107,7 +107,8 @@ void FdfHeader::read()
   vector<int> matrix, dims;
   vector<string> pt;
   bool chksumfound = false;
-  int chksum = 0, typesize = 32, bits_allocated = 32, byte_swapping = 0;
+  long chksum = 0;
+  int typesize = 32, bits_allocated = 32, byte_swapping = 0;
   int rank = 2, dimz = 1;
 
   // Parsing elements
