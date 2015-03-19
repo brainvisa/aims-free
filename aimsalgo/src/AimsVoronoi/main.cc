@@ -87,6 +87,89 @@ private:
 
 };
 
+
+template <typename T>
+void _raw_value( double ddomain, double doutside, T & val_domain,
+                 T & val_outside )
+{
+  val_domain = (T) ddomain;
+  val_outside = (T) doutside;
+}
+
+
+template <typename T>
+void _use_round( double ddomain, double doutside, T & val_domain,
+                 T & val_outside )
+{
+  val_domain = (T) round( ddomain );
+  val_outside = (T) round( doutside );
+}
+
+
+template <typename T>
+void _round_value( double ddomain, double doutside, T & val_domain,
+                   T & val_outside )
+{
+  _raw_value( ddomain, doutside, val_domain, val_outside );
+}
+
+
+template <> void _round_value( double ddomain, double doutside,
+                               int8_t & val_domain, int8_t & val_outside )
+{
+  _use_round( ddomain, doutside, val_domain, val_outside );
+}
+
+
+template <> void _round_value( double ddomain, double doutside,
+                               uint8_t & val_domain, uint8_t & val_outside )
+{
+  _use_round( ddomain, doutside, val_domain, val_outside );
+}
+
+
+template <> void _round_value( double ddomain, double doutside,
+                               int16_t & val_domain, int16_t & val_outside )
+{
+  _use_round( ddomain, doutside, val_domain, val_outside );
+}
+
+
+template <> void _round_value( double ddomain, double doutside,
+                               uint16_t & val_domain, uint16_t & val_outside )
+{
+  _use_round( ddomain, doutside, val_domain, val_outside );
+}
+
+
+template <> void _round_value( double ddomain, double doutside,
+                               int32_t & val_domain, int32_t & val_outside )
+{
+  _use_round( ddomain, doutside, val_domain, val_outside );
+}
+
+
+template <> void _round_value( double ddomain, double doutside,
+                               uint32_t & val_domain, uint32_t & val_outside )
+{
+  _use_round( ddomain, doutside, val_domain, val_outside );
+}
+
+
+template <> void _round_value( double ddomain, double doutside,
+                               int64_t & val_domain, int64_t & val_outside )
+{
+  _use_round( ddomain, doutside, val_domain, val_outside );
+}
+
+
+template <> void _round_value( double ddomain, double doutside,
+                               uint64_t & val_domain, uint64_t & val_outside )
+{
+  _use_round( ddomain, doutside, val_domain, val_outside );
+}
+
+
 template <class T>
 bool doit( Process & p, const string &, Finder & ) {
 
@@ -101,6 +184,11 @@ bool doit( Process & p, const string &, Finder & ) {
     }
 
   AimsData<T> label;
+  /* use round() to convert _val_domain and _val_outside from double to T
+     if T is an integer type, otherwise rounding may change the value.
+  */
+  T val_domain, val_outside;
+  _round_value( v._val_domain, v._val_outside, val_domain, val_outside );
   label = AimsVoronoiFrontPropagation( seed, (T)v._val_domain, (T)v._val_outside,
                                        v._xmask, v._ymask, v._zmask, v._factor );
 
@@ -154,8 +242,8 @@ int main( int argc, char* argv[] )
   { 'h',"help"        ,AIMS_OPT_FLAG  ,( void* )Usage    ,AIMS_OPT_CALLFUNC,0},
   { 'i',"input"       ,AIMS_OPT_STRING,&filein     ,0                ,1},
   { 'o',"output"      ,AIMS_OPT_STRING,&fileout    ,0                ,1},
-  { 'd',"domain"      ,AIMS_OPT_SHORT ,&val_domain ,0                ,0},
-  { 'f',"forbiden"    ,AIMS_OPT_SHORT ,&val_outside,0                ,0},
+  { 'd',"domain"      ,AIMS_OPT_DOUBLE,&val_domain ,0                ,0},
+  { 'f',"forbiden"    ,AIMS_OPT_DOUBLE,&val_outside,0                ,0},
   { 'x',"xmask"       ,AIMS_OPT_INT   ,&xmask      ,0                ,0},
   { 'y',"ymask"       ,AIMS_OPT_INT   ,&ymask      ,0                ,0},
   { 'z',"zmask"       ,AIMS_OPT_INT   ,&zmask      ,0                ,0},
