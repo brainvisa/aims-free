@@ -33,13 +33,15 @@
 
 
 #include <cstdlib>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
+#include <aims/getopt/getoptProcess.h>
 #include <aims/distancemap/distancemap_g.h>
 #include <aims/data/data_g.h>
 #include <aims/io/io_g.h>
 #include <iostream>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
@@ -49,23 +51,14 @@ static bool doit( Process &, const string &, Finder & );
 class Voronoi : public Process
 {
 public:
-  Voronoi( string filein,
-           string fileout,
-           int xmask,
-           int ymask,
-           int zmask,
-           float factor,
-           double val_domain,
-           double val_outside ) :
+  Voronoi() :
     Process(),
-    _filein(filein),
-    _fileout(fileout),
-    _xmask(xmask),
-    _ymask(ymask),
-    _zmask(zmask),
-    _factor(factor),
-    _val_domain(val_domain),
-    _val_outside(val_outside)
+    _xmask(3),
+    _ymask(3),
+    _zmask(3),
+    _factor(50),
+    _val_domain(0),
+    _val_outside(-1)
   {
     registerProcessType( "Volume", "S8", &doit<int8_t> );
     registerProcessType( "Volume", "U8", &doit<uint8_t> );
@@ -75,11 +68,28 @@ public:
     registerProcessType( "Volume", "U32", &doit<uint32_t> );
   }
 
+  void initialize( const string & filein,
+                   const string & fileout,
+                   int xmask,
+                   int ymask,
+                   int zmask,
+                   float factor,
+                   double val_domain,
+                   double val_outside )
+  {
+    _filein = filein;
+    _fileout = fileout;
+    _xmask = xmask;
+    _ymask = ymask;
+    _zmask = zmask;
+    _factor = factor;
+    _val_domain = val_domain;
+    _val_outside = val_outside;
+  }
+
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
 
-
-private:
   string _filein, _fileout;
   int _xmask, _ymask, _zmask;
   float _factor;
@@ -171,17 +181,18 @@ template <> void _round_value( double ddomain, double doutside,
 
 
 template <class T>
-bool doit( Process & p, const string &, Finder & ) {
+bool doit( Process & p, const string & filein, Finder & f ) {
 
   Voronoi & v = (Voronoi &)p;
   AimsData<T> seed;
-  Reader<AimsData<T> > dataR( v._filein );
-  cout << "reading seed " << v._filein << endl;
-  if( !dataR.read( seed ) )
-    {
-      cerr << "could not read " << v._filein << endl;
-      return( 1 );
-    }
+  Reader<AimsData<T> > dataR( filein );
+  string format = f.format();
+  cout << "reading seed " << filein << endl;
+  if( !dataR.read( seed, 0, &format ) )
+  {
+    cerr << "could not read " << v._filein << endl;
+    return( 1 );
+  }
 
   AimsData<T> label;
   /* use round() to convert _val_domain and _val_outside from double to T
@@ -189,8 +200,10 @@ bool doit( Process & p, const string &, Finder & ) {
   */
   T val_domain, val_outside;
   _round_value( v._val_domain, v._val_outside, val_domain, val_outside );
-  label = AimsVoronoiFrontPropagation( seed, (T)v._val_domain, (T)v._val_outside,
-                                       v._xmask, v._ymask, v._zmask, v._factor );
+  label = AimsVoronoiFrontPropagation( seed, val_domain,
+                                       val_outside,
+                                       v._xmask, v._ymask, v._zmask,
+                                       v._factor );
 
   Writer<AimsData<T> > dataW( v._fileout );
   dataW << label;
@@ -198,71 +211,74 @@ bool doit( Process & p, const string &, Finder & ) {
   return true;
 }
 
-BEGIN_USAGE(usage)
-  "--------------------------------------------------------------------------",
-  "AimsVoronoi -i[nput]   <filein>                                           ",
-  "            -o[output] <fileout>                                          ",
-  "            [-d[omain] <val_domain>                                       ",
-  "            [-f[orbiden] <val_outside>                                    ",
-  "            [-x[mask] <X>] [-y[mask] <Y>] [-z[mask] <Z>] [-F[actor] <F>]  ",
-  "            [-h[elp]]                                                     ",
-  "--------------------------------------------------------------------------",
-  "Construct a Voronoi's diagram from labelled seed                          ",
-  "--------------------------------------------------------------------------",
-  "  filein      : input seed SHORT volume                                   ",
-  "  fileout     : prefix name for output SHORT Voronoi's diagram            ",
-  "  val_domain  :  value of the domain where to propagate the diagram       ",
-  "                                                   [default=0]            ",
-  "  val_outside : value of the outside of the domain [default=-1]           ",
-  "  X           : X size of the distance mask [default=3]                   ",
-  "  Y           : Y size of the distance mask [default=3]                   ",
-  "  Z           : Z size of the distance mask [default=3]                   ",
-  "  F           : chamfer multiplication factor [default=50]                ",
-  "--------------------------------------------------------------------------",
-END_USAGE
 
-
-void Usage( void )
+int main( int argc, const char* argv[] )
 {
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char* argv[] )
-{
-  char *filein = NULL, *fileout = NULL;
+  Voronoi voronoi;
+  ProcessInput pi( voronoi );
+  string filein, fileout;
   int xmask = 3, ymask = 3, zmask = 3;
   float factor = 50;
   double val_domain = 0, val_outside = -1;
 
-  //
-  // Getting options
-  //
-  AimsOption opt[] = {
-  { 'h',"help"        ,AIMS_OPT_FLAG  ,( void* )Usage    ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input"       ,AIMS_OPT_STRING,&filein     ,0                ,1},
-  { 'o',"output"      ,AIMS_OPT_STRING,&fileout    ,0                ,1},
-  { 'd',"domain"      ,AIMS_OPT_DOUBLE,&val_domain ,0                ,0},
-  { 'f',"forbiden"    ,AIMS_OPT_DOUBLE,&val_outside,0                ,0},
-  { 'x',"xmask"       ,AIMS_OPT_INT   ,&xmask      ,0                ,0},
-  { 'y',"ymask"       ,AIMS_OPT_INT   ,&ymask      ,0                ,0},
-  { 'z',"zmask"       ,AIMS_OPT_INT   ,&zmask      ,0                ,0},
-  { 'F',"Factor"      ,AIMS_OPT_FLOAT ,&factor     ,0                ,0},
-  { 0  ,0             ,AIMS_OPT_END   ,0           ,0                ,0}};
+  AimsApplication app( argc, argv,
+                       "Construct a Voronoi diagram from labelled seeds" );
+  app.addOption( pi, "-i", "input seeds volume filename" );
+  app.addOption( voronoi._fileout, "-o",
+                 "output Voronoi diagram filename (same voxel type as input)" );
+  app.addOption( voronoi._val_domain, "-d",
+                 "value of the domain where to propagate the diagram "
+                 "[default=0]", true );
+  app.addOption( voronoi._val_outside, "-f",
+                 "value of the outside (forbidden) of the domain [default=-1]",
+                 true );
+  app.addOption( voronoi._xmask, "-x",
+                 "X size of the distance mask [default=3]", true );
+  app.addOption( voronoi._ymask, "-y",
+                 "Y size of the distance mask [default=3]", true );
+  app.addOption( voronoi._zmask, "-z",
+                 "Z size of the distance mask [default=3]", true );
+  app.addOption( voronoi._factor, "-F",
+                 "chamfer multiplication factor [default=50]",
+                 true );
+  app.alias( "--input", "-i" );
+  app.alias( "-input", "-i" );
+  app.alias( "--output", "-o" );
+  app.alias( "-output", "-o" );
+  app.alias( "--domain", "-d" );
+  app.alias( "-domain", "-d" );
+  app.alias( "--forbidden", "-f" );
+  app.alias( "-forbidden", "-f" );
+  app.alias( "--xmask", "-x" );
+  app.alias( "-xmask", "-x" );
+  app.alias( "--ymask", "-y" );
+  app.alias( "-ymask", "-y" );
+  app.alias( "--zmask", "-z" );
+  app.alias( "-zmask", "-z" );
+  app.alias( "--factor", "-F" );
+  app.alias( "-Factor", "-F" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    //
+    // Getting options
+    //
+    app.initialize();
 
-  Voronoi p( string(filein),
-             string(fileout),
-             xmask,
-             ymask,
-             zmask,
-             factor,
-             val_domain,
-             val_outside );
+    cout << "in: " << pi.filename << endl;
 
-  if( !p.execute( string(filein) ) ) {
+    if( !voronoi.execute( pi.filename ) )
+    {
       return EXIT_FAILURE;
+    }
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
   }
 
   return EXIT_SUCCESS;
