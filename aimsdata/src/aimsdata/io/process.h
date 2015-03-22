@@ -238,8 +238,8 @@ namespace aims
         Reading options are used for two things:
         - they will be passed to the underlying Reader
         - some options may be interpreted by Process::execute():
-          * preferred_data_type will force using this data type if it is
-            supported amongst the Finder possible_data_types list, to
+          - \c preferred_data_type will force using this data type if it is
+            supported amongst the Finder::possibleDataTypes() list, to
             overwrite the default one.
     */
     void setReadOptions( carto::Object options ) { _options = options; }

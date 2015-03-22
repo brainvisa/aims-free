@@ -14,6 +14,7 @@ public:
   bool check( const std::string & ) /ReleaseGIL/;
   std::string objectType() const;
   std::string dataType() const;
+  vector_STRING possibleDataTypes() const;
   std::string format() const;
   carto::Object headerObject() const /PyName=header, ReleaseGIL/;
   static SIP_PYLIST extensions( const std::string & );
