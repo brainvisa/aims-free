@@ -5,7 +5,7 @@ set(AIMSDICOM_HEADERS ${_headers} PARENT_SCOPE)
 add_library( aimsdicom SHARED ${_sources} )
 add_dependencies( aimsdicom ${headersTarget} )
 set_property( TARGET aimsdicom PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-target_link_libraries( aimsdicom aimsdata ${DCMTK_LIBRARIES} )
+target_link_libraries( aimsdicom aimsdata ${DCMTK_LIBRARIES} ${JASPER_LIBRARIES} ${TIFF_LIBRARIES} ${PNG12_LIBRARIES} )
 BRAINVISA_INSTALL( TARGETS aimsdicom
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
