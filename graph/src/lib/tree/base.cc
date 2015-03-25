@@ -90,7 +90,7 @@ void BaseTree::insert( BaseTree* child, int index )
   child->setParent( this );
 
   RCObject* refcounting = dynamic_cast<RCObject *>( child );
-  if( refcounting )
+  if( refcounting && rc_ptr_trick::refCount( *refcounting ) != 0 )
   {
     rc_ptr<RCObject>  r( refcounting );
     // bidouille: inc the ref counter because we don't keep it in a real
@@ -123,7 +123,7 @@ void BaseTree::remove( unsigned index )
     BaseTree* child = *pos;
     _children.erase( pos );
     RCObject* refcounting = dynamic_cast<RCObject *>( child );
-    if( refcounting )
+    if( refcounting && rc_ptr_trick::refCount( *refcounting ) != 0 )
     {
       rc_ptr<RCObject>  r( refcounting );
       // bidouille: dec the ref counter because we don't keep it in a real
@@ -143,7 +143,7 @@ void BaseTree::remove( BaseTree* node )
     BaseTree* child = *pos;
     _children.erase( pos );
     RCObject* refcounting = dynamic_cast<RCObject *>( child );
-    if( refcounting )
+    if( refcounting && rc_ptr_trick::refCount( *refcounting ) != 0 )
     {
       rc_ptr<RCObject>  r( refcounting );
       // bidouille: dec the ref counter because we don't keep it in a real
@@ -178,7 +178,7 @@ void BaseTree::clear()
   {
     BaseTree* child = *i;
     RCObject* refcounting = dynamic_cast<RCObject *>( child );
-    if( refcounting )
+    if( refcounting && rc_ptr_trick::refCount( *refcounting ) != 0 )
     {
       rc_ptr<RCObject>  r( refcounting );
       // bidouille: dec the ref counter because we don't keep it in a real
