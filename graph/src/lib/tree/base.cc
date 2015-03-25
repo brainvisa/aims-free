@@ -34,7 +34,9 @@
 //--- header files ------------------------------------------------------------
 
 #include <graph/tree/base.h>
+#include <cartobase/smart/rcptrtrick.h>
 
+using namespace carto;
 using namespace std;
 
 
@@ -42,9 +44,7 @@ using namespace std;
 
 BaseTree::~BaseTree()
 {
-  const_iterator	it;
-
-  for( it=_children.begin(); it!=_children.end(); ++it ) delete *it;
+  clear();
 }
 
 
@@ -88,6 +88,15 @@ void BaseTree::insert( BaseTree* child, int index )
     }
   _children.insert( pos, child );
   child->setParent( this );
+
+  RCObject* refcounting = dynamic_cast<RCObject *>( child );
+  if( refcounting )
+  {
+    rc_ptr<RCObject>  r( refcounting );
+    // bidouille: inc the ref counter because we don't keep it in a real
+    //rc_ptr
+    ++rc_ptr_trick::refCount(r);
+  }
 }
 
 
@@ -109,7 +118,19 @@ void BaseTree::remove( unsigned index )
       unsigned	i = childrenSize();
       for( pos=_children.end(); i>index; --i, --pos ) {}
     }
-  if( pos != _children.end() ) _children.erase( pos );
+  if( pos != _children.end() )
+  {
+    BaseTree* child = *pos;
+    _children.erase( pos );
+    RCObject* refcounting = dynamic_cast<RCObject *>( child );
+    if( refcounting )
+    {
+      rc_ptr<RCObject>  r( refcounting );
+      // bidouille: dec the ref counter because we don't keep it in a real
+      //rc_ptr
+      --rc_ptr_trick::refCount(r);
+    }
+  }
 }
 
 
@@ -117,7 +138,19 @@ void BaseTree::remove( BaseTree* node )
 {
   iterator pos = find( _children.begin(), _children.end(), node );
 
-  if( pos != _children.end() ) _children.erase( pos );
+  if( pos != _children.end() )
+  {
+    BaseTree* child = *pos;
+    _children.erase( pos );
+    RCObject* refcounting = dynamic_cast<RCObject *>( child );
+    if( refcounting )
+    {
+      rc_ptr<RCObject>  r( refcounting );
+      // bidouille: dec the ref counter because we don't keep it in a real
+      //rc_ptr
+      --rc_ptr_trick::refCount(r);
+    }
+  }
 }
 
 
@@ -141,6 +174,19 @@ const BaseTree* BaseTree::getTopParent() const
 
 void BaseTree::clear()
 {
-  for( iterator i=_children.begin(); i!=_children.end(); ++i ) delete *i;
+  for( iterator i=_children.begin(); i!=_children.end(); ++i )
+  {
+    BaseTree* child = *i;
+    RCObject* refcounting = dynamic_cast<RCObject *>( child );
+    if( refcounting )
+    {
+      rc_ptr<RCObject>  r( refcounting );
+      // bidouille: dec the ref counter because we don't keep it in a real
+      //rc_ptr
+      --rc_ptr_trick::refCount(r);
+    }
+    else
+      delete child;
+  }
   _children.erase( _children.begin(), _children.end() );
 }
