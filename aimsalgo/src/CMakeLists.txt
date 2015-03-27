@@ -57,7 +57,7 @@ if( JPEG_FOUND )
   endforeach( _command AimsData2Jpeg )
 endif( JPEG_FOUND )
 # Targets linking with aimsdicom
-if( DCMTK_FOUND AND JASPER_FOUND AND TIFF_FOUND AND PNG12_FOUND )
+if( DCMTK_FOUND )
   include_directories( ${DCMTK_INCLUDE_DIR} )
   foreach( _command AimsSiemensEPI2Volume )
     file( GLOB _pro "${_command}/*.pro" )
