@@ -153,7 +153,14 @@ public:
 %MethodCode
   if( a0 < 0 )
     a0 = sipCpp->size() + a0;
-  sipRes = %Template1pyFromC%( %Template1address%(*sipCpp)[ a0 ] );
+  if( a0 < 0 || a0 >= sipCpp->size() )
+  {
+    sipRes = 0;
+    sipIsErr = 1;
+    PyErr_SetString( PyExc_IndexError, "vector index out of range" );
+  }
+  else
+    sipRes = %Template1pyFromC%( %Template1address%(*sipCpp)[ a0 ] );
 %End
 
 
@@ -161,7 +168,13 @@ public:
 %MethodCode
   if( a0 < 0 )
     a0 = sipCpp->size() + a0;
-  (*sipCpp)[ a0 ] = %Template1deref%a1;
+  if( a0 < 0 || a0 >= sipCpp->size() )
+  {
+    sipIsErr = 1;
+    PyErr_SetString( PyExc_IndexError, "vector index out of range" );
+  }
+  else
+    (*sipCpp)[ a0 ] = %Template1deref%a1;
 %End
 
 

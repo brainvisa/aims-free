@@ -42,6 +42,20 @@
 };
 
 
+%Exception std::out_of_range(std::exception) /PyName=IndexError/
+{
+%TypeHeaderCode
+#include <stdexcept>
+%End
+%RaiseCode
+        const char *detail = sipExceptionRef.what();
+        SIP_BLOCK_THREADS
+        PyErr_SetString(PyExc_IndexError, detail);
+        SIP_UNBLOCK_THREADS
+%End
+};
+
+
 %Exception carto::io_error(std::runtime_error) /PyName=IOError/
 {
 %TypeHeaderCode
