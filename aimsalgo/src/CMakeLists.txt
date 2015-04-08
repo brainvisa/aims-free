@@ -13,13 +13,13 @@ foreach( _command ${_commands} )
   set( _sources )
   foreach( _f ${_proSources} )
     set( _sources ${_sources} ${_command}/${_f} )
-  endforeach( _f ${_proSources} )
+  endforeach()
   BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
   target_link_libraries( ${_target} aimsalgo )
   BRAINVISA_INSTALL( TARGETS ${_target}
                 DESTINATION bin
                 COMPONENT ${PROJECT_NAME} )
-endforeach( _command ${commands} )
+endforeach()
 
 # Targets linking with aimsecat
 foreach( _command AimsFovSplit AimsSumPETFrame )
@@ -30,13 +30,13 @@ foreach( _command AimsFovSplit AimsSumPETFrame )
   set( _sources )
   foreach( _f ${_proSources} )
     set( _sources ${_sources} ${_command}/${_f} )
-  endforeach( _f ${_proSources} )
+  endforeach()
   BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
   target_link_libraries( ${_target} aimsalgo aimsecat )
   BRAINVISA_INSTALL( TARGETS ${_target}
                 DESTINATION bin
                 COMPONENT ${PROJECT_NAME} )
-endforeach( _command AimsFovSplit AimsSumPETFrame )
+endforeach()
   
 # Targets linking with aimsjpeg
 if( JPEG_FOUND )
@@ -48,15 +48,15 @@ if( JPEG_FOUND )
     set( _sources )
     foreach( _f ${_proSources} )
       set( _sources ${_sources} ${_command}/${_f} )
-    endforeach( _f ${_proSources} )
+    endforeach()
     BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
     target_link_libraries( ${_target} aimsalgo aimsjpeg )
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin
                   COMPONENT ${PROJECT_NAME} )
-  endforeach( _command AimsData2Jpeg )
-endif( JPEG_FOUND )
-# Targets linking with aimsdicom
+  endforeach()
+endif()
+# Targets linking with aimsdicom.
 if( DCMTK_FOUND )
   include_directories( ${DCMTK_INCLUDE_DIR} )
   foreach( _command AimsSiemensEPI2Volume )
@@ -67,11 +67,12 @@ if( DCMTK_FOUND )
     set( _sources )
     foreach( _f ${_proSources} )
       set( _sources ${_sources} ${_command}/${_f} )
-    endforeach( _f ${_proSources} )
+    endforeach()
     BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
     target_link_libraries( ${_target} aimsalgo aimsdicom )
+
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin
                   COMPONENT ${PROJECT_NAME} )
-  endforeach( _command AimsData2Jpeg )
+  endforeach()
 endif()
