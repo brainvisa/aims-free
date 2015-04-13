@@ -349,6 +349,10 @@ class CommandsTestManager(unittest.TestCase):
         if not os.path.exists(test_ref_directory):
             os.makedirs(test_ref_directory)
 
+        if not all([os.path.exists(os.path.join(
+                test_ref_directory, run_file)) \
+                for run_file in testcommand.get_run_files()]):
+
             # Run the test as reference in the test reference directory
             testcommand.execute(test_ref_directory)
 
