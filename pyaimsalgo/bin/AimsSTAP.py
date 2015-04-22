@@ -44,7 +44,7 @@ def relabel_STAP_vertices(vertices, plane_normal, planes_d):
         plane_dot = plane_normal.dot(centroid)
         if plane_dot + planes_d_side[0] >= 0 \
                 and plane_dot + planes_d_side[1] <= 0:
-            vertex[label_attribute] = 'S.T.s.med._%s' % side
+            vertex[label_attribute] = 'S.T.s.moy._%s' % side
 
 
 parser = OptionParser('Split the STAP par of the superior temporal sulcus '
