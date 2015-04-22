@@ -803,8 +803,19 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
     catch( ... )
     {
       // no interface between p0 and current point
-      cout << "no interface between seeds " << i << " and " << i+1 << endl;
-      return rc_ptr<BucketMap<Void> >( 0 );
+      // maybe they already touch each other
+      if( (*ip - p0).norm2() <= 3 )
+      {
+        sline0[ *ip ];
+        p0 = *ip;
+        continue;
+      }
+      else
+      {
+        cout << "no interface between seeds " << i << " and " << i+1 << endl;
+        cout << "distance: " << (*ip - p0).norm() << endl;
+        return rc_ptr<BucketMap<Void> >( 0 );
+      }
     }
     // follow "gradient" to get line from pmin to p0 and p
     // (restricted to voronoi regions)
