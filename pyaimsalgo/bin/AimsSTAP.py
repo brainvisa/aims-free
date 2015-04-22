@@ -9,7 +9,7 @@ from soma import aims, aimsalgo
 #output_fold_graph_filename = '/tmp/cut_graph.arg'
 label_attribute = 'label'
 left_planes = (11., 43.)
-right_planes = (11., 43.)
+right_planes = (6., 41.)
 
 def cut_vertex(graph, vertex, plane_normal, plane_d):
     cut_line = aims.BucketMap_VOID()
@@ -47,8 +47,8 @@ def relabel_STAP_vertices(vertices, plane_normal, planes_d):
             vertex[label_attribute] = 'S.T.s.moy._%s' % side
 
 
-parser = OptionParser('Split the STAP par of the superior temporal sulcus '
-    '(S.T.s.med) in a sulcal graph ')
+parser = OptionParser('Split the STAP part of the superior temporal sulcus '
+    '(S.T.s.med) in a sulcal graph (Leroy et al, PNAS 2015)')
 parser.add_option('-i', '--input', dest='input',
                   help='input labelled sulcal graph')
 parser.add_option('-o', '--output', dest='output',
