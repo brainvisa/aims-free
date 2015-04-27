@@ -353,6 +353,8 @@ AimsData<T>::AimsData( const AimsData<T>& other, int borderw )
   other.dimY() + borderw * 2, other.dimZ() + borderw * 2, other.dimT() ) ), 
     d( new Private )
 {
+  _volume->copyHeaderFrom( other.volume()->header() );
+
   if( borderw != 0 )
     _volume.reset( new carto::Volume<T>(
       _volume,
