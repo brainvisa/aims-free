@@ -24,6 +24,7 @@ set( _headers
     data/pheader_doc.h
     data/sliceformatheader.h
     data/volumemanip.h
+    data/volumeoperators_aims.h
     def/def_g.h
     def/assert.h
     def/general.h
@@ -231,6 +232,7 @@ set( _sources
     data/headerutil.cc
     data/pheader.cc
     data/sliceformatheader.cc
+    data/volumeoperators_aims.cc
     def/filedim.cc
     def/general.cc
     def/info.cc

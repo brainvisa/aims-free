@@ -1193,6 +1193,31 @@ typessub = { 'signed char' : \
                'module' : 'aims',
                'testPyType' : 'pyaimsAimsData_CDOUBLE_Check',
                },
+             'AimsData<Point3df>' : \
+             { 'typecode' : 'AimsData_POINT3DF',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new AimsData<Point3df>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'AimsData_POINT3DF',
+               'sipClass' : 'AimsData_POINT3DF',
+               'typeinclude' : \
+               '#include <aims/data/data.h>\n#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_AIMSDATA_POINT3DF_CHECK_DEFINED\n'
+               '#define PYAIMS_AIMSDATA_POINT3DF_CHECK_DEFINED\n'
+               'inline int pyaimsAimsData_POINT3DF_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsData_POINT3DF, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsAimsData_POINT3DF_Check',
+               },
 
              'carto::Volume<int8_t>' : \
              { 'typecode' : 'Volume_S8',
@@ -1545,6 +1570,32 @@ typessub = { 'signed char' : \
                '#endif',
                'module' : 'aims',
                'testPyType' : 'pyaimsVolume_CDOUBLE_Check',
+               },
+             'carto::Volume<Point3df>' : \
+             { 'typecode' : 'Volume_POINT3DF',
+               'pyFromC' : '',
+               'CFromPy' : '',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&',
+               'pyaddress' : '&',
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new carto::Volume<Point3df>',
+               'NumType' : 'PyArray_OBJECT',
+               'PyType' : 'Volume_POINT3DF',
+               'sipClass' : 'Volume_POINT3DF',
+               'typeinclude' : \
+               '#include <cartodata/volume/volume.h>\n' \
+               '#include <cartobase/type/types.h>',
+               'sipinclude' : '#ifndef PYAIMS_VOLUME_POINT3DF_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_POINT3DF_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_POINT3DF_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_POINT3DF, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module' : 'aims',
+               'testPyType' : 'pyaimsVolume_POINT3DF_Check',
                },
 
              '1' : \

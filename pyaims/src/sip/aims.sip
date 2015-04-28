@@ -168,6 +168,7 @@ typedef unsigned short uint16_t;
 %Include aimsdata_HSV.sip
 %Include aimsdata_CFLOAT.sip
 %Include aimsdata_CDOUBLE.sip
+%Include aimsdata_POINT3DF.sip
 
 %Include motion.sip
 %Include transformation.sip
@@ -212,6 +213,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include rcptr_AimsData_HSV.sip
 %Include rcptr_AimsData_CFLOAT.sip
 %Include rcptr_AimsData_CDOUBLE.sip
+%Include rcptr_AimsData_POINT3DF.sip
 
 %Include reader_AimsData_U8.sip
 %Include reader_AimsData_S16.sip
@@ -225,6 +227,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include reader_AimsData_HSV.sip
 %Include reader_AimsData_CFLOAT.sip
 %Include reader_AimsData_CDOUBLE.sip
+%Include reader_AimsData_POINT3DF.sip
 
 %Include rawconverter_bucket_S16.sip
 %Include rcptr_SparseMatrix.sip
@@ -249,6 +252,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include volume_HSV.sip
 %Include volume_CFLOAT.sip
 %Include volume_CDOUBLE.sip
+%Include volume_POINT3DF.sip
 
 %Include debuggingvol.sip
 
@@ -264,6 +268,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include rcptr_Volume_HSV.sip
 %Include rcptr_Volume_CFLOAT.sip
 %Include rcptr_Volume_CDOUBLE.sip
+%Include rcptr_Volume_POINT3DF.sip
 
 %Include reader_Volume_U8.sip
 %Include reader_Volume_S16.sip
@@ -277,6 +282,7 @@ typedef AimsTimeSurface_3 AimsSurfaceTriangle;
 %Include reader_Volume_HSV.sip
 %Include reader_Volume_CFLOAT.sip
 %Include reader_Volume_CDOUBLE.sip
+%Include reader_Volume_POINT3DF.sip
 
 %Include converter_Volume_DOUBLE_DOUBLE.sip
 %Include converter_Volume_DOUBLE_FLOAT.sip
