@@ -161,6 +161,16 @@ attributes = {
       const Point3df & normal = Point3df( 0, 0, 1 ),
       const Point3df & startdir = Point3df( 1, 0, 0 ), float startangle = 0,
       float stopangle = M_PI*2 );
+
+    static AimsTimeSurface<2,Void>*
+    grid( const carto::GenericObject & params );
+
+    /** Grid wireframe.
+     Similar to parallelepiped_wireframe, with a regular grid sampling.
+    */
+    static AimsTimeSurface<2,Void>* grid(
+      const Point3df & boundingbox_min, const Point3df & boundingbox_max,
+      const Point3df & grid_sampling );
   };
 
 }

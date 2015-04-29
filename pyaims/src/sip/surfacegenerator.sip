@@ -122,14 +122,14 @@ static ellipse( Point3df center, float radius1, float radius2, unsigned nfaces, 
 
   static AimsSurfaceTriangle* icosphere( const carto::GenericObject & ) /Factory/;
 %Docstring
-static icosphere( dictionary )
+icosphere( dictionary )
 See the description() and printDescription() methods for more information.
 %End
 
   static AimsSurfaceTriangle* icosphere( const Point3df &, float,
                                          unsigned=320 ) /Factory/;
 %Docstring
-static icosphere( Point3df center, float radius, unsigned nfaces=320 )
+icosphere( Point3df center, float radius, unsigned nfaces=320 )
 
 Compared to sphere() which performs meridian / parallels tesselation, icosphere over-segments an icosahedron to get equal, equilateral triangles.
 %End
@@ -139,7 +139,7 @@ Compared to sphere() which performs meridian / parallels tesselation, icosphere 
   static AimsTimeSurface_2* parallelepiped_wireframe(
     const Point3df & boundingbox_min, const Point3df & boundingbox_max ) /Factory/;
 %Docstring
-static parallelepiped_wireframe( Point3df boundingbox_min, Point3df boundingbox_max )
+parallelepiped_wireframe( Point3df boundingbox_min, Point3df boundingbox_max )
 %End
 
   static AimsTimeSurface_2*
@@ -158,6 +158,22 @@ Circle, or part of circle.
   of angles (circle ray).
   startangle, stopangle are meant to make parts of circle
 %End
+
+  static AimsTimeSurface_2*
+  grid( const carto::GenericObject & params ) /Factory/;
+%Docstring
+grid(dict)
+See the description() and printDescription() methods for more information.
+%End
+
+  static AimsTimeSurface_2* grid(
+    const Point3df & boundingbox_min, const Point3df & boundingbox_max,
+    const Point3df & grid_sampling ) /Factory/;
+%Docstring
+grid(Point3df boundingbox_min, Point3df boundingbox_max, Point3df grid_sampling)
+Regular, wireframe grid
+%End
+
 };
 
 };

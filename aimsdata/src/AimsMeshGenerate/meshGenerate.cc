@@ -50,6 +50,7 @@ int main( int argc, const char **argv )
   ostringstream	sg;
   sg << "input parameter file (.minf-like)\nPossible types and parameters:\n";
   SurfaceGenerator::printDescription( sg );
+  SurfaceGenerator::printDescription_wireframe( sg );
   app.addOption( filein, "-i", sg.str() );
   app.alias( "--input", "-i" );
   app.addOption( meshout, "-o", "output mesh" );
@@ -63,9 +64,20 @@ int main( int argc, const char **argv )
       AttributedObject	params( "AimsMeshGenerate" );
       pr.read( params );
 
-      AimsSurfaceTriangle	*mesh = SurfaceGenerator::generate( params );
+      try
+      {
+        AimsSurfaceTriangle	*mesh = SurfaceGenerator::generate( params );
 
-      meshout.write( *mesh );
+        meshout.write( *mesh );
+      }
+      catch( runtime_error & )
+      {
+        // try wireframe objects
+        AimsTimeSurface<2, Void> *mesh = SurfaceGenerator::generate_wireframe(
+          params );
+        Writer<AimsTimeSurface<2, Void> > w( meshout.fileName() );
+        w.write( *mesh );
+      }
     }
   catch( user_interruption & )
     {

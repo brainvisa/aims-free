@@ -125,6 +125,15 @@ namespace
   };
 
 
+  struct GridGen_wireframe
+    : public SurfaceGenerator::Generator_wireframe
+  {
+    virtual AimsTimeSurface<2,Void>*
+    generator( const carto::GenericObject & ) const;
+    virtual Object parameters() const;
+  };
+
+
   map<string, rc_ptr<SurfaceGenerator::Generator> > & generators()
   {
     static map<string,rc_ptr<SurfaceGenerator::Generator> >	functs;
@@ -164,6 +173,9 @@ namespace
       functs[ "circle" ]
         = rc_ptr<SurfaceGenerator::Generator_wireframe>(
           new CircleGen_wireframe );
+      functs[ "grid" ]
+        = rc_ptr<SurfaceGenerator::Generator_wireframe>(
+          new GridGen_wireframe );
     }
     return functs;
   }
@@ -418,6 +430,27 @@ namespace
     return d;
   }
 
+  AimsTimeSurface<2,Void>*
+  GridGen_wireframe::generator(
+    const carto::GenericObject & x ) const
+  {
+    return SurfaceGenerator::grid( x );
+  }
+
+
+  Object GridGen_wireframe::parameters() const
+  {
+    Object              d = Object::value( Dictionary() );
+    Dictionary  & p = d->value<Dictionary>();
+    p[ "boundingbox_min" ] = Object::value( string(
+      "3D position of the lower bounding box" ) );
+    p[ "boundingbox_max" ] = Object::value( string(
+      "3D position of the higher bounding box" ) );
+    p[ "grid_sampling" ] = Object::value( string(
+      "3D sampling interval" ) );
+    return d;
+  }
+
 }
 
 
@@ -441,9 +474,8 @@ SurfaceGenerator::generate( const GenericObject & params )
     return ifn->second->generator( params );
   else
     {
-      cerr << "SurfaceGenerator::generate: unknown shape type " << type 
-	   << endl;
-      throw runtime_error( string( "can't generate mesh of type " ) + type  );
+      throw runtime_error(
+        string( "SurfaceGenerator::generate: unknown shape type " ) );
     }
   return 0;
 }
@@ -456,7 +488,7 @@ SurfaceGenerator::generate_wireframe( const Object params )
 }
 
 
-AimsTimeSurface<2,Void>* 
+AimsTimeSurface<2,Void>*
 SurfaceGenerator::generate_wireframe( const GenericObject & params )
 {
   string        type = params.getProperty( "type" )->getString();
@@ -472,7 +504,9 @@ SurfaceGenerator::generate_wireframe( const GenericObject & params )
     {
       cerr << "SurfaceGenerator::generate_wireframe: unknown shape type " 
         << type << endl;
-      throw runtime_error( string( "can't generate mesh of type " ) + type  );
+      throw runtime_error(
+        string( "SurfaceGenerator::generate_wireframe: unknown shape type " )
+        + type );
     }
   return 0;
 }
@@ -1530,7 +1564,7 @@ AimsTimeSurface<2,Void>* SurfaceGenerator::parallelepiped_wireframe(
     cerr << "parallelepiped_wireframe needs 3 coords in boundingbox_min\n";
 
   vp1 = params.getProperty( "boundingbox_max" );
-  for( it=vp1->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
+  for( i=0, it=vp1->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
     corner2[i] = it->currentValue()->getScalar();
   if( i != 3 )
     cerr << "parallelepiped_wireframe needs 3 coords in boundingbox_max\n";
@@ -1715,6 +1749,104 @@ AimsTimeSurface<2,Void>* SurfaceGenerator::circle_wireframe(
   }
   else
     vert.push_back( lastver ); // open circle
+
+  return mesh;
+}
+
+
+AimsTimeSurface<2,Void>* SurfaceGenerator::grid(
+  const carto::GenericObject & params )
+{
+  Object        vp1;
+  Point3df      corner1, corner2, sampling;
+
+  vp1 = params.getProperty( "boundingbox_min" );
+
+  int i = 0;
+  Object it;
+  for( it=vp1->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
+    corner1[i] = it->currentValue()->getScalar();
+  if( i != 3 )
+    cerr << "grid needs 3 coords in boundingbox_min\n";
+
+  vp1 = params.getProperty( "boundingbox_max" );
+  for( it=vp1->objectIterator(), i=0; it->isValid() && i < 3; ++i, it->next() )
+    corner2[i] = it->currentValue()->getScalar();
+  if( i != 3 )
+    cerr << "grid needs 3 coords in boundingbox_max\n";
+
+  vp1 = params.getProperty( "grid_sampling" );
+  for( it=vp1->objectIterator(), i=0; it->isValid() && i < 3; ++i, it->next() )
+    sampling[i] = it->currentValue()->getScalar();
+  if( i != 3 )
+    cerr << "grid needs 3 coords in grid_sampling\n";
+
+  return grid( corner1, corner2, sampling );
+}
+
+
+AimsTimeSurface<2,Void>* SurfaceGenerator::grid(
+  const Point3df & boundingbox_min, const Point3df & boundingbox_max,
+  const Point3df & grid_sampling )
+{
+  AimsTimeSurface<2,Void> *mesh = new AimsTimeSurface<2,Void>;
+  AimsSurface<2, Void> & mesh0 = (*mesh)[0];
+  vector<Point3df> & vert = mesh0.vertex();
+  vector<AimsVector<uint32_t, 2> > & poly = mesh0.polygon();
+
+  int dimx = int( ( boundingbox_max[0] - boundingbox_min[0] )
+    / grid_sampling[0] ) + 1;
+  int dimy = int( ( boundingbox_max[1] - boundingbox_min[1] )
+    / grid_sampling[1] ) + 1;
+  int dimz = int( ( boundingbox_max[2] - boundingbox_min[2] )
+    / grid_sampling[2] ) + 1;
+  int x, y, z, i = 0;
+
+  vert.resize( dimx * dimy * dimz );
+
+  for( z=0; z<dimz; ++z )
+    for( y=0; y<dimy; ++y )
+      for( x=0; x<dimx; ++x )
+      {
+        Point3df pos( grid_sampling );
+        pos[0] *= x;
+        pos[1] *= y;
+        pos[2] *= z;
+        vert[i++] = boundingbox_min + pos;
+      }
+
+  int poly1 = ( dimx - 1 ) * dimy * dimz;
+  int poly2 = dimx * ( dimy - 1 ) * dimz;
+  int poly3 = dimx * dimy * ( dimz - 1 );
+
+  poly.resize( poly1 + poly2 + poly3 );
+
+  int splane = dimx * dimy;
+  i = 0;
+
+  for( z=0; z<dimz; ++z )
+    for( y=0; y<dimy; ++y )
+      for( x=0; x<dimx - 1; ++x )
+      {
+        poly[i++] = AimsVector<uint, 2>( x + y * dimx + z * splane,
+                                         x + 1 + y * dimx + z * splane );
+      }
+
+  for( z=0; z<dimz; ++z )
+    for( y=0; y<dimy - 1; ++y )
+      for( x=0; x<dimx; ++x )
+      {
+        poly[i++] = AimsVector<uint, 2>( x + y * dimx + z * splane,
+                                         x + dimx + y * dimx + z * splane );
+      }
+
+  for( z=0; z<dimz - 1; ++z )
+    for( y=0; y<dimy; ++y )
+      for( x=0; x<dimx; ++x )
+      {
+        poly[i++] = AimsVector<uint, 2>( x + y * dimx + z * splane,
+                                         x + splane + y * dimx + z * splane );
+      }
 
   return mesh;
 }
