@@ -16,6 +16,24 @@ The current document is dedicated to the C++ API. It may be used conjointly with
 .. contents:: index
    :local:
 
+C++ API docs
+------------
+
+:aimsdata:`AIMS library C++ API <doxygen/index.html>`
+
+AIMS is also composed of several sub-projects:
+
+* :cartoddox:`Carto data <index.html>`: neuroimaging data structures and IO implementations
+* :aimsdata:`AIMS data <user_doc/index.html>`: image processing basics (this doc)
+* :aimsalgo:`AIMS algo <index.html>`: algorithms for AIMS
+* :graphdox:`Graph <index.html>`: high-level graphs library
+* :aimsgui:`AIMS GUI <index.html>`: `Qt-based <http://qt-project.org>`_ GUI classes for AIMS
+* :aimstil:`AIMS Til <index.html>`: Mainly meshes manipulation tools for AIMS
+* **Soma-IO**: C++ general IO libraries, containing these sub-projects:
+
+  * :cartobdox:`Carto base <index.html>`: C++ general usage library
+  * :somaio:`Soma-IO <doxygen/index.html>`: IO libraries
+
 
 Using graph objects in AIMS
 ---------------------------

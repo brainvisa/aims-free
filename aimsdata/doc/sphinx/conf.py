@@ -201,6 +201,7 @@ latex_documents = [
 #latex_use_modindex = True
 
 autoclass_content = "both"
+aimstil_version = '1.2' # FIXME: find this automatically
 
 extlinks = {
   'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
@@ -209,16 +210,18 @@ extlinks = {
   'aimsex' : ('../../aimsdata-' + version + '/code_examples/%s', 'aimsdata '),
   'pyaims': ('../../pyaims-' + version + '/sphinx/%s',
     'pyaims '),
+  'aimsalgo' : ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo '),
+  'aimsgui': ('../../aimsgui-' + version + '/doxygen/%s', 'aimsgui '),
+  'aimstil': ('../../aimstil-' + aimstil_version + '/doxygen/%s', 'aimstil '),
   'cartobdox' : ('../../cartobase-' + version + '/doxygen/%s',
   'cartobdox '),
   'cartoddox' : ('../../cartodata-' + version + '/doxygen/%s',
   'cartoddox '),
-  'graphdox' : ('../../graph-' + version + '/doxygen/%s',
-  'graphdox '),
-  'sidox' : ('../../sigraph-' + version + '/doxygen/%s',
-  'sidox '),
+  'graphdox' : ('../../graph-' + version + '/doxygen/%s', 'graphdox '),
+  'somaio' : ('../../soma-io-' + version + '/%s', 'somaio '),
+  'sidox' : ('../../sigraph-' + version + '/doxygen/%s', 'sidox '),
   'connectdox' : ('../../connectomist-' + version + '/doxygen/%s',
-  'connectdox '),
+                  'connectdox '),
 }
 
 intersphinx_mapping = {

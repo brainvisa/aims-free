@@ -27,6 +27,8 @@ Developers section
 C++ API docs
 ------------
 
+:aims:`Beginning of programming tutorial <dev/index.html>`
+
 :aims:`AIMS library C++ API <doxygen/index.html>`
 
 AIMS is also composed of several sub-projects:
