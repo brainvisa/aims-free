@@ -32,7 +32,7 @@ AIMS is also composed of several sub-projects:
 * **Soma-IO**: C++ general IO libraries, containing these sub-projects:
 
   * :cartobdox:`Carto base <index.html>`: C++ general usage library
-  * :somaio:`Soma-IO <doxygen/index.html>`: IO libraries
+  * :somaio:`Soma-IO <index.html>`: IO libraries (:somaio:`C++ API <doxygen/index.html>`)
 
 
 Using graph objects in AIMS

@@ -9,3 +9,6 @@ find_package( Sphinx )
 BRAINVISA_GENERATE_SPHINX_DOC( "sphinx/user_doc"
   "share/doc/aimsdata-${BRAINVISA_PACKAGE_VERSION_MAJOR}.${BRAINVISA_PACKAGE_VERSION_MINOR}/user_doc" USER )
 
+BRAINVISA_GENERATE_SPHINX_DOC( "sphinx/dev_doc"
+    "share/doc/aimsdata-${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}/dev_doc"
+    TARGET aimsdata-sphinx )

@@ -218,7 +218,7 @@ latex_documents = [
 #latex_use_modindex = True
 
 autoclass_content = "both"
-aimstil_version = '1.2' # FIXME: find this automatically
+aimstil_version = '1.3' # FIXME: find this automatically
 
 extlinks = {
   'axon': ('../../axon-' + version + '/%s', 'axon '),
