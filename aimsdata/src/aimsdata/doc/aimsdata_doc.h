@@ -42,7 +42,7 @@
   AIMS is constantly under changes. Several things are moving, or are being
   rewritten in a cleaner and more modern way into \ref cartobase or 
   \ref cartodata, our newer library for medical imaging structures. The IO
-  system is in the process of being reimplemented in \ref soma-io.
+  system is in the process of being reimplemented in \ref somaio.
 
   A very incomplete <a href="../dev/index.html">developer documentation can 
   also be read here.</a>
