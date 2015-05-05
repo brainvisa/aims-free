@@ -232,7 +232,6 @@ set( _sources
     data/headerutil.cc
     data/pheader.cc
     data/sliceformatheader.cc
-    data/volumeoperators_aims.cc
     def/filedim.cc
     def/general.cc
     def/info.cc

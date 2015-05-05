@@ -42,7 +42,9 @@
 #include <aims/io/datatypecode.h>
 #include <aims/vector/vector.h>
 #include <aims/math/dtitensor.h>
+#include <aims/data/volumeoperators_aims.h>
 #include <cartodata/volume/volumeutil_d.h>
+#include <cartobase/object/object_d.h>
 #include <set>
 #include <map>
 
@@ -134,38 +136,42 @@ instantiate_volutil2( AimsHSV, std::minus<AimsHSV> )
 
 template class carto::VolumeProxy< Point3df >;
 template class carto::Volume< Point3df >;
-template class VolumeUtil<Point3df>;
+// template class VolumeUtil<Point3df>;
 template VolumeRef<Point3df> 
 VolumeUtil<Point3df>::apply( std::negate<Point3df>, 
                              const VolumeRef<Point3df> & );
+instantiate_volutil( Point3df )
 instantiate_volutil2( Point3df, std::plus<Point3df> )
 instantiate_volutil2( Point3df, std::minus<Point3df> )
 
 template class carto::VolumeProxy< Point3d >;
 template class carto::Volume< Point3d >;
-template class VolumeUtil<Point3d>;
-template VolumeRef<Point3d> 
+// template class VolumeUtil<Point3d>;
+template VolumeRef<Point3d>
 VolumeUtil<Point3d>::apply( std::negate<Point3d>, 
                             const VolumeRef<Point3d> & );
+instantiate_volutil( Point3d )
 instantiate_volutil2( Point3d, std::plus<Point3d> )
 instantiate_volutil2( Point3d, std::minus<Point3d> )
 
 template class carto::VolumeProxy< Point2d >;
 template class carto::Volume< Point2d >;
-template class VolumeUtil<Point2d>;
+// template class VolumeUtil<Point2d>;
 template VolumeRef<Point2d> 
 VolumeUtil<Point2d>::apply( std::negate<Point2d>, 
                             const VolumeRef<Point2d> & );
+instantiate_volutil( Point2d )
 instantiate_volutil2( Point2d, std::plus<Point2d> )
 instantiate_volutil2( Point2d, std::minus<Point2d> )
 
 typedef AimsVector<float,6> vectorf6;
 template class carto::VolumeProxy< vectorf6 >;
 template class carto::Volume< vectorf6 >;
-template class VolumeUtil<vectorf6>;
+// template class VolumeUtil<vectorf6>;
 template VolumeRef<vectorf6> 
 VolumeUtil<vectorf6>::apply( std::negate<vectorf6>, 
                              const VolumeRef<vectorf6> & );
+instantiate_volutil( vectorf6 )
 instantiate_volutil2( vectorf6, std::plus<vectorf6> )
 instantiate_volutil2( vectorf6, std::minus<vectorf6> )
 
@@ -177,4 +183,11 @@ template class carto::Volume< std::set<float> >;
 
 template class carto::VolumeProxy< std::map<int, float> >;
 template class carto::Volume< std::map<int, float> >;
+
+namespace carto
+{
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3df > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
+
+}
 
