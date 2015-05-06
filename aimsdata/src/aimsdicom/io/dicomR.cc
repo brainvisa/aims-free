@@ -152,8 +152,12 @@ namespace aims
       dfile.read( stream, EXS_Unknown, EGL_noChange );
       dfile.transferEnd();
       if ( dfile.error() != EC_Normal )
+#if OFFIS_DCMTK_VERSION_NUMBER >= 361
+        throw carto::wrong_format_error( dfile.error().text(), filename );
+#else
         throw carto::wrong_format_error( dcmErrorConditionToString
                                          ( dfile.error() ), filename );
+#endif
 
       DcmStack stack;
 
