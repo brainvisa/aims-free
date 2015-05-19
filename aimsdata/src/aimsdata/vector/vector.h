@@ -138,7 +138,7 @@ class AimsVector
     /// The constructor fills the D items of vector with value
     AimsVector(const T& value);
     /// The constructor copy the D item of value[]
-    AimsVector(const T value[]);
+    explicit AimsVector(const T value[]);
     /// Constructor for D=2
     AimsVector(const T& x,const T& y);
     /// Constructor for D=3
