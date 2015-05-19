@@ -31,41 +31,17 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef AIMS_DATA_VOLUMEOPERATORS_AIMS_H
-#define AIMS_DATA_VOLUMEOPERATORS_AIMS_H
-
-#include <cartodata/volume/volumeoperators.h>
+//--- plugin -----------------------------------------------------------------
+#include <soma-io/image/gisimagereader_d.h>
+#include <soma-io/image/gisimagewriter_d.h>
 #include <aims/vector/vector.h>
-#include <aims/math/dtitensor.h>
 
 namespace carto
 {
-
-
-  template <typename T, int D, typename U>
-  class Divider<AimsVector<T, D>, U>
-  {
-  public:
-    inline Divider( U x ) : divisor( x ) {}
-    inline AimsVector<T, D> operator () ( const AimsVector<T, D> & x ) const
-    { return x * ( 1. / divisor ); }
-    U      divisor;
-  };
-
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< Point3df > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< Point3d > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3d > > )
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< Point2d > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point2d > > )
-#define vectorf6 AimsVector<float, 6>
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< vectorf6 > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< vectorf6 > > )
-#undef vectorf6
-  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< DtiTensor* > )
-  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< DtiTensor* > > )
+  template class GisImageReader<Point3df>;
+  template class GisImageReader<Point3d>;
+  template class GisImageReader<Point2d>;
+  template class GisImageReader<AimsVector<float, 6> >;
 
 }
-
-#endif
 

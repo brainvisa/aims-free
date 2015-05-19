@@ -188,6 +188,22 @@ namespace carto
 {
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3df > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< vectorf6 > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< vectorf6 > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< DtiTensor* > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< DtiTensor* > > )
 
 }
+
+template class Creator<Volume<Point3df> >;
+template class Creator<Volume<Point3d> >;
+template class Creator<Volume<Point2d> >;
+template class Creator<Volume<vectorf6> >;
+template class Creator<Volume<DtiTensor*> >;
+
+template class Creator<VolumeRef<Point3df> >;
+template class Creator<VolumeRef<Point3d> >;
+template class Creator<VolumeRef<Point2d> >;
+template class Creator<VolumeRef<vectorf6> >;
+template class Creator<VolumeRef<DtiTensor*> >;
 

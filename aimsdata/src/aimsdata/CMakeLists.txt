@@ -261,6 +261,7 @@ set( _sources
     io/baseFormats_sparsematrix.cc
     io/baseFormats_syntax.cc
     io/bckheader.cc
+    io/carto_volume_io.cc
     io/channelR.cc
     io/coarseR.cc
     io/cmapR.cc

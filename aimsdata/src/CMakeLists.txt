@@ -1,5 +1,8 @@
+
 add_subdirectory(aimsdata)
 set(HEADERS ${AIMSDATA_HEADERS})
+
+# add_subdirectory(aimsgis)
 add_subdirectory(aimsecat)
 set(HEADERS ${HEADERS} ${AIMSECAT_HEADERS})
 if( NOT WIN32 )

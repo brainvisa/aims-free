@@ -176,7 +176,7 @@ del RCObject_init, RCObject_del
 
 # generic Reader class
 
-class Reader:
+class Reader(object):
 
     '''
     Generic reader that can theorerically load any SIP-mapped AIMS or
