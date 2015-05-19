@@ -42,6 +42,8 @@
 #include <soma-io/io/writer_d.h>
 #include <soma-io/io/formatdictionary_d.h>
 #include <soma-io/reader/formatreader_d.h>
+#include <soma-io/image/imagereader_d.h>
+#include <soma-io/image/imagewriter_d.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>
 //----------------------------------------------------------------------------
@@ -184,5 +186,19 @@ template class VolumeUtilIO<Point3d>;
 template class VolumeUtilIO<Point2d>;
 template class VolumeUtilIO<vectorf6>;
 // template class VolumeUtilIO<DtiTensor*>;
+
+//============================================================================
+//   I M A G E R E A D E R
+//============================================================================
+
+template class ImageReader<Point3df>;
+template class ImageReader<Point3d>;
+template class ImageReader<Point2d>;
+template class ImageReader<AimsVector<float, 6> >;
+
+template class ImageWriter<Point3df>;
+template class ImageWriter<Point3d>;
+template class ImageWriter<Point2d>;
+template class ImageWriter<AimsVector<float, 6> >;
 
 }

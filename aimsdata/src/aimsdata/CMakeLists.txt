@@ -54,6 +54,7 @@ set( _headers
     io/argheader.h
     io/argR.h
     io/argW.h
+    io/asciidatasourcetraits_aims.h
     io/baseFormats_bucket.h
     io/baseFormats_bucket_d.h
     io/baseFormats_cartovolume.h
