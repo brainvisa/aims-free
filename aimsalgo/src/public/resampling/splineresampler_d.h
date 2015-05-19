@@ -37,14 +37,12 @@
 
 #include <aims/resampling/splineresampler.h>
 #include <aims/utility/converter_volume.h>
-#include <cstdlib>
-#include <math.h>
 
 #define EPSILON   1.192092896e-7
 
 template < class T >
 SplineResampler< T >::SplineResampler()
-  : Resampler<T>(), _lastvolume( 0 ), _lasttime( -1 ) 
+  : Resampler<T>(), _lastvolume( 0 ), _lasttime( -1 )
 {
 }
 
@@ -64,13 +62,13 @@ AimsData<double> SplineResampler< T >::getSplineCoef( const AimsData< T >& inVol
 						      bool verbose )
 {
   updateParameters( inVolume, t, verbose);
-  return _splineCoefficients; 
+  return _splineCoefficients;
 
 }
 
 
 template < class T >
-void 
+void
 SplineResampler< T >::doResample( const AimsData< T >& inVolume,
                                   const Motion& invTransform3d,
                                   const T& outBackground,
@@ -151,7 +149,7 @@ SplineResampler< T >::doResample( const AimsData< T >& inVolume,
                   -- z;
 
                 }
-              z -= half;  
+              z -= half;
 
             }
           else
@@ -164,10 +162,10 @@ SplineResampler< T >::doResample( const AimsData< T >& inVolume,
           for ( k = 0; k < width; k++ )
             {
 
-              weightZ[ k ] = getBSplineWeight( z + k, 
+              weightZ[ k ] = getBSplineWeight( z + k,
                                                normalizedInLocation[2] );
               foldZ[ k ] = getFold( z + k, inVolume.dimZ() ) *
-                ( &_splineCoefficients( 0, 0, 1 ) 
+                ( &_splineCoefficients( 0, 0, 1 )
                   - &_splineCoefficients( 0 ) );
 
             }
@@ -186,7 +184,7 @@ SplineResampler< T >::doResample( const AimsData< T >& inVolume,
               -- y;
 
             }
-          y -= half;  
+          y -= half;
 
         }
       else
@@ -200,7 +198,7 @@ SplineResampler< T >::doResample( const AimsData< T >& inVolume,
         {
 
           weightY[ j ] = getBSplineWeight( y + j, normalizedInLocation[1] );
-          foldY[ j ] = getFold( y +j, inVolume.dimY() ) 
+          foldY[ j ] = getFold( y +j, inVolume.dimY() )
             * ( &_splineCoefficients( 0, 1 ) - &_splineCoefficients( 0 ) );
 
         }
@@ -217,7 +215,7 @@ SplineResampler< T >::doResample( const AimsData< T >& inVolume,
               -- x;
 
             }
-          x -= half;  
+          x -= half;
 
         }
       else
@@ -272,12 +270,12 @@ SplineResampler< T >::doResample( const AimsData< T >& inVolume,
 
 
 template < class T >
-void 
+void
 SplineResampler< T >::updateParameters( const AimsData< T >& inVolume,
                                         int t, bool verbose )
 {
 
-  if ( ( &inVolume != _lastvolume || t != _lasttime ) 
+  if ( ( &inVolume != _lastvolume || t != _lasttime )
        && this->getOrder() > 1 )
     {
 
@@ -421,7 +419,7 @@ SplineResampler< T >::updateParameters( const AimsData< T >& inVolume,
 
 
 template < class T >
-void 
+void
 SplineResampler< T >::iirConvolveMirror( std::vector< double >& data ) const
 {
 
@@ -537,24 +535,7 @@ SplineResampler< T >::iirConvolveMirror( std::vector< double >& data ) const
 template < class T >
 int SplineResampler< T >::getFold( int i, int size ) const
 {
-
-  i = std::abs( i );
-  if ( i < size )
-  {
-
-    return i;
-
-  }
-  if ( size == 1 )
-  {
-
-    return 0;
-
-  }
-  int size2 = ( size << 1 ) - 2;
-  ldiv_t modOp = std::ldiv( i, size2 );
-  return ( modOp.rem < size ) ? modOp.rem : ( size2 - modOp.rem );
-
+  return aims::mirrorCoeff(i, size);
 }
 
 
