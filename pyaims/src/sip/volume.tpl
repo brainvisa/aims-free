@@ -549,7 +549,7 @@ Set the voxel value at the given position.
   size_t strides[4];
   strides[3] = sizeof( %Template1% );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
-  if( ref.get() )
+  if( ref.get() && ref->allocatorContext().isAllocated() )
   {
     strides[2] = strides[3] * ref->getSizeX();
     strides[1] = strides[2] * ref->getSizeY();
@@ -575,7 +575,7 @@ Set the voxel value at the given position.
   size_t strides[4];
   strides[3] = sizeof( %Template1% );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
-  if( ref.get() )
+  if( ref.get() && ref->allocatorContext().isAllocated() )
   {
     strides[2] = strides[3] * ref->getSizeX();
     strides[1] = strides[2] * ref->getSizeY();
@@ -601,7 +601,7 @@ Set the voxel value at the given position.
   size_t strides[4];
   strides[3] = sizeof( %Template1% );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
-  if( ref.get() )
+  if( ref.get() && ref->allocatorContext().isAllocated() )
   {
     strides[2] = strides[3] * ref->getSizeX();
     strides[1] = strides[2] * ref->getSizeY();
