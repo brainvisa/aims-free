@@ -74,7 +74,15 @@ Voxel sizes in mm (list of 4 floats)
     virtual void copyHeaderFrom( const carto::PropertySet & other );
     virtual void copyHeaderFrom( const carto::Object & other );
 
-    const carto::AllocatorContext & allocatorContext() const;
+    carto::AllocatorContext & allocatorContext();
+%MethodCode
+    // handle constness of C++ returned object
+    // and the fact that a copied context is always unallocated
+    sipRes = const_cast<carto::AllocatorContext *>(
+        &sipCpp->allocatorContext() );
+    // Problem: the returned object is actually modifiable, which is not safe.
+%End
+
     void fill( const %Template1% & value ) /ReleaseGIL/;
 
     rc_ptr_Volume_%Template1typecode% refVolume() const;
