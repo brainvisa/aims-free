@@ -148,7 +148,6 @@ namespace aims
     static std::set<std::string> formats();
     /** builds base formats maps. Currently:
 	- Volume formats:
-	  - GIS
 	  - SPM
 	  - VIDA
 	  - DICOM
