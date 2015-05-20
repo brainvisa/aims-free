@@ -75,11 +75,4 @@ AIMS_INSTANTIATE_READER( AimsData<char> );
 AIMS_INSTANTIATE_READER( AimsData<int64_t> );
 AIMS_INSTANTIATE_READER( AimsData<uint64_t> );
 
-AIMS_INSTANTIATE_READER( Volume<Point3df> );
-AIMS_INSTANTIATE_READER( Volume<Point3d> );
-AIMS_INSTANTIATE_READER( Volume<AimsVector<float COMMA 6> > );
-
-AIMS_INSTANTIATE_READER( VolumeRef<Point3df> );
-AIMS_INSTANTIATE_READER( VolumeRef<Point3d> );
-AIMS_INSTANTIATE_READER( VolumeRef<AimsVector<float COMMA 6> > );
 
