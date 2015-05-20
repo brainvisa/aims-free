@@ -48,6 +48,8 @@ using namespace std;
 using namespace carto;
 using namespace aims;
 
+#define COMMA ,
+
 AIMS_INSTANTIATE_WRITER( Volume<int8_t> );
 AIMS_INSTANTIATE_WRITER( Volume<uint8_t> );
 AIMS_INSTANTIATE_WRITER( Volume<int16_t> );
@@ -67,6 +69,9 @@ AIMS_INSTANTIATE_WRITER( Volume<char> );
 #endif
 AIMS_INSTANTIATE_WRITER( Volume<int64_t> );
 AIMS_INSTANTIATE_WRITER( Volume<uint64_t> );
+AIMS_INSTANTIATE_WRITER( Volume<Point3df> );
+AIMS_INSTANTIATE_WRITER( Volume<Point3d> );
+AIMS_INSTANTIATE_WRITER( Volume<AimsVector<float COMMA 6> > );
 
 AIMS_INSTANTIATE_WRITER( VolumeRef<int8_t> );
 AIMS_INSTANTIATE_WRITER( VolumeRef<uint8_t> );
@@ -87,4 +92,7 @@ AIMS_INSTANTIATE_WRITER( VolumeRef<char> );
 #endif
 AIMS_INSTANTIATE_WRITER( VolumeRef<int64_t> );
 AIMS_INSTANTIATE_WRITER( VolumeRef<uint64_t> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<Point3df> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<Point3d> );
+AIMS_INSTANTIATE_WRITER( VolumeRef<AimsVector<float COMMA 6> > );
 

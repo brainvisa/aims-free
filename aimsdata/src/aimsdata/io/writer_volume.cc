@@ -76,11 +76,3 @@ AIMS_INSTANTIATE_WRITER( AimsData<char> );
 AIMS_INSTANTIATE_WRITER( AimsData<int64_t> );
 AIMS_INSTANTIATE_WRITER( AimsData<uint64_t> );
 
-AIMS_INSTANTIATE_WRITER( Volume<Point3df> );
-AIMS_INSTANTIATE_WRITER( Volume<Point3d> );
-AIMS_INSTANTIATE_WRITER( Volume<AimsVector<float COMMA 6> > );
-
-AIMS_INSTANTIATE_WRITER( VolumeRef<Point3df> );
-AIMS_INSTANTIATE_WRITER( VolumeRef<Point3d> );
-AIMS_INSTANTIATE_WRITER( VolumeRef<AimsVector<float COMMA 6> > );
-
