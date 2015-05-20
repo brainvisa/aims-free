@@ -400,16 +400,16 @@ object/data type (it's a template like Reader and Writer)
 In the most general case these operations are:
 - Finder (header) part:
   - write a header class with read (and write) function to read the file 
-    header (one class per format, ex.: aims::GisHeader)
+    header (one class per format, ex.: aims::JpegHeader)
   - wrap it in a aims::FinderFormat inherited class (ex.: 
-    aims::FinderGisFormat)
+    aims::FinderJpegFormat)
   - register it in the Finder class to allow Finder to recognize the new 
     file format: use the static aims::Finder::registerFormat() function
 - Reader (body) part:
-  - define the specific format reader and writer classes (see aims::GisReader 
+  - define the specific format reader and writer classes (see aims::JpegReader
     for an example) (usually template classes for all data types)
   - wrap them in a (a set of) aims::FileFormat inherited class(es) (ex.: 
-    aims::GisFormat)
+    aims::JpegFormat)
   - compile the aims::FileFormatDictionary template on your type(s) and 
     eventually specialize the registerBaseFormats() function to register 
     default formats (you must <tt>#include <aims/io/fileFormat_d.h></tt>)

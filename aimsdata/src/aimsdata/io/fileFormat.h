@@ -99,9 +99,9 @@ namespace aims
 
 	FileFormatDictionary is a plug-in mechanism to allow new formats to 
 	be registered.
-	It uses at lower level specific IO classes for each format (GisFormat 
-	for GIS, which in turn use GisReader and GisWriter, AimsVidaReader for 
-	Vida, AimsSpmReader for SPM, etc., and IO classes for 
+	It uses at lower level specific IO classes for each format (JpegFormat
+	for JPEG, which in turn use JpegReader and JpegWriter, AimsVidaReader
+        for Vida, AimsSpmReader for SPM, etc., and IO classes for
 	other object types (meshes, buckets, textures, ...))
 
 	\par Adding new IO formats

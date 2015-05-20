@@ -189,18 +189,10 @@ template<> void
 FileFormatDictionary<AimsData<Point3df> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<Point3df>	*gf = new GisFormat<Point3df>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<Point3df>	*vf = new VolumeFormat<Point3df>( "GIS" );
-  FileFormatDictionary<Volume<Point3df> >::registerFormat( "GIS", vf, ext );
-
-  ext.clear();
   ext.push_back( "" );
   SomaIOAimsDataFormat<Point3df>  *df = new SomaIOAimsDataFormat<Point3df>;
   registerFormat( "SOMAIO_VOLUMES", df, ext );
-  vf = new VolumeFormat<Point3df>( "SOMAIO_VOLUMES" );
+  VolumeFormat<Point3df> *vf = new VolumeFormat<Point3df>( "SOMAIO_VOLUMES" );
   FileFormatDictionary<Volume<Point3df> >::registerFormat( "SOMAIO_VOLUMES", 
                                                            vf, ext );
 }
@@ -209,18 +201,10 @@ template<> void
 FileFormatDictionary<AimsData<Point3d> >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<Point3d>	*gf = new GisFormat<Point3d>;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<Point3d>	*vf = new VolumeFormat<Point3d>( "GIS" );
-  FileFormatDictionary<Volume<Point3d> >::registerFormat( "GIS", vf, ext );
-
-  ext.clear();
   ext.push_back( "" );
   SomaIOAimsDataFormat<Point3d>  *df = new SomaIOAimsDataFormat<Point3d>;
   registerFormat( "SOMAIO_VOLUMES", df, ext );
-  vf = new VolumeFormat<Point3d>( "SOMAIO_VOLUMES" );
+  VolumeFormat<Point3d> *vf = new VolumeFormat<Point3d>( "SOMAIO_VOLUMES" );
   FileFormatDictionary<Volume<Point3d> >::registerFormat( "SOMAIO_VOLUMES", 
                                                           vf, ext );
 }
@@ -229,22 +213,12 @@ template<> void
 FileFormatDictionary<AimsData<AimsVector<float,6> > >::registerBaseFormats()
 {
   std::vector<std::string>	ext;
-  ext.push_back( "ima" );
-  ext.push_back( "dim" );
-  GisFormat<AimsVector<float,6> > *gf = new GisFormat<AimsVector<float,6> >;
-  registerFormat( "GIS", gf, ext );
-  VolumeFormat<AimsVector<float,6> >
-    *vf = new VolumeFormat<AimsVector<float,6> >( "GIS" );
-  FileFormatDictionary<Volume<AimsVector<float,6> > >::registerFormat( "GIS", 
-                                                                       vf, 
-                                                                       ext );
-
-  ext.clear();
   ext.push_back( "" );
   SomaIOAimsDataFormat<AimsVector<float,6> >  *df
     = new SomaIOAimsDataFormat<AimsVector<float,6> >;
   registerFormat( "SOMAIO_VOLUMES", df, ext );
-  vf = new VolumeFormat<AimsVector<float,6> >( "SOMAIO_VOLUMES" );
+  VolumeFormat<AimsVector<float, 6> > *vf
+    = new VolumeFormat<AimsVector<float,6> >( "SOMAIO_VOLUMES" );
   FileFormatDictionary<Volume<AimsVector<float,6> > >::registerFormat(
     "SOMAIO_VOLUMES", vf, ext );
 }

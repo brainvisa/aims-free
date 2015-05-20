@@ -99,10 +99,6 @@ void Finder::initPrivate()
     {
       pd.reset( new Finder_Private );
       vector<string>	ext;
-      ext.push_back( "ima" );
-      ext.push_back( "dim" );
-      registerFormat( "GIS", new FinderGisFormat, ext );
-      ext.clear();
       ext.push_back( "img" );
       ext.push_back( "hdr" );
       registerFormat( "SPM", new FinderSpmFormat, ext );
