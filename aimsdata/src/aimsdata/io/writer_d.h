@@ -47,21 +47,17 @@
 #include <set>
 #include <soma-io/io/writer.h>
 #include <soma-io/io/formatdictionary.h>
+
 #define AIMS_INSTANTIATE_WRITER( T ) \
   namespace aims { \
     template class aims::Writer< T >; \
     template bool \
     GenericWriter::write< T >( const T &, bool, const std::string * ); \
-  } \
-  namespace soma { \
-    template class soma::Writer< T >; \
   }
-#define AIMS_INSTANTIATE_ONLY_WRITER( T ) \
+
+  #define AIMS_INSTANTIATE_ONLY_WRITER( T ) \
   namespace aims { \
     template class aims::Writer< T >; \
-  } \
-  namespace soma { \
-    template class soma::Writer< T >; \
   }
 
 #include <iostream>
