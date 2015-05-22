@@ -58,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyAIMS'
-copyright = u'2011, IFR49.org, CEA'
+copyright = u'2015, CEA'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
