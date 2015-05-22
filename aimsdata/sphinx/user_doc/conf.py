@@ -23,6 +23,12 @@ try:
 except Exception, e:
   print 'warning:', e
 from soma import aims
+try:
+    import soma.info
+    somabase_version = '%d.%d' % (soma.info.version_major,
+                                  soma.info.version_minor)
+except:
+    somabase_version = '4.6'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -60,7 +66,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'AIMS'
-copyright = u'2014, CEA'
+copyright = u'2015, CEA'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -244,7 +250,7 @@ extlinks = {
   'cartoddox '),
   'graphdox' : ('../../graph-' + version + '/doxygen/%s',
   'graphdox '),
-  'somabase': ('../../soma-base-' + version + '/%s', 'soma-base '),
+  'somabase': ('../../soma-base-' + somabase_version + '/%s', 'soma-base '),
   'somaio': ('../../soma-io-' + version + '/%s', 'soma-io ' ),
   'anatomist': ('../../anatomist-' + version + '/%s', 'anatomist '),
   'pyanatomist': ('../../pyanatomist-' + version + '/sphinx/%s',
