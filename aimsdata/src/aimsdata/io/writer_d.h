@@ -104,13 +104,16 @@ namespace aims
   }
 
 
-
   template<class T>
   bool Writer<T>::write( const T & obj, bool ascii, const std::string* format )
   {
+    // force loading plugins if it has not been done already
+    carto::PluginLoader::load();
+
     // try first soma-io writer (since 2013)
     // try first 3 passes
-    try{
+    try
+    {
       // building uri
       std::string uri = _filename;
       if( ascii || format )
@@ -123,12 +126,17 @@ namespace aims
         uri += ( "format=" + *format );
 
       soma::Writer<T> writer( uri );
-      return writer.write( obj, _options, 1, 3 );
-    } catch( ... ) {}
-    // if it failed, continue with aims writer.
+      // copy options so that they are not modified
+      carto::Object options = carto::Object::value( carto::Dictionary() );
+      if( !_options.isNull() )
+        options->copyProperties( _options );
+      return writer.write( obj, options, 1, 3 );
+    }
+    catch( ... )
+    {
+    }
 
-    // force loading plugins if it has not been done already
-    carto::PluginLoader::load();
+    // if it failed, continue with aims writer.
 
     std::set<std::string>		tried;
     FileFormat<T>			*writer;
