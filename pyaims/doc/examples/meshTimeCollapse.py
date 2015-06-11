@@ -7,10 +7,10 @@
 #
 # This software is governed by the CeCILL-B license under
 # French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the 
+# You can  use, modify and/or redistribute the software under the
 # terms of the CeCILL-B license as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info". 
-# 
+# and INRIA at the following URL "http://www.cecill.info".
+#
 # As a counterpart to the access to the source code and  rights to copy,
 # modify and redistribute granted by the license, users are provided only
 # with a limited warranty  and the software's author,  the holder of the
@@ -24,8 +24,8 @@
 # therefore means  that it is reserved for developers  and  experienced
 # professionals having in-depth computer knowledge. Users are therefore
 # encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or 
-# data to be ensured and,  more generally, to use and operate it in the 
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
 # same conditions as regards security.
 #
 # The fact that you are presently reading this means that you have had
@@ -43,11 +43,13 @@ from soma import aims
 from numpy import *
 v = aims.read('/home/dr144257/data/ra_head.mesh')
 
+
 def getFromMesh(v, t):
     vertex = array(v.vertex(t))
     normal = array(v.normal(t))
     polygon = array(v.polygon(t))
     return(vertex, normal, polygon)
+
 
 def meshlistMerge(meshlist):
     outv = vstack([x[0] for x in meshlist])
@@ -60,6 +62,7 @@ def meshlistMerge(meshlist):
     outp = vstack(outplst)
     return (outv, outn, outp)
 
+
 def writeMesh(vertex, normal, polygon):
     vv = aims.vector_POINT3DF()
     vn = aims.vector_POINT3DF()
@@ -71,9 +74,9 @@ def writeMesh(vertex, normal, polygon):
     for x in polygon:
         vp.append(x)
     m = aims.AimsTimeSurface_3()
-    m.vertex().assign( vv )
-    m.normal().assign( vn )
-    m.polygon().assign( vp )
+    m.vertex().assign(vv)
+    m.normal().assign(vn)
+    m.polygon().assign(vp)
     aims.write(m, '/tmp/mesh0')
 
 

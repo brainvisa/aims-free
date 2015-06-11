@@ -2,7 +2,8 @@
 
 import threading
 from soma import aims
-import os, sys
+import os
+import sys
 from optparse import OptionParser
 import threading
 import tempfile
@@ -11,106 +12,108 @@ import subprocess
 import time
 
 
-def aims_test_thread_read( filenames, verbose=True ):
+def aims_test_thread_read(filenames, verbose=True):
 
-    class Loadfile( object ):
-        def __init__( self, filename, lock, objnum, verbose ):
+    class Loadfile(object):
+
+        def __init__(self, filename, lock, objnum, verbose):
             self._filename = filename
             self.lock = lock
             self.objnum = objnum
             self.verbose = verbose
-        def __call__( self ):
+
+        def __call__(self):
             if self.verbose:
                 print 'reading %s...' % self._filename
-            obj = aims.read( self._filename )
+            obj = aims.read(self._filename)
             if self.verbose:
-                print 'read %s: %s' % ( self._filename, str(type(obj)) )
+                print 'read %s: %s' % (self._filename, str(type(obj)))
             self.lock.acquire()
             self.objnum[0] += 1
             self.lock.release()
 
-    aims.carto.PluginLoader.load() # do this once in main thread
+    aims.carto.PluginLoader.load()  # do this once in main thread
 
     threads = []
     lock = threading.RLock()
     # objnum is a list, not an int, because the counter has to be shared
     # between all threads: a list is, an int is not
-    objnum = [ 0 ]
+    objnum = [0]
 
     starttime = time.time()
     for fname in filenames:
         thread = threading.Thread(
-            target=Loadfile( fname, lock, objnum, verbose ) )
+            target=Loadfile(fname, lock, objnum, verbose))
         thread.start()
-        threads.append( thread )
+        threads.append(thread)
 
     for thread in threads:
         thread.join()
 
     duration = time.time() - starttime
     print 'finished. Read %d / %d objects in %.3f seconds.' % \
-        ( objnum[0], len( filenames ), duration )
-    nmissing = len( filenames ) - objnum[0]
+        (objnum[0], len(filenames), duration)
+    nmissing = len(filenames) - objnum[0]
     if nmissing != 0:
         print 'Not all objects were loaded, %d missing.' % nmissing
-        raise RuntimeError( 'Not all objects were loaded, %d missing.' \
-            % nmissing )
+        raise RuntimeError('Not all objects were loaded, %d missing.'
+                           % nmissing)
 
 
-def _convertFileFormat( aimsobj, directory, prefix, format, is_soma=False ):
+def _convertFileFormat(aimsobj, directory, prefix, format, is_soma=False):
     if is_soma:
-        exts = somaio_extensions( aimsobj, format )
+        exts = somaio_extensions(aimsobj, format)
     else:
-        exts = aims.Finder.extensions( format )
-    if len( exts ) == 0:
+        exts = aims.Finder.extensions(format)
+    if len(exts) == 0:
         return None
-    exts2 = [ x for x in exts if x != '' ]
-    if len( exts ) != len( exts2 ):
-        exts2.append( '' )
+    exts2 = [x for x in exts if x != '']
+    if len(exts) != len(exts2):
+        exts2.append('')
     exts = exts2
     del exts2
     formatok = False
     for ext in exts:
         if ext == '':
-            newfilename = os.path.join( directory, prefix )
+            newfilename = os.path.join(directory, prefix)
         else:
-            newfilename = os.path.join( directory,
-                '.'.join( ( prefix, ext ) ) )
+            newfilename = os.path.join(directory,
+                                       '.'.join((prefix, ext)))
         try:
-            aims.write( aimsobj, newfilename, format=format )
-            if not os.path.exists( newfilename ):
-                for f in os.listdir( directory ):
+            aims.write(aimsobj, newfilename, format=format)
+            if not os.path.exists(newfilename):
+                for f in os.listdir(directory):
                     if not f.endswith( '.minf' ) \
-                            and ( ext == '' or f.endswith( '.' + ext ) ):
-                        newfilename = os.path.join( directory, f )
+                            and (ext == '' or f.endswith('.' + ext)):
+                        newfilename = os.path.join(directory, f)
                         break
                 else:
-                    shutil.rmtree( directory )
-                    os.mkdir( directory )
+                    shutil.rmtree(directory)
+                    os.mkdir(directory)
                     continue
             f = aims.Finder()
-            if f.check( newfilename ) and f.format() == format:
+            if f.check(newfilename) and f.format() == format:
                 formatok = True
                 break
             else:
-                #print 'could not read', newfilename
-                shutil.rmtree( directory )
-                os.mkdir( directory )
+                # print 'could not read', newfilename
+                shutil.rmtree(directory)
+                os.mkdir(directory)
         except:
-            shutil.rmtree( directory )
-            os.mkdir( directory )
+            shutil.rmtree(directory)
+            os.mkdir(directory)
             continue
     if formatok:
         return newfilename
     return None
 
 
-def somaio_formats( aimsobj ):
+def somaio_formats(aimsobj):
     try:
-        fclass = getattr( aims.carto,
-            'FormatDictionary_%s' % aims.typeCode( aimsobj ) )
+        fclass = getattr(aims.carto,
+                         'FormatDictionary_%s' % aims.typeCode(aimsobj))
     except:
-        if isinstance( aimsobj, aims.carto.GenericObject ):
+        if isinstance(aimsobj, aims.carto.GenericObject):
             fclass = aims.carto.FormatDictionary_Object
         else:
             return
@@ -123,109 +126,111 @@ def somaio_formats( aimsobj ):
     return ext_by_format
 
 
-def somaio_extensions( aimsobj, format ):
+def somaio_extensions(aimsobj, format):
     try:
-        fclass = getattr( aims.carto,
-            'FormatDictionary_%s' % aims.typeCode( aimsobj ) )
+        fclass = getattr(aims.carto,
+                         'FormatDictionary_%s' % aims.typeCode(aimsobj))
     except:
-        if isinstance( aimsobj, aims.carto.GenericObject ):
+        if isinstance(aimsobj, aims.carto.GenericObject):
             fclass = aims.carto.FormatDictionary_Object
         else:
             return []
     exts = fclass.writeExtensions()
-    exts_for_format = [ext for ext, formats in exts.iteritems() \
-        if format in formats]
+    exts_for_format = [ext for ext, formats in exts.iteritems()
+                       if format in formats]
     return exts_for_format
 
 
-def test_all_formats( filename, number=30, separate_process=False ):
+def test_all_formats(filename, number=30, separate_process=False):
     f = aims.Finder()
-    if not f.check( filename ):
-        raise IOError( '%f is not readable' % filename )
+    if not f.check(filename):
+        raise IOError('%f is not readable' % filename)
     ot = f.objectType(), f.dataType()
-    aimsobj = aims.read( filename )
-    formats = aims.IOObjectTypesDictionary.formats( *ot )
-    soma_io_formats = somaio_formats( aimsobj )
+    aimsobj = aims.read(filename)
+    formats = aims.IOObjectTypesDictionary.formats(*ot)
+    soma_io_formats = somaio_formats(aimsobj)
     success = True
     unsafe_formats = []
     safe_formats = []
-    all_formats = zip(formats, [False]*len(formats)) \
+    all_formats = zip(formats, [False] * len(formats)) \
         + [(f, True) for f in soma_io_formats]
     for format, is_soma in all_formats:
         # JP2 writer in Qt (4.8.1 at least) systematically crashes.
-        if format in ( 'JP2' ): continue
-        print 'testing: %s / %s, format: %s' % ( ot[0], ot[1], format )
+        if format in ('JP2'):
+            continue
+        print 'testing: %s / %s, format: %s' % (ot[0], ot[1], format)
         try:
-            directory = tempfile.mkdtemp( prefix='aims_thread_test' )
-            newfilename = _convertFileFormat( aimsobj, directory, 'aims_test',
-                format, is_soma )
+            directory = tempfile.mkdtemp(prefix='aims_thread_test')
+            newfilename = _convertFileFormat(aimsobj, directory, 'aims_test',
+                                             format, is_soma)
             if not newfilename:
                 print 'could not generate format', format
-                #shutil.rmtree( directory )
+                # shutil.rmtree( directory )
                 continue
             print 'testing read on %s...' % newfilename
             try:
                 if separate_process:
-                    subprocess.check_call( [ sys.executable, '-m',
-                      'soma.aims.tests.test_pyaims_thread_read', '-i',
-                      newfilename, '-n', str(number), '--silent' ] )
+                    subprocess.check_call([sys.executable, '-m',
+                                           'soma.aims.tests.test_pyaims_thread_read', '-i',
+                                           newfilename, '-n', str(number), '--silent'])
                 else:
-                    aims_test_thread_read( [ newfilename ] * number,
-                        verbose=False )
+                    aims_test_thread_read([newfilename] * number,
+                                          verbose=False)
                 print 'Passed.'
-                safe_formats.append( format )
-                #shutil.rmtree( directory )
+                safe_formats.append(format)
+                # shutil.rmtree( directory )
             except:
                 print 'format %s is unsafe.' % format
                 success = False
-                unsafe_formats.append( format )
+                unsafe_formats.append(format)
         finally:
-            shutil.rmtree( directory )
+            shutil.rmtree(directory)
     print 'All done for %s / %s. Success =' % ot, success
     if not success:
-        return { ot : unsafe_formats }, { ot : safe_formats }
-    return {}, { ot : safe_formats }
+        return {ot: unsafe_formats}, {ot: safe_formats}
+    return {}, {ot: safe_formats}
 
 
 if __name__ == '__main__':
 
-    parser = OptionParser( description='Perform tests of threaded concurrent loading of aims objects in pyaims' )
-    parser.add_option( '-i', '--input', dest='infiles',
-        help='files to be read concurrently', action='append', default=[] )
-    parser.add_option( '-n', '--number', dest='number', type='int',
-        help='number of times each file should be read at the same time. Default: 30 if one input filename, 1 otherwise', default=0 )
-    parser.add_option( '-a', '--all', dest='all', action='store_true',
-        default=False,
-        help='test all possible formats for each input file (convert to all of them and test)' )
-    parser.add_option( '-s', '--subprocess', dest='subprocess',
-        action='store_true', default=False,
-        help='use subprocesses to run formats tests (with -a option). By default, they run in a single process, so a thread-related crash will end all tests (but will be easier to trace with a debugger).' )
-    parser.add_option( '--silent', dest='silent', action='store_true',
-        default=False,
-        help='be less verbose in per-file tests (no -a option)' )
-    parser.add_option( '-l', '--loop', dest='loop',
-        action='store_true', help='loop the execution endlessly (until it crashes). Useful for debugging rare crashes' )
+    parser = OptionParser(
+        description='Perform tests of threaded concurrent loading of aims objects in pyaims')
+    parser.add_option('-i', '--input', dest='infiles',
+                      help='files to be read concurrently', action='append', default=[])
+    parser.add_option('-n', '--number', dest='number', type='int',
+                      help='number of times each file should be read at the same time. Default: 30 if one input filename, 1 otherwise', default=0)
+    parser.add_option('-a', '--all', dest='all', action='store_true',
+                      default=False,
+                      help='test all possible formats for each input file (convert to all of them and test)')
+    parser.add_option('-s', '--subprocess', dest='subprocess',
+                      action='store_true', default=False,
+                      help='use subprocesses to run formats tests (with -a option). By default, they run in a single process, so a thread-related crash will end all tests (but will be easier to trace with a debugger).')
+    parser.add_option('--silent', dest='silent', action='store_true',
+                      default=False,
+                      help='be less verbose in per-file tests (no -a option)')
+    parser.add_option('-l', '--loop', dest='loop',
+                      action='store_true', help='loop the execution endlessly (until it crashes). Useful for debugging rare crashes')
 
     options, args = parser.parse_args()
 
     filenames = options.infiles + args
-    if len( filenames ) == 0:
+    if len(filenames) == 0:
         print 'no input files.'
-        parser.parse_args( [ '-h' ] )
+        parser.parse_args(['-h'])
     if options.number == 0:
-        if len( filenames ) == 1 or options.all:
+        if len(filenames) == 1 or options.all:
             num = 30
         else:
             num = 1
     else:
         num = options.number
 
-    #import libxml2
-    #libxml2.newTextReaderFilename( '/tmp/ra_head.gii.minf' )
-    #import xml.parsers.expat
-    #open( '/tmp/xml.xml', 'w' ).write( '<?xml version="1.0" encoding="utf-8" ?><grop></grop>' )
-    #p = xml.parsers.expat.ParserCreate()
-    #p.ParseFile( open( '/tmp/xml.xml' ) )
+    # import libxml2
+    # libxml2.newTextReaderFilename( '/tmp/ra_head.gii.minf' )
+    # import xml.parsers.expat
+    # open( '/tmp/xml.xml', 'w' ).write( '<?xml version="1.0" encoding="utf-8" ?><grop></grop>' )
+    # p = xml.parsers.expat.ParserCreate()
+    # p.ParseFile( open( '/tmp/xml.xml' ) )
 
     from PyQt4 import QtGui
     app = QtGui.QApplication(sys.argv)
@@ -236,25 +241,24 @@ if __name__ == '__main__':
             unsafe_formats = {}
             safe_formats = {}
             for filename in filenames:
-                tested_formats = test_all_formats( filename, num,
-                    separate_process=options.subprocess )
-                unsafe_formats.update( tested_formats[0] )
-                safe_formats.update( tested_formats[1] )
-            if len( unsafe_formats ) != 0:
+                tested_formats = test_all_formats(filename, num,
+                                                  separate_process=options.subprocess)
+                unsafe_formats.update(tested_formats[0])
+                safe_formats.update(tested_formats[1])
+            if len(unsafe_formats) != 0:
                 print 'Results:'
                 print 'unsafe formats:'
                 print unsafe_formats
                 print 'safe formats:'
                 print safe_formats
-                raise RuntimeError( 'Some tests failed.' )
+                raise RuntimeError('Some tests failed.')
             else:
                 print 'OK.'
                 print 'safe formats:'
                 print safe_formats
         else:
             filenames = filenames * num
-            aims_test_thread_read( filenames, verbose=not options.silent )
+            aims_test_thread_read(filenames, verbose=not options.silent)
 
         if not options.loop:
             doit = False
-

@@ -118,8 +118,8 @@ from soma.importer import ExtendedImporter, GenericHandlers
 # module import.
 ExtendedImporter().importInModule('', globals(), locals(), 'aimssip')
 ExtendedImporter().importInModule(
-  '', globals(), locals(), 'aimssip', [],
-  [GenericHandlers.removeChildren], ['Reader_', 'Writer_'])
+    '', globals(), locals(), 'aimssip', [],
+    [GenericHandlers.removeChildren], ['Reader_', 'Writer_'])
 ExtendedImporter().importInModule('', globals(), locals(), 'aimssip',
                                   ['aimssip.aims'])
 # move Object out of carto namespace
@@ -245,9 +245,9 @@ class Reader(object):
             self.allocmode = carto.AllocatorContext(allocmode)
         else:
             raise TypeError(
-              'allocmode argument (2) must be either a '
-              'aims.carto.AllocatorContext or a '
-              'carto.AllocatorStrategy.DataAccess')
+                'allocmode argument (2) must be either a '
+                'aims.carto.AllocatorContext or a '
+                'carto.AllocatorStrategy.DataAccess')
         self.options = options
 
     def read(self, filename, border=0, frame=-1, dtype=None):

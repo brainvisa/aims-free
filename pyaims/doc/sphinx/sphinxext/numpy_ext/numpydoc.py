@@ -42,7 +42,7 @@ def mangle_docstrings(app, what, name, obj, options, lines,
         lines[:] = unicode(doc).split(u"\n")
 
     if app.config.numpydoc_edit_link and hasattr(obj, '__name__') and \
-           obj.__name__:
+            obj.__name__:
         if hasattr(obj, '__module__'):
             v = dict(full_name=u"%s.%s" % (obj.__module__, obj.__name__))
         else:
@@ -81,7 +81,7 @@ def mangle_signature(app, what, name, obj,
     # Do not try to inspect classes that don't define `__init__`
     if (inspect.isclass(obj) and
         (not hasattr(obj, '__init__') or
-        'initializes x; see ' in pydoc.getdoc(obj.__init__))):
+         'initializes x; see ' in pydoc.getdoc(obj.__init__))):
         return '', ''
 
     if not (callable(obj) or hasattr(obj, '__argspec_is_invalid_')):
@@ -157,6 +157,7 @@ class NumpyCDomain(ManglingDomainBase, CDomain):
 
 def wrap_mangling_directive(base_directive, objtype):
     class directive(base_directive):
+
         def run(self):
             env = self.state.document.settings.env
 

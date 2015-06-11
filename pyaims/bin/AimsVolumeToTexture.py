@@ -33,62 +33,62 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-import sys, os
+import sys
+import os
 from optparse import OptionParser
 from soma import aims
 import numpy as np
 
-parser = OptionParser( description = 'Project volume voxels valus on a mesh into a texture. Each vertex simply gets the volume value at its position.' )
-parser.add_option( '-i', '--input', dest='input',
-    help='input volume' )
-parser.add_option( "-m", "--mesh", dest="mesh", action='store',
-    help="mesh file" )
-parser.add_option( '-o', '--output', dest='output', action='store',
-    help='output texture file' )
-parser.add_option( '-t', '--transform', dest='transform', action='store',
-    help='optional transformation file between the volume and mesh spaces' )
+parser = OptionParser(
+    description='Project volume voxels valus on a mesh into a texture. Each vertex simply gets the volume value at its position.')
+parser.add_option('-i', '--input', dest='input',
+                  help='input volume')
+parser.add_option("-m", "--mesh", dest="mesh", action='store',
+                  help="mesh file")
+parser.add_option('-o', '--output', dest='output', action='store',
+                  help='output texture file')
+parser.add_option('-t', '--transform', dest='transform', action='store',
+                  help='optional transformation file between the volume and mesh spaces')
 
 (options, args) = parser.parse_args()
-if not options.input and len( args ) != 0:
-    options.input = args.pop( 0 )
-if not options.mesh and len( args ) != 0:
-    options.mesh = args.pop( 0 )
-if not options.output and len( args ) != 0:
-    options.output = args.pop( 0 )
-if not options.transform and len( args ) != 0:
-    options.transform = args.pop( 0 )
+if not options.input and len(args) != 0:
+    options.input = args.pop(0)
+if not options.mesh and len(args) != 0:
+    options.mesh = args.pop(0)
+if not options.output and len(args) != 0:
+    options.output = args.pop(0)
+if not options.transform and len(args) != 0:
+    options.transform = args.pop(0)
 
 if not options.input or not options.mesh or not options.output \
-    or len( args ) != 0:
-    parser.parse_args( [ sys.argv[0], '-h' ] )
+        or len(args) != 0:
+    parser.parse_args([sys.argv[0], '-h'])
 
-vol = aims.read( options.input )
-mesh = aims.read( options.mesh )
+vol = aims.read(options.input)
+mesh = aims.read(options.mesh)
 trans = None
 
-tex = aims.TimeTexture( str( vol.arraydata().dtype ) )
+tex = aims.TimeTexture(str(vol.arraydata().dtype))
 
 if options.transform:
-    trans = aims.read( options.transform )
-    vert = [ trans.transform(v) for v in mesh.vertex() ]
+    trans = aims.read(options.transform)
+    vert = [trans.transform(v) for v in mesh.vertex()]
 else:
     vert = mesh.vertex()
 nv = vert.size()
-vs = vol.header()[ 'voxel_size' ][:3]
-ivert = np.round( np.array( vert ) / vs ).astype( 'int' )
+vs = vol.header()['voxel_size'][:3]
+ivert = np.round(np.array(vert) / vs).astype('int')
 # clamp indices
-ivert[ ivert < 0 ] = 0
-ivert[ np.where( ivert[:,0] >= vol.getSizeX() )[0], 0 ] = vol.getSizeX() - 1
-ivert[ np.where( ivert[:,1] >= vol.getSizeY() )[0], 1 ] = vol.getSizeY() - 1
-ivert[ np.where( ivert[:,2] >= vol.getSizeZ() )[0], 2 ] = vol.getSizeZ() - 1
-ar = np.array( vol, copy=False )
+ivert[ivert < 0] = 0
+ivert[np.where(ivert[:, 0] >= vol.getSizeX())[0], 0] = vol.getSizeX() - 1
+ivert[np.where(ivert[:, 1] >= vol.getSizeY())[0], 1] = vol.getSizeY() - 1
+ivert[np.where(ivert[:, 2] >= vol.getSizeZ())[0], 2] = vol.getSizeZ() - 1
+ar = np.array(vol, copy=False)
 
 
-for t in xrange( vol.getSizeT() ):
+for t in xrange(vol.getSizeT()):
     t = tex[t]
-    t.reserve( nv )
-    t.assign( ar[ivert[:,0], ivert[:,1], ivert[:,2], 0 ] )
+    t.reserve(nv)
+    t.assign(ar[ivert[:, 0], ivert[:, 1], ivert[:, 2], 0])
 
-aims.write( tex, options.output )
-
-
+aims.write(tex, options.output)

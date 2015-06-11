@@ -8,10 +8,10 @@
 #
 # This software is governed by the CeCILL-B license under
 # French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the 
+# You can  use, modify and/or redistribute the software under the
 # terms of the CeCILL-B license as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info". 
-# 
+# and INRIA at the following URL "http://www.cecill.info".
+#
 # As a counterpart to the access to the source code and  rights to copy,
 # modify and redistribute granted by the license, users are provided only
 # with a limited warranty  and the software's author,  the holder of the
@@ -25,8 +25,8 @@
 # therefore means  that it is reserved for developers  and  experienced
 # professionals having in-depth computer knowledge. Users are therefore
 # encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or 
-# data to be ensured and,  more generally, to use and operate it in the 
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
 # same conditions as regards security.
 #
 # The fact that you are presently reading this means that you have had
@@ -34,12 +34,12 @@
 from soma import aims
 import sys
 
-infile = aims.carto.Paths.findResourceFile( \
-  'doc/pyanatomist-%s/examples/Rbase.arg' \
-    % '.'.join( [ str(x) for x in aims.version() ] ) )
+infile = aims.carto.Paths.findResourceFile(
+    'doc/pyanatomist-%s/examples/Rbase.arg'
+    % '.'.join([str(x) for x in aims.version()]))
 if not infile:
-  infile = 'Rbase.arg'
-graph = aims.read( infile )
+    infile = 'Rbase.arg'
+graph = aims.read(infile)
 print 'graph:', graph
 print 'global properties:', graph.keys()
 print 'nodes:', graph.order()
@@ -48,19 +48,19 @@ print 'relations:', graph.edgesSize()
 # iterate on properties
 for p in graph:
     print 'property:', p, ', type:', \
-      ( graph[p].type() if isinstance( graph[p], aims.Object ) \
-        else type( graph[p] ) )
+        (graph[p].type() if isinstance(graph[p], aims.Object)
+         else type(graph[p]))
 
 # iterate on vertices
 for v in graph.vertices():
     print 'vertex:', v.getSyntax(), ', edges:', v.edgesSize()
-    if v.has_key( 'name' ):
-        print '  name:', v[ 'name' ]
-    if v.has_key( 'label' ):
-        print '  label:', v[ 'label' ]
+    if v.has_key('name'):
+        print '  name:', v['name']
+    if v.has_key('label'):
+        print '  label:', v['label']
     try:
         # access mesh in attribute 'aims_Tmtktri'
-        mesh = v[ 'aims_Tmtktri' ]
+        mesh = v['aims_Tmtktri']
         print 'mesh:', mesh, ', polygons:', mesh.polygon().size()
     except:
         pass
@@ -72,8 +72,7 @@ for e in graph.edges():
 fileout = '/tmp/toto.arg'
 print 'writing graph to', fileout
 w = aims.Writer()
-w.write( graph, fileout )
+w.write(graph, fileout)
 print 'object type:', w.writtenObjectType()
 print 'data type:', w.writtenObjectDataType()
 print 'full type:', w.writtenObjectFullType()
-

@@ -66,7 +66,7 @@ def crop_volume(vol, threshold=0, border=0):
     # look for empty slices
     zeroslice = -1
     for z in xrange(vol.getSizeZ()):
-        slicevol = arr[:,:,z,:]
+        slicevol = arr[:,:, z,:]
         if np.all(slicevol <= threshold):
             zeroslice = z
         else:
@@ -77,7 +77,7 @@ def crop_volume(vol, threshold=0, border=0):
     zeroslice = vol.getSizeZ()
     if z != -1:
         for z in xrange(vol.getSizeZ()-1, 0, -1):
-            slicevol = arr[:,:,z,:]
+            slicevol = arr[:,:, z,:]
             if np.all(slicevol <= threshold):
                 zeroslice = z
             else:
@@ -86,7 +86,7 @@ def crop_volume(vol, threshold=0, border=0):
 
     zeroslice = -1
     for y in xrange(vol.getSizeY()):
-        slicevol = arr[:,y,:,:]
+        slicevol = arr[:, y,:,:]
         if np.all(slicevol <= threshold):
             zeroslice = y
         else:
@@ -97,7 +97,7 @@ def crop_volume(vol, threshold=0, border=0):
     zeroslice = vol.getSizeY()
     if y != -1:
         for y in xrange(vol.getSizeY()-1, 0, -1):
-            slicevol = arr[:,y,:,:]
+            slicevol = arr[:, y,:,:]
             if np.all(slicevol <= threshold):
                 zeroslice = y
             else:

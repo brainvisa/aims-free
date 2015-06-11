@@ -33,6 +33,7 @@
 
 from soma import aims
 
+
 def same_graphs(ref_graph, test_graph, verbose=False):
     '''
     Compare two graphs and return if they are identical.
@@ -65,7 +66,8 @@ def same_graphs(ref_graph, test_graph, verbose=False):
     ref_vertices = _build_vertice_dictionary(ref_graph)
     test_vertices = _build_vertice_dictionary(test_graph)
 
-    if verbose: print "Compare vertices:"
+    if verbose:
+        print "Compare vertices:"
     if not _same_dictionary(ref_vertices, test_vertices, _same_vertice,
                             verbose):
         if verbose:
@@ -78,7 +80,8 @@ def same_graphs(ref_graph, test_graph, verbose=False):
     if verbose:
         print "Compare edges:"
     if not _same_dictionary(ref_edges, test_edges, _same_edge, verbose):
-        if verbose: print "  differences in edges"
+        if verbose:
+            print "  differences in edges"
         return False
 
     return True
@@ -112,12 +115,13 @@ def _same_dictionary(ref_dict, test_dict, same_element_function, verbose=False):
     for index, ref in ref_dict.iteritems():
         if index not in test_dict:
             if verbose:
-                print "  test dict has no element with index " +  repr(index)
+                print "  test dict has no element with index " + repr(index)
             same_dict = False
             break
         same_dict = same_element_function(ref, test_dict[index], verbose)
         if not same_dict:
-            if verbose: print "difference in " + repr(index)
+            if verbose:
+                print "difference in " + repr(index)
             break
     return same_dict
 
@@ -130,7 +134,8 @@ def _same_vertice(ref_vertice, test_vertice, verbose):
         return False
     for key in ref_vertice.keys():
         if key not in test_vertice:
-            if verbose: print repr(key) + " not in test_vertice"
+            if verbose:
+                print repr(key) + " not in test_vertice"
             return False
         if key not in ['aims_bottom', 'aims_other', 'aims_ss', 'aims_Tmtktri',
                        'bottom_label', 'other_label', 'ss_label',
@@ -154,7 +159,8 @@ def _same_edge(ref_edge, test_edge, verbose):
         return False
     for key in ref_edge.keys():
         if key not in test_edge:
-            if verbose: print repr(key) + " not in test_edge"
+            if verbose:
+                print repr(key) + " not in test_edge"
             return False
         if key not in ['aims_cortical', 'aims_junction', 'aims_plidepassage',
                        'cortical_label', 'junction_label',
@@ -166,4 +172,3 @@ def _same_edge(ref_edge, test_edge, verbose):
                         + str(test_edge[key])
                 return False
     return True
-

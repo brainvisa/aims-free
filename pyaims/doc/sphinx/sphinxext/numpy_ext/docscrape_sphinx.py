@@ -9,6 +9,7 @@ from docscrape import ClassDoc
 
 
 class SphinxDocString(NumpyDocString):
+
     def __init__(self, docstring, config=None):
         config = {} if config is None else config
         self.use_plots = config.get('use_plots', False)
@@ -202,18 +203,21 @@ class SphinxDocString(NumpyDocString):
 
 
 class SphinxFunctionDoc(SphinxDocString, FunctionDoc):
+
     def __init__(self, obj, doc=None, config={}):
         self.use_plots = config.get('use_plots', False)
         FunctionDoc.__init__(self, obj, doc=doc, config=config)
 
 
 class SphinxClassDoc(SphinxDocString, ClassDoc):
+
     def __init__(self, obj, doc=None, func_doc=None, config={}):
         self.use_plots = config.get('use_plots', False)
         ClassDoc.__init__(self, obj, doc=doc, func_doc=None, config=config)
 
 
 class SphinxObjDoc(SphinxDocString):
+
     def __init__(self, obj, doc=None, config=None):
         self._f = obj
         SphinxDocString.__init__(self, doc, config=config)

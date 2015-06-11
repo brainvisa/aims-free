@@ -33,6 +33,7 @@
 import numpy
 from soma import aims
 
+
 def meshSplit(mesh, tex, graph, tex_time_step=0):
     '''Splits a mesh into patches corresponding to a labels texture. Patches are
     organized into a graph.
@@ -54,8 +55,10 @@ def meshSplit(mesh, tex, graph, tex_time_step=0):
         label_int = round(label * num_labels)
         v['name'] = str(label_int)
         sub_mesh = aims.SurfaceManip.meshExtract(mesh, tex2, label_int)
-        aims.GraphManip.storeAims(graph, v._get(), 'roi_mesh', aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]))
+        aims.GraphManip.storeAims(
+            graph, v._get(), 'roi_mesh', aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]))
     return graph
+
 
 def meshSplit2(mesh, tex, graph, voxel_size=None, tex_time_step=None):
     """
@@ -106,7 +109,7 @@ def meshSplit2(mesh, tex, graph, voxel_size=None, tex_time_step=None):
         # mesh corresponding to texture of label
         sub_mesh = aims.SurfaceManip.meshExtract(mesh, tex_tstep, label)
         aims.GraphManip.storeAims(graph, v._get(), 'roi_mesh',
-            aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]))
+                                  aims.rc_ptr_AimsTimeSurface_3(sub_mesh[0]))
 
         # (2) aims_roi
         if voxel_size is not None:
@@ -122,9 +125,8 @@ def meshSplit2(mesh, tex, graph, voxel_size=None, tex_time_step=None):
 
             if len(voxel_size) >= 3:
                 bucketMap.setSizeXYZT(voxel_size[0], voxel_size[1],
-                    voxel_size[2], 1)
+                                      voxel_size[2], 1)
             else:
                 bucketMap.setSizeXYZT(1, 1, 1, 1)
             aims.GraphManip.storeAims(graph, v._get(), 'aims_roi',
-                aims.rc_ptr_BucketMap_VOID(bucketMap))
-
+                                      aims.rc_ptr_BucketMap_VOID(bucketMap))

@@ -8,10 +8,10 @@
 #
 # This software is governed by the CeCILL-B license under
 # French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the 
+# You can  use, modify and/or redistribute the software under the
 # terms of the CeCILL-B license as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info". 
-# 
+# and INRIA at the following URL "http://www.cecill.info".
+#
 # As a counterpart to the access to the source code and  rights to copy,
 # modify and redistribute granted by the license, users are provided only
 # with a limited warranty  and the software's author,  the holder of the
@@ -25,27 +25,29 @@
 # therefore means  that it is reserved for developers  and  experienced
 # professionals having in-depth computer knowledge. Users are therefore
 # encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or 
-# data to be ensured and,  more generally, to use and operate it in the 
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
 # same conditions as regards security.
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-import sys, os
+import sys
+import os
 from optparse import OptionParser
 from soma import aims
 from soma.aims import fslTransformation
 
-parser = OptionParser( description = 'Transforms a FSL registration matrix (.mat, but _not_ a matlab file) into an AIMS .trm transformation file, and converts coordinates systems from FSL to AIMS.' )
-parser.add_option( '-i', '--input', dest='input',
-                    help='input .mat FSL transformation' )
-parser.add_option( '-o', '--output', dest='output',
-                    help='output .trm AIMS transformation' )
-parser.add_option( "-s", "--source", dest="source",
-                    help="transformation source image" )
-parser.add_option( '-d', '--destination', dest='destination',
-                    help='transformation destination image' )
+parser = OptionParser(
+    description='Transforms a FSL registration matrix (.mat, but _not_ a matlab file) into an AIMS .trm transformation file, and converts coordinates systems from FSL to AIMS.')
+parser.add_option('-i', '--input', dest='input',
+                  help='input .mat FSL transformation')
+parser.add_option('-o', '--output', dest='output',
+                  help='output .trm AIMS transformation')
+parser.add_option("-s", "--source", dest="source",
+                  help="transformation source image")
+parser.add_option('-d', '--destination', dest='destination',
+                  help='transformation destination image')
 
 (options, args) = parser.parse_args()
 
@@ -54,8 +56,7 @@ srcimage = options.source
 dstimage = options.destination
 outtrm = options.output
 if not matfile or not srcimage or not dstimage or not outtrm:
-  parser.parse_args( [ '-h' ] )
+    parser.parse_args(['-h'])
 
-trm = fslTransformation.fslMatToTrm( matfile, srcimage, dstimage )
-aims.write( trm, outtrm )
-
+trm = fslTransformation.fslMatToTrm(matfile, srcimage, dstimage)
+aims.write(trm, outtrm)

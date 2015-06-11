@@ -11,9 +11,11 @@ from warnings import warn
 
 
 class Reader(object):
+
     """A line-based string reader.
 
     """
+
     def __init__(self, data):
         """
         Parameters
@@ -86,6 +88,7 @@ class Reader(object):
 
 
 class NumpyDocString(object):
+
     def __init__(self, docstring, config={}):
         docstring = textwrap.dedent(docstring).split('\n')
 
@@ -108,7 +111,7 @@ class NumpyDocString(object):
             'Examples': '',
             'index': {},
             'Description': ''
-            }
+        }
 
         self._parse()
 
@@ -418,6 +421,7 @@ def header(text, style='-'):
 
 
 class FunctionDoc(NumpyDocString):
+
     def __init__(self, func, role='func', doc=None, config={}):
         self._f = func
         self._role = role  # e.g. "func" or "meth"
@@ -468,6 +472,7 @@ class FunctionDoc(NumpyDocString):
 
 
 class ClassDoc(NumpyDocString):
+
     def __init__(self, cls, doc=None, modulename='', func_doc=FunctionDoc,
                  config=None):
         if not inspect.isclass(cls) and cls is not None:
