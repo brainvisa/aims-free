@@ -167,3 +167,43 @@ def average_texture(output, inputs):
     otex[0].assign(maj)
 
     aims.write(otex, output)
+
+
+def nomenclature_to_colormap(hierarchy, labels_list, as_float=True,
+                             default_color=[0.3, 0.6, 1., 1.]):
+    """
+    Make a colormap from labels and colors of a nomenclature (hierarchy),
+    following a labels_list order.
+
+    Parameters
+    ----------
+    hierarchy: Hierarchy object
+        nomenclature
+    labels_list: list of strings
+        labels with order. The returned colormap will follow this ordering.
+    as_float: bool (optional, default: True)
+        if True, colors will be float values in the [0-1] range.
+        If False, they will be int values in the [0-255] range.
+    default_color: list (4 floats) (optional)
+        Color used for labels not found in the nomenclature. It is given as
+        floats ([0-1] range).
+
+    Returns
+    -------
+    colormap: numpy array
+        array of colors (4 float values in [0-1] range)
+    """
+    colors = []
+    for label in labels_list:
+        try:
+            color = hierarchy.find_color(label, default_color=default_color)
+            color = list(color)
+            if len(color) < 4:
+                color.append(1.)
+        except:
+            color = default_color
+        if not as_float:
+            color = [int(c*255.9) for c in color]
+        colors.append(list(color))
+    return numpy.array(colors)
+

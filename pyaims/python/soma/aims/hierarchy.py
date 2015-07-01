@@ -53,11 +53,13 @@ def _cache_tree(self, tree, parents):
         self._cache_tree(t, p)
 
 
-def find_color(self, name):
+def find_color(self, name, default_color=KeyError):
     try:
         stack = self.find(name)
     except exceptions.KeyError:
-        return [1, 1, 1, 0.1]
+        if default_color is KeyError:
+            raise
+        return default_color
     if stack is None:
         raise KeyError("unknown label '%s'" % name)
 
@@ -68,7 +70,9 @@ def find_color(self, name):
             return color
         except exceptions.KeyError:
             continue
-    return [1, 1, 1, 0.1]
+    if default_color is KeyError:
+        raise KeyError('label %s has no color in the nomenclature' % name)
+    return default_color
 
 
 def find(self, name):
