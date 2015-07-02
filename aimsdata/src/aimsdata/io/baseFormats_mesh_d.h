@@ -41,6 +41,8 @@
 #include <aims/io/meshR.h>
 #include <aims/io/meshW.h>
 #include <aims/io/povW.h>
+#include <aims/io/wavefrontmeshW.h>
+#include <aims/io/wavefrontmeshR.h>
 
 
 namespace aims
@@ -113,6 +115,35 @@ namespace aims
     PovWriter<D> r( filename );
     r.write( obj );
     return( true );
+  }
+
+
+  //	WAVEFRONT
+
+  template<int D, typename T>
+  WavefrontMeshFormat<D, T>::~WavefrontMeshFormat()
+  {
+  }
+
+
+  template<int D, typename T>
+  bool WavefrontMeshFormat<D, T>::read( const std::string & filename,
+                           AimsTimeSurface<D,T> & obj,
+                           const carto::AllocatorContext & context,
+                           carto::Object options )
+  {
+    WavefrontMeshReader<D, T>	r( filename );
+    r.read( obj, context, options );
+    return true;
+  }
+
+  template<int D, typename T>
+  bool WavefrontMeshFormat<D, T>::write( const std::string & filename,
+                            const AimsTimeSurface<D, T> & obj, carto::Object )
+  {
+    WavefrontMeshWriter<D, T> r( filename );
+    r.write( obj );
+    return true;
   }
 
 }

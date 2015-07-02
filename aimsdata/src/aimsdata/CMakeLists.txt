@@ -147,6 +147,9 @@ set( _headers
     io/texW.h
     io/process.h
     io/datatypecode.h
+    io/wavefrontheader.h
+    io/wavefrontmeshW.h
+    io/wavefrontmeshR.h
     math/dtitensor.h
     math/gausslu.h
     math/integrator.h
@@ -323,6 +326,7 @@ set( _sources
     io/triR.cc
     io/triW.cc
     io/trmheader.cc
+    io/wavefrontheader.cc
     io/writer_bucket.cc
     io/writer_cartovolume.cc
     io/writer_genericobject.cc

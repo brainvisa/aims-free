@@ -76,6 +76,11 @@ FileFormatDictionary<AimsSurfaceTriangle>::registerBaseFormats()
   MniObjFormat *fo = new MniObjFormat;
   registerFormat( "MNI_OBJ", fo, ext );
   ext.clear();
+
+  ext.push_back( "obj" );
+  WavefrontMeshFormat<3, Void> *wo = new WavefrontMeshFormat<3, Void>;
+  registerFormat( "WAVEFRONT", wo, ext );
+  ext.clear();
 }
 
 
@@ -90,6 +95,11 @@ FileFormatDictionary<AimsSurfaceFacet>::registerBaseFormats()
   ext.push_back( "pov" );
   PovFormat<4> *fp = new PovFormat<4>;
   registerFormat( "POV", fp, ext );
+
+  ext.push_back( "obj" );
+  WavefrontMeshFormat<4, Void> *wo = new WavefrontMeshFormat<4, Void>;
+  registerFormat( "WAVEFRONT", wo, ext );
+  ext.clear();
 }
 
 
@@ -104,6 +114,11 @@ FileFormatDictionary<AimsTimeSurface<2,Void> >::registerBaseFormats()
   ext.push_back( "pov" );
   PovFormat<2> *fp = new PovFormat<2>;
   registerFormat( "POV", fp, ext );
+
+  ext.push_back( "obj" );
+  WavefrontMeshFormat<2, Void> *wo = new WavefrontMeshFormat<2, Void>;
+  registerFormat( "WAVEFRONT", wo, ext );
+  ext.clear();
 }
 
 }

@@ -122,6 +122,23 @@ namespace aims
       carto::Object options = carto::none() );
   };
 
+
+  template<int D, typename T>
+  class WavefrontMeshFormat : public FileFormat<AimsTimeSurface<D, T> >
+  {
+  public:
+    virtual ~WavefrontMeshFormat();
+
+    virtual bool read( const std::string & filename,
+                       AimsTimeSurface<D, T>&obj,
+                       const carto::AllocatorContext & context,
+                       carto::Object options );
+
+    virtual bool write(const std::string & filename,
+      const AimsTimeSurface<D, T> &vol,
+      carto::Object options = carto::none() );
+  };
+
 }
 
 

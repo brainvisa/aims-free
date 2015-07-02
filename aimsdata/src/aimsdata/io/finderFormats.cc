@@ -55,6 +55,7 @@
 #include <aims/io/argheader.h>
 #include <aims/io/trmheader.h>
 #include <aims/io/mniobjheader.h>
+#include <aims/io/wavefrontheader.h>
 #include <aims/io/imasparseheader.h>
 #include <aims/io/byteswap.h>
 #include <cartobase/exception/ioexcept.h>
@@ -404,6 +405,50 @@ bool FinderMniObjFormat::check( const string & filename, Finder & f ) const
   vt.push_back( type );
   f.setPossibleDataTypes( vt );
   f.setFormat( "MNI_OBJ" );
+
+  return true;
+}
+
+
+bool FinderWavefrontFormat::check( const string & filename, Finder & f ) const
+{
+  WavefrontHeader  *hdr = new WavefrontHeader( filename );
+  try
+    {
+      if( !hdr->read() )
+      {
+        delete hdr;
+        return( false );
+      }
+    }
+  catch( exception & )
+    {
+      delete hdr;
+      throw;
+    }
+
+  f.setHeader( hdr );
+  f.setObjectType( "Mesh" );
+  int ps = 0;
+  if( hdr->getProperty( "polygon_dimension", ps ) )
+    switch( ps )
+      {
+      case 2:
+        f.setObjectType( "Segments" );
+        break;
+      case 4:
+        f.setObjectType( "Mesh4" );
+        break;
+      default:
+        break;
+      }
+  string  type;
+  hdr->getProperty( "data_type", type );
+  f.setDataType( type );
+  vector<string>  vt;
+  vt.push_back( type );
+  f.setPossibleDataTypes( vt );
+  f.setFormat( "WAVEFRONT" );
 
   return true;
 }
