@@ -60,7 +60,8 @@ namespace aims
 
   private:
     inline static PythonHeader* writeHeader(
-      const Header & header, std::ostream & os, const std::string & filename );
+      const Header & header, std::ostream & os, const std::string & filename,
+      const std::string & dtype );
     inline static void writeObjectHeader( std::ostream & os, int timestep,
                                           PythonHeader *hdr );
     inline static void writeMtl( PythonHeader *hdr );
@@ -86,7 +87,8 @@ namespace aims
     inline static std::string removeExtension(const std::string& name);
 
     inline static PythonHeader* writeHeader(
-      const Header & header, std::ostream & os, const std::string & filename );
+      const Header & header, std::ostream & os, const std::string & filename,
+      const std::string & dtype );
     inline static void writeObjectHeader(
       std::ostream & os, int timestep, PythonHeader *hdr );
     inline static void writeMtl( PythonHeader *hdr );
@@ -117,9 +119,11 @@ namespace aims
 
   template <int D, class T>
   PythonHeader* WavefrontMeshWriter<D,T>::writeHeader(
-    const Header & header, std::ostream & os, const std::string & filename )
+    const Header & header, std::ostream & os, const std::string & filename,
+    const std::string & dtype )
   {
-    return WavefrontMeshWriter<D, Void>::writeHeader( header, os, filename );
+    return WavefrontMeshWriter<D, Void>::writeHeader( header, os, filename,
+                                                      dtype );
   }
 
 
@@ -156,7 +160,8 @@ namespace aims
 
   template <int D>
   PythonHeader* WavefrontMeshWriter<D, Void>::writeHeader(
-    const Header & header, std::ostream & os, const std::string & filename )
+    const Header & header, std::ostream & os, const std::string & filename,
+    const std::string & dtype )
   {
     PythonHeader	*hdr = new PythonHeader;
     const PythonHeader
@@ -170,7 +175,8 @@ namespace aims
     hdr->setProperty( "object_type",
                       carto::DataTypeCode<
                         AimsTimeSurface<D, Void> >::objectType() );
-    hdr->setProperty( "data_type", carto::DataTypeCode<Void>::name() );
+    if( !dtype.empty() )
+      hdr->setProperty( "data_type", dtype );
 
     os << "# Wavefront OBJ\n" << std::endl;
 
@@ -332,7 +338,9 @@ namespace aims
     if( !os )
       throw carto::file_error( "Could not open file", fname );
 
-    PythonHeader *hdr = writeHeader( thing.header(), os, _name );
+    PythonHeader *hdr = writeHeader(
+      thing.header(), os, _name,
+      carto::DataTypeCode< AimsTimeSurface<D, T> >::dataType() );
 
     typename AimsTimeSurface<D,T>::const_iterator is, es = thing.end();
     int timestep = 0;
@@ -400,7 +408,7 @@ namespace aims
     if( !os )
       throw carto::file_error( "Could not open file", fname );
 
-    PythonHeader *hdr = writeHeader( thing.header(), os, _name );
+    PythonHeader *hdr = writeHeader( thing.header(), os, _name, "VOID" );
 
     typename AimsTimeSurface<D, Void>::const_iterator is, es = thing.end();
     int timestep = 0;
