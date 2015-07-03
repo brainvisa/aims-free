@@ -310,11 +310,9 @@ namespace aims
 
     std::string mtlfilename = mtl->getProperty( "filename" )->getString();
     std::ofstream ms( mtlfilename.c_str() );
-    std::cout << "mtl size: " << mtl->size() << std::endl;
     carto::Object oit = mtl->objectIterator();
     for( ; oit->isValid(); oit->next() )
     {
-      std::cout << "item: " << oit->key() << std::endl;
       if( oit->key() == "filename" )
         continue;
       std::string oname = oit->key();
