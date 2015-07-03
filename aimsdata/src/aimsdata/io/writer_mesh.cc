@@ -53,3 +53,6 @@ using namespace aims;
 AIMS_INSTANTIATE_WRITER( AimsTimeSurface<2 COMMA Void> );
 AIMS_INSTANTIATE_WRITER( AimsSurfaceTriangle);
 AIMS_INSTANTIATE_WRITER( AimsSurfaceFacet);
+AIMS_INSTANTIATE_WRITER( AimsTimeSurface<2 COMMA float> );
+AIMS_INSTANTIATE_WRITER( AimsTimeSurface<3 COMMA float> );
+AIMS_INSTANTIATE_WRITER( AimsTimeSurface<4 COMMA float> );
