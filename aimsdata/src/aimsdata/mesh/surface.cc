@@ -44,4 +44,17 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsSegments > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsSurfaceTriangle > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsSurfaceFacet > )
 
+#define _mesh_type AimsTimeSurface<2, float>
+INSTANTIATE_GENERIC_OBJECT_TYPE( _mesh_type )
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< _mesh_type > )
+#undef _mesh_type
+#define _mesh_type AimsTimeSurface<3, float>
+INSTANTIATE_GENERIC_OBJECT_TYPE( _mesh_type )
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< _mesh_type > )
+#undef _mesh_type
+#define _mesh_type AimsTimeSurface<4, float>
+INSTANTIATE_GENERIC_OBJECT_TYPE( _mesh_type )
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< _mesh_type > )
+#undef _mesh_type
+
 } // namespace carto

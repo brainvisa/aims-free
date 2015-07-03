@@ -194,8 +194,6 @@ static bool _meshdic()
   FileFormatDictionary<AimsTimeSurface<2, float> >::init();
   FileFormatDictionary<AimsTimeSurface<3, float> >::init();
   FileFormatDictionary<AimsTimeSurface<4, float> >::init();
-  std::cout << "registered meshes.\n";
-  std::cout << "dtc: " << carto::DataTypeCode<AimsTimeSurface<4, float> >::name() << std::endl;
 
   return true;
 }
