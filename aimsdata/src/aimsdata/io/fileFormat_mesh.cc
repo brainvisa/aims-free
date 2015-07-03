@@ -121,23 +121,82 @@ FileFormatDictionary<AimsTimeSurface<2,Void> >::registerBaseFormats()
   ext.clear();
 }
 
+
+template<> void
+FileFormatDictionary<AimsTimeSurface<3, float> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "mesh" );
+  MeshFormat<3, float>    *fm = new MeshFormat<3, float>;
+  registerFormat( "MESH", fm, ext );
+
+  ext.push_back( "obj" );
+  WavefrontMeshFormat<3, float> *wo = new WavefrontMeshFormat<3, float>;
+  registerFormat( "WAVEFRONT", wo, ext );
+  ext.clear();
+}
+
+
+template<> void
+FileFormatDictionary<AimsTimeSurface<2, float> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "mesh" );
+  MeshFormat<2, float>    *fm = new MeshFormat<2, float>;
+  registerFormat( "MESH", fm, ext );
+
+  ext.push_back( "obj" );
+  WavefrontMeshFormat<2, float> *wo = new WavefrontMeshFormat<2, float>;
+  registerFormat( "WAVEFRONT", wo, ext );
+  ext.clear();
+}
+
+
+template<> void
+FileFormatDictionary<AimsTimeSurface<4, float> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "mesh" );
+  MeshFormat<4, float>    *fm = new MeshFormat<4, float>;
+  registerFormat( "MESH", fm, ext );
+
+  ext.push_back( "obj" );
+  WavefrontMeshFormat<4, float> *wo = new WavefrontMeshFormat<4, float>;
+  registerFormat( "WAVEFRONT", wo, ext );
+  ext.clear();
+}
+
 }
 
 
 template class FileFormatDictionary<AimsTimeSurface<2, Void> >;
 template class FileFormatDictionary<AimsSurfaceTriangle>;
 template class FileFormatDictionary<AimsSurfaceFacet>;
+template class FileFormatDictionary<AimsTimeSurface<2, float> >;
+template class FileFormatDictionary<AimsTimeSurface<3, float> >;
+template class FileFormatDictionary<AimsTimeSurface<4, float> >;
 
 // #ifdef __APPLE__ // also needed on linux + gcc 4.3...
 template class FileFormat<AimsTimeSurface<2, Void> >;
 template class FileFormat<AimsSurfaceTriangle>;
 template class FileFormat<AimsSurfaceFacet>;
+template class FileFormat<AimsTimeSurface<2, float> >;
+template class FileFormat<AimsTimeSurface<3, float> >;
+template class FileFormat<AimsTimeSurface<4, float> >;
 // #endif
 
 
 static bool _meshdic()
 {
   FileFormatDictionary<AimsSurfaceTriangle>::init();
+  FileFormatDictionary<AimsSurfaceFacet>::init();
+  FileFormatDictionary<AimsTimeSurface<2, Void> >::init();
+  FileFormatDictionary<AimsTimeSurface<2, float> >::init();
+  FileFormatDictionary<AimsTimeSurface<3, float> >::init();
+  FileFormatDictionary<AimsTimeSurface<4, float> >::init();
+  std::cout << "registered meshes.\n";
+  std::cout << "dtc: " << carto::DataTypeCode<AimsTimeSurface<4, float> >::name() << std::endl;
+
   return true;
 }
 

@@ -355,23 +355,41 @@ namespace carto
     // Nothing about D ?
   };
 
-  template<> inline std::string 
-  DataTypeCode<AimsTimeSurface<2,Void> >::objectType()
-  {
-    return "Segments";
-  }
 
-  template<> inline std::string 
-  DataTypeCode<AimsTimeSurface<4,Void> >::objectType()
+  template<typename T> class DataTypeCode<AimsTimeSurface<2,T> >
   {
-    return "Mesh4";
-  }
+  public:
+    static std::string objectType()
+    { return "Segments"; }
+    static std::string dataType()
+    { return DataTypeCode<T>::dataType(); }
+    static std::string name()
+    {
+      return objectType() + std::string(" of ") + DataTypeCode< T >::name();
+    }
+  };
 
+
+  template<typename T> class DataTypeCode<AimsTimeSurface<4,T> >
+  {
+  public:
+    static std::string objectType()
+    { return "Mesh4"; }
+    static std::string dataType()
+    { return DataTypeCode<T>::dataType(); }
+    static std::string name()
+    {
+      return objectType() + std::string(" of ") + DataTypeCode< T >::name();
+    }
+  };
+
+  /*
   template<> inline std::string
   DataTypeCode<AimsTimeSurface<3,Void> >::name()
   {
     return "mesh of VOID";
   }
+  */
 
 }
 

@@ -772,7 +772,8 @@ convertersObjectToPython = {
     'rc_ptr of bucket of U32': BucketMap_U32.fromObject,
     'rc_ptr of bucket of FLOAT': BucketMap_FLOAT.fromObject,
     'rc_ptr of bucket of DOUBLE': BucketMap_DOUBLE.fromObject,
-    'rc_ptr of mesh of VOID': AimsSurfaceTriangle.fromObject,
+    'rc_ptr of Mesh of VOID': AimsSurfaceTriangle.fromObject,
+    'rc_ptr of mesh of VOID': AimsSurfaceTriangle.fromObject, # obsolete
     'rc_ptr of Mesh4 of VOID': AimsTimeSurface_4.fromObject,
     'rc_ptr of Segments of VOID': AimsTimeSurface_2.fromObject,
     'rc_ptr of texture of S16': TimeTexture_S16.fromObject,

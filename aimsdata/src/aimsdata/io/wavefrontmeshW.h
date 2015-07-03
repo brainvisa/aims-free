@@ -60,11 +60,8 @@ namespace aims
 
   private:
     inline static PythonHeader* writeHeader(
-      const AimsTimeSurface<D, T> & thing,
-      std::ostream & os,
-      const std::string & filename );
-    inline static void writeObjectHeader( const AimsTimeSurface<D, T> & thing,
-                                          std::ostream & os, int timestep,
+      const Header & header, std::ostream & os, const std::string & filename );
+    inline static void writeObjectHeader( std::ostream & os, int timestep,
                                           PythonHeader *hdr );
     inline static void writeMtl( PythonHeader *hdr );
     std::string _name;
@@ -81,18 +78,20 @@ namespace aims
 
     inline void write( const AimsTimeSurface<D, Void> & thing );
 
+  private:
+    template <int U, typename T>
+    friend class aims::WavefrontMeshWriter;
+
     /// Return a name without .obj extension
     inline static std::string removeExtension(const std::string& name);
 
-  private:
     inline static PythonHeader* writeHeader(
-      const AimsTimeSurface<D, Void> & thing,
-      std::ostream & os,
-      const std::string & filename );
+      const Header & header, std::ostream & os, const std::string & filename );
     inline static void writeObjectHeader(
-      const AimsTimeSurface<D, Void> & thing,
       std::ostream & os, int timestep, PythonHeader *hdr );
     inline static void writeMtl( PythonHeader *hdr );
+
+  private:
     std::string _name;
   };
 
@@ -100,7 +99,8 @@ namespace aims
   template <int D, class T>
   inline
   WavefrontMeshWriter<D,T> &
-  operator << ( WavefrontMeshWriter<D,T> & writer, const AimsTimeSurface<D,T> & thing )
+  operator << ( WavefrontMeshWriter<D,T> & writer,
+                const AimsTimeSurface<D,T> & thing )
   {
     writer.write( thing );
     return( writer );
@@ -117,20 +117,18 @@ namespace aims
 
   template <int D, class T>
   PythonHeader* WavefrontMeshWriter<D,T>::writeHeader(
-    const AimsTimeSurface<D,T> & thing, std::ostream & os,
-    const std::string & filename )
+    const Header & header, std::ostream & os, const std::string & filename )
   {
-    return WavefrontMeshWriter<D, Void>::writeHeader( thing, os, filename );
+    return WavefrontMeshWriter<D, Void>::writeHeader( header, os, filename );
   }
 
 
   template <int D, class T>
   void WavefrontMeshWriter<D,T>::writeObjectHeader(
-    const AimsTimeSurface<D,T> & thing, std::ostream & os, int timestep,
+    std::ostream & os, int timestep,
     PythonHeader *hdr )
   {
-    WavefrontMeshWriter<D, Void>::writeObjectHeader( thing, os, timestep,
-                                                     hdr );
+    WavefrontMeshWriter<D, Void>::writeObjectHeader( os, timestep, hdr );
   }
 
 
@@ -158,12 +156,11 @@ namespace aims
 
   template <int D>
   PythonHeader* WavefrontMeshWriter<D, Void>::writeHeader(
-    const AimsTimeSurface<D, Void> & thing, std::ostream & os,
-    const std::string & filename )
+    const Header & header, std::ostream & os, const std::string & filename )
   {
     PythonHeader	*hdr = new PythonHeader;
     const PythonHeader
-      *ph = dynamic_cast<const PythonHeader *>( &thing.header() );
+      *ph = dynamic_cast<const PythonHeader *>( &header );
     if( ph )
       hdr->copy( *ph );
 
@@ -201,8 +198,7 @@ namespace aims
 
   template <int D>
   void WavefrontMeshWriter<D, Void>::writeObjectHeader(
-    const AimsTimeSurface<D, Void> & thing, std::ostream & os, int timestep,
-    PythonHeader *hdr )
+    std::ostream & os, int timestep, PythonHeader *hdr )
   {
     std::stringstream namess;
     namess << "mesh_" << timestep;
@@ -336,14 +332,14 @@ namespace aims
     if( !os )
       throw carto::file_error( "Could not open file", fname );
 
-    PythonHeader *hdr = writeHeader( thing, os, _name );
+    PythonHeader *hdr = writeHeader( thing.header(), os, _name );
 
     typename AimsTimeSurface<D,T>::const_iterator is, es = thing.end();
     int timestep = 0;
 
     for( is=thing.begin(); is!=es; ++is, ++timestep )
     {
-      writeObjectHeader( thing, os, timestep, hdr );
+      writeObjectHeader( os, timestep, hdr );
 
       const std::vector<Point3df> &vert = (*is).second.vertex();
       const std::vector<Point3df> &norm = (*is).second.normal();
@@ -380,7 +376,8 @@ namespace aims
         os << "f";
         for( int p=0; p<D; ++p )
           // WARNING obj indices start at 1 (like matlab...)
-          os << " " << (*ip)[p] + 1 << "/" << (*ip)[p] + 1 << "/" (*ip)[p] + 1;
+          os << " " << (*ip)[p] + 1 << "/" << (*ip)[p] + 1 << "/"
+            << (*ip)[p] + 1;
         os << std::endl;
       }
       os << std::endl;
@@ -403,14 +400,14 @@ namespace aims
     if( !os )
       throw carto::file_error( "Could not open file", fname );
 
-    PythonHeader *hdr = writeHeader( thing, os, _name );
+    PythonHeader *hdr = writeHeader( thing.header(), os, _name );
 
     typename AimsTimeSurface<D, Void>::const_iterator is, es = thing.end();
     int timestep = 0;
 
     for( is=thing.begin(); is!=es; ++is, ++timestep )
     {
-      writeObjectHeader( thing, os, timestep, hdr );
+      writeObjectHeader( os, timestep, hdr );
 
       const std::vector<Point3df> &vert = (*is).second.vertex();
       const std::vector<Point3df> &norm = (*is).second.normal();
