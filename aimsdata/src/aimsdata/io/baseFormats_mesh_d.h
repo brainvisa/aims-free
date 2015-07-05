@@ -139,10 +139,11 @@ namespace aims
 
   template<int D, typename T>
   bool WavefrontMeshFormat<D, T>::write( const std::string & filename,
-                            const AimsTimeSurface<D, T> & obj, carto::Object )
+                            const AimsTimeSurface<D, T> & obj,
+                            carto::Object options )
   {
     WavefrontMeshWriter<D, T> r( filename );
-    r.write( obj );
+    r.write( obj, options );
     return true;
   }
 

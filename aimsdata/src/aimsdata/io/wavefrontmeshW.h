@@ -53,7 +53,8 @@ namespace aims
       : _name( name ) { }
     ~WavefrontMeshWriter() {}
 
-    inline void write( const AimsTimeSurface<D,T> & thing );
+    inline void write( const AimsTimeSurface<D,T> & thing,
+                       carto::Object options = carto::none() );
 
     /// Return a name without .obj extension
     inline static std::string removeExtension( const std::string& name );
@@ -61,10 +62,11 @@ namespace aims
   private:
     inline static PythonHeader* writeHeader(
       const Header & header, std::ostream & os, const std::string & filename,
-      const std::string & dtype );
+      const std::string & dtype, carto::Object options );
     inline static void writeObjectHeader( std::ostream & os, int timestep,
-                                          PythonHeader *hdr );
-    inline static void writeMtl( PythonHeader *hdr );
+                                          PythonHeader *hdr,
+                                          carto::Object options );
+    inline static void writeMtl( PythonHeader *hdr, carto::Object options );
     inline std::string printTextureCoord( std::ostream & os,
                                           const T & tex ) const;
     std::string _name;
@@ -79,7 +81,8 @@ namespace aims
       : _name( name ) { }
     ~WavefrontMeshWriter() {}
 
-    inline void write( const AimsTimeSurface<D, Void> & thing );
+    inline void write( const AimsTimeSurface<D, Void> & thing,
+                       carto::Object options = carto::none() );
 
   private:
     template <int U, typename T>
@@ -90,10 +93,11 @@ namespace aims
 
     inline static PythonHeader* writeHeader(
       const Header & header, std::ostream & os, const std::string & filename,
-      const std::string & dtype );
+      const std::string & dtype, carto::Object options );
     inline static void writeObjectHeader(
-      std::ostream & os, int timestep, PythonHeader *hdr );
-    inline static void writeMtl( PythonHeader *hdr );
+      std::ostream & os, int timestep, PythonHeader *hdr,
+      carto::Object options );
+    inline static void writeMtl( PythonHeader *hdr, carto::Object options );
 
   private:
     std::string _name;
@@ -122,26 +126,28 @@ namespace aims
   template <int D, class T> inline
   PythonHeader* WavefrontMeshWriter<D,T>::writeHeader(
     const Header & header, std::ostream & os, const std::string & filename,
-    const std::string & dtype )
+    const std::string & dtype, carto::Object options )
   {
     return WavefrontMeshWriter<D, Void>::writeHeader( header, os, filename,
-                                                      dtype );
+                                                      dtype, options );
   }
 
 
   template <int D, class T> inline
   void WavefrontMeshWriter<D,T>::writeObjectHeader(
     std::ostream & os, int timestep,
-    PythonHeader *hdr )
+    PythonHeader *hdr, carto::Object options )
   {
-    WavefrontMeshWriter<D, Void>::writeObjectHeader( os, timestep, hdr );
+    WavefrontMeshWriter<D, Void>::writeObjectHeader( os, timestep, hdr,
+                                                     options );
   }
 
 
   template <int D, class T> inline
-  void WavefrontMeshWriter<D,T>::writeMtl( PythonHeader *hdr )
+  void WavefrontMeshWriter<D,T>::writeMtl( PythonHeader *hdr,
+                                           carto::Object options )
   {
-    WavefrontMeshWriter<D, Void>::writeMtl( hdr );
+    WavefrontMeshWriter<D, Void>::writeMtl( hdr, options );
   }
 
   template <int D, class T> inline
@@ -172,7 +178,7 @@ namespace aims
   template <int D>
   PythonHeader* WavefrontMeshWriter<D, Void>::writeHeader(
     const Header & header, std::ostream & os, const std::string & filename,
-    const std::string & dtype )
+    const std::string & dtype, carto::Object options )
   {
     PythonHeader	*hdr = new PythonHeader;
     const PythonHeader
@@ -215,7 +221,7 @@ namespace aims
 
   template <int D>
   void WavefrontMeshWriter<D, Void>::writeObjectHeader(
-    std::ostream & os, int timestep, PythonHeader *hdr )
+    std::ostream & os, int timestep, PythonHeader *hdr, carto::Object options )
   {
     std::stringstream namess;
     namess << "mesh_" << timestep;
@@ -309,7 +315,8 @@ namespace aims
 
 
   template <int D>
-  void WavefrontMeshWriter<D, Void>::writeMtl( PythonHeader *hdr )
+  void WavefrontMeshWriter<D, Void>::writeMtl( PythonHeader *hdr,
+                                               carto::Object options )
   {
     carto::Object mtl;
     try
@@ -342,7 +349,8 @@ namespace aims
   // ---
 
   template <int D, class T>
-  void WavefrontMeshWriter<D,T>::write( const AimsTimeSurface<D,T> & thing )
+  void WavefrontMeshWriter<D,T>::write( const AimsTimeSurface<D,T> & thing,
+                                        carto::Object options )
   {
     std::string fname = _name;
     std::ofstream os( fname.c_str() );
@@ -351,14 +359,14 @@ namespace aims
 
     PythonHeader *hdr = writeHeader(
       thing.header(), os, _name,
-      carto::DataTypeCode< AimsTimeSurface<D, T> >::dataType() );
+      carto::DataTypeCode< AimsTimeSurface<D, T> >::dataType(), options );
 
     typename AimsTimeSurface<D,T>::const_iterator is, es = thing.end();
     int timestep = 0;
 
     for( is=thing.begin(); is!=es; ++is, ++timestep )
     {
-      writeObjectHeader( os, timestep, hdr );
+      writeObjectHeader( os, timestep, hdr, options );
 
       const std::vector<Point3df> &vert = (*is).second.vertex();
       const std::vector<Point3df> &norm = (*is).second.normal();
@@ -403,7 +411,7 @@ namespace aims
 
     }
 
-    writeMtl( hdr );
+    writeMtl( hdr, options );
     hdr->writeMinf( fname + ".minf" );
 
   }
@@ -412,21 +420,22 @@ namespace aims
 
   template <int D>
   void WavefrontMeshWriter<D, Void>::write(
-    const AimsTimeSurface<D, Void> & thing )
+    const AimsTimeSurface<D, Void> & thing, carto::Object options )
   {
     std::string fname = _name;
     std::ofstream os( fname.c_str() );
     if( !os )
       throw carto::file_error( "Could not open file", fname );
 
-    PythonHeader *hdr = writeHeader( thing.header(), os, _name, "VOID" );
+    PythonHeader *hdr = writeHeader( thing.header(), os, _name, "VOID",
+                                     options );
 
     typename AimsTimeSurface<D, Void>::const_iterator is, es = thing.end();
     int timestep = 0;
 
     for( is=thing.begin(); is!=es; ++is, ++timestep )
     {
-      writeObjectHeader( os, timestep, hdr );
+      writeObjectHeader( os, timestep, hdr, options );
 
       const std::vector<Point3df> &vert = (*is).second.vertex();
       const std::vector<Point3df> &norm = (*is).second.normal();
@@ -460,7 +469,7 @@ namespace aims
 
     }
 
-    writeMtl( hdr );
+    writeMtl( hdr, options );
     hdr->writeMinf( fname + ".minf" );
   }
 }
