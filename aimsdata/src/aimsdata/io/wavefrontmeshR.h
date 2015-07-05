@@ -239,7 +239,12 @@ namespace aims
     for( int i=0, k=normals_ind.size(); i<k; ++i )
     {
       if( normals_ind[i] < 0 || normals_ind[i] >= vertices.size() )
-        throw carto::parse_error( "normal index out of range", i, _name );
+      {
+        std::stringstream s;
+        s << "normal index out of range: " << normals_ind[i] << " / "
+          << vertices.size() << " at index " << i;
+        throw carto::parse_error( s.str() , i, _name );
+      }
       o_normals[i] = normals[normals_ind[i]];
     }
     thing[timestep].normal() = o_normals;
@@ -248,6 +253,8 @@ namespace aims
     if( carto::DataTypeCode<T>::name()
         != carto::DataTypeCode<Void>::name() )
     {
+      std::cout << "read texture\n";
+      std::cout << "tex 0: " << texture[0] << std::endl;
       // copy reordered texture
       std::vector<T> o_texture;
       o_texture.resize( texture_ind.size() );
@@ -256,6 +263,7 @@ namespace aims
         if( texture_ind[i] < 0 || texture_ind[i] >= vertices.size() )
           throw carto::parse_error( "texture index out of range", i, _name );
         o_texture[i] = texture[texture_ind[i]];
+//         std::cout << texture_ind[i] << " -> " << texture[texture_ind[i]] << std::endl;
       }
       thing[timestep].texture() = o_texture;
     }
@@ -373,14 +381,15 @@ namespace aims
         for( int p=0; p<D; ++p )
         {
           s >> item;
-          pos0 = item.find('/');
+          pos0 = item.find( '/' );
           std::stringstream z( item.substr(0, pos0 ) );
           z >> poly[p];
           --poly[p]; // nums start at 1
           if( pos0 == std::string::npos )
             continue;
 
-          pos = item.find('/', pos0+1);
+          ++pos0;
+          pos = item.find( '/', pos0 );
           if( carto::DataTypeCode<T>::name()
               != carto::DataTypeCode<Void>::name() )
           {
@@ -388,21 +397,22 @@ namespace aims
             z >> tex;
             if( texture_ind.size() <= poly[p] )
               texture_ind.resize( poly[p] + 1 );
-            texture_ind[ poly[p] ] = tex;
+            texture_ind[ poly[p] ] = tex - 1; // (starts at 1)
           }
-          else if( pos != pos0 + 1 )
+          else if( pos != pos0 )
             throw carto::parse_error( "malformed face", line, filename );
           if( pos == std::string::npos )
             continue;
-          pos0 = pos;
-          pos = item.find('/', pos0 + 1);
+          pos0 = pos + 1;
+          pos = item.find( '/', pos0 );
           if( pos == std::string::npos )
             continue;
           std::stringstream n( item.substr(pos0, pos - pos0 ) );
           n >> norm;
+          std::cout << item << " " << pos0 << " " << pos << " " << n << std::endl;
           if( normals_ind.size() <= poly[p] )
             normals_ind.resize( poly[p] + 1 );
-          normals_ind[ poly[p] ] = norm;
+          normals_ind[ poly[p] ] = norm - 1; // (starts at 1)
         }
         polygons.push_back( poly );
       }

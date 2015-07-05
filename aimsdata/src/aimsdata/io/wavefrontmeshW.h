@@ -65,6 +65,8 @@ namespace aims
     inline static void writeObjectHeader( std::ostream & os, int timestep,
                                           PythonHeader *hdr );
     inline static void writeMtl( PythonHeader *hdr );
+    inline std::string printTextureCoord( std::ostream & os,
+                                          const T & tex ) const;
     std::string _name;
   };
 
@@ -109,7 +111,7 @@ namespace aims
   }
 
 
-  template <int D, class T>
+  template <int D, class T> inline
   std::string WavefrontMeshWriter<D,T>::removeExtension(
     const std::string& name )
   {
@@ -117,7 +119,7 @@ namespace aims
   }
 
 
-  template <int D, class T>
+  template <int D, class T> inline
   PythonHeader* WavefrontMeshWriter<D,T>::writeHeader(
     const Header & header, std::ostream & os, const std::string & filename,
     const std::string & dtype )
@@ -127,7 +129,7 @@ namespace aims
   }
 
 
-  template <int D, class T>
+  template <int D, class T> inline
   void WavefrontMeshWriter<D,T>::writeObjectHeader(
     std::ostream & os, int timestep,
     PythonHeader *hdr )
@@ -136,15 +138,24 @@ namespace aims
   }
 
 
-  template <int D, class T>
+  template <int D, class T> inline
   void WavefrontMeshWriter<D,T>::writeMtl( PythonHeader *hdr )
   {
     WavefrontMeshWriter<D, Void>::writeMtl( hdr );
   }
 
+  template <int D, class T> inline
+  std::string WavefrontMeshWriter<D, T>::printTextureCoord(
+    std::ostream & os, const T & tex ) const
+  {
+    std::stringstream s;
+    s << tex << " 0"; // mut extend to 2D
+    return s.str();
+  }
+
   // ---
 
-  template <int D>
+  template <int D> inline
   std::string WavefrontMeshWriter<D, Void>::removeExtension(
     const std::string& name )
   {
@@ -373,7 +384,7 @@ namespace aims
 
       for( it=is->second.texture().begin(); it!=et; ++it )
       {
-        os << "vt " << *it << std::endl;
+        os << "vt " << printTextureCoord( os, *it ) << std::endl;
       }
       os << std::endl;
 
