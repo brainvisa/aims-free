@@ -301,6 +301,9 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< double > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< cfloat > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< cdouble > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelRGB > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelRGBA > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelHSV > )
 #ifdef CARTO_LONG_IS_DISTINCT
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
@@ -321,6 +324,9 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< double > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cfloat > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cdouble > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelRGB > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelRGBA > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelHSV > > )
 #ifdef CARTO_LONG_IS_DISTINCT
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
