@@ -261,7 +261,6 @@ namespace aims
             std::string teximage_fname
               = carto::FileUtil::dirname( mtl_filename )
                 + carto::FileUtil::separator() + item;
-            std::cout << "read tex image: " << teximage_fname << std::endl;
             Reader<carto::Volume<AimsRGBA> > r( teximage_fname );
             try
             {
