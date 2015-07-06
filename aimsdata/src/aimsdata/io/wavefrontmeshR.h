@@ -37,6 +37,9 @@
 #include <aims/data/pheader.h>
 #include <aims/io/datatypecode.h>
 #include <aims/io/wavefrontheader.h>
+#include <aims/io/reader.h>
+#include <aims/rgb/rgb.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/exception/format.h>
 #include <cartobase/stream/fileutil.h>
@@ -144,7 +147,9 @@ namespace aims
     soma::IStreamDataSource ds( ms );
     int line = 0;
     carto::Object current_obj;
+    carto::Object current_mat;
     std::string l, element, objname;
+    int timestep = -1;
 
     while( ds && !ds.eof() )
     {
@@ -170,8 +175,11 @@ namespace aims
       if( element == "newmtl" )
       {
         s >> objname;
+        ++timestep;
         current_obj = carto::Object::value( carto::Dictionary() );
         mtl_dict->setProperty( objname, current_obj );
+        current_mat = carto::Object::value( carto::Dictionary() );
+        current_obj->setProperty( objname, current_mat );
       }
       else if( element == "Ka" )
       {
@@ -182,7 +190,7 @@ namespace aims
         }
         std::vector<float> ambient( 3 );
         s >> ambient[0] >> ambient[1] >> ambient[2];
-        current_obj->setProperty( "ambient", ambient );
+        current_mat->setProperty( "ambient", ambient );
       }
       else if( element == "Kd" )
       {
@@ -193,7 +201,7 @@ namespace aims
         }
         std::vector<float> diffuse( 3 );
         s >> diffuse[0] >> diffuse[1] >> diffuse[2];
-        current_obj->setProperty( "diffuse", diffuse );
+        current_mat->setProperty( "diffuse", diffuse );
       }
       else if( element == "Ks" )
       {
@@ -204,7 +212,7 @@ namespace aims
         }
         std::vector<float> specular( 3 );
         s >> specular[0] >> specular[1] >> specular[2];
-        current_obj->setProperty( "specular", specular );
+        current_mat->setProperty( "specular", specular );
       }
       else if( element == "Ns" )
       {
@@ -215,7 +223,61 @@ namespace aims
         }
         float ns;
         s >> ns;
-        current_obj->setProperty( "shininess", ns );
+        current_mat->setProperty( "shininess", ns );
+      }
+      else if( element == "map_Kd" )
+      {
+        if( !current_obj )
+        {
+          std::cerr << "MTL error: no current object.\n";
+          continue;
+        }
+        // texture image and params
+        std::string item;
+        bool image_found = false;
+        while( !image_found && s )
+        {
+          s >> item;
+          if( item == "-o" )
+          {
+            // FIXME might be less than 3 values and up to 4
+            std::vector<float> tex_offset( 3 );
+            s >> tex_offset[0] >> tex_offset[1] >> tex_offset[2];
+            current_obj->setProperty( "texture_offset", tex_offset );
+          }
+          else if( item == "-s" )
+          {
+            // FIXME might be less than 3 values and up to 4
+            std::vector<float> tex_scale( 3 );
+            s >> tex_scale[0] >> tex_scale[1] >> tex_scale[2];
+            current_obj->setProperty( "texture_scale", tex_scale );
+          }
+          else if( item == "-clamp" )
+          {
+            s >> item;
+          }
+          else // TODO: other values
+          {
+            std::string teximage_fname
+              = carto::FileUtil::dirname( mtl_filename )
+                + carto::FileUtil::separator() + item;
+            std::cout << "read tex image: " << teximage_fname << std::endl;
+            Reader<carto::Volume<AimsRGBA> > r( teximage_fname );
+            try
+            {
+              carto::rc_ptr<carto::Volume<AimsRGBA> > teximage( r.read() );
+              std::map<int, carto::Object> palettes;
+              mtl_dict->getProperty( "_texture_palettes", palettes );
+              palettes[timestep] = carto::Object::value( teximage );
+              mtl_dict->setProperty( "_texture_palettes", palettes );
+            }
+            catch( ... )
+            {
+              std::cout << "failed to read texture image " << teximage_fname
+                << std::endl;
+            }
+          }
+        }
       }
       else
       {
@@ -233,23 +295,12 @@ namespace aims
                                          const std::string & mtl_objname,
                                          PythonHeader & hdr )
   {
-    carto::Object material = carto::Object::value( carto::Dictionary() );
-    try
+    carto::Object m = mtl_dict->getProperty( mtl_objname );
+    hdr.copyProperties( m );
+    if( mtl_dict->hasProperty( "_texture_palettes" ) )
     {
-      material = hdr.getProperty( "material" );
-    }
-    catch( ... )
-    {
-      hdr.setProperty( "material", material );
-    }
-
-    try
-    {
-      carto::Object m = mtl_dict->getProperty( mtl_objname );
-      material->copyProperties( m );
-    }
-    catch( ... )
-    {
+      carto::Object palettes = mtl_dict->getProperty( "_texture_palettes" );
+      hdr.setProperty( "_texture_palettes", palettes );
     }
   }
 
@@ -299,7 +350,6 @@ namespace aims
           throw carto::parse_error( s.str(), i, _name );
         }
         o_texture[i] = texture[texture_ind[i]];
-//         std::cout << texture_ind[i] << " -> " << texture[texture_ind[i]] << std::endl;
       }
       thing[timestep].texture() = o_texture;
     }
@@ -375,6 +425,8 @@ namespace aims
       }
       else if( element == "g" )
         continue; // TODO: groups
+      else if( element == "s" )
+        continue; // smoothing
       else if( element == "mtllib" )
       {
         std::string mtl_filename;
