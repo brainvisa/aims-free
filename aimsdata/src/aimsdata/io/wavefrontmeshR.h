@@ -50,6 +50,39 @@
 #include <cartobase/exception/ioexcept.h>
 
 
+namespace
+{
+
+  template <typename T>
+  class _readTexture
+  {
+  public:
+    inline static void r( std::istream & s, T & tex )
+    {
+      s >> tex;
+    }
+  };
+
+
+  template <typename T, int D>
+  class _readTexture<AimsVector<T, D> >
+  {
+  public:
+    inline static
+    void r( std::istream & s, AimsVector<T, D> & tex )
+    {
+      int i;
+      for( i=0; i<3 && i<D; ++i )
+      {
+        s >> tex[i];
+      }
+      for( ; i<D; ++i )
+        tex[i] = 0;
+    }
+  };
+
+}
+
 namespace aims
 {
 
@@ -367,7 +400,7 @@ namespace aims
       {
         // texture
         T tex;
-        s >> tex;
+        _readTexture<T>::r( s, tex );
         texture.push_back(tex);
       }
       else if( element == "f" )

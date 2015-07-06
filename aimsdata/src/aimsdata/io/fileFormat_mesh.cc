@@ -166,6 +166,51 @@ FileFormatDictionary<AimsTimeSurface<4, float> >::registerBaseFormats()
   ext.clear();
 }
 
+
+template<> void
+FileFormatDictionary<AimsTimeSurface<3, Point2df> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "mesh" );
+  MeshFormat<3, Point2df>    *fm = new MeshFormat<3, Point2df>;
+  registerFormat( "MESH", fm, ext );
+
+  ext.push_back( "obj" );
+  WavefrontMeshFormat<3, Point2df> *wo = new WavefrontMeshFormat<3, Point2df>;
+  registerFormat( "WAVEFRONT", wo, ext );
+  ext.clear();
+}
+
+
+template<> void
+FileFormatDictionary<AimsTimeSurface<2, Point2df> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "mesh" );
+  MeshFormat<2, Point2df>    *fm = new MeshFormat<2, Point2df>;
+  registerFormat( "MESH", fm, ext );
+
+  ext.push_back( "obj" );
+  WavefrontMeshFormat<2, Point2df> *wo = new WavefrontMeshFormat<2, Point2df>;
+  registerFormat( "WAVEFRONT", wo, ext );
+  ext.clear();
+}
+
+
+template<> void
+FileFormatDictionary<AimsTimeSurface<4, Point2df> >::registerBaseFormats()
+{
+  std::vector<std::string>      ext;
+  ext.push_back( "mesh" );
+  MeshFormat<4, Point2df>    *fm = new MeshFormat<4, Point2df>;
+  registerFormat( "MESH", fm, ext );
+
+  ext.push_back( "obj" );
+  WavefrontMeshFormat<4, Point2df> *wo = new WavefrontMeshFormat<4, Point2df>;
+  registerFormat( "WAVEFRONT", wo, ext );
+  ext.clear();
+}
+
 }
 
 
@@ -175,6 +220,9 @@ template class FileFormatDictionary<AimsSurfaceFacet>;
 template class FileFormatDictionary<AimsTimeSurface<2, float> >;
 template class FileFormatDictionary<AimsTimeSurface<3, float> >;
 template class FileFormatDictionary<AimsTimeSurface<4, float> >;
+template class FileFormatDictionary<AimsTimeSurface<2, Point2df> >;
+template class FileFormatDictionary<AimsTimeSurface<3, Point2df> >;
+template class FileFormatDictionary<AimsTimeSurface<4, Point2df> >;
 
 // #ifdef __APPLE__ // also needed on linux + gcc 4.3...
 template class FileFormat<AimsTimeSurface<2, Void> >;
@@ -183,6 +231,9 @@ template class FileFormat<AimsSurfaceFacet>;
 template class FileFormat<AimsTimeSurface<2, float> >;
 template class FileFormat<AimsTimeSurface<3, float> >;
 template class FileFormat<AimsTimeSurface<4, float> >;
+template class FileFormat<AimsTimeSurface<2, Point2df> >;
+template class FileFormat<AimsTimeSurface<3, Point2df> >;
+template class FileFormat<AimsTimeSurface<4, Point2df> >;
 // #endif
 
 
@@ -194,6 +245,9 @@ static bool _meshdic()
   FileFormatDictionary<AimsTimeSurface<2, float> >::init();
   FileFormatDictionary<AimsTimeSurface<3, float> >::init();
   FileFormatDictionary<AimsTimeSurface<4, float> >::init();
+  FileFormatDictionary<AimsTimeSurface<2, Point2df> >::init();
+  FileFormatDictionary<AimsTimeSurface<3, Point2df> >::init();
+  FileFormatDictionary<AimsTimeSurface<4, Point2df> >::init();
 
   return true;
 }

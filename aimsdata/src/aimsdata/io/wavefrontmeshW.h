@@ -71,6 +71,41 @@ namespace
     return Void();
   }
 
+
+  template <typename T>
+  class _printTextureCoord
+  {
+  public:
+    inline static
+    std::string p( const T & tex, float m = 0.001 )
+    {
+      std::stringstream s;
+      s << _clamp( tex, m ) << " 0"; // mut extend to 2D
+      return s.str();
+    }
+  };
+
+
+  template <typename T, int D>
+  class _printTextureCoord< AimsVector<T, D> >
+  {
+  public:
+    inline static
+    std::string p( const AimsVector<T, D> & tex, float m )
+    {
+      std::stringstream s;
+      for( int i=0; i<3 && i<D; ++i )
+      {
+        if( i != 0 )
+          s << " ";
+        s << _clamp( tex[i], m );
+      }
+      if( D == 1 )
+        s << " 0";
+      return s.str();
+    }
+  };
+
 }
 
 
@@ -100,8 +135,6 @@ namespace aims
                                           const std::string & obj_filename,
                                           carto::Object options );
     inline static void writeMtl( PythonHeader *hdr, carto::Object options );
-    inline std::string printTextureCoord( std::ostream & os, const T & tex,
-                                          float m = 0.001 ) const;
     std::string _name;
   };
 
@@ -182,15 +215,6 @@ namespace aims
                                            carto::Object options )
   {
     WavefrontMeshWriter<D, Void>::writeMtl( hdr, options );
-  }
-
-  template <int D, class T> inline
-  std::string WavefrontMeshWriter<D, T>::printTextureCoord(
-    std::ostream & os, const T & tex, float m ) const
-  {
-    std::stringstream s;
-    s << _clamp( tex, m ) << " 0"; // mut extend to 2D
-    return s.str();
   }
 
   // ---
@@ -481,7 +505,7 @@ namespace aims
 
       for( it=is->second.texture().begin(); it!=et; ++it )
       {
-        os << "vt " << printTextureCoord( os, *it, m ) << std::endl;
+        os << "vt " << _printTextureCoord<T>::p( *it, m ) << std::endl;
       }
       os << std::endl;
 

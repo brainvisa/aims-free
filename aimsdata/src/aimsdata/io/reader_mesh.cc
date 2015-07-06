@@ -55,4 +55,7 @@ AIMS_INSTANTIATE_READER( AimsSurfaceFacet);
 AIMS_INSTANTIATE_READER( AimsTimeSurface<2 COMMA float> );
 AIMS_INSTANTIATE_READER( AimsTimeSurface<3 COMMA float> );
 AIMS_INSTANTIATE_READER( AimsTimeSurface<4 COMMA float> );
+AIMS_INSTANTIATE_READER( AimsTimeSurface<2 COMMA Point2df> );
+AIMS_INSTANTIATE_READER( AimsTimeSurface<3 COMMA Point2df> );
+AIMS_INSTANTIATE_READER( AimsTimeSurface<4 COMMA Point2df> );
 

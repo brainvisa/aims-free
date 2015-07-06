@@ -56,5 +56,17 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< _mesh_type > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( _mesh_type )
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< _mesh_type > )
 #undef _mesh_type
+#define _mesh_type AimsTimeSurface<2, Point2df>
+INSTANTIATE_GENERIC_OBJECT_TYPE( _mesh_type )
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< _mesh_type > )
+#undef _mesh_type
+#define _mesh_type AimsTimeSurface<3, Point2df>
+INSTANTIATE_GENERIC_OBJECT_TYPE( _mesh_type )
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< _mesh_type > )
+#undef _mesh_type
+#define _mesh_type AimsTimeSurface<4, Point2df>
+INSTANTIATE_GENERIC_OBJECT_TYPE( _mesh_type )
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< _mesh_type > )
+#undef _mesh_type
 
 } // namespace carto
