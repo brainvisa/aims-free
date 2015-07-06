@@ -38,8 +38,10 @@
 #include <aims/io/defaultItemW.h>
 #include <aims/data/pheader.h>
 #include <aims/mesh/surface.h>
+#include <aims/io/writer.h>
 #include <aims/io/datatypecode.h>
 #include <cartobase/exception/file.h>
+#include <cartobase/stream/fileutil.h>
 
 
 namespace aims
@@ -65,6 +67,7 @@ namespace aims
       const std::string & dtype, carto::Object options );
     inline static void writeObjectHeader( std::ostream & os, int timestep,
                                           PythonHeader *hdr,
+                                          const std::string & obj_filename,
                                           carto::Object options );
     inline static void writeMtl( PythonHeader *hdr, carto::Object options );
     inline std::string printTextureCoord( std::ostream & os,
@@ -96,7 +99,7 @@ namespace aims
       const std::string & dtype, carto::Object options );
     inline static void writeObjectHeader(
       std::ostream & os, int timestep, PythonHeader *hdr,
-      carto::Object options );
+      const std::string & obj_filename, carto::Object options );
     inline static void writeMtl( PythonHeader *hdr, carto::Object options );
 
   private:
@@ -136,10 +139,11 @@ namespace aims
   template <int D, class T> inline
   void WavefrontMeshWriter<D,T>::writeObjectHeader(
     std::ostream & os, int timestep,
-    PythonHeader *hdr, carto::Object options )
+    PythonHeader *hdr, const std::string & obj_filename,
+    carto::Object options )
   {
     WavefrontMeshWriter<D, Void>::writeObjectHeader( os, timestep, hdr,
-                                                     options );
+                                                     obj_filename, options );
   }
 
 
@@ -155,7 +159,7 @@ namespace aims
     std::ostream & os, const T & tex ) const
   {
     std::stringstream s;
-    s << tex << " 0"; // mut extend to 2D
+    s << tex << " " << tex; // mut extend to 2D
     return s.str();
   }
 
@@ -221,10 +225,12 @@ namespace aims
 
   template <int D>
   void WavefrontMeshWriter<D, Void>::writeObjectHeader(
-    std::ostream & os, int timestep, PythonHeader *hdr, carto::Object options )
+    std::ostream & os, int timestep, PythonHeader *hdr,
+    const std::string & obj_filename, carto::Object options )
   {
     std::stringstream namess;
-    namess << "mesh_" << timestep;
+    namess << carto::FileUtil::basename( carto::FileUtil::removeExtension(
+      obj_filename ) ) <<  "_" << timestep;
     std::string name = namess.str();
     os << "o " << name << std::endl << std::endl;
     os << "s 1\n" << std::endl;
@@ -311,6 +317,36 @@ namespace aims
       }
 
     }
+
+    if( hdr->hasProperty( "_texture_palettes" ) )
+    {
+      std::map<int, carto::Object> palettes;
+      hdr->getProperty( "_texture_palettes", palettes );
+      std::map<int, carto::Object>::iterator ip = palettes.find( timestep );
+      if( ip != palettes.end() )
+      {
+        std::string pal_fname = name + ".png";
+
+        carto::Object mtl = hdr->getProperty( "mtl" );
+        carto::Object mtldict = carto::Object::value( carto::Dictionary() );
+
+        try
+        {
+          mtldict = mtl->getProperty( name );
+        }
+        catch( ... )
+        {
+          mtl->setProperty( name, mtldict );
+        }
+
+        mtldict->setProperty( "map_Kd", pal_fname );
+        pal_fname = carto::FileUtil::dirname( obj_filename ) +
+          carto::FileUtil::separator() + pal_fname;
+        Writer<carto::Volume<AimsRGBA> > w( pal_fname );
+        w.write(
+          ip->second->value<carto::rc_ptr<carto::Volume<AimsRGBA> > >() );
+      }
+    }
   }
 
 
@@ -366,7 +402,7 @@ namespace aims
 
     for( is=thing.begin(); is!=es; ++is, ++timestep )
     {
-      writeObjectHeader( os, timestep, hdr, options );
+      writeObjectHeader( os, timestep, hdr, fname, options );
 
       const std::vector<Point3df> &vert = (*is).second.vertex();
       const std::vector<Point3df> &norm = (*is).second.normal();
@@ -435,7 +471,7 @@ namespace aims
 
     for( is=thing.begin(); is!=es; ++is, ++timestep )
     {
-      writeObjectHeader( os, timestep, hdr, options );
+      writeObjectHeader( os, timestep, hdr, fname, options );
 
       const std::vector<Point3df> &vert = (*is).second.vertex();
       const std::vector<Point3df> &norm = (*is).second.normal();
