@@ -44,6 +44,36 @@
 #include <cartobase/stream/fileutil.h>
 
 
+namespace
+{
+
+  template <typename T>
+  inline
+  T _clamp( const T& value, float m )
+  {
+    T new_value;
+
+    if( (float) value < m ) // clamp
+      new_value = (T) m;
+    else if( (float) value > 1. - m )
+      new_value = (T) ( 1. - m );
+    else
+      return value;
+
+    return new_value;
+  }
+
+
+  template <>
+  inline
+  Void _clamp( const Void &, float )
+  {
+    return Void();
+  }
+
+}
+
+
 namespace aims
 {
 
@@ -70,8 +100,8 @@ namespace aims
                                           const std::string & obj_filename,
                                           carto::Object options );
     inline static void writeMtl( PythonHeader *hdr, carto::Object options );
-    inline std::string printTextureCoord( std::ostream & os,
-                                          const T & tex ) const;
+    inline std::string printTextureCoord( std::ostream & os, const T & tex,
+                                          float m = 0.001 ) const;
     std::string _name;
   };
 
@@ -156,10 +186,10 @@ namespace aims
 
   template <int D, class T> inline
   std::string WavefrontMeshWriter<D, T>::printTextureCoord(
-    std::ostream & os, const T & tex ) const
+    std::ostream & os, const T & tex, float m ) const
   {
     std::stringstream s;
-    s << tex << " " << tex; // mut extend to 2D
+    s << _clamp( tex, m ) << " 0"; // mut extend to 2D
     return s.str();
   }
 
@@ -339,7 +369,24 @@ namespace aims
           mtl->setProperty( name, mtldict );
         }
 
-        mtldict->setProperty( "map_Kd", pal_fname );
+        // texture space offsets / scaling.
+        // WARNING: blender doesn't support texture map options.
+        std::stringstream mapkd_val_s;
+        std::vector<float> texoffset;
+        if( hdr->getProperty( "texture_offset", texoffset )
+          && texoffset.size() == 3 )
+        {
+          mapkd_val_s << "-o " << texoffset[0] << " " << texoffset[1] << " "
+            << texoffset[2] << " ";
+        }
+        std::vector<float> texscale;
+        if( hdr->getProperty( "texture_scale", texscale )
+          && texscale.size() == 3 )
+        {
+          mapkd_val_s << "-s " << texscale[0] << " " << texscale[1] << " "
+            << texscale[2] << " ";
+        }
+        mtldict->setProperty( "map_Kd", mapkd_val_s.str() + pal_fname );
         pal_fname = carto::FileUtil::dirname( obj_filename ) +
           carto::FileUtil::separator() + pal_fname;
         Writer<carto::Volume<AimsRGBA> > w( pal_fname );
@@ -426,9 +473,15 @@ namespace aims
       typename std::vector<T>::const_iterator it,
         et=is->second.texture().end();
 
+      float m = 1. / 512; // minimum value to clamp, for a 256 size texture
+      /* need to clamp is maybe just due to blender ?
+         Apparently texture coord values of 0 and 1 are "outside" the texture
+         (rendered as a strange pink color (?))
+      */
+
       for( it=is->second.texture().begin(); it!=et; ++it )
       {
-        os << "vt " << printTextureCoord( os, *it ) << std::endl;
+        os << "vt " << printTextureCoord( os, *it, m ) << std::endl;
       }
       os << std::endl;
 
