@@ -286,15 +286,18 @@ namespace aims
     if( carto::DataTypeCode<T>::name()
         != carto::DataTypeCode<Void>::name() )
     {
-      std::cout << "read texture\n";
-      std::cout << "tex 0: " << texture[0] << std::endl;
       // copy reordered texture
       std::vector<T> o_texture;
       o_texture.resize( texture_ind.size() );
       for( int i=0, k=texture_ind.size(); i<k; ++i )
       {
-        if( texture_ind[i] < 0 || texture_ind[i] >= vertices.size() )
-          throw carto::parse_error( "texture index out of range", i, _name );
+        if( texture_ind[i] < 0 || texture_ind[i] >= texture.size() )
+        {
+          std::stringstream s;
+          s << "texture index out of range: " << texture_ind[i] << " / "
+          << texture.size() << " at index " << i;
+          throw carto::parse_error( s.str(), i, _name );
+        }
         o_texture[i] = texture[texture_ind[i]];
 //         std::cout << texture_ind[i] << " -> " << texture[texture_ind[i]] << std::endl;
       }
@@ -351,7 +354,7 @@ namespace aims
       std::stringstream s(l);
       std::string element;
       s >> element;
-      if( element == "o" || element == "g" )
+      if( element == "o" )
       {
         // new object / group
         if( timestep != 0 || !vertices.empty() )
@@ -370,6 +373,8 @@ namespace aims
           texture_ind.clear();
         }
       }
+      else if( element == "g" )
+        continue; // TODO: groups
       else if( element == "mtllib" )
       {
         std::string mtl_filename;
@@ -442,7 +447,6 @@ namespace aims
             continue;
           std::stringstream n( item.substr(pos0, pos - pos0 ) );
           n >> norm;
-          std::cout << item << " " << pos0 << " " << pos << " " << n << std::endl;
           if( normals_ind.size() <= poly[p] )
             normals_ind.resize( poly[p] + 1 );
           normals_ind[ poly[p] ] = norm - 1; // (starts at 1)
