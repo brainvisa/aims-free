@@ -180,6 +180,7 @@ void AimsSurface<D,T>::updateNormals()
   // see specialization for D=3 and T=Void
 }
 
+
 template <> inline
 void AimsSurface<3,Void>::updateNormals()
 {
@@ -214,6 +215,60 @@ void AimsSurface<3,Void>::updateNormals()
     _normal[i]=norm;
   }
 }
+
+
+template <> inline
+void AimsSurface<4,Void>::updateNormals()
+{
+  unsigned int	i;
+  std::vector< Point3df >::size_type	nVert=_vertex.size();
+  Polygons::size_type			nPoly=_polygon.size();
+  std::vector<std::pair<std::set<uint>, std::set<uint> > >
+    polyVert(_vertex.size());
+  Point3df				norm;
+
+  if( _normal.size() != nVert )
+    _normal.resize( nVert );
+
+  // build vector of set(poly id), each quad divided in 2 distinct triangles
+  for( i=0; i<nPoly; ++i )
+  {
+    polyVert[_polygon[i][0]].first.insert(i);
+    polyVert[_polygon[i][1]].first.insert(i);
+    polyVert[_polygon[i][2]].first.insert(i);
+    polyVert[_polygon[i][0]].second.insert(i);
+    polyVert[_polygon[i][2]].second.insert(i);
+    polyVert[_polygon[i][3]].second.insert(i);
+  }
+
+  // fill normals
+  for( i=0; i<nVert; ++i )
+  {
+    norm=Point3df(0.0);
+    // for each point, run through triangles it belongs (both sets)
+    std::set<uint>::const_iterator it;
+    const std::pair<std::set<uint>, std::set<uint> > & polySet = polyVert[i];
+    for( it=polySet.first.begin(); it != polySet.first.end(); ++it )
+    {
+      /* For each polygon which the point belongs to,
+         calculate area.Normal=0.5.(ABxAC) */
+      norm += crossed(
+        (_vertex[_polygon[(*it)][1]]-_vertex[_polygon[(*it)][0]]),
+        (_vertex[_polygon[(*it)][2]]-_vertex[_polygon[(*it)][0]]) ) * 0.5F;
+    }
+    for( it=polySet.second.begin(); it != polySet.second.end(); ++it )
+    {
+      /* For each polygon which the point belongs to,
+         calculate area.Normal=0.5.(ABxAC) */
+      norm += crossed(
+        (_vertex[_polygon[(*it)][2]]-_vertex[_polygon[(*it)][0]]),
+        (_vertex[_polygon[(*it)][3]]-_vertex[_polygon[(*it)][0]]) ) * 0.5F;
+    }
+    norm.normalize();
+    _normal[i] = norm;
+  }
+}
+
 
 template <int D,class T> inline
 std::ostream& operator << (std::ostream& out,const AimsSurface<D,T>& thing)
@@ -454,7 +509,16 @@ void AimsTimeSurface<3,Void>::updateNormals()
 {
   AimsTimeSurface<3,Void>::iterator it;
   for (it=this->begin();it!=this->end();it++)
-  	((*it).second).updateNormals();
+    ((*it).second).updateNormals();
+}
+
+
+template <> inline
+void AimsTimeSurface<4,Void>::updateNormals()
+{
+  AimsTimeSurface<4,Void>::iterator it;
+  for (it=this->begin();it!=this->end();it++)
+    ((*it).second).updateNormals();
 }
 
 
