@@ -647,12 +647,20 @@ def __fixsipclasses__(classes):
                     y.__getitem__ = __fixsipclasses__.__getitem_vec__
                     y.__oldsetitem__ = y.__setitem__
                     y.__setitem__ = __fixsipclasses__.__setitem_vec__
-                if y.__name__.startswith('BucketMap_'):
-                    y.Bucket.__iterclass__ = BckIter
-                    y.Bucket.__iteritemclass__ = BckIterItem
-                    y.Bucket.__iter__ = lambda self: self.__iterclass__(self)
-                    y.Bucket.iteritems = lambda self: self.__iteritemclass__(
+                if y.__name__.startswith('BucketMap_') \
+                        or y.__name__.startswith('TimeTexture_'):
+                    y.__iterclass__ = BckIter
+                    y.__iteritemclass__ = BckIterItem
+                    y.__iter__ = lambda self: self.__iterclass__(self)
+                    y.iteritems = lambda self: self.__iteritemclass__(
                         self)
+                    if y.__name__.startswith('BucketMap_'):
+                        y.Bucket.__iterclass__ = BckIter
+                        y.Bucket.__iteritemclass__ = BckIterItem
+                        y.Bucket.__iter__ \
+                            = lambda self: self.__iterclass__(self)
+                        y.Bucket.iteritems \
+                            = lambda self: self.__iteritemclass__(self)
         except:
             pass
 

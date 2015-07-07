@@ -52,6 +52,32 @@ public:
   void setSizeT( float );
   void setSizeXYZT( float, float, float, float );
 
+
+  SIP_SSIZE_T __len__() const;
+%MethodCode
+  sipRes = sipCpp->size();
+%End
+
+  SIP_PYLIST keys() const;
+%MethodCode
+  if( (sipRes = PyList_New(sipCpp->size())) == NULL )
+    return NULL;
+
+  unsigned n = sipCpp->size();
+  BucketMap_%Template1typecode%::const_iterator it, et = sipCpp->end();
+  unsigned i = 0;
+
+  for( it=sipCpp->begin(); it!=et; ++it, ++i )
+    if( PyList_SetItem( sipRes, i, PyInt_FromLong( it->first ) ) < 0 )
+      {
+        Py_DECREF(sipRes);
+        sipIsErr = 1;
+        sipRes = 0;
+        PyErr_SetString( PyExc_TypeError, "item conversion failed" );
+        break;
+      }
+%End
+
   class Bucket
   {
   public:
