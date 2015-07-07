@@ -44,14 +44,27 @@ def extractLabelsFromTexture(tex, labels_list, new_label):
 
 def connectedComponents(mesh, tex, areas_mode=0):
     """
-    inputs:
-            mesh
-            tex: aimsTimeTexture_S16 (one time step) labeled between 1 and LabelsNb, background = 0, ignored_vertex = -1
-            areas_mode: if = 1: computing area measures of the connected components, if = 0: no measure (by default)
-    output:
-            cctex: onnectedComponentTex: aimsTimeTexture_S16, time step = LabelsNb, for each time step (label in the tex), texture of the connected components corresponding to this label (background = -1, and connected components = values between 1 and ccNb)
+    Parameters
+    ----------
+    mesh
+    tex: aimsTimeTexture_S16
+        (one time step) labeled between 1 and LabelsNb, background = 0,
+        ignored_vertex = -1.
 
-            areas_measures = python dictionary, areas_measures[label] = [16.5, 6.0] (numpy array) if label (in tex) has two connected Components 1 and 2 with area = 16.5 and 6.0 respectively, areas are in square mm
+    areas_mode:
+        if = 1: computing area measures of the connected components,
+        if = 0: no measure (by default).
+
+    Returns
+    -------
+    cctex: connectedComponentTex: aimsTimeTexture_S16
+        time step = LabelsNb, for each time step (label in the tex), texture of
+        the connected components corresponding to this label (background = -1,
+        and connected components = values between 1 and ccNb).
+    areas_measure: python dictionary
+        areas_measures[label] = [16.5, 6.0]
+        (numpy array) if label (in tex) has two connected Components 1 and 2
+        with area = 16.5 and 6.0 respectively, areas are in square mm
     """
     meshVertexNb = int(mesh.vertex().size())
     print 'Vertices number of mesh: ', meshVertexNb
@@ -81,10 +94,10 @@ def connectedComponents(mesh, tex, areas_mode=0):
             ccNb = labelcctex[0].arraydata().max()
             areas_measures[label] = numpy.zeros(ccNb)
             for c in xrange(ccNb):
-                c = c + 1
-                ccMesh = aims.SurfaceManip.meshExtract(mesh, labelcctex, c)[0]
+                ccMesh = aims.SurfaceManip.meshExtract(
+                    mesh, labelcctex, c + 1)[0]
                 ccArea = aims.SurfaceManip.meshArea(ccMesh)
-                areas_measures[label][c - 1] = ccArea
+                areas_measures[label][c] = ccArea
         cctex[label - 1].resize(meshVertexNb, 0)
         cctex[label - 1].assign(labelcctex[0].arraydata())
 
@@ -92,6 +105,37 @@ def connectedComponents(mesh, tex, areas_mode=0):
         return cctex, areas_measures
     else:
         return cctex
+
+
+def remove_non_principal_connected_components(mesh, tex, trash_label):
+    """Keep only the largest connected component in each label, for a label
+    texture.
+
+    Parameters
+    ----------
+    mesh:
+    tex: label texture (S16, int)
+    trash_label: value to replace non-principal components
+
+    Returns
+    -------
+    out_tex: label texture
+    """
+    t0 = tex[0].arraydata()
+    t0 += 1  # 0 is a real label
+    conn_comp, areas = connectedComponents(mesh, tex, areas_mode=True)
+    t0 -= 1
+    dtype = type(tex[0][0])
+    out_tex = aims.TimeTexture(dtype)
+    out_tex[0].assign(numpy.zeros(tex[0].size(), dtype=dtype))
+    out_arr = out_tex[0].arraydata()
+    out_arr[:] = trash_label
+    for label in xrange(conn_comp.size()):
+        comps = conn_comp[label]
+        largest = numpy.argmax(areas[label + 1]) + 1
+        comp_arr = comps.arraydata()
+        out_arr[comp_arr==largest] = label
+    return out_tex
 
 
 def meshDiceIndex(mesh, texture1, texture2, timestep1=0,
