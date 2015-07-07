@@ -57,11 +57,10 @@ namespace aims
 // using the dist parameter as the size of the structuring element
 template <class T>
 Texture<T> MeshVoronoiT ( const AimsSurface<3,Void> & mesh,
-					      const Texture<T> & inittex, 
-					      const T & Back, const T & For, 
-					      float dist, bool connexity,bool object)
+                          const Texture<T> & inittex,
+                          const T & Back, const T & For,
+                          float dist, bool connexity, bool object)
 {
-
   Texture<T>  				vor = inittex;
   Texture<float>			tex;
   const std::vector<Point3df>		& vert = mesh.vertex();
