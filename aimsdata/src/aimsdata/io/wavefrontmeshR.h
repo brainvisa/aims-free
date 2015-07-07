@@ -264,6 +264,7 @@ namespace aims
             Reader<carto::Volume<AimsRGBA> > r( teximage_fname );
             try
             {
+              std::cout << "read tex image: " << teximage_fname << std::endl;
               carto::rc_ptr<carto::Volume<AimsRGBA> > teximage( r.read() );
               std::map<int, carto::Object> palettes;
               mtl_dict->getProperty( "_texture_palettes", palettes );
@@ -295,6 +296,7 @@ namespace aims
                                          PythonHeader & hdr )
   {
     carto::Object m = mtl_dict->getProperty( mtl_objname );
+    // merge all materials/texture properties
     hdr.copyProperties( m );
     if( mtl_dict->hasProperty( "_texture_palettes" ) )
     {
@@ -430,6 +432,8 @@ namespace aims
       {
         std::string mtl_filename;
         s >> mtl_filename;
+        mtl_filename = carto::FileUtil::dirname( filename )
+          + carto::FileUtil::separator() + mtl_filename;
         mtl_dict = readMtlFle( mtl_filename );
       }
       else if( element == "usemtl" )

@@ -262,7 +262,8 @@ namespace aims
       if( material.get() )
       {
         std::string mtlfilename = removeExtension( filename ) + ".mtl";
-        os << "mtllib " << mtlfilename << std::endl << std::endl;
+        os << "mtllib " << carto::FileUtil::basename( mtlfilename )
+          << std::endl << std::endl;
 
         hdr->setProperty( "mtl", carto::Dictionary() );
         carto::Object mtl = hdr->getProperty( "mtl" );
