@@ -125,12 +125,12 @@ def remove_non_principal_connected_components(mesh, tex, trash_label):
     t0 += 1  # 0 is a real label
     conn_comp, areas = connectedComponents(mesh, tex, areas_mode=True)
     t0 -= 1
-    dtype = type(tex[0][0])
-    out_tex = aims.TimeTexture(dtype)
+    dtype = tex[0].arraydata().dtype
+    out_tex = aims.TimeTexture(dtype=dtype)
     out_tex[0].assign(numpy.zeros(tex[0].size(), dtype=dtype))
     out_arr = out_tex[0].arraydata()
     out_arr[:] = trash_label
-    for label in xrange(conn_comp.size()):
+    for label in conn_comp.keys():
         comps = conn_comp[label]
         largest = numpy.argmax(areas[label + 1]) + 1
         comp_arr = comps.arraydata()
@@ -251,3 +251,69 @@ def nomenclature_to_colormap(hierarchy, labels_list, as_float=True,
         colors.append(list(color))
     return numpy.array(colors)
 
+
+def vertex_texture_to_polygon_texture(mesh, tex):
+    """
+    """
+    dtype = tex[tex.keys()[0]].arraydata().dtype
+    poly_tex = aims.TimeTexture(dtype=dtype)
+
+    for t, tex0 in tex.iteritems():
+        tdata = tex0.arraydata()
+        ptex0 = poly_tex[t]
+        ptex0.resize(len(mesh.polygon(t)))
+        poly_labels = ptex0.arraydata()
+        for p, poly in enumerate(mesh.polygon(t)):
+            labels = (tdata[poly[0]], tdata[poly[1]], tdata[poly[2]])
+            if labels[0] == labels[1] or labels[0] == labels[2]:
+                poly_labels[p] = labels[0]
+            elif labels[1] == labels[2]:
+                poly_labels[p] = labels[1]
+            else:
+                poly_labels[p] = labels[2]
+
+    return poly_tex
+
+
+def mesh_to_polygon_textured_mesh(mesh, poly_tex):
+    """
+    """
+    out_mesh = mesh.__class__()
+    out_tex = poly_tex.__class__()
+    polygons = mesh.polygon()
+    dtype = poly_tex[poly_tex.keys()[0]].arraydata().dtype
+    for t, tex0 in poly_tex.iteritems():
+        print 't:', t
+        overt = out_mesh.vertex(t)
+        overt.assign(mesh.vertex())
+        onorm = out_mesh.normal(t)
+        onorm.assign(mesh.vertex())
+        opoly = out_mesh.polygon(t)
+        opoly.assign(mesh.polygon())
+        otex = out_tex[t]
+        otex.assign(numpy.zeros(mesh.vertex().size(), dtype=dtype) - 1)
+        #otex_arr = otex.arraydata()
+        tex_arr = tex0.arraydata()
+        added = {}
+        for p in xrange(len(mesh.polygon())):
+            plabel = tex_arr[p]
+            poly = opoly[p]
+            for i, v in enumerate(poly):
+                if otex[v] < 0:
+                    otex[v] = plabel
+                elif otex[v] != plabel:
+                    old_new = added.get((v, plabel))
+                    if old_new:
+                        # already added, just change triangle
+                        poly[i] = old_new
+                    else:
+                        # add a new vertex, and change triangle
+                        vb = overt.size()
+                        overt.append(overt[v])
+                        poly[i] = vb
+                        otex.data().append(plabel)
+                        added[(v, plabel)] = vb
+                        #otex_arr = otex.arraydata()
+
+    out_mesh.updateNormals()
+    return out_mesh, out_tex
