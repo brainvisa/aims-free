@@ -32,7 +32,7 @@ In soma.aims module
 .. autoclass:: soma.aims.GradientAdvection
   :members:
 
-.. autoclasss:: soma.aims.MeshInterpoler
+.. autoclass:: soma.aims.MeshInterpoler
   :members:
 
 .. autoclass:: soma.aims.RegularBinnedHistogram_FLOAT

@@ -326,7 +326,7 @@ def t1mapping_VFA(flip_angle_factor, GRE_data):
     cA1 = np.cos(A1)
     cA2 = np.cos(A2)
     p = (S2 * sA1 - S1 * sA2) / (S2 * sA1 * cA2 - S1 * sA2 * cA1)
-    print 'negative p:', p[p <= 0]
+    # print 'negative p:', p[p <= 0]
     epsilon = 1e-3
     p[p <= 0] = epsilon
     T1 = np.real(-GRE_data.repetition_time / np.log(p))
@@ -350,7 +350,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
 
     .. math::
 
-        unbiased_vol = biased\_vol / b1map
+        unbiased\_vol = biased\_vol / b1map
 
     (plus improvements)
 
