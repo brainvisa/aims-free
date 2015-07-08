@@ -74,8 +74,16 @@ BAFI_amplitude = aims.read(options.bafi_ampl)
 BAFI_phase = aims.read(options.bafi_phase)
 
 BAFI_data = t1mapping.BAFIData(BAFI_amplitude, BAFI_phase)
-BAFI_data.prescribed_flip_angle = 60.0  # degrees
-BAFI_data.echo_times = [3.061, 3.061, 4.5, 7.0]  # milliseconds
+if BAFI_amplitude.header().has_key('flip_angle'):
+    BAFI_data.prescribed_flip_angle = BAFI_amplitude.header()['flip_angle']
+else:
+    print 'warning, cannot determine flip angle in BAFI image. Taking 60.'
+    BAFI_data.prescribed_flip_angle = 60.0  # degrees
+if BAFI_amplitude.header().has_key('TEs'):
+    BAFI_data.echo_times = BAFI_amplitude.header()['TEs']
+else:
+    print 'warning, cannot determine echo times angle in BAFI image. Taking builtin values.'
+    BAFI_data.echo_times = [3.061, 3.061, 4.5, 7.0]  # milliseconds
 BAFI_data.TR_factor = 5.0
 BAFI_data.tau = 1.2e-3  # RF pulse duration in seconds TODO check real value!!
 
@@ -92,9 +100,6 @@ if options.out_b1map_raw:
 
 # extrapolate / smooth and resample the B1 map
 
-print B1map_volume
-print B1map_volume.getSize()
-print np.asarray(B1map_volume).shape
 output_median = False
 if options.out_b1map_median and options.smooth_type == 'median':
     output_median=True
@@ -117,9 +122,31 @@ GRE_20deg = aims.read(options.t1_highangle)
 B1map_vs = np.array(B1map_volume.header()['voxel_size'][:3])
 GRE_vs = np.array(GRE_5deg.header()['voxel_size'][:3])
 
-translation = (B1map_vs - GRE_vs) / 2
-transform = aims.AffineTransformation3d()
-transform.setTranslation(translation)
+transform = None
+if BAFI_amplitude.header().has_key('transformations') \
+        and BAFI_amplitude.header().has_key('referentials') \
+        and GRE_5deg.header().has_key('transformations') \
+        and GRE_5deg.header().has_key('referentials'):
+    trans1 = None
+    trans2 = None
+    refs = list(BAFI_amplitude.header()['referentials'])
+    if 'Scanner-based anatomical coordinates' in refs:
+        ref1 = refs.index('Scanner-based anatomical coordinates')
+        trans1 = aims.AffineTransformation3d(
+            BAFI_amplitude.header()['transformations'][ref1])
+    refs = list(GRE_5deg.header()['referentials'])
+    if 'Scanner-based anatomical coordinates' in refs:
+        ref2 = refs.index('Scanner-based anatomical coordinates')
+        trans2 = aims.AffineTransformation3d(
+            GRE_5deg.header()['transformations'][ref2])
+    if trans1 and trans2:
+        transform = trans2 * trans1.inverse()
+        print 'transform:', transform
+if not transform:
+    print 'Warning, transformation info not found in image headers. Assuming same field of view (which might cause errors).'
+    translation = (B1map_vs - GRE_vs) / 2
+    transform = aims.AffineTransformation3d()
+    transform.setTranslation(translation)
 
 # resampling
 if options.smooth_type == 'nearest':
@@ -145,7 +172,19 @@ B1map_ar[B1map_ar<0] = 0
 
 GRE_data = t1mapping.GREData2FlipAngles(GRE_5deg, GRE_20deg)
 GRE_data.flip_angles = [5, 20]  # degrees
-GRE_data.repetition_time = 14  # milliseconds
+if GRE_5deg.header().has_key('flip_angle'):
+    GRE_data.flip_angles[0] = GRE_5deg.header()['flip_angle']
+else:
+    print 'warning, cannot determine flip angle in low angle image. Taking %f.' % GRE_data.flip_angles[0]
+if GRE_20deg.header().has_key('flip_angle'):
+    GRE_data.flip_angles[1] = GRE_20deg.header()['flip_angle']
+else:
+    print 'warning, cannot determine flip angle in high angle image. Taking %f.' % GRE_data.flip_angles[1]
+if GRE_5deg.header().has_key('tr'):
+    GRE_data.repetition_time = GRE_5deg.header()['tr']  # milliseconds
+else:
+    print 'warning, cannot determine repetition time. Taking 14 ms.'
+    GRE_data.repetition_time = 14  # milliseconds
 
 T1map = t1mapping.t1mapping_VFA(B1map, GRE_data)
 #T1map = np.log(T1map+1) * 500
