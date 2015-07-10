@@ -284,7 +284,7 @@ public:
   sipRes = ( sipCpp->find( a0 ) != sipCpp->end() );
 %End
 
-  SIP_SSIZE_T __len__() const;
+  int __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End

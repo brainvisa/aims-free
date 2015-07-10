@@ -53,7 +53,7 @@ public:
   void setSizeXYZT( float, float, float, float );
 
 
-  SIP_SSIZE_T __len__() const;
+  int __len__() const;
 %MethodCode
   sipRes = sipCpp->size();
 %End
