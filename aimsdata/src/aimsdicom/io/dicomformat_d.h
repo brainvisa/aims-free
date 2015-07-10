@@ -35,7 +35,7 @@
 #define AIMS_IO_DICOMFORMAT_D_H
 
 #include <aims/io/dicomformat.h>
-#include <aims/io/dicomR.h>
+// #include <aims/io/dicomR.h>
 #include <aims/io/dicomW.h>
 #include <aims/data/data.h>
 
@@ -47,9 +47,12 @@ namespace aims
                              const carto::AllocatorContext & context, 
                              carto::Object options )
   {
-    DicomReader<T>	r( filename );
-    r.read( vol, context, options );
-    return( true );
+    // The DICOM reader has been reimplemented in Soma-IO.
+    // This old one should not be used any longer.
+    return false;
+//     DicomReader<T>	r( filename );
+//     r.read( vol, context, options );
+//     return( true );
   }
 
 

@@ -40,6 +40,13 @@
 #include <aims/io/scaledcoding.h>
 #include <string>
 
+#ifndef HAVE_CONFIG_H // needed by osconfig.h to include cfunix.h???
+#define HAVE_CONFIG_H 1
+#endif
+#include <dctk.h>
+#ifdef UID_RawDataStorage // #if (OFFIS_DCMTK_VERSION_NUMBER-0 > 351)
+#include <dcistrmf.h>
+#endif
 
 namespace aims
 {
