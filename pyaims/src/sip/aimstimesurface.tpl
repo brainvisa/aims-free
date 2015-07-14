@@ -1,16 +1,11 @@
 
-class AimsTimeSurface_%Template1typecode% : carto::RCObject
+class AimsTimeSurface_%Template1typecode%_%Template2typecode% : carto::RCObject
 {
 %TypeHeaderCode
 #include <aims/mesh/surface.h>
-#ifndef PYAIMS_AIMSTIMESURFACE_%Template1typecode%_VOID_DEFINED
-#define PYAIMS_AIMSTIMESURFACE_%Template1typecode%_VOID_DEFINED
-typedef AimsTimeSurface<%Template1%,Void> AimsTimeSurface_%Template1typecode%;
-#endif
-
-#if SIP_VERSION < 0x040700
-#include "sipaimssipvector_AimsVector_U32_%Template1typecode%.h"
-#include "sipaimssiprc_ptr_AimsTimeSurface_%Template1typecode%.h"
+#ifndef PYAIMS_AIMSTIMESURFACE_%Template1typecode%_%Template2typecode%_DEFINED
+#define PYAIMS_AIMSTIMESURFACE_%Template1typecode%_%Template2typecode%_DEFINED
+typedef AimsTimeSurface<%Template1%, %Template2% > AimsTimeSurface_%Template1typecode%_%Template2typecode%;
 #endif
 %End
 
@@ -20,13 +15,13 @@ typedef AimsTimeSurface<%Template1%,Void> AimsTimeSurface_%Template1typecode%;
 
 %ConvertToTypeCode
   return pyaims::standardConvertToTypeCode( sipPy,
-    sipClass_AimsTimeSurface_%Template1typecode%,
+    sipClass_AimsTimeSurface_%Template1typecode%_%Template2typecode%,
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
 public:
-  AimsTimeSurface_%Template1typecode%();
-  virtual ~AimsTimeSurface_%Template1typecode%();
+  AimsTimeSurface_%Template1typecode%_%Template2typecode%();
+  virtual ~AimsTimeSurface_%Template1typecode%_%Template2typecode%();
 
   void updateNormals();
   // const carto::GenericObject &  header() const;
@@ -36,14 +31,14 @@ public:
   unsigned size() const;
 
   // conversion from Object
-  static  rc_ptr_AimsTimeSurface_%Template1typecode%
+  static  rc_ptr_AimsTimeSurface_%Template1typecode%_%Template2typecode%
   fromObject( carto::GenericObject ) /Factory/;
 %MethodCode
   try
     {
-      carto::rc_ptr<AimsTimeSurface_%Template1typecode%> & mesh 
-        = a0->value<carto::rc_ptr<AimsTimeSurface_%Template1typecode%> >();
-      sipRes = new carto::rc_ptr<AimsTimeSurface_%Template1typecode%>( mesh );
+      carto::rc_ptr<AimsTimeSurface_%Template1typecode%_%Template2typecode%> & mesh
+        = a0->value<carto::rc_ptr<AimsTimeSurface_%Template1typecode%_%Template2typecode%> >();
+      sipRes = new carto::rc_ptr<AimsTimeSurface_%Template1typecode%_%Template2typecode%>( mesh );
     }
   catch( std::exception & e )
     {
@@ -77,6 +72,11 @@ public:
   sipRes = &(*sipCpp)[a0].polygon();
 %End
 
+  vector_%Template2typecode%* texture( int = 0 );
+%MethodCode
+  sipRes = &(*sipCpp)[a0].texture();
+%End
+
 
   int __len__() const;
 %MethodCode
@@ -89,7 +89,7 @@ public:
     return NULL;
 
   unsigned n = sipCpp->size();
-  AimsTimeSurface_%Template1typecode%::const_iterator it, et = sipCpp->end();
+  AimsTimeSurface_%Template1typecode%_%Template2typecode%::const_iterator it, et = sipCpp->end();
   unsigned i = 0;
 
   for( it=sipCpp->begin(); it!=et; ++it, ++i )

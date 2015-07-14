@@ -368,8 +368,8 @@ typessub = {'signed char':
             },
             'Void':
            {'typecode': 'VOID',
-               'pyFromC': 'PyNone',
-               'CFromPy': '',
+               'pyFromC': 'PyNone_FromVoid',
+               'CFromPy': 'PyVoid',
                'castFromSip': '',
                'deref': '*',
                'pyderef': '*',
@@ -382,13 +382,14 @@ typessub = {'signed char':
                'PyType': 'Void',
                'sipClass': 'Void',
                'typeinclude': '#include <cartobase/type/types.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipVoid.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_VOID_DEFINED\n'
+               'sipinclude': '#ifndef PYAIMS_VOID_DEFINED\n'
                '#define PYAIMS_VOID_DEFINED\n'
-               'inline int pyaimsVoid_Ckeck( PyObject *o )\n'
-               '{ return o == PyNone; }\n'
+               'inline int pyaimsVoid_Check( PyObject *o )\n'
+               '{ return o == Py_None; }\n'
+               'inline Void* PyVoid( PyObject* )\n'
+               '{ return new Void; }\n'
+               'inline PyObject* PyNone_FromVoid( const Void* )\n'
+               '{ return Py_None; }\n'
                '#endif',
                'module': 'aims',
                'testPyType': 'pyaimsVoid_Check',
@@ -1695,7 +1696,7 @@ typessub = {'signed char':
             },
 
             'AimsTimeSurface<2,Void>':
-           {'typecode': 'AimsTimeSurface_2',
+           {'typecode': 'AimsTimeSurface_2_VOID',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -1707,23 +1708,20 @@ typessub = {'signed char':
                'defNumpyBindings': '',
                'new': 'new AimsTimeSurface<2,Void>',
                'NumType': 'PyArray_OBJECT',
-               'PyType': 'AimsTimeSurface_2',
-               'sipClass': 'AimsTimeSurface_2',
+               'PyType': 'AimsTimeSurface_2_VOID',
+               'sipClass': 'AimsTimeSurface_2_VOID',
                'typeinclude':
                '#include <aims/mesh/surface.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsTimeSurface_2.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_TIMESURFACE_2_CHECK_DEFINED\n'
-               '#define PYAIMS_TIMESURFACE_2_CHECK_DEFINED\n'
-               'inline int pyaimsTimeSurface_2_Check( PyObject* o )\n'
-               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_2, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_TIMESURFACE_2_VOID_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_2_VOID_CHECK_DEFINED\n'
+               'inline int pyaimsTimeSurface_2_VOID_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_2_VOID, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsTimeSurface_2_Check',
+               'testPyType': 'pyaimsTimeSurface_2_VOID_Check',
             },
             'AimsTimeSurface<3,Void>':
-           {'typecode': 'AimsTimeSurface_3',
+           {'typecode': 'AimsTimeSurface_3_VOID',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -1735,23 +1733,20 @@ typessub = {'signed char':
                'defNumpyBindings': '',
                'new': 'new AimsTimeSurface<3,Void>',
                'NumType': 'PyArray_OBJECT',
-               'PyType': 'AimsTimeSurface_3',
-               'sipClass': 'AimsTimeSurface_3',
+               'PyType': 'AimsTimeSurface_3_VOID',
+               'sipClass': 'AimsTimeSurface_3_VOID',
                'typeinclude':
                '#include <aims/mesh/surface.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsTimeSurface_3.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_TIMESURFACE_3_CHECK_DEFINED\n'
-               '#define PYAIMS_TIMESURFACE_3_CHECK_DEFINED\n'
-               'inline int pyaimsTimeSurface_3_Check( PyObject* o )\n'
-               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_3, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_TIMESURFACE_3_VOID_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_3_VOID_CHECK_DEFINED\n'
+               'inline int pyaimsTimeSurface_3_VOID_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_3_VOID, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsTimeSurface_3_Check',
+               'testPyType': 'pyaimsTimeSurface_3_VOID_Check',
             },
             'AimsTimeSurface<4,Void>':
-           {'typecode': 'AimsTimeSurface_4',
+           {'typecode': 'AimsTimeSurface_4_VOID',
                'pyFromC': '',
                'CFromPy': '',
                'castFromSip': '',
@@ -1763,20 +1758,169 @@ typessub = {'signed char':
                'defNumpyBindings': '',
                'new': 'new AimsTimeSurface<4,Void>',
                'NumType': 'PyArray_OBJECT',
-               'PyType': 'AimsTimeSurface_4',
-               'sipClass': 'AimsTimeSurface_4',
+               'PyType': 'AimsTimeSurface_4_VOID',
+               'sipClass': 'AimsTimeSurface_4_VOID',
                'typeinclude':
                '#include <aims/mesh/surface.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsTimeSurface_4.h"\n'
-               '#endif\n'
-               '#ifndef PYAIMS_TIMESURFACE_4_CHECK_DEFINED\n'
-               '#define PYAIMS_TIMESURFACE_4_CHECK_DEFINED\n'
-               'inline int pyaimsTimeSurface_4_Check( PyObject* o )\n'
-               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_4, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               'sipinclude': '#ifndef PYAIMS_TIMESURFACE_4_VOID_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_4_VOID_CHECK_DEFINED\n'
+               'inline int pyaimsTimeSurface_4_VOID_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_4_VOID, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
                '#endif',
                'module': 'aims',
-               'testPyType': 'pyaimsTimeSurface_4_Check',
+               'testPyType': 'pyaimsTimeSurface_4_VOID_Check',
+            },
+
+            'AimsTimeSurface<2,float>':
+           {'typecode': 'AimsTimeSurface_2_FLOAT',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new AimsTimeSurface<2,float>',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'AimsTimeSurface_2_FLOAT',
+               'sipClass': 'AimsTimeSurface_2_FLOAT',
+               'typeinclude':
+               '#include <aims/mesh/surface.h>',
+               'sipinclude': '#ifndef PYAIMS_TIMESURFACE_2_FLOAT_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_2_FLOAT_CHECK_DEFINED\n'
+               'inline int pyaimsTimeSurface_2_FLOAT_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_2_FLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeSurface_2_FLOAT_Check',
+            },
+            'AimsTimeSurface<3,float>':
+           {'typecode': 'AimsTimeSurface_3_FLOAT',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new AimsTimeSurface<3,float>',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'AimsTimeSurface_3_FLOAT',
+               'sipClass': 'AimsTimeSurface_3_FLOAT',
+               'typeinclude':
+               '#include <aims/mesh/surface.h>',
+               'sipinclude': '#ifndef PYAIMS_TIMESURFACE_3_FLOAT_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_3_FLOAT_CHECK_DEFINED\n'
+               'inline int pyaimsTimeSurface_3_FLOAT_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_3_FLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeSurface_3_FLOAT_Check',
+            },
+            'AimsTimeSurface<4,float>':
+           {'typecode': 'AimsTimeSurface_4_FLOAT',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new AimsTimeSurface<4,float>',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'AimsTimeSurface_4_FLOAT',
+               'sipClass': 'AimsTimeSurface_4_FLOAT',
+               'typeinclude':
+               '#include <aims/mesh/surface.h>',
+               'sipinclude': '#ifndef PYAIMS_TIMESURFACE_4_FLOAT_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_4_FLOAT_CHECK_DEFINED\n'
+               'inline int pyaimsTimeSurface_4_FLOAT_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_4_FLOAT, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeSurface_4_FLOAT_Check',
+            },
+
+            'AimsTimeSurface<2,Point2df>':
+           {'typecode': 'AimsTimeSurface_2_POINT2DF',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new AimsTimeSurface<2,Point2df>',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'AimsTimeSurface_2_POINT2DF',
+               'sipClass': 'AimsTimeSurface_2_POINT2DF',
+               'typeinclude':
+               '#include <aims/mesh/surface.h>',
+               'sipinclude': '#ifndef PYAIMS_TIMESURFACE_2_POINT2DF_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_2_POINT2DF_CHECK_DEFINED\n'
+               'inline int pyaimsTimeSurface_2_POINT2DF_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_2_POINT2DF, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeSurface_2_POINT2DF_Check',
+            },
+            'AimsTimeSurface<3,Point2df>':
+           {'typecode': 'AimsTimeSurface_3_POINT2DF',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new AimsTimeSurface<3,Point2DF>',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'AimsTimeSurface_3_POINT2DF',
+               'sipClass': 'AimsTimeSurface_3_POINT2DF',
+               'typeinclude':
+               '#include <aims/mesh/surface.h>',
+               'sipinclude': '#ifndef PYAIMS_TIMESURFACE_3_POINT2DF_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_3_POINT2DF_CHECK_DEFINED\n'
+               'inline int pyaimsTimeSurface_3_POINT2DF_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_3_POINT2DF, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeSurface_3_POINT2DF_Check',
+            },
+            'AimsTimeSurface<4,Point2df>':
+           {'typecode': 'AimsTimeSurface_4_POINT2DF',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new AimsTimeSurface<4,Point2df>',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'AimsTimeSurface_4_POINT2DF',
+               'sipClass': 'AimsTimeSurface_4_POINT2DF',
+               'typeinclude':
+               '#include <aims/mesh/surface.h>',
+               'sipinclude': '#ifndef PYAIMS_TIMESURFACE_4_POINT2DF_CHECK_DEFINED\n'
+               '#define PYAIMS_TIMESURFACE_4_POINT2DF_CHECK_DEFINED\n'
+               'inline int pyaimsTimeSurface_4_POINT2DF_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_AimsTimeSurface_4_POINT2DF, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsTimeSurface_4_POINT2DF_Check',
             },
 
             'Texture<float>':

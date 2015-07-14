@@ -12,7 +12,7 @@ Surface Manipulation Object. All mehtods are static in this class, it is just a 
 #include <aims/mesh/surfaceOperation.h>
 #ifndef PYAIMS_AIMSTIMESURFACE_2_VOID_DEFINED
 #define PYAIMS_AIMSTIMESURFACE_2_VOID_DEFINED
-typedef AimsTimeSurface<2,Void> AimsTimeSurface_2;
+typedef AimsTimeSurface<2,Void> AimsTimeSurface_2_VOID;
 #endif
 #ifndef PYAIMS_TIMETEXTURE_S16_DEFINED
 #define PYAIMS_TIMETEXTURE_S16_DEFINED
@@ -21,9 +21,8 @@ typedef TimeTexture<int16_t> TimeTexture_S16;
 %End
 
 public:
-  static AimsSurfaceTriangle* meshPlanarPolygon( const Point4df &,
-                                                 const AimsTimeSurface_2 & )
-                                                /Factory/;
+  static AimsSurfaceTriangle* meshPlanarPolygon(
+    const Point4df &, const AimsTimeSurface_2_VOID & ) /Factory/;
 %Docstring
 meshPlanarPolygon(plane, polygon)
 
@@ -33,7 +32,7 @@ Parameters
 ----------
 plane: Point4df
     plane equation
-polygon: AimsTimeSurface_2
+polygon: AimsTimeSurface_2_VOID
     planar polygon to tesselate. Typically, the output of cutMesh()
 
 Returns
@@ -48,7 +47,7 @@ planar_mesh: AimsSurfaceTriangle
   sipRes = pm;
 %End
 
-  static void invertSurfacePolygons( AimsTimeSurface_3 & surface );
+  static void invertSurfacePolygons( AimsTimeSurface_3_VOID & surface );
 %Docstring
 invertSurfacePolygons(mesh)
 
@@ -56,7 +55,12 @@ Invert polygons order (flips 2 vertex indices in each triangle) to flip its inte
 The input mesh is modified in-place.
 %End
 
-  static void meshMerge( AimsTimeSurface_3 &, const AimsTimeSurface_3 & );
+  static void meshMerge( AimsTimeSurface_2_VOID &,
+                         const AimsTimeSurface_2_VOID & );
+  static void meshMerge( AimsTimeSurface_3_VOID &,
+                         const AimsTimeSurface_3_VOID & );
+  static void meshMerge( AimsTimeSurface_4_VOID &,
+                         const AimsTimeSurface_4_VOID & );
 %Docstring
 meshMerge(input_output_mesh, input_mesh)
 
@@ -64,9 +68,9 @@ Concatenates the second mesh to the first one. The first argument will be modifi
 
 Parameters
 ----------
-input_output_mesh: AimsTimeSurface_3
+input_output_mesh: AimsTimeSurface_3_VOID
     first mesh. Will be modified to be the output.
-input_mesh: AimsTimeSurface_3
+input_mesh: AimsTimeSurface_3_VOID
     second mesh to be appended to the first one.
 
 Returns
@@ -74,7 +78,7 @@ Returns
 None
 %End
 
-  static void meshTransform( AimsTimeSurface_3 &, const Motion & );
+  static void meshTransform( AimsTimeSurface_3_VOID &, const Motion & );
 %Docstring
 meshTransform(mesh, transformation)
 
@@ -82,7 +86,7 @@ Apply linear coordinates transformation to a mesh. The input mesh will be modifi
 
 Parameters
 ----------
-mesh: AimsTimeSurface_3 or AimsTimeSurface_2
+mesh: AimsTimeSurface_3_VOID or AimsTimeSurface_2_VOID
     mesh to be transformed. Will be modified.
 transformation: AffineTransformation3d
     Linear transformation matrix
@@ -92,7 +96,7 @@ Returns
 None
 %End
 
-  static void meshTransform( AimsTimeSurface_2 &, const Motion & );
+  static void meshTransform( AimsTimeSurface_2_VOID &, const Motion & );
 
   static float meshArea( const AimsSurfaceTriangle & surf );
 %Docstring
@@ -107,8 +111,8 @@ Volume inside a triangular mesh, in mm^3.
 The mesh must enclode a closed volume, with no holes, otherwise the volume processing will "leak" and will be wrong.
 %End
 
-  static AimsTimeSurface_3 *
-      meshExtract( const AimsTimeSurface_3 & mesh,
+  static AimsTimeSurface_3_VOID *
+      meshExtract( const AimsTimeSurface_3_VOID & mesh,
                    const TimeTexture_S16 & tex, short value,
                    vector_SIZE_T ** overtex = 0 ) /Factory/;
 %Docstring
@@ -118,13 +122,13 @@ Extracts a sub-mesh defined by a texture label value.
 
 Returns
 -------
-sub_mesh: AimsTimeSurface_3
+sub_mesh: AimsTimeSurface_3_VOID
     extracted sub-mesh
 vertices: vector_ULONG
     indices of extracted vertices
 %End
 
-  static AimsTimeSurface_2 *
+  static AimsTimeSurface_2_VOID *
       meshTextureBoundary( const AimsSurfaceTriangle & mesh,
         const TimeTexture_S16 & tex, short region ) /Factory/;
 %Docstring
@@ -145,20 +149,20 @@ region_value: int16, int32 or float
 
 Returns
 -------
-boundary: AimsTimeSurface_2
+boundary: AimsTimeSurface_2_VOID
     output segments mesh (filar mesh) for the boundary
 %End
 
-  static AimsTimeSurface_2 *
+  static AimsTimeSurface_2_VOID *
     meshTextureBoundary( const AimsSurfaceTriangle & mesh,
       const TimeTexture_S32 & tex, int region ) /Factory/;
-  static AimsTimeSurface_2 *
+  static AimsTimeSurface_2_VOID *
     meshTextureBoundary( const AimsSurfaceTriangle & mesh,
       const TimeTexture_FLOAT & tex, float region ) /Factory/;
 
   static void cutMesh( const AimsSurfaceTriangle & insurf,
                        const Point4df & plane, AimsSurfaceTriangle & cut,
-                       AimsTimeSurface_2 & borderline );
+                       AimsTimeSurface_2_VOID & borderline );
 %Docstring
 cutMesh(in_mesh, plane, cut_mesh, border_line)
 
@@ -172,7 +176,7 @@ plane: Point4df
     cut plane equation (4 coefs)
 cut_mesh: AimsSurfaceTriangle
     output cut mesh (the part satisfying the plane equation). Polygons crossing the plane will be cut into smaller ones.
-border_line: AimsTimeSurface_2
+border_line: AimsTimeSurface_2_VOID
     output cut section polygon
 
 Returns
@@ -248,7 +252,7 @@ density_texture: TimeTexture_FLOAT
                                   const AimsSurfaceTriangle & );
 
   static vector_POINT3DF * lineDirections(
-    const AimsTimeSurface_2 & ) /Factory/;
+    const AimsTimeSurface_2_VOID & ) /Factory/;
 %Docstring
 lineDirections(segments_mesh)
 
@@ -256,7 +260,7 @@ calculate directions of a line mesh, for each vertex
 
 Parameters
 ----------
-segments_mesh: AimsTimeSurface_2
+segments_mesh: AimsTimeSurface_2_VOID
 
 Returns
 -------

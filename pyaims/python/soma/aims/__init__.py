@@ -74,8 +74,9 @@ Main classes:
     reference counting
   - :py:class:`BucketMap_VOID`: list of voxels. Created using the factory
     function :py:func:`BucketMap`
-  - AimsTimeSurface_<polygons_size>: meshes, and the factory function
-    :py:func:`AimsTimeSurface`
+  - AimsTimeSurface_<polygons_size>_<texture_type=VOID>: meshes, and the factory
+    function :py:func:`AimsTimeSurface`. See for instance
+    :py:class:`AimsTimeSurface_3_VOID`.
   - TimeTexture_<type>: textures to map on meshes, and the factory function
     :py:func:`TimeTexture`.
   - :py:class:`Graph`
@@ -137,7 +138,10 @@ except:
 # typedefs
 
 try:
-    AimsSurfaceTriangle = AimsTimeSurface_3
+    AimsSurfaceTriangle = AimsTimeSurface_3_VOID
+    AimsTimeSurface_2 = AimsTimeSurface_2_VOID
+    AimsTimeSurface_3 = AimsTimeSurface_3_VOID
+    AimsTimeSurface_4 = AimsTimeSurface_4_VOID
 except:
     pass  # no surface support
 
@@ -205,7 +209,7 @@ class Reader(object):
           .. code-block:: python
 
             'Mesh' : { 'VOID' : 'AimsSurfaceTriangle',
-                        'default_object_type' : 'AimsTimeSurface_3' }
+                        'default_object_type' : 'AimsTimeSurface_3_VOID' }
 
           (and this example corresponds to the default internal map if none is
           specified)
@@ -213,16 +217,25 @@ class Reader(object):
         if typemap is None:
             self._typemap = {  # 'Volume' : 'AimsData',
                 'Segments':
-                {'VOID': 'AimsTimeSurface_2',
-                 'default_object_type': 'AimsTimeSurface_2',
+                {
+                    'VOID': 'AimsTimeSurface_2_VOID',
+                    'FLOAT': 'AimsTimeSurface_2_FLOAT',
+                    'POINT2DF': 'AimsTimeSurface_2_POINT2DF',
+                    'default_object_type': 'AimsTimeSurface_2_VOID',
                  },
                 'Mesh':
-                {'VOID': 'AimsTimeSurface_3',
-                 'default_object_type': 'AimsTimeSurface_3',
+                {
+                    'VOID': 'AimsTimeSurface_3_VOID',
+                    'FLOAT': 'AimsTimeSurface_3_FLOAT',
+                    'POINT2DF': 'AimsTimeSurface_3_POINT2DF',
+                    'default_object_type': 'AimsTimeSurface_3_VOID',
                  },
                 'Mesh4':
-                {'VOID': 'AimsTimeSurface_4',
-                 'default_object_type': 'AimsTimeSurface_4',
+                {
+                    'VOID': 'AimsTimeSurface_4_VOID',
+                    'FLOAT': 'AimsTimeSurface_4_FLOAT',
+                    'POINT2DF': 'AimsTimeSurface_4_POINT2DF',
+                    'default_object_type': 'AimsTimeSurface_4_VOID',
                  },
                 'Graph': {'VOID': 'Graph', },
                 'AffineTransformation3d':
@@ -768,7 +781,9 @@ AffineTransformation3d.__repr__ = lambda self: __fixsipclasses__.fakerepr(
 AffineTransformation3d.__str__ = lambda self: self.toMatrix().__str__()
 
 # This one add support for += in 3D mesh
-AimsTimeSurface_3.__iadd__ = lambda s, o: SurfaceManip.meshMerge(s, o) or s
+AimsTimeSurface_2_VOID.__iadd__ = lambda s, o: SurfaceManip.meshMerge(s, o) or s
+AimsTimeSurface_3_VOID.__iadd__ = lambda s, o: SurfaceManip.meshMerge(s, o) or s
+AimsTimeSurface_3_VOID.__iadd__ = lambda s, o: SurfaceManip.meshMerge(s, o) or s
 
 # conversions from GenericObject
 convertersObjectToPython = {
@@ -782,8 +797,14 @@ convertersObjectToPython = {
     'rc_ptr of bucket of DOUBLE': BucketMap_DOUBLE.fromObject,
     'rc_ptr of Mesh of VOID': AimsSurfaceTriangle.fromObject,
     'rc_ptr of mesh of VOID': AimsSurfaceTriangle.fromObject, # obsolete
-    'rc_ptr of Mesh4 of VOID': AimsTimeSurface_4.fromObject,
-    'rc_ptr of Segments of VOID': AimsTimeSurface_2.fromObject,
+    'rc_ptr of Mesh4 of VOID': AimsTimeSurface_4_VOID.fromObject,
+    'rc_ptr of Segments of VOID': AimsTimeSurface_2_VOID.fromObject,
+    'rc_ptr of Mesh of FLOAT': AimsTimeSurface_3_FLOAT.fromObject,
+    'rc_ptr of Mesh4 of FLOAT': AimsTimeSurface_4_FLOAT.fromObject,
+    'rc_ptr of Segments of FLOAT': AimsTimeSurface_2_FLOAT.fromObject,
+    'rc_ptr of Mesh of POINT2DF': AimsTimeSurface_3_POINT2DF.fromObject,
+    'rc_ptr of Mesh4 of POINT2DF': AimsTimeSurface_4_POINT2DF.fromObject,
+    'rc_ptr of Segments of POINT2DF': AimsTimeSurface_2_POINT2DF.fromObject,
     'rc_ptr of texture of S16': TimeTexture_S16.fromObject,
     'rc_ptr of texture of S32': TimeTexture_S32.fromObject,
     'rc_ptr of texture of U32': TimeTexture_U32.fromObject,
@@ -1362,15 +1383,18 @@ def ShallowConverter(*args, **kwargs):
         (*args)
 
 
-def TimeSurface(dim=3):
-    '''same as AimsTimeSurface( dim )'''
-    return AimsTimeSurface(dim)
+def TimeSurface(dim=3, dtype='VOID'):
+    '''same as AimsTimeSurface(dim, dtype)'''
+    return AimsTimeSurface(dim, dtype)
 
 
-def AimsTimeSurface(dim=3):
-    '''Create an instance of Aims mesh (AimsTimeSurface_<dim>) from a dimension
-    parameter'''
-    return getattr(aimssip, 'AimsTimeSurface_' + str(dim))()
+def AimsTimeSurface(dim=3, dtype='VOID'):
+    '''Create an instance of Aims mesh (AimsTimeSurface_<dim>_<dtype>) from a
+    dimension parameter.
+
+    See for instance :py:class:`AimsTimeSurface_3_VOID`
+    '''
+    return getattr(aimssip, 'AimsTimeSurface_%d_%s' % (dim, dtype))()
 
 
 def AimsThreshold(*args, **kwargs):

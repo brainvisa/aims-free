@@ -45,7 +45,7 @@
 
 
 <!-- -->
-<h4> <a name="version-4.5.0"></a>Jul. 07, 2015, Version 4.5.0</h4>
+<h4> <a name="version-4.5.0"></a>Jul. 13, 2015, Version 4.5.0</h4>
 
 <ul>
 <li>Major changes in IO system: Soma-IO is being used instead of AIMS IO for major image formats:
@@ -68,8 +68,13 @@
 <li>Some fibers/bundles utility classes and IO (BundleProducer, BundleListener, BundleReader and bundle/graph conversion) have moved from the old connectomist project to aimsdata. Fibers IO are thus now builtin in aims/anatomist and do not depend on other libs and plugins.</li>
 <li>Support for Trackvis fibers format (for reading).</li>
 <li>More python bindings in pyaims</li>
+<li>Important change in PyAIMS: the surface mesh classes (AimsTimeSurface_&lt;D&gt;) have been extended to textured meshes, thus getting an additional texture type parameter. This has always be so in the C++ classes but python bindings were omitting this second template. The mesh classes are now named <tt>AimsTimeSurface_&lt;D&gt;_&lt;DTYPE&gt;</tt>. <tt>D</tt> is the number of vertices per polygon, as it used to be (2, 3 or 4), and <tt>DTYPE</tt> is the texture type: <tt>VOID</tt>, <tt>FLOT</tt>, <tt>POINT2DF</tt> for now. To maintain compatibility, the untextured meshes classes can still be found and used under their older names: <tt>AimsTimeSurface_&lt;D&gt;</tt> is then an alias to <tt>AimsTimeSurface_&lt;D&gt;_&lt;DTYPE&gt;</tt>.<br/>
+Still for compatibility, in the bugfix branch of aims 4.4, the inverse alias has been introduced, so that <tt>AimsTimeSurface_&lt;D&gt;_&lt;DTYPE&gt;</tt> will be recognized by this updated branch.
+</li>
+<li>Support for textured meshes in pyaims</li>
 <li>And many many other fixes...</li>
 </ul>
+
 
 <!-- -->
 <h4> <a name="version-4.4.0"></a>Oct 9th, 2013, Version 4.4.0</h4>

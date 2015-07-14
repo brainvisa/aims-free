@@ -140,10 +140,10 @@ class FoldsGraphThickness:
     def vertex_mesh(self, v, skel):
       cut_mesh = aims.SurfaceManip.meshExtract( self.gm_wm_mesh, self.gm_wm_tex, skel )[0]
       v['white_surface_area'] = aims.SurfaceManip.meshArea(cut_mesh)
-      #aims.GraphManip.storeAims( self.fold_graph, v, 'cortexWhite',  aims.rc_ptr_AimsTimeSurface_3(cut_mesh))
+      #aims.GraphManip.storeAims( self.fold_graph, v, 'cortexWhite',  aims.rc_ptr_AimsTimeSurface_3_VOID(cut_mesh))
       cut_mesh = aims.SurfaceManip.meshExtract( self.gm_lcr_mesh, self.gm_lcr_tex, skel )[0]
       v['grey_surface_area'] = aims.SurfaceManip.meshArea(cut_mesh)
-      #aims.GraphManip.storeAims( self.fold_graph, v, 'cortexHemi',  aims.rc_ptr_AimsTimeSurface_3(cut_mesh))
+      #aims.GraphManip.storeAims( self.fold_graph, v, 'cortexHemi',  aims.rc_ptr_AimsTimeSurface_3_VOID(cut_mesh))
 
     print 'calculating vertices thickness'
     fat = aims.FoldGraphAttributes( self.voronoi_vol, self.fold_graph )

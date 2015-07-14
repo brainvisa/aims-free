@@ -45,7 +45,7 @@ class Moment :
 		triangulationMoment = TriangulationMoment( momentType )
 		invariantMoment = MomentInvariant_S16( triangulationMoment )
 		
-		if ( isinstance( object, aims.rc_ptr_AimsTimeSurface_3 ) ) :
+		if ( isinstance( object, aims.rc_ptr_AimsTimeSurface_3_VOID ) ) :
 			invariantMoment.doit( object._get() )
 			result = invariantMoment
 

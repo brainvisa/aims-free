@@ -32,7 +32,7 @@ Neuroimaging data structures
 
 .. autofunction:: soma.aims.AimsTimeSurface
 
-  For an example of mesh surface classes, see the :py:class:`soma.aims.AimsTimeSurface_3` class.
+  For an example of mesh surface classes, see the :py:class:`soma.aims.AimsTimeSurface_3_VOID` class.
 
 .. autofunction:: soma.aims.TimeTexture
 

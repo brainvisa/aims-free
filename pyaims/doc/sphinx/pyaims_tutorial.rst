@@ -60,7 +60,7 @@ Reading operations are accessed via a single :py:func:`soma.aims.read()` functio
 <soma.aims.Volume_DOUBLE object at ...
 >>> obj3 = aims.read( 'data_for_anatomist/subject01/subject01_Lhemi.mesh' )
 >>> print obj3
-<soma.aims.AimsTimeSurface_3 object at ...
+<soma.aims.AimsTimeSurface_3_VOID object at ...
 
 The returned object can have various types according to what is found in the disk file(s).
 
@@ -462,8 +462,8 @@ polygons: 67678
 normals: 33837
 
 
-To build a mesh, we can instantiate an object of type `aims.AimsTimeSurface_<n>`, 
-for example :py:class:`soma.aims.AimsTimeSurface_3`, with *n* being the number of vertices by polygon. 
+To build a mesh, we can instantiate an object of type `aims.AimsTimeSurface_<n>_VOID`,
+for example :py:class:`soma.aims.AimsTimeSurface_3_VOID`, with *n* being the number of vertices by polygon. VOID means that the mesh has no texture in it (which we generally don't use, we prefer using texture as separate objects).
 Then we can add vertices, normals and polygons to the mesh:
 
 >>> # build a flying saucer mesh

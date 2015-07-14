@@ -21,10 +21,10 @@ public:
   static AimsSurfaceTriangle* generate( const carto::GenericObject & )
     throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
 
-  static AimsTimeSurface_2* generate_wireframe( carto::Object )
+  static AimsTimeSurface_2_VOID* generate_wireframe( carto::Object )
     throw( std::runtime_error, std::invalid_argument ) /Factory/;
 
-  static AimsTimeSurface_2* generate_wireframe( 
+  static AimsTimeSurface_2_VOID* generate_wireframe(
     const carto::GenericObject & )
     throw( /* std::runtime_error, std::invalid_argument */ ) /Factory/;
 
@@ -134,17 +134,17 @@ icosphere( Point3df center, float radius, unsigned nfaces=320 )
 Compared to sphere() which performs meridian / parallels tesselation, icosphere over-segments an icosahedron to get equal, equilateral triangles.
 %End
 
-  static AimsTimeSurface_2*
+  static AimsTimeSurface_2_VOID*
   parallelepiped_wireframe( const carto::GenericObject & params ) /Factory/;
-  static AimsTimeSurface_2* parallelepiped_wireframe(
+  static AimsTimeSurface_2_VOID* parallelepiped_wireframe(
     const Point3df & boundingbox_min, const Point3df & boundingbox_max ) /Factory/;
 %Docstring
 parallelepiped_wireframe( Point3df boundingbox_min, Point3df boundingbox_max )
 %End
 
-  static AimsTimeSurface_2*
+  static AimsTimeSurface_2_VOID*
   circle_wireframe( const carto::GenericObject & params ) /Factory/;
-  static AimsTimeSurface_2* circle_wireframe(
+  static AimsTimeSurface_2_VOID* circle_wireframe(
     const Point3df & center, float radius, unsigned nseg=20,
     const Point3df & normal = Point3df( 0, 0, 1 ),
     const Point3df & startdir = Point3df( 1, 0, 0 ), float startangle = 0,
@@ -159,14 +159,14 @@ Circle, or part of circle.
   startangle, stopangle are meant to make parts of circle
 %End
 
-  static AimsTimeSurface_2*
+  static AimsTimeSurface_2_VOID*
   grid( const carto::GenericObject & params ) /Factory/;
 %Docstring
 grid(dict)
 See the description() and printDescription() methods for more information.
 %End
 
-  static AimsTimeSurface_2* grid(
+  static AimsTimeSurface_2_VOID* grid(
     const Point3df & boundingbox_min, const Point3df & boundingbox_max,
     const Point3df & grid_sampling ) /Factory/;
 %Docstring

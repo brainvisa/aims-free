@@ -57,6 +57,7 @@ typedef unsigned short uint16_t;
 %Include vector_AimsVector_U32_3.sip
 %Include vector_AimsVector_U32_4.sip
 %Include vector_set_U32.sip
+%Include vector_VOID.sip
 //%Include vector_InfoPtr.sip
 %Include set_S16.sip
 %Include set_S32.sip
@@ -101,9 +102,15 @@ typedef unsigned short uint16_t;
 %Include hierarchy.sip
 %Include quaternion.sip
 
-%Include aimstimesurface_2.sip
-%Include aimstimesurface_3.sip
-%Include aimstimesurface_4.sip
+%Include aimstimesurface_2_VOID.sip
+%Include aimstimesurface_3_VOID.sip
+%Include aimstimesurface_4_VOID.sip
+%Include aimstimesurface_2_FLOAT.sip
+%Include aimstimesurface_3_FLOAT.sip
+%Include aimstimesurface_4_FLOAT.sip
+%Include aimstimesurface_2_POINT2DF.sip
+%Include aimstimesurface_3_POINT2DF.sip
+%Include aimstimesurface_4_POINT2DF.sip
 
 %Include timetexture_S16.sip
 %Include timetexture_S32.sip
@@ -112,9 +119,15 @@ typedef unsigned short uint16_t;
 %Include timetexture_DOUBLE.sip
 %Include timetexture_POINT2DF.sip
 
-%Include rcptr_AimsTimeSurface_2.sip
-%Include rcptr_AimsTimeSurface_3.sip
-%Include rcptr_AimsTimeSurface_4.sip
+%Include rcptr_AimsTimeSurface_2_VOID.sip
+%Include rcptr_AimsTimeSurface_3_VOID.sip
+%Include rcptr_AimsTimeSurface_4_VOID.sip
+%Include rcptr_AimsTimeSurface_2_FLOAT.sip
+%Include rcptr_AimsTimeSurface_3_FLOAT.sip
+%Include rcptr_AimsTimeSurface_4_FLOAT.sip
+%Include rcptr_AimsTimeSurface_2_POINT2DF.sip
+%Include rcptr_AimsTimeSurface_3_POINT2DF.sip
+%Include rcptr_AimsTimeSurface_4_POINT2DF.sip
 %Include rcptr_TimeTexture_S16.sip
 %Include rcptr_TimeTexture_S32.sip
 %Include rcptr_TimeTexture_U32.sip
@@ -124,9 +137,15 @@ typedef unsigned short uint16_t;
 
 %Include reader_Graph.sip
 %Include reader_Hierarchy.sip
-%Include reader_AimsTimeSurface_2.sip
-%Include reader_AimsTimeSurface_3.sip
-%Include reader_AimsTimeSurface_4.sip
+%Include reader_AimsTimeSurface_2_VOID.sip
+%Include reader_AimsTimeSurface_3_VOID.sip
+%Include reader_AimsTimeSurface_4_VOID.sip
+%Include reader_AimsTimeSurface_2_FLOAT.sip
+%Include reader_AimsTimeSurface_3_FLOAT.sip
+%Include reader_AimsTimeSurface_4_FLOAT.sip
+%Include reader_AimsTimeSurface_2_POINT2DF.sip
+%Include reader_AimsTimeSurface_3_POINT2DF.sip
+%Include reader_AimsTimeSurface_4_POINT2DF.sip
 %Include reader_TimeTexture_S16.sip
 %Include reader_TimeTexture_S32.sip
 %Include reader_TimeTexture_U32.sip
@@ -184,7 +203,14 @@ typedef unsigned short uint16_t;
 %Include sparsematrix.sip
 %Include sparseordensematrix.sip
 
-typedef AimsTimeSurface_3 AimsSurfaceTriangle;
+typedef AimsTimeSurface_3_VOID AimsSurfaceTriangle;
+// compatibility with pyaims 4.4
+typedef AimsTimeSurface_2_VOID aimstimesurface_2;
+typedef AimsTimeSurface_3_VOID aimstimesurface_3;
+typedef AimsTimeSurface_4_VOID aimstimesurface_4;
+typedef rc_ptr_AimsTimeSurface_2_VOID rc_ptr_AimsTimeSurface_2;
+typedef rc_ptr_AimsTimeSurface_3_VOID rc_ptr_AimsTimeSurface_3;
+typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include surfacegenerator.sip
 %Include surfacemanip.sip
 %Include threshold.sip

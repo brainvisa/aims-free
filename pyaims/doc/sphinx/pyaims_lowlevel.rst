@@ -157,14 +157,25 @@ Graphs and trees
 Meshes and textures
 :::::::::::::::::::
 
-.. autoclass:: soma.aims.AimsTimeSurface_3
+.. autoclass:: soma.aims.AimsTimeSurface_3_VOID
   :members:
 
   See the :aimsdox:`AimsTimeSurface C++ documentation <classAimsTimeSurface.html>`
   
   .. note::
   
-    Compared to the C++ classes, the texture type template argument has beed dropped from the Python bindings, because textures are handled via separate objects (see :py:func:`soma.aims.TimeTexture`) and the builtin texture is actually never used.
+    Before PyAIMS 4.5, compared to the C++ classes, the texture type template argument had beed dropped from the Python bindings, because textures are handled via separate objects (see :py:func:`soma.aims.TimeTexture`) and the builtin texture was actually never used.
+    However textured meshes have shown useful to be read/written as an exchange format to other software and formats (typically the Wavefront .obj format), so the support for textured meshes has been added in Pyaims 4.5. As a consequence, mesh classes have changed name. To maintain compatibility with older code, the AimsTimeSurface_D_VOID classes (D being 2, 3 or 4) can still be found under their older names: AimsTimeSurface_D.
+
+.. class:: soma.aims.AimsTimeSurface_2_VOID
+.. class:: soma.aims.AimsTimeSurface_4_VOID
+.. class:: soma.aims.AimsTimeSurface_2_FLOAT
+.. class:: soma.aims.AimsTimeSurface_3_FLOAT
+.. class:: soma.aims.AimsTimeSurface_4_FLOAT
+.. class:: soma.aims.AimsTimeSurface_2_POINT2DF
+.. class:: soma.aims.AimsTimeSurface_3_POINT2DF
+.. class:: soma.aims.AimsTimeSurface_4_POINT2DF
+
 
 .. autoclass:: soma.aims.TimeTexture_FLOAT
   :members:

@@ -27,7 +27,7 @@ class Moment_%Template1typecode%
   #include <aims/mesh/surface.h>
   #ifndef PYAIMS_AIMSTIMESURFACE_3_VOID_DEFINED
   #define PYAIMS_AIMSTIMESURFACE_3_VOID_DEFINED
-  typedef AimsTimeSurface<3,Void> AimsTimeSurface_3;
+  typedef AimsTimeSurface<3,Void> AimsTimeSurface_3_VOID;
   #endif
 
   #ifndef PYAIMSSIP_VECTOR_DOUBLE_DEFINED
@@ -252,7 +252,7 @@ class GeometricMoment_%Template1typecode% : MomentBase, Moment_%Template1typecod
 #if SIP_VERSION >= 0x040700
 #ifndef PYAIMS_AIMSTIMESURFACE_3_VOID_DEFINED
 #define PYAIMS_AIMSTIMESURFACE_3_VOID_DEFINED
-typedef AimsTimeSurface<3,Void> AimsTimeSurface_3;
+typedef AimsTimeSurface<3,Void> AimsTimeSurface_3_VOID;
 #endif
 #endif
 %End

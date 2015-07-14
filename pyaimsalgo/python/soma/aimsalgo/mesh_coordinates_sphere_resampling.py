@@ -21,7 +21,7 @@ def draw_sphere(mesh, longitude, latitude):
 
     Parameters
     ----------
-    mesh: (AimsTimeSurface_3)
+    mesh: (AimsTimeSurface_3_VOID)
         a spherical triangulation of cortical hemisphere of the subject
     longitude: (TimeTexture_FLOAT)
         a longitude texture from HipHop mapping that go with the white_mesh
@@ -34,7 +34,7 @@ def draw_sphere(mesh, longitude, latitude):
 
     Return
     ------
-    sphere_mesh: (AimsTimeSurface_3)
+    sphere_mesh: (AimsTimeSurface_3_VOID)
         a spherical triangulation of the subject of its cortical hemisphere,
         projected on a sphere
     """
@@ -81,7 +81,7 @@ def sphere_coordinates(sphere, inversion=False):
 
     Parameters
     ----------
-    sphere: (AimsTimeSurface_3)
+    sphere: (AimsTimeSurface_3_VOID)
         a sphere mesh: vertices must be on a sphere with center 0.
 
     Return
@@ -121,9 +121,9 @@ def resample_mesh_to_sphere(
 
     Parameters
     ----------
-    mesh: (AimsTimeSurface_3)
+    mesh: (AimsTimeSurface_3_VOID)
         a spherical triangulation of cortical hemisphere of the subject
-    sphere: (AimsTimeSurface_3)
+    sphere: (AimsTimeSurface_3_VOID)
         a sphere mesh with center 0.
         For example, a spherical mesh of size 100 located in standard
         BrainVISA directory can be used.
@@ -138,7 +138,7 @@ def resample_mesh_to_sphere(
 
     Return
     ------
-    resampled: (AimsTimeSurface_3)
+    resampled: (AimsTimeSurface_3_VOID)
 
     """
     # get spherical coordinates textures on the sphere
@@ -178,7 +178,7 @@ def texture_by_polygon(mesh, texture):
 
     Parameters
     ----------
-    mesh: (AimsTimeSurface_3)
+    mesh: (AimsTimeSurface_3_VOID)
         a mesh providing trianglar struture
     texture: (TimeTexture_FLOAT)
         texture data
@@ -203,7 +203,7 @@ def polygon_average_sizes(mesh):
 
     Parameters
     ----------
-    mesh: (AimsTimeSurface_3)
+    mesh: (AimsTimeSurface_3_VOID)
         a mesh providing trianglar struture
 
     Return:
@@ -228,7 +228,7 @@ def polygon_max_sizes(mesh):
 
     Parameters
     ----------
-    mesh: (AimsTimeSurface_3)
+    mesh: (AimsTimeSurface_3_VOID)
         a mesh providing trianglar struture
 
     Return:
@@ -261,16 +261,16 @@ def refine_sphere_mesh(init_sphere, avg_dist_texture, current_sphere,
 
     Parameters
     ----------
-    init_sphere: (AimsTimeSurface_3)
+    init_sphere: (AimsTimeSurface_3_VOID)
     avg_dist_texture: (TimeTexture_FLOAT)
-    current_sphere: (AimsTimeSurface_3)
+    current_sphere: (AimsTimeSurface_3_VOID)
     target_avg_dist: (float)
     init_sphere_coords: (tuple of 2 textures) (optional)
     current_sphere_coords: (tuple of 2 textures) (optional)
 
     Returns
     -------
-    refined_sphere: (AimsTimeSurface_3)
+    refined_sphere: (AimsTimeSurface_3_VOID)
     """
     if init_sphere_coords is not None:
         init_lon, init_lat = init_sphere_coords
@@ -349,7 +349,7 @@ def sphere_mesh_from_distance_map(init_sphere, avg_dist_texture,
 
     Parameters
     ----------
-    init_sphere: (AimsTimeSurface_3)
+    init_sphere: (AimsTimeSurface_3_VOID)
     avg_dist_texture: (TimeTexture_FLOAT)
     target_avg_dist: (float)
     dist_texture_is_scaled: (bool) (optional)
@@ -360,7 +360,7 @@ def sphere_mesh_from_distance_map(init_sphere, avg_dist_texture,
 
     Return
     ------
-    refined_sphere: (AimsTimeSurface_3)
+    refined_sphere: (AimsTimeSurface_3_VOID)
     """
     vert2 = numpy.square(numpy.asarray(init_sphere.vertex()))
     dist = numpy.sqrt(numpy.sum(vert2, axis=1))
