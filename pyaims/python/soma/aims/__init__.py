@@ -137,6 +137,10 @@ except:
 
 try:
   AimsSurfaceTriangle = AimsTimeSurface_3
+  # for future compatibility (pyaims 4.5)
+  AimsTimeSurface_2_VOID = AimsTimeSurface_2
+  AimsTimeSurface_3_VOID = AimsTimeSurface_3
+  AimsTimeSurface_4_VOID = AimsTimeSurface_4
 except:
   pass # no surface support
 
