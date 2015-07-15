@@ -73,7 +73,7 @@ def crop_volume(vol, threshold=0, border=0):
             break
     else:
         z = -1
-    zmin = np.max(zeroslice + 1 - border, 0)
+    zmin = np.max((zeroslice + 1 - border, 0))
     zeroslice = vol.getSizeZ()
     if z != -1:
         for z in xrange(vol.getSizeZ()-1, 0, -1):
@@ -102,7 +102,7 @@ def crop_volume(vol, threshold=0, border=0):
                 zeroslice = y
             else:
                 break
-    yup = np.min((zeroslice + border, vol.getSizeZ()))
+    yup = np.min((zeroslice + border, vol.getSizeY()))
 
     zeroslice = -1
     for x in xrange(vol.getSizeX()):
