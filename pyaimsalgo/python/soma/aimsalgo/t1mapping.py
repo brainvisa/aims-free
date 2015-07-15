@@ -33,6 +33,17 @@ class BAFIData:
         self.TR_factor = 5.0
         # RF pulse duration in seconds TODO check real value!!
         self.tau = 1.2e-3
+        if amplitude_volume.header().has_key('flip_angle'):
+            self.prescribed_flip_angle \
+                = amplitude_volume.header()['flip_angle']
+        else:
+            print 'warning, cannot determine flip angle in BAFI image. ' \
+                'Taking 60.'
+        if amplitude_volume.header().has_key('TEs'):
+            self.echo_times = amplitude_volume.header()['TEs']
+        else:
+            print 'warning, cannot determine echo times angle in BAFI image.' \
+                ' Taking builtin values.'
 
     def make_B1_map(self, B0_correction=False):
         """Build a map of B1 (in radians) from BAFI data.
@@ -117,8 +128,11 @@ class BAFIData:
         BAFI_amplitude = np.asarray(self.amplitude_volume)
         signal_echo1 = BAFI_amplitude[:, :, :, 0]
         signal_echo2 = BAFI_amplitude[:, :, :, 1]
-        abs_r = signal_echo2 / signal_echo1
+        invalid = np.where(signal_echo1 == 0)
+        abs_r = signal_echo2.astype(float)
+        abs_r[signal_echo1 != 0] /= signal_echo1[signal_echo1 != 0]
         fa = np.arccos((abs_r * self.TR_factor - 1) / (self.TR_factor - abs_r))
+        fa[invalid] = 0
         fa[abs_r >= 1] = 0
         return fa
 
@@ -448,6 +462,15 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
     conv = aims.Converter(intype=b1map_resamp.volume().get(),
                           outtype=aims.Volume_FLOAT)
     field = conv(b1map_resamp).volume()
+    b1map_max = np.max(np.asarray(field))
+    if b1map_max >= 600.: # probably degrees * 10
+        # (the maps output by the Siemens 7T machine are this kind)
+        # defaul threshold is 100 (10 degrees)
+        threshold = 100
+    elif b1map_max >= 60.: # degrees ?
+        threshold = 10
+    else: # radians
+        threshold = np.pi / 180. * 10
     field_arr = np.asarray(field)
     if dp_gre_low_contrast:
         tr_dp_gre = aims.AffineTransformation3d(dp_gre_low_contrast.header()[
@@ -469,11 +492,11 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
         field_arr *= np.asarray(dp_conv(dp_gre_resamp).volume())
         if field_threshold is None:
             # default threshold is 3000
-            field_threshold = 3000
+            field_threshold = threshold * 30
     else:
         if field_threshold is None:
             # defaul threshold is 100 (10 degrees)
-            field_threshold = 100
+            field_threshold = threshold
 
     if field_threshold != 0:
         # clamp values under field_threshold and non-null to avoid
@@ -495,6 +518,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
     # before correction
     biased_arr = np.asarray(biased_vol)
     biased_max = np.max(biased_arr)
+    #print 'biased_max:', biased_max
     biased_avg = np.average(biased_arr[biased_arr >= biased_max/20.])
     #print 'biased avg:', biased_avg
     unbiased_arr = np.asarray(unbiased_vol)
@@ -504,6 +528,7 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
     unbiased_avg = np.average(unbiased_arr[real_locs])
     #print 'unbiased avg:', unbiased_avg
     corr_factor = biased_avg / unbiased_avg
+    #print 'corr_factor:', corr_factor
     corr_factor = _check_max(corr_factor, np.max(unbiased_arr),
                              biased_arr.dtype)
     unbiased_vol *= corr_factor

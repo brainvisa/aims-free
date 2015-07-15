@@ -74,18 +74,6 @@ BAFI_amplitude = aims.read(options.bafi_ampl)
 BAFI_phase = aims.read(options.bafi_phase)
 
 BAFI_data = t1mapping.BAFIData(BAFI_amplitude, BAFI_phase)
-if BAFI_amplitude.header().has_key('flip_angle'):
-    BAFI_data.prescribed_flip_angle = BAFI_amplitude.header()['flip_angle']
-else:
-    print 'warning, cannot determine flip angle in BAFI image. Taking 60.'
-    BAFI_data.prescribed_flip_angle = 60.0  # degrees
-if BAFI_amplitude.header().has_key('TEs'):
-    BAFI_data.echo_times = BAFI_amplitude.header()['TEs']
-else:
-    print 'warning, cannot determine echo times angle in BAFI image. Taking builtin values.'
-    BAFI_data.echo_times = [3.061, 3.061, 4.5, 7.0]  # milliseconds
-BAFI_data.TR_factor = 5.0
-BAFI_data.tau = 1.2e-3  # RF pulse duration in seconds TODO check real value!!
 
 #B1map_array = np.abs(BAFI_data.make_B1_map())
 B1map_array = np.abs(BAFI_data.make_flip_angle_map())
