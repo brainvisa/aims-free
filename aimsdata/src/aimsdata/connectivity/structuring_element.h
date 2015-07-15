@@ -103,13 +103,10 @@ namespace aims {
       StructuringElement(): _vector() {}
       StructuringElement( const std::vector<Point3d> & vector ):
         _vector(vector) {}
-      StructuringElement( const StructuringElement & se ):
-        _vector(se._vector) {}
       virtual ~StructuringElement() {}
-      StructuringElement & operator= ( const StructuringElement & se )
-      {
-        _vector = se._vector;
-      }
+      // Use default compiler-supplied copy constructor and assignment operator
+      // StructuringElement( const StructuringElement & se );
+      // StructuringElement & operator= ( const StructuringElement & se );
 
       //----------------------------------------------------------------------
       // ITERATORS
