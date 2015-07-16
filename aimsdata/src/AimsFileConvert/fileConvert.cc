@@ -172,6 +172,8 @@ FileConvert::FileConvert()
 template <typename T1, typename U>
 static bool convData( Process &, const string &, Finder & );
 
+template<class ConverterType, class U>
+bool write( Process &, U &, const string &, int, const string & );
 
 template<typename T>
 class DataConverter : public Process
@@ -183,6 +185,8 @@ public:
 
   template<class T1, class U>
   friend bool convData( Process&, const string &, Finder & );
+  template<class ConverterType, class U>
+  friend bool write( Process &, U &, const string &, int, const string & );
 
  private:
   static bool noConvert( Process &, const string &, Finder & );
@@ -203,8 +207,8 @@ public:
 template<typename T>
 bool DataConverter<T>::noConvert( Process & p, const string &, Finder & )
 {
-  DataConverter	& dc = (DataConverter &) p;
-  return( write( p, dc.data, dc.file, dc.encoding, dc.normal , dc.form ) );
+  DataConverter	& dc = dynamic_cast<DataConverter &>(p);
+  return( write<DataConverter<T> >( p, dc.data, dc.file, dc.encoding, dc.normal , dc.form ) );
 }
 
 // partial specializations
@@ -219,6 +223,8 @@ public:
 
   template<class T1, class U>
   friend bool convData( Process&, const string &, Finder & );
+  template<class ConverterType, class U>
+  friend bool write( Process &, U &, const string &, int, const string & );
 
  private:
   VolumeRef<T>	& data;
@@ -243,6 +249,8 @@ public:
 
   template<class T1, class U>
   friend bool convData( Process&, const string &, Finder & );
+  template<class ConverterType, class U>
+  friend bool write( Process &, U &, const string &, int, const string & );
 
  private:
   TimeTexture<T>	& data;
@@ -268,6 +276,8 @@ public:
 
   template<class T1, class U>
   friend bool convData( Process&, const string &, Finder & );
+  template<class ConverterType, class U>
+  friend bool write( Process &, U &, const string &, int, const string & );
 
  private:
   BucketMap<T>		& data;
@@ -420,7 +430,7 @@ template<class T>
 bool read( Process & p, T & data, const string & filename, const Finder & f,
            bool rw, const string & orient )
 {
-  FileConvert	&fc = (FileConvert &) p;
+  FileConvert	&fc = dynamic_cast<FileConvert &>(p);
 
   Reader<T>	r( filename );
 
@@ -450,18 +460,18 @@ bool read( Process & p, T & data, const string & filename, const Finder & f,
 }
 
 
-template<class T>
-bool write( Process & p, T & data, const string & file, int encoding, const string & form )
+template<class ConverterType, class U>
+bool write( Process & p, U & data, const string & file, int encoding, const string & form )
 {
-  FileConvert	&fc = (FileConvert &) p;
+  ConverterType &dc = dynamic_cast<ConverterType &>(p);
 
   cout << "writing " << file << "...\n";
   Object options = Object::value( Dictionary() );
   options->setProperty( "exact_format", true );
-  options->setProperty( "normal", fc.normal );
-  options->setProperty( "encoding", fc.encoding );
+  options->setProperty( "normal", dc.normal );
+  options->setProperty( "encoding", dc.encoding );
 
-  Writer<T>	w( file, options );
+  Writer<U>	w( file, options );
   const string	*wf = 0;
   if( !form.empty() )
   {
@@ -485,20 +495,20 @@ bool write( Process & p, T & data, const string & file, int encoding, const stri
 template<class T>
 bool readAndWrite( Process & p, const string & filename, Finder & f )
 {
-  FileConvert	&fc = (FileConvert &) p;
+  FileConvert	&fc = dynamic_cast<FileConvert &>(p);
   T		data;
 
   if( !read( p, data, filename, f, filename == fc.file, fc.orient ) )
     return( false );
 
-  return( write( p, data, fc.file, fc.encoding, fc.form ) );
+  return( write<FileConvert>( p, data, fc.file, fc.encoding, fc.form ) );
 }
 
 
 template<class T>
 bool convert( Process & p, const string & filename, Finder & f )
 {
-  FileConvert		&fc = (FileConvert &) p;
+  FileConvert		&fc = dynamic_cast<FileConvert &>(p);
   T			data;
   //DataTypeCode<T>	dtc;
   cout << "reading " << filename << " as " << f.objectType() << " / " 
@@ -620,7 +630,7 @@ void sizeT( AimsTimeSurface<D,T> & obj )
 template<class T,class U>
 bool convData( Process & p, const string &, Finder & )
 {
-  DataConverter<T>	& dc = (DataConverter<T> &) p;
+  DataConverter<T>	& dc = dynamic_cast<DataConverter<T> &>(p);
   cout << "converting data...\n";
 
   ShallowConverter<T,U>	conv( dc.rescale, dc.info );
@@ -643,7 +653,7 @@ bool convData( Process & p, const string &, Finder & )
 
   cout << "convert done\n";
 
-  return( write( p, *vol2, dc.file, dc.encoding, dc.form ) );
+  return( write<DataConverter<T> >( p, *vol2, dc.file, dc.encoding, dc.form ) );
 }
 
 
