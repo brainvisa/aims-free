@@ -64,7 +64,7 @@ namespace aims {
       ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
       return *this;
     }
-    ExtremaDifferenceFilter<T> *clone() { return new ExtremaDifferenceFilter<T>(*this); }
+    ExtremaDifferenceFilter<T> *clone() const { return new ExtremaDifferenceFilter<T>(*this); }
   };
 
 } // namespace aims

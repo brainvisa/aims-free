@@ -64,7 +64,8 @@ namespace aims {
       ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
       return *this;
     }
-    MedianFilter<T> *clone() { return new MedianFilter<T>(*this); }
+    MedianFilter<T> *clone() const {
+      return new MedianFilter<T>(*this); }
   };
 
   template <typename T>
@@ -90,7 +91,7 @@ namespace aims {
       ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
       return *this;
     }
-    NotNullMedianFilter<T> *clone() { return new NotNullMedianFilter<T>(*this); }
+    NotNullMedianFilter<T> *clone() const { return new NotNullMedianFilter<T>(*this); }
   };
 
 } // namespace aims

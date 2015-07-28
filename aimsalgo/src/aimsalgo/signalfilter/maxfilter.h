@@ -64,7 +64,7 @@ namespace aims {
       ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
       return *this;
     }
-    MaxFilter<T> *clone() { return new MaxFilter<T>(*this); }
+    MaxFilter<T> *clone() const { return new MaxFilter<T>(*this); }
   };
 
 } // namespace aims

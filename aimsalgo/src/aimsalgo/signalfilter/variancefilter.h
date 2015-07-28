@@ -64,7 +64,7 @@ namespace aims {
       ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
       return *this;
     }
-    VarFilter<T> *clone() { return new VarFilter<T>(*this); }
+    VarFilter<T> *clone() const { return new VarFilter<T>(*this); }
   };
 
 } // namespace aims

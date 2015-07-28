@@ -188,7 +188,7 @@ namespace aims {
   ) const
   {
     StructuredConstVolume<T> volse( *volume, *se );
-    return MathUtil<T>::min( volse.begin(), volse.end() );
+    return MathUtil<T>::median( volse.begin(), volse.end() );
   }
 
   //--------------------------------------------------------------------------

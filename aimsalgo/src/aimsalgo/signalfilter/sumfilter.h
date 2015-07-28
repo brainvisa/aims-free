@@ -64,7 +64,7 @@ namespace aims {
       ElementFilteringImageAlgorithm<T>::operator=( (ElementFilteringImageAlgorithm<T>&)other );
       return *this;
     }
-    SumFilter<T> *clone() { return new SumFilter<T>(*this); }
+    SumFilter<T> *clone() const { return new SumFilter<T>(*this); }
   };
 
 } // namespace aims
