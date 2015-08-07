@@ -24,8 +24,22 @@ public:
   virtual ~AimsTimeSurface_%Template1typecode%_%Template2typecode%();
 
   void updateNormals();
-  // const carto::GenericObject &  header() const;
-  carto::GenericObject &  header() /Transfer/;
+
+  SIP_PYOBJECT header() /Factory/;
+%Docstring
+The header contains all meta-data.
+%End
+%MethodCode
+  aims::PythonHeader & ph = sipCpp->header();
+  carto::Object* h = new carto::Object( carto::Object::reference( ph ) );
+  sipRes = sipConvertFromNewType( h, sipType_carto_Object, 0 );
+  // set into header a reference to the mesh to forbid it to die before the
+  // python header object
+  if( PyObject_SetAttrString( sipRes, "_meshref", sipSelf ) == -1 )
+  {
+    std::cerr << "cannot set header ._meshref" << std::endl;
+  }
+%End
 
   void erase();
   unsigned size() const;
