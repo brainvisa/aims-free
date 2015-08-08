@@ -35,7 +35,7 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/io/reader.h>
 #include <aims/io/aimsGraphW.h>
-#include <aims/def/path.h>
+#include <cartobase/config/paths.h>
 #include <aims/graph/graphmanip.h>
 #include <graph/graph/graph.h>
 #include <graph/graph/gwriter.h>
@@ -392,7 +392,8 @@ int main( int argc, const char **argv )
 
       char	sep = FileUtil::separator();
       // syntax
-      SyntaxReader	sr( Path::singleton().syntax() + sep + "graph.stx" );
+      SyntaxReader	sr( Paths::findResourceFile(
+        "nomenclature/syntax/graph.stx", "aims" ) );
       sr >> syntax;
 
       // read
