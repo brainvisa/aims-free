@@ -37,7 +37,7 @@
 #include <aims/io/aimsGraphR.h>
 #include <aims/io/aimsGraphW.h>
 #include <aims/graph/graphmanip.h>
-#include <aims/def/path.h>
+#include <cartobase/config/paths.h>
 #include <aims/mesh/mesher.h>
 #include <aims/mesh/surfaceOperation.h>
 #include <aims/bucket/bucketMap.h>
@@ -236,7 +236,8 @@ int main( int argc, const char **argv )
 	}
 
       // syntax
-      SyntaxReader	sr( Path::singleton().syntax() + "/graph.stx" );
+      SyntaxReader	sr( Paths::findResourceFile(
+        "nomenclature/syntax/graph.stx", "aims" ) );
       sr >> syntax;
 
       // read

@@ -32,7 +32,7 @@
  */
 
 #include <aims/io/argR.h>
-#include <aims/def/path.h>
+#include <cartobase/config/paths.h>
 #include <aims/io/argheader.h>
 #include <aims/io/aimsGraphR.h>
 #include <aims/io/roiR.h>
@@ -183,8 +183,8 @@ LowLevelStandardArgReader::LowLevelStandardArgReader()
 {
   try
     {
-      SyntaxReader	sr( Path::singleton().syntax() + FileUtil::separator() 
-                            + "graph.stx" );
+      SyntaxReader	sr( Paths::findResourceFile(
+        "nomenclature/syntax/graph.stx", "aims" ) );
       sr >> *_syntax;
     }
   catch( exception & )

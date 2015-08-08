@@ -33,7 +33,7 @@
 
 #include <cstdlib>
 #include <aims/getopt/getopt2.h>
-#include <aims/def/path.h>
+#include <cartobase/config/paths.h>
 #include <aims/resampling/motion.h>
 #include <aims/io/motionW.h>
 #include <aims/graph/graphmanip.h>
@@ -83,8 +83,8 @@ int main( int argc, const char **argv )
 	}
 
       // syntax
-      SyntaxReader	sr( Path::singleton().syntax() + FileUtil::separator() 
-                            + "graph.stx" );
+      SyntaxReader	sr( Paths::findResourceFile(
+                            "nomenclature/syntax/graph.stx", "aims" ) );
       sr >> syntax;
 
       // read

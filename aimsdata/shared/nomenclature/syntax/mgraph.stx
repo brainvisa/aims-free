@@ -1,0 +1,38 @@
+*BEGIN SYNTAX model_graph
+model_VERSION           		string
+model_compatibility_data_VERSION	string
+model_finder		string
+filename_base		string
+default_model_file	string
+type.tri		string
+fold.tri		string
+Tmtktri_filename	int_vector
+model_file		string
+nbase_graphs		int
+void_label		string
+# default nomenclature/hierarchy of names
+default_nomenclature			string
+# names selector in nomenclature
+default_selector			string
+label_list      		        int_vector
+*END
+
+*BEGIN SYNTAX model_node
+model_file		string	!
+domain_file		string	!
+label			string	!
+Tmtktri_filename	string
+occurence_count		int
+noinstance_count	int
+model_type              string
+*END
+
+
+*BEGIN SYNTAX model_edge
+model_file		string	!
+label1			string	!
+label2			string	!
+occurence_count		int
+noinstance_count	int
+*END
+

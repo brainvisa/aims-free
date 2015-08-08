@@ -1,0 +1,837 @@
+###########################
+###### GRAPHES DE CLUSTERS (ACTIVATION...)
+
+*BEGIN SYNTAX ClusterArg
+ClusterArg_VERSION            string
+datagraph_VERSION             string
+datagraph_compatibility_model_VERSION   string
+voxel_size                    float_vector   !
+filename_base                 string
+boundingbox_min                    int_vector     !
+boundingbox_max                    int_vector     !
+type.tri                      string
+cluster.tri                   string
+type.bck                      string
+cluster.bck                   string
+cluster.global.bck            string
+cluster.global.vol            string
+type.tex                      string
+type.global.tri               string
+type.global.bck               string
+type.global.tex               string
+type.global.vol               string
+cluster.global.tri            string
+maximum.global.tri            string
+minimum.global.tri            string
+minimum2.global.tri           string
+Tmtktri.global.tri            string
+Tmtktri_filename              int_vector
+Tmtktri_label                 int_vector
+mesh_filename_maximum              int_vector
+mesh_filename_minimum              int_vector
+mesh_filename_minimum2             int_vector
+roi_label_maximum             int_vector
+roi_label_minimum             int_vector
+roi_label_minimum2            int_vector
+bucket_filename                    int_vector
+bucket_label                  int_vector
+bucket_Volume_filename             string
+cluster_Volume_filename            string
+minscale                 float
+maxscale                 float
+scales                        float_vector
+Talairach_rotation            float_vector
+Talairach_translation              float_vector
+Talairach_scale                    float_vector
+Tal_boundingbox_min           float_vector
+Tal_boundingbox_max           float_vector
+origin                        float_vector
+spm_normalized                int
+spm_spm2_normalization        int
+spm_radio_convention          int
+label_property                string
+roi_junction.global.tri       string
+roi_junction.tri              string
+roi_mesh_junction.global.tri            string
+roi_mesh_junction_filename    int_vector
+roi_mesh_junction_label       int_vector
+*END
+
+*BEGIN SYNTAX cluster
+point_number        int
+size           float
+index               int
+label                   string
+name           string         !
+Tmtktri_filename        string
+Tmtktri_label           int
+cluster_filename        string
+cluster_label           int
+maximum_filename        string
+maximum_label           int
+minimum_filename        string
+minimum_label           int
+minimum2_filename       string
+minimum2_label          int
+bucket_filename         string
+bucket_label            int
+roi_label      int
+roi_label_maximum   int
+roi_label_minimum   int
+roi_label_minimum2  int
+mesh_filename_maximum    string
+mesh_filename_minimum    string
+mesh_filename_minimum2   string
+maximum             float
+minimum             float
+maximum_position    float_vector
+minimum_position    float_vector
+gravity_center      float_vector
+Talairach(mm)       float_vector
+custom_num_val             float
+
+# gray level blobs
+blob_saddle_type    string
+apparitionflag      int
+jamflag_up          int
+jamflag_down        int
+wflag_up       int
+wflag_down          int
+volume              float
+surface             float
+scale               float
+minscale       float
+maxscale       float
+lifetime       float
+
+# scalespace blobs
+gray_level_blobs    int_vector
+*END
+
+*BEGIN SYNTAX scalebloblink
+*END
+
+*BEGIN SYNTAX blob_saddle_link
+*END
+
+###########################
+###### GRAPHES DE NOYAUX etc
+
+*BEGIN SYNTAX NucleusArg
+NucleusArg_VERSION            string
+datagraph_VERSION             string
+datagraph_compatibility_model_VERSION   string
+voxel_size                    float_vector   !
+filename_base                 string
+boundingbox_min                    int_vector     !
+boundingbox_max                    int_vector     !
+type.tri                      string
+nucleus.tri                   string
+roi.tri                       string
+bucket.tri                    string
+type.bck                      string
+nucleus.bck                   string
+roi.bck                       string
+bucket.bck                    string
+type.global.tri               string
+nucleus.global.tri            string
+roi.global.tri                string
+bucket.global.tri             string
+type.global.bck               string
+nucleus.global.bck            string
+roi.global.bck                string
+bucket.global.bck             string
+type.global.vol               string
+nucleus.global.vol            string
+roi.global.vol                string
+bucket.global.vol             string
+Tmtktri.global.bck            string
+Tmtktri_filename              int_vector
+Tmtktri_label                 int_vector
+bucket_filename                    int_vector
+bucket_label                  int_vector
+origin                        float_vector
+spm_normalized                int
+spm_spm2_normalization        int
+spm_radio_convention          int
+label_property                string
+
+*END
+
+*BEGIN SYNTAX nucleus
+point_number        int
+size           float
+index               int
+name           string         !
+Tmtktri_filename        string
+Tmtktri_label       int
+bucket_filename          string
+bucket_label        int
+roi_label      int
+*END
+
+
+###########################
+###### GRAPHES DE REGIONS D'INTERET etc
+
+*BEGIN SYNTAX RoiArg
+RoiArg_VERSION                string
+datagraph_VERSION             string
+datagraph_compatibility_model_VERSION   string
+voxel_size                    float_vector   !
+filename_base                 string
+boundingbox_min                    int_vector     !
+boundingbox_max                    int_vector     !
+anterior_commissure           int_vector
+posterior_commissure               int_vector
+interhemi_point               int_vector
+type.tri                      string
+roi.tri                       string
+roi_junction.tri              string
+type.bck                      string
+roi.bck                       string
+type.global.tri               string
+roi.global.tri                string
+roi_junction.global.tri       string
+type.global.bck               string
+roi.global.bck                string
+type.global.vol               string
+roi.global.vol                string
+roi_Volume_filename           string
+Tmtktri_filename              int_vector
+bucket_filename               int_vector
+roi_mesh_label                int_vector
+roi_mesh_filename             int_vector
+roi_mesh_junction_filename    int_vector
+roi_mesh_junction_label       int_vector
+origin                        float_vector
+spm_normalized                int
+spm_spm2_normalization        int
+spm_radio_convention          int
+label_property                string
+
+*END
+
+*BEGIN SYNTAX roi
+point_number        int
+size           float
+custom_num_val	       float
+index               int
+name           string         !
+Tmtktri_filename        string
+Tmtktri_label       int
+gravity_center      float_vector
+gravity_center      float_vector
+bucket_filename         string
+roi_filename        string
+roi_label      int
+roi_mesh_filename   string
+roi_mesh_label      int
+surface_area        float
+*END
+
+*BEGIN SYNTAX roi_junction
+size           float
+roi_mesh_junction_filename        string
+roi_mesh_junction_label       int
+*END
+
+##################################
+##### GRAPHES DE PRIMAL SKETCH
+
+*BEGIN SYNTAX PrimalSketchArg
+datagraph_VERSION             string
+datagraph_compatibility_model_VERSION   string
+subject                         string
+type                     string
+filename_base                 string
+voxel_size                    float_vector   !
+boundingbox_min                    int_vector     !
+boundingbox_max                    int_vector     !
+blob_filename                 string
+type.global.bck                    string
+type.bck                 string
+type.global.tri                    string
+type.tri                 string
+ssblob.global.bck             string
+ssblob.bck                    string
+ssblob.global.tri             string
+ssblob.tri                    string
+label_property                string
+*END
+
+#Attributs syntaxiques des noeuds
+
+*BEGIN SYNTAX ssblob
+label                    string
+label_occur_number       int
+name                     string
+activation               int
+index                    int
+tmin                     float
+tmax                     float
+trep                     float
+lifeTime                 float
+significance             float
+t_rankperc             float
+sim_rankperc             float
+maxIntensity        float
+meanIntensity       float
+maxContrast         float
+meanContrast        float
+t                   float
+t2		    float
+tValue              float
+area                float
+rank                int
+gravity_center      float_vector
+refgravity_center   float_vector
+boundingbox_min     float_vector
+boundingbox_max     float_vector
+barycenter          float_vector
+boundingbox_min     float_vector
+boundingbox_max                 float_vector
+ssblob_filename                     string
+ssblobbucket_filename                     string
+ssblobbucket_label                     int
+ssblob_label                int
+*END
+
+
+###########################
+##### GRAPHES DE SILLONS
+
+*BEGIN SYNTAX CorticalFoldArg
+CorticalFoldArg_VERSION            string
+datagraph_VERSION                  string
+datagraph_compatibility_model_VERSION   string
+Talairach_rotation                 float_vector
+Talairach_translation              float_vector
+Talairach_scale                    float_vector
+voxel_size                         float_vector   !
+filename_base                      string
+boundingbox_min                    int_vector     !
+boundingbox_max                    int_vector     !
+Tal_boundingbox_min                float_vector
+Tal_boundingbox_max                float_vector
+anterior_commissure                int_vector
+posterior_commissure               int_vector
+interhemi_point                    int_vector
+type.tri                           string
+type.global.tri                    string
+type.bck                           string
+type.tex                           string
+type.global.bck                    string
+type.global.vol                    string
+type.global.tex                    string
+fold.tri                           string
+fold.global.tri                    string
+fold.bck                           string
+fold.global.bck                    string
+fold.global.vol                    string
+# obsolete
+oldtri_filename                    int_vector
+# obsolete
+oldtri_label                       int_vector
+Tmtktri.tri                        string
+Tmtktri.global.tri                 string
+Tmtktri_filename                   int_vector
+Tmtktri_label                      int_vector
+# obsolete
+ss.global.bck                      string
+# obsolete
+ss.bck                             string
+ss_filename                        int_vector
+ss_label                           int_vector
+ss_Volume_filename                 string
+ss_mesh_label                      int_vector
+ss_mesh_filename                   int_vector
+# obsolete
+bottom.global.bck                  string
+# obsolete
+bottom.bck                         string
+bottom_filename                    int_vector
+bottom_label                       int_vector
+bottom_volume_filename             string
+bottom_mesh_filename               int_vector
+bottom_mesh_label                  int_vector
+# obsolete
+other.bck                          string
+# obsolete
+other.global.bck                   string
+other_filename                     int_vector
+other_label                        int_vector
+other_Volume_filename              string
+other_mesh_label                   int_vector
+other_mesh_filename                int_vector
+plidepassage.bck                   string
+plidepassage.global.bck            string
+plidepassage_filename              int_vector
+plidepassage_label                 int_vector
+plidepassage_Volume_filename       string
+plidepassage_mesh_label            int_vector
+plidepassage_mesh_filename         int_vector
+cortical.bck                       string
+cortical.global.bck                string
+cortical.global.vol                string
+cortical_filename                  int_vector
+cortical_label                     int_vector
+cortical_Volume_filename           string
+cortical_mesh_label                int_vector
+cortical_mesh_filename             int_vector
+junction.bck                       string
+junction.global.bck                string
+junction.global.vol                string
+junction_filename                  int_vector
+junction_label                     int_vector
+junction_Volume_filename           string
+junction_mesh_label                int_vector
+junction_mesh_filename             int_vector
+hull_junction.bck                  string
+hull_junction.global.bck           string
+hull_junction.global.vol           string
+hull_junction_filename             int_vector
+hull_junction_label                int_vector
+hull_junction_Volume_filename      string
+flipped_hemispheres                int
+origin                             float_vector
+spm_normalized                     int
+spm_spm2_normalization             int
+spm_radio_convention               int
+brain_hull_volume                  float
+refbrain_hull_volume               float
+brain_hull_area                    float
+refbrain_hull_area                 float
+folds_area                         float
+reffolds_area                      float
+cortexHemi_filename                int_vector
+cortexHemi_label                   int_vector
+cortexWhite_filename               int_vector
+cortexWhite_label                  int_vector
+LCR_filename                       int_vector
+LCR_label                          int_vector
+GM_filename                        int_vector
+GM_label                           int_vector
+WM_filename                        int_vector
+WM_label                           int_vector
+GM_volume                          float
+LCR_volume                         float
+CSF_volume                         float
+thickness_mean                     float
+thickness_std                      float
+label_property                     string
+total_sulci_length                 float
+reftotal_sulci_length              float
+custom_num_val                     float
+*END
+
+# graphes ancien format
+
+*BEGIN SYNTAX graphe_sillon
+Talairach_rotation  float_vector
+Talairach_translation    float_vector
+Talairach_scale          float_vector
+voxel_size          float_vector   !
+filename_base       string         !
+boundingbox_min     int_vector
+boundingbox_max     int_vector
+gravity_center      float_vector
+Tal_boundingbox_min         float_vector
+Tal_boundingbox_max         float_vector
+anterior_commissure int_vector
+posterior_commissure     int_vector
+interhemi_point          int_vector
+type.tri                string
+fold.tri                string
+type.bck                string
+fold.bck                string
+junction.bck            string
+plidepassage.bck        string
+hull_junction.bck       string
+cortical.bck            string
+cortical.global.bck     string
+oldtri_filename         int_vector
+Tmtktri_filename        int_vector
+ss_filename             int_vector
+bottom_filename         int_vector
+other_filename          int_vector
+roi_label               int
+*END
+
+#Attributs syntaxiques des noeuds
+
+*BEGIN SYNTAX hull
+point_number        int
+size           float
+index               int
+name           string         !
+skeleton_label      int
+*END
+
+*BEGIN SYNTAX fold
+point_number        int       !
+name           string         !
+skeleton_label      int       !
+label               string
+index                   int
+size           float          !
+refsize             float
+normal              float_vector
+refnormal      float_vector
+gravity_center      float_vector
+refgravity_center       float_vector
+maxdepth       float
+mindepth       float
+mean_depth          float
+refmean_depth       float
+refmaxdepth         float
+refmindepth         float
+rootsbassin             int
+boundingbox_min             int_vector
+boundingbox_max             int_vector
+Tal_boundingbox_min float_vector
+Tal_boundingbox_max float_vector
+ss_point_number          int       !
+bottom_point_number int       !
+other_point_number  int
+ss_filename         string
+ss_label       int
+ss_mesh_filename    string
+ss_mesh_label       int
+oldtri_filename          string
+oldtri_label        int
+Tmtktri_filename        string
+Tmtktri_label       int
+bottom_filename          string
+bottom_label        int
+bottom_mesh_filename     string
+bottom_mesh_label   int
+other_filename      string
+other_label         int
+other_mesh_filename string
+other_mesh_label    int
+surface_area        float
+refsurface_area          float
+talcovar                float_vector
+moments             float_vector
+refmoments          float_vector
+GM_volume               float
+white_surface_area      float
+grey_surface_area       float
+LCR_volume              float
+CSF_volume              float
+thickness_mean	        float
+thickness_std           float
+mid_interface_voxels    int
+cortexHemi_filename	string
+cortexHemi_label	int
+cortexWhite_filename	string
+cortexWhite_label	int
+LCR_filename		string
+LCR_label		int
+GM_filename		string
+GM_label		int
+WM_filename		string
+WM_label		int
+used_labels             dictionary
+direction               float_vector
+refdirection            float_vector
+hull_normal             float_vector
+refhull_normal          float_vector
+hull_normal_weight      float
+depth_direction         float_vector
+refdepth_direction      float_vector
+depth_direction_weight  float
+custom_num_val             float
+# graphs v 3.3
+splitnode_index         int
+*END
+
+#Attributs syntaxiques des relations
+
+*BEGIN SYNTAX hull_junction
+point_number        int  !
+size           float     !
+refsize             float
+direction           float_vector
+refdirection        float_vector
+extremity1          int_vector
+extremity2          int_vector
+refextremity1       float_vector
+refextremity2       float_vector
+junction_filename   string
+junction_label      int
+junction_mesh_filename   string
+junction_mesh_label int
+length              float
+reflength      float
+*END
+
+*BEGIN SYNTAX junction
+point_number        int  !
+size           float     !
+refsize             float
+mindepth       float
+maxdepth       float
+refmindepth         float
+refmaxdepth         float
+direction           float_vector
+refdirection        float_vector
+extremity1          int_vector
+extremity2          int_vector
+refextremity1       float_vector
+refextremity2       float_vector
+junction_filename   string
+junction_label      int
+junction_mesh_filename   string
+junction_mesh_label int
+roi_label      int
+length              float
+reflength      float
+*END
+
+*BEGIN SYNTAX plidepassage
+point_number        int  !
+size           float     !
+refsize             float
+plidepassage_filename    string
+plidepassage_label  int
+plidepassage_mesh_filename    string
+plidepassage_mesh_label  int
+depth               float
+refdepth       float
+location       int_vector
+reflocation         float_vector
+roi_label      int
+*END
+
+*BEGIN SYNTAX cortical
+point_number        int  !
+size           float     !
+refsize             float
+cortical_filename   string
+cortical_label      int
+cortical_mesh_filename   string
+cortical_mesh_label int
+dist           float
+refdist             float
+refmean_connected_dist	float
+refstd_connected_dist	float
+refmean_connected_dir	float_vector
+SS1nearest          int_vector
+SS2nearest          int_vector
+refSS1nearest       float_vector
+refSS2nearest       float_vector
+roi_label      int
+length              float
+reflength      float
+*END
+
+
+###########################
+###### GRAPHES MODELES
+
+
+*BEGIN SYNTAX model_graph
+model_VERSION                 string
+model_compatibility_data_VERSION   string
+model_finder                  string
+filename_base                 string
+default_model_file            string
+type.tri                 string
+fold.tri                 string
+Tmtktri_filename              int_vector
+model_file                    string
+nbase_graphs                  int
+void_label          string
+# default nomenclature/hierarchy of names
+default_nomenclature               string
+# names selector in nomenclature
+default_selector              string
+label_list                       int_vector
+*END
+
+*BEGIN SYNTAX model_node
+model_file          string    !
+domain_file         string    !
+label               string    !
+Tmtktri_filename    string
+occurence_count          int
+noinstance_count    int
+*END
+
+
+*BEGIN SYNTAX model_edge
+model_file          string    !
+label1              string    !
+label2              string    !
+occurence_count          int
+noinstance_count    int
+*END
+
+
+##################################
+###### ARBRES DE HIERARCHIE
+
+*BEGIN SYNTAX hierarchy
+graph_syntax        string    !
+*END
+
+*BEGIN SYNTAX fold_name
+name           string    !
+color               int_vector
+label       string
+*END
+
+
+##################################
+##### GRAPHES DE BLOBS
+
+*BEGIN SYNTAX BlobsArg
+
+datagraph_VERSION             string
+datagraph_compatibility_model_VERSION   string
+
+type                          string
+filename_base                 string
+
+# IN CASE IT IS A GROUP GRAPH
+subjects                        list
+meshes                        list
+textures                      list
+latitudes                     list
+longitudes                    list
+indiv_graphs                  list
+representation_meshes         list
+global_energy                 float
+
+# IN CASE IT IS A SUBJECT GRAPH
+subject                         string
+mesh                          string
+texture                       string
+latitude                      string
+longitude                     string
+representation_mesh           string
+
+voxel_size                    float_vector   !
+boundingbox_min                    int_vector     !
+boundingbox_max                    int_vector     !
+
+type.global.bck                    string
+type.bck                 string
+type.global.tri                    string
+type.tri                 string
+
+glb.global.bck                    string
+glb.bck                 string
+glb.global.tri             string
+glb.tri                    string
+glb_filename	         int_vector
+glb_label		 int_vector
+
+ssb.global.bck                    string
+ssb.bck                 string
+ssb.global.tri             string
+ssb.tri                    string
+ssb_filename	         int_vector
+ssb_label		 int_vector
+
+g2g.global.tri             string
+g2g.tri                    string
+g2g_filename	         int_vector
+g2g_label		 int_vector
+
+b2b.global.tri             string
+b2b.tri                    string
+b2b_filename	         int_vector
+b2b_label		 int_vector
+
+bifurcation.global.tri             string
+bifurcation.tri                    string
+bifurcation_filename	         int_vector
+bifurcation_label		 int_vector
+*END
+
+#Attributs syntaxiques des noeuds
+
+*BEGIN SYNTAX ssb
+int                      int
+label                    string
+label_occur_number       int
+name                     string
+index                    int
+subject                  string
+significance             float
+t_rankperc               float
+sim_rankperc             float
+ssb_filename	         string
+ssb_label		         int
+scales                   float_vector
+tmax                     float
+tmin                     float
+trep                     float
+lifeTime                 float
+t                        float
+tValue                   float
+rank                     int
+node                     int
+nodes                    int_vector
+gravity_center           float_vector
+boundingbox_min          float_vector
+boundingbox_max          float_vector
+filtered_out              int
+
+*END
+
+*BEGIN SYNTAX glb
+index                    int
+label                    string
+name                     string
+subject                  string
+scale                    float
+nodes    		         int_vector
+x                        float_vector
+y                        float_vector
+glb_filename	         string
+glb_label		         int
+t                        float
+tValue                   float
+boundingbox_min          float_vector
+boundingbox_max          float_vector
+filtered_out             int
+
+*END
+
+
+
+#Attributs syntaxiques des relations
+
+*BEGIN SYNTAX b2b
+type               string
+similarity         float
+distance           float
+b2b_filename	         string
+b2b_label		 int
+*END
+
+*BEGIN SYNTAX s2g
+type               string
+s2g_filename	         string
+s2g_label		 int
+*END
+
+*BEGIN SYNTAX g2g
+type               string
+g2g_filename	         string
+g2g_label		 int
+*END
+
+*BEGIN SYNTAX bifurcation
+type               string
+blob_up            int
+blob_down          int
+bifurcation_filename	         string
+bifurcation_label		 int
+*END
+
+
