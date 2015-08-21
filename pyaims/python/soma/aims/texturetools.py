@@ -252,27 +252,126 @@ def nomenclature_to_colormap(hierarchy, labels_list, as_float=True,
     return numpy.array(colors)
 
 
-def vertex_texture_to_polygon_texture(mesh, tex):
-    """
+def vertex_texture_to_polygon_texture(mesh, tex, allow_cut=False):
+    """Make a "polygon texture" from a vartex-based label texture.
+    A polygon texture has a value for each polygon.
+
+    For a given polygon the value is taken as the majority of values on its
+    vertices. If an absolute majority cannot be obtained, the mesh polygons may
+    be cut to avoid losing precision. This is done if allow_cut is True.
+
+    When allow_cut is False, the returned value is the polygon texture.
+    It may work on meshes of any polygon size (triangles, quads, segments...)
+
+    When allow_cut is True, the returned value is a tuple:
+      * polygon texture
+      * new mesh with possibly split triangles
+    It only works for meshes of triangles.
     """
     dtype = tex[tex.keys()[0]].arraydata().dtype
     poly_tex = aims.TimeTexture(dtype=dtype)
+
+    if allow_cut:
+        out_mesh = mesh.__class__(mesh)
 
     for t, tex0 in tex.iteritems():
         tdata = tex0.arraydata()
         ptex0 = poly_tex[t]
         ptex0.resize(len(mesh.polygon(t)))
         poly_labels = ptex0.arraydata()
-        for p, poly in enumerate(mesh.polygon(t)):
-            labels = (tdata[poly[0]], tdata[poly[1]], tdata[poly[2]])
-            if labels[0] == labels[1] or labels[0] == labels[2]:
-                poly_labels[p] = labels[0]
-            elif labels[1] == labels[2]:
-                poly_labels[p] = labels[1]
-            else:
-                poly_labels[p] = labels[2]
+        if allow_cut:
+            added_vert = {}
+            vertex = out_mesh.vertex(t)
+            polygon = out_mesh.polygon(t)
 
-    return poly_tex
+        for p, poly in enumerate(mesh.polygon(t)):
+            D = len(poly)
+            labels = [tdata[v] for v in poly]
+            ulabels = numpy.unique(labels)
+            ilabels = [numpy.where(labels==u)[0] for u in ulabels]
+            nlabels = [len(u) for u in ilabels]
+            if not allow_cut:
+                maj = ulabels[numpy.argmax(nlabels)]
+                poly_labels[p] = maj
+            else:
+                # WARNING this only works for triangles.
+                if len(ulabels) == 1:
+                    poly_labels[p] = ulabels[0]
+                elif len(ulabels) == 2:
+                    # cut off one vertex
+                    iother = labels.index(ulabels[numpy.argmin(nlabels)])
+                    ikeep = [i for i in range(D) if i!=iother]
+                    iv0 = poly[iother]
+                    iv1 = poly[(iother-1) % D]
+                    ind = (min((iv0, iv1)), max((iv0, iv1)))
+                    ivn1 = added_vert.get(ind)
+                    if ivn1 is None:
+                        v1 = (vertex[iv0] + vertex[iv1]) * 0.5
+                        ivn1 = len(vertex)
+                        vertex.append(v1)
+                        added_vert[ind] = ivn1
+
+                    iv2 = poly[(iother+1) % D]
+                    ind = (min((iv0, iv2)), max((iv0, iv2)))
+                    ivn2 = added_vert.get(ind)
+                    if ivn2 is None:
+                        v2 = (vertex[iv0] + vertex[iv2]) * 0.5
+                        ivn2 = len(vertex)
+                        vertex.append(v2)
+                        added_vert[ind] = ivn2
+                    polygon[p][(iother-1) % D] = ivn1
+                    polygon[p][(iother+1) % D] = ivn2
+                    polygon.append(poly.__class__(iv1, ivn1, ivn2))
+                    polygon.append(poly.__class__(ivn2, iv2, iv1))
+                    poly_labels[p] = tdata[iv0]
+                    ptex0.append(tdata[iv1])
+                    ptex0.append(tdata[iv2])
+                else:
+                    # cut in 3 regions
+                    bs0 = (min(poly[0], poly[1]), max(poly[0], poly[1]))
+                    bs1 = (min(poly[1], poly[2]), max(poly[1], poly[2]))
+                    bs2 = (min(poly[2], poly[0]), max(poly[2], poly[0]))
+                    bi0 = added_vert.get(bs0)
+                    if bi0 is None:
+                        v0 = (vertex[poly[0]] + vertex[poly[1]]) * 0.5
+                        bi0 = len(vertex)
+                        added_vert[bs0] = bi0
+                        vertex.append(v0)
+                    bi1 = added_vert.get(bs1)
+                    if bi1 is None:
+                        v1 = (vertex[poly[1]] + vertex[poly[2]]) * 0.5
+                        bi1 = len(vertex)
+                        added_vert[bs1] = bi1
+                        vertex.append(v1)
+                    bi2 = added_vert.get(bs2)
+                    if bi2 is None:
+                        v2 = (vertex[poly[2]] + vertex[poly[0]]) * 0.5
+                        bi2 = len(vertex)
+                        added_vert[bs2] = bi2
+                        vertex.append(v2)
+                    bi3 = len(vertex)
+                    v3 = (vertex[poly[0]] + vertex[poly[1]]
+                          + vertex[poly[2]]) / 3.
+                    vertex.append(v3)
+                    polygon[p][1] = bi0
+                    polygon[p][2] = bi3
+                    polygon.append(poly.__class__(bi3, bi2, poly[0]))
+                    polygon.append(poly.__class__(poly[1], bi1, bi3))
+                    polygon.append(poly.__class__(poly[1], bi3, bi0))
+                    polygon.append(poly.__class__(poly[2], bi2, bi3))
+                    polygon.append(poly.__class__(poly[2], bi3, bi1))
+
+                    poly_labels[p] = labels[0]
+                    ptex0.append(labels[0])
+                    ptex0.append(labels[1])
+                    ptex0.append(labels[1])
+                    ptex0.append(labels[2])
+                    ptex0.append(labels[2])
+
+    if allow_cut:
+        return (poly_tex, out_mesh)
+    else:
+        return poly_tex
 
 
 def mesh_to_polygon_textured_mesh(mesh, poly_tex):
