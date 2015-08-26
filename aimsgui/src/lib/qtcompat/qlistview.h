@@ -37,14 +37,21 @@
 #include <qglobal.h>
 #if QT_VERSION >= 0x040000
 
+#ifdef QT3_SUPPORT
+// if QT3_SUPORT is not defined, this file is useless,
+// which shows that it is now obsolete.
+
 #include <Q3ListView>
 /*
 typedef Q3ListView QListView;
 typedef Q3ListViewItem QListViewItem;
 typedef Q3ListViewItemIterator QListViewItemIterator;
 */
+#else // Qt 4+ without Qt3 support
+#include <QTreeWidget>
+#endif
 
-#else
+#else // Qt3
 
 #include <qlistview.h>
 

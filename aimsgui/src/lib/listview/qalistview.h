@@ -36,6 +36,9 @@
 
 #include <qglobal.h>
 #include <aims/qtcompat/qlistview.h>
+// if QT3_SUPPORT is disabled, this class is useless.
+// which means that it is now obsolete.
+#ifdef QT3_SUPPORT
 #include <aims/qtcompat/qmouseevent.h>
 
 namespace aims
@@ -104,4 +107,5 @@ namespace gui
 
 }
 
+#endif
 #endif

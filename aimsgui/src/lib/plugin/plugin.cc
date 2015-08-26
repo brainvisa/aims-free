@@ -35,6 +35,7 @@
 #include <aims/def/path.h>
 #include <aims/plugin/aimsguiplugin.h>
 #include <cartobase/stream/fileutil.h>
+#include <QStringList>
 
 using namespace aims;
 using namespace carto;
@@ -56,7 +57,7 @@ namespace aims
           + "lib" + sep + "qt3-plugins";
 
         QStringList	paths = QApplication::libraryPaths();
-        if( paths.find( base.c_str() ) == paths.end() )
+        if( paths.indexOf( base.c_str() ) == -1 )
           QApplication::addLibraryPath( base.c_str() );
       }
     return true;

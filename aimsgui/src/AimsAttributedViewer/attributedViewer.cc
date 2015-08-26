@@ -67,7 +67,6 @@ int main( int argc, char** argv )
     QApplication          app( argc, argv );
     AttributedView mw;
     mw.load( filename );
-    app.setMainWidget( &mw );
     mw.show();
     return app.exec();
   }

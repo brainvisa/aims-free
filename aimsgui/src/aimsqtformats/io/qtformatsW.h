@@ -135,10 +135,10 @@ namespace aims
                                        unsigned z, unsigned t )
   {
     int		x, y, dx = thing.dimX(), dy = thing.dimY();
-    QImage	im( dx, dy, QImage::Format_ARGB32 );
+    QImage	im( dx, dy, QImage::Format_RGB32 );
     if( carto::DataTypeCode<T>::name()
         == carto::DataTypeCode<AimsRGBA>::name() )
-      im.setAlphaBuffer( true );
+      im = im.convertToFormat( QImage::Format_ARGB32 );
     im.setDotsPerMeterX( (int) rint( 1000 / thing.sizeX() ) );
     im.setDotsPerMeterY( (int) rint( 1000 / thing.sizeY() ) );
     for( y=0; y<dy; ++y )

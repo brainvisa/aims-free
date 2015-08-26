@@ -108,7 +108,7 @@ void QSqlGraphFormatHeader::read()
         if( ok )
           _name = fileName;
         else
-          throw file_not_found_error( db.lastError().text().utf8().data(),
+          throw file_not_found_error( db.lastError().text().toStdString(),
                                       _name );
       }
     }
@@ -119,13 +119,13 @@ void QSqlGraphFormatHeader::read()
       QSqlQuery res = db.exec( "SELECT Graph.eid, class.class_name FROM Graph"
         " JOIN class on class.eid=Graph.eid" );
       if( db.lastError().type() != 0 )
-        throw wrong_format_error( db.lastError().text().utf8().data(),
+        throw wrong_format_error( db.lastError().text().toStdString(),
                                   fileName );
       // cout << "GRAPHS:\n";
       while( res.next() )
       {
         gid.push_back( res.value(0).toInt() );
-        synt = res.value(1).toString().utf8().data();
+        synt = res.value(1).toString().toStdString();
         synts.push_back( synt );
         // cout << gid << ": " << synt << endl;
         ++n;

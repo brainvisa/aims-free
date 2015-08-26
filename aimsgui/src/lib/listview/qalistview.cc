@@ -33,6 +33,8 @@
 
 
 #include <aims/listview/qalistview.h>
+#ifdef QT3_SUPPORT
+
 #include <q3header.h>
 #include <iostream>
 
@@ -205,4 +207,6 @@ void QAListView::_itemCancelsRename( Q3ListViewItem* item, int col )
 {
   emit itemCancelsRename( item, col );
 }
+
+#endif
 

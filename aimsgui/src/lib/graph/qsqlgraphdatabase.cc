@@ -204,14 +204,14 @@ bool QSqlGraphDatabase::readSchema()
   // read inheritance map
   QSqlQuery res = database().exec( "SELECT name, base FROM soma_classes" );
   if( database().lastError().type() != 0 )
-    throw syntax_check_error( database().lastError().text().utf8().data(),
+    throw syntax_check_error( database().lastError().text().toStdString(),
                               hostname() );
   map<string, string> bases;
   while( res.next() )
   {
-    string base = res.value(1).toString().utf8().data();
+    string base = res.value(1).toString().toStdString();
     if( !base.empty() )
-      bases[ res.value(0).toString().utf8().data() ] = base;
+      bases[ res.value(0).toString().toStdString() ] = base;
   }
 
   syntaxInheritance.clear();
@@ -231,7 +231,7 @@ bool QSqlGraphDatabase::readSchema()
   res = database().exec( "SELECT soma_class, name, type, label, optional,"
     " default_value FROM soma_attributes" );
   if( database().lastError().type() != 0 )
-    throw syntax_check_error( database().lastError().text().utf8().data(),
+    throw syntax_check_error( database().lastError().text().toStdString(),
                               hostname() );
   typedef map<string, map<string, vector<string> > > ResType;
   ResType *attributes = new ResType;
@@ -240,7 +240,7 @@ bool QSqlGraphDatabase::readSchema()
   cout << "class, name, type, label, optional, default_value\n"; */
   while( res.next() )
   {
-    string t = res.value(0).toString().utf8().data();
+    string t = res.value(0).toString().toStdString();
     ResType::iterator i = attributes->find( t );
     if( i == attributes->end() )
     {
@@ -251,14 +251,14 @@ bool QSqlGraphDatabase::readSchema()
     optional = res.value(4).toInt( &ok );
     if( !ok )
       optional = true;
-    string classname = res.value(1).toString().utf8().data();
+    string classname = res.value(1).toString().toStdString();
     vector<string> & sem = gt[ classname ];
     sem.reserve( 4 );
-    sem.push_back( res.value(2).toString().utf8().data() );
-    sem.push_back( res.value(3).toString().utf8().data() );
+    sem.push_back( res.value(2).toString().toStdString() );
+    sem.push_back( res.value(3).toString().toStdString() );
     sem.push_back( optional ? "" : "needed" );
-    sem.push_back( res.value(5).toString().utf8().data() );
-    /* cout << t << " | " << res.value(1).toString().utf8().data() << " | "
+    sem.push_back( res.value(5).toString().toStdString() );
+    /* cout << t << " | " << res.value(1).toString().toStdString() << " | "
     << sem[0] << " | " << sem[1] << " | " << sem[2] << " | " << sem[3]
     << endl; */
   }
@@ -315,12 +315,12 @@ void QSqlGraphDatabase::updateElement( const GraphObject & element, int eid )
       sql += QString( i->first.c_str() ) + "=" + i->second.c_str();
     }
     sql += QString( " WHERE eid=" ) + QString::number( eid );
-    cout << "element update SQL: " << sql.utf8().data() << endl;
+    cout << "element update SQL: " << sql.toStdString() << endl;
     QSqlQuery res = database().exec( sql );
     if( res.lastError().type() != 0 )
     {
-      cout << "SQL error: " << res.lastError().text().utf8().data() << endl;
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      cout << "SQL error: " << res.lastError().text().toStdString() << endl;
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   _hostname );
     }
   }
@@ -434,7 +434,7 @@ void QSqlGraphDatabase::fillGraphData(
     string sql = string( "SELECT eid FROM _Graph WHERE uuid='" ) + uuid + "'";
     QSqlQuery res = exec( sql );
     if( !res.lastError().type() == 0 )
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   _hostname );
     res.next();
     eid = res.value(0).toInt();
@@ -470,20 +470,20 @@ void QSqlGraphDatabase::insertOrUpdateVertex( Vertex* v,
     // insert
     // cout << "insert vertex " << v << ": " << v->getSyntax() << endl;
     string sql = "INSERT INTO " + v->getSyntax() + " ( graph";
-    string values = QString::number( data.gid ).utf8().data();
+    string values = QString::number( data.gid ).toStdString();
     sqlAttributesAsStrings( *v, sql, values, false );
     sql += string( " ) values ( " ) + values + " )";
     // cout << "vertex SQL:\n" << sql << endl;
     QSqlQuery res = exec( sql );
     if( !res.lastError().type() == 0 )
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   hostname() );
     // get vertex id
 /*    sql = string( "SELECT eid FROM " ) + v->getSyntax()
       + " ORDER BY eid DESC LIMIT 1";
     res = exec( sql );
     if( !res.lastError().type() == 0 )
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   hostname() );
     res.next();
     eid = res.value(0).toInt();*/
@@ -534,15 +534,15 @@ void QSqlGraphDatabase::insertOrUpdateEdge( Edge* v,
     // cout << "Edge SQL: " << sql << endl;
     QSqlQuery res = exec( sql );
     if( !res.lastError().type() == 0 )
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   hostname() );
     // get edge id
 /*    sql = string( "SELECT eid FROM " ) + v->getSyntax()
-      + " WHERE eid>" + QString::number( previouseid ).utf8().data()
+      + " WHERE eid>" + QString::number( previouseid ).toStdString()
       + " ORDER BY eid DESC LIMIT 1";
     res = exec( sql );
     if( !res.lastError().type() == 0 )
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   hostname() );
     res.next();*/
     //eid = res.value(0).toInt();
@@ -564,7 +564,7 @@ void QSqlGraphDatabase::updateVertexIndexMap( CurrentGraphData & data )
       + QString::number( data.gid ) );
   cout << "query done\n";
   if( !res.lastError().type() == 0 )
-    throw invalid_format_error( res.lastError().text().utf8().data(),
+    throw invalid_format_error( res.lastError().text().toStdString(),
                                 hostname() );
   while( res.next() )
     data.vertexindex2eid[ res.value(0).toInt() ] = res.value(1).toInt();
@@ -580,7 +580,7 @@ void QSqlGraphDatabase::updateEdgeIndexMap( CurrentGraphData & data )
       + QString::number( data.gid ) );
   cout << "query done\n";
   if( !res.lastError().type() == 0 )
-    throw invalid_format_error( res.lastError().text().utf8().data(),
+    throw invalid_format_error( res.lastError().text().toStdString(),
                                 hostname() );
   while( res.next() )
     data.edgeindex2eid[ res.value(0).toInt() ] = res.value(1).toInt();
@@ -710,7 +710,7 @@ QSqlGraphDatabase::partialReadFromVertexQuery( const string & sqlquery,
 
   QSqlQuery res = exec( sqlquery );
   if( !res.lastError().type() == 0 )
-    throw invalid_format_error( res.lastError().text().utf8().data(),
+    throw invalid_format_error( res.lastError().text().toStdString(),
                                 hostname() );
 
   map<int, CurrentGraphData*>::iterator im, em = graphmap.end();
@@ -755,10 +755,10 @@ QSqlGraphDatabase::partialReadFromVertexQuery( const string & sqlquery,
       vidstring += QString::number( eid );
     }
     sql += vidstring + ")";
-    // cout << "graphs SQL: " << sql.utf8().data() << endl;
+    // cout << "graphs SQL: " << sql.toStdString() << endl;
     QSqlQuery res2 = database().exec( sql );
     if( !res2.lastError().type() == 0 )
-      throw invalid_format_error( res2.lastError().text().utf8().data(),
+      throw invalid_format_error( res2.lastError().text().toStdString(),
                                   hostname() );
     int graph;
     map<int, CurrentGraphData *> v2g;
@@ -796,7 +796,7 @@ QSqlGraphDatabase::partialReadFromVertexQuery( const string & sqlquery,
         + " )";
       res2 = database().exec( sql );
       if( !res2.lastError().type() == 0 )
-        throw invalid_format_error( res2.lastError().text().utf8().data(),
+        throw invalid_format_error( res2.lastError().text().toStdString(),
                                     hostname() );
       while( res2.next() )
       {
@@ -816,7 +816,7 @@ QSqlGraphDatabase::partialReadFromVertexQuery( const string & sqlquery,
         continue;
       CurrentGraphData *cg = iv2g->second;
       string classname;
-      classname = vv[ classnameindex ].toString().utf8().data();
+      classname = vv[ classnameindex ].toString().toStdString();
 
       Vertex *v = 0;
       map<int, Vertex *> & verts = vmap[ cg->graph ];
@@ -852,7 +852,7 @@ QSqlGraphDatabase::partialReadFromVertexQuery( const string & sqlquery,
       string classname;
       if( classnameindex >= 0 )
       {
-        classname = res.value( classnameindex ).toString().utf8().data();
+        classname = res.value( classnameindex ).toString().toStdString();
       }
       im = graphmap.find( graph );
       CurrentGraphData *cg = 0;
@@ -941,7 +941,7 @@ QSqlGraphDatabase::partialReadFromEdgeQuery( const string & sqlquery,
 
   QSqlQuery res = exec( sqlquery );
   if( !res.lastError().type() == 0 )
-    throw invalid_format_error( res.lastError().text().utf8().data(),
+    throw invalid_format_error( res.lastError().text().toStdString(),
                                 hostname() );
 
   map<int, CurrentGraphData*>::iterator im, em = graphmap.end();
@@ -995,10 +995,10 @@ QSqlGraphDatabase::partialReadFromEdgeQuery( const string & sqlquery,
         sql += QString::number( ir->first );
       }
       sql += ")";
-      // cout << "SQL: " << sql.utf8().data() << endl;
+      // cout << "SQL: " << sql.toStdString() << endl;
       res = database().exec( sql );
       if( !res.lastError().type() == 0 )
-        throw invalid_format_error( res.lastError().text().utf8().data(),
+        throw invalid_format_error( res.lastError().text().toStdString(),
                                     hostname() );
       while( res.next() )
       {
@@ -1034,10 +1034,10 @@ QSqlGraphDatabase::partialReadFromEdgeQuery( const string & sqlquery,
       }
       sql += ")";
       cout << "vertices: " << vid.size() << endl;
-      // cout << "graphs SQL: " << sql.utf8().data() << endl;
+      // cout << "graphs SQL: " << sql.toStdString() << endl;
       QSqlQuery res2 = database().exec( sql );
       if( !res2.lastError().type() == 0 )
-        throw invalid_format_error( res2.lastError().text().utf8().data(),
+        throw invalid_format_error( res2.lastError().text().toStdString(),
                                     hostname() );
       int graph, i = 0;
       while( res2.next() )
@@ -1080,7 +1080,7 @@ QSqlGraphDatabase::partialReadFromEdgeQuery( const string & sqlquery,
       int graph = -1;
       string classname;
       if( classnameindex >= 0 )
-        classname = res.value( classnameindex ).toString().utf8().data();
+        classname = res.value( classnameindex ).toString().toStdString();
       CurrentGraphData *cg = 0;
       if( graphindex >= 0 )
       {
@@ -1181,7 +1181,7 @@ QSqlGraphDatabase::partialReadFromEdgeQuery( const string & sqlquery,
       int graph = -1;
       string classname;
       if( classnameindex >= 0 )
-        classname = res.value( classnameindex ).toString().utf8().data();
+        classname = res.value( classnameindex ).toString().toStdString();
       CurrentGraphData *cg = 0;
       /* if( graphindex >= 0 )
       { */
@@ -1304,13 +1304,13 @@ namespace
         QString( "SELECT class_name FROM class WHERE eid=" )
         + QString::number( eid ) );
       if( res.lastError().type() != 0 )
-        throw invalid_format_error( res.lastError().text().utf8().data(),
+        throw invalid_format_error( res.lastError().text().toStdString(),
                                     db.hostname() );
       res.next();
       if( !res.isValid() )
         throw invalid_format_error( "eid not found in class table",
                                     db.hostname() );
-      synt = res.value(0).toString().utf8().data();
+      synt = res.value(0).toString().toStdString();
       element.setSyntax( synt );
     }
     QSqlGraphDatabase::Syntax::const_iterator
@@ -1388,12 +1388,12 @@ void QSqlGraphDatabase::readGraphAttributes( Graph & graph, int gid )
       QString( "SELECT class_name FROM class WHERE eid=" )
       + QString::number( gid ) );
     if( res.lastError().type() != 0 )
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   hostname() );
     res.next();
     if( !res.isValid() )
       throw invalid_format_error( "eid not found in class table", hostname() );
-    syntax = res.value(0).toString().utf8().data();
+    syntax = res.value(0).toString().toStdString();
     graph.setSyntax( syntax );
   }
   // read graph attributes
@@ -1409,15 +1409,15 @@ void QSqlGraphDatabase::readGraphAttributes( Graph & graph, int gid )
     sql += ia->first;
   }
   sql += " FROM " + syntax + " WHERE eid="
-    + QString::number( gid ).utf8().data();
+    + QString::number( gid ).toStdString();
   // cout << "graph SQL: " << sql << endl;
   QSqlQuery res = exec( sql );
   if( res.lastError().type() != 0 )
-    throw wrong_format_error( res.lastError().text().utf8().data(),
+    throw wrong_format_error( res.lastError().text().toStdString(),
                               hostname() );
 
   res.next();
-  graph.setProperty( "uuid", string( res.value(0).toString().utf8().data() ) );
+  graph.setProperty( "uuid", string( res.value(0).toString().toStdString() ) );
   readElementAttributes( graph, res, gatts, 1 );
 }
 
@@ -1451,14 +1451,14 @@ void QSqlGraphDatabase::readGraphAttributes
   if( !unknowntypes.empty() )
   {
     sql += " )";
-    // cout << "graphs types query: " << sql.utf8().data() << endl;
+    // cout << "graphs types query: " << sql.toStdString() << endl;
     QSqlQuery res = database().exec( sql );
     if( res.lastError().type() != 0 )
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   hostname() );
     while( res.next() )
     {
-      syntax = res.value(0).toString().utf8().data();
+      syntax = res.value(0).toString().toStdString();
       int eid = res.value(1).toInt();
       // cout << eid << ": " << syntax << endl;
       type2eid[ syntax ].push_back( eid );
@@ -1495,17 +1495,17 @@ void QSqlGraphDatabase::readGraphAttributes
       sql += QString::number( *il );
     }
     sql += " )";
-    // cout << "graphs SQL: " << sql.utf8().data() << endl;
+    // cout << "graphs SQL: " << sql.toStdString() << endl;
     QSqlQuery res = database().exec( sql );
     if( res.lastError().type() != 0 )
-      throw wrong_format_error( res.lastError().text().utf8().data(),
+      throw wrong_format_error( res.lastError().text().toStdString(),
                                 hostname() );
 
     while( res.next() )
     {
       Graph *graph = graphmap[ res.value(0).toInt() ]->graph;
       graph->setProperty( "uuid",
-                          string( res.value(1).toString().utf8().data() ) );
+                          string( res.value(1).toString().toStdString() ) );
       readElementAttributes( *graph, res, gatts, 2 );
     }
   }

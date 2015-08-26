@@ -125,9 +125,9 @@ set<string> QtFormatsHeader::extensions() const
       QList<QByteArray>::iterator	c, ce = iform.end();
 
       for( c=iform.begin(); c!=ce; ++c )
-        exts.insert( QString( *c ).upper().utf8().data() );
+        exts.insert( QString( *c ).toUpper().toStdString() );
       for( c=oform.begin(),ce=oform.end(); c!=ce; ++c )
-        exts.insert( QString( *c ).upper().utf8().data() );
+        exts.insert( QString( *c ).toUpper().toStdString() );
     }
 
   qformatsMutex().unlock();
@@ -265,7 +265,7 @@ void QtFormatsHeader::read()
           pdt.push_back( DataTypeCode<int32_t>().dataType() );
         }
     }
-  if( im.hasAlphaBuffer() )
+  if( im.hasAlphaChannel() )
     {
       if( dt.empty() )
         dt = DataTypeCode<AimsRGBA>().dataType();
@@ -297,12 +297,12 @@ void QtFormatsHeader::read()
     setProperty( "possible_data_types", pdt );
 
   setProperty( "object_type", string( "Volume" ) );
-  QString sfmt = QString( fmt ).upper();
+  QString sfmt = QString( fmt ).toUpper();
   if( sfmt == "JPG" )
     fmt = "JPEG(Qt)";
   else if( fmt == "TIF" || fmt == "TIFF" )
     fmt = "TIFF(Qt)";
-  setProperty( "file_type", string( sfmt.utf8().data() ) );
+  setProperty( "file_type", string( sfmt.toStdString() ) );
 
   d->hasread = true;
 

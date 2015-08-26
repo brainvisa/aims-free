@@ -94,7 +94,6 @@ int main( int argc, char** argv )
       LabelSelector
         *ls = new LabelSelector( 0, "LabelSelector", false );
       ls->resize( ls->sizeHint() );
-      app.setMainWidget( ls );
       ls->show();
       if( !model.empty() )
         {
