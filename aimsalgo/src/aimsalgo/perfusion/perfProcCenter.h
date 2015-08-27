@@ -68,7 +68,7 @@ namespace aims
   
     void initialize();
 
-    void registerData( AimsData< short > * );
+    void registerData( carto::rc_ptr<carto::Volume< short > > );
 
     void doMask( int );
     void doSkip( int );
@@ -107,7 +107,7 @@ namespace aims
     std::map< int, PerfusionProcessing * > mProc;
     std::map< Point3d, LMGamma< float >, bestPoint3d > mFit;
   
-    AimsData< short > *_dataIn;
+    carto::rc_ptr<carto::Volume< short > > _dataIn;
     std::list< Point4dl > aifSelected;
     LMGamma< float > aifParam;
 

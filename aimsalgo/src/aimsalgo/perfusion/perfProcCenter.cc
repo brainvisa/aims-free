@@ -47,6 +47,7 @@
 
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
@@ -80,20 +81,16 @@ void PerfusionProcessingCenter::initialize()
 }
 
 
-void PerfusionProcessingCenter::registerData( AimsData< short > *d )
+void PerfusionProcessingCenter::registerData( rc_ptr<Volume< short > > d )
 {
   _dataIn = d;
-  
-  if ( d->header() )
-    {
-      aims::PythonHeader *ahdr;
-      ahdr = dynamic_cast< aims::PythonHeader * >( d->header() );
-      
-      float tmp;
-      
-      if ( ahdr && ahdr->getProperty( "tr", tmp ) )  _params.setTr( tmp );
-      if ( ahdr && ahdr->getProperty( "te", tmp ) )  _params.setTe( tmp );
-    }
+
+  PropertySet & ahdr = d->header();
+
+  float tmp;
+
+  if ( ahdr.getProperty( "tr", tmp ) )  _params.setTr( tmp );
+  if ( ahdr.getProperty( "te", tmp ) )  _params.setTe( tmp );
 }
 
 
@@ -103,10 +100,15 @@ void PerfusionProcessingCenter::doMask( int btn )
   
   if ( _dataIn )
     {
-      _dataIn->setSizeT( _params.tr() / 1000.0f );
+      vector<float> vs = _dataIn->getVoxelSize();
+      while( vs.size() < 4 )
+        vs.push_back( 1. );
+      vs[3] = _params.tr() / 1000.0f;
+      _dataIn->header().setProperty( "voxel_size", vs );
       try
 	{
-	  maskBck = pm->doit( *_dataIn, _params );
+          AimsData<int16_t> dataIn( _dataIn );
+	  maskBck = pm->doit( dataIn, _params );
 	  pm->setDone( true );
 	}
       catch( exception & )
@@ -126,7 +128,8 @@ void PerfusionProcessingCenter::doSkip( int btn )
     {
       try
 	{
-	  int skipValue = ps->value( *_dataIn, _params );
+          AimsData<int16_t> dataIn( _dataIn );
+	  int skipValue = ps->value( dataIn, _params );
 	  _params.setSkip( skipValue );
 	  ps->setDone( true );
 	}
@@ -145,7 +148,8 @@ void PerfusionProcessingCenter::doAifPoints( int btn )
 
   if ( _dataIn )
     {
-      aifPoints = p->search( *_dataIn, maskBck, _params );
+      AimsData<int16_t> dataIn( _dataIn );
+      aifPoints = p->search( dataIn, maskBck, _params );
       p->setDone( true );
     }
 }
@@ -158,7 +162,8 @@ void PerfusionProcessingCenter::doInjection( int btn )
   
   if ( _dataIn )
     {
-      int preInj = ppi->value( *_dataIn, aifSelected, _params );
+      AimsData<int16_t> dataIn( _dataIn );
+      int preInj = ppi->value( dataIn, aifSelected, _params );
       _params.setPreInj( preInj );
       ppi->setDone( true );
     }
@@ -172,7 +177,8 @@ void PerfusionProcessingCenter::doQuantification( int btn )
   
   if ( _dataIn )
     {
-      dataQuantif = pq->doit( *_dataIn, maskBck, _params );
+      AimsData<int16_t> dataIn( _dataIn );
+      dataQuantif = pq->doit( dataIn, maskBck, _params );
       pq->setDone( true );
     }
 }
