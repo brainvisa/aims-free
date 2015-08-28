@@ -75,7 +75,7 @@ Object QSqlGraphHelper::stringHelper( const QVariant & res, bool & ok )
     return none();
   }
   ok = true;
-  string value = res.toString().utf8().data();
+  string value = res.toString().toStdString();
   return Object::value( value );
 }
 
@@ -87,7 +87,7 @@ Object QSqlGraphHelper::pythonHelper( const QVariant & res, bool & ok )
     ok = false;
     return none();
   }
-  string value = res.toString().utf8().data();
+  string value = res.toString().toStdString();
   ok = true;
   istringstream sst( value );
   PythonReader pr;
@@ -105,7 +105,7 @@ Object QSqlGraphHelper::pythonHelperWithSyntax( const QVariant & res,
     ok = false;
     return none();
   }
-  string value = res.toString().utf8().data();
+  string value = res.toString().toStdString();
   ok = true;
   istringstream sst( value );
   SyntaxSet ss;

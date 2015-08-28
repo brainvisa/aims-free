@@ -38,7 +38,7 @@ endif( PYTHON_FOUND )
 if( @DESIRED_QT_VERSION@ EQUAL 3 )
   find_package( Qt3 )
 else()
-  find_package( Qt4 COMPONENTS QtCore QtGui Qt3Support )
+  find_package( Qt4 COMPONENTS QtCore QtGui )
 endif()
 
 

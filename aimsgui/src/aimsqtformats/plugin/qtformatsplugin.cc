@@ -66,7 +66,7 @@ namespace
           + "lib" + sep + "qt3-plugins";
 
         QStringList	paths = QApplication::libraryPaths();
-        if( paths.find( base.c_str() ) == paths.end() )
+        if( paths.indexOf( base.c_str() ) == -1 )
           QApplication::addLibraryPath( base.c_str() );
       }
     return true;
@@ -96,9 +96,9 @@ QtFormatsPlugin::QtFormatsPlugin() : Plugin()
   QList<QByteArray>::iterator	c, ce = iform.end();
 
   for( c=iform.begin(); c!=ce; ++c )
-    fset.insert( QString( *c ).upper().utf8().data() );
+    fset.insert( QString( *c ).toUpper() );
   for( c=oform.begin(),ce=oform.end(); c!=ce; ++c )
-    fset.insert( QString( *c ).upper().utf8().data() );
+    fset.insert( QString( *c ).toUpper() );
 
   QtFormats<int8_t>	*df1 = new QtFormats<int8_t>;
   QtFormats<uint8_t>	*df2 = new QtFormats<uint8_t>;
@@ -120,7 +120,7 @@ QtFormatsPlugin::QtFormatsPlugin() : Plugin()
     {
       vector<string>	ext;
       const QString	& e = *is;
-      string		fmt = e.upper().utf8().data();
+      string		fmt = e.toUpper().toStdString();
 
       if( fmt == "JPEG" )
         {
@@ -133,8 +133,8 @@ QtFormatsPlugin::QtFormatsPlugin() : Plugin()
         {
           if( fmt == "TIF" || fmt == "TIFF" )
             fmt = "TIFF(Qt)";
-          ext.push_back( e.lower().utf8().data() );
-          exts.push_back( e.lower().utf8().data() );
+          ext.push_back( e.toLower().toStdString() );
+          exts.push_back( e.toLower().toStdString() );
 //           if( format == "QtFormats" )
 //             format = fmt;
         }

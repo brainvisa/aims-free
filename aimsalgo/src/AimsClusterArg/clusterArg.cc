@@ -53,6 +53,7 @@
 #include <cartobase/object/syntax.h>
 #include <cartobase/object/sreader.h>
 #include <graph/graph/gwriter.h>
+#include <cartobase/config/paths.h>
 #include <stdio.h>
 #include <float.h>
 
@@ -133,7 +134,8 @@ bool ClusterArg::makeArg( AimsData<T> & data )
 
   cout << "writing cluster graph..." << endl;
   carto::SyntaxSet	ss;
-  SyntaxReader	sr( Path::singleton().syntax() + "/graph.stx" );
+  SyntaxReader	sr( Paths::findResourceFile(
+    "nomenclature/syntax/graph.stx", "aims" ) );
   sr >> ss;
   AimsGraphWriter	agw( fileout );
   agw.writeElements( gr, AimsGraphWriter::Global );

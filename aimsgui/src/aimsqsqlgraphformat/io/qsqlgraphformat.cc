@@ -202,7 +202,7 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
   bool ok = db.open();
   if( !ok )
   {
-    throw wrong_format_error( db.lastError().text().utf8().data(),
+    throw wrong_format_error( db.lastError().text().toStdString(),
                               filename );
   }
 
@@ -213,7 +213,7 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
       + graphquery );
     if( res.lastError().type() != 0 )
       throw invalid_format_error( string( "Graph reader, graph selection:" )
-        + res.lastError().text().utf8().data(), filename );
+        + res.lastError().text().toStdString(), filename );
     set<int> selgids;
     while( res.next() )
       selgids.insert( res.value(0).toInt() );
@@ -263,10 +263,10 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
       " WHERE _Vertex.graph=" + sgid + " GROUP BY class_name";
     res = db.exec( sql );
     if( res.lastError().type() != 0 )
-      throw wrong_format_error( res.lastError().text().utf8().data(),
+      throw wrong_format_error( res.lastError().text().toStdString(),
                                 filename );
     while( res.next() )
-      vtypes.insert( res.value(0).toString().utf8().data() );
+      vtypes.insert( res.value(0).toString().toStdString() );
   }
   else
   {
@@ -274,7 +274,7 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
       "WHERE _Vertex.graph=" ) + sgid.c_str();
     res = db.database().exec( sql );
     if( res.lastError().type() != 0 )
-      throw wrong_format_error( res.lastError().text().utf8().data(),
+      throw wrong_format_error( res.lastError().text().toStdString(),
                                 filename );
     bool first = true;
     while( res.next() )
@@ -286,7 +286,7 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
       else
         vidstring += ", ";
       vidstring += QString::number( eid );
-      vtypes.insert( res.value(2).toString().utf8().data() );
+      vtypes.insert( res.value(2).toString().toStdString() );
     }
   }
   map<int, Vertex *> id2vertex;
@@ -312,12 +312,12 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
     if( useJoins )
       sql += vt + " WHERE graph=" + sgid;
     else
-      sql += "_" + vt + " WHERE eid IN ( " + vidstring.utf8().data() + " )";
+      sql += "_" + vt + " WHERE eid IN ( " + vidstring.toStdString() + " )";
       // sql += "_" + vt + " WHERE graph=" + sgid;
     // cout << "vtype: " << vt << ", SQL:\n" << sql << endl;
     res = db.exec( sql );
     if( res.lastError().type() != 0 )
-      throw wrong_format_error( res.lastError().text().utf8().data(),
+      throw wrong_format_error( res.lastError().text().toStdString(),
                                 filename );
     while( res.next() )
     {
@@ -345,10 +345,10 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
       "_Vertex.graph=" + sgid + " GROUP BY class_name";
     res = db.exec( sql );
     if( res.lastError().type() != 0 )
-      throw wrong_format_error( res.lastError().text().utf8().data(),
+      throw wrong_format_error( res.lastError().text().toStdString(),
                                 filename );
     while( res.next() )
-      etypes[ res.value(0).toString().utf8().data() ] = "";
+      etypes[ res.value(0).toString().toStdString() ] = "";
 
     // cout << "edges types: " << etypes.size() << endl;
     // select edges
@@ -366,7 +366,7 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
       // cout << "etype: " << et << ", SQL:\n" << sql << endl;
       res = db.exec( sql );
       if( res.lastError().type() != 0 )
-        throw wrong_format_error( res.lastError().text().utf8().data(),
+        throw wrong_format_error( res.lastError().text().toStdString(),
                                   filename );
       while( res.next() )
       {
@@ -383,7 +383,7 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
       "class_name FROM _Edge WHERE graph=" ) + sgid.c_str();
     res = db.database().exec( sql );
     if( res.lastError().type() != 0 )
-      throw wrong_format_error( res.lastError().text().utf8().data(),
+      throw wrong_format_error( res.lastError().text().toStdString(),
                                 filename );
     while( res.next() )
     {
@@ -393,7 +393,7 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
       ee.push_back( res.value(1).toInt() );
       ee.push_back( res.value(2).toInt() );
       ee.push_back( res.value(3).toInt() );
-      QString & s = etypes[ res.value(4).toString().utf8().data() ];
+      QString & s = etypes[ res.value(4).toString().toStdString() ];
       if( !s.isEmpty() )
         s += ", ";
       s += QString::number( eid );
@@ -412,10 +412,10 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
         sql += ", " + QString( ieat->first.c_str() );
       sql += QString( " FROM _" ) + et.c_str() + " WHERE eid IN ( "
         + iet->second + " )";
-      // cout << "etype: " << et << ", SQL:\n" << sql.utf8().data() << endl;
+      // cout << "etype: " << et << ", SQL:\n" << sql.toStdString() << endl;
       res = db.database().exec( sql );
       if( res.lastError().type() != 0 )
-        throw wrong_format_error( res.lastError().text().utf8().data(),
+        throw wrong_format_error( res.lastError().text().toStdString(),
                                   filename );
       while( res.next() )
       {
@@ -490,7 +490,7 @@ bool QSqlGraphFormat::write( const std::string & filename1,
   bool ok = db.open();
   if( !ok )
   {
-    throw wrong_format_error( db.lastError().text().utf8().data(),
+    throw wrong_format_error( db.lastError().text().toStdString(),
                               filename );
   }
 
@@ -545,7 +545,7 @@ bool QSqlGraphFormat::write( const std::string & filename1,
       // execute SQL line
       res = db.exec( line );
       if( res.lastError().type() != 0 )
-        throw wrong_format_error( res.lastError().text().utf8().data(),
+        throw wrong_format_error( res.lastError().text().toStdString(),
                                   filename );
     }
     // cout << "SQL graph schema created\n";
@@ -615,19 +615,19 @@ bool QSqlGraphFormat::write( const std::string & filename1,
   sql = "DELETE FROM Graph";
   res = db.exec( sql.c_str() );
   if( !res.lastError().type() == 0 )
-    throw invalid_format_error( res.lastError().text().utf8().data(),
+    throw invalid_format_error( res.lastError().text().toStdString(),
                                 filename );
   cout << "deleting vertices\n";
   sql = "DELETE FROM Vertex";
   res = db.exec( sql.c_str() );
   if( !res.lastError().type() == 0 )
-    throw invalid_format_error( res.lastError().text().utf8().data(),
+    throw invalid_format_error( res.lastError().text().toStdString(),
                                 filename );
   cout << "deleting edges\n";
   sql = "DELETE * FROM Edge";
   res = db.exec( sql.c_str() );
   if( !res.lastError().type() == 0 )
-    throw invalid_format_error( res.lastError().text().utf8().data(),
+    throw invalid_format_error( res.lastError().text().toStdString(),
                                 filename );
   */
 
@@ -650,14 +650,14 @@ bool QSqlGraphFormat::write( const std::string & filename1,
     // cout << "graph SQL: " << sql << endl;
     res = db.exec( sql );
     if( !res.lastError().type() == 0 )
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   filename );
 
     // get graph id
     // cout << "querying graph eid\n";
     res = db.exec( "SELECT eid FROM Graph ORDER BY eid DESC LIMIT 1" );
     if( !res.lastError().type() == 0 )
-      throw invalid_format_error( res.lastError().text().utf8().data(),
+      throw invalid_format_error( res.lastError().text().toStdString(),
                                   filename );
     res.next();
     int gid = res.value(0).toInt();
