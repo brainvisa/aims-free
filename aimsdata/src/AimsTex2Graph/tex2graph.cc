@@ -145,7 +145,7 @@ int main( int argc, char **argv )
 
       SyntaxSet	syntax;
       SyntaxReader	sr( Paths::findResourceFile(
-        "nomenclature/syntax/graph.stx" ) );
+        "nomenclature/syntax/graph.stx", "aims" ) );
       sr >> syntax;
 
       AimsGraphWriter agw(fileout);
