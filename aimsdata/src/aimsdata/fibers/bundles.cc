@@ -1052,6 +1052,8 @@ namespace
               npoly * sizeof( AimsVector<uint, D> ) );
       current_index += npoly;
     }
+
+    vertex->removeProperty( "poly_counts" );
   }
 
 }
@@ -1111,15 +1113,20 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
         // Get current point
         const Polyline::Point_t &p = _currentCurve[ pointIndex ];
         // Check bounding boxes
-        if ( _boundingbox_min.empty() ) {
+        if ( _boundingbox_min.empty() )
+        {
           _boundingbox_min.resize( 3 );
           _boundingbox_max.resize( 3 );
-          for( int i = 0; i < 3; ++i ) {
+          for( int i = 0; i < 3; ++i )
+          {
             _boundingbox_min[ i ] = int( ::floor( p[ i ] ) );
             _boundingbox_max[ i ] = int( ::ceil( p[ i ] ) );
           }
-        } else {
-          for( int i = 0; i < 3; ++i ) {
+        }
+        else
+        {
+          for( int i = 0; i < 3; ++i )
+          {
             if ( _boundingbox_min[ i ] > p[ i ] ) 
               _boundingbox_min[ i ] = int( ::floor( p[ i ] ) );
             if ( _boundingbox_max[ i ] < p[ i ] ) 
@@ -1140,8 +1147,10 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
         lx.normalize();
         float max = fabs( lx[0] );
         unsigned coord = 0;
-        for( unsigned j = 1; j < 3; ++j ) {
-          if ( fabs( lx[j] ) > max ) {
+        for( unsigned j = 1; j < 3; ++j )
+        {
+          if ( fabs( lx[j] ) > max )
+          {
             max = fabs( lx[ j ] );
             coord = j;
           }
@@ -1151,7 +1160,8 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
           crossed( lz, lx ).normalize();
 
         // Add section vertices
-        for( unsigned j = 0; j < _section.size(); ++j ) {
+        for( unsigned j = 0; j < _section.size(); ++j )
+        {
           Point3df pointNormal = lx * _section[ j ][ 0 ] 
             + ly * _section[ j ][ 1 ];
           _currentMesh->vertex().push_back( p + pointNormal );
@@ -1159,8 +1169,10 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
         }
         // Add triangles
         if ( ( _currentMesh->vertex().size() - firstVertex ) > 
-             _section.size() ) {
-          for( unsigned i = 0; i < _section.size(); ++i ) {
+             _section.size() )
+        {
+          for( unsigned i = 0; i < _section.size(); ++i )
+          {
             const unsigned jp = _currentMesh->vertex().size() - 
               _section.size() + i;
             const unsigned j = jp - _section.size();
@@ -1174,9 +1186,9 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
           }
         }
       }
+      poly_counts.push_back( _currentMesh->polygon().size() );
     }
 
-    poly_counts.push_back( _currentMesh->polygon().size() );
   }
   else
   {
@@ -1192,15 +1204,20 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
         const Point3df p = _currentCurve[ pointIndex ];
 
         // Check bounding boxes
-        if ( _boundingbox_min.empty() ) {
+        if ( _boundingbox_min.empty() )
+        {
           _boundingbox_min.resize( 3 );
           _boundingbox_max.resize( 3 );
-          for( int i = 0; i < 3; ++i ) {
+          for( int i = 0; i < 3; ++i )
+          {
             _boundingbox_min[ i ] = int( ::floor( p[ i ] ) );
             _boundingbox_max[ i ] = int( ::ceil( p[ i ] ) );
           }
-        } else {
-          for( int i = 0; i < 3; ++i ) {
+        }
+        else
+        {
+          for( int i = 0; i < 3; ++i )
+          {
             if ( _boundingbox_min[ i ] > p[ i ] ) 
               _boundingbox_min[ i ] = int( ::floor( p[ i ] ) );
             if ( _boundingbox_max[ i ] < p[ i ] ) 
@@ -1210,7 +1227,8 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
         _currentLines->vertex().push_back( p );
         if( _normalsAsFiberStartPos )
           _currentLines->normal().push_back( norm );
-        if ( pointIndex > 0 ) {
+        if ( pointIndex > 0 )
+        {
           _currentLines->polygon()
             .push_back( AimsVector<uint,2>( _currentLines->vertex().size()-2, 
                                             _currentLines->vertex().size()-1));
@@ -1221,9 +1239,10 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
       if( !_normalsAsFiberStartPos )
         mat->setProperty( "normal_is_direction", 1 );
       mat->setProperty( "shader_color_normals", 1 );
+
+      poly_counts.push_back( _currentLines->polygon().size() );
     }
 
-    poly_counts.push_back( _currentLines->polygon().size() );
   }
 }
 
