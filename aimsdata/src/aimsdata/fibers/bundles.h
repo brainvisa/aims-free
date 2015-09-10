@@ -384,6 +384,7 @@ protected:
   virtual void parametersValueChanged();
   void parameterChangedSlot( const carto::Object &, const std::string &,
                              const carto::Object & );
+  void shuffleBundle();
 
   Graph *_meshResult;
   carto::rc_ptr< Graph > _rcptrMeshResult;

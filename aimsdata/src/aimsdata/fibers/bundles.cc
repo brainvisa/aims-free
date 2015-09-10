@@ -825,6 +825,34 @@ Object ConnectomistBundlesReader::readHeader()
   PythonReader out( _fileName + ".bundles" );
   out.read( *header );
 
+  vector<float> vs( 3, 1. );
+  // get resolution, if available
+  try
+  {
+    Object rx = header->getProperty( "resolutionX" );
+    vs[0] = float( rx->getScalar() );
+  }
+  catch( exception & )
+  {
+  }
+  try
+  {
+    Object ry = header->getProperty( "resolutionY" );
+    vs[1] = float( ry->getScalar() );
+  }
+  catch( exception & )
+  {
+  }
+  try
+  {
+    Object rz = header->getProperty( "resolutionZ" );
+    vs[2] = float( rz->getScalar() );
+  }
+  catch( exception & )
+  {
+  }
+  header->setProperty( "voxel_size", vs );
+
   return header;
 }
 
@@ -894,11 +922,14 @@ void BundleToGraph::parametersValueChanged()
   }
 
   // Initialize graph
-  vector<float> vs( 3 );
-  vs[0] = 1;
-  vs[1] = 1;
-  vs[2] = 1;
-  _meshResult->setProperty( "voxel_size", vs );
+  if( !_meshResult->hasProperty( "voxel_size" ) )
+  {
+    vector<float> vs( 3 );
+    vs[0] = 1;
+    vs[1] = 1;
+    vs[2] = 1;
+    _meshResult->setProperty( "voxel_size", vs );
+  }
   _meshResult->setProperty( "filename_base", string( "*" ) );
   rc_ptr< map< string, map< string, GraphElementCode > > > 
     objmap( new map< string, map< string, GraphElementCode > > );
@@ -956,12 +987,82 @@ void BundleToGraph::bundleStarted( const BundleProducer &,
 void BundleToGraph::bundleTerminated( const BundleProducer &,
                                       const BundleInfo & )
 {
+  shuffleBundle();
   if ( _currentMesh.isNull() ) {
     _currentVertex->setProperty( "aims_Tmtktri", _currentLines );
   } else {
     _currentVertex->setProperty( "aims_Tmtktri", _currentMesh );
   }
   _currentVertex->setProperty( "fibers_count", (int) _current_fibers_count );
+}
+
+
+namespace
+{
+
+  // http://stackoverflow.com/questions/6127503/shuffle-array-in-c
+  template <typename T>
+  void shuffle( T *array, size_t n )
+  {
+      if (n > 1)
+      {
+          size_t i;
+          for (i = n - 1; i > 0; i--)
+          {
+              size_t j = (size_t) (rand() / (RAND_MAX / (i+1) + 1));
+              T t = array[j];
+              array[j] = array[i];
+              array[i] = t;
+          }
+      }
+  }
+
+
+  template <int D> void shuffleFiberPolygons(
+    Vertex *vertex, rc_ptr<AimsTimeSurface<D, Void> > mesh )
+  {
+    Object poly_counts_o;
+    poly_counts_o = vertex->getProperty( "poly_counts" );
+    vector<size_t> & poly_counts
+      = poly_counts_o->value<vector<size_t> >();
+
+    size_t i, j, n = poly_counts.size();
+
+    vector<size_t> order( n );
+    size_t *p = &order[0];
+    // fill linear order
+    for( i=0; i<n; ++i )
+      *p++ = i;
+    // shuffle order
+    shuffle( &order[0], n );
+
+    vector<AimsVector<uint, D> > & poly = mesh->polygon();
+    vector<AimsVector<uint, D> > old_poly = poly;
+    size_t start, npoly, current_index = 0;
+
+    for( i=0; i<n; ++i )
+    {
+      j = order[i];
+      if( j == 0 )
+        start = 0;
+      else
+        start = poly_counts[j-1];
+      npoly = poly_counts[j] - start;
+      memcpy( &poly[current_index], &old_poly[start],
+              npoly * sizeof( AimsVector<uint, D> ) );
+      current_index += npoly;
+    }
+  }
+
+}
+
+
+void BundleToGraph::shuffleBundle()
+{
+  if ( _currentLines.isNull() )
+    shuffleFiberPolygons( _currentVertex, _currentMesh );
+  else
+    shuffleFiberPolygons( _currentVertex, _currentLines );
 }
 
 
@@ -983,6 +1084,19 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
   if ( _currentCurve.size() < 2 ) return;
 
   ++_current_fibers_count;
+
+  Object poly_counts_o;
+  try
+  {
+    poly_counts_o = _currentVertex->getProperty( "poly_counts" );
+  }
+  catch( ... )
+  {
+    poly_counts_o = Object::value( vector<size_t>() );
+    _currentVertex->setProperty( "poly_counts", poly_counts_o );
+  }
+  vector<size_t> & poly_counts
+    = poly_counts_o->value<vector<size_t> >();
 
   if ( _currentLines.isNull() )
   {
@@ -1061,6 +1175,8 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
         }
       }
     }
+
+    poly_counts.push_back( _currentMesh->polygon().size() );
   }
   else
   {
@@ -1106,6 +1222,8 @@ void BundleToGraph::fiberTerminated( const BundleProducer &,
         mat->setProperty( "normal_is_direction", 1 );
       mat->setProperty( "shader_color_normals", 1 );
     }
+
+    poly_counts.push_back( _currentLines->polygon().size() );
   }
 }
 
