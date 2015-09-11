@@ -41,7 +41,7 @@ using namespace std;
 
 
 TabulSpline::TabulSpline( string name, int  order, int length, int factor) :
-  _name(name), _splineTabLength(length + 1), _factor(factor)
+  _name(name), _factor(factor), _splineTabLength(length + 1)
 {
   if (order != 3)
     {

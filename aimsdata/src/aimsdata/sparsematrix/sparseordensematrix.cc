@@ -83,6 +83,7 @@ SparseOrDenseMatrix& SparseOrDenseMatrix::operator = (
     _fakeheader = Object::reference( _densematrix->header() );
   else
     _fakeheader.reset( 0 );
+  return *this;
 }
 
 
@@ -255,7 +256,7 @@ void SparseOrDenseMatrix::read( const std::string& filename )
     && hdr->getProperty( "non_zero_elements", nz ) )
   {
     // the map takes about 8 times the size of a double for an element
-    if( nz * sizeof( double ) * 8 < long( dims[0] ) * dims[1] )
+    if( nz * sizeof( double ) * 8 < static_cast<size_t>( dims[0] ) * dims[1] )
     {
       // use sparse
       cout << "read SparseOrDenseMatrix as sparse\n";

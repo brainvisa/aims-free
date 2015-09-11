@@ -76,7 +76,7 @@ Object TrackvisBundleReader::readHeaderStream( istream & file )
 
   char c;
   char id_string[6];
-  int i;
+  unsigned int i;
 
   file.read( id_string, 6 );
   if( !file.good() )

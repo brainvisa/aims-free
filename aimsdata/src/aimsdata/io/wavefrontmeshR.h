@@ -322,7 +322,7 @@ namespace aims
     // copy reordered normals
     for( int i=0, k=normals_ind.size(); i<k; ++i )
     {
-      if( normals_ind[i] < 0 || normals_ind[i] >= vertices.size() )
+      if( normals_ind[i] < 0 || normals_ind[i] >= static_cast<int>(vertices.size()) )
       {
         std::stringstream s;
         s << "normal index out of range: " << normals_ind[i] << " / "
@@ -342,7 +342,7 @@ namespace aims
       o_texture.resize( texture_ind.size() );
       for( int i=0, k=texture_ind.size(); i<k; ++i )
       {
-        if( texture_ind[i] < 0 || texture_ind[i] >= texture.size() )
+        if( texture_ind[i] < 0 || texture_ind[i] >= static_cast<int>(texture.size()) )
         {
           std::stringstream s;
           s << "texture index out of range: " << texture_ind[i] << " / "

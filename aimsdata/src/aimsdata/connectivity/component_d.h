@@ -215,7 +215,7 @@ namespace aims
 
       for( im = compSizes.rbegin(); 
            im != em && im->first >= minSize 
-             && ( numMax == 0 || label <= numMax ); ++im )
+             && ( numMax == 0 || static_cast<size_t>(label) <= numMax ); ++im )
       {
 
         if( verbose )
@@ -223,7 +223,7 @@ namespace aims
                     << " : " << std::setw( 8 ) << im->first 
                     << " points" << std::endl;
 
-        valids[ im->second ] = (size_t) label++;
+        valids[ im->second ] = static_cast<size_t>( label++ );
       }
 
       ConnectedComponentEngine<AimsData<size_t>, AimsData<O> >

@@ -211,7 +211,7 @@ namespace soma
     {
       if( dsi->header()->hasProperty( "possible_data_types" ) )
       {
-        int i;
+        size_t i;
         for( i=0;
             i<dsi->header()->getProperty( "possible_data_types" )->size();
             ++i )
