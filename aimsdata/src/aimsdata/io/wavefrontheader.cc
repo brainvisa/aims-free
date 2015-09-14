@@ -219,14 +219,14 @@ void WavefrontHeader::readMesh( bool stopWhenIdentified, int poly_size,
       int norm;
       vector<string::size_type> pos;
       string::size_type pos0 = 2, pos1, ls = l.length();
-      while( l[pos0] == ' ' || l[pos0] == '\t' && pos0 < ls )
+      while( l[pos0] == ' ' || ( l[pos0] == '\t' && pos0 < ls ) )
         ++pos0;
       if( pos0 == ls )
         throw carto::parse_error( "malformed face", line, fname );
       pos.push_back( pos0 );
       while( pos0 != string::npos && pos0 != string::npos )
       {
-        while( l[pos0] == ' ' || l[pos0] == '\t' && pos0 < ls )
+        while( l[pos0] == ' ' || ( l[pos0] == '\t' && pos0 < ls ) )
           ++pos0;
         if( pos0 == ls )
           break;

@@ -40,8 +40,8 @@
 template <class T>
 SobelGradient<T, 2>::SobelGradient(const AimsData<T> & image,
                                    const T levels)
-      : _image(image), 
-        _levels(levels) {
+  : _levels(levels),
+    _image(image) {
   // gradient values: Gx,Gy
   _gradX = AimsData<double>(_image.dimX(), 
                             _image.dimY(), 

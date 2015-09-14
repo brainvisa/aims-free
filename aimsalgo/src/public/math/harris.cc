@@ -44,11 +44,12 @@ BaseHarrisDetector<T>::BaseHarrisDetector(const AimsData<T> & image,
                                           const double k, 
                                           const double epsilon,
                                           const T levels)
-  : _image(image), 
-    _sigma(sigma), 
-    _k(k), 
-    _epsilon(epsilon),
-    _levels(levels) {
+  : _epsilon(epsilon),
+    _k(k),
+    _sigma(sigma),
+    _levels(levels),
+    _image(image)
+  {
                       
 //     if (! levels){
 //       _levels = DataTypeInfo<T>::depth() * 8 - 1;

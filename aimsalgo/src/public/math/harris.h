@@ -84,7 +84,7 @@ class BaseHarrisDetector {
     virtual double harrisMeasure(const int x, 
                                  const int y, 
                                  const int z, 
-                                 const int t) {}
+                                 const int t) = 0;
  
     /**
     * Compute the Harris measure for each pixel of the image
@@ -97,7 +97,7 @@ class BaseHarrisDetector {
     virtual bool isSpatialMaxima(const int x, 
                                  const int y, 
                                  const int z, 
-                                 const int t) {}
+                                 const int t) = 0;
   
   
     /**

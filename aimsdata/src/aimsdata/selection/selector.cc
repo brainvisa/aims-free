@@ -167,10 +167,12 @@ namespace
   {
     Graph::const_iterator iv = model.begin();
     if( iv != model.end() )
+    {
       if( (*iv)->hasProperty( "label" ) )
         return "label";
       else if( (*iv)->hasProperty( "name" ) )
         return "name";
+    }
     return "label";
   }
 

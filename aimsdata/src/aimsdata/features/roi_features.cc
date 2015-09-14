@@ -294,7 +294,7 @@ void RoiFeatures::writeCSV( ostream &out ) const
             Object time_features = feature->getProperty( itFeatures->key() ) ;
             if ( time_features->isDictionary() ) {
               list< string > time_feature_names;
-              int time_steps = 0;
+              unsigned int time_steps = 0;
               for( Object itTimeFeatures = time_features->objectIterator(); itTimeFeatures->isValid(); itTimeFeatures->next() ) {
                 if ( itTimeFeatures->currentValue()->isArray() ) {
                   bool ignore = true;
@@ -314,7 +314,7 @@ void RoiFeatures::writeCSV( ostream &out ) const
                   }
                 }
               }
-              for( int time_step = 0; time_step < time_steps; ++time_step ) {
+              for( unsigned int time_step = 0; time_step < time_steps; ++time_step ) {
                 map< string, DoubleStringOrNone > time_features_line = roi_features;
                 time_features_line[ "image_label" ] = DoubleStringOrNone( itFeatures->key() );
                 for( list< string >::const_iterator it = time_feature_names.begin(); it != time_feature_names.end(); ++it ) {
