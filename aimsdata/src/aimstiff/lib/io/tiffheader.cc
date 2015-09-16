@@ -218,7 +218,7 @@ void TiffHeader::read()
     setProperty( "possible_data_types", pt );
 
   // add meta-info to header
-  readMinf( removeExtension( _name ) + extension() + ".minf" );
+  readMinf( fileName + ".minf" );
 
   inputFilenames();
   // check if dimensions have changed
@@ -231,6 +231,17 @@ void TiffHeader::read()
     if( dims.size() >= 4 )
       _dimT = dims[3];
   }
+}
+
+
+string TiffHeader::extension() const
+{
+  set<string> pext = extensions();
+  set<string>::const_iterator i, e = pext.end();
+  for( i=pext.begin(); i!=e; ++i )
+    if( _name.substr( _name.length() - i->length(), i->length() ) == *i )
+      return *i;
+  return ".tiff";
 }
 
 

@@ -74,7 +74,7 @@ namespace aims
     std::string name() const { return _name; }
     std::vector<std::string> possibleDataTypes() const;
 
-    virtual std::string extension() const { return( ".tiff" ); }
+    virtual std::string extension() const;
     virtual std::set<std::string> extensions() const;
 
     void read();
