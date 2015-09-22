@@ -31,7 +31,7 @@
  * knowledge of the CeCILL license version 2 and that you accept its terms.
  */
 
-#include <aims/qtcompat/qtoolbutton.h>
+#include <aims/qtmisc/qtoolbutton.h>
 #include <qtoolbar.h>
 #include <qaction.h>
 
