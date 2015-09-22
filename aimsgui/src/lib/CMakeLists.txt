@@ -10,16 +10,15 @@ set( _headers
     graph/qsqlgraphformatheader.h
     graph/qsqlgraphhelper.h
     plugin/aimsguiplugin.h
-    qtcompat/qtoolbutton.h
     qtmisc/initqapplication.h
     qtmisc/resolvesymlinks.h
+    qtmisc/qtoolbutton.h
 )
 
 set( _sources
     graph/qsqlgraphdatabase.cc
     graph/qsqlgraphformatheader.cc
     graph/qsqlgraphhelper.cc
-    qtcompat/qtoolbutton.cc
     selection/labelselector.cc
     listview/orderinglist.cc
     listview/qatreewidget.cc
@@ -29,6 +28,7 @@ set( _sources
     qtmisc/initqapplication.cc
     qtmisc/qwidgetobject.cc
     qtmisc/resolvesymlinks.cc
+    qtmisc/qtoolbutton.cc
 )
 
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
