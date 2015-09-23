@@ -63,7 +63,7 @@ static int AimsOptionRequiredCount(const AimsOption *opt)
 
 static int AimsOptionMatch(const AimsOption *opt,const char *s,int lng)
 { int  nopt,q, matchlen=0;
-  char *p;
+  const char *p;
 
   nopt = AimsOptionCount(opt);
   if (lng) 
