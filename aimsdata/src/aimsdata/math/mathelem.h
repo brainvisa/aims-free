@@ -78,7 +78,7 @@ namespace aims
   template <typename T>
   inline T absdiff( const T& x, const T& y )
   {
-    return (T)abs(double(y) - double(x));
+    return std::abs(static_cast<double>(y) - static_cast<double>(x));
   }
 
   //@}
