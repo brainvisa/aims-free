@@ -208,6 +208,14 @@ namespace aims
     static std::vector<Point3df>* lineDirections(
       const AimsTimeSurface<2, Void> & );
 
+    /** Sort polygons along a given direction.
+        Polygons centers will be used for sorting. Only one timestep is
+        performed (to be fast).
+    */
+    template <int D, typename T>
+    static void sortPolygonsAlongDirection(
+      AimsTimeSurface<D,T> & mesh, int timestep, const Point3df & direction );
+
   };
 
 }

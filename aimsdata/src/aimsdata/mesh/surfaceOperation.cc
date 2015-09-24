@@ -76,6 +76,13 @@ SurfaceManip::invertSurfacePolygons( AimsSurfaceTriangle & surface );
 template void
 SurfaceManip::invertSurfacePolygons( AimsSurfaceFacet & surface );
 
+template void SurfaceManip::sortPolygonsAlongDirection(
+  AimsTimeSurface<2, Void> & mesh, int timestep, const Point3df & direction );
+template void SurfaceManip::sortPolygonsAlongDirection(
+  AimsTimeSurface<3, Void> & mesh, int timestep, const Point3df & direction );
+template void SurfaceManip::sortPolygonsAlongDirection(
+  AimsTimeSurface<4, Void> & mesh, int timestep, const Point3df & direction );
+
 
 namespace
 {
