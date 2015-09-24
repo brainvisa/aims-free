@@ -469,10 +469,10 @@ namespace aims
 
   template <typename T>
   void AimsConnectedComponent( BucketMap<T>& data,
-                               Connectivity::Type connectivity, 
-                               const T & backgrnd = 0, bool bin = true, 
-                               size_t minsize = 0, size_t maxcomp = 0, 
-                               bool verbose = true )
+                               Connectivity::Type connectivity,
+                               const T & backgrnd, bool bin,
+                               size_t minsize, size_t maxcomp,
+                               bool verbose )
   {
     AimsBucket<Void>	comps;
     AimsConnectedComponent( comps, data, connectivity, backgrnd, bin, minsize, 

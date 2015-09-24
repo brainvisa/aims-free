@@ -63,7 +63,7 @@ SimpleVoxelSampler::~SimpleVoxelSampler() {}
 
 
 //-----------------------------------------------------------------------------
-SimpleVoxelSampler::SimpleVoxelSampler( int voxelSampling = 1 )
+SimpleVoxelSampler::SimpleVoxelSampler( int voxelSampling )
 {
   if ( voxelSampling < 1 ) {
     throw runtime_error( "Less than one point per voxel requested" );
