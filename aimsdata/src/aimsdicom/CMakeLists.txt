@@ -5,6 +5,13 @@ BRAINVISA_GET_FILE_LIST_FROM_PRO( ${CMAKE_CURRENT_SOURCE_DIR}/dicom.pro
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
 set(AIMSDICOM_HEADERS ${_headers} PARENT_SCOPE)
 add_library( aimsdicom SHARED ${_sources} )
+
+if ( NOT WIN32 )
+  add_definitions( -DHAVE_CONFIG_H )
+else ()
+  add_definitions( -DUSE_STD_CXX_INCLUDES )
+endif ()
+
 add_dependencies( aimsdicom ${headersTarget} )
 set_property( TARGET aimsdicom PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 # For DICOM version < 3.6, dcmimage.so depends on PNG and TIFF libraries

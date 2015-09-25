@@ -51,9 +51,10 @@
 #include <cartobase/thread/mutex.h>
 #include <vector>
 
-#ifndef HAVE_CONFIG_H
-#define HAVE_CONFIG_H 1
-#endif
+// This is now set by cmake configuration
+// #ifndef HAVE_CONFIG_H
+// #define HAVE_CONFIG_H 1
+// #endif
 #include <dctk.h>
 // We recommend that applications should use the new loadFile() and saveFile()
 // methods now defined in DcmFileFormat and DcmDataset, thus completely
