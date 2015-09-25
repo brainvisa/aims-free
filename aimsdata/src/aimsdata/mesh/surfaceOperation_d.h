@@ -670,6 +670,37 @@ namespace aims
     return outmesh;
   }
 
+
+  template <int D, typename T>
+  void SurfaceManip::sortPolygonsAlongDirection( AimsTimeSurface<D, T> & mesh,
+                                                 int timestep,
+                                                 const Point3df & direction )
+  {
+    const std::vector<Point3df> & vert = mesh[timestep].vertex();
+    std::vector<AimsVector<uint, D> > & poly = mesh[timestep].polygon();
+    std::multimap<float, AimsVector<uint, D> > sorted;
+    typename std::vector<AimsVector<uint, D> >::iterator
+      ip, ep = poly.end();
+    typename std::multimap<float, AimsVector<uint, D> >::iterator
+      im, em = sorted.end();
+    int d;
+    Point3df center;
+
+    // sort using a map
+    for( ip=poly.begin(); ip!=ep; ++ip )
+    {
+      center = vert[(*ip)[0]];
+      for( d=1; d<D; ++d )
+        center += vert[(*ip)[d]];
+      sorted.insert( std::make_pair( center.dot( direction ), *ip ) );
+    }
+
+    // rewrite polygons
+    for( im=sorted.begin(), ip=poly.begin(); im!=em; ++im, ++ip )
+      *ip = im->second;
+  }
+
+
 }
 
 #endif

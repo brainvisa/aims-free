@@ -266,6 +266,55 @@ Returns
 -------
 directions: vector_POINT3DF
 %End
+
+  static void sortPolygonsAlongDirection(
+    AimsTimeSurface_2_VOID & mesh, int timestep, const Point3df & direction );
+%Docstring
+sortPolygonsAlongDirection(mesh, timestep, direction)
+
+Sort polygons along a given direction.
+Polygons centers will be used for sorting. Only one timestep is performed (to be fast).
+
+Parameters
+----------
+mesh: AimstimeSurface_*
+    The mesh will be modified.
+timestep: int
+direction: Point3df
+%End
+
+
+  static void sortPolygonsAlongDirection(
+    AimsTimeSurface_3_VOID & mesh, int timestep, const Point3df & direction );
+%Docstring
+sortPolygonsAlongDirection(mesh, timestep, direction)
+
+Sort polygons along a given direction.
+Polygons centers will be used for sorting. Only one timestep is performed (to be fast).
+
+Parameters
+----------
+mesh: AimstimeSurface_*
+    The mesh will be modified.
+timestep: int
+direction: Point3df
+%End
+
+  static void sortPolygonsAlongDirection(
+    AimsTimeSurface_4_VOID & mesh, int timestep, const Point3df & direction );
+%Docstring
+sortPolygonsAlongDirection(mesh, timestep, direction)
+
+Sort polygons along a given direction.
+Polygons centers will be used for sorting. Only one timestep is performed (to be fast).
+
+Parameters
+----------
+mesh: AimstimeSurface_*
+    The mesh will be modified.
+timestep: int
+direction: Point3df
+%End
 };
 
 };
