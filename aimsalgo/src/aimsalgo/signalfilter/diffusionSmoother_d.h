@@ -47,6 +47,30 @@
 
 namespace aims {
 
+
+template<typename T>
+AimsData<float> BaseDiffusionSmoother<T>::laplacian =
+  BaseDiffusionSmoother<T>::init_laplacian();
+
+template<typename T>
+AimsData<float> BaseDiffusionSmoother<T>::init_laplacian(void)
+{
+  AimsData<float>	laplacian(3, 3, 3, 1);
+  laplacian = 0.;
+  /* WARNING: this kernel is only suitable for isotropic, 1mm voxels.
+     Moreover I don't explain the 1/2 factor on the whole kernel
+     (I would expect coefs 1 -6 1 instead of 0.5 -3 0.5)
+     Anyway, this kernel is now completely rebuilt in doSmoothing() to
+     take into account voxel size, so it is not used as is.
+     (Denis, 2014/02/14)
+  */
+  laplacian(1,1,0) = laplacian(1,0,1) = laplacian(0,1,1) =
+    laplacian(2,1,1) = laplacian(1,2,1) = laplacian(1,1,2) = 0.5;
+  laplacian(1,1,1) = -3;
+
+  return laplacian;
+}
+
 template<class T>
 void BaseDiffusionSmoother<T>::check(int maxiter)
 {
