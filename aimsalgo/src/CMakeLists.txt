@@ -68,6 +68,13 @@ if( DCMTK_FOUND )
     foreach( _f ${_proSources} )
       set( _sources ${_sources} ${_command}/${_f} )
     endforeach()
+
+    if ( NOT WIN32 )
+      add_definitions( -DHAVE_CONFIG_H )
+    else ()
+      add_definitions( -DUSE_STD_CXX_INCLUDES )
+    endif ()
+
     BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
     target_link_libraries( ${_target} aimsalgo aimsdicom )
 
