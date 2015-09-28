@@ -171,7 +171,6 @@ namespace aims
     if( PyArray_NDIM( arr ) != ndim )
     {
       PyArray_NDIM( arr ) = ndim;
-      free( PyArray_DIMS( arr ) );
       PyArray_DIMS( arr ) = PyDimMem_RENEW( PyArray_DIMS( arr ), ndim*2 );
     }
     int i;
