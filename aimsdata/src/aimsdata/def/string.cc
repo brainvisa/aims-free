@@ -61,7 +61,7 @@ void AimsError(const string& message)
   cerr << message << "\n";
   cerr << "----------------------------------------"
        << "---------------------------------------\n";
-  exit(0);
+  exit(EXIT_FAILURE);
 }
 
 
