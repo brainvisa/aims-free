@@ -147,6 +147,9 @@ class AimsVector
     AimsVector(const T& x,const T& y,const T& z,const T& t);
     /// Copy constructor
     AimsVector(const AimsVector<T,D>& other);
+    /// Type conversion
+    template<class U>
+    explicit AimsVector(const AimsVector<U,D>& other);
 
     /// The destructor deletes the allocated memory space
     ~AimsVector();
@@ -463,6 +466,14 @@ AimsVector<T,D>::AimsVector(const T& x, const T& y, const T& z, const T& t)
 template <class T,int D>
 inline
 AimsVector<T,D>::AimsVector(const AimsVector<T,D>& other)
+{
+  for (int d = 0; d < D; d++)
+    _value[d] = other._value[d];
+}
+
+template <class T,int D> template<class U>
+inline
+AimsVector<T,D>::AimsVector(const AimsVector<U,D>& other)
 {
   for (int d = 0; d < D; d++)
     _value[d] = other._value[d];

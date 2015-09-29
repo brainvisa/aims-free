@@ -352,7 +352,7 @@ namespace aims
           for (uint i=0; i<(*mesh).size(); i++) {
             for (uint j=0; j<(*mesh)[i].vertex().size(); j++)
             {
-              bckItem.location()=(*mesh)[i].vertex()[j];
+              bckItem.location()=static_cast<Point3d>((*mesh)[i].vertex()[j]);
               (*blobBck)[i].push_back(bckItem);
             }
           }

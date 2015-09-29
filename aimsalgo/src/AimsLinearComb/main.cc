@@ -83,7 +83,8 @@ void Usage( void )
   AimsUsage( usage );
 }
 
-
+template<class T>
+bool lintex( Process & p, const string & fname, Finder & f );
 
 template<class T>
 static bool linread1( Process & p, const string & fname, Finder & f );
