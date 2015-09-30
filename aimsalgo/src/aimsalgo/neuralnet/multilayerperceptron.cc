@@ -469,11 +469,11 @@ AimsData<float> AimsMultilayerPerceptron::weights() const
 
 void AimsMultilayerPerceptron::save(const string &filetopology,
                                     const string &fileweight)
-{ AimsData<float> weights(weights());
+{ AimsData<float> weights_ = weights();
 
   Writer<AimsData<int32_t> > writer1(filetopology);
   writer1 << *_topology;
 
   Writer<AimsData<float> > writer2(fileweight);
-  writer2 << weights;
+  writer2 << weights_;
 }

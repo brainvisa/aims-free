@@ -113,11 +113,12 @@ static void dictGraphHelper( const GenericObject & obj, PythonWriter & w,
 	w.write( *im->currentValue(), indent, "", im->key(), writeInternals );
       }
   // write vertices
-  const Graph	& g = dynamic_cast<const Graph &>( obj );
-  if( !&g )
+  const Graph	* pg = dynamic_cast<const Graph *>( &obj );
+  if( !pg )
     cerr << "Warning: Graph helper used on something which is not a Graph\n";
-  else if( g.order() > 0 )
+  else if( pg->order() > 0 )
     {
+      const Graph& g = *pg;
       ds.putch( ',' );
       ds.putch( sep );
       AsciiDataSourceTraits<string>::write( ds, ind );
@@ -249,11 +250,12 @@ static void dictTreeHelper( const GenericObject & obj, PythonWriter & w,
 	w.write( *im->currentValue(), indent, "", im->key(), writeInternals );
       }
   // write subtrees
-  const Tree	& t = dynamic_cast<const Tree &>( obj );
-  if( !&t )
+  const Tree	* pt = dynamic_cast<const Tree *>( &obj );
+  if( !pt )
     cerr << "Warning: Tree helper used on something which is not a Tree\n";
-  else if( t.size() > 0 )
+  else if( pt->size() > 0 )
     {
+      const Tree& t = *pt;
       ds << ',' << sep << ind << "'__children__' : [" << sep << ind << "  ";
       Tree::const_iterator	it, et = t.end();
       bool			first = true;

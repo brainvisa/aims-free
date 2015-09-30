@@ -42,7 +42,10 @@
   NAME< VOXELTYPE >::~NAME() {}                                              \
   NAME< VOXELTYPE > & NAME< VOXELTYPE >::operator=( const NAME< VOXELTYPE > & other )  \
   {                                                                          \
-    _m = other._m;                                                           \
+    if(this != &other) {                                                     \
+      _m = other._m;                                                         \
+    }                                                                        \
+    return *this;                                                            \
   }                                                                          \
   void NAME< VOXELTYPE >::setOptions( const carto::Object & options )        \
   {                                                                          \

@@ -81,7 +81,7 @@ namespace
     {
       Object osp = options->getProperty( "relative_fiber_start_pos" );
       Point3df pos( 0, 0, 0 );
-      int i;
+      int i = 0;
       Object it = osp->objectIterator();
       while( i<3 && it->isValid() )
       {

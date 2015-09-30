@@ -147,9 +147,9 @@ void GenesisHeader::read()
   if( !is )
     io_error::launchErrnoExcept( fileName );
 
-  short		dimx, dimy, dimz, patage, patian, patsex;
-  float		sx, sy, sz, loc, sloc, eloc, spc; //, lmhor;
-  int		tr, te, ti;
+  short		dimx = 0, dimy = 0, dimz = 0, patage, patian, patsex;
+  float		sx = 0, sy = 0, sz = 0, loc = 0, sloc, eloc, spc = 0; //, lmhor;
+  int		tr = 0, te = 0, ti = 0;
   string	patid, patname;
 
 #define macroReadSeries( var, field ) \

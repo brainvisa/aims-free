@@ -16,7 +16,7 @@ using namespace std;
 
 GeodesicPath::GeodesicPath( const AimsSurfaceTriangle & surface, int method,
                             int strain ) :
-    _surface(surface), _method(method), _strain(strain)
+    _strain(strain), _method(method), _surface(surface)
 {
   //cout << "compute texture curvature : ";
   _texCurv = TimeTexture<float>(1, _surface.vertex().size());
@@ -29,7 +29,7 @@ GeodesicPath::GeodesicPath( const AimsSurfaceTriangle & surface, int method,
 GeodesicPath::GeodesicPath( const AimsSurfaceTriangle & surface,
                             const TimeTexture<float> & texCurv, int method,
                             int strain ) :
-    _surface(surface), _texCurv(texCurv), _method(method), _strain(strain)
+    _strain(strain), _method(method), _surface(surface), _texCurv(texCurv)
 {
   computeGraphDijkstra(_surface, _texCurv, _method, _strain);
 }
@@ -56,13 +56,13 @@ void GeodesicPath::computeGraphDijkstra( const AimsSurfaceTriangle & surface,
   pointsSP.resize(3*vert.size());
   facesSP.resize(3*tri.size());
 
-  for (uint j = 0; j < (int) vert.size(); j++)
+  for (size_t j = 0; j < vert.size(); j++)
   {
     pointsSP[3*j] = vert[j][0];
     pointsSP[3*j+1] = vert[j][1];
     pointsSP[3*j+2] = vert[j][2];
   }
-  for (uint j = 0; j < (int) tri.size(); j++)
+  for (size_t j = 0; j < tri.size(); j++)
   {
     facesSP[3*j] = tri[j][0];
     facesSP[3*j+1] = tri[j][1];
@@ -175,8 +175,7 @@ vector<Point3df> GeodesicPath::shortestPath_1_1_xyz(unsigned source, unsigned ta
   std::vector< Point3df > vertexList;
   Point3df newVertex;
 
-  int i;
-  for (i = 0; i < SPath.size(); i++)
+  for (size_t i = 0; i < SPath.size(); i++)
   {
     newVertex[0] = SPath[i].x();
     newVertex[1] = SPath[i].y();
@@ -323,8 +322,7 @@ void GeodesicPath::shortestPath_1_1_ind_xyz(unsigned source, unsigned target,std
 
   Point3df newVertex;
 
-  int i;
-  for (i = 0; i < SPath.size(); i++)
+  for (size_t i = 0; i < SPath.size(); i++)
   {
     newVertex[0] = SPath[i].x();
     newVertex[1] = SPath[i].y();
@@ -343,10 +341,9 @@ double GeodesicPath::shortestPath_1_1_len(unsigned source, unsigned target)
 
   listIndexVertexPathSP = shortestPath_1_1_xyz(source, target);
 
-  int i;
   double dx,dy,dz;
 
-  for (i = 0; i < listIndexVertexPathSP.size() - 1; i++)
+  for (size_t i = 0; i < listIndexVertexPathSP.size() - 1; i++)
   {
     dx = listIndexVertexPathSP[i+1][0]-listIndexVertexPathSP[i][0];
     dy = listIndexVertexPathSP[i+1][1]-listIndexVertexPathSP[i][1];
@@ -372,7 +369,7 @@ void GeodesicPath::shortestPath_1_N_ind(unsigned source, vector<unsigned> target
 
   dijkstra_algorithm->propagate(all_sources);
 
-  for (int j = 0; j < targets.size(); j++)
+  for (size_t j = 0; j < targets.size(); j++)
   {
     geodesic::SurfacePoint t(&_meshSP.vertices()[targets[j]]);
 
@@ -424,7 +421,7 @@ void GeodesicPath::longestPath_1_N_ind(unsigned source, vector<unsigned> targets
   {
     dijkstra_algorithm->propagate(all_sources);
 
-    for (int j = 0; j < targets.size(); j++)
+    for (size_t j = 0; j < targets.size(); j++)
     {
       geodesic::SurfacePoint t(&_meshSP.vertices()[targets[j]]);
       unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
@@ -502,7 +499,7 @@ GeodesicPath::longestPath_1_N_len(unsigned source, vector<unsigned> targets,
   {
     dijkstra_algorithm->propagate(all_sources);
 
-    for (int j = 0; j < targets.size(); j++)
+    for (size_t j = 0; j < targets.size(); j++)
     {
       geodesic::SurfacePoint t(&_meshSP.vertices()[targets[j]]);
       unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
@@ -566,7 +563,7 @@ GeodesicPath::longestPath_1_N_len(unsigned source, vector<unsigned> targets,
 
 vector<unsigned> GeodesicPath::longestPath_N_N_ind(vector<unsigned> points, int* s, int *d, double *length,int type_distance)
 {
-  int i,j;
+  int j;
   unsigned target;
   vector<unsigned> listIndexVertexPathSP;
   vector<unsigned> targetsTemp;
@@ -584,13 +581,13 @@ vector<unsigned> GeodesicPath::longestPath_N_N_ind(vector<unsigned> points, int*
 
   //std::cout << "nb extremities " << points.size() << "-->  ";
 
-  for (i=0; i<points.size(); i++)
+  for (size_t i=0; i<points.size(); i++)
     {
     targetsTemp.push_back(points[i]);
     //cout << points[i] << " ";
     }
 
-  for (i=0; i<points.size()-1; i++)
+  for (size_t i=0; i<points.size()-1; i++)
   {
     index = points[i];
     targetsTemp.erase(targetsTemp.begin());
@@ -647,7 +644,7 @@ void GeodesicPath::distanceMap_1_N_ind(unsigned source, vector<float> &distanceM
   {
     dijkstra_algorithm->propagate(all_sources);
 
-    for (int j = 0; j < _meshSP.vertices().size(); j++)
+    for (size_t j = 0; j < _meshSP.vertices().size(); j++)
     {
       geodesic::SurfacePoint t(&_meshSP.vertices()[j]);
       unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
@@ -668,7 +665,7 @@ void GeodesicPath::distanceMap_1_N_ind(unsigned source, vector<float> &distanceM
   {
     std::vector<geodesic::SurfacePoint> all_targets;
 
-    for (int j = 0; j < _meshSP.vertices().size(); j++)
+    for (size_t j = 0; j < _meshSP.vertices().size(); j++)
       {
       //cout << j << endl;
       all_targets.push_back(geodesic::SurfacePoint(&_meshSP.vertices()[j]));

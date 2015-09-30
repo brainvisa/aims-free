@@ -186,7 +186,7 @@ void TextureSmoothing::surfaceBlockSmooth( const string & latt_filename,
               /* WARNING only default type "int" */
 
               fseek( fp_neighs, 4 * k * nodes_block * ncolPINV, 0 );
-              int len = fread( IND_NEIGHS_chunk, sizeof(int),
+              size_t len = fread( IND_NEIGHS_chunk, sizeof(int),
                      nodes_block_curr * ncolPINV, fp_neighs );
               if( len != nodes_block_curr*ncolPINV )
               {

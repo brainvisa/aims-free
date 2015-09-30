@@ -615,6 +615,11 @@ bool SpmHeader::read()
         {
           if( bswap )
             {
+              // This code breaks the strict aliasing rule, but as the proper
+              // way of doing the conversion is not obvious, just make the
+              // warning non-fatal for now.
+              #pragma GCC diagnostic push
+              #pragma GCC diagnostic warning "-Wstrict-aliasing"
               origin.push_back( byteswap16( *( (short *) 
                                                & header.hist.originator[0] 
                                                ) ) );
@@ -624,6 +629,7 @@ bool SpmHeader::read()
               origin.push_back( byteswap16( *( (short *) 
                                                & header.hist.originator[4] 
                                                ) ) );
+              #pragma GCC diagnostic pop
             }
           else
             {

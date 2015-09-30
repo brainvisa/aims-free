@@ -123,7 +123,6 @@ namespace aims {
 
   template <typename T>
   GaborFilterFunc<T>::GaborFilterFunc( const GaborFilterFunc<T> & other ):
-    _init(other._init ),
     _sigma(other._sigma),
     _theta(other._theta),
     _lambda(other._lambda),
@@ -131,8 +130,9 @@ namespace aims {
     _gamma(other._gamma),
     _real(other._real),
     _nstd(other._nstd),
-    _voxelsize(other._voxelsize),
+    _init(other._init),
     _amplitude(other._amplitude),
+    _voxelsize(other._voxelsize),
     _kernel(new carto::Volume<double>( *(other._kernel) ))
   {}
 
@@ -143,17 +143,20 @@ namespace aims {
   template <typename T>
   GaborFilterFunc<T> & GaborFilterFunc<T>::operator=( const GaborFilterFunc<T> & other )
   {
-    _init = other._init ;
-    _sigma = other._sigma;
-    _theta = other._theta;
-    _lambda = other._lambda;
-    _psi = other._psi;
-    _gamma = other._gamma;
-    _real = other._real;
-    _nstd = other._nstd;
-    _voxelsize = other._voxelsize;
-    _amplitude = other._amplitude;
-    _kernel = carto::VolumeRef<double>( new carto::Volume<double>( *(other._kernel) ) );
+    if(this != &other) {
+      _init = other._init ;
+      _sigma = other._sigma;
+      _theta = other._theta;
+      _lambda = other._lambda;
+      _psi = other._psi;
+      _gamma = other._gamma;
+      _real = other._real;
+      _nstd = other._nstd;
+      _voxelsize = other._voxelsize;
+      _amplitude = other._amplitude;
+      _kernel = carto::VolumeRef<double>( new carto::Volume<double>( *(other._kernel) ) );
+    }
+    return *this;
   }
 
   template <typename T>

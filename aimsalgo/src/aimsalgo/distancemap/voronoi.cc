@@ -171,6 +171,11 @@ EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
             ite = ptr->end(); it != ite; it++ )
       {
         center = it->location();
+
+        // Make this warning non-fatal as it is probably harmless and the fix
+        // is not obvious
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic warning "-Wsign-compare"
         if ( vol( center ) >= dist )
           for ( n = 0; n < mask.length(); n++ )
           {
@@ -194,6 +199,7 @@ EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
               }
             }
           }
+        #pragma GCC diagnostic pop
       }
     }
   }

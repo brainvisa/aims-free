@@ -1,3 +1,7 @@
+# Ensure that features such as strdup and caddr_t are defined when GCC/clang
+# is used in strict standards mode (-std=c89)
+add_definitions( -D_DEFAULT_SOURCE )
+
 BRAINVISA_GET_FILE_LIST_FROM_PRO(  ${CMAKE_CURRENT_SOURCE_DIR}/lib.pro "HEADERS" _headers "SOURCES" _sources )
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers ecat headersTarget )
 add_library( ecat SHARED ${_sources} )
