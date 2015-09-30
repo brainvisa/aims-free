@@ -26,7 +26,7 @@
 /* Speed Hacks */
 
 #ifdef __GNUC__
-#define INLINE extern inline
+#define INLINE static inline
 #else
 #define INLINE			/* Not available for non-GNU C Compilers */
 #endif
