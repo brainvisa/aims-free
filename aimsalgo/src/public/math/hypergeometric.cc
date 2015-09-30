@@ -630,7 +630,8 @@ double	loghypergeometric(double *p, int np, double *q, int nq,
   free((*a).D);
   free((*a).jx);
 
+  const double ret = a->s;
   free(a);
-  return (*a).s;
+  return ret;
 }
 

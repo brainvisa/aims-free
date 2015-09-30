@@ -49,7 +49,11 @@ namespace aims
 
 // ABCD in ASCII
 #define AIMS_MAGIC_NUMBER 0x41424344
-  
+
+// Ignore __attribute__ on non-GCC compilers
+#if !(defined(__GNUC__) || defined(__attribute__))
+#define __attribute__(a) /* nothing */
+#endif
 
 /** Display formalism.
     There exists 2 formalisms to display a vector or matrix.
@@ -107,7 +111,7 @@ AIMSDATA_API bool    AimsIsComplexType(int type);
 /// Read the next word from *str, put it in strRef and move *str behind the word
 AIMSDATA_API void    AimsScanNflush(char **str,char *strRef);
 /// Give an error message on display
-AIMSDATA_API void    AimsError(const std::string& message);
+AIMSDATA_API void    AimsError(const std::string& message) __attribute__((__noreturn__));
 /// Give a warning message on display
 AIMSDATA_API void    AimsWarning(const std::string& message);
 //@}

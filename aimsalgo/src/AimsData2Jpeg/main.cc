@@ -170,7 +170,7 @@ static void save2Jpeg( const AimsData<int>& buffer, const ColorMap& cmap,
   fclose( fp );
   jpeg_destroy_compress( &cinfo );
 
-  delete pixels;
+  delete[] pixels;
 }
 
 
