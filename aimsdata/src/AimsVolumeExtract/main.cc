@@ -237,7 +237,8 @@ void checkInput( const  string   & fname,
   cout << "Checking file : " << fname << endl;
 
   string rname = FileUtil::uriFilename( fname );
-  if( info.exists = ( FileUtil::fileStat( rname ).find( '+' ) != string::npos ) )
+  info.exists = FileUtil::fileStat( rname ).find( '+' ) != string::npos;
+  if( info.exists )
   {
     checkReadable( fname, info, forceaims );
   } else
@@ -726,11 +727,13 @@ void executeOverVolume( string        ifname,
       if( sizeout[i] == 0 )
         sizeout[i] = sizein[i];
       if( voxelout[i] == 0.0 )
+      {
         if( inputInfo.header.get() && inputInfo.header->hasProperty( "voxel_size") )
             voxelout[i] = inputInfo.header->getProperty( "voxel_size" )
                                             ->getArrayItem( i )->getScalar();
         else
           voxelout[i] = 1.0;
+      }
     }
   }
 

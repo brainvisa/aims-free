@@ -21,6 +21,7 @@
 //#include <aims/utility/utility_g.h>
 
 #include <iostream>
+#include <limits>
 #include <cartobase/config/verbose.h>
 
 using namespace aims;
@@ -135,7 +136,7 @@ bool CxParcel::parcellation( AimsData<T> & gmdata )
   for(z=0; z<zmax; z++)
     for(y=0; y<ymax; y++)
       for(x=0; x<xmax; x++)
-        if(gmdata(x,y,z) == gm_value)
+        if(gmdata(x,y,z) == static_cast<T>(gm_value))
 	       gmax++;
   gm.reserve(gmax);
 
@@ -143,7 +144,7 @@ bool CxParcel::parcellation( AimsData<T> & gmdata )
   for(z=0; z<zmax; z++)
      for(y=0; y<ymax; y++)
        for(x=0; x<xmax; x++)
-         if(gmdata(x,y,z) == gm_value)
+         if(gmdata(x,y,z) == static_cast<T>(gm_value))
          {
             gm[g][0]=x*sx;
             gm[g][1]=y*sy;
@@ -161,7 +162,7 @@ bool CxParcel::parcellation( AimsData<T> & gmdata )
     
     // searching for the closest vertex
     d2min = 1000.;
-    pmin = -1;
+    pmin = numeric_limits<unsigned>::max();
     for( p=0; p<pmax; p++)
     {
       d2 = (vert[p][0]-gm[g][0])*(vert[p][0]-gm[g][0]) 
@@ -173,7 +174,7 @@ bool CxParcel::parcellation( AimsData<T> & gmdata )
         pmin = p;
       }
     }
-    if(pmin!=-1)
+    if(pmin != numeric_limits<unsigned>::max())
     {
       x=round(gm[g][0]/sx);
       y=round(gm[g][1]/sy);

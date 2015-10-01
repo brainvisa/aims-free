@@ -166,6 +166,7 @@ int DoImagePrimalSketch ( std::string fileIn,
 
     std::cout << "Finished" << std::endl;
 
+    return EXIT_SUCCESS;
 }
 
 
@@ -212,7 +213,7 @@ int main(int argc, const char **argv) {
         app.initialize();
         
         
-        DoImagePrimalSketch( fileIn, fileoutScales, fileoutBlobs, fileMask, subject, smoothOperator, dt, tmax, tmin, statFile, graphFile );
+        return DoImagePrimalSketch( fileIn, fileoutScales, fileoutBlobs, fileMask, subject, smoothOperator, dt, tmax, tmin, statFile, graphFile );
         
     }   
     catch( user_interruption & )

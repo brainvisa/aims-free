@@ -111,7 +111,7 @@ bool makemapbck( Process & p, const string & filein, Finder & f )
   BucketMap<T>		vol;
   string		format = f.format();
   Reader<BucketMap<T> >	reader( filein );
-  if( ! reader.read( vol,1, &format ) );
+  if( ! reader.read( vol,1, &format ) )
     throw logic_error( "Internal error: read failed" );
 
   AimsDistanceFrontPropagation( vol, (T) fp.val_domain, (T) fp.val_outside,
