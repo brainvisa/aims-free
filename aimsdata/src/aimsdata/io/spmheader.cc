@@ -618,8 +618,10 @@ bool SpmHeader::read()
               // This code breaks the strict aliasing rule, but as the proper
               // way of doing the conversion is not obvious, just make the
               // warning non-fatal for now.
+#if defined(__GNUC__) && ( __GNUC__ * 0x100 + __GNUC_MINOR__ >= 0x403 )
               #pragma GCC diagnostic push
               #pragma GCC diagnostic warning "-Wstrict-aliasing"
+#endif
               origin.push_back( byteswap16( *( (short *) 
                                                & header.hist.originator[0] 
                                                ) ) );
@@ -629,7 +631,9 @@ bool SpmHeader::read()
               origin.push_back( byteswap16( *( (short *) 
                                                & header.hist.originator[4] 
                                                ) ) );
+#if defined(__GNUC__) && ( __GNUC__ * 0x100 + __GNUC_MINOR__ >= 0x403 )
               #pragma GCC diagnostic pop
+#endif
             }
           else
             {
