@@ -116,7 +116,7 @@ ChannelExtract<I>::ChannelExtract( ChannelExtractInput& ct)
 template<typename INP>
 bool select( Process & p, const string & filename, Finder & f )
 {
-  ChannelExtractInput   &t = (ChannelExtractInput &) p;
+  ChannelExtractInput &t = dynamic_cast<ChannelExtractInput &>( p);
   ChannelExtract<INP> c(t);
 
   Finder    f2;
@@ -175,7 +175,7 @@ bool doit( Process & p, const string & filename, Finder & f )
   }
   
   string ofilename;
-  for (int i = 0; i < t.channels.size(); ++i)
+  for (size_t i = 0; i < t.channels.size(); ++i)
   {
     if (i < t.filesout.size()) {
       // Get specified name
@@ -187,7 +187,7 @@ bool doit( Process & p, const string & filename, Finder & f )
     }
     
     // Get channel name
-    if (t.channels[i] < dcode.size()) {
+    if (static_cast<size_t>(t.channels[i]) < dcode.size()) {
       cname = dcode[ t.channels[i] ];
     }
     else {

@@ -107,7 +107,7 @@ bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
   Volume<T> *isvolume = view.get();
   Volume<T> *isview = 0;
   int cnt = 0;
-  while( isview = isvolume->refVolume().get() ) {
+  while( ( isview = isvolume->refVolume().get() ) ) {
     cnt++;
     cartoMsg( 1, " -> parent" + carto::toString( cnt ) + " found.", "PARTIALIO_TEST" );
     isvolume = isview;
