@@ -37,6 +37,10 @@
 using namespace aims;
 using namespace std;
 
+// This code generates a ton of these warnings, it is not obvious how to fix
+// them without breaking the code. Make the warnings non-fatal for now.
+#pragma GCC diagnostic warning "-Wsign-compare"
+
 namespace aims
 {
 

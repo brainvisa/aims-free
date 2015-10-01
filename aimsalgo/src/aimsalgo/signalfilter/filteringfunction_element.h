@@ -139,7 +139,7 @@ namespace aims {
   template <typename T>                                                      \
   NAME<T>::~NAME() {}                                                        \
   template <typename T>                                                      \
-  NAME<T> & NAME<T>::operator=( const NAME<T> & other ) {}                   \
+  NAME<T> & NAME<T>::operator=( const NAME<T> & other ) { return *this; }    \
   template <typename T>                                                      \
   void NAME<T>::setOptions( const carto::Object & options ) {}
 

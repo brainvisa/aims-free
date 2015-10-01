@@ -32,7 +32,7 @@
  */
 
 
-#ifndef AIMS_TOPOLOGY_CONNECTICITY26_H
+#ifndef AIMS_TOPOLOGY_CONNECTIVITY26_H
 #define AIMS_TOPOLOGY_CONNECTIVITY26_H
 
 #include <aims/topology/relation.h>

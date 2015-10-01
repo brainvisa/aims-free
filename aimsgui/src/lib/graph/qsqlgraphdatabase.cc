@@ -433,7 +433,7 @@ void QSqlGraphDatabase::fillGraphData(
     g.getProperty( "uuid" );
     string sql = string( "SELECT eid FROM _Graph WHERE uuid='" ) + uuid + "'";
     QSqlQuery res = exec( sql );
-    if( !res.lastError().type() == 0 )
+    if( res.lastError().type() != QSqlError::NoError )
       throw invalid_format_error( res.lastError().text().toStdString(),
                                   _hostname );
     res.next();
@@ -475,7 +475,7 @@ void QSqlGraphDatabase::insertOrUpdateVertex( Vertex* v,
     sql += string( " ) values ( " ) + values + " )";
     // cout << "vertex SQL:\n" << sql << endl;
     QSqlQuery res = exec( sql );
-    if( !res.lastError().type() == 0 )
+    if( res.lastError().type() != QSqlError::NoError )
       throw invalid_format_error( res.lastError().text().toStdString(),
                                   hostname() );
     // get vertex id
@@ -533,7 +533,7 @@ void QSqlGraphDatabase::insertOrUpdateEdge( Edge* v,
     sql += string( " ) values ( " ) + values + " )";
     // cout << "Edge SQL: " << sql << endl;
     QSqlQuery res = exec( sql );
-    if( !res.lastError().type() == 0 )
+    if( res.lastError().type() != QSqlError::NoError )
       throw invalid_format_error( res.lastError().text().toStdString(),
                                   hostname() );
     // get edge id
@@ -563,7 +563,7 @@ void QSqlGraphDatabase::updateVertexIndexMap( CurrentGraphData & data )
     = database().exec( "SELECT graph_index, eid FROM _Vertex WHERE graph="
       + QString::number( data.gid ) );
   cout << "query done\n";
-  if( !res.lastError().type() == 0 )
+  if( res.lastError().type() != QSqlError::NoError )
     throw invalid_format_error( res.lastError().text().toStdString(),
                                 hostname() );
   while( res.next() )
@@ -579,7 +579,7 @@ void QSqlGraphDatabase::updateEdgeIndexMap( CurrentGraphData & data )
       "_Vertex ON _Vertex.eid=_Edge.vertex1 WHERE _Vertex.graph="
       + QString::number( data.gid ) );
   cout << "query done\n";
-  if( !res.lastError().type() == 0 )
+  if( res.lastError().type() != QSqlError::NoError )
     throw invalid_format_error( res.lastError().text().toStdString(),
                                 hostname() );
   while( res.next() )
@@ -709,7 +709,7 @@ QSqlGraphDatabase::partialReadFromVertexQuery( const string & sqlquery,
       "SELECT request on vertices must query eid", hostname() );
 
   QSqlQuery res = exec( sqlquery );
-  if( !res.lastError().type() == 0 )
+  if( res.lastError().type() != QSqlError::NoError )
     throw invalid_format_error( res.lastError().text().toStdString(),
                                 hostname() );
 
@@ -757,7 +757,7 @@ QSqlGraphDatabase::partialReadFromVertexQuery( const string & sqlquery,
     sql += vidstring + ")";
     // cout << "graphs SQL: " << sql.toStdString() << endl;
     QSqlQuery res2 = database().exec( sql );
-    if( !res2.lastError().type() == 0 )
+    if( res2.lastError().type() != QSqlError::NoError )
       throw invalid_format_error( res2.lastError().text().toStdString(),
                                   hostname() );
     int graph;
@@ -795,7 +795,7 @@ QSqlGraphDatabase::partialReadFromVertexQuery( const string & sqlquery,
       sql = "SELECT class_name, eid FROM class WHERE eid in ( " + vidstring
         + " )";
       res2 = database().exec( sql );
-      if( !res2.lastError().type() == 0 )
+      if( res2.lastError().type() != QSqlError::NoError )
         throw invalid_format_error( res2.lastError().text().toStdString(),
                                     hostname() );
       while( res2.next() )
@@ -940,7 +940,7 @@ QSqlGraphDatabase::partialReadFromEdgeQuery( const string & sqlquery,
       hostname() );
 
   QSqlQuery res = exec( sqlquery );
-  if( !res.lastError().type() == 0 )
+  if( res.lastError().type() != QSqlError::NoError )
     throw invalid_format_error( res.lastError().text().toStdString(),
                                 hostname() );
 
@@ -997,7 +997,7 @@ QSqlGraphDatabase::partialReadFromEdgeQuery( const string & sqlquery,
       sql += ")";
       // cout << "SQL: " << sql.toStdString() << endl;
       res = database().exec( sql );
-      if( !res.lastError().type() == 0 )
+      if( res.lastError().type() != QSqlError::NoError )
         throw invalid_format_error( res.lastError().text().toStdString(),
                                     hostname() );
       while( res.next() )
@@ -1036,7 +1036,7 @@ QSqlGraphDatabase::partialReadFromEdgeQuery( const string & sqlquery,
       cout << "vertices: " << vid.size() << endl;
       // cout << "graphs SQL: " << sql.toStdString() << endl;
       QSqlQuery res2 = database().exec( sql );
-      if( !res2.lastError().type() == 0 )
+      if( res2.lastError().type() != QSqlError::NoError )
         throw invalid_format_error( res2.lastError().text().toStdString(),
                                     hostname() );
       int graph, i = 0;

@@ -313,7 +313,6 @@ void TrackvisBundleReader::read()
   int n_scalars;
   int n_properties;
   int byte_swapping;
-  int i;
   vector<int> dim;
   vector<float> vs;
   vector<float> s2m_v;
@@ -337,6 +336,7 @@ void TrackvisBundleReader::read()
 
   int npts, p;
   FiberPoint pos;
+  int i = 0;
   BundleInfo currentBundle( i, "trackvis_bundle" );
   startBundle( currentBundle );
 

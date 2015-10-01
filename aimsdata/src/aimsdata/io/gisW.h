@@ -34,7 +34,7 @@
 /*
  *  Data writer class
  */
-#ifndef AIMS_IO_GIDW_H
+#ifndef AIMS_IO_GISW_H
 #define AIMS_IO_GISW_H
 
 #include <aims/config/aimsdata_config.h>

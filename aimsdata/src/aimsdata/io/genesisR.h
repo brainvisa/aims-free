@@ -35,7 +35,7 @@
  *  Data reader class
  */
 
-#ifndef AIMS_IO_GENESIDR_H
+#ifndef AIMS_IO_GENESISR_H
 #define AIMS_IO_GENESISR_H
 
 #include <aims/config/aimsdata_config.h>
