@@ -93,7 +93,7 @@ const QListWidget *QOrderingListWidget::qListWidget() const
 
 void QOrderingListWidget::up()
 {
-  unsigned	i, n = d->listwidget->count(), ind = -1;
+  int	i, n = d->listwidget->count(), ind = -1;
   QListWidgetItem	*sel = 0;
   for( i=0; i<n; ++i )
     if( d->listwidget->item(i)->isSelected() )
@@ -115,7 +115,7 @@ void QOrderingListWidget::up()
 
 void QOrderingListWidget::down()
 {
-  unsigned	i, n = d->listwidget->count(), ind = -1;
+  int	i, n = d->listwidget->count(), ind = -1;
   QListWidgetItem	*sel = 0;
   for( i=0; i<n; ++i )
     if( d->listwidget->item(i)->isSelected() )
