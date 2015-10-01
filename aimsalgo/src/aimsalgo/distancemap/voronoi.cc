@@ -133,6 +133,10 @@ FillVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
       }
 }
 
+// Make this warning non-fatal as it is probably harmless and the fix is not
+// obvious
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wsign-compare"
 template <class T>
 void
 EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
@@ -172,10 +176,6 @@ EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
       {
         center = it->location();
 
-        // Make this warning non-fatal as it is probably harmless and the fix
-        // is not obvious
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic warning "-Wsign-compare"
         if ( vol( center ) >= dist )
           for ( n = 0; n < mask.length(); n++ )
           {
@@ -199,13 +199,13 @@ EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
               }
             }
           }
-        #pragma GCC diagnostic pop
       }
     }
   }
   cout <<  "\b\b\b\b\b\b\b\b\b\b\b\b" << setw(12) << setprecision(8)
        << float( last_dist ) / mult_factor << endl;
 }
+#pragma GCC diagnostic pop
 
 
 template <class T>
