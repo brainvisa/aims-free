@@ -149,7 +149,7 @@ namespace aims
     std::set<std::string>		names = dir.files();
     std::set<std::string>::iterator	in, en = names.end();
     std::string				name;
-    int					z, t, ss = 0;
+    int					z, t, ss = 0, es = 0;
     std::vector<bool>			reads( data.dimT() * data.dimZ() );
 
     z = data.dimZ();	// temp
@@ -158,6 +158,8 @@ namespace aims
 	name = dirname + s + *in;
 	//cout << "read " << name << endl;
 	GenesisHeader	h( name );	// (re)read each header
+
+    //std::cout << "read " << name << "(byte swapping: " << h.byteSwapping() << ")" << std::endl;
 	try
 	  {
 	    h.read();
@@ -176,20 +178,27 @@ namespace aims
 	    t = 0;	// temporarily
 	    h.getProperty( "slice", z );
 	    h.getProperty( "start_slice", ss );
-            z -= ss;
-	    if( z >= 0 && z < data.dimZ() && t >= 0 && t < data.dimT() )
+            h.getProperty( "end_slice", es );
+            z = abs(es - z);
+	    if( (z >= 0) && (z < data.dimZ()) /*&& (t >= 0) && (t < data.dimT())*/ ) //FR: unuseful checks
 	      {
 		if( reads[ t*data.dimZ() + z ] )
+                {
 		  std::cerr << "warning: slice z=" << z << ", t=" << t 
 			    << " already read" << std::endl;
+                }
 		else
+                {
+                  std::cerr << "........reading slice z=" << z << ", t=" << t << std::endl;
 		  reads[ t*data.dimZ() + z ] = true;
-		DefaultItemReader<T>	ib1;
-		ItemReader<T>	*ir = ib1.reader( "binar", h.byteSwapping() );
-		for( int y=0; y<data.dimY(); ++y )  
-		  ir->read( is, &data(0,y,z,t), data.dimX() );
+                
+		  DefaultItemReader<T>	ib1;
+		  ItemReader<T>	*ir = ib1.reader( "binar", h.byteSwapping() );
+		  for( int y=0; y<data.dimY(); ++y )  
+		    ir->read( is, &data(0,y,z,t), data.dimX() );
 
-		delete ir;
+		  delete ir;
+                }
 	      }
 	  }
 	catch( std::exception & )
