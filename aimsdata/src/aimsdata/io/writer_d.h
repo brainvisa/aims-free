@@ -165,6 +165,7 @@ namespace aims
 
     if( format )	// priority to format hint
     {
+
       writer = FileFormatDictionary<T>::fileFormat( *format );
       if( writer )
       {
@@ -176,7 +177,7 @@ namespace aims
           if( writer->write( _filename, obj, options ) )
             return true;
           else if( exactformat )
-            throw carto::wrong_format_error( std::string( "Cannot write "
+            throw carto::wrong_format_error( std::string( "1. Cannot write "
               "object in format " ) + *format, _filename );
         }
         catch( std::exception & e )
@@ -228,6 +229,7 @@ namespace aims
         if( defformato )
         {
           std::string defformat = defformato->getString();
+
           if( tried.find( defformat ) == notyet )
           {
             writer = FileFormatDictionary<T>::fileFormat( defformat );
@@ -241,7 +243,7 @@ namespace aims
                 if( writer->write( _filename, obj, options ) )
                   return true;
                 else if( exactformat )
-                  throw carto::wrong_format_error( std::string( "Cannot write "
+                  throw carto::wrong_format_error( std::string( "2. Cannot write "
                     "object in format " ) + defformat, _filename );
               }
               catch( std::exception & e )
@@ -270,6 +272,7 @@ namespace aims
     // try every matching format until one works
     if( iext != eext )
       for( ie=iext->second.begin(), ee=iext->second.end(); ie!=ee; ++ie )
+      {
         if( tried.find( *ie ) == notyet )
         {
           writer = FileFormatDictionary<T>::fileFormat( *ie );
@@ -283,7 +286,7 @@ namespace aims
               if( writer->write( _filename, obj, options ) )
                 return true;
               else if( exactformat )
-                throw carto::wrong_format_error( std::string( "Cannot write "
+                throw carto::wrong_format_error( std::string( "3. Cannot write "
                   "object in format " ) + *ie, _filename );
             }
             catch( std::exception & e )
@@ -300,6 +303,7 @@ namespace aims
             tried.insert( *ie );
           }
         }
+      }
 
     if( !ext.empty() )
     {
@@ -321,7 +325,7 @@ namespace aims
                 if( writer->write( _filename, obj, options ) )
                   return true;
                 else if( exactformat )
-                  throw carto::wrong_format_error( std::string( "Cannot write "
+                  throw carto::wrong_format_error( std::string( "4. Cannot write "
                     "object in format " ) + *ie, _filename );
               }
               catch( std::exception & e )
@@ -352,7 +356,7 @@ namespace aims
               if( writer->write( _filename, obj, options ) )
                 return true;
               else if( exactformat )
-                throw carto::wrong_format_error( std::string( "Cannot write "
+                throw carto::wrong_format_error( std::string( "5. Cannot write "
                 "object in format " ) + *ie, _filename );
             }
             catch( std::exception & e )
