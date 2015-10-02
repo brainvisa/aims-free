@@ -539,9 +539,19 @@ bool SpmHeader::read()
 
   vector<float> stomvec;
   if( !getProperty( "storage_to_memory", stomvec ) || stomvec.size() != 16 )
+  {
+#ifdef DEBUG
+    cout << "....put storage_to_memory in properties...(spmheader.cc)" << endl;
+#endif
     setProperty( "storage_to_memory", stom.toVector() );
+  }
   else
+  {
+#ifdef DEBUG
+    cout << "...no storage_to_memory in properties...(spmheader.cc)" << endl;
+#endif
     stom = Motion( stomvec );
+  }
   Point3df df = stom.transform( Point3df( header.dime.dim[1],
                                 header.dime.dim[2], header.dime.dim[3] ) )
       - stom.transform( Point3df( 0, 0, 0 ) );
@@ -814,6 +824,7 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
   Point3d tdims( dims[0], dims[1], dims[2] );
   std::vector<float> vstom;
   Motion  stom;
+  stom.setToIdentity();
   stom.rotation()(1,1) = -1;
   stom.rotation()(2,2) = -1;
   stom.translation()[1] = dims[1] - 1;
@@ -829,6 +840,9 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
   char orient = 0;
   if( getProperty( "storage_to_memory", vstom ) )
   {
+
+    //cout << "...storage_to_memory in write spmheader.cc..." << endl;
+
     stom = Motion( vstom );
     // ensure image is axial
     if( fabs( stom.rotation()(0,0) ) < 0.9
@@ -841,11 +855,17 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
       stom.rotation()(2,2) = -1;
       stom.translation()[1] = dims[1] - 1;
       stom.translation()[2] = dims[2] - 1;
+
+      //cout << "...storage modified..." << endl;
+
       setProperty( "storage_to_memory", stom.toVector() );
     }
   }
   else
   {
+
+    //cout << "...no storage_to_memory in write spmheader.cc..." << endl;
+
     bool      radio = true;
     try
     {
@@ -857,6 +877,8 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
         m2.rotation()(0,0) = -1.;
         stom.translation()[0] = dims[0] - 1;
         stom = m2 * stom;
+
+        cout << "...flip x axis..." << endl;
       }
     }
     catch( exception & )
