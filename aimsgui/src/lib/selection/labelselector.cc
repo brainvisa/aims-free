@@ -940,7 +940,7 @@ void LabelSelector::loadModel( const QString & filename )
     }
     else
     {
-      clog << "Graph " << filename << " cannot be read." << endl;
+      clog << "Graph " << filename.toStdString() << " cannot be read." << endl;
       return;
     }
   }
