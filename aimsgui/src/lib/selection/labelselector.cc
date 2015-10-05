@@ -938,6 +938,11 @@ void LabelSelector::loadModel( const QString & filename )
       d->modellabel->setText( filename );
       updateModelCaps();
     }
+    else
+    {
+      clog << "Graph " << filename << " cannot be read." << endl;
+      return;
+    }
   }
   catch( exception & e )
   {
