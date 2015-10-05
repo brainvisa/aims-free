@@ -378,7 +378,7 @@ unsigned cat( AimsData<T> & out, const AimsData<T> & in, unsigned t0 )
       outph = dynamic_cast< PythonHeader *>( out.header() );
 
       // Check first file of the concatenation list
-      if( outph && !outph->getProperty("zero_start_time", out_zst) )
+      if( !outph->getProperty("zero_start_time", out_zst) )
 	{ // first file
 	  outph->setProperty("zero_start_time", in_zst);
 	  outph->setProperty("start_time", in_st);
