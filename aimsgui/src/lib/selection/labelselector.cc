@@ -339,7 +339,7 @@ void SelectBox::addSelection( const SelectionSet & sel, const string & parent )
       mergeSelection( nsel );
 
       // find parent
-      QTreeWidgetItem			*pitem;
+      QTreeWidgetItem			*pitem = 0;
       unsigned i, n = topLevelItemCount();
 
       for( i=0; i<n; ++i )
