@@ -137,51 +137,59 @@ namespace aims
     typename std::vector< AimsVector<uint,D> >::iterator	ip, fp;
     uint					n = D/2;
     for ( is=surface.begin(); is!=fs; ++is )
-      {
-	AimsSurface<D, T>		& surf = is->second;
-	std::vector< AimsVector<uint,D> >	& poly = surf.polygon();
+    {
+      AimsSurface<D, T>		& surf = is->second;
+      std::vector< AimsVector<uint,D> >	& poly = surf.polygon();
 
-	for ( ip=poly.begin(), fp=poly.end(); ip!=fp; ++ip )
-	  {
-	    AimsVector<uint,D>	& p = *ip;
-	    for ( uint i=0; i<n; ++i )
-	      {
-		uint vert = p[i];
-		p[i] = p[D-i-1];
-		p[D-i-1] = vert;
-	      }
-	  }
+      for ( ip=poly.begin(), fp=poly.end(); ip!=fp; ++ip )
+      {
+        AimsVector<uint,D>	& p = *ip;
+        for ( uint i=0; i<n; ++i )
+        {
+          uint vert = p[i];
+          p[i] = p[D-i-1];
+          p[D-i-1] = vert;
+        }
       }
+    }
   }
 
 
   template<int D, class T>
-  void SurfaceManip::meshMerge( AimsTimeSurface<D,T> & dst, 
+  void SurfaceManip::meshMerge( AimsTimeSurface<D,T> & dst,
                                 const AimsTimeSurface<D,T> & add )
   {
-    std::vector<Point3df> & vert = dst.vertex();
-    std::vector<Point3df> & norm = dst.normal();
-    std::vector<AimsVector<uint,D> > & poly = dst.polygon();
-    const std::vector<Point3df>  & vert2 = add.vertex();
-    const std::vector<Point3df>  & norm2 = add.normal();
-    const std::vector<AimsVector<uint,D> >  & poly2 = add.polygon();
-    unsigned i, j, n = vert.size(), m = vert2.size(), p = poly2.size();
+    typename AimsTimeSurface<D, T>::const_iterator is, es = add.end();
+    for( is=add.begin(); is!=es; ++is )
+    {
+      int t = is->first;
+      const AimsSurface<D, T> & imesh = is->second;
+      AimsSurface<D, T> & omesh = dst[t];
+      std::vector<Point3df> & vert = omesh.vertex();
+      std::vector<Point3df> & norm = omesh.normal();
+      std::vector<AimsVector<uint,D> > & poly = omesh.polygon();
+      const std::vector<Point3df>  & vert2 = imesh.vertex();
+      const std::vector<Point3df>  & norm2 = imesh.normal();
+      const std::vector<AimsVector<uint,D> >  & poly2 = imesh.polygon();
+      unsigned i, j, n = vert.size(), m = vert2.size(), p = poly2.size();
 
-    // copy vertices & normals
-    for ( i=0; i<m; ++i )
-      vert.push_back( vert2[i] );
-    for ( i=0, m=norm2.size(); i<m; ++i )
-	norm.push_back( norm2[i] );
+      // copy vertices & normals
+      for ( i=0; i<m; ++i )
+        vert.push_back( vert2[i] );
+      for ( i=0, m=norm2.size(); i<m; ++i )
+        norm.push_back( norm2[i] );
 
-    // translate & copy polygons
-    for ( i=0; i<p; ++i )
+      // translate & copy polygons
+      for ( i=0; i<p; ++i )
       {
-	AimsVector<uint,D>  pol;
-	for ( j=0; j<D; ++j )
-	  pol[j] = poly2[i][j] + n;
-	poly.push_back( pol );
+        AimsVector<uint,D>  pol;
+        for ( j=0; j<D; ++j )
+          pol[j] = poly2[i][j] + n;
+        poly.push_back( pol );
       }
-    dst.header().setProperty( "vertex_number", int( n + m ) );
+      if( t == 0 )
+        dst.header().setProperty( "vertex_number", int( n + m ) );
+    }
   }
 
   template<int D, class T>
