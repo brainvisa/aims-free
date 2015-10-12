@@ -131,7 +131,10 @@ public:
 
 
 
-  void insert( %Template1PyType% & );
+  void insert( %Template1PyType%%Template1deref% );
+%MethodCode
+  sipCpp->insert( %Template1deref%a0 );
+%End
 
   void add( %Template1PyType%%Template1deref% );
 %MethodCode

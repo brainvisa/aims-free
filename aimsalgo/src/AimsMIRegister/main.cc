@@ -345,49 +345,44 @@ int main( int argc, const char** argv )
     // choice of index to be minimized
     //
     ObjFunc* objfunc = NULL;
-    if( !c_objfunc.empty() )
+    ASSERT( c_objfunc == "mi" ||
+            c_objfunc == "cr"   );
+    if( c_objfunc == "mi" )
     {
-      ASSERT( c_objfunc == "mi" ||
-              c_objfunc == "cr"   );
-      if( c_objfunc == "mi" )
-      {
-        objfunc = new MutualInfoFunc( numLevel, interpolator, comb, maskSize );
-        cout << "objective function   : mutual information" << endl;
-      }
-      else if( c_objfunc == "cr" )
-      {
-        objfunc = new CorRatioFunc( numLevel, interpolator, comb, maskSize );
-        cout << "objective function   : correlation ratio" << endl;
-      }
+      objfunc = new MutualInfoFunc( numLevel, interpolator, comb, maskSize );
+      cout << "objective function   : mutual information" << endl;
     }
+    else if( c_objfunc == "cr" )
+    {
+      objfunc = new CorRatioFunc( numLevel, interpolator, comb, maskSize );
+      cout << "objective function   : correlation ratio" << endl;
+    } else ASSERT(false);
 
 
     //
     // choice of optimizer
     //
     Optimizer<float,6>* optimizer = NULL;
-    if( !c_optimizer.empty() )
+    ASSERT( c_optimizer == "powell" ||
+            c_optimizer == "random" ||
+            c_optimizer == "single"    );
+    if( c_optimizer == "powell" )
     {
-      ASSERT( c_optimizer == "powell" ||
-              c_optimizer == "random" ||
-              c_optimizer == "single"    );
-      if( c_optimizer == "powell" )
-      {
-        optimizer = new PowellOptimizer<float,6>( *objfunc, error );
-        cout << "optimizer            : powell" << endl;
-      }
-      else if( c_optimizer == "random" )
-      {
-        optimizer = new DetermOptimizer<float,6>( *objfunc, error, 10000, 100, 
-              true );
-        cout << "optimizer            : deterministic" << endl;
-      }
-      else if( c_optimizer == "single" )
-      {
-        optimizer = new SingleOptimizer<float,6>( *objfunc );
-        cout << "optimizer            : singleoptimizer" << endl;
-      }
+      optimizer = new PowellOptimizer<float,6>( *objfunc, error );
+      cout << "optimizer            : powell" << endl;
     }
+    else if( c_optimizer == "random" )
+    {
+      optimizer = new DetermOptimizer<float,6>( *objfunc, error, 10000, 100, 
+                                                true );
+      cout << "optimizer            : deterministic" << endl;
+    }
+    else if( c_optimizer == "single" )
+    {
+      optimizer = new SingleOptimizer<float,6>( *objfunc );
+      cout << "optimizer            : singleoptimizer" << endl;
+    }
+    else ASSERT(false);
 
     //
     // Equiped with probe

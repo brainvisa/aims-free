@@ -44,6 +44,7 @@
 #include <aims/math/mathelem.h>
 #include <float.h>
 #include <iomanip>
+#include <memory>
 
 using namespace aims;
 using namespace carto;
@@ -155,10 +156,10 @@ void RoiStats::streamout( char *out )
   string          surname;
   int             nbVox;
   float           volVox;
-  ofstream        *os = NULL;
+  auto_ptr<ofstream> os;
 
   if (out)
-    os = new ofstream(out, ios::app);
+    os.reset(new ofstream(out, ios::app));
 
   ASSERT( hasProperty("start_time") );     // Checking
   getProperty("start_time", start_time);
@@ -178,7 +179,7 @@ void RoiStats::streamout( char *out )
   
   // Streaming out yet...
   string separ = "|";
-  if (os)
+  if (os.get())
     *os << setw(15) << "RoiName" << separ  
 	<< setw(7) << "StTime" << separ 
 	<< setw(7) <<"DuTime" << separ 
@@ -198,14 +199,14 @@ void RoiStats::streamout( char *out )
 	<< setw(10) << "Max";
   if ( isGtmCorrected() )
     {
-      if (os)
+      if (os.get())
 	*os << setw(10) << separ << "GtmCorr" << endl;
       else
 	cout << setw(10) <<separ << "GtmCorr" << endl;
     }
   else
     {
-      if (os)
+      if (os.get())
 	*os << endl;
       else
 	cout << endl;
@@ -237,7 +238,7 @@ void RoiStats::streamout( char *out )
       int endT = taCurv.size();
       for(int t=0;t<endT;t++)
 	{
-	  if (os)
+	  if (os.get())
 	    *os << setw(15) << surname.c_str() << separ 
 		<< setw(7) << start_time[t] << separ
 		<< setw(7) << duration_time[t] << separ
@@ -257,21 +258,22 @@ void RoiStats::streamout( char *out )
                <<  setw(10) << maxCurv[t];
 	    if ( isGtmCorrected() )
 	      {
-		if (os)
+		if (os.get())
 		  *os << separ <<  setw(10) << gtm_ac[t] << endl;
 		else
 		  cout << separ << setw(10) << gtm_ac[t] << endl;
 	      }
 	    else
 	      {
-		if (os)
+		if (os.get())
 		  *os << endl;
 		else
 		  cout << endl;
 	      }
 	}
     }
-  os->close();
-  delete(os);
+  if(os.get()) {
+    os->close();
+  }
 }
 
