@@ -626,9 +626,13 @@ CoordinatesFieldMeshInterpoler::Private::Private(
   unsigned i;
 
   for( im=source.begin(), it1=srccoord1.begin(), it2=srccoord2.begin();
-      im!=em && it1!=et1 && it2!=et2; ++em, ++it1, ++it2 )
+      im!=em; ++im, ++it1, ++it2 )
   {
     AimsSurface<3, Void> & s = srcmesh[im->first];
+    if( it1 == et1 )
+      --it1;;
+    if( it2 == et2 )
+      --it2;
     s.polygon() = im->second.polygon();
     vector<Point3df> & vert = s.vertex();
     vert.resize( min( it1->second.nItem(), it2->second.nItem() ) );
