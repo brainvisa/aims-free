@@ -83,6 +83,8 @@ def sphere_coordinates(sphere, inversion=False):
     ----------
     sphere: (AimsTimeSurface_3_VOID)
         a sphere mesh: vertices must be on a sphere with center 0.
+    inversion: bool
+        if True, the longitude coord is inverted (useful for right hemisphere)
 
     Return
     ------
@@ -135,6 +137,8 @@ def resample_mesh_to_sphere(
         a latitude texture from HipHop mapping that go with the white_mesh
         of the subject. This texture indicates the spherical coordinates
         at each point.
+    inversion: bool
+        if True, the longitude coord is inverted (useful for right hemisphere)
 
     Return
     ------
@@ -167,6 +171,76 @@ def resample_mesh_to_sphere(
     # sourceshape and the source mesh of the interpoler must have the same
     # structure and topology (same vertices number and order, same polygons).
     resampled = interpoler.resampleMesh(mesh)
+
+    return resampled
+
+
+def resample_texture_to_sphere(
+    mesh, sphere, longitude, latitude, texture, interpolation='linear',
+    inversion=False):
+    """Resample a mesh to the sphere.
+
+    Parameters
+    ----------
+    mesh: (AimsTimeSurface_3_VOID)
+        a spherical triangulation of cortical hemisphere of the subject
+    sphere: (AimsTimeSurface_3_VOID)
+        a sphere mesh with center 0.
+        For example, a spherical mesh of size 100 located in standard
+        BrainVISA directory can be used.
+    longitude: (TimeTexture_FLOAT)
+        a longitude texture from HipHop mapping that go with the white_mesh
+        of the subject. This texture indicates the spherical coordinates
+        at each point.
+    latitude: (TimeTexture_FLOAT)
+        a latitude texture from HipHop mapping that go with the white_mesh
+        of the subject. This texture indicates the spherical coordinates
+        at each point.
+    interpolation: string or MeshInterpoler.InterpolationType enum
+        resampling interpolation type: "linear" or "nearest_neighbour"
+    inversion: bool
+        if True, the longitude coord is inverted (useful for right hemisphere)
+
+    Return
+    ------
+    resampled: (same type as input texture)
+
+    """
+    # get spherical coordinates textures on the sphere
+    slon_tex, slat_tex = sphere_coordinates(sphere, inversion)
+
+    #########################################################################
+    #                         Mesh interpoler                               #
+    #########################################################################
+
+    #  ...
+    # multiply latitudes by 2 to get same amplitude on both coords
+    latitude = aims.TimeTexture(latitude[0].arraydata() * 2)
+    slat_tex = aims.TimeTexture(slat_tex[0].arraydata() * 2)
+    interpoler = aims.CoordinatesFieldMeshInterpoler(
+        mesh, sphere, latitude, longitude, slat_tex, slon_tex)
+
+    # set interpoler discontinuity thresholds to handle 0/360 and 0/180 deg
+    # gaps
+    interpoler.setDiscontinuityThresholds(200, 200, 0)
+    # the main operation is project(), which calculates the correspondances
+    # between the source and destination mesh
+    interpoler.project()
+
+    # Resample the sourceshape texture onto the topology of the interpoler
+    # destination mesh, but staying in the native space of sourceshape.
+    # sourceshape and the source mesh of the interpoler must have the same
+    # structure and topology (same vertices number and order, same polygons).
+    if isinstance(interpolation, interpoler.InterpolationType):
+        interp_type = interpolation
+    elif interpolation == 'linear':
+        interp_type = interpoler.Linear
+    elif interpolation == 'nearest_neighbour':
+        interp_type = interpoler.NearestNeighbour
+    else:
+        raise ValueError('unknown interpolation type: %s'
+            % repr(interpolation))
+    resampled = interpoler.resampleTexture(texture, interp_type)
 
     return resampled
 
