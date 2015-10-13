@@ -637,24 +637,55 @@ typessub = {'signed char':
                'compareElement': '',
             },
 
-            'AimsVector<unsigned,2>':
-           {'typecode': 'AimsVector_U32_2',
-               'pyFromC': 'pyaimsConvertFrom_AimsVector',
-               'CFromPy': 'pyaimsConvertTo_AimsVector<uint32_t,2>',
-               'castFromSip': '',
-               'deref': '*',
-               'pyderef': '*',
-               'address': '&',
-               'pyaddress': '&',
-               'defScalar': '',
-               'defNumpyBindings': '',
-               'new': 'new AimsVector_U32_2',
-               'NumType': 'PyArray_OBJECT',
-               'PyType': 'AimsVector_U32_2',
-               'sipClass': 'AimsVector_U32_2',
-               'typeinclude': '#include <pyaims/vector/vector.h>',
-               'sipinclude': '#if SIP_VERSION < 0x040700\n'
-               '#include "sipaimssipAimsVector_U32_2.h"\n'
+             'Point3dl' : \
+             { 'typecode' : 'POINT3DL',
+               'pyFromC' : 'pyaimsConvertFrom_AimsVector',
+               'CFromPy' : 'pyaimsConvertTo_AimsVector<int32_t,3>',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&', 
+               'pyaddress' : '&', 
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new Point3dl', 
+               'NumType' : 'PyArray_OBJECT', 
+               'PyType' : 'Point3dl',
+               'sipClass' : 'Point3dl',
+               'typeinclude' : '#include <pyaims/vector/vector.h>', 
+               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipAimsVector_S32_3.h"\n' 
+               '#endif\n'
+               '#include <pyaims/vector/sipvector.h>\n'
+               '#ifndef PYAIMS_WRAPPER_AIMSVECTOR_S32_3\n'
+               '#define PYAIMS_WRAPPER_AIMSVECTOR_S32_3\n'
+               'template <> inline sipWrapperType*\n'
+               'sipClass_AimsVector<int32_t,3>()\n'
+               '{ return sipClass_AimsVector_S32_3; }\n' 
+               '#endif', 
+               'module' : 'aims', 
+               'testPyType' : 'pyaimsCheck_AimsVector<int32_t,3>', 
+               'compareElement' : '',
+               },
+
+             'AimsVector<unsigned,2>' : \
+             { 'typecode' : 'AimsVector_U32_2',
+               'pyFromC' : 'pyaimsConvertFrom_AimsVector',
+               'CFromPy' : 'pyaimsConvertTo_AimsVector<uint32_t,2>',
+               'castFromSip' : '',
+               'deref' : '*',
+               'pyderef' : '*',
+               'address' : '&', 
+               'pyaddress' : '&', 
+               'defScalar' : '',
+               'defNumpyBindings' : '',
+               'new' : 'new AimsVector_U32_2', 
+               'NumType' : 'PyArray_OBJECT', 
+               'PyType' : 'AimsVector_U32_2',
+               'sipClass' : 'AimsVector_U32_2',
+               'typeinclude' : '#include <pyaims/vector/vector.h>', 
+               'sipinclude' : '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipAimsVector_U32_2.h"\n' 
                '#endif\n'
                '#include <pyaims/vector/sipvector.h>\n'
                '#ifndef PYAIMS_WRAPPER_AIMSVECTOR_U32_2\n'
