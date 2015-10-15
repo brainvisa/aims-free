@@ -165,8 +165,9 @@ AIMSDATA_API void AimsOptionSetFatalFunc(void (*f)(const char *, ...));
   /// Parse all the options and returns eventually an error message
 AIMSDATA_API void AimsParseOptions(int *argc,char **argv,const AimsOption *opt,
                       const char **usage,int allowNegNum=1);
-  /// Return usage on stderr stream
-AIMSDATA_API void AimsUsage(const char **usage_text);
+  /// Return usage on stderr stream and exit
+AIMSDATA_API void AimsUsage(const char **usage_text)
+  __attribute__((__noreturn__));
   //@}
 
 //@}
