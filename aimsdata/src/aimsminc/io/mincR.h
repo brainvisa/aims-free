@@ -337,7 +337,7 @@ namespace aims
 
     if (result != MI_NOERROR)
     {
-      std::cerr << "Error opening input file: " << result << std::endl;
+//       std::cerr << "Error opening input file: " << result << std::endl;
       throw carto::corrupt_stream_error( "could not read MINC file",
                                           _name );
     }

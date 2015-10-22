@@ -55,11 +55,11 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
   //Only works for 3D volume. Should add 4D support.
   int n_dimensions=4;
-    
+
   if(thing.dimT()==1) {
     if(thing.dimZ()==1) {
       if(thing.dimY()==1) {
-	n_dimensions=1;
+        n_dimensions=1;
       }
       else n_dimensions=2;
     }
@@ -67,7 +67,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   }
   ::Volume volume;
   STRING dim_names[4];
-    
+
   dim_names[0] = create_string( const_cast<char*>( MIzspace) );
   dim_names[1] = create_string( const_cast<char*>( MIyspace ) );
   dim_names[2] = create_string( const_cast<char*>( MIxspace ) );
@@ -75,7 +75,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
   nc_type nc_data_type, nc_disk_data_type;
   BOOLEAN signed_flag;
-  
+
   carto::DataTypeCode<T>	dtc;
   bool scaledcoding = false;
   T mini = thing.minimum(), maxi = thing.maximum();
@@ -132,14 +132,14 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     dmax = maxi;
   }
   volume=create_volume(n_dimensions,
-		       dim_names,
-		       nc_data_type,
-		       signed_flag,
-		       mini,
-		       maxi);
-    
+                       dim_names,
+                       nc_data_type,
+                       signed_flag,
+                       mini,
+                       maxi);
+
   set_volume_real_range(volume,mini,maxi);
-    
+
   int       sizes[MAX_DIMENSIONS];
   sizes[3]=thing.dimZ();
   sizes[2]=thing.dimX();
@@ -151,9 +151,9 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   alloc_volume_data(volume);
 
   MincHeader	hdr(  _name, dtc.dataType(), thing.dimX(), thing.dimY(), 
-                      thing.dimZ(), thing.dimT(), 
-		      thing.sizeX(), thing.sizeY(), thing.sizeZ(), 
-		      thing.sizeT() );
+                      thing.dimZ(), thing.dimT(),
+                      thing.sizeX(), thing.sizeY(), thing.sizeZ(),
+                      thing.sizeT() );
 
   const PythonHeader *ph = dynamic_cast<const PythonHeader *>( thing.header() );
 
@@ -161,11 +161,10 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   float minc_sizeY=thing.sizeY();
   float minc_sizeZ=thing.sizeZ();
   float minc_sizeT=thing.sizeT();
-  
+
   if( ph ) {
     hdr.copy( *ph );
-    
-    
+
     if(hdr.hasProperty( "MINC_voxel_size" )) {
       vector<float> minc_vs;
       
@@ -206,10 +205,9 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   for( int t=0; t<thing.dimT(); ++t )  
     for( int z=0; z<thing.dimZ(); ++z )  
       for( int y=0; y<thing.dimY(); ++y )  
-	for( int x=0; x<thing.dimX(); ++x ) {
-	  set_volume_real_value( volume,  (Z_pos)*thing.dimZ()-dirZ*z-(Z_pos), (Y_pos)*thing.dimY()-dirY*y-(Y_pos), (X_pos)*thing.dimX()-dirX*x-(X_pos), t, 0, thing(x,y,z,t));
-		    
-	}
+        for( int x=0; x<thing.dimX(); ++x ) {
+          set_volume_real_value( volume,  (Z_pos)*thing.dimZ()-dirZ*z-(Z_pos), (Y_pos)*thing.dimY()-dirY*y-(Y_pos), (X_pos)*thing.dimX()-dirX*x-(X_pos), t, 0, thing(x,y,z,t));
+        }
 
 
   //1) Voxel to world transform
