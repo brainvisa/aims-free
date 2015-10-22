@@ -124,19 +124,23 @@ bool ManualBiasCorrection::processBiasCorrection( AimsData<T> & data, const stri
     }
     dir = 2 ;
   }
-  if( _direction == "y" ){
+  else if( _direction == "y" ){
     if( data.dimY() == 1 ){
       cerr << "Wrong image dimensions" << endl ;
       return false ;
     }
     dir = 1 ;
   }
-  if( _direction == "x" ){
+  else if( _direction == "x" ){
     if( data.dimX() == 1 ){
       cerr << "Wrong image dimensions" << endl ;
       return false ;
     }
     dir = 0 ;
+  }
+  else{
+    cerr << "direction must be x, y, or z" << endl ;
+    return false;
   }
   Point3df invDim( 1./(data.dimX() - 1.), 1./(data.dimY() - 1.), 1./(data.dimZ() - 1.) ) ;
   Point3d  p ;

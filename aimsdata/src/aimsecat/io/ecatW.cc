@@ -169,8 +169,14 @@ void EcatWriter::write(const AimsData<short>& thing)
       vs[3] = thing.sizeT();
       hdr.setProperty( "voxel_size", vs );
     }
-  
-  short *s_pt,*s_vol = new short[ thing.dimX() * thing.dimY() * thing.dimZ()];
+
+  /* 512 bytes added because in EcatWriteVolume_S16, a call to
+     file_data_to_host() (libecat) is performed, which only works on chunks
+     of 512 bytes (!)
+  */
+  size_t sbuf = thing.dimX() * thing.dimY() * thing.dimZ()
+    + 512 / sizeof(int16_t);
+  short *s_pt,*s_vol = new short[ sbuf ];
   ASSERT(s_vol);
   
   for (int t=0;t<EcatSizeT(uei);t++)
@@ -255,7 +261,13 @@ void EcatWriter::write(const AimsData<float>& thing)
       hdr.setProperty( "voxel_size", vs );
     }
   
-  float *f_pt,*f_vol = new float[ thing.dimX() * thing.dimY() * thing.dimZ()];
+  /* 512 bytes added because in EcatWriteVolume_S16, a call to
+     file_data_to_host() (libecat) is performed, which only works on chunks
+     of 512 bytes (!)
+  */
+  size_t sbuf = thing.dimX() * thing.dimY() * thing.dimZ()
+    + 512 / sizeof(float);
+  float *f_pt,*f_vol = new float[ sbuf ];
   ASSERT(f_vol);
   
   for (int t=0;t<EcatSizeT(uei);t++)

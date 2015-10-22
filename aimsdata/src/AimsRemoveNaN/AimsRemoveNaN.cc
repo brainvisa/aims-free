@@ -42,6 +42,8 @@
 #include <cmath>
 #endif
 
+#include <limits>
+
 #include <cartobase/config/cartobase_config.h>
 #include <aims/io/io_g.h>
 #include <aims/data/data_g.h>
@@ -94,7 +96,8 @@ doit( Process & p, const string & fname, Finder & f )
 
   if ( ! nr.noPercentage ) {
     if ( verbose ) cout << "Computing minimum and maximum" << endl;
-    T mini, maxi;
+    T mini = std::numeric_limits<T>::quiet_NaN(),
+      maxi = std::numeric_limits<T>::quiet_NaN();
     size_t countNaN = 0;
     size_t countNormal = 0;
     int x, y, z, t;

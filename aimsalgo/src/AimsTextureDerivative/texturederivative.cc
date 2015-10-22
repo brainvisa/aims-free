@@ -175,7 +175,7 @@ int main( int argc, char** argv )
   cout << "Computing derivatives..." << flush;
   
   int		i;
-  float 	Ix,Ixx,Ixy,Iy,Iyy;
+  float 	Ix,Ixx,Iy,Iyy, Ixy = 0;
 
   
   deriveTex = TextureSmoothing::derivative( inv, text,  max_neigh );
