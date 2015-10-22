@@ -12,7 +12,7 @@ class TestPyaimsIO(unittest.TestCase):
         self.work_dir = tempfile.mkdtemp(prefix='test_pyaims')
 
 
-    def compare_images(self, vol, vol2, vol1_name, vol2_name):
+    def compare_images(self, vol, vol2, vol1_name, vol2_name, thresh=1e-6):
         #print 'comp vol, sizes:', vol.getSize(), vol2.getSize()
         #print '    vsizes:', vol.getVoxelSize(), vol2.getVoxelSize()
         msg = 'comparing %s and %s' % (vol1_name, vol2_name)
@@ -21,10 +21,12 @@ class TestPyaimsIO(unittest.TestCase):
             np.max(np.abs(np.asarray(vol.getVoxelSize())
                           - vol2.getVoxelSize())) < 1e-6, msg)
         self.assertTrue(np.max(np.abs(np.asarray(vol) - np.asarray(vol2)))
-                        < 1e-6, msg)
+                        < thresh,
+                        msg + ', max diff: %f'
+                        % np.max(np.abs(np.asarray(vol) - np.asarray(vol2))) )
 
     def test_pyaims_io(self):
-        formats = ['.nii', '.nii.gz', '.ima' ] #, '.mnc']
+        formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v']
         types = ['S16', 'FLOAT']
         for dtype in types:
             vol = aims.Volume(10, 10, 10, dtype=dtype)
@@ -40,7 +42,11 @@ class TestPyaimsIO(unittest.TestCase):
 
                 vol2_name = os.path.basename(fname) + ' (re-read)'
                 vol2 = aims.read(fname)
-                self.compare_images(vol, vol2, vol1_name, vol2_name)
+                thresh = 1e-6
+                if format in ['.v']:
+                    # ecat scaling is far from exact...
+                    thresh = 1e-3
+                self.compare_images(vol, vol2, vol1_name, vol2_name, thresh)
                 del vol2
 
                 # test native file without minf
@@ -49,7 +55,7 @@ class TestPyaimsIO(unittest.TestCase):
                 vol3_name = os.path.basename(fname) \
                     + ' (re-read without .minf)'
                 vol3 = aims.read(fname)
-                self.compare_images(vol, vol3, vol1_name, vol3_name)
+                self.compare_images(vol, vol3, vol1_name, vol3_name, thresh)
 
     def tearDown(self):
         shutil.rmtree(self.work_dir)
