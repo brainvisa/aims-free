@@ -16,7 +16,9 @@ class TestPyaimsIO(unittest.TestCase):
         #print 'comp vol, sizes:', vol.getSize(), vol2.getSize()
         #print '    vsizes:', vol.getVoxelSize(), vol2.getVoxelSize()
         msg = 'comparing %s and %s' % (vol1_name, vol2_name)
-        self.assertEqual(vol.getSize(), vol2.getSize(), msg)
+        self.assertEqual(vol.getSize(), vol2.getSize(),
+                         msg + ': %s != %s'
+                         % (str(vol.getSize()), str(vol2.getSize())))
         self.assertTrue(
             np.max(np.abs(np.asarray(vol.getVoxelSize())
                           - vol2.getVoxelSize())) < 1e-6, msg)
@@ -26,7 +28,8 @@ class TestPyaimsIO(unittest.TestCase):
                         % np.max(np.abs(np.asarray(vol) - np.asarray(vol2))) )
 
     def test_pyaims_io(self):
-        formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v']
+        formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v', '.tiff']
+        suffixes = {'.dcm': '1', '.tiff': '_0000'}
         types = ['S16', 'FLOAT']
         for dtype in types:
             vol = aims.Volume(10, 10, 10, dtype=dtype)
@@ -40,6 +43,9 @@ class TestPyaimsIO(unittest.TestCase):
                 aims.write(vol, fname)
                 vol1_name = os.path.basename(fname) + ' (written)'
 
+                fname = os.path.join(
+                    self.work_dir, 'vol_%s%s%s'
+                    % (dtype, suffixes.get(format, ''), format))
                 vol2_name = os.path.basename(fname) + ' (re-read)'
                 vol2 = aims.read(fname)
                 thresh = 1e-6
@@ -51,11 +57,14 @@ class TestPyaimsIO(unittest.TestCase):
 
                 # test native file without minf
                 minf_fname = fname + '.minf'
-                os.unlink(minf_fname)
-                vol3_name = os.path.basename(fname) \
-                    + ' (re-read without .minf)'
-                vol3 = aims.read(fname)
-                self.compare_images(vol, vol3, vol1_name, vol3_name, thresh)
+                minf = aims.read(minf_fname)
+                if 'filenames' not in minf:
+                    os.unlink(minf_fname)
+                    vol3_name = os.path.basename(fname) \
+                        + ' (re-read without .minf)'
+                    vol3 = aims.read(fname)
+                    self.compare_images(vol, vol3, vol1_name, vol3_name,
+                                        thresh)
 
     def tearDown(self):
         shutil.rmtree(self.work_dir)
