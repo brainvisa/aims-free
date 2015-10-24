@@ -132,7 +132,7 @@ if( DCMTK_FOUND )
 endif()
 if( MINC_FOUND )
   set( AIMS_INCLUDE_DIRS ${AIMS_INCLUDE_DIRS}
-       "${MINC_INCLUDE_DIRS}" )
+       "${LIBMINC_INCLUDE_DIRS}" )
   if( MINC2_FOUND )
     set( AIMS_HAS_MINC2 "1" )
   endif()
