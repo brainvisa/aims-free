@@ -6,6 +6,8 @@
 # In particular, the detection of burnt-in PHI is not managed.
 
 from soma.dicom import tag_lists
+from soma.archive import unpack, pack, is_archive
+from tempfile import mkdtemp
 import os
 import hashlib
 try:
@@ -21,28 +23,47 @@ def anonymize(dicom_in, dicom_out,
     if not os.path.exists(dicom_in):
         print "The DICOM input does not exist."
         return
-    if os.path.isfile(dicom_in):
-        if os.path.exists(dicom_out) and os.path.isdir(dicom_out):
-            dicom_out = os.path.join(dicom_out, os.path.basename(dicom_in))
-        anon = Anonymizer(dicom_in, dicom_out, tags_to_keep, forced_values)
+    
+    is_dicom_in_archive = is_archive(dicom_in)
+    is_dicom_out_archive = is_archive(dicom_out)
+    if is_dicom_in_archive:
+        wip_dicom_in = mkdtemp()
+        unpack(dicom_in, wip_dicom_in)
+    else:
+        wip_dicom_in = os.path.abspath(dicom_in)
+    if is_dicom_out_archive:
+        wip_dicom_out = mkdtemp()
+    else:
+        wip_dicom_out = os.path.abspath(dicom_out)    
+    
+    if os.path.isfile(wip_dicom_in):
+        if os.path.exists(wip_dicom_out) and os.path.isdir(wip_dicom_out):
+            wip_dicom_out = os.path.join(wip_dicom_out, os.path.basename(wip_dicom_in))
+        anon = Anonymizer(wip_dicom_in, wip_dicom_out, tags_to_keep, forced_values)
         anon.run()
-    elif os.path.isdir(dicom_in):
-        if os.path.isfile(dicom_out):
+    elif os.path.isdir(wip_dicom_in):
+        if os.path.isfile(wip_dicom_out):
             print "Since the input is a directory, an output directory is expected."
             return
-        if not os.path.exists(dicom_out):
-            os.makedirs(dicom_out)
-        for root, dirs, files in os.walk(dicom_in):
+        if not os.path.exists(wip_dicom_out):
+            os.makedirs(wip_dicom_out)
+        for root, dirs, files in os.walk(wip_dicom_in):
             for name in files:
                 current_file = os.path.join(root, name)
-                subdir = root.replace(dicom_in + '/', '').replace(dicom_in, '')
-                file_out = os.path.join(dicom_out, subdir, os.path.basename(current_file))
+                if is_dicom_in_archive:
+                    subdir = root.replace(wip_dicom_in + '/', '').replace(wip_dicom_in, '')
+                else:
+                    subdir = root.replace(os.path.dirname(wip_dicom_in) + '/', '').replace(os.path.dirname(wip_dicom_in), '')
+                file_out = os.path.join(wip_dicom_out, subdir, os.path.basename(current_file))
                 if not os.path.exists(os.path.dirname(file_out)):
                     os.makedirs(os.path.dirname(file_out))
                 anon = Anonymizer(current_file, file_out, tags_to_keep, forced_values)
                 anon.run()
     else:
         print "The input file type is not handled by this tool."
+
+    if is_dicom_out_archive:
+        pack(os.path.abspath(dicom_out), os.path.join(wip_dicom_out, os.listdir(wip_dicom_out)[0]))
 
 class Anonymizer():
     """
