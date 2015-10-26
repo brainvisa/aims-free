@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 from soma import argparse
 from soma.dicom import anonymizer
 
