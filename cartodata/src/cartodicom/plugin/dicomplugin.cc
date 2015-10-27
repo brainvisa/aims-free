@@ -34,8 +34,10 @@
 //--- plugin -------------------------------------------------------------------
 #include <cartodata/plugin/dicomplugin.h>
 #include <soma-io/image/dicomimagereader.h>
+#include <soma-io/image/dicomimagewriter.h>
 //--- cartodata ----------------------------------------------------------------
 #include <cartodata/io/volumeformatreader.h>
+#include <cartodata/io/volumeformatwriter.h>
 //--- soma-io ------------------------------------------------------------------
 #include <soma-io/io/formatdictionary.h>
 //--- cartobase ----------------------------------------------------------------
@@ -126,6 +128,66 @@ DicomPlugin::DicomPlugin() : Plugin()
     VolumeRefFormatReader<uint16_t> *rfru16 = new VolumeRefFormatReader<uint16_t>;
     rfru16->attach( rc_ptr<ImageReader<uint16_t> >( new DicomImageReader<uint16_t> ) );
     FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "DICOM", rfru16, exts );
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    ////                           W R I T E R                              ////
+    ////////////////////////////////////////////////////////////////////////////
+
+    exts.resize(1);
+    exts[0] = "dcm";
+    
+    //==========================================================================
+    //   V O L U M E
+    //==========================================================================
+    
+    //--- RGB ------------------------------------------------------------------
+    
+    VolumeFormatWriter<VoxelRGB> *vfw_rgb = new VolumeFormatWriter<VoxelRGB>;
+    vfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new DicomImageWriter<VoxelRGB> ) );
+    FormatDictionary<Volume<VoxelRGB> >::registerFormat( "DICOM", vfw_rgb, exts );
+    
+    //--- INT ------------------------------------------------------------------
+    
+    VolumeFormatWriter<int16_t> *vfw16 = new VolumeFormatWriter<int16_t>;
+    vfw16->attach( rc_ptr<ImageWriter<int16_t> >( new DicomImageWriter<int16_t> ) );
+    FormatDictionary<Volume<int16_t> >::registerFormat( "DICOM", vfw16, exts );
+    
+    //--- UINT -----------------------------------------------------------------
+    
+    VolumeFormatWriter<uint8_t> *vfwu8 = new VolumeFormatWriter<uint8_t>;
+    vfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new DicomImageWriter<uint8_t> ) );
+    FormatDictionary<Volume<uint8_t> >::registerFormat( "DICOM", vfwu8, exts );
+    
+    VolumeFormatWriter<uint16_t> *vfwu16 = new VolumeFormatWriter<uint16_t>;
+    vfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new DicomImageWriter<uint16_t> ) );
+    FormatDictionary<Volume<uint16_t> >::registerFormat( "DICOM", vfwu16, exts );
+    
+    //==========================================================================
+    //   V O L U M E   R E F
+    //==========================================================================
+
+    //--- RGB ------------------------------------------------------------------
+    
+    VolumeRefFormatWriter<VoxelRGB> *rfw_rgb = new VolumeRefFormatWriter<VoxelRGB>;
+    rfw_rgb->attach( rc_ptr<ImageWriter<VoxelRGB> >( new DicomImageWriter<VoxelRGB> ) );
+    FormatDictionary<VolumeRef<VoxelRGB> >::registerFormat( "DICOM", rfw_rgb, exts );
+    
+    //--- INT ------------------------------------------------------------------
+    
+    VolumeRefFormatWriter<int16_t> *rfw16 = new VolumeRefFormatWriter<int16_t>;
+    rfw16->attach( rc_ptr<ImageWriter<int16_t> >( new DicomImageWriter<int16_t> ) );
+    FormatDictionary<VolumeRef<int16_t> >::registerFormat( "DICOM", rfw16, exts );
+    
+    //--- UINT -----------------------------------------------------------------
+    
+    VolumeRefFormatWriter<uint8_t> *rfwu8 = new VolumeRefFormatWriter<uint8_t>;
+    rfwu8->attach( rc_ptr<ImageWriter<uint8_t> >( new DicomImageWriter<uint8_t> ) );
+    FormatDictionary<VolumeRef<uint8_t> >::registerFormat( "DICOM", rfwu8, exts );
+    
+    VolumeRefFormatWriter<uint16_t> *rfwu16 = new VolumeRefFormatWriter<uint16_t>;
+    rfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new DicomImageWriter<uint16_t> ) );
+    FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "DICOM", rfwu16, exts );
 
 }
 
