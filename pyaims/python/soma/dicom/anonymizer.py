@@ -50,10 +50,7 @@ def anonymize(dicom_in, dicom_out,
         for root, dirs, files in os.walk(wip_dicom_in):
             for name in files:
                 current_file = os.path.join(root, name)
-                if is_dicom_in_archive:
-                    subdir = root.replace(wip_dicom_in + '/', '').replace(wip_dicom_in, '')
-                else:
-                    subdir = root.replace(os.path.dirname(wip_dicom_in) + '/', '').replace(os.path.dirname(wip_dicom_in), '')
+                subdir = root.replace(wip_dicom_in + '/', '').replace(wip_dicom_in, '')
                 file_out = os.path.join(wip_dicom_out, subdir, os.path.basename(current_file))
                 if not os.path.exists(os.path.dirname(file_out)):
                     os.makedirs(os.path.dirname(file_out))
