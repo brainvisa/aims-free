@@ -9,6 +9,8 @@ from soma.dicom import tag_lists
 from soma.archive import unpack, pack, is_archive
 from tempfile import mkdtemp
 import os
+import shutil
+from glob import glob
 import hashlib
 try:
     import dicom
@@ -59,8 +61,11 @@ def anonymize(dicom_in, dicom_out,
     else:
         print "The input file type is not handled by this tool."
 
+    if is_dicom_in_archive:
+        shutil.rmtree(wip_dicom_in)
     if is_dicom_out_archive:
-        pack(os.path.abspath(dicom_out), os.path.join(wip_dicom_out, os.listdir(wip_dicom_out)[0]))
+        pack(os.path.abspath(dicom_out), glob(os.path.join(wip_dicom_out, '*')))
+        shutil.rmtree(wip_dicom_out)
 
 class Anonymizer():
     """
