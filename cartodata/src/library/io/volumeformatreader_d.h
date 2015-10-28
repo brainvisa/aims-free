@@ -141,6 +141,8 @@ namespace soma
                                         const AllocatorContext & context,
                                         carto::Object options )
   {
+    localMsg( "Creating and reading object ( " + dsi->url() + " )" );
+
     //=== Reading URI ========================================================
     std::string uri = dsi->list().dataSource()->url();
     std::string url = FileUtil::uriFilename( uri );
@@ -163,15 +165,20 @@ namespace soma
     Volume<T> *volume = 0;
     for( p = prop.begin(); p != plast; ++p )
     {
-      if( options->hasProperty( *p ) ) {
+      if( options->hasProperty( *p ) )
+      {
+        localMsg( "using VolumeUtilIO<T>::read ( " + dsi->url() + " )" );
         volume = VolumeUtilIO<T>::read( 0, dsi, options );
         break;
       }
     }
     //=== if no known property -> classic reading ============================
     if( !volume )
+    {
+      localMsg( "using classical Volume reading ( " + dsi->url() + " )" );
       volume = FormatReader<Volume<T> >::createAndRead(
         dsi, context, options );
+    }
     if( volume )
     {
       bool convert = false;
