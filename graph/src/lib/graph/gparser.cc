@@ -65,10 +65,10 @@ void GraphParser::detach()
 }
 
 
-string GraphParser::name()
+string GraphParser::name() const
 {
-  rc_ptr<DataSource>	ds = dataSource();
-  if( !ds )
+  const_ref<DataSource>	ds = dataSource();
+  if( ds.isNull() )
     return string();
   return ds->url();
 }

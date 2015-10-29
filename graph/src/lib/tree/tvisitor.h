@@ -105,6 +105,35 @@ public:
   virtual void visitTree( const Tree* tr );
   //@}
 
+  /** Entry point of the visitor -- DO NOT OVERRIDE
+
+      This method forwards to visitAttributedObject(const
+      carto::AttributedObject*) (note the \c const argument). All children of
+      ConstTreeVisitor shall override that \c const function, not this one. */
+#if __cplusplus >= 201103L
+  // ensure that no child class can override this method
+  void visitAttributedObject( carto::AttributedObject* ao ) override final
+#else
+  void visitAttributedObject( carto::AttributedObject* ao )
+#endif
+  {
+    visitAttributedObject(static_cast<const carto::AttributedObject*>(ao));
+  };
+  /** Entry point of the visitor -- DO NOT OVERRIDE
+
+      This method forwards to visitTree(const carto::Tree*) (note the \c const
+      argument). All children of ConstTreeVisitor shall override that \c const
+      function, not this one. */
+#if __cplusplus >= 201103L
+  // ensure that no child class can override this method
+  void visitTree( Tree* tr ) override final
+#else
+  void visitTree( Tree* tr )
+#endif
+  {
+    visitTree(static_cast<const Tree*>(tr));
+  };
+
 protected:
   /**	@name Constructors */
   //@{

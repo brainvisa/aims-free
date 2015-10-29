@@ -244,9 +244,8 @@ class Reader(object):
                 'Texture': 'TimeTexture',
                 'Tree': {'hierarchy': 'Hierarchy'},
                 'genericobject': {'any': 'Object'},
-                'SparseMatrix': {'DOUBLE': 'SparseMatrix'},
-                'SparseOrDenseMatrix': {'DOUBLE':
-                                        'SparseOrDenseMatrix'},
+                #'SparseMatrix': {'DOUBLE': 'SparseMatrix'},
+                'SparseMatrix': {'DOUBLE': 'SparseOrDenseMatrix'},
             }
         else:
             self._typemap = typemap

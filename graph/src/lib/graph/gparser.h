@@ -51,7 +51,11 @@ public:
   /// detaches the stream (forgets it without closing it)
   virtual void detach();
   virtual carto::rc_ptr<carto::DataSource> dataSource();
-  virtual std::string name();
+  carto::const_ref<carto::DataSource> dataSource() const
+  {
+    return const_cast<GraphParser*>(this)->dataSource();
+  };
+  virtual std::string name() const;
 
 protected:
   carto::rc_ptr<carto::DataSource>	_datasource;

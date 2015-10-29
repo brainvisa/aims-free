@@ -56,7 +56,7 @@ namespace aims {
       LinearFilteringImageAlgorithm<T>::operator=( (LinearFilteringImageAlgorithm<T>&)other );
       return *this;
     }
-    GaborFilter<T> *clone() { return new GaborFilter<T>(*this); }
+    GaborFilter<T> *clone() const { return new GaborFilter<T>(*this); }
   };
 
 }

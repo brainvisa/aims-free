@@ -50,6 +50,7 @@ namespace aims
     LabelReader( const std::string& filename );
     virtual ~LabelReader() {}
 
+    using Reader<AimsData<int16_t> >::read;
     virtual bool read( AimsData<int16_t> & vol, int border=0, 
 		       const std::string* format = 0 );
   };

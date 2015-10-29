@@ -56,7 +56,10 @@ namespace carto
     virtual void attach( rc_ptr<DataSource> ds ) = 0;
     virtual void detach() = 0;
     virtual rc_ptr<DataSource> dataSource() = 0;
-    virtual std::string name();
+    const_ref<DataSource> dataSource() const {
+      return const_cast<TreeParser*>(this)->dataSource();
+    };
+    virtual std::string name() const;
   };
 
 }

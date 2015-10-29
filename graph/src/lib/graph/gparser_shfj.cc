@@ -65,7 +65,7 @@ rc_ptr<DataSource> GraphParser_shfj::dataSource()
 }
 
 
-string GraphParser_shfj::name()
+string GraphParser_shfj::name() const
 {
   return GraphParser::name();
 }

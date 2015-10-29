@@ -58,7 +58,7 @@ public:
   */
   virtual int read(Graph& graph);
   virtual carto::rc_ptr<carto::DataSource> dataSource();
-  virtual std::string name();
+  virtual std::string name() const;
   virtual void attach( carto::rc_ptr<carto::DataSource> ds );
 
 private:

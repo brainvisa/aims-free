@@ -53,9 +53,14 @@ class GeometricMoment : public MomentBase, public Moment< T >
     void setMomentType( MomentType );
   
     void update( double, double, double, int dir=(int)Moment< T >::mAdd );
-  
-    void doit( AimsData< T >&, T, int d=(int)Moment< T >::mAdd );
-    void doit( const aims::BucketMap<Void> &, int d=(int)Moment< T >::mAdd );
+
+    // ignore this warning (the API is broken, see comment in Moment<T>)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+    virtual void doit( AimsData< T >&, T, int d=(int)Moment< T >::mAdd );
+    virtual void doit( const aims::BucketMap<Void> &, int d=(int)Moment< T >::mAdd );
+    #pragma GCC diagnostic pop
+
     
   private:
   

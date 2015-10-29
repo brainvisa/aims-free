@@ -54,6 +54,7 @@ namespace carto
 
     virtual ~GraphParser_Python();
 
+    using PythonReader::read;
     virtual int read( Graph& graph );
     virtual int read( Tree& tree );
     static const HelperSet & defaultHelperSet();
