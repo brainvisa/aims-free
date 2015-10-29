@@ -55,6 +55,7 @@ namespace aims
       void muteToDense();
       void muteToSparse();
       void muteToOptimalShape();
+      bool isOptimalShape() const;
 
       aims::SparseOrDenseMatrix &
         operator += ( const aims::SparseOrDenseMatrix& thing );
