@@ -305,7 +305,7 @@ rc_ptr<DataSource> TreeParser_shfj::dataSource()
 }
 
 
-string TreeParser_shfj::name()
+string TreeParser_shfj::name() const
 {
   return AttributedReader::name();
 }

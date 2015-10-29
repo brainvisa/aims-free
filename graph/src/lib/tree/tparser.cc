@@ -47,10 +47,10 @@ TreeParser::~TreeParser()
 }
 
 
-string TreeParser::name()
+string TreeParser::name() const
 {
-  rc_ptr<DataSource>	ds = dataSource();
-  if( !ds )
+  const_ref<DataSource>	ds = dataSource();
+  if( ds.isNull() )
     return string();
   return ds->url();
 }

@@ -52,7 +52,11 @@ class AIMSALGO_API TriangulationMoment
 
     void setMomentType( MomentType );
   
-    void doit( AimsSurfaceTriangle& );
+    // ignore this warning (the API is broken, see comment in Moment<T>)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+    virtual void doit( AimsSurfaceTriangle& );
+    #pragma GCC diagnostic pop
     
   private:
   

@@ -109,7 +109,7 @@ namespace carto
     virtual void attach( rc_ptr<DataSource> ds );
     virtual void detach();
     virtual rc_ptr<DataSource> dataSource();
-    std::string name();
+    std::string name() const;
 
   protected:
     /**@name	Helpers */

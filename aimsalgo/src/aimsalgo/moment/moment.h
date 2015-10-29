@@ -36,6 +36,7 @@
 #define AIMS_MOMENT_MOMENT_H
 
 #include <fstream>
+#include <iostream>
 
 #include <aims/data/data.h>
 #include <aims/mesh/surface.h>
@@ -124,10 +125,12 @@ class Moment
     virtual void update( Point3df&, int );
     virtual void update( AimsVector<double,3>&, int );
     virtual void update( double, double, double, int );
-    
-    virtual void doit( AimsData< T >&, T, int ) { }
-    virtual void doit( AimsSurfaceTriangle& ) { }
-    virtual void doit( const aims::BucketMap<Void> & ) { }
+
+    // TODO: fix this API, having these methods left unimplemented is asking
+    // for trouble...
+    virtual void doit( AimsData< T >&, T, int );
+    virtual void doit( AimsSurfaceTriangle& );
+    virtual void doit( const aims::BucketMap<Void> & );
 
     virtual void orientation();
 
@@ -212,6 +215,9 @@ void Moment< T >::clear()
 }
 
 
+// make GCC warning non-fatal
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 template< class T > inline
 void Moment< T >::update( Point3df& pt, int dir )
 {
@@ -231,6 +237,7 @@ void Moment< T >::update( double, double, double, int )
 {
   orientation();
 }
+#pragma GCC diagnostic pop
 
 
 template< class T > inline
@@ -394,5 +401,44 @@ Moment<T> Moment<T>::operator + ( const Moment<T> & m )
   return mom;
 }
 
+// make warning non-fatal (the API is broken, see comment in Moment<T>)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+template< class T >
+void Moment<T>::doit( AimsData< T >&, T, int )
+{
+  std::clog << "PROGRAMMING ERROR: called unimplemented base method"
+               " Moment<T>::doit( AimsData< T >&, T, int )"
+            << std::endl;
+#ifndef NDEBUG
+  throw std::logic_error("called unimplemented base method"
+                         " Moment<T>::doit( AimsData< T >&, T, int )");
+#endif
+}
+
+template< class T >
+void Moment<T>::doit( AimsSurfaceTriangle& )
+{
+  std::clog << "PROGRAMMING ERROR: called unimplemented base method"
+               " Moment<T>::doit( AimsSurfaceTriangle& )"
+            << std::endl;
+#ifndef NDEBUG
+  throw std::logic_error("called unimplemented base method"
+                         " Moment<T>::doit( AimsSurfaceTriangle& )");
+#endif
+}
+
+template< class T >
+void Moment<T>::doit( const aims::BucketMap<Void> & )
+{
+  std::clog << "PROGRAMMING ERROR: called unimplemented base method"
+               " Moment<T>::doit( const aims::BucketMap<Void> & )"
+            << std::endl;
+#ifndef NDEBUG
+  throw std::logic_error("called unimplemented base method"
+                         " Moment<T>::doit( const aims::BucketMap<Void> & )");
+#endif
+}
+#pragma GCC diagnostic pop
 
 #endif

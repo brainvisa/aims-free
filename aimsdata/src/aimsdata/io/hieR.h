@@ -57,6 +57,7 @@ namespace aims
         carto::SyntaxSet() );
     virtual ~HierarchyReader();
 
+    using TreeReader::read;
     void read( Hierarchy& thing );
 
     friend HierarchyReader& operator >> ( HierarchyReader&, Hierarchy& );
