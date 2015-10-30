@@ -56,9 +56,9 @@ int main(int argc, const char **argv)
   AimsApplication     app( argc, argv, "Lissage couplé d'un couple d'images 2D avec des contraintes ");
 
 
-  app.addOption( fileIn1, "-i1", "input Image1", "");
+  app.addOption( fileIn1, "-i1", "input Image1", true);
   app.alias( "--input1", "-i1" );
-  app.addOption( fileIn2, "-i2", "input Image2", "");
+  app.addOption( fileIn2, "-i2", "input Image2", true);
   app.alias( "--input2", "-i2" );
   app.addOption( fileCont1, "-c1", "input constraint1");
   app.alias( "--cont1", "-c1" );
@@ -70,11 +70,11 @@ int main(int argc, const char **argv)
   app.alias( "--output2", "-o2" );
   app.addOption( tmax, "-t", "scale");
   app.alias( "--scale", "-t" );
-  app.addOption( dt, "-dt", "time step (diffusion only; default=0.1)", 0.1);
+  app.addOption( dt, "-dt", "time step (diffusion only; default=0.1)", true);
   app.alias( "--deltat", "-dt" );
-  app.addOption( alpha, "-a", "diffusion weight",  1.0);
-  app.addOption( beta, "-b", "constraints term", 1.0);
-  app.addOption( gamma, "-g", "coupling term", 1.0);
+  app.addOption( alpha, "-a", "diffusion weight",  true);
+  app.addOption( beta, "-b", "constraints term", true);
+  app.addOption( gamma, "-g", "coupling term", true);
   try
   {
     app.initialize();

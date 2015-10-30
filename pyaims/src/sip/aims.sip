@@ -1,3 +1,8 @@
+%ExportedHeaderCode
+// Such warnings are caused by the Python API and cannot be avoided
+#pragma GCC diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
+%End
+
 %Module soma.aims.aimssip
 
 %Feature CARTODATA

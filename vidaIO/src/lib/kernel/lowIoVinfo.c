@@ -31,6 +31,9 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+// Have stdio.h define fileno()
+#define _POSIX_C_SOURCE 1
+
 #include <vidaIO/kernel/vidaio.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -226,7 +226,7 @@ int VidaWrite(char *buff,int slice,int frame,VIDAim *vp)
       /* Determination des extrema                  */
       /**********************************************/
       i_max = -32768; i_min = 32767;
-      for(i=size_im, pts = s_to_wri;i > 0; i--, pts++, i_pt1++)
+      for(i=size_im, pts = s_to_wri;i > 0; i--, pts++)
 	{ 
 	  if (*pts > i_max) i_max = *pts;
 	  if (*pts < i_min) i_min = *pts;

@@ -120,6 +120,7 @@ namespace soma
                                     const AimsVector<T, D> & x )
   {
     AsciiDataSourceTraits<AimsVector<T, D> >::write( ds, x );
+    return ds;
   }
 
 #endif

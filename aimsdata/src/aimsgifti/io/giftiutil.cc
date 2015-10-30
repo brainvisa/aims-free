@@ -155,11 +155,12 @@ namespace aims
       case 1:
         break;
       case 2:
-        if( intent != NIFTI_INTENT_TIME_SERIES )
-        if( elemtype == "FLOAT" )
-          gdtype = "POINT2DF";
-        else
-          gdtype = "VECTOR_OF_2_" + elemtype;
+        if( intent != NIFTI_INTENT_TIME_SERIES ) {
+          if( elemtype == "FLOAT" )
+            gdtype = "POINT2DF";
+          else
+            gdtype = "VECTOR_OF_2_" + elemtype;
+        }
         break;
       case 3:
         if( elemtype == "FLOAT" )

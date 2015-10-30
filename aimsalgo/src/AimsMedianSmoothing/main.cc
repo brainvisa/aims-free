@@ -89,6 +89,8 @@ Algo::doit( Process & p, const string & fname, Finder & f )
   out.setHeader( in.header()->cloneHeader() );
   Writer<AimsData<T> > writer( mp.fileout );
   writer.write( out );
+
+  return true;
 }
 
 
