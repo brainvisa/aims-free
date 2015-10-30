@@ -45,17 +45,19 @@
 namespace aims
 {
 
-  /// OBSOLETE, use SurfaceManip::meshMerge() instead
+  /// \deprecated{OBSOLETE, use SurfaceManip::meshMerge() instead}
   template<int D, class T>
   void meshMerge( AimsTimeSurface<D,T> & dst, 
 		  const AimsTimeSurface<D,T> & add )
+    __attribute__((__deprecated__("OBSOLETE, use SurfaceManip::meshMerge() instead")))
   {
     SurfaceManip::meshMerge( dst, add );
   }
-  /// OBSOLETE, use SurfaceManip::meshMerge() instead
+  /// \deprecated{OBSOLETE, use SurfaceManip::meshMerge() instead}
   template<int D, class T>
   void meshMerge( AimsTimeSurface<D,T> & dst, 
 		  const std::list<AimsTimeSurface<D,T> > & src )
+    __attribute__((__deprecated__("OBSOLETE, use SurfaceManip::meshMerge() instead")))
   {
     SurfaceManip::meshMerge( dst, src );
   }

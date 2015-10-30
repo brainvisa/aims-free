@@ -35,7 +35,8 @@
  *  AFFINE 3-D transformations (Linear + Translation)
  */
  
-/* NOTE: the class AffineTransformation3d has got real problem of CLARITY and IMPLEMENTATION.
+/** \class AffineTransformation3d
+NOTE: the class AffineTransformation3d has got real problem of CLARITY and IMPLEMENTATION.
 For example the order of specification of the attributes can change the
 resulting AffineTransformation3d.
 At this stage of the code (11/03/2010, submitted by Thierry Delzescaux, Nicolas

@@ -84,11 +84,13 @@ public:
 
   virtual Tree* read();
   virtual void read( Tree & );
-  /// OBSOLETE, use read( Tree & ) instead
-  virtual void readTree( Tree * );
+  /// \deprecated{OBSOLETE, use read( Tree & ) instead}
+  virtual void readTree( Tree * )
+    __attribute__((__deprecated__("OBSOLETE, use read( Tree & ) instead")));
 
-  /// obsolete - use attach() instead
-  void open(const std::string& filename);
+  /// \deprecated{obsolete - use attach() instead}
+  void open(const std::string& filename)
+    __attribute__((__deprecated__("use attach() instead")));
   void close();
   void attach( std::istream & s, int line_num = 1 );
   void attach( const std::string & filename );

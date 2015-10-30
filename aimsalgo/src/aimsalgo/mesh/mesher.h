@@ -158,7 +158,10 @@ class AIMSALGO_API Mesher
     // =============
     /** OBSOLETE - specify extension in the output filename of 
 	setMeshOutputFile() or doit() */
-    void setTriOutputFile() { _triOutputFlag = true; }
+    void setTriOutputFile()
+      __attribute__((__deprecated__("specify extension in the output filename "
+                                    "of setMeshOutputFile() or doit()")))
+    { _triOutputFlag = true; }
     void setMeshOutputFile() { _triOutputFlag = false; }
 
     // MINIMUM NUMBER OF FACETS TO ALLOW DECIMATION

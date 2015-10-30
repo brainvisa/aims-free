@@ -102,8 +102,9 @@ public:
 
   //@}
 
-  /// obsolete - use atatch()
-  void open(const std::string& filename);
+  /// \deprecated{obsolete - use attach()}
+  void open(const std::string& filename)
+    __attribute__((__deprecated__("use attach() instead")));
   void close();
   void attach( std::istream & s, int line_num = 1 );
   void attach( carto::rc_ptr<carto::DataSource> ds );

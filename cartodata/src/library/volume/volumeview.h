@@ -43,7 +43,8 @@ namespace carto
   /// \deprecated
   /// Do not use anymore. Use Volume, which now manages views, instead.
   template <typename T>
-  class VolumeView : public Volume<T>
+  class __attribute__((__deprecated__("Use Volume, which now manages views, instead."))) VolumeView
+    : public Volume<T>
   {
   public:
     typedef typename Volume<T>::Position4Di Position4Di;

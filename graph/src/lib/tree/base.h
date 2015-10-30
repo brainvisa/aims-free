@@ -101,7 +101,8 @@ public:
 	children. In a future release, size() will disapear to avoid ambiguity 
         with the GenericObject size in Tree specialization
   */
-  virtual size_t size() const;
+  virtual size_t size() const
+    __attribute__((__deprecated__("use childrenSize() for the number of children")));
   ///	Returns the number of children BaseTree the receiver contains
   virtual size_t childrenSize() const;
   const_iterator begin() const;
