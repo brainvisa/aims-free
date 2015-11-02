@@ -110,6 +110,40 @@ namespace aims
     // force loading plugins if it has not been done already
     carto::PluginLoader::load();
 
+    bool exactformat = false;
+    carto::Object options = carto::Object::value( carto::Dictionary() );
+    if( !_options.isNull() )
+    {
+      try
+      {
+        carto::Object exact = _options->getProperty( "exact_format" );
+        exactformat = (bool) exact->getScalar();
+      }
+      catch( ... )
+      {
+      }
+      options->copyProperties( _options );
+    }
+
+    if( !options->hasProperty( "ascii" ) )
+      options->setProperty( "ascii", ascii );
+
+    std::string _format;
+    if( !format )
+    {
+      try
+      {
+        carto::Object oformat = options->getProperty( "format" );
+        _format = oformat->getString();
+        format = &_format;
+      }
+      catch( ... )
+      {
+      }
+    }
+    else
+      options->setProperty( "format", *format );
+
     // try first soma-io writer (since 2013)
     // try first 3 passes
     try
@@ -144,24 +178,6 @@ namespace aims
     int					excp = 0;
     int					exct = -1;
     std::string				excm;
-
-    bool exactformat = false;
-    carto::Object options = carto::Object::value( carto::Dictionary() );
-    if( !_options.isNull() )
-    {
-      try
-      {
-        carto::Object exact = _options->getProperty( "exact_format" );
-        exactformat = (bool) exact->getScalar();
-      }
-      catch( ... )
-      {
-      }
-      options->copyProperties( _options );
-    }
-
-    if( !options->hasProperty( "ascii" ) )
-      options->setProperty( "ascii", ascii );
 
     if( format )	// priority to format hint
     {
