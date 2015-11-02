@@ -272,8 +272,9 @@ void SparseOrDenseMatrix::read( const std::string& filename )
   }
 
   // use dense
+  string format = f.format();
   Reader<Volume<double> > r( filename );
-  Volume<double> *dense = r.read();
+  Volume<double> *dense = r.read( 0, &format );
   if( dense )
   {
     cout << "read SparseOrDenseMatrix as dense\n";
@@ -289,6 +290,9 @@ void SparseOrDenseMatrix::write( const std::string& filename,
 {
   if( isDense() )
   {
+    Object doptions = options->clone();
+    // use given extension (.imas probably) if saving as another format
+    doptions->setProperty( "override_extension", true );
     Writer<Volume<double> > w( filename, options );
     w.write( *denseMatrix() );
   }
