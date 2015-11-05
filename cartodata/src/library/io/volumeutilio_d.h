@@ -144,9 +144,11 @@ namespace soma {
       borders[2] = (int) rint( options->getProperty( "bz" )->getScalar() );
       options->removeProperty( "bz" );
     } catch( ... ) {}
-
+    
     bool partial = !( frame[0] == 0 && frame[1] == 0 &&
-                      frame[2] == 0 && frame[3] == 0 );
+                      frame[2] == 0 && frame[3] == 0 && 
+                      position[0] == 0 && position[1] == 0 &&
+                      position[2] == 0 && position[3] == 0);
     if( partial )
       return readPartial( obj, dsi, position, frame, borders, options );
     else
