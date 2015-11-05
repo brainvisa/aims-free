@@ -54,7 +54,7 @@ namespace aims{
 
     The class for motion write operation.
 */
-class MotionWriter
+class __attribute__((__deprecated__("OBSOLETE"))) MotionWriter
 { public:
     /**@name Constructor and Destructor*/
     //@{

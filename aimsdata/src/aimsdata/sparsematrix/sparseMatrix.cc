@@ -1101,7 +1101,7 @@ void aims::SparseMatrix::write( const std::string& filename,
   catch (std::exception & e )
   {
     throw std::runtime_error( std::string( "void "
-        "aims::SparseMatrix::read( const std::string& filename, "
+        "aims::SparseMatrix::write( const std::string& filename, "
         "const std::string & openmode, "
         "bool bswap )" )+  e.what() );
   }

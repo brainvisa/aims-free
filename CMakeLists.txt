@@ -170,8 +170,14 @@ BRAINVISA_INSTALL( FILES "${CMAKE_BINARY_DIR}/include/aims/config/aimsminc_confi
                    COMPONENT ${PROJECT_NAME}-dev )
 add_subdirectory( cartodata )
 add_subdirectory( graph )
-add_subdirectory( ecat )
-add_subdirectory( ecat+ )
+
+option(BUILD_ECAT "Build the Ecat library and tools that depend on it" ON)
+mark_as_advanced( BUILD_ECAT )
+if( BUILD_ECAT )
+  add_subdirectory( ecat )
+  add_subdirectory( ecat+ )
+endif( BUILD_ECAT )
+
 if( NOT WIN32 )
   add_subdirectory( vidaIO )
 endif( NOT WIN32 )

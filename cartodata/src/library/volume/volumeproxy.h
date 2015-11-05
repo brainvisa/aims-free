@@ -51,7 +51,7 @@ namespace carto
 
   public:
 
-    VolumeProxy( int sizeX = 1, int sizeY = 1, int sizeZ = 1, int sizeT = 1 );
+    explicit VolumeProxy( int sizeX = 1, int sizeY = 1, int sizeZ = 1, int sizeT = 1 );
     VolumeProxy( const VolumeProxy< T >& other );
     virtual ~VolumeProxy();
 

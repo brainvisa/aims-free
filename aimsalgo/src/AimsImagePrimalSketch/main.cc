@@ -193,22 +193,22 @@ int main(int argc, const char **argv) {
         app.alias( "--output-scales", "-os" );
         app.addOption( fileoutBlobs, "-ob", "output blobs filename");
         app.alias( "--output-blobs", "-ob" );
-        app.addOption( tmin, "-t1", "minimum scale (default=1.0)", 1.0);
+        app.addOption( tmin, "-t1", "minimum scale (default=1.0)", true);
         app.alias( "--scalemin", "-t1" );
         app.addOption( tmax, "-t2", "maximum scale");
         app.alias( "--scalemax", "-t2" );
-        app.addOption( smoothOperator, "-s", "smoother (0 : Gaussian, 1 : diffusion; default=0)", 0);
+        app.addOption( smoothOperator, "-s", "smoother (0 : Gaussian, 1 : diffusion; default=0)", true);
         app.alias( "--smoother", "-s" );
-        app.addOption( dt, "-dt", "time step (for diffusion only; default=0.1)", 0.1);
+        app.addOption( dt, "-dt", "time step (for diffusion only; default=0.1)", true);
         app.alias( "--deltat", "-dt" );
-        app.addOption( statFile, "-f", "name of file containing statistics for blob measurements normalisation", "" );
+        app.addOption( statFile, "-f", "name of file containing statistics for blob measurements normalisation", true );
         app.alias ("--stats", "-f");
-        app.addOption( subject, "-sj", "subject name (default : inputImage)", "none");
+        app.addOption( subject, "-sj", "subject name (default : inputImage)", true);
         app.alias ("--subject", "-sj");
 //        app.addOption( recover, "--recover", "recover", 1.0 );
 //        app.addOption( scaleSpacePath, "--ss", "scale space path", 1.0 );
 
-        app.addOption( graphFile, "-og", "primal sketch graph", "");
+        app.addOption( graphFile, "-og", "primal sketch graph", true);
         app.alias ("--graph", "-og");
         app.initialize();
         

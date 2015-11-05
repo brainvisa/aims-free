@@ -59,7 +59,7 @@ namespace aims
                        const carto::AllocatorContext & context,
                        carto::Object options );
     virtual bool write( const std::string & filename, const Graph & vol,
-                        bool ascii = false );
+                        carto::Object options = carto::none() );
   };
 
 }

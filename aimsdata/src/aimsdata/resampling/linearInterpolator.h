@@ -76,18 +76,22 @@ public:
   }
   /** Obsolete, use value() method */
   virtual Scalar_t operator()( Coordinate_t x, Coordinate_t y, 
-                                Coordinate_t z ) const = 0;
+                                Coordinate_t z ) const
+    __attribute__((__deprecated__("use value() method instead"))) = 0;
   /** Obsolete, use value() method */
   inline Scalar_t operator()( const Interpolator::Point_t &point ) const
+    __attribute__((__deprecated__("use value() method instead")))
   {
     return operator ()( point[ 0 ], point[ 1 ], point[ 2 ] );
   }
   /** Obsolete, use values() method */
   virtual void operator()( Coordinate_t x, Coordinate_t y, Coordinate_t z,
-                             std::vector<Scalar_t> & ) const = 0;
+                             std::vector<Scalar_t> & ) const
+    __attribute__((__deprecated__("use values() method instead"))) = 0;
   /** Obsolete, use values() method */
   inline void operator()( const Interpolator::Point_t &point,
                             std::vector<Scalar_t> &v ) const
+    __attribute__((__deprecated__("use values() method instead")))
   {
     operator ()( point[ 0 ], point[ 1 ], point[ 2 ], v );
   }

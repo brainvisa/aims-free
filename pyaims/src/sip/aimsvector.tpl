@@ -110,7 +110,7 @@ public:
                        "AimsVector_%Template1typecode%_%Template2typecode%" );
       done = true; 
     }
-    else if( !arr->descr->type_num == %Template1NumType% )
+    else if( arr->descr->type_num != %Template1NumType% )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_TypeError, "wrong array data type" );

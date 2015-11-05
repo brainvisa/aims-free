@@ -401,7 +401,7 @@ int DicomHeader::read()
       } 
  
     dimZ = _slices.size() / dimT;
-    if( dimZ * dimT != _slices.size() )
+    if( static_cast<size_t>(dimZ * dimT) != _slices.size() )
     {
       cerr << "DICOM reader warning: slices number does not make a complete "
         << "volume" << std::endl;

@@ -460,7 +460,7 @@ bool QSqlGraphFormat::read( const std::string & filename1, Graph & graph,
 
 
 bool QSqlGraphFormat::write( const std::string & filename1,
-                             const Graph & graph, bool )
+                             const Graph & graph, carto::Object )
 {
   // cout << "QSqlGraphFormat::write " << filename1 << endl;
 
@@ -614,19 +614,19 @@ bool QSqlGraphFormat::write( const std::string & filename1,
   cout << "deleting graphs\n";
   sql = "DELETE FROM Graph";
   res = db.exec( sql.c_str() );
-  if( !res.lastError().type() == 0 )
+  if( res.lastError().type() != QSqlError::NoError )
     throw invalid_format_error( res.lastError().text().toStdString(),
                                 filename );
   cout << "deleting vertices\n";
   sql = "DELETE FROM Vertex";
   res = db.exec( sql.c_str() );
-  if( !res.lastError().type() == 0 )
+  if( res.lastError().type() != QSqlError::NoError )
     throw invalid_format_error( res.lastError().text().toStdString(),
                                 filename );
   cout << "deleting edges\n";
   sql = "DELETE * FROM Edge";
   res = db.exec( sql.c_str() );
-  if( !res.lastError().type() == 0 )
+  if( res.lastError().type() != QSqlError::NoError )
     throw invalid_format_error( res.lastError().text().toStdString(),
                                 filename );
   */
@@ -649,14 +649,14 @@ bool QSqlGraphFormat::write( const std::string & filename1,
     sql += string( " ) values ( " ) + values + " )";
     // cout << "graph SQL: " << sql << endl;
     res = db.exec( sql );
-    if( !res.lastError().type() == 0 )
+    if( res.lastError().type() != QSqlError::NoError )
       throw invalid_format_error( res.lastError().text().toStdString(),
                                   filename );
 
     // get graph id
     // cout << "querying graph eid\n";
     res = db.exec( "SELECT eid FROM Graph ORDER BY eid DESC LIMIT 1" );
-    if( !res.lastError().type() == 0 )
+    if( res.lastError().type() != QSqlError::NoError )
       throw invalid_format_error( res.lastError().text().toStdString(),
                                   filename );
     res.next();

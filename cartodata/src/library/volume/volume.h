@@ -107,7 +107,8 @@ namespace carto
     class Position4Di
     {
     public:
-      Position4Di( int x = 0, int y = 0, int z = 0, int t = 0 ) : _coords( 4 )
+      explicit Position4Di( int x = 0, int y = 0, int z = 0, int t = 0 )
+        : _coords( 4 )
       {
         _coords[0] = x;
         _coords[1] = y;
@@ -339,16 +340,25 @@ namespace carto
                                            allocatorContext, allocated ) )
     {}
 
+    std::vector<int> getSize() const { return (*this)->getSize(); }
     int getSizeX() const { return (*this)->getSizeX(); }
     int getSizeY() const { return (*this)->getSizeY(); }
     int getSizeZ() const { return (*this)->getSizeZ(); }
     int getSizeT() const { return (*this)->getSizeT(); }
     const PropertySet& header() const { return (*this)->header(); }
           PropertySet& header()       { return (*this)->header(); }
-    /// Obsolete. still here for compatibility purpose. Use header() instead.
-    const PropertySet& getPropertySet() const { return (*this)->header(); }
-    /// Obsolete. still here for compatibility purpose. Use header() instead.
-          PropertySet& getPropertySet()       { return (*this)->header(); }
+
+    /// \deprecated{Obsolete. still here for compatibility purpose.
+    /// Use header() instead.}
+    const PropertySet& getPropertySet() const
+      __attribute__((__deprecated__("use header() instead")))
+    { return (*this)->header(); }
+    /// \deprecated{Obsolete. still here for compatibility purpose.
+    /// Use header() instead.}
+    PropertySet& getPropertySet()
+      __attribute__((__deprecated__("use header() instead")))
+    { return (*this)->header(); }
+
     std::vector<float> getVoxelSize() const { return (*this)->getVoxelSize(); }
 
     void fill( const T& value )   { (*this)->fill( value ); }

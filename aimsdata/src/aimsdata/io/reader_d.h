@@ -138,6 +138,34 @@ namespace aims
                         int frame )
   {
 
+    // take care of old-style options
+    if( !_options.get() )
+      _options = carto::Object::value( carto::PropertySet() );
+    if( frame >= 0 )
+      {
+        _options->setProperty( "frame", frame );
+        // (for graphs)
+        _options->setProperty( "subobjectsfilter", frame );
+      }
+    if( border > 0 )
+      _options->setProperty( "border", border );
+
+    std::string _format;
+    if( !format )
+    {
+      try
+      {
+        carto::Object oformat = _options->getProperty( "format" );
+        _format = oformat->getString();
+        format = &_format;
+      }
+      catch( ... )
+      {
+      }
+    }
+    else
+      _options->setProperty( "format", *format );
+
     // try first soma-io reader (since 2013)
     // try first 3 passes
     try{
@@ -180,18 +208,6 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
     std::cout << "Reader<" << carto::DataTypeCode<T>::name() << ">\n";
 #endif
-
-    // take care of old-style options
-    if( !_options.get() )
-      _options = carto::Object::value( carto::PropertySet() );
-    if( frame >= 0 )
-      {
-        _options->setProperty( "frame", frame );
-        // (for graphs)
-        _options->setProperty( "subobjectsfilter", frame );
-      }
-    if( border > 0 )
-      _options->setProperty( "border", border );
 
     std::set<std::string>		tried;
     std::set<FileFormat<T> *>		triedf;
@@ -408,6 +424,34 @@ namespace aims
   template<class T>
   T* Reader<T>::read( int border, const std::string* format, int frame )
   {
+    // take care of old-style options
+    if( !_options.get() )
+      _options = carto::Object::value( carto::PropertySet() );
+    if( frame >= 0 )
+      {
+        _options->setProperty( "frame", frame );
+        // (for graphs)
+        _options->setProperty( "subobjectsfilter", frame );
+      }
+    if( border > 0 )
+      _options->setProperty( "border", border );
+
+    std::string _format;
+    if( !format )
+    {
+      try
+      {
+        carto::Object oformat = _options->getProperty( "format" );
+        _format = oformat->getString();
+        format = &_format;
+      }
+      catch( ... )
+      {
+      }
+    }
+    else
+      _options->setProperty( "format", *format );
+
     // try first soma-io reader (since 2013)
     // try first 3 passes
     try{
@@ -433,18 +477,6 @@ namespace aims
       return reader.read( carto::none(), 1, 3 );
     } catch( ... ) {}
     // if it failed, continue with aims reader.
-    
-    // take care of old-style options
-    if( !_options.get() )
-      _options = carto::Object::value( carto::PropertySet() );
-    if( frame >= 0 )
-      {
-        _options->setProperty( "frame", frame );
-        // (for graphs)
-        _options->setProperty( "subobjectsfilter", frame );
-      }
-    if( border > 0 )
-      _options->setProperty( "border", border );
 
     std::set<std::string>		tried;
     std::set<FileFormat<T> *>		triedf;

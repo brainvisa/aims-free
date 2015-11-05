@@ -110,6 +110,7 @@ class AffineTransformation3d : public Transformation3d
 {
 public:
 
+  /// Create an identity transformation
   AffineTransformation3d();
   AffineTransformation3d( const AffineTransformation3d& other );
   /// Create a AffineTransformation3d from a 4x4 matrix given as a line vector

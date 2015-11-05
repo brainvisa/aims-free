@@ -78,7 +78,7 @@ public:
   std::set< Tree * > getElementsWith( const std::string&, const T&, 
 				      bool recurse=true ) const;
   /// deprecated
-  virtual size_t size() const;
+  virtual size_t size() const __attribute__((__deprecated__));
   virtual size_t childrenSize() const;
 
 protected:

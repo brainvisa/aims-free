@@ -178,8 +178,6 @@ int main( int argc, char** argv )
 	}
       dur = rint( (sigma * sigma) / (8 * ::log(2) ) );
     }
-  else
-    dur =  dur;
 
   
   FWHM = 4 * sqrt ( ::log(2) * dur  );

@@ -82,7 +82,7 @@ namespace aims {
       // backward compability
       //----------------------------------------------------------------------
       /// \deprecated
-      T doit( const AimsData<T> & in )
+      T doit( const AimsData<T> & in ) __attribute__((__deprecated__))
       {
         return execute( in.volume() );
       }

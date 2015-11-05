@@ -34,21 +34,26 @@
 #include <pyaims/object/numconv.h>
 
 #include <iostream>
+#include <limits>
 
 namespace carto
 {
 
   uint32_t uint32_FromPy( PyObject *pyobj )
   {
-    uint32_t x = PyLong_AsUnsignedLong( pyobj );
-    if( x == (int32_t) -1 )
+    unsigned long x = PyLong_AsUnsignedLong( pyobj );
+    if( x == static_cast<unsigned long>( -1 ) )
     {
       PyErr_Clear();
       double y = PyFloat_AsDouble( pyobj );
-      if( !PyErr_Occurred() )
-        x = (uint32_t) round( y );
+      if( y != -1.0 || !PyErr_Occurred() )
+        x = static_cast<uint32_t>( round( y ) );
     }
-    return x;
+    // Handle the case where unsigned long is larger than 32 bit
+    if(x <= std::numeric_limits<uint32_t>::max())
+      return x;
+    else
+      return -1;
   }
 
 }

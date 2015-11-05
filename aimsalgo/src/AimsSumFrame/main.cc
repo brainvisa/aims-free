@@ -130,16 +130,18 @@ doit( Process & p, const string & fname, Finder & f )
       PythonHeader * sumpoh = dynamic_cast<PythonHeader *>(poh->cloneHeader() ) ;
       //PythonHeader * sumpoh = poh->cloneHeader() ;
       if(sumpoh)
+      {
         if( sumpoh->hasProperty("start_time") 
             && sumpoh->hasProperty("duration_time") )
           {
 	      throw runtime_error( "Image is a PET image and shold not be !" ) ;
-          }else{
+          } else {
 	     int i, j, k, l;
 	     for (l=parsed_start; l< parsed_end; l++)
 	        ForEach3d( (*sum),i,j,k) 
 	         (*sum)(i,j,k) += series(i,j,k,l) ;
     	  }
+      }
       Writer<AimsData<float> > writer( tc.sum_volume );
       writer << *sum;   
     }

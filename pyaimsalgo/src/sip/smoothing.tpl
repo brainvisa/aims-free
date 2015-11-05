@@ -54,7 +54,7 @@ class MedianSmoothing_%Template1typecode%
     MedianSmoothing_%Template1typecode%( int sx = 3, int sy = 3, int sz = 3 );
     virtual ~MedianSmoothing_%Template1typecode%();
     virtual AimsData_%Template1typecode% doit(
-      const AimsData_%Template1typecode%& in );
+      const AimsData_%Template1typecode%& in ) const;
 
   private:
     MedianSmoothing_%Template1typecode% & operator = (
