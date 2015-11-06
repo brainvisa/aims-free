@@ -43,6 +43,11 @@
 #include <cartobase/plugin/plugin.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <windef.h>
+#include <winbase.h>
+#endif
+
 using namespace carto;
 using namespace std;
 
@@ -267,6 +272,10 @@ void AimsParseOptions(int *argc,char **argv, const AimsOption *opt,
        *o,        // pointer to an option character
        *p;
   int  nrequired=0;
+  
+#ifdef WIN32
+  SetErrorMode(SEM_NOGPFAULTERRORBOX);
+#endif
 
   PluginLoader::load();
 

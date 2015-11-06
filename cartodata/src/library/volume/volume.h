@@ -340,6 +340,7 @@ namespace carto
                                            allocatorContext, allocated ) )
     {}
 
+    std::vector<int> getSize() const { return (*this)->getSize(); }
     int getSizeX() const { return (*this)->getSizeX(); }
     int getSizeY() const { return (*this)->getSizeY(); }
     int getSizeZ() const { return (*this)->getSizeZ(); }
