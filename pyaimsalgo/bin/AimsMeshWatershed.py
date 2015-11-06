@@ -35,7 +35,6 @@ from soma import aims
 
 #----------------------------Functions-----------------------------------------
 
-
 def parse_args(argv):
     """Parses the given list of arguments."""
 
@@ -81,10 +80,10 @@ def parse_args(argv):
 
 
 def main():
-    # load the arguments of parser (delete script name: sys.arg[0])
-    arguments = (sys.argv[1:])
+    # Load the arguments of parser (delete script name: sys.arg[0])
+    arguments = (sys.argv[1], sys.argv[2], sys.argv[3])
     parser, args = parse_args(arguments)
-
+    
     # load the normed profile and its white mesh
     tex = aims.read(args.normedprofile)
     mesh = aims.read(args.whitemesh)
@@ -94,12 +93,12 @@ def main():
                                         args.basins_depth, args.threshold,
                                         args.mode)
 
-    # write the reduced profile by basins on the disk
+    # write the watershed texture with two criteria on the basins    
     aims.write(outtex, args.basins)
 
 
 #----------------------------Main program--------------------------------------
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
     main()
