@@ -48,6 +48,11 @@ namespace aims
                           vector<AimsVector<uint,2> > & edges,
                           vector<double> & weights )
   {
+    /** For triangular meshing, each vertex is associated with its neighbour (*6)
+     *  Then, the difference between the coordinates of vertex and its neighbour
+     *  is calculated to obtain a vector.
+     *  Finally, a norm assigns a positive length to each vector.
+     */
     const vector<Point3df> & vert = mesh.vertex();
     const vector<AimsVector<uint,3> > & poly = mesh.polygon();
     int i, N = vert.size();
@@ -106,7 +111,6 @@ namespace aims
     distancesFromMesh( mesh, edges, weights );
 
     int E = edges.size();
-
     int nA,nB,remain;
     double delta;
 
@@ -157,6 +161,8 @@ namespace aims
       {
         nA = edges[i][0];
         nB = edges[i][1];
+        //std::cout << "nA" << nA << std::endl;
+        //std::cout << "nB" << nB << std::endl;
         if( field[nA] > th )
           if( mfield[nA] <  mfield[nB] ||
             ( ( mfield[nA] == mfield[nB] ) && maj2[nA] > maj2[nB] ) )

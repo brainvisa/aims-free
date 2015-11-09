@@ -193,7 +193,7 @@ None
 
   static AimsSurfaceTriangle* refineMeshTri4(
     const AimsSurfaceTriangle & mesh,
-    const vector_U32 & selectedPolygons = vector_U32() ) /Factory/;
+    const vector_U32 & selectedPolygons = vector_U32() ) /Factory, ReleaseGIL/;
 %Docstring
 refineMeshTri4(mesh, selected_polygons=None)
 
@@ -214,7 +214,7 @@ refined_mesh: AimsSurfaceTriangle
 
   static TimeTexture_FLOAT* meshEdgeLengthRatioTexture(
     const AimsSurfaceTriangle & nummesh,
-    const AimsSurfaceTriangle & denommesh ) /Factory/;
+    const AimsSurfaceTriangle & denommesh ) /Factory, ReleaseGIL/;
 %Docstring
 meshEdgeLengthRatioTexture(numerator_mesh, denominator_mesh)
 

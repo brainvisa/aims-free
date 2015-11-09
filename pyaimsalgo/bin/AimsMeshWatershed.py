@@ -11,8 +11,8 @@
 
 """
 This script does the following:
-*
-*
+* executes the watershed algotrithm
+* generate a reduced profile by basins
 
 Main dependencies: PyAims library
 
@@ -28,7 +28,7 @@ import sys
 import argparse
 import textwrap
 
-# soma module 
+# soma module
 from soma.aimsalgo.meshwatershedtools import watershedWithBasinsMerging
 from soma import aims
 
@@ -44,7 +44,10 @@ def parse_args(argv):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent("""\
             -------------------------------------------------------------------
-            
+            Compute  the ROIs from the watershed algorithm.
+            Select the ROIs according to two main criteria: their size and
+            their depth.
+            Generate a reduced profile by basins.
             -------------------------------------------------------------------
             """))
 
@@ -52,52 +55,51 @@ def parse_args(argv):
     parser.add_argument(
         "normedprofile", type=str, help="input normed connectivity profile")
     parser.add_argument(
-        "whitemesh", type=str, help = "input white mesh")
+        "whitemesh", type=str, help="input white mesh")
     parser.add_argument(
-        "basins", type=str, help = "output basins segmentation")
+        "basins", type=str, help="output basins segmentation")
     parser.add_argument("--basins_size",
                         type=int,
                         default=10,
-                        help = "size criteria to regroup smallest parcels")
+                        help="size criteria to regroup smallest parcels")
     parser.add_argument("--basins_depth",
                         type=float,
                         default=0.05,
-                        help = "depth criteria to regroup parcels")
+                        help="depth criteria to regroup parcels")
     parser.add_argument("--mode", type=str, default='and',
-        help = "mode of merging : "\
-        "mode = \'and\': merge done if parcel_size < k_size and " \
-        "parcel_depth < k_depth \n"\
-        "mode = \'or\' idem with or operator : more merges")
+                        help="mode of merging : "
+                        "mode = \'and\': merge done if parcel_size < k_size "
+                        "and parcel_depth < k_depth \n"
+                        "mode = \'or\' idem with or operator : more merges")
     parser.add_argument("--threshold",
                         type=float,
                         default=0.01,
-                        help = "threshold on the input texture intensities")
+                        help="threshold on the input texture intensities")
 
     # parsing arguments
     return parser, parser.parse_args(argv)
 
 
 def main():
-    # Load the arguments of parser (delete script name: sys.arg[0])
-    arguments = (sys.argv[1], sys.argv[2], sys.argv[3])
+    # load the arguments of parser (delete script name: sys.arg[0])
+    arguments = (sys.argv[1:])
     parser, args = parse_args(arguments)
-    
-    # load the texture and its mesh
+
+    # load the normed profile and its white mesh
     tex = aims.read(args.normedprofile)
     mesh = aims.read(args.whitemesh)
 
-    print "Computing watershed"
-    outtex = watershedWithBasinsMerging(tex, mesh, args.basins_size, 
-                                        args.basins_depth, args.threshold, 
+    # compute the reduced profile: ROIs (basins) are autodetected
+    outtex = watershedWithBasinsMerging(tex, mesh, args.basins_size,
+                                        args.basins_depth, args.threshold,
                                         args.mode)
-    print "Merging of basins according to size and depth values"
 
-    # write the watershed texture with two criteria on the basins    
+    # write the reduced profile by basins on the disk
     aims.write(outtex, args.basins)
 
 
 #----------------------------Main program--------------------------------------
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     main()

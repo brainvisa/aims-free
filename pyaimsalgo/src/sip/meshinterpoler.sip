@@ -21,33 +21,33 @@ class MeshInterpoler
 
     void setDiscontinuityThresholds( float xthresh, float ythresh,
                                      float zthresh );
-    void project();
+    void project() /ReleaseGIL/;
     AimsSurfaceTriangle *resampleMesh(
-      const AimsSurfaceTriangle & sourceshape ) const /Factory/;
+      const AimsSurfaceTriangle & sourceshape ) const /Factory, ReleaseGIL/;
     TimeTexture_FLOAT *resampleTexture( const TimeTexture_FLOAT &,
       aims::MeshInterpoler::InterpolationType
-        = aims::MeshInterpoler::Linear ) const /Factory/;
+        = aims::MeshInterpoler::Linear ) const /Factory, ReleaseGIL/;
     void resampleTexture( const Texture_FLOAT &, Texture_FLOAT &, int=0,
       aims::MeshInterpoler::InterpolationType
-        = aims::MeshInterpoler::Linear ) const;
+        = aims::MeshInterpoler::Linear ) const /ReleaseGIL/;
     TimeTexture_S16 *resampleTexture( const TimeTexture_S16 &,
       aims::MeshInterpoler::InterpolationType
-        = aims::MeshInterpoler::Linear ) const /Factory/;
+        = aims::MeshInterpoler::Linear ) const /Factory, ReleaseGIL/;
     void resampleTexture( const Texture_S16 &, Texture_S16 &, int=0,
       aims::MeshInterpoler::InterpolationType
-        = aims::MeshInterpoler::Linear ) const;
+        = aims::MeshInterpoler::Linear ) const /ReleaseGIL/;
     TimeTexture_S32 *resampleTexture( const TimeTexture_S32 &,
       aims::MeshInterpoler::InterpolationType
-        = aims::MeshInterpoler::Linear ) const /Factory/;
+        = aims::MeshInterpoler::Linear ) const /Factory, ReleaseGIL/;
     void resampleTexture( const Texture_S32 &, Texture_S32 &, int=0,
       aims::MeshInterpoler::InterpolationType
-        = aims::MeshInterpoler::Linear ) const;
+        = aims::MeshInterpoler::Linear ) const /ReleaseGIL/;
     TimeTexture_POINT2DF *resampleTexture( const TimeTexture_POINT2DF &,
       aims::MeshInterpoler::InterpolationType
-        = aims::MeshInterpoler::Linear ) const /Factory/;
+        = aims::MeshInterpoler::Linear ) const /Factory, ReleaseGIL/;
     void resampleTexture( const Texture_POINT2DF &, Texture_POINT2DF &, int=0,
       aims::MeshInterpoler::InterpolationType
-        = aims::MeshInterpoler::Linear ) const;
+        = aims::MeshInterpoler::Linear ) const /ReleaseGIL/;
 
     const TimeTexture_U32 & projectedTriangles() const /Transfer/;
     const TimeTexture_FLOAT & projectedTriCoord1() const /Transfer/;
@@ -74,7 +74,8 @@ class MeshInterpoler
                                     const TimeTexture_FLOAT & srccoord1,
                                     const TimeTexture_FLOAT & srccoord2,
                                     const TimeTexture_FLOAT & dstcoord1,
-                                    const TimeTexture_FLOAT & dstcoord2 );
+                                    const TimeTexture_FLOAT & dstcoord2 
+                                  ) /ReleaseGIL/;
     virtual ~CoordinatesFieldMeshInterpoler();
   };
 
