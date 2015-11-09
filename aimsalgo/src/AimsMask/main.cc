@@ -32,6 +32,7 @@
  */
 
 
+#include <cmath>
 #include <cstdlib>
 #include <cartobase/config/verbose.h>
 #include <aims/io/io_g.h>
@@ -46,119 +47,181 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-template<class T>
-static bool doit( Process &, const string &, Finder & );
+// Process 1: read mask
 
+template <typename M>
+bool doitMask( Process &, const string &, Finder & );
 
-class Masker : public Process
+class MaskProcess: public Process
 {
 public:
-  Masker( const string & maskf, const string & fout, bool doInverse, string defaultval);
-
-  template<class T>
-  friend bool doit( Process &, const string &, Finder & );
-  bool getdoInverse() {return _doInverse;}
-
-private:
-  string	filemask;
-  string	fileout;
-  bool          _doInverse;
-  string        _defaultval;
-};
-
-
-Masker::Masker( const string & maskf, const string & fout, bool doInverse, string defaultval ) 
-  : Process(), filemask( maskf ), fileout( fout ), _doInverse(doInverse), _defaultval(defaultval)
-{
-  registerProcessType( "Volume", "S8", &doit<int8_t> );
-  registerProcessType( "Volume", "U8", &doit<uint8_t> );
-  registerProcessType( "Volume", "S16", &doit<int16_t> );
-  registerProcessType( "Volume", "U16", &doit<uint16_t> );
-  registerProcessType( "Volume", "S32", &doit<int32_t> );
-  registerProcessType( "Volume", "U32", &doit<uint32_t> );
-  registerProcessType( "Volume", "FLOAT", &doit<float> );
-  registerProcessType( "Volume", "DOUBLE", &doit<double> );
-  registerProcessType( "Volume", "RGB", &doit<AimsRGB> );
-  registerProcessType( "Volume", "RGBA", &doit<AimsRGBA> );
-}
-
-
-template<class T> bool 
-doit( Process & p, const string & fname, Finder & f )
-{
-  Masker		& mp = (Masker &) p;
-  T                     dv;
-  stringTo( mp._defaultval, dv );
-
-  AimsData<T>		data;
-  string		format = f.format();
-  Reader<AimsData<T> >	r( fname );
-
-  cout << "reading volume...\n";
-  if( !r.read( data, 0, &format ) )
-    return( false );
-  cout << "done\n";
-
-  Reader<AimsData<short> > reader2( mp.filemask );
-  AimsData<short> mask;
-  if( !reader2.read( mask ) )
-    return( false );
-
-  int x,y,z,t;
-  if( mp.getdoInverse() )
+  MaskProcess():
+    filein(),
+    fileout(),
+    doInverse(false),
+    defaultval("0")
   {
-    ForEach4d( mask ,x ,y ,z ,t )
-    {
-      if ( mask(x,y,z,t) == 0 ) mask(x,y,z,t) = 1;
-      else mask(x,y,z,t) = 0;
-    }
+    registerProcessType( "Volume", "S8",     &doitMask<int8_t> );
+    registerProcessType( "Volume", "U8",     &doitMask<uint8_t> );
+    registerProcessType( "Volume", "S16",    &doitMask<int16_t> );
+    registerProcessType( "Volume", "U16",    &doitMask<uint16_t> );
+    registerProcessType( "Volume", "S32",    &doitMask<int32_t> );
+    registerProcessType( "Volume", "U32",    &doitMask<uint32_t> );
+    registerProcessType( "Volume", "FLOAT",  &doitMask<float> );
+    registerProcessType( "Volume", "DOUBLE", &doitMask<double> );
   }
 
-  // Resampling if differences of voxels sizes
-  if( data.sizeX()!=mask.sizeX() ||
-      data.sizeY()!=mask.sizeY() ||
-      data.sizeZ()!=mask.sizeZ() ||
-      data.sizeT()!=mask.sizeT() )
-  {
-    unsigned dimz = 1;
-    if( data.dimZ()!=1 || mask.dimZ()!=1 ) 
-      dimz = unsigned(mask.dimZ()*mask.sizeZ()/(1.0*data.sizeZ()) + .5);
+  string  filein;
+  string  fileout;
+  bool    doInverse;
+  string  defaultval;
+};
 
-    Motion identity;
-    identity.setToIdentity();
-		NearestNeighborResampler<short> reech;
-    reech.setRef( mask );
-    mask = reech.doit( identity, 
-                       unsigned (mask.dimX()*mask.sizeX()/(1.0*data.sizeX()) + .5),
-                       unsigned (mask.dimY()*mask.sizeY()/(1.0*data.sizeY()) + .5),
-                       dimz,
-                       Point3df(data.sizeX(),data.sizeY(),data.sizeZ()));
+// Process 2: read data
+
+template <typename M, typename T>
+bool doitData( Process &, const string &, Finder & );
+
+template <typename M>
+class DataProcess: public Process
+{
+public:
+  DataProcess():
+    fileout(),
+    doInverse(false),
+    defaultval("0"),
+    vsData(1., 1., 1.),
+    vsMask(1., 1., 1.),
+    dimData(1, 1, 1),
+    dimMask(1, 1, 1)
+  {
+    registerProcessType( "Volume", "S8",      &doitData<M,int8_t> );
+    registerProcessType( "Volume", "U8",      &doitData<M,uint8_t> );
+    registerProcessType( "Volume", "S16",     &doitData<M,int16_t> );
+    registerProcessType( "Volume", "U16",     &doitData<M,uint16_t> );
+    registerProcessType( "Volume", "S32",     &doitData<M,int32_t> );
+    registerProcessType( "Volume", "U32",     &doitData<M,uint32_t> );
+    registerProcessType( "Volume", "FLOAT",   &doitData<M,float> );
+    registerProcessType( "Volume", "DOUBLE",  &doitData<M,double> );
+    registerProcessType( "Volume", "RGB",     &doitData<M,AimsRGB> );
+    registerProcessType( "Volume", "RGBA",    &doitData<M,AimsRGBA> );
+  }
+
+  Point3dl data2Mask( const Point3dl & ) const;
+
+  string       fileout;
+  bool         doInverse;
+  string       defaultval;
+
+  AimsData<M>  mask;
+  Point3df     vsData;
+  Point3df     vsMask;
+  Point3dl     dimData;
+  Point3dl     dimMask;
+};
+
+// Process 1: doit
+template <typename M>
+bool doitMask( Process & p, const string & fname, Finder & f )
+{
+  MaskProcess & mp = (MaskProcess &) p;
+  DataProcess<M> ip;
+  ip.fileout = mp.fileout;
+  ip.doInverse = mp.doInverse;
+  ip.defaultval = mp.defaultval;
+
+  Reader<AimsData<M> > maskReader( fname );
+  cout << "reading mask..." << endl;
+  maskReader >> ip.mask;
+  cout << "done" << endl;
+  ip.vsMask[0] = ip.mask.sizeX();
+  ip.vsMask[1] = ip.mask.sizeY();
+  ip.vsMask[2] = ip.mask.sizeZ();
+  ip.dimMask[0] = ip.mask.dimX();
+  ip.dimMask[1] = ip.mask.dimY();
+  ip.dimMask[2] = ip.mask.dimZ();
+
+  return ip.execute( mp.filein );
+}
+
+// Process 2: helper
+template <typename M>
+Point3dl DataProcess<M>::data2Mask( const Point3dl & p ) const
+{
+  Point3dl out(p);
+  if( dimMask[0] != 1 || dimData[0] != 1 )
+    out[0] = int( floor( ( float(p[0]) + .5 ) * vsData[0] / vsMask[0] ) );
+  if( dimMask[1] != 1 || dimData[2] != 1 )
+    out[1] = int( floor( ( float(p[1]) + .5 ) * vsData[1] / vsMask[1] ) );
+  if( dimMask[2] != 1 || dimData[2] != 1 )
+    out[2] = int( floor( ( float(p[2]) + .5 ) * vsData[2] / vsMask[2] ) );
+  return out;
+}
+
+// Process 2: doit
+template <typename M, typename T>
+bool doitData( Process & p, const string & fname, Finder & f )
+{
+  DataProcess<M> & ip = (DataProcess<M> &) p;
+  T dv;
+  stringTo( ip.defaultval, dv );
+
+  AimsData<T> data;
+  string format = f.format();
+  Reader<AimsData<T> > inputReader( fname );
+
+  cout << "reading volume..." << endl;
+  inputReader >> data;
+  cout << "done" << endl;
+  ip.vsData[0] = data.sizeX();
+  ip.vsData[1] = data.sizeY();
+  ip.vsData[2] = data.sizeZ();
+  ip.dimData[0] = data.dimX();
+  ip.dimData[1] = data.dimY();
+  ip.dimData[2] = data.dimZ();
+
+  int x, y, z, t;
+  if( ip.doInverse )
+  {
+    ForEach4d( ip.mask, x, y, z, t )
+    {
+      if ( ip.mask(x, y, z, t) == 0 )
+        ip.mask(x, y, z, t) = 1;
+      else
+        ip.mask(x, y, z, t) = 0;
+    }
   }
 
   // Maskage
   aims::Progression progress(data.dimT() * data.dimZ() * data.dimY() * data.dimX() - 1);
-  
+
   if (carto::verbose)
     std::cout << std::endl << "Masking progress: ";
-  
-  ForEach4d( data ,x ,y ,z ,t ) {
-    if (carto::verbose){
-      ++progress;
-      // Display progression
-      std::cout << progress << std::flush;
-    }
-    int minT = min( t, mask.dimT()-1 );
-    if( x<mask.dimX() && y<mask.dimY() && z<mask.dimZ() ) {
-      if( mask(x,y,z,minT) == 0 )
+
+  ForEach4d( data, x, y, z, t )
+  {
+    if (carto::verbose)
+      std::cout << ++progress << std::flush;
+
+    Point3dl pData(x, y, z);
+    Point3dl pMask = ip.data2Mask( pData );
+    int minT = min( t, ip.mask.dimT()-1 );
+
+    if( 0 <= pMask[0] && pMask[0] < ip.mask.dimX() &&
+        0 <= pMask[1] && pMask[1] < ip.mask.dimY() &&
+        0 <= pMask[2] && pMask[2] < ip.mask.dimZ() )
+    {
+      if( ip.mask( pMask[0], pMask[1], pMask[2], minT ) == 0 )
         data( x, y, z, t ) = dv;
-    } else if( !mp.getdoInverse() )
+    }
+    else if( !ip.doInverse )
       data( x, y, z, t ) = dv;
   }
 
   if (carto::verbose)
     std::cout << std::endl;
 
-  Writer<AimsData<T> > writer( mp.fileout );
+  Writer<AimsData<T> > writer( ip.fileout );
   return( writer.write( data ) );
 }
 
@@ -166,40 +229,35 @@ doit( Process & p, const string & fname, Finder & f )
 int main( int argc, const char **argv )
 {
   int result = EXIT_SUCCESS;
+  try
+  {
 
-  try	{
+    MaskProcess proc;
+    string filemask("");
 
-  string filein = "", fileout = "", filemask = "";
-  bool doInverse = false;
-  string defaultval = "0";
+    AimsApplication app( argc, argv, "Mask an image with another one" );
+    app.addOption( proc.filein,  "-i", "origin file" );
+    app.addOption( proc.fileout, "-o", "output file" );
+    app.addOption( filemask, "-m", "mask" );
+    app.addOption( proc.doInverse, "--inv", "use inverse mask image (default=no)" , true);
+    app.addOption( proc.defaultval, "-d", "Default values for masked pixels [default=0]", true );
+    app.initialize();
 
-
-  AimsApplication app( argc, argv, "Mask an image with another one" );
-  app.addOption( filein,  "-i", "origin file" );
-  app.addOption( fileout, "-o", "output file" ); 
-  app.addOption( filemask, "-m", "S16 mask" ); 
-  app.addOption( doInverse, "--inv", "use inverse mask image (default=no)" ,true);
-  app.addOption( defaultval, "-d", "Default values for masked pixels [default=0]", true );
-  app.initialize(); 
-
-
-  Masker	proc( filemask, fileout, doInverse, defaultval );
-  if( !proc.execute( filein ) )
+    if( !proc.execute( filemask ) )
     {
-      cerr << "Could not process\n";
-      return( 1 );
+      cerr << "Could not process" << endl;
+      result = EXIT_FAILURE;
     }
 
-
   }
-  catch(user_interruption &e) 
+  catch(user_interruption &e)
   {
   }
   catch(std::exception &e)
   {
-	cerr<<argv[0]<<":"<<e.what()<<endl;
-   result = EXIT_FAILURE;
+    cerr<< argv[0] << ": " << e.what() << endl;
+    result = EXIT_FAILURE;
   }
-  
+
   return result;
 }
