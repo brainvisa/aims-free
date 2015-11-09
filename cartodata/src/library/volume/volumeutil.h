@@ -42,7 +42,7 @@ namespace carto
 {
 
   /** Utility functor.
-      Converts a regular binary functor to a unary functor using a constant 
+      Converts a regular binary functor to a unary functor using a constant
       value as second argument.
       This class may move in another location later.
   */
@@ -50,7 +50,7 @@ namespace carto
   class UnaryFromConstantBinaryFunctor
   {
   public:
-    inline UnaryFromConstantBinaryFunctor( const T & x, BinaryFunction func ) 
+    inline UnaryFromConstantBinaryFunctor( const T & x, BinaryFunction func )
       : value( x ), f( func ) {}
     inline T operator () ( const T & y ) const
     { return f( y, value ); }
@@ -60,14 +60,14 @@ namespace carto
 
 
   /** Utility functor.
-      Same as the fist form except that the constant term is the first 
+      Same as the fist form except that the constant term is the first
       argument or the binary functor.
   */
   template <typename T, class BinaryFunction>
   class UnaryFromConstantBinaryFunctor2
   {
   public:
-    inline UnaryFromConstantBinaryFunctor2( const T & x, BinaryFunction func ) 
+    inline UnaryFromConstantBinaryFunctor2( const T & x, BinaryFunction func )
       : value( x ), f( func ) {}
     inline T operator () ( const T & y ) const
     { return f( value, y ); }
@@ -85,12 +85,12 @@ namespace carto
   {
   public:
     inline Scaler( U x ) : scale( x ) {}
-    inline T operator () ( const T & x ) const 
+    inline T operator () ( const T & x ) const
     { return (T) ( x * scale ); }
     U	scale;
   };
 
-  template<> inline cfloat 
+  template<> inline cfloat
   Scaler<cfloat, double>::operator () ( const cfloat & x ) const
   {
     return x * (float) scale;
@@ -169,7 +169,7 @@ namespace carto
       /** Get the minimum voxel value of a volume.
       */
       static T min( const Volume<T> & o );
-      
+
       /** Get the maximum voxel value of a volume.
       */
       static T max( const Volume<T> & o );
@@ -186,20 +186,20 @@ namespace carto
   {
   public:
     /// applies a unary function to each voxel of a volume
-    template <class UnaryFunction> static 
+    template <class UnaryFunction> static
     VolumeRef<T> apply( UnaryFunction f, const VolumeRef<T> & o );
     /// applies a binary function to each voxel of a pair of volumes
-    template <class BinaryFunction> static 
-    VolumeRef<T> apply( BinaryFunction f, const VolumeRef<T> & o1, 
+    template <class BinaryFunction> static
+    VolumeRef<T> apply( BinaryFunction f, const VolumeRef<T> & o1,
                         const VolumeRef<T> & o2 );
-    /** same as apply() except that the input volume is used to store the 
+    /** same as apply() except that the input volume is used to store the
         result */
-    template <class UnaryFunction> static 
+    template <class UnaryFunction> static
     void selfApply( UnaryFunction f, VolumeRef<T> & o );
-    /** same as apply() except that the first input volume is used to store 
+    /** same as apply() except that the first input volume is used to store
         the result */
-    template <class BinaryFunction> static 
-    void selfApply( BinaryFunction f, VolumeRef<T> & o1, 
+    template <class BinaryFunction> static
+    void selfApply( BinaryFunction f, VolumeRef<T> & o1,
                     const VolumeRef<T> & o2 );
     /** Apply a binary function to each voxel of the volume, with a "current"
         value as second argument. The voxel result is used for other voxels
@@ -217,6 +217,30 @@ namespace carto
     template <class BinaryFunction> static
     T accumulate( BinaryFunction f, const Volume<T> & o2, T initial );
   };
+
+  //--------------------------------------------------------------------------
+  // Copy functions
+  //--------------------------------------------------------------------------
+
+  /// Transfer data from an allocated volume to another
+  ///
+  /// Allocated sizes must be equal (same number of voxels)
+  template <typename T>
+  void transfer( const carto::VolumeRef<T> & src,
+                 carto::VolumeRef<T> & dst );
+
+
+  /// Performs a copy of the data (not only a reference copy)
+  ///
+  /// \param copy_full_structure if true, the complete view hierarchy is copied
+  ///                            if false, only visible data is copied
+  template <typename T>
+  carto::VolumeRef<T> deepcopy( const carto::VolumeRef<T> & src,
+                                bool copy_full_structure = true );
+
+  /// Similar to deepcopy() with copy_full_structure = false
+  template <typename T>
+  carto::VolumeRef<T> copy( const carto::VolumeRef<T> & src );
 
 }
 
