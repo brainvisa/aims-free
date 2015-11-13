@@ -91,7 +91,8 @@ namespace aims
      @param name The name of the MINC file must be provided.
      @param read_mode The read mode is optional : it can be either "real" or "voxel" depending on wether one wants to read "real values" (i.e. with the scale factor applied) or "voxel values". Default value is "real". It is strongly recommended to use the "voxel" mode for MRI volumes and "real" mode for all others (including label volumes).
     */
-    MincReader( const std::string& name, const std::string& read_mode="real", ItemReader<T>* ir = 0 ) 
+    MincReader( const std::string& name, const std::string& read_mode="real",
+                ItemReader<T>* ir = 0 )
       : _name( name ), _read_mode(read_mode), _itemr( ir )
     {}
     ~MincReader() { delete _itemr; }
@@ -504,10 +505,10 @@ namespace aims
                             carto::Object options )
   {
     //cout << "reading MINC (new version)...\n";
-    string fname = _name;
+    std::string fname = _name;
     // Replaces '\' in name with '/'
     for ( size_t pos = fname.find("\\"); 
-          pos != string::npos; pos = fname.find("\\", pos + 1) )
+          pos != std::string::npos; pos = fname.find("\\", pos + 1) )
       fname.replace(pos, 1, "/");
     
     MincHeader	*hdr = new MincHeader( _name );
