@@ -390,9 +390,15 @@ void MincHeader::read()
   if( st.st_size == 0 )
     throw eof_error( name() );
 
+  string fname = _name;
+  // Replaces '\' in name with '/'
+  for ( size_t pos = fname.find("\\"); 
+        pos != string::npos; pos = fname.find("\\", pos + 1) )
+    fname.replace(pos, 1, "/");
+    
   ::Volume volume;
   STRING dim_names[4];
-  STRING fileName = create_string ( (char *) _name.c_str());
+  STRING fileName = create_string ( (char *) fname.c_str());
 
   dim_names[0] = create_string( const_cast<char*>( MIzspace ) );
   dim_names[1] = create_string( const_cast<char*>( MIyspace ) );
@@ -735,7 +741,7 @@ void MincHeader::read()
 
   readMincHistory(mincid);
 
-  readMinf( removeExtension( _name ) + extension() + ".minf" );
+  readMinf( removeExtension( fname ) + extension() + ".minf" );
 
   //Free memory
   delete_volume(volume);

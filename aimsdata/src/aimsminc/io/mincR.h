@@ -91,7 +91,8 @@ namespace aims
      @param name The name of the MINC file must be provided.
      @param read_mode The read mode is optional : it can be either "real" or "voxel" depending on wether one wants to read "real values" (i.e. with the scale factor applied) or "voxel values". Default value is "real". It is strongly recommended to use the "voxel" mode for MRI volumes and "real" mode for all others (including label volumes).
     */
-    MincReader( const std::string& name, const std::string& read_mode="real", ItemReader<T>* ir = 0 ) 
+    MincReader( const std::string& name, const std::string& read_mode="real",
+                ItemReader<T>* ir = 0 )
       : _name( name ), _read_mode(read_mode), _itemr( ir )
     {}
     ~MincReader() { delete _itemr; }
@@ -202,7 +203,7 @@ namespace aims
 
     Volume volume;
     STRING dim_names[4];
-    STRING fileName = create_string ( (char*)_name.c_str());
+    STRING fileName = create_string ( const_cast<char*>(data.volume()->allocatorContext().dataSource()->url().c_str()));
 
 
 
@@ -324,6 +325,7 @@ namespace aims
   inline
   void MincReader<T>::readMinc2( AimsData<T>& data, int tmin, int dimt )
   {
+    
     Header *h = data.header();
     MincHeader *hdr = static_cast<MincHeader *>( h );
 
@@ -332,7 +334,7 @@ namespace aims
     double voxel;
 
     MincHeader::mincMutex().lock();
-    result = miopen_volume( _name.c_str(), MI2_OPEN_READ, &minc_volume);
+    result = miopen_volume( data.volume()->allocatorContext().dataSource()->url().c_str(), MI2_OPEN_READ, &minc_volume);
     MincHeader::mincMutex().unlock();
 
     if (result != MI_NOERROR)
@@ -503,6 +505,12 @@ namespace aims
                             carto::Object options )
   {
     //cout << "reading MINC (new version)...\n";
+    std::string fname = _name;
+    // Replaces '\' in name with '/'
+    for ( size_t pos = fname.find("\\"); 
+          pos != std::string::npos; pos = fname.find("\\", pos + 1) )
+      fname.replace(pos, 1, "/");
+    
     MincHeader	*hdr = new MincHeader( _name );
     //cout << "(header allocated)\n";
     try
@@ -540,7 +548,7 @@ namespace aims
       tmin = 0;
     }
 
-    std::string name = hdr->removeExtension( _name ) + ".mnc";
+    std::string name = hdr->removeExtension( fname ) + ".mnc";
 
     carto::AllocatorContext	al 
       ( context.accessMode(), 
