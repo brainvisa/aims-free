@@ -54,6 +54,12 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   */
 
   //Only works for 3D volume. Should add 4D support.
+  string fname = _name;
+  // Replaces '\' in name with '/'
+  for ( size_t pos = fname.find("\\"); 
+        pos != string::npos; pos = fname.find("\\", pos + 1) )
+    fname.replace(pos, 1, "/");
+  
   int n_dimensions=4;
 
   if(thing.dimT()==1) {
@@ -150,7 +156,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     
   alloc_volume_data(volume);
 
-  MincHeader	hdr(  _name, dtc.dataType(), thing.dimX(), thing.dimY(), 
+  MincHeader	hdr(  fname, dtc.dataType(), thing.dimX(), thing.dimY(), 
                       thing.dimZ(), thing.dimT(),
                       thing.sizeX(), thing.sizeY(), thing.sizeZ(),
                       thing.sizeT() );
@@ -271,7 +277,8 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   bool ok = true;
   fdinhibitor fdi( 2 );
   fdi.close(); // inhibit output on stderr
-  if( output_volume((char*)(_name.c_str()),
+  //std::cout << "MINC Plugin::write: name: " << fname << std::endl << std::flush;
+  if( output_volume((char*)(fname.c_str()),
                 nc_disk_data_type,
                 signed_flag,
                 dmin,
@@ -283,7 +290,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   int mincid = -1;
   if( ok )
   {
-    mincid=ncopen((char*)(_name.c_str()),NC_WRITE);
+    mincid=ncopen((char*)(fname.c_str()),NC_WRITE);
     if( mincid < 0 )
       ok = false;
   }
@@ -374,7 +381,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
 
     hdr.writeMincHistory(mincid);
-    hdr.writeMinf( FileUtil::removeExtension( _name ) + ".mnc.minf" );
+    hdr.writeMinf( FileUtil::removeExtension( fname ) + ".mnc.minf" );
     miclose(mincid);
   }
 

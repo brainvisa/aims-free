@@ -202,7 +202,7 @@ namespace aims
 
     Volume volume;
     STRING dim_names[4];
-    STRING fileName = create_string ( (char*)_name.c_str());
+    STRING fileName = create_string ( const_cast<char*>(data.volume()->allocatorContext().dataSource()->url().c_str()));
 
 
 
@@ -324,6 +324,7 @@ namespace aims
   inline
   void MincReader<T>::readMinc2( AimsData<T>& data, int tmin, int dimt )
   {
+    
     Header *h = data.header();
     MincHeader *hdr = static_cast<MincHeader *>( h );
 
@@ -332,7 +333,7 @@ namespace aims
     double voxel;
 
     MincHeader::mincMutex().lock();
-    result = miopen_volume( _name.c_str(), MI2_OPEN_READ, &minc_volume);
+    result = miopen_volume( data.volume()->allocatorContext().dataSource()->url().c_str(), MI2_OPEN_READ, &minc_volume);
     MincHeader::mincMutex().unlock();
 
     if (result != MI_NOERROR)
@@ -503,6 +504,12 @@ namespace aims
                             carto::Object options )
   {
     //cout << "reading MINC (new version)...\n";
+    string fname = _name;
+    // Replaces '\' in name with '/'
+    for ( size_t pos = fname.find("\\"); 
+          pos != string::npos; pos = fname.find("\\", pos + 1) )
+      fname.replace(pos, 1, "/");
+    
     MincHeader	*hdr = new MincHeader( _name );
     //cout << "(header allocated)\n";
     try
@@ -540,7 +547,7 @@ namespace aims
       tmin = 0;
     }
 
-    std::string name = hdr->removeExtension( _name ) + ".mnc";
+    std::string name = hdr->removeExtension( fname ) + ".mnc";
 
     carto::AllocatorContext	al 
       ( context.accessMode(), 
