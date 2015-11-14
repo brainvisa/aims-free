@@ -9,9 +9,14 @@ namespace carto
 #include <cartobase/allocator/allocator.h>
 %End
 
+%Docstring
+Memory management strategy helper. Contains mainly constants and a memory query function.
+%End
+
   public:
     enum DataAccess
       {
+
         InternalModif,
         ReadOnly,
         ReadWrite,
@@ -35,12 +40,18 @@ namespace carto
     static void memSizes( unsigned long long & ram,
                           unsigned long long & freeram,
                           unsigned long long & swap );
+%Docstring
+Check the current system memory and return the amount of RAM, free RAM, and swap.
+%End
 
     static carto::AllocatorContext
       allocator( carto::AllocatorStrategy::MappingMode );
 %MethodCode
     sipRes = new carto::AllocatorContext
       ( &carto::AllocatorStrategy::lowLevelAllocator( a0 ) );
+%End
+%Docstring
+Create an AllocatorContext object with the required mapping mode
 %End
 
   };
@@ -50,6 +61,11 @@ namespace carto
   {
 %TypeHeaderCode
 #include <cartobase/allocator/allocator.h>
+%End
+
+%Docstring
+Allocation context specifications.
+This object is used when memory must be allocated for large objects (volumes, arrays...), especially for data which will be read from disk. It allows to specify how the memory will be used (read-only, read-write, how much...) to allow to decide whether any memory mapping techniques should be used or not.
 %End
 
   public:

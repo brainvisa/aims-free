@@ -199,20 +199,29 @@ class Reader(object):
 
         The map has 2 modes:
 
-        - object_type : object_type (ex: ``{'Volume' : 'AimsData'}`` )
-        - object_type : dict( data_type : full_type )
+        * object_type : object_type (ex: ``{'Volume' : 'AimsData'}`` )
+        * object_type : dict( data_type : full_type )
           (ex: ``'Mesh' : { 'VOID' : 'AimsSurfaceTriangle' }`` )
 
           A default object_type can be specified if the data_type is not
           found:
 
-          .. code-block:: python
+          ::
 
             'Mesh' : { 'VOID' : 'AimsSurfaceTriangle',
                         'default_object_type' : 'AimsTimeSurface_3_VOID' }
 
           (and this example corresponds to the default internal map if none is
           specified)
+
+        Parameters
+        ----------
+        typemap: dict (optional)
+            described above
+        allocmode: (optional)
+            :py:class:`carto.AllocatorContext` or
+            :py:class:`carto.AllocatorStrategy`.DataAccess constant:
+            allocation specification.
         '''
         if typemap is None:
             self._typemap = {  # 'Volume' : 'AimsData',
@@ -1257,13 +1266,22 @@ def VolumeView(volume, position, size):
     '''
     volclass = type(volume)
     if volclass.__name__.startswith('Volume_'):
-        return volclass(volume, position, size)
+        vol = volume
     elif volclass.__name__.startswith('AimsData_'):
+        vol = volume.volume()
         volclass = type(volume.volume())
-        return volclass(volume.volume(), position, size)
     elif volclass.__name__.startswith('rc_ptr_'):
         volclass = type(volume.get())
-        return volclass(volume, position, size)
+    else:
+        raise TypeError('incompatible or wrong volume type: %s'
+            % volclass.__name__)
+
+    posclass = volclass.Position4Di
+    if not isinstance(position, posclass):
+        position = posclass(*position)
+    if not isinstance(size, posclass):
+        size = posclass(*size)
+    return volclass(vol, position, size)
 
 
 def AimsData(*args, **kwargs):
@@ -1819,6 +1837,34 @@ del x, y
 
 del _volumedoc, _aimsdatadoc
 
+
+carto.AllocatorStrategy.DataAccess.__doc__ = '''
+Data access mode
+
+InternalModif:
+    random access in memory, disk data (memmapped) should not be overwritten.
+ReadOnly:
+    read only in memory. Accessing data in write mode may cause a crash.
+ReadWrite:
+    read/write both in memory and on disk, if memmapped.
+NotOwner:
+    data is unallocated, or its ownership belongs to a proxy object.
+'''
+
+carto.AllocatorStrategy.MappingMode.__doc__ = '''
+Memory mapping modes
+
+Memory, (MEM):
+    in-memory allocation
+CopyMap, (MAP, MAP_COPY):
+    data is copied into a memmaped file (accessed read/write)
+ReadOnlyMap, (MAP_RO):
+    read-only memory mapping
+ReadWriteMap, (MAP_RW):
+    read/write memory mapping: modifying the memory also modifies the file on disk.
+Unallocated:
+    not allocated.
+'''
 
 SurfaceGenerator.__doc__ = """
 Surface Generator Object. Available Methods are :

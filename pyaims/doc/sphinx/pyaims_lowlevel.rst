@@ -203,14 +203,20 @@ Generic object
 ::::::::::::::
 
 .. autoclass:: soma.aims.carto
-  :members: GenericObject
+  :members: GenericObject, AllocatorContext, AllocatorStrategy
 
   This class represents the carto C++ namespace. It is rather used like a module, not as a class.
 
   .. autoclass:: soma.aims.carto.GenericObject
-
+    :members:
 
     See the :cartobdox:`GenericObject C++ documentation <classcarto_1_1GenericObject.html>`
+
+  .. autoclass:: soma.aims.carto.AllocatorStrategy
+    :members:
+
+  .. autoclass:: soma.aims.carto.AllocatorContext
+    :members:
 
 .. autoclass:: soma.aims.rc_ptr_GenericObject
   :members:
@@ -273,4 +279,5 @@ Conversion classes and functions
 
 .. autoclass:: soma.aims.ShallowConverter_Volume_S16_Volume_FLOAT
   :members:
+
 

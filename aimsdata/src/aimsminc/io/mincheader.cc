@@ -421,6 +421,7 @@ void MincHeader::read()
                                MI_ORIGINAL_TYPE, TRUE,
                                0.0, 0.0, TRUE, &volume,
                                (minc_input_options *) NULL,&input_info );
+
   fdi.open();
 
   if(status != OK)
@@ -604,7 +605,8 @@ void MincHeader::read()
     setProperty ( "MINC_general_transform:type", transfo_type );
     //std::cout << "MINC Non-linear voxel to world transform are not yet supported !!\n";
   }
-  else {
+  else
+  {
     string transfo_type="linear";
     setProperty ( "MINC_general_transform:type", transfo_type );
     //std::cout << gt->inverse_flag << "\n";
@@ -751,6 +753,7 @@ void MincHeader::read()
   delete_string(dim_names[2]);
   delete_string(dim_names[3]);
   delete_general_transform(gt);
+  delete_volume_input(&input_info);
   }
   catch( ... )
   {
