@@ -29,7 +29,21 @@ class TestPyaimsIO(unittest.TestCase):
         self.assertTrue(np.max(np.abs(np.asarray(vol) - np.asarray(vol2)))
                         < thresh,
                         msg + ', max diff: %f'
-                        % np.max(np.abs(np.asarray(vol) - np.asarray(vol2))) )
+                        % np.max(np.abs(np.asarray(vol) - np.asarray(vol2))))
+
+    def check_open_files(self, fnames):
+        proc_dir = '/proc/self/fd'
+        failing = []
+        if os.path.exists(proc_dir):
+            for fd in os.listdir(proc_dir):
+                fdpath = os.path.join(proc_dir, fd)
+                if os.path.islink(fdpath):
+                    fpath = os.readlink(fdpath)
+                    if fpath in fnames:
+                        failing.append((fd, fpath))
+        if self.verbose and failing:
+            print '    ! remaining open files:', failing
+        return failing
 
 
     def use_type(self, dtype):
@@ -39,8 +53,10 @@ class TestPyaimsIO(unittest.TestCase):
         vol = aims.Volume(10, 10, 10, dtype=dtype)
         vol.header()['voxel_size'] = [0.5, 0.6, 0.7]
         np.asarray(vol)[:,:,:,:] = np.ogrid[0:1000].reshape(10, 10, 10, 1)
+        failing_files = set()
         for format in formats:
-            self.use_format(vol, format)
+            failing_files.update(self.use_format(vol, format))
+        return failing_files
 
 
     def use_format(self, vol, format):
@@ -88,14 +104,22 @@ class TestPyaimsIO(unittest.TestCase):
             vol4 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
             self.compare_images(vol4, vol3, 'sub-volume', 'patially read')
 
+        # check if files remain open
+        failing_files = self.check_open_files([fname, minf_fname])
+        return failing_files
+
 
     def test_pyaims_io(self):
         formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v', '.tiff']
         suffixes = {'.dcm': '1', '.tiff': '_0000'}
         partial_io = ['.nii', '.nii.gz', '.ima']
         types = ['S16', 'FLOAT']
+        failing_files = set()
         for dtype in types:
-            self.use_type(dtype)
+            failing_files.update(self.use_type(dtype))
+        if failing_files:
+            raise RuntimeError('There are still open files: %s'
+                % repr(failing_files) )
 
 
     def tearDown(self):
