@@ -44,6 +44,18 @@ extern "C" {
 #include <volume_io.h>
 }
 
+#ifndef HAVE_MINC2
+// use older types
+#define VIO_Volume ::volume
+#define VIO_STR STRING
+#define VIO_BOOL BOOLEAN
+#define VIO_OK OK
+#define VIO_MAX_DIMENSIONS MAX_DIMENSIONS
+#define VIO_Real Real
+#define VIO_General_transform General_transform
+#define VIO_Transform Transform
+#endif
+
 namespace carto
 {
   class Mutex;

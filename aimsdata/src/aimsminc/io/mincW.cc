@@ -71,8 +71,8 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     }
     else n_dimensions=3;
   }
-  ::Volume volume;
-  STRING dim_names[4];
+  VIO_Volume volume;
+  VIO_STR dim_names[4];
 
   dim_names[0] = create_string( const_cast<char*>( MIzspace) );
   dim_names[1] = create_string( const_cast<char*>( MIyspace ) );
@@ -80,7 +80,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   dim_names[3] = create_string( const_cast<char*>( MItime ) );
 
   nc_type nc_data_type, nc_disk_data_type;
-  BOOLEAN signed_flag;
+  VIO_BOOL signed_flag;
 
   carto::DataTypeCode<T>	dtc;
   bool scaledcoding = false;
@@ -146,7 +146,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
   set_volume_real_range(volume,mini,maxi);
 
-  int       sizes[MAX_DIMENSIONS];
+  int       sizes[VIO_MAX_DIMENSIONS];
   sizes[3]=thing.dimZ();
   sizes[2]=thing.dimX();
   sizes[1]=thing.dimY();
@@ -199,7 +199,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   if(dirZ>0) Z_pos=1; 
   else Z_pos=0;
 
-  Real separations[MAX_DIMENSIONS];
+  VIO_Real separations[VIO_MAX_DIMENSIONS];
     
   separations[3]=minc_sizeT;
   separations[2]=minc_sizeX;
@@ -240,10 +240,10 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
           tr *= s2m;
         }
         // handle MINC transform
-        General_transform *gt=get_voxel_to_world_transform(volume);
+        VIO_General_transform *gt=get_voxel_to_world_transform(volume);
         gt->type=LINEAR;
         gt->inverse_flag=FALSE;
-        gt->linear_transform=(Transform*)malloc(sizeof(Transform));
+        gt->linear_transform=(VIO_Transform*)malloc(sizeof(VIO_Transform));
         for(int i=0;i<3;i++)
         {
           for(int j=0;j<3;j++)
@@ -285,7 +285,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
                 dmax,
                 volume,
                 NULL,
-                NULL) != OK )
+                NULL) != VIO_OK )
     ok = false;
   int mincid = -1;
   if( ok )

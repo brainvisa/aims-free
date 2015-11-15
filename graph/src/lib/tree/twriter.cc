@@ -87,7 +87,7 @@ void TreeWriter::writeTree( const Tree* tree, const string & type )
              << tree->getInterface<SyntaxedInterface>()->getSyntax()
 	     << endl;
 
-  writeAttributes( tree );
+  writeAttributes( *tree );
 
   for ( Tree::const_iterator n = tree->begin(); n != tree->end(); ++n )
     {
