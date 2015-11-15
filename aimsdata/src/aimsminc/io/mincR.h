@@ -201,9 +201,9 @@ namespace aims
     Header *h = data.header();
     MincHeader *hdr = static_cast<MincHeader *>( h );
 
-    Volume volume;
-    STRING dim_names[4];
-    STRING fileName = create_string ( const_cast<char*>(data.volume()->allocatorContext().dataSource()->url().c_str()));
+    VIO_Volume volume;
+    VIO_STR dim_names[4];
+    VIO_STR fileName = create_string ( const_cast<char*>(data.volume()->allocatorContext().dataSource()->url().c_str()));
 
 
 
@@ -232,7 +232,7 @@ namespace aims
                       0.0, 0.0, TRUE, &volume,
                       (minc_input_options *) NULL );
     MincHeader::mincMutex().unlock();
-    if( res != OK )
+    if( res != VIO_OK )
     {
       std::cout << "input_volume failed.\n";
       throw carto::corrupt_stream_error( "could not read MINC file",
@@ -353,8 +353,8 @@ namespace aims
     std::vector<midimhandle_t> dimensions( ndim );
     double        world_location[3];
     double        dvoxel_location[3];
-    std::vector<unsigned long> start( ndim ), count( ndim );
-    std::vector<unsigned int>  sizes( ndim );
+    std::vector<misize_t> start( ndim ), count( ndim );
+    std::vector<misize_t>  sizes( ndim );
 
     miget_volume_dimensions( minc_volume, MI_DIMCLASS_ANY,
       MI_DIMATTR_ALL, MI_DIMORDER_FILE, ndim, &dimensions[0] );

@@ -371,7 +371,8 @@ namespace
 
 void MincHeader::read()
 {
-  //cout << "MincHeader::read(), file : " << _name << endl;
+  // cout << "MincHeader::read(), file : " << _name << endl;
+
   if( FileUtil::fileStat( name() ).empty() )
   {
     if( name().length() < 4 || name().substr( name().length()-4, 4 ) != ".mnc" )
@@ -395,17 +396,16 @@ void MincHeader::read()
   for ( size_t pos = fname.find("\\"); 
         pos != string::npos; pos = fname.find("\\", pos + 1) )
     fname.replace(pos, 1, "/");
-    
-  ::Volume volume;
-  STRING dim_names[4];
-  STRING fileName = create_string ( (char *) fname.c_str());
 
-  dim_names[0] = create_string( const_cast<char*>( MIzspace ) );
-  dim_names[1] = create_string( const_cast<char*>( MIyspace ) );
-  dim_names[2] = create_string( const_cast<char*>( MIxspace ) );
-  dim_names[3] = create_string( const_cast<char*>( MItime ) );
+  VIO_Volume volume;
+  VIO_STR dim_names[4];
+  VIO_STR fileName = create_string ( const_cast<char *>( fname.c_str() ) );
 
- 
+  dim_names[0] = create_string( const_cast<char *>( MIzspace ) );
+  dim_names[1] = create_string( const_cast<char *>( MIyspace ) );
+  dim_names[2] = create_string( const_cast<char *>( MIxspace ) );
+  dim_names[3] = create_string( const_cast<char *>( MItime ) );
+
   volume_input_struct input_info;
   //Read the header of the MINC file. This volume is not allocated and its content is not read from disk.
   set_print_error_function(my_empty_print_error);
@@ -417,14 +417,13 @@ void MincHeader::read()
   mincMutex().lock();
   try
   {
-  status = start_volume_input( fileName, 0, dim_names,
+  status = start_volume_input( fileName, 4, dim_names,
                                MI_ORIGINAL_TYPE, TRUE,
                                0.0, 0.0, TRUE, &volume,
-                               (minc_input_options *) NULL,&input_info );
-
+                               (minc_input_options *) NULL, &input_info );
   fdi.open();
 
-  if(status != OK)
+  if(status != VIO_OK)
     throw wrong_format_error( fileName );
 
   if(volume->nc_data_type==NC_BYTE && volume->signed_flag==FALSE) 
@@ -471,7 +470,7 @@ void MincHeader::read()
     throw wrong_format_error( fileName );
 
   //Read the volume size
-  int       sizes[MAX_DIMENSIONS];
+  int       sizes[VIO_MAX_DIMENSIONS];
   get_volume_sizes( volume, sizes );
   _dimT=sizes[3];
   _dimX=sizes[2];
@@ -504,7 +503,7 @@ void MincHeader::read()
   }
   
   //Read voxel range and real range. Only for debugging purpose: the values are not stored in the class.
-  Real vmin,vmax,rmin,rmax;
+  VIO_Real vmin,vmax,rmin,rmax;
   get_volume_voxel_range(volume,&vmin,&vmax);
   //std::cout << "Voxel range : " << vmin << ";" <<vmax<<"\n";
   get_volume_real_range(volume,&rmin,&rmax);
@@ -598,7 +597,7 @@ void MincHeader::read()
     s2m.translation()[2] = _dimZ-1;
   setProperty( "storage_to_memory", s2m.toVector() );
 
-  General_transform *gt=get_voxel_to_world_transform(volume);
+  VIO_General_transform *gt=get_voxel_to_world_transform(volume);
 
   if(gt->type!=LINEAR) {
     string transfo_type="NOT SUPPORTED !!";
@@ -757,6 +756,7 @@ void MincHeader::read()
   }
   catch( ... )
   {
+    fdi.open();
     mincMutex().unlock();
     throw;
   }
