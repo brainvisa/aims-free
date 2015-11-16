@@ -62,6 +62,10 @@ typedef unsigned int aims_misize_t;
 #else
 typedef misize_t aims_misize_t;
 #endif
+#ifndef VIO_MAX_DIMENSIONS
+// happens in some versions of minc...
+#define VIO_MAX_DIMENSIONS MAX_DIMENSIONS
+#endif
 
 namespace carto
 {
