@@ -49,11 +49,18 @@ extern "C" {
 #define VIO_Volume ::volume
 #define VIO_STR STRING
 #define VIO_BOOL BOOLEAN
-#define VIO_OK OK
 #define VIO_MAX_DIMENSIONS MAX_DIMENSIONS
 #define VIO_Real Real
 #define VIO_General_transform General_transform
 #define VIO_Transform Transform
+#endif
+
+#ifndef VIO_FLOOR
+// most recent type changes - is there a version anywhere ?
+#define VIO_OK OK
+typedef unsigned int aims_misize_t;
+#else
+typedef misizze_t aims_misize_t;
 #endif
 
 namespace carto
