@@ -354,7 +354,7 @@ namespace aims
     double        world_location[3];
     double        dvoxel_location[3];
     std::vector<misize_t> start( ndim ), count( ndim );
-    std::vector<misize_t>  sizes( ndim );
+    std::vector<aims_misize_t>  sizes( ndim );
 
     miget_volume_dimensions( minc_volume, MI_DIMCLASS_ANY,
       MI_DIMATTR_ALL, MI_DIMORDER_FILE, ndim, &dimensions[0] );
