@@ -60,7 +60,7 @@ extern "C" {
 #define VIO_OK OK
 typedef unsigned int aims_misize_t;
 #else
-typedef misizze_t aims_misize_t;
+typedef misize_t aims_misize_t;
 #endif
 
 namespace carto
