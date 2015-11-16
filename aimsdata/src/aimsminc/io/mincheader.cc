@@ -398,13 +398,15 @@ void MincHeader::read()
     fname.replace(pos, 1, "/");
 
   VIO_Volume volume;
-  VIO_STR dim_names[4];
+  vector<VIO_STR> dim_names( VIO_MAX_DIMENSIONS );
   VIO_STR fileName = create_string ( const_cast<char *>( fname.c_str() ) );
 
   dim_names[0] = create_string( const_cast<char *>( MIzspace ) );
   dim_names[1] = create_string( const_cast<char *>( MIyspace ) );
   dim_names[2] = create_string( const_cast<char *>( MIxspace ) );
   dim_names[3] = create_string( const_cast<char *>( MItime ) );
+  for( unsigned i=4; i<VIO_MAX_DIMENSIONS; ++i )
+    dim_names[i] = 0;
 
   volume_input_struct input_info;
   //Read the header of the MINC file. This volume is not allocated and its content is not read from disk.
@@ -417,7 +419,7 @@ void MincHeader::read()
   mincMutex().lock();
   try
   {
-  status = start_volume_input( fileName, 4, dim_names,
+  status = start_volume_input( fileName, 0, &dim_names[0],
                                MI_ORIGINAL_TYPE, TRUE,
                                0.0, 0.0, TRUE, &volume,
                                (minc_input_options *) NULL, &input_info );
