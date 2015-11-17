@@ -89,8 +89,8 @@ void WriteCurrentDepInFile(
   MotionWriter motionWRev(inverse,
         (notFirstCall? ios::app : ios::out) );
 
-  motionWDir << depl;
-  motionWRev << invdepl;
+  motionWDir.write( depl );
+  motionWRev.write( invdepl );
 
 
   if (generatecurve) {

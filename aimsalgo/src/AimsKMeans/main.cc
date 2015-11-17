@@ -44,11 +44,13 @@ AimsEssai-JD -i ../AimsThalamus-JD/sortie_classe -f ~/clust/sortie_cla
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <aims/data/data_g.h>
+#include <cartobase/exception/ioexcept.h>
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>
 
-using namespace aims ;
+using namespace aims;
+using namespace carto;
 using namespace std;
 
 BEGIN_USAGE(usage)
@@ -122,21 +124,25 @@ int main( int argc, char* argv[] )
 
   pfichier=fopen(fileread, "r");
   pfichier2=fopen(fileread2, "r");
-  
+
   cout<<"ok jusque la"<<endl;
-  
+
   for(int i =0; i<n;i++)
   {
- 		for(int j=0;j<3;j++)
-			{ 	
-				fscanf(pfichier2,"%d", &tab);
-  				p[j] = tab;
-				//cout<<p[j]<<" ";
-			}
-		fscanf(pfichier,"%u", &e);
-		im( (unsigned) p[0], (unsigned) p[1], (unsigned) p[2] ) = e;
-		cout<<p[0]<<" "<<p[1]<<" "<<p[2]<<" classe : "<<e<<endl;
-	}
+    for(int j=0;j<3;j++)
+    {
+      int res = fscanf(pfichier2,"%d", &tab);
+      if( res != 1 )
+        throw parse_error( "Could not read input", "", "", 1 );
+      p[j] = tab;
+      //cout<<p[j]<<" ";
+    }
+    int res = fscanf(pfichier,"%u", &e);
+    if( res != 1 )
+      throw parse_error( "Could not read input", "", "", 1 );
+    im( (unsigned) p[0], (unsigned) p[1], (unsigned) p[2] ) = e;
+    cout<<p[0]<<" "<<p[1]<<" "<<p[2]<<" classe : "<<e<<endl;
+  }
 
   fclose(pfichier);
   fclose(pfichier2);
