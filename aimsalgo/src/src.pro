@@ -57,7 +57,6 @@ PSUBDIRS = \
     AimsKMeans                \
     AimsKMeansImageSegmentation                \
     AimsLightenAtlas \
-    AimsLZHCompress           \
     AimsLinearComb            \
 #    AimsLmaGtm            \
     AimsManualBiasCorrection       \

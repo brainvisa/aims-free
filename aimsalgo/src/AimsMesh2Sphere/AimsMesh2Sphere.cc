@@ -42,6 +42,7 @@
 #include <aims/utility/utility_g.h>
 #include <aims/mesh/mesh_g.h>
 #include <aims/io/io_g.h> 
+#include <cartobase/exception/file.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -224,15 +225,19 @@ int main(int argc, char **argv)
 	if (verts==NULL) exit(1);
 	p=(float*)calloc(3*nv,sizeof(float));
 	if (p==NULL)	exit(2);
-	fread(p,sizeof(float),3*nv,verts);
+	size_t res = fread(p,sizeof(float),3*nv,verts);
 	fclose(verts);
+        if( res != sizeof(float) * 3*nv )
+          throw file_error( file_verts );
 	
 	trians=fopen(file_trians, "r");
 	if (trians==NULL) exit(3);
 	T=(int*)calloc(3*nt,sizeof(int));
 	if (T==NULL)	exit(4);
-	fread(T,sizeof(int),3*nt,trians);
+	res = fread(T,sizeof(int),3*nt,trians);
 	fclose(trians);
+        if( res != sizeof(int) * 3*nt )
+          throw file_error( file_trians );
 	
 	// 3. compute surface coordinates
 	new_mesh(&mesh,(float3D*)p,(int3D*)T, nv, nt);

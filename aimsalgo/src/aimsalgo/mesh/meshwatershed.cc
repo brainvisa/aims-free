@@ -104,22 +104,22 @@ namespace aims
     */
 
     // taken from old fff_field.c (ancestor of nipy)
-    int i,r,N = mesh.vertex().size();
+    size_t i,r,N = mesh.vertex().size();
     vector<AimsVector<uint,2> > edges;
     vector<double> weights;
 
     distancesFromMesh( mesh, edges, weights );
 
-    int E = edges.size();
-    int nA,nB,remain;
+    size_t E = edges.size();
+    size_t nA, nB, remain;
     double delta;
 
-    int k = 0;
+    size_t k = 0;
 
-    vector<int> win( N, 0 );
-    vector<int> maj1( N, 0 );
-    vector<int> maj2;
-    vector<int> incwin( N, 0 );
+    vector<size_t> win( N, 0 );
+    vector<size_t> maj1( N, 0 );
+    vector<size_t> maj2;
+    vector<size_t> incwin( N, 0 );
     vector<double> mfield;
     vector<double> Mfield;
     /* mfield: max field of the basin associated with each vertex
@@ -205,7 +205,7 @@ namespace aims
     }
 
     /* get the local maximum associated with any point  */
-    int j,aux;
+    size_t j, aux;
     for( i=0 ; i<N ; i++ )
     {
       if( field[i] > th )
@@ -290,7 +290,7 @@ namespace aims
                                 vector<long> & neighb,
                                 vector<double> & weight,
                                 const vector<AimsVector<uint, 2> > & edges,
-                                const vector<double> & inweights, long V )
+                                const vector<double> & inweights, size_t V )
   {
     /* This function recomputes the connectivity system of the graph in an efficient way:
     The edges are arraned in the following manner
@@ -300,9 +300,9 @@ namespace aims
 
         cindices codes for the origin vector: origin=i between cindices[i] and cindices[i+1]-1
     */
-    long E = edges.size();
-    long a,b;
-    long i,j;
+    size_t E = edges.size();
+    size_t a,b;
+    size_t i,j;
     double aux = 0;
 
     if( ( cindices.size() < V ) | ( neighb.size() < E )
@@ -351,22 +351,23 @@ namespace aims
     // label: blob number for each node
 
     // taken from old fff_field.c (ancestor of nipy)
-    int V = mesh.vertex().size();
+    size_t V = mesh.vertex().size();
     vector<AimsVector<uint,2> > edges;
     vector<double> weights;
 
     distancesFromMesh( mesh, edges, weights );
 
-    int E = edges.size();
+    size_t E = edges.size();
 
-    int i,j,k,l,win,start, end;
+    size_t i, j, l, win, start, end;
+    long k;
     int ll = 0;
     vector<long> cindices( V+1, 0 ), neighb( E, 0 );
     vector<double> weight( E, 0. );
     vector<long> father( 2*V, 0 ), possible( V, 0 ), idx( 2*V, 0 );
     vector<double> height( 2*V, 0. );
     vector<long> p( V, 0 );
-    long q;
+    size_t q;
 
     if( label.size() != V )
       label.resize( V );
@@ -460,7 +461,7 @@ namespace aims
     Father.resize( ll );
     Idx.resize( ll );
     Height.resize( ll );
-    for( i=0; i<ll; ++i )
+    for( i=0; i<size_t(ll); ++i )
     {
       Father[i] = father[i];
       Idx[i] = idx[i];
