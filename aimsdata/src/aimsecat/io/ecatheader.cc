@@ -195,10 +195,10 @@ void EcatHeader::read()
           const_cast<char*>( "r" ) )) != ECATSHFJ_FAIL )
           _name = fileName + ".p";
         else
-          throw file_error("Wrong format", fileName);
+          throw file_error( fileName );
   }
 
-  setProperty( "file_type", string( "ECAT" ) );   
+  setProperty( "file_type", string( "ECAT" ) );
 
   vector< int > volDim;
   volDim.push_back( (int) EcatSizeX( uei ) );

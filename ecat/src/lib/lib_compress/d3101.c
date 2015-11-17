@@ -114,7 +114,7 @@ get_ccode()
       case 2:			/* increment codeword size  */
         inp_code_len++;
         if (inp_code_len > 12 ) {  
-            fprintf(stderr,"Error: codeword length > 12 at count %d\n", 
+            fprintf(stderr,"Error: codeword length > 12 at count %ld\n",
                 inp_byte_cnt);
             ERROR_flag = 1;
             return 0;
@@ -130,7 +130,7 @@ get_ccode()
       case 5:
       case 6:
       case 7:
-        fprintf(stderr,"Error: undefined control code %d at count %d\n",
+        fprintf(stderr,"Error: undefined control code %d at count %ld\n",
             cur_code,inp_byte_cnt);
         ERROR_flag = 1;
         break;

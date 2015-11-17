@@ -64,7 +64,7 @@ int main(int argc,char *argv[])
 	exit(EXIT_FAILURE);
       case 'i' :
 	if (strlen(optarg) >= MAXFNAMESIZE) {
-	  printf("  !!! Error: input parameter '%s' should contain less than %0d characters (%0x)\n",
+	  printf("  !!! Error: input parameter '%s' should contain less than %0d characters (%0zx)\n",
 		 optarg,MAXFNAMESIZE,strlen(optarg));
 	  exit(EXIT_FAILURE);
 	}
@@ -81,7 +81,7 @@ int main(int argc,char *argv[])
 	break;
       case 'o' :
 	if (strlen(optarg) >= MAXFNAMESIZE) {
-	  printf("  !!! Error: input parameter '%s' should contain less than %0d characters (%0x)\n",
+	  printf("  !!! Error: input parameter '%s' should contain less than %0d characters (%0zx)\n",
 		 optarg,MAXFNAMESIZE,strlen(optarg));
 	  exit(EXIT_FAILURE);
 	}

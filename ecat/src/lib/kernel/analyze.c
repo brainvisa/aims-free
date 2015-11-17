@@ -199,7 +199,7 @@ MatrixFile *mptr;
     strncpy(patient_id,hdr.hist.patient_id,10);
     patient_id[10] ='\0';
 	mh = mptr->mhptr;
-	sprintf(mh->magic_number,"%d",sizeof(struct dsr));
+	sprintf(mh->magic_number,"%ld",sizeof(struct dsr));
 	mh->sw_version = 70;
 	mh->file_type = InterfileImage;
 	mptr->interfile_header = (char**)calloc(END_OF_INTERFILE,sizeof(char*));

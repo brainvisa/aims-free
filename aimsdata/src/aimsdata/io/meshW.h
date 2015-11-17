@@ -105,7 +105,7 @@ namespace aims
       omd |= std::ios::binary;
     std::ofstream	os( fname.c_str(), omd );
     if( !os )
-      throw carto::file_error( "Could not open file", fname );
+      throw carto::file_error( fname );
 
     if( !_itemw )
       _itemw = new DefaultItemWriter<T>;

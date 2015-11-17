@@ -118,7 +118,7 @@ void EcatWriter::write(const AimsData<short>& thing)
   UnifiedEcatInfo *uei =  EcatOpen((char*)fileName.c_str(),
                                     const_cast<char*>( "w" ) );
   if (uei == ECATSHFJ_FAIL)
-    throw file_error("Cannot create file ", fileName);
+    throw file_error( fileName );
  
 
   // Champs initialisable depuis les informations contenues 
@@ -210,7 +210,7 @@ void EcatWriter::write(const AimsData<float>& thing)
   UnifiedEcatInfo *uei =  EcatOpen((char*)fileName.c_str(),
                                     const_cast<char*>( "w" ) );
   if (uei == ECATSHFJ_FAIL)
-    throw file_error("Cannot create file ", fileName);
+    throw file_error( fileName );
  
 
   // Champs initialisable depuis les informations contenues 

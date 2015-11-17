@@ -111,8 +111,7 @@ void JpegHeader::read()
       * We need to clean up the JPEG object, close the input file, and return.
       */
     jpeg_destroy_decompress(&cinfo);
-    throw carto::file_error( "JPEG lib failure : corrupt file or not JPEG "
-                              "format", fileName );
+    throw carto::file_error( fileName );
   }
   jpeg_create_decompress( &cinfo );
 
@@ -121,7 +120,7 @@ void JpegHeader::read()
   if( !fp )
   {
     jpeg_destroy_decompress( &cinfo );
-    throw carto::file_error( "JPEG reader : can't open file", fileName );
+    throw carto::file_error( fileName );
   }
 
   jpeg_stdio_src( &cinfo, fp );
@@ -129,8 +128,7 @@ void JpegHeader::read()
   {
     jpeg_destroy_decompress( &cinfo );
     fclose( fp );
-    throw carto::file_error( "JPEG header error : corrupt data or not JPEG "
-                              "file", fileName );
+    throw carto::file_error( fileName );
   }
   fclose( fp );
   jerr.fp = 0;

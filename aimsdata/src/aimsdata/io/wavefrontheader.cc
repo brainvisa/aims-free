@@ -222,7 +222,7 @@ void WavefrontHeader::readMesh( bool stopWhenIdentified, int poly_size,
       while( l[pos0] == ' ' || ( l[pos0] == '\t' && pos0 < ls ) )
         ++pos0;
       if( pos0 == ls )
-        throw carto::parse_error( "malformed face", line, fname );
+        throw carto::parse_error( "malformed face", "", fname, line );
       pos.push_back( pos0 );
       while( pos0 != string::npos && pos0 != string::npos )
       {
@@ -241,8 +241,8 @@ void WavefrontHeader::readMesh( bool stopWhenIdentified, int poly_size,
         setProperty( "polygon_dimension", poly_size );
       }
       else if( p != poly_size )
-        throw carto::parse_error( "inconsistant polygon size", line,
-                                  fname );
+        throw carto::parse_error( "inconsistant polygon size", "",
+                                  fname, line );
 
       poly.resize( poly_size );
 
@@ -260,8 +260,8 @@ void WavefrontHeader::readMesh( bool stopWhenIdentified, int poly_size,
         if( pos1 == pos0 + 1 )
         {
           if( tex_num > 0 )
-            throw carto::parse_error( "malformed face, mising texrure",
-                                      line, fname );
+            throw carto::parse_error( "malformed face, mising texrure", "",
+                                      fname, line );
           else if( tex_num < 0 )
           {
             tex_num = 0;
@@ -277,7 +277,8 @@ void WavefrontHeader::readMesh( bool stopWhenIdentified, int poly_size,
           }
           else if( tex_num != 1 )
             throw carto::parse_error(
-              "malformed face, inconsistant texture numbers", line, fname );
+              "malformed face, inconsistant texture numbers", "", fname,
+              line );
           std::stringstream z( item.substr(pos0, pos1 - pos0 ) );
           z >> tex;
           if( texture_ind.size() <= poly[p] )

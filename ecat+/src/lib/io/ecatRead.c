@@ -218,7 +218,7 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
 	return ECATSHFJ_FAIL;
       }
       if (sh->data_type != SunShort && sh->data_type != VAX_Ix2) {
-	printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %°0d are currently supported)\n",
+	printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %0d are currently supported)\n",
 	       mptr->fname,sh->data_type,SunShort,VAX_Ix2);
 	return ECATSHFJ_FAIL;
       }
@@ -256,7 +256,7 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
 	  return ECATSHFJ_FAIL;
 	}
 	if (sh->data_type != SunShort && sh->data_type != VAX_Ix2) {
-	  printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %°0d are currently supported)\n",
+	  printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %0d are currently supported)\n",
 	         mptr->fname,sh->data_type,SunShort,VAX_Ix2);
 	  return ECATSHFJ_FAIL;
 	}
@@ -381,7 +381,7 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
 	  return ECATSHFJ_FAIL;
 	}
 	if (sh->data_type != SunShort && sh->data_type != VAX_Ix2) {
-	  printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %°0d are currently supported)\n",
+	  printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %0d are currently supported)\n",
 	         mptr->fname,sh->data_type,SunShort,VAX_Ix2);
 	  free(fdata); free(sdata); free(sdata_bed);
 	  return ECATSHFJ_FAIL;
@@ -448,7 +448,7 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
 	    return ECATSHFJ_FAIL;
 	  }
 	  if (sh->data_type != SunShort && sh->data_type != VAX_Ix2) {
-	    printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %°0d are currently supported)\n",
+	    printf("EcatReadVolume_S16 : unsuported data type in %s: %0d (only %0d and %0d are currently supported)\n",
 	           mptr->fname,sh->data_type,SunShort,VAX_Ix2);
 	    return ECATSHFJ_FAIL;
 	  }

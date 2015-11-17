@@ -352,7 +352,7 @@ public:
 	size_t order() const;
 
 	/** \deprecated{specialization deprecated because ambiguous: use
-	    edgeSize() for the number of edges. In a future release, size()
+	    edgesSize() for the number of edges. In a future release, size()
 	    will return the number properties as it does in GenericObject} */
 	size_t size() const
 	  __attribute__((__deprecated__("use edgeSize() for "

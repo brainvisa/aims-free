@@ -110,11 +110,11 @@ static void fillEcatSinoHdr( UnifiedEcatSinoInfo *uesi, const vector< Sinogram<T
       // Allocate uesi Scan3D subheader : chainage peut etre inutile
       scan3DSub *currentUesiSub;
       if (( currentUesiSub = (scan3DSub *)calloc(thing.size(),
-						 sizeof(scan3DSub))) == NULL)
-	{
-	  EcatSinoFree( uesi );
-	  throw file_error("Cannot get python info to create file ",uesi->fname);
-	}
+                                                 sizeof(scan3DSub))) == NULL)
+      {
+        EcatSinoFree( uesi );
+        throw file_error( uesi->fname );
+      }
       int i;
       (currentUesiSub[thing.size() - 1]).next = NULL;
       for ( i = 1 ; i< (int) thing.size() ; ++i)
@@ -155,7 +155,7 @@ static void fillEcatSinoHdr( UnifiedEcatSinoInfo *uesi, const vector< Sinogram<T
   else
     {
       EcatSinoFree( uesi );
-      throw file_error("File is not sinogram, cannot create file ", uesi->fname);
+      throw file_error( uesi->fname );
     }
 }
 
@@ -235,7 +235,7 @@ void EcatSinoWriter<T>::write( const vector< Sinogram<T> >& thing)
   UnifiedEcatSinoInfo *uesi =  EcatSinoOpen((char*)fileName.c_str(),
                                              const_cast<char*>( "w" ) );
   if (uesi == ECATSHFJ_FAIL)
-    throw file_error("Cannot create file ", fileName);
+    throw file_error( fileName );
 
   // On peut peut ete faire plus simple mais les pb d'ordre d'initialisation
   // sont dus au fait que des informations d'int�r�t g�n�ral sont stock�es 
@@ -255,7 +255,7 @@ void EcatSinoWriter<T>::write( const vector< Sinogram<T> >& thing)
   // dans AimsData sans recours au Header de AimsData
   
   if( thing.size() == 0 )
-    throw file_error( "No sinogram to write ", fileName ) ;
+    throw file_error( fileName ) ;
     
   if (thing[0].getInternalMode() ==  Sinogram<T>::VIEW)
     uesi->storage_order = 0;
@@ -276,8 +276,7 @@ void EcatSinoWriter<T>::write( const vector< Sinogram<T> >& thing)
   else
     {
       EcatSinoFree( uesi );
-      throw file_error("Cannot get type info to create file ",
-		       fileName);
+      throw file_error( fileName );
     }
   
   // 33333333333
@@ -290,9 +289,9 @@ void EcatSinoWriter<T>::write( const vector< Sinogram<T> >& thing)
   else
     {
       EcatSinoFree( uesi );
-      throw file_error("Cannot get python info to create file, or incompatible headers", fileName);
+      throw file_error( fileName );
     }
-  
+
   // 44444444444444
   int s;
   for(s = 0; s < thing[0].getNumSeg(); s+=2)
@@ -313,7 +312,7 @@ void EcatSinoWriter<T>::write( const vector< Sinogram<T> >& thing)
   // Ecriture segment par segment
   // Normalemement il faudrait remplcer short par T
   if (thing[0].getInternalMode() !=  Sinogram<T>::VIEW ) // temporaire
-    throw file_error("Cannot create file in mode SINO", fileName);
+    throw file_error( fileName );
 
   int seg;
   int isMultiBed = 0, isMultiGate = 0, isMultiFrame = 0 ;

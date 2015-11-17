@@ -184,7 +184,7 @@ int	 slice, segment;
 				free_matrix_data(data);
 				return NULL;
 			}	
-			file_data_to_host(fdata,nblks,IeeeFloat);
+			file_data_to_host((char *) fdata,nblks,IeeeFloat);
 		}
 		data->xdim = num_projs;
 		data->ydim = num_views;

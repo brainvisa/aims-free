@@ -198,8 +198,8 @@ namespace aims
     if (tif) {
       tiled = TIFFIsTiled(tif);
       if (tiled) {
-        throw carto::invalid_format_error( "Not a tiled TIFF image : "
-                          "can't read" );
+        throw carto::invalid_format_error(
+          "Not a tiled TIFF image : can't read" );
       }
       else {
         if ( zframe == -1 ) {

@@ -187,7 +187,7 @@ GraphParser_shfj::readVertex(Graph& graph)
         throw parse_error(Lexicon::end(), token,
                           name(), line());
       else
-        readAttribute(vertex, token);
+        readAttribute(*vertex, token);
       StreamUtil::skip( *ds );
       token = StreamUtil::readUntil( *ds );
     }
@@ -233,7 +233,7 @@ GraphParser_shfj::readUEdge(Graph& graph)
         throw parse_error(Lexicon::end(), token, \
                           name(), line());
       else
-        readAttribute(edge, token);
+        readAttribute(*edge, token);
       StreamUtil::skip( *ds );
       token = StreamUtil::readUntil( *ds );
     }
@@ -279,7 +279,7 @@ GraphParser_shfj::readDEdge(Graph& graph)
         throw parse_error(Lexicon::end(), token, \
                           name(), line());
       else
-        readAttribute(edge, token);
+        readAttribute(*edge, token);
       StreamUtil::skip( *ds );
       token = StreamUtil::readUntil( *ds );
     }

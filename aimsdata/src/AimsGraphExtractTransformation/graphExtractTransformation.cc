@@ -95,7 +95,7 @@ int main( int argc, const char **argv )
       Motion	m = GraphManip::talairach( g );
 
       MotionWriter	w( fileout );
-      w << m;
+      w.write( m );
     }
   catch( user_interruption &e )
     {

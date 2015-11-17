@@ -24,11 +24,11 @@ public:
   virtual bool isValid( float, float, float ) const = 0;
   bool isValid( const Point3df & ) const;
   
-  double value( float, float, float ) const;
+  virtual double value( float, float, float ) const;
   double value( const Point3df & ) const;
 
-  void values( float, float, float,
-               vector_DOUBLE & /Out/ ) const;
+  virtual void values( float, float, float,
+                       vector_DOUBLE & /Out/ ) const;
   void values( const Point3df &,
                vector_DOUBLE & /Out/ ) const;
 };

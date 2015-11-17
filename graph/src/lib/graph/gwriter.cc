@@ -80,7 +80,7 @@ GraphWriter::write(const Graph& graph)
 	     << Lexicon::graph() << ' '
 	     << graph.getInterface<SyntaxedInterface>()->getSyntax() << endl;
 
-  writeAttributes(&graph);
+  writeAttributes(graph);
 
   const set<Vertex*> vertex = graph.vertices();	
   for (set<Vertex*>::const_iterator v = vertex.begin(); v != vertex.end(); ++v)
@@ -111,7 +111,7 @@ GraphWriter::write(const Vertex& vertex)
 	     << vertex.getInterface<SyntaxedInterface>()->getSyntax() << ' '
 	     << _index << endl;
 
-  writeAttributes(&vertex);
+  writeAttributes(vertex);
 
   (*_stream) << Lexicon::end() << endl;
 }
@@ -147,7 +147,7 @@ GraphWriter::write(const Edge& edge)
 
   (*_stream) << endl;
 	
-  writeAttributes(&edge);
+  writeAttributes(edge);
 
   (*_stream) << Lexicon::end() << endl;
 }

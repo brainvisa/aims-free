@@ -632,8 +632,8 @@ bool SpmHeader::read()
               #pragma GCC diagnostic push
               #pragma GCC diagnostic warning "-Wstrict-aliasing"
 #endif
-              origin.push_back( byteswap16( *( (short *) 
-                                               & header.hist.originator[0] 
+              origin.push_back( byteswap16( *( (short *)
+                                               & header.hist.originator[0]
                                                ) ) );
               origin.push_back( byteswap16( *( (short *) 
                                                & header.hist.originator[2] 
