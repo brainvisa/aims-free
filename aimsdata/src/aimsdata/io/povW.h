@@ -95,7 +95,7 @@ namespace aims
     std::string	fname = removeExtension( _name ) + ".pov";
     std::ofstream	os( fname.c_str() );
     if( !os )
-      throw carto::file_error( "Could not open file", fname );
+      throw carto::file_error( fname );
 
     //	write data
     os << "mesh2 {" << std::endl;

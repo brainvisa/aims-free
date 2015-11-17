@@ -85,7 +85,7 @@ scalarFeatureValues( std::vector< ScalarFeaturesProvider::Scalar_t > &result )
   for( std::vector< Point_t >::const_iterator it = _points.begin();
        it != _points.end(); ++it ) {
     if ( _interpolator->isValid( *it ) ) {
-      ssf.values().push_back( (*_interpolator)( *it ) );
+      ssf.values().push_back( _interpolator->value( *it ) );
     }
   }
   ssf.scalarFeatureValues( result );

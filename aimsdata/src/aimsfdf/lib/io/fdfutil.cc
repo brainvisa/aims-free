@@ -68,7 +68,7 @@ std::string parseLine(std::string line)
 {
     // sanity check
     if( line.find( '\0' ) != std::string::npos )
-      throw parse_error( "invalid character encountered", 0 );
+      throw parse_error( "invalid character encountered", "", "", 0 );
     // strip *
     removeCharacters(line, "*");
     removeCharacters(line, "\"");

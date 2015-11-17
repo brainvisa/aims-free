@@ -327,7 +327,7 @@ namespace aims
         std::stringstream s;
         s << "normal index out of range: " << normals_ind[i] << " / "
           << vertices.size() << " at index " << i;
-        throw carto::parse_error( s.str() , i, _name );
+        throw carto::parse_error( s.str() , "", _name, i );
       }
       o_normals[i] = normals[normals_ind[i]];
     }
@@ -347,7 +347,7 @@ namespace aims
           std::stringstream s;
           s << "texture index out of range: " << texture_ind[i] << " / "
           << texture.size() << " at index " << i;
-          throw carto::parse_error( s.str(), i, _name );
+          throw carto::parse_error( s.str(), "", _name, i );
         }
         o_texture[i] = texture[texture_ind[i]];
       }
@@ -492,7 +492,7 @@ namespace aims
             texture_ind[ poly[p] ] = tex - 1; // (starts at 1)
           }
           else if( pos != pos0 )
-            throw carto::parse_error( "malformed face", line, filename );
+            throw carto::parse_error( "malformed face", "", filename, line );
           if( pos == std::string::npos )
             continue;
           pos0 = pos + 1;

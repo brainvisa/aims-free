@@ -109,13 +109,13 @@ set< Tree * > Tree::getElementsWith( const string& s, bool recurse ) const
 
 size_t Tree::childrenSize() const
 {
-  return BaseTree::size();
+  return BaseTree::childrenSize();
 }
 
 
 size_t Tree::size() const
 {
-  return BaseTree::size();
+  return BaseTree::childrenSize();
 }
 
 

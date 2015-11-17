@@ -68,5 +68,5 @@ HierarchyReader::~HierarchyReader()
 
 void  HierarchyReader::read(Hierarchy& thing)
 {
-  TreeReader::readTree( &thing );
+  TreeReader::read( thing );
 }

@@ -86,10 +86,10 @@ void EcatSinoHeader::read( )
 	      != ECATSHFJ_FAIL )
       _name = fileName + ".S";
     else
-      throw file_error("Wrong format", fileName);
+      throw file_error( fileName );
   }
-  
-  setProperty( "file_type", string( "ECAT" ) );   
+
+  setProperty( "file_type", string( "ECAT" ) );
   setProperty( "ecat_file_type", string(uesi->file_type) ); 
   setProperty( "ecat_system_type",  uesi->system_type);
   setProperty( "ecat_scan_start_time", uesi->scan_start_time);
@@ -139,8 +139,7 @@ void EcatSinoHeader::read( )
   if ( (( uesi->num_frames > 1) && (uesi->num_bed_pos > 0) ) ||
        (( uesi->num_frames > 1) && (uesi->num_gates > 1)) ||
        (( uesi->num_bed_pos > 0) && (uesi->num_gates > 1)) )
-     throw file_error( " A study can only be multiple bed or multiple frame exclusively", 
-		       fileName);
+     throw file_error( fileName );
 
   vector<int> p, d, m, t, st, dt, gt, tcr;
   vector<short> smin, smax ;

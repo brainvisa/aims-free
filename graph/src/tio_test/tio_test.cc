@@ -66,7 +66,7 @@ int main()
 
   cout << "Arbre : " << tree.getInterface<SyntaxedInterface>()->getSyntax() 
        << endl;
-  cout << "Nb de noeuds 1er niveau : " << tree.size() << endl;
+  cout << "Nb de noeuds 1er niveau : " << tree.childrenSize() << endl;
 
   TreeWriter		tw( "./example-bis.tree", as );
 

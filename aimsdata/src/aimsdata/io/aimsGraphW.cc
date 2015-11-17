@@ -564,7 +564,7 @@ void AimsGraphWriter::writeElements( Graph & g, SavingMode newmode,
 	}
       if( !dir.isValid() )
 	{
-	  throw file_error( "can't create directory", dirname );
+	  throw file_error( dirname );
 	}
     }
 

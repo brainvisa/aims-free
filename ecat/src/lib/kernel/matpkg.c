@@ -2,6 +2,8 @@
 
 #include <ecat/kernel/matpkg.h>
 #include <ecat/kernel/sincos.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 matmpy(a,b,c)
   Matrix a,b,c;

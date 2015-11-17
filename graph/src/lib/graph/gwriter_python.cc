@@ -146,7 +146,7 @@ static void dictGraphHelper( const GenericObject & obj, PythonWriter & w,
       AsciiDataSourceTraits<string>::write( ds, "  ]" );
 
       // write edges
-      if( g.size() > 0 )
+      if( g.edgesSize() > 0 )
         {
           const set<Edge *>	& edg = g.edges();
           ds.putch( ',' );
@@ -253,7 +253,7 @@ static void dictTreeHelper( const GenericObject & obj, PythonWriter & w,
   const Tree	* pt = dynamic_cast<const Tree *>( &obj );
   if( !pt )
     cerr << "Warning: Tree helper used on something which is not a Tree\n";
-  else if( pt->size() > 0 )
+  else if( pt->childrenSize() > 0 )
     {
       const Tree& t = *pt;
       ds << ',' << sep << ind << "'__children__' : [" << sep << ind << "  ";

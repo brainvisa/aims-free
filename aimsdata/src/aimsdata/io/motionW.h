@@ -42,22 +42,21 @@
 #include <aims/io/defaultItemW.h>
 #include <aims/resampling/motion.h>
 
-namespace aims{
+namespace aims
+{
+
   class MotionWriter;
-  
 
+
+  ///     <b>--- OBSOLETE ---</b>
   MotionWriter&
-  operator << (MotionWriter& writer,
-	       const Motion& thing);
+  operator << (MotionWriter& writer, const AffineTransformation3d & thing)
+    __attribute__((__deprecated__("OBSOLETE")));
 
-/**	<b>--- OBSOLETE ---</b>
-
-    The class for motion write operation.
+/** The class for motion write operation.
 */
-class __attribute__((__deprecated__("OBSOLETE"))) MotionWriter
+class MotionWriter
 { public:
-    /**@name Constructor and Destructor*/
-    //@{
     /** The programmer should give the file name to the writer.
         @param name reference to the file name
         @param openmode open mode [default="binar"]
@@ -66,39 +65,28 @@ class __attribute__((__deprecated__("OBSOLETE"))) MotionWriter
       : _name( name ), _mode( mode )  { }
     /// Destructor does nothing special
     virtual ~MotionWriter() { }
-    //@}
 
-    /**@name Methods*/
-    //@{
     /** Write the motion with "name" file name to disk
         @param thing const reference to the data to write
     */
-    void write(const Motion& thing);
+    void write(const AffineTransformation3d & thing);
 
   /// Output stream operator
   friend
   MotionWriter& 
   operator <<( MotionWriter& writer,
-	       const Motion& thing);
-    //@}
+               const AffineTransformation3d & thing);
 
   private:
-    /**@name Data*/
-    //@{
-    /// File name
     std::string   _name;
-    //@}
-    //@{
-    /// Open mode
     int          _mode;
-    //@}
 };
 
 
 inline MotionWriter&
 operator << (MotionWriter& writer,
              const Motion& thing)
-{ 
+{
   writer.write(thing);
   return(writer);
 }

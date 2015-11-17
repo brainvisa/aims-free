@@ -971,7 +971,7 @@ int Write_Image_Ecat7(MatrixFile *mptr, Image_subheader *sh, float indata[], int
   data_size = sh->x_dimension*sh->y_dimension*sh->z_dimension;
   nblks = (data_size*type_size+MatBLKSIZE-1)/MatBLKSIZE;
   if ((cdata = (char*) calloc(type_size,data_size)) == NULL) {
-    printf(" Write_Image_Ecat7> !!! Error: can not allocate %0d bytes\n",type_size*data_size);
+    printf(" Write_Image_Ecat7> !!! Error: can not allocate %0zu bytes\n",type_size*data_size);
     return -1;
   }
   if (matrix_find(mptr,matnum,&matdir) == -1) {
@@ -1079,7 +1079,7 @@ int Read_Scan3D_Ecat7(MatrixFile *mptr, Scan3D_subheader *sh, short *outdata, in
   }
   /*}}}  */
   if ((cdata = (char*) calloc(type_size,data_size)) == NULL) {
-    printf(" Read_Scan3D_Ecat7> !!! Error: can not allocate %0d bytes\n",type_size*data_size);
+    printf(" Read_Scan3D_Ecat7> !!! Error: can not allocate %0zu bytes\n",type_size*data_size);
     return -1;
   }
   scalefac = 1.0;
@@ -1182,7 +1182,7 @@ int Read_Scan3D_Ecat7_FLOAT(MatrixFile *mptr, Scan3D_subheader *sh, float *outda
   /*}}}  */
   //printf("RS3DE7 3\n") ;
   if ((cdata = (char*) calloc(type_size,data_size)) == NULL) {
-    printf(" Read_Scan3D_Ecat7> !!! Error: can not allocate %0d bytes\n",type_size*data_size);
+    printf(" Read_Scan3D_Ecat7> !!! Error: can not allocate %0zu bytes\n",type_size*data_size);
     return -1;
   }
   scalefac = 1.0;
@@ -1285,7 +1285,7 @@ int Read_Atten_Ecat7(MatrixFile *mptr, Attn_subheader *sh, float *outdata, int m
   }
   /*}}}  */
   if ((cdata = (char*) calloc(type_size,data_size)) == NULL) {
-    printf(" Read_Atten_Ecat7> !!! Error: can not allocate %0d bytes\n",type_size*data_size);
+    printf(" Read_Atten_Ecat7> !!! Error: can not allocate %0zu bytes\n",type_size*data_size);
     return -1;
   }
   scalefac = 1.0;
@@ -1341,7 +1341,7 @@ int Read_Image_Ecat7(MatrixFile *mptr, Image_subheader *sh, float *outdata, int 
   /*}}}  */
   data_size = sh->x_dimension*sh->y_dimension*sh->z_dimension;
   if ((cdata = (char*) calloc(type_size,data_size)) == NULL) {
-    printf(" Read_Image_Ecat7> !!! Error: can not allocate %0d bytes\n",type_size*data_size);
+    printf(" Read_Image_Ecat7> !!! Error: can not allocate %0zu bytes\n",type_size*data_size);
     return -1;
   }
   /*{{{  read image*/

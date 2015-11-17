@@ -158,7 +158,7 @@ void TreeParser_shfj::readTree( Tree* tree )
 			      name(), line());
 	}
       else
-	readAttribute(tree, token);
+        readAttribute(*tree, token);
       StreamUtil::skip( ds );
       token = StreamUtil::readUntil( ds );
     }
@@ -228,7 +228,7 @@ Tree* TreeParser_shfj::readSubTree()
 			      name(), line());
 	}
       else
-	readAttribute(tree, token);
+        readAttribute(*tree, token);
       StreamUtil::skip( ds );
       token = StreamUtil::readUntil( ds );
     }

@@ -75,48 +75,48 @@ public:
     return isValid( point[ 0 ], point[ 1 ], point[ 2 ] );
   }
   /** Obsolete, use value() method */
-  virtual Scalar_t operator()( Coordinate_t x, Coordinate_t y, 
+  inline Scalar_t operator()( Coordinate_t x, Coordinate_t y,
                                 Coordinate_t z ) const
-    __attribute__((__deprecated__("use value() method instead"))) = 0;
+    __attribute__((__deprecated__("use value() method instead")))
+  {
+    return value( x, y, z );
+  }
   /** Obsolete, use value() method */
   inline Scalar_t operator()( const Interpolator::Point_t &point ) const
     __attribute__((__deprecated__("use value() method instead")))
   {
-    return operator ()( point[ 0 ], point[ 1 ], point[ 2 ] );
+    return value( point[ 0 ], point[ 1 ], point[ 2 ] );
   }
   /** Obsolete, use values() method */
-  virtual void operator()( Coordinate_t x, Coordinate_t y, Coordinate_t z,
-                             std::vector<Scalar_t> & ) const
-    __attribute__((__deprecated__("use values() method instead"))) = 0;
+  inline void operator()( Coordinate_t x, Coordinate_t y, Coordinate_t z,
+                             std::vector<Scalar_t> & v ) const
+    __attribute__((__deprecated__("use values() method instead")))
+  {
+    values( x, y, z, v );
+  }
   /** Obsolete, use values() method */
   inline void operator()( const Interpolator::Point_t &point,
                             std::vector<Scalar_t> &v ) const
     __attribute__((__deprecated__("use values() method instead")))
   {
-    operator ()( point[ 0 ], point[ 1 ], point[ 2 ], v );
+    values( point[ 0 ], point[ 1 ], point[ 2 ], v );
   }
   /** Interpolate to get a value from point ( x, y ,z ). */
-  inline Scalar_t value( Coordinate_t x, Coordinate_t y, 
-                         Coordinate_t z ) const
-  {
-    return operator ()( x, y, z );
-  }
+  virtual Scalar_t value( Coordinate_t x, Coordinate_t y,
+                         Coordinate_t z ) const = 0;
   /** Interpolate to get a value from point */
   inline Scalar_t value( const Interpolator::Point_t &point ) const
   {
-    return operator ()( point[ 0 ], point[ 1 ], point[ 2 ] );
+    return value( point[ 0 ], point[ 1 ], point[ 2 ] );
   }
   /** Interpolate to get a series of values from point ( x, y ,z ) */
-  inline void values( Coordinate_t x, Coordinate_t y, Coordinate_t z,
-                      std::vector<Scalar_t> &v ) const
-  {
-    operator ()( x, y, z, v );
-  }
+  virtual void values( Coordinate_t x, Coordinate_t y, Coordinate_t z,
+                      std::vector<Scalar_t> &v ) const = 0;
   /** Interpolate to get a series of values from point ( x, y ,z ) */
   inline void values( const Interpolator::Point_t &point,
                             std::vector<Scalar_t> &v ) const
   {
-    operator ()( point[ 0 ], point[ 1 ], point[ 2 ], v );
+    values( point[ 0 ], point[ 1 ], point[ 2 ], v );
   }
   /** Return the header of the image.
   */
@@ -149,9 +149,10 @@ public:
   virtual ~LinearInterpolator();
 
   bool isValid( Coordinate_t x, Coordinate_t y, Coordinate_t z ) const;
-  Scalar_t operator()( Coordinate_t x, Coordinate_t y, Coordinate_t z ) const;
-  void operator()( Coordinate_t x, Coordinate_t y, Coordinate_t z,
-                   std::vector<Scalar_t> & ) const;
+  virtual Scalar_t value( Coordinate_t x, Coordinate_t y,
+                          Coordinate_t z ) const;
+  virtual void values( Coordinate_t x, Coordinate_t y, Coordinate_t z,
+                       std::vector<Scalar_t> & ) const;
 
   virtual const carto::PropertySet &header() const;
 
@@ -183,6 +184,7 @@ private:
 
 //-----------------------------------------------------------------------------
 template <typename T>
+inline
 carto::rc_ptr< Interpolator > getLinearInterpolator( const AimsData<T> &image )
 {
   return carto::rc_ptr< Interpolator >( new LinearInterpolator<T>( image ) );
@@ -214,6 +216,7 @@ extern template carto::rc_ptr< Interpolator >
 
 //-----------------------------------------------------------------------------
 template <typename T>
+inline
 LinearInterpolator<T>::LinearInterpolator( const AimsData<T> & image ) :
   _image( image )
 {
@@ -232,13 +235,15 @@ LinearInterpolator<T>::LinearInterpolator( const AimsData<T> & image ) :
 
 //-----------------------------------------------------------------------------
 template <typename T>
+inline
 LinearInterpolator<T>::~LinearInterpolator()
 {
 }
 
 //-----------------------------------------------------------------------------
 template <typename T>
-bool LinearInterpolator<T>::isValid( Interpolator::Coordinate_t x, 
+inline
+bool LinearInterpolator<T>::isValid( Interpolator::Coordinate_t x,
                                      Interpolator::Coordinate_t y, 
                                      Interpolator::Coordinate_t z ) const
 {
@@ -254,6 +259,7 @@ bool LinearInterpolator<T>::isValid( Interpolator::Coordinate_t x,
 
 //-----------------------------------------------------------------------------
 template <typename T>
+inline
 void LinearInterpolator<T>::
   _interpolationCoefficients( Interpolator::Coordinate_t xx,
                               int & x,
@@ -286,10 +292,11 @@ void LinearInterpolator<T>::
 
 //-----------------------------------------------------------------------------
 template <typename T>
+inline
 Interpolator::Scalar_t
-LinearInterpolator<T>::operator ()( Interpolator::Coordinate_t xx,
-                                    Interpolator::Coordinate_t yy,
-                                    Interpolator::Coordinate_t zz ) const
+LinearInterpolator<T>::value( Interpolator::Coordinate_t xx,
+                              Interpolator::Coordinate_t yy,
+                              Interpolator::Coordinate_t zz ) const
 {
   int x, X, y, Y, z, Z;
   Interpolator::Coordinate_t ax, ay, az;
@@ -310,11 +317,12 @@ LinearInterpolator<T>::operator ()( Interpolator::Coordinate_t xx,
 
 //-----------------------------------------------------------------------------
 template <typename T>
+inline
 void LinearInterpolator<T>::
-  operator ()( Interpolator::Coordinate_t xx,
-               Interpolator::Coordinate_t yy,
-               Interpolator::Coordinate_t zz,
-               std::vector< Interpolator::Scalar_t > &values ) const
+  values( Interpolator::Coordinate_t xx,
+          Interpolator::Coordinate_t yy,
+          Interpolator::Coordinate_t zz,
+          std::vector< Interpolator::Scalar_t > &values ) const
 {
   values.resize( _image.dimT() );
   int x, X, y, Y, z, Z;
@@ -328,16 +336,19 @@ void LinearInterpolator<T>::
       linint(
              linint(
                     linint(_image( x, y, z, t ), _image( X, y, z, t ), ax),
-                    linint(_image( x, Y, z, t ), _image( X, Y, z, t ), ax), ay),
+                    linint(_image( x, Y, z, t ), _image( X, Y, z, t ), ax),
+                    ay),
              linint(
                     linint(_image( x, y, Z, t ), _image( X, y, Z, t ), ax),
-                    linint(_image( x, Y, Z, t ), _image( X, Y, Z, t ), ax), ay), az);
+                    linint(_image( x, Y, Z, t ), _image( X, Y, Z, t ), ax),
+                    ay), az);
   }
 }
 
 
 //-----------------------------------------------------------------------------
 template <typename T>
+inline
 const carto::PropertySet & LinearInterpolator<T>::header() const
 {
   return _image.volume()->header();

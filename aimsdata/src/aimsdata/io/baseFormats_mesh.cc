@@ -86,7 +86,7 @@ namespace aims
   {
     std::ofstream os( filename.c_str());
     if( !os )
-      throw carto::file_error( "Could not open file", filename );
+      throw carto::file_error( filename );
 
 
     os << "#VRML V1.0 ascii\n\n";

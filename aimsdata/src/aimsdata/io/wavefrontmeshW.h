@@ -463,7 +463,7 @@ namespace aims
     std::string fname = _name;
     std::ofstream os( fname.c_str() );
     if( !os )
-      throw carto::file_error( "Could not open file", fname );
+      throw carto::file_error( fname );
 
     PythonHeader *hdr = writeHeader(
       thing.header(), os, _name,
@@ -539,7 +539,7 @@ namespace aims
     std::string fname = _name;
     std::ofstream os( fname.c_str() );
     if( !os )
-      throw carto::file_error( "Could not open file", fname );
+      throw carto::file_error( fname );
 
     PythonHeader *hdr = writeHeader( thing.header(), os, _name, "VOID",
                                      options );

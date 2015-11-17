@@ -49,7 +49,7 @@ TriWriter::write( const AimsSurfaceTriangle& thing )
   string name = hdr.removeExtension( _name ) + ".tri";
   ofstream	os( name.c_str() );
   if( !os )
-    throw file_error( "Can't write file", name );
+    throw file_error( name );
 
   os << "- " << thing.vertex().size() << endl;
 

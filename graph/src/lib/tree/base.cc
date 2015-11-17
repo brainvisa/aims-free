@@ -72,7 +72,7 @@ void BaseTree::insert( BaseTree* child, int index )
 
   iterator	pos;
 
-  if( index >= (int) size() || index < 0 )
+  if( index >= (int) childrenSize() || index < 0 )
     {
       pos = _children.end();
     }
