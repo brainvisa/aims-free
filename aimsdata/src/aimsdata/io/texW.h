@@ -93,7 +93,7 @@ namespace aims
       omd |= std::ios::binary;
     std::ofstream	os( hdr.filename().c_str(), omd );
     if ( !os )
-      throw carto::file_error( "Cant't write file", hdr.filename() );
+      throw carto::file_error( hdr.filename() );
 
     if ( !_itemw )
       _itemw = new DefaultItemWriter<T>;

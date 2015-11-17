@@ -143,7 +143,7 @@ namespace aims
 
     fp = fopen( filename.c_str(), "wb" );
     if( !fp )
-      throw carto::file_error( "JPEG writer : can't open file ", filename );
+      throw carto::file_error( filename );
 
     jpeg_stdio_dest( &cinfo, fp );
     jpeg_start_compress( &cinfo, true );

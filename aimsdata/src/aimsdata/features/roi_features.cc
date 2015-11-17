@@ -85,7 +85,7 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
         for( maskIterator->restart(); maskIterator->isValid();
              maskIterator->next() ) {
           const Point3df &p = maskIterator->valueMillimeters();
-          (*interpolator)( p[ 0 ], p[ 1 ], p[ 2 ], interpolated );
+          interpolator->values( p[ 0 ], p[ 1 ], p[ 2 ], interpolated );
           if ( interpolated.size() > 1 ) {
             if ( timesValues.empty() ) {
               allValues.reserve( point_count * interpolated.size() );

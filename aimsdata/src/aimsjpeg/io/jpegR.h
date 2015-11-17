@@ -182,7 +182,7 @@ namespace aims
 
     fp = fopen( name.c_str(), "rb" );
     if( !fp )
-      throw carto::file_error( "JPEG reader : can't open file ", name );
+      throw carto::file_error( name );
 
     jpeg_stdio_src( &cinfo, fp );
     if( jpeg_read_header( &cinfo, true ) != 1 )

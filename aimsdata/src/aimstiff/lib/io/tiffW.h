@@ -220,7 +220,7 @@ namespace aims
     tsize_t res = TIFFWriteEncodedStrip(tif, 0, buffer, (bps / 8) * spp * data.dimX() * data.dimY() );
 
     if( res < 0 )
-      throw carto::file_error( "TIFF writer : an error occured writing file ", filename );
+      throw carto::file_error( filename );
 
     // Close the file
     TIFFClose(tif);
