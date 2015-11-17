@@ -47,7 +47,7 @@ extern "C" {
 #ifndef HAVE_MINC2
 // use older types
 #ifndef VIO_Volume
-#define VIO_Volume ::volume
+#define VIO_Volume ::Volume
 #endif
 
 #ifndef VIO_STR
