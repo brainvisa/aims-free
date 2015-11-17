@@ -46,13 +46,34 @@ extern "C" {
 
 #ifndef HAVE_MINC2
 // use older types
+#ifndef VIO_Volume
 #define VIO_Volume ::volume
+#endif
+
+#ifndef VIO_STR
 #define VIO_STR STRING
+#endif
+
+#ifndef VIO_BOOL
 #define VIO_BOOL BOOLEAN
+#endif
+
+#ifndef VIO_MAX_DIMENSIONS
 #define VIO_MAX_DIMENSIONS MAX_DIMENSIONS
+#endif
+
+#ifndef VIO_Real
 #define VIO_Real Real
+#endif
+
+#ifndef VIO_General
 #define VIO_General_transform General_transform
+#endif
+
+#ifndef VIO_Transform
 #define VIO_Transform Transform
+#endif
+
 #endif
 
 #ifndef VIO_FLOOR
