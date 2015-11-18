@@ -165,8 +165,6 @@ AimsVector<float,16> Quaternion::inverseRotationMatrix() const
 
 Point3df Quaternion::transformInverse( const Point3df & p ) const
 {
-  /* WARNING: BUG: I think this is applyInverse(), the matrix is in rows and
-  is used as columns here ! */
   AimsVector<float,16>	r = rotationMatrix();
   return( Point3df( r[0] * p[0] + r[4] * p[1] + r[8] * p[2], 
                     r[1] * p[0] + r[5] * p[1] + r[9] * p[2],
@@ -211,12 +209,6 @@ Quaternion & Quaternion::operator *= ( const Quaternion & q )
 }
 
 
-Quaternion & Quaternion::operator += ( const Quaternion & q )
-{
-  return( operator *= ( q ) );
-}
-
-
 Quaternion aims::operator * ( const Quaternion & a, const Quaternion & b )
 {
   Quaternion		q;
@@ -231,12 +223,6 @@ Quaternion aims::operator * ( const Quaternion & a, const Quaternion & b )
   q.norm();
 
   return( q );
-}
-
-
-Quaternion aims::operator + ( const Quaternion & a, const Quaternion & b )
-{
-  return( a * b );
 }
 
 

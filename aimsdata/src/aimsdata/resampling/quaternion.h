@@ -74,16 +74,6 @@ namespace aims
     /// Rotates vecotor p
     Point3df transform( const Point3df & p ) const;
     Point3df transformInverse( const Point3df & p ) const;
-    /// OBSOLETE BUGGY FUNCTION - Don't use it ever.
-    Point3df apply( const Point3df & p ) const
-      __attribute__((__deprecated__("OBSOLETE BUGGY FUNCTION.")))
-    { return transformInverse( p ); }
-    /// OBSOLETE BUGGY FUNCTION - Don't use it ever.
-    Point3df applyInverse( const Point3df & p ) const
-      __attribute__((__deprecated__("OBSOLETE BUGGY FUNCTION.")))
-    { return transform( p ); }
-
-    Quaternion & operator += ( const Quaternion & q );
     Quaternion & operator *= ( const Quaternion & q );
     void norm();
     Quaternion normalized() const;
@@ -103,7 +93,6 @@ namespace aims
   };
 
 
-  Quaternion operator + ( const Quaternion & a, const Quaternion & b );
   Quaternion operator * ( const Quaternion & a, const Quaternion & b );
 
 }
