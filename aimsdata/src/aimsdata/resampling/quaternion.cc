@@ -165,8 +165,6 @@ AimsVector<float,16> Quaternion::inverseRotationMatrix() const
 
 Point3df Quaternion::transformInverse( const Point3df & p ) const
 {
-  /* WARNING: BUG: I think this is applyInverse(), the matrix is in rows and
-  is used as columns here ! */
   AimsVector<float,16>	r = rotationMatrix();
   return( Point3df( r[0] * p[0] + r[4] * p[1] + r[8] * p[2], 
                     r[1] * p[0] + r[5] * p[1] + r[9] * p[2],
@@ -211,12 +209,6 @@ Quaternion & Quaternion::operator *= ( const Quaternion & q )
 }
 
 
-Quaternion & Quaternion::operator += ( const Quaternion & q )
-{
-  return( operator *= ( q ) );
-}
-
-
 Quaternion aims::operator * ( const Quaternion & a, const Quaternion & b )
 {
   Quaternion		q;
@@ -231,12 +223,6 @@ Quaternion aims::operator * ( const Quaternion & a, const Quaternion & b )
   q.norm();
 
   return( q );
-}
-
-
-Quaternion aims::operator + ( const Quaternion & a, const Quaternion & b )
-{
-  return( a * b );
 }
 
 
@@ -363,9 +349,9 @@ void Quaternion::buildFromMotion( const Motion & m )
     s = sqrt( tr + 1. );
     _vector[3] = s * 0.5;
     s = 0.5 / s;
-    _vector[0] = ( rotation(1,2) - rotation(2,1) ) * s;
-    _vector[1] = ( rotation(2,0) - rotation(0,2) ) * s;
-    _vector[2] = ( rotation(0,1) - rotation(1,0) ) * s;
+    _vector[0] = ( rotation(2,1) - rotation(1,2) ) * s;
+    _vector[1] = ( rotation(0,2) - rotation(2,0) ) * s;
+    _vector[2] = ( rotation(1,0) - rotation(0,1) ) * s;
   }
   else
   {
@@ -380,9 +366,9 @@ void Quaternion::buildFromMotion( const Motion & m )
     s = sqrt( rotation(i,i) - ( rotation(j,j) + rotation(k,k) ) + 1. );
     _vector[i] = s * 0.5;
     s = 0.5 / s;
-    _vector[3] = ( rotation(j,k) - rotation(k,j) ) * s;
-    _vector[j] = ( rotation(i,j) - rotation(j,i) ) * s;
-    _vector[k] = ( rotation(i,k) - rotation(k,i) ) * s;
+    _vector[3] = ( rotation(k,j) - rotation(j,k) ) * s;
+    _vector[j] = ( rotation(j,i) - rotation(i,j) ) * s;
+    _vector[k] = ( rotation(k,i) - rotation(i,k) ) * s;
   }
 }
 
@@ -390,5 +376,5 @@ void Quaternion::buildFromMotion( const Motion & m )
 Quaternion Quaternion::inverse() const
 {
   return( Quaternion( Point4df( -_vector[0], -_vector[1], -_vector[2], 
-				_vector[3] ) ) );
+                                _vector[3] ) ) );
 }
