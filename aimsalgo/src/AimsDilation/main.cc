@@ -39,39 +39,14 @@
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <aims/io/finder.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <cstdlib>
 #include <iostream>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
-BEGIN_USAGE(usage)
-  "-------------------------------------------------------------------------",
-  "AimsDilation -i[nput]  <filein>                                          ",
-  "             -o[utput] <fileout>                                         ",
-  "             -e[radius] <radius>                                         ",
-  "             [-x[mask] <xxx>] [-y[mask] <yyy>] [-z[mask] <zzz>]          ",
-  "             [-f[actor] <fff>]                                           ",
-  "             [-h[elp]]                                                   ",
-  "-------------------------------------------------------------------------",
-  "Morphological dilation                                                   ",
-  "-------------------------------------------------------------------------",
-  "     filein  : source volume                                             ",
-  "     fileout : destination volume                                        ",
-  "     radius  : radius of the structuring element                         ",
-  "     xxx     : X size of the distance mask [default=3]                   ",
-  "     yyy     : Y size of the distance mask [default=3]                   ",
-  "     zzz     : Z size of the distance mask [default=3]                   ",
-  "     fff     : chamfer multiplication factor [default=50]                ",
-  "-------------------------------------------------------------------------",
-END_USAGE
-
-
-void Usage( void )
-{
-  AimsUsage( usage );
-}
 
 template<class T>
 static bool dilat( Process & p, const string & filename, Finder & f );
@@ -128,32 +103,53 @@ bool Dilatation::dilat_m( T & data, const string & filename, Finder & f )
 }
 
 
-int main( int argc, char **argv )
+int main( int argc, const char **argv )
 {
-  char *filein,*fileout;
+  string filein, fileout;
   int xmask = 3, ymask = 3, zmask = 3;
   float radius, factor = 50;
 
+  AimsApplication app( argc, argv, "Morphological dilation" );
+  app.addOption( filein, "-i", "source volume" );
+  app.alias( "--input", "-i" );
+  app.addOption( fileout, "-o", "destination volume" );
+  app.alias( "--output", "-o" );
+  app.addOption( radius, "-e", "radius of the structuring element" );
+  app.alias( "--eradius", "-e" );
+  app.alias( "-r", "-e" );
+  app.alias( "--radius", "-e" );
+  app.addOption( xmask, "-x", "X size of the distance mask [default=3]",
+                 true );
+  app.addOption( ymask, "-y", "Y size of the distance mask [default=3]",
+                 true );
+  app.addOption( zmask, "-z", "Z size of the distance mask [default=3]",
+                 true );
+  app.alias( "--xmask", "-x" );
+  app.alias( "--ymask", "-y" );
+  app.alias( "--zmask", "-z" );
+  app.addOption( factor, "-f", "chamfer multiplication factor [default=50]",
+                 true );
+  app.alias( "--factor", "-f" );
 
-  AimsOption opt[] = {
-  { 'h',"help"    ,AIMS_OPT_FLAG  ,( void* )Usage    ,AIMS_OPT_CALLFUNC,0},
-  { 'x',"xmask"   ,AIMS_OPT_INT   ,&xmask   ,0                ,0},
-  { 'y',"ymask"   ,AIMS_OPT_INT   ,&ymask   ,0                ,0},
-  { 'z',"zmask"   ,AIMS_OPT_INT   ,&zmask   ,0                ,0},
-  { 'e',"eradius" ,AIMS_OPT_FLOAT ,&radius  ,0                ,1},
-  { 'f',"factor"  ,AIMS_OPT_FLOAT ,&factor  ,0                ,0},
-  { 'i',"input"   ,AIMS_OPT_STRING,&filein  ,0                ,1},
-  { 'o',"output"  ,AIMS_OPT_STRING,&fileout ,0                ,1},
-  { 0  ,0         ,AIMS_OPT_END   ,0        ,0                ,0}};
+  try
+  {
+    app.initialize();
 
-  AimsParseOptions( &argc, argv, opt, usage );
-
-  Dilatation	proc( fileout, xmask, ymask, zmask, radius, factor );
-  if( !proc.execute( filein ) )
+    Dilatation	proc( fileout, xmask, ymask, zmask, radius, factor );
+    if( !proc.execute( filein ) )
     {
       cerr << "Couldn't process\n";
       return( 1 );
     }
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
 
   return( EXIT_SUCCESS );
 }
