@@ -35,49 +35,13 @@
 #include <cstdlib>
 #include <aims/io/io_g.h>
 #include <aims/data/data_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/utility/utility_g.h>
 #include <assert.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
-
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsTextureThreshold -i[nput] <filein>                          ",
-  "              -o[utput] <fileout>                               ",
-  "              -m[ode] <mm>                                      ",
-  "              -t <threshold1>                                   ",
-  "              [-u <threshold2>]                                 ",
-  "              [-b[inary]]                                       ",
-  "              [-h[elp]]                                         ",
-  "----------------------------------------------------------------",
-  "Threshold on texture  (each time serie is thresholded)          ",
-  "----------------------------------------------------------------",
-  "     filein    : origin file                                    ",
-  "     fileout   : output file                                    ",
-  "     mm        : mode that can be                               ",
-  "                   lt --> lower than                            ",
-  "                   le --> lower or equal to                     ",
-  "                   gt --> greater than                          ",
-  "                   ge --> greater or equal to                   ",
-  "                   eq --> equal to                              ",
-  "                   di --> differ                                ",
-  "                   be --> between                               ",
-  "                   ou --> outside                               ",
-  "     threshold1 : first threshold                               ",
-  "     threshold2 : second threshold                              ",
-  "     binary     : returns a short binary texture                ",
-  "                  (background : 0 ; object : 1)                 ",
-  "----------------------------------------------------------------",
-END_USAGE
-
-
-void Usage( void )
-{
-  AimsUsage( usage );
-}
-
 
 
 template<class T>
@@ -107,7 +71,6 @@ Thresholder::Thresholder( threshold_t m, const string & fileout, float th1, floa
   {
     registerProcessType( "Texture", "S16", &doit<short> );
     registerProcessType( "Texture", "FLOAT", &doit<float> );
-    
   }
 
 
@@ -124,7 +87,7 @@ doit( Process & p, const string & fname, Finder & f )
   cout << "reading done\n";
 
   cout << "thresholding..." << flush;
-  
+
   AimsTexThreshold<T,short> thresh( tc.mode, (T) tc.t1, (T) tc.t2 );
   if( tc.bin )
     {
@@ -142,40 +105,63 @@ doit( Process & p, const string & fname, Finder & f )
 }
 
 
-int main( int argc, char **argv )
+int main( int argc, const char **argv )
 {
-  char *filein = NULL, *fileout = NULL, *smode = NULL;
+  string filein, fileout, smode;
   float t1 = 0, t2 = 0;
-  int binary = 0;
+  bool binary = false;
   threshold_t  mode;
 
-  AimsOption opt[] = {
-  { 'h',"help"  ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input" ,AIMS_OPT_STRING,&filein     ,0                ,1},
-  { 'o',"output",AIMS_OPT_STRING,&fileout    ,0                ,1},
-  { 'm',"mode"  ,AIMS_OPT_STRING,&smode      ,0                ,1},
-  { 't',"t"     ,AIMS_OPT_FLOAT ,&t1         ,0                ,1},
-  { 'u',"u"     ,AIMS_OPT_FLOAT ,&t2         ,0                ,0},
-  { 'b',"binary",AIMS_OPT_FLAG  ,&binary     ,0                ,0},
-  { 0  ,0       ,AIMS_OPT_END   ,0           ,0                ,0}};
+  AimsApplication app( argc, argv,
+    "Threshold on texture  (each time serie is thresholded)" );
+  app.addOption( filein, "-i", "origin file" );
+  app.alias( "--input", "-i" );
+  app.addOption( fileout, "-o", "output file" );
+  app.alias( "--output", "-o" );
+  app.addOption( smode, "-m", "mode that can be:\n"
+    "lt --> lower than\n"
+    "le --> lower or equal to\n"
+    "gt --> greater than\n"
+    "ge --> greater or equal to\n"
+    "eq --> equal to\n"
+    "di --> differ\n"
+    "be --> between\n"
+    "ou --> outside" );
+  app.alias( "--mode", "-m" );
+  app.addOption( t1, "-t", "first threshold" );
+  app.addOption( t2, "-u", "second threshold (if any)", true );
+  app.addOption( binary, "-b", "returns a short binary texture "
+    "(background : 0 ; object : 1)", true );
+  app.alias( "--binary", "-b" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
 
-  if      ( string( smode ) == "lt" ) mode = AIMS_LOWER_THAN;
-  else if ( string( smode ) == "le" ) mode = AIMS_LOWER_OR_EQUAL_TO;
-  else if ( string( smode ) == "gt" ) mode = AIMS_GREATER_THAN;
-  else if ( string( smode ) == "ge" ) mode = AIMS_GREATER_OR_EQUAL_TO;
-  else if ( string( smode ) == "eq" ) mode = AIMS_EQUAL_TO;
-  else if ( string( smode ) == "di" ) mode = AIMS_DIFFER;
-  else if ( string( smode ) == "be" ) mode = AIMS_BETWEEN;
-  else if ( string( smode ) == "ou" ) mode = AIMS_OUTSIDE;
-  else
-    AimsError("AimsThreshold : bad mode" );
+    if      ( string( smode ) == "lt" ) mode = AIMS_LOWER_THAN;
+    else if ( string( smode ) == "le" ) mode = AIMS_LOWER_OR_EQUAL_TO;
+    else if ( string( smode ) == "gt" ) mode = AIMS_GREATER_THAN;
+    else if ( string( smode ) == "ge" ) mode = AIMS_GREATER_OR_EQUAL_TO;
+    else if ( string( smode ) == "eq" ) mode = AIMS_EQUAL_TO;
+    else if ( string( smode ) == "di" ) mode = AIMS_DIFFER;
+    else if ( string( smode ) == "be" ) mode = AIMS_BETWEEN;
+    else if ( string( smode ) == "ou" ) mode = AIMS_OUTSIDE;
+    else
+      AimsError("AimsThreshold : bad mode" );
 
-  Thresholder	proc( mode, fileout, t1, t2, binary );
-  if( ! proc.execute( filein ) )
-    throw logic_error( "Internal error: execute failed" );
-  cout << "done\n";
+    Thresholder	proc( mode, fileout, t1, t2, binary );
+    if( ! proc.execute( filein ) )
+      throw logic_error( "Internal error: execute failed" );
+    cout << "done\n";
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
 
   return( EXIT_SUCCESS );
 }

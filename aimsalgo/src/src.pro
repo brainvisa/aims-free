@@ -81,7 +81,6 @@ PSUBDIRS = \
     AimsMeshGeodesicDepth          \
     AimsMeshLineMeasurement        \
     AimsMeshParcellation2VolumeParcellation \
-    AimsMeshPlane             \
     AimsMeshSmoothing         \
     AimsMeshWhite             \
 #    AimsMixtureOfPpcaForRats \
