@@ -80,9 +80,7 @@ PSUBDIRS = \
     AimsMeshDistance               \
     AimsMeshGeodesicDepth          \
     AimsMeshLineMeasurement        \
-    AimsMeshMni2Mesh               \
     AimsMeshParcellation2VolumeParcellation \
-    AimsMeshPlane             \
     AimsMeshSmoothing         \
     AimsMeshWhite             \
 #    AimsMixtureOfPpcaForRats \

@@ -90,7 +90,7 @@ int main( int argc, const char **argv )
 
   app.addOption( reader, "-i", "source volume" );
   app.addOption( writer, "-o", "destination volume" );
-  app.addOption( radius, "-r", "radius of the structuring element" );
+  app.addOption( radius, "-e", "radius of the structuring element" );
   app.addOption( xmask, "-x", "X size of the distance mask [default=3]", 
                  true );
   app.addOption( ymask, "-y", "Y size of the distance mask [default=3]", 
@@ -102,7 +102,9 @@ int main( int argc, const char **argv )
 
   app.alias( "--input", "-i" );
   app.alias( "--output", "-o" );
-  app.alias( "--radius", "-r" );
+  app.alias( "--eradius", "-e" );
+  app.alias( "-r", "-e" );
+  app.alias( "--radius", "-e" );
   app.alias( "--xmask", "-x" );
   app.alias( "--ymask", "-y" );
   app.alias( "--zmask", "-z" );
@@ -128,7 +130,7 @@ int main( int argc, const char **argv )
       offset = (int) (radius / *f.rbegin() )  ;
       int borderW = (int ) (dimMax - 1) / 2 ;
       
-      reader.read(vol, borderW );
+      reader.read( vol, borderW );
       
       float dist;
       dist = AimsDistanceToBorder(vol);

@@ -34,8 +34,7 @@
 
 #include <cstdlib>
 #include <aims/scalespace/meshDiffuse.h>
-#include <aims/io/io_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/mesh/texture.h>
 #include <aims/mesh/curv.h>
 #include <aims/data/pheader.h>
@@ -45,44 +44,16 @@
 #include <aims/io/writer.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
-BEGIN_USAGE(usage)
-  "-------------------------------------------------------------------------",
-  "AimsTextureSmoothing  -i[nput] <input_texture>                           ",
-  "                  [-S[ource] <input_source_texture> default = none]      ",
-  "                  -o[utput <output_texture>]                             ",
-  "                  [-t[imestep] <dt> default = automatic estimation]      ", 
-  "                  -m[esh] <mesh_file>                                    ", 
-  "                  [-W[max] <weight ratio threshold> default = 0.98       ", 
-  "                  [-H[max] <output threshold> default = 10000]          ",
-  "                  [-s[igma] <equivalent gaussian sigma>]                 ", 
-  "                  [-T[ime]   <time serie> default = 0]                   ",
-  "                  [-d[uration] <duration>]                               ", 
-  "                  [-h[elp]]                                              ",
-  "-------------------------------------------------------------------------",
-  " Geodesic smoothing of the input texture (heat equation)                 ",
-  "-------------------------------------------------------------------------",
-  "     input_texture       : object definition                             ",
-  "     input_source_texture: source definition                              ",
-  "     output_texture      : output *.tex file (blobs)                     ",
-  "-------------------------------------------------------------------------",
-END_USAGE
-
-
-//
-// Usage
-//
-void Usage( void )
+int main( int argc, const char** argv )
 {
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char** argv )
-{
-  char	*intexfile = 0, *outtexfile = 0, *meshfile, *sourcefile =0;
+  Reader<TimeTexture<float> > texR;
+  Reader<AimsSurfaceTriangle> triR;
+  Reader<TimeTexture<float> > texRs;
+  Writer<Texture1d>   texW;
   float	sigma = 0, dt=0, dur = 0, FWHM, H=10000;
   float Wmax = 0.98;
   int T=0;
@@ -90,135 +61,159 @@ int main( int argc, char** argv )
   //
   // Parser of options
   //
-  AimsOption opt[] = {
-    { 'h',"help"         ,AIMS_OPT_FLAG  ,( void* )Usage  ,AIMS_OPT_CALLFUNC,0},
-    { 'i',"input"        ,AIMS_OPT_STRING,&intexfile      ,0                ,1},
-    { 'S',"Source"       ,AIMS_OPT_STRING,&sourcefile       ,0                ,0},
-    { 'm',"mesh"         ,AIMS_OPT_STRING,&meshfile       ,0                ,1},
-    { 'o',"output"       ,AIMS_OPT_STRING,&outtexfile     ,0                ,0},
-    { 't',"timestep"     ,AIMS_OPT_FLOAT ,&dt             ,0                ,0},
-    { 'W',"Wmax"         ,AIMS_OPT_FLOAT ,&Wmax           ,0                ,0},
-    { 'T',"Time"         ,AIMS_OPT_INT   ,&T              ,0                ,0},
-    { 's',"sigma"        ,AIMS_OPT_FLOAT ,&sigma          ,0                ,0},
-    { 'H',"Hmax"         ,AIMS_OPT_FLOAT ,&H              ,0                ,0},
-    { 'd',"duration"     ,AIMS_OPT_FLOAT ,&dur            ,0                ,0},
-    { 0  ,0              ,AIMS_OPT_END   ,0               ,0                ,0}};
+  AimsApplication app( argc, argv,
+    "Geodesic smoothing of the input texture (Laplacian: heat equation)" );
+  app.addOption( texR, "-i", "input object definition texture" );
+  app.alias( "--input", "-i" );
+  app.addOption( texW, "-o", "output texture file" );
+  app.alias( "--output", "-o" );
+  app.addOption( triR, "-m", "mesh file" );
+  app.alias( "--mesh", "-m" );
+  app.addOption( texRs, "-S", "input source definition texture", true );
+  app.alias( "--Source", "-S" );
+  app.alias( "--source", "-S" );
+  app.addOption( sigma, "-s",
+    "equivalent gaussian sigma. Specify either sigma or duration.", true );
+  app.alias( "--sigma", "-s" );
+  app.addOption( dur, "-d",
+    "Diffusion process duration. Either sigma or duration must be specified.",
+    true );
+  app.alias( "--duration", "-d" );
+  app.addOption( dt, "-t", "timestep. Default = automatic estimation", true );
+  app.alias( "--timestep", "-t" );
+  app.addOption( T, "-T",
+    "Timepoint in the input texture to be smoothed. Default: 0", true );
+  app.alias( "--Time", "-T" );
+  app.alias( "--time", "-T" );
+  app.addOption( Wmax, "-W", "weight ratio threshold. Default: 0.98", true );
+  app.alias( "--Wmax", "-W" );
+  app.addOption( H, "-H", "output threshold (max of the output texture). "
+    "Default: 10000", true );
+  app.alias( "--Hmaw", "-H" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
-  
-  //
-  // read triangulation
-  //
-  cout << "reading triangulation   : " << flush;
-  AimsSurfaceTriangle surface;
-  Reader<AimsSurfaceTriangle> triR( meshfile );
-  triR >> surface;
-  cout << "done" << endl;
+  try
+  {
+    app.initialize();
 
- 
-  //	read texture
-  
-  TimeTexture<float>	inpTex;
-  
-  cout << "reading texture " << intexfile << endl;
-  Reader<TimeTexture<float> >	texR( intexfile );
-  texR >> inpTex ;
-  unsigned n=inpTex[(unsigned)T].nItem();
- 
-   
-  Texture<float> itex(n),otex(n);
-  TimeTexture<float>  outTex(1,n);
-  
-  map<unsigned, set< pair<unsigned,float> > > weightLapl;
-  weightLapl = AimsMeshWeightFiniteElementLaplacian(surface[0],Wmax);
- 
-  /*
-  map<unsigned, set< pair<unsigned,float> > >::iterator iw,ew;
-  set< pair<unsigned,float> >::iterator ip,ep;
+    //
+    // read triangulation
+    //
+    cout << "reading triangulation   : " << flush;
+    AimsSurfaceTriangle surface;
+    triR >> surface;
+    cout << "done" << endl;
 
-  for ( iw = weightLapl.begin(), ew = weightLapl.end(); iw != ew; ++iw )
+
+    //	read texture
+
+    TimeTexture<float>	inpTex;
+
+    cout << "reading texture " << texR.fileName() << endl;
+    texR >> inpTex ;
+    unsigned n=inpTex[(unsigned)T].nItem();
+
+
+    Texture<float> itex(n),otex(n);
+    TimeTexture<float>  outTex(1,n);
+
+    map<unsigned, set< pair<unsigned,float> > > weightLapl;
+    weightLapl = AimsMeshWeightFiniteElementLaplacian(surface[0],Wmax);
+
+    /*
+    map<unsigned, set< pair<unsigned,float> > >::iterator iw,ew;
+    set< pair<unsigned,float> >::iterator ip,ep;
+
+    for ( iw = weightLapl.begin(), ew = weightLapl.end(); iw != ew; ++iw )
+      {
+        for ( ip = iw->second.begin(), ep = iw->second.end(); ip != ep; ++ip  )
+        cout << ip->second << " ";
+        //cout << endl;
+      }
+    */
+
+    set<float>   hval;
+    for (unsigned i=0; i<n; ++i)
+      {
+        itex.item(i)= inpTex[(unsigned)T].item(i);
+        hval.insert(fabs(inpTex[(unsigned)T].item(i)));
+      }
+
+    //The  smoothed texture values are threshold.
+    //The threshold is the max of the input texture.
+    if (H == 0)
+      H = *hval.rbegin() ;
+
+    if (dt == 0)
+      {
+        cout << "Estime the laplacian\n";
+        otex =  AimsMeshLaplacian(itex,weightLapl);
+        float dte;
+        cout << "Estime dt\n";
+        dte = AimsMeshFiniteElementDt(itex,otex,H);
+        cout << "dt estimated : " << dte << endl;
+        dt =  dte;
+      }
+
+
+
+    if( dur == 0 )
+      {
+        if( sigma == 0 )
+          {
+            cerr << "Must provide either sigma or duration\n";
+            exit( 1 );
+          }
+        dur = rint( (sigma * sigma) / (8 * ::log(2) ) );
+      }
+
+
+    FWHM = 4 * sqrt ( ::log(2) * dur  );
+    cout << "dur=" << dur*dt << " and equivalent FWHM =" << FWHM << " mm" << endl;
+    cout << "Weight ratio thresold: " << Wmax << endl;
+    cout << "output threshold: "<< H << endl;
+
+    TimeTexture<float> stex;
+    if ( texRs.fileName().empty() )
+      outTex[0] = TextureSmoothing::FiniteElementSmoothing(
+        itex, dt, dur, H, weightLapl );
+    else
     {
-      for ( ip = iw->second.begin(), ep = iw->second.end(); ip != ep; ++ip  )
-      cout << ip->second << " "; 
-      //cout << endl;
-    }
-  */
-
-  set<float>   hval;
-  for (unsigned i=0; i<n; ++i)
-    {
-      itex.item(i)= inpTex[(unsigned)T].item(i);
-      hval.insert(fabs(inpTex[(unsigned)T].item(i)));
+      texRs >> stex;
+      outTex[0] = TextureSmoothing::FiniteElementSmoothingWithSource(
+        itex, stex[0], dt, dur, weightLapl );
     }
 
-  //The  smoothed texture values are threshold.
-  //The threshold is the max of the input texture.
-  if (H == 0)
-    H = *hval.rbegin() ;
-  
-  if (dt == 0)
-    {
-      cout << "Estime the laplacian\n";
-      otex =  AimsMeshLaplacian(itex,weightLapl);
-      float dte;
-      cout << "Estime dt\n";
-      dte = AimsMeshFiniteElementDt(itex,otex,H);
-      cout << "dt estimated : " << dte << endl;
-      dt =  dte;
-    }
+    float m=0;
+    sigma=0;
 
-  
-  
-  if( dur == 0 )
-    {
-      if( sigma == 0 )
-	{
-	  cerr << "Must provide either sigma or duration\n";
-	  exit( 1 );
-	}
-      dur = rint( (sigma * sigma) / (8 * ::log(2) ) );
-    }
+    for (unsigned i=0; i<outTex[0].nItem(); ++i)
+      m+=outTex[0].item(i);
+    m /= outTex[0].nItem();
+    for (unsigned i=0; i<outTex[0].nItem(); ++i)
+      sigma += (outTex[0].item(i) - m)*(outTex[0].item(i) - m);
+    sigma = sqrt(sigma);
+    sigma /= outTex[0].nItem();
+    cout << endl << "Mean: " << m << " sigma: " << sigma << endl;
 
-  
-  FWHM = 4 * sqrt ( ::log(2) * dur  );
-  cout << "dur=" << dur*dt << " and equivalent FWHM =" << FWHM << " mm" << endl;
-  cout << "Weight ratio thresold: " << Wmax << endl;
-  cout << "output threshold: "<< H << endl;
-  
-  TimeTexture<float> stex;
-  if (sourcefile == NULL)
-    outTex[0] = TextureSmoothing::FiniteElementSmoothing(itex,dt,dur,H,weightLapl);
-  else
-    {
-      Reader<TimeTexture<float> >	texRs( sourcefile );
-      texRs >> stex ;
-      outTex[0] = TextureSmoothing::FiniteElementSmoothingWithSource(itex,stex[0],dt,dur,weightLapl);
-    }
+    set<float> values;
+    for (unsigned i=0; i<outTex[0].nItem(); ++i)
+          values.insert(outTex[0].item(i));
+    cout << "min: " << *values.begin() << " max: " << *values.rbegin() << endl;
 
-  float m=0;
-  sigma=0;
- 
-  for (unsigned i=0; i<outTex[0].nItem(); ++i)
-    m+=outTex[0].item(i);
-  m /= outTex[0].nItem();
-  for (unsigned i=0; i<outTex[0].nItem(); ++i)
-    sigma += (outTex[0].item(i) - m)*(outTex[0].item(i) - m);
-  sigma = sqrt(sigma);
-  sigma /= outTex[0].nItem();
-  cout << endl << "Mean: " << m << " sigma: " << sigma << endl; 
-   
-  set<float> values;
-  for (unsigned i=0; i<outTex[0].nItem(); ++i)
-	values.insert(outTex[0].item(i));
-   cout << "min: " << *values.begin() << " max: " << *values.rbegin() << endl; 
-	
-  cout << "writing texture : " << flush;
-  Writer<Texture1d>	texW( outtexfile );
-  texW.write( outTex );
-  cout << "done " << endl;
-  
+    cout << "writing texture : " << flush;
+    texW.write( outTex );
+    cout << "done " << endl;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
 
-  return( 0 );
+  return EXIT_SUCCESS;
 }
 
 

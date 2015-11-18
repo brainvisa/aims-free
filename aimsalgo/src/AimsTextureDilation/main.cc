@@ -34,54 +34,20 @@
 
 #include <aims/distancemap/meshmorphomat.h>
 #include <aims/data/data_g.h>
-#include <aims/io/io_g.h>
 #include <aims/math/math_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/vector/vector.h>
 #include <aims/mesh/texture.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
+#include <aims/io/process.h>
 
 typedef float float3[3];
 
 using namespace aims;
 using namespace aims::meshdistance;
+using namespace carto;
 using namespace std;
-
-BEGIN_USAGE(usage)
-  "-------------------------------------------------------------------------",
-  "AimsTextureDilation -i[nput] <meshfilein>                                ",
-  "                    -t[exture] <input_texture>                           ",
-  "                    -o[utput <output_dist_texture>                       ",
-  "		       -s[ize]    <erosion_size>                            ",
-  "		       [-b[ackground]    <background label>]                  ",
-  "		       [-f[orbidden]    <forbidden label>]                    ",
-  "                    [--connexity]                                        ",
-  "                    [--ascii]                                            ",
-  "                    [-h[elp]]                                            ",
-  "-------------------------------------------------------------------------",
-  "  Dilation of an image(binar or grey level ) painted on a triangulation   ",
-  "  Input texture of 'short int' are dilated with binar structurant element ",
-  "  The 'background label' corresponds to the label of the background (default = 0)",
-  "  The 'forbidden label' corresponds to the label out of the domain   (default = -1)",
-  "  Input texture of 'float' are dilated with the max function as structurant element",
-  "-------------------------------------------------------------------------",
-  "     meshfilein          : input *.tri or *.mesh file                    ",
-  "     output_dist_texture : output *.tex file (labelled opening)          ",
-  "     input_texture       : object definition                             ",
-  "     ascii         : write *.tex file in ASCII [default=binar]           ",
-  "     connexity     : euclidean or mesh connexity distance [default=euclidean]     ",
-  "-------------------------------------------------------------------------",
-END_USAGE
-
-
-//
-// Usage
-//
-void Usage( void )
-{
-  AimsUsage( usage );
-}
 
 
 template<typename T> bool
@@ -103,8 +69,10 @@ public:
 
 
 TextureDilation::TextureDilation( AimsSurfaceTriangle & m, float cs, 
-				int cf, const string & of,short ba, short forb)
-  : surface( m ), dilatesize( cs ), connexityFlag( cf ), outtexfile( of ), back(ba), forbidden(forb)
+                                  int cf, const string & of,short ba,
+                                  short forb)
+  : surface( m ), dilatesize( cs ), connexityFlag( cf ), outtexfile( of ),
+    back(ba), forbidden(forb)
 {
   registerProcessType( "Texture", "FLOAT", &texdilate<float> );
   registerProcessType( "Texture", "S16", &texdilate<short> );
@@ -116,47 +84,75 @@ TextureDilation::~TextureDilation()
 }
 
 
-int main( int argc, char** argv )
+int main( int argc, const char** argv )
 {
-  char	*meshfile = 0, *intexfile = 0, *outtexfile = 0;
-  int	connexityFlag=0;
+  string meshfile, intexfile, outtexfile;
+  bool connexityFlag = false;
   float dilatesize;
   int back = 0, forbidden = -1;
+
   //
   // Parser of options
   //
-  AimsOption opt[] = {
-  { 'h',"help"         ,AIMS_OPT_FLAG  ,( void* )Usage           ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input"        ,AIMS_OPT_STRING,&meshfile       ,0                ,1},
-  { 'o',"output"       ,AIMS_OPT_STRING,&outtexfile     ,0                ,1},
-  { 't',"texture"      ,AIMS_OPT_STRING,&intexfile      ,0                ,1},
-  { 'b',"background"   ,AIMS_OPT_INT,   &back           ,0                ,0},
-  { 'f',"forbidden"    ,AIMS_OPT_INT,   &forbidden      ,0                ,0},
-  { 's',"size"         ,AIMS_OPT_FLOAT, &dilatesize     ,0                ,1},
-  { ' ',"connexity"    ,AIMS_OPT_FLAG  ,&connexityFlag  ,0                ,0},
-  { 0  ,0              ,AIMS_OPT_END   ,0               ,0                ,0}};
+  AimsApplication app( argc, argv,
+    "Dilation of an image (binary or grey level) painted on a triangulation.\n"
+    "Input texture of 'short int' are eroded with binary structuring "
+    "element.\n"
+    "The 'background label' corresponds to the label of the background "
+    "(default = 0).\n"
+    "The 'forbidden label' corresponds to the label out of the domain "
+    "(default = -1).\n"
+    "Input texture of 'float' are eroded with the min function as structuring "
+    "element" );
+  app.addOption( meshfile, "-i", "input mesh file" );
+  app.alias( "--input", "-i" );
+  app.addOption( intexfile, "-t", "object definition texture" );
+  app.alias( "--texture", "-t" );
+  app.addOption( outtexfile, "-o", "output texture file (labelled opening)" );
+  app.alias( "--output", "-o" );
+  app.addOption( dilatesize, "-s", "dilation size (in mm)" );
+  app.alias( "--size", "-s" );
+  app.addOption( back, "-b", "background label", true );
+  app.alias( "--background", "-b" );
+  app.addOption( forbidden, "-f", "forbidden label", true );
+  app.alias( "--forbidden", "-f" );
+  app.addOption( connexityFlag, "--connexity",
+    "euclidean or mesh connexity [default=euclidean]", true );
+//   app.addOption( greyFlag, "--grey", "default: binary", true );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
 
+    if (connexityFlag )
+      cout << "Size of the dilation : " << dilatesize << " connections"
+        << endl;
+    else
+      cout << "Size of the dilation : " << dilatesize << "mm" << endl;
 
-  if (connexityFlag ) 
-    cout << "Size of the dilation : " << dilatesize << " connections" << endl;
-  else
-     cout << "Size of the dilation : " << dilatesize << "mm" << endl;
+    //
+    // read triangulation
+    //
+    cout << "reading triangulation   : " << flush;
+    AimsSurfaceTriangle surface;
+    Reader<AimsSurfaceTriangle> surfaceR( meshfile );
+    surfaceR >> surface;
+    cout << "done" << endl;
 
-
-  //
-  // read triangulation
-  //
-  cout << "reading triangulation   : " << flush;
-  AimsSurfaceTriangle surface;
-  Reader<AimsSurfaceTriangle> surfaceR( meshfile );
-  surfaceR >> surface;
-  cout << "done" << endl;
-
-  TextureDilation	proc( surface, dilatesize, connexityFlag, outtexfile,back,forbidden);
-  if( !proc.execute( intexfile ) )
-    cerr << "Failed\n";
+    TextureDilation	proc( surface, dilatesize, connexityFlag,
+                              outtexfile, back, forbidden);
+    if( !proc.execute( intexfile ) )
+      cerr << "Failed\n";
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }
 
 
