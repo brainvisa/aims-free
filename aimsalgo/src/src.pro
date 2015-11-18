@@ -29,7 +29,6 @@ PSUBDIRS = \
     AimsCompareSPMtToPrimalSketch \
     AimsDilation              \
     AimsDistordDti            \
-    AimsDivide                \
     AimsDtiBck2Vol            \
     AimsElevationMap \
     AimsErosion              \
@@ -90,7 +89,6 @@ PSUBDIRS = \
     AimsMIRegister \
     AimsMoment           \
     AimsMorphoMath            \
-    AimsMultiply \
     AimsNormWithRegion             \
     AimsNormDiff              \
 #    AimsNormalizeAtlasProbabilities \
