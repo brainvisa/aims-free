@@ -382,7 +382,7 @@ namespace carto
 
   template <typename T>
   carto::VolumeRef<T> deepcopy( const carto::VolumeRef<T> & src,
-                                bool copy_full_structure = true )
+                                bool copy_full_structure )
   {
     carto::VolumeRef<T> dst( (carto::Volume<T>*)0 );
     if( copy_full_structure )
