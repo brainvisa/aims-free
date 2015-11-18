@@ -205,14 +205,14 @@ int main(int argc,char **argv)
 
 
       MotionWriter w("comp_TO_ref.trm");
-      w << comp2ref;
+      w.write( comp2ref );
 
       LinearResampler<float> interpolator;
       interpolator.setRef( compared );
       AimsData< float > res_compared = interpolator.doit( comp2ref,
-			       reference.dimX(),reference.dimY(),reference.dimZ(),
-			       Point3df(reference.sizeX(), reference.sizeY(),reference.sizeZ()) );
-      
+        reference.dimX(),reference.dimY(),reference.dimZ(),
+        Point3df(reference.sizeX(), reference.sizeY(),reference.sizeZ()) );
+
 //       Writer< AimsData<float> > yy("groumf");
 //       yy << res_compared;
       int x, y, z;

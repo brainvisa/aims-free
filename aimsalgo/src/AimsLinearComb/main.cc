@@ -382,6 +382,8 @@ int main( int argc, char **argv )
   char *i1 = NULL, *i2 = NULL, *fileout = NULL, *type = 0;
   double num1 = 1.0, num2 = 1.0, den1 = 1.0, den2 = 1.0, cst = 0.0;
 
+  cout << "WARNING: AimsLinearComb is obsolete. Please use cartoLinearComb.py instead.\n\n";
+
   AimsOption opt[] = {
   { 'h',"help"  ,AIMS_OPT_FLAG   ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0,},
   { 'i',"i"     ,AIMS_OPT_STRING ,&i1         ,0                ,1},
