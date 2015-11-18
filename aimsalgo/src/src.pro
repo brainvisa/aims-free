@@ -122,7 +122,6 @@ PSUBDIRS = \
     AimsSubTensor             \
     AimsSulcusSPAM              \
     AimsSumFrame              \
-    AimsSwapEndian            \
     AimsTMStarget             \
     AimsTalairachTransform         \
     AimsTensor2Bucket         \
