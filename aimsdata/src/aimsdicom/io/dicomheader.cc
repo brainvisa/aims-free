@@ -5,7 +5,7 @@
  *      4 place du General Leclerc
  *      91401 Orsay cedex
  *      France
-/* This software and supporting documentation are distributed by
+ * This software and supporting documentation are distributed by
  *     Institut Federatif de Recherche 49
  *     CEA/NeuroSpin, Batiment 145,
  *     91191 Gif-sur-Yvette cedex

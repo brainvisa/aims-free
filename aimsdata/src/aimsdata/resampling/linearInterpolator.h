@@ -101,6 +101,12 @@ public:
   {
     values( point[ 0 ], point[ 1 ], point[ 2 ], v );
   }
+
+  // These methods call operator() which is deprecated API, but they have to do
+  // so because because operator() is the virtual method that is overloaded in
+  // children classes.
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   /** Interpolate to get a value from point ( x, y ,z ). */
   virtual Scalar_t value( Coordinate_t x, Coordinate_t y,
                          Coordinate_t z ) const = 0;
@@ -118,6 +124,8 @@ public:
   {
     values( point[ 0 ], point[ 1 ], point[ 2 ], v );
   }
+  #pragma GCC diagnostic pop
+
   /** Return the header of the image.
   */
   virtual const carto::PropertySet &header() const = 0;
