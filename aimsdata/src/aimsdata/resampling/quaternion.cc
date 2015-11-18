@@ -349,9 +349,9 @@ void Quaternion::buildFromMotion( const Motion & m )
     s = sqrt( tr + 1. );
     _vector[3] = s * 0.5;
     s = 0.5 / s;
-    _vector[0] = ( rotation(1,2) - rotation(2,1) ) * s;
-    _vector[1] = ( rotation(2,0) - rotation(0,2) ) * s;
-    _vector[2] = ( rotation(0,1) - rotation(1,0) ) * s;
+    _vector[0] = ( rotation(2,1) - rotation(1,2) ) * s;
+    _vector[1] = ( rotation(0,2) - rotation(2,0) ) * s;
+    _vector[2] = ( rotation(1,0) - rotation(0,1) ) * s;
   }
   else
   {
@@ -366,9 +366,9 @@ void Quaternion::buildFromMotion( const Motion & m )
     s = sqrt( rotation(i,i) - ( rotation(j,j) + rotation(k,k) ) + 1. );
     _vector[i] = s * 0.5;
     s = 0.5 / s;
-    _vector[3] = ( rotation(j,k) - rotation(k,j) ) * s;
-    _vector[j] = ( rotation(i,j) - rotation(j,i) ) * s;
-    _vector[k] = ( rotation(i,k) - rotation(k,i) ) * s;
+    _vector[3] = ( rotation(k,j) - rotation(j,k) ) * s;
+    _vector[j] = ( rotation(j,i) - rotation(i,j) ) * s;
+    _vector[k] = ( rotation(k,i) - rotation(i,k) ) * s;
   }
 }
 
@@ -376,5 +376,5 @@ void Quaternion::buildFromMotion( const Motion & m )
 Quaternion Quaternion::inverse() const
 {
   return( Quaternion( Point4df( -_vector[0], -_vector[1], -_vector[2], 
-				_vector[3] ) ) );
+                                _vector[3] ) ) );
 }
