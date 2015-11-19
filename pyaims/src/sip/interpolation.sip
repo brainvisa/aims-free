@@ -21,16 +21,20 @@ public:
 
   virtual ~Interpolator();
 
-  virtual bool isValid( float, float, float ) const = 0;
+  bool isValid( float, float, float ) const;
   bool isValid( const Point3df & ) const;
-  
-  virtual double value( float, float, float ) const = 0;
+
+  double value( float, float, float ) const;
   double value( const Point3df & ) const;
 
-  virtual void values( float, float, float,
-                       vector_DOUBLE & /Out/ ) const = 0;
+  void values( float, float, float,
+               vector_DOUBLE & /Out/ ) const;
   void values( const Point3df &,
                vector_DOUBLE & /Out/ ) const;
+private:
+  virtual double do_interpolation( float x, float y, float z ) const = 0;
+  virtual void do_interpolations( float x, float y, float z,
+                                  vector_DOUBLE & /Out/ ) const = 0;
 };
 
 
