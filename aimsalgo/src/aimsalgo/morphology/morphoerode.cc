@@ -43,9 +43,11 @@
 
 using namespace std;
 
-AimsData<short> AimsMorphoConnectivityChamferErosion(AimsData<short> &vol,
-						     float size,
-						     Connectivity::Type type)
+template <>
+AimsData<short> AimsMorphoConnectivityChamferErosion(
+  const AimsData<short> &vol,
+  float size,
+  Connectivity::Type type )
 {
   ASSERT(vol.dimT()==1);
   ASSERT( size>0 && size<(float)square(vol.dimX()) && 
@@ -62,29 +64,11 @@ AimsData<short> AimsMorphoConnectivityChamferErosion(AimsData<short> &vol,
 }
 
 
-AimsData<short> AimsMorphoErosion(AimsData<short> &vol,
-                                    float size, AimsMorphoMode mode)
-{
-  ASSERT(vol.dimT()==1);
-  AimsData<short> erosion;
-
-  switch (mode)
-  {
-    case AIMS_CHAMFER_BALL_3D :
-      erosion = AimsMorphoChamferErosion(vol,size,3,3,3,50);
-      break;
-    case AIMS_CHAMFER_BALL_2D :
-      erosion = AimsMorphoChamferErosion(vol,size,3,3,1,50);
-      break;
-  }
-  return erosion;
-}
-
-
-AimsData<short> AimsMorphoChamferErosion(AimsData<short> &vol,
-                                           float size,
-                                           int xmask,int ymask,int zmask,
-                                           float mult_fact)
+template <>
+AimsData<short> AimsMorphoChamferErosion( const AimsData<short> &vol,
+                                          float size,
+                                          int xmask,int ymask,int zmask,
+                                          float mult_fact )
 {
   ASSERT(vol.dimT()==1);
   ASSERT( size>0 && size<(float)square(vol.dimX()) && 
@@ -100,8 +84,11 @@ AimsData<short> AimsMorphoChamferErosion(AimsData<short> &vol,
   return thresh.bin(eroded);
 }
 
-AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(AimsData<short> &initvol,float size,
-						       Connectivity::Type connectivity)
+
+template <>
+AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
+  const AimsData<short> &initvol,float size,
+  Connectivity::Type connectivity )
 {
   
   int x,y,z;
@@ -216,3 +203,24 @@ AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(AimsData<short> &i
   return(eroded);
   
 }
+
+
+template <>
+AimsData<short> AimsMorphoErosion( const AimsData<short> &vol,
+                                   float size, AimsMorphoMode mode )
+{
+  ASSERT(vol.dimT()==1);
+  AimsData<short> erosion;
+
+  switch (mode)
+  {
+    case AIMS_CHAMFER_BALL_3D :
+      erosion = AimsMorphoChamferErosion(vol,size,3,3,3,50);
+      break;
+    case AIMS_CHAMFER_BALL_2D :
+      erosion = AimsMorphoChamferErosion(vol,size,3,3,1,50);
+      break;
+  }
+  return erosion;
+}
+

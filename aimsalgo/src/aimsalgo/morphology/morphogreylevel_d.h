@@ -36,6 +36,7 @@
 #define AIMS_MORPHOLOGY_MORPHOGREYLEVEL_D_H
 
 #include <aims/morphology/operatormorpho.h>
+#include <aims/data/data.h>
 #include <cartodata/volume/volumeutil_d.h>
 #include <aims/math/mathelem.h>
 
@@ -43,7 +44,9 @@ namespace aims
 {
 
   template <typename T>
-  MorphoGreyLevel<T>::MorphoGreyLevel(): radius(1.), int_radius(1,1,1)
+  MorphoGreyLevel<T>::MorphoGreyLevel(): radius(1.), int_radius(1,1,1),
+    _use_chamfer( true ), _chamfer_factor( 50.F ),
+    _chamfer_mask_size( 3, 3, 3 )
   {
   }
 
@@ -115,7 +118,8 @@ namespace aims
               }
         //   Writer< AimsData< int16_t > > ws( "sphere.ima" );
         //   ws.write( sphere );
-        std::cout << "Number of voxels in the structuring element = " << list.size() << std::endl << std::endl;
+        std::cout << "Number of voxels in the structuring element = "
+          << list.size() << std::endl << std::endl;
         return list;
       }
     else return list;
@@ -124,25 +128,33 @@ namespace aims
 
   template<typename T>
   carto::VolumeRef<T> MorphoGreyLevel<T>::doErosion(
-    const carto::Volume< T >& dataIn, float radius )
+    const carto::VolumeRef< T >& dataIn, float radius )
   {
     std::cout << "EROSION" << std::endl;
+
+    carto::VolumeRef< T > dataOut;
+
+    dataOut = tryChamferErosion( dataIn, radius );
+    if( dataOut.get() )
+      return dataOut;
+
     T value = carto::VolumeUtil<T>::max(dataIn);
 
     std::vector<float> vs = dataIn.getVoxelSize();
     Point4df voxelsize( vs[0], vs[1], vs[2], vs[3] );
 
-    Point4d dim( dataIn.getSizeX(),
-                dataIn.getSizeY(),
-                dataIn.getSizeZ(),
-                dataIn.getSizeT() );
+    Point4d dim( dataIn->getSizeX(),
+                 dataIn->getSizeY(),
+                 dataIn->getSizeZ(),
+                 dataIn->getSizeT() );
 
     // FIXME: this copy sometimes gets a shared buffer. WHY ?
     // carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
-    carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn.getSizeX(), dataIn.getSizeY(), dataIn.getSizeZ(), dataIn.getSizeT() ) );
+    dataOut.reset(
+      new carto::Volume<T>( dataIn->getSizeX(), dataIn->getSizeY(),
+                            dataIn->getSizeZ(), dataIn->getSizeT() ) );
     dataOut->fill( T(0) );
-    dataOut->header().copyProperties(
-      carto::Object::reference( dataIn.header() ) );
+    dataOut->copyHeaderFrom( dataIn->header() );
 
     int_radius = computeIntRadius( radius, voxelsize );
     list = doStructElement( radius, voxelsize );
@@ -166,7 +178,7 @@ namespace aims
                         && (coord[1]>=0) && (coord[1]<dim[1] )
                         && (coord[2]>=0) && (coord[2]<dim[2] ) )
                       {
-                        tmp = dataIn( coord[0], coord[1], coord[2] );
+                        tmp = dataIn->at( coord[0], coord[1], coord[2] );
                         if( tmp < min ) min = tmp;
                       }
                   }
@@ -180,25 +192,33 @@ namespace aims
 
   template<typename T>
   carto::VolumeRef<T> MorphoGreyLevel<T>::doDilation(
-    const carto::Volume< T >& dataIn, float radius )
+    const carto::VolumeRef< T >& dataIn, float radius )
   {
     std::cout << "DILATION" << std::endl;
+
+    carto::VolumeRef< T > dataOut;
+
+    dataOut = tryChamferDilation( dataIn, radius );
+    if( dataOut.get() )
+      return dataOut;
+
     T value = carto::VolumeUtil<T>::min(dataIn);
 
-    std::vector<float> vs = dataIn.getVoxelSize();
+    std::vector<float> vs = dataIn->getVoxelSize();
     Point4df voxelsize( vs[0], vs[1], vs[2], vs[3] );
 
-    Point4d dim( dataIn.getSizeX(),
-                dataIn.getSizeY(),
-                dataIn.getSizeZ(),
-                dataIn.getSizeT() );
+    Point4d dim( dataIn->getSizeX(),
+                 dataIn->getSizeY(),
+                 dataIn->getSizeZ(),
+                 dataIn->getSizeT() );
 
     // FIXME: this copy sometimes gets a shared buffer. WHY ?
 //     carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn ) );
-    carto::VolumeRef< T > dataOut( new carto::Volume<T>( dataIn.getSizeX(), dataIn.getSizeY(), dataIn.getSizeZ(), dataIn.getSizeT() ) );
+    dataOut.reset(
+      new carto::Volume<T>( dataIn->getSizeX(), dataIn->getSizeY(),
+                            dataIn->getSizeZ(), dataIn->getSizeT() ) );
     dataOut->fill( T(0) );
-    dataOut->header().copyProperties(
-      carto::Object::reference( dataIn.header() ) );
+    dataOut->copyHeaderFrom( dataIn.header() );
 
     int_radius = computeIntRadius( radius, voxelsize );
     list = doStructElement( radius, voxelsize );
@@ -222,7 +242,7 @@ namespace aims
                   && (coord[1]>=0) && (coord[1]<dim[1] )
                   && (coord[2]>=0) && (coord[2]<dim[2] ) )
               {
-                tmp = dataIn.at( coord[0], coord[1], coord[2] );
+                tmp = dataIn->at( coord[0], coord[1], coord[2] );
                 if( tmp > max ) max = tmp;
               }
             }
@@ -236,11 +256,16 @@ namespace aims
 
   template<typename T>
   carto::VolumeRef<T> MorphoGreyLevel<T>::doClosing(
-    const carto::Volume<T>& dataIn, float radius )
+    const carto::VolumeRef<T>& dataIn, float radius )
   {
     carto::VolumeRef< T > dataOut;
+
+    dataOut = tryChamferClosing( dataIn, radius );
+    if( dataOut.get() )
+      return dataOut;
+
     dataOut = doDilation( dataIn, radius );
-    dataOut = doErosion( *dataOut, radius );
+    dataOut = doErosion( dataOut, radius );
 
     return dataOut;
   }
@@ -248,13 +273,283 @@ namespace aims
 
   template<typename T>
   carto::VolumeRef<T> MorphoGreyLevel<T>::doOpening(
-    const carto::Volume<T>& dataIn, float radius )
+    const carto::VolumeRef<T>& dataIn, float radius )
   {
     carto::VolumeRef< T > dataOut;
+
+    dataOut = tryChamferOpening( dataIn, radius );
+    if( dataOut.get() )
+      return dataOut;
+
     dataOut = doErosion( dataIn, radius );
-    dataOut = doDilation( *dataOut, radius );
+    dataOut = doDilation( dataOut, radius );
 
     return dataOut;
+  }
+
+  // chamfer-specific implementations
+
+  template<typename T>
+  carto::VolumeRef<T> MorphoGreyLevel<T>::tryChamferErosion(
+    const carto::VolumeRef< T >& dataIn, float radius )
+  {
+    return 0;
+  }
+
+
+  template<typename T>
+  carto::VolumeRef<T> MorphoGreyLevel<T>::tryChamferDilation(
+    const carto::VolumeRef< T >& dataIn, float radius )
+  {
+    return 0;
+  }
+
+
+  template<typename T>
+  carto::VolumeRef<T> MorphoGreyLevel<T>::tryChamferClosing(
+    const carto::VolumeRef< T >& dataIn, float radius )
+  {
+    return 0;
+  }
+
+
+  template<typename T>
+  carto::VolumeRef<T> MorphoGreyLevel<T>::tryChamferOpening(
+    const carto::VolumeRef< T >& dataIn, float radius )
+  {
+    return 0;
+  }
+
+
+  template<>
+  carto::VolumeRef<int16_t> MorphoGreyLevel<int16_t>::tryChamferErosion(
+    const carto::VolumeRef< int16_t >& dataIn, float radius )
+  {
+    if( _use_chamfer && isBinary( dataIn ) )
+    {
+      carto::VolumeRef<int16_t> dataIn2 = checkBorderWidth( dataIn );
+      return AimsMorphoChamferErosion(
+        AimsData<int16_t>(
+          const_cast<carto::VolumeRef<int16_t> &>( dataIn2 ) ),
+        radius, _chamfer_mask_size[0], _chamfer_mask_size[0],
+        _chamfer_mask_size[0], _chamfer_factor ).volume();
+    }
+    return 0;
+  }
+
+
+  template<>
+  carto::VolumeRef<int16_t> MorphoGreyLevel<int16_t>::tryChamferDilation(
+    const carto::VolumeRef< int16_t >& dataIn, float radius )
+  {
+    if( _use_chamfer && isBinary( dataIn ) )
+    {
+      carto::VolumeRef<int16_t> dataIn2 = checkBorderWidth( dataIn );
+      return AimsMorphoChamferDilation(
+        AimsData<int16_t>(
+          const_cast<carto::VolumeRef<int16_t> &>( dataIn2 ) ),
+        radius, _chamfer_mask_size[0], _chamfer_mask_size[0],
+        _chamfer_mask_size[0], _chamfer_factor ).volume();
+    }
+    return 0;
+  }
+
+
+  template<>
+  carto::VolumeRef<int16_t> MorphoGreyLevel<int16_t>::tryChamferClosing(
+    const carto::VolumeRef< int16_t >& dataIn, float radius )
+  {
+    if( _use_chamfer && isBinary( dataIn ) )
+    {
+      carto::VolumeRef<int16_t> dataIn2 = checkBorderWidth( dataIn );
+      return AimsMorphoChamferClosing(
+        AimsData<int16_t>(
+          const_cast<carto::VolumeRef<int16_t> &>( dataIn2 ) ),
+        radius, _chamfer_mask_size[0], _chamfer_mask_size[0],
+        _chamfer_mask_size[0], _chamfer_factor ).volume();
+    }
+    return 0;
+  }
+
+
+  template<>
+  carto::VolumeRef<int16_t> MorphoGreyLevel<int16_t>::tryChamferOpening(
+    const carto::VolumeRef< int16_t >& dataIn, float radius )
+  {
+    if( _use_chamfer && isBinary( dataIn ) )
+    {
+      carto::VolumeRef<int16_t> dataIn2 = checkDistanceToBorder( dataIn,
+                                                                 radius );
+      int size_diff = ( dataIn2->getSizeX() - dataIn->getSizeX() ) / 2;
+      carto::VolumeRef<int16_t> dataOut = AimsMorphoChamferOpening(
+        AimsData<int16_t>(
+          const_cast<carto::VolumeRef<int16_t> &>( dataIn2 ) ),
+        radius, 3, 3, 3, _chamfer_factor ).volume();
+      if( size_diff != 0 )
+        dataOut = reallocateVolume( dataOut, -size_diff, 1 ); // FIXME border
+      return dataOut;
+    }
+    return 0;
+  }
+
+  // chamfer-specific sanity checks
+
+  template<typename T>
+  carto::VolumeRef<T> MorphoGreyLevel<T>::checkDistanceToBorder(
+    const carto::VolumeRef<T>& dataIn, float radius ) const
+  {
+    std::set<float> f;
+    std::vector<float> vs = dataIn->getVoxelSize();
+    f.insert( vs[0] );
+    f.insert( vs[1] );
+    f.insert( vs[2] );
+    int offset ;
+    offset = (int) ( radius / *f.rbegin() );
+    float dist = distanceToBorder( dataIn );
+
+    if( dist <= offset )
+    {
+      std::cout << "The distance between the object and the border is less "
+        "than the radius. Copying it.\n";
+
+      int border_width = 1; // for now.
+      carto::VolumeRef<T> outvol = reallocateVolume( dataIn, offset,
+                                                     border_width );
+      return outvol;
+    }
+    return dataIn;
+  }
+
+
+  template<typename T>
+  carto::VolumeRef<T> MorphoGreyLevel<T>::checkBorderWidth(
+    const carto::VolumeRef<T>& dataIn ) const
+  {
+    int needed_border = neededBorderWidth();
+    int border = 0;
+
+    if( !dataIn->refVolume().isNull() ) // is a view to another volume
+    {
+      std::set<int> b;
+      b.insert( dataIn->refVolume()->getSizeX() - dataIn->getSizeX() );
+      b.insert( dataIn->refVolume()->getSizeY() - dataIn->getSizeY() );
+      b.insert( dataIn->refVolume()->getSizeZ() - dataIn->getSizeZ() );
+      border = *b.rbegin() / 2;
+    }
+    if( border < needed_border )
+      return reallocateVolume( dataIn, 0, needed_border );
+    return dataIn;
+  }
+
+
+  template<typename T>
+  float MorphoGreyLevel<T>::distanceToBorder( const carto::VolumeRef<T> &vol )
+  {
+    int x,y,z;
+    int dx = vol->getSizeX() ,dy = vol->getSizeY(), dz = vol->getSizeZ();
+    int distance = dx + dy + dz;
+
+    for(x=0; x < dx; ++x)
+      for(y=0; y < dy; ++y)
+        for(z=0; z < dz; ++z)
+          if ( vol->at(x,y,z) == 32767 )
+          {
+            if (x < distance)
+              distance = x ;
+            else
+              if ( (dx - x) < distance && (dx - x) >= 0 )
+                distance = dx - x;
+
+            if (y < distance)
+              distance = y ;
+            else
+              if ( (dy - y) < distance && (dy - y) >= 0 )
+                distance = dy - y;
+
+            if (z < distance)
+              distance = z ;
+            else
+              if ( (dz - z) < distance && (dz - z) >= 0 )
+                distance = dz - z;
+          }
+
+    return distance;
+  }
+
+
+  template<typename T>
+  carto::VolumeRef<T> MorphoGreyLevel<T>::reallocateVolume(
+    const carto::VolumeRef<T>& dataIn, int added_width, int border_width )
+  {
+    int x, y, z, ox = 0, oy = 0, oz = 0;
+    int dx = dataIn->getSizeX(), dy = dataIn->getSizeY(),
+      dz = dataIn->getSizeZ();
+
+    carto::VolumeRef<T> volBig( dx + 2 * added_width,
+                                dy + 2 * added_width,
+                                dz + 2 * added_width,
+                                1, border_width );
+
+    if( added_width < 0 )
+    {
+      dx += added_width;
+      dy += added_width;
+      dz += added_width;
+      ox = -added_width;
+      oy = -added_width;
+      oz = -added_width;
+    }
+
+    std::vector<float> voxelsize = dataIn->getVoxelSize();
+    volBig->copyHeaderFrom( dataIn->header() );
+
+    volBig->fill( 0 );
+
+    for(z=oz; z < dz; ++z)
+      for(y=oy; y < dy; ++y)
+        for(x=ox; x < dx; ++x)
+          volBig->at( x + added_width, y + added_width, z+added_width )
+            = dataIn->at( x, y, z );
+
+    return volBig;
+  }
+
+
+  template<typename T>
+  bool MorphoGreyLevel<T>::isBinary( const carto::VolumeRef<T>& dataIn )
+  {
+    int x,y,z;
+    int dx = dataIn->getSizeX(), dy = dataIn->getSizeY(),
+      dz = dataIn->getSizeZ();
+    T value = 0, v;
+
+    for(z=0; z < dz; ++z)
+      for(y=0; y < dy; ++y)
+        for(x=0; x < dx; ++x)
+        {
+          v = dataIn->at( x, y, z );
+          if( v != 0 )
+            if( value == 0 )
+            {
+              value = v;
+              if( v != 32767 ) // for now
+                return false;
+            }
+            else if( value != v )
+              return false;
+        }
+  }
+
+
+  template<typename T>
+  int MorphoGreyLevel<T>::neededBorderWidth() const
+  {
+    std::set<unsigned> s;
+    s.insert( _chamfer_mask_size[0] );
+    s.insert( _chamfer_mask_size[1] );
+    s.insert( _chamfer_mask_size[2] );
+    int dimMax = *s.rbegin();
+    return (int) (dimMax - 1) / 2;
   }
 
 }

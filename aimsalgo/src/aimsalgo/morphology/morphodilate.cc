@@ -40,9 +40,11 @@
 #include <aims/math/mathelem.h>
 
 
-AimsData<short> AimsMorphoConnectivityChamferDilation(AimsData<short> &vol,
-						     float size,
-						     Connectivity::Type type)
+template <>
+AimsData<short> AimsMorphoConnectivityChamferDilation(
+  const AimsData<short> &vol,
+  float size,
+  Connectivity::Type type)
 {
   ASSERT(vol.dimT()==1);
   ASSERT( size>0 && size<(float)square(vol.dimX()) && 
@@ -59,8 +61,28 @@ AimsData<short> AimsMorphoConnectivityChamferDilation(AimsData<short> &vol,
 }
 
 
-AimsData<short> AimsMorphoDilation(AimsData<short> &vol,
-                                     float size, AimsMorphoMode mode)
+template <>
+AimsData<short> AimsMorphoChamferDilation( const AimsData<short> &vol,
+                                           float size,
+                                           int xmask,int ymask,int zmask,
+                                           float mult_fact)
+{
+  ASSERT(vol.dimT()==1);
+  ASSERT( size>0 && size<(float)square(vol.dimX()) && 
+                    size<(float)square(vol.dimY()) );
+
+  AimsData<short> dilated;
+  dilated = AimsChamferDistanceMap(vol,xmask,ymask,zmask,mult_fact);
+
+  AimsThreshold<short,short> thresh(AIMS_LOWER_OR_EQUAL_TO,
+                                    (short)(size*mult_fact+0.5));
+  return thresh.bin(dilated);
+}
+
+
+template <>
+AimsData<short> AimsMorphoDilation( const AimsData<short> &vol,
+                                    float size, AimsMorphoMode mode)
 {
   ASSERT(vol.dimT()==1);
   AimsData<short> dilate;
@@ -78,19 +100,3 @@ AimsData<short> AimsMorphoDilation(AimsData<short> &vol,
 }
 
 
-AimsData<short> AimsMorphoChamferDilation(AimsData<short> &vol,
-                                           float size,
-                                           int xmask,int ymask,int zmask,
-                                           float mult_fact)
-{
-  ASSERT(vol.dimT()==1);
-  ASSERT( size>0 && size<(float)square(vol.dimX()) && 
-                    size<(float)square(vol.dimY()) );
-
-  AimsData<short> dilated;
-  dilated = AimsChamferDistanceMap(vol,xmask,ymask,zmask,mult_fact);
-
-  AimsThreshold<short,short> thresh(AIMS_LOWER_OR_EQUAL_TO,
-                                    (short)(size*mult_fact+0.5));
-  return thresh.bin(dilated);
-}

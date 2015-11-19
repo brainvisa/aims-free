@@ -61,16 +61,19 @@ enum AimsMorphoMode
 //@{
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoErosion(
-  AimsData<short> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
+template <typename T>
+AimsData<T> AimsMorphoErosion(
+  const AimsData<T> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 
 AIMSALGO_API
-AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
-  AimsData<short> &initvol, float size, Connectivity::Type connectivity );
+template <typename T>
+AimsData<T> AimsMorphoConnectivityChamferHomotopicErosion(
+  AimsData<T> &initvol, float size, Connectivity::Type connectivity );
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoChamferErosion(
-  AimsData<short> &vol,
+template <typename T>
+AimsData<T> AimsMorphoChamferErosion(
+  const AimsData<T> &vol,
   float size,
   int xmask=3,
   int ymask=3,
@@ -79,12 +82,14 @@ AimsData<short> AimsMorphoChamferErosion(
 
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoConnectivityChamferErosion(
-  AimsData<short> &vol, float size, Connectivity::Type type );
+template <typename T>
+AimsData<T> AimsMorphoConnectivityChamferErosion(
+  const AimsData<T> &vol, float size, Connectivity::Type type );
 
 AIMSALGO_API
-AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
-  AimsData<short> &initvol, float size, Connectivity::Type connectivity );
+template <typename T>
+AimsData<T> AimsMorphoConnectivityChamferHomotopicErosion(
+  const AimsData<T> &initvol, float size, Connectivity::Type connectivity );
 
 //@}
 
@@ -93,15 +98,17 @@ AimsData<short> AimsMorphoConnectivityChamferHomotopicErosion(
 //@{
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoDilation(
-  AimsData<short> &vol,
+template <typename T>
+AimsData<T> AimsMorphoDilation(
+  const AimsData<T> &vol,
   float size,
   AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoChamferDilation(
-  AimsData<short> &vol,
+template <typename T>
+AimsData<T> AimsMorphoChamferDilation(
+  const AimsData<T> &vol,
   float size,
   int xmask=3,
   int ymask=3,
@@ -110,8 +117,9 @@ AimsData<short> AimsMorphoChamferDilation(
 
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoConnectivityChamferDilation(
-  AimsData<short> &vol, float size, Connectivity::Type type);
+template <typename T>
+AimsData<T> AimsMorphoConnectivityChamferDilation(
+  const AimsData<T> &vol, float size, Connectivity::Type type);
 //@}
 
 
@@ -119,12 +127,14 @@ AimsData<short> AimsMorphoConnectivityChamferDilation(
 //@{
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoClosing(
-  AimsData<short> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
+template <typename T>
+AimsData<T> AimsMorphoClosing(
+  const AimsData<T> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoChamferClosing(
-  AimsData<short> &vol,
+template <typename T>
+AimsData<T> AimsMorphoChamferClosing(
+  const AimsData<T> &vol,
   float size,
   int xmask=3,
   int ymask=3,
@@ -132,8 +142,9 @@ AimsData<short> AimsMorphoChamferClosing(
   float mult_fact=50 );
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoConnectivityChamferClosing(
-  AimsData<short> &vol, float size, Connectivity::Type type );
+template <typename T>
+AimsData<T> AimsMorphoConnectivityChamferClosing(
+  const AimsData<T> &vol, float size, Connectivity::Type type );
 //@}
 
 
@@ -141,12 +152,14 @@ AimsData<short> AimsMorphoConnectivityChamferClosing(
 //@{
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoOpening(
-  AimsData<short> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
+template <typename T>
+AimsData<T> AimsMorphoOpening(
+  const AimsData<T> &vol, float size, AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D );
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoChamferOpening(
-  AimsData<short> &vol,
+template <typename T>
+AimsData<T> AimsMorphoChamferOpening(
+  const AimsData<T> &vol,
   float size,
   int xmask=3,
   int ymask=3,
@@ -155,13 +168,15 @@ AimsData<short> AimsMorphoChamferOpening(
 
 ///
 AIMSALGO_API
-AimsData<short> AimsMorphoConnectivityChamferOpening(
-  AimsData<short> &vol, float size, Connectivity::Type type );
+template <typename T>
+AimsData<T> AimsMorphoConnectivityChamferOpening(
+  const AimsData<T> &vol, float size, Connectivity::Type type );
 //@}
 
 namespace aims
 {
 
+  /// Grey-level mathematical morphology
   template <typename T>
   class MorphoGreyLevel
   {
@@ -169,23 +184,55 @@ namespace aims
     MorphoGreyLevel();
     virtual ~MorphoGreyLevel();
 
+    /** when enabled, on binary images, the chamfer-based morphomath is
+        used instead of the grey-level one. This is the default as it is
+        way faster.
+    */
+    bool isChamferBinaryMorphoEnabled() const { return _use_chamfer; }
+    void setChamferBinaryMorphoEnabled( bool x ) { _use_chamfer = x; }
+
     carto::VolumeRef<T>
-      doErosion( const carto::Volume<T>& dataIn, float radius );
+      doErosion( const carto::VolumeRef<T>& dataIn, float radius );
     carto::VolumeRef<T>
-      doDilation( const carto::Volume<T>& dataIn, float radius );
+      doDilation( const carto::VolumeRef<T>& dataIn, float radius );
     carto::VolumeRef<T>
-      doClosing( const carto::Volume<T>& dataIn, float radius );
+      doClosing( const carto::VolumeRef<T>& dataIn, float radius );
     carto::VolumeRef<T>
-      doOpening( const carto::Volume<T>& dataIn, float radius );
+      doOpening( const carto::VolumeRef<T>& dataIn, float radius );
+
+    float chamferFactor() const { return _chamfer_factor; }
+    void setChamferFactor( float x ) { _chamfer_factor = x; }
+    Point3d chamferMaskSize() const { return _chamfer_mask_size; }
+    void setChamferMaskSize( const Point3d & p ) { _chamfer_mask_size = p; }
+    int neededBorderWidth() const;
 
   private:
     std::vector<Point3d> doStructElement( float radius,
                                           const Point4df & voxelsize );
     Point3d computeIntRadius( float radius, const Point4df & voxelsize);
+    static bool isBinary( const carto::VolumeRef<T>& dataIn );
+    carto::VolumeRef<T> checkDistanceToBorder(
+      const carto::VolumeRef<T>& dataIn, float radius ) const;
+    carto::VolumeRef<T> checkBorderWidth(
+      const carto::VolumeRef<T>& dataIn ) const;
+    static float distanceToBorder( const carto::VolumeRef<T> &vol );
+    static carto::VolumeRef<T> reallocateVolume(
+      const carto::VolumeRef<T>& dataIn, int added_width, int border_width );
+    carto::VolumeRef<T>
+      tryChamferErosion( const carto::VolumeRef<T>& dataIn, float radius );
+    carto::VolumeRef<T>
+      tryChamferDilation( const carto::VolumeRef<T>& dataIn, float radius );
+    carto::VolumeRef<T>
+      tryChamferClosing( const carto::VolumeRef<T>& dataIn, float radius );
+    carto::VolumeRef<T>
+      tryChamferOpening( const carto::VolumeRef<T>& dataIn, float radius );
 
     float radius;
     Point3d int_radius;
     std::vector<Point3d> list;
+    bool _use_chamfer;
+    float _chamfer_factor;
+    Point3d _chamfer_mask_size;
   };
 
 }
