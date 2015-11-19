@@ -1,8 +1,7 @@
 %ExportedHeaderCode
 // Such warnings are caused by the Python API and cannot be avoided
-// I don't know how to say this with gcc 5.2
-#if __GNUC__ < 5
-#pragma GCC diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
 #endif
 
 %End
