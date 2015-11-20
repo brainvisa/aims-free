@@ -40,9 +40,11 @@
 #include <aims/math/mathelem.h>
 
 
-AimsData<short> AimsMorphoConnectivityChamferOpening(AimsData<short> &vol,
-						     float size,
-						     Connectivity::Type type)
+template <>
+AimsData<short> AimsMorphoConnectivityChamferOpening(
+  const AimsData<short> &vol,
+  float size,
+  Connectivity::Type type )
 {
   ASSERT(vol.dimT()==1);
   ASSERT( size>0 && size<(float)square(vol.dimX()) && 
@@ -67,29 +69,11 @@ AimsData<short> AimsMorphoConnectivityChamferOpening(AimsData<short> &vol,
 
 
 
-AimsData<short> AimsMorphoOpening(AimsData<short> &vol,
-                                    float size, AimsMorphoMode mode)
-{
-  ASSERT(vol.dimT()==1);
-  AimsData<short> open;
-
-  switch (mode)
-  {
-    case AIMS_CHAMFER_BALL_3D :
-      open = AimsMorphoChamferOpening(vol,size,3,3,3,50);
-      break;
-    case AIMS_CHAMFER_BALL_2D :
-      open = AimsMorphoChamferOpening(vol,size,3,3,1,50);
-      break;
-  }
-  return open;
-}
-
-
-AimsData<short> AimsMorphoChamferOpening(AimsData<short> &vol,
-                                           float size,
-                                           int xmask,int ymask,int zmask,
-                                           float mult_fact)
+template <>
+AimsData<short> AimsMorphoChamferOpening( const AimsData<short> &vol,
+                                          float size,
+                                          int xmask,int ymask,int zmask,
+                                          float mult_fact )
 {
   ASSERT(vol.dimT()==1);
   ASSERT( size>0 && size<(float)square(vol.dimX()) && 
@@ -113,3 +97,24 @@ AimsData<short> AimsMorphoChamferOpening(AimsData<short> &vol,
                                      (short)(size*mult_fact+0.5));
   return thresh2.bin(dilated);
 }
+
+
+template <>
+AimsData<short> AimsMorphoOpening( const AimsData<short> &vol,
+                                   float size, AimsMorphoMode mode )
+{
+  ASSERT(vol.dimT()==1);
+  AimsData<short> open;
+
+  switch (mode)
+  {
+    case AIMS_CHAMFER_BALL_3D :
+      open = AimsMorphoChamferOpening(vol,size,3,3,3,50);
+      break;
+    case AIMS_CHAMFER_BALL_2D :
+      open = AimsMorphoChamferOpening(vol,size,3,3,1,50);
+      break;
+  }
+  return open;
+}
+

@@ -11,23 +11,23 @@ enum AimsMorphoMode
 };
 
 
-AimsData_S16 AimsMorphoErosion( AimsData_S16 &, float,
+AimsData_S16 AimsMorphoErosion( const AimsData_S16 &, float,
   AimsMorphoMode = AIMS_CHAMFER_BALL_3D ) throw() /ReleaseGIL/;
 
-AimsData_S16 AimsMorphoDilation( AimsData_S16 &, float,
+AimsData_S16 AimsMorphoDilation( const AimsData_S16 &, float,
   AimsMorphoMode = AIMS_CHAMFER_BALL_3D ) throw() /ReleaseGIL/;
-AimsData_S16 AimsMorphoChamferDilation( AimsData_S16 &, float, int=3, int=3,
+AimsData_S16 AimsMorphoChamferDilation( const AimsData_S16 &, float, int=3, int=3,
   int=3, float=50) throw() /ReleaseGIL/;
 
-AimsData_S16 AimsMorphoClosing( AimsData_S16 &, float,
+AimsData_S16 AimsMorphoClosing( const AimsData_S16 &, float,
   AimsMorphoMode=AIMS_CHAMFER_BALL_3D ) throw() /ReleaseGIL/;
-AimsData_S16 AimsMorphoChamferClosing( AimsData_S16 &vol, float size,
+AimsData_S16 AimsMorphoChamferClosing( const AimsData_S16 &vol, float size,
   int xmask=3, int ymask=3, int zmask=3, float mult_fact=50 ) throw()
   /ReleaseGIL/;
 
-AimsData_S16 AimsMorphoOpening( AimsData_S16 &vol, float size,
+AimsData_S16 AimsMorphoOpening( const AimsData_S16 &vol, float size,
   AimsMorphoMode mode=AIMS_CHAMFER_BALL_3D ) throw() /ReleaseGIL/;
-AimsData_S16 AimsMorphoChamferOpening( AimsData_S16 &vol, float size,
+AimsData_S16 AimsMorphoChamferOpening( const AimsData_S16 &vol, float size,
   int xmask=3, int ymask=3, int zmask=3, float mult_fact=50 ) throw()
   /ReleaseGIL/;
 

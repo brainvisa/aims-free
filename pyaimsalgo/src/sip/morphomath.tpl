@@ -16,12 +16,12 @@ public:
   virtual ~MorphoGreyLevel_%Template1typecode%();
 
   rc_ptr_Volume_%Template1typecode%
-    doErosion( const Volume_%Template1typecode% & dataIn, float radius );
+    doErosion( const rc_ptr_Volume_%Template1typecode% & dataIn, float radius );
   rc_ptr_Volume_%Template1typecode%
-    doDilation( const Volume_%Template1typecode% & dataIn, float radius );
+    doDilation( const rc_ptr_Volume_%Template1typecode% & dataIn, float radius );
   rc_ptr_Volume_%Template1typecode%
-    doClosing( const Volume_%Template1typecode% & dataIn, float radius );
+    doClosing( const rc_ptr_Volume_%Template1typecode% & dataIn, float radius );
   rc_ptr_Volume_%Template1typecode%
-    doOpening( const Volume_%Template1typecode% & dataIn, float radius );
+    doOpening( const rc_ptr_Volume_%Template1typecode% & dataIn, float radius );
 };
 

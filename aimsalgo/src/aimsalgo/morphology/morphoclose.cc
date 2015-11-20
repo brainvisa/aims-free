@@ -41,9 +41,11 @@
 
 
 
-AimsData<short> AimsMorphoConnectivityChamferClosing(AimsData<short> &vol,
-                                         float size,
-					 Connectivity::Type type)
+template <>
+AimsData<short> AimsMorphoConnectivityChamferClosing(
+  const AimsData<short> &vol,
+  float size,
+  Connectivity::Type type )
 {
   ASSERT(vol.dimT()==1);
   ASSERT( size>0 && size<(float)square(vol.dimX()) && 
@@ -63,29 +65,11 @@ AimsData<short> AimsMorphoConnectivityChamferClosing(AimsData<short> &vol,
 }
 
 
-AimsData<short> AimsMorphoClosing(AimsData<short> &vol,
-                                  float size, AimsMorphoMode mode)
-{
-  ASSERT(vol.dimT()==1);
-  AimsData<short> close;
-
-  switch (mode)
-  {
-    case AIMS_CHAMFER_BALL_3D :
-      close = AimsMorphoChamferClosing(vol,size,3,3,3,50);
-      break;
-    case AIMS_CHAMFER_BALL_2D :
-      close = AimsMorphoChamferClosing(vol,size,3,3,1,50);
-      break;
-  }
-  return close;
-}
-
-
-AimsData<short> AimsMorphoChamferClosing(AimsData<short> &vol,
-                                         float size,
-                                         int xmask,int ymask,int zmask,
-                                         float mult_fact)
+template <>
+AimsData<short> AimsMorphoChamferClosing( const AimsData<short> &vol,
+                                          float size,
+                                          int xmask,int ymask,int zmask,
+                                          float mult_fact )
 {
   ASSERT(vol.dimT()==1);
   ASSERT( size>0 && size<(float)square(vol.dimX()) && 
@@ -105,3 +89,24 @@ AimsData<short> AimsMorphoChamferClosing(AimsData<short> &vol,
                                      (short)(size*mult_fact+0.5));
   return thresh2.bin(eroded);
 }
+
+
+template <>
+AimsData<short> AimsMorphoClosing( const AimsData<short> &vol,
+                                   float size, AimsMorphoMode mode )
+{
+  ASSERT(vol.dimT()==1);
+  AimsData<short> close;
+
+  switch (mode)
+  {
+    case AIMS_CHAMFER_BALL_3D :
+      close = AimsMorphoChamferClosing(vol,size,3,3,3,50);
+      break;
+    case AIMS_CHAMFER_BALL_2D :
+      close = AimsMorphoChamferClosing(vol,size,3,3,1,50);
+      break;
+  }
+  return close;
+}
+
