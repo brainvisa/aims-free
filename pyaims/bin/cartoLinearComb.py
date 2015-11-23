@@ -36,9 +36,11 @@ from soma import aims
 import sys
 import re
 from optparse import OptionParser
+import numpy as np
 
 parser = OptionParser(description='Apply a formula to a set of homogeneous '
-                      'images (homogeneous means all of the same data type)')
+                      'images or textures (homogeneous means all of the same '
+                      'data type)')
 parser.add_option('-o', '--output', dest='output', help='output volume')
 parser.add_option("-f", "--formula",
                   dest="formula",
@@ -72,11 +74,23 @@ image = [None]
 typesord = ('RGBA', 'RGB', 'DOUBLE', 'FLOAT', 'S32', 'U32', 'S16',
             'U16', 'U8', 'S8')
 restype = len(typesord) - 1
+objtype = None
 
-r = aims.Reader({})
+r = aims.Reader({'Texture': 'TimeTexture'})
 for x in options.filename:
     vol = r.read(x)
     t = vol.header()['data_type']
+    if type(vol).__name__.startswith('Volume'):
+        t_objtype = 'Volume'
+    elif type(vol).__name__.startswith('TimeTexture'):
+        t_objtype = 'TimeTexture'
+        vol = np.asarray(vol)
+    else:
+        raise TypeError('unsupported data: %s' % type(vol).__name__)
+    if objtype is None:
+        objtype = t_objtype
+    elif objtype != t_objtype:
+        raise TypeError('heterogeneous data: %s and %s' % (objtype, t_objtype))
     for i in xrange(restype):
         if typesord[i] == t:
             restype = i
@@ -84,16 +98,21 @@ for x in options.filename:
 
 # convert all volumes to result type
 print 'output type:', typesord[restype]
-for i in xrange(1, len(image)):
-    vol = image[i]
-    c = aims.__getattribute__('ShallowConverter_' + type(vol).__name__ +
-                              '_Volume_' + typesord[restype])
-    image[i] = c()(vol)
+if objtype == 'Volume':
+    for i in xrange(1, len(image)):
+        vol = image[i]
+        c = aims.__getattribute__('ShallowConverter_' + type(vol).__name__ +
+                                  '_Volume_' + typesord[restype])
+        image[i] = c()(vol)
 
 # print image
 
 result = eval(formula)
 # print result
 
-w = aims.Writer()
-w.write(result, options.output)
+if objtype in ('TimeTexture',):
+    # reconvert numpy object to aims object
+    # transpose is needed for textures
+    result = getattr(aims, objtype)(np.transpose(result))
+
+aims.write(result, options.output)
