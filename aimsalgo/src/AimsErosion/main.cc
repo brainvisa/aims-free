@@ -33,126 +33,16 @@
 
 
 #include <cstdlib>
-#include <aims/data/data_g.h>
-#include <aims/morphology/morphology_g.h>
-#include <aims/io/process.h>
-#include <aims/io/reader.h>
-#include <aims/io/writer.h>
-#include <aims/io/finder.h>
-#include <aims/getopt/getopt2.h>
-#include <cstdlib>
 #include <iostream>
 
-using namespace aims;
-using namespace carto;
 using namespace std;
-
-
-template<class T>
-static bool erode( Process & p, const string & filename, Finder & f );
-
-
-class Erosion : public Process
-{
-public:
-  Erosion( const string & fout, int xm, int ym, int zm, float rad, float fac );
-
-  template<class T>
-  friend bool erode( Process & p, const string & filename, Finder & f );
-  template<class T>
-  bool erode_m( T & data, const string & filename, Finder & f );
-
-private:
-  string	fileout;
-  int		xmask;
-  int		ymask;
-  int		zmask;
-  float		radius;
-  float		factor;
-};
-
-
-Erosion::Erosion( const string & fout, int xm, int ym, int zm, float rad, 
-         float fac ) : Process(), fileout( fout ), xmask( xm ), 
-        	       ymask( ym ), zmask( zm ), radius( rad ), factor( fac )
-{
-  registerProcessType( "Volume", "S16", &erode<AimsData<int16_t> > );
-  // add new types here when morphology operators become templates...
-}
-
-
-template<class T> 
-bool erode( Process & p, const string & filename, Finder & f )
-{
-  Erosion	& dp = (Erosion &) p;
-  T		data;
-  return dp.erode_m( data, filename, f );
-}
-
-
-template<class T> 
-bool Erosion::erode_m( T & data, const string & filename, Finder & f )
-{
-  Reader<T>	reader( filename );
-  string	format = f.format();
-  if( !reader.read( data, 1, &format ) )
-    return false;
-
-  T		dil;
-  dil = AimsMorphoChamferErosion( data, radius, xmask, ymask, zmask, factor );
-
-  Writer<T>	writer( fileout );
-  return writer.write( dil );
-}
 
 
 int main( int argc, const char **argv )
 {
-  string filein, fileout;
-  int xmask = 3, ymask = 3, zmask = 3;
-  float radius, factor = 50;
+  cerr << "-----------------------------------------------------------------------\n";
+  cerr << "AimsErosion has been replaced by AimsMorphoMath. Please use it instead.\n";
+  cerr << "-----------------------------------------------------------------------\n";
 
-  AimsApplication app( argc, argv, "Morphological erosion" );
-  app.addOption( filein, "-i", "source volume" );
-  app.alias( "--input", "-i" );
-  app.addOption( fileout, "-o", "destination volume" );
-  app.alias( "--output", "-o" );
-  app.addOption( radius, "-e", "radius of the structuring element" );
-  app.alias( "--eradius", "-e" );
-  app.alias( "-r", "-e" );
-  app.alias( "--radius", "-e" );
-  app.addOption( xmask, "-x", "X size of the distance mask [default=3]",
-                 true );
-  app.addOption( ymask, "-y", "Y size of the distance mask [default=3]",
-                 true );
-  app.addOption( zmask, "-z", "Z size of the distance mask [default=3]",
-                 true );
-  app.alias( "--xmask", "-x" );
-  app.alias( "--ymask", "-y" );
-  app.alias( "--zmask", "-z" );
-  app.addOption( factor, "-f", "chamfer multiplication factor [default=50]",
-                 true );
-  app.alias( "--factor", "-f" );
-
-  try
-  {
-    app.initialize();
-
-    Erosion	proc( fileout, xmask, ymask, zmask, radius, factor );
-    if( !proc.execute( filein ) )
-    {
-      cerr << "Couldn't process\n";
-      return 1;
-    }
-  }
-  catch( user_interruption & )
-  {
-  }
-  catch( exception & e )
-  {
-    cerr << e.what() << endl;
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return EXIT_FAILURE;
 }
