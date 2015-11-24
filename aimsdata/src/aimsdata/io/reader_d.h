@@ -168,7 +168,8 @@ namespace aims
 
     // try first soma-io reader (since 2013)
     // try first 3 passes
-    try{
+    try
+    {
       // building uri
       std::string uri = _filename;
       if( border != 0 || frame != -1 )
@@ -178,7 +179,7 @@ namespace aims
       if( border != 0 && frame != -1 )
         uri += "&";
       if ( frame != -1 )
-        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+        uri += ( "ot=" + carto::toString( frame ) + "&st=1" );
 
       soma::Reader<T> reader( uri );
       // set conversion option to invoque Carto2AimsHeaderTranslator
@@ -395,7 +396,8 @@ namespace aims
 
     // try first soma-io reader (since 2013)
     // try pass 4
-    try{
+    try
+    {
       // building uri
       std::string uri = _filename;
       if( border != 0 || frame != -1 )
@@ -405,7 +407,7 @@ namespace aims
       if( border != 0 && frame != -1 )
         uri += "&";
       if ( frame != -1 )
-        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+        uri += ( "ot=" + carto::toString( frame ) + "&st=1" );
 
       soma::Reader<T> reader( uri );
       reader.setOptions( _options );
@@ -454,7 +456,8 @@ namespace aims
 
     // try first soma-io reader (since 2013)
     // try first 3 passes
-    try{
+    try
+    {
       // building uri
       std::string uri = _filename;
       if( border != 0 || frame != -1 )
@@ -464,7 +467,7 @@ namespace aims
       if( border != 0 && frame != -1 )
         uri += "&";
       if ( frame != -1 )
-        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+        uri += ( "ot=" + carto::toString( frame ) + "&st=1" );
 
       soma::Reader<T> reader( uri );
       // set conversion option to invoque Carto2AimsHeaderTranslator
@@ -618,7 +621,8 @@ namespace aims
 
     // try first soma-io reader (since 2013)
     // try pass 4
-    try{
+    try
+    {
       // building uri
       std::string uri = _filename;
       if( border != 0 || frame != -1 )
@@ -628,7 +632,7 @@ namespace aims
       if( border != 0 && frame != -1 )
         uri += "&";
       if ( frame != -1 )
-        uri += ( "oz=" + carto::toString( frame ) + "&sz=1" );
+        uri += ( "ot=" + carto::toString( frame ) + "&st=1" );
 
       soma::Reader<T> reader( uri );
       reader.setOptions( _options );
