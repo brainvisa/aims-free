@@ -590,11 +590,11 @@ int main( int argc, const char** argv )
         deltaP[0] = test.sizeX() / 2.0;
         deltaP[1] = test.sizeY() / 2.0;
         deltaP[3] = test.sizeZ() / 2.0;
-        deltaP[2] = 180.0/ 3.14159 / test.dimX();
-        deltaP[4] = 180.0/ 3.14159 / test.dimZ();
-        deltaP[5] = 180.0/ 3.14159 / test.dimZ();   //<-----  ????!!!!!
+        deltaP[2] = 180.0/ 3.14159 / test.dimZ();
+        deltaP[4] = 180.0/ 3.14159 / test.dimX();
+        deltaP[5] = 180.0/ 3.14159 / test.dimY();
       }
-      
+
       // Coarse to fine
       // ----------------------------------------------
       if ( Ptest ) delete ( Ptest );
