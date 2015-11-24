@@ -33,77 +33,16 @@
 
 
 #include <cstdlib>
-#include <aims/data/data_g.h>
-#include <aims/morphology/morphology_g.h>
-#include <aims/io/io_g.h>
-#include <aims/getopt/getopt2.h>
+#include <iostream>
 
-using namespace aims;
-using namespace carto;
 using namespace std;
 
 
 int main( int argc, const char **argv )
 {
-  Reader<AimsData<short> > reader;
-  Writer<AimsData<short> > writer;
-  int xmask = 3, ymask = 3, zmask = 3;
-  float radius, factor = 50;
+  cerr << "-----------------------------------------------------------------------\n";
+  cerr << "AimsOpening has been replaced by AimsMorphoMath. Please use it instead.\n";
+  cerr << "-----------------------------------------------------------------------\n";
 
-
-  AimsApplication       app( argc, argv, "Chamfer opening on a volume" );
-
-  app.addOption( reader, "-i", "source volume" );
-  app.addOption( writer, "-o", "destination volume" );
-  app.addOption( radius, "-e", "radius of the structuring element" );
-  app.addOption( xmask, "-x", "X size of the distance mask [default=3]",
-                 true );
-  app.addOption( ymask, "-y", "Y size of the distance mask [default=3]",
-                 true );
-  app.addOption( zmask, "-z", "Z size of the distance mask [default=3]",
-                 true );
-  app.addOption( factor, "-f", "chamfer multiplication factor [default=50]",
-                 true );
-
-  app.alias( "--input", "-i" );
-  app.alias( "--output", "-o" );
-  app.alias( "--eradius", "-e" );
-  app.alias( "-r", "-e" );
-  app.alias( "--radius", "-e" );
-  app.alias( "--xmask", "-x" );
-  app.alias( "--ymask", "-y" );
-  app.alias( "--zmask", "-z" );
-  app.alias( "--factor", "-f" );
-
-  try
-  {
-    app.initialize();
-
-    AimsData<short> vol;
-
-    set<unsigned> s;
-    s.insert(xmask);
-    s.insert(ymask);
-    s.insert(zmask);
-    float dimMax = *s.rbegin();
-    int borderW = (int ) (dimMax - 1) / 2;
-
-    reader.read( vol, borderW );
-
-    AimsData<short> ope;
-
-    ope = AimsMorphoChamferOpening( vol, radius, xmask, ymask, zmask, factor );
-
-    writer.write( ope );
-  }
-  catch( user_interruption & )
-  {
-  }
-  catch( exception & e )
-  {
-    cerr << e.what() << endl;
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return EXIT_FAILURE;
 }
