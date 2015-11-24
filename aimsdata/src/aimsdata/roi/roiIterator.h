@@ -266,8 +266,10 @@ namespace aims
     for( p[2] = 0; p[2] < _data->dimZ(); ++p[2] ) {
       for( p[1] = 0; p[1] < _data->dimY(); ++p[1] ) {
         for( p[0] = 0; p[0] < _data->dimX(); ++p[0] ) {
-          const T v = (*_data)( p );
+          T v = (*_data)( p );
           if ( v ) {
+            if( isnan( v ) )
+              v = 0;
             it = _labels.find( v );
             _labels[ v ].lastPoint = p;
 
