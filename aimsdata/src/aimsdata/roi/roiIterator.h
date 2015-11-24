@@ -267,9 +267,8 @@ namespace aims
       for( p[1] = 0; p[1] < _data->dimY(); ++p[1] ) {
         for( p[0] = 0; p[0] < _data->dimX(); ++p[0] ) {
           T v = (*_data)( p );
-          if ( v ) {
-            if( isnan( v ) )
-              v = 0;
+          // NaN values are considered background like 0 (SPM does so)
+          if ( v && !isnan( v ) ) {
             it = _labels.find( v );
             _labels[ v ].lastPoint = p;
 
