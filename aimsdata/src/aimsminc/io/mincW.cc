@@ -273,8 +273,13 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     ASSERT( hdr.getProperty( "MINC_space_type", space_name) );
     set_volume_space_type(volume,(char*)space_name.c_str());
   }
+
+//   ncopts = NC_VERBOSE;
+  ncopts = 0;
+
+
   //3) Other attributes
-  bool ok = true;
+  bool ok = true, ok2 = false;
   fdinhibitor fdi( 2 );
   fdi.close(); // inhibit output on stderr
   //std::cout << "MINC Plugin::write: name: " << fname << std::endl << std::flush;
@@ -287,20 +292,27 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
                 NULL,
                 NULL) != VIO_OK )
     ok = false;
+
+//   ncopts = NC_VERBOSE;
+  ncopts = 0;
+  ncerr = 0;
+  errno = 0;
+
   int mincid = -1;
   if( ok )
   {
-    mincid=ncopen((char*)(fname.c_str()),NC_WRITE);
-    if( mincid < 0 )
-      ok = false;
+    mincid = miopen((char*)(fname.c_str()), NC_WRITE);
+    if( mincid >= 0 && ncerr == 0 )
+      ok2 = true;
   }
   fdi.open(); // allow again output on stderr
-  if( ok )
+  if( ok2 )
   {
     ncredef(mincid);
-
-    //ncopts=NC_VERBOSE;
-    ncopts=0;
+    // ncredef sometimes fails with error -33, Not a valid ID
+    // I don't know why. So let it go...
+    ncerr = 0;
+    errno = 0;
 
     SyntaxSet	*s = PythonHeader::syntax();
     Syntax	&sx = (*s)[ "__generic__" /*"PythonHeader"*/ ];
@@ -379,10 +391,14 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filename", "MINC_processing:transformation0-filename");
     hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filedata", "MINC_processing:transformation0-filedata");
 
-
     hdr.writeMincHistory(mincid);
-    hdr.writeMinf( FileUtil::removeExtension( fname ) + ".mnc.minf" );
+
     miclose(mincid);
+  }
+
+  if( ok )
+  {
+    hdr.writeMinf( fname + ".minf" );
   }
 
   //std::cout << "Delete starts\n";
