@@ -52,6 +52,12 @@ typedef aims::AffineTransformation3d Motion;
 template<typename T> class TimeTexture;
 template<typename T> class Texture;
 
+namespace carto
+{
+  template <typename T> class Volume;
+}
+
+
 namespace aims
 {
 
@@ -215,6 +221,19 @@ namespace aims
     template <int D, typename T>
     static void sortPolygonsAlongDirection(
       AimsTimeSurface<D,T> & mesh, int timestep, const Point3df & direction );
+
+    /** Rasterize polygons edges into a volume.
+    */
+    template <int D, typename T>
+    static void rasterizeMeshWireframe(
+      const AimsTimeSurface<D,T> & mesh,
+      carto::rc_ptr<carto::Volume<int16_t> > & volume, int value = 1 );
+
+    /** Rasterize polygons into a volume.
+    */
+    static void rasterizeMesh(
+      const AimsTimeSurface<3, Void> & mesh,
+      carto::rc_ptr<carto::Volume<int16_t> > & volume, int value = 2 );
 
   };
 
