@@ -40,6 +40,7 @@
 #include <aims/data/pheader.h>
 #include <aims/data/data.h>
 #include <cartobase/exception/file.h>
+#include <cartobase/exception/ioexcept.h>
 #include <stdio.h>
 extern "C"
 {
@@ -121,7 +122,7 @@ namespace aims
     // Open the TIFF file
     if((tif = TIFFOpen(filename.c_str(), "w")) == NULL){
       std::cout << "Could not open '" << filename << "' for writing." << std::endl;
-      exit(42);
+      throw carto::file_not_found_error( _name );
     }
 
     std::string name = carto::DataTypeCode<T>().name();
