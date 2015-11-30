@@ -2,6 +2,8 @@ set( _headers
     bucket/bucket_g.h
     data/data_g.h
     border/border.h
+    border/borderfiller.h
+    border/borderiterator.h
     bucket/bucket.h
     bucket/bucketMap.h
     bucket/item.h
