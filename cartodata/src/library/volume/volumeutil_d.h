@@ -36,6 +36,7 @@
 
 #include <cartodata/volume/volumeutil.h>
 #include <cartobase/type/datatypetraits.h>
+#include <cartobase/exception/assert.h>
 #include <limits>
 
 #if defined(__GNUC__) && ((__GNUC__<4) || ((__GNUC__==4) && (__GNUC_MINOR__<=2)))
@@ -54,21 +55,21 @@ namespace
   T internal_min( const T x, const T y )
   { return std::min<T>( x, y ); }
 }
-  
+
 #endif
 
 namespace carto
 {
 
-  template <typename T> template <class UnaryFunction> 
+  template <typename T> template <class UnaryFunction>
   VolumeRef<T> VolumeUtil<T>::apply( UnaryFunction f, const VolumeRef<T> & o )
   {
     VolumeRef<T>	res
-      ( new Volume<T>( o->getSizeX(), o->getSizeY(), o->getSizeZ(), 
+      ( new Volume<T>( o->getSizeX(), o->getSizeY(), o->getSizeZ(),
                        o->getSizeT() ) );
     res->header() = o->header();
 
-    unsigned	x, nx = o->getSizeX(), y, ny = o->getSizeY(), 
+    unsigned	x, nx = o->getSizeX(), y, ny = o->getSizeY(),
       z, nz = o->getSizeZ(), t, nt = o->getSizeT();
     T	*op, *rp;
     for( t=0; t<nt; ++t )
@@ -135,12 +136,12 @@ namespace carto
   }
 
 
-  template <typename T> template <class BinaryFunction> 
-  VolumeRef<T> VolumeUtil<T>::apply( BinaryFunction f, 
-                                     const VolumeRef<T> & o1, 
+  template <typename T> template <class BinaryFunction>
+  VolumeRef<T> VolumeUtil<T>::apply( BinaryFunction f,
+                                     const VolumeRef<T> & o1,
                                      const VolumeRef<T> & o2 )
   {
-    int	x, nx = o1->getSizeX(), y, ny = o1->getSizeY(), 
+    int	x, nx = o1->getSizeX(), y, ny = o1->getSizeY(),
       z, nz = o1->getSizeZ(), t, nt = o1->getSizeT(), nx2, ny2, nz2, nt2, nx3;
     if( o2->getSizeX() < nx )
       {
@@ -229,9 +230,9 @@ namespace carto
                 rp = &res->at( 0, y, z, t );
 
                 /*
-                std::cout << "pos: " << t << ", " << z << ", " << y 
-                          << ", x1: " << x1 << ", " << y1 << ", " << z1 
-                          << ", x2: " << x2 << ", "  << y2 << ", " << z2 
+                std::cout << "pos: " << t << ", " << z << ", " << y
+                          << ", x1: " << x1 << ", " << y1 << ", " << z1
+                          << ", x2: " << x2 << ", "  << y2 << ", " << z2
                           << std::endl;
                 */
 
@@ -259,7 +260,7 @@ namespace carto
                   for( ; x<nx3; ++x )
                     *rp++ = f( *o1p++, internal::_neutral<T>() );
                 for( ; x<nx2; ++x )
-                  *rp++ = f( internal::_neutral<T>(), 
+                  *rp++ = f( internal::_neutral<T>(),
                              internal::_neutral<T>() );
               }
           }
@@ -268,10 +269,10 @@ namespace carto
   }
 
 
-  template <typename T> template <class UnaryFunction> 
+  template <typename T> template <class UnaryFunction>
   void VolumeUtil<T>::selfApply( UnaryFunction f, VolumeRef<T> & o )
   {
-    int	x, nx = o->getSizeX(), y, ny = o->getSizeY(), 
+    int	x, nx = o->getSizeX(), y, ny = o->getSizeY(),
       z, nz = o->getSizeZ(), t, nt = o->getSizeT();
     T	*op;
     for( t=0; t<nt; ++t )
@@ -285,11 +286,11 @@ namespace carto
   }
 
 
-  template <typename T> template <class BinaryFunction> 
-  void VolumeUtil<T>::selfApply( BinaryFunction f, VolumeRef<T> & o1, 
+  template <typename T> template <class BinaryFunction>
+  void VolumeUtil<T>::selfApply( BinaryFunction f, VolumeRef<T> & o1,
                                  const VolumeRef<T> & o2 )
   {
-    int	x, nx = o1->getSizeX(), y, ny = o1->getSizeY(), 
+    int	x, nx = o1->getSizeX(), y, ny = o1->getSizeY(),
       z, nz = o1->getSizeZ(), t, nt = o1->getSizeT();
 
     if( o2->getSizeX() < nx )
@@ -345,7 +346,7 @@ namespace carto
               std::min<T>, o, std::numeric_limits<T>::max() );
 #endif
   }
-  
+
   template <typename T>
   T VolumeUtilBase<T, true>::max( const Volume<T> & o )
   {
@@ -357,7 +358,84 @@ namespace carto
               std::max<T>, o, -std::numeric_limits<T>::max() );
 #endif
   }
-  
+
+
+  //--------------------------------------------------------------------------
+  // Copy functions
+  //--------------------------------------------------------------------------
+
+  template <typename T>
+  void transfer( const carto::VolumeRef<T> & src,
+                 carto::VolumeRef<T> & dst )
+  {
+    ASSERT( ( src.getSizeX() * src.getSizeY() *
+              src.getSizeZ() * src.getSizeT() ) ==
+            ( dst.getSizeX() * dst.getSizeY() *
+              dst.getSizeZ() * dst.getSizeT() ) );
+
+    typename carto::VolumeRef<T>::const_iterator i;
+    typename carto::VolumeRef<T>::iterator j;
+
+    for( i = src.begin(), j = dst.begin(); i != src.end(); ++i, ++j )
+      *j = *i;
+  }
+
+  template <typename T>
+  carto::VolumeRef<T> deepcopy( const carto::VolumeRef<T> & src,
+                                bool copy_full_structure )
+  {
+    carto::VolumeRef<T> dst( (carto::Volume<T>*)0 );
+    if( copy_full_structure )
+    {
+      carto::VolumeRef<T> src_cur = src;
+      carto::VolumeRef<T> src_prv = src;
+      carto::VolumeRef<T> dst_cur = dst;
+      carto::VolumeRef<T> dst_prv = dst;
+      while( src_cur )
+      {
+        dst_cur.reset( new carto::Volume<T>(
+          src_cur.getSizeX(),
+          src_cur.getSizeY(),
+          src_cur.getSizeZ(),
+          src_cur.getSizeT(),
+          carto::AllocatorContext(),
+          src_cur->allocatorContext().isAllocated() ) );
+        dst_cur->copyHeaderFrom( src_cur.header() );
+        if( src_cur->allocatorContext().isAllocated() )
+          transfer( src_cur, dst_cur );
+
+        if( dst_prv )
+        {
+          dst_prv->setRefVolume( dst_cur );
+          dst_prv->setPosInRefVolume( src_prv->posInRefVolume() );
+        }
+        else
+          dst = dst_cur;
+
+        dst_prv = dst_cur;
+        src_prv = src_cur;
+        src_cur = src_cur->refVolume();
+      }
+    }
+    else
+    {
+      dst.reset( new carto::Volume<T>(
+        src.getSizeX(), src.getSizeY(),
+        src.getSizeZ(), src.getSizeT() ) );
+      dst->copyHeaderFrom( src.header() );
+      transfer( src, dst );
+    }
+
+    return dst;
+  }
+
+  template <typename T>
+  carto::VolumeRef<T> copy( const carto::VolumeRef<T> & src )
+  {
+    return deepcopy( src, false );
+  }
+
+
 }
 
 #endif

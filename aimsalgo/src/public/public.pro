@@ -9,7 +9,7 @@ HEADERS=	\
     config/aimsalgopub_config.h	\
     ffd/tabulSpline.h	\
     information/information.h	\
-    information/pdf.h                 \
+    information/pdf.h \
     math/math_g.h			\
     math/balanc.h			\
     math/balbak.h			\
@@ -37,6 +37,7 @@ HEADERS=	\
     math/pca_d.h			\
     math/ppca.h			\
     math/ppca_d.h			\
+    math/bspline.h                  \
     math/bspline2.h                 \
     math/bspline3.h                 \
     math/sobel.h    \
@@ -114,6 +115,7 @@ SOURCES = \
     math/balanc.cc			\
     math/balbak.cc			\
     math/bessel.cc			\
+    math/bspline.cc         \
     math/bspline3.cc		\
     math/bspline2.cc		\
     math/discriminantanalysis.cc    \

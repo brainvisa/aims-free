@@ -333,4 +333,42 @@ namespace carto {
 #endif
 
 
+  //--------------------------------------------------------------------------
+  // Copy functions
+  //--------------------------------------------------------------------------
+
+#define instantiate_copy( T )                                                \
+  template void transfer( const carto::VolumeRef<T> & src,                   \
+                          carto::VolumeRef<T> & dst );                       \
+  template carto::VolumeRef<T> deepcopy( const carto::VolumeRef<T> & src,    \
+                                         bool copy_full_structure = true );  \
+  template carto::VolumeRef<T> copy( const carto::VolumeRef<T> & src );
+
+#define COMMA ,
+
+  instantiate_copy( int8_t )
+  instantiate_copy( uint8_t )
+  instantiate_copy( int16_t )
+  instantiate_copy( uint16_t )
+// ### remove after everything has been moved to intN_t/uintN_t
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+  instantiate_copy( char )
+#endif
+  instantiate_copy( int32_t )
+  instantiate_copy( uint32_t )
+  instantiate_copy( int64_t )
+  instantiate_copy( uint64_t )
+  instantiate_copy( float )
+  instantiate_copy( double )
+  instantiate_copy( cfloat )
+  instantiate_copy( cdouble )
+  instantiate_copy( std::map<int COMMA float> )
+  instantiate_copy( VoxelRGB )
+  instantiate_copy( VoxelRGBA )
+  instantiate_copy( VoxelHSV )
+#ifdef CARTO_LONG_IS_DISTINCT
+  instantiate_copy( long )
+  instantiate_copy( unsigned long )
+#endif
+
 } // namespace carto

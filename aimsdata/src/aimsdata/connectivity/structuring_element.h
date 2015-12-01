@@ -112,21 +112,23 @@ namespace aims {
       // ITERATORS
       //----------------------------------------------------------------------
       /// \brief Return iterator to beginning
-      StructuringElement::iterator begin() { return _vector.begin(); }
+      iterator begin() { return _vector.begin(); }
       /// \brief Return iterator to end
-      StructuringElement::iterator end() { return _vector.end(); }
+      iterator end() { return _vector.end(); }
       /// \brief Return const_iterator to beginning
       /// \return aims::StructuringElement::const_iterator that points to
       ///         the beginning Point3d
-      StructuringElement::const_iterator begin() const { return _vector.begin(); }
+      const_iterator begin() const { return _vector.begin(); }
       /// \brief Return const_iterator to end
       /// \return aims::StructuringElement::const_iterator that points to
       ///         the element past the end
-      StructuringElement::const_iterator end() const { return _vector.end(); }
+      const_iterator end() const { return _vector.end(); }
+
 
       //----------------------------------------------------------------------
       // ACCESSOR
       //----------------------------------------------------------------------
+      size_t size() const { return _vector.size(); }
       /// \brief Return std::vector<Point3d>
       /// \return std::vector<Point3d> that contains 3d positions of the
       ///         structuring element
@@ -177,6 +179,7 @@ namespace aims {
       std::vector<carto::reference_wrapper<T> > _vector;
   };
 
+  /// \see StructuredVolume
   template <typename T>
   class StructuredConstVolume
   {
@@ -204,15 +207,46 @@ namespace aims {
   // STRUCTURING ELEMENT: REFERENCE
   //==========================================================================
   /// Convenient handle for a StructuringElement
+  ///
+  /// This class is a reference counting pointer to a StructuringElement
+  /// (or one of its derived classes).
+  /// It also implements all StructuringElement public methods.
   class StructuringElementRef: public carto::rc_ptr<StructuringElement>
   {
     public:
+      typedef StructuringElement::iterator        iterator;
+      typedef StructuringElement::const_iterator  const_iterator;
+
+      /// Default constructor
+      ///
+      /// This constructor builds an empty pointer. Such a pointer equals to
+      /// strel::none().
       StructuringElementRef():
         carto::rc_ptr<StructuringElement>() {}
+      /// New object constructor
+      ///
+      /// This constructor initiate reference counting. It should always be
+      /// passed an unowned pointer (for example, built using new)
       StructuringElementRef( StructuringElement * se ):
         carto::rc_ptr<StructuringElement>(se) {}
+      /// Copy constructor
+      ///
+      /// This constructor takes any reference counted pointer.
+      /// It increments the reference counter by one.
       StructuringElementRef( const carto::rc_ptr<StructuringElement> & se ):
         carto::rc_ptr<StructuringElement>(se) {}
+
+      iterator begin() { return (*this)->begin(); }
+      iterator end() { return (*this)->end(); }
+      const_iterator begin() const { return (*this)->begin(); }
+      const_iterator end() const { return (*this)->end(); }
+
+      size_t size() const { return (*this)->size(); }
+      const std::vector<Point3d> & getVector() const
+      { return (*this)->getVector(); }
+      std::vector<int>
+      getAmplitude( const Point3d & origin = Point3d(0,0,0) ) const
+      { return (*this)->getAmplitude(origin); }
   };
 
   namespace strel {
@@ -236,6 +270,8 @@ namespace aims {
     {
       friend class ShapeFactory;
       public:
+        typedef StructuringElement::iterator        iterator;
+        typedef StructuringElement::const_iterator  const_iterator;
         virtual ~Shape() {};
         virtual Shape* clone() const = 0;
       protected:
@@ -317,6 +353,8 @@ namespace aims {
     {
       friend class ConnectivityFactory;
       public:
+        typedef StructuringElement::iterator        iterator;
+        typedef StructuringElement::const_iterator  const_iterator;
         virtual ~Connectivity() {};
         virtual Connectivity* clone() const = 0;
         //--------------------------------------------------------------------
@@ -407,6 +445,8 @@ namespace aims {
   class NAME: public Shape                                                   \
   {                                                                          \
     public:                                                                  \
+      typedef StructuringElement::iterator        iterator;                  \
+      typedef StructuringElement::const_iterator  const_iterator;            \
       NAME( const double amplitude = 1.,                                     \
             const bool usecenter = false ): Shape()                          \
           { Shape::setParameters( amplitude, usecenter ); }                  \
@@ -457,6 +497,8 @@ namespace aims {
   class NAME: public Connectivity                                            \
   {                                                                          \
     public:                                                                  \
+      typedef StructuringElement::iterator        iterator;                  \
+      typedef StructuringElement::const_iterator  const_iterator;            \
       NAME(): Connectivity() { setVectorFromMatrix(); }                      \
       virtual ~NAME() {}                                                     \
       Connectivity::Matrix3x3x3Const getMatrix() const;                      \

@@ -25,7 +25,10 @@ Author: Sandrine Lefranc, 2015
 
 # python modules
 import sys
-import argparse
+try:
+    import argparse
+except:
+    from soma import argparse
 import textwrap
 
 # soma module
@@ -34,7 +37,6 @@ from soma import aims
 
 
 #----------------------------Functions-----------------------------------------
-
 
 def parse_args(argv):
     """Parses the given list of arguments."""
