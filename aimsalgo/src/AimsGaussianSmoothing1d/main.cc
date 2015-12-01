@@ -39,7 +39,7 @@
 #include <aims/io/finder.h>
 #include <aims/data/data_g.h>
 #include <aims/data/pheader.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/utility/utility_g.h>
 #include <aims/signalfilter/signalfilter_g.h>
 #include <cstdlib>
@@ -48,29 +48,6 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsGaussianSmoothing1d -i[nput] <filein>                       ",
-  "                        -o[utput] <fileout>                     ",
-  "                        -d[irection] <dir>                      ",
-  "                       [-s[igma] <sigma>]                       ",
-  "                       [-h[elp]]                                ",
-  "----------------------------------------------------------------",
-  "1D Deriche's recursive gaussian smoothing filter                ",
-  "----------------------------------------------------------------",
-  "     filein    : origin file                                    ",
-  "     fileout   : output file                                    ",
-  "     dir       : direction of smooting (x/y/z)                  ",
-  "     sigma     : standard deviation of the gaussian function    ",
-  "                             [default=corresponding voxel size] ",
-  "----------------------------------------------------------------",
-END_USAGE
-
-
-static void Usage()
-{
-  AimsUsage( usage );
-}
 
 
 template<class T>
@@ -90,9 +67,9 @@ public:
   bool gauss_m( AimsData<T> & data, const string & filename, aims::Finder & f );
 
 private:
-  string	fileout;
-  string	direction;
-  float		sigma;
+  string    fileout;
+  string    direction;
+  float     sigma;
 };
 
 
@@ -113,7 +90,6 @@ GaussFilt1d::GaussFilt1d( const string & fout,
   registerProcessType( "Volume", "FLOAT", &gauss<float> );
   registerProcessType( "Volume", "DOUBLE", &gauss<double> );
 }
-
 
 template<class T> 
 bool gauss( Process & p, const string & filename, Finder & f )
@@ -266,27 +242,45 @@ bool GaussFilt1d::gauss_m( AimsData<T> & data, const string & filename,
 }
 
 
-int main( int argc, char **argv )
+int main( int argc, const char **argv )
 {
-  char  *filein = NULL, *fileout = NULL, *direction = NULL;
-  float sigma = 0.0f;
-
-  AimsOption opt[] = {
-  { 'h',"help"  ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0,},
-  { 'i',"input" ,AIMS_OPT_STRING,&filein     ,0                ,1},
-  { 'o',"output",AIMS_OPT_STRING,&fileout    ,0                ,1},
-  { 'd',"direction",AIMS_OPT_STRING,&direction,0               ,1},
-  { 's',"sigma",AIMS_OPT_FLOAT ,&sigma       ,0                ,0},
-  { 0  ,0       ,AIMS_OPT_END   ,0           ,0                ,0}};
-
-  AimsParseOptions( &argc, argv, opt, usage );
-
-  GaussFilt1d proc( fileout, direction, sigma );
-  if( !proc.execute( filein ) )
+  try
   {
-    cerr << "Couldn't process\n";
-    return( 1 );
+    std::string filein, fileout;
+    std::string direction;
+    float       sigma = 0.0f;
+
+    AimsApplication app( argc, argv,
+                         "1D Deriche's recursive gaussian smoothing filter.\n" );
+    app.addOption( filein,       "-i", "Source volume" );
+    app.addOption( fileout,      "-o", "Destination volume" );
+    app.addOption( direction,    "-d", "Direction of smoothing: "
+                                       "x, y, z" );
+    app.addOption( sigma,        "-s", "Standard deviation of the gaussian function\n"
+                                       "[default = corresponding voxel size]", true );
+    app.alias( "--input", "-i" );
+    app.alias( "--output", "-o" );
+    app.alias( "--direction", "-d" );
+    app.alias( "--sigma", "-s" );
+
+    app.initialize();
+
+    GaussFilt1d proc( fileout, direction, sigma );
+    if( !proc.execute( filein ) )
+    {
+        cerr << "Couldn't process\n";
+        return( EXIT_FAILURE );
+    }
+  }
+  catch( user_interruption & )
+  {
+    return( EXIT_FAILURE );
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return( EXIT_FAILURE );
   }
 
-  return( EXIT_SUCCESS );
+  return EXIT_SUCCESS;
 }
