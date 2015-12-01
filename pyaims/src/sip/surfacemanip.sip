@@ -315,6 +315,19 @@ mesh: AimstimeSurface_*
 timestep: int
 direction: Point3df
 %End
+
+
+  static void rasterizeMeshWireframe( const AimsTimeSurface_2_VOID & mesh,
+                                      rc_ptr_Volume_S16 & volume,
+                                      int value = 1 );
+  static void rasterizeMeshWireframe( const AimsTimeSurface_3_VOID & mesh,
+                                      rc_ptr_Volume_S16 & volume,
+                                      int value = 1 );
+  static void rasterizeMeshWireframe( const AimsTimeSurface_4_VOID & mesh,
+                                      rc_ptr_Volume_S16 & volume,
+                                      int value = 1 );
+  static void rasterizeMesh( const AimsTimeSurface_3_VOID & mesh,
+                             rc_ptr_Volume_S16 & volume, int value = 2 );
 };
 
 };

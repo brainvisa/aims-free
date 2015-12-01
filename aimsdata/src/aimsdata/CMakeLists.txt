@@ -164,6 +164,7 @@ set( _headers
     math/trapezeitg.h
     math/trieder.h
     memmap/allocator.h
+    mesh/mesh_rasterization_d.h
     mesh/surface_g.h
     mesh/surface.h
     mesh/surfaceOperation.h
@@ -346,6 +347,7 @@ set( _sources
     math/triederRot.cc
     math/gccbuiltin.c
     memmap/allocator.cc
+    mesh/mesh_rasterization_d.cc
     mesh/surface.cc
     mesh/surfacegen.cc
     mesh/surfaceOperation.cc
