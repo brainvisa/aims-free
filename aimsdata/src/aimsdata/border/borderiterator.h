@@ -8,6 +8,8 @@
 #include <aims/vector/vector.h>                                      // Point*
 #include <cartodata/volume/volume.h>                              // VolumeRef
 
+#include <iostream>
+
 namespace aims
 {
   /// Represents the border of a volume. This border can be outside (if
@@ -76,6 +78,9 @@ namespace aims
           _sizesup[3] = borders[7];
         }
       }
+
+      std::cout << _sizeinf << std::endl;
+      std::cout << _sizesup << std::endl;
     }
     BorderIterator( carto::VolumeRef<T> in, bool inside,
                     const Point4dl & sizeinf,
@@ -545,7 +550,7 @@ namespace aims
     {
       // if current was in inf border: jump inside image
       if( isInferiorBorder( current, move ) )
-        next = current + _border.jump( move );
+        next += _border.jump( move );
       // else: reset studied dim at line begin, and change dim
       else {
         next = reset( current, move );
