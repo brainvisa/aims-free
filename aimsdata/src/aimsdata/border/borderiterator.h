@@ -1,17 +1,15 @@
 #ifndef AIMSDATA_BORDER_BORDERITERATOR_H
 #define AIMSDATA_BORDER_BORDERITERATOR_H
 
-//============================================================================
-// BORDER ITERATOR
-//============================================================================
 
 #include <aims/vector/vector.h>                                      // Point*
 #include <cartodata/volume/volume.h>                              // VolumeRef
 
-#include <iostream>
-
 namespace aims
 {
+  //==========================================================================
+  // BORDER ITERATOR
+  //==========================================================================
   /// Represents the border of a volume. This border can be outside (if
   /// volume with borders are used and enough memory is allocated) or inside.
   /// It is defined by a Volume Ref, a border size and its direction (inside
@@ -78,9 +76,6 @@ namespace aims
           _sizesup[3] = borders[7];
         }
       }
-
-      std::cout << _sizeinf << std::endl;
-      std::cout << _sizesup << std::endl;
     }
     BorderIterator( carto::VolumeRef<T> in, bool inside,
                     const Point4dl & sizeinf,
