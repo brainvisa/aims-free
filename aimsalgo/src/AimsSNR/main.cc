@@ -35,7 +35,7 @@
 #include <cstdlib>
 #include <aims/io/io_g.h>
 #include <aims/data/data_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/math/math_g.h>
 #include <aims/utility/converter_volume.h>
 #include <iostream>
@@ -45,34 +45,6 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsSNR -i[nput] <filein>                                       ",
-  "       [-v[oi] <voi>]                                           ",
-  "       [-x <X> -y <Y> -z <Z> -R <R>]                            ",
-  "       [-o[utput] <fileout>]                                    ",
-  "       [--lineFlag] <output_format>]                                    ",
-  "       [-h[elp]]                                                ",
-  "----------------------------------------------------------------",
-  "SNR of a VOI in a 3D image                                      ",
-  "----------------------------------------------------------------",
-  "     filein  : origin 3D file                                   ",
-  "     voi     : U08 mask file of the V.O.I.                      ",
-  "     X,Y,Z   : Point3d center of a spherical ROI                ",
-  "     R       : radius of spherical ROI                          ",
-  "     fileout : output file [default=stdout]                     ",
-  "     output_format : format of the output file [default=detailed]",
-  "                     detailed in two columns or just a line a values",
-  "----------------------------------------------------------------",
-END_USAGE
-
-
-void Usage( void )
-{
-  AimsUsage( usage );
-}
-
-
 template<class T>
 static bool doit( Process &, const string &, Finder & );
 
@@ -80,7 +52,8 @@ static bool doit( Process &, const string &, Finder & );
 class SNR : public Process
 {
 public:
-  SNR( AimsData<byte> & mk, short cx, short cy, short cz, float r, int lf, const string & fout );
+  SNR( AimsData<byte> & mk, short cx, short cy, short cz, float r, bool lf,
+       const string & fout );
 
 private:
   template<class T>
@@ -92,13 +65,13 @@ private:
   short			centerY;
   short			centerZ;
   float			radius;
-  int		        lineflag;
+  bool		        lineflag;
   string		fileout;
 };
 
 
-SNR::SNR( AimsData<byte> & mk, short cx, short cy, short cz, float r, int lf,
-       const string & fout ) 
+SNR::SNR( AimsData<byte> & mk, short cx, short cy, short cz, float r, bool lf,
+          const string & fout )
     : Process(), mask( mk ), centerX( cx ), centerY( cy ), centerZ( cz ), 
       radius( r ), lineflag(lf), fileout( fout )
 {
@@ -249,48 +222,61 @@ bool SNR::snr( AimsData<float> & in )
 }
 
 
-int main( int argc, char **argv )
+int main( int argc, const char **argv )
 {
-  char *filein, *filemask = NULL, *fileout = NULL;
+  string filein, filemask, fileout;
   short centerX = -1, centerY = -1, centerZ = -1;
-  float radius=-1; 
-  int   lineFlag=0;
+  float radius = -1;
+  bool   lineFlag = false;
 
+  AimsApplication app( argc, argv, "SNR of a VOI in a 3D image" );
+  app.addOption( filein, "-i", "3D volume file" );
+  app.alias( "--input", "-i" );
+  app.addOption( filemask, "-v", "U08 mask file of the V.O.I.", true );
+  app.alias( "--voi", "-v" );
+  app.addOption( centerX, "-x", "X coord of center of a spherical ROI", true );
+  app.addOption( centerY, "-y", "Y coord of center of a spherical ROI", true );
+  app.addOption( centerZ, "-z", "Z coord of center of a spherical ROI", true );
+  app.addOption( radius, "-R", "radius of a spherical ROI", true );
+  app.addOption( fileout, "-o", "output file [default=stdout]", true );
+  app.alias( "--output", "-o" );
+  app.addOption( lineFlag, "--line",
+                 "format of the output file [default=detailed]\n"
+                 "detailed in two columns or just a line a value", true );
 
-  AimsOption opt[] = {
-  { 'h',"help"  ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0,},
-  { 'i',"input" ,AIMS_OPT_STRING,&filein     ,0                ,1},
-  { 'v',"voi"   ,AIMS_OPT_STRING,&filemask   ,0                ,0},
-  { 'x',"x"     ,AIMS_OPT_SHORT ,&centerX    ,0                ,0},
-  { 'y',"y"     ,AIMS_OPT_SHORT ,&centerY    ,0                ,0},
-  { 'z',"z"     ,AIMS_OPT_SHORT ,&centerZ    ,0                ,0},
-  { 'R',"R"     ,AIMS_OPT_FLOAT ,&radius     ,0                ,0},
-  { ' ',"line"  ,AIMS_OPT_FLAG  ,&lineFlag   ,0                ,0},
-  { 'o',"output",AIMS_OPT_STRING,&fileout    ,0                ,0},
-  { 0  ,0       ,AIMS_OPT_END   ,0           ,0                ,0}};
-
-  AimsParseOptions( &argc, argv, opt, usage );
-
-
-  if ( filemask )
-    assert( centerX == -1 && centerY == -1 && centerZ == -1 );
-  else
-    assert( centerX >= 0 && centerY >= 0 && centerZ >= 0 && radius >= 0 );
-
-  AimsData< byte > mask;
-  if ( filemask )
+  try
   {
-    Reader<AimsData<byte> > dataR1( filemask );
-    dataR1 >> mask;
-  }
+    app.initialize();
 
-  assert( mask.dimT() == 1 );
+    if( !filemask.empty() )
+      assert( centerX == -1 && centerY == -1 && centerZ == -1 );
+    else
+      assert( centerX >= 0 && centerY >= 0 && centerZ >= 0 && radius >= 0 );
 
-  SNR	proc( mask, centerX, centerY, centerZ, radius, lineFlag, fileout );
-  if ( !proc.execute( filein ) )
+    AimsData< byte > mask;
+    if( !filemask.empty() )
+    {
+      Reader<AimsData<byte> > dataR1( filemask );
+      dataR1 >> mask;
+    }
+
+    assert( mask.dimT() == 1 );
+
+    SNR	proc( mask, centerX, centerY, centerZ, radius, lineFlag, fileout );
+    if ( !proc.execute( filein ) )
     {
       cerr << "Could not process\n";
-      Usage();
+      return EXIT_FAILURE;
     }
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
+
   return EXIT_SUCCESS ;
 }

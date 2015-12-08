@@ -36,107 +36,88 @@
 #include <aims/data/data_g.h>
 #include <aims/io/io_g.h>
 #include <aims/math/math_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/vector/vector.h>
 #include <aims/mesh/texture.h>
 #include <iomanip>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
-typedef float float3[3];
 
-BEGIN_USAGE(usage)
-  "-------------------------------------------------------------------------",
-  "AimsMeshConnectedComp  -i[nput] <meshfilein>                             ",
-  "                  -t[exture] <input_texture>                             ",
-  "                  [-T[hreshold] <default:0>]                             ",
-  "                  [-m[ode] <default:0>]                                  ",
-  "                  [-o[utput] <output_dist_texture>]                      ",
-  "                  [--tri]                                                ",
-  "                  [--ascii]                                              ",
-  "                  [-h[elp]]                                              ",
-  "-------------------------------------------------------------------------",
-  " Label Connected Component                                     ",
-  "-------------------------------------------------------------------------",
-  "     meshfilein          : input *.tri or *.mesh file                    ",
-  "     output_dist_texture : output *.tex file (distance)                  ",
-  "     threshold           : applied on input texture                      ",
-  "     mode          : 1: lesser than threshold, 0: greater [default=0]    ",
-  "     input_texture       : object definition                             ",
-  "     tri           : mesh in *.tri format [default=*.mesh]               ",
-  "     ascii         : write *.tex file in ASCII [default=binar]           ",
-  "-------------------------------------------------------------------------",
-END_USAGE
-
-
-//
-// Usage
-//
-void Usage( void )
+int main( int argc, const char** argv )
 {
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char** argv )
-{
-  char	*meshfile = 0, *intexfile = 0, *outtexfile = 0;
-  int	triFlag = 0;
-  int	asciiFlag = 0;
-  int	modeFlag = 0;
+  string meshfile, intexfile, outtexfile;
+  int modeFlag = 0;
   float threshold = 0;
 
   //
   // Parser of options
   //
-  AimsOption opt[] = {
-  { 'h',"help"         ,AIMS_OPT_FLAG  ,(void *) Usage  ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input"        ,AIMS_OPT_STRING,&meshfile       ,0                ,1},
-  { 'o',"output"       ,AIMS_OPT_STRING,&outtexfile     ,0                ,1},
-  { 't',"texture"      ,AIMS_OPT_STRING,&intexfile      ,0                ,1},
-  { 'T',"Threshold"    ,AIMS_OPT_FLOAT ,&threshold      ,0                ,0},
-  { 'm',"mode"         ,AIMS_OPT_INT   ,&modeFlag       ,0                ,0},
-  { ' ',"tri"          ,AIMS_OPT_FLAG  ,&triFlag        ,0                ,0},
-  { ' ',"ascii"        ,AIMS_OPT_FLAG  ,&asciiFlag      ,0                ,0},
-  { 0  ,0              ,AIMS_OPT_END   ,0               ,0                ,0}};
+  AimsApplication app( argc, argv, "Connected Components in a label texture" );
+  app.addOption( meshfile, "-i", "input mesh file" );
+  app.alias( "--input", "-i" );
+  app.addOption( intexfile, "-t", "object definition texture" );
+  app.alias( "--texture", "-t" );
+  app.addOption( outtexfile, "-o",
+                 "output connected components texture file" );
+  app.alias( "--output", "-o" );
+  app.addOption( threshold, "-T",
+                 "threshold applied to binarize the input texture [0]", true );
+  app.alias( "--Threshold", "-T" );
+  app.addOption( modeFlag, "-m",
+                 "mode: 1: lesser than threshold, 0: greater [default=0]",
+                 true );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
 
-  //
-  // read triangulation
-  //
-  cout << "reading triangulation   : " << flush;
-  AimsSurfaceTriangle surface;
-  Reader<AimsSurfaceTriangle> triR( meshfile );
-  triR >> surface;
-  cout << "done" << endl;
+    //
+    // read triangulation
+    //
+    cout << "reading triangulation   : " << flush;
+    AimsSurfaceTriangle surface;
+    Reader<AimsSurfaceTriangle> triR( meshfile );
+    triR >> surface;
+    cout << "done" << endl;
 
-  //
-  // read input texture
-  //
-  cout << "reading texture   : " << flush;
-  TimeTexture<float>	inpTex;
-  Reader<Texture1d> texR( intexfile );
-  texR >> inpTex;
-  cout << "done" << endl;
+    //
+    // read input texture
+    //
+    cout << "reading texture   : " << flush;
+    TimeTexture<float>	inpTex;
+    Reader<Texture1d> texR( intexfile );
+    texR >> inpTex;
+    cout << "done" << endl;
 
-  cout << "mesh vertices : " << surface[0].vertex().size() << endl;
-  cout << "mesh polygons : " << surface[0].polygon().size() << endl;
-  cout << "texture dim   : " << inpTex[0].nItem() << endl;
+    cout << "mesh vertices : " << surface[0].vertex().size() << endl;
+    cout << "mesh polygons : " << surface[0].polygon().size() << endl;
+    cout << "texture dim   : " << inpTex[0].nItem() << endl;
 
-  TimeTexture<float>	outTex;
-  cout << "Thresholding: " << threshold << endl;
+    TimeTexture<float>	outTex;
+    cout << "Thresholding: " << threshold << endl;
 
-  outTex[0] = AimsMeshLabelConnectedComponent( surface[0], inpTex[0], threshold,
-		  modeFlag);
+    outTex[0] = AimsMeshLabelConnectedComponent( surface[0], inpTex[0],
+                                                 threshold, modeFlag);
 
-  cout << "writing texture : " << flush;
-  Writer<Texture1d>	texW( outtexfile );
-  texW.write( outTex, asciiFlag );
-  cout << "done" << endl;
+    cout << "writing texture : " << flush;
+    Writer<Texture1d>	texW( outtexfile );
+    texW.write( outTex );
+    cout << "done" << endl;
 
-  return( 0 );
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
 }
 
 
