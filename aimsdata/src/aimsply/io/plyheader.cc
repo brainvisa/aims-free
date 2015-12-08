@@ -36,7 +36,6 @@
 #include <aims/io/byteswap.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
-#include <cartobase/getopt/getopt.h>
 #include <cartobase/stream/fdinhibitor.h>
 #include <aims/rply/rply.h>
 #include <iostream>
