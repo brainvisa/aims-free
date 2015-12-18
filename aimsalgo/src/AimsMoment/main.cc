@@ -34,41 +34,15 @@
 
 #include <cstdlib>
 #include <aims/def/def_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/io/io_g.h>
 #include <aims/utility/utility_g.h>
 #include <aims/moment/moment_g.h>
 #include <stdio.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
-
-
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsMoment -i[nput] <filein>                                    ",
-  "           [-l[abel] <label>]                                   ",
-  "           [-o[utput] <out>]                                    ",
-  "           [-m[ode] <mode>]                                     ",
-  "           [-t[ype] <type>]                                     ",
-  "           [-h[elp]]                                            ",
-  "----------------------------------------------------------------",
-  "Compute the moment invariant                                    ",
-  "----------------------------------------------------------------",
-  "     filein : input data (in 8 or 16 bits) or triangulated mesh ",
-  "     label  : object label in raster image  [default=all label] ",
-  "     out    : ASCII result file name           [default=stdout] ",
-  "     mode   : mode  f -> full  i -> invariant only  [default=f] ",
-  "     type   : type  v -> volumic  s -> surfacic     [default=v] ",
-  "              (only for triangulated mesh)                      ",
-  "----------------------------------------------------------------",
-END_USAGE
-
-
-void Usage( void )
-{
-  AimsUsage( usage );
-}
 
 
 template<class U>
@@ -260,32 +234,47 @@ bool doit( Process & p, const string & fname, Finder & f )
 }
 
 
-int main( int argc, char **argv )
+int main( int argc, const char **argv )
 {
-  char *filein = 0, *fileout = 0, *dmode = 0, *dtype = 0;
+  string filein, fileout, dmode, dtype;
   int label = -1;
-  
-  AimsOption opt[] = {
-  { 'h', "help"  , AIMS_OPT_FLAG  , ( void* )Usage   , AIMS_OPT_CALLFUNC, 0,},
-  { 'i', "input" , AIMS_OPT_STRING, &filein , 0                , 1 },
-  { 'l', "label" , AIMS_OPT_INT   , &label  , 0                , 0 },
-  { 'o', "output", AIMS_OPT_STRING, &fileout, 0                , 0 },
-  { 'm', "mode"  , AIMS_OPT_STRING, &dmode  , 0                , 0 },
-  { 't', "type"  , AIMS_OPT_STRING, &dtype  , 0                , 0 },
-  { 0  , 0       , AIMS_OPT_END   , 0       , 0                , 0 }};
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  AimsApplication app( argc, argv, "Compute the invariant moments" );
+  app.addOption( filein, "-i",
+                 "input volume (in 8 or 16 bits) or triangulated mesh" );
+  app.alias( "--input", "-i" );
+  app.addOption( label, "-l",
+                 "object label in raster image [default=all label]", true );
+  app.alias( "--label", "-l" );
+  app.addOption( fileout, "-o", "ASCII result file name [default=stdout]",
+                 true );
+  app.alias( "--output", "-o" );
+  app.addOption( dmode, "-m",
+                 "mode: f -> full, i -> invariant only [default=f]", true );
+  app.alias( "--mode", "-m" );
+  app.addOption( dtype, "-t", "type: v -> volumic, s -> surfacic [default=v] "
+    "(only for triangulated mesh)", true );
+  app.alias( "--type", "-t" );
 
-  string theFileout, theMode, theType;
-  if ( fileout ) theFileout = fileout;
-  if ( dmode ) theMode = dmode;
-  if ( dtype ) theType = dtype;
+  try
+  {
+    app.initialize();
 
-  Momentor	proc( theFileout, theMode, theType, label );
-  if( !proc.execute( filein ) )
+    Momentor	proc( fileout, dmode, dtype, label );
+    if( !proc.execute( filein ) )
     {
       cerr << "Failed.\n";
-      Usage();
+      return EXIT_FAILURE;
     }
-  return( EXIT_SUCCESS );
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
 }
