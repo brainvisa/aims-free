@@ -34,101 +34,87 @@
 
 #include <aims/scalespace/meshBlob.h>
 #include <aims/io/io_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/mesh/texture.h>
 #include <aims/connectivity/meshcc.h>
 
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
-BEGIN_USAGE(usage)
-  "-------------------------------------------------------------------------",
-  "AimsMeshBlobExtract  -i[nput] <meshfilein>                             ",
-  "                  -t[exture] <input_texture>                             ",
-  "                  [-T[ime]   <time serie> default = 0]                   ",
-  "                  [-o[utput] <output_texture>]                      ",
-  "                  [-h[elp]]                                              ",
-  "-------------------------------------------------------------------------",
-  " Extract blobs                                                           ",
-  "-------------------------------------------------------------------------",
-  "     meshfilein          : input *.tri or *.mesh file                    ",
-  "     output_texture      : output *.tex file (blobs)                     ",
-  "     input_texture       : object definition                             ",
-  "-------------------------------------------------------------------------",
-END_USAGE
-
-
-//
-// Usage
-//
-void Usage( void )
+int main( int argc, const char** argv )
 {
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char** argv )
-{
-  char	*meshfile = 0, *intexfile = 0, *outtexfile = 0;
-  int	triFlag = 0;
-  int	asciiFlag = 0;
-  int T=0;
+  string meshfile, intexfile, outtexfile;
+  int T = 0;
 
   //
   // Parser of options
   //
-  AimsOption opt[] = {
-  { 'h',"help"         ,AIMS_OPT_FLAG  ,( void* )Usage  ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input"        ,AIMS_OPT_STRING,&meshfile       ,0                ,1},
-  { 'o',"output"       ,AIMS_OPT_STRING,&outtexfile     ,0                ,1},
-  { 'T',"Time"         ,AIMS_OPT_INT   ,&T              ,0                ,0},
-  { 't',"texture"      ,AIMS_OPT_STRING,&intexfile      ,0                ,1},
-  { ' ',"tri"          ,AIMS_OPT_FLAG  ,&triFlag        ,0                ,0},
-  { ' ',"ascii"        ,AIMS_OPT_FLAG  ,&asciiFlag      ,0                ,0},
-  { 0  ,0              ,AIMS_OPT_END   ,0               ,0                ,0}};
+  AimsApplication app( argc, argv, "Extract blobs" );
+  app.addOption( meshfile, "-i", "input mesh file" );
+  app.alias( "--input", "-i" );
+  app.addOption( intexfile, "-t", "object definition" );
+  app.alias( "--texture", "-t" );
+  app.addOption( outtexfile, "-o", "output texture file (blobs)" );
+  app.alias( "--output", "-o" );
+  app.addOption( T, "-T", "time point [default = 0]", true );
+  app.alias( "--Time", "-T" );
+  app.alias( "--time", "-T" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
 
-  //
-  // read triangulation
-  //
-  cout << "reading triangulation   : " << flush;
-  AimsSurfaceTriangle surface;
-  Reader<AimsSurfaceTriangle>	triR( meshfile );
-  triR >> surface;
-  cout << "done" << endl;
+    //
+    // read triangulation
+    //
+    cout << "reading triangulation   : " << flush;
+    AimsSurfaceTriangle surface;
+    Reader<AimsSurfaceTriangle>	triR( meshfile );
+    triR >> surface;
+    cout << "done" << endl;
 
-  //
-  // read input texture
-  //
-  cout << "reading texture   : " << flush;
-  TimeTexture<float>	inpTex;
-  Reader<Texture1d> texR( intexfile );
-  texR >> inpTex;
-  cout << "done" << endl;
+    //
+    // read input texture
+    //
+    cout << "reading texture   : " << flush;
+    TimeTexture<float>	inpTex;
+    Reader<Texture1d> texR( intexfile );
+    texR >> inpTex;
+    cout << "done" << endl;
 
-  cout << "mesh vertices : " << surface[0].vertex().size() << endl;
-  cout << "mesh polygons : " << surface[0].polygon().size() << endl;
-  cout << "texture dim   : " << inpTex[T].nItem() << endl;
+    cout << "mesh vertices : " << surface[0].vertex().size() << endl;
+    cout << "mesh polygons : " << surface[0].polygon().size() << endl;
+    cout << "texture dim   : " << inpTex[T].nItem() << endl;
 
-  TimeTexture<float>			outTex;
-  map<int, ScaleSpace::BlobDescriptor>	limits;
+    TimeTexture<float>			outTex;
+    map<int, ScaleSpace::BlobDescriptor>	limits;
 
-  ScaleSpace	ss;
-  Texture<int>	texint = ss.meshBlobExtract( surface[0], inpTex[T], limits );
+    ScaleSpace	ss;
+    Texture<int>	texint = ss.meshBlobExtract( surface[0], inpTex[T],
+                                                     limits );
 
-  for( unsigned i=0, n=texint.nItem(); i<n; ++i )
-    outTex[0].push_back( texint.item( i ) ); 
-    
- 
-  cout << "writing texture : " << flush;
-  Writer<Texture1d>	texW( outtexfile );
-  texW.write( outTex, asciiFlag );
-  cout << "done" << endl;
+    for( unsigned i=0, n=texint.nItem(); i<n; ++i )
+      outTex[0].push_back( texint.item( i ) );
 
-  return( 0 );
+
+    cout << "writing texture : " << flush;
+    Writer<Texture1d>	texW( outtexfile );
+    texW.write( outTex );
+    cout << "done" << endl;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
 }
 
 

@@ -1,16 +1,16 @@
 attributes = {
   'release_plugins' : [
     'libaimsgis.so',
-    'libaimsvida.so', 
+    'libaimsvida.so',
     'libaimsdicom.so',
     'libaimsecat.so',
     'libaimsfdf.so',
-    'libaimsjpeg.so', 
-    'libaimstiff.so', 
+    'libaimsjpeg.so',
+    'libaimstiff.so',
     'libaimsqsqlgraphformat.so',
-    'libaimsqtformats.so', 
-    'libaimsminc.so', 
-    'libaimsply.so', 
+    'libaimsqtformats.so',
+    'libaimsminc.so',
+    'libaimsply.so',
     'libaimsgifti.so',
     'libconnect-fiber-clustering-plugin-aims.so'
   ], 
