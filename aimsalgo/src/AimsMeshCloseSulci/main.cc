@@ -37,7 +37,7 @@
 #include <aims/data/data_g.h>
 #include <aims/io/io_g.h>
 #include <aims/math/math_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/vector/vector.h>
 #include <aims/mesh/texture.h>
 #include <aims/io/reader.h>
@@ -48,9 +48,8 @@
 
 using namespace aims;
 using namespace aims::meshdistance;
- 
- 
-typedef float float3[3];
+using namespace carto;
+using namespace std;
 
 BEGIN_USAGE(usage)
   "-------------------------------------------------------------------------",
@@ -71,87 +70,94 @@ BEGIN_USAGE(usage)
   "-------------------------------------------------------------------------",
 END_USAGE
 
-
-//
-// Usage
-//
-void Usage( void )
+int main( int argc, const char** argv )
 {
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char** argv )
-{
-  char	*meshfile = 0, *intexfile = 0, *outtexfile = 0;
+  string meshfile, intexfile, outtexfile;
   float maxdil = 3;
   bool connexity = false;
-  int time=0;
+  int time = 0;
 
   //
   // Parser of options
   //
-  AimsOption opt[] = {
-  { 'h',"help"         ,AIMS_OPT_FLAG  ,( void* )Usage           ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input"        ,AIMS_OPT_STRING,&meshfile       ,0                ,1},
-  { 'o',"output"       ,AIMS_OPT_STRING,&outtexfile     ,0                ,1},
-  { 't',"texture"      ,AIMS_OPT_STRING,&intexfile      ,0                ,1},
-  { 'T',"Time"         ,AIMS_OPT_INT   ,&time           ,0                ,0},
-  { 'm',"maxdilation"  ,AIMS_OPT_FLOAT ,&maxdil         ,0                ,0},
-  { 'c',"connexity"    ,AIMS_OPT_FLAG  ,&connexity      ,0                ,0},
-  { 0  ,0              ,AIMS_OPT_END   ,0               ,0                ,0}};
+  AimsApplication app( argc, argv, "Close Sulci defined on a texture" );
+  app.addOption( meshfile, "-i", "input mesh file" );
+  app.alias( "--input", "-i" );
+  app.addOption( intexfile, "-t", "object definition (sulci)" );
+  app.alias( "--texture", "-t" );
+  app.addOption( outtexfile, "-o", "output texture file (voronoi diagram)" );
+  app.alias( "--output", "-o" );
+  app.addOption( time, "-T", "time step [default: 0]", true );
+  app.alias( "--Time", "-T" );
+  app.alias( "--time", "-t" );
+  app.addOption( maxdil, "-m", "max dilation [default: 3mm]", true );
+  app.alias( "--maxdilation", "-m" );
+  app.addOption( connexity, "-c", "connectivity or geodesic euclidean distance "
+    "[default: geodesic euclidean]", true );
+  app.alias( "--connectivity", "-c" );
+  app.alias( "--connexity", "-c" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
 
-  //
-  // read triangulation
-  //
-  cout << "reading triangulation   : " << flush;
-  AimsSurfaceTriangle surface;
-  Reader<AimsSurfaceTriangle> triR( meshfile );
-  triR >> surface;
-  cout << "done" << endl;
+    //
+    // read triangulation
+    //
+    cout << "reading triangulation   : " << flush;
+    AimsSurfaceTriangle surface;
+    Reader<AimsSurfaceTriangle> triR( meshfile );
+    triR >> surface;
+    cout << "done" << endl;
 
- 
-  //
-  // read input texture
-  //
-  cout << "reading texture   : " << flush;
-  TimeTexture<short>	inpTex; // objects def (labels >0)
-  Reader<TimeTexture<short> > texR( intexfile );
-  texR >> inpTex;
-  
-  cout << "done" << endl;
 
-  cout << "mesh vertices : " << surface[0].vertex().size() << endl;
-  cout << "mesh polygons : " << surface[0].polygon().size() << endl;
-  cout << "Object texture dim   : " << inpTex[(unsigned)time].nItem() << endl;
+    //
+    // read input texture
+    //
+    cout << "reading texture   : " << flush;
+    TimeTexture<short>	inpTex; // objects def (labels >0)
+    Reader<TimeTexture<short> > texR( intexfile );
+    texR >> inpTex;
 
-  
-  if ( ! (  inpTex[(unsigned)time].nItem() ==  surface[0].vertex().size() ) )
+    cout << "done" << endl;
+
+    cout << "mesh vertices : " << surface[0].vertex().size() << endl;
+    cout << "mesh polygons : " << surface[0].polygon().size() << endl;
+    cout << "Object texture dim   : " << inpTex[(unsigned)time].nItem() << endl;
+
+
+    if ( ! (  inpTex[(unsigned)time].nItem() ==  surface[0].vertex().size() ) )
     {
       cout << "The triangulation and the textures must correspond to the same object \n";
       assert( 0 );
     }
 
    
-  unsigned  n=inpTex[(unsigned)time].nItem();
-  TimeTexture<short>	outTex(3,n);  
-  
-  //outTex[1] = AimsMeshLabelConnectedComponent2Texture(surface[0],inpTex[(unsigned)time],(short)1 );
-  outTex[0] = CloseSulci<short>(surface[0],inpTex[(unsigned)time],maxdil,connexity,0,-1);
-  //outTex[0] = CloseSulci<short>(surface[0],outTex[1],maxdil,connexity,0,-1);
+    unsigned  n=inpTex[(unsigned)time].nItem();
+    TimeTexture<short>	outTex(3,n);
 
-  // Writting the textures
-  cout << "writing texture : " << flush;
-  Writer<TimeTexture<short> >	texW( outtexfile );
-  texW <<  outTex ;
- 
-  cout << "done" << endl;
+    //outTex[1] = AimsMeshLabelConnectedComponent2Texture(surface[0],inpTex[(unsigned)time],(short)1 );
+    outTex[0] = CloseSulci<short>(surface[0],inpTex[(unsigned)time],maxdil,connexity,0,-1);
+    //outTex[0] = CloseSulci<short>(surface[0],outTex[1],maxdil,connexity,0,-1);
+
+    // Writting the textures
+    cout << "writing texture : " << flush;
+    Writer<TimeTexture<short> >	texW( outtexfile );
+    texW <<  outTex ;
+
+    cout << "done" << endl;
   
-  
-  
-  return( 0 );  
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
 }
 
 
