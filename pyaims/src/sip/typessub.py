@@ -93,6 +93,10 @@ def classInAimsNamespace(include, cls, cppclass=None):
     return classInNamespace(include, cls, 'aims', cppclass=cppclass)
 
 
+def classInSomaNamespace(include, cls, cppclass=None):
+    return classInNamespace(include, cls, 'soma', cppclass=cppclass)
+
+
 def classOutsideNamespace(include, cls, cppclass=None, typecode=None):
     if cppclass is None:
         cppclass = cls
@@ -2683,6 +2687,15 @@ typessub = {'signed char':
             'aims::SparseOrDenseMatrix':
             classInAimsNamespace('aims/sparsematrix/sparseordensematrix.h',
                                  'SparseOrDenseMatrix'),
+
+            'soma::DataSource':
+            classInSomaNamespace('soma-io/datasource/datasource.h',
+                                  'DataSource'),
+
+            'soma::DataSourceInfo':
+            classInSomaNamespace('soma-io/datasourceinfo/datasourceinfo.h',
+                                  'DataSourceInfo'),
+
             }
 
 completeTypesSub(typessub)

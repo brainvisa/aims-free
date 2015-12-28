@@ -113,6 +113,12 @@ typedef unsigned short uint16_t;
 %Include hierarchy.sip
 %Include quaternion.sip
 
+%Include soma_VOID.sip
+%Include datasource.sip
+
+%Include rcptr_DataSource.sip
+%Include rcptr_DataSourceInfo.sip
+
 %Include aimstimesurface_2_VOID.sip
 %Include aimstimesurface_3_VOID.sip
 %Include aimstimesurface_4_VOID.sip
@@ -237,6 +243,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include bundles.sip
 
 %Include reader_Object.sip
+%Include soma_reader_Object.sip
 
 %Include rcptr_AimsData_U8.sip
 %Include rcptr_AimsData_S16.sip
@@ -320,6 +327,20 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include reader_Volume_CFLOAT.sip
 %Include reader_Volume_CDOUBLE.sip
 %Include reader_Volume_POINT3DF.sip
+
+%Include soma_reader_Volume_U8.sip
+%Include soma_reader_Volume_S16.sip
+%Include soma_reader_Volume_U16.sip
+%Include soma_reader_Volume_S32.sip
+%Include soma_reader_Volume_U32.sip
+%Include soma_reader_Volume_FLOAT.sip
+%Include soma_reader_Volume_DOUBLE.sip
+%Include soma_reader_Volume_RGB.sip
+%Include soma_reader_Volume_RGBA.sip
+%Include soma_reader_Volume_HSV.sip
+%Include soma_reader_Volume_CFLOAT.sip
+%Include soma_reader_Volume_CDOUBLE.sip
+%Include soma_reader_Volume_POINT3DF.sip
 
 %Include converter_Volume_DOUBLE_DOUBLE.sip
 %Include converter_Volume_DOUBLE_FLOAT.sip
