@@ -11,6 +11,11 @@ typedef aims::BucketMap< Void > BucketMap_VOID;
 namespace carto
 {
 
+  carto::Object none();
+%Docstring
+  Returns a null aims.Object
+%End
+
   class Object : rc_ptr_GenericObject
   {
 %TypeHeaderCode
