@@ -281,3 +281,34 @@ Conversion classes and functions
   :members:
 
 
+Soma-IO
++++++++
+
+In this module, the newer IO system Soma-IO and supporting library is made available in Python, in the module soma.aims.soma.
+
+.. autoclass:: soma.aims.soma
+  :members:
+
+  This class represents the soma C++ namespace. It is rather used like a module, not as a class.
+
+  .. autoclass:: soma.aims.soma.Reader_S16
+    :members:
+
+  .. autoclass:: soma.aims.soma.Writer_S16
+    :members:
+
+  .. autoclass:: soma.aims.soma.DataSource
+    :members:
+
+  .. autoclass:: soma.aims.soma.FileDataSource
+    :members:
+
+  .. autoclass:: soma.aims.soma.DataSourceList
+    :members:
+
+  .. autoclass:: soma.aims.soma.DataSourceInfo
+    :members:
+
+  .. autoclass:: soma.aims.soma.DataSourceInfoLoader
+    :members:
+
