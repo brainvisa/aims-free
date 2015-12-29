@@ -9,11 +9,11 @@ namespace soma
 %End
 
 %Docstring
-  Abstraction layer for various data sources (file,
-  buffer, socket...).
+    Abstraction layer for various data sources (file, buffer, socket...).
 
-  It can be seen as a stream, and is inspired by the QIODevice of
-  Qt library
+    It can be seen as a stream, and is inspired by the QIODevice of Qt library.
+
+    Abstract class.
 %End
 
   public:
@@ -23,12 +23,24 @@ namespace soma
       Write = 2,
       ReadWrite = 3,
     };
+%Docstring
+
+    Mode:
+      enum (Read, Write, ReadWrite)
+      Read / write mode
+%End
 
     enum IterateMode
     {
       DirectAccess = 1,
       SequentialAccess = 2,
     };
+%Docstring
+
+    IterateMode:
+      enum (DirectAccess, SequentialAccess)
+      Direct / sequential access
+%End
 
     virtual ~DataSource();
 
@@ -37,31 +49,152 @@ namespace soma
     access mode(s) (read/write): bitwise OR of Mode values
 %End
 
-    virtual soma::DataSource* clone() const = 0;
+    virtual soma::DataSource* clone() const = 0 /Factory/;
 %Docstring
-    possible iteration mode(s): bitwise OR of IterateMode values
+    duplicate the DataSource object
 %End
 
     virtual int iterateMode() const = 0;
+%Docstring
+    bitwise combination of possible access: direct (1) or sequential (2) access
+%End
+
     virtual bool isOpen() const = 0;
+%Docstring
+    tells if the stream is open / ok.
+%End
+
     virtual bool eof() const;
+%Docstring
+    when the end of stream is reached
+%End
+
 //    virtual bool operator ! () const;
 //    virtual operator bool () const;
     virtual bool open ( int mode ) = 0;
+%Docstring
+    open(mode)
+
+    Opens the stream (when supported) in the specified Mode
+
+    Parameters
+    ----------
+    mode: int
+        access Mode: Read (1), Write (2) or ReadWrite (3)
+
+    Returns
+    -------
+    ok: bool
+        if the operation was successful
+%End
+
     virtual void close() = 0;
+%Docstring
+    Close the stream
+%End
+
     virtual void flush();
+%Docstring
+    flush the stream for buffered output
+%End
+
     virtual soma::offset_t size() const = 0;
+%Docstring
+    size (or len) of the data inn stream, in bytes
+%End
+
     virtual soma::offset_t at() const = 0;
+%Docstring
+    offset = at()
+
+    returns the current position in the stream
+%End
+
     virtual bool at( soma::offset_t pos ) = 0;
+%Docstring
+    bool at(pos)
+
+    Sets the current position in the stream (when supported).
+    Returns True if successful.
+%End
+
     virtual bool atEnd() const;
+%Docstring
+    True if the current position is at the end of the stream
+%End
+
     bool reset();
+%Docstring
+    reset the stream and get to the start
+%End
+
     virtual long readBlock( char * data, unsigned long maxlen ) = 0;
+%Docstring
+    readBlock(data, maxlen)
+
+    Parameters
+    ----------
+    data: char*
+        read buffer (C++)
+    maxlen: unsigned long int
+        number of bytes to read
+
+    Returns
+    -------
+    num: long int
+        number of bytes actually read
+%End
+
     virtual long writeBlock( const char * data, unsigned long len ) = 0;
+%Docstring
+    writeBlock(data, len)
+
+    Parameters
+    ----------
+    data: const char * (C++)
+        buffer to be written
+    len: unsigned long int
+        size of the buffer to be written
+
+    Returns
+    -------
+    num: long int
+        number of bytes actually written
+%End
+
     virtual int getch() = 0;
+%Docstring
+    read one char and returns it
+%End
+
     virtual int putch( int ch ) = 0;
+%Docstring
+    putch(ch)
+
+    write one char, and returns it
+
+    Parameters
+    ----------
+    ch: int
+        char to write
+%End
+
     virtual bool ungetch( int ch ) = 0;
+%Docstring
+    ungetch(ch)
+
+    un-read one char: put it back in the read buffer, and rewind one char
+%End
+
     virtual bool allowsMemoryMapping() const = 0;
+%Docstring
+    returns True if memory mapping is allowed on this kind of stream
+%End
+
     virtual std::string url() const;
+%Docstring
+    URL of filename for the stream, when available
+%End
 
     static const rc_ptr_DataSource none();
 %Docstring
@@ -77,10 +210,14 @@ protected:
   class FDDataSource : soma::DataSource
   {
   public:
+%Docstring
+    DataSource specialization for file descriptor stream
+%End
+
     FDDataSource( int fd = -1, int mode = Read );
     virtual ~FDDataSource();
 
-    virtual soma::DataSource* clone() const;
+    virtual soma::DataSource* clone() const /Factory/;
     virtual int iterateMode() const;
     virtual bool isOpen() const;
     virtual bool open ( int mode );
@@ -96,8 +233,21 @@ protected:
     virtual bool allowsMemoryMapping() const;
 
     int descriptor() const;     // should it be non-const ?
+%Docstring
+    get the file descriptor
+%End
+
     void setDescriptor( int fd );
+%Docstring
+    setDescriptor(fd)
+
+    Set the file descriptor fd (int)
+%End
+
     bool isFile() const;
+%Docstring
+    True if the DataSource is a file
+%End
   };
 
 
@@ -107,12 +257,37 @@ protected:
 #include <soma-io/datasource/filedatasource.h>
 %End
 
+%Docstring
+    DataSource specialization for a file.
+
+%End
+
   public:
     FileDataSource( const std::string & filename, soma::offset_t offset = 0,
                     int mode = soma::DataSource::Read );
+%Docstring
+    FileDataSource(filename, offset=0, mode=aims.soma.DataSource.Read)
+
+    Parameters
+    ----------
+    filename: string
+        file name on the filesystem
+    offset: soma.offset_t (optional)
+        offset to start reading in the file
+    mode: aims.soma.DataSource.Mode (optional)
+        read / write mode
+%End
+
     virtual ~FileDataSource();
     virtual std::string url() const;
+%Docstring
+    file name or URL of the file
+%End
+
     soma::offset_t initialOffset() const;
+%Docstring
+    initial offset in the input file to start reading
+%End
 
     virtual soma::DataSource* clone() const;
     virtual bool open( int mode );
@@ -203,9 +378,28 @@ protected:
 %End
 
       int   typecount() const;
+%Docstring
+      number of keys in the types dictionary
+%End
+
       bool  exists( const std::string & ) const;
+%Docstring
+      exists(key)
+
+      True if the key exists in the dictionary
+%End
+
       bool  empty( const std::string & ) const;
+%Docstring
+      True if there is no key in the dictionary
+%End
+
       int   size( const std::string & ) const;
+%Docstring
+      size(key)
+
+      number of elements with the key key
+%End
 
       rc_ptr_DataSource
       dataSource( const std::string & key = "default", int i = 0 );
@@ -241,6 +435,9 @@ protected:
 %End
 
       void reset();
+%Docstring
+      clear the dictionary: all keys and contents are removed.
+%End
   };
 
 
@@ -318,12 +515,33 @@ protected:
       virtual ~DataSourceInfo();
 
       carto::Object header();
+%Docstring
+      get the header dict of the underlying data
+%End
+
 //      DataSourceCapabilities & capabilities();
 //      carto::Object privateIOData();
       soma::DataSourceList & list();
+%Docstring
+      get the DataSourceList of the underlying data
+%End
+
       std::string url() const;
+%Docstring
+      main filename or URL
+%End
+
       std::string identifiedFormat() const;
+%Docstring
+      file format name
+%End
+
       void setIdentifiedFormat( const std::string & format );
+%Docstring
+      setIdentifiedFormat(format)
+
+      force the identified format name
+%End
   };
 
 
@@ -441,14 +659,61 @@ protected:
 %End
 
       State state() const;
+%Docstring
+      state of the DataSourceInfoLoader reading trial
+%End
+
       std::string errorMessage() const;
-      void launchException();
+%Docstring
+      error message from the last check
+%End
+
+      void launchException()
+          throw ( carto::io_error, std::exception );
+%Docstring
+      raise the read exception which was most probably the cause of a check() failure
+%End
 
       static carto::Object readMinf( soma::DataSource & ds,
                                      carto::Object base = carto::none(),
                                      carto::Object options = carto::none() );
+%Docstring
+      readMinf(ds, base=aims.none(), options=aims.none())
+
+      read a .minf file dictionary
+
+      Parameters
+      ----------
+      ds: DataSource
+          minf file DataSource
+      base: Object
+          base dict to be completed by .minf information
+      options: Object
+          options dict
+
+      Returns
+      -------
+      minf: Object
+          the minf file contents as a dictionary
+%End
+
 //      static carto::SyntaxSet & minfSyntax();
       static set_STRING extensions( const std::string & format );
+%Docstring
+      extensions(format)
+
+      Query supported file extensions for a format
+
+      Parameters
+      ----------
+      format: string
+          format to query
+
+      Returns
+      -------
+      exts: set_STRING
+          set of extensions names
+%End
   };
 
 };
