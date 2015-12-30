@@ -317,6 +317,10 @@ class Reader(object):
         return r.read(border, f.format(), frame)
 
     def mapType(self, iotype, aimstype):
+        ''' Get the translated type correspondance between identified data type
+        (from IO system) and the data type that will actually be read. This is
+        generally the identity, but a few IO/types allow some variations.
+        '''
         self._typemap[iotype] = aimstype
 
 
@@ -380,12 +384,19 @@ class Writer:
             raise  # 'Unsupported object type: ' + obj.__class__.__name__
 
     def writtenObjectType(self):
+        ''' Data object type (Volume, Mesh...) written (available after writing)
+        '''
         return self._objectType
 
     def writtenObjectDataType(self):
+        ''' Data content type (voxel or texture type...) written (available
+        after writing)
+        '''
         return self._dataType
 
     def writtenObjectFullType(self):
+        ''' Data full type written (available after writing)
+        '''
         return self._fullType
 
 

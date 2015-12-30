@@ -117,17 +117,64 @@ namespace soma
         int passbegin = 1, int passend = 4 );
 
     rc_ptr_DataSourceInfo & dataSourceInfo();
+%Docstring
+    Get the dataSourceInfo, providing information on the read data
+%End
 
     void setAllocatorContext( const carto::AllocatorContext & ac );
+%Docstring
+    setAllocatorContext(context)
+
+    Set allocation context for reading
+%End
+
     const carto::AllocatorContext & allocatorContext() const;
+%Docstring
+    Get the allocation context
+%End
+
     void setOptions( carto::Object options );
+%Docstring
+    setOptions(options)
+
+    set reading options (Object dictionary)
+%End
+
     carto::Object options();
+%Docstring
+    Get reading options (Object dictionary)
+%End
+
     rc_ptr_DataSource dataSource();
+%Docstring
+    Get the data source (rc_ptr_DataSource)
+%End
+
     void attach( rc_ptr_DataSource ds );
+%Docstring
+    attach(ds)
+
+    Attach a DataSource to read from (rc_ptr_DataSource)
+%End
+
     void attach( const std::string & filename, soma::offset_t offset = 0 );
+%Docstring
+    attach(filename, offset=0)
+
+    Attach a new filename + offset for reading
+%End
+
 //    void attach( std::istream & stream );
     void flush();
+%Docstring
+    Flush the read buffer
+%End
+
     void close();
+%Docstring
+    Close the data source stream
+%End
+
 //    static std::string extension( const std::string & filename );
   };
 
@@ -196,14 +243,40 @@ namespace soma
 %End
 
     virtual std::string writtenObjectType() const;
+%Docstring
+    After writing, get the object type code (string) of the data
+%End
 
     rc_ptr_DataSource dataSource();
+%Docstring
+    Get the data source (rc_ptr_DataSource)
+%End
+
     void attach( rc_ptr_DataSource ds );
+%Docstring
+    attach(ds)
+
+    Attach a new data source (rc_ptr_DataSource) to write into
+%End
+
     void attach( const std::string & filename );
+%Docstring
+    attach(filename)
+
+    Attach a new output file name to write into
+%End
+
 //    void attach( std::ostream & stream );
 
     void flush();
+%Docstring
+    flush the write buffer
+%End
+
     void close();
+%Docstring
+    Close the data source stream
+%End
 };
 
 }; // namespace  soma
