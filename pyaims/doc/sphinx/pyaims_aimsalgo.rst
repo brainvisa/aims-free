@@ -68,9 +68,19 @@ soma.aimsalgo module
 
   .. py:function:: AimsMorphoChamferClosing
 
+      Please use preferably MorphoGreyLevel_* classes.
+
   .. py:function:: AimsMorphoChamferDilation
 
+      Please use preferably MorphoGreyLevel_* classes.
+
+  .. py:function:: AimsMorphoChamferErosion
+
+      Please use preferably MorphoGreyLevel_* classes.
+
   .. py:function:: AimsMorphoChamferOpening
+
+      Please use preferably MorphoGreyLevel_* classes.
 
   .. py:function:: AimsMorphoClosing
 
@@ -84,27 +94,27 @@ soma.aimsalgo module
 
   .. py:function:: AimsMeshLabelConnectedComponent
 
-  .. py:class:: DiffusionSmoother_FLOAT
+  .. autoclass:: DiffusionSmoother_S16
 
-  .. py:class:: Gaussian3DSmoothing_FLOAT
+  .. autoclass:: DiffusionSmoother_FLOAT
 
-  .. py:class:: GeneralSampler_FLOAT_3
+  .. autoclass:: Gaussian3DSmoothing_FLOAT
 
-  .. py:class:: GeometricMoment_DOUBLE
+  .. autoclass:: GeneralSampler_FLOAT_3
 
-  .. py::class:: AimsGradient_FLOAT
+  .. autoclass:: GeometricMoment_DOUBLE
 
-  .. py:class:: Histogram_FLOAT
+  .. autoclass:: AimsGradient_FLOAT
 
-  .. py:class:: Mesher
+  .. autoclass:: Histogram_FLOAT
 
-  .. py:class:: MomentInvariant_FLOAT
+  .. autoclass:: Mesher
 
-  .. py:class:: Moment_FLOAT
+  .. autoclass:: MomentInvariant_FLOAT
 
-  .. py:class:: TriangulationMoment
+  .. autoclass:: Moment_FLOAT
 
-  .. py:class:: Resampler_FLOAT
+  .. autoclass:: TriangulationMoment
 
 
 soma.aimsalgo.t1mapping module
@@ -120,15 +130,23 @@ soma.wip.aimsalgo module
 .. automodule:: soma.wip.aimsalgo.foldsgraphthickness
   :members:
 
-  .. py:class:: FoldsGraphThickness
+  .. autoclass:: FoldsGraphThickness
 
 .. automodule:: soma.wip.aimsalgo.moment
   :members:
 
+  .. autoclass:: Moment
+
 .. automodule:: soma.wip.aimsalgo.samplables
   :members:
 
+  .. autoclass:: SuperQuadricSamplable
+
 .. automodule:: soma.wip.aimsalgo.transform
   :members:
+
+  .. autoclass:: BendingTransform
+
+  .. autoclass:: TaperingTransform
 
 

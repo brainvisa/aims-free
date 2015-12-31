@@ -72,8 +72,8 @@ namespace aims
     // Test on dimension
     if( (int_radius[0]==0) || (int_radius[1]==0) || (int_radius[2]==0) )
       {
-        std::cout << "WARNING: Radius too small according to voxelsize !!! STOP.\n" << std::endl;
-        exit(1);
+        std::cout << "ERROR: Radius too small according to voxelsize !!! STOP.\n" << std::endl;
+        throw std::runtime_error( "Radius too small according to voxelsize" );
       }
 
     if( (int_radius[0]==1) || (int_radius[1]==1) || (int_radius[2]==1) )
