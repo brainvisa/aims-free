@@ -24,5 +24,5 @@ Contents
   pyaims_examples
   pyaims_examples_advanced
   pyaims_aimsalgo
-  pyaims_aimsalgo_examples
-  
+..  pyaims_aimsalgo_examples
+

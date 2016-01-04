@@ -98,7 +98,33 @@ soma.aimsalgo module
 
   .. autoclass:: DiffusionSmoother_FLOAT
 
+  .. autoclass:: Gaussian2DSmoothing_DOUBLE
+
+  .. autoclass:: Gaussian2DSmoothing_FLOAT
+
+  .. autoclass:: Gaussian2DSmoothing_S16
+
+  .. autoclass:: Gaussian2DSmoothing_S32
+
+  .. autoclass:: Gaussian2DSmoothing_U16
+
+  .. autoclass:: Gaussian2DSmoothing_U32
+
+  .. autoclass:: Gaussian2DSmoothing_U8
+
+  .. autoclass:: Gaussian3DSmoothing_DOUBLE
+
   .. autoclass:: Gaussian3DSmoothing_FLOAT
+
+  .. autoclass:: Gaussian3DSmoothing_S16
+
+  .. autoclass:: Gaussian3DSmoothing_S32
+
+  .. autoclass:: Gaussian3DSmoothing_U16
+
+  .. autoclass:: Gaussian3DSmoothing_U32
+
+  .. autoclass:: Gaussian3DSmoothing_U8
 
   .. autoclass:: GeneralSampler_FLOAT_3
 
@@ -107,6 +133,20 @@ soma.aimsalgo module
   .. autoclass:: AimsGradient_FLOAT
 
   .. autoclass:: Histogram_FLOAT
+
+  .. autoclass:: MedianSmoothing_DOUBLE
+
+  .. autoclass:: MedianSmoothing_FLOAT
+
+  .. autoclass:: MedianSmoothing_S16
+
+  .. autoclass:: MedianSmoothing_S32
+
+  .. autoclass:: MedianSmoothing_U16
+
+  .. autoclass:: MedianSmoothing_U32
+
+  .. autoclass:: MedianSmoothing_U8
 
   .. autoclass:: Mesher
 

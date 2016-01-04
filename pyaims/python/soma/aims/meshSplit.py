@@ -61,13 +61,17 @@ def meshSplit(mesh, tex, graph, tex_time_step=0):
 
 
 def meshSplit2(mesh, tex, graph, voxel_size=None, tex_time_step=None):
-    """
+    """ Split mesh according to texture patches
+
+    Compared to meshSplit, this version also adds buckets (voxels lists) in each graph node.
+
     Parameters
     ----------
     mesh: cortex mesh for example
     tex: aims.TimeTexture_S16
         texture of labels (parcellation of the mesh, labels between 1 and nb_labels, background = 0)
-    graph: :py:class:`soma.aims.Graph`, __syntax__:'roi'
+    graph: Graph
+        the graph __syntax__ attribute should be: 'roi'
     voxel_size: (optional)
         if a voxel size is given, a bucket will be built with the specified
         voxel size to follow the mesh. Otherwise there will be no bucket.
