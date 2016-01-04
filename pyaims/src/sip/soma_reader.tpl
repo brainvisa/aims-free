@@ -4,7 +4,7 @@ namespace soma
 
   class Reader_%Template1typecode%
   {
-  %TypeHeaderCode
+%TypeHeaderCode
   #include <soma-io/io/reader.h>
   %Template1typeinclude%
   %Template1sipinclude%
@@ -12,9 +12,9 @@ namespace soma
   {
     typedef soma::Reader<%Template1% > Reader_%Template1typecode%;
   }
-  %End
+%End
 
-  %Docstring
+%Docstring
   Soma-IO Reader class. This is a C++ template class, which can read a specific type of data. All supported formats can be read.
 
   Constructor parameters may be:
@@ -22,7 +22,7 @@ namespace soma
   * string: filename
   * rc_ptr_DataSource: generic DataSource
   * rc_ptr_DataSourceInfo: DataSource with info (more optimal when the data source has been identified and the header loaded)
-  %End
+%End
 
   public:
     Reader_%Template1typecode%();
