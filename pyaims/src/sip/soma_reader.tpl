@@ -181,7 +181,7 @@ namespace soma
 
   class Writer_%Template1typecode%
   {
-  %TypeHeaderCode
+%TypeHeaderCode
   #include <soma-io/io/writer.h>
   %Template1typeinclude%
   %Template1sipinclude%
@@ -189,16 +189,16 @@ namespace soma
   {
     typedef soma::Writer<%Template1% > Writer_%Template1typecode%;
   }
-  %End
+%End
 
-  %Docstring
+%Docstring
   Soma-IO Writer class. This is a C++ template class, which can write a specific type of data. All supported formats can be written.
 
   Constructor parameters may be:
 
   * string: filename
   * rc_ptr_DataSource: generic DataSource
-  %End
+%End
 
   public:
     Writer_%Template1typecode%();
