@@ -538,6 +538,7 @@ namespace aims
             else if( value != v )
               return false;
         }
+    return true;
   }
 
 
