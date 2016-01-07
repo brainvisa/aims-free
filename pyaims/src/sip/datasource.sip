@@ -209,11 +209,15 @@ protected:
 
   class FDDataSource : soma::DataSource
   {
-  public:
+%TypeHeaderCode
+#include <soma-io/datasource/fddatasource.h>
+%End
+
 %Docstring
     DataSource specialization for file descriptor stream
 %End
 
+  public:
     FDDataSource( int fd = -1, int mode = Read );
     virtual ~FDDataSource();
 
@@ -309,6 +313,10 @@ protected:
 
   class DataSourceList
   {
+%TypeHeaderCode
+#include <soma-io/datasource/datasourcelist.h>
+%End
+
 %Docstring
   This class allows to manipulate "lists" of pointers to DataSource.
 
