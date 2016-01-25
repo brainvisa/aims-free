@@ -183,6 +183,77 @@ namespace aims
     thing.setHeader( hdr );
   }
 
+  namespace
+  {
+    template <typename T, typename U> inline
+    T tiff_scaled_value_single( const U* buffer )
+    {
+      T item;
+      int shift = sizeof(U) <= sizeof(T) ?
+        0 : ((sizeof(U) - sizeof(T)) * 8);
+      item = *buffer >> shift;
+      return item;
+    }
+
+    template <typename T, typename U> inline
+    T tiff_scaled_value_items( const U* buffer, uint16_t nitems )
+    {
+      T item;
+      int shift = sizeof(U) * nitems <= sizeof(T) ?
+        0 : ((sizeof(U) - sizeof(T) / nitems) * 8);
+      for( uint16_t i=0; i<nitems; ++i )
+      {
+        item[i] = *buffer++ >> shift;
+      }
+      return item;
+    }
+
+    template <typename T, typename U>
+    class tiff_scaled_value_u
+    {
+    public:
+      static inline T scale( const U* buffer )
+      {
+        return tiff_scaled_value_single<T, U>( buffer );
+      }
+    };
+
+    template <typename U>
+    class tiff_scaled_value_u<AimsRGB, U>
+    {
+    public:
+      static inline AimsRGB scale( const U* buffer )
+      {
+        return tiff_scaled_value_items<AimsRGB, U>( buffer, 3 );
+      }
+    };
+
+    template <typename U>
+    class tiff_scaled_value_u<AimsRGBA, U>
+    {
+    public:
+      static inline AimsRGBA scale( const U* buffer )
+      {
+        return tiff_scaled_value_items<AimsRGBA, U>( buffer, 4 );
+      }
+    };
+
+    template <typename T> inline
+    T tiff_scaled_value( const char *buffer, uint16_t bits )
+    {
+      if( bits == 8 )
+        return tiff_scaled_value_u<T, uint8_t>::scale(
+          (const uint8_t *) buffer );
+      else if( bits == 16 )
+        return tiff_scaled_value_u<T, uint16_t>::scale(
+          (const uint16_t *) buffer );
+      else // if( bits == 32 )
+        return tiff_scaled_value_u<T, uint32_t>::scale(
+          (const uint32_t *) buffer );
+    }
+
+  }
+
   template<class T>
   inline
   void TiffReader<T>::readFrame( AimsData<T> & data,
@@ -190,57 +261,93 @@ namespace aims
                                  unsigned tframe )
   {
     int tiled, stripSize, rowsPerStrip, i, s;
-    uint zmin, zmax;
+    uint zmin, zmax, dx = data.dimX();
     ushort photometric;
 
     TIFFSetWarningHandler( 0 );
     TIFF* tif = TIFFOpen(name.c_str(), "r");
-    if (tif) {
+
+    if( !tif )
+      throw carto::wrong_format_error( _name );
+
+    if (tif)
+    {
       tiled = TIFFIsTiled(tif);
-      if (tiled) {
+      if (tiled)
+      {
         throw carto::invalid_format_error(
           "Not a tiled TIFF image : can't read" );
       }
-      else {
-        if ( zframe == -1 ) {
+      else
+      {
+        if ( zframe == -1 )
+        {
             // Process all Tiff directories
             zmin = 0;
             zmax = data.dimZ();
-        } else {
+        }
+        else
+        {
             // Process only the matching z slice
             zmin = (uint)zframe;
             zmax = (uint)zframe + 1;
         }
 
-        for ( uint z = zmin; z < zmax; z++ ) {
-            TIFFSetDirectory(tif,  z );
-            stripSize = TIFFStripSize(tif);
+        for ( uint z = zmin; z < zmax; z++ )
+        {
+          TIFFSetDirectory(tif,  z );
+          stripSize = TIFFStripSize(tif);
+          uint16_t bits, samplesize, items;
 
-            // Read tif frame properties
-            TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rowsPerStrip);
-            TIFFGetFieldDefaulted(tif, TIFFTAG_PHOTOMETRIC, &photometric);
-            if ( photometric != PHOTOMETRIC_PALETTE ) {
-                for(s=0, i=0; s < data.dimY(); s += rowsPerStrip, ++i) {
-                     TIFFReadEncodedStrip(tif, i, &data(0, s, z, tframe), stripSize);
-                }
-
-                if(photometric == PHOTOMETRIC_MINISWHITE){
-                    // Flip bits
-                    byte* buffer;
-
-                    for(int y = 0; y < data.dimY(); ++y) {
-                        buffer = (byte*)&data(0, y, z, tframe);
-                        for (unsigned index = 0; index < (data.dimX() * sizeof(T)) ; index++) {
-                            buffer[index] =~ buffer[index];
-                        }
-                    }
+          // Read tif frame properties
+          TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rowsPerStrip);
+          TIFFGetFieldDefaulted(tif, TIFFTAG_PHOTOMETRIC, &photometric);
+          TIFFGetFieldDefaulted(tif, TIFFTAG_BITSPERSAMPLE, &bits);
+          samplesize = stripSize / dx / rowsPerStrip;
+          items = samplesize / (bits >> 3);
+//             std::cout << "tiff rowsPerStrip: " << rowsPerStrip << ", photometric: " << photometric << ", t: " << tframe << ", z: " << z << ", stripsize: " << stripSize << ", bits: " << bits << ", samplesize: " << samplesize << ", items: " << items << std::endl;
+          if( photometric != PHOTOMETRIC_PALETTE )
+          {
+            std::vector<char> buffer( stripSize, 0 );
+            for(s=0, i=0; s < data.dimY(); s += rowsPerStrip, ++i)
+            {
+              TIFFReadEncodedStrip(tif, i, &buffer[0], stripSize);
+              if( bits == 8 )
+                for( int y=s; y<s+rowsPerStrip; ++y )
+                  memcpy( &data(0, y, z, tframe), &buffer[0],
+                          dx * sizeof(T) );
+              else
+                for( int y=s; y<s+rowsPerStrip; ++y )
+                {
+                  T* ibuf = &data( 0, y, z, tframe );
+                  for( int x=0; x<dx; ++x, ++ibuf )
+                    *ibuf = tiff_scaled_value<T>( &buffer[x * samplesize],
+                                                  bits );
                 }
             }
-            else if ( carto::DataTypeCode<T>().dataType() == carto::DataTypeCode<AimsRGBA>().dataType() ) {
-                // Indexed images can only be read as RGBA data
-                uint32 * rgba_data = (uint32 *)&data(0, 0, z, tframe);
-                TIFFReadRGBAImageOriented(tif, data.dimX(), data.dimY(), rgba_data, ORIENTATION_TOPLEFT);
+
+            if(photometric == PHOTOMETRIC_MINISWHITE)
+            {
+              // Flip bits
+              byte* buffer;
+
+              for(int y = 0; y < data.dimY(); ++y) {
+                  buffer = (byte*)&data(0, y, z, tframe);
+                  for( unsigned index=0; index<(dx * sizeof(T)); index++ )
+                  {
+                    buffer[index] =~ buffer[index];
+                  }
+              }
             }
+          }
+          else if( carto::DataTypeCode<T>().dataType()
+            == carto::DataTypeCode<AimsRGBA>().dataType() )
+          {
+            // Indexed images can only be read as RGBA data
+            uint32 * rgba_data = (uint32 *)&data(0, 0, z, tframe);
+            TIFFReadRGBAImageOriented(tif, dx, data.dimY(),
+                                      rgba_data, ORIENTATION_TOPLEFT);
+          }
         }
       }
       TIFFClose(tif);
