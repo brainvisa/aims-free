@@ -85,8 +85,17 @@ namespace soma
     //=== multiresolution level ==============================================
     localMsg( "reading resolution level..." );
     int level = 0;
-    if( options->hasProperty( "resolution_level" ) )
+    if( options->hasProperty( "resolution_level" ) ) {
       options->getProperty( "resolution_level", level );
+      if (level < 0) {
+        try {
+            // Try to solve negative level values
+          level += dsi->header()->getProperty( "resolutions_dimension" )
+                                ->size();
+        }
+        catch(...){}
+      }
+    }
     localMsg( " -> level to write : " + carto::toString( level ) );
 
     //=== partial reading ====================================================
