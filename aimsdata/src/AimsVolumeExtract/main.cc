@@ -63,10 +63,10 @@ using namespace carto;
 using namespace std;
 
 // ===========================================================================
-//                              AimsOverVolume
+//                              AimsVolumeExtract
 // ---------------------------------------------------------------------------
-// This command extends the previous AimsOverVolume cammnd by taking avantage 
-// of the capacities brought by the SomaIO system.
+// This command extends the previous AimsVolumeExtract cammnd by taking 
+// avantage of the capacities brought by the SomaIO system.
 // What was previously possible should still be so (writing an input volume 
 // in a bigger output volume).
 // When possible, this new command do so by not allocating the full output 
@@ -87,6 +87,13 @@ using namespace std;
 // ported to soma-io, a lot of cleaning should be possible.
 // ===========================================================================
 
+class ObjectType{
+public:
+    static const std::string                        VOLUME;
+};
+
+const std::string ObjectType::VOLUME = "Volume";
+
 struct ReadInfo
 {
   bool    exists;
@@ -103,6 +110,8 @@ struct ReadInfo
   bool    canWriteLine;
   bool    canWriteVoxel;
   Object  header;
+  string  objectType;
+  string  dataType;
 };
 
 // ===========================================================================
@@ -125,7 +134,74 @@ ReadInfo readInfoCreator()
   out.canWriteLine    = false;
   out.canWriteVoxel   = false;
   out.header.reset(0);
+  out.objectType      = ObjectType::VOLUME;
+  out.dataType        = "";
   return out;
+}
+
+
+// ===========================================================================
+// DataTypeCodeRegistry
+// ===========================================================================
+
+class DataTypeCodeRegistry {
+
+public:
+    //typedef std::string (*ObjectType)();
+    //typedef std::string (*DataType)();
+   
+    DataTypeCodeRegistry();
+    virtual ~DataTypeCodeRegistry();
+   
+    //std::string objectType(std::string object_type);    
+    std::string dataTypeName(const std::string & object_type, 
+                             const std::string & data_type);
+    
+protected:
+    // Store information about object types and data types
+    std::map<std::string, std::map<std::string, std::string> > _objectDataTypes;
+};
+
+DataTypeCodeRegistry::DataTypeCodeRegistry() {
+    // Register info about usable volumes
+    _objectDataTypes[ObjectType::VOLUME]["U8"]      = DataTypeCode<Volume<uint8_t> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["S8"]      = DataTypeCode<Volume<int8_t> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["U16"]     = DataTypeCode<Volume<uint16_t> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["S16"]     = DataTypeCode<Volume<int16_t> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["U32"]     = DataTypeCode<Volume<uint32_t> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["S32"]     = DataTypeCode<Volume<int32_t> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["U64"]     = DataTypeCode<Volume<uint64_t> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["S64"]     = DataTypeCode<Volume<int64_t> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["FLOAT"]   = DataTypeCode<Volume<float> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["DOUBLE"]  = DataTypeCode<Volume<double> >::name();
+//     _objectDataTypes[ObjectType::VOLUME]["CFLOAT"]   = DataTypeCode<Volume<cfloat> >::name();
+//     _objectDataTypes[ObjectType::VOLUME]["CDOUBLE"]  = DataTypeCode<Volume<cdouble> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["RGB"]     = DataTypeCode<Volume<AimsRGB> >::name();
+    _objectDataTypes[ObjectType::VOLUME]["RGBA"]    = DataTypeCode<Volume<AimsRGBA> >::name();
+//     _objectDataTypes[ObjectType::VOLUME]["HSV"]     = DataTypeCode<Volume<AimsHSV> >::name();
+//     _objectDataTypes[ObjectType::VOLUME]["HSVA"]    = DataTypeCode<Volume<AimsHSVA> >::name();
+}
+
+DataTypeCodeRegistry::~DataTypeCodeRegistry() {
+}
+
+string DataTypeCodeRegistry::dataTypeName(const string & object_type, 
+                                          const string & data_type){
+    
+    map<string, string> data_types = _objectDataTypes[object_type];
+    if (data_types.size() > 0) {
+        if (!data_types[data_type].empty()) {
+            return data_types[data_type];
+        }
+        else {
+            throw runtime_error("Data type " + data_type + " is not"
+                              + " registered for " + object_type + ".");
+        }
+    }
+    else {
+        throw runtime_error("Object type " + object_type + " is not"
+                            + " a valid registered type.");
+    }
 }
 
 // ===========================================================================
@@ -142,28 +218,71 @@ void checkWritable( const string   & fname,
 {
   string rname = FileUtil::uriFilename( fname );
   string ext = FileUtil::extension( rname );
+  
+  cout << "-> Enable writing trough soma: ";
+  
+  DataTypeCodeRegistry registry;
+  string data_type_name;
+  
+  try {
+    data_type_name = registry.dataTypeName(info.objectType,
+                                           info.dataType);
+  }
+  catch(...){}
+  
+  const set<string> soma_write_formats = DataSourceInfoLoader::writeFormats(
+                                                                   ext, 
+                                                                   data_type_name
+                                                               );
+  
+  // Try to find associated formats
+/*  
+  bool soma_writable = false;
+  if (!data_type_name.empty()) {
+      
+    // Try to find an associated format for the given extension   
+    typename carto::IOObjectTypesDictionary::FormatInfo format_info 
+           = carto::IOObjectTypesDictionary::writeTypes()[data_type_name];
+    
+    if (format_info){
+        const set<string> data_type_formats = format_info();
+        vector<string> soma_formats(
+            max(data_type_formats.size(), formats.size())
+        );
+        vector<string>::iterator it = set_intersection(
+            data_type_formats.begin(), data_type_formats.end(),
+            formats.begin(), formats.end(),
+            soma_formats.begin()
+        );       
+        soma_formats.resize(it - soma_formats.begin());
+        
+        // Soma formats were found in the intersection that matches object type,
+        // data type and extension requirements
+        if (soma_formats.size() > 0)
+            soma_writable = true;
+    }
+  }*/
 
   // try soma writable
-  if( ext == "ima" || ext == "dim" ) {
+  if(soma_write_formats.size() > 0) {
+    cout << "yes !" << endl;
     info.somaWritable = true;
-    // for now, just GIS in soma-io so true for all
-    // to be changed when more writers added
     info.canWriteVolume = true;
     info.canWriteSlice = true;
     info.canWriteLine = true;
     info.canWriteVoxel = true;
-    cout << "-> Writable through soma" << endl;
     return;
   }
 
+  cout << "no !" << endl;
   // try aims writable
-    info.aimsWritable = true;
-    info.canWriteVolume = false;
-    info.canWriteSlice = false;
-    info.canWriteLine = false;
-    info.canWriteVoxel = false;
-    cout << "-> Writable through aims" << endl;
-    return;
+  info.aimsWritable = true;
+  info.canWriteVolume = false;
+  info.canWriteSlice = false;
+  info.canWriteLine = false;
+  info.canWriteVoxel = false;
+  cout << "-> Enable writing trough aims: yes !" << endl;
+  return;
 }
 
 // ===========================================================================
@@ -182,7 +301,7 @@ void checkReadable( const  string   & fname,
   // test soma readable
   if( !forceaims )
   {
-    cout << "-> Try soma : ";
+    cout << "-> Enable reading trough soma: ";
     DataSourceInfo odsi( fname );
     DataSourceInfoLoader dsil;
     try {
@@ -195,17 +314,19 @@ void checkReadable( const  string   & fname,
         info.canReadSlice = odsi.capabilities().canSeekSlice();
         info.canReadLine = odsi.capabilities().canSeekLine();
         info.canReadVoxel = odsi.capabilities().canSeekVoxel();
-        cout << "it worked !" << endl;
+        info.objectType = odsi.header()->getProperty("object_type")->getString();
+        info.dataType = odsi.header()->getProperty("data_type")->getString();
+        cout << "yes !" << endl;
         return;
       } else
         throw runtime_error( "soma cannot check" );
     } catch( ... ) {
-      cout << "it failed !" << endl;
+      cout << "no !" << endl;
     }
   }
 
   // test aims readable
-  cout << "-> Try aims : ";
+  cout << "-> Enable reading trough aims: ";
   Finder fnd;
   fnd.check( fname );
   if( fnd.headerObject() )
@@ -216,10 +337,12 @@ void checkReadable( const  string   & fname,
     info.canReadSlice= false;
     info.canReadLine = false;
     info.canReadVoxel = false;
-    cout << "it worked !" << endl;
+    info.objectType = info.header->getProperty("object_type")->getString();
+    info.dataType = info.header->getProperty("data_type")->getString();
+    cout << "yes !" << endl;
     return;
   } else
-    cout << "it failed !" << endl;
+    cout << "no !" << endl;
 }
 
 // ===========================================================================
@@ -632,15 +755,15 @@ void registerFunc()
 // Initialize needed parameters.
 // Calls accordingly generic processes.
 // ===========================================================================
-void executeOverVolume( string        ifname,
-                        string        ofname,
-                        vector<int>   sizeout,
-                        vector<float> voxelout,
-                        vector<int>   posout,
-                        vector<int>   regionin,
-                        vector<int>   posin,
-                        string        datatype,
-                        bool          extract )
+void executeExtractVolume( string        ifname,
+                           string        ofname,
+                           vector<int>   sizeout,
+                           vector<float> voxelout,
+                           vector<int>   posout,
+                           vector<int>   regionin,
+                           vector<int>   posin,
+                           string        datatype,
+                           bool          extract )
 {
   //--- variable utils -------------------------------------------------------
   int32_t     i                 = 0;      // loop index
@@ -653,11 +776,17 @@ void executeOverVolume( string        ifname,
 
   //--- checking input -------------------------------------------------------
   ReadInfo inputInfo = readInfoCreator();
+  
   if( !ifname.empty() )
     checkInput( ifname, inputInfo );
 
+  if( datatype.empty() && !inputInfo.dataType.empty() )
+    datatype = inputInfo.dataType;
+  
   //--- checking output ------------------------------------------------------
   ReadInfo outputInfo = readInfoCreator();
+  outputInfo.dataType = datatype;
+  
   if( !ofname.empty() )
     checkInput( ofname, outputInfo );
 
@@ -711,8 +840,8 @@ void executeOverVolume( string        ifname,
     for( i=0; i<4; ++i )
     {
       sizeout[i] = (int) rint( 
-        outputInfo.header->getProperty( "volume_dimension")
-                         ->getArrayItem( i )->getScalar() 
+        outputInfo.header->getProperty("volume_dimension")
+                         ->getArrayItem(i)->getScalar() 
       );
     }
   }
@@ -736,9 +865,6 @@ void executeOverVolume( string        ifname,
       }
     }
   }
-
-  if( datatype.empty() )
-    datatype = inputInfo.header->getProperty( "data_type" )->getString();
 
   cout << "Recap parameters : " << endl;
   if( !ifname.empty() ) {
@@ -965,10 +1091,10 @@ int main( int argc, const char** argv )
 
     //=== ALGORITHM ==========================================================
     registerFunc();
-    executeOverVolume( ifname, ofname, 
-                       sizeout, voxelout, posout,
-                       regionin, posin, 
-                       datatype, extract );
+    executeExtractVolume( ifname, ofname, 
+                          sizeout, voxelout, posout,
+                          regionin, posin, 
+                          datatype, extract );
   }
   catch( user_interruption & )
   {
