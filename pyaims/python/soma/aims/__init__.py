@@ -848,6 +848,8 @@ def getPython(self):
     :py:data:`soma.aims.convertersObjectToPython` stores
     converters
     """
+    if self.isNone():
+        return None
     t = self.type()
     cv = convertersObjectToPython.get(t)
     res = None

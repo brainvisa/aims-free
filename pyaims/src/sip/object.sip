@@ -305,11 +305,15 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %End
 
     // Scalar API
+    virtual bool isScalar() const = 0;
     virtual double getScalar() const = 0;
 
     // String API
+    virtual bool isString() const = 0;
     virtual std::string getString() const = 0;
 
+    // None API
+    virtual bool isNone() const = 0;
 
     // Array API
 
