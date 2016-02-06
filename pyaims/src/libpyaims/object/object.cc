@@ -62,8 +62,21 @@ namespace carto
     bool x = PyMapping_Check( _value );
     if( x ) // it seems PyMapping_Check is not sufficient...
     {
+      if( PyObject_HasAttrString( _value, "isDictionary" ) )
+      {
+        // the PyObject contains an Object: delegate to it.
+        PyObject *res = PyObject_CallMethod(
+          _value, const_cast<char *>( "isDictionary" ), 0 );
+        if( res )
+        {
+          x = ( res == Py_True );
+          Py_DECREF( res );
+        }
+        else
+          x = false;
+      }
       // this at least avoids problems for numpy.float32 objects...
-      if( !PyObject_HasAttrString( _value, "keys" ) )
+      else if( !PyObject_HasAttrString( _value, "keys" ) )
         x = false;
     }
     PyGILState_Release(gstate);
@@ -81,16 +94,27 @@ namespace carto
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
     bool x = PySequence_Check( _value );
-    if( !x )
+    if( x ) // it seems PySequence_Check is not sufficient...
     {
-      x = PyMapping_Check( _value );
-      if( x ) // it seems PyMapping_Check is not sufficient...
+      if( PyObject_HasAttrString( _value, "isIterable" ) )
       {
-        // this at least avoids problems for numpy.float32 objects...
-        if( !PyObject_HasAttrString( _value, "keys" ) )
+        // the PyObject contains an Object: delegate to it.
+        PyObject *res = PyObject_CallMethod(
+          _value, const_cast<char *>( "isIterable" ), 0 );
+        if( res )
+        {
+          x = ( res == Py_True );
+          Py_DECREF( res );
+        }
+        else
           x = false;
       }
+      // this at least avoids problems for numpy.float32 objects...
+      else if( !PyObject_HasAttrString( _value, "index" ) )
+        x = false;
     }
+    if( !x )
+      x = isDictionary();
     PyGILState_Release(gstate);
     return x;
   }
@@ -106,6 +130,16 @@ namespace carto
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
     bool x = PyNumber_Check( _value );
+    if( !x && PyObject_HasAttrString( _value, "isScalar" ) )
+    {
+      PyObject *res = PyObject_CallMethod(
+        _value, const_cast<char *>( "isScalar" ), 0 );
+      if( res )
+      {
+        x = ( res == Py_True );
+        Py_DECREF( res );
+      }
+    }
     PyGILState_Release(gstate);
     return x;
   }
@@ -123,6 +157,16 @@ namespace carto
     bool x = PyString_Check( _value );
     if( !x )
       x = PyUnicode_Check( _value );
+    if( !x && PyObject_HasAttrString( _value, "isString" ) )
+    {
+      PyObject *res = PyObject_CallMethod(
+        _value, const_cast<char *>( "isString" ), 0 );
+      if( res )
+      {
+        x = ( res == Py_True );
+        Py_DECREF( res );
+      }
+    }
     PyGILState_Release(gstate);
     return x;
   }
@@ -138,6 +182,16 @@ namespace carto
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
     bool x = PyIter_Check( _value );
+    if( !x && PyObject_HasAttrString( _value, "isIterator" ) )
+    {
+      PyObject *res = PyObject_CallMethod(
+        _value, const_cast<char *>( "isIteraror" ), 0 );
+      if( res )
+      {
+        x = ( res == Py_True );
+        Py_DECREF( res );
+      }
+    }
     PyGILState_Release(gstate);
     return x;
   }
@@ -153,6 +207,16 @@ namespace carto
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
     bool x = PyIter_Check( _value ); // && ?;
+    if( !x && PyObject_HasAttrString( _value, "isDictionaryIterator" ) )
+    {
+      PyObject *res = PyObject_CallMethod(
+        _value, const_cast<char *>( "isDictionaryIterator" ), 0 );
+      if( res )
+      {
+        x = ( res == Py_True );
+        Py_DECREF( res );
+      }
+    }
     PyGILState_Release(gstate);
     return x;
   }
@@ -168,6 +232,16 @@ namespace carto
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
     bool x = PySequence_Check( _value );
+    if( !x && PyObject_HasAttrString( _value, "isArray" ) )
+    {
+      PyObject *res = PyObject_CallMethod(
+        _value, const_cast<char *>( "isArray" ), 0 );
+      if( res )
+      {
+        x = ( res == Py_True );
+        Py_DECREF( res );
+      }
+    }
     PyGILState_Release(gstate);
     return x;
   }
@@ -183,6 +257,16 @@ namespace carto
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
     bool x = PySequence_Check( _value );
+    if( !x && PyObject_HasAttrString( _value, "isDynArray" ) )
+    {
+      PyObject *res = PyObject_CallMethod(
+        _value, const_cast<char *>( "isDynArray" ), 0 );
+      if( res )
+      {
+        x = ( res == Py_True );
+        Py_DECREF( res );
+      }
+    }
     PyGILState_Release(gstate);
     return x;
   }
@@ -195,7 +279,23 @@ namespace carto
     PyObject    *_value = getValue();
     if( !_value )
       return true;
-    return _value == Py_None;
+    if( _value == Py_None )
+      return true;
+    bool x = false;
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+    if( PyObject_HasAttrString( _value, "isNone" ) )
+    {
+      PyObject *res = PyObject_CallMethod(
+        _value, const_cast<char *>( "isNone" ), 0 );
+      if( res )
+      {
+        x = ( res == Py_True );
+        Py_DECREF( res );
+      }
+    }
+    PyGILState_Release(gstate);
+    return x;
   }
 
 
@@ -212,8 +312,17 @@ namespace carto
       {
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
-        bool x = (bool)
-          PyNumber_Check( to.getValue() );
+        bool x = (bool) PyNumber_Check( to.getValue() );
+        if( !x && PyObject_HasAttrString( to.getValue(), "isScalar" ) )
+        {
+          PyObject *res = PyObject_CallMethod(
+            to.getValue(), const_cast<char *>( "isScalar" ), 0 );
+          if( res )
+          {
+            x = ( res == Py_True );
+            Py_DECREF( res );
+          }
+        }
         PyGILState_Release(gstate);
         return x;
       }
@@ -235,6 +344,18 @@ namespace carto
           Py_DECREF( po );
           PyGILState_Release(gstate);
           return x;
+        }
+        if( PyObject_HasAttrString( to.getValue(), "getScalar" ) )
+        {
+          PyObject *res = PyObject_CallMethod(
+            to.getValue(), const_cast<char *>( "getScalar" ), 0 );
+          if( res )
+          {
+            double x = PyFloat_AsDouble( res );
+            Py_DECREF( res );
+            PyGILState_Release(gstate);
+            return x;
+          }
         }
         PyErr_Clear();
         PyGILState_Release(gstate);
@@ -275,6 +396,16 @@ namespace carto
         bool x = PyString_Check( po.getValue() );
         if( !x )
           x = PyUnicode_Check( po.getValue() );
+        if( !x && PyObject_HasAttrString( po.getValue(), "isString" ) )
+        {
+          PyObject *res = PyObject_CallMethod(
+            po.getValue(), const_cast<char *>( "isString" ), 0 );
+          if( res )
+          {
+            x = ( res == Py_True );
+            Py_DECREF( res );
+          }
+        }
         PyGILState_Release(gstate);
         return x;
       }
@@ -292,12 +423,24 @@ namespace carto
         PyErr_Clear();
         PyObject	*po = PyNumber_Float( to.getValue() );
         if( po )
+        {
+          double	x = PyFloat_AsDouble( po );
+          Py_DECREF( po );
+          PyGILState_Release(gstate);
+          return toString( x );
+        }
+        if( PyObject_HasAttrString( to.getValue(), "getString" ) )
+        {
+          PyObject *res = PyObject_CallMethod(
+            to.getValue(), const_cast<char *>( "getString" ), 0 );
+          if( res )
           {
-            double	x = PyFloat_AsDouble( po );
-            Py_DECREF( po );
+            const char *x = PyString_AsString( res );
+            Py_DECREF( res );
             PyGILState_Release(gstate);
-            return toString( x );
+            return x;
           }
+        }
         PyErr_Clear();
         PyGILState_Release(gstate);
         throw std::runtime_error( "Cannot convert python object to string" );
@@ -333,6 +476,18 @@ namespace carto
         s = PyMapping_Size( object.getValue() );
       if( s < 0 )
       {
+        if( PyObject_HasAttrString( object.getValue(), "size" ) )
+        {
+          PyObject *res = PyObject_CallMethod(
+            object.getValue(), const_cast<char *>( "size" ), 0 );
+          if( res )
+          {
+            long x = PyInt_AsLong( res );
+            Py_DECREF( res );
+            PyGILState_Release(gstate);
+            return size_t(x);
+          }
+        }
         PyErr_Clear();
         PyGILState_Release(gstate);
         throw std::runtime_error( std::string( "Cannot convert object of "
@@ -357,6 +512,16 @@ namespace carto
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
         bool x = PySequence_Check( to.getValue() );
+        if( !x && PyObject_HasAttrString( to.getValue(), "isArray" ) )
+        {
+          PyObject *res = PyObject_CallMethod(
+            to.getValue(), const_cast<char *>( "isArray" ), 0 );
+          if( res )
+          {
+            x = ( res == Py_True );
+            Py_DECREF( res );
+          }
+        }
         PyGILState_Release(gstate);
         return x;
       }
@@ -372,7 +537,7 @@ namespace carto
           PyErr_Clear();
           PyGILState_Release(gstate);
           throw std::runtime_error( std::string( "Array item not found in " )
-                                    + DataTypeCode<PyObject *>::name() 
+                                    + DataTypeCode<PyObject *>::name()
                                     + " at index " + toString( index ) );
         }
         Object	obj = Object::value( o );
@@ -416,6 +581,16 @@ namespace carto
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
         bool x = PyList_Check( to.getValue() );
+        if( !x && PyObject_HasAttrString( to.getValue(), "isDynArray" ) )
+        {
+          PyObject *res = PyObject_CallMethod(
+            to.getValue(), const_cast<char *>( "isDynArray" ), 0 );
+          if( res )
+          {
+            x = ( res == Py_True );
+            Py_DECREF( res );
+          }
+        }
         PyGILState_Release(gstate);
         return x;
       }
@@ -492,7 +667,26 @@ namespace carto
       {
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
-        bool x = PyDict_Check( to.getValue() );
+        bool x = PyMapping_Check( to.getValue() );
+        if( x ) // it seems PyMapping_Check is not sufficient...
+        {
+          if( PyObject_HasAttrString( to.getValue(), "isDictionary" ) )
+          {
+            // the PyObject contains an Object: delegate to it.
+            PyObject *res = PyObject_CallMethod(
+              to.getValue(), const_cast<char *>( "isDictionary" ), 0 );
+            if( res )
+            {
+              x = ( res == Py_True );
+              Py_DECREF( res );
+            }
+            else
+              x = false;
+          }
+          // this at least avoids problems for numpy.float32 objects...
+          else if( !PyObject_HasAttrString( to.getValue(), "keys" ) )
+            x = false;
+        }
         PyGILState_Release(gstate);
         return x;
       }
@@ -719,7 +913,24 @@ namespace carto
       static inline bool isNone( const TypedObject<PyObject *> & to )
       {
         PyObject * o = to.getValue();
-        return !o || o == Py_None;
+        if( !o || o == Py_None )
+          return true;
+
+        bool x = false;
+        PyGILState_STATE gstate;
+        gstate = PyGILState_Ensure();
+        if( PyObject_HasAttrString( to.getValue(), "isNone" ) )
+        {
+          PyObject *res = PyObject_CallMethod(
+            to.getValue(), const_cast<char *>( "isNone" ), 0 );
+          if( res )
+          {
+            x = ( res == Py_True );
+            Py_DECREF( res );
+          }
+        }
+        PyGILState_Release(gstate);
+        return x;
       }
     };
 
