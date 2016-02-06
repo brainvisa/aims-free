@@ -188,7 +188,18 @@ namespace carto
   }
 
 
-  namespace interface_internal
+   template <>
+  //inline
+  bool TypedObject<PyObject *>::isNone() const
+  {
+    PyObject    *_value = getValue();
+    if( !_value )
+      return true;
+    return _value == Py_None;
+  }
+
+
+ namespace interface_internal
   {
 
     // ScalarInterface
@@ -695,6 +706,20 @@ namespace carto
         bool x = PyIter_Check( to.getValue() );
         PyGILState_Release(gstate);
         return x;
+      }
+    };
+
+
+    // NoneInterface
+    //-------------------------------------------------------------------------
+    template <>
+    class NoneImpl< PyObject *, false >
+    {
+    public:
+      static inline bool isNone( const TypedObject<PyObject *> & to )
+      {
+        PyObject * o = to.getValue();
+        return !o || o == Py_None;
       }
     };
 
