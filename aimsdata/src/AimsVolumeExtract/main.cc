@@ -574,8 +574,9 @@ void somaReadSomaWrite_f( const string       & ifname,
                     readvol->getSizeT() != sizeout[3] ) ) 
   {
     writeoptions->setProperty( "partial_writing", true );
-    VolumeRef<T> fullvol( new Volume<T>( sizeout[0], sizeout[1], sizeout[2], sizeout[3],
-                          AllocatorContext(), false ) );
+    VolumeRef<T> fullvol( new Volume<T>( sizeout[0], sizeout[1],
+                                         sizeout[2], sizeout[3],
+                                         AllocatorContext(), false ) );
     readvol->setRefVolume(fullvol);
     readvol->setPosInRefVolume(
       typename carto::Volume<T>::Position4Di( 

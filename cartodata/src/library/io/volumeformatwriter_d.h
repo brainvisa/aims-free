@@ -252,27 +252,31 @@ namespace soma
 
     //=== writing image ======================================================
     localMsg( "writing volume..." );
+    const T* data = 0;
     if( parent1 || obj.allocatorContext().isAllocated() )
-    {
-//       if( !withborders ) {
-        _imw->write( (T*) &obj(0,0,0,0), *dsi, position, view, strides,
-                     options );
-//       } else {
-//         int y, z, t;
-//         std::vector<int> posline ( position );
-//         std::vector<int> sizeline ( 4, 1 );
-//         sizeline[ 0 ] = view[ 0 ];
-//         for( t=0; t<view[3]; ++t )
-//           for( z=0; z<view[2]; ++z )
-//             for( y=0; y<view[1]; ++y ) {
-//               posline[ 1 ] = position[ 1 ] + y;
-//               posline[ 2 ] = position[ 2 ] + z;
-//               posline[ 3 ] = position[ 3 ] + t;
-//               _imw->write( (T*) &obj(0,y,z,t), *dsi, posline,
-//                           sizeline, options );
-//             }
-//       }
-    }
+      data = reinterpret_cast<const T*>( &obj(0,0,0,0) );
+    // in unallocated case, data is null; this is OK.
+    _imw->write( data, *dsi, position, view, strides, options );
+//     {
+// //       if( !withborders ) {
+//         _imw->write( (T*) &obj(0,0,0,0), *dsi, position, view, strides,
+//                      options );
+// //       } else {
+// //         int y, z, t;
+// //         std::vector<int> posline ( position );
+// //         std::vector<int> sizeline ( 4, 1 );
+// //         sizeline[ 0 ] = view[ 0 ];
+// //         for( t=0; t<view[3]; ++t )
+// //           for( z=0; z<view[2]; ++z )
+// //             for( y=0; y<view[1]; ++y ) {
+// //               posline[ 1 ] = position[ 1 ] + y;
+// //               posline[ 2 ] = position[ 2 ] + z;
+// //               posline[ 3 ] = position[ 3 ] + t;
+// //               _imw->write( (T*) &obj(0,y,z,t), *dsi, posline,
+// //                           sizeline, options );
+// //             }
+// //       }
+//     }
     // else we just needed to write the header and reserve file space
     // no image to write
 
