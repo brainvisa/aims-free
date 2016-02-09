@@ -45,7 +45,7 @@
 
 
 <!-- -->
-<h4> <a name="version-4.5.0"></a>Sep. 25, 2015, Version 4.5.0</h4>
+<h4> <a name="version-4.5.0"></a>Feb. 17, 2016, Version 4.5.0</h4>
 
 <ul>
 <li>Major changes in IO system: Soma-IO is being used instead of AIMS IO for major image formats:
@@ -64,7 +64,8 @@
 </li>
 <li>Basic support for Wavefront .obj mesh format (in aims)</li>
 <li>Enabled support for IO on textured meshes (used in anatomist, especially to export complex objects to wavefront format).</li>
-<li>Volume classes have been added a few convenience methods to make things easier to handle.</li>
+<li>Volume classes have been added a few convenience methods to make things easier to handle, and operator functions. The volume source code has been completely reorganized (into several files) for readability.
+</li>
 <li>Some fibers/bundles utility classes and IO (BundleProducer, BundleListener, BundleReader and bundle/graph conversion) have moved from the old connectomist project to aimsdata. Fibers IO are thus now builtin in aims/anatomist and do not depend on other libs and plugins.</li>
 <li>Support for Trackvis fibers format (for reading).</li>
 <li>More python bindings in pyaims</li>
@@ -74,6 +75,8 @@ Still for compatibility, in the bugfix branch of aims 4.4, the inverse alias has
 <li>Support for textured meshes in pyaims</li>
 <li>Function to sort a mesh polygons along a given direction in SurfaceManip: useful to handle transparency in Anatomist.
 </li>
+<li>Improved python bindings for generic objects / dictionaries.</li>
+<li>JSON format support for generic objects (mainly a variant of minf format).</li>
 <li>aims-qtgui has been cleared from the Qt3Support dependency, and compatibility headers/sources (in aims/qt3compat/...) have been removed.
 </li>
 <li>And many many other fixes...</li>
