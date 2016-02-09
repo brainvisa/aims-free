@@ -77,6 +77,7 @@ namespace soma
                                      carto::rc_ptr<DataSourceInfo> dsi,
                                      carto::Object options )
   {
+    localMsg( "writing: " + dsi->url() );
     //=== memory mapping =====================================================
     localMsg( "checking for memory mapping..." );
     if( obj.allocatorContext().allocatorType() == AllocatorStrategy::ReadWriteMap )
@@ -238,6 +239,16 @@ namespace soma
 //         localMsg( "override ot : " + carto::toString(position[3]) );
         std::cout << "override ot : " + carto::toString(position[3]) << std::endl;
       } catch( ... ) {}
+    }
+
+    //=== sanity check =======================================================
+    if( position[0] + view[0] > size[0]
+        || position[1] + view[1] > size[1]
+        || position[2] + view[2] > size[2]
+        || position[3] + view[3] > size[3] )
+    {
+      localMsg( "view is larger than the volume." );
+      throw carto::invalid_number( "view is larger than the volume." );
     }
 
     //=== writing header & creating files ====================================
