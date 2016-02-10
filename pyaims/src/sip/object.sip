@@ -169,6 +169,8 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
   // return 0;
 %End
 
+  bool operator == ( const carto::Object & ) const;
+
 
   protected:
     Object() /ReleaseGIL/;
@@ -584,6 +586,8 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %MethodCode
     sipCpp->insertArrayItem( sipCpp->size(), *a0 );
 %End
+
+    virtual bool operator == ( const carto::GenericObject & ) const;
 
 
     // printing
