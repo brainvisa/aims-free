@@ -128,6 +128,9 @@ Object = carto.Object
 
 del aims, ExtendedImporter
 
+# version string is more or less standard as __version__
+__version__ = versionString()
+
 from soma.aims import hierarchy
 del hierarchy  # init has been done, get rid of it...
 try:

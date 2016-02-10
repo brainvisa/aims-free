@@ -170,6 +170,10 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %End
 
   bool operator == ( const carto::Object & ) const;
+  bool operator == ( SIP_PYOBJECT ) const;
+%MethodCode
+  sipRes = sipCpp->operator == ( carto::Object::value( a0 ) );
+%End
 
 
   protected:
