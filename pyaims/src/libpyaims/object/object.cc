@@ -380,6 +380,14 @@ namespace carto
         PyGILState_Release(gstate);
         to.getValue() = po;
       }
+
+      static bool equals( const TypedObject<PyObject *> & o1,
+                          const GenericObject & o2 )
+      {
+        return o1.isScalar() && o2.isScalar()
+          && o1.getScalar() == o2.getScalar();
+      }
+
     };
 
 
@@ -459,6 +467,14 @@ namespace carto
         PyGILState_Release(gstate);
         to.getValue() = po;
       }
+
+      static bool equals( const TypedObject<PyObject *> & o1,
+                          const GenericObject & o2 )
+      {
+        return o1.isString() && o2.isString()
+          && o1.getString() == o2.getString();
+      }
+
     };
 
 
@@ -840,6 +856,33 @@ namespace carto
         PyGILState_Release(gstate);
         return x;
       }
+
+      static bool equals( const TypedObject<PyObject *> & o1,
+                          const GenericObject & o2 )
+      {
+        if( !o1.isDictionary() || !o2.isDictionary() )
+          return false;
+        if( o1.size() != o2.size() )
+          return false;
+        Object it, other_value;
+        for( it=o1.objectIterator(); it->isValid(); it->next() )
+        {
+          try
+          {
+            other_value = o2.getProperty( it->key() );
+            if( it->currentValue() != other_value )
+            {
+              return false;
+            }
+          }
+          catch( ... )
+          {
+            return false;
+          }
+        }
+        return true;
+      }
+
     };
 
 
@@ -901,6 +944,24 @@ namespace carto
         PyGILState_Release(gstate);
         return x;
       }
+
+      static inline bool equals( const TypedObject<PyObject *> & o1,
+                                 const GenericObject & o2 )
+      {
+        if( !o1.isIterable() || !o2.isIterable() )
+          return false;
+        if( o1.size() != o2.size() )
+          return false;
+        Object it, it2;
+        for( it=o1.objectIterator(), it2=o2.objectIterator();
+            it->isValid(); it->next(), it2->next() )
+        {
+          if( !it2->isValid() || it->currentValue() != it2->currentValue() )
+            return false;
+        }
+        return true;
+      }
+
     };
 
 
