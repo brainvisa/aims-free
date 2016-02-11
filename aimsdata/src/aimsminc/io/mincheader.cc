@@ -360,7 +360,8 @@ namespace
 {
   inline float checkbounds( double x )
   {
-    if( isnan(x) || isnan(float(x)) || x == numeric_limits<double>::infinity() 
+    if( std::isnan(x) || std::isnan(float(x))
+        || x == numeric_limits<double>::infinity()
         || x < -numeric_limits<float>::max() 
         || x > numeric_limits<float>::max() )
       return 1.F;

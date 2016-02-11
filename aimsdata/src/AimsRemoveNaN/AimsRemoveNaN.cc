@@ -103,7 +103,7 @@ doit( Process & p, const string & fname, Finder & f )
     int x, y, z, t;
     bool firstValue = true;
     ForEach4d( data, x, y ,z, t ) {
-      if ( ! isnan( data( x, y, z, t ) ) ) {
+      if ( ! std::isnan( data( x, y, z, t ) ) ) {
         if ( firstValue ) {
           mini = maxi = data( x, y, z, t );
           firstValue = false;
@@ -129,7 +129,7 @@ doit( Process & p, const string & fname, Finder & f )
   if ( verbose ) cout << "processing...\n";
   int x, y, z, t;
   ForEach4d( data, x, y ,z, t ) {
-    if ( isnan( data( x, y, z, t ) ) ) data( x, y, z, t ) = (T) nr.value;
+    if ( std::isnan( data( x, y, z, t ) ) ) data( x, y, z, t ) = (T) nr.value;
   }
   
   if ( ! nr.fileout.empty() ) {

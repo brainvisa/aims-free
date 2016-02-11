@@ -773,22 +773,22 @@ int main( int argc, const char **argv )
     ostringstream vminstream;
     vminstream << (double)proc.info.vmin;
     cout << "imin    : "
-      << (isnan<double>( proc.info.vmin ) ? "default" : vminstream.str())
+      << (std::isnan( proc.info.vmin ) ? "default" : vminstream.str())
       << endl;
     ostringstream vmaxstream;
     vmaxstream << (double)proc.info.vmax;
     cout << "imax    : "
-      << (isnan<double>( proc.info.vmax ) ? "default" : vmaxstream.str())
+      << (std::isnan( proc.info.vmax ) ? "default" : vmaxstream.str())
       << endl;
     ostringstream ominstream;
     ominstream << (double)proc.info.omin;
     cout << "omin    : "
-      << (isnan<double>( proc.info.omin ) ? "default" : ominstream.str())
+      << (std::isnan( proc.info.omin ) ? "default" : ominstream.str())
       << endl;
     ostringstream omaxstream;
     omaxstream << (double)proc.info.omax;
     cout << "omax    : "
-      << (isnan<double>( proc.info.omax ) ? "default" : omaxstream.str())
+      << (std::isnan( proc.info.omax ) ? "default" : omaxstream.str())
       << endl;
 
     //	Use the Process mechanism to switch on types
