@@ -160,7 +160,7 @@ int main( int argc, char **argv )
   Object *vec;
 
   ifstream is( filein );
-  ASSERT( is );
+  ASSERT( is.good() );
 
   string tmp;
   is >> nObject >> dimx >> dimy >> dimz;

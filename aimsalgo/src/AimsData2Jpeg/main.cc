@@ -465,7 +465,7 @@ int main( int argc, char **argv )
     string tmp;
     int tp;
     ifstream is( colorMap );
-    ASSERT( is );
+    ASSERT( is.good() );
 
     is >> cmap.name;
     is >> cmap.size;
