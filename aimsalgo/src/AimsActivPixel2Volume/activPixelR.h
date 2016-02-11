@@ -94,7 +94,7 @@ void AimsActivPixelReader::read( AimsActivPixel& thing )
   float x=0.0, y=0.0, z=0.0;
 
   _is.open( (char *)_name.c_str(), std::ios::in );
-  ASSERT( _is );
+  ASSERT( _is.good() );
 
   aims::DefaultAsciiItemReader< float > item;
 
