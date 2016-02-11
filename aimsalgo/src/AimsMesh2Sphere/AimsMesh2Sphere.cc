@@ -1287,7 +1287,7 @@ void msh_linbcgDN(int n,int en, double D[], double N[], int2D *E, double b[], do
 				pp[j]=bk*pp[j]+zz[j];
 			}
 		}
-                if (isnan(bknum))
+                if (std::isnan(bknum))
                 {
                     exit(99);
                 }

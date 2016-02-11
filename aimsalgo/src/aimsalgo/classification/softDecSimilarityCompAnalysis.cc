@@ -141,7 +141,7 @@ SoftDecisionSimilarComponent::doIt( const AimsData<float>& indivMatrix )
     notFinished = !stopCriterion( 1.e-4 ) ;
     lnL =  lnLikelyhood(indivMatrix) ;
     cout << "\riteration " << iter << "lnKikelyhood = " << lnL << endl ;
-    if( lnL > 0. || isnan( lnL ) )
+    if( lnL > 0. || std::isnan( lnL ) )
       return 0. ;
     ++iter ;
     if (iter > 50 )
