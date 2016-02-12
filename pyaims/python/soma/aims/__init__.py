@@ -648,8 +648,8 @@ def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
     for x, y in classes:
         try:
-            if y.__name__.startswith( 'rc_ptr_' ) \
-                or y.__name__.startswith( 'weak_shared_ptr_' ) \
+            if y.__name__.startswith('rc_ptr_') \
+                or y.__name__.startswith('weak_shared_ptr_') \
                     or y.__name__.startswith('weak_ptr_'):
                 # add __getattr__ method
                 y.__len__ = __fixsipclasses__.proxylen
@@ -667,6 +667,16 @@ def __fixsipclasses__(classes):
             elif y.__name__.startswith('ShallowConverter_'):
                 y.__oldcall__ = y.__call__
                 y.__call__ = lambda self, obj: self.__oldcall__(obj)._get()
+            elif y.__name__.startswith('Volume_'):
+                for op in ('add', 'iadd', 'radd', 'sub', 'isub', 'rsub',
+                           'mul', 'imul', 'rmul', 'div', 'idiv', 'rdiv',
+                           'mod', 'imod', 'rmod', 'and', 'iand', 'rand',
+                           'or', 'ior', 'ror', 'xor', 'ixor' 'rxor'):
+                    add = getattr(aimssip, '__%s_%s__' % (op, y.__name__),
+                                  None)
+                    if add is not None:
+                        setattr(y, '__%s__' % op,
+                                types.MethodType(add, None, y))
             else:
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
