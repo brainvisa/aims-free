@@ -189,6 +189,16 @@ class AimsVector
 
     //@}
 
+    /// @name Iterators
+    /// @{
+    typedef T *        iterator;
+    typedef const T *  const_iterator;
+    iterator begin() { return _value; }
+    const_iterator begin() const { return _value; }
+    iterator end() { return _value + D; }
+    const_iterator end() const { return _value + D; }
+    /// @}
+
   protected:
     /// Memory space allocated
     T _value[D];
@@ -197,15 +207,32 @@ class AimsVector
 
 /**@name Useful type definitions*/
 //@{
-typedef AimsVector<short,2> Point2d;
-typedef AimsVector<short,3> Point3d;
-typedef AimsVector<short,4> Point4d;
-typedef AimsVector<int,2> Point2dl;
-typedef AimsVector<int,3> Point3dl;
-typedef AimsVector<int,4> Point4dl;
-typedef AimsVector<unsigned,2> Point2du;
-typedef AimsVector<unsigned,3> Point3du;
-typedef AimsVector<unsigned,4> Point4du;
+// Keep those for compability
+typedef AimsVector<int16_t,2> Point2d;
+typedef AimsVector<int16_t,3> Point3d;
+typedef AimsVector<int16_t,4> Point4d;
+typedef AimsVector<uint32_t,2> Point2du;
+typedef AimsVector<uint32_t,3> Point3du;
+typedef AimsVector<uint32_t,4> Point4du;
+// 2016: l now means long (64bit), i int (32bit), s short (16bit)
+typedef AimsVector<int16_t,2> Point2ds;
+typedef AimsVector<int16_t,3> Point3ds;
+typedef AimsVector<int16_t,4> Point4ds;
+typedef AimsVector<int32_t,2> Point2di;
+typedef AimsVector<int32_t,3> Point3di;
+typedef AimsVector<int32_t,4> Point4di;
+typedef AimsVector<int64_t,2> Point2dl;
+typedef AimsVector<int64_t,3> Point3dl;
+typedef AimsVector<int64_t,4> Point4dl;
+typedef AimsVector<uint16_t,2> Point2dus;
+typedef AimsVector<uint16_t,3> Point3dus;
+typedef AimsVector<uint16_t,4> Point4dus;
+typedef AimsVector<uint32_t,2> Point2dui;
+typedef AimsVector<uint32_t,3> Point3dui;
+typedef AimsVector<uint32_t,4> Point4dui;
+typedef AimsVector<uint64_t,2> Point2dul;
+typedef AimsVector<uint64_t,3> Point3dul;
+typedef AimsVector<uint64_t,4> Point4dul;
 typedef AimsVector<float,2> Point2df;
 typedef AimsVector<float,3> Point3df;
 typedef AimsVector<float,4> Point4df;
@@ -215,51 +242,77 @@ typedef AimsVector<double,4> Point4dd;
 //@}
 
 
-// these declarations are not necessary since all is inline in AimsVector
-extern template class AimsVector<short,2>;
-extern template class AimsVector<short,3>;
-extern template class AimsVector<short,4>;
-extern template class AimsVector<int,2>;
-extern template class AimsVector<int,3>;
-extern template class AimsVector<int,4>;
+extern template class AimsVector<int16_t,2>;
+extern template class AimsVector<int16_t,3>;
+extern template class AimsVector<int16_t,4>;
+extern template class AimsVector<int32_t,2>;
+extern template class AimsVector<int32_t,3>;
+extern template class AimsVector<int32_t,4>;
+extern template class AimsVector<int64_t,2>;
+extern template class AimsVector<int64_t,3>;
+extern template class AimsVector<int64_t,4>;
+extern template class AimsVector<uint16_t,2>;
+extern template class AimsVector<uint16_t,3>;
+extern template class AimsVector<uint16_t,4>;
+extern template class AimsVector<uint32_t,2>;
+extern template class AimsVector<uint32_t,3>;
+extern template class AimsVector<uint32_t,4>;
+extern template class AimsVector<uint64_t,2>;
+extern template class AimsVector<uint64_t,3>;
+extern template class AimsVector<uint64_t,4>;
 extern template class AimsVector<float,2>;
 extern template class AimsVector<float,3>;
 extern template class AimsVector<float,4>;
 extern template class AimsVector<double,2>;
 extern template class AimsVector<double,3>;
 extern template class AimsVector<double,4>;
-extern template class AimsVector<unsigned,2>;
-extern template class AimsVector<unsigned,3>;
-extern template class AimsVector<unsigned,4>;
 
 #ifndef DOXYGEN_HIDE_INTERNAL_CLASSES
 
 namespace carto
 {
-DECLARE_GENERIC_OBJECT_TYPE( Point2d )
-DECLARE_GENERIC_OBJECT_TYPE( Point3d )
-DECLARE_GENERIC_OBJECT_TYPE( Point4d )
+DECLARE_GENERIC_OBJECT_TYPE( Point2ds )
+DECLARE_GENERIC_OBJECT_TYPE( Point3ds )
+DECLARE_GENERIC_OBJECT_TYPE( Point4ds )
+DECLARE_GENERIC_OBJECT_TYPE( Point2di )
+DECLARE_GENERIC_OBJECT_TYPE( Point3di )
+DECLARE_GENERIC_OBJECT_TYPE( Point4di )
 DECLARE_GENERIC_OBJECT_TYPE( Point2dl )
 DECLARE_GENERIC_OBJECT_TYPE( Point3dl )
 DECLARE_GENERIC_OBJECT_TYPE( Point4dl )
+DECLARE_GENERIC_OBJECT_TYPE( Point2dus )
+DECLARE_GENERIC_OBJECT_TYPE( Point3dus )
+DECLARE_GENERIC_OBJECT_TYPE( Point4dus )
+DECLARE_GENERIC_OBJECT_TYPE( Point2dui )
+DECLARE_GENERIC_OBJECT_TYPE( Point3dui )
+DECLARE_GENERIC_OBJECT_TYPE( Point4dui )
+DECLARE_GENERIC_OBJECT_TYPE( Point2dul )
+DECLARE_GENERIC_OBJECT_TYPE( Point3dul )
+DECLARE_GENERIC_OBJECT_TYPE( Point4dul )
 DECLARE_GENERIC_OBJECT_TYPE( Point2df )
 DECLARE_GENERIC_OBJECT_TYPE( Point3df )
 DECLARE_GENERIC_OBJECT_TYPE( Point4df )
 DECLARE_GENERIC_OBJECT_TYPE( Point2dd )
 DECLARE_GENERIC_OBJECT_TYPE( Point3dd )
 DECLARE_GENERIC_OBJECT_TYPE( Point4dd )
-DECLARE_GENERIC_OBJECT_TYPE( Point2du )
-DECLARE_GENERIC_OBJECT_TYPE( Point3du )
-DECLARE_GENERIC_OBJECT_TYPE( Point4du )
-DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point2d> )
-DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point3d> )
-DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4d> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point2ds> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point3ds> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4ds> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point2di> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point3di> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4di> )
 DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point2dl> )
 DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point3dl> )
 DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4dl> )
-DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point2du> )
-DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point3du> )
-DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4du> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point2dus> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point3dus> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4dus> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point2dui> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point3dui> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4dui> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point2dul> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point3dul> )
+DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4dul> )
 DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point2df> )
 DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point3df> )
 DECLARE_GENERIC_OBJECT_TYPE( std::vector<Point4df> )

@@ -15,8 +15,19 @@ HEADERS =                           \
   io/volumeformatwriter_d.h         \
   io/volumeutilio.h                 \
   io/volumeutilio_d.h               \
+  volume/functional.h               \
   volume/volume.h                   \
   volume/volume_d.h                 \
+  volume/volumebase.h               \
+  volume/volumebase_d.h             \
+  volume/volumebase_d_inline.h      \
+  volume/volumebase_d_operators.h   \
+  volume/volumebase_d_instantiate.h \
+  volume/volumeref.h                \
+  volume/volumeref_d.h              \
+  volume/volumeref_d_inline.h       \
+  volume/volumeref_d_operators.h    \
+  volume/volumeref_d_instantiate.h  \
   volume/volumeoperators.h          \
   volume/volumeproxy.h              \
   volume/volumeproxy_d.h            \

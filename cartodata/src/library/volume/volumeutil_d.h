@@ -35,6 +35,12 @@
 #define CARTODATA_VOLUME_VOLUMEUTIL_D_H
 
 #include <cartodata/volume/volumeutil.h>
+#include <cartodata/volume/volumebase.h>
+#include <cartodata/volume/volumebase_d_inline.h>
+#include <cartodata/volume/volumebase_d_instantiate.h>
+#include <cartodata/volume/volumeref.h>
+#include <cartodata/volume/volumeref_d_inline.h>
+#include <cartodata/volume/volumeref_d_instantiate.h>
 #include <cartobase/type/datatypetraits.h>
 #include <cartobase/exception/assert.h>
 #include <limits>
@@ -348,82 +354,6 @@ namespace carto
   {
     return carto::VolumeUtil<T>::accumulate(
               internal_max<T>, o, -std::numeric_limits<T>::max() );
-  }
-
-
-  //--------------------------------------------------------------------------
-  // Copy functions
-  //--------------------------------------------------------------------------
-
-  template <typename T>
-  void transfer( const carto::VolumeRef<T> & src,
-                 carto::VolumeRef<T> & dst )
-  {
-    ASSERT( ( src.getSizeX() * src.getSizeY() *
-              src.getSizeZ() * src.getSizeT() ) ==
-            ( dst.getSizeX() * dst.getSizeY() *
-              dst.getSizeZ() * dst.getSizeT() ) );
-
-    typename carto::VolumeRef<T>::const_iterator i;
-    typename carto::VolumeRef<T>::iterator j;
-
-    for( i = src.begin(), j = dst.begin(); i != src.end(); ++i, ++j )
-      *j = *i;
-  }
-
-  template <typename T>
-  carto::VolumeRef<T> deepcopy( const carto::VolumeRef<T> & src,
-                                bool copy_full_structure )
-  {
-    carto::VolumeRef<T> dst( (carto::Volume<T>*)0 );
-    if( copy_full_structure )
-    {
-      carto::VolumeRef<T> src_cur = src;
-      carto::VolumeRef<T> src_prv = src;
-      carto::VolumeRef<T> dst_cur = dst;
-      carto::VolumeRef<T> dst_prv = dst;
-      while( src_cur )
-      {
-        dst_cur.reset( new carto::Volume<T>(
-          src_cur.getSizeX(),
-          src_cur.getSizeY(),
-          src_cur.getSizeZ(),
-          src_cur.getSizeT(),
-          carto::AllocatorContext(),
-          src_cur->allocatorContext().isAllocated() ) );
-        dst_cur->copyHeaderFrom( src_cur.header() );
-        if( src_cur->allocatorContext().isAllocated() )
-          transfer( src_cur, dst_cur );
-
-        if( dst_prv )
-        {
-          dst_prv->setRefVolume( dst_cur );
-          dst_prv->setPosInRefVolume( src_prv->posInRefVolume() );
-        }
-        else
-          dst = dst_cur;
-
-        dst_prv = dst_cur;
-        src_prv = src_cur;
-        src_cur = src_cur->refVolume();
-      }
-    }
-    else
-    {
-      dst.reset( new carto::Volume<T>(
-        src.getSizeX(), src.getSizeY(),
-        src.getSizeZ(), src.getSizeT() ) );
-      dst->copyHeaderFrom( src.header() );
-      transfer( src, dst );
-    }
-
-    return dst;
-  }
-
-  template <typename T>
-  carto::VolumeRef<T> copy( const carto::VolumeRef<T> & src )
-  {
-    return deepcopy( src, false );
   }
 
 
