@@ -31,16 +31,22 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <cartobase/object/object_d.h>
-#include <cartodata/volume/volume_d.h>
+//--- cartodata --------------------------------------------------------------
+#include <cartodata/volume/volumebase_d.h>
+#include <cartodata/volume/volumeref_d.h>
 #include <cartodata/volume/volumeutil_d.h>
-#include <functional>
+//--- cartobase --------------------------------------------------------------
+#include <cartobase/object/object_d.h>
 #include <cartobase/type/voxelrgb.h>
 #include <cartobase/type/voxelrgba.h>
 #include <cartobase/type/voxelhsv.h>
+//--- std --------------------------------------------------------------------
+#include <functional>
+//----------------------------------------------------------------------------
 
 using namespace carto;
 
+template class VolumeProxy< bool >;
 template class VolumeProxy< int8_t >;
 template class VolumeProxy< uint8_t >;
 // ### remove after everything has been moved to intN_t/uintN_t
@@ -66,6 +72,7 @@ template class VolumeProxy< long >;
 template class VolumeProxy< unsigned long >;
 #endif
 
+template class Volume< bool >;
 template class Volume< int8_t >;
 template class Volume< uint8_t >;
 // ### remove after everything has been moved to intN_t/uintN_t
@@ -91,6 +98,7 @@ template class Volume< long >;
 template class Volume< unsigned long >;
 #endif
 
+template class Creator<Volume< bool > >;
 template class Creator<Volume< int8_t > >;
 template class Creator<Volume< uint8_t > >;
 // ### remove after everything has been moved to intN_t/uintN_t
@@ -116,6 +124,7 @@ template class Creator< Volume< long > >;
 template class Creator< Volume< unsigned long > >;
 #endif
 
+template class Creator<VolumeRef< bool > >;
 template class Creator<VolumeRef< int8_t > >;
 template class Creator<VolumeRef< uint8_t > >;
 // ### remove after everything has been moved to intN_t/uintN_t
@@ -142,6 +151,7 @@ template class Creator<VolumeRef< unsigned long > >;
 #endif
 
 // utilities
+#if 0
 
 #define instantiate_volutil( T ) \
 template class VolumeUtil<T>; \
@@ -284,6 +294,8 @@ instantiate_volutil2( cdouble, std::minus<cdouble> )
 instantiate_volutil2( cdouble, std::multiplies<cdouble> )
 instantiate_volutil2( cdouble, std::divides<cdouble> )
 
+#endif
+
 namespace carto {
 
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )
@@ -337,6 +349,8 @@ namespace carto {
   // Copy functions
   //--------------------------------------------------------------------------
 
+#if 0
+
 #define instantiate_copy( T )                                                \
   template void transfer( const carto::VolumeRef<T> & src,                   \
                           carto::VolumeRef<T> & dst );                       \
@@ -346,6 +360,7 @@ namespace carto {
 
 #define COMMA ,
 
+  instantiate_copy( bool )
   instantiate_copy( int8_t )
   instantiate_copy( uint8_t )
   instantiate_copy( int16_t )
@@ -371,4 +386,88 @@ namespace carto {
   instantiate_copy( unsigned long )
 #endif
 
+#endif
+
 } // namespace carto
+
+//----------------------------------------------------------------------------
+// Streams
+//----------------------------------------------------------------------------
+
+namespace carto {
+
+  //--- VolumeOStream --------------------------------------------------------
+
+  VolumeOStream::VolumeOStream( std::ostream & ostream ):
+    _ostream(ostream),
+    _maxT(5),
+    _maxZ(5),
+    _maxY(5),
+    _maxX(5)
+  {}
+
+  VolumeOStream::VolumeOStream( const VolumeOStream & other ):
+    _ostream( other.ostream() ),
+    _maxT(other._maxT),
+    _maxZ(other._maxZ),
+    _maxY(other._maxY),
+    _maxX(other._maxX)
+  {}
+
+  std::ostream & VolumeOStream::ostream() const{ return _ostream; }
+
+  const size_t & VolumeOStream::maxT() const { return _maxT; }
+  const size_t & VolumeOStream::maxZ() const { return _maxZ; }
+  const size_t & VolumeOStream::maxY() const { return _maxY; }
+  const size_t & VolumeOStream::maxX() const { return _maxX; }
+
+  size_t & VolumeOStream::maxT() { return _maxT; }
+  size_t & VolumeOStream::maxZ() { return _maxZ; }
+  size_t & VolumeOStream::maxY() { return _maxY; }
+  size_t & VolumeOStream::maxX() { return _maxX; }
+
+  //--- VolumeOStreamSetter --------------------------------------------------
+
+  VolumeOStreamSetter::VolumeOStreamSetter():
+    _maxT(5),
+    _maxZ(5),
+    _maxY(5),
+    _maxX(5)
+  {}
+
+  const size_t & VolumeOStreamSetter::maxT() const { return _maxT; }
+  const size_t & VolumeOStreamSetter::maxZ() const { return _maxZ; }
+  const size_t & VolumeOStreamSetter::maxY() const { return _maxY; }
+  const size_t & VolumeOStreamSetter::maxX() const { return _maxX; }
+
+  size_t & VolumeOStreamSetter::maxT() { return _maxT; }
+  size_t & VolumeOStreamSetter::maxZ() { return _maxZ; }
+  size_t & VolumeOStreamSetter::maxY() { return _maxY; }
+  size_t & VolumeOStreamSetter::maxX() { return _maxX; }
+
+  //--- setMaxDim ------------------------------------------------------------
+
+  VolumeOStreamSetter setMaxDim( size_t m )
+  {
+    VolumeOStreamSetter out;
+    out.maxT() = m;
+    out.maxZ() = m;
+    out.maxY() = m;
+    out.maxX() = m;
+    return out;
+  }
+
+}
+
+//--- operator<< -------------------------------------------------------------
+
+carto::VolumeOStream operator<< ( std::ostream & out,
+                                  const carto::VolumeOStreamSetter & setter )
+{
+  carto::VolumeOStream volstream( out );
+  volstream.maxT() = setter.maxT();
+  volstream.maxZ() = setter.maxZ();
+  volstream.maxY() = setter.maxY();
+  volstream.maxX() = setter.maxX();
+  return volstream;
+}

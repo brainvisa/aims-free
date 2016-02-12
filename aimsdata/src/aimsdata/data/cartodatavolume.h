@@ -1259,8 +1259,9 @@ inline
 AimsData<T> operator + ( const AimsData<T>& firstThing, 
                          const AimsData<T>& secondThing )
 {
-  return carto::VolumeRef<T>( firstThing.volume() ) 
-    + carto::VolumeRef<T>( secondThing.volume() );
+  carto::VolumeRef<T> v = carto::VolumeRef<T>(firstThing.volume()).deepcopy();
+  v += carto::VolumeRef<T>(secondThing.volume());
+  return v;
 }
 
 
@@ -1269,15 +1270,18 @@ inline
 AimsData<T> operator - ( const AimsData<T>& firstThing, 
                          const AimsData<T>& secondThing )
 {
-  return carto::VolumeRef<T>( firstThing.volume() ) - 
-    carto::VolumeRef<T>( secondThing.volume() );
+  carto::VolumeRef<T> v = carto::VolumeRef<T>(firstThing.volume()).deepcopy();
+  v -= carto::VolumeRef<T>(secondThing.volume());
+  return v;
 }
 
 template < typename T >
 inline
 AimsData<T> operator * ( const AimsData<T>& firstThing, float scale )
 {
-  return carto::VolumeRef<T>( firstThing.volume() ) * scale;
+  carto::VolumeRef<T> v = carto::VolumeRef<T>(firstThing.volume()).deepcopy();
+  v *= scale;
+  return v;
 }
 
 
