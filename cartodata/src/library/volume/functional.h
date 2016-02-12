@@ -67,25 +67,35 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT>
   struct plus_result
   {
+#if __cplusplus >= 201100
+    typedef decltype( std::declval<LEFT>() + std::declval<RIGHT>() )
+      result_type;
+#else
     typedef typeof( LEFT() + RIGHT() ) result_type;
+#endif
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct plus_result<CONTAINER<LEFT>, RIGHT>
   {
-    typedef CONTAINER<typename plus_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename plus_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct plus_result<LEFT, CONTAINER<RIGHT> >
   {
-    typedef CONTAINER<typename plus_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename plus_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER1, template <typename> class CONTAINER2>
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER1,
+            template <typename> class CONTAINER2>
   struct plus_result<CONTAINER1<LEFT>, CONTAINER2<RIGHT> >
   {
-    typedef CONTAINER1<typename plus_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER1<typename plus_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   // minus
@@ -93,25 +103,35 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT>
   struct minus_result
   {
+#if __cplusplus >= 201100
+    typedef decltype( std::declval<LEFT>() - std::declval<RIGHT>() )
+      result_type;
+#else
     typedef typeof( LEFT() - RIGHT() ) result_type;
+#endif
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct minus_result<CONTAINER<LEFT>, RIGHT>
   {
-    typedef CONTAINER<typename minus_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename minus_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct minus_result<LEFT, CONTAINER<RIGHT> >
   {
-    typedef CONTAINER<typename minus_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename minus_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER1, template <typename> class CONTAINER2>
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER1,
+            template <typename> class CONTAINER2>
   struct minus_result<CONTAINER1<LEFT>, CONTAINER2<RIGHT> >
   {
-    typedef CONTAINER1<typename minus_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER1<typename minus_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   // multiplies
@@ -119,25 +139,33 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT>
   struct multiplies_result
   {
+#if __cplusplus >= 201100
+    typedef decltype( std::declval<LEFT>() * std::declval<RIGHT>() )
+      result_type;
+#else
     typedef typeof( LEFT() * RIGHT() ) result_type;
+#endif
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct multiplies_result<CONTAINER<LEFT>, RIGHT>
   {
-    typedef CONTAINER<typename multiplies_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename multiplies_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct multiplies_result<LEFT, CONTAINER<RIGHT> >
   {
-    typedef CONTAINER<typename multiplies_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename multiplies_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER1, template <typename> class CONTAINER2>
   struct multiplies_result<CONTAINER1<LEFT>, CONTAINER2<RIGHT> >
   {
-    typedef CONTAINER1<typename multiplies_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER1<typename multiplies_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   // divides
@@ -145,25 +173,35 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT>
   struct divides_result
   {
+#if __cplusplus >= 201100
+    typedef decltype( std::declval<LEFT>() / std::declval<RIGHT>() )
+      result_type;
+#else
     typedef typeof( LEFT() / RIGHT() ) result_type;
+#endif
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct divides_result<CONTAINER<LEFT>, RIGHT>
   {
-    typedef CONTAINER<typename divides_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename divides_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct divides_result<LEFT, CONTAINER<RIGHT> >
   {
-    typedef CONTAINER<typename divides_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename divides_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER1, template <typename> class CONTAINER2>
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER1,
+            template <typename> class CONTAINER2>
   struct divides_result<CONTAINER1<LEFT>, CONTAINER2<RIGHT> >
   {
-    typedef CONTAINER1<typename divides_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER1<typename divides_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   // modulus
@@ -171,25 +209,37 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT>
   struct modulus_result
   {
+#if __cplusplus >= 201100
+    typedef decltype( std::declval<LEFT>() % std::declval<RIGHT>() )
+      result_type;
+#else
     typedef typeof( LEFT() % RIGHT() ) result_type;
+#endif
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER >
   struct modulus_result<CONTAINER<LEFT>, RIGHT>
   {
-    typedef CONTAINER<typename modulus_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename modulus_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER >
   struct modulus_result<LEFT, CONTAINER<RIGHT> >
   {
-    typedef CONTAINER<typename modulus_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename modulus_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER1, template <typename> class CONTAINER2>
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER1,
+            template <typename> class CONTAINER2>
   struct modulus_result<CONTAINER1<LEFT>, CONTAINER2<RIGHT> >
   {
-    typedef CONTAINER1<typename modulus_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER1<typename modulus_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   // bitwise_and
@@ -197,25 +247,35 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT>
   struct bitwise_and_result
   {
+#if __cplusplus >= 201100
+    typedef decltype( std::declval<LEFT>() & std::declval<RIGHT>() )
+      result_type;
+#else
     typedef typeof( LEFT() & RIGHT() ) result_type;
+#endif
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct bitwise_and_result<CONTAINER<LEFT>, RIGHT>
   {
-    typedef CONTAINER<typename bitwise_and_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename bitwise_and_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct bitwise_and_result<LEFT, CONTAINER<RIGHT> >
   {
-    typedef CONTAINER<typename bitwise_and_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename bitwise_and_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER1, template <typename> class CONTAINER2>
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER1,
+            template <typename> class CONTAINER2>
   struct bitwise_and_result<CONTAINER1<LEFT>, CONTAINER2<RIGHT> >
   {
-    typedef CONTAINER1<typename bitwise_and_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER1<typename bitwise_and_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   // bitwise_or
@@ -223,25 +283,35 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT>
   struct bitwise_or_result
   {
+#if __cplusplus >= 201100
+    typedef decltype( std::declval<LEFT>() | std::declval<RIGHT>() )
+      result_type;
+#else
     typedef typeof( LEFT() | RIGHT() ) result_type;
+#endif
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct bitwise_or_result<CONTAINER<LEFT>, RIGHT>
   {
-    typedef CONTAINER<typename bitwise_or_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename bitwise_or_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct bitwise_or_result<LEFT, CONTAINER<RIGHT> >
   {
-    typedef CONTAINER<typename bitwise_or_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename bitwise_or_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER1, template <typename> class CONTAINER2>
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER1,
+            template <typename> class CONTAINER2>
   struct bitwise_or_result<CONTAINER1<LEFT>, CONTAINER2<RIGHT> >
   {
-    typedef CONTAINER1<typename bitwise_or_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER1<typename bitwise_or_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   // bitwise_xor
@@ -249,25 +319,35 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT>
   struct bitwise_xor_result
   {
+#if __cplusplus >= 201100
+    typedef decltype( std::declval<LEFT>() ^ std::declval<RIGHT>() )
+      result_type;
+#else
     typedef typeof( LEFT() ^ RIGHT() ) result_type;
+#endif
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct bitwise_xor_result<CONTAINER<LEFT>, RIGHT>
   {
-    typedef CONTAINER<typename bitwise_xor_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename bitwise_xor_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct bitwise_xor_result<LEFT, CONTAINER<RIGHT> >
   {
-    typedef CONTAINER<typename bitwise_xor_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename bitwise_xor_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER1, template <typename> class CONTAINER2>
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER1,
+            template <typename> class CONTAINER2>
   struct bitwise_xor_result<CONTAINER1<LEFT>, CONTAINER2<RIGHT> >
   {
-    typedef CONTAINER1<typename bitwise_xor_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER1<typename bitwise_xor_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   // select
@@ -275,25 +355,35 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT>
   struct select_result
   {
+#if __cplusplus >= 201100
+    typedef decltype( true ? std::declval<LEFT>() : std::declval<RIGHT>() )
+      result_type;
+#else
     typedef typeof( true ? LEFT() : RIGHT() ) result_type;
+#endif
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct select_result<CONTAINER<LEFT>, RIGHT>
   {
-    typedef CONTAINER<typename select_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename select_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
   struct select_result<LEFT, CONTAINER<RIGHT> >
   {
-    typedef CONTAINER<typename select_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER<typename select_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
-  template <typename LEFT, typename RIGHT, template<typename> class CONTAINER1, template <typename> class CONTAINER2>
+  template <typename LEFT, typename RIGHT,
+            template<typename> class CONTAINER1,
+            template <typename> class CONTAINER2>
   struct select_result<CONTAINER1<LEFT>, CONTAINER2<RIGHT> >
   {
-    typedef CONTAINER1<typename select_result<LEFT,RIGHT>::result_type> result_type;
+    typedef CONTAINER1<typename select_result<LEFT,RIGHT>::result_type>
+      result_type;
   };
 
   //==========================================================================
@@ -310,7 +400,8 @@ namespace volumeutil {
   template <>
   struct basic_type_result<uint8_t, int8_t> { typedef uint8_t result_type; };
   template <>
-  struct basic_type_result<uint8_t, uint16_t> { typedef uint16_t result_type; };
+  struct basic_type_result<uint8_t, uint16_t>
+  { typedef uint16_t result_type; };
   template <>
   struct basic_type_result<uint8_t, int16_t> { typedef int16_t result_type; };
 
@@ -324,20 +415,24 @@ namespace volumeutil {
   struct basic_type_result<int8_t, int16_t> { typedef int16_t result_type; };
 
   template <>
-  struct basic_type_result<uint16_t, uint8_t> { typedef uint16_t result_type; };
+  struct basic_type_result<uint16_t, uint8_t>
+  { typedef uint16_t result_type; };
   template <>
   struct basic_type_result<uint16_t, int8_t> { typedef uint16_t result_type; };
   template <>
-  struct basic_type_result<uint16_t, uint16_t> { typedef uint16_t result_type; };
+  struct basic_type_result<uint16_t, uint16_t>
+  { typedef uint16_t result_type; };
   template <>
-  struct basic_type_result<uint16_t, int16_t> { typedef uint16_t result_type; };
+  struct basic_type_result<uint16_t, int16_t>
+  { typedef uint16_t result_type; };
 
   template <>
   struct basic_type_result<int16_t, uint8_t> { typedef int16_t result_type; };
   template <>
   struct basic_type_result<int16_t, int8_t> { typedef int16_t result_type; };
   template <>
-  struct basic_type_result<int16_t, uint16_t> { typedef uint16_t result_type; };
+  struct basic_type_result<int16_t, uint16_t>
+  { typedef uint16_t result_type; };
   template <>
   struct basic_type_result<int16_t, int16_t> { typedef int16_t result_type; };
 

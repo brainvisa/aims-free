@@ -54,7 +54,11 @@ struct container
 template <typename LEFT, typename RIGHT>
 struct result
 {
+#if __cplusplus >= 201100
+  typedef decltype( std::declval<LEFT>() + std::declval<RIGHT>() ) result_type;
+#else
   typedef typeof( LEFT() + RIGHT() ) result_type;
+#endif
 };
 
 template <typename LEFT, typename RIGHT, template<typename> class CONTAINER >
