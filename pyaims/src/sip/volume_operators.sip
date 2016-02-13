@@ -312,10 +312,14 @@ Volume_U8* __add__( Volume_U8 &, long )
   unsigned char p = (unsigned char) a1;
   sipRes = __add__( *a0, p );
 %End
+/*
+// sip apparently does not distinguish between int and double:
+// this function is never called.
 Volume_DOUBLE* __add__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__radd_Volume_U8__/;
 Volume_DOUBLE* __add__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__add_Volume_U8__/;
+*/
 Volume_U8 & __iadd__( Volume_U8 &, double )
   /ReleaseGIL, PyName=__iadd_Volume_U8__/;
 
@@ -331,15 +335,15 @@ Volume_U8* __sub__( Volume_U8 &, long )
   unsigned char p = (unsigned char) a1;
   sipRes = __sub__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __sub__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__rsub_Volume_U8__/;
 %MethodCode
   sipRes = __sub__( a1, *a0 );
 %End
-// sip apparently does not distinguish between int and double:
-// this function is never called.
 Volume_DOUBLE* __sub__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__sub_Volume_U8__/;
+*/
 Volume_U8 & __isub__( Volume_U8 &, double )
   /ReleaseGIL, PyName=__isub_Volume_U8__/;
 
@@ -355,10 +359,12 @@ Volume_U8* __mul__( Volume_U8 &, long )
   unsigned char p = (unsigned char) a1;
   sipRes = __mul__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __mul__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_U8__/;
 Volume_DOUBLE* __mul__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_U8__/;
+*/
 Volume_U8 & __imul__( Volume_U8 &, double )
   /ReleaseGIL, PyName=__imul_Volume_U8__/;
 
@@ -374,6 +380,7 @@ Volume_U8* __div__( Volume_U8 &, long )
   unsigned char p = (unsigned char) a1;
   sipRes = __div__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __div__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_U8__/;
 %MethodCode
@@ -381,6 +388,7 @@ Volume_DOUBLE* __div__( Volume_U8 &, double )
 %End
 Volume_DOUBLE* __div__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_U8__/;
+*/
 Volume_U8 & __idiv__( Volume_U8 &, double )
   /ReleaseGIL, PyName=__idiv_Volume_U8__/;
 
@@ -776,10 +784,12 @@ Volume_S16* __add__( Volume_S16 &, long )
   short p = (short) a1;
   sipRes = __add__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __add__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__radd_Volume_S16__/;
 Volume_DOUBLE* __add__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__add_Volume_S16__/;
+*/
 Volume_S16 & __iadd__( Volume_S16 &, double )
   /ReleaseGIL, PyName=__iadd_Volume_S16__/;
 
@@ -795,15 +805,15 @@ Volume_S16* __sub__( Volume_S16 &, long )
   short p = (short) a1;
   sipRes = __sub__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __sub__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__rsub_Volume_S16__/;
 %MethodCode
   sipRes = __sub__( a1, *a0 );
 %End
-// sip apparently does not distinguish between int and double:
-// this function is never called.
 Volume_DOUBLE* __sub__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__sub_Volume_S16__/;
+*/
 Volume_S16 & __isub__( Volume_S16 &, double )
   /ReleaseGIL, PyName=__isub_Volume_S16__/;
 
@@ -819,10 +829,12 @@ Volume_S16* __mul__( Volume_S16 &, long )
   short p = (short) a1;
   sipRes = __mul__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __mul__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_S16__/;
 Volume_DOUBLE* __mul__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_S16__/;
+*/
 Volume_S16 & __imul__( Volume_S16 &, double )
   /ReleaseGIL, PyName=__imul_Volume_S16__/;
 
@@ -838,6 +850,7 @@ Volume_S16* __div__( Volume_S16 &, long )
   short p = (short) a1;
   sipRes = __div__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __div__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_S16__/;
 %MethodCode
@@ -845,6 +858,7 @@ Volume_DOUBLE* __div__( Volume_S16 &, double )
 %End
 Volume_DOUBLE* __div__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_S16__/;
+*/
 Volume_S16 & __idiv__( Volume_S16 &, double )
   /ReleaseGIL, PyName=__idiv_Volume_S16__/;
 
@@ -1219,10 +1233,12 @@ Volume_U16* __add__( Volume_U16 &, long )
   short p = (short) a1;
   sipRes = __add__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __add__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__radd_Volume_U16__/;
 Volume_DOUBLE* __add__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__add_Volume_U16__/;
+*/
 Volume_U16 & __iadd__( Volume_U16 &, double )
   /ReleaseGIL, PyName=__iadd_Volume_U16__/;
 
@@ -1238,15 +1254,15 @@ Volume_U16* __sub__( Volume_U16 &, long )
   short p = (short) a1;
   sipRes = __sub__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __sub__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__rsub_Volume_U16__/;
 %MethodCode
   sipRes = __sub__( a1, *a0 );
 %End
-// sip apparently does not distinguish between int and double:
-// this function is never called.
 Volume_DOUBLE* __sub__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__sub_Volume_U16__/;
+*/
 Volume_U16 & __isub__( Volume_U16 &, double )
   /ReleaseGIL, PyName=__isub_Volume_U16__/;
 
@@ -1262,10 +1278,12 @@ Volume_U16* __mul__( Volume_U16 &, long )
   short p = (short) a1;
   sipRes = __mul__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __mul__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_U16__/;
 Volume_DOUBLE* __mul__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_U16__/;
+*/
 Volume_U16 & __imul__( Volume_U16 &, double )
   /ReleaseGIL, PyName=__imul_Volume_U16__/;
 
@@ -1281,6 +1299,7 @@ Volume_U16* __div__( Volume_U16 &, long )
   short p = (short) a1;
   sipRes = __div__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __div__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_U16__/;
 %MethodCode
@@ -1288,6 +1307,7 @@ Volume_DOUBLE* __div__( Volume_U16 &, double )
 %End
 Volume_DOUBLE* __div__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_U16__/;
+*/
 Volume_U16 & __idiv__( Volume_U16 &, double )
   /ReleaseGIL, PyName=__idiv_Volume_U16__/;
 
@@ -1683,10 +1703,12 @@ Volume_S32* __add__( Volume_S32 &, long )
   int p = (int) a1;
   sipRes = __add__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __add__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__radd_Volume_S32__/;
 Volume_DOUBLE* __add__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__add_Volume_S32__/;
+*/
 Volume_S32 & __iadd__( Volume_S32 &, double )
   /ReleaseGIL, PyName=__iadd_Volume_S32__/;
 
@@ -1702,15 +1724,15 @@ Volume_S32* __sub__( Volume_S32 &, long )
   int p = (int) a1;
   sipRes = __sub__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __sub__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__rsub_Volume_S32__/;
 %MethodCode
   sipRes = __sub__( a1, *a0 );
 %End
-// sip apparently does not distinguish between int and double:
-// this function is never called.
 Volume_DOUBLE* __sub__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__sub_Volume_S32__/;
+*/
 Volume_S32 & __isub__( Volume_S32 &, double )
   /ReleaseGIL, PyName=__isub_Volume_S32__/;
 
@@ -1726,10 +1748,12 @@ Volume_S32* __mul__( Volume_S32 &, long )
   int p = (int) a1;
   sipRes = __mul__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __mul__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_S32__/;
 Volume_DOUBLE* __mul__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_S32__/;
+*/
 Volume_S32 & __imul__( Volume_S32 &, double )
   /ReleaseGIL, PyName=__imul_Volume_S32__/;
 
@@ -1745,6 +1769,7 @@ Volume_S32* __div__( Volume_S32 &, long )
   int p = (int) a1;
   sipRes = __div__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __div__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_S32__/;
 %MethodCode
@@ -1752,6 +1777,7 @@ Volume_DOUBLE* __div__( Volume_S32 &, double )
 %End
 Volume_DOUBLE* __div__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_S32__/;
+*/
 Volume_S32 & __idiv__( Volume_S32 &, double )
   /ReleaseGIL, PyName=__idiv_Volume_S32__/;
 
@@ -2126,10 +2152,12 @@ Volume_U32* __add__( Volume_U32 &, long )
   unsigned p = (unsigned) a1;
   sipRes = __add__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __add__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__radd_Volume_U32__/;
 Volume_DOUBLE* __add__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__add_Volume_U32__/;
+*/
 Volume_U32 & __iadd__( Volume_U32 &, double )
   /ReleaseGIL, PyName=__iadd_Volume_U32__/;
 
@@ -2145,15 +2173,15 @@ Volume_U32* __sub__( Volume_U32 &, long )
   unsigned p = (unsigned) a1;
   sipRes = __sub__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __sub__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__rsub_Volume_U32__/;
 %MethodCode
   sipRes = __sub__( a1, *a0 );
 %End
-// sip apparently does not distinguish between int and double:
-// this function is never called.
 Volume_DOUBLE* __sub__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__sub_Volume_U32__/;
+*/
 Volume_U32 & __isub__( Volume_U32 &, double )
   /ReleaseGIL, PyName=__isub_Volume_U32__/;
 
@@ -2169,10 +2197,12 @@ Volume_U32* __mul__( Volume_U32 &, long )
   unsigned p = (unsigned) a1;
   sipRes = __mul__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __mul__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_U32__/;
 Volume_DOUBLE* __mul__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_U32__/;
+*/
 Volume_U32 & __imul__( Volume_U32 &, double )
   /ReleaseGIL, PyName=__imul_Volume_U32__/;
 
@@ -2188,6 +2218,7 @@ Volume_U32* __div__( Volume_U32 &, long )
   unsigned p = (unsigned) a1;
   sipRes = __div__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __div__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_U32__/;
 %MethodCode
@@ -2195,6 +2226,7 @@ Volume_DOUBLE* __div__( Volume_U32 &, double )
 %End
 Volume_DOUBLE* __div__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_U32__/;
+*/
 Volume_U32 & __idiv__( Volume_U32 &, double )
   /ReleaseGIL, PyName=__idiv_Volume_U32__/;
 
@@ -2560,10 +2592,12 @@ Volume_FLOAT* __add__( Volume_FLOAT &, float )
   float p = (float) a1;
   sipRes = __add__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __add__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__radd_Volume_FLOAT__/;
 Volume_DOUBLE* __add__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__add_Volume_FLOAT__/;
+*/
 Volume_FLOAT & __iadd__( Volume_FLOAT &, double )
   /ReleaseGIL, PyName=__iadd_Volume_FLOAT__/;
 
@@ -2579,15 +2613,15 @@ Volume_FLOAT* __sub__( Volume_FLOAT &, float )
   float p = (float) a1;
   sipRes = __sub__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __sub__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__rsub_Volume_FLOAT__/;
 %MethodCode
   sipRes = __sub__( a1, *a0 );
 %End
-// sip apparently does not distinguish between int and double:
-// this function is never called.
 Volume_DOUBLE* __sub__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__sub_Volume_FLOAT__/;
+*/
 Volume_FLOAT & __isub__( Volume_FLOAT &, double )
   /ReleaseGIL, PyName=__isub_Volume_FLOAT__/;
 
@@ -2603,10 +2637,12 @@ Volume_FLOAT* __mul__( Volume_FLOAT &, float )
   float p = (float) a1;
   sipRes = __mul__( *a0, p );
 %End
+/*
 Volume_DOUBLE* __mul__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_FLOAT__/;
 Volume_DOUBLE* __mul__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_FLOAT__/;
+*/
 Volume_FLOAT & __imul__( Volume_FLOAT &, double )
   /ReleaseGIL, PyName=__imul_Volume_FLOAT__/;
 
@@ -2622,6 +2658,7 @@ Volume_FLOAT* __div__( Volume_FLOAT &, float )
   float p = (float) a1;
   sipRes = __div__( p, *a0 );
 %End
+/*
 Volume_DOUBLE* __div__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_FLOAT__/;
 %MethodCode
@@ -2629,10 +2666,11 @@ Volume_DOUBLE* __div__( Volume_FLOAT &, double )
 %End
 Volume_DOUBLE* __div__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_FLOAT__/;
+*/
 Volume_FLOAT & __idiv__( Volume_FLOAT &, double )
   /ReleaseGIL, PyName=__idiv_Volume_FLOAT__/;
 
-/*
+/* mod exists in python on float, but is not implemented on Volume un C++
 Volume_FLOAT* __mod__( Volume_FLOAT &, float )
   /Factory, ReleaseGIL, PyName=__mod_Volume_FLOAT__/;
 %MethodCode
@@ -2975,6 +3013,125 @@ Volume_RGBA* __div__( Volume_DOUBLE &, AimsRGBA & )
 
 // --- POINT3DF
 
+// POINT3DF + U8
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U8 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_U8 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U8 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_U8 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_U8 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + S16
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_S16 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_S16 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_S16 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_S16 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_S16 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + U16
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U16 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_U16 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U16 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_U16 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_U16 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + S32
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_S32 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_S32 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_S32 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_S32 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_S32 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + U32
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U32 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_U32 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U32 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_U32 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_U32 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + FLOAT
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_FLOAT & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_FLOAT & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_FLOAT & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_FLOAT & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_FLOAT & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + DOUBLE
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
 // POINT3DF + POINT3DF
 
 Volume_POINT3DF* __add__( Volume_POINT3DF &, Volume_POINT3DF & )
@@ -3007,6 +3164,25 @@ Volume_POINT3DF* __sub__( Volume_POINT3DF &, Point3df & )
   /Factory, ReleaseGIL, PyName=__sub_Volume_POINT3DF__/;
 Volume_POINT3DF & __isub__( Volume_POINT3DF &, Point3df & )
   /ReleaseGIL, PyName=__isub_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+/*
+Volume_POINT3DF* __div__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__rdiv_Volume_POINT3DF__/;
+%MethodCode
+  sipRes = __div__( a1, *a0 );
+%End
+*/
 
 // --- RGB
 
