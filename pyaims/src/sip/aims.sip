@@ -314,6 +314,8 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include rcptr_Volume_CDOUBLE.sip
 %Include rcptr_Volume_POINT3DF.sip
 
+%Include volume_operators.sip
+
 %Include reader_Volume_U8.sip
 %Include reader_Volume_S16.sip
 %Include reader_Volume_U16.sip

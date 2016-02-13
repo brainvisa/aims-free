@@ -447,29 +447,29 @@ namespace volumeutil {
   template <>
   struct plus_result<uint8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
   template <>
-  struct plus_result<int8_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct plus_result<int8_t, uint8_t>: public basic_type_result<int8_t, uint8_t> {};
   template <>
-  struct plus_result<int8_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct plus_result<int8_t, int8_t>: public basic_type_result<int8_t, int8_t> {};
   template <>
-  struct plus_result<int8_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct plus_result<int8_t, uint16_t>: public basic_type_result<int8_t, uint16_t> {};
   template <>
-  struct plus_result<int8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct plus_result<int8_t, int16_t>: public basic_type_result<int8_t, int16_t> {};
   template <>
-  struct plus_result<uint16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct plus_result<uint16_t, uint8_t>: public basic_type_result<uint16_t, uint8_t> {};
   template <>
-  struct plus_result<uint16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct plus_result<uint16_t, int8_t>: public basic_type_result<uint16_t, int8_t> {};
   template <>
-  struct plus_result<uint16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct plus_result<uint16_t, uint16_t>: public basic_type_result<uint16_t, uint16_t> {};
   template <>
-  struct plus_result<uint16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct plus_result<uint16_t, int16_t>: public basic_type_result<uint16_t, int16_t> {};
   template <>
-  struct plus_result<int16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct plus_result<int16_t, uint8_t>: public basic_type_result<int16_t, uint8_t> {};
   template <>
-  struct plus_result<int16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct plus_result<int16_t, int8_t>: public basic_type_result<int16_t, int8_t> {};
   template <>
-  struct plus_result<int16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct plus_result<int16_t, uint16_t>: public basic_type_result<int16_t, uint16_t> {};
   template <>
-  struct plus_result<int16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct plus_result<int16_t, int16_t>: public basic_type_result<int16_t, int16_t> {};
 
   // minus
 
@@ -482,29 +482,29 @@ namespace volumeutil {
   template <>
   struct minus_result<uint8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
   template <>
-  struct minus_result<int8_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct minus_result<int8_t, uint8_t>: public basic_type_result<int8_t, uint8_t> {};
   template <>
-  struct minus_result<int8_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct minus_result<int8_t, int8_t>: public basic_type_result<int8_t, int8_t> {};
   template <>
-  struct minus_result<int8_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct minus_result<int8_t, uint16_t>: public basic_type_result<int8_t, uint16_t> {};
   template <>
-  struct minus_result<int8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct minus_result<int8_t, int16_t>: public basic_type_result<int8_t, int16_t> {};
   template <>
-  struct minus_result<uint16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct minus_result<uint16_t, uint8_t>: public basic_type_result<uint16_t, uint8_t> {};
   template <>
-  struct minus_result<uint16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct minus_result<uint16_t, int8_t>: public basic_type_result<uint16_t, int8_t> {};
   template <>
-  struct minus_result<uint16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct minus_result<uint16_t, uint16_t>: public basic_type_result<uint16_t, uint16_t> {};
   template <>
-  struct minus_result<uint16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct minus_result<uint16_t, int16_t>: public basic_type_result<uint16_t, int16_t> {};
   template <>
-  struct minus_result<int16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct minus_result<int16_t, uint8_t>: public basic_type_result<int16_t, uint8_t> {};
   template <>
-  struct minus_result<int16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct minus_result<int16_t, int8_t>: public basic_type_result<int16_t, int8_t> {};
   template <>
-  struct minus_result<int16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct minus_result<int16_t, uint16_t>: public basic_type_result<int16_t, uint16_t> {};
   template <>
-  struct minus_result<int16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct minus_result<int16_t, int16_t>: public basic_type_result<int16_t, int16_t> {};
 
   // multiplies
 
@@ -517,29 +517,29 @@ namespace volumeutil {
   template <>
   struct multiplies_result<uint8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
   template <>
-  struct multiplies_result<int8_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct multiplies_result<int8_t, uint8_t>: public basic_type_result<int8_t, uint8_t> {};
   template <>
-  struct multiplies_result<int8_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct multiplies_result<int8_t, int8_t>: public basic_type_result<int8_t, int8_t> {};
   template <>
-  struct multiplies_result<int8_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct multiplies_result<int8_t, uint16_t>: public basic_type_result<int8_t, uint16_t> {};
   template <>
-  struct multiplies_result<int8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct multiplies_result<int8_t, int16_t>: public basic_type_result<int8_t, int16_t> {};
   template <>
-  struct multiplies_result<uint16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct multiplies_result<uint16_t, uint8_t>: public basic_type_result<uint16_t, uint8_t> {};
   template <>
-  struct multiplies_result<uint16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct multiplies_result<uint16_t, int8_t>: public basic_type_result<uint16_t, int8_t> {};
   template <>
-  struct multiplies_result<uint16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct multiplies_result<uint16_t, uint16_t>: public basic_type_result<uint16_t, uint16_t> {};
   template <>
-  struct multiplies_result<uint16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct multiplies_result<uint16_t, int16_t>: public basic_type_result<uint16_t, int16_t> {};
   template <>
-  struct multiplies_result<int16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct multiplies_result<int16_t, uint8_t>: public basic_type_result<int16_t, uint8_t> {};
   template <>
-  struct multiplies_result<int16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct multiplies_result<int16_t, int8_t>: public basic_type_result<int16_t, int8_t> {};
   template <>
-  struct multiplies_result<int16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct multiplies_result<int16_t, uint16_t>: public basic_type_result<int16_t, uint16_t> {};
   template <>
-  struct multiplies_result<int16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct multiplies_result<int16_t, int16_t>: public basic_type_result<int16_t, int16_t> {};
 
   // divides
 
@@ -552,29 +552,29 @@ namespace volumeutil {
   template <>
   struct divides_result<uint8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
   template <>
-  struct divides_result<int8_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct divides_result<int8_t, uint8_t>: public basic_type_result<int8_t, uint8_t> {};
   template <>
-  struct divides_result<int8_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct divides_result<int8_t, int8_t>: public basic_type_result<int8_t, int8_t> {};
   template <>
-  struct divides_result<int8_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct divides_result<int8_t, uint16_t>: public basic_type_result<int8_t, uint16_t> {};
   template <>
-  struct divides_result<int8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct divides_result<int8_t, int16_t>: public basic_type_result<int8_t, int16_t> {};
   template <>
-  struct divides_result<uint16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct divides_result<uint16_t, uint8_t>: public basic_type_result<uint16_t, uint8_t> {};
   template <>
-  struct divides_result<uint16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct divides_result<uint16_t, int8_t>: public basic_type_result<uint16_t, int8_t> {};
   template <>
-  struct divides_result<uint16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct divides_result<uint16_t, uint16_t>: public basic_type_result<uint16_t, uint16_t> {};
   template <>
-  struct divides_result<uint16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct divides_result<uint16_t, int16_t>: public basic_type_result<uint16_t, int16_t> {};
   template <>
-  struct divides_result<int16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct divides_result<int16_t, uint8_t>: public basic_type_result<int16_t, uint8_t> {};
   template <>
-  struct divides_result<int16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct divides_result<int16_t, int8_t>: public basic_type_result<int16_t, int8_t> {};
   template <>
-  struct divides_result<int16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct divides_result<int16_t, uint16_t>: public basic_type_result<int16_t, uint16_t> {};
   template <>
-  struct divides_result<int16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct divides_result<int16_t, int16_t>: public basic_type_result<int16_t, int16_t> {};
 
   // modulus
 
@@ -587,29 +587,29 @@ namespace volumeutil {
   template <>
   struct modulus_result<uint8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
   template <>
-  struct modulus_result<int8_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct modulus_result<int8_t, uint8_t>: public basic_type_result<int8_t, uint8_t> {};
   template <>
-  struct modulus_result<int8_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct modulus_result<int8_t, int8_t>: public basic_type_result<int8_t, int8_t> {};
   template <>
-  struct modulus_result<int8_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct modulus_result<int8_t, uint16_t>: public basic_type_result<int8_t, uint16_t> {};
   template <>
-  struct modulus_result<int8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct modulus_result<int8_t, int16_t>: public basic_type_result<int8_t, int16_t> {};
   template <>
-  struct modulus_result<uint16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct modulus_result<uint16_t, uint8_t>: public basic_type_result<uint16_t, uint8_t> {};
   template <>
-  struct modulus_result<uint16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct modulus_result<uint16_t, int8_t>: public basic_type_result<uint16_t, int8_t> {};
   template <>
-  struct modulus_result<uint16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct modulus_result<uint16_t, uint16_t>: public basic_type_result<uint16_t, uint16_t> {};
   template <>
-  struct modulus_result<uint16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct modulus_result<uint16_t, int16_t>: public basic_type_result<uint16_t, int16_t> {};
   template <>
-  struct modulus_result<int16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct modulus_result<int16_t, uint8_t>: public basic_type_result<int16_t, uint8_t> {};
   template <>
-  struct modulus_result<int16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct modulus_result<int16_t, int8_t>: public basic_type_result<int16_t, int8_t> {};
   template <>
-  struct modulus_result<int16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct modulus_result<int16_t, uint16_t>: public basic_type_result<int16_t, uint16_t> {};
   template <>
-  struct modulus_result<int16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct modulus_result<int16_t, int16_t>: public basic_type_result<int16_t, int16_t> {};
 
   // bitwise_and
 
@@ -622,29 +622,29 @@ namespace volumeutil {
   template <>
   struct bitwise_and_result<uint8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
   template <>
-  struct bitwise_and_result<int8_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct bitwise_and_result<int8_t, uint8_t>: public basic_type_result<int8_t, uint8_t> {};
   template <>
-  struct bitwise_and_result<int8_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct bitwise_and_result<int8_t, int8_t>: public basic_type_result<int8_t, int8_t> {};
   template <>
-  struct bitwise_and_result<int8_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct bitwise_and_result<int8_t, uint16_t>: public basic_type_result<int8_t, uint16_t> {};
   template <>
-  struct bitwise_and_result<int8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct bitwise_and_result<int8_t, int16_t>: public basic_type_result<int8_t, int16_t> {};
   template <>
-  struct bitwise_and_result<uint16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct bitwise_and_result<uint16_t, uint8_t>: public basic_type_result<uint16_t, uint8_t> {};
   template <>
-  struct bitwise_and_result<uint16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct bitwise_and_result<uint16_t, int8_t>: public basic_type_result<uint16_t, int8_t> {};
   template <>
-  struct bitwise_and_result<uint16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct bitwise_and_result<uint16_t, uint16_t>: public basic_type_result<uint16_t, uint16_t> {};
   template <>
-  struct bitwise_and_result<uint16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct bitwise_and_result<uint16_t, int16_t>: public basic_type_result<uint16_t, int16_t> {};
   template <>
-  struct bitwise_and_result<int16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct bitwise_and_result<int16_t, uint8_t>: public basic_type_result<int16_t, uint8_t> {};
   template <>
-  struct bitwise_and_result<int16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct bitwise_and_result<int16_t, int8_t>: public basic_type_result<int16_t, int8_t> {};
   template <>
-  struct bitwise_and_result<int16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct bitwise_and_result<int16_t, uint16_t>: public basic_type_result<int16_t, uint16_t> {};
   template <>
-  struct bitwise_and_result<int16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct bitwise_and_result<int16_t, int16_t>: public basic_type_result<int16_t, int16_t> {};
 
   // bitwise_or
 
@@ -657,29 +657,29 @@ namespace volumeutil {
   template <>
   struct bitwise_or_result<uint8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
   template <>
-  struct bitwise_or_result<int8_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct bitwise_or_result<int8_t, uint8_t>: public basic_type_result<int8_t, uint8_t> {};
   template <>
-  struct bitwise_or_result<int8_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct bitwise_or_result<int8_t, int8_t>: public basic_type_result<int8_t, int8_t> {};
   template <>
-  struct bitwise_or_result<int8_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct bitwise_or_result<int8_t, uint16_t>: public basic_type_result<int8_t, uint16_t> {};
   template <>
-  struct bitwise_or_result<int8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct bitwise_or_result<int8_t, int16_t>: public basic_type_result<int8_t, int16_t> {};
   template <>
-  struct bitwise_or_result<uint16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct bitwise_or_result<uint16_t, uint8_t>: public basic_type_result<uint16_t, uint8_t> {};
   template <>
-  struct bitwise_or_result<uint16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct bitwise_or_result<uint16_t, int8_t>: public basic_type_result<uint16_t, int8_t> {};
   template <>
-  struct bitwise_or_result<uint16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct bitwise_or_result<uint16_t, uint16_t>: public basic_type_result<uint16_t, uint16_t> {};
   template <>
-  struct bitwise_or_result<uint16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct bitwise_or_result<uint16_t, int16_t>: public basic_type_result<uint16_t, int16_t> {};
   template <>
-  struct bitwise_or_result<int16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct bitwise_or_result<int16_t, uint8_t>: public basic_type_result<int16_t, uint8_t> {};
   template <>
-  struct bitwise_or_result<int16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct bitwise_or_result<int16_t, int8_t>: public basic_type_result<int16_t, int8_t> {};
   template <>
-  struct bitwise_or_result<int16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct bitwise_or_result<int16_t, uint16_t>: public basic_type_result<int16_t, uint16_t> {};
   template <>
-  struct bitwise_or_result<int16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct bitwise_or_result<int16_t, int16_t>: public basic_type_result<int16_t, int16_t> {};
 
   // bitwise_xor
 
@@ -692,29 +692,29 @@ namespace volumeutil {
   template <>
   struct bitwise_xor_result<uint8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
   template <>
-  struct bitwise_xor_result<int8_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct bitwise_xor_result<int8_t, uint8_t>: public basic_type_result<int8_t, uint8_t> {};
   template <>
-  struct bitwise_xor_result<int8_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct bitwise_xor_result<int8_t, int8_t>: public basic_type_result<int8_t, int8_t> {};
   template <>
-  struct bitwise_xor_result<int8_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct bitwise_xor_result<int8_t, uint16_t>: public basic_type_result<int8_t, uint16_t> {};
   template <>
-  struct bitwise_xor_result<int8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct bitwise_xor_result<int8_t, int16_t>: public basic_type_result<int8_t, int16_t> {};
   template <>
-  struct bitwise_xor_result<uint16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct bitwise_xor_result<uint16_t, uint8_t>: public basic_type_result<uint16_t, uint8_t> {};
   template <>
-  struct bitwise_xor_result<uint16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct bitwise_xor_result<uint16_t, int8_t>: public basic_type_result<uint16_t, int8_t> {};
   template <>
-  struct bitwise_xor_result<uint16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct bitwise_xor_result<uint16_t, uint16_t>: public basic_type_result<uint16_t, uint16_t> {};
   template <>
-  struct bitwise_xor_result<uint16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct bitwise_xor_result<uint16_t, int16_t>: public basic_type_result<uint16_t, int16_t> {};
   template <>
-  struct bitwise_xor_result<int16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct bitwise_xor_result<int16_t, uint8_t>: public basic_type_result<int16_t, uint8_t> {};
   template <>
-  struct bitwise_xor_result<int16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct bitwise_xor_result<int16_t, int8_t>: public basic_type_result<int16_t, int8_t> {};
   template <>
-  struct bitwise_xor_result<int16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct bitwise_xor_result<int16_t, uint16_t>: public basic_type_result<int16_t, uint16_t> {};
   template <>
-  struct bitwise_xor_result<int16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct bitwise_xor_result<int16_t, int16_t>: public basic_type_result<int16_t, int16_t> {};
 
   // select
 
@@ -727,29 +727,29 @@ namespace volumeutil {
   template <>
   struct select_result<uint8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
   template <>
-  struct select_result<int8_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct select_result<int8_t, uint8_t>: public basic_type_result<int8_t, uint8_t> {};
   template <>
-  struct select_result<int8_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct select_result<int8_t, int8_t>: public basic_type_result<int8_t, int8_t> {};
   template <>
-  struct select_result<int8_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct select_result<int8_t, uint16_t>: public basic_type_result<int8_t, uint16_t> {};
   template <>
-  struct select_result<int8_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct select_result<int8_t, int16_t>: public basic_type_result<int8_t, int16_t> {};
   template <>
-  struct select_result<uint16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct select_result<uint16_t, uint8_t>: public basic_type_result<uint16_t, uint8_t> {};
   template <>
-  struct select_result<uint16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct select_result<uint16_t, int8_t>: public basic_type_result<uint16_t, int8_t> {};
   template <>
-  struct select_result<uint16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct select_result<uint16_t, uint16_t>: public basic_type_result<uint16_t, uint16_t> {};
   template <>
-  struct select_result<uint16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct select_result<uint16_t, int16_t>: public basic_type_result<uint16_t, int16_t> {};
   template <>
-  struct select_result<int16_t, uint8_t>: public basic_type_result<uint8_t, uint8_t> {};
+  struct select_result<int16_t, uint8_t>: public basic_type_result<int16_t, uint8_t> {};
   template <>
-  struct select_result<int16_t, int8_t>: public basic_type_result<uint8_t, int8_t> {};
+  struct select_result<int16_t, int8_t>: public basic_type_result<int16_t, int8_t> {};
   template <>
-  struct select_result<int16_t, uint16_t>: public basic_type_result<uint8_t, uint16_t> {};
+  struct select_result<int16_t, uint16_t>: public basic_type_result<int16_t, uint16_t> {};
   template <>
-  struct select_result<int16_t, int16_t>: public basic_type_result<uint8_t, int16_t> {};
+  struct select_result<int16_t, int16_t>: public basic_type_result<int16_t, int16_t> {};
 
   //==========================================================================
   //   Generic operators
