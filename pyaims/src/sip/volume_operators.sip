@@ -3013,6 +3013,125 @@ Volume_RGBA* __div__( Volume_DOUBLE &, AimsRGBA & )
 
 // --- POINT3DF
 
+// POINT3DF + U8
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U8 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_U8 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U8 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_U8 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_U8 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + S16
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_S16 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_S16 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_S16 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_S16 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_S16 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + U16
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U16 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_U16 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U16 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_U16 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_U16 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + S32
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_S32 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_S32 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_S32 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_S32 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_S32 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + U32
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U32 & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_U32 & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_U32 & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_U32 & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_U32 & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + FLOAT
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_FLOAT & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_FLOAT & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_FLOAT & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_FLOAT & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_FLOAT & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
+// POINT3DF + DOUBLE
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, Volume_DOUBLE & )
+  /ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+
 // POINT3DF + POINT3DF
 
 Volume_POINT3DF* __add__( Volume_POINT3DF &, Volume_POINT3DF & )
@@ -3045,6 +3164,25 @@ Volume_POINT3DF* __sub__( Volume_POINT3DF &, Point3df & )
   /Factory, ReleaseGIL, PyName=__sub_Volume_POINT3DF__/;
 Volume_POINT3DF & __isub__( Volume_POINT3DF &, Point3df & )
   /ReleaseGIL, PyName=__isub_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__mul_Volume_POINT3DF__/;
+Volume_POINT3DF & __imul__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__imul_Volume_POINT3DF__/;
+Volume_POINT3DF* __mul__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__rmul_Volume_POINT3DF__/;
+
+Volume_POINT3DF* __div__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__div_Volume_POINT3DF__/;
+Volume_POINT3DF & __idiv__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__idiv_Volume_POINT3DF__/;
+/*
+Volume_POINT3DF* __div__( Volume_POINT3DF &, float )
+  /Factory, ReleaseGIL, PyName=__rdiv_Volume_POINT3DF__/;
+%MethodCode
+  sipRes = __div__( a1, *a0 );
+%End
+*/
 
 // --- RGB
 

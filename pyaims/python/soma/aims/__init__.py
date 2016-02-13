@@ -109,7 +109,7 @@ if 'BRAINVISA_SHARE' not in os.environ:
 del os
 
 from soma.aims import aimssip
-# from soma.functiontools import partial
+from soma.functiontools import partial
 from soma.importer import ExtendedImporter, GenericHandlers
 
 # Rename sip modules and reorganize namespaces using the Importer class
@@ -643,6 +643,18 @@ def __setitem_vec__(self, s, val):
         return self.__oldsetitem__(s, val)
 
 
+def __operator_overload__(op, self, other):
+    try:
+        return op(self, other)
+    except TypeError:
+        # this excaption handling is here to follow the behaviour of normal
+        # operators: if a.__add__(b) does not support the operand type of b,
+        # it should return NotImplemented, and should not raise an exception.
+        # In that case, python can call b.__radd__(a), which it doesn't do if
+        # an exception is raised.
+        return NotImplemented
+
+
 # scan classes and modify some of them
 def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
@@ -676,7 +688,11 @@ def __fixsipclasses__(classes):
                                   None)
                     if add is not None:
                         setattr(y, '__%s__' % op,
-                                types.MethodType(add, None, y))
+                                types.MethodType(
+                                    partial(
+                                      __fixsipclasses__.__operator_overload__,
+                                        add),
+                                    None, y))
             else:
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
@@ -724,10 +740,11 @@ __fixsipclasses__.getAttributeNames = rcptr_getAttributeNames
 __fixsipclasses__.__getitem_vec__ = __getitem_vec__
 __fixsipclasses__.__setitem_vec__ = __setitem_vec__
 __fixsipclasses__.proxyiter = proxyiter
+__fixsipclasses__.__operator_overload__ = __operator_overload__
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
-del __getitem_vec__, __setitem_vec__
+del __getitem_vec__, __setitem_vec__, __operator_overload__
 
 __fixsipclasses__(globals().items() + carto.__dict__.items())
 
