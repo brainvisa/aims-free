@@ -103,6 +103,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   typename carto::volumeutil::plus_result<L, R>::result_type *
   __add__( L & l, R & r )
   {
@@ -111,6 +112,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   L & __iadd__( L & l, R & r )
   {
     l += r;
@@ -182,6 +184,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   typename carto::volumeutil::minus_result<L, R>::result_type *
   __sub__( L & l, R & r )
   {
@@ -190,6 +193,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   L & __isub__( L & l, R & r )
   {
     l -= r;
@@ -261,6 +265,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   typename carto::volumeutil::multiplies_result<L, R>::result_type *
   __mul__( L & l, R & r )
   {
@@ -269,6 +274,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   L & __imul__( L & l, R & r )
   {
     l *= r;
@@ -340,6 +346,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   typename carto::volumeutil::divides_result<L, R>::result_type *
   __div__( L & l, R & r )
   {
@@ -348,6 +355,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   L & __idiv__( L & l, R & r )
   {
     l /= r;
@@ -419,6 +427,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   typename carto::volumeutil::modulus_result<L, R>::result_type *
   __mod__( L & l, R & r )
   {
@@ -427,6 +436,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   L & __imod__( L & l, R & r )
   {
     l %= r;
@@ -498,6 +508,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   typename carto::volumeutil::bitwise_and_result<L, R>::result_type *
   __and__( L & l, R & r )
   {
@@ -506,6 +517,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   L & __iand__( L & l, R & r )
   {
     l &= r;
@@ -577,6 +589,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   typename carto::volumeutil::bitwise_or_result<L, R>::result_type *
   __or__( L & l, R & r )
   {
@@ -585,6 +598,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   L & __ior__( L & l, R & r )
   {
     l |= r;
@@ -656,6 +670,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   typename carto::volumeutil::bitwise_xor_result<L, R>::result_type *
   __xor__( L & l, R & r )
   {
@@ -664,6 +679,7 @@ namespace
 
 
   template <typename L, typename R>
+  inline
   L & __ixor__( L & l, R & r )
   {
     l ^= r;
