@@ -655,6 +655,45 @@ def __operator_overload__(op, self, other):
         return NotImplemented
 
 
+def __Volume_astype__(self, dtype, copy=False):
+    '''Easy conversion method for volumes. Works in a similar was as numpy
+    arrays astype() methods, except that the "copy" parameter defaults to
+    False.
+
+    Parameters
+    ----------
+    dtype: string or type object
+        may be a volume or voxel type, specified either as a type oject
+        (int, aims.Volume_S32, numpy.int16), or as a string ("S16"...).
+    copy: bool
+        if False, a ShallowConverter will be used: if dtype matches the
+        current volume type, a shared reference to self will be returned.
+        Otherwise a new copy will be returned.
+
+    Returns
+    -------
+    A volume of the converted type
+    '''
+    if isinstance(dtype, basestring):
+        if dtype.startswith('Volume_'):
+            dtype = typeCode(dtype[7:])
+        else:
+            dtype = typeCode(dtype)
+    elif dtype.__name__.startswith('Volume_'):
+        dtype = typeCode(dtype.__name__[7:])
+    else:
+        dtype = typeCode(dtype)
+    outtype = 'Volume_%s' % dtype
+    try:
+        if not copy:
+            conv = ShallowConverter(intype=self, outtype=outtype)
+        else:
+            conv = Converter(intype=self, outtype=outtype)
+    except AttributeError:
+        raise TypeError('No conversion to type %s' % outtype)
+    return conv(self)
+
+
 # scan classes and modify some of them
 def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
@@ -693,6 +732,8 @@ def __fixsipclasses__(classes):
                                       __fixsipclasses__.__operator_overload__,
                                         add),
                                     None, y))
+                y.astype = types.MethodType(
+                    __fixsipclasses__.__Volume_astype__, None, y)
             else:
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
@@ -741,10 +782,11 @@ __fixsipclasses__.__getitem_vec__ = __getitem_vec__
 __fixsipclasses__.__setitem_vec__ = __setitem_vec__
 __fixsipclasses__.proxyiter = proxyiter
 __fixsipclasses__.__operator_overload__ = __operator_overload__
+__fixsipclasses__.__Volume_astype__ = __Volume_astype__
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
-del __getitem_vec__, __setitem_vec__, __operator_overload__
+del __getitem_vec__, __setitem_vec__, __operator_overload__, __Volume_astype__
 
 __fixsipclasses__(globals().items() + carto.__dict__.items())
 
