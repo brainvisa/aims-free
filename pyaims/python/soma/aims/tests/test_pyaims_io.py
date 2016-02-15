@@ -61,7 +61,8 @@ class TestPyaimsIO(unittest.TestCase):
 
     def use_format(self, vol, format):
         suffixes = {'.dcm': '1', '.tiff': '_0000'}
-        partial_io = ['.nii', '.nii.gz', '.ima']
+        partial_read = ['.nii', '.nii.gz', '.ima']
+        partial_write = ['.nii', '.ima']
         default_epsilon = 1e-6
         # ecat scaling is far from exact...
         epsilon = {'.v': 5e-2}
@@ -96,13 +97,30 @@ class TestPyaimsIO(unittest.TestCase):
             vol3 = aims.read(fname)
             self.compare_images(vol, vol3, vol1_name, vol3_name, thresh)
 
-        if format in partial_io:
+        if format in partial_read:
             if self.verbose:
-                print '    testing partial IO', format
+                print '    testing partial reading:', format
             vol3 = aims.read(fname + '?ox=2&&sx=7&&oy=3&&sy=5&&oz=4&&sz=6')
             self.assertEqual(vol3.getSize(), (7, 5, 6, 1))
             vol4 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
             self.compare_images(vol4, vol3, 'sub-volume', 'patially read')
+
+        if format in partial_write:
+            if self.verbose:
+                print '    testing partial writing:', format
+            vol2 = aims.VolumeView(vol, (3, 3, 3, 0), (5, 6, 4, 1))
+            aims.write(vol2, fname + '?partial_writing=1&ox=2&&oy=4&&oz=5')
+            vol3 = aims.read(fname)
+            self.assertEqual(vol3.getSize(), (10, 10, 10, 1))
+            vol4 = aims.VolumeView(vol3, (2, 4, 5, 0), (5, 6, 4, 1))
+            # compare the written view
+            self.compare_images(vol4, vol2, 'sub-volume (write)',
+                                'patially written')
+            # compare a part of the original volume
+            vol2 = aims.VolumeView(vol, (0, 0, 0, 0), (10, 10, 5, 1))
+            vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), (10, 10, 5, 1))
+            self.compare_images(vol4, vol2, 'sub-volume (write)',
+                                'original part')
 
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
@@ -110,9 +128,6 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def test_pyaims_io(self):
-        formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v', '.tiff']
-        suffixes = {'.dcm': '1', '.tiff': '_0000'}
-        partial_io = ['.nii', '.nii.gz', '.ima']
         types = ['S16', 'FLOAT']
         failing_files = set()
         for dtype in types:
