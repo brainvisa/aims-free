@@ -347,48 +347,32 @@ Volume_DOUBLE* __sub__( Volume_U8 &, double )
 Volume_U8 & __isub__( Volume_U8 &, double )
   /ReleaseGIL, PyName=__isub_Volume_U8__/;
 
-Volume_U8* __mul__( Volume_U8 &, long )
+Volume_U8* __mul__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_U8__/;
 %MethodCode
-  unsigned char p = (unsigned char) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_U8( *a0 );
+  (*sipRes) *= a1;
 %End
-Volume_U8* __mul__( Volume_U8 &, long )
+Volume_U8* __mul__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_U8__/;
 %MethodCode
-  unsigned char p = (unsigned char) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_U8( *a0 );
+  (*sipRes) *= a1;
 %End
-/*
-Volume_DOUBLE* __mul__( Volume_U8 &, double )
-  /Factory, ReleaseGIL, PyName=__rmul_Volume_U8__/;
-Volume_DOUBLE* __mul__( Volume_U8 &, double )
-  /Factory, ReleaseGIL, PyName=__mul_Volume_U8__/;
-*/
 Volume_U8 & __imul__( Volume_U8 &, double )
   /ReleaseGIL, PyName=__imul_Volume_U8__/;
 
 Volume_U8* __div__( Volume_U8 &, long )
   /Factory, ReleaseGIL, PyName=__div_Volume_U8__/;
 %MethodCode
-  unsigned char p = (unsigned char) a1;
-  sipRes = __div__( *a0, p );
+  sipRes = new Volume_U8( *a0 );
+  (*sipRes) /= a1;
 %End
-Volume_U8* __div__( Volume_U8 &, long )
-  /Factory, ReleaseGIL, PyName=__rdiv_Volume_U8__/;
-%MethodCode
-  unsigned char p = (unsigned char) a1;
-  sipRes = __div__( p, *a0 );
-%End
-/*
 Volume_DOUBLE* __div__( Volume_U8 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_U8__/;
 %MethodCode
   sipRes = __div__( a1, *a0 );
 %End
-Volume_DOUBLE* __div__( Volume_U8 &, double )
-  /Factory, ReleaseGIL, PyName=__div_Volume_U8__/;
-*/
 Volume_U8 & __idiv__( Volume_U8 &, double )
   /ReleaseGIL, PyName=__idiv_Volume_U8__/;
 
@@ -817,45 +801,33 @@ Volume_DOUBLE* __sub__( Volume_S16 &, double )
 Volume_S16 & __isub__( Volume_S16 &, double )
   /ReleaseGIL, PyName=__isub_Volume_S16__/;
 
-Volume_S16* __mul__( Volume_S16 &, long )
+Volume_S16* __mul__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_S16__/;
 %MethodCode
-  short p = (short) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_S16( *a0 );
+  (*sipRes) *= a1;
 %End
-Volume_S16* __mul__( Volume_S16 &, long )
+Volume_S16* __mul__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_S16__/;
 %MethodCode
-  short p = (short) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_S16( *a0 );
+  (*sipRes) *= a1;
 %End
-/*
-Volume_DOUBLE* __mul__( Volume_S16 &, double )
-  /Factory, ReleaseGIL, PyName=__rmul_Volume_S16__/;
-Volume_DOUBLE* __mul__( Volume_S16 &, double )
-  /Factory, ReleaseGIL, PyName=__mul_Volume_S16__/;
-*/
 Volume_S16 & __imul__( Volume_S16 &, double )
   /ReleaseGIL, PyName=__imul_Volume_S16__/;
 
-Volume_S16* __div__( Volume_S16 &, long )
+Volume_S16* __div__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_S16__/;
 %MethodCode
-  short p = (short) a1;
-  sipRes = __div__( *a0, p );
+  sipRes = new Volume_S16( *a0 );
+  (*sipRes) /= a1;
 %End
-Volume_S16* __div__( Volume_S16 &, long )
-  /Factory, ReleaseGIL, PyName=__rdiv_Volume_S16__/;
-%MethodCode
-  short p = (short) a1;
-  sipRes = __div__( p, *a0 );
-%End
-/*
 Volume_DOUBLE* __div__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_S16__/;
 %MethodCode
   sipRes = __div__( a1, *a0 );
 %End
+/*
 Volume_DOUBLE* __div__( Volume_S16 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_S16__/;
 */
@@ -1266,48 +1238,32 @@ Volume_DOUBLE* __sub__( Volume_U16 &, double )
 Volume_U16 & __isub__( Volume_U16 &, double )
   /ReleaseGIL, PyName=__isub_Volume_U16__/;
 
-Volume_U16* __mul__( Volume_U16 &, long )
+Volume_U16* __mul__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_U16__/;
 %MethodCode
-  short p = (short) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_U16( *a0 );
+  (*sipRes) *= a1;
 %End
-Volume_U16* __mul__( Volume_U16 &, long )
+Volume_U16* __mul__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_U16__/;
 %MethodCode
-  short p = (short) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_U16( *a0 );
+  (*sipRes) *= a1;
 %End
-/*
-Volume_DOUBLE* __mul__( Volume_U16 &, double )
-  /Factory, ReleaseGIL, PyName=__rmul_Volume_U16__/;
-Volume_DOUBLE* __mul__( Volume_U16 &, double )
-  /Factory, ReleaseGIL, PyName=__mul_Volume_U16__/;
-*/
 Volume_U16 & __imul__( Volume_U16 &, double )
   /ReleaseGIL, PyName=__imul_Volume_U16__/;
 
-Volume_U16* __div__( Volume_U16 &, long )
+Volume_U16* __div__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_U16__/;
 %MethodCode
-  short p = (short) a1;
-  sipRes = __div__( *a0, p );
+  sipRes = new Volume_U16( *a0 );
+  (*sipRes) /= a1;
 %End
-Volume_U16* __div__( Volume_U16 &, long )
-  /Factory, ReleaseGIL, PyName=__rdiv_Volume_U16__/;
-%MethodCode
-  short p = (short) a1;
-  sipRes = __div__( p, *a0 );
-%End
-/*
 Volume_DOUBLE* __div__( Volume_U16 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_U16__/;
 %MethodCode
   sipRes = __div__( a1, *a0 );
 %End
-Volume_DOUBLE* __div__( Volume_U16 &, double )
-  /Factory, ReleaseGIL, PyName=__div_Volume_U16__/;
-*/
 Volume_U16 & __idiv__( Volume_U16 &, double )
   /ReleaseGIL, PyName=__idiv_Volume_U16__/;
 
@@ -1736,48 +1692,32 @@ Volume_DOUBLE* __sub__( Volume_S32 &, double )
 Volume_S32 & __isub__( Volume_S32 &, double )
   /ReleaseGIL, PyName=__isub_Volume_S32__/;
 
-Volume_S32* __mul__( Volume_S32 &, long )
+Volume_S32* __mul__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_S32__/;
 %MethodCode
-  int p = (int) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_S32( *a0 );
+  (*sipRes) *= a1;
 %End
-Volume_S32* __mul__( Volume_S32 &, long )
+Volume_S32* __mul__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_S32__/;
 %MethodCode
-  int p = (int) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_S32( *a0 );
+  (*sipRes) *= a1;
 %End
-/*
-Volume_DOUBLE* __mul__( Volume_S32 &, double )
-  /Factory, ReleaseGIL, PyName=__rmul_Volume_S32__/;
-Volume_DOUBLE* __mul__( Volume_S32 &, double )
-  /Factory, ReleaseGIL, PyName=__mul_Volume_S32__/;
-*/
 Volume_S32 & __imul__( Volume_S32 &, double )
   /ReleaseGIL, PyName=__imul_Volume_S32__/;
 
-Volume_S32* __div__( Volume_S32 &, long )
+Volume_S32* __div__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_S32__/;
 %MethodCode
-  int p = (int) a1;
-  sipRes = __div__( *a0, p );
+  sipRes = new Volume_S32( *a0 );
+  (*sipRes) /= a1;
 %End
-Volume_S32* __div__( Volume_S32 &, long )
-  /Factory, ReleaseGIL, PyName=__rdiv_Volume_S32__/;
-%MethodCode
-  int p = (int) a1;
-  sipRes = __div__( p, *a0 );
-%End
-/*
 Volume_DOUBLE* __div__( Volume_S32 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_S32__/;
 %MethodCode
   sipRes = __div__( a1, *a0 );
 %End
-Volume_DOUBLE* __div__( Volume_S32 &, double )
-  /Factory, ReleaseGIL, PyName=__div_Volume_S32__/;
-*/
 Volume_S32 & __idiv__( Volume_S32 &, double )
   /ReleaseGIL, PyName=__idiv_Volume_S32__/;
 
@@ -2185,48 +2125,32 @@ Volume_DOUBLE* __sub__( Volume_U32 &, double )
 Volume_U32 & __isub__( Volume_U32 &, double )
   /ReleaseGIL, PyName=__isub_Volume_U32__/;
 
-Volume_U32* __mul__( Volume_U32 &, long )
+Volume_U32* __mul__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_U32__/;
 %MethodCode
-  unsigned p = (unsigned) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_U32( *a0 );
+  (*sipRes) *= a1;
 %End
-Volume_U32* __mul__( Volume_U32 &, long )
+Volume_U32* __mul__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_U32__/;
 %MethodCode
-  unsigned p = (unsigned) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_U32( *a0 );
+  (*sipRes) *= a1;
 %End
-/*
-Volume_DOUBLE* __mul__( Volume_U32 &, double )
-  /Factory, ReleaseGIL, PyName=__rmul_Volume_U32__/;
-Volume_DOUBLE* __mul__( Volume_U32 &, double )
-  /Factory, ReleaseGIL, PyName=__mul_Volume_U32__/;
-*/
 Volume_U32 & __imul__( Volume_U32 &, double )
   /ReleaseGIL, PyName=__imul_Volume_U32__/;
 
-Volume_U32* __div__( Volume_U32 &, long )
+Volume_U32* __div__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_U32__/;
 %MethodCode
-  unsigned p = (unsigned) a1;
-  sipRes = __div__( *a0, p );
+  sipRes = new Volume_U32( *a0 );
+  (*sipRes) /= a1;
 %End
-Volume_U32* __div__( Volume_U32 &, long )
-  /Factory, ReleaseGIL, PyName=__rdiv_Volume_U32__/;
-%MethodCode
-  unsigned p = (unsigned) a1;
-  sipRes = __div__( p, *a0 );
-%End
-/*
 Volume_DOUBLE* __div__( Volume_U32 &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_U32__/;
 %MethodCode
   sipRes = __div__( a1, *a0 );
 %End
-Volume_DOUBLE* __div__( Volume_U32 &, double )
-  /Factory, ReleaseGIL, PyName=__div_Volume_U32__/;
-*/
 Volume_U32 & __idiv__( Volume_U32 &, double )
   /ReleaseGIL, PyName=__idiv_Volume_U32__/;
 
@@ -2625,48 +2549,32 @@ Volume_DOUBLE* __sub__( Volume_FLOAT &, double )
 Volume_FLOAT & __isub__( Volume_FLOAT &, double )
   /ReleaseGIL, PyName=__isub_Volume_FLOAT__/;
 
-Volume_FLOAT* __mul__( Volume_FLOAT &, float )
+Volume_FLOAT* __mul__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__mul_Volume_FLOAT__/;
 %MethodCode
-  float p = (float) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_FLOAT( *a0 );
+  (*sipRes) *= a1;
 %End
-Volume_FLOAT* __mul__( Volume_FLOAT &, float )
+Volume_FLOAT* __mul__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__rmul_Volume_FLOAT__/;
 %MethodCode
-  float p = (float) a1;
-  sipRes = __mul__( *a0, p );
+  sipRes = new Volume_FLOAT( *a0 );
+  (*sipRes) *= a1;
 %End
-/*
-Volume_DOUBLE* __mul__( Volume_FLOAT &, double )
-  /Factory, ReleaseGIL, PyName=__rmul_Volume_FLOAT__/;
-Volume_DOUBLE* __mul__( Volume_FLOAT &, double )
-  /Factory, ReleaseGIL, PyName=__mul_Volume_FLOAT__/;
-*/
 Volume_FLOAT & __imul__( Volume_FLOAT &, double )
   /ReleaseGIL, PyName=__imul_Volume_FLOAT__/;
 
-Volume_FLOAT* __div__( Volume_FLOAT &, float )
+Volume_FLOAT* __div__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__div_Volume_FLOAT__/;
 %MethodCode
-  float p = (float) a1;
-  sipRes = __div__( *a0, p );
+  sipRes = new Volume_FLOAT( *a0 );
+  (*sipRes) /= a1;
 %End
-Volume_FLOAT* __div__( Volume_FLOAT &, float )
-  /Factory, ReleaseGIL, PyName=__rdiv_Volume_FLOAT__/;
-%MethodCode
-  float p = (float) a1;
-  sipRes = __div__( p, *a0 );
-%End
-/*
 Volume_DOUBLE* __div__( Volume_FLOAT &, double )
   /Factory, ReleaseGIL, PyName=__rdiv_Volume_FLOAT__/;
 %MethodCode
   sipRes = __div__( a1, *a0 );
 %End
-Volume_DOUBLE* __div__( Volume_FLOAT &, double )
-  /Factory, ReleaseGIL, PyName=__div_Volume_FLOAT__/;
-*/
 Volume_FLOAT & __idiv__( Volume_FLOAT &, double )
   /ReleaseGIL, PyName=__idiv_Volume_FLOAT__/;
 
