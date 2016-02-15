@@ -241,16 +241,6 @@ namespace soma
       } catch( ... ) {}
     }
 
-    //=== sanity check =======================================================
-    if( position[0] + view[0] > size[0]
-        || position[1] + view[1] > size[1]
-        || position[2] + view[2] > size[2]
-        || position[3] + view[3] > size[3] )
-    {
-      localMsg( "view is larger than the volume." );
-      throw carto::invalid_number( "view is larger than the volume." );
-    }
-
     //=== writing header & creating files ====================================
     localMsg( "writing header..." );
     std::vector<long> strides(4);
@@ -260,6 +250,26 @@ namespace soma
     strides[3] = &obj(0,0,0,1) - &obj(0,0,0,0);
     *dsi = _imw->writeHeader( *dsi, (T*) &obj(0,0,0,0), position, view,
                               strides, options );
+
+    //=== sanity check =======================================================
+    if( partial )
+    {
+      // file sizes may be different from what has been set before (since
+      // the file already exists, its size has been re-read by writeHeader())
+      int file_dx, file_dy, file_dz, file_dt;
+      dsi->header()->getProperty( "sizeX", file_dx );
+      dsi->header()->getProperty( "sizeY", file_dy );
+      dsi->header()->getProperty( "sizeZ", file_dz );
+      dsi->header()->getProperty( "sizeT", file_dt );
+      if( position[0] + view[0] > file_dx
+          || position[1] + view[1] > file_dy
+          || position[2] + view[2] > file_dz
+          || position[3] + view[3] > file_dt )
+      {
+        localMsg( "view is larger than the volume." );
+        throw carto::format_error( "view is larger than the volume." );
+      }
+    }
 
     //=== writing image ======================================================
     localMsg( "writing volume..." );
