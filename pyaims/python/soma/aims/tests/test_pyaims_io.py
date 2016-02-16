@@ -61,7 +61,7 @@ class TestPyaimsIO(unittest.TestCase):
 
     def use_format(self, vol, format):
         suffixes = {'.dcm': '1', '.tiff': '_0000'}
-        partial_read = ['.nii', '.nii.gz', '.ima']
+        partial_read = ['.nii', '.nii.gz', '.ima', '.dcm']
         partial_write = ['.nii', '.ima']
         default_epsilon = 1e-6
         # ecat scaling is far from exact...
