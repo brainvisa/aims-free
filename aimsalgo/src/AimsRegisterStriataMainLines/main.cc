@@ -34,7 +34,7 @@
 
 #include <aims/data/data.h>
 #include <aims/resampling/resampling_g.h>
-#include <aims/transform/motionLSestimation.h>
+#include <aims/transform/least_square_estimation.h>
 #include <aims/morphology/morphology_g.h>
 #include <aims/io/io_g.h>
 #include <aims/getopt/getopt2.h>

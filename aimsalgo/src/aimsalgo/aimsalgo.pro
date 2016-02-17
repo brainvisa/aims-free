@@ -101,6 +101,7 @@ HEADERS = \
     morphology/morphogreylevel_d.h \
     morphology/morphology_g.h  \
     morphology/operatormorpho.h  \
+    mpi/types.h \
     neuralnet/multilayerperceptron.h\
     neuralnet/selforganizingmap.h  \
     perfusion/perfAif.h    \
@@ -178,6 +179,17 @@ HEADERS = \
     primalsketch/imageCoupledSmoother.h \
     primalsketch/coupledDiffusion2DSmoother.h \
     primalsketch/coupledDiffusion2DSmoother_d.h \
+    registration/block_matching.h \
+    registration/block_matching_d.h \
+    registration/displacement_field.h \
+    registration/displacement_field_d.h \
+    registration/ffd.h \
+    registration/minimisation.h \
+    registration/minimisation_d.h \
+    registration/scale_control.h \
+    registration/scale_control_d.h \
+    registration/transformation.h \
+    registration/transformation_d.h \
     resampling/harmonicCageResampler.h \
     resampling/meshToVoxelsResampler.h \
     resampling/meshToVoxelsResampler_d.h \
@@ -265,6 +277,7 @@ HEADERS = \
     topology/topology.h    \
     transform/fft1d.h    \
     transform/hilbert1d.h    \
+    transform/least_square_estimation.h    \
     transform/rigidestimation.h    \
     geodesicpath/geodesic_algorithm_base.h    \
     geodesicpath/geodesic_algorithm_subdivision.h    \
@@ -386,6 +399,12 @@ SOURCES = \
     perfusion/perfSVDTikho.cc  \
     perfusion/perfSVDTrunc.cc  \
     perfusion/perfTTP.cc    \
+    registration/block_matching.cc   \
+    registration/displacement_field.cc   \
+    registration/ffd.cc            \
+    registration/minimisation.cc    \
+    registration/scale_control.cc    \
+    registration/transformation.cc    \
     resampling/harmonicCageResampler.cc \
     resampling/meshToVoxelsResampler.cc \
     roi/clusterArg.cc     \
@@ -431,6 +450,7 @@ SOURCES = \
     transform/fft1d.cc    \
     transform/hilbert1d.cc    \
     transform/xcor1d.cc    \
+    transform/least_square_estimation.cc    \
     transform/rigidestimation.cc
 
 

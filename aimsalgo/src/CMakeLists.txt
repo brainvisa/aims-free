@@ -85,3 +85,13 @@ if( DCMTK_FOUND )
                   COMPONENT ${PROJECT_NAME} )
   endforeach()
 endif()
+
+# Targets linking with gfortran
+foreach( _command AimsRegisterFFDEstimate )
+  file( GLOB _pro "${_command}/*.pro" )
+  BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"
+                              TARGET _target )
+  target_link_libraries( ${_target} gfortran )
+endforeach()
+
+#add_subdirectory( tests )

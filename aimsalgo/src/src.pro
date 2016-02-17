@@ -104,6 +104,9 @@ PSUBDIRS = \
 #    AimsPETMIPProjection  \
 #    AimsRatClassif           \
     AimsRefineMesh            \
+    AimsRegisterBMEstimate         \
+    AimsRegisterFFDEstimate        \
+    AimsRegisterFFDApply           \
     AimsReplaceLevel               \
     AimsResample                   \
     AimsSimilarComponentAnalysisSegmentation \
