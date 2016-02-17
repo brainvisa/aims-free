@@ -15,12 +15,14 @@ A few examples of how to use and manipulate the main data structures will be sho
 
 The data for the examples in this section can be downloaded here: `<ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip>`_. 
 To use the examples directly, users should go to the directory where this archive was uncompressed, and then run ipython from this directory.
-A cleaner alternative, especially if no write access is allowed on this data directory, is to make a symbolic link to the *data_for_anatomist* subdirectory::
+A cleaner alternative, especially if no write access is allowed on this data directory, is to make a symbolic link to the *data_for_anatomist* subdirectory
+
+.. code-block:: bash
 
   cd $HOME
   mkdir bvcourse
   cd bvcourse
-  ln -s &lt;path_to_data&gt;/data_for_anatomist .
+  ln -s <path_to_data>/data_for_anatomist .
   ipython
 
 
@@ -36,8 +38,8 @@ In python, the aimsdata library is available as the :py:mod:`soma.aims` module.
 >>> # the module is actually soma.aims:
 >>> vol = soma.aims.Volume( 100, 100, 100, dtype='int16' )
 
-        or:
-        
+or:
+
 >>> from soma import aims
 >>> # the module is available as aims (not soma.aims):
 >>> vol = aims.Volume( 100, 100, 100, dtype='int16' )

@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 2.6 )
 find_package( brainvisa-cmake REQUIRED )
-BRAINVISA_PROJECT()
+BRAINVISA_PROJECT( CXX Fortran )
 enable_testing()
 
 BRAINVISA_DEPENDENCY( DEV DEPENDS "${BRAINVISA_PACKAGE_NAME}" RUN "= ${${BRAINVISA_PACKAGE_NAME}_VERSION}" )
