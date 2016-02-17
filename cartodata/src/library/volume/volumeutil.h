@@ -956,27 +956,30 @@ namespace carto
                    const typename Volume<T>::Position4Di & top,
                    const typename Volume<T>::Position4Di & bottom )
   {
-    if( bottom = typename Volume<T>::Position4Di(-1, -1, -1, -1) )
-      bottom = top;
+    const typename Volume<T>::Position4Di & bot =
+      ( bottom == typename Volume<T>::Position4Di(-1, -1, -1, -1) ?
+        top : bottom );
     std::vector<int> b = volume.getBorders();
-    if( b[0] != top[0] || b[1] != bottom[0] ||
-        b[2] != top[1] || b[3] != bottom[1] ||
-        b[4] != top[2] || b[5] != bottom[2] ||
-        b[6] != top[3] || b[7] != bottom[3] )
+    if( b[0] != top[0] || b[1] != bot[0] ||
+        b[2] != top[1] || b[3] != bot[1] ||
+        b[4] != top[2] || b[5] != bot[2] ||
+        b[6] != top[3] || b[7] != bot[3] )
     {
-      rc_ptr<Volume<T> > parent = new Volume<T>(
-          volume.getSizeX() + top[0] + bottom[0],
-          volume.getSizeY() + top[1] + bottom[1],
-          volume.getSizeZ() + top[2] + bottom[2],
-          volume.getSizeT() + top[3] + bottom[3] );
+      rc_ptr<Volume<T> > parent( new Volume<T>(
+          volume.getSizeX() + top[0] + bot[0],
+          volume.getSizeY() + top[1] + bot[1],
+          volume.getSizeZ() + top[2] + bot[2],
+          volume.getSizeT() + top[3] + bot[3] ) );
       parent->copyHeaderFrom( volume.header() );
-      typename Volume<T>::Position4Di size( volume.getSizeX(), volume.getSizeY(),
-                                            volume.getSizeZ(), volume.getSizeT() );
+      typename Volume<T>::Position4Di size( volume.getSizeX(),
+                                            volume.getSizeY(),
+                                            volume.getSizeZ(),
+                                            volume.getSizeT() );
       Volume<T> view( parent, top, size );
       transfer( volume, view );
       volume.reallocate( volume.getSizeX(), volume.getSizeY(),
                          volume.getSizeZ(), volume.getSizeT(),
-                         volume.allocatorContext(), false );
+                         true, volume.allocatorContext(), false );
       volume.setRefVolume( parent );
       volume.setPosInRefVolume( top );
     }
@@ -987,27 +990,30 @@ namespace carto
                    const typename Volume<T>::Position4Di & top,
                    const typename Volume<T>::Position4Di & bottom )
   {
-    if( bottom = typename Volume<T>::Position4Di(-1, -1, -1, -1) )
-      bottom = top;
+    const typename Volume<T>::Position4Di & bot =
+      ( bottom == typename Volume<T>::Position4Di(-1, -1, -1, -1) ?
+        top : bottom );
     std::vector<int> b = volume->getBorders();
-    if( b[0] != top[0] || b[1] != bottom[0] ||
-        b[2] != top[1] || b[3] != bottom[1] ||
-        b[4] != top[2] || b[5] != bottom[2] ||
-        b[6] != top[3] || b[7] != bottom[3] )
+    if( b[0] != top[0] || b[1] != bot[0] ||
+        b[2] != top[1] || b[3] != bot[1] ||
+        b[4] != top[2] || b[5] != bot[2] ||
+        b[6] != top[3] || b[7] != bot[3] )
     {
-      rc_ptr<Volume<T> > parent = new Volume<T>(
-          volume->getSizeX() + top[0] + bottom[0],
-          volume->getSizeY() + top[1] + bottom[1],
-          volume->getSizeZ() + top[2] + bottom[2],
-          volume->getSizeT() + top[3] + bottom[3] );
-      parent->copyHeaderFrom( volume.header() );
-      typename Volume<T>::Position4Di size( volume.getSizeX(), volume.getSizeY(),
-                                            volume.getSizeZ(), volume.getSizeT() );
-      rc_ptr<Volume<T> > view = new Volume<T>( parent, top, size );
+      rc_ptr<Volume<T> > parent( new Volume<T>(
+          volume->getSizeX() + top[0] + bot[0],
+          volume->getSizeY() + top[1] + bot[1],
+          volume->getSizeZ() + top[2] + bot[2],
+          volume->getSizeT() + top[3] + bot[3] ) );
+      parent->copyHeaderFrom( volume->header() );
+      typename Volume<T>::Position4Di size( volume->getSizeX(),
+                                            volume->getSizeY(),
+                                            volume->getSizeZ(),
+                                            volume->getSizeT() );
+      rc_ptr<Volume<T> > view( new Volume<T>( parent, top, size ) );
       transfer( volume, view );
       volume->reallocate( volume->getSizeX(), volume->getSizeY(),
                           volume->getSizeZ(), volume->getSizeT(),
-                          volume->allocatorContext(), false );
+                          true, volume->allocatorContext(), false );
       volume->setRefVolume( parent );
       volume->setPosInRefVolume( top );
     }
@@ -1018,27 +1024,30 @@ namespace carto
                       const typename Volume<T>::Position4Di & top,
                       const typename Volume<T>::Position4Di & bottom )
   {
-    if( bottom = typename Volume<T>::Position4Di(-1, -1, -1, -1) )
-      bottom = top;
+    const typename Volume<T>::Position4Di & bot =
+      ( bottom == typename Volume<T>::Position4Di(-1, -1, -1, -1) ?
+        top : bottom );
     std::vector<int> b = volume.getBorders();
-    if( b[0] < top[0] || b[1] < bottom[0] ||
-        b[2] < top[1] || b[3] < bottom[1] ||
-        b[4] < top[2] || b[5] < bottom[2] ||
-        b[6] < top[3] || b[7] < bottom[3] )
+    if( b[0] < top[0] || b[1] < bot[0] ||
+        b[2] < top[1] || b[3] < bot[1] ||
+        b[4] < top[2] || b[5] < bot[2] ||
+        b[6] < top[3] || b[7] < bot[3] )
     {
-      rc_ptr<Volume<T> > parent = new Volume<T>(
-          volume.getSizeX() + top[0] + bottom[0],
-          volume.getSizeY() + top[1] + bottom[1],
-          volume.getSizeZ() + top[2] + bottom[2],
-          volume.getSizeT() + top[3] + bottom[3] );
+      rc_ptr<Volume<T> > parent( new Volume<T>(
+          volume.getSizeX() + top[0] + bot[0],
+          volume.getSizeY() + top[1] + bot[1],
+          volume.getSizeZ() + top[2] + bot[2],
+          volume.getSizeT() + top[3] + bot[3] ) );
       parent->copyHeaderFrom( volume.header() );
-      typename Volume<T>::Position4Di size( volume.getSizeX(), volume.getSizeY(),
-                                            volume.getSizeZ(), volume.getSizeT() );
+      typename Volume<T>::Position4Di size( volume.getSizeX(),
+                                            volume.getSizeY(),
+                                            volume.getSizeZ(),
+                                            volume.getSizeT() );
       Volume<T> view( parent, top, size );
       transfer( volume, view );
       volume.reallocate( volume.getSizeX(), volume.getSizeY(),
                          volume.getSizeZ(), volume.getSizeT(),
-                         volume.allocatorContext(), false );
+                         true, volume.allocatorContext(), false );
       volume.setRefVolume( parent );
       volume.setPosInRefVolume( top );
     }
@@ -1049,27 +1058,30 @@ namespace carto
                       const typename Volume<T>::Position4Di & top,
                       const typename Volume<T>::Position4Di & bottom )
   {
-    if( bottom = typename Volume<T>::Position4Di(-1, -1, -1, -1) )
-      bottom = top;
+    const typename Volume<T>::Position4Di & bot =
+      ( bottom == typename Volume<T>::Position4Di(-1, -1, -1, -1) ?
+        top : bottom );
     std::vector<int> b = volume->getBorders();
-    if( b[0] < top[0] || b[1] < bottom[0] ||
-        b[2] < top[1] || b[3] < bottom[1] ||
-        b[4] < top[2] || b[5] < bottom[2] ||
-        b[6] < top[3] || b[7] < bottom[3] )
+    if( b[0] < top[0] || b[1] < bot[0] ||
+        b[2] < top[1] || b[3] < bot[1] ||
+        b[4] < top[2] || b[5] < bot[2] ||
+        b[6] < top[3] || b[7] < bot[3] )
     {
-      rc_ptr<Volume<T> > parent = new Volume<T>(
-          volume->getSizeX() + top[0] + bottom[0],
-          volume->getSizeY() + top[1] + bottom[1],
-          volume->getSizeZ() + top[2] + bottom[2],
-          volume->getSizeT() + top[3] + bottom[3] );
-      parent->copyHeaderFrom( volume.header() );
-      typename Volume<T>::Position4Di size( volume.getSizeX(), volume.getSizeY(),
-                                            volume.getSizeZ(), volume.getSizeT() );
-      rc_ptr<Volume<T> > view = new Volume<T>( parent, top, size );
+      rc_ptr<Volume<T> > parent( new Volume<T>(
+          volume->getSizeX() + top[0] + bot[0],
+          volume->getSizeY() + top[1] + bot[1],
+          volume->getSizeZ() + top[2] + bot[2],
+          volume->getSizeT() + top[3] + bot[3] ) );
+      parent->copyHeaderFrom( volume->header() );
+      typename Volume<T>::Position4Di size( volume->getSizeX(),
+                                            volume->getSizeY(),
+                                            volume->getSizeZ(),
+                                            volume->getSizeT() );
+      rc_ptr<Volume<T> > view( new Volume<T>( parent, top, size ) );
       transfer( volume, view );
       volume->reallocate( volume->getSizeX(), volume->getSizeY(),
                           volume->getSizeZ(), volume->getSizeT(),
-                          volume->allocatorContext(), false );
+                          true, volume->allocatorContext(), false );
       volume->setRefVolume( parent );
       volume->setPosInRefVolume( top );
     }
