@@ -277,6 +277,91 @@ void substitute( Graph& graph,
 }
 
 
+void substituteLabelsName( Graph& graph, const string& filename )
+{
+
+  try
+  {
+
+    // opening substitution file
+    ValueObject< Dictionary > dictionary;
+    PythonReader reader( filename );
+
+    reader.read( dictionary );
+
+    ObjectVector labels;
+    ObjectVector names;
+
+    if ( !dictionary.getProperty( "labels", labels ) )
+    {
+
+      throw runtime_error(
+                      std::string( "'labels' not present in '" ) +
+                      filename + "' substitution file" );
+
+    }
+    if ( !dictionary.getProperty( "names", names ) )
+    {
+
+      throw runtime_error(
+                      std::string( "'names' not present in '" ) +
+                      filename + "' substitution file" );
+
+    }
+
+    if ( labels.size() != names.size() )
+    {
+
+      throw runtime_error(
+                      std::string( "'labels' and 'names' does not have the "
+                                   "same length in '" ) +
+                      filename + "' substitution file" );
+
+    }
+
+    map< int, string > lut;
+    ObjectVector::const_iterator
+      l = labels.begin(),
+      le = labels.end();
+    ObjectVector::const_iterator
+      n = names.begin();
+
+    while ( l != le )
+    {
+
+      lut.insert( make_pair( (*l)->getScalar(), (*n)->getString() ) );
+      ++l;
+      ++n;
+
+    }
+
+    Graph::iterator iv, ev = graph.end();
+    int roiLabel;
+  
+    for( iv=graph.begin(); iv!=ev; ++iv )
+      if( (*iv)->getProperty("roi_label", roiLabel ) )
+      {
+        map< int, string >::iterator m = lut.find( roiLabel );
+        if ( m != lut.end() )
+        {
+ 	  (*iv)->setProperty("name", m->second ) ;
+        }
+      }
+
+  }
+  catch ( exception& e )
+  {
+
+    throw runtime_error(
+        string( "void substituteLabelsName( Graph& g, "
+                "const string& filename )" ) +
+        " : " + e.what() );
+
+  }
+
+}
+
+
 void copyatt( Graph & g, const string & attfrom, const string & attto, 
 	      const string & stx, const SyntaxSet & syntax  )
 {
@@ -322,6 +407,7 @@ int main( int argc, const char **argv )
   bool		local = false;
   bool		volume = false, bucket = false, roi = false;
   string        substitutionFileName;
+  string	labelFileName;
   AimsApplication	app( argc, argv, "Performs graph storage conversion " 
 			     "or volume-S16 labels volume to graph conversion" 
 			     );
@@ -360,6 +446,9 @@ int main( int argc, const char **argv )
 
   app.addOption( substitutionFileName, "--substitution",
                  "Graph substitution file for syntax and label", 
+                 true );
+  app.addOption( labelFileName, "--labels",
+                 "Substitution file for label's name", 
                  true );
 
   Graph		g( "ClusterArg" );
@@ -456,6 +545,13 @@ int main( int argc, const char **argv )
      {
 
         substitute( g, substitutionFileName );        
+
+     }
+
+     if ( !labelFileName.empty() )
+     {
+
+        substituteLabelsName( g, labelFileName );        
 
      }
       
