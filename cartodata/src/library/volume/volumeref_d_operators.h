@@ -94,11 +94,11 @@ namespace carto {
   }
 
   template <typename T>
-  template <typename OUT>
+  template <typename OUTP>
   inline
-  OUT VolumeRef<T>::sum() const
+  OUTP VolumeRef<T>::sum() const
   {
-    return (*this)->sum<OUT>();
+    return (*this)->sum<OUTP>();
   }
 
 
@@ -134,11 +134,11 @@ namespace carto {
   }
 
   template <typename T>
-  template <typename OUT>
+  template <typename OUTP>
   inline
-  VolumeRef<OUT> VolumeRef<T>::copy() const
+  VolumeRef<OUTP> VolumeRef<T>::copy() const
   {
-    return ::carto::copy<OUT,T>( *this );
+    return ::carto::copy<OUTP,T>( *this );
   }
 
   template <typename T>
@@ -149,11 +149,11 @@ namespace carto {
   }
 
   template <typename T>
-  template <typename OUT>
+  template <typename OUTP>
   inline
-  VolumeRef<OUT> VolumeRef<T>::deepcopy() const
+  VolumeRef<OUTP> VolumeRef<T>::deepcopy() const
   {
-    return ::carto::deepcopy<OUT,T>( *this );
+    return ::carto::deepcopy<OUTP,T>( *this );
   }
 
   template <typename T>
@@ -164,19 +164,19 @@ namespace carto {
   }
 
   template <typename T>
-  template <typename OUT>
+  template <typename OUTP>
   inline
-  VolumeRef<OUT> VolumeRef<T>::copyStructure() const
+  VolumeRef<OUTP> VolumeRef<T>::copyStructure() const
   {
-    return ::carto::copyStructure<OUT,T>( *this );
+    return ::carto::copyStructure<OUTP,T>( *this );
   }
 
   template <typename T>
-  template <typename OUT>
+  template <typename OUTP>
   inline
-  VolumeRef<T>::operator VolumeRef<OUT>() const
+  VolumeRef<T>::operator VolumeRef<OUTP>() const
   {
-    return ::carto::deepcopy<OUT,T>( *this );
+    return ::carto::deepcopy<OUTP,T>( *this );
   }
 
 #endif // CARTO_VOLUME_AUTO_DEREFERENCE
