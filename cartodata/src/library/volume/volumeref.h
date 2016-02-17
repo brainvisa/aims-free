@@ -190,19 +190,19 @@ namespace carto {
     //   COPY / VIEW
     //========================================================================
     VolumeRef<T> copy() const;
-    template <typename OUT>
-    VolumeRef<OUT> copy() const;
+    template <typename OUTP>
+    VolumeRef<OUTP> copy() const;
 
     VolumeRef<T> deepcopy() const;
-    template <typename OUT>
-    VolumeRef<OUT> deepcopy() const;
+    template <typename OUTP>
+    VolumeRef<OUTP> deepcopy() const;
 
     VolumeRef<T> copyStructure() const;
-    template <typename OUT>
-    VolumeRef<OUT> copyStructure() const;
+    template <typename OUTP>
+    VolumeRef<OUTP> copyStructure() const;
 
-    template <typename OUT>
-    operator VolumeRef<OUT>() const;
+    template <typename OUTP>
+    operator VolumeRef<OUTP>() const;
 
     rc_ptr<Volume<T> > refVolume() const;
     void setRefVolume(const rc_ptr<Volume<T> > & refvol);
@@ -224,8 +224,8 @@ namespace carto {
     T min() const;
     T max() const;
     T sum() const;
-    template <typename OUT>
-    OUT sum() const;
+    template <typename OUTP>
+    OUTP sum() const;
 
     //========================================================================
     //   FILL / REPLACE
