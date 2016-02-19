@@ -304,23 +304,23 @@ namespace carto
     /// does not deal with the underlying view structures, so borders or
     /// parent volumes are not copied or transfered.
     Volume<T> copy() const;
-    template <typename OUT>
-    Volume<OUT> copy() const;
+    template <typename OUTP>
+    Volume<OUTP> copy() const;
     /// Copy the full data structure. This is similar to what the copy
     /// constructor does.
     Volume<T> deepcopy() const;
-    template <typename OUT>
-    Volume<OUT> deepcopy() const;
+    template <typename OUTP>
+    Volume<OUTP> deepcopy() const;
 
     /// Copy the full data structure without copying the actual data.
     Volume<T> copyStructure() const;
     /// Copy the full data structure without copying the actual data.
-    template <typename OUT>
-    Volume<OUT> copyStructure() const;
+    template <typename OUTP>
+    Volume<OUTP> copyStructure() const;
 
     /// Cast to Volume of different datatype
-    template <typename OUT>
-    operator Volume<OUT>() const;
+    template <typename OUTP>
+    operator Volume<OUTP>() const;
 
     /// Get parent volume
     ///
@@ -376,8 +376,8 @@ namespace carto
     T min() const;
     T max() const;
     T sum() const;
-    template <typename OUT>
-    OUT sum() const;
+    template <typename OUTP>
+    OUTP sum() const;
 
     //========================================================================
     //   FILL / REPLACE

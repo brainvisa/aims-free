@@ -98,12 +98,12 @@ namespace carto
     /// \note Loop usage is restricted to these 2 functions.
     /// Maybe a bit of multithreading could be done here ?
     /// @{
-    template <typename T, typename OUT, typename UnaryFunction>
-    Volume<OUT> &
-    applyTowards( const Volume<T> & vol, Volume<OUT> & dst, UnaryFunction func );
-    template <typename T, typename U, typename OUT, typename BinaryFunction>
-    Volume<OUT> &
-    applyTowards( const Volume<T> & vol1, const Volume<U> & vol2, Volume<OUT> & dst, BinaryFunction func );
+    template <typename T, typename OUTP, typename UnaryFunction>
+    Volume<OUTP> &
+    applyTowards( const Volume<T> & vol, Volume<OUTP> & dst, UnaryFunction func );
+    template <typename T, typename U, typename OUTP, typename BinaryFunction>
+    Volume<OUTP> &
+    applyTowards( const Volume<T> & vol1, const Volume<U> & vol2, Volume<OUTP> & dst, BinaryFunction func );
     /// @}
 
     /// Accumulation over a volume
@@ -119,10 +119,10 @@ namespace carto
     /// - Calling it with function \c plus performs a sum over the volume
     /// - Calling it with function \c select_min returns its minimum value
     /// @{
-    template <typename OUT, typename T, typename BinaryFunction>
-    OUT accumulate( const Volume<T> & vol, BinaryFunction func, OUT initial );
-    template <typename OUT, typename T, typename BinaryFunction>
-    OUT accumulate( const rc_ptr<Volume<T> > & vol, BinaryFunction func, OUT initial );
+    template <typename OUTP, typename T, typename BinaryFunction>
+    OUTP accumulate( const Volume<T> & vol, BinaryFunction func, OUTP initial );
+    template <typename OUTP, typename T, typename BinaryFunction>
+    OUTP accumulate( const rc_ptr<Volume<T> > & vol, BinaryFunction func, OUTP initial );
     /// @}
 
   } // namespace volumeutil
@@ -138,10 +138,10 @@ namespace carto
   void transfer( const Volume<T> & src, Volume<T> & dst );
   template <typename T>
   void transfer( const rc_ptr<Volume<T> > & src, rc_ptr<Volume<T> > & dst );
-  template <typename OUT, typename IN>
-  void transfer( const Volume<IN> & src, Volume<OUT> & dst );
-  template <typename OUT, typename IN>
-  void transfer( const rc_ptr<Volume<IN> > & src, rc_ptr<Volume<OUT> > & dst );
+  template <typename OUTP, typename INP>
+  void transfer( const Volume<INP> & src, Volume<OUTP> & dst );
+  template <typename OUTP, typename INP>
+  void transfer( const rc_ptr<Volume<INP> > & src, rc_ptr<Volume<OUTP> > & dst );
   /// @}
 
   /// Performs a copy of the data (not only a reference copy)
@@ -151,10 +151,10 @@ namespace carto
   Volume<T> deepcopy( const Volume<T> & src );
   template <typename T>
   rc_ptr<Volume<T> > deepcopy( const rc_ptr<Volume<T> > & src );
-  template <typename OUT, typename IN>
-  Volume<OUT> deepcopy( const Volume<IN> & src );
-  template <typename OUT, typename IN>
-  rc_ptr<Volume<OUT> > deepcopy( const rc_ptr<Volume<IN> > & src );
+  template <typename OUTP, typename INP>
+  Volume<OUTP> deepcopy( const Volume<INP> & src );
+  template <typename OUTP, typename INP>
+  rc_ptr<Volume<OUTP> > deepcopy( const rc_ptr<Volume<INP> > & src );
   /// @}
 
   /// Performs a copy of the data (not only a reference copy)
@@ -165,10 +165,10 @@ namespace carto
   Volume<T> copy( const Volume<T> & src );
   template <typename T>
   rc_ptr<Volume<T> > copy( const rc_ptr<Volume<T> > & src );
-  template <typename OUT, typename IN>
-  Volume<OUT> copy( const Volume<IN> & src );
-  template <typename OUT, typename IN>
-  rc_ptr<Volume<OUT> > copy( const rc_ptr<Volume<IN> > & src );
+  template <typename OUTP, typename INP>
+  Volume<OUTP> copy( const Volume<INP> & src );
+  template <typename OUTP, typename INP>
+  rc_ptr<Volume<OUTP> > copy( const rc_ptr<Volume<INP> > & src );
   /// @}
 
   /// Performs a copy of the view structure without transfering the data.
@@ -177,10 +177,10 @@ namespace carto
   Volume<T> copyStructure( const Volume<T> & src );
   template <typename T>
   rc_ptr<Volume<T> > copyStructure( const rc_ptr<Volume<T> > & src );
-  template <typename OUT, typename IN>
-  Volume<OUT> copyStructure( const Volume<IN> & src );
-  template <typename OUT, typename IN>
-  rc_ptr<Volume<OUT> > copyStructure( const rc_ptr<Volume<IN> > & src );
+  template <typename OUTP, typename INP>
+  Volume<OUTP> copyStructure( const Volume<INP> & src );
+  template <typename OUTP, typename INP>
+  rc_ptr<Volume<OUTP> > copyStructure( const rc_ptr<Volume<INP> > & src );
   /// @}
 
   //==========================================================================
@@ -211,12 +211,12 @@ namespace carto
   /// @{
   template <typename T>
   T sum( const Volume<T> & vol );
-  template <typename OUT, typename T>
-  OUT sum( const Volume<T> & vol );
+  template <typename OUTP, typename T>
+  OUTP sum( const Volume<T> & vol );
   template <typename T>
   T sum( const rc_ptr<Volume<T> > & vol );
-  template <typename OUT, typename T>
-  OUT sum( const rc_ptr<Volume<T> > & vol );
+  template <typename OUTP, typename T>
+  OUTP sum( const rc_ptr<Volume<T> > & vol );
   /// @}
 
   /// Returns true if all values compare to true
@@ -351,8 +351,8 @@ namespace carto
     Volume<typename UnaryFunction::result_type>
     apply( const Volume<T> & vol, UnaryFunction func )
     {
-      typedef typename UnaryFunction::result_type OUT;
-      Volume<OUT> output = deepcopy<OUT,T>(vol);
+      typedef typename UnaryFunction::result_type OUTP;
+      Volume<OUTP> output = deepcopy<OUTP,T>(vol);
       applyTowards( vol, output, func );
       return output;
     }
@@ -361,8 +361,8 @@ namespace carto
     Volume<typename BinaryFunction::result_type>
     apply( const Volume<T> & vol1, const Volume<U> & vol2, BinaryFunction func )
     {
-      typedef typename BinaryFunction::result_type OUT;
-      Volume<OUT> output = deepcopy<OUT,T>(vol1);
+      typedef typename BinaryFunction::result_type OUTP;
+      Volume<OUTP> output = deepcopy<OUTP,T>(vol1);
       applyTowards( vol1, vol2, output, func );
       return output;
     }
@@ -373,8 +373,8 @@ namespace carto
     rc_ptr<Volume<typename UnaryFunction::result_type> >
     apply( const rc_ptr<Volume<T> > & vol, UnaryFunction func )
     {
-      typedef typename UnaryFunction::result_type OUT;
-      rc_ptr<Volume<OUT> > output = deepcopy<OUT,T>(vol);
+      typedef typename UnaryFunction::result_type OUTP;
+      rc_ptr<Volume<OUTP> > output = deepcopy<OUTP,T>(vol);
       applyTowards( *vol, *output, func );
       return output;
     }
@@ -383,8 +383,8 @@ namespace carto
     rc_ptr<Volume<typename BinaryFunction::result_type> >
     apply( const rc_ptr<Volume<T> > & vol1, const Volume<U> & vol2, BinaryFunction func )
     {
-      typedef typename BinaryFunction::result_type OUT;
-      rc_ptr<Volume<OUT> > output = deepcopy<OUT,T>(vol1);
+      typedef typename BinaryFunction::result_type OUTP;
+      rc_ptr<Volume<OUTP> > output = deepcopy<OUTP,T>(vol1);
       applyTowards( *vol1, vol2, *output, func );
       return output;
     }
@@ -422,9 +422,9 @@ namespace carto
     }
 
     //--- Volume [op] other -> Output  ---------------------------------------
-    template <typename T, typename OUT, typename UnaryFunction>
-    Volume<OUT> &
-    applyTowards( const Volume<T> & vol, Volume<OUT> & dst, UnaryFunction func )
+    template <typename T, typename OUTP, typename UnaryFunction>
+    Volume<OUTP> &
+    applyTowards( const Volume<T> & vol, Volume<OUTP> & dst, UnaryFunction func )
     {
       for( long t = 0; t < vol.getSizeT(); ++t )
         for( long z = 0; z < vol.getSizeZ(); ++z )
@@ -434,9 +434,9 @@ namespace carto
       return dst;
     }
 
-    template <typename T, typename U, typename OUT, typename BinaryFunction>
-    Volume<OUT> &
-    applyTowards( const Volume<T> & vol1, const Volume<U> & vol2, Volume<OUT> & dst, BinaryFunction func )
+    template <typename T, typename U, typename OUTP, typename BinaryFunction>
+    Volume<OUTP> &
+    applyTowards( const Volume<T> & vol1, const Volume<U> & vol2, Volume<OUTP> & dst, BinaryFunction func )
     {
       for( long t = 0; t < vol1.getSizeT() && t < vol2.getSizeT(); ++t )
         for( long z = 0; z < vol1.getSizeZ() && z < vol2.getSizeZ(); ++z )
@@ -448,8 +448,8 @@ namespace carto
 
     //--- Volume: accumulate -------------------------------------------------
 
-    template <typename OUT, typename T, typename BinaryFunction>
-    OUT accumulate( const Volume<T> & vol, BinaryFunction func, OUT initial )
+    template <typename OUTP, typename T, typename BinaryFunction>
+    OUTP accumulate( const Volume<T> & vol, BinaryFunction func, OUTP initial )
     {
       for( long t = 0; t < vol.getSizeT(); ++t )
         for( long z = 0; z < vol.getSizeZ(); ++z )
@@ -461,10 +461,10 @@ namespace carto
 
     //--- VolumeRef: accumulate ----------------------------------------------
 
-    template <typename OUT, typename T, typename BinaryFunction>
-    OUT accumulate( const rc_ptr<Volume<T> > & vol, BinaryFunction func, OUT initial )
+    template <typename OUTP, typename T, typename BinaryFunction>
+    OUTP accumulate( const rc_ptr<Volume<T> > & vol, BinaryFunction func, OUTP initial )
     {
-      return accumulate<OUT, T, BinaryFunction>( *vol, func, initial );
+      return accumulate<OUTP, T, BinaryFunction>( *vol, func, initial );
     }
 
   } // namespace volumeutil
@@ -487,14 +487,14 @@ namespace carto
     transfer<T,T>( src, dst );
   }
 
-  template <typename OUT, typename IN>
-  void transfer( const Volume<IN> & src, Volume<OUT> & dst )
+  template <typename OUTP, typename INP>
+  void transfer( const Volume<INP> & src, Volume<OUTP> & dst )
   {
-    volumeutil::applyTowards( src, dst, volumeutil::identity<IN>() );
+    volumeutil::applyTowards( src, dst, volumeutil::identity<INP>() );
   }
 
-  template <typename OUT, typename IN>
-  void transfer( const rc_ptr<Volume<IN> > & src, rc_ptr<Volume<OUT> > & dst )
+  template <typename OUTP, typename INP>
+  void transfer( const rc_ptr<Volume<INP> > & src, rc_ptr<Volume<OUTP> > & dst )
   {
     transfer( *src, *dst );
   }
@@ -513,10 +513,10 @@ namespace carto
     return deepcopy<T,T>( src );
   }
 
-  template <typename OUT, typename IN>
-  Volume<OUT> deepcopy( const Volume<IN> & src )
+  template <typename OUTP, typename INP>
+  Volume<OUTP> deepcopy( const Volume<INP> & src )
   {
-    Volume<OUT> dst( src.getSizeX(), src.getSizeY(),
+    Volume<OUTP> dst( src.getSizeX(), src.getSizeY(),
                      src.getSizeZ(), src.getSizeT(),
                      src.allocatorContext(),
                      src.allocatorContext().isAllocated() );
@@ -526,8 +526,8 @@ namespace carto
 
     if( src.refVolume() )
     {
-      rc_ptr<Volume<IN> > srcparent = src.refVolume();
-      rc_ptr<Volume<OUT> > dstparent( new Volume<OUT>(
+      rc_ptr<Volume<INP> > srcparent = src.refVolume();
+      rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
           srcparent->getSizeX(), srcparent->getSizeY(),
           srcparent->getSizeZ(), srcparent->getSizeT(),
           srcparent->allocatorContext(),
@@ -538,13 +538,13 @@ namespace carto
       dst.setPosInRefVolume( src.posInRefVolume() );
     }
 
-    rc_ptr<Volume<IN> > srcchild = src.refVolume();
-    rc_ptr<Volume<OUT> > dstchild = dst.refVolume();
+    rc_ptr<Volume<INP> > srcchild = src.refVolume();
+    rc_ptr<Volume<OUTP> > dstchild = dst.refVolume();
 
     while( srcchild->refVolume().get() )
     {
-      rc_ptr<Volume<IN> > srcparent = srcchild->refVolume();
-      rc_ptr<Volume<OUT> > dstparent( new Volume<OUT>(
+      rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
+      rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
           srcparent->getSizeX(), srcparent->getSizeY(),
           srcparent->getSizeZ(), srcparent->getSizeT(),
           srcparent->allocatorContext(),
@@ -561,10 +561,10 @@ namespace carto
     return dst;
   }
 
-  template <typename OUT, typename IN>
-  rc_ptr<Volume<OUT> > deepcopy( const rc_ptr<Volume<IN> > & src )
+  template <typename OUTP, typename INP>
+  rc_ptr<Volume<OUTP> > deepcopy( const rc_ptr<Volume<INP> > & src )
   {
-    rc_ptr<Volume<OUT> > dst( new Volume<OUT>(
+    rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>(
         src->getSizeX(), src->getSizeY(),
         src->getSizeZ(), src->getSizeT(),
         src->allocatorContext(),
@@ -573,13 +573,13 @@ namespace carto
     if( src->allocatorContext().isAllocated() )
       transfer( src, dst );
 
-    rc_ptr<Volume<IN> > srcchild = src;
-    rc_ptr<Volume<OUT> > dstchild = dst;
+    rc_ptr<Volume<INP> > srcchild = src;
+    rc_ptr<Volume<OUTP> > dstchild = dst;
 
     while( srcchild->refVolume().get() )
     {
-      rc_ptr<Volume<IN> > srcparent = srcchild->refVolume();
-      rc_ptr<Volume<OUT> > dstparent( new Volume<OUT>(
+      rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
+      rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
           srcparent->getSizeX(), srcparent->getSizeY(),
           srcparent->getSizeZ(), srcparent->getSizeT(),
           srcparent->allocatorContext(),
@@ -611,20 +611,20 @@ namespace carto
     return copy<T,T>( src );
   }
 
-  template <typename OUT, typename IN>
-  Volume<OUT> copy( const Volume<IN> & src )
+  template <typename OUTP, typename INP>
+  Volume<OUTP> copy( const Volume<INP> & src )
   {
-    Volume<OUT> dst( src.getSizeX(), src.getSizeY(),
+    Volume<OUTP> dst( src.getSizeX(), src.getSizeY(),
                      src.getSizeZ(), src.getSizeT() );
     dst.copyHeaderFrom( src.header() );
     transfer( src, dst );
     return dst;
   }
 
-  template <typename OUT, typename IN>
-  rc_ptr<Volume<OUT> > copy( const rc_ptr<Volume<IN> > & src )
+  template <typename OUTP, typename INP>
+  rc_ptr<Volume<OUTP> > copy( const rc_ptr<Volume<INP> > & src )
   {
-    rc_ptr<Volume<OUT> > dst( new Volume<OUT>(
+    rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>(
         src->getSizeX(), src->getSizeY(),
         src->getSizeZ(), src->getSizeT() ) );
     dst->copyHeaderFrom( src->header() );
@@ -647,10 +647,10 @@ namespace carto
     return copyStructure<T,T>( src );
   }
 
-  template <typename OUT, typename IN>
-  Volume<OUT> copyStructure( const Volume<IN> & src )
+  template <typename OUTP, typename INP>
+  Volume<OUTP> copyStructure( const Volume<INP> & src )
   {
-    Volume<OUT> dst( src.getSizeX(), src.getSizeY(),
+    Volume<OUTP> dst( src.getSizeX(), src.getSizeY(),
                      src.getSizeZ(), src.getSizeT(),
                      src.allocatorContext(),
                      src.allocatorContext().isAllocated() );
@@ -660,8 +660,8 @@ namespace carto
 
     if( src.refVolume() )
     {
-      rc_ptr<Volume<IN> > srcparent = src.refVolume();
-      rc_ptr<Volume<OUT> > dstparent( new Volume<OUT>(
+      rc_ptr<Volume<INP> > srcparent = src.refVolume();
+      rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
           srcparent->getSizeX(), srcparent->getSizeY(),
           srcparent->getSizeZ(), srcparent->getSizeT(),
           srcparent->allocatorContext(),
@@ -672,13 +672,13 @@ namespace carto
       dst.setPosInRefVolume( src.posInRefVolume() );
     }
 
-    rc_ptr<Volume<IN> > srcchild = src.refVolume();
-    rc_ptr<Volume<OUT> > dstchild = dst.refVolume();
+    rc_ptr<Volume<INP> > srcchild = src.refVolume();
+    rc_ptr<Volume<OUTP> > dstchild = dst.refVolume();
 
     while( srcchild->refVolume().get() )
     {
-      rc_ptr<Volume<IN> > srcparent = srcchild->refVolume();
-      rc_ptr<Volume<OUT> > dstparent( new Volume<OUT>(
+      rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
+      rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
           srcparent->getSizeX(), srcparent->getSizeY(),
           srcparent->getSizeZ(), srcparent->getSizeT(),
           srcparent->allocatorContext(),
@@ -695,10 +695,10 @@ namespace carto
     return dst;
   }
 
-  template <typename OUT, typename IN>
-  rc_ptr<Volume<OUT> > copyStructure( const rc_ptr<Volume<IN> > & src )
+  template <typename OUTP, typename INP>
+  rc_ptr<Volume<OUTP> > copyStructure( const rc_ptr<Volume<INP> > & src )
   {
-    rc_ptr<Volume<OUT> > dst( new Volume<OUT>(
+    rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>(
         src->getSizeX(), src->getSizeY(),
         src->getSizeZ(), src->getSizeT(),
         src->allocatorContext(),
@@ -707,13 +707,13 @@ namespace carto
     // if( src->allocatorContext().isAllocated() )
     //   dst->fill(0);
 
-    rc_ptr<Volume<IN> > srcchild = src;
-    rc_ptr<Volume<OUT> > dstchild = dst;
+    rc_ptr<Volume<INP> > srcchild = src;
+    rc_ptr<Volume<OUTP> > dstchild = dst;
 
     while( srcchild->refVolume().get() )
     {
-      rc_ptr<Volume<IN> > srcparent = srcchild->refVolume();
-      rc_ptr<Volume<OUT> > dstparent( new Volume<OUT>(
+      rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
+      rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
           srcparent->getSizeX(), srcparent->getSizeY(),
           srcparent->getSizeZ(), srcparent->getSizeT(),
           srcparent->allocatorContext(),
@@ -778,10 +778,10 @@ namespace carto
   }
 
 
-  template <typename OUT, typename T>
-  OUT sum( const Volume<T> & vol )
+  template <typename OUTP, typename T>
+  OUTP sum( const Volume<T> & vol )
   {
-    return accumulate( vol, volumeutil::plus<OUT,T>(), static_cast<OUT>(0) );
+    return accumulate( vol, volumeutil::plus<OUTP,T>(), static_cast<OUTP>(0) );
   }
 
   template <typename T>
@@ -790,12 +790,12 @@ namespace carto
     return sum<T,T>( vol );
   }
 
-  template <typename OUT, typename T>
-  OUT sum( const rc_ptr<Volume<T> > & vol )
+  template <typename OUTP, typename T>
+  OUTP sum( const rc_ptr<Volume<T> > & vol )
   {
     if( !vol.get() )
-      return static_cast<OUT>(0);
-    return accumulate( vol, volumeutil::plus<OUT,T>(), static_cast<OUT>(0) );
+      return static_cast<OUTP>(0);
+    return accumulate( vol, volumeutil::plus<OUTP,T>(), static_cast<OUTP>(0) );
   }
 
   template <typename T>
@@ -956,27 +956,30 @@ namespace carto
                    const typename Volume<T>::Position4Di & top,
                    const typename Volume<T>::Position4Di & bottom )
   {
-    if( bottom = typename Volume<T>::Position4Di(-1, -1, -1, -1) )
-      bottom = top;
+    const typename Volume<T>::Position4Di & bot =
+      ( bottom == typename Volume<T>::Position4Di(-1, -1, -1, -1) ?
+        top : bottom );
     std::vector<int> b = volume.getBorders();
-    if( b[0] != top[0] || b[1] != bottom[0] ||
-        b[2] != top[1] || b[3] != bottom[1] ||
-        b[4] != top[2] || b[5] != bottom[2] ||
-        b[6] != top[3] || b[7] != bottom[3] )
+    if( b[0] != top[0] || b[1] != bot[0] ||
+        b[2] != top[1] || b[3] != bot[1] ||
+        b[4] != top[2] || b[5] != bot[2] ||
+        b[6] != top[3] || b[7] != bot[3] )
     {
-      rc_ptr<Volume<T> > parent = new Volume<T>(
-          volume.getSizeX() + top[0] + bottom[0],
-          volume.getSizeY() + top[1] + bottom[1],
-          volume.getSizeZ() + top[2] + bottom[2],
-          volume.getSizeT() + top[3] + bottom[3] );
+      rc_ptr<Volume<T> > parent( new Volume<T>(
+          volume.getSizeX() + top[0] + bot[0],
+          volume.getSizeY() + top[1] + bot[1],
+          volume.getSizeZ() + top[2] + bot[2],
+          volume.getSizeT() + top[3] + bot[3] ) );
       parent->copyHeaderFrom( volume.header() );
-      typename Volume<T>::Position4Di size( volume.getSizeX(), volume.getSizeY(),
-                                            volume.getSizeZ(), volume.getSizeT() );
+      typename Volume<T>::Position4Di size( volume.getSizeX(),
+                                            volume.getSizeY(),
+                                            volume.getSizeZ(),
+                                            volume.getSizeT() );
       Volume<T> view( parent, top, size );
       transfer( volume, view );
       volume.reallocate( volume.getSizeX(), volume.getSizeY(),
                          volume.getSizeZ(), volume.getSizeT(),
-                         volume.allocatorContext(), false );
+                         true, volume.allocatorContext(), false );
       volume.setRefVolume( parent );
       volume.setPosInRefVolume( top );
     }
@@ -987,27 +990,30 @@ namespace carto
                    const typename Volume<T>::Position4Di & top,
                    const typename Volume<T>::Position4Di & bottom )
   {
-    if( bottom = typename Volume<T>::Position4Di(-1, -1, -1, -1) )
-      bottom = top;
+    const typename Volume<T>::Position4Di & bot =
+      ( bottom == typename Volume<T>::Position4Di(-1, -1, -1, -1) ?
+        top : bottom );
     std::vector<int> b = volume->getBorders();
-    if( b[0] != top[0] || b[1] != bottom[0] ||
-        b[2] != top[1] || b[3] != bottom[1] ||
-        b[4] != top[2] || b[5] != bottom[2] ||
-        b[6] != top[3] || b[7] != bottom[3] )
+    if( b[0] != top[0] || b[1] != bot[0] ||
+        b[2] != top[1] || b[3] != bot[1] ||
+        b[4] != top[2] || b[5] != bot[2] ||
+        b[6] != top[3] || b[7] != bot[3] )
     {
-      rc_ptr<Volume<T> > parent = new Volume<T>(
-          volume->getSizeX() + top[0] + bottom[0],
-          volume->getSizeY() + top[1] + bottom[1],
-          volume->getSizeZ() + top[2] + bottom[2],
-          volume->getSizeT() + top[3] + bottom[3] );
-      parent->copyHeaderFrom( volume.header() );
-      typename Volume<T>::Position4Di size( volume.getSizeX(), volume.getSizeY(),
-                                            volume.getSizeZ(), volume.getSizeT() );
-      rc_ptr<Volume<T> > view = new Volume<T>( parent, top, size );
+      rc_ptr<Volume<T> > parent( new Volume<T>(
+          volume->getSizeX() + top[0] + bot[0],
+          volume->getSizeY() + top[1] + bot[1],
+          volume->getSizeZ() + top[2] + bot[2],
+          volume->getSizeT() + top[3] + bot[3] ) );
+      parent->copyHeaderFrom( volume->header() );
+      typename Volume<T>::Position4Di size( volume->getSizeX(),
+                                            volume->getSizeY(),
+                                            volume->getSizeZ(),
+                                            volume->getSizeT() );
+      rc_ptr<Volume<T> > view( new Volume<T>( parent, top, size ) );
       transfer( volume, view );
       volume->reallocate( volume->getSizeX(), volume->getSizeY(),
                           volume->getSizeZ(), volume->getSizeT(),
-                          volume->allocatorContext(), false );
+                          true, volume->allocatorContext(), false );
       volume->setRefVolume( parent );
       volume->setPosInRefVolume( top );
     }
@@ -1018,27 +1024,30 @@ namespace carto
                       const typename Volume<T>::Position4Di & top,
                       const typename Volume<T>::Position4Di & bottom )
   {
-    if( bottom = typename Volume<T>::Position4Di(-1, -1, -1, -1) )
-      bottom = top;
+    const typename Volume<T>::Position4Di & bot =
+      ( bottom == typename Volume<T>::Position4Di(-1, -1, -1, -1) ?
+        top : bottom );
     std::vector<int> b = volume.getBorders();
-    if( b[0] < top[0] || b[1] < bottom[0] ||
-        b[2] < top[1] || b[3] < bottom[1] ||
-        b[4] < top[2] || b[5] < bottom[2] ||
-        b[6] < top[3] || b[7] < bottom[3] )
+    if( b[0] < top[0] || b[1] < bot[0] ||
+        b[2] < top[1] || b[3] < bot[1] ||
+        b[4] < top[2] || b[5] < bot[2] ||
+        b[6] < top[3] || b[7] < bot[3] )
     {
-      rc_ptr<Volume<T> > parent = new Volume<T>(
-          volume.getSizeX() + top[0] + bottom[0],
-          volume.getSizeY() + top[1] + bottom[1],
-          volume.getSizeZ() + top[2] + bottom[2],
-          volume.getSizeT() + top[3] + bottom[3] );
+      rc_ptr<Volume<T> > parent( new Volume<T>(
+          volume.getSizeX() + top[0] + bot[0],
+          volume.getSizeY() + top[1] + bot[1],
+          volume.getSizeZ() + top[2] + bot[2],
+          volume.getSizeT() + top[3] + bot[3] ) );
       parent->copyHeaderFrom( volume.header() );
-      typename Volume<T>::Position4Di size( volume.getSizeX(), volume.getSizeY(),
-                                            volume.getSizeZ(), volume.getSizeT() );
+      typename Volume<T>::Position4Di size( volume.getSizeX(),
+                                            volume.getSizeY(),
+                                            volume.getSizeZ(),
+                                            volume.getSizeT() );
       Volume<T> view( parent, top, size );
       transfer( volume, view );
       volume.reallocate( volume.getSizeX(), volume.getSizeY(),
                          volume.getSizeZ(), volume.getSizeT(),
-                         volume.allocatorContext(), false );
+                         true, volume.allocatorContext(), false );
       volume.setRefVolume( parent );
       volume.setPosInRefVolume( top );
     }
@@ -1049,27 +1058,30 @@ namespace carto
                       const typename Volume<T>::Position4Di & top,
                       const typename Volume<T>::Position4Di & bottom )
   {
-    if( bottom = typename Volume<T>::Position4Di(-1, -1, -1, -1) )
-      bottom = top;
+    const typename Volume<T>::Position4Di & bot =
+      ( bottom == typename Volume<T>::Position4Di(-1, -1, -1, -1) ?
+        top : bottom );
     std::vector<int> b = volume->getBorders();
-    if( b[0] < top[0] || b[1] < bottom[0] ||
-        b[2] < top[1] || b[3] < bottom[1] ||
-        b[4] < top[2] || b[5] < bottom[2] ||
-        b[6] < top[3] || b[7] < bottom[3] )
+    if( b[0] < top[0] || b[1] < bot[0] ||
+        b[2] < top[1] || b[3] < bot[1] ||
+        b[4] < top[2] || b[5] < bot[2] ||
+        b[6] < top[3] || b[7] < bot[3] )
     {
-      rc_ptr<Volume<T> > parent = new Volume<T>(
-          volume->getSizeX() + top[0] + bottom[0],
-          volume->getSizeY() + top[1] + bottom[1],
-          volume->getSizeZ() + top[2] + bottom[2],
-          volume->getSizeT() + top[3] + bottom[3] );
-      parent->copyHeaderFrom( volume.header() );
-      typename Volume<T>::Position4Di size( volume.getSizeX(), volume.getSizeY(),
-                                            volume.getSizeZ(), volume.getSizeT() );
-      rc_ptr<Volume<T> > view = new Volume<T>( parent, top, size );
+      rc_ptr<Volume<T> > parent( new Volume<T>(
+          volume->getSizeX() + top[0] + bot[0],
+          volume->getSizeY() + top[1] + bot[1],
+          volume->getSizeZ() + top[2] + bot[2],
+          volume->getSizeT() + top[3] + bot[3] ) );
+      parent->copyHeaderFrom( volume->header() );
+      typename Volume<T>::Position4Di size( volume->getSizeX(),
+                                            volume->getSizeY(),
+                                            volume->getSizeZ(),
+                                            volume->getSizeT() );
+      rc_ptr<Volume<T> > view( new Volume<T>( parent, top, size ) );
       transfer( volume, view );
       volume->reallocate( volume->getSizeX(), volume->getSizeY(),
                           volume->getSizeZ(), volume->getSizeT(),
-                          volume->allocatorContext(), false );
+                          true, volume->allocatorContext(), false );
       volume->setRefVolume( parent );
       volume->setPosInRefVolume( top );
     }
