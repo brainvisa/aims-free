@@ -23,8 +23,11 @@ protected :
 public:
     virtual std::string type() const /AutoGen/;
     virtual size_t size() const /AutoGen/;
+    virtual bool isScalar() const;
     virtual double getScalar() const /AutoGen/;
+    virtual bool isString() const;
     virtual std::string getString() const /AutoGen/;
+    virtual bool isNone() const;
     virtual bool isArray() const /AutoGen/;
     virtual bool isDynArray() const /AutoGen/;
     virtual bool isDictionary() const /AutoGen/;

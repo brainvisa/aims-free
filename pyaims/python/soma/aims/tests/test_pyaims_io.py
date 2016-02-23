@@ -114,12 +114,14 @@ class TestPyaimsIO(unittest.TestCase):
             self.assertEqual(vol3.getSize(), (10, 10, 10, 1))
             vol4 = aims.VolumeView(vol3, (2, 4, 5, 0), (5, 6, 4, 1))
             # compare the written view
-            self.compare_images(vol4, vol2, 'sub-volume (write)',
+            self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
+                                % (aims.typeCode(vol), format),
                                 'patially written')
             # compare a part of the original volume
             vol2 = aims.VolumeView(vol, (0, 0, 0, 0), (10, 10, 5, 1))
             vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), (10, 10, 5, 1))
-            self.compare_images(vol4, vol2, 'sub-volume (write)',
+            self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
+                                % (aims.typeCode(vol), format),
                                 'original part')
 
         # check if files remain open
