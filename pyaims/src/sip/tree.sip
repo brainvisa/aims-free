@@ -24,8 +24,11 @@ public:
 %MethodCode
   sipRes = sipCpp->carto::AttributedObject::size();
 %End
+  virtual bool isScalar() const;
   virtual double getScalar() const ;
+  virtual bool isString() const;
   virtual std::string getString() const ;
+  virtual bool isNone() const;
   virtual bool isArray() const ;
   virtual bool isDynArray() const ;
   virtual bool isDictionary() const ;
