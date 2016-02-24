@@ -118,6 +118,9 @@ using namespace std;
 //----------//
 
 //-----------------------------------------------------------------------------
+namespace aims
+{
+    
 ostream& operator << ( ostream& os, const AffineTransformation3d& thing )
 {
   // os << "{translation=" << thing.translation() << ", "<<endl
@@ -137,6 +140,7 @@ ostream& operator << ( ostream& os, const AffineTransformation3d& thing )
   return os;
 }
 
+}
 
 //-----------------------------------------------------------------------------
 AffineTransformation3d::AffineTransformation3d()
@@ -801,8 +805,6 @@ enough and better. see NOTE, line 38. */
 // }
 
 
-
-
 AffineTransformation3d & AffineTransformation3d::operator *= ( const AffineTransformation3d & m )
 {
   Point3df	r2 = transform( m.translation() );
@@ -878,7 +880,12 @@ AffineTransformation3d AffineTransformation3d::operator - () const
 
 
 //-----------------------------------------------------------------------------
-AffineTransformation3d operator * (const AffineTransformation3d& AffineTransformation3d1, const AffineTransformation3d& AffineTransformation3d2)
+namespace aims
+{
+
+AffineTransformation3d operator * (
+  const AffineTransformation3d& AffineTransformation3d1, 
+  const AffineTransformation3d& AffineTransformation3d2 )
 {
   AffineTransformation3d AffineTransformation3dOut;
 
@@ -925,6 +932,7 @@ AffineTransformation3d operator * (const AffineTransformation3d& AffineTransform
   return AffineTransformation3dOut;
 }
 
+}
 
 //-----------------------------------------------------------------------------
 vector<float> AffineTransformation3d::toVector() const
