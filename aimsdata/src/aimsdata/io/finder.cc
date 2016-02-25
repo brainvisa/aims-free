@@ -238,14 +238,19 @@ bool Finder::check( const string& filename )
   cout << "FINDER:: trying check through DataSourceInfoLoader... " << endl;
   #endif
   Object h;
-  try {
+  string somaio_ext;
+  try
+  {
     // try first 2 passes
     DataSourceInfoLoader dsil;
     rc_ptr<DataSource> ds( new FileDataSource( filename ) );
     DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ),
                                       carto::none(), 1, 2 );
     h = dsi.header();
-  } catch( ... ) {
+    somaio_ext = dsi.identifiedFileExtension();
+  }
+  catch( ... )
+  {
   }
   bool dsok = !h.isNone();
   if( dsok )
@@ -276,9 +281,9 @@ bool Finder::check( const string& filename )
       #ifdef AIMS_DEBUG_IO
       cout << "FINDER:: DataSourceInfo worked" << endl;
       #endif
-      if( filename.substr( filename.length() - 4, 4 ) != ".gii" )
-        // bidouille to let the gifti reader work (it's both gifti and XML)
-        return true;
+//       if( filename.substr( filename.length() - 4, 4 ) != ".gii" )
+//         // bidouille to let the gifti reader work (it's both gifti and XML)
+//         return true;
     }
   #ifdef AIMS_DEBUG_IO
   cout << "FINDER:: DataSourceInfo didn't work, trying through Finder... " << endl;
@@ -309,11 +314,19 @@ bool Finder::check( const string& filename )
       = pd->extensions.find( ext ),
   eext = pd->extensions.end();
 
+  // find longest matching ext
   while( iext == eext && (pos=bname.find( '.', pos+1 ))!=string::npos )
-    {
-      ext = filename.substr( dlen+pos+1, filename.length() - pos - 1 );
-      iext = pd->extensions.find( ext );
-    }
+  {
+    ext = filename.substr( dlen+pos+1, filename.length() - pos - 1 );
+    iext = pd->extensions.find( ext );
+  }
+  if( _state == Ok && ( iext == eext || ext.length() <= somaio_ext.length() ) )
+  {
+    // Soma-IO has recognized the format, and none in aims matches a longer
+    // extension, so let's go with Soma-IO.
+    return true;
+  }
+
   list<string>::const_iterator	ie, ee;
   if( iext != eext )
   {
@@ -464,7 +477,9 @@ bool Finder::check( const string& filename )
   // still not succeeded, it's hopeless...
 
   if( dsok )
-    return true; // well, the datasource was OK (exception for .gii )
+    // well, the datasource was OK (exception for .gii and longer
+    // formats extensions)
+    return true;
 
   _state = Error;
   if( _errorcode < 0 )
@@ -473,7 +488,7 @@ bool Finder::check( const string& filename )
       _errormsg = filename + " : could not identify format";
     }
   //launchException();
-  return( false );
+  return false;
 }
 
 
