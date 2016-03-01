@@ -90,6 +90,16 @@ typedef unsigned short uint16_t;
 %Include list_POINT3DF.sip
 %Include map_STRING_STRING.sip
 %Include map_S32_STRING.sip
+%Include map_STRING_S32.sip
+%Include map_STRING_U8.sip
+%Include map_STRING_S16.sip
+%Include map_STRING_U16.sip
+%Include map_STRING_U32.sip
+%Include map_STRING_FLOAT.sip
+%Include map_STRING_DOUBLE.sip
+// %Include map_STRING_RGB.sip
+// %Include map_STRING_RGBA.sip
+// %Include map_STRING_HSV.sip
 
 %Include rcobject.sip
 %Include sharedobject.sip
@@ -219,6 +229,7 @@ typedef unsigned short uint16_t;
 %Include rcptr_Interpolator.sip
 %Include sparsematrix.sip
 %Include sparseordensematrix.sip
+// %Include ciftitools.sip
 
 typedef AimsTimeSurface_3_VOID AimsSurfaceTriangle;
 // compatibility with pyaims 4.4
