@@ -666,7 +666,6 @@ FileFormatDictionary<AimsData<cdouble> >::registerBaseFormats()
                                                           vvf, ext );
 }
 
-}
 
 template class FileFormatDictionary<AimsData<int8_t> >;
 template class FileFormatDictionary<AimsData<uint8_t> >;
@@ -805,6 +804,8 @@ template class VolumeRefFormat<cdouble>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 template class VolumeRefFormat<char>;
 #endif
+
+} // namespace aims
 
 
 #if __GNUC__ < 3

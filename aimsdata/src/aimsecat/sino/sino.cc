@@ -36,9 +36,10 @@
 #include <iostream>
 
 
-using namespace aims;
 using namespace std;
 using namespace carto;
+
+namespace aims {
 
 ScannerConf::ScannerConf( int ring, int numSeg, int ringDiff, int span, int numAngles, int numBin, 
 			  float zResolution, float binResolution, float /*faceRadius*/ ) :
@@ -201,6 +202,8 @@ template class AIMSDATA_API Sinogram<int32_t>;
 template class AIMSDATA_API Sinogram<float>;
 template class AIMSDATA_API Sinogram<double>;
 
+} // namespace aims
+
 // compilation of some Volume classes on Aims types
 #include <cartodata/volume/volume_d.h>
 
@@ -210,4 +213,3 @@ template class carto::Volume< AimsData< AimsData<double> > >;
 template class carto::Volume< AimsData< AimsData<int8_t> > >;
 template class carto::Volume< AimsData< AimsData<int16_t> > >;
 template class carto::Volume< AimsData< AimsData<int32_t> > >;
-

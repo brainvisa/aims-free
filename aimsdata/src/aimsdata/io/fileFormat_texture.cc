@@ -113,8 +113,6 @@ FileFormatDictionary<TimeTexture<Point2d> >::registerBaseFormats()
   registerFormat( "TEX", fm, ext );
 }
 
-}
-
 template class FileFormatDictionary<TimeTexture<float> >;
 template class FileFormatDictionary<TimeTexture<double> >;
 template class FileFormatDictionary<TimeTexture<Point2df> >;
@@ -130,6 +128,9 @@ template class FileFormat<TimeTexture<int16_t> >;
 template class FileFormat<TimeTexture<uint32_t> >;
 template class FileFormat<TimeTexture<int32_t> >;
 template class FileFormat<TimeTexture<Point2d> >;
+
+} // namespace aims
+
 
 static bool _texdic()
 {

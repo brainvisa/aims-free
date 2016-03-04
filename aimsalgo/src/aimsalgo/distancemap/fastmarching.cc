@@ -264,7 +264,7 @@ namespace
           }
     return u;
   }
-}
+} // anonymous namespace
 
 
 template <typename T>
@@ -366,14 +366,14 @@ namespace
     }
   }
 
-}
+} // anonymous namespace
 
 
 namespace
 {
   template <typename T> typename FastMarching<T>::RCFloatType
   doit_private( FastMarchingPrivateStruct<T> & fps );
-}
+} // anonymous namespace
 
 template <typename T>
 typename FastMarching<T>::RCFloatType
@@ -594,7 +594,7 @@ namespace
   return fps.dist.data();
 }
 
-}
+} // anonymous namespace
 
 
 template <typename T>
@@ -692,7 +692,10 @@ bool FastMarching<T>::verbose() const
   return d->verbose;
 }
 
+namespace aims {
 
 template class FastMarching<Volume<int16_t> >;
 template class FastMarching<BucketMap<int16_t> >;
 template class FastMarching<BucketMap<float> >;
+
+} // namespace aims

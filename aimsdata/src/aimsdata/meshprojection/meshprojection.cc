@@ -37,10 +37,13 @@
 
 #include <aims/meshprojection/meshprojection_d.h>
 
-using namespace aims;
+namespace aims
+{
 
 template class MeshProjection< float >;
 template class MeshProjection< int16_t >;
 
 template class MeshProjectionFactory< float >;
 template class MeshProjectionFactory< int16_t >;
+
+} // namespace aims

@@ -33,7 +33,8 @@
 
 #include <aims/io/spmR_d.h>
 
-using namespace aims ;
+namespace aims
+{
 
 template class SpmReader<int8_t> ;
 template class SpmReader<uint8_t> ;
@@ -50,3 +51,5 @@ template class SpmReader<char> ;
 #endif
 template class SpmReader<int64_t> ;
 template class SpmReader<uint64_t> ;
+
+} // namespace aims

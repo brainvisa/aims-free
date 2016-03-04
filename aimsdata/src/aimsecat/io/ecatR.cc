@@ -421,8 +421,7 @@ void EcatReader< float >::read( AimsData<float>& thing,
   thing = data;
 }
 
-}
-
 template class EcatReader< int16_t >;
 template class EcatReader< float >;
 
+} // namespace aims

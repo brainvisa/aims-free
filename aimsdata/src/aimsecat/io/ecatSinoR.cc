@@ -352,12 +352,12 @@ void EcatSinoReader< float >::read( vector < Sinogram<float> > & thing )
   delete hdr; 
 }
 
-}
-
 // instanciation explicite.
 
 template class EcatSinoReader< short >;
 template class EcatSinoReader< float >;
+
+} // namespace aims
 
 // compilation of some Volume classes on Aims types
 #include <cartodata/volume/volume_d.h>
