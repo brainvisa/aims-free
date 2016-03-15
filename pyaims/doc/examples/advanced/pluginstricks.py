@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 '''Maniupulate the plugins loader to avoid loading some of them, or to load additional plugins afterwards
 '''

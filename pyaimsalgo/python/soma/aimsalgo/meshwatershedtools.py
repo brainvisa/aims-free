@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 ############################################################################
 # This software and supporting documentation are distributed by
 # CEA/NeuroSpin, Batiment 145, 91191 Gif-sur-Yvette cedex, France.
