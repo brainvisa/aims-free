@@ -34,8 +34,9 @@
 
 #include <aims/math/ppca_d.h>
 
-using namespace aims;
 using namespace std ;
+
+namespace aims {
 
 double * ProbabilisticPcaElement::_exp = 0 ;
 
@@ -134,3 +135,5 @@ template class  ProbabilisticPca<char> ;
 template class  ProbabilisticPca<long> ;
 template class  ProbabilisticPca<unsigned long> ;
 #endif
+
+} // namespace aims

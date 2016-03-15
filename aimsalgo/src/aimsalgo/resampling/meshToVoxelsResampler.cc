@@ -33,7 +33,9 @@
 
 #include <aims/resampling/meshToVoxelsResampler_d.h>
 
-using namespace aims;
+namespace aims {
 
 template class MeshToVoxelsResampler<AimsData<unsigned int> >;
 template class MeshToVoxelsResampler<BucketMap<Void> >;
+
+} // namespace aims

@@ -10,7 +10,7 @@ namespace aims
 
     public:
 
-      typedef rc_ptr_Volume_DOUBLE DenseMatrixType;
+      // typedef rc_ptr_Volume_DOUBLE DenseMatrixType;
       typedef rc_ptr_SparseMatrix SparseMatrixType;
 
       SparseOrDenseMatrix( int size1 = 1, int size2 = 1 );
@@ -42,16 +42,16 @@ namespace aims
       bool isDense() const;
 
       SparseMatrixType sparseMatrix();
-      DenseMatrixType denseMatrix();
+      rc_ptr_Volume_DOUBLE denseMatrix();
 
       void setMatrix( SparseMatrixType matrix );
-      void setMatrix( DenseMatrixType matrix );
+      void setMatrix( rc_ptr_Volume_DOUBLE matrix );
 
       carto::Object header();
       void setHeader( carto::Object ph );
 
       SparseMatrixType asSparse( bool copy=false ) const;
-      DenseMatrixType asDense( bool copy=false ) const;
+      rc_ptr_Volume_DOUBLE asDense( bool copy=false ) const;
       void muteToDense();
       void muteToSparse();
       void muteToOptimalShape();

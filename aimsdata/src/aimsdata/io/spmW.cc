@@ -33,7 +33,8 @@
 
 #include <aims/io/spmW_d.h>
 
-using namespace aims ;
+namespace aims
+{
 
 template class SpmWriter<int8_t> ;
 template class SpmWriter<uint8_t> ;
@@ -50,3 +51,5 @@ template class SpmWriter<char> ;
 #endif
 template class SpmWriter<int64_t> ;
 template class SpmWriter<uint64_t> ;
+
+} // namespace aims

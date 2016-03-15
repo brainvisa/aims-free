@@ -34,7 +34,7 @@
 
 #include <aims/math/discriminantanalysis_d.h>
 
-using namespace aims;
+namespace aims {
 
 template void DiscriminantAnalysisElement::doIt<int8_t>(const AimsData<int8_t>&) ;
 template void DiscriminantAnalysisElement::doIt<uint8_t>(const AimsData<uint8_t>&) ;
@@ -85,3 +85,5 @@ template class DiscriminantAnalysis<char> ;
 #endif
 template class DiscriminantAnalysis<int64_t> ;
 template class DiscriminantAnalysis<uint64_t> ;
+
+} // namespace aims

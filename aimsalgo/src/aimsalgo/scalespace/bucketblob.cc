@@ -34,7 +34,8 @@
 
 #include <aims/scalespace/bucketblob_d.h>
 
-using namespace aims;
+namespace aims {
 
 template class BucketBlobExtractor<float>;
 
+} // namespace aims

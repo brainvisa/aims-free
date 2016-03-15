@@ -258,6 +258,7 @@ class Reader(object):
                 'genericobject': {'any': 'Object'},
                 #'SparseMatrix': {'DOUBLE': 'SparseMatrix'},
                 'SparseMatrix': {'DOUBLE': 'SparseOrDenseMatrix'},
+                'SparseOrDenseMatrix': {'DOUBLE': 'SparseOrDenseMatrix'},
             }
         else:
             self._typemap = typemap

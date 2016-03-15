@@ -33,7 +33,7 @@
 
 #include <aims/morphology/morphogreylevel_d.h>
 
-using namespace aims;
+namespace aims {
 
 template class MorphoGreyLevel<int8_t>;
 template class MorphoGreyLevel<uint8_t>;
@@ -44,4 +44,4 @@ template class MorphoGreyLevel<uint32_t>;
 template class MorphoGreyLevel<float>;
 template class MorphoGreyLevel<double>;
 
-
+} // namespace aims

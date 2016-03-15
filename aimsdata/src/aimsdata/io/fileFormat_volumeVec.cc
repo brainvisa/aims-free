@@ -223,7 +223,6 @@ FileFormatDictionary<AimsData<AimsVector<float,6> > >::registerBaseFormats()
     "SOMAIO_VOLUMES", vf, ext );
 }
 
-}
 
 template class FileFormatDictionary<AimsData<AimsRGB> >;
 template class FileFormatDictionary<AimsData<AimsRGBA> >;
@@ -279,6 +278,9 @@ template class VolumeRefFormat<AimsHSV>;
 template class VolumeRefFormat<Point3df>;
 template class VolumeRefFormat<Point3d>;
 template class VolumeRefFormat<AimsVector<float,6> >;
+
+} // namespace aims
+
 
 static bool _volvecdic()
 {

@@ -98,7 +98,7 @@ namespace carto {
   inline
   OUTP VolumeRef<T>::sum() const
   {
-    return (*this)->sum<OUTP>();
+    return (*this)->template sum<OUTP>();
   }
 
 

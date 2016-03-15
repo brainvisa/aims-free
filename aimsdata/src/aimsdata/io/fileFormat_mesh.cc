@@ -211,8 +211,6 @@ FileFormatDictionary<AimsTimeSurface<4, Point2df> >::registerBaseFormats()
   ext.clear();
 }
 
-}
-
 
 template class FileFormatDictionary<AimsTimeSurface<2, Void> >;
 template class FileFormatDictionary<AimsSurfaceTriangle>;
@@ -235,6 +233,8 @@ template class FileFormat<AimsTimeSurface<2, Point2df> >;
 template class FileFormat<AimsTimeSurface<3, Point2df> >;
 template class FileFormat<AimsTimeSurface<4, Point2df> >;
 // #endif
+
+} // namespace aims
 
 
 static bool _meshdic()
