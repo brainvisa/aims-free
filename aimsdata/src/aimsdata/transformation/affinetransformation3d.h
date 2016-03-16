@@ -53,16 +53,12 @@ namespace aims
       ( const AffineTransformation3d &AffineTransformation3d,
         const Point3df & pmin1, const Point3df & pmax1, Point3df & pmin2,
         Point3df & pmax2 );
-}
+
+  std::ostream&
+    operator << ( std::ostream& os,
+                  const AffineTransformation3d& thing );
 
 //-----------------------------------------------------------------------------
-std::ostream&
-  operator << ( std::ostream& os,
-                const aims::AffineTransformation3d& thing );
-
-
-namespace aims
-{
 
   //--------------------------//
  //  AffineTransformation3d  //
@@ -158,10 +154,6 @@ public:
   /// transform AffineTransformation3d to a vector (useful for conversions and IO)
   std::vector<float> toVector() const;
 
-  // Output
-  friend std::ostream& ::operator << ( std::ostream& os, const AffineTransformation3d& thing );
-
-
   static AimsData<float> rotationaroundx(float rx) ;
   static AimsData<float> rotationaroundy(float ry) ;
   static AimsData<float> rotationaroundz(float rz) ;
@@ -181,13 +173,13 @@ protected:
   aims::PythonHeader  *_header;
 };
 
+  // Compose AffineTransformation3d
+  AffineTransformation3d
+      operator * ( const AffineTransformation3d& affineTransformation3d1,
+                   const AffineTransformation3d& affineTransformation3d2 );
+
 }
 
-
-// Compose AffineTransformation3d
-aims::AffineTransformation3d
-    operator * ( const aims::AffineTransformation3d& AffineTransformation3d1,
-                 const aims::AffineTransformation3d& AffineTransformation3d );
 
 
 

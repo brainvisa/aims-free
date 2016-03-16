@@ -44,12 +44,12 @@
 using namespace aims;
 using namespace std;
 
+namespace aims
+{
+
 #if defined( __APPLE__ ) && (__GNUC__-0) < 4
 template<> FileFormat<Motion>::~FileFormat() {}
 #endif
-
-namespace aims
-{
 
 template<> void 
 FileFormatDictionary<Motion>::registerBaseFormats()
@@ -60,10 +60,12 @@ FileFormatDictionary<Motion>::registerBaseFormats()
   registerFormat( "TRM", fm, ext );
 }
 
-}
 
 template class FileFormatDictionary<Motion>;
 template class FileFormat<Motion>;
+
+} // namespace aims
+
 
 static bool _motiondic()
 {

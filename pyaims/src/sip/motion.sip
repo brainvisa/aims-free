@@ -49,8 +49,8 @@ public:
   bool isIdentity() const;
   virtual void setToIdentity();
   aims::AffineTransformation3d inverse() const;
-  aims::AffineTransformation3d operator* (const aims::AffineTransformation3d & );
-  // aims::AffineTransformation3d operator*= (const aims::AffineTransformation3d & ); // SIP4.5> (*sipCpp) *= *a0))
+  aims::AffineTransformation3d operator* (const aims::AffineTransformation3d & ) const;
+  void operator*= (const aims::AffineTransformation3d & ); // SIP4.5> (*sipCpp) *= *a0))
   virtual void scale( const Point3df &, const Point3df & );
   bool isDirect() const;
   void setTranslation( Point3df );

@@ -18,11 +18,11 @@
 #include <cmath>
 #include <string>
 
-using namespace bio;
 using namespace aims;
 using namespace std;
 using namespace carto;
 
+namespace bio {
 
 //============================================================================
 //   FFD TRANSFORMATION
@@ -805,3 +805,5 @@ template class NearestNeighborFfdResampler<float>;
 template class NearestNeighborFfdResampler<double>;
 template class NearestNeighborFfdResampler<AimsRGB, AimsRGB::ChannelType>;
 template class NearestNeighborFfdResampler<AimsRGBA, AimsRGBA::ChannelType>;
+
+} // namespace bio

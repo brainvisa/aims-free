@@ -103,13 +103,13 @@ namespace aims
     registerFormat( "STX", af, ext );
   }
 
-}
-
 
 template class FileFormatDictionary<Graph>;
 template class FileFormat<Graph>;
 template class FileFormatDictionary<SyntaxSet>;
 template class FileFormat<SyntaxSet>;
+
+} // namespace aims
 
 
 static bool _graphdic()

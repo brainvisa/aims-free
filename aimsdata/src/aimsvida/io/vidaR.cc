@@ -413,7 +413,7 @@ void VidaReader< float >::read(AimsData< float >& thing,
   thing = data;
 }
 
-}
-
 template class VidaReader< int16_t >;
 template class VidaReader< float >;
+
+} // namespace aims

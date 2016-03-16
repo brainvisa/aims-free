@@ -263,36 +263,38 @@ std::ostream & operator<< ( const carto::VolumeOStream & out,
 
   for( int t = 0; t < volume.getSizeT(); ++t )
   {
-    if( hasT )
-      if( t < out.maxT() )
+    if( hasT ) {
+      if( t < out.maxT() ) {
         out.ostream() << std::setw(2) << std::left << tB;
-      else {
+      } else {
         out.ostream() << std::setw(3) << std::left << "...";
         break;
       }
+    }
     for( int z = 0; z < volume.getSizeZ(); ++z )
     {
-      if( hasZ )
-        if( z < out.maxZ() )
+      if( hasZ ) {
+        if( z < out.maxZ() ) {
           out.ostream() << std::setw(2) << std::left << zB;
-        else {
+        } else {
           out.ostream() << std::setw(3) << std::left << "...";
           break;
         }
+      }
       for( int y = 0; y < volume.getSizeY(); ++y )
       {
-        if( y < out.maxY() )
+        if( y < out.maxY() ) {
           out.ostream() << std::setw(2) << std::left << yB;
-          else {
-            out.ostream() << std::setw(3) << std::left << "...";
-            break;
-          }
+        } else {
+          out.ostream() << std::setw(3) << std::left << "...";
+          break;
+        }
         for( int x = 0; x < volume.getSizeX(); ++x )
         {
-          if( x < out.maxX() )
+          if( x < out.maxX() ) {
             out.ostream() << std::setw(8) << std::setprecision(6) << std::left
                           << carto::toString( volume( x, y, z, t ) );
-          else {
+          } else {
             out.ostream() << std::setw(8) << std::left << "...";
             break;
           }

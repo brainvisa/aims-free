@@ -46,9 +46,10 @@
 #include <time.h>
 
 
-using namespace aims;
 using namespace std;
 using namespace carto;   
+
+namespace aims {
 
 template< class T >
 static void fillEcatSinoHdr( UnifiedEcatSinoInfo *uesi, const vector< Sinogram<T> >& thing )
@@ -379,4 +380,4 @@ template void fillEcatSinoHdr( UnifiedEcatSinoInfo *uesi,
 template class AIMSDATA_API EcatSinoWriter< short >;
 template class AIMSDATA_API EcatSinoWriter< float >;
 
-
+} // namespace aims

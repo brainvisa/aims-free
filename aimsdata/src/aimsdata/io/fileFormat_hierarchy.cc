@@ -60,10 +60,10 @@ namespace aims
     registerFormat( "HIE", fm, ext );
   }
 
-}
-
 template class FileFormatDictionary<Hierarchy>;
 template class FileFormat<Hierarchy>;
+
+} // namespace aims
 
 
 static bool _hiedic()

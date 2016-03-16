@@ -44,7 +44,7 @@
 #include <aims/resampling/sixthorderresampler_d.h>
 #include <aims/resampling/seventhorderresampler_d.h>
 
-using namespace aims;
+// TODO: all resamplers should be moved into the aims namespace
 
 template class Resampler<int8_t>;
 template class SplineResampler<int8_t>;
@@ -56,7 +56,7 @@ template class QuarticResampler<int8_t>;
 template class QuinticResampler<int8_t>;
 template class SixthOrderResampler<int8_t>;
 template class SeventhOrderResampler<int8_t>;
-template class ResamplerFactory<int8_t>;
+template class aims::ResamplerFactory<int8_t>;
 
 template class Resampler<uint8_t>;
 template class SplineResampler<uint8_t>;
@@ -68,7 +68,7 @@ template class QuarticResampler<uint8_t>;
 template class QuinticResampler<uint8_t>;
 template class SixthOrderResampler<uint8_t>;
 template class SeventhOrderResampler<uint8_t>;
-template class ResamplerFactory<uint8_t>;
+template class aims::ResamplerFactory<uint8_t>;
 
 template class Resampler<int16_t>;
 template class SplineResampler<int16_t>;
@@ -80,7 +80,7 @@ template class QuarticResampler<int16_t>;
 template class QuinticResampler<int16_t>;
 template class SixthOrderResampler<int16_t>;
 template class SeventhOrderResampler<int16_t>;
-template class ResamplerFactory<int16_t>;
+template class aims::ResamplerFactory<int16_t>;
 
 template class Resampler<uint16_t>;
 template class SplineResampler<uint16_t>;
@@ -92,7 +92,7 @@ template class QuarticResampler<uint16_t>;
 template class QuinticResampler<uint16_t>;
 template class SixthOrderResampler<uint16_t>;
 template class SeventhOrderResampler<uint16_t>;
-template class ResamplerFactory<uint16_t>;
+template class aims::ResamplerFactory<uint16_t>;
 
 template class Resampler<int32_t>;
 template class SplineResampler<int32_t>;
@@ -104,7 +104,7 @@ template class QuarticResampler<int32_t>;
 template class QuinticResampler<int32_t>;
 template class SixthOrderResampler<int32_t>;
 template class SeventhOrderResampler<int32_t>;
-template class ResamplerFactory<int32_t>;
+template class aims::ResamplerFactory<int32_t>;
 
 template class Resampler<uint32_t>;
 template class SplineResampler<uint32_t>;
@@ -116,7 +116,7 @@ template class QuarticResampler<uint32_t>;
 template class QuinticResampler<uint32_t>;
 template class SixthOrderResampler<uint32_t>;
 template class SeventhOrderResampler<uint32_t>;
-template class ResamplerFactory<uint32_t>;
+template class aims::ResamplerFactory<uint32_t>;
 
 template class Resampler<float>;
 template class SplineResampler<float>;
@@ -128,7 +128,7 @@ template class QuarticResampler<float>;
 template class QuinticResampler<float>;
 template class SixthOrderResampler<float>;
 template class SeventhOrderResampler<float>;
-template class ResamplerFactory<float>;
+template class aims::ResamplerFactory<float>;
 
 template class Resampler<double>;
 template class SplineResampler<double>;
@@ -140,12 +140,12 @@ template class QuarticResampler<double>;
 template class QuinticResampler<double>;
 template class SixthOrderResampler<double>;
 template class SeventhOrderResampler<double>;
-template class ResamplerFactory<double>;
+template class aims::ResamplerFactory<double>;
 
 template class Resampler<AimsRGB>;
 template class NearestNeighborResampler<AimsRGB>;
-template class ResamplerFactory<AimsRGB>;
+template class aims::ResamplerFactory<AimsRGB>;
 
 template class Resampler<AimsRGBA>;
 template class NearestNeighborResampler<AimsRGBA>;
-template class ResamplerFactory<AimsRGBA>;
+template class aims::ResamplerFactory<AimsRGBA>;

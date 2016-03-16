@@ -415,10 +415,6 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   return( true );
 }
 
-}
-
-using namespace aims ;
-
 template class MincWriter<uint8_t> ;
 template class MincWriter<int8_t> ;
 template class MincWriter<uint16_t> ;
@@ -434,3 +430,5 @@ template class MincWriter<char> ;
 #endif
 template class MincWriter<int64_t> ;
 template class MincWriter<uint64_t> ;
+
+} // namespace aims

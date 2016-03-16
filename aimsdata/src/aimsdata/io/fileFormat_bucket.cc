@@ -269,7 +269,6 @@ FileFormatDictionary<BucketMap<DtiTensor> >::registerBaseFormats()
     registerFormat( "BCK", fm, ext );
   }
 
-}
 
 template class FileFormatDictionary<AimsBucket<Void> >;
 template class FileFormatDictionary<AimsBucket<short> >;
@@ -297,6 +296,9 @@ template class FileFormatDictionary<AimsBucket<vector<int32_t> > >;
 template class FileFormatDictionary<AimsBucket<vector<uint32_t> > >;
 template class FileFormatDictionary<AimsBucket<vector<float> > >;
 template class FileFormatDictionary<AimsBucket<vector<double> > >;
+
+} // namespace aims
+
 
 static bool _buckdic()
 {

@@ -300,7 +300,7 @@ namespace carto {
   inline
   const AllocatorContext & VolumeRef<T>::allocatorContext() const
   {
-    (*this)->allocatorContext();
+    return (*this)->allocatorContext();
   }
 
   template <typename T>

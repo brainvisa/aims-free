@@ -67,12 +67,14 @@ FileFormatDictionary<SparseOrDenseMatrix>::registerBaseFormats()
   registerFormat( "IMASPARSE", fm, ext );
 }
 
-}
 
 template class FileFormatDictionary<SparseMatrix>;
 template class FileFormat<SparseMatrix>;
 template class FileFormatDictionary<SparseOrDenseMatrix>;
 template class FileFormat<SparseOrDenseMatrix>;
+
+} // namespace aims
+
 
 static bool _sparsematdic()
 {

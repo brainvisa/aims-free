@@ -46,6 +46,8 @@
 
 using namespace carto;
 
+namespace carto {
+
 template class VolumeProxy< bool >;
 template class VolumeProxy< int8_t >;
 template class VolumeProxy< uint8_t >;
@@ -149,6 +151,8 @@ template class Creator< VolumeRef< VoxelHSV > >;
 template class Creator<VolumeRef< long > >;
 template class Creator<VolumeRef< unsigned long > >;
 #endif
+
+} // namespace carto
 
 // utilities
 #if 0

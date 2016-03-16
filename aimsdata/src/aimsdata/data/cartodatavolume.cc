@@ -48,8 +48,6 @@
 #include <set>
 #include <map>
 
-using namespace carto;
-
 #define instantiate_volutil( T ) \
 template class VolumeUtil<T>; \
 template VolumeRef<T> \
@@ -114,7 +112,6 @@ namespace carto
   {
     return apply( Scaler<AimsHSV, long>( -1 ), o );
   }
-}
 
 template class carto::VolumeProxy< AimsRGB >;
 template class carto::Volume< AimsRGB >;
@@ -184,8 +181,7 @@ template class carto::Volume< std::set<float> >;
 template class carto::VolumeProxy< std::map<int, float> >;
 template class carto::Volume< std::map<int, float> >;
 
-namespace carto
-{
+
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3df > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< vectorf6 > )
@@ -193,7 +189,6 @@ namespace carto
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< DtiTensor* > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< DtiTensor* > > )
 
-}
 
 template class Creator<Volume<Point3df> >;
 template class Creator<Volume<Point3d> >;
@@ -207,3 +202,4 @@ template class Creator<VolumeRef<Point2d> >;
 template class Creator<VolumeRef<vectorf6> >;
 template class Creator<VolumeRef<DtiTensor*> >;
 
+} // namespace carto

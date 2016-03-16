@@ -90,10 +90,6 @@ public:
   void setRotation( float Rx, float Ry, float Rz ) ;
   void transAffine(Point3df cg = Point3df( 0.0 ) );
 
-
-  // Output
-  friend std::ostream& ::operator << ( std::ostream& os, const AffineTransformation3d& thing );
-
 protected:
 
   AimsData<float> _shear;

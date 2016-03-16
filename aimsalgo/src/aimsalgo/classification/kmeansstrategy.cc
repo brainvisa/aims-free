@@ -34,7 +34,7 @@
 
 #include <aims/classification/kmeansstrategy_d.h>
 
-using namespace aims ;
+namespace aims {
 
 template class KmeansStrategy<char> ;
 template class KmeansStrategy<unsigned char> ;
@@ -44,3 +44,5 @@ template class KmeansStrategy<int> ;
 template class KmeansStrategy<unsigned int> ;
 template class KmeansStrategy<float> ;
 template class KmeansStrategy<double> ;
+
+} // namespace aims

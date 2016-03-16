@@ -15,12 +15,7 @@ endif()
 
 BRAINVISA_DEPENDENCY( DEV DEPENDS "${BRAINVISA_PACKAGE_NAME}" RUN "= ${${BRAINVISA_PACKAGE_NAME}_VERSION}" )
 
-if( DESIRED_QT_VERSION EQUAL 3 )
-  include_directories( ${QT_INCLUDE_DIR} )
-  add_definitions( ${QT_DEFINITIONS} )
-else()
-  include( "${QT_USE_FILE}" )
-endif()
+include( "${QT_USE_FILE}" )
 
 add_subdirectory( src )
 
