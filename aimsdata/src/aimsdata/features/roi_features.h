@@ -53,8 +53,8 @@ class RoiFeatures
 {
 public:
 
-  void addImageStatistics( const std::string &name, 
-                           const std::string & );
+  void addImageStatistics( const std::string & label,
+                           const std::string & filename );
   void computeFeatures( const carto::rc_ptr< RoiIterator > & );
   void write( std::ostream &out, const std::string &format = "minf" ) const;
 
