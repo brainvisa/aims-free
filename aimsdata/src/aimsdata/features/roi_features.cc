@@ -108,11 +108,6 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
           o = features->getProperty( it->first );
         }
 
-        vector<int> v;
-        v.resize( 3 );
-        v[ 0 ] = 1;
-        v[ 1 ] = 2;
-        v[ 2 ] = 3;
         const PropertySet &header = interpolator->header();
 
         _scalarSetFeatures.setValues( allValues );
