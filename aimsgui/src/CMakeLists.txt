@@ -8,6 +8,9 @@ if( APPLE )
   add_subdirectory( bundle_aimsqtformats )
   set( _guiExecutable MACOSX_BUNDLE )
 endif( APPLE )
+# external official CIFTI lib
+add_subdirectory( CiftiLib-1.3 )
+add_subdirectory( aimscifti )
 
 #------------------------------------------------------------------------------
 # Build targets for commands by looking into "Aims*" directories

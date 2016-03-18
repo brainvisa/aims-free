@@ -229,7 +229,7 @@ typedef unsigned short uint16_t;
 %Include rcptr_Interpolator.sip
 %Include sparsematrix.sip
 %Include sparseordensematrix.sip
-// %Include ciftitools.sip
+%Include ciftitools.sip
 
 typedef AimsTimeSurface_3_VOID AimsSurfaceTriangle;
 // compatibility with pyaims 4.4
