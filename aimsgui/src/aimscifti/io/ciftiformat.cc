@@ -91,7 +91,7 @@ bool CiftiFormat::read( const std::string & filename,
       !iter.atEnd();
       ++iter)
   {//helper class to iterate over 2D and 3D cifti with the same code - the "+ 1" is to drop the first dimension (row length)
-    inputFile.getRow(scratchRow.data(), *iter);
+    inputFile.getRow(&scratchRow[0], *iter);
     if( ndim >= 3 )
     {
       z = (*iter)[1];
