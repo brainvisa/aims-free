@@ -504,7 +504,7 @@ void NiftiHeader::read(BinaryFile& inFile)
             if ((size_t)esize > 2 * sizeof(int32_t))//don't try to read 0 bytes
             {
                 tempExtension->m_bytes.resize(esize - 2 * sizeof(int32_t));
-                inFile.read(tempExtension->m_bytes.data(), esize - 2 * sizeof(int32_t));
+                inFile.read(&tempExtension->m_bytes[0], esize - 2 * sizeof(int32_t));
             }
             tempExtension->m_ecode = ecode;
             m_extensions.push_back(tempExtension);
@@ -746,7 +746,7 @@ void NiftiHeader::write(BinaryFile& outFile, const int& version, const bool& swa
         }
         outFile.write(&outSize, sizeof(int32_t));
         outFile.write(&outEcode, sizeof(int32_t));
-        outFile.write(m_extensions[i]->m_bytes.data(), m_extensions[i]->m_bytes.size());
+        outFile.write(&m_extensions[i]->m_bytes[0], m_extensions[i]->m_bytes.size());
         if (paddingBytes != 0) outFile.write(padding, paddingBytes);
     }
     CiftiAssert(outFile.pos() == voxOffset);
