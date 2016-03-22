@@ -92,8 +92,13 @@ def sphere_coordinates(sphere, inversion=False):
     """
     # a vector of vertices where each vertex is a 3D point
     # with coordinates in millimeters
-    vert = sphere.vertex()
-    nvert = numpy.asarray(vert)
+    if isinstance(sphere, (aims.AimsTimeSurface_3_VOID,
+                           aims.AimsTimeSurface_2_VOID,
+                           aims.AimsTimeSurface_4_VOID)):
+        vert = sphere.vertex()
+        nvert = numpy.asarray(vert)
+    else:
+        nvert = numpy.asarray(sphere)
 
     #########################################################################
     #                         A latitude texture                            #
