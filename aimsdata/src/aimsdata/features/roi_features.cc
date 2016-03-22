@@ -64,8 +64,6 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
       features = _result->getProperty( roiIterator->regionName() );
     }
 
-    vector< ScalarFeaturesProvider::Scalar_t > featureValues;
-
     rc_ptr< MaskIterator > maskIterator = roiIterator->maskIterator();
     size_t point_count = 0;
     while ( maskIterator->isValid() ) {
@@ -110,11 +108,6 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
           o = features->getProperty( it->first );
         }
 
-        vector<int> v;
-        v.resize( 3 );
-        v[ 0 ] = 1;
-        v[ 1 ] = 2;
-        v[ 2 ] = 3;
         const PropertySet &header = interpolator->header();
 
         _scalarSetFeatures.setValues( allValues );
@@ -169,13 +162,13 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
 
 //-----------------------------------------------------------------------------
 void RoiFeatures::
-addImageStatistics( const std::string &prefix,
+addImageStatistics( const std::string &label,
                     const std::string &filename )
 {
-  if ( _images.find( prefix ) == _images.end() ) {
-    _images[ prefix ] = filename;
+  if ( _images.find( label ) == _images.end() ) {
+    _images[ label ] = filename;
   } else {
-    throw runtime_error( string( "Cannot compute statistics because the label \"" ) + prefix + "\" is used for several images." );
+    throw runtime_error( string( "Cannot compute statistics because the label \"" ) + label + "\" is used for several images." );
   }
 }
 
