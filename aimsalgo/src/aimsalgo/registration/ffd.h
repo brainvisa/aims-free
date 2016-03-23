@@ -13,7 +13,8 @@
 #define AIMS_REGISTRATION_FFD_H
 
 #include <aims/data/data.h>                           // AimsData
-#include <aims/ffd/tabulSpline.h>                     // tabulSpline
+#include <aims/io/io_g.h>                             // aims::Reader / Writer
+#include <aims/math/bspline.h>                        // aims::TabulBSpline
 #include <aims/resampling/resampling_g.h>
 #include <aims/resampling/resamplerfactory.h>
 #include <aims/transformation/transformation.h>       // aims::Transformatin
@@ -22,14 +23,13 @@
 #include <limits>
 #include <string>
 
-namespace bio {
+namespace aims {
 
   //==========================================================================
   //   FFD TRANSFORMATION
   //==========================================================================
 
-  class SplineFfd:
-    public aims::Transformation3d
+  class SplineFfd: public aims::Transformation3d
   {
    public:
     //--- Constructor --------------------------------------------------------
@@ -73,7 +73,7 @@ namespace bio {
     Point3dd     deformation( const Point3dd& p_mm ) const;
     Point3dd     ffdCoord( const Point3dd& p_mm ) const
     { return mmToSplineVox(p_mm); }
-    double spline3( double x ) const { return _spline.spline3(x); }
+    double spline3( double x ) const { return _spline(x); }
 
     //--- Parameters ---------------------------------------------------------
     int          dimX() const { return _ctrlPointDelta.dimX(); }
@@ -111,20 +111,20 @@ namespace bio {
     Point3dd     transformDouble( double x, double y, double z ) const;
 
     AimsData<Point3df>  _ctrlPointDelta;
-    TabulSpline         _spline;
+    aims::TabulBSpline  _spline;
   };
 
   template <typename T>
   SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
                         const AimsData<T> & test_volume ):
-    _spline("SplineFFD"),
+    _spline(3, 0),
     _ctrlPointDelta( dimX, dimY, dimZ )
   {
     _ctrlPointDelta = Point3df(0., 0., 0.);
     _ctrlPointDelta.setSizeXYZT(
-      double(test_volume.dimX() - 1) / double(dimX - 1) * test_volume.sizeX(),
-      double(test_volume.dimY() - 1) / double(dimY - 1) * test_volume.sizeY(),
-      double(test_volume.dimZ() - 1) / double(dimZ - 1) * test_volume.sizeZ()
+      isFlat(0) ? test_volume.sizeX() : double(test_volume.dimX() - 1) / double(dimX - 1) * test_volume.sizeX(),
+      isFlat(1) ? test_volume.sizeY() : double(test_volume.dimY() - 1) / double(dimY - 1) * test_volume.sizeY(),
+      isFlat(2) ? test_volume.sizeZ() : double(test_volume.dimZ() - 1) / double(dimZ - 1) * test_volume.sizeZ()
     );
   }
 
@@ -143,25 +143,20 @@ namespace bio {
                      p[1] / sizeY(),
                      p[2] / sizeZ() );
   }
-} // namespace bio
-
 
 //============================================================================
 //   FFD READER/WRITER
 //============================================================================
-#include <aims/io/io_g.h>                             // aims::Reader / Writer
-namespace aims
-{
 
   template <>
-  class Reader<bio::SplineFfd>: public Reader<AimsData<Point3df> >
+  class Reader<aims::SplineFfd>: public Reader<AimsData<Point3df> >
   {
     typedef Reader<AimsData<Point3df> > base;
   public:
     Reader(): base() {}
     Reader( const std::string& filename ): base(filename) {}
     virtual ~Reader() {}
-    virtual bool read( bio::SplineFfd & obj,
+    virtual bool read( aims::SplineFfd & obj,
                        int border=0,
                        const std::string* format = 0,
                        int frame = -1 )
@@ -172,7 +167,7 @@ namespace aims
   };
 
   template<>
-  class Writer<bio::SplineFfd> : public Writer<AimsData<Point3df> >
+  class Writer<aims::SplineFfd> : public Writer<AimsData<Point3df> >
   {
     typedef Writer<AimsData<Point3df> > base;
   public:
@@ -181,7 +176,7 @@ namespace aims
                    carto::Object options = carto::none() ):
       base( filename, options ) {}
     virtual ~Writer() {}
-    virtual bool write( const bio::SplineFfd & obj,
+    virtual bool write( const aims::SplineFfd & obj,
                         bool ascii = false,
                         const std::string* format = 0 )
     {
@@ -189,12 +184,9 @@ namespace aims
     }
   };
 
-} // namespace aims
-
 //============================================================================
 //   R E S A M P L I N G
 //============================================================================
-namespace bio {
 
   /// Resampling image using Free Form Deformation transformations.
   ///
@@ -263,6 +255,6 @@ namespace bio {
       int _samples;
   };
 
-} // namespace bio
+} // namespace aims
 
 #endif

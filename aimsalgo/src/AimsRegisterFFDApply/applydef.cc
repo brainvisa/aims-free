@@ -25,7 +25,6 @@
 #include <algorithm>
 //----------------------------------------------------------------------------
 
-using namespace bio;
 using namespace aims;
 using namespace std;
 using namespace carto;
@@ -189,9 +188,9 @@ bool doit( Process & process, const string & fileref, Finder & )
 
   //--- Field of view (in which it is useful to compte a ffd motion)
   int32_t fdx, fdy, fdz;
-  fdx = (int32_t)( double(deformation.dimX()) * deformation.sizeX() / ffdproc.sx );
-  fdy = (int32_t)( double(deformation.dimY()) * deformation.sizeY() / ffdproc.sy );
-  fdz = (int32_t)( double(deformation.dimZ()) * deformation.sizeZ() / ffdproc.sz );
+  fdx = deformation.isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation.dimX()) * deformation.sizeX() / ffdproc.sx );
+  fdy = deformation.isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation.dimY()) * deformation.sizeY() / ffdproc.sy );
+  fdz = deformation.isFlat(2) ? ffdproc.sz : (int32_t)( double(deformation.dimZ()) * deformation.sizeZ() / ffdproc.sz );
   fdx = std::min( fdx, ffdproc.dx );
   fdy = std::min( fdy, ffdproc.dy );
   fdz = std::min( fdz, ffdproc.dz );
@@ -318,98 +317,94 @@ bool doit( Process & process, const string & fileref, Finder & )
   if( ffdproc.dz > 1)
     std::cout << "Progress: ";
 
-  aims::Progression progress(ffdproc.dz * in.dimT());
+  aims::Progression progress(ffdproc.dx * ffdproc.dy * ffdproc.dz * in.dimT());
 
   for( int t = 0; t < in.dimT(); ++t )
-  for( long z = 0; z < ffdproc.dz; ++z, ++progress )
+  for( long z = 0; z < ffdproc.dz; ++z )
+  for( long y = 0; y < ffdproc.dy; ++y )
+  for( long x = 0; x < ffdproc.dx; ++x )
   {
-    // Display progression
-    std::cout << progress << std::flush;
+    (++progress).print();
 
-    for( long y = 0; y < ffdproc.dy; ++y )
-    for( long x = 0; x < ffdproc.dx; ++x )
+    Point3df porg(x, y, z);
+    porg[0] *= ffdproc.sx;
+    porg[1] *= ffdproc.sy;
+    porg[2] *= ffdproc.sz;
+    Point3df p = rsp->resample( porg, out(x, y, z, t), t );
+
+    if( t == 0 )
     {
+      p[0] /= ffdproc.sx;
+      p[1] /= ffdproc.sy;
+      p[2] /= ffdproc.sz;
 
-      Point3df porg(x, y, z);
-      porg[0] *= ffdproc.sx;
-      porg[1] *= ffdproc.sy;
-      porg[2] *= ffdproc.sz;
-      Point3df p = rsp->resample( porg, out(x, y, z, t), t );
+      if( !ffdproc.gridout.empty() ) {
+        grid( x, y, z, 0 ) = p[0] - x;
+        grid( x, y, z, 1 ) = p[1] - y;
+        grid( x, y, z, 2 ) = p[2] - z;
+      }
 
-      if( t == 0 )
+      if( !ffdproc.compout.empty() )
       {
-        p[0] /= ffdproc.sx;
-        p[1] /= ffdproc.sy;
-        p[2] /= ffdproc.sz;
+        // Generate a deformed mesh
+        AimsSurfaceTriangle  vol;
+        AimsSurface<3, Void>  & vo = vol[0];
+        vector<Point3df>     ogv;
+        vector<Point3df>     & vert = vo.vertex();
+        vector< AimsVector<uint, 3> > & poly = vo.polygon();
 
-        if( !ffdproc.gridout.empty() ) {
-          grid( x, y, z, 0 ) = p[0] - x;
-          grid( x, y, z, 1 ) = p[1] - y;
-          grid( x, y, z, 2 ) = p[2] - z;
-        }
+        ogv.reserve( 8 );
+        vert.reserve( 8 );
+        poly.reserve( 12 );
 
-        if( !ffdproc.compout.empty() )
+        ogv.push_back( Point3df( x - dx, y - dy, z - dz ) );
+        ogv.push_back( Point3df( x + dx, y - dy, z - dz ) );
+        ogv.push_back( Point3df( x - dx, y + dy, z - dz ) );
+        ogv.push_back( Point3df( x + dx, y + dy, z - dz ) );
+        ogv.push_back( Point3df( x - dx, y - dy, z + dz ) );
+        ogv.push_back( Point3df( x + dx, y - dy, z + dz ) );
+        ogv.push_back( Point3df( x - dx, y + dy, z + dz ) );
+        ogv.push_back( Point3df( x + dx, y + dy, z + dz ) );
+
+        poly.push_back( AimsVector<uint,3>( 0, 2, 3 ) );
+        poly.push_back( AimsVector<uint,3>( 0, 3, 1 ) );
+        poly.push_back( AimsVector<uint,3>( 4, 7, 6 ) );
+        poly.push_back( AimsVector<uint,3>( 4, 5, 7 ) );
+        poly.push_back( AimsVector<uint,3>( 0, 6, 2 ) );
+        poly.push_back( AimsVector<uint,3>( 0, 4, 6 ) );
+        poly.push_back( AimsVector<uint,3>( 1, 3, 7 ) );
+        poly.push_back( AimsVector<uint,3>( 1, 7, 5 ) );
+        poly.push_back( AimsVector<uint,3>( 4, 0, 1 ) );
+        poly.push_back( AimsVector<uint,3>( 4, 1, 5 ) );
+        poly.push_back( AimsVector<uint,3>( 6, 3, 2 ) );
+        poly.push_back( AimsVector<uint,3>( 6, 7, 3 ) );
+
+        // Apply vertices deformation
+        vector<Point3df>::iterator it, ie = ogv.end();
+        for( it = ogv.begin(); it < ie; it++ )
         {
-          // Generate a deformed mesh
-          AimsSurfaceTriangle  vol;
-          AimsSurface<3, Void>  & vo = vol[0];
-          vector<Point3df>     ogv;
-          vector<Point3df>     & vert = vo.vertex();
-          vector< AimsVector<uint, 3> > & poly = vo.polygon();
-
-          ogv.reserve( 8 );
-          vert.reserve( 8 );
-          poly.reserve( 12 );
-
-          ogv.push_back( Point3df( x - dx, y - dy, z - dz ) );
-          ogv.push_back( Point3df( x + dx, y - dy, z - dz ) );
-          ogv.push_back( Point3df( x - dx, y + dy, z - dz ) );
-          ogv.push_back( Point3df( x + dx, y + dy, z - dz ) );
-          ogv.push_back( Point3df( x - dx, y - dy, z + dz ) );
-          ogv.push_back( Point3df( x + dx, y - dy, z + dz ) );
-          ogv.push_back( Point3df( x - dx, y + dy, z + dz ) );
-          ogv.push_back( Point3df( x + dx, y + dy, z + dz ) );
-
-          poly.push_back( AimsVector<uint,3>( 0, 2, 3 ) );
-          poly.push_back( AimsVector<uint,3>( 0, 3, 1 ) );
-          poly.push_back( AimsVector<uint,3>( 4, 7, 6 ) );
-          poly.push_back( AimsVector<uint,3>( 4, 5, 7 ) );
-          poly.push_back( AimsVector<uint,3>( 0, 6, 2 ) );
-          poly.push_back( AimsVector<uint,3>( 0, 4, 6 ) );
-          poly.push_back( AimsVector<uint,3>( 1, 3, 7 ) );
-          poly.push_back( AimsVector<uint,3>( 1, 7, 5 ) );
-          poly.push_back( AimsVector<uint,3>( 4, 0, 1 ) );
-          poly.push_back( AimsVector<uint,3>( 4, 1, 5 ) );
-          poly.push_back( AimsVector<uint,3>( 6, 3, 2 ) );
-          poly.push_back( AimsVector<uint,3>( 6, 7, 3 ) );
-
-          // Apply vertices deformation
-          vector<Point3df>::iterator it, ie = ogv.end();
-          for( it = ogv.begin(); it < ie; it++ )
+          v = *it;
+          if (! affine.isIdentity() )
           {
-            v = *it;
-            if (! affine.isIdentity() )
-            {
-              // Apply inverted affine transformation
-              v[0] *= size[0];
-              v[1] *= size[1];
-              v[2] *= size[2];
-              v = affine.transform( v );
-              v[0] /= size[0];
-              v[1] /= size[1];
-              v[2] /= size[2];
-            }
-            v = deformation.transform( v );
-            vert.push_back( v );
+            // Apply inverted affine transformation
+            v[0] *= size[0];
+            v[1] *= size[1];
+            v[2] *= size[2];
+            v = affine.transform( v );
+            v[0] /= size[0];
+            v[1] /= size[1];
+            v[2] /= size[2];
           }
-
-          v_deform = SurfaceManip::meshVolume( vol );
-          compression( porg[0], porg[1], porg[2] ) =  (-1) * 100 * ( v_unity - v_deform ) / v_unity;
+          v = deformation.transform( v );
+          vert.push_back( v );
         }
 
-      } // if t == 0
-    } // for y/x
-  } // for t/z
+        v_deform = SurfaceManip::meshVolume( vol );
+        compression( porg[0], porg[1], porg[2] ) =  (-1) * 100 * ( v_unity - v_deform ) / v_unity;
+      }
+
+    } // if t == 0
+  }
 
   cout << endl;
 

@@ -15,7 +15,6 @@
 #include <aims/io/writer.h>
 #include <cmath>
 
-using namespace bio;
 using namespace aims;
 using namespace carto;
 using namespace std;
@@ -47,7 +46,8 @@ DataModel::DataModel( BucketMap< Void >&                s,
                       AimsData< short >&                t,
                       Motion&                           m,
                       SplineFfd&                        d,
-                      ParzenProbDensFunction&           pdf ):
+                      ParzenProbDensFunction&           pdf,
+                      bool                              prepro ):
     _deformation( d ),
     _rigid( m ),
     _pdf( pdf ),
@@ -66,7 +66,7 @@ DataModel::DataModel( BucketMap< Void >&                s,
   _contrib.setSizeXYZT( r.sizeX(), r.sizeY(), r.sizeZ(), r.sizeT() );
 
   // Compute histo parameter + replace min max values
-  _pdf.updateBinSizeAndMin( r, t );
+  _pdf.updateBinSizeAndMin( r, t, prepro );
 
   // Construction des coefficients splines pour l'image test
   CubicResampler<short> interpolator;
@@ -270,12 +270,18 @@ bool  DataModel::evalCrit(const Point3df & pTest, const short & value)
   double gradTestX = 0., gradTestY = 0., gradTestZ = 0.;
 
   // Bounds for interpolation
-  Point3d kSplineTestLow( max((int)(std::floor(pX)) - 1, -1),
-                          max((int)(std::floor(pY)) - 1, -1),
-                          max((int)(std::floor(pZ)) - 1, -1) );
-  Point3d kSplineTestUpp( min((int)(std::floor(pX)) + 2, _splineTest.dimX() + 1),
-                          min((int)(std::floor(pY)) + 2, _splineTest.dimY() + 1),
-                          min((int)(std::floor(pZ)) + 2, _splineTest.dimZ() + 1) );
+  // Point3d kSplineTestLow( max((int)(std::floor(pX)) - 1, -1),
+  //                         max((int)(std::floor(pY)) - 1, -1),
+  //                         max((int)(std::floor(pZ)) - 1, -1) );
+  // Point3d kSplineTestUpp( min((int)(std::floor(pX)) + 2, _splineTest.dimX() + 1),
+  //                         min((int)(std::floor(pY)) + 2, _splineTest.dimY() + 1),
+  //                         min((int)(std::floor(pZ)) + 2, _splineTest.dimZ() + 1) );
+  Point3d kSplineTestLow( (int)(std::floor(pX)) - 1,
+                          (int)(std::floor(pY)) - 1,
+                          (int)(std::floor(pZ)) - 1 );
+  Point3d kSplineTestUpp( (int)(std::floor(pX)) + 2,
+                          (int)(std::floor(pY)) + 2,
+                          (int)(std::floor(pZ)) + 2 );
   // 2d cases
   kSplineTestLow[0] = ( _is2d[0] ? 0 : kSplineTestLow[0] );
   kSplineTestLow[1] = ( _is2d[1] ? 0 : kSplineTestLow[1] );
@@ -310,6 +316,9 @@ bool  DataModel::evalCrit(const Point3df & pTest, const short & value)
       }
     }
   }
+  gradTestX /= _splineTest.sizeX();
+  gradTestY /= _splineTest.sizeY();
+  gradTestZ /= _splineTest.sizeZ();
 
   int kappa  = _pdf.getKappa( value );
   int lambda = _pdf.getLambda( t );
@@ -329,12 +338,18 @@ bool  DataModel::evalCrit(const Point3df & pTest, const short & value)
     // Il ne devrait pas y avoir de pb de bord par construction
     Point3dd gradTest(gradTestX, gradTestY, gradTestZ);
 
-    Point3d kFFDTestLow( max((int)(std::floor(pFFD[0])) - 1, 0),
-                         max((int)(std::floor(pFFD[1])) - 1, 0),
-                         max((int)(std::floor(pFFD[2])) - 1, 0) );
-    Point3d kFFDTestUpp( min((int)(std::floor(pFFD[0])) + 2, _deformation.dimX() - 1),
-                         min((int)(std::floor(pFFD[1])) + 2, _deformation.dimY() - 1),
-                         min((int)(std::floor(pFFD[2])) + 2, _deformation.dimZ() - 1) );
+    // Point3d kFFDTestLow( max((int)(std::floor(pFFD[0])) - 1, 0),
+    //                      max((int)(std::floor(pFFD[1])) - 1, 0),
+    //                      max((int)(std::floor(pFFD[2])) - 1, 0) );
+    // Point3d kFFDTestUpp( min((int)(std::floor(pFFD[0])) + 2, _deformation.dimX() - 1),
+    //                      min((int)(std::floor(pFFD[1])) + 2, _deformation.dimY() - 1),
+    //                      min((int)(std::floor(pFFD[2])) + 2, _deformation.dimZ() - 1) );
+    Point3d kFFDTestLow( (int)(std::floor(pFFD[0])) - 1,
+                         (int)(std::floor(pFFD[1])) - 1,
+                         (int)(std::floor(pFFD[2])) - 1 );
+    Point3d kFFDTestUpp( (int)(std::floor(pFFD[0])) + 2,
+                         (int)(std::floor(pFFD[1])) + 2,
+                         (int)(std::floor(pFFD[2])) + 2 );
     // 2d cases
     kFFDTestLow[0] = ( _is2d[0] ? 0 : kFFDTestLow[0] );
     kFFDTestLow[1] = ( _is2d[1] ? 0 : kFFDTestLow[1] );
@@ -345,14 +360,17 @@ bool  DataModel::evalCrit(const Point3df & pTest, const short & value)
 
     for( int k = kFFDTestLow[2]; k <= kFFDTestUpp[2]; ++k )
     {
+      ck = getFold(k, _deformation.dimZ());
       bk3 = ( _is2d[2] ? 1. : spline3(pffdZ - k) );
       for( int j = kFFDTestLow[1]; j <= kFFDTestUpp[1]; ++j )
       {
+        cj = getFold(j, _deformation.dimY());
         bj3 = ( _is2d[1] ? 1. : spline3(pffdY - j) );
         for( int i = kFFDTestLow[0]; i <= kFFDTestUpp[0]; ++i )
         {
-          bi3 = ( _is2d[1] ? 1. : spline3(pffdX - i) );
-          _pdf.addDerContrib( i, j, k,
+          ci = getFold(i, _deformation.dimX());
+          bi3 = ( _is2d[0] ? 1. : spline3(pffdX - i) );
+          _pdf.addDerContrib( ci, cj, ck,
                               lambda, kappa, t,
                               bk3 * bj3 * bi3,
                               gradTest );
@@ -386,19 +404,21 @@ void DataModel::writeDebugDerMI( const std::string & filename ) const
   AimsData<float> der( _deformation.dimX(),
                        _deformation.dimY(),
                        _deformation.dimZ(), 3 );
+  der.setSizeXYZT( _deformation.sizeX(), _deformation.sizeY(), _deformation.sizeZ() );
   der = 0.;
 
-  for( int k = 0, ind = 0; k < _deformation.dimZ(); ++k )
+  int ind = 0;
+  for( int k = 0; k < _deformation.dimZ(); ++k )
   for( int j = 0; j < _deformation.dimY(); ++j )
   for( int i = 0; i < _deformation.dimX(); ++i )
-  for( int c = 0; c < 2; ++c )
+  for( int c = 0; c < 3; ++c )
   {
     if( !_is2d[c] )
       der(i, j, k, c) = _partDer[ind++];
   }
 
   Writer<AimsData<float> > w( filename );
-  w << der;
+  w.write( der );
 
 }
 
