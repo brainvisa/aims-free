@@ -106,6 +106,8 @@ namespace aims {
       virtual std::string render(const bool force = false);
       /// Convert progression to the display string
       virtual std::string toString() const;
+      /// Print to cout if value changed or forced
+      virtual void print( const bool force = false );
 
       /// Prefix operator to increment internal value
       ProgressInfo<T1, T2>& operator++(); // Prefix operator
@@ -125,18 +127,18 @@ namespace aims {
 
   typedef ProgressInfo<double, double> Progression;
 
-}
+  template <class T1, class T2>
+  inline std::ostream& operator<< (
+    std::ostream &out, aims::ProgressInfo<T1, T2> &progression)
+  {
+    std::string p = progression.render();
 
-template <class T1, class T2>
-inline std::ostream& operator<< (
-  std::ostream &out, aims::ProgressInfo<T1, T2> &progression)
-{
-  std::string p = progression.render();
+    if ( !p.empty() )
+      out << p;
 
-  if ( !p.empty() )
-    out << p;
+    return out;
+  }
 
-  return out;
 }
 
 

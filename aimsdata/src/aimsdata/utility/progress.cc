@@ -40,9 +40,9 @@
 using namespace std;
 
 namespace aims {
-      
+
   template <class T1, class T2>
-  ProgressInfo<T1, T2>::ProgressInfo(const T1 min, 
+  ProgressInfo<T1, T2>::ProgressInfo(const T1 min,
                                      const T1 max,
                                      const T2 progressmin,
                                      const T2 progressmax,
@@ -59,7 +59,7 @@ namespace aims {
       _progressmax(progressmax),
       _unit(unit) {
   }
-  
+
   template <class T1, class T2>
   ProgressInfo<T1, T2>::ProgressInfo( const T1 max )
     : _displayed(0),
@@ -73,28 +73,28 @@ namespace aims {
       _progressmax(100),
       _unit("%") {
   }
-                    
+
   template <class T1, class T2>
   T1& ProgressInfo<T1, T2>::current(){
     return _current;
   }
-  
+
   template <class T1, class T2>
   void ProgressInfo<T1, T2>::reset(){
     _progressprec = _progressmin;
     _current = _min;
   }
-  
+
   template <class T1, class T2>
   const double& ProgressInfo<T1, T2>::scale() const {
     return _scale;
   }
-  
+
   template <class T1, class T2>
   const double ProgressInfo<T1, T2>::rescale(const T1& value) const {
     return round((((double)value) - _min) * _scale + _progressmin);
   }
-  
+
   template <class T1, class T2>
   const double ProgressInfo<T1, T2>::progression() const {
     return rescale(_current);
@@ -106,39 +106,52 @@ namespace aims {
     s.assign((size_t)_displayed, '\b');
     return s;
   }
-      
+
   template <class T1, class T2>
   std::string ProgressInfo<T1, T2>::render(const bool force) {
-    std::string s = toString(),
-                e = erase();
-
     // Only render if displayed value changed
     double p = this->progression();
-    if ((p != this->_progressprec) 
-        || (this->_current == this->_min) // This is necessary to start display
-        || force){
+    if( p != this->_progressprec ||
+        this->_current == this->_min || // This is necessary to start display
+        force )
+    {
+      std::string s = toString(), e = erase();
       _displayed = s.length();
       _progressprec = p;
       return e + s;
     }
-    else {
+    else
       return "";
+  }
+
+  template <class T1, class T2>
+  void ProgressInfo<T1, T2>::print(const bool force) {
+    // Only render if displayed value changed
+    double p = this->progression();
+    if( p != this->_progressprec ||
+        _displayed == 0 || // This is necessary to start display
+        force )
+    {
+      std::string s = toString(), e = erase();
+      _displayed = s.length();
+      _progressprec = p;
+      std::cout << e + s << std::flush;
     }
   }
-      
+
   template <class T1, class T2>
   std::string ProgressInfo<T1, T2>::toString() const {
     std::stringstream s;
     s << std::setw(_width) << progression() << " " << _unit;
     return s.str();
   }
-  
+
   template <class T1, class T2>
   ProgressInfo<T1, T2>& ProgressInfo<T1, T2>::operator++(){
     this->_current++;
     return *this;
   }
-  
+
   template <class T1, class T2>
   ProgressInfo<T1, T2> ProgressInfo<T1, T2>::operator++ (int)
   {
@@ -146,7 +159,7 @@ namespace aims {
     ++(*this);
     return p;
   }
-  
+
   template <class T1, class T2>
   ProgressInfo<T1, T2>& ProgressInfo<T1, T2>::operator+=(const T1& r)
   {
@@ -158,7 +171,6 @@ namespace aims {
   //   I N S T A N C I A T I O N
   //============================================================================
   template class ProgressInfo<double, double>;
-  
-}
 
-template std::ostream& operator<< (std::ostream &out, aims::ProgressInfo<double, double> &progression);
+  template std::ostream& operator<< (std::ostream &out, aims::ProgressInfo<double, double> &progression);
+}
