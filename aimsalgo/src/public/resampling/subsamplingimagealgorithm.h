@@ -216,32 +216,26 @@ namespace aims {
 
         int32_t i, j, k, t;
         unsigned m, n, l;
-        aims::Progression progress( out->getSizeT() *
-                                    out->getSizeZ() *
-                                    out->getSizeY() - 1 );
+        aims::Progression progress( (long) out->getSizeT() *
+                                    (long) out->getSizeZ() *
+                                    (long) out->getSizeY() *
+                                    (long) out->getSizeX() );
 
         if( this->_verbose > 0 )
           std::cout << "Subsampling progress: ";
 
         for( t = 0; t < (int32_t)out->getSizeT(); ++t )
           for( k = 0; k < (int32_t)out->getSizeZ(); ++k )
-            for( j = 0; j < (int32_t)out->getSizeY(); ++j, ++progress )
-            {
-              // Display progression
-              // The "normal" operator << should be as:
-              // std::cout << progress << std::flush;
-              // but it doesn't work in gcc 4.0, there is a namespace
-              // confusion, so we have to specify ::operator <<
-              if( ImageAlgorithmInterface<T>::_verbose > 0 )
-                ::operator << ( std::cout, progress ) << std::flush;
-
-              for( i = 0; i < (int32_t)out->getSizeX(); ++i ) {
+            for( j = 0; j < (int32_t)out->getSizeY(); ++j )
+              for( i = 0; i < (int32_t)out->getSizeX(); ++i )
+              {
+                if( this->_verbose > 0 )
+                  (++progress).print();
                 // Set view position in the volume
                 win->setPosInRefVolume( typename carto::Volume<VoxelType>::Position4Di(
                   i * _win_size_x, j * _win_size_y, k * _win_size_z, t) );
                 (*out)( i, j, k, t ) = _func->execute(win);
               }
-            }
 
         if( this->_verbose > 0 )
           std::cout << std::endl;
