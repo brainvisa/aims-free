@@ -56,29 +56,34 @@
 
   std::map<%Template1%, %Template2% > *qa 
     = new std::map<%Template1%, %Template2% >;
- 
+
   PyErr_Clear();
   PyObject *l = PyMapping_Items( sipPy ), *item;
+  bool err = false;
 
   for (int i = 0; i < PyList_GET_SIZE(l); ++i)
     {
       item = PyList_GET_ITEM( l, i );
-      (*qa)[ %Template1deref%(%Template1% %Template1deref%)
-                   %Template1CFromPy%( PyTuple_GET_ITEM( item, 0 ) ) ]
-        = %Template2deref%(%Template2% %Template2deref%)
-                   %Template2CFromPy%( PyTuple_GET_ITEM( item, 1 ) );
- 
-      if (PyErr_Occurred() != NULL)
-        {
-          delete qa;
-          *sipIsErr = 1;
-          Py_DECREF( l );
-          std::ostringstream msg;
-          msg << "item " << i << " could not be converted to a pair of " 
-                "%Template1%, %Template1%";
-          PyErr_SetString( PyExc_TypeError, msg.str().c_str() );
-          return 0;
-        }
+      PyObject *value = PyTuple_GET_ITEM( item, 1 );
+      if( !%Template2testPyType%( value ) )
+        err = true;
+      else
+        (*qa)[ %Template1deref%(%Template1% %Template1deref%)
+                      %Template1CFromPy%( PyTuple_GET_ITEM( item, 0 ) ) ]
+            = %Template2deref%(%Template2% %Template2deref%)
+                   %Template2CFromPy%( value );
+
+      if( err || (PyErr_Occurred() != NULL) )
+      {
+        delete qa;
+        *sipIsErr = 1;
+        Py_DECREF( l );
+        std::ostringstream msg;
+        msg << "item " << i << " could not be converted to a pair of "
+              "%Template1%, %Template2%";
+        PyErr_SetString( PyExc_TypeError, msg.str().c_str() );
+        return 0;
+      }
     }
  
   *sipCppPtr = qa;
