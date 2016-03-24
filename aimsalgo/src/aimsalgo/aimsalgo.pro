@@ -159,6 +159,7 @@ HEADERS = \
     perfusion/perfSVDTikho.h  \
     perfusion/perfSVDTrunc.h  \
     perfusion/perfTTP.h    \
+    points_distribution/points_distribution.h \
     primalsketch/dericheSmoother_d.h  \
     primalsketch/dericheSmoother.h  \
     primalsketch/peronaMalikSmoother_d.h \
@@ -399,6 +400,7 @@ SOURCES = \
     perfusion/perfSVDTikho.cc  \
     perfusion/perfSVDTrunc.cc  \
     perfusion/perfTTP.cc    \
+    points_distribution/points_distribution.cc \
     registration/block_matching.cc   \
     registration/displacement_field.cc   \
     registration/ffd.cc            \
@@ -452,9 +454,6 @@ SOURCES = \
     transform/xcor1d.cc    \
     transform/least_square_estimation.cc    \
     transform/rigidestimation.cc
-
-
-
 
 
 
