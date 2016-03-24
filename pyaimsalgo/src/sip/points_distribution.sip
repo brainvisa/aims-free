@@ -247,16 +247,17 @@ namespace aims
     points: list of 3D points (Point3df)
     nsteps: max number of optimization iterations
     step: initial move step factor (is adapted during the minimization)
+
 %End
 
     aims::PointsDistribution::PointSet *distribute( unsigned npoints,
                           unsigned nsteps = 100,
                           double step = 0.01 );
 %Docstring
-        distribute(npoints, nsteps=100, step=0.01)
+    distribute(npoints, nsteps=100, step=0.01)
 
-        Same as above but point are randomly initialized on a sphere,
-        using the init_points() function
+    Same as above but point are randomly initialized on a sphere,
+    using the init_points() function
 %End
   };
 
