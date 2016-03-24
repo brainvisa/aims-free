@@ -14,10 +14,21 @@ typedef std::set<%Template1% > set_%Template1typecode%;
 
 %ConvertToTypeCode
   if (sipIsErr == NULL)
-    return ( PySequence_Check( sipPy ) && !PyString_Check( sipPy ) )
-           || sipCanConvertToInstance( sipPy, 
+  {
+    if( sipCanConvertToInstance( sipPy,
                                        sipClass_set_%Template1typecode%,
-                                       SIP_NOT_NONE | SIP_NO_CONVERTORS );
+                                       SIP_NOT_NONE | SIP_NO_CONVERTORS ) )
+      return true;
+
+    PyObject *iter = PyObject_GetIter( sipPy );
+    if( iter )
+    {
+      // FIXME: should check items types
+      Py_DECREF( iter );
+      return true;
+    }
+    return false;
+  }
 
   if( sipCanConvertToInstance( sipPy, sipClass_set_%Template1typecode%,
       SIP_NO_CONVERTORS ) )
@@ -41,15 +52,16 @@ typedef std::set<%Template1% > set_%Template1typecode%;
     }
   }
 
-  if( PySequence_Check( sipPy ) )
+  PyObject *iter = PyObject_GetIter( sipPy );
+  if( iter )
   {
-    *sipCppPtr = new std::set<%Template1% >;
-    unsigned    i, n = PySequence_Size( sipPy );
-    PyObject    *pyitem;
-    for( i=0; i<n; ++i )
+    PyObject  *pyitem;
+    *sipCppPtr = new set_%Template1typecode%;
+    unsigned    i = 0;
+
+    for( pyitem=PyIter_Next( iter ); pyitem; pyitem=PyIter_Next( iter ), ++i )
     {
-      pyitem = PySequence_GetItem( sipPy, i );
-      if( !pyitem || !%Template1testPyType%( pyitem ) )
+      if( !%Template1testPyType%( pyitem ) )
       {
         *sipIsErr = 1;
         delete *sipCppPtr;
@@ -57,6 +69,8 @@ typedef std::set<%Template1% > set_%Template1typecode%;
         std::ostringstream s;
         s << "wrong list item type, item " << i;
         PyErr_SetString( PyExc_TypeError, s.str().c_str() );
+        Py_DECREF( pyitem );
+        Py_DECREF( iter );
         return 0;
       }
 
@@ -64,6 +78,7 @@ typedef std::set<%Template1% > set_%Template1typecode%;
                             %Template1CFromPy%( pyitem ) );
       Py_DECREF( pyitem );
     }
+    Py_DECREF( iter );
     return sipGetState( sipTransferObj );
   }
   *sipCppPtr = 
@@ -79,20 +94,21 @@ public:
 
   set_%Template1typecode%( SIP_PYOBJECT );
 %MethodCode
-  if( !PySequence_Check( a0 ) )
+  PyObject *iter = PyObject_GetIter( a0 );
+  if( !iter )
   {
     sipIsErr = 1;
     PyErr_SetString( PyExc_TypeError, "wrong argument type" );
   }
   else
   {
-    unsigned    i, n = PySequence_Size( a0 );
+    PyObject  *pyitem;
     sipCpp = new set_%Template1typecode%;
-    PyObject    *pyitem;
-    for( i=0; i<n; ++i )
+    unsigned    i = 0;
+
+    for( pyitem=PyIter_Next( iter ); pyitem; pyitem=PyIter_Next( iter ), ++i )
     {
-      pyitem = PySequence_GetItem(a0,i);
-      if( !pyitem || !%Template1testPyType%( pyitem ) )
+      if( !%Template1testPyType%( pyitem ) )
       {
         sipIsErr = 1;
         delete sipCpp;
@@ -100,12 +116,15 @@ public:
         std::ostringstream s;
         s << "wrong list item type, item " << i;
         PyErr_SetString( PyExc_TypeError, s.str().c_str() );
+        Py_DECREF( pyitem );
         break;
       }
 
       sipCpp->insert( %Template1pyderef% %Template1castFromSip%
                       %Template1CFromPy%( pyitem ) );
+      Py_DECREF( pyitem );
     }
+    Py_DECREF( iter );
   }
 %End
 
