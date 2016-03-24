@@ -38,9 +38,9 @@ using namespace aims;
 using namespace std;
 
 
-Point3df PointsDistribution::coulomb_force( const Point3df & p1,
-                                           const Point3df & p2,
-                                           bool has_link )
+Point3df PointsDistribution::CoulombForce::force( const Point3df & p1,
+                                                  const Point3df & p2,
+                                                  bool has_link )
 {
   Point3df r = p1 - p2;
   double l = r.norm();
@@ -55,9 +55,9 @@ Point3df PointsDistribution::coulomb_force( const Point3df & p1,
 }
 
 
-double PointsDistribution::coulomb_energy( const Point3df & p1,
-                                           const Point3df & p2,
-                                           bool has_link )
+double PointsDistribution::CoulombForce::energy( const Point3df & p1,
+                                                 const Point3df & p2,
+                                                 bool has_link )
 {
   double l = (p2 - p1).norm();
   if( has_link )
@@ -68,9 +68,8 @@ double PointsDistribution::coulomb_energy( const Point3df & p1,
 }
 
 
-Point3df PointsDistribution::coulomb_and_restoring_force( const Point3df & p1,
-                                                         const Point3df & p2,
-                                                         bool has_link )
+Point3df PointsDistribution::CoulombAndRestoringForce::force(
+  const Point3df & p1, const Point3df & p2, bool has_link )
 {
   Point3df r = p1 - p2;
   double l = r.norm();
@@ -86,9 +85,8 @@ Point3df PointsDistribution::coulomb_and_restoring_force( const Point3df & p1,
 }
 
 
-double PointsDistribution::coulomb_and_restoring_energy( const Point3df & p1,
-                                                         const Point3df & p2,
-                                                         bool has_link )
+double PointsDistribution::CoulombAndRestoringForce::energy(
+  const Point3df & p1, const Point3df & p2, bool has_link )
 {
   double l = (p2 - p1).norm();
   double attract = 1.;
@@ -101,11 +99,52 @@ double PointsDistribution::coulomb_and_restoring_energy( const Point3df & p1,
 }
 
 
-Point3df PointsDistribution::unconstrained_move( const Point3df & pt,
-                                                 const Point3df & f,
-                                                 double step )
+Point3df PointsDistribution::SphereMove::position( const Point3df & pt,
+                                                   const Point3df & f,
+                                                   double step )
 {
-  return pt + f * step;
+  double d = f.dot( pt );
+  Point3df fp = f - pt * d;
+  Point3df pt2 = pt + fp * step;
+  pt2.normalize();
+  return pt2;
+}
+
+
+PointsDistribution::PointsDistribution(
+  ForceFunction *force,
+  MoveConstraints *move_constraint )
+  : _force_function( force ? force : new CoulombForce ),
+    _move_constraints( move_constraint ? move_constraint : new SphereMove )
+{
+}
+
+
+PointsDistribution::~PointsDistribution()
+{
+  delete _move_constraints;
+  delete _force_function;
+}
+
+void PointsDistribution::set_links( const LinkSet & links )
+{
+  _links = links;
+}
+
+
+void PointsDistribution::setForceFunction( ForceFunction *force )
+{
+  if( _force_function != force )
+    delete _force_function;
+  _force_function = force;
+}
+
+
+void PointsDistribution::setMoveConstraints( MoveConstraints *move_constaint )
+{
+  if( _move_constraints != move_constaint )
+    delete _move_constraints;
+  _move_constraints = move_constaint;
 }
 
 
@@ -151,7 +190,7 @@ namespace
 
 
 PointsDistribution::PointSet *PointsDistribution::get_forces(
-  const PointSet & pts, const LinkSet & links, ForceFunction indiv_force )
+  const PointSet & pts )
 {
   unsigned np = pts.size();
   PointSet *f = new PointSet( np, Point3df( 0., 0., 0. ) );
@@ -159,7 +198,8 @@ PointsDistribution::PointSet *PointsDistribution::get_forces(
   for( i=0; i<np; ++i )
     for( j=i+1; j<np; ++j )
     {
-      Point3df ff = indiv_force( pts[i], pts[j], has_link( i, j, links ) );
+      Point3df ff = _force_function->force( pts[i], pts[j],
+                                            has_link( i, j, _links ) );
       (*f)[i] += ff;
       (*f)[j] -= ff;
     }
@@ -167,53 +207,37 @@ PointsDistribution::PointSet *PointsDistribution::get_forces(
 }
 
 
-double PointsDistribution::get_coulomb_energy( const PointSet & pts,
-                                               const LinkSet & links,
-                                               EnergyFunction indiv_energy )
+double PointsDistribution::get_coulomb_energy( const PointSet & pts )
 {
   unsigned np = pts.size();
   double e = 0.;
   unsigned i, j;
   for( i=0; i<np; ++i )
     for( j=i+1; j<np; ++j )
-      e += indiv_energy( pts[i], pts[j], has_link( i, j, links ) );
+      e += _force_function->energy( pts[i], pts[j], has_link( i, j, _links ) );
   return e;
 }
 
 
 PointsDistribution::PointSet *PointsDistribution::distribute(
   const PointSet & pts,
-  unsigned nsteps, double step,
-  const LinkSet & links,
-  ForceFunction indiv_force,
-  MoveConstraints pos_constraints,
-  EnergyFunction indiv_energy )
+  unsigned nsteps, double step )
 {
   float minimal_step = 1e-10;
   unsigned np = pts.size();
 
   PointSet *pp0 = new PointSet( pts );
   PointSet *pp1 = new PointSet( pts );
-  double e0 = get_coulomb_energy( *pp0, links, indiv_energy );
+  double e0 = get_coulomb_energy( *pp0 );
   unsigned k, i;
 
   for( k=0; k<nsteps; ++k )
   {
-    PointSet *f = get_forces( *pp0, links, indiv_force );
+    PointSet *f = get_forces( *pp0 );
     for( i=0; i<np; ++i )
-    {
-      double d = (*f)[i].dot( (*pp0)[i] );
-      if( pos_constraints )
-          (*pp1)[i] = pos_constraints( (*pp0)[i], (*f)[i], step );
-      else // assume sphere of radius 1.
-      {
-        (*f)[i] -= (*pp0)[i] * d;
-        (*pp1)[i] = (*pp0)[i] + (*f)[i] * step;
-        (*pp1)[i].normalize();
-      }
-    }
+      (*pp1)[i] = _move_constraints->position( (*pp0)[i], (*f)[i], step );
     delete f;
-    double e = get_coulomb_energy( *pp1, links, indiv_energy );
+    double e = get_coulomb_energy( *pp1 );
     if( e >= e0 )
     {
       step /= 2.;
@@ -236,15 +260,10 @@ PointsDistribution::PointSet *PointsDistribution::distribute(
 
 
 PointsDistribution::PointSet *PointsDistribution::distribute(
-  unsigned npoints, unsigned nsteps, double step,
-  const LinkSet &links,
-  ForceFunction indiv_force,
-  MoveConstraints pos_constraints,
-  EnergyFunction indiv_energy )
+  unsigned npoints, unsigned nsteps, double step )
 {
   PointSet pts = init_points( npoints );
-  return distribute( pts, nsteps, step, links, indiv_force, pos_constraints,
-                     indiv_energy );
+  return distribute( pts, nsteps, step );
 }
 
 
