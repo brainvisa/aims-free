@@ -64,5 +64,6 @@
 %Include histogram_DOUBLE.sip
 %Include geodesicPath.sip
 %Include meshwatershed.sip
+%Include points_distribution.sip
 
 

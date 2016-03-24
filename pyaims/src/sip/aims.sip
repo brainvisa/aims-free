@@ -100,6 +100,7 @@ typedef unsigned short uint16_t;
 // %Include map_STRING_RGB.sip
 // %Include map_STRING_RGBA.sip
 // %Include map_STRING_HSV.sip
+%Include map_U32_set_U32.sip
 
 %Include rcobject.sip
 %Include sharedobject.sip
