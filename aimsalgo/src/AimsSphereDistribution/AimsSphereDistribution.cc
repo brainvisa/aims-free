@@ -91,7 +91,7 @@ int main( int argc, const char **argv )
       }
     }
 
-    vector<Point3df> *p1 = PointsDistribution::distribute( p0, Nstep, step );
+    vector<Point3df> *p1 = PointsDistribution().distribute( p0, Nstep, step );
 
     ostream *out;
     if ( !fileOut.empty() ) {
@@ -112,8 +112,9 @@ int main( int argc, const char **argv )
   catch( user_interruption & )
   {
   }
-  catch( ... )
+  catch( exception & e )
   {
+    cerr << e.what() << endl;
     return EXIT_FAILURE;
   }
 

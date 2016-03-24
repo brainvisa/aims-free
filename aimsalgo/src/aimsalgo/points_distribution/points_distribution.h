@@ -43,28 +43,45 @@ namespace aims
   class PointsDistribution
   {
   public:
-    /** Utility function type for sphere_distribution.
+    /** Utility force class for sphere_distribution.
 
-        Individual force between 2 points
+        Individual force and energy between 2 points
     */
-    typedef Point3df (*ForceFunction)( const Point3df & p1,
-                                       const Point3df & p2, bool has_link );
-    /** Utility function type for sphere_distribution.
+    class ForceFunction
+    {
+    public:
+      ForceFunction() {}
+      virtual ~ForceFunction() {}
+      /// Force between 2 points
+      virtual Point3df force( const Point3df & p1, const Point3df & p2,
+                              bool has_link ) = 0;
+      /** Energy of the force between 2 points
 
-        Energy functions are the integral of corresponding forces -
-        they are used to drive the minimization.
+          Energy functions are the integral of corresponding forces -
+          they are used to drive the minimization.
+      */
+      virtual double energy( const Point3df & p1, const Point3df & p2,
+                             bool has_link ) = 0;
+    };
 
-        Individual energy between 2 points.
-    */
-    typedef double (*EnergyFunction)( const Point3df & p1,
-                                      const Point3df & p2, bool has_link );
     /** Utility function for sphere_distribution.
 
         Add force f * step to the returned point position pt, and optionally
         apply some specific position constraints (stick to sphere...)
     */
-    typedef Point3df (*MoveConstraints)( const Point3df & pt,
-                                         const Point3df & f, double step );
+    class MoveConstraints
+    {
+    public:
+      MoveConstraints() {}
+      virtual ~MoveConstraints() {}
+      /// The default is unconstrained: just move the requested amount
+      virtual Point3df position( const Point3df & pt, const Point3df & f,
+                                 double step )
+      {
+        return pt + f * step;
+      }
+    };
+
     typedef std::vector<Point3df> PointSet;
     typedef std::map<unsigned, std::set<unsigned> > LinkSet;
 
@@ -72,54 +89,60 @@ namespace aims
 
         Individual Coulomb force between 2 points
     */
-    static Point3df coulomb_force( const Point3df & p1, const Point3df & p2,
-                                   bool has_link );
-    /** Utility function for sphere_distribution.
-
-        Energy functions are the integral of corresponding forces -
-        they are used to drive the minimization.
-
-        Individual Coulomb energy between 2 points.
-    */
-    static double coulomb_energy( const Point3df & p1, const Point3df & p2,
-                                  bool has_link );
+    class CoulombForce : public ForceFunction
+    {
+    public:
+      CoulombForce() : ForceFunction() {}
+      virtual ~CoulombForce() {}
+      /// Coulomb electrostatic force between 2 points (1/r^2)
+      virtual Point3df force( const Point3df & p1, const Point3df & p2,
+                              bool has_link );
+      /// Coulomb energy of the force between 2 points
+      virtual double energy( const Point3df & p1, const Point3df & p2,
+                             bool has_link );
+    };
 
     /** Utility function for sphere_distribution.
 
         Individual Coulomb force between 2 points, plus a restoring force that
         avoids points expanding away like the universe
     */
-    static Point3df coulomb_and_restoring_force( const Point3df & p1,
-                                                 const Point3df & p2,
-                                                 bool has_link );
-    /** Utility function for sphere_distribution.
+    class CoulombAndRestoringForce : public ForceFunction
+    {
+    public:
+      CoulombAndRestoringForce() : ForceFunction() {}
+      virtual ~CoulombAndRestoringForce() {}
+      virtual Point3df force( const Point3df & p1, const Point3df & p2,
+                              bool has_link );
+      virtual double energy( const Point3df & p1, const Point3df & p2,
+                             bool has_link );
+    };
 
-        Energy functions are the integral of corresponding forces -
-        they are used to drive the minimization.
-
-        Individual energy between 2 points for the coulomb_and_restoring_force.
+    /** Move point constrained to a uinit sphere: project the force to be
+        tangent to the sphere, move the point, then stick it onto the sphere.
     */
-    static double coulomb_and_restoring_energy( const Point3df & p1,
-                                                const Point3df & p2,
-                                                bool has_link );
-    /** Utility function for sphere_distribution.
+    class SphereMove : public MoveConstraints
+    {
+    public:
+      SphereMove() : MoveConstraints() {}
+      virtual ~SphereMove() {}
+      virtual Point3df position( const Point3df & pt, const Point3df & f,
+                                 double step );
+    };
 
-        MoveConstraints function for unconstrained move (not restricted to a
-        sphere).
+    PointsDistribution( ForceFunction *force = new CoulombForce,
+                        MoveConstraints *move_constraint = new SphereMove );
+    ~PointsDistribution();
 
-        It merely adds force f * step to the returned point position pt
-    */
-    static Point3df unconstrained_move( const Point3df & pt,
-                                        const Point3df & f, double step );
+    void set_links( const LinkSet & links );
+    void setForceFunction( ForceFunction *force );
+    void setMoveConstraints( MoveConstraints *move_constaint );
+
     /// Randomly initialize npoints points on a unit sphere
     static PointSet init_points( unsigned npoints );
-    static PointSet *get_forces( const PointSet & pts,
-                                 const LinkSet & links = LinkSet(),
-                                 ForceFunction indiv_force = &coulomb_force );
-    static double get_coulomb_energy( const PointSet & pts,
-                                      const LinkSet & links = LinkSet(),
-                                      EnergyFunction indiv_energy
-                                        = &coulomb_energy );
+
+    PointSet *get_forces( const PointSet & pts );
+    double get_coulomb_energy( const PointSet & pts );
     /** get a points distribution on a sphere.
 
     adapted from: http://www.nicoptere.net/blog/index.php/2008/09/20/50-distribution-points-sphere-actionscript
@@ -153,24 +176,18 @@ namespace aims
         (actually the opposite of the integral of indiv_force)
         Defaults to Coulomb energy (1/r)
     */
-    static PointSet *distribute( const PointSet & pts, unsigned nsteps=100,
-                                 double step=0.01,
-                                 const LinkSet & links = LinkSet(),
-                                 ForceFunction indiv_force = &coulomb_force,
-                                 MoveConstraints pos_constraints = 0,
-                                 EnergyFunction indiv_energy
-                                   = &coulomb_energy );
+    PointSet *distribute( const PointSet & pts, unsigned nsteps=100,
+                          double step=0.01 );
     /** Same as above but point are randomly initialized on a sphere,
         using the init_points() function
     */
-    static PointSet *distribute( unsigned npoints, unsigned nsteps = 100,
-                                 double step = 0.01,
-                                 const LinkSet &links = LinkSet(),
-                                 ForceFunction indiv_force = &coulomb_force,
-                                 MoveConstraints pos_constraints = 0,
-                                 EnergyFunction indiv_energy
-                                   = &coulomb_energy );
+    PointSet *distribute( unsigned npoints, unsigned nsteps = 100,
+                          double step = 0.01 );
 
+  private:
+    ForceFunction *_force_function;
+    MoveConstraints *_move_constraints;
+    LinkSet _links;
   };
 
 }
