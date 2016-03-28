@@ -740,11 +740,12 @@ def __fixsipclasses__(classes):
                     y.__iter__ = __fixsipclasses__.newiter
                 if hasattr(y, '__objnext__'):
                     y.next = __fixsipclasses__.newnext
-                elif y.__name__.startswith( 'AimsVector_' ) \
-                        or y.__name__.startswith('Texture_'):
+                elif y.__name__.startswith('AimsVector_') \
+                        or y.__name__.startswith('Texture_') \
+                        or y.__name__ in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
                     y.__iterclass__ = VecIter
                     y.__iter__ = lambda self: self.__iterclass__(self)
-                if y.__name__.startswith( 'vector_' ) \
+                if y.__name__.startswith('vector_') \
                         or y.__name__.startswith('AimsVector_'):
                     y.__oldgetitem__ = y.__getitem__
                     y.__getitem__ = __fixsipclasses__.__getitem_vec__
