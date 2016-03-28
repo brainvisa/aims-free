@@ -34,6 +34,11 @@ public:
   sipRes = ( (*sipCpp) == a0 );
 %End
 
+  SIP_SSIZE_T __len__() const;
+%MethodCode
+  sipRes = 3;
+%End
+
   unsigned red () const;
   unsigned green () const;
   unsigned blue () const;
@@ -86,6 +91,11 @@ public:
   bool  operator == ( const unsigned char & );
 %MethodCode
   sipRes = ( (*sipCpp) == a0 );
+%End
+
+  SIP_SSIZE_T __len__() const;
+%MethodCode
+  sipRes = 4;
 %End
 
   unsigned red  () const;
@@ -147,6 +157,11 @@ public:
   bool  operator == ( const unsigned char & );
 %MethodCode
   sipRes = ( (*sipCpp) == a0 );
+%End
+
+  SIP_SSIZE_T __len__() const;
+%MethodCode
+  sipRes = 3;
 %End
 
   unsigned hue () const;
