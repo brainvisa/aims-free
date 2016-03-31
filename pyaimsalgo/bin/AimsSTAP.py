@@ -8,8 +8,8 @@ from soma import aims, aimsalgo
 #folds_arg_filename = '/volatile/riviere/basetests-3.1.0/subjects/sujet01/t1mri/default_acquisition/default_analysis/folds/3.1/default_session_auto/Lsujet01_default_session_auto.arg'
 #output_fold_graph_filename = '/tmp/cut_graph.arg'
 label_attribute = 'label'
-left_planes = (11., 43.)
-right_planes = (6., 41.)
+left_planes = (12., 45.)
+right_planes = (8., 42.)
 
 def cut_vertex(graph, vertex, plane_normal, plane_d):
     cut_line = aims.BucketMap_VOID()
