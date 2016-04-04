@@ -425,30 +425,33 @@ namespace soma
               + std::string( ( partialreading ? "yes" : "no" ) ) );
 
     //=== reading volume =====================================================
-    localMsg( "reading volume..." );
     int y, z, t;
     if( !withborders || dsi->capabilities().canHandleStrides() )
     {
+      localMsg( "reading volume using strides..." );
       // we can read the volume/region into a contiguous buffer
       _imr->read( ( T * ) &obj(0,0,0,0), *dsi, pos,
                   viewsize, strides, options );
     }
     else
     {
+      localMsg( "reading volume without strides..." );
       // we are in a "border" context. The volume/region must be read
       // line by line
       std::vector<int> posline ( pos );
       std::vector<int> sizeline ( 4, 1 );
       sizeline[ 0 ] = viewsize[ 0 ];
-      for ( t=0; t<viewsize[ 3 ]; ++t )
-        for ( z=0; z<viewsize[ 2 ]; ++z )
+      for ( t=0; t<viewsize[ 3 ]; ++t ) {
+        posline[ 3 ] = pos[ 3 ] + t;
+        for ( z=0; z<viewsize[ 2 ]; ++z ) {
+          posline[ 2 ] = pos[ 2 ] + z;
           for ( y=0; y<viewsize[ 1 ]; ++y ) {
             posline[ 1 ] = pos[ 1 ] + y;
-            posline[ 2 ] = pos[ 2 ] + z;
-            posline[ 3 ] = pos[ 3 ] + t;
             _imr->read( ( T * ) &obj(0,y,z,t), *dsi, posline,
                         sizeline, strides, options );
           }
+        }
+      }
     }
 
     // we reset at 0 the ImageReader's members (sizes, binary, ...) so that
