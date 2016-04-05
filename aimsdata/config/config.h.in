@@ -39,8 +39,13 @@
 #ifndef AIMS
 #define AIMS
 #endif
+
 #ifndef CARTO_USE_KDTREE
 #define CARTO_USE_KDTREE
+#endif
+
+#ifndef AIMS_DEBUG_IO
+#cmakedefine AIMS_DEBUG_IO
 #endif
 
 #endif
