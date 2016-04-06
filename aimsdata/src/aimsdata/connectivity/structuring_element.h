@@ -274,6 +274,33 @@ namespace aims {
         typedef StructuringElement::const_iterator  const_iterator;
         virtual ~Shape() {};
         virtual Shape* clone() const = 0;
+        //My_mod :
+//         CircleXY( const double amplitude = 1.,
+//                   const bool usecenter = false ):
+//             aims::strel::Shape()
+//         {
+//             aims::strel::Shape::setParameters( amplitude, usecenter );
+//         }
+//         CircleXY( const Point3d & origin,
+//                     const double amplitude = 1.,
+//                     const bool usecenter = false ):
+//             aims::strel::Shape()
+//         {
+//             aims::strel::Shape::setParameters( origin, amplitude, usecenter );
+//         }
+//         CircleXY( const std::vector<double> & amplitude,
+//                     const bool usecenter = false ):
+//             aims::strel::Shape()
+//         {
+//             aims::strel::Shape::setParameters( amplitude, usecenter );
+//         }
+//         CircleXY( const Point3d & origin,
+//                     const std::vector<double> & amplitude, 
+//                     const bool usecenter = false ):
+//             aims::strel::Shape()
+//         {
+//         setParameters( origin, amplitude, usecenter );
+//         }
       protected:
         // Defined methods
         void setParameters( const double amplitude = 1.,
@@ -313,6 +340,7 @@ namespace aims {
     /// registerShape( "diagonalcrossxy", DiagonalCrossXY() );
     /// registerShape( "diagonalcrossxz", DiagonalCrossXZ() );
     /// registerShape( "diagonalcrossyz", DiagonalCrossYZ() );
+    /// registerShape( "circlexy", CircleXY() );
     /// \endcode
     class ShapeFactory {
       public:
@@ -487,6 +515,7 @@ namespace aims {
     AIMS_DECLARE_STREL_SHAPE( DiagonalCrossXY );
     AIMS_DECLARE_STREL_SHAPE( DiagonalCrossXZ );
     AIMS_DECLARE_STREL_SHAPE( DiagonalCrossYZ );
+    AIMS_DECLARE_STREL_SHAPE( CircleXY );
   } // namespace strel
 } // namespace aims
 
