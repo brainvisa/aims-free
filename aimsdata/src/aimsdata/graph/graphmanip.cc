@@ -1067,7 +1067,6 @@ namespace
     nsize = 0;
     imgec = mgec->find( ao->getSyntax() );
 
-   
     if( imgec != emgec )
       for( igec=imgec->second.begin(), egec=imgec->second.end(); 
            igec!=egec; ++igec )
@@ -1080,13 +1079,13 @@ namespace
               && ao->getProperty( gec.attribute, bucket ) 
               && bucket.get() )
             {
-              //size += bucket->sizeX() * bucket->sizeY() * bucket->sizeZ() * ((bucket->begin())->second).size() ;
-              size += vvol * ((bucket->begin())->second).size() ;
+              size += vvol * bucket->begin()->second.size() ;
               if( nvvol != 0 )
-                  nsize = nvvol * ((bucket->begin())->second).size() ;
-              
+                nsize += nvvol * bucket->begin()->second.size() ;
             }
         }
+    if( nvvol == 0 )
+      nsize = size;
   }
 
 }
@@ -1109,34 +1108,34 @@ void GraphManip::completeGraph( Graph & g )
   g.getProperty( "voxel_size", vs );
   vvol = vs[0]*vs[1]*vs[2];
   if (normalized)
-    {
-      Point3df	p0( 0, 0, 0 );
-      p0 = mtal.transform( p0 );
-      nvs[0] = ( mtal.transform( Point3df( vs[0], 0, 0 ) ) - p0 ).norm();
-      nvs[1] = ( mtal.transform( Point3df( 0, vs[1], 0 ) ) - p0 ).norm();
-      nvs[2] = ( mtal.transform( Point3df( 0, 0, vs[2] ) ) - p0 ).norm();
-      nvvol = nvs[0] * nvs[1] * nvs[2]; 
-    }
+  {
+    Point3df	p0( 0, 0, 0 );
+    p0 = mtal.transform( p0 );
+    nvs[0] = ( mtal.transform( Point3df( vs[0], 0, 0 ) ) - p0 ).norm();
+    nvs[1] = ( mtal.transform( Point3df( 0, vs[1], 0 ) ) - p0 ).norm();
+    nvs[2] = ( mtal.transform( Point3df( 0, 0, vs[2] ) ) - p0 ).norm();
+    nvvol = nvs[0] * nvs[1] * nvs[2];
+  }
 
   for( ig=g.begin(); ig!=eg; ++ig )
-    {
-      getArea( *ig, mgec, area, narea, normalized ? &mtal : 0 );
-      if( area > 0 )
-	(*ig)->setProperty( "surface_area", area );
-      if( narea > 0 )
-	(*ig)->setProperty( "refsurface_area", narea );
+  {
+    getArea( *ig, mgec, area, narea, normalized ? &mtal : 0 );
+    if( area > 0 )
+      (*ig)->setProperty( "surface_area", area );
+    if( narea > 0 )
+      (*ig)->setProperty( "refsurface_area", narea );
 
-      getSize( *ig, mgec, size, nsize, vvol, normalized ? nvvol : 0 );
-      if( size > 0 )
-	(*ig)->setProperty( "size", size );
-      if( nsize > 0 )
-	(*ig)->setProperty( "refsize", nsize );
-    }
+    getSize( *ig, mgec, size, nsize, vvol, normalized ? nvvol : 0 );
+    if( size > 0 )
+      (*ig)->setProperty( "size", size );
+    if( nsize > 0 )
+      (*ig)->setProperty( "refsize", nsize );
+  }
 }
 
 
 
-//TODO! attention les maillages d'un de graphes est modifie !!
+//TODO! attention les maillages d'un des graphes est modifie !!
 Graph*  GraphManip::mergeGraph( const string & key,  Graph & h,  Graph &g, 
                                 bool Merge, bool invNormal )
 {
