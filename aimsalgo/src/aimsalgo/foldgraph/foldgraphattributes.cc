@@ -1970,9 +1970,6 @@ AimsData<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
   for( iie=edges.begin(); iie!=eie; ++iie )
   {
     iie->second->getProperty( "aims_junction", bck );
-    iv = iie->second->begin();
-    if( (*iv)->getSyntax() != "fold" )
-      ++iv;
     index = iie->first;
     printBucket( seedvol, bck, index );
     seeds.insert( index );
