@@ -1946,7 +1946,14 @@ AimsData<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
   set<Edge *>::iterator ie, ee = _graph.edges().end(), je;
   Edge::const_iterator iv;
   rc_ptr<BucketMap<Void> > bck;
+
+  /* sort hull_junction edges by skeleton_label index.
+     This is useful to ensure consistency in the order which buckets will be
+     printed into the seeds volume. As they overlap somehow, if we do not do
+     this, seeds are not the same from one run to another.
+  */
   int index;
+  map<int, Edge *> edges;
   for( ie=_graph.edges().begin(); ie!=ee; ++ie )
     if( (*ie)->getSyntax() == "hull_junction"
       && (*ie)->getProperty( "aims_junction", bck ) )
@@ -1955,11 +1962,21 @@ AimsData<int16_t> FoldGraphAttributes::rebuildCorticalRelations()
       if( (*iv)->getSyntax() != "fold" )
         ++iv;
       if( (*iv)->getProperty( "skeleton_label", index ) )
-      {
-        printBucket( seedvol, bck, index );
-        seeds.insert( index );
-      }
+        edges[index] = *ie;
     }
+
+  map<int, Edge *>::iterator iie, eie = edges.end();
+
+  for( iie=edges.begin(); iie!=eie; ++iie )
+  {
+    iie->second->getProperty( "aims_junction", bck );
+    iv = iie->second->begin();
+    if( (*iv)->getSyntax() != "fold" )
+      ++iv;
+    index = iie->first;
+    printBucket( seedvol, bck, index );
+    seeds.insert( index );
+  }
 
   // voronoi
   set<int16_t> work;
