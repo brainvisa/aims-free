@@ -34,6 +34,7 @@
 #include <aims/features/scalar_set_features.h>
 #include <math.h>
 #include <algorithm>
+#include <stdexcept>
 
 using namespace std;
 
@@ -80,8 +81,17 @@ void ScalarSetFeatures::setValues( const std::vector< Scalar_t > &values )
 }
 
 //-----------------------------------------------------------------------------
+void ScalarSetFeatures::setValues( const std::vector< Scalar_t > &values,
+                                   const std::vector< Scalar_t > &weights
+)
+{
+  _values = values;
+  _weights = weights;
+}
+
+//-----------------------------------------------------------------------------
 void ScalarSetFeatures::scalarFeatureValues( 
-  vector< ScalarFeaturesProvider::Scalar_t > &result ) const
+  vector< ScalarFeaturesProvider::Scalar_t > &result) const
 {
   result.resize( 5 );
   Scalar_t &mean = result[ 0 ];
@@ -89,6 +99,9 @@ void ScalarSetFeatures::scalarFeatureValues(
   Scalar_t &minimum = result[ 2 ];
   Scalar_t &maximum = result[ 3 ];
   Scalar_t &median = result[ 4 ];
+
+  double sumWeight = 0;
+  double product = 0;
   
   if ( _values.empty() ) {
     mean = stddev = minimum = maximum = median = 0;
@@ -96,20 +109,48 @@ void ScalarSetFeatures::scalarFeatureValues(
     mean = minimum = maximum = median = _values[ 0 ];
     stddev = 0;
   } else {
-    vector< Scalar_t >::const_iterator itValue = _values.begin();
-    mean = minimum = maximum = *itValue;
-    for( ++itValue; itValue != _values.end(); ++itValue ) {
-       mean += *itValue;
-       if ( *itValue > maximum ) maximum = *itValue;
-       if ( *itValue < minimum ) minimum = *itValue;
+    vector< Scalar_t >::iterator itValue = _values.begin();
+    const bool has_weights = _weights.begin() != _weights.end();
+    if ( has_weights ) {
+      vector< Scalar_t >::const_iterator itWeight = _weights.begin();
+      mean = minimum = maximum = ( *itWeight ) * ( *itValue );
+      sumWeight = ( *itWeight );
+      ++itWeight;
+      ++itValue;
+      for( itValue; itValue != _values.end(); ++itValue ) {
+        if ( itWeight == _weights.end() ) {
+          throw runtime_error( "Weight data don't have the same size as images" );
+        }
+        product = ( *itWeight ) * ( *itValue );
+        mean += product;
+        sumWeight += ( *itWeight );
+        if ( product > maximum ) maximum = product;
+        if ( product < minimum ) minimum = product;
+        ++itWeight;
+      }
+      mean /= sumWeight;
+      stddev = 0;
+      itWeight = _weights.begin();
+      for( itValue = _values.begin(); itValue != _values.end(); ++itValue ) {
+        stddev += ( *itWeight ) * (( *itValue - mean ) * ( *itValue - mean ));
+        *itValue *= *itWeight;
+        ++itWeight;
+      }
+      stddev = sqrt( stddev / sumWeight );
+    } else {
+      mean = minimum = maximum = *itValue;
+      for( ++itValue; itValue != _values.end(); ++itValue ) {
+        mean += *itValue;
+        if ( *itValue > maximum ) maximum = *itValue;
+        if ( *itValue < minimum ) minimum = *itValue;
+      }
+      mean /= _values.size();
+      stddev = 0;
+      for( itValue = _values.begin(); itValue != _values.end(); ++itValue ) {
+        stddev += ( *itValue - mean ) * ( *itValue - mean );
+      }
+      stddev = sqrt( stddev / _values.size() );
     }
-    mean /= _values.size();
-    stddev = 0;
-    for( itValue = _values.begin(); itValue != _values.end(); ++itValue ) {
-      stddev += ( *itValue - mean ) * ( *itValue - mean );
-    }
-    stddev = sqrt( stddev / _values.size() );
-
     // Compute median
     sort( _values.begin(), _values.end() );
     if ( _values.size() & 1 ) {
