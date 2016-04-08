@@ -6,9 +6,20 @@ from aims.tests.api import CommandTest, CommandsTestManager
 """
 Class to test structuring elements
 """
-class AimsStructuringElementTests(CommandsTestManager) :
-  ref_directory = os.path.join(tempfile.gettempdir(), 'tmp_tests_aimsdata', 'ref')
-  run_directory = os.path.join(tempfile.gettempdir(), 'tmp_tests_aimsdata', 'run')
+class AimsStructuringElementTests(CommandsTestManager):
+  @staticmethod
+  def get_test_dir():
+    tests_dir = os.getenv("BRAINVISA_TESTS_DIR")
+    if not tests_dir:
+        tests_dir = tempfile.gettempdir()
+    if not os.path.exists(tests_dir):
+        os.makedirs(tests_dir)
+    return tests_dir
+
+  ref_directory = os.path.join(AimsStructuringElementTests.get_test_dir(),
+                               'tmp_tests_aimsdata', 'ref')
+  run_directory = os.path.join(AimsStructuringElementTests.get_test_dir(),
+                               'tmp_tests_aimsdata', 'run')
   
   test_cases = (
 
