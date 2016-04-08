@@ -12,8 +12,10 @@ import sys
 
 
 def setup_doctest(test):
-    tempdir = tempfile.gettempdir()
-    tests_dir = os.path.join(tempdir, "tmp_tests_brainvisa")
+    tests_dir = os.getenv("BRAINVISA_TESTS_DIR")
+    if not tests_dir:
+        tests_dir = tempfile.gettempdir()
+    tests_dir = os.path.join(tests_dir, "tmp_tests_brainvisa")
     if not os.path.exists(tests_dir):
         os.mkdir(tests_dir)
     os.chdir(tests_dir)
