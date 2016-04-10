@@ -34,7 +34,7 @@ public:
   sipRes = ( (*sipCpp) == a0 );
 %End
 
-  SIP_SSIZE_T __len__() const;
+  int __len__() const;
 %MethodCode
   sipRes = 3;
 %End
@@ -93,7 +93,7 @@ public:
   sipRes = ( (*sipCpp) == a0 );
 %End
 
-  SIP_SSIZE_T __len__() const;
+  int __len__() const;
 %MethodCode
   sipRes = 4;
 %End
@@ -159,7 +159,7 @@ public:
   sipRes = ( (*sipCpp) == a0 );
 %End
 
-  SIP_SSIZE_T __len__() const;
+  int __len__() const;
 %MethodCode
   sipRes = 3;
 %End
