@@ -102,7 +102,7 @@ namespace aims
     typedef vector_POINT3DF PointSet;
     typedef std::map<unsigned, std::set<unsigned> > LinkSet;
 
-    class CoulombForce : public aims::PointsDistribution::ForceFunction
+    class CoulombForce : aims::PointsDistribution::ForceFunction
     {
     public:
 %Docstring
@@ -125,7 +125,7 @@ namespace aims
     };
 
     class CoulombAndRestoringForce
-      : public aims::PointsDistribution::ForceFunction
+      : aims::PointsDistribution::ForceFunction
     {
     public:
 %Docstring
@@ -142,7 +142,7 @@ namespace aims
                              bool has_link );
     };
 
-    class SphereMove : public aims::PointsDistribution::MoveConstraints
+    class SphereMove : aims::PointsDistribution::MoveConstraints
     {
     public:
 %Docstring
