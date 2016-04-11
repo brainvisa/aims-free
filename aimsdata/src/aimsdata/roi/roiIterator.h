@@ -268,7 +268,7 @@ namespace aims
         for( p[0] = 0; p[0] < _data->dimX(); ++p[0] ) {
           T v = (*_data)( p );
           // NaN values are considered background like 0 (SPM does so)
-          if ( v && !isnan( v ) ) {
+          if ( v && !std::isnan( v ) ) {
             it = _labels.find( v );
             _labels[ v ].lastPoint = p;
 
