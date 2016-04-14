@@ -16,6 +16,6 @@ NiftiIO.cxx
 # Find Headers
 #
 INCLUDE_DIRECTORIES(
-${CMAKE_SOURCE_DIR}/Nifti
-${CMAKE_SOURCE_DIR}/Common
+${CMAKE_CURRENT_SOURCE_DIR}/../Nifti
+${CMAKE_CURRENT_SOURCE_DIR}/../Common
 )

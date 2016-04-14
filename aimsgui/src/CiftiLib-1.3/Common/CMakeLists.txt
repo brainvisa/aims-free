@@ -31,5 +31,5 @@ XmlAdapter.h
 XmlAdapter.cxx)
 
 INCLUDE_DIRECTORIES(
-${CMAKE_SOURCE_DIR}/Common
+${CMAKE_CURRENT_SOURCE_DIR}/../Common
 )
