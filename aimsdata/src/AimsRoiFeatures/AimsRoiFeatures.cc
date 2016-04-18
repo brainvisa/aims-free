@@ -158,7 +158,6 @@ int main( int argc, const char **argv )
                                        "same elements order, etc." ) );
         }
         string label;
-        string label2;
         if ( index < 0 ) {
           if ( imageStatistics.size() > 1 ) {
             label = FileUtil::basename( *it );
@@ -171,9 +170,7 @@ int main( int argc, const char **argv )
           label = it->substr( 0, index );
         }
         const string fileName = it->substr( index+1, it->size() - index - 1 );
-        cout << "fileName : " << fileName << endl;
         const string weights_fileName = itw->substr( index+1, itw->size() - index - 1 );
-        cout << "weights_fileName : " << weights_fileName << endl;
         roiFeatures.addImageStatistics( label, fileName, weights_fileName );
         ++itw;
       }
