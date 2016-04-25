@@ -747,8 +747,8 @@ namespace carto
   template <typename T>
   T min( const rc_ptr<Volume<T> > & vol )
   {
-    if( !vol.get() || ( vol.getSizeX() == 0 && vol.getSizeY() == 0 &&
-                        vol.getSizeZ() == 0 && vol.getSizeT() == 0 ) )
+    if( !vol.get() || ( vol->getSizeX() == 0 && vol->getSizeY() == 0 &&
+                        vol->getSizeZ() == 0 && vol->getSizeT() == 0 ) )
       throw std::runtime_error("Cannot compute min of an empty volume");
     return accumulate( vol, volumeutil::select_min<T>(), vol->at(0, 0, 0, 0) );
   }
@@ -765,8 +765,8 @@ namespace carto
   template <typename T>
   T max( const rc_ptr<Volume<T> > & vol )
   {
-    if( !vol.get() || ( vol.getSizeX() == 0 && vol.getSizeY() == 0 &&
-                        vol.getSizeZ() == 0 && vol.getSizeT() == 0 ) )
+    if( !vol.get() || ( vol->getSizeX() == 0 && vol->getSizeY() == 0 &&
+                        vol->getSizeZ() == 0 && vol->getSizeT() == 0 ) )
       throw std::runtime_error("Cannot compute max of an empty volume");
     return accumulate( vol, volumeutil::select_max<T>(), vol->at(0, 0, 0, 0) );
   }
