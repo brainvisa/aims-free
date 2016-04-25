@@ -292,6 +292,8 @@ SplineResampler< T >::updateParameters( const AimsData< T >& inVolume,
 
       carto::Converter< AimsData< T >, AimsData< double > > converter;
       _splineCoefficients = AimsData<double>( inSizeX, inSizeY, inSizeZ );
+      _splineCoefficients.setSizeXYZT( inVolume.sizeX(), inVolume.sizeY(),
+                                       inVolume.sizeZ(), inVolume.sizeT() );
       if( t > 0 )
         {
           AimsData<T> tmpvol( inSizeX, inSizeY, inSizeZ );
@@ -429,6 +431,9 @@ SplineResampler< T >::iirConvolveMirror( std::vector< double >& data ) const
   while ( d != de )
   {
 
+    // Note: Relatively to this article:
+    // - Unser et al. IEEE Transactions on Signal Processing 1993
+    // _gain = c0 * PROD(poles)
     *d *= _gain;
     ++ d;
 
