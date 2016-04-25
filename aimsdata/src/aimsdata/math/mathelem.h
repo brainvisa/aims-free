@@ -89,8 +89,8 @@ namespace aims
 //============================================================================
 namespace aims {
 
-  // helper function in anonymous namespace
-  namespace {
+  // helper function in private namespace
+  namespace internal {
     template <typename T>
     bool is_min( T a, T b )
     {
@@ -120,7 +120,7 @@ namespace aims {
     static T max( Iterator b, Iterator e, T default_value = std::numeric_limits<T>::min() )
     {
       Iterator m;
-      m = std::max_element( b, e, is_min<T> );
+      m = std::max_element( b, e, internal::is_min<T> );
       if( m == e )
         return default_value;
       else
@@ -131,7 +131,7 @@ namespace aims {
     static T min( Iterator b, Iterator e, T default_value = std::numeric_limits<T>::max() )
     {
       Iterator m;
-      m = std::min_element( b, e, is_min<T> );
+      m = std::min_element( b, e, internal::is_min<T> );
       if( m == e )
         return default_value;
       else
