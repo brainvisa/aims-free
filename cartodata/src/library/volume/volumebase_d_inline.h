@@ -217,110 +217,110 @@ namespace carto {
 
 
   template <typename T>
-  carto::Object getObjectHeader( Volume<T> & obj )
+  Object getObjectHeader( Volume<T> & obj )
   {
     return Object::reference( obj.header() );
   }
 
-} // namespace carto
-
-template <typename T>
-inline
-std::ostream & operator<< ( std::ostream & out,
-                            const carto::Volume<T> & volume )
-{
-  carto::VolumeOStream volumeout( out );
-  return volumeout << volume;
-}
-
-template <typename T>
-inline
-std::ostream & operator<< ( const carto::VolumeOStream & out,
-                            const carto::Volume<T> & volume )
-{
-  out.ostream() << "Volume of " << carto::DataTypeCode<T>::dataType() << ": "
-                << volume.getSizeX() << " x "
-                << volume.getSizeY() << " x "
-                << volume.getSizeZ() << " x "
-                << volume.getSizeT() << std::endl;
-
-  bool hasT = volume.getSizeT() > 1;
-  std::string tB = ( hasT ? "[" : "" );
-  std::string tE = ( hasT ? "]" : "" );
-  std::string tS = ( hasT ? " " : "" );
-  bool hasZ = volume.getSizeZ() > 1;
-  std::string zB = ( hasZ ? "[" : "" );
-  std::string zE = ( hasZ ? "]" : "" );
-  std::string zS = ( hasZ ? " " : "" );
-  bool hasY = volume.getSizeY() > 1;
-  std::string yB = ( hasY ? "[" : "" );
-  std::string yE = ( hasY ? "]" : "" );
-  std::string yS = ( hasY ? " " : "" );
-  bool hasX = volume.getSizeX() > 1;
-  std::string xB = ( hasX ? "[" : "" );
-  std::string xE = ( hasX ? "]" : "" );
-  std::string xS = ( hasX ? " " : "" );
-
-  for( int t = 0; t < volume.getSizeT(); ++t )
+  template <typename T>
+  inline
+  std::ostream & operator<< ( std::ostream & out,
+                              const Volume<T> & volume )
   {
-    if( hasT ) {
-      if( t < out.maxT() ) {
-        out.ostream() << std::setw(2) << std::left << tB;
-      } else {
-        out.ostream() << std::setw(3) << std::left << "...";
-        break;
-      }
-    }
-    for( int z = 0; z < volume.getSizeZ(); ++z )
+    VolumeOStream volumeout( out );
+    return volumeout << volume;
+  }
+
+  template <typename T>
+  inline
+  std::ostream & operator<< ( const VolumeOStream & out,
+                              const Volume<T> & volume )
+  {
+    out.ostream() << "Volume of " << DataTypeCode<T>::dataType() << ": "
+                  << volume.getSizeX() << " x "
+                  << volume.getSizeY() << " x "
+                  << volume.getSizeZ() << " x "
+                  << volume.getSizeT() << std::endl;
+
+    bool hasT = volume.getSizeT() > 1;
+    std::string tB = ( hasT ? "[" : "" );
+    std::string tE = ( hasT ? "]" : "" );
+    std::string tS = ( hasT ? " " : "" );
+    bool hasZ = volume.getSizeZ() > 1;
+    std::string zB = ( hasZ ? "[" : "" );
+    std::string zE = ( hasZ ? "]" : "" );
+    std::string zS = ( hasZ ? " " : "" );
+    bool hasY = volume.getSizeY() > 1;
+    std::string yB = ( hasY ? "[" : "" );
+    std::string yE = ( hasY ? "]" : "" );
+    std::string yS = ( hasY ? " " : "" );
+    bool hasX = volume.getSizeX() > 1;
+    std::string xB = ( hasX ? "[" : "" );
+    std::string xE = ( hasX ? "]" : "" );
+    std::string xS = ( hasX ? " " : "" );
+
+    for( int t = 0; t < volume.getSizeT(); ++t )
     {
-      if( hasZ ) {
-        if( z < out.maxZ() ) {
-          out.ostream() << std::setw(2) << std::left << zB;
+      if( hasT ) {
+        if( t < out.maxT() ) {
+          out.ostream() << std::setw(2) << std::left << tB;
         } else {
           out.ostream() << std::setw(3) << std::left << "...";
           break;
         }
       }
-      for( int y = 0; y < volume.getSizeY(); ++y )
+      for( int z = 0; z < volume.getSizeZ(); ++z )
       {
-        if( y < out.maxY() ) {
-          out.ostream() << std::setw(2) << std::left << yB;
-        } else {
-          out.ostream() << std::setw(3) << std::left << "...";
-          break;
-        }
-        for( int x = 0; x < volume.getSizeX(); ++x )
-        {
-          if( x < out.maxX() ) {
-            out.ostream() << std::setw(8) << std::setprecision(6) << std::left
-                          << carto::toString( volume( x, y, z, t ) );
+        if( hasZ ) {
+          if( z < out.maxZ() ) {
+            out.ostream() << std::setw(2) << std::left << zB;
           } else {
-            out.ostream() << std::setw(8) << std::left << "...";
+            out.ostream() << std::setw(3) << std::left << "...";
             break;
           }
         }
-        out.ostream() << std::setw(2) << std::left << yE;
-        if( y < volume.getSizeY() - 1 )
-          out.ostream() << std::endl;
+        for( int y = 0; y < volume.getSizeY(); ++y )
+        {
+          if( y < out.maxY() ) {
+            out.ostream() << std::setw(2) << std::left << yB;
+          } else {
+            out.ostream() << std::setw(3) << std::left << "...";
+            break;
+          }
+          for( int x = 0; x < volume.getSizeX(); ++x )
+          {
+            if( x < out.maxX() ) {
+              out.ostream() << std::setw(10) << std::left
+                            << toString( volume( x, y, z, t ) );
+            } else {
+              out.ostream() << std::setw(10) << std::left << "...";
+              break;
+            }
+          }
+          out.ostream() << std::setw(2) << std::left << yE;
+          if( y < volume.getSizeY() - 1 )
+            out.ostream() << std::endl;
+          if( hasZ )
+            out.ostream() << std::setw(2) << std::left << zS;
+          if( hasT )
+            out.ostream() << std::setw(2) << std::left << tS;
+        }
         if( hasZ )
-          out.ostream() << std::setw(2) << std::left << zS;
+          out.ostream() << std::setw(2) << std::left << zE;
+        if( z < volume.getSizeZ() - 1 )
+          out.ostream()  << std::endl;
         if( hasT )
           out.ostream() << std::setw(2) << std::left << tS;
       }
-      if( hasZ )
-        out.ostream() << std::setw(2) << std::left << zE;
-      if( z < volume.getSizeZ() - 1 )
-        out.ostream()  << std::endl;
       if( hasT )
-        out.ostream() << std::setw(2) << std::left << tS;
+        out.ostream() << std::setw(2) << std::left << tE;
+      if( t < volume.getSizeT() - 1 )
+        out.ostream() << std::endl;
     }
-    if( hasT )
-      out.ostream() << std::setw(2) << std::left << tE;
-    if( t < volume.getSizeT() - 1 )
-      out.ostream() << std::endl;
+
+    return out.ostream();
   }
 
-  return out.ostream();
-}
+} // namespace carto
 
 #endif // CARTODATA_VOLUME_VOLUMEBASE_D_INLINE_H

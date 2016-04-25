@@ -376,9 +376,9 @@ namespace carto {
   inline
   std::vector<size_t> VolumeRef<T>::getStrides() const
   {
-      return (*this)->getStrides();    
+      return (*this)->getStrides();
   }
-  
+
   template < typename T >
   inline
   void VolumeRef< T >::copyHeaderFrom( const PropertySet & other )
@@ -412,37 +412,38 @@ namespace carto {
     return Object::reference( obj->header() );
   }
 
+  //==========================================================================
+  //   STREAMS
+  //==========================================================================
+
+  template <typename T>
+  std::ostream & operator<< ( std::ostream & out,
+                              const rc_ptr<Volume<T> > & volume )
+  {
+    VolumeOStream volumeout( out );
+    return volumeout << volume;
+  }
+
+  template <typename T>
+  std::ostream & operator<< ( const VolumeOStream & out,
+                              const rc_ptr<Volume<T> > & volume )
+  {
+    out.ostream() << "VolumeRef" << std::flush;
+    if( !volume.get() ) {
+      out.ostream() << " of " << DataTypeCode<T>::dataType()
+                    << ": empty" << std::endl;
+      return out.ostream();
+    }
+    else
+    {
+      out.ostream() << ": " << std::flush;
+      return out << *(volume.get());
+    }
+  }
+
 } // namespace carto
 
 
-//============================================================================
-//   STREAMS
-//============================================================================
-
-template <typename T>
-std::ostream & operator<< ( std::ostream & out,
-                            const carto::rc_ptr<carto::Volume<T> > & volume )
-{
-  carto::VolumeOStream volumeout( out );
-  return volumeout << volume;
-}
-
-template <typename T>
-std::ostream & operator<< ( const carto::VolumeOStream & out,
-                            const carto::rc_ptr<carto::Volume<T> > & volume )
-{
-  out.ostream() << "VolumeRef" << std::flush;
-  if( !volume.get() ) {
-    out.ostream() << " of " << carto::DataTypeCode<T>::dataType()
-                  << ": empty" << std::endl;
-    return out.ostream();
-  }
-  else
-  {
-    out.ostream() << ": " << std::flush;
-    return out << *(volume.get());
-  }
-}
 
 
 #endif // CARTODATA_VOLUME_VOLUMEREF_D_INLINE_H

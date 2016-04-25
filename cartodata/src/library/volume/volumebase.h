@@ -353,16 +353,16 @@ namespace carto
     /// each dimension including.
     /// \return std::vector<uint16_t> that contains the borders availables for
     ///                               the volume.
-    ///         vector[0]: number of voxels for the 0 dimension. Value is 
+    ///         vector[0]: number of voxels for the 0 dimension. Value is
     ///                    always 1 as no border is defined around each voxel.
-    ///         vector[1]: number of voxels for the 1st dimension, i.e. in a 
+    ///         vector[1]: number of voxels for the 1st dimension, i.e. in a
     ///                    line including its borders.
-    ///         vector[2]: number of voxels for the 2nde dimension, i.e. in a 
+    ///         vector[2]: number of voxels for the 2nde dimension, i.e. in a
     ///                    slice including its borders.
-    ///         vector[3]: number of voxels for the 3rd dimension, i.e. in a 
+    ///         vector[3]: number of voxels for the 3rd dimension, i.e. in a
     ///                    volume including its borders.
     std::vector<size_t> getStrides() const;
-    
+
     //========================================================================
     //   BOOLEANS / ACCUMULATED VALUES
     //========================================================================
@@ -491,15 +491,11 @@ namespace carto
 
 #endif
 
-} // namespace carto
-
 //============================================================================
 // STREAM
 //============================================================================
 
 #ifndef DOXYGEN_HIDE_INTERNAL_CLASSES
-
-namespace carto {
 
   // Warper for output streams that integrates parameters for volume
   // printing
@@ -552,39 +548,42 @@ namespace carto {
     size_t _maxX;
   };
 
+  VolumeOStream operator<< ( std::ostream & out,
+                             const VolumeOStreamSetter & setter );
+
+  template <typename T>
+  std::ostream & operator<< ( const VolumeOStream & out,
+                              const Volume<T> & volume );
+
+  // Method used to set Volume printing parameters
+  VolumeOStreamSetter setMaxDim( size_t m );
+  VolumeOStreamSetter setMaxDim( size_t mx, size_t my, size_t mz, size_t mt );
+
+  #endif // DOXYGEN_HIDE_INTERNAL_CLASSES
+
+
+  /// Volumes are printable to standard output streams.
+  /// They are shown as an array, eventually cropped at a given size.
+  /// The default crop value is 5 in each dimension.
+  /// The crop value can be set with setMaxDim() the following way:
+  /// \code
+  /// #include <cartodata/volume/volume.h>
+  /// #include <iostream>
+  /// using namespace carto;
+  /// using namespace std;
+  ///
+  /// carto::Volume<int16_t> vol( 10, 10, 10 );
+  /// cout << setMaxDim( 10 ) << vol << endl;
+  /// cout << setMaxDim( 5, 10, 1, 1 ) << vol << endl;
+  /// \endcode
+  /// setMaxDim can either receive 4 value (used in all directions) or
+  /// 4 values (directions x y, z, t).
+  template <typename T>
+  std::ostream & operator<< ( std::ostream & out,
+                              const Volume<T> & volume );
 
 } // namespace carto:
 
-carto::VolumeOStream operator<< ( std::ostream & out,
-                                  const carto::VolumeOStreamSetter & setter );
-
-template <typename T>
-std::ostream & operator<< ( const carto::VolumeOStream & out,
-                            const carto::Volume<T> & volume );
-
-#endif // DOXYGEN_HIDE_INTERNAL_CLASSES
-
-namespace carto {
-  /// Method used to set Volume printing parameters
-  VolumeOStreamSetter setMaxDim( size_t m );
-}
-
-/// Volumes are printable to standard output streams.
-/// They are shown as an array, eventually cropped at a given size.
-/// The default crop value is 5 in each dimension.
-/// The crop value can be set with setMaxDim() the following way:
-/// \code
-/// #include <cartodata/volume/volume.h>
-/// #include <iostream>
-/// using namespace carto;
-/// using namespace std;
-///
-/// carto::Volume<int16_t> vol( 10, 10, 10 );
-/// cout << setMaxDim( 10 ) << vol << endl;
-/// \endcode
-template <typename T>
-std::ostream & operator<< ( std::ostream & out,
-                            const carto::Volume<T> & volume );
 
 
 #endif // CARTODATA_VOLUME_VOLUMEBASE_H
