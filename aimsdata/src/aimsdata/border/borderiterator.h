@@ -4,6 +4,7 @@
 
 #include <aims/vector/vector.h>                                      // Point*
 #include <cartodata/volume/volume.h>                              // VolumeRef
+#include <iostream>
 
 namespace aims
 {
@@ -166,37 +167,35 @@ namespace aims
       //--- members ----------------------------------------------------------
     protected:
       BorderIterator<T>     _border;
-      Point4dl      _current;
+      Point4dl              _current;
 
       //--- helpers ----------------------------------------------------------
     protected:
       /// returns true if the \c p is in the border described by _border
-      bool isBorder( const Point4dl & p );
-      /// returns true if \c p is in the inferior (i.e. left) border
-      /// regarding the dmension \c move
-      /// \param p     studied point
-      /// \param move  point with value 1 in one dimension and 0 in the others
-      bool isInferiorBorder( const Point4dl & p,
-                             const Point4dl & move );
+      bool isBorder( const Point4dl & p ) const;
+      /// returns true if \c p is in the image but not in the border.
+      bool isNonBorderImage( const Point4dl & p ) const;
       /// Sets the coordinate (in the dimension described by \c move) at its
       /// most inferior (i.e. left) value.
       Point4dl reset( const Point4dl & p,
-                      const Point4dl & move );
+                      const Point4dl & move ) const;
       /// Computes the next move. If \c move was in the X dimension (\c move
       /// == (1,0,0,0)) the next move is in the Y dimension, and so on. If
       /// \c move was in the T dimension, nextMove() returns (0,0,0,0).
-      Point4dl nextMove( const Point4dl & move );
+      Point4dl nextMove( const Point4dl & move ) const;
       /// computeNext(p) returns the next point in the border.
       /// \param p     previous position
       /// \param move  direction in which to seek the next point.
       /// The method is always called with \c move 's default value from the
       /// outside, but calls iteself recursively with other values.
-      Point4dl computeNext( const Point4dl & p,
-                            const Point4dl & move = Point4dl(1,0,0,0) );
+      Point4dl computeNext( const Point4dl & p ) const;
       /// Point value for the "end" iterator (which points to no voxel).
       /// In this implemention, its value is
       /// (MAX_LONG,MAX_LONG,MAX_LONG,MAX_LONG)
-      Point4dl end();
+      Point4dl end() const;
+      /// Gives the size of the non-border volume in the X dimension.
+      /// It is used to jump the non border volume when iterating on voxels.
+      long jumpX() const;
 
       //--- friends ----------------------------------------------------------
       friend class BorderIterator<T>;
@@ -250,45 +249,6 @@ namespace aims
     }
 
   protected:
-    /// utility method used by the iterators
-    /// It gives the size of the non-border volume in selected dimensions.
-    /// This jump is returned for each dimension in which \c move is not
-    /// zero
-    Point4dl jump( const Point4dl & move )
-    {
-      Point4dl out(0,0,0,0);
-      if( move[0] > 0 )
-      {
-        if( _inside )
-          out[0] = _volume.getSizeX() - _sizeinf[0] - _sizesup[0];
-        else
-          out[0] = _volume.getSizeX();
-      }
-      if( move[1] > 0 )
-      {
-        if( _inside )
-          out[1] = _volume.getSizeX() - _sizeinf[1] - _sizesup[1];
-        else
-          out[1] = _volume.getSizeX();
-      }
-      if( move[2] > 0 )
-      {
-        if( _inside )
-          out[2] = _volume.getSizeX() - _sizeinf[2] - _sizesup[2];
-        else
-          out[2] = _volume.getSizeX();
-      }
-      if( move[3] > 0 )
-      {
-        if( _inside )
-          out[3] = _volume.getSizeX() - _sizeinf[3] - _sizesup[3];
-        else
-          out[3] = _volume.getSizeX();
-      }
-      return out;
-    }
-
-  protected:
     carto::VolumeRef<T>   _volume;
     bool                  _inside;
     Point4dl              _sizeinf;
@@ -312,8 +272,10 @@ namespace aims
   {
     if( !_border._inside && !end )
     {
-      Point4dl start = _border._sizeinf;
+      const Point4dl & start = _border._sizeinf;
       _current = Point4dl( -start[0], -start[1], -start[2], -start[3] );
+      if( !isBorder(_current) )
+        _current = computeNext( _current );
     }
   }
 
@@ -393,7 +355,7 @@ namespace aims
   }
 
   template <typename T>
-  Point4dl BorderIterator<T>::const_iterator::end()
+  Point4dl BorderIterator<T>::const_iterator::end() const
   {
     return Point4dl( std::numeric_limits<long>::max(),
                      std::numeric_limits<long>::max(),
@@ -402,7 +364,16 @@ namespace aims
   }
 
   template <typename T>
-  bool BorderIterator<T>::const_iterator::isBorder( const Point4dl & p )
+  long BorderIterator<T>::const_iterator::jumpX() const
+  {
+    if( _border._inside )
+      return _border._volume.getSizeX() - _border._sizesup[0];
+    else
+      return _border._volume.getSizeX();
+  }
+
+  template <typename T>
+  bool BorderIterator<T>::const_iterator::isBorder( const Point4dl & p ) const
   {
     if( _border._inside )
     {
@@ -451,40 +422,27 @@ namespace aims
   }
 
   template <typename T>
-  bool BorderIterator<T>::const_iterator::isInferiorBorder(
-    const Point4dl & p, const Point4dl & move )
+  bool BorderIterator<T>::const_iterator::isNonBorderImage( const Point4dl & p ) const
   {
     if( _border._inside )
     {
-      if( move[0] > 0 && p[0] < _border._sizeinf[0] )
-        return true;
-      else if( move[1] > 0 && p[1] < _border._sizeinf[1] )
-        return true;
-      else if( move[2] > 0 && p[2] < _border._sizeinf[2] )
-        return true;
-      else if( move[3] > 0 && p[3] < _border._sizeinf[3] )
-        return true;
-      else
-        return false;
+      return( _border._sizeinf[0] <= p[0] && p[0] < _border._volume.getSizeX() - _border._sizesup[0] &&
+              _border._sizeinf[1] <= p[1] && p[1] < _border._volume.getSizeY() - _border._sizesup[1] &&
+              _border._sizeinf[2] <= p[2] && p[2] < _border._volume.getSizeZ() - _border._sizesup[2] &&
+              _border._sizeinf[3] <= p[3] && p[3] < _border._volume.getSizeT() - _border._sizesup[3] );
     }
     else
     {
-      if( move[0] > 0 && p[0] < 0 )
-        return true;
-      else if( move[1] > 0 && p[1] < 0 )
-        return true;
-      else if( move[2] > 0 && p[2] < 0 )
-        return true;
-      else if( move[3] > 0 && p[3] < 0 )
-        return true;
-      else
-        return false;
+      return( 0 <= p[0] && p[0] < _border._volume.getSizeX() &&
+              0 <= p[1] && p[1] < _border._volume.getSizeY() &&
+              0 <= p[2] && p[2] < _border._volume.getSizeZ() &&
+              0 <= p[3] && p[3] < _border._volume.getSizeT() );
     }
   }
 
   template <typename T>
   Point4dl BorderIterator<T>::const_iterator::reset(
-    const Point4dl & p, const Point4dl & move )
+    const Point4dl & p, const Point4dl & move ) const
   {
     Point4dl newp = p;
 
@@ -516,7 +474,7 @@ namespace aims
 
   template <typename T>
   Point4dl BorderIterator<T>::const_iterator::nextMove(
-    const Point4dl & move )
+    const Point4dl & move ) const
   {
     if( move[0] > 0 )
       return Point4dl(0,1,0,0);
@@ -533,23 +491,26 @@ namespace aims
 
   template <typename T>
   Point4dl BorderIterator<T>::const_iterator::computeNext(
-    const Point4dl & current, const Point4dl & move )
+    const Point4dl & current ) const
   {
-    // if last voxel: return end()
-    if( move == Point4dl(0,0,0,0) )
-      return end();
-
-    // if next point valid: return it
+    Point4dl move( 1, 0, 0, 0 );
     Point4dl next = current + move;
-    if( !isBorder(next) )
+    while( !isBorder(next) && next != end() )
     {
-      // if current was in inf border: jump inside image
-      if( isInferiorBorder( current, move ) )
-        next += _border.jump( move );
+      // if next is inside: jump inside image
+      if( isNonBorderImage( next ) ) {
+        next[0] = jumpX();
+        move = Point4dl( 1, 0, 0, 0 );
+      }
       // else: reset studied dim at line begin, and change dim
-      else {
-        next = reset( current, move );
-        next = computeNext( next, nextMove( move ) );
+      else
+      {
+        next = reset( next, move );
+        move = nextMove( move );
+        if( move == Point4dl(0, 0, 0, 0) )
+          next = end();
+        else
+          next = next + move;
       }
     }
 
@@ -559,7 +520,7 @@ namespace aims
   template <typename T>
   typename BorderIterator<T>::const_iterator & BorderIterator<T>::const_iterator::operator++()
   {
-    _current = computeNext( _current, Point4dl(1,0,0,0) );
+    _current = computeNext( _current );
     return *this;
   }
 
@@ -567,7 +528,7 @@ namespace aims
   typename BorderIterator<T>::const_iterator BorderIterator<T>::const_iterator::operator++(int)
   {
     typename BorderIterator<T>::const_iterator prev = *this;
-    _current = computeNext( _current, Point4dl(1,0,0,0) );
+    _current = computeNext( _current );
     return prev;
   }
 
@@ -625,7 +586,7 @@ namespace aims
   typename BorderIterator<T>::iterator & BorderIterator<T>::iterator::operator++()
   {
     const_iterator::_current = const_iterator::computeNext(
-      const_iterator::_current, Point4dl(1,0,0,0) );
+      const_iterator::_current );
     return *this;
   }
 
@@ -634,7 +595,7 @@ namespace aims
   {
     typename BorderIterator<T>::iterator prev = *this;
     const_iterator::_current = const_iterator::computeNext(
-      const_iterator::_current, Point4dl(1,0,0,0) );
+      const_iterator::_current );
     return prev;
   }
 
