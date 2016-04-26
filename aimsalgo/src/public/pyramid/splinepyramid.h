@@ -59,8 +59,8 @@ namespace aims {
     /// InterpolatedVolume types
     //------------------------------------------------------------------------
     /// @{
-    typedef typename InterpolatedVolume::Vector Vector;
-    typedef typename InterpolatedVolume::Matrix Matrix;
+    typedef InterpolatedVolume::Vector Vector;
+    typedef InterpolatedVolume::Matrix Matrix;
     /// @}
 
     //------------------------------------------------------------------------
