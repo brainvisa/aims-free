@@ -110,7 +110,7 @@ namespace aims {
     return bk;
   }
 
-  typename InterpolatedVolume::Vector
+  InterpolatedVolume::Vector
   InterpolatedVolume::derivative( double x, double y,
                                   double z, long t ) const
   {
@@ -160,7 +160,7 @@ namespace aims {
     return value;
   }
 
-  typename InterpolatedVolume::Matrix
+  InterpolatedVolume::Matrix
   InterpolatedVolume::nderivative( unsigned n, double x, double y,
                                    double z, long t ) const
   {
@@ -301,19 +301,19 @@ namespace aims {
     return at(x, y, z, t);
   }
 
-  typename InterpolatedVolume::Vector
+  InterpolatedVolume::Vector
   InterpolatedVolume::der( double x, double y, double z, long t ) const
   {
     return derivative(x, y, z, t);
   }
 
-  typename InterpolatedVolume::Matrix
+  InterpolatedVolume::Matrix
   InterpolatedVolume::der2( double x, double y, double z, long t ) const
   {
     return nderivative(2, x, y, z, t);
   }
 
-  typename InterpolatedVolume::Matrix
+  InterpolatedVolume::Matrix
   InterpolatedVolume::der3( double x, double y, double z, long t ) const
   {
     return nderivative(3, x, y, z, t);
@@ -367,7 +367,7 @@ namespace aims {
     return at( x/vs[0], y/vs[1], z/vs[2], t );
   }
 
-  typename InterpolatedVolume::Vector
+  InterpolatedVolume::Vector
   InterpolatedVolume::derivativeMm( double x, double y, double z, long t ) const
   {
     std::vector<float> vs(4, 1.);
@@ -379,7 +379,7 @@ namespace aims {
     return der;
   }
 
-  typename InterpolatedVolume::Matrix
+  InterpolatedVolume::Matrix
   InterpolatedVolume::nderivativeMm( unsigned n, double x, double y, double z, long t ) const
   {
     std::vector<float> vs(4, 1.);
@@ -396,7 +396,7 @@ namespace aims {
     return der;
   }
 
-  typename InterpolatedVolume::Vector
+  InterpolatedVolume::Vector
   InterpolatedVolume::derMm( double x, double y, double z, long t ) const
   {
     std::vector<float> vs(4, 1.);
@@ -408,7 +408,7 @@ namespace aims {
     return der;
   }
 
-  typename InterpolatedVolume::Matrix
+  InterpolatedVolume::Matrix
   InterpolatedVolume::der2Mm( double x, double y, double z, long t ) const
   {
     std::vector<float> vs(4, 1.);
@@ -420,7 +420,7 @@ namespace aims {
     return der;
   }
 
-  typename InterpolatedVolume::Matrix
+  InterpolatedVolume::Matrix
   InterpolatedVolume::der3Mm( double x, double y, double z, long t ) const
   {
     std::vector<float> vs(4, 1.);
