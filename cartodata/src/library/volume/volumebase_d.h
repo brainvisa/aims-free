@@ -580,7 +580,6 @@ namespace carto
   template < typename T >
   Volume< T >& Volume< T >::operator=( const Volume< T >& other )
   {
-
     if( &other == this )
       return *this;
 
@@ -589,17 +588,23 @@ namespace carto
       Headered::blockSignals( true );
     this->VolumeProxy< T >::operator=( other );
     _items = other._items;
+
 #ifdef CARTO_USE_BLITZ
     // TODO: test blitz ownership / strides
     // _blitz.reference( other.blitz );
-    _blitz.reference( blitz::Array<T,4>
-                      ( &_items[0],
-                        blitz::shape( VolumeProxy<T>::_sizeX,
-                                      VolumeProxy<T>::_sizeY,
-                                      VolumeProxy<T>::_sizeZ,
-                                      VolumeProxy<T>::_sizeT ),
-                        blitz::GeneralArrayStorage<4>
-                        ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+    _blitz.reference
+        ( blitz::Array<T,4>
+        ( &_items[0],
+            blitz::shape( VolumeProxy<T>::getSizeX(),
+                          VolumeProxy<T>::getSizeY(),
+                          VolumeProxy<T>::getSizeZ(),
+                          VolumeProxy<T>::getSizeT() ),
+            blitz::shape( 1, 
+                          &other( 0, 1, 0, 0 ) - &other( 0, 0, 0, 0 ),
+                          &other( 0, 0, 1, 0 ) - &other( 0, 0, 0, 0 ),
+                          &other( 0, 0, 0, 1 ) - &other( 0, 0, 0, 0 ) ),
+            blitz::GeneralArrayStorage<4>
+            ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
 #else
     _lineoffset = other._lineoffset;
     _sliceoffset = other._sliceoffset;
