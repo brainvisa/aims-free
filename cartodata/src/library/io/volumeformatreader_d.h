@@ -189,6 +189,12 @@ namespace soma
         translator.translate( carto::Object::reference( volume->header() ) );
       }
     }
+//     localMsg( "-> effective volume size ( "
+//               + carto::toString( volume->getSizeX() ) + ", "
+//               + carto::toString( volume->getSizeY() ) + ", "
+//               + carto::toString( volume->getSizeZ() ) + ", "
+//               + carto::toString( volume->getSizeT() ) + " )"
+//              );
     return volume;
   }
 
@@ -423,7 +429,7 @@ namespace soma
               + std::string( ( withborders ? "yes" : "no" ) ) );
     localMsg( "Partial Reading : "
               + std::string( ( partialreading ? "yes" : "no" ) ) );
-
+    
     //=== reading volume =====================================================
     int y, z, t;
     if( !withborders || dsi->capabilities().canHandleStrides() )
@@ -453,7 +459,7 @@ namespace soma
         }
       }
     }
-
+    
     // we reset at 0 the ImageReader's members (sizes, binary, ...) so that
     // they are recomputed at the next reading.
     _imr->resetParams();
@@ -522,9 +528,12 @@ namespace soma
       dsi->list().dataSource().reset( new FileDataSource(  url ) );
     }
     //=== if no options -> classic reading ===================================
-    if( !options.get() )
-      return FormatReader<VolumeRef<T> >::setupAndRead( obj, dsi, context,
-                                                        options );
+    if( !options.get() ) {
+      FormatReader<VolumeRef<T> >::setupAndRead( obj, dsi, context,
+                                                 options );
+      return;
+    }
+    
     //=== else, look for known properties ====================================
     std::set<std::string> prop = VolumeUtilIO<T>::listReadProperties();
     typename std::set<std::string>::iterator p;
@@ -547,8 +556,8 @@ namespace soma
       }
     }
     //=== if no known property -> classic reading ============================
-    return FormatReader<VolumeRef<T> >::setupAndRead( obj, dsi, context,
-                                                      options );
+    FormatReader<VolumeRef<T> >::setupAndRead( obj, dsi, context,
+                                               options );
   }
 
   /*** createAndRead *********************************************************

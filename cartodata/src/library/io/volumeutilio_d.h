@@ -317,6 +317,21 @@ namespace soma {
     fullsize[ 1 ] = fullVolume->getSizeY();
     fullsize[ 2 ] = fullVolume->getSizeZ();
     fullsize[ 3 ] = fullVolume->getSizeT();
+//     localMsg( "-> full size ( "
+//               + carto::toString( fullsize[0] ) + ", "
+//               + carto::toString( fullsize[1] ) + ", "
+//               + carto::toString( fullsize[2] ) + ", "
+//               + carto::toString( fullsize[3] ) + " )" );
+//     localMsg( "-> position ( "
+//               + carto::toString( position[0] ) + ", "
+//               + carto::toString( position[1] ) + ", "
+//               + carto::toString( position[2] ) + ", "
+//               + carto::toString( position[3] ) + " )" );
+//     localMsg( "-> borders ( "
+//               + carto::toString( borders[0] ) + ", "
+//               + carto::toString( borders[1] ) + ", "
+//               + carto::toString( borders[2] ) + ", "
+//               + carto::toString( borders[3] ) + " )" );
     if( viewframe[ 0 ] == 0 )
       viewframe[ 0 ] = (fullsize[ 0 ] - position[ 0 ]);
     if( viewframe[ 1 ] == 0 )
@@ -356,6 +371,13 @@ namespace soma {
                  );
       bordersVolume = carto::VolumeRef<T>(
         new carto::Volume<T>( fullVolume, borderpos, borderframe ) );
+      
+//       localMsg( "-> effective frame size ( "
+//                 + carto::toString( bordersVolume->getSizeX() ) + ", "
+//                 + carto::toString( bordersVolume->getSizeY() ) + ", "
+//                 + carto::toString( bordersVolume->getSizeZ() ) + ", "
+//                 + carto::toString( bordersVolume->getSizeT() ) + " )"
+//                  );
 
       //=== UNALLOCATED READ VIEW ============================================
       localMsg( "=== UNALLOCATED READ VIEW" );
@@ -396,11 +418,26 @@ namespace soma {
                  );
       readVolume = carto::VolumeRef<T>(
         new carto::Volume<T>( bordersVolume, readpos, readframe ) );
+      
+//       localMsg( "-> effective read view size ( "
+//                 + carto::toString( readVolume->getSizeX() ) + ", "
+//                 + carto::toString( readVolume->getSizeY() ) + ", "
+//                 + carto::toString( readVolume->getSizeZ() ) + ", "
+//                 + carto::toString( readVolume->getSizeT() ) + " )"
+//                  );
+      
       localMsg( "reading frame..." );
       rView.read( *readVolume );
 
+//       localMsg( "-> effective read view size after read ( "
+//                 + carto::toString( readVolume->getSizeX() ) + ", "
+//                 + carto::toString( readVolume->getSizeY() ) + ", "
+//                 + carto::toString( readVolume->getSizeZ() ) + ", "
+//                 + carto::toString( readVolume->getSizeT() ) + " )"
+//                  );
+
       //=== UNALLOCATED PROCCESSED VOLUME ====================================
-      localMsg( "=== UNALLOCATED PROCCESSED VOLUME" );
+      localMsg( "=== UNALLOCATED PROCESSED VOLUME" );
       localMsg( "computing view frame..." );
       // setting "viewVolume" position / "bordersVolume"
       viewpos[0] = borders[0];
@@ -420,10 +457,11 @@ namespace soma {
                 + carto::toString( viewpos[2] ) + ", "
                 + carto::toString( viewpos[3] ) + " )"
                  );
-      if( obj)
+      if(obj)
         *obj = carto::Volume<T>( bordersVolume, viewpos, viewframe );
       else
         obj = new carto::Volume<T>( bordersVolume, viewpos, viewframe );
+
       localMsg( "copying header..." );
       obj->blockSignals( true );
       obj->header().copyProperties( carto::Object::value( readVolume->header() ) );
@@ -468,7 +506,7 @@ namespace soma {
       localMsg( "reading partial volume..." );
       rView.read( *obj );
     }
-
+    
     return obj;
   }
 
