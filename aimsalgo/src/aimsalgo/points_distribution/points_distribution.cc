@@ -33,6 +33,7 @@
 
 #include <aims/points_distribution/points_distribution.h>
 #include <cmath>
+#include <stdlib.h>
 
 using namespace aims;
 using namespace std;
