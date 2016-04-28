@@ -122,6 +122,7 @@ namespace aims
       const PythonHeader & thdr = thing.header();
       GiftiHeader hdr( filename );
       hdr.copy( thdr );
+      hdr.setProperty( "data_type", carto::DataTypeCode<T>::name() );
 
       if( hdr.hasProperty( "nb_t_pos" ) )
         hdr.removeProperty( "nb_t_pos" );

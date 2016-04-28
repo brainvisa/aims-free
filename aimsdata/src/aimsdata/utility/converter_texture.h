@@ -63,13 +63,14 @@ namespace carto
 
     for( it=in.begin(); it!=et; ++it )
       {
-	Texture<OUTP>	& tout = out[ it->first ];
-	unsigned	i, n = it->second.nItem();
-	tout.reserve( n );
-	for( i=0; i<n; ++i )
-	  tout.push_back( (OUTP) it->second.item( i ) );
+        Texture<OUTP>	& tout = out[ it->first ];
+        unsigned	i, n = it->second.nItem();
+        tout.reserve( n );
+        for( i=0; i<n; ++i )
+          tout.push_back( (OUTP) it->second.item( i ) );
       }
     out.setHeader( in.header() );
+    out.header().setProperty( "data_type", carto::DataTypeCode<OUTP>::name() );
   }
 
 }
