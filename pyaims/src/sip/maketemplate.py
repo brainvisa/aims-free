@@ -31,6 +31,9 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 import sys
 import os
 import re
@@ -38,6 +41,13 @@ import sipconfig
 from optparse import OptionParser
 import subprocess
 import platform
+
+if sys.version_info[0] >= 3:
+    def xreadlines(f):
+        return f.readlines()
+else:
+    def xreadlines(f):
+        return f.xreadlines()
 
 
 def convert_string_to_int(s):
@@ -55,9 +65,9 @@ def convert_string_to_int(s):
 def makeTemplate(
     infile, outfile, types, templates={}, cpp='cpp -C', moc=None,
         quiet=0):
-    # print 'input :', infile
-    # print 'output:', outfile
-    # print 'types :', types
+    # print('input :', infile)
+    # print('output:', outfile)
+    # print('types :', types)
 
     fi = open(infile)
     fo = open(outfile, 'w')
@@ -81,12 +91,12 @@ def makeTemplate(
             qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
             cppcmd.append('-DQT_VERSION=' + hex(qver))
             # print >> sys.stderr, 'Qt version:', hex( qver )
-        except Exception, e:
+        except Exception as e:
             if not quiet:
-                print e
+                print(e)
             pass  # Qt not available ?
         if not quiet:
-            print ' '.join(cppcmd)
+            print(' '.join(cppcmd))
         # fo2, cppout = os.popen2( cppcmd )
         if platform.system() == 'Windows':
             p = subprocess.Popen(cppcmd,
@@ -102,13 +112,13 @@ def makeTemplate(
     preprocre = re.compile('(^\s*)(%#)(.*)%$')
     removeprere = re.compile('^\s*#.*$')
 
-    for line in fi.xreadlines():
+    for line in xreadlines(fi):
         lo = line
         templ = templatere.search(lo)
         while templ:
             tempn = templ.group(2)
             tempv = templ.group(3)
-            # print 'fount template:', tempn, tempv
+            # print('fount template:', tempn, tempv)
             t = templates.get(tempn)
             val = None
             if t:
@@ -119,9 +129,9 @@ def makeTemplate(
                     if tv:
                         val = tv.get(tempv)
             if val is not None:
-                # print templ.group(0), '->', val
+                # print(templ.group(0), '->', val)
                 pos = templ.start(1) + len(val)
-                # print lo, 'pos:', pos
+                # print(lo, 'pos:', pos)
                 lo = templatere.sub(val, lo, 1)
             else:
                 pos = templ.end(1)
@@ -140,7 +150,7 @@ def makeTemplate(
     if cpp:
         # cppout = p.communicate()[0]
         fo2.close()
-        for line in cppout.xreadlines():
+        for line in xreadlines(cppout):
             # This is necessary to remove CR LF on windows
             if len(line) >= 2 and line[-2] == '\r':
                 line = line[:-2] + '\n'
@@ -189,16 +199,20 @@ if __name__ == '__main__':
     templates = {}
     if options.templates:
         if len(options.templates) % 2 != 0:
-            print 'template arguments go by pairs (key, value)'
+            print('template arguments go by pairs (key, value)')
             sys.exit(1)
         for i in xrange(len(options.templates) / 2):
             templates[options.templates[i * 2]] = options.templates[i * 2 + 1]
 
-    # print 'templates:', options.templates
-    # print 'subs:', options.subs
+    # print('templates:', options.templates)
+    # print('subs:', options.subs)
 
     if options.subs:
-        execfile(options.subs)
+        if sys.version_info[0] >= 3:
+            code = compile(open(options.sub).read(), options.sub, 'exec')
+            exec(code, globals(), globals())
+        else:
+            execfile(options.subs)
         types = typessub
 
     for i in xrange(len(args) / 2):
