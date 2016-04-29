@@ -1022,7 +1022,15 @@ namespace
     Vertex *vertex, rc_ptr<AimsTimeSurface<D, Void> > mesh )
   {
     Object poly_counts_o;
-    poly_counts_o = vertex->getProperty( "poly_counts" );
+    try
+    {
+      poly_counts_o = vertex->getProperty( "poly_counts" );
+    }
+    catch( ... )
+    {
+      // no polygons: empty fiber, do nothing
+      return;
+    }
     vector<size_t> & poly_counts
       = poly_counts_o->value<vector<size_t> >();
 
