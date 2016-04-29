@@ -32,6 +32,7 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import print_function
 
 import sys
 import os
@@ -43,6 +44,9 @@ import glob
 import re
 from optparse import OptionParser
 import subprocess
+
+if sys.version_info[0] >= 3:
+    basestring = str
 
 parser = OptionParser(description='Preprocess a template file to generate '
                       'typed SIP inpuyt files')
@@ -115,14 +119,18 @@ try:
                          stderr=subprocess.PIPE).communicate()[1]
     x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
     qt_version = [convert_string_to_int(k) for k in x.split('.')]
-except Exception, e:
+except Exception as e:
     if not options.listFilesOnly:
-        print e
+        print(e)
     qt_version = [4, 0, 0]  # Qt not available ?
 
 # read generatedtypes file
 # expected to fill in the 'todo' dictionary variable
-execfile(options.input, globals(), globals())
+if sys.version_info[0] >= 3:
+    code = compile(open(options.input).read(), options.input, 'exec')
+    exec(code, globals(), globals())
+else:
+    execfile(options.input, globals(), globals())
 
 if options.tpldir == '':
     dir_name = os.path.dirname(options.input)
@@ -133,7 +141,11 @@ else:
 typesmtime = 0
 for x in options.typessub:
     typesmtime = max(typesmtime, os.stat(x)[stat.ST_MTIME])
-    execfile(x, globals(), globals())
+    if sys.version_info[0] >= 3:
+        code = compile(open(x).read(), x, 'exec')
+        exec(code, globals(), globals())
+    else:
+        execfile(x, globals(), globals())
 
 typesmtime = max(typesmtime,
                  os.stat(maketemplate.__file__)[stat.ST_MTIME])
@@ -144,7 +156,7 @@ outfiles = []
 allok = True
 
 for file, tps in todo.items():
-    # print file, ':', tps
+    # print(file, ':', tps)
     infile = os.path.join(dir_name, file + '.tpl')
     if not os.path.exists(infile):
         infile = os.path.join(pyaimssip, infile)
@@ -155,7 +167,7 @@ for file, tps in todo.items():
     else:
         ofilebase = file
     for x in tps:
-        if type(x) is types.StringType:
+        if isinstance(x, basestring):
             templates = {'Template1': x}
             ts = typessub[x].get('typecode')
             if not ts:
@@ -175,7 +187,7 @@ for file, tps in todo.items():
             ofile += '.sip'
         outfiles.append(ofile)
         try:
-            # print 'templates:', templates
+            # print('templates:', templates)
             done = 0
             if os.path.exists(ofile):
                 otmpfile = ofile + '.tmp'
@@ -184,7 +196,7 @@ for file, tps in todo.items():
                 if s1 <= s2 and typesmtime < s2:
                     done = 1
                     if not options.listFilesOnly:
-                        print >> sys.stderr, 'skipping', ofile, '- up to date'
+                        print('skipping', ofile, '- up to date', file=sys.stderr)
             else:
                 otmpfile = ofile
             if not done:
@@ -197,33 +209,33 @@ for file, tps in todo.items():
                     if not filecmp.cmp(ofile, otmpfile):
                         shutil.copyfile(otmpfile, ofile)
                         if not options.listFilesOnly:
-                            print ' - differs'
+                            print(' - differs')
                     else:
                         if not options.listFilesOnly:
-                            print ' - unchanged'
+                            print(' - unchanged')
                         # copy it anyway because sip.py will take care of it
                         shutil.copyfile(otmpfile, ofile)
                     os.unlink(otmpfile)
                 else:
                     if not options.listFilesOnly:
-                        print
-        except Exception, e:
-            print >> sys.stderr, 'error in generation of', ofile, ':'
-            print >> sys.stderr, e
+                        print()
+        except Exception as e:
+            print('error in generation of', ofile, ':', file=sys.stderr)
+            print(e, file=sys.stderr)
             allok = False
 
 if options.listFilesOnly:
-    print ";".join(outfiles).replace('\\', '/')
+    print(";".join(outfiles).replace('\\', '/'))
 
 if allok and options.cleanup and options.output:
     if not options.listFilesOnly:
-        print 'cleanup obsolete files...'
+        print('cleanup obsolete files...')
     files = glob.glob(os.path.join(options.output, '*.sip'))
     for f in files:
         if f not in outfiles \
-                and stat.S_IMODE(os.stat(f)[stat.ST_MODE]) & 0200:
+                and stat.S_IMODE(os.stat(f)[stat.ST_MODE]) & 0o200:
             if not options.listFilesOnly:
-                print 'deleting', f
+                print('deleting', f)
             os.unlink(f)
 
 if not allok:

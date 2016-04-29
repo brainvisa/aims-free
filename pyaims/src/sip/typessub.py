@@ -145,7 +145,7 @@ def classOutsideNamespace(include, cls, cppclass=None, typecode=None):
 
 def completeTypesSub(typessub):
     for x, y in typessub.items():
-        if not y.has_key('compareElement'):
+        if 'compareElement' not in y:
             if(x.endswith('*')):
                 y['compareElement'] = ''
             else:
