@@ -35,8 +35,8 @@ numtypes = ['unsigned char', 'short', 'unsigned short', 'int',
             'unsigned', 'float', 'double']
 basetypes = numtypes + ['AimsRGB', 'AimsRGBA', 'AimsHSV']
 matrix = []
-for z in [map(lambda y: (x, y), basetypes) for x in basetypes]:
-    matrix += z
+for x in basetypes:
+    matrix += [(x, y) for y in basetypes]
 
 todo = {'system': ['Void'],
         'volume': basetypes + ['cfloat', 'cdouble', 'Point3df'],

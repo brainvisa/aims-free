@@ -47,6 +47,7 @@ import subprocess
 
 if sys.version_info[0] >= 3:
     basestring = str
+    xrange = range
 
 parser = OptionParser(description='Preprocess a template file to generate '
                       'typed SIP inpuyt files')
@@ -116,7 +117,7 @@ try:
         else:
             moc = 'moc'
     l = subprocess.Popen([moc, '-v'], stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE).communicate()[1]
+                         stderr=subprocess.PIPE).communicate()[1].decode()
     x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
     qt_version = [convert_string_to_int(k) for k in x.split('.')]
 except Exception as e:
@@ -188,15 +189,16 @@ for file, tps in todo.items():
         outfiles.append(ofile)
         try:
             # print('templates:', templates)
-            done = 0
+            done = False
             if os.path.exists(ofile):
                 otmpfile = ofile + '.tmp'
                 s1 = os.stat(infile)[stat.ST_MTIME]
                 s2 = os.stat(ofile)[stat.ST_MTIME]
                 if s1 <= s2 and typesmtime < s2:
-                    done = 1
+                    done = True
                     if not options.listFilesOnly:
-                        print('skipping', ofile, '- up to date', file=sys.stderr)
+                        print('skipping', ofile, '- up to date',
+                              file=sys.stderr)
             else:
                 otmpfile = ofile
             if not done:
