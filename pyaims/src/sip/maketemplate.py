@@ -45,6 +45,7 @@ import platform
 if sys.version_info[0] >= 3:
     def xreadlines(f):
         return f.readlines()
+    xrange = range
 else:
     def xreadlines(f):
         return f.xreadlines()
@@ -85,7 +86,8 @@ def makeTemplate(
                 else:
                     moc = 'moc'
             l = subprocess.Popen([moc, '-v'], stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE).communicate()[1]
+                                 stderr=subprocess.PIPE).communicate()[
+                                   1].decode()
             x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
             qv = [convert_string_to_int(k) for k in x.split('.')]
             qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
@@ -97,7 +99,6 @@ def makeTemplate(
             pass  # Qt not available ?
         if not quiet:
             print(' '.join(cppcmd))
-        # fo2, cppout = os.popen2( cppcmd )
         if platform.system() == 'Windows':
             p = subprocess.Popen(cppcmd,
                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -145,12 +146,13 @@ def makeTemplate(
             lo = enableprere.sub('\\1#\\3', lo)
             fo.write(lo)
         else:
-            fo2.write(lo)
+            fo2.write(lo.encode())
 
     if cpp:
         # cppout = p.communicate()[0]
         fo2.close()
         for line in xreadlines(cppout):
+            line = line.decode()
             # This is necessary to remove CR LF on windows
             if len(line) >= 2 and line[-2] == '\r':
                 line = line[:-2] + '\n'
@@ -201,7 +203,7 @@ if __name__ == '__main__':
         if len(options.templates) % 2 != 0:
             print('template arguments go by pairs (key, value)')
             sys.exit(1)
-        for i in xrange(len(options.templates) / 2):
+        for i in xrange(int(len(options.templates) / 2)):
             templates[options.templates[i * 2]] = options.templates[i * 2 + 1]
 
     # print('templates:', options.templates)
@@ -215,7 +217,7 @@ if __name__ == '__main__':
             execfile(options.subs)
         types = typessub
 
-    for i in xrange(len(args) / 2):
+    for i in xrange(int(len(args) / 2)):
         types[args[i * 2]] = args[i * 2 + 1]
 
     makeTemplate(infile, outfile, types, templates, cppc, moc=options.moc)

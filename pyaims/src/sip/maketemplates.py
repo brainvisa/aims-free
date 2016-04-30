@@ -47,6 +47,7 @@ import subprocess
 
 if sys.version_info[0] >= 3:
     basestring = str
+    xrange = range
 
 parser = OptionParser(description='Preprocess a template file to generate '
                       'typed SIP inpuyt files')
@@ -116,7 +117,7 @@ try:
         else:
             moc = 'moc'
     l = subprocess.Popen([moc, '-v'], stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE).communicate()[1]
+                         stderr=subprocess.PIPE).communicate()[1].decode()
     x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
     qt_version = [convert_string_to_int(k) for k in x.split('.')]
 except Exception as e:
