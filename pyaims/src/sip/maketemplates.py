@@ -189,15 +189,16 @@ for file, tps in todo.items():
         outfiles.append(ofile)
         try:
             # print('templates:', templates)
-            done = 0
+            done = False
             if os.path.exists(ofile):
                 otmpfile = ofile + '.tmp'
                 s1 = os.stat(infile)[stat.ST_MTIME]
                 s2 = os.stat(ofile)[stat.ST_MTIME]
                 if s1 <= s2 and typesmtime < s2:
-                    done = 1
+                    done = True
                     if not options.listFilesOnly:
-                        print('skipping', ofile, '- up to date', file=sys.stderr)
+                        print('skipping', ofile, '- up to date',
+                              file=sys.stderr)
             else:
                 otmpfile = ofile
             if not done:
