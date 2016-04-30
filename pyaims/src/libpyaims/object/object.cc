@@ -154,8 +154,11 @@ namespace carto
       return false;
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
-    bool x = PyString_Check( _value );
+    bool x;
+#if PY_VERSION_HEX < 0x03000000
+    x = PyString_Check( _value );
     if( !x )
+#endif
       x = PyUnicode_Check( _value );
     if( !x && PyObject_HasAttrString( _value, "isString" ) )
     {
@@ -401,8 +404,11 @@ namespace carto
       {
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
-        bool x = PyString_Check( po.getValue() );
+        bool x;
+#if PY_VERSION_HEX < 0x03000000
+        x = PyString_Check( po.getValue() );
         if( !x )
+#endif
           x = PyUnicode_Check( po.getValue() );
         if( !x && PyObject_HasAttrString( po.getValue(), "isString" ) )
         {
@@ -422,12 +428,44 @@ namespace carto
       {
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
-        const char	*s = PyString_AsString( to.getValue() );
+        if( PyUnicode_Check( to.getValue() ) )
+        {
+#if PY_VERSION_HEX >= 0x03000000
+          PyObject *enc = PyUnicode_EncodeLocale( to.getValue(), 0 );
+          if( enc )
+          {
+              char *s = PyBytes_AsString( enc );
+              Py_DECREF( enc );
+              if( s )
+              {
+                PyGILState_Release( gstate );
+                return s;
+              }
+          }
+#else
+          PyObject *enc = PyString_AsEncodedObject( to.getValue(), "utf-8",
+                                                    0 );
+          if( enc )
+          {
+              char *s = PyString_AsString( enc );
+              Py_DECREF( enc );
+              if( s )
+              {
+                PyGILState_Release( gstate );
+                return s;
+              }
+          }
+#endif
+        }
+
+#if PY_VERSION_HEX < 0x03000000
+        char *s = PyString_AsString( to.getValue() );
         if( s )
         {
           PyGILState_Release(gstate);
           return s;
         }
+#endif
         PyErr_Clear();
         PyObject	*po = PyNumber_Float( to.getValue() );
         if( po )
@@ -443,7 +481,13 @@ namespace carto
             to.getValue(), const_cast<char *>( "getString" ), 0 );
           if( res )
           {
+#if PY_VERSION_HEX >= 0x03000000
+            PyObject *enc = PyUnicode_EncodeLocale( res, 0 );
+            const char *x = PyBytes_AsString( enc );
+            Py_DECREF( enc );
+#else
             const char *x = PyString_AsString( res );
+#endif
             Py_DECREF( res );
             PyGILState_Release(gstate);
             return x;
@@ -459,7 +503,11 @@ namespace carto
       {
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
-        PyObject	*po = PyString_FromString( value.c_str() );
+#if PY_VERSION_HEX >= 0x03000000
+        PyObject *po = PyUnicode_FromString( value.c_str() );
+#else
+        PyObject *po = PyString_FromString( value.c_str() );
+#endif
         if( to.getValue() )
         {
           Py_DECREF( to.getValue() );
@@ -498,7 +546,11 @@ namespace carto
             object.getValue(), const_cast<char *>( "size" ), 0 );
           if( res )
           {
+#if PY_VERSION_HEX >= 0x03000000
+            long x = PyLong_AsLong( res );
+#else
             long x = PyInt_AsLong( res );
+#endif
             Py_DECREF( res );
             PyGILState_Release(gstate);
             return size_t(x);
@@ -746,7 +798,11 @@ namespace carto
           try
           {
             int x = value->value<int>();
+#if PY_VERSION_HEX >= 0x03000000
+            po = PyLong_FromLong( x );
+#else
             po = PyInt_FromLong( x );
+#endif
           }
           catch( ... )
           {
@@ -767,7 +823,11 @@ namespace carto
                 try
                 {
                   string x = value->getString();
+#if PY_VERSION_HEX >= 0x03000000
+                  po = PyUnicode_FromString( x.c_str() );
+#else
                   po = PyString_FromString( x.c_str() );
+#endif
                 }
                 catch( ... )
                 {
@@ -1167,16 +1227,29 @@ std::string IterableImpl<PyObject *, false>::PyMappingIterator::key() const
     throw std::runtime_error( "no current iterator key" );
   PyGILState_STATE gstate;
   gstate = PyGILState_Ensure();
-  if( !PyString_Check( _pycur ) )
+  char *c = 0;
+  if( PyUnicode_Check( _pycur ) )
   {
-    PyGILState_Release(gstate);
-    throw std::runtime_error( "current iterator key is not a string" );
+#if PY_VERSION_HEX >= 0x03000000
+    PyObject *enc = PyUnicode_EncodeLocale( _pycur, 0 );
+    c = PyBytes_AsString( enc );
+#else
+    PyObject *enc = PyString_AsEncodedObject( _pycur, "utf-8", 0 );
+    if( enc )
+      c = PyString_AsString( enc );
+#endif
+    Py_DECREF( enc );
   }
-  char		*c = PyString_AsString( _pycur );
+#if PY_VERSION_HEX < 0x03000000
+  else if( PyString_Check( _pycur ) )
+    c = PyString_AsString( _pycur );
+#endif
+
   PyGILState_Release(gstate);
-  std::string	key;
-  if( c )
-    key = c;
+  if( !c )
+    throw std::runtime_error( "current iterator key is not a string" );
+
+  std::string	key = c;
   return key;
 }
 

@@ -35,10 +35,28 @@
 #define PY_ARRAY_UNIQUE_SYMBOL PyAims_NumpyAPI
 #include <numpy/arrayobject.h>
 
+namespace
+{
+  /* import_array() is a macro which defines a block of code, which
+     includes a return statement. This return statement, in python 2, does
+     not return any value, but in python 3, returns NULL.
+     So we must use it as part of a function declaration, which conforms to
+     this return policy.
+   */
+#if PY_VERSION_HEX >= 0x03000000
+  void *npy_import_array()
+#else
+  void npy_import_array()
+#endif
+  {
+    import_array();
+  }
+}
+
 namespace carto
 {
-	void    pyaims_init(void)
-	{
-		import_array();
-	}
+  void pyaims_init(void)
+  {
+    npy_import_array();
+  }
 }

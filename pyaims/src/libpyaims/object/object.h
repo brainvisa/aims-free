@@ -168,7 +168,11 @@ namespace carto
     {
       PyGILState_STATE gstate;
       gstate = PyGILState_Ensure();
+#if PY_VERSION_HEX >= 0x03000000
+      PyObject *y = PyLong_FromLong( x );
+#else
       PyObject *y = PyInt_FromLong( x );
+#endif
       PyGILState_Release(gstate);
       return y;
     }
@@ -188,7 +192,11 @@ namespace carto
     {
       PyGILState_STATE gstate;
       gstate = PyGILState_Ensure();
+#if PY_VERSION_HEX >= 0x03000000
+      PyObject *y = PyLong_FromLong( x );
+#else
       PyObject *y = PyInt_FromLong( x );
+#endif
       PyGILState_Release(gstate);
       return y;
     }
@@ -198,7 +206,11 @@ namespace carto
     {
       PyGILState_STATE gstate;
       gstate = PyGILState_Ensure();
+#if PY_VERSION_HEX >= 0x03000000
+      PyObject *y = PyLong_FromLong( x );
+#else
       PyObject *y = PyInt_FromLong( x );
+#endif
       PyGILState_Release(gstate);
       return y;
     }
@@ -208,7 +220,11 @@ namespace carto
     {
       PyGILState_STATE gstate;
       gstate = PyGILState_Ensure();
+#if PY_VERSION_HEX >= 0x03000000
+      PyObject *y = PyLong_FromLong( x );
+#else
       PyObject *y = PyInt_FromLong( x );
+#endif
       PyGILState_Release(gstate);
       return y;
     }
@@ -218,7 +234,11 @@ namespace carto
     {
       PyGILState_STATE gstate;
       gstate = PyGILState_Ensure();
+#if PY_VERSION_HEX >= 0x03000000
+      PyObject *y = PyLong_FromLong( x );
+#else
       PyObject *y = PyInt_FromLong( x );
+#endif
       PyGILState_Release(gstate);
       return y;
     }
@@ -238,7 +258,11 @@ namespace carto
     {
       PyGILState_STATE gstate;
       gstate = PyGILState_Ensure();
+#if PY_VERSION_HEX >= 0x03000000
+      PyObject *y = PyUnicode_FromString( x.c_str() );
+#else
       PyObject *y = PyString_FromString( x.c_str() );
+#endif
       PyGILState_Release(gstate);
       return y;
     }
@@ -248,7 +272,11 @@ namespace carto
     {
       PyGILState_STATE gstate;
       gstate = PyGILState_Ensure();
+#if PY_VERSION_HEX >= 0x03000000
+      PyObject *y = PyUnicode_FromString( x );
+#else
       PyObject *y = PyString_FromString( x );
+#endif
       PyGILState_Release(gstate);
       return y;
     }
