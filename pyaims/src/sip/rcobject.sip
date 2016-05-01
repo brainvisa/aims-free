@@ -37,7 +37,11 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
   {
     // increase C++ ref counter to avoid destruction by C++
     ++carto::rc_ptr_trick::refCount( *a0 );
+#if PY_VERSION_HEX >= 0x03000000
+    PyObject_SetAttrString( a0Wrapper, "_cpp_rcptr", PyLong_FromLong( 1 ) );
+#else
     PyObject_SetAttrString( a0Wrapper, "_cpp_rcptr", PyInt_FromLong( 1 ) );
+#endif
 #ifdef PYAIMS_DEBUG_RC
     std::cout << "inc rc: " << carto::rc_ptr_trick::refCount( *a0 )
       << std::endl;
@@ -84,7 +88,11 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
         // give ownership to C++ to avoid destruction by python now
         sipTransferTo( a0Wrapper, 0 );
         // and leave a marker
+#if PY_VERSION_HEX >= 0x03000000
+        PyObject_SetAttrString( a0Wrapper, "_dontdel", PyLong_FromLong( 1 ) );
+#else
         PyObject_SetAttrString( a0Wrapper, "_dontdel", PyInt_FromLong( 1 ) );
+#endif
       }
     }
   }

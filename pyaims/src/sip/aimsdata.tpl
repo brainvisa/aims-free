@@ -191,10 +191,17 @@ public:
   SIP_BLOCK_THREADS
   PyObject	*res = PyTuple_New( 2 );
   PyObject	*pos = PyTuple_New( 4 );
+#if PY_VERSION_HEX >= 0x03000000
+  PyTuple_SET_ITEM( pos, 0, PyLong_FromLong( x ) );
+  PyTuple_SET_ITEM( pos, 1, PyLong_FromLong( y ) );
+  PyTuple_SET_ITEM( pos, 2, PyLong_FromLong( z ) );
+  PyTuple_SET_ITEM( pos, 3, PyLong_FromLong( t ) );
+#else
   PyTuple_SET_ITEM( pos, 0, PyInt_FromLong( x ) );
   PyTuple_SET_ITEM( pos, 1, PyInt_FromLong( y ) );
   PyTuple_SET_ITEM( pos, 2, PyInt_FromLong( z ) );
   PyTuple_SET_ITEM( pos, 3, PyInt_FromLong( t ) );
+#endif
   PyTuple_SET_ITEM( res, 0, pos );
   PyTuple_SET_ITEM( res, 1, %Template1pyFromC%( v ) );
   sipRes = res;
@@ -208,10 +215,17 @@ public:
   SIP_BLOCK_THREADS
   PyObject	*res = PyTuple_New( 2 );
   PyObject	*pos = PyTuple_New( 4 );
+#if PY_VERSION_HEX >= 0x03000000
+  PyTuple_SET_ITEM( pos, 0, PyLong_FromLong( x ) );
+  PyTuple_SET_ITEM( pos, 1, PyLong_FromLong( y ) );
+  PyTuple_SET_ITEM( pos, 2, PyLong_FromLong( z ) );
+  PyTuple_SET_ITEM( pos, 3, PyLong_FromLong( t ) );
+#else
   PyTuple_SET_ITEM( pos, 0, PyInt_FromLong( x ) );
   PyTuple_SET_ITEM( pos, 1, PyInt_FromLong( y ) );
   PyTuple_SET_ITEM( pos, 2, PyInt_FromLong( z ) );
   PyTuple_SET_ITEM( pos, 3, PyInt_FromLong( t ) );
+#endif
   PyTuple_SET_ITEM( res, 0, pos );
   PyTuple_SET_ITEM( res, 1, %Template1pyFromC%( v ) );
   sipRes = res;

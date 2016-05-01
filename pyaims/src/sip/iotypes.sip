@@ -32,9 +32,15 @@ public:
   for( i=aims::IOObjectTypesDictionary::types().begin(); i!=e; ++i )
   {
     PyObject *p = PyTuple_New( i->second.size() );
+#if PY_VERSION_HEX >= 0x03000000
+    for( u=0, iot=i->second.begin(), eot=i->second.end(); iot!=eot; ++iot, ++u )
+      PyTuple_SetItem( p, u, PyUnicode_FromString( iot->first.c_str() ) );
+    PyDict_SetItem( sipRes, PyUnicode_FromString( i->first.c_str() ), p );
+#else
     for( u=0, iot=i->second.begin(), eot=i->second.end(); iot!=eot; ++iot, ++u )
       PyTuple_SetItem( p, u, PyString_FromString( iot->first.c_str() ) );
     PyDict_SetItem( sipRes, PyString_FromString( i->first.c_str() ), p );
+#endif
   }
 %End
 
@@ -89,9 +95,15 @@ namespace carto // FIXME: will become soma
   {
     const std::set<std::string> & iset = i->second();
     PyObject *p = PyTuple_New( iset.size() );
+#if PY_VERSION_HEX >= 0x03000000
+    for( u=0, iot=iset.begin(), eot=iset.end(); iot!=eot; ++iot, ++u )
+      PyTuple_SetItem( p, u, PyUnicode_FromString( iot->c_str() ) );
+    PyDict_SetItem( sipRes, PyUnicode_FromString( i->first.c_str() ), p );
+#else
     for( u=0, iot=iset.begin(), eot=iset.end(); iot!=eot; ++iot, ++u )
       PyTuple_SetItem( p, u, PyString_FromString( iot->c_str() ) );
     PyDict_SetItem( sipRes, PyString_FromString( i->first.c_str() ), p );
+#endif
   }
 %End
 
@@ -107,9 +119,15 @@ namespace carto // FIXME: will become soma
   {
     const std::set<std::string> & iset = i->second();
     PyObject *p = PyTuple_New( iset.size() );
+#if PY_VERSION_HEX >= 0x03000000
+    for( u=0, iot=iset.begin(), eot=iset.end(); iot!=eot; ++iot, ++u )
+      PyTuple_SetItem( p, u, PyUnicode_FromString( iot->c_str() ) );
+    PyDict_SetItem( sipRes, PyUnicode_FromString( i->first.c_str() ), p );
+#else
     for( u=0, iot=iset.begin(), eot=iset.end(); iot!=eot; ++iot, ++u )
       PyTuple_SetItem( p, u, PyString_FromString( iot->c_str() ) );
     PyDict_SetItem( sipRes, PyString_FromString( i->first.c_str() ), p );
+#endif
   }
 %End
 

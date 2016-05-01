@@ -4,6 +4,7 @@ class list_%Template1typecode%
 %TypeHeaderCode
 #include <list>
 #include <cartobase/object/object.h>
+#include <pyaims/object/numconv.h>
 %Template1typeinclude%
 %Template1sipinclude%
 #ifndef PYAIMSSIP_LIST_%Template1typecode%_DEFINED
@@ -316,10 +317,7 @@ public:
     ss << ", ...";
   ss << " ]";
   std::string	s = ss.str();
-  const char	*s2 = s.c_str();
-  if( s2 == 0 )
-    s2 = "";
-  sipRes = PyString_FromString(s2);
+  sipRes = carto::PyString_FromStdString(s);
 %#else%
   std::ostringstream  ss;
   ss << "[ ";
@@ -333,7 +331,7 @@ public:
     po = %Template1pyFromC%(%Template1address% *il);
     str = PyObject_Str( po );
     if( str )
-      ss << PyString_AsString( str );
+      ss << carto::PyString_AsStdString( str );
     else
       ss << "<object not printable>";
     if( i < n-1 )
@@ -343,10 +341,7 @@ public:
     ss << ", ...";
   ss << " ]";
   std::string	s = ss.str();
-  const char	*s2 = s.c_str();
-  if( s2 == 0 )
-    s2 = "";
-  sipRes = PyString_FromString(s2);
+  sipRes = carto::PyString_FromStdString(s);
 %#endif%
 %End
 

@@ -12,11 +12,19 @@ AIMS / Cartobase version, as a 2-digit tuple
   std::string v = carto::cartobaseShortVersion();
   std::string::size_type n = v.find( '.' );
   sipRes = PyTuple_New( 2 );
+#if PY_VERSION_HEX >= 0x03000000
+  PyTuple_SetItem( sipRes, 0, PyLong_FromString(
+    const_cast<char *>( v.substr( 0, n ).c_str() ), 0, 10 ) );
+  PyTuple_SetItem( sipRes, 1, PyLong_FromString(
+    const_cast<char *>( v.substr( n+1, v.length() - n - 1 ).c_str() ), 0,
+    10 ) );
+#else
   PyTuple_SetItem( sipRes, 0, PyInt_FromString(
     const_cast<char *>( v.substr( 0, n ).c_str() ), 0, 10 ) );
   PyTuple_SetItem( sipRes, 1, PyInt_FromString(
     const_cast<char *>( v.substr( n+1, v.length() - n - 1 ).c_str() ), 0,
     10 ) );
+#endif
 %End
 
 
