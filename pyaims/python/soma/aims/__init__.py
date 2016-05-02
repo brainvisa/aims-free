@@ -144,6 +144,7 @@ if sys.version_info[0] >= 3:
     import functools
     unicode = str
     basestring = str
+    xrange = range
 
 
 # typedefs
