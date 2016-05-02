@@ -97,6 +97,8 @@ import collections
 import types
 import sip
 import os
+import six
+import sys
 
 # check for share dir, and set the BRAINVISA_SHARE environment var if it is not
 # already set
@@ -137,6 +139,13 @@ try:
     from soma.aims.spmnormalizationreader import *
 except:
     pass  # probably cannot import scipy.io
+
+if sys.version_info[0] >= 3:
+    import functools
+    unicode = str
+    basestring = str
+    xrange = range
+
 
 # typedefs
 
@@ -298,7 +307,7 @@ class Reader(object):
             otype = f.objectType()
             dtype = f.dataType()
             otype2 = self._typemap.get(otype, otype)
-            if isinstance(otype2, bytes):
+            if isinstance(otype2, (bytes, str)):
                 finaltype = otype2 + '_' + dtype
                 otype = otype2
             else:
@@ -444,12 +453,21 @@ class VecIter:
     def __iter__(self):
         return self
 
-    def next(self):
-        if self._index >= len(self._vector):
-            raise StopIteration('iterator outside bounds')
-        val = self._vector[self._index]
-        self._index += 1
-        return val
+    if sys.version_info[0] >= 3:
+        def __next__(self):
+            if self._index >= len(self._vector):
+                raise StopIteration('iterator outside bounds')
+            val = self._vector[self._index]
+            self._index += 1
+            return val
+
+    else:
+        def next(self):
+            if self._index >= len(self._vector):
+                raise StopIteration('iterator outside bounds')
+            val = self._vector[self._index]
+            self._index += 1
+            return val
 
 # Iterator (doesn't work when implemented in SIP so far)
 
@@ -466,8 +484,12 @@ def objiter(self):
     return self._get().__iter__()
 
 
-def objnext(self):
-    return self._get().next()
+if sys.version_info[0] >= 3:
+    def objnext(self):
+        return self._get().__next__()
+else:
+    def objnext(self):
+        return self._get().next()
 
 
 def objiteritems(self):
@@ -479,12 +501,21 @@ def objiteritems(self):
         def __iter__(self):
             return self
 
-        def next(self):
-            if not self.iterator.isValid():
-                raise StopIteration("iterator outside bounds")
-            res = (self.iterator.key(), self.iterator.currentValue())
-            self.iterator.next()
-            return res
+        if sys.version_info[0] >= 3:
+            def __next__(self):
+                if not self.iterator.isValid():
+                    raise StopIteration("iterator outside bounds")
+                res = (self.iterator.key(), self.iterator.currentValue())
+                self.iterator.__next__()
+                return res
+        else:
+            def next(self):
+                if not self.iterator.isValid():
+                    raise StopIteration("iterator outside bounds")
+                res = (self.iterator.key(), self.iterator.currentValue())
+                self.iterator.next()
+                return res
+
     return iterator(self.objectIterator())
 
 
@@ -497,12 +528,21 @@ def objitervalues(self):
         def __iter__(self):
             return self
 
-        def next(self):
-            if not self.iterator.isValid():
-                raise StopIteration("iterator outside bounds")
-            res = self.iterator.currentValue()
-            self.iterator.next()
-            return res
+        if sys.version_info[0] >= 3:
+            def __next__(self):
+                if not self.iterator.isValid():
+                    raise StopIteration("iterator outside bounds")
+                res = self.iterator.currentValue()
+                self.iterator.__next__()
+                return res
+        else:
+            def next(self):
+                if not self.iterator.isValid():
+                    raise StopIteration("iterator outside bounds")
+                res = self.iterator.currentValue()
+                self.iterator.next()
+                return res
+
     return iterator(self.objectIterator())
 
 
@@ -517,11 +557,18 @@ class BckIter:
     def __iter__(self):
         return self
 
-    def next(self):
-        if self._iter is None:
-            self._iter = iter(self._bck.keys())
-        elem = self._iter.next()
-        return self._bck[elem]
+    if sys.version_info[0] >= 3:
+        def __next__(self):
+            if self._iter is None:
+                self._iter = iter(self._bck.keys())
+            elem = self._iter.__next__()
+            return self._bck[elem]
+    else:
+        def next(self):
+            if self._iter is None:
+                self._iter = iter(self._bck.keys())
+            elem = self._iter.next()
+            return self._bck[elem]
 
 
 class BckIterItem:
@@ -535,11 +582,18 @@ class BckIterItem:
     def __iter__(self):
         return self
 
-    def next(self):
-        if self._iter is None:
-            self._iter = iter(self._bck.keys())
-        elem = self._iter.next()
-        return elem, self._bck[elem]
+    if sys.version_info[0] >= 3:
+        def __next__(self):
+            if self._iter is None:
+                self._iter = iter(self._bck.keys())
+            elem = self._iter.__next__()
+            return elem, self._bck[elem]
+    else:
+        def next(self):
+            if self._iter is None:
+                self._iter = iter(self._bck.keys())
+            elem = self._iter.next()
+            return elem, self._bck[elem]
 
 # automatic rc_ptr dereferencing
 
@@ -644,16 +698,30 @@ def __setitem_vec__(self, s, val):
         return self.__oldsetitem__(s, val)
 
 
-def __operator_overload__(op, self, other):
-    try:
-        return op(self, other)
-    except TypeError:
-        # this excaption handling is here to follow the behaviour of normal
-        # operators: if a.__add__(b) does not support the operand type of b,
-        # it should return NotImplemented, and should not raise an exception.
-        # In that case, python can call b.__radd__(a), which it doesn't do if
-        # an exception is raised.
-        return NotImplemented
+if sys.version_info[0] >= 3:
+    def __operator_overload__(self, op, other):
+        try:
+            return op(self, other)
+        except TypeError:
+            # this exception handling is here to follow the behaviour of normal
+            # operators: if a.__add__(b) does not support the operand type of
+            # b, it should return NotImplemented, and should not raise an
+            # exception. In that case, python can call b.__radd__(a), which it
+            # doesn't do if an exception is raised.
+            return NotImplemented
+
+else:
+    def __operator_overload__(op, self, other):
+        try:
+            return op(self, other)
+        except TypeError:
+            # this exception handling is here to follow the behaviour of normal
+            # operators: if a.__add__(b) does not support the operand type of
+            # b, it should return NotImplemented, and should not raise an
+            # exception. In that case, python can call b.__radd__(a), which it
+            # doesn't do if an exception is raised.
+            return NotImplemented
+
 
 
 def __Volume_astype__(self, dtype, copy=False):
@@ -700,6 +768,9 @@ def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
     for x, y in classes:
         try:
+            if not hasattr(y, '__name__'):
+                # not a named class
+                continue
             if y.__name__.startswith('rc_ptr_') \
                 or y.__name__.startswith('weak_shared_ptr_') \
                     or y.__name__.startswith('weak_ptr_'):
@@ -727,26 +798,40 @@ def __fixsipclasses__(classes):
                     add = getattr(aimssip, '__%s_%s__' % (op, y.__name__),
                                   None)
                     if add is not None:
-                        setattr(y, '__%s__' % op,
+                        if sys.version_info[0] >= 3:
+                            setattr(
+                                y, '__%s__' % op, functools.partialmethod(
+                                    __fixsipclasses__.__operator_overload__,
+                                    add))
+                        else:
+                            setattr(
+                                y, '__%s__' % op,
                                 types.MethodType(
                                     partial(
                                       __fixsipclasses__.__operator_overload__,
                                         add),
                                     None, y))
-                y.astype = types.MethodType(
-                    __fixsipclasses__.__Volume_astype__, None, y)
+                if sys.version_info[0] >= 3:
+                    y.astype = __fixsipclasses__.__Volume_astype__
+                else:
+                    y.astype = types.MethodType(
+                        __fixsipclasses__.__Volume_astype__, None, y)
             else:
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
                 if hasattr(y, '__objnext__'):
-                    y.next = __fixsipclasses__.newnext
+                    if sys.version_info[0] >= 3:
+                        y.__next__ = __fixsipclasses__.newnext
+                    else:
+                        y.next = __fixsipclasses__.newnext
                 elif y.__name__.startswith('AimsVector_') \
                         or y.__name__.startswith('Texture_') \
                         or y.__name__ in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
                     y.__iterclass__ = VecIter
                     y.__iter__ = lambda self: self.__iterclass__(self)
-                if y.__name__.startswith('vector_') \
-                        or y.__name__.startswith('AimsVector_'):
+                if (y.__name__.startswith('vector_') \
+                        or y.__name__.startswith('AimsVector_')) \
+                        and 'iterator' not in y.__name__:
                     y.__oldgetitem__ = y.__getitem__
                     y.__getitem__ = __fixsipclasses__.__getitem_vec__
                     y.__oldsetitem__ = y.__setitem__
@@ -758,6 +843,9 @@ def __fixsipclasses__(classes):
                     y.__iter__ = lambda self: self.__iterclass__(self)
                     y.iteritems = lambda self: self.__iteritemclass__(
                         self)
+                    if sys.version_info[0] >= 3:
+                        y.items = lambda self: self.__iteritemclass__(
+                            self)
                     if y.__name__.startswith('BucketMap_'):
                         y.Bucket.__iterclass__ = BckIter
                         y.Bucket.__iteritemclass__ = BckIterItem
@@ -765,7 +853,18 @@ def __fixsipclasses__(classes):
                             = lambda self: self.__iterclass__(self)
                         y.Bucket.iteritems \
                             = lambda self: self.__iteritemclass__(self)
-        except:
+                        if sys.version_info[0] >= 3:
+                            y.Bucket.items \
+                                = lambda self: self.__iteritemclass__(self)
+            # fix python3 iterators
+            if sys.version_info[0] >= 3 and hasattr(y, 'next') \
+                    and not hasattr(y, '__next__'):
+                # cannot just assign y.__next__ = y.next
+                # because SIP functions seem not to be copied correctly.
+                y.__next__ = lambda self: self.next()
+                #del y.next
+        except Exception as e:
+            print('warning: exception during classes patching:', e, ' for:', y)
             pass
 
 __fixsipclasses__.newiter = newiter
@@ -790,10 +889,13 @@ del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
 del __getitem_vec__, __setitem_vec__, __operator_overload__, __Volume_astype__
 
-__fixsipclasses__(globals().items() + carto.__dict__.items())
+__fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
 Object.__iter__ = __fixsipclasses__.objiter
-Object.next = __fixsipclasses__.objnext
+if sys.version_info[0] >= 3:
+    Object.__next__ = __fixsipclasses__.objnext
+else:
+    Object.next = __fixsipclasses__.objnext
 Object.__delitem__ = __fixsipclasses__.proxydelitem
 Object._getAttributeNames = __fixsipclasses__.getAttributeNames
 
@@ -1102,7 +1204,7 @@ def genobj__update__(self, x):
     if not self.isDictionary():
         raise ValueError(
             'Generic object is not a dictionary-compatible object')
-    for x, y in x.iteritems():
+    for x, y in six.iteritems(x):
         self[x] = y
 
 
@@ -1130,6 +1232,8 @@ carto.GenericObject.__getattribute__ = genobj__getattribute__
 carto.GenericObject.update = genobj__update__
 carto.GenericObject.__iadd__ = genobj__iadd__
 carto.GenericObject.iteritems = objiteritems
+if sys.version_info[0] >= 3:
+    carto.GenericObject.items = objiteritems
 carto.GenericObject.itervalues = objitervalues
 carto.GenericObject.iterkeys = carto.GenericObject.__iter__
 Object.__iadd__ = obj__iadd__
@@ -1142,7 +1246,6 @@ del obj__iadd__
 # trap every access to Point3df's instance methods to check for the
 # weakref on the surface-object
 # KNOWN BUG: using */+- in python skips __getattribute__, thus may sig11 :(
-from new import instancemethod
 import weakref
 Point3df.__refParent = weakref.ref(Point3df)
 Point3df.__oldgetattr__ = Point3df.__getattribute__
@@ -1915,7 +2018,7 @@ to the ``Volume`` constructor.
 In all cases the voxels memory block is shared.
 '''
 
-for x, y in locals().items():
+for x, y in list(locals().items()):
     if x.startswith('Volume_'):
         y.__doc__ = _volumedoc
     elif x.startswith('AimsData_'):

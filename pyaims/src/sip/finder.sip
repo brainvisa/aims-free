@@ -8,6 +8,10 @@ class Finder
 #include <aims/io/finder.h>
 %End
 
+%TypeCode
+#include <pyaims/object/numconv.h>
+%End
+
 public:
   Finder();
   virtual ~Finder();
@@ -29,7 +33,7 @@ public:
   for (i=0, it = extensions.begin(), et = extensions.end();
 						it != et; ++it, ++i)
   {
-    PyObject *extension_py = PyString_FromString((*it).c_str());
+    PyObject *extension_py = carto::PyString_FromStdString( *it );
     if (PyList_SetItem(sipRes, i, extension_py) < 0)
     {
       Py_DECREF(sipRes);

@@ -2,14 +2,18 @@
 %MappedType std::string
 {
 %TypeHeaderCode
-#include <string>
+#include <pyaims/object/numconv.h>
 %End
 
 %ConvertToTypeCode
   // Allow a Python string whenever a std::string is expected.
 
   if (sipIsErr == NULL)
+#if PY_VERSION_HEX >= 0x03000000
+    return PyUnicode_Check( sipPy );
+#else
     return( PyString_Check( sipPy ) || PyUnicode_Check( sipPy ) );
+#endif
 
   if( sipPy == Py_None )
   {
@@ -18,14 +22,20 @@
     return 1;
   }
 
+#if PY_VERSION_HEX < 0x03000000
   if( PyString_Check( sipPy ) )
   {
     *sipCppPtr = new std::string(PyString_AS_STRING(sipPy));
 
     return 1;
   }
+#endif
   if( PyUnicode_Check( sipPy ) )
   {
+    int res = 1;
+    *sipCppPtr = carto::PyString_ToStdString( sipPy );
+
+/*
     PyObject *sysmod = 0;
     PyObject *codmod = 0;
     PyObject *cod = 0;
@@ -75,13 +85,6 @@
         std::cerr << "cannot get encoded string\n";
         throw std::runtime_error( "cannot get encoded string" );
       }
-      /*
-      if( !PyString_Check( str ) )
-        std::cerr << "encoder output is not a string\n";
-      else
-        std::cout << "encoded string: " << PyString_AS_STRING( str )
-          << std::endl;
-      */
 
       *sipCppPtr = new std::string( PyString_AS_STRING( str ) );
     }
@@ -112,6 +115,8 @@
     {
       Py_DECREF( defencmeth );
     }
+*/
+
     return res;
   }
 
@@ -122,9 +127,12 @@
 %ConvertFromTypeCode
   // std::string -> PyObject
   if( !sipCpp )
-    return PyString_FromString( "" );
+  {
+    std::string s;
+    return carto::PyString_FromStdString( &s );
+  }
 
-  return PyString_FromString( sipCpp->c_str() );
+  return carto::PyString_FromStdString( sipCpp );
 %End
 };
 

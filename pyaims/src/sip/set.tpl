@@ -246,7 +246,11 @@ public:
   const char    *s2 = s.c_str();
   if( s2 == 0 )
     s2 = "";
+#if PY_VERSION_HEX >= 0x03000000
+  sipRes = PyUnicode_FromString(s2);
+#else
   sipRes = PyString_FromString(s2);
+#endif
 %#else%
   std::ostringstream  ss;
   ss << "[ ";
@@ -260,7 +264,15 @@ public:
     po = %Template1pyFromC%(%Template1address%(*is));
     str = PyObject_Str( po );
     if( str )
+    {
+#if PY_VERSION_HEX >= 0x03000000
+      PyObject *enc = PyUnicode_EncodeLocale( str, 0 );
+      ss << PyBytes_AsString( enc );
+      Py_DECREF( enc );
+#else
       ss << PyString_AsString( str );
+#endif
+    }
     else
       ss << "<object not printable>";
     if( i < n-1 )
@@ -273,7 +285,11 @@ public:
   const char    *s2 = s.c_str();
   if( s2 == 0 )
     s2 = "";
+#if PY_VERSION_HEX >= 0x03000000
+  sipRes = PyUnicode_FromString(s2);
+#else
   sipRes = PyString_FromString(s2);
+#endif
 %#endif%
 %End
 

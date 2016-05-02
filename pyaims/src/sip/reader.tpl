@@ -105,10 +105,18 @@ namespace carto
       p = PyList_New( 0 );
       pymap[i->first] = p;
       ipm = pymap.find(i->first);
+#if PY_VERSION_HEX >= 0x03000000
+      PyDict_SetItem( sipRes, PyUnicode_FromString( i->first.c_str() ), p );
+#else
       PyDict_SetItem( sipRes, PyString_FromString( i->first.c_str() ), p );
+#endif
     }
     p = ipm->second;
+#if PY_VERSION_HEX >= 0x03000000
+    PyList_Append( p, PyUnicode_FromString( i->second.c_str() ) );
+#else
     PyList_Append( p, PyString_FromString( i->second.c_str() ) );
+#endif
   }
 %End
 
@@ -129,10 +137,18 @@ namespace carto
       p = PyList_New( 0 );
       pymap[i->first] = p;
       ipm = pymap.find(i->first);
+#if PY_VERSION_HEX >= 0x03000000
+      PyDict_SetItem( sipRes, PyUnicode_FromString( i->first.c_str() ), p );
+#else
       PyDict_SetItem( sipRes, PyString_FromString( i->first.c_str() ), p );
+#endif
     }
     p = ipm->second;
+#if PY_VERSION_HEX >= 0x03000000
+    PyList_Append( p, PyUnicode_FromString( i->second.c_str() ) );
+#else
     PyList_Append( p, PyString_FromString( i->second.c_str() ) );
+#endif
   }
 %End
 

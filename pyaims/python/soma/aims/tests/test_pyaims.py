@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import unittest
 import doctest
 import urllib
@@ -20,7 +22,8 @@ def setup_doctest(test):
         os.mkdir(tests_dir)
     os.chdir(tests_dir)
     if not os.path.exists("demo_data.zip"):
-        print "Download ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip to ", tests_dir
+        print("Download ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip "
+              "to ", tests_dir)
         urllib.urlretrieve(
             "ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip",
             "demo_data.zip")
@@ -38,8 +41,12 @@ def teardown_doctest(test):
 
 def test_suite():
     suite = unittest.TestSuite()
+    if sys.version_info[0] >= 3:
+        tutorial_file = "pyaims_tutorial_py3.rst"
+    else:
+        tutorial_file = "pyaims_tutorial.rst"
     doctest_suite = unittest.TestSuite(
-        doctest.DocFileSuite("pyaims_tutorial.rst",
+        doctest.DocFileSuite(tutorial_file,
                              globs={'curdir': os.path.abspath(os.curdir)},
                              setUp=setup_doctest,
                              tearDown=teardown_doctest,

@@ -107,7 +107,11 @@ The header contains all meta-data.
   unsigned i = 0;
 
   for( it=sipCpp->begin(); it!=et; ++it, ++i )
+#if PY_VERSION_HEX >= 0x03000000
+    if( PyList_SetItem( sipRes, i, PyLong_FromLong( it->first ) ) < 0 )
+#else
     if( PyList_SetItem( sipRes, i, PyInt_FromLong( it->first ) ) < 0 )
+#endif
       {
         Py_DECREF(sipRes);
         sipIsErr = 1;

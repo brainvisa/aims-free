@@ -34,6 +34,7 @@
 #ifndef PYAIMS_VECTOR_NUMCONV_H
 #define PYAIMS_VECTOR_NUMCONV_H
 
+#include <string>
 #include <stdint.h>
 #include <Python.h>
 
@@ -41,6 +42,102 @@ namespace carto
 {
 
   uint32_t uint32_FromPy( PyObject *pyobj );
+
+
+  inline PyObject* PyaimsInt_FromLong( long x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    return PyLong_FromLong( x );
+#else
+    return PyInt_FromLong( x );
+#endif
+  }
+
+
+  inline int PyaimsInt_AsLong( PyObject *x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    return int( PyLong_AsLong( x ) );
+#else
+    return PyInt_AsLong( x );
+#endif
+  }
+
+
+  inline PyObject*
+  PyString_FromStdString( const std::string * x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    return PyUnicode_FromString( x->c_str() );
+#else
+    return PyString_FromString( x->c_str() );
+#endif
+  }
+
+
+  inline PyObject*
+  PyString_FromStdString( const std::string & x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    return PyUnicode_FromString( x.c_str() );
+#else
+    return PyString_FromString( x.c_str() );
+#endif
+  }
+
+
+  inline std::string *
+  PyString_ToStdString( PyObject * x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyObject *enc = PyUnicode_EncodeLocale( x, 0 );
+    std::string *s = new std::string( PyBytes_AsString( enc ) );
+    Py_DECREF( enc );
+    return s;
+#else
+    if( PyString_Check( x ) )
+      return new std::string( PyString_AsString(x) );
+    else
+    {
+      PyObject *enc = PyUnicode_AsEncodedString( x, "utf-8", 0 );
+      std::string *s = new std::string( PyString_AsString( enc ) );
+      Py_DECREF( enc );
+      return s;
+    }
+#endif
+  }
+
+
+  inline std::string
+  PyString_AsStdString( PyObject * x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyObject *enc = PyUnicode_EncodeLocale( x, 0 );
+    std::string s = std::string( PyBytes_AsString( enc ) );
+    Py_DECREF( enc );
+    return s;
+#else
+    if( PyString_Check( x ) )
+      return std::string( PyString_AsString(x) );
+    else
+    {
+      PyObject *enc = PyUnicode_AsEncodedString( x, "utf-8", 0 );
+      std::string s = std::string( PyString_AsString( enc ) );
+      Py_DECREF( enc );
+      return s;
+    }
+#endif
+  }
+
+
+  inline bool PyStdString_Check( PyObject *x )
+  {
+  #if PY_VERSION_HEX >= 0x03000000
+    return PyUnicode_Check( x );
+  #else
+    return PyString_Check( x ) || PyUnicode_Check( x );
+  #endif
+  }
 
 }
 
