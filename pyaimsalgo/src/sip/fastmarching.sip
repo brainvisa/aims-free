@@ -194,8 +194,13 @@ labels: tuple of tuples
   for( i=0; i<n; ++i )
   {
     PyObject *item = PyTuple_New( 2 );
+#if PY_VERSION_HEX >= 0x03000000
+    PyTuple_SetItem( item, 0, PyLong_FromLong( mil[i].first ) );
+    PyTuple_SetItem( item, 1, PyLong_FromLong( mil[i].second ) );
+#else
     PyTuple_SetItem( item, 0, PyInt_FromLong( mil[i].first ) );
     PyTuple_SetItem( item, 1, PyInt_FromLong( mil[i].second ) );
+#endif
     PyTuple_SetItem( sipRes, i, item );
   }
 %End
@@ -390,8 +395,13 @@ labels: tuple of tuples
   for( i=0; i<n; ++i )
   {
     PyObject *item = PyTuple_New( 2 );
+#if PY_VERSION_HEX >= 0x03000000
+    PyTuple_SetItem( item, 0, PyLong_FromLong( mil[i].first ) );
+    PyTuple_SetItem( item, 1, PyLong_FromLong( mil[i].second ) );
+#else
     PyTuple_SetItem( item, 0, PyInt_FromLong( mil[i].first ) );
     PyTuple_SetItem( item, 1, PyInt_FromLong( mil[i].second ) );
+#endif
     PyTuple_SetItem( sipRes, i, item );
   }
 %End

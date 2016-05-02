@@ -35,30 +35,34 @@ class Moment_%Template1typecode%
   typedef std::vector<double> vector_DOUBLE;
   #endif
 %End
-  
+
+%TypeCode
+#include <pyaims/object/numconv.h>
+%End
+
   public:
-  
+
     enum Operation
     {
       mSub = -1,
       mAdd = 1
     };
-  
+
     enum MomentId
     {
       m000 = 0,
-    
+
       m100 = 0,
       m010 = 1,
       m001 = 2,
-    
+
       m200 = 0,
       m020 = 1,
       m002 = 2,
       m110 = 3,
       m101 = 4,
       m011 = 5,
-    
+
       m300 = 0,
       m030 = 1,
       m003 = 2,
@@ -70,7 +74,7 @@ class Moment_%Template1typecode%
       m012 = 8,
       m111 = 9
     };
-    
+
     Moment_%Template1typecode%();
     Moment_%Template1typecode%( const Moment_%Template1typecode% & /Transfer/ );
     virtual ~Moment_%Template1typecode%();
@@ -112,15 +116,11 @@ class Moment_%Template1typecode%
       {
         std::ostringstream ss;
         std::string stmp;
-        const char *s;
 
         ss << *sipCpp << std::endl;
         stmp = ss.str();
-        s = stmp.c_str();
-        if( s == 0 )
-          s = "";
 
-        sipRes = PyString_FromString(s);
+        sipRes = carto::PyString_FromStdString(stmp);
       }
       catch( std::exception & e )
       {
@@ -197,15 +197,11 @@ class MomentInvariant_%Template1typecode%
       {
         std::ostringstream ss;
         std::string stmp;
-        const char *s;
 
-		ss << *sipCpp << std::endl;
-		stmp = ss.str();
-        s = stmp.c_str();
-        if( s == 0 )
-          s = "";
-        
-		sipRes = PyString_FromString(s);
+        ss << *sipCpp << std::endl;
+        stmp = ss.str();
+
+        sipRes = carto::PyString_FromStdString(stmp);
       }
       catch( std::exception & e )
       {
