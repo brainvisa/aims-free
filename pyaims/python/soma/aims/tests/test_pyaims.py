@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import unittest
 import doctest
 import urllib
@@ -20,7 +22,8 @@ def setup_doctest(test):
         os.mkdir(tests_dir)
     os.chdir(tests_dir)
     if not os.path.exists("demo_data.zip"):
-        print "Download ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip to ", tests_dir
+        print("Download ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip "
+              "to ", tests_dir)
         urllib.urlretrieve(
             "ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip",
             "demo_data.zip")

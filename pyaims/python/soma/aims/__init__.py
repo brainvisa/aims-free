@@ -141,7 +141,9 @@ except:
     pass  # probably cannot import scipy.io
 
 if sys.version_info[0] >= 3:
+    import functools
     unicode = str
+    basestring = str
 
 
 # typedefs
@@ -450,12 +452,21 @@ class VecIter:
     def __iter__(self):
         return self
 
-    def next(self):
-        if self._index >= len(self._vector):
-            raise StopIteration('iterator outside bounds')
-        val = self._vector[self._index]
-        self._index += 1
-        return val
+    if sys.version_info[0] >= 3:
+        def __next__(self):
+            if self._index >= len(self._vector):
+                raise StopIteration('iterator outside bounds')
+            val = self._vector[self._index]
+            self._index += 1
+            return val
+
+    else:
+        def next(self):
+            if self._index >= len(self._vector):
+                raise StopIteration('iterator outside bounds')
+            val = self._vector[self._index]
+            self._index += 1
+            return val
 
 # Iterator (doesn't work when implemented in SIP so far)
 
@@ -472,8 +483,12 @@ def objiter(self):
     return self._get().__iter__()
 
 
-def objnext(self):
-    return self._get().next()
+if sys.version_info[0] >= 3:
+    def objnext(self):
+        return self._get().__next__()
+else:
+    def objnext(self):
+        return self._get().next()
 
 
 def objiteritems(self):
@@ -485,12 +500,21 @@ def objiteritems(self):
         def __iter__(self):
             return self
 
-        def next(self):
-            if not self.iterator.isValid():
-                raise StopIteration("iterator outside bounds")
-            res = (self.iterator.key(), self.iterator.currentValue())
-            self.iterator.next()
-            return res
+        if sys.version_info[0] >= 3:
+            def __next__(self):
+                if not self.iterator.isValid():
+                    raise StopIteration("iterator outside bounds")
+                res = (self.iterator.key(), self.iterator.currentValue())
+                self.iterator.__next__()
+                return res
+        else:
+            def next(self):
+                if not self.iterator.isValid():
+                    raise StopIteration("iterator outside bounds")
+                res = (self.iterator.key(), self.iterator.currentValue())
+                self.iterator.next()
+                return res
+
     return iterator(self.objectIterator())
 
 
@@ -503,12 +527,21 @@ def objitervalues(self):
         def __iter__(self):
             return self
 
-        def next(self):
-            if not self.iterator.isValid():
-                raise StopIteration("iterator outside bounds")
-            res = self.iterator.currentValue()
-            self.iterator.next()
-            return res
+        if sys.version_info[0] >= 3:
+            def __next__(self):
+                if not self.iterator.isValid():
+                    raise StopIteration("iterator outside bounds")
+                res = self.iterator.currentValue()
+                self.iterator.__next__()
+                return res
+        else:
+            def next(self):
+                if not self.iterator.isValid():
+                    raise StopIteration("iterator outside bounds")
+                res = self.iterator.currentValue()
+                self.iterator.next()
+                return res
+
     return iterator(self.objectIterator())
 
 
@@ -523,11 +556,18 @@ class BckIter:
     def __iter__(self):
         return self
 
-    def next(self):
-        if self._iter is None:
-            self._iter = iter(self._bck.keys())
-        elem = self._iter.next()
-        return self._bck[elem]
+    if sys.version_info[0] >= 3:
+        def __next__(self):
+            if self._iter is None:
+                self._iter = iter(self._bck.keys())
+            elem = self._iter.__next__()
+            return self._bck[elem]
+    else:
+        def next(self):
+            if self._iter is None:
+                self._iter = iter(self._bck.keys())
+            elem = self._iter.next()
+            return self._bck[elem]
 
 
 class BckIterItem:
@@ -541,11 +581,18 @@ class BckIterItem:
     def __iter__(self):
         return self
 
-    def next(self):
-        if self._iter is None:
-            self._iter = iter(self._bck.keys())
-        elem = self._iter.next()
-        return elem, self._bck[elem]
+    if sys.version_info[0] >= 3:
+        def __next__(self):
+            if self._iter is None:
+                self._iter = iter(self._bck.keys())
+            elem = self._iter.__next__()
+            return elem, self._bck[elem]
+    else:
+        def next(self):
+            if self._iter is None:
+                self._iter = iter(self._bck.keys())
+            elem = self._iter.next()
+            return elem, self._bck[elem]
 
 # automatic rc_ptr dereferencing
 
@@ -650,16 +697,30 @@ def __setitem_vec__(self, s, val):
         return self.__oldsetitem__(s, val)
 
 
-def __operator_overload__(op, self, other):
-    try:
-        return op(self, other)
-    except TypeError:
-        # this excaption handling is here to follow the behaviour of normal
-        # operators: if a.__add__(b) does not support the operand type of b,
-        # it should return NotImplemented, and should not raise an exception.
-        # In that case, python can call b.__radd__(a), which it doesn't do if
-        # an exception is raised.
-        return NotImplemented
+if sys.version_info[0] >= 3:
+    def __operator_overload__(self, op, other):
+        try:
+            return op(self, other)
+        except TypeError:
+            # this exception handling is here to follow the behaviour of normal
+            # operators: if a.__add__(b) does not support the operand type of
+            # b, it should return NotImplemented, and should not raise an
+            # exception. In that case, python can call b.__radd__(a), which it
+            # doesn't do if an exception is raised.
+            return NotImplemented
+
+else:
+    def __operator_overload__(op, self, other):
+        try:
+            return op(self, other)
+        except TypeError:
+            # this exception handling is here to follow the behaviour of normal
+            # operators: if a.__add__(b) does not support the operand type of
+            # b, it should return NotImplemented, and should not raise an
+            # exception. In that case, python can call b.__radd__(a), which it
+            # doesn't do if an exception is raised.
+            return NotImplemented
+
 
 
 def __Volume_astype__(self, dtype, copy=False):
@@ -706,6 +767,9 @@ def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
     for x, y in classes:
         try:
+            if not hasattr(y, '__name__'):
+                # not a named class
+                continue
             if y.__name__.startswith('rc_ptr_') \
                 or y.__name__.startswith('weak_shared_ptr_') \
                     or y.__name__.startswith('weak_ptr_'):
@@ -733,26 +797,40 @@ def __fixsipclasses__(classes):
                     add = getattr(aimssip, '__%s_%s__' % (op, y.__name__),
                                   None)
                     if add is not None:
-                        setattr(y, '__%s__' % op,
+                        if sys.version_info[0] >= 3:
+                            setattr(
+                                y, '__%s__' % op, functools.partialmethod(
+                                    __fixsipclasses__.__operator_overload__,
+                                    add))
+                        else:
+                            setattr(
+                                y, '__%s__' % op,
                                 types.MethodType(
                                     partial(
                                       __fixsipclasses__.__operator_overload__,
                                         add),
                                     None, y))
-                y.astype = types.MethodType(
-                    __fixsipclasses__.__Volume_astype__, None, y)
+                if sys.version_info[0] >= 3:
+                    y.astype = __fixsipclasses__.__Volume_astype__
+                else:
+                    y.astype = types.MethodType(
+                        __fixsipclasses__.__Volume_astype__, None, y)
             else:
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
                 if hasattr(y, '__objnext__'):
-                    y.next = __fixsipclasses__.newnext
+                    if sys.version_info[0] >= 3:
+                        y.__next__ = __fixsipclasses__.newnext
+                    else:
+                        y.next = __fixsipclasses__.newnext
                 elif y.__name__.startswith('AimsVector_') \
                         or y.__name__.startswith('Texture_') \
                         or y.__name__ in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
                     y.__iterclass__ = VecIter
                     y.__iter__ = lambda self: self.__iterclass__(self)
-                if y.__name__.startswith('vector_') \
-                        or y.__name__.startswith('AimsVector_'):
+                if (y.__name__.startswith('vector_') \
+                        or y.__name__.startswith('AimsVector_')) \
+                        and 'iterator' not in y.__name__:
                     y.__oldgetitem__ = y.__getitem__
                     y.__getitem__ = __fixsipclasses__.__getitem_vec__
                     y.__oldsetitem__ = y.__setitem__
@@ -777,7 +855,15 @@ def __fixsipclasses__(classes):
                         if sys.version_info[0] >= 3:
                             y.Bucket.items \
                                 = lambda self: self.__iteritemclass__(self)
-        except:
+            # fix python3 iterators
+            if sys.version_info[0] >= 3 and hasattr(y, 'next') \
+                    and not hasattr(y, '__next__'):
+                # cannot just assign y.__next__ = y.next
+                # because SIP functions seem not to be copied correctly.
+                y.__next__ = lambda self: self.next()
+                #del y.next
+        except Exception as e:
+            print('warning: exception during classes patching:', e, ' for:', y)
             pass
 
 __fixsipclasses__.newiter = newiter
@@ -805,7 +891,10 @@ del __getitem_vec__, __setitem_vec__, __operator_overload__, __Volume_astype__
 __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
 Object.__iter__ = __fixsipclasses__.objiter
-Object.next = __fixsipclasses__.objnext
+if sys.version_info[0] >= 3:
+    Object.__next__ = __fixsipclasses__.objnext
+else:
+    Object.next = __fixsipclasses__.objnext
 Object.__delitem__ = __fixsipclasses__.proxydelitem
 Object._getAttributeNames = __fixsipclasses__.getAttributeNames
 
