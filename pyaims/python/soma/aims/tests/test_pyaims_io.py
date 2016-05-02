@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 import tempfile
 import os
 import sys
@@ -17,8 +19,8 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def compare_images(self, vol, vol2, vol1_name, vol2_name, thresh=1e-6):
-        #print 'comp vol, sizes:', vol.getSize(), vol2.getSize()
-        #print '    vsizes:', vol.getVoxelSize(), vol2.getVoxelSize()
+        #print('comp vol, sizes:', vol.getSize(), vol2.getSize())
+        #print('    vsizes:', vol.getVoxelSize(), vol2.getVoxelSize())
         msg = 'comparing %s and %s' % (vol1_name, vol2_name)
         self.assertEqual(vol.getSize(), vol2.getSize(),
                          msg + ': %s != %s'
@@ -42,7 +44,7 @@ class TestPyaimsIO(unittest.TestCase):
                     if fpath in fnames:
                         failing.append((fd, fpath))
         if self.verbose and failing:
-            print '    ! remaining open files:', failing
+            print('    ! remaining open files:', failing)
         return failing
 
 
@@ -69,7 +71,7 @@ class TestPyaimsIO(unittest.TestCase):
         dtype = aims.typeCode(np.asarray(vol).dtype)
 
         if self.verbose:
-            print 'testing type: %s, format: %s' % (dtype, format)
+            print('testing type: %s, format: %s' % (dtype, format))
         # write volume
         fname = os.path.join(
             self.work_dir, 'vol_%s%s' % (dtype, format))
@@ -99,7 +101,7 @@ class TestPyaimsIO(unittest.TestCase):
 
         if format in partial_read:
             if self.verbose:
-                print '    testing partial reading:', format
+                print('    testing partial reading:', format)
             vol3 = aims.read(fname + '?ox=2&&sx=7&&oy=3&&sy=5&&oz=4&&sz=6')
             self.assertEqual(vol3.getSize(), (7, 5, 6, 1))
             vol4 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
@@ -107,7 +109,7 @@ class TestPyaimsIO(unittest.TestCase):
 
         if format in partial_write:
             if self.verbose:
-                print '    testing partial writing:', format
+                print('    testing partial writing:', format)
             vol2 = aims.VolumeView(vol, (3, 3, 3, 0), (5, 6, 4, 1))
             aims.write(vol2, fname + '?partial_writing=1&ox=2&&oy=4&&oz=5')
             vol3 = aims.read(fname)

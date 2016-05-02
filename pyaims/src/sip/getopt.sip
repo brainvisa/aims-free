@@ -53,36 +53,54 @@ namespace aims
 // Convert a Python argv list to a conventional C argc count and argv array.
 static char **pyArgvToC(PyObject *argvlist,int *argcp)
 {
-	int argc;
-	char **argv;
+  int argc;
+  char **argv;
 
-	argc = PyList_Size(argvlist);
+  argc = PyList_Size(argvlist);
 
-	// Allocate space for two copies of the argument pointers, plus the
-	// terminating NULL.
-	if ((argv = (char **)sipMalloc(2 * (argc + 1) * sizeof (char *))) == NULL)
-		return NULL;
+  // Allocate space for two copies of the argument pointers, plus the
+  // terminating NULL.
+  if ((argv = (char **)sipMalloc(2 * (argc + 1) * sizeof (char *))) == NULL)
+          return NULL;
 
-	// Convert the list.
-	for (int a = 0; a < argc; ++a)
-	{
-		char *arg;
+  // Convert the list.
+  for (int a = 0; a < argc; ++a)
+  {
+    char *arg;
 
-		// Get the argument and allocate memory for it.
-		if ((arg = PyString_AsString(PyList_GetItem(argvlist,a))) == NULL ||
-		    (argv[a] = (char *)sipMalloc(strlen(arg) + 1)) == NULL)
-			return NULL;
+    // Get the argument and allocate memory for it.
+    PyObject *item = PyList_GetItem(argvlist,a);
 
-		// Copy the argument and save a pointer to it.
-		strcpy(argv[a],arg);
-		argv[a + argc + 1] = argv[a];
-	}
+#if PY_VERSION_HEX >= 0x03000000
+    PyObject *enc = PyUnicode_EncodeLocale( item, 0 );
+    if( !enc )
+      return 0;
+    arg = PyBytes_AsString( enc );
+    if( !arg ||
+        ( argv[a] = (char *) sipMalloc(strlen(arg) + 1)) == NULL )
+    {
+      Py_DECREF( enc );
+      return 0;
+    }
+    // Copy the argument and save a pointer to it.
+    strcpy( argv[a], arg );
+    Py_DECREF( enc );
+#else
+    if ((arg = PyString_AsString( item )) == NULL ||
+        (argv[a] = (char *)sipMalloc(strlen(arg) + 1)) == NULL)
+      return NULL;
 
-	argv[argc + argc + 1] = argv[argc] = NULL;
+    // Copy the argument and save a pointer to it.
+    strcpy(argv[a],arg);
+#endif
+    argv[a + argc + 1] = argv[a];
+  }
 
-	*argcp = argc;
+  argv[argc + argc + 1] = argv[argc] = NULL;
 
-	return argv;
+  *argcp = argc;
+
+  return argv;
 }
 
 

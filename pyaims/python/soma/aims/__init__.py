@@ -97,6 +97,8 @@ import collections
 import types
 import sip
 import os
+import six
+import sys
 
 # check for share dir, and set the BRAINVISA_SHARE environment var if it is not
 # already set
@@ -137,6 +139,10 @@ try:
     from soma.aims.spmnormalizationreader import *
 except:
     pass  # probably cannot import scipy.io
+
+if sys.version_info[0] >= 3:
+    unicode = str
+
 
 # typedefs
 
@@ -298,7 +304,7 @@ class Reader(object):
             otype = f.objectType()
             dtype = f.dataType()
             otype2 = self._typemap.get(otype, otype)
-            if isinstance(otype2, bytes):
+            if isinstance(otype2, (bytes, str)):
                 finaltype = otype2 + '_' + dtype
                 otype = otype2
             else:
@@ -758,6 +764,9 @@ def __fixsipclasses__(classes):
                     y.__iter__ = lambda self: self.__iterclass__(self)
                     y.iteritems = lambda self: self.__iteritemclass__(
                         self)
+                    if sys.version_info[0] >= 3:
+                        y.items = lambda self: self.__iteritemclass__(
+                            self)
                     if y.__name__.startswith('BucketMap_'):
                         y.Bucket.__iterclass__ = BckIter
                         y.Bucket.__iteritemclass__ = BckIterItem
@@ -765,6 +774,9 @@ def __fixsipclasses__(classes):
                             = lambda self: self.__iterclass__(self)
                         y.Bucket.iteritems \
                             = lambda self: self.__iteritemclass__(self)
+                        if sys.version_info[0] >= 3:
+                            y.Bucket.items \
+                                = lambda self: self.__iteritemclass__(self)
         except:
             pass
 
@@ -790,7 +802,7 @@ del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
 del __getitem_vec__, __setitem_vec__, __operator_overload__, __Volume_astype__
 
-__fixsipclasses__(globals().items() + carto.__dict__.items())
+__fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
 Object.__iter__ = __fixsipclasses__.objiter
 Object.next = __fixsipclasses__.objnext
@@ -1102,7 +1114,7 @@ def genobj__update__(self, x):
     if not self.isDictionary():
         raise ValueError(
             'Generic object is not a dictionary-compatible object')
-    for x, y in x.iteritems():
+    for x, y in six.iteritems(x):
         self[x] = y
 
 
@@ -1130,6 +1142,8 @@ carto.GenericObject.__getattribute__ = genobj__getattribute__
 carto.GenericObject.update = genobj__update__
 carto.GenericObject.__iadd__ = genobj__iadd__
 carto.GenericObject.iteritems = objiteritems
+if sys.version_info[0] >= 3:
+    carto.GenericObject.items = objiteritems
 carto.GenericObject.itervalues = objitervalues
 carto.GenericObject.iterkeys = carto.GenericObject.__iter__
 Object.__iadd__ = obj__iadd__
@@ -1142,7 +1156,6 @@ del obj__iadd__
 # trap every access to Point3df's instance methods to check for the
 # weakref on the surface-object
 # KNOWN BUG: using */+- in python skips __getattribute__, thus may sig11 :(
-from new import instancemethod
 import weakref
 Point3df.__refParent = weakref.ref(Point3df)
 Point3df.__oldgetattr__ = Point3df.__getattribute__
@@ -1915,7 +1928,7 @@ to the ``Volume`` constructor.
 In all cases the voxels memory block is shared.
 '''
 
-for x, y in locals().items():
+for x, y in list(locals().items()):
     if x.startswith('Volume_'):
         y.__doc__ = _volumedoc
     elif x.startswith('AimsData_'):

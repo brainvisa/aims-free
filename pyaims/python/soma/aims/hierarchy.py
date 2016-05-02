@@ -29,7 +29,6 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
-import exceptions
 import numpy
 import sys
 aims = sys.modules['soma.aims']
@@ -48,7 +47,7 @@ def _cache_tree(self, tree, parents):
         try:
             name = t['name']
             self._cache[name] = p
-        except exceptions.KeyError:
+        except KeyError:
             pass
         self._cache_tree(t, p)
 
@@ -56,7 +55,7 @@ def _cache_tree(self, tree, parents):
 def find_color(self, name, default_color=KeyError):
     try:
         stack = self.find(name)
-    except exceptions.KeyError:
+    except KeyError:
         if default_color is KeyError:
             raise
         return default_color
@@ -68,7 +67,7 @@ def find_color(self, name, default_color=KeyError):
             color = numpy.array(t['color'], dtype='f')
             color /= 255.
             return color
-        except exceptions.KeyError:
+        except KeyError:
             continue
     if default_color is KeyError:
         raise KeyError('label %s has no color in the nomenclature' % name)
@@ -78,12 +77,12 @@ def find_color(self, name, default_color=KeyError):
 def find(self, name):
     try:
         c = self._cache
-    except exceptions.AttributeError:
+    except AttributeError:
         self._init_cache()
         return self.find(name)
     try:
         return c[name]
-    except exceptions.KeyError:
+    except KeyError:
         return None
 
 

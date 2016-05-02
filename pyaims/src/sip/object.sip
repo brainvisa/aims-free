@@ -533,7 +533,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     try
       {
         void    *obj;
-#if PY_VERSION_HEX >= 0x03000000
+#if PY_VERSION_HEX < 0x03000000
         if( PyInt_Check( a1 ) )
           {
             sipCpp->setProperty( *a0, 
