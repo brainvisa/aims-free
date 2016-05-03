@@ -26,6 +26,7 @@ namespace carto
 
 %TypeCode
 #include <cartobase/smart/rcptrtrick.h>
+#include <pyaims/object/numconv.h>
 
 #ifndef PYAIMS_RCPTR_GenericObject_DEFINED
 #define PYAIMS_RCPTR_GenericObject_DEFINED
@@ -224,6 +225,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 
 %TypeCode
 #include <pyaims/object/rcptrconv.h>
+#include <pyaims/object/numconv.h>
 %End
 
 %ConvertToSubClassCode
