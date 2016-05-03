@@ -235,7 +235,8 @@ bool Finder::check( const string& filename )
 
   // try using DataSourceInfo first (new system 2005)
   #ifdef AIMS_DEBUG_IO
-  cout << "FINDER:: trying check through DataSourceInfoLoader... " << endl;
+  cout << "FINDER:: trying check " << filename
+    << " through DataSourceInfoLoader... " << endl;
   #endif
   Object h;
   string somaio_ext;
@@ -254,39 +255,47 @@ bool Finder::check( const string& filename )
   }
   bool dsok = !h.isNone();
   if( dsok )
-    {
-      _state = Ok;
+  {
+    _state = Ok;
 
-      Carto2AimsHeaderTranslator	t;
-      t.translate( h );
+    Carto2AimsHeaderTranslator	t;
+    t.translate( h );
 
-      string	x;
-      h->getProperty( "object_type", x );
-      setObjectType( x );
-      x.clear();
-      h->getProperty( "data_type", x );
-      setDataType( x );
-      vector<string>	vt;
-      vt.push_back( x );
-      h->getProperty( "possible_data_types", vt );
-      setPossibleDataTypes( vt );
-      x.clear();
-      h->getProperty( "file_type", x );
-      setFormat( x );
+    string	x;
+    h->getProperty( "object_type", x );
+    setObjectType( x );
+    x.clear();
+    h->getProperty( "data_type", x );
+    setDataType( x );
+    vector<string>	vt;
+    vt.push_back( x );
+    h->getProperty( "possible_data_types", vt );
+    setPossibleDataTypes( vt );
+    x.clear();
+    h->getProperty( "file_type", x );
+    setFormat( x );
 
-      PythonHeader	*ph = new PythonHeader;
-      ph->copyProperties( h );
-      setHeader( ph );
+    PythonHeader	*ph = new PythonHeader;
+    ph->copyProperties( h );
+    setHeader( ph );
 
-      #ifdef AIMS_DEBUG_IO
-      cout << "FINDER:: DataSourceInfo worked" << endl;
-      #endif
-//       if( filename.substr( filename.length() - 4, 4 ) != ".gii" )
-//         // bidouille to let the gifti reader work (it's both gifti and XML)
-//         return true;
-    }
+    #ifdef AIMS_DEBUG_IO
+    cout << "FINDER:: DataSourceInfo worked for " << filename
+      << " with extension: " << somaio_ext << endl;
+    #endif
+
+    /* Not returning yet, even if the file was identified by Soma-IO:
+        Some formats are more specialized in Aims (typically: GIFTI is XML,
+        XML is recognized by Soma-IO, but we actually want the GIFTI reader
+        in, Aims.
+
+        So we go on to check if a longer file extension is matching in the
+        ones registered in Aims, which could be "longer" and (euristically)
+        more appropriate.
+    */
+  }
   #ifdef AIMS_DEBUG_IO
-  cout << "FINDER:: DataSourceInfo didn't work, trying through Finder... " << endl;
+  cout << "FINDER:: for " << filename << ", trying through Finder... " << endl;
   #endif
 
   _errorcode = -1;
@@ -320,10 +329,21 @@ bool Finder::check( const string& filename )
     ext = filename.substr( dlen+pos+1, filename.length() - pos - 1 );
     iext = pd->extensions.find( ext );
   }
-  if( _state == Ok && ( iext == eext || ext.length() <= somaio_ext.length() ) )
+  if( iext != eext )
+  {
+#ifdef AIMS_DEBUG_IO
+    cout << "best extension: " << iext->first << endl;
+#endif
+    ext = iext->first;
+  }
+  if( _state == Ok && ( iext == eext
+      || iext->first.length() <= somaio_ext.length() ) )
   {
     // Soma-IO has recognized the format, and none in aims matches a longer
     // extension, so let's go with Soma-IO.
+#ifdef AIMS_DEBUG_IO
+    cout << "No better match in AIMS - taking Soma-IO format.\n";
+#endif
     return true;
   }
 
@@ -335,7 +355,7 @@ bool Finder::check( const string& filename )
       if( tried.find( *ie ) == notyet )
         {
 #ifdef AIMS_DEBUG_IO
-          cout << "FINDER:: trying " << *ie << "...\n";
+          cout << "FINDER:: trying " << *ie << " for " << filename << "...\n";
 #endif
           reader = finderFormat( *ie );
           if( reader )
