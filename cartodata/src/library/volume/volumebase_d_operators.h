@@ -96,27 +96,27 @@ namespace carto {
     {
       static bool all( const Volume<T> & vol )
       {
-        return all(vol);
+        return carto::all(vol);
       }
 
       static bool any( const Volume<T> & vol )
       {
-        return any(vol);
+        return carto::any(vol);
       }
 
       static T min( const Volume<T> & vol )
       {
-        return min(vol);
+        return carto::min(vol);
       }
 
       static T max( const Volume<T> & vol )
       {
-        return max(vol);
+        return carto::max(vol);
       }
 
       static T sum( const Volume<T> & vol )
       {
-        return sum(vol);
+        return carto::sum(vol);
       }
     };
   }
