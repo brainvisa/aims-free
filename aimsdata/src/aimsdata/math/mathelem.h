@@ -37,8 +37,9 @@
 #ifndef AIMS_MATH_MATHELEM_H
 #define AIMS_MATH_MATHELEM_H
 
-#include <cstdlib>
 #include <aims/config/aimsdata_config.h>
+#include <cartobase/type/converter.h>  // carto::min_limit<T>()
+#include <cstdlib>
 #include <cmath>
 #include <algorithm>
 #include <vector>
@@ -89,8 +90,8 @@ namespace aims
 //============================================================================
 namespace aims {
 
-  // helper function in anonymous namespace
-  namespace {
+  // helper function in private namespace
+  namespace internal {
     template <typename T>
     bool is_min( T a, T b )
     {
@@ -117,10 +118,10 @@ namespace aims {
   {
   public:
     template<typename Iterator>
-    static T max( Iterator b, Iterator e, T default_value = std::numeric_limits<T>::min() )
+    static T max( Iterator b, Iterator e, T default_value = carto::min_limit<T>() )
     {
       Iterator m;
-      m = std::max_element( b, e, is_min<T> );
+      m = std::max_element( b, e, internal::is_min<T> );
       if( m == e )
         return default_value;
       else
@@ -131,7 +132,7 @@ namespace aims {
     static T min( Iterator b, Iterator e, T default_value = std::numeric_limits<T>::max() )
     {
       Iterator m;
-      m = std::min_element( b, e, is_min<T> );
+      m = std::min_element( b, e, internal::is_min<T> );
       if( m == e )
         return default_value;
       else
