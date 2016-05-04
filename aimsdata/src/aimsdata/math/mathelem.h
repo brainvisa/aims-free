@@ -37,8 +37,9 @@
 #ifndef AIMS_MATH_MATHELEM_H
 #define AIMS_MATH_MATHELEM_H
 
-#include <cstdlib>
 #include <aims/config/aimsdata_config.h>
+#include <cartobase/type/converter.h>  // carto::min_limit<T>()
+#include <cstdlib>
 #include <cmath>
 #include <algorithm>
 #include <vector>
@@ -117,7 +118,7 @@ namespace aims {
   {
   public:
     template<typename Iterator>
-    static T max( Iterator b, Iterator e, T default_value = std::numeric_limits<T>::min() )
+    static T max( Iterator b, Iterator e, T default_value = carto::min_limit<T>() )
     {
       Iterator m;
       m = std::max_element( b, e, internal::is_min<T> );
