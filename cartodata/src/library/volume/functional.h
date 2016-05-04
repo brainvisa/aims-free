@@ -357,7 +357,8 @@ namespace volumeutil {
   {
 #if __cplusplus >= 201100
     typedef decltype( true ? std::declval<LEFT>() : std::declval<RIGHT>() )
-      result_type;
+      ref_result_type;
+    typedef typename std::remove_reference<ref_result_type>::type result_type;
 #else
     typedef typeof( true ? LEFT() : RIGHT() ) result_type;
 #endif
