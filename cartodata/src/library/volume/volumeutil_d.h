@@ -43,6 +43,7 @@
 #include <cartodata/volume/volumeref_d_instantiate.h>
 #include <cartobase/type/datatypetraits.h>
 #include <cartobase/exception/assert.h>
+#include <cartobase/type/converter.h>  // carto::min_limit<T>()
 #include <limits>
 
 /* bug in gcc 4.2, accumulate doesn't accept std::max<T> or std::min<T> as
@@ -342,6 +343,7 @@ namespace carto
     return res;
   }
 
+  
   template <typename T>
   T VolumeUtilBase<T, true>::min( const Volume<T> & o )
   {
@@ -353,7 +355,7 @@ namespace carto
   T VolumeUtilBase<T, true>::max( const Volume<T> & o )
   {
     return carto::VolumeUtil<T>::accumulate(
-              internal_max<T>, o, -std::numeric_limits<T>::max() );
+              internal_max<T>, o, min_limit<T>() );
   }
 
 
