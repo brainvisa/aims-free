@@ -63,7 +63,7 @@ namespace aims
 
     public:
       LabelSelector( QWidget* parent = 0, const char* name = 0, 
-                     bool modal=true, Qt::WFlags f=0 );
+                     bool modal=true, Qt::WindowFlags f=0 );
       virtual ~LabelSelector();
 
       void loadPreselection( const QString & );

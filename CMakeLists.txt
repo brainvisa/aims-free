@@ -32,6 +32,7 @@ if( DESIRED_QT_VERSION EQUAL 4 )
   find_package( Qt4 COMPONENTS QtCore QtGui QtSql )
 elseif( DESIRED_QT_VERSION EQUAL 5 )
   find_package( Qt5Widgets )
+  find_package( Qt5Sql )
 endif()
 find_package( QtVersion )
 

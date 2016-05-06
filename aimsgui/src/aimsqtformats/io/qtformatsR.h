@@ -207,7 +207,7 @@ namespace aims
     const QImage	& im = *imp;
     int			y, dx = data.dimX(), dy = data.dimY();
 
-    if( im.depth() == sizeof(T) && im.numColors() == 0 )
+    if( im.depth() == sizeof(T) && im.colorCount() == 0 )
       for( y=0; y<dy; ++y )
         memcpy( &data( 0, y, z, t ), im.scanLine( y ), dx * sizeof( T ) );
     else
