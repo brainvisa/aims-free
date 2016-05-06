@@ -37,8 +37,11 @@ endif( PYTHON_FOUND )
 
 if( @DESIRED_QT_VERSION@ EQUAL 3 )
   find_package( Qt3 )
-else()
+elseif( @DESIRED_QT_VERSION@ EQUAL 4 )
   find_package( Qt4 COMPONENTS QtCore QtGui )
+else()
+  find_package( Qt5Widgets )
+  find_package( Qt5Sql )
 endif()
 
 
