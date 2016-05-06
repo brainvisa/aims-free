@@ -213,8 +213,8 @@ void QtFormatsHeader::read()
   bool gray = im.allGray();
   if( gray )
     {
-      //cout << "gray image, numCol: " << im.numColors() << endl;
-      if( im.numColors() == 0 )
+      //cout << "gray image, numCol: " << im.colorCount() << endl;
+      if( im.colorCount() == 0 )
         switch( im.depth() )
           {
           case 1:
@@ -247,12 +247,12 @@ void QtFormatsHeader::read()
           }
       else
         {
-          if( im.numColors() <= 256 )
+          if( im.colorCount() <= 256 )
             {
               dt = DataTypeCode<byte>().dataType();
               pdt.push_back( DataTypeCode<uint8_t>().dataType() );
             }
-          if( im.numColors() <= 65536 )
+          if( im.colorCount() <= 65536 )
             {
               if( dt.empty() )
                 dt = DataTypeCode<uint16_t>().dataType();

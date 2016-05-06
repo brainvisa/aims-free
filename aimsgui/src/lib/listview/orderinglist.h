@@ -53,7 +53,7 @@ namespace aims
 
     public:
       QOrderingListWidget( QWidget* parent = 0, const char* name = 0, 
-                        Qt::WFlags f = 0 );
+                        Qt::WindowFlags f = 0 );
       virtual ~QOrderingListWidget();
 
       QListWidget *qListWidget();

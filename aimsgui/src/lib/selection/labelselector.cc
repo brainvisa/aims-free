@@ -53,6 +53,8 @@
 #include <QDragMoveEvent>
 #include <QTreeWidgetItemIterator>
 #include <QListWidget>
+#include <QMimeData>
+#include <QDrag>
 #include <graph/tree/treader.h>
 #include <cartobase/stream/sstream.h>
 #include <iostream>
@@ -463,7 +465,7 @@ struct LabelSelector::LabelSelector_private
 
 
 LabelSelector::LabelSelector( QWidget* parent, const char* name, bool modal, 
-			      Qt::WFlags f )
+			      Qt::WindowFlags f )
   : QDialog( parent, f ), d( new LabelSelector_private )
 {
   setWindowTitle( tr( "Labels selector" ) );
