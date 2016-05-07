@@ -85,10 +85,15 @@ def makeTemplate(
                         moc = 'moc'
                 else:
                     moc = 'moc'
-            l = subprocess.Popen([moc, '-v'], stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE).communicate()[
-                                   1].decode()
-            x = re.search('[0-9]+\.[0-9]+\.[0-9]+', l).group(0)
+            moc_out = subprocess.Popen(
+                [moc, '-v'], stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE).communicate()
+            l = moc_out[1].decode()
+            if l == '':
+                l = moc_out[0].decode() # moc 5
+                x = re.search('^.*moc ([0-9\.]+).*$', l).group(1)
+            else:
+                x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
             qv = [convert_string_to_int(k) for k in x.split('.')]
             qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
             cppcmd.append('-DQT_VERSION=' + hex(qver))

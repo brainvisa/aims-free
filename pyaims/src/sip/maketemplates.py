@@ -116,9 +116,15 @@ try:
                 moc = 'moc'
         else:
             moc = 'moc'
-    l = subprocess.Popen([moc, '-v'], stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE).communicate()[1].decode()
-    x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
+    moc_out = subprocess.Popen(
+        [moc, '-v'], stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE).communicate()
+    l = moc_out[1].decode()
+    if l == '':
+        l = moc_out[0].decode() # moc 5
+        x = re.search('^.*moc ([0-9\.]+).*$', l).group(1)
+    else:
+        x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
     qt_version = [convert_string_to_int(k) for k in x.split('.')]
 except Exception as e:
     if not options.listFilesOnly:
