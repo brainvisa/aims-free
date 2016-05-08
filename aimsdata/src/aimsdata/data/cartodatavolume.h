@@ -244,9 +244,7 @@ template<typename T>
 inline
 typename AimsData<T>::iterator AimsData<T>::begin()
 {
-  return _volume->refVolume().isNull() ?
-    &*_volume->begin() :
-    &*_volume->refVolume()->begin(); // pointer to the border
+  return &*_volume->begin();
 }
 
 
@@ -254,9 +252,7 @@ template<typename T>
 inline
 typename AimsData<T>::const_iterator AimsData<T>::begin() const
 {
-  return _volume->refVolume().isNull() ?
-    &*_volume->begin() :
-    &*_volume->refVolume()->begin(); // pointer to the border
+  return &*_volume->begin();
 }
 
 
@@ -264,14 +260,7 @@ template<typename T>
 inline
 typename AimsData<T>::iterator AimsData<T>::end()
 {
-  carto::Volume<T> *vol = _volume->refVolume().isNull() ?
-    _volume.get() : _volume->refVolume().get();
-#ifdef CARTO_USE_BLITZ
-  return &*vol->begin() + long(vol->getSizeX()) * vol->getSizeY()
-      * vol->getSizeZ() * vol->getSizeT();
-#else
   return &*_volume->end();
-#endif
 }
 
 
@@ -279,14 +268,7 @@ template<typename T>
 inline
 typename AimsData<T>::const_iterator AimsData<T>::end() const
 {
-  carto::Volume<T> *vol = _volume->refVolume().isNull() ?
-    _volume.get() : _volume->refVolume().get();
-#ifdef CARTO_USE_BLITZ
-  return &*vol->begin() + long(vol->getSizeX()) * vol->getSizeY()
-      * vol->getSizeZ() * vol->getSizeT();
-#else
   return &*_volume->end();
-#endif
 }
 
 
@@ -311,6 +293,7 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt, int borderw )
       _volume,
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ) ) );
+  _oFirstPoint = 0;
   d->header = new aims::PythonHeader( *_volume );
 }
 
@@ -329,6 +312,7 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt,
       _volume,
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ), al ) );
+  _oFirstPoint = 0;
   d->header = new aims::PythonHeader( *_volume );
 }
 
@@ -337,10 +321,18 @@ template < typename T >
 inline 
 AimsData<T>::AimsData( const AimsData<T>& other )
   : carto::RCObject(), aims::Border( other.dimX(), other.dimY(), 
-		  other.dimZ(), other.borderWidth() ), 
+                                     other.dimZ(), other.borderWidth() ),
     _volume( other._volume ), 
     d( new Private )
 {
+  _oFirstPoint = 0;
+  _oLine       = &_volume->at( 0, 1 ) - &_volume->at( 0 );
+  _oPointBetweenLine = &_volume->at( 0, 1 ) - &_volume->at( dimX() );
+  _oSlice      =  &_volume->at( 0, 0, 1 ) - &_volume->at( 0 );
+  _oLineBetweenSlice = &_volume->at( 0, 0, 1 ) - &_volume->at( 0, dimY() );
+  _oVolume     = &_volume->at( 0, 0, 0, 1 ) - &_volume->at( 0 );
+  _oSliceBetweenVolume = &_volume->at( 0, 0, 0, 1 )
+    - &_volume->at( 0, 0, dimZ() );
   d->header = new aims::PythonHeader( *_volume );
 }
 
@@ -361,6 +353,8 @@ AimsData<T>::AimsData( const AimsData<T>& other, int borderw )
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( other.dimX(), other.dimY(),
                                               other.dimZ(), other.dimT() ) ) );
+  _oFirstPoint = 0;
+
   long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
   for ( t = 0; t < tm; t++ )
     for ( z = 0; z < zm; z++ )
@@ -390,6 +384,14 @@ AimsData<T>::AimsData( carto::rc_ptr<carto::Volume<T> > vol )
     _volume( vol ), 
     d( new Private )
 {
+  _oFirstPoint = 0;
+  _oLine       = &_volume->at( 0, 1 ) - &_volume->at( 0 );
+  _oPointBetweenLine = &_volume->at( 0, 1 ) - &_volume->at( dimX() );
+  _oSlice      =  &_volume->at( 0, 0, 1 ) - &_volume->at( 0 );
+  _oLineBetweenSlice = &_volume->at( 0, 0, 1 ) - &_volume->at( 0, dimY() );
+  _oVolume     = &_volume->at( 0, 0, 0, 1 ) - &_volume->at( 0 );
+  _oSliceBetweenVolume = &_volume->at( 0, 0, 0, 1 )
+    - &_volume->at( 0, 0, dimZ() );
   d->header = new aims::PythonHeader( *_volume );
 }
 
@@ -406,6 +408,7 @@ AimsData<T> & AimsData<T>::operator = ( carto::rc_ptr<carto::Volume<T> > vol )
               vol->getSizeZ(), border );
   delete d->header;
   _volume = vol;
+  _oFirstPoint = 0;
   d->header = new aims::PythonHeader( *_volume );
 
   return *this;
@@ -423,6 +426,14 @@ AimsData<T>& AimsData<T>::operator = ( const AimsData<T>& other )
   delete d->header;
   _volume = other._volume;
   *d = *other.d;
+  _oFirstPoint = 0;
+  _oLine       = &_volume->at( 0, 1 ) - &_volume->at( 0 );
+  _oPointBetweenLine = &_volume->at( 0, 1 ) - &_volume->at( dimX() );
+  _oSlice      =  &_volume->at( 0, 0, 1 ) - &_volume->at( 0 );
+  _oLineBetweenSlice = &_volume->at( 0, 0, 1 ) - &_volume->at( 0, dimY() );
+  _oVolume     = &_volume->at( 0, 0, 0, 1 ) - &_volume->at( 0 );
+  _oSliceBetweenVolume = &_volume->at( 0, 0, 0, 1 )
+    - &_volume->at( 0, 0, dimZ() );
   d->header = new aims::PythonHeader( *_volume );
   return *this;
 }
@@ -982,32 +993,7 @@ template < typename T >
 inline
 T AimsData<T>::minimum() const 
 {
-  T mini;
-  const_iterator it = begin() + oFirstPoint();
-
-  mini = *it;
-  long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
-
-  for ( t = 0; t < tm; t++ )
-  {
-    for ( z = 0; z < zm; z++ )
-    {
-      for ( y = 0; y < ym; y++ )
-      {
-        for ( x = 0; x < xm; x++ )
-        {
-          if ( *it < mini )
-            mini = *it;
-          it++;
-        }
-        it += oPointBetweenLine();
-      }
-      it += oLineBetweenSlice();
-    }
-    it += oSliceBetweenVolume();
-  }
-
-  return mini;
+  return volume()->min();
 }
 
 
@@ -1015,32 +1001,7 @@ template < typename T >
 inline
 T AimsData<T>::maximum() const 
 {
-  T maxi;
-  const_iterator it = begin() + oFirstPoint();
-
-  maxi = *it;
-  long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
-
-  for ( t = 0; t < tm; t++ )
-  {
-    for ( z = 0; z < zm; z++ )
-    {
-      for ( y = 0; y < ym; y++ )
-      {
-        for ( x = 0; x < xm; x++ )
-        {
-          if ( *it > maxi )
-            maxi = *it;
-          it++;
-        }
-        it += oPointBetweenLine();
-      }
-      it += oLineBetweenSlice();
-    }
-    it += oSliceBetweenVolume();
-  }
-
-  return maxi;
+  return volume()->max();
 }
 
 
@@ -1071,7 +1032,7 @@ T AimsData<T>::minIndex( int* xx, int* yy, int* zz, int* tt ) const
             minzind = z;
             mintind = t;
           }
-          it++;        
+          it++;
         }
         it += oPointBetweenLine();
       }

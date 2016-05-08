@@ -1464,6 +1464,7 @@ def VolumeView(volume, position, size):
         volclass = type(volume.volume())
     elif volclass.__name__.startswith('rc_ptr_'):
         volclass = type(volume.get())
+        vol = volume
     else:
         raise TypeError('incompatible or wrong volume type: %s'
             % volclass.__name__)
