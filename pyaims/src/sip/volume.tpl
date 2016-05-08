@@ -84,6 +84,10 @@ Voxel sizes in mm (list of 4 floats)
 %End
 
     void fill( const %Template1% & value ) /ReleaseGIL/;
+    bool all() const;
+    bool any() const;
+    %Template1PyType% min() const;
+    %Template1PyType% max() const;
 
     rc_ptr_Volume_%Template1typecode% refVolume() const;
 %Docstring
