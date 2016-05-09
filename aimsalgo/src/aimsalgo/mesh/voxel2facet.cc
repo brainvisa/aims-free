@@ -137,7 +137,7 @@ void Mesher::getInterface( map< size_t, list< MapOfFacet > >& interface,
   int dimZ = thing.dimZ();
 
   ASSERT( thing.borderWidth() != 0 );
-  ASSERT( thing[ 0 ] == -1 );
+  ASSERT( thing[ -1 ] == -1 );
 
   AimsData<short>::const_iterator it;
   it = thing.begin() + thing.oFirstPoint();
