@@ -156,6 +156,9 @@ try:
     AimsTimeSurface_2 = AimsTimeSurface_2_VOID
     AimsTimeSurface_3 = AimsTimeSurface_3_VOID
     AimsTimeSurface_4 = AimsTimeSurface_4_VOID
+    rc_ptr_AimsTimeSurface_2 = rc_ptr_AimsTimeSurface_2_VOID
+    rc_ptr_AimsTimeSurface_3 = rc_ptr_AimsTimeSurface_3_VOID
+    rc_ptr_AimsTimeSurface_4 = rc_ptr_AimsTimeSurface_4_VOID
 except:
     pass  # no surface support
 
