@@ -366,7 +366,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 
     virtual bool isDictionary() const = 0;
 
-    SIP_PYTUPLE keys() const /AutoGen/;
+    SIP_PYTUPLE keys() const;
 %MethodCode
     carto::Object i;
     unsigned c = 0;
@@ -390,7 +390,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %End
 
 
-    SIP_PYTUPLE items() const /AutoGen/;
+    SIP_PYTUPLE items() const;
 %MethodCode
     carto::Object i;
     unsigned c = 0;
@@ -421,7 +421,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %End
 
 
-    SIP_PYTUPLE values() const /AutoGen/;
+    SIP_PYTUPLE values() const;
 %MethodCode
     carto::Object i;
     unsigned c = 0;
