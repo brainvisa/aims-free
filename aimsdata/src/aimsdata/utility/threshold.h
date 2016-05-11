@@ -39,6 +39,7 @@
 
 #include <iostream>
 #include <limits>
+#include <functional>
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/data/data.h>
@@ -168,6 +169,129 @@ AimsTexThreshold<T,U>::AimsTexThreshold( threshold_t type,T level,T level2,
 {
 }
 
+namespace internal
+{
+
+  template <typename LEFT, typename OP>
+  struct thresh1: public std::unary_function<LEFT, LEFT>
+  {
+    thresh1( LEFT threshold, LEFT background )
+      : std::unary_function<LEFT, LEFT>(), threshold( threshold ),
+        background( background )
+    {
+    }
+
+    LEFT operator() (const LEFT & x) const
+    {
+      return OP()( x, threshold ) ? x : background;
+    }
+
+    LEFT threshold;
+    LEFT background;
+  };
+
+
+  template <typename T>
+  struct between_with_bounds
+  {
+    bool operator() (const T & x, const T & y, const T & z) const
+    {
+      return x >= y && x <= z;
+    }
+  };
+
+
+  template <typename T>
+  struct between_with_upper_bound
+  {
+    bool operator() (const T & x, const T & y, const T & z) const
+    {
+      return x > y && x <= z;
+    }
+  };
+
+
+  template <typename T>
+  struct between_with_lower_bound
+  {
+    bool operator() (const T & x, const T & y, const T & z) const
+    {
+      return x >= y && x < z;
+    }
+  };
+
+
+  template <typename T>
+  struct between_without_bounds
+  {
+    bool operator() (const T & x, const T & y, const T & z) const
+    {
+      return x > y && x < z;
+    }
+  };
+
+
+  template <typename T>
+  struct outside_with_bounds
+  {
+    bool operator() (const T & x, const T & y, const T & z) const
+    {
+      return x <= y || x >= z;
+    }
+  };
+
+
+  template <typename T>
+  struct outside_with_upper_bound
+  {
+    bool operator() (const T & x, const T & y, const T & z) const
+    {
+      return x < y || x >= z;
+    }
+  };
+
+
+  template <typename T>
+  struct outside_with_lower_bound
+  {
+    bool operator() (const T & x, const T & y, const T & z) const
+    {
+      return x <= y || x > z;
+    }
+  };
+
+
+  template <typename T>
+  struct outside_without_bounds
+  {
+    bool operator() (const T & x, const T & y, const T & z) const
+    {
+      return x < y || x > z;
+    }
+  };
+
+
+  template <typename LEFT, typename OP>
+  struct thresh2: public std::unary_function<LEFT, LEFT>
+  {
+    thresh2( LEFT threshold1, LEFT threshold2, LEFT background )
+      : std::unary_function<LEFT, LEFT>(), threshold1( threshold1 ),
+        threshold2( threshold2), background( background )
+    {
+    }
+
+    LEFT operator() (const LEFT & x) const
+    {
+      return OP()( x, threshold1, threshold2 ) ? x : background;
+    }
+
+    LEFT threshold1;
+    LEFT threshold2;
+    LEFT background;
+  };
+
+}
+
 template <class T,class U> inline
 AimsData<T> AimsThreshold<T,U>::operator () (const AimsData<T> &sqv)
 {
@@ -185,60 +309,87 @@ AimsData<T> AimsThreshold<T,U>::operator () (const AimsData<T> &sqv)
 
   switch (_type)
   { case AIMS_LOWER_THAN :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1<T, carto::volumeutil::less<T> >( _level, _backgd ) );
       break;
     case AIMS_LOWER_OR_EQUAL_TO :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 <= _level ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1<T, carto::volumeutil::less_equal<T> >( _level,
+                                                                 _backgd ) );
       break;
     case AIMS_GREATER_THAN :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1<T, carto::volumeutil::greater<T> >( _level,
+                                                              _backgd ) );
       break;
     case AIMS_GREATER_OR_EQUAL_TO :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1<T, carto::volumeutil::greater_equal<T> >(
+          _level, _backgd ) );
       break;
     case AIMS_EQUAL_TO :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 == _level ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1<T, carto::volumeutil::equal_to<T> >(
+          _level, _backgd ) );
       break;
     case AIMS_DIFFER :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 != _level ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1<T, carto::volumeutil::not_equal_to<T> >(
+          _level, _backgd ) );
       break;
     case AIMS_BETWEEN :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level && *it2 <= _level2 ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2<T, internal::between_with_bounds<T> >(
+          _level, _level2, _backgd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level && *it2 <= _level2 ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2<T, internal::between_with_upper_bound<T> >(
+          _level, _level2, _backgd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level && *it2 < _level2 ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2<T, internal::between_with_lower_bound<T> >(
+          _level, _level2, _backgd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level && *it2 < _level2 ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2<T, internal::between_without_bounds<T> >(
+          _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level || *it2 > _level2 ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2<T, internal::outside_without_bounds<T> >(
+          _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 <= _level || *it2 > _level2 ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2<T, internal::outside_with_lower_bound<T> >(
+          _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level || *it2 >= _level2 ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2<T, internal::outside_with_upper_bound<T> >(
+          _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_BOUNDS :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level || *it2 > _level2 ? *it2 : _backgd);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2<T, internal::outside_with_bounds<T> >(
+          _level, _level2, _backgd ) );
       break;
   }
 
@@ -251,6 +402,102 @@ AimsData<T> AimsThreshold<T,U>::operator () (const AimsData<T> &sqv)
         ph->removeProperty( "data_type" );
     }
   return(res);
+}
+
+namespace internal
+{
+
+  template <typename LEFT, typename OP>
+  struct clip1: public std::unary_function<LEFT, LEFT>
+  {
+    clip1( LEFT threshold )
+      : std::unary_function<LEFT, LEFT>(), threshold( threshold )
+    {
+    }
+
+    LEFT operator() (const LEFT & x) const
+    {
+      return OP()( x, threshold ) ? x : threshold;
+    }
+
+    LEFT threshold;
+  };
+
+
+  template <typename T>
+  struct rel_between_with_bounds
+  {
+    int operator() (const T & x, const T & y, const T & z) const
+    {
+      if( x < y )
+        return -1;
+      return x <= z ? 0 : 1;
+    }
+  };
+
+
+  template <typename T>
+  struct rel_between_with_lower_bound
+  {
+    int operator() (const T & x, const T & y, const T & z) const
+    {
+      if( x <= y )
+        return -1;
+      return x <= z ? 0 : 1;
+    }
+  };
+
+
+  template <typename T>
+  struct rel_between_with_upper_bound
+  {
+    int operator() (const T & x, const T & y, const T & z) const
+    {
+      if( x < y )
+        return -1;
+      return x < z ? 0 : 1;
+    }
+  };
+
+
+  template <typename T>
+  struct rel_between_without_bounds
+  {
+    int operator() (const T & x, const T & y, const T & z) const
+    {
+      if( x <= y )
+        return -1;
+      return x < z ? 0 : 1;
+    }
+  };
+
+
+  template <typename LEFT, typename OP>
+  struct clip2: public std::unary_function<LEFT, LEFT>
+  {
+    clip2( LEFT threshold1, LEFT threshold2 )
+      : std::unary_function<LEFT, LEFT>(), threshold1( threshold1 ),
+        threshold2( threshold2)
+    {
+    }
+
+    LEFT operator() (const LEFT & x) const
+    {
+      switch( OP()( x, threshold1, threshold2 ) )
+      {
+        case -1:
+          return threshold1;
+        case 0:
+          return x;
+        case 1:
+          return threshold2;
+      }
+    }
+
+    LEFT threshold1;
+    LEFT threshold2;
+  };
+
 }
 
 template <class T,class U> inline
@@ -270,36 +517,48 @@ AimsData<T> AimsThreshold<T,U>::clip (const AimsData<T> &sqv)
 
   switch (_type)
   { case AIMS_LOWER_THAN :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level ? *it2 : _level);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::clip1<T, carto::volumeutil::less<T> >( _level ) );
       break;
     case AIMS_LOWER_OR_EQUAL_TO :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 <= _level ? *it2 : _level);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::clip1<T, carto::volumeutil::less_equal<T> >( _level ) );
       break;
     case AIMS_GREATER_THAN :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level ? *it2 : _level);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::clip1<T, carto::volumeutil::greater<T> >( _level ) );
       break;
     case AIMS_GREATER_OR_EQUAL_TO :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level ? *it2 : _level);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::clip1<T, carto::volumeutil::greater_equal<T> >( _level ) );
       break;
     case AIMS_BETWEEN :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level ? (*it2 <= _level2 ? *it2 : _level2) : _level);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::clip2<T, internal::rel_between_with_bounds<T> >(
+          _level, _level2 ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level ? ( *it2 <= _level2 ? *it2 : _level2 ) : _level);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::clip2<T, internal::rel_between_with_upper_bound<T> >(
+          _level, _level2 ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level ? ( *it2 < _level2 ? *it2 : _level2 ) : _level);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::clip2<T, internal::rel_between_with_lower_bound<T> >(
+          _level, _level2 ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level ? ( *it2 < _level2 ? *it2 : _level2 ) : _level);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::clip2<T, internal::rel_between_without_bounds<T> >(
+          _level, _level2 ) );
       break;
     case AIMS_OUTSIDE :
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND :
@@ -433,6 +692,49 @@ TimeTexture<T> AimsTexThreshold<T,U>::operator () (const TimeTexture<T> &sqv)
   return(res);
 }
 
+namespace internal
+{
+
+  template <typename LEFT, typename RIGHT, typename OP>
+  struct thresh1_bin: public std::unary_function<LEFT, RIGHT>
+  {
+    thresh1_bin( LEFT threshold, RIGHT foreground )
+      : std::unary_function<LEFT, RIGHT>(), threshold( threshold ),
+        foreground( foreground )
+    {
+    }
+
+    RIGHT operator() (const LEFT & x) const
+    {
+      return OP()( x, threshold ) ? foreground : 0;
+    }
+
+    LEFT threshold;
+    RIGHT foreground;
+  };
+
+
+  template <typename LEFT, typename RIGHT, typename OP>
+  struct thresh2_bin: public std::unary_function<LEFT, RIGHT>
+  {
+    thresh2_bin( LEFT threshold1, LEFT threshold2, RIGHT foreground )
+      : std::unary_function<LEFT, RIGHT>(), threshold1( threshold1 ),
+        threshold2( threshold2 ), foreground( foreground )
+    {
+    }
+
+    RIGHT operator() (const LEFT & x) const
+    {
+      return OP()( x, threshold1, threshold2 ) ? foreground : 0;
+    }
+
+    LEFT threshold1;
+    LEFT threshold2;
+    RIGHT foreground;
+  };
+
+}
+
 template <class T,class U> inline
 AimsData<U> AimsThreshold<T,U>::bin(const AimsData<T> &sqv)
 {
@@ -447,63 +749,93 @@ AimsData<U> AimsThreshold<T,U>::bin(const AimsData<T> &sqv)
 
   typename AimsData<U>::iterator       it1;
   typename AimsData<T>::const_iterator it2;
-  
+
   switch (_type)
-  { case AIMS_LOWER_THAN : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level ? _foregd : 0);
+  {
+
+    case AIMS_LOWER_THAN :
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1_bin<T, U, carto::volumeutil::less<T> >(
+          _level, _foregd ) );
       break;
     case AIMS_LOWER_OR_EQUAL_TO : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 <= _level ? _foregd : 0);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1_bin<T, U, carto::volumeutil::less_equal<T> >(
+          _level, _foregd ) );
       break;
     case AIMS_GREATER_THAN : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level ? _foregd : 0);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1_bin<T, U, carto::volumeutil::greater<T> >(
+          _level, _foregd ) );
       break;
     case AIMS_GREATER_OR_EQUAL_TO : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level ? _foregd : 0);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1_bin<T, U, carto::volumeutil::greater_equal<T> >(
+          _level, _foregd ) );
       break;
-    case AIMS_EQUAL_TO : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 == _level ? _foregd : 0);
+    case AIMS_EQUAL_TO :
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1_bin<T, U, carto::volumeutil::equal_to<T> >(
+          _level, _foregd ) );
       break;
-    case AIMS_DIFFER : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 != _level ? _foregd : 0);
+    case AIMS_DIFFER :
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh1_bin<T, U, carto::volumeutil::not_equal_to<T> >(
+          _level, _foregd ) );
       break;
     case AIMS_BETWEEN :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level && *it2 <= _level2 ? _foregd : 0);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2_bin<T, U, internal::between_with_bounds<T> >(
+          _level, _level2, _foregd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level && *it2 <= _level2 ? _foregd : 0);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2_bin<T, U, internal::between_with_upper_bound<T> >(
+          _level, _level2, _foregd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 >= _level && *it2 < _level2 ? _foregd : 0);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2_bin<T, U, internal::between_with_lower_bound<T> >(
+          _level, _level2, _foregd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 > _level && *it2 < _level2 ? _foregd : 0);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2_bin<T, U, internal::between_without_bounds<T> >(
+          _level, _level2, _foregd ) );
       break;
-    case AIMS_OUTSIDE : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level || *it2 > _level2 ? _foregd : 0);
+    case AIMS_OUTSIDE :
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2_bin<T, U, internal::outside_without_bounds<T> >(
+          _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 <= _level || *it2 > _level2 ? _foregd : 0);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2_bin<T, U, internal::outside_with_lower_bound<T> >(
+          _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 < _level || *it2 >= _level2 ? _foregd : 0);
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2_bin<T, U, internal::outside_with_upper_bound<T> >(
+          _level, _level2, _foregd ) );
       break;
-    case AIMS_OUTSIDE_INCLUDE_BOUNDS : 
-      for (it1=res.begin(),it2=sqv.begin();it2<sqv.end();it1++,it2++)
-        *it1 = (*it2 <= _level || *it2 >= _level2 ? _foregd : 0);
+    case AIMS_OUTSIDE_INCLUDE_BOUNDS :
+      carto::volumeutil::applyTowards(
+        *sqv.volume(), *res.volume(),
+        internal::thresh2_bin<T, U, internal::outside_with_bounds<T> >(
+          _level, _level2, _foregd ) );
       break;
   }
 
