@@ -260,7 +260,10 @@ template<typename T>
 inline
 typename AimsData<T>::iterator AimsData<T>::end()
 {
-  return &*_volume->end();
+  // &*_volume->end() may return 0 with some versions of blitz++
+  // do does not make a valid pointer for end
+  return &_volume->at( _volume->getSizeX() - 1, _volume->getSizeY() - 1,
+                       _volume->getSizeZ() - 1, _volume->getSizeT() - 1 ) + 1;
 }
 
 
@@ -268,7 +271,10 @@ template<typename T>
 inline
 typename AimsData<T>::const_iterator AimsData<T>::end() const
 {
-  return &*_volume->end();
+  // &*_volume->end() may return 0 with some versions of blitz++
+  // do does not make a valid pointer for end
+  return &_volume->at( _volume->getSizeX() - 1, _volume->getSizeY() - 1,
+                       _volume->getSizeZ() - 1, _volume->getSizeT() - 1 ) + 1;
 }
 
 
