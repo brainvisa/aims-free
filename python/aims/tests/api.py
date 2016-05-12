@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 
 import unittest
 import tempfile
@@ -53,18 +54,19 @@ class ImageFileComparison:
             i2 = numpy.array([])
             
         if ((i1 == numpy.array([])) and (i2 == numpy.array([]))):
-          print >> sys.stderr, 'WARNING: image file comparison of empty images (%s, %s)' % (image1, image2)
+          print('WARNING: image file comparison of empty images (%s, %s)'
+                % (image1, image2), file=sys.stderr)
 
         # Process differences between pixels
         if not numpy.array_equal(i1, i2) :
           testcase.fail(msg)
-          #print >> sys.stderr, 'ERROR: image (%s, %s) content is not the same' % (image1, image2)
+          #print('ERROR: image (%s, %s) content is not the same' % (image1, image2), file=sys.stderr)
 
         # testunit 1.63 for python 2.6 (installed on MacOS) does not have assertDictEqual method
         if hasattr(testcase, 'assertDictEqual'):
           # Process differences between headers
           testcase.assertDictEqual(h1, h2, msg)
-          #print >> sys.stderr, 'ERROR: image (%s, %s) header is not the same' % (image1, image2)
+          #print('ERROR: image (%s, %s) header is not the same' % (image1, image2), file=sys.stderr)
           
         i1 = None
         i2 = None
@@ -489,7 +491,7 @@ class CommandsTestManager(unittest.TestCase):
             # Run the test in the test run directory
             try:
                 c.execute(self.get_run_directory(c))
-                #print >> sys.stdout, 'command run normally:', c
+                #print('command run normally:', c, file=sys.stderr)
 
                 # Compare each produced run file with its matching reference
                 ref_files = self.get_ref_files(c)
@@ -498,9 +500,9 @@ class CommandsTestManager(unittest.TestCase):
                 for ref_file, run_file in zip(ref_files, run_files):
                     sys.stderr.write('compare files: %s <=> %s\n' % (ref_file, run_file))
                     FileComparison.assertEqual(self, run_file, ref_file)
-                    
-            except Exception, e:
-                print 'Test failure:', e, 'while running:', c
+
+            except Exception as e:
+                print('Test failure:', e, 'while running:', c, file=sys.stderr)
                 n_failed += 1
         if n_failed != 0:
             raise RuntimeError('%d / %d tests failed.'

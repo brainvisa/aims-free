@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+from __future__ import print_function
+
 from soma import aims, aimsalgo
 import exceptions
 import numpy
 import os
+import six
 
 
 def mergeLabelsFromTexture(tex, labels_list, new_label):
@@ -67,7 +71,7 @@ def connectedComponents(mesh, tex, areas_mode=0):
         with area = 16.5 and 6.0 respectively, areas are in square mm
     """
     meshVertexNb = int(mesh.vertex().size())
-    print 'Vertices number of mesh: ', meshVertexNb
+    print('Vertices number of mesh: ', meshVertexNb)
     areas_measures = {}
 
     if (meshVertexNb != tex.nItem()):
@@ -81,7 +85,7 @@ def connectedComponents(mesh, tex, areas_mode=0):
         labelsList.remove(0)
     if labelsList.count(-1) != 0:
         labelsList.remove(-1)
-    print 'Labels list: ', labelsList
+    print('Labels list: ', labelsList)
 
     dtex = tex[0].arraydata()
     otex = aims.TimeTexture(dtype='S16')
@@ -274,7 +278,7 @@ def vertex_texture_to_polygon_texture(mesh, tex, allow_cut=False):
     if allow_cut:
         out_mesh = mesh.__class__(mesh)
 
-    for t, tex0 in tex.iteritems():
+    for t, tex0 in six.iteritems(tex):
         tdata = tex0.arraydata()
         ptex0 = poly_tex[t]
         ptex0.resize(len(mesh.polygon(t)))
@@ -381,8 +385,8 @@ def mesh_to_polygon_textured_mesh(mesh, poly_tex):
     out_tex = poly_tex.__class__()
     polygons = mesh.polygon()
     dtype = poly_tex[poly_tex.keys()[0]].arraydata().dtype
-    for t, tex0 in poly_tex.iteritems():
-        print 't:', t
+    for t, tex0 in six.iteritems(poly_tex):
+        print('t:', t)
         overt = out_mesh.vertex(t)
         overt.assign(mesh.vertex())
         onorm = out_mesh.normal(t)

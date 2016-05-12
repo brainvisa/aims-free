@@ -35,7 +35,7 @@
 import os
 try:
     import dicom
-except ImportError, e:
+except ImportError as e:
     raise Exception("DICOM aggregator requires pydicom.")
 
 class DicomAggregator( object ):

@@ -30,6 +30,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import print_function
+
 import scipy
 import scipy.io
 import numpy
@@ -104,7 +106,7 @@ def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
         if not f.check(source):
             raise IOError('could not read source image header for ' + source)
         hdr = f.header()
-        if hdr.has_key('object_type') and hdr['object_type'] == 'genericobject':
+        if 'object_type' in hdr and hdr['object_type'] == 'genericobject':
             hdr = aims.read(source)
     elif hasattr(source, 'header'):
         hdr = source.header()
@@ -122,7 +124,7 @@ def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
         s2m = aims.AffineTransformation3d()
     sn3d = scipy.io.loadmat(matfilename)
     Affine = aims.AffineTransformation3d(sn3d['Affine'])
-    if sn3d.has_key('VG'):
+    if 'VG' in sn3d:
         # SPM >= 2
         VG = sn3d['VG']
         scipyversion = [int(x) for x in scipy.version.version.split('.')[:2]]
@@ -147,7 +149,7 @@ def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
     # no normalized_volume is specified
     AtoT = MT * (vsA * s2m * At * Affine).inverse()
     ahdr = AtoT.header()
-    if srcref is None and hdr.has_key('referential'):
+    if srcref is None and 'referential' in hdr:
         srcref = hdr['referential']
     if srcref:
         if srcref == aims.StandardReferentials.mniTemplateReferential():
@@ -158,8 +160,9 @@ def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
             uuid.Uuid(srcref)
             ahdr['source_referential'] = srcref
         except:
-            print >> sys.stderr, 'source referential', srcref, \
-                'cannot be converted to a valid UUID - not setting it.'
+            print('source referential', srcref,
+                  'cannot be converted to a valid UUID - not setting it.',
+                  file=sys.stderr)
     if destref:
         if destref == aims.StandardReferentials.mniTemplateReferential():
             destref = aims.StandardReferentials.mniTemplateReferentialID()
@@ -169,7 +172,8 @@ def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
             uuid.Uuid(destref)
             ahdr['destination_referential'] = destref
         except:
-            print >> sys.stderr, 'destination referential', destref, \
-                'cannot be converted to a valid UUID - not setting it.'
+            print('destination referential', destref,
+                  'cannot be converted to a valid UUID - not setting it.',
+                  file=sys.stderr)
 
     return AtoT

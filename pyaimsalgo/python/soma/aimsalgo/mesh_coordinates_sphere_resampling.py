@@ -9,6 +9,8 @@
 # and INRIA at the following URL "http://www.cecill.info".
 ############################################################################
 
+from __future__ import print_function
+
 # system import
 import numpy
 
@@ -114,9 +116,9 @@ def sphere_coordinates(sphere, inversion=False):
     sphere_lon = numpy.arctan2(nvert[:, 1], nvert[:, 0])
     sphere_lon *= 180. / numpy.pi
     sphere_lon += 180
-    print 'inversion: ', inversion
+    print('inversion: ', inversion)
     if inversion == "True":
-        print "il y a inversion", inversion
+        print("there is an inversion", inversion)
         sphere_lon = 360 - sphere_lon
     slon_tex = aims.TimeTexture(sphere_lon.astype(numpy.float32))
     return slon_tex, slat_tex
@@ -453,7 +455,7 @@ def sphere_mesh_from_distance_map(init_sphere, avg_dist_texture,
     while next_sphere is not current_sphere:
         if next_sphere is not None:
             current_sphere = next_sphere
-        print 'step:', step
+        print('step:', step)
         next_sphere = refine_sphere_mesh(
             init_sphere, avg_dist_texture, current_sphere, target_avg_dist,
             inversion, init_sphere_coords,

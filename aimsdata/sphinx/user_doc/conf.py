@@ -11,6 +11,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from __future__ import print_function
+
 import sys, os
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -18,10 +20,10 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.append(os.path.abspath('.'))
 try:
-  import matplotlib
-  sys.path.append( os.path.abspath( os.path.join( os.path.dirname( os.path.dirname( matplotlib.__file__ ) ), 'sphinx', 'ext' ) ) )
-except Exception, e:
-  print 'warning:', e
+    import matplotlib
+    sys.path.append( os.path.abspath( os.path.join( os.path.dirname( os.path.dirname( matplotlib.__file__ ) ), 'sphinx', 'ext' ) ) )
+except Exception as e:
+    print('warning:', e)
 from soma import aims
 try:
     import soma.info
