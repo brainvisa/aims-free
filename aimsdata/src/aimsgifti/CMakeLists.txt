@@ -25,11 +25,18 @@ include_directories( "${CMAKE_BINARY_DIR}/include/aims/io/gifticlib" "${CMAKE_BI
 add_definitions( "-DHAVE_ZLIB" )
 add_library( aimsgifti MODULE ${_sources} )
 add_dependencies( aimsgifti ${headersTarget} )
+
 if( APPLE )
+  # Setting VERSION or SOVERSION on a MODULE cause a link error on MacOS 10.5 with cmake 2.6:
+  #  i686-apple-darwin9-g++-4.0.1: -compatibility_version only allowed with -dynamiclib
   set_property( TARGET aimsgifti PROPERTY OUTPUT_NAME aimsgifti.${${PROJECT_NAME}_VERSION} )
 else()
-  set_property( TARGET aimsgifti PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
+  # in cmake 3.5 on linux, making a "module" removes the version number in the
+  # .so so the suffix has to be forced.
+  set_target_properties( aimsgifti
+    PROPERTIES SOVERSION ${${PROJECT_NAME}_VERSION} SUFFIX ".so.${${PROJECT_NAME}_VERSION}" )
 endif()
+
 target_link_libraries( aimsgifti ${AIMS_AIMSDATA_LIBRARIES} somanifti "${ZLIB_LIBRARIES}" ${EXPAT_LIBRARIES} )
 BRAINVISA_INSTALL( TARGETS aimsgifti
 DESTINATION lib
