@@ -311,84 +311,84 @@ AimsData<T> AimsThreshold<T,U>::operator () (const AimsData<T> &sqv)
   { case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1<T, carto::volumeutil::less<T> >( _level, _backgd ) );
+        ::internal::thresh1<T, carto::volumeutil::less<T> >( _level, _backgd ) );
       break;
     case AIMS_LOWER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1<T, carto::volumeutil::less_equal<T> >( _level,
+        ::internal::thresh1<T, carto::volumeutil::less_equal<T> >( _level,
                                                                  _backgd ) );
       break;
     case AIMS_GREATER_THAN :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1<T, carto::volumeutil::greater<T> >( _level,
+        ::internal::thresh1<T, carto::volumeutil::greater<T> >( _level,
                                                               _backgd ) );
       break;
     case AIMS_GREATER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1<T, carto::volumeutil::greater_equal<T> >(
+        ::internal::thresh1<T, carto::volumeutil::greater_equal<T> >(
           _level, _backgd ) );
       break;
     case AIMS_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1<T, carto::volumeutil::equal_to<T> >(
+        ::internal::thresh1<T, carto::volumeutil::equal_to<T> >(
           _level, _backgd ) );
       break;
     case AIMS_DIFFER :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1<T, carto::volumeutil::not_equal_to<T> >(
+        ::internal::thresh1<T, carto::volumeutil::not_equal_to<T> >(
           _level, _backgd ) );
       break;
     case AIMS_BETWEEN :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2<T, internal::between_with_bounds<T> >(
+        ::internal::thresh2<T, ::internal::between_with_bounds<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2<T, internal::between_with_upper_bound<T> >(
+        ::internal::thresh2<T, ::internal::between_with_upper_bound<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2<T, internal::between_with_lower_bound<T> >(
+        ::internal::thresh2<T, ::internal::between_with_lower_bound<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2<T, internal::between_without_bounds<T> >(
+        ::internal::thresh2<T, ::internal::between_without_bounds<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2<T, internal::outside_without_bounds<T> >(
+        ::internal::thresh2<T, ::internal::outside_without_bounds<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2<T, internal::outside_with_lower_bound<T> >(
+        ::internal::thresh2<T, ::internal::outside_with_lower_bound<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2<T, internal::outside_with_upper_bound<T> >(
+        ::internal::thresh2<T, ::internal::outside_with_upper_bound<T> >(
           _level, _level2, _backgd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2<T, internal::outside_with_bounds<T> >(
+        ::internal::thresh2<T, ::internal::outside_with_bounds<T> >(
           _level, _level2, _backgd ) );
       break;
   }
@@ -519,45 +519,45 @@ AimsData<T> AimsThreshold<T,U>::clip (const AimsData<T> &sqv)
   { case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::clip1<T, carto::volumeutil::less<T> >( _level ) );
+        ::internal::clip1<T, carto::volumeutil::less<T> >( _level ) );
       break;
     case AIMS_LOWER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::clip1<T, carto::volumeutil::less_equal<T> >( _level ) );
+        ::internal::clip1<T, carto::volumeutil::less_equal<T> >( _level ) );
       break;
     case AIMS_GREATER_THAN :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::clip1<T, carto::volumeutil::greater<T> >( _level ) );
+        ::internal::clip1<T, carto::volumeutil::greater<T> >( _level ) );
       break;
     case AIMS_GREATER_OR_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::clip1<T, carto::volumeutil::greater_equal<T> >( _level ) );
+        ::internal::clip1<T, carto::volumeutil::greater_equal<T> >( _level ) );
       break;
     case AIMS_BETWEEN :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::clip2<T, internal::rel_between_with_bounds<T> >(
+        ::internal::clip2<T, ::internal::rel_between_with_bounds<T> >(
           _level, _level2 ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::clip2<T, internal::rel_between_with_upper_bound<T> >(
+        ::internal::clip2<T, ::internal::rel_between_with_upper_bound<T> >(
           _level, _level2 ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::clip2<T, internal::rel_between_with_lower_bound<T> >(
+        ::internal::clip2<T, ::internal::rel_between_with_lower_bound<T> >(
           _level, _level2 ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::clip2<T, internal::rel_between_without_bounds<T> >(
+        ::internal::clip2<T, ::internal::rel_between_without_bounds<T> >(
           _level, _level2 ) );
       break;
     case AIMS_OUTSIDE :
@@ -756,85 +756,85 @@ AimsData<U> AimsThreshold<T,U>::bin(const AimsData<T> &sqv)
     case AIMS_LOWER_THAN :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1_bin<T, U, carto::volumeutil::less<T> >(
+        ::internal::thresh1_bin<T, U, carto::volumeutil::less<T> >(
           _level, _foregd ) );
       break;
     case AIMS_LOWER_OR_EQUAL_TO : 
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1_bin<T, U, carto::volumeutil::less_equal<T> >(
+        ::internal::thresh1_bin<T, U, carto::volumeutil::less_equal<T> >(
           _level, _foregd ) );
       break;
     case AIMS_GREATER_THAN : 
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1_bin<T, U, carto::volumeutil::greater<T> >(
+        ::internal::thresh1_bin<T, U, carto::volumeutil::greater<T> >(
           _level, _foregd ) );
       break;
     case AIMS_GREATER_OR_EQUAL_TO : 
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1_bin<T, U, carto::volumeutil::greater_equal<T> >(
+        ::internal::thresh1_bin<T, U, carto::volumeutil::greater_equal<T> >(
           _level, _foregd ) );
       break;
     case AIMS_EQUAL_TO :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1_bin<T, U, carto::volumeutil::equal_to<T> >(
+        ::internal::thresh1_bin<T, U, carto::volumeutil::equal_to<T> >(
           _level, _foregd ) );
       break;
     case AIMS_DIFFER :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh1_bin<T, U, carto::volumeutil::not_equal_to<T> >(
+        ::internal::thresh1_bin<T, U, carto::volumeutil::not_equal_to<T> >(
           _level, _foregd ) );
       break;
     case AIMS_BETWEEN :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2_bin<T, U, internal::between_with_bounds<T> >(
+        ::internal::thresh2_bin<T, U, ::internal::between_with_bounds<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_LOWER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2_bin<T, U, internal::between_with_upper_bound<T> >(
+        ::internal::thresh2_bin<T, U, ::internal::between_with_upper_bound<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_HIGHER_BOUND :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2_bin<T, U, internal::between_with_lower_bound<T> >(
+        ::internal::thresh2_bin<T, U, ::internal::between_with_lower_bound<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_BETWEEN_EXCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2_bin<T, U, internal::between_without_bounds<T> >(
+        ::internal::thresh2_bin<T, U, ::internal::between_without_bounds<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2_bin<T, U, internal::outside_without_bounds<T> >(
+        ::internal::thresh2_bin<T, U, ::internal::outside_without_bounds<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_LOWER_BOUND : 
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2_bin<T, U, internal::outside_with_lower_bound<T> >(
+        ::internal::thresh2_bin<T, U, ::internal::outside_with_lower_bound<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_HIGHER_BOUND : 
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2_bin<T, U, internal::outside_with_upper_bound<T> >(
+        ::internal::thresh2_bin<T, U, ::internal::outside_with_upper_bound<T> >(
           _level, _level2, _foregd ) );
       break;
     case AIMS_OUTSIDE_INCLUDE_BOUNDS :
       carto::volumeutil::applyTowards(
         *sqv.volume(), *res.volume(),
-        internal::thresh2_bin<T, U, internal::outside_with_bounds<T> >(
+        ::internal::thresh2_bin<T, U, ::internal::outside_with_bounds<T> >(
           _level, _level2, _foregd ) );
       break;
   }
