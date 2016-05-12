@@ -32,6 +32,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import print_function
+
 import sys
 import os
 from optparse import OptionParser
@@ -73,15 +75,15 @@ if options.destination is None and len(args) > 0:
 if len(args) > 0:
     parser.parse_args(['-h'])
 if options.transnum is None and options.transformation is None:
-    print >> sys.stderr, 'If no transformation is specified (erase mode), ' \
-        'the transformation number to erase sould be specified: -t and -n ' \
-        'options cannot be both omitted.'
+    print('If no transformation is specified (erase mode), '
+          'the transformation number to erase sould be specified: -t and -n '
+          'options cannot be both omitted.', file=sys.stderr)
     sys.exit(1)
 if options.input is None or options.transformation is None:
     parser.parse_args(['-h'])
 
-# print options
-# print args
+# print(options)
+# print(args)
 
 # look for correct file
 input = options.input
@@ -100,11 +102,11 @@ except:
         except:
             pass
 if obj is None:
-    print >> sys.stderr, 'cannot read input object', options.input
+    print('cannot read input object', options.input, file=sys.stderr)
     sys.exit(1)
 
-if not hdr.has_key('transformations'):
-    print >> sys.stderr, 'Object header has no transformations'
+if 'transformations' not in hdr:
+    print('Object header has no transformations', file=sys.stderr)
     sys.exit(1)
 
 trans = hdr['transformations']
@@ -115,12 +117,12 @@ else:
 try:
     tr = trans[transnum]
 except:
-    print >> sys.stderr, 'No such transformation in header.'
+    print('No such transformation in header.', file=sys.stderr)
 mot = aims.Motion(tr)
 dest = None
 if options.destination is not None:
     dest = options.destination
-elif hdr.has_key('referentials'):
+elif 'referentials' in hdr:
     refs = hdr['referentials']
     if transnum < len(refs):
         dest = refs[transnum]
@@ -133,12 +135,13 @@ if dest is not None:
         uuid.Uuid(dest)
         mot.header()['destination_referential'] = dest
     except:
-        print >> sys.stderr, 'destination referential', dest, \
-            'cannot be converted to a valid UUID - not setting it.'
+        print('destination referential', dest,
+              'cannot be converted to a valid UUID - not setting it.',
+              file=sys.stderr)
 src = None
 if options.source is not None:
     src = options.source
-elif hdr.has_key('referential'):
+elif 'referential' in hdr:
     src = hdr['referential']
 if src is not None:
     if src == aims.StandardReferentials.mniTemplateReferential():
@@ -149,7 +152,8 @@ if src is not None:
         uuid.Uuid(src)
         mot.header()['source_referential'] = src
     except:
-        print >> sys.stderr, 'source referential', src, \
-            'cannot be converted to a valid UUID - not setting it.'
+        print('source referential', src,
+              'cannot be converted to a valid UUID - not setting it.',
+              file=sys.stderr)
 
 aims.write(mot, options.transformation)

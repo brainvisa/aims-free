@@ -31,7 +31,10 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import print_function
+
 from soma import aims
+import six
 
 
 def same_graphs(ref_graph, test_graph, verbose=False):
@@ -67,21 +70,21 @@ def same_graphs(ref_graph, test_graph, verbose=False):
     test_vertices = _build_vertice_dictionary(test_graph)
 
     if verbose:
-        print "Compare vertices:"
+        print("Compare vertices:")
     if not _same_dictionary(ref_vertices, test_vertices, _same_vertice,
                             verbose):
         if verbose:
-            print "  differences in vertices"
+            print("  differences in vertices")
         return False
 
     ref_edges = _build_edge_dictionary(ref_graph)
     test_edges = _build_edge_dictionary(test_graph)
 
     if verbose:
-        print "Compare edges:"
+        print("Compare edges:")
     if not _same_dictionary(ref_edges, test_edges, _same_edge, verbose):
         if verbose:
-            print "  differences in edges"
+            print("  differences in edges")
         return False
 
     return True
@@ -106,22 +109,22 @@ def _build_edge_dictionary(graph):
 
 def _same_dictionary(ref_dict, test_dict, same_element_function, verbose=False):
     if verbose:
-        print "  first:  " + str(len(ref_dict)) + " elements."
-        print "  second: " + str(len(test_dict)) + " elements."
+        print("  first:  " + str(len(ref_dict)) + " elements.")
+        print("  second: " + str(len(test_dict)) + " elements.")
     if not len(ref_dict) == len(test_dict):
         if verbose:
-            print "  different number of elements."
+            print("  different number of elements.")
         return False
-    for index, ref in ref_dict.iteritems():
+    for index, ref in six.iteritems(ref_dict):
         if index not in test_dict:
             if verbose:
-                print "  test dict has no element with index " + repr(index)
+                print("  test dict has no element with index " + repr(index))
             same_dict = False
             break
         same_dict = same_element_function(ref, test_dict[index], verbose)
         if not same_dict:
             if verbose:
-                print "difference in " + repr(index)
+                print("difference in " + repr(index))
             break
     return same_dict
 
@@ -129,13 +132,13 @@ def _same_dictionary(ref_dict, test_dict, same_element_function, verbose=False):
 def _same_vertice(ref_vertice, test_vertice, verbose):
     if not len(ref_vertice) == len(test_vertice):
         if verbose:
-            print "  different number of arguments " + repr(len(ref_vertice)) \
-                + " " + repr(len(test_vertice))
+            print("  different number of arguments " + repr(len(ref_vertice))
+                  + " " + repr(len(test_vertice)))
         return False
     for key in ref_vertice.keys():
         if key not in test_vertice:
             if verbose:
-                print repr(key) + " not in test_vertice"
+                print(repr(key) + " not in test_vertice")
             return False
         if key not in ['aims_bottom', 'aims_other', 'aims_ss', 'aims_Tmtktri',
                        'bottom_label', 'other_label', 'ss_label',
@@ -143,8 +146,8 @@ def _same_vertice(ref_vertice, test_vertice, verbose):
             # XXX ref_vertice and test_vertice should be compared directly
             if str(ref_vertice[key]) != str(test_vertice[key]):
                 if verbose:
-                    print "vertice " + repr(key) + " " + str(ref_vertice[key]) \
-                        + " " + str(test_vertice[key])
+                    print("vertice " + repr(key) + " " + str(ref_vertice[key])
+                          + " " + str(test_vertice[key]))
                 return False
     return True
 
@@ -154,13 +157,13 @@ def _same_edge(ref_edge, test_edge, verbose):
     same = len(ref_edge) == len(test_edge)
     if not same:
         if verbose:
-            print "different numbers of arguments " + repr(len(ref_edge)) \
-                + " " + repr(len(test_edge))
+            print("different numbers of arguments " + repr(len(ref_edge))
+                  + " " + repr(len(test_edge)))
         return False
     for key in ref_edge.keys():
         if key not in test_edge:
             if verbose:
-                print repr(key) + " not in test_edge"
+                print(repr(key) + " not in test_edge")
             return False
         if key not in ['aims_cortical', 'aims_junction', 'aims_plidepassage',
                        'cortical_label', 'junction_label',
@@ -168,7 +171,7 @@ def _same_edge(ref_edge, test_edge, verbose):
             # XXX ref_edge and test_edge should be compared directly
             if str(ref_edge[key]) != str(test_edge[key]):
                 if verbose:
-                    print "edge " + repr(key) + " " + str(ref_edge[key]) + " " \
-                        + str(test_edge[key])
+                    print("edge " + repr(key) + " " + str(ref_edge[key]) + " "
+                          + str(test_edge[key]))
                 return False
     return True

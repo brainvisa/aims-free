@@ -1,3 +1,6 @@
+
+from __future__ import print_function
+
 from optparse import OptionParser
 from soma.aims import texturetools
 from soma import aims
@@ -23,8 +26,8 @@ def parseOpts(argv):
 def main():
     parser, (options, args) = parseOpts(sys.argv)
     tex = aims.read(options.gyri_tex)
-    print 'ilabel', options.ilabel
-    print 'type: ', type(options.ilabel)
+    print('ilabel', options.ilabel)
+    print('type: ', type(options.ilabel))
     otex = texturetools.mergeLabelsFromTexture(
         tex, options.ilabel, options.olabel)
     aims.write(otex, options.gyri_otex)

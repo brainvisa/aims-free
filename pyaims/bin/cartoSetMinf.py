@@ -32,6 +32,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import print_funct
+
 import sys
 import os
 from optparse import OptionParser
@@ -73,8 +75,8 @@ if len(args) % 2 == 0:
         options.value.append(args[0])
         del args[0]
 
-# print options
-# print args
+# print(options)
+# print(args)
 
 if args or not options.input \
         or len(options.property) != len(options.value):
@@ -106,8 +108,8 @@ for i in xrange(len(options.property)):
 if options.expression:
     exec(options.expression)
 
-print 'MINF file:', input
-print attributes
+print('MINF file:', input)
+print(attributes)
 f = open(input, 'w')
-print >> f, 'attributes =', repr(attributes)
+print('attributes =', repr(attributes), file=f)
 f.close()

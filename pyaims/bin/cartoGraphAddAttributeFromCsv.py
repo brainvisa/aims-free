@@ -32,6 +32,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import print_function
+
 
 def graphAddAttributeFromCsv(input_graph, output_graph, input_csv, table_key_col, graph_key_attr, graph_val_attr, table_val_col, verbose):
     from soma import aims
@@ -47,11 +49,13 @@ def graphAddAttributeFromCsv(input_graph, output_graph, input_csv, table_key_col
         mask_idx = d[:, table_key_col] == DF.code(v[graph_key_attr])
         if np.sum(mask_idx) == 0:
             if verbose:
-                print v[graph_key_attr], "\thas no correspondance in the table", input_csv
+                print(v[graph_key_attr], "\thas no correspondance in the table",
+                      input_csv)
             continue
         if np.sum(mask_idx) > 1:
             if verbose:
-                print v[graph_key_attr], "\thas multiple correspondances in the table", input_csv
+                print(v[graph_key_attr],
+                      "\thas multiple correspondances in the table", input_csv)
             continue
         val = d[mask_idx, table_val_col].item()
         v[graph_val_attr] = val
@@ -91,9 +95,9 @@ if __name__ == '__main__':
     # Run parser -------------------------------------------------------------
     (options, args) = parser.parse_args()
 
-    print options
+    print(options)
     if options.input_graph is None or options.input_csv is None:
-        print "Error: input graph or csv file is missing"
+        print("Error: input graph or csv file is missing")
         parser.parse_args(['-h'])
     # class O:pass
     # options=O()

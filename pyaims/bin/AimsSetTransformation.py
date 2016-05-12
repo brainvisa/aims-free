@@ -32,6 +32,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import print_function
+
 import sys
 import os
 from optparse import OptionParser
@@ -70,15 +72,15 @@ if options.destination is None and len(args) > 0:
 if len(args) > 0:
     parser.parse_args(['-h'])
 if options.transnum is None and options.transformation is None:
-    print >> sys.stderr, 'If no transformation is specified (erase mode), ' \
-        'the transformation number to erase sould be specified: -t and -n ' \
-        'options cannot be both omitted.'
+    print('If no transformation is specified (erase mode), '
+          'the transformation number to erase sould be specified: -t and -n '
+          'options cannot be both omitted.', file=sys.stderr)
     sys.exit(1)
 if options.input is None:
     parser.parse_args(['-h'])
 
-# print options
-# print args
+# print(options)
+# print(args)
 
 # look for correct file
 input = options.input
@@ -97,25 +99,25 @@ except:
         except:
             pass
 if obj is None:
-    print >> sys.stderr, 'cannot read input object', options.input
+    print('cannot read input object', options.input, file=sys.stderr)
     sys.exit(1)
 
 if options.transformation is None:
     # erase mode
-    if not hdr.has_key('transformations'):
-        print 'No transformation to erase. Nothing done.'
+    if 'transformations' not in hdr:
+        print('No transformation to erase. Nothing done.')
         sys.exit(0)
     trans = hdr['transformations']
     if ( options.transnum >= 0 and len( trans ) <= options.transnum ) \
             or (options.transnum < 0 and len(trans) < -options.transnum):
-        print >> sys.stderr, 'No such transformation in header.'
+        print('No such transformation in header.', file=sys.stderr)
         sys.exit(1)
     if options.transnum < 0:
         num = len(trans) + options.transnum
     else:
         num = options.transnum
     del trans[num]
-    if hdr.has_key('referentials'):
+    if 'referentials' in hdr:
         refs = hdr['referentials']
         if len(refs) > num:
             del refs[num]
@@ -126,11 +128,11 @@ else:
     dest = options.destination
     if dest is None:
         th = trans.header()
-        if th.has_key('destination_referential'):
+        if 'destination_referential' in th:
             dest = th['destination_referential']
             if dest == aims.StandardReferentials.mniTemplateReferentialID():
                 dest = aims.StandardReferentials.mniTemplateReferential()
-    if hdr.has_key('transformations'):
+    if 'transformations' in hdr:
         translist = hdr['transformations']
     else:
         translist = []
@@ -142,7 +144,8 @@ else:
         if ( options.transnum >= 0 and len( translist ) <= options.transnum ) \
             or (options.transnum < 0 and
                 len(translist) < -options.transnum):
-            print >> sys.stderr, 'No such transformation in header. Appending.'
+            print('No such transformation in header. Appending.',
+                  file=sys.stderr)
             transnum = len(translist)
             translist.append(trans.toVector())
         else:
@@ -150,7 +153,7 @@ else:
             if transnum < 0:
                 transnum = len(translist) + transnum
             translist[transnum] = trans.toVector()
-    if hdr.has_key('referentials'):
+    if 'referentials' in hdr:
         refs = hdr['referentials']
     else:
         refs = []
@@ -162,7 +165,7 @@ else:
         refs[transnum] = dest
 
 # write back updated information
-if hdr.has_key('file_type'):
+if 'file_type' in hdr:
     format = hdr['file_type']
 else:
     format = None

@@ -31,6 +31,9 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 from soma import aimsalgo
 from soma import aims
 import sys
@@ -52,7 +55,7 @@ parser.set_defaults( length = 20, minsize = 50 )
 graph = aims.read(options.graph_name)
 fov = aims.FoldArgOverSegment( graph )
 nv = fov.subdivizeGraph( options.length, options.minsize )
-print 'created', nv, 'new nodes'
+print('created', nv, 'new nodes')
 
 aims.write(graph, options.output_graph_name)
 

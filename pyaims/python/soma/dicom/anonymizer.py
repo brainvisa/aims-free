@@ -5,6 +5,8 @@
 # This script is not guaranteed to be complete.
 # In particular, the detection of burnt-in PHI is not managed.
 
+from __future__ import print_function
+
 from soma.dicom import tag_lists
 from soma.archive import unpack, pack, is_archive
 from tempfile import mkdtemp
@@ -14,7 +16,7 @@ from glob import glob
 import hashlib
 try:
     import dicom
-except ImportError, e:
+except ImportError as e:
     raise Exception("DICOM anonymiser requires pydicom.")
 
 def anonymize(dicom_in, dicom_out,
@@ -23,7 +25,7 @@ def anonymize(dicom_in, dicom_out,
     Configures the Anonymizer and runs it on DICOM files.
     """
     if not os.path.exists(dicom_in):
-        print "The DICOM input does not exist."
+        print("The DICOM input does not exist.")
         return
     
     is_dicom_in_archive = is_archive(dicom_in)
@@ -45,7 +47,7 @@ def anonymize(dicom_in, dicom_out,
         anon.run()
     elif os.path.isdir(wip_dicom_in):
         if os.path.isfile(wip_dicom_out):
-            print "Since the input is a directory, an output directory is expected."
+            print("Since the input is a directory, an output directory is expected.")
             return
         if not os.path.exists(wip_dicom_out):
             os.makedirs(wip_dicom_out)
@@ -59,7 +61,7 @@ def anonymize(dicom_in, dicom_out,
                 anon = Anonymizer(current_file, file_out, tags_to_keep, forced_values)
                 anon.run()
     else:
-        print "The input file type is not handled by this tool."
+        print("The input file type is not handled by this tool.")
 
     if is_dicom_in_archive:
         shutil.rmtree(wip_dicom_in)
@@ -94,18 +96,18 @@ class Anonymizer():
             try:
                 meta_data = dicom.filereader.read_file_meta_info(self._dicom_filein)
                 if meta_data[0x0002,0x0002].value == "Media Storage Directory Storage":
-                    print "This file is a DICOMDIR:", self._dicom_filein
+                    print("This file is a DICOMDIR:", self._dicom_filein)
                     return
             except:
                 pass
         except:
-            print "This file is not a DICOM file:", self._dicom_filein
+            print("This file is not a DICOM file:", self._dicom_filein)
             return
         ds.walk(self.anonymize)
         try:
             dicom.write_file(self._dicom_fileout, ds)
         except:
-            print "The anonymization fails on", self._dicom_filein
+            print("The anonymization fails on", self._dicom_filein)
             return
             
     def anonymize(self, ds, data_element):

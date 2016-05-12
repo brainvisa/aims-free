@@ -32,6 +32,9 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 import glob
 import string
 import os
@@ -48,19 +51,19 @@ def graphTransform2(g, motions, tmpg):
     else:
         tmpdat = tmpg + '.data'
     vol = glob.glob(os.path.join(tmpdat, '*.ima'))[0]
-    print 'label volume:', vol
+    print('label volume:', vol)
     for v in g.vertices():
         l = v['name'].getString()
         i = v['roi_label'].getScalar()
-        print 'node:', i, ':', l
+        print('node:', i, ':', l)
         if l in ks:
             mot = motions[l]
-            print 'transfo:', mot
+            print('transfo:', mot)
             thr = '/tmp/toto.ima'
             c = ['AimsThreshold', '-i', vol, '-o', thr, '-m', 'eq',
                  '-t', str(i), '-b']
             cs = '"' + string.join(c, '" "') + '"'
-            print cs
+            print(cs)
             os.system(cs)
             c = ['AimsResample', '-i', thr, '-o', thr, '-m', mot, '-t', 'n']
             # ... unfinished ...
@@ -69,7 +72,7 @@ def graphTransform2(g, motions, tmpg):
 def graphTransform(g, motions):
     ks = motions.keys()
     vs = g['voxel_size']
-    print 'voxel size:', vs
+    print('voxel size:', vs)
     globalmot = None
     if None in ks:
         globalmot = motions[None]
@@ -82,7 +85,7 @@ def graphTransform(g, motions):
         elif globalmot:
             mot = globalmot
         if mot:
-            print 'transform', l
+            print('transform', l)
             b2 = aims.BucketMap_VOID()
             bi = b[0]
             bo = b2[0]
@@ -93,8 +96,8 @@ def graphTransform(g, motions):
                 poi = aims.Point3d(round(po.item(0) / vs[0]),
                                    round(po.item(1) / vs[1]),
                                    round(po.item(2) / vs[2]))
-                # print p.item(0), p.item(1), p.item(2), '->', poi.item(0),
-                # poi.item(1), poi.item(2)
+                # print(p.item(0), p.item(1), p.item(2), '->', poi.item(0),
+                # poi.item(1), poi.item(2))
                 bo[poi] = 0
             # store bucket
             b._get()[0] = bo
@@ -154,17 +157,17 @@ if __name__ == '__main__':
     # gvol = '/tmp/roivol.arg'
     # c = [ 'AimsGraphConvert', '-i', gname, '-o', gvol, '--volume' ]
     # cs = '"' + string.join( c, '" "' ) + '"'
-    # print cs
+    # print(cs)
     # os.system( cs )
 
-    print 'input:', gname
-    print 'output:', outname
-    print 'transfos:', motnames
+    print('input:', gname)
+    print('output:', outname)
+    print('transfos:', motnames)
 
     g = aims.read(gname)
     motions = {}
     for l, m in motnames.items():
-        print 'read transform', m
+        print('read transform', m)
         motions[l] = aims.read(m)
 
     graphTransform(g, motions)

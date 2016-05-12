@@ -32,6 +32,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import print_function
+
 from soma import aims
 import sys
 import re
@@ -60,14 +62,14 @@ if options.filename is None:
     options.filename = []
 options.filename += args
 
-# print options
-# print args
+# print(options)
+# print(args)
 
 if not options.filename or not options.output or not options.formula:
     parser.parse_args(['-h'])
 
 formula = re.sub('I([0-9]+)', 'image[\\1]', options.formula)
-# print formula
+# print(formula)
 
 # read images
 image = [None]
@@ -90,15 +92,15 @@ for x in options.filename:
         raise TypeError('heterogeneous data: %s and %s' % (objtype, t_objtype))
     image.append(vol)
 
-# print image
+# print(image)
 
 result = eval(formula)
-# print result
+# print(result)
 
 if objtype in ('TimeTexture',):
     # reconvert numpy object to aims object
     # transpose is needed for textures
     result = getattr(aims, objtype)(np.transpose(result))
 
-print 'output type:', type(result).__name__
+print('output type:', type(result).__name__)
 aims.write(result, options.output)

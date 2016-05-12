@@ -1,5 +1,7 @@
 #!/usr/bin/env python2
 
+from __future__ import print_function
+
 import threading
 from soma import aims
 import os
@@ -10,6 +12,7 @@ import tempfile
 import shutil
 import subprocess
 import time
+import six
 
 
 def aims_test_thread_read(filenames, verbose=True):
@@ -24,10 +27,10 @@ def aims_test_thread_read(filenames, verbose=True):
 
         def __call__(self):
             if self.verbose:
-                print 'reading %s...' % self._filename
+                print('reading %s...' % self._filename)
             obj = aims.read(self._filename)
             if self.verbose:
-                print 'read %s: %s' % (self._filename, str(type(obj)))
+                print('read %s: %s' % (self._filename, str(type(obj))))
             self.lock.acquire()
             self.objnum[0] += 1
             self.lock.release()
@@ -51,11 +54,11 @@ def aims_test_thread_read(filenames, verbose=True):
         thread.join()
 
     duration = time.time() - starttime
-    print 'finished. Read %d / %d objects in %.3f seconds.' % \
-        (objnum[0], len(filenames), duration)
+    print('finished. Read %d / %d objects in %.3f seconds.'
+          % (objnum[0], len(filenames), duration))
     nmissing = len(filenames) - objnum[0]
     if nmissing != 0:
-        print 'Not all objects were loaded, %d missing.' % nmissing
+        print('Not all objects were loaded, %d missing.' % nmissing)
         raise RuntimeError('Not all objects were loaded, %d missing.'
                            % nmissing)
 
@@ -96,7 +99,7 @@ def _convertFileFormat(aimsobj, directory, prefix, format, is_soma=False):
                 formatok = True
                 break
             else:
-                # print 'could not read', newfilename
+                # print('could not read', newfilename)
                 shutil.rmtree(directory)
                 os.mkdir(directory)
         except:
@@ -120,7 +123,7 @@ def somaio_formats(aimsobj):
     formats = fclass.writeFormats()
     exts = fclass.writeExtensions()
     ext_by_format = dict([(f, []) for f in formats])
-    for ext, flist in exts.iteritems():
+    for ext, flist in six.iteritems(exts):
         for f in flist:
             ext_by_format[f].append(ext)
     return ext_by_format
@@ -136,7 +139,7 @@ def somaio_extensions(aimsobj, format):
         else:
             return []
     exts = fclass.writeExtensions()
-    exts_for_format = [ext for ext, formats in exts.iteritems()
+    exts_for_format = [ext for ext, formats in six.iteritems(exts)
                        if format in formats]
     return exts_for_format
 
@@ -158,16 +161,16 @@ def test_all_formats(filename, number=30, separate_process=False):
         # JP2 writer in Qt (4.8.1 at least) systematically crashes.
         if format in ('JP2'):
             continue
-        print 'testing: %s / %s, format: %s' % (ot[0], ot[1], format)
+        print('testing: %s / %s, format: %s' % (ot[0], ot[1], format))
         try:
             directory = tempfile.mkdtemp(prefix='aims_thread_test')
             newfilename = _convertFileFormat(aimsobj, directory, 'aims_test',
                                              format, is_soma)
             if not newfilename:
-                print 'could not generate format', format
+                print('could not generate format', format)
                 # shutil.rmtree( directory )
                 continue
-            print 'testing read on %s...' % newfilename
+            print('testing read on %s...' % newfilename)
             try:
                 if separate_process:
                     subprocess.check_call([sys.executable, '-m',
@@ -176,16 +179,16 @@ def test_all_formats(filename, number=30, separate_process=False):
                 else:
                     aims_test_thread_read([newfilename] * number,
                                           verbose=False)
-                print 'Passed.'
+                print('Passed.')
                 safe_formats.append(format)
                 # shutil.rmtree( directory )
             except:
-                print 'format %s is unsafe.' % format
+                print('format %s is unsafe.' % format)
                 success = False
                 unsafe_formats.append(format)
         finally:
             shutil.rmtree(directory)
-    print 'All done for %s / %s. Success =' % ot, success
+    print('All done for %s / %s. Success =' % ot, success)
     if not success:
         return {ot: unsafe_formats}, {ot: safe_formats}
     return {}, {ot: safe_formats}
@@ -215,7 +218,7 @@ if __name__ == '__main__':
 
     filenames = options.infiles + args
     if len(filenames) == 0:
-        print 'no input files.'
+        print('no input files.')
         parser.parse_args(['-h'])
     if options.number == 0:
         if len(filenames) == 1 or options.all:
@@ -246,16 +249,16 @@ if __name__ == '__main__':
                 unsafe_formats.update(tested_formats[0])
                 safe_formats.update(tested_formats[1])
             if len(unsafe_formats) != 0:
-                print 'Results:'
-                print 'unsafe formats:'
-                print unsafe_formats
-                print 'safe formats:'
-                print safe_formats
+                print('Results:')
+                print('unsafe formats:')
+                print(unsafe_formats)
+                print('safe formats:')
+                print(safe_formats)
                 raise RuntimeError('Some tests failed.')
             else:
-                print 'OK.'
-                print 'safe formats:'
-                print safe_formats
+                print('OK.')
+                print('safe formats:')
+                print(safe_formats)
         else:
             filenames = filenames * num
             aims_test_thread_read(filenames, verbose=not options.silent)

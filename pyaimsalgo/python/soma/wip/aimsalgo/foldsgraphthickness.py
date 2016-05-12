@@ -31,6 +31,9 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from  __future__  import print_function
+
 from soma import aims
 from soma import aimsalgo
 import numpy
@@ -48,7 +51,7 @@ class FoldsGraphThickness:
     self.voronoi_vol = voronoi
 
   def preProcess(self):
-    print "preProcess"
+    print("preProcess")
     voxel_size = self.lgw_vol.header()["voxel_size"]
 
     def printbucket( bck, vol, value ):
@@ -79,10 +82,10 @@ class FoldsGraphThickness:
           pass
 
       f1 = aims.FastMarching()
-      print "Voronoi in Grey matter"
+      print("Voronoi in Grey matter")
       f1.doit(seed, [-self.LCR_label, -self.GM_label], seed_label_list)
       self.voronoi_vol = f1.voronoiVol()
-      print "Voronoi in White matter"
+      print("Voronoi in White matter")
       n = numpy.array( voronoi_vol, copy=False )
       n[ n == -1 ] = -100 # avoid value -1 which doesn't seem to work (!)
       del n
@@ -102,13 +105,13 @@ class FoldsGraphThickness:
         mesh_vertex_y = int(round(mesh_vertex[1]/voxel_size[1]))
         mesh_vertex_z = int(round(mesh_vertex[2]/voxel_size[2]))
         text.push_back(self.voronoi_vol.at(int(round(mesh_vertex[0]/voxel_size[0])), int(round(mesh_vertex[1]/voxel_size[1])), int(round(mesh_vertex[2]/voxel_size[2]))))
-        #print str(compteur)
+        #print(str(compteur))
       return tex
 
-    print 'extracting meshes'
+    print('extracting meshes')
     self.gm_wm_tex = vorTexCreation(self.gm_wm_mesh)
     self.gm_lcr_tex = vorTexCreation(self.gm_lcr_mesh)
-    print 'making thickness map'
+    print('making thickness map')
     f1 = aims.FastMarching('26', True)
     dist = f1.doit(self.lgw_vol, [self.GM_label], [self.WM_label, self.LCR_label])
     self.mid_interface_bck = f1.midInterface(self.WM_label, self.LCR_label)
@@ -132,7 +135,7 @@ class FoldsGraphThickness:
     self.fold_graph['CSF_volume'] = LCR_voxels * voxel_volume
 
   def vertexProcess(self):
-    print "vertexProcess"
+    print("vertexProcess")
     voxel_size = self.lgw_vol.header()["voxel_size"]
     voxel_volume = voxel_size[0]*voxel_size[1]*voxel_size[2]
     coords = self.mid_interface.arraydata()!=-1
@@ -145,20 +148,21 @@ class FoldsGraphThickness:
       v['grey_surface_area'] = aims.SurfaceManip.meshArea(cut_mesh)
       #aims.GraphManip.storeAims( self.fold_graph, v, 'cortexHemi',  aims.rc_ptr_AimsTimeSurface_3_VOID(cut_mesh))
 
-    print 'calculating vertices thickness'
+    print('calculating vertices thickness')
     fat = aims.FoldGraphAttributes( self.voronoi_vol, self.fold_graph )
     fat.thickness( self.mid_interface_bck, self.voronoi_vol )
 
-    print 'calculating GM and CSF volumes'
+    print('calculating GM and CSF volumes')
     fat.greyAndCSFVolumes( self.lgw_vol, self.voronoi_vol )
 
-    print 'calculating surfaces areas'
+    print('calculating surfaces areas')
     compteur = 0
     n = len(self.fold_graph.vertices())
     for v in self.fold_graph.vertices():
       try:
         skel = v['skeleton_label']
-        print "skel : " + str(skel) + " compteur : " + str(compteur) + '/' + str(n)
+        print("skel : " + str(skel) + " compteur : " + str(compteur) + '/'
+              + str(n))
         compteur = compteur + 1
         vertex_mesh(self, v, skel)
       except:
