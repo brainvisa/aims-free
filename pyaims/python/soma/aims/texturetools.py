@@ -8,6 +8,10 @@ import exceptions
 import numpy
 import os
 import six
+import sys
+
+if sys.version_info[0] >= 3:
+    xrange = range
 
 
 def mergeLabelsFromTexture(tex, labels_list, new_label):

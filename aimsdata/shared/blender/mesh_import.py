@@ -38,6 +38,8 @@ Group: 'Import'
 Tooltip: 'Import BrainVISA mesh File Format (.mesh)'
 """
 
+from __future__ import print_function
+
 __author__ = "Yann Cointepas"
 __url__ = ("BrainVISA project, http://brainvisa.info",)
 __version__ = "1.0"
@@ -57,6 +59,11 @@ Notes:<br>
 import struct
 import Blender
 from Blender import NMesh
+import sys
+
+if sys.version_info[0] >= 3:
+    xrange = range
+
 
 def readAndUnpack( format, file ):
   return struct.unpack( format, file.read( struct.calcsize( format ) ) )
@@ -158,17 +165,17 @@ class MeshReader:
 def read(filename):
   reader = MeshReader( filename )
   mesh = NMesh.New()
-  print reader.verticesCount, 'vertices'
+  print(reader.verticesCount, 'vertices')
   for x, y, z in reader.vertices():
     mesh.verts.append( NMesh.Vert( x, y, z ) )
   count = 0
-  print reader.normalsCount, 'normals'
+  print(reader.normalsCount, 'normals')
   for x, y, z in reader.normals():
     mesh.verts[ count ].no[ 0 ] = x
     mesh.verts[ count ].no[ 1 ] = y
     mesh.verts[ count ].no[ 2 ] = z
     count += 1
-  print reader.facesCount, 'faces'
+  print(reader.facesCount, 'faces')
   for f in reader.faces():
     face = NMesh.Face( [mesh.verts[i] for i in f] )
     face.smooth = True

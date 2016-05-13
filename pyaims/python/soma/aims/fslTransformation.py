@@ -46,6 +46,10 @@ from soma.minf.api import readMinf
 import numpy
 import types
 import os
+import sys
+
+if sys.version_info[0] >= 3:
+    basestring = str
 
 
 def fslMatToTrm(matfile, srcimage, dstimage):
@@ -117,7 +121,7 @@ def fslMatToTrm(matfile, srcimage, dstimage):
     #   vsm2 * s2m2 * inv(vsd2) * inv(flip2)
     # with mot between both parts.
 
-    if type(srcimage) in types.StringTypes:
+    if isinstance(srcimage, basestring):
         f = aims.Finder()
         f.check(srcimage)
         im1 = f.header()
@@ -126,7 +130,7 @@ def fslMatToTrm(matfile, srcimage, dstimage):
             im1 = srcimage.header()
         except:  # otherwise it is considered to already be a header
             im1 = srcimage
-    if type(dstimage) in types.StringTypes:
+    if isinstance(dstimage, basestring):
         f = aims.Finder()
         f.check(dstimage)
         im2 = f.header()

@@ -33,6 +33,10 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 from soma import aims
 from optparse import OptionParser
+import sys
+
+if sys.version_info[0] >= 3:
+    xrange = range
 
 parser = OptionParser(description='Graphs concatenation')
 parser.add_option('-o', '--output', dest='output', help='output graph')

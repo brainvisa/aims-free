@@ -35,6 +35,10 @@ from __future__ import print_function
 
 from soma import aims
 import six
+import sys
+
+if sys.version_info[0] >= 3:
+    basestring = str
 
 
 def same_graphs(ref_graph, test_graph, verbose=False):

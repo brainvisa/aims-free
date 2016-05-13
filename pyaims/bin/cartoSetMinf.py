@@ -38,6 +38,10 @@ import sys
 import os
 from optparse import OptionParser
 
+if sys.version_info[0] >= 3:
+    xrange = range
+
+
 parser = OptionParser(description='set/create properties in a .minf '
                       'header')
 parser.add_option('-i', '--inpput', dest='input', help='input .minf')

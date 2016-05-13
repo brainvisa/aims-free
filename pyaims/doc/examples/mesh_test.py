@@ -31,28 +31,35 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 from soma import aims
 import sys
 
-mesh = aims.read('/home/dr144257/data/ra_head.mesh')
-print 'mesh:', mesh
-h = mesh.header()
-print 'header:', h
+if sys.version_info[0] >= 3:
+    xrange = range
 
-print 'timesteps:', mesh.size()
+
+mesh = aims.read('/home/dr144257/data/ra_head.mesh')
+print('mesh:', mesh)
+h = mesh.header()
+print('header:', h)
+
+print('timesteps:', mesh.size())
 for t in xrange(mesh.size()):
-    print 'time:', t
+    print('time:', t)
     v = mesh.vertex(t)
-    print 'vertices:', v
+    print('vertices:', v)
     n = mesh.normal(t)
-    print 'normals:', n
+    print('normals:', n)
     p = mesh.polygon(t)
-    print 'polygons:', p
+    print('polygons:', p)
 
 fileout = '/tmp/toto.mesh'
-print 'writing mesh to', fileout
+print('writing mesh to', fileout)
 w = aims.Writer()
 w.write(mesh, fileout)
-print 'object type:', w.writtenObjectType()
-print 'data type:', w.writtenObjectDataType()
-print 'full type:', w.writtenObjectFullType()
+print('object type:', w.writtenObjectType())
+print('data type:', w.writtenObjectDataType())
+print('full type:', w.writtenObjectFullType())

@@ -31,26 +31,32 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 from soma import aims
 import sys
 
+if sys.version_info[0] >= 3:
+    xrange = range
+
 bck = aims.read(
     '/neurospin/lnao/Panabase/data/diffusion/chaos/t1mri/default_acquisition/default_analysis/folds/3.0/base2005_manual/Rchaos_base2005_manual.data/ss_Bucket.bck')
-print 'bucket:', bck
+print('bucket:', bck)
 
-print 'timesteps:', bck.size()
+print('timesteps:', bck.size())
 for t in xrange(bck.size()):
-    print 'time:', t
+    print('time:', t)
     b = bck[t]
-    print 'bucket:', b, ', size:', b.size()
+    print('bucket:', b, ', size:', b.size())
     for p in b.keys():
         sys.stdout.write(str(p.list()) + ' ')
     print
 
 fileout = '/tmp/toto.bck'
-print 'writing bucket to', fileout
+print('writing bucket to', fileout)
 w = aims.Writer()
 w.write(bck, fileout)
-print 'object type:', w.writtenObjectType()
-print 'data type:', w.writtenObjectDataType()
-print 'full type:', w.writtenObjectFullType()
+print('object type:', w.writtenObjectType())
+print('data type:', w.writtenObjectDataType())
+print('full type:', w.writtenObjectFullType())

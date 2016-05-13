@@ -4,6 +4,8 @@ Inspired by Fitpoly.m, courtesy of Alexandre Vignaud.
 """
 
 from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import itertools
 
@@ -14,7 +16,7 @@ def meshgrid_volume(volume):
     dim_z = volume.getSizeZ()
     step_x, step_y, step_z = volume.header()["voxel_size"][:3]
     #step_x, step_y, step_z = ( 4, 4, 4 )
-    #print step_x, step_y, step_z
+    #print(step_x, step_y, step_z)
     grid = np.mgrid[0:step_x*dim_x:step_x, 0:step_y*dim_y:step_y, 0:step_z*dim_z:step_z]
     return (grid[0], grid[1], grid[2])
     #return np.meshgrid(step_x * np.arange(dim_x),

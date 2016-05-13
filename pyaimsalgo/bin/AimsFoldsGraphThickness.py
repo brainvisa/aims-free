@@ -32,6 +32,9 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 from soma import aimsalgo
 from soma import aims
 from soma.wip.aimsalgo import foldsgraphthickness
@@ -83,7 +86,7 @@ w = aims.Writer()
 w.write(graph_out, options.output_graph_name)
 if options.output_mid_interface_name:
   mid=fd.mid_interface
-  print "mid : " ,type(mid), mid.getSizeX()
+  print("mid : " ,type(mid), mid.getSizeX())
   w.write(mid._get(), options.output_mid_interface_name)
 
 if options.output_lcr_grey_white_name:

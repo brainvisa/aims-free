@@ -11,6 +11,10 @@
 
 import numpy
 from soma import aims
+import sys
+
+if sys.version_info[0] >= 3:
+    xrange = range
 
 
 def coulomb_force(p1, p2, has_link):

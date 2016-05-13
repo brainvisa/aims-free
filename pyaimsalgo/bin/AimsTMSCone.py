@@ -32,6 +32,9 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 from soma import aims, aimsalgo
 from optparse import OptionParser
 import numpy, math
@@ -74,7 +77,7 @@ parser.set_defaults( normalradius = 20, cortexvalue=None )
 
 (options, args) = parser.parse_args()
 
-#print options
+#print(options)
 if options.headmeshfile is None or options.conefile is None \
   or options.stimpoint is None or options.baseradius is None \
   or options.depth is None \
@@ -104,26 +107,26 @@ ntarget.normalize()
 tline = stimpoint - targetpoint
 if tline.norm() < 5:
   tline = ntarget
-  print 'target is on the head: target line is the normal'
+  print('target is on the head: target line is the normal')
 else:
   tline.normalize()
 cosalpha = tline.dot( ntarget )
 if cosalpha > 1.:
   cosalpha = 1.
 alpha = math.acos( cosalpha )
-print 'stimulation position on head:', stimpoint.list()
-print 'normal:', ntarget.list()
-print 'target line:', tline.list()
-print '(normal, target line) angle:', alpha
-print 
+print('stimulation position on head:', stimpoint.list())
+print('normal:', ntarget.list())
+print('target line:', tline.list())
+print('(normal, target line) angle:', alpha)
+print()
 endpoint = stimpoint - ntarget * depth
 if options.writeresults:
   f = open( options.writeresults, 'w' )
-  print >> f, 'target:', targetpoint.list()
-  print >> f, 'coil:', stimpoint.list()
-  print >> f, 'normal:', ntarget.list()
-  print >> f, 'target_line:', tline.list()
-  print >> f, 'normal_target_angle:', alpha
+  print('target:', targetpoint.list(), file=f)
+  print('coil:', stimpoint.list(), file=f)
+  print('normal:', ntarget.list(), file=f)
+  print('target_line:', tline.list(), file=f)
+  print('normal_target_angle:', alpha, file=f)
   f.close()
   del f
 
@@ -163,12 +166,12 @@ if options.targetlinemesh:
   aims.write( tlmesh, options.targetlinemesh )
 
 if options.stimzone:
-  print 'masking stimulation zone...'
+  print('masking stimulation zone...')
   # read brain mask
   brain = aims.read( options.brain )
   vs = brain.header()[ 'voxel_size' ]
   dims = brain.header()[ 'volume_dimension' ]
-  dimm = [ dims[i] * vs[i] for i in xrange( 3 ) ]
+  dimm = [ dims[i] * vs[i] for i in range( 3 ) ]
   # intersection with the stimulation zone
   #  (take a rough bounding box)
   bmin = numpy.min( ( stimpoint, endpoint ), axis=0 )
@@ -188,7 +191,7 @@ if options.stimzone:
       True )
 
   zone = stzone[0]
-  print 'stimulation zone:', zone.size(), 'voxels (', \
-    zone.size() * vs[0] * vs[1] * vs[2], 'mm3)'
+  print('stimulation zone:', zone.size(), 'voxels (',
+        zone.size() * vs[0] * vs[1] * vs[2], 'mm3)')
   aims.write( stzone, options.stimzone )
 

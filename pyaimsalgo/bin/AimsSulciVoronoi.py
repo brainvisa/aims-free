@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import sys, os
 from soma import aims, aimsalgo
 import numpy
@@ -68,10 +70,10 @@ for v in fold_graph.vertices():
     pass
 
 f1 = aims.FastMarching()
-print "Voronoi in Grey matter"
+print("Voronoi in Grey matter")
 f1.doit(seed, [-LCR_label, -GM_label], seed_label_list)
 voronoi_vol = f1.voronoiVol()
-print "Voronoi in White matter"
+print("Voronoi in White matter")
 f1 = aims.FastMarching()
 n = numpy.array( voronoi_vol, copy=False )
 n[ n == -1 ] = -100

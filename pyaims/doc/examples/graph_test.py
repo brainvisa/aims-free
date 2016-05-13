@@ -31,6 +31,9 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 from soma import aims
 import sys
 
@@ -40,39 +43,39 @@ infile = aims.carto.Paths.findResourceFile(
 if not infile:
     infile = 'Rbase.arg'
 graph = aims.read(infile)
-print 'graph:', graph
-print 'global properties:', graph.keys()
-print 'nodes:', graph.order()
-print 'relations:', graph.edgesSize()
+print('graph:', graph)
+print('global properties:', graph.keys())
+print('nodes:', graph.order())
+print('relations:', graph.edgesSize())
 
 # iterate on properties
 for p in graph:
-    print 'property:', p, ', type:', \
-        (graph[p].type() if isinstance(graph[p], aims.Object)
-         else type(graph[p]))
+    print('property:', p, ', type:',
+          (graph[p].type() if isinstance(graph[p], aims.Object)
+           else type(graph[p])))
 
 # iterate on vertices
 for v in graph.vertices():
-    print 'vertex:', v.getSyntax(), ', edges:', v.edgesSize()
-    if v.has_key('name'):
-        print '  name:', v['name']
-    if v.has_key('label'):
-        print '  label:', v['label']
+    print('vertex:', v.getSyntax(), ', edges:', v.edgesSize())
+    if 'name' in v:
+        print('  name:', v['name'])
+    if 'label' in v:
+        print('  label:', v['label'])
     try:
         # access mesh in attribute 'aims_Tmtktri'
         mesh = v['aims_Tmtktri']
-        print 'mesh:', mesh, ', polygons:', mesh.polygon().size()
+        print('mesh:', mesh, ', polygons:', mesh.polygon().size())
     except:
         pass
 
 # iterate on edges
 for e in graph.edges():
-    print 'edge:', e.getSyntax(), ', links', e.verticesSize(), 'vertices'
+    print('edge:', e.getSyntax(), ', links', e.verticesSize(), 'vertices')
 
 fileout = '/tmp/toto.arg'
-print 'writing graph to', fileout
+print('writing graph to', fileout)
 w = aims.Writer()
 w.write(graph, fileout)
-print 'object type:', w.writtenObjectType()
-print 'data type:', w.writtenObjectDataType()
-print 'full type:', w.writtenObjectFullType()
+print('object type:', w.writtenObjectType())
+print('data type:', w.writtenObjectDataType())
+print('full type:', w.writtenObjectFullType())

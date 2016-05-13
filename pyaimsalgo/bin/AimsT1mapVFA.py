@@ -34,6 +34,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import print_function
+
 import sys
 import numpy as np
 from soma import aims, aimsalgo
@@ -95,7 +97,7 @@ B1map_volume_corr = BAFI_data.fix_b1_map(
     B1map_volume, smooth_type=options.smooth_type, gaussian=options.gaussian,
     output_median=output_median)
 if output_median:
-    print 'writing median.'
+    print('writing median.')
     aims.write(B1map_volume_corr[1], options.out_b1map_median)
     B1map_volume = B1map_volume_corr[0]
 else:
@@ -111,10 +113,10 @@ B1map_vs = np.array(B1map_volume.header()['voxel_size'][:3])
 GRE_vs = np.array(GRE_5deg.header()['voxel_size'][:3])
 
 transform = None
-if BAFI_amplitude.header().has_key('transformations') \
-        and BAFI_amplitude.header().has_key('referentials') \
-        and GRE_5deg.header().has_key('transformations') \
-        and GRE_5deg.header().has_key('referentials'):
+if 'transformations' in BAFI_amplitude.header() \
+        and 'referentials' in BAFI_amplitude.header() \
+        and 'transformations' in GRE_5deg.header() \
+        and 'referentials' in GRE_5deg.header():
     trans1 = None
     trans2 = None
     refs = list(BAFI_amplitude.header()['referentials'])
@@ -129,9 +131,9 @@ if BAFI_amplitude.header().has_key('transformations') \
             GRE_5deg.header()['transformations'][ref2])
     if trans1 and trans2:
         transform = trans2 * trans1.inverse()
-        print 'transform:', transform
+        print('transform:', transform)
 if not transform:
-    print 'Warning, transformation info not found in image headers. Assuming same field of view (which might cause errors).'
+    print('Warning, transformation info not found in image headers. Assuming same field of view (which might cause errors).')
     translation = (B1map_vs - GRE_vs) / 2
     transform = aims.AffineTransformation3d()
     transform.setTranslation(translation)
@@ -160,18 +162,18 @@ B1map_ar[B1map_ar<0] = 0
 
 GRE_data = t1mapping.GREData2FlipAngles(GRE_5deg, GRE_20deg)
 GRE_data.flip_angles = [5, 20]  # degrees
-if GRE_5deg.header().has_key('flip_angle'):
+if 'flip_angle' in GRE_5deg.header():
     GRE_data.flip_angles[0] = GRE_5deg.header()['flip_angle']
 else:
-    print 'warning, cannot determine flip angle in low angle image. Taking %f.' % GRE_data.flip_angles[0]
-if GRE_20deg.header().has_key('flip_angle'):
+    print('warning, cannot determine flip angle in low angle image. Taking %f.' % GRE_data.flip_angles[0])
+if 'flip_angle' in GRE_20deg.header():
     GRE_data.flip_angles[1] = GRE_20deg.header()['flip_angle']
 else:
-    print 'warning, cannot determine flip angle in high angle image. Taking %f.' % GRE_data.flip_angles[1]
-if GRE_5deg.header().has_key('tr'):
+    print('warning, cannot determine flip angle in high angle image. Taking %f.' % GRE_data.flip_angles[1])
+if 'tr' in GRE_5deg.header():
     GRE_data.repetition_time = GRE_5deg.header()['tr']  # milliseconds
 else:
-    print 'warning, cannot determine repetition time. Taking 14 ms.'
+    print('warning, cannot determine repetition time. Taking 14 ms.')
     GRE_data.repetition_time = 14  # milliseconds
 
 T1map = t1mapping.t1mapping_VFA(B1map, GRE_data)

@@ -51,6 +51,10 @@ from soma.aimsalgo import Samplable_FLOAT_3
 from soma.wip.aimsalgo.transform import BendingTransform
 from soma.wip.aimsalgo.transform import TaperingTransform
 
+if sys.version_info[0] >= 3:
+    xrange = range
+
+
 class SuperQuadricSamplable( Samplable_FLOAT_3 ) :
 
 	"""
