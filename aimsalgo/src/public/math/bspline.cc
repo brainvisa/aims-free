@@ -80,7 +80,7 @@ BSpline::~BSpline()
 
 double BSpline::operator() ( double x ) const
 {
-  return at(x);
+  return this->at(x);
 }
 
 double BSpline::at( double x ) const
@@ -104,14 +104,19 @@ double BSpline::at( double x ) const
 double BSpline::derivative( double x, unsigned n ) const
 {
   if( n == 0 )
-    return at(x);
+    return this->at(x);
+  else if( n > this->order() )
+    return 0.;
   else
   {
-    ASSERT( n <= order() );
-    x = ( _scale != 1. ? x/_scale : x ) + ( _shift ? 0.5 : 0. );
+    x = ( this->scale() != 1. ? x/this->scale() : x ) + ( this->shifted() ? 0.5 : 0. );
     BSpline bminus( order() - 1 ); // centered, unscaled
-    return bminus.derivative( x + .5, n - 1 )
-           - bminus.derivative( x - .5, n - 1 );
+    double result =  ( dO()/2. + .5 + x ) / dO()
+           * bminus.derivative( x + .5, n )
+           + ( dO()/2. + .5 - x ) / dO()
+           * bminus.derivative( x - .5, n )
+           + ( bminus.derivative( x + .5, n - 1 ) - bminus.derivative( x - .5 , n - 1 ) ) * double(n) / dO();
+    return result;
   }
 }
 
@@ -356,8 +361,55 @@ double FastBSpline::derivative( double x, unsigned n ) const
   else
   {
     ASSERT( n <= this->order() );
-    throw std::logic_error( "aims::FastBSpline: derivative nor implemented." );
-    return 0;
+    // throw std::logic_error( "aims::FastBSpline: derivative not implemented." );
+
+    x = ( this->scale() != 1. ? x / this->scale() : x ) +
+        ( this->shifted() ? 0.5 : 0. );
+    double sign = ( x < 0 && n % 2 ? -1. /* antisym if odd */
+                                   : 1.  /* sym if even */ );
+    x = std::abs( x );
+    double result = 0;
+    switch( this->order() )
+    {
+      case 1: result = ( x < 1.0 ? -1.0
+                                 : 0.0 );
+        break;
+      case 2:
+        switch( n )
+        {
+          case 1: result = ( x < 0.5 ? -2.0 * x :
+                             x < 1.5 ? x - 1.5
+                                     : 0.0 );
+            break;
+          case 2: result = ( x < 0.5 ? -2.0 :
+                             x < 1.5 ? 1.0
+                                     : 0.0 );
+            break;
+        }
+      case 3:
+        switch( n )
+        {
+          case 1: result = ( x < 1.0 ? 1.5 * x * x - 2.0 * x :
+                             x < 2.0 ? -0.5 * ( 2.0 - x ) * ( 2.0 - x )
+                                     : 0.0 );
+            break;
+          case 2: result = ( x < 1.0 ? 3.0 * x - 2.0 :
+                             x < 2.0 ? 2.0 - x
+                                     : 0.0 );
+            break;
+          case 3: result = ( x < 1.0 ? 3.0 :
+                             x < 2.0 ? -1.0
+                                     : 0.0 );
+            break;
+        }
+    default:
+      throw std::invalid_argument( "aims::FastBSpline: derivative " +
+                                   carto::toString(n) +
+                                   " of order " +
+                                   carto::toString(order()) +
+                                   " not implemented." );
+    }
+    return result * sign;
   }
 }
 
@@ -487,6 +539,10 @@ double TabulBSpline::derivative( double x, unsigned n ) const
 
   ASSERT( n <= this->order() && n < _values.size() );
   size_t i = index(x);
+
+  x = ( this->scale() != 1. ? x / this->scale() : x ) +
+      ( this->shifted() ? 0.5 : 0. ); // for symmetry test
+
   if( !is_valid(i) )
     return 0.;
   else

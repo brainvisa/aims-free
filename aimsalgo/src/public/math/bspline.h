@@ -228,9 +228,14 @@ namespace aims {
     /// Compute value
     /// @{
     /// spline value at point x
+    ///
+    /// Implemented for orders 0 to 7
+    virtual
     double   at( double x )                     const;
     /// n-th derivative of the spline at point x
-    /// \warning DO NOT USE: not impleùented yet
+    ///
+    /// Implemented for orders 0 to 3
+    virtual
     double   derivative( double x, unsigned n = 1 ) const;
     /// @}
 
@@ -262,8 +267,10 @@ namespace aims {
     /// Get value
     /// @{
     /// spline value at point x
+    virtual
     double   at( double x )                     const;
     /// n-th derivative of the spline at point x
+    virtual
     double   derivative( double x, unsigned n = 1 ) const;
     /// @}
 
@@ -275,24 +282,30 @@ namespace aims {
     ///
     /// @{
     /// (Re)set all parameters
+    virtual
     void reset( unsigned order = 3,
                 unsigned nder = 1,
                 float scale = 1.,
                 bool shifted = false,
                 size_t length = std::numeric_limits<unsigned short>::max() - 1 );
     /// order
+    virtual
     void setOrder( unsigned order );
     /// number of derivative stored
+    virtual
     void setNbDer( unsigned nder );
     /// array length
+    virtual
     void setLength( size_t length );
     /// @}
 
     /// Get parameters
     /// @{
     /// number of derivative stored
+    virtual
     unsigned nder()     const;
     /// array length
+    virtual
     size_t   length()   const;
     /// @}
 
@@ -324,7 +337,9 @@ namespace aims {
 
     /// Get value
     /// @{
+    virtual
     double operator() ( int x ) const;
+    virtual
     double at( int x ) const;
     /// @}
 
@@ -336,14 +351,19 @@ namespace aims {
     ///
     /// @{
     /// (Re)set all parameters
+    virtual
     void reset( unsigned order = 3, float scale = 1., bool shifted = false );
     /// order
+    virtual
     void setOrder( unsigned order );
     /// scale
+    virtual
     void setScale( float scale );
     /// shifted
+    virtual
     void setShifted( bool shifted = true );
     /// centered
+    virtual
     void setCentered( bool centered = true );
     /// @}
 
