@@ -41,7 +41,7 @@ namespace aims {
 
   InterpolatedVolume::InterpolatedVolume():
     _order( 3 ),
-    _spline( new FastBSpline( 3 ) ),
+    _spline( new TabulBSpline( 3, 3 ) ),
     _coeff( (carto::Volume<double> *)0 )
   {}
 
@@ -72,13 +72,13 @@ namespace aims {
   double InterpolatedVolume::at( double x, double y,
                                  double z, long t ) const
   {
-    int half = (int)std::floor( (_order + 1) / 2 );
-    Point3dl low( (long)(std::floor(x)) - half + 1,
-                  (long)(std::floor(y)) - half + 1,
-                  (long)(std::floor(z)) - half + 1 );
-    Point3dl upp( (long)(std::floor(x)) + half,
-                  (long)(std::floor(y)) + half,
-                  (long)(std::floor(z)) + half );
+    double half = (_order + 1) / 2.;
+    Point3dl low( (long)std::ceil(x - half),
+                  (long)std::ceil(y - half),
+                  (long)std::ceil(z - half) );
+    Point3dl upp( (long)std::floor(x + half),
+                  (long)std::floor(y + half),
+                  (long)std::floor(z + half) );
 
     // 2d cases
     bool is2d = _coeff.getSizeZ() == 1;
@@ -114,13 +114,13 @@ namespace aims {
   InterpolatedVolume::derivative( double x, double y,
                                   double z, long t ) const
   {
-    int half = (int)std::floor( (_order + 1) / 2 );
-    Point3dl low( (long)(std::floor(x)) - half + 1,
-                  (long)(std::floor(y)) - half + 1,
-                  (long)(std::floor(z)) - half + 1 );
-    Point3dl upp( (long)(std::floor(x)) + half,
-                  (long)(std::floor(y)) + half,
-                  (long)(std::floor(z)) + half );
+    double half = (_order + 1) / 2.;
+    Point3dl low( (long)std::ceil(x - half),
+                  (long)std::ceil(y - half),
+                  (long)std::ceil(z - half) );
+    Point3dl upp( (long)std::floor(x + half),
+                  (long)std::floor(y + half),
+                  (long)std::floor(z + half) );
 
     // 2d cases
     bool is2d = _coeff.getSizeZ() == 1;
@@ -164,7 +164,7 @@ namespace aims {
   InterpolatedVolume::nderivative( unsigned n, double x, double y,
                                    double z, long t ) const
   {
-    ASSERT( n < _order && n <= 4 ); //< else we cannot store it in a volume
+    ASSERT( n <= _order && n <= 4 ); //< else we cannot store it in a volume
 
     carto::VolumeRef<double> value;
     if( n == 1 )
@@ -189,13 +189,13 @@ namespace aims {
     b->fill(0.);
     b(0) = 1.;
 
-    int half = (int)std::floor( (_order + 1) / 2 );
-    Point3dl low( (long)(std::floor(x)) - half + 1,
-                  (long)(std::floor(y)) - half + 1,
-                  (long)(std::floor(z)) - half + 1 );
-    Point3dl upp( (long)(std::floor(x)) + half,
-                  (long)(std::floor(y)) + half,
-                  (long)(std::floor(z)) + half );
+    double half = (_order + 1) / 2.;
+    Point3dl low( (long)std::ceil(x - half),
+                  (long)std::ceil(y - half),
+                  (long)std::ceil(z - half) );
+    Point3dl upp( (long)std::floor(x + half),
+                  (long)std::floor(y + half),
+                  (long)std::floor(z + half) );
 
     // 2d cases
     bool is2d = _coeff.getSizeZ() == 1;
