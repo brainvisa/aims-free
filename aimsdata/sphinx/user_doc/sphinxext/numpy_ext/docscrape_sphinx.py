@@ -6,6 +6,7 @@ import sphinx
 from docscrape import NumpyDocString
 from docscrape import FunctionDoc
 from docscrape import ClassDoc
+import six
 
 
 class SphinxDocString(NumpyDocString):
@@ -137,7 +138,7 @@ class SphinxDocString(NumpyDocString):
             return out
 
         out += ['.. index:: %s' % idx.get('default', '')]
-        for section, references in idx.iteritems():
+        for section, references in six.iteritems(idx):
             if section == 'default':
                 continue
             elif section == 'refguide':

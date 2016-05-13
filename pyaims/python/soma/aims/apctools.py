@@ -35,6 +35,11 @@ __docformat__ = 'restructuredtext en'
 
 from soma import aims
 import types
+import sys
+
+if sys.version_info[0] >= 3:
+    xrange = range
+    basestring = str
 
 
 def apcRead(filename, imagefile=None):
@@ -90,7 +95,7 @@ def apcRead(filename, imagefile=None):
     if imagefile is None:
         return apcdict
 
-    if type(imagefile) in types.StringTypes:
+    if isinstqnce(imagefile, basestring):
         f = aims.Finder()
         if f.check(imagefile):
             image = f.header()
@@ -101,8 +106,8 @@ def apcRead(filename, imagefile=None):
             image = imagefile.header()
         except:  # otherwise it is considered to already be a header
             image = imagefile
-            if not hasattr( image, 'has_key' ) \
-                    or not image.has_key('voxel_size'):
+            if not hasattr( image, 'keys' ) \
+                    or 'voxel_size' not in image:
                 image = {'voxel_size': imagefile}  # directly the VS list ?
     vs = image['voxel_size']
     if len(acm) != 3:
@@ -178,7 +183,7 @@ def apcTransform(apcdict, transform, outimagevoxelsize):
     Coordinates are transformed in the ``apcdict`` dictionary, which is
     modified in-place.
     '''
-    if type(outimagevoxelsize) in types.StringTypes:
+    if isinstance(outimagevoxelsize, basestring):
         f = aims.Finder()
         if f.check(outimagevoxelsize):
             outhdr = f.header()
@@ -189,8 +194,8 @@ def apcTransform(apcdict, transform, outimagevoxelsize):
             outhdr = outimagevoxelsize.header()
         except:  # otherwise it is considered to already be a header
             outhdr = outimagevoxelsize
-            if not hasattr( outhdr, 'has_key' ) \
-                    or not outhdr.has_key('voxel_size'):
+            if not hasattr( outhdr, 'keys' ) \
+                    or 'voxel_size' not in outhdr:
                 outhdr = {'voxel_size': outhdr}  # directly the VS list ?
     outvs = outhdr['voxel_size']
     for p in ('ac', 'pc', 'ih'):

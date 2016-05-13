@@ -31,8 +31,15 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 from soma import aims
 import sys
+
+if sys.version_info[0] >= 3:
+    xrange = range
+
 
 app = aims.AimsApplication(sys.argv, 'Volume test in python')
 
@@ -44,9 +51,9 @@ infile = aims.carto.Paths.findResourceFile(
 if not infile:
     infile = 'irm.ima'
 vol = aims.read(infile)
-print 'vol:', vol
+print('vol:', vol)
 h = vol.header()
-print 'header:', h
+print('header:', h)
 
 dx = vol.getSizeX()
 dy = vol.getSizeY()
@@ -57,28 +64,28 @@ mi = vol.value(0)
 ma = vol.value(0)
 
 dims = [dx, dy, dz, dt]
-print 'volume_dimensions:', dims
-print 'voxel_size:', h['voxel_size']
+print('volume_dimensions:', dims)
+print('voxel_size:', h['voxel_size'])
 
 # array min/max
 
 arr = vol.arraydata()
-# print 'array min/max:', Numeric.minimum( arr ), '-', Numeric.maximum( arr )
+# print('array min/max:', Numeric.minimum( arr ), '-', Numeric.maximum( arr ))
 
-print 'setting value 1618 at pos (125, 63, 12 )'
+print('setting value 1618 at pos (125, 63, 12 )')
 vol.setValue(1618, 125, 63, 12)
-# print 'C++ min/max:', vol.minimum(), '-', vol.maximum()
+# print('C++ min/max:', vol.minimum(), '-', vol.maximum())
 
-# print 'minIndex:', vol.minIndex()
-# print 'maxIndex:', vol.maxIndex()
+# print('minIndex:', vol.minIndex())
+# print('maxIndex:', vol.maxIndex())
 
-print '(numpy) min:', arr.min(), ' at voxel ', arr.argmin()
-print '(numpy) max:', arr.max(), ' at voxel ', arr.argmax()
+print('(numpy) min:', arr.min(), ' at voxel ', arr.argmin())
+print('(numpy) max:', arr.max(), ' at voxel ', arr.argmax())
 
-print 'python min/max...'
+print('python min/max...')
 for t in xrange(dt):
     for z in xrange(dz):
-        print 't:', t, 'z:', z
+        print('t:', t, 'z:', z)
         for y in xrange(dy):
             for x in xrange(dx):
                 v = vol.value(x, y, z, t)
@@ -87,13 +94,13 @@ for t in xrange(dt):
                 if ma < v:
                     ma = v
 
-print 'min:', mi
-print 'max:', ma
+print('min:', mi)
+print('max:', ma)
 
 fileout = '/tmp/toto.img'
-print 'writing volume to', fileout
+print('writing volume to', fileout)
 w = aims.Writer()
 w.write(vol, fileout)
-print 'object type:', w.writtenObjectType()
-print 'data type:', w.writtenObjectDataType()
-print 'full type:', w.writtenObjectFullType()
+print('object type:', w.writtenObjectType())
+print('data type:', w.writtenObjectDataType())
+print('full type:', w.writtenObjectFullType())

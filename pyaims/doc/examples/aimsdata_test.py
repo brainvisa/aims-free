@@ -31,8 +31,15 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
+
 from soma import aims
 import sys
+
+if sys.version_info[0] >= 3:
+    xrange = range
+
 
 app = aims.AimsApplication(sys.argv, 'AimsData test in python')
 
@@ -47,9 +54,9 @@ infile = aims.carto.Paths.findResourceFile(
 if not infile:
     infile = 'irm.ima'
 data = reader.read(infile)
-print 'data:', data
+print('data:', data)
 h = data.header()
-print 'header:', h
+print('header:', h)
 
 dx = data.dimX()
 dy = data.dimY()
@@ -60,21 +67,21 @@ mi = data.value(0)
 ma = data.value(0)
 
 dims = [dx, dy, dz, dt]
-print 'volume_dimensions:', dims
-print 'voxel_size:', [data.sizeX(), data.sizeY(), data.sizeZ(), data.sizeT()]
+print('volume_dimensions:', dims)
+print('voxel_size:', [data.sizeX(), data.sizeY(), data.sizeZ(), data.sizeT()])
 
-print 'C++ min/max:', data.minimum(), '-', data.maximum()
-print 'setting value 1618 at pos (125, 63, 12 )'
+print('C++ min/max:', data.minimum(), '-', data.maximum())
+print('setting value 1618 at pos (125, 63, 12 )')
 data.setValue(1618, 125, 63, 12)
-print 'C++ min/max:', data.minimum(), '-', data.maximum()
+print('C++ min/max:', data.minimum(), '-', data.maximum())
 
-print 'minIndex:', data.minIndex()
-print 'maxIndex:', data.maxIndex()
+print('minIndex:', data.minIndex())
+print('maxIndex:', data.maxIndex())
 
-print 'python min/max...'
+print('python min/max...')
 for t in xrange(dt):
     for z in xrange(dz):
-        print 't:', t, 'z:', z
+        print('t:', t, 'z:', z)
         for y in xrange(dy):
             for x in xrange(dx):
                 v = data.value(x, y, z, t)
@@ -83,13 +90,13 @@ for t in xrange(dt):
                 if ma < v:
                     ma = v
 
-print 'min:', mi
-print 'max:', ma
+print('min:', mi)
+print('max:', ma)
 
 fileout = '/tmp/toto.vimg'
-print 'writing volume to', fileout
+print('writing volume to', fileout)
 w = aims.Writer()
 w.write(data, fileout)
-print 'object type:', w.writtenObjectType()
-print 'data type:', w.writtenObjectDataType()
-print 'full type:', w.writtenObjectFullType()
+print('object type:', w.writtenObjectType())
+print('data type:', w.writtenObjectDataType())
+print('full type:', w.writtenObjectFullType())

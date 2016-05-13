@@ -24,6 +24,10 @@ from docscrape_sphinx import get_doc_object
 from docscrape_sphinx import SphinxDocString
 from sphinx.util.compat import Directive
 import inspect
+import sys
+
+if sys.version_info[0] >= 3:
+    unicode = str
 
 
 def mangle_docstrings(app, what, name, obj, options, lines,

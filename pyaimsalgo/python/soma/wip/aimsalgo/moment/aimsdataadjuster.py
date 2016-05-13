@@ -31,6 +31,7 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 import math, numpy
+import sys
 
 from soma import aimsalgo, aims
 from soma.wip.aimsalgo import *
@@ -38,6 +39,9 @@ from soma.wip.aimsalgo import *
 from soma.aims import AimsData_S16, BucketMap_VOID, Converter_AimsData_S16_BucketMap_VOID, Converter_BucketMap_VOID_AimsData_S16, Motion, Reader, ResamplerFactory_S16, Writer, Volume_S16
 from soma.aimsalgo import MomentBase, GeometricMoment_S16, MomentInvariant_S16
 from soma.wip.aimsalgo.moment import Moment
+
+if sys.version_info[0] >= 3:
+    xrange = range
 
 
 class AimsDataAdjuster :

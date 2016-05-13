@@ -1,5 +1,7 @@
 #!/usr/bin/env python2
 
+from __future__ import print_function
+
 from optparse import OptionParser
 import math
 import numpy as np
@@ -14,7 +16,7 @@ right_planes = (8., 42.)
 def cut_vertex(graph, vertex, plane_normal, plane_d):
     cut_line = aims.BucketMap_VOID()
     for bucket_name in ('aims_ss', 'aims_bottom', 'aims_other'):
-        if not vertex.has_key(bucket_name):
+        if bucket_name not in vertex:
             continue
         bucket = vertex[bucket_name]
         vs = (bucket.sizeX(), bucket.sizeY(), bucket.sizeZ())
@@ -84,10 +86,10 @@ graph = aims.read(folds_arg_filename)
 
 if options.label_attr:
     label_attribute = options.label_attr
-elif graph.has_key('label_property'):
+elif 'label_property' in graph:
     label_attribute = graph['label_property']
-print 'label attribute:', label_attribute
-print 'planes:', left_planes, right_planes
+print('label attribute:', label_attribute)
+print('planes:', left_planes, right_planes)
 
 talairach_trans = aims.GraphManip.talairach(graph)
 inv_talairach = talairach_trans.inverse()
@@ -107,7 +109,7 @@ transformed_right_d = (-transformed_right_points[0].dot(transformed_normal),
 left_cuts = []
 right_cuts = []
 for vertex in graph.vertices():
-    if not vertex.has_key(label_attribute):
+    if label_attribute not in vertex:
         continue
     label = vertex[label_attribute]
     if label == 'S.T.s._left':

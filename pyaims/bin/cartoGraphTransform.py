@@ -41,6 +41,8 @@ import os
 import sys
 from optparse import OptionParser
 from soma import aims
+if sys.version_info[0] >= 3:
+    xrange = range
 
 
 def graphTransform2(g, motions, tmpg):

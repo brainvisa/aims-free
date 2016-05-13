@@ -23,9 +23,13 @@ Main dependencies: PyAims library
 
 # import system
 import numpy
+import sys
 
 # soma import
 from soma import aims, aimsalgo
+
+if sys.version_info[0] >= 3:
+    xrange = range
 
 
 #----------------------------Functions-----------------------------------------

@@ -5,6 +5,7 @@ plus a few improvements functions (such as mask and B1 map holes filling).
 """
 
 from __future__ import division
+from __future__ import print_function
 
 import itertools
 import math
@@ -33,17 +34,17 @@ class BAFIData:
         self.TR_factor = 5.0
         # RF pulse duration in seconds TODO check real value!!
         self.tau = 1.2e-3
-        if amplitude_volume.header().has_key('flip_angle'):
+        if 'flip_angle' in amplitude_volume.header():
             self.prescribed_flip_angle \
                 = amplitude_volume.header()['flip_angle']
         else:
-            print 'warning, cannot determine flip angle in BAFI image. ' \
-                'Taking 60.'
-        if amplitude_volume.header().has_key('TEs'):
+            print('warning, cannot determine flip angle in BAFI image. '
+                  'Taking 60.')
+        if 'TEs' in amplitude_volume.header():
             self.echo_times = amplitude_volume.header()['TEs']
         else:
-            print 'warning, cannot determine echo times angle in BAFI image.' \
-                ' Taking builtin values.'
+            print('warning, cannot determine echo times angle in BAFI image.'
+                  ' Taking builtin values.')
 
     def make_B1_map(self, B0_correction=False):
         """Build a map of B1 (in radians) from BAFI data.
@@ -340,7 +341,7 @@ def t1mapping_VFA(flip_angle_factor, GRE_data):
     cA1 = np.cos(A1)
     cA2 = np.cos(A2)
     p = (S2 * sA1 - S1 * sA2) / (S2 * sA1 * cA2 - S1 * sA2 * cA1)
-    # print 'negative p:', p[p <= 0]
+    # print('negative p:', p[p <= 0])
     epsilon = 1e-3
     p[p <= 0] = epsilon
     T1 = np.real(-GRE_data.repetition_time / np.log(p))
@@ -518,17 +519,17 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
     # before correction
     biased_arr = np.asarray(biased_vol)
     biased_max = np.max(biased_arr)
-    #print 'biased_max:', biased_max
+    #print('biased_max:', biased_max)
     biased_avg = np.average(biased_arr[biased_arr >= biased_max/20.])
-    #print 'biased avg:', biased_avg
+    #print('biased avg:', biased_avg)
     unbiased_arr = np.asarray(unbiased_vol)
     large_vals = np.where(biased_arr >= biased_max/20.)
     real_vals = np.where(unbiased_arr[large_vals] != 0)
     real_locs = [x[real_vals] for x in large_vals]
     unbiased_avg = np.average(unbiased_arr[real_locs])
-    #print 'unbiased avg:', unbiased_avg
+    #print('unbiased avg:', unbiased_avg)
     corr_factor = biased_avg / unbiased_avg
-    #print 'corr_factor:', corr_factor
+    #print('corr_factor:', corr_factor)
     corr_factor = _check_max(corr_factor, np.max(unbiased_arr),
                              biased_arr.dtype)
     unbiased_vol *= corr_factor

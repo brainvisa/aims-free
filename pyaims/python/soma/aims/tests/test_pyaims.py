@@ -12,6 +12,9 @@ from shutil import rmtree
 import tempfile
 import sys
 
+if sys.version_info[0] >= 3:
+    from urllib import request as urllib
+
 
 def setup_doctest(test):
     tests_dir = os.getenv("BRAINVISA_TESTS_DIR")

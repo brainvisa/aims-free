@@ -75,14 +75,14 @@ class DicomAggregator( object ):
             
 #            try:
 #                frameOfRefUID = ds.FrameofReferenceUID
-#                if not self.frameOfReferenceUID.has_key(frameOfRefUID):
+#                if frameOfRefUID not in self.frameOfReferenceUID:
 #                    self.frameOfReferenceUID[frameOfRefUID] = []
 #                if serie_uid not in self.frameOfReferenceUID[frameOfRefUID]:
 #                    self.frameOfReferenceUID[frameOfRefUID].append(serie_uid)
 #            except:
 #                pass
             
-            if not self._aggregate_sources.has_key( serie_uid ):
+            if serie_uid not in self._aggregate_sources:
                 self._aggregate_sources[ serie_uid ] = []
                 serie_sop_uids[ serie_uid ] = []
 

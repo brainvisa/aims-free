@@ -35,6 +35,11 @@ __docformat__ = 'restructuredtext en'
 
 from soma import aims
 import numpy as np
+import sys
+
+if sys.version_info[0] >= 3:
+    xrange = range
+
 
 def crop_volume(vol, threshold=0, border=0):
     '''
@@ -133,14 +138,14 @@ def crop_volume(vol, threshold=0, border=0):
         vol.Position4Di(xup - xmin, yup - ymin, zup - zmin, vol.getSizeT()))
     cropped_vol.copyHeaderFrom(vol.header())
     transl = aims.AffineTransformation3d()
-    if cropped_vol.header().has_key('referential'):
+    if 'referential' in cropped_vol.header():
         del cropped_vol.header()['referential']
-    if cropped_vol.header().has_key('uuid'):
+    if 'uuid' in cropped_vol.header():
         del cropped_vol.header()['uuid']
     vs = vol.getVoxelSize()
     transl.setTranslation((xmin * vs[0], ymin * vs[1], zmin * vs[2]))
-    if vol.header().has_key('transformations') \
-            and vol.header().has_key('referentials'):
+    if 'transformations' in vol.header() \
+            and 'referentials' in vol.header():
         trans_list = vol.header()['transformations']
         ctrans_list = []
         for trans_v in trans_list:

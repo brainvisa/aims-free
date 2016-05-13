@@ -34,10 +34,14 @@
 from soma import aims
 import numpy
 import types
+import sys
 try:
     from soma import aimsalgo
 except:
     aimsalgo = None
+
+if sys.version_info[0] >= 3:
+    xrange = range
 
 
 def checkVolume(vol):
@@ -383,7 +387,7 @@ def chooseColormaps(vols):
                 # classify by likelihood
                 lh = vol['volume_contents_likelihoods'][vtype]
         tc = typeclasses[vtype]
-        if tc.has_key(lh):
+        if lh in tc:
             tc[lh].append((vol, i))
         else:
             tc[lh] = [(vol, i)]
