@@ -124,6 +124,7 @@ namespace carto
 }
 
 //--- Vector/RGB conversion --------------------------------------------------
+#include <aims/data/data_g.h>
 #include <aims/vector/vector.h>
 #include <limits>
 
