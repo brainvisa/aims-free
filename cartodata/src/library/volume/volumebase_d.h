@@ -543,7 +543,7 @@ namespace carto
   std::vector<int> Volume<T>::getBorders() const
   {
     std::vector<int> borders(8, 0);
-    if (_refvol.get())
+    if( _refvol.get() && _refvol->allocatorContext().isAllocated() )
     {
       borders[0] = _pos[0];
       borders[1] = _refvol->_sizeX - VolumeProxy<T>::_sizeX - _pos[0];
@@ -562,11 +562,11 @@ namespace carto
   std::vector<size_t> Volume<T>::getStrides() const
   {
     std::vector<size_t> strides(4);
-    
+
 #ifdef CARTO_USE_BLITZ
     const blitz::TinyVector<int, 4>& bstrides = _blitz.stride();
     for (int d = 0; d < 4; ++d)
-        strides[d] = bstrides[d];    
+        strides[d] = bstrides[d];
 #else
     strides[0] = 1;
     strides[1] = _lineoffset;
@@ -576,7 +576,7 @@ namespace carto
 
     return strides;
   }
-  
+
   template < typename T >
   Volume< T >& Volume< T >::operator=( const Volume< T >& other )
   {
@@ -599,7 +599,7 @@ namespace carto
                           VolumeProxy<T>::getSizeY(),
                           VolumeProxy<T>::getSizeZ(),
                           VolumeProxy<T>::getSizeT() ),
-            blitz::shape( 1, 
+            blitz::shape( 1,
                           &other( 0, 1, 0, 0 ) - &other( 0, 0, 0, 0 ),
                           &other( 0, 0, 1, 0 ) - &other( 0, 0, 0, 0 ),
                           &other( 0, 0, 0, 1 ) - &other( 0, 0, 0, 0 ) ),
