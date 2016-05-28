@@ -15,6 +15,9 @@ if( APPLE )
   # Setting VERSION or SOVERSION on a MODULE cause a link error on MacOS 10.5 with cmake 2.6:
   #  i686-apple-darwin9-g++-4.0.1: -compatibility_version only allowed with -dynamiclib
   set_property( TARGET cartotiff PROPERTY OUTPUT_NAME cartotiff.${${PROJECT_NAME}_VERSION} )
+elseif( CMAKE_VERSION VERSION_LESS "3.5" )
+    set_target_properties( cartotiff
+        PROPERTIES SOVERSION ${${PROJECT_NAME}_VERSION} )
 else()
   # in cmake 3.5 on linux, making a "module" removes the version number in the
   # .so so the suffix has top be forced.
