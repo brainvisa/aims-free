@@ -369,10 +369,12 @@ double FastBSpline::derivative( double x, unsigned n ) const
                                    : 1.  /* sym if even */ );
     x = std::abs( x );
     double result = 0;
+    bool ok = false;
     switch( this->order() )
     {
       case 1: result = ( x < 1.0 ? -1.0
                                  : 0.0 );
+        ok = true;
         break;
       case 2:
         switch( n )
@@ -380,10 +382,12 @@ double FastBSpline::derivative( double x, unsigned n ) const
           case 1: result = ( x < 0.5 ? -2.0 * x :
                              x < 1.5 ? x - 1.5
                                      : 0.0 );
+            ok = true;
             break;
           case 2: result = ( x < 0.5 ? -2.0 :
                              x < 1.5 ? 1.0
                                      : 0.0 );
+            ok = true;
             break;
         }
       case 3:
@@ -392,22 +396,26 @@ double FastBSpline::derivative( double x, unsigned n ) const
           case 1: result = ( x < 1.0 ? 1.5 * x * x - 2.0 * x :
                              x < 2.0 ? -0.5 * ( 2.0 - x ) * ( 2.0 - x )
                                      : 0.0 );
+            ok = true;
             break;
           case 2: result = ( x < 1.0 ? 3.0 * x - 2.0 :
                              x < 2.0 ? 2.0 - x
                                      : 0.0 );
+            ok = true;
             break;
           case 3: result = ( x < 1.0 ? 3.0 :
                              x < 2.0 ? -1.0
                                      : 0.0 );
+            ok = true;
             break;
         }
     default:
-      throw std::invalid_argument( "aims::FastBSpline: derivative " +
-                                   carto::toString(n) +
-                                   " of order " +
-                                   carto::toString(order()) +
-                                   " not implemented." );
+      if( !ok )
+        throw std::invalid_argument( "aims::FastBSpline: derivative " +
+                                     carto::toString(n) +
+                                     " of order " +
+                                     carto::toString(order()) +
+                                     " not implemented." );
     }
     return result * sign;
   }
