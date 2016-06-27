@@ -204,7 +204,7 @@ namespace aims {
                                _dir[1] && (*f)[1] > 1,
                                _dir[2] && (*f)[2] > 1,
                                _dir[3] && (*f)[3] > 1 );
-      pyramid.push_back( _subsampler.execute<T,T>( pyramid[l-1] ) );
+      pyramid.push_back( _subsampler.template execute<T,T>( pyramid[l-1] ) );
     }
 
     return pyramid;
