@@ -170,7 +170,9 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
   catch( std::exception & e )
     {
       // sipIsErr = 1;
+      SIP_BLOCK_THREADS
       PyErr_SetString( PyExc_AttributeError, e.what() );
+      SIP_UNBLOCK_THREADS
       return 0;
     }
   return sipGetState(sipTransferObj);
@@ -313,10 +315,19 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     virtual size_t size() const = 0;
     int __len__() const;
 %MethodCode
-    carto::Object i = sipCpp->objectIterator();
-    int	c = 0;
-    for( ; i->isValid(); i->next(), ++c ) {}
-    sipRes = c;
+    try
+    {
+      carto::Object i = sipCpp->objectIterator();
+      int	c = 0;
+      for( ; i->isValid(); i->next(), ++c ) {}
+      sipRes = c;
+    }
+    catch( std::exception & e )
+    {
+      SIP_BLOCK_THREADS
+      PyErr_SetString( PyExc_TypeError, "object has no size" );
+      SIP_UNBLOCK_THREADS
+    }
 %End
 
     // Scalar API
@@ -382,10 +393,13 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       }
     catch( std::exception & e )
       {
+        sipIsErr = 1;
+        sipRes = 0;
+        SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_RuntimeError, 
                          ( std::string( "error while iterating dictionary: " ) 
                            + e.what() ).c_str() );
-        sipIsErr = 1;
+        SIP_UNBLOCK_THREADS
       }
 %End
 
@@ -413,10 +427,13 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     }
     catch( std::exception & e )
     {
+        sipIsErr = 1;
+        sipRes = 0;
+        SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_RuntimeError, 
                          ( std::string( "error while iterating dictionary: " ) 
                            + e.what() ).c_str() );
-        sipIsErr = 1;
+        SIP_UNBLOCK_THREADS
     }
 %End
 
@@ -439,9 +456,12 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     }
     catch( std::exception & e )
     {
-        PyErr_SetString( PyExc_RuntimeError, 
+        sipRes = 0;
+        SIP_BLOCK_THREADS
+        PyErr_SetString( PyExc_RuntimeError,
                          ( std::string( "error while iterating dictionary: " ) 
                            + e.what() ).c_str() );
+        SIP_UNBLOCK_THREADS
         sipIsErr = 1;
     }
 %End
@@ -460,7 +480,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         sipIsErr = 1;
         sipRes = 0;
         SIP_BLOCK_THREADS
-        PyErr_SetString( PyExc_KeyError, a0->c_str() );
+        PyErr_SetString( PyExc_TypeError, a0->c_str() );
         SIP_UNBLOCK_THREADS
       }
 %End
@@ -524,7 +544,9 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     catch( std::exception & e )
       {
         sipIsErr = 1;
+        SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_AttributeError, e.what() );
+        SIP_UNBLOCK_THREADS
       }
 %End
 
@@ -585,7 +607,9 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     catch( std::exception & e )
       {
         sipIsErr = 1;
+        SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_AttributeError, e.what() );
+        SIP_UNBLOCK_THREADS
       }
 %End
 
@@ -660,14 +684,18 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
           {
             sipRes = 0;
             sipIsErr = 1;
+            SIP_BLOCK_THREADS
             PyErr_SetString( PyExc_RuntimeError, "object has no syntax" );
+            SIP_UNBLOCK_THREADS
           }
       }
     catch( std::exception & e )
       {
         sipIsErr = 1;
         sipRes = 0;
+        SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_RuntimeError, e.what() );
+        SIP_UNBLOCK_THREADS
       }
 %End
 
@@ -682,13 +710,17 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         else
           {
             sipIsErr = 1;
+            SIP_BLOCK_THREADS
             PyErr_SetString( PyExc_RuntimeError, "object has no syntax" );
+            SIP_UNBLOCK_THREADS
           }
       }
     catch( std::exception & e )
       {
         sipIsErr = 1;
+        SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_RuntimeError, e.what() );
+        SIP_UNBLOCK_THREADS
       }
 %End
 
@@ -700,11 +732,22 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     // __iter__ isn't called by python iter() function when defined in SIP
     carto::Object __objiter__() /Factory, AutoGen/;
 %MethodCode
-    //std::cout << "__iter__\n";
-    if( sipCpp->isIterator() )
-      sipRes = new carto::Object( sipCpp );
-    else
-      sipRes = new carto::Object( sipCpp->objectIterator() );
+    // std::cout << "__iter__ " << sipCpp->type() << std::endl;
+    try
+    {
+        if( sipCpp->isIterator() )
+              sipRes = new carto::Object( sipCpp );
+        else
+              sipRes = new carto::Object( sipCpp->objectIterator() );
+    }
+    catch( std::exception & e )
+    {
+      sipIsErr = 1;
+      sipRes = 0;
+      SIP_BLOCK_THREADS
+      PyErr_SetString( PyExc_TypeError, e.what() );
+      SIP_UNBLOCK_THREADS
+    }
 %End
 
     int __contains__( const std::string & ) const /AutoGen, ReleaseGIL/;
@@ -760,15 +803,19 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     //std::cout << "it next\n";
     if( !sipCpp->isIterator() )
       {
-        sipRes = 0;
         sipIsErr = 1;
+        sipRes = 0;
+        SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_TypeError, "not an iterator" );
+        SIP_UNBLOCK_THREADS
       }
     else if( !sipCpp->isValid() )
       {
         sipRes = 0;
         sipIsErr = 1;
+        SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_StopIteration, "iterator outside bounds" );
+        SIP_UNBLOCK_THREADS
       }
     else
       {
