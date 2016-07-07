@@ -138,8 +138,19 @@ namespace aims
                                      carto::DataSource::Read ) ),
         false, context.useFactor() );
 
-    AimsData<T> data( hdr->dimX(), hdr->dimY(), hdr->dimZ(),
-                      tmax - tmin + 1, border, al );
+//     std::cout << "TiffReader allocate data " << carto::DataTypeCode<T>::dataType()
+//               << "[ " << hdr->dimX() 
+//               << ", " << hdr->dimY()
+//               << ", " << hdr->dimZ()
+//               << ", " << tmax - tmin + 1 << " ]"
+//               << " border size " << carto::toString(border)
+//               << std::endl << std::flush;
+              
+    AimsData<T> data( hdr->dimX(), 
+                      hdr->dimY(), 
+                      hdr->dimZ(),
+                      tmax - tmin + 1, 
+                      border, al );
     data.setSizeX( hdr->sizeX() );
     data.setSizeY( hdr->sizeY() );
     data.setSizeZ( hdr->sizeZ() );
@@ -260,8 +271,8 @@ namespace aims
                                  const std::string & name, int zframe,
                                  unsigned tframe )
   {
-    int tiled, stripSize, rowsPerStrip, i, s;
-    uint zmin, zmax, dx = data.dimX();
+    int tiled, stripSize, rowsPerStrip;
+    uint i, s, zmin, zmax, dx = data.dimX(), dy = data.dimY();
     ushort photometric;
 
     TIFFSetWarningHandler( 0 );
@@ -309,16 +320,16 @@ namespace aims
           if( photometric != PHOTOMETRIC_PALETTE )
           {
             std::vector<char> buffer( stripSize, 0 );
-            for(s=0, i=0; s < data.dimY(); s += rowsPerStrip, ++i)
+            for(s=0, i=0; s < dy; s += rowsPerStrip, ++i)
             {
               TIFFReadEncodedStrip(tif, i, &buffer[0], stripSize);
               if( samplesize == sizeof(T) )
-                for( int y=s; y<s+rowsPerStrip; ++y )
+                for( int y=s; y<std::min(s+rowsPerStrip, dy); ++y )
                   memcpy( &data(0, y, z, tframe),
                           &buffer[(y-s) * dx * samplesize],
                           dx * sizeof(T) );
               else
-                for( int y=s; y<s+rowsPerStrip; ++y )
+                for( int y=s; y<std::min(s+rowsPerStrip, dy); ++y )
                 {
                   T* ibuf = &data( 0, y, z, tframe );
                   for( int x=0; x<dx; ++x, ++ibuf )
