@@ -53,6 +53,27 @@ namespace aims
                                bool bin = true,
                                size_t minSize = 0, size_t numMax = 0,
                                bool verbose = true );
+%Docstring
+  void AimsConnectedComponent(data, connectivity, valids, backgrnd=0,
+                              bin=True, minSize=0, numMax=0, verbose=True)
+
+  Connected components extraction.
+  The function modifies the input data, and does not return a new one.
+
+  Parameters
+  ----------
+  data: AimsData_%Template1typecode% instance
+      data will be modified during the process.
+  connectivity: Connectivity.Type enum code
+  valids: dict %Template1%: size_t
+  backgrnd: %Template1%
+  bin: bool (optional)
+  minsize: size_t (optional)
+  numMax: size_t (optional)
+  verbose: bool (optional)
+
+
+%End
 
   void AimsConnectedComponent( AimsData_%Template1typecode% & data,
                                aims::Connectivity::Type connectivity,
@@ -60,6 +81,26 @@ namespace aims
                                bool bin = true,
                                size_t minSize = 0, size_t numMax = 0,
                                bool verbose = true );
+%Docstring
+  void AimsConnectedComponent(data, connectivity, backgrnd=0, bin=True,
+                              minSize=0, numMax=0, verbose=True)
+
+  Connected components extraction.
+  The function modifies the input data, and does not return a new one.
+
+  Parameters
+  ----------
+  data: AimsData_%Template1typecode% instance
+      data will be modified during the process.
+  connectivity: Connectivity.Type enum code
+  backgrnd: %Template1%
+  bin: bool (optional)
+  minsize: size_t (optional)
+  numMax: size_t (optional)
+  verbose: bool (optional)
+
+
+%End
 
   void AimsConnectedComponent( BucketMap_%Template1typecode% & data,
                                aims::Connectivity::Type connectivity,
@@ -67,6 +108,27 @@ namespace aims
                                bool bin = true,
                                size_t minSize = 0, size_t numMax = 0,
                                bool verbose = true );
+%Docstring
+  void AimsConnectedComponent(data, connectivity, backgrnd=0, bin=True,
+                              minSize=0, numMax=0, verbose=True)
+
+  Connected components extraction, Bucket version.
+  The function modifies the input data, and does not return a new one.
+
+  Parameters
+  ----------
+  data: BucketMap_%Template1typecode% instance
+      data will be modified during the process.
+  connectivity: Connectivity.Type enum code
+  backgrnd: %Template1%
+  bin: bool (optional)
+  minsize: size_t (optional)
+  numMax: size_t (optional)
+  verbose: bool (optional)
+
+
+%End
+
 
 /*
   void AimsConnectedComponent( AimsBucket_%Template1typecode% & component,
