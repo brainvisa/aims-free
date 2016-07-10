@@ -97,6 +97,16 @@ typedef unsigned short uint16_t;
 %Include map_STRING_U32.sip
 %Include map_STRING_FLOAT.sip
 %Include map_STRING_DOUBLE.sip
+%Include map_U8_ULONG.sip
+%Include map_U8_U32.sip
+%Include map_S16_ULONG.sip
+%Include map_S16_U32.sip
+%Include map_U16_ULONG.sip
+%Include map_U16_U32.sip
+%Include map_S32_ULONG.sip
+%Include map_S32_U32.sip
+%Include map_U32_ULONG.sip
+%Include map_U32_U32.sip
 // %Include map_STRING_RGB.sip
 // %Include map_STRING_RGBA.sip
 // %Include map_STRING_HSV.sip
@@ -246,6 +256,12 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include threshold_FLOAT_S16.sip
 %Include mask.sip
 %Include standardreferentials.sip
+%Include connectivity.sip
+//%Include connected_component_U8.sip
+%Include connected_component_S16.sip
+%Include connected_component_U16.sip
+%Include connected_component_S32.sip
+%Include connected_component_U32.sip
 
 %Include merge.sip
 %Include merge_S16_S16.sip
