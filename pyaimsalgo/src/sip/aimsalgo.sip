@@ -46,7 +46,7 @@
 %Include mesher.sip
 %Include fastmarching.sip
 %Include meshdistance.sip
-%Include connectivity.sip
+%Include meshconnectivity.sip
 %Include spam.sip
 %Include foldgraphattributes.sip
 %Include gradient.sip

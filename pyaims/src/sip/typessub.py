@@ -31,6 +31,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+import sys
+import platform
 
 def classInNamespace(include, cls, namespace, cppnamespace=None,
                      cppclass=None):
@@ -2689,5 +2691,10 @@ typessub = {'signed char':
                                   'DataSourceInfo'),
 
             }
+
+if sys.platform == 'darwin' or platform.processor() == 'x86_64':
+    typessub['size_t'] = typessub['unsigned long']
+else:
+    typessub['size_t'] = typessub['unsigned']
 
 completeTypesSub(typessub)

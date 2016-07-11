@@ -124,7 +124,16 @@ namespace aims
   template void 
   AimsConnectedComponent( BucketMap<int16_t>&, Connectivity::Type, 
                           const int16_t &, bool, size_t, size_t, bool );
-  template void 
+  template void
+  AimsConnectedComponent( BucketMap<uint16_t>&, Connectivity::Type,
+                          const uint16_t &, bool, size_t, size_t, bool );
+  template void
+  AimsConnectedComponent( BucketMap<int32_t>&, Connectivity::Type,
+                          const int32_t &, bool, size_t, size_t, bool );
+  template void
+  AimsConnectedComponent( BucketMap<uint32_t>&, Connectivity::Type,
+                          const uint32_t &, bool, size_t, size_t, bool );
+  template void
   AimsConnectedComponent( BucketMap<float>&, Connectivity::Type, 
                           const float &, bool, size_t, size_t, bool );
 
