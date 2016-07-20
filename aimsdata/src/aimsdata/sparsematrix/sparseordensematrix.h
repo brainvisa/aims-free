@@ -47,6 +47,30 @@ namespace aims
 
     public:
 
+      /** MatrixLazyReader allows to read a row or a column from file, on
+          demand. It is useful to read partially very large matrices.
+
+          The default implementation does just nothing.
+      */
+      class MatrixLazyReader
+      {
+      public:
+          MatrixLazyReader() {}
+          virtual ~MatrixLazyReader() {}
+          /** tells if row s1 has already been read.
+              If so, SparseOrDenseMatrix::readRow will not read it again.
+          */
+          virtual bool hasRow( int32_t s1 ) const { return true; }
+          /** tells if column s2 has already been read.
+              If so, SparseOrDenseMatrix::readColumn will not read it again.
+          */
+          virtual bool hasColumn( int32_t s2 ) const { return true; }
+          virtual std::vector<double> *readRow( int32_t s1 ) {}
+          virtual std::vector<double> *readColumn( int32_t s2 ) {}
+          virtual void freeRow( int32_t s1 ) {}
+          virtual void freeColumn( int32_t s2 ) {}
+      };
+
       typedef carto::VolumeRef<double> DenseMatrixType;
       typedef carto::rc_ptr<SparseMatrix> SparseMatrixType;
 
@@ -73,6 +97,21 @@ namespace aims
 
       std::vector<double> getRow( int32_t i ) const;
       std::vector<double> getColumn( int32_t j ) const;
+
+      /** read a row using lazy reading, using the MatrixLazyReader.
+          The default implementation does just nothing.
+      */
+      void readRow( int32_t i );
+      /** read a column using lazy reading, using the MatrixLazyReader.
+          The default implementation does just nothing.
+      */
+      void readColumn( int32_t i );
+      /** read all rows using lazy reading, using the MatrixLazyReader.
+          The default implementation does just nothing.
+      */
+      void readAll();
+      void freeRow( int32_t i );
+      void freeColumn( int32_t i );
 
       template <typename VectorType>
         VectorType getSparseRow( int32_t i ) const;
@@ -118,11 +157,20 @@ namespace aims
       SparseOrDenseMatrix &
         operator /= ( double x );
 
+      void setLazyReader( MatrixLazyReader* reader )
+      {
+        delete _lazyreader;
+        _lazyreader = reader;
+      }
+      MatrixLazyReader* lazyReader() const
+      { return _lazyreader; }
+
     protected:
 
       SparseMatrixType _sparsematrix;
       DenseMatrixType _densematrix;
       carto::Object _fakeheader;
+      MatrixLazyReader *_lazyreader;
 
   };
 

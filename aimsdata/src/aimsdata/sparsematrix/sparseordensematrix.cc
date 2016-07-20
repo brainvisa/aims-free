@@ -46,13 +46,14 @@ using namespace std;
 SparseOrDenseMatrix::SparseOrDenseMatrix( 
   int32_t size1, int32_t size2 )
   : _sparsematrix( new SparseMatrix( size1, size2 ) ),
-  _fakeheader( 0 )
+  _fakeheader( 0 ), _lazyreader( new MatrixLazyReader )
 {
   _densematrix.reset( 0 );
 }
 
 
 SparseOrDenseMatrix::SparseOrDenseMatrix( const SparseOrDenseMatrix& other )
+  : _lazyreader( new MatrixLazyReader )
 {
   if( other.isDense() )
   {
@@ -71,6 +72,7 @@ SparseOrDenseMatrix::SparseOrDenseMatrix( const SparseOrDenseMatrix& other )
 
 SparseOrDenseMatrix::~SparseOrDenseMatrix()
 {
+  delete _lazyreader;
 }
 
 
@@ -442,6 +444,58 @@ void SparseOrDenseMatrix::muteToOptimalShape()
     muteToSparse();
   else
     muteToDense();
+}
+
+
+void SparseOrDenseMatrix::readRow( int32_t i )
+{
+  if( _lazyreader->hasRow( i ) )
+    return;
+  vector<double> *row = _lazyreader->readRow( i );
+  setRow( i, *row );
+  delete row;
+}
+
+
+void SparseOrDenseMatrix::readColumn( int32_t i )
+{
+  if( _lazyreader->hasColumn( i ) )
+    return;
+  vector<double> *col = _lazyreader->readColumn( i );
+  setColumn( i, *col );
+  delete col;
+}
+
+
+void SparseOrDenseMatrix::readAll()
+{
+  int32_t i, n = getSize1();
+  for( i=0; i<n; ++i )
+    readRow( i );
+}
+
+
+void SparseOrDenseMatrix::freeRow( int32_t i )
+{
+  // if dense, do nothing: we will not release memory anyway
+  if( !isDense() )
+  {
+    vector<double> row( getSize2(), 0. );
+    setRow( i, row );
+    _lazyreader->freeRow( i );
+  }
+}
+
+
+void SparseOrDenseMatrix::freeColumn( int32_t i )
+{
+  // if dense, do nothing: we will not release memory anyway
+  if( !isDense() )
+  {
+    vector<double> col( getSize1(), 0. );
+    setColumn( i, col );
+    _lazyreader->freeColumn( i );
+  }
 }
 
 

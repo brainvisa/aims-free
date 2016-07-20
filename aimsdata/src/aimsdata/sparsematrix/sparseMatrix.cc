@@ -451,7 +451,11 @@ void aims::SparseMatrix::setRow( int32_t s1, const std::vector<double>& row )
     for ( s2 = 0; s2 < getSize2(); s2++ )
     {
 
-      ( *this )( s1, s2 ) = row[ s2 ];
+      const double & element = row[s2];
+      if( element == 0 )
+        erase_element( s1, s2 );
+      else
+        ( *this )( s1, s2 ) = element;
 
     }
 

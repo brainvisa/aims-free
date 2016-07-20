@@ -32,6 +32,12 @@ namespace aims
       void setRow( int s1, const vector_DOUBLE & row );
       void setColumn( int s2, const vector_DOUBLE & column );
 
+      void readRow( int s1 );
+      void readColumn( int s1 );
+      void readAll();
+      void freeRow( int i );
+      void freeColumn( int i );
+
       vector_DOUBLE getRow( int i ) const;
       vector_DOUBLE getColumn( int j ) const;
 
