@@ -450,10 +450,13 @@ namespace carto
           int & operator [] ( int coord )       { return _coords[ coord ]; }
     const int & operator [] ( int coord ) const { return _coords[ coord ]; }
 
-    bool operator==(const Position4Di& p) const { return ( _coords[0] == p._coords[0]
-                                                           && _coords[1] == p._coords[1]
-                                                           && _coords[2] == p._coords[2]
-                                                           && _coords[3] == p._coords[3] ); }
+    bool operator==(const Position4Di& p) const
+    {
+      return ( _coords[0] == p._coords[0]
+               && _coords[1] == p._coords[1]
+               && _coords[2] == p._coords[2]
+               && _coords[3] == p._coords[3] );
+    }
     bool operator!=(const Position4Di& p) const { return !(this->operator ==(p)); }
 
     unsigned size() const { return 4; }

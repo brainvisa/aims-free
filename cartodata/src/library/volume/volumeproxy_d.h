@@ -45,16 +45,17 @@ namespace carto
   template < typename T >
   VolumeProxy< T >::VolumeProxy( int sizeX, int sizeY, int sizeZ, int sizeT )
     : Headered(),
-      _sizeX( sizeX ),
-      _sizeY( sizeY ),
-      _sizeZ( sizeZ ),
-      _sizeT( sizeT )
+      _size( 4 )
   {
+    _size[0] = sizeX;
+    _size[1] = sizeY;
+    _size[2] = sizeZ;
+    _size[3] = sizeT;
 
-    header().addBuiltinProperty( "sizeX", _sizeX );
-    header().addBuiltinProperty( "sizeY", _sizeY );
-    header().addBuiltinProperty( "sizeZ", _sizeZ );
-    header().addBuiltinProperty( "sizeT", _sizeT );
+    header().addBuiltinProperty( "sizeX", _size[0] );
+    header().addBuiltinProperty( "sizeY", _size[1] );
+    header().addBuiltinProperty( "sizeZ", _size[2] );
+    header().addBuiltinProperty( "sizeT", _size[3] );
 
   }
 
@@ -63,10 +64,7 @@ namespace carto
   VolumeProxy< T >::VolumeProxy( const VolumeProxy< T >& other )
     : RCObject(), 
       Headered( other ),
-      _sizeX( other._sizeX ),
-      _sizeY( other._sizeY ),
-      _sizeZ( other._sizeZ ),
-      _sizeT( other._sizeT )
+      _size( other._size )
   {
 
     if( header().hasProperty( "sizeX" ) )
@@ -78,10 +76,10 @@ namespace carto
     if( header().hasProperty( "sizeT" ) )
       header().removeProperty( "sizeT" );
 
-    header().addBuiltinProperty( "sizeX", _sizeX );
-    header().addBuiltinProperty( "sizeY", _sizeY );
-    header().addBuiltinProperty( "sizeZ", _sizeZ );
-    header().addBuiltinProperty( "sizeT", _sizeT );
+    header().addBuiltinProperty( "sizeX", _size[0] );
+    header().addBuiltinProperty( "sizeY", _size[1] );
+    header().addBuiltinProperty( "sizeZ", _size[2] );
+    header().addBuiltinProperty( "sizeT", _size[3] );
 
   }
 
@@ -101,10 +99,17 @@ namespace carto
       return *this;
 
     this->Headered::operator=( other );
-    _sizeX = other._sizeX;
-    _sizeY = other._sizeY;
-    _sizeZ = other._sizeZ;
-    _sizeT = other._sizeT;
+    _size = other._size;
+
+    header().removeProperty( "sizeX" );
+    header().removeProperty( "sizeY" );
+    header().removeProperty( "sizeZ" );
+    header().removeProperty( "sizeT" );
+
+    header().addBuiltinProperty( "sizeX", _size[0] );
+    header().addBuiltinProperty( "sizeY", _size[1] );
+    header().addBuiltinProperty( "sizeZ", _size[2] );
+    header().addBuiltinProperty( "sizeT", _size[3] );
 
     return *this;
 
@@ -115,7 +120,7 @@ namespace carto
   std::vector<float> VolumeProxy< T >::getVoxelSize() const
   {
 
-    std::vector<float> voxelsize(4, 1.);
+    std::vector<float> voxelsize( _size.size(), 1. );
     carto::Object vso;
     try
     {

@@ -52,6 +52,7 @@ namespace carto
   public:
 
     explicit VolumeProxy( int sizeX = 1, int sizeY = 1, int sizeZ = 1, int sizeT = 1 );
+    explicit VolumeProxy( const std::vector<int> size );
     VolumeProxy( const VolumeProxy< T >& other );
     virtual ~VolumeProxy();
 
@@ -75,10 +76,7 @@ namespace carto
 
   protected:
 
-    int _sizeX;
-    int _sizeY;
-    int _sizeZ;
-    int _sizeT;
+    std::vector<int> _size;
 
   };
 
@@ -88,7 +86,7 @@ namespace carto
   int VolumeProxy< T >::getSizeX() const
   {
 
-    return _sizeX;
+    return _size[0];
 
   }
 
@@ -98,7 +96,7 @@ namespace carto
   int VolumeProxy< T >::getSizeY() const
   {
 
-    return _sizeY;
+    return _size[1];
 
   }
 
@@ -108,7 +106,7 @@ namespace carto
   int VolumeProxy< T >::getSizeZ() const
   {
 
-    return _sizeZ;
+    return _size[2];
 
   }
 
@@ -118,7 +116,7 @@ namespace carto
   int VolumeProxy< T >::getSizeT() const
   {
 
-    return _sizeT;
+    return _size[3];
 
   }
 
@@ -128,12 +126,7 @@ namespace carto
   std::vector<int> VolumeProxy< T >::getSize() const
   {
 
-    std::vector<int> size(4);
-    size[0] = _sizeX;
-    size[1] = _sizeY;
-    size[2] = _sizeZ;
-    size[3] = _sizeT;
-    return size;
+    return _size;
 
   }
 
