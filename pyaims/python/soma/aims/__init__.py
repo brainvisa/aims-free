@@ -816,6 +816,11 @@ def __fixsipclasses__(classes):
                                       __fixsipclasses__.__operator_overload__,
                                         add),
                                     None, y))
+                # volume item access
+                y.__getitem__ = lambda self, *args, **kwargs: \
+                    numpy.asarray(self).__getitem__(*args, **kwargs)
+                y.__setitem__ = lambda self, *args, **kwargs: \
+                    numpy.asarray(self).__setitem__(*args, **kwargs)
                 if sys.version_info[0] >= 3:
                     y.astype = __fixsipclasses__.__Volume_astype__
                 else:
@@ -861,6 +866,13 @@ def __fixsipclasses__(classes):
                         if sys.version_info[0] >= 3:
                             y.Bucket.items \
                                 = lambda self: self.__iteritemclass__(self)
+            if y.__name__.startswith('AimsData_'):
+                # volume item access
+                y.__getitem__ = lambda self, *args, **kwargs: \
+                    numpy.asarray(self.volume()).__getitem__(*args, **kwargs)
+                y.__setitem__ = lambda self, *args, **kwargs: \
+                    numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
+
             # fix python3 iterators
             if sys.version_info[0] >= 3 and hasattr(y, 'next') \
                     and not hasattr(y, '__next__'):
