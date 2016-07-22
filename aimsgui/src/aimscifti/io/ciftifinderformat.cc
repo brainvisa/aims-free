@@ -62,6 +62,9 @@ bool CiftiFinderFormat::check( const string & filename, Finder & f ) const
   Object cifti_tree = ciftiobj.ciftiToObject( inputFile );
   hdr->copyProperties( cifti_tree );
 
+  const vector<int64_t>& dims = inputFile.getDimensions();
+  hdr->setProperty( "dimensions", dims );
+
   return true;
 }
 
