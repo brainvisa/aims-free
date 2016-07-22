@@ -61,6 +61,18 @@ namespace carto
 
 
   template < typename T >
+  VolumeProxy< T >::VolumeProxy( const std::vector<int> & size )
+    : Headered(),
+      _size( size )
+  {
+    header().addBuiltinProperty( "sizeX", _size[0] );
+    header().addBuiltinProperty( "sizeY", _size[1] );
+    header().addBuiltinProperty( "sizeZ", _size[2] );
+    header().addBuiltinProperty( "sizeT", _size[3] );
+  }
+
+
+  template < typename T >
   VolumeProxy< T >::VolumeProxy( const VolumeProxy< T >& other )
     : RCObject(), 
       Headered( other ),

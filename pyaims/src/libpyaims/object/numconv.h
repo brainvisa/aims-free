@@ -54,12 +54,52 @@ namespace carto
   }
 
 
-  inline int PyaimsInt_AsLong( PyObject *x )
+  inline long PyaimsLong_AsLong( PyObject *x )
   {
 #if PY_VERSION_HEX >= 0x03000000
-    return int( PyLong_AsLong( x ) );
+    return PyLong_AsLong( x );
 #else
-    return PyInt_AsLong( x );
+    if( PyInt_Check( x ) )
+      return PyInt_AsLong( x );
+    else
+      return PyLong_AsLong( x );
+#endif
+  }
+
+
+  inline int PyaimsInt_AsLong( PyObject *x )
+  {
+    return int( PyaimsLong_AsLong( x ) );
+  }
+
+
+  inline bool PyaimsInt_Check( PyObject *x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    return PyLong_Check( x );
+#else
+    return PyLong_Check( x ) || PyInt_Check( x );
+#endif
+  }
+
+
+  inline double PyaimsFloat_AsDouble( PyObject *x )
+  {
+    if( PyFloat_Check( x ) )
+      return PyFloat_AsDouble( x );
+    else if( PyInt_Check( x ) )
+      return double( PyInt_AsLong( x ) );
+    else
+      return double( PyLong_AsLong( x ) );
+  }
+
+
+  inline bool PyaimsNumber_Check( PyObject *x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    return PyFloat_Check( x ) || PyLong_Check( x );
+#else
+    return PyFloat_Check( x ) || PyLong_Check( x ) || PyInt_Check( x );
 #endif
   }
 

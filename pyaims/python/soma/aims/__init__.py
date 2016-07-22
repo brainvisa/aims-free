@@ -1484,11 +1484,6 @@ def VolumeView(volume, position, size):
         raise TypeError('incompatible or wrong volume type: %s'
             % volclass.__name__)
 
-    posclass = volclass.Position4Di
-    if not isinstance(position, posclass):
-        position = posclass(*position)
-    if not isinstance(size, posclass):
-        size = posclass(*size)
     return volclass(vol, position, size)
 
 

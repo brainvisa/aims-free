@@ -51,8 +51,9 @@ namespace carto
 
   public:
 
-    explicit VolumeProxy( int sizeX = 1, int sizeY = 1, int sizeZ = 1, int sizeT = 1 );
-    explicit VolumeProxy( const std::vector<int> size );
+    explicit VolumeProxy( int sizeX = 1, int sizeY = 1, int sizeZ = 1,
+                          int sizeT = 1 );
+    explicit VolumeProxy( const std::vector<int> & size );
     VolumeProxy( const VolumeProxy< T >& other );
     virtual ~VolumeProxy();
 

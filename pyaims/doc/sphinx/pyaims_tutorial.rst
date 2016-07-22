@@ -510,7 +510,7 @@ Then we can add vertices, normals and polygons to the mesh:
 >>> pol[19, 1] = 2
 >>> pol2 = numpy.vstack((numpy.ogrid[2: 22], numpy.ogrid[3: 23], numpy.ones(20, dtype=numpy.int32))).transpose()
 >>> pol2[19, 1] = 2
->>> poly.assign([aims.AimsVector(x, dtype='U32',dim=3) for x in numpy.vstack((pol, pol2))])
+>>> poly.assign([aims.AimsVector(x.astype('int'), dtype='U32',dim=3) for x in numpy.vstack((pol, pol2))])
 >>> # write result
 >>> aims.write(mesh, 'saucer.mesh')
 >>> # automatically calculate normals

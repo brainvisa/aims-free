@@ -48,12 +48,17 @@ public:
     Volume_%Template1typecode%( const Volume_%Template1typecode% & )
       /ReleaseGIL/;
     Volume_%Template1typecode%( rc_ptr_Volume_%Template1typecode% other,
-      const Volume_%Template1typecode%::Position4Di & pos
-        = Volume_%Template1typecode%::Position4Di( 0, 0, 0, 0 ),
-      const Volume_%Template1typecode%::Position4Di & size
-        = Volume_%Template1typecode%::Position4Di( -1, -1, -1, -1 ),
+      const vector_S32 & pos = vector_S32( 4, 0 ),
+      const vector_S32 & size = vector_S32(),
       const carto::AllocatorContext & allocContext
         = carto::AllocatorContext() );
+    Volume_%Template1typecode%( const vector_S32 &,
+      const carto::AllocatorContext& allocatorContext
+        = carto::AllocatorContext(), bool = true ) /ReleaseGIL/;
+    Volume_%Template1typecode%( const vector_S32 &,
+      const vector_S32 &,
+      const carto::AllocatorContext& allocatorContext
+        = carto::AllocatorContext(), bool = true ) /ReleaseGIL/;
 
     virtual ~Volume_%Template1typecode%() /ReleaseGIL/;
 
@@ -94,7 +99,7 @@ Voxel sizes in mm (list of 4 floats)
 If the volume is a view into another (larger) one, this returns the "parent" one.
 %End
 
-    Volume_%Template1typecode%::Position4Di posInRefVolume() const;
+    vector_S32 posInRefVolume() const;
 %Docstring
 If the volume is a view into another (larger) one, this returns the position in "parent" one.
 %End
@@ -102,6 +107,20 @@ If the volume is a view into another (larger) one, this returns the position in 
   %Template1PyType% at( long, long = 0, long = 0, long = 0 ) const;
 %Docstring
 at(posx, posy=0, posz=0, post=0)
+
+Returns the volume value for the selected voxel.
+%End
+
+  %Template1PyType% at( long, long, long, long, long, long=0, long=0, long=0 ) const;
+%Docstring
+at(posx1, posx2, posx3, posx4, posx5, posx6=0, posx7=0, posx8=0)
+
+Returns the volume value for the selected voxel.
+%End
+
+  %Template1PyType% at( const vector_S32 & ) const;
+%Docstring
+at(vector_int)
 
 Returns the volume value for the selected voxel.
 %End
@@ -130,6 +149,17 @@ Set the voxel value at the given position.
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
 %End
 
+ void setValue( %Template1%, const vector_S32 & );
+%Docstring
+setValue(value, [x1, x2, x3, x4, x5, x6...])
+
+Set the voxel value at the given position.
+%End
+
+%MethodCode
+ sipCpp->at( *a1 ) = %Template1deref%a0;
+%End
+
 %#ifdef PyAims_Volume_U8_defined%
  void setValue( int, long, long = 0, long = 0, long = 0 );
 %Docstring
@@ -137,6 +167,14 @@ Set a voxel value at given position
 %End
 %MethodCode
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
+%End
+
+ void setValue( int, const vector_S32 & );
+%Docstring
+Set a voxel value at given position
+%End
+%MethodCode
+ sipCpp->at( *a1 ) = %Template1deref%a0;
 %End
 %#endif%
 
@@ -413,7 +451,7 @@ The header contains all meta-data.
 %#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS) %
 
   Volume_%Template1typecode%( SIP_PYOBJECT )
-    [(int, int, int, int, %Template1% *)];
+    [(vector_S32, %Template1% *)];
 %MethodCode
   static std::list<std::set<int> > compatibletypes;
   if( compatibletypes.empty() )
@@ -499,7 +537,7 @@ The header contains all meta-data.
     else
     */
 
-    if( arr->nd < 0 || arr->nd >4 )
+    if( arr->nd <= 1 || arr->nd > carto::Volume<%Template1%>::DIM_MAX )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_RuntimeError,
@@ -531,7 +569,10 @@ The header contains all meta-data.
   if( !sipIsErr )
   {
     // retreive dimensions
-    int dims[4] = { 1, 1, 1, 1 };
+    int nd = arr->nd;
+    if( nd < 4 )
+      nd = 4;
+    std::vector<int> dims( nd, 1 );
     int inc = 1, start = 0;
     // TODO: retreive exact strides and react accordingly
     if( PyArray_NDIM( arr ) >= 2 )
@@ -543,20 +584,10 @@ The header contains all meta-data.
         start = arr->nd-1;
       }
     }
-    dims[0] = arr->dimensions[ start ];
-    if( arr->nd >= 2 )
-    {
-      dims[1] = arr->dimensions[ start + inc ];
-      if( arr->nd >= 3 )
-        {
-          dims[2] = arr->dimensions[ start + inc * 2 ];
-          if( arr->nd >= 4 )
-            dims[3] = arr->dimensions[ start + inc * 3 ];
-        }
-    }
+    for( int i=0; i<arr->nd; ++i )
+      dims[i] = arr->dimensions[ start + inc * i];
 
-    sipCpp = new sipVolume_%Template1typecode%( dims[0], dims[1], dims[2],
-                                                dims[3],
+    sipCpp = new sipVolume_%Template1typecode%( dims,
                                                 ( %Template1% *) arr->data );
     // keep ref to the array to prevent its destruction
     PyObject_SetAttrString( (PyObject *) sipSelf, "_arrayext", a0 );
@@ -588,80 +619,70 @@ The header contains all meta-data.
 %End
 
 %MethodCode
-  std::vector<int> dims(4);
-  dims[3] = sipCpp->getSizeX();
-  dims[2] = sipCpp->getSizeY();
-  dims[1] = sipCpp->getSizeZ();
-  dims[0] = sipCpp->getSizeT();
-  size_t strides[4];
-  strides[3] = sizeof( %Template1% );
+  std::vector<int> vdims = sipCpp->getSize();
+  int i, n= vdims.size();
+  std::vector<size_t> vstrides, strides( n );
+  std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
+
   if( ref.get() && ref->allocatorContext().isAllocated() )
-  {
-    strides[2] = strides[3] * ref->getSizeX();
-    strides[1] = strides[2] * ref->getSizeY();
-    strides[0] = strides[1] * ref->getSizeZ();
-  }
+    vstrides = ref->getStrides();
   else
+    vstrides = sipCpp->getStrides();
+
+  for( i=0; i<n; ++i )
   {
-    strides[2] = strides[3] * dims[3];
-    strides[1] = strides[2] * dims[2];
-    strides[0] = strides[1] * dims[1];
+    dims[n - 1 - i] = vdims[i];
+    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
   }
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
-                                 (char *) &sipCpp->at( 0 ), false, strides );
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, n, &dims[0],
+                                 (char *) &sipCpp->at( 0 ), false,
+                                 &strides[0] );
 %End
 
   SIP_PYOBJECT __array__() /Factory/;
 %MethodCode
-  std::vector<int> dims(4);
-  dims[3] = sipCpp->getSizeX();
-  dims[2] = sipCpp->getSizeY();
-  dims[1] = sipCpp->getSizeZ();
-  dims[0] = sipCpp->getSizeT();
-  size_t strides[4];
-  strides[3] = sizeof( %Template1% );
+  std::vector<int> vdims = sipCpp->getSize();
+  int i, n= vdims.size();
+  std::vector<size_t> vstrides, strides( n );
+  std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
+
   if( ref.get() && ref->allocatorContext().isAllocated() )
-  {
-    strides[2] = strides[3] * ref->getSizeX();
-    strides[1] = strides[2] * ref->getSizeY();
-    strides[0] = strides[1] * ref->getSizeZ();
-  }
+    vstrides = ref->getStrides();
   else
+    vstrides = sipCpp->getStrides();
+
+  for( i=0; i<n; ++i )
   {
-    strides[2] = strides[3] * dims[3];
-    strides[1] = strides[2] * dims[2];
-    strides[0] = strides[1] * dims[1];
+    dims[n - 1 - i] = vdims[i];
+    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
   }
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
-                                 (char *) &sipCpp->at( 0 ), true, strides );
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, n, &dims[0],
+                                 (char *) &sipCpp->at( 0 ), true,
+                                 &strides[0] );
 %End
 
   void checkResize();
 %MethodCode
-  std::vector<int> dims(4);
-  dims[3] = sipCpp->getSizeX();
-  dims[2] = sipCpp->getSizeY();
-  dims[1] = sipCpp->getSizeZ();
-  dims[0] = sipCpp->getSizeT();
-  size_t strides[4];
-  strides[3] = sizeof( %Template1% );
+  std::vector<int> vdims = sipCpp->getSize();
+  int i, n= vdims.size();
+  std::vector<size_t> vstrides, strides( n );
+  std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
+
   if( ref.get() && ref->allocatorContext().isAllocated() )
-  {
-    strides[2] = strides[3] * ref->getSizeX();
-    strides[1] = strides[2] * ref->getSizeY();
-    strides[0] = strides[1] * ref->getSizeZ();
-  }
+    vstrides = ref->getStrides();
   else
+    vstrides = sipCpp->getStrides();
+
+  for( i=0; i<n; ++i )
   {
-    strides[2] = strides[3] * dims[3];
-    strides[1] = strides[2] * dims[2];
-    strides[0] = strides[1] * dims[1];
+    dims[n - 1 - i] = vdims[i];
+    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
   }
-  aims::resizeNumpyArray( sipSelf, 4, &dims[0], (char *) &sipCpp->at( 0 ),
-    strides );
+  aims::resizeNumpyArray( sipSelf, n, &dims[0], (char *) &sipCpp->at( 0 ),
+    &strides[0] );
 %End
 
   void _arrayDestroyedCallback( SIP_PYOBJECT );
