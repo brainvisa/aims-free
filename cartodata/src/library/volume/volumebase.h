@@ -127,7 +127,9 @@ namespace carto
     /// offsets when in a Volume view. Taking care of splitting loops
     /// line-by-line is the responsability of programmers using such
 #ifdef CARTO_USE_BLITZ
-    static const int DIM_MAX = 8;
+    // static const int DIM_MAX = 8; leads to build issues on old GCC versions
+    // so we need to use enum to be able to declare DIM_MAX in carto::Volume
+    enum { DIM_MAX = 8 };
     typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::iterator iterator;
     typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::const_iterator const_iterator;
 #else
