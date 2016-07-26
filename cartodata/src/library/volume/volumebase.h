@@ -128,8 +128,8 @@ namespace carto
     /// line-by-line is the responsability of programmers using such
 #ifdef CARTO_USE_BLITZ
     static const int DIM_MAX = 8;
-    typedef typename blitz::Array<T,DIM_MAX>::iterator iterator;
-    typedef typename blitz::Array<T,DIM_MAX>::const_iterator const_iterator;
+    typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::iterator iterator;
+    typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::const_iterator const_iterator;
 #else
     typedef typename AllocatedVector<T>::iterator iterator;
     typedef typename AllocatedVector<T>::const_iterator const_iterator;
@@ -291,19 +291,19 @@ namespace carto
     T & at( const blitz::TinyVector<int,3> & );
     const T & at( const blitz::TinyVector<int,4> & ) const;
     T & at( const blitz::TinyVector<int,4> & );
-    const T & at( const blitz::TinyVector<int,DIM_MAX> & ) const;
-    T & at( const blitz::TinyVector<int,DIM_MAX> & );
-    blitz::Array<T,DIM_MAX> at( const blitz::RectDomain<DIM_MAX>
+    const T & at( const blitz::TinyVector<int,Volume<T>::DIM_MAX> & ) const;
+    T & at( const blitz::TinyVector<int,Volume<T>::DIM_MAX> & );
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::RectDomain<Volume<T>::DIM_MAX>
       & subdomain ) const;
-    blitz::Array<T,DIM_MAX> at( const blitz::StridedDomain<DIM_MAX>
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::StridedDomain<Volume<T>::DIM_MAX>
       & subdomain ) const;
-    blitz::Array<T,DIM_MAX> at( const blitz::Range & r0 ) const;
-    blitz::Array<T,DIM_MAX> at( const blitz::Range & r0,
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::Range & r0 ) const;
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::Range & r0,
                           const blitz::Range & r1 ) const;
-    blitz::Array<T,DIM_MAX> at( const blitz::Range & r0,
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::Range & r0,
                                 const blitz::Range & r1,
                                 const blitz::Range & r2 ) const;
-    blitz::Array<T,DIM_MAX> at( const blitz::Range & r0,
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::Range & r0,
                                 const blitz::Range & r1,
                                 const blitz::Range & r2,
                                 const blitz::Range & r3 ) const;
@@ -454,7 +454,7 @@ namespace carto
 
     AllocatedVector<T> _items;
 #ifdef CARTO_USE_BLITZ
-    blitz::Array<T, DIM_MAX>  _blitz;
+    blitz::Array<T, Volume<T>::DIM_MAX>  _blitz;
 #else
     size_t  _lineoffset;
     size_t  _sliceoffset;

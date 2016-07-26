@@ -137,11 +137,11 @@ namespace carto
       {
         // fix offsets
 #ifdef CARTO_USE_BLITZ
-        blitz::TinyVector<int, DIM_MAX> dims;
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
         int i, n=VolumeProxy<T>::_size.size();
         for( int i=0; i<n; ++i )
           dims[i] = VolumeProxy<T>::_size[i];
-        for( ; i<DIM_MAX; ++i )
+        for( ; i<Volume<T>::DIM_MAX; ++i )
           dims[i] = 1;
         _blitz.reference
           ( blitz::Array<T,8>
@@ -383,18 +383,18 @@ namespace carto
 
       // fix offsets
 #ifdef CARTO_USE_BLITZ
-      blitz::TinyVector<int, DIM_MAX> dims;
+      blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
       n = VolumeProxy<T>::_size.size();
       for( int i=0; i<n; ++i )
         dims[i] = VolumeProxy<T>::_size[i];
-      for( ; i<DIM_MAX; ++i )
+      for( ; i<Volume<T>::DIM_MAX; ++i )
         dims[i] = 1;
       _blitz.reference
-        ( blitz::Array<T,DIM_MAX>
+        ( blitz::Array<T,Volume<T>::DIM_MAX>
           ( &_items[0],
             dims,
             other->_blitz.stride(),
-            blitz::GeneralArrayStorage<DIM_MAX>
+            blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
             ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
       _lineoffset = &(*other)( 0, 1, 0 ) - &(*other)( 0, 0, 0 );
@@ -455,18 +455,18 @@ namespace carto
 
       // fix offsets
 #ifdef CARTO_USE_BLITZ
-      blitz::TinyVector<int, DIM_MAX> dims;
+      blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
       n = VolumeProxy<T>::_size.size();
       for( int i=0; i<n; ++i )
         dims[i] = VolumeProxy<T>::_size[i];
-      for( ; i<DIM_MAX; ++i )
+      for( ; i<Volume<T>::DIM_MAX; ++i )
         dims[i] = 1;
       _blitz.reference
-        ( blitz::Array<T,DIM_MAX>
+        ( blitz::Array<T,Volume<T>::DIM_MAX>
           ( &_items[0],
             dims,
             other->_blitz.stride(),
-            blitz::GeneralArrayStorage<DIM_MAX>
+            blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
             ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
       _lineoffset = &(*other)( 0, 1, 0 ) - &(*other)( 0, 0, 0 );
@@ -539,18 +539,18 @@ namespace carto
       {
         // fix offsets
 #ifdef CARTO_USE_BLITZ
-        blitz::TinyVector<int, DIM_MAX> dims;
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
         int i, n=VolumeProxy<T>::_size.size();
         for( int i=0; i<n; ++i )
           dims[i] = VolumeProxy<T>::_size[i];
-        for( ; i<DIM_MAX; ++i )
+        for( ; i<Volume<T>::DIM_MAX; ++i )
           dims[i] = 1;
         _blitz.reference
-          ( blitz::Array<T,DIM_MAX>
+          ( blitz::Array<T,Volume<T>::DIM_MAX>
             ( &_items[0],
               dims,
               other._blitz.stride(),
-              blitz::GeneralArrayStorage<DIM_MAX>
+              blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
               ( blitz::shape( 0, 1, 2, 3, 5, 6, 7, 8 ), true ) ) );
 #else
         _lineoffset = &other( 0, 1, 0 ) - &other( 0, 0, 0 );
@@ -623,18 +623,18 @@ namespace carto
         {
           // fix offsets
 #ifdef CARTO_USE_BLITZ
-          blitz::TinyVector<int, DIM_MAX> dims;
+          blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
           int i, n=VolumeProxy<T>::_size.size();
           for( int i=0; i<n; ++i )
             dims[i] = VolumeProxy<T>::_size[i];
-          for( ; i<DIM_MAX; ++i )
+          for( ; i<Volume<T>::DIM_MAX; ++i )
             dims[i] = 1;
           _blitz.reference
-            ( blitz::Array<T,DIM_MAX>
+            ( blitz::Array<T,Volume<T>::DIM_MAX>
               ( &_items[0],
                 dims,
                 _refvol->_blitz.stride(),
-                blitz::GeneralArrayStorage<DIM_MAX>
+                blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
                 ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
           _lineoffset = &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 );
@@ -719,7 +719,7 @@ namespace carto
   {
 
 #ifdef CARTO_USE_BLITZ
-    const blitz::TinyVector<int, DIM_MAX>& bstrides = _blitz.stride();
+    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides = _blitz.stride();
     int d, n = VolumeProxy<T>::_size.size();
     std::vector<size_t> strides( n );
     for (int d = 0; d < n; ++d)
@@ -751,18 +751,18 @@ namespace carto
 #ifdef CARTO_USE_BLITZ
     // TODO: test blitz ownership / strides
     // _blitz.reference( other.blitz );
-    blitz::TinyVector<long, DIM_MAX> dims;
+    blitz::TinyVector<long, Volume<T>::DIM_MAX> dims;
     int i, n = VolumeProxy<T>::_size.size();
     for( i=0; i<n; ++i )
       dims[i] = VolumeProxy<T>::_size[i];
-    for( ; i<DIM_MAX; ++i )
+    for( ; i<Volume<T>::DIM_MAX; ++i )
       dims[i] = 1;
     _blitz.reference
-        ( blitz::Array<T,DIM_MAX>
+        ( blitz::Array<T,Volume<T>::DIM_MAX>
         ( &_items[0],
             dims,
             other._blitz.stride(),
-            blitz::GeneralArrayStorage<DIM_MAX>
+            blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
             ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
     _lineoffset = other._lineoffset;
@@ -880,7 +880,7 @@ namespace carto
                               const AllocatorContext& ac )
   {
 
-    std::vector<unsigned long long int> strides(DIM_MAX, 0);
+    std::vector<unsigned long long int> strides(Volume<T>::DIM_MAX, 0);
     int i, n = oldSize.size(), nn = VolumeProxy<T>::_size.size();
 
     for( i=0; i<nn; ++i )
@@ -888,7 +888,7 @@ namespace carto
       strides[i] = ( i == 0 ? VolumeProxy<T>::_size[0]
                     : VolumeProxy<T>::_size[i] * strides[i-1] );
     }
-    for( ; i<DIM_MAX; ++i )
+    for( ; i<Volume<T>::DIM_MAX; ++i )
       strides[i] = strides[i-1];
 
     unsigned long long int total_len = strides[nn-1];
@@ -983,15 +983,15 @@ namespace carto
                   << VolumeProxy<T>::_size[2] << ", "
                   << VolumeProxy<T>::_size[3] << std::endl;
         */
-        blitz::TinyVector<int, DIM_MAX> dims;
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
         for( i=0; i<nn; ++i )
           dims[i] = VolumeProxy<T>::_size[i];
-        for( ; i<DIM_MAX; ++i )
+        for( ; i<Volume<T>::DIM_MAX; ++i )
           dims[i] = 1;
-        _blitz.reference( blitz::Array<T,DIM_MAX>
+        _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
                           ( &_items[0],
                             dims,
-                            blitz::GeneralArrayStorage<DIM_MAX>
+                            blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
                             ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ),
                               true ) ) );
         /*
@@ -1014,16 +1014,16 @@ namespace carto
     else
       {
 #ifdef CARTO_USE_BLITZ
-        blitz::TinyVector<int, DIM_MAX> dims;
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
         for( i=0; i<nn; ++i )
           dims[i] = VolumeProxy<T>::_size[i];
-        for( ; i<DIM_MAX; ++i )
+        for( ; i<Volume<T>::DIM_MAX; ++i )
           dims[i] = 1;
         // TODO: test blitz ownership / strides
-        _blitz.reference( blitz::Array<T,DIM_MAX>
+        _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
                       ( 0,
                         dims,
-                        blitz::GeneralArrayStorage<DIM_MAX>
+                        blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
                         ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
         _lineoffset = 0;

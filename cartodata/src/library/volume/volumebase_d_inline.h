@@ -127,11 +127,11 @@ namespace carto {
   const T & Volume< T >::at( const std::vector<int> & index ) const
   {
 #ifdef CARTO_USE_BLITZ
-    blitz::TinyVector<int, DIM_MAX> pos;
+    blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
     int i, n = index.size();
-    for( i=0; i<n && i<DIM_MAX; ++i )
+    for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
       pos[i] = index[i];
-    for( ; i<DIM_MAX; ++i )
+    for( ; i<Volume<T>::DIM_MAX; ++i )
       pos[i] = 0;
     return _blitz( pos );
 #else
@@ -150,11 +150,11 @@ namespace carto {
   T & Volume< T >::at( const std::vector<int> & index )
   {
 #ifdef CARTO_USE_BLITZ
-    blitz::TinyVector<int, DIM_MAX> pos;
+    blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
     int i, n = index.size();
-    for( i=0; i<n && i<DIM_MAX; ++i )
+    for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
       pos[i] = index[i];
-    for( ; i<DIM_MAX; ++i )
+    for( ; i<Volume<T>::DIM_MAX; ++i )
       pos[i] = 0;
     return _blitz( pos );
 #else
@@ -232,27 +232,27 @@ namespace carto {
   }
 
   template < typename T > inline
-  const T & Volume< T >::at( const blitz::TinyVector<int,DIM_MAX> & index ) const
+  const T & Volume< T >::at( const blitz::TinyVector<int,Volume<T>::DIM_MAX> & index ) const
   {
     return _blitz( index );
   }
 
   template < typename T > inline
-  T & Volume< T >::at( const blitz::TinyVector<int,DIM_MAX> & index )
+  T & Volume< T >::at( const blitz::TinyVector<int,Volume<T>::DIM_MAX> & index )
   {
     return _blitz( index );
   }
 
   template < typename T > inline
   blitz::Array<T,Volume< T >::DIM_MAX>
-  Volume< T >::at( const blitz::RectDomain<DIM_MAX> & subdomain ) const
+  Volume< T >::at( const blitz::RectDomain<Volume<T>::DIM_MAX> & subdomain ) const
   {
     return _blitz( subdomain );
   }
 
   template < typename T > inline
   blitz::Array<T,Volume< T >::DIM_MAX>
-  Volume< T >::at( const blitz::StridedDomain<DIM_MAX> & subdomain ) const
+  Volume< T >::at( const blitz::StridedDomain<Volume<T>::DIM_MAX> & subdomain ) const
   {
     return _blitz( subdomain );
   }
