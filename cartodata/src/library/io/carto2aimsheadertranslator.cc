@@ -80,8 +80,13 @@ void Carto2AimsHeaderTranslator::translate( Object srcheader,
     s << "sizeDim" << i;
     try
     {
-      p = hdr->getProperty( s.str() );
-      vdims
+      int vdim;
+      if( dstheader->getProperty( s.str(), vdim ) )
+      {
+        while( dim.size() < i )
+          dim.push_back( 1 );
+        dim[i] = vdim;
+      }
     }
     catch( ... )
     {
