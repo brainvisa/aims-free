@@ -37,6 +37,9 @@
 #include <string>
 #include <stdint.h>
 #include <Python.h>
+#include <numpy/ndarrayobject.h>
+
+#include <iostream>
 
 namespace carto
 {
@@ -76,10 +79,20 @@ namespace carto
   inline bool PyaimsInt_Check( PyObject *x )
   {
 #if PY_VERSION_HEX >= 0x03000000
-    return PyLong_Check( x );
+    if( PyLong_Check( x ) )
+      return true;
+    long y = PyLong_AsLong( x );
 #else
-    return PyLong_Check( x ) || PyInt_Check( x );
+    if( PyLong_Check( x ) || PyInt_Check( x ) )
+      return true;
+    long y = PyInt_AsLong( x );
 #endif
+    if( y == -1 && PyErr_Occurred() )
+    {
+      PyErr_Clear();
+      return false;
+    }
+    return true;
   }
 
 
@@ -87,20 +100,34 @@ namespace carto
   {
     if( PyFloat_Check( x ) )
       return PyFloat_AsDouble( x );
-    else if( PyInt_Check( x ) )
-      return double( PyInt_AsLong( x ) );
+    long y;
+#if PY_VERSION_HEX <= 0x03000000
+    y = PyInt_AsLong( x );
+    if( y != -1 || !PyErr_Occurred() )
+      return double( y );
     else
-      return double( PyLong_AsLong( x ) );
+      PyErr_Clear();
+#endif
+    return double( PyLong_AsLong( x ) );
   }
 
 
   inline bool PyaimsNumber_Check( PyObject *x )
   {
 #if PY_VERSION_HEX >= 0x03000000
-    return PyFloat_Check( x ) || PyLong_Check( x );
+    if( PyFloat_Check( x ) || PyLong_Check( x ) )
+      return true;
 #else
-    return PyFloat_Check( x ) || PyLong_Check( x ) || PyInt_Check( x );
+    if( PyFloat_Check( x ) || PyLong_Check( x ) || PyInt_Check( x ) )
+      return true;
 #endif
+    double y = PyFloat_AsDouble( x );
+    if( y == -1. && PyErr_Occurred() )
+    {
+      PyErr_Clear();
+      return false;
+    }
+    return true;
   }
 
 
