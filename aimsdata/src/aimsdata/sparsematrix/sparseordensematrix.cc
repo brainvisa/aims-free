@@ -116,6 +116,19 @@ int32_t SparseOrDenseMatrix::getSize2() const
 }
 
 
+vector<int32_t> SparseOrDenseMatrix::getSize() const
+{
+  if( isDense() )
+    return denseMatrix()->getSize();
+  else
+  {
+    vector<int32_t> size;
+    sparseMatrix()->header()->getProperty( "dimensions", size );
+    return size;
+  }
+}
+
+
 int32_t SparseOrDenseMatrix::getNonZeroElementCount() const
 {
   if( isDense() )

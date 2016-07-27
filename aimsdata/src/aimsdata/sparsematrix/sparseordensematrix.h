@@ -69,6 +69,7 @@ namespace aims
           virtual std::vector<double> *readColumn( int32_t s2 ) {}
           virtual void freeRow( int32_t s1 ) {}
           virtual void freeColumn( int32_t s2 ) {}
+          virtual void selectDimension( const std::vector<int32_t> & dims ) {}
       };
 
       typedef carto::VolumeRef<double> DenseMatrixType;
@@ -85,6 +86,7 @@ namespace aims
       int32_t getSize1() const;
       int32_t getSize2() const;
       int32_t getNonZeroElementCount() const;
+      std::vector<int32_t> getSize() const;
 
       bool hasElement( int32_t i, int32_t j ) const;
 

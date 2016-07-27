@@ -144,7 +144,7 @@ namespace aims
       const std::vector<int> & dim_indices_pos ) const;
 
   private:
-      carto::rc_ptr<SparseOrDenseMatrix> _matrix;
+      mutable carto::rc_ptr<SparseOrDenseMatrix> _matrix;
       BrainStuctureToMeshMap _smap;
   };
 

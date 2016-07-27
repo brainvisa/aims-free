@@ -74,6 +74,19 @@ void Carto2AimsHeaderTranslator::translate( Object srcheader,
     dstheader->removeProperty( "sizeZ" );
   if( dstheader->getProperty( "sizeT", dim[3] ) )
     dstheader->removeProperty( "sizeT" );
+  for( size_t i=4; i<8; ++i )
+  {
+    stringstream s;
+    s << "sizeDim" << i;
+    try
+    {
+      p = hdr->getProperty( s.str() );
+      vdims
+    }
+    catch( ... )
+    {
+    }
+  }
   /* keep erasing sizes because it causes a problem upon copy
   dstheader->getProperty( "sizeX", dim[0] );
   dstheader->getProperty( "sizeY", dim[1] );

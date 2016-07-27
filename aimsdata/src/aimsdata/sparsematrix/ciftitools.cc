@@ -434,13 +434,20 @@ CiftiTools::TextureList *CiftiTools::expandedValueTextureFromDimension(
 namespace
 {
 
-  void getScalarsPointData( const Volume<double> & matrix, int value_dim,
-    Volume<double>::Position4Di & pos, CiftiTools::TextureList & texlist,
+  void getScalarsPointData( SparseOrDenseMatrix & matrix, int value_dim,
+    vector<int32_t> & pos, CiftiTools::TextureList & texlist,
     int tex_index, size_t pos_in_tex, float background, bool single )
   {
     if( single )
     {
-      (*texlist[tex_index])[0][ pos_in_tex ] = float( matrix.at( pos ) );
+      // select needed dimension when more than 2 are available
+      if( pos.size() > 2 )
+        matrix.lazyReader()->selectDimension( vector<int32_t>( pos.begin() + 2,
+                                                               pos.end() ) );
+      matrix.readRow( pos[1] );
+
+      (*texlist[tex_index])[0][ pos_in_tex ] = float( matrix( pos[0],
+                                                              pos[1] ) );
     }
     else
     {
@@ -456,19 +463,30 @@ namespace
       for( i=0; i<n; ++i )
       {
         pos[value_dim] = i;
-        (*tex)[i][pos_in_tex] = float( matrix.at( pos ) );
+        // select needed dimension when more than 2 are available
+        if( pos.size() > 2 )
+          matrix.lazyReader()->selectDimension(
+            vector<int32_t>( pos.begin() + 2, pos.end() ) );
+        matrix.readRow( pos[1] );
+        (*tex)[i][pos_in_tex] = float( matrix( pos[0], pos[1] ) );
       }
     }
   }
 
 
-  void getLabelsPointData( const Volume<double> & matrix, int value_dim,
-    Volume<double>::Position4Di & pos, CiftiTools::TextureList & texlist,
+  void getLabelsPointData( SparseOrDenseMatrix & matrix, int value_dim,
+    vector<int32_t> & pos, CiftiTools::TextureList & texlist,
     int tex_index, size_t pos_in_tex, float background, bool single )
   {
     if( single )
     {
-      (*texlist[tex_index])[0][ pos_in_tex ] = float( matrix.at( pos ) );
+      // select needed dimension when more than 2 are available
+      if( pos.size() > 2 )
+        matrix.lazyReader()->selectDimension(
+          vector<int32_t>( pos.begin() + 2, pos.end() ) );
+      matrix.readRow( pos[1] );
+      (*texlist[tex_index])[0][ pos_in_tex ] = float( matrix( pos[0],
+                                                              pos[1] ) );
     }
     else
     {
@@ -477,15 +495,20 @@ namespace
       for( i=0; i<n; ++i )
       {
         pos[value_dim] = i;
+        // select needed dimension when more than 2 are available
+        if( pos.size() > 2 )
+          matrix.lazyReader()->selectDimension(
+            vector<int32_t>( pos.begin() + 2, pos.end() ) );
+        matrix.readRow( pos[1] );
         (*texlist[ tex_index + i * nsurfaces ])[0][ pos_in_tex ]
-          = float( matrix.at( pos ) );
+          = float( matrix( pos[0], pos[1] ) );
       }
     }
   }
 
 
-  void getPointData( const Volume<double> & matrix, int value_dim,
-    Volume<double>::Position4Di & pos, CiftiTools::TextureList & texlist,
+  void getPointData( SparseOrDenseMatrix & matrix, int value_dim,
+    vector<int32_t> & pos, CiftiTools::TextureList & texlist,
     int tex_index, size_t pos_in_tex, const string & value_type,
     float background, bool single )
   {
@@ -519,14 +542,14 @@ namespace
   void getSurfaceModelTexture( const CiftiTools & cifti,
                                Object surf, CiftiTools::TextureList & texlist,
                                const CiftiTools::BrainStuctureToMeshMap & smap,
-                               const SparseOrDenseMatrix & mat, int dim,
+                               SparseOrDenseMatrix & mat, int dim,
                                const vector<int> & dim_indices_pos,
                                unsigned  nsurfaces )
   {
     Object siter = surf->objectIterator();
-    SparseOrDenseMatrix::DenseMatrixType matrix = mat.asDense();
-    Volume<double>::Position4Di pos( 0, 0, 0, 0 );
+//     SparseOrDenseMatrix::DenseMatrixType matrix = mat.asDense();
     unsigned i, n = dim_indices_pos.size();
+    vector<int32_t> pos( n, 0 );
     for( i=0; i<n; ++i )
       pos[i] = dim_indices_pos[i];
     int value_dim = cifti.valuesDimNum();
@@ -612,7 +635,7 @@ namespace
       {
         pos[dim] = int( rint(
           iiter->currentValue()->getArrayItem(0)->getScalar() ) );
-        getPointData( *matrix, value_dim, pos, texlist, tex_index,
+        getPointData( mat, value_dim, pos, texlist, tex_index,
           int( rint( iiter->currentValue()->getArrayItem(1)->getScalar() ) ),
           value_type, background, false );
       }
@@ -676,9 +699,9 @@ void CiftiTools::getParcelsTexture(
   Object parcels_o = cifti_info->getProperty( "parcels" );
   Object parcels = parcels_o->getProperty( "parcels" );
   Object surfaces;
-  SparseOrDenseMatrix::DenseMatrixType matrix = _matrix->asDense();
-  Volume<double>::Position4Di pos( 0, 0, 0, 0 );
+//   SparseOrDenseMatrix::DenseMatrixType matrix = _matrix->asDense();
   unsigned i, n = dim_indices_pos.size();
+  vector<int32_t> pos( n, 0 );
   for( i=0; i<n; ++i )
     pos[i] = dim_indices_pos[i];
   int value_dim = CiftiTools::valuesDimNum();
@@ -748,9 +771,14 @@ void CiftiTools::getParcelsTexture(
         if( roi.nItem() <= v )
           roi.data().resize( v + 1 );
         pos[dim] = label;
-        roi[v] = float( matrix->at( pos ) );
+        // select needed dimension when more than 2 are available
+        if( pos.size() > 2 )
+          _matrix->lazyReader()->selectDimension(
+            vector<int32_t>( pos.begin() + 2, pos.end() ) );
+        _matrix->readRow( pos[1] );
+        roi[v] = float( (*_matrix)( pos[0], pos[1] ) );
 
-        getPointData( *matrix, value_dim, pos, texlist, tex_index, v,
+        getPointData( *_matrix, value_dim, pos, texlist, tex_index, v,
           value_type, background, false );
 
       }

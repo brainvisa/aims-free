@@ -59,11 +59,15 @@ namespace aims
     virtual std::vector<double> *readColumn( int32_t s2 );
     virtual void freeRow( int32_t s1 ) { _read_rows.erase( s1 ); }
     virtual void freeColumn( int32_t s2 ) { _read_cols.erase( s2 ); }
+    virtual void selectDimension( const vector<int32_t> & dims );
+
+    vector<int32_t> fix_dims( const vector<int32_t> & pos );
 
   protected:
     std::set<int32_t> _read_rows;
     std::set<int32_t> _read_cols;
     CiftiFile *_cifti_file;
+    vector<int32_t> _current_dim;
   };
 
 }
@@ -98,17 +102,17 @@ std::vector<double> *CiftiLazyReader::readRow( int32_t s1 )
   vector<float> scratchRow( dims[0] );
   vector<double> *aimsrow = new vector<double>( dims[0] );
 
-  // for now we only read 2D matrices
-
-//   vector<int64_t> indexSelect( dims.size() - 1, 0 );
-//   indexSelect[0] = s1;
   // mark this row as read
   _read_rows.insert( s1 );
 
-//   inputFile.getRow( &scratchRow[0], indexSelect );
-  _cifti_file->getRow( &scratchRow[0], s1 );
+  vector<int64_t> indexSelect( dims.size() - 1, 1 );
+  int64_t i, n = dims.size();
+  for( i=2; i<n; ++i )
+    indexSelect[i] = _current_dim[i-2];
+  indexSelect[0] = s1;
 
-  int32_t i;
+  _cifti_file->getRow( &scratchRow[0], indexSelect );
+
   for( i=0; i<dims[0]; ++i )
     (*aimsrow)[i] = scratchRow[i];
 
@@ -118,6 +122,8 @@ std::vector<double> *CiftiLazyReader::readRow( int32_t s1 )
 
 std::vector<double> *CiftiLazyReader::readColumn( int32_t s2 )
 {
+  // Warning: the CIFTI API doesn allow to read columns on other than the 1st
+  // dimensions. The _current_dim position is thus ignored.
   const vector<int64_t>& dims = _cifti_file->getDimensions();
   vector<float> scratchCol( dims[1] );
   vector<double> *aimscol = new vector<double>( dims[1] );
@@ -135,6 +141,33 @@ std::vector<double> *CiftiLazyReader::readColumn( int32_t s2 )
 
   return aimscol;
 }
+
+
+vector<int32_t> CiftiLazyReader::fix_dims( const vector<int32_t> & pos )
+{
+  size_t i, n = _current_dim.size();
+  if( n == 0 )
+    n = _cifti_file->getDimensions().size() - 2;
+  if( pos.size() == n )
+    return pos;
+  vector<int32_t> fixed_pos( n, 0 );
+  for( i=0; i<n; ++i )
+    fixed_pos[i] = pos[i];
+  return fixed_pos;
+}
+
+
+void CiftiLazyReader::selectDimension( const vector<int32_t> & dims )
+{
+  vector<int32_t> fixed_dims = fix_dims( dims );
+  if( fixed_dims != _current_dim )
+  {
+    _current_dim = fixed_dims;
+    _read_rows.clear();
+    _read_cols.clear();
+  }
+}
+
 
 // ---
 
