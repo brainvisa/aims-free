@@ -37,9 +37,6 @@
 #include <string>
 #include <stdint.h>
 #include <Python.h>
-#include <numpy/ndarrayobject.h>
-
-#include <iostream>
 
 namespace carto
 {
