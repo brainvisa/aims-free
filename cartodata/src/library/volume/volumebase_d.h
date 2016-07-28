@@ -139,7 +139,7 @@ namespace carto
 #ifdef CARTO_USE_BLITZ
         blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
         int i, n=VolumeProxy<T>::_size.size();
-        for( int i=0; i<n; ++i )
+        for(i=0; i<n; ++i )
           dims[i] = VolumeProxy<T>::_size[i];
         for( ; i<Volume<T>::DIM_MAX; ++i )
           dims[i] = 1;
@@ -385,7 +385,7 @@ namespace carto
 #ifdef CARTO_USE_BLITZ
       blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
       n = VolumeProxy<T>::_size.size();
-      for( int i=0; i<n; ++i )
+      for( i=0; i<n; ++i )
         dims[i] = VolumeProxy<T>::_size[i];
       for( ; i<Volume<T>::DIM_MAX; ++i )
         dims[i] = 1;
@@ -457,7 +457,7 @@ namespace carto
 #ifdef CARTO_USE_BLITZ
       blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
       n = VolumeProxy<T>::_size.size();
-      for( int i=0; i<n; ++i )
+      for(i=0; i<n; ++i )
         dims[i] = VolumeProxy<T>::_size[i];
       for( ; i<Volume<T>::DIM_MAX; ++i )
         dims[i] = 1;
@@ -541,7 +541,7 @@ namespace carto
 #ifdef CARTO_USE_BLITZ
         blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
         int i, n=VolumeProxy<T>::_size.size();
-        for( int i=0; i<n; ++i )
+        for( i=0; i<n; ++i )
           dims[i] = VolumeProxy<T>::_size[i];
         for( ; i<Volume<T>::DIM_MAX; ++i )
           dims[i] = 1;
@@ -625,7 +625,7 @@ namespace carto
 #ifdef CARTO_USE_BLITZ
           blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
           int i, n=VolumeProxy<T>::_size.size();
-          for( int i=0; i<n; ++i )
+          for( i=0; i<n; ++i )
             dims[i] = VolumeProxy<T>::_size[i];
           for( ; i<Volume<T>::DIM_MAX; ++i )
             dims[i] = 1;
