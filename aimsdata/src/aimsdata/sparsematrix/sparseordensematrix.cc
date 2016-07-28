@@ -123,7 +123,7 @@ vector<int32_t> SparseOrDenseMatrix::getSize() const
   else
   {
     vector<int32_t> size;
-    sparseMatrix()->header()->getProperty( "dimensions", size );
+    header()->getProperty( "dimensions", size );
     return size;
   }
 }

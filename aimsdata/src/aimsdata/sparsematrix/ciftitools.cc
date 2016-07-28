@@ -438,21 +438,53 @@ namespace
     vector<int32_t> & pos, CiftiTools::TextureList & texlist,
     int tex_index, size_t pos_in_tex, float background, bool single )
   {
-    if( single )
+    cout << "getScalarsPointData " << pos[0] << ", " << pos[1] << endl;
+    cout << "tex_index: " << tex_index << ", texlist: " << texlist.size() << endl;
+    cout << "value_dim: " << value_dim << endl;
+    cout << "mat size: " << matrix.getSize().size() << endl;
+
+    size_t value_dim_size = CiftiTools::valuesDimSize( matrix, value_dim );
+    cout << "value_dim_size: " << value_dim_size << endl;
+
+    if( single || value_dim_size == 1 )
     {
+      cout << "single\n";
       // select needed dimension when more than 2 are available
       if( pos.size() > 2 )
         matrix.lazyReader()->selectDimension( vector<int32_t>( pos.begin() + 2,
                                                                pos.end() ) );
-      matrix.readRow( pos[1] );
+//       bool free_row = false;
+//       if( value_dim == 0 )
+//       {
+//         free_row = !matrix.lazyReader()->hasColumn( pos[1] );
+//         cout << "read col " << pos[1] << endl;
+//         matrix.readColumn( pos[1] );
+//       }
+//       else if( value_dim == 1 )
+//       {
+//         free_row = !matrix.lazyReader()->hasRow( pos[0] );
+//         cout << "read row " << pos[0] << endl;
+//         matrix.readRow( pos[0] );
+//       }
 
       (*texlist[tex_index])[0][ pos_in_tex ] = float( matrix( pos[0],
                                                               pos[1] ) );
+//       if( free_row )
+//       {
+//         if( value_dim == 0 )
+//           matrix->freeColumn( pos[1] );
+//         else
+//           matrix->freeRow( pos[0] );
+//       }
     }
     else
     {
+      cout << "multi\n";
       rc_ptr<TimeTexture<float> > tex = texlist[ tex_index ];
       size_t i, n = matrix.getSize()[ value_dim ], len = (*tex)[0].nItem();
+      cout << "n: " << n << ", len: " << len << endl;
+//       if( n > 10 )
+//         n = 10;
       while( tex->size() < n )
       {
         Texture<float> & tx = (*tex)[ tex->size() ];
@@ -460,6 +492,26 @@ namespace
         for( i=0; i<len; ++i )
           tx[i] = background;
       }
+
+      pos[value_dim] = 0;
+      // select needed dimension when more than 2 are available
+      if( pos.size() > 2 )
+        matrix.lazyReader()->selectDimension(
+          vector<int32_t>( pos.begin() + 2, pos.end() ) );
+
+      bool free_same_row = false, free_row = false;
+      if( value_dim == 0 )
+      {
+        free_same_row = !matrix.lazyReader()->hasColumn( pos[1] );
+        matrix.readColumn( pos[1] );
+      }
+      else if( value_dim == 1 )
+      {
+        free_same_row = !matrix.lazyReader()->hasRow( pos[0] );
+        matrix.readRow( pos[0] );
+      }
+      else if( value_dim >= 2 )
+        free_row = true;
       for( i=0; i<n; ++i )
       {
         pos[value_dim] = i;
@@ -467,8 +519,21 @@ namespace
         if( pos.size() > 2 )
           matrix.lazyReader()->selectDimension(
             vector<int32_t>( pos.begin() + 2, pos.end() ) );
-        matrix.readRow( pos[1] );
+
+        if( value_dim >= 2 )
+          matrix.readRow( pos[0] );
         (*tex)[i][pos_in_tex] = float( matrix( pos[0], pos[1] ) );
+        if( free_row )
+        { cout << "freeing row\n";
+          matrix.freeRow( pos[0] );
+        }
+      }
+      if( false ) // free_same_row )
+      {
+        if( value_dim == 0 )
+          matrix.freeColumn( pos[1] );
+        else
+          matrix.freeRow( pos[0] );
       }
     }
   }
@@ -546,25 +611,24 @@ namespace
                                const vector<int> & dim_indices_pos,
                                unsigned  nsurfaces )
   {
+    cout << "getSurfaceModelTexture, dim: " << dim << endl;
     Object siter = surf->objectIterator();
-//     SparseOrDenseMatrix::DenseMatrixType matrix = mat.asDense();
     unsigned i, n = dim_indices_pos.size();
     vector<int32_t> pos( n, 0 );
     for( i=0; i<n; ++i )
       pos[i] = dim_indices_pos[i];
     int value_dim = cifti.valuesDimNum();
+    cout << "value_dim: " << value_dim << endl;
     string value_type = CiftiTools::dimensionType(
       mat.header()->getProperty( "cifti_dimensions" ), value_dim );
     float background = -1;
     unsigned repet, nrepet = 1;
 
+    cout << "value_type: " << value_type << endl;
+
     if( value_type == "labels" )
-    {
-      nrepet = unsigned( rint(
-        mat.header()->getProperty( "cifti_dimensions" )
-          ->getArrayItem( value_dim )->getProperty( "dimension_length")
-          ->getScalar() ) );
-    }
+      nrepet = CiftiTools::valuesDimSize( mat, value_dim );
+    cout << "nrepet: " << nrepet << endl;
 
     rc_ptr<CiftiTools::RoiTextureList> dim_info;
     map<string, Object> structures;
@@ -575,6 +639,8 @@ namespace
       Object isurf = siter->currentValue();
       structures[ struct_name ] = isurf;
     }
+    cout << "structures: " << structures.size() << endl;
+    cout << "nsurfaces: " << nsurfaces << endl;
 
     unsigned ntex = nsurfaces * nrepet;
     int csurf;
@@ -600,16 +666,21 @@ namespace
     for( is=structures.begin(); is!=es; ++is )
     {
       string struct_name = is->first;
+      cout << "structure: " << struct_name << endl;
       Object isurf = is->second;
       int tex_index = smap.find( struct_name )->second;
+      cout << "tex_index: " << tex_index << endl;
       size_t nnodes
         = size_t( isurf->getProperty( "number_of_nodes" )->getScalar() );
+      cout << "nnodes: " << nnodes << endl;
       Object indices = isurf->getProperty( "vertices_map" );
+      cout << "indices: " << indices->size() << endl;
 
       for( repet=0; repet<nrepet; ++repet )
       {
         rc_ptr<TimeTexture<float> > & troi
           = texlist[ tex_index + repet * nsurfaces ];
+        troi->header().setProperty( "structure", struct_name );
 
         Texture<float> & roi = (*troi)[0];
         if( roi.data().empty() )
@@ -631,13 +702,21 @@ namespace
       }
       Object iiter = indices->objectIterator();
 
+      if( pos.size() > 2 )
+        mat.lazyReader()->selectDimension( vector<int>( pos.begin() + 2,
+                                                        pos.end() ) );
+      if( dim == 0 )
+        mat.readColumn( pos[1] );
+      else if( dim == 1 )
+        mat.readRow( pos[0] );
+
       for( ; iiter->isValid(); iiter->next() )
       {
         pos[dim] = int( rint(
           iiter->currentValue()->getArrayItem(0)->getScalar() ) );
         getPointData( mat, value_dim, pos, texlist, tex_index,
           int( rint( iiter->currentValue()->getArrayItem(1)->getScalar() ) ),
-          value_type, background, false );
+          value_type, background, true );
       }
     }
   }
@@ -867,6 +946,8 @@ CiftiTools::BrainStuctureToMeshMap CiftiTools::defaultBrainStructureToMeshMap()
 
 string CiftiTools::dimensionType( Object cifti_info, int dim )
 {
+  if( dim < 0 )
+    return "scalars";
   Object cdim = cifti_info->getArrayItem( dim );
   if( cdim->hasProperty( "labels" ) )
     return "labels";
@@ -899,7 +980,20 @@ int CiftiTools::valuesDimNum( Object cifti_info )
       return dim;
   }
 
-  return ndim - 1;
+  return - 1;
+}
+
+
+size_t CiftiTools::valuesDimSize( const SparseOrDenseMatrix & mat,
+                                  int value_dim )
+{
+  if( value_dim < 0 )
+    return 1;
+  size_t len = unsigned( rint(
+        mat.header()->getProperty( "cifti_dimensions" )
+          ->getArrayItem( value_dim )->getProperty( "dimension_length" )
+          ->getScalar() ) );
+  return len;
 }
 
 

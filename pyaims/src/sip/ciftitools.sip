@@ -188,6 +188,8 @@ mesh_map: map_STRING_S32
 
     int valuesDimNum();
     static int valuesDimNum( carto::Object cifti_info );
+    static size_t valuesDimSize( const aims::SparseOrDenseMatrix & mat,
+                                 int value_dim );
     static std::string dimensionType( carto::Object cifti_info, int dim );
 
 /*

@@ -127,6 +127,8 @@ namespace aims
     static BrainStuctureToMeshMap defaultBrainStructureToMeshMap();
     int valuesDimNum() const;
     static int valuesDimNum( carto::Object cifti_info );
+    static size_t valuesDimSize( const SparseOrDenseMatrix & mat,
+                                 int value_dim );
     static std::string dimensionType( carto::Object cifti_info, int dim );
 
     // lower-level (could probably be private)

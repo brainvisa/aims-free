@@ -57,8 +57,10 @@ namespace aims
     virtual bool hasColumn( int32_t s2 ) const;
     virtual std::vector<double> *readRow( int32_t s1 );
     virtual std::vector<double> *readColumn( int32_t s2 );
-    virtual void freeRow( int32_t s1 ) { _read_rows.erase( s1 ); }
-    virtual void freeColumn( int32_t s2 ) { _read_cols.erase( s2 ); }
+    virtual void freeRow( int32_t s1 )
+    { _read_rows.erase( s1 ); _read_cols.clear(); }
+    virtual void freeColumn( int32_t s2 )
+    { _read_cols.erase( s2 ); _read_rows.clear(); }
     virtual void selectDimension( const vector<int32_t> & dims );
 
     vector<int32_t> fix_dims( const vector<int32_t> & pos );
@@ -203,6 +205,8 @@ bool CiftiFormat::read( const std::string & filename,
   Object hdr = vol.header();
   hdr->setProperty( "file_type", format );
   hdr->setProperty( "data_type", string("DOUBLE") );
+  vector<int> dimsi( dims.begin(), dims.end() );
+  hdr->setProperty( "dimensions", dimsi );
   hdr->copyProperties( cifti_tree );
 
   // lazy reader

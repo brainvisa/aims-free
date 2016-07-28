@@ -21,6 +21,7 @@ namespace aims
 
       int getSize1() const;
       int getSize2() const;
+      vector_S32 getSize() const;
       int getNonZeroElementCount() const;
 
       bool hasElement( int i, int j ) const;
