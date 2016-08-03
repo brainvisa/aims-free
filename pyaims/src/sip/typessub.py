@@ -2670,9 +2670,39 @@ typessub = {'signed char':
                'compareElement': '',
             },
 
+            'std::vector<int32_t>':
+            {
+                'typecode': 'vector_S32',
+                'pyFromC': 'pyaimsConvertFrom_vector',
+                'CFromPy': 'pyaimsConvertTo_vector<int32_t>',
+                'castFromSip': '',
+                'deref': '*',
+                'pyderef': '*',
+                'address': '&',
+                'pyaddress': '&',
+                'defScalar': '',
+                'defNumpyBindings': '',
+                'new': 'new vector_S32',
+                'NumType': 'PyArray_OBJECT',
+                'PyType': 'vector_S32',
+                'sipClass': 'vector_S32',
+                'typeinclude': '#include <vector>',
+                'sipinclude': '#include <pyaims/vector/stdvector.h>\n'
+                '#ifndef PYAIMS_WRAPPER_VECTOR_S32\n'
+                '#define PYAIMS_WRAPPER_VECTOR_S32\n'
+                'template <> inline sipWrapperType*\n'
+                'sipClass_vector<int32_t>()\n'
+                '{ return sipClass_vector_S32; }\n'
+                '#endif',
+                'module': 'aims',
+                'testPyType': 'pyaimsCheck_vector<int32_t>',
+                'compareElement': '',
+              },
+
             'carto::PluginLoader::PluginFile':
             classInNamespace('cartobase/plugin/plugin.h',
-                             'PluginFile', 'carto_PluginLoader', 'carto::PluginLoader'),
+                             'PluginFile', 'carto_PluginLoader',
+                             'carto::PluginLoader'),
 
             'aims::SparseMatrix':
             classInAimsNamespace('aims/sparsematrix/sparseMatrix.h',

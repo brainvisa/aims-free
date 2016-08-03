@@ -119,7 +119,13 @@ int32_t SparseOrDenseMatrix::getSize2() const
 vector<int32_t> SparseOrDenseMatrix::getSize() const
 {
   if( isDense() )
-    return denseMatrix()->getSize();
+  {
+    vector<int32_t> dims = denseMatrix()->getSize();
+    int32_t d0 = dims[0];
+    dims[0] = dims[1];
+    dims[1] = d0;
+    return dims;
+  }
   else
   {
     vector<int32_t> size;
@@ -378,6 +384,8 @@ SparseOrDenseMatrix::SparseMatrixType SparseOrDenseMatrix::asSparse(
 
   unsigned l, c, nl = _densematrix->getSizeY(), nc = _densematrix->getSizeX();
   SparseMatrixType sparse( new SparseMatrix( nl, nc ) );
+  sparse->header()->copyProperties(
+    Object::reference( _densematrix->header() ) );
   double *ptr;
   long inc;
 
@@ -408,6 +416,9 @@ SparseOrDenseMatrix::DenseMatrixType SparseOrDenseMatrix::asDense(
 
   DenseMatrixType dense( _sparsematrix->getSize2(), 
                          _sparsematrix->getSize1() );
+
+  dense.copyHeaderFrom( header() );
+
   dense.fill( 0 );
   SparseMatrix::const_iterator1 i, e = _sparsematrix->end1();
   SparseMatrix::const_iterator2 j, ej;
@@ -656,6 +667,79 @@ SparseOrDenseMatrix
   SparseOrDenseMatrix copy( thing1 );
   copy *= thing2;
   return copy;
+}
+
+
+SparseOrDenseMatrix* SparseOrDenseMatrix::subMatrix(
+  const vector<int32_t> & start, const vector<int32_t> & size )
+{
+  int32_t i, j, nd = size.size();
+  vector<vector<int32_t> > sparse( nd );
+  for( j=0; j<nd; ++j )
+  {
+    sparse[j].resize( size[j] );
+    vector<int32_t> & sparse_dim = sparse[j];
+    for( i=0; i<size[j]; ++i )
+      sparse_dim[i] = i + start[j];
+  }
+  return subMatrix( sparse );
+}
+
+
+SparseOrDenseMatrix* SparseOrDenseMatrix::subMatrix(
+  const vector<vector<int32_t> > & indices_along_dims )
+{
+  SparseOrDenseMatrix *mat = new SparseOrDenseMatrix;
+  bool needs3d = false;
+  size_t dim, ndim = indices_along_dims.size();
+  vector<int32_t> dims( ndim, 1 );
+  vector<int32_t> pos( ndim, 0 );
+  for( dim=0; dim<ndim; ++dim )
+  {
+    dims[dim] = (int32_t) indices_along_dims[dim].size();
+    pos[dim] = indices_along_dims[dim][0];
+    if( dim >= 2 && dims[dim] > 1 )
+    {
+      needs3d = true;
+      break;
+    }
+  }
+  if( needs3d )
+  {
+    // swap dims 0/1
+    int32_t d0 = dims[0];
+    dims[0] = dims[1];
+    dims[1] = d0;
+    DenseMatrixType dense = new Volume<double>( dims );
+    mat->setMatrix( dense );
+    dims[1] = dims[0];
+    dims[0] = d0;
+  }
+  else
+    mat->reallocate( dims[0], dims[1] );
+  mat->header()->setProperty( "dimensions", dims );
+
+  size_t i, j, j0, n=dims[1], nc = dims[0];
+  vector<int32_t>::const_iterator ij;
+
+  // handle only 2D for now.
+  for( j0=0; j0!=nc; ++j0 )
+  {
+    j = indices_along_dims[0][j0];
+    pos[0] = j;
+    lazyReader()->selectDimension( vector<int32_t>(
+      pos.begin() + 2, pos.end() ) );
+    bool free_row = !lazyReader()->hasRow( j );
+    readRow( j );
+    vector<double> row = getRow( j );
+    for( i=0; i<n; ++i )
+      mat->set_element( j0, i, row[ indices_along_dims[1][i] ] );
+    if( free_row )
+      freeRow( j );
+    mat->muteToOptimalShape();
+  }
+
+  return mat;
 }
 
 

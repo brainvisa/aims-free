@@ -323,6 +323,8 @@ namespace
                             const CiftiTools::BrainStuctureToMeshMap & smap,
                             int struct_index )
   {
+    // FIXME: struct_index is not used, the roi label from cifti is used
+    // instead
     Object siter = surf->objectIterator();
     for( ; siter->isValid(); siter->next() )
     {
@@ -337,22 +339,32 @@ namespace
         troi.reset( new TimeTexture<int> );
       Texture<int> & roi = (*troi)[0];
       size_t nnodes
-        = size_t( surf->getProperty( "number_of_nodes" )->getScalar() );
+        = size_t( rint(
+          surf->getProperty( "number_of_nodes" )->getScalar() ) );
+      int label =  int( rint( surf->getProperty(
+        "label_number" )->getScalar() ) );
+      Object labels_map;
+      if( troi->header().hasProperty( "labels_map" ) )
+        labels_map = troi->header().getProperty( "labels_map" );
+      else
+        labels_map = Object::value( IntDictionary() );
+      labels_map->setArrayItem( label, Object::value( struct_name ) );
+      troi->header().setProperty( "labels_map", labels_map );
       if( roi.data().empty() )
-        roi.data().resize( nnodes );
+        roi.data().resize( nnodes, 0 );
       if( roi.nItem() < nnodes )
       {
         cout << "warning: number_of_nodes (" << nnodes
           << ") differ from allocated texture size (" << roi.nItem() << ")"
           << endl;
-        roi.data().resize( nnodes );
+        roi.data().resize( nnodes, 0 );
       }
       Object indices = surf->getProperty( "vertices_map" );
       Object iiter = indices->objectIterator();
       for( ; iiter->isValid(); iiter->next() )
       {
         roi[ int( iiter->currentValue()->getArrayItem(1)->getScalar() ) ]
-          = struct_index;
+          = label;
       }
     }
   }
@@ -438,54 +450,58 @@ namespace
     vector<int32_t> & pos, CiftiTools::TextureList & texlist,
     int tex_index, size_t pos_in_tex, float background, bool single )
   {
-    cout << "getScalarsPointData " << pos[0] << ", " << pos[1] << endl;
-    cout << "tex_index: " << tex_index << ", texlist: " << texlist.size() << endl;
-    cout << "value_dim: " << value_dim << endl;
-    cout << "mat size: " << matrix.getSize().size() << endl;
+//     cout << "getScalarsPointData " << pos[0] << ", " << pos[1] << endl;
+//     cout << "tex_index: " << tex_index << ", texlist: " << texlist.size() << endl;
+//     cout << "value_dim: " << value_dim << endl;
+//     cout << "mat size: " << matrix.getSize().size() << endl;
 
     size_t value_dim_size = CiftiTools::valuesDimSize( matrix, value_dim );
-    cout << "value_dim_size: " << value_dim_size << endl;
+//     cout << "value_dim_size: " << value_dim_size << endl;
 
     if( single || value_dim_size == 1 )
     {
-      cout << "single\n";
+//       cout << "single\n";
       // select needed dimension when more than 2 are available
       if( pos.size() > 2 )
         matrix.lazyReader()->selectDimension( vector<int32_t>( pos.begin() + 2,
                                                                pos.end() ) );
-//       bool free_row = false;
-//       if( value_dim == 0 )
-//       {
-//         free_row = !matrix.lazyReader()->hasColumn( pos[1] );
-//         cout << "read col " << pos[1] << endl;
-//         matrix.readColumn( pos[1] );
-//       }
-//       else if( value_dim == 1 )
-//       {
-//         free_row = !matrix.lazyReader()->hasRow( pos[0] );
-//         cout << "read row " << pos[0] << endl;
-//         matrix.readRow( pos[0] );
-//       }
+      bool free_row = false;
+      // if data are not in memory, need to load them
+      if( !matrix.lazyReader()->hasRow( pos[0] )
+          && !matrix.lazyReader()->hasColumn( pos[1] ) )
+      {
+        if( value_dim == 0 )
+        {
+          free_row = !matrix.lazyReader()->hasColumn( pos[1] );
+          matrix.readColumn( pos[1] );
+        }
+        else
+        {
+          free_row = !matrix.lazyReader()->hasRow( pos[0] );
+          matrix.readRow( pos[0] );
+        }
+      }
 
       (*texlist[tex_index])[0][ pos_in_tex ] = float( matrix( pos[0],
                                                               pos[1] ) );
-//       if( free_row )
-//       {
-//         if( value_dim == 0 )
-//           matrix->freeColumn( pos[1] );
-//         else
-//           matrix->freeRow( pos[0] );
-//       }
+      if( free_row )
+      {
+        /* if reading repetitively in the same row / column, freeing here
+           may be very inefficient.
+           In the other hand, not freeing, may eat memory if reading
+           repetitively from different rows / columns. */
+        if( value_dim == 0 )
+          matrix.freeColumn( pos[1] );
+        else
+          matrix.freeRow( pos[0] );
+      }
     }
     else
     {
-      cout << "multi\n";
+//       cout << "multi\n";
       rc_ptr<TimeTexture<float> > tex = texlist[ tex_index ];
-      size_t i, n = matrix.getSize()[ value_dim ], len = (*tex)[0].nItem();
-      cout << "n: " << n << ", len: " << len << endl;
-//       if( n > 10 )
-//         n = 10;
-      while( tex->size() < n )
+      size_t i, len = (*tex)[0].nItem();
+      while( tex->size() < value_dim_size )
       {
         Texture<float> & tx = (*tex)[ tex->size() ];
         tx.data().resize( len );
@@ -510,9 +526,9 @@ namespace
         free_same_row = !matrix.lazyReader()->hasRow( pos[0] );
         matrix.readRow( pos[0] );
       }
-      else if( value_dim >= 2 )
+      else
         free_row = true;
-      for( i=0; i<n; ++i )
+      for( i=0; i<value_dim_size; ++i )
       {
         pos[value_dim] = i;
         // select needed dimension when more than 2 are available
@@ -520,15 +536,13 @@ namespace
           matrix.lazyReader()->selectDimension(
             vector<int32_t>( pos.begin() + 2, pos.end() ) );
 
-        if( value_dim >= 2 )
+        if( free_row )
           matrix.readRow( pos[0] );
         (*tex)[i][pos_in_tex] = float( matrix( pos[0], pos[1] ) );
         if( free_row )
-        { cout << "freeing row\n";
           matrix.freeRow( pos[0] );
-        }
       }
-      if( false ) // free_same_row )
+      if( free_same_row )
       {
         if( value_dim == 0 )
           matrix.freeColumn( pos[1] );

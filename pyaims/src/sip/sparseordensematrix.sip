@@ -64,6 +64,11 @@ namespace aims
       void muteToOptimalShape();
       bool isOptimalShape() const;
 
+      aims::SparseOrDenseMatrix* subMatrix(
+        const vector_S32 & start, const vector_S32 & size ) /Factory/;
+      aims::SparseOrDenseMatrix* subMatrix(
+        const vector_vector_S32 & indices_along_dims ) /Factory/;
+
       aims::SparseOrDenseMatrix &
         operator += ( const aims::SparseOrDenseMatrix& thing );
       aims::SparseOrDenseMatrix &

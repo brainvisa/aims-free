@@ -35,18 +35,13 @@
 #ifndef PYAIMS_VECTOR_STDVECTOR_H
 #define PYAIMS_VECTOR_STDVECTOR_H
 
+#include <vector>
 #include <stdlib.h>
 
 template <typename T>
 inline std::vector<T> * pyaimsCopyFrom_Array( T * array, unsigned size )
 {
-  std::vector<T> * result = new std::vector<T>;
-  result->reserve( size );
-
-  for( unsigned index=0; index < size; ++index )
-  {
-    result->push_back( array[index] );
-  }
+  std::vector<T> * result = new std::vector<T>( array, array + size );
 
   return result;
 }
@@ -58,6 +53,36 @@ typedef std::vector<unsigned long> vector_SIZE_T;
 // typedef unsigned size_t;
 typedef std::vector<unsigned> vector_SIZE_T;
 #endif
+
+
+template <typename T>
+inline sipWrapperType* sipClass_vector();
+
+
+template <typename T>
+inline PyObject *pyaimsConvertFrom_vector( std::vector<T> * p )
+{
+  return sipConvertFromInstance( p, sipClass_vector<T>(), 0 );
+}
+
+
+template <typename T>
+inline std::vector<T> *pyaimsConvertTo_vector( PyObject* p )
+{
+  int   iserr = 0;
+  return (std::vector<T> *)
+    sipConvertToInstance( p, sipClass_vector<T>(), 0,
+                          SIP_NO_CONVERTORS, 0, &iserr );
+}
+
+
+template <typename T>
+inline bool pyaimsCheck_vector( PyObject* o )
+{
+  return sipCanConvertToInstance( o, (sipClass_vector<T>()),
+                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+}
+
 
 #endif
 

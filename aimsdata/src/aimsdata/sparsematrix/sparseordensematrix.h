@@ -167,6 +167,11 @@ namespace aims
       MatrixLazyReader* lazyReader() const
       { return _lazyreader; }
 
+      SparseOrDenseMatrix* subMatrix( const std::vector<int32_t> & start,
+                                      const std::vector<int32_t> & size );
+      SparseOrDenseMatrix* subMatrix(
+        const std::vector<std::vector<int32_t> > & indices_along_dims );
+
     protected:
 
       SparseMatrixType _sparsematrix;

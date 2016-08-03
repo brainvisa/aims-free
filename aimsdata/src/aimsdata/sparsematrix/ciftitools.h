@@ -122,7 +122,7 @@ namespace aims
     // intermediate
     /** Define the brain structure to mesh mapping: several meshes may be
         involved in CIFTI data mapping (typically a left hemisphere mesh and
-        a right
+        a right)
     */
     static BrainStuctureToMeshMap defaultBrainStructureToMeshMap();
     int valuesDimNum() const;
