@@ -196,8 +196,33 @@ mesh_map: map_STRING_S32
     vector_S32 getIndicesForBrainStructure(
       int dim, const std::string & struct_name ) const;
 %Docstring
+getIndicesForBrainStructure(dim, struct_name)
+
 Get the list of indices corresponding to a given brain structure in the matrix,
 on a given dimension.
+%End
+
+    vector_S32 getIndicesForSurfaceIndices(
+      int dim, int surface_num, const vector_S32 & roi_indices ) const;
+%Docstring
+getIndicesForSurfaceIndices(dim, surface_num, roi_indices)
+
+Get the list of matrix indices corresponding to a given region on a
+mesh, for a given dimension.
+
+Parameters
+----------
+dim: int
+    matrix dimension
+surface_num: int
+    surface number (same as given by brainStructureMap())
+roi_indices: list or array of int
+    indices in the surface mesh of vertices if interest
+
+Returns
+-------
+indices: vector_S32
+    list of indices in the matrix
 %End
 
     list_STRING getBrainStructures( int dim ) const;

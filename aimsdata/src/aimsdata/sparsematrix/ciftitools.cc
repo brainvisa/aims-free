@@ -389,6 +389,34 @@ namespace
     }
   }
 
+
+  void getSurfaceModelIndicesForRoiIndices(
+    Object surf, int surface_num, const set<int> & roi_indices,
+    vector<int> & indices_vec,
+    const CiftiTools::BrainStuctureToMeshMap & smap )
+  {
+    Object siter = surf->objectIterator();
+    for( ; siter->isValid(); siter->next() )
+    {
+      string struct_name = siter->key();
+      int surfnum = smap.find( struct_name )->second;
+      if( surfnum == surface_num )
+      {
+        Object surf = siter->currentValue();
+        Object indices = surf->getProperty( "vertices_map" );
+        Object iiter = indices->objectIterator();
+        for( ; iiter->isValid(); iiter->next() )
+        {
+          int surf_ind = int( rint(
+            iiter->currentValue()->getArrayItem(1)->getScalar() ) );
+          if( roi_indices.find( surf_ind ) != roi_indices.end() )
+            indices_vec.push_back( int( rint(
+              iiter->currentValue()->getArrayItem(0)->getScalar() ) ) );
+        }
+      }
+    }
+  }
+
 }
 
 
@@ -645,24 +673,19 @@ namespace
                                const vector<int> & dim_indices_pos,
                                unsigned  nsurfaces )
   {
-    cout << "getSurfaceModelTexture, dim: " << dim << endl;
     Object siter = surf->objectIterator();
     unsigned i, n = dim_indices_pos.size();
     vector<int32_t> pos( n, 0 );
     for( i=0; i<n; ++i )
       pos[i] = dim_indices_pos[i];
     int value_dim = cifti.valuesDimNum();
-    cout << "value_dim: " << value_dim << endl;
     string value_type = CiftiTools::dimensionType(
       mat.header()->getProperty( "cifti_dimensions" ), value_dim );
     float background = -1;
     unsigned repet, nrepet = 1;
 
-    cout << "value_type: " << value_type << endl;
-
     if( value_type == "labels" )
       nrepet = CiftiTools::valuesDimSize( mat, value_dim );
-    cout << "nrepet: " << nrepet << endl;
 
     rc_ptr<CiftiTools::RoiTextureList> dim_info;
     map<string, Object> structures;
@@ -673,8 +696,6 @@ namespace
       Object isurf = siter->currentValue();
       structures[ struct_name ] = isurf;
     }
-    cout << "structures: " << structures.size() << endl;
-    cout << "nsurfaces: " << nsurfaces << endl;
 
     unsigned ntex = nsurfaces * nrepet;
     int csurf;
@@ -700,15 +721,11 @@ namespace
     for( is=structures.begin(); is!=es; ++is )
     {
       string struct_name = is->first;
-      cout << "structure: " << struct_name << endl;
       Object isurf = is->second;
       int tex_index = smap.find( struct_name )->second;
-      cout << "tex_index: " << tex_index << endl;
       size_t nnodes
         = size_t( isurf->getProperty( "number_of_nodes" )->getScalar() );
-      cout << "nnodes: " << nnodes << endl;
       Object indices = isurf->getProperty( "vertices_map" );
-      cout << "indices: " << indices->size() << endl;
 
       for( repet=0; repet<nrepet; ++repet )
       {
@@ -836,6 +853,35 @@ vector<int> CiftiTools::getIndicesForBrainStructure(
 
   return indices;
 }
+
+
+vector<int> CiftiTools::getIndicesForSurfaceIndices(
+  int dim, int surface_num, const vector<int> & roi_indices ) const
+{
+  Object cifti_info = getDimensionObject( dim );
+
+  Object models = cifti_info->getProperty( "brain_models" );
+  Object iter = models->objectIterator();
+  vector<int> indices;
+  set<int> roi_set( roi_indices.begin(), roi_indices.end() );
+  indices.reserve( roi_indices.size() );
+
+  for( ; iter->isValid(); iter->next() )
+  {
+    try
+    {
+      Object surf = iter->currentValue()->getProperty( "surface" );
+      getSurfaceModelIndicesForRoiIndices( surf, surface_num, roi_set,
+                                           indices, _smap );
+    }
+    catch( exception & )
+    {
+    }
+  }
+
+  return indices;
+}
+
 
 
 list<string> CiftiTools::getBrainStructures( int dim ) const

@@ -146,11 +146,16 @@ namespace aims
     void getParcelsTexture(
       carto::Object cifti_info, TextureList & texlist, int dim,
       const std::vector<int> & dim_indices_pos ) const;
-    /** Get the list of indices corresponding to a given brain structure in the
-        matrix, on a given dimension. */
+    std::list<std::string> getBrainStructures( int dim ) const;
+    /** Get the list of matrix indices corresponding to a given brain
+        structure, on a given dimension. */
     std::vector<int> getIndicesForBrainStructure(
       int dim, const std::string & struct_name ) const;
-    std::list<std::string> getBrainStructures( int dim ) const;
+    /** Get the list of matrix indices corresponding to a given region on a
+        mesh, for a given dimension.
+    */
+    std::vector<int> getIndicesForSurfaceIndices(
+      int dim, int surface_num, const std::vector<int> & roi_indices ) const;
 
   private:
       mutable carto::rc_ptr<SparseOrDenseMatrix> _matrix;
