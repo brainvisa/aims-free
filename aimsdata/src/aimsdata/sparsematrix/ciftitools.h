@@ -38,6 +38,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <list>
 
 template <typename T> class TimeTexture;
 
@@ -130,6 +131,7 @@ namespace aims
     static size_t valuesDimSize( const SparseOrDenseMatrix & mat,
                                  int value_dim );
     static std::string dimensionType( carto::Object cifti_info, int dim );
+    std::string dimensionType( int dim ) const;
 
     // lower-level (could probably be private)
     carto::Object getDimensionObject( int dim ) const;
@@ -144,6 +146,11 @@ namespace aims
     void getParcelsTexture(
       carto::Object cifti_info, TextureList & texlist, int dim,
       const std::vector<int> & dim_indices_pos ) const;
+    /** Get the list of indices corresponding to a given brain structure in the
+        matrix, on a given dimension. */
+    std::vector<int> getIndicesForBrainStructure(
+      int dim, const std::string & struct_name ) const;
+    std::list<std::string> getBrainStructures( int dim ) const;
 
   private:
       mutable carto::rc_ptr<SparseOrDenseMatrix> _matrix;

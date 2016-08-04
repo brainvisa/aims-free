@@ -320,11 +320,8 @@ namespace
 {
 
   void getSurfaceModelInfo( Object surf, CiftiTools::RoiTextureList & roilist,
-                            const CiftiTools::BrainStuctureToMeshMap & smap,
-                            int struct_index )
+                            const CiftiTools::BrainStuctureToMeshMap & smap )
   {
-    // FIXME: struct_index is not used, the roi label from cifti is used
-    // instead
     Object siter = surf->objectIterator();
     for( ; siter->isValid(); siter->next() )
     {
@@ -363,9 +360,32 @@ namespace
       Object iiter = indices->objectIterator();
       for( ; iiter->isValid(); iiter->next() )
       {
-        roi[ int( iiter->currentValue()->getArrayItem(1)->getScalar() ) ]
-          = label;
+        roi[ int( rint(
+          iiter->currentValue()->getArrayItem(1)->getScalar() ) ) ]
+            = label;
       }
+    }
+  }
+
+
+  void getModelIndices( Object surf, const string & model_name,
+                        vector<int> & indices_vec )
+  {
+    Object siter = surf->objectIterator();
+    for( ; siter->isValid(); siter->next() )
+    {
+      string struct_name = siter->key();
+      if( struct_name != model_name )
+        continue;
+
+      Object surf = siter->currentValue();
+      Object indices = surf->getProperty( "vertices_map" );
+      size_t i = indices_vec.size();
+      indices_vec.resize( indices_vec.size() + indices->size() );
+      Object iiter = indices->objectIterator();
+      for( ; iiter->isValid(); iiter->next(), ++i )
+        indices_vec[i] = int( rint(
+          iiter->currentValue()->getArrayItem(0)->getScalar() ) );
     }
   }
 
@@ -383,7 +403,7 @@ void CiftiTools::getBrainModelsInfo( Object cifti_info,
     try
     {
       Object surf = iter->currentValue()->getProperty( "surface" );
-      getSurfaceModelInfo( surf, roilist, _smap, struct_index );
+      getSurfaceModelInfo( surf, roilist, _smap );
     }
     catch( exception & )
     {
@@ -391,7 +411,7 @@ void CiftiTools::getBrainModelsInfo( Object cifti_info,
       {
         Object vox = iter->currentValue()->getProperty( "voxels" );
         // TODO
-        // getVoxelsModelInfo( surf, roilist, _smap, struct_index );
+        // getVoxelsModelInfo( surf, roilist, _smap /*, struct_index*/ );
       }
       catch( exception & )
       {
@@ -785,6 +805,78 @@ void CiftiTools::getBrainModelsTexture(
 }
 
 
+vector<int> CiftiTools::getIndicesForBrainStructure(
+  int dim, const string & struct_name ) const
+{
+  Object cifti_info = getDimensionObject( dim );
+
+  Object models = cifti_info->getProperty( "brain_models" );
+  Object iter = models->objectIterator();
+  vector<int> indices;
+
+  for( ; iter->isValid(); iter->next() )
+  {
+    try
+    {
+      Object surf = iter->currentValue()->getProperty( "surface" );
+      getModelIndices( surf, struct_name, indices );
+    }
+    catch( exception & )
+    {
+      try
+      {
+        Object vox = iter->currentValue()->getProperty( "voxels" );
+        getModelIndices( vox, struct_name, indices );
+      }
+      catch( exception & )
+      {
+      }
+    }
+  }
+
+  return indices;
+}
+
+
+list<string> CiftiTools::getBrainStructures( int dim ) const
+{
+  Object cifti_info = getDimensionObject( dim );
+
+  Object models = cifti_info->getProperty( "brain_models" );
+  Object iter = models->objectIterator();
+  list<string> structures;
+
+  for( ; iter->isValid(); iter->next() )
+  {
+    Object surf_or_vox;
+    try
+    {
+      surf_or_vox = iter->currentValue()->getProperty( "surface" );
+    }
+    catch( exception & )
+    {
+      try
+      {
+        surf_or_vox = iter->currentValue()->getProperty( "voxels" );
+      }
+      catch( exception & )
+      {
+        continue;
+      }
+    }
+
+    Object siter = surf_or_vox->objectIterator();
+    for( ; siter->isValid(); siter->next() )
+    {
+      string struct_name = siter->key();
+      structures.push_back( struct_name );
+    }
+  }
+
+  return structures;
+}
+
+
 void CiftiTools::getParcelsTexture(
   Object cifti_info, TextureList & texlist,
   int dim, const vector<int> & dim_indices_pos ) const
@@ -975,6 +1067,13 @@ string CiftiTools::dimensionType( Object cifti_info, int dim )
     return "brain_models";
 
   return "";
+}
+
+
+string CiftiTools::dimensionType( int dim ) const
+{
+  return dimensionType( _matrix->header()->getProperty( "cifti_dimensions" ),
+                        dim );
 }
 
 

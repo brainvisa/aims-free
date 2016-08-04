@@ -191,15 +191,16 @@ mesh_map: map_STRING_S32
     static size_t valuesDimSize( const aims::SparseOrDenseMatrix & mat,
                                  int value_dim );
     static std::string dimensionType( carto::Object cifti_info, int dim );
+    std::string dimensionType( int dim ) const;
 
-/*
-    static carto::Object getDimensionObject(
-      const aims::SparseOrDenseMatrix & mat, int dim );
-    static TimeTexture_S32 *roiTextureFromDimension(
-      const aims::SparseOrDenseMatrix & mat, int dim ) /Factory/;
-    static TimeTexture_FLOAT *expandedValueTextureFromDimension(
-      const aims::SparseOrDenseMatrix & mat, int dim ) /Factory/;
-*/
+    vector_S32 getIndicesForBrainStructure(
+      int dim, const std::string & struct_name ) const;
+%Docstring
+Get the list of indices corresponding to a given brain structure in the matrix,
+on a given dimension.
+%End
+
+    list_STRING getBrainStructures( int dim ) const;
   };
 
 };
