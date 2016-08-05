@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 import numpy as np
 import sys
 import six
+import gc
 
 # --cifti /volatile/riviere/hcp_course/HCP_2015_Course/home/hcpcourse/day3-wednesday/Diffusion_practicals/100307/MNINonLinear/Connectomes/Conn3_HCPcourse_log.dconn.nii
 # meshes:
@@ -131,15 +132,16 @@ def main():
         print('row:', row, ':', i, '/', len(row_indices), 'dense:',
               gyr_mat.isDense())
         mat.readRow(row)
-        row_data = mat.getRow(row)
-        #row_data.arraydata()[np.isnan(row_data)] = 0
-        row_data.arraydata()[np.isinf(row_data)] = 0
+        row_data = mat.getRow(row).arraydata()
+        #row_data[np.isnan(row_data)] = 0
+        row_data[np.isinf(row_data)] = 0
         mat.freeRow(row)
         new_row_data = np.zeros((total_vertices, ))
         new_row_data[new_col_indices] = row_data
         gyr_mat.setRow(i, new_row_data)
         if i % 20 == 0:
             gyr_mat.muteToOptimalShape()
+            gc.collect()
     gyr_mat.muteToOptimalShape()
 
     # save gyrus matrix
