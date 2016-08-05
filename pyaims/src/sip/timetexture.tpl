@@ -192,11 +192,14 @@ public:
             sipIsErr = 1;
             PyErr_SetString( PyExc_TypeError, s.str().c_str() );
           }
+          if( pyitem )
+            Py_DECREF( pyitem );
           break;
         }
 
         (*sipCpp)[i] = %Template1pyderef% %Template1castFromSip%
                        %Template1CFromPy%( pyitem );
+        Py_DECREF( pyitem );
       }
     }
   }
