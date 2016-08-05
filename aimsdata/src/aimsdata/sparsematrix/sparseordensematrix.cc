@@ -92,7 +92,7 @@ SparseOrDenseMatrix& SparseOrDenseMatrix::operator = (
 void SparseOrDenseMatrix::reallocate( int32_t size1, int32_t size2 )
 {
   if( isDense() )
-    denseMatrix()->reallocate( size1, size2 );
+    denseMatrix()->reallocate( size2, size1 );
   else
     sparseMatrix()->reallocate( size1, size2 );
 }
@@ -130,6 +130,10 @@ vector<int32_t> SparseOrDenseMatrix::getSize() const
   {
     vector<int32_t> size;
     header()->getProperty( "dimensions", size );
+    if( size.size() < 2 )
+      size.resize( 2 );
+    size[0] = getSize1();
+    size[1] = getSize2();
     return size;
   }
 }
