@@ -30,7 +30,12 @@ typedef AimsVector<%Template1%, %Template2%>
       {
         pyitem = PySequence_GetItem( sipPy, i );
         if( !pyitem || !%Template1testPyType%( pyitem ) )
+        {
+          if( pyitem )
+            Py_DECREF( pyitem );
           return 0;
+        }
+        Py_DECREF( pyitem );
       }
       return 1;
     }
@@ -63,6 +68,8 @@ typedef AimsVector<%Template1%, %Template2%>
         std::ostringstream s;
         s << "wrong list item type, item " << i;
         PyErr_SetString( PyExc_TypeError, s.str().c_str() );
+        if( pyitem )
+          Py_DECREF( pyitem );
         return 0;
       }
 
@@ -171,11 +178,14 @@ public:
             s << "wrong list item type, item " << i;
             if( !sipIsErr )
               PyErr_SetString( PyExc_TypeError, s.str().c_str() );
+            if( pyitem )
+              Py_DECREF( pyitem );
             break;
           }
 
           (*sipCpp)[i] = %Template1pyderef% %Template1castFromSip%
                         %Template1CFromPy%( pyitem );
+          Py_DECREF( pyitem );
         }
         sipIsErr = 0;
       }
