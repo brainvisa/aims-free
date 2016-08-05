@@ -90,7 +90,7 @@ SparseOrDenseMatrix& SparseOrDenseMatrix::operator = (
 void SparseOrDenseMatrix::reallocate( int32_t size1, int32_t size2 )
 {
   if( isDense() )
-    denseMatrix()->reallocate( size1, size2 );
+    denseMatrix()->reallocate( size2, size1 );
   else
     sparseMatrix()->reallocate( size1, size2 );
 }
