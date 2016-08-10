@@ -89,6 +89,10 @@ DicomPlugin::DicomPlugin() : Plugin()
     
     //--- INT ------------------------------------------------------------------
     
+    VolumeFormatReader<int8_t> *vfr8 = new VolumeFormatReader<int8_t>;
+    vfr8->attach( rc_ptr<ImageReader<int8_t> >( new DicomImageReader<int8_t> ) );
+    FormatDictionary<Volume<int8_t> >::registerFormat( "DICOM", vfr8, exts );
+    
     VolumeFormatReader<int16_t> *vfr16 = new VolumeFormatReader<int16_t>;
     vfr16->attach( rc_ptr<ImageReader<int16_t> >( new DicomImageReader<int16_t> ) );
     FormatDictionary<Volume<int16_t> >::registerFormat( "DICOM", vfr16, exts );
@@ -103,6 +107,12 @@ DicomPlugin::DicomPlugin() : Plugin()
     vfru16->attach( rc_ptr<ImageReader<uint16_t> >( new DicomImageReader<uint16_t> ) );
     FormatDictionary<Volume<uint16_t> >::registerFormat( "DICOM", vfru16, exts );
     
+    //--- FLOAT ----------------------------------------------------------------
+    
+    VolumeFormatReader<float> *vfrf = new VolumeFormatReader<float>;
+    vfrf->attach( rc_ptr<ImageReader<float> >( new DicomImageReader<float> ) );
+    FormatDictionary<Volume<float> >::registerFormat( "DICOM", vfrf, exts );
+    
     //==========================================================================
     //   V O L U M E   R E F
     //==========================================================================
@@ -114,6 +124,10 @@ DicomPlugin::DicomPlugin() : Plugin()
     FormatDictionary<VolumeRef<VoxelRGB> >::registerFormat( "DICOM", rfr_rgb, exts );
     
     //--- INT ------------------------------------------------------------------
+    
+    VolumeRefFormatReader<int8_t> *rfr8 = new VolumeRefFormatReader<int8_t>;
+    rfr8->attach( rc_ptr<ImageReader<int8_t> >( new DicomImageReader<int8_t> ) );
+    FormatDictionary<VolumeRef<int8_t> >::registerFormat( "DICOM", rfr8, exts );
     
     VolumeRefFormatReader<int16_t> *rfr16 = new VolumeRefFormatReader<int16_t>;
     rfr16->attach( rc_ptr<ImageReader<int16_t> >( new DicomImageReader<int16_t> ) );
@@ -128,6 +142,12 @@ DicomPlugin::DicomPlugin() : Plugin()
     VolumeRefFormatReader<uint16_t> *rfru16 = new VolumeRefFormatReader<uint16_t>;
     rfru16->attach( rc_ptr<ImageReader<uint16_t> >( new DicomImageReader<uint16_t> ) );
     FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "DICOM", rfru16, exts );
+    
+    //--- FLOAT ----------------------------------------------------------------
+    
+    VolumeRefFormatReader<float> *rfrf = new VolumeRefFormatReader<float>;
+    rfrf->attach( rc_ptr<ImageReader<float> >( new DicomImageReader<float> ) );
+    FormatDictionary<VolumeRef<float> >::registerFormat( "DICOM", rfrf, exts );
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -148,6 +168,10 @@ DicomPlugin::DicomPlugin() : Plugin()
     FormatDictionary<Volume<VoxelRGB> >::registerFormat( "DICOM", vfw_rgb, exts );
     
     //--- INT ------------------------------------------------------------------
+    
+    VolumeFormatWriter<int8_t> *vfw8 = new VolumeFormatWriter<int8_t>;
+    vfw8->attach( rc_ptr<ImageWriter<int8_t> >( new DicomImageWriter<int8_t> ) );
+    FormatDictionary<Volume<int8_t> >::registerFormat( "DICOM", vfw8, exts );
     
     VolumeFormatWriter<int16_t> *vfw16 = new VolumeFormatWriter<int16_t>;
     vfw16->attach( rc_ptr<ImageWriter<int16_t> >( new DicomImageWriter<int16_t> ) );
@@ -174,6 +198,10 @@ DicomPlugin::DicomPlugin() : Plugin()
     FormatDictionary<VolumeRef<VoxelRGB> >::registerFormat( "DICOM", rfw_rgb, exts );
     
     //--- INT ------------------------------------------------------------------
+    
+    VolumeRefFormatWriter<int8_t> *rfw8 = new VolumeRefFormatWriter<int8_t>;
+    rfw8->attach( rc_ptr<ImageWriter<int8_t> >( new DicomImageWriter<int8_t> ) );
+    FormatDictionary<VolumeRef<int8_t> >::registerFormat( "DICOM", rfw8, exts );
     
     VolumeRefFormatWriter<int16_t> *rfw16 = new VolumeRefFormatWriter<int16_t>;
     rfw16->attach( rc_ptr<ImageWriter<int16_t> >( new DicomImageWriter<int16_t> ) );
