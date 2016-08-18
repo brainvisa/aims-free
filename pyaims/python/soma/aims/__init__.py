@@ -510,14 +510,28 @@ def objiteritems(self):
             def __next__(self):
                 if not self.iterator.isValid():
                     raise StopIteration("iterator outside bounds")
-                res = (self.iterator.key(), self.iterator.currentValue())
+                try:
+                    key = self.iterator.key()
+                except:
+                    try:
+                        key = self.iterator.intKey()
+                    except:
+                        key = self.iterator.keyObject()
+                res = (key, self.iterator.currentValue())
                 self.iterator.__next__()
                 return res
         else:
             def next(self):
                 if not self.iterator.isValid():
                     raise StopIteration("iterator outside bounds")
-                res = (self.iterator.key(), self.iterator.currentValue())
+                try:
+                    key = self.iterator.key()
+                except:
+                    try:
+                        key = self.iterator.intKey()
+                    except:
+                        key = self.iterator.keyObject()
+                res = (key, self.iterator.currentValue())
                 self.iterator.next()
                 return res
 

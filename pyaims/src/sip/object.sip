@@ -352,14 +352,34 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       {
         if( sipCpp->isArray() )
         {
-          unsigned long n = sipCpp->size();
-          if( a0 < 0 )
-            a0 += n;
-          if( a0 < 0 || a0 >= n )
-            throw std::runtime_error( "key error: out of range" );
+          // check for int key iterator
+          carto::Object i = sipCpp->objectIterator();
+          if( i.get() && i->isValid() && i->isIntKeyIterator() )
+          {
+            // int key dict: size does not matter...
+          }
+          else
+          {
+            unsigned long n = sipCpp->size();
+            if( a0 < 0 )
+              a0 += n;
+            if( a0 < 0 || a0 >= n )
+              throw std::runtime_error( "key error: out of range" );
+          }
         }
         carto::Object o = sipCpp->getArrayItem( a0 );
-        sipRes = new carto::Object( o );
+        if( !o.get() )
+        {
+          sipIsErr = 1;
+          sipRes = 0;
+          std::ostringstream x;
+          x << a0;
+          SIP_BLOCK_THREADS
+          PyErr_SetString( PyExc_KeyError, x.str().c_str() );
+          SIP_UNBLOCK_THREADS
+        }
+        else
+          sipRes = new carto::Object( o );
       }
     catch( ... )
       {
@@ -396,8 +416,8 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         sipIsErr = 1;
         sipRes = 0;
         SIP_BLOCK_THREADS
-        PyErr_SetString( PyExc_RuntimeError, 
-                         ( std::string( "error while iterating dictionary: " ) 
+        PyErr_SetString( PyExc_RuntimeError,
+                         ( std::string( "error while iterating dictionary: " )
                            + e.what() ).c_str() );
         SIP_UNBLOCK_THREADS
       }
@@ -829,7 +849,9 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       }
 %End
 
-    virtual std::string key() const = 0 /Factory/;
+    virtual std::string key() const = 0;
+    virtual long intKey() const = 0;
+    // virtual carto::GenericObject * keyObject() const = 0 /Facrory/;
 
   protected:
     GenericObject();
