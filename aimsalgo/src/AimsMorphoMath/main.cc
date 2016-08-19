@@ -62,7 +62,7 @@ public:
   string fileOut, mode;
   bool use_chamfer;
   float chamfer_factor;
-  Point3d chamfer_mask_size;
+  Point3dl chamfer_mask_size;
 };
 
 
@@ -189,7 +189,7 @@ int main( int argc, const char **argv )
       proc.mode = mode;
       proc.use_chamfer = !dont_use_chamfer;
       proc.chamfer_factor = factor;
-      proc.chamfer_mask_size = Point3d( xmask, ymask, zmask );
+      proc.chamfer_mask_size = Point3dl( xmask, ymask, zmask );
 
       if( !proc.execute( fileIn.filename ) )
         cout << "Couldn't process file - aborted\n";
