@@ -202,14 +202,14 @@ namespace aims
 
     float chamferFactor() const { return _chamfer_factor; }
     void setChamferFactor( float x ) { _chamfer_factor = x; }
-    Point3dl chamferMaskSize() const { return _chamfer_mask_size; }
-    void setChamferMaskSize( const Point3dl & p ) { _chamfer_mask_size = p; }
+    Point3d chamferMaskSize() const { return _chamfer_mask_size; }
+    void setChamferMaskSize( const Point3d & p ) { _chamfer_mask_size = p; }
     int neededBorderWidth() const;
 
   private:
-    std::vector<Point3dl> doStructElement( float radius,
+    std::vector<Point3d> doStructElement( float radius,
                                           const Point4df & voxelsize );
-    Point3dl computeIntRadius( float radius, const Point4df & voxelsize);
+    Point3d computeIntRadius( float radius, const Point4df & voxelsize);
     static bool isBinary( const carto::VolumeRef<T>& dataIn );
     carto::VolumeRef<T> checkDistanceToBorder(
       const carto::VolumeRef<T>& dataIn, float radius ) const;
@@ -228,11 +228,11 @@ namespace aims
       tryChamferOpening( const carto::VolumeRef<T>& dataIn, float radius );
 
     float radius;
-    Point3dl int_radius;
-    std::vector<Point3dl> list;
+    Point3d int_radius;
+    std::vector<Point3d> list;
     bool _use_chamfer;
     float _chamfer_factor;
-    Point3dl _chamfer_mask_size;
+    Point3d _chamfer_mask_size;
   };
 
 }

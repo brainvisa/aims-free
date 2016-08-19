@@ -58,7 +58,7 @@ namespace aims
 
 
   template <typename T>
-  Point3dl MorphoGreyLevel<T>::computeIntRadius( float radius,
+  Point3d MorphoGreyLevel<T>::computeIntRadius( float radius,
                                                 const Point4df & voxelsize )
   {
     int_radius[0] = int(ceil( radius/voxelsize[0] ));
@@ -88,7 +88,7 @@ namespace aims
 
 
   template <typename T>
-  std::vector<Point3dl> MorphoGreyLevel<T>::doStructElement(
+  std::vector<Point3d> MorphoGreyLevel<T>::doStructElement(
     float radius, const Point4df & voxelsize )
   {
   //   AimsData< int16_t > sphere( 2*int_radius[0]-1,
@@ -112,7 +112,7 @@ namespace aims
                     sqr( float(v) * voxelsize[1] ) +
                     sqr( float(w) * voxelsize[2] ) <= sqradius )
                   {
-                    list.push_back( Point3dl(u, v, w) );
+                    list.push_back( Point3d(u, v, w) );
                     //               sphere(u, v, w) = 1;
                   }
               }
@@ -170,7 +170,7 @@ namespace aims
                 T min = value, tmp;
                 for(int l = 0; l < int(list.size()); ++l)
                   {
-                    Point3dl coord( x + list[l][0],
+                    Point3d coord( x + list[l][0],
                                    y + list[l][1],
                                    z + list[l][2] );
 
@@ -234,7 +234,7 @@ namespace aims
             T max = value, tmp;
             for(int l = 0; l < int(list.size()); ++l)
             {
-              Point3dl coord( x + list[l][0],
+              Point3d coord( x + list[l][0],
                               y + list[l][1],
                               z + list[l][2] );
 
