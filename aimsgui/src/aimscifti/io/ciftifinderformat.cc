@@ -65,6 +65,8 @@ bool CiftiFinderFormat::check( const string & filename, Finder & f ) const
   const vector<int64_t>& dims = inputFile.getDimensions();
   hdr->setProperty( "dimensions", dims );
 
+  hdr->readMinf( filename + ".minf" );
+
   return true;
 }
 

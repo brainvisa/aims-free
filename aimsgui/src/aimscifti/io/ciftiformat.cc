@@ -209,6 +209,11 @@ bool CiftiFormat::read( const std::string & filename,
   hdr->setProperty( "dimensions", dimsi );
   hdr->copyProperties( cifti_tree );
 
+  // .minf
+  PythonHeader ph;
+  ph.readMinf( filename + ".minf" );
+  hdr->copyProperties( Object::reference( ph ) );
+
   // lazy reader
 
   CiftiLazyReader *cifti_lazy = new CiftiLazyReader( inputFile );
