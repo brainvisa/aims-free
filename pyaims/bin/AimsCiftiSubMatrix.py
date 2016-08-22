@@ -143,6 +143,7 @@ def main():
             gyr_mat.muteToOptimalShape()
             gc.collect()
     gyr_mat.muteToOptimalShape()
+    gyr_mat.header()['row_labels'] = gyrus_list
 
     # save gyrus matrix
     aims.write(gyr_mat, output_gyrus_matrix)
