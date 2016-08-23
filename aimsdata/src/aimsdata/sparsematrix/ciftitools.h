@@ -158,6 +158,8 @@ namespace aims
     */
     std::vector<int> getIndicesForSurfaceIndices(
       int dim, int surface_num, const std::vector<int> & roi_indices ) const;
+    size_t getBrainStructureMeshNumberOfNodes(
+      int dim, const std::string & struct_name ) const;
 
   private:
       mutable carto::rc_ptr<SparseOrDenseMatrix> _matrix;

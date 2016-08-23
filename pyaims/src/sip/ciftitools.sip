@@ -202,6 +202,9 @@ Get the list of indices corresponding to a given brain structure in the matrix,
 on a given dimension.
 %End
 
+    size_t getBrainStructureMeshNumberOfNodes(
+      int dim, const std::string & struct_name ) const;
+
     vector_S32 getIndicesForSurfaceIndices(
       int dim, int surface_num, const vector_S32 & roi_indices ) const;
 %Docstring

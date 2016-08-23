@@ -822,14 +822,60 @@ void CiftiTools::getBrainModelsTexture(
 }
 
 
+size_t CiftiTools::getBrainStructureMeshNumberOfNodes(
+  int dim, const string & struct_name ) const
+{
+  Object cifti_info = getDimensionObject( dim );
+  if( cifti_info.isNull() )
+  {
+    if( struct_name == "CORTEX" )
+      return _matrix->getSize()[ dim ];
+    return 0;
+  }
+
+  Object models = cifti_info->getProperty( "brain_models" );
+  Object iter = models->objectIterator();
+  size_t nnodes = 0;
+
+  for( ; iter->isValid(); iter->next() )
+  {
+    try
+    {
+      Object surf = iter->currentValue()->getProperty( "surface" );
+      Object bstruct = surf->getProperty( struct_name );
+      nnodes = size_t( rint( bstruct->getProperty( "number_of_nodes" )
+        ->getScalar() ) );
+    }
+    catch( exception & )
+    {
+    }
+  }
+
+  return nnodes;
+}
+
+
 vector<int> CiftiTools::getIndicesForBrainStructure(
   int dim, const string & struct_name ) const
 {
   Object cifti_info = getDimensionObject( dim );
+  vector<int> indices;
+
+  if( cifti_info.isNull() )
+  {
+    if( struct_name == "CORTEX" )
+    {
+      // assume all cols
+      size_t ncols = _matrix->getSize()[ dim ];
+      indices.resize( ncols );
+      for( size_t i=0; i<ncols; ++i )
+        indices[i] = i;
+    }
+    return indices;
+  }
 
   Object models = cifti_info->getProperty( "brain_models" );
   Object iter = models->objectIterator();
-  vector<int> indices;
 
   for( ; iter->isValid(); iter->next() )
   {
