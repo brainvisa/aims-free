@@ -225,7 +225,27 @@ indices: vector_S32
     list of indices in the matrix
 %End
 
-    list_STRING getBrainStructures( int dim ) const;
+    list_STRING getBrainStructures( int dim, bool keepSurfaces=true,
+                                    bool keepVoxels=true ) const;
+%Docstring
+getBrainStructures( dim, keepSurfaces=True, keepVoxels=True )
+
+Retreive brain structures list in a brain models dimension
+
+Parameters
+----------
+dim: int
+    dimension in Cifti matrix
+keepSurfaces: bool
+    keep or filter out surface models
+keepVoxels: bool
+    keep or filter out voxesl models
+
+Returns
+-------
+brain_structures: list of string
+    brain structures names list
+%End
   };
 
 };

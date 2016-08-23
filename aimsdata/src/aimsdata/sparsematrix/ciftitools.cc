@@ -884,38 +884,49 @@ vector<int> CiftiTools::getIndicesForSurfaceIndices(
 
 
 
-list<string> CiftiTools::getBrainStructures( int dim ) const
+list<string> CiftiTools::getBrainStructures( int dim, bool keepSurfaces,
+                                             bool keepVoxels ) const
 {
   Object cifti_info = getDimensionObject( dim );
+  list<string> structures;
+
+  if( cifti_info.isNull() )
+  {
+    structures.push_back( "CORTEX" ); // assume single whole cortex mesh
+    return structures;
+  }
 
   Object models = cifti_info->getProperty( "brain_models" );
   Object iter = models->objectIterator();
-  list<string> structures;
 
   for( ; iter->isValid(); iter->next() )
   {
-    Object surf_or_vox;
-    try
-    {
-      surf_or_vox = iter->currentValue()->getProperty( "surface" );
-    }
-    catch( exception & )
-    {
+    Object surf_or_vox = none();
+    if( keepSurfaces )
+      try
+      {
+        surf_or_vox = iter->currentValue()->getProperty( "surface" );
+      }
+      catch( exception & )
+      {
+      }
+    if( keepVoxels && surf_or_vox.isNull() )
       try
       {
         surf_or_vox = iter->currentValue()->getProperty( "voxels" );
       }
       catch( exception & )
       {
-        continue;
       }
-    }
 
-    Object siter = surf_or_vox->objectIterator();
-    for( ; siter->isValid(); siter->next() )
+    if( !surf_or_vox.isNull() )
     {
-      string struct_name = siter->key();
-      structures.push_back( struct_name );
+      Object siter = surf_or_vox->objectIterator();
+      for( ; siter->isValid(); siter->next() )
+      {
+        string struct_name = siter->key();
+        structures.push_back( struct_name );
+      }
     }
   }
 

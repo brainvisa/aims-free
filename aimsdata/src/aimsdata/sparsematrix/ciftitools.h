@@ -146,7 +146,9 @@ namespace aims
     void getParcelsTexture(
       carto::Object cifti_info, TextureList & texlist, int dim,
       const std::vector<int> & dim_indices_pos ) const;
-    std::list<std::string> getBrainStructures( int dim ) const;
+    std::list<std::string> getBrainStructures( int dim,
+                                               bool keepSurfaces = true,
+                                               bool keepVoxels = true ) const;
     /** Get the list of matrix indices corresponding to a given brain
         structure, on a given dimension. */
     std::vector<int> getIndicesForBrainStructure(
