@@ -98,7 +98,24 @@ test ( const container<T> & vol, const container<U> & other )
 int main( int /*argc*/, char** /*argv*/ )
 {
   test( container<float>(), container<float>() );
-  int	result = EXIT_SUCCESS;
+  int   result = EXIT_SUCCESS;
+
+  cout << "-- Test 0: volume copy --" << endl;
+  carto::Volume<int16_t> first( 5, 5, 5 );
+  carto::Volume<int16_t> second( 3, 3, 3 );
+  first = second;
+  int sizex = 0, sizey = 0, sizez = 0;
+  first.header().getProperty("sizeX", sizex );
+  first.header().getProperty("sizeY", sizey );
+  first.header().getProperty("sizeZ", sizez );
+  cout << "copied volume dims: " << sizex << ", " << sizey << ", " << sizez
+    << endl;
+  if( sizex != 3 || sizey != 3 || sizez != 3 )
+  {
+    cerr << "*** error in copied sizes ***" << endl;
+    result = EXIT_FAILURE;
+  }
+  cout << endl;
 
   cout << "-- Test 1: regular volume: vol1 ( 10, 10, 10 ) --" << endl;
   VolumeRef<int16_t>	vol1( new Volume<int16_t>( 10, 10, 10 ) );
