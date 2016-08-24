@@ -1139,23 +1139,18 @@ namespace carto
   {
     std::vector<int> old = VolumeProxy<T>::_size;
 
-    VolumeProxy<T>::header().removeProperty( "sizeX" );
-    VolumeProxy<T>::header().removeProperty( "sizeY" );
-    VolumeProxy<T>::header().removeProperty( "sizeZ" );
-    VolumeProxy<T>::header().removeProperty( "sizeT" );
-
     VolumeProxy<T>::_size = size;
     while( VolumeProxy<T>::_size.size() < 4 )
       VolumeProxy<T>::_size.push_back( 1 );
 
-    VolumeProxy<T>::header().addBuiltinProperty( "sizeX",
-                                                 VolumeProxy<T>::_size[0] );
-    VolumeProxy<T>::header().addBuiltinProperty( "sizeY",
-                                                 VolumeProxy<T>::_size[1] );
-    VolumeProxy<T>::header().addBuiltinProperty( "sizeZ",
-                                                 VolumeProxy<T>::_size[2] );
-    VolumeProxy<T>::header().addBuiltinProperty( "sizeT",
-                                                 VolumeProxy<T>::_size[3] );
+    VolumeProxy<T>::header().changeBuiltinProperty( "sizeX",
+                                                    VolumeProxy<T>::_size[0] );
+    VolumeProxy<T>::header().changeBuiltinProperty( "sizeY",
+                                                    VolumeProxy<T>::_size[1] );
+    VolumeProxy<T>::header().changeBuiltinProperty( "sizeZ",
+                                                    VolumeProxy<T>::_size[2] );
+    VolumeProxy<T>::header().changeBuiltinProperty( "sizeT",
+                                                    VolumeProxy<T>::_size[3] );
 
     if( keepcontents || size == old )
       allocate( old, alloc, ac );

@@ -113,15 +113,10 @@ namespace carto
     this->Headered::operator=( other );
     _size = other._size;
 
-    header().removeProperty( "sizeX" );
-    header().removeProperty( "sizeY" );
-    header().removeProperty( "sizeZ" );
-    header().removeProperty( "sizeT" );
-
-    header().addBuiltinProperty( "sizeX", _size[0] );
-    header().addBuiltinProperty( "sizeY", _size[1] );
-    header().addBuiltinProperty( "sizeZ", _size[2] );
-    header().addBuiltinProperty( "sizeT", _size[3] );
+    header().changeBuiltinProperty( "sizeX", _size[0] );
+    header().changeBuiltinProperty( "sizeY", _size[1] );
+    header().changeBuiltinProperty( "sizeZ", _size[2] );
+    header().changeBuiltinProperty( "sizeT", _size[3] );
 
     return *this;
 
