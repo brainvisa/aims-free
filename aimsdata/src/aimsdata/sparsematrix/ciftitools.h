@@ -41,6 +41,8 @@
 #include <list>
 
 template <typename T> class TimeTexture;
+class Void;
+template <int D, typename T> class AimsTimeSurface;
 
 namespace carto
 {
@@ -160,10 +162,46 @@ namespace aims
       int dim, int surface_num, const std::vector<int> & roi_indices ) const;
     size_t getBrainStructureMeshNumberOfNodes(
       int dim, const std::string & struct_name ) const;
+    /** checks if the given mesh matches a surface description in the given
+        dimension of the Cifti matrix.
+        Returns true if it matches, and in this case, brainmodels and
+        surf_index are filled in accordingly.
+        surf_hint specifies which surface (index) is tested first.
+    */
+    bool isMatchingSurface( int dim, const AimsTimeSurface<3, Void> & mesh,
+                            std::list<std::string> & brainmodels,
+                            int & surf_index, int surf_hint = 0 ) const
+    {
+      return isMatchingSurfaceOrTexture( dim, mesh, brainmodels, surf_index,
+                                         surf_hint );
+    }
+    /** checks if the given texture matches a surface description in the given
+        dimension of the Cifti matrix.
+        Returns true if it matches, and in this case, brainmodels and
+        surf_index are filled in accordingly.
+        surf_hint specifies which surface (index) is tested first.
+    */
+    template <typename T>
+    bool isMatchingTexture( int dim, const TimeTexture<T> & tex,
+                            std::list<std::string> & brainmodels,
+                            int & surf_index, int surf_hint = 0 ) const
+    {
+      return isMatchingSurfaceOrTexture( dim, tex, brainmodels, surf_index,
+                                         surf_hint );
+    }
+    bool isMatchingSurfaceOrTexture( int dim, size_t nvertices,
+                                     const carto::Object header,
+                                     std::list<std::string> & brainmodels,
+                                     int & surf_index,
+                                     int surf_hint = 0 ) const;
 
   private:
-      mutable carto::rc_ptr<SparseOrDenseMatrix> _matrix;
-      BrainStuctureToMeshMap _smap;
+    template <typename T> bool
+      isMatchingSurfaceOrTexture( int dim, const T & mesh,
+                                  std::list<std::string> & brainmodels,
+                                  int & surf_index, int surf_hint = 0 ) const;
+    mutable carto::rc_ptr<SparseOrDenseMatrix> _matrix;
+    BrainStuctureToMeshMap _smap;
   };
 
 }

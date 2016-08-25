@@ -34,6 +34,7 @@
 #include <aims/sparsematrix/ciftitools.h>
 #include <aims/sparsematrix/sparseordensematrix.h>
 #include <aims/mesh/texture.h>
+#include <aims/mesh/surface.h>
 
 using namespace aims;
 using namespace carto;
@@ -1229,5 +1230,179 @@ int CiftiTools::valuesDimNum() const
   }
   return valuesDimNum( cifti_dims );
 }
+
+
+namespace
+{
+  template <typename T>
+  class MeshOrTexInfo
+  {
+  public:
+    static size_t nvertices( const T & mesh_or_tex );
+  };
+
+  template <>
+  size_t MeshOrTexInfo<AimsSurfaceTriangle>::nvertices(
+    const AimsSurfaceTriangle & mesh )
+  {
+    return mesh.vertex().size();
+  }
+
+  template <typename T>
+  class MeshOrTexInfo<TimeTexture<T> >
+  {
+  public:
+    static size_t nvertices( const TimeTexture<T> & tex )
+    {
+      return tex.begin()->second.nItem();
+    }
+  };
+
+
+  string upper( const string & text )
+  {
+    string s = text;
+    size_t i, n = text.size();
+    for( i=0; i<n; ++i )
+      if( s[i] >= 'a' && s[i] <= 'z' )
+        s[i] -= 'a' - 'A';
+    return s;
+  }
+
+
+  string upper_with_underscores( const string & text )
+  {
+    string s;
+    size_t i, n = text.size();
+    for( i=0; i<n; ++i )
+    {
+      char c = s[i];
+      if( c >= 'a' && c <= 'z' )
+        c -= 'a' - 'A';
+      else if( c >= 'A' && c <= 'Z' && !s.empty() && s[s.length() - 1] != '_' )
+        s += '_';
+      s += c;
+    }
+    return s;
+  }
+
+
+  string getBrainStructure( const CiftiTools & c, const Object & hdr )
+  {
+    string bstruct = "CORTEX";
+    if( hdr->hasProperty( "GIFTI_dataarrays_info" ) )
+    {
+      Object dai = hdr->getProperty( "GIFTI_dataarrays_info" );
+      try
+      {
+        Object da0 = dai->getArrayItem( 0 );
+        Object meta = da0->getProperty( "GIFTI_metadata" );
+        string structure = meta->getProperty(
+          "AnatomicalStructurePrimary" )->getString();
+        const CiftiTools::BrainStuctureToMeshMap
+          & bsmap = c.brainStructureMap();
+        if( bsmap.find( structure ) != bsmap.end() )
+          bstruct = structure;
+        else
+        {
+          string s2 = upper( structure );
+          if( bsmap.find( s2 ) != bsmap.end() )
+            bstruct = structure;
+          else
+          {
+            s2 = upper_with_underscores( structure );
+            if( bsmap.find( s2 ) != bsmap.end() )
+              bstruct = structure;
+          }
+        }
+      }
+      catch( ... )
+      {
+      }
+    }
+    return bstruct;
+  }
+
+}
+
+
+template <typename T>
+bool CiftiTools::isMatchingSurfaceOrTexture( int dim, const T & mesh,
+                                             list<string> & brainmodels,
+                                             int & surf_index,
+                                             int surf_hint ) const
+{
+  MeshOrTexInfo<T> info;
+  return isMatchingSurfaceOrTexture( dim, info.nvertices( mesh ),
+                                     Object::reference( mesh.header() ),
+                                     brainmodels, surf_index, surf_hint );
+}
+
+
+bool CiftiTools::isMatchingSurfaceOrTexture( int dim, size_t nvert,
+                                             const Object header,
+                                             list<string> & brainmodels,
+                                             int & surf_index,
+                                             int surf_hint ) const
+{
+  Object dimobj = getDimensionObject( dim );
+  if( dimobj.isNull() )
+    return nvert == _matrix->getSize()[ dim ];
+
+  if( dimensionType( dim ) != "brain_models" )
+    return false;
+
+  RoiTextureList *texlist = roiTextureFromDimension( dim );
+  int i, j, ntex = (int) texlist->size();
+  vector<int> indices( ntex );
+  bool result = false;
+
+  if( surf_hint >= 0 && surf_hint < ntex )
+    indices[0] = surf_hint;
+  for( i=0, j=1; i<ntex; ++i )
+  {
+    if( i != surf_hint )
+      indices[j++] = i;
+  }
+
+  for( i=0; !result && i<ntex; ++i )
+  {
+    TimeTexture<int> & tex = *(*texlist)[indices[i]];
+    if( tex[0].nItem() != nvert )
+      continue;
+    // mesh is of matching size. Check brain structures
+    string meshstruct = getBrainStructure( *this, header );
+    const BrainStuctureToMeshMap bsmap = brainStructureMap();
+
+    if( bsmap.find( meshstruct )->second != indices[i] )
+      continue;
+
+    brainmodels.clear();
+    Object lmap = tex.header().getProperty( "labels_map" );
+    Object it = lmap->objectIterator();
+    for( ; it->isValid(); it->next() )
+      brainmodels.push_back( it->currentValue()->getString() );
+
+    surf_index = indices[i];
+    result = true;
+  }
+
+  delete texlist;
+  return result;
+}
+
+
+template bool
+CiftiTools::isMatchingSurfaceOrTexture<AimsSurfaceTriangle>(
+  int, const AimsSurfaceTriangle &, list<string> &, int &, int ) const;
+template bool
+CiftiTools::isMatchingSurfaceOrTexture<TimeTexture<int16_t> >(
+  int, const TimeTexture<int16_t> &, list<string> &, int &, int ) const;
+template bool
+CiftiTools::isMatchingSurfaceOrTexture<TimeTexture<int32_t> >(
+  int, const TimeTexture<int32_t> &, list<string> &, int &, int ) const;
+template bool
+CiftiTools::isMatchingSurfaceOrTexture<TimeTexture<float> >(
+  int, const TimeTexture<float> &, list<string> &, int &, int ) const;
 
 

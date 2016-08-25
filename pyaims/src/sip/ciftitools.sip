@@ -249,6 +249,24 @@ Returns
 brain_structures: list of string
     brain structures names list
 %End
+
+    bool isMatchingSurface( int dim, const AimsSurfaceTriangle & mesh,
+                            list_STRING & brainmodels,
+                            int & surf_index, int surf_hint = 0 ) const;
+    bool isMatchingTexture( int dim, const TimeTexture_S16 & tex,
+                            list_STRING & brainmodels,
+                            int & surf_index, int surf_hint = 0 ) const;
+    bool isMatchingTexture( int dim, const TimeTexture_S32 & tex,
+                            list_STRING & brainmodels,
+                            int & surf_index, int surf_hint = 0 ) const;
+    bool isMatchingTexture( int dim, const TimeTexture_FLOAT & tex,
+                            list_STRING & brainmodels,
+                            int & surf_index, int surf_hint = 0 ) const;
+    bool isMatchingSurfaceOrTexture( int dim, size_t nvertices,
+                                     const carto::Object header,
+                                     list_STRING & brainmodels,
+                                     int & surf_index,
+                                     int surf_hint = 0 ) const;
   };
 
 };
