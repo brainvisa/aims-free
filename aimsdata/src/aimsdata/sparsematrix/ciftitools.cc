@@ -84,11 +84,20 @@ Object CiftiTools::getDimensionObject( int dim ) const
 CiftiTools::RoiTextureList *CiftiTools::roiTextureFromDimension(
   int dim ) const
 {
+  RoiTextureList *roilist = new RoiTextureList;
   Object cdim = getDimensionObject( dim );
   if( !cdim )
-    return 0;
+  {
+    int dsize = _matrix->getSize()[ dim ];
+    rc_ptr<TimeTexture<int> > tex( new TimeTexture<int> );
+    roilist->push_back( tex );
+    vector<int> & data = (*tex)[0].data();
+    data.resize( dsize );
+    for( int i=0; i<dsize; ++i )
+      data[i] = 1;
+    return roilist;
+  }
 
-  RoiTextureList *roilist = new RoiTextureList;
   BrainStuctureToMeshMap dsmap;
 
   if( cdim->hasProperty( "labels" ) )
@@ -455,19 +464,19 @@ CiftiTools::TextureList *CiftiTools::expandedValueTextureFromDimension(
   const vector<int> & dim_indices_pos,
   TextureList* existing_tex_list ) const
 {
-  Object cdim = getDimensionObject( dim );
-  if( !cdim )
-    return 0;
-
   TextureList *texlist;
   if( existing_tex_list )
     texlist = existing_tex_list;
   else
     texlist = new TextureList;
 
-  BrainStuctureToMeshMap dsmap;
+  Object cdim = getDimensionObject( dim );
 
-  if( cdim->hasProperty( "labels" ) )
+  if( !cdim || cdim->hasProperty( "brain_models" ) )
+  {
+    getBrainModelsTexture( cdim, *texlist, dim, dim_indices_pos );
+  }
+  else if( cdim->hasProperty( "labels" ) )
   {
 //     getLabelsTexture( cdim, *texlist, dim, dim_indices_pos );
   }
@@ -482,10 +491,6 @@ CiftiTools::TextureList *CiftiTools::expandedValueTextureFromDimension(
   else if( cdim->hasProperty( "parcels" ) )
   {
     getParcelsTexture( cdim, *texlist, dim, dim_indices_pos );
-  }
-  else if( cdim->hasProperty( "brain_models" ) )
-  {
-    getBrainModelsTexture( cdim, *texlist, dim, dim_indices_pos );
   }
 
   return texlist;
@@ -780,6 +785,42 @@ void CiftiTools::getBrainModelsTexture(
   Object cifti_info, TextureList & texlist,
   int dim, const vector<int> & dim_indices_pos ) const
 {
+  if( !cifti_info )
+  {
+    // not a Cifti matrix
+    rc_ptr<TimeTexture<float> > tex;
+    if( texlist.size() < 1 )
+    {
+      tex.reset( new TimeTexture<float> );
+      texlist.push_back( tex );
+    }
+    if( dim_indices_pos.size() > 2 )
+      _matrix->lazyReader()->selectDimension(
+        vector<int32_t>( dim_indices_pos.begin() + 2,
+                         dim_indices_pos.end() ) );
+    vector<float> & data = (*tex)[0].data();
+    data.clear();
+    if( dim == 1 )
+    {
+      bool free_it = _matrix->lazyReader()->hasRow( dim_indices_pos[0] );
+      _matrix->readRow( dim_indices_pos[0] );
+      vector<double> ddata = _matrix->getRow( dim_indices_pos[0] );
+      data.insert( data.end(), ddata.begin(), ddata.end() );
+      if( free_it )
+        _matrix->freeRow( dim_indices_pos[0] );
+    }
+    else if( dim == 0 )
+    {
+      bool free_it = _matrix->lazyReader()->hasColumn( dim_indices_pos[1] );
+      _matrix->readColumn( dim_indices_pos[1] );
+      vector<double> ddata = _matrix->getColumn( dim_indices_pos[1] );
+      data.insert( data.end(), ddata.begin(), ddata.end() );
+      if( free_it )
+        _matrix->freeColumn( dim_indices_pos[1] );
+    }
+    return;
+  }
+
   Object models = cifti_info->getProperty( "brain_models" );
   Object iter = models->objectIterator();
   int struct_index = 0;
@@ -1290,6 +1331,8 @@ namespace
   string getBrainStructure( const CiftiTools & c, const Object & hdr )
   {
     string bstruct = "CORTEX";
+    string structure;
+
     if( hdr->hasProperty( "GIFTI_dataarrays_info" ) )
     {
       Object dai = hdr->getProperty( "GIFTI_dataarrays_info" );
@@ -1297,27 +1340,39 @@ namespace
       {
         Object da0 = dai->getArrayItem( 0 );
         Object meta = da0->getProperty( "GIFTI_metadata" );
-        string structure = meta->getProperty(
+        structure = meta->getProperty(
           "AnatomicalStructurePrimary" )->getString();
-        const CiftiTools::BrainStuctureToMeshMap
-          & bsmap = c.brainStructureMap();
-        if( bsmap.find( structure ) != bsmap.end() )
-          bstruct = structure;
-        else
-        {
-          string s2 = upper( structure );
-          if( bsmap.find( s2 ) != bsmap.end() )
-            bstruct = structure;
-          else
-          {
-            s2 = upper_with_underscores( structure );
-            if( bsmap.find( s2 ) != bsmap.end() )
-              bstruct = structure;
-          }
-        }
       }
       catch( ... )
       {
+        try
+        {
+          Object meta = hdr->getProperty( "GIFTI_metadata" );
+          structure = meta->getProperty(
+            "AnatomicalStructurePrimary" )->getString();
+        }
+        catch( ... )
+        {
+        }
+      }
+    }
+    if( !structure.empty() )
+    {
+      const CiftiTools::BrainStuctureToMeshMap
+        & bsmap = c.brainStructureMap();
+      if( bsmap.find( structure ) != bsmap.end() )
+        bstruct = structure;
+      else
+      {
+        string s2 = upper( structure );
+        if( bsmap.find( s2 ) != bsmap.end() )
+          bstruct = structure;
+        else
+        {
+          s2 = upper_with_underscores( structure );
+          if( bsmap.find( s2 ) != bsmap.end() )
+            bstruct = s2;
+        }
       }
     }
     return bstruct;
