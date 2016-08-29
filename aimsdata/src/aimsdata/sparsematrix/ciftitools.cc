@@ -794,6 +794,7 @@ void CiftiTools::getBrainModelsTexture(
       tex.reset( new TimeTexture<float> );
       texlist.push_back( tex );
     }
+    tex = texlist[0];
     if( dim_indices_pos.size() > 2 )
       _matrix->lazyReader()->selectDimension(
         vector<int32_t>( dim_indices_pos.begin() + 2,
