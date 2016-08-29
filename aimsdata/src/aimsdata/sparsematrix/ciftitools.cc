@@ -948,6 +948,23 @@ vector<int> CiftiTools::getIndicesForSurfaceIndices(
 {
   Object cifti_info = getDimensionObject( dim );
 
+  if( !cifti_info )
+  {
+    size_t i, n = std::min( (size_t) roi_indices.size(),
+                            (size_t) _matrix->getSize()[ dim ] );
+    vector<int> indices( n );
+    if( dim == 0 )
+      for( i=0; i<n; ++i )
+        indices[i] = i;
+    else if( dim == 1 )
+      for( i=0; i<n; ++i )
+        if( roi_indices[i] >= n )
+          indices[i] = 0;
+        else
+          indices[i] = roi_indices[i];
+    return indices;
+  }
+
   Object models = cifti_info->getProperty( "brain_models" );
   Object iter = models->objectIterator();
   vector<int> indices;
