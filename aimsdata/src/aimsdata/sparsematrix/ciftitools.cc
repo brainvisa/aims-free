@@ -957,11 +957,14 @@ vector<int> CiftiTools::getIndicesForSurfaceIndices(
       for( i=0; i<n; ++i )
         indices[i] = i;
     else if( dim == 1 )
+    {
+      size_t nv = (size_t) _matrix->getSize()[ dim ];
       for( i=0; i<n; ++i )
-        if( roi_indices[i] >= n )
+        if( roi_indices[i] >= nv )
           indices[i] = 0;
         else
           indices[i] = roi_indices[i];
+    }
     return indices;
   }
 
