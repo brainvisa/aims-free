@@ -672,6 +672,41 @@ namespace
   }
 
 
+  bool load_row_or_col( SparseOrDenseMatrix & mat, int dim,
+                        const vector<int> & pos )
+  {
+    if( pos.size() > 2 )
+      mat.lazyReader()->selectDimension(
+        vector<int32_t>( pos.begin() + 2, pos.end() ) );
+
+    bool free_row = false;
+    if( dim == 0 )
+    {
+      free_row = !mat.lazyReader()->hasColumn( pos[1] );
+      mat.readColumn( pos[1] );
+    }
+    else if( dim == 1 )
+    {
+      free_row = !mat.lazyReader()->hasRow( pos[0] );
+      mat.readRow( pos[0] );
+    }
+    return free_row;
+  }
+
+
+  void unload_row_or_col( SparseOrDenseMatrix & mat, int dim,
+                          const vector<int> & pos, bool free_it )
+  {
+    if( free_it )
+    {
+      if( dim == 0 )
+        mat.freeColumn( pos[1] );
+      else
+        mat.freeRow( pos[0] );
+    }
+  }
+
+
   void getSurfaceModelTexture( const CiftiTools & cifti,
                                Object surf, CiftiTools::TextureList & texlist,
                                const CiftiTools::BrainStuctureToMeshMap & smap,
@@ -722,6 +757,8 @@ namespace
           }
         }
 
+    bool free_row = load_row_or_col( mat, dim, pos );
+
     map<string, Object>::iterator is, es=structures.end();
 
     for( is=structures.begin(); is!=es; ++is )
@@ -759,14 +796,6 @@ namespace
       }
       Object iiter = indices->objectIterator();
 
-      if( pos.size() > 2 )
-        mat.lazyReader()->selectDimension( vector<int>( pos.begin() + 2,
-                                                        pos.end() ) );
-      if( dim == 0 )
-        mat.readColumn( pos[1] );
-      else if( dim == 1 )
-        mat.readRow( pos[0] );
-
       for( ; iiter->isValid(); iiter->next() )
       {
         pos[dim] = int( rint(
@@ -776,6 +805,8 @@ namespace
           value_type, background, true );
       }
     }
+
+    unload_row_or_col( mat, dim, pos, free_row );
   }
 
 }
@@ -785,6 +816,8 @@ void CiftiTools::getBrainModelsTexture(
   Object cifti_info, TextureList & texlist,
   int dim, const vector<int> & dim_indices_pos ) const
 {
+  bool free_it = load_row_or_col( *_matrix, dim, dim_indices_pos );
+
   if( !cifti_info )
   {
     // not a Cifti matrix
@@ -795,30 +828,19 @@ void CiftiTools::getBrainModelsTexture(
       texlist.push_back( tex );
     }
     tex = texlist[0];
-    if( dim_indices_pos.size() > 2 )
-      _matrix->lazyReader()->selectDimension(
-        vector<int32_t>( dim_indices_pos.begin() + 2,
-                         dim_indices_pos.end() ) );
     vector<float> & data = (*tex)[0].data();
     data.clear();
     if( dim == 1 )
     {
-      bool free_it = _matrix->lazyReader()->hasRow( dim_indices_pos[0] );
-      _matrix->readRow( dim_indices_pos[0] );
       vector<double> ddata = _matrix->getRow( dim_indices_pos[0] );
       data.insert( data.end(), ddata.begin(), ddata.end() );
-      if( free_it )
-        _matrix->freeRow( dim_indices_pos[0] );
     }
     else if( dim == 0 )
     {
-      bool free_it = _matrix->lazyReader()->hasColumn( dim_indices_pos[1] );
-      _matrix->readColumn( dim_indices_pos[1] );
       vector<double> ddata = _matrix->getColumn( dim_indices_pos[1] );
       data.insert( data.end(), ddata.begin(), ddata.end() );
-      if( free_it )
-        _matrix->freeColumn( dim_indices_pos[1] );
     }
+    unload_row_or_col( *_matrix, dim, dim_indices_pos, free_it );
     return;
   }
 
@@ -862,6 +884,7 @@ void CiftiTools::getBrainModelsTexture(
       }
     }
   }
+  unload_row_or_col( *_matrix, dim, dim_indices_pos, free_it );
 }
 
 
