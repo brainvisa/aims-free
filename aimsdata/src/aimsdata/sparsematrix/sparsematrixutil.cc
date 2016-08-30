@@ -40,13 +40,13 @@ using namespace carto;
 
 double SparseMatrixUtil::min( const SparseMatrix & mat )
 {
-  SparseMatrix::const_iterator1 s1;
-  SparseMatrix::const_iterator2 s2;
+  SparseMatrix::const_iterator1 s1, e1 = mat.end1();
+  SparseMatrix::const_iterator2 s2, e2;
   double acc = std::numeric_limits<double>::max();
 
-  for( s1 = mat.begin1(); s1 != mat.end1(); ++s1 )
+  for( s1 = mat.begin1(); s1 != e1; ++s1 )
   {
-    for( s2 = s1.begin(); s2 != s1.end(); ++s2 )
+    for( s2 = s1.begin(), e2 = s1.end(); s2 != e2; ++s2 )
     {
       if( *s2 < acc )
         acc = *s2;
@@ -58,13 +58,13 @@ double SparseMatrixUtil::min( const SparseMatrix & mat )
 
 double SparseMatrixUtil::max( const SparseMatrix & mat )
 {
-  SparseMatrix::const_iterator1 s1;
-  SparseMatrix::const_iterator2 s2;
+  SparseMatrix::const_iterator1 s1, e1 = mat.end1();
+  SparseMatrix::const_iterator2 s2, e2;
   double acc = -std::numeric_limits<double>::max();
 
-  for( s1 = mat.begin1(); s1 != mat.end1(); ++s1 )
+  for( s1 = mat.begin1(); s1 != e1; ++s1 )
   {
-    for( s2 = s1.begin(); s2 != s1.end(); ++s2 )
+    for( s2 = s1.begin(), e2 = s1.end(); s2 != e2; ++s2 )
     {
       if( *s2 > acc )
         acc = *s2;
