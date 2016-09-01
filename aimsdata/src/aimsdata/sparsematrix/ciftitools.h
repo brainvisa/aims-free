@@ -82,8 +82,7 @@ namespace aims
     { return _matrix; }
     carto::rc_ptr<SparseOrDenseMatrix> matrix()
     { return _matrix; }
-    void setMatrix( carto::rc_ptr<SparseOrDenseMatrix> matrix )
-    { _matrix = matrix; }
+    void setMatrix( carto::rc_ptr<SparseOrDenseMatrix> matrix );
     const BrainStuctureToMeshMap & brainStructureMap() const
     { return _smap; }
     BrainStuctureToMeshMap & brainStructureMap()

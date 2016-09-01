@@ -43,10 +43,18 @@ using namespace std;
 
 struct CiftiTools::Private
 {
+  void clear();
   // cache for vertex / matrix line/col mapping, on each dimension
   mutable map<int32_t, vector<map<uint32_t, uint32_t> > > dimVertexMatrixMap;
   mutable map<int32_t, vector<size_t> > surfaceSize;
 };
+
+
+void CiftiTools::Private::clear()
+{
+  dimVertexMatrixMap.clear();
+  surfaceSize.clear();
+}
 
 
 CiftiTools::CiftiTools( rc_ptr<SparseOrDenseMatrix> matrix,
@@ -64,6 +72,14 @@ CiftiTools::CiftiTools( rc_ptr<SparseOrDenseMatrix> matrix,
 CiftiTools::~CiftiTools()
 {
   delete d;
+}
+
+
+void CiftiTools::setMatrix( carto::rc_ptr<SparseOrDenseMatrix> matrix )
+{
+  _matrix = matrix;
+  // clear caches
+  d->clear();
 }
 
 
