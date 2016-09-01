@@ -495,6 +495,28 @@ void SparseOrDenseMatrix::readColumn( int32_t i )
 }
 
 
+vector<double> *SparseOrDenseMatrix::getReadRow( int32_t i, bool store )
+{
+  if( _lazyreader->hasRow( i ) )
+    return new vector<double>( getRow( i ) );
+  vector<double> *row = _lazyreader->readRow( i, store );
+  if( store )
+    setRow( i, *row );
+  return row;
+}
+
+
+vector<double> *SparseOrDenseMatrix::getReadColumn( int32_t i, bool store )
+{
+  if( _lazyreader->hasColumn( i ) )
+    return new vector<double>( getColumn( i ) );
+  vector<double> *vec = _lazyreader->readColumn( i, store );
+  if( store )
+    setColumn( i, *vec );
+  return vec;
+}
+
+
 void SparseOrDenseMatrix::readAll()
 {
   int32_t i, n = getSize1();

@@ -76,7 +76,7 @@ namespace aims
     CiftiTools(
       carto::rc_ptr<SparseOrDenseMatrix> matrix,
       const BrainStuctureToMeshMap & smap = BrainStuctureToMeshMap() );
-    ~CiftiTools() {}
+    ~CiftiTools();
 
     const carto::rc_ptr<SparseOrDenseMatrix> matrix() const
     { return _matrix; }
@@ -200,6 +200,16 @@ namespace aims
       isMatchingSurfaceOrTexture( int dim, const T & mesh,
                                   std::list<std::string> & brainmodels,
                                   int & surf_index, int surf_hint = 0 ) const;
+    void getSurfaceModelTexture(
+      carto::Object surf, TextureList & texlist,
+      const BrainStuctureToMeshMap & smap,
+      SparseOrDenseMatrix & mat, int dim,
+      const std::vector<int> & dim_indices_pos,
+      unsigned  nsurfaces ) const;
+
+    struct Private;
+
+    Private *d;
     mutable carto::rc_ptr<SparseOrDenseMatrix> _matrix;
     BrainStuctureToMeshMap _smap;
   };

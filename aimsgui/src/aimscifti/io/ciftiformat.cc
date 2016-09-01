@@ -55,8 +55,8 @@ namespace aims
     virtual ~CiftiLazyReader();
     virtual bool hasRow( int32_t s1 ) const;
     virtual bool hasColumn( int32_t s2 ) const;
-    virtual std::vector<double> *readRow( int32_t s1 );
-    virtual std::vector<double> *readColumn( int32_t s2 );
+    virtual std::vector<double> *readRow( int32_t s1, bool store = true );
+    virtual std::vector<double> *readColumn( int32_t s2, bool store = true );
     virtual void freeRow( int32_t s1 )
     { _read_rows.erase( s1 ); _read_cols.clear(); }
     virtual void freeColumn( int32_t s2 )
@@ -98,14 +98,15 @@ bool CiftiLazyReader::hasColumn( int32_t s2 ) const
 }
 
 
-std::vector<double> *CiftiLazyReader::readRow( int32_t s1 )
+std::vector<double> *CiftiLazyReader::readRow( int32_t s1, bool store )
 {
   const vector<int64_t>& dims = _cifti_file->getDimensions();
   vector<float> scratchRow( dims[0] );
   vector<double> *aimsrow = new vector<double>( dims[0] );
 
   // mark this row as read
-  _read_rows.insert( s1 );
+  if( store )
+    _read_rows.insert( s1 );
 
   vector<int64_t> indexSelect( dims.size() - 1, 1 );
   int64_t i, n = dims.size();
@@ -115,14 +116,23 @@ std::vector<double> *CiftiLazyReader::readRow( int32_t s1 )
 
   _cifti_file->getRow( &scratchRow[0], indexSelect );
 
+  bool keep_inf = keepsInf();
+  bool keep_nan = keepsNan();
+
   for( i=0; i<dims[0]; ++i )
-    (*aimsrow)[i] = scratchRow[i];
+  {
+    float & item = scratchRow[i];
+    if( ( !keep_inf && isinf( item ) ) || ( !keep_nan && isnan( item ) ) )
+      (*aimsrow)[i] = 0;
+    else
+      (*aimsrow)[i] = item;
+  }
 
   return aimsrow;
 }
 
 
-std::vector<double> *CiftiLazyReader::readColumn( int32_t s2 )
+std::vector<double> *CiftiLazyReader::readColumn( int32_t s2, bool store )
 {
   // Warning: the CIFTI API doesn allow to read columns on other than the 1st
   // dimensions. The _current_dim position is thus ignored.
@@ -133,13 +143,23 @@ std::vector<double> *CiftiLazyReader::readColumn( int32_t s2 )
   // for now we only read 2D matrices
 
   // mark this col as read
-  _read_cols.insert( s2 );
+  if( store )
+    _read_cols.insert( s2 );
 
   _cifti_file->getColumn( &scratchCol[0], s2 );
 
+  bool keep_inf = keepsInf();
+  bool keep_nan = keepsNan();
+
   int32_t i;
   for( i=0; i<dims[1]; ++i )
-    (*aimscol)[i] = scratchCol[i];
+  {
+    float & item = scratchCol[i];
+    if( ( !keep_inf && isinf( item ) ) || ( !keep_nan && isnan( item ) ) )
+      (*aimscol)[i] = 0;
+    else
+      (*aimscol)[i] = scratchCol[i];
+  }
 
   return aimscol;
 }

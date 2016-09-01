@@ -55,21 +55,31 @@ namespace aims
       class MatrixLazyReader
       {
       public:
-          MatrixLazyReader() {}
-          virtual ~MatrixLazyReader() {}
-          /** tells if row s1 has already been read.
-              If so, SparseOrDenseMatrix::readRow will not read it again.
-          */
-          virtual bool hasRow( int32_t s1 ) const { return true; }
-          /** tells if column s2 has already been read.
-              If so, SparseOrDenseMatrix::readColumn will not read it again.
-          */
-          virtual bool hasColumn( int32_t s2 ) const { return true; }
-          virtual std::vector<double> *readRow( int32_t s1 ) {}
-          virtual std::vector<double> *readColumn( int32_t s2 ) {}
-          virtual void freeRow( int32_t s1 ) {}
-          virtual void freeColumn( int32_t s2 ) {}
-          virtual void selectDimension( const std::vector<int32_t> & dims ) {}
+        MatrixLazyReader() {}
+        virtual ~MatrixLazyReader() {}
+        /** tells if row s1 has already been read.
+            If so, SparseOrDenseMatrix::readRow will not read it again.
+        */
+        virtual bool hasRow( int32_t s1 ) const { return true; }
+        /** tells if column s2 has already been read.
+            If so, SparseOrDenseMatrix::readColumn will not read it again.
+        */
+        virtual bool hasColumn( int32_t s2 ) const { return true; }
+        virtual std::vector<double> *readRow( int32_t s1, bool store = true )
+        {}
+        virtual std::vector<double> *readColumn( int32_t s2,
+                                                 bool store = true ) {}
+        virtual void freeRow( int32_t s1 ) {}
+        virtual void freeColumn( int32_t s2 ) {}
+        virtual void selectDimension( const std::vector<int32_t> & dims ) {}
+        void setInfFiltering( bool keep_inf, bool keep_nan )
+        { _keep_inf = keep_inf; _keep_nan = keep_nan; }
+        bool keepsInf() const { return _keep_inf; }
+        bool keepsNan() const { return _keep_nan; }
+
+      private:
+        bool _keep_inf;
+        bool _keep_nan;
       };
 
       typedef carto::VolumeRef<double> DenseMatrixType;
@@ -102,12 +112,32 @@ namespace aims
 
       /** read a row using lazy reading, using the MatrixLazyReader.
           The default implementation does just nothing.
+
+          If "vector" is not Null, the read vector is "returned" in
+          *vector. In such a case, the vector has to be freed after use.
+          If store is false and vector is not null, the vector is read
+          (potentially from disk) but not kept in the matrix.
       */
       void readRow( int32_t i );
       /** read a column using lazy reading, using the MatrixLazyReader.
           The default implementation does just nothing.
+
+          If "vector" is not Null, the read vector is "returned" in
+          *vector. In such a case, the vector has to be freed after use.
+          If store is false and vector is not null, the vector is read
+          (potentially from disk) but not kept in the matrix.
       */
       void readColumn( int32_t i );
+      /** Get row, read it if it is not in memory, and optionally store it
+          for later access.
+          The returned vector has to be freed after use.
+      */
+      std::vector<double> *getReadRow( int32_t i, bool store = true );
+      /** Get column, read it if it is not in memory, and optionally store it
+          for later access.
+          The returned vector has to be freed after use.
+      */
+      std::vector<double> *getReadColumn( int32_t i, bool store = true );
       /** read all rows using lazy reading, using the MatrixLazyReader.
           The default implementation does just nothing.
       */
