@@ -296,7 +296,7 @@ typessub = {'signed char':
                'PyType': 'unsigned long',
                'sipClass': '',
                'typeinclude': '',
-               'sipinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
                'testPyType': 'carto::PyaimsInt_Check',
                'compareElement': '',
