@@ -16,6 +16,7 @@ typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
 #include <iostream>
 #include <pyaims/vector/numpyarrayfunc.h>
 #include <pyaims/object/rcptrconv.h>
+%Template1sipinclude%
 %End
 
 %ConvertToTypeCode
