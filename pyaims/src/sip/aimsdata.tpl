@@ -13,6 +13,7 @@ typedef AimsData<%Template1% > AimsData_%Template1typecode%;
 #include <pyaims/object/rcptrconv.h>
 // DEBUG
 // #include <cartobase/smart/rcptrtrick.h>
+%Template1sipinclude%
 %End
 
 %ConvertToTypeCode
