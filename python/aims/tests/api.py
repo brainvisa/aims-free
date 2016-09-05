@@ -200,7 +200,7 @@ class CommandTest:
         self.__run_files = [os.path.basename(f) for f in run_files]
         self.__last_run_directory = None
 
-        if type(run_files) in (types.ListType, types.TupleType):
+        if type(run_files) in (list, tuple):
             # Add the output file and error file
             self.__run_files += [self.__outfile, self.__errfile]
 
