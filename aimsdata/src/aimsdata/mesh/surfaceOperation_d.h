@@ -650,29 +650,35 @@ namespace aims
       unsigned mtimestep = imesh->first;
       unsigned ttimestep = itex->first;
       AimsSurface<2, Void> *tmesh = meshTextureBoundary( imesh->second,
-                                                         itex->second, region );
+                                                         itex->second,
+                                                         region );
       (*outmesh)[ std::max( mtimestep, ttimestep ) ] = *tmesh;
       delete tmesh;
-      if( jmesh->first < jtex->first )
+      if( jmesh == emesh && jtex == etex )
+        break;
+      if( jmesh != emesh && ( jtex == etex || jmesh->first < jtex->first ) )
       {
         imesh = jmesh;
-        if( jmesh != emesh )
-          ++jmesh;
+        ++jmesh;
       }
-      else if( jmesh->first > jtex->first )
+      else if( jtex != etex
+               && ( jmesh == emesh || jmesh->first > jtex->first ) )
       {
         itex = jtex;
-        if( jtex != etex )
-          ++jtex;
+        ++jtex;
       }
       else
       {
-        imesh = jmesh;
         if( jmesh != emesh )
+        {
+          imesh = jmesh;
           ++jmesh;
-        itex = jtex;
+        }
         if( jtex != etex )
+        {
+          itex = jtex;
           ++jtex;
+        }
       }
     }
     return outmesh;
