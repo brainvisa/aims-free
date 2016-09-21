@@ -108,22 +108,22 @@ namespace aims {
   //
   //==========================================================================
 
-  /// *Centered and *scaled B-Spline function, evaluated at run time.
+  /// *Centered* and *scaled* B-Spline function, evaluated at run time.
   ///
   /// Centered B-splines of order \c n are recursively evaluated following the
   /// formula:
   /// \f[
-  ///   \Beta^n(x) = \frac{
-  ///     (\frac{n+1}{2} + x) \Beta^{n-1}( x + \frac{1}{2} ) +
-  ///     (\frac{n+1}{2} - x) \Beta^{n-1}( x - \frac{1}{2} )
+  ///   \beta^n(x) = \frac{
+  ///     (\frac{n+1}{2} + x) \beta^{n-1}( x + \frac{1}{2} ) +
+  ///     (\frac{n+1}{2} - x) \beta^{n-1}( x - \frac{1}{2} )
   ///   }{n}
   /// \f]
   ///
   /// Let \c m be the scaling factor, the scaled B-Spline is then equal to
-  /// \f$b_m^n(x) = \Beta^n( \frac{x}{m} )\f$
+  /// \f$b_m^n(x) = \beta^n( \frac{x}{m} )\f$
   ///
   /// A shifted scaled B-Spline is equal to:
-  /// \f$c_m^n(x) = \Beta^n( \frac{x}{m} + \frac{1}{2} )\f$
+  /// \f$c_m^n(x) = \beta^n( \frac{x}{m} + \frac{1}{2} )\f$
   ///
   /// See Unser, Aldroubi & Eden: "B-Spline Signal Processing: Part I -
   /// Theory" in IEEE Transactions on Signal Processing (February 1993).
