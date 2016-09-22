@@ -49,7 +49,7 @@ def checkVolume(vol):
     '''
     def _histogram(vol, bins):
         histo = getattr(aims, 'RegularBinnedHistogram_' + dtype)
-        if not type(bins) is types.IntType:
+        if type(bins) is not int:
             m, M = bins[0], bins[-1]
             bins = len(bins) - 1
             hg = histo(bins)
@@ -235,10 +235,12 @@ def checkVolume(vol):
     # get specified palette information if any
 
     try:
+        print('hdr:', type(hdr))
+        print(hdr)
         pal = hdr['palette']
         p = pal['palette']
         hints['palette'] = p
-    except KeyError:
+    except: # KeyError: # FIXME: with python3 we can get an AttribteError
         pass
 
     return hints
@@ -396,7 +398,7 @@ def chooseColormaps(vols):
     # re-order volumes by type/likelihood
     ordered = []
     for t in typeclasses:
-        keys = t.keys()
+        keys = list(t.keys())
         keys.sort()
         keys.reverse()  # highest at first
         for k in keys:
