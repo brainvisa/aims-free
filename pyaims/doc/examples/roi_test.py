@@ -30,6 +30,7 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+from __future__ import print_function
 import sys
 from soma import aims
 import math
@@ -46,25 +47,25 @@ interpolator = aims.getLinearInterpolator(image)
 
 # Iterate on each region
 while roiIterator.isValid():
-    print roiIterator.regionName() + ':'
+    print(roiIterator.regionName() + ':')
     maskIterator = roiIterator.maskIterator()
-    print 'maskIterator:', maskIterator
+    print('maskIterator:', maskIterator)
     valid = 0
     invalid = 0
     sum = None
     sqsum = 0
     # Iterate on each point of a region
-    print 'iter on maskIterator'
+    print('iter on maskIterator')
     while maskIterator.isValid():
-        print ' point'
+        print(' point')
         p = maskIterator.valueMillimeters()
-        print p
+        print(p)
         # Check if the point is in the image limit
-        print '4:', interpolator
+        print('4:', interpolator)
         if interpolator.isValid(p):
-            print '6'
+            print('6')
             value = interpolator.value(p)
-            print '7:', value
+            print('7:', value)
             if sum is None:
                 sum = value
             else:
@@ -73,10 +74,10 @@ while roiIterator.isValid():
             sqsum += value * value
         else:
             invalid += 1
-        print '8'
+        print('8')
         maskIterator.next()
-    print '  valid points:', valid
-    print '  invalid points:', invalid
+    print('  valid points:', valid)
+    print('  invalid points:', invalid)
     if valid:
         mean = sum / float(valid)
         if valid >= 2:
@@ -86,6 +87,6 @@ while roiIterator.isValid():
     else:
         mean = 'N/A'
         stddev = 'N/A'
-    print '  mean value:', mean
-    print '  std dev   :', stddev
+    print('  mean value:', mean)
+    print('  std dev   :', stddev)
     roiIterator.next()

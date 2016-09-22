@@ -31,24 +31,26 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+from __future__ import print_function
 from soma import aims
 import sys
 
 tex = aims.read('/home/dr144257/data/texture2d.tex')
-print 'texture:', tex
+print('texture:', tex)
 h = tex.header()
-print 'header:', h
+print('header:', h)
 
-print 'timesteps:', tex.size()
+print('timesteps:', tex.size())
 for t in xrange(tex.size()):
-    print 'time:', t
+    print('time:', t)
     tx = tex[t]
-    print 'texture:', tx, ', size:', tx.nItem()
+    print('texture:', tx, ', size:', tx.nItem())
 
 fileout = '/tmp/toto.tex'
-print 'writing texture to', fileout
+print('writing texture to', fileout)
 w = aims.Writer()
 w.write(tex, fileout)
-print 'object type:', w.writtenObjectType()
-print 'data type:', w.writtenObjectDataType()
-print 'full type:', w.writtenObjectFullType()
+print('object type:', w.writtenObjectType())
+print('data type:', w.writtenObjectDataType())
+print('full type:', w.writtenObjectFullType())

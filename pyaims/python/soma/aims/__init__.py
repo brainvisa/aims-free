@@ -92,6 +92,7 @@ Main classes:
 
 .. _numpy: http://numpy.scipy.org/
 '''
+from __future__ import print_function
 __docformat__ = 'restructuredtext en'
 
 
@@ -166,18 +167,18 @@ except:
 
 
 def RCObject_init(self, *args):
-    # print 'RCObject init'
+    # print('RCObject init')
     carto.RCObject.__oldinit__(self, *args)
     carto.RCObject._setupRC(self)
 
 
 def RCObject_del(self):
-    # print 'RCObject_del', self
+    # print('RCObject_del', self)
     # Prevent a corner case when an object is created in python side and
     # deleted within C++ side. Thus, the sip wrapper doesn't contain its
     # wrapped C++ object any more, so all deleting works are commited to C++.
     if sip.isdeleted(self):
-        # print 'already deleted'
+        # print('already deleted')
         return
     carto.RCObject._releaseRC(self)
     if hasattr(self, '_dontdel'):
@@ -353,13 +354,13 @@ class Writer:
         pass
 
     def write(self, obj, filename, format=None, options={}):
-        '''Writes the object <obj> in a file named <filename>, whatever the type
-        of <obj>, as format <format>.
+        '''Writes the object <obj> in a file named <filename>, whatever the
+        type of <obj>, as format <format>.
         All objects types and formats supported by the Aims IO system can be
         used. <obj> may be a reference-counter to an object type supported by
         the IO system.
-        Additional specific options may be passed to the underlying IO system in
-        an optional <options> dictionary.
+        Additional specific options may be passed to the underlying IO system
+        in an optional <options> dictionary.
         '''
         c = obj.__class__.__name__.split('.')[-1]
         wr = 'Writer_' + c
@@ -372,8 +373,8 @@ class Writer:
             if c.startswith('rc_ptr_'):
                 obj = obj._get()
                 # build a list of parent classes, so that we can try a more
-                # generic writer if the exact type of the object does not have a
-                # specific Writer in C++
+                # generic writer if the exact type of the object does not have
+                # a specific Writer in C++
                 tryclass = [obj.__class__]
             else:
                 tryclass = list(obj.__class__.__bases__)
@@ -1413,7 +1414,7 @@ def somaio_typeCode(data):
 
 def _parseTypeInArgs(*args, **kwargs):
     dtype = kwargs.get('dtype', None)
-    # print '_parseTypeInArgs:', dtype
+    # print('_parseTypeInArgs:', dtype)
     if dtype is not None:
         # kwargs = dict( kwargs )
         del kwargs['dtype']
@@ -1757,111 +1758,112 @@ files volume.img/volume.hdr[/volume.img.minf] represent a 3D volume (a MRI
 volume, typically, here in Analyze/SPM or Nifti format). We will read it
 using aims, and access its header data, which comes as a generic object.
 
-  >>> from soma import aims
-  >>> vol = aims.read( 'volume.img' )
-  >>> hdr = vol.header()
+    >>> from __future__ import print_function # work using python 2 or 3
+    >>> from soma import aims
+    >>> vol = aims.read('volume.img')
+    >>> hdr = vol.header()
 
 Now ``vol`` is the volume, and ``hdr`` its header, of type ``Object``.
 
-  >>> type( hdr )
-  <class 'soma.aims.Object'>
-  >>> print hdr
-  { 'voxel_size' : [ 1.875, 1.875, 4, 1 ], 'file_type' : 'SPM',
-  'byte_swapping' : 0, 'volume_dimension' : [ 128, 128, 16, 1 ],
-  'vox_units' : 'mm  ', 'cal_units' : '', 'data_type' : 'S16',
-  'disk_data_type' : 'S16', 'bits_allocated' : 2, 'tr' : 1,
-  'minimum' : 0, 'maximum' : 13645, 'scale_factor' : 1,
-  'scale_factor_applied' : 0, 'db_name' : '',
-  'aux_file' : '', 'orient' : 3, 'generated' : '', 'scannum' : '',
-  'patient_id' : '', 'exp_date' : '', 'exp_time' : '', 'views' : 0,
-  'start_field' : 32768, 'field_skip' : 8192, 'omax' : 0,
-  'omin' : 0, 'smax' : 32, 'smin' : 0, 'SPM_data_type' : '',
-  'possible_data_types' : [ 'S16' ], 'spm_radio_convention' : 1,
-  'spm_origin' : [ 65, 65, 9 ], 'origin' : [ 64, 63, 7 ] }
+    >>> type(hdr)
+    <class 'soma.aims.Object'>
+    >>> print(hdr)
+    { 'voxel_size' : [ 1.875, 1.875, 4, 1 ], 'file_type' : 'SPM',
+    'byte_swapping' : 0, 'volume_dimension' : [ 128, 128, 16, 1 ],
+    'vox_units' : 'mm  ', 'cal_units' : '', 'data_type' : 'S16',
+    'disk_data_type' : 'S16', 'bits_allocated' : 2, 'tr' : 1,
+    'minimum' : 0, 'maximum' : 13645, 'scale_factor' : 1,
+    'scale_factor_applied' : 0, 'db_name' : '',
+    'aux_file' : '', 'orient' : 3, 'generated' : '', 'scannum' : '',
+    'patient_id' : '', 'exp_date' : '', 'exp_time' : '', 'views' : 0,
+    'start_field' : 32768, 'field_skip' : 8192, 'omax' : 0,
+    'omin' : 0, 'smax' : 32, 'smin' : 0, 'SPM_data_type' : '',
+    'possible_data_types' : [ 'S16' ], 'spm_radio_convention' : 1,
+    'spm_origin' : [ 65, 65, 9 ], 'origin' : [ 64, 63, 7 ] }
 
 ``hdr`` prints like a dictionary, but is not really a python dictionary object.
 However it behaves like a dictionary:
 
-  >>> print hdr[ 'voxel_size' ]
-  [ 1.875, 1.875, 4, 1 ]
-  >>> print hdr[ 'data_type' ]
-  S16
-  >>> print hdr[ 'voxel_size' ][0]
-  1.875
-  >>> for x in hdr:
-  >>>     print x
-  >>>
-  voxel_size
-  file_type
-  byte_swapping
-  volume_dimension
-  vox_units
-  cal_units
-  data_type
-  disk_data_type
-  bits_allocated
-  tr
-  minimum
-  maximum
-  scale_factor
-  scale_factor_applied
-  db_name
-  aux_file
-  orient
-  generated
-  scannum
-  patient_id
-  exp_date
-  exp_time
-  views
-  start_field
-  field_skip
-  omax
-  omin
-  smax
-  smin
-  SPM_data_type
-  possible_data_types
-  spm_radio_convention
-  spm_origin
-  origin
-  >>> for x,y in hdr.items():
-  >>>     print x, ':', y
-  >>>
-  voxel_size : [ 1.875, 1.875, 4, 1 ]
-  file_type : 'SPM'
-  byte_swapping : 0
-  volume_dimension : [ 128, 128, 16, 1 ]
-  vox_units : 'mm  '
-  cal_units : ''
-  data_type : 'S16'
-  disk_data_type : 'S16'
-  bits_allocated : 2
-  tr : 1
-  minimum : 0
-  maximum : 13645
-  scale_factor : 1
-  scale_factor_applied : 0
-  db_name : ''
-  aux_file : ''
-  orient : 3
-  generated : ''
-  scannum : ''
-  patient_id : ''
-  exp_date : ''
-  exp_time : ''
-  views : 0
-  start_field : 32768
-  field_skip : 8192
-  omax : 0
-  omin : 0
-  smax : 32
-  smin : 0
-  SPM_data_type : ''
-  possible_data_types : [ 'S16' ]
-  spm_radio_convention : 1
-  spm_origin : [ 65, 65, 9 ]
-  origin : [ 64, 63, 7 ]
+    >>> print(hdr['voxel_size'])
+    [ 1.875, 1.875, 4, 1 ]
+    >>> print(hdr['data_type'])
+    S16
+    >>> print(hdr['voxel_size'][0])
+    1.875
+    >>> for x in hdr:
+    >>>     print(x)
+    >>>
+    voxel_size
+    file_type
+    byte_swapping
+    volume_dimension
+    vox_units
+    cal_units
+    data_type
+    disk_data_type
+    bits_allocated
+    tr
+    minimum
+    maximum
+    scale_factor
+    scale_factor_applied
+    db_name
+    aux_file
+    orient
+    generated
+    scannum
+    patient_id
+    exp_date
+    exp_time
+    views
+    start_field
+    field_skip
+    omax
+    omin
+    smax
+    smin
+    SPM_data_type
+    possible_data_types
+    spm_radio_convention
+    spm_origin
+    origin
+    >>> for x,y in hdr.items():
+    >>>     print(x, ':', y)
+    >>>
+    voxel_size : [ 1.875, 1.875, 4, 1 ]
+    file_type : 'SPM'
+    byte_swapping : 0
+    volume_dimension : [ 128, 128, 16, 1 ]
+    vox_units : 'mm  '
+    cal_units : ''
+    data_type : 'S16'
+    disk_data_type : 'S16'
+    bits_allocated : 2
+    tr : 1
+    minimum : 0
+    maximum : 13645
+    scale_factor : 1
+    scale_factor_applied : 0
+    db_name : ''
+    aux_file : ''
+    orient : 3
+    generated : ''
+    scannum : ''
+    patient_id : ''
+    exp_date : ''
+    exp_time : ''
+    views : 0
+    start_field : 32768
+    field_skip : 8192
+    omax : 0
+    omin : 0
+    smax : 32
+    smin : 0
+    SPM_data_type : ''
+    possible_data_types : [ 'S16' ]
+    spm_radio_convention : 1
+    spm_origin : [ 65, 65, 9 ]
+    origin : [ 64, 63, 7 ]
 
 Elements returned by the dictionary queries can have various types, althrough
 they are all stored internally in a C++ structure through
@@ -1884,9 +1886,9 @@ method and can be extended.
 
 Elements in ``Object`` containers can generally be read and written:
 
-  >>> hdr[ 'data_type' ] = 'FLOAT'
-  >>> hdr[ 'data_type' ]
-  'FLOAT'
+    >>> hdr['data_type'] = 'FLOAT'
+    >>> hdr['data_type']
+    'FLOAT'
 
 This generally suits your needs. But in a few cases there will be a problem in
 internal types handling in the C++ layer.
@@ -1907,8 +1909,8 @@ and if not, convert to it if possible.
 You can query a type identifier for a generic object via the ``type()``
 method:
 
-  >>> hdr.type()
-  'PropertySet'
+    >>> hdr.type()
+    'PropertySet'
 
 Objects that can be converted from C++ generic objects to python are not necessarily known in advance. A conversion table is kept in the global variable :py:data:`soma.aims.convertersObjectToPython` (in the aims module) and can be extended. Therefore other python modules using aims (such as sigraph) can extend this conversion table.
 
@@ -1929,32 +1931,32 @@ are shared and not copied anymore, which is consistent with the normal
 python behaviour. The non-pythonic thing is the first insertion in a
 generic object:
 
->>> a = aims.vector_FLOAT( [ 12.6, -5.7 ] )
->>> print a
+>>> a = aims.vector_FLOAT([12.6, -5.7])
+>>> print(a)
 [ 12.6, -5.7 ]
 >>> hdr['foo'] = a # here a is copied into hdr['foo']
 >>> a.append( 6.8 ) # a is changed but not hdr
->>> print a
+>>> print(a)
 [ 12.6, -5.7, 6.8 ]
->>> print hdr['foo']
+>>> print(hdr['foo'])
 [ 12.6, -5.7 ]
 >>> hdr['dummy'] = hdr['foo']
->>> hdr['foo'].append( 4.2 )
->>> print hdr['dummy'] # this time hdr['dummy'] is changed
+>>> hdr['foo'].append(4.2)
+>>> print(hdr['dummy']) # this time hdr['dummy'] is changed
 [ 12.6, -5.7, 4.2 ]
 
 To overcome the first copy problem, you may have to reassign the initial
 variable to the copy instance:
 
->>> a = aims.vector_FLOAT( [ 1.2, 2.3, 3.4 ] )
+>>> a = aims.vector_FLOAT([1.2, 2.3, 3.4])
 >>> hdr['foo'] = a
 >>> a = hdr['foo']
->>> print hdr['foo']
+>>> print(hdr['foo'])
 [ 1.2, 2.3, 3.4 ]
 >>> a[1] = 12.8
->>> print a
+>>> print(a)
 [ 1.2, 12.8, 3.4 ]
->>> print hdr['foo']
+>>> print(hdr['foo'])
 [ 1.2, 12.8, 3.4 ]
 
 There are exceptions to this behaviour:
@@ -1979,11 +1981,11 @@ Volumes are read and written using the :py:class:`soma.aims.Reader` and
 
 A volume of a given type can be built either using its specialized class constructor, or the general Volume() function which can take a voxel type in its arguments: the following are equivalent:
 
-  >>> v = aims.Volume_S16( 100, 100, 10 )
-  >>> v = aims.Volume( 'S16', 100, 100, 10 )
-  >>> v = aims.Volume( 100, 100, 10, dtype='S16' )
-  >>> import numpy
-  >>> v = aims.Volume( numpy.int16, 100, 100, 10 )
+    >>> v = aims.Volume_S16(100, 100, 10)
+    >>> v = aims.Volume('S16', 100, 100, 10)
+    >>> v = aims.Volume(100, 100, 10, dtype='S16')
+    >>> import numpy
+    >>> v = aims.Volume(numpy.int16, 100, 100, 10)
 
 A volume is an array of voxels, which can be accessed via the ``at()``
 method.
@@ -2010,11 +2012,11 @@ the volume contents when the volume is saved on disk.
 Volumes support a number of arithmetic operators like +, - etc. when the
 operands types and sizes match: for instance:
 
-  >>> # V1 and V2 are two volumes
-  >>> V3 = V1 + V2  # adds two volumes
-  >>> V2 -= V1
-  >>> V3 = V1 + 3   # adds 3 to aceh voxel
-  >>> V3 = V1 * V2  # itemwise multiplication
+    >>> # V1 and V2 are two volumes
+    >>> V3 = V1 + V2  # adds two volumes
+    >>> V2 -= V1
+    >>> V3 = V1 + 3   # adds 3 to aceh voxel
+    >>> V3 = V1 * V2  # itemwise multiplication
 
 Some type conversions can be performed on volumes, for istance to
 convert a Volume_S16 to a Volume_FLOAT: see the converter classes
@@ -2023,9 +2025,9 @@ with <type1> and <type2> being volume types: for instance
 :py:class:`soma.aims.Converter_Volume_S16_Volume_FLOAT`.
 The converter can also be called using type arguments:
 
-  >>> vol1 = aims.Volume( 'S16', 100, 100, 10 )
-  >>> c = aims.Converter( intype=vol1, outtype='Volume_DOUBLE' )
-  >>> vol2 = c( vol1 )
+    >>> vol1 = aims.Volume('S16', 100, 100, 10)
+    >>> c = aims.Converter(intype=vol1, outtype='Volume_DOUBLE')
+    >>> vol2 = c(vol1)
 
 .. _numpy: http://numpy.scipy.org/
 '''
