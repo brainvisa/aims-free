@@ -2,6 +2,7 @@
 
 using namespace std;
 using namespace aims;
+using namespace carto;
 
 namespace aims
 {
@@ -66,6 +67,45 @@ namespace aims
     if (verbose) std::cout << "OK" << std::endl;
     return labelsHisto_ptr;
   }//labelsHistogram
+
+
+  VolumeRef<AimsRGBA> giftiColormap( const carto::Object header )
+  {
+    VolumeRef<AimsRGBA> vol;
+    Object labels_table;
+    try
+    {
+      vector<string> labels;
+      labels_table = header->getProperty( "GIFTI_labels_table" );
+      size_t i, j, n = labels_table->size();
+      vol->reallocate( n );
+      labels.resize( n );
+      for( i=0; i<n; ++i )
+        try
+        {
+          Object label_map = labels_table->getArrayItem( i );
+          string label = label_map->getProperty( "Label" )->getString();
+          Object color = label_map->getProperty( "RGB" );
+          labels[i] = label;
+          AimsRGBA rgba;
+          rgba[3] = 255;
+          Object cit = color->objectIterator();
+          for( j=0; cit->isValid() && j<4; ++j, cit->next() )
+            rgba[j] = uint8_t( rint( cit->currentValue()->getScalar()
+                                     * 255.9 ) );
+          vol->at( i ) = rgba;
+        }
+        catch( ... )
+        {
+        }
+      vol->header().setProperty( "labels", labels );
+
+    }
+    catch( ... )
+    {
+    }
+    return vol;
+  }
 
 }//namespace aims
 

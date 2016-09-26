@@ -3,6 +3,8 @@
 
 #include <aims/mesh/texture.h>
 #include <aims/mesh/surface.h>
+#include <cartodata/volume/volume.h>
+#include <aims/rgb/rgb.h>
 
 
 namespace aims
@@ -11,6 +13,15 @@ namespace aims
 
     std::vector< size_t > * labelsHistogram(
       const TimeTexture<short> & intex, size_t labels_nb, bool verbose );
+
+    carto::VolumeRef<AimsRGBA> giftiColormap( const carto::Object header );
+
+    template <typename T>
+    carto::VolumeRef<AimsRGBA> giftiColormap( const TimeTexture<T> & texture )
+    {
+      return giftiColormap( carto::Object::reference(
+        texture.header() ) );
+    }
 
 } // namespace aims
 
