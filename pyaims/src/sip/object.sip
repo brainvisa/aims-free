@@ -408,7 +408,17 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         PyObject	*po = PyTuple_New( c );
         c = 0;
         for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c )
-          PyTuple_SetItem( po, c, carto::PyString_FromStdString( i->key() ) );
+        {
+          try
+          {
+            PyTuple_SetItem( po, c,
+                             carto::PyString_FromStdString( i->key() ) );
+          }
+          catch( std::runtime_error & )
+          {
+            PyTuple_SetItem( po, c, PyLong_FromLong( i->intKey() ) );
+          }
+        }
         sipRes = po;
       }
     catch( std::exception & e )
@@ -437,7 +447,15 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c )
         {
           pi = PyTuple_New( 2 );
-          PyTuple_SetItem( pi, 0, carto::PyString_FromStdString( i->key() ) );
+          try
+          {
+            PyTuple_SetItem( pi, 0,
+                             carto::PyString_FromStdString( i->key() ) );
+          }
+          catch( std::runtime_error & )
+          {
+            PyTuple_SetItem( pi, 0, PyLong_FromLong( i->intKey() ) );
+          }
           PyTuple_SetItem( pi, 1,
             sipConvertFromInstance( new carto::Object( i->currentValue() ),
               sipClass_carto_Object, Py_None ) );
@@ -775,7 +793,17 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     carto::Object i = sipCpp->objectIterator();
     if( i->isValid() && i->isDictionaryIterator() )
       {
-        for( ; i->isValid() && i->key()!= *a0; i->next() ) {}
+        for( ; i->isValid(); i->next() )
+        {
+          try
+          {
+            if( i->key() == *a0 )
+              break;
+          }
+          catch( std::runtime_error & )
+          {
+          }
+        }
         sipRes = i->isValid();
       }
     else
@@ -798,9 +826,45 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     carto::Object i = sipCpp->objectIterator();
     if( i->isValid() && i->isDictionaryIterator() )
       {
-        std::string k = (*a0)->getString();
-        for( ; i->isValid() && i->key()!= k; i->next() ) {}
-        sipRes = i->isValid();
+        sipRes = false;
+        try
+        {
+          std::string k = (*a0)->getString();
+          for( ; i->isValid(); i->next() )
+          {
+            try
+            {
+              if( i->key() == k )
+                break;
+            }
+            catch( std::runtime_error & )
+            {
+            }
+          }
+          sipRes = i->isValid();
+        }
+        catch( ... )
+        {
+          try
+          {
+            long k = long( rint( (*a0)->getScalar() ) );
+            for( ; i->isValid(); i->next() )
+            {
+              try
+              {
+                if( i->intKey() == k )
+                  break;
+              }
+              catch( std::runtime_error & )
+              {
+              }
+            }
+            sipRes = i->isValid();
+          }
+          catch( std::runtime_error & )
+          {
+          }
+        }
       }
     else
       {
@@ -840,7 +904,16 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     else
       {
         if( sipCpp->isDictionaryIterator() )
-          sipRes = carto::PyString_FromStdString( sipCpp->key() );
+        {
+          try
+          {
+            sipRes = carto::PyString_FromStdString( sipCpp->key() );
+          }
+          catch( ... )
+          {
+            sipRes = PyLong_FromLong( sipCpp->intKey() );
+          }
+        }
         else
           sipRes = sipConvertFromInstance
             ( new carto::Object( sipCpp->currentValue() ), 
