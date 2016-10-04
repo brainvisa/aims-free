@@ -65,6 +65,11 @@ namespace carto
     : Headered(),
       _size( size )
   {
+    while( _size.size() < 4 )
+    {
+      _size.reserve( 4 );
+      _size.push_back( 1 );
+    }
     header().addBuiltinProperty( "sizeX", _size[0] );
     header().addBuiltinProperty( "sizeY", _size[1] );
     header().addBuiltinProperty( "sizeZ", _size[2] );
