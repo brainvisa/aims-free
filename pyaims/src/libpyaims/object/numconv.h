@@ -37,6 +37,7 @@
 #include <string>
 #include <stdint.h>
 #include <Python.h>
+#include <pyaims/numpyarray.h>
 
 namespace carto
 {
@@ -78,18 +79,23 @@ namespace carto
 #if PY_VERSION_HEX >= 0x03000000
     if( PyLong_Check( x ) )
       return true;
-    long y = PyLong_AsLong( x );
+//     long y = PyLong_AsLong( x );
 #else
     if( PyLong_Check( x ) || PyInt_Check( x ) )
       return true;
-    long y = PyInt_AsLong( x );
 #endif
-    if( y == -1 && PyErr_Occurred() )
-    {
-      PyErr_Clear();
+    // check numpy types
+    PyArray_Descr* dtype;
+    if( !PyArray_DescrConverter( x, &dtype ) )
       return false;
-    }
-    return true;
+    int typeNum = dtype->type_num;
+    Py_DECREF( dtype );
+    if( typeNum == NPY_BOOL || typeNum == NPY_INT8 || typeNum == NPY_UINT8
+        || typeNum == NPY_INT16 || typeNum == NPY_UINT16
+        || typeNum == NPY_INT32 || typeNum == NPY_UINT32
+        || typeNum == NPY_INT64 || typeNum == NPY_UINT64 )
+      return true;
+    return false;
   }
 
 
