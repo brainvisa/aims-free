@@ -54,12 +54,16 @@ public:
       const carto::AllocatorContext & allocContext
         = carto::AllocatorContext() );
     Volume_%Template1typecode%( const vector_S32 &,
-      const carto::AllocatorContext& allocatorContext
-        = carto::AllocatorContext(), bool = true ) /ReleaseGIL/;
+      const carto::AllocatorContext& allocatorContext,
+      bool = true ) /ReleaseGIL/;
     Volume_%Template1typecode%( const vector_S32 &,
       const vector_S32 &,
       const carto::AllocatorContext& allocatorContext
         = carto::AllocatorContext(), bool = true ) /ReleaseGIL/;
+    /*
+      The constructor taking a vector<int> is moved to the end of this class,
+      because the numpy array constructor should be used first.
+    */
 
     virtual ~Volume_%Template1typecode%() /ReleaseGIL/;
 
@@ -454,77 +458,109 @@ The header contains all meta-data.
   Volume_%Template1typecode%( SIP_PYOBJECT )
     [(vector_S32, %Template1% *)];
 %MethodCode
-  static std::list<std::set<int> > compatibletypes;
-  if( compatibletypes.empty() )
-  {
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_BYTE );
-      tl.insert( PyArray_INT8 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_UBYTE );
-      tl.insert( PyArray_UINT8 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_SHORT );
-      tl.insert( PyArray_INT16 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_USHORT );
-      tl.insert( PyArray_UINT16 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_INT32 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      // tl.insert( PyArray_UINT );
-      tl.insert( PyArray_UINT32 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      // tl.insert( PyArray_INT );
-      tl.insert( PyArray_INT64 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_UINT );
-      tl.insert( PyArray_UINT64 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_FLOAT32 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      // tl.insert( PyArray_FLOAT );
-      tl.insert( PyArray_DOUBLE );
-      tl.insert( PyArray_FLOAT64 );
-    }
-  }
   PyArrayObject *arr = 0;
   if( !PyArray_Check( a0 ) )
   {
-    sipIsErr = 1;
+    /* copy of the code of Volume( const std::vector<int32_t> & )
+    */
+    {
+        const vector_S32* a0;
+        int a0State = 0;
+
+        if (sipParseKwdArgs(sipParseErr, sipArgs, sipKwds, NULL, sipUnused, "J1", sipType_vector_S32, &a0, &a0State))
+        {
+            Py_BEGIN_ALLOW_THREADS
+            try
+            {
+            sipCpp = new sipVolume_%Template1typecode%(*a0,
+              carto::AllocatorContext(), true);
+            }
+            catch (...)
+            {
+                Py_BLOCK_THREADS
+
+            sipReleaseType(const_cast<vector_S32 *>(a0),sipType_vector_S32,a0State);
+                sipRaiseUnknownException();
+                return NULL;
+            }
+            Py_END_ALLOW_THREADS
+            sipReleaseType(const_cast<vector_S32 *>(a0),sipType_vector_S32,a0State);
+
+            sipCpp->sipPySelf = sipSelf;
+
+            return sipCpp;
+        }
+    }
+
+     sipIsErr = 1;
     PyErr_SetString( PyExc_TypeError, "wrong argument type" );
   }
   else
   {
+    static std::list<std::set<int> > compatibletypes;
+    if( compatibletypes.empty() )
+    {
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_BYTE );
+        tl.insert( PyArray_INT8 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_UBYTE );
+        tl.insert( PyArray_UINT8 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_SHORT );
+        tl.insert( PyArray_INT16 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_USHORT );
+        tl.insert( PyArray_UINT16 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_INT32 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        // tl.insert( PyArray_UINT );
+        tl.insert( PyArray_UINT32 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        // tl.insert( PyArray_INT );
+        tl.insert( PyArray_INT64 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_UINT );
+        tl.insert( PyArray_UINT64 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_FLOAT32 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        // tl.insert( PyArray_FLOAT );
+        tl.insert( PyArray_DOUBLE );
+        tl.insert( PyArray_FLOAT64 );
+      }
+    }
+
     arr = (PyArrayObject *) a0;
 
     /* I comment this out because transposed arrays are not seen as contiguous
@@ -538,7 +574,7 @@ The header contains all meta-data.
     else
     */
 
-    if( arr->nd <= 1 || arr->nd > carto::Volume<%Template1%>::DIM_MAX )
+    if( arr->nd < 1 || arr->nd > carto::Volume<%Template1%>::DIM_MAX )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_RuntimeError,
