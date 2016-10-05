@@ -77,42 +77,39 @@ namespace aims
     {
       vector<string> labels;
       labels_table = header->getProperty( "GIFTI_labels_table" );
-      /* labels_table is a dictionary-like object with int keys.
-         In cartobase/aims 4.5 the generic objects API does not allow to
-         introspect such keys. 4.6 will be OK.
-         The problem is that here the table may have negative values (-1) and
-         may not be continuous (missing values), so the size of the table is
-         not its max.
-      */
-      size_t i, j, n = labels_table->size();
+
+      // labels_table is a dictionary-like object with int keys.
+      set<int32_t> keys;
+      Object it = labels_table->objectIterator();
+      for( ; it->isValid(); it->next() )
+        keys.insert( it->intKey() );
+
+      if( keys.empty() )
+        return vol;
+
+      set<int32_t>::const_iterator il, el = keys.end();
+      int32_t tmin = *keys.begin();
+      size_t i, j, n = *keys.rbegin() - tmin + 1;
       vol->reallocate( n );
       labels.resize( n );
-      for( i=0; i<n; ++i )
+      for( il=keys.begin(); il!=el; ++il )
         try
         {
+          i = *il;
           Object label_map = labels_table->getArrayItem( i );
           if( label_map.isNull() )
-          {
-            ++n; // increase max size
             continue;
-          }
-
-          if( i >= vol->getSizeX() )
-          {
-            labels.resize( n );
-            vol->reallocate( n, 1, 1, 1, true );
-          }
 
           string label = label_map->getProperty( "Label" )->getString();
           Object color = label_map->getProperty( "RGB" );
-          labels[i] = label;
+          labels[i - tmin] = label;
           AimsRGBA rgba;
           rgba[3] = 255;
           Object cit = color->objectIterator();
           for( j=0; cit->isValid() && j<4; ++j, cit->next() )
             rgba[j] = uint8_t( rint( cit->currentValue()->getScalar()
                                     * 255.9 ) );
-          vol->at( i ) = rgba;
+          vol->at( i - tmin ) = rgba;
         }
         catch( ... )
         {
