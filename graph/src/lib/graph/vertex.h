@@ -98,7 +98,7 @@ public:
 	    edgeSize() for the number of edges. In a future release, size()
 	    will return the number properties as it does in GenericObject} */
 	size_t size() const
-	  __attribute__((__deprecated__("use edgeSize() for "
+	  __attribute__((__deprecated__("use edgesSize() for "
 	    "the number of edges. In a future release, size() will return the "
 	    "number properties as it does in GenericObject")));
 	/**	The edgesSize of a vertex is the number of attached edges
