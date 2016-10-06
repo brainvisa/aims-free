@@ -79,7 +79,7 @@ namespace carto
 
   template < typename T >
   VolumeProxy< T >::VolumeProxy( const VolumeProxy< T >& other )
-    : RCObject(), 
+    : RCObject(),
       Headered( other ),
       _size( other._size )
   {
@@ -108,7 +108,7 @@ namespace carto
 
 
   template < typename T >
-  VolumeProxy< T >& 
+  VolumeProxy< T >&
   VolumeProxy< T >::operator=( const VolumeProxy< T >& other )
   {
 
@@ -118,10 +118,14 @@ namespace carto
     this->Headered::operator=( other );
     _size = other._size;
 
-    header().changeBuiltinProperty( "sizeX", _size[0] );
-    header().changeBuiltinProperty( "sizeY", _size[1] );
-    header().changeBuiltinProperty( "sizeZ", _size[2] );
-    header().changeBuiltinProperty( "sizeT", _size[3] );
+    if( header().hasProperty( "sizeX" ) )
+      header().changeBuiltinProperty( "sizeX", _size[0] );
+    if( header().hasProperty( "sizeY" ) )
+      header().changeBuiltinProperty( "sizeY", _size[1] );
+    if( header().hasProperty( "sizeZ" ) )
+      header().changeBuiltinProperty( "sizeZ", _size[2] );
+    if( header().hasProperty( "sizeT" ) )
+      header().changeBuiltinProperty( "sizeT", _size[3] );
 
     return *this;
 
