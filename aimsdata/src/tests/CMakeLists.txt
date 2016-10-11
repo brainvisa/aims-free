@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(AimsVarious_test     ${AIMS_AIMSDATA_LIBRARIES})
 
 IF ( PYTHON_FOUND )
   # Run tests for aims using python unittest
-  ADD_TEST(AimsStructuringElementTests "${CMAKE_BINARY_DIR}/bin/bv_env" "${PYTHON_EXECUTABLE}"
+  ADD_TEST(AimsStructuringElementTests "${CMAKE_BINARY_DIR}/bin/bv_env${CMAKE_EXECUTABLE_SUFFIX}" "${PYTHON_EXECUTABLE}"
                                        "${CMAKE_BINARY_DIR}/bin/bv_unit_test" 
                                        aims.tests.test_aimsdata.AimsStructuringElementTests)
 ENDIF()
