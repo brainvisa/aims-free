@@ -65,54 +65,62 @@ def connectedComponents(mesh, tex, areas_mode=0):
 
     Returns
     -------
-    cctex: connectedComponentTex: aimsTimeTexture_S16
+    step_cc: connectedComponentTex: aimsTimeTexture_S16
         time step = LabelsNb, for each time step (label in the tex), texture of
         the connected components corresponding to this label (background = -1,
-        and connected components = values between 1 and ccNb).
+        and connected components = values between 1 and nb_cc).
     areas_measure: python dictionary
         areas_measures[label] = [16.5, 6.0]
         (numpy array) if label (in tex) has two connected Components 1 and 2
         with area = 16.5 and 6.0 respectively, areas are in square mm
     """
-    meshVertexNb = int(mesh.vertex().size())
-    print('Vertices number of mesh: ', meshVertexNb)
-    areas_measures = {}
+    # create a numpy array from aims object
+    dtex = tex[0].arraydata()
 
-    if (meshVertexNb != tex.nItem()):
+    # number of vertices
+    nbvert = len(mesh.vertex())
+
+    # test for homogeneity dimension
+    if len(dtex) != nbvert:
         raise exceptions.ValueError(
-            'mesh and input texture have not the same dimension...')
+            'mesh and texture have not the same dimension...')
 
-    dtex = tex[0].arraydata()
+    # list of existing labels
     labels = numpy.unique(dtex)
-    labelsList = labels.tolist()
-    if labelsList.count(0) != 0:
-        labelsList.remove(0)
-    if labelsList.count(-1) != 0:
-        labelsList.remove(-1)
-    print('Labels list: ', labelsList)
 
-    dtex = tex[0].arraydata()
-    otex = aims.TimeTexture(dtype='S16')
-    cctex = aims.TimeTexture_S16()
-    for label in labelsList:
-        otex[0].assign((dtex == label).astype('int16'))
-        labelcctex = aimsalgo.AimsMeshLabelConnectedComponent(
-            mesh, otex, 0, 0)
-        if areas_mode:
-            ccNb = labelcctex[0].arraydata().max()
-            areas_measures[label] = numpy.zeros(ccNb)
-            for c in xrange(ccNb):
-                ccMesh = aims.SurfaceManip.meshExtract(
-                    mesh, labelcctex, c + 1)[0]
-                ccArea = aims.SurfaceManip.meshArea(ccMesh)
-                areas_measures[label][c] = ccArea
-        cctex[label - 1].resize(meshVertexNb, 0)
-        cctex[label - 1].assign(labelcctex[0].arraydata())
+    # remove a specific elements
+    if 0 in labels:
+        numpy.delete(labels, numpy.where(labels == 0))
+    if -1 in labels:
+        numpy.delete(labels, numpy.where(labels == -1))
+
+    otex = aims.TimeTexture_S16()
+    step_cc = aims.TimeTexture_S16()
 
     if areas_mode:
-        return cctex, areas_measures
+        areas_measures = {}
+
+    for label in labels:
+        otex[0].assign((dtex == label))
+        label_cc = aimsalgo.AimsMeshLabelConnectedComponent(mesh, otex, 0, 0)
+        # transform aims.TimeTexture_S16 to numpy array
+        label_cc_np = label_cc[0].arraydata()
+        step_cc[label-1].assign(label_cc_np)
+        
+        if areas_mode:
+            nb_cc = label_cc_np.max()
+            areas_measures[label] = numpy.zeros(nb_cc)
+            for c in range(nb_cc):
+                # extracts a sub-mesh defined by a texture label value (c+1)
+                mesh_cc = aims.SurfaceManip.meshExtract(mesh, label_cc, c+1)[0]
+                # surface area of a triangular mesh (in mm2)
+                area_cc = aims.SurfaceManip.meshArea(mesh_cc)
+                areas_measures[label][c] = area_cc
+
+    if areas_mode:
+        return step_cc, areas_measures
     else:
-        return cctex
+        return step_cc
 
 
 def remove_non_principal_connected_components(mesh, tex, trash_label):
@@ -204,9 +212,12 @@ def average_texture(output, inputs):
         tex.append(aims.read(fname))
     # make a 2D array from a series of textures
     ar = numpy.vstack([t[0].arraydata() for t in tex])
+    # replace the negative values by positive integers
+    if len(ar[ar == -1]) != 0:
+        tmp_label = numpy.max(ar) + 1
+        ar[ar == -1] = tmp_label
     # count occurrences
     N = numpy.max(ar)
-
     def bin_resized(x):
         y = numpy.bincount(x)
         y.resize(N + 1)  # labels: 1 to 72
@@ -214,9 +225,13 @@ def average_texture(output, inputs):
     cnt = numpy.apply_along_axis(bin_resized, 0, ar)
     # get max of occurrences in each vertex
     maj = numpy.argmax(cnt, axis=0)
+    # to keep the same labels, replace (max + 1) by -1 
+    if tmp_label:
+        maj[maj == tmp_label] = -1
     # make an aims texture from result (numpy array)
     otex = aims.TimeTexture('S16')
     otex[0].assign(maj)
+    otex.header().update(tex[0].header())
 
     aims.write(otex, output)
 
@@ -424,3 +439,108 @@ def mesh_to_polygon_textured_mesh(mesh, poly_tex):
 
     out_mesh.updateNormals()
     return out_mesh, out_tex
+
+
+def change_wrong_labels(cc_label, label, gyri_tex, mesh_neighbors_vector,
+                        cc_tex_label):
+    """After a study of its neighbors, wrong label is replaced by the
+    correct number.
+
+    Parameters
+    ----------
+    cc_label: label of connected component in cc_tex_label
+    label: label of associated vertices in gyri texture
+    gyri_tex (aims time texture S16): gyri texture
+    mesh_neighbors_vector : aims.SurfaceManip.surfaceNeighbours(mesh)
+    cc_tex_label : texture representing connected components of label
+
+    Returns
+    -------
+    gyri_tex (aims time texture S16): new gyri_tex texture,
+                                      without isolated vertex.
+    winner_label: the correct number.
+    """
+    indexes = numpy.where(cc_tex_label == cc_label)[0]
+    neighbor_labels = []
+    print('Nb of wrong indexes: ', indexes.size)
+    for i in indexes:
+        for n in mesh_neighbors_vector[i]:
+            n_label = gyri_tex[0][n]
+            if n_label != label:
+                neighbor_labels.append(n_label)
+    v_labels = numpy.unique(neighbor_labels)
+    max_count = 0
+    winnner_label = -1
+    for l in v_labels:
+        nb_v_labels = neighbor_labels.count(l)
+        if nb_v_labels > max_count:
+            print('Number of neighbor labels: ', nb_v_labels, 'for', l)
+            winnner_label = l
+            max_count = nb_v_labels
+    for i in indexes:
+        gyri_tex[0][i] = winnner_label
+    return gyri_tex, winnner_label
+
+
+def find_wrong_labels(mesh, gyriTex):
+    """
+
+    Parameters
+    ----------
+    mesh:
+    gyriTex: gyri texture
+
+    Returns
+    -------
+    wrong_labels: list of wrong labels
+        [cctex: connectedComponentTex: aimsTimeTexture_S16,
+        time step = LabelsNb, for each time step (label in the tex),
+        texture of the connected components corresponding to this label
+        (background = -1, and connected components = values between 1 and ccNb)
+        areas_measures = python dictionary,
+        areas_measures[label] = [16.5, 6.0] (numpy array)
+        if label (in tex) has two connected Components 1 and 2 with
+        area = 16.5 and 6.0 respectively, areas are in square mm]
+    """
+
+    meshNeighborsVector = aims.SurfaceManip.surfaceNeighbours(mesh)
+    cctex, areas_measures = connectedComponents(
+        mesh, gyriTex, areas_mode=1)
+    wrong_labels = []
+    for label in areas_measures.keys():
+        if areas_measures[label].size != 1:
+            wrong_labels.append(label)
+    return wrong_labels
+
+
+def clean_gyri_texture(mesh, gyri_tex):
+    """Cleaning a gyri texture by using connected components.
+
+    Parameters
+    ----------
+    mesh (aims time surface):
+        white mesh associated to gyri_tex
+    gyri_tex (aims time texture S16):
+        gyri texture as full FreeSurfer parcellation.
+    Return
+    ------
+    gyri_tex (aims time texture S16):
+        new gyri texture, without isolated vertex.
+    """
+    # get a list of neighbouring nodes from a surface mesh
+    mesh_neighbors_vector = aims.SurfaceManip.surfaceNeighbours(mesh)
+
+    cc_tex, areas_measures = connectedComponents(
+        mesh, gyri_tex, areas_mode=1)
+    wrong_labels = []
+    for label in areas_measures.keys():
+        if areas_measures[label].size != 1:
+            wrong_labels.append(label)
+    for label in wrong_labels:
+        cc_tex_label = cc_tex[label - 1].arraydata()
+        areas_measures_cc = areas_measures[label]
+        cc_nb = areas_measures_cc.size
+        for l in range(1, cc_nb):
+            gyri_tex, win = change_wrong_labels(
+                l + 1, label, gyri_tex, mesh_neighbors_vector, cc_tex_label)
+    return gyri_tex
