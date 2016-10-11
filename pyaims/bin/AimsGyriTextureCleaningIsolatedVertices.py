@@ -20,6 +20,7 @@ Author: Sandrine Lefranc, 2015
 
 
 # python system module
+from __future__ import print_function
 import argparse
 import textwrap
 import sys
@@ -41,7 +42,7 @@ def parse_args(argv):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent("""\
             -------------------------------------------------------------------
-            Threshold an aimsTimeTexture (Warning: with one time step only)
+            Clean a label AimsTimeTexture from isolated vertices
             -------------------------------------------------------------------
             """))
 
@@ -57,8 +58,7 @@ def parse_args(argv):
 
 def main():
     # load the arguments of parser (delete script name: sys.arg[0])
-    arguments = (sys.argv[1], sys.argv[2], sys.argv[3])
-    parser, args = parse_args(arguments)
+    parser, args = parse_args(sys.argv[1:])
 
     # load the files with aims
     tex = aims.read(args.gyriseg)
@@ -67,7 +67,7 @@ def main():
     cont = True
     count = 0
     while cont and count < 10:
-        print "clean up number ", str(count + 1), " :"
+        print("clean up number ", str(count + 1), " :")
         tex = clean_gyri_texture(mesh, tex)
         wrong_labels = find_wrong_labels(mesh, tex)
         cont = False
