@@ -77,11 +77,23 @@ parser.add_option('-l', '--listing', dest='listFilesOnly',
 parser.add_option('-m', '--moc', dest='moc',
                   help='Path to the moc executable.',
                   default=None)
+parser.add_option('--no-preprocess', dest='preprocess',
+                  action='store_false', help='use C preprocessor '
+                  '[default:true]', default=True)
+parser.add_option("-P", "--preprocessor", dest='preprocessor',
+                  help="C preprocessor command (default: 'cpp -C')")
 
 (options, args) = parser.parse_args()
 if args:
     parser.parse(['-h'])
 
+cpp = options.preprocess
+cppc = options.preprocessor
+if cpp and not cppc:
+    cppc = 'cpp -C'
+elif not cpp:
+    cppc = None
+        
 if not options.typessub:
     p = [os.path.join(options.sourcepath, 'typessub.py'), 'typessub.py']
     options.typessub = filter(os.path.exists, p)
@@ -211,8 +223,8 @@ for file, tps in todo.items():
                 if not options.listFilesOnly:
                     sys.stdout.write('generating ' + ofile)
                 makeTemplate(
-                    infile, otmpfile, typessub, templates, moc=options.moc,
-                    quiet=options.listFilesOnly)
+                    infile, otmpfile, typessub, templates, cpp=cppc,
+                    moc=options.moc, quiet=options.listFilesOnly)
                 if ofile != otmpfile:
                     if not filecmp.cmp(ofile, otmpfile):
                         shutil.copyfile(otmpfile, ofile)

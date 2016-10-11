@@ -19,6 +19,7 @@ exec_program( ${PYTHON_EXECUTABLE}
         -t "${CMAKE_CURRENT_SOURCE_DIR}/aimsalgotypessub.py"
         -l
         -m "${QT_MOC_EXECUTABLE}"
+        -P "'${CMAKE_C_PREPROCESSOR}'"
   OUTPUT_VARIABLE _generatedSipFileList 
   RETURN_VALUE _returnValue )
 

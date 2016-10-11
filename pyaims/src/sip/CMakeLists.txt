@@ -19,6 +19,7 @@ BRAINVISA_COPY_FILES( ${PROJECT_NAME}-dev maketemplates.py maketemplate.py types
 file( GLOB _sipSources "${CMAKE_CURRENT_SOURCE_DIR}/*.sip" )
 
 file( MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}" )
+
 exec_program( ${PYTHON_EXECUTABLE}
   ARGS "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}/maketemplates.py"
         -i "${_generatedtypes_py}"
@@ -27,6 +28,7 @@ exec_program( ${PYTHON_EXECUTABLE}
         -t "${CMAKE_CURRENT_SOURCE_DIR}/typessub.py"
         -l
         -m "${QT_MOC_EXECUTABLE}"
+        -P "'${CMAKE_C_PREPROCESSOR}'"
   OUTPUT_VARIABLE _generatedSipFileList 
   RETURN_VALUE _returnValue )
 
