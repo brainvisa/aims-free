@@ -69,9 +69,11 @@ namespace soma
   /// \see Reader FileUtil
   /// \note Options currently available are : 
   /// - (bool) partial_writing : if view should be partially written into an
-  ///          existing full volume (GIS).
+  ///          existing full volume.
   /// - (bool) byte_swapping : if data should be byte swapped (GIS).
   /// - (bool) ascii : if data should be written in ASCII (GIS).
+  /// - (int) ox, oy, oz, ot : top left position of partial frame in the output 
+  ///         file.
   template <typename T>
   class VolumeFormatWriter : public FormatWriter<carto::Volume<T> >
   {
