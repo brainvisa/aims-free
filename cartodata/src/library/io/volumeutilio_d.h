@@ -71,6 +71,23 @@ namespace soma {
     properties.insert( "by" );
     properties.insert( "bz" );
     properties.insert( "border" );
+    properties.insert( "ox1" );
+    properties.insert( "ox1" );
+    properties.insert( "ox2" );
+    properties.insert( "ox3" );
+    properties.insert( "ox4" );
+    properties.insert( "ox5" );
+    properties.insert( "ox6" );
+    properties.insert( "ox7" );
+    properties.insert( "ox8" );
+    properties.insert( "sx1" );
+    properties.insert( "sx2" );
+    properties.insert( "sx3" );
+    properties.insert( "sx4" );
+    properties.insert( "sx5" );
+    properties.insert( "sx6" );
+    properties.insert( "sx7" );
+    properties.insert( "sx8" );
     return properties;
   }
 
@@ -145,10 +162,43 @@ namespace soma {
       options->removeProperty( "bz" );
     } catch( ... ) {}
     
-    bool partial = !( frame[0] == 0 && frame[1] == 0 &&
-                      frame[2] == 0 && frame[3] == 0 && 
-                      position[0] == 0 && position[1] == 0 &&
-                      position[2] == 0 && position[3] == 0);
+    int dim, value;
+    for( dim=0; dim<carto::Volume<T>::DIM_MAX; ++dim )
+    {
+      try
+      {
+        std::stringstream skey;
+        skey << "ox" << dim+1;
+        std::string key = skey.str();
+        value = (int) rint( options->getProperty( key )->getScalar() );
+        options->removeProperty( key );
+        while( position.size() <= dim )
+          position.push_back( 0 );
+        position[ dim ] = value;
+      }
+      catch( ... ) {}
+      try
+      {
+        std::stringstream skey;
+        skey << "sx" << dim+1;
+        std::string key = skey.str();
+        value = (int) rint( options->getProperty( key )->getScalar() );
+        options->removeProperty( key );
+        while( position.size() <= dim )
+          frame.push_back( 0 );
+        frame[ dim ] = value;
+      }
+      catch( ... ) {}
+    }
+    
+    bool partial = false;
+    for( dim=0; !partial && dim<position.size(); ++dim )
+      if( position[dim] != 0 )
+        partial = true;
+    for( dim=0; !partial && dim<frame.size(); ++dim )
+      if( frame[dim] != 0 )
+        partial = true;
+      
     if( partial )
       return readPartial( obj, dsi, position, frame, borders, options );
     else

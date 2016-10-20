@@ -221,24 +221,42 @@ namespace soma
     if( partial ) {
       try {
         position[0] = (int) rint( options->getProperty( "ox" )->getScalar() );
-//         localMsg( "override ox : " + carto::toString(position[0]) );
-        std::cout << "override ox : " + carto::toString(position[0]) << std::endl;
+        localMsg( "override ox : " + carto::toString(position[0]) );
+//         std::cout << "override ox : " + carto::toString(position[0]) << std::endl;
       } catch( ... ) {}
       try {
         position[1] = (int) rint( options->getProperty( "oy" )->getScalar() );
-//         localMsg( "override oy : " + carto::toString(position[1]) );
-        std::cout << "override oy : " + carto::toString(position[1]) << std::endl;
+        localMsg( "override oy : " + carto::toString(position[1]) );
+//         std::cout << "override oy : " + carto::toString(position[1]) << std::endl;
       } catch( ... ) {}
       try {
         position[2] = (int) rint( options->getProperty( "oz" )->getScalar() );
-//         localMsg( "override oz : " + carto::toString(position[2]) );
-        std::cout << "override oz : " + carto::toString(position[2]) << std::endl;
+        localMsg( "override oz : " + carto::toString(position[2]) );
+//         std::cout << "override oz : " + carto::toString(position[2]) << std::endl;
       } catch( ... ) {}
       try {
         position[3] = (int) rint( options->getProperty( "ot" )->getScalar() );
-//         localMsg( "override ot : " + carto::toString(position[3]) );
-        std::cout << "override ot : " + carto::toString(position[3]) << std::endl;
+        localMsg( "override ot : " + carto::toString(position[3]) );
+//         std::cout << "override ot : " + carto::toString(position[3]) << std::endl;
       } catch( ... ) {}
+
+      int dim, value;
+      for( dim=0; dim<carto::Volume<T>::DIM_MAX; ++dim )
+      {
+        try
+        {
+          std::stringstream skey;
+          skey << "ox" << dim+1;
+          std::string key = skey.str();
+          value = (int) rint( options->getProperty( key )->getScalar() );
+          options->removeProperty( key );
+          while( position.size() <= dim )
+            position.push_back( 0 );
+          position[ dim ] = value;
+//           std::cout << "override " << key << " : " + carto::toString(value) << std::endl;
+        }
+        catch( ... ) {}
+      }
     }
 
     //=== writing header & creating files ====================================
