@@ -421,21 +421,45 @@ namespace soma
       localMsg( "reading volume without strides..." );
       // we are in a "border" context. The volume/region must be read
       // line by line
-      // FIXME TODO read all dims
       std::vector<int> posline ( pos );
-      std::vector<int> sizeline ( 4, 1 );
+      std::vector<int> sizeline ( ndim, 1 );
+      std::vector<int> volpos( ndim, 0 );
       sizeline[ 0 ] = viewsize[ 0 ];
-      for ( t=0; t<viewsize[ 3 ]; ++t ) {
-        posline[ 3 ] = pos[ 3 ] + t;
-        for ( z=0; z<viewsize[ 2 ]; ++z ) {
-          posline[ 2 ] = pos[ 2 ] + z;
-          for ( y=0; y<viewsize[ 1 ]; ++y ) {
-            posline[ 1 ] = pos[ 1 ] + y;
-            _imr->read( ( T * ) &obj(0,y,z,t), *dsi, posline,
-                        sizeline, strides, options );
+      int dim;
+      bool nextrow = false;
+      while( !nextrow )
+      {
+        nextrow = true;
+        for( dim=1; dim<ndim; ++dim )
+        {
+          if( nextrow )
+          {
+            ++volpos[dim];
+            if( volpos[dim] == viewsize[dim] )
+              volpos[dim] = 0;
+            else
+              nextrow = false;
           }
+          posline[dim] = pos[dim] + volpos[dim];
         }
+        posline[1] = pos[1] + volpos[1];
+        _imr->read( ( T * ) &obj( volpos ), *dsi, posline,
+                    sizeline, strides, options );
       }
+//       for ( t=0; t<viewsize[ 3 ]; ++t ) {
+//         volpos[ 3 ] = t;
+//         posline[ 3 ] = pos[ 3 ] + t;
+//         for ( z=0; z<viewsize[ 2 ]; ++z ) {
+//           volpos[ 2 ] = z;
+//           posline[ 2 ] = pos[ 2 ] + z;
+//           for ( y=0; y<viewsize[ 1 ]; ++y ) {
+//             volpos[ 1 ] =  y;
+//             posline[ 1 ] = pos[ 1 ] + y;
+//             _imr->read( ( T * ) &obj( volpos ), *dsi, posline,
+//                         sizeline, strides, options );
+//           }
+//         }
+//       }
     }
     
     // we reset at 0 the ImageReader's members (sizes, binary, ...) so that
