@@ -1169,12 +1169,15 @@ namespace carto
                                           const AllocatorContext & context,
                                           Object options )
   {
-    int                sizex = 1, sizey = 1, sizez = 1, sizet = 1;
+    std::vector<int> dims( 4, 1 );
     bool        unalloc = false;
-    header->getProperty( "sizeX", sizex );
-    header->getProperty( "sizeY", sizey );
-    header->getProperty( "sizeZ", sizez );
-    header->getProperty( "sizeT", sizet );
+    if( !header->getProperty( "volume_dimension", dims ) )
+    {
+      header->getProperty( "sizeX", dims[0] );
+      header->getProperty( "sizeY", dims[1] );
+      header->getProperty( "sizeZ", dims[2] );
+      header->getProperty( "sizeT", dims[3] );
+    }
     options->getProperty( "unallocated", unalloc );
     std::vector<int> borders( 3, 0 );
     try {
@@ -1194,19 +1197,15 @@ namespace carto
     Volume<T>        *obj;
     if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 )
     {
-      obj = new Volume<T>( sizex + borders[0] * 2,
-                           sizey + borders[1] * 2,
-                           sizez + borders[2] * 2,
-                           sizet, context, !unalloc );
-      obj = new Volume<T>( rc_ptr<Volume<T> >( obj ),
-                           typename Volume<T>::Position4Di( borders[0],
-                              borders[1], borders[2], 0 ),
-                           typename Volume<T>::Position4Di( sizex, sizey,
-                              sizez, sizet ),
-                           context );
+      std::vector<int> big_dims = dims;
+      big_dims[0] += borders[0] * 2;
+      big_dims[1] += borders[1] * 2;
+      big_dims[2] += borders[2] * 2;
+      obj = new Volume<T>( big_dims, context, !unalloc );
+      obj = new Volume<T>( rc_ptr<Volume<T> >( obj ), borders, dims, context );
     }
     else
-      obj = new Volume<T>( sizex, sizey, sizez, sizet, context, !unalloc );
+      obj = new Volume<T>( dims, context, !unalloc );
     obj->blockSignals( true );
     obj->header().copyProperties( header );
     // restore original sizes : temporary too...
@@ -1219,41 +1218,41 @@ namespace carto
                                    const AllocatorContext & context,
                                    Object options )
   {
-    int                sizex = 1, sizey = 1, sizez = 1, sizet = 1;
+    std::vector<int> dims( 4, 1 );
     bool        unalloc = false, partial = false, keep_allocation = false;
     options->getProperty( "partial_reading", partial );
     if( !partial )
+    {
+      if( !header->getProperty( "volume_dimension", dims ) )
       {
-        header->getProperty( "sizeX", sizex );
-        header->getProperty( "sizeY", sizey );
-        header->getProperty( "sizeZ", sizez );
-        header->getProperty( "sizeT", sizet );
-        options->getProperty( "unallocated", unalloc );
-        options->getProperty( "keep_allocation", keep_allocation );
-        if( !keep_allocation || !obj.allocatorContext().isAllocated() )
-          obj.reallocate( sizex, sizey, sizez, sizet, false, context,
-                          !unalloc );
+        header->getProperty( "sizeX", dims[0] );
+        header->getProperty( "sizeY", dims[1] );
+        header->getProperty( "sizeZ", dims[2] );
+        header->getProperty( "sizeT", dims[3] );
       }
+      options->getProperty( "unallocated", unalloc );
+      options->getProperty( "keep_allocation", keep_allocation );
+      if( !keep_allocation || !obj.allocatorContext().isAllocated() )
+        obj.reallocate( dims, false, context, !unalloc );
+    }
     else
-      {
-        const_cast<AllocatorContext &>( obj.allocatorContext() ).setDataSource
-          ( context.dataSource() );
-        // preserve dimensions
-        sizex = obj.getSizeX();
-        sizey = obj.getSizeY();
-        sizez = obj.getSizeZ();
-        sizet = obj.getSizeT();
-      }
+    {
+      const_cast<AllocatorContext &>( obj.allocatorContext() ).setDataSource
+        ( context.dataSource() );
+      // preserve dimensions
+      dims = obj.getSize();
+    }
     obj.blockSignals( true );
     obj.header().copyProperties( header );
     if( partial )
       {
         // restore dimensions
         PropertySet        & ps = obj.header();
-        ps.setProperty( "sizeX", sizex );
-        ps.setProperty( "sizeY", sizey );
-        ps.setProperty( "sizeZ", sizez );
-        ps.setProperty( "sizeT", sizet );
+        ps.setProperty( "volume_dimension", dims );
+        ps.setProperty( "sizeX", dims[0] );
+        ps.setProperty( "sizeY", dims[1] );
+        ps.setProperty( "sizeZ", dims[2] );
+        ps.setProperty( "sizeT", dims[3] );
       }
     obj.blockSignals( false );
   }

@@ -157,7 +157,7 @@ namespace soma
       // we treat the view as a pure Volume
       localMsg( " -> from self (no partial writing)" )
       size = view;
-      position = std::vector<int>( 4, 0 );
+      position = std::vector<int>( ndim, 0 );
     }
 
     localMsg( " -> Full volume size : ( "

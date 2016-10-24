@@ -275,11 +275,7 @@ namespace soma
 
     //=== view size ==========================================================
     localMsg( "reading view size..." );
-    std::vector<int>  viewsize( 4, 0 );
-    viewsize[ 0 ] = obj.getSizeX();
-    viewsize[ 1 ] = obj.getSizeY();
-    viewsize[ 2 ] = obj.getSizeZ();
-    viewsize[ 3 ] = obj.getSizeT();
+    std::vector<int>  viewsize = obj.getSize();
     localMsg( " -> view size ( "
               + carto::toString( viewsize[ 0 ] ) + ", "
               + carto::toString( viewsize[ 1 ] ) + ", "
@@ -378,7 +374,7 @@ namespace soma
 
     //=== region's origine ===================================================
     localMsg( "reading view position in reference to full volume..." );
-    std::vector<int>  pos ( 4 , 0 );
+    std::vector<int>  pos ( ndim, 0 );
     if( parent1 && !parent1->allocatorContext().isAllocated() ) {
       pos = obj.posInRefVolume();
     } else if( parent2 ) {
@@ -426,8 +422,8 @@ namespace soma
       std::vector<int> volpos( ndim, 0 );
       sizeline[ 0 ] = viewsize[ 0 ];
       int dim;
-      bool nextrow = false;
-      while( !nextrow )
+      bool nextrow = false, ended = false;
+      while( !ended )
       {
         nextrow = true;
         for( dim=1; dim<ndim; ++dim )
@@ -436,16 +432,24 @@ namespace soma
           {
             ++volpos[dim];
             if( volpos[dim] == viewsize[dim] )
+            {
+              if( dim == ndim - 1 )
+                ended = true;
               volpos[dim] = 0;
+            }
             else
               nextrow = false;
           }
           posline[dim] = pos[dim] + volpos[dim];
         }
-        posline[1] = pos[1] + volpos[1];
-        _imr->read( ( T * ) &obj( volpos ), *dsi, posline,
-                    sizeline, strides, options );
+        if( !ended )
+        {
+          posline[1] = pos[1] + volpos[1];
+          _imr->read( ( T * ) &obj( volpos ), *dsi, posline,
+                      sizeline, strides, options );
+        }
       }
+
 //       for ( t=0; t<viewsize[ 3 ]; ++t ) {
 //         volpos[ 3 ] = t;
 //         posline[ 3 ] = pos[ 3 ] + t;
