@@ -52,6 +52,7 @@ namespace carto
     _size[2] = sizeZ;
     _size[3] = sizeT;
 
+    header().addBuiltinProperty( "volume_dimension", _size );
     header().addBuiltinProperty( "sizeX", _size[0] );
     header().addBuiltinProperty( "sizeY", _size[1] );
     header().addBuiltinProperty( "sizeZ", _size[2] );
@@ -70,6 +71,7 @@ namespace carto
       _size.reserve( 4 );
       _size.push_back( 1 );
     }
+    header().addBuiltinProperty( "volume_dimension", _size );
     header().addBuiltinProperty( "sizeX", _size[0] );
     header().addBuiltinProperty( "sizeY", _size[1] );
     header().addBuiltinProperty( "sizeZ", _size[2] );
@@ -84,6 +86,8 @@ namespace carto
       _size( other._size )
   {
 
+    if( header().hasProperty( "volume_dimension" ) )
+      header().removeProperty( "volume_dimension" );
     if( header().hasProperty( "sizeX" ) )
       header().removeProperty( "sizeX" );
     if( header().hasProperty( "sizeY" ) )
@@ -93,6 +97,7 @@ namespace carto
     if( header().hasProperty( "sizeT" ) )
       header().removeProperty( "sizeT" );
 
+    header().addBuiltinProperty( "volume_dimension", _size );
     header().addBuiltinProperty( "sizeX", _size[0] );
     header().addBuiltinProperty( "sizeY", _size[1] );
     header().addBuiltinProperty( "sizeZ", _size[2] );

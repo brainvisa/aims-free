@@ -64,8 +64,11 @@ void Carto2AimsHeaderTranslator::translate( Object srcheader,
   else
     dstheader->copyProperties( srcheader );
 
-  vector<int>	dim( 4, 1 );
+  vector<int>	dim;
 
+  dstheader->getProperty( "volume_dimension", dim );
+  while( dim.size() <  4 )
+    dim.push_back( 1 );
   dstheader->getProperty( "sizeX", dim[0] );
   dstheader->getProperty( "sizeY", dim[1] );
   dstheader->getProperty( "sizeZ", dim[2] );

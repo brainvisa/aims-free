@@ -846,6 +846,7 @@ namespace carto
     sizePropertyNames.insert( "sizeY" );
     sizePropertyNames.insert( "sizeZ" );
     sizePropertyNames.insert( "sizeT" );
+    sizePropertyNames.insert( "volume_dimension" );
     rc_ptr< PropertyFilter >
       sizeRcPropertyFilter( new PropertyFilter( "size", sizePropertyNames ) );
 
