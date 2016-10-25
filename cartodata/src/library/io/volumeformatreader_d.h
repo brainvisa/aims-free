@@ -420,6 +420,7 @@ namespace soma
       std::vector<int> posline ( pos );
       std::vector<int> sizeline ( ndim, 1 );
       std::vector<int> volpos( ndim, 0 );
+      volpos[1] = -1;
       sizeline[ 0 ] = viewsize[ 0 ];
       int dim;
       bool nextrow = false, ended = false;
