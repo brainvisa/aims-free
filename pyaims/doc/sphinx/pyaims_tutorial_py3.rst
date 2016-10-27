@@ -131,7 +131,7 @@ Building a volume
 >>> # set the voxels size
 >>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
 >>> print(vol.header())
-{ 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
+{ 'volume_dimension' : [ 192, 256, 128, 1 ], 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 
 .. figure:: images/volume1.png
@@ -338,7 +338,7 @@ If you need to build another, different volume, with the same structure and size
 >>> vol2 = aims.Volume(vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), vol.getSizeT(), 'FLOAT')
 >>> vol2.header().update(vol.header())
 >>> vol2.header()
-{ 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
+{ 'volume_dimension' : [ 192, 256, 128, 1 ], 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 Important information can reside in the header, like voxel size, or coordinates systems and geometric transformations to other coordinates systems, 
 so it is really very important to carry this information with duplicated or derived volumes.
@@ -385,7 +385,7 @@ others are optional and default to 0, but up to 4 coordinates may be used. In th
 >>> # set the voxels size
 >>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
 >>> print(vol.header())
-{ 'sizeX' : 30, 'sizeY' : 30, 'sizeZ' : 30, 'sizeT' : 4, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
+{ 'volume_dimension' : [ 30, 30, 30, 4 ], 'sizeX' : 30, 'sizeY' : 30, 'sizeZ' : 30, 'sizeT' : 4, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 Similarly, 1D or 2D volumes may be used exactly the same way.
 
