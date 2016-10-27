@@ -52,15 +52,15 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def use_type(self, dtype):
-        formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v', '.tiff']
+        formats = ['.nii', '.nii.gz', '.ima'] #, '.mnc', '.v', '.tiff']
         # formats which support more than 4D
-        nd_io = ['.ima'] #, '.nii', '.nii.gz']
+        nd_io = ['.ima' ] #, '.nii'] #, '.nii.gz']
 
         # create test volume
-        vol = aims.Volume(10, 10, 10, dtype=dtype)
-        vol.header()['voxel_size'] = [0.5, 0.6, 0.7]
-        view = ((2, 3, 4, 0), (7, 5, 6, 1), (2, 4, 5, 0), (5, 6, 4, 1))
-        np.asarray(vol)[:,:,:,:] \
+        vol = aims.Volume(10, 10, 10, 5, dtype=dtype)
+        vol.header()['voxel_size'] = [0.5, 0.6, 0.7, 0.8]
+        view = ((2, 3, 4, 1), (7, 5, 6, 2), (2, 4, 5, 3), (5, 6, 4, 2))
+        np.asarray(vol)[:] \
             = np.ogrid[0:np.asarray(vol).ravel().shape[0]].reshape(
                 np.asarray(vol).shape)
         failing_files = set()
@@ -71,11 +71,11 @@ class TestPyaimsIO(unittest.TestCase):
         vol.header()['voxel_size'] = [0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.1, 1.2]
         view = ((2, 3, 2, 1, 1, 1, 1, 1), (7, 5, 2, 2, 3, 2, 2, 2),
                 (1, 2, 3, 3, 2, 0, 0, 0), (7, 5, 2, 2, 3, 2, 2, 2))
-        np.asarray(vol)[:,:,:,:] \
+        np.asarray(vol)[:] \
             = np.ogrid[0:np.asarray(vol).ravel().shape[0]].reshape(
                 np.asarray(vol).shape)
         if self.verbose:
-            print('    testing 8D IO:')
+            print('** testing 8D IO:')
         for format in nd_io:
             failing_files.update(self.use_format(vol, format, view))
         return failing_files
