@@ -147,7 +147,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   set_volume_real_range(volume,mini,maxi);
 
   int       sizes[VIO_MAX_DIMENSIONS];
-  sizes[3]=thing.dimZ();
+  sizes[3]=thing.dimT();
   sizes[2]=thing.dimX();
   sizes[1]=thing.dimY();
   sizes[0]=thing.dimZ();
