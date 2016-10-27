@@ -209,12 +209,9 @@ namespace soma {
     soma::Reader<carto::Volume<T> > rVol;
     soma::DataSourceInfoLoader dsil;
     carto::VolumeRef<T> bordersVolume;
-//     carto::Volume<T>* fullVolume;
-    typename carto::Volume<T>::Position4Di fullsize;
-    typename carto::Volume<T>::Position4Di bordersize;
-    typename carto::Volume<T>::Position4Di volumepos( borders[0],
-                                                      borders[1],
-                                                      borders[2], 0 );
+    std::vector<int> fullsize;
+    std::vector<int> bordersize;
+    std::vector<int> volumepos;
 
     if( borders[0] !=0 || borders[1] !=0 || borders[2] !=0 )
     {
@@ -225,14 +222,23 @@ namespace soma {
       localMsg( "checking full volume..." );
       *dsi = dsil.check( *dsi, options );
       localMsg( "reading size..." );
-      fullsize[0] = (int) rint(
-        dsi->header()->getProperty( "sizeX" )->getScalar() );
-      fullsize[1] = (int) rint(
-        dsi->header()->getProperty( "sizeY" )->getScalar() );
-      fullsize[2] = (int) rint(
-          dsi->header()->getProperty( "sizeZ" )->getScalar() );
-      fullsize[3] = (int) rint(
-          dsi->header()->getProperty( "sizeT" )->getScalar() );
+      if( !dsi->header()->getProperty( "volume_dimension", fullsize ) )
+      {
+        fullsize[0] = (int) rint(
+          dsi->header()->getProperty( "sizeX" )->getScalar() );
+        fullsize[1] = (int) rint(
+          dsi->header()->getProperty( "sizeY" )->getScalar() );
+        fullsize[2] = (int) rint(
+            dsi->header()->getProperty( "sizeZ" )->getScalar() );
+        fullsize[3] = (int) rint(
+            dsi->header()->getProperty( "sizeT" )->getScalar() );
+      }
+      if( fullsize.size() < 4 )
+        fullsize.resize( 4, 1 );
+      volumepos.resize( fullsize.size(), 0 );
+      volumepos[0] = borders[0];
+      volumepos[1] = borders[1];
+      volumepos[2] = borders[2];
       localMsg( "-> size =  ( "
                 + carto::toString( fullsize[0] ) + ", "
                 + carto::toString( fullsize[1] ) + ", "
@@ -243,10 +249,10 @@ namespace soma {
       //=== BORDERS VOLUME ===================================================
       localMsg( "=== ALLOCATED BORDERS VOLUME" );
       localMsg( "computing sizes..." );
+      bordersize = fullsize;
       bordersize[0] = fullsize[0] + 2*borders[0];
       bordersize[1] = fullsize[1] + 2*borders[1];
       bordersize[2] = fullsize[2] + 2*borders[2];
-      bordersize[3] = fullsize[3];
       localMsg( "creating allocated volume..." );
       localMsg( "-> with size ( "
                 + carto::toString( bordersize[0] ) + ", "
@@ -255,8 +261,7 @@ namespace soma {
                 + carto::toString( bordersize[3] ) + " )"
                  );
       bordersVolume = carto::VolumeRef<T>(
-        new carto::Volume<T>( bordersize[0], bordersize[1],
-                              bordersize[2], bordersize[3] ) );
+        new carto::Volume<T>( bordersize ) );
 
       //=== READ FULL VOLUME =================================================
       localMsg( "=== UNALLOCATED FULL VIEW" );
@@ -523,6 +528,7 @@ namespace soma {
       ps.setProperty( "sizeY", viewframe[1] );
       ps.setProperty( "sizeZ", viewframe[2] );
       ps.setProperty( "sizeT", viewframe[3] );
+      ps.setProperty( "volume_dimension", viewframe );
       obj->blockSignals( false );
     }
     else 
@@ -539,6 +545,7 @@ namespace soma {
         *obj = carto::Volume<T>( fullVolume, viewpos, viewframe );
       else
         obj = new carto::Volume<T>( fullVolume, viewpos, viewframe );
+
       localMsg( "reading partial volume..." );
       rView.read( *obj );
     }

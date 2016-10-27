@@ -66,38 +66,16 @@ void Carto2AimsHeaderTranslator::translate( Object srcheader,
 
   vector<int>	dim;
 
-  dstheader->getProperty( "volume_dimension", dim );
-  while( dim.size() <  4 )
-    dim.push_back( 1 );
-  dstheader->getProperty( "sizeX", dim[0] );
-  dstheader->getProperty( "sizeY", dim[1] );
-  dstheader->getProperty( "sizeZ", dim[2] );
-  dstheader->getProperty( "sizeT", dim[3] );
-  for( size_t i=4; i<8; ++i )
+  if( !dstheader->getProperty( "volume_dimension", dim ) )
   {
-    stringstream s;
-    s << "sizeDim" << i;
-    try
-    {
-      int vdim;
-      if( dstheader->getProperty( s.str(), vdim ) )
-      {
-        while( dim.size() < i )
-          dim.push_back( 1 );
-        dim[i] = vdim;
-      }
-    }
-    catch( ... )
-    {
-    }
+    while( dim.size() <  4 )
+      dim.push_back( 1 );
+    dstheader->getProperty( "sizeX", dim[0] );
+    dstheader->getProperty( "sizeY", dim[1] );
+    dstheader->getProperty( "sizeZ", dim[2] );
+    dstheader->getProperty( "sizeT", dim[3] );
+    dstheader->setProperty( "volume_dimension", dim );
   }
-  /* keep erasing sizes because it causes a problem upon copy
-  dstheader->getProperty( "sizeX", dim[0] );
-  dstheader->getProperty( "sizeY", dim[1] );
-  dstheader->getProperty( "sizeZ", dim[2] );
-  dstheader->getProperty( "sizeT", dim[3] );
-  */
-  dstheader->setProperty( "volume_dimension", dim );
 
   string	x;
   if( dstheader->getProperty( "format", x ) )
