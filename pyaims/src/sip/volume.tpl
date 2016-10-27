@@ -662,10 +662,7 @@ The header contains all meta-data.
   std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
 
-  if( ref.get() && ref->allocatorContext().isAllocated() )
-    vstrides = ref->getStrides();
-  else
-    vstrides = sipCpp->getStrides();
+  vstrides = sipCpp->getStrides();
 
   for( i=0; i<n; ++i )
   {
@@ -685,10 +682,7 @@ The header contains all meta-data.
   std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
 
-  if( ref.get() && ref->allocatorContext().isAllocated() )
-    vstrides = ref->getStrides();
-  else
-    vstrides = sipCpp->getStrides();
+  vstrides = sipCpp->getStrides();
 
   for( i=0; i<n; ++i )
   {
@@ -708,10 +702,7 @@ The header contains all meta-data.
   std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
 
-  if( ref.get() && ref->allocatorContext().isAllocated() )
-    vstrides = ref->getStrides();
-  else
-    vstrides = sipCpp->getStrides();
+  vstrides = sipCpp->getStrides();
 
   for( i=0; i<n; ++i )
   {
