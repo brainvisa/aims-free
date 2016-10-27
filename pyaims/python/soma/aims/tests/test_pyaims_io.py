@@ -12,10 +12,13 @@ import numpy as np
 class TestPyaimsIO(unittest.TestCase):
 
     verbose = False
+    debug = False
 
 
     def setUp(self):
         self.work_dir = tempfile.mkdtemp(prefix='test_pyaims')
+        if self.verbose or self.debug:
+            print('work directory:', self.work_dir)
 
 
     def compare_images(self, vol, vol2, vol1_name, vol2_name, thresh=1e-6):
@@ -50,18 +53,35 @@ class TestPyaimsIO(unittest.TestCase):
 
     def use_type(self, dtype):
         formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v', '.tiff']
+        # formats which support more than 4D
+        nd_io = ['.ima'] #, '.nii', '.nii.gz']
 
         # create test volume
         vol = aims.Volume(10, 10, 10, dtype=dtype)
         vol.header()['voxel_size'] = [0.5, 0.6, 0.7]
-        np.asarray(vol)[:,:,:,:] = np.ogrid[0:1000].reshape(10, 10, 10, 1)
+        view = ((2, 3, 4, 0), (7, 5, 6, 1), (2, 4, 5, 0), (5, 6, 4, 1))
+        np.asarray(vol)[:,:,:,:] \
+            = np.ogrid[0:np.asarray(vol).ravel().shape[0]].reshape(
+                np.asarray(vol).shape)
         failing_files = set()
         for format in formats:
-            failing_files.update(self.use_format(vol, format))
+            failing_files.update(self.use_format(vol, format, view))
+        # create test volume for 8D IO
+        vol = aims.Volume((9, 8, 7, 6, 5, 4, 3, 3), dtype=dtype)
+        vol.header()['voxel_size'] = [0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.1, 1.2]
+        view = ((2, 3, 2, 1, 1, 1, 1, 1), (7, 5, 2, 2, 3, 2, 2, 2),
+                (1, 2, 3, 3, 2, 0, 0, 0), (7, 5, 2, 2, 3, 2, 2, 2))
+        np.asarray(vol)[:,:,:,:] \
+            = np.ogrid[0:np.asarray(vol).ravel().shape[0]].reshape(
+                np.asarray(vol).shape)
+        if self.verbose:
+            print('    testing 8D IO:')
+        for format in nd_io:
+            failing_files.update(self.use_format(vol, format, view))
         return failing_files
 
 
-    def use_format(self, vol, format):
+    def use_format(self, vol, format, view):
         suffixes = {'.dcm': '1', '.tiff': '_0000'}
         partial_read = ['.nii', '.nii.gz', '.ima', '.dcm']
         partial_write = ['.nii', '.ima']
@@ -99,22 +119,29 @@ class TestPyaimsIO(unittest.TestCase):
             vol3 = aims.read(fname)
             self.compare_images(vol, vol3, vol1_name, vol3_name, thresh)
 
+        view_pos1, view_size1, view_pos2, view_size2 = view
         if format in partial_read:
             if self.verbose:
                 print('    testing partial reading:', format)
-            vol3 = aims.read(fname + '?ox=2&&sx=7&&oy=3&&sy=5&&oz=4&&sz=6')
-            self.assertEqual(vol3.getSize(), (7, 5, 6, 1))
-            vol4 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
+            url_ext = '&&'.join(['ox%d=%d' % (i + 1, n)
+                                 for i, n in enumerate(view_pos1)])
+            url_ext += '&&' + '&&'.join(['sx%d=%d' % (i + 1, n)
+                                         for i, n in enumerate(view_size1)])
+            vol3 = aims.read(fname + '?%s' % url_ext)
+            self.assertEqual(vol3.getSize(), view_size1)
+            vol4 = aims.VolumeView(vol, view_pos1, view_size1)
             self.compare_images(vol4, vol3, 'sub-volume', 'patially read')
 
         if format in partial_write:
             if self.verbose:
                 print('    testing partial writing:', format)
-            vol2 = aims.VolumeView(vol, (3, 3, 3, 0), (5, 6, 4, 1))
-            aims.write(vol2, fname + '?partial_writing=1&ox=2&&oy=4&&oz=5')
+            vol2 = aims.VolumeView(vol, view_pos2, view_size2)
+            url_ext = '&&'.join(['ox%d=%d' % (i + 1, n)
+                                 for i, n in enumerate(view_pos2)])
+            aims.write(vol2, fname + '?partial_writing=1&&%s' % url_ext)
             vol3 = aims.read(fname)
-            self.assertEqual(vol3.getSize(), (10, 10, 10, 1))
-            vol4 = aims.VolumeView(vol3, (2, 4, 5, 0), (5, 6, 4, 1))
+            self.assertEqual(vol3.getSize(), vol.getSize())
+            vol4 = aims.VolumeView(vol3, view_pos2, view_size2)
             # compare the written view
             self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
                                 % (aims.typeCode(vol), format),
@@ -142,15 +169,25 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def tearDown(self):
-        shutil.rmtree(self.work_dir)
+        if self.debug:
+            print('leaving files in', self.work_dir)
+        else:
+            shutil.rmtree(self.work_dir)
 
 
 def test_suite():
-  if '-v' in sys.argv[1:] or '--verbose' in sys.argv[1:]:
-      TestPyaimsIO.verbose = True
-  return unittest.TestLoader().loadTestsFromTestCase(TestPyaimsIO)
+    if '-v' in sys.argv[1:] or '--verbose' in sys.argv[1:]:
+        TestPyaimsIO.verbose = True
+    return unittest.TestLoader().loadTestsFromTestCase(TestPyaimsIO)
 
 
 if __name__ == '__main__':
+    if '-d' in sys.argv[1:] or '--debug' in sys.argv[1:]:
+        TestPyaimsIO.debug = True
+        try:
+            i = sys.argv.index('-d')
+        except:
+            i = sys.argv.index('--debug')
+        del sys.argv[i]
     unittest.main(defaultTest='test_suite')
 
