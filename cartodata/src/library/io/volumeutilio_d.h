@@ -104,43 +104,35 @@ namespace soma {
     std::vector<int> frame( 4, 0 );
     std::vector<int> borders( 4, 0 );
     try {
-      position[0] = (int) rint(
-        options->getProperty( "ox" )->getScalar() );
+      position[0] = (int) rint(options->getProperty( "ox" )->getScalar() );
       options->removeProperty( "ox" );
     } catch( ... ) {}
     try {
-      position[1] = (int) rint(
-        options->getProperty( "oy" )->getScalar() );
+      position[1] = (int) rint( options->getProperty( "oy" )->getScalar() );
       options->removeProperty( "oy" );
     } catch( ... ) {}
     try {
-      position[2] = (int) rint(
-        options->getProperty( "oz" )->getScalar() );
+      position[2] = (int) rint( options->getProperty( "oz" )->getScalar() );
       options->removeProperty( "oz" );
     } catch( ... ) {}
     try {
-      position[3] = (int) rint(
-        options->getProperty( "ot" )->getScalar() );
+      position[3] = (int) rint( options->getProperty( "ot" )->getScalar() );
       options->removeProperty( "ot" );
     } catch( ... ) {}
     try {
-      frame[0] = (int) rint(
-        options->getProperty( "sx" )->getScalar() );
+      frame[0] = (int) rint( options->getProperty( "sx" )->getScalar() );
       options->removeProperty( "sx" );
     } catch( ... ) {}
     try {
-      frame[1] = (int) rint(
-        options->getProperty( "sy" )->getScalar() );
+      frame[1] = (int) rint( options->getProperty( "sy" )->getScalar() );
       options->removeProperty( "sy" );
     } catch( ... ) {}
     try {
-      frame[2] = (int) rint(
-        options->getProperty( "sz" )->getScalar() );
+      frame[2] = (int) rint( options->getProperty( "sz" )->getScalar() );
       options->removeProperty( "sz" );
     } catch( ... ) {}
     try {
-      frame[3] = (int) rint(
-        options->getProperty( "st" )->getScalar() );
+      frame[3] = (int) rint( options->getProperty( "st" )->getScalar() );
       options->removeProperty( "st" );
     } catch( ... ) {}
     try {
@@ -161,7 +153,7 @@ namespace soma {
       borders[2] = (int) rint( options->getProperty( "bz" )->getScalar() );
       options->removeProperty( "bz" );
     } catch( ... ) {}
-    
+
     int dim, value;
     for( dim=0; dim<carto::Volume<T>::DIM_MAX; ++dim )
     {
@@ -172,8 +164,8 @@ namespace soma {
         std::string key = skey.str();
         value = (int) rint( options->getProperty( key )->getScalar() );
         options->removeProperty( key );
-        while( position.size() <= dim )
-          position.push_back( 0 );
+        if( position.size() <= dim )
+          position.resize( dim + 1, 0 );
         position[ dim ] = value;
       }
       catch( ... ) {}
@@ -184,13 +176,13 @@ namespace soma {
         std::string key = skey.str();
         value = (int) rint( options->getProperty( key )->getScalar() );
         options->removeProperty( key );
-        while( position.size() <= dim )
-          frame.push_back( 0 );
+        if( frame.size() <= dim )
+          frame.resize( dim + 1, 0 );
         frame[ dim ] = value;
       }
       catch( ... ) {}
     }
-    
+
     bool partial = false;
     for( dim=0; !partial && dim<position.size(); ++dim )
       if( position[dim] != 0 )
@@ -198,7 +190,7 @@ namespace soma {
     for( dim=0; !partial && dim<frame.size(); ++dim )
       if( frame[dim] != 0 )
         partial = true;
-      
+
     if( partial )
       return readPartial( obj, dsi, position, frame, borders, options );
     else
@@ -337,16 +329,18 @@ namespace soma {
                                 carto::Object                  options )
   {
     //=== VARIABLES ==========================================================
-    int verbose = carto::debugMessageLevel;
-    typename carto::Volume<T>::Position4Di
-      viewframe( frame[0], frame[1], frame[2], frame[3] );
-    typename carto::Volume<T>::Position4Di
-      viewpos( position[0], position[1], position[2], position[3] );
-    typename carto::Volume<T>::Position4Di fullsize;     // full size
-    typename carto::Volume<T>::Position4Di borderframe;  // allocated volume size
-    typename carto::Volume<T>::Position4Di borderpos;    // allocated volume size
-    typename carto::Volume<T>::Position4Di readframe;    // read frame size
-    typename carto::Volume<T>::Position4Di readpos;      // read frame origin
+    std::vector<int> viewframe( frame );
+    size_t dim, ndim = std::max( position.size(), frame.size() );
+    if( viewframe.size() < ndim )
+      viewframe.resize( ndim, 0 );
+    std::vector<int> viewpos( position );
+    if( viewpos.size() < ndim )
+      viewpos.resize( ndim, 0 );
+    std::vector<int> fullsize;     // full size
+    std::vector<int> borderframe( ndim, 1 );  // allocated volume size
+    std::vector<int> borderpos;    // allocated volume size
+    std::vector<int> readframe;    // read frame size
+    std::vector<int> readpos( ndim, 0 );      // read frame origin
     carto::Object newoptions;
     soma::Reader<carto::Volume<T> > rVol;
     soma::Reader<carto::Volume<T> > rView;
@@ -363,10 +357,7 @@ namespace soma {
     localMsg( "reading unallocated volume..." );
     fullVolume = carto::VolumeRef<T>( rVol.read() );
     localMsg( "reading size from volume..." );
-    fullsize[ 0 ] = fullVolume->getSizeX();
-    fullsize[ 1 ] = fullVolume->getSizeY();
-    fullsize[ 2 ] = fullVolume->getSizeZ();
-    fullsize[ 3 ] = fullVolume->getSizeT();
+    fullsize = fullVolume->getSize();
 //     localMsg( "-> full size ( "
 //               + carto::toString( fullsize[0] ) + ", "
 //               + carto::toString( fullsize[1] ) + ", "
@@ -382,14 +373,9 @@ namespace soma {
 //               + carto::toString( borders[1] ) + ", "
 //               + carto::toString( borders[2] ) + ", "
 //               + carto::toString( borders[3] ) + " )" );
-    if( viewframe[ 0 ] == 0 )
-      viewframe[ 0 ] = (fullsize[ 0 ] - position[ 0 ]);
-    if( viewframe[ 1 ] == 0 )
-      viewframe[ 1 ] = (fullsize[ 1 ] - position[ 1 ]);
-    if( viewframe[ 2 ] == 0 )
-      viewframe[ 2 ] = (fullsize[ 2 ] - position[ 2 ]);
-    if( viewframe[ 3 ] == 0 )
-      viewframe[ 3 ] = (fullsize[ 3 ] - position[ 3 ]);
+    for( dim=0; dim<ndim; ++dim )
+      if( viewframe[ dim ] == 0 )
+        viewframe[ dim ] = (fullsize[ dim ] - position[ dim ]);
     localMsg( "===" );
 
     if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 ) 
