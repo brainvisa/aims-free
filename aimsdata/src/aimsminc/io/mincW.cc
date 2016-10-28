@@ -113,6 +113,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   }
   else if(dtc.dataType()=="FLOAT") {
     nc_data_type=NC_FLOAT;
+    /* scale factors don't seem to work.
     float slope = 1., offset = 0.;
     if( canEncodeAsScaledS16( *thing.volume(), slope, offset, true, 0 ) )
     {
@@ -120,7 +121,9 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
       scaledcoding = true;
       dmin = rint( ( mini - offset ) / slope );
       dmax = rint( ( maxi - offset ) / slope );
+      std::cout << "Minc: use scale factor " << slope << " / " << offset << ", min: " << dmin << ", max: " << dmax << endl;
     }
+    */
     signed_flag=TRUE;
   }
   else if(dtc.dataType()=="DOUBLE") {
