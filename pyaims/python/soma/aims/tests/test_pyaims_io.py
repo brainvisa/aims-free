@@ -90,7 +90,7 @@ class TestPyaimsIO(unittest.TestCase):
         partial_write = ['.nii', '.ima']
         default_epsilon = 1e-6
         # ecat scaling is far from exact...
-        epsilon = {'.v': {'S16': 1e-6, 'FLOAT': 5e-5, 'rel': True}}
+        epsilon = {'.v': {'S16': 1e-6, 'FLOAT': (5e-5, True)}}
         dtype = aims.typeCode(np.asarray(vol).dtype)
 
         ndim = len(vol.getSize())
@@ -120,8 +120,9 @@ class TestPyaimsIO(unittest.TestCase):
         thresh = epsilon.get(format, default_epsilon)
         rel_thresh = False
         if isinstance(thresh, dict):
-            rel_thresh = thresh.get('rel', False)
             thresh = thresh.get(dtype, default_epsilon)
+        if isinstance(thresh, tuple):
+            thresh, rel_thresh = thresh
 
         # ensure we get the same
         self.compare_images(vol, vol2, vol1_name, vol2_name, thresh,
