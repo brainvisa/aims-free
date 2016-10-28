@@ -141,32 +141,22 @@ namespace carto
   std::vector<float> VolumeProxy< T >::getVoxelSize() const
   {
 
-    std::vector<float> voxelsize( _size.size(), 1. );
+    size_t i, n = _size.size();
+    std::vector<float> voxelsize( n, 1. );
     carto::Object vso;
     try
     {
       vso = header().getProperty( "voxel_size" );
-      if( !vso.isNull() )
-      {
-        carto::Object it = vso->objectIterator();
-        if( it->isValid() )
+      if( vso->size() < n )
+        n = vso->size();
+      for( i=0; i<n; ++i )
+        try
         {
-          voxelsize[0] = it->currentValue()->getScalar();
-          it->next();
-          if( it->isValid() )
-          {
-            voxelsize[1] = it->currentValue()->getScalar();
-            it->next();
-            if( it->isValid() )
-            {
-              voxelsize[2] = it->currentValue()->getScalar();
-              it->next();
-              if( it->isValid() )
-                voxelsize[3] = it->currentValue()->getScalar();
-            }
-          }
+          voxelsize[i] = float( vso->getArrayItem(i)->getScalar() );
         }
-      }
+        catch( std::exception & )
+        {
+        }
     }
     catch( std::exception & )
     {

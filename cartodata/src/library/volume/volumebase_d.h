@@ -417,7 +417,18 @@ namespace carto
     try
     {
       carto::Object vs = other->header().getProperty( "voxel_size" );
-      this->header().setProperty( "voxel_size", vs );
+      size_t n = this->getSize().size();
+      if( vs->size() > n )
+      {
+        // drop additional sizes
+        size_t i;
+        std::vector<carto::Object> vs2( n );
+        for( i=0; i<n; ++i )
+          vs2[i] = vs->getArrayItem( i );
+        this->header().setProperty( "voxel_size", vs2 );
+      }
+      else
+        this->header().setProperty( "voxel_size", vs );
     }
     catch( ... )
     {
@@ -489,7 +500,18 @@ namespace carto
     try
     {
       carto::Object vs = other->header().getProperty( "voxel_size" );
-      this->header().setProperty( "voxel_size", vs );
+      size_t n = this->getSize().size();
+      if( vs->size() > n )
+      {
+        // drop additional sizes
+        size_t i;
+        std::vector<carto::Object> vs2( n );
+        for( i=0; i<n; ++i )
+          vs2[i] = vs->getArrayItem( i );
+        this->header().setProperty( "voxel_size", vs2 );
+      }
+      else
+        this->header().setProperty( "voxel_size", vs );
     }
     catch( ... )
     {
