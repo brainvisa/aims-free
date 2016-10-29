@@ -61,6 +61,7 @@ class TestPyaimsIO(unittest.TestCase):
 
     def use_type(self, dtype):
         formats = [('.nii', {'max_dims': 7}),
+                   ('.nii', {'max_dims': 4}), # to use scale factor
                    ('.nii.gz', {'max_dims': 7}),
                    '.ima',
                    ('.tiff', {'max_dims': 4}),
@@ -72,9 +73,9 @@ class TestPyaimsIO(unittest.TestCase):
         vol.header()['voxel_size'] = [0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.1, 1.2]
         view = ((2, 3, 2, 1, 1, 1, 1, 1), (7, 5, 2, 2, 3, 2, 2, 2),
                 (1, 2, 3, 3, 2, 0, 0, 0), (7, 5, 2, 2, 3, 2, 2, 2))
-        np.asarray(vol)[:] \
-            = np.ogrid[0:np.asarray(vol).ravel().shape[0]].reshape(
-                np.asarray(vol).shape)
+        vol.arraydata()[:] \
+            = np.ogrid[0:vol.arraydata().ravel().shape[0]].reshape(
+                vol.arraydata().shape)
         failing_files = set()
         for format in formats:
             options = None

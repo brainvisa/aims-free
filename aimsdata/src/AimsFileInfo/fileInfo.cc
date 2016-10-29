@@ -53,6 +53,7 @@
 #include <soma-io/writer/pythonwriter.h>
 #include <cartobase/object/attributed.h>
 #include <cartobase/stream/sstream.h>
+#include <cartobase/containers/nditerator.h>
 #include <time.h>
 
 using namespace aims;
@@ -223,55 +224,55 @@ bool printExtrema ( VolumeRef<T> & vol, const string & filename,
        << endl;
   */
 
-  int		x, y, z, t, xmin, ymin, zmin, tmin, xmax, ymax, zmax, tmax;
-  int		xm, ym, zm, tm;
+  int		x;
+  int		xm;
   T		valmin = vol( 0, 0, 0 ), valmax = vol( 0, 0, 0 ), val;
   double	sum = 0;
+  size_t        dim, ndim = vol->getSize().size();
+  vector<int>   pmin( ndim, 0 ), pmax( ndim, 0 );
 
-  xmin = ymin = zmin = tmin = xmax = ymax = zmax = tmax = 0;
   xm = vol.getSizeX();
-  ym = vol.getSizeY();
-  zm = vol.getSizeZ();
-  tm = vol.getSizeT();
 
-  for( t=0; t<tm; ++t )
-    for( z=0; z<zm; ++z )
-      for( y=0; y<ym; ++y )
-        for( x=0; x<xm; ++x )
-          {
-            val = vol( x, y, z, t );
-            if( val < valmin )
-              {
-                valmin = val;
-                xmin = x;
-                ymin = y;
-                zmin = z;
-                tmin = t;
-              }
-            if( val > valmax )
-              {
-                valmax = val;
-                xmax = x;
-                ymax = y;
-                zmax = z;
-                tmax = t;
-              }
-            sum += val;
-          }
+  const_line_NDIterator<T> it( &vol->at(0), vol->getSize(),
+                               vol->getStrides() );
+  for( ; !it.ended(); ++it )
+  {
+    const T* p = &*it;
+    for( x=0; x<xm; ++x, ++p )
+      {
+        val = *p;
+        if( val < valmin )
+        {
+          valmin = val;
+          pmin = it.position();
+          pmin[0] = x;
+        }
+        if( val > valmax )
+        {
+          valmax = val;
+          pmax = it.position();
+          pmax[0] = x;
+        }
+        sum += val;
+      }
+  }
 
   cout << "minimum : ";
   outHelper<T>(valmin, cout);
-  cout << " at " 
-       << "(" << xmin << "," << ymin << "," 
-       << zmin << "," << tmin << ")" << endl;
+  cout << " at " << "(" << pmin[0];
+  for( dim=1; dim<ndim; ++dim )
+    cout << ", " << pmin[dim];
+  cout << ")" << endl;
   cout << "maximum : ";
   outHelper<T>(valmax, cout);
-  cout << " at " 
-       << "(" << xmax << "," << ymax << "," 
-       << zmax << "," << tmax << ")" << endl;
-  cout   << "mean : " 
-       << sum / ( long( vol.getSizeX() ) * vol.getSizeY() * vol.getSizeZ() 
-                  * vol.getSizeT() ) << endl;
+  cout << " at (" << pmax[0];
+  for( dim=1; dim<ndim; ++dim )
+    cout << "," << pmax[dim];
+  cout << ")" << endl;
+  size_t np = 1;
+  for( dim=0; dim<ndim; ++dim )
+    np *= vol->getSize()[dim];
+  cout   << "mean : " << sum / np << endl;
 
   return true;
 }
