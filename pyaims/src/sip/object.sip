@@ -654,17 +654,50 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 
     void __delitem__( const std::string & ) /AutoGen/;
 %MethodCode
-    sipCpp->removeProperty( *a0 );
+    try
+    {
+      sipCpp->removeProperty( *a0 );
+    }
+  catch( std::exception & e )
+    {
+      // sipIsErr = 1;
+      SIP_BLOCK_THREADS
+      PyErr_SetString( PyExc_AttributeError, e.what() );
+      SIP_UNBLOCK_THREADS
+      return 0;
+    }
 %End
 
     void __delitem__( int ) /AutoGen/;
 %MethodCode
-    sipCpp->removeArrayItem( a0 );
+    try
+    {
+      sipCpp->removeArrayItem( a0 );
+    }
+  catch( std::exception & e )
+    {
+      // sipIsErr = 1;
+      SIP_BLOCK_THREADS
+      PyErr_SetString( PyExc_AttributeError, e.what() );
+      SIP_UNBLOCK_THREADS
+      return 0;
+    }
 %End
 
     void append( const carto::Object );
 %MethodCode
-    sipCpp->insertArrayItem( sipCpp->size(), *a0 );
+    try
+    {
+      sipCpp->insertArrayItem( sipCpp->size(), *a0 );
+    }
+  catch( std::exception & e )
+    {
+      // sipIsErr = 1;
+      SIP_BLOCK_THREADS
+      PyErr_SetString( PyExc_AttributeError, e.what() );
+      SIP_UNBLOCK_THREADS
+      return 0;
+    }
 %End
 
     virtual bool operator == ( const carto::GenericObject & ) const;
