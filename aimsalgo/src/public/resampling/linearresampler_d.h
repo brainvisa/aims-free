@@ -112,7 +112,7 @@ void LinearResampler< T >::doResample(
   {
 
     double weightX0, weightY0, weightX1, weightY1;
-    int foldX0, foldY0, foldX1, foldY1;
+    long foldX0, foldY0, foldX1, foldY1;
     double intensity, qi, qj;
 
     // first y contribution
@@ -126,12 +126,12 @@ void LinearResampler< T >::doResample(
 
     }
     weightY0 = getBSplineWeight( y, normalizedInLocation[1] );
-    foldY0 = this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
+    foldY0 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
     // second y contribution
     ++ y;
     weightY1 = getBSplineWeight( y, normalizedInLocation[1] );
-    foldY1 = this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
+    foldY1 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
     // first x contribution
     normalizedInLocation[0] -= 0.5;
@@ -144,12 +144,12 @@ void LinearResampler< T >::doResample(
 
     }
     weightX0 = getBSplineWeight( x, normalizedInLocation[0] );
-    foldX0 = this->getFold( x, inVolume.dimX() );
+    foldX0 = (long)this->getFold( x, inVolume.dimX() );
 
     // second x contribution
     ++ x;
     weightX1 = getBSplineWeight( x, normalizedInLocation[0] );
-    foldX1 = this->getFold( x, inVolume.dimX() );
+    foldX1 = (long)this->getFold( x, inVolume.dimX() );
 
     if ( inVolume.dimZ() == 1 )
     {
