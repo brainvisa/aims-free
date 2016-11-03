@@ -1047,6 +1047,23 @@ convertersObjectToPython = {
     'boolean': carto.NumericGenericObjectConverter.asBool,
     'string': lambda x: x.getString(),
 }
+''' Conversion function map. These converters are used to convert between a C++ object inside a generic object to their Python equivalent. They are typically used when accessing a sub-object:
+
+>>> from soma import aims
+>>> v = aims.Object(aims.vector_STRING())
+>>> v.append('toto')
+>>> v.append('bubu')
+>>> type(v)
+soma.aims.Object
+>>> v.type()
+'vector of string'
+>>> v[0]
+'toto'
+>>> type(v[0])
+str
+
+In this example, v contains a C++ object of type std::vector<std::string>. Its elements are accessed via a wrapping which is using a C++ generic object (carto::Object). But in python we obtain a str (pyton string): the string has been taken out of the generic object using this conversion map (and then converted automatically to str by the SIP tool).
+'''
 
 
 def getPython(self):
