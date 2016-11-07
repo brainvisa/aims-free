@@ -133,6 +133,7 @@ namespace carto
     typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::iterator iterator;
     typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::const_iterator const_iterator;
 #else
+    enum { DIM_MAX = 4 }; // still limited to 4D in this case.
     typedef typename AllocatedVector<T>::iterator iterator;
     typedef typename AllocatedVector<T>::const_iterator const_iterator;
 #endif
