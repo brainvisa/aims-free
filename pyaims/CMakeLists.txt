@@ -26,5 +26,5 @@ BRAINVISA_COPY_FILES( ${PROJECT_NAME} "pyaims_tutorial.rst"
     "pyaims_tutorial_py3.rst"
     SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/doc/sphinx"
     DESTINATION "python/soma/aims/tests" )
-add_test(pyaims-tests "${CMAKE_BINARY_DIR}/bin/bv_env${CMAKE_EXECUTABLE_SUFFIX}" "${PYTHON_EXECUTABLE}" -m soma.aims.tests.test_pyaims)
-add_test(pyaims-io-tests "${CMAKE_BINARY_DIR}/bin/bv_env${CMAKE_EXECUTABLE_SUFFIX}" "${PYTHON_EXECUTABLE}" -m soma.aims.tests.test_pyaims_io)
+add_test(pyaims-tests "${CMAKE_BINARY_DIR}/bin/bv_env_test" "${PYTHON_EXECUTABLE}" -m soma.aims.tests.test_pyaims)
+add_test(pyaims-io-tests "${CMAKE_BINARY_DIR}/bin/bv_env_test" "${PYTHON_EXECUTABLE}" -m soma.aims.tests.test_pyaims_io)
