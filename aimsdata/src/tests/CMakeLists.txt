@@ -8,9 +8,15 @@ BRAINVISA_ADD_EXECUTABLE(AimsVarious_test     AimsVarious_test/various_test.cc H
 TARGET_LINK_LIBRARIES(AimsPartialIO_test   ${AIMS_AIMSDATA_LIBRARIES})
 TARGET_LINK_LIBRARIES(AimsVarious_test     ${AIMS_AIMSDATA_LIBRARIES})
 
+BRAINVISA_INSTALL( TARGETS AimsStructuringElement_test AimsPartialIO_test
+              AimsVarious_test
+              DESTINATION bin
+              COMPONENT ${PROJECT_NAME}-test )
+
 IF ( PYTHON_FOUND )
   # Run tests for aims using python unittest
-  ADD_TEST(AimsStructuringElementTests "${CMAKE_BINARY_DIR}/bin/bv_env${CMAKE_EXECUTABLE_SUFFIX}" "${PYTHON_EXECUTABLE}"
+  ADD_TEST(AimsStructuringElementTests "${CMAKE_BINARY_DIR}/bin/bv_env_test"
+                                       "${PYTHON_EXECUTABLE}"
                                        "${CMAKE_BINARY_DIR}/bin/bv_unit_test" 
                                        aims.tests.test_aimsdata.AimsStructuringElementTests)
 ENDIF()
