@@ -8,5 +8,9 @@ TARGET_LINK_LIBRARIES(cartoVolume_test
 cartodata
 )
 
-add_test( cartoVolume_test "${CMAKE_BINARY_DIR}/bin/bv_env${CMAKE_EXECUTABLE_SUFFIX}" cartoVolume_test )
+BRAINVISA_INSTALL( TARGETS cartovolume_test
+              DESTINATION bin
+              COMPONENT ${PROJECT_NAME}-test )
+
+add_test( cartoVolume_test "${CMAKE_BINARY_DIR}/bin/bv_env_test" cartoVolume_test )
 
