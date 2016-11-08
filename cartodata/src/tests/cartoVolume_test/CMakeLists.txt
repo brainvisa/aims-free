@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(cartoVolume_test
 cartodata
 )
 
-BRAINVISA_INSTALL( TARGETS cartovolume_test
+BRAINVISA_INSTALL( TARGETS cartoVolume_test
               DESTINATION bin
               COMPONENT ${PROJECT_NAME}-test )
 
