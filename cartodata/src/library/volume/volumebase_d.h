@@ -1030,8 +1030,8 @@ namespace carto
         */
 #else
         _lineoffset = VolumeProxy<T>::_size[0];
-        _sliceoffset = sizeXY;
-        _volumeoffset = sizeXYZ;
+        _sliceoffset = strides[1];
+        _volumeoffset = strides[2];
 #endif
       }
     else
