@@ -60,12 +60,13 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def use_type(self, dtype):
-        formats = [('.nii', {'max_dims': 7}),
+        formats = [('.nii', {'max_dims': 7, 'write_unallocated': True}),
                    ('.nii', {'max_dims': 4}), # to use scale factor
-                   ('.nii.gz', {'max_dims': 7}),
-                   '.ima',
+                   ('.nii.gz', {'max_dims': 7, 'write_unallocated': True}),
+                   ('.ima', {'write_unallocated': True}),
                    ('.tiff', {'max_dims': 4}),
-                   ('.mnc', {'max_dims': 3}), # minc 4D is OK except voxel size
+                   # minc 4D is OK except voxel size
+                   ('.mnc', {'max_dims': 3}),
                    ('.v', {'max_dims': 3})] # ecat >= 4D unsupported
 
         # create test volume for 8D IO
@@ -78,14 +79,14 @@ class TestPyaimsIO(unittest.TestCase):
                 vol.arraydata().shape)
         failing_files = set()
         for format in formats:
-            options = None
+            options = {}
             if isinstance(format, tuple):
                 format, options = format
             failing_files.update(self.use_format(vol, format, view, options))
         return failing_files
 
 
-    def use_format(self, vol, format, view, options=None):
+    def use_format(self, vol, format, view, options={}):
         suffixes = {'.dcm': '1', '.tiff': '_t0000_s0'}
         partial_read = ['.nii', '.nii.gz', '.ima', '.dcm']
         partial_write = ['.nii', '.ima']
@@ -95,13 +96,12 @@ class TestPyaimsIO(unittest.TestCase):
         dtype = aims.typeCode(np.asarray(vol).dtype)
 
         ndim = len(vol.getSize())
-        if options:
-            if 'max_dims' in options:
-                ndim = options['max_dims']
-                vol = aims.VolumeView(vol, [0] * ndim, vol.getSize()[:ndim])
-                view = [x[:ndim] for x in view]
-                for i in range(ndim, len(vol.header()['voxel_size'])):
-                    vol.header()['voxel_size'][i] = 1.
+        if 'max_dims' in options:
+            ndim = options['max_dims']
+            vol = aims.VolumeView(vol, [0] * ndim, vol.getSize()[:ndim])
+            view = [x[:ndim] for x in view]
+            for i in range(ndim, len(vol.header()['voxel_size'])):
+                vol.header()['voxel_size'][i] = 1.
 
         if self.verbose:
             print('testing type: %s, format: %s, dims: %d'
@@ -174,6 +174,35 @@ class TestPyaimsIO(unittest.TestCase):
             self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
                                 % (aims.typeCode(vol), format),
                                 'original part', thresh, rel_thresh)
+
+        if options.get('write_unallocated', False):
+            if self.verbose:
+                print('    testing unallocated volume writing')
+            # create an unallocated volume
+            vol5 = aims.Volume(
+                vol.getSize(),
+                aims.carto.AllocatorContext(
+                    aims.carto.AllocatorStrategy.InternalModif),
+                False, dtype=aims.typeCode(np.asarray(vol).dtype))
+            self.assertFalse(vol5.allocatorContext().isAllocated())
+            vol5.copyHeaderFrom(vol.header())
+            os.unlink(fname)
+            aims.write(vol5, fname)
+            vol3 = aims.read(fname)
+            self.assertEqual(vol3.getSize(), vol.getSize())
+            if format in partial_write:
+                vol2 = aims.VolumeView(vol, view_pos2, view_size2)
+                url_ext = '&&'.join(['ox%d=%d' % (i + 1, n)
+                                    for i, n in enumerate(view_pos2)])
+                aims.write(vol2, fname + '?partial_writing=1&&%s' % url_ext)
+                vol3 = aims.read(fname)
+                self.assertEqual(vol3.getSize(), vol.getSize())
+                vol4 = aims.VolumeView(vol3, view_pos2, view_size2)
+                # compare the written view
+                self.compare_images(vol4, vol2,
+                                    'sub-volume %s (write, format %s)'
+                                    % (aims.typeCode(vol), format),
+                                    'patially written', thresh, rel_thresh)
 
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
