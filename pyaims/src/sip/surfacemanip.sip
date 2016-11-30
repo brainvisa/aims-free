@@ -166,7 +166,7 @@ boundary: AimsTimeSurface_2_VOID
 %Docstring
 cutMesh(in_mesh, plane, cut_mesh, border_line)
 
-Cut a mesh by a plane
+Cut a mesh by a plane and that's all.
 
 Parameters
 ----------
@@ -277,7 +277,7 @@ Polygons centers will be used for sorting. Only one timestep is performed (to be
 
 Parameters
 ----------
-mesh: AimstimeSurface_*
+mesh: AimsTimeSurface_*
     The mesh will be modified.
 timestep: int
 direction: Point3df
@@ -319,15 +319,47 @@ direction: Point3df
 
   static void rasterizeMeshWireframe( const AimsTimeSurface_2_VOID & mesh,
                                       rc_ptr_Volume_S16 & volume,
-                                      int value = 1 );
+                                      int value = 1 ) /ReleaseGIL/;
+
+%Docstring
+rasterizeMeshWireframe(mesh, volume, value=1)
+
+Rasterize polygons edges into a volume.
+
+Parameters
+----------
+mesh: AimsTimeSurface_*
+volume: Volume_S16
+    Volume to write mesh imprint to
+value: int
+    label value used to write the mesh imprint in the volume
+%End
+
   static void rasterizeMeshWireframe( const AimsTimeSurface_3_VOID & mesh,
                                       rc_ptr_Volume_S16 & volume,
-                                      int value = 1 );
+                                      int value = 1 ) /ReleaseGIL/;
+
   static void rasterizeMeshWireframe( const AimsTimeSurface_4_VOID & mesh,
                                       rc_ptr_Volume_S16 & volume,
-                                      int value = 1 );
+                                      int value = 1 ) /ReleaseGIL/;
+
   static void rasterizeMesh( const AimsTimeSurface_3_VOID & mesh,
-                             rc_ptr_Volume_S16 & volume, int value = 2 );
+                             rc_ptr_Volume_S16 & volume, int value = 2 )
+                             /ReleaseGIL/;
+%Docstring
+rasterizeMesh(mesh, volume, value=2)
+
+Rasterize polygons into a volume.
+
+Parameters
+----------
+mesh: AimsTimeSurface_*
+volume: Volume_S16
+    Volume to write mesh imprint to
+value: int
+    label value used to write the mesh imprint in the volume
+%End
+
 };
 
 };
