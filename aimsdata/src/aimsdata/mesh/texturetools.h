@@ -7,21 +7,22 @@
 #include <aims/rgb/rgb.h>
 
 
-namespace aims
-{
-    size_t textureMax( const TimeTexture<short> & intex );
+namespace aims {
 
-    std::vector< size_t > * labelsHistogram(
-      const TimeTexture<short> & intex, size_t labels_nb, bool verbose );
+  int textureMax(const TimeTexture<short> & intex);
+  int textureMin(const TimeTexture<short> & intex);
 
-    carto::VolumeRef<AimsRGBA> giftiColormap( const carto::Object header );
+  std::map<short, size_t> *labelsHistogram(
+      const TimeTexture<short> &intex, int maxlabel = 32767,
+      int minlabel = -32768, bool verbose = false);
 
-    template <typename T>
-    carto::VolumeRef<AimsRGBA> giftiColormap( const TimeTexture<T> & texture )
-    {
-      return giftiColormap( carto::Object::reference(
-        texture.header() ) );
-    }
+  carto::VolumeRef<AimsRGBA> giftiColormap( const carto::Object header);
+
+  template <typename T>
+  carto::VolumeRef<AimsRGBA> giftiColormap(const TimeTexture<T> & texture) {
+      return giftiColormap(carto::Object::reference(
+        texture.header()));
+  }
 
 } // namespace aims
 
