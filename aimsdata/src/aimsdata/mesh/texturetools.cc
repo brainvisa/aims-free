@@ -4,71 +4,92 @@ using namespace std;
 using namespace aims;
 using namespace carto;
 
-namespace aims
-{
+namespace aims {
 
-  std::size_t textureMax( const TimeTexture<short> & intex )
-  {
+  //--------------
+  //  textureMax
+  //--------------
+  int textureMax(const TimeTexture<short> & intex) {
+
     const Texture<short> & intex0 = intex.begin()->second;
+    // Compute the vertices number in the texture
     unsigned n_intexvertex = intex0.nItem();
+
+    // Search the largest label number
     int max = 0;
-    for (unsigned i = 0; i < n_intexvertex; ++i)
-    {
+    for (unsigned i = 0; i < n_intexvertex; ++i) {
       int current_val = intex0[i];
-      if (current_val > max)
-      {
-        max = current_val;
-      }
+      if (current_val > max) max = current_val;
     }
-    return std::size_t(max);
-  }//textureMax
 
+    return max;
+  }
 
-  std::vector< std::size_t > * labelsHistogram(
-    const TimeTexture<short> & intex, std::size_t labels_nb, bool verbose )
-  {
-    std::vector< std::size_t > * labelsHisto_ptr = new std::vector<std::size_t>( labels_nb + 1, 0 );
-    std::vector< std::size_t > & labels_histo = *labelsHisto_ptr;
-    if (verbose)
-      std::cout << "Reading Region (Gyrus) Labels... " << std::endl;
-    std::size_t countLabel = 0;
-    std::size_t label;
-    std::size_t extra_labels = 0;
-    std::size_t background_labels = 0;
+  //--------------
+  //  TextureMin
+  //--------------
+  int textureMin(const TimeTexture<short> & intex) {
+
     const Texture<short> & intex0 = intex.begin()->second;
-    for (std::size_t i = 0; i < intex0.nItem(); ++i)
-    {
-      label = intex0.item(i); 
-      if (label <= labels_nb && 1 <= label)
-      {
-        labels_histo[label]++;
+    // Compute the vertices number in the texture
+    unsigned n_intexvertex = intex0.nItem();
+
+    // Search the smallest label number
+    int min = 0;
+    for (unsigned i = 0; i < n_intexvertex; ++i) {
+      int current_val = intex0[i];
+      if (current_val < min) min = current_val;
+    }
+
+    return min;
+  }
+
+  //-------------------
+  //  labelsHistogram
+  //-------------------
+  map<short, size_t> *labelsHistogram(const TimeTexture<short> &intex,
+                                  int maxlabel,
+                                  int minlabel,
+                                  bool verbose) {
+
+    map<short, size_t> *labelsHisto_ptr = new map<short, size_t>;
+
+    size_t background_labels = 0;
+    size_t extra_toplabels   = 0;
+    size_t extra_lowlabels   = 0;
+    size_t emptyLabel        = 0;
+    int label                = 0;
+
+    const Texture<short> & intex0 = intex.begin()->second;
+ 
+    for (size_t i = 0; i < intex0.nItem(); ++i) {
+      label = intex0.item(i);
+      if (label == 0) {
+        background_labels++;
+      } else if (label <= maxlabel && label >= minlabel) {
+        (*labelsHisto_ptr)[label]++;
+      } else if (label > maxlabel) {
+        extra_toplabels++;
+      } else if (label < minlabel) {
+        extra_lowlabels++;
       }
-      else
-      {
-        if (label > labels_nb)
-          extra_labels++;  // count labels greater than NUM_LABELS
-        else
-        {
-          background_labels++; // count labels lower than 1 : background labels
-        }
-      }
     }
-    for (std::size_t i = 0; i < labels_histo.size(); ++i)
-    {
-      if (labels_histo[i] != 0) countLabel++;
+
+    if (verbose) {
+      cout << "Number of bad labels: #labels > " << maxlabel
+        << ": " << extra_toplabels << endl;
+      cout << "Number of bad labels: #labels < " <<  minlabel
+        << ": " << extra_lowlabels << endl;
+      cout << "Number of non identified labels (background): "
+        << background_labels << endl;
     }
-  
-    if (verbose)
-    {
-      std::cout << "Number of not-empty labels:" << countLabel << std::endl;
-      std::cout << "Number of bad labels:   #labels > " << labels_nb << ": " << extra_labels << std::endl;
-      std::cout << "Number of bad labels:   #labels < 1 : " << background_labels << std::endl;
-    }
-    if (verbose) std::cout << "OK" << std::endl;
+
     return labelsHisto_ptr;
-  }//labelsHistogram
+  }
 
-
+  //-----------------
+  //  giftiColormap
+  //-----------------
   VolumeRef<AimsRGBA> giftiColormap( const carto::Object header )
   {
     VolumeRef<AimsRGBA> vol;

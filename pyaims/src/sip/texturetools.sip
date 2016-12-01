@@ -7,8 +7,8 @@ namespace aims
   size_t textureMax( const TimeTexture_S16 & intex );
 
 /*
-  vector_?< size_t > * labelsHistogram(
-    const TimeTexture_S16 & intex, size_t labels_nb, bool verbose );
+  map<short, size_t> * labelsHistogram(
+    const TimeTexture_S16 & intex, int maxlabel, int minlabel, bool verbose );
 */
 
     rc_ptr_Volume_RGBA giftiColormap( const TimeTexture_S16 & texture );
