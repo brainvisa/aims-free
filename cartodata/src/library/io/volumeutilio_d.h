@@ -344,7 +344,7 @@ namespace soma {
     std::vector<int> fullsize;     // full size
     std::vector<int> borderframe( ndim, 1 );  // allocated volume size
     std::vector<int> borderpos;    // allocated volume size
-    std::vector<int> readframe;    // read frame size
+    std::vector<int> readframe( ndim, 0 );    // read frame size
     std::vector<int> readpos( ndim, 0 );      // read frame origin
     carto::Object newoptions;
     soma::Reader<carto::Volume<T> > rVol;
