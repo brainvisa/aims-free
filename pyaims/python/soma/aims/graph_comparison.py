@@ -119,17 +119,24 @@ def _same_dictionary(ref_dict, test_dict, same_element_function, verbose=False):
         if verbose:
             print("  different number of elements.")
         return False
+    same_dict = True
     for index, ref in six.iteritems(ref_dict):
+        same_item = True
         if index not in test_dict:
+            same_item = False
+            same_dict = False
             if verbose:
                 print("  test dict has no element with index " + repr(index))
+            else:
+                break
+        if same_item:
+            same_item = same_element_function(ref, test_dict[index], verbose)
+        if not same_item:
             same_dict = False
-            break
-        same_dict = same_element_function(ref, test_dict[index], verbose)
-        if not same_dict:
             if verbose:
                 print("difference in " + repr(index))
-            break
+            else:
+                break
     return same_dict
 
 
@@ -151,7 +158,7 @@ def _same_vertice(ref_vertice, test_vertice, verbose):
             if str(ref_vertice[key]) != str(test_vertice[key]):
                 if verbose:
                     print("vertice " + repr(key) + " " + str(ref_vertice[key])
-                          + " " + str(test_vertice[key]))
+                          + " != " + str(test_vertice[key]))
                 return False
     return True
 
