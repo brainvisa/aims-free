@@ -18,6 +18,6 @@ IF ( PYTHON_FOUND )
   add_test(AimsStructuringElementTests
     "${CMAKE_BINARY_DIR}/bin/bv_env_test"
     "${PYTHON_EXECUTABLE}"
-    "$(which $BRAINVISA_PACKAGE_INSTALL_PREFIX/bin/bv_env bv_unit_test)"
+    "$BRAINVISA_PACKAGE_INSTALL_PREFIX/bin/$\{BRAINVISA_REAL_BIN\}bv_unit_test"
     aims.tests.test_aimsdata.AimsStructuringElementTests)
 ENDIF()
