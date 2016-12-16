@@ -15,8 +15,9 @@ BRAINVISA_INSTALL( TARGETS AimsStructuringElement_test AimsPartialIO_test
 
 IF ( PYTHON_FOUND )
   # Run tests for aims using python unittest
-  ADD_TEST(AimsStructuringElementTests "${CMAKE_BINARY_DIR}/bin/bv_env_test"
-                                       "${PYTHON_EXECUTABLE}"
-                                       "${CMAKE_BINARY_DIR}/bin/bv_unit_test" 
-                                       aims.tests.test_aimsdata.AimsStructuringElementTests)
+  add_test(AimsStructuringElementTests
+    "${CMAKE_BINARY_DIR}/bin/bv_env_test"
+    "${PYTHON_EXECUTABLE}"
+    "$BRAINVISA_PACKAGE_INSTALL_PREFIX/bin/bv_unit_test"
+    aims.tests.test_aimsdata.AimsStructuringElementTests)
 ENDIF()
