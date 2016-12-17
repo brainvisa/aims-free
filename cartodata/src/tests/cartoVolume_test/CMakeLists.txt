@@ -12,5 +12,5 @@ BRAINVISA_INSTALL( TARGETS cartoVolume_test
               DESTINATION bin
               COMPONENT ${PROJECT_NAME}-test )
 
-add_test( cartoVolume_test "${CMAKE_BINARY_DIR}/bin/bv_env_test" cartoVolume_test )
+brainvisa_add_test( cartoVolume_test cartoVolume_test )
 
