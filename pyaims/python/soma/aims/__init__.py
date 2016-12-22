@@ -195,6 +195,25 @@ carto.RCObject.__del__ = RCObject_del
 
 del RCObject_init, RCObject_del
 
+def rgb_str(self):
+    return '[%d, %d, %d]' % (self[0], self[1], self[2])
+
+def rgb_repr(self):
+    return '<soma.aims.%s> [%d, %d, %d]' % (self.__class__.__name__, self[0],
+                                            self[1], self[2])
+
+def rgba_str(self):
+    return '[%d, %d, %d]' % (self[0], self[1], self[2], self[3])
+
+def rgba_repr(self):
+    return '<soma.aims.%s> [%d, %d, %d]' % (self.__class__.__name__, self[0],
+                                            self[1], self[2], self[3])
+AimsRGB.__str__ = rgb_str
+AimsRGB.__repr__ = rgb_repr
+AimsRGBA.__str__ = rgba_str
+AimsRGBA.__repr__ = rgba_repr
+del rgb_str, rgba_str, rgb_repr, rgba_repr
+
 
 # generic Reader class
 
