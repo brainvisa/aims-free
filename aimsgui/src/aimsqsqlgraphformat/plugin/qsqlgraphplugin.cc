@@ -81,19 +81,20 @@ namespace
 
 QSqlGraphPlugin::QSqlGraphPlugin() : Plugin()
 {
+  // QCoreApplication is needed to read qt.conf and have correct plugins paths
+  if( !QCoreApplication::instance() )
+  {
+    static int argc = 1;
+    static char * argv[] = { (char *) "aims", (char *) 0 };
+    // WARNING: should be in the main thread / with a Mutex
+    new QCoreApplication( argc, argv );
+  }
+
   QSqlGraphFormat       *df1 = new QSqlGraphFormat;
   vector<string>        exts;
   string                format = "QSqlGraph";
   exts.push_back( "sqlite" );
   // TODO: add other database formats
-
-//   if( !QCoreApplication::instance() )
-//   {
-//     static int argc = 1;
-//     static char * argv[] = { (char *) "aims", (char *) 0 };
-//     // WARNING: should maybe in the main thread / with a Mutex
-//     new QCoreApplication( argc, argv );
-//   }
 
   FileFormatDictionary<Graph>::registerFormat( format, df1, exts );
   Finder::registerFormat( format, new FinderQSqlGraphFormat, exts );
