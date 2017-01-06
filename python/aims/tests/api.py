@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import types
+import errno
 
 class ImageFileComparison:
 
@@ -227,11 +228,26 @@ class CommandTest:
             raise RuntimeError(
                 'Command exited because run directory \'%s\' does not exists.'
                 % (run_directory,))
-
-        retcode = subprocess.call(self.__command,
+        if sys.version_info >= (2, 7):
+            retcode = subprocess.call(self.__command,
+                                      stdout=fout,
+                                      stderr=ferr,
+                                      cwd=run_directory)
+        else:
+            # python 2.6 / Mac cat get a INTR signal
+            # https://bugs.python.org/issue1068268
+            p = subprocess.Popen(self.__command,
                                   stdout=fout,
                                   stderr=ferr,
                                   cwd=run_directory)
+            while p.returncode is None:
+                try:
+                    p.communicate()
+                    p.wait()
+                except OSError as e:
+                    if e.errno != errno.EINTR:
+                        raise
+            retcode = p.returncode
         if retcode != 0:
             raise RuntimeError(
                 'Command exit code was not 0. code: %d, Command: %s'
