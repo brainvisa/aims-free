@@ -123,6 +123,7 @@ typedef unsigned short uint16_t;
 %Include getopt.sip
 %Include finder.sip
 %Include plugin.sip
+%Include fdinhibitor.sip
 
 %Include syntax.sip
 /* %Include map_STRING_Semantic.sip
