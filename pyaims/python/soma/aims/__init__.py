@@ -102,7 +102,9 @@ import sip
 import os
 import six
 import sys
-import exceptions
+
+# save the original IOError type, it will be replaced by aims bindings
+IOError_orig = IOError
 
 # check for share dir, and set the BRAINVISA_SHARE environment var if it is not
 # already set
@@ -150,6 +152,9 @@ if sys.version_info[0] >= 3:
     basestring = str
     xrange = range
 
+# restore the original IOError
+IOError = IOError_orig
+del IOError_orig
 
 # typedefs
 
@@ -324,11 +329,9 @@ class Reader(object):
         '''
         f = Finder()
         if not f.check(filename):
-            #self.fix_stderr()
             open(filename).close()  # "file not found"-case raising first
-            raise exceptions.IOError(
+            raise IOError(
                 'Unknown file format or missing meta-file(s): ' + filename)
-        #self.fix_stderr()
         if dtype is not None:
             finaltype = typeCode(dtype)
         else:
@@ -349,7 +352,7 @@ class Reader(object):
         rdr = 'Reader_' + finaltype
         r = getattr(aimssip, rdr, None)
         if r is None:
-            raise exceptions.IOError('Unsupported object type: ' + finaltype)
+            raise IOError('Unsupported object type: ' + finaltype)
         r = r(filename)
         if self.allocmode is not None:
             r.setAllocatorContext(self.allocmode)
@@ -357,15 +360,7 @@ class Reader(object):
             r.setOptions(self.options)
 
         result = r.read(border, f.format(), frame)
-        #self.fix_stderr()
         return result
-
-    #def fix_stderr(self):
-        #import exceptions
-        #try:
-            #sys.stderr.write('')
-        #except exceptions.IOError as e:
-            #pass
 
     def mapType(self, iotype, aimstype):
         ''' Get the translated type correspondance between identified data type
@@ -1766,12 +1761,12 @@ class StdOutInhibitorFix(carto.fdinhibitor.ResetCallback):
         if fd == sys.stdout.fileno():
             try:
                 sys.stdout.write('')
-            except exceptions.IOError:
+            except IOError:
                 pass
         elif fd == sys.stderr.fileno():
             try:
                 sys.stderr.write('')
-            except exceptions.IOError:
+            except IOError:
                 pass
 
 carto.fdinhibitor.registerResetCallback('sys.stderr', StdOutInhibitorFix())
