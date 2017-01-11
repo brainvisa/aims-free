@@ -143,10 +143,10 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
       const AimsSurface<3,Void>         & surface = mesh[t];
       const vector<Point3df>            & vert = surface.vertex();
       const vector<Point3df>            & u = surface.normal();
-      unsigned                         n = vert.size();
+      unsigned                          n = vert.size();
       vector<Point3df>                  v = vector<Point3df>( n );
       vector<Point3df>                  w = vector<Point3df>( n );
-      
+
       if( verbose )
         cout << "Computing sets of normal vectors at each vertex" << endl;
 
@@ -179,10 +179,10 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
       otex.reserve( n );
 
       for( p=0; p<n; p++ ) 
-      {        
+      {
         // label initialization
         label.clear();
-               
+
         // cylinder (radius, alpha*height+1)
 	switch ( mode )
       	{
@@ -211,7 +211,8 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
                       x = round(vert[p][0]/data.sizeX() + i*u[p][0] + j*v[p][0] + k*w[p][0]);
                       y = round(vert[p][1]/data.sizeY() + i*u[p][1] + j*v[p][1] + k*w[p][1]);
                       z = round(vert[p][2]/data.sizeZ() + i*u[p][2] + j*v[p][2] + k*w[p][2]);
-                      if(x<data.dimX() && y<data.dimY() && z<data.dimZ())
+                      if(x >= 0 && x<data.dimX() && y >= 0 && y<data.dimY()
+                         && z >= 0 && z<data.dimZ())
                       {
                         val = (short) data( x, y, z, t );
                         if( val>0 && (!BRAIN_MASK || brainData(x, y, z, t)))
@@ -220,7 +221,7 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
                     }
                 }
             }
-        if( label.size() )
+        if( !label.empty() )
         {
            sort(label.begin(), label.end());
            cur_label=-1;
@@ -244,17 +245,17 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
              else
                nlabel ++;
            }
-           
+
            if( nlabel > nlabel_max )
            {  // the largest label
               nlabel_max = nlabel;
-              label_max = cur_label; 
+              label_max = cur_label;
            }
-           otex.push_back( label_max );            
-        }                
+           otex.push_back( label_max );
+        }
         else
            otex.push_back( 0 );
-      }      
+      }
     }
 
   /* Writing ouput */
@@ -311,6 +312,7 @@ int main( int argc, const char** argv )
   catch( exception & e )
     {
       cerr << e.what() << endl;
+      return EXIT_FAILURE;
     }
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
