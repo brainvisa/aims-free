@@ -1761,12 +1761,12 @@ class StdOutInhibitorFix(carto.fdinhibitor.ResetCallback):
         if fd == sys.stdout.fileno():
             try:
                 sys.stdout.write('')
-            except IOError:
+            except: # IOError:
                 pass
         elif fd == sys.stderr.fileno():
             try:
                 sys.stderr.write('')
-            except IOError:
+            except: # IOError:
                 pass
 
 carto.fdinhibitor.registerResetCallback('sys.stderr', StdOutInhibitorFix())
