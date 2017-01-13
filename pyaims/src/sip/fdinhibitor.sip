@@ -25,12 +25,21 @@ namespace carto
     };
 
     fdinhibitor( int fd, bool permanent=false );
-    %Docstring
+%Docstring
     fdinhibitor(fd, permanent=False)
 
-    fd: file descriptor to inhibate, permanent: if false, don't reopen the
-    stream when deleting the fdinhibitor
-    %End
+    fd: file descriptor to inhibit,
+    permanent: if false, don't reopen the stream when deleting the fdinhibitor
+
+    usage:
+    from soma import aims
+    fdi = aims.carto.fdinhibitor(sys.stderr.fileno())
+    fdi.close()
+    # call a function which prints something on stderr which we don't want to
+    # appear
+    fdi.open()
+    sys.stderr.write('after reopen\n') # works again
+%End
 
     ~fdinhibitor();
 
