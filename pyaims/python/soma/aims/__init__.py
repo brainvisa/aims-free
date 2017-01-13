@@ -1769,7 +1769,7 @@ class StdOutInhibitorFix(carto.fdinhibitor.ResetCallback):
             except: # IOError:
                 pass
 
-carto.fdinhibitor.registerResetCallback('sys.stderr', StdOutInhibitorFix())
+#carto.fdinhibitor.registerResetCallback('sys.stderr', StdOutInhibitorFix())
 
 
 # documentation
