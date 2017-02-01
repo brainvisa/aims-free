@@ -8,6 +8,7 @@ import unittest
 import shutil
 from soma import aims
 import numpy as np
+from soma.aims.volumetools import compare_images
 
 class TestPyaimsIO(unittest.TestCase):
 
@@ -20,29 +21,6 @@ class TestPyaimsIO(unittest.TestCase):
         if self.verbose or self.debug:
             print('work directory:', self.work_dir)
 
-
-    def compare_images(self, vol, vol2, vol1_name, vol2_name, thresh=1e-6,
-                       rel_thresh = False):
-        #print('comp vol, sizes:', vol.getSize(), vol2.getSize())
-        #print('    vsizes:', vol.getVoxelSize(), vol2.getVoxelSize())
-        msg = 'comparing %s and %s' % (vol1_name, vol2_name)
-        self.assertEqual(vol.getSize(), vol2.getSize(),
-                         msg + ': %s != %s'
-                         % (str(vol.getSize()), str(vol2.getSize())))
-        self.assertTrue(
-            np.max(np.abs(np.asarray(vol.getVoxelSize())
-                          - vol2.getVoxelSize())) < 1e-6,
-            msg + ': voxels size differ: %s != %s'
-            % (str(vol.getVoxelSize()), str(vol2.getVoxelSize())))
-        if rel_thresh:
-            val_range = float(np.max(np.asarray(vol))) \
-                - np.min(np.asarray(vol))
-            thresh = thresh * val_range
-        self.assertTrue(np.max(np.abs(np.asarray(vol) - np.asarray(vol2)))
-                        < thresh,
-                        msg + ', max diff: %f, max allowed: %f'
-                        % (np.max(np.abs(np.asarray(vol) - np.asarray(vol2))),
-                           thresh))
 
     def check_open_files(self, fnames):
         proc_dir = '/proc/self/fd'
@@ -126,8 +104,8 @@ class TestPyaimsIO(unittest.TestCase):
             thresh, rel_thresh = thresh
 
         # ensure we get the same
-        self.compare_images(vol, vol2, vol1_name, vol2_name, thresh,
-                            rel_thresh)
+        self.assertTrue(compare_images(vol, vol2, vol1_name, vol2_name, thresh,
+                            rel_thresh))
         del vol2
 
         # test native file without minf
@@ -137,8 +115,8 @@ class TestPyaimsIO(unittest.TestCase):
             os.unlink(minf_fname)
             vol3_name = os.path.basename(fname) + ' (re-read without .minf)'
             vol3 = aims.read(fname)
-            self.compare_images(vol, vol3, vol1_name, vol3_name, thresh,
-                                rel_thresh)
+            self.assertTrue(compare_images(vol, vol3, vol1_name, vol3_name, thresh,
+                                rel_thresh))
 
         view_pos1, view_size1, view_pos2, view_size2 = view
         if format in partial_read:
@@ -151,8 +129,8 @@ class TestPyaimsIO(unittest.TestCase):
             vol3 = aims.read(fname + '?%s' % url_ext)
             self.assertEqual(vol3.getSize(), view_size1)
             vol4 = aims.VolumeView(vol, view_pos1, view_size1)
-            self.compare_images(vol4, vol3, 'sub-volume', 'patially read',
-                                thresh, rel_thresh)
+            self.assertTrue(compare_images(vol4, vol3, 'sub-volume', 'patially read',
+                                thresh, rel_thresh))
 
         if format in partial_write:
             if self.verbose:
@@ -165,15 +143,16 @@ class TestPyaimsIO(unittest.TestCase):
             self.assertEqual(vol3.getSize(), vol.getSize())
             vol4 = aims.VolumeView(vol3, view_pos2, view_size2)
             # compare the written view
-            self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
+            self.assertTrue(compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
                                 % (aims.typeCode(vol), format),
-                                'patially written', thresh, rel_thresh)
+                                'patially written', thresh, rel_thresh))
             # compare a part of the original volume
             vol2 = aims.VolumeView(vol, (0, 0, 0, 0), (10, 10, 5, 1))
             vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), (10, 10, 5, 1))
-            self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
+            self.assertTrue(compare_images(vol4, vol2, 
+                                'sub-volume %s (write, format %s)'
                                 % (aims.typeCode(vol), format),
-                                'original part', thresh, rel_thresh)
+                                'original part', thresh, rel_thresh))
 
         if options.get('write_unallocated', False):
             if self.verbose:
@@ -199,10 +178,10 @@ class TestPyaimsIO(unittest.TestCase):
                 self.assertEqual(vol3.getSize(), vol.getSize())
                 vol4 = aims.VolumeView(vol3, view_pos2, view_size2)
                 # compare the written view
-                self.compare_images(vol4, vol2,
+                self.assertTrue(compare_images(vol4, vol2,
                                     'sub-volume %s (write, format %s)'
                                     % (aims.typeCode(vol), format),
-                                    'patially written', thresh, rel_thresh)
+                                    'patially written', thresh, rel_thresh))
 
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
