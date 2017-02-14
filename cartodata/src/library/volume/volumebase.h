@@ -42,6 +42,7 @@
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/allocator/allocator.h>
 #include <cartobase/smart/rcptr.h>
+#include <cartobase/type/datatypetraits.h>
 //--- blitz ------------------------------------------------------------------
 #ifdef CARTO_USE_BLITZ
   #ifdef _WIN32
@@ -429,9 +430,9 @@ namespace carto
     bool any() const;
     T min() const;
     T max() const;
-    T sum() const;
-    template <typename OUTP>
-    OUTP sum() const;
+    /// To avoid overflow, the biggest possible type (intmax_t, uintmax_t,
+    /// double...) is used for computation and returned.
+    typename DataTypeTraits<T>::LongType sum() const;
 
     //========================================================================
     //   FILL / REPLACE
