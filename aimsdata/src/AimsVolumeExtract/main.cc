@@ -65,25 +65,25 @@ using namespace std;
 // ===========================================================================
 //                              AimsVolumeExtract
 // ---------------------------------------------------------------------------
-// This command extends the previous AimsVolumeExtract cammnd by taking 
+// This command extends the previous AimsVolumeExtract cammnd by taking
 // avantage of the capacities brought by the SomaIO system.
-// What was previously possible should still be so (writing an input volume 
+// What was previously possible should still be so (writing an input volume
 // in a bigger output volume).
-// When possible, this new command do so by not allocating the full output 
-// volume. It just books disk space for the ouput volume, and writes the 
-// input data at the chosen location (making use of partial writing 
+// When possible, this new command do so by not allocating the full output
+// volume. It just books disk space for the ouput volume, and writes the
+// input data at the chosen location (making use of partial writing
 // capacities). When this is not possible, the old strategy is used.
 // The commands also allows us to :
 // - Create an empty output volume on disk
 // - Use only part of the input data (partial reading)
 // - Write data in an existing volume (not just an empty one)
-// When using this command, one should keep in mind the partial i/o 
-// capacities of the formats used as input and output, since some actions 
+// When using this command, one should keep in mind the partial i/o
+// capacities of the formats used as input and output, since some actions
 // may be restricted by these.
-// 
-// Notes for developers : Since i/o systems are divided between aims and 
-// soma systems, the current procedure is quite messy (it needs to check 
-// at each step which system to use). If all readers/writers are 
+//
+// Notes for developers : Since i/o systems are divided between aims and
+// soma systems, the current procedure is quite messy (it needs to check
+// at each step which system to use). If all readers/writers are
 // ported to soma-io, a lot of cleaning should be possible.
 // ===========================================================================
 
@@ -149,14 +149,14 @@ class DataTypeCodeRegistry {
 public:
     //typedef std::string (*ObjectType)();
     //typedef std::string (*DataType)();
-   
+
     DataTypeCodeRegistry();
     virtual ~DataTypeCodeRegistry();
-   
-    //std::string objectType(std::string object_type);    
-    std::string dataTypeName(const std::string & object_type, 
+
+    //std::string objectType(std::string object_type);
+    std::string dataTypeName(const std::string & object_type,
                              const std::string & data_type);
-    
+
 protected:
     // Store information about object types and data types
     std::map<std::string, std::map<std::string, std::string> > _objectDataTypes;
@@ -185,9 +185,9 @@ DataTypeCodeRegistry::DataTypeCodeRegistry() {
 DataTypeCodeRegistry::~DataTypeCodeRegistry() {
 }
 
-string DataTypeCodeRegistry::dataTypeName(const string & object_type, 
+string DataTypeCodeRegistry::dataTypeName(const string & object_type,
                                           const string & data_type){
-    
+
     map<string, string> data_types = _objectDataTypes[object_type];
     if (data_types.size() > 0) {
         if (!data_types[data_type].empty()) {
@@ -209,41 +209,41 @@ string DataTypeCodeRegistry::dataTypeName(const string & object_type,
 // Since there is no system for "checking" non existant files, this function
 // is an inperfect workaround. For now, I just check whether or not output
 // extension is GIS.
-// 
+//
 // \param  fname  Filename to check
 // \param  info  ReadInfo structure to fill
 // ===========================================================================
-void checkWritable( const string   & fname, 
+void checkWritable( const string   & fname,
                           ReadInfo & info )
 {
   string rname = FileUtil::uriFilename( fname );
   string ext = FileUtil::extension( rname );
-  
+
   cout << "-> Enable writing trough soma: ";
-  
+
   DataTypeCodeRegistry registry;
   string data_type_name;
-  
+
   try {
     data_type_name = registry.dataTypeName(info.objectType,
                                            info.dataType);
   }
   catch(...){}
-  
+
   const set<string> soma_write_formats = DataSourceInfoLoader::writeFormats(
-                                                                   ext, 
+                                                                   ext,
                                                                    data_type_name
                                                                );
-  
+
   // Try to find associated formats
-/*  
+/*
   bool soma_writable = false;
   if (!data_type_name.empty()) {
-      
-    // Try to find an associated format for the given extension   
-    typename carto::IOObjectTypesDictionary::FormatInfo format_info 
+
+    // Try to find an associated format for the given extension
+    typename carto::IOObjectTypesDictionary::FormatInfo format_info
            = carto::IOObjectTypesDictionary::writeTypes()[data_type_name];
-    
+
     if (format_info){
         const set<string> data_type_formats = format_info();
         vector<string> soma_formats(
@@ -253,9 +253,9 @@ void checkWritable( const string   & fname,
             data_type_formats.begin(), data_type_formats.end(),
             formats.begin(), formats.end(),
             soma_formats.begin()
-        );       
+        );
         soma_formats.resize(it - soma_formats.begin());
-        
+
         // Soma formats were found in the intersection that matches object type,
         // data type and extension requirements
         if (soma_formats.size() > 0)
@@ -289,7 +289,7 @@ void checkWritable( const string   & fname,
 // Checks whether output file can be read using soma-io/aims systems and
 // process actuall header reading.
 // If soma-io works, we don't try aims unless forceaims is TRUE.
-// 
+//
 // \param  fname  Filename to check
 // \param  info  ReadInfo structure to fill
 // \param  forceaims Force use of AIMS checker
@@ -346,9 +346,9 @@ void checkReadable( const  string   & fname,
 }
 
 // ===========================================================================
-// First try for existence of file. If exists, calls checkReadable. Then 
+// First try for existence of file. If exists, calls checkReadable. Then
 // calls checkWritable anyway.
-// 
+//
 // \param  fname  Filename to check
 // \param  info  ReadInfo structure to fill
 // \param  forceaims  If true, do not try soma-io system.
@@ -399,7 +399,7 @@ void resizeVolume( rc_ptr<Volume<T> > & vol,
 }
 
 // ===========================================================================
-// Write empty volume using soma-io system (this way, we don't need to 
+// Write empty volume using soma-io system (this way, we don't need to
 // allocate such a volume)
 // ===========================================================================
 template <typename T>
@@ -409,8 +409,8 @@ void somaWriteEmptyVolume_f( const vector<int>    & sizeout,
 {
   cout << "Writing empty volume (soma)"
        << endl;
-  cout << "-> size : [ " 
-       << sizeout[0] << ", " << sizeout[1] << ", " 
+  cout << "-> size : [ "
+       << sizeout[0] << ", " << sizeout[1] << ", "
        << sizeout[2] << ", " << sizeout[3] << " ]"
        << endl;
   cout << "-> voxel_size : [ "
@@ -418,7 +418,7 @@ void somaWriteEmptyVolume_f( const vector<int>    & sizeout,
        << voxelout[2] << ", " << voxelout[3] << " ]"
        << endl;
 
-  VolumeRef<T> voltowrite( new Volume<T>( sizeout[0], sizeout[1], 
+  VolumeRef<T> voltowrite( new Volume<T>( sizeout[0], sizeout[1],
                                           sizeout[2], sizeout[3],
                                           AllocatorContext(), false )
                          );
@@ -432,7 +432,7 @@ typedef void (*somaWriteEmptyVolume_g)( const vector<int>    &,
 map<string,somaWriteEmptyVolume_g> somaWriteEmptyVolume;
 
 // ===========================================================================
-// Write empty volume using aims system (this way, we need to 
+// Write empty volume using aims system (this way, we need to
 // first allocate such a volume)
 // ===========================================================================
 template <typename T>
@@ -442,8 +442,8 @@ void aimsWriteEmptyVolume_f( const vector<int>    & sizeout,
 {
   cout << "Writing empty volume (aims)"
        << endl;
-  cout << "-> size : [ " 
-       << sizeout[0] << ", " << sizeout[1] << ", " 
+  cout << "-> size : [ "
+       << sizeout[0] << ", " << sizeout[1] << ", "
        << sizeout[2] << ", " << sizeout[3] << " ]"
        << endl;
   cout << "-> voxel_size : [ "
@@ -460,7 +460,7 @@ typedef void (*aimsWriteEmptyVolume_g)( const vector<int>    &,
                                         const vector<float>  &,
                                         const string         & );
 map<string,aimsWriteEmptyVolume_g> aimsWriteEmptyVolume;
- 
+
 // ===========================================================================
 // Read input using soma-io.
 // Write output using soma-io
@@ -480,15 +480,15 @@ void somaReadSomaWrite_f( const string       & ifname,
   cout << "Reading input volume (soma)"
        << endl;
   cout << "-> size : [ "
-       << ( inputInfo.canReadVoxel  ? regionin[0] : sizein[0] ) << ", " 
+       << ( inputInfo.canReadVoxel  ? regionin[0] : sizein[0] ) << ", "
        << ( inputInfo.canReadLine   ? regionin[1] : sizein[1] ) << ", "
-       << ( inputInfo.canReadSlice  ? regionin[2] : sizein[2] ) << ", " 
+       << ( inputInfo.canReadSlice  ? regionin[2] : sizein[2] ) << ", "
        << ( inputInfo.canReadVolume ? regionin[3] : sizein[3] ) << " ]"
        << endl;
   cout << "-> position : [ "
-       << ( inputInfo.canReadVoxel  ? posin[0] : 0 ) << ", " 
+       << ( inputInfo.canReadVoxel  ? posin[0] : 0 ) << ", "
        << ( inputInfo.canReadVoxel  ? posin[1] : 0 ) << ", "
-       << ( inputInfo.canReadVoxel  ? posin[2] : 0 ) << ", " 
+       << ( inputInfo.canReadVoxel  ? posin[2] : 0 ) << ", "
        << ( inputInfo.canReadVoxel  ? posin[3] : 0 ) << " ]"
        << endl;
 
@@ -522,18 +522,18 @@ void somaReadSomaWrite_f( const string       & ifname,
   {
     cout << "Resizing volume"
          << endl;
-    resizeVolume( readvol, 
-                  ( inputInfo.canWriteVoxel 
-                    ? ( outputInfo.canReadVoxel  ? readvol->getSizeX() : regionin[0] ) 
+    resizeVolume( readvol,
+                  ( inputInfo.canWriteVoxel
+                    ? ( outputInfo.canReadVoxel  ? readvol->getSizeX() : regionin[0] )
                     : sizeout[0] ) ,
-                  ( inputInfo.canWriteLine 
-                    ? ( outputInfo.canReadLine   ? readvol->getSizeY() : regionin[1] ) 
+                  ( inputInfo.canWriteLine
+                    ? ( outputInfo.canReadLine   ? readvol->getSizeY() : regionin[1] )
                     : sizeout[1] ) ,
-                  ( inputInfo.canWriteSlice 
-                    ? ( outputInfo.canReadSlice  ? readvol->getSizeZ() : regionin[2] ) 
+                  ( inputInfo.canWriteSlice
+                    ? ( outputInfo.canReadSlice  ? readvol->getSizeZ() : regionin[2] )
                     : sizeout[2] ) ,
-                  ( inputInfo.canWriteVolume 
-                    ? ( outputInfo.canReadVolume ? readvol->getSizeT() : regionin[3] ) 
+                  ( inputInfo.canWriteVolume
+                    ? ( outputInfo.canReadVolume ? readvol->getSizeT() : regionin[3] )
                     : sizeout[3] ) ,
                   ( inputInfo.canWriteVoxel  ? 0 : posout[0] ) ,
                   ( inputInfo.canWriteLine   ? 0 : posout[1] ) ,
@@ -553,14 +553,14 @@ void somaReadSomaWrite_f( const string       & ifname,
   cout << "Writing output volume (soma)" << ( extract ? "" : " (partially)" )
        << endl;
   cout << "-> size : [ "
-       << readvol->getSizeX() << ", " << readvol->getSizeY() << ", " 
+       << readvol->getSizeX() << ", " << readvol->getSizeY() << ", "
        << readvol->getSizeZ() << ", " << readvol->getSizeT() << " ]"
        << endl;
   if( !extract ) {
     cout << "-> position : [ "
-         << ( outputInfo.canWriteVoxel ? posout[0] : 0 ) << ", " 
+         << ( outputInfo.canWriteVoxel ? posout[0] : 0 ) << ", "
          << ( outputInfo.canWriteVoxel ? posout[1] : 0 ) << ", "
-         << ( outputInfo.canWriteVoxel ? posout[2] : 0 ) << ", " 
+         << ( outputInfo.canWriteVoxel ? posout[2] : 0 ) << ", "
          << ( outputInfo.canWriteVoxel ? posout[3] : 0 ) << " ]"
          << endl;
   }
@@ -568,10 +568,10 @@ void somaReadSomaWrite_f( const string       & ifname,
   // writer
   soma::Writer<Volume<T> > writer( ofname );
   Object writeoptions = Object::value( PropertySet() );
-  if( !extract && ( readvol->getSizeX() != sizeout[0] || 
+  if( !extract && ( readvol->getSizeX() != sizeout[0] ||
                     readvol->getSizeY() != sizeout[1] ||
                     readvol->getSizeZ() != sizeout[2] ||
-                    readvol->getSizeT() != sizeout[3] ) ) 
+                    readvol->getSizeT() != sizeout[3] ) )
   {
     writeoptions->setProperty( "partial_writing", true );
     VolumeRef<T> fullvol( new Volume<T>( sizeout[0], sizeout[1],
@@ -579,7 +579,7 @@ void somaReadSomaWrite_f( const string       & ifname,
                                          AllocatorContext(), false ) );
     readvol->setRefVolume(fullvol);
     readvol->setPosInRefVolume(
-      typename carto::Volume<T>::Position4Di( 
+      typename carto::Volume<T>::Position4Di(
         outputInfo.canWriteVoxel  ? posout[0] : 0,
         outputInfo.canWriteLine   ? posout[1] : 0,
         outputInfo.canWriteSlice  ? posout[2] : 0,
@@ -661,7 +661,7 @@ void somaReadAimsWrite_f( const string       & ifname,
                           const vector<int>  & posout,
                           const bool         & extract )
 {
-  cerr << "Not implemented yet." << endl; 
+  cerr << "Not implemented yet." << endl;
 }
 typedef void (*somaReadAimsWrite_g)( const string       & ,
                                      const string       & ,
@@ -758,6 +758,7 @@ void registerFunc()
 // ===========================================================================
 void executeExtractVolume( string        ifname,
                            string        ofname,
+                           string        rfname,
                            vector<int>   sizeout,
                            vector<float> voxelout,
                            vector<int>   posout,
@@ -777,17 +778,26 @@ void executeExtractVolume( string        ifname,
 
   //--- checking input -------------------------------------------------------
   ReadInfo inputInfo = readInfoCreator();
-  
+
   if( !ifname.empty() )
     checkInput( ifname, inputInfo );
 
   if( datatype.empty() && !inputInfo.dataType.empty() )
     datatype = inputInfo.dataType;
-  
+
+  //--- checking reference ---------------------------------------------------
+  ReadInfo referenceInfo = readInfoCreator();
+
+  if( !rfname.empty() )
+    checkInput( rfname, referenceInfo );
+
+  if( datatype.empty() && !referenceInfo.dataType.empty() )
+    datatype = referenceInfo.dataType;
+
   //--- checking output ------------------------------------------------------
   ReadInfo outputInfo = readInfoCreator();
   outputInfo.dataType = datatype;
-  
+
   if( !ofname.empty() )
     checkInput( ofname, outputInfo );
 
@@ -796,34 +806,53 @@ void executeExtractVolume( string        ifname,
     throw runtime_error( "Output filename is needed" );
   if( !ifname.empty() && !inputInfo.header.get() )
     throw runtime_error( "Input checking failed : " + ifname );
-  if( !outputInfo.header.get() && sizeout == vector<int>(4,0) && !extract )
+  if( !rfname.empty() && !referenceInfo.header.get() )
+    throw runtime_error( "Reference checking failed : " + rfname );
+  if( !outputInfo.header.get()
+      && !referenceInfo.header.get()
+      && sizeout == std::vector<int>(4,0)
+      && !extract )
     throw runtime_error( "Output checking failed : " + ofname );
-  if( ifname.empty() && datatype.empty() )
-    throw runtime_error( "Output creation needs either input volume (-i) "
-                          "or data type (-t)" );
-  if( ifname.empty() && sizeout == vector<int>(4,0) )
-    throw runtime_error( "Output creation needs either input volume (-i) "
-                          "or output dimensions (--dx,...)" );
+  if( ifname.empty() && rfname.empty() && datatype.empty() )
+    throw runtime_error( "Output creation needs either input volume (-i), "
+                          "reference volume (-r) or data type (-t)" );
+  if( ifname.empty()
+      && rfname.empty()
+      && sizeout == std::vector<int>(4,0) )
+    throw runtime_error( "Output creation needs either input volume (-i), "
+                         "reference volume (-r) or output dimensions (-od)" );
   if( inputInfo.header.get() && !inputInfo.header->hasProperty( "data_type" ) )
     throw runtime_error( "Input header lacks \"data_type\" : " + ifname );
   if( outputInfo.header.get() && !outputInfo.header->hasProperty( "data_type" ) )
     throw runtime_error( "Input header lacks \"data_type\" : " + ofname );
-  if( !extract && inputInfo.header.get() 
-      && outputInfo.header.get() && sizeout == vector<int>(4,0)
-      && ( inputInfo.header->getProperty( "data_type" )->getString() != 
+  if( !extract && inputInfo.header.get()
+      && outputInfo.header.get() && sizeout == std::vector<int>(4,0)
+      && ( inputInfo.header->getProperty( "data_type" )->getString() !=
            outputInfo.header->getProperty( "data_type" )->getString() ) )
     throw runtime_error( "Input and output data types must be consistent" );
+
+
+  //--- reading parameters from reference ------------------------------------
+  for( int i = 0; i < 4; ++i ) {
+    if( sizeout[i] == 0 )
+      sizeout[i] = referenceInfo.header->getProperty( "volume_dimension" )
+                                       ->getArrayItem( i )->getScalar();
+    if( voxelout[i] == 0 )
+      voxelout[i] = referenceInfo.header->getProperty( "voxel_size" )
+                                        ->getArrayItem( i )->getScalar();
+  }
 
   //--- filling missing parameters -------------------------------------------
   for( i=0; i<4; ++i )
   {
-    string champ = ( i==0 ? "sizeX" : 
-                     ( i==1 ? "sizeY" : 
+    string champ = ( i==0 ? "sizeX" :
+                     ( i==1 ? "sizeY" :
                        ( i==2 ? "sizeZ" :
                          ( i==3 ? "sizeT" : "" ))));
-    if( inputInfo.header.get() && inputInfo.header->hasProperty( "volume_dimension") )
+    if( inputInfo.header.get()
+        && inputInfo.header->hasProperty( "volume_dimension") )
     {
-      sizein[i] = (int) rint( 
+      sizein[i] = (int) rint(
         inputInfo.header->getProperty( "volume_dimension" )
                         ->getArrayItem( i )->getScalar()
       );
@@ -835,32 +864,33 @@ void executeExtractVolume( string        ifname,
   }
 
   overwriteOutput = true;
-  if( sizeout == vector<int>(4,0) && !extract )
+  if( sizeout == std::vector<int>(4,0) && !extract )
   {
     overwriteOutput = false;
-    for( i=0; i<4; ++i )
+    for( i = 0; i < 4; ++i )
     {
-      sizeout[i] = (int) rint( 
+      sizeout.push_back( (int) rint(
         outputInfo.header->getProperty("volume_dimension")
-                         ->getArrayItem(i)->getScalar() 
-      );
+                         ->getArrayItem(i)->getScalar()
+      ) );
     }
   }
-  else if( sizeout == vector<int>(4,0) && extract )
-    sizeout= regionin;
+  else if( sizeout == std::vector<int>(4,0) && extract )
+    sizeout = regionin;
 
-  if( sizeout != vector<int>(4,0) )
+  if( sizeout != std::vector<int>(4,0) )
   {
     // need to create output volume
-    for( i=0; i<4; ++i )
+    for( i = 0; i < 4; ++i )
     {
       if( sizeout[i] == 0 )
         sizeout[i] = sizein[i];
       if( voxelout[i] == 0.0 )
       {
-        if( inputInfo.header.get() && inputInfo.header->hasProperty( "voxel_size") )
+        if( inputInfo.header.get()
+            && inputInfo.header->hasProperty( "voxel_size") )
             voxelout[i] = inputInfo.header->getProperty( "voxel_size" )
-                                            ->getArrayItem( i )->getScalar();
+                                          ->getArrayItem( i )->getScalar();
         else
           voxelout[i] = 1.0;
       }
@@ -898,11 +928,11 @@ void executeExtractVolume( string        ifname,
        << posout[2] << ", " << posout[3] << " ]"
        << endl;
   }
-  cout << "-> output data type : " 
-       << datatype 
+  cout << "-> output data type : "
+       << datatype
        << endl;
-  cout << "-> overwrite output : " 
-       << ( overwriteOutput ? "yes" : "no" ) 
+  cout << "-> overwrite output : "
+       << ( overwriteOutput ? "yes" : "no" )
        << endl;
 
 
@@ -927,8 +957,8 @@ void executeExtractVolume( string        ifname,
                    ( regionin[1] != sizein[1] && inputInfo.canReadLine ) ||
                    ( regionin[0] != sizein[0] && inputInfo.canReadVoxel ) );
 
-  needWritePartial = !ifname.empty() && !extract && 
-                    ( regionin[0] != sizeout[0] || 
+  needWritePartial = !ifname.empty() && !extract &&
+                    ( regionin[0] != sizeout[0] ||
                       regionin[1] != sizeout[1] ||
                       regionin[2] != sizeout[2] ||
                       regionin[3] != sizeout[3] );
@@ -1011,9 +1041,10 @@ int main( int argc, const char** argv )
   {
     //=== APPLICATION ========================================================
     string        ifname;             // file to read
+    string        rfname;             // reference file for output dim
     string        ofname;             // file to write
-    vector<int>   sizeout(4,0);       // dimensions of volume to write
-    vector<float> voxelout(4,0.0);    // voxel size of volume to write
+    vector<int>   sizeout(4, 0);      // dimensions of volume to write
+    vector<float> voxelout(4, 0);     // voxel size of volume to write
     string        datatype;           // data type of volume to write
     vector<int>   posout(4,0);        // output position where to write data
     vector<int>   regionin(4,0);      // size of partial region to read
@@ -1036,10 +1067,15 @@ int main( int argc, const char** argv )
       "At least one of -i and -s[x|y|z|t] option is required. See "
       "additional descriptions to understand the usage of parameters.\n"
     );
-    app.addOption( ofname, "-o", "output filename to be written.\n"
+    app.addOption( ofname, "-o", "Output filename to be written.\n"
       "If volume dimensions are given, it is created on disk, else if the "
       "output file already exist, data are written in it\n"
     );
+    app.addOption( rfname, "-r", "Reference volume\n"
+      "Its dimension and voxel size will be used for the output volume in "
+      "the case of empty volume creation, when no input is given. "
+      "They will be overriden by the use of -od and -ov options.\n",
+    true );
     app.addOptionSeries( sizeout, "-od", "Dimension of output volume.\n"
       "If one of the output size parameters is given, eventual existing "
       "volume is crushed. If it is not given and a new volume is created, "
@@ -1092,9 +1128,9 @@ int main( int argc, const char** argv )
 
     //=== ALGORITHM ==========================================================
     registerFunc();
-    executeExtractVolume( ifname, ofname, 
+    executeExtractVolume( ifname, ofname, rfname,
                           sizeout, voxelout, posout,
-                          regionin, posin, 
+                          regionin, posin,
                           datatype, extract );
   }
   catch( user_interruption & )
