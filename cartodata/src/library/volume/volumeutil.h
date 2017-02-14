@@ -210,11 +210,11 @@ namespace carto
   /// Returns the sum of the volume values
   /// @{
   template <typename T>
-  T sum( const Volume<T> & vol );
+  typename DataTypeTraits<T>::LongType sum( const Volume<T> & vol );
   template <typename OUTP, typename T>
   OUTP sum( const Volume<T> & vol );
   template <typename T>
-  T sum( const rc_ptr<Volume<T> > & vol );
+  typename DataTypeTraits<T>::LongType sum( const rc_ptr<Volume<T> > & vol );
   template <typename OUTP, typename T>
   OUTP sum( const rc_ptr<Volume<T> > & vol );
   /// @}
@@ -670,26 +670,27 @@ namespace carto
       //   dstparent->fill(0);
       dst.setRefVolume( dstparent );
       dst.setPosInRefVolume( src.posInRefVolume() );
-    }
 
-    rc_ptr<Volume<INP> > srcchild = src.refVolume();
-    rc_ptr<Volume<OUTP> > dstchild = dst.refVolume();
+      rc_ptr<Volume<INP> > srcchild = src.refVolume();
+      rc_ptr<Volume<OUTP> > dstchild = dst.refVolume();
 
-    while( srcchild->refVolume().get() )
-    {
-      rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
-      rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
-          srcparent->getSizeX(), srcparent->getSizeY(),
-          srcparent->getSizeZ(), srcparent->getSizeT(),
-          srcparent->allocatorContext(),
-          srcparent->allocatorContext().isAllocated() ) );
-      dstparent->copyHeaderFrom( srcparent->header() );
-      // if( srcparent->allocatorContext().isAllocated() )
-      //   dstparent->fill(0);
-      dstchild->setRefVolume( dstparent );
-      dstchild->setPosInRefVolume( srcchild->posInRefVolume() );
-      srcchild = srcparent;
-      dstchild = dstparent;
+      while( srcchild->refVolume().get() )
+      {
+        rc_ptr<Volume<INP> > srcparent = srcchild->refVolume();
+        rc_ptr<Volume<OUTP> > dstparent( new Volume<OUTP>(
+            srcparent->getSizeX(), srcparent->getSizeY(),
+            srcparent->getSizeZ(), srcparent->getSizeT(),
+            srcparent->allocatorContext(),
+            srcparent->allocatorContext().isAllocated() ) );
+        dstparent->copyHeaderFrom( srcparent->header() );
+        // if( srcparent->allocatorContext().isAllocated() )
+        //   dstparent->fill(0);
+        dstchild->setRefVolume( dstparent );
+        dstchild->setPosInRefVolume( srcchild->posInRefVolume() );
+        srcchild = srcparent;
+        dstchild = dstparent;
+      }
+
     }
 
     return dst;
@@ -698,6 +699,9 @@ namespace carto
   template <typename OUTP, typename INP>
   rc_ptr<Volume<OUTP> > copyStructure( const rc_ptr<Volume<INP> > & src )
   {
+    if( !src.get() )
+      return rc_ptr<Volume<OUTP> >( (Volume<OUTP>*)0 );
+
     rc_ptr<Volume<OUTP> > dst( new Volume<OUTP>(
         src->getSizeX(), src->getSizeY(),
         src->getSizeZ(), src->getSizeT(),
@@ -772,9 +776,9 @@ namespace carto
   }
 
   template <typename T>
-  T sum( const Volume<T> & vol )
+  typename DataTypeTraits<T>::LongType sum( const Volume<T> & vol )
   {
-    return sum<T,T>( vol );
+    return sum<typename DataTypeTraits<T>::LongType,T>( vol );
   }
 
 
@@ -785,9 +789,9 @@ namespace carto
   }
 
   template <typename T>
-  T sum( const rc_ptr<Volume<T> > & vol )
+  typename DataTypeTraits<T>::LongType sum( const rc_ptr<Volume<T> > & vol )
   {
-    return sum<T,T>( vol );
+    return sum<typename DataTypeTraits<T>::LongType,T>( vol );
   }
 
   template <typename OUTP, typename T>
