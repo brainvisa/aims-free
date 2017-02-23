@@ -249,10 +249,6 @@ namespace aims
     return column;
   }
 
-}
-
-
-
 aims::SparseOrDenseMatrix
   operator - ( const aims::SparseOrDenseMatrix & thing );
 
@@ -271,6 +267,8 @@ aims::SparseOrDenseMatrix
 aims::SparseOrDenseMatrix
   operator / ( const aims::SparseOrDenseMatrix & thing1,
                const double& thing2 );
+
+}
 
 
 #ifndef DOXYGEN_HIDE_INTERNAL_CLASSES

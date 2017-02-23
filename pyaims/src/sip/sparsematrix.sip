@@ -72,8 +72,6 @@ namespace aims
         operator /= ( double x );
   };
 
-};
-
 
 aims::SparseMatrix 
     operator - ( const aims::SparseMatrix& thing );
@@ -101,4 +99,6 @@ aims::SparseMatrix
 aims::SparseMatrix
     operator / ( const aims::SparseMatrix& thing1,
                  const double& thing2 );
+
+};
 

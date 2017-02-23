@@ -628,7 +628,7 @@ SparseOrDenseMatrix &
 
 
 SparseOrDenseMatrix
-  operator - ( const SparseOrDenseMatrix & thing )
+  aims::operator - ( const SparseOrDenseMatrix & thing )
 {
   SparseOrDenseMatrix copy( thing );
   copy *= -1;
@@ -637,7 +637,7 @@ SparseOrDenseMatrix
 
 
 SparseOrDenseMatrix
-  operator + ( const SparseOrDenseMatrix & thing1,
+  aims::operator + ( const SparseOrDenseMatrix & thing1,
                const SparseOrDenseMatrix & thing2 )
 {
   if( thing1.isDense() || !thing2.isDense() )
@@ -656,7 +656,7 @@ SparseOrDenseMatrix
 
 
 SparseOrDenseMatrix
-  operator - ( const SparseOrDenseMatrix & thing1,
+  aims::operator - ( const SparseOrDenseMatrix & thing1,
                const SparseOrDenseMatrix & thing2 )
 {
   if( thing1.isDense() || thing2.isDense() )
@@ -677,7 +677,7 @@ SparseOrDenseMatrix
 
 
 SparseOrDenseMatrix
-  operator * ( const SparseOrDenseMatrix& thing1,
+  aims::operator * ( const SparseOrDenseMatrix& thing1,
                const double& thing2 )
 {
   SparseOrDenseMatrix copy( thing1 );
@@ -687,7 +687,7 @@ SparseOrDenseMatrix
 
 
 SparseOrDenseMatrix
-  operator / ( const SparseOrDenseMatrix & thing1,
+  aims::operator / ( const SparseOrDenseMatrix & thing1,
                const double& thing2 )
 {
   SparseOrDenseMatrix copy( thing1 );

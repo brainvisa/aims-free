@@ -79,9 +79,6 @@ namespace aims
         operator /= ( double x );
   };
 
-};
-
-
 aims::SparseOrDenseMatrix
   operator - ( const aims::SparseOrDenseMatrix & thing );
 
@@ -100,3 +97,5 @@ aims::SparseOrDenseMatrix
 aims::SparseOrDenseMatrix
   operator / ( const aims::SparseOrDenseMatrix & thing1,
                const double& thing2 );
+
+};

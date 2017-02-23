@@ -1138,7 +1138,7 @@ aims::SparseMatrix
 
 // - SparseMatrix
 aims::SparseMatrix 
-    operator - ( const aims::SparseMatrix& thing )
+    aims::operator - ( const aims::SparseMatrix& thing )
 {
 
   try
@@ -1246,7 +1246,7 @@ aims::SparseMatrix &
 
 // SparseMatrix + SparseMatrix
 aims::SparseMatrix
-    operator + ( const aims::SparseMatrix& thing1,
+    aims::operator + ( const aims::SparseMatrix& thing1,
                  const aims::SparseMatrix& thing2 )
 {
 
@@ -1282,7 +1282,7 @@ aims::SparseMatrix
 
 // SparseMatrix - SparseMatrix
 aims::SparseMatrix
-    operator - ( const aims::SparseMatrix& thing1,
+    aims::operator - ( const aims::SparseMatrix& thing1,
                  const aims::SparseMatrix& thing2 )
 {
 
@@ -1318,7 +1318,7 @@ aims::SparseMatrix
 
 // SparseMatrix * SparseMatrix
 aims::SparseMatrix
-    operator * ( const aims::SparseMatrix& thing1,
+    aims::operator * ( const aims::SparseMatrix& thing1,
                  const aims::SparseMatrix& thing2 )
 {
 
@@ -1339,7 +1339,7 @@ aims::SparseMatrix
 
 // SparseMatrix * std::vector<double>
 std::vector<double>
-    operator * ( const aims::SparseMatrix& thing1,
+    aims::operator * ( const aims::SparseMatrix& thing1,
                  const std::vector<double>& thing2 )
 {
 
@@ -1360,7 +1360,7 @@ std::vector<double>
 
 // SparseMatrix * double
 aims::SparseMatrix
-    operator * ( const aims::SparseMatrix& thing1,
+    aims::operator * ( const aims::SparseMatrix& thing1,
                  const double& thing2 )
 {
 
@@ -1388,7 +1388,7 @@ aims::SparseMatrix
 
 // SparseMatrix / double
 aims::SparseMatrix
-    operator / ( const aims::SparseMatrix& thing1,
+    aims::operator / ( const aims::SparseMatrix& thing1,
                  const double& thing2 )
 {
 
