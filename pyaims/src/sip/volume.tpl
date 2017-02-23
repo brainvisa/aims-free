@@ -94,6 +94,19 @@ Voxel sizes in mm (list of 4 floats)
 %End
 
     void fill( const %Template1% & value ) /ReleaseGIL/;
+%Docstring
+fill(value)
+
+Fill Volume_%Template1typecode% using the given value.
+%End
+
+%#ifdef PyAims_Volume_U8_defined%
+    void fill( int ) /ReleaseGIL/;
+%MethodCode
+        sipCpp->fill( %Template1deref%a0 );
+%End
+%#endif%
+
     bool all() const;
     bool any() const;
     %Template1PyType% min() const;
@@ -390,6 +403,30 @@ The header contains all meta-data.
   carto::VolumeRef<%Template1% > r1( sipCpp );
   r1 /= a0;
   r1.release();
+%End
+
+  int __nonzero__() const /ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r( const_cast<carto::Volume<%Template1% > *>(sipCpp) );
+  sipRes = r->all();
+  r.release();
+%End
+
+  Volume_BOOL * operator == ( Volume_%Template1typecode% & )
+  /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( sipCpp );
+  carto::VolumeRef<%Template1% > r2( a0 );
+  
+  carto::VolumeRef<bool> r = 
+        carto::copyStructure<bool, %Template1% >( r1 );
+  carto::volumeutil::applyTowards( *r1, *r2, *r, 
+        carto::volumeutil::equal_to<%Template1%, %Template1% >() );
+  
+  sipRes = r.get();
+  r.release();
+  r1.release();
+  r2.release();
 %End
 
 %%Template1defScalar%%

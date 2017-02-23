@@ -55,22 +55,8 @@ namespace carto {
     // This is the aim of this helper.
     // all(), any(), min(), max(), sum() are concerned
     template <typename T, bool is_scalar = DataTypeTraits<T>::is_scalar>
-    struct select
+    struct select_is_scalar
     {
-      static bool all( const Volume<T> & vol )
-      {
-        throw std::logic_error( "Member function all() is only enabled for "
-          "volumes of scalar. Try to use the non-member function "
-          "carto::all(Volume<T>) instead." );
-      }
-
-      static bool any( const Volume<T> & vol )
-      {
-        throw std::logic_error( "Member function any() is only enabled for "
-          "volumes of scalar. Try to use the non-member function "
-          "carto::any(Volume<T>) instead." );
-      }
-
       static T min( const Volume<T> & vol )
       {
         throw std::logic_error( "Member function min() is only enabled for "
@@ -92,22 +78,31 @@ namespace carto {
           "volumes of scalar. Try to use the non-member function "
           "carto::sum(Volume<T>) instead." );
       }
+
     };
 
-
-    template <typename T>
-    struct select<T, true>
+    template <typename T, bool has_bool_conversion = DataTypeTraits<T>::has_bool_conversion>
+    struct select_has_bool_conversion
     {
       static bool all( const Volume<T> & vol )
       {
-        return carto::all(vol);
+        throw std::logic_error( "Member function all() is only enabled for "
+          "volumes of types that support boolean conversion. Try to use the "
+          "non-member function carto::all(Volume<T>) instead." );
       }
 
       static bool any( const Volume<T> & vol )
       {
-        return carto::any(vol);
+        throw std::logic_error( "Member function any() is only enabled for "
+          "volumes of that support boolean conversion. Try to use the "
+          "non-member function carto::any(Volume<T>) instead." );
       }
+    };
 
+
+    template <typename T>
+    struct select_is_scalar<T, true>
+    {
       static T min( const Volume<T> & vol )
       {
         return carto::min(vol);
@@ -123,6 +118,21 @@ namespace carto {
       {
         return carto::sum(vol);
       }
+
+    };
+
+    template <typename T>
+    struct select_has_bool_conversion<T, true>
+    {
+      static bool all( const Volume<T> & vol )
+      {
+        return carto::all(vol);
+      }
+
+      static bool any( const Volume<T> & vol )
+      {
+        return carto::any(vol);
+      }
     };
   }
 
@@ -133,42 +143,43 @@ namespace carto {
   inline
   bool Volume<T>::all() const
   {
-    return volumebaseinternal::select<T>::all( *this );
+    return volumebaseinternal::select_has_bool_conversion<T>::all( *this );
   }
 
   template <typename T>
   inline
   bool Volume<T>::any() const
   {
-    return volumebaseinternal::select<T>::any( *this );
+    return volumebaseinternal::select_has_bool_conversion<T>::any( *this );
   }
 
   template <typename T>
   inline
   Volume<T>::operator bool() const
   {
-    return all();
+    return volumebaseinternal::select_has_bool_conversion<T>::all( *this );
   }
 
   template <typename T>
   inline
   T Volume<T>::min() const
   {
-    return volumebaseinternal::select<T>::min( *this );
+    return volumebaseinternal::select_is_scalar<T>::min( *this );
   }
 
   template <typename T>
   inline
   T Volume<T>::max() const
   {
-    return volumebaseinternal::select<T>::max( *this );
+    return volumebaseinternal::select_is_scalar<T>::max( *this );
   }
 
   template <typename T>
   inline
   typename DataTypeTraits<T>::LongType Volume<T>::sum() const
   {
-    return volumebaseinternal::select<T>::sum( *this );
+    //return ::carto::sum( *this );
+    return volumebaseinternal::select_is_scalar<T>::sum( *this );
   }
 
 

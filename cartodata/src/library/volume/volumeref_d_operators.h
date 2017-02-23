@@ -350,7 +350,7 @@ namespace carto {
 
   template <typename T, typename U>
   inline
-  carto::Volume<bool> operator== ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
+carto::VolumeRef<bool> operator== ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
     carto::Volume<bool> output = carto::copyStructure<bool, T>( vol );
     return carto::volumeutil::applyTowards( vol, *other, output, carto::volumeutil::equal_to<T,U>() );
@@ -358,7 +358,7 @@ namespace carto {
 
   template <typename T, typename U>
   inline
-  carto::Volume<bool> operator!= ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
+carto::VolumeRef<bool> operator!= ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
     carto::Volume<bool> output = carto::copyStructure<bool, T>( vol );
     return carto::volumeutil::applyTowards( vol, *other, output, carto::volumeutil::not_equal_to<T,U>() );
@@ -366,7 +366,7 @@ namespace carto {
 
   template <typename T, typename U>
   inline
-  carto::Volume<bool> operator>= ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
+carto::VolumeRef<bool> operator>= ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
     carto::Volume<bool> output = carto::copyStructure<bool, T>( vol );
     return carto::volumeutil::applyTowards( vol, *other, output, carto::volumeutil::greater_equal<T,U>() );
@@ -374,7 +374,7 @@ namespace carto {
 
   template <typename T, typename U>
   inline
-  carto::Volume<bool> operator<= ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
+carto::VolumeRef<bool> operator<= ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
     carto::Volume<bool> output = carto::copyStructure<bool, T>( vol );
     return carto::volumeutil::applyTowards( vol, *other, output, carto::volumeutil::less_equal<T,U>() );
@@ -382,7 +382,7 @@ namespace carto {
 
   template <typename T, typename U>
   inline
-  carto::Volume<bool> operator>  ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
+carto::VolumeRef<bool> operator>  ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
     carto::Volume<bool> output = carto::copyStructure<bool, T>( vol );
     return carto::volumeutil::applyTowards( vol, *other, output, carto::volumeutil::greater<T,U>() );
@@ -390,7 +390,7 @@ namespace carto {
 
   template <typename T, typename U>
   inline
-  carto::Volume<bool> operator<  ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
+carto::VolumeRef<bool> operator<  ( const carto::Volume<T> & vol, const carto::VolumeRef<U> & other )
   {
     carto::Volume<bool> output = carto::copyStructure<bool, T>( vol );
     return carto::volumeutil::applyTowards( vol, *other, output, carto::volumeutil::less<T,U>() );

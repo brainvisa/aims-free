@@ -314,6 +314,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 
 %If ( CARTODATA )
 
+%Include volume_BOOL.sip
 %Include volume_U8.sip
 %Include volume_S16.sip
 %Include volume_U16.sip
@@ -330,6 +331,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 
 %Include debuggingvol.sip
 
+%Include rcptr_Volume_BOOL.sip
 %Include rcptr_Volume_U8.sip
 %Include rcptr_Volume_S16.sip
 %Include rcptr_Volume_U16.sip

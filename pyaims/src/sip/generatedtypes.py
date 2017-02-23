@@ -31,8 +31,8 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
-numtypes = ['unsigned char', 'short', 'unsigned short', 'int',
-            'unsigned', 'float', 'double']
+numtypes = ['bool', 'unsigned char', 'short', 'unsigned short',
+            'int', 'unsigned', 'float', 'double']
 basetypes = numtypes + ['AimsRGB', 'AimsRGBA', 'AimsHSV']
 matrix = []
 for x in basetypes:
@@ -77,7 +77,7 @@ todo = {'system': ['Void'],
                   'AimsData<AimsRGBA>', 'AimsData<AimsHSV>',
                   'AimsData<cfloat>',
                   'AimsData<cdouble>', 'AimsData<Point3df>',
-                  'carto::Volume<uint8_t>',
+                  'carto::Volume<bool>', 'carto::Volume<uint8_t>',
                   'carto::Volume<int16_t>', 'carto::Volume<uint16_t>',
                   'carto::Volume<int32_t>', 'carto::Volume<uint32_t>',
                   'carto::Volume<float>', 'carto::Volume<double>',
@@ -218,6 +218,7 @@ todo = {'system': ['Void'],
                    'AimsData<AimsRGBA>', 'AimsData<AimsHSV>',
                    'AimsData<cfloat>',
                    'AimsData<cdouble>', 'AimsData<Point3df>',
+                   'carto::Volume<bool>',
                    'carto::Volume<uint8_t>', 'carto::Volume<int16_t>',
                    'carto::Volume<uint16_t>', 'carto::Volume<int32_t>',
                    'carto::Volume<uint32_t>', 'carto::Volume<float>',
@@ -247,6 +248,7 @@ todo = {'system': ['Void'],
                    ],
 
         'soma_reader': [
+                   'carto::Volume<bool>',
                    'carto::Volume<uint8_t>', 'carto::Volume<int16_t>',
                    'carto::Volume<uint16_t>', 'carto::Volume<int32_t>',
                    'carto::Volume<uint32_t>', 'carto::Volume<float>',
