@@ -832,14 +832,16 @@ void executeExtractVolume( string        ifname,
     throw runtime_error( "Input and output data types must be consistent" );
 
 
-  //--- reading parameters from reference ------------------------------------
-  for( int i = 0; i < 4; ++i ) {
-    if( sizeout[i] == 0 )
-      sizeout[i] = referenceInfo.header->getProperty( "volume_dimension" )
-                                       ->getArrayItem( i )->getScalar();
-    if( voxelout[i] == 0 )
-      voxelout[i] = referenceInfo.header->getProperty( "voxel_size" )
+  if( !rfname.empty() ) {
+    //--- reading parameters from reference ------------------------------------
+    for( int i = 0; i < 4; ++i ) {
+        if( sizeout[i] == 0 )
+        sizeout[i] = referenceInfo.header->getProperty( "volume_dimension" )
                                         ->getArrayItem( i )->getScalar();
+        if( voxelout[i] == 0 )
+        voxelout[i] = referenceInfo.header->getProperty( "voxel_size" )
+                                            ->getArrayItem( i )->getScalar();
+    }
   }
 
   //--- filling missing parameters -------------------------------------------
