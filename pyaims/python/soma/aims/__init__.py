@@ -1347,33 +1347,28 @@ def typeCode(data):
             }
     if isinstance(data, numpy.dtype):
         data = str(data)
+    if type(data) in (str, unicode):
+        return dmap.get(data, data)
+    if not isinstance(data, type):
+        # we use the type, not an instance (which may not be hashable)
+        dtn2 = type(data).__name__
+        if dtn2.startswith('rc_ptr_'):
+            # special case of rc_ptr: get the object in it
+            try:
+                data = type(data.get())
+            except AttributeError:
+                data = type(data)
+        else:
+            data = type(data)
     dt = dmap.get(data, None)
     if dt is not None:
         return dt
-    if type(data) in (str, unicode):
-        return data
     dtn = getattr(data, '__name__', None)
-    if dtn is not None and dtn.startswith('rc_ptr_'):
-        try:
-            dtn = getattr(data.get(), '__name__', None)
-        except AttributeError:
-            pass
     if dtn is not None:  # if data is a type class
         dt = dmap.get(dtn, None)
         if dt is not None:
             return dt
-    dtn2 = type(data).__name__  # instance
-    if dtn2.startswith('rc_ptr_'):
-        try:
-            dtn2 = type(data.get()).__name__
-        except AttributeError:
-            pass
-    dt = dmap.get(dtn2, None)
-    if dt is not None:
-        return dt
-    if dtn is not None:
-        return dtn
-    return dtn2
+    return dtn
 
 
 def voxelTypeCode(data):
