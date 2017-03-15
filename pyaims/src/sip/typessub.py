@@ -2691,7 +2691,7 @@ typessub = {'bool':
             },
 
             'std::set<unsigned>':
-           {'typecode': 'set_U32',
+            {'typecode': 'set_U32',
                'pyFromC': 'pyaimsConvertFrom_set',
                'CFromPy': 'pyaimsConvertTo_set<unsigned>',
                'castFromSip': '',
@@ -2715,6 +2715,35 @@ typessub = {'bool':
                '#endif',
                'module': 'aims',
                'testPyType': 'pyaimsCheck_set<unsigned>',
+               'compareElement': '',
+            },
+
+            'std::vector<Point3df>':
+            {'typecode': 'vector_POINT3DF',
+               'pyFromC': 'pyaimsConvertFrom_vector',
+               'CFromPy': 'pyaimsConvertTo_vector<Point3df>',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new vector_POINT3DF',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'vector_POINT3DF',
+               'sipClass': 'vector_POINT3DF',
+               'typeinclude': '#include <vector>\n'
+               '#include <aims/vector/vector.h>',
+               'sipinclude': '#include <pyaims/vector/sipstdvector.h>\n'
+               '#ifndef PYAIMS_WRAPPER_VECTOR_POINT3DF\n'
+               '#define PYAIMS_WRAPPER_VECTOR_POINT3DF\n'
+               'template <> inline sipWrapperType*\n'
+               'sipClass_vector<Point3df>()\n'
+               '{ return sipClass_vector_POINT3DF; }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsCheck_vector<Point3df>',
                'compareElement': '',
             },
 

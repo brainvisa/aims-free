@@ -428,7 +428,7 @@ class list_%Template1typecode%_iterator
                                      PyObject* pylist )
   : _list( v ), _pylist( pylist )
   { Py_INCREF( pylist ); }
-  list_%Template1typecode%_iterator( std::list<%Template1PyType%>::iterator
+  list_%Template1typecode%_iterator( std::list<%Template1% >::iterator
                                      & i,
                                      list_%Template1typecode%* v,
                                      PyObject* pylist )
