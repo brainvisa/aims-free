@@ -54,35 +54,5 @@ typedef std::vector<unsigned long> vector_SIZE_T;
 typedef std::vector<unsigned> vector_SIZE_T;
 #endif
 
-
-template <typename T>
-inline sipWrapperType* sipClass_vector();
-
-
-template <typename T>
-inline PyObject *pyaimsConvertFrom_vector( std::vector<T> * p )
-{
-  return sipConvertFromInstance( p, sipClass_vector<T>(), 0 );
-}
-
-
-template <typename T>
-inline std::vector<T> *pyaimsConvertTo_vector( PyObject* p )
-{
-  int   iserr = 0;
-  return (std::vector<T> *)
-    sipConvertToInstance( p, sipClass_vector<T>(), 0,
-                          SIP_NO_CONVERTORS, 0, &iserr );
-}
-
-
-template <typename T>
-inline bool pyaimsCheck_vector( PyObject* o )
-{
-  return sipCanConvertToInstance( o, (sipClass_vector<T>()),
-                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
-}
-
-
 #endif
 

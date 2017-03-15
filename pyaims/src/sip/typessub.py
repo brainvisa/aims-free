@@ -2764,7 +2764,7 @@ typessub = {'bool':
                 'PyType': 'vector_S32',
                 'sipClass': 'vector_S32',
                 'typeinclude': '#include <vector>',
-                'sipinclude': '#include <pyaims/vector/stdvector.h>\n'
+                'sipinclude': '#include <pyaims/vector/sipstdvector.h>\n'
                 '#ifndef PYAIMS_WRAPPER_VECTOR_S32\n'
                 '#define PYAIMS_WRAPPER_VECTOR_S32\n'
                 'template <> inline sipWrapperType*\n'
@@ -2775,6 +2775,35 @@ typessub = {'bool':
                 'testPyType': 'pyaimsCheck_vector<int32_t>',
                 'compareElement': '',
               },
+
+            'std::vector<std::string>':
+            {'typecode': 'vector_STRING',
+               'pyFromC': 'pyaimsConvertFrom_vector',
+               'CFromPy': 'pyaimsConvertTo_vector<std::string>',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new vector_STRING',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'vector_STRING',
+               'sipClass': 'vector_STRING',
+               'typeinclude': '#include <vector>\n'
+               '#include <string>',
+               'sipinclude': '#include <pyaims/vector/sipstdvector.h>\n'
+               '#ifndef PYAIMS_WRAPPER_VECTOR_STRING\n'
+               '#define PYAIMS_WRAPPER_VECTOR_STRING\n'
+               'template <> inline sipWrapperType*\n'
+               'sipClass_vector<std::string>()\n'
+               '{ return sipClass_vector_STRING; }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsCheck_vector<std::string>',
+               'compareElement': '',
+            },
 
             'carto::PluginLoader::PluginFile':
             classInNamespace('cartobase/plugin/plugin.h',

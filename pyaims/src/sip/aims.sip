@@ -70,6 +70,7 @@ typedef unsigned short uint16_t;
 %Include vector_set_U32.sip
 %Include vector_VOID.sip
 %Include vector_vector_S32.sip
+%Include vector_vector_STRING.sip
 %Include vector_vector_POINT3DF.sip
 //%Include vector_InfoPtr.sip
 %Include set_S16.sip
@@ -90,6 +91,7 @@ typedef unsigned short uint16_t;
 %Include list_rc_ptr_Graph.sip
 %Include list_POINT3D.sip
 %Include list_POINT3DF.sip
+%Include list_vector_STRING.sip
 %Include list_vector_POINT3DF.sip
 %Include map_STRING_STRING.sip
 %Include map_S32_STRING.sip
