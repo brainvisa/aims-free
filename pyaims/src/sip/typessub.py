@@ -2699,6 +2699,35 @@ typessub = {'signed char':
                'compareElement': '',
             },
 
+            'std::vector<int32_t>':
+            {
+                'typecode': 'vector_S32',
+                'pyFromC': 'pyaimsConvertFrom_vector',
+                'CFromPy': 'pyaimsConvertTo_vector<int32_t>',
+                'castFromSip': '',
+                'deref': '*',
+                'pyderef': '*',
+                'address': '&',
+                'pyaddress': '&',
+                'defScalar': '',
+                'defNumpyBindings': '',
+                'new': 'new vector_S32',
+                'NumType': 'PyArray_OBJECT',
+                'PyType': 'vector_S32',
+                'sipClass': 'vector_S32',
+                'typeinclude': '#include <vector>',
+                'sipinclude': '#include <pyaims/vector/sipstdvector.h>\n'
+                '#ifndef PYAIMS_WRAPPER_VECTOR_S32\n'
+                '#define PYAIMS_WRAPPER_VECTOR_S32\n'
+                'template <> inline sipWrapperType*\n'
+                'sipClass_vector<int32_t>()\n'
+                '{ return sipClass_vector_S32; }\n'
+                '#endif',
+                'module': 'aims',
+                'testPyType': 'pyaimsCheck_vector<int32_t>',
+                'compareElement': '',
+              },
+
             'std::vector<std::string>':
             {'typecode': 'vector_STRING',
                'pyFromC': 'pyaimsConvertFrom_vector',

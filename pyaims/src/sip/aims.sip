@@ -69,6 +69,7 @@ typedef unsigned short uint16_t;
 %Include vector_AimsVector_U32_4.sip
 %Include vector_set_U32.sip
 %Include vector_VOID.sip
+%Include vector_vector_S32.sip
 %Include vector_vector_STRING.sip
 %Include vector_vector_POINT3DF.sip
 //%Include vector_InfoPtr.sip
