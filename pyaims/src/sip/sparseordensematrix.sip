@@ -81,6 +81,9 @@ namespace aims
         operator /= ( double x ) /ReleaseGIL/;
   };
 
+};
+
+
 aims::SparseOrDenseMatrix
   operator - ( const aims::SparseOrDenseMatrix & thing ) /ReleaseGIL/;
 
@@ -99,5 +102,3 @@ aims::SparseOrDenseMatrix
 aims::SparseOrDenseMatrix
   operator / ( const aims::SparseOrDenseMatrix & thing1,
                const double& thing2 ) /ReleaseGIL/;
-
-};
