@@ -14,10 +14,11 @@ namespace aims
       typedef rc_ptr_SparseMatrix SparseMatrixType;
 
       SparseOrDenseMatrix( int size1 = 1, int size2 = 1 );
-      SparseOrDenseMatrix( const aims::SparseOrDenseMatrix& other );
-      virtual ~SparseOrDenseMatrix();
+      SparseOrDenseMatrix( const aims::SparseOrDenseMatrix& other )
+        /ReleaseGIL/;
+      virtual ~SparseOrDenseMatrix() /ReleaseGIL/;
 
-      void reallocate( int size1, int size2 );
+      void reallocate( int size1, int size2 ) /ReleaseGIL/;
 
       int getSize1() const;
       int getSize2() const;
@@ -30,72 +31,73 @@ namespace aims
       void erase_element( int i, int j );
       void set_element( int i, int j, double x );
 
-      void setRow( int s1, const vector_DOUBLE & row );
-      void setColumn( int s2, const vector_DOUBLE & column );
+      void setRow( int s1, const vector_DOUBLE & row ) /ReleaseGIL/;
+      void setColumn( int s2, const vector_DOUBLE & column ) /ReleaseGIL/;
 
-      void readRow( int s1 );
-      void readColumn( int s1 );
-      void readAll();
+      void readRow( int s1 ) /ReleaseGIL/;
+      void readColumn( int s1 ) /ReleaseGIL/;
+      void readAll() /ReleaseGIL/;
       void freeRow( int i );
       void freeColumn( int i );
 
-      vector_DOUBLE getRow( int i ) const;
-      vector_DOUBLE getColumn( int j ) const;
+      vector_DOUBLE getRow( int i ) const /ReleaseGIL/;
+      vector_DOUBLE getColumn( int j ) const /ReleaseGIL/;
 
-      void read( const std::string& filename );
+      void read( const std::string& filename ) /ReleaseGIL/;
       void write( const std::string& filename, 
-        carto::Object options=carto::none() ) const;
+        carto::Object options=carto::none() ) const /ReleaseGIL/;
 
       bool isDense() const;
 
       SparseMatrixType sparseMatrix();
       rc_ptr_Volume_DOUBLE denseMatrix();
 
-      void setMatrix( SparseMatrixType matrix );
-      void setMatrix( rc_ptr_Volume_DOUBLE matrix );
+      void setMatrix( SparseMatrixType matrix ) /ReleaseGIL/;
+      void setMatrix( rc_ptr_Volume_DOUBLE matrix ) /ReleaseGIL/;
 
       carto::Object header();
       void setHeader( carto::Object ph );
 
-      SparseMatrixType asSparse( bool copy=false ) const;
-      rc_ptr_Volume_DOUBLE asDense( bool copy=false ) const;
-      void muteToDense();
-      void muteToSparse();
-      void muteToOptimalShape();
+      SparseMatrixType asSparse( bool copy=false ) const /ReleaseGIL/;
+      rc_ptr_Volume_DOUBLE asDense( bool copy=false ) const /ReleaseGIL/;
+      void muteToDense() /ReleaseGIL/;
+      void muteToSparse() /ReleaseGIL/;
+      void muteToOptimalShape() /ReleaseGIL/;
       bool isOptimalShape() const;
 
       aims::SparseOrDenseMatrix* subMatrix(
-        const vector_S32 & start, const vector_S32 & size ) /Factory/;
+        const vector_S32 & start, const vector_S32 & size )
+          /Factory, ReleaseGIL/;
       aims::SparseOrDenseMatrix* subMatrix(
-        const vector_vector_S32 & indices_along_dims ) /Factory/;
+        const vector_vector_S32 & indices_along_dims ) /Factory, ReleaseGIL/;
 
       aims::SparseOrDenseMatrix &
-        operator += ( const aims::SparseOrDenseMatrix& thing );
+        operator += ( const aims::SparseOrDenseMatrix& thing ) /ReleaseGIL/;
       aims::SparseOrDenseMatrix &
-        operator -= ( const aims::SparseOrDenseMatrix& thing );
+        operator -= ( const aims::SparseOrDenseMatrix& thing ) /ReleaseGIL/;
       aims::SparseOrDenseMatrix &
-        operator *= ( double x );
+        operator *= ( double x ) /ReleaseGIL/;
       aims::SparseOrDenseMatrix &
-        operator /= ( double x );
+        operator /= ( double x ) /ReleaseGIL/;
   };
 
 aims::SparseOrDenseMatrix
-  operator - ( const aims::SparseOrDenseMatrix & thing );
+  operator - ( const aims::SparseOrDenseMatrix & thing ) /ReleaseGIL/;
 
 aims::SparseOrDenseMatrix
   operator + ( const aims::SparseOrDenseMatrix & thing1,
-               const aims::SparseOrDenseMatrix & thing2 );
+               const aims::SparseOrDenseMatrix & thing2 ) /ReleaseGIL/;
 
 aims::SparseOrDenseMatrix
   operator - ( const aims::SparseOrDenseMatrix & thing1,
-               const aims::SparseOrDenseMatrix & thing2 );
+               const aims::SparseOrDenseMatrix & thing2 ) /ReleaseGIL/;
 
 aims::SparseOrDenseMatrix
   operator * ( const aims::SparseOrDenseMatrix& thing1,
-               const double& thing2 );
+               const double& thing2 ) /ReleaseGIL/;
 
 aims::SparseOrDenseMatrix
   operator / ( const aims::SparseOrDenseMatrix & thing1,
-               const double& thing2 );
+               const double& thing2 ) /ReleaseGIL/;
 
 };
