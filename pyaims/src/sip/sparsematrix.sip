@@ -35,70 +35,70 @@ namespace aims
                  int offset2,
                  int size1,
                  int size2,
-                 const double& value );
+                 const double& value ) /ReleaseGIL/;
       void fill( int offset1,
                  int offset2,
                  const aims::SparseMatrix& other,
                  int size1 = 0,
                  int size2 = 0 );
-      void setDiagonal( const double& value );
-      void transpose();
+      void setDiagonal( const double& value ) /ReleaseGIL/;
+      void transpose() /ReleaseGIL/;
 
-      double getTrace() const;
-      aims::SparseMatrix getTransposition() const;
-      aims::SparseMatrix getComposition( const aims::SparseMatrix& other ) const;
-      vector_DOUBLE getComposition( const vector_DOUBLE& other ) const;
+      double getTrace() const /ReleaseGIL/;
+      aims::SparseMatrix getTransposition() const /ReleaseGIL/;
+      aims::SparseMatrix getComposition( const aims::SparseMatrix& other ) const /ReleaseGIL/;
+      vector_DOUBLE getComposition( const vector_DOUBLE& other ) const /ReleaseGIL/;
 
-      vector_DOUBLE getRow( int i ) const;
-      vector_DOUBLE getColumn( int j ) const;
+      vector_DOUBLE getRow( int i ) const /ReleaseGIL/;
+      vector_DOUBLE getColumn( int j ) const /ReleaseGIL/;
       void erase_element( int i, int j );
 
       void read( const std::string& filename,
                  const std::string & openmode = "binar",
-                 bool bswap = false );
+                 bool bswap = false ) /ReleaseGIL/;
       void write( const std::string& filename,
                   const std::string & openmode = "binar",
-                  bool bswap = false ) const;
+                  bool bswap = false ) const /ReleaseGIL/;
 
       carto::Object header();
 
       aims::SparseMatrix &
-        operator += ( const aims::SparseMatrix& thing );
+        operator += ( const aims::SparseMatrix& thing ) /ReleaseGIL/;
       aims::SparseMatrix &
-        operator -= ( const aims::SparseMatrix& thing );
+        operator -= ( const aims::SparseMatrix& thing ) /ReleaseGIL/;
       aims::SparseMatrix &
-        operator *= ( double x );
+        operator *= ( double x ) /ReleaseGIL/;
       aims::SparseMatrix &
-        operator /= ( double x );
+        operator /= ( double x ) /ReleaseGIL/;
   };
 
 
 aims::SparseMatrix 
-    operator - ( const aims::SparseMatrix& thing );
+    operator - ( const aims::SparseMatrix& thing ) /ReleaseGIL/;
 
 aims::SparseMatrix
     operator + ( const aims::SparseMatrix& thing1,
-                 const aims::SparseMatrix& thing2 );
+                 const aims::SparseMatrix& thing2 ) /ReleaseGIL/;
 
 aims::SparseMatrix
     operator - ( const aims::SparseMatrix& thing1,
-                 const aims::SparseMatrix& thing2 );
+                 const aims::SparseMatrix& thing2 ) /ReleaseGIL/;
 
 aims::SparseMatrix
     operator * ( const aims::SparseMatrix& thing1,
-                 const aims::SparseMatrix& thing2 );
+                 const aims::SparseMatrix& thing2 ) /ReleaseGIL/;
 
 vector_DOUBLE
     operator * ( const aims::SparseMatrix& thing1,
-                 const vector_DOUBLE & thing2 );
+                 const vector_DOUBLE & thing2 ) /ReleaseGIL/;
 
 aims::SparseMatrix
     operator * ( const aims::SparseMatrix& thing1,
-                 const double& thing2 );
+                 const double& thing2 ) /ReleaseGIL/;
 
 aims::SparseMatrix
     operator / ( const aims::SparseMatrix& thing1,
-                 const double& thing2 );
+                 const double& thing2 ) /ReleaseGIL/;
 
 };
 
