@@ -772,8 +772,9 @@ map<unsigned, set< pair<unsigned,float> > >  AimsMeshWeightFiniteElementLaplacia
         weight = (*iphi + *itheta) / surface;
       else
       {
-        cerr << "Triangle with null surface\n";
-        ASSERT (0);
+        cerr << "Triangle(s) with null surface on vertex " << i << endl;
+        // ASSERT (0);
+        weight = 0.;
       }
 
       values.insert(weight);

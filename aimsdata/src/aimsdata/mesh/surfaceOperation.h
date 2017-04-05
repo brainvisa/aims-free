@@ -139,7 +139,9 @@ namespace aims
     static bool checkMesh( const AimsSurfaceTriangle & insurf, 
 			   AimsSurfaceTriangle *outsurf = 0 );
     static float meshArea( const AimsSurfaceTriangle & surf );
+    static float meshArea( const AimsSurface<3, Void> & surf );
     static float meshVolume( const AimsSurfaceTriangle & surf );
+    static float meshVolume( const AimsSurface<3, Void> & surf );
     /// concatenates 2 meshes into one (adds the second to the first one)
     template<int D, class T>
     static void meshMerge( AimsTimeSurface<D,T> & dst, 
