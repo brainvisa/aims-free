@@ -2806,6 +2806,12 @@ void SurfaceManip::meshPlanarPolygon( const Point4df & plane,
 
 float SurfaceManip::meshArea( const AimsSurfaceTriangle & surf )
 {
+  return meshArea( surf.begin()->second );
+}
+
+
+float SurfaceManip::meshArea( const AimsSurface<3, Void> & surf )
+{
   const vector<Point3df>		& vert = surf.vertex();
   const vector<AimsVector<uint, 3> >	& poly = surf.polygon();
   unsigned				ip, np = poly.size();
@@ -2838,6 +2844,12 @@ float SurfaceManip::meshArea( const AimsSurfaceTriangle & surf )
 
 
 float SurfaceManip::meshVolume( const AimsSurfaceTriangle & surf )
+{
+  return meshVolume( surf.begin()->second );
+}
+
+
+float SurfaceManip::meshVolume( const AimsSurface<3, Void> & surf )
 {
   const vector<Point3df>                & vert = surf.vertex();
   const vector<AimsVector<uint, 3> >    & poly = surf.polygon();
