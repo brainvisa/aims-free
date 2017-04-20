@@ -1,6 +1,12 @@
 cmake_minimum_required( VERSION 2.6 )
 find_package( brainvisa-cmake REQUIRED )
-BRAINVISA_PROJECT( CXX Fortran )
+# if( LIBGFORTRAN_FOUND )
+#   # only declare fortran language if it is available
+#   BRAINVISA_PROJECT( CXX Fortran )
+# else()
+# endif()
+BRAINVISA_PROJECT( CXX )
+enable_language( Fortran OPTIONAL )
 enable_testing()
 
 BRAINVISA_DEPENDENCY( DEV DEPENDS "${BRAINVISA_PACKAGE_NAME}" RUN "= ${${BRAINVISA_PACKAGE_NAME}_VERSION}" )
