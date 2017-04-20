@@ -179,14 +179,14 @@ namespace carto {
   inline
   const PropertySet& VolumeRef<T>::getPropertySet() const
   {
-    return (*this)->getPropertySet();
+    return (*this)->header();
   }
 
   template <typename T>
   inline
   PropertySet& VolumeRef<T>::getPropertySet()
   {
-    return (*this)->getPropertySet();
+    return (*this)->header();
   }
 
   template <typename T>
