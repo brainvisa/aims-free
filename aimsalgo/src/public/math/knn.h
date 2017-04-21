@@ -384,6 +384,16 @@ public:
 			return _ind <= it._ind;
 		};
 
+		bool	operator>(const iterator &it)
+		{
+			return _ind > it._ind;
+		};
+
+		bool	operator>=(const iterator &it)
+		{
+			return _ind >= it._ind;
+		};
+
         private:
 		Database	*_db;
 		unsigned int	_ind;
