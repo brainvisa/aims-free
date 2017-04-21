@@ -417,28 +417,28 @@ namespace carto {
   //==========================================================================
 
   template <typename T>
-  std::ostream & operator<< ( std::ostream & out,
-                              const rc_ptr<Volume<T> > & volume )
-  {
-    VolumeOStream volumeout( out );
-    return volumeout << volume;
+std::ostream & operator<< ( const carto::VolumeOStream & out,
+                            const carto::rc_ptr<carto::Volume<T> > & volume )
+{
+  out.ostream() << "VolumeRef" << std::flush;
+  if( !volume.get() ) {
+    out.ostream() << " of " << carto::DataTypeCode<T>::dataType()
+                  << ": empty" << std::endl;
+    return out.ostream();
   }
-
-  template <typename T>
-  std::ostream & operator<< ( const VolumeOStream & out,
-                              const rc_ptr<Volume<T> > & volume )
+  else
   {
-    out.ostream() << "VolumeRef" << std::flush;
-    if( !volume.get() ) {
-      out.ostream() << " of " << DataTypeCode<T>::dataType()
-                    << ": empty" << std::endl;
-      return out.ostream();
-    }
-    else
-    {
-      out.ostream() << ": " << std::flush;
-      return out << *(volume.get());
-    }
+    out.ostream() << ": " << std::flush;
+    return out << *(volume.get());
+  }
+}
+
+template <typename T>
+std::ostream & operator<< ( std::ostream & out,
+                            const carto::rc_ptr<carto::Volume<T> > & volume )
+{
+  carto::VolumeOStream volumeout( out );
+  return volumeout << volume;
   }
 
 } // namespace carto

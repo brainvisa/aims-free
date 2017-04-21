@@ -592,11 +592,12 @@ namespace carto
 
   // Warper for output streams that integrates parameters for volume
   // printing
-  class VolumeOStream: public std::ostream
+  class VolumeOStream // : public std::ostream // is not really a stream
   {
   public:
     VolumeOStream( std::ostream & ostream );
     VolumeOStream( const VolumeOStream & other );
+    ~VolumeOStream();
 
     std::ostream & ostream() const;
 
