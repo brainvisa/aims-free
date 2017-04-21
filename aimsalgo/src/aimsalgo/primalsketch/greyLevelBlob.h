@@ -332,7 +332,7 @@ namespace aims {
         SiteIterator<Geom> ptSite=(*_texdata).siteBegin();
 
         for ( ; ptSite != (*_texdata).siteEnd(); ++ptSite)
-            sortedSites.insert(std::pair<Val, Site>((*_texdata).intensity(*ptSite), (*ptSite)));
+            sortedSites.insert(std::pair<const Val, Site>((*_texdata).intensity(*ptSite), (*ptSite)));
 
 
 
@@ -347,7 +347,7 @@ namespace aims {
             labelsImage.intensity(*ptSite)=BACKGROUND;
         // GL Blob extraction
         // This is the core algorithm
-        typename std::multimap<Val, Site>::reverse_iterator ptSortedSites;
+        typename std::multimap<const Val, Site>::reverse_iterator ptSortedSites;
 
         //std::cout << "DEBUG: extractor has started detection" << std::endl;
         for ( ptSortedSites=sortedSites.rbegin(); ptSortedSites != sortedSites.rend(); ++ptSortedSites) {

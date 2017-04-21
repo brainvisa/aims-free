@@ -72,7 +72,7 @@ public:
 private:
   void computeMap( ) ;
   struct energyCompare{
-    bool operator()(float a, float b)
+    bool operator()(float a, float b) const
       { return a < b ; }
   };
   void initMap( ) ;
