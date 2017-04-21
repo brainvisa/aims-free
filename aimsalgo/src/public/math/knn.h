@@ -361,6 +361,13 @@ public:
 			return iterator(_db, _ind + ind);
 		};
 
+                iterator & operator +=( unsigned int ind )
+		{
+                        for( unsigned i=0; i<ind; ++i )
+                              this->operator ++();
+                        return *this;
+		};
+
 		Vector	&operator*(void)
 		{
 			_vector.update(_db, _ind);
@@ -372,7 +379,12 @@ public:
 			return _ind < it._ind;
 		};
 
-	private:
+		bool	operator<=(const iterator &it)
+		{
+			return _ind <= it._ind;
+		};
+
+        private:
 		Database	*_db;
 		unsigned int	_ind;
 		Vector		_vector;
