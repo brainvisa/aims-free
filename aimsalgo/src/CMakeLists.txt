@@ -87,7 +87,7 @@ if( DCMTK_FOUND )
 endif()
 
 # Targets linking with gfortran
-if( CMAKE_Fortran_COMPILE_OBJECT )
+if( CMAKE_Fortran_COMPILER )
   foreach( _command AimsRegisterFFDEstimate )
     file( GLOB _pro "${_command}/*.pro" )
     BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"
