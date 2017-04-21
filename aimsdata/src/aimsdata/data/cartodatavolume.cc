@@ -181,6 +181,17 @@ template class carto::Volume< std::set<float> >;
 template class carto::VolumeProxy< std::map<int, float> >;
 template class carto::Volume< std::map<int, float> >;
 
+// Mac LLVM compiler does not seem to allow indirect instanciation
+template class carto::VolumeRef< AimsRGB >;
+template class carto::VolumeRef< AimsRGBA >;
+template class carto::VolumeRef< AimsHSV >;
+template class carto::VolumeRef< Point3df >;
+template class carto::VolumeRef< Point3d >;
+template class carto::VolumeRef< Point2d >;
+template class carto::VolumeRef< vectorf6 >;
+template class carto::VolumeRef< DtiTensor * >;
+template class carto::VolumeRef< std::set<float> >;
+template class carto::VolumeRef< std::map<int, float> >;
 
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3df > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
