@@ -589,9 +589,20 @@ void SplineFfd::write( const string & filename ) const
   w << *this;
 }
 
+
+template <typename T>
+FfdResampler<T>::~FfdResampler()
+{
+}
+
 //============================================================================
 //   S P L I N E   R E S A M P L E R
 //============================================================================
+template <class T, class C>
+SplineFfdResampler<T, C>::~SplineFfdResampler()
+{
+}
+
 template <class T, class C>
 void SplineFfdResampler<T, C>::init()
 {
@@ -725,6 +736,11 @@ Point3df SplineFfdResampler<T, C>::resample(
 //============================================================================
 //   N E A R E S T N E I G H B O R  R E S A M P L E R
 //============================================================================
+template <class T, class C>
+NearestNeighborFfdResampler<T, C>::~NearestNeighborFfdResampler()
+{}
+
+
 template <class T, class C>
 void NearestNeighborFfdResampler<T, C>::init()
 {}

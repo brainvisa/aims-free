@@ -207,6 +207,7 @@ namespace bio {
   {
     public:
 
+      virtual ~FfdResampler();
       virtual void init() = 0;
       virtual void setRef(const AimsData<T> & ref) = 0;
       virtual Point3df resample( const Point3df & output_location,
@@ -219,6 +220,7 @@ namespace bio {
   {
     public:
 
+      virtual ~SplineFfdResampler();
       virtual void init();
       SplineFfdResampler(const SplineFfd & spline, T background = (T)0);
       SplineFfdResampler(const SplineFfd & spline, Motion affine, T background = (T)0);
@@ -247,6 +249,7 @@ namespace bio {
   {
     public:
 
+      virtual ~NearestNeighborFfdResampler();
       virtual void init();
       NearestNeighborFfdResampler(const SplineFfd & spline, T background = (T)0);
       NearestNeighborFfdResampler(const SplineFfd & spline, Motion affine, T background = (T)0);
