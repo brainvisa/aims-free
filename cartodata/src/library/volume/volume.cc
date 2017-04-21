@@ -100,6 +100,32 @@ template class Volume< long >;
 template class Volume< unsigned long >;
 #endif
 
+// Mac compiler does not seem to allow indirect instanciation
+template class VolumeRef< bool >;
+template class VolumeRef< int8_t >;
+template class VolumeRef< uint8_t >;
+#if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
+template class VolumeRef< char >;
+#endif
+template class VolumeRef< int16_t >;
+template class VolumeRef< uint16_t >;
+template class VolumeRef< int32_t >;
+template class VolumeRef< uint32_t >;
+template class VolumeRef< int64_t >;
+template class VolumeRef< uint64_t >;
+template class VolumeRef< float >;
+template class VolumeRef< double >;
+template class VolumeRef< cfloat >;
+template class VolumeRef< cdouble >;
+template class VolumeRef< std::map<int, float> >;
+template class VolumeRef< VoxelRGB >;
+template class VolumeRef< VoxelRGBA >;
+template class VolumeRef< VoxelHSV >;
+#ifdef CARTO_LONG_IS_DISTINCT
+template class VolumeRef< long >;
+template class VolumeRef< unsigned long >;
+#endif
+
 template class Creator<Volume< bool > >;
 template class Creator<Volume< int8_t > >;
 template class Creator<Volume< uint8_t > >;
