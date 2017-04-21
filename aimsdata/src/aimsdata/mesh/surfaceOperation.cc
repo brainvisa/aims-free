@@ -1228,7 +1228,7 @@ namespace
   class DirectionalSort
   {
   public:
-    bool operator () ( const ProjPoint *x, const ProjPoint *y )
+    bool operator () ( const ProjPoint *x, const ProjPoint *y ) const
     {
       return (*x) < (*y);
     }
