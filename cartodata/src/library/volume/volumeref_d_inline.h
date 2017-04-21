@@ -420,14 +420,6 @@ namespace carto {
 //============================================================================
 
 template <typename T>
-std::ostream & operator<< ( std::ostream & out,
-                            const carto::rc_ptr<carto::Volume<T> > & volume )
-{
-  carto::VolumeOStream volumeout( out );
-  return volumeout << volume;
-}
-
-template <typename T>
 std::ostream & operator<< ( const carto::VolumeOStream & out,
                             const carto::rc_ptr<carto::Volume<T> > & volume )
 {
@@ -442,6 +434,14 @@ std::ostream & operator<< ( const carto::VolumeOStream & out,
     out.ostream() << ": " << std::flush;
     return out << *(volume.get());
   }
+}
+
+template <typename T>
+std::ostream & operator<< ( std::ostream & out,
+                            const carto::rc_ptr<carto::Volume<T> > & volume )
+{
+  carto::VolumeOStream volumeout( out );
+  return volumeout << volume;
 }
 
 
