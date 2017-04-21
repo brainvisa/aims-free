@@ -444,6 +444,10 @@ namespace carto {
     _maxX(other._maxX)
   {}
 
+  VolumeOStream::~VolumeOStream()
+  {
+  }
+
   std::ostream & VolumeOStream::ostream() const{ return _ostream; }
 
   const size_t & VolumeOStream::maxT() const { return _maxT; }
