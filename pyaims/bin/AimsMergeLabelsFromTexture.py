@@ -71,7 +71,7 @@ if len(args) > 0:
     parser.parse_args(['-h'])
 
 if not options.input_tex or not options.output_tex \
-    or not options.ilabel or not options.olabel:
+    or not options.ilabel or options.olabel is None:
     print("Error: input texture or ouput texture or labels are missing")
     parser.parse_args(['-h'])
 
