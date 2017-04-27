@@ -380,7 +380,9 @@ set( _sources
     utility/clock.cc
     utility/masscenter.cc
     utility/progress.cc
-    vector/vector.cc
+    vector/vector2d.cc
+    vector/vector3d.cc
+    vector/vector4d.cc
 )
 
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
