@@ -235,7 +235,7 @@ if __name__ == '__main__':
     # p = xml.parsers.expat.ParserCreate()
     # p.ParseFile( open( '/tmp/xml.xml' ) )
 
-    from PyQt4 import QtGui
+    from soma.qt_gui.qt_backend import QtGui
     app = QtGui.QApplication(sys.argv)
 
     doit = True
