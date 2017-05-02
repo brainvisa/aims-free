@@ -75,6 +75,7 @@ foreach( _command
           AimsChannelExtract
           AimsComposeTransformation
           AimsConnectedComp
+          AimsFiberOversampler
           AimsFileConvert
           AimsFileInfo
           AimsFlip
