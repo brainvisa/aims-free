@@ -39,6 +39,11 @@ set( _headers
     features/point_set_features.h
     features/roi_features.h
     fibers/bundles.h
+    fibers/bundles_features.h
+    fibers/bundlesFusion.h
+    fibers/bundleRegroup.h
+    fibers/bundleSampler.h
+    fibers/bundlesSlicer.h
     fibers/trackvisbundlereader.h
     getopt/getopt.h
     getopt/getopt2.h
@@ -249,6 +254,11 @@ set( _sources
     features/point_set_features.cc
     features/roi_features.cc
     fibers/bundles.cc
+    fibers/bundles_features.cc
+    fibers/bundlesFusion.cc
+    fibers/bundleRegroup.cc
+    fibers/bundleSampler.cc
+    fibers/bundlesSlicer.cc
     fibers/trackvisbundlereader.cc
     getopt/getopt.cc
     getopt/getopt2.cc
