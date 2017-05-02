@@ -44,9 +44,11 @@
   \ref cartodata, our newer library for medical imaging structures. The IO
   system is in the process of being reimplemented in \ref somaio.
 
-  A very incomplete <a href="../dev/index.html">developer documentation can 
+  A very incomplete <a href="../dev_doc/index.html">developer documentation can
   also be read here.</a>
 
+  Some bits of <a href="../user_doc/index.html">user documentation can
+  be found here.</a>
 
   \section aims_meaning What does AIMS mean ?
 

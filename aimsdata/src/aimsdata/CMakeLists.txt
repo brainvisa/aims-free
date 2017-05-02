@@ -44,6 +44,7 @@ set( _headers
     fibers/bundleRegroup.h
     fibers/bundleSampler.h
     fibers/bundlesSlicer.h
+    fibers/fiberOversampler.h
     fibers/trackvisbundlereader.h
     getopt/getopt.h
     getopt/getopt2.h
@@ -259,6 +260,7 @@ set( _sources
     fibers/bundleRegroup.cc
     fibers/bundleSampler.cc
     fibers/bundlesSlicer.cc
+    fibers/fiberOversampler.cc
     fibers/trackvisbundlereader.cc
     getopt/getopt.cc
     getopt/getopt2.cc
