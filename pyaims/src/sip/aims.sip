@@ -274,7 +274,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include texturetools.sip
 
 %Include bundles.sip
-%Include bundleSlicer.sip
+%Include bundlesSlicer.sip
 
 %Include reader_Object.sip
 %Include soma_reader_Object.sip
