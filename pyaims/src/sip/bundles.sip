@@ -351,5 +351,25 @@ public:
 };
 
 
+  //------------------//
+ // BundleSampler //
+//------------------//
+
+class BundleSampler : aims::BundleProducer, aims::BundleListener
+{
+%TypeHeaderCode
+#include <aims/fibers/bundleSampler.h>
+%End
+
+public:
+  BundleSampler(float percent, const std::string &bundle_name,
+                const std::string &sampled_bundle_name, int mode);
+  BundleSampler(float percent, const std::string &bundle_name,
+                const std::string &sampled_bundle_name, int mode,
+                bool discarded);
+  virtual ~BundleSampler();
+};
+
+
 }; // namespace aims
 
