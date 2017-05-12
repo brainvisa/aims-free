@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import unittest
-import tempfile
 import os
 import shutil
 import subprocess
 import sys
-import types
 import errno
+import warnings
+
+import soma.test_utils
+
 
 class ImageFileComparison:
 
@@ -53,7 +54,7 @@ class ImageFileComparison:
         else:
             h2 = dict()
             i2 = numpy.array([])
-            
+
         if ((i1 == numpy.array([])) and (i2 == numpy.array([]))):
           print('WARNING: image file comparison of empty images (%s, %s)'
                 % (image1, image2), file=sys.stderr)
@@ -68,7 +69,7 @@ class ImageFileComparison:
           # Process differences between headers
           testcase.assertDictEqual(h1, h2, msg)
           #print('ERROR: image (%s, %s) header is not the same' % (image1, image2), file=sys.stderr)
-          
+
         i1 = None
         i2 = None
 
@@ -295,21 +296,17 @@ class CommandTest:
     def __str__(self):
         return ' '.join(self.__command) + \
                ' run in \'%(last_run_directory)s\'. [output => \'%(outfile)s\', error =>\'%(errfile)s\']' \
-                % { 'last_run_directory': self.__last_run_directory, 
+                % { 'last_run_directory': self.__last_run_directory,
                     'outfile': self.__outfile,
                     'errfile': self.__errfile }
 
 
-class CommandsTestManager(unittest.TestCase):
+class CommandsTestManager(soma.test_utils.SomaTestCase):
 
     """ CommandsTestManager class is a base class to test commands.
-        Derived class needs to define the following attributes :
-          - ref_directory string path to the base reference directory.
-            It is where results of the reference tests are stored.
-          - run_directory string path to the base run directory
-            It is where results of the current run tests are stored.
-          - test_cases an iterable containing CommandTest instances.
-            CommandTest are the command line to execute during the test.
+        Derived class needs to define an iterable containing CommandTest
+        instances (test_cases). CommandTest are the command line to execute
+        during the test.
     """
 
     def get_ref_directory(self, testcommand):
@@ -327,7 +324,8 @@ class CommandsTestManager(unittest.TestCase):
             path to the refernce directory of the unit test.
         """
 
-        return os.path.join(self.ref_directory, testcommand.get_test_name())
+        return os.path.join(self.private_ref_data_dir,
+                            testcommand.get_test_name())
 
     def get_run_directory(self, testcommand):
         """ Get run directory for a CommandTest.
@@ -344,12 +342,11 @@ class CommandsTestManager(unittest.TestCase):
             path to the run directory of the unit test.
         """
 
-        return os.path.join(self.run_directory, testcommand.get_test_name())
+        return os.path.join(self.private_run_data_dir,
+                            testcommand.get_test_name())
 
-    def create_ref_directory(self, testcommand):
+    def create_ref_directory(self, testcommand, fail_if_exists=True):
         """ Creates a reference test directory for a CommandTest.
-          If the reference test directory does not exist the
-          CommandTest is run to be used as a reference.
 
         Parameters
         ----------
@@ -362,17 +359,14 @@ class CommandsTestManager(unittest.TestCase):
             path to the reference test directory for the unit test.
         """
 
-        test_ref_directory = os.path.join(
-            self.ref_directory, testcommand.get_test_name())
+        msg = "Test reference directory %s already exists."
+        test_ref_directory = self.get_ref_directory(testcommand)
         if not os.path.exists(test_ref_directory):
             os.makedirs(test_ref_directory)
-
-        if not all([os.path.exists(os.path.join(
-                test_ref_directory, run_file)) \
-                for run_file in testcommand.get_run_files()]):
-
-            # Run the test as reference in the test reference directory
-            testcommand.execute(test_ref_directory)
+        elif fail_if_exists:
+            raise EnvironmentError(msg % test_ref_directory)
+        else:
+            warnings.warn(msg % test_ref_directory)
 
         return test_ref_directory
 
@@ -390,8 +384,7 @@ class CommandsTestManager(unittest.TestCase):
             a path to the test run directory for the unit test.
         """
 
-        test_directory = os.path.join(
-            self.run_directory, testcommand.get_test_name())
+        test_directory = self.get_run_directory(testcommand)
         if not os.path.exists(test_directory):
             os.makedirs(test_directory)
         return test_directory
@@ -410,8 +403,7 @@ class CommandsTestManager(unittest.TestCase):
             a path to the test run directory for the unit test.
         """
 
-        test_directory = os.path.join(
-            self.run_directory, testcommand.get_test_name())
+        test_directory = self.get_run_directory(testcommand)
         if os.path.exists(test_directory):
             shutil.rmtree(test_directory)
 
@@ -437,7 +429,8 @@ class CommandsTestManager(unittest.TestCase):
         if directory is None:
             return []
         else:
-            return [os.path.join(directory, f) for f in testcommand.get_run_files()]
+            return [os.path.join(directory, f)
+                    for f in testcommand.get_run_files()]
 
     def get_ref_files(self, testcommand):
         """ Returns pathes to reference files
@@ -475,23 +468,56 @@ class CommandsTestManager(unittest.TestCase):
         return CommandsTestManager.get_command_files(
             testcommand, self.get_run_directory(testcommand))
 
+    def get_run_ref_files(self, testcommand, check_ref_files=True):
+        """
+        Get the run and reference output files altogether. Optionaly checks if
+        some reference files are not found or there are extra reference files.
+
+        Parameters
+        ----------
+        testcommand : CommandTest (mandatory)
+            command for which to get the files.
+
+        Returns
+        -------
+        files: list of tuples
+            list of tuples (run_file, ref_file).
+        """
+        files = zip(self.get_run_files(testcommand),
+                    self.get_ref_files(testcommand))
+        if check_ref_files:
+            ref_files = set([t[1] for t in files])
+            real_ref_files = set(os.listdir(self.get_ref_directory(testcommand)))
+            if ref_files < real_ref_files:
+                diff = real_ref_files - ref_files
+                msg_fmt = ("Found extra reference files ({s}); "
+                           "consider re-running \'ref\' mode")
+                msg = msg_fmt.format(s=diff)
+                warnings.warn(msg)
+            if ref_files > real_ref_files:
+                diff = ref_files - real_ref_files
+                msg_fmt = ("Missing reference files ({s}); "
+                           "test should not habe been run mode")
+                msg = msg_fmt.format(s=diff)
+                warnings.warn(msg)
+        return files
+
     def setUp(self):
         """ Overriden unittest.TestCase that setup
             reference and run directories for CommandTest
             contained in the test_cases attribute.
         """
-
-        tempdir = tempfile.gettempdir()
-
+        super(CommandsTestManager, self).setUp()
         if hasattr(self, 'test_cases'):
             # Create directories for test cases
             for c in self.test_cases:
                 # Create reference directory
-                self.create_ref_directory(c)
-
-                # Remove run directory and re-create it
-                self.remove_run_directory(c)
-                self.create_run_directory(c)
+                if self.test_mode == soma.test_utils.ref_mode:
+                    self.create_ref_directory(c)
+                else:
+                    # Remove run directory and re-create it
+                    self.remove_run_directory(c)
+                    self.create_run_directory(c)
 
         else:
             raise Exception(
@@ -504,30 +530,46 @@ class CommandsTestManager(unittest.TestCase):
 
         n_failed = 0
         for c in self.test_cases:
-            # Run the test in the test run directory
             try:
-                c.execute(self.get_run_directory(c))
-                #print('command run normally:', c, file=sys.stderr)
+                if self.test_mode == soma.test_utils.ref_mode:
+                    # Run the test in the test ref directory
+                    c.execute(self.get_ref_directory(c))
+                    #print('command run normally:', c, file=sys.stderr)
+                else:
+                    # Get reference and run files (this is a bit of extra work
+                    # if we don't run the test but simplify code)
+                    run_ref_files = self.get_run_ref_files(c)
 
-                # Compare each produced run file with its matching reference
-                ref_files = self.get_ref_files(c)
-                run_files = self.get_run_files(c)
+                    # Check that reference files exist (otherwise don't run the
+                    # test)
+                    ref_files = [t[1] for t in run_ref_files]
+                    if not all(map(os.path.exists, ref_files)):
+                        msg_fmt = ("Can't run %s because some reference files "
+                                   "are missing; re-run in ref mode.")
+                        msg = msg_fmt % c.get_test_name()
+                        raise EnvironmentError(msg)
 
-                for ref_file, run_file in zip(ref_files, run_files):
-                    sys.stderr.write('compare files: %s <=> %s\n' % (ref_file, run_file))
-                    FileComparison.assertEqual(self, run_file, ref_file)
+                    # Run the test in the test run directory
+                    c.execute(self.get_run_directory(c))
+                    #print('command run normally:', c, file=sys.stderr)
+
+                    # Compare each run file with its reference
+                    for run_file, ref_file in run_ref_files:
+                        sys.stderr.write('compare files: %s <=> %s\n' % (ref_file, run_file))
+                        FileComparison.assertEqual(self, run_file, ref_file)
 
             except Exception as e:
                 print('Test failure:', e, 'while running:', c, file=sys.stderr)
                 n_failed += 1
         if n_failed != 0:
             raise RuntimeError('%d / %d tests failed.'
-                % (n_failed, len(self.test_cases)))
+                               % (n_failed, len(self.test_cases)))
 
     def tearDown(self):
         """
         Remove last run directories for registered TestCommand.
         """
-        for c in self.test_cases:
-            # Remove run directory
-            self.remove_run_directory(c)
+        if self.test_mode == soma.test_utils.run_mode:
+            for c in self.test_cases:
+                # Remove run directory
+                self.remove_run_directory(c)
