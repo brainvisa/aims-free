@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import sys
 import unittest
 
@@ -349,4 +350,4 @@ def test(argv):
 
 if __name__ == "__main__":
     ret = test(sys.argv[1:])
-    print "RETURNCODE: ", ret
+    print("RETURNCODE: ", ret)
