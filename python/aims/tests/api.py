@@ -324,7 +324,7 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
             path to the refernce directory of the unit test.
         """
 
-        return os.path.join(self.private_ref_data_dir,
+        return os.path.join(self.private_ref_data_dir(),
                             testcommand.get_test_name())
 
     def get_run_directory(self, testcommand):
@@ -342,7 +342,7 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
             path to the run directory of the unit test.
         """
 
-        return os.path.join(self.private_run_data_dir,
+        return os.path.join(self.private_run_data_dir(),
                             testcommand.get_test_name())
 
     def create_ref_directory(self, testcommand, fail_if_exists=True):
