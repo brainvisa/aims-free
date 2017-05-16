@@ -355,4 +355,4 @@ if __name__ == "__main__":
     if ret:
         sys.exit(os.EX_OK)
     else:
-        sys.exc_clear(os.EX_SOFTWARE)
+        sys.exit(os.EX_SOFTWARE)
