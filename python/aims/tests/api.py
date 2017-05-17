@@ -46,7 +46,6 @@ class ImageFileComparison:
             h1 = dict()
             i1 = numpy.array([])
 
-
         if os.path.exists(image2):
             d2 = soma.aims.read(image2)
             h2 = dict(d2.header())
@@ -56,19 +55,19 @@ class ImageFileComparison:
             i2 = numpy.array([])
 
         if ((i1 == numpy.array([])) and (i2 == numpy.array([]))):
-          print('WARNING: image file comparison of empty images (%s, %s)'
-                % (image1, image2), file=sys.stderr)
+            print('WARNING: image file comparison of empty images (%s, %s)'
+                  % (image1, image2), file=sys.stderr)
 
         # Process differences between pixels
-        if not numpy.array_equal(i1, i2) :
-          testcase.fail(msg)
-          #print('ERROR: image (%s, %s) content is not the same' % (image1, image2), file=sys.stderr)
+        if not numpy.array_equal(i1, i2):
+            testcase.fail(msg)
+            #print('ERROR: image (%s, %s) content is not the same' % (image1, image2), file=sys.stderr)
 
         # testunit 1.63 for python 2.6 (installed on MacOS) does not have assertDictEqual method
         if hasattr(testcase, 'assertDictEqual'):
-          # Process differences between headers
-          testcase.assertDictEqual(h1, h2, msg)
-          #print('ERROR: image (%s, %s) header is not the same' % (image1, image2), file=sys.stderr)
+            # Process differences between headers
+            testcase.assertDictEqual(h1, h2, msg)
+            #print('ERROR: image (%s, %s) header is not the same' % (image1, image2), file=sys.stderr)
 
         i1 = None
         i2 = None
@@ -238,9 +237,9 @@ class CommandTest:
             # python 2.6 / Mac cat get a INTR signal
             # https://bugs.python.org/issue1068268
             p = subprocess.Popen(self.__command,
-                                  stdout=fout,
-                                  stderr=ferr,
-                                  cwd=run_directory)
+                                 stdout=fout,
+                                 stderr=ferr,
+                                 cwd=run_directory)
             while p.returncode is None:
                 try:
                     p.communicate()
@@ -267,7 +266,8 @@ class CommandTest:
         if self.__last_run_directory is None:
             return []
         else:
-            return [os.path.join(self.__last_run_directory, f) for f in self.__run_files]
+            return [os.path.join(self.__last_run_directory, f)
+                    for f in self.__run_files]
 
     def get_test_name(self):
         """ Returns the test name of the test command.
@@ -298,7 +298,7 @@ class CommandTest:
                ' run in \'%(last_run_directory)s\'. [output => \'%(outfile)s\', error =>\'%(errfile)s\']' \
                 % { 'last_run_directory': self.__last_run_directory,
                     'outfile': self.__outfile,
-                    'errfile': self.__errfile }
+                    'errfile': self.__errfile}
 
 
 class CommandsTestManager(soma.test_utils.SomaTestCase):
@@ -425,7 +425,9 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
                     self.get_ref_files(testcommand))
         if check_ref_files:
             ref_files = set([t[1] for t in files])
-            real_ref_files = set(os.listdir(self.get_ref_directory(testcommand)))
+            real_ref_files = set(
+                os.listdir(self.get_ref_directory(testcommand))
+            )
             if ref_files < real_ref_files:
                 diff = real_ref_files - ref_files
                 msg_fmt = ("Found extra reference files ({s}); "
