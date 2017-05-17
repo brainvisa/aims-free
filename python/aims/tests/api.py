@@ -345,68 +345,6 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
         return os.path.join(self.private_run_data_dir(),
                             testcommand.get_test_name())
 
-    def create_ref_directory(self, testcommand, fail_if_exists=True):
-        """ Creates a reference test directory for a CommandTest.
-
-        Parameters
-        ----------
-        testcommand : CommandTest (mandatory)
-            command to generate reference files.
-
-        Returns
-        -------
-        test_directory : str
-            path to the reference test directory for the unit test.
-        """
-
-        msg = "Test reference directory %s already exists."
-        test_ref_directory = self.get_ref_directory(testcommand)
-        if not os.path.exists(test_ref_directory):
-            os.makedirs(test_ref_directory)
-        elif fail_if_exists:
-            raise EnvironmentError(msg % test_ref_directory)
-        else:
-            warnings.warn(msg % test_ref_directory)
-
-        return test_ref_directory
-
-    def create_run_directory(self, testcommand):
-        """ Creates a test run directory for a CommandTest.
-
-        Parameters
-        ----------
-        testcommand : CommandTest (mandatory)
-            command for which to create a run directory.
-
-        Returns
-        -------
-        test_directory : str
-            a path to the test run directory for the unit test.
-        """
-
-        test_directory = self.get_run_directory(testcommand)
-        if not os.path.exists(test_directory):
-            os.makedirs(test_directory)
-        return test_directory
-
-    def remove_run_directory(self, testcommand):
-        """ Remove a test run directory for a given test.
-
-        Parameters
-        ----------
-        testcommand : CommandTest (mandatory)
-            command for which to delete a run directory.
-
-        Returns
-        -------
-        test_directory : str
-            a path to the test run directory for the unit test.
-        """
-
-        test_directory = self.get_run_directory(testcommand)
-        if os.path.exists(test_directory):
-            shutil.rmtree(test_directory)
-
     @staticmethod
     def get_command_files(testcommand, directory):
         """ Static method that returns pathes to files
@@ -511,14 +449,18 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
         if hasattr(self, 'test_cases'):
             # Create directories for test cases
             for c in self.test_cases:
-                # Create reference directory
                 if self.test_mode == soma.test_utils.ref_mode:
-                    self.create_ref_directory(c)
+                    # Remove reference directory and re-create it
+                    cmd_ref_dir = self.get_ref_directory(c)
+                    if os.path.exists(cmd_ref_dir):
+                        shutil.rmtree(cmd_ref_dir)
+                    os.makedirs(cmd_ref_dir)
                 else:
                     # Remove run directory and re-create it
-                    self.remove_run_directory(c)
-                    self.create_run_directory(c)
-
+                    cmd_run_dir = self.get_run_directory(c)
+                    if os.path.exists(cmd_run_dir):
+                        shutil.rmtree(cmd_run_dir)
+                    os.makedirs(cmd_run_dir)
         else:
             raise Exception(
                 'An attribute named test_cases that contains a list of CommandTest must be added.')
