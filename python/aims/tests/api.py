@@ -517,3 +517,9 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
             for c in self.test_cases:
                 # Remove run directory
                 self.remove_run_directory(c)
+
+    def remove_run_directory(self):
+        """
+        Cleanup run directory. Does nothing by default, can be overloaded.
+        """
+        pass
