@@ -49,12 +49,30 @@ namespace aims
 typedef std::vector< aims::FiberPoint > Fiber;
 typedef std::vector< Fiber > Fibers;
 
+/** Filter fibers by randomly discarding a proportion of them.
+    Discarded fibers may optionally be kept in an additional "discarded" bundle.
+*/
 class BundleSampler : public aims::BundleProducer, public aims::BundleListener
 {
 public:
 
+  /** Parameters:
+
+      \param percent proportion of accepted fibers
+      \param bundle_name ?
+      \param mode 0: fibers are randomly selected (default), 1: at least one fiber per bundle is selected
+  */
   BundleSampler(float percent, const std::string &bundle_name,
                 const std::string &sampled_bundle_name, int mode);
+  /** Parameters:
+
+      \param percent proportion of accepted fibers
+      \param bundle_name ?
+      \param mode 0: fibers are randomly selected (default), 1: at least one
+      fiber per bundle is selected
+      \param discarded if true, discarded fibers will be used in an
+      additional bundle with the name "discarded".
+  */
   BundleSampler(float percent, const std::string &bundle_name,
                 const std::string &sampled_bundle_name, int mode,
                 bool discarded);
