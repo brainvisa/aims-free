@@ -307,6 +307,8 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
         Derived class needs to define an iterable containing CommandTest
         instances (test_cases). CommandTest are the command line to execute
         during the test.
+
+        The data are kept from one invocation to another (in run and ref mode).
     """
 
     def get_ref_directory(self, testcommand):
@@ -508,18 +510,3 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
         if n_failed != 0:
             raise RuntimeError('%d / %d tests failed.'
                                % (n_failed, len(self.test_cases)))
-
-    def tearDown(self):
-        """
-        Remove last run directories for registered TestCommand.
-        """
-        if self.test_mode == soma.test_utils.run_mode:
-            for c in self.test_cases:
-                # Remove run directory
-                self.remove_run_directory(c)
-
-    def remove_run_directory(self):
-        """
-        Cleanup run directory. Does nothing by default, can be overloaded.
-        """
-        pass
