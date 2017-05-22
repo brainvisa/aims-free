@@ -353,6 +353,6 @@ if __name__ == "__main__":
     ret = test(sys.argv[1:])
     print("RETURNCODE: ", ret)
     if ret:
-        sys.exit(os.EX_OK)
+        sys.exit(0)
     else:
-        sys.exit(os.EX_SOFTWARE)
+        sys.exit(1)
