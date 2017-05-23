@@ -16,5 +16,5 @@ BRAINVISA_INSTALL( TARGETS AimsStructuringElement_test AimsPartialIO_test
 IF ( PYTHON_FOUND )
   # Run tests for aims using python unittest
   brainvisa_add_test(AimsStructuringElementTests
-  "${TARGET_PYTHON_EXECUTABLE_NAME}" -m aims.tests.test_aimsdata TESTREF)
+  "${PYTHON_EXECUTABLE_NAME}" -m aims.tests.test_aimsdata TESTREF)
 ENDIF()

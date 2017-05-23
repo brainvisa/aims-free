@@ -10,7 +10,7 @@ BRAINVISA_COPY_FILES( ${PROJECT_NAME}-dev
 
 file( GLOB _sipSources "${CMAKE_CURRENT_SOURCE_DIR}/*.sip" )
 
-exec_program( ${PYTHON_EXECUTABLE}
+exec_program( ${PYTHON_HOST_EXECUTABLE}
   ARGS "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}/maketemplates.py"
         -i "${CMAKE_CURRENT_SOURCE_DIR}/generatedtypes.py"
         -p "${CMAKE_CURRENT_SOURCE_DIR}"
