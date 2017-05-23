@@ -47,7 +47,7 @@ namespace carto
 
   /// only needed in bindings of GenericObject and subclasses
   void _objectStrCatchFunction( PythonWriter &, std::exception &,
-                                const carto::GenericObject & );
+                                const carto::Object & );
 
   template<> inline
   std::string DataTypeCode<PyObject *>::objectType()
