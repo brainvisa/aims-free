@@ -44,7 +44,7 @@ namespace carto
 {
 
   void _objectStrCatchFunction( carto::PythonWriter & pw, std::exception & e,
-                                const carto::GenericObject & )
+                                const carto::Object & )
   {
     AsciiDataSourceTraits<std::string>::write( *pw.dataSource(),
       string( "<" ) + e.what() + ">" );
