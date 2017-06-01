@@ -20,7 +20,7 @@ file( GLOB _sipSources "${CMAKE_CURRENT_SOURCE_DIR}/*.sip" )
 
 file( MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}" )
 
-execute_process( COMMAND ${PYTHON_HOST_EXECUTABLE}
+execute_process( COMMAND "${PYTHON_HOST_EXECUTABLE}"
         "${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}/maketemplates.py"
         -i "${_generatedtypes_py}"
         -p "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -28,12 +28,13 @@ execute_process( COMMAND ${PYTHON_HOST_EXECUTABLE}
         -t "${CMAKE_CURRENT_SOURCE_DIR}/typessub.py"
         -l
         -m "${QT_MOC_EXECUTABLE}"
-        -P "'${CMAKE_C_PREPROCESSOR}'"
+        -P "${CMAKE_C_PREPROCESSOR}"
   OUTPUT_VARIABLE _generatedSipFileList 
   RESULT_VARIABLE _returnValue )
 
 if( NOT _returnValue EQUAL 0 )
-  message( SEND_ERROR "The sip generation from pyaims templates with \"${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}/maketemplates.py\" returned an error:\n${_generatedSipFileList}\n========================")
+  message( SEND_ERROR "The sip generation from pyaims templates failed. Command:\n${PYTHON_HOST_EXECUTABLE} ${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY}/maketemplates.py -i ${_generatedtypes_py} -p ${CMAKE_CURRENT_SOURCE_DIR} -o ${CMAKE_BINARY_DIR}/${AIMS_RELATIVE_SIP_DIRECTORY} -t ${CMAKE_CURRENT_SOURCE_DIR}/typessub.py -l -m ${QT_MOC_EXECUTABLE} -P '${CMAKE_C_PREPROCESSOR}'\nreturned output:\n${_generatedSipFileList}\n========================")
+
 endif( NOT _returnValue EQUAL 0 )
 BRAINVISA_ADD_SIP_PYTHON_MODULE( aimssip 
   soma/aims
