@@ -290,5 +290,24 @@ public:
   virtual bool contains( const carto::Site & ) const = 0;
 };
 
-
 }; // namespace carto
+
+
+namespace aims
+{
+
+  class RoiDiff
+  {
+  %TypeHeaderCode
+  #include <aims/roi/roi_diff.h>
+  %End
+
+  public:
+    RoiDiff();
+    ~RoiDiff();
+
+    bool diff( const Graph & g1, const Graph & g2 );
+    void writeCSV( const std::string & name );
+  };
+
+}; // namespace aims
