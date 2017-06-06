@@ -40,26 +40,6 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
-namespace
-{
-
-  struct DiffStat
-  {
-    DiffStat()
-      : matching_voxels( 0 ), unmatching_voxels( 0 ), to_unknown( 0 ),
-        from_unknown( 0 ), dice( 0. )
-      {}
-
-    unsigned matching_voxels;
-    unsigned unmatching_voxels;
-    unsigned to_unknown;
-    unsigned from_unknown;
-    double dice;
-    BucketMap<Void> g2_bucket;
-  };
-
-}
-
 
 struct RoiDiff::Private
 {
@@ -81,6 +61,41 @@ RoiDiff::RoiDiff()
 RoiDiff::~RoiDiff()
 {
   delete d;
+}
+
+
+const map<string, RoiDiff::DiffStat> & RoiDiff::statsByLabel() const
+{
+  return d->stats;
+}
+
+
+const RoiDiff::DiffStat & RoiDiff::globalStats() const
+{
+  return d->global;
+}
+
+
+rc_ptr<BucketMap<Void> > RoiDiff::mismatch_bucket() const
+{
+  return d->unmatching_voxels;
+}
+
+rc_ptr<Volume<int16_t> > RoiDiff::graph2LabelVolume() const
+{
+  return d->vol2;
+}
+
+
+const std::vector<std::string> & RoiDiff::roiNames() const
+{
+  return d->roi_names;
+}
+
+
+const std::map<std::string, int> & RoiDiff::roiNamesInv() const
+{
+  return d->roi_names_inv;
 }
 
 

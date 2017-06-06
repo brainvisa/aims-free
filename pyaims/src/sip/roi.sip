@@ -303,11 +303,45 @@ namespace aims
   %End
 
   public:
+    struct DiffStat
+    {
+      DiffStat();
+      /// nb of voxels from graph1 matching in graph2
+      unsigned matching_voxels;
+      /// nb of voxels from graph1 not matching in graph2
+      unsigned unmatching_voxels;
+      double dice;
+      /// voxels from graph2
+      BucketMap_VOID g2_bucket;
+    };
+
     RoiDiff();
     ~RoiDiff();
 
     bool diff( const Graph & g1, const Graph & g2 );
     void writeCSV( const std::string & name );
+
+    // const map_STRING_DiffStat & statsByLabel() const;
+    const aims::RoiDiff::DiffStat & globalStats() const;
+    rc_ptr_BucketMap_VOID mismatch_bucket() const;
+    rc_ptr_Volume_S16 graph2LabelVolume() const;
+    const vector_STRING & roiNames() const;
+    const std::map<std::string, int> & roiNamesInv() const;
+    const aims::RoiDiff::DiffStat
+      & statsByLabel( const std::string & label ) const;
+%MethodCode
+  const std::map<std::string, aims::RoiDiff::DiffStat> & stats
+    = sipCpp->statsByLabel();
+  std::map<std::string, aims::RoiDiff::DiffStat>::const_iterator
+    i = stats.find( *a0 );
+  if( i == stats.end() )
+  {
+    sipIsErr = 1;
+    PyErr_SetString( PyExc_KeyError, "Label not found" );
+  }
+  else
+    sipRes = const_cast<aims::RoiDiff::DiffStat *>( &i->second );
+%End
   };
 
 }; // namespace aims
