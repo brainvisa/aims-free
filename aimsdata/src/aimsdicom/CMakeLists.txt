@@ -8,8 +8,10 @@ add_library( aimsdicom SHARED ${_sources} )
 
 if ( NOT WIN32 )
   add_definitions( -DHAVE_CONFIG_H )
-else ()
-  add_definitions( -DUSE_STD_CXX_INCLUDES )
+# Not necessary anymore (probably for version >= 3.6.0)
+# it generates warning during compilation
+# else ()
+#   add_definitions( -DUSE_STD_CXX_INCLUDES )
 endif ()
 
 add_dependencies( aimsdicom ${headersTarget} )
