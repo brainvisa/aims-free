@@ -34,8 +34,6 @@
 #include <fstream>
 #include <aims/roi/roi_diff.h>
 #include <aims/roi/roiIterator.h>
-// DEBUG FIXME
-#include <aims/io/writer.h>
 
 using namespace aims;
 using namespace carto;
@@ -100,7 +98,7 @@ const std::map<std::string, int> & RoiDiff::roiNamesInv() const
 }
 
 
-bool RoiDiff::diff( const Graph & g1, const Graph & g2 )
+void RoiDiff::diff( const Graph & g1, const Graph & g2 )
 {
   rc_ptr<RoiIterator> roi_it2 = getRoiIterator( g2 );
 
@@ -116,6 +114,7 @@ bool RoiDiff::diff( const Graph & g1, const Graph & g2 )
   map<string, int>::const_iterator irn, ern = roi_names_inv.end();
   int num = 0;
   map<string, DiffStat> & stats = d->stats;
+  stats.clear();
 
   for( roi_it2->restart(); roi_it2->isValid(); roi_it2->next() )
   {
@@ -136,9 +135,6 @@ bool RoiDiff::diff( const Graph & g1, const Graph & g2 )
     }
   }
 
-  Writer<Volume<int16_t> > w( "/tmp/roi2.nii" );
-  w.write( vol2 );
-
   d->unmatching_voxels.reset( new BucketMap<Void> );
   BucketMap<Void> & g1_not_in_g2 = *d->unmatching_voxels;
   g1_not_in_g2.setSizeX( vol2.getVoxelSize()[0] );
@@ -146,18 +142,16 @@ bool RoiDiff::diff( const Graph & g1, const Graph & g2 )
   g1_not_in_g2.setSizeZ( vol2.getVoxelSize()[2] );
   BucketMap<Void>::Bucket & g1n2 = g1_not_in_g2[0];
 
+  d->global = DiffStat(); // reset
   DiffStat & global = d->global;
-  cout << "stats: " << stats.size() << endl;
 
   rc_ptr<RoiIterator> roi_it1 = getRoiIterator( g1 );
   for( roi_it1->restart(); roi_it1->isValid(); roi_it1->next() )
   {
     string name = roi_it1->regionName();
-    cout << "diff " << name << endl;
     irn = roi_names_inv.find( name );
     if( irn == ern )
     {
-      cout << "not found\n";
       num = roi_names.size() + 1;
       roi_names.push_back( name );
       roi_names_inv[ name ] = num;
@@ -180,17 +174,16 @@ bool RoiDiff::diff( const Graph & g1, const Graph & g2 )
         g1n2[p] = Void();
       }
     }
+    if(  ds.matching_voxels + ds.unmatching_voxels + ds.g2_bucket[0].size()
+         == 0 )
+    {
+      stats.erase( name );
+      roi_names_inv.erase( name );
+      roi_names.erase( roi_names.begin() + ( num - 1 ) ); // assume it is the last
+      continue;
+    }
     ds.dice = double( ds.matching_voxels ) * 2.
       / ( ds.matching_voxels + ds.unmatching_voxels + ds.g2_bucket[0].size() );
-
-    cout << "match:   " << ds.matching_voxels << " ("
-      << double(ds.matching_voxels) * 100.
-        / ( ds.matching_voxels + ds.unmatching_voxels )
-      << " %)" << endl;
-    cout << "unmatch: " << ds.unmatching_voxels << endl;
-    cout << "sizes: " << ds.matching_voxels + ds.unmatching_voxels << ", "
-      << ds.g2_bucket[0].size() << endl;
-    cout << "dice: " << ds.dice << endl;
 
     global.matching_voxels += ds.matching_voxels;
     global.unmatching_voxels += ds.unmatching_voxels;
@@ -198,18 +191,6 @@ bool RoiDiff::diff( const Graph & g1, const Graph & g2 )
 
   global.dice = double( global.matching_voxels )
     / ( global.matching_voxels + global.unmatching_voxels );
-
-  cout << "\nglobal match: " << global.matching_voxels << " ("
-      << double(global.matching_voxels) * 100.
-        / ( global.matching_voxels + global.unmatching_voxels )
-      << " %)" << endl;
-  cout << "global unmatch: " << global.unmatching_voxels << endl;
-  cout << "global dice: " << global.dice << endl;
-
-  Writer<BucketMap<Void> > wb( "/tmp/roi1_not_in_2.bck" );
-  wb.write( g1_not_in_g2 );
-
-  return false;
 }
 
 

@@ -318,7 +318,7 @@ namespace aims
     RoiDiff();
     ~RoiDiff();
 
-    bool diff( const Graph & g1, const Graph & g2 );
+    void diff( const Graph & g1, const Graph & g2 );
     void writeCSV( const std::string & name );
 
     // const map_STRING_DiffStat & statsByLabel() const;
@@ -328,7 +328,7 @@ namespace aims
     const vector_STRING & roiNames() const;
     const std::map<std::string, int> & roiNamesInv() const;
     const aims::RoiDiff::DiffStat
-      & statsByLabel( const std::string & label ) const;
+      *statsByLabel( const std::string & label ) const;
 %MethodCode
   const std::map<std::string, aims::RoiDiff::DiffStat> & stats
     = sipCpp->statsByLabel();
@@ -340,7 +340,7 @@ namespace aims
     PyErr_SetString( PyExc_KeyError, "Label not found" );
   }
   else
-    sipRes = const_cast<aims::RoiDiff::DiffStat *>( &i->second );
+    sipRes = &i->second;
 %End
   };
 
