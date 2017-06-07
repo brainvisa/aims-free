@@ -174,6 +174,14 @@ void RoiDiff::diff( const Graph & g1, const Graph & g2 )
         g1n2[p] = Void();
       }
     }
+    if(  ds.matching_voxels + ds.unmatching_voxels + ds.g2_bucket[0].size()
+         == 0 )
+    {
+      stats.erase( name );
+      roi_names_inv.erase( name );
+      roi_names.erase( roi_names.begin() + ( num - 1 ) ); // assume it is the last
+      continue;
+    }
     ds.dice = double( ds.matching_voxels ) * 2.
       / ( ds.matching_voxels + ds.unmatching_voxels + ds.g2_bucket[0].size() );
 
