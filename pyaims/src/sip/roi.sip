@@ -318,7 +318,7 @@ namespace aims
     RoiDiff();
     ~RoiDiff();
 
-    bool diff( const Graph & g1, const Graph & g2 );
+    void diff( const Graph & g1, const Graph & g2 );
     void writeCSV( const std::string & name );
 
     // const map_STRING_DiffStat & statsByLabel() const;
