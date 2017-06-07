@@ -195,6 +195,7 @@ set( _headers
     roi/maskIterator.h
     roi/roiIterator.h
     roi/roi.h
+    roi/roi_diff.h
     roi/voxelSampling.h
     selection/selection.h
     selection/selector.h
@@ -377,6 +378,7 @@ set( _sources
     roi/maskIterator.cc
     roi/roiIterator.cc
     roi/roi.cc
+    roi/roi_diff.cc
     roi/voxelSampling.cc
     selection/selection.cc
     selection/selector.cc
