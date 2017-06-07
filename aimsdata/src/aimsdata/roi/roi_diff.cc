@@ -114,6 +114,7 @@ void RoiDiff::diff( const Graph & g1, const Graph & g2 )
   map<string, int>::const_iterator irn, ern = roi_names_inv.end();
   int num = 0;
   map<string, DiffStat> & stats = d->stats;
+  stats.clear();
 
   for( roi_it2->restart(); roi_it2->isValid(); roi_it2->next() )
   {
@@ -141,6 +142,7 @@ void RoiDiff::diff( const Graph & g1, const Graph & g2 )
   g1_not_in_g2.setSizeZ( vol2.getVoxelSize()[2] );
   BucketMap<Void>::Bucket & g1n2 = g1_not_in_g2[0];
 
+  d->global = DiffStat(); // reset
   DiffStat & global = d->global;
 
   rc_ptr<RoiIterator> roi_it1 = getRoiIterator( g1 );

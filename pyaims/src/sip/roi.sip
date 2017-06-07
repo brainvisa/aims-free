@@ -328,7 +328,7 @@ namespace aims
     const vector_STRING & roiNames() const;
     const std::map<std::string, int> & roiNamesInv() const;
     const aims::RoiDiff::DiffStat
-      & statsByLabel( const std::string & label ) const;
+      *statsByLabel( const std::string & label ) const;
 %MethodCode
   const std::map<std::string, aims::RoiDiff::DiffStat> & stats
     = sipCpp->statsByLabel();
@@ -340,7 +340,7 @@ namespace aims
     PyErr_SetString( PyExc_KeyError, "Label not found" );
   }
   else
-    sipRes = const_cast<aims::RoiDiff::DiffStat *>( &i->second );
+    sipRes = &i->second;
 %End
   };
 
