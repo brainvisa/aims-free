@@ -31,6 +31,7 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#include <fstream>
 #include <aims/roi/roi_diff.h>
 #include <aims/roi/roiIterator.h>
 // DEBUG FIXME
@@ -214,7 +215,7 @@ bool RoiDiff::diff( const Graph & g1, const Graph & g2 )
 
 void RoiDiff::writeCSV( const std::string & name )
 {
-  ofstream s( name );
+  ofstream s( name.c_str() );
   writeCSV( s );
 }
 
