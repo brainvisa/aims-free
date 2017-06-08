@@ -77,6 +77,13 @@ int32_t MotionedVolumeROILabelMap::at( const Point3df &point ) const
 
 
 //----------------------------------------------------------------------------
+void RoiIterator::setRegionNameAttributes( const std::string & attribute )
+{
+  setRegionNameAttributes( vector<string>( 1, attribute ) );
+}
+
+
+//----------------------------------------------------------------------------
 rc_ptr< ROILabelMap > RoiIterator::createLabelMap()
 {
   const Point3df &voxelSize = this->voxelSize();
@@ -142,6 +149,17 @@ size_t  MotionedRoiIterator::count() const
 void  MotionedRoiIterator::next()
 {
   _roiIterator->next();
+}
+
+
+//----------------------------------------------------------------------------
+void MotionedRoiIterator::setRegionNameAttributes(
+  const std::vector<std::string>& attributes )
+{
+   if ( _roiIterator.isNull() )
+    throw runtime_error( "Fatal internal error: "
+                         "MotionedRoiIterator::_roiIterator is null" );
+  _roiIterator->setRegionNameAttributes( attributes );
 }
 
 
@@ -244,13 +262,14 @@ RoiIteratorOf<Graph>::~RoiIteratorOf()
 //----------------------------------------------------------------------------
 rc_ptr< MaskIterator > RoiIteratorOf<Graph>::maskIterator() const
 {
-  if ( _roiLife.get() == NULL ) {
-    return rc_ptr< MaskIterator >
-      ( new MaskIteratorOf<Graph>( *_roi, *_itNames, _voxelSampler ) );
-  } else {
-    return rc_ptr< MaskIterator >
-      ( new MaskIteratorOf<Graph>( _roiLife, *_itNames, _voxelSampler ) );
-  }
+  MaskIteratorOf<Graph> *mit = 0;
+  if ( _roiLife.get() == NULL )
+    mit = new MaskIteratorOf<Graph>( *_roi, *_itNames, _voxelSampler,
+                                     _nameAttributes );
+  else
+    mit = new MaskIteratorOf<Graph>( _roiLife, *_itNames, _voxelSampler,
+                                     _nameAttributes );
+  return rc_ptr< MaskIterator >( mit );
 }
 
 
@@ -269,16 +288,46 @@ bool RoiIteratorOf<Graph>::isValid() const
 
 
 //----------------------------------------------------------------------------
+void RoiIteratorOf<Graph>::setRegionNameAttributes(
+  const vector<string> & attributes )
+{
+  _nameAttributes = attributes;
+}
+
+
+//----------------------------------------------------------------------------
 void RoiIteratorOf<Graph>::restart()
 {
+  if( _nameAttributes.empty() )
+  {
+    cout << "build _nameAttributes\n";
+    try
+    {
+      string att = _roi->getProperty( "label_property" )->getString();
+      _nameAttributes.push_back( att );
+      cout << "label_property: " << att << endl;
+    }
+    catch( ... )
+    {
+      cout << "default name, label\n";
+      // default attributes search list
+      _nameAttributes.push_back( "name" );
+      _nameAttributes.push_back( "label" );
+    }
+  }
+  cout << "_nameAttributes: " << _nameAttributes.size() << endl;
   _names.clear();
   for( Graph::const_iterator it = _roi->begin();
-       it != _roi->end(); ++it ) {
+       it != _roi->end(); ++it )
+  {
     string name;
-    if ( (*it)->getProperty( "name", name ) ||
-         (*it)->getProperty( "label", name ) ) {
-      _names.insert( name );
-    }
+    vector<string>::const_iterator il, el = _nameAttributes.end();
+    for( il=_nameAttributes.begin(); il!=el; ++il )
+      if ( (*it)->getProperty( *il, name ) )
+      {
+        _names.insert( name );
+        break;
+      }
   }
   _itNames = _names.begin();
 }

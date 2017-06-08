@@ -126,6 +126,8 @@ namespace aims
 
     inline virtual ~NodeFilter() {}
 
+    virtual void setRegionNameAttributes(
+      const std::vector<std::string> & ) {}
     virtual bool filter( const carto::AttributedObject & ) const;
   };
 
@@ -148,12 +150,17 @@ namespace aims
   class NameNodeFilter : public NodeFilter
   {
     std::string _name;
+    std::vector<std::string> _nameAttributes;
 
   public:
 
-    NameNodeFilter( const std::string &name ) : _name( name ) {}
+    NameNodeFilter( const std::string &name,
+                    const std::vector<std::string> & name_attributes
+                      = std::vector<std::string>() );
     inline virtual ~NameNodeFilter() {}
 
+    virtual void setRegionNameAttributes(
+      const std::vector<std::string> & attributes );
     virtual bool filter( const carto::AttributedObject & ) const;
   };
 
@@ -172,6 +179,7 @@ namespace aims
     BucketMap<Void>::Bucket::const_iterator _itPoints;
     std::auto_ptr< NodeFilter > _nodeFilter;
     carto::rc_ptr< VoxelSampler > _voxelSampler;
+    std::vector<std::string> _nameAttributes;
 
     static void
     _findBucketAttributeNames( const Graph &graph,
@@ -191,7 +199,9 @@ namespace aims
                     carto::rc_ptr< VoxelSampler >() );
     MaskIteratorOf( const Graph &roi, const std::string &label,
                     carto::rc_ptr< VoxelSampler > voxelSampler =
-                    carto::rc_ptr< VoxelSampler >() );
+                    carto::rc_ptr< VoxelSampler >(),
+                    const std::vector<std::string> & regionNameAttributes =
+                    std::vector<std::string>() );
     MaskIteratorOf( const carto::rc_ptr<Graph> &roi,
                     carto::rc_ptr< VoxelSampler > voxelSampler =
                     carto::rc_ptr< VoxelSampler >() );
@@ -201,7 +211,9 @@ namespace aims
     MaskIteratorOf( const carto::rc_ptr<Graph> &roi,
                     const std::string &label,
                     carto::rc_ptr< VoxelSampler > voxelSampler =
-                    carto::rc_ptr< VoxelSampler >() );
+                    carto::rc_ptr< VoxelSampler >(),
+                    const std::vector<std::string> & regionNameAttributes =
+                    std::vector<std::string>() );
     MaskIteratorOf( const std::string &fileName,
                     carto::rc_ptr< VoxelSampler > voxelSampler =
                     carto::rc_ptr< VoxelSampler >() );
@@ -210,7 +222,9 @@ namespace aims
                     carto::rc_ptr< VoxelSampler >() );
     MaskIteratorOf( const std::string &fileName, const std::string &label,
                     carto::rc_ptr< VoxelSampler > voxelSampler =
-                    carto::rc_ptr< VoxelSampler >() );
+                    carto::rc_ptr< VoxelSampler >(),
+                    const std::vector<std::string> & regionNameAttributes =
+                    std::vector<std::string>() );
     virtual ~MaskIteratorOf();
 
     virtual const Point3df voxelSize() const { return _voxelSize; }
@@ -225,6 +239,15 @@ namespace aims
     virtual bool contains( const Point3df & ) const;
     virtual const Point3d volumeDimension() const;
     virtual std::string regionName() const;
+    /** Set region name attribute in graph.
+        Normally "name" or "label". If several values are provided, attributes
+        are searched in each graph vertex, in that order.
+        If the attributes list is empty, then the graph "label_property"
+        attribute will be used, and if it is not specified there, the default
+        search list ("name", "label") will be used.
+    */
+    virtual void setRegionNameAttributes( const std::vector<std::string>
+                                          & attributes );
   };
 
 
