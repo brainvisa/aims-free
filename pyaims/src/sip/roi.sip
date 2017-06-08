@@ -32,6 +32,7 @@ public:
   virtual bool contains( const Point3df & ) const = 0;
   virtual const Point3d volumeDimension() const = 0;
   std::string regionName() const = 0;
+  // virtual void setRegionNameAttributes( const vector_STRING & );
 };
 
 }; // namesapce aims
@@ -110,6 +111,18 @@ public:
   virtual unsigned count() const = 0;
   virtual std::string regionName() const = 0;
   virtual carto::rc_ptr_MaskIterator maskIterator() const = 0;
+  virtual void setRegionNameAttributes( const vector_STRING & );
+%Docstring
+      setRegionNameAttributes( attributes )
+
+      set region name attribute in graph.
+      Normally "name" or "label". If several values are provided, attributes
+      are searched in each graph vertex, in that order.
+      If the attributes list is empty, then the graph "label_property"
+      attribute will be used, and if it is not specified there, the default
+      search list ("name", "label") will be used.
+%End
+  virtual void setRegionNameAttributes( const std::string & );
 };
 
 }; // namesapce aims

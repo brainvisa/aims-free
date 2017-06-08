@@ -144,7 +144,17 @@ std::string MotionedMaskIterator::regionName() const
 
 
 
-
+//----------------------------------------------------------------------------
+ NameNodeFilter::NameNodeFilter( const string &name,
+    const vector<string> & name_attributes )
+  : _name( name ), _nameAttributes( name_attributes )
+{
+  if( name_attributes.empty() )
+  {
+    _nameAttributes.push_back( "name" );
+    _nameAttributes.push_back( "label" );
+  }
+}
 
 
 //----------------------------------------------------------------------------
@@ -169,12 +179,20 @@ bool LabelNodeFilter::filter( const AttributedObject &object ) const
 bool NameNodeFilter::filter( const AttributedObject &object ) const
 {
   string name;
-  if ( object.getProperty( "name", name ) ) {
-    return name == _name;
-  }
+  vector<string>::const_iterator il, el = _nameAttributes.end();
+  for( il=_nameAttributes.begin(); il!=el; ++il )
+    if ( object.getProperty( *il, name ) )
+      return name == _name;
   return false;
 }
 
+
+void NameNodeFilter::setRegionNameAttributes(
+  const vector<string> & attributes )
+{
+  cout << "NameNodeFilter::setRegionNameAttributes: " << attributes.size() << endl;
+  _nameAttributes = attributes;
+}
 
 //----------------------------------------------------------------------------
 void MaskIteratorOf<Graph>::_getRequiredAttributes()
@@ -217,10 +235,12 @@ MaskIteratorOf( const Graph &roi, int label,
 //----------------------------------------------------------------------------
 MaskIteratorOf<Graph>::
 MaskIteratorOf( const Graph &roi, const string &label,
-                carto::rc_ptr< VoxelSampler > voxelSampler ):
+                carto::rc_ptr< VoxelSampler > voxelSampler,
+                const vector<string> & regionNameAttributes ):
   _roi( &roi ),
   _nodeFilter( new NameNodeFilter( label ) ),
-  _voxelSampler( voxelSampler )
+  _voxelSampler( voxelSampler ),
+  _nameAttributes( regionNameAttributes )
 {
   _getRequiredAttributes();
   restart();
@@ -257,10 +277,12 @@ MaskIteratorOf( const rc_ptr<Graph> &roi, int label,
 //----------------------------------------------------------------------------
 MaskIteratorOf<Graph>::
 MaskIteratorOf( const rc_ptr<Graph> &roi, const string &label,
-                carto::rc_ptr< VoxelSampler > voxelSampler ):
+                carto::rc_ptr< VoxelSampler > voxelSampler,
+                const vector<string> & regionNameAttributes ):
   _roiLife( roi ),
   _nodeFilter( new NameNodeFilter( label ) ),
-  _voxelSampler( voxelSampler )
+  _voxelSampler( voxelSampler ),
+  _nameAttributes( regionNameAttributes )
 {
   _roi = _roiLife.get();
   _getRequiredAttributes();
@@ -300,9 +322,11 @@ MaskIteratorOf( const string &fileName, int label,
 //----------------------------------------------------------------------------
 MaskIteratorOf<Graph>::
 MaskIteratorOf( const string &fileName, const string &label,
-                carto::rc_ptr< VoxelSampler > voxelSampler ) :
+                carto::rc_ptr< VoxelSampler > voxelSampler,
+                const vector<string> & regionNameAttributes ) :
   _nodeFilter( new NameNodeFilter( label ) ),
-  _voxelSampler( voxelSampler )
+  _voxelSampler( voxelSampler ),
+  _nameAttributes( regionNameAttributes )
 {
   Reader<Graph> gr( fileName );
   _roiLife.reset( gr.read( 1 ) );
@@ -420,12 +444,23 @@ bool MaskIteratorOf<Graph>::isValid() const
 
 }
 
+
+//----------------------------------------------------------------------------
+void MaskIteratorOf<Graph>::setRegionNameAttributes(
+  const vector<string> & attributes )
+{
+  _nameAttributes = attributes;
+  cout << "MaskIteratorOf<Graph>::setRegionNameAttributes " << _nameAttributes.size() << ", for " << this << endl;
+}
+
 //----------------------------------------------------------------------------
 void MaskIteratorOf<Graph>::restart()
 {
   if ( ! _voxelSampler.isNull() ) {
     _voxelSampler->restart();
   }
+  cout << "MaskIteratorOf<Graph>::restart, " << this << ", atts: " << _nameAttributes.size() << endl;
+  _nodeFilter->setRegionNameAttributes( _nameAttributes );
   for( _itRoi = _roi->begin();
        _itRoi != _roi->end();
        ++_itRoi ) {
@@ -500,11 +535,11 @@ const Point3d MaskIteratorOf<Graph>::volumeDimension() const
 //----------------------------------------------------------------------------
 string MaskIteratorOf<Graph>::regionName() const
 {
-  string result;
-  if ( ! (*_itRoi)->getProperty( "label", result ) &&
-       ! (*_itRoi)->getProperty( "name", result ) ) {
-    result = "unknown";
-  }
+  string result = "unknown";
+  vector<string>::const_iterator il, el = _nameAttributes.end();
+  for( il=_nameAttributes.begin(); il!=el; ++il )
+    if ( (*_itRoi)->getProperty( *il, result ) )
+      break;
   return result;
 }
 

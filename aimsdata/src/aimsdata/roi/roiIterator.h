@@ -103,6 +103,19 @@ namespace aims
     inline const Point3df voxelSize() const;
     inline float voxelVolume() const;
     virtual std::string regionName() const = 0;
+    /** Set region name attribute in graph.
+        Normally "name" or "label". If several values are provided, attributes
+        are searched in each graph vertex, in that order.
+        If the attributes list is empty, then the graph "label_property"
+        attribute will be used, and if it is not specified there, the default
+        search list ("name", "label") will be used.
+    */
+    virtual void setRegionNameAttributes( const std::vector<std::string>& ) {}
+    /** Set region name attribute in graph.
+        Same as above, for a single attribute.
+    */
+    virtual void setRegionNameAttributes( const std::string & );
+
 
     virtual carto::rc_ptr< ROILabelMap > createLabelMap();
   };
@@ -126,6 +139,7 @@ namespace aims
     inline const Point3df voxelSize() const;
     inline float voxelVolume() const;
     virtual std::string regionName() const;
+    virtual void setRegionNameAttributes( const std::vector<std::string>& );
 
     virtual carto::rc_ptr< ROILabelMap > createLabelMap();
 
@@ -169,6 +183,7 @@ namespace aims
     std::set< std::string > _names;
     std::set< std::string >::const_iterator _itNames;
     carto::rc_ptr< VoxelSampler > _voxelSampler;
+    std::vector<std::string> _nameAttributes;
 
   public:
 
@@ -187,6 +202,15 @@ namespace aims
     virtual void restart();
     virtual size_t count() const;
 
+    /** Set region name attribute in graph.
+        Normally "name" or "label". If several values are provided, attributes
+        are searched in each graph vertex, in that order.
+        If the attributes list is empty, then the graph "label_property"
+        attribute will be used, and if it is not specified there, the default
+        search list ("name", "label") will be used.
+    */
+    virtual void setRegionNameAttributes( const std::vector<std::string>
+                                          & attributes );
     virtual std::string regionName() const;
 
     virtual carto::rc_ptr< MaskIterator > maskIterator() const;
