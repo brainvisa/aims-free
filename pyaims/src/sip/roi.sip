@@ -298,9 +298,9 @@ namespace aims
 
   class RoiDiff
   {
-  %TypeHeaderCode
-  #include <aims/roi/roi_diff.h>
-  %End
+%TypeHeaderCode
+#include <aims/roi/roi_diff.h>
+%End
 
   public:
     struct DiffStat
