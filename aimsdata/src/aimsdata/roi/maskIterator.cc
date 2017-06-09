@@ -190,7 +190,6 @@ bool NameNodeFilter::filter( const AttributedObject &object ) const
 void NameNodeFilter::setRegionNameAttributes(
   const vector<string> & attributes )
 {
-  cout << "NameNodeFilter::setRegionNameAttributes: " << attributes.size() << endl;
   _nameAttributes = attributes;
 }
 
@@ -450,7 +449,6 @@ void MaskIteratorOf<Graph>::setRegionNameAttributes(
   const vector<string> & attributes )
 {
   _nameAttributes = attributes;
-  cout << "MaskIteratorOf<Graph>::setRegionNameAttributes " << _nameAttributes.size() << ", for " << this << endl;
 }
 
 //----------------------------------------------------------------------------
@@ -459,7 +457,6 @@ void MaskIteratorOf<Graph>::restart()
   if ( ! _voxelSampler.isNull() ) {
     _voxelSampler->restart();
   }
-  cout << "MaskIteratorOf<Graph>::restart, " << this << ", atts: " << _nameAttributes.size() << endl;
   _nodeFilter->setRegionNameAttributes( _nameAttributes );
   for( _itRoi = _roi->begin();
        _itRoi != _roi->end();
