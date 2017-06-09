@@ -300,22 +300,18 @@ void RoiIteratorOf<Graph>::restart()
 {
   if( _nameAttributes.empty() )
   {
-    cout << "build _nameAttributes\n";
     try
     {
       string att = _roi->getProperty( "label_property" )->getString();
       _nameAttributes.push_back( att );
-      cout << "label_property: " << att << endl;
     }
     catch( ... )
     {
-      cout << "default name, label\n";
       // default attributes search list
       _nameAttributes.push_back( "name" );
       _nameAttributes.push_back( "label" );
     }
   }
-  cout << "_nameAttributes: " << _nameAttributes.size() << endl;
   _names.clear();
   for( Graph::const_iterator it = _roi->begin();
        it != _roi->end(); ++it )
