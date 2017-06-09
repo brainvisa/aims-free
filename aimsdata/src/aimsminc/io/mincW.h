@@ -45,9 +45,11 @@
 #include <vector>
 
 //MINC I/O support
+#define OMPI_SKIP_MPICXX // avoid including mpi c++ stuff in an extern "C" context
 extern "C" {
 #include <volume_io.h>
 }
+#undef OMPI_SKIP_MPICXX
 
 namespace aims
 {
