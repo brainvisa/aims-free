@@ -40,9 +40,11 @@
 #include <string>
 
 //MINC I/O support
+#define OMPI_SKIP_MPICXX // avoid including mpi c++ stuff in an extern "C" context
 extern "C" {
 #include <volume_io.h>
 }
+#undef OMPI_SKIP_MPICXX
 
 #ifndef VIO_FLOOR
 // most recent type changes - is there a version anywhere ?

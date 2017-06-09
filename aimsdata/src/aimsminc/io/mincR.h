@@ -37,6 +37,7 @@
 #include <aims/config/aimsminc_config.h>
 
 //MINC I/O support
+#define OMPI_SKIP_MPICXX // avoid including mpi c++ stuff in an extern "C" context
 extern "C" {
 /* redefine some stupid macros that conflict with 
    those of the stupid system on Windows
@@ -57,6 +58,7 @@ extern "C" {
 #undef X
 #undef Y
 }
+#undef OMPI_SKIP_MPICXX
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/io/defaultItemR.h>
