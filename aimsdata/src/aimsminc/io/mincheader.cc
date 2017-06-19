@@ -38,7 +38,6 @@
 #include <aims/resampling/standardreferentials.h>
 #include <cartobase/exception/ioexcept.h>
 #include <cartobase/stream/fileutil.h>
-#include <cartobase/stream/fdinhibitor.h>
 #include <cartobase/thread/mutex.h>
 #include <vector>
 #include <fstream>
@@ -413,19 +412,18 @@ void MincHeader::read()
   //Read the header of the MINC file. This volume is not allocated and its content is not read from disk.
   set_print_error_function(my_empty_print_error);
 
-  // avoid printing anything from Minc/NetCDF lib
-  fdinhibitor	fdi( STDERR_FILENO );
-  fdi.close();
-  int   status = 0;
   mincMutex().lock();
+  // avoid printing anything from Minc/NetCDF lib  
+  milog_init(CARTOBASE_STREAM_NULLDEVICE);
+  int   status = 0;
   try
   {
   status = start_volume_input( fileName, 0, &dim_names[0],
                                MI_ORIGINAL_TYPE, TRUE,
                                0.0, 0.0, TRUE, &volume,
                                (minc_input_options *) NULL, &input_info );
-  fdi.open();
-
+  milog_init("stderr");
+  
   if(status != VIO_OK)
     throw wrong_format_error( fileName );
 
@@ -759,7 +757,7 @@ void MincHeader::read()
   }
   catch( ... )
   {
-    fdi.open();
+    milog_init("stderr");
     mincMutex().unlock();
     throw;
   }

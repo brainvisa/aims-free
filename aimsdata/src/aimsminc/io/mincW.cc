@@ -32,12 +32,12 @@
  */
 
 #include <cstdlib>
+#include <cstdio>
 #include <aims/io/mincW.h>
 #include <aims/io/mincheader.h>
 #include <aims/resampling/motion.h>
 #include <aims/io/scaledcoding.h>
 #include <cartobase/stream/fileutil.h>
-#include <cartobase/stream/fdinhibitor.h>
 
 using namespace carto;
 using namespace std;
@@ -52,7 +52,6 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   cout << "MincWriter<" << DataTypeCode<T>::name() << ">::write " << _name 
        << endl;
   */
-
   //Only works for 3D volume. Should add 4D support.
   string fname = _name;
   // Replaces '\' in name with '/'
@@ -82,9 +81,16 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   nc_type nc_data_type, nc_disk_data_type;
   VIO_BOOL signed_flag;
 
-  carto::DataTypeCode<T>	dtc;
+  carto::DataTypeCode<T>        dtc;
   bool scaledcoding = false;
   T mini = thing.minimum(), maxi = thing.maximum();
+  
+  // It is necessary to avoid dividing by 0 in case where 
+  // mini and maxi are identical otherwise minc writing 
+  // will fail.
+  if (mini == maxi)
+      maxi = mini + 1;
+  
   double dmin = 0., dmax = 0.;
   //std::cout << "Type: " << dtc.dataType() << "\n";
   if(dtc.dataType()=="U8") {
@@ -140,13 +146,18 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     dmin = mini;
     dmax = maxi;
   }
+//   cout << "MincWriter<" << DataTypeCode<T>::name() << ">::write-1, "
+//        << "n_dimensions: " << carto::toString(n_dimensions) 
+//        << "nc_data_type: " << carto::toString(nc_data_type) 
+//        << "mini: " << carto::toString(mini) 
+//        << "maxi: " << carto::toString(maxi) 
+//        << std::endl << std::flush;
   volume=create_volume(n_dimensions,
                        dim_names,
                        nc_data_type,
                        signed_flag,
                        mini,
                        maxi);
-
   set_volume_real_range(volume,mini,maxi);
 
   int       sizes[VIO_MAX_DIMENSIONS];
@@ -283,8 +294,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
   //3) Other attributes
   bool ok = true, ok2 = false;
-  fdinhibitor fdi( 2 );
-  fdi.close(); // inhibit output on stderr
+  milog_init(CARTOBASE_STREAM_NULLDEVICE);
   //std::cout << "MINC Plugin::write: name: " << fname << std::endl << std::flush;
   if( output_volume((char*)(fname.c_str()),
                 nc_disk_data_type,
@@ -295,7 +305,6 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
                 NULL,
                 NULL) != VIO_OK )
     ok = false;
-
 //   ncopts = NC_VERBOSE;
   ncopts = 0;
   ncerr = 0;
@@ -308,7 +317,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     if( mincid >= 0 && ncerr == 0 )
       ok2 = true;
   }
-  fdi.open(); // allow again output on stderr
+  milog_init("stderr"); // allow again output on stderr
   if( ok2 )
   {
     ncredef(mincid);
@@ -319,7 +328,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
     SyntaxSet	*s = PythonHeader::syntax();
     Syntax	&sx = (*s)[ "__generic__" /*"PythonHeader"*/ ];
-
+       
     hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "varid", "MINC_patient:varid");
     hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "vartype", "MINC_patient:vartype");
     hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "version", "MINC_patient:version");
@@ -393,7 +402,6 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
     hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filename", "MINC_processing:transformation0-filename");
     hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filedata", "MINC_processing:transformation0-filedata");
-
     hdr.writeMincHistory(mincid);
 
     miclose(mincid);
