@@ -37,7 +37,6 @@
 #include <aims/resampling/motion.h>
 #include <aims/io/scaledcoding.h>
 #include <cartobase/stream/fileutil.h>
-#include <cartobase/stream/fdinhibitor.h>
 
 using namespace carto;
 using namespace std;
@@ -280,8 +279,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
   //3) Other attributes
   bool ok = true, ok2 = false;
-  fdinhibitor fdi( 2 );
-  fdi.close(); // inhibit output on stderr
+  milog_init(CARTOBASE_STREAM_NULLDEVICE);
   //std::cout << "MINC Plugin::write: name: " << fname << std::endl << std::flush;
   if( output_volume((char*)(fname.c_str()),
                 nc_disk_data_type,
@@ -305,7 +303,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     if( mincid >= 0 && ncerr == 0 )
       ok2 = true;
   }
-  fdi.open(); // allow again output on stderr
+  milog_init("stderr"); // allow again output on stderr
   if( ok2 )
   {
     ncredef(mincid);
