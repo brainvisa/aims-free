@@ -42,6 +42,7 @@
  *  lecture de fichiers DICOM avec DCMTK
  */
 #include <cstdlib>
+#include <cstdio>
 #include <aims/io/dicomheader.h>
 #include <aims/def/general.h>
 #include <aims/def/assert.h>
@@ -574,7 +575,7 @@ namespace
 int DicomHeader::readFirst()
 {
   // avoid printing anything from dcmtk
-  fdinhibitor   fdi( STDERR_FILENO );
+  fdinhibitor   fdi( stderr );
   fdi.close();
   // open file
 #ifdef UID_RawDataStorage // #if (OFFIS_DCMTK_VERSION_NUMBER-0 > 351)

@@ -44,6 +44,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <cstdio>
 
 using namespace aims;
 using namespace carto;
@@ -137,7 +138,7 @@ bool PlyHeader::read( uint32_t* )
                                 &polysize, 0);
 
   // avoid printing anything from RPly lib
-  fdinhibitor	fdi( STDERR_FILENO );
+  fdinhibitor	fdi( stderr );
   fdi.close();
 
   ply_read(ply);

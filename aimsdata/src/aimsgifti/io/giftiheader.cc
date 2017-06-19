@@ -39,6 +39,7 @@
 #include <aims/resampling/standardreferentials.h>
 #include <aims/mesh/texture.h>
 #include <cartobase/thread/mutex.h>
+#include <cstdio>
 
 using namespace aims;
 using namespace carto;
@@ -107,7 +108,7 @@ bool GiftiHeader::read()
   if( !FileUtil::fileStat( fname ).empty() )
   {
     // avoid printing anything from gitficlib
-    fdinhibitor   fdi( STDERR_FILENO );
+    fdinhibitor   fdi( stderr );
     fdi.close();
     giftiMutex().lock();
     gim = gifti_read_image( fname.c_str(), 0 );
@@ -120,7 +121,7 @@ bool GiftiHeader::read()
     if( FileUtil::fileStat( fname ).empty() )
       return false;
     // avoid printing anything from gitficlib
-    fdinhibitor   fdi( STDERR_FILENO );
+    fdinhibitor   fdi( stderr );
     fdi.close();
     giftiMutex().lock();
     gim = gifti_read_image( fname.c_str(), 0 );

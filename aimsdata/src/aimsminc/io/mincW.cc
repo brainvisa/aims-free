@@ -81,9 +81,16 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   nc_type nc_data_type, nc_disk_data_type;
   VIO_BOOL signed_flag;
 
-  carto::DataTypeCode<T>	dtc;
+  carto::DataTypeCode<T>        dtc;
   bool scaledcoding = false;
   T mini = thing.minimum(), maxi = thing.maximum();
+  
+  // It is necessary to avoid dividing by 0 in case where 
+  // mini and maxi are identical otherwise minc writing 
+  // will fail.
+  if (mini == maxi)
+      maxi = mini + 1;
+  
   double dmin = 0., dmax = 0.;
   //std::cout << "Type: " << dtc.dataType() << "\n";
   if(dtc.dataType()=="U8") {

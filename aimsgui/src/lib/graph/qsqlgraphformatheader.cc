@@ -39,6 +39,7 @@
 #include <qsqlquery.h>
 #include <qsqlerror.h>
 #include <qvariant.h>
+#include <cstdio>
 
 using namespace aims;
 using namespace carto;
@@ -81,7 +82,7 @@ void QSqlGraphFormatHeader::read()
         throw file_not_found_error( "file not found", _name );
     }
     // avoid writing error messages about missing QtSQL plugins
-    fdinhibitor fdi( STDERR_FILENO );
+    fdinhibitor fdi( stderr );
     fdi.close();
 #if QT_VERSION >= 0x040000
     QSqlDatabase db = QSqlDatabase::addDatabase( dbtype.c_str(),
