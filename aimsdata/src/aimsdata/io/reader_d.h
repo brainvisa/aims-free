@@ -36,6 +36,7 @@
 
 #include <aims/io/reader.h>
 #include <aims/io/fileFormat.h>
+#include <aims/def/settings.h>
 #include <aims/io/finder.h>
 #include <cartobase/type/string_conversion.h>
 #include <cartobase/exception/ioexcept.h>
@@ -137,6 +138,12 @@ namespace aims
   bool Reader<T>::read( T & obj, int border, const std::string* format, 
                         int frame )
   {
+    carto::Object read_options = carto::Object::value( carto::PropertySet() );
+      
+    // Copy aims settings to read options
+    read_options->copyProperties(
+      carto::Object::reference( 
+        Settings::settings().getValue() ) );
 
     // take care of old-style options
     if( !_options.get() )
@@ -166,6 +173,9 @@ namespace aims
     else
       _options->setProperty( "format", *format );
 
+    // update read options using reader object options
+    read_options->copyProperties(_options);
+    
     // try first soma-io reader (since 2013)
     // try first 3 passes
     try
@@ -183,7 +193,7 @@ namespace aims
 
       soma::Reader<T> reader( uri );
       // set conversion option to invoque Carto2AimsHeaderTranslator
-      carto::Object options = _options;
+      carto::Object options = read_options;
       if( options.isNull() )
         options = carto::Object::value( carto::Dictionary() );
       options->setProperty( "convert_to_aims", true );
@@ -229,7 +239,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
           std::cout << "1. try reader " << *format << std::endl;
 #endif
-          if( reader->read( _filename, obj, _alloccontext, _options ) )
+          if( reader->read( _filename, obj, _alloccontext, read_options ) )
           {
 #ifdef AIMS_DEBUG_IO
             std::cout << "1. " << *format << " OK\n";
@@ -288,7 +298,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
               std::cout << "2. try reader " << *ie << std::endl;
 #endif
-              if( reader->read( _filename, obj, _alloccontext, _options ) )
+              if( reader->read( _filename, obj, _alloccontext, read_options ) )
               {
 #ifdef AIMS_DEBUG_IO
                 std::cout << "2. " << *ie << " OK\n";
@@ -332,7 +342,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
                 std::cout << "3. try reader " << *ie << std::endl;
 #endif
-                if( reader->read( _filename, obj, _alloccontext, _options ) )
+                if( reader->read( _filename, obj, _alloccontext, read_options ) )
                 {
 #ifdef AIMS_DEBUG_IO
                   std::cout << "3. " << *ie << " OK\n";
@@ -370,7 +380,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
               std::cout << "4. try reader " << *ie << std::endl;
 #endif
-              if( reader->read( _filename, obj, _alloccontext, _options ) )
+              if( reader->read( _filename, obj, _alloccontext, read_options ) )
               {
 #ifdef AIMS_DEBUG_IO
                 std::cout << "4. " << *ie << " OK\n";
@@ -410,7 +420,7 @@ namespace aims
         uri += ( "ot=" + carto::toString( frame ) + "&st=1" );
 
       soma::Reader<T> reader( uri );
-      reader.setOptions( _options );
+      reader.setOptions( read_options );
       const carto::Object & n = carto::none();
       return reader.read( obj, n, 4, 4 );
     } catch( ... ) {}
@@ -426,6 +436,13 @@ namespace aims
   template<class T>
   T* Reader<T>::read( int border, const std::string* format, int frame )
   {
+    carto::Object read_options = carto::Object::value( carto::PropertySet() );
+      
+    // Copy aims settings to read options
+    read_options->copyProperties(
+      carto::Object::reference( 
+        Settings::settings().getValue() ) );
+    
     // take care of old-style options
     if( !_options.get() )
       _options = carto::Object::value( carto::PropertySet() );
@@ -454,6 +471,9 @@ namespace aims
     else
       _options->setProperty( "format", *format );
 
+    // update read options using reader object options
+    read_options->copyProperties(_options);
+    
     // try first soma-io reader (since 2013)
     // try first 3 passes
     try
@@ -471,7 +491,7 @@ namespace aims
 
       soma::Reader<T> reader( uri );
       // set conversion option to invoque Carto2AimsHeaderTranslator
-      carto::Object options = _options;
+      carto::Object options = read_options;
       if( options.isNull() )
         options = carto::Object::value( carto::Dictionary() );
       options->setProperty( "convert_to_aims", true );
@@ -498,7 +518,7 @@ namespace aims
       {
         try
         {
-          obj = reader->read( _filename, _alloccontext, _options );
+          obj = reader->read( _filename, _alloccontext, read_options );
           if( obj )
           {
             carto::Object h = carto::getObjectHeader( obj );
@@ -537,7 +557,7 @@ namespace aims
           {
             try
             {
-              obj = reader->read( _filename, _alloccontext, _options );
+              obj = reader->read( _filename, _alloccontext, read_options );
               if( obj )
               {
                 carto::Object h = carto::getObjectHeader( obj );
@@ -570,7 +590,7 @@ namespace aims
             {
               try
               {
-                obj = reader->read( _filename, _alloccontext, _options );
+                obj = reader->read( _filename, _alloccontext, read_options );
                 if( obj )
                 {
                   carto::Object h = carto::getObjectHeader( obj );
@@ -600,7 +620,7 @@ namespace aims
           {
             try
             {
-              obj = reader->read( _filename, _alloccontext, _options );
+              obj = reader->read( _filename, _alloccontext, read_options );
               if( obj )
               {
                 carto::Object h = carto::getObjectHeader( obj );
@@ -635,7 +655,7 @@ namespace aims
         uri += ( "ot=" + carto::toString( frame ) + "&st=1" );
 
       soma::Reader<T> reader( uri );
-      reader.setOptions( _options );
+      reader.setOptions( read_options );
       return reader.read( carto::none(), 4, 4 );
     } catch( ... ) {}
     // if it failed, it's hopeless

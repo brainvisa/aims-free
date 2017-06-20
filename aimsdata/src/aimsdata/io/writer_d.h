@@ -112,6 +112,12 @@ namespace aims
 
     bool exactformat = false;
     carto::Object options = carto::Object::value( carto::Dictionary() );
+    
+    // Copy aims settings to options
+    options->copyProperties(
+      carto::Object::reference( 
+        Settings::settings().getValue() ) );
+    
     if( !_options.isNull() )
     {
       try
@@ -162,6 +168,11 @@ namespace aims
       soma::Writer<T> writer( uri );
       // copy options so that they are not modified
       carto::Object options = carto::Object::value( carto::Dictionary() );
+      // Copy aims settings to options
+      options->copyProperties(
+        carto::Object::reference( 
+          Settings::settings().getValue() ) );
+    
       if( !_options.isNull() )
         options->copyProperties( _options );
       return writer.write( obj, options, 1, 3 );
