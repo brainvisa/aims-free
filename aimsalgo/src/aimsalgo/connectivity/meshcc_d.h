@@ -95,7 +95,7 @@ Texture<T> AimsMeshLabelConnectedComponent( const AimsSurface<3,Void> & mesh,
      std::cerr << "AimsMeshLabelConnectedComponent : thresholding mode unknown" << std::endl;
      exit(1);
    }
-  std::cout << nnode << "/" << n << std::flush;
+  std::cout << nnode << "/" << n << std::endl;
 
   //Detect connectivity
   for( i=0; i<poly.size(); ++i )
@@ -249,9 +249,14 @@ Texture<T> AimsMeshLabelConnectedComponent2Texture( const AimsSurface<3,Void> & 
   const std::vector<Point3df>      & vert = mesh.vertex();
   const std::vector< AimsVector<uint,3> >    & poly = mesh.polygon();
   unsigned                    i, n = vert.size();
+  
+  Texture<T>                  tex_ord;
+  std::map<T,std::set<unsigned> >  labels;
+  std::multimap<unsigned, T>       nbLabels;
 
   ASSERT( inittex.nItem() == n );
   tex.reserve( n );
+  tex_ord.reserve( n );
 
   // neighbours map
 
@@ -261,12 +266,18 @@ Texture<T> AimsMeshLabelConnectedComponent2Texture( const AimsSurface<3,Void> & 
 
   // init texture
   for( i=0; i<n; ++i )
+  {
+    if(inittex.item(i) < threshold)
     {
-      if(inittex.item(i) < threshold)
-     tex.push_back( FORBIDDEN );
-      else
-     tex.push_back( 0 );
+      tex.push_back( FORBIDDEN );
+      tex_ord.push_back( FORBIDDEN );
     }
+    else
+    {
+      tex.push_back( 0 );
+      tex_ord.push_back( 0 );
+    }
+  }
 
   //Detect connectivity
   for( i=0; i<poly.size(); ++i )
@@ -303,34 +314,53 @@ Texture<T> AimsMeshLabelConnectedComponent2Texture( const AimsSurface<3,Void> & 
   std::stack<unsigned> current;
   std::set<unsigned>::iterator          in, fn;
 
-
   for( i=0; i<n; ++i )
-      if(tex.item(i) == 0)
+    if(tex.item(i) == 0)
+    {
+      label++;
+      current.push(i);
+      while(!current.empty())
       {
-       label++;
-       current.push(i);
-       while(!current.empty())
-         {
-           point = current.top();
-           current.pop();
-           tex.item(point)=label;
-           for( in=neighbours[point].begin(), fn=neighbours[point].end(); in!=fn; ++in )
-          {
-            if(tex.item(*in)==0)
-              {
-                current.push(*in);
-              }
-          }
-         }
-     }
-
+        point = current.top();
+        current.pop();
+        tex.item(point)=label;
+        labels[label].insert(point);
+        for( in=neighbours[point].begin(), fn=neighbours[point].end(); in!=fn; ++in )
+        {
+          if(tex.item(*in)==0) current.push(*in);
+        }
+      }
+      nbLabels.insert( std::pair<unsigned, T> ( labels[label].size(), label ) );
+    }
+  
   std::cout << "Nb of cc : "<< label << std::endl;
 
+  typename std::multimap<unsigned,T>::reverse_iterator rit;
+  std::map<T, T> nbLabels_ord;
+  T lab = 0;
+  for (rit=nbLabels.rbegin(); rit!=nbLabels.rend(); ++rit)
+  {
+    nbLabels_ord[rit->second] = ++lab;
+    std::cout << "The " << lab << "th cc has " << rit->first << " points" << std::endl;
+  }
+  
+  typename std::map<T, T>::iterator it; 
   for (i=0;i<n;++i)
-    if (tex.item(i) == FORBIDDEN)
-      tex.item(i) = 0;
+    if (tex_ord.item(i) == FORBIDDEN)
+       tex_ord.item(i) = 0;
+    else
+    {
+      for (it=nbLabels_ord.begin(); it!=nbLabels_ord.end(); ++it)
+      {
+        if (tex.item(i) == it->first)
+        {
+          tex_ord.item(i) = it->second;
+          break;
+        }  
+      }
+    }
 
-  return tex;
+  return tex_ord;
 }
 
 template<class T>
