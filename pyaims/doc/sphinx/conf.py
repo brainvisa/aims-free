@@ -46,8 +46,20 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.extlinks',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.autosummary',
-              'sphinx.ext.pngmath',
+              #'sphinx.ext.imgmath',
               'numpy_ext.numpydoc', ]
+
+try:
+    # nbsphinx converts ipython/jupyter notebooks to sphinx docs
+    import nbsphinx
+    nbsphinx_allow_errors = True
+    extensions += ['nbsphinx',
+                   'sphinx.ext.mathjax']
+    # set this env variable to tell notebooks that we should not use
+    # any GUI during notebooks execution
+    os.environ['ALLOW_GUI'] = '0'
+except ImportError:
+    nbsphinx = None
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -90,6 +102,14 @@ release = aims.versionString()
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
 exclude_trees = []
+
+# List of directories, relative to source directory, that shouldn't be searched
+# for source files.
+exclude_patterns = ['examples',
+                    "_themes/scikit-learn/static/ML_MAPS_README.rst",
+                    '_build',
+                    '**.ipynb_checkpoints'] \
+                   + templates_path
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None

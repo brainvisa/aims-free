@@ -14,10 +14,23 @@ Overview
 Contents
 ++++++++
 
+.. ifconfig:: 'nbsphinx' not in extensions
+
+  .. toctree::
+    :titlesonly:
+
+    pyaims_tutorial
+
+.. ifconfig:: 'nbsphinx' in extensions
+
+  .. toctree::
+    :titlesonly:
+
+    pyaims_tutorial_nb.ipynb
+
 .. toctree::
   :titlesonly:
 
-  pyaims_tutorial
   pyaims_highlevel
   pyaims_lowlevel
   pyaims_algo
