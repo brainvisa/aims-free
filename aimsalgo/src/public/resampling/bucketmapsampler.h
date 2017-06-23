@@ -45,7 +45,7 @@
 namespace aimsalgo
 {
 	template <class T,unsigned D>
-	class BucketMapSampler : GeneralSampler<T,D>
+	class BucketMapSampler : public GeneralSampler<T,D>
 	{
 	public:
 		BucketMapSampler( ) { }
