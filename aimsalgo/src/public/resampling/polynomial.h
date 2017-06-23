@@ -44,7 +44,7 @@
 namespace aimsalgo
 {
 	template <class T,unsigned D>
-	class Polynomial : Samplable<T,D>
+	class Polynomial : public Samplable<T,D>
 	{
 		public:
 			Polynomial(std::vector<T> * coefficients, T orderStep = 1);
