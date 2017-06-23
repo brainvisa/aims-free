@@ -16,7 +16,7 @@ public:
 	void 	unlock();
 };
 
-class MutexedObject : carto::Mutex
+class MutexedObject : carto::RCObject
 {
 %TypeHeaderCode
 #include <cartobase/smart/mutexrcptr.h>
