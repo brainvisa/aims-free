@@ -20,6 +20,7 @@ def notebook_run(path):
     with tempfile.NamedTemporaryFile(suffix=".ipynb") as fout:
         args = ["jupyter", "nbconvert", "--to", "notebook", "--execute",
           "--ExecutePreprocessor.timeout=60",
+          "--ExecutePreprocessor.kernel_name=python%d" % sys.version_info[0],
           "--output", fout.name, path]
         try:
             old_argv = sys.argv

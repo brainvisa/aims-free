@@ -11,6 +11,22 @@ Overview
 .. automodule:: soma.aims
 
 
+Tutorial
+++++++++
+
+There is a PyAims tutorial available as a `Jupyter/Ipython notebook <http://jupyter.org>`_:
+
+.. ifconfig:: 'nbsphinx' in extensions
+
+    * :download:`download tutorial notebook <pyaims_tutorial_nb.ipynb>`
+    * :doc:`see it in the doc <pyaims_tutorial_nb>`
+
+.. ifconfig:: 'nbsphinx' not in extensions
+
+    * :download:`download tutorial notebook <pyaims_tutorial_nb.ipynb>`
+    * :doc:`see it in the doc <pyaims_tutorial>`
+
+
 Contents
 ++++++++
 
