@@ -59,17 +59,13 @@ def test_suite():
 
 if __name__ == '__main__':
     # try the notebook version if it can be processed on this system
+    from soma.test_utils import test_notebook as tnb
     try:
-        from soma.aims.tests import test_pyaims_nb
-        can_run_test = True
-    except ImportError:
-        can_run_test = False
-
-    if can_run_test:
-        pyaims_nb = test_pyaims_nb.main
-        cmd = [test_pyaims_nb.__file__] + sys.argv[1:]
-        sys.exit(pyaims_nb(cmd))
-
-    else:
-
+        if tnb.test_notebook(
+            os.path.join(os.path.dirname(sys.argv[0]),
+                         'pyaims_tutorial_nb.ipynb'))):
+            sys.exit(0)
+        else:
+            sys.exit(1)
+    except Warning:
         unittest.main(defaultTest='test_suite')
