@@ -63,7 +63,8 @@ if __name__ == '__main__':
     try:
         if tnb.test_notebook(
             os.path.join(os.path.dirname(sys.argv[0]),
-                         'pyaims_tutorial_nb.ipynb'))):
+                         'pyaims_tutorial_nb.ipynb'),
+            timeout=300):
             sys.exit(0)
         else:
             sys.exit(1)
