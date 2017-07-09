@@ -314,7 +314,13 @@ class CubicResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
+
+  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  #endif
 %End
+
 public:
 
   CubicResampler_%Template1typecode%();
@@ -338,7 +344,13 @@ class QuarticResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
+
+  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  #endif
 %End
+
 public:
 
   QuarticResampler_%Template1typecode%();
@@ -362,7 +374,13 @@ class QuinticResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
+
+  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  #endif
 %End
+
 public:
 
   QuinticResampler_%Template1typecode%();
@@ -386,7 +404,13 @@ class SixthOrderResampler_%Template1typecode%:SplineResampler_%Template1typecode
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
+
+  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  #endif
 %End
+
 public:
 
   SixthOrderResampler_%Template1typecode%();
@@ -410,7 +434,13 @@ class SeventhOrderResampler_%Template1typecode%:SplineResampler_%Template1typeco
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
+
+  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  #endif
 %End
+
 public:
 
   SeventhOrderResampler_%Template1typecode%();
@@ -434,7 +464,13 @@ class LinearResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
+
+  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  #endif
 %End
+
 public:
 
   LinearResampler_%Template1typecode%();

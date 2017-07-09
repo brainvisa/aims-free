@@ -520,24 +520,28 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
                 carto::Object::value
                 ( carto::PyString_AsStdString( a1 ) ) );
           }
-        else if( ( obj = sipForceConvertToInstance( a1, sipClass_carto_Object,
-          0, 0, &state, &sipIsErr ) ) )
-          {
-            carto::Object	*o = (carto::Object *) obj;
-            sipCpp->setArrayItem( a0, *o );
-            sipReleaseInstance( obj, sipClass_carto_Object, state );
-          }
-        else if( ( obj = sipForceConvertToInstance( a1,
-          sipClass_carto_GenericObject, 0, 0, &state, &sipIsErr ) ) )
-          {
-            carto::GenericObject	*o = (carto::GenericObject *) obj;
-            sipCpp->setArrayItem( a0, carto::Object( o ) );
-            sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
-          }
+        else if( sipCanConvertToInstance( a1, sipClass_carto_Object,
+                   SIP_NO_CONVERTORS ) )
+        {
+          obj = sipForceConvertToInstance( a1, sipClass_carto_Object,
+            0, 0, &state, &sipIsErr );
+          carto::Object	*o = (carto::Object *) obj;
+          sipCpp->setArrayItem( a0, *o );
+          sipReleaseInstance( obj, sipClass_carto_Object, state );
+        }
+        else if( sipCanConvertToInstance( a1, sipClass_carto_GenericObject,
+                   SIP_NO_CONVERTORS ) )
+        {
+          obj = sipForceConvertToInstance( a1,
+            sipClass_carto_GenericObject, 0, 0, &state, &sipIsErr );
+          carto::GenericObject	*o = (carto::GenericObject *) obj;
+          sipCpp->setArrayItem( a0, carto::Object( o ) );
+          sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+        }
         else
-          {
-            sipCpp->setArrayItem( a0, carto::Object::value( a1 ) );
-          }
+        {
+          sipCpp->setArrayItem( a0, carto::Object::value( a1 ) );
+        }
         sipIsErr = 0;
         PyErr_Clear();
       }
