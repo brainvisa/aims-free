@@ -1528,6 +1528,11 @@ def VolumeView(volume, position, size):
     if not isinstance(position, posclass):
         position = posclass(*position)
     if not isinstance(size, posclass):
+        if len(size) < 4:
+            size = list(size) + [1] * (4 - len(size))
+        for i in range(4):
+            if size[i] == 0:
+                size[i] = 1
         size = posclass(*size)
     return volclass(vol, position, size)
 
