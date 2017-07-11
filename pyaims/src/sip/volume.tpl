@@ -37,6 +37,10 @@ public:
       Position4Di( const Volume_%Template1typecode%::Position4Di & );
       ~Position4Di();
       int operator [] ( int coord ) const;
+      int __len__() const;
+%MethodCode
+      sipRes = 4;
+%End
     };
 
     Volume_%Template1typecode%( int = 1, int = 1, int = 1, int = 1,
