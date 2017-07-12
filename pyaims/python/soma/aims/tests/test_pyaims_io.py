@@ -126,6 +126,13 @@ class TestPyaimsIO(unittest.TestCase):
                                 % (aims.typeCode(vol), format),
                                 'original part')
 
+        # test IO for VolumeView
+        vol2 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
+        aims.write(vol2, fname)
+        vol3 = aims.read(fname)
+        self.assertEqual(vol3.getSize(), (7, 5, 6, 1))
+        self.compare_images(vol2, vol3, 'volume view', 're-read volume view')
+
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
         return failing_files

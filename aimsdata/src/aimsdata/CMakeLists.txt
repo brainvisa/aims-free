@@ -192,6 +192,8 @@ set( _headers
     rgb/rgbnorm.h
     roi/hie.h
     roi/roi_g.h
+    roi/fill.h
+    roi/fill_d.h
     roi/maskIterator.h
     roi/roiIterator.h
     roi/roi.h
@@ -373,6 +375,7 @@ set( _sources
     resampling/linearInterpolator.cc
     resampling/quaternion.cc
     resampling/standardreferentials.cc
+    roi/fill.cc
     roi/hie.cc
     roi/maskIterator.cc
     roi/roiIterator.cc
