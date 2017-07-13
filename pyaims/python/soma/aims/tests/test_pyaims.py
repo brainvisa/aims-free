@@ -17,7 +17,7 @@ if sys.version_info[0] >= 3:
 
 
 def setup_doctest(test):
-    tests_dir = os.getenv("BRAINVISA_TESTS_DIR")
+    tests_dir = os.getenv("BRAINVISA_TEST_RUN_DATA_DIR")
     if not tests_dir:
         tests_dir = tempfile.gettempdir()
     tests_dir = os.path.join(tests_dir, "tmp_tests_brainvisa")

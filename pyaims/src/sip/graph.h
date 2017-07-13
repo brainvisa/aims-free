@@ -43,87 +43,83 @@ typedef carto::rc_ptr<Graph> rc_ptr_Graph;
 
 inline PyObject* pyaimsConvertFrom_GraphP( void * a )
 {
-  return sipConvertFromInstance( a, sipClass_Graph, 0 );
+  return sipConvertFromType( a, sipFindType( "Graph" ), 0 );
 }
 
 
 inline void* pyaimsConvertTo_GraphP( PyObject * o )
 {
   int isErr = 0;
-  return sipConvertToInstance( o, sipClass_Graph, 0, 0, 0,
-                               &isErr );
+  return sipConvertToType( o, sipFindType( "Graph" ), 0, 0, 0, &isErr );
 }
 
 
 inline int pyaimsGraphP_Check( PyObject* o )
 {
-  return sipCanConvertToInstance( o, sipClass_Graph,
-                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+  return sipCanConvertToType( o, sipFindType( "Graph" ),
+                              SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 // ---
 
 inline PyObject* pyaimsConvertFrom_GraphR( void * a )
 {
-  return sipConvertFromInstance( a, sipClass_rc_ptr_Graph, 0 );
+  return sipConvertFromType( a, sipFindType( "rc_ptr_Graph" ), 0 );
 }
 
 
 inline void* pyaimsConvertTo_GraphR( PyObject * o )
 {
   int isErr = 0;
-  return sipConvertToInstance( o, sipClass_rc_ptr_Graph, 0, 0, 0,
-                               &isErr );
+  return sipConvertToType( o, sipFindType( "rc_ptr_Graph" ), 0, 0, 0, &isErr );
 }
 
 
 inline int pyaimsGraphR_Check( PyObject* o )
 {
-  return sipCanConvertToInstance( o, sipClass_rc_ptr_Graph,
-                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+  return sipCanConvertToType( o, sipFindType( "rc_ptr_Graph" ),
+                              SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 // ---
 
 inline PyObject* pyaimsConvertFrom_VertexP( void * a )
 {
-  return sipConvertFromInstance( a, sipClass_Vertex, 0 );
+  return sipConvertFromType( a, sipFindType( "Vertex" ), 0 );
 }
 
 
 inline void* pyaimsConvertTo_VertexP( PyObject * o )
 {
   int isErr = 0;
-  return sipConvertToInstance( o, sipClass_Vertex, 0, 0, 0,
-                               &isErr );
+  return sipConvertToType( o, sipFindType( "Vertex" ), 0, 0, 0, &isErr );
 }
 
 
 inline int pyaimsVertexP_Check( PyObject* o )
 {
-  return sipCanConvertToInstance( o, sipClass_Vertex,
-                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+  return sipCanConvertToType( o, sipFindType( "Vertex" ),
+                              SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 
 inline PyObject* pyaimsConvertFrom_EdgeP( void * a )
 {
-  return sipConvertFromInstance( a, sipClass_Edge, 0 );
+  return sipConvertFromType( a, sipFindType( "Edge" ), 0 );
 }
 
 
 inline void* pyaimsConvertTo_EdgeP( PyObject * o )
 {
   int isErr = 0;
-  return sipConvertToInstance( o, sipClass_Edge, 0, 0, 0,
-                               &isErr );
+  return sipConvertToType( o, sipFindType( "Edge" ), 0, 0, 0, &isErr );
 }
 
 
 inline int pyaimsEdgeP_Check( PyObject* o )
 {
-  return sipCanConvertToInstance( o, sipClass_Edge,
-                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+  return sipCanConvertToType( o, sipFindType( "Edge" ),
+                              SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 

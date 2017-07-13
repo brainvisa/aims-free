@@ -22,7 +22,7 @@ typedef Texture<%Template1% > Texture_%Template1typecode%;
 
 %ConvertToTypeCode
   return pyaims::standardConvertToTypeCode( sipPy,
-    sipClass_Texture_%Template1typecode%,
+    sipFindType( "Texture_%Template1typecode%" ),
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
@@ -259,7 +259,7 @@ typedef TimeTexture<%Template1% > TimeTexture_%Template1typecode%;
 
 %ConvertToTypeCode
   return pyaims::standardConvertToTypeCode( sipPy,
-    sipClass_TimeTexture_%Template1typecode%,
+    sipFindType( "TimeTexture_%Template1typecode%" ),
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 

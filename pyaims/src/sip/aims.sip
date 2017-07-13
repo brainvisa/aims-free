@@ -20,6 +20,9 @@ carto::pyaims_init();
 %End
 
 typedef unsigned short uint16_t;
+typedef short int16_t;
+typedef unsigned int uint32_t;
+typedef int int32_t;
 
 %Include libxml2.sip
 %Include carto.sip
@@ -579,5 +582,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include converter_BucketMap_DOUBLE_AimsData_S32.sip
 %Include converter_BucketMap_DOUBLE_AimsData_FLOAT.sip
 %Include converter_BucketMap_DOUBLE_AimsData_DOUBLE.sip
+
+%Include fill.sip
 
 %End
