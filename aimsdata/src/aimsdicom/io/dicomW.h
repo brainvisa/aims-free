@@ -48,6 +48,11 @@
 #include <dcistrmf.h>
 #endif
 
+#include <sstream>
+#include <iomanip>
+#include <ctime>
+
+
 namespace aims
 {
   template <class T> class DicomWriter;
@@ -126,6 +131,9 @@ namespace aims
 
     DcmFileFormat fileFormat;
     DcmDataset* dataset = fileFormat.getDataset();
+    std::string studyID = "1";
+    std::string seriesID = "1000";
+    struct tm* tms;
 
     // SOP common
     dataset->putAndInsertString( DCM_SOPClassUID, 
@@ -174,7 +182,24 @@ namespace aims
     dataset->insertEmptyElement( DCM_SeriesNumber );
 
     // Equipment
+    dataset->putAndInsertString( DCM_StudyID, studyID.c_str() );
+    dataset->putAndInsertString( DCM_SeriesNumber, seriesID.c_str() );
     dataset->putAndInsertString( DCM_ConversionType, "WSD" );
+
+    time_t currentTime = std::time( 0 );
+    tms = std::localtime( &currentTime );
+    std::ostringstream oss;
+
+    oss << 1900 + tms->tm_year;
+    oss << std::setfill( '0' ) << std::setw( 2 ) << tms->tm_mon;
+    oss << std::setfill( '0' ) << std::setw( 2 ) << tms->tm_mday;
+    dataset->putAndInsertString( DCM_StudyDate, oss.str().c_str() );
+
+    oss.str( "" );
+    oss << std::setfill( '0' ) << std::setw( 2 ) << tms->tm_hour;
+    oss << std::setfill( '0' ) << std::setw( 2 ) << tms->tm_min;
+    oss << std::setfill( '0' ) << std::setw( 2 ) << tms->tm_sec;
+    dataset->putAndInsertString( DCM_StudyTime, oss.str().c_str() );
 
     // Image
     int nBits = 8 * (int)sizeof( T );
@@ -254,6 +279,9 @@ namespace aims
       dataset->putAndInsertString( DCM_SliceThickness, slThick.c_str() );
     }
 
+    dataset->putAndInsertString( DCM_ImageOrientationPatient, 
+                                 "1\\0\\0\\0\\1\\0" );
+
     int y, z, t, iN = 1;
     int dt = thing.dimT();
     typename AimsData<T>::const_iterator it = thing.begin() + thing.oFirstPoint();
@@ -291,7 +319,22 @@ namespace aims
         dataset->putAndInsertString( DCM_SliceLocation, slStr.c_str() );
         sliceLocation += sz;
 
-        dataset->putAndInsertUint8Array( DCM_PixelData, data, n );
+        std::string tmpStr = "0\\0\\" + slStr;
+        dataset->putAndInsertString( DCM_ImagePositionPatient, tmpStr.c_str() );
+
+        if ( sizeof( T ) == 2 )
+        {
+
+          dataset->putAndInsertUint16Array( DCM_PixelData, 
+                                            (uint16_t*)data, dx * dy );
+
+        }
+        else
+        {
+
+          dataset->putAndInsertUint8Array( DCM_PixelData, data, dx * dy );
+
+        }
 
         std::string imageName = filename_noext + 
                                 instanceNumber.str().c_str() + ".dcm";
@@ -318,10 +361,10 @@ namespace aims
     try
     {
         soma::ScaledEncodingInfo info;
-        AimsData<int16_t> dcmdata( thing.dimX(), 
-                                   thing.dimY(),
-                                   thing.dimZ(),
-                                   thing.dimT() );
+        AimsData<uint16_t> dcmdata( thing.dimX(), 
+                                    thing.dimY(),
+                                    thing.dimZ(),
+                                    thing.dimT() );
         dcmdata.setSizeXYZT( thing.sizeX(), 
                              thing.sizeY(), 
                              thing.sizeZ(),
@@ -330,13 +373,13 @@ namespace aims
         if( thing.header() )
           dcmdata.setHeader( thing.header()->cloneHeader( true ) );
     
-        info = ScaledEncoding<float, int16_t>::rescale( thing, dcmdata );
+        info = ScaledEncoding<float, uint16_t>::rescale( thing, dcmdata );
         PythonHeader * hdr = (PythonHeader *)dcmdata.header();
         hdr->setProperty( "scale_factor_applied", true );
         hdr->setProperty( "scale_factor", info.slope() );
         hdr->setProperty( "scale_offset", info.offset() - info.slope() * (double)std::numeric_limits<int16_t>::min() );
 
-        DicomWriter<int16_t>	w( _name );
+        DicomWriter<uint16_t>	w( _name );
         return w.write( dcmdata );
     }
     catch( std::exception & e )
