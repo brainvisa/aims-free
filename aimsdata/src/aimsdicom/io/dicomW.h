@@ -377,7 +377,7 @@ namespace aims
         PythonHeader * hdr = (PythonHeader *)dcmdata.header();
         hdr->setProperty( "scale_factor_applied", true );
         hdr->setProperty( "scale_factor", info.slope() );
-        hdr->setProperty( "scale_offset", info.offset() - info.slope() * (double)std::numeric_limits<int16_t>::min() );
+        hdr->setProperty( "scale_offset", info.offset() - info.slope() * (double)std::numeric_limits<uint16_t>::min() );
 
         DicomWriter<uint16_t>	w( _name );
         return w.write( dcmdata );
