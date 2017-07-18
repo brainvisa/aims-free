@@ -8,6 +8,7 @@ import unittest
 import shutil
 from soma import aims
 import numpy as np
+import glob
 from soma.aims.volumetools import compare_images
 
 class TestPyaimsIO(unittest.TestCase):
@@ -64,13 +65,31 @@ class TestPyaimsIO(unittest.TestCase):
         return failing_files
 
 
+    def file_name(self, vol, dtype, format):
+        def sliced_suffix(vol):
+            if np.any(np.array(vol.getSize()[3:]) - 1 != 0):
+                return '_t0000_s0'
+            else:
+                return '_0000'
+        suffixes = {'.dcm': '*', '.tiff': sliced_suffix}
+        suffix = suffixes.get(format, '')
+        if not isinstance(suffix, str):
+            suffix = suffix(vol)
+        fname = os.path.join(
+            self.work_dir, 'vol_%s%s%s'
+            % (dtype, suffix, format))
+        if '*' in suffix:
+            # wildcard in suffix: use glob to get the filename
+            fname = glob.glob(fname)[0]
+        return fname
+
+
     def use_format(self, vol, format, view, options={}):
-        suffixes = {'.dcm': '1', '.tiff': '_t0000_s0'}
         partial_read = ['.nii', '.nii.gz', '.ima', '.dcm']
         partial_write = ['.nii', '.ima']
         default_epsilon = 1e-6
         # ecat scaling is far from exact...
-        epsilon = {'.v': {'S16': 1e-6, 'FLOAT': (5e-5, True)}}
+        epsilon = {'.v': {'S16': 1e-6, 'FLOAT': (6e-5, True)}}
         dtype = aims.typeCode(np.asarray(vol).dtype)
 
         ndim = len(vol.getSize())
@@ -87,13 +106,12 @@ class TestPyaimsIO(unittest.TestCase):
         # write volume
         fname = os.path.join(
             self.work_dir, 'vol_%s%s' % (dtype, format))
+        w_fname = fname # write under this file name
         aims.write(vol, fname)
         vol1_name = os.path.basename(fname) + ' (written)'
 
         # re-read it
-        fname = os.path.join(
-            self.work_dir, 'vol_%s%s%s'
-            % (dtype, suffixes.get(format, ''), format))
+        fname = self.file_name(vol, dtype, format)
         vol2_name = os.path.basename(fname) + ' (re-read)'
         vol2 = aims.read(fname)
         thresh = epsilon.get(format, default_epsilon)
@@ -115,8 +133,8 @@ class TestPyaimsIO(unittest.TestCase):
             os.unlink(minf_fname)
             vol3_name = os.path.basename(fname) + ' (re-read without .minf)'
             vol3 = aims.read(fname)
-            self.assertTrue(compare_images(vol, vol3, vol1_name, vol3_name, thresh,
-                                rel_thresh))
+            self.assertTrue(compare_images(vol, vol3, vol1_name, vol3_name,
+                                           thresh, rel_thresh))
 
         view_pos1, view_size1, view_pos2, view_size2 = view
         if format in partial_read:
@@ -129,8 +147,9 @@ class TestPyaimsIO(unittest.TestCase):
             vol3 = aims.read(fname + '?%s' % url_ext)
             self.assertEqual(vol3.getSize(), view_size1)
             vol4 = aims.VolumeView(vol, view_pos1, view_size1)
-            self.assertTrue(compare_images(vol4, vol3, 'sub-volume', 'patially read',
-                                thresh, rel_thresh))
+            self.assertTrue(compare_images(vol4, vol3, 'sub-volume',
+                                           'patially read', thresh,
+                                           rel_thresh))
 
         if format in partial_write:
             if self.verbose:
@@ -143,16 +162,19 @@ class TestPyaimsIO(unittest.TestCase):
             self.assertEqual(vol3.getSize(), vol.getSize())
             vol4 = aims.VolumeView(vol3, view_pos2, view_size2)
             # compare the written view
-            self.assertTrue(compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
-                                % (aims.typeCode(vol), format),
-                                'patially written', thresh, rel_thresh))
+            self.assertTrue(compare_images(vol4, vol2,
+                                           'sub-volume %s (write, format %s)'
+                                           % (aims.typeCode(vol), format),
+                                           'patially written', thresh,
+                                           rel_thresh))
             # compare a part of the original volume
             vol2 = aims.VolumeView(vol, (0, 0, 0, 0), (10, 10, 5, 1))
             vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), (10, 10, 5, 1))
-            self.assertTrue(compare_images(vol4, vol2, 
-                                'sub-volume %s (write, format %s)'
-                                % (aims.typeCode(vol), format),
-                                'original part', thresh, rel_thresh))
+            self.assertTrue(compare_images(vol4, vol2,
+                                           'sub-volume %s (write, format %s)'
+                                           % (aims.typeCode(vol), format),
+                                           'original part', thresh,
+                                           rel_thresh))
 
         if options.get('write_unallocated', False):
             if self.verbose:
@@ -184,12 +206,21 @@ class TestPyaimsIO(unittest.TestCase):
                                     'patially written', thresh, rel_thresh))
 
         # disable this test for now.
-        ## test IO for VolumeView
-        #vol2 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
-        #aims.write(vol2, fname)
-        #vol3 = aims.read(fname)
-        #self.assertEqual(vol3.getSize(), (7, 5, 6, 1))
-        #self.compare_images(vol2, vol3, 'volume view', 're-read volume view')
+        # test IO for VolumeView
+        if 'filenames' in minf:
+            for f in minf['filenames']:
+                os.unlink(os.path.join(os.path.dirname(fname), f))
+        else:
+            os.unlink(fname)
+        if os.path.exists(minf_fname):
+            os.unlink(minf_fname)
+        vol2 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
+        aims.write(vol2, w_fname)
+        fname = self.file_name(vol2, dtype, format)
+        vol3 = aims.read(fname)
+        self.assertEqual(tuple(vol3.getSize()), (7, 5, 6, 1))
+        self.assertTrue(compare_images(vol2, vol3, 'volume view',
+                                       're-read volume view', thresh, rel_thresh))
 
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
