@@ -8,6 +8,9 @@ import unittest
 import shutil
 from soma import aims
 import numpy as np
+import glob
+
+keep_directory = False
 
 class TestPyaimsIO(unittest.TestCase):
 
@@ -16,6 +19,8 @@ class TestPyaimsIO(unittest.TestCase):
 
     def setUp(self):
         self.work_dir = tempfile.mkdtemp(prefix='test_pyaims')
+        if keep_directory:
+            print('working directory:', self.work_dir, 'will not ne erased.')
 
 
     def compare_images(self, vol, vol2, vol1_name, vol2_name, thresh=1e-6):
@@ -49,7 +54,7 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def use_type(self, dtype):
-        formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v', '.tiff']
+        formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v', '.tiff'] #, '.dcm']
 
         # create test volume
         vol = aims.Volume(10, 10, 10, dtype=dtype)
@@ -62,7 +67,7 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def use_format(self, vol, format):
-        suffixes = {'.dcm': '1', '.tiff': '_0000'}
+        suffixes = {'.dcm': '*', '.tiff': '_0000'}
         partial_read = ['.nii', '.nii.gz', '.ima', '.dcm']
         partial_write = ['.nii', '.ima']
         default_epsilon = 1e-6
@@ -75,6 +80,7 @@ class TestPyaimsIO(unittest.TestCase):
         # write volume
         fname = os.path.join(
             self.work_dir, 'vol_%s%s' % (dtype, format))
+        w_fname = fname # write under this file name
         aims.write(vol, fname)
         vol1_name = os.path.basename(fname) + ' (written)'
 
@@ -82,6 +88,9 @@ class TestPyaimsIO(unittest.TestCase):
         fname = os.path.join(
             self.work_dir, 'vol_%s%s%s'
             % (dtype, suffixes.get(format, ''), format))
+        if '*' in suffixes.get(format, ''):
+            # wildcard in suffix: use glob to get the filename
+            fname = glob.glob(fname)[0]
         vol2_name = os.path.basename(fname) + ' (re-read)'
         vol2 = aims.read(fname)
         thresh = epsilon.get(format, default_epsilon)
@@ -105,7 +114,8 @@ class TestPyaimsIO(unittest.TestCase):
             vol3 = aims.read(fname + '?ox=2&&sx=7&&oy=3&&sy=5&&oz=4&&sz=6')
             self.assertEqual(vol3.getSize(), (7, 5, 6, 1))
             vol4 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
-            self.compare_images(vol4, vol3, 'sub-volume', 'patially read')
+            self.compare_images(vol4, vol3, 'sub-volume', 'patially read',
+                                thresh)
 
         if format in partial_write:
             if self.verbose:
@@ -118,21 +128,29 @@ class TestPyaimsIO(unittest.TestCase):
             # compare the written view
             self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
                                 % (aims.typeCode(vol), format),
-                                'patially written')
+                                'patially written', thresh)
             # compare a part of the original volume
             vol2 = aims.VolumeView(vol, (0, 0, 0, 0), (10, 10, 5, 1))
             vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), (10, 10, 5, 1))
             self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
                                 % (aims.typeCode(vol), format),
-                                'original part')
+                                'original part', thresh)
 
         # disable this test for now.
-        ## test IO for VolumeView
-        #vol2 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
-        #aims.write(vol2, fname)
-        #vol3 = aims.read(fname)
-        #self.assertEqual(vol3.getSize(), (7, 5, 6, 1))
-        #self.compare_images(vol2, vol3, 'volume view', 're-read volume view')
+        # test IO for VolumeView
+        if 'filenames' in minf:
+            for f in minf['filenames']:
+                os.unlink(os.path.join(os.path.dirname(fname), f))
+        else:
+            os.unlink(fname)
+        if os.path.exists(minf_fname):
+            os.unlink(minf_fname)
+        vol2 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
+        aims.write(vol2, w_fname)
+        vol3 = aims.read(fname)
+        self.assertEqual(tuple(vol3.getSize()), (7, 5, 6, 1))
+        self.compare_images(vol2, vol3, 'volume view', 're-read volume view',
+                            thresh)
 
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
@@ -150,7 +168,8 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def tearDown(self):
-        shutil.rmtree(self.work_dir)
+        if not keep_directory:
+            shutil.rmtree(self.work_dir)
 
 
 def test_suite():
