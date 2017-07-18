@@ -36,7 +36,6 @@
 #include <aims/io/io_g.h>
 #include <aims/data/data_g.h>
 #include <aims/getopt/getopt.h>
-#include <aims/io/dicomR.h>	// VERY SPECIFIC
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/directory.h>
 #include <map>
@@ -116,7 +115,7 @@ int main( int argc, char **argv )
 
   cout << "Repetition 1 : " << it->second << endl;
   AimsData< short > in;
-  DicomReader< short > readfirst( it->second );
+  Reader< AimsData<short> > readfirst( it->second );
   readfirst >> in;
   ++it;
 
@@ -136,7 +135,7 @@ int main( int argc, char **argv )
   do 
     {
       cout << "Repetition " << theRep + 1 << " : " << it->second << endl;
-      DicomReader< short > reader( it->second );
+      Reader< AimsData<short> > reader( it->second );
       reader >> in;
       ++it;
 

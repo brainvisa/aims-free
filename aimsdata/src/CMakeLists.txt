@@ -34,15 +34,6 @@ IF(JPEG_FOUND)
 ENDIF(JPEG_FOUND)
 
 
-IF( DCMTK_FOUND )
-  add_subdirectory(aimsdicom)
-  set(HEADERS ${HEADERS} ${AIMSDICOM_HEADERS})
-  IF(APPLE)
-    add_subdirectory(bundle_aimsdicom)
-  ENDIF(APPLE)
-ENDIF()
-
-
 IF(MINC_FOUND)
   add_subdirectory(aimsminc)
   set(HEADERS ${HEADERS} ${AIMSMINC_HEADERS})
