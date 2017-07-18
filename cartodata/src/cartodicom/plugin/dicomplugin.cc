@@ -187,6 +187,12 @@ DicomPlugin::DicomPlugin() : Plugin()
     vfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new DicomImageWriter<uint16_t> ) );
     FormatDictionary<Volume<uint16_t> >::registerFormat( "DICOM", vfwu16, exts );
     
+    //--- FLOAT -----------------------------------------------------------------
+    
+    VolumeFormatWriter<float> *vfwf = new VolumeFormatWriter<float>;
+    vfwf->attach( rc_ptr<ImageWriter<float> >( new DicomImageWriter<float> ) );
+    FormatDictionary<Volume<float> >::registerFormat( "DICOM", vfwf, exts );
+    
     //==========================================================================
     //   V O L U M E   R E F
     //==========================================================================
@@ -216,6 +222,12 @@ DicomPlugin::DicomPlugin() : Plugin()
     VolumeRefFormatWriter<uint16_t> *rfwu16 = new VolumeRefFormatWriter<uint16_t>;
     rfwu16->attach( rc_ptr<ImageWriter<uint16_t> >( new DicomImageWriter<uint16_t> ) );
     FormatDictionary<VolumeRef<uint16_t> >::registerFormat( "DICOM", rfwu16, exts );
+    
+    //--- FLOAT -----------------------------------------------------------------
+    
+    VolumeRefFormatWriter<float> *rfwf = new VolumeRefFormatWriter<float>;
+    rfwf->attach( rc_ptr<ImageWriter<float> >( new DicomImageWriter<float> ) );
+    FormatDictionary<VolumeRef<float> >::registerFormat( "DICOM", rfwf, exts );
 
 }
 
