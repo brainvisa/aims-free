@@ -39,11 +39,14 @@
 template <typename T>
 inline sipWrapperType* sipClass_vector();
 
+template <typename T>
+inline const sipTypeDef* sipType_vector();
+
 
 template <typename T>
 inline PyObject *pyaimsConvertFrom_vector( std::vector<T> * p )
 {
-  return sipConvertFromInstance( p, sipClass_vector<T>(), 0 );
+  return sipConvertFromType( p, sipType_vector<T>(), 0 );
 }
 
 
@@ -52,16 +55,16 @@ inline std::vector<T> *pyaimsConvertTo_vector( PyObject* p )
 {
   int	iserr = 0;
   return (std::vector<T> *)
-    sipConvertToInstance( p, sipClass_vector<T>(), 0,
-                          SIP_NO_CONVERTORS, 0, &iserr );
+    sipConvertToType( p, sipType_vector<T>(), 0,
+                      SIP_NO_CONVERTORS, 0, &iserr );
 }
 
 
 template <typename T>
 inline bool pyaimsCheck_vector( PyObject* o )
 {
-  return sipCanConvertToInstance( o, (sipClass_vector<T>()),
-                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+  return sipCanConvertToType( o, (sipType_vector<T>()),
+                              SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 #endif

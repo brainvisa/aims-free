@@ -39,11 +39,14 @@
 template <typename T>
 inline sipWrapperType* sipClass_set();
 
+template <typename T>
+inline const sipTypeDef* sipType_set();
+
 
 template <typename T>
 inline PyObject *pyaimsConvertFrom_set( std::set<T> * p )
 {
-  return sipConvertFromInstance( p, sipClass_set<T>(), 0 );
+  return sipConvertFromType( p, sipType_set<T>(), 0 );
 }
 
 
@@ -52,16 +55,16 @@ inline std::set<T> *pyaimsConvertTo_set( PyObject* p )
 {
   int	iserr = 0;
   return (std::set<T> *)
-    sipConvertToInstance( p, sipClass_set<T>(), 0,
-                          SIP_NO_CONVERTORS, 0, &iserr );
+    sipConvertToType( p, sipType_set<T>(), 0,
+                      SIP_NO_CONVERTORS, 0, &iserr );
 }
 
 
 template <typename T>
 inline bool pyaimsCheck_set( PyObject* o )
 {
-  return sipCanConvertToInstance( o, (sipClass_set<T>()),
-                                  SIP_NOT_NONE | SIP_NO_CONVERTORS );
+  return sipCanConvertToType( o, (sipType_set<T>()),
+                              SIP_NOT_NONE | SIP_NO_CONVERTORS );
 }
 
 #endif
