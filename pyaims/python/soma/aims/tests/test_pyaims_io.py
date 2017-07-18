@@ -85,7 +85,7 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def use_format(self, vol, format, view, options={}):
-        partial_read = ['.nii', '.nii.gz', '.ima', '.dcm']
+        partial_read = ['.nii', '.nii.gz', '.ima'] #, '.dcm']
         partial_write = ['.nii', '.ima']
         default_epsilon = 1e-6
         # ecat scaling is far from exact...
@@ -128,13 +128,17 @@ class TestPyaimsIO(unittest.TestCase):
 
         # test native file without minf
         minf_fname = fname + '.minf'
-        minf = aims.read(minf_fname)
-        if 'filenames' not in minf:
-            os.unlink(minf_fname)
-            vol3_name = os.path.basename(fname) + ' (re-read without .minf)'
-            vol3 = aims.read(fname)
-            self.assertTrue(compare_images(vol, vol3, vol1_name, vol3_name,
-                                           thresh, rel_thresh))
+        if os.path.exists(minf_fname):
+            minf = aims.read(minf_fname)
+            if 'filenames' not in minf:
+                os.unlink(minf_fname)
+                vol3_name = os.path.basename(fname) \
+                    + ' (re-read without .minf)'
+                vol3 = aims.read(fname)
+                self.assertTrue(compare_images(vol, vol3, vol1_name, vol3_name,
+                                               thresh, rel_thresh))
+        else:
+            minf = {} # no .minf file (dicom)
 
         view_pos1, view_size1, view_pos2, view_size2 = view
         if format in partial_read:
