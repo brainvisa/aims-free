@@ -66,9 +66,27 @@ class TestPyaimsIO(unittest.TestCase):
         return failing_files
 
 
+    def file_name(self, vol, dtype, format):
+        def sliced_suffix(vol):
+            if np.any(np.array(vol.getSize()[3:]) - 1 != 0):
+                return '_t0000_s0'
+            else:
+                return '_0000'
+        suffixes = {'.dcm': '*', '.tiff': sliced_suffix}
+        suffix = suffixes.get(format, '')
+        if not isinstance(suffix, str):
+            suffix = suffix(vol)
+        fname = os.path.join(
+            self.work_dir, 'vol_%s%s%s'
+            % (dtype, suffix, format))
+        if '*' in suffix:
+            # wildcard in suffix: use glob to get the filename
+            fname = glob.glob(fname)[0]
+        return fname
+
+
     def use_format(self, vol, format):
-        suffixes = {'.dcm': '*', '.tiff': '_0000'}
-        partial_read = ['.nii', '.nii.gz', '.ima', '.dcm']
+        partial_read = ['.nii', '.nii.gz', '.ima'] #, '.dcm']
         partial_write = ['.nii', '.ima']
         default_epsilon = 1e-6
         # ecat scaling is far from exact...
@@ -85,12 +103,7 @@ class TestPyaimsIO(unittest.TestCase):
         vol1_name = os.path.basename(fname) + ' (written)'
 
         # re-read it
-        fname = os.path.join(
-            self.work_dir, 'vol_%s%s%s'
-            % (dtype, suffixes.get(format, ''), format))
-        if '*' in suffixes.get(format, ''):
-            # wildcard in suffix: use glob to get the filename
-            fname = glob.glob(fname)[0]
+        fname = self.file_name(vol, dtype, format)
         vol2_name = os.path.basename(fname) + ' (re-read)'
         vol2 = aims.read(fname)
         thresh = epsilon.get(format, default_epsilon)
@@ -101,12 +114,16 @@ class TestPyaimsIO(unittest.TestCase):
 
         # test native file without minf
         minf_fname = fname + '.minf'
-        minf = aims.read(minf_fname)
-        if 'filenames' not in minf:
-            os.unlink(minf_fname)
-            vol3_name = os.path.basename(fname) + ' (re-read without .minf)'
-            vol3 = aims.read(fname)
-            self.compare_images(vol, vol3, vol1_name, vol3_name, thresh)
+        if os.path.exists(minf_fname):
+            minf = aims.read(minf_fname)
+            if 'filenames' not in minf:
+                os.unlink(minf_fname)
+                vol3_name = os.path.basename(fname) \
+                    + ' (re-read without .minf)'
+                vol3 = aims.read(fname)
+                self.compare_images(vol, vol3, vol1_name, vol3_name, thresh)
+        else:
+            minf = {} # no .minf file (dicom)
 
         if format in partial_read:
             if self.verbose:
@@ -147,6 +164,7 @@ class TestPyaimsIO(unittest.TestCase):
             os.unlink(minf_fname)
         vol2 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
         aims.write(vol2, w_fname)
+        fname = self.file_name(vol2, dtype, format)
         vol3 = aims.read(fname)
         self.assertEqual(tuple(vol3.getSize()), (7, 5, 6, 1))
         self.compare_images(vol2, vol3, 'volume view', 're-read volume view',
