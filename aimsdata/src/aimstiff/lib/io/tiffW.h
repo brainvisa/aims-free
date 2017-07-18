@@ -110,14 +110,13 @@ namespace aims
   template<class T>
   inline
   void TiffWriter<T>::writeFrame( const AimsData<T> & data,
-				                  const std::string & filename, 
+                                  const std::string & filename,
                                   unsigned z,
-				                  unsigned t )
+                                  unsigned t )
   {
     int bps, spp, photometric;
     // Define an image
     TIFF *tif;
-    byte* buffer;
 
     // Open the TIFF file
     if((tif = TIFFOpen(filename.c_str(), "w")) == NULL){
@@ -217,11 +216,16 @@ namespace aims
     TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, sampleformat);
 
     // Write the information to the file
-    buffer = (byte *)&data(0, 0, z, t);
-    tsize_t res = TIFFWriteEncodedStrip(tif, 0, buffer, (bps / 8) * spp * data.dimX() * data.dimY() );
+    tsize_t res;
+    int y, ny = data.dimY();
+    for( y=0; y<ny; ++y )
+    {
+      res = TIFFWriteEncodedStrip(tif, y, (byte *)&data(0, y, z, t),
+                                          (bps / 8) * spp * data.dimX() );
 
-    if( res < 0 )
-      throw carto::file_error( filename );
+      if( res < 0 )
+        throw carto::file_error( filename );
+    }
 
     // Close the file
     TIFFClose(tif);

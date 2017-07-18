@@ -80,7 +80,7 @@ if( DCMTK_FOUND )
     endif ()
 
     BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
-    target_link_libraries( ${_target} aimsalgo aimsdicom )
+    target_link_libraries( ${_target} aimsalgo )
 
     BRAINVISA_INSTALL( TARGETS ${_target}
                   DESTINATION bin
