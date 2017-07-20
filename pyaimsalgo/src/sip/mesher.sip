@@ -12,11 +12,22 @@ class Mesher
       LOWPASS,
     };
 
+%Docstring
+Mesh binary objects in a volume and produce surface meshes.
+%End
+
+  public:
     Mesher();
     virtual ~Mesher();
 
     void doit( const AimsData_S16&, const std::string&,
                const std::string& = "binar" ) /ReleaseGIL/;
+%Docstring
+doit(volume, filename_base, write_mode="binar")
+
+Mesh every interface of objects in the input label volume. Each mesh is written in a separate file. Files are numbered according to objects interfaces (label1_label2) and an interface number for this pair of objects.
+write_mode is an old flag to write files in ascii or binary modes. It's obsolete.
+%End
 
     void setSmoothing( SmoothingType smoothType, int nIteration, float factor );
     void setSmoothingLaplacian( float featureAngle );
