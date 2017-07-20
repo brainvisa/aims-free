@@ -205,13 +205,13 @@ namespace aims
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, data.dimY());
     TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bps);
     TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, spp );
-    TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, data.dimY() );
+    TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1 );
 
     TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, photometric);
     TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
-    TIFFSetField(tif, TIFFTAG_XRESOLUTION, 10 / data.sizeX());
-    TIFFSetField(tif, TIFFTAG_YRESOLUTION, 10 / data.sizeY());
+    TIFFSetField(tif, TIFFTAG_XRESOLUTION, 10. / data.sizeX());
+    TIFFSetField(tif, TIFFTAG_YRESOLUTION, 10. / data.sizeY());
     TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, RESUNIT_CENTIMETER);
     TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, sampleformat);
 
