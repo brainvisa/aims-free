@@ -205,12 +205,12 @@ namespace aims
     Point3d chamferMaskSize() const { return _chamfer_mask_size; }
     void setChamferMaskSize( const Point3d & p ) { _chamfer_mask_size = p; }
     int neededBorderWidth() const;
+    static bool isBinary( const carto::VolumeRef<T>& dataIn );
 
   private:
     std::vector<Point3d> doStructElement( float radius,
                                           const Point4df & voxelsize );
     Point3d computeIntRadius( float radius, const Point4df & voxelsize);
-    static bool isBinary( const carto::VolumeRef<T>& dataIn );
     carto::VolumeRef<T> checkDistanceToBorder(
       const carto::VolumeRef<T>& dataIn, float radius ) const;
     carto::VolumeRef<T> checkBorderWidth(
