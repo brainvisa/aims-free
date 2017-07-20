@@ -161,5 +161,11 @@ public:
 %Docstring
   border width needed to perform chamfer mask operations, in binary mode (int).
 %End
+
+  static bool isBinary( const rc_ptr_Volume_%Template1typecode% ) const;
+%Docstring
+  Tells if the given volume is considered a binary volume and thus is
+  compatible with binary fast operators.
+%End
 };
 
