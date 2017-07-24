@@ -158,6 +158,16 @@ namespace aims
         rasterizeMeshWireframe( borderline, volume, value );
       }
     }
+
+    // ensure each mesh vertex is actually in the rasterized volume.
+    // as the mesh is sliced across volume voxels slice positions, the
+    // exact position of vertices may be missed in the above algorithm
+    const vector<Point3df> & vert = mesh.vertex();
+    vector<Point3df>::const_iterator ip, ep = vert.end();
+    for( ip=vert.begin(); ip!=ep; ++ip )
+      volume->at( int( rint( (*ip)[0] / vs[0] ) ),
+                  int( rint( (*ip)[1] / vs[1] ) ),
+                  int( rint( (*ip)[2] / vs[2] ) ) ) = value;
   }
 
 
