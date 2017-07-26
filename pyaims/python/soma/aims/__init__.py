@@ -102,6 +102,7 @@ import sip
 import os
 import six
 import sys
+import numbers
 
 # save the original IOError type, it will be replaced by aims bindings
 IOError_orig = IOError
@@ -1653,17 +1654,110 @@ def ShallowConverter(*args, **kwargs):
         (*args)
 
 
-def TimeSurface(dim=3, dtype='VOID'):
+def TimeSurface(*args, **kwargs):
     '''same as AimsTimeSurface(dim, dtype)'''
-    return AimsTimeSurface(dim, dtype)
+    return AimsTimeSurface(*args, **kwargs)
 
 
-def AimsTimeSurface(dim=3, dtype='VOID'):
+def AimsTimeSurface(*args, **kwargs):
     '''Create an instance of Aims mesh (AimsTimeSurface_<dim>_<dtype>) from a
-    dimension parameter.
+    dimension parameter, or copies a mesh, or build it from arrays.
 
     See for instance :py:class:`AimsTimeSurface_3_VOID`
+
+    Usages:
+
+    ::
+
+        mesh1 = AimsTimeSurface()
+        mesh2 = AimsTimeSurface(3)
+        mesh3 = AimsTimeSurface(3, 'VOID')
+        mesh4 = AimsTimeSurface(3, dtype='VOID')
+        mesh5 = AimsTimeSurface(dim=3, dtype='VOID')
+
+    ::
+
+        mesh6 = AimsTimeSurface(mesh)
+
+    ::
+
+        mesh7 = AimsTimeSurface(vertices=[[1,2,3], [3,4,5.6]],
+                                polygons=[[0,1]])
+        mesh8 = AimsTimeSurface([[1,2,3], [3,4,5.6]], polygons=[[0,1]])
+        mesh9 = AimsTimeSurface([[1,2,3], [3,4,5.6]], None, [[0,1]])
+        mesh10 = AimsTimeSurface([[1,2,3], [3,4,5.6]], [[0,1]], normals=[])
     '''
+    dtype = kwargs.get('dtype', None)
+    dim = kwargs.get('dim', None)
+    vert = kwargs.get('vertices', None)
+    norm = kwargs.get('normals', None)
+    poly = kwargs.get('polygons', None)
+    has_arrays = not (vert is None and norm is None and poly is None)
+
+    if not has_arrays and len(args) == 0:
+        if dim is None:
+            dim = 3
+        if dtype is None:
+            dtype = 'VOID'
+        return getattr(aimssip, 'AimsTimeSurface_%d_%s' % (dim, dtype))()
+
+    if not has_arrays and len(args) == 1 and dim is None \
+            and isinstance(args[0], numbers.Number):
+        dim = args[0]
+    elif not has_arrays and len(args) == 1 \
+            and type(args[0]).__name__.startswith('AimsTimeSurface_'):
+        # copy
+        return type(args[0])(args[0])
+    elif not has_arrays and len(args) == 2 \
+            and isinstance(args[0], numbers.Number) \
+            and dtype is None and dim is None:
+        dim = args[0]
+        dtype = args[1]
+    elif dim is None:
+        nargs = 0
+        if vert is None and len(args) > nargs:
+            vert = args[nargs]
+            nargs += 1
+        if norm is None and len(args) > nargs:
+            norm = args[nargs]
+            nargs += 1
+        if poly is None and len(args) > nargs:
+            poly = args[nargs]
+            nargs += 1
+        if dtype is None and len(args) > nargs:
+            dtype = args[nargs]
+            nargs += 1
+        if len(args) > nargs + 1 or vert is None or poly is None:
+            raise ValueError('Wrong parameters for AimsTimeSurface')
+        if not poly:
+            if dim is None:
+                dim = 3
+        else:
+            if isinstance(poly[0], AimsVector_U32_2):
+                dim = 2
+            elif isinstance(poly[0], AimsVector_U32_3):
+                dim = 3
+            elif isinstance(poly[0], AimsVector_U32_4):
+                dim = 4
+            else:
+                dim = len(poly[0])
+        if dtype is None:
+            dtype = 'VOID'
+        mesh = getattr(aimssip, 'AimsTimeSurface_%d_%s' % (dim, dtype))()
+        if not isinstance(vert[0], Point3df):
+            vert = [Point3df(x) for x in vert]
+        poly_type = getattr(aimssip, 'AimsVector_U32_%d' % dim)
+        if not isinstance(poly[0], poly_type):
+            poly = [poly_type(x) for x in poly]
+        mesh.vertex().assign(vert)
+        mesh.polygon().assign(poly)
+        if norm:
+            if not isinstance(norm[0], Point3df):
+                norm = [Point3df(x) for x in norm]
+            mesh.normal().assign(norm)
+        return mesh
+    if dtype is None:
+        dtype = 'VOID'
     return getattr(aimssip, 'AimsTimeSurface_%d_%s' % (dim, dtype))()
 
 
