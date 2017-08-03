@@ -61,7 +61,8 @@ class DicomAggregator( object ):
         for f in self._dicom_sources:
             try:
                 ds = dicom.read_file( f )
-            except:
+            except Exception as e:
+                print(e)
                 continue
             
             if len(self.modalities) != 0 and \
@@ -70,7 +71,8 @@ class DicomAggregator( object ):
             
             try:
                 serie_uid = ds.SeriesInstanceUID
-            except:
+            except Exception as e:
+                print(e)
                 continue
             
 #            try:
@@ -90,7 +92,8 @@ class DicomAggregator( object ):
                 position_and_orientation = ( ds.ImagePositionPatient,
                                              ds.ImageOrientationPatient,
                                              ds.FrameReferenceTime )
-            except:
+            except Exception as e:
+                print(e)
                 position_and_orientation = None
             
             sop_uid = ds.SOPInstanceUID
