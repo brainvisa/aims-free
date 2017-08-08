@@ -54,35 +54,35 @@ namespace carto {
     template <typename T, bool is_scalar = DataTypeTraits<T>::is_scalar>
     struct select
     {
-      static bool all( const Volume<T> & vol )
+      static bool all( const Volume<T> & )
       {
         throw std::logic_error( "Member function all() is only enabled for "
           "volumes of scalar. Try to use the non-member function "
           "carto::all(Volume<T>) instead." );
       }
 
-      static bool any( const Volume<T> & vol )
+      static bool any( const Volume<T> & )
       {
         throw std::logic_error( "Member function any() is only enabled for "
           "volumes of scalar. Try to use the non-member function "
           "carto::any(Volume<T>) instead." );
       }
 
-      static T min( const Volume<T> & vol )
+      static T min( const Volume<T> & )
       {
         throw std::logic_error( "Member function min() is only enabled for "
           "volumes of scalar. Try to use the non-member function "
           "carto::min(Volume<T>) instead." );
       }
 
-      static T max( const Volume<T> & vol )
+      static T max( const Volume<T> & )
       {
         throw std::logic_error( "Member function max() is only enabled for "
           "volumes of scalar. Try to use the non-member function "
           "carto::max(Volume<T>) instead." );
       }
 
-      static T sum( const Volume<T> & vol )
+      static T sum( const Volume<T> & )
       {
         throw std::logic_error( "Member function sum() is only enabled for "
           "volumes of scalar. Try to use the non-member function "

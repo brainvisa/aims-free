@@ -261,7 +261,7 @@ std::ostream & operator<< ( const carto::VolumeOStream & out,
   std::string xE = ( hasX ? "]" : "" );
   std::string xS = ( hasX ? " " : "" );
 
-  for( int t = 0; t < volume.getSizeT(); ++t )
+  for( size_t t = 0; t < static_cast<size_t>(volume.getSizeT()); ++t )
   {
     if( hasT ) {
       if( t < out.maxT() ) {
@@ -271,7 +271,7 @@ std::ostream & operator<< ( const carto::VolumeOStream & out,
         break;
       }
     }
-    for( int z = 0; z < volume.getSizeZ(); ++z )
+    for( size_t z = 0; z < static_cast<size_t>(volume.getSizeZ()); ++z )
     {
       if( hasZ ) {
         if( z < out.maxZ() ) {
@@ -281,7 +281,7 @@ std::ostream & operator<< ( const carto::VolumeOStream & out,
           break;
         }
       }
-      for( int y = 0; y < volume.getSizeY(); ++y )
+      for( size_t y = 0; y < static_cast<size_t>(volume.getSizeY()); ++y )
       {
         if( y < out.maxY() ) {
           out.ostream() << std::setw(2) << std::left << yB;
@@ -289,7 +289,7 @@ std::ostream & operator<< ( const carto::VolumeOStream & out,
           out.ostream() << std::setw(3) << std::left << "...";
           break;
         }
-        for( int x = 0; x < volume.getSizeX(); ++x )
+        for( size_t x = 0; x < static_cast<size_t>(volume.getSizeX()); ++x )
         {
           if( x < out.maxX() ) {
             out.ostream() << std::setw(8) << std::setprecision(6) << std::left
