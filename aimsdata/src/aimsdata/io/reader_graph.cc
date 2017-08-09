@@ -38,10 +38,10 @@
 // of the most useful Reader templates
 
 #include <aims/config/aimsdata_config.h>
+#include <graph/graph/graph.h>
 #include <soma-io/io/reader_d.h>
 #include <soma-io/io/formatdictionary_d.h>
 #include <aims/io/reader_d.h>
-#include <graph/graph/graph.h>
 
 using namespace aims;
 using namespace carto;

@@ -510,7 +510,6 @@ bool FinderBckFormat::check( const string & filename, Finder & f ) const
 }
 
 
-// Yann // A v�rifier et compl�ter
 bool FinderGraphFormat::check( const string & filename, Finder & f ) const
 {
   ArgHeader	*hdr = new ArgHeader( filename );
@@ -532,7 +531,8 @@ bool FinderGraphFormat::check( const string & filename, Finder & f ) const
   vector<string>	vt;
   vt.push_back( dattp );
   f.setPossibleDataTypes( vt );
-  f.setFormat( "ARG" );
+  string format = hdr->getProperty( "file_type" )->getString();
+  f.setFormat( format );
   f.setHeader( hdr );
 
   return true;
