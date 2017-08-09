@@ -764,7 +764,7 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT = LEFT>
   struct select_left: public std::binary_function<LEFT, RIGHT, LEFT>
   {
-    const LEFT & operator() ( const LEFT & x, const RIGHT & y ) const
+    const LEFT & operator() ( const LEFT & x, const RIGHT & ) const
     {
       return x;
     }
@@ -773,7 +773,7 @@ namespace volumeutil {
   template <typename LEFT, typename RIGHT = LEFT>
   struct select_right: public std::binary_function<LEFT, RIGHT, RIGHT>
   {
-    const RIGHT & operator() ( const LEFT & x, const RIGHT & y ) const
+    const RIGHT & operator() ( const LEFT & , const RIGHT & y ) const
     {
       return y;
     }
@@ -1172,7 +1172,7 @@ namespace volumeutil {
   template <>
   struct increment<bool>: public std::unary_function<bool, bool>
   {
-    bool operator() ( bool x )
+    bool operator() ( bool )
     {
       return true;
     }
@@ -1181,7 +1181,7 @@ namespace volumeutil {
   template <>
   struct decrement<bool>: public std::unary_function<bool, bool>
   {
-    bool operator() ( bool x )
+    bool operator() ( bool )
     {
       return false;
     }

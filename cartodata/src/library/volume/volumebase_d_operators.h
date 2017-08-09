@@ -57,14 +57,14 @@ namespace carto {
     template <typename T, bool is_scalar = DataTypeTraits<T>::is_scalar>
     struct select_is_scalar
     {
-      static T min( const Volume<T> & vol )
+      static T min( const Volume<T> & )
       {
         throw std::logic_error( "Member function min() is only enabled for "
           "volumes of scalar. Try to use the non-member function "
           "carto::min(Volume<T>) instead." );
       }
 
-      static T max( const Volume<T> & vol )
+      static T max( const Volume<T> & )
       {
         throw std::logic_error( "Member function max() is only enabled for "
           "volumes of scalar. Try to use the non-member function "
@@ -72,7 +72,7 @@ namespace carto {
       }
 
       static typename DataTypeTraits<T>::LongType
-      sum( const Volume<T> & vol )
+      sum( const Volume<T> & )
       {
         throw std::logic_error( "Member function sum() is only enabled for "
           "volumes of scalar. Try to use the non-member function "
@@ -84,14 +84,14 @@ namespace carto {
     template <typename T, bool has_bool_conversion = DataTypeTraits<T>::has_bool_conversion>
     struct select_has_bool_conversion
     {
-      static bool all( const Volume<T> & vol )
+      static bool all( const Volume<T> & )
       {
         throw std::logic_error( "Member function all() is only enabled for "
           "volumes of types that support boolean conversion. Try to use the "
           "non-member function carto::all(Volume<T>) instead." );
       }
 
-      static bool any( const Volume<T> & vol )
+      static bool any( const Volume<T> & )
       {
         throw std::logic_error( "Member function any() is only enabled for "
           "volumes of that support boolean conversion. Try to use the "

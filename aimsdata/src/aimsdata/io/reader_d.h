@@ -57,6 +57,7 @@
     template class aims::Reader< T >; \
   }
 
+
 namespace aims
 {
 
@@ -138,6 +139,11 @@ namespace aims
   bool Reader<T>::read( T & obj, int border, const std::string* format, 
                         int frame )
   {
+#ifdef AIMS_DEBUG_IO
+    std::cout << "void Reader<" << carto::DataTypeCode<T>::name()
+      << ">::read( obj )\n";
+#endif
+
     carto::Object read_options = carto::Object::value( carto::PropertySet() );
       
     // Copy aims settings to read options
@@ -215,10 +221,6 @@ namespace aims
 #endif
 
     // if it failed, continue with aims reader.
-
-#ifdef AIMS_DEBUG_IO
-    std::cout << "Reader<" << carto::DataTypeCode<T>::name() << ">\n";
-#endif
 
     std::set<std::string>		tried;
     std::set<FileFormat<T> *>		triedf;
@@ -436,6 +438,11 @@ namespace aims
   template<class T>
   T* Reader<T>::read( int border, const std::string* format, int frame )
   {
+#ifdef AIMS_DEBUG_IO
+    std::cout << carto::DataTypeCode<T>::name() << "* Reader<"
+      << carto::DataTypeCode<T>::name() << ">::read()\n";
+#endif
+
     carto::Object read_options = carto::Object::value( carto::PropertySet() );
       
     // Copy aims settings to read options
@@ -497,8 +504,20 @@ namespace aims
       options->setProperty( "convert_to_aims", true );
       reader.setOptions( options );
       reader.setAllocatorContext( allocatorContext() );
+#ifdef AIMS_DEBUG_IO
+    std::cout << "0. Try soma::Reader ..." << std::endl ;
+#endif
       return reader.read( carto::none(), 1, 3 );
-    } catch( ... ) {}
+    }
+#ifdef AIMS_DEBUG_IO
+    catch( std::exception & e )
+    {
+      std::cout << "0. soma::Reader failed: " << e.what() << std::endl;
+    }
+#else
+    catch( ... ) {}
+#endif
+
     // if it failed, continue with aims reader.
 
     std::set<std::string>		tried;
@@ -518,9 +537,15 @@ namespace aims
       {
         try
         {
+#ifdef AIMS_DEBUG_IO
+          std::cout << "1. try reader " << *format << std::endl;
+#endif
           obj = reader->read( _filename, _alloccontext, read_options );
           if( obj )
           {
+#ifdef AIMS_DEBUG_IO
+            std::cout << "1. " << *format << " OK\n";
+#endif
             carto::Object h = carto::getObjectHeader( obj );
             if( h )
               Finder::postProcessHeader( h );
@@ -529,6 +554,9 @@ namespace aims
         }
         catch( std::exception & e )
         {
+#ifdef AIMS_DEBUG_IO
+          std::cout << "1. failed: " << e.what() << "\n";
+#endif
           carto::io_error::keepExceptionPriority( e, excp, exct, excm,
                                                   5 );
         }
@@ -557,9 +585,15 @@ namespace aims
           {
             try
             {
+#ifdef AIMS_DEBUG_IO
+              std::cout << "2. try reader " << *ie << std::endl;
+#endif
               obj = reader->read( _filename, _alloccontext, read_options );
               if( obj )
               {
+#ifdef AIMS_DEBUG_IO
+                std::cout << "2. " << *ie << " OK\n";
+#endif
                 carto::Object h = carto::getObjectHeader( obj );
                 if( h )
                   Finder::postProcessHeader( h );
@@ -568,9 +602,15 @@ namespace aims
             }
             catch( std::exception & e )
             {
+#ifdef AIMS_DEBUG_IO
+              std::cout << "2. failed: " << e.what() << "\n";
+#endif
               carto::io_error::keepExceptionPriority( e, excp, exct,
                                                       excm );
             }
+#ifdef AIMS_DEBUG_IO
+            std::cout << "2. unsuccessfully tried " << *ie << std::endl;
+#endif
             tried.insert( *ie );
             triedf.insert( reader );
           }
@@ -590,9 +630,15 @@ namespace aims
             {
               try
               {
+#ifdef AIMS_DEBUG_IO
+                std::cout << "3. try reader " << *ie << std::endl;
+#endif
                 obj = reader->read( _filename, _alloccontext, read_options );
                 if( obj )
                 {
+#ifdef AIMS_DEBUG_IO
+                  std::cout << "3. " << *ie << " OK\n";
+#endif
                   carto::Object h = carto::getObjectHeader( obj );
                   if( h )
                     Finder::postProcessHeader( h );
@@ -601,6 +647,9 @@ namespace aims
               }
               catch( std::exception & e )
               {
+#ifdef AIMS_DEBUG_IO
+                std::cout << "3. failed: " << e.what() << "\n";
+#endif
                 carto::io_error::keepExceptionPriority( e, excp, exct,
                                                         excm );
               }
@@ -620,9 +669,15 @@ namespace aims
           {
             try
             {
+#ifdef AIMS_DEBUG_IO
+              std::cout << "4. try reader " << *ie << std::endl;
+#endif
               obj = reader->read( _filename, _alloccontext, read_options );
               if( obj )
               {
+#ifdef AIMS_DEBUG_IO
+                std::cout << "4. " << *ie << " OK\n";
+#endif
                 carto::Object h = carto::getObjectHeader( obj );
                 if( h )
                   Finder::postProcessHeader( h );
@@ -631,6 +686,9 @@ namespace aims
             }
             catch( std::exception & e )
             {
+#ifdef AIMS_DEBUG_IO
+              std::cout << "4. failed: " << e.what() << "\n";
+#endif
               carto::io_error::keepExceptionPriority( e, excp, exct,
                                                       excm );
             }
