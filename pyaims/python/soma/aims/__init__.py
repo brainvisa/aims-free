@@ -357,14 +357,12 @@ class Reader(object):
         r = r(filename)
         if self.allocmode is not None:
             r.setAllocatorContext(self.allocmode)
+        format = f.format()
         if self.options:
             r.setOptions(self.options)
-
-        # allow forcing format in options
-        if 'format' in self.options:
-            format = self.options['format']
-        else:
-            format = f.format()
+            # allow forcing format in options
+            if 'format' in self.options:
+                format = self.options['format']
 
         result = r.read(border, format, frame)
         return result
