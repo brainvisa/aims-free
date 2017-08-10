@@ -360,7 +360,13 @@ class Reader(object):
         if self.options:
             r.setOptions(self.options)
 
-        result = r.read(border, f.format(), frame)
+        # allow forcing format in options
+        if 'format' in self.options:
+            format = self.options['format']
+        else:
+            format = f.format()
+
+        result = r.read(border, format, frame)
         return result
 
     def mapType(self, iotype, aimstype):
