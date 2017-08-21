@@ -101,9 +101,9 @@ namespace carto
 
   inline double PyaimsFloat_AsDouble( PyObject *x )
   {
-    PyTypeObject* ptype = Py_TYPE( pyobj ); //->ob_type;
+    PyTypeObject* ptype = Py_TYPE( x ); //->ob_type;
     if( ptype == &PyFloat32ArrType_Type )
-      return reinterpret_cast<PyFloatScalarObject *>( pyobj )->obval;
+      return reinterpret_cast<PyFloatScalarObject *>( x )->obval;
     if( PyFloat_Check( x ) )
       return PyFloat_AsDouble( x );
     long y;
