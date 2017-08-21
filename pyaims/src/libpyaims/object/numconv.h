@@ -38,6 +38,7 @@
 #include <stdint.h>
 #include <Python.h>
 #include <pyaims/numpyarray.h>
+#include <numpy/arrayscalars.h>
 
 namespace carto
 {
