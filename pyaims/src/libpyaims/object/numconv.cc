@@ -32,6 +32,8 @@
  */
 
 #include <pyaims/object/numconv.h>
+#include <pyaims/numpyarray.h>
+#include <numpy/arrayscalars.h>
 
 #include <iostream>
 #include <limits>
