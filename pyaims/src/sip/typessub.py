@@ -304,7 +304,7 @@ typessub = {'signed char':
             'float':
            {'typecode': 'FLOAT',
                'pyFromC': 'PyFloat_FromDouble',
-               'CFromPy': 'PyFloat_AsDouble',
+               'CFromPy': 'carto::float_FromPy',
                'castFromSip': '',
                'deref': '',
                'pyderef': '',
@@ -317,7 +317,7 @@ typessub = {'signed char':
                'PyType': 'float',
                'sipClass': '',
                'typeinclude': '',
-               'sipinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
                'testPyType': 'PyNumber_Check',
                'compareElement': '',

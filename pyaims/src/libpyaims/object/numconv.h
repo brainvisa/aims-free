@@ -42,6 +42,7 @@ namespace carto
 {
 
   uint32_t uint32_FromPy( PyObject *pyobj );
+  float float_FromPy( PyObject* pyobj );
 
 
   inline PyObject* PyaimsInt_FromLong( long x )
