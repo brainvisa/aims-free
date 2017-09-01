@@ -72,7 +72,6 @@ void MotionReader::read( Motion& motion )
     else
       throw file_not_found_error( _name );
   }
-
   AsciiDataSourceTraits<float>		fir;
   if( !StreamUtil::skip( is, " \t\n\r" ) )
     throw wrong_format_error( _name );
@@ -86,7 +85,6 @@ void MotionReader::read( Motion& motion )
     throw wrong_format_error( _name  );
   if( !fir.read( is, motion.translation().item( 2 ) ) )
     throw wrong_format_error( _name );
-
   unsigned	i, j;
   for( i=0; i<3; ++i )
     for( j=0; j<3; ++j )
@@ -108,10 +106,8 @@ void MotionReader::read( Motion& motion )
   }
 }
 
-
-MotionReader& operator >> ( MotionReader& reader, Motion& thing )
+MotionReader& MotionReader::operator >> ( Motion& thing )
 {
-  reader.read( thing );
-  return reader;
+  this->read( thing );
+  return *this;
 }
-
