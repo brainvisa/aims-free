@@ -42,9 +42,6 @@
 
 class MotionReader;
 
-AIMSDATA_API MotionReader& operator >> ( MotionReader&, Motion& );
-
-
 /** Class for Motion reading operation.
 */
 class AIMSDATA_API MotionReader
@@ -71,7 +68,7 @@ public:
   */
   void read( Motion& thing );
 
-  friend MotionReader& operator >> ( MotionReader&, Motion& );
+  MotionReader& operator >> ( Motion& );
 
 private:
 

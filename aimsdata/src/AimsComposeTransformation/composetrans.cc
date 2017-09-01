@@ -43,53 +43,55 @@ using namespace std;
 
 int main( int argc, const char** argv )
 {
-  try
+    try
     {
-      list< string > list_r1;
-      string	r2="";
-      string	w;
-      AimsApplication	app( argc, argv, "Composes two Aims/anatomist "
-			     "transformations: M1 x M2 "
-			     "[Possibility to use a list of motions with -i option]");
-      app.addOptionSeries( list_r1, "-i", "M1: 1st input transformation" );
-      app.addOption( r2, "-j", "M2: 2nd input transformation [option]", true );
-      app.addOption( w, "-o", "output transformation "
-		     "(default: same as 1st input)", true );
-      app.initialize();
+        list< string > list_r1;
+        string r2="";
+        string w;
+        AimsApplication app( argc, argv, "Composes two Aims/anatomist "
+                    "transformations: M1 x M2 "
+                    "[Possibility to use a list of motions with -i option]");
+        app.addOptionSeries( list_r1, "-i", "M1: 1st input transformation" );
+        app.addOption( r2, "-j", "M2: 2nd input transformation [option]", true );
+        app.addOption( w, "-o", "output transformation "
+                "(default: same as 1st input)", true );
+        app.initialize();
 
-      list<string>::const_iterator it = list_r1.begin();
+        list<string>::const_iterator it = list_r1.begin();
+        
+        Motion m, n;
+        MotionReader mr1( it->c_str() ); 
+        mr1 >> m;    //  First motion of the list
+        for(++it; it != list_r1.end(); ++it )
+        {
+            MotionReader mrdd( it->c_str() ); 
+            mrdd >> n;
+            m = m * n;
+        }
+        
+        if( !r2.empty() )
+        {
+            MotionReader mr2( r2 );  
+            mr2 >> n;
+            m = m * n;   
+        }
 
-      Motion	m, n;
-      MotionReader mr1( it->c_str() );	
-      mr1 >> m;	   //  First motion of the list
-      
-      for(++it; it != list_r1.end(); ++it )
-	{
-	  MotionReader mrdd( it->c_str() );	
-	  mrdd >> n;
-	  m = m * n;
-	}
-      
-      if( !r2.empty() )
-	{
-	  MotionReader mr2( r2 ); 	
-	  mr2 >> n;
-	  m = m * n;	  
-	}
-
-      if( w.empty() )
-	w = *list_r1.begin();
-
-      MotionWriter	mw( w );
-      mw.write( m );
+        if( w.empty() )
+            w = *list_r1.begin();
+          
+        MotionWriter mw( w );
+        mw.write( m );
 
     }
-  catch( user_interruption & )
+    catch( user_interruption & )
     {
     }
-  catch( exception & e )
+    catch( exception & e )
     {
-      cerr << e.what() << endl;
+        cerr << argv[ 0 ] << ": " << e.what() << endl;
+        return EXIT_FAILURE;
     }
+
+    return EXIT_SUCCESS;
 }
 
