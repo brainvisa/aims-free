@@ -40,6 +40,7 @@ public:
   virtual bool isValid() const ;
   virtual carto::Object currentValue() const;
   virtual std::string key() const;
+  virtual long intKey() const;
 
   void insert( Tree* child /Transfer/, int index=-1 );
   void remove( unsigned index );

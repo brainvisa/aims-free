@@ -32,7 +32,7 @@
  */
 
 /*
- *  RGB class
+ *  HSV class
  */
 #ifndef AIMS_HSV_HSV_H
 #define AIMS_HSV_HSV_H

@@ -43,6 +43,7 @@
 #include <soma-io/utilities/creator.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>
+#include <cartobase/type/datatypetraits.h>
 //----------------------------------------------------------------------------
 #include <iostream>
 
@@ -145,7 +146,7 @@ namespace carto {
     PropertySet& getPropertySet()
       __attribute__((__deprecated__("use header() instead")));
     std::vector<float> getVoxelSize() const;
-    
+
     virtual void copyHeaderFrom( const PropertySet & other );
     virtual void copyHeaderFrom( const Object & other );
 
@@ -223,9 +224,9 @@ namespace carto {
     // operator bool() const;
     T min() const;
     T max() const;
-    T sum() const;
-    template <typename OUTP>
-    OUTP sum() const;
+    /// To avoid overflow, the biggest possible type (intmax_t, uintmax_t,
+    /// double...) is used for computation and returned.
+    typename DataTypeTraits<T>::LongType sum() const;
 
     //========================================================================
     //   FILL / REPLACE
@@ -270,20 +271,38 @@ namespace carto {
     static void setup( VolumeRef<T> &, Object, const AllocatorContext &, Object );
   };
 
-#endif
-
-} // namespace carto
+#endif // DOXYGEN_HIDE_INTERNAL_CLASSES
 
 //============================================================================
 //   STREAM
 //============================================================================
 
-template <typename T>
-std::ostream & operator<< ( std::ostream & out,
-                            const carto::rc_ptr<carto::Volume<T> > & volume );
+#ifndef DOXYGEN_HIDE_INTERNAL_CLASSES
 
-template <typename T>
-std::ostream & operator<< ( const carto::VolumeOStream & out,
-                            const carto::rc_ptr<carto::VolumeRef<T> > & volume );
+  template <typename T>
+  std::ostream & operator<< ( const carto::VolumeOStream & out,
+                              const carto::rc_ptr<carto::VolumeRef<T> > & volume );
+
+#endif // DOXYGEN_HIDE_INTERNAL_CLASSES
+
+  /// Volumes are printable to standard output streams.
+  /// They are shown as an array, eventually cropped at a given size.
+  /// The default crop value is 5 in each dimension.
+  /// The crop value can be set with setMaxDim() the following way:
+  /// \code
+  /// #include <cartodata/volume/volume.h>
+  /// #include <iostream>
+  /// using namespace carto;
+  /// using namespace std;
+  ///
+  /// carto::VolumeRef<int16_t> vol( 10, 10, 10 );
+  /// cout << setMaxDim( 10 ) << vol << endl;
+  /// \endcode
+  template <typename T>
+  std::ostream & operator<< ( std::ostream & out,
+                              const carto::rc_ptr<carto::Volume<T> > & volume );
+
+} // namespace carto
+
 
 #endif // CARTODATA_VOLUME_VOLUMEREF_H

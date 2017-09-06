@@ -233,9 +233,6 @@ namespace aims
 
   }
 
-}
-
-
 //
 // unary operators + & -
 //
@@ -297,6 +294,7 @@ aims::SparseMatrix
     operator / ( const aims::SparseMatrix& thing1,
                  const double& thing2 );
 
+}
 
 namespace std
 {

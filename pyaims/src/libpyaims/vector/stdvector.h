@@ -35,18 +35,13 @@
 #ifndef PYAIMS_VECTOR_STDVECTOR_H
 #define PYAIMS_VECTOR_STDVECTOR_H
 
+#include <vector>
 #include <stdlib.h>
 
 template <typename T>
 inline std::vector<T> * pyaimsCopyFrom_Array( T * array, unsigned size )
 {
-  std::vector<T> * result = new std::vector<T>;
-  result->reserve( size );
-
-  for( unsigned index=0; index < size; ++index )
-  {
-    result->push_back( array[index] );
-  }
+  std::vector<T> * result = new std::vector<T>( array, array + size );
 
   return result;
 }

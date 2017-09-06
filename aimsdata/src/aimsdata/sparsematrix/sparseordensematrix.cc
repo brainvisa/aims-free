@@ -46,13 +46,14 @@ using namespace std;
 SparseOrDenseMatrix::SparseOrDenseMatrix( 
   int32_t size1, int32_t size2 )
   : _sparsematrix( new SparseMatrix( size1, size2 ) ),
-  _fakeheader( 0 )
+  _fakeheader( 0 ), _lazyreader( new MatrixLazyReader )
 {
   _densematrix.reset( 0 );
 }
 
 
 SparseOrDenseMatrix::SparseOrDenseMatrix( const SparseOrDenseMatrix& other )
+  : _lazyreader( new MatrixLazyReader )
 {
   if( other.isDense() )
   {
@@ -71,6 +72,7 @@ SparseOrDenseMatrix::SparseOrDenseMatrix( const SparseOrDenseMatrix& other )
 
 SparseOrDenseMatrix::~SparseOrDenseMatrix()
 {
+  delete _lazyreader;
 }
 
 
@@ -111,6 +113,29 @@ int32_t SparseOrDenseMatrix::getSize2() const
     return denseMatrix()->getSizeX();
   else
     return sparseMatrix()->getSize2();
+}
+
+
+vector<int32_t> SparseOrDenseMatrix::getSize() const
+{
+  if( isDense() )
+  {
+    vector<int32_t> dims = denseMatrix()->getSize();
+    int32_t d0 = dims[0];
+    dims[0] = dims[1];
+    dims[1] = d0;
+    return dims;
+  }
+  else
+  {
+    vector<int32_t> size;
+    header()->getProperty( "dimensions", size );
+    if( size.size() < 2 )
+      size.resize( 2 );
+    size[0] = getSize1();
+    size[1] = getSize2();
+    return size;
+  }
 }
 
 
@@ -363,6 +388,8 @@ SparseOrDenseMatrix::SparseMatrixType SparseOrDenseMatrix::asSparse(
 
   unsigned l, c, nl = _densematrix->getSizeY(), nc = _densematrix->getSizeX();
   SparseMatrixType sparse( new SparseMatrix( nl, nc ) );
+  sparse->header()->copyProperties(
+    Object::reference( _densematrix->header() ) );
   double *ptr;
   long inc;
 
@@ -393,6 +420,9 @@ SparseOrDenseMatrix::DenseMatrixType SparseOrDenseMatrix::asDense(
 
   DenseMatrixType dense( _sparsematrix->getSize2(), 
                          _sparsematrix->getSize1() );
+
+  dense.copyHeaderFrom( header() );
+
   dense.fill( 0 );
   SparseMatrix::const_iterator1 i, e = _sparsematrix->end1();
   SparseMatrix::const_iterator2 j, ej;
@@ -442,6 +472,80 @@ void SparseOrDenseMatrix::muteToOptimalShape()
     muteToSparse();
   else
     muteToDense();
+}
+
+
+void SparseOrDenseMatrix::readRow( int32_t i )
+{
+  if( _lazyreader->hasRow( i ) )
+    return;
+  vector<double> *row = _lazyreader->readRow( i );
+  setRow( i, *row );
+  delete row;
+}
+
+
+void SparseOrDenseMatrix::readColumn( int32_t i )
+{
+  if( _lazyreader->hasColumn( i ) )
+    return;
+  vector<double> *col = _lazyreader->readColumn( i );
+  setColumn( i, *col );
+  delete col;
+}
+
+
+vector<double> *SparseOrDenseMatrix::getReadRow( int32_t i, bool store )
+{
+  if( _lazyreader->hasRow( i ) )
+    return new vector<double>( getRow( i ) );
+  vector<double> *row = _lazyreader->readRow( i, store );
+  if( store )
+    setRow( i, *row );
+  return row;
+}
+
+
+vector<double> *SparseOrDenseMatrix::getReadColumn( int32_t i, bool store )
+{
+  if( _lazyreader->hasColumn( i ) )
+    return new vector<double>( getColumn( i ) );
+  vector<double> *vec = _lazyreader->readColumn( i, store );
+  if( store )
+    setColumn( i, *vec );
+  return vec;
+}
+
+
+void SparseOrDenseMatrix::readAll()
+{
+  int32_t i, n = getSize1();
+  for( i=0; i<n; ++i )
+    readRow( i );
+}
+
+
+void SparseOrDenseMatrix::freeRow( int32_t i )
+{
+  // if dense, do nothing: we will not release memory anyway
+  if( !isDense() )
+  {
+    vector<double> row( getSize2(), 0. );
+    setRow( i, row );
+    _lazyreader->freeRow( i );
+  }
+}
+
+
+void SparseOrDenseMatrix::freeColumn( int32_t i )
+{
+  // if dense, do nothing: we will not release memory anyway
+  if( !isDense() )
+  {
+    vector<double> col( getSize1(), 0. );
+    setColumn( i, col );
+    _lazyreader->freeColumn( i );
+  }
 }
 
 
@@ -524,7 +628,7 @@ SparseOrDenseMatrix &
 
 
 SparseOrDenseMatrix
-  operator - ( const SparseOrDenseMatrix & thing )
+  aims::operator - ( const SparseOrDenseMatrix & thing )
 {
   SparseOrDenseMatrix copy( thing );
   copy *= -1;
@@ -533,7 +637,7 @@ SparseOrDenseMatrix
 
 
 SparseOrDenseMatrix
-  operator + ( const SparseOrDenseMatrix & thing1,
+  aims::operator + ( const SparseOrDenseMatrix & thing1,
                const SparseOrDenseMatrix & thing2 )
 {
   if( thing1.isDense() || !thing2.isDense() )
@@ -552,7 +656,7 @@ SparseOrDenseMatrix
 
 
 SparseOrDenseMatrix
-  operator - ( const SparseOrDenseMatrix & thing1,
+  aims::operator - ( const SparseOrDenseMatrix & thing1,
                const SparseOrDenseMatrix & thing2 )
 {
   if( thing1.isDense() || thing2.isDense() )
@@ -573,7 +677,7 @@ SparseOrDenseMatrix
 
 
 SparseOrDenseMatrix
-  operator * ( const SparseOrDenseMatrix& thing1,
+  aims::operator * ( const SparseOrDenseMatrix& thing1,
                const double& thing2 )
 {
   SparseOrDenseMatrix copy( thing1 );
@@ -583,12 +687,85 @@ SparseOrDenseMatrix
 
 
 SparseOrDenseMatrix
-  operator / ( const SparseOrDenseMatrix & thing1,
+  aims::operator / ( const SparseOrDenseMatrix & thing1,
                const double& thing2 )
 {
   SparseOrDenseMatrix copy( thing1 );
   copy *= thing2;
   return copy;
+}
+
+
+SparseOrDenseMatrix* SparseOrDenseMatrix::subMatrix(
+  const vector<int32_t> & start, const vector<int32_t> & size )
+{
+  int32_t i, j, nd = size.size();
+  vector<vector<int32_t> > sparse( nd );
+  for( j=0; j<nd; ++j )
+  {
+    sparse[j].resize( size[j] );
+    vector<int32_t> & sparse_dim = sparse[j];
+    for( i=0; i<size[j]; ++i )
+      sparse_dim[i] = i + start[j];
+  }
+  return subMatrix( sparse );
+}
+
+
+SparseOrDenseMatrix* SparseOrDenseMatrix::subMatrix(
+  const vector<vector<int32_t> > & indices_along_dims )
+{
+  SparseOrDenseMatrix *mat = new SparseOrDenseMatrix;
+  bool needs3d = false;
+  size_t dim, ndim = indices_along_dims.size();
+  vector<int32_t> dims( ndim, 1 );
+  vector<int32_t> pos( ndim, 0 );
+  for( dim=0; dim<ndim; ++dim )
+  {
+    dims[dim] = (int32_t) indices_along_dims[dim].size();
+    pos[dim] = indices_along_dims[dim][0];
+    if( dim >= 2 && dims[dim] > 1 )
+    {
+      needs3d = true;
+      break;
+    }
+  }
+  if( needs3d )
+  {
+    // swap dims 0/1
+    int32_t d0 = dims[0];
+    dims[0] = dims[1];
+    dims[1] = d0;
+    DenseMatrixType dense = new Volume<double>( dims );
+    mat->setMatrix( dense );
+    dims[1] = dims[0];
+    dims[0] = d0;
+  }
+  else
+    mat->reallocate( dims[0], dims[1] );
+  mat->header()->setProperty( "dimensions", dims );
+
+  size_t i, j, j0, n=dims[1], nc = dims[0];
+  vector<int32_t>::const_iterator ij;
+
+  // handle only 2D for now.
+  for( j0=0; j0!=nc; ++j0 )
+  {
+    j = indices_along_dims[0][j0];
+    pos[0] = j;
+    lazyReader()->selectDimension( vector<int32_t>(
+      pos.begin() + 2, pos.end() ) );
+    bool free_row = !lazyReader()->hasRow( j );
+    readRow( j );
+    vector<double> row = getRow( j );
+    for( i=0; i<n; ++i )
+      mat->set_element( j0, i, row[ indices_along_dims[1][i] ] );
+    if( free_row )
+      freeRow( j );
+    mat->muteToOptimalShape();
+  }
+
+  return mat;
 }
 
 

@@ -56,7 +56,7 @@ namespace
 }
 
 
-void Carto2AimsHeaderTranslator::translate( Object srcheader, 
+void Carto2AimsHeaderTranslator::translate( Object srcheader,
                                             Object dstheader ) const
 {
   if( !dstheader.get() )
@@ -64,23 +64,18 @@ void Carto2AimsHeaderTranslator::translate( Object srcheader,
   else
     dstheader->copyProperties( srcheader );
 
-  vector<int>	dim( 4, 1 );
+  vector<int>	dim;
 
-  if( dstheader->getProperty( "sizeX", dim[0] ) )
-    dstheader->removeProperty( "sizeX" );
-  if( dstheader->getProperty( "sizeY", dim[1] ) )
-    dstheader->removeProperty( "sizeY" );
-  if( dstheader->getProperty( "sizeZ", dim[2] ) )
-    dstheader->removeProperty( "sizeZ" );
-  if( dstheader->getProperty( "sizeT", dim[3] ) )
-    dstheader->removeProperty( "sizeT" );
-  /* keep erasing sizes because it causes a problem upon copy
-  dstheader->getProperty( "sizeX", dim[0] );
-  dstheader->getProperty( "sizeY", dim[1] );
-  dstheader->getProperty( "sizeZ", dim[2] );
-  dstheader->getProperty( "sizeT", dim[3] );
-  */
-  dstheader->setProperty( "volume_dimension", dim );
+  if( !dstheader->getProperty( "volume_dimension", dim ) )
+  {
+    while( dim.size() <  4 )
+      dim.push_back( 1 );
+    dstheader->getProperty( "sizeX", dim[0] );
+    dstheader->getProperty( "sizeY", dim[1] );
+    dstheader->getProperty( "sizeZ", dim[2] );
+    dstheader->getProperty( "sizeT", dim[3] );
+    dstheader->setProperty( "volume_dimension", dim );
+  }
 
   string	x;
   if( dstheader->getProperty( "format", x ) )
@@ -91,7 +86,7 @@ void Carto2AimsHeaderTranslator::translate( Object srcheader,
 
   // data / object types
   string	otype, dtype;
-  if( !dstheader->hasProperty( "data_type" ) 
+  if( !dstheader->hasProperty( "data_type" )
       && dstheader->getProperty( "object_type", otype ) )
     {
       cout << "no data_type\n";
@@ -102,7 +97,7 @@ void Carto2AimsHeaderTranslator::translate( Object srcheader,
 
   // possible_types
   vector<string>	ptypes, nptypes;
-  if( !dstheader->hasProperty( "possible_data_types" ) 
+  if( !dstheader->hasProperty( "possible_data_types" )
       && dstheader->getProperty( "possible_types", ptypes ) )
     {
       unsigned	i=0, n = ptypes.size();

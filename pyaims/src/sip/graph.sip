@@ -40,6 +40,7 @@ public:
     virtual bool isValid() const /AutoGen/;
     /*virtual*/ carto::Object currentValue() const  /Factory, AutoGen/;
     virtual std::string key() const  /Factory, AutoGen/;
+    virtual long intKey() const /AutoGen/;
 
 private:
     virtual carto::GenericObject* clone() const /AutoGen/;

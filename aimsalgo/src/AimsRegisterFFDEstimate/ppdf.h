@@ -25,7 +25,7 @@ class ParzenProbDensFunction
   public:
     static const int PAD = 2;
 
-    ParzenProbDensFunction(bio::SplineFfd& deformation,
+    ParzenProbDensFunction(aims::SplineFfd& deformation,
                           bool is2dx = false,
                           bool is2dy = false,
                           bool is2dz = false,
@@ -34,7 +34,8 @@ class ParzenProbDensFunction
 
     virtual  ~ParzenProbDensFunction();
     void      updateBinSizeAndMin(AimsData<short>& refImage,
-                                 AimsData<short>& testImage );
+                                 AimsData<short>&  testImage,
+                                 bool              prepro = true );
     // add [lambda,kappa] point to the joint histogram
     // testlevel is used to better manage discretisation.
     bool      addContrib(int lambda, int kappa, double testLevel);

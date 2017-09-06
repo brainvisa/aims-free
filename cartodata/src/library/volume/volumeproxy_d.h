@@ -45,30 +45,49 @@ namespace carto
   template < typename T >
   VolumeProxy< T >::VolumeProxy( int sizeX, int sizeY, int sizeZ, int sizeT )
     : Headered(),
-      _sizeX( sizeX ),
-      _sizeY( sizeY ),
-      _sizeZ( sizeZ ),
-      _sizeT( sizeT )
+      _size( 4 )
   {
+    _size[0] = sizeX;
+    _size[1] = sizeY;
+    _size[2] = sizeZ;
+    _size[3] = sizeT;
 
-    header().addBuiltinProperty( "sizeX", _sizeX );
-    header().addBuiltinProperty( "sizeY", _sizeY );
-    header().addBuiltinProperty( "sizeZ", _sizeZ );
-    header().addBuiltinProperty( "sizeT", _sizeT );
+    header().addBuiltinProperty( "volume_dimension", _size );
+    header().addBuiltinProperty( "sizeX", _size[0] );
+    header().addBuiltinProperty( "sizeY", _size[1] );
+    header().addBuiltinProperty( "sizeZ", _size[2] );
+    header().addBuiltinProperty( "sizeT", _size[3] );
 
   }
 
 
   template < typename T >
+  VolumeProxy< T >::VolumeProxy( const std::vector<int> & size )
+    : Headered(),
+      _size( size )
+  {
+    while( _size.size() < 4 )
+    {
+      _size.reserve( 4 );
+      _size.push_back( 1 );
+    }
+    header().addBuiltinProperty( "volume_dimension", _size );
+    header().addBuiltinProperty( "sizeX", _size[0] );
+    header().addBuiltinProperty( "sizeY", _size[1] );
+    header().addBuiltinProperty( "sizeZ", _size[2] );
+    header().addBuiltinProperty( "sizeT", _size[3] );
+  }
+
+
+  template < typename T >
   VolumeProxy< T >::VolumeProxy( const VolumeProxy< T >& other )
-    : RCObject(), 
+    : RCObject(),
       Headered( other ),
-      _sizeX( other._sizeX ),
-      _sizeY( other._sizeY ),
-      _sizeZ( other._sizeZ ),
-      _sizeT( other._sizeT )
+      _size( other._size )
   {
 
+    if( header().hasProperty( "volume_dimension" ) )
+      header().removeProperty( "volume_dimension" );
     if( header().hasProperty( "sizeX" ) )
       header().removeProperty( "sizeX" );
     if( header().hasProperty( "sizeY" ) )
@@ -78,10 +97,11 @@ namespace carto
     if( header().hasProperty( "sizeT" ) )
       header().removeProperty( "sizeT" );
 
-    header().addBuiltinProperty( "sizeX", _sizeX );
-    header().addBuiltinProperty( "sizeY", _sizeY );
-    header().addBuiltinProperty( "sizeZ", _sizeZ );
-    header().addBuiltinProperty( "sizeT", _sizeT );
+    header().addBuiltinProperty( "volume_dimension", _size );
+    header().addBuiltinProperty( "sizeX", _size[0] );
+    header().addBuiltinProperty( "sizeY", _size[1] );
+    header().addBuiltinProperty( "sizeZ", _size[2] );
+    header().addBuiltinProperty( "sizeT", _size[3] );
 
   }
 
@@ -93,7 +113,7 @@ namespace carto
 
 
   template < typename T >
-  VolumeProxy< T >& 
+  VolumeProxy< T >&
   VolumeProxy< T >::operator=( const VolumeProxy< T >& other )
   {
 
@@ -101,10 +121,16 @@ namespace carto
       return *this;
 
     this->Headered::operator=( other );
-    _sizeX = other._sizeX;
-    _sizeY = other._sizeY;
-    _sizeZ = other._sizeZ;
-    _sizeT = other._sizeT;
+    _size = other._size;
+
+    if( header().hasProperty( "sizeX" ) )
+      header().changeBuiltinProperty( "sizeX", _size[0] );
+    if( header().hasProperty( "sizeY" ) )
+      header().changeBuiltinProperty( "sizeY", _size[1] );
+    if( header().hasProperty( "sizeZ" ) )
+      header().changeBuiltinProperty( "sizeZ", _size[2] );
+    if( header().hasProperty( "sizeT" ) )
+      header().changeBuiltinProperty( "sizeT", _size[3] );
 
     return *this;
 
@@ -115,32 +141,22 @@ namespace carto
   std::vector<float> VolumeProxy< T >::getVoxelSize() const
   {
 
-    std::vector<float> voxelsize(4, 1.);
+    size_t i, n = _size.size();
+    std::vector<float> voxelsize( n, 1. );
     carto::Object vso;
     try
     {
       vso = header().getProperty( "voxel_size" );
-      if( !vso.isNull() )
-      {
-        carto::Object it = vso->objectIterator();
-        if( it->isValid() )
+      if( vso->size() < n )
+        n = vso->size();
+      for( i=0; i<n; ++i )
+        try
         {
-          voxelsize[0] = it->currentValue()->getScalar();
-          it->next();
-          if( it->isValid() )
-          {
-            voxelsize[1] = it->currentValue()->getScalar();
-            it->next();
-            if( it->isValid() )
-            {
-              voxelsize[2] = it->currentValue()->getScalar();
-              it->next();
-              if( it->isValid() )
-                voxelsize[3] = it->currentValue()->getScalar();
-            }
-          }
+          voxelsize[i] = float( vso->getArrayItem(i)->getScalar() );
         }
-      }
+        catch( std::exception & )
+        {
+        }
     }
     catch( std::exception & )
     {

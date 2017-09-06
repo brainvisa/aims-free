@@ -37,12 +37,13 @@
 #include <string>
 #include <stdint.h>
 #include <Python.h>
+#include <pyaims/numpyarray.h>
+#include <numpy/arrayscalars.h>
 
 namespace carto
 {
 
   uint32_t uint32_FromPy( PyObject *pyobj );
-  float float_FromPy( PyObject* pyobj );
 
 
   inline PyObject* PyaimsInt_FromLong( long x )
@@ -55,13 +56,85 @@ namespace carto
   }
 
 
-  inline int PyaimsInt_AsLong( PyObject *x )
+  inline long PyaimsLong_AsLong( PyObject *x )
   {
 #if PY_VERSION_HEX >= 0x03000000
-    return int( PyLong_AsLong( x ) );
+    return PyLong_AsLong( x );
 #else
-    return PyInt_AsLong( x );
+    if( PyInt_Check( x ) )
+      return PyInt_AsLong( x );
+    else
+      return PyLong_AsLong( x );
 #endif
+  }
+
+
+  inline int PyaimsInt_AsLong( PyObject *x )
+  {
+    return int( PyaimsLong_AsLong( x ) );
+  }
+
+
+  inline bool PyaimsInt_Check( PyObject *x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    if( PyLong_Check( x ) )
+      return true;
+//     long y = PyLong_AsLong( x );
+#else
+    if( PyLong_Check( x ) || PyInt_Check( x ) )
+      return true;
+#endif
+    // check numpy types
+    PyArray_Descr* dtype;
+    if( !PyArray_DescrConverter( x, &dtype ) )
+      return false;
+    int typeNum = dtype->type_num;
+    Py_DECREF( dtype );
+    if( typeNum == NPY_BOOL || typeNum == NPY_INT8 || typeNum == NPY_UINT8
+        || typeNum == NPY_INT16 || typeNum == NPY_UINT16
+        || typeNum == NPY_INT32 || typeNum == NPY_UINT32
+        || typeNum == NPY_INT64 || typeNum == NPY_UINT64 )
+      return true;
+    return false;
+  }
+
+
+  inline double PyaimsFloat_AsDouble( PyObject *x )
+  {
+    PyTypeObject* ptype = Py_TYPE( x ); //->ob_type;
+    if( ptype == &PyFloat32ArrType_Type )
+      return reinterpret_cast<PyFloatScalarObject *>( x )->obval;
+    if( PyFloat_Check( x ) )
+      return PyFloat_AsDouble( x );
+    long y;
+#if PY_VERSION_HEX <= 0x03000000
+    y = PyInt_AsLong( x );
+    if( y != -1 || !PyErr_Occurred() )
+      return double( y );
+    else
+      PyErr_Clear();
+#endif
+    return double( PyLong_AsLong( x ) );
+  }
+
+
+  inline bool PyaimsNumber_Check( PyObject *x )
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    if( PyFloat_Check( x ) || PyLong_Check( x ) )
+      return true;
+#else
+    if( PyFloat_Check( x ) || PyLong_Check( x ) || PyInt_Check( x ) )
+      return true;
+#endif
+    double y = PyFloat_AsDouble( x );
+    if( y == -1. && PyErr_Occurred() )
+    {
+      PyErr_Clear();
+      return false;
+    }
+    return true;
   }
 
 

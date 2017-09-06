@@ -315,23 +315,17 @@ namespace aims {
       size[2] = amplitude[4] + amplitude[5] + 1;
       carto::VolumeRef<T> win( new carto::Volume<T>( in, pos, size ) );
 
-      aims::Progression progress( out->getSizeT() * (ez - sz) * (ey - sy) - 1 );
+      aims::Progression progress( out->getSizeT() * (ez - sz) * (ey - sy) * (ex - sx) );
       if( ImageAlgorithmInterface<T>::_verbose > 0 )
         std::cout << "Filtering progress: ";
 
       for( t = 0; t < in->getSizeT(); ++t )
         for( z = sz; z < ez; ++z )
-          for( y = sy; y < ey; ++y, ++progress ) {
-            if( ImageAlgorithmInterface<T>::_verbose > 0 ) {
-              // Display progression
-              // The "normal" operator << should be as:
-              // std::cout << progress << std::flush;
-              // but it doesn't work in gcc 4.0, there is a namespace
-              // confusion, so we have to specify ::operator <<
-              ::operator << ( std::cout, progress ) << std::flush;
-            }
+          for( y = sy; y < ey; ++y )
             for( x = sx; x < ex; ++x )
             {
+              if( this->_verbose > 0 )
+                (++progress).print();
               // Set view position in the volume
               pos[0] = x - amplitude[0];
               pos[1] = y - amplitude[2];
@@ -340,7 +334,6 @@ namespace aims {
               win->setPosInRefVolume( pos );
               (*out)( x, y, z, t ) = _func->execute( win );
             }
-          }
 
       if( ImageAlgorithmInterface<T>::_verbose > 0 )
         std::cout << std::endl;
@@ -463,23 +456,17 @@ namespace aims {
 
       carto::VolumeRef<T> win( new carto::Volume<T>( in, pos, size ) );
 
-      aims::Progression progress( out->getSizeT() * (ez - sz) * (ey - sy) - 1 );
+      aims::Progression progress( out->getSizeT() * (ez - sz) * (ey - sy) *(ex - sx) );
       if( ImageAlgorithmInterface<T>::_verbose > 0 )
         std::cout << "Filtering progress: ";
 
       for( t = 0; t < in->getSizeT(); ++t )
         for( z = sz; z < ez; ++z )
-          for( y = sy; y < ey; ++y, ++progress ) {
-            if( ImageAlgorithmInterface<T>::_verbose > 0 ) {
-              // Display progression
-              // The "normal" operator << should be as:
-              // std::cout << progress << std::flush;
-              // but it doesn't work in gcc 4.0, there is a namespace
-              // confusion, so we have to specify ::operator <<
-              ::operator << ( std::cout, progress ) << std::flush;
-            }
+          for( y = sy; y < ey; ++y )
             for( x = sx; x < ex; ++x )
             {
+              if( this->_verbose > 0 )
+                (++progress).print();
               // Set view position in the volume
               pos[0] = x;
               pos[1] = y;
@@ -488,7 +475,6 @@ namespace aims {
               win->setPosInRefVolume( pos );
               (*out)( x, y, z, t ) = _func->execute( win, _strel );
             }
-          }
 
       if( ImageAlgorithmInterface<T>::_verbose > 0 )
         std::cout << std::endl;

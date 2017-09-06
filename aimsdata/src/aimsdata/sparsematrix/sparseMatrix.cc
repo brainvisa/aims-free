@@ -451,7 +451,11 @@ void aims::SparseMatrix::setRow( int32_t s1, const std::vector<double>& row )
     for ( s2 = 0; s2 < getSize2(); s2++ )
     {
 
-      ( *this )( s1, s2 ) = row[ s2 ];
+      const double & element = row[s2];
+      if( element == 0 )
+        erase_element( s1, s2 );
+      else
+        ( *this )( s1, s2 ) = element;
 
     }
 
@@ -1134,7 +1138,7 @@ aims::SparseMatrix
 
 // - SparseMatrix
 aims::SparseMatrix 
-    operator - ( const aims::SparseMatrix& thing )
+    aims::operator - ( const aims::SparseMatrix& thing )
 {
 
   try
@@ -1242,7 +1246,7 @@ aims::SparseMatrix &
 
 // SparseMatrix + SparseMatrix
 aims::SparseMatrix
-    operator + ( const aims::SparseMatrix& thing1,
+    aims::operator + ( const aims::SparseMatrix& thing1,
                  const aims::SparseMatrix& thing2 )
 {
 
@@ -1278,7 +1282,7 @@ aims::SparseMatrix
 
 // SparseMatrix - SparseMatrix
 aims::SparseMatrix
-    operator - ( const aims::SparseMatrix& thing1,
+    aims::operator - ( const aims::SparseMatrix& thing1,
                  const aims::SparseMatrix& thing2 )
 {
 
@@ -1314,7 +1318,7 @@ aims::SparseMatrix
 
 // SparseMatrix * SparseMatrix
 aims::SparseMatrix
-    operator * ( const aims::SparseMatrix& thing1,
+    aims::operator * ( const aims::SparseMatrix& thing1,
                  const aims::SparseMatrix& thing2 )
 {
 
@@ -1335,7 +1339,7 @@ aims::SparseMatrix
 
 // SparseMatrix * std::vector<double>
 std::vector<double>
-    operator * ( const aims::SparseMatrix& thing1,
+    aims::operator * ( const aims::SparseMatrix& thing1,
                  const std::vector<double>& thing2 )
 {
 
@@ -1356,7 +1360,7 @@ std::vector<double>
 
 // SparseMatrix * double
 aims::SparseMatrix
-    operator * ( const aims::SparseMatrix& thing1,
+    aims::operator * ( const aims::SparseMatrix& thing1,
                  const double& thing2 )
 {
 
@@ -1384,7 +1388,7 @@ aims::SparseMatrix
 
 // SparseMatrix / double
 aims::SparseMatrix
-    operator / ( const aims::SparseMatrix& thing1,
+    aims::operator / ( const aims::SparseMatrix& thing1,
                  const double& thing2 )
 {
 

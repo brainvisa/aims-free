@@ -42,6 +42,7 @@
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/allocator/allocator.h>
 #include <cartobase/smart/rcptr.h>
+#include <cartobase/type/datatypetraits.h>
 //--- blitz ------------------------------------------------------------------
 #ifdef CARTO_USE_BLITZ
   #ifdef _WIN32
@@ -117,6 +118,7 @@ namespace carto
     /// "vector-like" object, i.e. possessing a size() method and the []
     /// operator
     class Position4Di;
+    typedef std::vector<int> Position;
 
     /// Access to T type
     typedef T datatype;
@@ -126,9 +128,13 @@ namespace carto
     /// offsets when in a Volume view. Taking care of splitting loops
     /// line-by-line is the responsability of programmers using such
 #ifdef CARTO_USE_BLITZ
-    typedef typename blitz::Array<T,4>::iterator iterator;
-    typedef typename blitz::Array<T,4>::const_iterator const_iterator;
+    // static const int DIM_MAX = 8; leads to build issues on old GCC versions
+    // so we need to use enum to be able to declare DIM_MAX in carto::Volume
+    enum { DIM_MAX = 8 };
+    typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::iterator iterator;
+    typedef typename blitz::Array<T,Volume<T>::DIM_MAX>::const_iterator const_iterator;
 #else
+    enum { DIM_MAX = 4 }; // still limited to 4D in this case.
     typedef typename AllocatedVector<T>::iterator iterator;
     typedef typename AllocatedVector<T>::const_iterator const_iterator;
 #endif
@@ -197,6 +203,21 @@ namespace carto
                      const AllocatorContext& allocatorContext
                       = AllocatorContext(),
                      bool allocated = true );
+    /// Volume construction and allocation: std::vector version
+    /// Same as the above constructor, but allows to specify a border size
+    /// in each dimension
+    explicit Volume( const std::vector<int> & size,
+                     const AllocatorContext& allocatorContext
+                      = AllocatorContext(),
+                     bool allocated = true );
+    /// Volume construction and allocation: std::vector version
+    /// Same as the above constructor, but allows to specify a border size
+    /// in each dimension
+    explicit Volume( const std::vector<int> & size,
+                     const std::vector<int> & border,
+                     const AllocatorContext& allocatorContext
+                      = AllocatorContext(),
+                     bool allocated = true );
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
     Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer );
@@ -204,6 +225,7 @@ namespace carto
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
     Volume( const Position4Di & size, T* buffer );
+    Volume( const std::vector<int> & size, T* buffer );
     /// This is the volume view constructor.
     /// Beware not to mix it up with the copy constructor ( it takes a pointer
     /// to volume instead of a volume )
@@ -212,6 +234,15 @@ namespace carto
     Volume( rc_ptr<Volume<T> > other,
             const Position4Di & pos = Position4Di( 0, 0, 0, 0 ),
             const Position4Di & size = Position4Di( -1, -1, -1, -1 ),
+            const AllocatorContext & allocContext = AllocatorContext() );
+    /// This is the volume view constructor.
+    /// Beware not to mix it up with the copy constructor ( it takes a pointer
+    /// to volume instead of a volume )
+    /// If parent volume is allocated, view points to its data and doesn't own
+    /// it. Else, it allocates \c size and owns it.
+    Volume( rc_ptr<Volume<T> > other,
+            const Position & pos,
+            const Position & size = Position(),
             const AllocatorContext & allocContext = AllocatorContext() );
     /// Copy constructor
     /// The copy constructors actually duplicates data buffers. In the case
@@ -250,6 +281,10 @@ namespace carto
     T& operator() ( const Position4Di & position );
     const T& at( const Position4Di & position ) const;
     T& at( const Position4Di & position );
+    const T & at( const std::vector<int> & ) const;
+    T & at( const std::vector<int> & );
+    const T& operator() ( const std::vector<int> & position ) const;
+    T& operator() ( const std::vector<int> & position );
 
 #ifdef CARTO_USE_BLITZ
     const T & at( const blitz::TinyVector<int,1> & ) const;
@@ -260,16 +295,31 @@ namespace carto
     T & at( const blitz::TinyVector<int,3> & );
     const T & at( const blitz::TinyVector<int,4> & ) const;
     T & at( const blitz::TinyVector<int,4> & );
-    blitz::Array<T,4> at( const blitz::RectDomain<4> & subdomain ) const;
-    blitz::Array<T,4> at( const blitz::StridedDomain<4> & subdomain ) const;
-    blitz::Array<T,4> at( const blitz::Range & r0 ) const;
-    blitz::Array<T,4> at( const blitz::Range & r0,
+    const T & at( const blitz::TinyVector<int,Volume<T>::DIM_MAX> & ) const;
+    T & at( const blitz::TinyVector<int,Volume<T>::DIM_MAX> & );
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::RectDomain<Volume<T>::DIM_MAX>
+      & subdomain ) const;
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::StridedDomain<Volume<T>::DIM_MAX>
+      & subdomain ) const;
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::Range & r0 ) const;
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::Range & r0,
                           const blitz::Range & r1 ) const;
-    blitz::Array<T,4> at( const blitz::Range & r0, const blitz::Range & r1,
-                          const blitz::Range & r2 ) const;
-    blitz::Array<T,4> at( const blitz::Range & r0, const blitz::Range & r1,
-                          const blitz::Range & r2,
-                          const blitz::Range & r3 ) const;
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::Range & r0,
+                                const blitz::Range & r1,
+                                const blitz::Range & r2 ) const;
+    blitz::Array<T,Volume<T>::DIM_MAX> at( const blitz::Range & r0,
+                                const blitz::Range & r1,
+                                const blitz::Range & r2,
+                                const blitz::Range & r3 ) const;
+    // to get beyond 4 dimensions
+    const T & at( long x1, long x2, long x3, long x4, long x5, long x6=0,
+                  long x7=0, long x8=0 ) const;
+    T & at( long x1, long x2, long x3, long x4, long x5, long x6=0,
+            long x7=0, long x8=0 );
+    const T& operator()( long x1, long x2, long x3, long x4, long x5,
+                         long x6=0, long x7=0, long x8=0 ) const;
+    T& operator() ( long x1, long x2, long x3, long x4, long x5, long x6=0,
+                    long x7=0, long x8=0 );
 #endif
 
     //========================================================================
@@ -292,6 +342,10 @@ namespace carto
                              const AllocatorContext& allocatorContext
                              = AllocatorContext(), bool allocate = true );
     virtual void reallocate( const Position4Di & size,
+                             bool keepcontents = false,
+                             const AllocatorContext& allocatorContext
+                             = AllocatorContext(), bool allocate = true );
+    virtual void reallocate( const std::vector<int> & size,
                              bool keepcontents = false,
                              const AllocatorContext& allocatorContext
                              = AllocatorContext(), bool allocate = true );
@@ -332,9 +386,10 @@ namespace carto
     /// Set parent volume
     void setRefVolume(const rc_ptr<Volume<T> > & refvol);
     /// Get position in parent volume
-    const Position4Di posInRefVolume() const;
+    const Position & posInRefVolume() const;
     /// Set position in parent volume
     void setPosInRefVolume(const Position4Di & pos);
+    void setPosInRefVolume(const Position & pos);
 
     /// Get borders for the volume. A volume that can have borders is a volume \n
     /// that references another volume. It can be understood as a view in the reference volume.
@@ -353,16 +408,16 @@ namespace carto
     /// each dimension including.
     /// \return std::vector<uint16_t> that contains the borders availables for
     ///                               the volume.
-    ///         vector[0]: number of voxels for the 0 dimension. Value is 
+    ///         vector[0]: number of voxels for the 0 dimension. Value is
     ///                    always 1 as no border is defined around each voxel.
-    ///         vector[1]: number of voxels for the 1st dimension, i.e. in a 
+    ///         vector[1]: number of voxels for the 1st dimension, i.e. in a
     ///                    line including its borders.
-    ///         vector[2]: number of voxels for the 2nde dimension, i.e. in a 
+    ///         vector[2]: number of voxels for the 2nde dimension, i.e. in a
     ///                    slice including its borders.
-    ///         vector[3]: number of voxels for the 3rd dimension, i.e. in a 
+    ///         vector[3]: number of voxels for the 3rd dimension, i.e. in a
     ///                    volume including its borders.
     std::vector<size_t> getStrides() const;
-    
+
     //========================================================================
     //   BOOLEANS / ACCUMULATED VALUES
     //========================================================================
@@ -375,9 +430,9 @@ namespace carto
     bool any() const;
     T min() const;
     T max() const;
-    T sum() const;
-    template <typename OUTP>
-    OUTP sum() const;
+    /// To avoid overflow, the biggest possible type (intmax_t, uintmax_t,
+    /// double...) is used for computation and returned.
+    typename DataTypeTraits<T>::LongType sum() const;
 
     //========================================================================
     //   FILL / REPLACE
@@ -392,23 +447,25 @@ namespace carto
     //========================================================================
     void allocate( int oldSizeX, int oldSizeY, int oldSizeZ, int oldSizeT,
                    bool allocate, const AllocatorContext& allocatorContext );
+    void allocate( const std::vector<int> & oldSize,
+                   bool allocate, const AllocatorContext& allocatorContext );
     void slotSizeChanged( const PropertyFilter& propertyFilter );
     void updateItemsBuffer();
 
-    void constructBorders( const Position4Di & bordersize,
+    void constructBorders( const Position & bordersize,
                            const AllocatorContext& allocatorContext,
                            bool allocated );
 
     AllocatedVector<T> _items;
 #ifdef CARTO_USE_BLITZ
-    blitz::Array<T, 4>  _blitz;
+    blitz::Array<T, Volume<T>::DIM_MAX>  _blitz;
 #else
     size_t  _lineoffset;
     size_t  _sliceoffset;
     size_t  _volumeoffset;
 #endif
     rc_ptr<Volume<T> >  _refvol;
-    Position4Di         _pos;
+    std::vector<int>    _pos;
   };
 
 //============================================================================
@@ -450,13 +507,49 @@ namespace carto
           int & operator [] ( int coord )       { return _coords[ coord ]; }
     const int & operator [] ( int coord ) const { return _coords[ coord ]; }
 
-    bool operator==(const Position4Di& p) const { return ( _coords[0] == p._coords[0]
-                                                           && _coords[1] == p._coords[1]
-                                                           && _coords[2] == p._coords[2]
-                                                           && _coords[3] == p._coords[3] ); }
-    bool operator!=(const Position4Di& p) const { return !(this->operator ==(p)); }
+    bool operator==(const Position4Di& p) const
+    {
+      return ( _coords == p._coords );
+    }
+    bool operator!=(const Position4Di& p) const
+    { return !(this->operator ==(p)); }
 
-    unsigned size() const { return 4; }
+    unsigned size() const { return _coords.size(); }
+    const std::vector<int> & toVector() const
+    { return _coords; }
+
+    /* utility functions, not really related, but which we don't really know
+       where to put them */
+    static std::vector<int> fixed_position( const std::vector<int> & vec )
+    {
+      if( vec.size() >= 4 )
+        return vec;
+      std::vector<int> fixed( vec );
+      fixed.resize( 4 );
+      for( int i=vec.size(); i<4; ++i )
+        fixed[i] = 0;
+      return fixed;
+    }
+
+    static std::vector<int> fixed_size( const std::vector<int> & vec )
+    {
+      if( vec.size() >= 4 )
+        return vec;
+      std::vector<int> fixed( vec );
+      fixed.resize( 4 );
+      for( int i=vec.size(); i<4; ++i )
+        fixed[i] = 1;
+      return fixed;
+    }
+
+    static unsigned long long size_num_elements( const std::vector<int> & vec )
+    {
+      int i, n = vec.size();
+      unsigned long long num = 1;
+      for( i=0; i<n; ++i )
+        num *= vec[i];
+      return num;
+    }
 
   private:
     std::vector<int>  _coords;
@@ -491,15 +584,11 @@ namespace carto
 
 #endif
 
-} // namespace carto
-
 //============================================================================
 // STREAM
 //============================================================================
 
 #ifndef DOXYGEN_HIDE_INTERNAL_CLASSES
-
-namespace carto {
 
   // Warper for output streams that integrates parameters for volume
   // printing
@@ -553,39 +642,42 @@ namespace carto {
     size_t _maxX;
   };
 
+  VolumeOStream operator<< ( std::ostream & out,
+                             const VolumeOStreamSetter & setter );
+
+  template <typename T>
+  std::ostream & operator<< ( const VolumeOStream & out,
+                              const Volume<T> & volume );
+
+  // Method used to set Volume printing parameters
+  VolumeOStreamSetter setMaxDim( size_t m );
+  VolumeOStreamSetter setMaxDim( size_t mx, size_t my, size_t mz, size_t mt );
+
+  #endif // DOXYGEN_HIDE_INTERNAL_CLASSES
+
+
+  /// Volumes are printable to standard output streams.
+  /// They are shown as an array, eventually cropped at a given size.
+  /// The default crop value is 5 in each dimension.
+  /// The crop value can be set with setMaxDim() the following way:
+  /// \code
+  /// #include <cartodata/volume/volume.h>
+  /// #include <iostream>
+  /// using namespace carto;
+  /// using namespace std;
+  ///
+  /// carto::Volume<int16_t> vol( 10, 10, 10 );
+  /// cout << setMaxDim( 10 ) << vol << endl;
+  /// cout << setMaxDim( 5, 10, 1, 1 ) << vol << endl;
+  /// \endcode
+  /// setMaxDim can either receive 4 value (used in all directions) or
+  /// 4 values (directions x y, z, t).
+  template <typename T>
+  std::ostream & operator<< ( std::ostream & out,
+                              const Volume<T> & volume );
 
 } // namespace carto:
 
-carto::VolumeOStream operator<< ( std::ostream & out,
-                                  const carto::VolumeOStreamSetter & setter );
-
-template <typename T>
-std::ostream & operator<< ( const carto::VolumeOStream & out,
-                            const carto::Volume<T> & volume );
-
-#endif // DOXYGEN_HIDE_INTERNAL_CLASSES
-
-namespace carto {
-  /// Method used to set Volume printing parameters
-  VolumeOStreamSetter setMaxDim( size_t m );
-}
-
-/// Volumes are printable to standard output streams.
-/// They are shown as an array, eventually cropped at a given size.
-/// The default crop value is 5 in each dimension.
-/// The crop value can be set with setMaxDim() the following way:
-/// \code
-/// #include <cartodata/volume/volume.h>
-/// #include <iostream>
-/// using namespace carto;
-/// using namespace std;
-///
-/// carto::Volume<int16_t> vol( 10, 10, 10 );
-/// cout << setMaxDim( 10 ) << vol << endl;
-/// \endcode
-template <typename T>
-std::ostream & operator<< ( std::ostream & out,
-                            const carto::Volume<T> & volume );
 
 
 #endif // CARTODATA_VOLUME_VOLUMEBASE_H

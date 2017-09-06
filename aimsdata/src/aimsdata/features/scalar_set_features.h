@@ -55,6 +55,8 @@ public:
   ScalarSetFeatures();
   ScalarSetFeatures( const std::vector< Scalar_t > & );
   void setValues( const std::vector< Scalar_t > & );
+  void setValues( const std::vector< Scalar_t > &,
+                  const std::vector< Scalar_t > & );
   inline virtual ~ScalarSetFeatures();
   
   inline const std::vector< Scalar_t > &values() const;
@@ -67,6 +69,7 @@ private:
   // The following is mutable because it is necessary to sort
   // values for median computation.
   mutable std::vector< Scalar_t > _values;
+  std::vector< Scalar_t > _weights;
 };
 
 

@@ -543,14 +543,28 @@ def objiteritems(self):
             def __next__(self):
                 if not self.iterator.isValid():
                     raise StopIteration("iterator outside bounds")
-                res = (self.iterator.key(), self.iterator.currentValue())
+                try:
+                    key = self.iterator.key()
+                except:
+                    try:
+                        key = self.iterator.intKey()
+                    except:
+                        key = self.iterator.keyObject()
+                res = (key, self.iterator.currentValue())
                 self.iterator.__next__()
                 return res
         else:
             def next(self):
                 if not self.iterator.isValid():
                     raise StopIteration("iterator outside bounds")
-                res = (self.iterator.key(), self.iterator.currentValue())
+                try:
+                    key = self.iterator.key()
+                except:
+                    try:
+                        key = self.iterator.intKey()
+                    except:
+                        key = self.iterator.keyObject()
+                res = (key, self.iterator.currentValue())
                 self.iterator.next()
                 return res
 
@@ -1529,16 +1543,11 @@ def VolumeView(volume, position, size):
         raise TypeError('incompatible or wrong volume type: %s'
             % volclass.__name__)
 
-    posclass = volclass.Position4Di
-    if not isinstance(position, posclass):
-        position = posclass(*position)
-    if not isinstance(size, posclass):
         if len(size) < 4:
             size = list(size) + [1] * (4 - len(size))
         for i in range(4):
             if size[i] == 0:
                 size[i] = 1
-        size = posclass(*size)
     return volclass(vol, position, size)
 
 
@@ -2134,6 +2143,7 @@ A volume of a given type can be built either using its specialized class constru
     >>> v = aims.Volume_S16(100, 100, 10)
     >>> v = aims.Volume('S16', 100, 100, 10)
     >>> v = aims.Volume(100, 100, 10, dtype='S16')
+    >>> v = aims.Volume([100, 100, 10], dtype='S16')
     >>> import numpy
     >>> v = aims.Volume(numpy.int16, 100, 100, 10)
 
@@ -2141,7 +2151,7 @@ A volume is an array of voxels, which can be accessed via the ``at()``
 method.
 For standard numeric types, it is also posisble to get the voxels array as a
 numpy_ array, using the ``arraydata()`` method, or more conveniently,
-``numpy.array( volume, copy=False )``.
+``numpy.array(volume, copy=False)`` or ``numpy.asarray(volume)``.
 The array returned is a reference to the actual data block, so any
 modification to its contents also affect the Volume contents, so it is
 generally an easy way of manipulating volume voxels because all the power of
@@ -2178,6 +2188,21 @@ The converter can also be called using type arguments:
     >>> vol1 = aims.Volume('S16', 100, 100, 10)
     >>> c = aims.Converter(intype=vol1, outtype='Volume_DOUBLE')
     >>> vol2 = c(vol1)
+
+It is also possible to build a Volume from a numpy array:
+
+    >>> v = aims.Volume(numpy.zeros((100, 100, 10)))
+
+Note that passing a 1D numpy array of ints will build a volume mapping the array contents, whereas passing a python list or tuple of ints will interpret the list as a shape for the volume:
+
+    >>> v = aims.Volume(numpy.array([100, 100, 10]).astype('int32'))
+    >>> print v.getSize()
+    [ 3, 1, 1, 1 ]
+    >>> print np.asarray(v)
+    [100 100  10]
+    >>> v = aims.Volume([100, 100, 10])
+    >>> print v.getSize()
+    [ 100, 100, 10, 1 ]
 
 .. _numpy: http://numpy.scipy.org/
 '''

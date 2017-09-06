@@ -9,34 +9,19 @@ import shutil
 from soma import aims
 import numpy as np
 import glob
-
-keep_directory = False
+from soma.aims.volumetools import compare_images
 
 class TestPyaimsIO(unittest.TestCase):
 
     verbose = False
+    debug = False
 
 
     def setUp(self):
         self.work_dir = tempfile.mkdtemp(prefix='test_pyaims')
-        if keep_directory:
-            print('working directory:', self.work_dir, 'will not ne erased.')
+        if self.verbose or self.debug:
+            print('work directory:', self.work_dir)
 
-
-    def compare_images(self, vol, vol2, vol1_name, vol2_name, thresh=1e-6):
-        #print('comp vol, sizes:', vol.getSize(), vol2.getSize())
-        #print('    vsizes:', vol.getVoxelSize(), vol2.getVoxelSize())
-        msg = 'comparing %s and %s' % (vol1_name, vol2_name)
-        self.assertEqual(vol.getSize(), vol2.getSize(),
-                         msg + ': %s != %s'
-                         % (str(vol.getSize()), str(vol2.getSize())))
-        self.assertTrue(
-            np.max(np.abs(np.asarray(vol.getVoxelSize())
-                          - vol2.getVoxelSize())) < 1e-6, msg)
-        self.assertTrue(np.max(np.abs(np.asarray(vol) - np.asarray(vol2)))
-                        < thresh,
-                        msg + ', max diff: %f'
-                        % np.max(np.abs(np.asarray(vol) - np.asarray(vol2))))
 
     def check_open_files(self, fnames):
         proc_dir = '/proc/self/fd'
@@ -54,15 +39,29 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def use_type(self, dtype):
-        formats = ['.nii', '.nii.gz', '.ima', '.mnc', '.v', '.tiff'] #, '.dcm']
+        formats = [('.nii', {'max_dims': 7, 'write_unallocated': True}),
+                   ('.nii', {'max_dims': 4}), # to use scale factor
+                   ('.nii.gz', {'max_dims': 7, 'write_unallocated': True}),
+                   ('.ima', {'write_unallocated': True}),
+                   ('.tiff', {'max_dims': 4}),
+                   # minc 4D is OK except voxel size
+                   ('.mnc', {'max_dims': 3}),
+                   ('.v', {'max_dims': 3})] # ecat >= 4D unsupported
 
-        # create test volume
-        vol = aims.Volume(10, 10, 10, dtype=dtype)
-        vol.header()['voxel_size'] = [0.5, 0.6, 0.7]
-        np.asarray(vol)[:,:,:,:] = np.ogrid[0:1000].reshape(10, 10, 10, 1)
+        # create test volume for 8D IO
+        vol = aims.Volume((9, 8, 7, 6, 5, 4, 3, 3), dtype=dtype)
+        vol.header()['voxel_size'] = [0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.1, 1.2]
+        view = ((2, 3, 2, 1, 1, 1, 1, 1), (7, 5, 2, 2, 3, 2, 2, 2),
+                (1, 2, 3, 3, 2, 0, 0, 0), (7, 5, 2, 2, 3, 2, 2, 2))
+        vol.arraydata()[:] \
+            = np.ogrid[0:vol.arraydata().ravel().shape[0]].reshape(
+                vol.arraydata().shape)
         failing_files = set()
         for format in formats:
-            failing_files.update(self.use_format(vol, format))
+            options = {}
+            if isinstance(format, tuple):
+                format, options = format
+            failing_files.update(self.use_format(vol, format, view, options))
         return failing_files
 
 
@@ -85,16 +84,25 @@ class TestPyaimsIO(unittest.TestCase):
         return fname
 
 
-    def use_format(self, vol, format):
+    def use_format(self, vol, format, view, options={}):
         partial_read = ['.nii', '.nii.gz', '.ima'] #, '.dcm']
         partial_write = ['.nii', '.ima']
         default_epsilon = 1e-6
         # ecat scaling is far from exact...
-        epsilon = {'.v': 5e-2}
+        epsilon = {'.v': {'S16': 1e-6, 'FLOAT': (6e-5, True)}}
         dtype = aims.typeCode(np.asarray(vol).dtype)
 
+        ndim = len(vol.getSize())
+        if 'max_dims' in options:
+            ndim = options['max_dims']
+            vol = aims.VolumeView(vol, [0] * ndim, vol.getSize()[:ndim])
+            view = [x[:ndim] for x in view]
+            for i in range(ndim, len(vol.header()['voxel_size'])):
+                vol.header()['voxel_size'][i] = 1.
+
         if self.verbose:
-            print('testing type: %s, format: %s' % (dtype, format))
+            print('testing type: %s, format: %s, dims: %d'
+                  % (dtype, format, ndim))
         # write volume
         fname = os.path.join(
             self.work_dir, 'vol_%s%s' % (dtype, format))
@@ -107,9 +115,15 @@ class TestPyaimsIO(unittest.TestCase):
         vol2_name = os.path.basename(fname) + ' (re-read)'
         vol2 = aims.read(fname)
         thresh = epsilon.get(format, default_epsilon)
+        rel_thresh = False
+        if isinstance(thresh, dict):
+            thresh = thresh.get(dtype, default_epsilon)
+        if isinstance(thresh, tuple):
+            thresh, rel_thresh = thresh
 
         # ensure we get the same
-        self.compare_images(vol, vol2, vol1_name, vol2_name, thresh)
+        self.assertTrue(compare_images(vol, vol2, vol1_name, vol2_name, thresh,
+                            rel_thresh))
         del vol2
 
         # test native file without minf
@@ -121,37 +135,79 @@ class TestPyaimsIO(unittest.TestCase):
                 vol3_name = os.path.basename(fname) \
                     + ' (re-read without .minf)'
                 vol3 = aims.read(fname)
-                self.compare_images(vol, vol3, vol1_name, vol3_name, thresh)
+                self.assertTrue(compare_images(vol, vol3, vol1_name, vol3_name,
+                                               thresh, rel_thresh))
         else:
             minf = {} # no .minf file (dicom)
 
+        view_pos1, view_size1, view_pos2, view_size2 = view
         if format in partial_read:
             if self.verbose:
                 print('    testing partial reading:', format)
-            vol3 = aims.read(fname + '?ox=2&&sx=7&&oy=3&&sy=5&&oz=4&&sz=6')
-            self.assertEqual(vol3.getSize(), (7, 5, 6, 1))
-            vol4 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
-            self.compare_images(vol4, vol3, 'sub-volume', 'patially read',
-                                thresh)
+            url_ext = '&&'.join(['ox%d=%d' % (i + 1, n)
+                                 for i, n in enumerate(view_pos1)])
+            url_ext += '&&' + '&&'.join(['sx%d=%d' % (i + 1, n)
+                                         for i, n in enumerate(view_size1)])
+            vol3 = aims.read(fname + '?%s' % url_ext)
+            self.assertEqual(vol3.getSize(), view_size1)
+            vol4 = aims.VolumeView(vol, view_pos1, view_size1)
+            self.assertTrue(compare_images(vol4, vol3, 'sub-volume',
+                                           'patially read', thresh,
+                                           rel_thresh))
 
         if format in partial_write:
             if self.verbose:
                 print('    testing partial writing:', format)
-            vol2 = aims.VolumeView(vol, (3, 3, 3, 0), (5, 6, 4, 1))
-            aims.write(vol2, fname + '?partial_writing=1&ox=2&&oy=4&&oz=5')
+            vol2 = aims.VolumeView(vol, view_pos2, view_size2)
+            url_ext = '&&'.join(['ox%d=%d' % (i + 1, n)
+                                 for i, n in enumerate(view_pos2)])
+            aims.write(vol2, fname + '?partial_writing=1&&%s' % url_ext)
             vol3 = aims.read(fname)
-            self.assertEqual(vol3.getSize(), (10, 10, 10, 1))
-            vol4 = aims.VolumeView(vol3, (2, 4, 5, 0), (5, 6, 4, 1))
+            self.assertEqual(vol3.getSize(), vol.getSize())
+            vol4 = aims.VolumeView(vol3, view_pos2, view_size2)
             # compare the written view
-            self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
-                                % (aims.typeCode(vol), format),
-                                'patially written', thresh)
+            self.assertTrue(compare_images(vol4, vol2,
+                                           'sub-volume %s (write, format %s)'
+                                           % (aims.typeCode(vol), format),
+                                           'patially written', thresh,
+                                           rel_thresh))
             # compare a part of the original volume
             vol2 = aims.VolumeView(vol, (0, 0, 0, 0), (10, 10, 5, 1))
             vol4 = aims.VolumeView(vol3, (0, 0, 0, 0), (10, 10, 5, 1))
-            self.compare_images(vol4, vol2, 'sub-volume %s (write, format %s)'
-                                % (aims.typeCode(vol), format),
-                                'original part', thresh)
+            self.assertTrue(compare_images(vol4, vol2,
+                                           'sub-volume %s (write, format %s)'
+                                           % (aims.typeCode(vol), format),
+                                           'original part', thresh,
+                                           rel_thresh))
+
+        if options.get('write_unallocated', False):
+            if self.verbose:
+                print('    testing unallocated volume writing')
+            # create an unallocated volume
+            vol5 = aims.Volume(
+                vol.getSize(),
+                aims.carto.AllocatorContext(
+                    aims.carto.AllocatorStrategy.InternalModif),
+                False, dtype=aims.typeCode(np.asarray(vol).dtype))
+            self.assertFalse(vol5.allocatorContext().isAllocated())
+            vol5.copyHeaderFrom(vol.header())
+            os.unlink(fname)
+            aims.write(vol5, fname)
+            vol3 = aims.read(fname)
+            self.assertEqual(vol3.getSize(), vol.getSize())
+            if format in partial_write:
+                vol2 = aims.VolumeView(vol, view_pos2, view_size2)
+                url_ext = '&&'.join(['ox%d=%d' % (i + 1, n)
+                                    for i, n in enumerate(view_pos2)])
+                aims.write(vol2, fname + '?partial_writing=1&&%s' % url_ext)
+                vol3 = aims.read(fname)
+                self.assertEqual(vol3.getSize(), vol.getSize())
+                vol4 = aims.VolumeView(vol3, view_pos2, view_size2)
+                # compare the written view
+                self.assertTrue(compare_images(vol4, vol2,
+                                    'sub-volume %s (write, format %s)'
+                                    % (aims.typeCode(vol), format),
+                                    'patially written', thresh, rel_thresh))
 
         # disable this test for now.
         # test IO for VolumeView
@@ -167,8 +223,8 @@ class TestPyaimsIO(unittest.TestCase):
         fname = self.file_name(vol2, dtype, format)
         vol3 = aims.read(fname)
         self.assertEqual(tuple(vol3.getSize()), (7, 5, 6, 1))
-        self.compare_images(vol2, vol3, 'volume view', 're-read volume view',
-                            thresh)
+        self.assertTrue(compare_images(vol2, vol3, 'volume view',
+                                       're-read volume view', thresh, rel_thresh))
 
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
@@ -186,16 +242,25 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def tearDown(self):
-        if not keep_directory:
+        if self.debug:
+            print('leaving files in', self.work_dir)
+        else:
             shutil.rmtree(self.work_dir)
 
 
 def test_suite():
-  if '-v' in sys.argv[1:] or '--verbose' in sys.argv[1:]:
-      TestPyaimsIO.verbose = True
-  return unittest.TestLoader().loadTestsFromTestCase(TestPyaimsIO)
+    if '-v' in sys.argv[1:] or '--verbose' in sys.argv[1:]:
+        TestPyaimsIO.verbose = True
+    return unittest.TestLoader().loadTestsFromTestCase(TestPyaimsIO)
 
 
 if __name__ == '__main__':
+    if '-d' in sys.argv[1:] or '--debug' in sys.argv[1:]:
+        TestPyaimsIO.debug = True
+        try:
+            i = sys.argv.index('-d')
+        except:
+            i = sys.argv.index('--debug')
+        del sys.argv[i]
     unittest.main(defaultTest='test_suite')
 

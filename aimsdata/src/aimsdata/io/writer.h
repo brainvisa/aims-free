@@ -55,8 +55,8 @@ namespace aims
     /*!	\brief Finds the correct format and writes the object
 
     If \c format is specified, this format is tried first, so you can use it
-    to force the format, otherwise it will be determined from the filename 
-    extension. If no extension and no format are given, the first working 
+    to force the format, otherwise it will be determined from the filename
+    extension. If no extension and no format are given, the first working
     format will be used. */
     template <typename T>
     bool write( const T & obj, bool ascii = false,
@@ -82,9 +82,9 @@ namespace aims
 
   };
 
-  /**	Generic writer for *every* format of Aims object. 
+  /**	Generic writer for *every* format of Aims object.
 	The Writer classes are built on the same model as the Reader classes
-	and share the same FileFormatDictionary with them to store all 
+	and share the same FileFormatDictionary with them to store all
 	known file formats.
 
 	\see FileFormatDictionary Reader
@@ -101,10 +101,10 @@ namespace aims
     /*!	\brief Finds the correct format and writes the object
 
     If \c format is specified, this format is tried first, so you can use it
-    to force the format, otherwise it will be determined from the filename 
-    extension. If no extension and no format are given, the first working 
+    to force the format, otherwise it will be determined from the filename
+    extension. If no extension and no format are given, the first working
     format will be used. */
-    virtual bool write( const T & obj, bool ascii = false, 
+    virtual bool write( const T & obj, bool ascii = false,
                         const std::string* format = 0 );
 
     virtual std::string writtenObjectType() const;
@@ -112,24 +112,23 @@ namespace aims
     virtual std::string writtenObjectFullType() const;
   };
 
-}
+  template <class T>
+  inline aims::GenericWriter &
+  operator << ( aims::GenericWriter & writer, const T & thing )
+  {
+    writer.write( thing );
+    return writer;
+  }
 
 
-template <class T>
-inline aims::GenericWriter &
-operator << ( aims::GenericWriter & writer, const T & thing )
-{
-  writer.write( thing );
-  return writer;
-}
+  template <class T>
+  inline aims::Writer<T> &
+  operator << ( aims::Writer<T> & writer, const T & thing )
+  {
+    writer.write( thing );
+    return writer;
+  }
 
-
-template <class T>
-inline aims::Writer<T> &
-operator << ( aims::Writer<T> & writer, const T & thing )
-{
-  writer.write( thing );
-  return writer;
 }
 
 

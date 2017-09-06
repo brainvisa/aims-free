@@ -52,7 +52,48 @@ typedef AimsVector<%Template1%, %Template2%>
           0, SIP_NO_CONVERTORS, 0, sipIsErr );
       return 0;
     }
-  if( PySequence_Check( sipPy ) && PySequence_Size( sipPy ) == %Template2% )
+
+  bool done = false;
+
+%#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS )%
+  if( PyArray_Check( sipPy ) )
+  {
+    PyArrayObject *arr = 0;
+    arr = (PyArrayObject *) sipPy;
+    if( arr->nd < 0 || arr->nd >1 )
+    {
+      *sipIsErr = 1;
+      PyErr_SetString( PyExc_RuntimeError,
+                       "Array dimensions are not compatible with "
+                       "AimsVector_%Template1typecode%_%Template2typecode%" );
+      return 0;
+    }
+    else if( arr->descr->type_num == %Template1NumType% )
+    {
+      // retreive dimensions
+      int dims = arr->dimensions[0], i;
+      if( dims != %Template2% )
+      {
+        *sipIsErr = 1;
+        PyErr_SetString( PyExc_RuntimeError,
+                         "Array size is not compatible with "
+                         "AimsVector_%Template1typecode%_%Template2typecode%"
+                       );
+        return 0;
+      }
+      else
+      {
+        *sipCppPtr = new AimsVector_%Template1typecode%_%Template2typecode%;
+        for( i=0; i<dims; ++i )
+          (**sipCppPtr)[i] = ((%Template1% *)( PyArray_DATA(arr) ))[i];
+        done = true;
+      }
+    }
+  }
+%#endif%
+
+  if( !done && PySequence_Check( sipPy )
+      && PySequence_Size( sipPy ) == %Template2% )
   {
     *sipCppPtr = new AimsVector_%Template1typecode%_%Template2typecode%;
     PyObject	*pyitem;

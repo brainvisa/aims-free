@@ -54,7 +54,12 @@ class RoiFeatures
 public:
 
   void addImageStatistics( const std::string & label,
-                           const std::string & filename );
+                           const std::string & filename
+                         );
+  void addImageStatistics( const std::string & label,
+                           const std::string & filename,
+                           const std::string & weights_filename
+                         );
   void computeFeatures( const carto::rc_ptr< RoiIterator > & );
   void write( std::ostream &out, const std::string &format = "minf" ) const;
 
@@ -65,9 +70,11 @@ protected:
 
 
   typedef std::map< std::string,
-                    std::string > Images_t;
+                    std::pair< std::string,
+                               std::string > > Images_t;
 
   ScalarSetFeatures _scalarSetFeatures;
+  // Associate a label name to an image filename and a weight filename
   Images_t _images;
 
   carto::rc_ptr< RoiIterator > _roiIterator;
@@ -76,6 +83,13 @@ protected:
 };
 
 
+//-----------------------------------------------------------------------------
+inline void RoiFeatures::
+addImageStatistics( const std::string &label,
+                    const std::string &filename )
+{
+  addImageStatistics( label, filename, "" );
+}
 
 } // namespace aims
 

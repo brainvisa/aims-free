@@ -33,6 +33,7 @@
 
 #include <cstdlib>
 #include <cartodata/volume/volume.h>
+#include <cartobase/containers/nditerator.h>
 #include <cstdlib>
 #include <iostream>
 #include <time.h>
@@ -256,7 +257,75 @@ int main( int /*argc*/, char** /*argv*/ )
   cout << "vol5 += 5." << endl << vol5 << endl;
 
 
-  cout << "-- Test 6: speed test --" << endl;
+  cout << "-- Test 6: N-D iterators test --" << endl;
+  vector<int> dims( 8, 1 );
+  dims[0] = 3;
+  dims[1] = 3;
+  dims[2] = 3;
+  dims[3] = 3;
+  dims[4] = 3;
+  dims[5] = 3;
+  dims[6] = 3;
+  dims[7] = 2;
+  VolumeRef<int16_t> vol7( new Volume<int16_t>( dims ) );
+  if( vol7->getSize() != dims )
+  {
+    cerr << "*** error in 8D volume dims ***" << endl;
+    result = EXIT_FAILURE;
+    size_t dim, ndim = vol7->getSize().size();
+    for( dim=0; dim<ndim; ++dim )
+      cerr << vol7->getSize()[dim] << ", ";
+    cerr << "\n expected:\n";
+    for( dim=0; dim<dims.size(); ++dim )
+      cerr << dims[dim] << ", ";
+    cerr << endl;
+  }
+  size_t dim, ndim = vol7->getSize().size();
+  vector<size_t> sstrides = vol7->getStrides();
+  vector<int> strides( sstrides.begin(), sstrides.end() );
+  NDIterator<int16_t> it( &vol7->at( 0 ), vol7->getSize(), strides );
+  size_t cnt = 0;
+  for( ; !it.ended(); ++it, ++cnt )
+  {
+  }
+  cout << "items count: " << cnt << endl;
+  size_t nit = 1;
+  for( dim=0; dim<ndim; ++dim )
+    nit *= dims[dim];
+  if( cnt != nit )
+  {
+    cerr << "*** error in 8D volume iteration count ***" << endl;
+    result = EXIT_FAILURE;
+    cerr << "iter count: " << cnt << ", should be: " << nit << endl;
+  }
+//   if( it.position() != dims )
+//   {
+//     cerr << "*** error in 8D volume iteration end position ***" << endl;
+//     result = EXIT_FAILURE;
+//     cerr << "position:\n";
+//   }
+//   if( it.offset() != nit )
+//   {
+//     cerr << "*** error in 8D volume iteration end offset ***" << endl;
+//     result = EXIT_FAILURE;
+//     cout << "offset: " << it.offset() << ", should be: " << nit << endl;
+//   }
+
+  line_NDIterator<int16_t> it2( &vol7->at( 0 ), vol7->getSize(), strides );
+  cnt = 0;
+  for( ; !it2.ended(); ++it2, ++cnt )
+  {
+  }
+  cout << "line items count: " << cnt << endl;
+  if( cnt != nit / dims[0] )
+  {
+    cerr << "*** error in 8D volume line iteration count ***" << endl;
+    result = EXIT_FAILURE;
+    cerr << "iter count: " << cnt << ", should be: " << nit / dims[0] << endl;
+  }
+
+
+  cout << "-- Test 7: speed test --" << endl;
   // allocate a 16 MB volume
   VolumeRef<int16_t>	vol6( 256, 256, 128 );
   int		n, nn = 0, x, y, z, t, nx = vol6->getSizeX(),
@@ -303,6 +372,36 @@ int main( int /*argc*/, char** /*argv*/ )
   cout << nn << " x 8M voxels in " << ck2
        << "s : " << sz * nn / ck2 << " vox/s" << endl;
 
+  cout << "N-D iterators : " << flush;
+  sstrides = vol6->getStrides();
+  strides.clear();
+  strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
+  ck = clock();
+  for( n=0; n<nn; ++n )
+  {
+    NDIterator<int16_t> it4( &vol6->at( 0 ), vol6->getSize(), strides );
+    for( ; !it4.ended(); ++it4 )
+      ++(*it4);
+  }
+  ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
+  cout << nn << " x 8M voxels in " << ck2
+       << "s : " << sz * nn / ck2 << " vox/s" << endl;
+
+  cout << "line iterators : " << flush;
+  ck = clock();
+  for( n=0; n<nn; ++n )
+  {
+    line_NDIterator<int16_t> it3( &vol6->at( 0 ), vol6->getSize(), strides );
+    for( ; !it3.ended(); ++it3 )
+    {
+      p = &*it3;
+      for( pp=p + vol6->getSizeX(); p!=pp; ++p )
+        ++(*p);
+    }
+  }
+  ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
+  cout << nn << " x 8M voxels in " << ck2
+       << "s : " << sz * nn / ck2 << " vox/s" << endl;
 
   cout << "===========\n";
   cout << "Overall result: "

@@ -31,58 +31,49 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#ifndef AIMS_IO_DICOMFORMAT_D_H
+#define AIMS_IO_DICOMFORMAT_D_H
 
-
-#ifndef AIMS_MESH_MESHMERGE_H
-#define AIMS_MESH_MESHMERGE_H
-
-
-#include <aims/config/aimsalgo_config.h>
-#include <aims/mesh/surfaceOperation.h>
-#include <list>
-
+#include <aims/io/dicomformat.h>
+// #include <aims/io/dicomR.h>
+#include <aims/io/dicomW.h>
+#include <aims/data/data.h>
 
 namespace aims
 {
 
-  /// \deprecated{OBSOLETE, use SurfaceManip::meshMerge() instead}
-  template<int D, class T>
-  void meshMerge( AimsTimeSurface<D,T> & dst, 
-		  const AimsTimeSurface<D,T> & add )
-    __attribute__((__deprecated__("OBSOLETE, use SurfaceManip::meshMerge() instead")));
-
-  template<int D, class T>
-  void meshMerge( AimsTimeSurface<D,T> & dst, 
-		  const AimsTimeSurface<D,T> & add )
+  template<class T>
+  bool DicomFormat<T>::read( const std::string & filename, AimsData<T> & vol, 
+                             const carto::AllocatorContext & context, 
+                             carto::Object options )
   {
-    SurfaceManip::meshMerge( dst, add );
-  }
-  /// \deprecated{OBSOLETE, use SurfaceManip::meshMerge() instead}
-  template<int D, class T>
-  void meshMerge( AimsTimeSurface<D,T> & dst, 
-		  const std::list<AimsTimeSurface<D,T> > & src )
-    __attribute__((__deprecated__("OBSOLETE, use SurfaceManip::meshMerge() instead")));
-
-  template<int D, class T>
-  void meshMerge( AimsTimeSurface<D,T> & dst, 
-		  const std::list<AimsTimeSurface<D,T> > & src )
-  {
-    SurfaceManip::meshMerge( dst, src );
+    // The DICOM reader has been reimplemented in Soma-IO.
+    // This old one should not be used any longer.
+    return false;
+//     DicomReader<T>	r( filename );
+//     r.read( vol, context, options );
+//     return( true );
   }
 
-  AIMSALGO_API AimsSurfaceTriangle createCylinder( const Point3df & p1, 
-						   const Point3df & p2, 
-						   float radius, 
-						   unsigned nfacets, 
-						   bool closed = false );
 
-  AIMSALGO_API AimsSurfaceTriangle createCube( const Point3df & center, 
-					       float size );
+  template<class T>
+  bool DicomFormat< T >::write( const std::string & filename, 
+                                const AimsData<T> & vol, 
+                                carto::Object )
+  {
+    try
+    {
+        DicomWriter<T>	w( filename );
+        return w.write( vol );
+    }
+    catch( std::exception & e )
+    {
+	return false;
+    }
 
-  AIMSALGO_API AimsSurfaceTriangle createIcosahedron( const Point3df & center, 
-						      float radius );
+    return true;
+  }
 
 }
-
 
 #endif

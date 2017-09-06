@@ -201,6 +201,7 @@ set( _headers
     roi/voxelSampling.h
     selection/selection.h
     selection/selector.h
+    sparsematrix/ciftitools.h
     sparsematrix/sparseMatrix.h
     sparsematrix/sparseMatrixItemR.h
     sparsematrix/sparseMatrixItemW.h
@@ -384,6 +385,7 @@ set( _sources
     roi/voxelSampling.cc
     selection/selection.cc
     selection/selector.cc
+    sparsematrix/ciftitools.cc
     sparsematrix/sparseMatrix.cc
     sparsematrix/sparseMatrixItemR.cc
     sparsematrix/sparseMatrixItemW.cc
@@ -395,7 +397,9 @@ set( _sources
     utility/clock.cc
     utility/masscenter.cc
     utility/progress.cc
-    vector/vector.cc
+    vector/vector2d.cc
+    vector/vector3d.cc
+    vector/vector4d.cc
 )
 
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )

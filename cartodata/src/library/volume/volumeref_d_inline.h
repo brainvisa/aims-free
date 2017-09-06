@@ -376,9 +376,9 @@ namespace carto {
   inline
   std::vector<size_t> VolumeRef<T>::getStrides() const
   {
-      return (*this)->getStrides();    
+      return (*this)->getStrides();
   }
-  
+
   template < typename T >
   inline
   void VolumeRef< T >::copyHeaderFrom( const PropertySet & other )
@@ -412,14 +412,11 @@ namespace carto {
     return Object::reference( obj->header() );
   }
 
-} // namespace carto
+  //==========================================================================
+  //   STREAMS
+  //==========================================================================
 
-
-//============================================================================
-//   STREAMS
-//============================================================================
-
-template <typename T>
+  template <typename T>
 std::ostream & operator<< ( const carto::VolumeOStream & out,
                             const carto::rc_ptr<carto::Volume<T> > & volume )
 {
@@ -442,7 +439,11 @@ std::ostream & operator<< ( std::ostream & out,
 {
   carto::VolumeOStream volumeout( out );
   return volumeout << volume;
-}
+  }
+
+} // namespace carto
+
+
 
 
 #endif // CARTODATA_VOLUME_VOLUMEREF_D_INLINE_H

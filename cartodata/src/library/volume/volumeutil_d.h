@@ -343,6 +343,7 @@ namespace carto
     return res;
   }
 
+  
   template <typename T>
   T VolumeUtilBase<T, true>::min( const Volume<T> & o )
   {

@@ -42,8 +42,9 @@ class DataModel
                 AimsData< short >&                 r,
                 AimsData< short >&                 t,
                 Motion&                            m,
-                bio::SplineFfd&                         d,
-              ParzenProbDensFunction&            pdf );
+                aims::SplineFfd&                    d,
+                ParzenProbDensFunction&            pdf,
+                bool                               prepro  = true );
 
     virtual ~DataModel();
 
@@ -92,7 +93,7 @@ class DataModel
   private:
     std::vector<float>         _current;       ///< Param
     AimsData<double>           _splineTest;    ///< B-Spline coefficients for the test image
-    bio::SplineFfd&            _deformation;   ///< FFD transformation
+    aims::SplineFfd&            _deformation;   ///< FFD transformation
     Motion&                    _rigid;         ///< Pre computed affine motion
     ParzenProbDensFunction&    _pdf;
     /// Points in which to compute MI

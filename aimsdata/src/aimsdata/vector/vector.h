@@ -441,6 +441,8 @@ namespace internal
     {
       _value[0] = x;
       _value[1] = y;
+      for (int d = 2; d < D; d++)
+        _value[d] = 0;
     }
   };
 
@@ -453,6 +455,8 @@ namespace internal
       _value[0] = x;
       _value[1] = y;
       _value[2] = z;
+      for (int d = 3; d < D; d++)
+        _value[d] = 0;
     }
   };
 
@@ -467,6 +471,8 @@ namespace internal
       _value[1] = y;
       _value[2] = z;
       _value[3] = t;
+      for (int d = 4; d < D; d++)
+        _value[d] = 0;
     }
   };
 

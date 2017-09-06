@@ -14,7 +14,6 @@
 #include <aims/math/mathelem.h>                              // aims::MathUtil
 #include <cmath>                                                   // std::log
 
-using namespace bio;
 using namespace aims;
 using namespace std;
 
@@ -72,6 +71,7 @@ ParzenProbDensFunction::getMutualInfo()
 {
   double mi=0.0;
   int x, y, levelsx, levelsy;
+  double log2 = std::log(2);
 
   // normalize joint density histogram (i.e. compute alpha)
   _alpha = 0.;
@@ -98,6 +98,7 @@ ParzenProbDensFunction::getMutualInfo()
       if ( _ypdf( y ) && _jpdf( x, y ) && _xpdf( x ) ) {
         mi += _jpdf( x, y ) * log( _jpdf( x, y ) / ( _xpdf( x ) * _ypdf( y ) ) );
       }
+  mi /= log2;
 
   return float( -mi );
 }
@@ -112,49 +113,54 @@ ParzenProbDensFunction::getPartDer( vector<float>&  v )
   ASSERT( (v.size() % _dimParam) == 0); // Multiple de triplet
   ASSERT( levelsx ==  _jpdf.dimY()- 2*PAD ); // Dimension derPart coherentes
 
-  //---< compute d[p_y]/d[mu_i] = SUM[x](d[p_xy]/d[mu_i])
-  AimsData<AimsData<Point3dd> > derypdf( _derjpdf.dimX(), _derjpdf.dimY(), _derjpdf.dimZ() );
-  AimsData<Point3dd> tmp( _testBinNb + 2*PAD );
-  tmp = Point3dd(0.);
-  int pi, pj, pk;
-  ForEach3d(derypdf, pi, pj, pk)
-  {
-    derypdf(pi, pj, pk) = tmp.clone();
-    AimsData<Point3dd> & dpT_d_mu_i = derypdf(pi, pj, pk);
-    for( int j=0; j<dpT_d_mu_i.dimX(); ++j )
-      for( int i=0; i<_refBinNb; ++i )
-        dpT_d_mu_i[j] += _derjpdf(pi, pj, pk)(i, j);
-  }
-  //--->
+  double log2 = std::log(2);
+
+  // //---< compute d[p_y]/d[mu_i] = SUM[x](d[p_xy]/d[mu_i])
+  // AimsData<AimsData<Point3dd> > derypdf( _derjpdf.dimX(), _derjpdf.dimY(), _derjpdf.dimZ() );
+  // AimsData<Point3dd> tmp( _testBinNb + 2*PAD );
+  // tmp = Point3dd(0.);
+  // int pi, pj, pk;
+  // ForEach3d(derypdf, pi, pj, pk)
+  // {
+  //   derypdf(pi, pj, pk) = tmp.clone();
+  //   AimsData<Point3dd> & dpT_d_mu_i = derypdf(pi, pj, pk);
+  //   for( int j=0; j<dpT_d_mu_i.dimX(); ++j )
+  //     for( int i=0; i<_refBinNb; ++i )
+  //       dpT_d_mu_i[j] += _derjpdf(pi, pj, pk)(i, j);
+  // }
+  // //--->
 
 
   double p_xy, p_y, p_x;
   Point3dd t, dp_dmu_i_xy, dpT_dmu_i_y;
 
-  for( int k = 0, ind = 0; k < _derjpdf.dimZ(); ++k )
+  int ind = 0;
+  for( int k = 0; k < _derjpdf.dimZ(); ++k )
   for( int j = 0; j < _derjpdf.dimY(); ++j )
   for( int i = 0; i < _derjpdf.dimX(); ++i )
   {
     const AimsData< Point3dd > & dp_dmu_i  = _derjpdf(i, j, k);
-    const AimsData< Point3dd > & dpT_dmu_i = derypdf(i, j, k);
+    // const AimsData< Point3dd > & dpT_dmu_i = derypdf(i, j, k);
 
-    Point3dd t = Point3dd(0.0, 0.0, 0.0);
+    t = Point3dd(0.0, 0.0, 0.0);
     for ( int y = 0; y < levelsy; y++ )
     for ( int x = 0; x < levelsx; x++ )
     {
         dp_dmu_i_xy = dp_dmu_i(x, y);
-        dpT_dmu_i_y = dpT_dmu_i( y );
+        // dpT_dmu_i_y = dpT_dmu_i( y );
         p_xy = _jpdf( x, y);
         p_y  = _ypdf( y );
-        p_x  = _xpdf( x );
+        // p_x  = _xpdf( x );
         if( (dp_dmu_i_xy != Point3dd(0.) ) &&
-            (dpT_dmu_i_y != Point3dd(0.) ) &&
-            p_xy && p_x && p_y )
+            // (dpT_dmu_i_y != Point3dd(0.) ) &&
+            p_xy && /*p_x &&*/ p_y )
         {
-          t -= dp_dmu_i_xy * (log( p_xy / (p_y * p_x) ) + 1.) -
-               dpT_dmu_i_y * p_xy / p_y;
+          // t -= dp_dmu_i_xy * (log( p_xy / (p_y * p_x) ) + 1.) -
+          //      dpT_dmu_i_y * p_xy / p_y;
+          t -= dp_dmu_i_xy * log( p_xy / p_y );
         }
     }
+    t /= log2;
 
     if( !_is2d[0] )  v[ind++] = float( _alpha * t[0] / _testDeltaBin );
     if( !_is2d[1] )  v[ind++] = float( _alpha * t[1] / _testDeltaBin );
@@ -196,94 +202,117 @@ void ParzenProbDensFunction::resizeParam( Point3d newDim )
 // mask pixels should fall in a "negative" histogram bin.
 void
 ParzenProbDensFunction::updateBinSizeAndMin(AimsData<short>& refImage,
-                                            AimsData<short>& testImage )
+                                            AimsData<short>& testImage,
+                                            bool             prepro )
 {
   // Find Ref second minimum
   _refMax = refImage.maximum();
-  _refMin = _refMax;
-  short refTrueMin = refImage.minimum();
-  for( int k=0; k<refImage.dimZ(); ++k )
-    for( int j=0; j<refImage.dimY(); ++j )
-      for( int i=0; i<refImage.dimX(); ++i )
-      {
-        if( refImage(i, j, k) != refTrueMin && refImage(i, j, k) < _refMin )
-          _refMin = refImage(i, j, k);
-      }
-  _refMin -= 1;
+  if( prepro )
+  {
+    _refMin = _refMax;
+    short refTrueMin = refImage.minimum();
+    for( int k=0; k<refImage.dimZ(); ++k )
+      for( int j=0; j<refImage.dimY(); ++j )
+        for( int i=0; i<refImage.dimX(); ++i )
+        {
+          if( refImage(i, j, k) != refTrueMin && refImage(i, j, k) < _refMin )
+            _refMin = refImage(i, j, k);
+        }
+    _refMin -= 1;
+  }
+  else
+    _refMin = refImage.minimum();
 
   // Find test second minimum
   _testMax = testImage.maximum();
-  _testMin = _testMax;
-  short testTrueMin = testImage.minimum();
-  for( int k=0; k<testImage.dimZ(); ++k )
-    for( int j=0; j<testImage.dimY(); ++j )
-      for( int i=0; i<testImage.dimX(); ++i )
-      {
-        if( testImage(i, j, k) != testTrueMin && testImage(i, j, k) < _testMin )
-          _testMin = testImage(i, j, k);
-      }
-  _testMin -= 1;
+  if( prepro )
+  {
+    _testMin = _testMax;
+    short testTrueMin = testImage.minimum();
+    for( int k=0; k<testImage.dimZ(); ++k )
+      for( int j=0; j<testImage.dimY(); ++j )
+        for( int i=0; i<testImage.dimX(); ++i )
+        {
+          if( testImage(i, j, k) != testTrueMin && testImage(i, j, k) < _testMin )
+            _testMin = testImage(i, j, k);
+        }
+    _testMin -= 1;
+  }
+  else
+    _testMin = testImage.minimum();
 
   // Find Ref 99% max
-  std::vector<long> refHisto( _refMax - _refMin, 0 );
-  for( int k=0; k<refImage.dimZ(); ++k )
-    for( int j=0; j<refImage.dimY(); ++j )
-      for( int i=0; i<refImage.dimX(); ++i )
-      {
-        short val = refImage(i, j, k);
-        if( val > _refMin )
-          refHisto[ val - _refMin - 1 ] += 1;
-      }
-  long refHistoSize = MathUtil<long>::sum( refHisto.begin(), refHisto.end() );
-  long refAccumulate = 0;
-  while( _refMax - _refMin - 1 >= 0 && (double)refAccumulate / refHistoSize < 0.01 )
+  if( prepro )
   {
-    refAccumulate += refHisto[_refMax - _refMin - 1];
-    _refMax -= 1;
+    std::vector<long> refHisto( _refMax - _refMin, 0 );
+    for( int k=0; k<refImage.dimZ(); ++k )
+      for( int j=0; j<refImage.dimY(); ++j )
+        for( int i=0; i<refImage.dimX(); ++i )
+        {
+          short val = refImage(i, j, k);
+          if( val > _refMin )
+            refHisto[ val - _refMin - 1 ] += 1;
+        }
+    long refHistoSize = MathUtil<long>::sum( refHisto.begin(), refHisto.end() );
+    long refAccumulate = 0;
+    while( _refMax - _refMin - 1 >= 0 && (double)refAccumulate / refHistoSize < 0.01 )
+    {
+      refAccumulate += refHisto[_refMax - _refMin - 1];
+      _refMax -= 1;
+    }
+    _refMax += 1;
+    refHisto.clear();
   }
-  _refMax += 1;
-  refHisto.clear();
 
-  // Find Test 99% max
-  std::vector<long> testHisto( _testMax - _testMin, 0 );
-  for( int k=0; k<testImage.dimZ(); ++k )
-    for( int j=0; j<testImage.dimY(); ++j )
-      for( int i=0; i<testImage.dimX(); ++i )
-      {
-        short val = testImage(i, j, k);
-        if( val > _testMin )
-          testHisto[ val - _testMin - 1 ] += 1;
-      }
-  long testHistoSize = MathUtil<long>::sum( testHisto.begin(), testHisto.end() );
-  long testAccumulate = 0;
-  while( _testMax - _testMin - 1 >= 0 && (double)testAccumulate / testHistoSize < 0.01 )
+  // Find Test 99% max*
+  if( prepro )
   {
-    testAccumulate += testHisto[_testMax - _testMin - 1];
-    _testMax -= 1;
+    std::vector<long> testHisto( _testMax - _testMin, 0 );
+    for( int k=0; k<testImage.dimZ(); ++k )
+      for( int j=0; j<testImage.dimY(); ++j )
+        for( int i=0; i<testImage.dimX(); ++i )
+        {
+          short val = testImage(i, j, k);
+          if( val > _testMin )
+            testHisto[ val - _testMin - 1 ] += 1;
+        }
+    long testHistoSize = MathUtil<long>::sum( testHisto.begin(), testHisto.end() );
+    long testAccumulate = 0;
+    while( _testMax - _testMin - 1 >= 0 && (double)testAccumulate / testHistoSize < 0.01 )
+    {
+      testAccumulate += testHisto[_testMax - _testMin - 1];
+      _testMax -= 1;
+    }
+    _testMax += 1;
   }
-  _testMax += 1;
 
   // Replace Ref levels
-  for( int k=0; k<refImage.dimZ(); ++k )
-    for( int j=0; j<refImage.dimY(); ++j )
-      for( int i=0; i<refImage.dimX(); ++i )
-      {
-        if( refImage(i, j, k) < _refMin )
-          refImage(i, j, k) = _refMin;
-        else if( refImage(i, j, k) > _refMax )
-          refImage(i, j, k) = _refMax;
-      }
+  if( prepro )
+  {
+    for( int k=0; k<refImage.dimZ(); ++k )
+      for( int j=0; j<refImage.dimY(); ++j )
+        for( int i=0; i<refImage.dimX(); ++i )
+        {
+          if( refImage(i, j, k) < _refMin )
+            refImage(i, j, k) = _refMin;
+          else if( refImage(i, j, k) > _refMax )
+            refImage(i, j, k) = _refMax;
+        }
+  }
 
   // Replace Test levels
-  for( int k=0; k<testImage.dimZ(); ++k )
-    for( int j=0; j<testImage.dimY(); ++j )
-      for( int i=0; i<testImage.dimX(); ++i )
-      {
-        if( testImage(i, j, k) < _testMin )
-          testImage(i, j, k) = _testMin;
-        else if( testImage(i, j, k) > _testMax )
-          testImage(i, j, k) = _testMax;
-      }
+  if( prepro )
+  {
+    for( int k=0; k<testImage.dimZ(); ++k )
+      for( int j=0; j<testImage.dimY(); ++j )
+        for( int i=0; i<testImage.dimX(); ++i )
+        {
+          if( testImage(i, j, k) < _testMin )
+            testImage(i, j, k) = _testMin;
+          else if( testImage(i, j, k) > _testMax )
+            testImage(i, j, k) = _testMax;
+        }
+  }
 
   // Compute delta
   _refDeltaBin = double( _refMax - _refMin + 1 ) / _jpdf.dimX();

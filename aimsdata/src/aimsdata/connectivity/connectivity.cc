@@ -32,7 +32,7 @@
  */
 
 /*
- *  Connectivity class methods
+ * Connectivity class methods
  */
 #include <cstdlib>
 #include <aims/connectivity/connectivity.h>

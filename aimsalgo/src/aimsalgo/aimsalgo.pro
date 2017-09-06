@@ -79,7 +79,6 @@ HEADERS = \
     mesh/geometric.h \
     mesh/inflate.h    \
     mesh/mesher.h      \
-    mesh/meshMerge.h    \
     mesh/meshinterpoler.h \
     mesh/meshinterpoler_d.h \
     mesh/meshinterpoler_p.h \
@@ -337,7 +336,6 @@ SOURCES = \
     mesh/inflate.cc    \
     mesh/mesher.cc      \
     mesh/meshinterpoler.cc \
-    mesh/meshMerge.cc    \
     mesh/meshwatershed.cc \
     mesh/normals.cc      \
     mesh/reducedNeigh.cc    \

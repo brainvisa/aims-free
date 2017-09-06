@@ -399,7 +399,7 @@ namespace carto
 	    /*if( y == 0 && x == 0 )
 	      cout << "slice : " << z << endl;*/
 	    val = in( x, y, z, t );
-	    if( val != 0 )
+	    if( val != (INP)0 )
               {
                 itemconv.convert( val, outval );
                 bck.insert( std::pair<Point3d, OUTP>

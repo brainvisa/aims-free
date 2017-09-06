@@ -491,17 +491,27 @@ namespace carto {
     return out;
   }
 
-}
+  VolumeOStreamSetter setMaxDim( size_t mx, size_t my, size_t mz, size_t mt )
+  {
+    VolumeOStreamSetter out;
+    out.maxT() = mt;
+    out.maxZ() = mz;
+    out.maxY() = my;
+    out.maxX() = mx;
+    return out;
+  }
 
-//--- operator<< -------------------------------------------------------------
+  //--- operator<< -----------------------------------------------------------
 
-carto::VolumeOStream operator<< ( std::ostream & out,
-                                  const carto::VolumeOStreamSetter & setter )
-{
-  carto::VolumeOStream volstream( out );
-  volstream.maxT() = setter.maxT();
-  volstream.maxZ() = setter.maxZ();
-  volstream.maxY() = setter.maxY();
-  volstream.maxX() = setter.maxX();
-  return volstream;
-}
+  VolumeOStream operator<< ( std::ostream & out,
+                                    const VolumeOStreamSetter & setter )
+  {
+    VolumeOStream volstream( out );
+    volstream.maxT() = setter.maxT();
+    volstream.maxZ() = setter.maxZ();
+    volstream.maxY() = setter.maxY();
+    volstream.maxX() = setter.maxX();
+    return volstream;
+  }
+
+} // namespace carto

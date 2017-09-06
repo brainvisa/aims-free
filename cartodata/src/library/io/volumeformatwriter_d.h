@@ -107,9 +107,10 @@ namespace soma
     if( partial )
       localMsg( " -> partial writing enabled." );
 
-    std::vector<int> position( 4, 0 );
-    std::vector<int> view( 4, 0 );
-    std::vector<int> size( 4, 0 );
+    size_t dim, ndim = obj.getSize().size();
+    std::vector<int> position( ndim, 0 );
+    std::vector<int> view( ndim, 0 );
+    std::vector<int> size( ndim, 1 );
 
     //=== checking if obj is a view ==========================================
     localMsg( "checking if object is a view..." );
@@ -132,33 +133,21 @@ namespace soma
 
     //=== view size ==========================================================
     localMsg( "reading view size..." );
-    view[ 0 ] = obj.getSizeX();
-    view[ 1 ] = obj.getSizeY();
-    view[ 2 ] = obj.getSizeZ();
-    view[ 3 ] = obj.getSizeT();
+    view = obj.getSize();
 
     //=== full volume size ===================================================
     localMsg( "reading full volume size and view position..." );
     if( parent1 && !parent1->allocatorContext().isAllocated() ) {
       localMsg( " -> from parent1" )
-      size[ 0 ] = parent1->getSizeX();
-      size[ 1 ] = parent1->getSizeY();
-      size[ 2 ] = parent1->getSizeZ();
-      size[ 3 ] = parent1->getSizeT();
-      position[ 0 ] = obj.posInRefVolume()[ 0 ];
-      position[ 1 ] = obj.posInRefVolume()[ 1 ];
-      position[ 2 ] = obj.posInRefVolume()[ 2 ];
-      position[ 3 ] = obj.posInRefVolume()[ 3 ];
+      size = parent1->getSize();
+      position = obj.posInRefVolume();
     } else if( parent2 ) {
       localMsg( " -> from parent2" )
-      size[ 0 ] = parent2->getSizeX();
-      size[ 1 ] = parent2->getSizeY();
-      size[ 2 ] = parent2->getSizeZ();
-      size[ 3 ] = parent2->getSizeT();
-      position[ 0 ] = obj.posInRefVolume()[ 0 ] + parent1->posInRefVolume()[ 0 ];
-      position[ 1 ] = obj.posInRefVolume()[ 1 ] + parent1->posInRefVolume()[ 1 ];
-      position[ 2 ] = obj.posInRefVolume()[ 2 ] + parent1->posInRefVolume()[ 2 ];
-      position[ 3 ] = obj.posInRefVolume()[ 3 ] + parent1->posInRefVolume()[ 3 ];
+      size = parent2->getSize();
+      position = obj.posInRefVolume();
+      size_t i, ndim = parent1->posInRefVolume().size();
+      for( i=0; i<ndim; ++i )
+        position[ i ] += parent1->posInRefVolume()[ i ];
     } else {
       localMsg( " -> from self" )
       size = view;
@@ -168,7 +157,7 @@ namespace soma
       // we treat the view as a pure Volume
       localMsg( " -> from self (no partial writing)" )
       size = view;
-      position = std::vector<int>( 4, 0 );
+      position = std::vector<int>( ndim, 0 );
     }
 
     localMsg( " -> Full volume size : ( "
@@ -206,6 +195,7 @@ namespace soma
       dsi->header()->copyProperties(
         carto::Object::reference( obj.header() ) );
     }
+    dsi->header()->setProperty( "volume_dimension", size );
     dsi->header()->setProperty( "sizeX", size[ 0 ] );
     dsi->header()->setProperty( "sizeY", size[ 1 ] );
     dsi->header()->setProperty( "sizeZ", size[ 2 ] );
@@ -221,33 +211,50 @@ namespace soma
     if( partial ) {
       try {
         position[0] = (int) rint( options->getProperty( "ox" )->getScalar() );
-//         localMsg( "override ox : " + carto::toString(position[0]) );
-        std::cout << "override ox : " + carto::toString(position[0]) << std::endl;
+        localMsg( "override ox : " + carto::toString(position[0]) );
       } catch( ... ) {}
       try {
         position[1] = (int) rint( options->getProperty( "oy" )->getScalar() );
-//         localMsg( "override oy : " + carto::toString(position[1]) );
-        std::cout << "override oy : " + carto::toString(position[1]) << std::endl;
+        localMsg( "override oy : " + carto::toString(position[1]) );
       } catch( ... ) {}
       try {
         position[2] = (int) rint( options->getProperty( "oz" )->getScalar() );
-//         localMsg( "override oz : " + carto::toString(position[2]) );
-        std::cout << "override oz : " + carto::toString(position[2]) << std::endl;
+        localMsg( "override oz : " + carto::toString(position[2]) );
+//         std::cout << "override oz : " + carto::toString(position[2]) << std::endl;
       } catch( ... ) {}
       try {
         position[3] = (int) rint( options->getProperty( "ot" )->getScalar() );
-//         localMsg( "override ot : " + carto::toString(position[3]) );
-        std::cout << "override ot : " + carto::toString(position[3]) << std::endl;
+        localMsg( "override ot : " + carto::toString(position[3]) );
+//         std::cout << "override ot : " + carto::toString(position[3]) << std::endl;
       } catch( ... ) {}
+      int dim, value;
+      for( dim=0; dim<carto::Volume<T>::DIM_MAX; ++dim )
+      {
+        try
+        {
+          std::stringstream skey;
+          skey << "ox" << dim+1;
+          std::string key = skey.str();
+          value = (int) rint( options->getProperty( key )->getScalar() );
+          options->removeProperty( key );
+          while( position.size() <= dim )
+            position.push_back( 0 );
+          position[ dim ] = value;
+//           std::cout << "override " << key << " : " + carto::toString(value) << std::endl;
+        }
+        catch( ... ) {}
+      }
     }
 
     //=== writing header & creating files ====================================
     localMsg( "writing header..." );
-    std::vector<long> strides(4);
-    strides[0] = &obj(1,0,0,0) - &obj(0,0,0,0);
-    strides[1] = &obj(0,1,0,0) - &obj(0,0,0,0);
-    strides[2] = &obj(0,0,1,0) - &obj(0,0,0,0);
-    strides[3] = &obj(0,0,0,1) - &obj(0,0,0,0);
+    std::vector<long> strides( ndim );
+    for( dim=0; dim<ndim; ++dim )
+    {
+      std::vector<int> pos( ndim, 0 );
+      pos[dim] = 1;
+      strides[dim] = &obj( pos ) - &obj(0,0,0,0);
+    }
     *dsi = _imw->writeHeader( *dsi, (T*) &obj(0,0,0,0), position, view,
                               strides, options );
 
@@ -256,18 +263,23 @@ namespace soma
     {
       // file sizes may be different from what has been set before (since
       // the file already exists, its size has been re-read by writeHeader())
-      int file_dx, file_dy, file_dz, file_dt;
-      dsi->header()->getProperty( "sizeX", file_dx );
-      dsi->header()->getProperty( "sizeY", file_dy );
-      dsi->header()->getProperty( "sizeZ", file_dz );
-      dsi->header()->getProperty( "sizeT", file_dt );
-      if( position[0] + view[0] > file_dx
-          || position[1] + view[1] > file_dy
-          || position[2] + view[2] > file_dz
-          || position[3] + view[3] > file_dt )
+      std::vector<int> file_sz( ndim, 1 );
+      if( !dsi->header()->getProperty( "volume_dimension", file_sz ) )
       {
-        localMsg( "view is larger than the volume." );
-        throw carto::format_error( "view is larger than the volume." );
+        dsi->header()->getProperty( "sizeX", file_sz[0] );
+        dsi->header()->getProperty( "sizeY", file_sz[1] );
+        dsi->header()->getProperty( "sizeZ", file_sz[2] );
+        dsi->header()->getProperty( "sizeT", file_sz[3] );
+      }
+      for( dim=0; dim<ndim; ++dim  )
+      {
+        if( file_sz.size() <= dim )
+          file_sz.push_back( 1 );
+          if( position[dim] + view[dim] > file_sz[dim] )
+        {
+          localMsg( "view is larger than the volume." );
+          throw carto::format_error( "view is larger than the volume." );
+        }
       }
     }
 

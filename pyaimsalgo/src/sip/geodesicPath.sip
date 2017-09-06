@@ -17,6 +17,7 @@ class GeodesicPath
   public :
 
     GeodesicPath( AimsSurfaceTriangle surface , int method, int strain);
+    GeodesicPath( AimsSurfaceTriangle surface , TimeTexture_FLOAT texCurv, int method, int strain);
      ~GeodesicPath();
 
     vector_U32 shortestPath_1_1_ind(unsigned source, unsigned target);

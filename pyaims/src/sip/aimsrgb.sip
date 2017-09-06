@@ -21,15 +21,15 @@ public:
   AimsRGB operator * ( long );
   AimsRGB operator / ( long );
 
-  bool  operator == ( const AimsRGB & );
+  bool  operator == ( const AimsRGB & ) const;
 %MethodCode
   sipRes = ( (*sipCpp) == *a0 );
 %End
-  bool  operator != ( const AimsRGB & );
+  bool  operator != ( const AimsRGB & ) const;
 %MethodCode
   sipRes = ( (*sipCpp) != *a0 );
 %End
-  bool  operator == ( const unsigned char & );
+  bool  operator == ( const unsigned char & ) const;
 %MethodCode
   sipRes = ( (*sipCpp) == a0 );
 %End

@@ -211,6 +211,7 @@ void EcatHeader::read()
   voxSize.push_back( (float)  EcatVoxSizeX( uei ));
   voxSize.push_back( (float)  EcatVoxSizeY( uei ));
   voxSize.push_back( (float)  EcatVoxSizeZ( uei ));
+  voxSize.push_back( (float)  EcatVoxSizeT( uei ));
   setProperty( "voxel_size", voxSize );
 
   setProperty( "time_resolution", (float) 1.0);

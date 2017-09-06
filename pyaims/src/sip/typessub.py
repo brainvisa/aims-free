@@ -154,7 +154,28 @@ def completeTypesSub(typessub):
                 y['compareElement'] = '&'
 
 
-typessub = {'signed char':
+typessub = {'bool':
+           {'typecode': 'BOOL',
+               'pyFromC': 'carto::PyaimsInt_FromLong',
+               'CFromPy': 'carto::PyaimsInt_AsLong',
+               'castFromSip': '',
+               'deref': '',
+               'pyderef': '',
+               'address': '',
+               'pyaddress': '',
+               'defScalar': '#define PYAIMS_SCALAR',
+               'defNumpyBindings': '',
+               'new': '',
+               'NumType': 'PyArray_BOOL',
+               'PyType': 'bool',
+               'sipClass': '',
+               'typeinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
+               'module': 'aims',
+               'testPyType': 'carto::PyaimsInt_Check',
+               'compareElement': '',
+            },
+           'signed char':
            {'typecode': 'S8',
                'pyFromC': 'carto::PyaimsInt_FromLong',
                'CFromPy': 'carto::PyaimsInt_AsLong',
@@ -172,7 +193,7 @@ typessub = {'signed char':
                'typeinclude': '',
                'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
-               'testPyType': 'PyNumber_Check',
+               'testPyType': 'carto::PyaimsInt_Check',
                'compareElement': '',
             },
             'unsigned char':
@@ -193,7 +214,7 @@ typessub = {'signed char':
                'typeinclude': '',
                'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
-               'testPyType': 'PyNumber_Check',
+               'testPyType': 'carto::PyaimsInt_Check',
                'compareElement': '',
             },
             'short':
@@ -214,7 +235,7 @@ typessub = {'signed char':
                'typeinclude': '',
                'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
-               'testPyType': 'PyNumber_Check',
+               'testPyType': 'carto::PyaimsInt_Check',
                'compareElement': '',
             },
             'unsigned short':
@@ -235,7 +256,7 @@ typessub = {'signed char':
                'typeinclude': '',
                'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
-               'testPyType': 'PyNumber_Check',
+               'testPyType': 'carto::PyaimsInt_Check',
                'compareElement': '',
             },
             'int':
@@ -256,7 +277,7 @@ typessub = {'signed char':
                'typeinclude': '',
                'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
-               'testPyType': 'PyNumber_Check',
+               'testPyType': 'carto::PyaimsInt_Check',
                'compareElement': '',
             },
             'unsigned':
@@ -277,7 +298,7 @@ typessub = {'signed char':
                'typeinclude': '',
                'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
-               'testPyType': 'PyNumber_Check',
+               'testPyType': 'carto::PyaimsInt_Check',
                'compareElement': '',
             },
             'unsigned long':
@@ -296,15 +317,15 @@ typessub = {'signed char':
                'PyType': 'unsigned long',
                'sipClass': '',
                'typeinclude': '',
-               'sipinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
-               'testPyType': 'PyNumber_Check',
+               'testPyType': 'carto::PyaimsInt_Check',
                'compareElement': '',
             },
             'float':
            {'typecode': 'FLOAT',
                'pyFromC': 'PyFloat_FromDouble',
-               'CFromPy': 'carto::float_FromPy',
+               'CFromPy': 'carto::PyaimsFloat_AsDouble',
                'castFromSip': '',
                'deref': '',
                'pyderef': '',
@@ -319,13 +340,13 @@ typessub = {'signed char':
                'typeinclude': '',
                'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
-               'testPyType': 'PyNumber_Check',
+               'testPyType': 'carto::PyaimsNumber_Check',
                'compareElement': '',
             },
             'double':
            {'typecode': 'DOUBLE',
                'pyFromC': 'PyFloat_FromDouble',
-               'CFromPy': 'PyFloat_AsDouble',
+               'CFromPy': 'carto::PyaimsFloat_AsDouble',
                'castFromSip': '',
                'deref': '',
                'pyderef': '',
@@ -338,9 +359,9 @@ typessub = {'signed char':
                'PyType': 'double',
                'sipClass': '',
                'typeinclude': '',
-               'sipinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
                'module': 'aims',
-               'testPyType': 'PyNumber_Check',
+               'testPyType': 'carto::PyaimsNumber_Check',
                'compareElement': '',
             },
             'std::string':
@@ -1272,6 +1293,33 @@ typessub = {'signed char':
                'testPyType': 'pyaimsAimsData_POINT3DF_Check',
             },
 
+            'carto::Volume<bool>':
+           {'typecode': 'Volume_BOOL',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new carto::Volume<bool>',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'Volume_BOOL',
+               'sipClass': 'Volume_BOOL',
+               'typeinclude': '#include <cartodata/volume/volume.h>',
+               'sipinclude': '#if SIP_VERSION < 0x040700\n'
+               '#include "sipaimssipVolume_BOOL.h"\n'
+               '#endif\n'
+               '#ifndef PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
+               '#define PYAIMS_VOLUME_BOOL_CHECK_DEFINED\n'
+               'inline int pyaimsVolume_BOOL_Check( PyObject* o )\n'
+               '{ return sipCanConvertToInstance( o, sipClass_Volume_BOOL, SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsVolume_BOOL_Check',
+            },
             'carto::Volume<int8_t>':
            {'typecode': 'Volume_S8',
                'pyFromC': '',
@@ -2759,7 +2807,8 @@ typessub = {'signed char':
 
             'carto::PluginLoader::PluginFile':
             classInNamespace('cartobase/plugin/plugin.h',
-                             'PluginFile', 'carto_PluginLoader', 'carto::PluginLoader'),
+                             'PluginFile', 'carto_PluginLoader',
+                             'carto::PluginLoader'),
 
             'aims::SparseMatrix':
             classInAimsNamespace('aims/sparsematrix/sparseMatrix.h',

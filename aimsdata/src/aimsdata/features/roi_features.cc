@@ -75,15 +75,25 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
     if ( ! _images.empty() ) {
       for( Images_t::const_iterator it = _images.begin();
            it != _images.end(); ++it ) {
-        const rc_ptr< Interpolator > interpolator = getLinearInterpolator( it->second );
+        const rc_ptr< Interpolator > interpolator = getLinearInterpolator( it->second.first );
+        rc_ptr< Interpolator > weight_interpolator( NULL );
+        if ( ! it->second.second.empty() ) {
+            weight_interpolator = getLinearInterpolator( it->second.second );
+        }
         vector< Interpolator::Scalar_t > interpolated;
+        Interpolator::Scalar_t weight;
         vector<  ScalarFeaturesProvider::Scalar_t > allValues;
         allValues.reserve( point_count );
+        vector<  ScalarFeaturesProvider::Scalar_t > allWeights;
+        allWeights.reserve( point_count );
         vector< vector<  ScalarFeaturesProvider::Scalar_t > > timesValues;
         for( maskIterator->restart(); maskIterator->isValid();
              maskIterator->next() ) {
           const Point3df &p = maskIterator->valueMillimeters();
           interpolator->values( p[ 0 ], p[ 1 ], p[ 2 ], interpolated );
+          if ( ! weight_interpolator.isNull() ) {
+              weight = weight_interpolator->value( p[ 0 ], p[ 1 ], p[ 2 ] );
+          }
           if ( interpolated.size() > 1 ) {
             if ( timesValues.empty() ) {
               allValues.reserve( point_count * interpolated.size() );
@@ -95,9 +105,15 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
             for( size_t i = 0; i < interpolated.size(); ++i ) {
               timesValues[ i ].push_back( interpolated[ i ] );
               allValues.push_back( interpolated[ i ] );
+              if ( ! weight_interpolator.isNull() ) {
+                  allWeights.push_back( weight );
+              }
             }
           } else {
             allValues.push_back( *interpolated.begin() );
+            if ( ! weight_interpolator.isNull() ) {
+                allWeights.push_back( weight );
+            }
           }
         }
 
@@ -110,11 +126,15 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
 
         const PropertySet &header = interpolator->header();
 
-        _scalarSetFeatures.setValues( allValues );
+        if ( weight_interpolator.isNull() ) {
+          _scalarSetFeatures.setValues( allValues );
+        } else {
+          _scalarSetFeatures.setValues( allValues, allWeights );
+        }
         _scalarSetFeatures.scalarFeatureValues( interpolated );
         for( size_t iName = 0; iName < featureNames.size(); ++iName ) {
           o->setProperty( featureNames[ iName ],
-                                interpolated[ iName ] );
+                          interpolated[ iName ] );
         }
         if ( ! timesValues.empty() ) {
           features->getProperty( "times", o );
@@ -163,10 +183,11 @@ void RoiFeatures::computeFeatures( const rc_ptr< RoiIterator > &roiIterator )
 //-----------------------------------------------------------------------------
 void RoiFeatures::
 addImageStatistics( const std::string &label,
-                    const std::string &filename )
+                    const std::string &filename,
+                    const std::string &weight_filename )
 {
   if ( _images.find( label ) == _images.end() ) {
-    _images[ label ] = filename;
+    _images[ label ] = std::pair<std::string, std::string>(filename, weight_filename);
   } else {
     throw runtime_error( string( "Cannot compute statistics because the label \"" ) + label + "\" is used for several images." );
   }

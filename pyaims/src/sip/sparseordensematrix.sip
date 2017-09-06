@@ -22,6 +22,7 @@ namespace aims
 
       int getSize1() const;
       int getSize2() const;
+      vector_S32 getSize() const;
       int getNonZeroElementCount() const;
 
       bool hasElement( int i, int j ) const;
@@ -32,6 +33,12 @@ namespace aims
 
       void setRow( int s1, const vector_DOUBLE & row ) /ReleaseGIL/;
       void setColumn( int s2, const vector_DOUBLE & column ) /ReleaseGIL/;
+
+      void readRow( int s1 ) /ReleaseGIL/;
+      void readColumn( int s1 ) /ReleaseGIL/;
+      void readAll() /ReleaseGIL/;
+      void freeRow( int i );
+      void freeColumn( int i );
 
       vector_DOUBLE getRow( int i ) const /ReleaseGIL/;
       vector_DOUBLE getColumn( int j ) const /ReleaseGIL/;
@@ -57,6 +64,12 @@ namespace aims
       void muteToSparse() /ReleaseGIL/;
       void muteToOptimalShape() /ReleaseGIL/;
       bool isOptimalShape() const;
+
+      aims::SparseOrDenseMatrix* subMatrix(
+        const vector_S32 & start, const vector_S32 & size )
+          /Factory, ReleaseGIL/;
+      aims::SparseOrDenseMatrix* subMatrix(
+        const vector_vector_S32 & indices_along_dims ) /Factory, ReleaseGIL/;
 
       aims::SparseOrDenseMatrix &
         operator += ( const aims::SparseOrDenseMatrix& thing ) /ReleaseGIL/;

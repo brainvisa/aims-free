@@ -275,11 +275,7 @@ namespace soma
 
     //=== view size ==========================================================
     localMsg( "reading view size..." );
-    std::vector<int>  viewsize( 4, 0 );
-    viewsize[ 0 ] = obj.getSizeX();
-    viewsize[ 1 ] = obj.getSizeY();
-    viewsize[ 2 ] = obj.getSizeZ();
-    viewsize[ 3 ] = obj.getSizeT();
+    std::vector<int>  viewsize = obj.getSize();
     localMsg( " -> view size ( "
               + carto::toString( viewsize[ 0 ] ) + ", "
               + carto::toString( viewsize[ 1 ] ) + ", "
@@ -307,52 +303,30 @@ namespace soma
     std::vector<int>  imagesize( 4, 0 );
     try {
       // first we look for "resolutions_dimension" property
-      imagesize[ 0 ] = (int) rint(
-        dsi->header()->getProperty( "resolutions_dimension" )
-                          ->getArrayItem( level )->getArrayItem( 0 )
-                          ->getScalar() );
-      imagesize[ 1 ] = (int) rint(
-        dsi->header()->getProperty( "resolutions_dimension" )
-                          ->getArrayItem( level )->getArrayItem( 1 )
-                          ->getScalar() );
-      imagesize[ 2 ] = (int) rint(
-        dsi->header()->getProperty( "resolutions_dimension" )
-                          ->getArrayItem( level )->getArrayItem( 2 )
-                          ->getScalar() );
-      imagesize[ 3 ] = (int) rint(
-        dsi->header()->getProperty( "resolutions_dimension" )
-                          ->getArrayItem( level )->getArrayItem( 3 )
-                          ->getScalar() );
+      carto::Object dim
+        = dsi->header()->getProperty( "resolutions_dimension" )->getArrayItem(
+          level );
+      int i, ndim = dim->size();
+      imagesize.resize( std::max( size_t( 4 ), dim->size() ), 1 );
+      for( i=0; i<ndim; ++i )
+      imagesize[ i ] = (int) rint( dim->getArrayItem( i )->getScalar() );
       localMsg( " -> found \"resolutions_dimension\"." );
     } catch( ... ) {
       try {
         // if it doesn't work, we look for "volume_dimension"
-        imagesize[ 0 ] = (int) rint(
-          dsi->header()->getProperty( "volume_dimension" )
-                            ->getArrayItem( 0 )->getScalar() );
-        imagesize[ 1 ] = (int) rint(
-          dsi->header()->getProperty( "volume_dimension" )
-                            ->getArrayItem( 1 )->getScalar() );
-        imagesize[ 2 ] = (int) rint(
-          dsi->header()->getProperty( "volume_dimension" )
-                            ->getArrayItem( 2 )->getScalar() );
-        imagesize[ 3 ] = (int) rint(
-            dsi->header()->getProperty( "volume_dimension" )
-                            ->getArrayItem( 3 )->getScalar() );
+        carto::Object dim = dsi->header()->getProperty( "volume_dimension" );
+        int i, ndim = dim->size();
+        imagesize.resize( std::max( size_t( 4 ), dim->size() ), 1 );
+        for( i=0; i<ndim; ++i )
+          imagesize[ i ] = (int) rint( dim->getArrayItem( i )->getScalar() );
         localMsg( " -> found \"volume_dimension\"." );
       } catch( ... ) {
         // if still nothing, we look for parent volumes
         if( parent1 && !parent1->allocatorContext().isAllocated() ) {
-          imagesize[ 0 ] = parent1->getSizeX();
-          imagesize[ 1 ] = parent1->getSizeY();
-          imagesize[ 2 ] = parent1->getSizeZ();
-          imagesize[ 3 ] = parent1->getSizeT();
+          imagesize = parent1->getSize();
           localMsg( " -> found unallocated parent." );
         } else if( parent2 ) {
-          imagesize[ 0 ] = parent2->getSizeX();
-          imagesize[ 1 ] = parent2->getSizeY();
-          imagesize[ 2 ] = parent2->getSizeZ();
-          imagesize[ 3 ] = parent2->getSizeT();
+          imagesize = parent2->getSize();
           localMsg( " -> found grandparent." );
         } else {
           imagesize = viewsize;
@@ -360,6 +334,7 @@ namespace soma
         }
       }
     }
+    // FIXME: print all dims
     localMsg( " -> full volume size ( "
               + carto::toString( imagesize[ 0 ] ) + ", "
               + carto::toString( imagesize[ 1 ] ) + ", "
@@ -376,10 +351,7 @@ namespace soma
       allocsize = viewsize;
       localMsg( " -> allocated volume is self (partial volume)." );
     } else {
-      allocsize[0] = parent1->getSizeX();
-      allocsize[1] = parent1->getSizeY();
-      allocsize[2] = parent1->getSizeZ();
-      allocsize[3] = parent1->getSizeT();
+      allocsize = parent1->getSize();
       localMsg( " -> allocated volume is parent "
                 "(borders or partially loading in full volume)." );
     }
@@ -390,25 +362,25 @@ namespace soma
               + carto::toString( allocsize[ 3 ] ) + " )" );
 
     //=== strides ============================================================
-    std::vector<long> strides(4);
-    strides[0] = &obj(1,0,0,0) - &obj(0,0,0,0);
-    strides[1] = &obj(0,1,0,0) - &obj(0,0,0,0);
-    strides[2] = &obj(0,0,1,0) - &obj(0,0,0,0);
-    strides[3] = &obj(0,0,0,1) - &obj(0,0,0,0);
+    int i, ndim = allocsize.size();
+    std::vector<long> strides( ndim );
+    std::vector<int> stride_pos;
+    for( i=0; i<ndim; ++i )
+    {
+      stride_pos = std::vector<int>( ndim, 0 );
+      stride_pos[i] =  1;
+      strides[i] = &obj( stride_pos ) - &obj( 0,0,0,0 );
+    }
 
     //=== region's origine ===================================================
     localMsg( "reading view position in reference to full volume..." );
-    std::vector<int>  pos ( 4 , 0 );
+    std::vector<int>  pos ( ndim, 0 );
     if( parent1 && !parent1->allocatorContext().isAllocated() ) {
-      pos[ 0 ] = obj.posInRefVolume()[ 0 ];
-      pos[ 1 ] = obj.posInRefVolume()[ 1 ];
-      pos[ 2 ] = obj.posInRefVolume()[ 2 ];
-      pos[ 3 ] = obj.posInRefVolume()[ 3 ];
+      pos = obj.posInRefVolume();
     } else if( parent2 ) {
-      pos[ 0 ] = obj.posInRefVolume()[ 0 ] + parent1->posInRefVolume()[ 0 ];
-      pos[ 1 ] = obj.posInRefVolume()[ 1 ] + parent1->posInRefVolume()[ 1 ];
-      pos[ 2 ] = obj.posInRefVolume()[ 2 ] + parent1->posInRefVolume()[ 2 ];
-      pos[ 3 ] = obj.posInRefVolume()[ 3 ] + parent1->posInRefVolume()[ 3 ];
+      pos = obj.posInRefVolume();
+      for( i=0; i<parent1->posInRefVolume().size(); ++i )
+        pos[i] += parent1->posInRefVolume()[i];
     }
     localMsg( " -> view position ( "
               + carto::toString( pos[ 0 ] ) + ", "
@@ -417,14 +389,15 @@ namespace soma
               + carto::toString( pos[ 3 ] ) + " )" );
 
     //=== possibilities : with borders, partial reading ======================
-    bool withborders = allocsize[0] > viewsize[0] ||
-                       allocsize[1] > viewsize[1] ||
-                       allocsize[2] > viewsize[2] ||
-                       allocsize[3] > viewsize[3];
-    bool partialreading = imagesize[0] > viewsize[0] ||
-                          imagesize[1] > viewsize[1] ||
-                          imagesize[2] > viewsize[2] ||
-                          imagesize[3] > viewsize[3];
+    bool withborders = false;
+    bool partialreading = false;
+    for( i=0; i<ndim; ++i )
+    {
+      if( allocsize[i] > viewsize[i] )
+        withborders = true;
+      if( imagesize[i] > viewsize[i] )
+        partialreading = true;
+    }
     localMsg( "With Borders : "
               + std::string( ( withborders ? "yes" : "no" ) ) );
     localMsg( "Partial Reading : "
@@ -445,19 +418,53 @@ namespace soma
       // we are in a "border" context. The volume/region must be read
       // line by line
       std::vector<int> posline ( pos );
-      std::vector<int> sizeline ( 4, 1 );
+      std::vector<int> sizeline ( ndim, 1 );
+      std::vector<int> volpos( ndim, 0 );
+      volpos[1] = -1;
       sizeline[ 0 ] = viewsize[ 0 ];
-      for ( t=0; t<viewsize[ 3 ]; ++t ) {
-        posline[ 3 ] = pos[ 3 ] + t;
-        for ( z=0; z<viewsize[ 2 ]; ++z ) {
-          posline[ 2 ] = pos[ 2 ] + z;
-          for ( y=0; y<viewsize[ 1 ]; ++y ) {
-            posline[ 1 ] = pos[ 1 ] + y;
-            _imr->read( ( T * ) &obj(0,y,z,t), *dsi, posline,
-                        sizeline, strides, options );
+      int dim;
+      bool nextrow = false, ended = false;
+      while( !ended )
+      {
+        nextrow = true;
+        for( dim=1; dim<ndim; ++dim )
+        {
+          if( nextrow )
+          {
+            ++volpos[dim];
+            if( volpos[dim] == viewsize[dim] )
+            {
+              if( dim == ndim - 1 )
+                ended = true;
+              volpos[dim] = 0;
+            }
+            else
+              nextrow = false;
           }
+          posline[dim] = pos[dim] + volpos[dim];
+        }
+        if( !ended )
+        {
+          posline[1] = pos[1] + volpos[1];
+          _imr->read( ( T * ) &obj( volpos ), *dsi, posline,
+                      sizeline, strides, options );
         }
       }
+
+//       for ( t=0; t<viewsize[ 3 ]; ++t ) {
+//         volpos[ 3 ] = t;
+//         posline[ 3 ] = pos[ 3 ] + t;
+//         for ( z=0; z<viewsize[ 2 ]; ++z ) {
+//           volpos[ 2 ] = z;
+//           posline[ 2 ] = pos[ 2 ] + z;
+//           for ( y=0; y<viewsize[ 1 ]; ++y ) {
+//             volpos[ 1 ] =  y;
+//             posline[ 1 ] = pos[ 1 ] + y;
+//             _imr->read( ( T * ) &obj( volpos ), *dsi, posline,
+//                         sizeline, strides, options );
+//           }
+//         }
+//       }
     }
     
     // we reset at 0 the ImageReader's members (sizes, binary, ...) so that

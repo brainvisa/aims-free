@@ -110,10 +110,9 @@ namespace aims
         if( strides )
         {
           // if strides are specified, force them (volume views...)
-          PyArray_STRIDES( sipRes )[0] = strides[0];
-          PyArray_STRIDES( sipRes )[1] = strides[1];
-          PyArray_STRIDES( sipRes )[2] = strides[2];
-          PyArray_STRIDES( sipRes )[3] = strides[3];
+          int dim;
+          for( dim=0; dim<ndim; ++dim )
+            PyArray_STRIDES( sipRes )[dim] = strides[dim];
         }
         sipRes = PyArray_Return( (PyArrayObject *) sipRes );
         // make a weakref to the array with a deletion callback

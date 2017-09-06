@@ -32,8 +32,6 @@
  */
 
 #include <pyaims/object/numconv.h>
-#include <pyaims/numpyarray.h>
-#include <numpy/arrayscalars.h>
 
 #include <iostream>
 #include <limits>
@@ -56,15 +54,6 @@ namespace carto
       return x;
     else
       return -1;
-  }
-
-
-  float float_FromPy( PyObject *pyobj )
-  {
-    PyTypeObject* ptype = Py_TYPE( pyobj ); //->ob_type;
-    if( ptype == &PyFloat32ArrType_Type )
-      return reinterpret_cast<PyFloatScalarObject *>( pyobj )->obval;
-    return PyFloat_AsDouble( pyobj );
   }
 
 }

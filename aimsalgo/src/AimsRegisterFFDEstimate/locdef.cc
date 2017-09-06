@@ -40,7 +40,6 @@
 #include <vector>
 //----------------------------------------------------------------------------
 
-using namespace bio;
 using namespace aims;
 using namespace carto;
 using namespace std;
@@ -65,6 +64,7 @@ int main( int argc, const char **argv )
     float       mi_ref = 0., gain_final_th = 0.01, gain_pyr_coef = 1.0;
     int         gain_first = 3;
     Point3df    defmax(-1., -1., -1.);
+    bool        prepro = true;
 
     // debug
     string  dbg_dir("/tmp/");
@@ -120,7 +120,8 @@ int main( int argc, const char **argv )
     application.addOption( gain_pyr_coef, "-scoef", "Reduction of the gain threshold / pyramid level [default=1=const]", true );
     application.addOption( bref, "-bref", "Number of bins to use for ref histogram [default=64]>", true );
     application.addOption( btest, "-btest", "Number of bins to use for test histogram [default=64]>", true );
-    application.addOption( dbg_dir, "-dbgPath", "[debug] Directory to write intermediate files [default=/tmp]", true );
+    application.addOption( prepro, "-pre", "Preprocess volumes (flatten masks, 99% cutoff [default=true]", true );
+    application.addOption( dbg_dir, "-dbgPath", "[debug] Directory to write intermediate files [default=/tmp/]", true );
     application.addOption( dbg_write_all, "-dbgWriteAll", "[debug] Write all intermediate files [default=false]", true );
     application.addOption( dbg_write_jpdf, "-dbgWriteJPDF", "[debug] Write joint histograms [default=false]", true );
     application.addOption( dbg_write_ctrlknots, "-dbgWriteParam", "[debug] Write parameters (i.e. FFD control knots) [default=false]", true );
@@ -143,9 +144,10 @@ int main( int argc, const char **argv )
 
     // directory for "degub writing
     dbg_dir = FileUtil::dirname(dbg_dir) + FileUtil::separator();
+    cout << dbg_dir << endl;
 
     // filename for debug writing
-    char dbg_name[30];
+    char dbg_name[150];
 
     if( dbg_write_all )
     {
@@ -229,7 +231,7 @@ int main( int argc, const char **argv )
     //
     //      Manage 2D cases
     //
-    //========================================================================  
+    //========================================================================
     bool is2d[3];
     is2d[0] = ( testimg.dimX() == 1 );
     is2d[1] = ( testimg.dimY() == 1 );
@@ -249,54 +251,54 @@ int main( int argc, const char **argv )
       final_ctrl_numz = 1;
       incr[2] = 0;
     }
-    
+
     //========================================================================
     //
     //      Check control knots parameters for the pyramid
     //
-    //========================================================================    
+    //========================================================================
     if (!is2d[0] && ((init_ctrl_numx < 4) || (init_ctrl_numx > 10))) {
-      cerr << "Wrong -icx option value: " << carto::toString(init_ctrl_numx) 
-           << ". Available values for this option are in the range 4-10." 
+      cerr << "Wrong -icx option value: " << carto::toString(init_ctrl_numx)
+           << ". Available values for this option are in the range 4-10."
            << endl << flush;
       return EXIT_FAILURE;
     }
-    
+
     if (!is2d[1] && ((init_ctrl_numy < 4) || (init_ctrl_numy > 10))) {
-      cerr << "Wrong -icy option value: " << carto::toString(init_ctrl_numy) 
-           << ". Available values for this option are in the range 4-10." 
+      cerr << "Wrong -icy option value: " << carto::toString(init_ctrl_numy)
+           << ". Available values for this option are in the range 4-10."
            << endl << flush;
       return EXIT_FAILURE;
     }
-    
+
     if (!is2d[2] && ((init_ctrl_numz < 4) || (init_ctrl_numz > 10))) {
-      cerr << "Wrong -icz option value: " << carto::toString(init_ctrl_numz) 
-           << ". Available values for this option are in the range 4-10." 
+      cerr << "Wrong -icz option value: " << carto::toString(init_ctrl_numz)
+           << ". Available values for this option are in the range 4-10."
            << endl << flush;
       return EXIT_FAILURE;
-    }        
-    
+    }
+
     if (!is2d[0] && ((final_ctrl_numx < init_ctrl_numx) || (final_ctrl_numx > 10))) {
-      cerr << "Wrong -fcx option value: " << carto::toString(final_ctrl_numx) 
-           << ". Available values for this option are in the range " 
+      cerr << "Wrong -fcx option value: " << carto::toString(final_ctrl_numx)
+           << ". Available values for this option are in the range "
            << carto::toString(init_ctrl_numx) << "-10." << endl << flush;
       return EXIT_FAILURE;
     }
-    
+
     if (!is2d[1] && ((final_ctrl_numy < init_ctrl_numy) || (final_ctrl_numy > 10))) {
-      cerr << "Wrong -fcy option value: " << carto::toString(final_ctrl_numy) 
-           << ". Available values for this option are in the range " 
+      cerr << "Wrong -fcy option value: " << carto::toString(final_ctrl_numy)
+           << ". Available values for this option are in the range "
            << carto::toString(init_ctrl_numy) << "-10." << endl << flush;
       return EXIT_FAILURE;
     }
-    
+
     if (!is2d[2] && ((final_ctrl_numz < init_ctrl_numz) || (final_ctrl_numz > 10))) {
-      cerr << "Wrong -fcz option value: " << carto::toString(final_ctrl_numz) 
-           << ". Available values for this option are in the range " 
+      cerr << "Wrong -fcz option value: " << carto::toString(final_ctrl_numz)
+           << ". Available values for this option are in the range "
            << carto::toString(init_ctrl_numz) << "-10." << endl << flush;
       return EXIT_FAILURE;
     }
-    
+
     //========================================================================
     //
     //      FFD initialization
@@ -358,7 +360,8 @@ int main( int argc, const char **argv )
                          testimg,
                          motion,
                          deformation,
-                         pPdf );
+                         pPdf,
+                         prepro );
     dataModel.initBound( defmax );
 
     //========================================================================
@@ -460,7 +463,8 @@ int main( int argc, const char **argv )
                                * deformation.dimY()
                                * deformation.dimZ() );
 
-        for( int k = 0, ind = 0; k < deformation.dimZ(); ++k )
+        int ind = 0;
+        for( int k = 0; k < deformation.dimZ(); ++k )
           for( int j = 0; j < deformation.dimY(); ++j )
             for( int i = 0; i < deformation.dimX(); ++i )
               for( int c = 0; c < 3; ++c )
@@ -502,27 +506,32 @@ int main( int argc, const char **argv )
           //--- debug --------------------------------------------------------
           if( dbg_write_ctrlknots )
           {
-            sprintf( dbg_name, "%sctrlknots_p%d_o%d", dbg_dir.c_str(), c_pyr, c_opt );
+            sprintf( dbg_name, "%sctrlknots_p%d_o%d.nii", dbg_dir.c_str(), c_pyr, c_opt );
+            cout << string("[dbg] ") + dbg_name << endl;
             dataModel.writeDebugCtrlKnots( dbg_name );
           }
           if( dbg_write_derparam )
           {
-            sprintf( dbg_name, "%sderparam_p%d_o%d", dbg_dir.c_str(), c_pyr, c_opt );
+            sprintf( dbg_name, "%sderparam_p%d_o%d.nii", dbg_dir.c_str(), c_pyr, c_opt );
+            cout << string("[dbg] ") + dbg_name << endl;
             dataModel.writeDebugDerMI( dbg_name );
           }
           if( dbg_write_jpdf )
           {
-            sprintf(dbg_name, "%sjoint_hist_p%d_o%d", dbg_dir.c_str(), c_pyr, c_opt );
+            sprintf(dbg_name, "%sjoint_hist_p%d_o%d.nii", dbg_dir.c_str(), c_pyr, c_opt );
+            cout << string("[dbg] ") + dbg_name << endl;
             dataModel.writeDebugJPdf( dbg_name );
           }
           if( dbg_write_contrib )
           {
-            sprintf(dbg_name, "%scontrib_p%d_o%d", dbg_dir.c_str(), c_pyr, c_opt );
+            sprintf(dbg_name, "%scontrib_p%d_o%d.nii", dbg_dir.c_str(), c_pyr, c_opt );
+            cout << string("[dbg] ") + dbg_name << endl;
             dataModel.writeDebugContrib( dbg_name );
           }
           if( dbg_write_deformation )
           {
-            sprintf(dbg_name, "%sdeformation_p%d_o%d", dbg_dir.c_str(), c_pyr, c_opt );
+            sprintf(dbg_name, "%sdeformation_p%d_o%d.nii", dbg_dir.c_str(), c_pyr, c_opt );
+            cout << string("[dbg] ") + dbg_name << endl;
             dataModel.writeDebugDeformations( dbg_name,
                                               testimg.dimX(), testimg.dimY(), testimg.dimZ(),
                                               testimg.sizeX(), testimg.sizeY(), testimg.sizeZ() );

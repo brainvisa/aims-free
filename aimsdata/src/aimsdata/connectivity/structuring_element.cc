@@ -141,6 +141,7 @@ void ShapeFactory::init()
     registerShape( "diagonalcrossxy", DiagonalCrossXY() );
     registerShape( "diagonalcrossxz", DiagonalCrossXZ() );
     registerShape( "diagonalcrossyz", DiagonalCrossYZ() );
+    registerShape( "circlexy", CircleXY() );
   }
 }
 
@@ -666,6 +667,27 @@ void DiagonalCrossYZ::setParameters(
         if( abs(j) == abs(k) )
           if( usecenter || ( j != 0 ) || ( k != 0 ) )
             _vector.push_back( Point3d(0, j, k) + origin );
+}
+
+void CircleXY::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
+  _vector.clear();
+  vector<double> vamplitude = amplitude;
+  if( vamplitude.size() < 1 )
+    vamplitude.push_back( 1.0 );
+  if( vamplitude.size() < 2 )
+    vamplitude.push_back( vamplitude[0] );
+
+  for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
+    for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
+      if( ( usecenter || ( i != 0 ) || ( j != 0 ) ) &&
+          ( sqrt( pow((float)i, 2)  + pow((float)j, 2) * ( pow( amplitude[0], 2 ) / pow( amplitude[1], 2 ) ) ) <= amplitude[0] ) &&
+          ( sqrt( pow((float)i, 2)  + pow((float)j, 2) * ( pow( amplitude[0], 2 ) / pow( amplitude[1], 2 ) ) ) > amplitude[0] - 1 ) )
+        _vector.push_back( Point3d(i, j, 0) + origin );
 }
 
 //============================================================================

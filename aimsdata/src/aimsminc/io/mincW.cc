@@ -32,6 +32,7 @@
  */
 
 #include <cstdlib>
+#include <cstdio>
 #include <aims/io/mincW.h>
 #include <aims/io/mincheader.h>
 #include <aims/resampling/motion.h>
@@ -51,7 +52,6 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   cout << "MincWriter<" << DataTypeCode<T>::name() << ">::write " << _name 
        << endl;
   */
-
   //Only works for 3D volume. Should add 4D support.
   string fname = _name;
   // Replaces '\' in name with '/'
@@ -119,6 +119,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   }
   else if(dtc.dataType()=="FLOAT") {
     nc_data_type=NC_FLOAT;
+    /* scale factors don't seem to work.
     float slope = 1., offset = 0.;
     if( canEncodeAsScaledS16( *thing.volume(), slope, offset, true, 0 ) )
     {
@@ -126,7 +127,9 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
       scaledcoding = true;
       dmin = rint( ( mini - offset ) / slope );
       dmax = rint( ( maxi - offset ) / slope );
+      std::cout << "Minc: use scale factor " << slope << " / " << offset << ", min: " << dmin << ", max: " << dmax << endl;
     }
+    */
     signed_flag=TRUE;
   }
   else if(dtc.dataType()=="DOUBLE") {
@@ -143,13 +146,18 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
     dmin = mini;
     dmax = maxi;
   }
+//   cout << "MincWriter<" << DataTypeCode<T>::name() << ">::write-1, "
+//        << "n_dimensions: " << carto::toString(n_dimensions) 
+//        << "nc_data_type: " << carto::toString(nc_data_type) 
+//        << "mini: " << carto::toString(mini) 
+//        << "maxi: " << carto::toString(maxi) 
+//        << std::endl << std::flush;
   volume=create_volume(n_dimensions,
                        dim_names,
                        nc_data_type,
                        signed_flag,
                        mini,
                        maxi);
-
   set_volume_real_range(volume,mini,maxi);
 
   int       sizes[VIO_MAX_DIMENSIONS];
@@ -297,7 +305,6 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
                 NULL,
                 NULL) != VIO_OK )
     ok = false;
-
 //   ncopts = NC_VERBOSE;
   ncopts = 0;
   ncerr = 0;
@@ -321,7 +328,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
     SyntaxSet	*s = PythonHeader::syntax();
     Syntax	&sx = (*s)[ "__generic__" /*"PythonHeader"*/ ];
-
+       
     hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "varid", "MINC_patient:varid");
     hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "vartype", "MINC_patient:vartype");
     hdr.writeMincAttribute(sx,mincid,"patient", NC_LONG, "rootvariable", "version", "MINC_patient:version");
@@ -395,7 +402,6 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
 
     hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filename", "MINC_processing:transformation0-filename");
     hdr.writeMincAttribute(sx,mincid,"processing", NC_LONG, "rootvariable", "transformation0-filedata", "MINC_processing:transformation0-filedata");
-
     hdr.writeMincHistory(mincid);
 
     miclose(mincid);

@@ -31,47 +31,43 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#include <aims/io/dicomfinderformat.h>
+#include <aims/io/dicomheader.h>
+#include <aims/io/finder.h>
 
+using namespace aims;
+using namespace std;
 
-#include <aims/mesh/meshMerge.h>
-
-
-template<int D, class T>
-void aims::meshMerge( AimsTimeSurface<D,T> & dst, 
-		      const AimsTimeSurface<D,T> & add )
+bool FinderDicomFormat::check( const string & filename, Finder & f ) const
 {
-  std::vector<Point3df> & vert = dst.vertex();
-  std::vector<Point3df> & norm = dst.normal();
-  std::vector<AimsVector<uint,D> > & poly = dst.polygon();
-  const std::vector<Point3df>  & vert2 = add.vertex();
-  const std::vector<Point3df>  & norm2 = add.normal();
-  const std::vector<AimsVector<uint,D> >  & poly2 = add.polygon();
-  unsigned i, j, n = vert.size(), m = vert2.size(), p = poly2.size();
-
-  // copy vertices & normals
-  for( i=0; i<m; ++i )
+  DicomHeader *hdr = new DicomHeader( filename );
+  int	status;
+  try
     {
-      vert.push_back( vert2[i] );
-      norm.push_back( norm2[i] );
+      status = hdr->read();
+    }
+  catch( exception & e )
+    {
+      // cerr << " FinderDicomFormat::check exception: " << e.what() << endl;
+      delete hdr;
+      return( false );
+    }
+  if( status < 0 )
+    {
+      // cerr << " FinderDicomFormat::check status = " << status << endl;
+      delete hdr;
+      return( false );
     }
 
-  // translate & copy polygons
-  for( i=0; i<p; ++i )
-    {
-      AimsVector<uint,D>  pol;
-      for( j=0; j<D; ++j )
-	pol[j] = poly2[i][j] + n;
-      poly.push_back( pol );
-    }
-}
+  string	dattp;
+  hdr->getProperty( "data_type", dattp );
+  f.setObjectType( "Volume" );
+  f.setFormat( "DICOM" );
+  f.setDataType( dattp );
+  vector<string>	vt;
+  vt.push_back( dattp );
+  f.setPossibleDataTypes( vt );
+  f.setHeader( hdr );
 
-template<int D, class T>
-void aims::meshMerge( AimsTimeSurface<D,T> & dst, 
-		      const std::list<AimsTimeSurface<D,T> > & src )
-{
-  dst.erase();
-  typename std::list<AimsTimeSurface<D,T> >::const_iterator
-    im, em = src.end();
-  for( im=src.begin(); im!=em; ++im )
-    meshMerge( dst, *im );
+  return( true );
 }

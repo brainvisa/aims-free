@@ -156,4 +156,28 @@ def crop_volume(vol, threshold=0, border=0):
 
     return cropped_vol
 
+def compare_images(vol, vol2, vol1_name, vol2_name, thresh=1e-6,
+                   rel_thresh = False):
+#    print('comp vol, sizes:', vol.getSize(), vol2.getSize())
+#    print('    vsizes:', str(vol.getVoxelSize()), str(vol2.getVoxelSize()))
+    msg = 'comparing %s and %s' % (vol1_name, vol2_name)
+    if vol.getSize().list() != vol2.getSize().list():
+        raise RuntimeError(msg + ': %s != %s'
+                            % (str(vol.getSize()), str(vol2.getSize())))
+    if np.max(np.abs(np.asarray(vol.getVoxelSize()) \
+                      - vol2.getVoxelSize())) >= 1e-6 :
+        raise RuntimeError(msg + ': voxels size differ: %s != %s'
+                            % (str(vol.getVoxelSize()), str(vol2.getVoxelSize())))
+    if rel_thresh:
+        val_range = float(np.max(np.asarray(vol))) \
+            - np.min(np.asarray(vol))
+        thresh = thresh * val_range
+        
+    if np.max(np.abs(np.asarray(vol) - np.asarray(vol2))) >= thresh:
+        raise RuntimeError(msg + ', max diff: %f, max allowed: %f'
+                            % (np.max(np.abs(np.asarray(vol) - np.asarray(vol2))),
+                               thresh))
+    
+    return True
+
 

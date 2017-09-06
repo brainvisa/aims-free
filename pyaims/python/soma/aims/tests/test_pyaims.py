@@ -69,4 +69,14 @@ if __name__ == '__main__':
         else:
             sys.exit(1)
     except Warning:
+        #verbosity=0
+        #if '-v' in sys.argv:
+            #i = sys.argv.index('-v')
+            #verbosity = int(sys.argv[i + 1])
+            #sys.argv = sys.argv[:i] + sys.argv[i+2:]
+        #elif '--verbose' in sys.argv:
+            #i = sys.argv.index('--verbose')
+            #verbosity = int(sys.argv[i + 1])
+            #sys.argv = sys.argv[:i] + sys.argv[i+2:]
+
         unittest.main(defaultTest='test_suite')

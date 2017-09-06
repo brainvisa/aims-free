@@ -22,7 +22,7 @@ using namespace aims;
 using namespace std;
 using namespace carto;
 
-namespace bio {
+namespace aims {
 
 //============================================================================
 //   FFD TRANSFORMATION
@@ -30,7 +30,7 @@ namespace bio {
 
 SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
                       float sizeX, float sizeY, float sizeZ ):
-  _spline("SplineFFD"),
+  _spline(3, 0),
   _ctrlPointDelta( dimX, dimY, dimZ )
 {
   _ctrlPointDelta = Point3df(0., 0., 0.);
@@ -38,13 +38,13 @@ SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
 }
 
 SplineFfd::SplineFfd( const SplineFfd & other ):
-  _spline("SplineFFD")
+  _spline(3, 0)
 {
   updateAllCtrlKnot(other._ctrlPointDelta);
 }
 
 SplineFfd::SplineFfd( const AimsData<Point3df> & other ):
-  _spline("SplineFFD")
+  _spline(3, 0)
 {
   updateAllCtrlKnot(other);
 }
@@ -199,9 +199,9 @@ void SplineFfd::increaseResolution( const Point3d & addKnot )
   // 1. we compute a volume of deformations in the new referential, but only
   // inside the image domain
   AimsData<Point3df> newDef( newDim[0], newDim[1], newDim[2] );
-  newDef.setSizeXYZT( double(dimX() - 1) / double(newDef.dimX() - 1) * sizeX(),
-                      double(dimY() - 1) / double(newDef.dimY() - 1) * sizeY(),
-                      double(dimZ() - 1) / double(newDef.dimZ() - 1) * sizeZ() );
+  newDef.setSizeXYZT( isFlat(0) ? sizeX() : double(dimX() - 1) / double(newDef.dimX() - 1) * sizeX(),
+                      isFlat(1) ? sizeY() : double(dimY() - 1) / double(newDef.dimY() - 1) * sizeY(),
+                      isFlat(2) ? sizeZ() : double(dimZ() - 1) / double(newDef.dimZ() - 1) * sizeZ() );
   newDef = Point3df(0.);
   Point3dd nd;
 
@@ -535,9 +535,9 @@ void SplineFfd::estimateLocalDisplacement( const Point3df & VoxelSize)
 
 void SplineFfd::printControlPointsGrid() const
 {
-  for( int z = 1; z < _ctrlPointDelta.dimZ(); ++z ) {
-    for( int y = 1; y < _ctrlPointDelta.dimY(); ++y ) {
-      for( int x = 1; x < _ctrlPointDelta.dimX(); ++x ) {
+  for( int z = 0; z < _ctrlPointDelta.dimZ(); ++z ) {
+    for( int y = 0; y < _ctrlPointDelta.dimY(); ++y ) {
+      for( int x = 0; x < _ctrlPointDelta.dimX(); ++x ) {
         cout << "\t" << _ctrlPointDelta(x, y, z);
       }
       cout << endl ;
@@ -684,8 +684,8 @@ Point3df SplineFfdResampler<T, C>::resample(
                    p_ref[2] / _ref.sizeZ() );
 
   Point3dl pi_ref( (int)(floor(pv_ref[0])),
-                    (int)(floor(pv_ref[1])),
-                    (int)(floor(pv_ref[2])) );
+                   (int)(floor(pv_ref[1])),
+                   (int)(floor(pv_ref[2])) );
 
   Point3dl kDown( ( _transformation.isFlat(0) ? pi_ref[0] : pi_ref[0] - 1 ),
                   ( _transformation.isFlat(1) ? pi_ref[1] : pi_ref[1] - 1 ),
@@ -822,4 +822,4 @@ template class NearestNeighborFfdResampler<double>;
 template class NearestNeighborFfdResampler<AimsRGB, AimsRGB::ChannelType>;
 template class NearestNeighborFfdResampler<AimsRGBA, AimsRGBA::ChannelType>;
 
-} // namespace bio
+} // namespace aims

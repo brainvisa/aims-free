@@ -53,12 +53,21 @@ public:
     Volume_%Template1typecode%( const Volume_%Template1typecode% & )
       /ReleaseGIL/;
     Volume_%Template1typecode%( rc_ptr_Volume_%Template1typecode% other,
-      const Volume_%Template1typecode%::Position4Di & pos
-        = Volume_%Template1typecode%::Position4Di( 0, 0, 0, 0 ),
-      const Volume_%Template1typecode%::Position4Di & size
-        = Volume_%Template1typecode%::Position4Di( -1, -1, -1, -1 ),
+      const vector_S32 & pos = vector_S32( 4, 0 ),
+      const vector_S32 & size = vector_S32(),
       const carto::AllocatorContext & allocContext
         = carto::AllocatorContext() );
+    Volume_%Template1typecode%( const vector_S32 &,
+      const carto::AllocatorContext& allocatorContext,
+      bool = true ) /ReleaseGIL/;
+    Volume_%Template1typecode%( const vector_S32 &,
+      const vector_S32 &,
+      const carto::AllocatorContext& allocatorContext
+        = carto::AllocatorContext(), bool = true ) /ReleaseGIL/;
+    /*
+      The constructor taking a vector<int> is moved to the end of this class,
+      because the numpy array constructor should be used first.
+    */
 
     virtual ~Volume_%Template1typecode%() /ReleaseGIL/;
 
@@ -89,6 +98,19 @@ Voxel sizes in mm (list of 4 floats)
 %End
 
     void fill( const %Template1% & value ) /ReleaseGIL/;
+%Docstring
+fill(value)
+
+Fill Volume_%Template1typecode% using the given value.
+%End
+
+%#ifdef PyAims_Volume_U8_defined%
+    void fill( int ) /ReleaseGIL/;
+%MethodCode
+        sipCpp->fill( %Template1deref%a0 );
+%End
+%#endif%
+
     bool all() const;
     bool any() const;
     %Template1PyType% min() const;
@@ -99,7 +121,7 @@ Voxel sizes in mm (list of 4 floats)
 If the volume is a view into another (larger) one, this returns the "parent" one.
 %End
 
-    Volume_%Template1typecode%::Position4Di posInRefVolume() const;
+    vector_S32 posInRefVolume() const;
 %Docstring
 If the volume is a view into another (larger) one, this returns the position in "parent" one.
 %End
@@ -107,6 +129,20 @@ If the volume is a view into another (larger) one, this returns the position in 
   %Template1PyType% at( long, long = 0, long = 0, long = 0 ) const;
 %Docstring
 at(posx, posy=0, posz=0, post=0)
+
+Returns the volume value for the selected voxel.
+%End
+
+  %Template1PyType% at( long, long, long, long, long, long=0, long=0, long=0 ) const;
+%Docstring
+at(posx1, posx2, posx3, posx4, posx5, posx6=0, posx7=0, posx8=0)
+
+Returns the volume value for the selected voxel.
+%End
+
+  %Template1PyType% at( const vector_S32 & ) const;
+%Docstring
+at(vector_int)
 
 Returns the volume value for the selected voxel.
 %End
@@ -135,6 +171,17 @@ Set the voxel value at the given position.
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
 %End
 
+ void setValue( %Template1%, const vector_S32 & );
+%Docstring
+setValue(value, [x1, x2, x3, x4, x5, x6...])
+
+Set the voxel value at the given position.
+%End
+
+%MethodCode
+ sipCpp->at( *a1 ) = %Template1deref%a0;
+%End
+
 %#ifdef PyAims_Volume_U8_defined%
  void setValue( int, long, long = 0, long = 0, long = 0 );
 %Docstring
@@ -142,6 +189,14 @@ Set a voxel value at given position
 %End
 %MethodCode
  sipCpp->at( a1, a2, a3, a4 ) = %Template1deref%a0;
+%End
+
+ void setValue( int, const vector_S32 & );
+%Docstring
+Set a voxel value at given position
+%End
+%MethodCode
+ sipCpp->at( *a1 ) = %Template1deref%a0;
 %End
 %#endif%
 
@@ -354,6 +409,30 @@ The header contains all meta-data.
   r1.release();
 %End
 
+  int __nonzero__() const /ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r( const_cast<carto::Volume<%Template1% > *>(sipCpp) );
+  sipRes = r->all();
+  r.release();
+%End
+
+  Volume_BOOL * operator == ( Volume_%Template1typecode% & )
+  /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( sipCpp );
+  carto::VolumeRef<%Template1% > r2( a0 );
+  
+  carto::VolumeRef<bool> r = 
+        carto::copyStructure<bool, %Template1% >( r1 );
+  carto::volumeutil::applyTowards( *r1, *r2, *r, 
+        carto::volumeutil::equal_to<%Template1%, %Template1% >() );
+  
+  sipRes = r.get();
+  r.release();
+  r1.release();
+  r2.release();
+%End
+
 %%Template1defScalar%%
 %#ifdef PYAIMS_SCALAR%
 
@@ -418,79 +497,111 @@ The header contains all meta-data.
 %#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS) %
 
   Volume_%Template1typecode%( SIP_PYOBJECT )
-    [(int, int, int, int, %Template1% *)];
+    [(vector_S32, %Template1% *)];
 %MethodCode
-  static std::list<std::set<int> > compatibletypes;
-  if( compatibletypes.empty() )
-  {
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_BYTE );
-      tl.insert( PyArray_INT8 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_UBYTE );
-      tl.insert( PyArray_UINT8 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_SHORT );
-      tl.insert( PyArray_INT16 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_USHORT );
-      tl.insert( PyArray_UINT16 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_INT32 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      // tl.insert( PyArray_UINT );
-      tl.insert( PyArray_UINT32 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      // tl.insert( PyArray_INT );
-      tl.insert( PyArray_INT64 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_UINT );
-      tl.insert( PyArray_UINT64 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      tl.insert( PyArray_FLOAT32 );
-    }
-    compatibletypes.push_back( std::set<int>() );
-    {
-      std::set<int> & tl = compatibletypes.back();
-      // tl.insert( PyArray_FLOAT );
-      tl.insert( PyArray_DOUBLE );
-      tl.insert( PyArray_FLOAT64 );
-    }
-  }
   PyArrayObject *arr = 0;
   if( !PyArray_Check( a0 ) )
   {
-    sipIsErr = 1;
+    /* copy of the code of Volume( const std::vector<int32_t> & )
+    */
+    {
+        const vector_S32* a0;
+        int a0State = 0;
+
+        if (sipParseKwdArgs(sipParseErr, sipArgs, sipKwds, NULL, sipUnused, "J1", sipType_vector_S32, &a0, &a0State))
+        {
+            Py_BEGIN_ALLOW_THREADS
+            try
+            {
+            sipCpp = new sipVolume_%Template1typecode%(*a0,
+              carto::AllocatorContext(), true);
+            }
+            catch (...)
+            {
+                Py_BLOCK_THREADS
+
+            sipReleaseType(const_cast<vector_S32 *>(a0),sipType_vector_S32,a0State);
+                sipRaiseUnknownException();
+                return NULL;
+            }
+            Py_END_ALLOW_THREADS
+            sipReleaseType(const_cast<vector_S32 *>(a0),sipType_vector_S32,a0State);
+
+            sipCpp->sipPySelf = sipSelf;
+
+            return sipCpp;
+        }
+    }
+
+     sipIsErr = 1;
     PyErr_SetString( PyExc_TypeError, "wrong argument type" );
   }
   else
   {
+    static std::list<std::set<int> > compatibletypes;
+    if( compatibletypes.empty() )
+    {
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_BYTE );
+        tl.insert( PyArray_INT8 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_UBYTE );
+        tl.insert( PyArray_UINT8 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_SHORT );
+        tl.insert( PyArray_INT16 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_USHORT );
+        tl.insert( PyArray_UINT16 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_INT32 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        // tl.insert( PyArray_UINT );
+        tl.insert( PyArray_UINT32 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        // tl.insert( PyArray_INT );
+        tl.insert( PyArray_INT64 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_UINT );
+        tl.insert( PyArray_UINT64 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        tl.insert( PyArray_FLOAT32 );
+      }
+      compatibletypes.push_back( std::set<int>() );
+      {
+        std::set<int> & tl = compatibletypes.back();
+        // tl.insert( PyArray_FLOAT );
+        tl.insert( PyArray_DOUBLE );
+        tl.insert( PyArray_FLOAT64 );
+      }
+    }
+
     arr = (PyArrayObject *) a0;
 
     /* I comment this out because transposed arrays are not seen as contiguous
@@ -504,7 +615,7 @@ The header contains all meta-data.
     else
     */
 
-    if( arr->nd < 0 || arr->nd >4 )
+    if( arr->nd < 1 || arr->nd > carto::Volume<%Template1%>::DIM_MAX )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_RuntimeError,
@@ -536,7 +647,10 @@ The header contains all meta-data.
   if( !sipIsErr )
   {
     // retreive dimensions
-    int dims[4] = { 1, 1, 1, 1 };
+    int nd = arr->nd;
+    if( nd < 4 )
+      nd = 4;
+    std::vector<int> dims( nd, 1 );
     int inc = 1, start = 0;
     // TODO: retreive exact strides and react accordingly
     if( PyArray_NDIM( arr ) >= 2 )
@@ -548,20 +662,10 @@ The header contains all meta-data.
         start = arr->nd-1;
       }
     }
-    dims[0] = arr->dimensions[ start ];
-    if( arr->nd >= 2 )
-    {
-      dims[1] = arr->dimensions[ start + inc ];
-      if( arr->nd >= 3 )
-        {
-          dims[2] = arr->dimensions[ start + inc * 2 ];
-          if( arr->nd >= 4 )
-            dims[3] = arr->dimensions[ start + inc * 3 ];
-        }
-    }
+    for( int i=0; i<arr->nd; ++i )
+      dims[i] = arr->dimensions[ start + inc * i];
 
-    sipCpp = new sipVolume_%Template1typecode%( dims[0], dims[1], dims[2],
-                                                dims[3],
+    sipCpp = new sipVolume_%Template1typecode%( dims,
                                                 ( %Template1% *) arr->data );
     // keep ref to the array to prevent its destruction
     PyObject_SetAttrString( (PyObject *) sipSelf, "_arrayext", a0 );
@@ -593,80 +697,61 @@ The header contains all meta-data.
 %End
 
 %MethodCode
-  std::vector<int> dims(4);
-  dims[3] = sipCpp->getSizeX();
-  dims[2] = sipCpp->getSizeY();
-  dims[1] = sipCpp->getSizeZ();
-  dims[0] = sipCpp->getSizeT();
-  size_t strides[4];
-  strides[3] = sizeof( %Template1% );
+  std::vector<int> vdims = sipCpp->getSize();
+  int i, n= vdims.size();
+  std::vector<size_t> vstrides, strides( n );
+  std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
-  if( ref.get() && ref->allocatorContext().isAllocated() )
+
+  vstrides = sipCpp->getStrides();
+
+  for( i=0; i<n; ++i )
   {
-    strides[2] = strides[3] * ref->getSizeX();
-    strides[1] = strides[2] * ref->getSizeY();
-    strides[0] = strides[1] * ref->getSizeZ();
+    dims[n - 1 - i] = vdims[i];
+    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
   }
-  else
-  {
-    strides[2] = strides[3] * dims[3];
-    strides[1] = strides[2] * dims[2];
-    strides[0] = strides[1] * dims[1];
-  }
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
-                                 (char *) &sipCpp->at( 0 ), false, strides );
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, n, &dims[0],
+                                 (char *) &sipCpp->at( 0 ), false,
+                                 &strides[0] );
 %End
 
   SIP_PYOBJECT __array__() /Factory/;
 %MethodCode
-  std::vector<int> dims(4);
-  dims[3] = sipCpp->getSizeX();
-  dims[2] = sipCpp->getSizeY();
-  dims[1] = sipCpp->getSizeZ();
-  dims[0] = sipCpp->getSizeT();
-  size_t strides[4];
-  strides[3] = sizeof( %Template1% );
+  std::vector<int> vdims = sipCpp->getSize();
+  int i, n= vdims.size();
+  std::vector<size_t> vstrides, strides( n );
+  std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
-  if( ref.get() && ref->allocatorContext().isAllocated() )
+
+  vstrides = sipCpp->getStrides();
+
+  for( i=0; i<n; ++i )
   {
-    strides[2] = strides[3] * ref->getSizeX();
-    strides[1] = strides[2] * ref->getSizeY();
-    strides[0] = strides[1] * ref->getSizeZ();
+    dims[n - 1 - i] = vdims[i];
+    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
   }
-  else
-  {
-    strides[2] = strides[3] * dims[3];
-    strides[1] = strides[2] * dims[2];
-    strides[0] = strides[1] * dims[1];
-  }
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 4, &dims[0],
-                                 (char *) &sipCpp->at( 0 ), true, strides );
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, n, &dims[0],
+                                 (char *) &sipCpp->at( 0 ), true,
+                                 &strides[0] );
 %End
 
   void checkResize();
 %MethodCode
-  std::vector<int> dims(4);
-  dims[3] = sipCpp->getSizeX();
-  dims[2] = sipCpp->getSizeY();
-  dims[1] = sipCpp->getSizeZ();
-  dims[0] = sipCpp->getSizeT();
-  size_t strides[4];
-  strides[3] = sizeof( %Template1% );
+  std::vector<int> vdims = sipCpp->getSize();
+  int i, n= vdims.size();
+  std::vector<size_t> vstrides, strides( n );
+  std::vector<int> dims( n );
   carto::rc_ptr<Volume_%Template1typecode% > ref = sipCpp->refVolume();
-  if( ref.get() && ref->allocatorContext().isAllocated() )
+
+  vstrides = sipCpp->getStrides();
+
+  for( i=0; i<n; ++i )
   {
-    strides[2] = strides[3] * ref->getSizeX();
-    strides[1] = strides[2] * ref->getSizeY();
-    strides[0] = strides[1] * ref->getSizeZ();
+    dims[n - 1 - i] = vdims[i];
+    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
   }
-  else
-  {
-    strides[2] = strides[3] * dims[3];
-    strides[1] = strides[2] * dims[2];
-    strides[0] = strides[1] * dims[1];
-  }
-  aims::resizeNumpyArray( sipSelf, 4, &dims[0], (char *) &sipCpp->at( 0 ),
-    strides );
+  aims::resizeNumpyArray( sipSelf, n, &dims[0], (char *) &sipCpp->at( 0 ),
+    &strides[0] );
 %End
 
   void _arrayDestroyedCallback( SIP_PYOBJECT );

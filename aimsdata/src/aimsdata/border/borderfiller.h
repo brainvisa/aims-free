@@ -1,10 +1,6 @@
 #ifndef AIMSDATA_BORDER_BORDERFILLER_H
 #define AIMSDATA_BORDER_BORDERFILLER_H
 
-//============================================================================
-// BORDER FILLER
-//============================================================================
-
 //--- aims -------------------------------------------------------------------
 #include <aims/border/borderiterator.h>
 #include <aims/math/mathelem.h>                                    // MathUtil
@@ -16,6 +12,9 @@
 namespace aims
 {
 
+  //==========================================================================
+  // BORDER FILLER
+  //==========================================================================
   /// This class contains static methods to fill the border of a VolumeRef
   /// with chosen values. This is useful for processing algorithms that work
   /// in a neighborhood (filtering...)
@@ -25,15 +24,17 @@ namespace aims
   public:
     /// Fills the border with a constant value
     static void fillConstant( carto::VolumeRef<T> in, const T & value = 0 );
-    /// Fills the border with a "median" value. This is the median value of
-    /// the inside border of equal size: if the outside border is of size
-    /// (2, 2, 0) in dimensions x, y, z, the inside border is also of size
-    /// (2, 2, 0)
+    /// Fills the border with a "median" value.
+    ///
+    /// This is the median value of the inside border of equal size:
+    /// if the outside border is of size (2, 2, 0) in dimensions x, y, z,
+    /// the inside border is also of size (2, 2, 0)
+    ///
+    /// This can be overriden by the argument \c size.
     static void fillMedian( carto::VolumeRef<T> in, Point4dl size = Point4dl(-1,-1,-1,-1) );
     /// Each voxel of the border is assigned with the nearest inside voxel.
     static void fillNearest( carto::VolumeRef<T> in );
     /// The border is filled by mirroring the inside border of same size.
-    /// \todo (not implemented yet)
     static void fillMirror( carto::VolumeRef<T> in );
   };
 

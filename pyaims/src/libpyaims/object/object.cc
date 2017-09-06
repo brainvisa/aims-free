@@ -226,6 +226,30 @@ namespace carto
 
 
   template <>
+  bool TypedObject<PyObject *>::isIntKeyIterator() const
+  {
+    PyObject    *_value = getValue();
+    if( !_value )
+      return false;
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+    bool x = PyIter_Check( _value ); // && ?;
+    if( !x && PyObject_HasAttrString( _value, "isIntKeyIterator" ) )
+    {
+      PyObject *res = PyObject_CallMethod(
+        _value, const_cast<char *>( "isIntKeyIterator" ), 0 );
+      if( res )
+      {
+        x = ( res == Py_True );
+        Py_DECREF( res );
+      }
+    }
+    PyGILState_Release(gstate);
+    return x;
+  }
+
+
+  template <>
   //inline
   bool TypedObject<PyObject *>::isArray() const
   {
@@ -977,6 +1001,7 @@ namespace carto
       };
 
       class PyMappingIterator :  public virtual DictionaryIteratorInterface, 
+                                 public virtual IntKeyIteratorInterface,
                                  public virtual PyObjectIterator
       {
       public:
@@ -986,6 +1011,7 @@ namespace carto
         Object currentValue() const;
         void next() { PyObjectIterator::next(); }
         std::string key() const;
+        long intKey() const;
         PyMappingIterator & operator = ( const PyMappingIterator & );
 
       private:
@@ -1160,15 +1186,16 @@ void IterableImpl<PyObject *, false>::PyObjectIterator::next()
 
 
 IterableImpl<PyObject *, false>::PyMappingIterator::PyMappingIterator()
-  :  DictionaryIteratorInterface(), PyObjectIterator(), _dict( 0 )
+  :  DictionaryIteratorInterface(), IntKeyIteratorInterface(),
+     PyObjectIterator(), _dict( 0 )
 {
 }
 
 
 IterableImpl<PyObject *, false>::PyMappingIterator::PyMappingIterator
 ( PyObject* pyobj )
-  :  DictionaryIteratorInterface(), PyObjectIterator( pyobj ), 
-     _dict( pyobj )
+  :  DictionaryIteratorInterface(), IntKeyIteratorInterface(),
+     PyObjectIterator( pyobj ), _dict( pyobj )
 {
   PyGILState_STATE gstate;
   gstate = PyGILState_Ensure();
@@ -1180,8 +1207,8 @@ IterableImpl<PyObject *, false>::PyMappingIterator::PyMappingIterator
 
 IterableImpl<PyObject *, false>::PyMappingIterator::PyMappingIterator
 ( const PyMappingIterator & x )
-  : Interface(), IteratorInterface(), DictionaryIteratorInterface(), 
-    PyObjectIterator( x ), 
+  : Interface(), IteratorInterface(), IntKeyIteratorInterface(),
+    DictionaryIteratorInterface(), PyObjectIterator( x ),
     _dict( x._dict )
 {
   PyGILState_STATE gstate;
@@ -1254,25 +1281,73 @@ std::string IterableImpl<PyObject *, false>::PyMappingIterator::key() const
 }
 
 
+long IterableImpl<PyObject *, false>::PyMappingIterator::intKey() const
+{
+  if( !_pycur )
+    throw std::runtime_error( "no current iterator key" );
+  PyGILState_STATE gstate;
+  gstate = PyGILState_Ensure();
+  long key = 0;
+  bool fail = false;
+  if( PyLong_Check( _pycur ) )
+    key = PyLong_AsLong( _pycur );
+#if PY_VERSION_HEX < 0x03000000
+  else if( PyInt_Check( _pycur ) )
+    key = PyInt_AsLong( _pycur );
+#endif
+  else
+    fail = true;
+
+  PyGILState_Release(gstate);
+  if( fail)
+    throw std::runtime_error( "current iterator key is not a number" );
+
+  return key;
+}
+
+
 Object 
 IterableImpl<PyObject *, false>::PyMappingIterator::currentValue() const
 {
-  std::string	k = key();
-  PyGILState_STATE gstate;
-  gstate = PyGILState_Ensure();
-  PyObject		*pyo
-    = PyMapping_GetItemString( _dict, const_cast<char *>( k.c_str() ) );
-  if( pyo )
+  try
+  {
+    std::string k = key();
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+    PyObject		*pyo
+      = PyMapping_GetItemString( _dict, const_cast<char *>( k.c_str() ) );
+    if( pyo )
     {
       Object	o = Object::value( pyo );
       Py_DECREF( pyo );
       PyGILState_Release(gstate);
       return o;
     }
+    PyErr_Clear();
+    PyGILState_Release(gstate);
+  }
+  catch( std::runtime_error & )
+  {
+  }
+
+  // try int dict
+  long k = intKey();
+  PyGILState_STATE gstate;
+  gstate = PyGILState_Ensure();
+  PyObject *key = PyLong_FromLong( k );
+  PyObject *pyo = PyObject_GetItem( _dict, key );
+  Py_DECREF( key );
+  if( pyo )
+  {
+    Object    o = Object::value( pyo );
+    Py_DECREF( pyo );
+    PyGILState_Release(gstate);
+    return o;
+  }
   PyErr_Clear();
   PyGILState_Release(gstate);
-  throw std::runtime_error( "no current iterator value (not a "
-                          "dictionary?)" );
+  throw std::runtime_error(
+    "no current iterator value (not a dictionary?)" );
 }
 
 

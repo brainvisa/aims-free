@@ -47,6 +47,41 @@ namespace aims
 
     public:
 
+      /** MatrixLazyReader allows to read a row or a column from file, on
+          demand. It is useful to read partially very large matrices.
+
+          The default implementation does just nothing.
+      */
+      class MatrixLazyReader
+      {
+      public:
+        MatrixLazyReader() {}
+        virtual ~MatrixLazyReader() {}
+        /** tells if row s1 has already been read.
+            If so, SparseOrDenseMatrix::readRow will not read it again.
+        */
+        virtual bool hasRow( int32_t s1 ) const { return true; }
+        /** tells if column s2 has already been read.
+            If so, SparseOrDenseMatrix::readColumn will not read it again.
+        */
+        virtual bool hasColumn( int32_t s2 ) const { return true; }
+        virtual std::vector<double> *readRow( int32_t s1, bool store = true )
+        {}
+        virtual std::vector<double> *readColumn( int32_t s2,
+                                                 bool store = true ) {}
+        virtual void freeRow( int32_t s1 ) {}
+        virtual void freeColumn( int32_t s2 ) {}
+        virtual void selectDimension( const std::vector<int32_t> & dims ) {}
+        void setInfFiltering( bool keep_inf, bool keep_nan )
+        { _keep_inf = keep_inf; _keep_nan = keep_nan; }
+        bool keepsInf() const { return _keep_inf; }
+        bool keepsNan() const { return _keep_nan; }
+
+      private:
+        bool _keep_inf;
+        bool _keep_nan;
+      };
+
       typedef carto::VolumeRef<double> DenseMatrixType;
       typedef carto::rc_ptr<SparseMatrix> SparseMatrixType;
 
@@ -61,6 +96,7 @@ namespace aims
       int32_t getSize1() const;
       int32_t getSize2() const;
       int32_t getNonZeroElementCount() const;
+      std::vector<int32_t> getSize() const;
 
       bool hasElement( int32_t i, int32_t j ) const;
 
@@ -73,6 +109,41 @@ namespace aims
 
       std::vector<double> getRow( int32_t i ) const;
       std::vector<double> getColumn( int32_t j ) const;
+
+      /** read a row using lazy reading, using the MatrixLazyReader.
+          The default implementation does just nothing.
+
+          If "vector" is not Null, the read vector is "returned" in
+          *vector. In such a case, the vector has to be freed after use.
+          If store is false and vector is not null, the vector is read
+          (potentially from disk) but not kept in the matrix.
+      */
+      void readRow( int32_t i );
+      /** read a column using lazy reading, using the MatrixLazyReader.
+          The default implementation does just nothing.
+
+          If "vector" is not Null, the read vector is "returned" in
+          *vector. In such a case, the vector has to be freed after use.
+          If store is false and vector is not null, the vector is read
+          (potentially from disk) but not kept in the matrix.
+      */
+      void readColumn( int32_t i );
+      /** Get row, read it if it is not in memory, and optionally store it
+          for later access.
+          The returned vector has to be freed after use.
+      */
+      std::vector<double> *getReadRow( int32_t i, bool store = true );
+      /** Get column, read it if it is not in memory, and optionally store it
+          for later access.
+          The returned vector has to be freed after use.
+      */
+      std::vector<double> *getReadColumn( int32_t i, bool store = true );
+      /** read all rows using lazy reading, using the MatrixLazyReader.
+          The default implementation does just nothing.
+      */
+      void readAll();
+      void freeRow( int32_t i );
+      void freeColumn( int32_t i );
 
       template <typename VectorType>
         VectorType getSparseRow( int32_t i ) const;
@@ -118,11 +189,25 @@ namespace aims
       SparseOrDenseMatrix &
         operator /= ( double x );
 
+      void setLazyReader( MatrixLazyReader* reader )
+      {
+        delete _lazyreader;
+        _lazyreader = reader;
+      }
+      MatrixLazyReader* lazyReader() const
+      { return _lazyreader; }
+
+      SparseOrDenseMatrix* subMatrix( const std::vector<int32_t> & start,
+                                      const std::vector<int32_t> & size );
+      SparseOrDenseMatrix* subMatrix(
+        const std::vector<std::vector<int32_t> > & indices_along_dims );
+
     protected:
 
       SparseMatrixType _sparsematrix;
       DenseMatrixType _densematrix;
       carto::Object _fakeheader;
+      MatrixLazyReader *_lazyreader;
 
   };
 
@@ -164,10 +249,6 @@ namespace aims
     return column;
   }
 
-}
-
-
-
 aims::SparseOrDenseMatrix
   operator - ( const aims::SparseOrDenseMatrix & thing );
 
@@ -186,6 +267,8 @@ aims::SparseOrDenseMatrix
 aims::SparseOrDenseMatrix
   operator / ( const aims::SparseOrDenseMatrix & thing1,
                const double& thing2 );
+
+}
 
 
 #ifndef DOXYGEN_HIDE_INTERNAL_CLASSES

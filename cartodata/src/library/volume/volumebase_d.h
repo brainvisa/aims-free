@@ -71,13 +71,13 @@ namespace carto
                        const AllocatorContext& allocatorContext,
                        bool allocated )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
-      _items( 0U, allocatorContext )
+      _items( 0U, allocatorContext ),
 #ifndef CARTO_USE_BLITZ
-    ,
       _lineoffset( 0 ),
       _sliceoffset( 0 ),
-      _volumeoffset( 0 )
+      _volumeoffset( 0 ),
 #endif
+      _pos( 4, 0 )
   {
     allocate( -1, -1, -1, -1, allocated, allocatorContext );
   }
@@ -90,13 +90,13 @@ namespace carto
                       size[1] > 0 ? size[1] : 1,
                       size[2] > 0 ? size[2] : 1,
                       size[3] > 0 ? size[3] : 1 ),
-    _items( 0U, allocatorContext )
+    _items( 0U, allocatorContext ),
 #ifndef CARTO_USE_BLITZ
-    ,
     _lineoffset( 0 ),
     _sliceoffset( 0 ),
-    _volumeoffset( 0 )
+    _volumeoffset( 0 ),
 #endif
+    _pos( 4, 0 )
   {
     allocate( -1, -1, -1, -1, allocated, allocatorContext );
   }
@@ -106,47 +106,50 @@ namespace carto
    **************************************************************************/
 
   template < typename T >
-  void Volume< T >::constructBorders( const Position4Di & bordersize,
+  void Volume< T >::constructBorders( const Position & bordersize,
                                       const AllocatorContext& allocatorContext,
                                       bool allocated )
   {
-    if( bordersize != Position4Di() )
+    if( !bordersize.empty()
+      && bordersize != Position4Di().toVector() )
     {
-      _refvol.reset( new Volume<T>( VolumeProxy<T>::getSizeX() + bordersize[0]*2,
-                                    VolumeProxy<T>::getSizeY() + bordersize[1]*2,
-                                    VolumeProxy<T>::getSizeZ() + bordersize[2]*2,
-                                    VolumeProxy<T>::getSizeT() + bordersize[3]*2,
+      int i, n = VolumeProxy<T>::_size.size();
+      size_t bsize = sizeof(T);
+      std::vector<int> large_size( n );
+      for( i=0; i<n; ++i )
+      {
+        large_size[i] = VolumeProxy<T>::_size[i];
+        if( i < bordersize.size() )
+          large_size[i] += bordersize[i] * 2;
+        bsize *= VolumeProxy<T>::_size[i];
+      }
+      _refvol.reset( new Volume<T>( large_size,
                                     allocatorContext, allocated ) );
 
       allocate( -1, -1, -1, -1, true,
         _refvol->allocatorContext().isAllocated()
           ? AllocatorContext( AllocatorStrategy::NotOwner,
                               rc_ptr<DataSource>( new BufferDataSource
-                                ( (char *) &(*_refvol)( bordersize[0], bordersize[1],
-                                                bordersize[2], bordersize[3] ),
-                                  VolumeProxy<T>::getSizeX()
-                                  * VolumeProxy<T>::getSizeY()
-                                  * VolumeProxy<T>::getSizeZ()
-                                  * VolumeProxy<T>::getSizeT()
-                                  * sizeof(T) ) ) )
+                                ( (char *) &(*_refvol)( bordersize ),
+                                  bsize ) ) )
           : allocatorContext );
       if( _refvol->allocatorContext().isAllocated() )
       {
         // fix offsets
 #ifdef CARTO_USE_BLITZ
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
+        int i, n=VolumeProxy<T>::_size.size();
+        for(i=0; i<n; ++i )
+          dims[i] = VolumeProxy<T>::_size[i];
+        for( ; i<Volume<T>::DIM_MAX; ++i )
+          dims[i] = 1;
         _blitz.reference
-          ( blitz::Array<T,4>
+          ( blitz::Array<T,8>
             ( &_items[0],
-              blitz::shape( VolumeProxy<T>::getSizeX(),
-                            VolumeProxy<T>::getSizeY(),
-                            VolumeProxy<T>::getSizeZ(),
-                            VolumeProxy<T>::getSizeT() ),
-              blitz::shape( 1, &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 ),
-                               &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 ),
-                               &(*_refvol)( 0, 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 )
-                          ),
-              blitz::GeneralArrayStorage<4>
-              ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+              dims,
+              _refvol->_blitz.stride(),
+              blitz::GeneralArrayStorage<8>
+              ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
         _lineoffset = &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 );
         _sliceoffset = &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 );
@@ -173,9 +176,9 @@ namespace carto
       _sliceoffset( 0 ),
       _volumeoffset( 0 ),
 #endif
-      _pos( bordersize[0], bordersize[1], bordersize[2], bordersize[3] )
+      _pos( bordersize.toVector() )
   {
-    constructBorders( bordersize, allocatorContext, allocated );
+    constructBorders( bordersize.toVector(), allocatorContext, allocated );
   }
 
   template < typename T >
@@ -194,9 +197,9 @@ namespace carto
     _sliceoffset( 0 ),
     _volumeoffset( 0 ),
 #endif
-    _pos( bordersize[0], bordersize[1], bordersize[2], bordersize[3] )
+    _pos( bordersize.toVector() )
   {
-    constructBorders( bordersize, allocatorContext, allocated );
+    constructBorders( bordersize.toVector(), allocatorContext, allocated );
   }
 
   template < typename T >
@@ -212,10 +215,15 @@ namespace carto
       _sliceoffset( 0 ),
       _volumeoffset( 0 ),
 #endif
-      _pos( bordersize, bordersize, bordersize, 0 )
+      _pos( 4, 0 )
   {
-    constructBorders( Position4Di( bordersize, bordersize, bordersize, 0 ),
-                      allocatorContext, allocated );
+    _pos[0] = bordersize;
+    _pos[1] = bordersize;
+    _pos[2] = bordersize;
+
+    constructBorders(
+      Position4Di( bordersize, bordersize, bordersize, 0 ).toVector(),
+      allocatorContext, allocated );
   }
 
   template < typename T >
@@ -234,10 +242,52 @@ namespace carto
     _sliceoffset( 0 ),
     _volumeoffset( 0 ),
 #endif
-    _pos( bordersize, bordersize, bordersize, 0 )
+    _pos( 4, 0 )
   {
-    constructBorders( Position4Di( bordersize, bordersize, bordersize, 0 ),
-                      allocatorContext, allocated );
+    _pos[0] = bordersize;
+    _pos[1] = bordersize;
+    _pos[2] = bordersize;
+    constructBorders(
+      Position4Di( bordersize, bordersize, bordersize, 0 ).toVector(),
+      allocatorContext, allocated );
+  }
+
+
+  template < typename T >
+  Volume< T >::Volume( const std::vector<int> & size,
+                       const AllocatorContext& allocatorContext,
+                       bool allocated ):
+    VolumeProxy< T >( size ),
+    _items( 0U, allocatorContext ),
+#ifndef CARTO_USE_BLITZ
+    _lineoffset( 0 ),
+    _sliceoffset( 0 ),
+    _volumeoffset( 0 ),
+#endif
+    _pos( 4, 0 )
+  {
+    allocate( std::vector<int>( 1, -1 ), allocated, allocatorContext );
+  }
+
+
+  template < typename T >
+  Volume< T >::Volume( const std::vector<int> & size,
+                       const std::vector<int> & bordersize,
+                       const AllocatorContext& allocatorContext,
+                       bool allocated ):
+    VolumeProxy< T >( size ),
+    _items( 0U, AllocatorContext( AllocatorStrategy::NotOwner,
+            DataSource::none() ) ),
+#ifndef CARTO_USE_BLITZ
+    _lineoffset( 0 ),
+    _sliceoffset( 0 ),
+    _volumeoffset( 0 ),
+#endif
+    _pos( bordersize )
+  {
+    while( _pos.size() < 4 )
+      _pos.push_back( 0 );
+    constructBorders( bordersize, allocatorContext, allocated );
   }
 
   /***************************************************************************
@@ -246,16 +296,17 @@ namespace carto
   template < typename T >
   Volume< T >::Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer )
     : VolumeProxy< T >( sizeX, sizeY, sizeZ, sizeT ),
-      _items( sizeX * sizeY * sizeZ * sizeT, buffer )
+      _items( sizeX * sizeY * sizeZ * sizeT, buffer ),
 #ifndef CARTO_USE_BLITZ
-    ,
       _lineoffset( 0 ),
       _sliceoffset( 0 ),
-      _volumeoffset( 0 )
+      _volumeoffset( 0 ),
 #endif
+      _pos( 4, 0 )
   {
     allocate( -1, -1, -1, -1, true, allocatorContext() );
   }
+
 
   template < typename T >
   Volume< T >::Volume( const Position4Di & size, T* buffer ):
@@ -266,15 +317,30 @@ namespace carto
     _items( (long)(size[0] > 0 ? size[0] : 1) *
             (long)(size[1] > 0 ? size[1] : 1) *
             (long)(size[2] > 0 ? size[2] : 1) *
-            (long)(size[3] > 0 ? size[3] : 1), buffer )
+            (long)(size[3] > 0 ? size[3] : 1), buffer ),
 #ifndef CARTO_USE_BLITZ
-    ,
     _lineoffset( 0 ),
     _sliceoffset( 0 ),
-    _volumeoffset( 0 )
+    _volumeoffset( 0 ),
 #endif
+    _pos( 4, 0 )
   {
     allocate( -1, -1, -1, -1, true, allocatorContext() );
+  }
+
+
+  template < typename T >
+  Volume< T >::Volume( const std::vector<int> & size, T* buffer ):
+    VolumeProxy< T >( size ),
+    _items( (long) Position4Di::size_num_elements( size ), buffer ),
+#ifndef CARTO_USE_BLITZ
+    _lineoffset( 0 ),
+    _sliceoffset( 0 ),
+    _volumeoffset( 0 ),
+#endif
+    _pos( 4, 0 )
+  {
+    allocate( std::vector<int>( 1, -1 ), true, allocatorContext() );
   }
 
 
@@ -293,54 +359,51 @@ namespace carto
           other->allocatorContext().isAllocated() ? other->getSizeZ() : 1,
         size[3] >= 0 ? size[3] :
           other->allocatorContext().isAllocated() ? other->getSizeT() : 1 ),
-      _items( 0U,
-              other->allocatorContext().isAllocated()
-                ? AllocatorContext( AllocatorStrategy::NotOwner,
-                                    rc_ptr<DataSource>( new BufferDataSource
-                                      ( (char *) &(*other)( pos[0], pos[1],
-                                                            pos[2], pos[3] ),
-                                        size[0] * size[1] * size[2] * size[3]
-                                        * sizeof(T) ) ) )
-                : allocContext ),
+      _items( 0U, allocContext ),
       _refvol( other ),
-      _pos( pos )
 #ifndef CARTO_USE_BLITZ
-    ,
       _lineoffset( 0 ),
       _sliceoffset( 0 ),
-      _volumeoffset( 0 )
+      _volumeoffset( 0 ),
 #endif
+      _pos( pos.toVector() )
   {
-    allocate( -1, -1, -1, -1, true, other->allocatorContext().isAllocated()
-                ? AllocatorContext( AllocatorStrategy::NotOwner,
-                                    rc_ptr<DataSource>( new BufferDataSource
-                                      ( (char *) &(*other)( pos[0], pos[1],
-                                                            pos[2], pos[3] ),
-                                        size[0] * size[1] * size[2] * size[3]
-                                        * sizeof(T) ) ) )
-                : allocContext );
     if( other->allocatorContext().isAllocated() )
-      {
-        // fix offsets
+    {
+      size_t bsize = sizeof(T);
+      int i, n = size.size();
+      for( i=0; i<n; ++i )
+        bsize *= size[i];
+
+      allocate( -1, -1, -1, -1, true,
+                AllocatorContext( AllocatorStrategy::NotOwner,
+                                  rc_ptr<DataSource>( new BufferDataSource
+                                    ( (char *) &(*other)( pos.toVector() ),
+                                      bsize ) ) ) );
+
+      // fix offsets
 #ifdef CARTO_USE_BLITZ
-        _blitz.reference
-          ( blitz::Array<T,4>
-            ( &_items[0],
-              blitz::shape( VolumeProxy<T>::getSizeX(),
-                            VolumeProxy<T>::getSizeY(),
-                            VolumeProxy<T>::getSizeZ(),
-                            VolumeProxy<T>::getSizeT() ),
-              blitz::shape( 1, &(*other)( 0, 1, 0 ) - &(*other)( 0, 0, 0 ),
-                            &(*other)( 0, 0, 1 ) - &(*other)( 0, 0, 0 ),
-                            &(*other)( 0, 0, 0, 1 ) - &(*other)( 0, 0, 0 ) ),
-              blitz::GeneralArrayStorage<4>
-              ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+      blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
+      n = VolumeProxy<T>::_size.size();
+      for( i=0; i<n; ++i )
+        dims[i] = VolumeProxy<T>::_size[i];
+      for( ; i<Volume<T>::DIM_MAX; ++i )
+        dims[i] = 1;
+      _blitz.reference
+        ( blitz::Array<T,Volume<T>::DIM_MAX>
+          ( &_items[0],
+            dims,
+            other->_blitz.stride(),
+            blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+            ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
-        _lineoffset = &(*other)( 0, 1, 0 ) - &(*other)( 0, 0, 0 );
-        _sliceoffset = &(*other)( 0, 0, 1 ) - &(*other)( 0, 0, 0 );
-        _volumeoffset = &(*other)( 0, 0, 0, 1 ) - &(*other)( 0, 0, 0 );
+      _lineoffset = &(*other)( 0, 1, 0 ) - &(*other)( 0, 0, 0 );
+      _sliceoffset = &(*other)( 0, 0, 1 ) - &(*other)( 0, 0, 0 );
+      _volumeoffset = &(*other)( 0, 0, 0, 1 ) - &(*other)( 0, 0, 0 );
 #endif
-      }
+    }
+    else
+      allocate( -1, -1, -1, -1, true, allocContext );
 
     /* copy voxel_size from underlying volume, if any.
        This should probably be more general, but cannot be applied to all
@@ -354,13 +417,108 @@ namespace carto
     try
     {
       carto::Object vs = other->header().getProperty( "voxel_size" );
-      this->header().setProperty( "voxel_size", vs );
+      size_t n = this->getSize().size();
+      if( vs->size() > n )
+      {
+        // drop additional sizes
+        size_t i;
+        std::vector<carto::Object> vs2( n );
+        for( i=0; i<n; ++i )
+          vs2[i] = vs->getArrayItem( i );
+        this->header().setProperty( "voxel_size", vs2 );
+      }
+      else
+        this->header().setProperty( "voxel_size", vs );
     }
     catch( ... )
     {
       // never mind.
     }
   }
+
+
+  template<typename T> inline
+  Volume<T>::Volume( rc_ptr<Volume<T> > other,
+                     const Position & pos, const Position & size,
+                     const AllocatorContext & allocContext )
+    : VolumeProxy<T>( Position4Di::fixed_size( size ) ),
+      _items( 0U, allocContext ),
+      _refvol( other ),
+#ifndef CARTO_USE_BLITZ
+      _lineoffset( 0 ),
+      _sliceoffset( 0 ),
+      _volumeoffset( 0 ),
+#endif
+      _pos( Position4Di::fixed_position( pos ) )
+  {
+    if( other->allocatorContext().isAllocated() )
+    {
+      size_t bsize = sizeof(T);
+      int i, n = size.size();
+      for( i=0; i<n; ++i )
+        bsize *= size[i];
+
+      allocate( -1, -1, -1, -1, true,
+                AllocatorContext( AllocatorStrategy::NotOwner,
+                                  rc_ptr<DataSource>( new BufferDataSource
+                                    ( (char *) &(*other)( pos ),
+                                      bsize ) ) ) );
+
+      // fix offsets
+#ifdef CARTO_USE_BLITZ
+      blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
+      n = VolumeProxy<T>::_size.size();
+      for(i=0; i<n; ++i )
+        dims[i] = VolumeProxy<T>::_size[i];
+      for( ; i<Volume<T>::DIM_MAX; ++i )
+        dims[i] = 1;
+      _blitz.reference
+        ( blitz::Array<T,Volume<T>::DIM_MAX>
+          ( &_items[0],
+            dims,
+            other->_blitz.stride(),
+            blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+            ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
+#else
+      _lineoffset = &(*other)( 0, 1, 0 ) - &(*other)( 0, 0, 0 );
+      _sliceoffset = &(*other)( 0, 0, 1 ) - &(*other)( 0, 0, 0 );
+      _volumeoffset = &(*other)( 0, 0, 0, 1 ) - &(*other)( 0, 0, 0 );
+#endif
+    }
+    else
+      allocate( -1, -1, -1, -1, true, allocContext );
+
+    /* copy voxel_size from underlying volume, if any.
+       This should probably be more general, but cannot be applied to all
+       header properties (size, transformations...).
+       WARNING: Moreover here we do not guarantee to keep both voxel_size
+       unique: we point to the same vector of values for now, but it can be
+       replaced (thus, duplicated) by a setProperty().
+       We could use a addBuiltinProperty(), but then the voxel size has to be
+       stored in a fixed location somewhere.
+    */
+    try
+    {
+      carto::Object vs = other->header().getProperty( "voxel_size" );
+      size_t n = this->getSize().size();
+      if( vs->size() > n )
+      {
+        // drop additional sizes
+        size_t i;
+        std::vector<carto::Object> vs2( n );
+        for( i=0; i<n; ++i )
+          vs2[i] = vs->getArrayItem( i );
+        this->header().setProperty( "voxel_size", vs2 );
+      }
+      else
+        this->header().setProperty( "voxel_size", vs );
+    }
+    catch( ... )
+    {
+      // never mind.
+    }
+  }
+
 
   /***************************************************************************
    * Copy Constructor
@@ -374,12 +532,9 @@ namespace carto
       // TODO: test blitz ownership / strides
       // _blitz = other.blitz;
       _blitz( &_items[0],
-              blitz::shape( VolumeProxy<T>::_sizeX,
-                            VolumeProxy<T>::_sizeY,
-                            VolumeProxy<T>::_sizeZ,
-                            VolumeProxy<T>::_sizeT ),
-              blitz::GeneralArrayStorage<4>
-              ( blitz::shape( 0, 1, 2, 3 ), true ) ),
+              other._blitz.shape(),
+              blitz::GeneralArrayStorage<8>
+              ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ),
 #else
       _lineoffset( other._lineoffset ),
       _sliceoffset( other._sliceoffset ),
@@ -392,7 +547,8 @@ namespace carto
     if( _refvol.get() ) // view case: the underlying volume is copied.
     {
       Position4Di pos = other.posInRefVolume();
-      allocate( -1, -1, -1, -1, true, _refvol->allocatorContext().isAllocated()
+      std::vector<int> oldSize(1, -1);
+      allocate( oldSize, true, _refvol->allocatorContext().isAllocated()
                 ? AllocatorContext( AllocatorStrategy::NotOwner,
                     rc_ptr<DataSource>( new BufferDataSource
                       ( (char *) &(*_refvol)( pos[0], pos[1], pos[2], pos[3] ),
@@ -405,18 +561,19 @@ namespace carto
       {
         // fix offsets
 #ifdef CARTO_USE_BLITZ
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
+        int i, n=VolumeProxy<T>::_size.size();
+        for( i=0; i<n; ++i )
+          dims[i] = VolumeProxy<T>::_size[i];
+        for( ; i<Volume<T>::DIM_MAX; ++i )
+          dims[i] = 1;
         _blitz.reference
-          ( blitz::Array<T,4>
+          ( blitz::Array<T,Volume<T>::DIM_MAX>
             ( &_items[0],
-              blitz::shape( VolumeProxy<T>::getSizeX(),
-                            VolumeProxy<T>::getSizeY(),
-                            VolumeProxy<T>::getSizeZ(),
-                            VolumeProxy<T>::getSizeT() ),
-              blitz::shape( 1, &other( 0, 1, 0 ) - &other( 0, 0, 0 ),
-                            &other( 0, 0, 1 ) - &other( 0, 0, 0 ),
-                            &other( 0, 0, 0, 1 ) - &other( 0, 0, 0 ) ),
-              blitz::GeneralArrayStorage<4>
-              ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+              dims,
+              other._blitz.stride(),
+              blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+              ( blitz::shape( 0, 1, 2, 3, 5, 6, 7, 8 ), true ) ) );
 #else
         _lineoffset = &other( 0, 1, 0 ) - &other( 0, 0, 0 );
         _sliceoffset = &other( 0, 0, 1 ) - &other( 0, 0, 0 );
@@ -448,52 +605,59 @@ namespace carto
   }
 
   template <typename T> inline
-  const typename Volume<T>::Position4Di Volume<T>::posInRefVolume() const
+  const typename Volume<T>::Position & Volume<T>::posInRefVolume() const
   {
     return _pos;
   }
 
   template <typename T> inline
-  void Volume<T>::updateItemsBuffer() {
+  void Volume<T>::updateItemsBuffer()
+  {
 
     if ( !allocatorContext().isAllocated()
-         || (allocatorContext().accessMode() == AllocatorStrategy::NotOwner) ) {
+         || (allocatorContext().accessMode() == AllocatorStrategy::NotOwner) )
+    {
 
       // Free old buffer
       _items.free();
 
-      if (_refvol.get()) {
+      if (_refvol.get())
+      {
         // Recreate items buffer that reference volume
         // using correct sizes and position
-        _items = AllocatedVector<T>( 0U,
-                    _refvol->allocatorContext().isAllocated()
-                    ? AllocatorContext( AllocatorStrategy::NotOwner,
-                                        rc_ptr<DataSource>( new BufferDataSource
-                                          ( (char *) &(*(_refvol))( _pos[0], _pos[1],
-                                                                    _pos[2], _pos[3] ),
-                                            VolumeProxy<T>::_sizeX
-                                            * VolumeProxy<T>::_sizeY
-                                            * VolumeProxy<T>::_sizeZ
-                                            * VolumeProxy<T>::_sizeT
-                                            * sizeof(T) ) ) )
-                    : allocatorContext() );
+        if( _refvol->allocatorContext().isAllocated() )
+        {
+          size_t size = sizeof(T);
+          int i, n = VolumeProxy<T>::_size.size();
+          for( i=0; i<n; ++i )
+            size *= VolumeProxy<T>::_size[i];
+          _items = AllocatedVector<T>(
+            0U,
+            AllocatorContext( AllocatorStrategy::NotOwner,
+                              rc_ptr<DataSource>( new BufferDataSource
+                                ( (char *) &(*(_refvol))( _pos ),
+                                  size ) ) ) );
+        }
+        else
+          _items = AllocatedVector<T>( 0U, allocatorContext() );
 
         if ( _refvol->allocatorContext().isAllocated() )
         {
           // fix offsets
 #ifdef CARTO_USE_BLITZ
+          blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
+          int i, n=VolumeProxy<T>::_size.size();
+          for( i=0; i<n; ++i )
+            dims[i] = VolumeProxy<T>::_size[i];
+          for( ; i<Volume<T>::DIM_MAX; ++i )
+            dims[i] = 1;
           _blitz.reference
-            ( blitz::Array<T,4>
+            ( blitz::Array<T,Volume<T>::DIM_MAX>
               ( &_items[0],
-                blitz::shape( VolumeProxy<T>::getSizeX(),
-                              VolumeProxy<T>::getSizeY(),
-                              VolumeProxy<T>::getSizeZ(),
-                              VolumeProxy<T>::getSizeT() ),
-                blitz::shape( 1, &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 ),
-                                 &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 ),
-                                 &(*_refvol)( 0, 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 ) ),
-                blitz::GeneralArrayStorage<4>
-                ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+                dims,
+                _refvol->_blitz.stride(),
+                blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+                ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
           _lineoffset = &(*_refvol)( 0, 1, 0 ) - &(*_refvol)( 0, 0, 0 );
           _sliceoffset = &(*_refvol)( 0, 0, 1 ) - &(*_refvol)( 0, 0, 0 );
@@ -524,9 +688,23 @@ namespace carto
   }
 
   template <typename T> inline
-  void Volume<T>::setPosInRefVolume( const Position4Di & pos ) {
-    if (pos != _pos) {
+  void Volume<T>::setPosInRefVolume( const Position4Di & pos )
+  {
+    if ( pos != _pos )
+    {
+      _pos = pos.toVector();
+      updateItemsBuffer();
+    }
+  }
+
+
+  template <typename T> inline
+  void Volume<T>::setPosInRefVolume( const Position & pos ) {
+    if (pos != _pos)
+    {
       _pos = pos;
+      while( _pos.size() < 4 )
+        _pos.push_back( 0 );
       updateItemsBuffer();
     }
   }
@@ -542,17 +720,17 @@ namespace carto
   template <typename T> inline
   std::vector<int> Volume<T>::getBorders() const
   {
-    std::vector<int> borders(8, 0);
-    if (_refvol.get())
+    std::vector<int> borders( VolumeProxy<T>::_size.size() * 2, 0 );
+    if( _refvol.get() && _refvol->allocatorContext().isAllocated() )
     {
-      borders[0] = _pos[0];
-      borders[1] = _refvol->_sizeX - VolumeProxy<T>::_sizeX - _pos[0];
-      borders[2] = _pos[1];
-      borders[3] = _refvol->_sizeY - VolumeProxy<T>::_sizeY - _pos[1];
-      borders[4] = _pos[2];
-      borders[5] = _refvol->_sizeZ - VolumeProxy<T>::_sizeZ - _pos[2];
-      borders[6] = _pos[3];
-      borders[7] = _refvol->_sizeT - VolumeProxy<T>::_sizeT - _pos[3];
+      int i, n = VolumeProxy<T>::_size.size();
+      for( i=0; i<n; ++i )
+        borders[i*2 + 1] = _refvol->_size[i] - VolumeProxy<T>::_size[i];
+      for( i=0, n=_pos.size(); i<n; ++i )
+      {
+        borders[i*2] = _pos[i];
+        borders[i*2+1] -= _pos[i];
+      }
     }
 
     return borders;
@@ -561,13 +739,16 @@ namespace carto
   template <typename T> inline
   std::vector<size_t> Volume<T>::getStrides() const
   {
-    std::vector<size_t> strides(4);
-    
+
 #ifdef CARTO_USE_BLITZ
-    const blitz::TinyVector<int, 4>& bstrides = _blitz.stride();
-    for (int d = 0; d < 4; ++d)
-        strides[d] = bstrides[d];    
+    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides = _blitz.stride();
+    int d, n = VolumeProxy<T>::_size.size();
+    std::vector<size_t> strides( n );
+    for (int d = 0; d < n; ++d)
+        strides[d] = bstrides[d];
 #else
+    std::vector<size_t> strides(4);
+
     strides[0] = 1;
     strides[1] = _lineoffset;
     strides[2] = _sliceoffset;
@@ -576,7 +757,7 @@ namespace carto
 
     return strides;
   }
-  
+
   template < typename T >
   Volume< T >& Volume< T >::operator=( const Volume< T >& other )
   {
@@ -592,19 +773,19 @@ namespace carto
 #ifdef CARTO_USE_BLITZ
     // TODO: test blitz ownership / strides
     // _blitz.reference( other.blitz );
+    blitz::TinyVector<long, Volume<T>::DIM_MAX> dims;
+    int i, n = VolumeProxy<T>::_size.size();
+    for( i=0; i<n; ++i )
+      dims[i] = VolumeProxy<T>::_size[i];
+    for( ; i<Volume<T>::DIM_MAX; ++i )
+      dims[i] = 1;
     _blitz.reference
-        ( blitz::Array<T,4>
+        ( blitz::Array<T,Volume<T>::DIM_MAX>
         ( &_items[0],
-            blitz::shape( VolumeProxy<T>::getSizeX(),
-                          VolumeProxy<T>::getSizeY(),
-                          VolumeProxy<T>::getSizeZ(),
-                          VolumeProxy<T>::getSizeT() ),
-            blitz::shape( 1, 
-                          &other( 0, 1, 0, 0 ) - &other( 0, 0, 0, 0 ),
-                          &other( 0, 0, 1, 0 ) - &other( 0, 0, 0, 0 ),
-                          &other( 0, 0, 0, 1 ) - &other( 0, 0, 0, 0 ) ),
-            blitz::GeneralArrayStorage<4>
-            ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+            dims,
+            other._blitz.stride(),
+            blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+            ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
     _lineoffset = other._lineoffset;
     _sliceoffset = other._sliceoffset;
@@ -687,6 +868,7 @@ namespace carto
     sizePropertyNames.insert( "sizeY" );
     sizePropertyNames.insert( "sizeZ" );
     sizePropertyNames.insert( "sizeT" );
+    sizePropertyNames.insert( "volume_dimension" );
     rc_ptr< PropertyFilter >
       sizeRcPropertyFilter( new PropertyFilter( "size", sizePropertyNames ) );
 
@@ -706,16 +888,35 @@ namespace carto
                               bool allocate,
                               const AllocatorContext& ac )
   {
+    std::vector<int> oldSize(4);
+    oldSize[0] = oldSizeX;
+    oldSize[1] = oldSizeY;
+    oldSize[2] = oldSizeZ;
+    oldSize[3] = oldSizeT;
+    Volume< T >::allocate( oldSize, allocate, ac );
+  }
 
-    unsigned long long int sizeXY =
-        (unsigned long long int) VolumeProxy<T>::_sizeX
-        * (unsigned long long int) VolumeProxy<T>::_sizeY;
-    unsigned long long int sizeXYZ = sizeXY
-        * (unsigned long long int) VolumeProxy<T>::_sizeZ;
-    unsigned long long int sizeXYZT = sizeXYZ
-        * (unsigned long long int) VolumeProxy<T>::_sizeT;
 
-    if ( sizeXYZT * sizeof(T) >
+  template < typename T >
+  void Volume< T >::allocate( const std::vector<int> & oldSize,
+                              bool allocate,
+                              const AllocatorContext& ac )
+  {
+
+    std::vector<unsigned long long int> strides(Volume<T>::DIM_MAX, 0);
+    int i, n = oldSize.size(), nn = VolumeProxy<T>::_size.size();
+
+    for( i=0; i<nn; ++i )
+    {
+      strides[i] = ( i == 0 ? VolumeProxy<T>::_size[0]
+                    : VolumeProxy<T>::_size[i] * strides[i-1] );
+    }
+    for( ; i<Volume<T>::DIM_MAX; ++i )
+      strides[i] = strides[i-1];
+
+    unsigned long long int total_len = strides[nn-1];
+
+    if ( total_len * sizeof(T) >
          (unsigned long long int) std::numeric_limits< size_t >::max() )
       {
 
@@ -726,60 +927,61 @@ namespace carto
 
       }
 
+    bool no_old = true;
+    for( i=0; i<n; ++i )
+      if( oldSize[i] != -1 )
+      {
+        no_old = false;
+        break;
+      }
+
     if ( !allocate // why !allocate ?
           || !_items.allocatorContext().isAllocated()
-          || ( ( oldSizeX == -1 ) &&
-              ( oldSizeY == -1 ) &&
-              ( oldSizeZ == -1 ) &&
-              ( oldSizeT == -1 ) ) )
+          || no_old )
     {
-
       // allocating memory space
       _items.free();
       if( allocate )
-        _items.allocate( ( size_t )sizeXYZT, ac );
+        _items.allocate( ( size_t ) total_len, ac );
     }
-    else if ( ( oldSizeX != VolumeProxy<T>::_sizeX ) ||
-              ( oldSizeY != VolumeProxy<T>::_sizeY ) ||
-              ( oldSizeZ != VolumeProxy<T>::_sizeZ ) ||
-              ( oldSizeT != VolumeProxy<T>::_sizeT )
+    else if ( oldSize != VolumeProxy<T>::_size
               || &ac != &_items.allocatorContext() )
       {
 
         // allocating a new memory space
-        AllocatedVector<T> newItems( ( size_t )sizeXYZT, ac );
+        AllocatedVector<T> newItems( ( size_t ) total_len, ac );
 
-        int minSizeX = std::min( oldSizeX, VolumeProxy<T>::_sizeX );
-        int minSizeY = std::min( oldSizeY, VolumeProxy<T>::_sizeY );
-        int minSizeZ = std::min( oldSizeZ, VolumeProxy<T>::_sizeZ );
-        int minSizeT = std::min( oldSizeT, VolumeProxy<T>::_sizeT );
+        std::vector<int> minSize = VolumeProxy<T>::_size;
+        for( i=0; i<std::min(n, nn); ++i )
+          if( oldSize[i] < minSize[i] )
+            minSize[i] = oldSize[i];
 
         // preserving data
         int x, y, z, t;
         if( newItems.allocatorContext().allocatorType()
             != AllocatorStrategy::ReadOnlyMap )
-          for ( t = 0; t < minSizeT; t++ )
+          for ( t = 0; t < minSize[3]; t++ )
             {
 
-              for ( z = 0; z < minSizeZ; z++ )
+              for ( z = 0; z < minSize[2]; z++ )
                 {
 
-                  for ( y = 0; y < minSizeY; y++ )
+                  for ( y = 0; y < minSize[1]; y++ )
                     {
 
-                      for ( x = 0; x < minSizeX; x++ )
+                      for ( x = 0; x < minSize[0]; x++ )
                         {
                           newItems[ x +
-                                    y * VolumeProxy<T>::_sizeX +
-                                    z * ( size_t ) sizeXY +
-                                    t * ( size_t ) sizeXYZ ] =
+                                    y * strides[0] +
+                                    z * ( size_t ) strides[1] +
+                                    t * ( size_t ) strides[2] ] =
                             _items[ x +
-                                    y * oldSizeX +
-                                    z * ( size_t ) oldSizeX
-                                    * ( size_t ) oldSizeY +
-                                    t * ( size_t ) oldSizeX *
-                                    ( size_t ) oldSizeY
-                                    * ( size_t ) oldSizeZ ];
+                                    y * oldSize[0] +
+                                    z * ( size_t ) oldSize[0]
+                                    * ( size_t ) oldSize[1] +
+                                    t * ( size_t ) oldSize[0] *
+                                    ( size_t ) oldSize[1]
+                                    * ( size_t ) oldSize[2] ];
 
                         }
 
@@ -799,48 +1001,53 @@ namespace carto
 #ifdef CARTO_USE_BLITZ
         // TODO: test blitz ownership / strides
         /*
-        std::cout << "alloc blitz: " << VolumeProxy<T>::_sizeX << ", "
-                  << VolumeProxy<T>::_sizeY << ", "
-                  << VolumeProxy<T>::_sizeZ << ", "
-                  << VolumeProxy<T>::_sizeT << std::endl;
+        std::cout << "alloc blitz: " << VolumeProxy<T>::_size[0] << ", "
+                  << VolumeProxy<T>::_size[1] << ", "
+                  << VolumeProxy<T>::_size[2] << ", "
+                  << VolumeProxy<T>::_size[3] << std::endl;
         */
-        _blitz.reference( blitz::Array<T,4>
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
+        for( i=0; i<nn; ++i )
+          dims[i] = VolumeProxy<T>::_size[i];
+        for( ; i<Volume<T>::DIM_MAX; ++i )
+          dims[i] = 1;
+        _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
                           ( &_items[0],
-                            blitz::shape( VolumeProxy<T>::_sizeX,
-                                          VolumeProxy<T>::_sizeY,
-                                          VolumeProxy<T>::_sizeZ,
-                                          VolumeProxy<T>::_sizeT ),
-                            blitz::GeneralArrayStorage<4>
-                            ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+                            dims,
+                            blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+                            ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ),
+                              true ) ) );
         /*
         std::cout << &_items[0] << " / " << &_blitz( 0 ) << std::endl;
-        std::cout << blitz::shape( VolumeProxy<T>::_sizeX,
-                                   VolumeProxy<T>::_sizeY,
-                                   VolumeProxy<T>::_sizeZ,
-                                   VolumeProxy<T>::_sizeT ) << std::endl;
+        std::cout << blitz::shape( VolumeProxy<T>::_size[0],
+                                   VolumeProxy<T>::_size[1],
+                                   VolumeProxy<T>::_size[2],
+                                   VolumeProxy<T>::_size[3}] ) << std::endl;
         std::cout << "blitz data: " << _blitz.data() << std::endl;
         std::cout << "blitz ordering: " << _blitz.ordering() << std::endl;
         std::cout << "blitz numEl: " << _blitz.numElements() << std::endl;
         std::cout << "blitz strides: " << _blitz.stride() << std::endl;
         */
 #else
-        _lineoffset = VolumeProxy<T>::_sizeX;
-        _sliceoffset = sizeXY;
-        _volumeoffset = sizeXYZ;
+        _lineoffset = VolumeProxy<T>::_size[0];
+        _sliceoffset = strides[1];
+        _volumeoffset = strides[2];
 #endif
       }
     else
       {
 #ifdef CARTO_USE_BLITZ
-    // TODO: test blitz ownership / strides
-    _blitz.reference( blitz::Array<T,4>
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
+        for( i=0; i<nn; ++i )
+          dims[i] = VolumeProxy<T>::_size[i];
+        for( ; i<Volume<T>::DIM_MAX; ++i )
+          dims[i] = 1;
+        // TODO: test blitz ownership / strides
+        _blitz.reference( blitz::Array<T,Volume<T>::DIM_MAX>
                       ( 0,
-                        blitz::shape( VolumeProxy<T>::_sizeX,
-                                      VolumeProxy<T>::_sizeY,
-                                      VolumeProxy<T>::_sizeZ,
-                                      VolumeProxy<T>::_sizeT ),
-                        blitz::GeneralArrayStorage<4>
-                        ( blitz::shape( 0, 1, 2, 3 ), true ) ) );
+                        dims,
+                        blitz::GeneralArrayStorage<Volume<T>::DIM_MAX>
+                        ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ) );
 #else
         _lineoffset = 0;
         _sliceoffset = 0;
@@ -855,9 +1062,7 @@ namespace carto
   void Volume< T >::allocate()
   {
     if( !allocatorContext().isAllocated() )
-      allocate( VolumeProxy<T>::getSizeX(), VolumeProxy<T>::getSizeY(),
-                VolumeProxy<T>::getSizeZ(), VolumeProxy<T>::getSizeT(), true,
-                allocatorContext() );
+      allocate( VolumeProxy<T>::getSize(), true, allocatorContext() );
   }
 
 
@@ -869,50 +1074,43 @@ namespace carto
               << " >::slotSizeChanged"
               << std::endl;
 
-    int oldSizeX = VolumeProxy<T>::_sizeX;
-    int oldSizeY = VolumeProxy<T>::_sizeY;
-    int oldSizeZ = VolumeProxy<T>::_sizeZ;
-    int oldSizeT = VolumeProxy<T>::_sizeT;
+    std::vector<int> oldSize = VolumeProxy<T>::_size;
 
     if ( propertyFilter.hasOldValue( "sizeX" ) )
       {
 
-        oldSizeX =
+        oldSize[0] =
           propertyFilter.getOldValue( "sizeX" )->GenericObject::value< int >();
-        std::cout << "old sizex: " << oldSizeX << std::endl;
 
       }
     if ( propertyFilter.hasOldValue( "sizeY" ) )
       {
 
-        oldSizeY =
+        oldSize[1] =
           propertyFilter.getOldValue( "sizeY" )->GenericObject::value< int >();
-        std::cout << "old sizey: " << oldSizeY << std::endl;
 
       }
     if ( propertyFilter.hasOldValue( "sizeZ" ) )
       {
 
-        oldSizeZ =
+        oldSize[2] =
           propertyFilter.getOldValue( "sizeZ" )->GenericObject::value< int >();
-        std::cout << "old sizez: " << oldSizeZ << std::endl;
 
       }
     if ( propertyFilter.hasOldValue( "sizeT" ) )
       {
 
-        oldSizeT =
+        oldSize[3] =
           propertyFilter.getOldValue( "sizeT" )->GenericObject::value< int >();
-        std::cout << "old sizet: " << oldSizeT << std::endl;
 
       }
-    std::cout << "old size: " << oldSizeX << ", " << oldSizeY << ", "
-              << oldSizeZ << ", " << oldSizeT << std::endl;
-    std::cout << "new size: " << VolumeProxy<T>::_sizeX << ", "
-              << VolumeProxy<T>::_sizeY << ", "
-              << VolumeProxy<T>::_sizeZ << ", " << VolumeProxy<T>::_sizeT
+    std::cout << "old size: " << oldSize[0] << ", " << oldSize[1] << ", "
+              << oldSize[2] << ", " << oldSize[3] << std::endl;
+    std::cout << "new size: " << VolumeProxy<T>::_size[0] << ", "
+              << VolumeProxy<T>::_size[1] << ", "
+              << VolumeProxy<T>::_size[2] << ", " << VolumeProxy<T>::_size[3]
               << std::endl;
-    allocate( oldSizeX, oldSizeY, oldSizeZ, oldSizeT,
+    allocate( oldSize,
               _items.allocatorContext().isAllocated(), allocatorContext() );
 
   }
@@ -927,19 +1125,19 @@ namespace carto
                                 const AllocatorContext & ac,
                                 bool alloc )
   {
-    int oldx = VolumeProxy<T>::_sizeX;
-    int oldy = VolumeProxy<T>::_sizeY;
-    int oldz = VolumeProxy<T>::_sizeZ;
-    int oldt = VolumeProxy<T>::_sizeT;
-    VolumeProxy<T>::_sizeX = sizeX;
-    VolumeProxy<T>::_sizeY = sizeY;
-    VolumeProxy<T>::_sizeZ = sizeZ;
-    VolumeProxy<T>::_sizeT = sizeT;
+    int oldx = VolumeProxy<T>::_size[0];
+    int oldy = VolumeProxy<T>::_size[1];
+    int oldz = VolumeProxy<T>::_size[2];
+    int oldt = VolumeProxy<T>::_size[3];
+    VolumeProxy<T>::_size[0] = sizeX;
+    VolumeProxy<T>::_size[1] = sizeY;
+    VolumeProxy<T>::_size[2] = sizeZ;
+    VolumeProxy<T>::_size[3] = sizeT;
     if( keepcontents || ( sizeX == oldx && sizeY == oldy && sizeZ == oldz
                           && sizeT ==  oldt ) )
       allocate( oldx, oldy, oldz, oldt, alloc, ac );
     else
-      allocate( -1, -1, -1, -1, alloc, ac );
+      allocate( std::vector<int>(1, -1), alloc, ac );
     // emit a signal ?
   }
 
@@ -956,6 +1154,34 @@ namespace carto
                        keepcontents, ac, alloc );
   }
 
+  template < typename T >
+  void Volume< T >::reallocate( const std::vector<int> & size,
+                                bool keepcontents,
+                                const AllocatorContext & ac,
+                                bool alloc )
+  {
+    std::vector<int> old = VolumeProxy<T>::_size;
+
+    VolumeProxy<T>::_size = size;
+    while( VolumeProxy<T>::_size.size() < 4 )
+      VolumeProxy<T>::_size.push_back( 1 );
+
+    VolumeProxy<T>::header().changeBuiltinProperty( "sizeX",
+                                                    VolumeProxy<T>::_size[0] );
+    VolumeProxy<T>::header().changeBuiltinProperty( "sizeY",
+                                                    VolumeProxy<T>::_size[1] );
+    VolumeProxy<T>::header().changeBuiltinProperty( "sizeZ",
+                                                    VolumeProxy<T>::_size[2] );
+    VolumeProxy<T>::header().changeBuiltinProperty( "sizeT",
+                                                    VolumeProxy<T>::_size[3] );
+
+    if( keepcontents || size == old )
+      allocate( old, alloc, ac );
+    else
+      allocate( std::vector<int>(1, -1), alloc, ac );
+    // emit a signal ?
+  }
+
 //============================================================================
 //   U T I L I T I E S
 //============================================================================
@@ -965,12 +1191,15 @@ namespace carto
                                           const AllocatorContext & context,
                                           Object options )
   {
-    int                sizex = 1, sizey = 1, sizez = 1, sizet = 1;
+    std::vector<int> dims( 4, 1 );
     bool        unalloc = false;
-    header->getProperty( "sizeX", sizex );
-    header->getProperty( "sizeY", sizey );
-    header->getProperty( "sizeZ", sizez );
-    header->getProperty( "sizeT", sizet );
+    if( !header->getProperty( "volume_dimension", dims ) )
+    {
+      header->getProperty( "sizeX", dims[0] );
+      header->getProperty( "sizeY", dims[1] );
+      header->getProperty( "sizeZ", dims[2] );
+      header->getProperty( "sizeT", dims[3] );
+    }
     options->getProperty( "unallocated", unalloc );
     std::vector<int> borders( 3, 0 );
     try {
@@ -990,19 +1219,15 @@ namespace carto
     Volume<T>        *obj;
     if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 )
     {
-      obj = new Volume<T>( sizex + borders[0] * 2,
-                           sizey + borders[1] * 2,
-                           sizez + borders[2] * 2,
-                           sizet, context, !unalloc );
-      obj = new Volume<T>( rc_ptr<Volume<T> >( obj ),
-                           typename Volume<T>::Position4Di( borders[0],
-                              borders[1], borders[2], 0 ),
-                           typename Volume<T>::Position4Di( sizex, sizey,
-                              sizez, sizet ),
-                           context );
+      std::vector<int> big_dims = dims;
+      big_dims[0] += borders[0] * 2;
+      big_dims[1] += borders[1] * 2;
+      big_dims[2] += borders[2] * 2;
+      obj = new Volume<T>( big_dims, context, !unalloc );
+      obj = new Volume<T>( rc_ptr<Volume<T> >( obj ), borders, dims, context );
     }
     else
-      obj = new Volume<T>( sizex, sizey, sizez, sizet, context, !unalloc );
+      obj = new Volume<T>( dims, context, !unalloc );
     obj->blockSignals( true );
     obj->header().copyProperties( header );
     // restore original sizes : temporary too...
@@ -1015,41 +1240,41 @@ namespace carto
                                    const AllocatorContext & context,
                                    Object options )
   {
-    int                sizex = 1, sizey = 1, sizez = 1, sizet = 1;
+    std::vector<int> dims( 4, 1 );
     bool        unalloc = false, partial = false, keep_allocation = false;
     options->getProperty( "partial_reading", partial );
     if( !partial )
+    {
+      if( !header->getProperty( "volume_dimension", dims ) )
       {
-        header->getProperty( "sizeX", sizex );
-        header->getProperty( "sizeY", sizey );
-        header->getProperty( "sizeZ", sizez );
-        header->getProperty( "sizeT", sizet );
-        options->getProperty( "unallocated", unalloc );
-        options->getProperty( "keep_allocation", keep_allocation );
-        if( !keep_allocation || !obj.allocatorContext().isAllocated() )
-          obj.reallocate( sizex, sizey, sizez, sizet, false, context,
-                          !unalloc );
+        header->getProperty( "sizeX", dims[0] );
+        header->getProperty( "sizeY", dims[1] );
+        header->getProperty( "sizeZ", dims[2] );
+        header->getProperty( "sizeT", dims[3] );
       }
+      options->getProperty( "unallocated", unalloc );
+      options->getProperty( "keep_allocation", keep_allocation );
+      if( !keep_allocation || !obj.allocatorContext().isAllocated() )
+        obj.reallocate( dims, false, context, !unalloc );
+    }
     else
-      {
-        const_cast<AllocatorContext &>( obj.allocatorContext() ).setDataSource
-          ( context.dataSource() );
-        // preserve dimensions
-        sizex = obj.getSizeX();
-        sizey = obj.getSizeY();
-        sizez = obj.getSizeZ();
-        sizet = obj.getSizeT();
-      }
+    {
+      const_cast<AllocatorContext &>( obj.allocatorContext() ).setDataSource
+        ( context.dataSource() );
+      // preserve dimensions
+      dims = obj.getSize();
+    }
     obj.blockSignals( true );
     obj.header().copyProperties( header );
     if( partial )
       {
         // restore dimensions
         PropertySet        & ps = obj.header();
-        ps.setProperty( "sizeX", sizex );
-        ps.setProperty( "sizeY", sizey );
-        ps.setProperty( "sizeZ", sizez );
-        ps.setProperty( "sizeT", sizet );
+        ps.setProperty( "volume_dimension", dims );
+        ps.setProperty( "sizeX", dims[0] );
+        ps.setProperty( "sizeY", dims[1] );
+        ps.setProperty( "sizeZ", dims[2] );
+        ps.setProperty( "sizeT", dims[3] );
       }
     obj.blockSignals( false );
   }

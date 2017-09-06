@@ -118,6 +118,7 @@ typedef int int32_t;
 // %Include map_STRING_RGB.sip
 // %Include map_STRING_RGBA.sip
 // %Include map_STRING_HSV.sip
+%Include map_U32_set_U32.sip
 
 %Include rcobject.sip
 %Include sharedobject.sip
@@ -248,7 +249,7 @@ typedef int int32_t;
 %Include rcptr_Interpolator.sip
 %Include sparsematrix.sip
 %Include sparseordensematrix.sip
-// %Include ciftitools.sip
+%Include ciftitools.sip
 
 typedef AimsTimeSurface_3_VOID AimsSurfaceTriangle;
 // compatibility with pyaims 4.4
@@ -321,6 +322,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 
 %If ( CARTODATA )
 
+%Include volume_BOOL.sip
 %Include volume_U8.sip
 %Include volume_S16.sip
 %Include volume_U16.sip
@@ -337,6 +339,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 
 %Include debuggingvol.sip
 
+%Include rcptr_Volume_BOOL.sip
 %Include rcptr_Volume_U8.sip
 %Include rcptr_Volume_S16.sip
 %Include rcptr_Volume_U16.sip
