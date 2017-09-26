@@ -43,9 +43,9 @@
 #include <fstream>
 #include <string>
 #include <stdio.h> // for JPEG
-#ifdef WIN32
-  #include <windows.h>
-#endif
+// #ifdef WIN32
+//   #include <windows.h>
+// #endif
 
 extern "C"
 {
