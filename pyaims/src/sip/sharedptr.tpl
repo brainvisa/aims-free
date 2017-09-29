@@ -167,7 +167,13 @@ public:
   bool operator < ( const weak_ptr_%Template1typecode% & x ) const;
   long __hash__() const;
 %MethodCode
-  sipRes = (long) sipCpp->get();
+  sipRes = 
+#if defined( _WIN64 )
+  (long long int) 
+#else
+  (long) 
+#endif
+  sipCpp->get();
 %End
 
 /*
@@ -291,7 +297,13 @@ public:
   bool operator < ( const weak_ptr_%Template1typecode% & x ) const;
   long __hash__() const;
 %MethodCode
-  sipRes = (long) sipCpp->get();
+  sipRes = 
+#if defined( _WIN64 )
+  (long long int) 
+#else
+  (long) 
+#endif
+  sipCpp->get();
 %End
 
 /*

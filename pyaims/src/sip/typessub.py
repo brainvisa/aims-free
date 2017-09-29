@@ -153,7 +153,12 @@ def completeTypesSub(typessub):
             else:
                 y['compareElement'] = '&'
 
-
+if 'options' in globals() and hasattr(options, 'target_platform'):
+    target_platform = options.target_platform
+else:
+    target_platform = '-'.join([platform.system().lower(), 
+                                platform.architecture()[0][:2]])
+    
 typessub = {'bool':
            {'typecode': 'BOOL',
                'pyFromC': 'carto::PyaimsInt_FromLong',
@@ -302,7 +307,7 @@ typessub = {'bool':
                'compareElement': '',
             },
             'unsigned long':
-           {'typecode': 'ULONG',
+            {'typecode': 'ULONG',
                'pyFromC': 'PyLong_FromLong',
                'CFromPy': 'PyLong_AsUnsignedLong',
                'castFromSip': '',
@@ -315,6 +320,27 @@ typessub = {'bool':
                'new': '',
                'NumType': 'PyArray_UINT',
                'PyType': 'unsigned long',
+               'sipClass': '',
+               'typeinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
+               'module': 'aims',
+               'testPyType': 'carto::PyaimsInt_Check',
+               'compareElement': '',
+            },
+            'unsigned long long':
+           {'typecode': 'ULONGLONG',
+               'pyFromC': 'PyLong_FromLongLong',
+               'CFromPy': 'PyLong_AsUnsignedLongLong',
+               'castFromSip': '',
+               'deref': '',
+               'pyderef': '',
+               'address': '',
+               'pyaddress': '',
+               'defScalar': '#define PYAIMS_SCALAR',
+               'defNumpyBindings': '',
+               'new': '',
+               'NumType': 'PyArray_UINT64',
+               'PyType': 'unsigned long long',
                'sipClass': '',
                'typeinclude': '',
                'sipinclude': '#include <pyaims/object/numconv.h>',
@@ -2827,8 +2853,10 @@ typessub = {'bool':
                                   'DataSourceInfo'),
 
             }
-
-if sys.platform == 'darwin' or platform.processor() == 'x86_64':
+if target_platform == 'windows-64':
+    typessub['size_t'] = typessub['unsigned long long']
+elif sys.platform == 'darwin' \
+    or platform.processor() == 'x86_64':
     typessub['size_t'] = typessub['unsigned long']
 else:
     typessub['size_t'] = typessub['unsigned']

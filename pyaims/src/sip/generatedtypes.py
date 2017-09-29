@@ -32,7 +32,8 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 numtypes = ['bool', 'unsigned char', 'short', 'unsigned short',
-            'int', 'unsigned', 'float', 'double']
+            'int', 'unsigned', 'unsigned long', 'unsigned long long',
+            'float', 'double']
 basetypes = numtypes + ['AimsRGB', 'AimsRGBA', 'AimsHSV']
 matrix = []
 for x in basetypes:
@@ -42,9 +43,9 @@ todo = {'system': ['Void'],
         'volume': basetypes + ['cfloat', 'cdouble', 'Point3df'],
         'aimsdata': basetypes + ['cfloat', 'cdouble', 'Point3df'],
         'vector': ['unsigned char', 'short', 'unsigned short', 'int',
-                   'unsigned', 'unsigned long', 'float',
-                   'double', 'Point2df', 'Point3df', 'Point3dd', 'Point3d',
-                   'std::string', 'AimsVector<unsigned,2>',
+                   'unsigned', 'unsigned long', 'unsigned long long',
+                   'float', 'double', 'Point2df', 'Point3df', 'Point3dd', 
+                   'Point3d', 'std::string', 'AimsVector<unsigned,2>',
                    'AimsVector<unsigned,3>', 'AimsVector<unsigned,4>',
                    'std::set<unsigned>', 'Void', 'std::vector<int32_t>',
                    'std::vector<std::string>', 'std::vector<Point3df>'],
@@ -62,14 +63,19 @@ todo = {'system': ['Void'],
                     ('std::string', 'carto::Syntax'),
                     ('unsigned', 'std::set<unsigned>'),
                     ('short', 'unsigned long'),
+                    ('short', 'unsigned long long'),
                     ('short', 'unsigned'),
                     ('int', 'unsigned long'),
+                    ('int', 'unsigned long long'),
                     ('int', 'unsigned'),
                     ('unsigned char', 'unsigned long'),
+                    ('unsigned char', 'unsigned long long'),
                     ('unsigned char', 'unsigned'),
                     ('unsigned short', 'unsigned long'),
+                    ('unsigned short', 'unsigned long long'),
                     ('unsigned short', 'unsigned'),
                     ('unsigned', 'unsigned long'),
+                    ('unsigned', 'unsigned long long'),
                     ('unsigned', 'unsigned')],
         'rcptr': ['AimsSurfaceTriangle', 'carto::GenericObject',
                   'AimsData<uint8_t>', 'AimsData<int16_t>',
