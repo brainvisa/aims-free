@@ -60,6 +60,7 @@ typedef int int32_t;
 %Include vector_S32.sip
 %Include vector_U32.sip
 %Include vector_ULONG.sip
+%Include vector_ULONGLONG.sip
 %Include vector_FLOAT.sip
 %Include vector_DOUBLE.sip
 %Include vector_POINT2DF.sip
@@ -106,14 +107,19 @@ typedef int int32_t;
 %Include map_STRING_FLOAT.sip
 %Include map_STRING_DOUBLE.sip
 %Include map_U8_ULONG.sip
+%Include map_U8_ULONGLONG.sip
 %Include map_U8_U32.sip
 %Include map_S16_ULONG.sip
+%Include map_S16_ULONGLONG.sip
 %Include map_S16_U32.sip
 %Include map_U16_ULONG.sip
+%Include map_U16_ULONGLONG.sip
 %Include map_U16_U32.sip
 %Include map_S32_ULONG.sip
+%Include map_S32_ULONGLONG.sip
 %Include map_S32_U32.sip
 %Include map_U32_ULONG.sip
+%Include map_U32_ULONGLONG.sip
 %Include map_U32_U32.sip
 // %Include map_STRING_RGB.sip
 // %Include map_STRING_RGBA.sip
@@ -321,7 +327,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include iotypes.sip
 
 %If ( CARTODATA )
-
+ 
 %Include volume_BOOL.sip
 %Include volume_U8.sip
 %Include volume_S16.sip

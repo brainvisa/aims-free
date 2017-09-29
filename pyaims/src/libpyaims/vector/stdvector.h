@@ -47,10 +47,15 @@ inline std::vector<T> * pyaimsCopyFrom_Array( T * array, unsigned size )
 }
 
 #if defined( __APPLE__ ) || defined( __LP64__ )
-// typedef unsigned long size_t;
+//#pragma message( "===== Defining apple or linux 64 bits vector types" )
 typedef std::vector<unsigned long> vector_SIZE_T;
+
+#elif defined( _WIN64 )
+//#pragma message( "===== Defining windows 64 bits vector types" )
+typedef std::vector<unsigned long long int> vector_SIZE_T;
+
 #else
-// typedef unsigned size_t;
+//#pragma message( "===== Defining 32 bits vector types" )
 typedef std::vector<unsigned> vector_SIZE_T;
 #endif
 

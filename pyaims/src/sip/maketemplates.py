@@ -43,6 +43,7 @@ import filecmp
 import glob
 import re
 from optparse import OptionParser
+import platform
 import subprocess
 
 if sys.version_info[0] >= 3:
@@ -81,7 +82,11 @@ parser.add_option('--no-preprocess', dest='preprocess',
                   action='store_false', help='use C preprocessor '
                   '[default:true]', default=True)
 parser.add_option("-P", "--preprocessor", dest='preprocessor',
-                  help="C preprocessor command (default: 'cpp -C')")
+                  help="C preprocessor command [default: 'cpp -C']")
+parser.add_option("-T", "--target-platform", dest='target_platform',
+                  help="Target platform [default: %s]" % 
+                  '-'.join([platform.system().lower(), 
+                            platform.architecture()[0][:2]]))
 
 (options, args) = parser.parse_args()
 if args:
@@ -93,7 +98,7 @@ if cpp and not cppc:
     cppc = 'cpp -C'
 elif not cpp:
     cppc = None
-        
+
 if not options.typessub:
     p = [os.path.join(options.sourcepath, 'typessub.py'), 'typessub.py']
     options.typessub = filter(os.path.exists, p)
