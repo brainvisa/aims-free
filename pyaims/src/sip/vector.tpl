@@ -27,18 +27,28 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
     // test compatibility of each element of the sequence
     unsigned    i, n = PySequence_Size( sipPy );
     PyObject    *pyitem;
-    for( i=0; i<n; ++i )
+    bool ok = true;
+    for( i=0; ok && i<n; ++i )
     {
       pyitem = PySequence_GetItem( sipPy, i );
-      if( !pyitem || !%Template1testPyType%( pyitem ) )
+      if( !pyitem )
       {
-        if( pyitem )
-          Py_DECREF( pyitem );
-        return 0;
+        ok = false;
+        break;
       }
-      Py_DECREF( pyitem );
+      if( !%Template1testPyType%( pyitem ) )
+      {
+        const sipTypeDef* st = sipFindType( "%Template1sipClass%" );
+        if( !st || !sipCanConvertToType( pyitem, st, SIP_NOT_NONE ) )
+          ok = false;
+      }
+      if( pyitem )
+        Py_DECREF( pyitem );
     }
-    return 1;
+    if( ok )
+      return 1;
+    else
+      return 0;
   }
 
   if( sipCanConvertToInstance( sipPy, sipClass_vector_%Template1typecode%,
