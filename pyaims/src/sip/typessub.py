@@ -575,7 +575,7 @@ typessub = {'bool':
                'new': 'new Point2df',
                'NumType': 'NPY_COMPLEX64',
                'PyType': 'Point2df',
-               'sipClass': 'Point2df',
+               'sipClass': 'AimsVector_FLOAT_2',
                'typeinclude': '#include <pyaims/vector/vector.h>',
                'sipinclude': '#include <pyaims/vector/sipvector.h>\n'
                '#ifndef PYAIMS_WRAPPER_AIMSVECTOR_FLOAT_2\n'
@@ -603,7 +603,7 @@ typessub = {'bool':
                'new': 'new Point3df',
                'NumType': 'PyArray_OBJECT',
                'PyType': 'Point3df',
-               'sipClass': 'Point3df',
+               'sipClass': 'AimsVector_FLOAT_3',
                'typeinclude': '#include <pyaims/vector/vector.h>',
                'sipinclude': '#if SIP_VERSION < 0x040700\n'
                '#include "sipaimssipAimsVector_FLOAT_3.h"\n'
@@ -634,7 +634,7 @@ typessub = {'bool':
                'new': 'new Point3dd',
                'NumType': 'PyArray_OBJECT',
                'PyType': 'Point3dd',
-               'sipClass': 'Point3dd',
+               'sipClass': 'AimsVector_DOUBLE_3',
                'typeinclude': '#include <pyaims/vector/vector.h>',
                'sipinclude': '#if SIP_VERSION < 0x040700\n'
                '#include "sipaimssipAimsVector_DOUBLE_3.h"\n'
@@ -665,7 +665,7 @@ typessub = {'bool':
                'new': 'new Point3d',
                'NumType': 'PyArray_OBJECT',
                'PyType': 'Point3d',
-               'sipClass': 'Point3d',
+               'sipClass': 'AimsVector_S16_3',
                'typeinclude': '#include <pyaims/vector/vector.h>',
                'sipinclude': '#if SIP_VERSION < 0x040700\n'
                '#include "sipaimssipAimsVector_S16_3.h"\n'
@@ -696,7 +696,7 @@ typessub = {'bool':
                'new' : 'new Point3dl', 
                'NumType' : 'PyArray_OBJECT', 
                'PyType' : 'Point3dl',
-               'sipClass' : 'Point3dl',
+               'sipClass' : 'AimsVector_S32_3',
                'typeinclude' : '#include <pyaims/vector/vector.h>', 
                'sipinclude' : '#if SIP_VERSION < 0x040700\n'
                '#include "sipaimssipAimsVector_S32_3.h"\n' 

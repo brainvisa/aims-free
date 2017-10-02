@@ -71,8 +71,28 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
     PyObject	*pyitem;
     for( i=0; i<n; ++i )
     {
+
       pyitem = PySequence_GetItem( sipPy, i );
-      if( !pyitem || !%Template1testPyType%( pyitem ) )
+      bool ok = false;
+      bool conv = false;
+      if( pyitem )
+      {
+        if( %Template1testPyType%( pyitem ) )
+          ok = true;
+        else
+        {
+          const sipTypeDef* st = sipFindType( "%Template1sipClass%" );
+          if( st )
+          {
+            if( sipCanConvertToType( pyitem, st, SIP_NOT_NONE ) )
+            {
+              ok = true;
+              conv = true;
+            }
+          }
+        }
+      }
+      if( !ok )
       {
         *sipIsErr = 1;
         delete *sipCppPtr;
@@ -85,8 +105,10 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
         return 0;
       }
 
-      (*sipCppPtr)->push_back( %Template1pyderef% %Template1castFromSip% 
-                               %Template1CFromPy%( pyitem ) );
+      %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
+      (*sipCppPtr)->push_back( %Template1deref%item );
+      if( conv )
+        delete & %Template1deref% item;
       Py_DECREF( pyitem );
     }
 #if SIP_VERSION >= 0x040400
@@ -122,7 +144,26 @@ public:
     for( i=0; i<n; ++i )
     {
       pyitem = PySequence_GetItem(a0,i);
-      if( !pyitem || !%Template1testPyType%( pyitem ) )
+      bool ok = false;
+      bool conv = false;
+      if( pyitem )
+      {
+        if( %Template1testPyType%( pyitem ) )
+          ok = true;
+        else
+        {
+          const sipTypeDef* st = sipFindType( "%Template1sipClass%" );
+          if( st )
+          {
+            if( sipCanConvertToType( pyitem, st, SIP_NOT_NONE ) )
+            {
+              ok = true;
+              conv = true;
+            }
+          }
+        }
+      }
+      if( !ok )
       {
         sipIsErr = 1;
         delete sipCpp;
@@ -135,8 +176,10 @@ public:
         break;
       }
 
-      sipCpp->push_back( %Template1pyderef% %Template1castFromSip% 
-                         %Template1CFromPy%( pyitem ) );
+      %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
+      sipCpp->push_back( %Template1deref%item );
+      if( conv )
+        delete & %Template1deref% item;
       Py_DECREF( pyitem );
     }
   }
