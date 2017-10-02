@@ -16,7 +16,7 @@
 
 <hr width="100%"> <br>
 
- <b><a href="#version-4.5.1">Version 4.5.1</a></b><br>
+ <b><a href="#version-4.6.0">Version 4.6.0</a></b><br>
  <b><a href="#version-4.5.0">Version 4.5.0</a></b><br>
  <b><a href="#version-4.4.0">Version 4.4.0</a></b><br>
  <b><a href="#version-4.3.1">Version 4.3.1</a></b><br>
@@ -46,11 +46,26 @@
 
 
 <!-- -->
-<h4> <a name="version-4.5.1"></a>May. 02, 2016, Version 4.5.1</h4>
+<h4> <a name="version-4.6.0"></a>Oct. 03, 2017, Version 4.6.0</h4>
 
 <ul>
+<li>Support for Volumes of more than 4 dimensions (currently setup for 8, can be changed by a constant (DIM_MAX) in sources - needs rebuilding). However not all IO formats support them.
+</li>
+<li>Volume APIs taking dimensions have been extended to take a vector of dimensions.
+</li>
+<li>Basic support for CIFTI files handling API: CiftiTools class.</li>
+<li>pyaims: improved python bindings, especially allow aims.vector_* to convert from other types transparently, like aims.vector_PIINT3DF(numpy.array([[1.,2.,3], [4.,5.,6]))
+</li>
 <li>Porting to Python3. PyAims and the underlying libraries (Soma-Base) have finally been ported to Python 3. They are thus source compatible with with Python 2 series (2.6 and later) and Python 3 (3.4 and later).
 </li>
+<li>Improvements and fixes in IO and options.</li>
+<li>Lazy partial IO for SparseOrDenseMatrix</li>
+<li>AIMS now includes fibers manipulation API, .bundles and .trk IO, moved from the former connectomist project (now dead).
+</li>
+<li>Points distribution function: electostatic forces models</li>
+<li>Build works with LLVM, C++11, and Win64 (via cross-compilation from Linux)
+</li>
+<li>Hundreds of fixes and other various improvements</li>
 </ul>
 
 <!-- -->
