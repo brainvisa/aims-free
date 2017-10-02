@@ -95,7 +95,7 @@ inline AimsVector<T, D> *pyaimsConvertTo_AimsVector( PyObject* p )
   int	iserr = 0;
   return (AimsVector<T,D> *) 
     sipConvertToType( p, (sipType_AimsVector<T,D>()), 0,
-                      SIP_NO_CONVERTORS, 0, &iserr );
+                      0, 0, &iserr );
 }
 
 
