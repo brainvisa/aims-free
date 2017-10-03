@@ -54,13 +54,13 @@
 <li>Volume APIs taking dimensions have been extended to take a vector of dimensions.
 </li>
 <li>Basic support for CIFTI files handling API: CiftiTools class.</li>
-<li>pyaims: improved python bindings, especially allow aims.vector_* to convert from other types transparently, like aims.vector_PIINT3DF(numpy.array([[1.,2.,3], [4.,5.,6]))
+<li>pyaims: improved python bindings, especially allow aims.vector_* and aims.list_* to convert from other types transparently, like aims.vector_PIINT3DF(numpy.array([[1.,2.,3], [4.,5.,6]))
 </li>
 <li>Porting to Python3. PyAims and the underlying libraries (Soma-Base) have finally been ported to Python 3. They are thus source compatible with with Python 2 series (2.6 and later) and Python 3 (3.4 and later).
 </li>
 <li>Improvements and fixes in IO and options.</li>
 <li>Lazy partial IO for SparseOrDenseMatrix</li>
-<li>AIMS now includes fibers manipulation API, .bundles and .trk IO, moved from the former connectomist project (now dead).
+<li>A few more fibers manipulation functions have moved from the former connectomist project (now dead) to AIMS.
 </li>
 <li>Points distribution function: electostatic forces models</li>
 <li>Build works with LLVM, C++11, and Win64 (via cross-compilation from Linux)
