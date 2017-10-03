@@ -81,7 +81,6 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
     PyObject	*pyitem;
     for( i=0; i<n; ++i )
     {
-
       pyitem = PySequence_GetItem( sipPy, i );
       bool ok = false;
       bool conv = false;
@@ -121,11 +120,7 @@ typedef std::vector<%Template1% > vector_%Template1typecode%;
         delete & %Template1deref% item;
       Py_DECREF( pyitem );
     }
-#if SIP_VERSION >= 0x040400
     return sipGetState( sipTransferObj );
-#else
-    return 1;
-#endif
   }
   *sipCppPtr = 
      (vector_%Template1typecode% *) 

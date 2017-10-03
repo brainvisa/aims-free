@@ -24,30 +24,52 @@ typedef std::list<%Template1% > list_%Template1typecode%;
     // test compatibility of each element of the sequence
     unsigned    i, n = PySequence_Size( sipPy );
     PyObject    *pyitem;
+    bool ok = true;
     for( i=0; i<n; ++i )
     {
       pyitem = PySequence_GetItem( sipPy, i );
-      if( !pyitem || !%Template1testPyType%( pyitem ) )
+      if( !pyitem )
       {
-        if( pyitem )
-          Py_DECREF( pyitem );
-        return 0;
+        ok = false;
+        break;
       }
-      Py_DECREF( pyitem );
+      if( !%Template1testPyType%( pyitem ) )
+      {
+        const sipTypeDef* st = sipFindType( "%Template1sipClass%" );
+        if( !st || !sipCanConvertToType( pyitem, st, SIP_NOT_NONE ) )
+          ok = false;
+      }
+      if( pyitem )
+        Py_DECREF( pyitem );
     }
-    return 1;
+    if( ok )
+      return 1;
+    else
+      return 0;
   }
 
-  if( PyObject_IsInstance( sipPy, (PyObject *) 
-      sipClass_list_%Template1typecode% ) )
+  if( sipCanConvertToInstance( sipPy, sipClass_list_%Template1typecode%,
+      SIP_NO_CONVERTORS ) )
   {
-    *sipCppPtr =
-      (list_%Template1typecode% *)
-      sipConvertToInstance( sipPy,
-        sipClass_list_%Template1typecode%,
-        0, SIP_NO_CONVERTORS, 0, sipIsErr );
-    return 0;
+    int state = 0;
+
+    list_%Template1typecode% * dat
+      = (list_%Template1typecode% *)
+        sipConvertToInstance( sipPy,
+          sipClass_list_%Template1typecode%,
+          sipTransferObj, SIP_NO_CONVERTORS, &state, sipIsErr );
+    if( *sipIsErr && dat )
+    {
+      sipReleaseInstance( dat, sipClass_list_%Template1typecode%, state );
+      dat = 0;
+    }
+    else if( dat )
+    {
+      *sipCppPtr = dat;
+      return 0;
+    }
   }
+
   if( PySequence_Check( sipPy ) )
   {
     *sipCppPtr = new std::list<%Template1% >;
@@ -56,7 +78,26 @@ typedef std::list<%Template1% > list_%Template1typecode%;
     for( i=0; i<n; ++i )
     {
       pyitem = PySequence_GetItem( sipPy, i );
-      if( !pyitem || !%Template1testPyType%( pyitem ) )
+      bool ok = false;
+      bool conv = false;
+      if( pyitem )
+      {
+        if( %Template1testPyType%( pyitem ) )
+          ok = true;
+        else
+        {
+          const sipTypeDef* st = sipFindType( "%Template1sipClass%" );
+          if( st )
+          {
+            if( sipCanConvertToType( pyitem, st, SIP_NOT_NONE ) )
+            {
+              ok = true;
+              conv = true;
+            }
+          }
+        }
+      }
+      if( !ok )
       {
         *sipIsErr = 1;
         delete *sipCppPtr;
@@ -69,15 +110,13 @@ typedef std::list<%Template1% > list_%Template1typecode%;
         return 0;
       }
 
-      (*sipCppPtr)->push_back( %Template1pyderef% %Template1castFromSip% 
-                               %Template1CFromPy%( pyitem ) );
+      %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
+      (*sipCppPtr)->push_back( %Template1deref%item );
+      if( conv )
+        delete & %Template1deref% item;
       Py_DECREF( pyitem );
     }
-#if SIP_VERSION >= 0x040400
     return sipGetState( sipTransferObj );
-#else
-    return 1;
-#endif
   }
   *sipCppPtr = (list_%Template1typecode% *)
   sipConvertToInstance( sipPy, sipClass_list_%Template1typecode%,
@@ -104,7 +143,26 @@ public:
     for( i=0; i<n; ++i )
     {
       pyitem = PySequence_GetItem(a0,i);
-      if( !pyitem || !%Template1testPyType%( pyitem ) )
+      bool ok = false;
+      bool conv = false;
+      if( pyitem )
+      {
+        if( %Template1testPyType%( pyitem ) )
+          ok = true;
+        else
+        {
+          const sipTypeDef* st = sipFindType( "%Template1sipClass%" );
+          if( st )
+          {
+            if( sipCanConvertToType( pyitem, st, SIP_NOT_NONE ) )
+            {
+              ok = true;
+              conv = true;
+            }
+          }
+        }
+      }
+      if( !ok )
       {
         sipIsErr = 1;
         delete sipCpp;
@@ -117,8 +175,10 @@ public:
         break;
       }
 
-      sipCpp->push_back( %Template1pyderef% %Template1castFromSip% 
-                         %Template1CFromPy%( pyitem ) );
+      %Template1% %Template1deref% item = %Template1castFromSip% %Template1CFromPy%( pyitem );
+      sipCpp->push_back( %Template1deref%item );
+      if( conv )
+        delete & %Template1deref% item;
       Py_DECREF( pyitem );
     }
   }
@@ -143,9 +203,10 @@ public:
 %MethodCode
   std::list<%Template1% >::iterator i, e = sipCpp->end();
   if( a0 < 0 )
-    a0 = sipCpp->size() - a0;
-  if( a0 < 0 )
+    a0 = sipCpp->size() + a0;
+  if( a0 < 0 || a0 >= sipCpp->size() )
   {
+    sipRes = 0;
     sipIsErr = 1;
     PyErr_SetString( PyExc_IndexError, "std::list index out of range" );
   }
@@ -168,8 +229,8 @@ public:
 %MethodCode
   std::list<%Template1% >::iterator i, e = sipCpp->end();
   if( a0 < 0 )
-    a0 = sipCpp->size() - a0;
-  if( a0 < 0 )
+    a0 = sipCpp->size() + a0;
+  if( a0 < 0 || a0 >= sipCpp->size() )
   {
     sipIsErr = 1;
     PyErr_SetString( PyExc_IndexError, "std::list index out of range" );
@@ -468,14 +529,9 @@ class list_%Template1typecode%_iterator
 
   SIP_PYOBJECT __iter__();
 %MethodCode
-#if SIP_VERSION >= 0x040400
   sipRes = 
     sipConvertFromInstance( sipCpp, 
                             sipClass_list_%Template1typecode%_iterator, 0 );
-#else
-  sipRes = sipMapCppToSelfSubClass( sipCpp, 
-                            sipClass_list_%Template1typecode%_iterator );
-#endif
 %End
 };
 
