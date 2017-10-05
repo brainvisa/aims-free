@@ -51,7 +51,7 @@ using namespace std;
 SliceFormatHeader::SliceFormatHeader( const std::string & filename, int dimx, 
                                       int dimy, int dimz, int dimt, float vsx,
                                       float vsy, float vsz, float vst )
-  : PythonHeader(), _name( filename )
+  : PythonHeader(), _name(filename)
 {
   vector<int>	dims(4);
   vector<float>	vs(4);

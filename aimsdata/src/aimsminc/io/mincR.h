@@ -67,6 +67,7 @@ extern "C" {
 #include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/exception/file.h>
 #include <cartobase/exception/format.h>
+#include <cartobase/stream/fileutil.h>
 #include <cartobase/thread/mutex.h>
 #include <soma-io/datasource/filedatasource.h>
 
@@ -336,7 +337,15 @@ namespace aims
     double voxel;
 
     MincHeader::mincMutex().lock();
-    result = miopen_volume( data.volume()->allocatorContext().dataSource()->url().c_str(), MI2_OPEN_READ, &minc_volume);
+    
+    std::string source = data.volume()->allocatorContext().dataSource()->url();
+
+    if (carto::FileUtil::fileStat(source) == "") {
+      throw carto::file_not_found_error("MINC file does not exists",
+                                        _name);
+    }
+
+    result = miopen_volume( source.c_str(), MI2_OPEN_READ, &minc_volume);
     MincHeader::mincMutex().unlock();
 
     if (result != MI_NOERROR)
