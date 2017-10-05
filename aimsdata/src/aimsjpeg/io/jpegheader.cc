@@ -56,7 +56,7 @@ using namespace std;
 
 set<string> JpegHeader::extensions() const
 {
-  set<string>	exts;
+  set<string>  exts;
   exts.insert( ".jpg" );
   exts.insert( ".JPG" );
   exts.insert( ".jpeg" );
@@ -70,8 +70,8 @@ namespace
 
   struct private_jpeg_error_mgr
   {
-    struct jpeg_error_mgr pub;	/* "public" fields */
-    jmp_buf setjmp_buffer;	/* for return to caller */
+    struct jpeg_error_mgr pub;  /* "public" fields */
+    jmp_buf setjmp_buffer;  /* for return to caller */
     FILE *fp;
   };
 
@@ -84,8 +84,7 @@ namespace
     if( myerr->fp )
       fclose( myerr->fp );
 
-    /* Return control to the setjmp point */
-    longjmp(myerr->setjmp_buffer, 1);
+    throw runtime_error( "JPEG error" );
   }
 
 }
@@ -95,24 +94,16 @@ void JpegHeader::read()
 {
   string fileName = _name;
   if( FileUtil::fileStat( fileName ).find( '+' ) == string::npos )
-    fileName = removeExtension(_name) + ".jpg";
+    fileName = removeExtension(fileName) + ".jpg";
 
-  struct jpeg_decompress_struct	cinfo;
-  struct private_jpeg_error_mgr	jerr;
-  FILE				*fp;
+  struct jpeg_decompress_struct cinfo;
+  struct private_jpeg_error_mgr jerr;
+  FILE        *fp;
 
   cinfo.err = jpeg_std_error( &jerr.pub );
   jerr.pub.error_exit = private_jpeg_error_exit;
   jerr.fp = 0;
-  /* Establish the setjmp return context for my_error_exit to use. */
-  if (setjmp(jerr.setjmp_buffer))
-  {
-    /* If we get here, the JPEG code has signaled an error.
-      * We need to clean up the JPEG object, close the input file, and return.
-      */
-    jpeg_destroy_decompress(&cinfo);
-    throw carto::file_error( fileName );
-  }
+
   jpeg_create_decompress( &cinfo );
 
   fp = fopen( fileName.c_str(), "rb" );
@@ -122,19 +113,22 @@ void JpegHeader::read()
     jpeg_destroy_decompress( &cinfo );
     throw carto::file_error( fileName );
   }
-
-  jpeg_stdio_src( &cinfo, fp );
-  if( jpeg_read_header( &cinfo, true ) != 1 )
-  {
-    jpeg_destroy_decompress( &cinfo );
-    fclose( fp );
-    throw carto::file_error( fileName );
+  try {
+    jpeg_stdio_src( &cinfo, fp );
+    jpeg_read_header( &cinfo, true );
   }
+  catch(...) {
+    fclose( fp );
+    jerr.fp = 0;
+    jpeg_destroy_decompress( &cinfo );
+    throw carto::file_error( fileName );    
+  }
+  
   fclose( fp );
   jerr.fp = 0;
   jpeg_destroy_decompress( &cinfo );
 
-  vector<string>	pt;
+  vector<string>  pt;
 
   if( cinfo.num_components == 1 )
     switch( cinfo.data_precision )
@@ -161,11 +155,11 @@ void JpegHeader::read()
   _dimY = cinfo.image_height;
   _dimZ = 1;
   _dimT = 1;
-  if( cinfo.X_density == 0 || cinfo.density_unit == 0 )	// not filled
+  if( cinfo.X_density == 0 || cinfo.density_unit == 0 )  // not filled
     _sizeX = 1;
   else
     _sizeX = ( cinfo.density_unit == 2 ? 1. : 25.4 ) / cinfo.X_density;
-  if( cinfo.Y_density == 0 || cinfo.density_unit == 0 )	// not filled
+  if( cinfo.Y_density == 0 || cinfo.density_unit == 0 )  // not filled
     _sizeY = 1;
   else
     _sizeY = ( cinfo.density_unit == 2 ? 1. : 25.4 ) / cinfo.Y_density;
@@ -174,14 +168,14 @@ void JpegHeader::read()
 
   setProperty( "file_type", string( "JPEG" ) );
 
-  vector<int>	dims;
+  vector<int>  dims;
   dims.push_back( dimX() );
   dims.push_back( dimY() );
   dims.push_back( dimZ() );
   dims.push_back( dimT() );
   setProperty( "volume_dimension", dims );
 
-  vector<float>	vs;
+  vector<float>  vs;
   vs.push_back( sizeX() );
   vs.push_back( sizeY() );
   vs.push_back( sizeZ() );
@@ -193,7 +187,6 @@ void JpegHeader::read()
 
   // add meta-info to header
   readMinf( removeExtension( _name ) + extension() + ".minf" );
-
   inputFilenames();
 
   // if .minf has been modified
@@ -217,19 +210,19 @@ void JpegHeader::read()
 
   getProperty( "voxel_size", vs );
   if( vs.size() >= 3 )
-    {
-      _sizeX = vs[0];
-      _sizeY = vs[1];
-      _sizeZ = vs[2];
-      if( vs.size() >= 4 )
-        _sizeT = vs[3];
-    }
+  {
+     _sizeX = vs[0];
+     _sizeY = vs[1];
+     _sizeZ = vs[2];
+     if( vs.size() >= 4 )
+       _sizeT = vs[3];
+  }
 }
 
 
 vector<string> JpegHeader::possibleDataTypes() const
 {
-  vector<string>	pt;
+  vector<string>  pt;
   getProperty( "possible_data_types", pt );
   return( pt );
 }

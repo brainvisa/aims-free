@@ -60,13 +60,12 @@ namespace aims
 
     void read( AimsData<T>& thing, const carto::AllocatorContext & context, 
                carto::Object options );
-    /**	called by read(), but you can call it for single frame reading 
-	(axial slice) */
+    /** called by read(), but you can call it for single frame reading (axial slice) */
     void readFrame( AimsData<T> & thing, const std::string & filename, 
                     unsigned zfame, unsigned tframe );
 
   private:
-    std::string		_name;
+    std::string _name;
   };
 
 
@@ -87,21 +86,21 @@ namespace aims
   {
     JpegHeader *hdr = new JpegHeader( _name );
     try
-      {
-	hdr->read();
-      }
+    {
+        hdr->read();
+    }
     catch( std::exception & e )
-      {
-	delete hdr;
-	throw;
-      }
+    {
+        delete hdr;
+        throw;
+    }
 
-    int	frame = -1, border = 0;
+    int frame = -1, border = 0;
     options->getProperty( "frame", frame );
     options->getProperty( "border", border );
 
-    std::vector<std::string>	files = hdr->inputFilenames();
-    std::vector<int>		dims;
+    std::vector<std::string> files = hdr->inputFilenames();
+    std::vector<int> dims;
     hdr->getProperty( "volume_dimensions", dims );
 
     if( dims.size() < 1 )
@@ -113,22 +112,22 @@ namespace aims
     if( dims.size() < 4 )
       dims.push_back( hdr->dimT() );
 
-    unsigned	tmin = 0, tmax = dims[3] - 1;
+    unsigned tmin = 0, tmax = dims[3] - 1;
     if( frame >= 0 )
+    {
+      if( tmax < (unsigned) frame )
       {
-        if( tmax < (unsigned) frame )
-          {
-            delete hdr;
-            throw std::domain_error( "frame higher than file dimT" );
-          }
-        if( (unsigned) frame < tmax )
-          files.erase( files.begin() + ( frame + 1 ) * hdr->dimZ(), 
-                       files.end() );
-        if( frame > 0 )
-          files.erase( files.begin(), files.begin() + frame * hdr->dimZ() );
-        tmin = frame;
-        tmax = frame;
+        delete hdr;
+        throw std::domain_error( "frame higher than file dimT" );
       }
+      if( (unsigned) frame < tmax )
+        files.erase( files.begin() + ( frame + 1 ) * hdr->dimZ(), 
+                       files.end() );
+      if( frame > 0 )
+        files.erase( files.begin(), files.begin() + frame * hdr->dimZ() );
+      tmin = frame;
+      tmax = frame;
+    }
 
     carto::AllocatorContext 
       cont2( context.accessMode(), 
@@ -137,8 +136,11 @@ namespace aims
                ( *files.begin(), 0, carto::DataSource::Read ) ), 
              false, context.useFactor() );
 
-    AimsData<T> data( hdr->dimX(), hdr->dimY(), hdr->dimZ(), 
-                      tmax - tmin + 1, border, cont2 );
+    AimsData<T> data( hdr->dimX(), 
+                      hdr->dimY(), 
+                      hdr->dimZ(), 
+                      tmax - tmin + 1, 
+                      border, cont2 );
     data.setSizeX( hdr->sizeX() );
     data.setSizeY( hdr->sizeY() );
     data.setSizeZ( hdr->sizeZ() );
@@ -147,14 +149,14 @@ namespace aims
     dims[3] = tmax - tmin + 1;
     hdr->setProperty( "volume_dimension", dims );
 
-    //	force data type into header
-    carto::DataTypeCode<T>	dtc;
+    // force data type into header
+    carto::DataTypeCode<T> dtc;
     hdr->setType( dtc.dataType() );
-    std::string		dir = carto::FileUtil::dirname( _name );
+    std::string dir = carto::FileUtil::dirname( _name );
     if( !dir.empty() )
       dir += carto::FileUtil::separator();
 
-    unsigned	i = 0, s, t, ns = (unsigned) data.dimZ(), nt = tmax - tmin + 1;
+    unsigned i = 0, s, t, ns = (unsigned) data.dimZ(), nt = tmax - tmin + 1;
     for( t=0; t<nt; ++t )
       for( s=0; s<ns; ++s, ++i )
         readFrame( data, dir + files[i], s, t );
@@ -167,15 +169,16 @@ namespace aims
 
   template<class T>
   inline
-  void JpegReader<T>::readFrame( AimsData<T> & data, 
-				 const std::string & name, unsigned z, 
-				 unsigned t )
+  void JpegReader<T>::readFrame(
+      AimsData<T> & data, 
+      const std::string & name, 
+      unsigned z, unsigned t)
   {
-    struct jpeg_decompress_struct	cinfo;
-    struct jpeg_error_mgr		jerr;
-    FILE				*fp;
-    unsigned				i;
-    JSAMPROW				row_pointer[1];
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+    FILE *fp;
+    unsigned i;
+    JSAMPROW row_pointer[1];
 
     cinfo.err = jpeg_std_error( &jerr );
     jpeg_create_decompress( &cinfo );
@@ -188,31 +191,30 @@ namespace aims
     if( jpeg_read_header( &cinfo, true ) != 1 )
       throw carto::format_error( name );
     else
+    {
+      carto::DataTypeCode<T> dtc;
+      if( dtc.dataType() == "RGB" )
       {
-	carto::DataTypeCode<T>	dtc;
-	if( dtc.dataType() == "RGB" )
-	  {
-	    cinfo.out_color_space = JCS_RGB;
-	    cinfo.out_color_components = 3;
-	  }
-	else
-	  {
-	    cinfo.out_color_space = JCS_GRAYSCALE;
-	    cinfo.out_color_components = 1;
-	  }
-	jpeg_start_decompress( &cinfo );
-	for( i=0; i<cinfo.image_height; ++i )
-	  {
-	    row_pointer[0] = (JSAMPROW) &data( 0, i, z, t );
-	    jpeg_read_scanlines( &cinfo, row_pointer, 1 );
-	  }
+        cinfo.out_color_space = JCS_RGB;
+        cinfo.out_color_components = 3;
       }
+      else
+      {
+        cinfo.out_color_space = JCS_GRAYSCALE;
+        cinfo.out_color_components = 1;
+      }
+      jpeg_start_decompress( &cinfo );
+      for( i=0; i<cinfo.image_height; ++i )
+      {
+        row_pointer[0] = (JSAMPROW) &data( 0, i, z, t );
+        jpeg_read_scanlines( &cinfo, row_pointer, 1 );
+      }
+    }
 
     jpeg_finish_decompress( &cinfo );
     fclose( fp );
     jpeg_destroy_decompress( &cinfo );
   }
-
 }
 
 #endif
