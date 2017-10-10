@@ -424,7 +424,7 @@ void somaWriteEmptyVolume_f( const vector<int>    & sizeout,
                          );
   voltowrite.header().setProperty( "voxel_size", voxelout );
   soma::Writer<Volume<T> > writer( ofname );
-  writer << *voltowrite;
+  writer.write(*voltowrite);
 }
 typedef void (*somaWriteEmptyVolume_g)( const vector<int>    &,
                                         const vector<float>  &,

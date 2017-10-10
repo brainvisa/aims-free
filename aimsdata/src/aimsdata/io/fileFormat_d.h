@@ -37,6 +37,7 @@
 
 #include <aims/io/fileFormat.h>
 #include <cartobase/thread/mutex.h>
+#include <cartobase/stream/fileutil.h>
 
 namespace aims
 {
@@ -121,20 +122,11 @@ namespace aims
     }
   }
 
-
   template<class T> std::string 
   FileFormatDictionary<T>::fileExtension( const std::string & filename )
   {
-    std::string::size_type	pos = filename.rfind( '.' );
-    std::string::size_type	pos1 = filename.rfind( '/' );
-    std::string			ext;
-
-    if( pos != std::string::npos 
-	&& ( pos1 == std::string::npos || pos1 < pos ) )
-      ext = filename.substr( pos+1, filename.length() - pos - 1 );
-    return( ext );
+    return( carto::FileUtil::extension(filename) );
   }
-
 
   template<class T> void 
   FileFormatDictionary<T>::registerFormat( const std::string & format, 
