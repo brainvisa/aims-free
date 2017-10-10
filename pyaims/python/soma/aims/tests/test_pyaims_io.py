@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import glob
 import tempfile
 import os
 import sys
 import unittest
 import shutil
+import six
+import types
 from soma import aims
+from soma.aims import soma
 import numpy as np
 import glob
 from soma.aims.volumetools import compare_images
@@ -21,7 +25,12 @@ class TestPyaimsIO(unittest.TestCase):
         self.work_dir = tempfile.mkdtemp(prefix='test_pyaims')
         if self.verbose or self.debug:
             print('work directory:', self.work_dir)
-
+            
+        if self.debug:
+            aims.carto.setDebugMessageLevel(100)
+            
+        if self.verbose:
+            aims.carto.setVerbose(1)
 
     def check_open_files(self, fnames):
         proc_dir = '/proc/self/fd'
@@ -229,17 +238,234 @@ class TestPyaimsIO(unittest.TestCase):
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
         return failing_files
-
-
+    
     def test_pyaims_io(self):
         types = ['S16', 'FLOAT']
         failing_files = set()
         for dtype in types:
             failing_files.update(self.use_type(dtype))
+
         if failing_files:
             raise RuntimeError('There are still open files: %s'
                 % repr(failing_files) )
 
+    def test_soma_io(self):
+        def parses_type_code(type_code):
+            return type_code.split(' of ')
+            
+        def is_volume_type(object_type):
+            return object_type in ('VolumeRef', 'carto_volume')
+    
+        def get_type_info(type_code):
+            lt = parses_type_code(type_code)
+            o, d = (None, None)
+            if len(lt) > 0:
+                o = lt[0]
+                if len(lt) > 1:
+                    d = ' of '.join(lt[1:])
+                    
+            return (o, d)
+        
+        def get_python_type(type_code):
+            import types
+            tmap = {'U8': types.IntType, 'S8': types.IntType,
+                    'U16': types.IntType, 'S16': types.IntType,
+                    'U32': types.IntType, 'S32': types.IntType,
+                    'U64': types.IntType, 'S64': types.IntType,
+                    'U64': types.LongType, 'S64': types.LongType,
+                    'FLOAT': types.FloatType, 'DOUBLE': types.FloatType,
+                    'CFLOAT': types.ComplexType, 'CDOUBLE': types.ComplexType, 
+                    'RGB': aims.AimsRGB, 'RGBA': aims.AimsRGBA,
+                    'HSV': aims.AimsHSV, #'HSVA': aims.AimsHSVA,
+                    'POINT2D': aims.Point2d, 'POINT2DF': aims.Point2df,
+                    'POINT2DD': aims.Point2d, 'POINT2DU': aims.Point2du,
+                    'POINT3D': aims.Point3d, 'POINT3DF': aims.Point3df,
+                    'POINT3DD': aims.Point3d, 'POINT3DU': aims.Point3du,
+                    'POINT4D': aims.Point4d, 'POINT4DF': aims.Point4df,
+                    'POINT4DD': aims.Point4d, 'POINT4DU': aims.Point4du}
+            t = tmap.get(type_code)
+            if t is None:
+                t = getattr(aims, type_code, None)
+                
+                if t is None:
+                    raise TypeError('Unknown type %s' % type_code)
+            
+            return t
+
+        def is_complex_type(data_type):
+            return data_type in ('CFLOAT', 'CDOUBLE')          
+        
+        def is_vector_type(data_type):
+            
+            if data_type is None:
+                return False
+            
+            return data_type in ('RGB', 'RGBA', 'HSV', 'HSVA') or \
+                   data_type.startswith('VECTOR_OF') or \
+                   data_type.startswith('POINT')
+        
+        def get_vector_type_info(data_type):
+            l, t = (None, None)
+            if data_type in ('RGB', 'RGBA', 'HSV', 'HSVA'):
+                l, t = (len(data_type), 'U8')
+            elif data_type.startswith('VECTOR_OF'):
+                v = data_type.split('_')
+                if len(v) > 2:
+                    l = int(v[2])
+                    if len(v) > 3:
+                        t = v[3]
+            elif data_type.startswith('POINT'):
+                v = data_type.lstrip('POINT').split('D', 1)
+                if len(v) > 0:
+                    l = int(v[0])
+                    if len(v) > 1:
+                        if v[1] == 'F':
+                            t = 'FLOAT'
+                        elif v[1] == 'D':
+                            t = 'DOUBLE'
+                        elif v[1] == 'U':
+                            t = 'U32'
+                        else:
+                            raise TypeError('Unknown %s type' % data_type)
+                    else:
+                        # TODO: check that Point3d type is S16 or S32
+                        t = 'S32'
+            else:
+                raise TypeError('Unknown type %s' % data_type)
+            
+            return (l, t)
+        
+        def get_vectorized_value(type_code, value):
+            l, t = get_vector_type_info(type_code)
+            if l is None or t is None:
+                raise RuntimeError('Unable to vectorize value %s for type %s' \
+                                   % (str(value), type_code))
+            python_type = get_python_type(type_code)
+            python_data_type = get_python_type(t)
+            v = [python_data_type(value)] * l
+            return python_type(*v)
+        
+        if self.verbose:
+            print('SOMA-IO')
+            print('- write format')
+        
+        # Some exceptions are necessary to make tests passing
+        # now but they should be avoided in a near future
+        format_exceptions = { 'DICOM': {'read_pattern': 'Volume_%s_%d_%s*%s',
+                                        'volume_types': ['Volume_FLOAT']} }
+        
+        dsil = soma.DataSourceInfoLoader()
+        for t, lf in six.iteritems(aims.carto.IOObjectTypesDictionary.writeTypes()):
+            object_type, data_type = get_type_info(t)            
+            if is_volume_type(object_type):
+                try:
+                    volume_type = getattr(aims, 'Volume_' + data_type)
+                except:
+                    print('WARNING: volume type', 'Volume_' + data_type, 
+                          'exists in C++ objects but is not supported by',
+                          'python bindings, so it will not be tested.',
+                          file = sys.stderr)
+                    continue
+                
+                volumes_info = [{ 'dims': [1,1,1], 'value': 0 },
+                                { 'dims': [10,10,10], 'value': 1 }]
+                volumes = []   
+                for vinfo in volumes_info:
+                    # Get a default value
+                    if is_vector_type(data_type):
+                        v = get_vectorized_value(data_type, 
+                                                 vinfo.get('value', 0))
+                    else:
+                        v = get_python_type(data_type)(vinfo.get('value', 0))
+                    
+                    # Create new volume initialized
+                    volume = volume_type(*vinfo.get('dims', []))
+                    volume.fill(v)
+                    volumes.append(volume)
+                
+                # global exceptions
+                ge = format_exceptions.get('*', dict())
+                for f in lf:
+                    # TODO: Check that format is also readable
+                    fe = format_exceptions.get(f, dict())
+                    fevt = set()
+                    for evt in fe.get('volume_types',[]) \
+                             + ge.get('volume_types',[]):
+                        if type(evt) in (types.StringType,) and evt != '*' :
+                            try:
+                                evt = getattr(aims, evt)
+                            except:
+                                print('WARNING: volume type', 
+                                      'Volume_' + evt, 'defined in',
+                                      'exceptions is not supported by python'
+                                      'bindings, so it will not be excluded.',
+                                      file = sys.stderr)
+                                continue
+                        fevt.add(evt)
+
+                    fee = set(fe.get('exts',[]) + ge.get('exts',[]))
+                    
+                    print('Exceptions for', f, ': exclude exts', fee, 
+                         'exclude volume_types', fevt)
+                    
+                    # Skip all volume types for all extensions
+                    #if len(fevt) > 0 and '*' in fevt and len(fee) == 0:
+                    if '*' in fevt:
+                        continue
+                    
+                    # Skip specific volume type for all extensions
+                    if volume_type in fevt:
+                        continue
+
+                    # Skip all extensions for all volume types             
+                    if '*' in fee:
+                        continue
+                    
+                    exts = dsil.extensions(f)
+                    for e in exts:
+                        # Skip a specific extension for all volume types
+                        if e in fee:
+                        #if e in fee and (len(fevt) == 0 or volume_type in fevt):
+                            continue
+
+                        write_pattern = fe.get('write_pattern', 
+                                               'Volume_%s_%d_%s%s')                        
+                        read_pattern = fe.get('read_pattern', 
+                                              'Volume_%s_%d_%s%s')
+                        
+                        for i in xrange(len(volumes)):
+                            fl = os.path.join(self.work_dir, 
+                                            write_pattern % (
+                                                data_type, i, f, 
+                                                '.' + e if len(e) > 0 else ''))
+                            if self.verbose:
+                                print('writing', 'Volume_' + data_type, 
+                                      list(volumes[i].header()['volume_dimension']),
+                                      'in', f, 'to file ', fl )
+                                
+                            # Due to some ambiguities (NIFTI-1 .img and 
+                            # ANALYZE .img) it is necessary to force format
+                            aims.write(volumes[i], fl, format = f, 
+                                       options = {'force_disk_data_type' : True})
+                            
+                            # Search for the written file
+                            fl = os.path.join(self.work_dir, 
+                                            read_pattern % (data_type, i, f, 
+                                            ('.' + e if len(e) > 0 else '')))
+                            found_files = glob.glob(fl)
+                            
+                            self.assertGreater(len(found_files), 0)
+                            fl = found_files[0]
+                            
+                            if self.verbose:
+                                print('reading', 'Volume_' + data_type, 'in', f,
+                                    'from file ', fl )
+
+                            self.assertTrue( volumes[i] == aims.read(fl) )
+                        
+        # TODO: Add tests for aims format and read-only formats
+        #print('- read format')
+        #print(aims.carto.IOObjectTypesDictionary.readTypes())
 
     def tearDown(self):
         if self.debug:
