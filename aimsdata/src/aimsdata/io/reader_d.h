@@ -565,7 +565,7 @@ namespace aims
       }
     }
 
-    std::string	ext = FileFormatDictionary<T>::fileExtension( _filename );
+    std::string	ext = carto::FileUtil::extension( _filename );
 
     const std::map<std::string, std::list<std::string> >	& extensions
         = FileFormatDictionary<T>::extensions();
