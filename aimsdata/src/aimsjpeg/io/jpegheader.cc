@@ -80,10 +80,7 @@ namespace
   {
     /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
     private_jpeg_error_mgr *myerr = (private_jpeg_error_mgr *) cinfo->err;
-    // close the file
-    if( myerr->fp )
-      fclose( myerr->fp );
-
+    
     throw runtime_error( "JPEG error" );
   }
 
