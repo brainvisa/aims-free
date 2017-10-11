@@ -8,7 +8,6 @@ import sys
 import unittest
 import shutil
 import six
-import types
 from soma import aims
 from soma.aims import soma
 import numpy as np
@@ -398,7 +397,7 @@ class TestPyaimsIO(unittest.TestCase):
                     fevt = set()
                     for evt in fe.get('volume_types',[]) \
                              + ge.get('volume_types',[]):
-                        if type(evt) in (types.StringType,) and evt != '*' :
+                        if isinstance(evt, str) and evt != '*' :
                             try:
                                 evt = getattr(aims, evt)
                             except:
