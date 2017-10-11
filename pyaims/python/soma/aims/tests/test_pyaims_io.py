@@ -356,8 +356,7 @@ class TestPyaimsIO(unittest.TestCase):
 
         # Some exceptions are necessary to make tests passing
         # now but they should be avoided in a near future
-        format_exceptions = { 'DICOM': {'read_pattern': 'Volume_%s_%d_%s*%s',
-                                        'volume_types': ['Volume_FLOAT']} }
+        format_exceptions = { 'DICOM': {'read_pattern': 'Volume_%s_%d_%s*%s'} }
 
         dsil = soma.DataSourceInfoLoader()
         for t, lf in \
@@ -389,51 +388,12 @@ class TestPyaimsIO(unittest.TestCase):
                     volume.fill(v)
                     volumes.append(volume)
 
-                # global exceptions
-                ge = format_exceptions.get('*', dict())
                 for f in lf:
                     # TODO: Check that format is also readable
                     fe = format_exceptions.get(f, dict())
-                    fevt = set()
-                    for evt in fe.get('volume_types',[]) \
-                             + ge.get('volume_types',[]):
-                        if isinstance(evt, str) and evt != '*' :
-                            try:
-                                evt = getattr(aims, evt)
-                            except:
-                                print('WARNING: volume type', 
-                                      'Volume_' + evt, 'defined in',
-                                      'exceptions is not supported by python'
-                                      'bindings, so it will not be excluded.',
-                                      file = sys.stderr)
-                                continue
-                        fevt.add(evt)
-
-                    fee = set(fe.get('exts',[]) + ge.get('exts',[]))
-
-                    print('Exceptions for', f, ': exclude exts', fee, 
-                         'exclude volume_types', fevt)
-
-                    # Skip all volume types for all extensions
-                    #if len(fevt) > 0 and '*' in fevt and len(fee) == 0:
-                    if '*' in fevt:
-                        continue
-
-                    # Skip specific volume type for all extensions
-                    if volume_type in fevt:
-                        continue
-
-                    # Skip all extensions for all volume types             
-                    if '*' in fee:
-                        continue
-
+ 
                     exts = dsil.extensions(f)
                     for e in exts:
-                        # Skip a specific extension for all volume types
-                        if e in fee:
-                        #if e in fee and (len(fevt) == 0 or volume_type in fevt):
-                            continue
-
                         write_pattern = fe.get('write_pattern', 
                                                'Volume_%s_%d_%s%s')
                         read_pattern = fe.get('read_pattern', 
