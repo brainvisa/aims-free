@@ -233,7 +233,8 @@ class TestPyaimsIO(unittest.TestCase):
         vol3 = aims.read(fname)
         self.assertEqual(tuple(vol3.getSize()), (7, 5, 6, 1))
         self.assertTrue(compare_images(vol2, vol3, 'volume view',
-                                       're-read volume view', thresh, rel_thresh))
+                                       're-read volume view', thresh,
+                                       rel_thresh))
 
         # check if files remain open
         failing_files = self.check_open_files([fname, minf_fname])
@@ -252,10 +253,10 @@ class TestPyaimsIO(unittest.TestCase):
     def test_soma_io(self):
         def parses_type_code(type_code):
             return type_code.split(' of ')
-            
+
         def is_volume_type(object_type):
             return object_type in ('VolumeRef', 'carto_volume')
-    
+
         def get_type_info(type_code):
             lt = parses_type_code(type_code)
             o, d = (None, None)
@@ -263,18 +264,20 @@ class TestPyaimsIO(unittest.TestCase):
                 o = lt[0]
                 if len(lt) > 1:
                     d = ' of '.join(lt[1:])
-                    
+
             return (o, d)
-        
+
         def get_python_type(type_code):
-            import types
-            tmap = {'U8': types.IntType, 'S8': types.IntType,
-                    'U16': types.IntType, 'S16': types.IntType,
-                    'U32': types.IntType, 'S32': types.IntType,
-                    'U64': types.IntType, 'S64': types.IntType,
-                    'U64': types.LongType, 'S64': types.LongType,
-                    'FLOAT': types.FloatType, 'DOUBLE': types.FloatType,
-                    'CFLOAT': types.ComplexType, 'CDOUBLE': types.ComplexType, 
+            if sys.version_info[0] >= 3:
+                longtype = int
+            else:
+                longtype = long
+            tmap = {'U8': int, 'S8': int,
+                    'U16': int, 'S16': int,
+                    'U32': int, 'S32': int,
+                    'U64': longtype, 'S64': longtype,
+                    'FLOAT': float, 'DOUBLE': float,
+                    'CFLOAT': complex, 'CDOUBLE': complex,
                     'RGB': aims.AimsRGB, 'RGBA': aims.AimsRGBA,
                     'HSV': aims.AimsHSV, #'HSVA': aims.AimsHSVA,
                     'POINT2D': aims.Point2d, 'POINT2DF': aims.Point2df,
@@ -286,24 +289,24 @@ class TestPyaimsIO(unittest.TestCase):
             t = tmap.get(type_code)
             if t is None:
                 t = getattr(aims, type_code, None)
-                
+
                 if t is None:
                     raise TypeError('Unknown type %s' % type_code)
-            
+
             return t
 
         def is_complex_type(data_type):
-            return data_type in ('CFLOAT', 'CDOUBLE')          
-        
+            return data_type in ('CFLOAT', 'CDOUBLE')
+
         def is_vector_type(data_type):
-            
+
             if data_type is None:
                 return False
-            
+
             return data_type in ('RGB', 'RGBA', 'HSV', 'HSVA') or \
                    data_type.startswith('VECTOR_OF') or \
                    data_type.startswith('POINT')
-        
+
         def get_vector_type_info(data_type):
             l, t = (None, None)
             if data_type in ('RGB', 'RGBA', 'HSV', 'HSVA'):
@@ -332,9 +335,9 @@ class TestPyaimsIO(unittest.TestCase):
                         t = 'S32'
             else:
                 raise TypeError('Unknown type %s' % data_type)
-            
+
             return (l, t)
-        
+
         def get_vectorized_value(type_code, value):
             l, t = get_vector_type_info(type_code)
             if l is None or t is None:
@@ -344,19 +347,20 @@ class TestPyaimsIO(unittest.TestCase):
             python_data_type = get_python_type(t)
             v = [python_data_type(value)] * l
             return python_type(*v)
-        
+
         if self.verbose:
             print('SOMA-IO')
             print('- write format')
-        
+
         # Some exceptions are necessary to make tests passing
         # now but they should be avoided in a near future
         format_exceptions = { 'DICOM': {'read_pattern': 'Volume_%s_%d_%s*%s',
                                         'volume_types': ['Volume_FLOAT']} }
-        
+
         dsil = soma.DataSourceInfoLoader()
-        for t, lf in six.iteritems(aims.carto.IOObjectTypesDictionary.writeTypes()):
-            object_type, data_type = get_type_info(t)            
+        for t, lf in \
+                six.iteritems(aims.carto.IOObjectTypesDictionary.writeTypes()):
+            object_type, data_type = get_type_info(t)
             if is_volume_type(object_type):
                 try:
                     volume_type = getattr(aims, 'Volume_' + data_type)
@@ -366,7 +370,7 @@ class TestPyaimsIO(unittest.TestCase):
                           'python bindings, so it will not be tested.',
                           file = sys.stderr)
                     continue
-                
+
                 volumes_info = [{ 'dims': [1,1,1], 'value': 0 },
                                 { 'dims': [10,10,10], 'value': 1 }]
                 volumes = []   
@@ -377,12 +381,12 @@ class TestPyaimsIO(unittest.TestCase):
                                                  vinfo.get('value', 0))
                     else:
                         v = get_python_type(data_type)(vinfo.get('value', 0))
-                    
+
                     # Create new volume initialized
                     volume = volume_type(*vinfo.get('dims', []))
                     volume.fill(v)
                     volumes.append(volume)
-                
+
                 # global exceptions
                 ge = format_exceptions.get('*', dict())
                 for f in lf:
@@ -404,15 +408,15 @@ class TestPyaimsIO(unittest.TestCase):
                         fevt.add(evt)
 
                     fee = set(fe.get('exts',[]) + ge.get('exts',[]))
-                    
+
                     print('Exceptions for', f, ': exclude exts', fee, 
                          'exclude volume_types', fevt)
-                    
+
                     # Skip all volume types for all extensions
                     #if len(fevt) > 0 and '*' in fevt and len(fee) == 0:
                     if '*' in fevt:
                         continue
-                    
+
                     # Skip specific volume type for all extensions
                     if volume_type in fevt:
                         continue
@@ -420,7 +424,7 @@ class TestPyaimsIO(unittest.TestCase):
                     # Skip all extensions for all volume types             
                     if '*' in fee:
                         continue
-                    
+
                     exts = dsil.extensions(f)
                     for e in exts:
                         # Skip a specific extension for all volume types
@@ -429,10 +433,10 @@ class TestPyaimsIO(unittest.TestCase):
                             continue
 
                         write_pattern = fe.get('write_pattern', 
-                                               'Volume_%s_%d_%s%s')                        
+                                               'Volume_%s_%d_%s%s')
                         read_pattern = fe.get('read_pattern', 
                                               'Volume_%s_%d_%s%s')
-                        
+
                         for i in xrange(len(volumes)):
                             fl = os.path.join(self.work_dir, 
                                             write_pattern % (
@@ -442,27 +446,27 @@ class TestPyaimsIO(unittest.TestCase):
                                 print('writing', 'Volume_' + data_type, 
                                       list(volumes[i].header()['volume_dimension']),
                                       'in', f, 'to file ', fl )
-                                
+
                             # Due to some ambiguities (NIFTI-1 .img and 
                             # ANALYZE .img) it is necessary to force format
                             aims.write(volumes[i], fl, format = f, 
-                                       options = {'force_disk_data_type' : True})
-                            
+                                       options = {'force_disk_data_type': True})
+
                             # Search for the written file
                             fl = os.path.join(self.work_dir, 
                                             read_pattern % (data_type, i, f, 
                                             ('.' + e if len(e) > 0 else '')))
                             found_files = glob.glob(fl)
-                            
+
                             self.assertGreater(len(found_files), 0)
                             fl = found_files[0]
-                            
+
                             if self.verbose:
                                 print('reading', 'Volume_' + data_type, 'in', f,
-                                    'from file ', fl )
+                                      'from file ', fl )
 
                             self.assertTrue( volumes[i] == aims.read(fl) )
-                        
+
         # TODO: Add tests for aims format and read-only formats
         #print('- read format')
         #print(aims.carto.IOObjectTypesDictionary.readTypes())
