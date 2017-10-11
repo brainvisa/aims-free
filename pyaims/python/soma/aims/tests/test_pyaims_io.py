@@ -8,12 +8,14 @@ import sys
 import unittest
 import shutil
 import six
-import types
 from soma import aims
 from soma.aims import soma
 import numpy as np
 import glob
 from soma.aims.volumetools import compare_images
+
+if sys.version_info[0] >= 3:
+    xrange = range
 
 class TestPyaimsIO(unittest.TestCase):
 
@@ -25,10 +27,10 @@ class TestPyaimsIO(unittest.TestCase):
         self.work_dir = tempfile.mkdtemp(prefix='test_pyaims')
         if self.verbose or self.debug:
             print('work directory:', self.work_dir)
-            
+
         if self.debug:
             aims.carto.setDebugMessageLevel(100)
-            
+
         if self.verbose:
             aims.carto.setVerbose(1)
 
@@ -395,7 +397,7 @@ class TestPyaimsIO(unittest.TestCase):
                     fevt = set()
                     for evt in fe.get('volume_types',[]) \
                              + ge.get('volume_types',[]):
-                        if type(evt) in (types.StringType,) and evt != '*' :
+                        if isinstance(evt, str) and evt != '*' :
                             try:
                                 evt = getattr(aims, evt)
                             except:
