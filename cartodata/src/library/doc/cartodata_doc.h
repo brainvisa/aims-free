@@ -65,12 +65,12 @@ namespace carto
   - <b>\ref cartovolumes</b>
   - \ref cartovolumes_io : IO types and formats implementations on volumes
 
-  - <b><a href="changelog.html">Change Log</a></b>
+  <!--- <b><a href="changelog.html">Change Log</a>--></b>
 
 */
 
 
-/*! \page cartovolumes Volumes concept philiosophy
+/*! \page cartovolumes Volumes concept philosophy
 
   Volumes rely on the allocator system of somaio: see \ref allocators.
 
