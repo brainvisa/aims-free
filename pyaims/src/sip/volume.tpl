@@ -126,6 +126,11 @@ If the volume is a view into another (larger) one, this returns the "parent" one
 If the volume is a view into another (larger) one, this returns the position in "parent" one.
 %End
 
+    void setPosInRefVolume(const vector_S32 & pos);
+%Docstring
+Set position in parent volume
+%End
+
   %Template1PyType% at( long, long = 0, long = 0, long = 0 ) const;
 %Docstring
 at(posx, posy=0, posz=0, post=0)
