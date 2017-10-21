@@ -83,6 +83,15 @@ This object is used when memory must be allocated for large objects (volumes, ar
     carto::AllocatorContext::MappingMode allocatorType() const;
     carto::AllocatorContext::DataAccess accessMode() const;
     void setAccessMode( carto::AllocatorContext::DataAccess mode );
+
+    void setDataSource( rc_ptr_DataSource datasource );
+    // const rc_ptr_DataSource dataSource() const;
+    rc_ptr_DataSource dataSource();
+
+    void setDataSourceInfo( rc_ptr_DataSourceInfo dsi );
+    // const rc_ptr_DataSourceInfo dataSourceInfo() const;
+    rc_ptr_DataSourceInfo dataSourceInfo();
+
     bool isAllocated() const;
     float useFactor() const;
     void setUseFactor( float x );
