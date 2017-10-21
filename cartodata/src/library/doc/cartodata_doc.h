@@ -60,6 +60,10 @@ namespace carto
     and array API
 
 
+  \section cartodata_building Building:
+
+  Use <a href="http://www.cmake.org/">CMake</a>, a cross-platform and open-source build system. More information on <a href="http://brainvisa.info/brainvisa-cmake/compile_existing.html">The BrainVISA-cmake build system</a>. See also <a href="http://brainvisa.info/web/infrastructure.html#sources">this page on BrainVISA website</a>.
+
   \section cartodata_maincontents Main contents
 
   - <b>\ref cartovolumes</b>

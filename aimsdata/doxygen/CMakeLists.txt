@@ -1,5 +1,5 @@
 IF ( DOXYGEN_FOUND )
-  SET( DOXYFILE_HTML_HEADER "\"${CMAKE_CURRENT_SOURCE_DIR}/head_aims.html\"" )
+#   SET( DOXYFILE_HTML_HEADER "\"${CMAKE_CURRENT_SOURCE_DIR}/head_aims.html\"" )
   set( _doxygenInput ${HEADERS} "config/config.h" )
   # remove some embedded external libs headers, some of which causing problems
   # to some doxygen versions (Ubuntu 13.10-14.04)
@@ -20,6 +20,8 @@ IF ( DOXYGEN_FOUND )
   set(_somaio_version "${soma-io_VERSION_MAJOR}.${soma-io_VERSION_MINOR}")
   set( DOXYFILE_TAGFILES
     "${CMAKE_BINARY_DIR}/share/doc/graph-${aims_version}/doxygen/graph.tag=../../graph-${aims_version}/doxygen ${CMAKE_BINARY_DIR}/share/doc/cartobase-${_somaio_version}/doxygen/cartobase.tag=../../cartobase-${_somaio_version}/doxygen ${CMAKE_BINARY_DIR}/share/doc/soma-io-${_somaio_version}/doxygen/soma-io.tag=../../soma-io-${_somaio_version}/doxygen ${CMAKE_BINARY_DIR}/share/doc/cartodata-${aims_version}/doxygen/cartodata.tag=../../cartodata-${aims_version}/doxygen" )
+  set( DOXYFILE_PROJECT_LOGO "\"${CMAKE_CURRENT_SOURCE_DIR}/aims.gif\"" )
+  set( DOXYFILE_PROJECT_BRIEF "\"Neuroimaging data hanling\"" )
   BRAINVISA_GENERATE_DOXYGEN_DOC(
     _doxygenInput head_aims.html aims.gif bvstyle.css
     INPUT_PREFIX "${CMAKE_BINARY_DIR}/include/aims"

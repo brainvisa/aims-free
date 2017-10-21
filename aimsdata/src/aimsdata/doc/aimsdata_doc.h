@@ -103,8 +103,7 @@
 
   \section aimsdata_building Building:
 
-  Use <a href="http://www.cmake.org/">CMake</a>, a cross-platform and open-source build system. More information on <a href="https://bioproj.extra.cea.fr/redmine/projects/brainvisa-devel/wiki/How_to_compile_BrainVISA_projects">this wiki page on Bioproj</a>, our Redmine based projects platform. To know more about Bioproj, see <a href="http://brainvisa.info/repository.html">this page on BrainVISA website</a>.
-
+  Use <a href="http://www.cmake.org/">CMake</a>, a cross-platform and open-source build system. More information on <a href="http://brainvisa.info/brainvisa-cmake/compile_existing.html">The BrainVISA-cmake build system</a>. See also <a href="http://brainvisa.info/web/infrastructure.html#sources">this page on BrainVISA website</a>.
 
   \section aimsdata_maincontents Main contents:
 
