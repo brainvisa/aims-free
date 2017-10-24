@@ -131,13 +131,19 @@ namespace
                      const BucketMap<Void> & src,
                      const BucketMap<int16_t> & voronoi, int16_t label1 )
   {
-    const BucketMap<Void>::Bucket & bk = src.begin()->second;
-    const BucketMap<int16_t>::Bucket & vor = voronoi.begin()->second;
-    BucketMap<Void>::Bucket::const_iterator ib, eb = bk.end();
     out1.reset( new BucketMap<Void> );
     out2.reset( new BucketMap<Void> );
     out1->setSizeXYZT( src.sizeX(), src.sizeY(), src.sizeZ(), src.sizeT() );
     out2->setSizeXYZT( src.sizeX(), src.sizeY(), src.sizeZ(), src.sizeT() );
+
+    if( src.empty() || src.begin()->second.empty()
+        || voronoi.empty() || voronoi.begin()->second.empty() )
+      // no source: nothing to do.
+      return;
+
+    const BucketMap<Void>::Bucket & bk = src.begin()->second;
+    const BucketMap<int16_t>::Bucket & vor = voronoi.begin()->second;
+    BucketMap<Void>::Bucket::const_iterator ib, eb = bk.end();
     BucketMap<Void>::Bucket & o1 = (*out1)[0];
     BucketMap<Void>::Bucket & o2 = (*out2)[0];
     BucketMap<int16_t>::Bucket::const_iterator ivo, evo = vor.end();
@@ -372,10 +378,10 @@ namespace
       vor[ ib->first ] = 1;
     for( ib=seed1->begin()->second.begin(), eb=seed1->begin()->second.end();
          ib!=eb; ++ib )
-    vor[ ib->first ] = 10;
+      vor[ ib->first ] = 10;
     for( ib=seed2->begin()->second.begin(), eb=seed2->begin()->second.end();
          ib!=eb; ++ib )
-    vor[ ib->first ] = 11;
+      vor[ ib->first ] = 11;
     set<int16_t> work, seeds;
     work.insert( 1 );
     seeds.insert( 10 );
@@ -1130,6 +1136,10 @@ Vertex *FoldArgOverSegment::splitVertex(
   {
     if( v->hasProperty( "aims_bottom" ) )
       v->removeProperty( "aims_bottom" );
+    if( v->hasProperty( "bottom_label" ) )
+      v->removeProperty( "bottom_label" );
+    if( v->hasProperty( "bottom_filename" ) )
+      v->removeProperty( "bottom_filename" );
   }
   if( (*other1)[0].size() != 0 )
     GraphManip::storeAims( *_graph, v, "aims_other", other1 );
@@ -1137,6 +1147,10 @@ Vertex *FoldArgOverSegment::splitVertex(
   {
     if( v->hasProperty( "aims_other" ) )
       v->removeProperty( "aims_other" );
+    if( v->hasProperty( "other_label" ) )
+      v->removeProperty( "other_label" );
+    if( v->hasProperty( "other_filename" ) )
+      v->removeProperty( "other_filename" );
   }
   Edge *hje2 = 0;
   if( hj )
@@ -1151,6 +1165,10 @@ Vertex *FoldArgOverSegment::splitVertex(
     {
       if( hj->hasProperty( "aims_junction" ) )
         hj->removeProperty( "aims_junction" );
+      if( hj->hasProperty( "junction_label" ) )
+        hj->removeProperty( "junction_label" );
+      if( hj->hasProperty( "junction_filename" ) )
+        hj->removeProperty( "junction_filename" );
       hje2 = _graph->addEdge( v2, hull, hj->getSyntax() );
       copyGraphObjectProperties( hj, hje2 );
       _graph->removeEdge( hj );
