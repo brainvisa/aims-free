@@ -114,6 +114,13 @@ namespace aims
       carto::rc_ptr<BucketMap<Void> > & ss1,
       carto::rc_ptr<BucketMap<Void> > & ss2 );
 
+    /** Dilate a bucket 1 voxel thicker to allow using the Fastmarching algorith
+        on it (used for Voronoi)
+    */
+    template <typename T>
+    static BucketMap<T> *dilateBucket( const BucketMap<T> & in );
+
+
   private:
     Graph *_graph;
   };

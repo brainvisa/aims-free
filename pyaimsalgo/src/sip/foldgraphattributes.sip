@@ -99,6 +99,8 @@ public:
       sipType_rc_ptr_BucketMap_VOID, Py_None ) );
   }
 %End
+
+  static BucketMap_S16 *dilateBucket( const BucketMap_S16 & in );
 };
 
 };

@@ -52,37 +52,6 @@ using namespace std;
 namespace
 {
 
-  // grows the bucket 1 voxel thicker
-  template <typename T>
-  BucketMap<T> *dilateBucket( const BucketMap<T> & in )
-  {
-    BucketMap<T> *res = new BucketMap<T>;
-    res->setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
-    typename BucketMap<T>::const_iterator ib, eb = in.end();
-    typename BucketMap<T>::Bucket::const_iterator ibb, ebb, jb, ejb;
-    Connectivity cd( 0, 0, Connectivity::CONNECTIVITY_6_XYZ );
-    int i, n = cd.nbNeighbors();
-
-    for( ib=in.begin(); ib!=eb; ++ib )
-    {
-      typename BucketMap<T>::Bucket & bk = (*res)[ib->first];
-      ejb = bk.end();
-      for( ibb=ib->second.begin(), ebb=ib->second.end(); ibb!=ebb; ++ibb )
-      {
-        bk[ ibb->first ] = ibb->second;
-        for( i=0; i<n; ++i )
-        {
-          Point3d p( ibb->first + cd.xyzOffset(i) );
-          jb = bk.find( p );
-          if( jb == ejb )
-            bk[ p ] = ibb->second;
-        }
-      }
-    }
-    return res;
-  }
-
-
   /* correspondance measure of neighborhood (max if b1 and b2 are
      really close neighbors, null if they are far).
      If dil is not 0, the initial b1 bucket is dilated dil voxels before
@@ -98,7 +67,7 @@ namespace
       b1bis.reset( new BucketMap<Void> );
       (*b1bis)[0] = b1;
       for( int i=0; i<dil; ++i )
-        b1bis.reset( dilateBucket( *b1bis ) );
+        b1bis.reset( FoldArgOverSegment::dilateBucket( *b1bis ) );
       b1p = &b1bis->begin()->second;
     }
     BucketMap<Void>::Bucket::const_iterator
@@ -387,7 +356,7 @@ namespace
     seeds.insert( 10 );
     seeds.insert( 11 );
     // dilate to overcome the 6-connectivity requirement of fastmarching
-    voronoi.reset( dilateBucket( *voronoi ) );
+    voronoi.reset( FoldArgOverSegment::dilateBucket( *voronoi ) );
     FastMarching<BucketMap<int16_t> > fm( Connectivity::CONNECTIVITY_26_XYZ );
     fm.doit( voronoi, work, seeds );
     return fm.voronoiVol();
@@ -1479,4 +1448,37 @@ int FoldArgOverSegment::subdivizeGraph( float piecelength, size_t minsize,
     nv += subdivizeVertex( *iv, piecelength, minsize, newvertices );
   return nv;
 }
+
+
+// grows the bucket 1 voxel thicker
+template <typename T>
+BucketMap<T> *FoldArgOverSegment::dilateBucket( const BucketMap<T> & in )
+{
+  BucketMap<T> *res = new BucketMap<T>;
+  res->setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
+  typename BucketMap<T>::const_iterator ib, eb = in.end();
+  typename BucketMap<T>::Bucket::const_iterator ibb, ebb, jb, ejb;
+  Connectivity cd( 0, 0, Connectivity::CONNECTIVITY_6_XYZ );
+  int i, n = cd.nbNeighbors();
+
+  for( ib=in.begin(); ib!=eb; ++ib )
+  {
+    typename BucketMap<T>::Bucket & bk = (*res)[ib->first];
+    ejb = bk.end();
+    for( ibb=ib->second.begin(), ebb=ib->second.end(); ibb!=ebb; ++ibb )
+    {
+      bk[ ibb->first ] = ibb->second;
+      for( i=0; i<n; ++i )
+      {
+        Point3d p( ibb->first + cd.xyzOffset(i) );
+        jb = bk.find( p );
+        if( jb == ejb )
+          bk[ p ] = ibb->second;
+      }
+    }
+  }
+  return res;
+}
+
+
 
