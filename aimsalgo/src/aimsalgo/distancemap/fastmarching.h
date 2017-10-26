@@ -112,6 +112,8 @@ namespace aims
 
         Propagation will take place in the regions listed in "worklabels", from
         all seeds in the "seedlabels" list.
+        
+        WARNING: the propagation labels in worklabels should be positive
     */
     RCFloatType doit( const RCType & vol,
       const std::set<int16_t> & worklabels,

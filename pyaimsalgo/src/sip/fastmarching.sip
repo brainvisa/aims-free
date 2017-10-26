@@ -112,6 +112,7 @@ Parameters
 vol: rc_ptr_Volume_S16
     label volume to build distance map from. Contains seeds, propagation (work) region, and possibly forbidden regions
 worklabels: set_S16
+    WARNING: the propagation labels in worklabels should be positive
 seedlabels: set_S16
 
 Returns
