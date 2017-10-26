@@ -427,7 +427,7 @@ FastMarching<T>::doit( const RCType & labels,
     fps.inv_speed->fill( FLT_MAX );
   typename SparseVolume<T>::iterator ist, est = slabels.end();
   typename SparseVolume<T>::LowLevelStorage::iterator iv, ev;
-  set<int16_t>::const_iterator is, es = seeds.end(), iw, ew = worklabels.end();
+  set<int16_t>::const_iterator is, es = seeds.end(), ew = worklabels.end();
   Connectivity c( 0, 0, d->connectivity );
   int i, n = c.nbNeighbors();
   long long nwork = 0, ninter = 0;
