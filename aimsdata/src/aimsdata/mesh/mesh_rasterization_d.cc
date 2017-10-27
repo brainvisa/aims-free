@@ -37,96 +37,117 @@ using namespace aims;
 using namespace carto;
 using namespace std;
 
+
+namespace
+{
+
+  template <typename T>
+  void setPoint( T & vol, const Point3d & pos, int value );
+
+  template <>
+  inline
+  void setPoint( Volume<int16_t> & vol, const Point3d & pos, int value )
+  {
+    vol.at( pos ) = value;
+  }
+
+  template <>
+  inline
+  void setPoint( BucketMap<Void>::Bucket & vol, const Point3d & pos, int )
+  {
+    vol[pos] = Void();
+  }
+
+}
+
 namespace aims
 {
 
-  namespace internal
-  {
-    static void rasterize_line(
+  template <typename T>
+  void SurfaceManip::rasterizeLine(
     const Point3df & p0, const Point3df & direction, float lmax,
-    carto::rc_ptr<carto::Volume<int16_t> > & volume, int value )
+    T & volume, int value )
+  {
+    float dx, dy, dz, dx2, dy2, dz2;
+    float ax, ay, az, lx, ly, lz, l;
+    Point3d pint;
+
+    dx = direction[0] == 0.F ? 0 : ( direction[0] > 0.F ? 1.F : -1.F );
+    dy = direction[1] == 0.F ? 0 : ( direction[1] > 0.F ? 1.F : -1.F );
+    dz = direction[2] == 0.F ? 0 : ( direction[2] > 0.F ? 1.F : -1.F );
+    dx2 = dx / 2;
+    dy2 = dy / 2;
+    dz2 = dz / 2;
+
+    if( dx == 0.F )
     {
-      float dx, dy, dz, dx2, dy2, dz2;
-      float ax, ay, az, lx, ly, lz, l;
-      Point3d pint;
-
-      dx = direction[0] == 0.F ? 0 : ( direction[0] > 0.F ? 1.F : -1.F );
-      dy = direction[1] == 0.F ? 0 : ( direction[1] > 0.F ? 1.F : -1.F );
-      dz = direction[2] == 0.F ? 0 : ( direction[2] > 0.F ? 1.F : -1.F );
-      dx2 = dx / 2;
-      dy2 = dy / 2;
-      dz2 = dz / 2;
-
-      if( dx == 0.F )
-      {
-        ax = 0.F;
-        lx = lmax + 1.;
-      }
+      ax = 0.F;
+      lx = lmax + 1.;
+    }
+    else
+    {
+      if( p0[0] == floor( p0[0] - dx2 ) + dx2 )
+        ax = - ( p0[0] + dx );
       else
-      {
-        if( p0[0] == floor( p0[0] - dx2 ) + dx2 )
-          ax = - ( p0[0] + dx );
-        else
-          ax = - ( floor( p0[0] + 0.5 ) + dx2 );
-      }
-      if( dy == 0.F )
-      {
-        ay = 0.F;
-        ly = lmax + 1.;
-      }
+        ax = - ( floor( p0[0] + 0.5 ) + dx2 );
+    }
+    if( dy == 0.F )
+    {
+      ay = 0.F;
+      ly = lmax + 1.;
+    }
+    else
+    {
+      if( p0[1] == floor( p0[1] - dy2 ) + dy2 )
+        ay = - ( p0[1] + dy );
       else
-      {
-        if( p0[1] == floor( p0[1] - dy2 ) + dy2 )
-          ay = - ( p0[1] + dy );
-        else
-          ay = - ( floor( p0[1] + 0.5 ) + dy2 );
-      }
-      if( dz == 0.F )
-      {
-        az = 0.F;
-        lz = lmax + 1.;
-      }
+        ay = - ( floor( p0[1] + 0.5 ) + dy2 );
+    }
+    if( dz == 0.F )
+    {
+      az = 0.F;
+      lz = lmax + 1.;
+    }
+    else
+    {
+      if( p0[2] == floor( p0[2] - dz2 ) + dz2 )
+        az = - ( p0[2] + dz );
       else
+        az = - ( floor( p0[2] + 0.5 ) + dz2 );
+    }
+
+    l = 0.F;
+    pint = Point3d( floor( p0[0] + 0.5 ), floor( p0[1] + 0.5 ),
+                    floor( p0[2] + 0.5 ) );
+    setPoint( volume, pint, value );
+
+    while( l < lmax )
+    {
+      if( dx != 0.F )
+        lx = - ( ax + p0[0] ) / direction[0];
+      if( dy != 0.F )
+        ly = - ( ay + p0[1] ) / direction[1];
+      if( dz != 0.F )
+        lz = - ( az + p0[2] ) / direction[2];
+      l = lx < ly ? lx : ly;
+      l = l < lz ? l : lz;
+      if( dx != 0.F && l == lx )
       {
-        if( p0[2] == floor( p0[2] - dz2 ) + dz2 )
-          az = - ( p0[2] + dz );
-        else
-          az = - ( floor( p0[2] + 0.5 ) + dz2 );
+        ax -= dx;
+        pint[0] += dx;
+        setPoint( volume, pint, value );
       }
-
-      l = 0.F;
-      pint = Point3d( floor( p0[0] + 0.5 ), floor( p0[1] + 0.5 ),
-                      floor( p0[2] + 0.5 ) );
-      volume->at( pint[0], pint[1], pint[2] ) = value;
-
-      while( l < lmax )
+      if( dy != 0.F && l == ly )
       {
-        if( dx != 0.F )
-          lx = - ( ax + p0[0] ) / direction[0];
-        if( dy != 0.F )
-          ly = - ( ay + p0[1] ) / direction[1];
-        if( dz != 0.F )
-          lz = - ( az + p0[2] ) / direction[2];
-        l = lx < ly ? lx : ly;
-        l = l < lz ? l : lz;
-        if( dx != 0.F && l == lx )
-        {
-          ax -= dx;
-          pint[0] += dx;
-          volume->at( pint[0], pint[1], pint[2] ) = value;
-        }
-        if( dy != 0.F && l == ly )
-        {
-          ay -= dy;
-          pint[1] += dy;
-          volume->at( pint[0], pint[1], pint[2] ) = value;
-        }
-        if( dz != 0.F && l == lz )
-        {
-          az -= dz;
-          pint[2] += dz;
-          volume->at( pint[0], pint[1], pint[2] ) = value;
-        }
+        ay -= dy;
+        pint[1] += dy;
+        setPoint( volume, pint, value );
+      }
+      if( dz != 0.F && l == lz )
+      {
+        az -= dz;
+        pint[2] += dz;
+        setPoint( volume, pint, value );
       }
     }
   }
@@ -184,6 +205,13 @@ namespace aims
     const AimsTimeSurface<4,Void> & mesh,
     carto::rc_ptr<carto::Volume<int16_t> > & volume,
     int value );
+
+  template void SurfaceManip::rasterizeLine(
+    const Point3df & p0, const Point3df & direction, float lmax,
+    Volume<int16_t> & volume, int value );
+  template void SurfaceManip::rasterizeLine(
+    const Point3df & p0, const Point3df & direction, float lmax,
+    BucketMap<Void>::Bucket & volume, int value );
 
 }
 
