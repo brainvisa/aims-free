@@ -36,17 +36,11 @@
 
 #include <aims/mesh/surfaceOperation.h>
 #include <cartodata/volume/volume.h>
+#include <aims/bucket/bucket.h>
+
 
 namespace aims
 {
-
-  namespace internal
-  {
-    static void rasterize_line(
-      const Point3df & p0, const Point3df & direction, float lmax,
-      carto::rc_ptr<carto::Volume<int16_t> > & volume, int value );
-  }
-
 
   template <int D, typename T>
   void SurfaceManip::rasterizeMeshWireframe(
@@ -62,6 +56,7 @@ namespace aims
     Point3df v1, v2, v1v, v2v, direction;
     float lmax;
     unsigned i;
+    carto::Volume<int16_t> & vol = *volume;
 
     for( ip=polygons.begin(); ip!=ep; ++ip )
     {
@@ -75,7 +70,7 @@ namespace aims
         direction = v2v - v1v;
         lmax = direction.norm();
         direction.normalize();
-        internal::rasterize_line( v1v, direction, lmax, volume, value );
+        rasterizeLine( v1v, direction, lmax, vol, value );
       }
     }
   }

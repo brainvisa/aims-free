@@ -237,6 +237,15 @@ namespace aims
       const AimsTimeSurface<3, Void> & mesh,
       carto::rc_ptr<carto::Volume<int16_t> > & volume, int value = 2 );
 
+    /** T should be carto::Volume<int16_t> or BucketMap<Void>::Bucket
+
+        Moreover, coordinates shoule be already be divided by the voxel size
+    */
+    template <typename T>
+    static void rasterizeLine(
+      const Point3df & p0, const Point3df & direction, float lmax,
+      T & volume, int value );
+
   };
 
 }
