@@ -210,11 +210,12 @@ def rgb_repr(self):
                                             self[1], self[2])
 
 def rgba_str(self):
-    return '[%d, %d, %d]' % (self[0], self[1], self[2], self[3])
+    return '[%d, %d, %d, %d]' % (self[0], self[1], self[2], self[3])
 
 def rgba_repr(self):
-    return '<soma.aims.%s> [%d, %d, %d]' % (self.__class__.__name__, self[0],
-                                            self[1], self[2], self[3])
+    return '<soma.aims.%s> [%d, %d, %d, %d]' % (self.__class__.__name__,
+                                                self[0], self[1], self[2],
+                                                self[3])
 AimsRGB.__str__ = rgb_str
 AimsRGB.__repr__ = rgb_repr
 AimsRGBA.__str__ = rgba_str
