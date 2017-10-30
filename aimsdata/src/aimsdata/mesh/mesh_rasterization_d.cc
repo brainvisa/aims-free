@@ -129,8 +129,8 @@ namespace aims
         ly = - ( ay + p0[1] ) / direction[1];
       if( dz != 0.F )
         lz = - ( az + p0[2] ) / direction[2];
-      l = lx < ly ? lx : ly;
-      l = l < lz ? l : lz;
+      l = ( lx < ly  && lx != l ) ? lx : ( ly != l ? ly : l );
+      l = ( lz < l && lz != l ) ? lz : l;
       if( dx != 0.F && l == lx )
       {
         ax -= dx;
