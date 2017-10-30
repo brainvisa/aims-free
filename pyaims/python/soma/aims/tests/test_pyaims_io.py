@@ -420,7 +420,7 @@ class TestPyaimsIO(unittest.TestCase):
                                             ('.' + e if len(e) > 0 else '')))
                             found_files = glob.glob(fl)
 
-                            self.assertGreater(len(found_files), 0)
+                            self.assertNotEqual(len(found_files), 0)
                             fl = found_files[0]
 
                             if self.verbose:
