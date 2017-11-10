@@ -190,8 +190,15 @@ private:
   float _invsizeX, _invsizeY, _invsizeZ;
 };
 
-
-
+//-----------------------------------------------------------------------------
+extern template class LinearInterpolator<uint8_t>;
+extern template class LinearInterpolator<int8_t>;
+extern template class LinearInterpolator<uint16_t>;
+extern template class LinearInterpolator<int16_t>;
+extern template class LinearInterpolator<uint32_t>;
+extern template class LinearInterpolator<int32_t>;
+extern template class LinearInterpolator<float>;
+extern template class LinearInterpolator<double>;
 
 
   //--------------------------------//
@@ -213,7 +220,9 @@ extern template carto::rc_ptr< Interpolator >
 extern template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const AimsData<int8_t> & );
 extern template carto::rc_ptr< Interpolator > 
- getLinearInterpolator( const AimsData<unsigned short> & );
+ getLinearInterpolator( const AimsData<uint16_t> & );
+extern template carto::rc_ptr< Interpolator >
+ getLinearInterpolator( const AimsData<int16_t> & );
 extern template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const AimsData<short> & );
 extern template carto::rc_ptr< Interpolator > 
@@ -367,19 +376,6 @@ const carto::PropertySet & LinearInterpolator<T>::header() const
 {
   return _image.volume()->header();
 }
-
-
-//-----------------------------------------------------------------------------
-extern template class LinearInterpolator<uint8_t>;
-extern template class LinearInterpolator<int8_t>;
-extern template class LinearInterpolator<uint16_t>;
-extern template class LinearInterpolator<int16_t>;
-extern template class LinearInterpolator<uint32_t>;
-extern template class LinearInterpolator<int32_t>;
-extern template class LinearInterpolator<float>;
-extern template class LinearInterpolator<double>;
-
-
 
 } // namespace aims
 

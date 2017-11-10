@@ -429,6 +429,10 @@ namespace aims
                   carto::rc_ptr< VoxelSampler > voxelSampler,
                   const Motion &motion ) ;
 
+  //---------------------------------------------------------------------------
+  extern template class RoiIteratorOf<AimsData<int16_t> >;
+  extern template class RoiIteratorOf<Graph>;
+  
 } // namespace aims
 
 #endif

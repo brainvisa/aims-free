@@ -75,7 +75,7 @@ class LinearInterpolatorFactory : public Process
 LinearInterpolatorFactory:: LinearInterpolatorFactory()
 {
   registerProcessType( "Volume", "S8", &createInterpolator<int8_t> );
-  registerProcessType( "Volume", "U8", &createInterpolator<byte> );
+  registerProcessType( "Volume", "U8", &createInterpolator<uint8_t> );
   registerProcessType( "Volume", "S16", &createInterpolator<int16_t> );
   registerProcessType( "Volume", "U16", &createInterpolator<uint16_t> );
   registerProcessType( "Volume", "S32", &createInterpolator<int32_t> );
@@ -124,7 +124,7 @@ template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const AimsData<uint16_t> & );
 template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const AimsData<int16_t> & );
-template carto::rc_ptr< Interpolator > 
+template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const AimsData<uint32_t> & );
 template carto::rc_ptr< Interpolator >
  getLinearInterpolator( const AimsData<int32_t> & );
