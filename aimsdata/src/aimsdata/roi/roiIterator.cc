@@ -505,4 +505,8 @@ getRoiIterator( const Graph &data,
                                motion ) );
 }
 
+//---------------------------------------------------------------------------
+  template class RoiIteratorOf<AimsData<int16_t> >;
+  template class RoiIteratorOf<Graph>;
+  
 } // namespace aims

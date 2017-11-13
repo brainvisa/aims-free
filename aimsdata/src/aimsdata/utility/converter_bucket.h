@@ -202,6 +202,14 @@ namespace carto
   };
 
 
+  template <typename INP,typename OUTP>
+  class ConverterAllocator<aims::BucketMap<INP>, VolumeRef<OUTP> >
+  {
+  public:
+    static VolumeRef<OUTP>* alloc( const aims::BucketMap<INP> &in );
+  };
+
+
   // implementation
 
   template <class INP,class OUTP> inline
@@ -473,6 +481,21 @@ namespace carto
   ConverterAllocator<aims::BucketMap<INP>,AimsData<OUTP> >::alloc
   ( const aims::BucketMap<INP> &in )
   {
+    VolumeRef<OUTP> *vol
+      = ConverterAllocator<aims::BucketMap<INP>, VolumeRef<OUTP> >::alloc( in );
+    AimsData<OUTP> *out = new AimsData<OUTP>( *vol );
+    delete vol;
+    return out;
+  }
+
+
+  // VolumeRef implementation
+
+  template <class INP,class OUTP>
+  inline VolumeRef<OUTP>*
+  ConverterAllocator<aims::BucketMap<INP>, VolumeRef<OUTP> >::alloc
+  ( const aims::BucketMap<INP> &in )
+  {
     typename aims::BucketMap<INP>::const_iterator	it, et = in.end();
     typename aims::BucketMap<INP>::Bucket::const_iterator	ib, eb;
     Point3d	bmin( 0, 0, 0 ), bmax( 0, 0, 0 );
@@ -481,49 +504,52 @@ namespace carto
     //	seek bounding box
     for( it=in.begin(); it!=et; ++it )
       for( ib=it->second.begin(), eb=it->second.end(); ib!=eb; ++ib )
-	{
-	  const Point3d	& pos = ib->first;
-	  if( first )
-	    {
-	      bmin[0] = pos[0];
-	      bmin[1] = pos[1];
-	      bmin[2] = pos[2];
-	      bmax[0] = pos[0];
-	      bmax[1] = pos[1];
-	      bmax[2] = pos[2];
-	      first = false;
-	    }
-	  else
-	    {
-	      if( pos[0] < bmin[0] )
-		bmin[0] = pos[0];
-	      if( pos[1] < bmin[1] )
-		bmin[1] = pos[1];
-	      if( pos[2] < bmin[2] )
-		bmin[2] = pos[2];
-	      if( pos[0] > bmax[0] )
-		bmax[0] = pos[0];
-	      if( pos[1] > bmax[1] )
-		bmax[1] = pos[1];
-	      if( pos[2] > bmax[2] )
-		bmax[2] = pos[2];
-	    }
-	}
+      {
+        const Point3d	& pos = ib->first;
+        if( first )
+        {
+          bmin[0] = pos[0];
+          bmin[1] = pos[1];
+          bmin[2] = pos[2];
+          bmax[0] = pos[0];
+          bmax[1] = pos[1];
+          bmax[2] = pos[2];
+          first = false;
+        }
+        else
+        {
+          if( pos[0] < bmin[0] )
+            bmin[0] = pos[0];
+          if( pos[1] < bmin[1] )
+            bmin[1] = pos[1];
+          if( pos[2] < bmin[2] )
+            bmin[2] = pos[2];
+          if( pos[0] > bmax[0] )
+            bmax[0] = pos[0];
+          if( pos[1] > bmax[1] )
+            bmax[1] = pos[1];
+          if( pos[2] > bmax[2] )
+            bmax[2] = pos[2];
+        }
+      }
 
     if( bmin[0] >= 0 && bmin[1] >= 0 && bmin[2] >= 0 )
       bmin = Point3d( 0, 0, 0 );
 
-    AimsData<OUTP> 
-      *out( new AimsData<OUTP>( bmax[0] - bmin[0] + 1, bmax[1] - bmin[1] + 1, 
-			       bmax[2] - bmin[2] + 1, in.size() ) );
-    out->setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ(), in.sizeT() );
+    VolumeRef<OUTP>
+      *out( new VolumeRef<OUTP>( bmax[0] - bmin[0] + 1, bmax[1] - bmin[1] + 1,
+                                 bmax[2] - bmin[2] + 1, in.size() ) );
+    std::vector<float> vs( 4 );
+    vs[0] = in.sizeX();
+    vs[1] = in.sizeY();
+    vs[2] = in.sizeZ();
+    vs[3] = in.sizeT();
+    out->header().setProperty( "voxel_size", vs );
 
-    *out = 0;
+    out->fill( 0 );
     return out;
   }
 
-
-  // VolumeRef implementation
 
   template <class INP,class OUTP> inline
   void RawConverter<aims::BucketMap<INP>, VolumeRef<OUTP> >::convert

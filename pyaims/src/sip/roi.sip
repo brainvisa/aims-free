@@ -102,13 +102,14 @@ class RoiIterator : carto::RCObject /Abstract/
     sipTransferObj, sipIsErr, sipCppPtr );
 %End
 
+
 public:
 
   virtual ~RoiIterator();
   virtual bool isValid() const = 0;
   virtual void next() = 0;
   virtual void restart() = 0;
-  virtual unsigned count() const = 0;
+  virtual size_t count() const = 0;
   virtual std::string regionName() const = 0;
   virtual carto::rc_ptr_MaskIterator maskIterator() const = 0;
   virtual void setRegionNameAttributes( const vector_STRING & );
@@ -125,7 +126,7 @@ public:
   virtual void setRegionNameAttributes( const std::string & );
 };
 
-}; // namesapce aims
+}; // namespace aims
 
 namespace carto {
 

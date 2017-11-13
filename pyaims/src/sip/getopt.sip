@@ -11,12 +11,12 @@ namespace aims
 
   public:
     AimsApplication( SIP_PYLIST, const std::string & ) 
-      [(int &,char **, const std::string &)];
+      [(int, const char **, const std::string &)];
 %MethodCode
  // The Python interface is a list of argument strings that is
  // modified.
 
- int argc;
+    int argc;
     char **argv;
 
     // Convert the list.
@@ -26,10 +26,8 @@ namespace aims
     else
       {
         // Create it now the arguments are right.
-        int nargc = argc;
-
         Py_BEGIN_ALLOW_THREADS
-          sipCpp = new aims::AimsApplication(nargc, (const char **) argv, *a1);
+        sipCpp = new aims::AimsApplication(argc, (const char **) argv, *a1);
         Py_END_ALLOW_THREADS
 
           // Now modify the original list.
@@ -38,6 +36,7 @@ namespace aims
 %End
 
     void initialize();
+    
     
     int verbose();
 %MethodCode
