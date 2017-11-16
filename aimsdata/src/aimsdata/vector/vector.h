@@ -44,6 +44,7 @@
 #include <fstream>
 #include <math.h>
 #include <cartobase/object/object.h>
+#include <vector>
 
 template <class T,int D> class AimsVector;
 
@@ -135,6 +136,7 @@ class AimsVector
     //@{
     /// The constructor allocates an appropriate amount of memory
     AimsVector();
+    explicit AimsVector( const std::vector<T> & value );
     /// The constructor fills the D items of vector with value
     AimsVector(const T& value);
     /// The constructor copy the D item of value[]
@@ -198,6 +200,8 @@ class AimsVector
     iterator end() { return _value + D; }
     const_iterator end() const { return _value + D; }
     /// @}
+
+    std::vector<T> toStdVector() const;
 
   protected:
     /// Memory space allocated
@@ -428,6 +432,17 @@ AimsVector<T,D>::AimsVector(const T value[])
 {
   for (int d = 0; d < D; d++)
     _value[d] = value[d];
+}
+
+template <class T, int D>
+inline
+AimsVector<T,D>::AimsVector( const std::vector<T> & value )
+{
+  int d, N = std::min( typename std::vector<T>::size_type( D ), value.size() );
+  for( d = 0; d < N; ++d )
+    _value[d] = value[d];
+  for( ; d<D; ++d )
+    _value[d] = T(0);
 }
 
 #ifndef DOXYGEN_HIDE_INTERNAL_CLASSES
@@ -757,6 +772,17 @@ T AimsVector<T,D>::dot(const AimsVector<T,D>& other) const
   return result;
 }
 
+
+template <class T,int D>
+inline
+std::vector<T> AimsVector<T, D>::toStdVector() const
+{
+  std::vector<T> vec( D );
+  int i;
+  for( i=0; i<D; ++i )
+    vec[i] = item(i);
+  return vec;
+}
 
 
 //
