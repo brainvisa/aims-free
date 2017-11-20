@@ -265,6 +265,11 @@ bool doit( Process & process, const string & fileref, Finder & )
       new NearestNeighborFfdResampler<T, C>(*deformation, affine, bv)
     );
   }
+  else if( ffdproc.type == "linear" || ffdproc.type == "l" )
+  {
+    rsp = carto::rc_ptr<FfdResampler<T> >(
+      new TrilinearFfdResampler<T, C>(*deformation, affine, bv) );
+  }
   else {
     rsp = carto::rc_ptr<FfdResampler<T> >(
       new SplineFfdResampler<T, C>(*deformation, affine, bv)
@@ -470,7 +475,7 @@ int main( int argc, const char **argv )
     application.addOption( ffdpi, "-i", "Input image" );
     application.addOption( ffdproc.inputmotion, "-d", "Input control knots grid", true );
     application.addOption( ffdproc.affinemotion, "-m", "Input affine transformation [Test_TO_Ref.trm]", true );
-    application.addOption( ffdproc.type, "-t", "Voxel values resampling type : n[earest], c[ubic] [default = cubic]", true );
+    application.addOption( ffdproc.type, "-t", "Voxel values resampling type : n[earest], l[inear], c[ubic] [default = cubic]", true );
     application.addOption( ffdproc.defaultval, "-bv", "Background value to use", true );
     application.addOption( ffdproc.dx, "--dx", "Output X dimension [default: same as input]", true );
     application.addOption( ffdproc.dy, "--dy", "Output Y dimension [default: same as input]", true );

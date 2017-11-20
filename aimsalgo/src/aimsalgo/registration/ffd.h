@@ -302,6 +302,33 @@ namespace aims {
       bool _idaffine;
   };
 
+
+  template <class T, class C = T>
+  class TrilinearFfdResampler : public FfdResampler<T>,
+                                public LinearResampler<C>
+  {
+    public:
+
+      virtual ~TrilinearFfdResampler();
+      virtual void init();
+      TrilinearFfdResampler(const SplineFfd & spline, T background = (T)0);
+      TrilinearFfdResampler(const SplineFfd & spline, Motion affine, T background = (T)0);
+      virtual void setRef(const AimsData<T> & ref);
+      virtual Point3df resample( const Point3df & output_location,
+                                 T & output_value, int t = 0 );
+
+    private:
+      const Motion       _affine;
+      const SplineFfd &  _transformation;
+      AimsData<T>        _ref;
+
+      T   _background;
+      int _samples;
+      int _dimx, _dimy, _dimz;
+      float _vsx, _vsy, _vsz;
+      bool _idaffine;
+  };
+
 } // namespace aims
 
 #endif

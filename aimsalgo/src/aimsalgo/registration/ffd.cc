@@ -669,30 +669,38 @@ Point3dd TrilinearFfd::deformation( const Point3dd& pImage ) const
       kSpline[2] < 0 || kSpline[2] >= dimZ() )
     return deformation;
 
-  Point3dl kDown( ( _flatx ? 0 : kSpline[0] ),
-                  ( _flaty ? 0 : kSpline[1] ),
-                  ( _flatz ? 0 : kSpline[2] ) );
   Point3dl kUp  ( ( _flatx ? 0 : kSpline[0] + 1 ),
                   ( _flaty ? 0 : kSpline[1] + 1 ),
                   ( _flatz ? 0 : kSpline[2] + 1 ) );
+
+  bool flatx = _flatx, flaty = _flaty, flatz = _flatz;
   if( kUp[0] >= dimX() )
-    kUp[0] = kDown[0];
+  {
+    kUp[0] = kSpline[0];
+    flatx = true;
+  }
   if( kUp[1] >= dimY() )
-    kUp[1] = kDown[1];
+  {
+    kUp[1] = kSpline[1];
+    flaty = true;
+  }
   if( kUp[2] >= dimZ() )
-    kUp[2] = kDown[2];
+  {
+    kUp[2] = kSpline[2];
+    flatz = true;
+  }
 
   double bz, by, bx;
 
-  for( int k = kDown[2]; k <= kUp[2]; ++k )
+  for( int k = kSpline[2]; k <= kUp[2]; ++k )
   {
-    bz = ( _flatz ? 1. : 1. + pSpline[2] - k );
-    for( int j = kDown[1]; j <= kUp[1]; ++j )
+    bz = ( flatz ? 1. : 1. - std::abs( pSpline[2] - k ) );
+    for( int j = kSpline[1]; j <= kUp[1]; ++j )
     {
-      by = ( _flaty ? 1. : 1. + pSpline[1] - j );
-      for( int i = kDown[0]; i <= kUp[0]; ++i )
+      by = ( flaty ? 1. : 1. - std::abs( pSpline[1] - j ) );
+      for( int i = kSpline[0]; i <= kUp[0]; ++i )
       {
-        bx = ( _flatx ? 1. : 1. + pSpline[0] - i );
+        bx = ( flatx ? 1. : 1. - std::abs( pSpline[0] - i ) );
         fdef = _ctrlPointDelta( i, j, k ) * bx * by * bz;
         deformation[0] += fdef[0];
         deformation[1] += fdef[1];
@@ -937,7 +945,7 @@ Point3df NearestNeighborFfdResampler<T, C>::resample(
     p_ref = _affine.transform( p_ref );
   p_ref = _transformation.transform( p_ref );
 
-  // Spline resampling
+  // Nearest neighbor resampling
   Point3dl pi_ref( (int)(p_ref[0] / _vsx + .5),
                    (int)(p_ref[1] / _vsy + .5),
                    (int)(p_ref[2] / _vsz + .5) );
@@ -953,6 +961,135 @@ Point3df NearestNeighborFfdResampler<T, C>::resample(
 
   return p_ref;
 }
+
+//============================================================================
+//   T R I L I N E A R   R E S A M P L E R
+//============================================================================
+template <class T, class C>
+TrilinearFfdResampler<T, C>::~TrilinearFfdResampler()
+{}
+
+
+template <class T, class C>
+void TrilinearFfdResampler<T, C>::init()
+{
+  _dimx = 1;
+  _dimy = 1;
+  _dimz = 1;
+  _vsx = 1.f;
+  _vsy = 1.f;
+  _vsz = 1.f;
+  _idaffine = _affine.isIdentity();
+}
+
+template <class T, class C>
+TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
+    const SplineFfd & spline, T background ):
+  LinearResampler<C>(),
+  _transformation(spline),
+  _background(background)
+{
+  init();
+}
+
+template <class T, class C>
+TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
+    const SplineFfd & spline, Motion affine, T background ):
+  LinearResampler<C>(),
+  _transformation(spline),
+  _affine(affine),
+  _background(background)
+{
+  init();
+}
+
+template <class T, class C>
+void TrilinearFfdResampler<T, C>::setRef(const AimsData<T> & ref) {
+  _ref = ref;
+  vector<int> dims = _ref.volume()->getSize();
+  _dimx = dims[0];
+  _dimy = dims[1];
+  _dimz = dims[2];
+  vector<float> vs = _ref.volume()->getVoxelSize();
+  _vsx = vs[0];
+  _vsy = vs[1];
+  _vsz = vs[2];
+}
+
+template <class T, class C>
+Point3df TrilinearFfdResampler<T, C>::resample(
+  const Point3df & output_location,
+  T & output_value, int t)
+{
+  double    bk3, bj3, bi3;
+  // output_location is in the output image referential (unit: mm)
+  Point3df p_ref = output_location;
+
+  if (! _idaffine )
+    p_ref = _affine.transform( p_ref );
+  p_ref = _transformation.transform( p_ref );
+
+  // Linear resampling
+
+  Point3dd pv_ref( p_ref[0] / _vsx,
+                   p_ref[1] / _vsy,
+                   p_ref[2] / _vsz );
+
+  Point3dl pi_ref( (int)(floor(pv_ref[0])),
+                   (int)(floor(pv_ref[1])),
+                   (int)(floor(pv_ref[2])) );
+
+  bool flatx = _transformation.isXFlat();
+  bool flaty = _transformation.isYFlat();
+  bool flatz = _transformation.isZFlat();
+
+  Point3dl kUp  ( ( flatx ? pi_ref[0] : pi_ref[0] + 1 ),
+                  ( flaty ? pi_ref[1] : pi_ref[1] + 1 ),
+                  ( flatz ? pi_ref[2] : pi_ref[2] + 1 ) );
+
+  if( kUp[0] >= _dimx )
+  {
+    kUp[0] = _dimx - 1;
+    flatx = true;
+  }
+  if( kUp[1] >= _dimy )
+  {
+    kUp[1] = _dimy - 1;
+    flaty = true;
+  }
+  if( kUp[2] >= _dimz )
+  {
+    kUp[2] = _dimz - 1;
+    flatz = true;
+  }
+
+  // Warning: interpolation is done in "source" space
+  if( pi_ref[0] >= 0 && pi_ref[0] < _dimx &&
+      pi_ref[1] >= 0 && pi_ref[1] < _dimy &&
+      pi_ref[2] >= 0 && pi_ref[2] < _dimz )
+  {
+    output_value = T(0);
+
+    for( int k = pi_ref[2]; k <= kUp[2]; ++k )
+    {
+      bk3 = ( flatz ? 1. : 1. - std::abs( pv_ref[2] - k ) );
+      for( int j = pi_ref[1]; j <= kUp[1]; ++j )
+      {
+        bj3 = ( flaty ? 1. : 1. - std::abs( pv_ref[1] - j ) );
+        for( int i = pi_ref[0]; i <= kUp[0]; ++i )
+        {
+          bi3 = ( flatx ? 1. : 1. - std::abs( pv_ref[0] - i ) );
+          output_value += _ref(i, j, k) * bi3 * bj3 * bk3;
+        }
+      }
+    }
+  }
+  else
+    output_value = _background;
+
+  return p_ref;
+}
+
 
 template class SplineFfdResampler<int8_t>;
 template class SplineFfdResampler<uint8_t>;
@@ -975,5 +1112,16 @@ template class NearestNeighborFfdResampler<float>;
 template class NearestNeighborFfdResampler<double>;
 template class NearestNeighborFfdResampler<AimsRGB, AimsRGB::ChannelType>;
 template class NearestNeighborFfdResampler<AimsRGBA, AimsRGBA::ChannelType>;
+
+template class TrilinearFfdResampler<int8_t>;
+template class TrilinearFfdResampler<uint8_t>;
+template class TrilinearFfdResampler<int16_t>;
+template class TrilinearFfdResampler<uint16_t>;
+template class TrilinearFfdResampler<int32_t>;
+template class TrilinearFfdResampler<uint32_t>;
+template class TrilinearFfdResampler<float>;
+template class TrilinearFfdResampler<double>;
+template class TrilinearFfdResampler<AimsRGB, AimsRGB::ChannelType>;
+template class TrilinearFfdResampler<AimsRGBA, AimsRGBA::ChannelType>;
 
 } // namespace aims
