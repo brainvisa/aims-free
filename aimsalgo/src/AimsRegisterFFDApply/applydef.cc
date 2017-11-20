@@ -57,6 +57,7 @@ public:
   double  sy;
   double  sz;
   bool old_mode;
+  string vfinterp;
 };
 
 
@@ -110,7 +111,14 @@ bool doit( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  SplineFfd deformation;
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+  { cout << "deformation: spline\n";
+    deformation.reset( new SplineFfd );
+  }
+
   // Before 2015, FFD deformations were in voxels. They are now stored in mm.
   // A hint is that old ffd motions have a voxel size of 1. mm.
   // Old motions can be used with old_mode set to true.
@@ -123,20 +131,22 @@ bool doit( Process & process, const string & fileref, Finder & )
       double(in.dimX() - 1) / double(grid.dimX() - 1) * in.sizeX(),
       double(in.dimY() - 1) / double(grid.dimY() - 1) * in.sizeY(),
       double(in.dimZ() - 1) / double(grid.dimZ() - 1) * in.sizeZ() );
-    for( int z = 0; z < grid.dimZ(); ++z )
-    for( int y = 0; y < grid.dimY(); ++y )
-    for( int x = 0; x < grid.dimX(); ++x )
+    int dx = grid.dimX(), dy = grid.dimY(), dz = grid.dimZ();
+    float sx = grid.sizeX(), sy = grid.sizeY(), sz = grid.sizeZ();
+    for( int z = 0; z < dz; ++z )
+    for( int y = 0; y < dy; ++y )
+    for( int x = 0; x < dx; ++x )
     {
-      grid(x, y, z)[0] *= grid.sizeX();
-      grid(x, y, z)[1] *= grid.sizeY();
-      grid(x, y, z)[2] *= grid.sizeZ();
+      grid(x, y, z)[0] *= sx;
+      grid(x, y, z)[1] *= sy;
+      grid(x, y, z)[2] *= sz;
     }
-    deformation.updateAllCtrlKnot(grid);
+    deformation->updateAllCtrlKnot(grid);
   }
   else
   {
     aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
-    rdef >> deformation;
+    rdef >> *deformation;
   }
 
   //--------------------------------------------------------------------------
@@ -188,9 +198,9 @@ bool doit( Process & process, const string & fileref, Finder & )
 
   //--- Field of view (in which it is useful to compte a ffd motion)
   int32_t fdx, fdy, fdz;
-  fdx = deformation.isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation.dimX()) * deformation.sizeX() / ffdproc.sx );
-  fdy = deformation.isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation.dimY()) * deformation.sizeY() / ffdproc.sy );
-  fdz = deformation.isFlat(2) ? ffdproc.sz : (int32_t)( double(deformation.dimZ()) * deformation.sizeZ() / ffdproc.sz );
+  fdx = deformation->isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation->dimX()) * deformation->sizeX() / ffdproc.sx );
+  fdy = deformation->isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation->dimY()) * deformation->sizeY() / ffdproc.sy );
+  fdz = deformation->isFlat(2) ? ffdproc.sz : (int32_t)( double(deformation->dimZ()) * deformation->sizeZ() / ffdproc.sz );
   fdx = std::min( fdx, ffdproc.dx );
   fdy = std::min( fdy, ffdproc.dy );
   fdz = std::min( fdz, ffdproc.dz );
@@ -252,12 +262,12 @@ bool doit( Process & process, const string & fileref, Finder & )
   carto::rc_ptr<FfdResampler<T> > rsp;
   if ((ffdproc.type == "nearest") || (ffdproc.type == "n")) {
     rsp = carto::rc_ptr<FfdResampler<T> >(
-      new NearestNeighborFfdResampler<T, C>(deformation, affine, bv)
+      new NearestNeighborFfdResampler<T, C>(*deformation, affine, bv)
     );
   }
   else {
     rsp = carto::rc_ptr<FfdResampler<T> >(
-      new SplineFfdResampler<T, C>(deformation, affine, bv)
+      new SplineFfdResampler<T, C>(*deformation, affine, bv)
     );
   }
   rsp->setRef(in);
@@ -274,13 +284,15 @@ bool doit( Process & process, const string & fileref, Finder & )
                                    ffdproc.sz,
                                    in.sizeT() );
     int dfx, dfy, dfz;
-    for(int k = 0; k < deformation.dimZ(); ++k)
-      for(int j = 0; j < deformation.dimY(); ++j)
-        for(int i = 0; i < deformation.dimX(); ++i)
+    int szx = deformation->dimX(), szy = deformation->dimY(),
+      szz = deformation->dimZ();
+    for(int k = 0; k < szz; ++k)
+      for(int j = 0; j < szy; ++j)
+        for(int i = 0; i < szx; ++i)
         {
-          dfx = int( i*(float(fdx) / float((deformation.dimX() - 1)) ));
-          dfy = int( j*(float(fdy) / float((deformation.dimY() - 1)) ));
-          dfz = int( k*(float(fdz) / float((deformation.dimZ() - 1)) ));
+          dfx = int( i*(float(fdx) / float((szx - 1)) ));
+          dfy = int( j*(float(fdy) / float((szy - 1)) ));
+          dfz = int( k*(float(fdz) / float((szz - 1)) ));
 
           subBucketMapVoid->insert( Point3d(dfx, dfy, dfz), Void() );
           subBucketMapVoid->insert( Point3d(dfx - 1, dfy, dfz), Void() );
@@ -395,7 +407,7 @@ bool doit( Process & process, const string & fileref, Finder & )
             v[1] /= size[1];
             v[2] /= size[2];
           }
-          v = deformation.transform( v );
+          v = deformation->transform( v );
           vert.push_back( v );
         }
 
@@ -458,7 +470,7 @@ int main( int argc, const char **argv )
     application.addOption( ffdpi, "-i", "Input image" );
     application.addOption( ffdproc.inputmotion, "-d", "Input control knots grid", true );
     application.addOption( ffdproc.affinemotion, "-m", "Input affine transformation [Test_TO_Ref.trm]", true );
-    application.addOption( ffdproc.type, "-t", "Resampling type : n[earest], c[ubic] [default = cubic]", true );
+    application.addOption( ffdproc.type, "-t", "Voxel values resampling type : n[earest], c[ubic] [default = cubic]", true );
     application.addOption( ffdproc.defaultval, "-bv", "Background value to use", true );
     application.addOption( ffdproc.dx, "--dx", "Output X dimension [default: same as input]", true );
     application.addOption( ffdproc.dy, "--dy", "Output Y dimension [default: same as input]", true );
@@ -474,6 +486,7 @@ int main( int argc, const char **argv )
     application.addOption( ffdproc.gridout, "-g", "Output grid mesh", true );
     application.addOption( ffdproc.compout, "-c", "Output compression volume", true );
     application.addOption( ffdproc.old_mode, "--old-mode", "Make this command work with pre-2015 FFD motions [default: false]", true );
+    application.addOption( ffdproc.vfinterp, "--vi", "Vector field interpolation type: l[inear], c[ubic] [default = cubic]", true );
     application.alias( "--input", "-i" );
     application.alias( "--motion", "-m" );
     application.alias( "--type", "-t" );
@@ -482,6 +495,7 @@ int main( int argc, const char **argv )
     application.alias( "--bucket", "-b" );
     application.alias( "--grid", "-g" );
     application.alias( "--compression", "-c" );
+    application.alias( "--vectorinterpolation", "--vi" );
     application.initialize();
 
     if (! ffdproc.execute( ffdpi.filename ))

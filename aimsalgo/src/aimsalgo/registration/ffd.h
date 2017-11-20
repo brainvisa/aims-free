@@ -76,22 +76,26 @@ namespace aims {
     double spline3( double x ) const { return _spline(x); }
 
     //--- Parameters ---------------------------------------------------------
-    int          dimX() const { return _ctrlPointDelta.dimX(); }
-    int          dimY() const { return _ctrlPointDelta.dimY(); }
-    int          dimZ() const { return _ctrlPointDelta.dimZ(); }
-    float        sizeX() const { return _ctrlPointDelta.sizeX(); }
-    float        sizeY() const { return _ctrlPointDelta.sizeY(); }
-    float        sizeZ() const { return _ctrlPointDelta.sizeZ(); }
+    int          dimX() const { return _dimx; }
+    int          dimY() const { return _dimy; }
+    int          dimZ() const { return _dimz; }
+    float        sizeX() const { return _vsx; }
+    float        sizeY() const { return _vsy; }
+    float        sizeZ() const { return _vsz; }
     bool isFlat( int i ) const
     {
       switch(i)
       {
-        case 0:  return dimX() == 1;
-        case 1:  return dimY() == 1;
-        case 2:  return dimZ() == 1;
+        case 0:  return _flatx;
+        case 1:  return _flaty;
+        case 2:  return _flatz;
         default: return false;
       }
     }
+    bool isXFlat() const { return _flatx; }
+    bool isYFlat() const { return _flaty; }
+    bool isZFlat() const { return _flatz; }
+    void updateDimensions();
 
     //--- Debug --------------------------------------------------------------
     void  printControlPointsGrid() const;
@@ -103,28 +107,33 @@ namespace aims {
     //--- Output -------------------------------------------------------------
     void   write( const std::string & filename ) const;
 
-  private:
+  protected:
     //--- Protected methods --------------------------------------------------
     Point3dd     splineVoxToMm( const Point3dd& p ) const;
     Point3dd     mmToSplineVox( const Point3dd& p ) const;
     void         updateGridResolution( const AimsData<Point3df> & newGrid );
-    Point3dd     transformDouble( double x, double y, double z ) const;
+    virtual Point3dd transformDouble( double x, double y, double z ) const;
 
     AimsData<Point3df>  _ctrlPointDelta;
     aims::TabulBSpline  _spline;
+    int _dimx, _dimy, _dimz;
+    float _vsx, _vsy, _vsz;
+    bool _flatx, _flaty, _flatz;
   };
 
   template <typename T>
   SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
                         const AimsData<T> & test_volume ):
     _spline(3, 0),
-    _ctrlPointDelta( dimX, dimY, dimZ )
+    _ctrlPointDelta( dimX, dimY, dimZ ),
+    _dimx( dimX ), _dimy( dimY ), _dimz( dimZ ),
+    _flatx( dimX == 1 ), _flaty( dimY == 1 ), _flatz( dimZ == 1 )
   {
     _ctrlPointDelta = Point3df(0., 0., 0.);
     _ctrlPointDelta.setSizeXYZT(
-      isFlat(0) ? test_volume.sizeX() : double(test_volume.dimX() - 1) / double(dimX - 1) * test_volume.sizeX(),
-      isFlat(1) ? test_volume.sizeY() : double(test_volume.dimY() - 1) / double(dimY - 1) * test_volume.sizeY(),
-      isFlat(2) ? test_volume.sizeZ() : double(test_volume.dimZ() - 1) / double(dimZ - 1) * test_volume.sizeZ()
+      _flatx ? test_volume.sizeX() : double(test_volume.dimX() - 1) / double(dimX - 1) * test_volume.sizeX(),
+      _flaty ? test_volume.sizeY() : double(test_volume.dimY() - 1) / double(dimY - 1) * test_volume.sizeY(),
+      _flatz ? test_volume.sizeZ() : double(test_volume.dimZ() - 1) / double(dimZ - 1) * test_volume.sizeZ()
     );
   }
 
@@ -162,6 +171,10 @@ namespace aims {
                        int frame = -1 )
     {
       bool res = base::read(obj, border, format, frame);
+      if( res )
+      {
+        obj.updateDimensions();
+      }
       return res;
     }
   };
@@ -182,6 +195,31 @@ namespace aims {
     {
       return base::write(obj, ascii, format);
     }
+  };
+
+  //==========================================================================
+  //   FFD TRILINEAR RESAMPLED TRANSFORMATION
+  //==========================================================================
+
+  class TrilinearFfd: public SplineFfd
+  {
+   public:
+    //--- Constructor --------------------------------------------------------
+    TrilinearFfd( int dimX = 0, int dimY = 1, int dimZ = 1,
+                  float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
+    template <typename T>
+    TrilinearFfd( int dimX, int dimY, int dimZ,
+                  const AimsData<T> & test_volume );
+
+    TrilinearFfd( const TrilinearFfd & other );
+    TrilinearFfd( const AimsData<Point3df> & other );
+    TrilinearFfd & operator=( const TrilinearFfd & other );
+
+    //--- Deformation --------------------------------------------------------
+    Point3dd     deformation( const Point3dd& p_mm ) const;
+
+  private:
+    virtual Point3dd transformDouble( double x, double y, double z ) const;
   };
 
 //============================================================================
@@ -233,6 +271,9 @@ namespace aims {
       int _last_t;
       std::vector<C>      _min;
       std::vector<C>      _max;
+      int _dimx, _dimy, _dimz;
+      float _vsx, _vsy, _vsz;
+      bool _idaffine;
   };
 
   template <class T, class C = T>
@@ -256,6 +297,9 @@ namespace aims {
 
       T   _background;
       int _samples;
+      int _dimx, _dimy, _dimz;
+      float _vsx, _vsy, _vsz;
+      bool _idaffine;
   };
 
 } // namespace aims
