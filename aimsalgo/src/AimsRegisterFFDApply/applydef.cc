@@ -35,6 +35,7 @@ template <class T, class C>
 bool doit( Process &, const string &, Finder & );
 template <int D>
 bool doMesh( Process &, const string &, Finder & );
+bool doBucket( Process &, const string &, Finder & );
 
 class FFDApplyProc : public Process
 {
@@ -83,6 +84,7 @@ FFDApplyProc::FFDApplyProc() : Process(),
   registerProcessType( "Mesh", "VOID",      &doMesh<3> );
   registerProcessType( "Mesh2", "VOID",     &doMesh<2> );
   registerProcessType( "Mesh4", "VOID",     &doMesh<4> );
+  registerProcessType( "Bucket", "VOID",    &doBucket );
 }
 
 template <class T, class C>
@@ -552,6 +554,105 @@ bool doMesh( Process & process, const string & fileref, Finder & )
 
 
 //
+// BUCKET RESAMPLING
+//
+
+bool doBucket( Process & process, const string & fileref, Finder & )
+{
+  FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
+
+  cout << "Type Bucket" << endl;
+
+  //==========================================================================
+  //
+  //      Read input data
+  //
+  //==========================================================================
+
+  //--------------------------------------------------------------------------
+  // Input mesh
+  //--------------------------------------------------------------------------
+  BucketMap<Void> in;
+  aims::Reader<BucketMap<Void> > rdata( fileref );
+  rdata >> in;
+
+  //--- Hard dimensions
+  ffdproc.sx = ( ffdproc.sx > 0 ? ffdproc.sx : in.sizeX() );
+  ffdproc.sy = ( ffdproc.sy > 0 ? ffdproc.sy : in.sizeY() );
+  ffdproc.sz = ( ffdproc.sz > 0 ? ffdproc.sz : in.sizeZ() );
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  Motion affine;
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
+    rmotion >> affine;
+    affine = affine.inverse();
+  }
+  cout << "Affine : " << affine << endl;
+
+  //==========================================================================
+  //
+  //      Do resampling
+  //
+  //==========================================================================
+  cout << "Resampling ";
+
+  typename BucketMap<Void>::iterator ib, eb = in.end();
+  bool idaffine = affine.isIdentity();
+  BucketMap<Void> out;
+  out.setSizeX( ffdproc.sx );
+  out.setSizeY( ffdproc.sy );
+  out.setSizeZ( ffdproc.sz );
+  Point3df vs( in.sizeX(), in.sizeY(), in.sizeZ() );
+
+  for( ib=in.begin(); ib!=eb; ++ib )
+  {
+    typename BucketMap<Void>::Bucket & obk = out[ ib->first ];
+    typename BucketMap<Void>::Bucket::iterator ip, ep = ib->second.end();
+    for( ip=ib->second.begin(); ip!=ep; ++ip )
+    {
+      Point3df p( ip->first[0] * vs[0], ip->first[1] * vs[1],
+                  ip->first[2] * vs[2] );
+      if( !idaffine )
+        p = affine.transform( p );
+      p = deformation->transform( p );
+      obk[ Point3d( int( rint( p[0] / ffdproc.sx ) ),
+                    int( rint( p[1] / ffdproc.sy ) ),
+                    int( rint( p[2] / ffdproc.sz ) ) ) ] = Void();
+    }
+  }
+
+  cout << endl;
+
+  //==========================================================================
+  //
+  //      Write output data
+  //
+  //==========================================================================
+
+  Writer<BucketMap<Void> > w3(ffdproc.output);
+  bool res = w3.write(out);
+
+  return res;
+}
+
+
+//
 //  POINTS RESAMPLING
 //
 
@@ -641,14 +742,15 @@ int main( int argc, const char **argv )
     //
     AimsApplication application(
       argc, argv,
-      "Apply FFD (vector field) transformation on an image, a mesh, or to "
-      "points.\n"
+      "Apply FFD (vector field) transformation on an image, a mesh, a 'bucket' "
+      "(voxels list file), or to points.\n"
       "\n"
       "Note that on images the vector field normally represents the inverse "
       "transformation (for a destination point we seek the source position of "
-      "the point), but for meshes or points the vector field is applied "
-      "directly (a vertex is moved according to the vector field), so the "
-      "transformation should be the inverse of the one applied to an image.\n"
+      "the point), but for meshes, buckets or points the vector field is "
+      "applied directly (a vertex is moved according to the vector field), so "
+      "the transformation should be the inverse of the one applied to an image."
+      "\n"
       "\n"
       "In points mode, the -i options either specifies an ASCII file "
       "containing point coordinates, or is directly one or several points "
@@ -656,7 +758,11 @@ int main( int argc, const char **argv )
       "\n"
       "Note also that for meshes or points, the dimensions, voxel sizes, grid, "
       "reference, and resampling options are pointless and are unused. Only "
-      "the vector field interpolation (--vi) option is used."
+      "the vector field interpolation (--vi) option is used.\n\n"
+      "In Buckets mode, the options --sx, --sy, --sz allow to specify the "
+      "output voxel size, but the reference (-r) is not used so far. The "
+      "transformation field is applied independently on each bucket voxel "
+      "with no resampling, so objects may end up with holes."
     );
     application.addOption( ffdpi, "-i", "Input image" );
     application.addOption( ffdproc.inputmotion, "-d", "Input control knots grid", true );
