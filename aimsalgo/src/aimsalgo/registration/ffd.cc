@@ -90,6 +90,19 @@ void SplineFfd::updateDimensions()
   _flatx = _dimx == 1;
   _flaty = _dimy == 1;
   _flatz = _dimz == 1;
+  int i;
+  _mirrorcoefvecx.resize( _dimx + 3 );
+  _mirrorcoefvecy.resize( _dimy + 3 );
+  _mirrorcoefvecz.resize( _dimz + 3 );
+  _mirrorcoefx = &_mirrorcoefvecx[1];
+  _mirrorcoefy = &_mirrorcoefvecy[1];
+  _mirrorcoefz = &_mirrorcoefvecz[1];
+  for( i=-1; i<_dimx + 2; ++i )
+    _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
+  for( i=-1; i<_dimy + 2; ++i )
+    _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
+  for( i=-1; i<_dimz + 2; ++i )
+    _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
 }
 
 
@@ -103,12 +116,6 @@ void SplineFfd::updateGridResolution( const AimsData<Point3df> & newGrid )
     _ctrlPointDelta = AimsData<Point3df>( newGrid.dimX(),
                                           newGrid.dimY(),
                                           newGrid.dimZ() );
-    _dimx = _ctrlPointDelta.dimX();
-    _dimy = _ctrlPointDelta.dimY();
-    _dimz = _ctrlPointDelta.dimZ();
-    _flatx = _dimx == 1;
-    _flaty = _dimy == 1;
-    _flatz = _dimz == 1;
   }
 
   if( newGrid.sizeX() != _vsx ||
@@ -116,10 +123,8 @@ void SplineFfd::updateGridResolution( const AimsData<Point3df> & newGrid )
       newGrid.sizeZ() != _vsz )
   {
     _ctrlPointDelta.setSizeXYZT( newGrid.sizeX(), newGrid.sizeY(), newGrid.sizeZ() );
-    _vsx = _ctrlPointDelta.sizeX();
-    _vsy = _ctrlPointDelta.sizeY();
-    _vsz = _ctrlPointDelta.sizeZ();
   }
+  updateDimensions();
 }
 
 void SplineFfd::updateAllCtrlKnot( const AimsData<Point3df> & newCtrlKnotGrid )
@@ -190,22 +195,23 @@ Point3dd SplineFfd::deformation( const Point3dd& pImage ) const
                   ( _flaty ? 0 : kSpline[1] + 2 ),
                   ( _flatz ? 0 : kSpline[2] + 2 ) );
 
-  double bz, by, bx;
+  double bz, by, bx, byz;
   int    cz, cy, cx;
 
   for( int k = kDown[2]; k <= kUp[2]; ++k )
   {
     bz = ( _flatz ? 1. : spline3( pSpline[2] - k ) );
-    cz  = aims::mirrorCoeff( k, dimZ() );
+    cz  =_mirrorcoefz[k];
     for( int j = kDown[1]; j <= kUp[1]; ++j )
     {
       by = ( _flaty ? 1. : spline3( pSpline[1] - j ) );
-      cy  = aims::mirrorCoeff( j, dimY() );
+      cy  = _mirrorcoefy[j];
+      byz = bz * by;
       for( int i = kDown[0]; i <= kUp[0]; ++i )
       {
         bx = ( _flatx ? 1. : spline3( pSpline[0] - i ) );
-        cx  = aims::mirrorCoeff( i, dimX() );
-        fdef = _ctrlPointDelta( cx, cy, cz ) * bx * by * bz;
+        cx  = _mirrorcoefx[i];
+        fdef = _ctrlPointDelta( cx, cy, cz ) * bx * byz;
         deformation[0] += fdef[0];
         deformation[1] += fdef[1];
         deformation[2] += fdef[2];
@@ -669,39 +675,71 @@ Point3dd TrilinearFfd::deformation( const Point3dd& pImage ) const
       kSpline[2] < 0 || kSpline[2] >= dimZ() )
     return deformation;
 
-  Point3dl kUp  ( ( _flatx ? 0 : kSpline[0] + 1 ),
-                  ( _flaty ? 0 : kSpline[1] + 1 ),
-                  ( _flatz ? 0 : kSpline[2] + 1 ) );
+  Point3dl kUp  ( kSpline[0] + 1,
+                  kSpline[1] + 1,
+                  kSpline[2] + 1 );
 
-  bool flatx = _flatx, flaty = _flaty, flatz = _flatz;
-  if( kUp[0] >= dimX() )
+  double bz, by, byz;
+  double bxt[2], byt[2], bzt[2];
+
+  if( _flatx || kUp[0] >= dimX() )
   {
     kUp[0] = kSpline[0];
-    flatx = true;
+    bxt[0] = 1.;
+    bxt[1] = 0.;
   }
-  if( kUp[1] >= dimY() )
+  else
   {
-    kUp[1] = kSpline[1];
-    flaty = true;
-  }
-  if( kUp[2] >= dimZ() )
-  {
-    kUp[2] = kSpline[2];
-    flatz = true;
+    bxt[1] = pSpline[0] - kSpline[0];
+    bxt[0] = 1. - bxt[1];
   }
 
-  double bz, by, bx;
+  if( _flaty || kUp[1] >= dimY() )
+  {
+    kUp[1] = kSpline[1];
+    byt[0] = 1.;
+    byt[1] = 0.;
+  }
+  else
+  {
+    byt[1] = pSpline[1] - kSpline[1];
+    byt[0] = 1. - byt[1];
+  }
+
+  if( _flatz || kUp[2] >= dimZ() )
+  {
+    kUp[2] = kSpline[2];
+    bzt[0] = 1.;
+    bzt[1] = 0.;
+  }
+  else
+  {
+    bzt[1] = pSpline[2] - kSpline[2];
+    bzt[0] = 1. - bzt[1];
+  }
+
+  const Point3df *pCtrlPt;
+  long incr = &_ctrlPointDelta( 1 ) - & _ctrlPointDelta( 0 );
+  kUp[0] -= kSpline[0];
 
   for( int k = kSpline[2]; k <= kUp[2]; ++k )
   {
-    bz = ( flatz ? 1. : 1. - std::abs( pSpline[2] - k ) );
+    bz = bzt[ k - kSpline[2] ];
     for( int j = kSpline[1]; j <= kUp[1]; ++j )
     {
-      by = ( flaty ? 1. : 1. - std::abs( pSpline[1] - j ) );
-      for( int i = kSpline[0]; i <= kUp[0]; ++i )
+      by = byt[ j - kSpline[1] ];
+      byz = bz * by;
+      pCtrlPt = &_ctrlPointDelta( kSpline[0], j, k );
+
+      fdef = *pCtrlPt * bxt[0] * byz;
+      pCtrlPt += incr;
+      deformation[0] += fdef[0];
+      deformation[1] += fdef[1];
+      deformation[2] += fdef[2];
+
+      if( kUp[0] != 0 )
       {
-        bx = ( flatx ? 1. : 1. - std::abs( pSpline[0] - i ) );
-        fdef = _ctrlPointDelta( i, j, k ) * bx * by * bz;
+        fdef = *pCtrlPt * bxt[1] * byz;
         deformation[0] += fdef[0];
         deformation[1] += fdef[1];
         deformation[2] += fdef[2];

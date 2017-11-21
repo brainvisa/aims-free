@@ -119,6 +119,12 @@ namespace aims {
     int _dimx, _dimy, _dimz;
     float _vsx, _vsy, _vsz;
     bool _flatx, _flaty, _flatz;
+    std::vector<int> _mirrorcoefvecx;
+    std::vector<int> _mirrorcoefvecy;
+    std::vector<int> _mirrorcoefvecz;
+    int *_mirrorcoefx;
+    int *_mirrorcoefy;
+    int *_mirrorcoefz;
   };
 
   template <typename T>
@@ -135,6 +141,7 @@ namespace aims {
       _flaty ? test_volume.sizeY() : double(test_volume.dimY() - 1) / double(dimY - 1) * test_volume.sizeY(),
       _flatz ? test_volume.sizeZ() : double(test_volume.dimZ() - 1) / double(dimZ - 1) * test_volume.sizeZ()
     );
+    updateDimensions();
   }
 
   inline Point3dd

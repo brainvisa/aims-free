@@ -163,31 +163,6 @@ void BSpline::setCentered( bool centered )
   setSupport();
 }
 
-unsigned BSpline::order() const
-{
-  return _order;
-}
-
-float BSpline::scale() const
-{
-  return _scale;
-}
-
-bool BSpline::shifted() const
-{
-  return _shift;
-}
-
-bool BSpline::centered() const
-{
-  return !_shift;
-}
-
-double BSpline::dO() const
-{
-  return (double)_order;
-}
-
 //============================================================================
 //
 //     B-SPLINE : FAST
@@ -455,9 +430,11 @@ TabulBSpline::~TabulBSpline()
 
 size_t TabulBSpline::index( double x ) const
 {
-  x = ( this->scale() != 1. ? x / this->scale() : x ) +
-        ( this->shifted() ? 0.5 : 0. );
-  return unsigned( std::abs(x) * 2. * double(_values[0].size() - 1) / ( double( this->order() ) + 1 ) );
+//   x = ( this->scale() != 1. ? x / this->scale() : x ) +
+//         ( this->shifted() ? 0.5 : 0. );
+//   return unsigned( std::abs(x) * 2. * double(_values[0].size() - 1) / ( double( this->order() ) + 1 ) );
+
+  return unsigned( std::abs( x * _tablescale + _tableoffset ) );
 }
 
 bool TabulBSpline::is_valid( size_t index ) const
@@ -492,6 +469,10 @@ void TabulBSpline::setArray( unsigned nder, size_t length )
     }
   }
 
+  _tablescale
+    = 2. * double(_values[0].size() - 1) / ( double( this->order() + 1 ) )
+      / scale();
+  _tableoffset = ( this->shifted() ? 0.5 : 0. ) / scale();
 }
 
 void TabulBSpline::reset( unsigned order, unsigned nder, float scale,
