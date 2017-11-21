@@ -18,6 +18,7 @@
 #include <aims/mesh/surfaceOperation.h>            // SurfaceManip::meshVolume
 #include <aims/registration/ffd.h>  // SplineFfd - SplineFfdResampler
 #include <aims/utility/progress.h>                       // aims::ProgressInfo
+#include <aims/fibers/bundles.h>
 //--- carto ------------------------------------------------------------------
 #include <cartobase/object/object.h>                                 // Object
 #include <cartobase/stream/fileutil.h>
@@ -36,6 +37,8 @@ bool doit( Process &, const string &, Finder & );
 template <int D>
 bool doMesh( Process &, const string &, Finder & );
 bool doBucket( Process &, const string &, Finder & );
+bool doBundles( Process &, const string &, Finder & );
+bool doGraph( Process &, const string &, Finder & );
 
 class FFDApplyProc : public Process
 {
@@ -85,6 +88,8 @@ FFDApplyProc::FFDApplyProc() : Process(),
   registerProcessType( "Mesh2", "VOID",     &doMesh<2> );
   registerProcessType( "Mesh4", "VOID",     &doMesh<4> );
   registerProcessType( "Bucket", "VOID",    &doBucket );
+  registerProcessType( "Graph", "VOID",     &doGraph );
+  registerProcessType( "BundleMap", "VOID", &doBundles ); // just for doc
 }
 
 template <class T, class C>
@@ -511,7 +516,6 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   {
     aims::Reader<Motion> rmotion(ffdproc.affinemotion);
     rmotion >> affine;
-    affine = affine.inverse();
   }
   cout << "Affine : " << affine << endl;
 
@@ -601,7 +605,6 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   {
     aims::Reader<Motion> rmotion(ffdproc.affinemotion);
     rmotion >> affine;
-    affine = affine.inverse();
   }
   cout << "Affine : " << affine << endl;
 
@@ -653,11 +656,172 @@ bool doBucket( Process & process, const string & fileref, Finder & )
 
 
 //
+// BUNDLES RESAMPLING
+//
+
+// transform bundles in stream
+class BundleTransformer : public BundleListener, public BundleProducer
+{
+public:
+  BundleTransformer( rc_ptr<SplineFfd> deformation, const Motion & affine );
+  virtual ~BundleTransformer() {}
+
+  virtual void 	bundleStarted(const BundleProducer &, const BundleInfo &);
+  virtual void 	bundleTerminated(const BundleProducer &, const BundleInfo &);
+  virtual void 	fiberStarted(const BundleProducer &, const BundleInfo &,
+                              const FiberInfo &);
+  virtual void 	fiberTerminated(const BundleProducer &, const BundleInfo &,
+                                 const FiberInfo &);
+  virtual void 	newFiberPoint(const BundleProducer &, const BundleInfo &,
+                               const FiberInfo &, const FiberPoint &);
+  virtual void 	noMoreBundle(const BundleProducer &);
+
+private:
+  rc_ptr<SplineFfd> _deformation;
+  const Motion & _affine;
+  bool _idaffine;
+};
+
+
+BundleTransformer::BundleTransformer( rc_ptr<SplineFfd> deformation,
+                                      const Motion & affine )
+  : BundleListener(), BundleProducer(),
+  _deformation( deformation ), _affine( affine ),
+  _idaffine( affine.isIdentity() )
+{
+}
+
+
+void BundleTransformer::bundleStarted( const BundleProducer &,
+                                       const BundleInfo &bi )
+{
+  startBundle( bi );
+}
+
+
+void BundleTransformer::bundleTerminated( const BundleProducer &,
+                                          const BundleInfo & bi )
+{
+  terminateBundle( bi );
+}
+
+
+void BundleTransformer::fiberStarted( const BundleProducer &,
+                                      const BundleInfo & bi,
+                                      const FiberInfo & fi )
+{
+  startFiber( bi, fi );
+}
+
+
+void BundleTransformer::fiberTerminated( const BundleProducer &,
+                                         const BundleInfo & bi,
+                                         const FiberInfo & fi )
+{
+  terminateFiber( bi, fi );
+}
+
+
+void BundleTransformer::newFiberPoint( const BundleProducer &,
+                                       const BundleInfo & bi,
+                                       const FiberInfo & fi,
+                                       const FiberPoint & pt )
+{
+  FiberPoint opt;
+  if( !_idaffine )
+    opt = _affine.transform( pt );
+  else
+    opt = pt;
+  opt = _deformation->transform( opt );
+  addFiberPoint( bi, fi, opt );
+}
+
+
+void BundleTransformer::noMoreBundle( const BundleProducer & )
+{
+  BundleProducer::noMoreBundle();
+}
+
+
+
+bool doGraph( Process & process, const string & fileref, Finder & f )
+{
+  const PythonHeader *ph = dynamic_cast<const PythonHeader *>( f.header() );
+  if( ph && ph->getProperty( "object_type" )->getString() == "BundleMap" )
+    return doBundles( process, fileref, f );
+  return false;
+}
+
+
+bool doBundles( Process & process, const string & fileref, Finder & )
+{
+  FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
+
+  cout << "Type Bundles" << endl;
+
+  //==========================================================================
+  //
+  //      Read input data
+  //
+  //==========================================================================
+
+  //--------------------------------------------------------------------------
+  // Input mesh
+  //--------------------------------------------------------------------------
+  aims::BundleReader rdata( fileref );
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  Motion affine;
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
+    rmotion >> affine;
+  }
+  cout << "Affine : " << affine << endl;
+
+  //==========================================================================
+  //
+  //      Do read, resampling and write
+  //
+  //==========================================================================
+  cout << "Resampling ";
+
+  BundleTransformer btrans( deformation, affine );
+  rdata.addBundleListener( btrans );
+  BundleWriter bw;
+  bw.setFileString( ffdproc.output );
+  btrans.addBundleListener( bw );
+
+  rdata.read();
+
+  cout << endl;
+
+  return true;
+}
+
+
+//
 //  POINTS RESAMPLING
 //
 
 bool doPoints( FFDApplyProc & ffdproc, const string & filename )
 {
+  cout << "Type points\n";
+
   istream *s = 0;
   ifstream f;
   stringstream sf;
@@ -694,7 +858,6 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
   {
     aims::Reader<Motion> rmotion(ffdproc.affinemotion);
     rmotion >> affine;
-    affine = affine.inverse();
   }
   cout << "Affine : " << affine << endl;
 
@@ -743,13 +906,15 @@ int main( int argc, const char **argv )
     AimsApplication application(
       argc, argv,
       "Apply FFD (vector field) transformation on an image, a mesh, a 'bucket' "
-      "(voxels list file), or to points.\n"
+      "(voxels list file), fiber tracts, or to points.\n"
       "\n"
       "Note that on images the vector field normally represents the inverse "
       "transformation (for a destination point we seek the source position of "
-      "the point), but for meshes, buckets or points the vector field is "
-      "applied directly (a vertex is moved according to the vector field), so "
-      "the transformation should be the inverse of the one applied to an image."
+      "the point), but for meshes, buckets, fibers, or points the vector field "
+      "is applied directly (a vertex is moved according to the vector field), "
+      "so the transformation should be the inverse of the one applied to an "
+      "image. Similarly, any affine transform given as -m option is from the "
+      "source object to the input deformation space."
       "\n"
       "\n"
       "In points mode, the -i options either specifies an ASCII file "
