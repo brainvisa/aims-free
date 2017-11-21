@@ -20,6 +20,8 @@
 #include <aims/utility/progress.h>                       // aims::ProgressInfo
 //--- carto ------------------------------------------------------------------
 #include <cartobase/object/object.h>                                 // Object
+#include <cartobase/stream/fileutil.h>
+#include <cartobase/exception/errno.h>
 //--- std --------------------------------------------------------------------
 #include <cstdio>
 #include <algorithm>
@@ -31,6 +33,8 @@ using namespace carto;
 
 template <class T, class C>
 bool doit( Process &, const string &, Finder & );
+template <int D>
+bool doMesh( Process &, const string &, Finder & );
 
 class FFDApplyProc : public Process
 {
@@ -76,6 +80,9 @@ FFDApplyProc::FFDApplyProc() : Process(),
   registerProcessType( "Volume", "DOUBLE",  &doit<double, double> );
   registerProcessType( "Volume", "RGB",     &doit<AimsRGB, AimsRGB::ChannelType> );
   registerProcessType( "Volume", "RGBA",    &doit<AimsRGBA, AimsRGBA::ChannelType> );
+  registerProcessType( "Mesh", "VOID",      &doMesh<3> );
+  registerProcessType( "Mesh2", "VOID",     &doMesh<2> );
+  registerProcessType( "Mesh4", "VOID",     &doMesh<4> );
 }
 
 template <class T, class C>
@@ -115,9 +122,7 @@ bool doit( Process & process, const string & fileref, Finder & )
   if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
     deformation.reset( new TrilinearFfd );
   else
-  { cout << "deformation: spline\n";
     deformation.reset( new SplineFfd );
-  }
 
   // Before 2015, FFD deformations were in voxels. They are now stored in mm.
   // A hint is that old ffd motions have a voxel size of 1. mm.
@@ -459,6 +464,169 @@ bool doit( Process & process, const string & fileref, Finder & )
   return res;
 }
 
+
+//
+// MESH RESAMPLING
+//
+
+template <int D>
+bool doMesh( Process & process, const string & fileref, Finder & )
+{
+  FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
+
+  cout << "Type Mesh <" << D << ">" << endl;
+
+  //==========================================================================
+  //
+  //      Read input data
+  //
+  //==========================================================================
+
+  //--------------------------------------------------------------------------
+  // Input mesh
+  //--------------------------------------------------------------------------
+  AimsTimeSurface<D, Void> in;
+  aims::Reader<AimsTimeSurface<D, Void> > rdata( fileref );
+  rdata >> in;
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  Motion affine;
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
+    rmotion >> affine;
+    affine = affine.inverse();
+  }
+  cout << "Affine : " << affine << endl;
+
+  //==========================================================================
+  //
+  //      Do resampling
+  //
+  //==========================================================================
+  cout << "Resampling ";
+
+  typename AimsTimeSurface<D, Void>::iterator is, es = in.end();
+  bool idaffine = affine.isIdentity();
+
+  for( is=in.begin(); is!=es; ++is )
+  {
+    vector<Point3df> & vert = is->second.vertex();
+    vector<Point3df>::iterator iv, ev = vert.end();
+    for( iv=vert.begin(); iv!=ev; ++iv )
+    {
+      Point3df & p = *iv;
+      if( !idaffine )
+        p = affine.transform( p );
+      p = deformation->transform( p );
+    }
+  }
+
+  cout << endl;
+
+  //==========================================================================
+  //
+  //      Write output data
+  //
+  //==========================================================================
+
+  Writer<AimsTimeSurface<D, Void> > w3(ffdproc.output);
+  bool res = w3.write(in);
+
+  return res;
+}
+
+
+//
+//  POINTS RESAMPLING
+//
+
+bool doPoints( FFDApplyProc & ffdproc, const string & filename )
+{
+  istream *s = 0;
+  ifstream f;
+  stringstream sf;
+  if( FileUtil::fileStat( filename ).find( '+' ) != string::npos )
+  {
+    f.open( filename );
+    if( !f )
+      throw errno_error();
+    s = &f;
+  }
+  else
+  {
+    sf.str( filename );
+    s = &sf;
+  }
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  Motion affine;
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
+    rmotion >> affine;
+    affine = affine.inverse();
+  }
+  cout << "Affine : " << affine << endl;
+
+  bool idaffine = affine.isIdentity();
+  vector<Point3df> transformed;
+
+  while( !s->eof() && !s->fail() )
+  {
+    Point3df p( 1e38, 1e38, 1e38 ), q;
+    (*s) >> p;
+    if( p == Point3df( 1e38, 1e38, 1e38 ) )
+      break;
+    if( !idaffine )
+      q = affine.transform( p );
+    else
+      q = p;
+    q = deformation->transform( p );
+    if( ffdproc.output.empty() )
+      cout << "p : " << p << " -> " << q << endl;
+    else
+      transformed.push_back( q );
+  }
+
+  if( !ffdproc.output.empty() )
+  {
+    ofstream g( ffdproc.output.c_str() );
+    vector<Point3df>::iterator ip, ep = transformed.end();
+    for( ip=transformed.begin(); ip!=ep; ++ip )
+      g << *ip << endl;
+  }
+}
+
+
 int main( int argc, const char **argv )
 
 {
@@ -469,9 +637,27 @@ int main( int argc, const char **argv )
     ProcessInput  ffdpi( ffdproc );
 
     //
-    // Collecte des arguments.
+    // Collect arguments.
     //
-    AimsApplication application( argc, argv, "Apply FFD transformation on image" );
+    AimsApplication application(
+      argc, argv,
+      "Apply FFD (vector field) transformation on an image, a mesh, or to "
+      "points.\n"
+      "\n"
+      "Note that on images the vector field normally represents the inverse "
+      "transformation (for a destination point we seek the source position of "
+      "the point), but for meshes or points the vector field is applied "
+      "directly (a vertex is moved according to the vector field), so the "
+      "transformation should be the inverse of the one applied to an image.\n"
+      "\n"
+      "In points mode, the -i options either specifies an ASCII file "
+      "containing point coordinates, or is directly one or several points "
+      "coordinates. Points shoud be in the shape (x, y, z) with parentheses.\n"
+      "\n"
+      "Note also that for meshes or points, the dimensions, voxel sizes, grid, "
+      "reference, and resampling options are pointless and are unused. Only "
+      "the vector field interpolation (--vi) option is used."
+    );
     application.addOption( ffdpi, "-i", "Input image" );
     application.addOption( ffdproc.inputmotion, "-d", "Input control knots grid", true );
     application.addOption( ffdproc.affinemotion, "-m", "Input affine transformation [Test_TO_Ref.trm]", true );
@@ -503,7 +689,25 @@ int main( int argc, const char **argv )
     application.alias( "--vectorinterpolation", "--vi" );
     application.initialize();
 
-    if (! ffdproc.execute( ffdpi.filename ))
+    bool ok = false;
+    try
+    {
+      ok = ffdproc.execute( ffdpi.filename );
+    }
+    catch( ... )
+    {
+    }
+    if( !ok )
+    {
+      try
+      {
+        ok = doPoints( ffdproc, ffdpi.filename );
+      }
+      catch( ... )
+      {
+      }
+    }
+    if( !ok )
       result = EXIT_FAILURE;
 
   }
