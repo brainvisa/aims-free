@@ -183,21 +183,17 @@ namespace aims {
     /// Get parameters
     /// @ {
     /// spline order
-    virtual
-    unsigned order()    const;
+    unsigned order()    const { return _order; }
     /// spline scale
-    virtual
-    float    scale()    const;
+    float    scale()    const { return _scale; }
     /// is shifted ?
-    virtual
-    bool     shifted()  const;
+    bool     shifted()  const { return _shift; }
     /// is centered ?
-    virtual
-    bool     centered() const;
+    bool     centered() const { return !_shift; }
     /// @}
 
   protected:
-    double dO()     const;
+    double dO()     const { return double( _order ); }
     virtual void setSupport();
     unsigned _order;
     float    _scale;
@@ -314,6 +310,8 @@ namespace aims {
     bool     is_valid( size_t index ) const;
     void     setArray( unsigned nder, size_t length );
     std::vector<std::vector<double> > _values;
+    double _tablescale;
+    double _tableoffset;
   };
 
   //==========================================================================

@@ -31,20 +31,28 @@ namespace aims {
 SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
                       float sizeX, float sizeY, float sizeZ ):
   _spline(3, 0),
-  _ctrlPointDelta( dimX, dimY, dimZ )
+  _ctrlPointDelta( dimX, dimY, dimZ ), _dimx( dimX ), _dimy( dimY ),
+  _dimz( dimZ ), _vsx( sizeX ), _vsy( sizeY ), _vsz( sizeZ ),
+  _flatx( dimX == 1 ), _flaty( dimY == 1 ), _flatz( dimZ == 1 )
 {
   _ctrlPointDelta = Point3df(0., 0., 0.);
   _ctrlPointDelta.setSizeXYZT( sizeX, sizeY, sizeZ );
 }
 
 SplineFfd::SplineFfd( const SplineFfd & other ):
-  _spline(3, 0)
+  _spline(3, 0), _dimx( other._dimx ), _dimy( other._dimy ),
+  _dimz( other._dimz ), _vsx( other._vsx ), _vsy( other._vsy ),
+  _vsz( other._vsz ),
+  _flatx( other._flatx ), _flaty( other._flaty ), _flatz( other._flatz )
 {
   updateAllCtrlKnot(other._ctrlPointDelta);
 }
 
 SplineFfd::SplineFfd( const AimsData<Point3df> & other ):
-  _spline(3, 0)
+  _spline(3, 0), _dimx( other.dimX() ), _dimy( other.dimY() ),
+  _dimz( other.dimZ() ), _vsx( other.sizeX() ), _vsy( other.sizeY() ),
+  _vsz( other.sizeZ() ),
+  _flatx( _dimx == 1 ), _flaty( _dimy == 1 ), _flatz( _dimz == 1 )
 {
   updateAllCtrlKnot(other);
 }
@@ -70,32 +78,63 @@ void SplineFfd::updateCtrlKnot( int nx, int ny, int nz, const Point3df & s )
   _ctrlPointDelta( nx, ny, nz ) = s;
 }
 
+
+void SplineFfd::updateDimensions()
+{
+  _dimx = _ctrlPointDelta.dimX();
+  _dimy = _ctrlPointDelta.dimY();
+  _dimz = _ctrlPointDelta.dimZ();
+  _vsx = _ctrlPointDelta.sizeX();
+  _vsy = _ctrlPointDelta.sizeY();
+  _vsz = _ctrlPointDelta.sizeZ();
+  _flatx = _dimx == 1;
+  _flaty = _dimy == 1;
+  _flatz = _dimz == 1;
+  int i;
+  _mirrorcoefvecx.resize( _dimx + 3 );
+  _mirrorcoefvecy.resize( _dimy + 3 );
+  _mirrorcoefvecz.resize( _dimz + 3 );
+  _mirrorcoefx = &_mirrorcoefvecx[1];
+  _mirrorcoefy = &_mirrorcoefvecy[1];
+  _mirrorcoefz = &_mirrorcoefvecz[1];
+  for( i=-1; i<_dimx + 2; ++i )
+    _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
+  for( i=-1; i<_dimy + 2; ++i )
+    _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
+  for( i=-1; i<_dimz + 2; ++i )
+    _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
+}
+
+
 void SplineFfd::updateGridResolution( const AimsData<Point3df> & newGrid )
 {
   // Ctrl Point Grid dimensions
-  if( newGrid.dimX() != dimX() ||
-      newGrid.dimY() != dimY() ||
-      newGrid.dimZ() != dimZ() )
+  if( newGrid.dimX() != _dimx ||
+      newGrid.dimY() != _dimy ||
+      newGrid.dimZ() != _dimz )
   {
     _ctrlPointDelta = AimsData<Point3df>( newGrid.dimX(),
                                           newGrid.dimY(),
                                           newGrid.dimZ() );
   }
 
-  if( newGrid.sizeX() != sizeX() ||
-      newGrid.sizeY() != sizeY() ||
-      newGrid.sizeZ() != sizeZ() )
+  if( newGrid.sizeX() != _vsx ||
+      newGrid.sizeY() != _vsy ||
+      newGrid.sizeZ() != _vsz )
   {
     _ctrlPointDelta.setSizeXYZT( newGrid.sizeX(), newGrid.sizeY(), newGrid.sizeZ() );
   }
+  updateDimensions();
 }
 
 void SplineFfd::updateAllCtrlKnot( const AimsData<Point3df> & newCtrlKnotGrid )
 {
   updateGridResolution( newCtrlKnotGrid );
-  for( int k = 0; k < newCtrlKnotGrid.dimZ(); ++k )
-  for( int j = 0; j < newCtrlKnotGrid.dimY(); ++j )
-  for( int i = 0; i < newCtrlKnotGrid.dimX(); ++i )
+  int dx = newCtrlKnotGrid.dimX(), dy = newCtrlKnotGrid.dimY(),
+    dz = newCtrlKnotGrid.dimZ();
+  for( int k = 0; k < dz; ++k )
+  for( int j = 0; j < dy; ++j )
+  for( int i = 0; i < dx; ++i )
     _ctrlPointDelta(i, j, k) = newCtrlKnotGrid(i, j, k);
 }
 
@@ -112,10 +151,11 @@ void SplineFfd::updateAllCtrlKnotFromDeformation( const AimsData<Point3df> & new
                          newDeformationGrid.dimZ() );
     def = 0.;
 
+    int dx = def.dimX(), dy = def.dimY(), dz = def.dimZ();
     // Copy of coefficients to def
-    for( int k = 0; k < def.dimZ(); ++k )
-    for( int j = 0; j < def.dimY(); ++j )
-    for( int i = 0; i < def.dimX(); ++i )
+    for( int k = 0; k < dz; ++k )
+    for( int j = 0; j < dy; ++j )
+    for( int i = 0; i < dx; ++i )
       def(i, j, k) = newDeformationGrid(i, j, k)[c];
 
     // Construction of spline coefficients for test image
@@ -125,9 +165,9 @@ void SplineFfd::updateAllCtrlKnotFromDeformation( const AimsData<Point3df> & new
       splineCoeff = interpolator.getSplineCoef( def );
     }
 
-    for( int k = 0; k < _ctrlPointDelta.dimZ(); ++k )
-    for( int j = 0; j < _ctrlPointDelta.dimY(); ++j )
-    for( int i = 0; i < _ctrlPointDelta.dimX(); ++i )
+    for( int k = 0; k < dz; ++k )
+    for( int j = 0; j < dy; ++j )
+    for( int i = 0; i < dx; ++i )
       _ctrlPointDelta(i, j, k)[c] = (float)splineCoeff(i, j, k);
   }
 }
@@ -148,29 +188,30 @@ Point3dd SplineFfd::deformation( const Point3dd& pImage ) const
       kSpline[2] < 0 || kSpline[2] >= dimZ() )
     return deformation;
 
-  Point3dl kDown( ( isFlat(0) ? 0 : kSpline[0] - 1 ),
-                  ( isFlat(1) ? 0 : kSpline[1] - 1 ),
-                  ( isFlat(2) ? 0 : kSpline[2] - 1 ) );
-  Point3dl kUp  ( ( isFlat(0) ? 0 : kSpline[0] + 2 ),
-                  ( isFlat(1) ? 0 : kSpline[1] + 2 ),
-                  ( isFlat(2) ? 0 : kSpline[2] + 2 ) );
+  Point3dl kDown( ( _flatx ? 0 : kSpline[0] - 1 ),
+                  ( _flaty ? 0 : kSpline[1] - 1 ),
+                  ( _flatz ? 0 : kSpline[2] - 1 ) );
+  Point3dl kUp  ( ( _flatx ? 0 : kSpline[0] + 2 ),
+                  ( _flaty ? 0 : kSpline[1] + 2 ),
+                  ( _flatz ? 0 : kSpline[2] + 2 ) );
 
-  double bz, by, bx;
+  double bz, by, bx, byz;
   int    cz, cy, cx;
 
   for( int k = kDown[2]; k <= kUp[2]; ++k )
   {
-    bz = ( isFlat(2) ? 1. : spline3( pSpline[2] - k ) );
-    cz  = aims::mirrorCoeff( k, dimZ() );
+    bz = ( _flatz ? 1. : spline3( pSpline[2] - k ) );
+    cz  =_mirrorcoefz[k];
     for( int j = kDown[1]; j <= kUp[1]; ++j )
     {
-      by = ( isFlat(1) ? 1. : spline3( pSpline[1] - j ) );
-      cy  = aims::mirrorCoeff( j, dimY() );
+      by = ( _flaty ? 1. : spline3( pSpline[1] - j ) );
+      cy  = _mirrorcoefy[j];
+      byz = bz * by;
       for( int i = kDown[0]; i <= kUp[0]; ++i )
       {
-        bx = ( isFlat(0) ? 1. : spline3( pSpline[0] - i ) );
-        cx  = aims::mirrorCoeff( i, dimX() );
-        fdef = _ctrlPointDelta( cx, cy, cz ) * bx * by * bz;
+        bx = ( _flatx ? 1. : spline3( pSpline[0] - i ) );
+        cx  = _mirrorcoefx[i];
+        fdef = _ctrlPointDelta( cx, cy, cz ) * bx * byz;
         deformation[0] += fdef[0];
         deformation[1] += fdef[1];
         deformation[2] += fdef[2];
@@ -199,19 +240,22 @@ void SplineFfd::increaseResolution( const Point3d & addKnot )
   // 1. we compute a volume of deformations in the new referential, but only
   // inside the image domain
   AimsData<Point3df> newDef( newDim[0], newDim[1], newDim[2] );
-  newDef.setSizeXYZT( isFlat(0) ? sizeX() : double(dimX() - 1) / double(newDef.dimX() - 1) * sizeX(),
-                      isFlat(1) ? sizeY() : double(dimY() - 1) / double(newDef.dimY() - 1) * sizeY(),
-                      isFlat(2) ? sizeZ() : double(dimZ() - 1) / double(newDef.dimZ() - 1) * sizeZ() );
+  newDef.setSizeXYZT( _flatx ? sizeX() : double(dimX() - 1) / double(newDef.dimX() - 1) * sizeX(),
+                      _flaty ? sizeY() : double(dimY() - 1) / double(newDef.dimY() - 1) * sizeY(),
+                      _flatz ? sizeZ() : double(dimZ() - 1) / double(newDef.dimZ() - 1) * sizeZ() );
   newDef = Point3df(0.);
   Point3dd nd;
 
-  for( int k = 0; k < newDef.dimZ(); ++k )
-  for( int j = 0; j < newDef.dimY(); ++j )
-  for( int i = 0; i < newDef.dimX(); ++i )
+  float vsx = newDef.sizeX(), vsy = newDef.sizeY(), vsz = newDef.sizeZ();
+  int dx = newDef.dimX(), dy = newDef.dimY(), dz = newDef.dimZ();
+
+  for( int k = 0; k < dz; ++k )
+  for( int j = 0; j < dy; ++j )
+  for( int i = 0; i < dx; ++i )
   {
-    Point3dd p_mm( i * newDef.sizeX(),
-                   j * newDef.sizeY(),
-                   k * newDef.sizeZ() );
+    Point3dd p_mm( i * vsx,
+                   j * vsy,
+                   k * vsz );
     nd = deformation( p_mm );
     newDef(i, j, k)[0] = nd[0];
     newDef(i, j, k)[1] = nd[1];
@@ -590,6 +634,131 @@ void SplineFfd::write( const string & filename ) const
 }
 
 
+//============================================================================
+//   FFD TRILINEAR RESAMPLED TRANSFORMATION
+//============================================================================
+
+TrilinearFfd::TrilinearFfd( int dimX, int dimY, int dimZ,
+                            float sizeX, float sizeY, float sizeZ ):
+  SplineFfd( dimX, dimY, dimZ, sizeX, sizeY, sizeZ )
+{
+}
+
+TrilinearFfd::TrilinearFfd( const TrilinearFfd & other ):
+  SplineFfd( other )
+{
+}
+
+TrilinearFfd::TrilinearFfd( const AimsData<Point3df> & other ):
+  SplineFfd( other )
+{
+}
+
+TrilinearFfd & TrilinearFfd::operator=( const TrilinearFfd & other )
+{
+  SplineFfd::operator = ( other );
+  return *this;
+}
+
+Point3dd TrilinearFfd::deformation( const Point3dd& pImage ) const
+{
+  Point3dd deformation(0., 0., 0.);
+  Point3df fdef;
+  Point3dd pSpline( mmToSplineVox(pImage) );
+
+  Point3dl kSpline( (int)std::floor(pSpline[0]),
+                    (int)std::floor(pSpline[1]),
+                    (int)std::floor(pSpline[2]) );
+
+  if( kSpline[0] < 0 || kSpline[0] >= dimX() ||
+      kSpline[1] < 0 || kSpline[1] >= dimY() ||
+      kSpline[2] < 0 || kSpline[2] >= dimZ() )
+    return deformation;
+
+  Point3dl kUp  ( kSpline[0] + 1,
+                  kSpline[1] + 1,
+                  kSpline[2] + 1 );
+
+  double bz, by, byz;
+  double bxt[2], byt[2], bzt[2];
+
+  if( _flatx || kUp[0] >= dimX() )
+  {
+    kUp[0] = kSpline[0];
+    bxt[0] = 1.;
+    bxt[1] = 0.;
+  }
+  else
+  {
+    bxt[1] = pSpline[0] - kSpline[0];
+    bxt[0] = 1. - bxt[1];
+  }
+
+  if( _flaty || kUp[1] >= dimY() )
+  {
+    kUp[1] = kSpline[1];
+    byt[0] = 1.;
+    byt[1] = 0.;
+  }
+  else
+  {
+    byt[1] = pSpline[1] - kSpline[1];
+    byt[0] = 1. - byt[1];
+  }
+
+  if( _flatz || kUp[2] >= dimZ() )
+  {
+    kUp[2] = kSpline[2];
+    bzt[0] = 1.;
+    bzt[1] = 0.;
+  }
+  else
+  {
+    bzt[1] = pSpline[2] - kSpline[2];
+    bzt[0] = 1. - bzt[1];
+  }
+
+  const Point3df *pCtrlPt;
+  long incr = &_ctrlPointDelta( 1 ) - & _ctrlPointDelta( 0 );
+  kUp[0] -= kSpline[0];
+
+  for( int k = kSpline[2]; k <= kUp[2]; ++k )
+  {
+    bz = bzt[ k - kSpline[2] ];
+    for( int j = kSpline[1]; j <= kUp[1]; ++j )
+    {
+      by = byt[ j - kSpline[1] ];
+      byz = bz * by;
+      pCtrlPt = &_ctrlPointDelta( kSpline[0], j, k );
+
+      fdef = *pCtrlPt * bxt[0] * byz;
+      pCtrlPt += incr;
+      deformation[0] += fdef[0];
+      deformation[1] += fdef[1];
+      deformation[2] += fdef[2];
+
+      if( kUp[0] != 0 )
+      {
+        fdef = *pCtrlPt * bxt[1] * byz;
+        deformation[0] += fdef[0];
+        deformation[1] += fdef[1];
+        deformation[2] += fdef[2];
+      }
+    }
+  }
+
+  return deformation;
+}
+
+Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
+{
+  Point3dd p(x, y, z);
+  return p + deformation(p);
+}
+
+
+//
+
 template <typename T>
 FfdResampler<T>::~FfdResampler()
 {
@@ -610,6 +779,13 @@ void SplineFfdResampler<T, C>::init()
   _channelcoef.resize(_samples);
   _min.resize(_samples);
   _max.resize(_samples);
+  _dimx = 1;
+  _dimy = 1;
+  _dimz = 1;
+  _vsx = 1.f;
+  _vsy = 1.f;
+  _vsz = 1.f;
+  _idaffine = _affine.isIdentity();
 }
 
 template <class T, class C>
@@ -656,6 +832,14 @@ void SplineFfdResampler<T, C>::setRef(const AimsData<T> & ref)
 {
   _ref = ref;
   _last_t = -1;
+  vector<int> dims = _ref.volume()->getSize();
+  _dimx = dims[0];
+  _dimy = dims[1];
+  _dimz = dims[2];
+  vector<float> vs = _ref.volume()->getVoxelSize();
+  _vsx = vs[0];
+  _vsy = vs[1];
+  _vsz = vs[2];
   updateCoef();
 }
 
@@ -673,30 +857,30 @@ Point3df SplineFfdResampler<T, C>::resample(
   Point3dd  p_ref( output_location[0], output_location[1], output_location[2] );
 
   // transform point
-  if( !_affine.isIdentity() )
+  if( !_idaffine )
     p_ref = _affine.transform( p_ref );
   p_ref = _transformation.transform( p_ref );
 
   // Spline resampling
 
-  Point3dd pv_ref( p_ref[0] / _ref.sizeX(),
-                   p_ref[1] / _ref.sizeY(),
-                   p_ref[2] / _ref.sizeZ() );
+  Point3dd pv_ref( p_ref[0] / _vsx,
+                   p_ref[1] / _vsy,
+                   p_ref[2] / _vsz );
 
   Point3dl pi_ref( (int)(floor(pv_ref[0])),
                    (int)(floor(pv_ref[1])),
                    (int)(floor(pv_ref[2])) );
 
-  Point3dl kDown( ( _transformation.isFlat(0) ? pi_ref[0] : pi_ref[0] - 1 ),
-                  ( _transformation.isFlat(1) ? pi_ref[1] : pi_ref[1] - 1 ),
-                  ( _transformation.isFlat(2) ? pi_ref[2] : pi_ref[2] - 1 ) );
-  Point3dl kUp  ( ( _transformation.isFlat(0) ? pi_ref[0] : pi_ref[0] + 2 ),
-                  ( _transformation.isFlat(1) ? pi_ref[1] : pi_ref[1] + 2 ),
-                  ( _transformation.isFlat(2) ? pi_ref[2] : pi_ref[2] + 2 ) );
+  Point3dl kDown( ( _transformation.isXFlat() ? pi_ref[0] : pi_ref[0] - 1 ),
+                  ( _transformation.isYFlat() ? pi_ref[1] : pi_ref[1] - 1 ),
+                  ( _transformation.isZFlat() ? pi_ref[2] : pi_ref[2] - 1 ) );
+  Point3dl kUp  ( ( _transformation.isXFlat() ? pi_ref[0] : pi_ref[0] + 2 ),
+                  ( _transformation.isYFlat() ? pi_ref[1] : pi_ref[1] + 2 ),
+                  ( _transformation.isZFlat() ? pi_ref[2] : pi_ref[2] + 2 ) );
 
-  if( pi_ref[0] >= 0 && pi_ref[0] < _ref.dimX() &&
-      pi_ref[1] >= 0 && pi_ref[1] < _ref.dimY() &&
-      pi_ref[2] >= 0 && pi_ref[2] < _ref.dimZ() )
+  if( pi_ref[0] >= 0 && pi_ref[0] < _dimx &&
+      pi_ref[1] >= 0 && pi_ref[1] < _dimy &&
+      pi_ref[2] >= 0 && pi_ref[2] < _dimz )
   {
     // Loop on channels to resample data in each one
     for ( int c = 0; c < _samples; ++c )
@@ -706,14 +890,14 @@ Point3df SplineFfdResampler<T, C>::resample(
       // Integrate spline values in 3 dimensions
       // pffd[0] - i, pffd[1] - j, pffd[2] - k,  vary in the range [-2, 2[
       for( int k = kDown[2]; k <= kUp[2]; ++k ) {
-        bk3 = ( _transformation.isFlat(2) ? 1. : _transformation.spline3(pv_ref[2] - k) );
-        ck = aims::mirrorCoeff( k, _ref.dimZ() );
+        bk3 = ( _transformation.isZFlat() ? 1. : _transformation.spline3(pv_ref[2] - k) );
+        ck = aims::mirrorCoeff( k, _dimz );
         for( int j = kDown[1]; j <= kUp[1]; ++j ) {
-          bj3 = ( _transformation.isFlat(1) ? 1. : _transformation.spline3(pv_ref[1] - j) );
-          cj = aims::mirrorCoeff( j, _ref.dimY() );
+          bj3 = ( _transformation.isYFlat() ? 1. : _transformation.spline3(pv_ref[1] - j) );
+          cj = aims::mirrorCoeff( j, _dimy );
           for( int i = kDown[0]; i <= kUp[0]; ++i ) {
-            bi3 = ( _transformation.isFlat(0) ? 1. : _transformation.spline3(pv_ref[0] - i) );
-            ci = aims::mirrorCoeff( i, _ref.dimX() );
+            bi3 = ( _transformation.isXFlat() ? 1. : _transformation.spline3(pv_ref[0] - i) );
+            ci = aims::mirrorCoeff( i, _dimx );
             output_channel_value += (_channelcoef[c])(ci, cj, ck) * bi3 * bj3 * bk3;
           }
         }
@@ -743,7 +927,15 @@ NearestNeighborFfdResampler<T, C>::~NearestNeighborFfdResampler()
 
 template <class T, class C>
 void NearestNeighborFfdResampler<T, C>::init()
-{}
+{
+  _dimx = 1;
+  _dimy = 1;
+  _dimz = 1;
+  _vsx = 1.f;
+  _vsy = 1.f;
+  _vsz = 1.f;
+  _idaffine = _affine.isIdentity();
+}
 
 template <class T, class C>
 NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
@@ -769,6 +961,14 @@ NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
 template <class T, class C>
 void NearestNeighborFfdResampler<T, C>::setRef(const AimsData<T> & ref) {
   _ref = ref;
+  vector<int> dims = _ref.volume()->getSize();
+  _dimx = dims[0];
+  _dimy = dims[1];
+  _dimz = dims[2];
+  vector<float> vs = _ref.volume()->getVoxelSize();
+  _vsx = vs[0];
+  _vsy = vs[1];
+  _vsz = vs[2];
 }
 
 template <class T, class C>
@@ -779,18 +979,18 @@ Point3df NearestNeighborFfdResampler<T, C>::resample(
   // output_location is in the output image referential (unit: mm)
   Point3df p_ref = output_location;
 
-  if (! _affine.isIdentity() )
+  if (! _idaffine )
     p_ref = _affine.transform( p_ref );
   p_ref = _transformation.transform( p_ref );
 
-  // Spline resampling
-  Point3dl pi_ref( (int)(p_ref[0] / _ref.sizeX() + .5),
-                   (int)(p_ref[1] / _ref.sizeY() + .5),
-                   (int)(p_ref[2] / _ref.sizeZ() + .5) ) ;
+  // Nearest neighbor resampling
+  Point3dl pi_ref( (int)(p_ref[0] / _vsx + .5),
+                   (int)(p_ref[1] / _vsy + .5),
+                   (int)(p_ref[2] / _vsz + .5) );
 
-  if( pi_ref[0] >= 0 && pi_ref[0] < _ref.dimX() &&
-      pi_ref[1] >= 0 && pi_ref[1] < _ref.dimY() &&
-      pi_ref[2] >= 0 && pi_ref[2] < _ref.dimZ() )
+  if( pi_ref[0] >= 0 && pi_ref[0] < _dimx &&
+      pi_ref[1] >= 0 && pi_ref[1] < _dimy &&
+      pi_ref[2] >= 0 && pi_ref[2] < _dimz )
   {
     output_value = _ref( pi_ref[0], pi_ref[1], pi_ref[2], t );
   }
@@ -799,6 +999,135 @@ Point3df NearestNeighborFfdResampler<T, C>::resample(
 
   return p_ref;
 }
+
+//============================================================================
+//   T R I L I N E A R   R E S A M P L E R
+//============================================================================
+template <class T, class C>
+TrilinearFfdResampler<T, C>::~TrilinearFfdResampler()
+{}
+
+
+template <class T, class C>
+void TrilinearFfdResampler<T, C>::init()
+{
+  _dimx = 1;
+  _dimy = 1;
+  _dimz = 1;
+  _vsx = 1.f;
+  _vsy = 1.f;
+  _vsz = 1.f;
+  _idaffine = _affine.isIdentity();
+}
+
+template <class T, class C>
+TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
+    const SplineFfd & spline, T background ):
+  LinearResampler<C>(),
+  _transformation(spline),
+  _background(background)
+{
+  init();
+}
+
+template <class T, class C>
+TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
+    const SplineFfd & spline, Motion affine, T background ):
+  LinearResampler<C>(),
+  _transformation(spline),
+  _affine(affine),
+  _background(background)
+{
+  init();
+}
+
+template <class T, class C>
+void TrilinearFfdResampler<T, C>::setRef(const AimsData<T> & ref) {
+  _ref = ref;
+  vector<int> dims = _ref.volume()->getSize();
+  _dimx = dims[0];
+  _dimy = dims[1];
+  _dimz = dims[2];
+  vector<float> vs = _ref.volume()->getVoxelSize();
+  _vsx = vs[0];
+  _vsy = vs[1];
+  _vsz = vs[2];
+}
+
+template <class T, class C>
+Point3df TrilinearFfdResampler<T, C>::resample(
+  const Point3df & output_location,
+  T & output_value, int t)
+{
+  double    bk3, bj3, bi3;
+  // output_location is in the output image referential (unit: mm)
+  Point3df p_ref = output_location;
+
+  if (! _idaffine )
+    p_ref = _affine.transform( p_ref );
+  p_ref = _transformation.transform( p_ref );
+
+  // Linear resampling
+
+  Point3dd pv_ref( p_ref[0] / _vsx,
+                   p_ref[1] / _vsy,
+                   p_ref[2] / _vsz );
+
+  Point3dl pi_ref( (int)(floor(pv_ref[0])),
+                   (int)(floor(pv_ref[1])),
+                   (int)(floor(pv_ref[2])) );
+
+  bool flatx = _transformation.isXFlat();
+  bool flaty = _transformation.isYFlat();
+  bool flatz = _transformation.isZFlat();
+
+  Point3dl kUp  ( ( flatx ? pi_ref[0] : pi_ref[0] + 1 ),
+                  ( flaty ? pi_ref[1] : pi_ref[1] + 1 ),
+                  ( flatz ? pi_ref[2] : pi_ref[2] + 1 ) );
+
+  if( kUp[0] >= _dimx )
+  {
+    kUp[0] = _dimx - 1;
+    flatx = true;
+  }
+  if( kUp[1] >= _dimy )
+  {
+    kUp[1] = _dimy - 1;
+    flaty = true;
+  }
+  if( kUp[2] >= _dimz )
+  {
+    kUp[2] = _dimz - 1;
+    flatz = true;
+  }
+
+  // Warning: interpolation is done in "source" space
+  if( pi_ref[0] >= 0 && pi_ref[0] < _dimx &&
+      pi_ref[1] >= 0 && pi_ref[1] < _dimy &&
+      pi_ref[2] >= 0 && pi_ref[2] < _dimz )
+  {
+    output_value = T(0);
+
+    for( int k = pi_ref[2]; k <= kUp[2]; ++k )
+    {
+      bk3 = ( flatz ? 1. : 1. - std::abs( pv_ref[2] - k ) );
+      for( int j = pi_ref[1]; j <= kUp[1]; ++j )
+      {
+        bj3 = ( flaty ? 1. : 1. - std::abs( pv_ref[1] - j ) );
+        for( int i = pi_ref[0]; i <= kUp[0]; ++i )
+        {
+          bi3 = ( flatx ? 1. : 1. - std::abs( pv_ref[0] - i ) );
+          output_value += _ref(i, j, k) * bi3 * bj3 * bk3;
+        }
+      }
+    }
+  }
+  else
+    output_value = _background;
+
+  return p_ref;
+}
+
 
 template class SplineFfdResampler<int8_t>;
 template class SplineFfdResampler<uint8_t>;
@@ -821,5 +1150,16 @@ template class NearestNeighborFfdResampler<float>;
 template class NearestNeighborFfdResampler<double>;
 template class NearestNeighborFfdResampler<AimsRGB, AimsRGB::ChannelType>;
 template class NearestNeighborFfdResampler<AimsRGBA, AimsRGBA::ChannelType>;
+
+template class TrilinearFfdResampler<int8_t>;
+template class TrilinearFfdResampler<uint8_t>;
+template class TrilinearFfdResampler<int16_t>;
+template class TrilinearFfdResampler<uint16_t>;
+template class TrilinearFfdResampler<int32_t>;
+template class TrilinearFfdResampler<uint32_t>;
+template class TrilinearFfdResampler<float>;
+template class TrilinearFfdResampler<double>;
+template class TrilinearFfdResampler<AimsRGB, AimsRGB::ChannelType>;
+template class TrilinearFfdResampler<AimsRGBA, AimsRGBA::ChannelType>;
 
 } // namespace aims

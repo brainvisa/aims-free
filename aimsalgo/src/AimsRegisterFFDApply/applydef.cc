@@ -18,8 +18,11 @@
 #include <aims/mesh/surfaceOperation.h>            // SurfaceManip::meshVolume
 #include <aims/registration/ffd.h>  // SplineFfd - SplineFfdResampler
 #include <aims/utility/progress.h>                       // aims::ProgressInfo
+#include <aims/fibers/bundles.h>
 //--- carto ------------------------------------------------------------------
 #include <cartobase/object/object.h>                                 // Object
+#include <cartobase/stream/fileutil.h>
+#include <cartobase/exception/errno.h>
 //--- std --------------------------------------------------------------------
 #include <cstdio>
 #include <algorithm>
@@ -31,6 +34,11 @@ using namespace carto;
 
 template <class T, class C>
 bool doit( Process &, const string &, Finder & );
+template <int D>
+bool doMesh( Process &, const string &, Finder & );
+bool doBucket( Process &, const string &, Finder & );
+bool doBundles( Process &, const string &, Finder & );
+bool doGraph( Process &, const string &, Finder & );
 
 class FFDApplyProc : public Process
 {
@@ -57,6 +65,7 @@ public:
   double  sy;
   double  sz;
   bool old_mode;
+  string vfinterp;
 };
 
 
@@ -75,6 +84,12 @@ FFDApplyProc::FFDApplyProc() : Process(),
   registerProcessType( "Volume", "DOUBLE",  &doit<double, double> );
   registerProcessType( "Volume", "RGB",     &doit<AimsRGB, AimsRGB::ChannelType> );
   registerProcessType( "Volume", "RGBA",    &doit<AimsRGBA, AimsRGBA::ChannelType> );
+  registerProcessType( "Mesh", "VOID",      &doMesh<3> );
+  registerProcessType( "Mesh2", "VOID",     &doMesh<2> );
+  registerProcessType( "Mesh4", "VOID",     &doMesh<4> );
+  registerProcessType( "Bucket", "VOID",    &doBucket );
+  registerProcessType( "Graph", "VOID",     &doGraph );
+  registerProcessType( "BundleMap", "VOID", &doBundles ); // just for doc
 }
 
 template <class T, class C>
@@ -110,7 +125,12 @@ bool doit( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  SplineFfd deformation;
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
   // Before 2015, FFD deformations were in voxels. They are now stored in mm.
   // A hint is that old ffd motions have a voxel size of 1. mm.
   // Old motions can be used with old_mode set to true.
@@ -123,20 +143,22 @@ bool doit( Process & process, const string & fileref, Finder & )
       double(in.dimX() - 1) / double(grid.dimX() - 1) * in.sizeX(),
       double(in.dimY() - 1) / double(grid.dimY() - 1) * in.sizeY(),
       double(in.dimZ() - 1) / double(grid.dimZ() - 1) * in.sizeZ() );
-    for( int z = 0; z < grid.dimZ(); ++z )
-    for( int y = 0; y < grid.dimY(); ++y )
-    for( int x = 0; x < grid.dimX(); ++x )
+    int dx = grid.dimX(), dy = grid.dimY(), dz = grid.dimZ();
+    float sx = grid.sizeX(), sy = grid.sizeY(), sz = grid.sizeZ();
+    for( int z = 0; z < dz; ++z )
+    for( int y = 0; y < dy; ++y )
+    for( int x = 0; x < dx; ++x )
     {
-      grid(x, y, z)[0] *= grid.sizeX();
-      grid(x, y, z)[1] *= grid.sizeY();
-      grid(x, y, z)[2] *= grid.sizeZ();
+      grid(x, y, z)[0] *= sx;
+      grid(x, y, z)[1] *= sy;
+      grid(x, y, z)[2] *= sz;
     }
-    deformation.updateAllCtrlKnot(grid);
+    deformation->updateAllCtrlKnot(grid);
   }
   else
   {
     aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
-    rdef >> deformation;
+    rdef >> *deformation;
   }
 
   //--------------------------------------------------------------------------
@@ -188,9 +210,9 @@ bool doit( Process & process, const string & fileref, Finder & )
 
   //--- Field of view (in which it is useful to compte a ffd motion)
   int32_t fdx, fdy, fdz;
-  fdx = deformation.isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation.dimX()) * deformation.sizeX() / ffdproc.sx );
-  fdy = deformation.isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation.dimY()) * deformation.sizeY() / ffdproc.sy );
-  fdz = deformation.isFlat(2) ? ffdproc.sz : (int32_t)( double(deformation.dimZ()) * deformation.sizeZ() / ffdproc.sz );
+  fdx = deformation->isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation->dimX()) * deformation->sizeX() / ffdproc.sx );
+  fdy = deformation->isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation->dimY()) * deformation->sizeY() / ffdproc.sy );
+  fdz = deformation->isFlat(2) ? ffdproc.sz : (int32_t)( double(deformation->dimZ()) * deformation->sizeZ() / ffdproc.sz );
   fdx = std::min( fdx, ffdproc.dx );
   fdy = std::min( fdy, ffdproc.dy );
   fdz = std::min( fdz, ffdproc.dz );
@@ -252,12 +274,17 @@ bool doit( Process & process, const string & fileref, Finder & )
   carto::rc_ptr<FfdResampler<T> > rsp;
   if ((ffdproc.type == "nearest") || (ffdproc.type == "n")) {
     rsp = carto::rc_ptr<FfdResampler<T> >(
-      new NearestNeighborFfdResampler<T, C>(deformation, affine, bv)
+      new NearestNeighborFfdResampler<T, C>(*deformation, affine, bv)
     );
+  }
+  else if( ffdproc.type == "linear" || ffdproc.type == "l" )
+  {
+    rsp = carto::rc_ptr<FfdResampler<T> >(
+      new TrilinearFfdResampler<T, C>(*deformation, affine, bv) );
   }
   else {
     rsp = carto::rc_ptr<FfdResampler<T> >(
-      new SplineFfdResampler<T, C>(deformation, affine, bv)
+      new SplineFfdResampler<T, C>(*deformation, affine, bv)
     );
   }
   rsp->setRef(in);
@@ -274,13 +301,15 @@ bool doit( Process & process, const string & fileref, Finder & )
                                    ffdproc.sz,
                                    in.sizeT() );
     int dfx, dfy, dfz;
-    for(int k = 0; k < deformation.dimZ(); ++k)
-      for(int j = 0; j < deformation.dimY(); ++j)
-        for(int i = 0; i < deformation.dimX(); ++i)
+    int szx = deformation->dimX(), szy = deformation->dimY(),
+      szz = deformation->dimZ();
+    for(int k = 0; k < szz; ++k)
+      for(int j = 0; j < szy; ++j)
+        for(int i = 0; i < szx; ++i)
         {
-          dfx = int( i*(float(fdx) / float((deformation.dimX() - 1)) ));
-          dfy = int( j*(float(fdy) / float((deformation.dimY() - 1)) ));
-          dfz = int( k*(float(fdz) / float((deformation.dimZ() - 1)) ));
+          dfx = int( i*(float(fdx) / float((szx - 1)) ));
+          dfy = int( j*(float(fdy) / float((szy - 1)) ));
+          dfz = int( k*(float(fdz) / float((szz - 1)) ));
 
           subBucketMapVoid->insert( Point3d(dfx, dfy, dfz), Void() );
           subBucketMapVoid->insert( Point3d(dfx - 1, dfy, dfz), Void() );
@@ -395,7 +424,7 @@ bool doit( Process & process, const string & fileref, Finder & )
             v[1] /= size[1];
             v[2] /= size[2];
           }
-          v = deformation.transform( v );
+          v = deformation->transform( v );
           vert.push_back( v );
         }
 
@@ -442,6 +471,426 @@ bool doit( Process & process, const string & fileref, Finder & )
   return res;
 }
 
+
+//
+// MESH RESAMPLING
+//
+
+template <int D>
+bool doMesh( Process & process, const string & fileref, Finder & )
+{
+  FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
+
+  cout << "Type Mesh <" << D << ">" << endl;
+
+  //==========================================================================
+  //
+  //      Read input data
+  //
+  //==========================================================================
+
+  //--------------------------------------------------------------------------
+  // Input mesh
+  //--------------------------------------------------------------------------
+  AimsTimeSurface<D, Void> in;
+  aims::Reader<AimsTimeSurface<D, Void> > rdata( fileref );
+  rdata >> in;
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  Motion affine;
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
+    rmotion >> affine;
+  }
+  cout << "Affine : " << affine << endl;
+
+  //==========================================================================
+  //
+  //      Do resampling
+  //
+  //==========================================================================
+  cout << "Resampling ";
+
+  typename AimsTimeSurface<D, Void>::iterator is, es = in.end();
+  bool idaffine = affine.isIdentity();
+
+  for( is=in.begin(); is!=es; ++is )
+  {
+    vector<Point3df> & vert = is->second.vertex();
+    vector<Point3df>::iterator iv, ev = vert.end();
+    for( iv=vert.begin(); iv!=ev; ++iv )
+    {
+      Point3df & p = *iv;
+      if( !idaffine )
+        p = affine.transform( p );
+      p = deformation->transform( p );
+    }
+  }
+
+  cout << endl;
+
+  //==========================================================================
+  //
+  //      Write output data
+  //
+  //==========================================================================
+
+  Writer<AimsTimeSurface<D, Void> > w3(ffdproc.output);
+  bool res = w3.write(in);
+
+  return res;
+}
+
+
+//
+// BUCKET RESAMPLING
+//
+
+bool doBucket( Process & process, const string & fileref, Finder & )
+{
+  FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
+
+  cout << "Type Bucket" << endl;
+
+  //==========================================================================
+  //
+  //      Read input data
+  //
+  //==========================================================================
+
+  //--------------------------------------------------------------------------
+  // Input mesh
+  //--------------------------------------------------------------------------
+  BucketMap<Void> in;
+  aims::Reader<BucketMap<Void> > rdata( fileref );
+  rdata >> in;
+
+  //--- Hard dimensions
+  ffdproc.sx = ( ffdproc.sx > 0 ? ffdproc.sx : in.sizeX() );
+  ffdproc.sy = ( ffdproc.sy > 0 ? ffdproc.sy : in.sizeY() );
+  ffdproc.sz = ( ffdproc.sz > 0 ? ffdproc.sz : in.sizeZ() );
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  Motion affine;
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
+    rmotion >> affine;
+  }
+  cout << "Affine : " << affine << endl;
+
+  //==========================================================================
+  //
+  //      Do resampling
+  //
+  //==========================================================================
+  cout << "Resampling ";
+
+  typename BucketMap<Void>::iterator ib, eb = in.end();
+  bool idaffine = affine.isIdentity();
+  BucketMap<Void> out;
+  out.setSizeX( ffdproc.sx );
+  out.setSizeY( ffdproc.sy );
+  out.setSizeZ( ffdproc.sz );
+  Point3df vs( in.sizeX(), in.sizeY(), in.sizeZ() );
+
+  for( ib=in.begin(); ib!=eb; ++ib )
+  {
+    typename BucketMap<Void>::Bucket & obk = out[ ib->first ];
+    typename BucketMap<Void>::Bucket::iterator ip, ep = ib->second.end();
+    for( ip=ib->second.begin(); ip!=ep; ++ip )
+    {
+      Point3df p( ip->first[0] * vs[0], ip->first[1] * vs[1],
+                  ip->first[2] * vs[2] );
+      if( !idaffine )
+        p = affine.transform( p );
+      p = deformation->transform( p );
+      obk[ Point3d( int( rint( p[0] / ffdproc.sx ) ),
+                    int( rint( p[1] / ffdproc.sy ) ),
+                    int( rint( p[2] / ffdproc.sz ) ) ) ] = Void();
+    }
+  }
+
+  cout << endl;
+
+  //==========================================================================
+  //
+  //      Write output data
+  //
+  //==========================================================================
+
+  Writer<BucketMap<Void> > w3(ffdproc.output);
+  bool res = w3.write(out);
+
+  return res;
+}
+
+
+//
+// BUNDLES RESAMPLING
+//
+
+// transform bundles in stream
+class BundleTransformer : public BundleListener, public BundleProducer
+{
+public:
+  BundleTransformer( rc_ptr<SplineFfd> deformation, const Motion & affine );
+  virtual ~BundleTransformer() {}
+
+  virtual void 	bundleStarted(const BundleProducer &, const BundleInfo &);
+  virtual void 	bundleTerminated(const BundleProducer &, const BundleInfo &);
+  virtual void 	fiberStarted(const BundleProducer &, const BundleInfo &,
+                              const FiberInfo &);
+  virtual void 	fiberTerminated(const BundleProducer &, const BundleInfo &,
+                                 const FiberInfo &);
+  virtual void 	newFiberPoint(const BundleProducer &, const BundleInfo &,
+                               const FiberInfo &, const FiberPoint &);
+  virtual void 	noMoreBundle(const BundleProducer &);
+
+private:
+  rc_ptr<SplineFfd> _deformation;
+  const Motion & _affine;
+  bool _idaffine;
+};
+
+
+BundleTransformer::BundleTransformer( rc_ptr<SplineFfd> deformation,
+                                      const Motion & affine )
+  : BundleListener(), BundleProducer(),
+  _deformation( deformation ), _affine( affine ),
+  _idaffine( affine.isIdentity() )
+{
+}
+
+
+void BundleTransformer::bundleStarted( const BundleProducer &,
+                                       const BundleInfo &bi )
+{
+  startBundle( bi );
+}
+
+
+void BundleTransformer::bundleTerminated( const BundleProducer &,
+                                          const BundleInfo & bi )
+{
+  terminateBundle( bi );
+}
+
+
+void BundleTransformer::fiberStarted( const BundleProducer &,
+                                      const BundleInfo & bi,
+                                      const FiberInfo & fi )
+{
+  startFiber( bi, fi );
+}
+
+
+void BundleTransformer::fiberTerminated( const BundleProducer &,
+                                         const BundleInfo & bi,
+                                         const FiberInfo & fi )
+{
+  terminateFiber( bi, fi );
+}
+
+
+void BundleTransformer::newFiberPoint( const BundleProducer &,
+                                       const BundleInfo & bi,
+                                       const FiberInfo & fi,
+                                       const FiberPoint & pt )
+{
+  FiberPoint opt;
+  if( !_idaffine )
+    opt = _affine.transform( pt );
+  else
+    opt = pt;
+  opt = _deformation->transform( opt );
+  addFiberPoint( bi, fi, opt );
+}
+
+
+void BundleTransformer::noMoreBundle( const BundleProducer & )
+{
+  BundleProducer::noMoreBundle();
+}
+
+
+
+bool doGraph( Process & process, const string & fileref, Finder & f )
+{
+  const PythonHeader *ph = dynamic_cast<const PythonHeader *>( f.header() );
+  if( ph && ph->getProperty( "object_type" )->getString() == "BundleMap" )
+    return doBundles( process, fileref, f );
+  return false;
+}
+
+
+bool doBundles( Process & process, const string & fileref, Finder & )
+{
+  FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
+
+  cout << "Type Bundles" << endl;
+
+  //==========================================================================
+  //
+  //      Read input data
+  //
+  //==========================================================================
+
+  //--------------------------------------------------------------------------
+  // Input mesh
+  //--------------------------------------------------------------------------
+  aims::BundleReader rdata( fileref );
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  Motion affine;
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
+    rmotion >> affine;
+  }
+  cout << "Affine : " << affine << endl;
+
+  //==========================================================================
+  //
+  //      Do read, resampling and write
+  //
+  //==========================================================================
+  cout << "Resampling ";
+
+  BundleTransformer btrans( deformation, affine );
+  rdata.addBundleListener( btrans );
+  BundleWriter bw;
+  bw.setFileString( ffdproc.output );
+  btrans.addBundleListener( bw );
+
+  rdata.read();
+
+  cout << endl;
+
+  return true;
+}
+
+
+//
+//  POINTS RESAMPLING
+//
+
+bool doPoints( FFDApplyProc & ffdproc, const string & filename )
+{
+  cout << "Type points\n";
+
+  istream *s = 0;
+  ifstream f;
+  stringstream sf;
+  if( FileUtil::fileStat( filename ).find( '+' ) != string::npos )
+  {
+    f.open( filename );
+    if( !f )
+      throw errno_error();
+    s = &f;
+  }
+  else
+  {
+    sf.str( filename );
+    s = &sf;
+  }
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  Motion affine;
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
+    rmotion >> affine;
+  }
+  cout << "Affine : " << affine << endl;
+
+  bool idaffine = affine.isIdentity();
+  vector<Point3df> transformed;
+
+  while( !s->eof() && !s->fail() )
+  {
+    Point3df p( 1e38, 1e38, 1e38 ), q;
+    (*s) >> p;
+    if( p == Point3df( 1e38, 1e38, 1e38 ) )
+      break;
+    if( !idaffine )
+      q = affine.transform( p );
+    else
+      q = p;
+    q = deformation->transform( p );
+    if( ffdproc.output.empty() )
+      cout << "p : " << p << " -> " << q << endl;
+    else
+      transformed.push_back( q );
+  }
+
+  if( !ffdproc.output.empty() )
+  {
+    ofstream g( ffdproc.output.c_str() );
+    vector<Point3df>::iterator ip, ep = transformed.end();
+    for( ip=transformed.begin(); ip!=ep; ++ip )
+      g << *ip << endl;
+  }
+}
+
+
 int main( int argc, const char **argv )
 
 {
@@ -452,13 +901,38 @@ int main( int argc, const char **argv )
     ProcessInput  ffdpi( ffdproc );
 
     //
-    // Collecte des arguments.
+    // Collect arguments.
     //
-    AimsApplication application( argc, argv, "Apply FFD transformation on image" );
+    AimsApplication application(
+      argc, argv,
+      "Apply FFD (vector field) transformation on an image, a mesh, a 'bucket' "
+      "(voxels list file), fiber tracts, or to points.\n"
+      "\n"
+      "Note that on images the vector field normally represents the inverse "
+      "transformation (for a destination point we seek the source position of "
+      "the point), but for meshes, buckets, fibers, or points the vector field "
+      "is applied directly (a vertex is moved according to the vector field), "
+      "so the transformation should be the inverse of the one applied to an "
+      "image. Similarly, any affine transform given as -m option is from the "
+      "source object to the input deformation space."
+      "\n"
+      "\n"
+      "In points mode, the -i options either specifies an ASCII file "
+      "containing point coordinates, or is directly one or several points "
+      "coordinates. Points shoud be in the shape (x, y, z) with parentheses.\n"
+      "\n"
+      "Note also that for meshes or points, the dimensions, voxel sizes, grid, "
+      "reference, and resampling options are pointless and are unused. Only "
+      "the vector field interpolation (--vi) option is used.\n\n"
+      "In Buckets mode, the options --sx, --sy, --sz allow to specify the "
+      "output voxel size, but the reference (-r) is not used so far. The "
+      "transformation field is applied independently on each bucket voxel "
+      "with no resampling, so objects may end up with holes."
+    );
     application.addOption( ffdpi, "-i", "Input image" );
     application.addOption( ffdproc.inputmotion, "-d", "Input control knots grid", true );
     application.addOption( ffdproc.affinemotion, "-m", "Input affine transformation [Test_TO_Ref.trm]", true );
-    application.addOption( ffdproc.type, "-t", "Resampling type : n[earest], c[ubic] [default = cubic]", true );
+    application.addOption( ffdproc.type, "-t", "Voxel values resampling type : n[earest], l[inear], c[ubic] [default = cubic]", true );
     application.addOption( ffdproc.defaultval, "-bv", "Background value to use", true );
     application.addOption( ffdproc.dx, "--dx", "Output X dimension [default: same as input]", true );
     application.addOption( ffdproc.dy, "--dy", "Output Y dimension [default: same as input]", true );
@@ -474,6 +948,7 @@ int main( int argc, const char **argv )
     application.addOption( ffdproc.gridout, "-g", "Output grid mesh", true );
     application.addOption( ffdproc.compout, "-c", "Output compression volume", true );
     application.addOption( ffdproc.old_mode, "--old-mode", "Make this command work with pre-2015 FFD motions [default: false]", true );
+    application.addOption( ffdproc.vfinterp, "--vi", "Vector field interpolation type: l[inear], c[ubic] [default = cubic]", true );
     application.alias( "--input", "-i" );
     application.alias( "--motion", "-m" );
     application.alias( "--type", "-t" );
@@ -482,9 +957,28 @@ int main( int argc, const char **argv )
     application.alias( "--bucket", "-b" );
     application.alias( "--grid", "-g" );
     application.alias( "--compression", "-c" );
+    application.alias( "--vectorinterpolation", "--vi" );
     application.initialize();
 
-    if (! ffdproc.execute( ffdpi.filename ))
+    bool ok = false;
+    try
+    {
+      ok = ffdproc.execute( ffdpi.filename );
+    }
+    catch( ... )
+    {
+    }
+    if( !ok )
+    {
+      try
+      {
+        ok = doPoints( ffdproc, ffdpi.filename );
+      }
+      catch( ... )
+      {
+      }
+    }
+    if( !ok )
       result = EXIT_FAILURE;
 
   }
