@@ -14,6 +14,8 @@
 #include <aims/math/bspline3.h>
 #include <aims/math/bspline2.h>
 #include <aims/io/io_g.h>
+#include <aims/graph/graphmanip.h>
+#include <graph/graph/graph.h>
 #include <cstdio>
 #include <cmath>
 #include <string>
@@ -1128,6 +1130,148 @@ Point3df TrilinearFfdResampler<T, C>::resample(
   return p_ref;
 }
 
+
+template <int D>
+void ffdTransformMesh( AimsTimeSurface<D, Void> & mesh,
+                       SplineFfd & deformation,
+                       const AffineTransformation3d & affine )
+{
+  typename AimsTimeSurface<D, Void>::iterator is, es = mesh.end();
+  bool idaffine = affine.isIdentity();
+
+  for( is=mesh.begin(); is!=es; ++is )
+  {
+    vector<Point3df> & vert = is->second.vertex();
+    vector<Point3df>::iterator iv, ev = vert.end();
+    for( iv=vert.begin(); iv!=ev; ++iv )
+    {
+      Point3df & p = *iv;
+      if( !idaffine )
+        p = affine.transform( p );
+      p = deformation.transform( p );
+    }
+  }
+}
+
+
+rc_ptr<BucketMap<Void> >
+ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & deformation,
+                    const AffineTransformation3d & affine,
+                    const Point3df & vso )
+{
+  Point3df vvs = vso;
+  if( vvs == Point3df( 0., 0., 0. ) )
+  {
+    vvs[0] = bck.sizeX();
+    vvs[1] = bck.sizeY();
+    vvs[2] = bck.sizeZ();
+  }
+  typename BucketMap<Void>::const_iterator ib, eb = bck.end();
+  bool idaffine = affine.isIdentity();
+  rc_ptr<BucketMap<Void> > out;
+  out->setSizeX( vvs[0] );
+  out->setSizeY( vvs[1] );
+  out->setSizeZ( vvs[2] );
+  Point3df vs( bck.sizeX(), bck.sizeY(), bck.sizeZ() );
+
+  for( ib=bck.begin(); ib!=eb; ++ib )
+  {
+    typename BucketMap<Void>::Bucket & obk = (*out)[ ib->first ];
+    typename BucketMap<Void>::Bucket::const_iterator ip, ep = ib->second.end();
+    for( ip=ib->second.begin(); ip!=ep; ++ip )
+    {
+      Point3df p( ip->first[0] * vs[0], ip->first[1] * vs[1],
+                  ip->first[2] * vs[2] );
+      if( !idaffine )
+        p = affine.transform( p );
+      p = deformation.transform( p );
+      obk[ Point3d( int( rint( p[0] / vvs[0] ) ),
+                    int( rint( p[1] / vvs[1] ) ),
+                    int( rint( p[2] / vvs[2] ) ) ) ] = Void();
+    }
+  }
+
+  return out;
+}
+
+
+void ffdTransformGraph( Graph & graph, SplineFfd & deformation,
+                        const AffineTransformation3d & affine )
+{
+  Graph::iterator iv, ev = graph.end();
+  Object iter;
+  for( iv=graph.begin(); iv!=ev; ++iv )
+  {
+    for( iter=(*iv)->objectIterator(); iter->isValid(); iter->next() )
+    {
+      rc_ptr<AimsSurfaceTriangle> mesh;
+      try
+      {
+        mesh = iter->currentValue()->value<rc_ptr<AimsSurfaceTriangle> >();
+        cout << iter->key() << " is a mesh\n";
+        ffdTransformMesh( *mesh, deformation, affine );
+        continue;
+      }
+      catch( ... )
+      {
+      }
+
+      rc_ptr<BucketMap<Void> > bck;
+      try
+      {
+        bck = iter->currentValue()->value<rc_ptr<BucketMap<Void> > >();
+        cout << iter->key() << " is a bucket\n";
+        rc_ptr<BucketMap<Void> > obk
+          = ffdTransformBucket( *bck, deformation, affine );
+        (*iv)->setProperty( iter->key(), obk );
+        continue;
+      }
+      catch( ... )
+      {
+      }
+    }
+  }
+
+  const set<Edge *> & edges = graph.edges();
+  set<Edge *>::const_iterator ie, ee = edges.end();
+  for( ie=edges.begin(); ie!=ee; ++ie )
+  {
+    for( iter=(*ie)->objectIterator(); iter->isValid(); iter->next() )
+    {
+      rc_ptr<AimsSurfaceTriangle> mesh;
+      try
+      {
+        mesh = iter->currentValue()->value<rc_ptr<AimsSurfaceTriangle> >();
+        ffdTransformMesh( *mesh, deformation, affine );
+        continue;
+      }
+      catch( ... )
+      {
+      }
+
+      rc_ptr<BucketMap<Void> > bck;
+      try
+      {
+        bck = iter->currentValue()->value<rc_ptr<BucketMap<Void> > >();
+        rc_ptr<BucketMap<Void> > obk
+          = ffdTransformBucket( *bck, deformation, affine );
+        (*iv)->setProperty( iter->key(), obk );
+        continue;
+      }
+      catch( ... )
+      {
+      }
+    }
+  }
+}
+
+
+template void ffdTransformMesh( AimsTimeSurface<2, Void> &, SplineFfd & spline,
+                                const AffineTransformation3d & affine );
+template void ffdTransformMesh( AimsTimeSurface<3, Void> &, SplineFfd & spline,
+                                const AffineTransformation3d & affine );
+template void ffdTransformMesh( AimsTimeSurface<4, Void> &, SplineFfd & spline,
+                                const AffineTransformation3d & affine );
 
 template class SplineFfdResampler<int8_t>;
 template class SplineFfdResampler<uint8_t>;

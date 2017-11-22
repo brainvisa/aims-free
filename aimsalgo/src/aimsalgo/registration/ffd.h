@@ -20,8 +20,12 @@
 #include <aims/transformation/transformation.h>       // aims::Transformatin
 #include <aims/utility/channel.h>
 #include <aims/vector/vector.h>                       // Point*
+#include <aims/mesh/surface.h>
+#include <aims/bucket/bucketMap.h>
 #include <limits>
 #include <string>
+
+class Graph;
 
 namespace aims {
 
@@ -335,6 +339,21 @@ namespace aims {
       float _vsx, _vsy, _vsz;
       bool _idaffine;
   };
+
+  template <int D>
+  void ffdTransformMesh( AimsTimeSurface<D, Void> & mesh, SplineFfd & spline,
+                         const AffineTransformation3d & affine
+                           = AffineTransformation3d() );
+
+  carto::rc_ptr<BucketMap<Void> >
+  ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & spline,
+                      const AffineTransformation3d & affine
+                        = AffineTransformation3d(),
+                      const Point3df & vs = Point3df( 0., 0., 0. ) );
+
+  void ffdTransformGraph( Graph & graph, SplineFfd & spline,
+                          const AffineTransformation3d & affine
+                            = AffineTransformation3d() );
 
 } // namespace aims
 

@@ -84,11 +84,11 @@ FFDApplyProc::FFDApplyProc() : Process(),
   registerProcessType( "Volume", "DOUBLE",  &doit<double, double> );
   registerProcessType( "Volume", "RGB",     &doit<AimsRGB, AimsRGB::ChannelType> );
   registerProcessType( "Volume", "RGBA",    &doit<AimsRGBA, AimsRGBA::ChannelType> );
-  registerProcessType( "Mesh", "VOID",      &doMesh<3> );
-  registerProcessType( "Mesh2", "VOID",     &doMesh<2> );
-  registerProcessType( "Mesh4", "VOID",     &doMesh<4> );
+  registerProcessType( "Mesh",   "VOID",    &doMesh<3> );
+  registerProcessType( "Mesh2",  "VOID",    &doMesh<2> );
+  registerProcessType( "Mesh4",  "VOID",    &doMesh<4> );
   registerProcessType( "Bucket", "VOID",    &doBucket );
-  registerProcessType( "Graph", "VOID",     &doGraph );
+  registerProcessType( "Graph",  "VOID",    &doGraph );
   registerProcessType( "BundleMap", "VOID", &doBundles ); // just for doc
 }
 
@@ -526,21 +526,7 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   //==========================================================================
   cout << "Resampling ";
 
-  typename AimsTimeSurface<D, Void>::iterator is, es = in.end();
-  bool idaffine = affine.isIdentity();
-
-  for( is=in.begin(); is!=es; ++is )
-  {
-    vector<Point3df> & vert = is->second.vertex();
-    vector<Point3df>::iterator iv, ev = vert.end();
-    for( iv=vert.begin(); iv!=ev; ++iv )
-    {
-      Point3df & p = *iv;
-      if( !idaffine )
-        p = affine.transform( p );
-      p = deformation->transform( p );
-    }
-  }
+  ffdTransformMesh( in, *deformation, affine );
 
   cout << endl;
 
@@ -574,7 +560,7 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   //==========================================================================
 
   //--------------------------------------------------------------------------
-  // Input mesh
+  // Input bucket
   //--------------------------------------------------------------------------
   BucketMap<Void> in;
   aims::Reader<BucketMap<Void> > rdata( fileref );
@@ -615,30 +601,9 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   //==========================================================================
   cout << "Resampling ";
 
-  typename BucketMap<Void>::iterator ib, eb = in.end();
-  bool idaffine = affine.isIdentity();
-  BucketMap<Void> out;
-  out.setSizeX( ffdproc.sx );
-  out.setSizeY( ffdproc.sy );
-  out.setSizeZ( ffdproc.sz );
-  Point3df vs( in.sizeX(), in.sizeY(), in.sizeZ() );
-
-  for( ib=in.begin(); ib!=eb; ++ib )
-  {
-    typename BucketMap<Void>::Bucket & obk = out[ ib->first ];
-    typename BucketMap<Void>::Bucket::iterator ip, ep = ib->second.end();
-    for( ip=ib->second.begin(); ip!=ep; ++ip )
-    {
-      Point3df p( ip->first[0] * vs[0], ip->first[1] * vs[1],
-                  ip->first[2] * vs[2] );
-      if( !idaffine )
-        p = affine.transform( p );
-      p = deformation->transform( p );
-      obk[ Point3d( int( rint( p[0] / ffdproc.sx ) ),
-                    int( rint( p[1] / ffdproc.sy ) ),
-                    int( rint( p[2] / ffdproc.sz ) ) ) ] = Void();
-    }
-  }
+  rc_ptr<BucketMap<Void> > out
+    = ffdTransformBucket( in, *deformation, affine,
+                          Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
 
   cout << endl;
 
@@ -649,7 +614,7 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   //==========================================================================
 
   Writer<BucketMap<Void> > w3(ffdproc.output);
-  bool res = w3.write(out);
+  bool res = w3.write(*out);
 
   return res;
 }
@@ -743,16 +708,6 @@ void BundleTransformer::noMoreBundle( const BundleProducer & )
 }
 
 
-
-bool doGraph( Process & process, const string & fileref, Finder & f )
-{
-  const PythonHeader *ph = dynamic_cast<const PythonHeader *>( f.header() );
-  if( ph && ph->getProperty( "object_type" )->getString() == "BundleMap" )
-    return doBundles( process, fileref, f );
-  return false;
-}
-
-
 bool doBundles( Process & process, const string & fileref, Finder & )
 {
   FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
@@ -766,7 +721,7 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   //==========================================================================
 
   //--------------------------------------------------------------------------
-  // Input mesh
+  // Input bundles reader
   //--------------------------------------------------------------------------
   aims::BundleReader rdata( fileref );
 
@@ -813,6 +768,84 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   return true;
 }
 
+//
+// GRAPH RESAMPLING
+//
+
+bool doGraph( Process & process, const string & fileref, Finder & f )
+{
+  // check bundles objects, which are reported as graphs by Finder
+  // (since they can be read as graphs, which is the only data structure to
+  // represent them internally)
+  const PythonHeader *ph = dynamic_cast<const PythonHeader *>( f.header() );
+  if( ph && ph->getProperty( "object_type" )->getString() == "BundleMap" )
+    return doBundles( process, fileref, f );
+
+  // other cases are "real" graphs
+
+  FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
+
+  cout << "Type Graph" << endl;
+
+  //==========================================================================
+  //
+  //      Read input data
+  //
+  //==========================================================================
+
+  //--------------------------------------------------------------------------
+  // Input graph
+  //--------------------------------------------------------------------------
+  rc_ptr<Graph> in;
+  aims::Reader<Graph> rdata( fileref );
+  in.reset( rdata.read() );
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<SplineFfd> deformation;
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  Motion affine;
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
+    rmotion >> affine;
+  }
+  cout << "Affine : " << affine << endl;
+
+  //==========================================================================
+  //
+  //      Do resampling
+  //
+  //==========================================================================
+  cout << "Resampling ";
+
+  ffdTransformGraph( *in, *deformation, affine );
+
+  cout << endl;
+
+  //==========================================================================
+  //
+  //      Write output data
+  //
+  //==========================================================================
+
+  Writer<Graph> w3(ffdproc.output);
+  bool res = w3.write(*in);
+
+  return res;
+}
+
 
 //
 //  POINTS RESAMPLING
@@ -827,7 +860,7 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
   stringstream sf;
   if( FileUtil::fileStat( filename ).find( '+' ) != string::npos )
   {
-    f.open( filename );
+    f.open( filename.c_str() );
     if( !f )
       throw errno_error();
     s = &f;
