@@ -774,6 +774,7 @@ SplineFfdResampler<T, C>::~SplineFfdResampler()
 {
 }
 
+
 template <class T, class C>
 void SplineFfdResampler<T, C>::init()
 {
@@ -918,6 +919,14 @@ Point3df SplineFfdResampler<T, C>::resample(
 
   return Point3df( p_ref[0], p_ref[1], p_ref[2] );
 }
+
+// template <>
+// Point3df SplineFfdResampler<Point3df, float>::defaultBackground()
+// {
+//   return Point3df( 0.f );
+// }
+
+
 
 //============================================================================
 //   N E A R E S T N E I G H B O R  R E S A M P L E R
@@ -1323,14 +1332,10 @@ void ffdTransformGraph( Graph & graph, SplineFfd & deformation,
   for( iv=graph.begin(); iv!=ev; ++iv )
     transformGraphObject( *iv, deformation, affine, vvs, bbmin, bbmax );
 
-  cout << "bmin: " << Point3df( bbmin[0], bbmin[1], bbmin[2] ) << ", bbmax: " << Point3df( bbmax[0], bbmax[1], bbmax[2] ) << endl;
-
   const set<Edge *> & edges = graph.edges();
   set<Edge *>::const_iterator ie, ee = edges.end();
   for( ie=edges.begin(); ie!=ee; ++ie )
     transformGraphObject( *ie, deformation, affine, vvs, bbmin, bbmax );
-
-  cout << "bmin: " << Point3df( bbmin[0], bbmin[1], bbmin[2] ) << ", bbmax: " << Point3df( bbmax[0], bbmax[1], bbmax[2] ) << endl;
 
   graph.setProperty( "boundingbox_min", bbmin );
   graph.setProperty( "boundingbox_max", bbmax );
@@ -1423,6 +1428,14 @@ void BundleFFDTransformer::noMoreBundle( const BundleProducer & )
   BundleProducer::noMoreBundle();
 }
 
+//
+
+template <>
+Point3df SplineFfdResampler<Point3df, float>::defaultBackground()
+{
+  return Point3df( 0.f );
+}
+
 
 // template instantiations
 
@@ -1441,7 +1454,7 @@ template class SplineFfdResampler<int32_t>;
 template class SplineFfdResampler<uint32_t>;
 template class SplineFfdResampler<float>;
 template class SplineFfdResampler<double>;
-// template class SplineFfdResampler<Point3df, float>;
+template class SplineFfdResampler<Point3df, float>;
 template class SplineFfdResampler<AimsRGB, AimsRGB::ChannelType>;
 template class SplineFfdResampler<AimsRGBA, AimsRGBA::ChannelType>;
 
@@ -1453,7 +1466,7 @@ template class NearestNeighborFfdResampler<int32_t>;
 template class NearestNeighborFfdResampler<uint32_t>;
 template class NearestNeighborFfdResampler<float>;
 template class NearestNeighborFfdResampler<double>;
-// template class NearestNeighborFfdResampler<Point3df, float>;
+template class NearestNeighborFfdResampler<Point3df, float>;
 template class NearestNeighborFfdResampler<AimsRGB, AimsRGB::ChannelType>;
 template class NearestNeighborFfdResampler<AimsRGBA, AimsRGBA::ChannelType>;
 
@@ -1465,7 +1478,7 @@ template class TrilinearFfdResampler<int32_t>;
 template class TrilinearFfdResampler<uint32_t>;
 template class TrilinearFfdResampler<float>;
 template class TrilinearFfdResampler<double>;
-// template class TrilinearFfdResampler<Point3df, float>;
+template class TrilinearFfdResampler<Point3df, float>;
 template class TrilinearFfdResampler<AimsRGB, AimsRGB::ChannelType>;
 template class TrilinearFfdResampler<AimsRGBA, AimsRGBA::ChannelType>;
 
