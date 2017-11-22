@@ -860,7 +860,7 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
   stringstream sf;
   if( FileUtil::fileStat( filename ).find( '+' ) != string::npos )
   {
-    f.open( filename );
+    f.open( filename.c_str() );
     if( !f )
       throw errno_error();
     s = &f;
