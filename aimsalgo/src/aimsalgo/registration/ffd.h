@@ -340,17 +340,27 @@ namespace aims {
       bool _idaffine;
   };
 
+  /** Transform a mesh using FFD vector field deformation.
+      Changes the mesh vertices position in place, modifying the input mesh.
+  */
   template <int D>
   void ffdTransformMesh( AimsTimeSurface<D, Void> & mesh, SplineFfd & spline,
                          const AffineTransformation3d & affine
                            = AffineTransformation3d() );
 
+  /** Transform a bucket using FFD vector field deformation.
+      Returns a new bucket, with possibly a different voxel size from the input
+      one.
+  */
   carto::rc_ptr<BucketMap<Void> >
   ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & spline,
                       const AffineTransformation3d & affine
                         = AffineTransformation3d(),
                       const Point3df & vs = Point3df( 0., 0., 0. ) );
 
+  /** Transform a graph using FFD vector field deformation.
+      Changes the graph meshes and buckets in place, modifying the input graph.
+  */
   void ffdTransformGraph( Graph & graph, SplineFfd & spline,
                           const AffineTransformation3d & affine
                             = AffineTransformation3d() );

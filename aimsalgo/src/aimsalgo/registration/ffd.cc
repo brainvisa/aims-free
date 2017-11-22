@@ -1151,6 +1151,8 @@ void ffdTransformMesh( AimsTimeSurface<D, Void> & mesh,
       p = deformation.transform( p );
     }
   }
+
+  mesh.updateNormals();
 }
 
 
@@ -1168,7 +1170,7 @@ ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & deformation,
   }
   typename BucketMap<Void>::const_iterator ib, eb = bck.end();
   bool idaffine = affine.isIdentity();
-  rc_ptr<BucketMap<Void> > out;
+  rc_ptr<BucketMap<Void> > out( new BucketMap<Void> );
   out->setSizeX( vvs[0] );
   out->setSizeY( vvs[1] );
   out->setSizeZ( vvs[2] );
@@ -1208,7 +1210,6 @@ void ffdTransformGraph( Graph & graph, SplineFfd & deformation,
       try
       {
         mesh = iter->currentValue()->value<rc_ptr<AimsSurfaceTriangle> >();
-        cout << iter->key() << " is a mesh\n";
         ffdTransformMesh( *mesh, deformation, affine );
         continue;
       }
@@ -1220,10 +1221,33 @@ void ffdTransformGraph( Graph & graph, SplineFfd & deformation,
       try
       {
         bck = iter->currentValue()->value<rc_ptr<BucketMap<Void> > >();
-        cout << iter->key() << " is a bucket\n";
         rc_ptr<BucketMap<Void> > obk
           = ffdTransformBucket( *bck, deformation, affine );
         (*iv)->setProperty( iter->key(), obk );
+        continue;
+      }
+      catch( ... )
+      {
+      }
+
+      rc_ptr<AimsTimeSurface<2, Void> > mesh2;
+      try
+      {
+        mesh2
+          = iter->currentValue()->value<rc_ptr<AimsTimeSurface<2, Void> > >();
+        ffdTransformMesh( *mesh2, deformation, affine );
+        continue;
+      }
+      catch( ... )
+      {
+      }
+
+      rc_ptr<AimsTimeSurface<4, Void> > mesh4;
+      try
+      {
+        mesh4
+          = iter->currentValue()->value<rc_ptr<AimsTimeSurface<4, Void> > >();
+        ffdTransformMesh( *mesh4, deformation, affine );
         continue;
       }
       catch( ... )
@@ -1255,7 +1279,31 @@ void ffdTransformGraph( Graph & graph, SplineFfd & deformation,
         bck = iter->currentValue()->value<rc_ptr<BucketMap<Void> > >();
         rc_ptr<BucketMap<Void> > obk
           = ffdTransformBucket( *bck, deformation, affine );
-        (*iv)->setProperty( iter->key(), obk );
+        (*ie)->setProperty( iter->key(), obk );
+        continue;
+      }
+      catch( ... )
+      {
+      }
+
+      rc_ptr<AimsTimeSurface<2, Void> > mesh2;
+      try
+      {
+        mesh2
+          = iter->currentValue()->value<rc_ptr<AimsTimeSurface<2, Void> > >();
+        ffdTransformMesh( *mesh2, deformation, affine );
+        continue;
+      }
+      catch( ... )
+      {
+      }
+
+      rc_ptr<AimsTimeSurface<4, Void> > mesh4;
+      try
+      {
+        mesh4
+          = iter->currentValue()->value<rc_ptr<AimsTimeSurface<4, Void> > >();
+        ffdTransformMesh( *mesh4, deformation, affine );
         continue;
       }
       catch( ... )

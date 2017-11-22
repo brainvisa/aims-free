@@ -939,7 +939,7 @@ int main( int argc, const char **argv )
     AimsApplication application(
       argc, argv,
       "Apply FFD (vector field) transformation on an image, a mesh, a 'bucket' "
-      "(voxels list file), fiber tracts, or to points.\n"
+      "(voxels list file), fiber tracts, a graph, or to points.\n"
       "\n"
       "Note that on images the vector field normally represents the inverse "
       "transformation (for a destination point we seek the source position of "
