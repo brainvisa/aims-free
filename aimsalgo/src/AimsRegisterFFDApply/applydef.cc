@@ -18,7 +18,6 @@
 #include <aims/mesh/surfaceOperation.h>            // SurfaceManip::meshVolume
 #include <aims/registration/ffd.h>  // SplineFfd - SplineFfdResampler
 #include <aims/utility/progress.h>                       // aims::ProgressInfo
-#include <aims/fibers/bundles.h>
 //--- carto ------------------------------------------------------------------
 #include <cartobase/object/object.h>                                 // Object
 #include <cartobase/stream/fileutil.h>
@@ -84,6 +83,7 @@ FFDApplyProc::FFDApplyProc() : Process(),
   registerProcessType( "Volume", "DOUBLE",  &doit<double, double> );
   registerProcessType( "Volume", "RGB",     &doit<AimsRGB, AimsRGB::ChannelType> );
   registerProcessType( "Volume", "RGBA",    &doit<AimsRGBA, AimsRGBA::ChannelType> );
+//   registerProcessType( "Volume", "POINT3DF", &doit<Point3df, float> );
   registerProcessType( "Mesh",   "VOID",    &doMesh<3> );
   registerProcessType( "Mesh2",  "VOID",    &doMesh<2> );
   registerProcessType( "Mesh4",  "VOID",    &doMesh<4> );
@@ -624,90 +624,6 @@ bool doBucket( Process & process, const string & fileref, Finder & )
 // BUNDLES RESAMPLING
 //
 
-// transform bundles in stream
-class BundleTransformer : public BundleListener, public BundleProducer
-{
-public:
-  BundleTransformer( rc_ptr<SplineFfd> deformation, const Motion & affine );
-  virtual ~BundleTransformer() {}
-
-  virtual void 	bundleStarted(const BundleProducer &, const BundleInfo &);
-  virtual void 	bundleTerminated(const BundleProducer &, const BundleInfo &);
-  virtual void 	fiberStarted(const BundleProducer &, const BundleInfo &,
-                              const FiberInfo &);
-  virtual void 	fiberTerminated(const BundleProducer &, const BundleInfo &,
-                                 const FiberInfo &);
-  virtual void 	newFiberPoint(const BundleProducer &, const BundleInfo &,
-                               const FiberInfo &, const FiberPoint &);
-  virtual void 	noMoreBundle(const BundleProducer &);
-
-private:
-  rc_ptr<SplineFfd> _deformation;
-  const Motion & _affine;
-  bool _idaffine;
-};
-
-
-BundleTransformer::BundleTransformer( rc_ptr<SplineFfd> deformation,
-                                      const Motion & affine )
-  : BundleListener(), BundleProducer(),
-  _deformation( deformation ), _affine( affine ),
-  _idaffine( affine.isIdentity() )
-{
-}
-
-
-void BundleTransformer::bundleStarted( const BundleProducer &,
-                                       const BundleInfo &bi )
-{
-  startBundle( bi );
-}
-
-
-void BundleTransformer::bundleTerminated( const BundleProducer &,
-                                          const BundleInfo & bi )
-{
-  terminateBundle( bi );
-}
-
-
-void BundleTransformer::fiberStarted( const BundleProducer &,
-                                      const BundleInfo & bi,
-                                      const FiberInfo & fi )
-{
-  startFiber( bi, fi );
-}
-
-
-void BundleTransformer::fiberTerminated( const BundleProducer &,
-                                         const BundleInfo & bi,
-                                         const FiberInfo & fi )
-{
-  terminateFiber( bi, fi );
-}
-
-
-void BundleTransformer::newFiberPoint( const BundleProducer &,
-                                       const BundleInfo & bi,
-                                       const FiberInfo & fi,
-                                       const FiberPoint & pt )
-{
-  FiberPoint opt;
-  if( !_idaffine )
-    opt = _affine.transform( pt );
-  else
-    opt = pt;
-  opt = _deformation->transform( opt );
-  addFiberPoint( bi, fi, opt );
-}
-
-
-void BundleTransformer::noMoreBundle( const BundleProducer & )
-{
-  BundleProducer::noMoreBundle();
-}
-
-
 bool doBundles( Process & process, const string & fileref, Finder & )
 {
   FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
@@ -755,7 +671,7 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   //==========================================================================
   cout << "Resampling ";
 
-  BundleTransformer btrans( deformation, affine );
+  BundleFFDTransformer btrans( deformation, affine );
   rdata.addBundleListener( btrans );
   BundleWriter bw;
   bw.setFileString( ffdproc.output );
@@ -800,6 +716,14 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   aims::Reader<Graph> rdata( fileref );
   in.reset( rdata.read() );
 
+  //--- Hard dimensions
+  vector<float> vs;
+  if( !in->getProperty( "voxel_size" ) )
+    vs = vector<float>( 3, 0.f );
+  ffdproc.sx = ( ffdproc.sx > 0 ? ffdproc.sx : vs[0] );
+  ffdproc.sy = ( ffdproc.sy > 0 ? ffdproc.sy : vs[1] );
+  ffdproc.sz = ( ffdproc.sz > 0 ? ffdproc.sz : vs[2] );
+
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
@@ -830,7 +754,8 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //==========================================================================
   cout << "Resampling ";
 
-  ffdTransformGraph( *in, *deformation, affine );
+  ffdTransformGraph( *in, *deformation, affine,
+                     Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
 
   cout << endl;
 
@@ -957,10 +882,10 @@ int main( int argc, const char **argv )
       "Note also that for meshes or points, the dimensions, voxel sizes, grid, "
       "reference, and resampling options are pointless and are unused. Only "
       "the vector field interpolation (--vi) option is used.\n\n"
-      "In Buckets mode, the options --sx, --sy, --sz allow to specify the "
-      "output voxel size, but the reference (-r) is not used so far. The "
-      "transformation field is applied independently on each bucket voxel "
-      "with no resampling, so objects may end up with holes."
+      "In Buckets and graph mode, the options --sx, --sy, --sz allow to "
+      "specify the output voxel size, but the reference (-r) is not used so "
+      "far. The transformation field is applied independently on each bucket "
+      "voxel with no resampling, so objects may end up with holes."
     );
     application.addOption( ffdpi, "-i", "Input image" );
     application.addOption( ffdproc.inputmotion, "-d", "Input control knots grid", true );
