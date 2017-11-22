@@ -83,7 +83,7 @@ FFDApplyProc::FFDApplyProc() : Process(),
   registerProcessType( "Volume", "DOUBLE",  &doit<double, double> );
   registerProcessType( "Volume", "RGB",     &doit<AimsRGB, AimsRGB::ChannelType> );
   registerProcessType( "Volume", "RGBA",    &doit<AimsRGBA, AimsRGBA::ChannelType> );
-//   registerProcessType( "Volume", "POINT3DF", &doit<Point3df, float> );
+  registerProcessType( "Volume", "POINT3DF", &doit<Point3df, float> );
   registerProcessType( "Mesh",   "VOID",    &doMesh<3> );
   registerProcessType( "Mesh2",  "VOID",    &doMesh<2> );
   registerProcessType( "Mesh4",  "VOID",    &doMesh<4> );

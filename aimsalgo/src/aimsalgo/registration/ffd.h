@@ -15,7 +15,9 @@
 #include <aims/data/data.h>                           // AimsData
 #include <aims/io/io_g.h>                             // aims::Reader / Writer
 #include <aims/math/bspline.h>                        // aims::TabulBSpline
-#include <aims/resampling/resampling_g.h>
+#include <aims/resampling/nearestneighborresampler.h>
+#include <aims/resampling/linearresampler.h>
+#include <aims/resampling/cubicresampler.h>
 #include <aims/resampling/resamplerfactory.h>
 #include <aims/transformation/transformation.h>       // aims::Transformatin
 #include <aims/utility/channel.h>
@@ -264,11 +266,12 @@ namespace aims {
 
       virtual ~SplineFfdResampler();
       virtual void init();
-      SplineFfdResampler(const SplineFfd & spline, T background = (T)0);
-      SplineFfdResampler(const SplineFfd & spline, Motion affine, T background = (T)0);
+      SplineFfdResampler(const SplineFfd & spline, T background = defaultBackground());
+      SplineFfdResampler(const SplineFfd & spline, Motion affine, T background = defaultBackground());
       virtual void setRef(const AimsData<T> & ref);
       virtual Point3df resample( const Point3df & output_location,
                                  T & output_value, int t = 0 );
+      static T defaultBackground() { return T(0); }
 
     private:
       void updateCoef( int t = 0 );
