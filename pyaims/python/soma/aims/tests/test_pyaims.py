@@ -3,10 +3,7 @@ from __future__ import print_function
 import unittest
 import doctest
 import urllib
-try:
-    from soma import zipfile
-except:
-    import zipfile
+import zipfile
 import os
 from shutil import rmtree
 import tempfile

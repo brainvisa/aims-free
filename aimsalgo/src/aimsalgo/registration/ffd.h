@@ -22,6 +22,7 @@
 #include <aims/vector/vector.h>                       // Point*
 #include <aims/mesh/surface.h>
 #include <aims/bucket/bucketMap.h>
+#include <aims/fibers/bundles.h>
 #include <limits>
 #include <string>
 
@@ -329,9 +330,10 @@ namespace aims {
                                  T & output_value, int t = 0 );
 
     private:
-      const Motion       _affine;
-      const SplineFfd &  _transformation;
-      AimsData<T>        _ref;
+      const Motion         _affine;
+      const SplineFfd &    _transformation;
+      AimsData<T>          _ref;
+      ChannelSelector<T,C> _channelselector;
 
       T   _background;
       int _samples;
@@ -363,7 +365,36 @@ namespace aims {
   */
   void ffdTransformGraph( Graph & graph, SplineFfd & spline,
                           const AffineTransformation3d & affine
-                            = AffineTransformation3d() );
+                            = AffineTransformation3d(),
+                          const Point3df & vs = Point3df( 0., 0., 0. ) );
+
+  /** FFD vector field transform for bundles in stream.
+      This is a BundleListener / BundleProducer stream processing class
+      which applies vector field deformation to bundle data. It can be
+      typically connected to a BundleReader and a BundleWriter.
+  */
+  class BundleFFDTransformer : public BundleListener, public BundleProducer
+  {
+  public:
+    BundleFFDTransformer( carto::rc_ptr<SplineFfd> deformation,
+                          const AffineTransformation3d & affine );
+    virtual ~BundleFFDTransformer();
+
+    virtual void bundleStarted( const BundleProducer &, const BundleInfo & );
+    virtual void bundleTerminated( const BundleProducer &, const BundleInfo & );
+    virtual void fiberStarted( const BundleProducer &, const BundleInfo &,
+                               const FiberInfo & );
+    virtual void fiberTerminated( const BundleProducer &, const BundleInfo &,
+                                  const FiberInfo & );
+    virtual void newFiberPoint( const BundleProducer &, const BundleInfo &,
+                                const FiberInfo &, const FiberPoint & );
+    virtual void noMoreBundle( const BundleProducer & );
+
+  private:
+    carto::rc_ptr<SplineFfd> _deformation;
+    const AffineTransformation3d & _affine;
+    bool _idaffine;
+  };
 
 } // namespace aims
 
