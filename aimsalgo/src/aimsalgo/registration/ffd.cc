@@ -1225,7 +1225,7 @@ namespace
       {
         bck = iter->currentValue()->value<rc_ptr<BucketMap<Void> > >();
         rc_ptr<BucketMap<Void> > obk
-          = ffdTransformBucket( *bck, deformation, affine );
+          = ffdTransformBucket( *bck, deformation, affine, vso );
         go->setProperty( iter->key(), obk );
 
         // bounding box
@@ -1323,10 +1323,14 @@ void ffdTransformGraph( Graph & graph, SplineFfd & deformation,
   for( iv=graph.begin(); iv!=ev; ++iv )
     transformGraphObject( *iv, deformation, affine, vvs, bbmin, bbmax );
 
+  cout << "bmin: " << Point3df( bbmin[0], bbmin[1], bbmin[2] ) << ", bbmax: " << Point3df( bbmax[0], bbmax[1], bbmax[2] ) << endl;
+
   const set<Edge *> & edges = graph.edges();
   set<Edge *>::const_iterator ie, ee = edges.end();
   for( ie=edges.begin(); ie!=ee; ++ie )
     transformGraphObject( *ie, deformation, affine, vvs, bbmin, bbmax );
+
+  cout << "bmin: " << Point3df( bbmin[0], bbmin[1], bbmin[2] ) << ", bbmax: " << Point3df( bbmax[0], bbmax[1], bbmax[2] ) << endl;
 
   graph.setProperty( "boundingbox_min", bbmin );
   graph.setProperty( "boundingbox_max", bbmax );
