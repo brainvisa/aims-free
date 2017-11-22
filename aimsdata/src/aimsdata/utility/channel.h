@@ -91,24 +91,44 @@ DECLARE_CHANNEL_SELECTOR_NAME() < T, U > \
 DECLARE_CHANNEL_SELECTOR_SPEC( T, U, byte ) \
 
 
-#define DECLARE_CHANNEL_SELECTOR_VOLUME_SPECIALIZED() \
-template <class T, class U> \
-DECLARE_CHANNEL_SELECTOR_NAME() < carto::VolumeRef<T>, carto::VolumeRef<U> > \
-DECLARE_CHANNEL_SELECTOR_SPEC( carto::VolumeRef<T>, carto::VolumeRef<U>, Void ) \
+/** Channel selection / extraction class to get one selected channel in a
+    multi-dimensional data type (RGB, vector etc.)
 
-
-#define DECLARE_CHANNEL_SELECTOR_AIMSDATA_SPECIALIZED() \
-template <class T, class U> \
-DECLARE_CHANNEL_SELECTOR_NAME() < AimsData<T>, AimsData<U> > \
-DECLARE_CHANNEL_SELECTOR_SPEC( AimsData<T>, AimsData<U>, Void ) \
-
-
+    Template arguments are:
+    T: the multi-dimensional data type (RGB, vector etc.)
+    U: scalar value from one channel, converted to this custom type
+    C: channel item values type (linked to T, thus)
+*/
 DECLARE_CHANNEL_SELECTOR_CLASS()
-DECLARE_CHANNEL_SELECTOR_VOLUME_SPECIALIZED()
-DECLARE_CHANNEL_SELECTOR_AIMSDATA_SPECIALIZED()
 DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsRGB )
 DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsRGBA )
 DECLARE_CHANNEL_SELECTOR_SPECIALIZED( AimsHSV )
+
+
+// partial specialzation for VolumeRef
+template <class T, class U>
+class ChannelSelector < carto::VolumeRef<T>, carto::VolumeRef<U> >
+{
+    public:
+      ChannelSelector() {}
+      virtual ~ChannelSelector() {}
+
+      carto::VolumeRef<U> select( const carto::VolumeRef<T>& input, const uint8_t channel );
+      void set( carto::VolumeRef<T>& input, const uint8_t channel, const carto::VolumeRef<U>& value );
+};
+
+
+// partial specialzation for AimsData
+template <class T, class U>
+class ChannelSelector < AimsData<T>, AimsData<U> >
+{
+    public:
+      ChannelSelector() {}
+      virtual ~ChannelSelector() {}
+
+      AimsData<U> select( const AimsData<T>& input, const uint8_t channel );
+      void set( AimsData<T>& input, const uint8_t channel, const AimsData<U>& value );
+};
 
 
 template <class T, class U, class C> inline
@@ -245,6 +265,47 @@ void ChannelSelector< AimsHSV, U >::set( AimsHSV& input, const uint8_t channel, 
       break;
   }
 }
+
+// AimsVector
+
+template <typename T, int D, typename U>
+class ChannelSelector<AimsVector<T, D>, U>
+{
+  public:
+      ChannelSelector() {}
+      virtual ~ChannelSelector() {}
+
+      U select( const AimsVector<T, D>& input, const uint8_t channel );
+      void set( AimsVector<T, D>& input, const uint8_t channel,
+                const U& value );
+
+    private:
+      carto::ShallowConverter<U, T> channelconvset;
+      carto::ShallowConverter<T, U> channelconv;
+      // carto::ShallowConverter<AimsVector<T, D>, U> dataconv;
+};
+
+template <typename T, int D, typename U>
+inline
+U ChannelSelector<AimsVector<T, D>, U>::select( const AimsVector<T, D> & input,
+                                                 const uint8_t channel )
+{
+  U output;
+
+  channelconv.convert( input[channel], output );
+  return output;
+}
+
+template <typename T, int D, typename U>
+void ChannelSelector< AimsVector<T, D>, U>::set( AimsVector<T, D> & input,
+                                                  const uint8_t channel,
+                                                  const U& value )
+{
+  channelconvset.convert( value, input[channel] );
+}
+
+
+// VolumeRef
 
 template<class T, class U> inline
 carto::VolumeRef<U>
