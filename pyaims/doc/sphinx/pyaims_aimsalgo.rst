@@ -38,15 +38,15 @@ In soma.aims module
 .. autoclass:: soma.aims.RegularBinnedHistogram_FLOAT
   :members:
 
-.. py:function:: soma.aims.meshdistance.MeshDilation
+.. autofunction:: soma.aims.meshdistance.MeshDilation
 
-.. py:function:: soma.aims.meshdistance.MeshDistance
+.. autofunction:: soma.aims.meshdistance.MeshDistance
 
-.. py:function:: soma.aims.meshdistance.MeshErosion
+.. autofunction:: soma.aims.meshdistance.MeshErosion
 
-.. py:function:: soma.aims.meshdistance.MeshVoronoi
+.. autofunction:: soma.aims.meshdistance.MeshVoronoi
 
-.. py:function:: soma.aims.meshdistance.MeshVoronoiStepbyStep
+.. autofunction:: soma.aims.meshdistance.MeshVoronoiStepbyStep
 
 .. autoclass:: soma.aims.Spam
   :members:
@@ -63,6 +63,9 @@ In soma.aims module
 .. autoclass:: soma.aims.TrilinearFfd
   :members:
 
+.. autoclass:: soma.aims.BundleFFDTransformer
+  :members:
+
 
 soma.aimsalgo module
 --------------------
@@ -70,35 +73,35 @@ soma.aimsalgo module
 .. automodule:: soma.aimsalgo
   :members:
 
-  .. py:function:: AimsDistanceFrontPropagation
+  .. autofunction:: AimsDistanceFrontPropagation
 
-  .. py:function:: AimsMorphoChamferClosing
-
-      Please use preferably MorphoGreyLevel_* classes.
-
-  .. py:function:: AimsMorphoChamferDilation
+  .. autofunction:: AimsMorphoChamferClosing
 
       Please use preferably MorphoGreyLevel_* classes.
 
-  .. py:function:: AimsMorphoChamferErosion
+  .. autofunction:: AimsMorphoChamferDilation
 
       Please use preferably MorphoGreyLevel_* classes.
 
-  .. py:function:: AimsMorphoChamferOpening
+  .. autofunction:: AimsMorphoChamferErosion
 
       Please use preferably MorphoGreyLevel_* classes.
 
-  .. py:function:: AimsMorphoClosing
+  .. autofunction:: AimsMorphoChamferOpening
 
-  .. py:function:: AimsMorphoDilation
+      Please use preferably MorphoGreyLevel_* classes.
 
-  .. py:function:: AimsMorphoErosion
+  .. autofunction:: AimsMorphoClosing
 
-  .. py:function:: AimsMorphoOpening
+  .. autofunction:: AimsMorphoDilation
 
-  .. py:function:: AimsVoronoiFrontPropagation
+  .. autofunction:: AimsMorphoErosion
 
-  .. py:function:: AimsMeshLabelConnectedComponent
+  .. autofunction:: AimsMorphoOpening
+
+  .. autofunction:: AimsVoronoiFrontPropagation
+
+  .. autofunction:: AimsMeshLabelConnectedComponent
 
   .. autoclass:: DiffusionSmoother_S16
 
@@ -124,13 +127,51 @@ soma.aimsalgo module
 
   .. autoclass:: FfdResampler_U8
 
-  .. autoclass:: SplineFfdResampler_DOUBLE_DOUBLE
+  .. autofunction:: ffdTransformMesh
 
-  .. autoclass:: SplineFfdResampler_FLOAT_FLOAT
+  .. autofunction:: ffdTransformBucket
 
-  .. autoclass:: SplineFfdResampler_POINT3DF_FLOAT
+  .. autofunction:: ffdTransformGraph
 
-  .. autoclass:: SplineFfdResampler_RGB_U8
+  .. autoclass:: SplineFfdResampler_DOUBLE
+
+  .. autoclass:: SplineFfdResampler_FLOAT
+
+  .. autoclass:: SplineFfdResampler_POINT3DF
+
+  .. autoclass:: SplineFfdResampler_RGB
+
+  .. autoclass:: SplineFfdResampler_RGBA
+
+  .. autoclass:: SplineFfdResampler_S16
+
+  .. autoclass:: SplineFfdResampler_S32
+
+  .. autoclass:: SplineFfdResampler_U16
+
+  .. autoclass:: SplineFfdResampler_U32
+
+  .. autoclass:: SplineFfdResampler_U8
+
+  .. autoclass:: TrilinearFfdResampler_DOUBLE
+
+  .. autoclass:: TrilinearFfdResampler_FLOAT
+
+  .. autoclass:: TrilinearFfdResampler_POINT3DF
+
+  .. autoclass:: TrilinearFfdResampler_RGB
+
+  .. autoclass:: TrilinearFfdResampler_RGBA
+
+  .. autoclass:: TrilinearFfdResampler_S16
+
+  .. autoclass:: TrilinearFfdResampler_S32
+
+  .. autoclass:: TrilinearFfdResampler_U16
+
+  .. autoclass:: TrilinearFfdResampler_U32
+
+  .. autoclass:: TrilinearFfdResampler_U8
 
   .. autoclass:: Gaussian2DSmoothing_DOUBLE
 

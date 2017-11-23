@@ -240,6 +240,13 @@ namespace aims
     Point3dd     deformation( const Point3dd& p_mm ) const;
   };
 
+};
+
+/* for an unknown reason functions defined in aimsalgo in the aims namespace
+   are not seen from the python module. Classes are, so are functions defined
+   the same way in aimsdata. The only workaround found is to define them
+   outside of their namespace
+*/
 
   void ffdTransformMesh( AimsTimeSurface_2_VOID & mesh,
                          aims::SplineFfd & spline,
@@ -249,16 +256,25 @@ namespace aims
       Transform a mesh using FFD vector field deformation.
       Changes the mesh vertices position in place, modifying the input mesh.
 %End
+%MethodCode
+  aims::ffdTransformMesh( *a0, *a1, *a2 );
+%End
 
   void ffdTransformMesh( AimsTimeSurface_3_VOID & mesh,
                          aims::SplineFfd & spline,
                          const aims::AffineTransformation3d & affine
                            = aims::AffineTransformation3d() );
+%MethodCode
+  aims::ffdTransformMesh( *a0, *a1, *a2 );
+%End
 
   void ffdTransformMesh( AimsTimeSurface_4_VOID & mesh,
                          aims::SplineFfd & spline,
                          const aims::AffineTransformation3d & affine
                            = aims::AffineTransformation3d() );
+%MethodCode
+  aims::ffdTransformMesh( *a0, *a1, *a2 );
+%End
 
   rc_ptr_BucketMap_VOID
   ffdTransformBucket( const BucketMap_VOID & bck, aims::SplineFfd & spline,
@@ -270,6 +286,11 @@ namespace aims
       Returns a new bucket, with possibly a different voxel size from the input
       one.
 %End
+%MethodCode
+  sipRes
+    = new carto::rc_ptr<aims::BucketMap<Void> >( aims::ffdTransformBucket(
+      *a0, *a1, *a2, *a3 ) );
+%End
 
   void ffdTransformGraph( Graph & graph, aims::SplineFfd & spline,
                           const aims::AffineTransformation3d & affine
@@ -279,7 +300,12 @@ namespace aims
       Transform a graph using FFD vector field deformation.
       Changes the graph meshes and buckets in place, modifying the input graph.
 %End
+%MethodCode
+  aims::ffdTransformGraph( *a0, *a1, *a2, *a3 );
+%End
 
+namespace aims
+{
 
   class BundleFFDTransformer : aims::BundleListener, aims::BundleProducer
   {
