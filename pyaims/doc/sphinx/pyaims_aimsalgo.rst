@@ -57,6 +57,12 @@ In soma.aims module
 .. autoclass:: soma.aims.SpamFromLikelihood
   :members:
 
+.. autoclass:: soma.aims.SplineFfd
+  :members:
+
+.. autoclass:: soma.aims.TrilinearFfd
+  :members:
+
 
 soma.aimsalgo module
 --------------------
@@ -97,6 +103,34 @@ soma.aimsalgo module
   .. autoclass:: DiffusionSmoother_S16
 
   .. autoclass:: DiffusionSmoother_FLOAT
+
+  .. autoclass:: FfdResampler_DOUBLE
+
+  .. autoclass:: FfdResampler_FLOAT
+
+  .. autoclass:: FfdResampler_POINT3DF
+
+  .. autoclass:: FfdResampler_RGB
+
+  .. autoclass:: FfdResampler_RGBA
+
+  .. autoclass:: FfdResampler_S16
+
+  .. autoclass:: FfdResampler_S32
+
+  .. autoclass:: FfdResampler_U16
+
+  .. autoclass:: FfdResampler_U32
+
+  .. autoclass:: FfdResampler_U8
+
+  .. autoclass:: SplineFfdResampler_DOUBLE_DOUBLE
+
+  .. autoclass:: SplineFfdResampler_FLOAT_FLOAT
+
+  .. autoclass:: SplineFfdResampler_POINT3DF_FLOAT
+
+  .. autoclass:: SplineFfdResampler_RGB_U8
 
   .. autoclass:: Gaussian2DSmoothing_DOUBLE
 
