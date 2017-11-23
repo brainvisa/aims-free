@@ -1258,7 +1258,7 @@ namespace
         go->setProperty( iter->key(), obk );
 
         // bounding box
-        typename BucketMap<Void>::Bucket::const_iterator
+        BucketMap<Void>::Bucket::const_iterator
           ip, ep = obk->begin()->second.end();
         for( ip=obk->begin()->second.begin(); ip!=ep; ++ip )
         {
