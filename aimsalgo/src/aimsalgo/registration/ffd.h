@@ -36,6 +36,34 @@ namespace aims {
   //   FFD TRANSFORMATION
   //==========================================================================
 
+  /** FFD vector field deformation transform
+
+      Free Form Deformation is the registration technique used to build the
+      vector fields. This class is dedicated to the application of the vector
+      field deformation to transform coordinates.
+
+      Vector fields are stored in volumes AimsData<Point3df>.
+
+      This Spline FFD uses cubic spline interpolation between displacement
+      vectors to process transformed coordinates. See TrilinearFfd for a
+      variant using trilinear interpolation.
+
+      This class is the "base" vector field deformation class, which can perform
+      point-to-point transformation. It is used by various higher-level classes
+      or functions to work on higher-level objects:
+
+      To resample full 2D or 3D images, see also the FfdResampler classs and
+      its derivatives - these classes are using SplineFfd and resample in
+      voxels space.
+
+      As a Transformation3d specialization, the main method of this class is the
+      transform() method, which actually performs 3D coordinates transformation.
+      The other methods can be seen as "internal machinery".
+
+      \see ffdTransformMesh, ffdTransformBucket, ffdTransformGraph and
+      BundleFFDTransformer to apply vector field deformations to various types
+      of objects.
+  */
   class SplineFfd: public aims::Transformation3d
   {
    public:
@@ -172,6 +200,9 @@ namespace aims {
 //   FFD READER/WRITER
 //============================================================================
 
+  /** FFD vector field transformation reader. It actually reads a volume of
+      Point3df.
+  */
   template <>
   class Reader<aims::SplineFfd>: public Reader<AimsData<Point3df> >
   {
@@ -194,6 +225,9 @@ namespace aims {
     }
   };
 
+  /** FFD vector field transformation writer. It actually reads a volume of
+      Point3df.
+  */
   template<>
   class Writer<aims::SplineFfd> : public Writer<AimsData<Point3df> >
   {
@@ -216,6 +250,18 @@ namespace aims {
   //   FFD TRILINEAR RESAMPLED TRANSFORMATION
   //==========================================================================
 
+  /** FFD vector field deformation transform
+
+      Free Form Deformation is the registration technique used to build the
+      vector fields. This class is dedicated to the application of the vector
+      field deformation to transform coordinates.
+
+      This is a variant of SplineFfd which is performing trilinear interpolation
+      between displacement vectors. See SplineFfd for details.
+
+      The implementation of TrilinearFfd inheriting SplineFfd is actually a
+      quick-and-dirty convenience implementation and is a design flaw.
+  */
   class TrilinearFfd: public SplineFfd
   {
    public:
@@ -250,12 +296,13 @@ namespace aims {
 //   R E S A M P L I N G
 //============================================================================
 
-  /// Resampling image using Free Form Deformation transformations.
-  ///
-  /// To use this class you must read yourself each input image and
-  /// apply \c processOneImage on it. Afterwards, the model is computed by
-  /// applying \c learnClustering on computed vectors, and written in a
-  /// Dpy file by calling \c saveDpy.
+  /** Resampling image using Free Form Deformation transformations.
+
+      FfdResampler is using a SplineFfd or TrilinearFfd transformation to
+      resample a full volume. It is an abstract class which is specialized to
+      implement cubic spline, trilinear, or nearest neighbor interpolation in
+      voxels values.
+  */
   template <class T>
   class FfdResampler
   {
@@ -268,6 +315,11 @@ namespace aims {
                                  T & output_value, int t = 0 ) = 0;
   };
 
+  /** Resampling image using Free Form Deformation transformations.
+
+      This variant of FfdResampler performs cubic spline interpolation in voxels
+      values.
+  */
   template <class T, class C = T>
   class SplineFfdResampler : public FfdResampler<T>,
                              public CubicResampler<C>
@@ -304,6 +356,10 @@ namespace aims {
       bool _idaffine;
   };
 
+  /** Resampling image using Free Form Deformation transformations.
+
+      This variant of FfdResampler uses nearest neighbor voxels values.
+  */
   template <class T, class C = T>
   class NearestNeighborFfdResampler : public FfdResampler<T>,
                                        public NearestNeighborResampler<C>
@@ -334,6 +390,11 @@ namespace aims {
   };
 
 
+  /** Resampling image using Free Form Deformation transformations.
+
+      This variant of FfdResampler performs trilinear interpolation in voxels
+      values.
+  */
   template <class T, class C = T>
   class TrilinearFfdResampler : public FfdResampler<T>,
                                 public LinearResampler<C>

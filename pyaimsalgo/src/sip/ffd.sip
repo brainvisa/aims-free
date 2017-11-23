@@ -17,6 +17,38 @@ namespace aims
 #include <pyaims/data/data.h>
 %End
 
+%Docstring
+      FFD vector field deformation transform
+
+      Free Form Deformation is the registration technique used to build the
+      vector fields. This class is dedicated to the application of the vector
+      field deformation to transform coordinates.
+
+      Vector fields are stored in volumes AimsData_POINT3DF.
+
+      This Spline FFD uses cubic spline interpolation between displacement
+      vectors to process transformed coordinates. See TrilinearFfd for a
+      variant using trilinear interpolation.
+
+      This class is the "base" vector field deformation class, which can perform
+      point-to-point transformation. It is used by various higher-level classes
+      or functions to work on higher-level objects:
+
+      To resample full 2D or 3D images, see also the FfdResampler classs and
+      its derivatives - these classes are using SplineFfd and resample in
+      voxels space.
+
+      As a Transformation3d specialization, the main method of this class is the
+      transform() method, which actually performs 3D coordinates transformation.
+      The other methods can be seen as "internal machinery".
+
+      .. seealso::
+
+          ffdTransformMesh, ffdTransformBucket, ffdTransformGraph and
+          BundleFFDTransformer to apply vector field deformations to various
+          types of objects.
+%End
+
    public:
     //--- Constructor --------------------------------------------------------
     SplineFfd( int dimX = 0, int dimY = 1, int dimZ = 1,
@@ -108,6 +140,11 @@ typedef aims::Reader<AimsData<Point3df> >Reader_AimsData_POINT3DF;
 #endif
 %End
 
+%Docstring
+      FFD vector field transformation reader. It actually reads a volume of
+      Point3df.
+%End
+
   public:
     Reader_SplineFfd();
     Reader_SplineFfd( const std::string& filename );
@@ -127,6 +164,11 @@ typedef aims::Reader<AimsData<Point3df> >Reader_AimsData_POINT3DF;
 typedef aims::Writer<aims::SplineFfd> Writer_SplineFfd;
 typedef aims::Writer<AimsData<Point3df> > Writer_AimsData_POINT3DF;
 #endif
+%End
+
+%Docstring
+      FFD vector field transformation writer. It actually reads a volume of
+      Point3df.
 %End
 
   public:
@@ -151,6 +193,17 @@ namespace aims
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
 #include <pyaims/data/data.h>
+%End
+
+%Docstring
+      FFD vector field deformation transform
+
+      Free Form Deformation is the registration technique used to build the
+      vector fields. This class is dedicated to the application of the vector
+      field deformation to transform coordinates.
+
+      This is a variant of SplineFfd which is performing trilinear interpolation
+      between displacement vectors. See SplineFfd for details.
 %End
 
   public:
@@ -187,52 +240,91 @@ namespace aims
     Point3dd     deformation( const Point3dd& p_mm ) const;
   };
 
+};
 
-  /** Transform a mesh using FFD vector field deformation.
+/* for an unknown reason functions defined in aimsalgo in the aims namespace
+   are not seen from the python module. Classes are, so are functions defined
+   the same way in aimsdata. The only workaround found is to define them
+   outside of their namespace
+*/
+
+  void ffdTransformMesh( AimsTimeSurface_2_VOID & mesh,
+                         aims::SplineFfd & spline,
+                         const aims::AffineTransformation3d & affine
+                           = aims::AffineTransformation3d() );
+%Docstring
+      Transform a mesh using FFD vector field deformation.
       Changes the mesh vertices position in place, modifying the input mesh.
-  */
-  void ffdTransformMesh( AimsTimeSurface_2_VOID & mesh, aims::SplineFfd & spline,
-                         const aims::AffineTransformation3d & affine
-                           = aims::AffineTransformation3d() );
-  void ffdTransformMesh( AimsTimeSurface_3_VOID & mesh, aims::SplineFfd & spline,
-                         const aims::AffineTransformation3d & affine
-                           = aims::AffineTransformation3d() );
-  void ffdTransformMesh( AimsTimeSurface_4_VOID & mesh, aims::SplineFfd & spline,
-                         const aims::AffineTransformation3d & affine
-                           = aims::AffineTransformation3d() );
+%End
+%MethodCode
+  aims::ffdTransformMesh( *a0, *a1, *a2 );
+%End
 
-  /** Transform a bucket using FFD vector field deformation.
-      Returns a new bucket, with possibly a different voxel size from the input
-      one.
-  */
+  void ffdTransformMesh( AimsTimeSurface_3_VOID & mesh,
+                         aims::SplineFfd & spline,
+                         const aims::AffineTransformation3d & affine
+                           = aims::AffineTransformation3d() );
+%MethodCode
+  aims::ffdTransformMesh( *a0, *a1, *a2 );
+%End
+
+  void ffdTransformMesh( AimsTimeSurface_4_VOID & mesh,
+                         aims::SplineFfd & spline,
+                         const aims::AffineTransformation3d & affine
+                           = aims::AffineTransformation3d() );
+%MethodCode
+  aims::ffdTransformMesh( *a0, *a1, *a2 );
+%End
+
   rc_ptr_BucketMap_VOID
   ffdTransformBucket( const BucketMap_VOID & bck, aims::SplineFfd & spline,
                       const aims::AffineTransformation3d & affine
                         = aims::AffineTransformation3d(),
                       const Point3df & vs = Point3df( 0., 0., 0. ) );
+%Docstring
+      Transform a bucket using FFD vector field deformation.
+      Returns a new bucket, with possibly a different voxel size from the input
+      one.
+%End
+%MethodCode
+  sipRes
+    = new carto::rc_ptr<aims::BucketMap<Void> >( aims::ffdTransformBucket(
+      *a0, *a1, *a2, *a3 ) );
+%End
 
-  /** Transform a graph using FFD vector field deformation.
-      Changes the graph meshes and buckets in place, modifying the input graph.
-  */
   void ffdTransformGraph( Graph & graph, aims::SplineFfd & spline,
                           const aims::AffineTransformation3d & affine
                             = aims::AffineTransformation3d(),
                           const Point3df & vs = Point3df( 0., 0., 0. ) );
+%Docstring
+      Transform a graph using FFD vector field deformation.
+      Changes the graph meshes and buckets in place, modifying the input graph.
+%End
+%MethodCode
+  aims::ffdTransformGraph( *a0, *a1, *a2, *a3 );
+%End
 
-  /** FFD vector field transform for bundles in stream.
+namespace aims
+{
+
+  class BundleFFDTransformer : aims::BundleListener, aims::BundleProducer
+  {
+%TypeHeaderCode
+#include <aims/registration/ffd.h>
+%End
+
+%Docstring
+      FFD vector field transform for bundles in stream.
       This is a BundleListener / BundleProducer stream processing class
       which applies vector field deformation to bundle data. It can be
       typically connected to a BundleReader and a BundleWriter.
-  */
-  /*
-  class BundleFFDTransformer : aims::BundleListener, aims::BundleProducer
-  {
+%End
+
   public:
     BundleFFDTransformer( rc_ptr_SplineFfd deformation,
                           const aims::AffineTransformation3d & affine );
     virtual ~BundleFFDTransformer();
   };
-  */
 
 }; // namespace aims
 
