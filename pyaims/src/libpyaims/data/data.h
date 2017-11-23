@@ -36,6 +36,7 @@
 
 #include <aims/data/data.h>
 #include <aims/rgb/rgb.h>
+#include <aims/vector/vector.h>
 
 typedef AimsData<int8_t> AimsData_S8;
 typedef AimsData<uint8_t> AimsData_U8;
@@ -47,6 +48,7 @@ typedef AimsData<float> AimsData_FLOAT;
 typedef AimsData<double> AimsData_DOUBLE;
 typedef AimsData<AimsRGB> AimsData_RGB;
 typedef AimsData<AimsRGBA> AimsData_RGBA;
+typedef AimsData<Point3df> AimsData_POINT3DF;
 
 typedef carto::Volume<int8_t> Volume_S8;
 typedef carto::Volume<uint8_t> Volume_U8;
@@ -58,6 +60,7 @@ typedef carto::Volume<float> Volume_FLOAT;
 typedef carto::Volume<double> Volume_DOUBLE;
 typedef carto::Volume<AimsRGB> Volume_RGB;
 typedef carto::Volume<AimsRGBA> Volume_RGBA;
+typedef carto::Volume<Point3df> Volume_POINT3DF;
 
 #endif
 
