@@ -65,5 +65,25 @@
 %Include geodesicPath.sip
 %Include meshwatershed.sip
 %Include points_distribution.sip
-
+%Include ffd.sip
+%Include ffd_U8.sip
+%Include ffd_S16.sip
+%Include ffd_U16.sip
+%Include ffd_S32.sip
+%Include ffd_U32.sip
+%Include ffd_FLOAT.sip
+%Include ffd_DOUBLE.sip
+%Include ffd_RGB.sip
+%Include ffd_RGBA.sip
+%Include ffd_POINT3DF.sip
+// %Include ffd2_U8_U8.sip
+%Include ffd2_S16_S16.sip
+%Include ffd2_U16_U16.sip
+%Include ffd2_S32_S32.sip
+%Include ffd2_U32_U32.sip
+%Include ffd2_FLOAT_FLOAT.sip
+%Include ffd2_DOUBLE_DOUBLE.sip
+%Include ffd2_RGB_U8.sip
+%Include ffd2_RGBA_U8.sip
+%Include ffd2_POINT3DF_FLOAT.sip
 

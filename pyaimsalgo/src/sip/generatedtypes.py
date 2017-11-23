@@ -30,25 +30,32 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
-numtypes = [ 'unsigned char', 'short', 'unsigned short', 'int',
-             'unsigned', 'float', 'double' ]
-basetypes = numtypes + [ 'AimsRGB', 'AimsRGBA' ]
+numtypes = ['unsigned char', 'short', 'unsigned short', 'int',
+            'unsigned', 'float', 'double']
+basetypes = numtypes + ['AimsRGB', 'AimsRGBA', 'AimsHSV']
 matrix = []
-for z in [ map( lambda y: (x,y), basetypes ) for x in basetypes ]:
+for z in [map( lambda y: (x,y), basetypes ) for x in basetypes]:
   matrix += z
 
 todo = {
-  'distancemap' : [ 'short', 'float' ],
-  'diffusionsmoother' : [ 'short', 'float' ],
-  'gradient' : [ 'float'],
-  'meshresampler' : [ 'AimsData<uint32_t>',
+  'distancemap' : ['short', 'float'],
+  'diffusionsmoother' : ['short', 'float'],
+  'gradient' : ['float'],
+  'meshresampler' : ['AimsData<uint32_t>',
           'aims::BucketMap<Void>'],
   'moment' : numtypes,
   'morphomath' : numtypes,
-  'polynomial' : [ ( 'float', '3' ) ],
+  'polynomial' : [('float', '3')],
   'resampler' : numtypes,
-  'sampler' : [ ( 'float', '3' ) ],
+  'sampler' : [('float', '3')],
   'smoothing' : numtypes,
   'histogram' : numtypes,
+  'rcptr': ['aims::SplineFfd'],
+  'ffd': basetypes + ['Point3df'],
+  'ffd2': [('unsigned char', 'unsigned char'), ('short', 'short'),
+           ('unsigned short', 'unsigned short'),
+           ('int', 'int'), ('unsigned', 'unsigned'), ('float', 'float'),
+           ('double', 'double'), ('AimsRGB', 'unsigned char'),
+           ('AimsRGBA', 'unsigned char'), ('Point3df', 'float')],
 }
 
