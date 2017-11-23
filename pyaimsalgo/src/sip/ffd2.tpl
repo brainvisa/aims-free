@@ -9,6 +9,7 @@
 typedef aims::SplineFfdResampler<%Template1%, %Template2% > SplineFfdResampler_%Template1typecode%_%Template2typecode%;
 typedef aims::FfdResampler<%Template1% > FfdResampler_%Template1typecode%;
 typedef CubicResampler<%Template2% > CubicResampler_%Template2typecode%;
+typedef Resampler<%Template2% > Resampler_%Template2typecode%;
 %End
 
 %Docstring
@@ -45,6 +46,7 @@ typedef CubicResampler<%Template2% > CubicResampler_%Template2typecode%;
 typedef aims::NearestNeighborFfdResampler<%Template1%, %Template2% > NearestNeighborFfdResampler_%Template1typecode%_%Template2typecode%;
 typedef aims::FfdResampler<%Template1% > FfdResampler_%Template1typecode%;
 typedef NearestNeighborResampler<%Template2% > NearestNeighborResampler_%Template2typecode%;
+typedef Resampler<%Template2% > Resampler_%Template2typecode%;
 %End
 
 %Docstring
@@ -79,6 +81,7 @@ typedef NearestNeighborResampler<%Template2% > NearestNeighborResampler_%Templat
 typedef aims::TrilinearFfdResampler<%Template1%, %Template2% > TrilinearFfdResampler_%Template1typecode%_%Template2typecode%;
 typedef aims::FfdResampler<%Template1% > FfdResampler_%Template1typecode%;
 typedef LinearResampler<%Template2% > LinearResampler_%Template2typecode%;
+typedef Resampler<%Template2% > Resampler_%Template2typecode%;
 %End
 
 %Docstring
