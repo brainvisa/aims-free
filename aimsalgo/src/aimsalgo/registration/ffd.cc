@@ -1198,7 +1198,7 @@ ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & deformation,
     vvs[1] = bck.sizeY();
     vvs[2] = bck.sizeZ();
   }
-  typename BucketMap<Void>::const_iterator ib, eb = bck.end();
+  BucketMap<Void>::const_iterator ib, eb = bck.end();
   bool idaffine = affine.isIdentity();
   rc_ptr<BucketMap<Void> > out( new BucketMap<Void> );
   out->setSizeX( vvs[0] );
@@ -1208,8 +1208,8 @@ ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & deformation,
 
   for( ib=bck.begin(); ib!=eb; ++ib )
   {
-    typename BucketMap<Void>::Bucket & obk = (*out)[ ib->first ];
-    typename BucketMap<Void>::Bucket::const_iterator ip, ep = ib->second.end();
+    BucketMap<Void>::Bucket & obk = (*out)[ ib->first ];
+    BucketMap<Void>::Bucket::const_iterator ip, ep = ib->second.end();
     for( ip=ib->second.begin(); ip!=ep; ++ip )
     {
       Point3df p( ip->first[0] * vs[0], ip->first[1] * vs[1],
