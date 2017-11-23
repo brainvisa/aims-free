@@ -774,6 +774,11 @@ SplineFfdResampler<T, C>::~SplineFfdResampler()
 {
 }
 
+template <class T, class C>
+T SplineFfdResampler<T, C>::defaultBackground()
+{
+  return T( 0 );
+}
 
 template <class T, class C>
 void SplineFfdResampler<T, C>::init()
@@ -803,7 +808,8 @@ SplineFfdResampler<T, C>::SplineFfdResampler(
 
 template <class T, class C>
 SplineFfdResampler<T, C>::SplineFfdResampler(
-    const SplineFfd & spline, Motion affine, T background ):
+    const SplineFfd & spline, const AffineTransformation3d & affine,
+    T background ):
   CubicResampler<C>(),
   _transformation(spline),
   _affine(affine),
@@ -937,6 +943,12 @@ NearestNeighborFfdResampler<T, C>::~NearestNeighborFfdResampler()
 
 
 template <class T, class C>
+T NearestNeighborFfdResampler<T, C>::defaultBackground()
+{
+  return T( 0 );
+}
+
+template <class T, class C>
 void NearestNeighborFfdResampler<T, C>::init()
 {
   _dimx = 1;
@@ -960,7 +972,8 @@ NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
 
 template <class T, class C>
 NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
-    const SplineFfd & spline, Motion affine, T background ):
+    const SplineFfd & spline, const AffineTransformation3d & affine,
+    T background ):
   NearestNeighborResampler<C>(),
   _transformation(spline),
   _affine(affine),
@@ -1020,6 +1033,12 @@ TrilinearFfdResampler<T, C>::~TrilinearFfdResampler()
 
 
 template <class T, class C>
+T TrilinearFfdResampler<T, C>::defaultBackground()
+{
+  return T( 0 );
+}
+
+template <class T, class C>
 void TrilinearFfdResampler<T, C>::init()
 {
   _dimx = 1;
@@ -1043,7 +1062,8 @@ TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
 
 template <class T, class C>
 TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
-    const SplineFfd & spline, Motion affine, T background ):
+    const SplineFfd & spline, const AffineTransformation3d & affine,
+    T background ):
   LinearResampler<C>(),
   _transformation(spline),
   _affine(affine),
@@ -1178,7 +1198,7 @@ ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & deformation,
     vvs[1] = bck.sizeY();
     vvs[2] = bck.sizeZ();
   }
-  typename BucketMap<Void>::const_iterator ib, eb = bck.end();
+  BucketMap<Void>::const_iterator ib, eb = bck.end();
   bool idaffine = affine.isIdentity();
   rc_ptr<BucketMap<Void> > out( new BucketMap<Void> );
   out->setSizeX( vvs[0] );
@@ -1188,8 +1208,8 @@ ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & deformation,
 
   for( ib=bck.begin(); ib!=eb; ++ib )
   {
-    typename BucketMap<Void>::Bucket & obk = (*out)[ ib->first ];
-    typename BucketMap<Void>::Bucket::const_iterator ip, ep = ib->second.end();
+    BucketMap<Void>::Bucket & obk = (*out)[ ib->first ];
+    BucketMap<Void>::Bucket::const_iterator ip, ep = ib->second.end();
     for( ip=ib->second.begin(); ip!=ep; ++ip )
     {
       Point3df p( ip->first[0] * vs[0], ip->first[1] * vs[1],
@@ -1364,8 +1384,8 @@ void ffdTransformGraph( Graph & graph, SplineFfd & deformation,
 
 // Bundles
 
-BundleFFDTransformer::BundleFFDTransformer( rc_ptr<SplineFfd> deformation,
-                                            const Motion & affine )
+BundleFFDTransformer::BundleFFDTransformer(
+  rc_ptr<SplineFfd> deformation, const AffineTransformation3d & affine )
   : BundleListener(), BundleProducer(),
     _deformation( deformation ), _affine( affine ),
     _idaffine( affine.isIdentity() )
@@ -1436,6 +1456,18 @@ Point3df SplineFfdResampler<Point3df, float>::defaultBackground()
   return Point3df( 0.f );
 }
 
+template <>
+Point3df NearestNeighborFfdResampler<Point3df, float>::defaultBackground()
+{
+  return Point3df( 0.f );
+}
+
+template <>
+Point3df TrilinearFfdResampler<Point3df, float>::defaultBackground()
+{
+  return Point3df( 0.f );
+}
+
 
 // template instantiations
 
@@ -1445,6 +1477,18 @@ template void ffdTransformMesh( AimsTimeSurface<3, Void> &, SplineFfd & spline,
                                 const AffineTransformation3d & affine );
 template void ffdTransformMesh( AimsTimeSurface<4, Void> &, SplineFfd & spline,
                                 const AffineTransformation3d & affine );
+
+template class FfdResampler<int8_t>;
+template class FfdResampler<uint8_t>;
+template class FfdResampler<int16_t>;
+template class FfdResampler<uint16_t>;
+template class FfdResampler<int32_t>;
+template class FfdResampler<uint32_t>;
+template class FfdResampler<float>;
+template class FfdResampler<double>;
+template class FfdResampler<Point3df>;
+template class FfdResampler<AimsRGB>;
+template class FfdResampler<AimsRGBA>;
 
 template class SplineFfdResampler<int8_t>;
 template class SplineFfdResampler<uint8_t>;

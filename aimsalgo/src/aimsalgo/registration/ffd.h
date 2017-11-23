@@ -73,8 +73,8 @@ namespace aims {
 
     //--- Modify -------------------------------------------------------------
     void         increaseResolution( const Point3d & addKnots );
-    void         inverseTransform();
-    void         estimateLocalDisplacement( const Point3df & voxelSize);
+    // void         inverseTransform();
+    // void         estimateLocalDisplacement( const Point3df & voxelSize);
 
     //--- Deformation --------------------------------------------------------
     Point3dd     deformation( const Point3dd& p_mm ) const;
@@ -135,6 +135,7 @@ namespace aims {
   };
 
   template <typename T>
+  inline
   SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
                         const AimsData<T> & test_volume ):
     _spline(3, 0),
@@ -236,6 +237,15 @@ namespace aims {
     virtual Point3dd transformDouble( double x, double y, double z ) const;
   };
 
+  template <typename T>
+  inline
+  TrilinearFfd::TrilinearFfd( int dimX, int dimY, int dimZ,
+                              const AimsData<T> & test_volume ):
+    SplineFfd( dimX, dimY, dimZ, test_volume )
+  {
+  }
+
+
 //============================================================================
 //   R E S A M P L I N G
 //============================================================================
@@ -266,16 +276,19 @@ namespace aims {
 
       virtual ~SplineFfdResampler();
       virtual void init();
-      SplineFfdResampler(const SplineFfd & spline, T background = defaultBackground());
-      SplineFfdResampler(const SplineFfd & spline, Motion affine, T background = defaultBackground());
-      virtual void setRef(const AimsData<T> & ref);
+      SplineFfdResampler( const SplineFfd & spline,
+                          T background = defaultBackground() );
+      SplineFfdResampler( const SplineFfd & spline,
+                          const AffineTransformation3d & affine,
+                          T background = defaultBackground() );
+      virtual void setRef( const AimsData<T> & ref);
       virtual Point3df resample( const Point3df & output_location,
                                  T & output_value, int t = 0 );
-      static T defaultBackground() { return T(0); }
+      static T defaultBackground();
 
     private:
       void updateCoef( int t = 0 );
-      const Motion       _affine;
+      AffineTransformation3d       _affine;
       const SplineFfd &  _transformation;
       AimsData<T>        _ref;
       std::vector<AimsData<double> >  _channelcoef;
@@ -299,14 +312,17 @@ namespace aims {
 
       virtual ~NearestNeighborFfdResampler();
       virtual void init();
-      NearestNeighborFfdResampler(const SplineFfd & spline, T background = (T)0);
-      NearestNeighborFfdResampler(const SplineFfd & spline, Motion affine, T background = (T)0);
-      virtual void setRef(const AimsData<T> & ref);
+      NearestNeighborFfdResampler( const SplineFfd & spline,
+                                   T background = defaultBackground() );
+      NearestNeighborFfdResampler( const SplineFfd & spline,
+                                   const AffineTransformation3d & affine, T background = defaultBackground() );
+      virtual void setRef( const AimsData<T> & ref );
       virtual Point3df resample( const Point3df & output_location,
                                  T & output_value, int t = 0 );
+      static T defaultBackground();
 
     private:
-      const Motion       _affine;
+      AffineTransformation3d       _affine;
       const SplineFfd &  _transformation;
       AimsData<T>        _ref;
 
@@ -326,11 +342,15 @@ namespace aims {
 
       virtual ~TrilinearFfdResampler();
       virtual void init();
-      TrilinearFfdResampler(const SplineFfd & spline, T background = (T)0);
-      TrilinearFfdResampler(const SplineFfd & spline, Motion affine, T background = (T)0);
-      virtual void setRef(const AimsData<T> & ref);
+      TrilinearFfdResampler( const SplineFfd & spline,
+                             T background = defaultBackground() );
+      TrilinearFfdResampler( const SplineFfd & spline,
+                             const AffineTransformation3d & affine,
+                             T background = (T)0);
+      virtual void setRef( const AimsData<T> & ref );
       virtual Point3df resample( const Point3df & output_location,
                                  T & output_value, int t = 0 );
+      static T defaultBackground();
 
     private:
       const Motion         _affine;
