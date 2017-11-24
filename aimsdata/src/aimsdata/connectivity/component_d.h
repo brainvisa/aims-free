@@ -243,7 +243,7 @@ namespace aims
                                size_t maxcomp, bool verbose )
   {
     AimsBucket<Void>			*cbk;
-    std::auto_ptr<AimsBucket<Void> >	abk;
+    std::unique_ptr<AimsBucket<Void> >	abk;
     if( minsize == 0 && maxcomp == 0 )
       cbk = &components;
     else
@@ -379,7 +379,7 @@ namespace aims
                                size_t maxcomp, bool )
   {
     AimsBucket<Void>			*cbk;
-    std::auto_ptr<AimsBucket<Void> >	abk;
+    std::unique_ptr<AimsBucket<Void> >	abk;
     if( minsize == 0 && maxcomp == 0 )
       cbk = &components;
     else
@@ -505,7 +505,7 @@ namespace aims
 //     ajout  pour retourner l'image de labels des composantes
     AimsData<int16_t> labelImage (data.dimX(), data.dimY(), data.dimZ());
     labelImage = 0;
-    std::auto_ptr<AimsBucket<Void> >  abk;
+    std::unique_ptr<AimsBucket<Void> >  abk;
     if( minsize == 0 && maxcomp == 0 )
       cbk = &components;
     else

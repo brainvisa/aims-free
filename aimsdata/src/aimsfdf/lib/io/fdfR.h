@@ -95,8 +95,8 @@ namespace aims
       options->getProperty( "border", borderWidth );
 
       // Load the header of the first file
-      std::auto_ptr<aims::FdfHeader> hdr
-        = std::auto_ptr<aims::FdfHeader>( new aims::FdfHeader( _name ) );
+      std::unique_ptr<aims::FdfHeader> hdr
+        = std::unique_ptr<aims::FdfHeader>( new aims::FdfHeader( _name ) );
       hdr->read();
 
       int rank = (int)hdr->getProperty( "rank" )->getScalar();

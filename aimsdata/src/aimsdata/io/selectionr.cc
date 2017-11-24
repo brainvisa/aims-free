@@ -194,7 +194,7 @@ void SelectionReader::read( SelectionSet & select )
   catch( ... )
   {
     // maybe an old Tree format ?
-    auto_ptr<istream>     s2;
+    unique_ptr<istream>     s2;
     istream       *stream;
     if( _stream )
       stream = _stream;

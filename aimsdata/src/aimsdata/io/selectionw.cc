@@ -103,7 +103,7 @@ namespace
 
 void SelectionWriter::write( const SelectionSet & select )
 {
-  auto_ptr<ostream>	s2;
+  unique_ptr<ostream>	s2;
   ostream	*stream;
   if( _stream )
     stream = _stream;

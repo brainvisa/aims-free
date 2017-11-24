@@ -91,9 +91,9 @@ namespace aims
       is.unsetf( std::ios::skipws );
     if ( !_itemr )
       _itemr = new DefaultItemReader<AimsBucketItem<T> >;
-    std::auto_ptr< ItemReader<AimsBucketItem<T> > > ir( _itemr->reader( hdr.openMode(), hdr.byteOrder() != AIMS_MAGIC_NUMBER ) );
+    std::unique_ptr< ItemReader<AimsBucketItem<T> > > ir( _itemr->reader( hdr.openMode(), hdr.byteOrder() != AIMS_MAGIC_NUMBER ) );
     DefaultItemReader<uint32_t>	sr1;
-    std::auto_ptr< ItemReader<uint32_t> > sr( sr1.reader( hdr.openMode(), hdr.byteOrder() != AIMS_MAGIC_NUMBER ) );
+    std::unique_ptr< ItemReader<uint32_t> > sr( sr1.reader( hdr.openMode(), hdr.byteOrder() != AIMS_MAGIC_NUMBER ) );
 
     thing.clear();
     thing.setHeader( hdr );

@@ -124,7 +124,7 @@ int main( int argc, const char** argv )
       Graph	graph;
       graphr.read( graph, -1 );
 
-      auto_ptr<Motion>	motion;
+      unique_ptr<Motion>	motion;
       if( !motionfname.empty() )
         {
           motion.reset( new Motion );

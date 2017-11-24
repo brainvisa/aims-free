@@ -175,7 +175,7 @@ namespace aims
     State			_state;
     std::string			_errormsg;
     int				_errorcode;
-    static std::auto_ptr<Finder_Private>	pd;
+    static std::unique_ptr<Finder_Private>	pd;
   };
 
 }

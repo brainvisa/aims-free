@@ -113,7 +113,8 @@ void TexHeader::read( size_t* offset )
       bswap = ( _byteOrder == AIMS_MAGIC_NUMBER ? false : true);
 
       DefaultItemReader< uint32_t > ib1;
-      auto_ptr<ItemReader<uint32_t> > itemR2( ib1.reader( _openMode, bswap ) );
+      unique_ptr<ItemReader<uint32_t> >
+        itemR2( ib1.reader( _openMode, bswap ) );
       uint32_t typeSize=0;
       itemR2->read( is, typeSize );
       if ( !is )

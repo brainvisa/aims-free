@@ -71,8 +71,8 @@ namespace aims
         }
 
       // load the header of the first file
-      std::auto_ptr<aims::DicomHeader> hdr
-        = std::auto_ptr<aims::DicomHeader>( new aims::DicomHeader( _name ) );
+      std::unique_ptr<aims::DicomHeader> hdr
+        = std::unique_ptr<aims::DicomHeader>( new aims::DicomHeader( _name ) );
       int num = hdr->read();
 
       if ( num < 0 )
