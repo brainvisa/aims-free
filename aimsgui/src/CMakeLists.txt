@@ -1,4 +1,9 @@
+
 add_subdirectory( lib )
+
+# external official CIFTI lib
+add_subdirectory( CiftiLib-1.5.1 )
+
 set(HEADERS ${AIMSGUI_HEADERS})
 add_subdirectory( aimsqtformats )
 set(HEADERS ${AIMSQTFORMATS_HEADERS} ${HEADERS})
@@ -8,8 +13,7 @@ if( APPLE )
   add_subdirectory( bundle_aimsqtformats )
   set( _guiExecutable MACOSX_BUNDLE )
 endif( APPLE )
-# external official CIFTI lib
-add_subdirectory( CiftiLib-1.3 )
+
 add_subdirectory( aimscifti )
 
 #------------------------------------------------------------------------------

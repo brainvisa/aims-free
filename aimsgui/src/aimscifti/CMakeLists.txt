@@ -22,7 +22,7 @@ include_directories( ${CIFTI_INCLUDES} )
 add_library( aimscifti SHARED ${_sources} )
 add_dependencies( aimscifti ${headersTarget} )
 set_property( TARGET aimscifti PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-target_link_libraries( aimscifti aimsdata Cifti Nifti Common ${CIFTI_LIBS} )
+target_link_libraries( aimscifti aimsdata ${CIFTI_LIBS} )
 BRAINVISA_INSTALL( TARGETS aimscifti
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
