@@ -239,7 +239,7 @@ namespace aims
 
     /** T should be carto::Volume<int16_t> or BucketMap<Void>::Bucket
 
-        Moreover, coordinates shoule be already be divided by the voxel size
+        Moreover, coordinates should be already be divided by the voxel size
     */
     template <typename T>
     static void rasterizeLine(
