@@ -14,9 +14,9 @@ SET(CIFTILIB_VERSION 1.5)
 SET(CIFTI_DEFINITIONS)
 
 #MSVC seems like the only compiler that chokes on -W -Wall
-IF (NOT MSVC)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall")
-ENDIF (NOT MSVC)
+# IF (NOT MSVC)
+#     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall")
+# ENDIF (NOT MSVC)
 
 SET(IGNORE_QT FALSE CACHE BOOL "don't try to use QT")
 
@@ -131,7 +131,7 @@ append_subdir_files(HEADERS src)
 append_subdir_files(PUBLIC_HEADERS src)
 append_subdir_files(PRIVATE_DIRS src)
 
-ADD_LIBRARY(Cifti
+ADD_LIBRARY(Cifti SHARED
 ${SOURCES}
 ${HEADERS}
 )
