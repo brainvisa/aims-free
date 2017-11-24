@@ -492,9 +492,9 @@ namespace carto
     Position4Di( const U & other ):
       _coords(4)
     {
-      for( int i = 0; i < other.size() && i < 4; ++i )
+      for( size_t i = 0; i < size_t( other.size() ) && i < 4; ++i )
         _coords[i] = other[i];
-      for( int i = other.size(); i < 4; ++i )
+      for( size_t i = size_t( other.size() ); i < 4; ++i )
         _coords[i] = 0;
     }
 
