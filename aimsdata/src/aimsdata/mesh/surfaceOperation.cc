@@ -2968,9 +2968,9 @@ namespace
     // triangle cut on 1 edge
     /*       p[0]
               /\
-              / |\
+             / |\
             /  | \
-            /   |  \
+           /   |  \
           /___ |___\
       p[1]     b   p[2]
     */
@@ -3020,11 +3020,11 @@ namespace
     // triangle cut on 2 edges
     /*       p[0]
               /\
-              /  \
-          a  ------  c
-            /\____ \
+             /  \
+         a  ------  c
+           /\____ \
           /______\_\
-      p[1]         p[2]
+       p[1]         p[2]
     */
     const uint *p0 , *p1, *p2, *p3, *p4;
     if( !hasa )
@@ -3081,11 +3081,11 @@ namespace
     // triangle split "normally" with 3 edges cut
     /*       p[0]
               /\
-              /  \
-          a  ------  c
-            / \  / \
+             /  \
+         a  ------  c
+           / \  / \
           /___\/___\
-      p[1]    b    p[2]
+       p[1]    b    p[2]
     */
     {
       op[0] = p[0];
@@ -3239,11 +3239,11 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
         // triangle split "normally" with 3 edges cut
         /*       p[0]
                   /\
-                  /  \
-              a  ------  c
-                / \  / \
+                 /  \
+             a  ------  c
+               / \  / \
               /___\/___\
-          p[1]    b    p[2]
+           p[1]    b    p[2]
         */
         split_tri_3( opoly, op, p, a, b, c, hasa, hasb, hasc );
         break;
@@ -3256,7 +3256,7 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
              a  ------  c
                /\____ \
               /______\_\
-          p[1]         p[2]
+           p[1]         p[2]
         */
         split_tri_2( opoly, op, p, a, b, c, hasa, hasb, hasc );
         break;
