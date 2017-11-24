@@ -16,8 +16,8 @@ Cifti
 ${LIBS})
 
 INCLUDE_DIRECTORIES(
-${CMAKE_SOURCE_DIR}/example
-${CMAKE_SOURCE_DIR}/src
+${CMAKE_CURRENT_SOURCE_DIR}
+${CMAKE_CURRENT_SOURCE_DIR}/../src
 )
 
 SET(cifti_files
@@ -71,13 +71,13 @@ MATH(EXPR loop_end "${num_cifti_files} - 1")
 FOREACH(index RANGE ${loop_end})
     LIST(GET cifti_files ${index} testfile)
     #ADD_TEST doesn't seem to have a way to capture stdout, so checking the output for consistency seems to be a problem
-    ADD_TEST(info-${testfile} xmlinfo ${CMAKE_SOURCE_DIR}/example/data/${testfile})
+    ADD_TEST(info-${testfile} xmlinfo ${CMAKE_CURRENT_SOURCE_DIR}/data/${testfile})
 
-    ADD_TEST(rewrite-little-${testfile} rewrite ${CMAKE_SOURCE_DIR}/example/data/${testfile} little-${testfile} LITTLE)
+    ADD_TEST(rewrite-little-${testfile} rewrite ${CMAKE_CURRENT_SOURCE_DIR}/data/${testfile} little-${testfile} LITTLE)
     LIST(GET cifti_le_md5s ${index} goodsum)
-    ADD_TEST(rewrite-little-md5-${testfile} ${CMAKE_COMMAND} -Dgood_sum=${goodsum} -Dcheck_file=little-${testfile} -P ${CMAKE_SOURCE_DIR}/cmake/scripts/testmd5.cmake)
+    ADD_TEST(rewrite-little-md5-${testfile} ${CMAKE_COMMAND} -Dgood_sum=${goodsum} -Dcheck_file=little-${testfile} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/scripts/testmd5.cmake)
 
-    ADD_TEST(rewrite-big-${testfile} rewrite ${CMAKE_SOURCE_DIR}/example/data/${testfile} big-${testfile} BIG)
+    ADD_TEST(rewrite-big-${testfile} rewrite ${CMAKE_CURRENT_SOURCE_DIR}/data/${testfile} big-${testfile} BIG)
     LIST(GET cifti_be_md5s ${index} goodsum)
-    ADD_TEST(rewrite-big-md5-${testfile} ${CMAKE_COMMAND} -Dgood_sum=${goodsum} -Dcheck_file=big-${testfile} -P ${CMAKE_SOURCE_DIR}/cmake/scripts/testmd5.cmake)
+    ADD_TEST(rewrite-big-md5-${testfile} ${CMAKE_COMMAND} -Dgood_sum=${goodsum} -Dcheck_file=big-${testfile} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/scripts/testmd5.cmake)
 ENDFOREACH(index RANGE ${loop_end})
