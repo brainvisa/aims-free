@@ -66,9 +66,10 @@ namespace aims
         */
         virtual bool hasColumn( int32_t s2 ) const { return true; }
         virtual std::vector<double> *readRow( int32_t s1, bool store = true )
-        {}
+        { return new std::vector<double>; }
         virtual std::vector<double> *readColumn( int32_t s2,
-                                                 bool store = true ) {}
+                                                 bool store = true )
+        { return new std::vector<double>; }
         virtual void freeRow( int32_t s1 ) {}
         virtual void freeColumn( int32_t s2 ) {}
         virtual void selectDimension( const std::vector<int32_t> & dims ) {}
