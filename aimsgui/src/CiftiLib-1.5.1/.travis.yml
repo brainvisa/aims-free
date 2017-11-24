@@ -1,0 +1,34 @@
+language: cpp
+sudo: false
+
+cache:
+    - apt
+    - ccache
+
+addons:
+    apt:
+        packages:
+            - libqt4-dev
+            - libxml++2.6-dev
+            - libboost-dev
+            - libboost-filesystem-dev
+            - zlib1g-dev
+
+compiler:
+    - clang
+    - gcc
+
+env:
+    - IGNORE_QT=false SHARED=true
+    - IGNORE_QT=false SHARED=false
+    - IGNORE_QT=true SHARED=true
+    - IGNORE_QT=true SHARED=false
+
+before_install:
+    - mkdir ../build
+    - cd ../build
+
+script:
+    - cmake -D BUILD_SHARED_LIBS:BOOL=$SHARED -D IGNORE_QT:BOOL=$IGNORE_QT ../CiftiLib
+    - make -j 4
+    - ctest
