@@ -492,6 +492,7 @@ namespace internal
         case 1:
           return threshold2;
       }
+      return x; // should not happen, just avoids a warning.
     }
 
     LEFT threshold1;

@@ -33,15 +33,13 @@ AimsData<T> Transformation::application(const AimsData<T>& test,Point3df p)
   int x,y;
   ForEach2d(testtrans, x, y)
     {
-      testtrans(x,y)      = 195;	
-      
+      testtrans(x,y)      = T( 195 );
+
       if(((_cx+c*(x-_cx)+s*(y-_cy)-p[1])<test.dimX())&&((_cx+c*(x-_cx)+s*(y-_cy)-p[1])>=0)&&((_cy-s*(x-_cx)+c*(y-_cy)-p[0])<test.dimY())&&((_cy-s*(x-_cx)+c*(y-_cy)-p[0])>=0))
-	
-	testtrans(x,y)	= test( unsigned(_cx+c*(x-_cx)+s*(y-_cy)-p[1]), unsigned(_cy-s*(x-_cx)+c*(y-_cy)-p[0]) ) ;
+        testtrans(x,y)	= test( unsigned(_cx+c*(x-_cx)+s*(y-_cy)-p[1]), unsigned(_cy-s*(x-_cx)+c*(y-_cy)-p[0]) ) ;
     }
-  
-  
-  return (testtrans);	      	
+
+  return (testtrans);
 } 
 
 

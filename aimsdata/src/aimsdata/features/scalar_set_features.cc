@@ -117,7 +117,7 @@ void ScalarSetFeatures::scalarFeatureValues(
       sumWeight = ( *itWeight );
       ++itWeight;
       ++itValue;
-      for( itValue; itValue != _values.end(); ++itValue ) {
+      for( ; itValue != _values.end(); ++itValue ) {
         if ( itWeight == _weights.end() ) {
           throw runtime_error( "Weight data don't have the same size as images" );
         }

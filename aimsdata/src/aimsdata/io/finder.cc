@@ -83,7 +83,7 @@ Finder_Private::~Finder_Private()
 }
 
 
-auto_ptr<Finder_Private>	Finder::pd( 0 );
+unique_ptr<Finder_Private>	Finder::pd;
 
 
 namespace
