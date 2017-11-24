@@ -529,6 +529,7 @@ namespace aims
         {
           v = dataIn->at( x, y, z );
           if( v != 0 )
+          {
             if( value == 0 )
             {
               value = v;
@@ -537,6 +538,7 @@ namespace aims
             }
             else if( value != v )
               return false;
+          }
         }
     return true;
   }

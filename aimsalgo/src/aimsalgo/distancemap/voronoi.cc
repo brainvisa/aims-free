@@ -176,14 +176,14 @@ EmptyVoronoiBucket( AimsBucket<Void>& bucket, AimsData<T>& vol,
       {
         center = it->location();
 
-        if ( vol( center ) >= dist )
+        if ( int( vol( center ) ) >= dist )
           for ( n = 0; n < mask.length(); n++ )
           {
             neigh.item(0) = center.item(0) + mask.offset( n ).item(0);
             neigh.item(1) = center.item(1) + mask.offset( n ).item(1);
             neigh.item(2) = center.item(2) + mask.offset( n ).item(2);
             if ( inside( neigh, dimX, dimY, dimZ ) &&
-                 vol( neigh ) > dist               &&
+                 int( vol( neigh ) ) > dist               &&
                  vol( neigh ) != AIMS_OUTSIDE(T)         )
             {
               new_val = vol( center ) + mask.distance( n );

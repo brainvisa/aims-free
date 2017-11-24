@@ -89,10 +89,12 @@ double BSpline::at( double x ) const
   if( std::abs(x) > double(order()+1)/2 )
     return 0.;
   if( order() == 0 )
+  {
     if( x < 0.5 )
       return 1.;
     else
       return 0.;
+  }
 
   BSpline bminus( order() - 1 ); // centered, unscaled
   return ( dO()/2. + .5 + x ) / dO()
@@ -439,7 +441,7 @@ size_t TabulBSpline::index( double x ) const
 
 bool TabulBSpline::is_valid( size_t index ) const
 {
-  return ( index >= 0 && index < _values[0].size() );
+  return ( /* index >= 0 && */ index < _values[0].size() );
 }
 
 void TabulBSpline::setArray( unsigned nder, size_t length )
@@ -449,10 +451,12 @@ void TabulBSpline::setArray( unsigned nder, size_t length )
   size_t old_length = ( _values.size() > 0 ? _values[0].size() : 0 );
   size_t new_length = ( this->order() ? length + 1 : 0 );
   if( new_length == old_length )
+  {
     if( nder + 1 > _values.size() )
       _values.resize( nder + 1, vector<double>( new_length ) );
     else if( nder + 1 < _values.size() )
       _values.resize( nder + 1 );
+  }
   else
     _values = std::vector<std::vector<double> >( nder + 1, vector<double>( new_length ) );
 
