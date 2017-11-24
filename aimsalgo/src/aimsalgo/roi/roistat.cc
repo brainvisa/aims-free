@@ -156,7 +156,7 @@ void RoiStats::streamout( char *out )
   string          surname;
   int             nbVox;
   float           volVox;
-  auto_ptr<ofstream> os;
+  unique_ptr<ofstream> os;
 
   if (out)
     os.reset(new ofstream(out, ios::app));

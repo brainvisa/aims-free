@@ -109,13 +109,13 @@ namespace aims
 
     if( !_itemw )
       _itemw = new DefaultItemWriter<T>;
-    std::auto_ptr< ItemWriter<T> > ir( _itemw->writer( mode, false ) );
+    std::unique_ptr< ItemWriter<T> > ir( _itemw->writer( mode, false ) );
     DefaultItemWriter<uint32_t> sr1;
-    std::auto_ptr< ItemWriter<uint32_t> > sr( sr1.writer( mode, false ) );
+    std::unique_ptr< ItemWriter<uint32_t> > sr( sr1.writer( mode, false ) );
     DefaultItemWriter<Point3df> pr1;
-    std::auto_ptr< ItemWriter<Point3df> > pr( pr1.writer( mode, false ) );
+    std::unique_ptr< ItemWriter<Point3df> > pr( pr1.writer( mode, false ) );
     DefaultItemWriter<AimsVector<uint,D> > plr1;
-    std::auto_ptr< ItemWriter<AimsVector<uint,D> > > plr ( plr1.writer( mode, false ) );
+    std::unique_ptr< ItemWriter<AimsVector<uint,D> > > plr ( plr1.writer( mode, false ) );
 
     //	write header
 

@@ -634,7 +634,7 @@ bool convData( Process & p, const string &, Finder & )
   cout << "converting data...\n";
 
   ShallowConverter<T,U>	conv( dc.rescale, dc.info );
-  auto_ptr<U>		vol2;
+  unique_ptr<U>		vol2;
   if( dc.xdim != 0 || dc.ydim != 0 || dc.zdim != 0 )
     {
       if( dc.xdim == 0 )

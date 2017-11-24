@@ -1114,10 +1114,10 @@ void	PrintFaces( void )
 }
 }
 
-auto_ptr< AimsSurfaceTriangle > convexHull(
+unique_ptr< AimsSurfaceTriangle > convexHull(
   const vector< Point3dd > &points )
 {
-  auto_ptr< AimsSurfaceTriangle > result( new AimsSurfaceTriangle );
+  unique_ptr< AimsSurfaceTriangle > result( new AimsSurfaceTriangle );
 
   // Add vertice to result and compute scale
   double mini, maxi;
@@ -1246,7 +1246,7 @@ int main(int argc, const char **argv )
       }
 
       // Build sphere triangulation
-      auto_ptr<AimsSurfaceTriangle> result( convexHull( points ) );
+      unique_ptr<AimsSurfaceTriangle> result( convexHull( points ) );
 
       // Write result
       writer.write( *result, asciiFlag );

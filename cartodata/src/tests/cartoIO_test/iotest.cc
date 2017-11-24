@@ -101,7 +101,7 @@ bool IOTest<T>::iotest( ReaderAlgorithm & algo, Object hdr,
   Readalgo	& ralgo = (Readalgo &) algo;
   Reader<T>	r( source );
   r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly ) );
-  auto_ptr<T>	obj;
+  unique_ptr<T>	obj;
   obj.reset( r.read( hdr ) );
   cout << "object read\n";
 

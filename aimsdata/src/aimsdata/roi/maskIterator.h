@@ -177,7 +177,7 @@ namespace aims
     carto::rc_ptr< BucketMap<Void> > _bucketMap;
     const BucketMap<Void>::Bucket *_bucket;
     BucketMap<Void>::Bucket::const_iterator _itPoints;
-    std::auto_ptr< NodeFilter > _nodeFilter;
+    std::unique_ptr< NodeFilter > _nodeFilter;
     carto::rc_ptr< VoxelSampler > _voxelSampler;
     std::vector<std::string> _nameAttributes;
 

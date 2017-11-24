@@ -100,7 +100,7 @@ namespace aims
     std::string	opmode = ascii ? "ascii" : "binar";
     ItemWriter<T>	*iw = _itemw->writer( opmode );
     DefaultItemWriter<uint32_t>	sw1;
-    std::auto_ptr<ItemWriter<uint32_t> > sw( sw1.writer( opmode ) );
+    std::unique_ptr<ItemWriter<uint32_t> > sw( sw1.writer( opmode ) );
 
     typename TimeTexture<T>::const_iterator it, et = thing.end();
 

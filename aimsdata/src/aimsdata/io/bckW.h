@@ -83,7 +83,7 @@ namespace aims
 
     if ( !_itemw )
       _itemw = new DefaultItemWriter<AimsBucketItem<T> >;
-    std::auto_ptr< ItemWriter<AimsBucketItem<T> > > iw( _itemw->writer( openmode, false ) );
+    std::unique_ptr< ItemWriter<AimsBucketItem<T> > > iw( _itemw->writer( openmode, false ) );
     DefaultItemWriter<uint32_t>	sw;
 
     typename AimsBucket<T>::const_iterator	ib, eb = thing.end();

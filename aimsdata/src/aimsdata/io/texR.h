@@ -106,7 +106,7 @@ namespace aims
       _itemr = new DefaultItemReader<T>;
     ItemReader<T> *ir( _itemr->reader( hdr.openMode(), hdr.byteSwapping() ) );
     DefaultItemReader<uint32_t>	sr1;
-    std::auto_ptr<ItemReader<uint32_t> > sr( sr1.reader( hdr.openMode(), hdr.byteSwapping() ) );
+    std::unique_ptr<ItemReader<uint32_t> > sr( sr1.reader( hdr.openMode(), hdr.byteSwapping() ) );
 
     int		nt;
     hdr.getProperty( "nb_t_pos", nt );
