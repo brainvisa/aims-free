@@ -155,7 +155,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 #install dirs
-INCLUDE(GNUInstallDirs)
+IF(CMAKE_VERSION VERSION_GREATER_EQUAL "3.4")
+  # GNUInstallDirs appeared in cmake 3.4
+  INCLUDE(GNUInstallDirs)
+ENDIF()
 
 #pkg-config
 CONFIGURE_FILE(CiftiLib.pc.in CiftiLib.pc @ONLY)
