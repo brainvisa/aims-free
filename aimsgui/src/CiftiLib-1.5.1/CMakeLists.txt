@@ -155,7 +155,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 #install dirs
-IF(CMAKE_VERSION VERSION_GREATER_EQUAL "3.4")
+IF(NOT CMAKE_VERSION VERSION_LESS "3.4")
   # GNUInstallDirs appeared in cmake 3.4
   INCLUDE(GNUInstallDirs)
 ENDIF()
