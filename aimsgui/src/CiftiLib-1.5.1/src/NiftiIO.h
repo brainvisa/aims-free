@@ -104,7 +104,7 @@ namespace cifti
         m_scratch.resize(numElems * numBytesPerElem());
         m_file.seek(numSkip * numBytesPerElem() + m_header.getDataOffset());
         int64_t numRead = 0;
-        m_file.read(m_scratch.data(), m_scratch.size(), &numRead);
+        m_file.read(&m_scratch[0], m_scratch.size(), &numRead);
         if ((numRead != (int64_t)m_scratch.size() && !tolerateShortRead) || numRead < 0)//for now, assume read giving -1 is always a problem
         {
             throw CiftiException("error while reading from file '" + m_file.getFilename() + "'");
@@ -113,40 +113,40 @@ namespace cifti
         {
             case NIFTI_TYPE_UINT8:
             case NIFTI_TYPE_RGB24://handled by components
-                convertRead(dataOut, (uint8_t*)m_scratch.data(), numElems);
+                convertRead(dataOut, (uint8_t*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_INT8:
-                convertRead(dataOut, (int8_t*)m_scratch.data(), numElems);
+                convertRead(dataOut, (int8_t*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_UINT16:
-                convertRead(dataOut, (uint16_t*)m_scratch.data(), numElems);
+                convertRead(dataOut, (uint16_t*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_INT16:
-                convertRead(dataOut, (int16_t*)m_scratch.data(), numElems);
+                convertRead(dataOut, (int16_t*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_UINT32:
-                convertRead(dataOut, (uint32_t*)m_scratch.data(), numElems);
+                convertRead(dataOut, (uint32_t*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_INT32:
-                convertRead(dataOut, (int32_t*)m_scratch.data(), numElems);
+                convertRead(dataOut, (int32_t*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_UINT64:
-                convertRead(dataOut, (uint64_t*)m_scratch.data(), numElems);
+                convertRead(dataOut, (uint64_t*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_INT64:
-                convertRead(dataOut, (int64_t*)m_scratch.data(), numElems);
+                convertRead(dataOut, (int64_t*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_FLOAT32:
             case NIFTI_TYPE_COMPLEX64://components
-                convertRead(dataOut, (float*)m_scratch.data(), numElems);
+                convertRead(dataOut, (float*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_FLOAT64:
             case NIFTI_TYPE_COMPLEX128:
-                convertRead(dataOut, (double*)m_scratch.data(), numElems);
+                convertRead(dataOut, (double*)&m_scratch[0], numElems);
                 break;
             case NIFTI_TYPE_FLOAT128:
             case NIFTI_TYPE_COMPLEX256:
-                convertRead(dataOut, (long double*)m_scratch.data(), numElems);
+                convertRead(dataOut, (long double*)&m_scratch[0], numElems);
                 break;
             default:
                 throw CiftiException("internal error, tell the developers what you just tried to do");
@@ -184,45 +184,45 @@ namespace cifti
         {
             case NIFTI_TYPE_UINT8:
             case NIFTI_TYPE_RGB24://handled by components
-                convertWrite((uint8_t*)m_scratch.data(), dataIn, numElems);
+                convertWrite((uint8_t*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_INT8:
-                convertWrite((int8_t*)m_scratch.data(), dataIn, numElems);
+                convertWrite((int8_t*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_UINT16:
-                convertWrite((uint16_t*)m_scratch.data(), dataIn, numElems);
+                convertWrite((uint16_t*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_INT16:
-                convertWrite((int16_t*)m_scratch.data(), dataIn, numElems);
+                convertWrite((int16_t*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_UINT32:
-                convertWrite((uint32_t*)m_scratch.data(), dataIn, numElems);
+                convertWrite((uint32_t*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_INT32:
-                convertWrite((int32_t*)m_scratch.data(), dataIn, numElems);
+                convertWrite((int32_t*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_UINT64:
-                convertWrite((uint64_t*)m_scratch.data(), dataIn, numElems);
+                convertWrite((uint64_t*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_INT64:
-                convertWrite((int64_t*)m_scratch.data(), dataIn, numElems);
+                convertWrite((int64_t*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_FLOAT32:
             case NIFTI_TYPE_COMPLEX64://components
-                convertWrite((float*)m_scratch.data(), dataIn, numElems);
+                convertWrite((float*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_FLOAT64:
             case NIFTI_TYPE_COMPLEX128:
-                convertWrite((double*)m_scratch.data(), dataIn, numElems);
+                convertWrite((double*)&m_scratch[0], dataIn, numElems);
                 break;
             case NIFTI_TYPE_FLOAT128:
             case NIFTI_TYPE_COMPLEX256:
-                convertWrite((long double*)m_scratch.data(), dataIn, numElems);
+                convertWrite((long double*)&m_scratch[0], dataIn, numElems);
                 break;
             default:
                 throw CiftiException("internal error, tell the developers what you just tried to do");
         }
-        m_file.write(m_scratch.data(), m_scratch.size());
+        m_file.write(&m_scratch[0], m_scratch.size());
     }
     
     template<typename TO, typename FROM>

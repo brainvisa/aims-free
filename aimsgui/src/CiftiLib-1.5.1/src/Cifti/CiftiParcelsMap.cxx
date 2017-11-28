@@ -617,7 +617,7 @@ CiftiParcelsMap::Parcel CiftiParcelsMap::readParcel1(XmlReader& xml)
             }
             for (int64_t index3 = 0; index3 < arraySize; index3 += 3)
             {
-                VoxelIJK temp(array.data() + index3);
+                VoxelIJK temp(&array[0] + index3);
                 if (ret.m_voxelIndices.find(temp) != ret.m_voxelIndices.end())
                 {
                     throw CiftiException("VoxelIndicesIJK elements may not reuse voxels");
@@ -677,7 +677,7 @@ CiftiParcelsMap::Parcel CiftiParcelsMap::readParcel1(XmlReader& xml)
                     }
                     for (int64_t index3 = 0; index3 < arraySize; index3 += 3)
                     {
-                        VoxelIJK temp(array.data() + index3);
+                        VoxelIJK temp(&array[0] + index3);
                         if (ret.m_voxelIndices.find(temp) != ret.m_voxelIndices.end())
                         {
                             throw CiftiException("VoxelIndicesIJK elements may not reuse voxels");
@@ -759,7 +759,7 @@ CiftiParcelsMap::Parcel CiftiParcelsMap::readParcel2(XmlReader& xml)
             }
             for (int64_t index3 = 0; index3 < arraySize; index3 += 3)
             {
-                VoxelIJK temp(array.data() + index3);
+                VoxelIJK temp(&array[0] + index3);
                 if (ret.m_voxelIndices.find(temp) != ret.m_voxelIndices.end())
                 {
                     throw CiftiException("VoxelIndicesIJK elements may not reuse voxels");
@@ -819,7 +819,7 @@ CiftiParcelsMap::Parcel CiftiParcelsMap::readParcel2(XmlReader& xml)
                     }
                     for (int64_t index3 = 0; index3 < arraySize; index3 += 3)
                     {
-                        VoxelIJK temp(array.data() + index3);
+                        VoxelIJK temp(&array[0] + index3);
                         if (ret.m_voxelIndices.find(temp) != ret.m_voxelIndices.end())
                         {
                             throw CiftiException("VoxelIndicesIJK elements may not reuse voxels");

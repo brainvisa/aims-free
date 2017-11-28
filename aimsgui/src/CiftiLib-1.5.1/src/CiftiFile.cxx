@@ -322,8 +322,8 @@ void CiftiFile::copyImplData(const ReadImplInterface* from, WriteImplInterface* 
     vector<float> scratchRow(dims[0]);
     for (MultiDimIterator<int64_t> iter(iterateDims); !iter.atEnd(); ++iter)
     {
-        from->getRow(scratchRow.data(), *iter, false);
-        to->setRow(scratchRow.data(), *iter);
+        from->getRow(&scratchRow[0], *iter, false);
+        to->setRow(&scratchRow[0], *iter);
     }
 }
 

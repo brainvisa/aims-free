@@ -234,11 +234,11 @@ void CiftiXML::readXML(const vector<char>& text)
 #ifdef CIFTILIB_USE_QT
     vector<char> text2 = text;
     text2.push_back('\0');//make sure it has a null terminator
-    XmlReader xml(text2.data());//so it works as a C string
+    XmlReader xml(&text2[0]);//so it works as a C string
 #else
 #ifdef CIFTILIB_USE_XMLPP
     vector<char>::const_iterator end = find(text.begin(), text.end(), '\0');//find the null terminator, if it exists, to prevent "extra content at end of document" errors
-    XmlReader xml((unsigned char*)text.data(), end - text.begin());//get the number of bytes
+    XmlReader xml((unsigned char*&)text[0], end - text.begin());//get the number of bytes
 #else
 #error "not implemented"
 #endif

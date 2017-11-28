@@ -110,14 +110,14 @@ namespace cifti
     template<typename I>
     T* MultiDimArray<T>::get(const int& fullDims, const std::vector<I>& indexSelect)
     {
-        return m_data.data() + index(fullDims, indexSelect);
+        return &m_data[0] + index(fullDims, indexSelect);
     }
     
     template<typename T>
     template<typename I>
     const T* MultiDimArray<T>::get(const int& fullDims, const std::vector<I>& indexSelect) const
     {
-        return m_data.data() + index(fullDims, indexSelect);
+        return &m_data[0] + index(fullDims, indexSelect);
     }
 }
 
