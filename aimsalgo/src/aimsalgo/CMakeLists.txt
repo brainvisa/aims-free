@@ -22,7 +22,6 @@ set( _headers
     compression/lz.h
     compression/lzhl.h
     config/aimsalgo_config.h
-    config/aimsalgopub_config.h
     connectivity/meshcc.h
     connectivity/meshcc_d.h
     distancemap/advection.h
