@@ -32,42 +32,31 @@
  */
 
 
-#ifndef AIMS_MATH_DISTSPHERIC_H
-#define AIMS_MATH_DISTSPHERIC_H
+#include <aims/math/random.h>
+#include <aims/data/fastAllocationData.h>
+#include <set>
+#include <stack>
+#include <stdlib.h>
+#include <math.h>
 
-#include <aims/config/aimsalgopub_config.h>
-#include <vector>
+using namespace std;
+using namespace aims;
 
-template <class T,int D> class AimsVector;
-template <class T> class AimsData;
+AimsData<int> AimsRandomList( int size )
+{
+  AimsFastAllocationData<int> data( size );
 
-/**@name Spheric distribution of points.*/
-//@{
-/**@name Continous distribution
-         Returns a unit vector closed to another one in a solid angle.
-         @param vec axis of the cone where to get another vector
-         @param theta_max aperture of the cone
-*/
-//@{
-///
-AimsVector<float,3>  AimsPointInSolidAngle(const AimsVector<float,3>  &vec,
-                                           float theta_max);
-//@}
+  set<int> stack;
+  int tmp=0;
 
-/**@name Discrete distribution.
-         Returns a vector of uniformly distributed points on a unit sphere.
-         The construction of that distribution starts from an icosahedron
-         (20 facets, 12 points) and iterates a subdivision of each triangle
-         into 4 sub-triangles.
-         @param minpoint minimum number of points in the distribution
-                         (12 at least) 
-*/
-//@{
-///
-AIMSALGOPUB_API std::vector<AimsVector<float,3>* > 
-AimsIcosahedronDiscreteSphericDistribution(int minpoint);
-//@}
-
-//@}
-
-#endif
+  while ( int( stack.size() ) < size )
+  {
+    tmp = UniformRandom( 0, 2 * size ) % size;
+    if ( stack.find( tmp ) == stack.end() )
+    {
+      data( stack.size() ) = tmp;
+      stack.insert( tmp ); 
+    }
+  }
+  return data;
+}

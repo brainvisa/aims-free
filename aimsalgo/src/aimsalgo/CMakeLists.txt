@@ -22,6 +22,7 @@ set( _headers
     compression/lz.h
     compression/lzhl.h
     config/aimsalgo_config.h
+    config/aimsalgopub_config.h
     connectivity/meshcc.h
     connectivity/meshcc_d.h
     distancemap/advection.h
@@ -53,17 +54,69 @@ set( _headers
     estimation/msfunc.h
     estimation/wlms-estimator.h
     fastComputation/tabulation.h
+    ffd/tabulSpline.h
     foldgraph/foldgraphattributes.h
     foldgraph/foldoversegmentation.h
+    geodesicpath/geodesic_algorithm_base.h
+    geodesicpath/geodesic_algorithm_subdivision.h
+    geodesicpath/geodesic_algorithm_dijkstra_alternative.h
+    geodesicpath/geodesic_constants_and_simple_functions.h
+    geodesicpath/geodesic_algorithm_dijkstra.h
+    geodesicpath/geodesic_memory.h
+    geodesicpath/geodesic_algorithm_exact_elements.h
+    geodesicpath/geodesic_mesh_elements.h
+    geodesicpath/geodesic_algorithm_exact.h
+    geodesicpath/geodesic_mesh.h
+    geodesicpath/geodesic_algorithm_graph_base.h
+    geodesicpath/geodesicPath.h
     histogram/histogram_g.h
     histogram/cumulated.h
     histogram/histogram.h
     histogram/simpleHisto.h
     histogram/equalizedHisto.h
     histogram/regularBinnedHisto.h
+    information/information.h
+    information/pdf.h
+#    information/mutualinfo.h
+    interpolation/interpolatedvolume.h
+    interpolation/interpolatedvolume_d.h
+#    interpolation/splineleastsquare.h
     io/roiselectorR.h
     io/roigtmR.h
     io/roigtmW.h
+    math/math_g.h
+    math/balanc.h
+    math/balbak.h
+    math/bessel.h
+    math/curv2Diso.h
+    math/curv3Diso.h
+    math/discriminantanalysis.h
+    math/discriminantanalysis_d.h
+    math/distspheric.h
+    math/eigen.h
+    math/elmhes.h
+    math/eltran.h
+    math/gaussj.h
+    math/geometry.h
+    math/gradient.h
+    math/harris.h
+    math/householder.h
+    math/hqr.h
+    math/hypergeometric.h
+    math/knn.h
+    math/multilinfit.h
+    math/random.h
+    math/svd.h
+    math/pca.h
+    math/pca_d.h
+    math/ppca.h
+    math/ppca_d.h
+    math/bspline.h
+    math/bspline2.h
+    math/bspline3.h
+    math/sobel.h
+    math/tensorMatrix.h
+    math/tqli.h
     mesh/mesh_g.h
     mesh/curv.h
     mesh/facet.h
@@ -94,6 +147,19 @@ set( _headers
     mpi/types.h
     neuralnet/multilayerperceptron.h
     neuralnet/selforganizingmap.h
+    optimization/covsrt.h
+    optimization/deterministic.h
+    optimization/levmrq.h
+    optimization/lm2gauss.h
+    optimization/lmfunc.h
+    optimization/lmgamma.h
+    optimization/lmgauss.h
+#   optimization/lmmultcompmodel.h
+    optimization/objective.h
+    optimization/optimization_g.h
+    optimization/optimizer.h
+    optimization/powell.h
+    optimization/singleoptimizer.h
     perfusion/perfAif.h
     perfusion/perfAifAvg.h
     perfusion/perfAifBest.h
@@ -170,6 +236,21 @@ set( _headers
     primalsketch/imageCoupledSmoother.h
     primalsketch/coupledDiffusion2DSmoother.h
     primalsketch/coupledDiffusion2DSmoother_d.h
+    pyramid/maxfunc.h
+    pyramid/meanfunc.h
+    pyramid/medfunc.h
+    pyramid/pyramid_g.h
+    pyramid/pyramid.h
+    pyramid/pyr-func.h
+    pyramid/convolutionsubsampler.h
+    pyramid/convolutionsubsampler_d.h
+    pyramid/splinesubsampler.h
+    pyramid/splinesubsampler_d.h
+    pyramid/movingaveragesubsampler.h
+    pyramid/splinepyramid.h
+    pyramid/splinepyramid_d.h
+    pyramid/subsamplingpyramid.h
+    pyramid/subsamplingpyramid_d.h
     registration/block_matching.h
     registration/block_matching_d.h
     registration/displacement_field.h
@@ -181,9 +262,51 @@ set( _headers
     registration/scale_control_d.h
     registration/transformation.h
     registration/transformation_d.h
+    resampling/bucketmapsampler.h
+    resampling/cubicresampler.h
+    resampling/cubicresampler_d.h
+    resampling/generalsampler.h
     resampling/harmonicCageResampler.h
+    resampling/linearresampler.h
+    resampling/linearresampler_d.h
+    resampling/masklinresampler.h
     resampling/meshToVoxelsResampler.h
     resampling/meshToVoxelsResampler_d.h
+    resampling/nearestneighborresampler.h
+    resampling/nearestneighborresampler_d.h
+    resampling/quadraticresampler.h
+    resampling/quadraticresampler_d.h
+    resampling/quarticresampler.h
+    resampling/quarticresampler_d.h
+    resampling/quinticresampler.h
+    resampling/quinticresampler_d.h
+    resampling/resampling_g.h
+    resampling/resampler.h
+    resampling/resampler_d.h
+    resampling/resamplerfactory.h
+    resampling/resamplerfactory_d.h
+    resampling/extremadifferencesubsampling.h
+    resampling/majoritysubsampling.h
+    resampling/maxsubsampling.h
+    resampling/meansubsampling.h
+    resampling/mediansubsampling.h
+    resampling/minsubsampling.h
+    resampling/notnullmeansubsampling.h
+    resampling/notnullmediansubsampling.h
+    resampling/sumsubsampling.h
+    resampling/multichannelresampler.h
+    resampling/samplable.h
+    resampling/samplable_cone.h
+    resampling/samplable_sphere.h
+    resampling/sampler.h
+    resampling/sixthorderresampler.h
+    resampling/sixthorderresampler_d.h
+    resampling/seventhorderresampler.h
+    resampling/seventhorderresampler_d.h
+    resampling/splineresampler.h
+    resampling/splineresampler_d.h
+    resampling/subsamplingimagealgorithm.h
+    resampling/polynomial.h
     roi/clusterArg.h
     roi/clusterArg_d.h
     roi/roigtm.h
@@ -195,11 +318,31 @@ set( _headers
     scalespace/meshDiffuse.h
     signalfilter/signalfilter_g.h
     signalfilter/convol.h
+    signalfilter/convolutionfilter.h
+    signalfilter/convolutionfilter_d.h
+    signalfilter/differencefilter.h
     signalfilter/diffusionSmoother_d.h
     signalfilter/diffusionSmoother.h
+    signalfilter/elementfilterfactory.h
+    signalfilter/elementfilterfactory_d.h
+    signalfilter/filteringfunction.h
+    signalfilter/filteringfunction_element.h
+    signalfilter/filteringfunction_element_d.h
+    signalfilter/filteringfunction_element_rgb.h
+    signalfilter/filteringfunction_element_rgb_d.h
+    signalfilter/filteringfunction_linear.h
+    signalfilter/filteringfunction_linear_d.h
+    signalfilter/filteringfunction_linear_rgb.h
+    signalfilter/filteringfunction_linear_rgb_d.h
+    signalfilter/filteringimagealgorithm.h
+#    signalfilter/filter_nonlinear.h
+#    signalfilter/filter_nonlinear_d.h
+#    signalfilter/filter_linear.h
+#    signalfilter/filter_linear_d.h
     signalfilter/firfilter.h
     signalfilter/g2dsmooth.h
     signalfilter/g3dsmooth.h
+    signalfilter/gaborfilter.h
     signalfilter/gcoef.h
     signalfilter/gcolumns.h
     signalfilter/ghessian.h
@@ -210,35 +353,22 @@ set( _headers
     signalfilter/gjacobian.h
     signalfilter/ggradient.h
     signalfilter/gframes.h
-    signalfilter/vfilter.h
     signalfilter/medianfilter.h
     signalfilter/meanfilter.h
     signalfilter/minfilter.h
     signalfilter/maxfilter.h
     signalfilter/majorityfilter.h
-    signalfilter/differencefilter.h
+    signalfilter/movingaveragefilter.h
     signalfilter/sumfilter.h
     signalfilter/variancefilter.h
     signalfilter/sdfilter.h
-    signalfilter/gaborfilter.h
-    signalfilter/filteringfunction.h
-    signalfilter/filteringfunction_linear.h
-    signalfilter/filteringfunction_linear_d.h
-    signalfilter/filteringfunction_element.h
-    signalfilter/filteringfunction_element_d.h
-    signalfilter/filteringimagealgorithm.h
+    signalfilter/iirfilter.h
     signalfilter/linearfilterfactory.h
     signalfilter/linearfilterfactory_d.h
-    signalfilter/elementfilterfactory.h
-    signalfilter/elementfilterfactory_d.h
-    signalfilter/filteringfunction_element_rgb.h
-    signalfilter/filteringfunction_element_rgb_d.h
-    signalfilter/filteringfunction_linear_rgb.h
-    signalfilter/filteringfunction_linear_rgb_d.h
-#    signalfilter/filter_nonlinear.h
-#    signalfilter/filter_nonlinear_d.h
-#    signalfilter/filter_linear.h
-#    signalfilter/filter_linear_d.h
+    signalfilter/splinefilter.h
+    signalfilter/splinefilter_d.h
+    signalfilter/types.h
+    signalfilter/vfilter.h
     spam/spam.h
     talairach/cramer.h
     talairach/talPoints.h
@@ -270,18 +400,8 @@ set( _headers
     transform/hilbert1d.h
     transform/least_square_estimation.h
     transform/rigidestimation.h
-    geodesicpath/geodesic_algorithm_base.h
-    geodesicpath/geodesic_algorithm_subdivision.h
-    geodesicpath/geodesic_algorithm_dijkstra_alternative.h
-    geodesicpath/geodesic_constants_and_simple_functions.h
-    geodesicpath/geodesic_algorithm_dijkstra.h
-    geodesicpath/geodesic_memory.h
-    geodesicpath/geodesic_algorithm_exact_elements.h
-    geodesicpath/geodesic_mesh_elements.h
-    geodesicpath/geodesic_algorithm_exact.h
-    geodesicpath/geodesic_mesh.h
-    geodesicpath/geodesic_algorithm_graph_base.h
-    geodesicpath/geodesicPath.h
+    utility/dynamic.h
+    utility/dynamic_d.h
 )
 
 set( _sources
@@ -313,12 +433,48 @@ set( _sources
     distancemap/thickness.cc
     distancemap/voronoi.cc
     fastComputation/tabulation.cc
+    ffd/tabulSpline.cc
     foldgraph/foldgraphattributes.cc
     foldgraph/foldoversegmentation.cc
     geodesicpath/geodesicPath.cc
+    information/corratio.cc
+    information/meshdistance.cc
+    information/mutual.cc
+    information/pdf.cc
+    interpolation/interpolatedvolume.cc
+#    interpolation/splineleastsquare.cc
     io/roiselectorR.cc
     io/roigtmR.cc
     io/roigtmW.cc
+    math/balanc.cc
+    math/balbak.cc
+    math/bessel.cc
+    math/bspline.cc
+    math/bspline3.cc
+    math/bspline2.cc
+    math/discriminantanalysis.cc
+    math/eigen.cc
+    math/elmhes.cc
+    math/eltran.cc
+    math/gaussj.cc
+    math/geometry.cc
+    math/harris.cc
+    math/householder.cc
+    math/hqr.cc
+    math/hypergeometric.cc
+    math/knn.cc
+    math/icosahedronDistrib.cc
+    math/multilinfit.cc
+    math/randlist.cc
+    math/random.cc
+    math/spheredistrib.cc
+    math/svd.cc
+    math/pca.cc
+    math/ppca.cc
+    math/sobel.cc
+    math/tensorMatrix.cc
+    math/toeplitz.cc
+    math/tqli.cc
     mesh/curv.cc
     mesh/decimation.cc
     mesh/extendedNeigh.cc
@@ -350,6 +506,8 @@ set( _sources
     morphology/morphoopen.cc
     neuralnet/multilayerperceptron.cc
     neuralnet/selforganizingmap.cc
+    optimization/covsrt.cc
+    optimization/levmrq.cc
     perfusion/perfAif.cc
     perfusion/perfAifAvg.cc
     perfusion/perfAifBest.cc
@@ -391,14 +549,23 @@ set( _sources
     perfusion/perfSVDTrunc.cc
     perfusion/perfTTP.cc
     points_distribution/points_distribution.cc
+    pyramid/splinesubsampler.cc
+    pyramid/splinepyramid.cc
+    pyramid/subsamplingpyramid.cc
+    pyramid/movingaveragesubsampler.cc
     registration/block_matching.cc
     registration/displacement_field.cc
     registration/ffd.cc
     registration/minimisation.cc
     registration/scale_control.cc
     registration/transformation.cc
+    resampling/bucketmapsampler.cc
+    resampling/generalsampler.cc
     resampling/harmonicCageResampler.cc
     resampling/meshToVoxelsResampler.cc
+    resampling/polynomial.cc
+    resampling/resamplers.cc
+    resampling/samplable.cc
     roi/clusterArg.cc
     roi/roigtm.cc
     roi/roistat.cc
@@ -407,22 +574,25 @@ set( _sources
     scalespace/meshBlob.cc
     scalespace/meshDiffuse.cc
     signalfilter/diffusionSmoother.cc
+    signalfilter/elementfilterfactory.cc
+    signalfilter/filteringfunction_element.cc
+    signalfilter/filteringfunction_element_rgb.cc
+    signalfilter/filteringfunction_linear.cc
+    signalfilter/filteringfunction_linear_rgb.cc
+#    signalfilter/filter_nonlinear.cc
+#    signalfilter/filter_linear.cc
     signalfilter/firfilter.cc
     signalfilter/gcoef.cc
     signalfilter/gcolumns.cc
+    signalfilter/gframes.cc
     signalfilter/glines.cc
     signalfilter/grecurse.cc
     signalfilter/gslices.cc
-    signalfilter/parity.cc
-    signalfilter/gframes.cc
-    signalfilter/filteringfunction_linear.cc
-    signalfilter/filteringfunction_element.cc
+    signalfilter/iirfilter.cc
     signalfilter/linearfilterfactory.cc
-    signalfilter/elementfilterfactory.cc
-    signalfilter/filteringfunction_linear_rgb.cc
-    signalfilter/filteringfunction_element_rgb.cc
-#    signalfilter/filter_nonlinear.cc
-#    signalfilter/filter_linear.cc
+    signalfilter/movingaveragefilter.cc
+    signalfilter/parity.cc
+    signalfilter/splinefilter.cc
     spam/spam.cc
     talairach/cramer.cc
     talairach/talPoints.cc
@@ -444,6 +614,7 @@ set( _sources
     transform/xcor1d.cc
     transform/least_square_estimation.cc
     transform/rigidestimation.cc
+    utility/dynamic.cc
 )
 
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
@@ -452,7 +623,7 @@ set(AIMSALGO_HEADERS ${_headers} PARENT_SCOPE)
 add_library( aimsalgo SHARED ${_sources} )
 add_dependencies( aimsalgo ${headersTarget} )
 set_property( TARGET aimsalgo PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-target_link_libraries( aimsalgo aimsalgopub )
+target_link_libraries( aimsalgo aimsdata )
 BRAINVISA_INSTALL( TARGETS aimsalgo
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )

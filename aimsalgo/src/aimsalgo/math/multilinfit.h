@@ -32,20 +32,32 @@
  */
 
 
-#ifndef AIMS_AIMSALGOPUB_CONFIG_H
-#define AIMS_AIMSALGOPUB_CONFIG_H
+#ifndef AIMS_MATH_MULTILINFIT_H
+#define AIMS_MATH_MULTILINFIT_H
 
-#include <cartobase/config/cartobase_config.h>
+#include <aims/config/aimsalgo_config.h>
 
-#if defined( _WIN32 ) && !defined( __GNUC__ )
-#ifdef AIMSALGOPUB_EXPORTS
-#define AIMSALGOPUB_API __declspec(dllexport)
-#else
-#define AIMSALGOPUB_API __declspec(dllimport)
+template <class T> class AimsData;
+
+
+/**@name Multilinear least square data fit
+    The model of the fit is : \\
+    \\yi = a0 + [b0 b1 ...... bM-1].[xi(0) xi(1) ...... xi(M-1)]\\
+    \\Given an X matrix containing x vector samples on lines, and given
+    the Y vector containing the result of the model for each sample, the
+    function returns the vector of coefficients [b0 b1 ....... bM-1].
+*/
+//@{
+///
+AimsData<float> AimsMultilinearLeastSquareFit(const AimsData<float> &X,
+                                              const AimsData<float> &Y);
+//@}
+
+
 #endif
-#else	// _WIN32
-#define AIMSALGOPUB_API
-#endif	// _WIN32
 
-#endif
+
+
+
+
 

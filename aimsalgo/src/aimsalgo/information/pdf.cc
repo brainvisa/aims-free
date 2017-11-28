@@ -591,7 +591,6 @@ void AimsJointPVPdf( const AimsData<short>& data1,
     }
 }
 
-AIMSALGOPUB_API 
 void AimsJointPVPdf( const aims::BucketMap<short>&               data1,
 		     const AimsData<short>&                      data2,
 		     const vector< PVVectorItem  >& comb,
@@ -740,7 +739,6 @@ void AimsJointPVPdf( const aims::BucketMap<short>&               data1,
     }
 }
 
-AIMSALGOPUB_API
 void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
 			AimsData<float> &pdf, unsigned int k)
 {
@@ -782,7 +780,6 @@ void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
 		pdf(x, y, z) /= sum;
 }
 
-AIMSALGOPUB_API
 void	AimsKnnPdf(aims::knn::Database &db,
 			AimsData<float> &pdf, unsigned int k)
 {

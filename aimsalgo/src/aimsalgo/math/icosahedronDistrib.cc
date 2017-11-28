@@ -98,7 +98,7 @@ static void subdivide(Point3df* v1,
 }
 
 
-AIMSALGOPUB_API vector<Point3df*> 
+vector<Point3df*>
 AimsIcosahedronDiscreteSphericDistribution(int minpoint)
 { MapOfPoint mp;
 

@@ -32,42 +32,10 @@
  */
 
 
-#ifndef AIMS_OPTIMIZATION_LEVMRQ_H
-#define AIMS_OPTIMIZATION_LEVMRQ_H
+#ifndef AIMS_AIMSALGOPUB_CONFIG_H
+#define AIMS_AIMSALGOPUB_CONFIG_H
 
-#include <aims/config/aimsalgopub_config.h>
-#include <aims/def/general.h>
-#include <aims/math/gaussj.h>
-#include <aims/optimization/lmfunc.h>
-#include <aims/optimization/covsrt.h>
-
-template <class T> class AimsData;
-
-
-template < class T >
-class AIMSALGOPUB_API LevenbergMarquardt
-{
-public:
-
-  LevenbergMarquardt( LMFunction< T > *lmf )  { lmFonc = lmf; }
-  virtual ~LevenbergMarquardt() { }
-
-  LMFunction< T > *doit( AimsData< T >&, AimsData< T >&, 
-			 AimsData< T > *sig=NULL, AimsData< int > *ia=NULL,
-			 AimsData< T > *covar=NULL );
-
-private:
-
-  GaussJordan< T > gaussj;
-  CovarianceStorage< T > covsrt;
-
-  LMFunction< T > *lmFonc;
-
-  bool mrqmin( AimsData< T >&, AimsData< T >&, AimsData< T >&, 
-	       AimsData< int >&, T *, T *, AimsData< T >&, AimsData< T >& );
-
-  void mrqcof( AimsData< T >&, AimsData< T >&, AimsData< T >&, 
-	       AimsData< int >&, T *, AimsData< T >&, AimsData< T >& );
-};
+#include <cartobase/config/cartobase_config.h>
 
 #endif
+
