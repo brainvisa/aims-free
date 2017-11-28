@@ -1,7 +1,0 @@
-28/07/02 Denis
-
-* Completer les DataExchanger pour qu'ils puissent avoir un attribut syntaxique
-* Completer les tests de conformance a la syntaxe dans les IO des DataExchanger
-* IO graph-like pour les DataExchanger
-* Remplacer AttributedObject par DataExchanger dans les graphes et les arbres
-* IO XML pour les DataExchanger
