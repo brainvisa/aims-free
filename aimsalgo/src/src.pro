@@ -2,8 +2,7 @@ TEMPLATE=       subdirs
 
 #!include ../config
 
-SUBDIRS = public        \
-          aimsalgo
+SUBDIRS = aimsalgo
 
 PSUBDIRS = \
 #    Aims3DAnalysis \

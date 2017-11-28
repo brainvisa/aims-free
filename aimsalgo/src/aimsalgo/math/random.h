@@ -36,7 +36,7 @@
 #define AIMS_MATH_RANDOM_H
 
 #include <cstdlib>
-#include <aims/config/aimsalgopub_config.h>
+#include <aims/config/aimsalgo_config.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
@@ -45,9 +45,9 @@
 /**@name Basic random generators*/ 
 //@{
 /// Uniform distribution between 0.0 and 1.0
-AIMSALGOPUB_API double UniformRandom();
+double UniformRandom();
 /// Normal gaussian distribution with mean = 0.0 and sigma = 1.0
-AIMSALGOPUB_API double NormalRandom();
+double NormalRandom();
 //@}
 
 /**@name Uniform random generator*/
@@ -56,11 +56,9 @@ AIMSALGOPUB_API double NormalRandom();
 template <class T>
 T UniformRandom(const T &min,const T &max);
 ///
-AIMSALGOPUB_API 
 std::complex<float>  UniformRandom(const std::complex<float>  &min,
 				   const std::complex<float>  &max);
 ///
-AIMSALGOPUB_API 
 std::complex<double> UniformRandom(const std::complex<double> &min,
 				   const std::complex<double> &max);
 //@}
@@ -72,11 +70,9 @@ std::complex<double> UniformRandom(const std::complex<double> &min,
 template <class T>
 T GaussianRandom(const T &mean,const T &sigma);
 ///
-AIMSALGOPUB_API 
 std::complex<float>  GaussianRandom(const std::complex<float>  &mean,
 				    const std::complex<float>  &sigma);
 ///
-AIMSALGOPUB_API 
 std::complex<double> GaussianRandom(const std::complex<double> &mean,
 				    const std::complex<double> &sigma);
 //@}
@@ -87,7 +83,7 @@ template <class T> class AimsData;
 /**@name Random functions*/
 //@{
 /// generate a random list of int between 0 and (size-1)
-AIMSALGOPUB_API AimsData<int> AimsRandomList( int size );
+AimsData<int> AimsRandomList( int size );
 //@}
 
 template <class T> inline

@@ -35,62 +35,53 @@
 #ifndef AIMS_INFORMATION_PDF_H
 #define AIMS_INFORMATION_PDF_H
 
-#include <aims/config/aimsalgopub_config.h>
+#include <aims/config/aimsalgo_config.h>
 #include <aims/resampling/sampler.h>
 #include <aims/math/knn.h>
 
 template <class T> class AimsData;
 
 
-AIMSALGOPUB_API 
 void AimsParzenJointPdf( const AimsData<short>& data1,
                          const AimsData<short>& data2,
                          AimsData<float>& p12, 
                          AimsData<float>& p1, AimsData<float>& p2 );
 
-AIMSALGOPUB_API 
 void AimsParzenPdf( const AimsData<short>& data,
                     AimsData<float>& p );
 
 
 
-AIMSALGOPUB_API 
 void AimsWinParzenJointPdf( const AimsData<short>& data1,
                             const AimsData<short>& data2,
                             AimsData<float>& p12, 
                             AimsData<float>& p1, AimsData<float>& p2,
                             const AimsData<float>& mask );
 
-AIMSALGOPUB_API 
 void AimsWinParzenPdf( const AimsData<short>& data,
                        AimsData<float>& p, const AimsData<float>& mask );
 
 
 
-AIMSALGOPUB_API 
 void AimsJointPdf( const AimsData<short>& data1,
                    const AimsData<short>& data2,
                    AimsData<float>& p12, 
                    AimsData<float>& p1, AimsData<float>& p2 );
 
-AIMSALGOPUB_API 
 void AimsPdf( const AimsData<short>& data, AimsData<float>& p );
 
 
-AIMSALGOPUB_API 
 void AimsJointMaskPdf( const AimsData<short>& data1,
 		       const AimsData<short>& data2,
 		       AimsData<float>& p12, 
 		       AimsData<float>& p1, AimsData<float>& p );
 
-AIMSALGOPUB_API 
 void AimsJointPVPdf( const AimsData<short>& data1,
 		     const AimsData<short>& data2,
 		     const AimsData<PVItem>& comb,
 		     AimsData<float>& p12, 
 		     AimsData<float>& p1, AimsData<float>& p2 );
 
-AIMSALGOPUB_API 
 void AimsJointPVPdf( const aims::BucketMap<short>&         data1, 
 		     const AimsData<short>&                data2,
 		     const std::vector< PVVectorItem >& comb,
@@ -103,7 +94,6 @@ void AimsJointPVPdf( const aims::BucketMap<short>&         data1,
     k : distance to the kth nearest neighbours is used to set parzen
         window width
  */
-AIMSALGOPUB_API
 void	AimsKnnPdf(aims::knn::Database &db,
 			AimsData<float> &pdf, unsigned int k);
 
@@ -113,7 +103,6 @@ void	AimsKnnPdf(aims::knn::Database &db,
     k : distance to the kth nearest neighbours is used to set parzen
         window width
  */
-AIMSALGOPUB_API
 void	AimsGeneralizedKnnParzenPdf(aims::knn::Database &db,
 			AimsData<float> &pdf, unsigned int k);
 

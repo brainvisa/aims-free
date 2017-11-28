@@ -39,7 +39,7 @@
 using namespace std;
 
 // generate uniform random number between 0.0 and 1.0
-AIMSALGOPUB_API double UniformRandom()
+double UniformRandom()
 {
   static int *_idum = NULL;
   int    k;
@@ -62,7 +62,7 @@ AIMSALGOPUB_API double UniformRandom()
 }
 
 // generate normal gaussian random number with mean=0.0,sigma=1.0
-AIMSALGOPUB_API double NormalRandom()
+double NormalRandom()
 { static int   iset=0;
   static float gset;
   float  fac,rsq,v1,v2;
@@ -85,14 +85,14 @@ AIMSALGOPUB_API double NormalRandom()
   }
 }
 
-AIMSALGOPUB_API complex<float> 
+complex<float>
 UniformRandom(const complex<float> &min,const complex<float> &max)
 { return(complex<float>(UniformRandom(real(min),real(max)),
                         UniformRandom(imag(min),imag(max))));
 }
 
 
-AIMSALGOPUB_API complex<double> 
+complex<double>
 UniformRandom(const complex<double> &min,const complex<double> &max)
 { return(complex<double>(UniformRandom(real(min),real(max)),
                          UniformRandom(imag(min),imag(max))));
@@ -100,13 +100,13 @@ UniformRandom(const complex<double> &min,const complex<double> &max)
 
 
 
-AIMSALGOPUB_API complex<float> 
+complex<float>
 GaussianRandom(const complex<float> &mean,const complex<float> &sigma)
 { return(complex<float>(GaussianRandom(real(mean),real(sigma)),
                         GaussianRandom(imag(mean),imag(sigma))));
 }
 
-AIMSALGOPUB_API complex<double> 
+complex<double>
 GaussianRandom(const complex<double> &mean,const complex<double> &sigma)
 { return(complex<double>(GaussianRandom(real(mean),real(sigma)),
                          GaussianRandom(imag(mean),imag(sigma))));

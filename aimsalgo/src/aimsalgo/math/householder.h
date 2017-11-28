@@ -32,33 +32,38 @@
  */
 
 
-#ifndef AIMS_MATH_MULTILINFIT_H
-#define AIMS_MATH_MULTILINFIT_H
+#ifndef AIMS_MATH_HOUSEHOLDER_H
+#define AIMS_MATH_HOUSEHOLDER_H
 
-#include <aims/config/aimsalgopub_config.h>
+#include <aims/config/aimsalgo_config.h>
+#include <aims/def/general.h>
 
 template <class T> class AimsData;
 
 
-/**@name Multilinear least square data fit
-    The model of the fit is : \\
-    \\yi = a0 + [b0 b1 ...... bM-1].[xi(0) xi(1) ...... xi(M-1)]\\
-    \\Given an X matrix containing x vector samples on lines, and given
-    the Y vector containing the result of the model for each sample, the
-    function returns the vector of coefficients [b0 b1 ....... bM-1].
-*/
-//@{
-///
-AIMSALGOPUB_API 
-AimsData<float> AimsMultilinearLeastSquareFit(const AimsData<float> &X,
-                                              const AimsData<float> &Y);
-//@}
+/** @name Householder tridiagonalization */
+template < class T >
+class HouseholderTridiag
+{
+public:
 
+  /** Constructor and destructor */
+  //@{
+  /// constructor
+  HouseholderTridiag() { }
+  /// destructor
+  virtual ~HouseholderTridiag() { }
+  //@}
+
+  /** Real symmetric matrix Householder tridiagonalization. \\
+      This function is adapted from the Numerical Recipes in C. \\
+      The first parameter is the input real symmetric matrix. On output,
+      it is replaced by the orthogonal matrix effecting the transformation. \\
+      The second parameter is output as a vector of the diagonal elements
+      of the tridiagonal matrix. \\
+      The last parameter is output as a vector of the off-diagonal elements.
+  */
+  void doit( AimsData< T >&, AimsData< T >&, AimsData< T >& );
+};
 
 #endif
-
-
-
-
-
-

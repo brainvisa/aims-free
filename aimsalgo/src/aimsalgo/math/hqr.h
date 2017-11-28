@@ -32,38 +32,44 @@
  */
 
 
-#ifndef AIMS_MATH_HOUSEHOLDER_H
-#define AIMS_MATH_HOUSEHOLDER_H
+#ifndef AIMS_MATH_HQR_H
+#define AIMS_MATH_HQR_H
 
-#include <aims/config/aimsalgopub_config.h>
+#include <aims/config/aimsalgo_config.h>
 #include <aims/def/general.h>
 
 template <class T> class AimsData;
 
 
-/** @name Householder tridiagonalization */
+/** @name QR transformation for real Hessenberg matrices */
 template < class T >
-class AIMSALGOPUB_API HouseholderTridiag
+class HessenbergQR
 {
 public:
 
   /** Constructor and destructor */
   //@{
   /// constructor
-  HouseholderTridiag() { }
+  HessenbergQR() { }
   /// destructor
-  virtual ~HouseholderTridiag() { }
+  virtual ~HessenbergQR() { }
   //@}
 
-  /** Real symmetric matrix Householder tridiagonalization. \\
-      This function is adapted from the Numerical Recipes in C. \\
-      The first parameter is the input real symmetric matrix. On output,
-      it is replaced by the orthogonal matrix effecting the transformation. \\
-      The second parameter is output as a vector of the diagonal elements
-      of the tridiagonal matrix. \\
-      The last parameter is output as a vector of the off-diagonal elements.
-  */
-  void doit( AimsData< T >&, AimsData< T >&, AimsData< T >& );
+  /** Hessenberg matrices' QR transformation. \\
+      This function is adapted from the Eispack routine 'hqr2.f'. \\
+      This routine returns the real parts of the eigenvalues of a real upper 
+      Hessenberg matrix passed on input by the QR method. \\
+      The second parameter is output as the imaginary parts of the 
+      eigenvalues. \\
+      @param zz contains (on output) the real and imaginary parts of the
+      eigenvectors. If the i-th eigenvalue is real, the i-th column of zz
+      contains its eigenvector. If the i-th eigenvalue is complex with
+      positive imaginary part, the i-th and (i+1)-th columns of zz contain
+      the real and imaginary parts of its eigenvector, and an other 
+      eigenvector is formed by its complex conjugate.
+   */
+  AimsData< T > doit( AimsData< T >&, AimsData< T >& , 
+		      AimsData< T > *zz = NULL );
 };
 
 #endif
