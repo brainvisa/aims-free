@@ -80,8 +80,14 @@ namespace
   {
     /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
     private_jpeg_error_mgr *myerr = (private_jpeg_error_mgr *) cinfo->err;
+    // close the file
+    if( myerr->fp ) {
+      fclose( myerr->fp );
+      myerr->fp = 0;
+    }
     
-    throw runtime_error( "JPEG error" );
+    /* Return control to the setjmp point */
+    longjmp(myerr->setjmp_buffer, 1);
   }
 
 }
@@ -100,7 +106,15 @@ void JpegHeader::read()
   cinfo.err = jpeg_std_error( &jerr.pub );
   jerr.pub.error_exit = private_jpeg_error_exit;
   jerr.fp = 0;
-
+  /* Establish the setjmp return context for my_error_exit to use. */
+  if (setjmp(jerr.setjmp_buffer))
+  {
+    /* If we get here, the JPEG code has signaled an error.
+      * We need to clean up the JPEG object, close the input file, and return.
+      */
+    jpeg_destroy_decompress(&cinfo);
+    throw carto::file_error( fileName );
+  }
   jpeg_create_decompress( &cinfo );
 
   fp = fopen( fileName.c_str(), "rb" );
@@ -110,17 +124,17 @@ void JpegHeader::read()
     jpeg_destroy_decompress( &cinfo );
     throw carto::file_error( fileName );
   }
-  try {
-    jpeg_stdio_src( &cinfo, fp );
-    jpeg_read_header( &cinfo, true );
-  }
-  catch(...) {
-    fclose( fp );
-    jerr.fp = 0;
+
+  jpeg_stdio_src( &cinfo, fp );
+  if( jpeg_read_header( &cinfo, true ) != 1 )
+  {
+    if (fp) {
+        fclose( fp );
+        fp = 0;
+    }
     jpeg_destroy_decompress( &cinfo );
-    throw carto::file_error( fileName );    
+    throw carto::file_error( fileName );
   }
-  
   fclose( fp );
   jerr.fp = 0;
   jpeg_destroy_decompress( &cinfo );
