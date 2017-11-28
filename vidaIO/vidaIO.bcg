@@ -1,8 +1,0 @@
-#-----------------------------------------------------------------------------
-class VidaIOComponent( GenericMakerComponent ):
-  _name = 'vidaIO'
-
-  def __init__( self, options ):
-    GenericMakerComponent.__init__( self, options )
-    if systemname == 'windows' and int( self._data.get( 'enabled', 0 ) ):
-      self._data[ 'enabled' ] = '0'

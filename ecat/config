@@ -1,5 +1,0 @@
-
-darwin:DEFINES	= unix
-
-#!include config-local
-
