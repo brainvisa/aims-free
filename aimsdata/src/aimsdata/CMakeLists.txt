@@ -233,10 +233,20 @@ set( _headers
     vector/vector.h
 )
 
-set( _sources
+# It is necessary to split aims libraries to reduce
+# sizes, especially for Windows OS. Symbols seems
+# to be undefined when library exceed size limit
+# (size limit is probably 64MB, but it is not )
+set( _aimsdata_0_sources
+    vector/vector2d.cc
+    vector/vector3d.cc
+    vector/vector4d.cc
+)
+
+set(_aimsdata_sources
+    border/border.cc
     bucket/bucketMap.cc
     bucket/bucketgen.cc
-    border/border.cc
     color/colormap.cc
     connectivity/component.cc
     connectivity/connectivity.cc
@@ -397,9 +407,6 @@ set( _sources
     utility/clock.cc
     utility/masscenter.cc
     utility/progress.cc
-    vector/vector2d.cc
-    vector/vector3d.cc
-    vector/vector4d.cc
 )
 
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
@@ -415,15 +422,26 @@ if( NOT LIBKDTREE_FOUND )
   BRAINVISA_COPY_AND_INSTALL_HEADERS( _kdtreeHeaders "" _kdtreeHeadersTarget )
 endif()
 set(AIMSDATA_HEADERS ${_headers} PARENT_SCOPE)
-add_library( aimsdata SHARED ${_sources} )
+
+add_library( aimsdata_0 SHARED ${_aimsdata_0_sources} )
+add_dependencies( aimsdata_0 ${headersTarget} )
+set_property( TARGET aimsdata_0 PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
+
+add_library( aimsdata SHARED ${_aimsdata_sources} )
 add_dependencies( aimsdata ${headersTarget} )
+set_property( TARGET aimsdata PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
+
 if( NOT LIBKDTREE_FOUND )
+  add_dependencies( aimsdata_0 ${_kdtreeHeadersTarget} )
   add_dependencies( aimsdata ${_kdtreeHeadersTarget} )
 endif()
-set_property( TARGET aimsdata PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
-target_link_libraries( aimsdata graph cartodata )
+
+target_link_libraries( aimsdata_0 graph cartodata )
+target_link_libraries( aimsdata aimsdata_0 )
+
 if( WIN32 AND CMAKE_CROSSCOMPILING )
-  target_link_libraries( aimsdata gnurx )
+  target_link_libraries( aimsdata_0 gnurx )
+  target_link_libraries( aimsdata )
 endif( WIN32 AND CMAKE_CROSSCOMPILING )
 BRAINVISA_INSTALL( TARGETS aimsdata
               DESTINATION lib
