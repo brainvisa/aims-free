@@ -443,6 +443,6 @@ if( WIN32 AND CMAKE_CROSSCOMPILING )
   target_link_libraries( aimsdata_0 gnurx )
   target_link_libraries( aimsdata )
 endif( WIN32 AND CMAKE_CROSSCOMPILING )
-BRAINVISA_INSTALL( TARGETS aimsdata
+BRAINVISA_INSTALL( TARGETS aimsdata aimsdata_0
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )
