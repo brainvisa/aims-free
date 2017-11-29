@@ -47,8 +47,8 @@ int main(int argc, char** argv)
         vector<float> scratchRow(dims[0]);//read/write a row at a time
         for (MultiDimIterator<int64_t> iter = inputFile.getIteratorOverRows(); !iter.atEnd(); ++iter)
         {//helper class to iterate over 2D and 3D cifti with the same code - the "+ 1" is to drop the first dimension (row length)
-            inputFile.getRow(scratchRow.data(), *iter);
-            outputFile.setRow(scratchRow.data(), *iter);
+            inputFile.getRow(&scratchRow[0], *iter);
+            outputFile.setRow(&scratchRow[0], *iter);
         }
         outputFile.writeFile(argv[2]);//because we called setWritingFile with this filename (and default cifti version), this will return immediately
         //NOTE: if you call writeFile with a different writing version (takes its default from CiftiVersion constructor) than setWritingFile, it will rewrite the entire file after reading it into memory
