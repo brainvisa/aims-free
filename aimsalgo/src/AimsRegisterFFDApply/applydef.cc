@@ -766,6 +766,7 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //==========================================================================
 
   Writer<Graph> w3(ffdproc.output);
+  in->setProperty("filename_base", "*" );
   bool res = w3.write(*in);
 
   return res;
