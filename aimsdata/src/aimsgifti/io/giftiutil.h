@@ -90,10 +90,45 @@ namespace aims
   };
 
 
+  template <typename U>
+  class _convertedNiftiArrayValue // functor to allow partial specialization
+  {
+  public:
+    inline U operator () ( void* data, int index, int dtype, size_t )
+    {
+      return _convertedNiftiValue<U>()( data, index, dtype );
+    }
+  };
+
+
+  template <typename U, int D>
+  class _convertedNiftiArrayValue<AimsVector<U,D> >
+  {
+  public:
+    inline AimsVector<U,D> operator () ( void* data, int index, int dtype,
+                                         size_t size
+    )
+    {
+      AimsVector<U,D> v;
+      int i;
+      for( i=0; i<D; ++i )
+        v[i] = _convertedNiftiValue<U>()( data, index + size * i, dtype );
+      return v;
+    }
+  };
+
+
   template <typename U> inline
   U convertedNiftiValue( void* data, int index, int dtype )
   {
     return _convertedNiftiValue<U>()( data, index, dtype );
+  }
+
+
+  template <typename U> inline
+  U convertedNiftiArrayValue( void* data, int index, int dtype, size_t size )
+  {
+    return _convertedNiftiArrayValue<U>()( data, index, dtype, size );
   }
 
 

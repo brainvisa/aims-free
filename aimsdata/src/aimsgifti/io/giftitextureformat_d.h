@@ -85,7 +85,7 @@ namespace aims
 
         default:
           {
-        	//std::cout << "type : " << gifti_intent_to_string(da->intent) << "\n";
+            // std::cout << "type : " << gifti_intent_to_string(da->intent) << "\n";
 
             int vnum = da->dims[0];
             int j;
@@ -94,8 +94,9 @@ namespace aims
             tex.reserve( vnum );
             for( j=0; j<vnum; ++j )
             {
-              tex.push_back( convertedNiftiValue<T>( da->data, j,
-                                                     da->datatype ) );
+              tex.push_back( convertedNiftiArrayValue<T>( da->data, j,
+                                                          da->datatype,
+                                                          vnum ) );
             }
             ++ttex;
           }
@@ -138,12 +139,9 @@ namespace aims
       }
       catch( ... )
       {
-        // std::cout << "error GIFTI_dataarrays_info\n";
       }
 
       hdr.setOptions(options());
-
-      //std::cout << "add texture\n";
 
       hdr.giftiAddTexture( gim, thing);
       // add external textures
@@ -177,6 +175,7 @@ namespace aims
         hdr.removeProperty( "file_type" );
       if( hdr.hasProperty( "GIFTI_labels_table") )
         hdr.removeProperty( "GIFTI_labels_table" );
+      hdr.setProperty( "object_type", "Texture" );
       hdr.writeMinf( fname + ".minf" );
 
       // std::cout << "OK\n";
