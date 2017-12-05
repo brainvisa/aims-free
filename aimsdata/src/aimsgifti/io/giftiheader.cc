@@ -498,11 +498,14 @@ namespace
                       size_t npadding, size_t nt )
     {
       da->dims[1] = D;
+      da->num_dim = 2;
       da->nbyper = sizeof( T );
       da->datatype = niftiIntDataType( carto::DataTypeCode<T>::name() );
       da->nvals = npadding * D * nt;
       int nda = gim->numDA - 1;
-      gifti_alloc_DA_data( gim, &nda, 1 );
+      int res = gifti_alloc_DA_data( gim, &nda, 1 );
+      if( res < 0 )
+        throw runtime_error( "could not allocate Gifti DA buffer" );
     }
   };
 
@@ -577,6 +580,7 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
       gifti_add_empty_darray( gim, 1 );
       da = gim->darray[nda];
       gifti_set_DA_defaults( da );
+      da->intent = NIFTI_INTENT_SHAPE; // if nothing otherwise specified
       if( tex.size() == 1 )
       {
         carto::Object da_info;
@@ -596,12 +600,10 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
             if( el->getProperty( "intent", intentit ) )
               da->intent = gifti_intent_from_string(intentit.c_str());
           }
-          else // nothing in header
-            da->intent = NIFTI_INTENT_SHAPE;
         }
         catch( ... )
         {
-          //std::cout << "error GIFTI_dataarrays_info\n";
+          // std::cout << "error GIFTI_dataarrays_info\n";
         }
       }
       else
@@ -650,7 +652,7 @@ void GiftiHeader::giftiAddTexture( gifti_image* gim,
       {
       }
 
-      string mname,mval;
+      string mname, mval;
       // metadata dataArray
       carto::Object dainf
         = GiftiHeader::giftiFindHdrDA( hdrtexda, da_info, "" );
