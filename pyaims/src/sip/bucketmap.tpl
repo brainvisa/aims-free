@@ -140,6 +140,14 @@ public:
 %End
 
     void clear();
+
+    int __contains__( const Point3d & ) const;
+%MethodCode
+    if( sipCpp->find( *a0 ) != sipCpp->end() )
+      sipRes = 1;
+    else
+      sipRes = 0;
+%End
   };
 
   unsigned size() const;
