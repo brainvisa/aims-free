@@ -132,6 +132,7 @@ void Finder::initPrivate()
       registerFormat( "MNI_OBJ", new FinderMniObjFormat, ext );
       ext.clear();
       ext.push_back( "obj" );
+      ext.push_back( "OBJ" );
       registerFormat( "WAVEFRONT", new FinderWavefrontFormat, ext );
       ext.clear();
       ext.push_back( "tex" );

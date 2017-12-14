@@ -318,18 +318,23 @@ namespace aims
   {
     thing[timestep].vertex() = vertices;
     std::vector<Point3df> o_normals;
-    o_normals.resize( normals_ind.size() );
-    // copy reordered normals
-    for( int i=0, k=normals_ind.size(); i<k; ++i )
+    if( normals_ind.size() != normals.size() )
+      o_normals = normals;
+    else
     {
-      if( normals_ind[i] < 0 || normals_ind[i] >= static_cast<int>(vertices.size()) )
+      o_normals.resize( normals_ind.size() );
+      // copy reordered normals
+      for( int i=0, k=normals_ind.size(); i<k; ++i )
       {
-        std::stringstream s;
-        s << "normal index out of range: " << normals_ind[i] << " / "
-          << vertices.size() << " at index " << i;
-        throw carto::parse_error( s.str() , "", _name, i );
+        if( normals_ind[i] < 0 || normals_ind[i] >= static_cast<int>(vertices.size()) )
+        {
+          std::stringstream s;
+          s << "normal index out of range: " << normals_ind[i] << " / "
+            << vertices.size() << " at index " << i;
+          throw carto::parse_error( s.str() , "", _name, i );
+        }
+        o_normals[i] = normals[normals_ind[i]];
       }
-      o_normals[i] = normals[normals_ind[i]];
     }
     thing[timestep].normal() = o_normals;
     thing[timestep].polygon() = polygons;
@@ -468,6 +473,7 @@ namespace aims
         std::string item;
         std::string::size_type pos, pos0;
         AimsVector<uint, D> poly;
+        int pol;
         int tex;
         int norm;
         for( int p=0; p<D; ++p )
@@ -475,8 +481,11 @@ namespace aims
           s >> item;
           pos0 = item.find( '/' );
           std::stringstream z( item.substr(0, pos0 ) );
-          z >> poly[p];
-          --poly[p]; // nums start at 1
+          z >> pol;
+          if( pol < 0 )
+            poly[p] = vertices.size() + pol;
+          else
+            poly[p] = pol - 1; // nums start at 1
           if( pos0 == std::string::npos )
             continue;
 
@@ -496,11 +505,10 @@ namespace aims
           if( pos == std::string::npos )
             continue;
           pos0 = pos + 1;
-          pos = item.find( '/', pos0 );
-          if( pos == std::string::npos )
-            continue;
-          std::stringstream n( item.substr(pos0, pos - pos0 ) );
+          std::stringstream n( item.substr( pos0, item.length() - pos0 ) );
           n >> norm;
+          if( norm < 0 )
+            norm = vertices.size() + norm + 1;
           if( normals_ind.size() <= poly[p] )
             normals_ind.resize( poly[p] + 1 );
           normals_ind[ poly[p] ] = norm - 1; // (starts at 1)
@@ -512,6 +520,11 @@ namespace aims
         std::cerr << "unrecognized element: " << l << std::endl;
       }
     }
+
+    /*
+    std::cout << "wavefront vertices: " << vertices.size() << ", normals: " << normals.size() << ", polygons: " << polygons.size() << ", normals_ind: " << normals_ind.size() << std::endl;
+    std::cout << "timestep: " << timestep << std::endl;
+    */
 
     storeMesh( thing, vertices, normals, polygons, texture, normals_ind,
                texture_ind, timestep );

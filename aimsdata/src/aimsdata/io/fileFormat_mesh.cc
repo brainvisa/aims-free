@@ -78,6 +78,7 @@ FileFormatDictionary<AimsSurfaceTriangle>::registerBaseFormats()
   ext.clear();
 
   ext.push_back( "obj" );
+  ext.push_back( "OBJ" );
   WavefrontMeshFormat<3, Void> *wo = new WavefrontMeshFormat<3, Void>;
   registerFormat( "WAVEFRONT", wo, ext );
   ext.clear();
