@@ -174,7 +174,11 @@ namespace aims
 
       if( element == "newmtl" )
       {
-        s >> objname;
+        objname = l.substr( s.tellg(), l.length() - s.tellg() );
+        size_t i = 0;
+        while( !objname.empty() && objname[i] == ' ' )
+          ++i;
+        objname = objname.substr( i, objname.length() - i );
         ++timestep;
         current_obj = carto::Object::value( carto::Dictionary() );
         mtl_dict->setProperty( objname, current_obj );
@@ -435,7 +439,11 @@ namespace aims
       else if( element == "mtllib" )
       {
         std::string mtl_filename;
-        s >> mtl_filename;
+        mtl_filename = l.substr( s.tellg(), l.length() - s.tellg() );
+        size_t i = 0;
+        while( !mtl_filename.empty() && mtl_filename[i] == ' ' )
+          ++i;
+        mtl_filename = mtl_filename.substr( i, mtl_filename.length() - i );
         mtl_filename = carto::FileUtil::dirname( filename )
           + carto::FileUtil::separator() + mtl_filename;
         mtl_dict = readMtlFle( mtl_filename );
@@ -443,7 +451,11 @@ namespace aims
       else if( element == "usemtl" )
       {
         std::string mtl_objname;
-        s >> mtl_objname;
+        mtl_objname = l.substr( s.tellg(), l.length() - s.tellg() );
+        size_t i = 0;
+        while( !mtl_objname.empty() && mtl_objname[i] == ' ' )
+          ++i;
+        mtl_objname = mtl_objname.substr( i, mtl_objname.length() - i );
         setMtl( mtl_dict, mtl_objname, hdr );
       }
       else if( element == "v" )
