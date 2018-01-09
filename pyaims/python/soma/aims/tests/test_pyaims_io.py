@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import glob
+import cmath
 import tempfile
 import os
 import sys
@@ -16,6 +17,8 @@ from soma.aims.volumetools import compare_images
 
 if sys.version_info[0] >= 3:
     xrange = range
+
+FLOAT_DATA_TYPES = ("FLOAT", "CFLOAT", "DOUBLE", "CDOUBLE")
 
 class TestPyaimsIO(unittest.TestCase):
 
@@ -374,6 +377,22 @@ class TestPyaimsIO(unittest.TestCase):
 
                 volumes_info = [{ 'dims': [1,1,1], 'value': 0 },
                                 { 'dims': [10,10,10], 'value': 1 }]
+                if data_type in FLOAT_DATA_TYPES:
+                    # Test non-normal forms of IEEE 754 floats. Some libs
+                    # (including unpatched niftilib) tend to silently discard
+                    # such values upon reading, but only higher-level
+                    # algorithmic code can decide how to handle them properly,
+                    # so the reader should let them pass through.
+                    # NOTE: a test for -0.0 is missing.
+                    volumes_info += [{ 'dims': [1,1,1], 'value': float("NaN") },
+                                     { 'dims': [1,1,1], 'value': float("Inf") }]
+                    # Test denormalized floats
+                    if data_type.endswith("FLOAT"):
+                        volumes_info.append({ 'dims': [1,1,1],
+                                              'value': 1.40129846e-45 })
+                    if data_type.endswith("DOUBLE"):
+                        volumes_info.append({ 'dims': [1,1,1],
+                                              'value': 4.9406564584124654e-324 })
                 volumes = []   
                 for vinfo in volumes_info:
                     # Get a default value
@@ -427,7 +446,12 @@ class TestPyaimsIO(unittest.TestCase):
                                 print('reading', 'Volume_' + data_type, 'in', f,
                                       'from file ', fl )
 
-                            self.assertTrue( volumes[i] == aims.read(fl) )
+                            volume_read_back = aims.read(fl)
+                            if (data_type in FLOAT_DATA_TYPES
+                                and cmath.isnan(volumes[i].at(0))):
+                                self.assertTrue( cmath.isnan(volume_read_back.at(0)) )
+                            else:
+                                self.assertTrue( (volumes[i] == volume_read_back).all() )
 
         # TODO: Add tests for aims format and read-only formats
         #print('- read format')

@@ -680,7 +680,11 @@ template <class T,int D>
 inline
 AimsVector<T,D>& AimsVector<T,D>::normalize()
 {
-  return operator /=( norm() );
+  float n = norm();
+  if( n != 0.f )
+    return operator /= ( n );
+  else
+    return *this;
 }
 
 
