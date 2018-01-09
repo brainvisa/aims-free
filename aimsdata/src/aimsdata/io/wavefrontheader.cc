@@ -211,7 +211,7 @@ void WavefrontHeader::readMesh( bool stopWhenIdentified, int poly_size,
       s >> tex;
       texture.push_back(tex);
     }
-    else if( element == "f" )
+    else if( element == "f" || element == "l" )
     {
       // face
       std::string item;
