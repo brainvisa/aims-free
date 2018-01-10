@@ -19,11 +19,15 @@ if sys.version_info[0] >= 3:
     xrange = range
 
 FLOAT_DATA_TYPES = ("FLOAT", "CFLOAT", "DOUBLE", "CDOUBLE")
+NO_NAN_FORMATS = ("DICOM", )
 
 class TestPyaimsIO(unittest.TestCase):
 
     verbose = False
     debug = False
+    default_epsilon = 1e-6
+    # ecat scaling is far from exact...
+    epsilon = {'.v': {'S16': 1e-6, 'FLOAT': (6e-5, True)}}
 
 
     def setUp(self):
@@ -98,12 +102,19 @@ class TestPyaimsIO(unittest.TestCase):
         return fname
 
 
+    def get_format_cmp_epsilon(self, format, dtype):
+        thresh = self.epsilon.get(format, self.default_epsilon)
+        rel_thresh = False
+        if isinstance(thresh, dict):
+            thresh = thresh.get(dtype, self.default_epsilon)
+        if isinstance(thresh, tuple):
+            thresh, rel_thresh = thresh
+        return thresh, rel_thresh
+
+
     def use_format(self, vol, format, view, options={}):
         partial_read = ['.nii', '.nii.gz', '.ima'] #, '.dcm']
         partial_write = ['.nii', '.ima']
-        default_epsilon = 1e-6
-        # ecat scaling is far from exact...
-        epsilon = {'.v': {'S16': 1e-6, 'FLOAT': (6e-5, True)}}
         dtype = aims.typeCode(np.asarray(vol).dtype)
 
         ndim = len(vol.getSize())
@@ -128,14 +139,9 @@ class TestPyaimsIO(unittest.TestCase):
         fname = self.file_name(vol, dtype, format)
         vol2_name = os.path.basename(fname) + ' (re-read)'
         vol2 = aims.read(fname)
-        thresh = epsilon.get(format, default_epsilon)
-        rel_thresh = False
-        if isinstance(thresh, dict):
-            thresh = thresh.get(dtype, default_epsilon)
-        if isinstance(thresh, tuple):
-            thresh, rel_thresh = thresh
 
         # ensure we get the same
+        thresh, rel_thresh = self.get_format_cmp_epsilon(format, dtype)
         self.assertTrue(compare_images(vol, vol2, vol1_name, vol2_name, thresh,
                             rel_thresh))
         del vol2
@@ -419,6 +425,11 @@ class TestPyaimsIO(unittest.TestCase):
                                               'Volume_%s_%d_%s%s')
 
                         for i in xrange(len(volumes)):
+                            if data_type in FLOAT_DATA_TYPES \
+                                    and (cmath.isnan(volumes[i].at(0))
+                                         or cmath.isinf(volumes[i].at(0))) \
+                                    and f in NO_NAN_FORMATS:
+                                continue
                             fl = os.path.join(self.work_dir, 
                                             write_pattern % (
                                                 data_type, i, f, 
@@ -448,10 +459,25 @@ class TestPyaimsIO(unittest.TestCase):
 
                             volume_read_back = aims.read(fl)
                             if (data_type in FLOAT_DATA_TYPES
-                                and cmath.isnan(volumes[i].at(0))):
-                                self.assertTrue( cmath.isnan(volume_read_back.at(0)) )
+                                and (cmath.isnan(volumes[i].at(0))
+                                     or cmath.isinf(volumes[i].at(0)))):
+                                if cmath.isnan(volumes[i].at(0)):
+                                    self.assertTrue(
+                                        cmath.isnan(volume_read_back.at(0)) )
+                                else:
+                                    self.assertTrue(
+                                        cmath.isinf(volume_read_back.at(0)) )
                             else:
-                                self.assertTrue( (volumes[i] == volume_read_back).all() )
+                                #self.assertTrue( (volumes[i] == volume_read_back).all() )
+                                thresh, rel_thresh \
+                                      = self.get_format_cmp_epsilon(f,
+                                                                    data_type)
+                                self.assertTrue(
+                                    compare_images(
+                                        volumes[i], volume_read_back,
+                                        'Volume_' + data_type,
+                                        'Volume_' + data_type,
+                                        thresh, rel_thresh))
 
         # TODO: Add tests for aims format and read-only formats
         #print('- read format')

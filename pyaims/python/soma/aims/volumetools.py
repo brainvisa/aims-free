@@ -156,8 +156,8 @@ def crop_volume(vol, threshold=0, border=0):
 
     return cropped_vol
 
-def compare_images(vol, vol2, vol1_name, vol2_name, thresh=1e-6,
-                   rel_thresh = False):
+def compare_images(vol, vol2, vol1_name='input', vol2_name='output',
+                   thresh=1e-6, rel_thresh = False):
 #    print('comp vol, sizes:', vol.getSize(), vol2.getSize())
 #    print('    vsizes:', str(vol.getVoxelSize()), str(vol2.getVoxelSize()))
     msg = 'comparing %s and %s' % (vol1_name, vol2_name)
@@ -168,6 +168,32 @@ def compare_images(vol, vol2, vol1_name, vol2_name, thresh=1e-6,
                       - vol2.getVoxelSize())) >= 1e-6 :
         raise RuntimeError(msg + ': voxels size differ: %s != %s'
                             % (str(vol.getVoxelSize()), str(vol2.getVoxelSize())))
+
+    if len(np.asarray(vol).shape) == 0:
+        # not bound to numpy, elements are supposed to be arrays
+        # use suboptimal python loop
+        dim = list(vol.getSize())
+        pos = [0] * len(dim)
+        end = False
+        nd = len(dim)
+        while not end:
+            diff = max([np.abs(x - y) for x, y in zip(vol.at(pos), vol2.at(pos))])
+            if diff >= thresh:
+                print('values at', pos, ':', vol.at(pos), vol2.at(pos), voldiff.at(pos))
+                raise RuntimeError(
+                    msg + ', diff %f exceeds max allowed: %f at %s'
+                    % (diff, thresh, repr(pos)))
+            pos[0] += 1
+            d = 0
+            while pos[d] == dim[d]:
+                pos[d] = 0
+                d += 1
+                if d == nd:
+                    end = True
+                    break
+                pos[d] += 1
+        return True
+
     if rel_thresh:
         val_range = float(np.max(np.asarray(vol))) \
             - np.min(np.asarray(vol))
