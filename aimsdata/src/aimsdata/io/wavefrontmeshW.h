@@ -514,7 +514,10 @@ namespace aims
       for( typename std::vector<AimsVector<uint,D> >::const_iterator ip =
              poly.begin(); ip != poly.end(); ++ip )
       {
-        os << "f";
+        if( D == 2 )
+          os << "l";
+        else
+          os << "f";
         for( int p=0; p<D; ++p )
           // WARNING obj indices start at 1 (like matlab...)
           os << " " << (*ip)[p] + 1 << "/" << (*ip)[p] + 1 << "/"
@@ -573,7 +576,10 @@ namespace aims
       for( typename std::vector<AimsVector<uint,D> >::const_iterator ip =
              poly.begin(); ip != poly.end(); ++ip )
       {
-        os << "f";
+        if( D == 2 )
+          os << "l";
+        else
+          os << "f";
         for( int p=0; p<D; ++p )
           // WARNING obj indices start at 1 (like matlab...)
           os << " " << (*ip)[p] + 1 << "//" << (*ip)[p] + 1;

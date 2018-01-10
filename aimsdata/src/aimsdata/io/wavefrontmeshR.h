@@ -479,7 +479,7 @@ namespace aims
         _readTexture<T>::r( s, tex );
         texture.push_back(tex);
       }
-      else if( element == "f" )
+      else if( element == "f" || (D == 2 && element == "l" ) ) // l for line (D=2)
       {
         // face
         std::string item;
@@ -529,7 +529,7 @@ namespace aims
       }
       else
       {
-        std::cerr << "unrecognized element: " << l << std::endl;
+        std::cerr << "unrecognized element: " << element << ", " << D << ", " << l << std::endl;
       }
     }
 
