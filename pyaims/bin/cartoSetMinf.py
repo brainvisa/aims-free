@@ -31,8 +31,7 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
-
-from __future__ import print_funct
+from __future__ import print_function
 
 import sys
 import os
@@ -79,8 +78,8 @@ if len(args) % 2 == 0:
         options.value.append(args[0])
         del args[0]
 
-# print(options)
-# print(args)
+print(options)
+print(args)
 
 if args or not options.input \
         or len(options.property) != len(options.value):
