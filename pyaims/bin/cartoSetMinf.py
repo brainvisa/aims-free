@@ -78,8 +78,8 @@ if len(args) % 2 == 0:
         options.value.append(args[0])
         del args[0]
 
-print(options)
-print(args)
+#print(options)
+#print(args)
 
 if args or not options.input \
         or len(options.property) != len(options.value):
