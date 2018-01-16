@@ -53,6 +53,7 @@ set( _headers
     estimation/msfunc.h
     estimation/wlms-estimator.h
     fastComputation/tabulation.h
+    fibers/fiberDistance.h
     ffd/tabulSpline.h
     foldgraph/foldgraphattributes.h
     foldgraph/foldoversegmentation.h
@@ -432,6 +433,7 @@ set( _sources
     distancemap/thickness.cc
     distancemap/voronoi.cc
     fastComputation/tabulation.cc
+    fibers/fiberDistance.cc
     ffd/tabulSpline.cc
     foldgraph/foldgraphattributes.cc
     foldgraph/foldoversegmentation.cc

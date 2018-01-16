@@ -20,6 +20,9 @@ foreach( _command ${_commands} )
                 COMPONENT ${PROJECT_NAME} )
 endforeach()
 
+add_subdirectory( AimsBundleSelectCenter )
+
+
 # Targets linking with aimsecat
 if( BUILD_ECAT )
   foreach( _command AimsFovSplit AimsSumPETFrame )
