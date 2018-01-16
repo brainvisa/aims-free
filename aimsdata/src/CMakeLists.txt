@@ -116,4 +116,7 @@ foreach( _command
   endif( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_command}" )
 endforeach( _command )
 
+add_subdirectory( AimsBundle2Vol )
+add_subdirectory( AimsBundleAnalysis )
+
 add_subdirectory( tests )

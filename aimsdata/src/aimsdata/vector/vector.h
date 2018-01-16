@@ -412,8 +412,8 @@ class DataTypeInfo<AimsVector<T,D> >
 {
   public :
 
-    static inline const uint8_t samples() { return D; }
-    static inline const uint8_t depth()
+    static inline uint8_t samples() { return D; }
+    static inline uint8_t depth()
     { return sizeof(T); }
     static inline const std::string channelType()
     { return carto::DataTypeCode<AimsVector<T,D> >::dataType(); }
