@@ -518,7 +518,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         sipIsErr = 1;
         sipRes = 0;
         SIP_BLOCK_THREADS
-        PyErr_SetString( PyExc_TypeError, a0->c_str() );
+        PyErr_SetString( PyExc_KeyError, a0->c_str() );
         SIP_UNBLOCK_THREADS
       }
 %End
