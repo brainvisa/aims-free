@@ -331,13 +331,20 @@ namespace aims
         carto::Object diffuse = material->getProperty( "diffuse" );
         carto::Object it = diffuse->objectIterator();
         std::stringstream s;
-        for( int i=0; it->isValid() && i < 3; it->next(), ++i )
+        int i;
+        for( i=0; it->isValid() && i < 3; it->next(), ++i )
         {
           if( i != 0 )
             s << " ";
           s << it->currentValue()->getScalar();
         }
         mtldict->setProperty( "Kd", s.str() );
+        if( i == 3 && it->isValid() )
+        {
+          std::stringstream sd;
+          sd << it->currentValue()->getScalar();
+          mtldict->setProperty( "d", sd.str() );
+        }
       }
       catch( ... )
       {

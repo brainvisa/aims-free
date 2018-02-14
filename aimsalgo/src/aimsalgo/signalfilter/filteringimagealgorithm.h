@@ -315,7 +315,8 @@ namespace aims {
       size[2] = amplitude[4] + amplitude[5] + 1;
       carto::VolumeRef<T> win( new carto::Volume<T>( in, pos, size ) );
 
-      aims::Progression progress( out->getSizeT() * (ez - sz) * (ey - sy) * (ex - sx) );
+      aims::Progression progress( static_cast<size_t>(out->getSizeT())
+                                  * (ez - sz) * (ey - sy) * (ex - sx) );
       if( ImageAlgorithmInterface<T>::_verbose > 0 )
         std::cout << "Filtering progress: ";
 
@@ -456,7 +457,8 @@ namespace aims {
 
       carto::VolumeRef<T> win( new carto::Volume<T>( in, pos, size ) );
 
-      aims::Progression progress( out->getSizeT() * (ez - sz) * (ey - sy) *(ex - sx) );
+      aims::Progression progress( static_cast<size_t>(out->getSizeT())
+                                  * (ez - sz) * (ey - sy) *(ex - sx) );
       if( ImageAlgorithmInterface<T>::_verbose > 0 )
         std::cout << "Filtering progress: ";
 

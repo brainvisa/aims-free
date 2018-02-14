@@ -183,7 +183,7 @@ namespace aims
         current_obj = carto::Object::value( carto::Dictionary() );
         mtl_dict->setProperty( objname, current_obj );
         current_mat = carto::Object::value( carto::Dictionary() );
-        current_obj->setProperty( objname, current_mat );
+        current_obj->setProperty( "material", current_mat );
       }
       else if( element == "Ka" )
       {
@@ -203,7 +203,10 @@ namespace aims
           std::cerr << "MTL error: no current object.\n";
           continue;
         }
-        std::vector<float> diffuse( 3 );
+        std::vector<float> diffuse( 4, 1. );
+        if( current_mat->getProperty( "diffuse", diffuse ) )
+          while( diffuse.size() < 4 )
+            diffuse.push_back( 1. );
         s >> diffuse[0] >> diffuse[1] >> diffuse[2];
         current_mat->setProperty( "diffuse", diffuse );
       }
@@ -228,6 +231,22 @@ namespace aims
         float ns;
         s >> ns;
         current_mat->setProperty( "shininess", ns );
+      }
+      else if( element == "d" )
+      {
+        if( !current_obj )
+        {
+          std::cerr << "MTL error: no current object.\n";
+          continue;
+        }
+        float a;
+        s >> a;
+        std::vector<float> diffuse( 4, 0.8 );
+        if( current_mat->getProperty( "diffuse", diffuse ) )
+          while( diffuse.size() < 4 )
+            diffuse.push_back( 0.8 );
+        diffuse[3] = a;
+        current_mat->setProperty( "diffuse", diffuse );
       }
       else if( element == "map_Kd" )
       {
