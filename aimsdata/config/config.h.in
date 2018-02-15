@@ -34,6 +34,11 @@
 #ifndef AIMSDATA_CONFIG_CONFIG_H
 #define AIMSDATA_CONFIG_CONFIG_H
 
+#define AIMSDATA_VERSION "@aims-free_VERSION@"
+#define AIMSDATA_VERSION_MAJOR @aims-free_VERSION_MAJOR@
+#define AIMSDATA_VERSION_MINOR @aims-free_VERSION_MINOR@
+#define AIMSDATA_VERSION_TINY @aims-free_VERSION_PATCH@
+
 #include <cartodata/config/config.h>
 
 #ifndef AIMS
