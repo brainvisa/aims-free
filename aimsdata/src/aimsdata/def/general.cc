@@ -50,8 +50,7 @@ using namespace std;
 
 string aims::aimsVersion()
 {
-  // now AIMS follows cartograph version
-  return carto::cartobaseVersionString();
+  return AIMSDATA_VERSION;
 }
 
 
@@ -65,7 +64,7 @@ void AimsClear()
 void AimsPrintVersion(void)
 {
   cout << "A.I.M.S. Library " << aims::aimsVersion() 
-       << " - (c)1995-2013, CEA/NeuroSpin (France)"
+       << " - (c)1995-2018, CEA/NeuroSpin (France)"
        << "http://www.brainvisa.info" << std::endl;
 }
 
