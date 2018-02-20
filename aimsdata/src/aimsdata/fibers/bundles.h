@@ -161,6 +161,9 @@ protected:
                              const FiberInfo & );
   virtual void fiberTerminated( const BundleProducer &, const BundleInfo &,
                                 const FiberInfo & );
+  /** This version of fiberTerminated() is obsolete, and does not get called
+      any longer by callbacks. Do not use it in your codes.
+  */
   virtual void fiberTerminated( const BundleProducer &, const BundleInfo &,
                                 const FiberInfo &,  FiberPoint *,int & );
   virtual void newFiberPoint( const BundleProducer &, const BundleInfo &,
@@ -196,6 +199,9 @@ protected:
   void terminateBundle( const BundleInfo & );
   void startFiber( const BundleInfo &, const FiberInfo & );
   void terminateFiber( const BundleInfo &, const FiberInfo & );
+  /** This version of fiberTerminated() is obsolete.
+      Do not use it in your codes.
+  */
   void terminateFiber( const BundleInfo &, const FiberInfo &,  FiberPoint* ,int &);
   void addFiberPoint( const BundleInfo &, const FiberInfo &,
                       const FiberPoint & );
