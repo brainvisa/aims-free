@@ -285,19 +285,6 @@ void BundleProducer::terminateFiber( const BundleInfo &bundleInfo,
 }
 
 //-----------------------------------------------------------------------------
-void BundleProducer::terminateFiber( const BundleInfo &bundleInfo,
-                                     const FiberInfo &fiberInfo,
-                                     FiberPoint* fiber,
-                                     int &fiberSize )
-{
-
-  for( BundleListenerList::iterator i = _bundleListeners.begin();
-       i != _bundleListeners.end(); ++i ) {
-    (*i)->fiberTerminated( *this, bundleInfo, fiberInfo, fiber, fiberSize );
-  }
-}
-
-//-----------------------------------------------------------------------------
 void BundleProducer::addFiberPoint( const BundleInfo &bundleInfo, 
                                     const FiberInfo &fiberInfo,
                                     const FiberPoint &fiberPoint )
@@ -355,13 +342,6 @@ void BundleListener::fiberTerminated( const BundleProducer &, const BundleInfo &
 {
 }
 
-
-//-----------------------------------------------------------------------------
-void BundleListener::fiberTerminated( const BundleProducer &, const BundleInfo &,
-                                      const FiberInfo & ,
-                                      FiberPoint * , int & )
-{
-}
 
 //-----------------------------------------------------------------------------
 void BundleListener::newFiberPoint( const BundleProducer &, const BundleInfo &,
