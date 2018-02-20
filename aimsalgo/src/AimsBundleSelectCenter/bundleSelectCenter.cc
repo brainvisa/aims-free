@@ -39,19 +39,19 @@ protected:
   virtual void fiberStarted( const BundleProducer &, const BundleInfo &,
            const FiberInfo & );
   virtual void fiberTerminated( const BundleProducer &, const BundleInfo &,
-                                const FiberInfo &, FiberPoint *, int & );
+                                const FiberInfo & );
+  virtual void newFiberPoint( const BundleProducer &, const BundleInfo &,
+                              const FiberInfo &, const FiberPoint & );
+
   virtual void noMoreBundle( const BundleProducer & );
   Point3df interp(Point3df p1, Point3df p2, float fact);
 
 private:
 
   int _bundleCount;
-  vector<FiberPoint *> _faisceau;
-  vector <int> _sizes;
+  vector<vector<FiberPoint> > _faisceau;
   float _distMin;
   int _ind;
-  vector< FiberPoint *> _selectedFaisceaux;
-  vector<int> _selectedSizes;
   string _bunOut;
   vector<string> _bundleNames;
   vector<string> _selectedBundleNames;
@@ -87,7 +87,6 @@ void SelectCenterFiber::bundleStarted( const BundleProducer &,
            const BundleInfo & )
 {
   _faisceau.clear();
-  _sizes.clear();
   _bundleNames.clear();
   _distMin = 100000000.;
   _ind = -1;
@@ -99,7 +98,7 @@ void SelectCenterFiber::bundleStarted( const BundleProducer &,
 void SelectCenterFiber::bundleTerminated( const BundleProducer &producer,
               const BundleInfo & )
 {
-  int size =_faisceau.size();
+  int size = _faisceau.size();
   vector<int> fiberMat;
   int matrixSize = _faisceau.size();
 
@@ -164,31 +163,40 @@ void SelectCenterFiber::bundleTerminated( const BundleProducer &producer,
         {
           if (_dist_type == 0) // mean of mean closest points distances
           {
-            dist = fiberDistance( _faisceau[fiberMat[f1]],
-                                  _faisceau[fiberMat[f2]],
-                                  _sizes[fiberMat[f1]],
-                                  _sizes[fiberMat[f2]] );
+            int s1 = static_cast<int>( _faisceau[fiberMat[f1]].size() ),
+              s2 = static_cast<int>( _faisceau[fiberMat[f2]].size() );
+            dist = fiberDistance( &_faisceau[fiberMat[f1]][0],
+                                  &_faisceau[fiberMat[f2]][0],
+                                  s1,
+                                  s2 );
           }
           else if (_dist_type == 1) // max of mean closest points distances
           {
-            dist = fiberDistanceMax( _faisceau[fiberMat[f1]],
-                                     _faisceau[fiberMat[f2]],
-                                     _sizes[fiberMat[f1]],
-                                     _sizes[fiberMat[f2]]);
+            int s1 = static_cast<int>( _faisceau[fiberMat[f1]].size() ),
+              s2 = static_cast<int>( _faisceau[fiberMat[f2]].size() );
+            dist = fiberDistanceMax( &_faisceau[fiberMat[f1]][0],
+                                     &_faisceau[fiberMat[f2]][0],
+                                     s1,
+                                     s2 );
           }
           else if (_dist_type == 2) // max distance of corresponding points
           {
-            dist = fiberDistanceMaxDistCorrespPoints(_faisceau[fiberMat[f1]],
-                                                     _faisceau[fiberMat[f2]],
-                                                     _sizes[fiberMat[f1]]);
+            int s1 = static_cast<int>( _faisceau[fiberMat[f1]].size() );
+            dist = fiberDistanceMaxDistCorrespPoints(
+              &_faisceau[fiberMat[f1]][0],
+              &_faisceau[fiberMat[f2]][0],
+              s1 );
           }
           else if (_dist_type == 3) // max distance of corresponding points normalized by fibers length
           {
-            dist = fiberDistanceMaxDistCorrespPointsNormByMinLength(_faisceau[fiberMat[f1]],
-                                                                    _faisceau[fiberMat[f2]],
-                                                                    normFactor,
-                                                                    _sizes[fiberMat[f1]],
-                                                                    _sizes[fiberMat[f2]]);
+            int s1 = static_cast<int>( _faisceau[fiberMat[f1]].size() ),
+              s2 = static_cast<int>( _faisceau[fiberMat[f2]].size() );
+            dist = fiberDistanceMaxDistCorrespPointsNormByMinLength(
+              &_faisceau[fiberMat[f1]][0],
+              &_faisceau[fiberMat[f2]][0],
+              normFactor,
+              s1,
+              s2 );
           }
           matrix[f1][f2] = dist;
           matrix[f2][f1] = dist;
@@ -220,14 +228,12 @@ void SelectCenterFiber::bundleTerminated( const BundleProducer &producer,
     BundleInfo bundle_tmp(_bundleNames[0]);
     _writer->bundleStarted(producer, bundle_tmp);
     FiberInfo fiber_tmp(1);
-    _writer->addFiber( producer, bundle_tmp, fiber_tmp, _faisceau[_ind], _sizes[_ind]);
-    _writer->bundleTerminated(producer,bundle_tmp);
+    int s = static_cast<int>( _faisceau[_ind].size() );
+    _writer->addFiber( producer, bundle_tmp, fiber_tmp, &_faisceau[_ind][0],
+                       s );
+    _writer->bundleTerminated(producer, bundle_tmp);
 
-    for( int i =0; i<_faisceau.size();i++)
-    {
-      if (i != _ind)
-        delete []_faisceau[i];
-    }
+    _faisceau.clear();
   }
 
 }
@@ -242,27 +248,31 @@ void SelectCenterFiber::fiberStarted( const BundleProducer &,
           const BundleInfo &,
           const FiberInfo & )
 {
-
+  _faisceau.push_back( vector<FiberPoint>() );
 }
 
 
-//-----------------------------------------------------------------------------
-void SelectCenterFiber::fiberTerminated( const BundleProducer &, 
-             const BundleInfo &bunInfo,
-             const FiberInfo & , FiberPoint *fiber, int &fiberSize)
+void SelectCenterFiber::fiberTerminated( const BundleProducer &,
+                                         const BundleInfo &bunInfo,
+                                         const FiberInfo & )
 {
-  _faisceau.push_back(fiber);
-  _sizes.push_back(fiberSize);
-  _bundleNames.push_back(bunInfo.name());
+  _bundleNames.push_back( bunInfo.name() );
 }
 
+void SelectCenterFiber::newFiberPoint( const BundleProducer &,
+                                       const BundleInfo &,
+                                       const FiberInfo &,
+                                       const FiberPoint & point )
+{
+  _faisceau[ _faisceau.size() - 1 ].push_back( point );
+}
 
 
 //-----------------------------------------------------------------------------
 void SelectCenterFiber::noMoreBundle( const BundleProducer &producer )
 {
   _writer->noMoreBundle(producer);
-  cout<<endl<<"fin de l'écriture!!"<<endl<<flush;
+  cout<<endl<<"written."<<endl<<flush;
 }
 
 int main( int argc, const char **argv )
