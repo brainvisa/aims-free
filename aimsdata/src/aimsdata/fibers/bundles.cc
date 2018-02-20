@@ -539,7 +539,6 @@ void BundleWriter::addFiber( const BundleProducer&, const BundleInfo &,const Fib
       _dataFile.write( reinterpret_cast< char * >( &fiber[ 0 ] ),
                         sizeof( FiberPoint ) *fiberSize );
     }
-  delete []fiber;
   if ( _ascii ) _dataFile << endl;
   }
   checkStreams();
