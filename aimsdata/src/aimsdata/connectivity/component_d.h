@@ -181,7 +181,8 @@ namespace aims
     AimsData<O>& out,
     Connectivity::Type connectivity,
     std::map<O, size_t>& valids,
-    const T & backg, bool bin, size_t minSize,
+    const T & backg, bool bin, 
+    size_t minSize, size_t maxSize,
     size_t numMax, bool verbose )
   {
     std::multimap<size_t, size_t> compSizes;
@@ -214,16 +215,16 @@ namespace aims
       O label = 1;
 
       for( im = compSizes.rbegin(); 
-           im != em && im->first >= minSize 
-             && ( numMax == 0 || static_cast<size_t>(label) <= numMax ); ++im )
+           im != em && ( numMax == 0 || static_cast<size_t>(label) <= numMax ); ++im )
       {
-
-        if( verbose )
-          std::cout << "component " << std::setw( 4 ) << im->second 
-                    << " : " << std::setw( 8 ) << im->first 
-                    << " points" << std::endl;
-
-        valids[ im->second ] = static_cast<size_t>( label++ );
+        if ((minSize ==0 || im->first >= minSize) && (maxSize == 0 || im->first <= maxSize))
+        {
+            if( verbose )
+            std::cout << "component " << std::setw( 4 ) << im->second 
+                        << " : " << std::setw( 8 ) << im->first 
+                        << " points" << std::endl;
+            valids[ im->second ] = static_cast<size_t>( label++ );
+        }
       }
 
       ConnectedComponentEngine<AimsData<size_t>, AimsData<O> >
@@ -239,12 +240,13 @@ namespace aims
   void AimsConnectedComponent( AimsBucket<Void>& components,
                                const AimsData<T>& data,
                                Connectivity::Type connectivity, 
-                               const T & backgrnd, bool bin, size_t minsize, 
+                               const T & backgrnd, bool bin, 
+                               size_t minsize, size_t maxsize,
                                size_t maxcomp, bool verbose )
   {
     AimsBucket<Void>			*cbk;
     std::unique_ptr<AimsBucket<Void> >	abk;
-    if( minsize == 0 && maxcomp == 0 )
+    if( minsize == 0 && maxsize == 0 && maxcomp == 0 )
       cbk = &components;
     else
 
@@ -335,13 +337,13 @@ namespace aims
         std::cout << std::endl;
 
       // filtering
-      if( minsize == 0 && maxcomp == 0 )
+      if( minsize == 0 && maxsize == 0 && maxcomp == 0 )
         return;
 
       AimsBucket<Void>::iterator	i, e = component.end();
       std::multimap<unsigned, std::list<AimsBucketItem<Void> > *>	comps;
       for( i=component.begin(); i!=e; ++i )
-        if( minsize == 0 || i->second.size() >= minsize )
+        if(( minsize == 0 || i->second.size() >= minsize ) && ( maxsize == 0 || i->second.size() <= maxsize ))
           comps.insert( std::pair<unsigned, std::list<AimsBucketItem<Void> > *>
                       ( i->second.size(),&i->second ) );
       std::multimap<unsigned, 
@@ -375,12 +377,13 @@ namespace aims
   void AimsConnectedComponent( AimsBucket<Void>& components,
                                const BucketMap<T>& data,
                                Connectivity::Type connectivity, 
-                               const T & backg, bool bin, size_t minsize, 
+                               const T & backg, bool bin, 
+                               size_t minsize, size_t maxsize,
                                size_t maxcomp, bool )
   {
     AimsBucket<Void>			*cbk;
     std::unique_ptr<AimsBucket<Void> >	abk;
-    if( minsize == 0 && maxcomp == 0 )
+    if( minsize == 0 && maxsize == 0 && maxcomp == 0 )
       cbk = &components;
     else
       {
@@ -455,7 +458,7 @@ namespace aims
     AimsBucket<Void>::iterator	i, e = component.end();
     std::multimap<unsigned, std::list<AimsBucketItem<Void> > *>	comps;
     for( i=component.begin(); i!=e; ++i )
-      if( minsize == 0 || i->second.size() >= minsize )
+      if(( minsize == 0 || i->second.size() >= minsize ) && ( maxsize == 0 || i->second.size() <= maxsize ))
         comps.insert( std::pair<unsigned, std::list<AimsBucketItem<Void> > *>
                       ( i->second.size(),&i->second ) );
     std::multimap<unsigned, 
@@ -471,11 +474,12 @@ namespace aims
   void AimsConnectedComponent( BucketMap<T>& data,
                                Connectivity::Type connectivity,
                                const T & backgrnd, bool bin,
-                               size_t minsize, size_t maxcomp,
+                               size_t minsize, size_t maxsize,
+                               size_t maxcomp,
                                bool verbose )
   {
     AimsBucket<Void>	comps;
-    AimsConnectedComponent( comps, data, connectivity, backgrnd, bin, minsize, 
+    AimsConnectedComponent( comps, data, connectivity, backgrnd, bin, minsize, maxsize,
                             maxcomp, verbose );
     AimsBucket<Void>::iterator			i, e = comps.end();
     std::list<AimsBucketItem<Void> >::iterator	ic, ec;
@@ -498,7 +502,8 @@ namespace aims
   AimsData<int16_t> AimsLabeledConnectedComponent( AimsBucket<Void>& components,
                                                    const AimsData<T>& data,
                                                    Connectivity::Type connectivity, 
-                                                   const T & backgrnd, bool bin, size_t minsize, 
+                                                   const T & backgrnd, bool bin, 
+                                                   size_t minsize, size_t maxsize,
                                                    size_t maxcomp, bool verbose )
   {
     AimsBucket<Void>      *cbk;
@@ -506,7 +511,7 @@ namespace aims
     AimsData<int16_t> labelImage (data.dimX(), data.dimY(), data.dimZ());
     labelImage = 0;
     std::unique_ptr<AimsBucket<Void> >  abk;
-    if( minsize == 0 && maxcomp == 0 )
+    if( minsize == 0 && maxsize == 0 && maxcomp == 0 )
       cbk = &components;
     else
 
@@ -564,7 +569,7 @@ namespace aims
             labelImage (x, y, z) = label;
             que.push( item );
             flag( x, y, z ) = true;
-//                   std::cout << "comp. " << label << ", val: " << val 
+//                   std::cout << "comp. " << lcbkabel << ", val: " << val 
 //                   << std::endl;
             std::list<AimsBucketItem<Void> > & bk = component[ label ];
             while ( !que.empty() )
@@ -603,13 +608,13 @@ namespace aims
         std::cout << std::endl;
 
 //       filtering probleme filtrage
-      if( minsize == 0 && maxcomp == 0 )
+      if( minsize == 0 && maxsize == 0 && maxcomp == 0 )
         return labelImage;
 
       AimsBucket<Void>::iterator  i, e = component.end();
       std::multimap<unsigned, std::list<AimsBucketItem<Void> > *> comps;
       for( i=component.begin(); i!=e; ++i )
-        if( minsize == 0 || i->second.size() >= minsize )
+        if(( minsize == 0 || i->second.size() >= minsize ) && (maxsize == 0 || i->second.size() <= maxsize ))
           comps.insert( std::pair<unsigned, std::list<AimsBucketItem<Void> > *>
               ( i->second.size(),&i->second ) );
       
