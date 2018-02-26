@@ -399,7 +399,7 @@ namespace
     // keep only biggest connected component
     // cout << "before AimsConnectedComponent, thread " << pthread_self() << endl;
     AimsConnectedComponent( vol, Connectivity::CONNECTIVITY_18_XYZ, int16_t(0),
-                            true, 0, 1, false );
+                            true, 0, 0, 1, false );
     // cout << "after AimsConnectedComponent, thread " << pthread_self() << endl;
 
     // mesh

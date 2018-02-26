@@ -249,7 +249,7 @@ namespace
       // extract connected components
       AimsBucket<Void> & abk = ccomps[i];
       AimsConnectedComponent( abk, *bcks[i], Connectivity::CONNECTIVITY_26_XYZ,
-                              Void(), true, 0, 0, false );
+                              Void(), true, 0, 0, 0, false );
       // scan component by component
       for( iab=abk.begin(), eab=abk.end(); iab!=eab; ++iab )
       {
@@ -464,7 +464,7 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
 
   AimsConnectedComponent( sssplb, *ss,
                         Connectivity::CONNECTIVITY_26_XYZ,
-                        Void(), true, 0, 0, false );
+                        Void(), true, 0, 0, 0, false );
   unsigned ncss = sssplb.size();
   rc_ptr<BucketMap<Void> > sscomp( new BucketMap<Void>( sssplb ) );
   sscomp->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
@@ -488,7 +488,7 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
       sssplb.clear();
       AimsConnectedComponent( sssplb, *sssplit,
                               Connectivity::CONNECTIVITY_26_XYZ,
-                              Void(), true, 0, 0, false );
+                              Void(), true, 0, 0, 0, false );
       ++nssdil;
     }
   }

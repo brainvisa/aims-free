@@ -243,7 +243,7 @@ namespace aims
               break;
             }
 
-    AimsConnectedComponent( datac, _connectivity, bg, false, _minsize, 0 );
+    AimsConnectedComponent( datac, _connectivity, bg, false, _minsize, 0, 0 );
     std::cout << "done\n";
 
     // transform

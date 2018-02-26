@@ -171,7 +171,7 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
   ForEach3d(sulcvol,x,y,z)
     ccvol(x,y,z) = sulcvol(x,y,z);
   AimsConnectedComponent( ccvol, aims::Connectivity::CONNECTIVITY_26_XYZ, 
-                          (short)0, false, (size_t) MINCC );
+                          (short)0, (short)0, false, (size_t) MINCC );
   
   //-----------------------------------------------------------------------------------------------------
   //           First projection - Closest points according to euclidean and curvature/depth
@@ -395,7 +395,7 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
   ForEach3d(sulcvol,x,y,z)
     ccvol(x,y,z) = sulcvol(x,y,z);
   AimsConnectedComponent( ccvol, aims::Connectivity::CONNECTIVITY_26_XYZ, 
-                          short(0), false, MINCC );
+                          short(0), short(0), false, MINCC );
   
 
 
