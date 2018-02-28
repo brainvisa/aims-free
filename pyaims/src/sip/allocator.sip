@@ -46,12 +46,12 @@ Check the current system memory and return the amount of RAM, free RAM, and swap
 
     static carto::AllocatorContext
       allocator( carto::AllocatorStrategy::MappingMode );
+%Docstring
+Create an AllocatorContext object with the required mapping mode
+%End
 %MethodCode
     sipRes = new carto::AllocatorContext
       ( &carto::AllocatorStrategy::lowLevelAllocator( a0 ) );
-%End
-%Docstring
-Create an AllocatorContext object with the required mapping mode
 %End
 
   };

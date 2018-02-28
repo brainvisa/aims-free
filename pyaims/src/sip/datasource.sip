@@ -23,24 +23,12 @@ namespace soma
       Write = 2,
       ReadWrite = 3,
     };
-%Docstring
-
-    Mode:
-      enum (Read, Write, ReadWrite)
-      Read / write mode
-%End
 
     enum IterateMode
     {
       DirectAccess = 1,
       SequentialAccess = 2,
     };
-%Docstring
-
-    IterateMode:
-      enum (DirectAccess, SequentialAccess)
-      Direct / sequential access
-%End
 
     virtual ~DataSource();
 
