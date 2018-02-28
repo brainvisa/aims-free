@@ -78,7 +78,7 @@ void MincHeader::my_empty_print_error(char *message)
 
 set<string> MincHeader::extensions() const
 {
-  set<string>	exts;
+  set<string> exts;
   exts.insert( ".mnc" );
   exts.insert( ".mnc.gz" );
   return exts;
@@ -150,15 +150,15 @@ int MincHeader::readMincAttribute(Syntax &sx, int mincid, std::string minc_var, 
     double *ddata;
     ddata = (double*)malloc(att_length * sizeof(double));
     miattget(mincid, varid, (char*)minc_att.c_str(), NC_DOUBLE, att_length,
-	     ddata, NULL);
+             ddata, NULL);
 
     // If the attribute length is 1, then it is stored as a single float
     if(att_length==1) {
       
       // If the corresponding AIMS attribute is not a float according to the syntax sx
       if(sx[aims_att_name].type!="float") {
-	free(ddata);
-	return(-3);
+        free(ddata);
+        return(-3);
       }
 
       float float_ddata=ddata[0];
@@ -169,14 +169,13 @@ int MincHeader::readMincAttribute(Syntax &sx, int mincid, std::string minc_var, 
       
       // If the corresponding AIMS attribute is not a vector of floats according to the syntax sx      
       if(sx[aims_att_name].type!="float_vector") {
-	free(ddata);
-	return(-3);
+        free(ddata);
+        return(-3);
       }
       vector<float> vec_ddata;
       
       for (int iiatt=0; iiatt<att_length; iiatt++) {
-	vec_ddata.push_back(ddata[iiatt]);
-
+        vec_ddata.push_back(ddata[iiatt]);
       }
       
       setProperty( aims_att_name, vec_ddata );
@@ -415,6 +414,7 @@ void MincHeader::read()
   mincMutex().lock();
   // avoid printing anything from Minc/NetCDF lib  
   milog_init(CARTOBASE_STREAM_NULLDEVICE);
+  milog_set_verbosity(0);
   int   status = 0;
   try
   {
@@ -497,8 +497,8 @@ void MincHeader::read()
       _dimZ=1;
       _sizeZ=1.0;
       if(n_dimensions==1) {
-	_dimY=1;
-	_sizeY=1.0;
+        _dimY=1;
+        _sizeY=1.0;
       }
     }
   }
@@ -512,7 +512,7 @@ void MincHeader::read()
 
   _pdt = vector<string>();
   _pdt.reserve( 8 );
-  set<string>	types;
+  set<string> types;
   types.insert( "U8" );
   types.insert( "S8" );
   types.insert( "U16" );
@@ -536,14 +536,14 @@ void MincHeader::read()
       _pdt.push_back( _type );
       types.erase( _type );
     }
-  set<string>::iterator	is, es = types.end();
+  set<string>::iterator is, es = types.end();
   for( is=types.begin(); is!=es; ++is )
     _pdt.push_back( *is );
 
 
   setProperty( "file_type", string( "MINC" ) );
 
-  std::vector<int>	dims;
+  std::vector<int> dims;
   dims.push_back( dimX() );
   dims.push_back( dimY() );
   dims.push_back( dimZ() );
@@ -551,14 +551,14 @@ void MincHeader::read()
   setProperty( "volume_dimension", dims );
 
 
-  vector<float>	vs;
+  vector<float> vs;
   vs.push_back( sizeX() );
   vs.push_back( sizeY() );
   vs.push_back( sizeZ() );
   vs.push_back( sizeT() );
   setProperty( "voxel_size", vs );
 
-  vector<float>	minc_vs;
+  vector<float> minc_vs;
   minc_vs.push_back( checkbounds( volume->separations[2] ) );
   minc_vs.push_back( checkbounds( volume->separations[1] ) );
   minc_vs.push_back( checkbounds( volume->separations[0] ) );
@@ -618,14 +618,14 @@ void MincHeader::read()
     vector<float> transfo( 16 );
     if(gt->inverse_flag==FALSE) {
       for(int i=0;i<4;i++) {
-	for(int j=0;j<4;j++) {
-	  // transfo1.push_back( Transform_elem(*(gt->linear_transform),j,i) );
+        for(int j=0;j<4;j++) {
+          // transfo1.push_back( Transform_elem(*(gt->linear_transform),j,i) );
           transfo[i*4+j] = Transform_elem(*(gt->linear_transform),i,j);
-	}
+        }
       }
     } else {
       for(int i=0;i<4;i++) {
-	for(int j=0;j<4;j++) {
+        for(int j=0;j<4;j++) {
           transfo[i*4+j]
               = Transform_elem(*(gt->inverse_linear_transform),i,j);
         }
@@ -664,8 +664,8 @@ void MincHeader::read()
   //ncopts=NC_VERBOSE;
   ncopts=0;
 
-  SyntaxSet	*s = PythonHeader::syntax();
-  Syntax	&sx = (*s)[ "__generic__" /*"PythonHeader"*/ ];
+  SyntaxSet *s = PythonHeader::syntax();
+  Syntax &sx = (*s)[ "__generic__" /*"PythonHeader"*/ ];
 
   readMincAttribute(sx, mincid, "patient", "varid", "MINC_patient:varid");
   readMincAttribute(sx, mincid, "patient", "vartype", "MINC_patient:vartype");
@@ -765,12 +765,8 @@ void MincHeader::read()
   mincMutex().unlock();
 }
 
-
-
 void MincHeader::write()
 {
-
-
 }
 
 
@@ -850,33 +846,33 @@ void MincHeader::write()
       
       ncattinq(mincid, varid, att_name, &att_datatype, &att_length);
       if (att_datatype == NC_CHAR) {
-	char *cdata;
-	cdata = (char*)malloc((att_length+1)*sizeof(char));
-	miattgetstr(mincid, varid, att_name, att_length+1, cdata);
-	(void) printf("%s\n", cdata);
-	
-	std::string str_cdata=cdata;
-	setProperty(sx,  "MINC_"+str_var_name+":"+str_att_name, str_cdata );
+    char *cdata;
+    cdata = (char*)malloc((att_length+1)*sizeof(char));
+    miattgetstr(mincid, varid, att_name, att_length+1, cdata);
+    (void) printf("%s\n", cdata);
+    
+    std::string str_cdata=cdata;
+    setProperty(sx,  "MINC_"+str_var_name+":"+str_att_name, str_cdata );
 
-	free(cdata);
+    free(cdata);
       }
       else {
-	double *ddata;
-	ddata = (double*)malloc(att_length * sizeof(double));
-	miattget(mincid, varid, att_name, NC_DOUBLE, att_length,
-		 ddata, NULL);
-	
-	vector<float> vec_ddata;
+    double *ddata;
+    ddata = (double*)malloc(att_length * sizeof(double));
+    miattget(mincid, varid, att_name, NC_DOUBLE, att_length,
+         ddata, NULL);
+    
+    vector<float> vec_ddata;
 
-	for (int iiatt=0; iiatt<att_length; iiatt++) {
-	  (void) printf("%.20g ", ddata[iiatt]);
-	  vec_ddata.push_back(ddata[iiatt]);
-	}
+    for (int iiatt=0; iiatt<att_length; iiatt++) {
+      (void) printf("%.20g ", ddata[iiatt]);
+      vec_ddata.push_back(ddata[iiatt]);
+    }
 
-	setProperty(sx,  "MINC_"+str_var_name+":"+str_att_name, vec_ddata );
-	
-	(void) printf("\n");
-	free(ddata);
+    setProperty(sx,  "MINC_"+str_var_name+":"+str_att_name, vec_ddata );
+    
+    (void) printf("\n");
+    free(ddata);
       }
     }
     
@@ -884,43 +880,43 @@ void MincHeader::write()
     var_length = 1;
     if(strcmp(var_name,"image")!=0) {
       for (int idim=0; idim<ndims; idim++) {
-	ncdiminq(mincid, my_dims[idim], NULL, &length);
-	start[idim] = 0;
-	count[idim] = length;
-	var_length *= length;
-	if (idim==ndims-1)
-	  row_length = length;
+    ncdiminq(mincid, my_dims[idim], NULL, &length);
+    start[idim] = 0;
+    count[idim] = length;
+    var_length *= length;
+    if (idim==ndims-1)
+      row_length = length;
       }
       if (var_datatype==NC_CHAR) {
-	char *cdata;
-	
-	cdata = (char*)malloc((var_length+1)*sizeof(char));
-	ncvarget(mincid, varid, start, count, cdata);
-	cdata[var_length]=0;
-	(void) printf("\tValue ");
-	for (int ival=0; ival<var_length; ival++) {
-	  (void) putchar((int) cdata[ival]);
-	  if (((ival+1) % row_length) == 0)
-	    (void) putchar((int)'\n');
-	}
-	std::string str_cdata=cdata;
-	setProperty(sx,  "MINC_"+str_var_name+":value", str_cdata );
-	free(cdata);
+    char *cdata;
+    
+    cdata = (char*)malloc((var_length+1)*sizeof(char));
+    ncvarget(mincid, varid, start, count, cdata);
+    cdata[var_length]=0;
+    (void) printf("\tValue ");
+    for (int ival=0; ival<var_length; ival++) {
+      (void) putchar((int) cdata[ival]);
+      if (((ival+1) % row_length) == 0)
+        (void) putchar((int)'\n');
+    }
+    std::string str_cdata=cdata;
+    setProperty(sx,  "MINC_"+str_var_name+":value", str_cdata );
+    free(cdata);
       }
       else {
-	double *ddata;
-	ddata = (double*)malloc(var_length*sizeof(double));
-	mivarget(mincid, varid, start, count, 
-		 NC_DOUBLE, NULL, ddata);
-	(void) printf("\tValue ");
-	vector<float> vec_ddata;
+    double *ddata;
+    ddata = (double*)malloc(var_length*sizeof(double));
+    mivarget(mincid, varid, start, count, 
+         NC_DOUBLE, NULL, ddata);
+    (void) printf("\tValue ");
+    vector<float> vec_ddata;
 
-	for (int ival=0; ival<var_length; ival++) {
-	  (void) printf("%.20g\n", ddata[ival]);
-	  vec_ddata.push_back(ddata[ival]);
-	}
-	setProperty(sx,  "MINC_"+str_var_name+":value", vec_ddata );
-	free(ddata);
+    for (int ival=0; ival<var_length; ival++) {
+      (void) printf("%.20g\n", ddata[ival]);
+      vec_ddata.push_back(ddata[ival]);
+    }
+    setProperty(sx,  "MINC_"+str_var_name+":value", vec_ddata );
+    free(ddata);
       }
       (void) printf("\n");
     }
@@ -957,16 +953,16 @@ void MincHeader::write()
       double *ddata;
       ddata = (double*)malloc(att_length * sizeof(double));
       miattget(mincid, varid, att_name, NC_DOUBLE, att_length,
-	       ddata, NULL);
-	
-	vector<float> vec_ddata;
+           ddata, NULL);
+    
+    vector<float> vec_ddata;
 
-	for (int iiatt=0; iiatt<att_length; iiatt++) {
-	  (void) printf("%.20g ", ddata[iiatt]);
-	  vec_ddata.push_back(ddata[iiatt]);
-	}
+    for (int iiatt=0; iiatt<att_length; iiatt++) {
+      (void) printf("%.20g ", ddata[iiatt]);
+      vec_ddata.push_back(ddata[iiatt]);
+    }
 
-	setProperty(sx,  "MINC_global:"+str_att_name, vec_ddata );
+    setProperty(sx,  "MINC_global:"+str_att_name, vec_ddata );
       free(ddata);
     }
   }

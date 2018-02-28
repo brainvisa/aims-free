@@ -338,6 +338,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   //3) Other attributes
   bool ok = true, ok2 = false;
   milog_init(CARTOBASE_STREAM_NULLDEVICE);
+  milog_set_verbosity(0);
   //std::cout << "MINC Plugin::write: name: " << fname << std::endl << std::flush;
   if( output_volume((char*)(fname.c_str()),
                 nc_disk_data_type,
