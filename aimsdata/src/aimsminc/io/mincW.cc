@@ -61,15 +61,40 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   
   int n_dimensions=4;
 
-  if(thing.dimT()==1) {
-    if(thing.dimZ()==1) {
-      if(thing.dimY()==1) {
-        n_dimensions=1;
-      }
-      else n_dimensions=2;
-    }
-    else n_dimensions=3;
-  }
+// -----------------------------------------------------------------------------
+// NS-2018-02-28: Current code is not able to deal with n_dimensions other than 
+// 4. Today, if n_dimensions is set to 2, only,  y and z dimension information 
+// is stored in the MINC file.
+//
+// TODO: Set correct dim_names and sizes vector values depending on n_dimensions
+// for n_dimensions == 1:
+// dim_names[0] and sizes[0] must contain X axis info
+// for n_dimensions == 2:
+// dim_names[0] and sizes[0] must contain Y axis info
+// dim_names[1] and sizes[1] must contain X axis info
+// for n_dimensions == 3:
+// dim_names[0] and sizes[0] must contain Z axis info
+// dim_names[1] and sizes[1] must contain Y axis info
+// dim_names[2] and sizes[2] must contain X axis info
+// for n_dimensions == 4:
+// dim_names[0] and sizes[0] must contain Z axis info
+// dim_names[1] and sizes[1] must contain Y axis info
+// dim_names[2] and sizes[2] must contain X axis info
+// dim_names[3] and sizes[3] must contain T axis info
+//
+// So I disabled the code bellow and always store data in a 4 dimensions volume
+// -----------------------------------------------------------------------------
+  
+//   if(thing.dimT()==1) {
+//     if(thing.dimZ()==1) {
+//       if(thing.dimY()==1) {
+//         n_dimensions=1;
+//       }
+//       else n_dimensions=2;
+//     }
+//     else n_dimensions=3;
+//   }
+  
   VIO_Volume volume;
   VIO_STR dim_names[4];
 
@@ -219,6 +244,13 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   separations[2]=minc_sizeX;
   separations[1]=minc_sizeY;
   separations[0]=minc_sizeZ;
+  
+//   std::cout << "===== MincWriter::write, separations: ("
+//             << separations[0] << ","
+//             << separations[1] << ","
+//             << separations[2] << ","
+//             << separations[3] << ")"
+//             << std::endl << std::flush;
 
   set_volume_separations(volume,separations);
   
@@ -235,8 +267,19 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   try
   {
     // convert AIMS transformaton to storage coords
-    transs = hdr.getProperty( "transformations" );
-    if( !transs.isNull() && transs->size() != 0 )
+//     std::cout << "==== MINC::Before getting transformations" 
+//               << std::endl << std::flush;
+//     if (! hdr.getProperty( "transformations", transs )) {
+//         // Set default transformation to identity
+//         std::vector<std::vector<float> > vtranss;
+//         vtranss.push_back(Motion().toVector());
+//         transs = Object::value(vtranss);
+//     }
+//     hdr.getProperty( "transformations", transs );
+//     std::cout << "==== MINC::After getting transformations" 
+//               << std::endl << std::flush;    
+    if( hdr.getProperty( "transformations", transs ) && 
+        !transs.isNull() && transs->size() != 0 )
     {
       Object t0 = transs->getArrayItem( 0 );
       if( !t0.isNull() )
@@ -278,7 +321,7 @@ bool MincWriter<T>::write( const AimsData<T>& thing )
   }
   catch( ... )
   {
-    cout << "no transform or problem in it\n";
+    cout << "problem while reading transformation" << endl;
   }
 
   //2) Space name
