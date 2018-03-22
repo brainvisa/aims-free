@@ -248,6 +248,22 @@ namespace aims
         diffuse[3] = a;
         current_mat->setProperty( "diffuse", diffuse );
       }
+      else if( element == "Tr" )
+      {
+        if( !current_obj )
+        {
+          std::cerr << "MTL error: no current object.\n";
+          continue;
+        }
+        float a;
+        s >> a;
+        std::vector<float> diffuse( 4, 0.8 );
+        if( current_mat->getProperty( "diffuse", diffuse ) )
+          while( diffuse.size() < 4 )
+            diffuse.push_back( 0.8 );
+        diffuse[3] = 1.f - a;
+        current_mat->setProperty( "diffuse", diffuse );
+      }
       else if( element == "map_Kd" )
       {
         if( !current_obj )
@@ -300,6 +316,18 @@ namespace aims
             }
           }
         }
+      }
+      else if( element == "illum" )
+      {
+        if( !current_obj )
+        {
+          std::cerr << "MTL error: no current object.\n";
+          continue;
+        }
+        float illum;
+        s >> illum;
+        current_obj->setProperty( "illum", illum );
+        // don't know what to do with this...
       }
       else
       {
