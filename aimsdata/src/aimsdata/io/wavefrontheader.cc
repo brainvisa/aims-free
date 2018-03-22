@@ -121,10 +121,12 @@ void WavefrontHeader::readMesh( bool stopWhenIdentified, int poly_size,
 //   thing.erase();
   std::string l;
   int line = 0;
+  int i;
 
   std::vector<Point3df> vertices, normals;
   std::vector<vector<uint> > polygons;
   std::vector<float> texture;
+  int tex_dim = 0;
   std::vector<int> normals_ind;
   std::vector<int> texture_ind;
   int timestep = 0;
@@ -202,14 +204,29 @@ void WavefrontHeader::readMesh( bool stopWhenIdentified, int poly_size,
     else if( element == "vt" )
     {
       // texture
+      float tex;
       if( tex_num < 1 )
       {
         tex_num = 1;
-        setProperty( "data_type", "FLOAT" );
+        while( !s.eof() )
+        {
+          s >> tex;
+          texture.push_back(tex);
+          ++tex_dim;
+        }
+        if( tex_dim == 2 )
+          setProperty( "data_type", "POINT2DF" );
+        else if( tex_dim == 3 )
+          setProperty( "data_type", "POINT3DF" );
+        else
+          setProperty( "data_type", "FLOAT" );
       }
-      float tex;
-      s >> tex;
-      texture.push_back(tex);
+      else
+        for( i=0; i<tex_dim; ++i )
+        {
+          s >> tex;
+          texture.push_back(tex);
+        }
     }
     else if( element == "f" || element == "l" )
     {
