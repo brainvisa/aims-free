@@ -347,7 +347,22 @@ namespace aims
   {
     carto::Object m = mtl_dict->getProperty( mtl_objname );
     // merge all materials/texture properties
+    carto::Object mat;
+    try
+    {
+      // material can be defined both sides (.mtl, .minf)
+      mat = m->getProperty( "material" );
+      carto::Object minfmat = hdr.getProperty( "material" );
+      mat->copyProperties( minfmat );
+    }
+    catch( ... )
+    {
+    }
+
     hdr.copyProperties( m );
+    if( mat.get() )
+      hdr.setProperty( "material", mat );
+
     if( mtl_dict->hasProperty( "_texture_palettes" ) )
     {
       carto::Object palettes = mtl_dict->getProperty( "_texture_palettes" );
