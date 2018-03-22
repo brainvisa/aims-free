@@ -398,14 +398,21 @@ namespace aims
       o_texture.resize( texture_ind.size() );
       for( int i=0, k=texture_ind.size(); i<k; ++i )
       {
-        if( texture_ind[i] < 0 || texture_ind[i] >= static_cast<int>(texture.size()) )
+        if( texture_ind[i] < 0
+            || texture_ind[i] >= static_cast<int>(texture.size()) )
         {
           std::stringstream s;
-          s << "texture index out of range: " << texture_ind[i] << " / "
-          << texture.size() << " at index " << i;
-          throw carto::parse_error( s.str(), "", _name, i );
+          if( texture_ind[i] >= 0 )
+          {
+            s << "texture index out of range: " << texture_ind[i] << " / "
+            << texture.size() << " at index " << i;
+            throw carto::parse_error( s.str(), "", _name, i );
+          }
+          // ind < 0, just not used.
+          o_texture[i] = texture[0];
         }
-        o_texture[i] = texture[texture_ind[i]];
+        else
+          o_texture[i] = texture[texture_ind[i]];
       }
       thing[timestep].texture() = o_texture;
     }
@@ -556,8 +563,18 @@ namespace aims
             std::stringstream z( item.substr(pos0, pos - pos0 ) );
             z >> tex;
             if( texture_ind.size() <= poly[p] )
-              texture_ind.resize( poly[p] + 1 );
-            texture_ind[ poly[p] ] = tex - 1; // (starts at 1)
+              texture_ind.resize( poly[p] + 1, -1 );
+            if( texture_ind[ poly[p] ] < 0 )
+              texture_ind[ poly[p] ] = tex - 1; // (starts at 1)
+            else if( texture_ind[ poly[p] ] != tex - 1 )
+            {
+              // same vertex is assigned a different texture:
+              // we must duplicate the vertex
+              vertices.push_back( vertices[ poly[p] ] );
+              poly[p] = vertices.size() - 1;
+              texture_ind.resize( poly[p] + 1, -1 );
+              texture_ind[ poly[p] ] = tex - 1;
+            }
           }
           else if( pos != pos0 )
             throw carto::parse_error( "malformed face", "", filename, line );
