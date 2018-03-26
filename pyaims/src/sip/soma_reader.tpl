@@ -47,12 +47,12 @@ namespace soma
     A multi-pass procedure is used to identify and read the data from the data source:
 
     * pass 1: format hint
-    * pass 2 : extension
-    * pass 3 : empty extension
-    * pass 4 : all readers
+    * pass 2: extension
+    * pass 3: empty extension
+    * pass 4: all readers
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     obj or header:
         in-place mode: %Template1PyType%, object to be read.
         OR:
@@ -63,8 +63,8 @@ namespace soma
     passend: int (optional)
         end at given step of the multi-pass identification/read procedure
 
-    Returns:
-    --------
+    Returns
+    -------
     in-place mode:
         True upon success
         False upon failure (but readers will more likely throw an exception)
@@ -87,12 +87,12 @@ namespace soma
     A multi-pass procedure is used to identify and read the data from the data source:
 
     * pass 1: format hint
-    * pass 2 : extension
-    * pass 3 : empty extension
-    * pass 4 : all readers
+    * pass 2: extension
+    * pass 3: empty extension
+    * pass 4: all readers
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     obj or header:
         in-place mode: %Template1PyType%, object to be read.
         OR:
@@ -103,8 +103,8 @@ namespace soma
     passend: int (optional)
         end at given step of the multi-pass identification/read procedure
 
-    Returns:
-    --------
+    Returns
+    -------
     in-place mode:
         True upon success
         False upon failure (but readers will more likely throw an exception)
@@ -218,12 +218,12 @@ namespace soma
     A multi-pass procedure is used to identify and write the data to the data source:
     
     * pass 1: format hint
-    * pass 2 : extension
-    * pass 3 : empty extension
-    * pass 4 : all writes
+    * pass 2: extension
+    * pass 3: empty extension
+    * pass 4: all writes
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     obj: %Template1PyType%
         object to write
     options: Object (optional)
@@ -236,10 +236,9 @@ namespace soma
     passbegin: int (optional)
     passend: int (optional)
 
-    Returns:
-    --------
-    True upon success
-    False upon failure, but an exception is more likely thrown in such case
+    Returns
+    -------
+    True upon success, False upon failure, but an exception is more likely thrown in such case
 %End
 
     virtual std::string writtenObjectType() const;
