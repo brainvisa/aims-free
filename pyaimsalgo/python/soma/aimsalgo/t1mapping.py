@@ -54,8 +54,8 @@ class BAFIData:
         This is a re-implementation of BAFI2B1map.m, courtesy of
         Alexandre Vignaud.
 
-        %% The method is Yarnykh's (MRM 57:192-200 (2007)) +
-        %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
+        * The method is Yarnykh's (MRM 57:192-200 (2007)) +
+        * Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
         and B1)
         """
         BAFI_amplitude = np.asarray(self.amplitude_volume)
@@ -92,8 +92,8 @@ class BAFIData:
         This is a re-implementation of BAFI2FAmap.m, courtesy of
         Alexandre Vignaud.
 
-        %% The method is Yarnykh's (MRM 57:192-200 (2007)) +
-        %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
+        * The method is Yarnykh's (MRM 57:192-200 (2007)) +
+        * Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
         and B1)
         """
         BAFI_amplitude = np.asarray(self.amplitude_volume)
@@ -122,8 +122,8 @@ class BAFIData:
         Alexandre Vignaud)
         modified to return only the real flip angle (omitting the phase).
 
-        %% The method is Yarnykh's (MRM 57:192-200 (2007)) +
-        %% Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
+        * The method is Yarnykh's (MRM 57:192-200 (2007)) +
+        * Amadon ISMRM2008 (MAFI sequence: simultaneaous cartography of B0
         and B1)
         """
         BAFI_amplitude = np.asarray(self.amplitude_volume)

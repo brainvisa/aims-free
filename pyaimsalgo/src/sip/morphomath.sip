@@ -13,6 +13,8 @@ enum AimsMorphoMode
 
 AimsData_S16 AimsMorphoErosion( const AimsData_S16 &, float,
   AimsMorphoMode = AIMS_CHAMFER_BALL_3D ) throw() /ReleaseGIL/;
+AimsData_S16 AimsMorphoChamferErosion( const AimsData_S16 &, float, int=3,
+  int=3, int=3, float=50) throw() /ReleaseGIL/;
 
 AimsData_S16 AimsMorphoDilation( const AimsData_S16 &, float,
   AimsMorphoMode = AIMS_CHAMFER_BALL_3D ) throw() /ReleaseGIL/;
