@@ -76,11 +76,16 @@ def graphTransform(g, motions):
     vs = g['voxel_size']
     print('voxel size:', vs)
     globalmot = None
+    bbmin = aims.Point3d()
+    bbmax = aims.Point3d()
+    first = True
     if None in ks:
         globalmot = motions[None]
     for v in g.vertices():
-        l = v['name']
-        b = v['aims_roi']
+        try:
+            l = v['name']
+        except:
+            l = None
         mot = None
         if l in ks:
             mot = motions[l]
@@ -88,21 +93,77 @@ def graphTransform(g, motions):
             mot = globalmot
         if mot:
             print('transform', l)
-            b2 = aims.BucketMap_VOID()
-            bi = b[0]
-            bo = b2[0]
-            for p in bi.keys():
-                po = mot.transform(aims.Point3df(p.item(0) * vs[0],
-                                                 p.item(1) * vs[1],
-                                                 p.item(2) * vs[2]))
-                poi = aims.Point3d(round(po.item(0) / vs[0]),
-                                   round(po.item(1) / vs[1]),
-                                   round(po.item(2) / vs[2]))
-                # print(p.item(0), p.item(1), p.item(2), '->', poi.item(0),
-                # poi.item(1), poi.item(2))
-                bo[poi] = 0
-            # store bucket
-            b._get()[0] = bo
+            for bname in ('aims_roi', 'aims_ss', 'aims_bottom', 'aims_other'):
+                try:
+                    b = v[bname]
+                except:
+                    continue
+                if b is not None:
+                    b2 = aims.BucketMap_VOID()
+                    bi = b[0]
+                    bo = b2[0]
+                    for p in bi.keys():
+                        po = mot.transform(aims.Point3df(p.item(0) * vs[0],
+                                                        p.item(1) * vs[1],
+                                                        p.item(2) * vs[2]))
+                        poi = aims.Point3d(round(po.item(0) / vs[0]),
+                                          round(po.item(1) / vs[1]),
+                                          round(po.item(2) / vs[2]))
+                        # print(p.item(0), p.item(1), p.item(2), '->', poi.item(0),
+                        # poi.item(1), poi.item(2))
+                        bo[poi] = 0
+                        if first:
+                            bbmin = poi
+                            bbmax = poi
+                        else:
+                            bbmin = np.min((bbmin, poi), axis=0)
+                            bbmax = np.min((bbmax, poi), axis=0)
+                    # store bucket
+                    b._get()[0] = bo
+            # transform meshes
+            for mname in ('aims_Tmtktri', ):
+                try:
+                    m = v[mname]
+                except:
+                    continue
+                if m is not None:
+                    aims.SurfaceManip.meshTransform(m, mot)
+
+    # transform edges
+    if globalmot is not None:
+        mot = globalmot
+        for e in g.edges():
+            for bname in ('aims_cortical', 'aims_junction',
+                          'aims_plidepassage'):
+                try:
+                    b = e[bname]
+                except:
+                    continue
+                if b is not None:
+                    b2 = aims.BucketMap_VOID()
+                    bi = b[0]
+                    bo = b2[0]
+                    for p in bi.keys():
+                        po = mot.transform(aims.Point3df(p.item(0) * vs[0],
+                                                        p.item(1) * vs[1],
+                                                        p.item(2) * vs[2]))
+                        poi = aims.Point3d(round(po.item(0) / vs[0]),
+                                          round(po.item(1) / vs[1]),
+                                          round(po.item(2) / vs[2]))
+                        # print(p.item(0), p.item(1), p.item(2), '->', poi.item(0),
+                        # poi.item(1), poi.item(2))
+                        bo[poi] = 0
+                        if first:
+                            bbmin = poi
+                            bbmax = poi
+                        else:
+                            bbmin = np.min((bbmin, poi), axis=0)
+                            bbmax = np.min((bbmax, poi), axis=0)
+                    # store bucket
+                    b._get()[0] = bo
+
+    g['boundingbox_min'] = list(bbmin)
+    g['boundingbox_max'] = list(bbmax)
 
 
 def parseOpts(argv):

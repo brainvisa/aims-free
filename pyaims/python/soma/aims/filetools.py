@@ -34,8 +34,10 @@
 import os
 import numpy as np
 import gzip
+import hashlib
 import tempfile
 import filecmp
+from soma import aims
 
 
 def compare_gzip_files(file1, file2):
@@ -83,4 +85,34 @@ def compare_text_files(file1, file2, thresh=1e-6):
     
     return False
     
+
+def compare_nii_files(file1, file2, thresh = 50):
+    '''
+    Compare nifti files (.nii, .nii.gz)
+    '''
+
+    # Get md5 for each file
+    if os.path.splitext(file1)[-1] == '.gz':
+        md5_file1 = hashlib.md5(gzip.open(file1, 'rb').read()).hexdigest()
+    else:
+        md5_file1 = hashlib.md5(open(file1, 'rb').read()).hexdigest()
+
+    if os.path.splitext(file2)[-1] == '.gz':
+        md5_file2 = hashlib.md5(gzip.open(file2, 'rb').read()).hexdigest()
+    else:
+        md5_file2 = hashlib.md5(open(file2, 'rb').read()).hexdigest()
+
+    if md5_file1 == md5_file2:
+        return True
+    
+    # md5 are differents
+    # Check the voxels
+    a_1 = aims.read(file1)
+    a_2 = aims.read(file2)
+    if a_1.arraydata().shape == a_2.arraydata().shape:
+        d = a_1.arraydata() - a_2.arraydata()
+        if abs(np.max(d) - np.min(d)) < thresh:
+            print 'WARNING, use aims to find t1mri file, absolute value taken : %s' % abs(np.max(d) - np.min(d))
+            return True
+    return False
     
