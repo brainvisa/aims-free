@@ -66,12 +66,7 @@ namespace {
 
 namespace aims
 {
-
-  template<class INP, class OUTP>
-  static bool internalconvert( aims::Process & p, const std::string & fname,
-                               aims::Finder & f );
-
-  /// Reads a AimsData, with conversion if needed
+  /// Reads a AimsData or carto::VolumeRef, with conversion if needed
   template<class OUTP>
   class ChannelReader
   {
