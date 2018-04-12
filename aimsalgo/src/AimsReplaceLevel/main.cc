@@ -36,6 +36,7 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/io/io_g.h>
 #include <aims/data/data_g.h>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <map>
@@ -51,19 +52,53 @@ static bool doit( Process &, const string &, Finder & );
 class Replacer : public Process
 {
 public:
-  Replacer( vector<float> l1, vector<float> l2, const string & fout );
+  Replacer( vector<string> l1, vector<string> l2, const string & fout );
 
 private:
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
 
-  vector<float>		level1;
-  vector<float>		level2;
+  vector<string>		level1;
+  vector<string>		level2;
   string		fileout;
 };
 
+namespace std
+{
+    template<>
+    struct less<AimsRGB>:binary_function<AimsRGB, AimsRGB, bool> {
 
-Replacer::Replacer( vector<float> l1, vector<float> l2, const string & fout ) 
+        bool operator() (const AimsRGB& x, const AimsRGB& y) const 
+        {
+            for(int32_t i=0; i<3; ++i)
+            {
+                if (x[i] > y[i])
+                    return false;
+                
+                if (x[i] < y[i])
+                    return true;
+            }
+        }
+    };
+    
+    template<>
+    struct less<AimsRGBA>:binary_function<AimsRGBA, AimsRGBA, bool> {
+
+        bool operator() (const AimsRGBA& x, const AimsRGBA& y) const 
+        {
+            for(int32_t i=0; i<4; ++i)
+            {
+                if (x[i] > y[i])
+                    return false;
+                
+                if (x[i] < y[i])
+                    return true;
+            }
+        }
+    };
+}
+
+Replacer::Replacer( vector<string> l1, vector<string> l2, const string & fout ) 
     : Process(), level1( l1 ), level2( l2 ), fileout( fout )
 {
   registerProcessType( "Volume", "S8", &doit<int8_t> );
@@ -74,6 +109,8 @@ Replacer::Replacer( vector<float> l1, vector<float> l2, const string & fout )
   registerProcessType( "Volume", "U32", &doit<uint32_t> );
   registerProcessType( "Volume", "FLOAT", &doit<float> );
   registerProcessType( "Volume", "DOUBLE", &doit<double> );
+  registerProcessType( "Volume", "RGB", &doit<AimsRGB> );
+  registerProcessType( "Volume", "RGBA", &doit<AimsRGBA> );
 }
 
 
@@ -88,19 +125,26 @@ doit( Process & p, const string & fname, Finder & f )
   if( !r.read( in, 0, &format ) )
     return false;
     
-  map<float,float>	levels;
-  map<float,float>::iterator	it;
+  map<T, T>	levels;
+  typename map<T, T>::iterator	it, ie;
   
-  for(unsigned int i=0; i<rp.level1.size();i++)
-  	levels[rp.level1[i]] = rp.level2[i]; 
+  for(unsigned int i = 0; i < rp.level1.size(); i++)
+  {
+     T l1, l2;
+     carto::stringTo(rp.level1[i], l1);
+     carto::stringTo(rp.level2[i], l2);
+     levels[l1] = l2;
+  }
+  ie = levels.end();
 
   int x, y, z, t;
-  ForEach4d( in, x, y, z, t )
+  ForEach4d(in, x, y, z, t)
   {
-    it = levels.find(in( x, y, z, t ));
-    if (  it != levels.end() ) 
-      in( x, y, z, t ) = (T)(*it).second;
+    it = levels.find(in(x, y, z, t));
+    if (it != ie)
+      in(x, y, z, t) = (T)it->second;
   }
+  
   Writer<AimsData<T> > writer( rp.fileout );
   return writer.write( in );
 }
@@ -110,14 +154,16 @@ int main( int argc, const char **argv )
 {
   
 string			filein, fileout;
-vector<float>		graylevel, newlevel;
+vector<string>		graylevel, newlevel;
 
   AimsApplication	app( argc, argv, "Replace gray levels by others");
   
   app.addOption(filein,"-i", "input");
   app.addOption(fileout,"-o", "outpout");
-  app.addOptionSeries(graylevel,"-g", "gray levels to replace",true);
-  app.addOptionSeries(newlevel,"-n", "new values for gray levels",true);
+  app.addOptionSeries(graylevel,"-g", 
+                      "gray levels or RGB/RGBA values to replace", true);
+  app.addOptionSeries(newlevel,"-n", "new values for gray levels or RGB/RGBA", 
+                      true);
   
   app.alias( "--input", "-i" );
   app.alias( "--output", "-o" );
