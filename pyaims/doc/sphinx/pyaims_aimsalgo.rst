@@ -48,6 +48,9 @@ In soma.aims module
 
 .. autofunction:: soma.aims.meshdistance.MeshVoronoiStepbyStep
 
+.. autoclass:: soma.aims.GeodesicPath
+  :members:
+
 .. autoclass:: soma.aims.Spam
   :members:
 
