@@ -26,7 +26,18 @@
 namespace aims
 {
 
+  /** Geodesic paths or distance maps, using the Dijkstra algorithm
 
+      ex:
+
+      \code
+      GeodesicPath gp( mesh, 0, 0 );
+      TimeTexture<float>  dmap;
+      double dmax = 0;
+      // get a distance map from vertex no 12
+      gp.distanceMap_1_N_ind( 12, dmap[0].data(), &dmax, 0 );
+      \endcode
+  */
   class GeodesicPath
   {
     public:
@@ -37,9 +48,24 @@ namespace aims
       TimeTexture<float> _texCurv;
       geodesic::Mesh _meshSP;
 
-      //Constructor
+      /** Initializes the geodesic path structures for a given mesh geometry,
+          using a weight map (curvature, typically). Several methods are
+          available.
+
+          \param surface mesh to compute geodesic paths or distances on
+          \param texCurv weight map texture
+          \param method 0: unconstrained,
+            1: sulci (maximize negative curvature),
+            2: gyri (maximize positive curvature),
+            3: "geodesic" (?)
+          \param strain seems to be a scaling factor on the weights map.
+            In practice we use 3 for sulci and gyri.
+      */
       GeodesicPath( const AimsSurfaceTriangle & surface,
                     const TimeTexture<float> & texCurv, int method, int strain);
+      /** Same as the above constructor, except that the weights map is
+          computed internally as the curvature of the mesh.
+      */
       GeodesicPath( const AimsSurfaceTriangle & surface , int method,
                     int strain);
       ~GeodesicPath();
@@ -48,9 +74,11 @@ namespace aims
 
     //private :
       //private methods
+      /** initialize internal stuctures, should be private. */
       void computeGraphDijkstra( const AimsSurfaceTriangle & surface,
                                 const TimeTexture<float> & texCurv, int method,
                                 int strain);
+      /** update internal structures, should be private. */
       void updateWeight( const TimeTexture<float> & texCurv, int method,
                         int strain, double sigmo);
 
@@ -70,7 +98,18 @@ namespace aims
 
 
       std::vector<unsigned> longestPath_N_N_ind(std::vector<unsigned> points, int* s, int *d, double *length, int type_distance);
-      void distanceMap_1_N_ind(unsigned source, std::vector<float> &distanceMap,double *length, int type_distance);
+      /** Compute a distance map from a given point
+
+          \param source index of the starting point (vertex number)
+          \param distanceMap output distance map, the vector can be empty, it
+            will be filled with as many values as the mesh vertices number.
+          \param length output max distance
+          \param type_distance 0: weighted distance,
+            1: euclidean distance
+      */
+      void distanceMap_1_N_ind(unsigned source,
+                               std::vector<float> &distanceMap,double *length,
+                               int type_distance);
   };
 
 }
