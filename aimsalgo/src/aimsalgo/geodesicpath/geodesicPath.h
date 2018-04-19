@@ -49,21 +49,23 @@ namespace aims
       geodesic::Mesh _meshSP;
 
       /** Initializes the geodesic path structures for a given mesh geometry,
-          using a weight map (curvature, typically). Several methods are
+          using a constraint map (curvature, typically). Several methods are
           available.
 
           \param surface mesh to compute geodesic paths or distances on
-          \param texCurv weight map texture
+          \param texCurv constraint map texture
           \param method 0: unconstrained,
-            1: sulci (maximize negative curvature),
-            2: gyri (maximize positive curvature),
-            3: "geodesic" (?)
-          \param strain seems to be a scaling factor on the weights map.
+            1: minimize the constraint map, suitable for sulci using the
+               curvature as constraint,
+            2: maximize constraint map, suitable for gyri using the curvature
+               as constraint,
+            3: unconstrained
+          \param strain weight factor on the constraints map.
             In practice we use 3 for sulci and gyri.
       */
       GeodesicPath( const AimsSurfaceTriangle & surface,
                     const TimeTexture<float> & texCurv, int method, int strain);
-      /** Same as the above constructor, except that the weights map is
+      /** Same as the above constructor, except that the constraints map is
           computed internally as the curvature of the mesh.
       */
       GeodesicPath( const AimsSurfaceTriangle & surface , int method,
