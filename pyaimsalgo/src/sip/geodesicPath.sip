@@ -40,27 +40,29 @@ class GeodesicPath
     GeodesicPath(surface, method, strain)
 
     Initializes the geodesic path structures for a given mesh geometry,
-    using a weight map (curvature, typically). Several methods are
+    using a constraint map (curvature, typically). Several methods are
     available.
 
     Parameters
     ----------
     surface: AimsTimeSurface_3_VOID
         mesh to compute geodesic paths or distances on
-    texCurv: TimeTexture-FLOAT
-        weight map texture. If not specified, the curvature will be computed
-        and used as weights.
+    texCurv: TimeTexture_FLOAT
+        constraint map texture. If not specified, the curvature will be
+        computed and used as constraint.
     method: int
         0:
             unconstrained,
         1:
-            sulci (maximize negative curvature),
+            minimize the constraint map, suitable for sulci using the
+            curvature as constraint,
         2:
-            gyri (maximize positive curvature),
+            maximize constraint map, suitable for gyri using the curvature
+            as constraint,
         3:
-            "geodesic" (?)
+            unconstrained
     strain: int
-        seems to be a scaling factor on the weights map.
+        weight factor on the constraints map.
         In practice we use 3 for sulci and gyri.
 %End
 
