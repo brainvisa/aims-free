@@ -295,7 +295,7 @@ float
 AimsPCA::reconstructionError2( const AimsData<float>& individual )
 {
   AimsFastAllocationData<float> residual = individual - projection( individual ) ;
-  cout << "Après proj " << endl ;
+  cout << "After proj " << endl ;
   
   float err2 = 0. ;
   for( int i = 0 ; i < residual.dimX() ; ++i )
