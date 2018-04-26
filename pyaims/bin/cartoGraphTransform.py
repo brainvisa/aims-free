@@ -158,7 +158,7 @@ def graphTransform(g, motions):
                             bbmax = poi
                         else:
                             bbmin = np.min((bbmin, poi), axis=0)
-                            bbmax = np.min((bbmax, poi), axis=0)
+                            bbmax = np.max((bbmax, poi), axis=0)
                     # store bucket
                     b._get()[0] = bo
 
