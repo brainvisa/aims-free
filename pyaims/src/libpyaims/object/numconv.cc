@@ -31,10 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <pyaims/object/numconv.h>
-
 #include <iostream>
 #include <limits>
+
+// included after <iostream> to avoid a macro conflict in python on MacOS 10.11
+#include <pyaims/object/numconv.h>
 
 namespace carto
 {
