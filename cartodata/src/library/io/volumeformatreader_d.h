@@ -427,6 +427,12 @@ namespace soma
       sizeline[ 0 ] = viewsize[ 0 ];
       int dim;
       bool nextrow = false, ended = false;
+
+      bool was_open = _imr->isOpen( *dsi );
+
+      if( !was_open && !_imr->open( *dsi ) )
+        throw carto::open_error( "data source not available", dsi->url() );
+
       while( !ended )
       {
         nextrow = true;
@@ -453,6 +459,9 @@ namespace soma
                       sizeline, strides, options );
         }
       }
+
+      if( !was_open )
+        _imr->close( *dsi );
 
 //       for ( t=0; t<viewsize[ 3 ]; ++t ) {
 //         volpos[ 3 ] = t;

@@ -73,6 +73,7 @@ MovingAverageKernel & MovingAverageKernel::operator= ( const MovingAverageKernel
     _values = other._values;
     _support = other._support;
   }
+  return *this;
 }
 
 //----------------------------------------------------------------------------
@@ -195,6 +196,7 @@ MovingAverageCascadeKernel & MovingAverageCascadeKernel::operator= ( const Movin
     _support = other._support;
     _n = other._n;
   }
+  return *this;
 }
 
 //----------------------------------------------------------------------------

@@ -167,6 +167,8 @@ namespace aims {
                      dir == 2 ? k : 0,
                      dir == 3 ? k : 0 );
     }
+    else
+      throw runtime_error("IIRFilterBase::at, unknown boundary type");
 
   }
 
