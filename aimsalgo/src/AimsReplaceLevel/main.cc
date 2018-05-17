@@ -78,6 +78,8 @@ namespace std
                 if (x[i] < y[i])
                     return true;
             }
+            
+            return false;
         }
     };
     
@@ -94,6 +96,8 @@ namespace std
                 if (x[i] < y[i])
                     return true;
             }
+            
+            return false;
         }
     };
 }
