@@ -816,6 +816,20 @@ def __Volume_astype__(self, dtype, copy=False):
     return conv(self)
 
 
+def proxyget(self, *args, **kwargs):
+    '''get() is ambiguous:
+    rc_ptr / Object has the get() method, providing access to the underlying
+    object.
+    GenericObject has the method get(key, default=None) as a dictionary-like
+    object.
+    This proxy calls the right one depending on arguments.
+    '''
+    if len(args) == 0 and len(kwargs) == 0:
+        # no arguments, it's really the rc_ptr.get() method
+        return self._get()
+    return self._get().get(*args, **kwargs)
+
+
 # scan classes and modify some of them
 def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
@@ -836,9 +850,8 @@ def __fixsipclasses__(classes):
                 y.__str__ = __fixsipclasses__.proxystr
                 y.__nonzero__ = __fixsipclasses__.proxynonzero
                 y._getAttributeNames = __fixsipclasses__.getAttributeNames
-                y.get = lambda self: self._get()
-                                               # to maintain compatibiity with
-                                               # pyaims 3.x
+                # to maintain compatibiity with pyaims 3.x
+                y.get = __fixsipclasses__.proxyget
                 y.__iter__ = __fixsipclasses__.proxyiter
             elif y.__name__.startswith('ShallowConverter_'):
                 y.__oldcall__ = y.__call__
@@ -949,10 +962,12 @@ __fixsipclasses__.__setitem_vec__ = __setitem_vec__
 __fixsipclasses__.proxyiter = proxyiter
 __fixsipclasses__.__operator_overload__ = __operator_overload__
 __fixsipclasses__.__Volume_astype__ = __Volume_astype__
+__fixsipclasses__.proxyget = proxyget
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
 del __getitem_vec__, __setitem_vec__, __operator_overload__, __Volume_astype__
+del proxyget
 
 __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
@@ -2127,6 +2142,29 @@ There are exceptions to this behaviour:
 - small builtin types: numbers and strings are always copied since they
   are always converted and copied, not wrapped, when passed from python
   to C++ and vice versa.
+
+**The get() method**
+
+On :class:`Object` the ``get`` method is ambiguous and has 2 meanings:
+
+* get() without arguments is a wrapping to the C++ ``rc_ptr::get()`` which
+  returns the underlying wrapped object (here, a :class:`GenericObject`)
+* get(key, default=None) is the dict-like method that is available on
+  :class:`GenericObject` since aims 4.6.1.
+
+Depending on the arguments the Object method will redirect to the right one, thus:
+
+::
+
+    myobject.get()            # gets the GenericObject
+    myobject.get('key')       # gets the dict item under keyt 'key'
+    myobject.get().get('key') # does both, but this is what the previous line
+                              # already does, so the result is the same
+
+To avoid this ambiguity, ``Object.get()`` and ``rc_ptr.get()`` have been
+renamed ``_get()`` years ago (in aims 4.0 I think) but ``get()`` is still
+present for compatibility. This use (without argument) is obsolete and may be
+removed in the future.
 '''
 
 _volumedoc = '''
@@ -2152,15 +2190,17 @@ A volume is an array of voxels, which can be accessed via the ``at()``
 method.
 For standard numeric types, it is also posisble to get the voxels array as a
 numpy_ array, using the ``arraydata()`` method, or more conveniently,
-``numpy.array(volume, copy=False)`` or ``numpy.asarray(volume)``.
+``numpy.asarray(volume)`` or ``numpy.array(volume, copy=False)``.
 The array returned is a reference to the actual data block, so any
 modification to its contents also affect the Volume contents, so it is
 generally an easy way of manipulating volume voxels because all the power of
 the numpy module can be used on Volumes.
 The ``arraydata()`` method returns a numpy array just like it is in memory,
 that is a 4D array indexed by ``[t][z][y][x]``, which is generally not what you like and is not consistent with AIMS indexing. Contrarily, using
-``numpy.array( volume, copy=False )`` sets strides in the returned numpy
+``numpy.asarray(volume)`` sets strides in the returned numpy
 array, so that indexing is in the "normal" order ``[x][y][z][t]``, while still sharing the same memory block.
+The Volume object now also wraps the numpy accessors to the volume object itself, so that ``volume[x, y, z, t]`` is the same as
+``nupmy.asarray(volume)[x, y, z, t]``.
 
 Volumes also store a header which can contain various information (including
 sizes and voxel sizes). The header is a dictionary-like generic object
@@ -2197,12 +2237,12 @@ It is also possible to build a Volume from a numpy array:
 Note that passing a 1D numpy array of ints will build a volume mapping the array contents, whereas passing a python list or tuple of ints will interpret the list as a shape for the volume:
 
     >>> v = aims.Volume(numpy.array([100, 100, 10]).astype('int32'))
-    >>> print v.getSize()
+    >>> print(v.getSize())
     [ 3, 1, 1, 1 ]
-    >>> print np.asarray(v)
+    >>> print(np.asarray(v))
     [100 100  10]
     >>> v = aims.Volume([100, 100, 10])
-    >>> print v.getSize()
+    >>> print(v.getSize())
     [ 100, 100, 10, 1 ]
 
 .. _numpy: http://numpy.scipy.org/
