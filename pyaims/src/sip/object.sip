@@ -524,6 +524,22 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 %End
 
 
+    SIP_PYOBJECT get( const std::string &, SIP_PYOBJECT = Py_None );
+%MethodCode
+    try
+    {
+      carto::Object o = sipCpp->getProperty( *a0 );
+      sipRes = sipConvertFromInstance( new carto::Object( o ),
+                                       sipClass_carto_Object, Py_None );
+    }
+    catch( ... )
+    {
+      sipRes = a1;
+      Py_INCREF( sipRes );
+    }
+%End
+
+
     void __setitem__( int, const SIP_PYOBJECT ) /AutoGen/;
 %MethodCode
     // std::cout << "setitem(int)\n";
