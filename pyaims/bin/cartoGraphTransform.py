@@ -41,6 +41,9 @@ import os
 import sys
 from optparse import OptionParser
 from soma import aims
+import tempfile
+import numpy as np
+
 if sys.version_info[0] >= 3:
     xrange = range
 
@@ -61,14 +64,19 @@ def graphTransform2(g, motions, tmpg):
         if l in ks:
             mot = motions[l]
             print('transfo:', mot)
-            thr = '/tmp/toto.ima'
-            c = ['AimsThreshold', '-i', vol, '-o', thr, '-m', 'eq',
-                 '-t', str(i), '-b']
-            cs = '"' + string.join(c, '" "') + '"'
-            print(cs)
-            os.system(cs)
-            c = ['AimsResample', '-i', thr, '-o', thr, '-m', mot, '-t', 'n']
-            # ... unfinished ...
+            fd, thr = tempfile.mkstemp(suffix='.ima')
+            os.close(fd)
+            try:
+                c = ['AimsThreshold', '-i', vol, '-o', thr, '-m', 'eq',
+                    '-t', str(i), '-b']
+                cs = '"' + string.join(c, '" "') + '"'
+                print(cs)
+                os.system(cs)
+                c = ['AimsResample', '-i', thr, '-o', thr, '-m', mot, '-t',
+                     'n']
+                # ... unfinished ...
+            finally:
+                os.unlink(thr)
 
 
 def graphTransform(g, motions):
@@ -162,8 +170,16 @@ def graphTransform(g, motions):
                     # store bucket
                     b._get()[0] = bo
 
-    g['boundingbox_min'] = list(bbmin)
-    g['boundingbox_max'] = list(bbmax)
+        g['boundingbox_min'] = list(bbmin)
+        g['boundingbox_max'] = list(bbmax)
+
+        # transform commissures
+        for ptn in ('anterior_commissure', 'posterior_commissure',
+                   'interhemi_point'):
+            pt = np.array(g[ptn]) * np.array(vs[:3])
+            opt = mot.transform(pt)
+            g[ptn] = list(np.round(opt).astype(int))
+
 
 
 def parseOpts(argv):
