@@ -177,7 +177,7 @@ def graphTransform(g, motions):
         for ptn in ('anterior_commissure', 'posterior_commissure',
                    'interhemi_point'):
             pt = np.array(g[ptn]) * np.array(vs[:3])
-            opt = mot.transform(pt)
+            opt = mot.transform(pt) / np.array(vs[:3])
             g[ptn] = list(np.round(opt).astype(int))
 
 
