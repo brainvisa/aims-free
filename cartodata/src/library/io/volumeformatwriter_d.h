@@ -70,6 +70,17 @@ namespace soma
   }
 
   //==========================================================================
+  //   F I L T E R   M E T H O D S
+  //==========================================================================
+  template <typename T>
+  bool VolumeFormatWriter<T>::filterProperties(carto::Object header)
+  {
+      header->removeProperty("resolutions_dimension");
+      
+      return true;
+  }
+  
+  //==========================================================================
   //   W R I T E   M E T H O D S
   //==========================================================================
   template <typename T>
@@ -255,6 +266,9 @@ namespace soma
       pos[dim] = 1;
       strides[dim] = &obj( pos ) - &obj(0,0,0,0);
     }
+    
+    this->filterProperties(dsi->header());
+    
     *dsi = _imw->writeHeader( *dsi, (T*) &obj(0,0,0,0), position, view,
                               strides, options );
 
@@ -333,6 +347,15 @@ namespace soma
   VolumeRefFormatWriter<T>::~VolumeRefFormatWriter()
   {
   }
+  
+  template <typename T>
+  bool VolumeRefFormatWriter<T>::filterProperties(carto::Object header)
+  {
+      header->removeProperty("resolutions_dimension");
+      
+      return true;
+  }
+  
 
   template <typename T>
   bool VolumeRefFormatWriter<T>::write( const carto::VolumeRef<T> & obj,
