@@ -21,6 +21,7 @@ It is used the following way:
   map.
 * Voronoi and boundaries can then be retreived using voronoiVol(),
   midInterface() or midInterfaceVol()
+
 %End
 
 %TypeHeaderCode
@@ -227,6 +228,7 @@ It is used the following way:
   map.
 * Voronoi and boundaries can then be retreived using voronoiVol(),
   midInterface() or midInterfaceVol()
+
 %End
 
 %TypeHeaderCode
