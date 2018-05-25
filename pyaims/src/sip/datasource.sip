@@ -321,6 +321,7 @@ protected:
   see Reader
 
   .. note::
+
     The "default" keyword always contains at least one entry, which
     may be empty. I haven't for now found any use to several "default"
     entries.
@@ -364,12 +365,14 @@ protected:
       bool  empty() const;
 %Docstring
     Returns true only if no keyword inserted.
+
     .. warning:: May return false while no DataSource present
 %End
 
       set_STRING types() const;
 %Docstring
     Returns existing keywords.
+
     .. warning:: There may be existing keywords with no DataSource
 %End
 
