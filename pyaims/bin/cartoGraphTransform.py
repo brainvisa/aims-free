@@ -178,11 +178,12 @@ def graphTransform(g, motions):
         # transform commissures
         for ptn in ('anterior_commissure', 'posterior_commissure',
                     'interhemi_point'):
+            # note: ac/pc/ip are actually in mm even if they are ints (!)
             try:
-                pt = np.array(g[ptn]) * np.array(vs[:3])
+                pt = np.array(g[ptn])
             except KeyError:
                 continue
-            opt = mot.transform(pt) / np.array(vs[:3])
+            opt = mot.transform(pt)
             g[ptn] = list(np.round(opt).astype(int))
 
         # adapt Talairach transform
