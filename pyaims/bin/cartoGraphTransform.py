@@ -137,9 +137,11 @@ def graphTransform(g, motions):
                 if m is not None:
                     aims.SurfaceManip.meshTransform(m, mot)
 
-    # transform edges
+    # global transformation, used to adapt various things
     if globalmot is not None:
         mot = globalmot
+
+        # transform edges
         for e in g.edges():
             for bname in ('aims_cortical', 'aims_junction',
                           'aims_plidepassage'):
@@ -153,11 +155,11 @@ def graphTransform(g, motions):
                     bo = b2[0]
                     for p in bi.keys():
                         po = mot.transform(aims.Point3df(p.item(0) * vs[0],
-                                                        p.item(1) * vs[1],
-                                                        p.item(2) * vs[2]))
+                                                         p.item(1) * vs[1],
+                                                         p.item(2) * vs[2]))
                         poi = aims.Point3d(round(po.item(0) / vs[0]),
-                                          round(po.item(1) / vs[1]),
-                                          round(po.item(2) / vs[2]))
+                                           round(po.item(1) / vs[1]),
+                                           round(po.item(2) / vs[2]))
                         # print(p.item(0), p.item(1), p.item(2), '->', poi.item(0),
                         # poi.item(1), poi.item(2))
                         bo[poi] = 0
@@ -175,10 +177,22 @@ def graphTransform(g, motions):
 
         # transform commissures
         for ptn in ('anterior_commissure', 'posterior_commissure',
-                   'interhemi_point'):
-            pt = np.array(g[ptn]) * np.array(vs[:3])
+                    'interhemi_point'):
+            try:
+                pt = np.array(g[ptn]) * np.array(vs[:3])
+            except KeyError:
+                continue
             opt = mot.transform(pt) / np.array(vs[:3])
             g[ptn] = list(np.round(opt).astype(int))
+
+        # adapt Talairach transform
+        # Tal2 = Tal * mot^-1
+        try:
+            talairach = aims.GraphManip.talairach(g)
+            talairach2 = talairach * mot.inverse()
+            aims.GraphManip.storeTalairach(g, talairach2)
+        except:
+            pass
 
 
 
