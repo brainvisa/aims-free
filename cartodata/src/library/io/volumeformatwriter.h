@@ -81,6 +81,10 @@ namespace soma
       virtual ~VolumeFormatWriter();
       
       /// FormatWriter derived function
+      /// It removes properties that must not be written.
+      virtual bool filterProperties(carto::Object header);
+      
+      /// FormatWriter derived function
       /// This method understands a volume and calls appropriate ImageWriter
       /// methods
       virtual bool write( const carto::Volume<T> & obj, 
@@ -107,6 +111,10 @@ namespace soma
   {
     public:
       virtual ~VolumeRefFormatWriter();
+
+      /// FormatWriter derived function
+      /// It removes properties that must not be written.
+      virtual bool filterProperties(carto::Object header);
       
       /// FormatWriter derived function
       /// This method understands a volume and calls appropriate ImageWriter
