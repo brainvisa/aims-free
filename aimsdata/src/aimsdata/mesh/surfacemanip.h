@@ -31,11 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/*
- *  Surface class
- */
-#ifndef AIMS_SURFACE_SURFACEOPERATION_H
-#define AIMS_SURFACE_SURFACEOPERATION_H
+#ifndef AIMS_MESH_SURFACEMANIP_H
+#define AIMS_MESH_SURFACEMANIP_H
 
 #include <aims/mesh/surface.h>
 #include <cartobase/smart/rcptr.h>

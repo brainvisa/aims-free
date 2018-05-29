@@ -35,7 +35,7 @@
  *  Surface class
  */
 #include <cstdlib>
-#include <aims/mesh/surfaceOperation_d.h>
+#include <aims/mesh/surfacemanip_d.h>
 #include <list>
 #include <algorithm>
 #include <math.h>

@@ -170,12 +170,15 @@ set( _headers
     math/trapezeitg.h
     math/trieder.h
     memmap/allocator.h
+    mesh/cutmesh.h
+    mesh/cutmesh_d.h
     mesh/mesh_rasterization_d.h
     mesh/surface_g.h
     mesh/surface.h
-    mesh/surfaceOperation.h
-    mesh/surfaceOperation_d.h
     mesh/surfacegen.h
+    mesh/surfacemanip.h
+    mesh/surfacemanip_d.h
+    mesh/surfaceOperation.h
     mesh/texture.h
     mesh/texturetools.h
     mesh/tex2graph.h
@@ -373,10 +376,11 @@ set(_aimsdata_sources
     math/triederRot.cc
     math/gccbuiltin.c
     memmap/allocator.cc
+    mesh/cutmesh.cc
     mesh/mesh_rasterization_d.cc
     mesh/surface.cc
     mesh/surfacegen.cc
-    mesh/surfaceOperation.cc
+    mesh/surfacemanip.cc
     mesh/tex2graph.cc
     mesh/texture.cc
     mesh/texturetools.cc

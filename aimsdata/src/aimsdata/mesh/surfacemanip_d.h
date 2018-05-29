@@ -34,7 +34,7 @@
 #ifndef AIMS_SURFACE_SURFACEOPERATION_D_H
 #define AIMS_SURFACE_SURFACEOPERATION_D_H
 
-#include <aims/mesh/surfaceOperation.h>
+#include <aims/mesh/surfacemanip.h>
 #include <aims/mesh/texture.h>
 #include <aims/resampling/motion.h>
 
