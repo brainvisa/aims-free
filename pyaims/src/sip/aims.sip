@@ -267,6 +267,7 @@ typedef rc_ptr_AimsTimeSurface_3_VOID rc_ptr_AimsTimeSurface_3;
 typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include surfacegenerator.sip
 %Include surfacemanip.sip
+%Include cutmesh.sip
 %Include threshold.sip
 %Include threshold_S16_S16.sip
 %Include threshold_FLOAT_S16.sip
