@@ -139,7 +139,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
         {
           overt.push_back( pv0 );
           onorm.push_back( inorm[ pol[0] ] );
-          addTexturePoint( i, pol[0] );
+          addTexturePoint( count, pol[0] );
           uv0 = nvo;
           ++nvo;
         }
@@ -148,7 +148,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
         {
           overt.push_back( pv1 );
           onorm.push_back( inorm[ pol[1] ] );
-          addTexturePoint( i, pol[1] );
+          addTexturePoint( count, pol[1] );
           uv1 = nvo;
           ++nvo;
         }
@@ -157,7 +157,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
         {
           overt.push_back( pv2 );
           onorm.push_back( inorm[ pol[2] ] );
-          addTexturePoint( i, pol[2] );
+          addTexturePoint( count, pol[2] );
           uv2 = nvo;
           ++nvo;
         }
@@ -220,7 +220,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
             uv0 = (int) nvo;
             overt.push_back( ivert[ pol0 ] );
             onorm.push_back( inorm[ pol0 ] );
-            addTexturePoint( i, pol0 );
+            addTexturePoint( count, pol0 );
             ++nvo;
           }
 
@@ -249,7 +249,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
             onorm.push_back( ( inorm[ pol[pos[0]] ] * p1
                               + inorm[ pol[pos[2]] ] * p0 )
                             / (p0 + p1) );
-            addTextureInterpolPoint( i, pol[pos[0]], p1, pol[pos[2]], p0 );
+            addTextureInterpolPoint( count, pol[pos[0]], p1, pol[pos[2]], p0 );
             ++nvo;
           }
           else
@@ -275,7 +275,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
             onorm.push_back( ( inorm[ pol[pos[0]] ] * p2
                               + inorm[ pol[pos[1]] ] * p0 )
                             / (p0 + p2) );
-            addTextureInterpolPoint( i, pol[pos[0]], p2, pol[pos[1]], p0 );
+            addTextureInterpolPoint( count, pol[pos[0]], p2, pol[pos[1]], p0 );
             uv2 = nvo;
             ++nvo;
           }
@@ -302,7 +302,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
             uv0 = (int) nvo;
             overt.push_back( ivert[ pol0 ] );
             onorm.push_back( inorm[ pol0 ] );
-            addTexturePoint( i, pol0 );
+            addTexturePoint( count, pol0 );
             ++nvo;
           }
           int	& uv1 = itoo[ pol[ pos[1] ] ];
@@ -312,7 +312,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
             uv1 = (int) nvo;
             overt.push_back( ivert[ pol0 ] );
             onorm.push_back( inorm[ pol0 ] );
-            addTexturePoint( i, pol0 );
+            addTexturePoint( count, pol0 );
             ++nvo;
           }
 
@@ -341,7 +341,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
             onorm.push_back( ( inorm[ pol[pos[0]] ] * p2
                               + inorm[ pol[pos[2]] ] * p0 )
                             / (p0 + p2) );
-            addTextureInterpolPoint( i, pol[pos[0]], p2, pol[pos[2]], p0 );
+            addTextureInterpolPoint( count, pol[pos[0]], p2, pol[pos[2]], p0 );
             ++nvo;
           }
           else
@@ -367,7 +367,7 @@ void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
             onorm.push_back( ( inorm[ pol[pos[1]] ] * p2
                               + inorm[ pol[pos[2]] ] * p1 )
                             / (p1 + p2) );
-            addTextureInterpolPoint( i, pol[pos[1]], p2, pol[pos[2]], p1 );
+            addTextureInterpolPoint( count, pol[pos[1]], p2, pol[pos[2]], p1 );
             ++nvo;
           }
           else

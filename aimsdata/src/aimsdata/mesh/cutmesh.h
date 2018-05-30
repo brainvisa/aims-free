@@ -112,11 +112,17 @@ namespace aims
                      const std::vector<std::vector<const TimeTexture<T> *> >
                      & intex,
                      const Point4df & plane );
+    CutTexturedMesh( const std::vector<const AimsSurfaceTriangle *> & insurf,
+                     const std::vector<std::vector<
+                      carto::rc_ptr<TimeTexture<T> > > > & intex,
+                     const Point4df & plane );
     virtual ~CutTexturedMesh();
 
     void setTextures(
       const std::vector<std::vector<carto::rc_ptr<TimeTexture<T> > > >
       & intex );
+    void setTextures(
+      const std::vector<std::vector<const TimeTexture<T> *> > & intex );
 
     /// get output
     std::vector<std::vector<carto::rc_ptr<TimeTexture<T> > > >

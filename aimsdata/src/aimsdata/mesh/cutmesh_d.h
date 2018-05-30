@@ -51,6 +51,17 @@ namespace aims
 
 
   template <typename T>
+  CutTexturedMesh<T>::CutTexturedMesh(
+    const std::vector<const AimsSurfaceTriangle *> & insurf,
+    const std::vector<std::vector<carto::rc_ptr<TimeTexture<T> > > > & intex,
+    const Point4df & plane )
+    : CutMesh( insurf, plane )
+  {
+    setTextures( intex );
+  }
+
+
+  template <typename T>
   CutTexturedMesh<T>::~CutTexturedMesh()
   {
   }
@@ -74,6 +85,15 @@ namespace aims
     for( it=intex.begin(), ipt=_intex.begin(); it!=et; ++it, ++ipt )
       for( iit=it->begin(), eit=it->end(); iit!=eit; ++iit )
         ipt->push_back( iit->get() );
+  }
+
+
+  template <typename T>
+  void CutTexturedMesh<T>::setTextures(
+      const std::vector<std::vector<const TimeTexture<T> *> > & intex )
+  {
+    _intex = intex;
+    _intexrc.clear();
   }
 
 
