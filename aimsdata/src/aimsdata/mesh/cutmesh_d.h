@@ -136,7 +136,7 @@ namespace aims
     template <typename T>
     inline T _interpol( const T & v1, float w1, const T & v2, float w2 )
     {
-      return v1 * w1 + v2 * w2;
+      return ( v1 * w1 + v2 * w2 ) / ( w1 + w2 );
     }
 
 
@@ -144,7 +144,7 @@ namespace aims
     inline int32_t _interpol( const int32_t & v1, float w1,
                               const int32_t & v2, float w2 )
     {
-      return int32_t( rint( v1 * w1 + v2 * w2 ) );
+      return int32_t( rint( ( v1 * w1 + v2 * w2 ) / ( w1 + w2 ) ) );
     }
 
 
@@ -152,7 +152,7 @@ namespace aims
     inline int16_t _interpol( const int16_t & v1, float w1,
                               const int16_t & v2, float w2 )
     {
-      return int16_t( rint( v1 * w1 + v2 * w2 ) );
+      return int16_t( rint( ( v1 * w1 + v2 * w2 ) / ( w1 + w2 ) ) );
     }
 
 
@@ -160,7 +160,7 @@ namespace aims
     inline uint32_t _interpol( const uint32_t & v1, float w1,
                                const uint32_t & v2, float w2 )
     {
-      return uint32_t( rint( v1 * w1 + v2 * w2 ) );
+      return uint32_t( rint( ( v1 * w1 + v2 * w2 ) / ( w1 + w2 ) ) );
     }
 
 
@@ -168,7 +168,7 @@ namespace aims
     inline uint16_t _interpol( const uint16_t & v1, float w1,
                                const uint16_t & v2, float w2 )
     {
-      return uint16_t( rint( v1 * w1 + v2 * w2 ) );
+      return uint16_t( rint( ( v1 * w1 + v2 * w2 ) / ( w1 + w2 ) ) );
     }
 
 
@@ -176,7 +176,7 @@ namespace aims
     inline Point2df _interpol( const Point2df & v1, float w1,
                       const Point2df & v2, float w2 )
     {
-      return v1 * w1 + v2 * w2;
+      return ( v1 * w1 + v2 * w2 ) / ( w1 + w2 );
     }
 
   }
