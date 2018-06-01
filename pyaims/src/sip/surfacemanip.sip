@@ -9,7 +9,7 @@ Surface Manipulation Object. All mehtods are static in this class, it is just a 
 
 %TypeHeaderCode
 #include <pyaims/vector/stdvector.h>
-#include <aims/mesh/surfaceOperation.h>
+#include <aims/mesh/surfacemanip.h>
 #ifndef PYAIMS_AIMSTIMESURFACE_2_VOID_DEFINED
 #define PYAIMS_AIMSTIMESURFACE_2_VOID_DEFINED
 typedef AimsTimeSurface<2,Void> AimsTimeSurface_2_VOID;
