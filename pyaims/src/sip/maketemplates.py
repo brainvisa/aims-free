@@ -90,7 +90,7 @@ parser.add_option("-T", "--target-platform", dest='target_platform',
 
 (options, args) = parser.parse_args()
 if args:
-    parser.parse(['-h'])
+    parser.parse_args(['-h'])
 
 cpp = options.preprocess
 cppc = options.preprocessor
