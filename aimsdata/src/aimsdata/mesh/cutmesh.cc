@@ -568,10 +568,15 @@ void CutMesh::cutBorder( int timestep )
 }
 
 
-template class CutTexturedMesh<float>;
-template class CutTexturedMesh<int16_t>;
-template class CutTexturedMesh<int32_t>;
-template class CutTexturedMesh<uint16_t>;
-template class CutTexturedMesh<uint32_t>;
-template class CutTexturedMesh<Point2df>;
+namespace aims
+{
+
+  template class CutTexturedMesh<float>;
+  template class CutTexturedMesh<int16_t>;
+  template class CutTexturedMesh<int32_t>;
+  template class CutTexturedMesh<uint16_t>;
+  template class CutTexturedMesh<uint32_t>;
+  template class CutTexturedMesh<Point2df>;
+
+}
 
