@@ -88,8 +88,8 @@ bool WavefrontHeader::byteSwapping() const
 string WavefrontHeader::filename() const
 {
   if ( _filename.length() > 4
-      && ( _filename.substr( _filename.length() - 4, 4 ) == ".obj" )
-           || _filename.substr( _filename.length() - 4, 4 ) == ".OBJ" )
+      && ( _filename.substr( _filename.length() - 4, 4 ) == ".obj"
+           || _filename.substr( _filename.length() - 4, 4 ) == ".OBJ" ) )
     return _filename;
   else
     return _filename + ".obj";
