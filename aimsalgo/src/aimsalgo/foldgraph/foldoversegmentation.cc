@@ -1481,4 +1481,9 @@ BucketMap<T> *FoldArgOverSegment::dilateBucket( const BucketMap<T> & in )
 }
 
 
+template BucketMap<Void> *
+FoldArgOverSegment::dilateBucket( const BucketMap<Void> & in );
+template BucketMap<int16_t> *
+FoldArgOverSegment::dilateBucket( const BucketMap<int16_t> & in );
+
 
