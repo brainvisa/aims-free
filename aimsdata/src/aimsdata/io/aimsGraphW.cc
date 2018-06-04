@@ -737,4 +737,6 @@ void AimsGraphWriter::writeElements( Graph & g, SavingMode newmode,
 #ifdef __APPLE__
 template struct AimsGraphWriter::ObjectWrapper<AimsSurfaceTriangle>;
 template struct AimsGraphWriter::ObjectWrapper<BucketMap<Void> >;
+template struct AimsGraphWriter::ObjectWrapper<AimsTimeSurface<2, Void> >;
 #endif
+
