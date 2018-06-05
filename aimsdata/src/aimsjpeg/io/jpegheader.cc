@@ -126,7 +126,7 @@ void JpegHeader::read()
   }
 
   jpeg_stdio_src( &cinfo, fp );
-  if( jpeg_read_header( &cinfo, true ) != 1 )
+  if( jpeg_read_header( &cinfo, TRUE ) != 1 )
   {
     if (fp) {
         fclose( fp );

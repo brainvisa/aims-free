@@ -136,7 +136,7 @@ namespace aims
     if( sizeof( T ) != 3 )
       cinfo.data_precision = 8 * sizeof( T );
     cinfo.smoothing_factor = 0;
-    jpeg_set_quality( &cinfo, 100, true );
+    jpeg_set_quality( &cinfo, 100, TRUE );
     cinfo.density_unit = 1;
     cinfo.X_density = (UINT16) ( 25.4 / thing.sizeX() );
     cinfo.Y_density = (UINT16) ( 25.4 / thing.sizeY() );
@@ -146,7 +146,7 @@ namespace aims
       throw carto::file_error( filename );
 
     jpeg_stdio_dest( &cinfo, fp );
-    jpeg_start_compress( &cinfo, true );
+    jpeg_start_compress( &cinfo, TRUE );
 
     for( i=0; i<cinfo.image_height; ++i )
       {
