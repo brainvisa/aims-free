@@ -188,7 +188,7 @@ namespace aims
       throw carto::file_error( name );
 
     jpeg_stdio_src( &cinfo, fp );
-    if( jpeg_read_header( &cinfo, true ) != 1 )
+    if( jpeg_read_header( &cinfo, TRUE ) != 1 )
       throw carto::format_error( name );
     else
     {
