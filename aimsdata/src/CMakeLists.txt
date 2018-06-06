@@ -22,6 +22,7 @@ IF(APPLE)
   endif( BUILD_ECAT )
   add_subdirectory(bundle_aimsply)
   add_subdirectory(bundle_aimsvida)
+  add_subdirectory(bundle_aimsfdf)
 ENDIF(APPLE)
 
 
