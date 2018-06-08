@@ -187,19 +187,39 @@ bool doit( Process & p, const string & filename, Finder & f )
     }
     
     // Get channel name
-    if (static_cast<size_t>(t.channels[i]) < dcode.size()) {
-      cname = dcode[ t.channels[i] ];
+    if (DataTypeInfo<INP>::samples() > 1) 
+    {
+      // Input data is multiple channel
+      if (static_cast<size_t>(t.channels[i]) < dcode.size()) {
+        cname = dcode[ t.channels[i] ];
+      }
+      else {
+        cname = toString(t.channels[i]);
+      }
     }
-    else {
-      cname = toString(t.channels[i]);
+    else
+    {
+      // Input data is single channel
+      cname = dcode;
     }
-    
-    ext = FileUtil::extension( ofilename );
-    if( ext.empty() )
-      ext = "ima";
       
     if (t.appendsuffix) {
+      ext = FileUtil::extension( ofilename );
       base = FileUtil::removeExtension( ofilename );
+      
+      bool gz = false;
+      if (ext == "gz") {
+        gz = true;
+        ext = FileUtil::extension( ofilename );
+        base = FileUtil::removeExtension( base );
+      }
+      
+      if( ext.empty() )
+        ext = "ima";
+        
+      if (gz)
+        ext += ".gz";
+    
       // Append suffix to output file name      
       ofilename = base + "_" + cname + "." + ext;
     }
