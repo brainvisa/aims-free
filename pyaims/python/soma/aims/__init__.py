@@ -1791,10 +1791,14 @@ def AimsTimeSurface(*args, **kwargs):
 
 
 def AimsThreshold(*args, **kwargs):
-    '''Create a AimsThreshold instance from input and output types. Types may be
-    passed as keyword arguments intype and outtype, or dtype if both are the
+    '''Create a AimsThreshold instance from input and output types. Types may
+    be passed as keyword arguments intype and outtype, or dtype if both are the
     same. Otherwise the arguments are parsed to find types arguments.
     Types may be specified as allowed by typeCode().
+
+    Other arguments are otherwise passed to the constructor of the underlying
+    threshold object. See for instance:
+    :class:`soma.aims.AimsThreshold_S16_S16`.
     '''
     intype, outtype, args, kwargs = _parse2TypesInArgs(*args, **kwargs)
     if intype.startswith('Volume_'):
