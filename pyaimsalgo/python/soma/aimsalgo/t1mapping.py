@@ -209,7 +209,7 @@ class BAFIData:
         else:
             return FAcor
 
-    def afi1_noT2((T1, M0, FA_factor), BAFI_Data):
+    def afi1_noT2(T1, M0, FA_factor, BAFI_Data):
         n = BAFI_Data.TR_factor
         TR1 = BAFI_Data.repetition_time / (n + 1)
         TR2 = n * TR1
@@ -220,7 +220,7 @@ class BAFIData:
                 (1 - E2 + (1 - E1) * E2 * math.cos(flip_angle)) /
                 (1 - E1 * E2 * np.cos(flip_angle) ** 2))
 
-    def afi2_noT2((T1, M0, FA_factor), BAFI_Data):
+    def afi2_noT2(T1, M0, FA_factor, BAFI_Data):
         n = BAFI_Data.TR_factor
         TR1 = BAFI_Data.repetition_time / (n + 1)
         TR2 = n * TR1
