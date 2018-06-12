@@ -104,6 +104,7 @@ PSUBDIRS = \
 #    AimsRatClassif           \
     AimsRefineMesh            \
     AimsRegisterBMEstimate         \
+    AimsRegisterFFDFromCoordImages \
     AimsRegisterFFDApply           \
     AimsReplaceLevel               \
     AimsResample                   \
