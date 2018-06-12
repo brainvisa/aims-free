@@ -31,6 +31,8 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 '''File functions'''
+from __future__ import print_function
+
 import os
 import numpy as np
 import gzip
@@ -112,7 +114,7 @@ def compare_nii_files(file1, file2, thresh = 50):
     if a_1.arraydata().shape == a_2.arraydata().shape:
         d = a_1.arraydata() - a_2.arraydata()
         if abs(np.max(d) - np.min(d)) < thresh:
-            print 'WARNING, use aims to find t1mri file, absolute value taken : %s' % abs(np.max(d) - np.min(d))
+            print('WARNING, use aims to find t1mri file, absolute value taken :
+                  %s' % abs(np.max(d) - np.min(d)))
             return True
     return False
-    
