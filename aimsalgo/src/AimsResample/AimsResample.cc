@@ -179,7 +179,7 @@ int main( int argc, const char **argv )
     
     AimsApplication	app( argc, argv, "Resampling. Applies a " 
                          "transformation matrix to a volume. Performs " 
-                         "linear resampling" );
+                         "linear resampling by default." );
     app.addOption( filein, "-i", "source volume" );
     app.addOption( fileout, "-o", "destination volume" );
     app.addOption( motionfile, "-m", "motion file [default=identity]", true );
@@ -196,7 +196,7 @@ int main( int argc, const char **argv )
                    "--sz", "voxel z dimension of the resampled volume", 
                    true );
     app.addOption( rt, "-t", 
-                   "Resampling type: l[inear], n[earest], q[uadratic], " 
+                   "Resampling type: n[earest], l[inear], q[uadratic], " 
                    "c[cubic], quartic, quintic, six[thorder], seven[thorder] " 
                    "[default=linear]. Modes may also be specified as order " 
                    "number: 0=nearest, 1=linear etc.",
@@ -205,8 +205,6 @@ int main( int argc, const char **argv )
                    "size and volume dimension (values are overrided by --dx, "
                    "--dy, --dz, --sx, --sy and --sz)",
                    true );
-//     app.addOption( defaultval, "-d", "Default value for borders [default=0]", 
-//                    true );
     app.addOption( defaultval, "-d", "Default value for borders [default=0]", true );
     app.alias( "--input", "-i" );
     app.alias( "--output", "-o" );

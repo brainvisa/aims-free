@@ -906,7 +906,7 @@ int main( int argc, const char **argv )
     application.addOption( ffdproc.bucketout, "-b", "Output bucket knots", true );
     application.addOption( ffdproc.gridout, "-g", "Output grid mesh", true );
     application.addOption( ffdproc.compout, "-c", "Output compression volume", true );
-    application.addOption( ffdproc.old_mode, "--old-mode", "Make this command work with pre-2015 FFD motions [default: false]", true );
+    application.addOption( ffdproc.old_mode, "--old-mode", "Make this command work with pre-2015 FFD motions (which are in voxels instead of millimetres) [default: false]", true );
     application.addOption( ffdproc.vfinterp, "--vi", "Vector field interpolation type: l[inear], c[ubic] [default = cubic]", true );
     application.alias( "--input", "-i" );
     application.alias( "--motion", "-m" );
