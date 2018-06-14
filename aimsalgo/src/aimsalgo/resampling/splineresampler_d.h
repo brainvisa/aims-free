@@ -73,7 +73,7 @@ SplineResampler< T >::doResample( const AimsData< T >& inVolume,
                                   const Motion& invTransform3d,
                                   const T& outBackground,
                                   const Point3df& outLocation,
-                                  T& outValue, int )
+                                  T& outValue, int ) const
 {
 
   int order = this->getOrder();
@@ -547,4 +547,3 @@ int SplineResampler< T >::getFold( int i, int size ) const
 #undef EPSILON
 
 #endif
-

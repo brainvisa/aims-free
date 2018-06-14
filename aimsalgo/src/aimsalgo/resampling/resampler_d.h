@@ -41,12 +41,12 @@
 #include <stdexcept>
 
 template < typename T >
-void 
+void
 Resampler< T >::resample( const AimsData< T >& inVolume,
                           const Motion& transform3d,
                           const T& outBackground,
                           AimsData< T >& outVolume,
-                          bool verbose )
+                          bool verbose ) const
 {
 
   Point3df inResolution;
@@ -100,7 +100,7 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
               for ( x = 0; x < outSizeX; x++ )
                 {
 
-                  doResample( inVolume, normTransform3d, outBackground, 
+                  doResample( inVolume, normTransform3d, outBackground,
                               outLoc, *o, t );
                   ++ o;
                   outLoc[0] += outResolution[0];
@@ -125,7 +125,7 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
 
             }
 
-        } 
+        }
 
     }
 
@@ -138,7 +138,7 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
                           const Motion& transform3d,
                           const T& outBackground,
                           const Point3df& outLocation,
-                          T& outValue, int t )
+                          T& outValue, int t ) const
 {
 
   Point3df inResolution;
@@ -159,16 +159,16 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
 
 
 template <typename T>
-void Resampler<T>::updateParameters( const AimsData< T > &, int, 
-                                     bool )
+void Resampler<T>::updateParameters( const AimsData< T > &, int,
+                                     bool ) const
 {
 }
 
 
 template <typename T>
-void Resampler<T>::doit( const Motion& motion, AimsData<T>& thing )
+void Resampler<T>::doit( const Motion& motion, AimsData<T>& thing ) const
 {
-  if( !_ref )
+  if( _ref.isNull() )
     throw std::runtime_error( "Resampler used without a ref volme to resample"
     );
   resample( *_ref, motion, _defval, thing, carto::verbose );
@@ -176,14 +176,14 @@ void Resampler<T>::doit( const Motion& motion, AimsData<T>& thing )
 
 
 template <typename T>
-AimsData<T> Resampler<T>::doit( const Motion& motion, int dimX, int dimY, 
-                                int dimZ, const Point3df& resolution )
+AimsData<T> Resampler<T>::doit( const Motion& motion, int dimX, int dimY,
+                                int dimZ, const Point3df& resolution ) const
 {
-  if( !_ref )
+  if( _ref.isNull() )
     throw std::runtime_error( "Resampler used without a ref volme to resample"
     );
   AimsData<T>	thing( dimX, dimY, dimZ, _ref->dimT() );
-  thing.setSizeXYZT( resolution[0], resolution[1], resolution[2], 
+  thing.setSizeXYZT( resolution[0], resolution[1], resolution[2],
                      _ref->sizeT() );
 
   resample( *_ref, motion, _defval, thing, carto::verbose );
@@ -250,4 +250,3 @@ AimsData<T> Resampler<T>::doit( const Motion& motion, int dimX, int dimY,
 }
 
 #endif
-

@@ -43,7 +43,7 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
                                          const Motion &invTransform3d, 
                                          const T &outBackground, 
                                          const Point3df &outLocation, 
-                                         T &outValue, int t )
+                                         T &outValue, int t ) const
 {
 
   Point3df inLocation = invTransform3d.transform( outLocation );
@@ -56,7 +56,7 @@ void
 NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume, 
                                          const Point3df &inLocation, 
                                          const T &outBackground, 
-                                         T &outValue, int t )
+                                         T &outValue, int t ) const
 {
   Point3df normalizedInLocation = inLocation;
   normalizedInLocation[0] += 0.5;

@@ -53,7 +53,7 @@ class Resampler
 {
 public:
 
-  Resampler() : _ref( 0 ), _defval( 0 ) { }
+  Resampler() : _ref(), _defval( T() ) { }
   virtual ~Resampler() { }
 
   /** Resample the reference input data (set via setRef()) into an existing
@@ -67,7 +67,7 @@ public:
           resampled data will fill this existing output data
   */
   virtual void doit( const aims::AffineTransformation3d& transform,
-                     AimsData<T>& output_data );
+                     AimsData<T>& output_data ) const;
 
   /** Resample the reference input data (set via setRef()) into a new output
       data.
@@ -82,7 +82,7 @@ public:
   */
   virtual AimsData<T> doit( const aims::AffineTransformation3d& transform,
                             int dimX, int dimY,
-                            int dimZ, const Point3df& voxel_size );
+                            int dimZ, const Point3df& voxel_size ) const;
 
   /** Resample the input data into an existing output data.
 
@@ -99,7 +99,7 @@ public:
                          const aims::AffineTransformation3d& transform,
                          const T& background,
                          AimsData< T >& output_data,
-                         bool verbose = false );
+                         bool verbose = false ) const;
 
   /** Resample a single voxel of the input data at a given specified output
       location, and set the output value.
@@ -119,29 +119,30 @@ public:
                          const aims::AffineTransformation3d& transform,
                          const T& background,
                          const Point3df& output_location,
-                         T& output_value, int timestep );
+                         T& output_value, int timestep ) const;
 
   /// set the input data to be resampled
-  void setRef( const AimsData<T>& ref ) { _ref = &ref; }
+  virtual void setRef( const AimsData<T>& ref )
+  { _ref = carto::const_ref<AimsData<T> >(&ref); }
+  const carto::const_ref<AimsData<T> >& ref() const { return _ref; }
   /// set the default background value
   void setDefaultValue( T val ) { _defval = val; }
+  const T& defaultValue() const { return _defval; };
 
 protected:
 
-  virtual void 
-  doResample( const AimsData< T > &inVolume, 
+  virtual void
+  doResample( const AimsData< T > &inVolume,
               const aims::AffineTransformation3d &invTransform3d,
-              const T &outBackground, const Point3df &outLocation, 
-              T &outValue, int time ) = 0;
+              const T &outBackground, const Point3df &outLocation,
+              T &outValue, int time ) const = 0;
 
   /// called before each time step, used in spline resamplers
-  virtual void updateParameters( const AimsData< T > &inVolume, int time, 
-                                 bool verbose );
+  virtual void updateParameters( const AimsData< T > &inVolume, int time,
+                                 bool verbose ) const;
 
-  const AimsData<T>* _ref;
+  carto::const_ref<AimsData<T> > _ref;
   T _defval;
 };
-
-
 
 #endif

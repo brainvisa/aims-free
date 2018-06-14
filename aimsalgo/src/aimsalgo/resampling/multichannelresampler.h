@@ -45,7 +45,7 @@ public: \
                          const Motion& transform3d, \
                          const T& outBackground, \
                          AimsData< T >& outVolume, \
-                         bool verbose = false ); \
+                         bool verbose = false ) const; \
 \
   int getOrder() const { return O; } \
 \
@@ -55,7 +55,7 @@ protected: \
   doResample( const AimsData< T > &, \
               const Motion &, \
               const T &, const Point3df &, \
-              T &, int ) {} \
+              T &, int ) const {} \
 \
 }; \
 
@@ -66,10 +66,9 @@ R< T >::resample( const AimsData< T >& inVolume, \
                   const Motion& transform3d, \
                   const T& outBackground, \
                   AimsData< T >& outVolume, \
-                  bool verbose ) \
+                  bool verbose ) const \
 { \
   ChannelSelector< AimsData<T>, AimsData<uint8_t> > selector; \
-  DataTypeInfo< T > info; \
 \
   int dimX = outVolume.dimX(); \
   int dimY = outVolume.dimY(); \

@@ -49,19 +49,19 @@ class MaskLinearResampler : public Resampler< T >
     MaskLinearResampler() : Resampler< T >() { };
     ~MaskLinearResampler() { }
 
-    void doit( const Motion& motion, AimsData<T>& thing );
+    void doit( const Motion& motion, AimsData<T>& thing ) const;
     AimsData<T> doit( const Motion& motion,int dimX, int dimY, int dimZ,
-                      const Point3df& resolution );
+                      const Point3df& resolution ) const;
 
   protected:
 
     void _sliceResamp( AimsData<T>& resamp, T* out,
 		       const Point3df& start, 
-                       int t, const AimsData<float>& Rinv );
+                       int t, const AimsData<float>& Rinv ) const;
 
     void 
     doResample( const AimsData< T > &, const Motion &, const T &, 
-                const Point3df &, T &, int ) {}
+                const Point3df &, T &, int ) const {}
 };
 
 
@@ -69,9 +69,9 @@ template <class T> inline
 AimsData<T> 
 MaskLinearResampler<T>::doit( const Motion& motion,
 			  int dimX, int dimY, int dimZ,
-			  const Point3df& resolution )
+			  const Point3df& resolution ) const
 {
-  ASSERT( this->_ref );
+  ASSERT( !this->_ref.isNull() );
 
   AimsData<T> thing( dimX, dimY, dimZ, this->_ref->dimT() );
   thing.setSizeXYZT( resolution[ 0 ], resolution[ 1 ], resolution[ 2 ],
@@ -85,9 +85,9 @@ MaskLinearResampler<T>::doit( const Motion& motion,
 
 template <class T> inline
 void MaskLinearResampler<T>::doit( const Motion& motion,
-				       AimsData<T>& thing )
+				       AimsData<T>& thing ) const
 {
-  ASSERT( this->_ref );
+  ASSERT( !this->_ref.isNull() );
   ASSERT( thing.dimT() == this->_ref->dimT() && thing.borderWidth() == 0 );
 
   Motion dirMotion = motion;
@@ -131,7 +131,7 @@ template <class T> inline
 void MaskLinearResampler<T>::_sliceResamp( AimsData<T>& resamp,
                                            T* out,
                                            const Point3df& start, int t,
-                                           const AimsData<float>& Rinv )
+                                           const AimsData<float>& Rinv ) const
 {
   typename AimsData<T>::const_iterator 
     pOrig = this->_ref->begin() + this->_ref->oFirstPoint() +

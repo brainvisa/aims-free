@@ -54,7 +54,7 @@ protected:
                    const Motion& transform3d,
                    const T& outBackground,
                    const Point3df& outLocation,
-                   T& outValue, int t );
+                   T& outValue, int t ) const;
   double getBSplineWeight( int i, double x ) const;
 };
 
