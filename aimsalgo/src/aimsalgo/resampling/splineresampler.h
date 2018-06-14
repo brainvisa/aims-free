@@ -121,7 +121,7 @@ protected:
                    const T &outBackground,
                    const Point3df &outLocation,
                    T &outValue,
-                   int t );
+                   int t ) const;
 
   /// \see getSplineCoef()
   void updateParameters( const AimsData< T >& inVolume, int t,
@@ -185,4 +185,3 @@ namespace aims {
 } // namespace aims
 
 #endif
-

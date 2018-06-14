@@ -67,7 +67,7 @@ void LinearResampler< T >::doResample(
                                       const Motion& invTransform3d,
                                       const T& outBackground,
                                       const Point3df& outLocation,
-                                      T& outValue, int t )
+                                      T& outValue, int t ) const
 {
 
   const T	*i = &inVolume( 0, 0, 0, t );
