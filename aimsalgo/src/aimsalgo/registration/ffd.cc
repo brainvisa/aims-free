@@ -846,8 +846,8 @@ SplineFfdResampler<T, C>::SplineFfdResampler(
     const FfdTransformation & transformation, T background ):
   CubicResampler<C>(),
   _transformation(transformation),
-  _background(background),
-  _spline(3, 0)
+  _spline(3, 0),
+  _background(background)
 {
   init();
 }
@@ -857,10 +857,10 @@ SplineFfdResampler<T, C>::SplineFfdResampler(
     const FfdTransformation & transformation, const AffineTransformation3d & affine,
     T background ):
   CubicResampler<C>(),
-  _transformation(transformation),
   _affine(affine),
-  _background(background),
-  _spline(3, 0)
+  _transformation(transformation),
+  _spline(3, 0),
+  _background(background)
 {
   init();
 }
@@ -909,7 +909,6 @@ Point3df SplineFfdResampler<T, C>::resample(
   double    output_channel_value;
   double    bk3, bj3, bi3;
   int       ck, cj, ci;
-  bool      aberrantvalue = false;
   Point3dd  p_ref( output_location[0], output_location[1], output_location[2] );
 
   // transform point
@@ -1022,8 +1021,8 @@ NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
     const FfdTransformation & transformation, const AffineTransformation3d & affine,
     T background ):
   NearestNeighborResampler<C>(),
-  _transformation(transformation),
   _affine(affine),
+  _transformation(transformation),
   _background(background)
 {
   init();
@@ -1112,8 +1111,8 @@ TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
     const FfdTransformation & transformation, const AffineTransformation3d & affine,
     T background ):
   LinearResampler<C>(),
-  _transformation(transformation),
   _affine(affine),
+  _transformation(transformation),
   _background(background)
 {
   init();
