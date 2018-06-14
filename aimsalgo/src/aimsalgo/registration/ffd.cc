@@ -30,9 +30,8 @@ namespace aims {
 //   FFD TRANSFORMATION
 //============================================================================
 
-SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
+FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
                       float sizeX, float sizeY, float sizeZ ):
-  _spline(3, 0),
   _ctrlPointDelta( dimX, dimY, dimZ ), _dimx( dimX ), _dimy( dimY ),
   _dimz( dimZ ), _vsx( sizeX ), _vsy( sizeY ), _vsz( sizeZ ),
   _flatx( dimX == 1 ), _flaty( dimY == 1 ), _flatz( dimZ == 1 )
@@ -41,8 +40,8 @@ SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
   _ctrlPointDelta.setSizeXYZT( sizeX, sizeY, sizeZ );
 }
 
-SplineFfd::SplineFfd( const SplineFfd & other ):
-  _spline(3, 0), _dimx( other._dimx ), _dimy( other._dimy ),
+FfdTransformation::FfdTransformation( const FfdTransformation & other ):
+  _dimx( other._dimx ), _dimy( other._dimy ),
   _dimz( other._dimz ), _vsx( other._vsx ), _vsy( other._vsy ),
   _vsz( other._vsz ),
   _flatx( other._flatx ), _flaty( other._flaty ), _flatz( other._flatz )
@@ -50,8 +49,8 @@ SplineFfd::SplineFfd( const SplineFfd & other ):
   updateAllCtrlKnot(other._ctrlPointDelta);
 }
 
-SplineFfd::SplineFfd( const AimsData<Point3df> & other ):
-  _spline(3, 0), _dimx( other.dimX() ), _dimy( other.dimY() ),
+FfdTransformation::FfdTransformation( const AimsData<Point3df> & other ):
+  _dimx( other.dimX() ), _dimy( other.dimY() ),
   _dimz( other.dimZ() ), _vsx( other.sizeX() ), _vsy( other.sizeY() ),
   _vsz( other.sizeZ() ),
   _flatx( _dimx == 1 ), _flaty( _dimy == 1 ), _flatz( _dimz == 1 )
@@ -59,7 +58,7 @@ SplineFfd::SplineFfd( const AimsData<Point3df> & other ):
   updateAllCtrlKnot(other);
 }
 
-SplineFfd & SplineFfd::operator=( const SplineFfd & other )
+FfdTransformation & FfdTransformation::operator=( const FfdTransformation & other )
 {
   if( this != &other )
   {
@@ -68,20 +67,20 @@ SplineFfd & SplineFfd::operator=( const SplineFfd & other )
   return *this;
 }
 
-Point3df SplineFfd::getCtrlKnot( int nx, int ny, int nz ) const
+Point3df FfdTransformation::getCtrlKnot( int nx, int ny, int nz ) const
 {
   return _ctrlPointDelta( aims::mirrorCoeff(nx, dimX()),
                           aims::mirrorCoeff(ny, dimY()),
                           aims::mirrorCoeff(nz, dimZ()) );
 }
 
-void SplineFfd::updateCtrlKnot( int nx, int ny, int nz, const Point3df & s )
+void FfdTransformation::updateCtrlKnot( int nx, int ny, int nz, const Point3df & s )
 {
   _ctrlPointDelta( nx, ny, nz ) = s;
 }
 
 
-void SplineFfd::updateDimensions()
+void FfdTransformation::updateDimensions()
 {
   _dimx = _ctrlPointDelta.dimX();
   _dimy = _ctrlPointDelta.dimY();
@@ -92,27 +91,10 @@ void SplineFfd::updateDimensions()
   _flatx = _dimx == 1;
   _flaty = _dimy == 1;
   _flatz = _dimz == 1;
-  /* 26/6/2018 (Yael)
-   * I went back to computing mirrored indices on the fly because it is hard
-   * to know in advance how many will be necessary.
-   */
-  // int i;
-  // _mirrorcoefvecx.resize( _dimx + 3 );
-  // _mirrorcoefvecy.resize( _dimy + 3 );
-  // _mirrorcoefvecz.resize( _dimz + 3 );
-  // _mirrorcoefx = &_mirrorcoefvecx[1];
-  // _mirrorcoefy = &_mirrorcoefvecy[1];
-  // _mirrorcoefz = &_mirrorcoefvecz[1];
-  // for( i=-1; i<_dimx + 2; ++i )
-  //   _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
-  // for( i=-1; i<_dimy + 2; ++i )
-  //   _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
-  // for( i=-1; i<_dimz + 2; ++i )
-  //   _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
 }
 
 
-void SplineFfd::updateGridResolution( const AimsData<Point3df> & newGrid )
+void FfdTransformation::updateGridResolution( const AimsData<Point3df> & newGrid )
 {
   // Ctrl Point Grid dimensions
   if( newGrid.dimX() != _dimx ||
@@ -133,7 +115,7 @@ void SplineFfd::updateGridResolution( const AimsData<Point3df> & newGrid )
   updateDimensions();
 }
 
-void SplineFfd::updateAllCtrlKnot( const AimsData<Point3df> & newCtrlKnotGrid )
+void FfdTransformation::updateAllCtrlKnot( const AimsData<Point3df> & newCtrlKnotGrid )
 {
   updateGridResolution( newCtrlKnotGrid );
   int dx = newCtrlKnotGrid.dimX(), dy = newCtrlKnotGrid.dimY(),
@@ -145,7 +127,7 @@ void SplineFfd::updateAllCtrlKnot( const AimsData<Point3df> & newCtrlKnotGrid )
 }
 
 
-void SplineFfd::updateAllCtrlKnotFromDeformation( const AimsData<Point3df> & newDeformationGrid )
+void FfdTransformation::updateAllCtrlKnotFromDeformation( const AimsData<Point3df> & newDeformationGrid )
 {
   updateGridResolution( newDeformationGrid );
 
@@ -178,70 +160,12 @@ void SplineFfd::updateAllCtrlKnotFromDeformation( const AimsData<Point3df> & new
   }
 }
 
-// This would be more precise if done in double
-Point3dd SplineFfd::deformation( const Point3dd& pImage ) const
+Point3dd FfdTransformation::deformation(const Point3dd& p_mm) const
 {
-  Point3dd deformation(0., 0., 0.);
-  Point3df fdef;
-  Point3dd pSpline( mmToSplineVox(pImage) );
-
-  Point3dl kSpline( (int)std::floor(pSpline[0]),
-                    (int)std::floor(pSpline[1]),
-                    (int)std::floor(pSpline[2]) );
-
-  /* 26/6/2018 (Yael)
-   * I removed this test because sometime the input point is outside of the
-   * FOV but the input + deformation falls back inside the FOV.
-   * Now, the deformation is always computed (this might add some unnecessary
-   * computations in some cases, but this is more safe)
-   */
-  // if( kSpline[0] < 0 || kSpline[0] >= dimX() ||
-  //     kSpline[1] < 0 || kSpline[1] >= dimY() ||
-  //     kSpline[2] < 0 || kSpline[2] >= dimZ() )
-  //   return deformation;
-
-  Point3dl kDown( ( _flatx ? 0 : kSpline[0] - 1 ),
-                  ( _flaty ? 0 : kSpline[1] - 1 ),
-                  ( _flatz ? 0 : kSpline[2] - 1 ) );
-  Point3dl kUp  ( ( _flatx ? 0 : kSpline[0] + 2 ),
-                  ( _flaty ? 0 : kSpline[1] + 2 ),
-                  ( _flatz ? 0 : kSpline[2] + 2 ) );
-
-  double bz, by, bx, byz;
-  int    cz, cy, cx;
-
-  for( int k = kDown[2]; k <= kUp[2]; ++k )
-  {
-    bz = ( _flatz ? 1. : spline3( pSpline[2] - k ) );
-    cz  = aims::mirrorCoeff(k, _dimz);
-    for( int j = kDown[1]; j <= kUp[1]; ++j )
-    {
-      by = ( _flaty ? 1. : spline3( pSpline[1] - j ) );
-      cy  = aims::mirrorCoeff(j, _dimy);
-      byz = bz * by;
-      for( int i = kDown[0]; i <= kUp[0]; ++i )
-      {
-        bx = ( _flatx ? 1. : spline3( pSpline[0] - i ) );
-        cx  = aims::mirrorCoeff(i, _dimx);
-        fdef = _ctrlPointDelta( cx, cy, cz ) * bx * byz;
-        deformation[0] += fdef[0];
-        deformation[1] += fdef[1];
-        deformation[2] += fdef[2];
-      }
-    }
-  }
-
-  return deformation;
+  return _deformation(p_mm);
 }
 
-Point3dd SplineFfd::transformDouble( double x, double y, double z ) const
-{
-  Point3dd p(x, y, z);
-  return p + deformation(p);
-}
-
-
-void SplineFfd::increaseResolution( const Point3d & addKnot )
+void FfdTransformation::increaseResolution( const Point3d & addKnot )
 {
   Point3d prevDim( dimX(), dimY(), dimZ() );
   Point3d newDim( prevDim + addKnot );
@@ -280,7 +204,7 @@ void SplineFfd::increaseResolution( const Point3d & addKnot )
 }
 
 #if 0
-void SplineFfd::inverseTransform()
+void FfdTransformation::inverseTransform()
 {
   int x, y, z, i, j, k;
 
@@ -544,7 +468,7 @@ void SplineFfd::inverseTransform()
 
 }
 
-void SplineFfd::estimateLocalDisplacement( const Point3df & VoxelSize)
+void FfdTransformation::estimateLocalDisplacement( const Point3df & VoxelSize)
 {
   int i, j, k;
 
@@ -589,7 +513,7 @@ void SplineFfd::estimateLocalDisplacement( const Point3df & VoxelSize)
 }
 #endif
 
-void SplineFfd::printControlPointsGrid() const
+void FfdTransformation::printControlPointsGrid() const
 {
   for( int z = 0; z < _ctrlPointDelta.dimZ(); ++z ) {
     for( int y = 0; y < _ctrlPointDelta.dimY(); ++y ) {
@@ -602,7 +526,7 @@ void SplineFfd::printControlPointsGrid() const
   }
 }
 
-void SplineFfd::writeDebugCtrlKnots( const string & filename ) const
+void FfdTransformation::writeDebugCtrlKnots( const string & filename ) const
 {
   AimsData<float> ctrlknots( dimX(), dimY(), dimZ(), 3 );
   ctrlknots.setSizeXYZT( sizeX(), sizeY(), sizeZ() );
@@ -617,7 +541,7 @@ void SplineFfd::writeDebugCtrlKnots( const string & filename ) const
   wcoef << ctrlknots;
 }
 
-void SplineFfd::writeDebugDeformations( const std::string & filename,
+void FfdTransformation::writeDebugDeformations( const std::string & filename,
                                         int dimX, int dimY, int dimZ,
                                         float sizeX, float sizeY, float sizeZ ) const
 {
@@ -639,10 +563,131 @@ void SplineFfd::writeDebugDeformations( const std::string & filename,
   wima << def;
 }
 
-void SplineFfd::write( const string & filename ) const
+void FfdTransformation::write( const string & filename ) const
 {
-  Writer<SplineFfd> w( filename );
+  Writer<FfdTransformation> w( filename );
   w << *this;
+}
+
+
+
+//============================================================================
+//   FFD SPLINE RESAMPLED TRANSFORMATION
+//============================================================================
+
+SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
+                      float sizeX, float sizeY, float sizeZ ):
+  FfdTransformation( dimX, dimY, dimZ, sizeX, sizeY, sizeZ ),
+  _spline(3, 0)
+{
+  // Set _mirrorcoef(vec)?[xyz]
+  updateDimensions();
+}
+
+SplineFfd::SplineFfd( const SplineFfd & other ):
+  FfdTransformation( other ),
+  _spline(3, 0)
+{
+  // Set _mirrorcoef(vec)?[xyz]
+  updateDimensions();
+}
+
+SplineFfd::SplineFfd( const AimsData<Point3df> & other ):
+  FfdTransformation( other ),
+  _spline(3, 0)
+{
+  // Set _mirrorcoef(vec)?[xyz]
+  updateDimensions();
+}
+
+SplineFfd & SplineFfd::operator=( const SplineFfd & other )
+{
+  FfdTransformation::operator = ( other );
+  return *this;
+}
+
+void SplineFfd::updateDimensions()
+{
+  FfdTransformation::updateDimensions();
+  /* 26/6/2018 (Yael)
+   * I went back to computing mirrored indices on the fly because it is hard
+   * to know in advance how many will be necessary.
+   */
+  // int i;
+  // _mirrorcoefvecx.resize( _dimx + 3 );
+  // _mirrorcoefvecy.resize( _dimy + 3 );
+  // _mirrorcoefvecz.resize( _dimz + 3 );
+  // _mirrorcoefx = &_mirrorcoefvecx[1];
+  // _mirrorcoefy = &_mirrorcoefvecy[1];
+  // _mirrorcoefz = &_mirrorcoefvecz[1];
+  // for( i=-1; i<_dimx + 2; ++i )
+  //   _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
+  // for( i=-1; i<_dimy + 2; ++i )
+  //   _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
+  // for( i=-1; i<_dimz + 2; ++i )
+  //   _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
+}
+
+Point3dd SplineFfd::transformDouble( double x, double y, double z ) const
+{
+  Point3dd p(x, y, z);
+  return p + deformation_private(p);
+}
+
+// This would be more precise if done in double
+Point3dd SplineFfd::deformation_private( const Point3dd& pImage ) const
+{
+  Point3dd deformation(0., 0., 0.);
+  Point3df fdef;
+  Point3dd pSpline( mmToSplineVox(pImage) );
+
+  Point3dl kSpline( (int)std::floor(pSpline[0]),
+                    (int)std::floor(pSpline[1]),
+                    (int)std::floor(pSpline[2]) );
+
+  /* 26/6/2018 (Yael)
+   * I removed this test because sometime the input point is outside of the
+   * FOV but the input + deformation falls back inside the FOV.
+   * Now, the deformation is always computed (this might add some unnecessary
+   * computations in some cases, but this is more safe)
+   */
+  // if( kSpline[0] < 0 || kSpline[0] >= dimX() ||
+  //     kSpline[1] < 0 || kSpline[1] >= dimY() ||
+  //     kSpline[2] < 0 || kSpline[2] >= dimZ() )
+  //   return deformation;
+
+  Point3dl kDown( ( _flatx ? 0 : kSpline[0] - 1 ),
+                  ( _flaty ? 0 : kSpline[1] - 1 ),
+                  ( _flatz ? 0 : kSpline[2] - 1 ) );
+  Point3dl kUp  ( ( _flatx ? 0 : kSpline[0] + 2 ),
+                  ( _flaty ? 0 : kSpline[1] + 2 ),
+                  ( _flatz ? 0 : kSpline[2] + 2 ) );
+
+  double bz, by, bx, byz;
+  int    cz, cy, cx;
+
+  for( int k = kDown[2]; k <= kUp[2]; ++k )
+  {
+    bz = ( _flatz ? 1. : spline3( pSpline[2] - k ) );
+    cz  = aims::mirrorCoeff(k, _dimz);
+    for( int j = kDown[1]; j <= kUp[1]; ++j )
+    {
+      by = ( _flaty ? 1. : spline3( pSpline[1] - j ) );
+      cy  = aims::mirrorCoeff(j, _dimy);
+      byz = bz * by;
+      for( int i = kDown[0]; i <= kUp[0]; ++i )
+      {
+        bx = ( _flatx ? 1. : spline3( pSpline[0] - i ) );
+        cx  = aims::mirrorCoeff(i, _dimx);
+        fdef = _ctrlPointDelta( cx, cy, cz ) * bx * byz;
+        deformation[0] += fdef[0];
+        deformation[1] += fdef[1];
+        deformation[2] += fdef[2];
+      }
+    }
+  }
+
+  return deformation;
 }
 
 
@@ -652,27 +697,27 @@ void SplineFfd::write( const string & filename ) const
 
 TrilinearFfd::TrilinearFfd( int dimX, int dimY, int dimZ,
                             float sizeX, float sizeY, float sizeZ ):
-  SplineFfd( dimX, dimY, dimZ, sizeX, sizeY, sizeZ )
+  FfdTransformation( dimX, dimY, dimZ, sizeX, sizeY, sizeZ )
 {
 }
 
 TrilinearFfd::TrilinearFfd( const TrilinearFfd & other ):
-  SplineFfd( other )
+  FfdTransformation( other )
 {
 }
 
 TrilinearFfd::TrilinearFfd( const AimsData<Point3df> & other ):
-  SplineFfd( other )
+  FfdTransformation( other )
 {
 }
 
 TrilinearFfd & TrilinearFfd::operator=( const TrilinearFfd & other )
 {
-  SplineFfd::operator = ( other );
+  FfdTransformation::operator = ( other );
   return *this;
 }
 
-Point3dd TrilinearFfd::deformation( const Point3dd& pImage ) const
+Point3dd TrilinearFfd::deformation_private( const Point3dd& pImage ) const
 {
   Point3dd deformation(0., 0., 0.);
   Point3df fdef;
@@ -765,7 +810,7 @@ Point3dd TrilinearFfd::deformation( const Point3dd& pImage ) const
 Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
 {
   Point3dd p(x, y, z);
-  return p + deformation(p);
+  return p + deformation_private(p);
 }
 
 
@@ -808,22 +853,24 @@ void SplineFfdResampler<T, C>::init()
 
 template <class T, class C>
 SplineFfdResampler<T, C>::SplineFfdResampler(
-    const SplineFfd & spline, T background ):
+    const FfdTransformation & transformation, T background ):
   CubicResampler<C>(),
-  _transformation(spline),
-  _background(background)
+  _transformation(transformation),
+  _background(background),
+  _spline(3, 0)
 {
   init();
 }
 
 template <class T, class C>
 SplineFfdResampler<T, C>::SplineFfdResampler(
-    const SplineFfd & spline, const AffineTransformation3d & affine,
+    const FfdTransformation & transformation, const AffineTransformation3d & affine,
     T background ):
   CubicResampler<C>(),
-  _transformation(spline),
+  _transformation(transformation),
   _affine(affine),
-  _background(background)
+  _background(background),
+  _spline(3, 0)
 {
   init();
 }
@@ -909,13 +956,13 @@ Point3df SplineFfdResampler<T, C>::resample(
       // Integrate spline values in 3 dimensions
       // pffd[0] - i, pffd[1] - j, pffd[2] - k,  vary in the range [-2, 2[
       for( int k = kDown[2]; k <= kUp[2]; ++k ) {
-        bk3 = ( _transformation.isZFlat() ? 1. : _transformation.spline3(pv_ref[2] - k) );
+        bk3 = ( _transformation.isZFlat() ? 1. : _spline(pv_ref[2] - k) );
         ck = aims::mirrorCoeff( k, _dimz );
         for( int j = kDown[1]; j <= kUp[1]; ++j ) {
-          bj3 = ( _transformation.isYFlat() ? 1. : _transformation.spline3(pv_ref[1] - j) );
+          bj3 = ( _transformation.isYFlat() ? 1. : _spline(pv_ref[1] - j) );
           cj = aims::mirrorCoeff( j, _dimy );
           for( int i = kDown[0]; i <= kUp[0]; ++i ) {
-            bi3 = ( _transformation.isXFlat() ? 1. : _transformation.spline3(pv_ref[0] - i) );
+            bi3 = ( _transformation.isXFlat() ? 1. : _spline(pv_ref[0] - i) );
             ci = aims::mirrorCoeff( i, _dimx );
             output_channel_value += (_channelcoef[c])(ci, cj, ck) * bi3 * bj3 * bk3;
           }
@@ -972,9 +1019,9 @@ void NearestNeighborFfdResampler<T, C>::init()
 
 template <class T, class C>
 NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
-    const SplineFfd & spline, T background ):
+    const FfdTransformation & transformation, T background ):
   NearestNeighborResampler<C>(),
-  _transformation(spline),
+  _transformation(transformation),
   _background(background)
 {
   init();
@@ -982,10 +1029,10 @@ NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
 
 template <class T, class C>
 NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
-    const SplineFfd & spline, const AffineTransformation3d & affine,
+    const FfdTransformation & transformation, const AffineTransformation3d & affine,
     T background ):
   NearestNeighborResampler<C>(),
-  _transformation(spline),
+  _transformation(transformation),
   _affine(affine),
   _background(background)
 {
@@ -1062,9 +1109,9 @@ void TrilinearFfdResampler<T, C>::init()
 
 template <class T, class C>
 TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
-    const SplineFfd & spline, T background ):
+    const FfdTransformation & transformation, T background ):
   LinearResampler<C>(),
-  _transformation(spline),
+  _transformation(transformation),
   _background(background)
 {
   init();
@@ -1072,10 +1119,10 @@ TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
 
 template <class T, class C>
 TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
-    const SplineFfd & spline, const AffineTransformation3d & affine,
+    const FfdTransformation & transformation, const AffineTransformation3d & affine,
     T background ):
   LinearResampler<C>(),
-  _transformation(spline),
+  _transformation(transformation),
   _affine(affine),
   _background(background)
 {
@@ -1173,7 +1220,7 @@ Point3df TrilinearFfdResampler<T, C>::resample(
 
 template <int D>
 void ffdTransformMesh( AimsTimeSurface<D, Void> & mesh,
-                       SplineFfd & deformation,
+                       FfdTransformation & deformation,
                        const AffineTransformation3d & affine )
 {
   typename AimsTimeSurface<D, Void>::iterator is, es = mesh.end();
@@ -1197,7 +1244,7 @@ void ffdTransformMesh( AimsTimeSurface<D, Void> & mesh,
 
 
 rc_ptr<BucketMap<Void> >
-ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & deformation,
+ffdTransformBucket( const BucketMap<Void> & bck, FfdTransformation & deformation,
                     const AffineTransformation3d & affine,
                     const Point3df & vso )
 {
@@ -1240,7 +1287,7 @@ ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & deformation,
 namespace
 {
 
-  void transformGraphObject( GraphObject *go, SplineFfd & deformation,
+  void transformGraphObject( GraphObject *go, FfdTransformation & deformation,
                         const AffineTransformation3d & affine,
                         const Point3df & vso, vector<int> &bbmin,
                         vector<int> & bbmax )
@@ -1333,7 +1380,7 @@ namespace
 }
 
 
-void ffdTransformGraph( Graph & graph, SplineFfd & deformation,
+void ffdTransformGraph( Graph & graph, FfdTransformation & deformation,
                         const AffineTransformation3d & affine,
                         const Point3df & vso )
 {
@@ -1395,7 +1442,7 @@ void ffdTransformGraph( Graph & graph, SplineFfd & deformation,
 // Bundles
 
 BundleFFDTransformer::BundleFFDTransformer(
-  rc_ptr<SplineFfd> deformation, const AffineTransformation3d & affine )
+  rc_ptr<FfdTransformation> deformation, const AffineTransformation3d & affine )
   : BundleListener(), BundleProducer(),
     _deformation( deformation ), _affine( affine ),
     _idaffine( affine.isIdentity() )
@@ -1481,12 +1528,12 @@ Point3df TrilinearFfdResampler<Point3df, float>::defaultBackground()
 
 // template instantiations
 
-template void ffdTransformMesh( AimsTimeSurface<2, Void> &, SplineFfd & spline,
-                                const AffineTransformation3d & affine );
-template void ffdTransformMesh( AimsTimeSurface<3, Void> &, SplineFfd & spline,
-                                const AffineTransformation3d & affine );
-template void ffdTransformMesh( AimsTimeSurface<4, Void> &, SplineFfd & spline,
-                                const AffineTransformation3d & affine );
+template void ffdTransformMesh( AimsTimeSurface<2, Void> &, FfdTransformation &,
+                                const AffineTransformation3d & );
+template void ffdTransformMesh( AimsTimeSurface<3, Void> &, FfdTransformation &,
+                                const AffineTransformation3d & );
+template void ffdTransformMesh( AimsTimeSurface<4, Void> &, FfdTransformation &,
+                                const AffineTransformation3d & );
 
 template class FfdResampler<int8_t>;
 template class FfdResampler<uint8_t>;

@@ -25,10 +25,10 @@ typedef Resampler<%Template2% > Resampler_%Template2typecode%;
       virtual ~SplineFfdResampler_%Template1typecode%_%Template2typecode%();
       virtual void init();
       SplineFfdResampler_%Template1typecode%_%Template2typecode%(
-        const aims::SplineFfd & spline,
+        const aims::FfdTransformation & spline,
         %Template1% background = SplineFfdResampler_%Template1typecode%_%Template2typecode%::defaultBackground() );
       SplineFfdResampler_%Template1typecode%_%Template2typecode%(
-        const aims::SplineFfd & spline,
+        const aims::FfdTransformation & spline,
         const aims::AffineTransformation3d & affine,
         %Template1% background = SplineFfdResampler_%Template1typecode%_%Template2typecode%::defaultBackground() );
       virtual void setRef( const AimsData_%Template1typecode% & ref );
@@ -62,10 +62,10 @@ typedef Resampler<%Template2% > Resampler_%Template2typecode%;
       virtual ~NearestNeighborFfdResampler_%Template1typecode%_%Template2typecode%();
       virtual void init();
       NearestNeighborFfdResampler_%Template1typecode%_%Template2typecode%(
-        const aims::SplineFfd & spline,
+        const aims::FfdTransformation & spline,
         %Template1% background = NearestNeighborFfdResampler_%Template1typecode%_%Template2typecode%::defaultBackground() );
       NearestNeighborFfdResampler_%Template1typecode%_%Template2typecode%(
-        const aims::SplineFfd & spline, Motion affine,
+        const aims::FfdTransformation & spline, Motion affine,
         %Template1% background = NearestNeighborFfdResampler_%Template1typecode%_%Template2typecode%::defaultBackground() );
       virtual void setRef( const AimsData_%Template1typecode% & ref );
       virtual Point3df resample( const Point3df & output_location,
@@ -99,9 +99,9 @@ typedef Resampler<%Template2% > Resampler_%Template2typecode%;
       virtual ~TrilinearFfdResampler_%Template1typecode%_%Template2typecode%();
       virtual void init();
       TrilinearFfdResampler_%Template1typecode%_%Template2typecode%(
-        const aims::SplineFfd & spline, %Template1% background = TrilinearFfdResampler_%Template1typecode%_%Template2typecode%::defaultBackground() );
+        const aims::FfdTransformation & spline, %Template1% background = TrilinearFfdResampler_%Template1typecode%_%Template2typecode%::defaultBackground() );
       TrilinearFfdResampler_%Template1typecode%_%Template2typecode%(
-        const aims::SplineFfd & spline,
+        const aims::FfdTransformation & spline,
         const aims::AffineTransformation3d & affine,
         %Template1% background = TrilinearFfdResampler_%Template1typecode%_%Template2typecode%::defaultBackground() );
       virtual void setRef( const AimsData_%Template1typecode% & ref );

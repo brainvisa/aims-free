@@ -50,7 +50,7 @@ todo = {
   'sampler' : [('float', '3')],
   'smoothing' : numtypes,
   'histogram' : numtypes,
-  'rcptr': ['aims::SplineFfd'],
+  'rcptr': ['aims::FfdTransformation', 'aims::SplineFfd', 'aims::TrilinearFfd'],
   'ffd': basetypes + ['Point3df'],
   'ffd2': [('unsigned char', 'unsigned char'), ('short', 'short'),
            ('unsigned short', 'unsigned short'),
@@ -58,4 +58,3 @@ todo = {
            ('double', 'double'), ('AimsRGB', 'unsigned char'),
            ('AimsRGBA', 'unsigned char'), ('Point3df', 'float')],
 }
-

@@ -125,7 +125,7 @@ bool doit( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<SplineFfd> deformation;
+  rc_ptr<FfdTransformation> deformation;
   if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
     deformation.reset( new TrilinearFfd );
   else
@@ -157,7 +157,7 @@ bool doit( Process & process, const string & fileref, Finder & )
   }
   else
   {
-    aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+    aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
     rdef >> *deformation;
   }
 
@@ -499,13 +499,13 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<SplineFfd> deformation;
+  rc_ptr<FfdTransformation> deformation;
   if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
     deformation.reset( new TrilinearFfd );
   else
     deformation.reset( new SplineFfd );
 
-  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
   rdef >> *deformation;
 
   //--------------------------------------------------------------------------
@@ -574,13 +574,13 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<SplineFfd> deformation;
+  rc_ptr<FfdTransformation> deformation;
   if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
     deformation.reset( new TrilinearFfd );
   else
     deformation.reset( new SplineFfd );
 
-  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
   rdef >> *deformation;
 
   //--------------------------------------------------------------------------
@@ -644,13 +644,13 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<SplineFfd> deformation;
+  rc_ptr<FfdTransformation> deformation;
   if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
     deformation.reset( new TrilinearFfd );
   else
     deformation.reset( new SplineFfd );
 
-  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
   rdef >> *deformation;
 
   //--------------------------------------------------------------------------
@@ -730,13 +730,13 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<SplineFfd> deformation;
+  rc_ptr<FfdTransformation> deformation;
   if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
     deformation.reset( new TrilinearFfd );
   else
     deformation.reset( new SplineFfd );
 
-  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
   rdef >> *deformation;
 
   //--------------------------------------------------------------------------
@@ -803,13 +803,13 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<SplineFfd> deformation;
+  rc_ptr<FfdTransformation> deformation;
   if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
     deformation.reset( new TrilinearFfd );
   else
     deformation.reset( new SplineFfd );
 
-  aims::Reader<SplineFfd> rdef(ffdproc.inputmotion);
+  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
   rdef >> *deformation;
 
   //--------------------------------------------------------------------------

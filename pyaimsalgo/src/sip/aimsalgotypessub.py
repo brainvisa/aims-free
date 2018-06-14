@@ -436,9 +436,15 @@ typessub.update(
         'module' : 'aimsalgo',
         'testPyType' : 'pyaimsalgoResamplerFactory_S16_Check',
     },
+    'aims::FfdTransformation':
+        classInAimsNamespace(
+                'aims/registration/ffd.h', 'FfdTransformation'),
     'aims::SplineFfd':
         classInAimsNamespace(
                 'aims/registration/ffd.h', 'SplineFfd'),
+    'aims::TrilinearFfd':
+        classInAimsNamespace(
+                'aims/registration/ffd.h', 'TrilinearFfd'),
   }
 )
 
