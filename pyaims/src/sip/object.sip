@@ -393,6 +393,44 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       }
 %End
 
+    int index( carto::Object ) const;
+%MethodCode
+    sipIsErr = 1;
+    try
+    {
+      if( sipCpp->isArray() )
+      {
+        // check for iterator
+        carto::Object i = sipCpp->objectIterator();
+        int n = 0;
+        if( i.get() && i->isValid() )
+        {
+          for( ; i->isValid(); i->next(), ++n )
+          {
+            carto::Object item = i->currentValue();
+            if( item == *a0 )
+            {
+              sipIsErr = 0;
+              sipRes = n;
+              break;
+            }
+          }
+        }
+      }
+    }
+    catch( ... )
+    {
+    }
+
+    if( sipIsErr )
+    {
+      sipRes = -1;
+      SIP_BLOCK_THREADS
+      PyErr_SetString( PyExc_ValueError, "item is not in list" );
+      SIP_UNBLOCK_THREADS
+    }
+%End
+
     // Dictionary API
 
     virtual bool isDictionary() const = 0;
