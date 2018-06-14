@@ -63,18 +63,6 @@ namespace aims
     Point3df transform( const Point3df & dir ) const;
     Point3df transform( float x, float y, float z ) const;
     Point3d transform( const Point3d & p ) const;
-    Point3dd transformVector( const Point3dd & vec ) const;
-    Point3df transformVector( const Point3df & dir ) const;
-    Point3dd transformVector( double x, double y, double z ) const;
-    Point3df transformVector( float x, float y, float z ) const;
-    Point3dd transformNormal( const Point3dd & dir ) const;
-    Point3df transformNormal( const Point3df & dir ) const;
-    Point3dd transformNormal( double x, double y, double z ) const;
-    Point3df transformNormal( float x, float y, float z ) const;
-    Point3dd transformUnitNormal( const Point3dd & dir ) const;
-    Point3df transformUnitNormal( const Point3df & dir ) const;
-    Point3dd transformUnitNormal( double x, double y, double z ) const;
-    Point3df transformUnitNormal( float x, float y, float z ) const;
 
   protected:
     Transformation3d() {}
@@ -84,16 +72,6 @@ namespace aims
     virtual Point3df transformPoint3df( const Point3df & dir ) const;
     virtual Point3d transformPoint3d( const Point3d & p ) const;
     virtual Point3df transformFloat( float x, float y, float z ) const;
-    virtual Point3dd transformVectorPoint3dd( const Point3dd & vec ) const;
-    virtual Point3df transformVectorPoint3df( const Point3df & dir ) const;
-    virtual Point3dd transformVectorDouble( double x, double y,
-                                            double z ) const;
-    virtual Point3df transformVectorFloat( float x, float y, float z ) const;
-    virtual Point3dd transformNormalPoint3dd( const Point3dd & dir ) const;
-    virtual Point3df transformNormalPoint3df( const Point3df & dir ) const;
-    virtual Point3dd transformNormalDouble( double x, double y,
-                                            double z ) const;
-    virtual Point3df transformNormalFloat( float x, float y, float z ) const;
   };
 
 
@@ -133,62 +111,6 @@ namespace aims
   }
 
 
-  inline Point3dd
-  Transformation3d::transformVector( double x, double y, double z ) const
-  {
-    return transformVectorDouble( x, y, z );
-  }
-
-
-  inline Point3df
-  Transformation3d::transformVector( float x, float y, float z ) const
-  {
-    return transformVectorFloat( x, y, z );
-  }
-
-
-  inline Point3df
-  Transformation3d::transformVector( const Point3df & pos ) const
-  {
-    return transformVectorPoint3df( pos );
-  }
-
-
-  inline Point3dd
-  Transformation3d::transformVector( const Point3dd & pos ) const
-  {
-    return transformVectorPoint3dd( pos );
-  }
-
-
-  inline Point3dd
-  Transformation3d::transformNormal( double x, double y, double z ) const
-  {
-    return transformNormalDouble( x, y, z );
-  }
-
-
-  inline Point3df
-  Transformation3d::transformNormal( float x, float y, float z ) const
-  {
-    return transformNormalFloat( x, y, z );
-  }
-
-
-  inline Point3df
-  Transformation3d::transformNormal( const Point3df & pos ) const
-  {
-    return transformNormalPoint3df( pos );
-  }
-
-
-  inline Point3dd
-  Transformation3d::transformNormal( const Point3dd & pos ) const
-  {
-    return transformNormalPoint3dd( pos );
-  }
-
-
   inline Point3df
   Transformation3d::transformPoint3df( const Point3df & pos ) const
   {
@@ -215,95 +137,6 @@ namespace aims
   }
 
 
-  inline Point3df
-  Transformation3d::transformVectorPoint3df( const Point3df & pos ) const
-  {
-    Point3dd transformed = transformVector( (double) pos[0], (double) pos[1],
-                                            (double) pos[2] );
-    return Point3df( (float) transformed[0], (float) transformed[1],
-                     (float) transformed[2] );
-  }
-
-
-  inline Point3dd
-  Transformation3d::transformVectorPoint3dd( const Point3dd & pos ) const
-  {
-    return transformVector( pos[0], pos[1], pos[2] );
-  }
-
-
-  inline Point3df
-  Transformation3d::transformVectorFloat( float x, float y, float z ) const
-  {
-    Point3dd transformed = transformVector( (double) x, (double) y,
-                                             (double) z );
-    return Point3df( (float) transformed[0], (float) transformed[1],
-                     (float) transformed[2] );
-  }
-
-
-  inline Point3df
-  Transformation3d::transformNormalPoint3df( const Point3df & pos ) const
-  {
-    Point3dd transformed = transformNormal( (double) pos[0], (double) pos[1],
-                                             (double) pos[2] );
-    return Point3df( (float) transformed[0], (float) transformed[1],
-                     (float) transformed[2] );
-  }
-
-
-  inline Point3dd
-  Transformation3d::transformNormalPoint3dd( const Point3dd & pos ) const
-  {
-    return transformNormal( pos[0], pos[1], pos[2] );
-  }
-
-
-  inline Point3df
-  Transformation3d::transformNormalFloat( float x, float y, float z ) const
-  {
-    Point3dd transformed = transformNormal( (double) x, (double) y,
-                                             (double) z );
-    return Point3df( (float) transformed[0], (float) transformed[1],
-                      (float) transformed[2] );
-  }
-
-
-  inline Point3dd
-  Transformation3d::transformUnitNormal( double x, double y, double z ) const
-  {
-    return transformNormal( x, y, z ).normalize();
-  }
-
-
-  inline Point3df
-  Transformation3d::transformUnitNormal( const Point3df & pos ) const
-  {
-    Point3dd transformed
-        = transformUnitNormal( (double) pos[0], (double) pos[1],
-                                (double) pos[2] );
-    return Point3df( (float) transformed[0], (float) transformed[1],
-                      (float) transformed[2] );
-  }
-
-
-  inline Point3dd
-  Transformation3d::transformUnitNormal( const Point3dd & pos ) const
-  {
-    return transformUnitNormal( pos[0], pos[1], pos[2] );
-  }
-
-
-  inline Point3df
-  Transformation3d::transformUnitNormal( float x, float y, float z ) const
-  {
-    Point3dd transformed = transformUnitNormal( (double) x, (double) y,
-                                                (double) z );
-    return Point3df( (float) transformed[0], (float) transformed[1],
-                      (float) transformed[2] );
-  }
-
-
   inline Point3d Transformation3d::transformPoint3d( const Point3d & p ) const
   {
     Point3dd transformed = transform( (double) p[0], (double) p[1],
@@ -316,4 +149,3 @@ namespace aims
 }
 
 #endif
-

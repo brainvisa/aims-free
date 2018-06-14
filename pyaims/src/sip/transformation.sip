@@ -32,15 +32,6 @@ namespace aims
     Point3dd transform( const Point3dd & pos ) const;
     Point3df transform( const Point3df & dir ) const;
     Point3d transform( const Point3d & p ) const;
-    Point3dd transformVector( const Point3dd & vec ) const;
-    Point3df transformVector( const Point3df & dir ) const;
-    Point3dd transformVector( double x, double y, double z ) const;
-    Point3dd transformNormal( const Point3dd & dir ) const;
-    Point3df transformNormal( const Point3df & dir ) const;
-    Point3dd transformNormal( double x, double y, double z ) const;
-    Point3dd transformUnitNormal( const Point3dd & dir ) const;
-    Point3df transformUnitNormal( const Point3df & dir ) const;
-    Point3dd transformUnitNormal( double x, double y, double z ) const;
 
     SIP_PYOBJECT transformPoints( SIP_PYOBJECT ) const /Factory/;
 %MethodCode
@@ -98,17 +89,6 @@ namespace aims
     virtual Point3df transformPoint3df( const Point3df & dir ) const;
     virtual Point3d transformPoint3d( const Point3d & p ) const;
     virtual Point3df transformFloat( float x, float y, float z ) const;
-    virtual Point3dd transformVectorPoint3dd( const Point3dd & vec ) const;
-    virtual Point3df transformVectorPoint3df( const Point3df & dir ) const;
-    virtual Point3dd transformVectorDouble( double x, double y,
-                                            double z ) const;
-    virtual Point3df transformVectorFloat( float x, float y, float z ) const;
-    virtual Point3dd transformNormalPoint3dd( const Point3dd & dir ) const;
-    virtual Point3df transformNormalPoint3df( const Point3df & dir ) const;
-    virtual Point3dd transformNormalDouble( double x, double y,
-                                            double z ) const;
-    virtual Point3df transformNormalFloat( float x, float y, float z ) const;
   };
 
 };
-
