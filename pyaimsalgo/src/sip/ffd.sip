@@ -10,7 +10,7 @@ namespace aims
   //   FFD TRANSFORMATION
   //==========================================================================
 
-  class SplineFfd: aims::Transformation3d
+  class FfdTransformation: aims::Transformation3d /Abstract/
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
@@ -51,33 +51,33 @@ namespace aims
 
    public:
     //--- Constructor --------------------------------------------------------
-    SplineFfd( int dimX = 0, int dimY = 1, int dimZ = 1,
-               float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_U8 & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_S16 & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_U16 & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_S32 & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_U32 & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_FLOAT & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_DOUBLE & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_RGB & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_RGBA & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_HSV & test_volume );
-    SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData_POINT3DF & test_volume );
+    FfdTransformation( int dimX = 0, int dimY = 1, int dimZ = 1,
+                       float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_U8 & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_S16 & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_U16 & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_S32 & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_U32 & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_FLOAT & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_DOUBLE & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_RGB & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_RGBA & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_HSV & test_volume );
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData_POINT3DF & test_volume );
 
-    SplineFfd( const aims::SplineFfd & other );
-    SplineFfd( const AimsData_POINT3DF & other );
+    FfdTransformation( const aims::FfdTransformation & other );
+    FfdTransformation( const AimsData_POINT3DF & other );
 
     operator AimsData_POINT3DF &();
 
@@ -97,7 +97,6 @@ namespace aims
     //--- Deformation --------------------------------------------------------
     Point3dd     deformation( const Point3dd& p_mm ) const;
     Point3dd     ffdCoord( const Point3dd& p_mm ) const;
-    double spline3( double x ) const;
 
     //--- Parameters ---------------------------------------------------------
     int          dimX() const;
@@ -129,13 +128,13 @@ namespace aims
 //   FFD READER/WRITER
 //============================================================================
 
-  class Reader_SplineFfd : Reader_AimsData_POINT3DF
+  class Reader_FfdTransformation : Reader_AimsData_POINT3DF
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
-#ifndef PYAIMS_READER_SPLINEFFD_DEFINED
-#define PYAIMS_READER_SPLINEFFD_DEFINED
-typedef aims::Reader<aims::SplineFfd> Reader_SplineFfd;
+#ifndef PYAIMS_READER_FFDTRANSFORMATION_DEFINED
+#define PYAIMS_READER_FFDTRANSFORMATION_DEFINED
+typedef aims::Reader<aims::FfdTransformation> Reader_FfdTransformation;
 typedef aims::Reader<AimsData<Point3df> >Reader_AimsData_POINT3DF;
 #endif
 %End
@@ -146,22 +145,22 @@ typedef aims::Reader<AimsData<Point3df> >Reader_AimsData_POINT3DF;
 %End
 
   public:
-    Reader_SplineFfd();
-    Reader_SplineFfd( const std::string& filename );
-    virtual ~Reader_SplineFfd();
-    virtual bool read( aims::SplineFfd & obj,
+    Reader_FfdTransformation();
+    Reader_FfdTransformation( const std::string& filename );
+    virtual ~Reader_FfdTransformation();
+    virtual bool read( aims::FfdTransformation & obj,
                        int border=0,
                        const std::string* format = 0,
                        int frame = -1 );
   };
 
-  class Writer_SplineFfd : Writer_AimsData_POINT3DF
+  class Writer_FfdTransformation : Writer_AimsData_POINT3DF
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
-#ifndef PYAIMS_WRITER_SPLINEFFD_DEFINED
-#define PYAIMS_WRITER_SPLINEFFD_DEFINED
-typedef aims::Writer<aims::SplineFfd> Writer_SplineFfd;
+#ifndef PYAIMS_WRITER_FFDTRANSFORMATION_DEFINED
+#define PYAIMS_WRITER_FFDTRANSFORMATION_DEFINED
+typedef aims::Writer<aims::FfdTransformation> Writer_FfdTransformation;
 typedef aims::Writer<AimsData<Point3df> > Writer_AimsData_POINT3DF;
 #endif
 %End
@@ -172,11 +171,11 @@ typedef aims::Writer<AimsData<Point3df> > Writer_AimsData_POINT3DF;
 %End
 
   public:
-    Writer_SplineFfd();
-    Writer_SplineFfd( const std::string& filename,
+    Writer_FfdTransformation();
+    Writer_FfdTransformation( const std::string& filename,
                    carto::Object options = carto::none() );
-    virtual ~Writer_SplineFfd();
-    virtual bool write( const aims::SplineFfd & obj,
+    virtual ~Writer_FfdTransformation();
+    virtual bool write( const aims::FfdTransformation & obj,
                         bool ascii = false,
                         const std::string* format = 0 );
   };
@@ -184,11 +183,59 @@ typedef aims::Writer<AimsData<Point3df> > Writer_AimsData_POINT3DF;
 namespace aims
 {
 
+  class SplineFfd: aims::FfdTransformation
+  {
+%TypeHeaderCode
+#include <aims/registration/ffd.h>
+#include <pyaims/data/data.h>
+%End
+
+%Docstring
+      FFD vector field deformation transform
+
+      Free Form Deformation is the registration technique used to build the
+      vector fields. This class is dedicated to the application of the vector
+      field deformation to transform coordinates.
+%End
+
+  public:
+    //--- Constructor --------------------------------------------------------
+    SplineFfd( int dimX = 0, int dimY = 1, int dimZ = 1,
+               float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_U8 & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_S16 & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_U16 & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_S32 & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_U32 & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_FLOAT & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_DOUBLE & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_RGB & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_RGBA & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_HSV & test_volume );
+    SplineFfd( int dimX, int dimY, int dimZ,
+               const AimsData_POINT3DF & test_volume );
+
+    SplineFfd( const aims::SplineFfd & other );
+    SplineFfd( const AimsData_POINT3DF & other );
+
+    double spline3( double x ) const;
+  };
+
   //==========================================================================
   //   FFD TRILINEAR RESAMPLED TRANSFORMATION
   //==========================================================================
 
-  class TrilinearFfd: aims::SplineFfd
+  class TrilinearFfd: aims::FfdTransformation
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
@@ -235,9 +282,6 @@ namespace aims
 
     TrilinearFfd( const aims::TrilinearFfd & other );
     TrilinearFfd( const AimsData_POINT3DF & other );
-
-    //--- Deformation --------------------------------------------------------
-    Point3dd     deformation( const Point3dd& p_mm ) const;
   };
 
 };
@@ -249,7 +293,7 @@ namespace aims
 */
 
   void ffdTransformMesh( AimsTimeSurface_2_VOID & mesh,
-                         aims::SplineFfd & spline,
+                         aims::FfdTransformation & transformation,
                          const aims::AffineTransformation3d & affine
                            = aims::AffineTransformation3d() );
 %Docstring
@@ -261,7 +305,7 @@ namespace aims
 %End
 
   void ffdTransformMesh( AimsTimeSurface_3_VOID & mesh,
-                         aims::SplineFfd & spline,
+                         aims::FfdTransformation & transformation,
                          const aims::AffineTransformation3d & affine
                            = aims::AffineTransformation3d() );
 %MethodCode
@@ -269,7 +313,7 @@ namespace aims
 %End
 
   void ffdTransformMesh( AimsTimeSurface_4_VOID & mesh,
-                         aims::SplineFfd & spline,
+                         aims::FfdTransformation & transformation,
                          const aims::AffineTransformation3d & affine
                            = aims::AffineTransformation3d() );
 %MethodCode
@@ -277,7 +321,7 @@ namespace aims
 %End
 
   rc_ptr_BucketMap_VOID
-  ffdTransformBucket( const BucketMap_VOID & bck, aims::SplineFfd & spline,
+  ffdTransformBucket( const BucketMap_VOID & bck, aims::FfdTransformation & transformation,
                       const aims::AffineTransformation3d & affine
                         = aims::AffineTransformation3d(),
                       const Point3df & vs = Point3df( 0., 0., 0. ) );
@@ -292,7 +336,7 @@ namespace aims
       *a0, *a1, *a2, *a3 ) );
 %End
 
-  void ffdTransformGraph( Graph & graph, aims::SplineFfd & spline,
+  void ffdTransformGraph( Graph & graph, aims::FfdTransformation & transformation,
                           const aims::AffineTransformation3d & affine
                             = aims::AffineTransformation3d(),
                           const Point3df & vs = Point3df( 0., 0., 0. ) );
@@ -321,7 +365,7 @@ namespace aims
 %End
 
   public:
-    BundleFFDTransformer( rc_ptr_SplineFfd deformation,
+    BundleFFDTransformer( rc_ptr_FfdTransformation & deformation,
                           const aims::AffineTransformation3d & affine );
     virtual ~BundleFFDTransformer();
   };

@@ -86,7 +86,9 @@
 %Include ffd2_RGB_U8.sip
 %Include ffd2_RGBA_U8.sip
 %Include ffd2_POINT3DF_FLOAT.sip
+%Include rcptr_FfdTransformation.sip
 %Include rcptr_SplineFfd.sip
+%Include rcptr_TrilinearFfd.sip
 
 // shorter names for double-templated classes
 
