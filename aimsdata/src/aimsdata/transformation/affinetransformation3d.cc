@@ -375,6 +375,21 @@ AffineTransformation3d::transformVectorFloat( float x, float y, float z ) const
 }
 
 
+Point3dd AffineTransformation3d::transformNormalDouble( double x, double y,
+                                                  double z ) const
+{
+  Point3dd      dir2( x, y, z );
+  Point3dd	u = vectProduct( dir2, Point3dd( 0, 0, 1 ) );
+  if( u.norm() <= 1e-4 ) u = vectProduct( dir2, Point3dd( 0, 1, 0 ) );
+  Point3dd      w = vectProduct( dir2, u );
+
+  u = transformVector( u );
+  w = transformVector( w );
+  dir2 = vectProduct( u, w );
+  return dir2;
+}
+
+
 //-----------------------------------------------------------------------------
 bool AffineTransformation3d::isIdentity() const
 {
