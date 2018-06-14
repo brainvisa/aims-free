@@ -68,10 +68,12 @@ public:
 };
 
 
-FFDApplyProc::FFDApplyProc() : Process(),
-  dx(0), dy(0), dz(0),
-  sx(0.), sy(0.), sz(0.),
-  old_mode(false), defaultval("0")
+FFDApplyProc::FFDApplyProc()
+  : Process(),
+    defaultval("0"),
+    dx(0), dy(0), dz(0),
+    sx(0.), sy(0.), sz(0.),
+    old_mode(false)
 {
   registerProcessType( "Volume", "S8",      &doit<int8_t, int8_t> );
   registerProcessType( "Volume", "U8",      &doit<uint8_t, uint8_t> );
@@ -847,6 +849,8 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
     for( ip=transformed.begin(); ip!=ep; ++ip )
       g << *ip << endl;
   }
+
+  return true;
 }
 
 
