@@ -35,7 +35,9 @@
 #ifndef AIMS_RESAMPLING_MASKLINRESAMPLER_H
 #define AIMS_RESAMPLING_MASKLINRESAMPLER_H
 
-#include <aims/resampling/motion.h>
+#include <stdexcept>
+
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/resampling/resampler.h>
 #include <aims/data/data.h>
 #include <aims/vector/vector.h>
@@ -49,27 +51,29 @@ class MaskLinearResampler : public Resampler< T >
     MaskLinearResampler() : Resampler< T >() { };
     ~MaskLinearResampler() { }
 
-    void doit( const Motion& motion, AimsData<T>& thing ) const;
-    AimsData<T> doit( const Motion& motion,int dimX, int dimY, int dimZ,
+    void doit( const aims::AffineTransformation3d& motion, AimsData<T>& thing ) const;
+    AimsData<T> doit( const aims::AffineTransformation3d& motion,
+                      int dimX, int dimY, int dimZ,
                       const Point3df& resolution ) const;
 
   protected:
 
     void _sliceResamp( AimsData<T>& resamp, T* out,
-		       const Point3df& start, 
+                       const Point3df& start,
                        int t, const AimsData<float>& Rinv ) const;
 
     void 
-    doResample( const AimsData< T > &, const Motion &, const T &, 
-                const Point3df &, T &, int ) const {}
+    doResample( const AimsData< T > &, const aims::Transformation3d &, const T &, 
+                const Point3df &, T &, int ) const
+    { throw std::runtime_error("not implemented"); }
 };
 
 
 template <class T> inline
 AimsData<T> 
-MaskLinearResampler<T>::doit( const Motion& motion,
-			  int dimX, int dimY, int dimZ,
-			  const Point3df& resolution ) const
+MaskLinearResampler<T>::doit( const aims::AffineTransformation3d& motion,
+                              int dimX, int dimY, int dimZ,
+                              const Point3df& resolution ) const
 {
   ASSERT( !this->_ref.isNull() );
 
@@ -84,14 +88,14 @@ MaskLinearResampler<T>::doit( const Motion& motion,
 
 
 template <class T> inline
-void MaskLinearResampler<T>::doit( const Motion& motion,
-				       AimsData<T>& thing ) const
+void MaskLinearResampler<T>::doit( const aims::AffineTransformation3d& motion,
+                                   AimsData<T>& thing ) const
 {
   ASSERT( !this->_ref.isNull() );
   ASSERT( thing.dimT() == this->_ref->dimT() && thing.borderWidth() == 0 );
 
-  Motion dirMotion = motion;
-  Motion invMotion = motion.inverse();
+  aims::AffineTransformation3d dirMotion = motion;
+  aims::AffineTransformation3d invMotion = motion.inverse();
   
   // scale motion
   Point3df sizeFrom( this->_ref->sizeX(), this->_ref->sizeY(), this->_ref->sizeZ() );

@@ -38,6 +38,7 @@
 #include <aims/resampling/resampler.h>
 #include <cstdlib>
 #include <cmath>
+#include <vector>
 
 /// B-Spline-based resampling.
 ///
@@ -117,13 +118,14 @@ protected:
   /// \param inVolume     volume to resample
   /// \param transform3d
   void doResample( const AimsData< T > &inVolume,
-                   const Motion &transform3d,
+                   const aims::Transformation3d &transform3d,
                    const T &outBackground,
                    const Point3df &outLocation,
                    T &outValue,
                    int t ) const;
 
-  /// \see getSplineCoef()
+  // FIXME: this method should be const in order to override the virtual method
+  // of the base class
   void updateParameters( const AimsData< T >& inVolume, int t,
                          bool verbose );
   void iirConvolveMirror( std::vector< double >& data ) const;

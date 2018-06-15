@@ -34,6 +34,8 @@
 #ifndef AIMS_RESAMPLING_MULTICHANNELRESAMPLER_H
 #define AIMS_RESAMPLING_MULTICHANNELRESAMPLER_H
 
+#include <stdexcept>
+
 
 #define AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( R, T, O ) \
 template <> \
@@ -42,7 +44,7 @@ class R< T > : public Resampler< T > \
 public: \
 \
   virtual void resample( const AimsData< T >& inVolume, \
-                         const Motion& transform3d, \
+                         const aims::AffineTransformation3d& transform3d, \
                          const T& outBackground, \
                          AimsData< T >& outVolume, \
                          bool verbose = false ) const; \
@@ -53,9 +55,9 @@ protected: \
 \
   virtual void \
   doResample( const AimsData< T > &, \
-              const Motion &, \
+              const aims::Transformation3d &, \
               const T &, const Point3df &, \
-              T &, int ) const {} \
+              T &, int ) const { throw std::runtime_error("not implemented");}; \
 \
 }; \
 
@@ -63,7 +65,7 @@ protected: \
 #define AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( R, T ) \
 void \
 R< T >::resample( const AimsData< T >& inVolume, \
-                  const Motion& transform3d, \
+                  const aims::AffineTransformation3d& transform3d,     \
                   const T& outBackground, \
                   AimsData< T >& outVolume, \
                   bool verbose ) const \

@@ -35,7 +35,7 @@
 #ifndef AIMS_RESAMPLING_LINEARRESAMPLER_D_H
 #define AIMS_RESAMPLING_LINEARRESAMPLER_D_H
 
-#include <cstdlib>
+#include <cmath>
 #include <aims/resampling/linearresampler.h>
 #include <aims/utility/channel.h>
 
@@ -64,7 +64,7 @@ int LinearResampler< T >::getOrder() const
 template < class T >
 void LinearResampler< T >::doResample(
                                       const AimsData< T >& inVolume,
-                                      const Motion& invTransform3d,
+                                      const aims::Transformation3d& invTransform3d,
                                       const T& outBackground,
                                       const Point3df& outLocation,
                                       T& outValue, int t ) const
@@ -231,4 +231,3 @@ AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGB )
 AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGBA )
 
 #endif
-

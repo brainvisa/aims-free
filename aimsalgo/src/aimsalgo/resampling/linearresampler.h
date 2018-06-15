@@ -51,7 +51,7 @@ public:
 protected:
 
   void doResample( const AimsData< T >& inVolume,
-                   const Motion& transform3d,
+                   const aims::Transformation3d& transform3d,
                    const T& outBackground,
                    const Point3df& outLocation,
                    T& outValue, int t ) const;
@@ -62,4 +62,3 @@ AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGB, 1 )
 AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGBA, 1 )
 
 #endif
-

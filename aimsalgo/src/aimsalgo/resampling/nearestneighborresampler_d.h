@@ -40,7 +40,7 @@
 template <class T>
 void 
 NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume, 
-                                         const Motion &invTransform3d, 
+                                         const aims::Transformation3d &invTransform3d,
                                          const T &outBackground, 
                                          const Point3df &outLocation, 
                                          T &outValue, int t ) const
