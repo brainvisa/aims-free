@@ -41,7 +41,7 @@
 #include <aims/config/aimsdata_config.h>
 #include <aims/data/data.h>
 #include <aims/math/mathelem.h>
-#include <iostream>
+#include <iosfwd>
 
 namespace aims
 {
@@ -78,7 +78,7 @@ aims/resampling/motion.h (the former location of the Motion class) and should
 minimize inconvenience when compiling old code which used Motion. However a few
 API differences may cause compilation problems:
 
-- forward declatations for the Motion class will not work any longer, since
+- forward declarations for the Motion class will not work any longer, since
   Motion is not a class anymore but a typedef. It is still possible to replace:
 \code class Motion;
 \endcode

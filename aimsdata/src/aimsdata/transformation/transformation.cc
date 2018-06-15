@@ -33,6 +33,8 @@
 
 #include <aims/transformation/transformation.h>
 
+#include <stdexcept>
+
 using namespace aims;
 using namespace std;
 
