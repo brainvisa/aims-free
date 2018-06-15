@@ -38,7 +38,8 @@
 
 #include <aims/data/data.h>
 #include <aims/vector/vector.h>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/transformation.h>
+#include <aims/transformation/affinetransformation3d.h>
 
 
 /** Resampler resamples an input data to build or fill an output data, using an affine transformation.
@@ -133,7 +134,7 @@ protected:
 
   virtual void
   doResample( const AimsData< T > &inVolume,
-              const aims::AffineTransformation3d &invTransform3d,
+              const aims::Transformation3d &invTransform3d,
               const T &outBackground, const Point3df &outLocation,
               T &outValue, int time ) const = 0;
 

@@ -37,13 +37,14 @@
 
 #include <aims/resampling/resampler.h>
 #include <cartobase/config/verbose.h>
+#include <iostream>
 #include <iomanip>
 #include <stdexcept>
 
 template < typename T >
 void
 Resampler< T >::resample( const AimsData< T >& inVolume,
-                          const Motion& transform3d,
+                          const aims::AffineTransformation3d& transform3d,
                           const T& outBackground,
                           AimsData< T >& outVolume,
                           bool verbose ) const
@@ -59,7 +60,7 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
   outResolution[1] = outVolume.sizeY();
   outResolution[2] = outVolume.sizeZ();
 
-  Motion normTransform3d;
+  aims::AffineTransformation3d normTransform3d;
 
   normTransform3d.scale( inResolution, Point3df( 1, 1, 1 ) );
   normTransform3d = transform3d * normTransform3d;
@@ -135,7 +136,7 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
 template < typename T >
 void
 Resampler< T >::resample( const AimsData< T >& inVolume,
-                          const Motion& transform3d,
+                          const aims::AffineTransformation3d& transform3d,
                           const T& outBackground,
                           const Point3df& outLocation,
                           T& outValue, int t ) const
@@ -146,7 +147,7 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
   inResolution[1] = inVolume.sizeY();
   inResolution[2] = inVolume.sizeZ();
 
-  Motion normTransform3d;
+  aims::AffineTransformation3d normTransform3d;
 
   normTransform3d.scale( inResolution, Point3df( 1, 1, 1 ) );
   normTransform3d = transform3d * normTransform3d;
@@ -166,7 +167,8 @@ void Resampler<T>::updateParameters( const AimsData< T > &, int,
 
 
 template <typename T>
-void Resampler<T>::doit( const Motion& motion, AimsData<T>& thing ) const
+void Resampler<T>::doit( const aims::AffineTransformation3d& motion,
+                         AimsData<T>& thing ) const
 {
   if( _ref.isNull() )
     throw std::runtime_error( "Resampler used without a ref volme to resample"
@@ -176,8 +178,9 @@ void Resampler<T>::doit( const Motion& motion, AimsData<T>& thing ) const
 
 
 template <typename T>
-AimsData<T> Resampler<T>::doit( const Motion& motion, int dimX, int dimY,
-                                int dimZ, const Point3df& resolution ) const
+AimsData<T> Resampler<T>::doit( const aims::AffineTransformation3d& motion,
+                                int dimX, int dimY, int dimZ,
+                                const Point3df& resolution ) const
 {
   if( _ref.isNull() )
     throw std::runtime_error( "Resampler used without a ref volme to resample"
@@ -208,12 +211,12 @@ AimsData<T> Resampler<T>::doit( const Motion& motion, int dimX, int dimY,
       {
         carto::Object trs = ph->getProperty( "transformations" );
         carto::Object tit = trs->objectIterator();
-        Motion motioninv = motion.inverse();
+        aims::AffineTransformation3d motioninv = motion.inverse();
         std::vector<std::vector<float> > trout;
         trout.reserve( trs->size() );
         for( ; tit->isValid(); tit->next() )
         {
-          Motion m( tit->currentValue() );
+          aims::AffineTransformation3d m( tit->currentValue() );
           m *= motioninv;
           trout.push_back( m.toVector() );
         }

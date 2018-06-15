@@ -36,6 +36,11 @@
 #define AIMS_RESAMPLING_SPLINERESAMPLER_D_H
 
 #include <aims/resampling/splineresampler.h>
+
+#include <cmath>
+#include <vector>
+#include <iostream>
+
 #include <aims/utility/converter_volume.h>
 
 #define EPSILON   1.192092896e-7
@@ -70,7 +75,7 @@ AimsData<double> SplineResampler< T >::getSplineCoef( const AimsData< T >& inVol
 template < class T >
 void
 SplineResampler< T >::doResample( const AimsData< T >& inVolume,
-                                  const Motion& invTransform3d,
+                                  const aims::Transformation3d& invTransform3d,
                                   const T& outBackground,
                                   const Point3df& outLocation,
                                   T& outValue, int ) const

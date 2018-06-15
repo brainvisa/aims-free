@@ -55,9 +55,9 @@ class NearestNeighborResampler : public Resampler< T >
                 T &outValue, int t ) const;
 
     virtual void
-    doResample( const AimsData< T > &inVolume, 
-                const Motion &transform3d, 
-                const T &outBackground, const Point3df &outLocation, 
+    doResample( const AimsData< T > &inVolume,
+                const aims::Transformation3d &transform3d,
+                const T &outBackground, const Point3df &outLocation,
                 T &outValue, int t ) const;
 };
 
