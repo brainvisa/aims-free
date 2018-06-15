@@ -54,11 +54,11 @@ class NearestNeighborResampler : public Resampler< T >
                 const T &outBackground, 
                 T &outValue, int t ) const;
 
-    virtual void
+    void
     doResample( const AimsData< T > &inVolume,
                 const aims::Transformation3d &transform3d,
                 const T &outBackground, const Point3df &outLocation,
-                T &outValue, int t ) const;
+                T &outValue, int t ) const CARTO_OVERRIDE;
 };
 
 #endif

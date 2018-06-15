@@ -46,11 +46,11 @@ public:
   SixthOrderResampler();
   ~SixthOrderResampler();
 
-  int getOrder() const;
+  int getOrder() const CARTO_OVERRIDE;
 
 protected:
 
-  double getBSplineWeight( int i, double x ) const;
+  double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
 
 AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( SixthOrderResampler, AimsRGB, 6 )

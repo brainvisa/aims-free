@@ -277,7 +277,7 @@ SplineResampler< T >::doResample( const AimsData< T >& inVolume,
 template < class T >
 void
 SplineResampler< T >::updateParameters( const AimsData< T >& inVolume,
-                                        int t, bool verbose )
+                                        int t, bool verbose ) const
 {
 
   if ( ( &inVolume != _lastvolume || t != _lasttime )

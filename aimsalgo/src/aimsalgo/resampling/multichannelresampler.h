@@ -37,27 +37,30 @@
 #include <stdexcept>
 
 
+// FIXME: multi-channel resamplers inherit directly from Resampler<T>, they
+// should inherit from SplineResampler<T> instead.
 #define AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( R, T, O ) \
 template <> \
 class R< T > : public Resampler< T > \
 { \
 public: \
 \
-  virtual void resample( const AimsData< T >& inVolume, \
-                         const aims::AffineTransformation3d& transform3d, \
-                         const T& outBackground, \
-                         AimsData< T >& outVolume, \
-                         bool verbose = false ) const; \
+  void resample( const AimsData< T >& inVolume, \
+                 const aims::AffineTransformation3d& transform3d,       \
+                 const T& outBackground,                                \
+                 AimsData< T >& outVolume,                              \
+                 bool verbose = false ) const CARTO_OVERRIDE;           \
 \
   int getOrder() const { return O; } \
 \
 protected: \
 \
-  virtual void \
+  void \
   doResample( const AimsData< T > &, \
               const aims::Transformation3d &, \
               const T &, const Point3df &, \
-              T &, int ) const { throw std::runtime_error("not implemented");}; \
+              T &, int ) const CARTO_OVERRIDE \
+  { throw std::runtime_error("not implemented");}; \
 \
 }; \
 
