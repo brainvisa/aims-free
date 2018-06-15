@@ -54,8 +54,8 @@ protected:
                    const aims::Transformation3d& transform3d,
                    const T& outBackground,
                    const Point3df& outLocation,
-                   T& outValue, int t ) const;
-  double getBSplineWeight( int i, double x ) const;
+                   T& outValue, int t ) const CARTO_OVERRIDE;
+  double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
 
 AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGB, 1 )

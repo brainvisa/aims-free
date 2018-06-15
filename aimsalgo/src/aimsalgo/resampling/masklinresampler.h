@@ -64,7 +64,7 @@ class MaskLinearResampler : public Resampler< T >
 
     void 
     doResample( const AimsData< T > &, const aims::Transformation3d &, const T &, 
-                const Point3df &, T &, int ) const
+                const Point3df &, T &, int ) const CARTO_OVERRIDE
     { throw std::runtime_error("not implemented"); }
 };
 

@@ -122,12 +122,10 @@ protected:
                    const T &outBackground,
                    const Point3df &outLocation,
                    T &outValue,
-                   int t ) const;
+                   int t ) const CARTO_OVERRIDE;
 
-  // FIXME: this method should be const in order to override the virtual method
-  // of the base class
   void updateParameters( const AimsData< T >& inVolume, int t,
-                         bool verbose );
+                         bool verbose ) const CARTO_OVERRIDE;
   void iirConvolveMirror( std::vector< double >& data ) const;
 
   // This method returns a mirror index when needed
@@ -148,9 +146,11 @@ protected:
 
   std::vector<double>  _poles;
   double               _gain;
-  AimsData<double>     _splineCoefficients;
-  const AimsData<T> *  _lastvolume;
-  int                  _lasttime;
+
+  // These three mutable members handle the cache of spline coefficients
+  mutable AimsData<double>     _splineCoefficients;
+  mutable const AimsData<T> *  _lastvolume;
+  mutable int                  _lasttime;
 };
 
 namespace aims {
