@@ -103,9 +103,6 @@ computes (1) consistently with all attributes i.e. this methods do
 #include <aims/resampling/quaternion.h>
 #include <aims/vector/vector.h>
 #include <aims/data/data.h>
-#include <aims/math/gausslu.h>
-#include <iostream>
-#include <fstream>
 #include <stdexcept>
 
 using namespace aims;

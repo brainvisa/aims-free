@@ -37,12 +37,9 @@
 #ifndef AIMS_RESAMPLING_MOTION_H
 #define AIMS_RESAMPLING_MOTION_H
 
-#include <aims/transformation/transformation.h>
-#include <aims/transformation/affinetransformation3d.h>
 #include <aims/config/aimsdata_config.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/data/data.h>
-#include <aims/math/mathelem.h>
-#include <iostream>
 
 namespace aims
 {
@@ -82,7 +79,7 @@ public:
   virtual void scale( const Point3df& sizeFrom, const Point3df& sizeTo );
 
   //Initialisation
-  virtual void setRotationAffine( float rx, float ry, float rz, 
+  virtual void setRotationAffine( float rx, float ry, float rz,
                                   const Point3df & c = Point3df( 0.0 ) );
   //void setRotationVectorial( const Point3df& v1, const Point3df& v2 );
   void setShearing(float Cx, float Cy, float Cz ) ;
@@ -105,4 +102,3 @@ typedef aims::AffineTransformation3d Motion;
 typedef aims::DecomposedAffineTransformation3d DecomposedMotion;
 
 #endif
-
