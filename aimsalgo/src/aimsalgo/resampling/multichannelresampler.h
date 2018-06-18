@@ -59,8 +59,7 @@ protected: \
   doResample( const AimsData< T > &, \
               const aims::Transformation3d &, \
               const T &, const Point3df &, \
-              T &, int ) const CARTO_OVERRIDE \
-  { throw std::runtime_error("not implemented");}; \
+              T &, int ) const CARTO_OVERRIDE;  \
 \
 }; \
 
@@ -84,7 +83,9 @@ R< T >::resample( const AimsData< T >& inVolume, \
   float sizeZ = outVolume.sizeZ(); \
   float sizeT = outVolume.sizeT(); \
 \
-  for (uint8_t channel = 0; channel < DataTypeInfo< T >::samples(); channel++) { \
+  for (uint8_t channel = 0; \
+       channel < DataTypeInfo< T >::samples(); \
+       channel++) { \
 \
     R< uint8_t > resampler; \
     AimsData<uint8_t> inChannel; \
@@ -101,18 +102,42 @@ R< T >::resample( const AimsData< T >& inVolume, \
     /* We split the data and process resampling on each component */ \
     inChannel = selector.select( inVolume, channel ); \
 \
-    resampler.setRef( inChannel ); \
-    resampler.setDefaultValue( _defval[ channel ] ); \
     resampler.resample( inChannel, \
-                       transform3d, \
-                       outBackground[ channel ], \
-                       outChannel, \
-                       verbose ); \
+                        transform3d, \
+                        outBackground[ channel ], \
+                        outChannel, \
+                        verbose ); \
 \
     selector.set( outVolume, channel, outChannel ); \
   } \
 \
 } \
+\
+\
+void \
+R< T >::doResample( const AimsData< T > &input_data, \
+                    const aims::Transformation3d &inverse_transform, \
+                    const T &background, const Point3df &output_location, \
+                    T &output_value, int timestep ) const \
+{ \
+  ChannelSelector< AimsData<T>, AimsData<uint8_t> > selector; \
+  R< uint8_t > resampler; \
+  AimsData<uint8_t> input_channel; \
+\
+  for (uint8_t channel = 0; \
+       channel < DataTypeInfo< T >::samples(); \
+       channel++) { \
+    input_channel = selector.select( input_data, channel ); \
+\
+    resampler.resample_inv_to_vox( input_channel, \
+                                   inverse_transform, \
+                                   background, \
+                                   output_location, \
+                                   output_value[channel], \
+                                   timestep ); \
+  } \
+} \
+
 
 
 #endif

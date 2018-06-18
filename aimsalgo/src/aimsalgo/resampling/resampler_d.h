@@ -41,30 +41,20 @@
 #include <iomanip>
 #include <stdexcept>
 
-template < typename T >
-void
-Resampler< T >::resample( const AimsData< T >& inVolume,
-                          const aims::AffineTransformation3d& transform3d,
-                          const T& outBackground,
-                          AimsData< T >& outVolume,
-                          bool verbose ) const
-{
 
-  Point3df inResolution;
-  inResolution[0] = inVolume.sizeX();
-  inResolution[1] = inVolume.sizeY();
-  inResolution[2] = inVolume.sizeZ();
+template <typename T>
+void Resampler<T>::
+resample_inv_to_vox( const AimsData< T >& inVolume,
+                     const aims::Transformation3d& inverse_transform_to_vox,
+                     const T& outBackground,
+                     AimsData< T >& outVolume,
+                     bool verbose ) const
+{
 
   Point3df outResolution;
   outResolution[0] = outVolume.sizeX();
   outResolution[1] = outVolume.sizeY();
   outResolution[2] = outVolume.sizeZ();
-
-  aims::AffineTransformation3d normTransform3d;
-
-  normTransform3d.scale( inResolution, Point3df( 1, 1, 1 ) );
-  normTransform3d = transform3d * normTransform3d;
-  normTransform3d = normTransform3d.inverse();
 
   int outSizeX = outVolume.dimX();
   int outSizeY = outVolume.dimY();
@@ -101,7 +91,7 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
               for ( x = 0; x < outSizeX; x++ )
                 {
 
-                  doResample( inVolume, normTransform3d, outBackground,
+                  doResample( inVolume, inverse_transform_to_vox, outBackground,
                               outLoc, *o, t );
                   ++ o;
                   outLoc[0] += outResolution[0];
@@ -129,6 +119,32 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
         }
 
     }
+
+}
+
+
+template < typename T >
+void
+Resampler< T >::resample( const AimsData< T >& inVolume,
+                          const aims::AffineTransformation3d& transform3d,
+                          const T& outBackground,
+                          AimsData< T >& outVolume,
+                          bool verbose ) const
+{
+
+  Point3df inResolution;
+  inResolution[0] = inVolume.sizeX();
+  inResolution[1] = inVolume.sizeY();
+  inResolution[2] = inVolume.sizeZ();
+
+  aims::AffineTransformation3d normTransform3d;
+
+  normTransform3d.scale( inResolution, Point3df( 1, 1, 1 ) );
+  normTransform3d = transform3d * normTransform3d;
+  normTransform3d = normTransform3d.inverse();
+
+  resample_inv_to_vox(inVolume, normTransform3d, outBackground, outVolume,
+                      verbose);
 
 }
 
