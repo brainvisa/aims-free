@@ -1,8 +1,7 @@
 
 
   class SplineFfdResampler_%Template1typecode%_%Template2typecode%
-    : FfdResampler_%Template1typecode%,
-      CubicResampler_%Template2typecode%
+    : FfdResampler_%Template1typecode%
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
@@ -39,8 +38,7 @@ typedef Resampler<%Template2% > Resampler_%Template2typecode%;
   };
 
   class NearestNeighborFfdResampler_%Template1typecode%_%Template2typecode%
-    : FfdResampler_%Template1typecode%,
-      NearestNeighborResampler_%Template2typecode%
+    : FfdResampler_%Template1typecode%
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
@@ -75,8 +73,7 @@ typedef Resampler<%Template2% > Resampler_%Template2typecode%;
 
 
   class TrilinearFfdResampler_%Template1typecode%_%Template2typecode%
-    : FfdResampler_%Template1typecode%,
-      LinearResampler_%Template2typecode%
+    : FfdResampler_%Template1typecode%
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>

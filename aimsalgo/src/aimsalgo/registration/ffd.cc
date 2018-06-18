@@ -1009,7 +1009,6 @@ void NearestNeighborFfdResampler<T, C>::init()
 template <class T, class C>
 NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
     const FfdTransformation & transformation, T background ):
-  NearestNeighborResampler<C>(),
   _transformation(transformation),
   _background(background)
 {
@@ -1020,7 +1019,6 @@ template <class T, class C>
 NearestNeighborFfdResampler<T, C>::NearestNeighborFfdResampler(
     const FfdTransformation & transformation, const AffineTransformation3d & affine,
     T background ):
-  NearestNeighborResampler<C>(),
   _affine(affine),
   _transformation(transformation),
   _background(background)
@@ -1099,7 +1097,6 @@ void TrilinearFfdResampler<T, C>::init()
 template <class T, class C>
 TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
     const FfdTransformation & transformation, T background ):
-  LinearResampler<C>(),
   _transformation(transformation),
   _background(background)
 {
@@ -1110,7 +1107,6 @@ template <class T, class C>
 TrilinearFfdResampler<T, C>::TrilinearFfdResampler(
     const FfdTransformation & transformation, const AffineTransformation3d & affine,
     T background ):
-  LinearResampler<C>(),
   _affine(affine),
   _transformation(transformation),
   _background(background)
