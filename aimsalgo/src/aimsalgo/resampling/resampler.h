@@ -202,10 +202,10 @@ protected:
               const T &background, const Point3df &output_location,
               T &output_value, int timestep ) const = 0;
 
-  /** Method called before each time step (used in derived classes).
+  /** Method called before doResample() for each time step.
 
       This method is called by all the resampling methods (resample() and
-      doit()) before they call doResample.
+      doit()) before they call doResample for a given time point \c t.
 
       The base class version of this method does nothing.
    */
