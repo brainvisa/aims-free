@@ -367,8 +367,7 @@ namespace aims {
       values.
   */
   template <class T, class C = T>
-  class SplineFfdResampler : public FfdResampler<T>,
-  private CubicResampler<C>
+  class SplineFfdResampler : public FfdResampler<T>
   {
     public:
 
@@ -391,6 +390,8 @@ namespace aims {
       AimsData<T>        _ref;
       std::vector<AimsData<double> >  _channelcoef;
       ChannelSelector<T,C>            _channelselector;
+
+      CubicResampler<C> _cubicresampler;
 
       const aims::TabulBSpline _spline;
       T   _background;
