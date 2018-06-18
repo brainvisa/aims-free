@@ -153,16 +153,11 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
   normTransform3d = transform3d * normTransform3d;
   normTransform3d = normTransform3d.inverse();
 
+  updateParameters( inVolume, t, carto::verbose );
+
   doResample( inVolume, normTransform3d, outBackground, outLocation,
               outValue, t );
 
-}
-
-
-template <typename T>
-void Resampler<T>::updateParameters( const AimsData< T > &, int,
-                                     bool ) const
-{
 }
 
 
@@ -171,7 +166,7 @@ void Resampler<T>::doit( const aims::AffineTransformation3d& motion,
                          AimsData<T>& thing ) const
 {
   if( _ref.isNull() )
-    throw std::runtime_error( "Resampler used without a ref volme to resample"
+    throw std::runtime_error( "Resampler used without a ref volume to resample"
     );
   resample( *_ref, motion, _defval, thing, carto::verbose );
 }
@@ -183,7 +178,7 @@ AimsData<T> Resampler<T>::doit( const aims::AffineTransformation3d& motion,
                                 const Point3df& resolution ) const
 {
   if( _ref.isNull() )
-    throw std::runtime_error( "Resampler used without a ref volme to resample"
+    throw std::runtime_error( "Resampler used without a ref volume to resample"
     );
   AimsData<T>	thing( dimX, dimY, dimZ, _ref->dimT() );
   thing.setSizeXYZT( resolution[0], resolution[1], resolution[2],
@@ -250,6 +245,13 @@ AimsData<T> Resampler<T>::doit( const aims::AffineTransformation3d& motion,
     }
   }
   return thing;
+}
+
+
+template <typename T>
+void Resampler<T>::setRef(const AimsData<T>& ref)
+{
+  _ref = carto::const_ref<AimsData<T> >(&ref);
 }
 
 #endif
