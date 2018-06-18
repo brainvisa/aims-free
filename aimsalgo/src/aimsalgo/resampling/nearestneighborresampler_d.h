@@ -37,12 +37,17 @@
 
 #include <aims/resampling/nearestneighborresampler.h>
 
+#include <cmath>
+
+using namespace std;
+
+
 template <class T>
-void 
-NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume, 
+void
+NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
                                          const aims::Transformation3d &invTransform3d,
-                                         const T &outBackground, 
-                                         const Point3df &outLocation, 
+                                         const T &outBackground,
+                                         const Point3df &outLocation,
                                          T &outValue, int t ) const
 {
 
@@ -52,59 +57,27 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
 }
 
 template <class T>
-void 
-NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume, 
-                                         const Point3df &inLocation, 
-                                         const T &outBackground, 
+void
+NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
+                                         const Point3df &inLocation,
+                                         const T &outBackground,
                                          T &outValue, int t ) const
 {
-  Point3df normalizedInLocation = inLocation;
-  normalizedInLocation[0] += 0.5;
-  normalizedInLocation[1] += 0.5;
-  normalizedInLocation[2] += 0.5;
+  long x = lround(inLocation[0]);
+  long y = lround(inLocation[1]);
+  long z = lround(inLocation[2]);
 
-  int x = ( int )normalizedInLocation[0];
-  int y = ( int )normalizedInLocation[1];
-  int z = ( int )normalizedInLocation[2];
-
-  if ( ( normalizedInLocation[0] < 0.0 ) &&
-       ( ( double )x != normalizedInLocation[0] ) )
-  {
-
-    -- x;
-
-  }
-  if ( ( normalizedInLocation[1] < 0.0 ) &&
-       ( ( double )y != normalizedInLocation[1] ) )
-  {
-
-    -- y;
-
-  }
-  if ( ( normalizedInLocation[2] < 0.0 ) &&
-       ( ( double )z != normalizedInLocation[2] ) )
-  {
-
-    -- z;
-
-  }
-    
   if ( ( x >= 0 ) && ( x < inVolume.dimX() ) &&
        ( y >= 0 ) && ( y < inVolume.dimY() ) &&
        ( z >= 0 ) && ( z < inVolume.dimZ() ) )
   {
-
     outValue = inVolume( x, y, z, t );
-
   }
   else
   {
-
     outValue = outBackground;
-
   }
 
 }
 
 #endif
-
