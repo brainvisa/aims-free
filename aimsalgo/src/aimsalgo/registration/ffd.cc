@@ -854,7 +854,6 @@ void SplineFfdResampler<T, C>::init()
 template <class T, class C>
 SplineFfdResampler<T, C>::SplineFfdResampler(
     const FfdTransformation & transformation, T background ):
-  CubicResampler<C>(),
   _transformation(transformation),
   _spline(3, 0),
   _background(background)
@@ -866,7 +865,6 @@ template <class T, class C>
 SplineFfdResampler<T, C>::SplineFfdResampler(
     const FfdTransformation & transformation, const AffineTransformation3d & affine,
     T background ):
-  CubicResampler<C>(),
   _affine(affine),
   _transformation(transformation),
   _spline(3, 0),
@@ -883,9 +881,9 @@ void SplineFfdResampler<T, C>::updateCoef( int t )
     ChannelSelector< AimsData<T>, AimsData<C> > dataselector;
     for ( uint8_t c = 0; c < _samples; ++c )
     {
-      this->reset();
+      _cubicresampler.reset();
       const AimsData<C> & channel = dataselector.select(_ref, c);
-      _channelcoef[c] = this->getSplineCoef( channel, t );
+      _channelcoef[c] = _cubicresampler.getSplineCoef( channel, t );
       _min[c] = channel.minimum();
       _max[c] = channel.maximum();
     }
