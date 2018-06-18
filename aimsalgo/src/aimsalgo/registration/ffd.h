@@ -368,20 +368,20 @@ namespace aims {
   */
   template <class T, class C = T>
   class SplineFfdResampler : public FfdResampler<T>,
-                             public CubicResampler<C>
+  private CubicResampler<C>
   {
     public:
 
-      virtual ~SplineFfdResampler();
-      virtual void init();
+      ~SplineFfdResampler();
+      void init() CARTO_OVERRIDE;
       SplineFfdResampler( const FfdTransformation & transformation,
                           T background = defaultBackground() );
       SplineFfdResampler( const FfdTransformation & transformation,
                           const AffineTransformation3d & affine,
                           T background = defaultBackground() );
-      virtual void setRef( const AimsData<T> & ref);
-      virtual Point3df resample( const Point3df & output_location,
-                                 T & output_value, int t = 0 );
+      void setRef( const AimsData<T> & ref) CARTO_OVERRIDE;
+      Point3df resample( const Point3df & output_location,
+                         T & output_value, int t = 0 ) CARTO_OVERRIDE;
       static T defaultBackground();
 
     private:
@@ -408,20 +408,20 @@ namespace aims {
       This variant of FfdResampler uses nearest neighbor voxels values.
   */
   template <class T, class C = T>
-  class NearestNeighborFfdResampler : public FfdResampler<T>,
-                                       public NearestNeighborResampler<C>
+  class NearestNeighborFfdResampler : public FfdResampler<T>
   {
     public:
 
-      virtual ~NearestNeighborFfdResampler();
-      virtual void init();
+      ~NearestNeighborFfdResampler() CARTO_OVERRIDE;
+      void init() CARTO_OVERRIDE;
       NearestNeighborFfdResampler( const FfdTransformation & transformation,
                                    T background = defaultBackground() );
       NearestNeighborFfdResampler( const FfdTransformation & transformation,
-                                   const AffineTransformation3d & affine, T background = defaultBackground() );
-      virtual void setRef( const AimsData<T> & ref );
-      virtual Point3df resample( const Point3df & output_location,
-                                 T & output_value, int t = 0 );
+                                   const AffineTransformation3d & affine,
+                                   T background = defaultBackground() );
+      void setRef( const AimsData<T> & ref ) CARTO_OVERRIDE;
+      Point3df resample( const Point3df & output_location,
+                                 T & output_value, int t = 0 ) CARTO_OVERRIDE;
       static T defaultBackground();
 
     private:
@@ -443,21 +443,20 @@ namespace aims {
       values.
   */
   template <class T, class C = T>
-  class TrilinearFfdResampler : public FfdResampler<T>,
-                                public LinearResampler<C>
+  class TrilinearFfdResampler : public FfdResampler<T>
   {
     public:
 
-      virtual ~TrilinearFfdResampler();
-      virtual void init();
+      ~TrilinearFfdResampler() CARTO_OVERRIDE;
+      void init() CARTO_OVERRIDE;
       TrilinearFfdResampler( const FfdTransformation & transformation,
                              T background = defaultBackground() );
       TrilinearFfdResampler( const FfdTransformation & transformation,
                              const AffineTransformation3d & affine,
                              T background = (T)0);
-      virtual void setRef( const AimsData<T> & ref );
-      virtual Point3df resample( const Point3df & output_location,
-                                 T & output_value, int t = 0 );
+      void setRef( const AimsData<T> & ref ) CARTO_OVERRIDE;
+      Point3df resample( const Point3df & output_location,
+                         T & output_value, int t = 0 ) CARTO_OVERRIDE;
       static T defaultBackground();
 
     private:
