@@ -56,17 +56,20 @@
 /// thus been implemented so that coefficients are not recomputed if the
 /// input volume did not change.
 ///
-/// For an input volume \c inVolume of dimensions [dimX, dimY, dimZ],
-/// coefficients are double precision values stored in a
-/// volume of same dimensions. Any value inVolume*(x, y, z) can then be
-/// interpolated through the formula:\n
-/// inVolume*(x, y, z) = Sum[i]( c_i * B^n(x - x_i) * B^n(y - y_i) *
-/// B^n(z - z_i) )\n
-/// with c_i the coefficients, B^n a nth order B-spline and (x_i, y_i, z_i)
-/// the discrete input image points. Given that the support of B^n is
-/// ]-(n+1)/2, (n+1)/2[, only the (n+1)^d (with d the volume dimension in
-/// [1,2,3]) closest coefficients/discrete points are used to interpolate a
-/// given point.
+/// For an input volume \c inVolume of dimensions `[dimX, dimY, dimZ]`,
+/// coefficients are double precision values stored in a volume of same
+/// dimensions. Any value \f$ \mathrm{inVolume}(x, y, z)\f$ can then be
+/// interpolated through the formula:
+/// \f[
+/// \mathrm{inVolume}(x, y, z) = \sum_i ( c_i * B^n(x - x_i) * B^n(y - y_i) *
+/// B^n(z - z_i) )
+/// \f]
+/// with \f$ c_i\f$ the coefficients, \f$ B^n\f$ a \f$ n\f$-th order B-spline
+/// and \f$ (x_i, y_i, z_i)\f$ the discrete input image points. Given that the
+/// support of \f$ B^n\f$ is \f$ ]-(n+1)/2, (n+1)/2[\f$, only the
+/// \f$ (n+1)^d\f$ (with \f$ d\f$ the volume dimension in \f$[1,2,3]\f$)
+/// closest coefficients / discrete points are used to interpolate a given
+/// point.
 ///
 /// \tparam T  Voxel data type
 template <class T>
@@ -99,8 +102,8 @@ public:
   /// This method actually calls updateParameters() ad returns the coeff
   /// container
   AimsData<double> getSplineCoef( const AimsData< T >& inVolume,
-				  int t = 0,
-				  bool verbose = false );
+                                  int t = 0,
+                                  bool verbose = false );
 
   /// Clear the cache.
   ///
@@ -124,22 +127,26 @@ protected:
                    T &outValue,
                    int t ) const CARTO_OVERRIDE;
 
+  /// Update the cache of spline coefficients if needed
+  ///
+  /// This method is called by all the resampling methods (resample() and
+  /// doit()) before they call doResample for a given time point \c t.
   void updateParameters( const AimsData< T >& inVolume, int t,
                          bool verbose ) const CARTO_OVERRIDE;
   void iirConvolveMirror( std::vector< double >& data ) const;
 
-  // This method returns a mirror index when needed
-  //
-  // Only inVolume's size spline coefficient are computed since "outside"
-  // coefficients are equal to their mirror inside the image domain.
-  // This method computes this mirror correspondance.
-  //
-  // - If i is in [0, size-1]: returns i
-  // - If i < 0:               returns -1
-  // - If i >= size:           returns size - (i - size) - 2
+  /// This method returns a mirror index when needed
+  ///
+  /// Only inVolume's size spline coefficient are computed since "outside"
+  /// coefficients are equal to their mirror inside the image domain.
+  /// This method computes this mirror correspondance.
+  ///
+  /// - If `i` is in `[0, size-1]`: returns `i`
+  /// - If `i < 0`:                 returns `-1`
+  /// - If `i >= size`:             returns `size - (i - size) - 2`
   int getFold( int i, int size ) const;
 
-  /// Returns B^n( x - i )
+  /// Returns \f$ B^n( x - i )\f$
   ///
   /// This method is defined by each nth order derived class
   virtual double getBSplineWeight( int i, double x ) const = 0;
@@ -155,15 +162,15 @@ protected:
 
 namespace aims {
 
-  // This method returns a mirror index when needed
-  //
-  // Only inVolume's size spline coefficient are computed since "outside"
-  // coefficients are equal to their mirror inside the image domain.
-  // This method computes this mirror correspondance.
-  //
-  // - If i is in [0, size-1]: returns i
-  // - If i < 0:               returns -1
-  // - If i >= size:           returns size - (i - size) - 2
+  /// This method returns a mirror index when needed
+  ///
+  /// Only inVolume's size spline coefficient are computed since "outside"
+  /// coefficients are equal to their mirror inside the image domain.
+  /// This method computes this mirror correspondance.
+  ///
+  /// - If `i` is in `[0, size-1]`: returns `i`
+  /// - If `i < 0`:                 returns `-1`
+  /// - If `i >= size`:             returns `size - (i - size) - 2`
   inline int mirrorCoeff( int i, int size )
   {
     i = std::abs( i );
