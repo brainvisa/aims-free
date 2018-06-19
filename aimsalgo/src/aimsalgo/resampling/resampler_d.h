@@ -41,6 +41,12 @@
 #include <iomanip>
 #include <stdexcept>
 
+template <typename T>
+Resampler<T>::Resampler()
+  : _ref(0, 0, 0, 0), _defval( T() )
+{
+}
+
 
 template <typename T>
 void Resampler<T>::
@@ -181,10 +187,10 @@ template <typename T>
 void Resampler<T>::doit( const aims::AffineTransformation3d& motion,
                          AimsData<T>& thing ) const
 {
-  if( _ref.isNull() )
+  if( _ref.empty() )
     throw std::runtime_error( "Resampler used without a ref volume to resample"
     );
-  resample( *_ref, motion, _defval, thing, carto::verbose );
+  resample( _ref, motion, _defval, thing, carto::verbose );
 }
 
 
@@ -193,17 +199,17 @@ AimsData<T> Resampler<T>::doit( const aims::AffineTransformation3d& motion,
                                 int dimX, int dimY, int dimZ,
                                 const Point3df& resolution ) const
 {
-  if( _ref.isNull() )
+  if( _ref.empty() )
     throw std::runtime_error( "Resampler used without a ref volume to resample"
     );
-  AimsData<T>	thing( dimX, dimY, dimZ, _ref->dimT() );
+  AimsData<T>	thing( dimX, dimY, dimZ, _ref.dimT() );
   thing.setSizeXYZT( resolution[0], resolution[1], resolution[2],
-                     _ref->sizeT() );
+                     _ref.sizeT() );
 
-  resample( *_ref, motion, _defval, thing, carto::verbose );
-  thing.setHeader( _ref->header()->cloneHeader() );
+  resample( _ref, motion, _defval, thing, carto::verbose );
+  thing.setHeader( _ref.header()->cloneHeader() );
   thing.setSizeXYZT( resolution[0], resolution[1], resolution[2],
-                     _ref->sizeT() );
+                     _ref.sizeT() );
   if( !motion.isIdentity() )
   {
     aims::PythonHeader
@@ -240,7 +246,7 @@ AimsData<T> Resampler<T>::doit( const aims::AffineTransformation3d& motion,
       std::vector<std::vector<float> > trout;
       std::vector<std::string> refsout;
       const aims::PythonHeader
-          *iph = dynamic_cast<const aims::PythonHeader *>( _ref->header() );
+          *iph = dynamic_cast<const aims::PythonHeader *>( _ref.header() );
       if( iph )
         try
         {
@@ -267,7 +273,7 @@ AimsData<T> Resampler<T>::doit( const aims::AffineTransformation3d& motion,
 template <typename T>
 void Resampler<T>::setRef(const AimsData<T>& ref)
 {
-  _ref = carto::const_ref<AimsData<T> >(&ref);
+  _ref = ref;
 }
 
 #endif
