@@ -75,11 +75,11 @@ MaskLinearResampler<T>::doit( const aims::AffineTransformation3d& motion,
                               int dimX, int dimY, int dimZ,
                               const Point3df& resolution ) const
 {
-  ASSERT( !this->_ref.isNull() );
+  ASSERT( !this->_ref.empty() );
 
-  AimsData<T> thing( dimX, dimY, dimZ, this->_ref->dimT() );
+  AimsData<T> thing( dimX, dimY, dimZ, this->_ref.dimT() );
   thing.setSizeXYZT( resolution[ 0 ], resolution[ 1 ], resolution[ 2 ],
-                     this->_ref->sizeT() );
+                     this->_ref.sizeT() );
 
   doit( motion, thing );
 
@@ -91,14 +91,14 @@ template <class T> inline
 void MaskLinearResampler<T>::doit( const aims::AffineTransformation3d& motion,
                                    AimsData<T>& thing ) const
 {
-  ASSERT( !this->_ref.isNull() );
-  ASSERT( thing.dimT() == this->_ref->dimT() && thing.borderWidth() == 0 );
+  ASSERT( !this->_ref.empty() );
+  ASSERT( thing.dimT() == this->_ref.dimT() && thing.borderWidth() == 0 );
 
   aims::AffineTransformation3d dirMotion = motion;
   aims::AffineTransformation3d invMotion = motion.inverse();
   
   // scale motion
-  Point3df sizeFrom( this->_ref->sizeX(), this->_ref->sizeY(), this->_ref->sizeZ() );
+  Point3df sizeFrom( this->_ref.sizeX(), this->_ref.sizeY(), this->_ref.sizeZ() );
   Point3df sizeTo( thing.sizeX(), thing.sizeY(), thing.sizeZ() );
   dirMotion.scale( sizeFrom, sizeTo );
   invMotion.scale( sizeTo, sizeFrom );
@@ -138,10 +138,10 @@ void MaskLinearResampler<T>::_sliceResamp( AimsData<T>& resamp,
                                            const AimsData<float>& Rinv ) const
 {
   typename AimsData<T>::const_iterator 
-    pOrig = this->_ref->begin() + this->_ref->oFirstPoint() +
-            t * this->_ref->oVolume();
+    pOrig = this->_ref.begin() + this->_ref.oFirstPoint() +
+            t * this->_ref.oVolume();
 
-  int dimX1 = this->_ref->dimX();
+  int dimX1 = this->_ref.dimX();
   int dimX2 = resamp.dimX();
   int dimY2 = resamp.dimY();
 
@@ -149,8 +149,8 @@ void MaskLinearResampler<T>::_sliceResamp( AimsData<T>& resamp,
   const int TWO_THEN_SIXTEEN = 65536;
 
   int maxX = TWO_THEN_SIXTEEN * ( dimX1 - 1 );
-  int maxY = TWO_THEN_SIXTEEN * ( this->_ref->dimY() - 1 );
-  int maxZ = TWO_THEN_SIXTEEN * ( this->_ref->dimZ() - 1 );
+  int maxY = TWO_THEN_SIXTEEN * ( this->_ref.dimY() - 1 );
+  int maxZ = TWO_THEN_SIXTEEN * ( this->_ref.dimZ() - 1 );
 
   int xLinCurrent = ( int )( 65536.0 * start[ 0 ] );
   int yLinCurrent = ( int )( 65536.0 * start[ 1 ] );
@@ -168,8 +168,8 @@ void MaskLinearResampler<T>::_sliceResamp( AimsData<T>& resamp,
   typename AimsData<T>::const_iterator it;
   int   incr_vois[8] = {0, 1,
 			dimX1+1,dimX1, 
-			this->_ref->oSlice(),this->_ref->oSlice()+1,
-			this->_ref->oSlice()+ dimX1+1,this->_ref->oSlice() + dimX1};
+			this->_ref.oSlice(),this->_ref.oSlice()+1,
+			this->_ref.oSlice()+ dimX1+1,this->_ref.oSlice() + dimX1};
   float stock1, stock2, stock3;
   for ( int v = dimY2; v--; )
   {
@@ -187,7 +187,7 @@ void MaskLinearResampler<T>::_sliceResamp( AimsData<T>& resamp,
         dy = yCurrent & 0xffff;
         dz = zCurrent & 0xffff;
 
-        it = pOrig + ( zCurrent >> SIXTEEN ) * this->_ref->oSlice()
+        it = pOrig + ( zCurrent >> SIXTEEN ) * this->_ref.oSlice()
                    + ( yCurrent >> SIXTEEN ) * dimX1
                    + ( xCurrent >> SIXTEEN );
 
@@ -219,7 +219,7 @@ void MaskLinearResampler<T>::_sliceResamp( AimsData<T>& resamp,
 	    stock1 += stock2 * dy;
 	    stock1 /= TWO_THEN_SIXTEEN;
 
-	    it += this->_ref->oSlice() - dimX1;
+	    it += this->_ref.oSlice() - dimX1;
 	    stock2 = *it * ( TWO_THEN_SIXTEEN - dx );
 	    stock2 += *(++it) * dx;
 	    stock2 /= TWO_THEN_SIXTEEN;

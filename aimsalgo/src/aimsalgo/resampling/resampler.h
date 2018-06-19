@@ -67,7 +67,7 @@ class Resampler
 {
 public:
 
-  Resampler() : _ref(), _defval( T() ) { }
+  Resampler();
   virtual ~Resampler() { }
 
   /** Resample the input volume set with setRef() into an existing volume.
@@ -244,7 +244,7 @@ public:
   void setRef( const AimsData<T>& ref );
 
   /// Input data to be resampled by the doit() methods
-  const carto::const_ref<AimsData<T> >& ref() const { return _ref; }
+  const AimsData<T>& ref() const { return _ref; }
 
   /// Set the background value to be used by the doit() methods
   void setDefaultValue( T val ) { _defval = val; }
@@ -284,7 +284,7 @@ protected:
   virtual void updateParameters( const AimsData< T > &inVolume, int time,
                                  bool verbose ) const {};
 
-  carto::const_ref<AimsData<T> > _ref;
+  AimsData<T> _ref;
   T _defval;
 };
 
