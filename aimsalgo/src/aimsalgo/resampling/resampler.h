@@ -91,11 +91,9 @@ public:
 
       The level of verbosity is taken from carto::verbose (i.e. the
       `--verbose` command-line argument is honoured).
-
-      \todo Fix MaskLinearResampler and make this method non-virtual
   */
-  virtual void doit( const aims::AffineTransformation3d& transform,
-                     AimsData<T>& output_data ) const;
+  void doit( const aims::AffineTransformation3d& transform,
+             AimsData<T>& output_data ) const;
 
   /** Resample the input volume set with setRef() in a newly allocated volume.
 
@@ -127,12 +125,10 @@ public:
           space. If that is not possible (e.g. the \c transformations attribute
           is missing or invalid), then a new transformation is added that
           points to the input volume.
-
-      \todo Fix MaskLinearResampler and make this method non-virtual
   */
-  virtual AimsData<T> doit( const aims::AffineTransformation3d& transform,
-                            int dimX, int dimY,
-                            int dimZ, const Point3df& voxel_size ) const;
+  AimsData<T> doit( const aims::AffineTransformation3d& transform,
+                    int dimX, int dimY,
+                    int dimZ, const Point3df& voxel_size ) const;
 
   /** Resample a volume into an existing output volume.
 
@@ -156,8 +152,9 @@ public:
       This method does \b not use the instance state set by setRef() or
       setDefaultValue().
 
-      \todo move optimized iterated resampling to a private method, then make
-      this method non-virtual.
+      Derived classes can override this method to optimize interpolation of a
+      full volume. The base class method simply calls doResample for each
+      point.
   */
   virtual void resample( const AimsData< T >& input_data,
                          const aims::AffineTransformation3d& transform,

@@ -243,39 +243,6 @@ public:
 };
 
 
-class MaskLinearResampler_%Template1typecode%:Resampler_%Template1typecode%
-{
-%TypeHeaderCode
-  #include <pyaims/vector/vector.h>
-  #include <aims/resampling/masklinresampler.h>
-  
-  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
-  #endif
-  
-  #ifndef PYAIMSALGOSIP_MASKLINEARRESAMPLER_%Template1typecode%_DEFINED
-  #define PYAIMSALGOSIP_MASKLINEARRESAMPLER_%Template1typecode%_DEFINED
-  typedef MaskLinearResampler<%Template1%> MaskLinearResampler_%Template1typecode%;
-  #endif
-    
-  #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  #define PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  typedef AimsData<%Template1%> AimsData_%Template1typecode%;
-  #endif
-
-%End
-public:
-
-  MaskLinearResampler_%Template1typecode%();
-  ~MaskLinearResampler_%Template1typecode%();
-
-  void doit( const Motion &, AimsData_%Template1typecode% &  ) /ReleaseGIL/;
-  AimsData_%Template1typecode% doit( const Motion &, int, int, int, const
-    Point3df & ) /Factory, ReleaseGIL/;
-};
-
-
 class NearestNeighborResampler_%Template1typecode%:Resampler_%Template1typecode%
 {
 %TypeHeaderCode
