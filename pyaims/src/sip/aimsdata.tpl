@@ -145,6 +145,8 @@ public:
   AimsData_%Template1typecode% clone () const /ReleaseGIL/;
   void fillBorder( const %Template1% & ) /ReleaseGIL/;
 
+  bool empty() const;
+
   void fill( const %Template1% & ) /ReleaseGIL/;
 %MethodCode
   *sipCpp = %Template1deref%a0;
