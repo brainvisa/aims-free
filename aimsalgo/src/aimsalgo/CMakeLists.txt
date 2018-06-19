@@ -270,6 +270,7 @@ set( _headers
     resampling/linearresampler.h
     resampling/linearresampler_d.h
     resampling/masklinresampler.h
+    resampling/masklinresampler_d.h
     resampling/meshToVoxelsResampler.h
     resampling/meshToVoxelsResampler_d.h
     resampling/nearestneighborresampler.h

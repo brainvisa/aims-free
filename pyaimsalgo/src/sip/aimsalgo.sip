@@ -22,6 +22,7 @@
 %Include meshresampler_AimsData_U32.sip
 %Include meshresampler_BucketMap_VOID.sip
 %Include meshinterpoler.sip
+%Include masklinresampler.sip
 %Include resampler_U8.sip
 %Include resampler_S16.sip
 %Include resampler_U16.sip

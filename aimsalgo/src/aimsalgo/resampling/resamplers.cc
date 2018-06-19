@@ -149,3 +149,7 @@ template class aims::ResamplerFactory<AimsRGB>;
 template class Resampler<AimsRGBA>;
 template class NearestNeighborResampler<AimsRGBA>;
 template class aims::ResamplerFactory<AimsRGBA>;
+
+
+#include <aims/resampling/masklinresampler_d.h>
+template class MaskLinearResampler<int16_t>;
