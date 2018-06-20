@@ -32,7 +32,7 @@ using namespace std;
 using namespace carto;
 
 template <class T, class C>
-bool doit( Process &, const string &, Finder & );
+bool doVolume( Process &, const string &, Finder & );
 template <int D>
 bool doMesh( Process &, const string &, Finder & );
 bool doBucket( Process &, const string &, Finder & );
@@ -43,9 +43,6 @@ class FFDApplyProc : public Process
 {
 public:
   FFDApplyProc();
-
-  template <class T, class C>
-  friend bool doit( Process &, const string &, Finder & );
 
   string  inputref;
   string  inputmotion;
@@ -75,17 +72,17 @@ FFDApplyProc::FFDApplyProc()
     sx(0.), sy(0.), sz(0.),
     old_mode(false)
 {
-  registerProcessType( "Volume", "S8",      &doit<int8_t, int8_t> );
-  registerProcessType( "Volume", "U8",      &doit<uint8_t, uint8_t> );
-  registerProcessType( "Volume", "S16",     &doit<int16_t, int16_t> );
-  registerProcessType( "Volume", "U16",     &doit<uint16_t, uint16_t> );
-  registerProcessType( "Volume", "S32",     &doit<int32_t, int32_t> );
-  registerProcessType( "Volume", "U32",     &doit<uint32_t, uint32_t> );
-  registerProcessType( "Volume", "FLOAT",   &doit<float, float> );
-  registerProcessType( "Volume", "DOUBLE",  &doit<double, double> );
-  registerProcessType( "Volume", "RGB",     &doit<AimsRGB, AimsRGB::ChannelType> );
-  registerProcessType( "Volume", "RGBA",    &doit<AimsRGBA, AimsRGBA::ChannelType> );
-  registerProcessType( "Volume", "POINT3DF", &doit<Point3df, float> );
+  registerProcessType( "Volume", "S8",      &doVolume<int8_t, int8_t> );
+  registerProcessType( "Volume", "U8",      &doVolume<uint8_t, uint8_t> );
+  registerProcessType( "Volume", "S16",     &doVolume<int16_t, int16_t> );
+  registerProcessType( "Volume", "U16",     &doVolume<uint16_t, uint16_t> );
+  registerProcessType( "Volume", "S32",     &doVolume<int32_t, int32_t> );
+  registerProcessType( "Volume", "U32",     &doVolume<uint32_t, uint32_t> );
+  registerProcessType( "Volume", "FLOAT",   &doVolume<float, float> );
+  registerProcessType( "Volume", "DOUBLE",  &doVolume<double, double> );
+  registerProcessType( "Volume", "RGB",     &doVolume<AimsRGB, AimsRGB::ChannelType> );
+  registerProcessType( "Volume", "RGBA",    &doVolume<AimsRGBA, AimsRGBA::ChannelType> );
+  registerProcessType( "Volume", "POINT3DF", &doVolume<Point3df, float> );
   registerProcessType( "Mesh",   "VOID",    &doMesh<3> );
   registerProcessType( "Mesh2",  "VOID",    &doMesh<2> );
   registerProcessType( "Mesh4",  "VOID",    &doMesh<4> );
@@ -95,7 +92,7 @@ FFDApplyProc::FFDApplyProc()
 }
 
 template <class T, class C>
-bool doit( Process & process, const string & fileref, Finder & )
+bool doVolume( Process & process, const string & fileref, Finder & )
 {
   FFDApplyProc & ffdproc = (FFDApplyProc & ) process;
 
