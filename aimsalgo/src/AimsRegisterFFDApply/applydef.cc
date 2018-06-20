@@ -191,15 +191,6 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   ffdproc.sy = ( ffdproc.sy > 0 ? ffdproc.sy : ( rsy > 0 ? rsy : in.sizeY() ) );
   ffdproc.sz = ( ffdproc.sz > 0 ? ffdproc.sz : ( rsz > 0 ? rsz : in.sizeZ() ) );
 
-  //--- Field of view (in which it is useful to compte a ffd motion)
-  int32_t fdx, fdy, fdz;
-  fdx = deformation->isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation->dimX()) * deformation->sizeX() / ffdproc.sx );
-  fdy = deformation->isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation->dimY()) * deformation->sizeY() / ffdproc.sy );
-  fdz = deformation->isFlat(2) ? ffdproc.sz : (int32_t)( double(deformation->dimZ()) * deformation->sizeZ() / ffdproc.sz );
-  fdx = std::min( fdx, ffdproc.dx );
-  fdy = std::min( fdy, ffdproc.dy );
-  fdz = std::min( fdz, ffdproc.dz );
-
   cout << "Output dimensions: "
        << ffdproc.dx << ", "
        << ffdproc.dy << ", "
@@ -207,11 +198,7 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   cout << "Output voxel size: "
        << ffdproc.sx << ", "
        << ffdproc.sy << ", "
-       << ffdproc.sz << endl;
-  cout << "Output field of view: "
-       << fdx << ", "
-       << fdy << ", "
-       << fdz << endl;
+       << ffdproc.sz << " mm" << endl;
 
 
   //==========================================================================
@@ -278,6 +265,18 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   // Create bucket (= nodes)  list
   BucketMap< Void > * subBucketMapVoid = 0;
   if( !ffdproc.bucketout.empty() ) {
+    //--- Field of view (in which it is useful to compte a ffd motion)
+    //
+    // FIXME: assigning the voxel size for flat dimensions is almost certainly
+    // wrong (fdx represents voxels, not mm)
+    int32_t fdx, fdy, fdz;
+    fdx = deformation->isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation->dimX()) * deformation->sizeX() / ffdproc.sx );
+    fdy = deformation->isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation->dimY()) * deformation->sizeY() / ffdproc.sy );
+    fdz = deformation->isFlat(2) ? ffdproc.sz : (int32_t)( double(deformation->dimZ()) * deformation->sizeZ() / ffdproc.sz );
+    fdx = std::min( fdx, ffdproc.dx );
+    fdy = std::min( fdy, ffdproc.dy );
+    fdz = std::min( fdz, ffdproc.dz );
+
     subBucketMapVoid = new BucketMap< Void >;
     subBucketMapVoid->setSizeXYZT( ffdproc.sx,
                                    ffdproc.sy,
