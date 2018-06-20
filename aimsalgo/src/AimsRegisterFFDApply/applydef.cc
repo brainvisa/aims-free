@@ -31,6 +31,13 @@ using namespace aims;
 using namespace std;
 using namespace carto;
 
+class FFDApplyProc;
+
+rc_ptr<FfdTransformation> load_ffd_deformation(const FFDApplyProc &);
+void convert_old_mode_deformation(rc_ptr<FfdTransformation> deformation,
+                                  const std::vector<int>& in_size,
+                                  const std::vector<float>& in_voxel_size);
+
 template <class T, class C>
 bool doVolume( Process &, const string &, Finder & );
 template <int D>
@@ -124,40 +131,12 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation;
-  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
-    deformation.reset( new TrilinearFfd );
-  else
-    deformation.reset( new SplineFfd );
-
-  // Before 2015, FFD deformations were in voxels. They are now stored in mm.
-  // A hint is that old ffd motions have a voxel size of 1. mm.
-  // Old motions can be used with old_mode set to true.
+  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
   if( ffdproc.old_mode )
   {
-    AimsData<Point3df> grid;
-    aims::Reader<AimsData<Point3df> > rdef(ffdproc.inputmotion);
-    rdef >> grid;
-    grid.setSizeXYZT(
-      double(in.dimX() - 1) / double(grid.dimX() - 1) * in.sizeX(),
-      double(in.dimY() - 1) / double(grid.dimY() - 1) * in.sizeY(),
-      double(in.dimZ() - 1) / double(grid.dimZ() - 1) * in.sizeZ() );
-    int dx = grid.dimX(), dy = grid.dimY(), dz = grid.dimZ();
-    float sx = grid.sizeX(), sy = grid.sizeY(), sz = grid.sizeZ();
-    for( int z = 0; z < dz; ++z )
-    for( int y = 0; y < dy; ++y )
-    for( int x = 0; x < dx; ++x )
-    {
-      grid(x, y, z)[0] *= sx;
-      grid(x, y, z)[1] *= sy;
-      grid(x, y, z)[2] *= sz;
-    }
-    deformation->updateAllCtrlKnot(grid);
-  }
-  else
-  {
-    aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
-    rdef >> *deformation;
+    convert_old_mode_deformation(deformation,
+                                 in.volume()->getSize(),
+                                 in.volume()->getVoxelSize());
   }
 
   //--------------------------------------------------------------------------
@@ -498,14 +477,7 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation;
-  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
-    deformation.reset( new TrilinearFfd );
-  else
-    deformation.reset( new SplineFfd );
-
-  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
-  rdef >> *deformation;
+  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
 
   //--------------------------------------------------------------------------
   // Affine motion
@@ -573,14 +545,7 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation;
-  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
-    deformation.reset( new TrilinearFfd );
-  else
-    deformation.reset( new SplineFfd );
-
-  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
-  rdef >> *deformation;
+  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
 
   //--------------------------------------------------------------------------
   // Affine motion
@@ -643,14 +608,7 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation;
-  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
-    deformation.reset( new TrilinearFfd );
-  else
-    deformation.reset( new SplineFfd );
-
-  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
-  rdef >> *deformation;
+  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
 
   //--------------------------------------------------------------------------
   // Affine motion
@@ -729,14 +687,7 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation;
-  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
-    deformation.reset( new TrilinearFfd );
-  else
-    deformation.reset( new SplineFfd );
-
-  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
-  rdef >> *deformation;
+  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
 
   //--------------------------------------------------------------------------
   // Affine motion
@@ -802,14 +753,7 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation;
-  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
-    deformation.reset( new TrilinearFfd );
-  else
-    deformation.reset( new SplineFfd );
-
-  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
-  rdef >> *deformation;
+  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
 
   //--------------------------------------------------------------------------
   // Affine motion
@@ -853,6 +797,48 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
   return true;
 }
 
+
+rc_ptr<FfdTransformation> load_ffd_deformation(const FFDApplyProc &ffdproc)
+{
+  rc_ptr<FfdTransformation> deformation;
+
+  if( ffdproc.vfinterp == "linear" || ffdproc.vfinterp == "l" )
+    deformation.reset( new TrilinearFfd );
+  else
+    deformation.reset( new SplineFfd );
+
+  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
+  rdef >> *deformation;
+
+  return deformation;
+}
+
+// Before 2015, FFD deformations were in voxels of the input image.
+// They are now stored in mm.
+// A hint is that old ffd motions have a voxel size of 1. mm.
+// Old motions can be used with old_mode set to true.
+void convert_old_mode_deformation(rc_ptr<FfdTransformation> deformation,
+                                  const std::vector<int>& in_size,
+                                  const std::vector<float>& in_voxel_size)
+{
+  // The grid can be updated in-place
+  AimsData<Point3df>& grid = static_cast<AimsData<Point3df>&>(*deformation);
+
+  grid.setSizeXYZT(
+    double(in_size[0] - 1) / double(grid.dimX() - 1) * in_voxel_size[0],
+    double(in_size[1] - 1) / double(grid.dimY() - 1) * in_voxel_size[1],
+    double(in_size[2] - 1) / double(grid.dimZ() - 1) * in_voxel_size[2] );
+  int dx = grid.dimX(), dy = grid.dimY(), dz = grid.dimZ();
+  float sx = grid.sizeX(), sy = grid.sizeY(), sz = grid.sizeZ();
+  for( int z = 0; z < dz; ++z )
+    for( int y = 0; y < dy; ++y )
+      for( int x = 0; x < dx; ++x )
+      {
+        grid(x, y, z)[0] *= sx;
+        grid(x, y, z)[1] *= sy;
+        grid(x, y, z)[2] *= sz;
+      }
+}
 
 int main( int argc, const char **argv )
 
@@ -910,7 +896,7 @@ int main( int argc, const char **argv )
     application.addOption( ffdproc.bucketout, "-b", "Output bucket knots", true );
     application.addOption( ffdproc.gridout, "-g", "Output grid mesh", true );
     application.addOption( ffdproc.compout, "-c", "Output compression volume", true );
-    application.addOption( ffdproc.old_mode, "--old-mode", "Make this command work with pre-2015 FFD motions (which are in voxels instead of millimetres) [default: false]", true );
+    application.addOption( ffdproc.old_mode, "--old-mode", "Make this command work with pre-2015 FFD motions (which are in voxels of the input image, instead of millimetres) [default: false]", true );
     application.addOption( ffdproc.vfinterp, "--vi", "Vector field interpolation type: l[inear], c[ubic] [default = cubic]", true );
     application.alias( "--input", "-i" );
     application.alias( "--motion", "-m" );
