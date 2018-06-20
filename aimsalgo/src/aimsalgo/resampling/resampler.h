@@ -61,6 +61,9 @@ You can also use arbitrary **non-affine transformations** (inheriting
 aims::Transformation3d) by using the resample_inv_to_vox() family of methods.
 In this case, you must pass the backward transformation (_from output space to
 input space_), because of the "pulling" mechanism described above.
+
+Beware that contrary to the other methods, the resample_inv_to_vox() overloads
+take a transformation that maps to \b voxel coordinates of the input image.
 */
 template <class T>
 class Resampler
@@ -212,8 +215,8 @@ public:
 
   /** Resample a volume into an existing output volume.
 
-      \param[in]     input_data  data to be resampled (its voxel size is taken
-                                 into account)
+      \param[in]     input_data  data to be resampled (its voxel size is
+                                 \b not taken into account)
       \param[in]     transform   transformation from coordinates of the
                                  *output* volume (unit: mm), to coordinates of
                                  the *input* volume *(unit: voxel)*
