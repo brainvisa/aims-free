@@ -160,25 +160,30 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   double rsx = 0., rsy = 0., rsz = 0.;
   if( !ffdproc.reference.empty() ) {
     Finder reffinder;
-    if( reffinder.check( ffdproc.reference ) ) {
-      Object refheader = reffinder.headerObject();
-      if( refheader->hasProperty( "volume_dimension" ) ) {
-        rdx = refheader->getProperty( "volume_dimension" )->getArrayItem(0)->getScalar();
-        rdy = refheader->getProperty( "volume_dimension" )->getArrayItem(1)->getScalar();
-        rdz = refheader->getProperty( "volume_dimension" )->getArrayItem(2)->getScalar();
-      }
-      if( refheader->hasProperty( "voxel_size" ) ) {
-        rsx = refheader->getProperty( "voxel_size" )->getArrayItem(0)->getScalar();
-        rsy = refheader->getProperty( "voxel_size" )->getArrayItem(1)->getScalar();
-        rsz = refheader->getProperty( "voxel_size" )->getArrayItem(2)->getScalar();
-      }
-    } else {
-      cout << "Failed to check " << ffdproc.reference << endl;
-      cout << "Continue anyway..." << endl;
+    if( !reffinder.check( ffdproc.reference ) ) {
+      cout << "Failed to check the reference volume "
+           << ffdproc.reference << endl;
+      return false;
+    }
+    Object refheader = reffinder.headerObject();
+    try {
+      rdx = refheader->getProperty( "volume_dimension" )->getArrayItem(0)->getScalar();
+      rdy = refheader->getProperty( "volume_dimension" )->getArrayItem(1)->getScalar();
+      rdz = refheader->getProperty( "volume_dimension" )->getArrayItem(2)->getScalar();
+      rsx = refheader->getProperty( "voxel_size" )->getArrayItem(0)->getScalar();
+      rsy = refheader->getProperty( "voxel_size" )->getArrayItem(1)->getScalar();
+      rsz = refheader->getProperty( "voxel_size" )->getArrayItem(2)->getScalar();
+    } catch(...) {
+      cout << "Failed to retrieve volume_dimension or voxel_size from "
+              "the reference volume "
+           << ffdproc.reference << endl;
+      return false;
     }
   }
 
-  //--- Hard dimensions
+  //--- Dimensions and voxel size of the resampled volume: in decreasing order
+  //--- of priority, use commandline flags, then the reference volume, then the
+  //--- input volume.
   ffdproc.dx = ( ffdproc.dx > 0 ? ffdproc.dx : ( rdx > 0 ? rdx : in.dimX() ) );
   ffdproc.dy = ( ffdproc.dy > 0 ? ffdproc.dy : ( rdy > 0 ? rdy : in.dimY() ) );
   ffdproc.dz = ( ffdproc.dz > 0 ? ffdproc.dz : ( rdz > 0 ? rdz : in.dimZ() ) );
