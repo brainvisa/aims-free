@@ -234,11 +234,11 @@ public:
       This method does \b not use the instance state set by setRef() or
       setDefaultValue().
   */
-  void resample_inv_to_vox( const AimsData< T >& input_data,
-                            const aims::Transformation3d& inverse_transform_to_vox,
-                            const T& background,
-                            AimsData< T >& output_data,
-                            bool verbose = false ) const;
+  virtual void resample_inv_to_vox( const AimsData< T >& input_data,
+                                    const aims::Transformation3d& inverse_transform_to_vox,
+                                    const T& background,
+                                    AimsData< T >& output_data,
+                                    bool verbose = false ) const;
 
   /// Set the input data to be resampled by the doit() methods
   void setRef( const AimsData<T>& ref );

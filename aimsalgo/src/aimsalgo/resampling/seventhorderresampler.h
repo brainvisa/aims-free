@@ -36,7 +36,6 @@
 #define AIMS_RESAMPLING_SEVENTHORDERRESAMPLER_H
 
 #include <aims/resampling/splineresampler.h>
-#include <aims/resampling/multichannelresampler.h>
 
 template <class T>
 class SeventhOrderResampler : public SplineResampler< T >
@@ -52,8 +51,5 @@ protected:
 
   double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
-
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( SeventhOrderResampler, AimsRGB, 7 )
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( SeventhOrderResampler, AimsRGBA, 7 )
 
 #endif

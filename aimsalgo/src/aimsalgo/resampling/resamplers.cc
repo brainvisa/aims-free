@@ -143,13 +143,41 @@ template class SeventhOrderResampler<double>;
 template class aims::ResamplerFactory<double>;
 
 template class Resampler<AimsRGB>;
+template class SplineResampler<AimsRGB>;
 template class NearestNeighborResampler<AimsRGB>;
+template class LinearResampler<AimsRGB>;
+template class QuadraticResampler<AimsRGB>;
+template class CubicResampler<AimsRGB>;
+template class QuarticResampler<AimsRGB>;
+template class QuinticResampler<AimsRGB>;
+template class SixthOrderResampler<AimsRGB>;
+template class SeventhOrderResampler<AimsRGB>;
 template class aims::ResamplerFactory<AimsRGB>;
 
+
 template class Resampler<AimsRGBA>;
+template class SplineResampler<AimsRGBA>;
 template class NearestNeighborResampler<AimsRGBA>;
+template class LinearResampler<AimsRGBA>;
+template class QuadraticResampler<AimsRGBA>;
+template class CubicResampler<AimsRGBA>;
+template class QuarticResampler<AimsRGBA>;
+template class QuinticResampler<AimsRGBA>;
+template class SixthOrderResampler<AimsRGBA>;
+template class SeventhOrderResampler<AimsRGBA>;
 template class aims::ResamplerFactory<AimsRGBA>;
 
+template class Resampler<Point3df>;
+template class SplineResampler<Point3df>;
+template class NearestNeighborResampler<Point3df>;
+template class LinearResampler<Point3df>;
+template class QuadraticResampler<Point3df>;
+template class CubicResampler<Point3df>;
+template class QuarticResampler<Point3df>;
+template class QuinticResampler<Point3df>;
+template class SixthOrderResampler<Point3df>;
+template class SeventhOrderResampler<Point3df>;
+template class aims::ResamplerFactory<Point3df>;
 
 #include <aims/resampling/masklinresampler_d.h>
 template class MaskLinearResampler<int16_t>;

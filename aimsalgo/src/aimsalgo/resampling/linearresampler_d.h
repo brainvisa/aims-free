@@ -35,9 +35,9 @@
 #ifndef AIMS_RESAMPLING_LINEARRESAMPLER_D_H
 #define AIMS_RESAMPLING_LINEARRESAMPLER_D_H
 
-#include <cmath>
 #include <aims/resampling/linearresampler.h>
-#include <aims/utility/channel.h>
+
+#include <cmath>
 
 template < class T >
 LinearResampler< T >::LinearResampler()
@@ -62,16 +62,16 @@ int LinearResampler< T >::getOrder() const
 
 
 template < class T >
-void LinearResampler< T >::doResample(
-                                      const AimsData< T >& inVolume,
-                                      const aims::Transformation3d& invTransform3d,
-                                      const T& outBackground,
-                                      const Point3df& outLocation,
-                                      T& outValue, int t ) const
+void LinearResampler< T >::
+doResampleChannel( const AimsData< ChannelType >& inVolume,
+                   const aims::Transformation3d& invTransform3d,
+                   const ChannelType& outBackground,
+                   const Point3df& outLocation,
+                   ChannelType& outValue, int t ) const
 {
 
-  const T	*i = &inVolume( 0, 0, 0, t );
-  const T	*pi, *pj;
+  const ChannelType *i = &inVolume( 0, 0, 0, t );
+  const ChannelType *pi, *pj;
 
   Point3df normalizedInLocation;
   normalizedInLocation = invTransform3d.transform( outLocation );
@@ -205,7 +205,7 @@ void LinearResampler< T >::doResample(
       qj += weightY1 * qi;
       intensity += getBSplineWeight( z, normalizedInLocation[2] ) * qj;
     }
-    outValue = ( T )intensity;
+    outValue = static_cast<ChannelType>(intensity);
 
   }
   else
@@ -226,8 +226,5 @@ double LinearResampler< T >::getBSplineWeight( int i, double x ) const
 
 }
 
-// AimsRGB Specialization
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGB )
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGBA )
 
 #endif

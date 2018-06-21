@@ -36,9 +36,16 @@
 #define AIMS_RESAMPLING_SPLINERESAMPLER_H
 
 #include <aims/resampling/resampler.h>
-#include <cstdlib>
+#include <cartobase/type/datatypetraits.h>
+
 #include <cmath>
 #include <vector>
+
+// This implementation helper allows to change the implementation of methods
+// depending if the data type is single-channel or multi-channel.
+template<bool, typename>
+struct MultiChannelResamplerSwitch;
+
 
 /// B-Spline-based resampling.
 ///
@@ -111,15 +118,26 @@ public:
   /// the spline coefficients in any case.
   void reset();
 
+  // Overridden for performance in case of multi-channel data
+  void resample_inv_to_vox( const AimsData< T >& input_data,
+                            const aims::Transformation3d& inverse_transform_to_vox,
+                            const T& background,
+                            AimsData< T >& output_data,
+                            bool verbose = false ) const CARTO_OVERRIDE;
+  using Resampler<T>::resample_inv_to_vox;
+
+  // Implements iteration over channels for multi-channel data types
+  template<bool, typename> friend struct MultiChannelResamplerSwitch;
+
+  typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
+
+  void resample_channel_inv_to_vox(const AimsData< ChannelType >& inVolume,
+                                   const aims::Transformation3d& inverse_transform_to_vox,
+                                   const ChannelType& outBackground,
+                                   AimsData< ChannelType >& outVolume,
+                                   bool verbose) const;
 protected:
 
-  /// Resample a point
-  ///
-  /// A call to getSplineCoef() or updateParameters() must have been made
-  /// using \c inVolume before.
-  ///
-  /// \param inVolume     volume to resample
-  /// \param transform3d
   void doResample( const AimsData< T > &inVolume,
                    const aims::Transformation3d &transform3d,
                    const T &outBackground,
@@ -127,12 +145,21 @@ protected:
                    T &outValue,
                    int t ) const CARTO_OVERRIDE;
 
+  virtual void doResampleChannel( const AimsData< ChannelType > &inVolume,
+                                  const aims::Transformation3d &transform3d,
+                                  const ChannelType &outBackground,
+                                  const Point3df &outLocation,
+                                  ChannelType &outValue,
+                                  int t ) const;
+
   /// Update the cache of spline coefficients if needed
   ///
   /// This method is called by all the resampling methods (resample() and
   /// doit()) before they call doResample for a given time point \c t.
   void updateParameters( const AimsData< T >& inVolume, int t,
                          bool verbose ) const CARTO_OVERRIDE;
+  virtual void updateParametersChannel( const AimsData< ChannelType >& inVolume, int t,
+                         bool verbose ) const;
   void iirConvolveMirror( std::vector< double >& data ) const;
 
   /// This method returns a mirror index when needed
@@ -155,9 +182,9 @@ protected:
   double               _gain;
 
   // These three mutable members handle the cache of spline coefficients
-  mutable AimsData<double>     _splineCoefficients;
-  mutable const AimsData<T> *  _lastvolume;
-  mutable int                  _lasttime;
+  mutable AimsData<double>               _splineCoefficients;
+  mutable const AimsData<ChannelType> *  _lastvolume;
+  mutable int                            _lasttime;
 };
 
 namespace aims {
