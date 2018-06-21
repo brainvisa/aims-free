@@ -34,23 +34,23 @@
 #include <aims/transformation/transformation_chain.h>
 
 void aims::TransformationChain3d::
-push_last(const carto::const_ref<Transformation3d>& transformation)
+push_back(const carto::const_ref<Transformation3d>& transformation)
 {
   _transformations.push_back(transformation);
 }
 
-void aims::TransformationChain3d::pop_last()
+void aims::TransformationChain3d::pop_back()
 {
   _transformations.pop_back();
 }
 
 void aims::TransformationChain3d::
-push_first(const carto::const_ref<Transformation3d>& transformation)
+push_front(const carto::const_ref<Transformation3d>& transformation)
 {
   _transformations.push_front(transformation);
 }
 
-void aims::TransformationChain3d::pop_first()
+void aims::TransformationChain3d::pop_front()
 {
   _transformations.pop_front();
 }
