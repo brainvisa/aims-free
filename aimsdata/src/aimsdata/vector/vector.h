@@ -41,7 +41,7 @@
 #include <aims/def/general.h>
 #include <soma-io/utilities/asciidatasourcetraits.h>
 #include <cartobase/type/types.h>
-#include <cartobase/type/datatypeinfo.h>
+#include <cartobase/type/datatypetraits.h>
 #include <fstream>
 #include <math.h>
 #include <cartobase/object/object.h>
@@ -403,21 +403,21 @@ DECLARE_GENERIC_OBJECT_TYPE( std::list<std::vector<Point4dd> > )
     return "POINT3DF";
   }
 
-}
-
-// DataTypeInfo
 
 template<typename T, int D>
-class DataTypeInfo<AimsVector<T,D> >
+class DataTypeTraits<AimsVector<T,D> >
 {
   public :
+  typedef T ChannelType;
+  typedef AimsVector<T, D> LongType;
 
-    static inline uint8_t samples() { return D; }
-    static inline uint8_t depth()
-    { return sizeof(T); }
-    static inline const std::string channelType()
-    { return carto::DataTypeCode<AimsVector<T,D> >::dataType(); }
+  static const bool is_scalar = false;
+  static const bool is_multichannel = true;
+  static const bool has_bool_conversion = false;
+  static const unsigned int channelcount = D;
 };
+
+}
 
 #endif // DOXYGEN_HIDE_INTERNAL_CLASSES
 
