@@ -34,10 +34,11 @@
 #ifndef AIMS_TRANSFORMATION_TRANSFORMATION_CHAIN_H
 #define AIMS_TRANSFORMATION_TRANSFORMATION_CHAIN_H
 
-#include <aims/transformation/transformation.h>
-#include <cartobase/smart/rcptr.h>
-
 #include <list>
+
+#include <cartobase/smart/rcptr.h>
+#include <aims/transformation/transformation.h>
+
 
 namespace aims
 {
@@ -46,10 +47,10 @@ class TransformationChain3d : public Transformation3d {
 public:
   typedef std::list<carto::const_ref<Transformation3d> > ListType;
 
-  void push_last(const carto::const_ref<Transformation3d>& transformation);
-  void pop_last();
-  void push_first(const carto::const_ref<Transformation3d>& transformation);
-  void pop_first();
+  void push_back(const carto::const_ref<Transformation3d>& transformation);
+  void pop_back();
+  void push_front(const carto::const_ref<Transformation3d>& transformation);
+  void pop_front();
 
 protected:
   ListType _transformations;
