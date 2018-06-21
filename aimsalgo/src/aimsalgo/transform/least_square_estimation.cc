@@ -314,10 +314,10 @@ TranslationLeastSquareEstimation::computeTranslationMotion()
 {
   if( _pointsFrom.size() != _pointsTo.size() )
     throw runtime_error("TranslationLeastSquareEstimation:Both vectors must have same size !") ;
-  unsigned size = _pointsFrom.size();
+  size_t size = _pointsFrom.size();
 
   _motion->translation() = Point3df( 0., 0., 0. ) ;
-  for( int n = 0 ; n < size ; ++n ){
+  for( size_t n = 0 ; n < size ; ++n ){
     _motion->translation() += _pointsTo[n] - _pointsFrom[n] ;
   }
   _motion->translation() /= float(size) ;
