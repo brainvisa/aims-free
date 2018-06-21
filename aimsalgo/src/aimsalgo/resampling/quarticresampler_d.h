@@ -40,6 +40,9 @@
 #include <cmath>
 
 
+namespace aims
+{
+
 template < class T >
 QuarticResampler< T >::QuarticResampler()
   : SplineResampler< T >()
@@ -99,5 +102,7 @@ double QuarticResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
+
+} // namespace aims
 
 #endif

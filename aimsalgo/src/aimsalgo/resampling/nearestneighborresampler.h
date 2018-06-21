@@ -37,6 +37,8 @@
 
 #include <aims/resampling/resampler.h>
 
+namespace aims
+{
 
 template <class T>
 class NearestNeighborResampler : public Resampler< T >
@@ -60,5 +62,7 @@ class NearestNeighborResampler : public Resampler< T >
                 const T &outBackground, const Point3df &outLocation,
                 T &outValue, int t ) const CARTO_OVERRIDE;
 };
+
+} // namespace aims
 
 #endif

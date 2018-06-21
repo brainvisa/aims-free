@@ -37,6 +37,9 @@
 
 #include <aims/resampling/splineresampler.h>
 
+namespace aims
+{
+
 template <class T>
 class LinearResampler : public SplineResampler< T >
 {
@@ -57,5 +60,7 @@ protected:
                           ChannelType& outValue, int t ) const CARTO_OVERRIDE;
   double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
+
+} // namespace aims
 
 #endif

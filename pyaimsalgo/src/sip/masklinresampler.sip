@@ -6,12 +6,12 @@ class MaskLinearResampler_S16:Resampler_S16
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_S16_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_S16_DEFINED
-  typedef Resampler<int16_t> Resampler_S16;
+  typedef aims::Resampler<int16_t> Resampler_S16;
   #endif
 
   #ifndef PYAIMSALGOSIP_MASKLINEARRESAMPLER_S16_DEFINED
   #define PYAIMSALGOSIP_MASKLINEARRESAMPLER_S16_DEFINED
-  typedef MaskLinearResampler<int16_t> MaskLinearResampler_S16;
+  typedef aims::MaskLinearResampler<int16_t> MaskLinearResampler_S16;
   #endif
 
   #ifndef PYAIMSSIP_AIMSDATA_S16_DEFINED

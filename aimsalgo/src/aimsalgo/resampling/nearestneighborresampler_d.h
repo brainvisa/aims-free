@@ -41,6 +41,8 @@
 
 using namespace std;
 
+namespace aims
+{
 
 template <class T>
 void
@@ -79,5 +81,7 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
   }
 
 }
+
+} // namespace aims
 
 #endif

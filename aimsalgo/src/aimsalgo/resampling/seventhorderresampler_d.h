@@ -39,6 +39,10 @@
 
 #include <cmath>
 
+
+namespace aims
+{
+
 template < class T >
 SeventhOrderResampler< T >::SeventhOrderResampler()
   : SplineResampler< T >()
@@ -110,5 +114,7 @@ double SeventhOrderResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
+
+} // namespace aims
 
 #endif

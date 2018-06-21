@@ -38,6 +38,9 @@
 #include <aims/resampling/resampler.h>
 #include <aims/resampling/linearresampler.h>
 
+namespace aims
+{
+
 template <class T>
 class MaskLinearResampler : public Resampler< T >
 {
@@ -77,5 +80,7 @@ class MaskLinearResampler : public Resampler< T >
     LinearResampler<T> _linearresampler;
 
 };
+
+} // namespace aims
 
 #endif // !defined(AIMS_RESAMPLING_MASKLINRESAMPLER_H)

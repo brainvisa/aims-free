@@ -54,6 +54,10 @@ carto::const_ref<T> external_ref(const T& object)
 
 } // anonymous namespace
 
+
+namespace aims
+{
+
 template <typename T>
 Resampler<T>::Resampler()
   : _ref(0, 0, 0, 0), _defval( T() )
@@ -338,5 +342,7 @@ void Resampler<T>::setRef(const AimsData<T>& ref)
 {
   _ref = ref;
 }
+
+} // namespace aims
 
 #endif

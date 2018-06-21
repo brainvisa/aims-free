@@ -46,6 +46,10 @@
 
 #define EPSILON   1.192092896e-7
 
+
+namespace aims
+{
+
 template < class T >
 SplineResampler< T >::SplineResampler()
   : Resampler<T>(), _lastvolume( 0 ), _lasttime( -1 )
@@ -809,5 +813,6 @@ doResample( const AimsData< T > &input_data,
                      output_location, output_value, timestep);
 }
 
+} // namespace aims
 
 #endif // !defined( AIMS_RESAMPLING_SPLINERESAMPLER_D_H )

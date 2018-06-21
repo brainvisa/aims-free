@@ -46,7 +46,7 @@ class MutualInfoFunc : public ObjFunc
 {
   public:
     MutualInfoFunc( int numLevel, 
-		    Resampler<short>* interpolator,
+		    aims::Resampler<short>* interpolator,
 		    Sampler<short>* comb,
                     int maskSize )
       : ObjFunc( numLevel, interpolator, comb, maskSize ) {}

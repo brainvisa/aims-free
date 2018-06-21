@@ -45,7 +45,7 @@ class CorRatioFunc : public ObjFunc
 {
   public:
     CorRatioFunc( int numLevel, 
-		  Resampler<short>* interpolator,
+		  aims::Resampler<short>* interpolator,
 		  Sampler<short>* comb,
                   int maskSize )
       : ObjFunc( numLevel, interpolator, comb, maskSize ) { }

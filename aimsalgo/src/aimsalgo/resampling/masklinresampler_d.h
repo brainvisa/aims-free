@@ -44,6 +44,9 @@
 #include <aims/transformation/affinetransformation3d.h>
 
 
+namespace aims
+{
+
 template <class T>
 void MaskLinearResampler<T>::
 doResample( const AimsData<T> &input_data,
@@ -258,3 +261,5 @@ void MaskLinearResampler<T>::_sliceResamp( const AimsData<T>& input_data,
     zLinCurrent += zv;
   }
 }
+
+} // namespace aims
