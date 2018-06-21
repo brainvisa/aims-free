@@ -36,10 +36,23 @@
 #define AIMS_RESAMPLING_RESAMPLER_D_H
 
 #include <aims/resampling/resampler.h>
+
+#include <aims/transformation/transformation_chain.h>
 #include <cartobase/config/verbose.h>
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
+
+
+namespace { // anonymous namespace for file-local symbols
+
+template <class T>
+carto::const_ref<T> external_ref(const T& object)
+{
+  return carto::const_ref<T>(&object, true);
+}
+
+} // anonymous namespace
 
 template <typename T>
 Resampler<T>::Resampler()
@@ -126,6 +139,56 @@ resample_inv_to_vox( const AimsData< T >& inVolume,
 
     }
 
+}
+
+
+template <typename T>
+void Resampler<T>::
+resample_inv( const AimsData< T >& input_data,
+              const aims::Transformation3d& inverse_transform_to_mm,
+              const T& background,
+              AimsData< T >& output_volume,
+              bool verbose ) const
+{
+
+  Point3df in_voxel_size(input_data.sizeX(),
+                         input_data.sizeY(),
+                         input_data.sizeZ());
+
+  aims::AffineTransformation3d mm_to_voxel_transform;
+  mm_to_voxel_transform.scale( Point3df( 1, 1, 1 ), in_voxel_size );
+
+  aims::TransformationChain3d transform_chain;
+  transform_chain.push_back(external_ref(inverse_transform_to_mm));
+  transform_chain.push_back(external_ref(mm_to_voxel_transform));
+
+  resample_inv_to_vox(input_data, transform_chain, background,
+                      output_volume, verbose);
+}
+
+template <typename T>
+void Resampler<T>::
+resample_inv( const AimsData< T >& input_data,
+              const aims::Transformation3d& inverse_transform_to_mm,
+              const T& background,
+              const Point3df& output_location,
+              T &output_value,
+              int timestep ) const
+{
+
+  Point3df in_voxel_size(input_data.sizeX(),
+                         input_data.sizeY(),
+                         input_data.sizeZ());
+
+  aims::AffineTransformation3d mm_to_voxel_transform;
+  mm_to_voxel_transform.scale( Point3df( 1, 1, 1 ), in_voxel_size );
+
+  aims::TransformationChain3d transform_chain;
+  transform_chain.push_back(external_ref(inverse_transform_to_mm));
+  transform_chain.push_back(external_ref(mm_to_voxel_transform));
+
+  resample_inv_to_vox(input_data, transform_chain, background,
+                      output_location, output_value, timestep);
 }
 
 
