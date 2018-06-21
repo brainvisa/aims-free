@@ -41,6 +41,9 @@
 #include <cmath>
 #include <vector>
 
+namespace aims
+{
+
 // This implementation helper allows to change the implementation of methods
 // depending if the data type is single-channel or multi-channel.
 template<bool, typename>
@@ -187,7 +190,6 @@ protected:
   mutable int                            _lasttime;
 };
 
-namespace aims {
 
   /// This method returns a mirror index when needed
   ///

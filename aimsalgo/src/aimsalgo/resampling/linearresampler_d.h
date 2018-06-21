@@ -39,6 +39,9 @@
 
 #include <cmath>
 
+namespace aims
+{
+
 template < class T >
 LinearResampler< T >::LinearResampler()
   : SplineResampler< T >()
@@ -226,5 +229,6 @@ double LinearResampler< T >::getBSplineWeight( int i, double x ) const
 
 }
 
+} // namespace aims
 
 #endif

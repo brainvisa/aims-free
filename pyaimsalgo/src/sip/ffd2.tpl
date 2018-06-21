@@ -7,9 +7,9 @@
 #include <aims/registration/ffd.h>
 typedef aims::SplineFfdResampler<%Template1%, %Template2% > SplineFfdResampler_%Template1typecode%_%Template2typecode%;
 typedef aims::FfdResampler<%Template1% > FfdResampler_%Template1typecode%;
-typedef CubicResampler<%Template2% > CubicResampler_%Template2typecode%;
-typedef SplineResampler<%Template2% > SplineResampler_%Template2typecode%;
-typedef Resampler<%Template2% > Resampler_%Template2typecode%;
+typedef aims::CubicResampler<%Template2% > CubicResampler_%Template2typecode%;
+typedef aims::SplineResampler<%Template2% > SplineResampler_%Template2typecode%;
+typedef aims::Resampler<%Template2% > Resampler_%Template2typecode%;
 %End
 
 %Docstring
@@ -44,9 +44,9 @@ typedef Resampler<%Template2% > Resampler_%Template2typecode%;
 #include <aims/registration/ffd.h>
 typedef aims::NearestNeighborFfdResampler<%Template1%, %Template2% > NearestNeighborFfdResampler_%Template1typecode%_%Template2typecode%;
 typedef aims::FfdResampler<%Template1% > FfdResampler_%Template1typecode%;
-typedef NearestNeighborResampler<%Template2% > NearestNeighborResampler_%Template2typecode%;
-typedef SplineResampler<%Template2% > SplineResampler_%Template2typecode%;
-typedef Resampler<%Template2% > Resampler_%Template2typecode%;
+typedef aims::NearestNeighborResampler<%Template2% > NearestNeighborResampler_%Template2typecode%;
+typedef aims::SplineResampler<%Template2% > SplineResampler_%Template2typecode%;
+typedef aims::Resampler<%Template2% > Resampler_%Template2typecode%;
 %End
 
 %Docstring
@@ -79,9 +79,9 @@ typedef Resampler<%Template2% > Resampler_%Template2typecode%;
 #include <aims/registration/ffd.h>
 typedef aims::TrilinearFfdResampler<%Template1%, %Template2% > TrilinearFfdResampler_%Template1typecode%_%Template2typecode%;
 typedef aims::FfdResampler<%Template1% > FfdResampler_%Template1typecode%;
-typedef LinearResampler<%Template2% > LinearResampler_%Template2typecode%;
-typedef SplineResampler<%Template2% > SplineResampler_%Template2typecode%;
-typedef Resampler<%Template2% > Resampler_%Template2typecode%;
+typedef aims::LinearResampler<%Template2% > LinearResampler_%Template2typecode%;
+typedef aims::SplineResampler<%Template2% > SplineResampler_%Template2typecode%;
+typedef aims::Resampler<%Template2% > Resampler_%Template2typecode%;
 %End
 
 %Docstring

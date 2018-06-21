@@ -39,6 +39,9 @@
 
 #include <cmath>
 
+namespace aims
+{
+
 template < class T >
 CubicResampler< T >::CubicResampler()
   : SplineResampler< T >()
@@ -86,5 +89,7 @@ double CubicResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
+
+} // namespace aims
 
 #endif

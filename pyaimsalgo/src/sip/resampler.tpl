@@ -11,7 +11,7 @@ ResamplerFactory classes are used to instantiate a Resampler object for the chos
   
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSALGOSIP_RESAMPLERFACTORY_%Template1typecode%_DEFINED
@@ -72,7 +72,7 @@ resample() methods also provide alternatives.
   
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
@@ -213,12 +213,12 @@ class SplineResampler_%Template1typecode%:Resampler_%Template1typecode% /Abstrac
   
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
-  typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
     
   #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
@@ -251,12 +251,12 @@ class NearestNeighborResampler_%Template1typecode%:Resampler_%Template1typecode%
   
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSALGOSIP_NEARESTNEIGHBORRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_NEARESTNEIGHBORRESAMPLER_%Template1typecode%_DEFINED
-  typedef NearestNeighborResampler<%Template1%> NearestNeighborResampler_%Template1typecode%;
+  typedef aims::NearestNeighborResampler<%Template1%> NearestNeighborResampler_%Template1typecode%;
   #endif
 
 %End
@@ -274,17 +274,17 @@ class CubicResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   
   #ifndef PYAIMSALGOSIP_CUBICRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_CUBICRESAMPLER_%Template1typecode%_DEFINED
-  typedef CubicResampler<%Template1%> CubicResampler_%Template1typecode%;
+  typedef aims::CubicResampler<%Template1%> CubicResampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
-  typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
 %End
 
@@ -304,17 +304,17 @@ class QuarticResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   
   #ifndef PYAIMSALGOSIP_QUARTICRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_QUARTICRESAMPLER_%Template1typecode%_DEFINED
-  typedef QuarticResampler<%Template1%> QuarticResampler_%Template1typecode%;
+  typedef aims::QuarticResampler<%Template1%> QuarticResampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
-  typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
 %End
 
@@ -334,17 +334,17 @@ class QuinticResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   
   #ifndef PYAIMSALGOSIP_QUINTICRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_QUINTICRESAMPLER_%Template1typecode%_DEFINED
-  typedef QuinticResampler<%Template1%> QuinticResampler_%Template1typecode%;
+  typedef aims::QuinticResampler<%Template1%> QuinticResampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
-  typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
 %End
 
@@ -364,17 +364,17 @@ class SixthOrderResampler_%Template1typecode%:SplineResampler_%Template1typecode
   
   #ifndef PYAIMSALGOSIP_SIXTHORDERRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SIXTHORDERRESAMPLER_%Template1typecode%_DEFINED
-  typedef SixthOrderResampler<%Template1%> SixthOrderResampler_%Template1typecode%;
+  typedef aims::SixthOrderResampler<%Template1%> SixthOrderResampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
-  typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
 %End
 
@@ -394,17 +394,17 @@ class SeventhOrderResampler_%Template1typecode%:SplineResampler_%Template1typeco
   
   #ifndef PYAIMSALGOSIP_SEVENTHORDERRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SEVENTHORDERRESAMPLER_%Template1typecode%_DEFINED
-  typedef SeventhOrderResampler<%Template1%> SeventhOrderResampler_%Template1typecode%;
+  typedef aims::SeventhOrderResampler<%Template1%> SeventhOrderResampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
-  typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
 %End
 
@@ -424,17 +424,17 @@ class LinearResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   
   #ifndef PYAIMSALGOSIP_LINEARRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_LINEARRESAMPLER_%Template1typecode%_DEFINED
-  typedef LinearResampler<%Template1%> LinearResampler_%Template1typecode%;
+  typedef aims::LinearResampler<%Template1%> LinearResampler_%Template1typecode%;
   #endif
   
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
-  typedef SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
 
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef Resampler<%Template1%> Resampler_%Template1typecode%;
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
 %End
 

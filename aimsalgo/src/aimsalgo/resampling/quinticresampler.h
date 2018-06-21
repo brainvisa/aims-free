@@ -37,6 +37,9 @@
 
 #include <aims/resampling/splineresampler.h>
 
+namespace aims
+{
+
 template <class T>
 class QuinticResampler : public SplineResampler< T >
 {
@@ -51,5 +54,7 @@ protected:
 
   double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
+
+} // namespace aims
 
 #endif

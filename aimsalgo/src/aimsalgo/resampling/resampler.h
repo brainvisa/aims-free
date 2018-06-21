@@ -41,6 +41,8 @@
 #include <aims/transformation/transformation.h>
 #include <aims/transformation/affinetransformation3d.h>
 
+namespace aims
+{
 
 /** Resampling of data from a volume, applying a transformation.
 
@@ -342,5 +344,7 @@ protected:
   AimsData<T> _ref;
   T _defval;
 };
+
+} // namespace aims
 
 #endif

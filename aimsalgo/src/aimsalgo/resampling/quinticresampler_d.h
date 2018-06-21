@@ -39,6 +39,9 @@
 
 #include <cmath>
 
+namespace aims
+{
+
 template < class T >
 QuinticResampler< T >::QuinticResampler()
   : SplineResampler< T >()
@@ -99,5 +102,7 @@ double QuinticResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
+
+} // namespace aims
 
 #endif

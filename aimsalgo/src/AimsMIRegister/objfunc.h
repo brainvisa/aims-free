@@ -47,7 +47,7 @@ class ObjFunc : public ObjectiveFunc<float,6>
 public:
   
   ObjFunc( int numLevel,
-	   Resampler<short>* interpolator,
+	   aims::Resampler<short>* interpolator,
 	   Sampler<short>* comb,	     
 	   int maskSize );
   virtual ~ObjFunc();
@@ -78,7 +78,7 @@ protected:
   AimsData<PVItem>*  _regc;
   
   int                    _numLevel;
-  Resampler<short>*      _interpolator;
+  aims::Resampler<short>*_interpolator;
   Sampler<short>*        _comb;
   AimsData<float>*       _mask;
   AimsData<float>*       _p1;
@@ -95,7 +95,7 @@ protected:
 
 inline
 ObjFunc::ObjFunc( int numLevel, 
-		  Resampler<short>* interpolator,
+		  aims::Resampler<short>* interpolator,
 		  Sampler<short>* comb,
 		  int maskSize )
         : ObjectiveFunc<float,6>(), _ref( NULL ), _test( NULL ),
