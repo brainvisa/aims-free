@@ -58,12 +58,14 @@ setDefaultValue() can also be called to set the background value.
 The resample() methods provide stateless alternatives.
 
 You can also use arbitrary **non-affine transformations** (inheriting
-aims::Transformation3d) by using the resample_inv_to_vox() family of methods.
+aims::Transformation3d) by using the resample_inv() family of methods.
 In this case, you must pass the backward transformation (_from output space to
 input space_), because of the "pulling" mechanism described above.
 
 Beware that contrary to the other methods, the resample_inv_to_vox() overloads
 take a transformation that maps to \b voxel coordinates of the input image.
+These methods can be slightly faster than resample_inv() because they map directly
+to the API of the actual resamplers are implementing (doResample()).
 */
 template <class T>
 class Resampler
@@ -192,6 +194,56 @@ public:
   /** Resample a volume at a single location.
 
       \param[in]     input_data   data to be resampled (its voxel size is
+                                  taken into account)
+      \param[in]     inverse_transform transformation from output coordinates
+                                  to coordinates of the input volume
+                                  (unit: mm)
+      \param[in]     background   value set if the transformed point is outside
+                                  of the input volume
+      \param[in,out] output_location coordinates in output space (source space
+                                  of \p transform)
+      \param[out]    output_value variable to be filled with resampled data
+      \param[in]     timestep     for 4D volume, time step to be used
+
+      This method does \b not use the instance state set by setRef() or
+      setDefaultValue().
+  */
+  void
+  resample_inv( const AimsData< T > &input_data,
+                const aims::Transformation3d &inverse_transform_to_mm,
+                const T &background, const Point3df &output_location,
+                T &output_value, int timestep ) const;
+
+  /** Resample a volume into an existing output volume.
+
+      \param[in]     input_data  data to be resampled (its voxel size is taken
+                                 into account)
+      \param[in]     transform   transformation from coordinates of the
+                                 *output* volume (unit: mm), to coordinates of
+                                 the *input* volume *(unit: mm)*
+      \param[in]     background  value set in output regions that are outside
+                                 of the transformed input volume
+      \param[in,out] output_data existing volume to be filled with resampled
+                                 data (its pre-existing dimensions and voxel
+                                 size are used)
+      \param[in]     verbose     print progress to stdout
+
+      The \c transformations, \c referentials, and \c referential header
+      attributes of \p output_data are not touched; it is up to the calling
+      code to update them accordingly.
+
+      This method does \b not use the instance state set by setRef() or
+      setDefaultValue().
+  */
+  void resample_inv( const AimsData< T >& input_data,
+                     const aims::Transformation3d& inverse_transform_to_mm,
+                     const T& background,
+                     AimsData< T >& output_data,
+                     bool verbose = false ) const;
+
+  /** Resample a volume at a single location.
+
+      \param[in]     input_data   data to be resampled (its voxel size is
                                   \b not taken into account)
       \param[in]     inverse_transform transformation from output coordinates
                                   to coordinates of the input volume
@@ -202,6 +254,9 @@ public:
                                   of \p transform)
       \param[out]    output_value variable to be filled with resampled data
       \param[in]     timestep     for 4D volume, time step to be used
+
+      This method does \b not use the instance state set by setRef() or
+      setDefaultValue().
   */
   void
   resample_inv_to_vox( const AimsData< T > &input_data,
