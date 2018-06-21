@@ -35,30 +35,35 @@
 #ifndef AIMS_RESAMPLING_RESAMPLERFACTORY_H
 #define AIMS_RESAMPLING_RESAMPLERFACTORY_H
 
+#include <cartobase/smart/rcptr.h>
+
 template <typename T> class Resampler;
 
 namespace aims
-{ 
+{
+
   template <typename T>
   class ResamplerFactory
   {
   public:
-  	enum ResamplerType
-	{
-		NearestNeighbor = 0,
-		Linear = 1,
-		Quadratic = 2,
-		Cubic = 3,
-		Quartic = 4,
-		Quintic = 5,
-		SixthOrder = 6,
-		SeventhOrder = 7
-	};
-  
-    Resampler<T> *getResampler( int order );
+    enum ResamplerType {
+      NearestNeighbor = 0,
+      Linear = 1,
+      Quadratic = 2,
+      Cubic = 3,
+      Quartic = 4,
+      Quintic = 5,
+      SixthOrder = 6,
+      SeventhOrder = 7
+    };
+
+    static const carto::rc_ptr<Resampler<T> >
+    newResampler( ResamplerType order );
+
+    Resampler<T>* getResampler( int order ) __attribute__((__deprecated__));
+
   };
 
-}
+} // namespace aims
 
-#endif
-
+#endif // !defined(AIMS_RESAMPLING_RESAMPLERFACTORY_H)
