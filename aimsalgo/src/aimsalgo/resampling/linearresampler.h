@@ -36,7 +36,6 @@
 #define AIMS_RESAMPLING_LINEARRESAMPLER_H
 
 #include <aims/resampling/splineresampler.h>
-#include <aims/resampling/multichannelresampler.h>
 
 template <class T>
 class LinearResampler : public SplineResampler< T >
@@ -49,16 +48,14 @@ public:
   int getOrder() const;
 
 protected:
+  typedef typename SplineResampler<T>::ChannelType ChannelType;
 
-  void doResample( const AimsData< T >& inVolume,
-                   const aims::Transformation3d& transform3d,
-                   const T& outBackground,
-                   const Point3df& outLocation,
-                   T& outValue, int t ) const CARTO_OVERRIDE;
+  void doResampleChannel( const AimsData< ChannelType >& inVolume,
+                          const aims::Transformation3d& transform3d,
+                          const ChannelType& outBackground,
+                          const Point3df& outLocation,
+                          ChannelType& outValue, int t ) const CARTO_OVERRIDE;
   double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
-
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGB, 1 )
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGBA, 1 )
 
 #endif

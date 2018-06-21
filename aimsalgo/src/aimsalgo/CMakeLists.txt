@@ -295,7 +295,6 @@ set( _headers
     resampling/notnullmeansubsampling.h
     resampling/notnullmediansubsampling.h
     resampling/sumsubsampling.h
-    resampling/multichannelresampler.h
     resampling/samplable.h
     resampling/samplable_cone.h
     resampling/samplable_sphere.h

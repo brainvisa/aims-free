@@ -35,9 +35,9 @@
 #ifndef AIMS_RESAMPLING_CUBICRESAMPLER_D_H
 #define AIMS_RESAMPLING_CUBICRESAMPLER_D_H
 
-#include <cstdlib>
 #include <aims/resampling/cubicresampler.h>
-#include <aims/utility/channel.h>
+
+#include <cmath>
 
 template < class T >
 CubicResampler< T >::CubicResampler()
@@ -86,9 +86,5 @@ double CubicResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
-
-// AimsRGB Specialization
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( CubicResampler, AimsRGB )
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( CubicResampler, AimsRGBA )
 
 #endif

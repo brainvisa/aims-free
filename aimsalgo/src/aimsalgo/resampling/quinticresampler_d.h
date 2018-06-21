@@ -35,9 +35,9 @@
 #ifndef AIMS_RESAMPLING_QUINTICRESAMPLER_D_H
 #define AIMS_RESAMPLING_QUINTICRESAMPLER_D_H
 
-#include <cstdlib>
 #include <aims/resampling/quinticresampler.h>
-#include <aims/utility/channel.h>
+
+#include <cmath>
 
 template < class T >
 QuinticResampler< T >::QuinticResampler()
@@ -99,9 +99,5 @@ double QuinticResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
-
-// AimsRGB Specialization
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuinticResampler, AimsRGB )
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuinticResampler, AimsRGBA )
 
 #endif

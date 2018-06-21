@@ -35,9 +35,9 @@
 #ifndef AIMS_RESAMPLING_QUADRATICRESAMPLER_D_H
 #define AIMS_RESAMPLING_QUADRATICRESAMPLER_D_H
 
-#include <cstdlib>
 #include <aims/resampling/quadraticresampler.h>
-#include <aims/utility/channel.h>
+
+#include <cmath>
 
 template < class T >
 QuadraticResampler< T >::QuadraticResampler()
@@ -85,9 +85,5 @@ double QuadraticResampler< T >::getBSplineWeight( int i, double x ) const
   return 0.0;
 
 }
-
-// AimsRGB Specialization
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuadraticResampler, AimsRGB )
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuadraticResampler, AimsRGBA )
 
 #endif
