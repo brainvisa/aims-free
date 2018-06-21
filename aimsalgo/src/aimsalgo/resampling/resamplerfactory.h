@@ -36,8 +36,7 @@
 #define AIMS_RESAMPLING_RESAMPLERFACTORY_H
 
 #include <cartobase/smart/rcptr.h>
-
-template <typename T> class Resampler;
+#include <aims/resampling/resampler.h>
 
 namespace aims
 {
