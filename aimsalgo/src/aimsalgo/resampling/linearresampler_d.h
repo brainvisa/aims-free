@@ -81,35 +81,9 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
   Point3df normalizedInLocation;
   normalizedInLocation = invTransform3d.transform( outLocation );
 
-  normalizedInLocation[0] += 0.5;
-  normalizedInLocation[1] += 0.5;
-  normalizedInLocation[2] += 0.5;
-
-  int x = ( int )normalizedInLocation[0];
-  int y = ( int )normalizedInLocation[1];
-  int z = ( int )normalizedInLocation[2];
-
-  if ( ( normalizedInLocation[0] < 0.0 ) &&
-       ( ( double )x != normalizedInLocation[0] ) )
-  {
-
-    -- x;
-
-  }
-  if ( ( normalizedInLocation[1] < 0.0 ) &&
-       ( ( double )y != normalizedInLocation[1] ) )
-  {
-
-    -- y;
-
-  }
-  if ( ( normalizedInLocation[2] < 0.0 ) &&
-       ( ( double )z != normalizedInLocation[2] ) )
-  {
-
-    -- z;
-
-  }
+  long x = lround(normalizedInLocation[0]);
+  long y = lround(normalizedInLocation[1]);
+  long z = lround(normalizedInLocation[2]);
 
   if ( ( x >= 0 ) && ( x < inVolume.dimX() ) &&
        ( y >= 0 ) && ( y < inVolume.dimY() ) &&
@@ -121,15 +95,7 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
     double intensity, qi, qj;
 
     // first y contribution
-    normalizedInLocation[1] -= 0.5;
-    y = ( int )normalizedInLocation[1];
-    if ( ( normalizedInLocation[1] < 0.0 ) &&
-         ( ( double )y != normalizedInLocation[1] ) )
-    {
-
-      -- y;
-
-    }
+    y = static_cast<long>(std::floor(normalizedInLocation[1]));
     weightY0 = getBSplineWeight( y, normalizedInLocation[1] );
     foldY0 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
@@ -139,15 +105,7 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
     foldY1 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
     // first x contribution
-    normalizedInLocation[0] -= 0.5;
-    x = ( int )normalizedInLocation[0];
-    if ( ( normalizedInLocation[0] < 0.0 ) &&
-         ( ( double )x != normalizedInLocation[0] ) )
-    {
-
-      -- x;
-
-    }
+    x = static_cast<long>(std::floor(normalizedInLocation[0]));
     weightX0 = getBSplineWeight( x, normalizedInLocation[0] );
     foldX0 = (long)this->getFold( x, inVolume.dimX() );
 
@@ -175,15 +133,7 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
     {
 
       // first z contribution
-      normalizedInLocation[2] -= 0.5;
-      z = ( int )normalizedInLocation[2];
-      if ( ( normalizedInLocation[2] < 0.0 ) &&
-           ( ( double )z != normalizedInLocation[2] ) )
-      {
-
-        -- z;
-
-      }
+      z = static_cast<long>(std::floor(normalizedInLocation[2]));
       pj = i + (size_t)(this->getFold( z, inVolume.dimZ() )) * inVolume.dimX() *
            inVolume.dimY();
       pi = pj + (size_t)(foldY0);
