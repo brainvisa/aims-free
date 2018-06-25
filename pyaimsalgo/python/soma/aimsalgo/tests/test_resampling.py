@@ -1,0 +1,137 @@
+# -*- coding: utf-8 -*-
+#  This software and supporting documentation are distributed by
+#      Institut Federatif de Recherche 49
+#      CEA/NeuroSpin, Batiment 145,
+#      91191 Gif-sur-Yvette cedex
+#      France
+#
+# This software is governed by the CeCILL-B license under
+# French law and abiding by the rules of distribution of free software.
+# You can  use, modify and/or redistribute the software under the
+# terms of the CeCILL-B license as circulated by CEA, CNRS
+# and INRIA at the following URL "http://www.cecill.info".
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability.
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
+# same conditions as regards security.
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL-B license and that you accept its terms.
+
+import unittest
+
+import numpy as np
+
+from soma import aims
+from soma import aimsalgo
+
+
+def create_reference_volume(dtype, shape=(4, 5, 6, 1)):
+    vol = aims.Volume(shape[0], shape[1], shape[2], shape[3], dtype=dtype)
+    arr = np.asarray(vol)
+    arr[...] = np.arange(np.prod(shape), dtype=dtype).reshape(shape)
+    return vol
+
+
+def empty_volume_like(ref):
+    return aims.Volume(ref.getSizeX(), ref.getSizeY(), ref.getSizeZ(),
+                       ref.getSizeT(), dtype=np.asarray(ref).dtype)
+
+
+def array_approx_equal(out, ref, border=0, atol=1e-6):
+    out, ref = np.asarray(out), np.asarray(ref)
+    if out.shape != ref.shape:
+        return False
+    if border == 0:
+        return np.allclose(out, ref, atol=atol)
+    else:
+        return np.allclose(out[border : -border,
+                               border : -border,
+                               border : -border],
+                           ref[border : -border,
+                               border : -border,
+                               border : -border], atol=atol)
+
+
+identity_transform = aims.AffineTransformation3d()
+assert identity_transform.isIdentity()
+
+
+class ResamplingTestCase(unittest.TestCase):
+    def do_identity_resampling_test(self, resampler, dtype, border=0):
+        """Helper function to test resampling with identity transform"""
+        ref = create_reference_volume(dtype)
+        out = empty_volume_like(ref)
+        resampler.setRef(ref)
+        resampler.doit(identity_transform, out)
+        self.assertTrue(array_approx_equal(out, ref, border))
+
+    def test_identity_nn_resampling_float32(self):
+        self.do_identity_resampling_test(
+            aimsalgo.NearestNeighborResampler_FLOAT(),
+            np.float32
+        )
+
+    def test_identity_linear_resampling_float32(self):
+        self.do_identity_resampling_test(
+            aimsalgo.LinearResampler_FLOAT(),
+            np.float32
+        )
+
+    def test_identity_cubic_resampling_float32(self):
+        self.do_identity_resampling_test(
+            aimsalgo.CubicResampler_FLOAT(),
+            np.float32
+        )
+
+    def test_identity_nn_resampling_int16(self):
+        self.do_identity_resampling_test(
+            aimsalgo.NearestNeighborResampler_S16(),
+            np.int16
+        )
+
+    def test_identity_linear_resampling_int16(self):
+        self.do_identity_resampling_test(
+            aimsalgo.LinearResampler_S16(),
+            np.int16
+        )
+
+    # known rounding issue
+    @unittest.expectedFailure
+    def test_identity_cubic_resampling_int16(self):
+        self.do_identity_resampling_test(
+            aimsalgo.CubicResampler_S16(),
+            np.int16
+        )
+
+    # known issue: the last element along each axis is -32768 (the mask value)
+    @unittest.expectedFailure
+    def test_identity_masklin_resampling_int16(self):
+        self.do_identity_resampling_test(
+            aimsalgo.MaskLinearResampler_S16(),
+            np.int16, border=0
+        )
+
+    def test_identity_masklin_resampling_int16_except_last_elem(self):
+        self.do_identity_resampling_test(
+            aimsalgo.MaskLinearResampler_S16(),
+            np.int16, border=1
+        )
+
+
+
+if __name__ == "__main__":
+    unittest.main()
