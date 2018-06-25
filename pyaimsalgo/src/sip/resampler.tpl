@@ -158,12 +158,12 @@ None
                          const Motion &,
                          const %Template1% &,
                          const Point3df &,
-                         %Template1% &, int ) /ReleaseGIL/;
+                         %Template1% & /Out/,
+                         int ) /ReleaseGIL/;
 %Docstring
-resample(input_data, transform, background, output_location, output_value,
-         timestep)
+resample(input_data, transform, background, output_location, timestep) -> output_value
 
-Resample a single voxel of the input data at a given specified output location, and set the output value.
+Resample a single voxel of the input data at a given specified output location, and return the output value.
 
 Parameters
 ----------
