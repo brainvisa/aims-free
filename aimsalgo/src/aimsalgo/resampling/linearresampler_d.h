@@ -37,6 +37,8 @@
 
 #include <aims/resampling/linearresampler.h>
 
+#include <cartobase/type/converter.h>
+
 #include <cmath>
 
 namespace aims
@@ -208,7 +210,8 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
       qj += weightY1 * qi;
       intensity += getBSplineWeight( z, normalizedInLocation[2] ) * qj;
     }
-    outValue = static_cast<ChannelType>(intensity);
+
+    carto::RawConverter<double, ChannelType>().convert(intensity, outValue);
 
   }
   else
