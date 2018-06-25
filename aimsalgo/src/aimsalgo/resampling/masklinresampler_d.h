@@ -82,7 +82,7 @@ doResample( const AimsData<T> &input_data,
                                            output_value, t);
     }
   } else {
-    output_value = defaultValue();
+    output_value = background;
   }
 }
 
