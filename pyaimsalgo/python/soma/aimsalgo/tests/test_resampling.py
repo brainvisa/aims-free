@@ -159,11 +159,11 @@ class ResamplingTestCase(unittest.TestCase):
     # known issue: not implemented
     @unittest.expectedFailure
     def test_masklinresampler_one_value(self):
-        shape = (3, 3, 3, 1)
+        shape = (3, 3, 3)
         ref = aims.Volume(np.arange(0, 2 * np.prod(shape), 2, dtype=np.int16)
                           .reshape(shape))
         resampler = aimsalgo.MaskLinearResampler_S16()
-        out = resampler.resample(ref, identity_transform, 0, [0.5, 0, 0], 0)
+        out = resampler.resample(ref, identity_transform, -1000, [0.5, 0, 0], 0)
         self.assertEqual(out, 1)
 
 
