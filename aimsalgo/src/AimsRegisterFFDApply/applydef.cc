@@ -104,6 +104,11 @@ FFDApplyProc::FFDApplyProc()
   registerProcessType( "BundleMap", "VOID", &doBundles ); // just for doc
 }
 
+
+bool doVolume_special_outputs(const FFDApplyProc &ffdproc,
+                              const FfdTransformation& deformation,
+                              const Transformation3d& transform);
+
 template <class T, class C>
 bool doVolume( Process & process, const string & fileref, Finder & )
 {
@@ -220,26 +225,6 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   out.setSizeXYZT( ffdproc.sx, ffdproc.sy, ffdproc.sz, in.sizeT() );
   out = bv;
 
-  //--------------------------------------------------------------------------
-  // Output grid of deformations
-  //--------------------------------------------------------------------------
-  AimsData<float> grid;
-  if( !ffdproc.gridout.empty() ) {
-    grid = AimsData<float>( ffdproc.dx, ffdproc.dy, ffdproc.dz, 3 );
-    grid.setSizeXYZT( ffdproc.sx, ffdproc.sy, ffdproc.sz, 1. );
-    grid = 0.;
-  }
-
-  //--------------------------------------------------------------------------
-  // Output compression volume
-  //--------------------------------------------------------------------------
-  AimsData<float> compression;
-  if( !ffdproc.compout.empty() ) {
-    compression = AimsData<float>( ffdproc.dx, ffdproc.dy, ffdproc.dz );
-    compression.setSizeXYZT( ffdproc.sx, ffdproc.sy, ffdproc.sz );
-    compression = 0.;
-  }
-
   //==========================================================================
   //
   //      Prepare resampler
@@ -267,6 +252,8 @@ bool doVolume( Process & process, const string & fileref, Finder & )
     transform_chain->push_back(affine);
   }
   transform_chain->push_back(deformation);
+
+  bool success = true;
 
   //--------------------------------------------------------------------------
   // Write bucket of ???
@@ -311,22 +298,59 @@ bool doVolume( Process & process, const string & fileref, Finder & )
           subBucketMapVoid->insert( Point3d(dfx, dfy, dfz + 1), Void() );
         }
     Writer< BucketMap< Void > > w2 ( ffdproc.bucketout );
-    w2 << *subBucketMapVoid;
+    success = w2.write(*subBucketMapVoid) && success;
     delete subBucketMapVoid;
   }
 
   cout << "Initialization done." << endl;
 
-
-  //==========================================================================
-  //
-  //      Do resampling
-  //
-  //==========================================================================
-  cout << "Resampling ";
-
+  cout << "Resampling... ";
   rsp->resample_inv( in, *transform_chain, bv,
                      out, true );
+  cout << endl;
+
+  if(!ffdproc.compout.empty()
+     || !ffdproc.gridout.empty()) {
+    success = doVolume_special_outputs(ffdproc,
+                                       *deformation,
+                                       *transform_chain) && success;
+  }
+
+  //--------------------------------------------------------------------------
+  // Output resampled volume
+  //--------------------------------------------------------------------------
+  Writer<AimsData<T> > w3(ffdproc.output);
+  success = w3.write(out) && success;
+
+  return success;
+}
+
+
+bool doVolume_special_outputs(const FFDApplyProc &ffdproc,
+                              const FfdTransformation& deformation,
+                              const Transformation3d& transform_chain)
+{
+  bool success = true;
+
+  //--------------------------------------------------------------------------
+  // Prepare output grid of deformations
+  //--------------------------------------------------------------------------
+  AimsData<float> grid;
+  if( !ffdproc.gridout.empty() ) {
+    grid = AimsData<float>( ffdproc.dx, ffdproc.dy, ffdproc.dz, 3 );
+    grid.setSizeXYZT( ffdproc.sx, ffdproc.sy, ffdproc.sz, 1. );
+    grid = 0.;
+  }
+
+  //--------------------------------------------------------------------------
+  // Prepare output compression volume
+  //--------------------------------------------------------------------------
+  AimsData<float> compression;
+  if( !ffdproc.compout.empty() ) {
+    compression = AimsData<float>( ffdproc.dx, ffdproc.dy, ffdproc.dz );
+    compression.setSizeXYZT( ffdproc.sx, ffdproc.sy, ffdproc.sz );
+    compression = 0.;
+  }
 
   Point3df size( ffdproc.sx, ffdproc.sy, ffdproc.sz );
   float v_unity = ffdproc.sx * ffdproc.sy * ffdproc.sz, v_deform;
@@ -337,13 +361,20 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   Point3df v;
   Point3df p_ext;
 
+  cout << "Computing special outputs (--grid and/or --compression)" << endl;
+
+  if(!ffdproc.compout.empty()) {
+    cout << "WARNING: the output of --compression is almost certainly wrong "
+         << "when the output voxel size is different from 1mm. See FIXME "
+         << "comments in the source code."
+         << endl;
+  }
 
   if( ffdproc.dz > 1)
     std::cout << "Progress: ";
 
-  aims::Progression progress(ffdproc.dx * ffdproc.dy * ffdproc.dz * in.dimT());
+  aims::Progression progress(ffdproc.dx * ffdproc.dy * ffdproc.dz);
 
-  for( int t = 0; t < in.dimT(); ++t )
   for( long z = 0; z < ffdproc.dz; ++z )
   for( long y = 0; y < ffdproc.dy; ++y )
   for( long x = 0; x < ffdproc.dx; ++x )
@@ -354,9 +385,8 @@ bool doVolume( Process & process, const string & fileref, Finder & )
     porg[0] *= ffdproc.sx;
     porg[1] *= ffdproc.sy;
     porg[2] *= ffdproc.sz;
-    Point3df p = transform_chain->transform(porg);
+    Point3df p = transform_chain.transform(porg);
 
-    if( t == 0 )
     {
       p[0] /= ffdproc.sx;
       p[1] /= ffdproc.sy;
@@ -408,42 +438,29 @@ bool doVolume( Process & process, const string & fileref, Finder & )
         for( it = ogv.begin(); it < ie; it++ )
         {
           v = *it;
-          if (! affine->isIdentity() )
-          {
-            // Apply inverted affine transformation
-            v[0] *= size[0];
-            v[1] *= size[1];
-            v[2] *= size[2];
-            v = affine->transform( v );
-            v[0] /= size[0];
-            v[1] /= size[1];
-            v[2] /= size[2];
-          }
-          v = deformation->transform( v );
+          // FIXME: v is assumed to be in voxels, but it is not really the case
+          // because it is the sum of an int voxel coordinate, and a float
+          // representing half the voxel size
+          v[0] *= size[0];
+          v[1] *= size[1];
+          v[2] *= size[2];
+          v = transform_chain.transform( v );
+          v[0] /= size[0];
+          v[1] /= size[1];
+          v[2] /= size[2];
           vert.push_back( v );
         }
 
         v_deform = SurfaceManip::meshVolume( vol );
+        // FIXME: porg is in mm, so it is definitely not the correct variable
+        // to use here for indexing the compression volume
         compression( porg[0], porg[1], porg[2] ) =  (-1) * 100 * ( v_unity - v_deform ) / v_unity;
       }
+    }
 
-    } // if t == 0
   }
 
   cout << endl;
-
-
-  //==========================================================================
-  //
-  //      Write output data
-  //
-  //==========================================================================
-
-  //--------------------------------------------------------------------------
-  // Output resampled volume
-  //--------------------------------------------------------------------------
-  Writer<AimsData<T> > w3(ffdproc.output);
-  bool res = w3.write(out);
 
   //--------------------------------------------------------------------------
   // Output grid
@@ -451,7 +468,7 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   if( ! ffdproc.gridout.empty() )
   {
     Writer< AimsData<float> > w4(ffdproc.gridout);
-    w4 << grid;
+    success = w4.write(grid) && success;
   }
 
   //--------------------------------------------------------------------------
@@ -460,10 +477,10 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   if( !ffdproc.compout.empty() )
   {
     Writer< AimsData<float> > w5(ffdproc.compout);
-    w5 << compression;
+    success = w5.write(compression) && success;
   }
 
-  return res;
+  return success;
 }
 
 
