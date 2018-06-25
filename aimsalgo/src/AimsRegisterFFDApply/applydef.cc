@@ -105,8 +105,9 @@ FFDApplyProc::FFDApplyProc()
 }
 
 
+bool write_node_bucket(const FFDApplyProc& ffdproc,
+                       const FfdTransformation& deformation);
 bool doVolume_special_outputs(const FFDApplyProc &ffdproc,
-                              const FfdTransformation& deformation,
                               const Transformation3d& transform);
 
 template <class T, class C>
@@ -255,6 +256,37 @@ bool doVolume( Process & process, const string & fileref, Finder & )
 
   bool success = true;
 
+  cout << "Initialization done." << endl;
+
+  if( !ffdproc.bucketout.empty() ) {
+    success = write_node_bucket(ffdproc, *deformation) && success;
+  }
+
+  cout << "Resampling... ";
+  rsp->resample_inv( in, *transform_chain, bv,
+                     out, true );
+  cout << endl;
+
+  if(!ffdproc.compout.empty()
+     || !ffdproc.gridout.empty()) {
+    success = doVolume_special_outputs(ffdproc,
+                                       *transform_chain) && success;
+  }
+
+  //--------------------------------------------------------------------------
+  // Output resampled volume
+  //--------------------------------------------------------------------------
+  Writer<AimsData<T> > w3(ffdproc.output);
+  success = w3.write(out) && success;
+
+  return success;
+}
+
+
+bool write_node_bucket(const FFDApplyProc& ffdproc,
+                       const FfdTransformation& deformation)
+{
+  bool success = true;
   //--------------------------------------------------------------------------
   // Write bucket of ???
   //--------------------------------------------------------------------------
@@ -266,9 +298,9 @@ bool doVolume( Process & process, const string & fileref, Finder & )
     // FIXME: assigning the voxel size for flat dimensions is almost certainly
     // wrong (fdx represents voxels, not mm)
     int32_t fdx, fdy, fdz;
-    fdx = deformation->isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation->dimX()) * deformation->sizeX() / ffdproc.sx );
-    fdy = deformation->isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation->dimY()) * deformation->sizeY() / ffdproc.sy );
-    fdz = deformation->isFlat(2) ? ffdproc.sz : (int32_t)( double(deformation->dimZ()) * deformation->sizeZ() / ffdproc.sz );
+    fdx = deformation.isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation.dimX()) * deformation.sizeX() / ffdproc.sx );
+    fdy = deformation.isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation.dimY()) * deformation.sizeY() / ffdproc.sy );
+    fdz = deformation.isFlat(2) ? ffdproc.sz : (int32_t)( double(deformation.dimZ()) * deformation.sizeZ() / ffdproc.sz );
     fdx = std::min( fdx, ffdproc.dx );
     fdy = std::min( fdy, ffdproc.dy );
     fdz = std::min( fdz, ffdproc.dz );
@@ -277,10 +309,10 @@ bool doVolume( Process & process, const string & fileref, Finder & )
     subBucketMapVoid->setSizeXYZT( ffdproc.sx,
                                    ffdproc.sy,
                                    ffdproc.sz,
-                                   in.sizeT() );
+                                   1);
     int dfx, dfy, dfz;
-    int szx = deformation->dimX(), szy = deformation->dimY(),
-      szz = deformation->dimZ();
+    int szx = deformation.dimX(), szy = deformation.dimY(),
+      szz = deformation.dimZ();
     for(int k = 0; k < szz; ++k)
       for(int j = 0; j < szy; ++j)
         for(int i = 0; i < szx; ++i)
@@ -301,33 +333,11 @@ bool doVolume( Process & process, const string & fileref, Finder & )
     success = w2.write(*subBucketMapVoid) && success;
     delete subBucketMapVoid;
   }
-
-  cout << "Initialization done." << endl;
-
-  cout << "Resampling... ";
-  rsp->resample_inv( in, *transform_chain, bv,
-                     out, true );
-  cout << endl;
-
-  if(!ffdproc.compout.empty()
-     || !ffdproc.gridout.empty()) {
-    success = doVolume_special_outputs(ffdproc,
-                                       *deformation,
-                                       *transform_chain) && success;
-  }
-
-  //--------------------------------------------------------------------------
-  // Output resampled volume
-  //--------------------------------------------------------------------------
-  Writer<AimsData<T> > w3(ffdproc.output);
-  success = w3.write(out) && success;
-
   return success;
 }
 
 
 bool doVolume_special_outputs(const FFDApplyProc &ffdproc,
-                              const FfdTransformation& deformation,
                               const Transformation3d& transform_chain)
 {
   bool success = true;
