@@ -131,6 +131,31 @@ class ResamplingTestCase(unittest.TestCase):
             np.int16, border=1
         )
 
+    def test_scaling(self):
+        ref = create_reference_volume(np.int16)
+        out = empty_volume_like(ref)
+        ref.header()["voxel_size"] = [0.2, 0.3, 0.4]
+        transform = aims.AffineTransformation3d()
+        transform.scale([1, 1, 1], ref.header()["voxel_size"])
+        resampler = aims.ResamplerFactory_S16().getResampler(0)
+        resampler.resample(ref, transform, 0, out)
+        self.assertTrue(np.array_equal(out, ref))
+
+    def test_nearestneighbor_rounding(self):
+        ref = create_reference_volume(np.int16)
+        out = empty_volume_like(ref)
+        transform = aims.AffineTransformation3d()
+        transform.setTranslation([0.49, 0.49, -0.49])
+        resampler = aims.ResamplerFactory_S16().getResampler(0)
+        resampler.resample(ref, transform, 0, out)
+        self.assertTrue(np.array_equal(out, ref))
+
+    def test_resample_one_value(self):
+        ref = aims.Volume(np.arange(2, dtype=np.float32).reshape(2, 1, 1, 1))
+        resampler = aims.ResamplerFactory_FLOAT().getResampler(1)
+        out = np.float32()
+        out = resampler.resample(ref, identity_transform, 0, [0.5, 0, 0], 0)
+        self.assertTrue(np.isclose(out, 0.5))
 
 
 if __name__ == "__main__":
