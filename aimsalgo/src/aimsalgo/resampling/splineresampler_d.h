@@ -649,12 +649,12 @@ struct MultiChannelResamplerSwitch<false, T>
                           T &output_value,
                           int timestep )
   {
-    spline_resampler->resample_inv_to_vox(input_data,
-                                          inverse_transform,
-                                          background,
-                                          output_location,
-                                          output_value,
-                                          timestep);
+    spline_resampler->doResampleChannel(input_data,
+                                        inverse_transform,
+                                        background,
+                                        output_location,
+                                        output_value,
+                                        timestep);
   }
 
   static void resample_inv_to_vox( const SplineResampler<T>* spline_resampler,
