@@ -12,8 +12,8 @@ BRAINVISA_INSTALL( TARGETS vidaIO
 # The rpc/rpc.h, rpc/types.h and rpc/xdr.h headers used to be shipped with
 # glibc, but they were moved to libtirpc and removed in glibc 2.26 (released
 # August 2017).
-include(CheckIncludeFile)
-CHECK_INCLUDE_FILE("rpc/xdr.h" rpc_headers_present)
+include(CheckIncludeFiles)
+CHECK_INCLUDE_FILES("rpc/types.h;rpc/xdr.h" rpc_headers_present)
 if(NOT rpc_headers_present)
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(libtirpc REQUIRED libtirpc)
