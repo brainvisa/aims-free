@@ -153,9 +153,18 @@ class ResamplingTestCase(unittest.TestCase):
     def test_resample_one_value(self):
         ref = aims.Volume(np.arange(2, dtype=np.float32).reshape(2, 1, 1, 1))
         resampler = aims.ResamplerFactory_FLOAT().getResampler(1)
-        out = np.float32()
         out = resampler.resample(ref, identity_transform, 0, [0.5, 0, 0], 0)
         self.assertTrue(np.isclose(out, 0.5))
+
+    # known issue: not implemented
+    @unittest.expectedFailure
+    def test_masklinresampler_one_value(self):
+        shape = (3, 3, 3, 1)
+        ref = aims.Volume(np.arange(0, 2 * np.prod(shape), 2, dtype=np.int16)
+                          .reshape(shape))
+        resampler = aimsalgo.MaskLinearResampler_S16()
+        out = resampler.resample(ref, identity_transform, 0, [0.5, 0, 0], 0)
+        self.assertEqual(out, 1)
 
 
 if __name__ == "__main__":
