@@ -109,8 +109,6 @@ class ResamplingTestCase(unittest.TestCase):
             np.int16
         )
 
-    # known rounding issue
-    @unittest.expectedFailure
     def test_identity_cubic_resampling_int16(self):
         self.do_identity_resampling_test(
             aimsalgo.CubicResampler_S16(),
@@ -156,15 +154,14 @@ class ResamplingTestCase(unittest.TestCase):
         out = resampler.resample(ref, identity_transform, 0, [0.5, 0, 0], 0)
         self.assertTrue(np.isclose(out, 0.5))
 
-    # known issue: not implemented
-    @unittest.expectedFailure
     def test_masklinresampler_one_value(self):
-        shape = (3, 3, 3, 1)
+        shape = (3, 3, 3)
         ref = aims.Volume(np.arange(0, 2 * np.prod(shape), 2, dtype=np.int16)
                           .reshape(shape))
         resampler = aimsalgo.MaskLinearResampler_S16()
-        out = resampler.resample(ref, identity_transform, 0, [0.5, 0, 0], 0)
+        out = resampler.resample(ref, identity_transform, -1, [0.5, 0, 0], 0)
         self.assertEqual(out, 1)
+
 
 
 if __name__ == "__main__":
