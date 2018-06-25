@@ -16,9 +16,14 @@
 #include <aims/io/datatypecode.h>                           // DataTypeCode<T>
 #include <aims/io/io_g.h>                          // Reader - Writer - Finder
 #include <aims/mesh/surfaceOperation.h>            // SurfaceManip::meshVolume
-#include <aims/registration/ffd.h>  // SplineFfd - SplineFfdResampler
+#include <aims/transformation/affinetransformation3d.h> // AffineTransformation3d
+#include <aims/transformation/transformation_chain.h> // TransformationChain3d
+#include <aims/resampling/linearresampler.h>                // LinearResampler
+#include <aims/resampling/cubicresampler.h>                  // CubicResampler
+#include <aims/registration/ffd.h>                        // FfdTransformation
 #include <aims/utility/progress.h>                       // aims::ProgressInfo
 //--- carto ------------------------------------------------------------------
+#include <cartobase/smart/rcptr.h>                                   // rc_ptr
 #include <cartobase/object/object.h>                                 // Object
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/errno.h>
@@ -30,6 +35,7 @@
 using namespace aims;
 using namespace std;
 using namespace carto;
+
 
 class FFDApplyProc;
 
@@ -142,14 +148,14 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // Affine motion
   //--------------------------------------------------------------------------
-  Motion affine;
+  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
   if( !ffdproc.affinemotion.empty() )
   {
-    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
-    rmotion >> affine;
-    affine = affine.inverse();
+    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
+    rmotion >> *affine;
+    *affine = affine->inverse();
   }
-  cout << "Affine : " << affine << endl;
+  cout << "Affine : " << *affine << endl;
 
   //--------------------------------------------------------------------------
   // Output volume dimensions
@@ -241,23 +247,26 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   //==========================================================================
 
   // Choose resampling type
-  carto::rc_ptr<FfdResampler<T> > rsp;
-  if ((ffdproc.type == "nearest") || (ffdproc.type == "n")) {
-    rsp = carto::rc_ptr<FfdResampler<T> >(
-      new NearestNeighborFfdResampler<T, C>(*deformation, affine, bv)
-    );
+  carto::rc_ptr<aims::Resampler<T> > rsp;
+  if (ffdproc.type == "nearest" || ffdproc.type == "n") {
+    rsp.reset(new NearestNeighborResampler<T>);
+  } else if( ffdproc.type == "linear" || ffdproc.type == "l" ) {
+    rsp.reset(new LinearResampler<T>);
+  } else {
+    rsp.reset(new CubicResampler<T>);
   }
-  else if( ffdproc.type == "linear" || ffdproc.type == "l" )
-  {
-    rsp = carto::rc_ptr<FfdResampler<T> >(
-      new TrilinearFfdResampler<T, C>(*deformation, affine, bv) );
+
+  //==========================================================================
+  //
+  //      Prepare the composed transformation
+  //
+  //==========================================================================
+
+  rc_ptr<TransformationChain3d> transform_chain(new TransformationChain3d);
+  if(!affine->isIdentity()) {
+    transform_chain->push_back(affine);
   }
-  else {
-    rsp = carto::rc_ptr<FfdResampler<T> >(
-      new SplineFfdResampler<T, C>(*deformation, affine, bv)
-    );
-  }
-  rsp->setRef(in);
+  transform_chain->push_back(deformation);
 
   //--------------------------------------------------------------------------
   // Write bucket of ???
@@ -316,6 +325,9 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   //==========================================================================
   cout << "Resampling ";
 
+  rsp->resample_inv( in, *transform_chain, bv,
+                     out, true );
+
   Point3df size( ffdproc.sx, ffdproc.sy, ffdproc.sz );
   float v_unity = ffdproc.sx * ffdproc.sy * ffdproc.sz, v_deform;
   float dx = .5 * ffdproc.sx;
@@ -324,6 +336,7 @@ bool doVolume( Process & process, const string & fileref, Finder & )
 
   Point3df v;
   Point3df p_ext;
+
 
   if( ffdproc.dz > 1)
     std::cout << "Progress: ";
@@ -341,7 +354,7 @@ bool doVolume( Process & process, const string & fileref, Finder & )
     porg[0] *= ffdproc.sx;
     porg[1] *= ffdproc.sy;
     porg[2] *= ffdproc.sz;
-    Point3df p = rsp->resample( porg, out(x, y, z, t), t );
+    Point3df p = transform_chain->transform(porg);
 
     if( t == 0 )
     {
@@ -395,13 +408,13 @@ bool doVolume( Process & process, const string & fileref, Finder & )
         for( it = ogv.begin(); it < ie; it++ )
         {
           v = *it;
-          if (! affine.isIdentity() )
+          if (! affine->isIdentity() )
           {
             // Apply inverted affine transformation
             v[0] *= size[0];
             v[1] *= size[1];
             v[2] *= size[2];
-            v = affine.transform( v );
+            v = affine->transform( v );
             v[0] /= size[0];
             v[1] /= size[1];
             v[2] /= size[2];
@@ -486,13 +499,13 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // Affine motion
   //--------------------------------------------------------------------------
-  Motion affine;
+  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
   if( !ffdproc.affinemotion.empty() )
   {
-    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
-    rmotion >> affine;
+    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
+    rmotion >> *affine;
   }
-  cout << "Affine : " << affine << endl;
+  cout << "Affine : " << *affine << endl;
 
   //==========================================================================
   //
@@ -501,7 +514,7 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   //==========================================================================
   cout << "Resampling ";
 
-  ffdTransformMesh( in, *deformation, affine );
+  ffdTransformMesh( in, *deformation, *affine );
 
   cout << endl;
 
@@ -554,13 +567,13 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // Affine motion
   //--------------------------------------------------------------------------
-  Motion affine;
+  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
   if( !ffdproc.affinemotion.empty() )
   {
-    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
-    rmotion >> affine;
+    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
+    rmotion >> *affine;
   }
-  cout << "Affine : " << affine << endl;
+  cout << "Affine : " << *affine << endl;
 
   //==========================================================================
   //
@@ -570,7 +583,7 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   cout << "Resampling ";
 
   rc_ptr<BucketMap<Void> > out
-    = ffdTransformBucket( in, *deformation, affine,
+    = ffdTransformBucket( in, *deformation, *affine,
                           Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
 
   cout << endl;
@@ -617,13 +630,13 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // Affine motion
   //--------------------------------------------------------------------------
-  Motion affine;
+  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
   if( !ffdproc.affinemotion.empty() )
   {
-    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
-    rmotion >> affine;
+    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
+    rmotion >> *affine;
   }
-  cout << "Affine : " << affine << endl;
+  cout << "Affine : " << *affine << endl;
 
   //==========================================================================
   //
@@ -632,7 +645,7 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   //==========================================================================
   cout << "Resampling ";
 
-  BundleFFDTransformer btrans( deformation, affine );
+  BundleFFDTransformer btrans( deformation, *affine );
   rdata.addBundleListener( btrans );
   BundleWriter bw;
   bw.setFileString( ffdproc.output );
@@ -696,13 +709,13 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //--------------------------------------------------------------------------
   // Affine motion
   //--------------------------------------------------------------------------
-  Motion affine;
+  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
   if( !ffdproc.affinemotion.empty() )
   {
-    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
-    rmotion >> affine;
+    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
+    rmotion >> *affine;
   }
-  cout << "Affine : " << affine << endl;
+  cout << "Affine : " << *affine << endl;
 
   //==========================================================================
   //
@@ -711,7 +724,7 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //==========================================================================
   cout << "Resampling ";
 
-  ffdTransformGraph( *in, *deformation, affine,
+  ffdTransformGraph( *in, *deformation, *affine,
                      Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
 
   cout << endl;
@@ -762,15 +775,15 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
   //--------------------------------------------------------------------------
   // Affine motion
   //--------------------------------------------------------------------------
-  Motion affine;
+  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
   if( !ffdproc.affinemotion.empty() )
   {
-    aims::Reader<Motion> rmotion(ffdproc.affinemotion);
-    rmotion >> affine;
+    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
+    rmotion >> *affine;
   }
-  cout << "Affine : " << affine << endl;
+  cout << "Affine : " << *affine << endl;
 
-  bool idaffine = affine.isIdentity();
+  bool idaffine = affine->isIdentity();
   vector<Point3df> transformed;
 
   while( !s->eof() && !s->fail() )
@@ -780,7 +793,7 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
     if( p == Point3df( 1e38, 1e38, 1e38 ) )
       break;
     if( !idaffine )
-      q = affine.transform( p );
+      q = affine->transform( p );
     else
       q = p;
     q = deformation->transform( p );
