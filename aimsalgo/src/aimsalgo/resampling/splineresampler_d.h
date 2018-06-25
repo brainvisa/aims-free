@@ -41,6 +41,7 @@
 #include <vector>
 #include <iostream>
 
+#include <cartobase/type/converter.h>
 #include <aims/utility/channel.h>
 #include <aims/utility/converter_volume.h>
 
@@ -265,7 +266,8 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
           intensity += weightZ[ k ] * qj;
 
         }
-      outValue = static_cast<ChannelType>(intensity);
+
+      carto::RawConverter<double, ChannelType>().convert(intensity, outValue);
 
     }
   else
