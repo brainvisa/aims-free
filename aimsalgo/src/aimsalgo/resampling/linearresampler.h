@@ -48,7 +48,7 @@ public:
   LinearResampler();
   ~LinearResampler();
 
-  int getOrder() const;
+  int getOrder() const CARTO_OVERRIDE;
 
 protected:
   typedef typename SplineResampler<T>::ChannelType ChannelType;
