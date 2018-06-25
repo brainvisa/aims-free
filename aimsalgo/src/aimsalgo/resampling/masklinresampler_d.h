@@ -44,6 +44,14 @@
 #include <aims/transformation/affinetransformation3d.h>
 
 
+namespace {
+  template <class T>
+  void _sliceResamp( const AimsData<T>& input_data, AimsData<T>& resamp,
+                     const T&background, T* out,
+                     const Point3df& start,
+                     int t, const AimsData<float>& Rinv );
+} // anonymous namespace
+
 namespace aims
 {
 
@@ -124,7 +132,8 @@ void MaskLinearResampler<T>::resample( const AimsData< T >& input_data,
                   << std::setw( 3 ) << s << "]" << std::flush;
       }
 
-      _sliceResamp( input_data, thing, it, start, t - 1, invMotion.rotation() );
+      _sliceResamp( input_data, thing, background, it, start, t - 1,
+                    invMotion.rotation() );
       it += thing.oSlice();
       start[ 0 ] += invMotion.rotation()( 0, 2 );
       start[ 1 ] += invMotion.rotation()( 1, 2 );
@@ -136,13 +145,17 @@ void MaskLinearResampler<T>::resample( const AimsData< T >& input_data,
   }
 }
 
+} // namespace aims
+
+
+namespace {
 
 template <class T>
-void MaskLinearResampler<T>::_sliceResamp( const AimsData<T>& input_data,
-                                           AimsData<T>& resamp,
-                                           T* out,
-                                           const Point3df& start, int t,
-                                           const AimsData<float>& Rinv ) const
+void _sliceResamp( const AimsData<T>& input_data,
+                   AimsData<T>& resamp,
+                   const T& background, T* out,
+                   const Point3df& start, int t,
+                   const AimsData<float>& Rinv )
 {
   static_assert(std::numeric_limits<int>::digits >= 31,
                 "the optimizations need at least 32-bit int");
@@ -250,7 +263,7 @@ void MaskLinearResampler<T>::_sliceResamp( const AimsData<T>& input_data,
 	  }
       }
       else
-        *out++ = defaultValue();
+        *out++ = background;
 
       xCurrent += xu;
       yCurrent += yu;
@@ -262,4 +275,4 @@ void MaskLinearResampler<T>::_sliceResamp( const AimsData<T>& input_data,
   }
 }
 
-} // namespace aims
+} // anonymous namespace

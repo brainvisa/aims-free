@@ -69,10 +69,6 @@ class MaskLinearResampler : public Resampler< T >
     static_assert(static_cast<T>(-32768) == -32768,
                   "type T cannot represent the mask value (-32768)");
 
-    void _sliceResamp( const AimsData<T>& input_data, AimsData<T>& resamp, T* out,
-                       const Point3df& start,
-                       int t, const AimsData<float>& Rinv ) const;
-
     void
     doResample( const AimsData< T > &, const aims::Transformation3d &, const T &,
                 const Point3df &, T &, int ) const CARTO_OVERRIDE;
