@@ -7,9 +7,6 @@
 #include <aims/registration/ffd.h>
 typedef aims::SplineFfdResampler<%Template1%, %Template2% > SplineFfdResampler_%Template1typecode%_%Template2typecode%;
 typedef aims::FfdResampler<%Template1% > FfdResampler_%Template1typecode%;
-typedef aims::CubicResampler<%Template2% > CubicResampler_%Template2typecode%;
-typedef aims::SplineResampler<%Template2% > SplineResampler_%Template2typecode%;
-typedef aims::Resampler<%Template2% > Resampler_%Template2typecode%;
 %End
 
 %Docstring
@@ -45,8 +42,6 @@ typedef aims::Resampler<%Template2% > Resampler_%Template2typecode%;
 typedef aims::NearestNeighborFfdResampler<%Template1%, %Template2% > NearestNeighborFfdResampler_%Template1typecode%_%Template2typecode%;
 typedef aims::FfdResampler<%Template1% > FfdResampler_%Template1typecode%;
 typedef aims::NearestNeighborResampler<%Template2% > NearestNeighborResampler_%Template2typecode%;
-typedef aims::SplineResampler<%Template2% > SplineResampler_%Template2typecode%;
-typedef aims::Resampler<%Template2% > Resampler_%Template2typecode%;
 %End
 
 %Docstring
@@ -80,8 +75,6 @@ typedef aims::Resampler<%Template2% > Resampler_%Template2typecode%;
 typedef aims::TrilinearFfdResampler<%Template1%, %Template2% > TrilinearFfdResampler_%Template1typecode%_%Template2typecode%;
 typedef aims::FfdResampler<%Template1% > FfdResampler_%Template1typecode%;
 typedef aims::LinearResampler<%Template2% > LinearResampler_%Template2typecode%;
-typedef aims::SplineResampler<%Template2% > SplineResampler_%Template2typecode%;
-typedef aims::Resampler<%Template2% > Resampler_%Template2typecode%;
 %End
 
 %Docstring
@@ -106,4 +99,3 @@ typedef aims::Resampler<%Template2% > Resampler_%Template2typecode%;
                                  %Template1% & output_value, int t = 0 );
       static %Template1% defaultBackground();
   };
-
