@@ -19,7 +19,7 @@
 #include <aims/resampling/linearresampler.h>
 #include <aims/resampling/cubicresampler.h>
 #include <aims/resampling/resamplerfactory.h>
-#include <aims/transformation/transformation.h>       // aims::Transformatin
+#include <aims/transformation/transformation.h>       // aims::Transformation
 #include <aims/utility/channel.h>
 #include <aims/vector/vector.h>                       // Point*
 #include <aims/mesh/surface.h>

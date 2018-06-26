@@ -18,6 +18,7 @@
 #include <aims/mesh/surfaceOperation.h>            // SurfaceManip::meshVolume
 #include <aims/transformation/affinetransformation3d.h> // AffineTransformation3d
 #include <aims/transformation/transformation_chain.h> // TransformationChain3d
+#include <aims/transform/transform_objects.h>
 #include <aims/resampling/linearresampler.h>                // LinearResampler
 #include <aims/resampling/cubicresampler.h>                  // CubicResampler
 #include <aims/registration/ffd.h>                        // FfdTransformation
@@ -28,8 +29,10 @@
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/errno.h>
 //--- std --------------------------------------------------------------------
-#include <cstdio>
 #include <algorithm>
+#include <iostream>
+#include <exception>
+#include <sstream>
 //----------------------------------------------------------------------------
 
 using namespace aims;
@@ -40,9 +43,19 @@ using namespace carto;
 class FFDApplyProc;
 
 rc_ptr<FfdTransformation> load_ffd_deformation(const FFDApplyProc &);
+rc_ptr<Transformation3d> load_transformations(
+  const FFDApplyProc& ffdproc,
+  bool *success,
+  const std::vector<int>& in_size = std::vector<int>(),
+  const std::vector<float>& in_voxel_size = std::vector<float>()
+);
 void convert_old_mode_deformation(rc_ptr<FfdTransformation> deformation,
                                   const std::vector<int>& in_size,
                                   const std::vector<float>& in_voxel_size);
+
+struct FatalError : public runtime_error {
+  explicit FatalError(const string& msg) : runtime_error(msg) {}
+};
 
 template <class T, class C>
 bool doVolume( Process &, const string &, Finder & );
@@ -140,28 +153,9 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   T bv;
   stringTo( ffdproc.defaultval, bv );
 
-  //--------------------------------------------------------------------------
-  // FFD motion
-  //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
-  if( ffdproc.old_mode )
-  {
-    convert_old_mode_deformation(deformation,
-                                 in.volume()->getSize(),
-                                 in.volume()->getVoxelSize());
-  }
-
-  //--------------------------------------------------------------------------
-  // Affine motion
-  //--------------------------------------------------------------------------
-  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
-  if( !ffdproc.affinemotion.empty() )
-  {
-    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
-    rmotion >> *affine;
-    *affine = affine->inverse();
-  }
-  cout << "Affine : " << *affine << endl;
+  bool success = true;
+  rc_ptr<Transformation3d> transform = load_transformations(
+    ffdproc, &success, in.volume()->getSize(), in.volume()->getVoxelSize());
 
   //--------------------------------------------------------------------------
   // Output volume dimensions
@@ -173,9 +167,10 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   if( !ffdproc.reference.empty() ) {
     Finder reffinder;
     if( !reffinder.check( ffdproc.reference ) ) {
-      cout << "Failed to check the reference volume "
-           << ffdproc.reference << endl;
-      return false;
+      ostringstream s;
+      s << "Failed to check the reference volume "
+        << ffdproc.reference;
+      throw FatalError(s.str());
     }
     Object refheader = reffinder.headerObject();
     try {
@@ -186,10 +181,11 @@ bool doVolume( Process & process, const string & fileref, Finder & )
       rsy = refheader->getProperty( "voxel_size" )->getArrayItem(1)->getScalar();
       rsz = refheader->getProperty( "voxel_size" )->getArrayItem(2)->getScalar();
     } catch(...) {
-      cout << "Failed to retrieve volume_dimension or voxel_size from "
-              "the reference volume "
-           << ffdproc.reference << endl;
-      return false;
+      ostringstream s;
+      s << "Failed to retrieve volume_dimension or voxel_size from "
+           "the reference volume "
+        << ffdproc.reference;
+      throw FatalError(s.str());
     }
   }
 
@@ -248,29 +244,15 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   //
   //==========================================================================
 
-  rc_ptr<TransformationChain3d> transform_chain(new TransformationChain3d);
-  if(!affine->isIdentity()) {
-    transform_chain->push_back(affine);
-  }
-  transform_chain->push_back(deformation);
-
-  bool success = true;
-
   cout << "Initialization done." << endl;
 
-  if( !ffdproc.bucketout.empty() ) {
-    success = write_node_bucket(ffdproc, *deformation) && success;
-  }
-
   cout << "Resampling... ";
-  rsp->resample_inv( in, *transform_chain, bv,
-                     out, true );
+  rsp->resample_inv( in, *transform, bv, out, true );
   cout << endl;
 
   if(!ffdproc.compout.empty()
      || !ffdproc.gridout.empty()) {
-    success = doVolume_special_outputs(ffdproc,
-                                       *transform_chain) && success;
+    success = doVolume_special_outputs(ffdproc, *transform) && success;
   }
 
   //--------------------------------------------------------------------------
@@ -521,18 +503,8 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
-
-  //--------------------------------------------------------------------------
-  // Affine motion
-  //--------------------------------------------------------------------------
-  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
-  if( !ffdproc.affinemotion.empty() )
-  {
-    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
-    rmotion >> *affine;
-  }
-  cout << "Affine : " << *affine << endl;
+  bool success = true;
+  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
 
   //==========================================================================
   //
@@ -541,7 +513,7 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   //==========================================================================
   cout << "Resampling ";
 
-  ffdTransformMesh( in, *deformation, *affine );
+  transformMesh( in, *transform );
 
   cout << endl;
 
@@ -589,18 +561,8 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
-
-  //--------------------------------------------------------------------------
-  // Affine motion
-  //--------------------------------------------------------------------------
-  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
-  if( !ffdproc.affinemotion.empty() )
-  {
-    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
-    rmotion >> *affine;
-  }
-  cout << "Affine : " << *affine << endl;
+  bool success = true;
+  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
 
   //==========================================================================
   //
@@ -610,8 +572,8 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   cout << "Resampling ";
 
   rc_ptr<BucketMap<Void> > out
-    = ffdTransformBucket( in, *deformation, *affine,
-                          Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
+    = transformBucket( in, *transform,
+                       Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
 
   cout << endl;
 
@@ -652,18 +614,8 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
-
-  //--------------------------------------------------------------------------
-  // Affine motion
-  //--------------------------------------------------------------------------
-  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
-  if( !ffdproc.affinemotion.empty() )
-  {
-    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
-    rmotion >> *affine;
-  }
-  cout << "Affine : " << *affine << endl;
+  bool success = true;
+  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
 
   //==========================================================================
   //
@@ -672,7 +624,7 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   //==========================================================================
   cout << "Resampling ";
 
-  BundleFFDTransformer btrans( deformation, *affine );
+  BundleTransformer btrans( transform );
   rdata.addBundleListener( btrans );
   BundleWriter bw;
   bw.setFileString( ffdproc.output );
@@ -731,18 +683,8 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
-
-  //--------------------------------------------------------------------------
-  // Affine motion
-  //--------------------------------------------------------------------------
-  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
-  if( !ffdproc.affinemotion.empty() )
-  {
-    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
-    rmotion >> *affine;
-  }
-  cout << "Affine : " << *affine << endl;
+  bool success = true;
+  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
 
   //==========================================================================
   //
@@ -751,8 +693,8 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //==========================================================================
   cout << "Resampling ";
 
-  ffdTransformGraph( *in, *deformation, *affine,
-                     Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
+  transformGraph( *in, *transform,
+                  Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
 
   cout << endl;
 
@@ -797,20 +739,9 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
   //--------------------------------------------------------------------------
   // FFD motion
   //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
+  bool success = true;
+  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
 
-  //--------------------------------------------------------------------------
-  // Affine motion
-  //--------------------------------------------------------------------------
-  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
-  if( !ffdproc.affinemotion.empty() )
-  {
-    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
-    rmotion >> *affine;
-  }
-  cout << "Affine : " << *affine << endl;
-
-  bool idaffine = affine->isIdentity();
   vector<Point3df> transformed;
 
   while( !s->eof() && !s->fail() )
@@ -819,11 +750,7 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
     (*s) >> p;
     if( p == Point3df( 1e38, 1e38, 1e38 ) )
       break;
-    if( !idaffine )
-      q = affine->transform( p );
-    else
-      q = p;
-    q = deformation->transform( p );
+    q = transform->transform( p );
     if( ffdproc.output.empty() )
       cout << "p : " << p << " -> " << q << endl;
     else
@@ -842,6 +769,65 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
 }
 
 
+// FatalError is thrown if the transformations cannot be loaded properly. In
+// case of a non-fatal error, the success parameter is set to false. When
+// passed volume dimensions and voxel size in the in_size and in_voxel_size
+// parameters, this function will work in "volume mode", which has two special
+// behaviours:
+// - it can read --old-mode deformation fields
+// - it will invert the affine transformation passed as -m / --motion.
+rc_ptr<Transformation3d>
+load_transformations(const FFDApplyProc& ffdproc,
+                     bool *success,
+                     const std::vector<int>& in_size,
+                     const std::vector<float>& in_voxel_size)
+{
+  const bool volume_mode = !in_size.empty() || !in_voxel_size.empty();
+
+  //--------------------------------------------------------------------------
+  // FFD motion
+  //--------------------------------------------------------------------------
+  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
+  if( ffdproc.old_mode )
+  {
+    convert_old_mode_deformation(deformation, in_size, in_voxel_size);
+  }
+
+  if( !ffdproc.bucketout.empty() ) {
+    *success = write_node_bucket(ffdproc, *deformation) && *success;
+  }
+
+  //--------------------------------------------------------------------------
+  // Affine motion
+  //--------------------------------------------------------------------------
+  rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
+  if( !ffdproc.affinemotion.empty() )
+  {
+    aims::Reader<AffineTransformation3d> rmotion(ffdproc.affinemotion);
+    bool read_success = rmotion.read(*affine);
+    if(!read_success) {
+      ostringstream s;
+      s << "Failed to load affine transformation from "
+        << ffdproc.affinemotion << ", aborting.";
+      throw FatalError(s.str());
+    }
+    if(volume_mode) {
+      *affine = affine->inverse();
+    }
+  }
+  cout << "Affine : " << *affine << endl;
+
+  rc_ptr<TransformationChain3d> transform_chain(new TransformationChain3d);
+  if(!affine->isIdentity()) {
+    transform_chain->push_back(affine);
+  }
+  transform_chain->push_back(deformation);
+
+  return rc_ptr<Transformation3d>(transform_chain.release());
+}
+
+
+// Throws FatalError in case of failure
 rc_ptr<FfdTransformation> load_ffd_deformation(const FFDApplyProc &ffdproc)
 {
   rc_ptr<FfdTransformation> deformation;
@@ -852,7 +838,13 @@ rc_ptr<FfdTransformation> load_ffd_deformation(const FFDApplyProc &ffdproc)
     deformation.reset( new SplineFfd );
 
   aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
-  rdef >> *deformation;
+  bool read_success = rdef.read(*deformation);
+  if(!read_success) {
+    ostringstream s;
+    s << "Failed to load a deformation field from "
+      << ffdproc.inputmotion << ", aborting.";
+    throw FatalError(s.str());
+  }
 
   return deformation;
 }
@@ -865,6 +857,12 @@ void convert_old_mode_deformation(rc_ptr<FfdTransformation> deformation,
                                   const std::vector<int>& in_size,
                                   const std::vector<float>& in_voxel_size)
 {
+  if(in_size.size() < 3 || in_voxel_size.size() < 3) {
+    throw FatalError("--old-mode needs to determine the size and voxel size "
+                     "of an input *volume*, it cannot work with other types "
+                     "of inputs");
+  }
+
   // The grid can be updated in-place
   AimsData<Point3df>& grid = static_cast<AimsData<Point3df>&>(*deformation);
 
@@ -954,28 +952,27 @@ int main( int argc, const char **argv )
     application.initialize();
 
     bool ok = false;
-    try
-    {
+    try {
       ok = ffdproc.execute( ffdpi.filename );
-    }
-    catch( ... )
-    {
+    } catch(const FatalError& exc) {
+      clog << "Failed to run in File mode, will now try Points mode ("
+           << exc.what() << ")."<< endl;
     }
     if( !ok )
     {
-      try
-      {
-        ok = doPoints( ffdproc, ffdpi.filename );
-      }
-      catch( ... )
-      {
-      }
+      ok = doPoints( ffdproc, ffdpi.filename );
     }
     if( !ok )
       result = EXIT_FAILURE;
 
   }
+  catch( const FatalError &exc )
+  {
+    clog << exc.what() << endl;
+    result = EXIT_FAILURE;
+  }
   catch( user_interruption &e ) {
+    result = EXIT_FAILURE;
   }
   catch( std::exception &e ) {
     cerr << argv[ 0 ] << ": " << e.what() << endl;
