@@ -31,11 +31,12 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <stdint.h>
+#include <aims/utility/progress.h>
+
 #include <sstream>
+#include <iostream>
 #include <iomanip>
 #include <cmath>
-#include <aims/utility/progress.h>
 
 using namespace std;
 

@@ -34,7 +34,7 @@
 #ifndef AIMS_UTILITY_PROGRESS_H
 #define AIMS_UTILITY_PROGRESS_H
 
-#include <iostream>
+#include <ostream>
 #include <string>
 
 namespace aims {
