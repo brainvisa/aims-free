@@ -42,10 +42,21 @@ using namespace carto;
 
 class FFDApplyProc;
 
-rc_ptr<FfdTransformation> load_ffd_deformation(const FFDApplyProc &);
+rc_ptr<Transformation3d>
+load_transformation(const string &filename,
+                    const FFDApplyProc &ffdproc,
+                    bool *successp,
+                    const vector<int>& in_size,
+                    const vector<float>& in_voxel_size);
+rc_ptr<FfdTransformation>
+load_ffd_deformation(const string &filename,
+                     const FFDApplyProc &ffdproc,
+                     bool *successp,
+                     const vector<int>& in_size,
+                     const vector<float>& in_voxel_size);
 rc_ptr<Transformation3d> load_transformations(
   const FFDApplyProc& ffdproc,
-  bool *success,
+  bool *successp,
   const std::vector<int>& in_size = std::vector<int>(),
   const std::vector<float>& in_voxel_size = std::vector<float>()
 );
@@ -71,7 +82,7 @@ public:
   FFDApplyProc();
 
   string  inputref;
-  string  inputmotion;
+  vector<string> transform_list;
   string  affinemotion;
   string  output;
   string  type;
@@ -778,27 +789,14 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
 // - it will invert the affine transformation passed as -m / --motion.
 rc_ptr<Transformation3d>
 load_transformations(const FFDApplyProc& ffdproc,
-                     bool *success,
+                     bool *successp,
                      const std::vector<int>& in_size,
                      const std::vector<float>& in_voxel_size)
 {
   const bool volume_mode = !in_size.empty() || !in_voxel_size.empty();
 
   //--------------------------------------------------------------------------
-  // FFD motion
-  //--------------------------------------------------------------------------
-  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(ffdproc);
-  if( ffdproc.old_mode )
-  {
-    convert_old_mode_deformation(deformation, in_size, in_voxel_size);
-  }
-
-  if( !ffdproc.bucketout.empty() ) {
-    *success = write_node_bucket(ffdproc, *deformation) && *success;
-  }
-
-  //--------------------------------------------------------------------------
-  // Affine motion
+  // Legacy affine motion
   //--------------------------------------------------------------------------
   rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
   if( !ffdproc.affinemotion.empty() )
@@ -821,14 +819,42 @@ load_transformations(const FFDApplyProc& ffdproc,
   if(!affine->isIdentity()) {
     transform_chain->push_back(affine);
   }
-  transform_chain->push_back(deformation);
+
+  for(vector<string>::const_iterator filename_it = ffdproc.transform_list.begin();
+      filename_it != ffdproc.transform_list.end();
+      ++filename_it)
+  {
+    rc_ptr<Transformation3d> transform = load_transformation(
+      *filename_it, ffdproc, successp, in_size, in_voxel_size
+    );
+    transform_chain->push_back(transform);
+  }
 
   return rc_ptr<Transformation3d>(transform_chain.release());
 }
 
 
+rc_ptr<Transformation3d>
+load_transformation(const string &filename,
+                    const FFDApplyProc &ffdproc,
+                    bool *successp,
+                    const vector<int>& in_size,
+                    const vector<float>& in_voxel_size)
+{
+  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(
+    filename, ffdproc, successp, in_size, in_voxel_size
+  );
+  return rc_ptr<Transformation3d>(deformation.release());
+}
+
+
 // Throws FatalError in case of failure
-rc_ptr<FfdTransformation> load_ffd_deformation(const FFDApplyProc &ffdproc)
+rc_ptr<FfdTransformation>
+load_ffd_deformation(const string &filename,
+                     const FFDApplyProc &ffdproc,
+                     bool *successp,
+                     const std::vector<int>& in_size,
+                     const std::vector<float>& in_voxel_size)
 {
   rc_ptr<FfdTransformation> deformation;
 
@@ -837,13 +863,28 @@ rc_ptr<FfdTransformation> load_ffd_deformation(const FFDApplyProc &ffdproc)
   else
     deformation.reset( new SplineFfd );
 
-  aims::Reader<FfdTransformation> rdef(ffdproc.inputmotion);
+  aims::Reader<FfdTransformation> rdef(filename);
   bool read_success = rdef.read(*deformation);
   if(!read_success) {
     ostringstream s;
     s << "Failed to load a deformation field from "
-      << ffdproc.inputmotion << ", aborting.";
+      << filename << ", aborting.";
     throw FatalError(s.str());
+  }
+
+  if( ffdproc.old_mode )
+  {
+    convert_old_mode_deformation(deformation, in_size, in_voxel_size);
+  }
+
+  if( !ffdproc.bucketout.empty() ) {
+    if( ffdproc.transform_list.size() == 1 ) {
+      *successp = write_node_bucket(ffdproc, *deformation) && *successp;
+    } else {
+      clog << "Error: --bucket only works if a single transformation is used"
+           << endl;
+      *successp = false;
+    }
   }
 
   return deformation;
@@ -921,7 +962,11 @@ int main( int argc, const char **argv )
       "voxel with no resampling, so objects may end up with holes."
     );
     application.addOption( ffdpi, "-i", "Input image" );
-    application.addOption( ffdproc.inputmotion, "-d", "Input control knots grid", true );
+    application.addOptionSeries( ffdproc.transform_list, "-d",
+                                 "transformations to be applied (multiple "
+                                 "transformation will be composed in the "
+                                 "order that they are passed on the "
+                                 "command-line)");
     application.addOption( ffdproc.affinemotion, "-m", "Input affine transformation [Test_TO_Ref.trm]", true );
     application.addOption( ffdproc.type, "-t", "Voxel values resampling type : n[earest], l[inear], c[ubic] [default = cubic]", true );
     application.addOption( ffdproc.defaultval, "-bv", "Background value to use", true );
@@ -941,6 +986,7 @@ int main( int argc, const char **argv )
     application.addOption( ffdproc.old_mode, "--old-mode", "Make this command work with pre-2015 FFD motions (which are in voxels of the input image, instead of millimetres) [default: false]", true );
     application.addOption( ffdproc.vfinterp, "--vi", "Vector field interpolation type: l[inear], c[ubic] [default = cubic]", true );
     application.alias( "--input", "-i" );
+    application.alias( "--transform", "-d" );
     application.alias( "--motion", "-m" );
     application.alias( "--type", "-t" );
     application.alias( "--reference", "-r" );
