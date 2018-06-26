@@ -39,7 +39,7 @@
 
 #include <aims/transformation/transformation.h>
 #include <aims/config/aimsdata_config.h>
-#include <aims/data/data.h>
+#include <aims/data/fastAllocationData.h>
 #include <aims/math/mathelem.h>
 #include <iosfwd>
 
@@ -187,7 +187,7 @@ protected:
 
   Point3df _translation;
   // _rotation contient pour le moment la matrice affine en fait!!
-  AimsData<float> _rotation;
+  AimsFastAllocationData<float> _rotation;
   aims::PythonHeader  *_header;
 };
 
