@@ -989,13 +989,22 @@ int main( int argc, const char **argv )
       "Apply FFD (vector field) transformation on an image, a mesh, a 'bucket' "
       "(voxels list file), fiber tracts, a graph, or to points.\n"
       "\n"
-      "Note that on images the vector field normally represents the inverse "
-      "transformation (for a destination point we seek the source position of "
-      "the point), but for meshes, buckets, fibers, or points the vector field "
-      "is applied directly (a vertex is moved according to the vector field), "
-      "so the transformation should be the inverse of the one applied to an "
-      "image. Similarly, any affine transform given as -m option is from the "
-      "source object to the input deformation space."
+      "Note that when resampling an image, the transformations must represent "
+      "the inverse direction (for a destination point we seek the source "
+      "position of the point), but for meshes, buckets, fibers, or points the "
+      "transformations are applied directly (a vertex is moved according to "
+      "the vector field). Similarly, the transformations are applied in the "
+      "order that they are passed on the command-line. As a result:\n"
+      "\n"
+      "- when resampling an image, inverse transformations must be given, "
+      "ordered from the target space to the input space. This also applies to "
+      "affine transformations (this is the opposite convention to "
+      "AimsResample, use the :inv suffix to invert affine transformations on "
+      "the fly).\n"
+      "\n"
+      "- when resampling meshes, buckets, fibers, or points, the direct "
+      "transformations should be given, ordered from the input space to the "
+      "target space.\n"
       "\n"
       "\n"
       "In points mode, the -i options either specifies an ASCII file "
@@ -1012,28 +1021,57 @@ int main( int argc, const char **argv )
     );
     application.addOption( ffdpi, "-i", "Input image" );
     application.addOptionSeries( ffdproc.transform_list, "-d",
-                                 "transformations to be applied (multiple "
+                                 "transformations to be applied. Multiple "
                                  "transformation will be composed in the "
                                  "order that they are passed on the "
-                                 "command-line)");
-    application.addOption( ffdproc.affinemotion, "-m", "Input affine transformation [Test_TO_Ref.trm]", true );
-    application.addOption( ffdproc.type, "-t", "Voxel values resampling type : n[earest], l[inear], c[ubic] [default = cubic]", true );
-    application.addOption( ffdproc.defaultval, "-bv", "Background value to use", true );
-    application.addOption( ffdproc.dx, "--dx", "Output X dimension [default: same as input]", true );
-    application.addOption( ffdproc.dy, "--dy", "Output Y dimension [default: same as input]", true );
-    application.addOption( ffdproc.dz, "--dz", "Output Z dimension [default: same as input]", true );
-    application.addOption( ffdproc.sx, "--sx", "Output X voxel size [default: same as input]", true );
-    application.addOption( ffdproc.sy, "--sy", "Output Y voxel size [default: same as input]", true );
-    application.addOption( ffdproc.sz, "--sz", "Output Z voxel size [default: same as input]", true );
-    application.addOption( ffdproc.reference, "-r", "Volume used to define output voxel size and "
-                                                    "volume dimension (values are overrided by "
-                                                    "--dx, --dy, --dz, --sx, --sy and --sz)", true );
+                                 "command-line. Affine transformations may be "
+                                 "suffixed with :inv to use their inverse.");
+    application.addOption( ffdproc.affinemotion, "-m",
+                           "Input affine transformation (deprecated: you can "
+                           "now pass affine transformations with -d)",
+                           true );
+    application.addOption( ffdproc.type, "-t",
+                           "Voxel values resampling type : n[earest], "
+                           "l[inear], c[ubic] [default = cubic]", true );
+    application.addOption( ffdproc.defaultval, "-bv",
+                           "Background value to use", true );
+    application.addOption( ffdproc.dx, "--dx",
+                           "Output X dimension [default: same as input]",
+                           true );
+    application.addOption( ffdproc.dy, "--dy",
+                           "Output Y dimension [default: same as input]",
+                           true );
+    application.addOption( ffdproc.dz, "--dz",
+                           "Output Z dimension [default: same as input]",
+                           true );
+    application.addOption( ffdproc.sx, "--sx",
+                           "Output X voxel size [default: same as input]",
+                           true );
+    application.addOption( ffdproc.sy, "--sy",
+                           "Output Y voxel size [default: same as input]",
+                           true );
+    application.addOption( ffdproc.sz, "--sz",
+                           "Output Z voxel size [default: same as input]",
+                           true );
+    application.addOption( ffdproc.reference, "-r", "Volume used to define "
+                           "output voxel size and volume dimension (values "
+                           "are overrided by --dx, --dy, --dz, --sx, --sy and "
+                           "--sz)", true );
     application.addOption( ffdproc.output, "-o", "Output image" );
-    application.addOption( ffdproc.bucketout, "-b", "Output bucket knots", true );
-    application.addOption( ffdproc.gridout, "-g", "Output grid mesh", true );
-    application.addOption( ffdproc.compout, "-c", "Output compression volume", true );
-    application.addOption( ffdproc.old_mode, "--old-mode", "Make this command work with pre-2015 FFD motions (which are in voxels of the input image, instead of millimetres) [default: false]", true );
-    application.addOption( ffdproc.vfinterp, "--vi", "Vector field interpolation type: l[inear], c[ubic] [default = cubic]", true );
+    application.addOption( ffdproc.bucketout, "-b", "Output bucket knots",
+                           true );
+    application.addOption( ffdproc.gridout, "-g",
+                           "Output a deformation field corresponding to the "
+                           "composed transformation", true );
+    application.addOption( ffdproc.compout, "-c", "Output compression volume",
+                           true );
+    application.addOption( ffdproc.old_mode, "--old-mode", "Make this command "
+                           "work with pre-2015 FFD motions (which are in "
+                           "voxels of the input image, instead of millimetres)"
+                           " [default: false]", true );
+    application.addOption( ffdproc.vfinterp, "--vi", "Vector field "
+                           "interpolation type: l[inear], c[ubic] "
+                           "[default = cubic]", true );
     application.alias( "--input", "-i" );
     application.alias( "--transform", "-d" );
     application.alias( "--motion", "-m" );
