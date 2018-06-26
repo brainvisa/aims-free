@@ -841,10 +841,38 @@ load_transformation(const string &filename,
                     const vector<int>& in_size,
                     const vector<float>& in_voxel_size)
 {
-  rc_ptr<FfdTransformation> deformation = load_ffd_deformation(
-    filename, ffdproc, successp, in_size, in_voxel_size
-  );
-  return rc_ptr<Transformation3d>(deformation.release());
+  Finder finder;
+  if( !finder.check( filename ) ) {
+    ostringstream s;
+    s << "Failed to check the transformation file " << filename;
+    throw FatalError(s.str());
+  }
+
+  if(finder.objectType() == "Volume" && finder.dataType() == "POINT3DF")
+  {
+    rc_ptr<FfdTransformation> deformation = load_ffd_deformation(
+      filename, ffdproc, successp, in_size, in_voxel_size
+      );
+    return rc_ptr<Transformation3d>(deformation.release());
+  }
+  else if(finder.objectType() == "AffineTransformation3d")
+  {
+    rc_ptr<AffineTransformation3d> affine(new AffineTransformation3d);
+    aims::Reader<AffineTransformation3d> reader(filename);
+    bool read_success = reader.read(*affine);
+    if(!read_success) {
+      ostringstream s;
+      s << "Failed to load affine transformation from "
+        << ffdproc.affinemotion << ", aborting.";
+      throw FatalError(s.str());
+    }
+    return rc_ptr<Transformation3d>(affine.release());
+  }
+
+  ostringstream s;
+  s << "Unsupported object type " << finder.objectType()
+    << "(of " << finder.dataType() << ") passed in " << filename;
+  throw FatalError(s.str());
 }
 
 
