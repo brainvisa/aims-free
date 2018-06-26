@@ -43,7 +43,7 @@ using namespace carto;
 class FFDApplyProc;
 
 rc_ptr<Transformation3d>
-load_transformation(const string &filename,
+load_transformation(const string &filename_arg,
                     const FFDApplyProc &ffdproc,
                     bool *successp,
                     const vector<int>& in_size,
@@ -832,12 +832,24 @@ load_transformations(const FFDApplyProc& ffdproc,
 
 
 rc_ptr<Transformation3d>
-load_transformation(const string &filename,
+load_transformation(const string &filename_arg,
                     const FFDApplyProc &ffdproc,
                     bool *successp,
                     const vector<int>& in_size,
                     const vector<float>& in_voxel_size)
 {
+  bool invert;
+  string filename;
+
+  if(filename_arg.size() > 4
+     && filename_arg.substr(filename_arg.size() - 4) == ":inv") {
+    filename = filename_arg.substr(0, filename_arg.size() - 4);
+    invert = true;
+  } else {
+    filename = filename_arg;
+    invert = false;
+  }
+
   Finder finder;
   if( !finder.check( filename ) ) {
     ostringstream s;
@@ -847,6 +859,12 @@ load_transformation(const string &filename,
 
   if(finder.objectType() == "Volume" && finder.dataType() == "POINT3DF")
   {
+    if(invert) {
+      ostringstream s;
+      s << "Cannot invert a deformation field )"
+        << filename_arg << "), aborting.";
+      throw FatalError(s.str());
+    }
     rc_ptr<FfdTransformation> deformation = load_ffd_deformation(
       filename, ffdproc, successp, in_size, in_voxel_size
       );
@@ -860,8 +878,11 @@ load_transformation(const string &filename,
     if(!read_success) {
       ostringstream s;
       s << "Failed to load affine transformation from "
-        << ffdproc.affinemotion << ", aborting.";
+        << filename << ", aborting.";
       throw FatalError(s.str());
+    }
+    if(invert) {
+      *affine = affine->inverse();
     }
     return rc_ptr<Transformation3d>(affine.release());
   }
