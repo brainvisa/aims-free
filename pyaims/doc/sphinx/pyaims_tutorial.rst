@@ -18,7 +18,7 @@ This has many advantages compared to pure C++:
 
 A few examples of how to use and manipulate the main data structures will be shown here.
 
-The data for the examples in this section can be downloaded here: `<ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip>`_. 
+The data for the examples in this section can be downloaded here: `<ftp://ftp.cea.fr/pub/dsv/anatomist/data/test_data.zip>`_.
 To use the examples directly, users should go to the directory where this archive was uncompressed, and then run ipython from this directory.
 A cleaner alternative, especially if no write access is allowed on this data directory, is to make a symbolic link to the *data_for_anatomist* subdirectory
 
@@ -39,14 +39,14 @@ Doing this in python:
     import os
     import os.path
     import tempfile
-    f = urllib2.urlopen('ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip')
-    demo_data = os.path.join(tempfile.gettempdir(), 'demo_data.zip')
+    f = urllib2.urlopen('ftp://ftp.cea.fr/pub/dsv/anatomist/data/test_data.zip')
+    test_data = os.path.join(tempfile.gettempdir(), 'test_data.zip')
     tuto_dir = os.path.expanduser('~/bvcourse')
-    open(demo_data, 'w').write(f.read())
+    open(test_data, 'w').write(f.read())
     f.close()
     os.mkdir(tuto_dir)
     os.chdir(tuto_dir)
-    f = zipfile.ZipFile(demo_data)
+    f = zipfile.ZipFile(test_data)
     f.extractall()
     del f
 
