@@ -37,10 +37,9 @@
 
 #include <aims/resampling/resampler.h>
 
-#include <aims/transformation/transformation_chain.h>
 #include <cartobase/config/verbose.h>
-#include <iostream>
-#include <iomanip>
+#include <aims/transformation/transformation_chain.h>
+#include <aims/utility/progress.h>
 #include <stdexcept>
 
 
@@ -88,15 +87,8 @@ resample_inv_to_vox( const AimsData< T >& inVolume,
 
   typename AimsData< T >::iterator o;
 
-  if ( verbose )
-    {
-
-      std::cout << std::setw( 4 ) << 0;
-      if( outSizeT > 1 )
-        std::cout << ", t: " << std::setw( 4 ) << 0;
-      std::cout << std::flush;
-
-    }
+  aims::Progression progress(0, static_cast<size_t>(outSizeX)
+                             * outSizeY * outSizeZ * outSizeT);
   Point3df outLoc;
   int x, y, z, t;
   for ( t = 0; t < outSizeT; t++ )
@@ -117,27 +109,19 @@ resample_inv_to_vox( const AimsData< T >& inVolume,
                   doResample( inVolume, inverse_transform_to_vox, outBackground,
                               outLoc, *o, t );
                   ++ o;
+                  ++progress;
                   outLoc[0] += outResolution[0];
 
                 }
               outLoc[1] += outResolution[1];
               outLoc[0] = 0.0;
 
+              if(verbose) {
+                progress.print();
+              }
             }
           outLoc[2] += outResolution[2];
           outLoc[1] = 0.0;
-
-          if ( verbose )
-            {
-
-              if( outSizeT > 1 )
-                std::cout << "\b\b\b\b\b\b\b\b\b";
-              std::cout << "\b\b\b\b" << std::setw( 4 ) << z + 1;
-              if( outSizeT > 1 )
-                std::cout << ", t: " << std::setw( 4 ) << t;
-              std::cout << std::flush;
-
-            }
 
         }
 

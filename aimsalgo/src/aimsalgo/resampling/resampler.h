@@ -66,8 +66,10 @@ input space_), because of the "pulling" mechanism described above.
 
 Beware that contrary to the other methods, the resample_inv_to_vox() overloads
 take a transformation that maps to \b voxel coordinates of the input image.
-These methods can be slightly faster than resample_inv() because they map directly
-to the API of the actual resamplers are implementing (doResample()).
+These methods can be slightly faster than resample_inv() because they map
+directly to the API of the actual resamplers are implementing (doResample()).
+This is especially true of the overload that performs resampling for a single
+point only.
 */
 template <class T>
 class Resampler
