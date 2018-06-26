@@ -31,7 +31,13 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-import unittest
+import sys
+if sys.version_info[:2] <= [2, 6]:
+    # @unittest.expectedFailure decorator is not available on python 2.6:
+    # we need a backport of a newer version of unittest.
+    import unittest2 as unitttest
+else:
+    import unittest
 
 import numpy as np
 
