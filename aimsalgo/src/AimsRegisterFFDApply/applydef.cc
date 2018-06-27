@@ -208,7 +208,7 @@ bool doit( Process & process, const string & fileref, Finder & )
   ffdproc.sy = ( ffdproc.sy > 0 ? ffdproc.sy : ( rsy > 0 ? rsy : in.sizeY() ) );
   ffdproc.sz = ( ffdproc.sz > 0 ? ffdproc.sz : ( rsz > 0 ? rsz : in.sizeZ() ) );
 
-  //--- Field of view (in which it is useful to compte a ffd motion)
+  //--- Field of view (in which it is useful to compute a ffd motion)
   int32_t fdx, fdy, fdz;
   fdx = deformation->isFlat(0) ? ffdproc.sx : (int32_t)( double(deformation->dimX()) * deformation->sizeX() / ffdproc.sx );
   fdy = deformation->isFlat(1) ? ffdproc.sy : (int32_t)( double(deformation->dimY()) * deformation->sizeY() / ffdproc.sy );

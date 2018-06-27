@@ -92,19 +92,23 @@ void SplineFfd::updateDimensions()
   _flatx = _dimx == 1;
   _flaty = _dimy == 1;
   _flatz = _dimz == 1;
-  int i;
-  _mirrorcoefvecx.resize( _dimx + 3 );
-  _mirrorcoefvecy.resize( _dimy + 3 );
-  _mirrorcoefvecz.resize( _dimz + 3 );
-  _mirrorcoefx = &_mirrorcoefvecx[1];
-  _mirrorcoefy = &_mirrorcoefvecy[1];
-  _mirrorcoefz = &_mirrorcoefvecz[1];
-  for( i=-1; i<_dimx + 2; ++i )
-    _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
-  for( i=-1; i<_dimy + 2; ++i )
-    _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
-  for( i=-1; i<_dimz + 2; ++i )
-    _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
+  /* 26/6/2018 (Yael)
+   * I went back to computing mirrored indices on the fly because it is hard
+   * to know in advance how many will be necessary.
+   */
+  // int i;
+  // _mirrorcoefvecx.resize( _dimx + 3 );
+  // _mirrorcoefvecy.resize( _dimy + 3 );
+  // _mirrorcoefvecz.resize( _dimz + 3 );
+  // _mirrorcoefx = &_mirrorcoefvecx[1];
+  // _mirrorcoefy = &_mirrorcoefvecy[1];
+  // _mirrorcoefz = &_mirrorcoefvecz[1];
+  // for( i=-1; i<_dimx + 2; ++i )
+  //   _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
+  // for( i=-1; i<_dimy + 2; ++i )
+  //   _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
+  // for( i=-1; i<_dimz + 2; ++i )
+  //   _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
 }
 
 
@@ -185,10 +189,16 @@ Point3dd SplineFfd::deformation( const Point3dd& pImage ) const
                     (int)std::floor(pSpline[1]),
                     (int)std::floor(pSpline[2]) );
 
-  if( kSpline[0] < 0 || kSpline[0] >= dimX() ||
-      kSpline[1] < 0 || kSpline[1] >= dimY() ||
-      kSpline[2] < 0 || kSpline[2] >= dimZ() )
-    return deformation;
+  /* 26/6/2018 (Yael)
+   * I removed this test because sometime the input point is outside of the
+   * FOV but the input + deformation falls back inside the FOV.
+   * Now, the deformation is always computed (this might add some unnecessary
+   * computations in some cases, but this is more safe)
+   */
+  // if( kSpline[0] < 0 || kSpline[0] >= dimX() ||
+  //     kSpline[1] < 0 || kSpline[1] >= dimY() ||
+  //     kSpline[2] < 0 || kSpline[2] >= dimZ() )
+  //   return deformation;
 
   Point3dl kDown( ( _flatx ? 0 : kSpline[0] - 1 ),
                   ( _flaty ? 0 : kSpline[1] - 1 ),
@@ -203,16 +213,16 @@ Point3dd SplineFfd::deformation( const Point3dd& pImage ) const
   for( int k = kDown[2]; k <= kUp[2]; ++k )
   {
     bz = ( _flatz ? 1. : spline3( pSpline[2] - k ) );
-    cz  =_mirrorcoefz[k];
+    cz  = aims::mirrorCoeff(k, _dimz);
     for( int j = kDown[1]; j <= kUp[1]; ++j )
     {
       by = ( _flaty ? 1. : spline3( pSpline[1] - j ) );
-      cy  = _mirrorcoefy[j];
+      cy  = aims::mirrorCoeff(j, _dimy);
       byz = bz * by;
       for( int i = kDown[0]; i <= kUp[0]; ++i )
       {
         bx = ( _flatx ? 1. : spline3( pSpline[0] - i ) );
-        cx  = _mirrorcoefx[i];
+        cx  = aims::mirrorCoeff(i, _dimx);
         fdef = _ctrlPointDelta( cx, cy, cz ) * bx * byz;
         deformation[0] += fdef[0];
         deformation[1] += fdef[1];
