@@ -42,14 +42,37 @@
 
 namespace aims
 {
+  /** Container for a composition of multiple transformations.
 
+      This container holds a list of transformations, and acts as the
+      composition of all transformations. Transformations are composed from the
+      front to the back of the list:
+
+      \code
+      rc_ptr<TransformationChain3d>(new TransformationChain3d())
+      chain->push_back(t1)
+      chain->push_back(t2)
+      // chain->transform(p) == t2->transform(t1->transform(p))
+      \endcode
+
+      \warning{Do not modify the transformations once you have passed them to
+      push_back() or push_front(): it is unspecified if the changes will be
+      noticed by TransformationChain3d (a reference to the same object may be
+      kept internally, or a copy could be made). This behaviour will allow
+      optimizations to be implemented (e.g. composing adjacent affine
+      transformations by multiplying their matrices).
+   */
 class TransformationChain3d : public Transformation3d {
 public:
   typedef std::list<carto::const_ref<Transformation3d> > ListType;
 
+  /** Add a transformation to the back of the list (applied last) */
   void push_back(const carto::const_ref<Transformation3d>& transformation);
+  /** Remove the last transformation from the list */
   void pop_back();
+  /** Add a transformation to the front of the list (applied first) */
   void push_front(const carto::const_ref<Transformation3d>& transformation);
+  /** Remove the first transformation from the list */
   void pop_front();
 
 protected:
