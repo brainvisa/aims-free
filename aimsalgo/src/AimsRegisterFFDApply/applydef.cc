@@ -583,8 +583,8 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   cout << "Resampling ";
 
   rc_ptr<BucketMap<Void> > out
-    = transformBucket( in, *transform,
-                       Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
+    = transformBucketDirect( in, *transform,
+                             Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
 
   cout << endl;
 

@@ -44,18 +44,53 @@ class Graph;
 namespace aims
 {
 
+  /** Apply a spatial transformation to a mesh (AimsTimeSurface)
+
+      Each vertex of the mesh is transformed according to the supplied
+      transformation. Normals are re-calculated from the new vertex positions.
+   */
   template <int D>
   void transformMesh( AimsTimeSurface<D, Void> & mesh,
-                      Transformation3d & transformation);
+                      const Transformation3d & direct_transformation );
 
+  /** Apply a spatial transformation to a BucketMap
+
+      Each voxel of the input bucket is transformed with
+      \arg direct_transformation, and the closest voxel of the output bucket is set.
+      The voxel size of the output bucket can optionally be specified in
+      \arg vs. By default, the same voxel size as the input bucket is used.
+
+      \warning{This method will not preserve the topology of the input bucket,
+      in fact it will create many holes for anything but a simple translation.
+      The correct way of resampling a bucket is to do nearest-neighbour
+      resampling using the inverse transformation. \todo{implement bucket
+      resampling}}
+   */
   carto::rc_ptr<BucketMap<Void> >
-  transformBucket( const BucketMap<Void> & bck, Transformation3d & transformation,
-                   const Point3df & vs = Point3df( 0., 0., 0. ) );
+  transformBucketDirect( const BucketMap<Void> & bck,
+                         const Transformation3d & direct_transformation,
+                         Point3df vs = Point3df( 0., 0., 0. ) );
 
-  void transformGraph( Graph & graph, Transformation3d & transformation,
-                       const Point3df & vs = Point3df( 0., 0., 0. ) );
+  /** Apply a spatial transformation to all objects contained in a Graph.
 
-  /** Apply an arbitrary transform to bundles in stream.
+      The graph is modified in-place.
+
+      \warning{Buckets are transformed with transformBucketDirect(), the same
+      caveats apply. Volumes are not transformed at the moment.}
+
+      \warning{The interface of this function will change to allow specifying
+      an inverse transformation, so that buckets and volumes can be resampled
+      properly.}
+   */
+  void transformGraph( Graph & graph,
+                       const Transformation3d& direct_transformation,
+                       Point3df vs = Point3df( 0., 0., 0. ) );
+
+  /** Apply a spatial transformation to fiber bundles.
+
+      Each point along the bundles is transformed according to the supplied
+      transformation.
+
       This is a BundleListener / BundleProducer stream processing class
       which applies vector field deformation to bundle data. It can be
       typically connected to a BundleReader and a BundleWriter.
@@ -63,7 +98,7 @@ namespace aims
   class BundleTransformer : public BundleListener, public BundleProducer
   {
   public:
-    BundleTransformer( const carto::rc_ptr<Transformation3d>& transformation );
+    BundleTransformer( const carto::rc_ptr<Transformation3d>& direct_transformation );
     virtual ~BundleTransformer();
 
     virtual void bundleStarted( const BundleProducer &, const BundleInfo & );
