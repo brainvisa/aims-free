@@ -187,16 +187,15 @@ namespace aims {
       point-to-point transformation. It is used by various higher-level classes
       or functions to work on higher-level objects:
 
-      To resample full 2D or 3D images, see also the FfdResampler classs and
-      its derivatives - these classes are using SplineFfd and resample in
-      voxels space.
+      To resample full 2D or 3D images, see the Resampler class and its derived
+      classes (see also ResamplerFactory).
 
       As a Transformation3d specialization, the main method of this class is the
       transform() method, which actually performs 3D coordinates transformation.
       The other methods can be seen as "internal machinery".
 
-      \see ffdTransformMesh, ffdTransformBucket, ffdTransformGraph and
-      BundleFFDTransformer to apply vector field deformations to various types
+      \see transformMesh, transformBucket, transformGraph and
+      BundleTransformer to apply vector field deformations to various types
       of objects.
   */
   class SplineFfd: public FfdTransformation
@@ -471,60 +470,6 @@ namespace aims {
       int _dimx, _dimy, _dimz;
       float _vsx, _vsy, _vsz;
       bool _idaffine;
-  };
-
-  /** Transform a mesh using FFD vector field deformation.
-      Changes the mesh vertices position in place, modifying the input mesh.
-  */
-  template <int D>
-  void ffdTransformMesh( AimsTimeSurface<D, Void> & mesh, FfdTransformation & transformation,
-                         const AffineTransformation3d & affine
-                           = AffineTransformation3d() );
-
-  /** Transform a bucket using FFD vector field deformation.
-      Returns a new bucket, with possibly a different voxel size from the input
-      one.
-  */
-  carto::rc_ptr<BucketMap<Void> >
-  ffdTransformBucket( const BucketMap<Void> & bck, FfdTransformation & transformation,
-                      const AffineTransformation3d & affine
-                        = AffineTransformation3d(),
-                      const Point3df & vs = Point3df( 0., 0., 0. ) );
-
-  /** Transform a graph using FFD vector field deformation.
-      Changes the graph meshes and buckets in place, modifying the input graph.
-  */
-  void ffdTransformGraph( Graph & graph, FfdTransformation & transformation,
-                          const AffineTransformation3d & affine
-                            = AffineTransformation3d(),
-                          const Point3df & vs = Point3df( 0., 0., 0. ) );
-
-  /** FFD vector field transform for bundles in stream.
-      This is a BundleListener / BundleProducer stream processing class
-      which applies vector field deformation to bundle data. It can be
-      typically connected to a BundleReader and a BundleWriter.
-  */
-  class BundleFFDTransformer : public BundleListener, public BundleProducer
-  {
-  public:
-    BundleFFDTransformer( carto::rc_ptr<FfdTransformation> deformation,
-                          const AffineTransformation3d & affine );
-    virtual ~BundleFFDTransformer();
-
-    virtual void bundleStarted( const BundleProducer &, const BundleInfo & );
-    virtual void bundleTerminated( const BundleProducer &, const BundleInfo & );
-    virtual void fiberStarted( const BundleProducer &, const BundleInfo &,
-                               const FiberInfo & );
-    virtual void fiberTerminated( const BundleProducer &, const BundleInfo &,
-                                  const FiberInfo & );
-    virtual void newFiberPoint( const BundleProducer &, const BundleInfo &,
-                                const FiberInfo &, const FiberPoint & );
-    virtual void noMoreBundle( const BundleProducer & );
-
-  private:
-    carto::rc_ptr<FfdTransformation> _deformation;
-    const AffineTransformation3d & _affine;
-    bool _idaffine;
   };
 
 } // namespace aims
