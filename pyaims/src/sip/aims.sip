@@ -245,6 +245,7 @@ typedef int int32_t;
 
 %Include motion.sip
 %Include transformation.sip
+%Include rcptr_Transformation3d.sip
 %Include rcptr_AffineTransformation3d.sip
 %Include reader_AffineTransformation3d.sip
 

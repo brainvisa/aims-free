@@ -2552,6 +2552,10 @@ typessub = {'bool':
                'testPyType': 'pyaimsBucketMap_DOUBLE_Check',
             },
 
+            'aims::Transformation3d':
+            classInAimsNamespace(
+                'aims/transformation/transformation.h', 'Transformation3d'),
+
             'aims::AffineTransformation3d':
             classInAimsNamespace(
                 'aims/resampling/motion.h', 'AffineTransformation3d'),

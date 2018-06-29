@@ -91,6 +91,7 @@
 %Include rcptr_FfdTransformation.sip
 %Include rcptr_SplineFfd.sip
 %Include rcptr_TrilinearFfd.sip
+%Include transform_objects.sip
 
 // shorter names for double-templated classes
 
