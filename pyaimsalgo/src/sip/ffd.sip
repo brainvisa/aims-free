@@ -17,35 +17,13 @@ namespace aims
 %End
 
 %Docstring
-      FFD vector field deformation transform
+FFD vector field deformation transform
 
-      Free Form Deformation is the registration technique used to build the
-      vector fields. This class is dedicated to the application of the vector
-      field deformation to transform coordinates.
+Free Form Deformation is the registration technique used to build the
+vector fields. This class is dedicated to the application of the vector
+field deformation to transform coordinates.
 
-      Vector fields are stored in volumes AimsData_POINT3DF.
-
-      This Spline FFD uses cubic spline interpolation between displacement
-      vectors to process transformed coordinates. See TrilinearFfd for a
-      variant using trilinear interpolation.
-
-      This class is the "base" vector field deformation class, which can perform
-      point-to-point transformation. It is used by various higher-level classes
-      or functions to work on higher-level objects:
-
-      To resample full 2D or 3D images, see also the FfdResampler classs and
-      its derivatives - these classes are using SplineFfd and resample in
-      voxels space.
-
-      As a Transformation3d specialization, the main method of this class is the
-      transform() method, which actually performs 3D coordinates transformation.
-      The other methods can be seen as "internal machinery".
-
-      .. seealso::
-
-          ffdTransformMesh, ffdTransformBucket, ffdTransformGraph and
-          BundleFFDTransformer to apply vector field deformations to various
-          types of objects.
+Vector fields are stored in volumes AimsData_POINT3DF.
 %End
 
    public:
@@ -139,8 +117,8 @@ typedef aims::Reader<AimsData<Point3df> >Reader_AimsData_POINT3DF;
 %End
 
 %Docstring
-      FFD vector field transformation reader. It actually reads a volume of
-      Point3df.
+FFD vector field transformation reader. It actually reads a volume of
+Point3df.
 %End
 
   public:
@@ -165,8 +143,8 @@ typedef aims::Writer<AimsData<Point3df> > Writer_AimsData_POINT3DF;
 %End
 
 %Docstring
-      FFD vector field transformation writer. It actually reads a volume of
-      Point3df.
+FFD vector field transformation writer. It actually reads a volume of
+Point3df.
 %End
 
   public:
@@ -190,11 +168,32 @@ namespace aims
 %End
 
 %Docstring
-      FFD vector field deformation transform
+FFD vector field deformation transform
 
-      Free Form Deformation is the registration technique used to build the
-      vector fields. This class is dedicated to the application of the vector
-      field deformation to transform coordinates.
+Free Form Deformation is the registration technique used to build the
+vector fields. This class is dedicated to the application of the vector
+field deformation to transform coordinates.
+
+Vector fields are stored in volumes AimsData_POINT3DF.
+
+This Spline FFD uses cubic spline interpolation between displacement
+vectors to process transformed coordinates. See TrilinearFfd for a
+variant using trilinear interpolation.
+
+This class is the "base" vector field deformation class, which can perform
+point-to-point transformation. It is used by various higher-level classes
+or functions to work on higher-level objects:
+
+To resample full 2D or 3D images, see the Resampler class and its derived
+classes (see also ResamplerFactory).
+
+As a Transformation3d specialization, the main method of this class is the
+transform() method, which actually performs 3D coordinates transformation.
+The other methods can be seen as "internal machinery".
+
+\see transformMesh, transformBucket, transformGraph and
+BundleTransformer to apply vector field deformations to various types
+of objects.
 %End
 
   public:
@@ -242,14 +241,14 @@ namespace aims
 %End
 
 %Docstring
-      FFD vector field deformation transform
+FFD vector field deformation transform
 
-      Free Form Deformation is the registration technique used to build the
-      vector fields. This class is dedicated to the application of the vector
-      field deformation to transform coordinates.
+Free Form Deformation is the registration technique used to build the
+vector fields. This class is dedicated to the application of the vector
+field deformation to transform coordinates.
 
-      This is a variant of SplineFfd which is performing trilinear interpolation
-      between displacement vectors. See SplineFfd for details.
+This is a variant of SplineFfd which is performing trilinear interpolation
+between displacement vectors. See SplineFfd for details.
 %End
 
   public:
