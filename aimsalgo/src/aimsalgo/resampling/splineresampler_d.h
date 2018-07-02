@@ -37,6 +37,7 @@
 
 #include <aims/resampling/splineresampler.h>
 
+#include <cassert>
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -83,8 +84,9 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
                                          const aims::Transformation3d& invTransform3d,
                                          const ChannelType& outBackground,
                                          const Point3df& outLocation,
-                                         ChannelType& outValue, int ) const
+                                         ChannelType& outValue, int t ) const
 {
+  assert(t == _lasttime);
 
   int order = this->getOrder();
   int half = order / 2;
