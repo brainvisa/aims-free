@@ -197,9 +197,10 @@ protected:
   /// coefficients are equal to their mirror inside the image domain.
   /// This method computes this mirror correspondance.
   ///
-  /// - If `i` is in `[0, size-1]`: returns `i`
-  /// - If `i < 0`:                 returns `-1`
-  /// - If `i >= size`:             returns `size - (i - size) - 2`
+  /// - If `i` is in `[0, size-1]`:          returns `i`
+  /// - If `i` is in `[size, 2 * size - 2]`: returns `size - (i - size) - 2`
+  /// - Else: `|i|` is wrapped modulo `2 * size - 2`, then one of the above
+  ///   conditions applies.
   inline int mirrorCoeff( int i, int size )
   {
     i = std::abs( i );
@@ -215,9 +216,9 @@ protected:
       return 0;
 
     }
-    int size2 = ( size << 1 ) - 2;
-    ldiv_t modOp = std::ldiv( i, size2 );
-    return ( modOp.rem < size ) ? modOp.rem : ( size2 - modOp.rem );
+    int size2 = ( size * 2 ) - 2;
+    int rem = i % size2;
+    return ( rem < size ) ? rem : ( size2 - rem );
   }
 
 } // namespace aims
