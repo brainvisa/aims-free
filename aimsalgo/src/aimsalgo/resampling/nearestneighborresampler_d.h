@@ -65,14 +65,19 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
                                          const T &outBackground,
                                          T &outValue, int t ) const
 {
-  long x = lround(inLocation[0]);
-  long y = lround(inLocation[1]);
-  long z = lround(inLocation[2]);
+  float xf = std::round(inLocation[0]);
+  float yf = std::round(inLocation[1]);
+  float zf = std::round(inLocation[2]);
 
-  if ( ( x >= 0 ) && ( x < inVolume.dimX() ) &&
-       ( y >= 0 ) && ( y < inVolume.dimY() ) &&
-       ( z >= 0 ) && ( z < inVolume.dimZ() ) )
+  // The test is done using floating-point so that NaN values are excluded (the
+  // background value is returned if the transformation yields NaN)
+  if ( ( xf >= 0 ) && ( xf < inVolume.dimX() ) &&
+       ( yf >= 0 ) && ( yf < inVolume.dimY() ) &&
+       ( zf >= 0 ) && ( zf < inVolume.dimZ() ) )
   {
+    int x = static_cast<int>(xf);
+    int y = static_cast<int>(yf);
+    int z = static_cast<int>(zf);
     outValue = inVolume( x, y, z, t );
   }
   else

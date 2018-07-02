@@ -81,13 +81,15 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
   Point3df normalizedInLocation;
   normalizedInLocation = invTransform3d.transform( outLocation );
 
-  long x = lround(normalizedInLocation[0]);
-  long y = lround(normalizedInLocation[1]);
-  long z = lround(normalizedInLocation[2]);
+  float xf = std::round(normalizedInLocation[0]);
+  float yf = std::round(normalizedInLocation[1]);
+  float zf = std::round(normalizedInLocation[2]);
 
-  if ( ( x >= 0 ) && ( x < inVolume.dimX() ) &&
-       ( y >= 0 ) && ( y < inVolume.dimY() ) &&
-       ( z >= 0 ) && ( z < inVolume.dimZ() ) )
+  // The test is done using floating-point so that NaN values are excluded (the
+  // background value is returned if the transformation yields NaN)
+  if ( ( xf >= 0 ) && ( xf < inVolume.dimX() ) &&
+       ( yf >= 0 ) && ( yf < inVolume.dimY() ) &&
+       ( zf >= 0 ) && ( zf < inVolume.dimZ() ) )
   {
 
     double weightX0, weightY0, weightX1, weightY1;
@@ -95,7 +97,7 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
     double intensity, qi, qj;
 
     // first y contribution
-    y = static_cast<long>(std::floor(normalizedInLocation[1]));
+    int y = static_cast<long>(std::floor(normalizedInLocation[1]));
     weightY0 = getBSplineWeight( y, normalizedInLocation[1] );
     foldY0 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
@@ -105,7 +107,7 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
     foldY1 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
     // first x contribution
-    x = static_cast<long>(std::floor(normalizedInLocation[0]));
+    int x = static_cast<long>(std::floor(normalizedInLocation[0]));
     weightX0 = getBSplineWeight( x, normalizedInLocation[0] );
     foldX0 = (long)this->getFold( x, inVolume.dimX() );
 
@@ -133,7 +135,7 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
     {
 
       // first z contribution
-      z = static_cast<long>(std::floor(normalizedInLocation[2]));
+      int z = static_cast<long>(std::floor(normalizedInLocation[2]));
       pj = i + (size_t)(this->getFold( z, inVolume.dimZ() )) * inVolume.dimX() *
            inVolume.dimY();
       pi = pj + (size_t)(foldY0);
