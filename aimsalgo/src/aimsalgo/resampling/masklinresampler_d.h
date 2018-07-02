@@ -65,14 +65,20 @@ doResample( const AimsData<T> &input_data,
 {
   const Point3df input_location = inverse_transform.transform(output_location);
 
-  int x = static_cast<int>(std::floor(input_location[0]));
-  int y = static_cast<int>(std::floor(input_location[1]));
-  int z = static_cast<int>(std::floor(input_location[2]));
+  float xf = std::floor(input_location[0]);
+  float yf = std::floor(input_location[1]);
+  float zf = std::floor(input_location[2]);
 
-  if(x >= 0 && (x + 1) < input_data.dimX() &&
-     y >= 0 && (y + 1) < input_data.dimY() &&
-     z >= 0 && (z + 1) < input_data.dimZ())
+  // The test is done using floating-point so that NaN values are excluded (the
+  // background value is returned if the transformation yields NaN)
+  if ( ( xf >= 0 ) && ( xf < input_data.dimX() ) &&
+       ( yf >= 0 ) && ( yf < input_data.dimY() ) &&
+       ( zf >= 0 ) && ( zf < input_data.dimZ() ) )
   {
+    int x = static_cast<int>(xf);
+    int y = static_cast<int>(yf);
+    int z = static_cast<int>(zf);
+
     if (input_data(x,     y,     z, t) == -32768 ||
         input_data(x + 1, y,     z, t) == -32768 ||
         input_data(x,     y + 1, z, t) == -32768 ||

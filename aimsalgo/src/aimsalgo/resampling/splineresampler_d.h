@@ -98,14 +98,19 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
   Point3df normalizedInLocation;
   normalizedInLocation = invTransform3d.transform( outLocation );
 
-  long x = lround(normalizedInLocation[0]);
-  long y = lround(normalizedInLocation[1]);
-  long z = lround(normalizedInLocation[2]);
+  float xf = std::round(normalizedInLocation[0]);
+  float yf = std::round(normalizedInLocation[1]);
+  float zf = std::round(normalizedInLocation[2]);
 
-  if ( ( x >= 0 ) && ( x < inVolume.dimX() ) &&
-       ( y >= 0 ) && ( y < inVolume.dimY() ) &&
-       ( z >= 0 ) && ( z < inVolume.dimZ() ) )
+  // The test is done using floating-point so that NaN values are excluded (the
+  // background value is returned if the transformation yields NaN)
+  if ( ( xf >= 0 ) && ( xf < inVolume.dimX() ) &&
+       ( yf >= 0 ) && ( yf < inVolume.dimY() ) &&
+       ( zf >= 0 ) && ( zf < inVolume.dimZ() ) )
     {
+      int x = static_cast<int>(xf);
+      int y = static_cast<int>(yf);
+      int z = static_cast<int>(zf);
 
       std::vector< double > weightX( width ), weightY( width ), weightZ( width);
       std::vector< int > foldX( width ), foldY( width ), foldZ( width );
@@ -126,7 +131,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
           if ( order % 2 )
             {
 
-              z = static_cast<long>(std::floor(normalizedInLocation[2]));
+              z = static_cast<int>(std::floor(normalizedInLocation[2]));
               z -= half;
 
             }
@@ -152,7 +157,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
       if ( order % 2 )
         {
 
-          y = static_cast<long>(std::floor(normalizedInLocation[1]));
+          y = static_cast<int>(std::floor(normalizedInLocation[1]));
           y -= half;
 
         }
@@ -174,7 +179,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
       if ( order % 2 )
         {
 
-          x = static_cast<long>(std::floor(normalizedInLocation[0]));
+          x = static_cast<int>(std::floor(normalizedInLocation[0]));
           x -= half;
 
         }
