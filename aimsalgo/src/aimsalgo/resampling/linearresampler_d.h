@@ -81,9 +81,9 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
   Point3df normalizedInLocation;
   normalizedInLocation = invTransform3d.transform( outLocation );
 
-  float xf = std::round(normalizedInLocation[0]);
-  float yf = std::round(normalizedInLocation[1]);
-  float zf = std::round(normalizedInLocation[2]);
+  float xf = round(normalizedInLocation[0]);
+  float yf = round(normalizedInLocation[1]);
+  float zf = round(normalizedInLocation[2]);
 
   // The test is done using floating-point so that NaN values are excluded (the
   // background value is returned if the transformation yields NaN)
@@ -97,7 +97,7 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
     double intensity, qi, qj;
 
     // first y contribution
-    int y = static_cast<long>(std::floor(normalizedInLocation[1]));
+    int y = static_cast<long>(floor(normalizedInLocation[1]));
     weightY0 = getBSplineWeight( y, normalizedInLocation[1] );
     foldY0 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
@@ -107,7 +107,7 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
     foldY1 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
 
     // first x contribution
-    int x = static_cast<long>(std::floor(normalizedInLocation[0]));
+    int x = static_cast<long>(floor(normalizedInLocation[0]));
     weightX0 = getBSplineWeight( x, normalizedInLocation[0] );
     foldX0 = (long)this->getFold( x, inVolume.dimX() );
 
@@ -135,7 +135,7 @@ doResampleChannel( const AimsData< ChannelType >& inVolume,
     {
 
       // first z contribution
-      int z = static_cast<long>(std::floor(normalizedInLocation[2]));
+      int z = static_cast<long>(floor(normalizedInLocation[2]));
       pj = i + (size_t)(this->getFold( z, inVolume.dimZ() )) * inVolume.dimX() *
            inVolume.dimY();
       pi = pj + (size_t)(foldY0);
@@ -179,7 +179,7 @@ template < class T >
 double LinearResampler< T >::getBSplineWeight( int i, double x ) const
 {
 
-  x = std::fabs( x - ( double )i );
+  x = fabs( x - ( double )i );
   return ( x > 1.0 ) ? 0.0 : 1.0 - x;
 
 }

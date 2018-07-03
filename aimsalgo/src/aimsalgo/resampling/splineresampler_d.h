@@ -98,9 +98,9 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
   Point3df normalizedInLocation;
   normalizedInLocation = invTransform3d.transform( outLocation );
 
-  float xf = std::round(normalizedInLocation[0]);
-  float yf = std::round(normalizedInLocation[1]);
-  float zf = std::round(normalizedInLocation[2]);
+  float xf = round(normalizedInLocation[0]);
+  float yf = round(normalizedInLocation[1]);
+  float zf = round(normalizedInLocation[2]);
 
   // The test is done using floating-point so that NaN values are excluded (the
   // background value is returned if the transformation yields NaN)
@@ -131,7 +131,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
           if ( order % 2 )
             {
 
-              z = static_cast<int>(std::floor(normalizedInLocation[2]));
+              z = static_cast<int>(floor(normalizedInLocation[2]));
               z -= half;
 
             }
@@ -157,7 +157,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
       if ( order % 2 )
         {
 
-          y = static_cast<int>(std::floor(normalizedInLocation[1]));
+          y = static_cast<int>(floor(normalizedInLocation[1]));
           y -= half;
 
         }
@@ -179,7 +179,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
       if ( order % 2 )
         {
 
-          x = static_cast<int>(std::floor(normalizedInLocation[0]));
+          x = static_cast<int>(floor(normalizedInLocation[0]));
           x -= half;
 
         }
@@ -391,7 +391,7 @@ void
 SplineResampler< T >::iirConvolveMirror( std::vector< double >& data ) const
 {
 
-  double tolerance = std::log10( EPSILON );
+  double tolerance = log10( EPSILON );
 
   std::vector< double >::iterator d = data.begin(), de = data.end();
   while ( d != de )
@@ -427,7 +427,7 @@ SplineResampler< T >::iirConvolveMirror( std::vector< double >& data ) const
   while ( p != pe )
   {
 
-    j = ( int )std::ceil( tolerance / std::log10( std::fabs( *p ) ) );
+    j = ( int )ceil( tolerance / log10( std::fabs( *p ) ) );
     k = j - size2 * ( j / size2 );
     j -= k;
     if ( k < size )
