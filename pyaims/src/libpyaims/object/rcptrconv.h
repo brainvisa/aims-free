@@ -132,9 +132,9 @@ namespace pyaims
 
   inline PyObject* extractPyObjectFromProxy( PyObject* sipPy )
   {
-    if( !PyObject_HasAttrString( sipPy, "get" ) )
+    if( !PyObject_HasAttrString( sipPy, "_get" ) )
       return 0;
-    PyObject* pointee = PyObject_CallMethod( sipPy, (char *) "get", NULL );
+    PyObject* pointee = PyObject_CallMethod( sipPy, (char *) "_get", NULL );
     if( !pointee )
     {
       PyErr_Clear();
