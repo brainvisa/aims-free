@@ -29,6 +29,10 @@
 %Include resampler_U32.sip
 %Include resampler_FLOAT.sip
 %Include resampler_DOUBLE.sip
+%Include resampler_RGB.sip
+%Include resampler_RGBA.sip
+%Include resampler_HSV.sip
+%Include resampler_POINT3DF.sip
 %Include masklinresampler.sip
 %Include sampler_FLOAT_3.sip
 %Include samplable_objects.sip

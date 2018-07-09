@@ -251,8 +251,6 @@ U ChannelSelector< AimsHSV, U >::select( const AimsHSV& input, const uint8_t cha
 template <class U> inline
 void ChannelSelector< AimsHSV, U >::set( AimsHSV& input, const uint8_t channel, const U& value )
 {
-  U output;
-
   switch(channel) {
     case HueChannel :
       channelconvset.convert( value, input.hue() );
