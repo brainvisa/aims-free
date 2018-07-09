@@ -12,7 +12,7 @@ void transformBoundingBox( const aims::AffineTransformation3d &motion,
 class AffineTransformation3d : aims::Transformation3d
 {
 %TypeHeaderCode
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #if SIP_VERSION < 0x040700
 #include "sipaimssipAimsData_FLOAT.h"
 #include "sipaimssipAimsVector_FLOAT_3.h"

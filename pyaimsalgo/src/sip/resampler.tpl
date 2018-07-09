@@ -58,149 +58,309 @@ result: Resampler_%Template1typecode%
 class Resampler_%Template1typecode% /Abstract/
 {
 %Docstring
-Resampler resamples an input data to build or fill an output data, using an affine transformation.
+Resampling of data from a volume, applying a transformation.
 
-Normally the input data should be set in the resampler using setRef().
+The doit() and resample() methods can be used to apply an **affine
+transformation** (aims::AffineTransformation3d). They take a _direct_
+transformation, i.e. the transformation goes from the space of the _input_
+image (unit: mm) to the space of the _output_ image (unit: mm). The
+transformation is inverted and normalized internally as needed, because the
+resamplers "pull" data by transforming output coordinates into input
+coordinates.
 
-Resampling is done using the doit() methods.
-resample() methods also provide alternatives.
+The doit() methods work on input data passed to the setRef() method.
+setDefaultValue() can also be called to set the background value.
+
+The resample() methods provide stateless alternatives.
+
+You can also use arbitrary **non-affine transformations** (inheriting
+aims::Transformation3d) by using the resample_inv() family of methods.
+In this case, you must pass the backward transformation (_from output space to
+input space_), because of the "pulling" mechanism described above.
+
+Beware that contrary to the other methods, the resample_inv_to_vox() overloads
+take a transformation that maps to **voxel** coordinates of the input image.
+These methods can be slightly faster than resample_inv() because they map
+directly to the API of the actual resamplers are implementing (doResample()).
+This is especially true of the overload that performs resampling for a single
+point only.
 %End
 
 %TypeHeaderCode
   #include <pyaims/vector/vector.h>
   #include <aims/resampling/resampler.h>
-  
+
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
-  
+
   #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
   #define PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
   typedef AimsData<%Template1%> AimsData_%Template1typecode%;
   #endif
-  
 %End
 
 public:
   Resampler_%Template1typecode%();
   virtual ~Resampler_%Template1typecode%();
 
-  virtual void doit( const Motion&, AimsData_%Template1typecode% & ) throw()
-    /ReleaseGIL/;
+
+  void doit( const aims::AffineTransformation3d&, AimsData_%Template1typecode% & ) const
+    throw(std::runtime_error) /ReleaseGIL/;
 %Docstring
 doit(transform, output_data)
 
-Resample the reference input data (set via setRef()) into an existing output data.
+Resample the input volume set with setRef() into an existing volume.
 
 Parameters
 ----------
 transform: AffineTransformation3d
-    transformation to apply
+
+    transformation from coordinates of the *input* volume (unit: mm), to
+    coordinates of the *output* volume (unit: mm) (its inverse is used
+    for resampling)
+
 output_data: AimsData_%Template1typecode%
-    resampled data will fill this existing output data
+
+    existing volume to be filled with resampled data (its pre-existing
+    dimensions and voxel size are used)
+
+Raises
+------
+RuntimeError: if no input volume has been set with setRef.
 
 Returns
 -------
 None
+
+Details
+-------
+
+The background value (to be used for regions that are outside of the
+input volume) can be set with setDefaultValue().
+
+The transformations, referentials, and referential header attributes of
+output_data are not touched; it is up to the calling code to update them
+accordingly.
+
+The level of verbosity is taken from carto::verbose (i.e. the
+`--verbose` command-line argument is honoured).
 %End
 
-  virtual AimsData_%Template1typecode% doit( const Motion &, int, int, int,
-    const Point3df & ) throw() /Factory, ReleaseGIL/;
+
+  AimsData_%Template1typecode% doit(
+    const aims::AffineTransformation3d &,
+    int, int, int,
+    const Point3df & ) const throw(std::runtime_error) /Factory, ReleaseGIL/;
 %Docstring
 output_data = doit(transform, dimx, dimy, dimz, voxel_size)
 
-Resample the reference input data (set via setRef()) into a new output data.
+Resample the input volume set with setRef() in a newly allocated volume.
 
 Parameters
 ----------
+
 transform: AffineTransformation3d
-    transformation to apply
-dimx, dimy, dimz: int
-    number of voxels in 3 dimensions
+
+    transformation from coordinates of the *input* volume (unit: mm), to
+    coordinates of the *output* volume (unit: mm) (its inverse is used
+    for resampling)
+
+dimX, dimY, dimZ: int
+
+    dimensions of the newly allocated volume
+
 voxel_size: Point3df (list of 3 floats)
-    voxel size of the output data
+
+    voxel size of the newly allocated volume (unit: mm)
 
 Returns
 -------
+
 output_data: AimsData_%Template1typecode%
-    resampled volume
+
+    a newly allocated volume containing the resampled data (its size
+    along the t axis is the same as the input volume).
+
+Raises
+------
+RuntimeError: if no input volume has been set with setRef.
+
+Details
+-------
+
+The background value (to be used for regions that are outside of the
+input volume) can be set with setDefaultValue().
+
+The level of verbosity is taken from carto::verbose (i.e. the
+`--verbose` command-line argument is honoured).
+
+The transformations, referentials, and referential header attributes of
+the new volume are reset if `transform.isIdentity()` is false:
+
+- the referential attribute is removed
+
+- each transformation in transformations is composed with transform so
+  that the output volume still points to the original space. If that is
+  not possible (e.g. the transformations attribute is missing or
+  invalid), then a new transformation is added that points to the input
+  volume.
 %End
 
+
   virtual void resample( const AimsData_%Template1typecode% &,
-                         const Motion &, const %Template1% &,
+                         const aims::AffineTransformation3d &,
+                         const %Template1% &,
                          AimsData_%Template1typecode% &,
-                         bool = false ) /ReleaseGIL/;
+                         bool = false ) const /ReleaseGIL/;
 %Docstring
 resample(input_data, transform, background, output_data, verbose=False)
 
-Resample the input data into an existing output data.
+Resample a volume into an existing output volume.
 
 Parameters
 ----------
+
 input_data: AimsData_%Template1typecode%
-    data to be resampled
+    data to be resampled (its voxel size is taken into account)
+
 transform: AffineTransformation3d
-    transformation to apply
-background: %Template1typecode%
-    value set in output regions which are outside of the transformation space of the input volume
+
+    transformation from coordinates of the *input* volume (unit: mm), to
+    coordinates of the *output* volume (unit: mm) (its inverse is used
+    for resampling)
+
+background: %Template1PyType%
+
+    value set in output regions that are outside of the transformed
+    input volume
+
 output_data: AimsData_%Template1typecode%
-    resampled data will fill this existing output data
+
+    existing volume to be filled with resampled data (its pre-existing
+    dimensions and voxel size are used)
+
 verbose: bool
-    print more things during resampling
+
+    print progress to stdout
+
+Details
+-------
+
+The transformations, referentials, and referential header attributes of
+output_data are not touched; it is up to the calling code to update them
+accordingly.
+
+This method does *not* use the instance state set by setRef() or
+setDefaultValue().
+
+Derived classes can override this method to optimize interpolation of a
+full volume. The base class method simply calls doResample for each
+point.
 
 Returns
 -------
 None
 %End
 
-  virtual void resample( const AimsData_%Template1typecode% &,
-                         const Motion &,
-                         const %Template1% &,
-                         const Point3df &,
-                         %Template1% & /Out/,
-                         int ) /ReleaseGIL/;
+
+  void resample( const AimsData_%Template1typecode% &,
+                 const aims::AffineTransformation3d &,
+                 const %Template1% &,
+                 const Point3df &,
+                 %Template1% & /Out/,
+                 int ) const /ReleaseGIL/;
 %Docstring
-resample(input_data, transform, background, output_location, timestep) -> output_value
+output_value = resample(input_data, transform, background, output_location, timestep)
 
-Resample a single voxel of the input data at a given specified output location, and return the output value.
+Resample a volume at a single location.
 
-Parameters
-----------
 input_data: AimsData_%Template1typecode%
-    data to be resampled
+
+    data to be resampled (its voxel size is taken into account)
+
 transform: AffineTransformation3d
-    transformation to apply
-background: %Template1typecode%
-    value set in output regions which are outside of the transformation space of the input volume
+
+    transformation from coordinates of the *input* volume (unit: mm), to
+    *output* coordinates (its inverse is used for resampling)
+
+background: %Template1PyType%
+
+    value set in output regions that are outside of the transformed
+    input volume
+
 output_location: Point3df (list of 3 floats)
-    position in the output space (warning, this is actually an input)
-output_value: %Template1typecode%
-    resampled output value
+
+    coordinates in output space (destination space of transform)
+
 timestep: int
+
     for 4D volume, time step to be used
 
 Returns
 -------
-None
+
+output_value: %Template1PyType%
+
+    resampled value
+
+Details
+-------
+
+This method does *not* use the instance state set by setRef() or
+setDefaultValue().
 %End
+
 
   void setRef( const AimsData_%Template1typecode% & /Transfer/ );
 %Docstring
 setRef(input_data)
 
-set the input data to be resampled
+Set the input data to be resampled by the doit() methods
 
 Parameters
 ----------
+
 input_data: AimsData_%Template1typecode%
 %End
+
+
+  const AimsData_%Template1typecode%& ref() const;
+%Docstring
+input_data = ref()
+
+Input data to be resampled by the doit() methods
+
+Returns
+-------
+
+input_data: AimsData_%Template1typecode%
+%End
+
 
   void setDefaultValue( %Template1% );
 %Docstring
 setDefaultValue(value)
 
-set the default background value
+Set the background value to be used by the doit() methods
+
+Parameters
+----------
+
+value: %Template1PyType%
+%End
+
+  %Template1% defaultValue() const;
+%Docstring
+value = defaultValue()
+
+Background value used by the doit() methods
+
+Returns
+-------
+
+value: %Template1PyType%
 %End
 };
 
