@@ -202,35 +202,26 @@ namespace aims
   void MincReader<T>::readMinc1( AimsData<T>& data, int tmin, int dimt )
   {
     Header *h = data.header();
-    MincHeader *hdr = static_cast<MincHeader *>( h );
 
     VIO_Volume volume;
-    VIO_STR dim_names[4];
-    VIO_STR fileName = create_string ( const_cast<char*>(data.volume()->allocatorContext().dataSource()->url().c_str()));
+    VIO_STR fileName
+      = create_string( const_cast<char*>( _name.c_str() ));
 
 
+    std::vector<VIO_STR> dim_names( VIO_MAX_DIMENSIONS );
 
     dim_names[0] = create_string( const_cast<char*>( MIzspace ) );
     dim_names[1] = create_string( const_cast<char*>( MIyspace ) );
     dim_names[2] = create_string( const_cast<char*>( MIxspace ) );
     dim_names[3] = create_string( const_cast<char*>( MItime ) );
+    for( unsigned i=4; i<VIO_MAX_DIMENSIONS; ++i )
+      dim_names[i] = 0;
+
     set_print_error_function(MincHeader::my_empty_print_error);
 
-    /*      int n_dimensions=4;
-
-    if(thing.dimT()==1) {
-      if(thing.dimZ()==1) {
-        if(thing.dimY()==1) {
-          n_dimensions=1;
-        }
-        else n_dimensions=2;
-      }
-      else n_dimensions=3;
-      }
-
-      std::cout << "n_dimensions: " << n_dimensions << "\n";*/
     MincHeader::mincMutex().lock();
-    int res = input_volume( fileName, 0, dim_names,
+
+    int res = input_volume( fileName, 0, &dim_names[0],
                       MI_ORIGINAL_TYPE, TRUE,
                       0.0, 0.0, TRUE, &volume,
                       (minc_input_options *) NULL );
@@ -328,17 +319,15 @@ namespace aims
   inline
   void MincReader<T>::readMinc2( AimsData<T>& data, int tmin, int dimt )
   {
-    
     Header *h = data.header();
-    MincHeader *hdr = static_cast<MincHeader *>( h );
+
+    std::string source = _name;
 
     mihandle_t    minc_volume;
     int result, i;
     double voxel;
 
     MincHeader::mincMutex().lock();
-    
-    std::string source = data.volume()->allocatorContext().dataSource()->url();
 
     if (carto::FileUtil::fileStat(source) == "") {
       throw carto::file_not_found_error("MINC file does not exists",
@@ -534,6 +523,7 @@ namespace aims
       delete hdr;
       throw;
     }
+    _name = hdr->name();
 
     int	frame = -1, border = 0;
     options->getProperty( "frame", frame );
@@ -559,7 +549,7 @@ namespace aims
       tmin = 0;
     }
 
-    std::string name = hdr->removeExtension( fname ) + ".mnc";
+    std::string name = hdr->name();
 
     carto::AllocatorContext	al 
       ( context.accessMode(), 
