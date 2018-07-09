@@ -72,7 +72,7 @@ The performance gain is especially noticeable for repeated calls to the
 overloads that perform resampling for a single point only.
 */
 template <class T>
-class Resampler
+class Resampler : public virtual carto::RCObject
 {
 public:
 
