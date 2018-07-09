@@ -55,7 +55,7 @@ result: Resampler_%Template1typecode%
   };
 };
 
-class Resampler_%Template1typecode% /Abstract/
+class Resampler_%Template1typecode% : carto::RCObject /Abstract/
 {
 %Docstring
 Resampling of data from a volume, applying a transformation.
