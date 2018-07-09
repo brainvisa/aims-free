@@ -637,9 +637,9 @@ Point3dd SplineFfd::deformation_private( const Point3dd& pImage ) const
   Point3df fdef;
   Point3dd pSpline( mmToSplineVox(pImage) );
 
-  Point3dl kSpline( (int)std::floor(pSpline[0]),
-                    (int)std::floor(pSpline[1]),
-                    (int)std::floor(pSpline[2]) );
+  Point3di kSpline(static_cast<int>(std::floor(pSpline[0])),
+                   static_cast<int>(std::floor(pSpline[1])),
+                   static_cast<int>(std::floor(pSpline[2])));
 
   /* 26/6/2018 (Yael)
    * I removed this test because sometime the input point is outside of the
@@ -652,10 +652,10 @@ Point3dd SplineFfd::deformation_private( const Point3dd& pImage ) const
   //     kSpline[2] < 0 || kSpline[2] >= dimZ() )
   //   return deformation;
 
-  Point3dl kDown( ( _flatx ? 0 : kSpline[0] - 1 ),
+  Point3di kDown( ( _flatx ? 0 : kSpline[0] - 1 ),
                   ( _flaty ? 0 : kSpline[1] - 1 ),
                   ( _flatz ? 0 : kSpline[2] - 1 ) );
-  Point3dl kUp  ( ( _flatx ? 0 : kSpline[0] + 2 ),
+  Point3di kUp  ( ( _flatx ? 0 : kSpline[0] + 2 ),
                   ( _flaty ? 0 : kSpline[1] + 2 ),
                   ( _flatz ? 0 : kSpline[2] + 2 ) );
 
@@ -719,16 +719,16 @@ Point3dd TrilinearFfd::deformation_private( const Point3dd& pImage ) const
   Point3df fdef;
   Point3dd pSpline( mmToSplineVox(pImage) );
 
-  Point3dl kSpline( (int)std::floor(pSpline[0]),
-                    (int)std::floor(pSpline[1]),
-                    (int)std::floor(pSpline[2]) );
+  Point3di kSpline(static_cast<int>(std::floor(pSpline[0])),
+                   static_cast<int>(std::floor(pSpline[1])),
+                   static_cast<int>(std::floor(pSpline[2])));
 
   if( kSpline[0] < 0 || kSpline[0] >= dimX() ||
       kSpline[1] < 0 || kSpline[1] >= dimY() ||
       kSpline[2] < 0 || kSpline[2] >= dimZ() )
     return deformation;
 
-  Point3dl kUp  ( kSpline[0] + 1,
+  Point3di kUp  ( kSpline[0] + 1,
                   kSpline[1] + 1,
                   kSpline[2] + 1 );
 
