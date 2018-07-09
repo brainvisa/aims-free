@@ -40,6 +40,11 @@
 namespace aims
 {
 
+/** Volume resampler using quartic (order 4) interpolation.
+
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
 template <class T>
 class QuarticResampler : public SplineResampler< T >
 {

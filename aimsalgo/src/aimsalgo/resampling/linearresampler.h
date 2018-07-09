@@ -40,6 +40,11 @@
 namespace aims
 {
 
+/** Volume resampler using linear (order 1) interpolation.
+
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
 template <class T>
 class LinearResampler : public SplineResampler< T >
 {

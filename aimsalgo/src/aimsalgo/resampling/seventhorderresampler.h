@@ -40,6 +40,12 @@
 namespace aims
 {
 
+/** Volume resampler using seventh-order interpolation.
+
+
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
 template <class T>
 class SeventhOrderResampler : public SplineResampler< T >
 {
