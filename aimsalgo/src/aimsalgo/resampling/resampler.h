@@ -65,11 +65,11 @@ In this case, you must pass the backward transformation (_from output space to
 input space_), because of the "pulling" mechanism described above.
 
 Beware that contrary to the other methods, the resample_inv_to_vox() overloads
-take a transformation that maps to \b voxel coordinates of the input image.
+take a transformation that maps to **voxel** coordinates of the input image.
 These methods can be slightly faster than resample_inv() because they map
-directly to the API of the actual resamplers are implementing (doResample()).
-This is especially true of the overload that performs resampling for a single
-point only.
+directly to the API that the actual resamplers are implementing (doResample()).
+The performance gain is especially noticeable for repeated calls to the
+overloads that perform resampling for a single point only.
 */
 template <class T>
 class Resampler
@@ -158,7 +158,7 @@ public:
       attributes of \p output_data are not touched; it is up to the calling
       code to update them accordingly.
 
-      This method does \b not use the instance state set by setRef() or
+      This method does *not* use the instance state set by setRef() or
       setDefaultValue().
 
       Derived classes can override this method to optimize interpolation of a
@@ -173,20 +173,20 @@ public:
 
   /** Resample a volume at a single location.
 
-      \param[in]     input_data   data to be resampled (its voxel size is taken
+      \param[in]  input_data      data to be resampled (its voxel size is taken
                                   into account)
-      \param[in]     transform    transformation from coordinates of the
+      \param[in]  transform       transformation from coordinates of the
                                   *input* volume (unit: mm), to *output*
                                   coordinates (its inverse is used for
                                   resampling)
-      \param[in]     background   value set in output regions that are outside
+      \param[in]  background      value set in output regions that are outside
                                   of the transformed input volume
-      \param[in,out] output_location coordinates in output space (destination
+      \param[in]  output_location coordinates in output space (destination
                                   space of \p transform)
-      \param[out]    output_value variable to be filled with resampled data
-      \param[in]     timestep     for 4D volume, time step to be used
+      \param[out] output_value    variable to be filled with resampled data
+      \param[in]  timestep        for 4D volume, time step to be used
 
-      This method does \b not use the instance state set by setRef() or
+      This method does *not* use the instance state set by setRef() or
       setDefaultValue().
   */
   void resample( const AimsData< T >& input_data,
@@ -197,19 +197,19 @@ public:
 
   /** Resample a volume at a single location.
 
-      \param[in]     input_data   data to be resampled (its voxel size is
+      \param[in]  input_data      data to be resampled (its voxel size is
                                   taken into account)
-      \param[in]     inverse_transform transformation from output coordinates
+      \param[in]  inverse_transform transformation from output coordinates
                                   to coordinates of the input volume
                                   (unit: mm)
-      \param[in]     background   value set if the transformed point is outside
+      \param[in]  background      value set if the transformed point is outside
                                   of the input volume
-      \param[in,out] output_location coordinates in output space (source space
+      \param[in]  output_location coordinates in output space (source space
                                   of \p transform)
-      \param[out]    output_value variable to be filled with resampled data
-      \param[in]     timestep     for 4D volume, time step to be used
+      \param[out] output_value    variable to be filled with resampled data
+      \param[in]  timestep        for 4D volume, time step to be used
 
-      This method does \b not use the instance state set by setRef() or
+      This method does *not* use the instance state set by setRef() or
       setDefaultValue().
   */
   void
@@ -236,7 +236,7 @@ public:
       attributes of \p output_data are not touched; it is up to the calling
       code to update them accordingly.
 
-      This method does \b not use the instance state set by setRef() or
+      This method does *not* use the instance state set by setRef() or
       setDefaultValue().
   */
   void resample_inv( const AimsData< T >& input_data,
@@ -247,19 +247,19 @@ public:
 
   /** Resample a volume at a single location.
 
-      \param[in]     input_data   data to be resampled (its voxel size is
-                                  \b not taken into account)
-      \param[in]     inverse_transform transformation from output coordinates
+      \param[in]  input_data      data to be resampled (its voxel size is
+                                  **not** taken into account)
+      \param[in]  inverse_transform transformation from output coordinates
                                   to coordinates of the input volume
-                                  (<b>unit: voxel</b>)
-      \param[in]     background   value set if the transformed point is outside
+                                  (**unit: voxel**)
+      \param[in]  background      value set if the transformed point is outside
                                   of the input volume
-      \param[in,out] output_location coordinates in output space (source space
+      \param[in]  output_location coordinates in output space (source space
                                   of \p transform)
-      \param[out]    output_value variable to be filled with resampled data
-      \param[in]     timestep     for 4D volume, time step to be used
+      \param[out] output_value    variable to be filled with resampled data
+      \param[in]  timestep        for 4D volume, time step to be used
 
-      This method does \b not use the instance state set by setRef() or
+      This method does *not* use the instance state set by setRef() or
       setDefaultValue().
   */
   void
@@ -275,7 +275,7 @@ public:
   /** Resample a volume into an existing output volume.
 
       \param[in]     input_data  data to be resampled (its voxel size is
-                                 \b not taken into account)
+                                 **not** taken into account)
       \param[in]     transform   transformation from coordinates of the
                                  *output* volume (unit: mm), to coordinates of
                                  the *input* volume *(unit: voxel)*
@@ -290,7 +290,7 @@ public:
       attributes of \p output_data are not touched; it is up to the calling
       code to update them accordingly.
 
-      This method does \b not use the instance state set by setRef() or
+      This method does *not* use the instance state set by setRef() or
       setDefaultValue().
   */
   virtual void resample_inv_to_vox( const AimsData< T >& input_data,
@@ -315,17 +315,17 @@ protected:
 
   /** Resample a volume at a single location.
 
-      \param[in]     input_data   data to be resampled (its voxel size is
-                                  \b not taken into account)
-      \param[in]     inverse_transform transformation from output coordinates
+      \param[in]  input_data      data to be resampled (its voxel size is
+                                  *not* taken into account)
+      \param[in]  inverse_transform transformation from output coordinates
                                   to coordinates of the input volume
                                   (<b>unit: voxels</b>)
-      \param[in]     background   value set if the transformed point is outside
+      \param[in]  background      value set if the transformed point is outside
                                   of the input volume
-      \param[in,out] output_location coordinates in output space (source space
+      \param[in]  output_location coordinates in output space (source space
                                   of \p transform)
-      \param[out]    output_value variable to be filled with resampled data
-      \param[in]     timestep     for 4D volume, time step to be used
+      \param[out] output_value    variable to be filled with resampled data
+      \param[in]  timestep        for 4D volume, time step to be used
   */
   virtual void
   doResample( const AimsData< T > &input_data,
