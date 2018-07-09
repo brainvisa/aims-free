@@ -383,6 +383,12 @@ void MincHeader::read()
       throw file_not_found_error( name() );
   }
 
+  if( ( _name.length() >= 4 && _name.substr( _name.length()-4, 4 ) == ".nii" )
+      || ( _name.length() >= 7
+           && _name.substr( _name.length()-7, 7 ) == ".nii.gz" ) )
+    // refuse reading nifti: we handle it in our reader.
+    throw wrong_format_error( name() );
+
   // Work aroud BUG in netCDF which incorrectly uses assert and
   // aborts on empty files
   struct stat   st;
@@ -425,6 +431,10 @@ void MincHeader::read()
   milog_init("stderr");
   
   if(status != VIO_OK)
+    throw wrong_format_error( fileName );
+
+  if( input_info.file_format == NII_FORMAT )
+    // refuse reading nifti: we handle it in our reader.
     throw wrong_format_error( fileName );
 
   if(volume->nc_data_type==NC_BYTE && volume->signed_flag==FALSE) 
@@ -471,12 +481,27 @@ void MincHeader::read()
     throw wrong_format_error( fileName );
 
   //Read the volume size
+  int n_dimensions = get_volume_n_dimensions(volume);
   int       sizes[VIO_MAX_DIMENSIONS];
   get_volume_sizes( volume, sizes );
-  _dimT=sizes[3];
-  _dimX=sizes[2];
-  _dimY=sizes[1];
-  _dimZ=sizes[0];
+  if( n_dimensions >= 4 )
+    _dimT = sizes[3];
+  else
+    _dimT = 1;
+  if( n_dimensions >= 3 )
+    _dimX = sizes[2];
+  else
+    _dimX = 1;
+  if( n_dimensions >= 2 )
+    _dimY = sizes[1];
+  else
+    _dimY = 1;
+  if( n_dimensions >= 1 )
+    _dimZ = sizes[0];
+  else
+    _dimZ = 1;
+
+  // cout << "read " << n_dimensions << " dims: " << Point4d(_dimX, _dimY, _dimZ, _dimT) << endl;
 
   //Read voxel size
   //In MINC, voxel size can be positive or negative. Here we take the absolute value of the voxel size and the case of negative increment steps (negative voxel sizes) is treated when the volume is read (in MincReader).
@@ -486,7 +511,6 @@ void MincHeader::read()
   _sizeY = fabs(volume->separations[1]);
   _sizeZ = fabs(volume->separations[0]);
 
-  int n_dimensions=get_volume_n_dimensions(volume);
   if(n_dimensions==5) {
     throw wrong_format_error( fileName );
   }
@@ -508,7 +532,7 @@ void MincHeader::read()
   get_volume_voxel_range(volume,&vmin,&vmax);
   //std::cout << "Voxel range : " << vmin << ";" <<vmax<<"\n";
   get_volume_real_range(volume,&rmin,&rmax);
-  //std::cout << "Real range : " << rmin << ";" <<rmax<<"\n";
+  // std::cout << "Real range : " << rmin << ";" <<rmax<<"\n";
 
   _pdt = vector<string>();
   _pdt.reserve( 8 );
@@ -572,9 +596,6 @@ void MincHeader::read()
 
   //OC : Meta-info: should we add something to read the rest of the minc header ?
   
-  
-  //std::cout << "MincHeader::read() done\n";
-
   //1) Voxel to world tranform
   //2) Space name
   //3) All other attributes
@@ -658,90 +679,98 @@ void MincHeader::read()
   
   //3) Other attributes
 
-  Minc_file minc_file= get_volume_input_minc_file(&input_info);
-  int mincid=get_minc_file_id(minc_file );
+  // std::cout << "MincHeader::read() 4\n";
+  if( input_info.file_format == MNC_FORMAT
+      || input_info.file_format == MNC2_FORMAT )
+  {
+    // only allowed for "real" minc
+    Minc_file minc_file = get_volume_input_minc_file(&input_info);
+    if( !minc_file )
+      throw wrong_format_error( fileName );
 
-  //ncopts=NC_VERBOSE;
-  ncopts=0;
+    int mincid = get_minc_file_id(minc_file );
 
-  SyntaxSet *s = PythonHeader::syntax();
-  Syntax &sx = (*s)[ "__generic__" /*"PythonHeader"*/ ];
+    //ncopts=NC_VERBOSE;
+    ncopts=0;
 
-  readMincAttribute(sx, mincid, "patient", "varid", "MINC_patient:varid");
-  readMincAttribute(sx, mincid, "patient", "vartype", "MINC_patient:vartype");
-  readMincAttribute(sx, mincid, "patient", "version", "MINC_patient:version");
-  readMincAttribute(sx, mincid, "patient", "full_name", "patient_id");
-  readMincAttribute(sx, mincid, "patient", "identification", "MINC_patient:identification");
-  readMincAttribute(sx, mincid, "patient", "birthdate", "MINC_patient:birthdate");
-  readMincAttribute(sx, mincid, "patient", "sex", "MINC_patient:sex");
-  readMincAttribute(sx, mincid, "patient", "weight", "MINC_patient:weight");
-  
-  readMincAttribute(sx, mincid, "study", "varid", "MINC_study:varid");
-  readMincAttribute(sx, mincid, "study", "vartype", "MINC_study:vartype");
-  readMincAttribute(sx, mincid, "study", "version", "MINC_study:version");
-  readMincAttribute(sx, mincid, "study", "start_time", "MINC_study:start_time");
-  readMincAttribute(sx, mincid, "study", "modality", "modality");
-  readMincAttribute(sx, mincid, "study", "institution", "MINC_study:institution");
-  readMincAttribute(sx, mincid, "study", "station_id", "MINC_study:station_id");
-  readMincAttribute(sx, mincid, "study", "procedure", "MINC_study:procedure");
-  readMincAttribute(sx, mincid, "study", "study_id", "study_id");
-  readMincAttribute(sx, mincid, "study", "acquisition_id", "MINC_study:acquisition_id");
+    SyntaxSet *s = PythonHeader::syntax();
+    Syntax &sx = (*s)[ "__generic__" /*"PythonHeader"*/ ];
 
-  readMincAttribute(sx, mincid, "acquisition", "varid", "MINC_acquisition:varid");
-  readMincAttribute(sx, mincid, "acquisition", "vartype", "MINC_acquisition:vartype");
-  readMincAttribute(sx, mincid, "acquisition", "version", "MINC_acquisition:version");
-  readMincAttribute(sx, mincid, "acquisition", "scanning_sequence", "MINC_acquisition:scanning_sequence");
-  readMincAttribute(sx, mincid, "acquisition", "repetition_time", "tr");
-  readMincAttribute(sx, mincid, "acquisition", "echo_time", "te");
-  readMincAttribute(sx, mincid, "acquisition", "inversion_time", "MINC_acquisition:inversion_time");
-  readMincAttribute(sx, mincid, "acquisition", "flip_angle", "flip_angle");
-  readMincAttribute(sx, mincid, "acquisition", "num_averages", "MINC_acquisition:num_averages");
-  readMincAttribute(sx, mincid, "acquisition", "imaging_frequency", "MINC_acquisition:imaging_frequency");
-  readMincAttribute(sx, mincid, "acquisition", "imaged_nucleus", "MINC_acquisition:imaged_nucleus");
-  readMincAttribute(sx, mincid, "acquisition", "comments", "MINC_acquisition:comments");
+    readMincAttribute(sx, mincid, "patient", "varid", "MINC_patient:varid");
+    readMincAttribute(sx, mincid, "patient", "vartype", "MINC_patient:vartype");
+    readMincAttribute(sx, mincid, "patient", "version", "MINC_patient:version");
+    readMincAttribute(sx, mincid, "patient", "full_name", "patient_id");
+    readMincAttribute(sx, mincid, "patient", "identification", "MINC_patient:identification");
+    readMincAttribute(sx, mincid, "patient", "birthdate", "MINC_patient:birthdate");
+    readMincAttribute(sx, mincid, "patient", "sex", "MINC_patient:sex");
+    readMincAttribute(sx, mincid, "patient", "weight", "MINC_patient:weight");
 
-  readMincAttribute(sx, mincid, "image-min", "units", "MINC_image-min:units");
-  readMincAttribute(sx, mincid, "image-max", "units", "MINC_image-max:units");
+    readMincAttribute(sx, mincid, "study", "varid", "MINC_study:varid");
+    readMincAttribute(sx, mincid, "study", "vartype", "MINC_study:vartype");
+    readMincAttribute(sx, mincid, "study", "version", "MINC_study:version");
+    readMincAttribute(sx, mincid, "study", "start_time", "MINC_study:start_time");
+    readMincAttribute(sx, mincid, "study", "modality", "modality");
+    readMincAttribute(sx, mincid, "study", "institution", "MINC_study:institution");
+    readMincAttribute(sx, mincid, "study", "station_id", "MINC_study:station_id");
+    readMincAttribute(sx, mincid, "study", "procedure", "MINC_study:procedure");
+    readMincAttribute(sx, mincid, "study", "study_id", "study_id");
+    readMincAttribute(sx, mincid, "study", "acquisition_id", "MINC_study:acquisition_id");
 
+    readMincAttribute(sx, mincid, "acquisition", "varid", "MINC_acquisition:varid");
+    readMincAttribute(sx, mincid, "acquisition", "vartype", "MINC_acquisition:vartype");
+    readMincAttribute(sx, mincid, "acquisition", "version", "MINC_acquisition:version");
+    readMincAttribute(sx, mincid, "acquisition", "scanning_sequence", "MINC_acquisition:scanning_sequence");
+    readMincAttribute(sx, mincid, "acquisition", "repetition_time", "tr");
+    readMincAttribute(sx, mincid, "acquisition", "echo_time", "te");
+    readMincAttribute(sx, mincid, "acquisition", "inversion_time", "MINC_acquisition:inversion_time");
+    readMincAttribute(sx, mincid, "acquisition", "flip_angle", "flip_angle");
+    readMincAttribute(sx, mincid, "acquisition", "num_averages", "MINC_acquisition:num_averages");
+    readMincAttribute(sx, mincid, "acquisition", "imaging_frequency", "MINC_acquisition:imaging_frequency");
+    readMincAttribute(sx, mincid, "acquisition", "imaged_nucleus", "MINC_acquisition:imaged_nucleus");
+    readMincAttribute(sx, mincid, "acquisition", "comments", "MINC_acquisition:comments");
 
-  readMincAttribute(sx, mincid, "patient", "age", "MINC_patient:age");
-
-  readMincAttribute(sx, mincid, "study", "start_date", "MINC_study:start_date");
-  readMincAttribute(sx, mincid, "study", "manufacturer", "MINC_study:manufacturer");
-  readMincAttribute(sx, mincid, "study", "model", "MINC_study:model");
-  readMincAttribute(sx, mincid, "study", "field_value", "MINC_study:field_value");
-  readMincAttribute(sx, mincid, "study", "software_version", "MINC_study:software_version");
-  readMincAttribute(sx, mincid, "study", "serial_no", "MINC_study:serial_no");
-  readMincAttribute(sx, mincid, "study", "performing_physician", "MINC_study:performing_physician");
-  readMincAttribute(sx, mincid, "study", "operator", "MINC_study:operator");
-  readMincAttribute(sx, mincid, "study", "calibration_date", "MINC_study:calibration_date");
-
-  readMincAttribute(sx, mincid, "acquisition", "acquisition_id", "MINC_acquisition:acquisition_id");
-  readMincAttribute(sx, mincid, "acquisition", "start_time", "MINC_acquisition:start_time");
-  readMincAttribute(sx, mincid, "acquisition", "protocol_name", "MINC_acquisition:protocol_name");
-  readMincAttribute(sx, mincid, "acquisition", "receive_coil", "MINC_acquisition:receive_coil");
-  readMincAttribute(sx, mincid, "acquisition", "transmit_coil", "MINC_acquisition:transmit_coil");
-  readMincAttribute(sx, mincid, "acquisition", "echo_number", "MINC_acquisition:echo_number");
-  readMincAttribute(sx, mincid, "acquisition", "slice_thickness", "MINC_acquisition:slice_thickness");
-  readMincAttribute(sx, mincid, "acquisition", "num_slices", "MINC_acquisition:num_slices");
-  readMincAttribute(sx, mincid, "acquisition", "num_dyn_scans", "MINC_acquisition:num_dyn_scans");
-  readMincAttribute(sx, mincid, "acquisition", "window_center", "MINC_acquisition:window_center");
-  readMincAttribute(sx, mincid, "acquisition", "window_width", "MINC_acquisition:window_width");
-  readMincAttribute(sx, mincid, "acquisition", "num_phase_enc_steps", "MINC_acquisition:num_phase_enc_steps");
-  readMincAttribute(sx, mincid, "acquisition", "percent_sampling", "MINC_acquisition:percent_sampling");
-  readMincAttribute(sx, mincid, "acquisition", "percent_phase_fov", "MINC_acquisition:percent_phase_fov");
-  readMincAttribute(sx, mincid, "acquisition", "pixel_bandwidth", "MINC_acquisition:pixel_bandwidth");
-  readMincAttribute(sx, mincid, "acquisition", "phase_enc_dir", "MINC_acquisition:phase_enc_dir");
-  readMincAttribute(sx, mincid, "acquisition", "SAR", "MINC_acquisition:SAR");
-  readMincAttribute(sx, mincid, "acquisition", "mr_acq_type", "MINC_acquisition:mr_acq_type");
-  readMincAttribute(sx, mincid, "acquisition", "image_type", "MINC_acquisition:image_type");
-  readMincAttribute(sx, mincid, "acquisition", "MrProt_dump", "MINC_acquisition:MrProt_dump");
-
-  readMincAttribute(sx, mincid, "processing", "transformation0-filename", "MINC_processing:transformation0-filename");
-  readMincAttribute(sx, mincid, "processing", "transformation0-filedata", "MINC_processing:transformation0-filedata");
+    readMincAttribute(sx, mincid, "image-min", "units", "MINC_image-min:units");
+    readMincAttribute(sx, mincid, "image-max", "units", "MINC_image-max:units");
 
 
-  readMincHistory(mincid);
+    readMincAttribute(sx, mincid, "patient", "age", "MINC_patient:age");
+
+    readMincAttribute(sx, mincid, "study", "start_date", "MINC_study:start_date");
+    readMincAttribute(sx, mincid, "study", "manufacturer", "MINC_study:manufacturer");
+    readMincAttribute(sx, mincid, "study", "model", "MINC_study:model");
+    readMincAttribute(sx, mincid, "study", "field_value", "MINC_study:field_value");
+    readMincAttribute(sx, mincid, "study", "software_version", "MINC_study:software_version");
+    readMincAttribute(sx, mincid, "study", "serial_no", "MINC_study:serial_no");
+    readMincAttribute(sx, mincid, "study", "performing_physician", "MINC_study:performing_physician");
+    readMincAttribute(sx, mincid, "study", "operator", "MINC_study:operator");
+    readMincAttribute(sx, mincid, "study", "calibration_date", "MINC_study:calibration_date");
+
+    readMincAttribute(sx, mincid, "acquisition", "acquisition_id", "MINC_acquisition:acquisition_id");
+    readMincAttribute(sx, mincid, "acquisition", "start_time", "MINC_acquisition:start_time");
+    readMincAttribute(sx, mincid, "acquisition", "protocol_name", "MINC_acquisition:protocol_name");
+    readMincAttribute(sx, mincid, "acquisition", "receive_coil", "MINC_acquisition:receive_coil");
+    readMincAttribute(sx, mincid, "acquisition", "transmit_coil", "MINC_acquisition:transmit_coil");
+    readMincAttribute(sx, mincid, "acquisition", "echo_number", "MINC_acquisition:echo_number");
+    readMincAttribute(sx, mincid, "acquisition", "slice_thickness", "MINC_acquisition:slice_thickness");
+    readMincAttribute(sx, mincid, "acquisition", "num_slices", "MINC_acquisition:num_slices");
+    readMincAttribute(sx, mincid, "acquisition", "num_dyn_scans", "MINC_acquisition:num_dyn_scans");
+    readMincAttribute(sx, mincid, "acquisition", "window_center", "MINC_acquisition:window_center");
+    readMincAttribute(sx, mincid, "acquisition", "window_width", "MINC_acquisition:window_width");
+    readMincAttribute(sx, mincid, "acquisition", "num_phase_enc_steps", "MINC_acquisition:num_phase_enc_steps");
+    readMincAttribute(sx, mincid, "acquisition", "percent_sampling", "MINC_acquisition:percent_sampling");
+    readMincAttribute(sx, mincid, "acquisition", "percent_phase_fov", "MINC_acquisition:percent_phase_fov");
+    readMincAttribute(sx, mincid, "acquisition", "pixel_bandwidth", "MINC_acquisition:pixel_bandwidth");
+    readMincAttribute(sx, mincid, "acquisition", "phase_enc_dir", "MINC_acquisition:phase_enc_dir");
+    readMincAttribute(sx, mincid, "acquisition", "SAR", "MINC_acquisition:SAR");
+    readMincAttribute(sx, mincid, "acquisition", "mr_acq_type", "MINC_acquisition:mr_acq_type");
+    readMincAttribute(sx, mincid, "acquisition", "image_type", "MINC_acquisition:image_type");
+    readMincAttribute(sx, mincid, "acquisition", "MrProt_dump", "MINC_acquisition:MrProt_dump");
+
+    readMincAttribute(sx, mincid, "processing", "transformation0-filename", "MINC_processing:transformation0-filename");
+    readMincAttribute(sx, mincid, "processing", "transformation0-filedata", "MINC_processing:transformation0-filedata");
+
+    readMincHistory(mincid);
+  }
 
   readMinf( removeExtension( fname ) + extension() + ".minf" );
 
@@ -761,6 +790,7 @@ void MincHeader::read()
     mincMutex().unlock();
     throw;
   }
+  // std::cout << "MincHeader::read() done\n";
 
   mincMutex().unlock();
 }
