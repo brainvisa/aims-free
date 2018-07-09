@@ -149,8 +149,8 @@ public:
   inline AimsData<float>& rotation() { return _rotation; }
   inline const AimsData<float>& rotation() const { return _rotation; }
 
-  virtual bool isIdentity() const;
-  virtual void setToIdentity() ;
+  bool isIdentity() const CARTO_OVERRIDE;
+  virtual void setToIdentity();
 
   // AffineTransformation3d algebraic operation
   AffineTransformation3d inverse() const;
@@ -186,8 +186,8 @@ public:
 
 
 protected:
-  virtual Point3dd transformDouble( double x, double y, double z ) const;
-  virtual Point3df transformFloat( float x, float y, float z ) const;
+  Point3dd transformDouble( double x, double y, double z ) const CARTO_OVERRIDE;
+  Point3df transformFloat( float x, float y, float z ) const CARTO_OVERRIDE;
 
   virtual Point3dd transformVectorPoint3dd( const Point3dd & vec ) const;
   virtual Point3df transformVectorPoint3df( const Point3df & dir ) const;

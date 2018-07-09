@@ -60,17 +60,8 @@ namespace aims {
     operator const AimsData<Point3df>&() const { return _ctrlPointDelta; }
     operator AimsData<Point3df>&() { return _ctrlPointDelta; }
 
-    bool isIdentity() const
-    {
-      for( int z = 0; z < dimZ(); ++z )
-      for( int y = 0; y < dimY(); ++y )
-      for( int x = 0; x < dimX(); ++x )
-      {
-        if( _ctrlPointDelta(x, y, z) != Point3df(0., 0., 0.) )
-          return false;
-      }
-      return true;
-    }
+    /// Always false, because testing for identity is expensive
+    bool isIdentity() const CARTO_OVERRIDE { return false; }
 
     //--- Control Knots ------------------------------------------------------
     Point3df     getCtrlKnot( int nx, int ny, int nz ) const;
