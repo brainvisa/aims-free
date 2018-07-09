@@ -249,9 +249,9 @@ public:
 
       \param[in]  input_data      data to be resampled (its voxel size is
                                   **not** taken into account)
-      \param[in]  inverse_transform transformation from output coordinates
-                                  to coordinates of the input volume
-                                  (**unit: voxel**)
+      \param[in]  inverse_transform_to_vox transformation from output
+                                  coordinates to coordinates of the input
+                                  volume (**unit: voxel**)
       \param[in]  background      value set if the transformed point is outside
                                   of the input volume
       \param[in]  output_location coordinates in output space (source space
@@ -276,9 +276,10 @@ public:
 
       \param[in]     input_data  data to be resampled (its voxel size is
                                  **not** taken into account)
-      \param[in]     transform   transformation from coordinates of the
-                                 *output* volume (unit: mm), to coordinates of
-                                 the *input* volume *(unit: voxel)*
+      \param[in]     inverse_transform_to_vox transformation from coordinates
+                                 of the *output* volume (unit: mm), to
+                                 coordinates of the *input* volume
+                                 **(unit: voxel)**
       \param[in]     background  value set in output regions that are outside
                                  of the transformed input volume
       \param[in,out] output_data existing volume to be filled with resampled
@@ -292,6 +293,10 @@ public:
 
       This method does *not* use the instance state set by setRef() or
       setDefaultValue().
+
+      Derived classes can override this method to optimize interpolation of a
+      full volume. The base class method simply calls doResample for each
+      point.
   */
   virtual void resample_inv_to_vox( const AimsData< T >& input_data,
                                     const aims::Transformation3d& inverse_transform_to_vox,
