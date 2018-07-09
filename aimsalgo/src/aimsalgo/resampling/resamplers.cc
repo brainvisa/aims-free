@@ -154,7 +154,6 @@ template class SixthOrderResampler<AimsRGB>;
 template class SeventhOrderResampler<AimsRGB>;
 template class ResamplerFactory<AimsRGB>;
 
-
 template class Resampler<AimsRGBA>;
 template class SplineResampler<AimsRGBA>;
 template class NearestNeighborResampler<AimsRGBA>;
@@ -166,6 +165,18 @@ template class QuinticResampler<AimsRGBA>;
 template class SixthOrderResampler<AimsRGBA>;
 template class SeventhOrderResampler<AimsRGBA>;
 template class ResamplerFactory<AimsRGBA>;
+
+template class Resampler<AimsHSV>;
+template class SplineResampler<AimsHSV>;
+template class NearestNeighborResampler<AimsHSV>;
+template class LinearResampler<AimsHSV>;
+template class QuadraticResampler<AimsHSV>;
+template class CubicResampler<AimsHSV>;
+template class QuarticResampler<AimsHSV>;
+template class QuinticResampler<AimsHSV>;
+template class SixthOrderResampler<AimsHSV>;
+template class SeventhOrderResampler<AimsHSV>;
+template class ResamplerFactory<AimsHSV>;
 
 template class Resampler<Point3df>;
 template class SplineResampler<Point3df>;
