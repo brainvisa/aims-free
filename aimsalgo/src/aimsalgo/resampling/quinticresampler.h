@@ -40,6 +40,11 @@
 namespace aims
 {
 
+/** Volume resampler using quintic (order 5) interpolation.
+
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
 template <class T>
 class QuinticResampler : public SplineResampler< T >
 {

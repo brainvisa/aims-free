@@ -8,19 +8,19 @@ ResamplerFactory classes are used to instantiate a Resampler object for the chos
 %TypeHeaderCode
   #include <aims/resampling/resamplerfactory.h>
   #include <aims/resampling/resampler.h>
-  
+
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
-  
+
   #ifndef PYAIMSALGOSIP_RESAMPLERFACTORY_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLERFACTORY_%Template1typecode%_DEFINED
   namespace aims {
-  	typedef ResamplerFactory<%Template1%> ResamplerFactory_%Template1typecode%;
+        typedef ResamplerFactory<%Template1%> ResamplerFactory_%Template1typecode%;
   }
   #endif
-  
+
 %End
 
   public:
@@ -567,60 +567,140 @@ value: %Template1PyType%
 };
 
 
-class SplineResampler_%Template1typecode%:Resampler_%Template1typecode% /Abstract/
+class SplineResampler_%Template1typecode% : Resampler_%Template1typecode% /Abstract/
 {
 %TypeHeaderCode
   #include <pyaims/vector/vector.h>
   #include <aims/resampling/splineresampler.h>
-  
+
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
-  
+
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
-    
+
   #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
   #define PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
   typedef AimsData<%Template1%> AimsData_%Template1typecode%;
   #endif
-    
+
   #ifndef PYAIMSSIP_AIMSDATA_DOUBLE_DEFINED
   #define PYAIMSSIP_AIMSDATA_DOUBLE_DEFINED
   typedef AimsData<double> AimsData_DOUBLE;
   #endif
 %End
+%Docstring
+B-Spline-based resampling.
+
+This is the base class for all resamplers based on B-spline interpolation
+as described by Unser, Aldroubi & Eden in IEEE PAMI (1991).
+A class computing the actual spline coefficient is derived for each
+spline order (1 to 7).
+
+See : LinearResampler, CubicResampler, QuadraticResampler,
+      QuinticResampler, SixthOrderResampler, SeventhOrderResampler
+
+Coefficients are computed through a recursive scheme from an input
+reference volume. This recursive algorithm is fast for whole
+volume resampling, but slower for single points. A cache mechanism has
+thus been implemented so that coefficients are not recomputed if the
+input volume did not change.
+
+The Resampling API is described in the base class, Resampler_%Template1typecode%.
+%End
+
 public:
 
   SplineResampler_%Template1typecode%();
   ~SplineResampler_%Template1typecode%();
 
   virtual int getOrder() const = 0;
-  AimsData_DOUBLE getSplineCoef( const AimsData_%Template1typecode% &,
-    int = 0, bool = false ) /Factory/;
+%Docstring
+order = getOrder()
+
+Spline order (1 to 7)
+
+Returns
+-------
+
+order: int (1 to 7)
+%End
+
+
+  AimsData_DOUBLE getSplineCoef(
+    const AimsData_%Template1typecode% & inVolume,
+    int t = 0, bool verbose = false ) /Factory/;
+
+
   void reset();
+  %Docstring
+  Computes spline coefficients corresponding to an input volume.
+
+  Parameters
+  ----------
+
+  inVolume: AimsData_%Template1typecode%
+
+    input image
+
+  t: int
+
+    volume to use in the T dimension in the case where inVolume is a
+    time series.
+
+  verbose: bool
+
+    print progress on stdout
+
+  Returns
+  -------
+
+  coeffs: AimsData_DOUBLE
+
+    Volume of double containing the coefficients in the image domain.
+    Border coefficient need to be retrieved by mirror.
+
+  Details
+  -------
+
+  Spline coefficients are recomputed only if one of these conditions is
+  satisfied:
+  - inVolume is different from the last volume used for coefficients
+    computation (in the sense that they share the same adress)
+  - t is different from the last t used for coefficients computation
+  - A call to reset() has previously been made
+
+  This method actually calls updateParameters() and returns the coeff
+  container
+  %End
 };
 
 
-class NearestNeighborResampler_%Template1typecode%:Resampler_%Template1typecode%
+class NearestNeighborResampler_%Template1typecode% : Resampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <pyaims/vector/vector.h>
   #include <aims/resampling/nearestneighborresampler.h>
-  
+
   #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
-  
+
   #ifndef PYAIMSALGOSIP_NEARESTNEIGHBORRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_NEARESTNEIGHBORRESAMPLER_%Template1typecode%_DEFINED
   typedef aims::NearestNeighborResampler<%Template1%> NearestNeighborResampler_%Template1typecode%;
   #endif
 
+%End
+%Docstring
+Volume resampler using nearest-neighbour interpolation.
+
+The Resampling API is described in the base Resampler class.
 %End
 public:
 
@@ -629,16 +709,16 @@ public:
 };
 
 
-class CubicResampler_%Template1typecode%:SplineResampler_%Template1typecode%
+class LinearResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
-  #include <aims/resampling/cubicresampler.h>
-  
-  #ifndef PYAIMSALGOSIP_CUBICRESAMPLER_%Template1typecode%_DEFINED
-  #define PYAIMSALGOSIP_CUBICRESAMPLER_%Template1typecode%_DEFINED
-  typedef aims::CubicResampler<%Template1%> CubicResampler_%Template1typecode%;
+  #include <aims/resampling/linearresampler.h>
+
+  #ifndef PYAIMSALGOSIP_LINEARRESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_LINEARRESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::LinearResampler<%Template1%> LinearResampler_%Template1typecode%;
   #endif
-  
+
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
@@ -648,6 +728,48 @@ class CubicResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
+%End
+%Docstring
+Volume resampler using linear (order 1) interpolation.
+
+The resampling API is described in the base classes,
+Resampler_%Template1typecode% and SplineResampler_%Template1typecode%.
+%End
+
+public:
+
+  LinearResampler_%Template1typecode%();
+  ~LinearResampler_%Template1typecode%();
+
+  int getOrder() const;
+};
+
+
+class CubicResampler_%Template1typecode% : SplineResampler_%Template1typecode%
+{
+%TypeHeaderCode
+  #include <aims/resampling/cubicresampler.h>
+
+  #ifndef PYAIMSALGOSIP_CUBICRESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_CUBICRESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::CubicResampler<%Template1%> CubicResampler_%Template1typecode%;
+  #endif
+
+  #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
+  #endif
+
+  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
+  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
+  #endif
+%End
+%Docstring
+Volume resampler using cubic interpolation.
+
+The resampling API is described in the base classes,
+Resampler_%Template1typecode% and SplineResampler_%Template1typecode%.
 %End
 
 public:
@@ -659,16 +781,16 @@ public:
 };
 
 
-class QuarticResampler_%Template1typecode%:SplineResampler_%Template1typecode%
+class QuarticResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/quarticresampler.h>
-  
+
   #ifndef PYAIMSALGOSIP_QUARTICRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_QUARTICRESAMPLER_%Template1typecode%_DEFINED
   typedef aims::QuarticResampler<%Template1%> QuarticResampler_%Template1typecode%;
   #endif
-  
+
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
@@ -678,6 +800,12 @@ class QuarticResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
+%End
+%Docstring
+Volume resampler using quartic (order 4) interpolation.
+
+The resampling API is described in the base classes,
+Resampler_%Template1typecode% and SplineResampler_%Template1typecode%.
 %End
 
 public:
@@ -689,16 +817,16 @@ public:
 };
 
 
-class QuinticResampler_%Template1typecode%:SplineResampler_%Template1typecode%
+class QuinticResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/quinticresampler.h>
-  
+
   #ifndef PYAIMSALGOSIP_QUINTICRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_QUINTICRESAMPLER_%Template1typecode%_DEFINED
   typedef aims::QuinticResampler<%Template1%> QuinticResampler_%Template1typecode%;
   #endif
-  
+
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
@@ -708,6 +836,12 @@ class QuinticResampler_%Template1typecode%:SplineResampler_%Template1typecode%
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
+%End
+%Docstring
+Volume resampler using quintic (order 5) interpolation.
+
+The resampling API is described in the base classes
+Resampler_%Template1typecode% and SplineResampler_%Template1typecode%.
 %End
 
 public:
@@ -719,16 +853,16 @@ public:
 };
 
 
-class SixthOrderResampler_%Template1typecode%:SplineResampler_%Template1typecode%
+class SixthOrderResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/sixthorderresampler.h>
-  
+
   #ifndef PYAIMSALGOSIP_SIXTHORDERRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SIXTHORDERRESAMPLER_%Template1typecode%_DEFINED
   typedef aims::SixthOrderResampler<%Template1%> SixthOrderResampler_%Template1typecode%;
   #endif
-  
+
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
@@ -738,6 +872,12 @@ class SixthOrderResampler_%Template1typecode%:SplineResampler_%Template1typecode
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
+%End
+%Docstring
+Volume resampler using sixth-order interpolation.
+
+The resampling API is described in the base classes,
+Resampler_%Template1typecode% and SplineResampler_%Template1typecode%.
 %End
 
 public:
@@ -749,16 +889,16 @@ public:
 };
 
 
-class SeventhOrderResampler_%Template1typecode%:SplineResampler_%Template1typecode%
+class SeventhOrderResampler_%Template1typecode% : SplineResampler_%Template1typecode%
 {
 %TypeHeaderCode
   #include <aims/resampling/seventhorderresampler.h>
-  
+
   #ifndef PYAIMSALGOSIP_SEVENTHORDERRESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SEVENTHORDERRESAMPLER_%Template1typecode%_DEFINED
   typedef aims::SeventhOrderResampler<%Template1%> SeventhOrderResampler_%Template1typecode%;
   #endif
-  
+
   #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
   typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
@@ -768,6 +908,12 @@ class SeventhOrderResampler_%Template1typecode%:SplineResampler_%Template1typeco
   #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
+%End
+%Docstring
+Volume resampler using seventh-order interpolation.
+
+The resampling API is described in the base classes,
+Resampler_%Template1typecode% and SplineResampler_%Template1typecode%.
 %End
 
 public:
@@ -777,34 +923,3 @@ public:
 
   int getOrder() const;
 };
-
-
-class LinearResampler_%Template1typecode%:SplineResampler_%Template1typecode%
-{
-%TypeHeaderCode
-  #include <aims/resampling/linearresampler.h>
-  
-  #ifndef PYAIMSALGOSIP_LINEARRESAMPLER_%Template1typecode%_DEFINED
-  #define PYAIMSALGOSIP_LINEARRESAMPLER_%Template1typecode%_DEFINED
-  typedef aims::LinearResampler<%Template1%> LinearResampler_%Template1typecode%;
-  #endif
-  
-  #ifndef PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
-  #define PYAIMSALGOSIP_SPLINERESAMPLER_%Template1typecode%_DEFINED
-  typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
-  #endif
-
-  #ifndef PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  #define PYAIMSALGOSIP_RESAMPLER_%Template1typecode%_DEFINED
-  typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
-  #endif
-%End
-
-public:
-
-  LinearResampler_%Template1typecode%();
-  ~LinearResampler_%Template1typecode%();
-
-  int getOrder() const;
-};
-

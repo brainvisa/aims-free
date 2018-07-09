@@ -57,6 +57,8 @@ struct MultiChannelResamplerSwitch;
 /// A class computing the actual spline coefficient is derived for each
 /// spline order (1 to 7).
 ///
+/// The resampling API is described in the base class, Resampler.
+///
 /// \see LinearResampler CubicResampler QuadraticResampler QuinticResampler
 ///      SixthOrderResampler SeventhOrderResampler
 ///
@@ -105,11 +107,12 @@ public:
   /// \param inVolume  input image
   /// \param t         volume to use in the T dimension in the case where
   ///                  inVolume is a time series.
+  /// \param verbose   print progress on stdout
   /// \return          Volume of double containing the coefficients in the
   ///                  image domain. Border coefficient need to be retrieved
   ///                  by mirror.
   ///
-  /// This method actually calls updateParameters() ad returns the coeff
+  /// This method actually calls updateParameters() and returns the coeff
   /// container
   AimsData<double> getSplineCoef( const AimsData< T >& inVolume,
                                   int t = 0,

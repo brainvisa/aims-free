@@ -40,6 +40,10 @@
 namespace aims
 {
 
+/** Volume resampler using nearest-neighbour interpolation.
+
+    The resampling API is described in the base class, Resampler.
+ */
 template <class T>
 class NearestNeighborResampler : public Resampler< T >
 {
@@ -50,10 +54,10 @@ class NearestNeighborResampler : public Resampler< T >
 
   protected:
 
-    void 
-    doResample( const AimsData< T > &inVolume, 
-                const Point3df &inLocation, 
-                const T &outBackground, 
+    void
+    doResample( const AimsData< T > &inVolume,
+                const Point3df &inLocation,
+                const T &outBackground,
                 T &outValue, int t ) const;
 
     void
