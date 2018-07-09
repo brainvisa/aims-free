@@ -1,21 +1,33 @@
 namespace aims
 {
 
-  class Transformation : carto::RCObject
+  class Transformation : carto::RCObject /Abstract/
   {
 %TypeHeaderCode
 #include <aims/transformation/transformation.h>
+%End
+%Docstring
+Base class for spatial transformations.
 %End
 
   public:
     virtual ~Transformation();
 
-  protected:
-    Transformation();
+    virtual bool isIdentity() const;
+    %Docstring
+    Test if the transformation can safely be omitted
+
+    This method must only return true if the transformation behaves exactly
+    like an identity transformation (notably, the transform methods will always
+    return the input coordinates unchanged).
+
+    NOTE: Implementors of derived classes may choose to always return false if
+    a test would be difficult to implement or expensive to run.
+    %End
   };
 
 
-  class Transformation3d : aims::Transformation
+  class Transformation3d : aims::Transformation /Abstract/
   {
 %TypeHeaderCode
 #include <aims/transformation/transformation.h>
@@ -23,6 +35,9 @@ namespace aims
 
 %TypeCode
 #include <pyaims/vector/numpyarrayfunc.h>
+%End
+%Docstring
+Base class for spatial transformations in 3D.
 %End
 
   public:
@@ -82,8 +97,6 @@ namespace aims
 %End
 
   protected:
-    Transformation3d();
-
     virtual Point3dd transformDouble( double x, double y, double z ) const = 0;
     virtual Point3dd transformPoint3dd( const Point3dd & pos ) const;
     virtual Point3df transformPoint3df( const Point3df & dir ) const;

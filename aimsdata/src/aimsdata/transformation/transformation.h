@@ -40,23 +40,40 @@
 namespace aims
 {
 
+  /** Polymorphic base class for spatial transformations
+   */
   class Transformation : public virtual carto::RCObject
   {
   public:
-    virtual ~Transformation();
+    virtual ~Transformation() {}
 
-    virtual bool isIdentity() const;
-    virtual void setToIdentity();
+    /** Test if the transformation can safely be omitted
+
+        This method returns true only if the transformation behaves exactly
+        like an identity transformation (notably, the transform methods will
+        always return the input coordinates unchanged).
+
+        \note{Implementors of derived classes may choose to always return false
+        if a test would be difficult to implement or expensive to run. As a
+        result, a false result does not guarantee in general that the
+        transformation is different from identity.}
+     */
+    virtual bool isIdentity() const
+    {
+      return false;
+    }
 
   protected:
     Transformation() {}
   };
 
 
+  /** Polymorphic base class for spatial transformations in 3D
+   */
   class Transformation3d : public Transformation
   {
   public:
-    virtual ~Transformation3d();
+    virtual ~Transformation3d() {}
 
     Point3dd transform( double x, double y, double z ) const;
     Point3dd transform( const Point3dd & pos ) const;
@@ -115,7 +132,7 @@ namespace aims
   Transformation3d::transformPoint3df( const Point3df & pos ) const
   {
     Point3dd transformed = transform( (double) pos[0], (double) pos[1],
-                                       (double) pos[2] );
+                                      (double) pos[2] );
     return Point3df( (float) transformed[0], (float) transformed[1],
                      (float) transformed[2] );
   }
@@ -140,7 +157,7 @@ namespace aims
   inline Point3d Transformation3d::transformPoint3d( const Point3d & p ) const
   {
     Point3dd transformed = transform( (double) p[0], (double) p[1],
-                                       (double) p[2] );
+                                      (double) p[2] );
     return Point3d( (int16_t) rint( transformed[0] ),
                     (int16_t) rint( transformed[1] ),
                     (int16_t) rint( transformed[2] ) );

@@ -75,6 +75,8 @@ public:
   /** Remove the first transformation from the list */
   void pop_front();
 
+  bool isIdentity() const CARTO_OVERRIDE;
+
 protected:
   ListType _transformations;
 

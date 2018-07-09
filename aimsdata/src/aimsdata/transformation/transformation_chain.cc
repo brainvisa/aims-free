@@ -55,6 +55,19 @@ void aims::TransformationChain3d::pop_front()
   _transformations.pop_front();
 }
 
+bool aims::TransformationChain3d::isIdentity() const
+{
+  for(ListType::const_iterator it = _transformations.begin() ;
+      it != _transformations.end() ;
+      ++it)
+  {
+    if(!(*it)->isIdentity()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 Point3dd aims::TransformationChain3d::
 transformPoint3dd( const Point3dd& point ) const
 {
