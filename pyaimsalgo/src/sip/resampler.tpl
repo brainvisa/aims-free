@@ -106,8 +106,9 @@ public:
   virtual ~Resampler_%Template1typecode%();
 
 
-  void doit( const aims::AffineTransformation3d&, AimsData_%Template1typecode% & ) const
-    throw(std::runtime_error) /ReleaseGIL/;
+  void doit( const aims::AffineTransformation3d& transform,
+             AimsData_%Template1typecode% & output_data )
+    const throw(std::runtime_error) /ReleaseGIL/;
 %Docstring
 doit(transform, output_data)
 
@@ -149,10 +150,10 @@ The level of verbosity is taken from carto::verbose (i.e. the
 %End
 
 
-  AimsData_%Template1typecode% doit(
-    const aims::AffineTransformation3d &,
-    int, int, int,
-    const Point3df & ) const throw(std::runtime_error) /Factory, ReleaseGIL/;
+  AimsData_%Template1typecode% doit(const aims::AffineTransformation3d & transform,
+                                    int dimx, int dimy, int dimz,
+                                    const Point3df & voxel_size )
+  const throw(std::runtime_error) /Factory, ReleaseGIL/;
 %Docstring
 output_data = doit(transform, dimx, dimy, dimz, voxel_size)
 
@@ -209,11 +210,11 @@ the new volume are reset if `transform.isIdentity()` is false:
 %End
 
 
-  virtual void resample( const AimsData_%Template1typecode% &,
-                         const aims::AffineTransformation3d &,
-                         const %Template1% &,
-                         AimsData_%Template1typecode% &,
-                         bool = false ) const /ReleaseGIL/;
+  virtual void resample( const AimsData_%Template1typecode% & input_data,
+                         const aims::AffineTransformation3d & transform,
+                         const %Template1% & background,
+                         AimsData_%Template1typecode% & output_data,
+                         bool verbose = false ) const /ReleaseGIL/;
 %Docstring
 resample(input_data, transform, background, output_data, verbose=False)
 
@@ -265,12 +266,12 @@ None
 %End
 
 
-  void resample( const AimsData_%Template1typecode% &,
-                 const aims::AffineTransformation3d &,
-                 const %Template1% &,
-                 const Point3df &,
-                 %Template1% & /Out/,
-                 int ) const /ReleaseGIL/;
+  void resample( const AimsData_%Template1typecode% & input_data,
+                 const aims::AffineTransformation3d & transform,
+                 const %Template1% & background,
+                 const Point3df & output_location,
+                 %Template1% & output_value /Out/,
+                 int timestep) const /ReleaseGIL/;
 %Docstring
 output_value = resample(input_data, transform, background, output_location, timestep)
 
@@ -323,6 +324,207 @@ Parameters
 ----------
 
 input_data: AimsData_%Template1typecode%
+%End
+
+
+  virtual void resample_inv( const AimsData_%Template1typecode% & input_data,
+                             const aims::Transformation3d & inverse_transform,
+                             const %Template1% & background,
+                             AimsData_%Template1typecode% & output_data,
+                             bool verbose = false ) const /ReleaseGIL/;
+%Docstring
+resample(input_data, inverse_transform, background, output_data, verbose=False)
+
+Resample a volume into an existing output volume.
+
+Parameters
+----------
+
+input_data: AimsData_%Template1typecode%
+    data to be resampled (its voxel size is taken into account)
+
+inverse_transform: Transformation3d
+
+    transformation from coordinates of the *output* volume (unit: mm), to
+    coordinates of the *input* volume *(unit: mm)*
+
+background: %Template1PyType%
+
+    value set in output regions that are outside of the transformed
+    input volume
+
+output_data: AimsData_%Template1typecode%
+
+    existing volume to be filled with resampled data (its pre-existing
+    dimensions and voxel size are used)
+
+verbose: bool
+
+    print progress to stdout
+
+Details
+-------
+
+The transformations, referentials, and referential header attributes of
+output_data are not touched; it is up to the calling code to update them
+accordingly.
+
+This method does *not* use the instance state set by setRef() or
+setDefaultValue().
+
+Returns
+-------
+None
+%End
+
+
+  void resample_inv( const AimsData_%Template1typecode% & input_data,
+                     const aims::Transformation3d & inverse_transform,
+                     const %Template1% & background,
+                     const Point3df & output_location,
+                     %Template1% & output_value /Out/,
+                     int timestep ) const /ReleaseGIL/;
+%Docstring
+output_value = resample(input_data, inverse_transform, background, output_location, timestep)
+
+Resample a volume at a single location.
+
+input_data: AimsData_%Template1typecode%
+
+    data to be resampled (its voxel size is taken into account)
+
+inverse_transform: Transformation3d
+
+    transformation from output coordinates to coordinates of the input
+    volume *(unit: mm)*
+
+background: %Template1PyType%
+
+    value set in output regions that are outside of the transformed
+    input volume
+
+output_location: Point3df (list of 3 floats)
+
+    coordinates in output space (destination space of transform)
+
+timestep: int
+
+    for 4D volume, time step to be used
+
+Returns
+-------
+
+output_value: %Template1PyType%
+
+    resampled value
+
+Details
+-------
+
+This method does *not* use the instance state set by setRef() or
+setDefaultValue().
+%End
+
+  virtual void resample_inv_to_vox( const AimsData_%Template1typecode% & input_data,
+                                    const aims::Transformation3d & inverse_transform_to_vox,
+                                    const %Template1% & background,
+                                    AimsData_%Template1typecode% & output_data,
+                                    bool verbose=false ) const /ReleaseGIL/;
+%Docstring
+resample(input_data, inverse_transform_to_vox, background, output_data, verbose=False)
+
+Resample a volume into an existing output volume.
+
+Parameters
+----------
+
+input_data: AimsData_%Template1typecode%
+    data to be resampled (its voxel size is taken into account)
+
+inverse_transform_to_vox: Transformation3d
+
+    transformation from coordinates of the *output* volume (unit: mm),
+    to coordinates of the *input* volume **(unit: voxel)**
+
+background: %Template1PyType%
+
+    value set in output regions that are outside of the transformed
+    input volume
+
+output_data: AimsData_%Template1typecode%
+
+    existing volume to be filled with resampled data (its pre-existing
+    dimensions and voxel size are used)
+
+verbose: bool
+
+    print progress to stdout
+
+Details
+-------
+
+The transformations, referentials, and referential header attributes of
+output_data are not touched; it is up to the calling code to update them
+accordingly.
+
+This method does *not* use the instance state set by setRef() or
+setDefaultValue().
+
+Derived classes can override this method to optimize interpolation of a
+full volume. The base class method simply calls doResample for each
+point.
+
+Returns
+-------
+None
+%End
+
+
+  void resample_inv_to_vox( const AimsData_%Template1typecode% & input_data,
+                            const aims::Transformation3d & inverse_transform_to_vox,
+                            const %Template1% & background,
+                            const Point3df & output_location,
+                            %Template1% & output_value /Out/,
+                            int timestep ) const /ReleaseGIL/;
+%Docstring
+output_value = resample(input_data, inverse_transform_to_vox, background, output_location, timestep)
+
+Resample a volume at a single location.
+
+input_data: AimsData_%Template1typecode%
+
+    data to be resampled (its voxel size is taken into account)
+
+inverse_transform_to_vox: Transformation3d
+
+    transformation from output coordinates to coordinates of the input
+    volume (**unit: voxel**)
+
+background: %Template1PyType%
+
+    value set in output regions that are outside of the transformed
+    input volume
+
+output_location: Point3df (list of 3 floats)
+
+    coordinates in output space (destination space of transform)
+
+timestep: int
+
+    for 4D volume, time step to be used
+
+Returns
+-------
+
+output_value: %Template1PyType%
+
+    resampled value
+
+Details
+-------
+
+This method does *not* use the instance state set by setRef() or
+setDefaultValue().
 %End
 
 
