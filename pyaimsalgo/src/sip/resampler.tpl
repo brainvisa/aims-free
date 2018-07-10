@@ -37,20 +37,25 @@ ResamplerFactory classes are used to instantiate a Resampler object for the chos
       SeventhOrder = 7
     };
 
-    virtual ~ResamplerFactory_%Template1typecode%();
-    Resampler_%Template1typecode% * getResampler( int ) /Factory/;
+    static Resampler_%Template1typecode% * getResampler( int order ) /Factory/;
 %Docstring
-result = getResampler( order )
+getResampler(order) -> resampler
+
+Instantiate a Resampler of the given order.
 
 Parameters
 ----------
 order: int
-    order of interpolation: 0 is nearest neighbour (no interpolation), 1 is linear, 2 is quadratic, etc, up to 7.
+    order of interpolation: 0 is nearest neighbour (no interpolation),
+    1 is linear, 3 is cubic, etc. up to 7th order.
 
 Returns
 -------
 result: Resampler_%Template1typecode%
-    the selected resampler instance.
+    a new instance of the selected resampler type
+%End
+%MethodCode
+  sipRes = aims::ResamplerFactory_%Template1typecode%::getResampler(a0).release();
 %End
   };
 };
