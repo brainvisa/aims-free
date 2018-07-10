@@ -406,9 +406,9 @@ void MincHeader::read()
   vector<VIO_STR> dim_names( VIO_MAX_DIMENSIONS );
   VIO_STR fileName = create_string ( const_cast<char *>( fname.c_str() ) );
 
-  dim_names[0] = create_string( const_cast<char *>( MIzspace ) );
+  dim_names[0] = create_string( const_cast<char *>( MIxspace ) );
   dim_names[1] = create_string( const_cast<char *>( MIyspace ) );
-  dim_names[2] = create_string( const_cast<char *>( MIxspace ) );
+  dim_names[2] = create_string( const_cast<char *>( MIzspace ) );
   dim_names[3] = create_string( const_cast<char *>( MItime ) );
   for( unsigned i=4; i<VIO_MAX_DIMENSIONS; ++i )
     dim_names[i] = 0;
@@ -489,17 +489,17 @@ void MincHeader::read()
   else
     _dimT = 1;
   if( n_dimensions >= 3 )
-    _dimX = sizes[2];
+    _dimZ = sizes[2];
   else
-    _dimX = 1;
+    _dimZ = 1;
   if( n_dimensions >= 2 )
     _dimY = sizes[1];
   else
     _dimY = 1;
   if( n_dimensions >= 1 )
-    _dimZ = sizes[0];
+    _dimX = sizes[0];
   else
-    _dimZ = 1;
+    _dimX = 1;
 
   // cout << "read " << n_dimensions << " dims: " << Point4d(_dimX, _dimY, _dimZ, _dimT) << endl;
 
@@ -507,9 +507,9 @@ void MincHeader::read()
   //In MINC, voxel size can be positive or negative. Here we take the absolute value of the voxel size and the case of negative increment steps (negative voxel sizes) is treated when the volume is read (in MincReader).
   _sizeT = fabs(volume->separations[3]);
   //std::cout << "dx="<< volume->separations[2] << ", dy="<< volume->separations[1] << ", dz="<< volume->separations[0]<<"\n";
-  _sizeX = fabs(volume->separations[2]);
+  _sizeX = fabs(volume->separations[0]);
   _sizeY = fabs(volume->separations[1]);
-  _sizeZ = fabs(volume->separations[0]);
+  _sizeZ = fabs(volume->separations[2]);
 
   if(n_dimensions==5) {
     throw wrong_format_error( fileName );
