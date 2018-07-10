@@ -584,7 +584,10 @@ namespace aims
     {
       // std::cout << "reading...\n";
 
-#if 0 //def AIMS_HAS_MINC2
+#if defined( AIMS_HAS_MINC2 ) && !defined( MINC_MNC2_SUPPORT )
+      /* if MINC_MNC2_SUPPORT then the general API also supports mnc2, so we
+         don't need this readMinc2(), which moreover hangs on some versions.
+      */
       try
       {
         readMinc2( data, tmin, dimt );

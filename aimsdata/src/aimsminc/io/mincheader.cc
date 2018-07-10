@@ -433,9 +433,11 @@ void MincHeader::read()
   if(status != VIO_OK)
     throw wrong_format_error( fileName );
 
+#ifdef MINC_NIFTI_SUPPORT
   if( input_info.file_format == NII_FORMAT )
     // refuse reading nifti: we handle it in our reader.
     throw wrong_format_error( fileName );
+#endif
 
   if(volume->nc_data_type==NC_BYTE && volume->signed_flag==FALSE) 
     {
@@ -681,7 +683,10 @@ void MincHeader::read()
 
   // std::cout << "MincHeader::read() 4\n";
   if( input_info.file_format == MNC_FORMAT
-      || input_info.file_format == MNC2_FORMAT )
+#ifdef MINC_MNC2_SUPPORT
+      || input_info.file_format == MNC2_FORMAT
+#endif
+    )
   {
     // only allowed for "real" minc
     Minc_file minc_file = get_volume_input_minc_file(&input_info);
