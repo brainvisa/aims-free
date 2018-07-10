@@ -210,9 +210,9 @@ namespace aims
 
     std::vector<VIO_STR> dim_names( VIO_MAX_DIMENSIONS );
 
-    dim_names[0] = create_string( const_cast<char*>( MIzspace ) );
+    dim_names[0] = create_string( const_cast<char*>( MIxspace ) );
     dim_names[1] = create_string( const_cast<char*>( MIyspace ) );
-    dim_names[2] = create_string( const_cast<char*>( MIxspace ) );
+    dim_names[2] = create_string( const_cast<char*>( MIzspace ) );
     dim_names[3] = create_string( const_cast<char*>( MItime ) );
     for( unsigned i=4; i<VIO_MAX_DIMENSIONS; ++i )
       dim_names[i] = 0;
@@ -236,9 +236,9 @@ namespace aims
 
     //Handle positive/negative voxel size.
     //Variables dirX, dirY and dirZ are defined as 1 if voxel size is positive and as -1 if voxel size is negative.
-    int dirX= (int)(volume->separations[2]/fabs(volume->separations[2]));
+    int dirX= (int)(volume->separations[0]/fabs(volume->separations[0]));
     int dirY= (int)(volume->separations[1]/fabs(volume->separations[1]));
-    int dirZ= (int)(volume->separations[0]/fabs(volume->separations[0]));
+    int dirZ= (int)(volume->separations[2]/fabs(volume->separations[2]));
 
     //Variables X_pos, Y_pos and Z_pos are defined as 1 if voxel size is positive and 0 if voxel size is negative.
     //This is further used during the actual reading.
@@ -274,9 +274,10 @@ namespace aims
                 //data(x,y,z,t)=(T)rint(get_volume_real_value( volume, z, y, x, t, 0 ));
                 data(x,y,z,t) = (T)rint(get_volume_real_value(
                   volume,
-                  (Z_pos)*data.dimZ()-dirZ*z-(Z_pos),
+                  (X_pos)*data.dimX()-dirX*x-(X_pos),
                   (Y_pos)*data.dimY()-dirY*y-(Y_pos),
-                  (X_pos)*data.dimX()-dirX*x-(X_pos) , t, 0 ));
+                  (Z_pos)*data.dimZ()-dirZ*z-(Z_pos),
+                  t, 0 ));
               }
       }
       else {
@@ -285,7 +286,12 @@ namespace aims
             for( int y=0; y<data.dimY(); ++y )  
               for( int x=0; x<data.dimX(); ++x ) {
                 //data(x,y,z,t)=(T)get_volume_real_value( volume, z, y, x, t, 0 );
-                data(x,y,z,t)=(T)get_volume_real_value( volume, (Z_pos)*data.dimZ()-dirZ*z-(Z_pos), (Y_pos)*data.dimY()-dirY*y-(Y_pos), (X_pos)*data.dimX()-dirX*x-(X_pos) , t, 0 );
+                data(x,y,z,t)=(T)get_volume_real_value(
+                  volume,
+                  (X_pos)*data.dimX()-dirX*x-(X_pos),
+                  (Y_pos)*data.dimY()-dirY*y-(Y_pos),
+                  (Z_pos)*data.dimZ()-dirZ*z-(Z_pos),
+                  t, 0 );
               }
       }
 
@@ -300,9 +306,11 @@ namespace aims
             for( int x=0; x<data.dimX(); ++x ) {
               //data(x,y,z,t)=(T)get_volume_voxel_value( volume, z, y, x, t, 0 );
               data(x,y,z,t) = (T)get_volume_voxel_value(
-                volume, (Z_pos)*data.dimZ()-dirZ*z-(Z_pos),
+                volume,
+                (X_pos)*data.dimX()-dirX*x-(X_pos),
                 (Y_pos)*data.dimY()-dirY*y-(Y_pos),
-                (X_pos)*data.dimX()-dirX*x-(X_pos) , t, 0 );
+                (Z_pos)*data.dimZ()-dirZ*z-(Z_pos),
+                t, 0 );
             }
     }
     delete_volume(volume);
@@ -576,7 +584,10 @@ namespace aims
     {
       // std::cout << "reading...\n";
 
-#ifdef AIMS_HAS_MINC2
+#if defined( AIMS_HAS_MINC2 ) && !defined( MINC_MNC2_SUPPORT )
+      /* if MINC_MNC2_SUPPORT then the general API also supports mnc2, so we
+         don't need this readMinc2(), which moreover hangs on some versions.
+      */
       try
       {
         readMinc2( data, tmin, dimt );

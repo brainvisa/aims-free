@@ -64,6 +64,11 @@ MincPlugin::MincPlugin() : Plugin()
   vector<string>	ext;
   ext.push_back( "mnc" );
   ext.push_back( "mnc.gz" );
+#ifdef MINC_MGH_SUPPORT
+  ext.push_back( "mgh" ); // Freesurfer format
+  ext.push_back( "mgz" ); // compressed Freesurfer format
+#endif
+
   MincFormat<int8_t>	*df1 = new MincFormat<int8_t>;
 #ifdef AIMS_APPLE_GCC33BUG
   macosxbugs::fileFormatDictionary_dataint8_registerFormat( "MINC", df1, ext );

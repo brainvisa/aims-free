@@ -406,9 +406,9 @@ void MincHeader::read()
   vector<VIO_STR> dim_names( VIO_MAX_DIMENSIONS );
   VIO_STR fileName = create_string ( const_cast<char *>( fname.c_str() ) );
 
-  dim_names[0] = create_string( const_cast<char *>( MIzspace ) );
+  dim_names[0] = create_string( const_cast<char *>( MIxspace ) );
   dim_names[1] = create_string( const_cast<char *>( MIyspace ) );
-  dim_names[2] = create_string( const_cast<char *>( MIxspace ) );
+  dim_names[2] = create_string( const_cast<char *>( MIzspace ) );
   dim_names[3] = create_string( const_cast<char *>( MItime ) );
   for( unsigned i=4; i<VIO_MAX_DIMENSIONS; ++i )
     dim_names[i] = 0;
@@ -433,9 +433,11 @@ void MincHeader::read()
   if(status != VIO_OK)
     throw wrong_format_error( fileName );
 
+#ifdef MINC_NIFTI_SUPPORT
   if( input_info.file_format == NII_FORMAT )
     // refuse reading nifti: we handle it in our reader.
     throw wrong_format_error( fileName );
+#endif
 
   if(volume->nc_data_type==NC_BYTE && volume->signed_flag==FALSE) 
     {
@@ -489,17 +491,17 @@ void MincHeader::read()
   else
     _dimT = 1;
   if( n_dimensions >= 3 )
-    _dimX = sizes[2];
+    _dimZ = sizes[2];
   else
-    _dimX = 1;
+    _dimZ = 1;
   if( n_dimensions >= 2 )
     _dimY = sizes[1];
   else
     _dimY = 1;
   if( n_dimensions >= 1 )
-    _dimZ = sizes[0];
+    _dimX = sizes[0];
   else
-    _dimZ = 1;
+    _dimX = 1;
 
   // cout << "read " << n_dimensions << " dims: " << Point4d(_dimX, _dimY, _dimZ, _dimT) << endl;
 
@@ -507,9 +509,9 @@ void MincHeader::read()
   //In MINC, voxel size can be positive or negative. Here we take the absolute value of the voxel size and the case of negative increment steps (negative voxel sizes) is treated when the volume is read (in MincReader).
   _sizeT = fabs(volume->separations[3]);
   //std::cout << "dx="<< volume->separations[2] << ", dy="<< volume->separations[1] << ", dz="<< volume->separations[0]<<"\n";
-  _sizeX = fabs(volume->separations[2]);
+  _sizeX = fabs(volume->separations[0]);
   _sizeY = fabs(volume->separations[1]);
-  _sizeZ = fabs(volume->separations[0]);
+  _sizeZ = fabs(volume->separations[2]);
 
   if(n_dimensions==5) {
     throw wrong_format_error( fileName );
@@ -681,7 +683,10 @@ void MincHeader::read()
 
   // std::cout << "MincHeader::read() 4\n";
   if( input_info.file_format == MNC_FORMAT
-      || input_info.file_format == MNC2_FORMAT )
+#ifdef MINC_MNC2_SUPPORT
+      || input_info.file_format == MNC2_FORMAT
+#endif
+    )
   {
     // only allowed for "real" minc
     Minc_file minc_file = get_volume_input_minc_file(&input_info);
