@@ -50,8 +50,8 @@
 
 namespace {
   template <class T, template<typename U> class ResamplerType>
-  carto::rc_ptr<aims::Resampler<T> > make_rc_ptr(ResamplerType<T>* obj) {
-    return carto::rc_ptr<aims::Resampler<T> >(obj);
+  std::unique_ptr<aims::Resampler<T> > make_ptr(ResamplerType<T>* obj) {
+    return std::unique_ptr<aims::Resampler<T> >(obj);
   }
 } // anonymous namespace
 
@@ -59,39 +59,32 @@ namespace aims
 {
 
   template <typename T>
-  const carto::rc_ptr<Resampler<T> >
-  ResamplerFactory<T>::newResampler( ResamplerType order )
+  std::unique_ptr<Resampler<T> >
+  ResamplerFactory<T>::getResampler( int order )
   {
     switch( order )
       {
       case 0:
-        return make_rc_ptr(new NearestNeighborResampler<T>);
+        return make_ptr(new NearestNeighborResampler<T>);
       case 1:
-        return make_rc_ptr(new LinearResampler<T>);
+        return make_ptr(new LinearResampler<T>);
       case 2:
-        return make_rc_ptr(new QuadraticResampler<T>);
+        return make_ptr(new QuadraticResampler<T>);
       case 3:
-        return make_rc_ptr(new CubicResampler<T>);
+        return make_ptr(new CubicResampler<T>);
       case 4:
-        return make_rc_ptr(new QuarticResampler<T>);
+        return make_ptr(new QuarticResampler<T>);
       case 5:
-        return make_rc_ptr(new QuinticResampler<T>);
+        return make_ptr(new QuinticResampler<T>);
       case 6:
-        return make_rc_ptr(new SixthOrderResampler<T>);
+        return make_ptr(new SixthOrderResampler<T>);
       case 7:
-        return make_rc_ptr(new SeventhOrderResampler<T>);
+        return make_ptr(new SeventhOrderResampler<T>);
       default:
         std::cerr << "no resampler for order " << order
                   << ", taking order 3 (cubic) instead" << std::endl;
       }
-    return make_rc_ptr(new CubicResampler<T>);
-  }
-
-  template <typename T>
-  Resampler<T>* ResamplerFactory<T>::getResampler( int order )
-  {
-    carto::rc_ptr<Resampler<T> > r = newResampler(static_cast<ResamplerType>(order));
-    return r.release();
+    return make_ptr(new CubicResampler<T>);
   }
 
 } // namespace aims
