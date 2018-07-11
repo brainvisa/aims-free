@@ -14,16 +14,16 @@ Base class for spatial transformations.
     virtual ~Transformation();
 
     virtual bool isIdentity() const;
-    %Docstring
-    Test if the transformation can safely be omitted
+%Docstring
+Test if the transformation can safely be omitted
 
-    This method must only return true if the transformation behaves exactly
-    like an identity transformation (notably, the transform methods will always
-    return the input coordinates unchanged).
+This method must only return true if the transformation behaves exactly
+like an identity transformation (notably, the transform methods will always
+return the input coordinates unchanged).
 
-    NOTE: Implementors of derived classes may choose to always return false if
-    a test would be difficult to implement or expensive to run.
-    %End
+NOTE: Implementors of derived classes may choose to always return false if
+a test would be difficult to implement or expensive to run.
+%End
   };
 
 
