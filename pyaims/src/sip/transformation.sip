@@ -1,7 +1,7 @@
 namespace aims
 {
 
-  class Transformation : carto::RCObject /Abstract/
+  class Transformation : carto::RCObject
   {
 %TypeHeaderCode
 #include <aims/transformation/transformation.h>
@@ -24,10 +24,13 @@ return the input coordinates unchanged).
 NOTE: Implementors of derived classes may choose to always return false if
 a test would be difficult to implement or expensive to run.
 %End
+
+  protected:
+    Transformation();
   };
 
 
-  class Transformation3d : aims::Transformation /Abstract/
+  class Transformation3d : aims::Transformation
   {
 %TypeHeaderCode
 #include <aims/transformation/transformation.h>
@@ -97,6 +100,7 @@ Base class for spatial transformations in 3D.
 %End
 
   protected:
+    Transformation3d();
     virtual Point3dd transformDouble( double x, double y, double z ) const = 0;
     virtual Point3dd transformPoint3dd( const Point3dd & pos ) const;
     virtual Point3df transformPoint3df( const Point3df & dir ) const;
