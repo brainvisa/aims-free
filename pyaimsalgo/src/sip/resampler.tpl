@@ -116,6 +116,7 @@ public:
     const throw(std::runtime_error) /ReleaseGIL/;
 %Docstring
 doit(transform, output_data)
+============================
 
 Resample the input volume set with setRef() into an existing volume.
 
@@ -143,6 +144,7 @@ Raises
 ------
 RuntimeError
     if no input volume has been set with setRef.
+
 %End
 
 
@@ -152,6 +154,7 @@ RuntimeError
   const throw(std::runtime_error) /Factory, ReleaseGIL/;
 %Docstring
 doit(transform, dimx, dimy, dimz, voxel_size)
+=============================================
 
 Resample the input volume set with setRef() in a newly allocated volume.
 
@@ -194,6 +197,7 @@ AimsData_%Template1typecode%
 Raises
 ------
 RuntimeError: if no input volume has been set with setRef.
+
 %End
 
 
@@ -204,6 +208,7 @@ RuntimeError: if no input volume has been set with setRef.
                          bool verbose = false ) const /ReleaseGIL/;
 %Docstring
 resample(input_data, transform, background, output_data, verbose=False)
+=======================================================================
 
 Resample a volume into an existing output volume.
 
@@ -235,6 +240,7 @@ output_data: AimsData_%Template1typecode%
     dimensions and voxel size are used)
 verbose: bool
     print progress to stdout
+
 %End
 
 
@@ -246,7 +252,7 @@ verbose: bool
                  int timestep) const /ReleaseGIL/;
 %Docstring
 resample(input_data, transform, background, output_location, timestep) -> output_value
-
+======================================================================================
 Resample a volume at a single location.
 
 This method does *not* use the instance state set by setRef() or
@@ -271,19 +277,7 @@ Returns
 -------
 %Template1PyType%
     resampled value
-%End
 
-
-  void setRef( const AimsData_%Template1typecode% & /Transfer/ );
-%Docstring
-setRef(input_data)
-
-Set the input data to be resampled by the doit() methods
-
-Parameters
-----------
-input_data: AimsData_%Template1typecode%
-    volume to be resampled
 %End
 
 
@@ -294,6 +288,7 @@ input_data: AimsData_%Template1typecode%
                              bool verbose = false ) const /ReleaseGIL/;
 %Docstring
 resample(input_data, inverse_transform, background, output_data, verbose=False)
+===============================================================================
 
 Resample a volume into an existing output volume.
 
@@ -320,6 +315,7 @@ output_data: AimsData_%Template1typecode%
     dimensions and voxel size are used)
 verbose: bool
     print progress to stdout
+
 %End
 
 
@@ -331,6 +327,7 @@ verbose: bool
                      int timestep ) const /ReleaseGIL/;
 %Docstring
 resample(input_data, inverse_transform, background, output_location, timestep) -> output_value
+==============================================================================================
 
 Resample a volume at a single location.
 
@@ -354,6 +351,7 @@ Returns
 -------
 %Template1PyType%
     resampled value
+
 %End
 
   virtual void resample_inv_to_vox( const AimsData_%Template1typecode% & input_data,
@@ -363,6 +361,7 @@ Returns
                                     bool verbose=false ) const /ReleaseGIL/;
 %Docstring
 resample(input_data, inverse_transform_to_vox, background, output_data, verbose=False)
+======================================================================================
 
 Resample a volume into an existing output volume.
 
@@ -392,6 +391,7 @@ output_data: AimsData_%Template1typecode%
     dimensions and voxel size are used)
 verbose: bool
     print progress to stdout
+
 %End
 
 
@@ -403,6 +403,7 @@ verbose: bool
                             int timestep ) const /ReleaseGIL/;
 %Docstring
 resample(input_data, inverse_transform_to_vox, background, output_location, timestep) -> output_value
+=====================================================================================================
 
 Resample a volume at a single location.
 
@@ -426,6 +427,20 @@ Returns
 -------
 %Template1PyType%
     resampled value
+
+%End
+
+
+  void setRef( const AimsData_%Template1typecode% & /Transfer/ );
+%Docstring
+setRef(input_data)
+
+Set the input data to be resampled by the doit() methods
+
+Parameters
+----------
+input_data: AimsData_%Template1typecode%
+    volume to be resampled
 %End
 
 
@@ -536,35 +551,35 @@ order: int (1 to 7)
 
 
   void reset();
-  %Docstring
-  Computes spline coefficients corresponding to an input volume.
+%Docstring
+Computes spline coefficients corresponding to an input volume.
 
-  Spline coefficients are recomputed only if one of these conditions is
-  satisfied:
-  - inVolume is different from the last volume used for coefficients
-    computation (in the sense that they share the same adress)
-  - t is different from the last t used for coefficients computation
-  - A call to reset() has previously been made
+Spline coefficients are recomputed only if one of these conditions is
+satisfied:
+- inVolume is different from the last volume used for coefficients
+  computation (in the sense that they share the same adress)
+- t is different from the last t used for coefficients computation
+- A call to reset() has previously been made
 
-  This method actually calls updateParameters() and returns the coeff
-  container
+This method actually calls updateParameters() and returns the coeff
+container
 
-  Parameters
-  ----------
-  inVolume: AimsData_%Template1typecode%
-    input image
-  t: int
-    volume to use in the T dimension in the case where inVolume is a
-    time series.
-  verbose: bool
-    print progress on stdout
+Parameters
+----------
+inVolume: AimsData_%Template1typecode%
+  input image
+t: int
+  volume to use in the T dimension in the case where inVolume is a
+  time series.
+verbose: bool
+  print progress on stdout
 
-  Returns
-  -------
-  AimsData_DOUBLE
-    Volume of double containing the coefficients in the image domain.
-    Border coefficient need to be retrieved by mirror.
-  %End
+Returns
+-------
+AimsData_DOUBLE
+  Volume of double containing the coefficients in the image domain.
+  Border coefficient need to be retrieved by mirror.
+%End
 };
 
 
