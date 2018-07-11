@@ -406,6 +406,7 @@ set(_aimsdata_sources
     sparsematrix/sparseMatrixItemW.cc
     sparsematrix/sparsematrixutil.cc
     sparsematrix/sparseordensematrix.cc
+    transformation/transformation.cc
     transformation/transformation_chain.cc
     transformation/affinetransformation3d.cc
     utility/boundingbox.cc

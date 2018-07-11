@@ -45,7 +45,7 @@ namespace aims
   class Transformation : public virtual carto::RCObject
   {
   public:
-    virtual ~Transformation() {}
+    virtual ~Transformation();
 
     /** Test if the transformation can safely be omitted
 
@@ -73,7 +73,7 @@ namespace aims
   class Transformation3d : public Transformation
   {
   public:
-    virtual ~Transformation3d() {}
+    virtual ~Transformation3d();
 
     Point3dd transform( double x, double y, double z ) const;
     Point3dd transform( const Point3dd & pos ) const;
