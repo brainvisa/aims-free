@@ -396,11 +396,9 @@ void MincHeader::read()
   if( st.st_size == 0 )
     throw eof_error( name() );
 
-  string fname = _name;
-  // Replaces '\' in name with '/'
-  for ( size_t pos = fname.find("\\"); 
-        pos != string::npos; pos = fname.find("\\", pos + 1) )
-    fname.replace(pos, 1, "/");
+  // MINC does not support windows filenames, so we replace it using linux
+  // separators
+  string fname = FileUtil::linuxFilename(_name);
 
   VIO_Volume volume;
   vector<VIO_STR> dim_names( VIO_MAX_DIMENSIONS );
