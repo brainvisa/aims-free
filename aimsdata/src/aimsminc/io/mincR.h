@@ -205,7 +205,7 @@ namespace aims
 
     VIO_Volume volume;
     VIO_STR fileName
-      = create_string( const_cast<char*>( _name.c_str() ));
+      = create_string( const_cast<char*>(carto::FileUtil::linuxFilename(_name).c_str() ));
 
 
     std::vector<VIO_STR> dim_names( VIO_MAX_DIMENSIONS );
@@ -342,7 +342,8 @@ namespace aims
                                         _name);
     }
 
-    result = miopen_volume( source.c_str(), MI2_OPEN_READ, &minc_volume);
+    result = miopen_volume(carto::FileUtil::linuxFilename(source).c_str(), 
+                           MI2_OPEN_READ, &minc_volume);
     MincHeader::mincMutex().unlock();
 
     if (result != MI_NOERROR)
@@ -513,11 +514,11 @@ namespace aims
                             carto::Object options )
   {
     //cout << "reading MINC (new version)...\n";
-    std::string fname = _name;
+//    std::string fname = _name;
     // Replaces '\' in name with '/'
-    for ( size_t pos = fname.find("\\"); 
-          pos != std::string::npos; pos = fname.find("\\", pos + 1) )
-      fname.replace(pos, 1, "/");
+//     for ( size_t pos = fname.find("\\"); 
+//           pos != std::string::npos; pos = fname.find("\\", pos + 1) )
+//       fname.replace(pos, 1, "/");
     
     MincHeader	*hdr = new MincHeader( _name );
     //cout << "(header allocated)\n";
