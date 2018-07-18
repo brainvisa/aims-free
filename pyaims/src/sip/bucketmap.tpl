@@ -51,7 +51,21 @@ public:
   void setSizeZ( float );
   void setSizeT( float );
   void setSizeXYZT( float, float, float, float );
-
+  SIP_PYOBJECT header() /Factory/;
+%Docstring
+The header contains all meta-data.
+%End
+%MethodCode
+  aims::PythonHeader & ph = sipCpp->header();
+  carto::Object* h = new carto::Object( carto::Object::reference( ph ) );
+  sipRes = sipConvertFromNewType( h, sipType_carto_Object, 0 );
+  // set into header a reference to the bucket to forbid it to die before the
+  // python header object
+  if( PyObject_SetAttrString( sipRes, "_bucketref", sipSelf ) == -1 )
+  {
+    std::cerr << "cannot set header ._bucketref" << std::endl;
+  }
+%End
 
   int __len__() const;
 %MethodCode
