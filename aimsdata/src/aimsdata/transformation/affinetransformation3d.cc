@@ -972,6 +972,47 @@ vector<float> AffineTransformation3d::toVector() const
 
 
 //-----------------------------------------------------------------------------
+vector<float> AffineTransformation3d::toColumnVector() const
+{
+  vector<float> vec( 16 );
+  vec[0] = _rotation( 0,0 );
+  vec[1] = _rotation( 1,0 );
+  vec[2] = _rotation( 2,0 );
+  vec[3] = 0;
+  vec[4] = _rotation( 0,1 );
+  vec[5] = _rotation( 1,1 );
+  vec[6] = _rotation( 2,1 );
+  vec[7] = 0;
+  vec[8] = _rotation( 0,2 );
+  vec[9] = _rotation( 1,2 );
+  vec[10] = _rotation( 2,2 );
+  vec[11] = 0;
+  vec[12] = _translation[0];
+  vec[13] = _translation[1];
+  vec[14] = _translation[2];
+  vec[15] = 1.;
+  return vec;
+}
+
+
+//-----------------------------------------------------------------------------
+void AffineTransformation3d::fromColumnVector( const float* vec )
+{
+  _rotation( 0, 0 ) = vec[0];
+  _rotation( 1, 0 ) = vec[1];
+  _rotation( 2, 0 ) = vec[2];
+  _translation[0] = vec[3];
+  _rotation( 0, 1 ) = vec[4];
+  _rotation( 1, 1 ) = vec[5];
+  _rotation( 2, 1 ) = vec[6];
+  _translation[1] = vec[7];
+  _rotation( 0, 2 ) = vec[8];
+  _rotation( 1, 2 ) = vec[9];
+  _rotation( 2, 2 ) = vec[10];
+  _translation[2] = vec[11];
+}
+
+//-----------------------------------------------------------------------------
 namespace aims
 {
 

@@ -164,8 +164,21 @@ public:
                                   const Point3df &cg = Point3df( 0.0 )  );
   //virtual void setRotationVectorial( const Point3df& v1, const Point3df& v2 );
 
-  /// transform AffineTransformation3d to a vector (useful for conversions and IO)
+  /// transform AffineTransformation3d to a line vector (useful for
+  /// conversions and IO)
   std::vector<float> toVector() const;
+  /// transform AffineTransformation3d to a column vector (useful for
+  /// conversions to OpenGL matrices)
+  std::vector<float> toColumnVector() const;
+  /// transform a column vector to an AffineTransformation3d (useful for
+  /// conversions from OpenGL matrices)
+  void fromColumnVector( const std::vector<float> & vec )
+  {
+    return fromColumnVector( &vec[0] );
+  }
+  /// transform a column vector to an AffineTransformation3d (useful for
+  /// conversions from OpenGL matrices)
+  void fromColumnVector( const float* vec );
 
   static AimsData<float> rotationaroundx(float rx) ;
   static AimsData<float> rotationaroundy(float ry) ;
