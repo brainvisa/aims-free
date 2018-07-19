@@ -137,7 +137,6 @@ Graph::hasVertex(const Vertex* vertex) const
 
 void
 Graph::removeVertex(Vertex* vertex)
-	throw(range_error)
 {
 	if (!hasVertex(vertex))
 	{
@@ -213,7 +212,6 @@ Graph::getVerticesWith(const string& s) const
 
 Edge*
 Graph::addDirectedEdge(Vertex* vertex1, Vertex* vertex2, string s)
-	throw(range_error)
 {
 	if (!hasVertex(vertex1) || !hasVertex(vertex2))
 	{
@@ -240,7 +238,6 @@ Graph::addDirectedEdge(Vertex* vertex1, Vertex* vertex2, string s)
 
 Edge*
 Graph::addUndirectedEdge(Vertex* vertex1, Vertex* vertex2, string s)
-	throw(range_error)
 {
 	if (!hasVertex(vertex1) || !hasVertex(vertex2))
 	{
@@ -275,7 +272,6 @@ Graph::hasEdge(const Edge* edge) const
 
 void
 Graph::removeEdge(Edge* edge)
-	throw(range_error)
 {
 	if (_edges.find(edge) == _edges.end())
 	{
@@ -432,7 +428,6 @@ Graph::check(const SyntaxSet& syntax, set<string>& missing) const
 
 void
 Graph::internalExtract(Graph& graph, const set<Vertex*>& vertices)
-		throw(range_error)
 {
 	map<Vertex*, Vertex*> translate;
 	set<Edge*> edges;
