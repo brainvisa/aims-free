@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import os
 import shutil
-import subprocess
+import soma.subprocess
 import sys
 import errno
 import warnings
@@ -229,14 +229,14 @@ class CommandTest:
                 'Command exited because run directory \'%s\' does not exists.'
                 % (run_directory,))
         if sys.version_info >= (2, 7):
-            retcode = subprocess.call(self.__command,
+            retcode = soma.subprocess.call(self.__command,
                                       stdout=fout,
                                       stderr=ferr,
                                       cwd=run_directory)
         else:
             # python 2.6 / Mac cat get a INTR signal
             # https://bugs.python.org/issue1068268
-            p = subprocess.Popen(self.__command,
+            p = soma.subprocess.Popen(self.__command,
                                  stdout=fout,
                                  stderr=ferr,
                                  cwd=run_directory)
