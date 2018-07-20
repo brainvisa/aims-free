@@ -631,22 +631,11 @@ bool SpmHeader::read()
               // GCC 4.4 does not support the use of directive
               // #pragma GCC diagnostic
               // inside a function.
-#if defined(__GNUC__) && ( __GNUC__ * 0x100 + __GNUC_MINOR__ >= 0x450 )
-              #pragma GCC diagnostic push
-              #pragma GCC diagnostic warning "-Wstrict-aliasing"
-#endif
-              origin.push_back( byteswap16( *( (short *)
-                                               & header.hist.originator[0]
-                                               ) ) );
-              origin.push_back( byteswap16( *( (short *) 
-                                               & header.hist.originator[2] 
-                                               ) ) );
-              origin.push_back( byteswap16( *( (short *) 
-                                               & header.hist.originator[4] 
-                                               ) ) );
-#if defined(__GNUC__) && ( __GNUC__ * 0x100 + __GNUC_MINOR__ >= 0x450 )
-              #pragma GCC diagnostic pop
-#endif
+              // FPoupon 20/07/2018 : use a temporary variable to fix this 
+              short* origShort = (short*)&header.hist.originator[ 0 ];
+              origin.push_back( byteswap16( origShort[ 0 ] ) );
+              origin.push_back( byteswap16( origShort[ 1 ] ) );
+              origin.push_back( byteswap16( origShort[ 2 ] ) );
             }
           else
             {
