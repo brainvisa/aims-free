@@ -200,13 +200,6 @@ void LowLevelStandardArgWriter::write( const string & filename, Graph & g,
   PythonHeader ph;
   try
   {
-    Object v = g.getProperty( "uuid" );
-    ph.setProperty( "uuid", v );
-  }
-  catch( ... )
-  {}
-  try
-  {
     Object v = g.getProperty( "referential" );
     ph.setProperty( "referential", v );
   }
