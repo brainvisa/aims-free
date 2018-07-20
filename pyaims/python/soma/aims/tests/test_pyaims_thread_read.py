@@ -10,7 +10,7 @@ from optparse import OptionParser
 import threading
 import tempfile
 import shutil
-import subprocess
+import soma.subprocess
 import time
 import six
 
@@ -173,7 +173,7 @@ def test_all_formats(filename, number=30, separate_process=False):
             print('testing read on %s...' % newfilename)
             try:
                 if separate_process:
-                    subprocess.check_call([sys.executable, '-m',
+                    soma.subprocess.check_call([sys.executable, '-m',
                                            'soma.aims.tests.test_pyaims_thread_read', '-i',
                                            newfilename, '-n', str(number), '--silent'])
                 else:
