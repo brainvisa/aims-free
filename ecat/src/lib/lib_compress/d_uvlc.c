@@ -65,7 +65,7 @@
 #include <stdlib.h>
 
 /* main routine */
-pdpet(skipdpcm, Long, input_filename, output_filename, ncol,nline)
+void pdpet(skipdpcm, Long, input_filename, output_filename, ncol,nline)
 int skipdpcm, Long;
 char *input_filename, *output_filename;
 int ncol,nline;

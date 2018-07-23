@@ -10,4 +10,7 @@ extern void posmsb();
 extern void uvlc();
 extern void uvld();
 
+void pcpet(int skipdpcm, int Long, char* input_filename, char* output_filename, int ncol, int nline);
+void pdpet(int skipdpcm, int Long, char* input_filename, char* output_filename, int ncol, int nline);
+
 #endif

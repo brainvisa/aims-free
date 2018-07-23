@@ -36,7 +36,7 @@
 #include <math.h>
 
 /* main routine */
-pcpet(skipdpcm, Long, input_filename, output_filename, ncol,nline)
+void pcpet(skipdpcm, Long, input_filename, output_filename, ncol,nline)
 int skipdpcm, Long;
 char *input_filename, *output_filename;
 int ncol,nline;
@@ -66,8 +66,8 @@ int ncol,nline;
 	for(i=0; i<nline; i++)
 		for(j=0; j<ncol; j++)
 		{
-	 		fread(&ij,2,1,input);	
-			p2[i*ncol+j]=ij;
+	 		if ( fread(&ij,2,1,input) == 1 )	
+			  p2[i*ncol+j]=ij;
 		}
 
 /*

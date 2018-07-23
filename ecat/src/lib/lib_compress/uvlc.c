@@ -20,6 +20,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 void   putin(mot,lmot,input,pin,rin)
 int *mot,lmot,*pin,*rin;
@@ -32,11 +33,13 @@ rr=*rin;
 point=pp+lmot;
 if(point<=32){*mot=((1<<lmot)-1)&(rr>>pp);*pin=point;}
 else{nx=((1<<(32-pp))-1)&(rr>>pp);
-     fread(rin,4,1,input); 
-     rr=*rin;
-     nr=((1<<(point-32))-1)&rr;
-     *mot=nx+(nr<<(32-pp));
-     *pin=point-32;
+     if ( fread(rin,4,1,input) == 1 )
+     { 
+       rr=*rin;
+       nr=((1<<(point-32))-1)&rr;
+       *mot=nx+(nr<<(32-pp));
+       *pin=point-32;
+     }
     }
 }
 

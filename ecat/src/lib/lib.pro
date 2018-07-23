@@ -19,6 +19,7 @@ HEADERS = \
 	kernel/plandefs.h \
 	kernel/sincos.h \
 	lib_compress/compress.h \
+        lib_compress/dclz.h \
 	lib_compress/uvlc.h
 
 SOURCES = \

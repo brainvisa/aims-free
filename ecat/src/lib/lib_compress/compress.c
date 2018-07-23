@@ -6,6 +6,8 @@
 
 #include <ecat/kernel//matrix.h>
 #include <ecat/lib_compress/compress.h>
+#include <ecat/lib_compress/dclz.h>
+#include <ecat/lib_compress/uvlc.h>
 
 #if defined(unix) || defined(__osf__) || defined(__APPLE__)
 #include <unistd.h>
@@ -23,7 +25,9 @@
 #endif
 
 static char *z_infile=NULL;
+static int fd_in = 0;
 static char *z_outfile=NULL;
+static int fd_out = 0;
 
 #ifdef ultrix
 static char *strdup(line)
@@ -36,14 +40,20 @@ char *line;
 #endif
 
 static int init_tmp_files() {
-	char line[80];
+	char lineIn[80], lineOut[80];
+	strcpy( lineIn, "ecatXXXXXX" );
+	strcpy( lineOut, "ecatXXXXXX" );
 	if (z_infile == NULL) {
-        if (tmpnam(line) == NULL) return 0;
-        z_infile = strdup(line);
+		    int f = mkstemp( lineIn );
+        if (f < 0) return 0;
+        z_infile = strdup(lineIn);
+				fd_in = f;
 	}
 	if (z_outfile == NULL) {
-        if (tmpnam(line) == NULL) return 0;
-        z_outfile = strdup(line);
+		    int f = mkstemp( lineOut );
+        if (f < 0) return 0;
+        z_outfile = strdup(lineOut);
+				fd_out = f;
 	}
 	return 1;
 }
@@ -120,7 +130,7 @@ int data_type, mode;
 	if (data_type != VAX_Ix2 && data_type != SunShort) return 0;
 	data_size = xdim*ydim*matrix_data->zdim*sizeof(short);
 	if (!init_tmp_files()) return 0;
-	if ( (fp=fopen(z_infile,"w")) == NULL) return 0;
+	if ( (fp=fdopen(fd_in,"w")) == NULL) return 0;
 	if (mode != 3)	{	/* byte based method, swap before compress  */
 		short_order(data,data_size,data_type);
 		fwrite(data,1,data_size,fp);
@@ -131,7 +141,8 @@ int data_type, mode;
 	case 1:				/* unix */
 		if (access(z_outfile,R_OK)==0) unlink(z_outfile);	/* already exists */
 		sprintf(line,"compress < %s > %s",z_infile,z_outfile);
-		system(line);
+		if ( system(line) < 0 )
+		  return 0;
 		break;
 	case 2:				/* dclz */
 		dclz(z_infile, z_outfile, 'c');
@@ -146,9 +157,13 @@ int data_type, mode;
 	unlink(z_infile);
 	if (stat(z_outfile, &st) < 0) return 0;
 	z_data_size = ((st.st_size+511)/512)*512;		/* align to block */
-	if ((fp=fopen(z_outfile,"r")) == NULL) return 0;
+	if ((fp=fdopen(fd_out,"r")) == NULL) return 0;
 	if (z_data == NULL) z_data = calloc(z_data_size,1);
-	fread(z_data,1,st.st_size,fp);
+	if ( fread(z_data,1,st.st_size,fp) != st.st_size )
+	{
+	  fclose(fp);
+		return 0;
+	}
 	fclose(fp);
 	unlink(z_outfile);
 	if (mode == 3)	{	/* int based method, swap after compress  */
@@ -173,7 +188,7 @@ int z_data_size, mode;
 	if (data_type != VAX_Ix2 && data_type != SunShort) return 0;
 	data_size = xdim*ydim*matrix_data->zdim*sizeof(short);
 	if (!init_tmp_files()) return 0;
-	if ( (fp=fopen(z_infile,"w")) == NULL) return 0;
+	if ( (fp=fdopen(fd_in,"w")) == NULL) return 0;
 	if (mode == 3)	{	/* int based method, swap before uncompress  */
 		int_order(z_data,z_data_size,data_type);
 	}
@@ -183,7 +198,8 @@ int z_data_size, mode;
 	case 1:				/* unix */
 		if (access(z_outfile,R_OK)==0) unlink(z_outfile);	/*already exists */
 		sprintf(line,"uncompress < %s > %s",z_infile,z_outfile);
-		system(line);
+		if ( system(line) < 0 )
+		  return 0;
 		break;
 	case 2:				/* dclz */
 		dclz(z_infile, z_outfile, 'd');
@@ -196,7 +212,7 @@ int z_data_size, mode;
 		return 0;
 	}
 	unlink(z_infile);
-	if ((fp=fopen(z_outfile,"r")) ==NULL) return 0;
+	if ((fp=fdopen(fd_out,"r")) ==NULL) return 0;
 	if (matrix_data->data_ptr == NULL)
 		matrix_data->data_ptr = calloc((data_size+511)/512,512);
 														/* align to block */

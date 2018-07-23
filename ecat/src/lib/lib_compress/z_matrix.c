@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <ecat/lib_compress/compress.h>
-#include <ecat/kernel/matrix.h>
+#include <ecat/kernel/matrix_extra.h>
 
 #define OK 0
 #define ERROR -1

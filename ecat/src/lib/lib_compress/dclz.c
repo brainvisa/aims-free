@@ -59,7 +59,7 @@ static int             period,threshold;
 /*****************************************************************************
 *   Routine:  usage                                                          *
 *****************************************************************************/
-usage()
+void usage()
 {
     fprintf(stderr, "Usage: dclz [infile] [outfile] [c|d]\n");
     exit(-1);
