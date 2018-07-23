@@ -31,28 +31,19 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#include <aims/math/mathelem.h>
+#include <aims/data/data.h>
 
-#ifndef AIMS_INFORMATION_INFORMATION_H
-#define AIMS_INFORMATION_INFORMATION_H
+float AimsEntropy(const AimsData<float>& p)
+{
+    int levels = p.dimX();
 
-#include <aims/mesh/surface.h>
+    ASSERT( p.dimY() == 1 && p.dimZ() == 1);
 
-float AimsEntropy( const AimsData<float>& p );
-
-float AimsMutualInformation( const AimsData<float>& p1,
-                             const AimsData<float>& p2,
-                             const AimsData<float>& p12 );
-
-float AimsCorrelationRatio( const AimsData<float>& p1,
-                            const AimsData<float>& p2,
-                            const AimsData<float>& p12 );
-
-float AimsMeshDistance( const AimsData< float > & refMap,
-                        const AimsSurfaceTriangle & testMesh,
-                        const Point3d  & dimImage,
-                        const Point3df & sizeVoxel,
-                        const float & maxDistanceMap,
-                        const int32_t & numVertices,
-                        const int16_t & dim          );
-#endif
-
+    double entropy = 0.0;
+    int x;
+    for ( x = 0; x < levels; x++ )
+        entropy -= double(p(x)) * (p(x) > 0. ? std::log(double(p(x))) : 0.);
+    
+    return float(entropy);
+}
