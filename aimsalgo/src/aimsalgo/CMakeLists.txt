@@ -439,6 +439,7 @@ set( _sources
     foldgraph/foldoversegmentation.cc
     geodesicpath/geodesicPath.cc
     information/corratio.cc
+    information/entropy.cc
     information/meshdistance.cc
     information/mutual.cc
     information/pdf.cc
