@@ -52,6 +52,7 @@
 %Include gradient.sip
 %Include gradient_FLOAT.sip
 %Include hypergeometric.sip
+%Include information.sip
 %Include knn.sip
 %Include pdf.sip
 %Include advection.sip
