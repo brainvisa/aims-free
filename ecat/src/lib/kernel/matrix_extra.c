@@ -55,6 +55,7 @@ static char sccsid[]="@(#)matrix_extra.c	1.13 5/7/93 Copyright 1991,1992 CTI Pet
 #include	<ecat/kernel/interfile.h>
 #include	<ecat/kernel/num_sort.h>
 #include	<ecat/kernel/machine_indep.h>
+#include	<ecat/kernel/matrix_extra.h>
 
 
 #define ERROR   -1
@@ -99,10 +100,8 @@ char* matrix_errors[] =
 		"Invalid multibed position"
 	};
 
-is_acs(fname)
-
+int is_acs(fname)
   char	*fname ;
-
 {
  	if (strstr(fname, "/sd") == fname)
 		return(TRUE) ; 
@@ -110,26 +109,13 @@ is_acs(fname)
 	   return(FALSE) ;
 }
 
-matrix_convert_data()
+int matrix_convert_data()
 {
 	return OK ;	/* dummy for now */
 }
 
-static void free_matrix_file(mptr)
-  MatrixFile *mptr ;
-{
-	if (mptr == NULL) return;
-	if (mptr->mhptr != NULL) free(mptr->mhptr) ;
-	if (mptr->dirlist != NULL) matrix_freelist(mptr->dirlist) ;
-	if (mptr->fptr) fclose(mptr->fptr);
-	if (mptr->fname) free(mptr->fname);
-	free(mptr);
-}
-
-matrix_freelist(matdirlist)
-
+int matrix_freelist(matdirlist)
   MatDirList	*matdirlist ;
-
 {
   MatDirNode	*node, *next ;
 
@@ -147,6 +133,17 @@ matrix_freelist(matdirlist)
 	}
 	free(matdirlist) ;
 	return OK;
+}
+
+static void free_matrix_file(mptr)
+  MatrixFile *mptr ;
+{
+	if (mptr == NULL) return;
+	if (mptr->mhptr != NULL) free(mptr->mhptr) ;
+	if (mptr->dirlist != NULL) matrix_freelist(mptr->dirlist) ;
+	if (mptr->fptr) fclose(mptr->fptr);
+	if (mptr->fname) free(mptr->fname);
+	free(mptr);
 }
 
 int 
@@ -724,7 +721,7 @@ int   matnum, plane;
 		}
 }
 
-matrix_write(mptr, matnum, data)
+int matrix_write(mptr, matnum, data)
   MatrixFile *mptr ;
   MatrixData *data ;
   int	matnum;
@@ -865,12 +862,10 @@ float find_fmax( fdata, nvals)
 }
 
 
-read_host_data(mptr, matnum, data, dtype) 
-
+int read_host_data(mptr, matnum, data, dtype) 
   MatrixFile	*mptr ;
   MatrixData	*data ;
   int	matnum , dtype;
-
  {
   struct MatDir matdir;
   int	 nblks, data_size ;
@@ -1266,10 +1261,8 @@ void free_matrix_data(data)
 
 
 
-file_exists(filename)	/* subroutine to see if file exists or not */
-
+int file_exists(filename)	/* subroutine to see if file exists or not */
   char *filename ;
-
 {
 #ifndef _WIN32
   Main_header mhead;
@@ -1292,10 +1285,8 @@ file_exists(filename)	/* subroutine to see if file exists or not */
 /* subroutine to return starting position of substring within string */
 /* return index of t in s, -1 if none */
 
-strindex(s, t)
-
+int strindex(s, t)
   char	s[], t[] ;
-
 {
   int	i, j, k ;
 
@@ -1319,7 +1310,7 @@ void matrix_perror( s)
 	else perror(s);
 }
 
-copy_proto_object( new, old)
+int copy_proto_object( new, old)
   MatrixData *new, *old;
 {
 	int sh_size;
@@ -1386,7 +1377,7 @@ void matrix_free( matrix)
 	free( matrix);
 }
 
-convert_float_scan( scan, fdata)
+int convert_float_scan( scan, fdata)
   MatrixData *scan;
   float *fdata;
 {
@@ -1427,7 +1418,7 @@ convert_float_scan( scan, fdata)
 	return OK;
 }
 
-convert_long_scan( scan, ldata)
+int convert_long_scan( scan, ldata)
   MatrixData *scan;
   int *ldata;
 {

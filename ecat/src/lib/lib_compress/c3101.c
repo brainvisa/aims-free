@@ -61,8 +61,8 @@
 static unsigned short hash[16384];
 static unsigned short dict[3832][2];
 
-static          out_len = 0;
-static          out_code_len = 9;
+static int      out_len = 0;
+static int      out_code_len = 9;
 static long     out_code_remainder = 0;
 
 static long            inp_byte_cnt;

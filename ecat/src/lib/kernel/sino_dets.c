@@ -4,7 +4,7 @@
 #define max(a,b) (((a)>(b))?(a):(b))
 #define min(a,b) (((a)<(b))?(a):(b))
 
-ve_to_dets( v, e, da, db, ndets)
+void ve_to_dets( v, e, da, db, ndets)
   int v,e,*da,*db,ndets;
 {
 	int h,i;
@@ -15,7 +15,7 @@ ve_to_dets( v, e, da, db, ndets)
 	*db=(h-(e+i)/2+v)%ndets;
 }
 
-dets_to_ve( da, db, v, e, ndets)
+void dets_to_ve( da, db, v, e, ndets)
   int da,db,*v,*e,ndets;
 {
 	int h,x,y,a,b,te;

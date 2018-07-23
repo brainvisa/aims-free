@@ -117,7 +117,11 @@ int	 slice, segment;
 		} else {			/* sinogram mode */
 			file_pos += slice*data_size;
 			fseek(mptr->fptr,file_pos,0);
-			fread(data->data_ptr,data_size,1,mptr->fptr);
+			if ( fread(data->data_ptr,data_size,1,mptr->fptr) != 1 )
+			{
+				free_matrix_data(data);
+				return NULL;
+			}
 			file_data_to_host(data->data_ptr,nblks,scan3Dsub->data_type);
 
 		}
@@ -329,7 +333,11 @@ int	 view, segment;
 	} else {			/* view mode */
 		file_pos += view*view_size;
 		fseek(mptr->fptr,file_pos,0);
-		fread(data->data_ptr,view_size,1,mptr->fptr);
+		if ( fread(data->data_ptr,view_size,1,mptr->fptr) != 1 )
+		{
+			free_matrix_data(data);
+			return NULL;
+		}
 		file_data_to_host(data->data_ptr,nblks,data->data_type);
 	}
 	data->xdim = num_projs;

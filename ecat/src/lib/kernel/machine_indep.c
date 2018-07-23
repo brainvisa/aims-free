@@ -80,8 +80,8 @@ unsigned short *bufr;
 #else  /* BIG ENDIAN : sun hp sgi*/
 void
 ftovaxf(orig,number)
-  unsigned short number[2];
   float orig;
+  unsigned short number[2];
 {
 
   	/* convert from sun float to vax float */
@@ -195,7 +195,7 @@ read_raw_acs_data(fname, strtblk, nblks, dptr, dtype)
 }
 
 
-read_matrix_data( fptr, strtblk, nblks, dptr, dtype)
+int read_matrix_data( fptr, strtblk, nblks, dptr, dtype)
   FILE *fptr;
   int strtblk, nblks, dtype;
   char * dptr;
@@ -207,7 +207,7 @@ read_matrix_data( fptr, strtblk, nblks, dptr, dtype)
 	return file_data_to_host(dptr,nblks,dtype);
 }
 
-write_matrix_data( fptr, strtblk, nblks, dptr, dtype)
+int write_matrix_data( fptr, strtblk, nblks, dptr, dtype)
 FILE *fptr;
 int strtblk, nblks, dtype;
 char *dptr;
@@ -251,7 +251,7 @@ char *dptr;
 		k = 0;
 		for (i=0; i<nblks; i++) {
 			for (j=0; j<512; j += sizeof(float), k += sizeof(float)) 
-				ftovaxf(*((float*)&dptr[k]),&bufr2[j]);
+				ftovaxf(*((float*)&dptr[k]),(unsigned short*)&bufr2[j]);
 			if ( mat_wblk( fptr, strtblk+i, bufr2, 1) < 0) error_flag++;
 		}
 		break;

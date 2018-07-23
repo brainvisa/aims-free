@@ -4,11 +4,12 @@
 */
 
 #include <math.h>
-#include <ecat/kernel/matrix.h>
 #include <ecat/kernel/matrix_64.h>
+
 #include <ecat/kernel/isotope_info.h>
 #include <string.h>
 #include <time.h>
+#include <stdlib.h>
 
 static char *olddisplayunits[NumOldUnits] =
     {"Total counts", "Unknown Units", "ECAT counts/sec", "uCi/cc", "LMRGlu",
@@ -93,7 +94,7 @@ int system_type;
     }
 }
 
-mh_convert(h, h_64)
+void mh_convert(h, h_64)
 Main_header * h;
 Main_header_64 *h_64;
 {

@@ -7,11 +7,11 @@ static char sccsid[]="@(#)matrix.c	1.11 6/7/93 Copyright 1989 CTI, Inc.";
  * 02-oct-02: Added modification from Dr. Harald Fricke <HFricke@hdz-nrw.de>
 */
 
-#include	<ecat/kernel/matrix_64.h>
-#include	<ecat/kernel/matrix.h>
-#include	<ecat/kernel/machine_indep.h>
-#include	<string.h>
-#include	<stdlib.h>
+#include <ecat/kernel/convert_64.h>
+#include <ecat/kernel/convert_70.h>
+#include <ecat/kernel/machine_indep.h>
+#include <string.h>
+#include <stdlib.h>
 
 #define  ERROR -1
 #define OK 0
@@ -407,7 +407,7 @@ int map64_main_header( bbufr, mh70)
       return 1;
 }
 
-static sunltovaxl( in, out)
+static void sunltovaxl( in, out)
   int in;
   unsigned short int out[2];
 {

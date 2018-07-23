@@ -19,7 +19,7 @@ static char sccsid[]="@(#)matrix.c	1.11 6/7/93 Copyright 1989 CTI, Inc.";
 
  */
 
-#include    <ecat/kernel/matrix.h>
+#include    <ecat/kernel/matrix_64.h>
 #include    <ecat/kernel/machine_indep.h>
 #include    <string.h>
 #include    <stdlib.h>
@@ -98,7 +98,7 @@ FILE *mat_open( fname, fmode)
 
 }
 
-mat_close( fptr)
+int mat_close( fptr)
   FILE *fptr;
 {
 	matrix_errno = MAT_OK;
@@ -804,7 +804,7 @@ int matrix_selector( matnum, ranges)
 
 
 
-str_find(s1, s2)
+int str_find(s1, s2)
 	char           *s1, *s2;
 {
 	int             i, j, k;
@@ -817,7 +817,7 @@ str_find(s1, s2)
 	return (-1);
 }
 
- str_replace(s1, s2, s3, s4)
+int str_replace(s1, s2, s3, s4)
 	char           *s1, *s2, *s3, *s4;
 {
 	int             nf = 0, n;
@@ -1363,9 +1363,9 @@ Norm3D_subheader *header;
 }
 
 #ifdef __STDC__
-matspec(const char *str, char *fname, int *matnum)
+int matspec(const char *str, char *fname, int *matnum)
 #else
-matspec(str, fname, matnum)
+int matspec(str, fname, matnum)
 	char           *str, *fname;
 	int            *matnum;
 #endif

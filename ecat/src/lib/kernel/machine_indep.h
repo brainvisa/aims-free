@@ -16,6 +16,7 @@ extern "C" {
 void swab(const void *src, void *dest, size_t nbytes);
 #endif
 void SWAB(const void *from, void *to, int length);
+void ftovaxf(float f, unsigned short *bufr);
 int file_data_to_host(char *dptr, int nblks, int dtype);
 int read_raw_acs_data(char *fname, int strtblk, int nblks, 
 					  char *dptr, int dtype);

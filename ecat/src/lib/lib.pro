@@ -5,6 +5,8 @@ TARGET = ecat${BUILDMODEEXT}
 
 HEADERS = \
 	kernel/analyze.h \
+	kernel/convert_64.h \
+	kernel/convert_70.h \
 	kernel/ecat_model.h \
 	kernel/interfile.h \
 	kernel/isotope_info.h \
@@ -12,6 +14,7 @@ HEADERS = \
 	kernel/matpkg.h \
 	kernel/matrix.h \
 	kernel/matrix_64.h \
+	kernel/matrix_extra.h \
 	kernel/num_sort.h \
 	kernel/plandefs.h \
 	kernel/sincos.h \

@@ -4,7 +4,7 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-make3dfilter( nprojs, nslices, phi, phi0, filter, ftype_x, cutoff_x, ftype_y, cutoff_y)
+void make3dfilter( nprojs, nslices, phi, phi0, filter, ftype_x, cutoff_x, ftype_y, cutoff_y)
   int nprojs, nslices, ftype_x, ftype_y;
   float phi, phi0, *filter, cutoff_x, cutoff_y;
 {
