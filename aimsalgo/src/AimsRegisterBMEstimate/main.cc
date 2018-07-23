@@ -543,7 +543,7 @@ bool doit( Process & process, const string & fileinr, Finder & )
                   + FileUtil::removeExtension( FileUtil::basename(string(n2))) + ".trm";
   }
   MotionWriter wm( outmotion );
-  wm << r;
+  wm.write( r );
   
   cout<<"End of the process"<<endl<<"Motion estimated is: "<<endl;
   cout << r << endl;
