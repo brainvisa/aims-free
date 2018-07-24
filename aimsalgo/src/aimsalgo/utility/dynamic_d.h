@@ -148,7 +148,7 @@ namespace aims {
       while( i99 >= 0 && (double)accumulate / histoSize < 1. - pct_kept )
       {
         accumulate += histo[i99];
-        max = min + histoDelta * double(i99);
+        max = (T)(min + histoDelta * double(i99));
         --i99;
       }
       histo.clear();

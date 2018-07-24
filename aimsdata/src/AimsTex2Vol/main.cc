@@ -176,10 +176,10 @@ bool CxParcel::parcellation( AimsData<T> & gmdata )
     }
     if(pmin != numeric_limits<unsigned>::max())
     {
-      x=round(gm[g][0]/sx);
-      y=round(gm[g][1]/sy);
-      z=round(gm[g][2]/sz);
-      parcel(x,y,z,0) = (round) (itex.item(pmin));
+      x=(int)round(gm[g][0]/sx);
+      y=(int)round(gm[g][1]/sy);
+      z=(int)round(gm[g][2]/sz);
+      parcel(x,y,z,0) = (short int)(round) (itex.item(pmin));
     }
     else
       printf("ERROR: could not find any single vertex closer than 1m to (%.0f, %.0f, %.f)!\n",
