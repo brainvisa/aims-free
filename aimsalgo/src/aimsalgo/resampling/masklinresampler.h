@@ -43,6 +43,12 @@ namespace aims
 
 /** Volume resampler using linear (order 1) interpolation.
 
+    \deprecated{This resampler shows unreliable behaviour: depending of the
+    platform it does not always resample the last element along each axis
+    correctly. Also, it uses some clever optimizations that do not check for
+    overflow. If you need such a masked resampler, please consider contributing
+    a fixed version.}
+
     This resampler will consider input voxels that are equal to -32768
     (hard-coded) as masked. The mask value (-32768) will always be returned for
     any interpolation involving a masked voxel.
@@ -53,7 +59,7 @@ namespace aims
     The resampling API is described in the base class, Resampler.
  */
 template <class T>
-class MaskLinearResampler : public Resampler< T >
+class __attribute__((__deprecated__)) MaskLinearResampler : public Resampler< T >
 {
 
   public:

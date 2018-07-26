@@ -122,13 +122,6 @@ class ResamplingTestCase(unittest.TestCase):
         )
 
     # known issue: the last element along each axis is -32768 (the mask value)
-    @unittest.expectedFailure
-    def test_identity_masklin_resampling_int16(self):
-        self.do_identity_resampling_test(
-            aimsalgo.MaskLinearResampler_S16(),
-            np.int16, border=0
-        )
-
     def test_identity_masklin_resampling_int16_except_last_elem(self):
         self.do_identity_resampling_test(
             aimsalgo.MaskLinearResampler_S16(),

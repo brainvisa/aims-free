@@ -23,6 +23,12 @@ class MaskLinearResampler_S16 : Resampler_S16
 %Docstring
 Volume resampler using linear (order 1) interpolation.
 
+This resampler shows unreliable behaviour: depending of the
+platform it does not always resample the last element along each axis
+correctly. Also, it uses some clever optimizations that do not check for
+overflow. If you need such a masked resampler, please consider contributing
+a fixed version.
+
 This resampler will consider input voxels that are equal to -32768
 (hard-coded) as masked. The mask value (-32768) will always be returned for
 any interpolation involving a masked voxel.
@@ -34,7 +40,7 @@ The resampling API is described in the base class, Resampler_S16.
 %End
 public:
 
-  MaskLinearResampler_S16();
+  MaskLinearResampler_S16() /Deprecated/;
   ~MaskLinearResampler_S16();
 
 };
