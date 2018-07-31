@@ -383,6 +383,7 @@ FastMarching<T>::doit( const RCType & labels,
 {
   if( d->verbose )
     cout << "FastMarching...\n" << flush;
+  d->mid_interface_map.clear();
   FastMarchingPrivateStruct<T> fps( d->mid_interface_map );
   SparseVolume<T> slabels( labels );
   vector<int> sz = slabels.getSize();

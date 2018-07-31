@@ -387,6 +387,8 @@ namespace aims
     : _data( sizeX, sizeY, sizeZ, sizeT, allocatorContext, allocated ),
       _background( 0 )
   {
+    if( allocated )
+      _data->fill( _background );
   }
 
 
@@ -504,7 +506,10 @@ namespace aims
         src.getSizeY(), src.getSizeZ(), src.getSizeT(),
         src.allocatorContext() );
     data->header() = src.header();
-    return SparseVolume<carto::Volume<T> >( data );
+    data->fill( other.background() );
+    SparseVolume<carto::Volume<T> > svol( data );
+    svol.setBackground( other.background() );
+    return svol;
   }
 
 
