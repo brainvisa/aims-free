@@ -55,12 +55,14 @@ struct FastMarching<T>::Private
   SparseVolume<T> voronoi;
   SparseVolume<FloatType> inv_speed;
   bool verbose;
+  bool manualSpeed;
 };
 
 
 template <typename T>
 FastMarching<T>::Private::Private( Connectivity::Type c, bool mid_interface )
-  : connectivity( c ), mid_interface_option( mid_interface ), verbose( false )
+  : connectivity( c ), mid_interface_option( mid_interface ), verbose( false ),
+    manualSpeed( false )
 {
 }
 
@@ -399,10 +401,11 @@ FastMarching<T>::doit( const RCType & labels,
   fps.dist = SparseVolume<FloatType>::alloc( slabels );
   SparseVolume<T> status( SparseVolume<T>::alloc( slabels ) );
   fps.seed = SparseVolume<T>::alloc( slabels );
-  bool initspeed = false;
+  bool initspeed = !d->manualSpeed;
   d->inv_speed.setBackground( FLT_MAX );
   vector<int> ssz = d->inv_speed.getSize();
-  if( ssz.size() < 3 || ssz[0] != sz[0] || ssz[1] != sz[1] || ssz[2] != sz[2] )
+  if( initspeed || ssz.size() < 3 || ssz[0] != sz[0] || ssz[1] != sz[1]
+      || ssz[2] != sz[2] )
   {
     initspeed = true;
     if( d->verbose )
@@ -414,6 +417,9 @@ FastMarching<T>::doit( const RCType & labels,
   fps.inv_speed = &d->inv_speed;
   multimap<float, Point3d> & front = fps.front;
   fps.status = status;
+  // we reset speed map to non-manual mode, because the map will be modified
+  // during the process, and will not be reusable for other data
+  d->manualSpeed = false;
 
   enum Status{
     far,
@@ -663,6 +669,7 @@ void FastMarching<T>::setSpeedMap( FastMarching<T>::RCFloatType speed )
       pos = s.position3d( i, iv );
       d->inv_speed.setValue( 1./s.at( pos ), pos );
     }
+  d->manualSpeed = true;
 }
 
 
@@ -670,6 +677,7 @@ template <typename T>
 void FastMarching<T>::setInvSpeedMap( FastMarching<T>::RCFloatType invspeed )
 {
   d->inv_speed = SparseVolume<FloatType>( invspeed );
+  d->manualSpeed = true;
 }
 
 
@@ -677,6 +685,14 @@ template <typename T>
 void FastMarching<T>::clearSpeedMap()
 {
   d->inv_speed = SparseVolume<FloatType>();
+  d->manualSpeed = false;
+}
+
+
+template <typename T>
+typename FastMarching<T>::RCFloatType FastMarching<T>::invSpeedMap() const
+{
+  return d->inv_speed.data();
 }
 
 
