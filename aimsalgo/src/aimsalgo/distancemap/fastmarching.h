@@ -143,13 +143,34 @@ namespace aims
     /// get the resulting Voronoi regions (after propagation)
     RCType voronoiVol() const;
     /** sets an initialized speed map.
-    The inverse speed will be deduced from it. */
+        The inverse speed will be deduced from it.
+        Once a speed map (or inverse speed map) has been setup manually, it
+        will be used during propagation in doit(), for **only one run**.
+        The speed map data contents will be modified during the process, and
+        the map will not be reusable for other data (seed voxels will be
+        printed in it).
+    */
     void setSpeedMap( RCFloatType speed );
     /** sets an initialized inverse speed map (overrides any previous speed
-    map) */
+        map).
+        Once a speed map (or inverse speed map) has been setup manually, it
+        will be used during propagation in doit(), for **only one run**.
+        The speed map data contents will be modified during the process, and
+        the map will not be reusable for other data (seed voxels will be
+        printed in it).
+        The input inverse speed map object will also be modified since it is a
+        shared reference, the algorithm will directly work in it.
+    */
     void setInvSpeedMap( RCFloatType invspeed );
     /// clear (inverse) speed map
     void clearSpeedMap();
+    /** get the current inverse speed map.
+        Note that if you modify it the FastMarching object will not be "aware"
+        it has been modified unless you use the setInvSpeedMap() method.
+        If the speed map has never been manually set, then it will be
+        recalculated when doit() is invoked.
+    */
+    RCFloatType invSpeedMap() const;
 
   private:
     struct Private;

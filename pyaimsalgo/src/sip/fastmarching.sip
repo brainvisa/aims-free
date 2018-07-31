@@ -158,6 +158,12 @@ setSpeedMap(speed)
 
 Sets an initialized speed map. The inverse speed will be deduced from it.
 
+Once a speed map (or inverse speed map) has been setup manually, it
+will be used during propagation in doit(), for **only one run**.
+The speed map data contents will be modified during the process, and
+the map will not be reusable for other data (seed voxels will be
+printed in it).
+
 Parameters
 ----------
 speed: rc_ptr_Volume_FLOAT
@@ -169,12 +175,21 @@ setInvSpeedMap(invspeed)
 
 Sets an initialized inverse speed map (overrides any previous speed map).
 
+Once a speed map (or inverse speed map) has been setup manually, it
+will be used during propagation in doit(), for **only one run**.
+The speed map data contents will be modified during the process, and
+the map will not be reusable for other data (seed voxels will be
+printed in it).
+The input inverse speed map object will also be modified since it is a shared
+reference, the algorithm will directly work in it.
+
 Parameters
 ----------
 invspeed: rc_ptr_Volume_FLOAT
 %End
 
     void clearSpeedMap();
+    rc_ptr_Volume_FLOAT invSpeedMap() const;
 
     SIP_PYTUPLE midInterfaceLabels() const;
 %Docstring
