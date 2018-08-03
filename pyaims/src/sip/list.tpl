@@ -204,7 +204,7 @@ public:
   std::list<%Template1% >::iterator i, e = sipCpp->end();
   if( a0 < 0 )
     a0 = sipCpp->size() + a0;
-  if( a0 < 0 || a0 >= sipCpp->size() )
+  if( a0 < 0 || a0 >= (long)sipCpp->size() )
   {
     sipRes = 0;
     sipIsErr = 1;
@@ -230,7 +230,7 @@ public:
   std::list<%Template1% >::iterator i, e = sipCpp->end();
   if( a0 < 0 )
     a0 = sipCpp->size() + a0;
-  if( a0 < 0 || a0 >= sipCpp->size() )
+  if( a0 < 0 || a0 >= (long)sipCpp->size() )
   {
     sipIsErr = 1;
     PyErr_SetString( PyExc_IndexError, "std::list index out of range" );

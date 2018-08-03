@@ -329,6 +329,7 @@ public:
     m_p(g)
   {
     set(x,y,z);
+    t=t;
   };
 
   void initialize(SurfacePoint const& p)

@@ -67,7 +67,7 @@ namespace {
     return true;
   }
 
-  bool tiffinit = inittiff();
+  bool tiffinit __attribute__((unused)) = inittiff();
 
 }
 

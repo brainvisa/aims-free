@@ -36,7 +36,6 @@ int main( int argc, const char **argv )
     for( im=mesh.begin(); im!=em; ++im )
     {
       vector< list<unsigned> > ordered = AimsMeshOrderTriangle( im->second );
-      bool first = true;
       uint32_t timepoint = im->first;
       const vector<AimsVector<uint32_t,3> > & poly = im->second.polygon();
 

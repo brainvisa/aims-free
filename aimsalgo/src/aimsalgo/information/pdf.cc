@@ -800,8 +800,7 @@ void  AimsKnnPdf(aims::knn::Database &db,
       AimsData<float> &pdf, unsigned int k)
 {
     int        x, y, z;
-    double        dx, dy, dz;
-    double        h, sum, val, dist;
+    double        h, sum, val;
     int        dim = db.dim();
     std::vector<double>    vec(dim);
     aims::knn::KnnGlobalFriedman  knn(db, k);

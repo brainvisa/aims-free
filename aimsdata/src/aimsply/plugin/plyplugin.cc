@@ -52,7 +52,7 @@ namespace
     return true;
   }
 
-  bool plyinit = initply();
+  bool plyinit __attribute__((unused)) = initply();
 
 }
 

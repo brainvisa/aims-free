@@ -73,8 +73,8 @@ O MeshToVoxelsResampler<O>::doit(const AimsSurfaceTriangle &m, float spacing,
 	float	xmin, ymin, zmin, xmax, ymax, zmax;
 	unsigned int 	vsize = vertices.size();
 	unsigned int	psize = polygons.size();
-	float		r2;
-	float		tc;
+	float		r2 = 0.0f;
+	float		tc = 0.0f;
 
 	if (connexity == 26)
 	{
@@ -234,7 +234,7 @@ O MeshToVoxelsResampler<O>::doit(const AimsSurfaceTriangle &m, float spacing,
 		float nx2 = nx * (nx > 0 ? 1 : -1);
 		float ny2 = ny * (ny > 0 ? 1 : -1);
 		float nz2 = nz * (nz > 0 ? 1 : -1);
-		float dlnk;
+		float dlnk = 0.0f;
 		float nsum = (nx2 + ny2 + nz2);
 		if (connexity == 26)
 			// dlnk = sqrt(3) * cos(alpha) / 2.

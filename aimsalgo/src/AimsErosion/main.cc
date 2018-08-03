@@ -38,7 +38,7 @@
 using namespace std;
 
 
-int main( int argc, const char **argv )
+int main()
 {
   cerr << "-----------------------------------------------------------------------\n";
   cerr << "AimsErosion has been replaced by AimsMorphoMath. Please use it instead.\n";

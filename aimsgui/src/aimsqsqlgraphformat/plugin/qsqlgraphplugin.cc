@@ -74,7 +74,7 @@ namespace
     return true;
   }
 
-  bool qsqlgraphformatinit = initqsqlgraphformat();
+  bool qsqlgraphformatinit __attribute__((unused)) = initqsqlgraphformat();
 
 }
 

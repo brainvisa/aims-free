@@ -69,7 +69,7 @@ namespace {
     return true;
   }
 
-  bool gisinit = initgis();
+  bool gisinit __attribute__((unused)) = initgis();
 
 }
 

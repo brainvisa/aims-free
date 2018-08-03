@@ -107,7 +107,7 @@ private:
 //           in aimsdata (io ?) or cartobase (attributed ?)
 
 std::string fileNameAndParameters( const std::string &,
-                                   carto::Object );
+                                   carto::PropertySet& );
 
 
 
@@ -743,13 +743,13 @@ void ConnectomistBundlesReader::read()
   int fiberRead = 0;
   do {
     startBundle( currentBundle );
-    bool noMoreBundle;
+    //bool noMoreBundle;
     int stopOnFiber;
     if ( it == bundles.end() ) {
-      noMoreBundle = true;
+      //noMoreBundle = true;
       stopOnFiber = fiberCount;
     } else {
-      noMoreBundle = false;
+      //noMoreBundle = false;
       bundleName = (*it)->value<string>();
       ++it;
       stopOnFiber = static_cast<int>( (*it)->value<double>() );
@@ -1268,7 +1268,7 @@ void BundleToGraph::noMoreBundle( const BundleProducer & )
       _relatveFiberStartPos = bmin + (bmax - bmin ) / 2;
     }
     Graph::iterator iv, ev = _meshResult->end();
-    int i, n;
+    int n;
     for( iv=_meshResult->begin(); iv!=ev; ++iv )
     {
       rc_ptr<AimsTimeSurface<2, Void> > mesh;

@@ -308,5 +308,5 @@ static bool _volvecdic()
   return true;
 }
 
-static bool volvecdic = _volvecdic();
+static bool volvecdic __attribute__((unused)) = _volvecdic();
 

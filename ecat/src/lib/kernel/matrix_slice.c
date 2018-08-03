@@ -14,7 +14,7 @@ MatrixFile *mptr ;
 MatrixData *volume;
 int	 slice, segment;
 {
-	int	i, group=0, slice_count=0, z_elements;
+	int	i, group=0, z_elements;
 	int view, num_views, num_projs;
 	int file_pos, nblks, npixels, data_size ;
 	float *fdata;
@@ -104,7 +104,7 @@ int	 slice, segment;
 				{
 						/* skip to planar view and read */
 					if (fseek(mptr->fptr,file_pos,0) != 0 ||
-						fread(line,1,line_size,mptr->fptr) != line_size) {
+						fread(line,1,line_size,mptr->fptr) != (size_t)line_size) {
 						free_matrix_data(data);
 						return NULL;
 					}
@@ -172,7 +172,7 @@ int	 slice, segment;
 			for (view=0; view<num_views; view++) {	/* for each planar view  */
 				/* skip to planar view and read */
 				if (fseek(mptr->fptr,file_pos,0) != 0 ||
-					fread(line,sizeof(float),num_projs,mptr->fptr) != num_projs) {
+					fread(line,sizeof(float),num_projs,mptr->fptr) != (size_t)num_projs) {
 					free_matrix_data(data);
 					return NULL;
 				}
@@ -184,7 +184,7 @@ int	 slice, segment;
 		} else {
 			file_pos += slice*npixels*sizeof(float);
 			if (fseek(mptr->fptr,file_pos,0) != 0 ||
-				fread(fdata,sizeof(float),npixels,mptr->fptr) != npixels) {
+				fread(fdata,sizeof(float),npixels,mptr->fptr) != (size_t)npixels) {
 				free_matrix_data(data);
 				return NULL;
 			}	
@@ -210,7 +210,7 @@ int	 slice, segment;
 		imagesub = (Image_subheader *) malloc(sizeof(Image_subheader));
 		if (imagesub == NULL ||
 			fseek(mptr->fptr,file_pos,0) != 0 ||
-			fread(data->data_ptr,1,data_size,mptr->fptr) != data_size) {
+			fread(data->data_ptr,1,data_size,mptr->fptr) != (size_t)data_size) {
 				free_matrix_data(data);
 				return NULL;
 		}
@@ -241,8 +241,6 @@ int	 view, segment;
 	Scan3D_subheader *scan3Dsub ;
 	struct MatDir matdir;
 	Attn_subheader *attnsub ;
-	Image_subheader *imagesub;
-	Scan_subheader *scansub ;
 	int z, line_size, line_blks;
 	short *z_elements;
 	char  *line, *p;
@@ -320,7 +318,7 @@ int	 view, segment;
 		for (z=0; z<num_planes; z++) {	/* for each slice */
 			/* skip to planar view and read */
 			if (fseek(mptr->fptr,file_pos,0) != 0 ||
-				fread(line,1,line_size,mptr->fptr) != line_size)
+				fread(line,1,line_size,mptr->fptr) != (size_t)line_size)
 			{
 				free_matrix_data(data);
 				return NULL;

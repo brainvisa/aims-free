@@ -371,7 +371,12 @@ namespace carto {
     std::string xE = ( hasX ? "]" : "" );
     std::string xS = ( hasX ? " " : "" );
 
-    for( size_t t = 0; t < static_cast<size_t>(volume.getSizeT()); ++t )
+    size_t sizeT = static_cast<size_t>(volume.getSizeT());
+    size_t sizeZ = static_cast<size_t>(volume.getSizeZ());
+    size_t sizeY = static_cast<size_t>(volume.getSizeY());
+    size_t sizeX = static_cast<size_t>(volume.getSizeX());
+
+    for( size_t t = 0; t < sizeT; ++t )
     {
       if( hasT ) {
         if( t < out.maxT() ) {
@@ -381,7 +386,7 @@ namespace carto {
           break;
         }
       }
-      for( size_t z = 0; z < static_cast<size_t>(volume.getSizeZ()); ++z )
+      for( size_t z = 0; z < sizeZ; ++z )
       {
         if( hasZ ) {
           if( z < out.maxZ() ) {
@@ -391,7 +396,7 @@ namespace carto {
             break;
           }
         }
-        for( size_t y = 0; y < static_cast<size_t>(volume.getSizeY()); ++y )
+        for( size_t y = 0; y < sizeY; ++y )
         {
           if( y < out.maxY() ) {
             out.ostream() << std::setw(2) << std::left << yB;
@@ -399,7 +404,7 @@ namespace carto {
             out.ostream() << std::setw(3) << std::left << "...";
             break;
           }
-          for( size_t x = 0; x < static_cast<size_t>(volume.getSizeX()); ++x )
+          for( size_t x = 0; x < sizeX; ++x )
           {
             if( x < out.maxX() ) {
               out.ostream() << std::setw(10) << std::left
@@ -410,7 +415,7 @@ namespace carto {
             }
           }
           out.ostream() << std::setw(2) << std::left << yE;
-          if( y < volume.getSizeY() - 1 )
+          if( y < sizeY - 1 )
             out.ostream() << std::endl;
           if( hasZ )
             out.ostream() << std::setw(2) << std::left << zS;
@@ -419,14 +424,14 @@ namespace carto {
         }
         if( hasZ )
           out.ostream() << std::setw(2) << std::left << zE;
-        if( z < volume.getSizeZ() - 1 )
+        if( z < sizeZ - 1 )
           out.ostream()  << std::endl;
         if( hasT )
           out.ostream() << std::setw(2) << std::left << tS;
       }
       if( hasT )
         out.ostream() << std::setw(2) << std::left << tE;
-      if( t < volume.getSizeT() - 1 )
+      if( t < sizeT - 1 )
         out.ostream() << std::endl;
     }
 

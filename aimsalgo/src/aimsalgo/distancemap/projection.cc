@@ -225,7 +225,7 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
 							      int MINCC,
 							      const map <short,string> & trans,
 							      const set<string>	& labels,
-							      float maxdil,float maxdil_mesh,float alpha_reg,bool connexity,
+							      float /*maxdil*/,float maxdil_mesh,float alpha_reg,bool connexity,
 							      const vector<list<unsigned> >  & neigho)
 {
 
@@ -285,8 +285,8 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
   //-----------------------------------------------------------------------------------------------------
   AimsData<short>    ccvol = sulcvol.clone();
   AimsData<short>     tempvol= sulcvol.clone();
-  float radius_close ;
-  radius_close = maxdil;
+  //float radius_close ;
+  //radius_close = maxdil;
 
   set<string>::iterator is,es = labels.end();
  

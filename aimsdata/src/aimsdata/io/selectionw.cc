@@ -82,6 +82,7 @@ void SelectionWriter::open( ostream & ostr )
 }
 
 
+#ifdef AIMS_SELECTION_TREE_OUTPUT
 namespace
 {
 
@@ -99,6 +100,7 @@ namespace
   }
 
 }
+#endif
 
 
 void SelectionWriter::write( const SelectionSet & select )

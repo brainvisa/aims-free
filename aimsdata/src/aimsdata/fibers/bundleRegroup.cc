@@ -44,7 +44,10 @@ using namespace std;
 namespace aims
 {
 
-BundleRegroup::BundleRegroup( const string &groupsFileName, std::vector< string > &excludednames ) : _file_name(groupsFileName), _excludednames(excludednames), _file( 0 )
+BundleRegroup::BundleRegroup( const string &groupsFileName, std::vector< string > &excludednames ) 
+             : _file_name(groupsFileName),
+               _file( 0 ),
+               _excludednames(excludednames)
 {
   if( !_file_name.empty() )
   {
@@ -55,7 +58,10 @@ BundleRegroup::BundleRegroup( const string &groupsFileName, std::vector< string 
 }
 //-----------------------------------------------------------------------------
 
-BundleRegroup::BundleRegroup( const string &groupsFileName ) : _file_name(groupsFileName), _excludednames(vect), _file( 0 )
+BundleRegroup::BundleRegroup( const string &groupsFileName )
+             : _file_name(groupsFileName),
+               _file( 0 ),
+               _excludednames(vect)
 {
   if( !_file_name.empty() )
   {
@@ -155,7 +161,7 @@ void BundleRegroup::noMoreBundle( const BundleProducer & )
     for (BundlesSet::iterator bun = _bundlesSet.begin(); bun!=_bundlesSet.end(); ++bun, ++names)
     {
       bool include = true;
-      for (int i = 0; i < _excludednames.size(); i++)
+      for (int i = 0; i < (int)_excludednames.size(); i++)
       {
         if (_excludednames[i] == *names)
         {

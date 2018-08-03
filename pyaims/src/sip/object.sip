@@ -360,7 +360,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
           }
           else
           {
-            unsigned long n = sipCpp->size();
+            long n = sipCpp->size();
             if( a0 < 0 )
               a0 += n;
             if( a0 < 0 || a0 >= n )

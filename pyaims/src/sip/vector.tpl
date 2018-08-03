@@ -211,7 +211,7 @@ public:
 %MethodCode
   if( a0 < 0 )
     a0 = sipCpp->size() + a0;
-  if( a0 < 0 || a0 >= sipCpp->size() )
+  if( a0 < 0 || a0 >= (long)sipCpp->size() )
   {
     sipRes = 0;
     sipIsErr = 1;
@@ -226,7 +226,7 @@ public:
 %MethodCode
   if( a0 < 0 )
     a0 = sipCpp->size() + a0;
-  if( a0 < 0 || a0 >= sipCpp->size() )
+  if( a0 < 0 || a0 >= (long)sipCpp->size() )
   {
     sipIsErr = 1;
     PyErr_SetString( PyExc_IndexError, "vector index out of range" );

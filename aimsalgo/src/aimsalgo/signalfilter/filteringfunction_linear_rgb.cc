@@ -36,8 +36,11 @@
 
 
 #define AIMS_LIN_FILTERFUNC_MULTICHANNEL_SPECIALIZE( NAME, VOXELTYPE )       \
-  NAME< VOXELTYPE >::NAME( carto::Object options ): _m(options) {}          \
+  NAME< VOXELTYPE >::NAME( carto::Object options ):                          \
+    LinearFilteringFunction<VOXELTYPE>(),                                    \
+    _m(options) {}                                                           \
   NAME< VOXELTYPE >::NAME( const NAME< VOXELTYPE > & other ):                \
+    LinearFilteringFunction<VOXELTYPE>(),                                    \
     _m(other._m) {}                                                          \
   NAME< VOXELTYPE >::~NAME() {}                                              \
   NAME< VOXELTYPE > & NAME< VOXELTYPE >::operator=( const NAME< VOXELTYPE > & other )  \

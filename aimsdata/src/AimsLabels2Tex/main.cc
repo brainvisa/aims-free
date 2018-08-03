@@ -121,7 +121,7 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
 
   set<size_t>::iterator             ins, endt = instants.end();
   unsigned                         p;
-  int                               x, y, z, i, j, k, kmax, xmin, ymin, zmin, min_cyl, max_cyl;
+  int                               x, y, z, i, j, k, kmax, min_cyl, max_cyl;
   short                             val=0, nlabel, nlabel_max, label_max, cur_label;
   vector< short >::iterator         lab, endlab;
   vector< short >                   label;

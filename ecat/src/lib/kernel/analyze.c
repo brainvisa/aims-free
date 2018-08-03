@@ -1,6 +1,6 @@
 /* 
-// sccsid = "@(#)analyze.c	1.5  UCL-TOPO	98/04/28"
-/*
+ * sccsid = "@(#)analyze.c	1.5  UCL-TOPO	98/04/28"
+ *
  *  Copyright (C) 1995 University of Louvain, Louvain-la-Neuve, Belgium
  *
  *  Author : <Merence Sibomana> Sibomana@topo.ucl.ac.be
@@ -47,7 +47,7 @@
 
 #define R_MODE "rb"
 
-static char* magicNumber = "interfile";
+//static char* magicNumber = "interfile";
 static struct dsr hdr;
 
 int analyze_orientation=0;	/* default is spm neurologist convention */
@@ -170,6 +170,7 @@ int i;
 char *buf;
 int radix;
 {
+	(void)(radix);
         sprintf(buf ,"%d",i);
         return buf;
 }

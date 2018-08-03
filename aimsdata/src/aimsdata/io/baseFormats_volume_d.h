@@ -142,8 +142,8 @@ namespace aims
   template <typename T>
   bool ImasVolFormat<T>::read( const std::string & filename, 
                                AimsData<T> & obj, 
-                               const carto::AllocatorContext & context, 
-                               carto::Object options )
+                               const carto::AllocatorContext & /* context */, 
+                               carto::Object /* options */ )
   {
     ImasHeader *hdr = new ImasHeader( filename );
     if( !hdr->read() )

@@ -81,7 +81,7 @@ namespace
     {
       Object lelem = Object::value( Dictionary() );
       labels->insertArrayItem( *ik, lelem );
-      const Label* clabel = ltable.getLabel( *ik );
+      //const Label* clabel = ltable.getLabel( *ik );
       lelem->setProperty( "label",
                           AString_to_std_string(
                             ltable.getLabelName( *ik ) ) );
@@ -454,9 +454,7 @@ Object CiftiObjectConverter::ciftiToObject( CiftiFile & inputFile ) const
 }
 
 
-void CiftiObjectConverter::objectToCifti( Object header,
-                                          CiftiFile & out_file ) const
+void CiftiObjectConverter::objectToCifti( Object /*header*/,
+                                          CiftiFile & /*out_file*/ ) const
 {
 }
-
-

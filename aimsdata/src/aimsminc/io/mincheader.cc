@@ -69,10 +69,8 @@ namespace
 
 
 //This function is used to make MINC functions behave silently
-void MincHeader::my_empty_print_error(char *message)
+void MincHeader::my_empty_print_error(char * /*message*/)
 {
-  /* do nothing. This is just to avoid the warning...*/
-  message=NULL;
 }
 
 

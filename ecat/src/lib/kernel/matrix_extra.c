@@ -1,6 +1,5 @@
-static char sccsid[]="@(#)matrix_extra.c	1.13 5/7/93 Copyright 1991,1992 CTI Pet Systems, Inc.";
-
-/*
+/* static char sccsid[]="@(#)matrix_extra.c	1.13 5/7/93 Copyright 1991,1992 CTI Pet Systems, Inc.";
+ *
  * Modification history :
  * March-1996 :		Sibomana@topo.ucl.ac.be
  *      Add ECAT V70, Interfile and Analyze support
@@ -160,7 +159,6 @@ mh_update(file)
 	int            frame_max,gate_max,bed_max;
 			
 	Main_header    *mh = file->mhptr;
-	MatDirList     *dir_list = file->dirlist;
 	int             mod = 0, nmats;					/* correction  7/12/99 MS */
 	if (file->dirlist == NULL || file->dirlist->nmats == 0)
 		return OK;
@@ -288,6 +286,10 @@ static int acs_read_scan_subheader( fname, mhptr, blknum, header)
         return unmap64_scan_header(buf,header, mhptr);
     return unmap_scan_header(buf,header);
 #else
+  (void)(fname);
+  (void)(mhptr);
+  (void)(blknum);
+  (void)(header);
 	return ERROR;
 #endif
 
@@ -305,6 +307,10 @@ static int acs_read_Scan3D_subheader( fname, mhptr, blknum, header)
     rtsRblk(fname, blknum+1, buf+MatBLKSIZE);
 	return unmap_Scan3D_header(buf,header);
 #else
+  (void)(fname);
+  (void)(mhptr);
+  (void)(blknum);
+  (void)(header);
 	return ERROR;
 #endif
 }
@@ -414,9 +420,6 @@ MatrixFile *matrix_open(fname, fmode, mtype)
   int	fmode, mtype ;
 #endif
 {
-#ifndef _WIN32
-  int status;
-#endif
   MatrixFile *mptr ;
   char *omode;
 
@@ -442,7 +445,7 @@ MatrixFile *matrix_open(fname, fmode, mtype)
 	/* read the main header from the file */
 	if (mptr->acs) {				/* located on the ACS filesystem */
 #ifdef _ACS_REACHABLE /* ACS access not implemented on WIN32 plateform */
-		if ( (status = rts_rmhd(fname, mptr->mhptr)) == ERROR) {
+		if ( rts_rmhd(fname, mptr->mhptr) == ERROR ) {
 #endif
 		  matrix_errno = MAT_ACS_FILE_NOT_FOUND ;
 		  free( mptr->mhptr);
@@ -643,7 +646,7 @@ MatrixData *matrix_read(mptr, matnum, dtype)
 	if (read_host_data(mptr, matnum, data, dtype) != OK) {
 		free_matrix_data(data);
 		data = NULL;
-	} else if (dtype != NoData && data->data_type != dtype)
+	} else if ((dtype != NoData) && ((int)data->data_type != dtype))
 		matrix_convert_data(data, dtype);
 	return (data);
 }
@@ -876,7 +879,7 @@ int read_host_data(mptr, matnum, data, dtype)
   Norm_subheader *normsub ;
   Norm3D_subheader *norm3d;
   int sx,sy,sz;
-  int elem_size= 2, datasize;
+  int elem_size= 2;
 
 	matrix_errno = MAT_OK;
 	matrix_errtxt[0] = '\0';
@@ -1264,9 +1267,6 @@ void free_matrix_data(data)
 int file_exists(filename)	/* subroutine to see if file exists or not */
   char *filename ;
 {
-#ifndef _WIN32
-  Main_header mhead;
-#endif
   struct stat stbuf;
 	if (!is_acs(filename))
 	{
@@ -1275,6 +1275,9 @@ int file_exists(filename)	/* subroutine to see if file exists or not */
 	}
 	else {
 #ifdef _ACS_REACHABLE
+#ifndef _WIN32
+    Main_header mhead;
+#endif
 		if (rts_rmhd(filename, &mhead) == OK) return (TRUE);
 #endif
 		return FALSE;
@@ -1313,7 +1316,7 @@ void matrix_perror( s)
 int copy_proto_object( new, old)
   MatrixData *new, *old;
 {
-	int sh_size;
+	int sh_size = 0;
 
 	matrix_errno = MAT_OK;
 	matrix_errtxt[0] = '\0';
@@ -1333,6 +1336,8 @@ int copy_proto_object( new, old)
 		case Normalization:
 			sh_size = sizeof(Norm_subheader);
 			break;
+		default:
+		  break;
 	  }
 	  new->shptr = (caddr_t) malloc( sh_size);
 	  if( !new->shptr ) return( ERROR );

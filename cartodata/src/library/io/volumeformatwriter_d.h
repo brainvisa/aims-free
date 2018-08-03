@@ -116,7 +116,9 @@ namespace soma
     if( options->hasProperty( "partial_writing" ) )
       partial = true;
     if( partial )
+    {
       localMsg( " -> partial writing enabled." );
+    }
 
     size_t dim, ndim = obj.getSize().size();
     std::vector<int> position( ndim, 0 );
@@ -134,13 +136,17 @@ namespace soma
               + ( obj.allocatorContext().isAllocated() ? "is" : "isn't" )
               + " allocated." );
     if( parent1 )
+    {
       localMsg( std::string("parent1 exists and ")
                 + ( parent1->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
+    }
     if( parent2 )
+    {
       localMsg( std::string("parent2 exists and ")
                 + ( parent2->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
+    }
 
     //=== view size ==========================================================
     localMsg( "reading view size..." );
@@ -193,6 +199,7 @@ namespace soma
     if( parent1 && parent1->allocatorContext().isAllocated() )
       withborders = true;
     localMsg( std::string(" -> ") + ( withborders ? "with borders" : "without borders" ) );
+    withborders = withborders; // compilation warning
 
     //=== header info ========================================================
     localMsg( "setting header..." );
@@ -238,7 +245,7 @@ namespace soma
         localMsg( "override ot : " + carto::toString(position[3]) );
 //         std::cout << "override ot : " + carto::toString(position[3]) << std::endl;
       } catch( ... ) {}
-      int dim, value;
+      size_t dim, value;
       for( dim=0; dim<carto::Volume<T>::DIM_MAX; ++dim )
       {
         try

@@ -1,7 +1,6 @@
 
-static char sccsid[]="@(#)matrix.c	1.11 6/7/93 Copyright 1989 CTI, Inc.";
-
-/*
+/* static char sccsid[]="@(#)matrix.c	1.11 6/7/93 Copyright 1989 CTI, Inc.";
+ *
  * modification by Sibomana@topo.ucl.ac.be      19-sep-1994
  * used to convert 6.4 image files in 7.0 format.
  * 02-oct-02: Added modification from Dr. Harald Fricke <HFricke@hdz-nrw.de>
@@ -48,7 +47,7 @@ int mat_lookup_64( fptr, matnum, entry)
 {
 	
 	int blk, i;
-	int nfree, nxtblk, prvblk, nused, matnbr, strtblk, endblk, matstat;
+	int /* nfree,*/ nxtblk, /* prvblk, nused, */ matnbr, strtblk, endblk, matstat;
 	int dirbufr[MatBLKSIZE/4];
 	char bytebufr[MatBLKSIZE];
 
@@ -62,10 +61,10 @@ int mat_lookup_64( fptr, matnum, entry)
 		swaw( (short*)dirbufr, (short*)bytebufr, MatBLKSIZE/2);
 	}
 	memcpy(dirbufr, bytebufr, MatBLKSIZE);
-	nfree  = dirbufr[0];
+	/* nfree  = dirbufr[0];*/
 	nxtblk = dirbufr[1];
-	prvblk = dirbufr[2];
-	nused  = dirbufr[3];
+	/* prvblk = dirbufr[2];
+	nused  = dirbufr[3]; */
 	for (i=4; i<MatBLKSIZE/4; i+=4)
 	{  matnbr  = dirbufr[i];
 	   strtblk = dirbufr[i+1];
@@ -262,7 +261,6 @@ int unmap64_attn_header(buf,header,mh)
   Attn_subheader *header;
   Main_header *mh;
 {
-	int i;
 	Attn_subheader_64 h_64;
 	short bufr[MatBLKSIZE/2];
 	Attn_subheader_64 *h = &h_64;
@@ -290,7 +288,6 @@ int unmap64_norm_header(buf, header, mh)
   Norm_subheader *header;
   Main_header *mh;
 {
-	int i;
 	Norm_subheader_64 h_64;
 	Norm_subheader_64 *h = &h_64;
 	short bufr[MatBLKSIZE/2];
@@ -317,9 +314,9 @@ int map64_main_header( bbufr, mh70)
   char *bbufr;
   Main_header *mh70;
 {
-      short bufr[MatBLKSIZE/2];
-      int err,i, loc;
-	Main_header_64 header;
+      unsigned short bufr[MatBLKSIZE/2];
+      int i;
+	    Main_header_64 header;
     
       memset(bufr,0,MatBLKSIZE);
    	  mh64_convert(&header,mh70);
@@ -358,7 +355,7 @@ int map64_main_header( bbufr, mh70)
       ftovaxf (header.init_bed_position, &bufr[192]);
       for (i=0; i<15; i++)
       {
-	ftovaxf (header.bed_offset[i], &bufr[194+2*i]);
+	      ftovaxf (header.bed_offset[i], &bufr[194+2*i]);
       }
       ftovaxf (header.plane_separation, &bufr[224]);
       bufr[226] = header.lwr_sctr_thres;
@@ -420,7 +417,7 @@ int map64_image_header( bbufr, h70, mh)
   Image_subheader *h70;
   Main_header *mh;
 {
-	short bufr[MatBLKSIZE/2];
+	unsigned short bufr[MatBLKSIZE/2];
 	int i;
 	Image_subheader_64 header;
 
@@ -479,8 +476,8 @@ int map64_scan_header( bbufr, h70, mh)
   Main_header *mh;
 {
   Scan_subheader_64 header;
-  	int i, err;
-  	short bufr[MatBLKSIZE/2];
+  	int i;
+  	unsigned short bufr[MatBLKSIZE/2];
   
 	sh64_convert(&header,h70,mh);
     memset(bufr,0,MatBLKSIZE);
@@ -542,8 +539,7 @@ int map64_attn_header( bbufr, h70, mh)
   Main_header *mh;
 {
 	Attn_subheader_64 header;
-	int i,err;
-	short bufr[MatBLKSIZE/2];
+	unsigned short bufr[MatBLKSIZE/2];
 	
 	ah64_convert(&header,h70,mh);
     memset(bufr,0,MatBLKSIZE);
@@ -585,9 +581,8 @@ int map64_norm_header( bbufr,h70,mh)
   Norm_subheader *h70;
   Main_header *mh;
 {
-	int i,err;
-  	Norm_subheader_64 header;
-	short bufr[MatBLKSIZE/2];
+ 	Norm_subheader_64 header;
+	unsigned short bufr[MatBLKSIZE/2];
 
 	nh64_convert(&header,h70,mh);
     memset(bufr,0,MatBLKSIZE);

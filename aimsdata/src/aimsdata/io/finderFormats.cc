@@ -632,7 +632,6 @@ bool FinderImasFormat::check( const string & filename, Finder & f ) const
 
   f.setHeader( hdr );
   f.setObjectType( "SparseMatrix" );
-  int ps = 0;
   string  type;
   hdr->getProperty( "data_type", type );
   f.setDataType( type );

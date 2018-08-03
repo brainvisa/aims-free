@@ -374,6 +374,7 @@ void GeodesicPath::shortestPath_1_N_ind(unsigned source, vector<unsigned> target
     geodesic::SurfacePoint t(&_meshSP.vertices()[targets[j]]);
 
     unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
+    best_source = best_source; // compilation warning...
 
     if (distance_temp < min_distance_temp )
     {
@@ -425,6 +426,7 @@ void GeodesicPath::longestPath_1_N_ind(unsigned source, vector<unsigned> targets
     {
       geodesic::SurfacePoint t(&_meshSP.vertices()[targets[j]]);
       unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
+      best_source = best_source; // compilation warning...
 
       if (distance_temp > max_distance_temp )
       {
@@ -503,6 +505,7 @@ GeodesicPath::longestPath_1_N_len(unsigned source, vector<unsigned> targets,
     {
       geodesic::SurfacePoint t(&_meshSP.vertices()[targets[j]]);
       unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
+      best_source = best_source; // compilation warning...
 
       if (distance_temp > max_distance_temp )
       {
@@ -529,8 +532,8 @@ GeodesicPath::longestPath_1_N_len(unsigned source, vector<unsigned> targets,
 
     vector<vector<SurfacePoint> >::iterator ite = paths.begin();
 
-    double max_len,len;
-    max_len = 0.0;
+    double /*max_len,*/len;
+    //max_len = 0.0;
     int ind = 0;
 
     for (; ite != paths.end(); ++ite)
@@ -563,7 +566,6 @@ GeodesicPath::longestPath_1_N_len(unsigned source, vector<unsigned> targets,
 
 vector<unsigned> GeodesicPath::longestPath_N_N_ind(vector<unsigned> points, int* s, int *d, double *length,int type_distance)
 {
-  int j;
   unsigned target;
   vector<unsigned> listIndexVertexPathSP;
   vector<unsigned> targetsTemp;
@@ -574,7 +576,7 @@ vector<unsigned> GeodesicPath::longestPath_N_N_ind(vector<unsigned> points, int*
   index_max_i = -1;
   index_max_j = -1;
 
-  int nb_combinaison_max = (points.size() * (points.size()-1))/2;
+  //int nb_combinaison_max = (points.size() * (points.size()-1))/2;
   int nb_combinaison = 0;
 
   dist_max = -100000;
@@ -648,6 +650,7 @@ void GeodesicPath::distanceMap_1_N_ind(unsigned source, vector<float> &distanceM
     {
       geodesic::SurfacePoint t(&_meshSP.vertices()[j]);
       unsigned best_source = dijkstra_algorithm->best_source(t,distance_temp);   //for a given surface point, find closets source and distance to this source
+      best_source = best_source; 
 
       distanceMap.push_back(distance_temp);
 

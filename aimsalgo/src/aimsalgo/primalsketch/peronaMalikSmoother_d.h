@@ -43,14 +43,13 @@
 namespace aims
 {
 
-  template<class T> AimsData<T> PeronaMalikSmoother<T>::doSmoothing(const AimsData<T> & ima, int maxiter, bool verbose)
+  template<class T> AimsData<T> PeronaMalikSmoother<T>::doSmoothing(const AimsData<T> & ima, int maxiter, bool /*verbose*/)
   {
     if (maxiter >= 0)
       {
       AimsData<float> kernel(3, 3, 3, 1);
           AimsData<float> *tmp1, *tmp2, *swap, grad;
-      int nbIter, i;
-          double nbFloat;
+      int i;
       int x,y,z, count=0;
       int sx=ima.dimX(), sy=ima.dimY(), sz=ima.dimZ();
       std::map<float, int> valueSet;

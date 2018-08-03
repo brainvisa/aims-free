@@ -429,19 +429,19 @@ namespace carto {
   //--- VolumeOStream --------------------------------------------------------
 
   VolumeOStream::VolumeOStream( std::ostream & ostream ):
-    _ostream(ostream),
     _maxT(5),
     _maxZ(5),
     _maxY(5),
-    _maxX(5)
+    _maxX(5),
+    _ostream(ostream)
   {}
 
   VolumeOStream::VolumeOStream( const VolumeOStream & other ):
-    _ostream( other.ostream() ),
     _maxT(other._maxT),
     _maxZ(other._maxZ),
     _maxY(other._maxY),
-    _maxX(other._maxX)
+    _maxX(other._maxX),
+    _ostream( other.ostream() )
   {}
 
   VolumeOStream::~VolumeOStream()

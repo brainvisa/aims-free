@@ -62,7 +62,7 @@ namespace
     return true;
   }
 
-  bool dicominit = initdicom();
+  bool dicominit __attribute__((unused)) = initdicom();
 
 }
 

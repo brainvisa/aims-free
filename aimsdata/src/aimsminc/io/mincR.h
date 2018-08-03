@@ -199,9 +199,9 @@ namespace aims
 
   template <class T>
   inline
-  void MincReader<T>::readMinc1( AimsData<T>& data, int tmin, int dimt )
+  void MincReader<T>::readMinc1( AimsData<T>& data, int /*tmin*/, int dimt )
   {
-    Header *h = data.header();
+    //Header *h = data.header();
 
     VIO_Volume volume;
     VIO_STR fileName

@@ -154,7 +154,7 @@ namespace soma {
       options->removeProperty( "bz" );
     } catch( ... ) {}
 
-    int dim, value;
+    size_t dim, value;
     for( dim=0; dim<carto::Volume<T>::DIM_MAX; ++dim )
     {
       try
@@ -204,7 +204,7 @@ namespace soma {
                              carto::Object                  options )
   {
     //=== VARIABLES ==========================================================
-    int verbose = carto::debugMessageLevel;
+    //int verbose = carto::debugMessageLevel;
     carto::Object newoptions;
     soma::Reader<carto::Volume<T> > rVol;
     soma::DataSourceInfoLoader dsil;

@@ -212,7 +212,7 @@ int main( int argc, const char **argv )
 
     cout << "merging labels" << flush;
     int labelCount;
-    short outputLabel;
+    short outputLabel = 0;
     for ( t = 0; t < dimT; t++ )
       for ( z = 0; z < dimZ; z++ )
         for ( y = 0; y < dimY; y++ )

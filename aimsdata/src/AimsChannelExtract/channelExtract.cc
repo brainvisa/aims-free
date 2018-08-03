@@ -114,7 +114,7 @@ ChannelExtract<I>::ChannelExtract( ChannelExtractInput& ct)
 }
 
 template<typename INP>
-bool select( Process & p, const string & filename, Finder & f )
+bool select( Process & p, const string & /*filename*/, Finder & /*f*/ )
 {
   ChannelExtractInput &t = dynamic_cast<ChannelExtractInput &>( p);
   ChannelExtract<INP> c(t);
@@ -132,7 +132,7 @@ bool select( Process & p, const string & filename, Finder & f )
 
 
 template <typename INP, typename OUTP>
-bool doit( Process & p, const string & filename, Finder & f )
+bool doit( Process & p, const string & /*filename*/, Finder & /*f*/ )
 {
   string base, ext, dcode, cname;
   ChannelExtract<INP> &ce = (ChannelExtract<INP> &) p;

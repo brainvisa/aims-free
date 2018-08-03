@@ -186,7 +186,7 @@ namespace aims
     size_t numMax, bool verbose )
   {
     std::multimap<size_t, size_t> compSizes;
-    int x=0, y=0, z=0, t=0, n=0;
+    int t=0;
     int dimX = data.dimX();
     int dimY = data.dimY();
     int dimZ = data.dimZ();

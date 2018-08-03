@@ -41,6 +41,7 @@ FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
 }
 
 FfdTransformation::FfdTransformation( const FfdTransformation & other ):
+  RCObject(),
   _dimx( other._dimx ), _dimy( other._dimy ),
   _dimz( other._dimz ), _vsx( other._vsx ), _vsy( other._vsy ),
   _vsz( other._vsz ),
@@ -585,6 +586,7 @@ SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
 }
 
 SplineFfd::SplineFfd( const SplineFfd & other ):
+  RCObject(),
   FfdTransformation( other ),
   _spline(3, 0)
 {
@@ -698,6 +700,7 @@ TrilinearFfd::TrilinearFfd( int dimX, int dimY, int dimZ,
 }
 
 TrilinearFfd::TrilinearFfd( const TrilinearFfd & other ):
+  RCObject(),
   FfdTransformation( other )
 {
 }

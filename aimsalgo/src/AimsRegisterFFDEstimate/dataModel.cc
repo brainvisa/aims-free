@@ -48,19 +48,19 @@ DataModel::DataModel( BucketMap< Void >&                s,
                       SplineFfd&                        d,
                       ParzenProbDensFunction&           pdf,
                       bool                              prepro ):
+    _current( ((t.dimX() != 1) + (t.dimY() != 1) + (t.dimZ() != 1))
+              * d.dimX() * d.dimY() * d.dimZ(), 0.),
     _deformation( d ),
     _rigid( m ),
     _pdf( pdf ),
-    _reference( r ),
-    _test( t ),
-    _dimParam( (t.dimX() != 1) + (t.dimY() != 1) + (t.dimZ() != 1) ),
-    _current( ((t.dimX() != 1) + (t.dimY() != 1) + (t.dimZ() != 1))
-              * d.dimX() * d.dimY() * d.dimZ(), 0.),
+    _spline(3, 1),
     _partDer( ((t.dimX() != 1) + (t.dimY() != 1) + (t.dimZ() != 1))
               * d.dimX() * d.dimY() * d.dimZ(), 0.),
-    _contrib( r.dimX(), r.dimY(), r.dimZ() ),
+    _reference( r ),
+    _test( t ),
     _is2d( t.dimX() == 1, t.dimY() == 1, t.dimZ() == 1 ),
-    _spline(3, 1)
+    _dimParam( (t.dimX() != 1) + (t.dimY() != 1) + (t.dimZ() != 1) ),
+    _contrib( r.dimX(), r.dimY(), r.dimZ() )
 {
   // debug
   _contrib.setSizeXYZT( r.sizeX(), r.sizeY(), r.sizeZ(), r.sizeT() );
@@ -156,7 +156,7 @@ void DataModel::update( vector<float>& p )
   //  if (p.size() != 1000) return;
 
   // Methode ASSERT a remplacer par une exception
-  ASSERT( p.size() == _dimParam * _deformation.dimX() * _deformation.dimY() * _deformation.dimZ());
+  ASSERT( p.size() == size_t(_dimParam * _deformation.dimX() * _deformation.dimY() * _deformation.dimZ()));
   ASSERT( p.size() == _current.size() );
 
   _current = p;

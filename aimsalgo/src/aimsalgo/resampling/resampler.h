@@ -345,8 +345,8 @@ protected:
 
       The base class version of this method does nothing.
    */
-  virtual void updateParameters( const AimsData< T > &inVolume, int time,
-                                 bool verbose ) const {};
+  virtual void updateParameters( const AimsData< T > & /*inVolume*/, int /*time*/,
+                                 bool /*verbose*/ ) const {};
 
   AimsData<T> _ref;
   T _defval;

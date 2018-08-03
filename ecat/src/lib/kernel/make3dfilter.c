@@ -9,12 +9,12 @@ void make3dfilter( nprojs, nslices, phi, phi0, filter, ftype_x, cutoff_x, ftype_
   float phi, phi0, *filter, cutoff_x, cutoff_y;
 {
 
-	float u, v, delta_u, delta_v, rho, rho_sqr, fval, cosphi;
+	float u, v, delta_u, delta_v, rho, rho_sqr, fval /*, cosphi */;
 	float cond, sin2_phi, sin2_phi0, dx, dy, damping(), fmax;
 	int x, y;
 
 
-	cosphi = (float) cos((double)phi);
+	/* cosphi = (float) cos((double)phi); */
 	sin2_phi = (float) sin((double) phi);
 	sin2_phi *= sin2_phi;
 	sin2_phi0 = (float) sin((double) phi0);

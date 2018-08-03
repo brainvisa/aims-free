@@ -57,7 +57,7 @@ CutMesh::~CutMesh()
 }
 
 
-void CutMesh::cut( bool buildborderline, bool meshplane, bool checkplane )
+void CutMesh::cut( bool buildborderline, bool meshplane, bool /* checkplane */ )
 {
   _cut.clear();
   _borderline.reset( new AimsTimeSurface<2, Void> );

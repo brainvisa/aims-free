@@ -63,7 +63,7 @@ void GeometricProperties::doPhi()
   list<unsigned>::const_iterator        	el;
   list<float>::const_iterator        	        efl,iflist;
   unsigned					v1, v2;
-  float						T,phi,t;
+  float						phi,t;
 
   doNeighbor();
   vector< list<unsigned> >                     neigho = _neighbourso;
@@ -87,7 +87,6 @@ void GeometricProperties::doPhi()
   for (i=0; i<n; ++i)
     {
       phi = 0;
-      T = 0;
       ASSERT(neigho[i].size() == surfl[i].size() );
       iflist = surfl[i].begin();
       elist = neigho[i].end();
@@ -123,7 +122,7 @@ void GeometricProperties::doTheta()
   list<float>::const_iterator		        il;
   list<unsigned>::iterator       		ilist,elist;
   unsigned					v1, v2;
-  float						T,theta,t;	
+  float						theta,t;	
 
 
   doNeighbor();
@@ -143,7 +142,6 @@ void GeometricProperties::doTheta()
   for (i=0; i<n; ++i)
     {
       theta = 0;
-      T = 0;
       il = surfl[i].begin();      
       elist =  neigho[i].end();
       --elist;
@@ -686,7 +684,7 @@ Texture<float> FiniteElementCurvature::doIt()
   Texture<float>				tex(n);
   list<unsigned>::const_iterator		ilist,elist;
   list<float>::const_iterator		        iphi,idot,itheta,isurf;
-  unsigned					nb,s,p,d,t;	
+  unsigned					/*nb,*/s,p,d,t;	
   float 					K,surf;
  
   doPhi();
@@ -707,7 +705,7 @@ Texture<float> FiniteElementCurvature::doIt()
       p = phi[i].size();
       t = theta[i].size();
       d = dot[i].size();
-      nb =neighbourso[i].size() ;
+      //nb =neighbourso[i].size() ;
       if ( !( s == p && s == t && s == d && p==t && p==d && t==d ) )
 	{
 	  cout << "Problem with the mesh features..." << endl;

@@ -149,6 +149,9 @@ endif()
 
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
+set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall" )
+
 set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase soma-io "${LIBXML2_LIBRARIES}" )
 set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}" )
 

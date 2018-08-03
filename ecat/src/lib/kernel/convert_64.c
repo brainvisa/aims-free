@@ -17,6 +17,7 @@ static char *olddisplayunits[NumOldUnits] =
     "LMRGlu umol/min/100g", "LMRGlu mg/min/100g", "nCi/ml", "Well counts",
     "Bq/cc", "ml/min/100g", "ml/min/g"};
 
+#if 0
 static int r_elements(system_type)
 int system_type;
 {
@@ -90,6 +91,7 @@ int system_type;
         return 0.0;
     }
 }
+#endif
 
 void mh64_convert(h_64, h)
 Main_header_64 *h_64;
@@ -150,13 +152,13 @@ Main_header * h;
 	case Processed:
 		h_64->calibration_units = UnknownEcfUnits;
 		strcpy( ustr1, h->data_units );
-		if( ptr = strstr( ustr1, "/ml" ) ) {
+		if( ( ptr = strstr( ustr1, "/ml" ) ) ) {
 			*(ptr+1) = 'c';
 			*(ptr+2) = 'c';
 		}
 		for( i = 0 ; i < NumOldUnits ; i++ ) {
 			strcpy( ustr2, olddisplayunits[i] );
-			if( ptr = strstr( ustr2, "/ml" ) ) {
+			if( ( ptr = strstr( ustr2, "/ml" ) ) ) {
 				*(ptr+1) = 'c';
 				*(ptr+2) = 'c';
 			}
@@ -311,6 +313,7 @@ Attn_subheader_64* h_64;
 Attn_subheader* h;
 Main_header* mh;
 {
+    (void)(mh);
 	mh64_data_type = h->data_type;	/* set main header data type */
 	memset(h_64,0,sizeof(Attn_subheader_64));		/* clear memory */
     h_64->data_type = h->data_type;

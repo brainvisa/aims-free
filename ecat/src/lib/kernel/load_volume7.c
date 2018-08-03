@@ -35,19 +35,19 @@ MatrixFile *matrix_file;
 int frame, gate, data, bedstart, bedend;
 #endif
 {
-	int		i, j, k, rev, ret;
+	int		i, j, k, rev;
 	MatrixData	*mat;
 	int		matnum, dimension;
 	float		zsep, maxval, minval;
 	Main_header	*mh;
 	Image_subheader	*imh = NULL;
-	int		plane, planes;
+	int		/* plane, */ planes;
 	struct MatDir	entry;
 	MatrixData	*volume;
-	int		npixels, nvoxels, overlap[MAX_BED_POS], ovlp, ovl, sbed, ebed, nbed, actbed, splane, eplane, sframe, eframe;
+	int		npixels, nvoxels, overlap[MAX_BED_POS], ovlp, ovl, sbed, ebed, nbed, actbed;
 	float		scale_factor, calibration_factor, w1, w2;
 	short		*p1;
-	float		*vp = NULL, *fvp;
+	float		*vp = NULL, *fvp = NULL;
 
 
 	matrix_errno = MAT_OK;

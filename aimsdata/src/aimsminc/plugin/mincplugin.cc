@@ -55,7 +55,7 @@ namespace
     return true;
   }
 
-  bool mincinit = initminc();
+  bool mincinit __attribute__((unused)) = initminc();
 
 }
 

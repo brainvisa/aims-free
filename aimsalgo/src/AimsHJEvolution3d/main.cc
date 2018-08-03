@@ -120,7 +120,7 @@ int main( int argc, char *argv[] )
   int   x=0,y=0,z=0,n=0,xx=0,yy=0,zz=0;
   char* typeCurv=NULL;
   int   typeMorpho=0;
-  bool  meanCurv=false, gaussianCurv=false, meanGaussianCurv=false,
+  bool  meanCurv=false, gaussianCurv=false, /*meanGaussianCurv=false,*/
         minCurv=false, maxCurv=false;
   float h=0.0, h2=0.0, criterion=0.0, Deltat=0.0, hh=0.0;
 
@@ -158,14 +158,14 @@ int main( int argc, char *argv[] )
       meanCurv = true;
     else if ( string( typeCurv ) == "gaussian" )
       gaussianCurv = true;
-    else if ( string( typeCurv ) == "mean-gaussian" )
-      meanGaussianCurv = true;
+    //else if ( string( typeCurv ) == "mean-gaussian" )
+    //  meanGaussianCurv = true;
     else if ( string( typeCurv ) == "min" )
       minCurv = true;
     else if ( string( typeCurv ) == "max" )
       maxCurv = true;
   }
-  else meanGaussianCurv = true;
+  //else meanGaussianCurv = true;
 
   //
   // reads image and binarizes it

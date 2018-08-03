@@ -83,5 +83,5 @@ static bool _sparsematdic()
   return true;
 }
 
-static bool sparsematdic = _sparsematdic();
+static bool sparsematdic __attribute__((unused)) = _sparsematdic();
 

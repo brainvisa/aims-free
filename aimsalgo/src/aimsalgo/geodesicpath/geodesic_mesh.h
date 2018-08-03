@@ -275,7 +275,7 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
 //    else
 //      e.length() = e.adjacent_vertices()[0]->distance(e.adjacent_vertices()[1]);
 //
-    double a1,a2;
+    double a1 = 0.0,a2 = 0.0;
 
     if (curvature!= NULL && mode != 0)
       {
@@ -512,7 +512,7 @@ inline void Mesh::update_weight(const float *curvature, int mode,double strain,d
 //    else
 //      e.length() = e.adjacent_vertices()[0]->distance(e.adjacent_vertices()[1]);
 //
-    double a1,a2;
+    double a1 = 0.0,a2 = 0.0;
 
     if (curvature!= NULL && mode != 0)
       {
@@ -791,7 +791,7 @@ inline void fill_surface_point_structure(geodesic::SurfacePoint* point,
 
 inline void fill_surface_point_double(geodesic::SurfacePoint* point, 
                     double* data,
-                    long mesh_id)
+                    long /*mesh_id*/)
 {
   data[0] = point->x();
   data[1] = point->y();

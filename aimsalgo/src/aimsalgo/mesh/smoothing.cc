@@ -88,8 +88,6 @@ void Mesher::getSmoothedLaplacian( const vector< Facet* >& vfac,
 {
     uint id;
     int n, size = (int)vfac.size();
-    float alpha, beta, force;
-    float curv, curv_mean;
     bool okToMove;
     
     Facet* facet = NULL, *f1 = NULL, *f2 = NULL, *f3 = NULL;

@@ -1,5 +1,5 @@
-static char sccsid[]="@(#)matrix.c	1.11 6/7/93 Copyright 1989 CTI, Inc.";
-/*
+/* static char sccsid[]="@(#)matrix.c	1.11 6/7/93 Copyright 1989 CTI, Inc.";
+ *
  * Modification history :
  * March-1996 :     Sibomana@topo.ucl.ac.be
  *      Add ECAT V70, Interfile and Analyze support
@@ -159,7 +159,7 @@ int mat_numdoc( matnum, matval)
 	matval->frame = matnum&0x1FF;
 	matval->plane = ((matnum>>16)&0xFF) + (((matnum>>9)&0x3)<<8);
 	matval->gate  = (matnum>>24)&0x3F;
-	matval->data  = ((matnum>>9)&0x4)|(matnum>>30)&0x3;
+	matval->data  = ((matnum>>9)&0x4)|((matnum>>30)&0x3);
 	matval->bed   = (matnum>>12)&0xF;
 	return 1;
 }
@@ -172,7 +172,7 @@ int mat_lookup(fptr, mhptr, matnum, entry)
 {
 	
 	int blk, i;
-	int nfree, nxtblk, prvblk, nused, matnbr, strtblk, endblk, matstat;
+	int /* nfree,*/ nxtblk, /* prvblk, nused, */ matnbr, strtblk, endblk, matstat;
 	int dirbufr[MatBLKSIZE/4];
 
 	matrix_errno = MAT_OK;
@@ -182,10 +182,10 @@ int mat_lookup(fptr, mhptr, matnum, entry)
 	blk = MatFirstDirBlk;
 	while(1) {
 		if( read_matrix_data(fptr,blk,1,(char*)dirbufr,SunLong) == ERROR ) return( ERROR );
-		nfree  = dirbufr[0];
+		/* nfree  = dirbufr[0];*/
 		nxtblk = dirbufr[1];
-		prvblk = dirbufr[2];
-		nused  = dirbufr[3];
+		/* prvblk = dirbufr[2];
+		nused  = dirbufr[3]; */
 		for (i=4; i<MatBLKSIZE/4; i+=4)
 		{  matnbr  = dirbufr[i];
 	   		strtblk = dirbufr[i+1];
@@ -280,7 +280,7 @@ int unmap_main_header( bufr, header)
 	bufRead_f(&header->bin_size, bufr, &i);
 	bufRead_f(&header->branching_fraction, bufr, &i);
 	bufRead_u(&header->dose_start_time, bufr, &i);
-	if (header->dose_start_time>0 && header->dose_start_time<one_week)
+	if ((header->dose_start_time>0) && (header->dose_start_time<(unsigned int)one_week))
 	{	/* assume 7.0 encoding */
 		fprintf(stderr,"converting V7.0 dose start time encoding\n");
 		header->dose_start_time = header->scan_start_time -
@@ -472,6 +472,7 @@ int mat_read_Scan3D_subheader( fptr, mhptr, blknum, header)
   int blknum;
   Scan3D_subheader *header;
 {
+	(void)(mhptr);
 	char buf[2*MatBLKSIZE];
 	if( mat_rblk( fptr, blknum, buf, 2) == ERROR ) return( ERROR );
 	return unmap_Scan3D_header(buf,header);
@@ -578,7 +579,9 @@ struct matdir *mat_read_dir( fptr, mhptr, selector)
   FILE *fptr;
   Main_header *mhptr;
   char *selector;
-{	int i, n, blk, nxtblk, ndblks, bufr[128];
+{	
+	(void)(selector);
+	int i, n, blk, nxtblk, ndblks, bufr[128];
 	struct matdir *dir;
 
 	matrix_errno = MAT_OK;

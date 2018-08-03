@@ -26,7 +26,7 @@ void   putin(mot,lmot,input,pin,rin)
 int *mot,lmot,*pin,*rin;
 FILE *input;
 {
-int point,nx,ny,pp,rr,nr;
+int point,nx,pp,rr,nr;
  
 pp=*pin;
 rr=*rin;
@@ -130,7 +130,7 @@ void uvlc(p,l,output,pout,rout)
   int *p,l,*pout,*rout;
 {
 int
-i,j,rl,ix,iax,n,mot,lmot,nz,srl[18][1025],slsb[18][1025],r[18],s[18],clas;
+i,ix,iax,n,nz,srl[18][1025],slsb[18][1025],r[18],s[18],clas;
 
 /* Store the RLs */
 
@@ -188,7 +188,7 @@ void uvld(p,l,input,pin,rin)
   int *p,l,*pin,*rin;
   FILE *input;
 {
-int i,ix,n,clas,pr,m,r,rl,rrl,lsb,s,nn,pos1;
+int i,n,clas,pr,m,r,rl,rrl,lsb,s,pos1;
 int srl[18][1025],val[18][1025],nrl[18],c[18],mrl[18];
 
 for(i=0;i<l;i++)p[i]=0;
@@ -200,7 +200,6 @@ if(clas!=0)
 {
 putin(&clas,4,input,pin,rin);
 clas+=1;
-nn=0;
 if(clas>15)clas=17;
 rrl=0;
 for(n=clas; n>0; n-=1)

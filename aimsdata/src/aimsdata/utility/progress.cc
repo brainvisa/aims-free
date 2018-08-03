@@ -92,12 +92,12 @@ namespace aims {
   }
 
   template <class T1, class T2>
-  const double ProgressInfo<T1, T2>::rescale(const T1& value) const {
+  double ProgressInfo<T1, T2>::rescale(const T1& value) const {
     return round((((double)value) - _min) * _scale + _progressmin);
   }
 
   template <class T1, class T2>
-  const double ProgressInfo<T1, T2>::progression() const {
+  double ProgressInfo<T1, T2>::progression() const {
     return rescale(_current);
   }
 

@@ -2057,6 +2057,7 @@ static int decode_b64(gxml_data * xd, char * cdata, int cdlen,
         GII_B64_decode4(din[0],din[1],din[2],din[3], a, b, c);
         if( *needed >= 1 ) dout[0] = a;
         if( *needed >= 2 ) dout[1] = b;
+        c = c; // compilation warning...
         assigned += *needed;
         *needed = 0;
     }

@@ -236,7 +236,7 @@ namespace aims
   template <int D>
   PythonHeader* WavefrontMeshWriter<D, Void>::writeHeader(
     const Header & header, std::ostream & os, const std::string & filename,
-    const std::string & dtype, carto::Object options )
+    const std::string & dtype, carto::Object /* options */ )
   {
     PythonHeader	*hdr = new PythonHeader;
     const PythonHeader
@@ -281,7 +281,7 @@ namespace aims
   template <int D>
   void WavefrontMeshWriter<D, Void>::writeObjectHeader(
     std::ostream & os, int timestep, PythonHeader *hdr,
-    const std::string & obj_filename, carto::Object options )
+    const std::string & obj_filename, carto::Object /* options */ )
   {
     std::stringstream namess;
     namess << carto::FileUtil::basename( carto::FileUtil::removeExtension(
@@ -431,7 +431,7 @@ namespace aims
 
   template <int D>
   void WavefrontMeshWriter<D, Void>::writeMtl( PythonHeader *hdr,
-                                               carto::Object options )
+                                               carto::Object /* options */ )
   {
     carto::Object mtl;
     try

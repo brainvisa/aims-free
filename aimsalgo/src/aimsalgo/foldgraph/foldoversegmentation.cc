@@ -1342,7 +1342,7 @@ int FoldArgOverSegment::subdivizeVertex( Vertex* v, float piecelength,
     return 0;
   }
   const BucketMap<Void>::Bucket & ss0 = ss->begin()->second;
-  size_t totalsize = ss0.size();
+  //size_t totalsize = ss0.size();
   // cout << "ss size: " << totalsize << endl;
 
   rc_ptr<BucketMap<int16_t> > iss( new BucketMap<int16_t> );

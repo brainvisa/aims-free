@@ -113,7 +113,7 @@ namespace carto
     if( !bordersize.empty()
       && bordersize != Position4Di().toVector() )
     {
-      int i, n = VolumeProxy<T>::_size.size();
+      size_t i, n = VolumeProxy<T>::_size.size();
       size_t bsize = sizeof(T);
       std::vector<int> large_size( n );
       for( i=0; i<n; ++i )
@@ -744,7 +744,7 @@ namespace carto
     const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides = _blitz.stride();
     int d, n = VolumeProxy<T>::_size.size();
     std::vector<size_t> strides( n );
-    for (int d = 0; d < n; ++d)
+    for (d = 0; d < n; ++d)
         strides[d] = bstrides[d];
 #else
     std::vector<size_t> strides(4);

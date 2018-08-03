@@ -79,7 +79,7 @@ namespace
     return true;
   }
 
-  bool gisinit = initGis();
+  bool gisinit __attribute__((unused)) = initGis();
 
 }
 

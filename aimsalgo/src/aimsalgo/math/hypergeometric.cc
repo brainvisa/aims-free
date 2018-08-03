@@ -65,7 +65,7 @@ double	hypergeometric(double *p, int np, double *q, int nq,
 { 
    int    h,sl,nmu,i,j,k,*f;
    double *Sx, *xn, *prodx;
-   double *Sy, *yn, *prody;
+   double *Sy = NULL, *yn = NULL, *prody = NULL;
    double c, *z, *coef, *kt, *mt, *blm, zn, dn,
           t, q1, q2, cc, output = 0.;
 

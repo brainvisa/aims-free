@@ -281,6 +281,7 @@ Norm_subheader* h;
 Norm_subheader_64* h_64;
 Main_header* mh;
 {
+    (void)(mh);
 	memset(h,0,sizeof(Norm_subheader));			/* clear memory */
     h->data_type = h_64->data_type;
     h->num_dimensions = 2;

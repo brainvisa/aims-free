@@ -49,7 +49,8 @@ aims::SparseMatrix::SparseMatrix( int32_t size1, int32_t size2 )
 
 
 aims::SparseMatrix::SparseMatrix( const aims::SparseMatrix& other )
-  : _matrix( other._matrix ), _header( Object::value( PropertySet() ) )
+  : RCObject(), 
+    _matrix( other._matrix ), _header( Object::value( PropertySet() ) )
 {
   *_header = *other.header();
 }

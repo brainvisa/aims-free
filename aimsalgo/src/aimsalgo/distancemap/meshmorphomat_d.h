@@ -293,7 +293,7 @@ Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh,
 {
 
   const std::vector<Point3df>                & vert = mesh.vertex();
-  unsigned                                 inc=0,nbLabel,i,nbDil,n = vert.size();
+  unsigned                                 inc=0,nbLabel,i,/*nbDil,*/n = vert.size();
   Texture<T>                             sulctemp(n),ccsulcus(n);
   Texture<T>                                tex(n);
   short                                  ncc;
@@ -319,7 +319,7 @@ Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh,
   for ( ilab = cc_sulci_labels.begin(), elab=cc_sulci_labels.end(); ilab!=elab; ++ilab)
       {
         ++inc;
-        nbDil=0;
+        //nbDil=0;
         label = *ilab;
         std::cout << inc << "/" << nbLabel << std::endl;
         for (i=0; i<n; ++i)
@@ -435,7 +435,7 @@ Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh,
 {
 
   const std::vector<Point3df>                & vert = mesh.vertex();
-  unsigned                                 inc=0,nbLabel,i,nbDil,n = vert.size();
+  unsigned                                 inc=0,nbLabel,i,/*nbDil,*/n = vert.size();
   Texture<T>                             sulctemp(n),ccsulcus(n);
   Texture<T>                                tex(n);
   short                                  ncc;
@@ -462,7 +462,7 @@ Texture<T> CloseSulci( const AimsSurface<3,Void> & mesh,
   for ( ilab = cc_sulci_labels.begin(), elab=cc_sulci_labels.end(); ilab!=elab; ++ilab)
       {
         ++inc;
-        nbDil=0;
+        //nbDil=0;
         label = *ilab;
         std::cout << inc << "/" << nbLabel << std::endl;
         for (i=0; i<n; ++i)

@@ -84,11 +84,11 @@ namespace aims
     virtual void initializeOutputTextures() {}
     /** this callback is called to handle textures: add tex corresponding to a
         vertex in the given mesh */
-    virtual void addTexturePoint( int mesh, uint v ) {}
+    virtual void addTexturePoint( int /* mesh */, uint /* v */ ) {}
     /** this callback is called to handle textures: add tex corresponding to an
         interpolation between two vertices in the given mesh */
-    virtual void addTextureInterpolPoint( int mesh, uint v, float w1,
-                                          uint w, float w2 )
+    virtual void addTextureInterpolPoint( int /* mesh */, uint /* v */, float /* w1 */,
+                                          uint /* w */, float /* w2 */ )
     {}
 
     std::vector<const AimsSurfaceTriangle *> _insurf;

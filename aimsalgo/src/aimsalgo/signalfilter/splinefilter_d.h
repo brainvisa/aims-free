@@ -57,8 +57,8 @@ namespace aims {
     double div = 1;
     for( int i = 0; i < 4; ++i )
       if( this->_dir[i] && size[i] > 1 )
-        div *= ( this->_func.size() > i ? this->_func[i].scale()
-                                        : this->_func[0].scale() );
+        div *= ( (int)this->_func.size() > i ? this->_func[i].scale()
+                                             : this->_func[0].scale() );
     out /= div;
     return out;
   }

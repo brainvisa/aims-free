@@ -260,7 +260,7 @@ int data_type, mode;
 	z_data_size = ((st.st_size+511)/512)*512;		/* align to block */
 	if ((fp=fdopen(fd_out,"r")) == NULL) return 0;
 	if (z_data == NULL) z_data = calloc(z_data_size,1);
-	if ( fread(z_data,1,st.st_size,fp) != st.st_size )
+	if ( fread(z_data,1,st.st_size,fp) != (size_t)st.st_size )
 	{
 	  fclose(fp);
 		return 0;
@@ -317,7 +317,7 @@ int z_data_size, mode;
 	if (matrix_data->data_ptr == NULL)
 		matrix_data->data_ptr = calloc((data_size+511)/512,512);
 														/* align to block */
-	if (fread(matrix_data->data_ptr,1,data_size,fp) != data_size)
+	if (fread(matrix_data->data_ptr,1,data_size,fp) != (size_t)data_size)
 		 data_size = 0;
 	fclose(fp);
 	unlink(z_outfile);

@@ -409,7 +409,7 @@ ScaleSpace::MergeCode ScaleSpace::mergeGraphs( Graph & g, Graph & h )
   Vertex::iterator      iv,ive,iw,iwe;
   g.getProperty("maxscale", maxscale );
   map <Vertex*, Vertex*> mgh;
-  bool  apparitionflag, jamflag;
+  bool  apparitionflag;
   Edge::iterator  ie,iee,ic,ice;
   int                   jammin,jammax,wmin,wmax;
   bool			pbup = false, pbdown = false;
@@ -517,7 +517,6 @@ ScaleSpace::MergeCode ScaleSpace::mergeGraphs( Graph & g, Graph & h )
   for ( ih=h.begin(), ihe=h.end(); ih!=ihe; ++ih )
     {
       apparitionflag=true;
-      jamflag=false;
       jammin=jammax=0;
       v=g.cloneVertex(*ih);
       vertexTranslation[*ih] = v;

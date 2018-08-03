@@ -286,7 +286,7 @@ bool SpmHeader::read()
   cal[6] = header.dime.cal_units[6] ;
   cal[7] = header.dime.cal_units[7] ;
   cal[8] = '\0' ;
-  string calUnits ;
+  string calUnits(cal);
   
   setProperty( "cal_units", calUnits );
 

@@ -1207,8 +1207,8 @@ IterableImpl<PyObject *, false>::PyMappingIterator::PyMappingIterator
 
 IterableImpl<PyObject *, false>::PyMappingIterator::PyMappingIterator
 ( const PyMappingIterator & x )
-  : Interface(), IteratorInterface(), IntKeyIteratorInterface(),
-    DictionaryIteratorInterface(), PyObjectIterator( x ),
+  : Interface(), IteratorInterface(), DictionaryIteratorInterface(),
+    IntKeyIteratorInterface(),PyObjectIterator( x ),
     _dict( x._dict )
 {
   PyGILState_STATE gstate;

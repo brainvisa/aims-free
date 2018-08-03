@@ -159,6 +159,7 @@ namespace aims {
         //--------------------------------------------------------------------
         SubSamplingImageAlgorithm( int sx, int sy, int sz,
                                    const FilteringFunctionInterface<T> & f ):
+          ImageAlgorithmInterface<T>(),
           _win_size_x( sx ),
           _win_size_y( sy ),
           _win_size_z( sz ),
@@ -166,6 +167,7 @@ namespace aims {
         {}
 
         SubSamplingImageAlgorithm( const SubSamplingImageAlgorithm & other ):
+          ImageAlgorithmInterface<T>(),
           _win_size_x( other._win_size_x ),
           _win_size_y( other._win_size_y ),
           _win_size_z( other._win_size_z ),
@@ -215,7 +217,6 @@ namespace aims {
         );
 
         int32_t i, j, k, t;
-        unsigned m, n, l;
         aims::Progression progress( (long) out->getSizeT() *
                                     (long) out->getSizeZ() *
                                     (long) out->getSizeY() *

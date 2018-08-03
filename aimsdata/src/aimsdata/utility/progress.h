@@ -96,9 +96,9 @@ namespace aims {
       /// and values
       const double& scale() const;
       /// Rescale value to its progression value
-      const double rescale(const T1& value) const;
+      double rescale(const T1& value) const;
       /// Current progression value
-      const double progression() const;
+      double progression() const;
       /// Erase the last displayed value
       virtual std::string erase() const;
       /// Render the current progression value if changed or forced.

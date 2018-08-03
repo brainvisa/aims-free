@@ -244,7 +244,7 @@ namespace aims {
   {
     _dir.assign( 4, true );
     _dir[3] = false;
-    for( int i = 0; i < dir.size() && i < _dir.size(); ++i )
+    for( size_t i = 0; (i < dir.size()) && (i < _dir.size()); ++i )
       _dir[i] = dir[i];
   }
 

@@ -252,6 +252,7 @@ namespace
   }
 
 
+#if 0
   void extrema( const BucketMap<Void> & bck, 
                 const AimsData<int16_t> & depth, int16_t & dmin, 
                 int16_t & dmax, bool reset )
@@ -275,6 +276,7 @@ namespace
             dmax = x;
         }
   }
+#endif
 
 
   void extremaLoc( const BucketMap<Void> & bck, 
@@ -1190,7 +1192,7 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
               AimsEigen<float>	eigen;
               eigen.setReturnType( AimsEigen<float>::VectorOfEigenValues );
               AimsData<float>	eigenval = eigen.doit( normc );
-              unsigned		mineig = 0, maxeig = 0, deptheig = 0;
+              unsigned		mineig = 0, /*maxeig = 0,*/ deptheig = 0;
 	      unsigned          eig1 = 0, eig2 = 0;
 	      float             dotmax = 0;
 	      v->getProperty("depth_direction", point);
@@ -1209,10 +1211,10 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
               eig2 = (deptheig + 2) % 3;
               if( eigenval( eig1 ) < eigenval( eig2 ) ) {
                    mineig = eig1;
-                   maxeig = eig2;
+                   //maxeig = eig2;
 	      } else {
                    mineig = eig2;
-                   maxeig = eig1;
+                   //maxeig = eig1;
 	      }
               norm = Point3df( normc( 0, mineig ), normc( 1, mineig ), 
                                normc( 2, mineig ) );

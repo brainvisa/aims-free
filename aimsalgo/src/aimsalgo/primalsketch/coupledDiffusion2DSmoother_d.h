@@ -58,7 +58,12 @@ namespace aims
 {
 
 template<class T> std::pair<AimsData<T>, AimsData<T> >
-CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData<T> > & ima, const std::pair<AimsData<T>, AimsData<T> > & constraints, int maxiter, bool verbose)
+CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, 
+                                           AimsData<T> > & ima,
+                                           const std::pair<AimsData<T>, 
+                                           AimsData<T> > & constraints,
+                                           int maxiter, 
+                                           bool /*verbose*/)
 {
     if ( maxiter >= 0)
     {
@@ -87,7 +92,6 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
         AimsData<float> *tmp1_1, *tmp1_2, *swap1;
         AimsData<float> *tmp2_1, *tmp2_2, *swap2;
         int i;
-        double nbFloat;
         float lapl1,  lapl2, div1, div2, lapx1, lapy1, lapx2, lapy2;
 
         std::vector<std::pair<int, int> > vcont1, vcont2;
@@ -194,7 +198,7 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
 
                 }
 
-            // lissage de gugv pour stabilité du schéma numérique...
+            // lissage de gugv pour stabilitï¿½ du schï¿½ma numï¿½rique...
 
             Gaussian2DSmoothing<float> g2d(2.0,2.0);
             AimsData<float> g1x(sx,sy), g2x(sx,sy), g1y(sx,sy), g2y(sx,sy);
@@ -294,7 +298,7 @@ CoupledDiffusion2DSmoother<T>::doSmoothing(const std::pair<AimsData<T>, AimsData
 //             std::cout << " OK) "; fflush(stdout);
             diffMax1=diffMax1/float(sx*sy);
             diffMax2=diffMax2/float(sx*sy);
-            // on fixe les contraintes à leur valeur initiale
+            // on fixe les contraintes ï¿½ leur valeur initiale
             for (pt1=vcont1.begin(); pt1!=vcont1.end(); ++pt1)
                 (*tmp1_2)((*pt1).first, (*pt1).second)= (float) constraints.first((*pt1).first, (*pt1).second);
             for (pt2=vcont2.begin(); pt2!=vcont2.end(); ++pt2)

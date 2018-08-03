@@ -278,7 +278,7 @@ void BundleTransformer::fiberTerminated( const BundleProducer &,
 void BundleTransformer::newFiberPoint( const BundleProducer &,
                                        const BundleInfo & bi,
                                        const FiberInfo & fi,
-                                       const FiberPoint & pt )
+                                       const FiberPoint & /*pt*/ )
 {
   FiberPoint opt;
   opt = _transformation->transform( opt );

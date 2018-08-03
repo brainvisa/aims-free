@@ -41,6 +41,7 @@ int off;
 {
 	unsigned int sign_exp, high, low, mantissa, ret;
 	unsigned u = (bufr[off+1] << 16) + bufr[off];
+	float* f_ret = NULL;
 	
 	if (u == 0) return 0.0;	
 	sign_exp = u & 0x0000ff80;
@@ -50,7 +51,8 @@ int off;
 	mantissa = (high << 16) + (low >> 16);
 	sign_exp = sign_exp << 16;
 	ret = sign_exp + mantissa;
-	return *(float*)(&ret);
+	f_ret = (float*)&ret;
+	return *f_ret;
 }
 
 #if defined(__alpha) || defined(_WIN32) /* LITTLE_ENDIAN : alpha, intel */
@@ -190,6 +192,11 @@ read_raw_acs_data(fname, strtblk, nblks, dptr, dtype)
 	}
 	return file_data_to_host(dptr, nblks, dtype);
 #else
+  (void)(fname);
+  (void)(strtblk);
+  (void)(nblks);
+  (void)(dtype);
+  (void)(dptr);
 	return -1;
 #endif
 }

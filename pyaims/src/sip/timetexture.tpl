@@ -297,7 +297,6 @@ public:
   if( (sipRes = PyList_New(sipCpp->size())) == NULL )
     return NULL;
 
-  unsigned n = sipCpp->size();
   TimeTexture_%Template1typecode%::const_iterator it, et = sipCpp->end();
   unsigned i = 0;
 

@@ -74,7 +74,6 @@ Object TrackvisBundleReader::readHeaderStream( istream & file )
   Object header;
   header = Object::value( Dictionary() );
 
-  char c;
   char id_string[6];
   unsigned int i;
 
@@ -316,7 +315,6 @@ void TrackvisBundleReader::read()
   vector<int> dim;
   vector<float> vs;
   vector<float> s2m_v;
-  unsigned char invert_x = 0, invert_y = 0, invert_z = 0;
 
   header->getProperty( "n_count", n_count );
   header->getProperty( "n_scalars", n_scalars );

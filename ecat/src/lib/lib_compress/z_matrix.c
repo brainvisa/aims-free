@@ -19,7 +19,6 @@ int	matnum;
 	int z_size, z_nblks;
 	caddr_t z_data=NULL;
 	int compress_method;
-	int system_type = mptr->mhptr->system_type;
 
 	compress_method = mptr->mhptr->compression_code/256;
 	if (!compress_method) return write_host_data(mptr, matnum, data);
@@ -89,14 +88,13 @@ MatrixData	*data ;
 int	matnum , dtype;
 {
 	struct MatDir matdir;
-	int	z_nblks=0, nblks=0, status;
+	int	z_nblks=0, nblks=0;
 	Scan_subheader *scansub=NULL ;
 	Image_subheader *imagesub=NULL ;
 	Attn_subheader *attnsub=NULL ;
 	Norm_subheader *normsub=NULL ;
 	caddr_t z_data=NULL;
 	int compress_method, size = 0;
-	int system_type = mptr->mhptr->system_type;
 
 	compress_method = mptr->mhptr->compression_code/256;
 	if (!compress_method) return read_host_data(mptr, matnum, data, dtype);

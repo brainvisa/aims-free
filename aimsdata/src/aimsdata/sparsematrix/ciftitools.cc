@@ -97,7 +97,7 @@ Object CiftiTools::getDimensionObject( int dim ) const
   {
     return none();
   }
-  if( dim >= cifti_dims->size() )
+  if( dim >= (int)cifti_dims->size() )
     return none();
   Object cdim;
   try
@@ -310,7 +310,7 @@ void CiftiTools::getParcelsInfo( Object cifti_info,
       string struct_name = pditer->key();
       Object elem = pditer->currentValue();
       int surfnum = _smap.find( struct_name )->second;
-      while( roilist.size() <= surfnum )
+      while( (int)roilist.size() <= surfnum )
         roilist.push_back( rc_ptr<TimeTexture<int> >() );
       rc_ptr<TimeTexture<int> > & troi
         = roilist[ _smap.find( struct_name )->second ];
@@ -349,7 +349,7 @@ void CiftiTools::getParcelsInfo( Object cifti_info,
       for( ; viter->isValid(); viter->next() )
       {
         v = int( rint( viter->currentValue()->getScalar() ) );
-        if( roi.nItem() <= v )
+        if( (int64_t)roi.nItem() <= v )
           roi.data().resize( v + 1 );
         roi[v] = label;
       }
@@ -370,7 +370,7 @@ namespace
       string struct_name = siter->key();
       Object surf = siter->currentValue();
       int surfnum = smap.find( struct_name )->second;
-      while( roilist.size() <= surfnum )
+      while( (int)roilist.size() <= surfnum )
         roilist.push_back( rc_ptr<TimeTexture<int> >() );
       rc_ptr<TimeTexture<int> > & troi
         = roilist[ smap.find( struct_name )->second ];
@@ -725,7 +725,7 @@ namespace
 
   void getLabelsPointData( SparseOrDenseMatrix & matrix, int value_dim,
     vector<int32_t> & pos, CiftiTools::TextureList & texlist,
-    int tex_index, size_t pos_in_tex, float background, bool single )
+    int tex_index, size_t pos_in_tex, float /* background */, bool single )
   {
     if( single )
     {
@@ -780,7 +780,7 @@ namespace
     {
       string struct_name = siter->key();
       Object isurf = siter->currentValue();
-      int surfnum = smap.find( struct_name )->second;
+      unsigned surfnum = smap.find( struct_name )->second;
       if( surfnum >= nsurfaces )
         nsurfaces = surfnum + 1;
     }
@@ -821,8 +821,7 @@ void CiftiTools::getSurfaceModelTexture(
     structures[ struct_name ] = isurf;
   }
 
-  unsigned ntex = nsurfaces * nrepet;
-  int csurf;
+  unsigned csurf;
 
   for( repet=0; repet<nrepet; ++repet )
     for( csurf=0; csurf<nsurfaces; ++csurf )
@@ -852,7 +851,7 @@ void CiftiTools::getSurfaceModelTexture(
     size_t nnodes
       = size_t( isurf->getProperty( "number_of_nodes" )->getScalar() );
     // fill cache
-    if( d->surfaceSize[dim].size() <= tex_index )
+    if( (int)d->surfaceSize[dim].size() <= tex_index )
       d->surfaceSize[dim].resize( tex_index + 1, 0 );
     d->surfaceSize[dim][tex_index] = nnodes;
 
@@ -886,7 +885,7 @@ void CiftiTools::getSurfaceModelTexture(
 
     // build cache
     vector<map<uint32_t, uint32_t> > & vcache = d->dimVertexMatrixMap[ dim ];
-    while( vcache.size() <= tex_index )
+    while( (int)vcache.size() <= tex_index )
       vcache.push_back( map<uint32_t, uint32_t>() );
     map<uint32_t, uint32_t> & cache = vcache[ tex_index ];
     uint32_t vertex;
@@ -1077,7 +1076,7 @@ vector<int> CiftiTools::getIndicesForSurfaceIndices(
         indices[i] = i;
     else if( dim == 1 )
     {
-      size_t nv = (size_t) _matrix->getSize()[ dim ];
+      int nv = _matrix->getSize()[ dim ];
       for( i=0; i<n; ++i )
         if( roi_indices[i] >= nv )
           indices[i] = 0;
@@ -1197,7 +1196,7 @@ void CiftiTools::getParcelsTexture(
       string struct_name = pditer->key();
       Object elem = pditer->currentValue();
       int surfnum = _smap.find( struct_name )->second;
-      while( texlist.size() <= surfnum )
+      while( (int)texlist.size() <= surfnum )
         texlist.push_back( rc_ptr<TimeTexture<float> >() );
       int tex_index = _smap.find( struct_name )->second;
       rc_ptr<TimeTexture<float> > & troi = texlist[ tex_index ];
@@ -1237,7 +1236,7 @@ void CiftiTools::getParcelsTexture(
       for( ; viter->isValid(); viter->next() )
       {
         v = int( rint( viter->currentValue()->getScalar() ) );
-        if( roi.nItem() <= v )
+        if( (int)roi.nItem() <= v )
           roi.data().resize( v + 1 );
         pos[dim] = label;
         // select needed dimension when more than 2 are available
@@ -1541,7 +1540,7 @@ bool CiftiTools::isMatchingSurfaceOrTexture( int dim, size_t nvert,
 {
   Object dimobj = getDimensionObject( dim );
   if( dimobj.isNull() )
-    return nvert == _matrix->getSize()[ dim ];
+    return ( nvert == (size_t)_matrix->getSize()[ dim ] );
 
   if( dimensionType( dim ) != "brain_models" )
     return false;

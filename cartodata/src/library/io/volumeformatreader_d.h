@@ -209,7 +209,7 @@ namespace soma
   template <typename T>
   void VolumeFormatReader<T>::read( carto::Volume<T> & obj,
                                     carto::rc_ptr<DataSourceInfo> dsi,
-                                    const AllocatorContext & context,
+                                    const AllocatorContext & /* context */,
                                     carto::Object options )
   {
     localMsg( "Reading object ( " + dsi->url() + " )" );
@@ -265,13 +265,17 @@ namespace soma
               + ( obj.allocatorContext().isAllocated() ? "is" : "isn't" )
               + " allocated." );
     if( parent1 )
+    {
       localMsg( std::string(" -> parent exists and ")
                 + ( parent1->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
+    }
     if( parent2 )
+    {
       localMsg( std::string(" -> grandparent exists and ")
                 + ( parent2->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
+    }
 
     //=== view size ==========================================================
     localMsg( "reading view size..." );
@@ -365,7 +369,7 @@ namespace soma
               + carto::toString( allocsize[ 3 ] ) + " )" );
 
     //=== strides ============================================================
-    int i, ndim = allocsize.size();
+    size_t i, ndim = allocsize.size();
     std::vector<long> strides( ndim );
     std::vector<int> stride_pos;
     for( i=0; i<ndim; ++i )
@@ -405,9 +409,10 @@ namespace soma
               + std::string( ( withborders ? "yes" : "no" ) ) );
     localMsg( "Partial Reading : "
               + std::string( ( partialreading ? "yes" : "no" ) ) );
+    partialreading = partialreading; // compilation warning
     
     //=== reading volume =====================================================
-    int y, z, t;
+    //int y, z, t;
     if( !withborders || dsi->capabilities().canHandleStrides() )
     {
       localMsg( "reading volume using strides..." );
@@ -425,7 +430,7 @@ namespace soma
       std::vector<int> volpos( ndim, 0 );
       volpos[1] = -1;
       sizeline[ 0 ] = viewsize[ 0 ];
-      int dim;
+      size_t dim;
       bool nextrow = false, ended = false;
 
       bool was_open = _imr->isOpen( *dsi );
@@ -443,7 +448,7 @@ namespace soma
             ++volpos[dim];
             if( volpos[dim] == viewsize[dim] )
             {
-              if( dim == ndim - 1 )
+              if( dim == ( ndim - 1 ) )
                 ended = true;
               volpos[dim] = 0;
             }

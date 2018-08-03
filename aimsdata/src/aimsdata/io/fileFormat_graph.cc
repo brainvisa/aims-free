@@ -120,5 +120,5 @@ static bool _graphdic()
   return true;
 }
 
-static bool graphdic = _graphdic();
+static bool graphdic __attribute__((unused)) = _graphdic();
 

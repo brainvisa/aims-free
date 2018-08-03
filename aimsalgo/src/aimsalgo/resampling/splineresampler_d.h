@@ -84,7 +84,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
                                          const aims::Transformation3d& invTransform3d,
                                          const ChannelType& outBackground,
                                          const Point3df& outLocation,
-                                         ChannelType& outValue, int t ) const
+                                         ChannelType& outValue, int /*t*/ ) const
 {
   assert(t == _lasttime);
 
@@ -698,9 +698,9 @@ struct MultiChannelResamplerSwitch<true, T>
 
   }
 
-  static void updateParameters( const SplineResampler<T>* spline_resampler,
-                                const AimsData< T >& inVolume,
-                                int t, bool verbose )
+  static void updateParameters( const SplineResampler<T>* /*spline_resampler*/,
+                                const AimsData< T >& /*inVolume*/,
+                                int /*t*/, bool /*verbose*/ )
   {
     // do nothing, updateParametersChannel is called as needed by the methods
     // above

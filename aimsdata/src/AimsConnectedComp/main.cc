@@ -167,7 +167,7 @@ CC::CC()
 }
 
 template <typename T>
-bool CC::convert( Process & p, const string & filename, Finder & finder )
+bool CC::convert( Process & p, const string & /*filename*/, Finder & finder )
 {
   CCConverter<T> c;
   c = (CCProcess &) p;
@@ -205,7 +205,7 @@ CCConverter<T>::CCConverter()
 }
 
 template <typename T, typename O>
-bool DataConverter<T, O>::doit( Process & p, const string & filename, Finder & finder )
+bool DataConverter<T, O>::doit( Process & p, const string & /*filename*/, Finder & finder )
 {
 //   cout << "data type needs conversion to " << finder.objectType() << " / " << finder.dataType() << endl << flush;
   CCProcess & c = (CCProcess &) p;
@@ -231,7 +231,7 @@ bool DataConverter<T, O>::doit( Process & p, const string & filename, Finder & f
 }
 
 template <typename T>
-bool DataConverter<T, T>::doit( Process & p, const string & filename, Finder & finder )
+bool DataConverter<T, T>::doit( Process & p, const string & /*filename*/, Finder & finder )
 {
   CCProcess & c = (CCProcess &) p;
   cout << "output file: " << c.out << " is processed as " << finder.objectType() << " / " << finder.dataType() << " (data type kept)" << endl << flush;

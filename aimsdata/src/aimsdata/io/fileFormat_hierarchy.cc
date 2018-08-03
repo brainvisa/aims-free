@@ -72,5 +72,5 @@ static bool _hiedic()
   return true;
 }
 
-static bool hiedic = _hiedic();
+static bool hiedic __attribute__((unused)) = _hiedic();
 

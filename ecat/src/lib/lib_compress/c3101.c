@@ -87,8 +87,6 @@ extern FILE *infile, *outfile;
 INLINE int
 get_ubyte()
 {
-    int             c;
-
     blk_inp_byte_cnt++;
     if ((blk_inp_byte_cnt & period_mask) == 0) {
 
