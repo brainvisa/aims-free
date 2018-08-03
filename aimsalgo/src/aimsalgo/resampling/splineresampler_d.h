@@ -87,6 +87,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
                                          ChannelType& outValue, int t ) const
 {
   assert(t == _lasttime);
+  (void)( t ); // compilation warning...
 
   int order = this->getOrder();
   int half = order / 2;
