@@ -682,8 +682,11 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
 
   //--- Hard dimensions
   vector<float> vs;
-  if( !in->getProperty( "voxel_size" ) )
+  if( !in->getProperty( "voxel_size", vs ) )
     vs = vector<float>( 3, 0.f );
+
+  if( vs.size() < 3 )
+    vs.resize( 3, 1. );
   ffdproc.sx = ( ffdproc.sx > 0 ? ffdproc.sx : vs[0] );
   ffdproc.sy = ( ffdproc.sy > 0 ? ffdproc.sy : vs[1] );
   ffdproc.sz = ( ffdproc.sz > 0 ? ffdproc.sz : vs[2] );
