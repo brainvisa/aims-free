@@ -30,7 +30,7 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
-import moment
-import samplables
-import transform
+from . import moment
+from . import samplables
+from . import transform
 
