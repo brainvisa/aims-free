@@ -42,31 +42,33 @@ DataModel::~DataModel()
 }
 
 DataModel::DataModel( BucketMap< Void >&                s,
-                      AimsData< short >&                r,
-                      AimsData< short >&                t,
+                      VolumeRef< short >                r,
+                      VolumeRef< short >                t,
                       Motion&                           m,
                       SplineFfd&                        d,
                       ParzenProbDensFunction&           pdf,
                       bool                              prepro ):
+    _current( ((t->getSizeX() != 1) + (t->getSizeY() != 1) + (t->getSizeZ() != 1))
+              * d.getSizeX() * d.getSizeY() * d.getSizeZ(), 0.),
     _deformation( d ),
     _rigid( m ),
     _pdf( pdf ),
+    _spline(3, 1),
+    _partDer( ((t->getSizeX() != 1) + (t->getSizeY() != 1) + (t->getSizeZ() != 1))
+              * d.getSizeX() * d.getSizeY() * d.getSizeZ(), 0.),
     _reference( r ),
     _test( t ),
-    _dimParam( (t.dimX() != 1) + (t.dimY() != 1) + (t.dimZ() != 1) ),
-    _current( ((t.dimX() != 1) + (t.dimY() != 1) + (t.dimZ() != 1))
-              * d.dimX() * d.dimY() * d.dimZ(), 0.),
-    _partDer( ((t.dimX() != 1) + (t.dimY() != 1) + (t.dimZ() != 1))
-              * d.dimX() * d.dimY() * d.dimZ(), 0.),
-    _contrib( r.dimX(), r.dimY(), r.dimZ() ),
-    _is2d( t.dimX() == 1, t.dimY() == 1, t.dimZ() == 1 ),
-    _spline(3, 1)
+    _is2d( t->getSizeX() == 1, t->getSizeY() == 1, t->getSizeZ() == 1 ),
+    _dimParam( (t->getSizeX() != 1) + (t->getSizeY() != 1) + (t->getSizeZ() != 1) ),
+    _contrib( r->getSizeX(), r->getSizeY(), r->getSizeZ() )
 {
   // debug
-  _contrib.setSizeXYZT( r.sizeX(), r.sizeY(), r.sizeZ(), r.sizeT() );
+  _contrib->header().setProperty( "voxel_size", r->getVoxelSize() );
 
   // Compute histo parameter + replace min max values
-  _pdf.updateBinSizeAndMin( r, t, prepro );
+  AimsData<short> ar( r ); // FIXME remove this after updateBinSizeAndMin changes
+  AimsData<short> at( t );
+  _pdf.updateBinSizeAndMin( ar, at, prepro );
 
   // Construction des coefficients splines pour l'image test
   CubicResampler<short> interpolator;
@@ -76,16 +78,20 @@ DataModel::DataModel( BucketMap< Void >&                s,
   // Initialize evaluation points
   //
 
-  this->_selection.setSizeXYZT( r.sizeX(),
-                                r.sizeY(),
-                                r.sizeZ(),
-                                r.sizeT() );
+  vector<float> vs = r->getVoxelSize();
+  this->_selection.setSizeXYZT( vs[0],
+                                vs[1],
+                                vs[2],
+                                vs[3] );
+
+  vector<int> sdim = _splineTest->getSize();
 
   if (s.size() > 0)
   {
     // Use input bucket points
     BucketMap<Void>::Bucket bucket = s.begin()->second;
     BucketMap<Void>::Bucket::iterator ib, eb = bucket.end();
+    vector<float> tvs = _test->getVoxelSize();
 
     for( ib = bucket.begin(); ib != eb; ++ib )
     {
@@ -93,14 +99,14 @@ DataModel::DataModel( BucketMap< Void >&                s,
                          float(ib->first[1]) * s.sizeY(),
                          float(ib->first[2]) * s.sizeZ() );
       Point3df p_test_mm = m.transform( p_ref_mm );
-      Point3df p_test_vox( p_test_mm[0] / _test.sizeX(),
-                           p_test_mm[1] / _test.sizeY(),
-                           p_test_mm[2] / _test.sizeZ() );
+      Point3df p_test_vox( p_test_mm[0] / tvs[0],
+                           p_test_mm[1] / tvs[1],
+                           p_test_mm[2] / tvs[2] );
 
       // On saute les bords car interpolation imparfaite
-      if( 0 <= p_test_vox[0] && p_test_vox[0] < _splineTest.dimX() &&
-          0 <= p_test_vox[1] && p_test_vox[1] < _splineTest.dimY() &&
-          0 <= p_test_vox[2] && p_test_vox[2] < _splineTest.dimZ() )
+      if( 0 <= p_test_vox[0] && p_test_vox[0] < sdim[0] &&
+          0 <= p_test_vox[1] && p_test_vox[1] < sdim[1] &&
+          0 <= p_test_vox[2] && p_test_vox[2] < sdim[2] )
       {
         this->_selection.insert(ib->first, p_test_mm);
       }
@@ -111,19 +117,21 @@ DataModel::DataModel( BucketMap< Void >&                s,
     // No available points in bucket map
     // Default use of the reference image
     int i, j, k;
-    ForEach3d(r, i, j, k) {
+    ForEach3d(ar, i, j, k) {
       Point3d a(i, j, k);
-      Point3df p_ref_mm( float(a[0]) * _reference.sizeX(),
-                         float(a[1]) * _reference.sizeY(),
-                         float(a[2]) * _reference.sizeZ() );
+      vector<float> vs = _reference->getVoxelSize();
+      Point3df p_ref_mm( float(a[0]) * vs[0],
+                         float(a[1]) * vs[1],
+                         float(a[2]) * vs[2] );
       Point3df p_test_mm = m.transform( p_ref_mm );
-      Point3df p_test_vox( p_test_mm[0] / _test.sizeX(),
-                           p_test_mm[1] / _test.sizeY(),
-                           p_test_mm[2] / _test.sizeZ() );
+      vector<float> tvs = _test->getVoxelSize();
+      Point3df p_test_vox( p_test_mm[0] / tvs[0],
+                           p_test_mm[1] / tvs[1],
+                           p_test_mm[2] / tvs[2] );
       // On saute les bords car interpolation imparfaite
-      if( 0 <= p_test_vox[0] && p_test_vox[0] < _splineTest.dimX() &&
-          0 <= p_test_vox[1] && p_test_vox[1] < _splineTest.dimY() &&
-          0 <= p_test_vox[2] && p_test_vox[2] < _splineTest.dimZ() )
+      if( 0 <= p_test_vox[0] && p_test_vox[0] < sdim[0] &&
+          0 <= p_test_vox[1] && p_test_vox[1] < sdim[1] &&
+          0 <= p_test_vox[2] && p_test_vox[2] < sdim[2] )
       {
         this->_selection.insert(a, p_test_mm);
       }
@@ -155,15 +163,17 @@ void DataModel::update( vector<float>& p )
 {
   //  if (p.size() != 1000) return;
 
+  vector<int> dims = _deformation.getSize();
+
   // Methode ASSERT a remplacer par une exception
-  ASSERT( p.size() == _dimParam * _deformation.dimX() * _deformation.dimY() * _deformation.dimZ());
+  ASSERT( p.size() == size_t(_dimParam * dims[0] * dims[1] * dims[2]));
   ASSERT( p.size() == _current.size() );
 
   _current = p;
 
-  for( int k = 0, pi = 0; k < _deformation.dimZ(); k++ )
-  for( int j = 0; j < _deformation.dimY(); j++ )
-  for( int i = 0; i < _deformation.dimX(); i++ )
+  for( int k = 0, pi = 0; k < dims[2]; k++ )
+  for( int j = 0; j < dims[1]; j++ )
+  for( int i = 0; i < dims[0]; i++ )
   {
     Point3df cp;
     cp[0] = ( _is2d[0] ? 0. : p[pi++] );
@@ -184,19 +194,22 @@ void DataModel::initBound( const Point3df & maxdef )
 
 void DataModel::updateBound()
 {
-  _lowerBound.resize( _dimParam * _deformation.dimX() * _deformation.dimY() * _deformation.dimZ() );
-  _upperBound.resize( _dimParam * _deformation.dimX() * _deformation.dimY() * _deformation.dimZ() );
+  vector<int> dims = _deformation.getSize();
+
+  _lowerBound.resize( _dimParam * dims[0] * dims[1] * dims[2] );
+  _upperBound.resize( _dimParam * dims[0] * dims[1] * dims[2] );
   Point3df def;
-  def[0] = ( _maxDef[0] >= 0 ? _maxDef[0] : _deformation.sizeX() );
-  def[1] = ( _maxDef[1] >= 0 ? _maxDef[1] : _deformation.sizeY() );
-  def[2] = ( _maxDef[2] >= 0 ? _maxDef[2] : _deformation.sizeZ() );
+  vector<float> vs = _deformation.getVoxelSize();
+  def[0] = ( _maxDef[0] >= 0 ? _maxDef[0] : vs[0] );
+  def[1] = ( _maxDef[1] >= 0 ? _maxDef[1] : vs[1] );
+  def[2] = ( _maxDef[2] >= 0 ? _maxDef[2] : vs[2] );
 
   std::cout << "max def: " << def << std::endl;
 
   int l = 0;
-  for( int k = 0; k < _deformation.dimZ(); ++k )
-  for( int j = 0; j < _deformation.dimY(); ++j )
-  for( int i = 0; i < _deformation.dimX(); ++i )
+  for( int k = 0; k < dims[2]; ++k )
+  for( int j = 0; j < dims[1]; ++j )
+  for( int i = 0; i < dims[0]; ++i )
   for( int c = 0; c < 3; ++c )
   {
     if( !_deformation.isFlat(c) ) {
@@ -246,9 +259,10 @@ bool  DataModel::evalCrit(const Point3df & pTest, const short & value)
 {
   // p = g(p_rig) i.e. transformed point
   Point3df pDef = _deformation.transform( pTest );
-  double pX = pDef[0] / _test.sizeX();
-  double pY = pDef[1] / _test.sizeY();
-  double pZ = pDef[2] / _test.sizeZ();
+  vector<float> vs = _test->getVoxelSize();
+  double pX = pDef[0] / vs[0];
+  double pY = pDef[1] / vs[1];
+  double pZ = pDef[2] / vs[2];
 
   //--------------------------------------//
   // Compute the interpoled Test value    //
@@ -291,22 +305,23 @@ bool  DataModel::evalCrit(const Point3df & pTest, const short & value)
   kSplineTestUpp[2] = ( _is2d[2] ? 0 : kSplineTestUpp[2] );
 
 
+  vector<int> tdim = _splineTest->getSize();
   // resample test image
   for ( int k = kSplineTestLow[2]; k <= kSplineTestUpp[2]; ++k )
   {
     bk3 = ( _is2d[2] ? 1. : spline3(pZ - k) );
     dbk3 = ( _is2d[2] ? 0. : spline3derivative(pZ - k) );
-    ck = getFold( k, _splineTest.dimZ() );
+    ck = getFold( k, tdim[2] );
     for ( int j = kSplineTestLow[1]; j <= kSplineTestUpp[1]; ++j )
     {
       bj3 = ( _is2d[1] ? 1. : spline3(pY - j) );
       dbj3 = ( _is2d[1] ? 0. : spline3derivative(pY - j) );
-      cj = getFold( j, _splineTest.dimY() );
+      cj = getFold( j, tdim[1] );
       for ( int i = kSplineTestLow[0]; i <= kSplineTestUpp[0]; ++i )
       {
         bi3 = ( _is2d[0] ? 1. : spline3(pX - i) );
         dbi3 = ( _is2d[0] ? 0. : spline3derivative(pX - i) );
-        ci = getFold( i, _splineTest.dimX() );
+        ci = getFold( i, tdim[0] );
         st = _splineTest( ci, cj, ck );
 
         t += st * bi3 * bj3 * bk3;
@@ -316,9 +331,10 @@ bool  DataModel::evalCrit(const Point3df & pTest, const short & value)
       }
     }
   }
-  gradTestX /= _splineTest.sizeX();
-  gradTestY /= _splineTest.sizeY();
-  gradTestZ /= _splineTest.sizeZ();
+  vector<float> tvs = _splineTest->getVoxelSize();
+  gradTestX /= tvs[0];
+  gradTestY /= tvs[1];
+  gradTestZ /= tvs[2];
 
   int kappa  = _pdf.getKappa( value );
   int lambda = _pdf.getLambda( t );
@@ -389,35 +405,36 @@ bool  DataModel::evalCrit(const Point3df & pTest, const short & value)
 
 void DataModel::writeDebugTestSpline( const std:: string & filename ) const
 {
-  Writer<AimsData<double> > w( filename );
+  Writer<VolumeRef<double> > w( filename );
   w << _splineTest;
 }
 
 void DataModel::writeDebugContrib( const std::string & filename ) const
 {
-  Writer<AimsData<short> > w( filename );
+  Writer<VolumeRef<short> > w( filename );
   w << _contrib;
 }
 
 void DataModel::writeDebugDerMI( const std::string & filename ) const
 {
-  AimsData<float> der( _deformation.dimX(),
-                       _deformation.dimY(),
-                       _deformation.dimZ(), 3 );
-  der.setSizeXYZT( _deformation.sizeX(), _deformation.sizeY(), _deformation.sizeZ() );
+  vector<int> dims = _deformation.getSize();
+  VolumeRef<float> der( dims[0],
+                        dims[1],
+                        dims[2], 3 );
+  der.header().setProperty( "voxel_size", _deformation.getVoxelSize() );
   der = 0.;
 
   int ind = 0;
-  for( int k = 0; k < _deformation.dimZ(); ++k )
-  for( int j = 0; j < _deformation.dimY(); ++j )
-  for( int i = 0; i < _deformation.dimX(); ++i )
+  for( int k = 0; k < dims[2]; ++k )
+  for( int j = 0; j < dims[1]; ++j )
+  for( int i = 0; i < dims[0]; ++i )
   for( int c = 0; c < 3; ++c )
   {
     if( !_is2d[c] )
       der(i, j, k, c) = _partDer[ind++];
   }
 
-  Writer<AimsData<float> > w( filename );
+  Writer<VolumeRef<float> > w( filename );
   w.write( der );
 
 }

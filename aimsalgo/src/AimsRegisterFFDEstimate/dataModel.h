@@ -39,8 +39,8 @@ class DataModel
     /// \param write_file  Write spline coefficient image as
     ///                    "path/dumpSplineTest.ima"
     DataModel( aims::BucketMap< Void >&            s,
-                AimsData< short >&                 r,
-                AimsData< short >&                 t,
+                carto::VolumeRef< short >          r,
+                carto::VolumeRef< short >          t,
                 Motion&                            m,
                 aims::SplineFfd&                    d,
                 ParzenProbDensFunction&            pdf,
@@ -92,7 +92,7 @@ class DataModel
     double spline3derivative( double x ) const { return _spline.derivative(x); }
   private:
     std::vector<float>         _current;       ///< Param
-    AimsData<double>           _splineTest;    ///< B-Spline coefficients for the test image
+    carto::VolumeRef<double>   _splineTest;    ///< B-Spline coefficients for the test image
     aims::SplineFfd&            _deformation;   ///< FFD transformation
     Motion&                    _rigid;         ///< Pre computed affine motion
     ParzenProbDensFunction&    _pdf;
@@ -106,8 +106,8 @@ class DataModel
     std::vector<float>      _partDer;       ///< dMI/dParam
     std::vector<float>      _upperBound;    ///< parameters bound for optimization
     std::vector<float>      _lowerBound;    ///< parameters bound for optimization
-    AimsData<int16_t> &     _reference;     ///< reference image
-    AimsData<int16_t> &     _test;          ///< test image
+    carto::VolumeRef<int16_t> & _reference;     ///< reference image
+    carto::VolumeRef<int16_t> & _test;          ///< test image
     Point3df                _maxDef;        ///< maximum deformation allowed in mm
 
     // 2d case
@@ -115,7 +115,7 @@ class DataModel
     long                    _dimParam;      ///< FFD dimension (1d/2d/3d)
 
     // debug
-    AimsData<short>         _contrib;
+    carto::VolumeRef<short> _contrib;
 };
 
 #endif

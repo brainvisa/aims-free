@@ -206,7 +206,7 @@ void ObjFunc::doPdf( const AimsVector<float,6>& param ) const
       ASSERT( _interpolator );  // il doit exister necesaire un interpolateur
       _interpolator->setRef( *_test );
       
-      _interpolator->doit( motion, *_reg );
+      _interpolator->doit( motion, *_reg->volume() );
       AimsJointMaskPdf( *_ref, *_reg, *_p12, *_p1, *_p2 );
     }
 }

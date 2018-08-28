@@ -177,16 +177,16 @@ int main( int argc, const char **argv )
     // Reference image
     //------------------------------------------------------------------------
     cout << "Reading reference image" << endl;
-    ChannelReader<AimsData<int16_t> > rdref(inputref);
-    AimsData<int16_t> reference;
+    ChannelReader<VolumeRef<int16_t> > rdref(inputref);
+    VolumeRef<int16_t> reference;
     rdref.read(reference, refchannel);
 
     //------------------------------------------------------------------------
     // Test image
     //------------------------------------------------------------------------
     cout << "Reading test image" << endl;
-    AimsData<int16_t>  testimg;
-    ChannelReader<AimsData<int16_t> > rdtest(inputtest);
+    VolumeRef<int16_t>  testimg;
+    ChannelReader<VolumeRef<int16_t> > rdtest(inputtest);
     rdtest.read(testimg, testchannel);
 
     //------------------------------------------------------------------------
@@ -215,16 +215,16 @@ int main( int argc, const char **argv )
     //------------------------------------------------------------------------
     // FFD initialization
     //------------------------------------------------------------------------
-    AimsData<Point3df> iffd;
+    VolumeRef<Point3df> iffd;
     if( !initffd.empty() || !initdep.empty() )
     {
       cout << "Reading initial FFD deformations: " << initffd << endl;
-      Reader<AimsData<Point3df> > rdiffd( ( !initffd.empty() ? initffd : initdep ) );
+      Reader<VolumeRef<Point3df> > rdiffd( ( !initffd.empty() ? initffd : initdep ) );
       rdiffd >> iffd;
 
-      init_ctrl_numx = iffd.dimX();
-      init_ctrl_numy = iffd.dimY();
-      init_ctrl_numz = iffd.dimZ();
+      init_ctrl_numx = iffd->getSizeX();
+      init_ctrl_numy = iffd->getSizeY();
+      init_ctrl_numz = iffd->getSizeZ();
     }
 
     //========================================================================
@@ -233,9 +233,9 @@ int main( int argc, const char **argv )
     //
     //========================================================================
     bool is2d[3];
-    is2d[0] = ( testimg.dimX() == 1 );
-    is2d[1] = ( testimg.dimY() == 1 );
-    is2d[2] = ( testimg.dimZ() == 1 );
+    is2d[0] = ( testimg->getSizeX() == 1 );
+    is2d[1] = ( testimg->getSizeY() == 1 );
+    is2d[2] = ( testimg->getSizeZ() == 1 );
     if( is2d[0] ) {
       init_ctrl_numx = 1;
       final_ctrl_numx = 1;
@@ -328,7 +328,7 @@ int main( int argc, const char **argv )
     bool test_init = true;       // do ffd init in loop ?
     cout << "Initializing FFD deformations... " << endl;
     SplineFfd deformation( init_ctrl_numx, init_ctrl_numy, init_ctrl_numz,
-                           testimg );
+                           *testimg );
 
     if( !initffd.empty() )
     {
@@ -396,7 +396,7 @@ int main( int argc, const char **argv )
     //------------------------------------------------------------------------
     // loop variables
     //------------------------------------------------------------------------
-    AimsData<Point3df> ct; // Intermediate and final control points
+    VolumeRef<Point3df> ct; // Intermediate and final control points
     int incr_limit = 0;
     int  incr_max = ( dimParam * final_ctrl_numx
                                * final_ctrl_numy
@@ -532,9 +532,12 @@ int main( int argc, const char **argv )
           {
             sprintf(dbg_name, "%sdeformation_p%d_o%d.nii", dbg_dir.c_str(), c_pyr, c_opt );
             cout << string("[dbg] ") + dbg_name << endl;
+            vector<float> vs = testimg->getVoxelSize();
             dataModel.writeDebugDeformations( dbg_name,
-                                              testimg.dimX(), testimg.dimY(), testimg.dimZ(),
-                                              testimg.sizeX(), testimg.sizeY(), testimg.sizeZ() );
+                                              testimg->getSizeX(),
+                                              testimg->getSizeY(),
+                                              testimg->getSizeZ(),
+                                              vs[0], vs[1], vs[2] );
           }
 
           //--- test condition -----------------------------------------------
@@ -649,9 +652,6 @@ int main( int argc, const char **argv )
 
 #include <cartodata/volume/volume_d.h>
 
-template class carto::Volume< AimsData<AimsData< Point3df > > >;
-template class carto::Volume< AimsData< Point3df > >;
-template class carto::Volume< AimsData<AimsData< Point3dd > > >;
 template class carto::Volume< AimsData< Point3dd > >;
 template class carto::Volume< Point3dd >;
 

@@ -69,9 +69,10 @@ void SplineResampler< T >::reset()
 }
 
 template < class T >
-AimsData<double> SplineResampler< T >::getSplineCoef( const AimsData< T >& inVolume,
-						      int t,
-						      bool verbose )
+carto::VolumeRef<double> SplineResampler< T >::getSplineCoef(
+  const carto::Volume< T >& inVolume,
+  int t,
+  bool verbose )
 {
   updateParameters( inVolume, t, verbose);
   return _splineCoefficients;
@@ -80,11 +81,12 @@ AimsData<double> SplineResampler< T >::getSplineCoef( const AimsData< T >& inVol
 
 template < class T >
 void
-SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume,
-                                         const aims::Transformation3d& invTransform3d,
-                                         const ChannelType& outBackground,
-                                         const Point3df& outLocation,
-                                         ChannelType& outValue, int t ) const
+SplineResampler< T >::doResampleChannel(
+  const carto::Volume< ChannelType >& inVolume,
+  const aims::Transformation3d& invTransform3d,
+  const ChannelType& outBackground,
+  const Point3df& outLocation,
+  ChannelType& outValue, int t ) const
 {
   assert(t == _lasttime);
   (void)( t ); // compilation warning...
@@ -93,8 +95,8 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
   int half = order / 2;
   int width = order + 1;
 
-  AimsData< double >::const_iterator s = &_splineCoefficients( 0, 0, 0 );
-  AimsData< double >::const_iterator pi, pj;
+  double *s = &_splineCoefficients( 0, 0, 0 );
+  double *pi, *pj;
 
   Point3df normalizedInLocation;
   normalizedInLocation = invTransform3d.transform( outLocation );
@@ -103,11 +105,15 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
   float yf = round(normalizedInLocation[1]);
   float zf = round(normalizedInLocation[2]);
 
+  int dimx = inVolume.getSizeX();
+  int dimy = inVolume.getSizeY();
+  int dimz = inVolume.getSizeZ();
+
   // The test is done using floating-point so that NaN values are excluded (the
   // background value is returned if the transformation yields NaN)
-  if ( ( xf >= 0 ) && ( xf < inVolume.dimX() ) &&
-       ( yf >= 0 ) && ( yf < inVolume.dimY() ) &&
-       ( zf >= 0 ) && ( zf < inVolume.dimZ() ) )
+  if ( ( xf >= 0 ) && ( xf < dimx ) &&
+       ( yf >= 0 ) && ( yf < dimy ) &&
+       ( zf >= 0 ) && ( zf < dimz ) )
     {
       int x = static_cast<int>(xf);
       int y = static_cast<int>(yf);
@@ -119,7 +125,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
       double intensity, qi, qj;
       int i, j, k;
 
-      if ( inVolume.dimZ() == 1 )
+      if (dimz == 1 )
         {
 
           weightZ[ 0 ] = 1.0;
@@ -147,7 +153,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
 
               weightZ[ k ] = getBSplineWeight( z + k,
                                                normalizedInLocation[2] );
-              foldZ[ k ] = getFold( z + k, inVolume.dimZ() ) *
+              foldZ[ k ] = getFold( z + k, dimz ) *
                 ( &_splineCoefficients( 0, 0, 1 )
                   - &_splineCoefficients( 0 ) );
 
@@ -172,7 +178,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
         {
 
           weightY[ j ] = getBSplineWeight( y + j, normalizedInLocation[1] );
-          foldY[ j ] = getFold( y +j, inVolume.dimY() )
+          foldY[ j ] = getFold( y +j, dimy )
             * ( &_splineCoefficients( 0, 1 ) - &_splineCoefficients( 0 ) );
 
         }
@@ -194,12 +200,12 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
         {
 
           weightX[ i ] = getBSplineWeight( x + i, normalizedInLocation[0] );
-          foldX[ i ] = getFold( x + i, inVolume.dimX() );
+          foldX[ i ] = getFold( x + i, dimx );
 
         }
 
       intensity = 0.0;
-      for ( k = 0; k < ( ( inVolume.dimZ() == 1 ) ? 1 : width ); k++ )
+      for ( k = 0; k < ( ( dimz == 1 ) ? 1 : width ); k++ )
         {
 
           pj = s + foldZ[ k ];
@@ -238,7 +244,7 @@ SplineResampler< T >::doResampleChannel( const AimsData< ChannelType >& inVolume
 template < class T >
 void
 SplineResampler< T >::
-updateParametersChannel( const AimsData< ChannelType >& inVolume,
+updateParametersChannel( const carto::Volume< ChannelType >& inVolume,
                          int t, bool verbose ) const
 {
 
@@ -253,31 +259,40 @@ updateParametersChannel( const AimsData< ChannelType >& inVolume,
 
         }
 
-      int inSizeX = inVolume.dimX();
-      int inSizeY = inVolume.dimY();
-      int inSizeZ = inVolume.dimZ();
+      std::vector<int> dims = inVolume.getSize();
+      int inSizeX = dims[0];
+      int inSizeY = dims[1];
+      int inSizeZ = dims[2];
 
-      carto::Converter< AimsData< ChannelType >, AimsData< double > > converter;
-      _splineCoefficients = AimsData<double>( inSizeX, inSizeY, inSizeZ );
-      _splineCoefficients.setSizeXYZT( inVolume.sizeX(), inVolume.sizeY(),
-                                       inVolume.sizeZ(), inVolume.sizeT() );
+      carto::Converter< carto::VolumeRef< ChannelType >,
+                        carto::VolumeRef< double > > converter;
+      _splineCoefficients = carto::VolumeRef<double>( inSizeX, inSizeY,
+                                                      inSizeZ );
+      _splineCoefficients->header().setProperty( "voxel_size",
+                                                 inVolume.getVoxelSize() );
       if( t > 0 )
         {
-          AimsData<ChannelType> tmpvol( inSizeX, inSizeY, inSizeZ );
+          carto::VolumeRef<ChannelType> tmpvol( inSizeX, inSizeY, inSizeZ );
           ChannelType          *p = &tmpvol( 0 );
           const ChannelType    *q;
           int x, y, z;
           for ( z = 0; z < inSizeZ; z++ )
             for ( y = 0; y < inSizeY; y++ )
               {
-                q = &inVolume( 0, y, z, t );
+                q = &inVolume.at( 0, y, z, t );
                 for ( x = 0; x < inSizeX; ++x, ++p, ++q )
                   *p = *q;
               }
           converter.convert( tmpvol, _splineCoefficients );
         }
       else
-        converter.convert( inVolume, _splineCoefficients );
+      {
+        // converter needs a VolumeRefm inVolume is a Volume
+        carto::rc_ptr<carto::Volume<ChannelType> > inref;
+        inref.reset( const_cast<carto::Volume<ChannelType> *>( &inVolume ) );
+        converter.convert( inref, _splineCoefficients );
+        inref.release();
+      }
 
       if ( inSizeX > 1 )
         {
@@ -516,25 +531,23 @@ int SplineResampler< T >::getFold( int i, int size ) const
 
 template <typename T>
 void SplineResampler<T>::
-resample_channel_inv_to_vox(const AimsData< ChannelType >& inVolume,
-                            const aims::Transformation3d& inverse_transform_to_vox,
+resample_channel_inv_to_vox(const carto::Volume< ChannelType >& inVolume,
+                            const aims::Transformation3d&
+                              inverse_transform_to_vox,
                             const ChannelType& outBackground,
-                            AimsData< ChannelType >& outVolume,
+                            carto::Volume< ChannelType > & outVolume,
                             bool verbose) const
 {
-  Point3df outResolution;
-  outResolution[0] = outVolume.sizeX();
-  outResolution[1] = outVolume.sizeY();
-  outResolution[2] = outVolume.sizeZ();
+  Point3df outResolution( outVolume.getVoxelSize() );
 
-  int outSizeX = outVolume.dimX();
-  int outSizeY = outVolume.dimY();
-  int outSizeZ = outVolume.dimZ();
-  int outSizeT = outVolume.dimT();
-  if( outSizeT > inVolume.dimT() )
-    outSizeT = inVolume.dimT();
+  int outSizeX = outVolume.getSizeX();
+  int outSizeY = outVolume.getSizeY();
+  int outSizeZ = outVolume.getSizeZ();
+  int outSizeT = outVolume.getSizeT();
+  if( outSizeT > inVolume.getSizeT() )
+    outSizeT = inVolume.getSizeT();
 
-  typename AimsData< ChannelType >::iterator o;
+  ChannelType* o;
 
   aims::Progression progress(0, static_cast<size_t>(outSizeX)
                              * outSizeY * outSizeZ * outSizeT);
@@ -550,7 +563,7 @@ resample_channel_inv_to_vox(const AimsData< ChannelType >& inVolume,
 
           for ( y = 0; y < outSizeY; y++ )
             {
-              o = &outVolume( 0, y, z, t );
+              o = &outVolume.at( 0, y, z, t );
 
               for ( x = 0; x < outSizeX; x++ )
                 {
@@ -584,7 +597,7 @@ struct MultiChannelResamplerSwitch<false, T>
 {
 
   static void doResample( const SplineResampler<T>* spline_resampler,
-                          const AimsData< T > &input_data,
+                          const carto::Volume< T > &input_data,
                           const aims::Transformation3d &inverse_transform,
                           const T &background,
                           const Point3df &output_location,
@@ -600,10 +613,11 @@ struct MultiChannelResamplerSwitch<false, T>
   }
 
   static void resample_inv_to_vox( const SplineResampler<T>* spline_resampler,
-                                   const AimsData< T >& input_data,
-                                   const aims::Transformation3d& inverse_transform_to_vox,
+                                   const carto::Volume< T >& input_data,
+                                   const aims::Transformation3d&
+                                    inverse_transform_to_vox,
                                    const T& background,
-                                   AimsData< T >& output_data,
+                                   carto::Volume< T > & output_data,
                                    bool verbose = false )
   {
     // Call the base class version, which just calls doResample for every voxel
@@ -613,7 +627,7 @@ struct MultiChannelResamplerSwitch<false, T>
   }
 
   static void updateParameters( const SplineResampler<T>* spline_resampler,
-                                const AimsData< T >& inVolume,
+                                const carto::Volume< T >& inVolume,
                                 int t, bool verbose )
   {
     spline_resampler->updateParametersChannel(inVolume, t, verbose);
@@ -629,20 +643,26 @@ struct MultiChannelResamplerSwitch<true, T>
   typedef typename carto::DataTypeTraits<T>::ChannelType ChannelType;
 
   static void doResample( const SplineResampler<T>* spline_resampler,
-                          const AimsData< T > &input_data,
+                          const carto::Volume< T > &input_data,
                           const aims::Transformation3d &inverse_transform,
                           const T &background,
                           const Point3df &output_location,
                           T &output_value,
                           int timestep )
   {
-    ChannelSelector< AimsData<T>, AimsData<ChannelType> > selector;
-    AimsData<ChannelType> input_channel;
+    ChannelSelector< carto::VolumeRef<T>, carto::VolumeRef<ChannelType> >
+      selector;
+    carto::VolumeRef<ChannelType> input_channel;
 
     for (unsigned int channel = 0;
          channel < carto::DataTypeTraits<T>::channelcount;
-         channel++) {
-      input_channel = selector.select(input_data, channel);
+         channel++)
+    {
+      // build a temporary VolumeRef
+      carto::VolumeRef<T> inref;
+      inref.reset( const_cast<carto::Volume<T> *>( &input_data ) );
+      input_channel = selector.select( inref, channel );
+      inref.reset();
 
       spline_resampler->updateParametersChannel(input_channel,
                                                 timestep, carto::verbose);
@@ -656,52 +676,56 @@ struct MultiChannelResamplerSwitch<true, T>
   }
 
   static void resample_inv_to_vox( const SplineResampler<T>* spline_resampler,
-                                   const AimsData< T >& input_data,
-                                   const aims::Transformation3d& inverse_transform_to_vox,
+                                   const carto::Volume< T >& input_data,
+                                   const aims::Transformation3d&
+                                    inverse_transform_to_vox,
                                    const T& background,
-                                   AimsData< T >& output_data,
+                                   carto::Volume< T > & output_data,
                                    bool verbose = false )
   {
-    ChannelSelector< AimsData<T>, AimsData<ChannelType> > selector;
+    ChannelSelector< carto::VolumeRef<T>, carto::VolumeRef<ChannelType> >
+      selector;
 
-    int dimX = output_data.dimX();
-    int dimY = output_data.dimY();
-    int dimZ = output_data.dimZ();
-    int dimT = output_data.dimT();
-    float sizeX = output_data.sizeX();
-    float sizeY = output_data.sizeY();
-    float sizeZ = output_data.sizeZ();
-    float sizeT = output_data.sizeT();
+    int dimX = output_data.getSizeX();
+    int dimY = output_data.getSizeY();
+    int dimZ = output_data.getSizeZ();
+    int dimT = output_data.getSizeT();
+    std::vector<float> vs = output_data.getVoxelSize();
 
     for (unsigned int channel = 0;
          channel < carto::DataTypeTraits<T>::channelcount;
-         channel++) {
+         channel++)
+    {
+      carto::VolumeRef<ChannelType> input_channel;
+      carto::VolumeRef<ChannelType> output_channel( dimX, dimY, dimZ, dimT );
 
-      AimsData<ChannelType> input_channel;
-      AimsData<ChannelType> output_channel( dimX, dimY, dimZ, dimT );
+      output_channel.header().setProperty( "voxel_size", vs );
 
-      output_channel.setSizeXYZT( sizeX, sizeY, sizeZ, sizeT );
+      output_channel.copyHeaderFrom( output_data.header() );
 
-      if( output_data.header() )
-      {
-        output_channel.setHeader( output_data.header()->cloneHeader( true ) );
-      }
-
+      // build a temporary VolumeRef
+      carto::VolumeRef<T> inref;
+      inref.reset( const_cast<carto::Volume<T> *>( &input_data ) );
       /* We split the data and process resampling on each component */
-      input_channel = selector.select( input_data, channel );
+      input_channel = selector.select( inref, channel );
+      inref.release();
 
       spline_resampler->resample_channel_inv_to_vox(
-        input_channel, inverse_transform_to_vox, background[ channel ],
-        output_channel, verbose );
+        *input_channel, inverse_transform_to_vox, background[ channel ],
+        *output_channel, verbose );
 
-      selector.set( output_data, channel, output_channel );
+      // build a temporary VolumeRef
+      carto::VolumeRef<T> outref;
+      outref.reset( &output_data );
+      selector.set( outref, channel, output_channel );
+      outref.release();
     }
 
   }
 
-  static void updateParameters( const SplineResampler<T>* spline_resampler,
-                                const AimsData< T >& inVolume,
-                                int t, bool verbose )
+  static void updateParameters( const SplineResampler<T>* /*spline_resampler*/,
+                                const carto::Volume< T >& /*inVolume*/,
+                                int /*t*/, bool /*verbose*/ )
   {
     // do nothing, updateParametersChannel is called as needed by the methods
     // above
@@ -712,7 +736,7 @@ struct MultiChannelResamplerSwitch<true, T>
 
 template < class T >
 void
-SplineResampler< T >::updateParameters( const AimsData< T >& inVolume,
+SplineResampler< T >::updateParameters( const carto::Volume< T >& inVolume,
                                         int t, bool verbose ) const
 {
   typedef MultiChannelResamplerSwitch<
@@ -724,10 +748,10 @@ SplineResampler< T >::updateParameters( const AimsData< T >& inVolume,
 
 template < class T >
 void SplineResampler<T>::
-resample_inv_to_vox( const AimsData< T >& input_data,
+resample_inv_to_vox( const carto::Volume< T >& input_data,
                      const aims::Transformation3d& inverse_transform_to_vox,
                      const T& background,
-                     AimsData< T >& output_data,
+                     carto::Volume< T > & output_data,
                      bool verbose ) const
 {
   typedef MultiChannelResamplerSwitch<
@@ -741,7 +765,7 @@ resample_inv_to_vox( const AimsData< T >& input_data,
 
 template < class T >
 void SplineResampler<T>::
-doResample( const AimsData< T > &input_data,
+doResample( const carto::Volume< T > &input_data,
             const aims::Transformation3d &inverse_transform,
             const T &background,
             const Point3df &output_location,

@@ -460,9 +460,9 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
     b1map_resamp = rsp1.doit(b1_to_bias, biased_vol.getSizeX(),
         biased_vol.getSizeY(), biased_vol.getSizeZ(),
         biased_vol.getVoxelSize()[:3])
-    conv = aims.Converter(intype=b1map_resamp.volume().get(),
+    conv = aims.Converter(intype=b1map_resamp.get(),
                           outtype=aims.Volume_FLOAT)
-    field = conv(b1map_resamp).volume()
+    field = conv(b1map_resamp)
     b1map_max = np.max(np.asarray(field))
     if b1map_max >= 600.: # probably degrees * 10
         # (the maps output by the Siemens 7T machine are this kind)
@@ -487,10 +487,10 @@ def correct_bias(biased_vol, b1map, dp_gre_low_contrast=None,
         dp_gre_resamp = rsp2.doit(dp_to_bias, biased_vol.getSizeX(),
             biased_vol.getSizeY(), biased_vol.getSizeZ(),
             biased_vol.getVoxelSize()[:3])
-        dp_conv = aims.Converter(intype=dp_gre_resamp.volume().get(),
+        dp_conv = aims.Converter(intype=dp_gre_resamp.get(),
                                  outtype=aims.Volume_FLOAT)
         #field_arr[:, :, :, :] = 1. / field_arr
-        field_arr *= np.asarray(dp_conv(dp_gre_resamp).volume())
+        field_arr *= np.asarray(dp_conv(dp_gre_resamp))
         if field_threshold is None:
             # default threshold is 3000
             field_threshold = threshold * 30

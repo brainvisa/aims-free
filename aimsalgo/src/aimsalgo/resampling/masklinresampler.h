@@ -75,10 +75,10 @@ class __attribute__((__deprecated__)) MaskLinearResampler : public Resampler< T 
     ~MaskLinearResampler() { }
 
     using Resampler<T>::resample;
-    void resample( const AimsData< T >& input_data,
+    void resample( const carto::Volume< T >& input_data,
                    const aims::AffineTransformation3d& transform,
                    const T& background,
-                   AimsData< T >& output_data,
+                   carto::Volume< T > & output_data,
                    bool verbose = false ) const CARTO_OVERRIDE;
 
   protected:
@@ -87,7 +87,8 @@ class __attribute__((__deprecated__)) MaskLinearResampler : public Resampler< T 
                   "type T cannot represent the mask value (-32768)");
 
     void
-    doResample( const AimsData< T > &, const aims::Transformation3d &, const T &,
+    doResample( const carto::Volume< T > &,
+                const aims::Transformation3d &, const T &,
                 const Point3df &, T &, int ) const CARTO_OVERRIDE;
 
     LinearResampler<T> _linearresampler;

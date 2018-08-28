@@ -46,10 +46,11 @@
 
 namespace {
   template <class T>
-  void _sliceResamp( const AimsData<T>& input_data, AimsData<T>& resamp,
+  void _sliceResamp( const carto::Volume<T>& input_data,
+                     carto::Volume<T> & resamp,
                      const T&background, T* out,
                      const Point3df& start,
-                     int t, const AimsData<float>& Rinv );
+                     int t, const carto::Volume<float>& Rinv );
 } // anonymous namespace
 
 namespace aims
@@ -57,7 +58,7 @@ namespace aims
 
 template <class T>
 void MaskLinearResampler<T>::
-doResample( const AimsData<T> &input_data,
+doResample( const carto::Volume<T> &input_data,
             const aims::Transformation3d &inverse_transform,
             const T &background,
             const Point3df& output_location,
@@ -69,24 +70,26 @@ doResample( const AimsData<T> &input_data,
   float yf = std::floor(input_location[1]);
   float zf = std::floor(input_location[2]);
 
+  std::vector<int> dims = input_data.getSize();
+
   // The test is done using floating-point so that NaN values are excluded (the
   // background value is returned if the transformation yields NaN)
-  if ( ( xf >= 0 ) && ( xf < input_data.dimX() ) &&
-       ( yf >= 0 ) && ( yf < input_data.dimY() ) &&
-       ( zf >= 0 ) && ( zf < input_data.dimZ() ) )
+  if ( ( xf >= 0 ) && ( xf < dims[0] ) &&
+       ( yf >= 0 ) && ( yf < dims[1] ) &&
+       ( zf >= 0 ) && ( zf < dims[2] ) )
   {
     int x = static_cast<int>(xf);
     int y = static_cast<int>(yf);
     int z = static_cast<int>(zf);
 
-    if (input_data(x,     y,     z, t) == -32768 ||
-        input_data(x + 1, y,     z, t) == -32768 ||
-        input_data(x,     y + 1, z, t) == -32768 ||
-        input_data(x + 1, y + 1, z, t) == -32768 ||
-        input_data(x,     y,     z + 1, t) == -32768 ||
-        input_data(x + 1, y,     z + 1, t) == -32768 ||
-        input_data(x,     y + 1, z + 1, t) == -32768 ||
-        input_data(x + 1, y + 1, z + 1, t) == -32768)
+    if (input_data.at(x,     y,     z, t) == -32768 ||
+        input_data.at(x + 1, y,     z, t) == -32768 ||
+        input_data.at(x,     y + 1, z, t) == -32768 ||
+        input_data.at(x + 1, y + 1, z, t) == -32768 ||
+        input_data.at(x,     y,     z + 1, t) == -32768 ||
+        input_data.at(x + 1, y,     z + 1, t) == -32768 ||
+        input_data.at(x,     y + 1, z + 1, t) == -32768 ||
+        input_data.at(x + 1, y + 1, z + 1, t) == -32768)
     {
       output_value = -32768;
     } else {
@@ -102,35 +105,39 @@ doResample( const AimsData<T> &input_data,
 
 
 template <class T>
-void MaskLinearResampler<T>::resample( const AimsData< T >& input_data,
-                                       const aims::AffineTransformation3d& motion,
+void MaskLinearResampler<T>::resample( const carto::Volume< T >& input_data,
+                                       const aims::AffineTransformation3d&
+                                         motion,
                                        const T& background,
-                                       AimsData< T >& thing,
+                                       carto::Volume< T > & thing,
                                        bool verbose ) const
 {
-  ASSERT( thing.dimT() == input_data.dimT() && thing.borderWidth() == 0 );
+  int dimt = thing.getSizeT();
+  ASSERT( thing.getSizeT() == input_data.getSizeT()
+          && thing.refVolume().isNull() );
 
   aims::AffineTransformation3d dirMotion = motion;
   aims::AffineTransformation3d invMotion = motion.inverse();
   
   // scale motion
-  Point3df sizeFrom( input_data.sizeX(), input_data.sizeY(), input_data.sizeZ() );
-  Point3df sizeTo( thing.sizeX(), thing.sizeY(), thing.sizeZ() );
+  Point3df sizeFrom( input_data.getVoxelSize() );
+  Point3df sizeTo( thing.getVoxelSize() );
   dirMotion.scale( sizeFrom, sizeTo );
   invMotion.scale( sizeTo, sizeFrom );
 
   //
   Point3df start;
-  typename AimsData<T>::iterator it = thing.begin() + thing.oFirstPoint();
+  T* it = &thing.at( 0 );
+  int dimz = thing.getSizeZ();
 
   if(verbose) {
     std::cout << "Resampling volume [  1] / slice [  1]" << std::flush;
   }
 
-  for (int t = 1; t <= thing.dimT(); t++ )
+  for (int t = 1; t <= dimt; t++ )
   {
     start = invMotion.translation();
-    for ( int s = 1; s <= thing.dimZ(); s++ )
+    for ( int s = 1; s <= dimz; s++ )
     {
       if(verbose) {
         std::cout << "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
@@ -139,8 +146,8 @@ void MaskLinearResampler<T>::resample( const AimsData< T >& input_data,
       }
 
       _sliceResamp( input_data, thing, background, it, start, t - 1,
-                    invMotion.rotation() );
-      it += thing.oSlice();
+                    invMotion.rotation().volume() );
+      it = &thing.at( 0, 0, s, t - 1 );
       start[ 0 ] += invMotion.rotation()( 0, 2 );
       start[ 1 ] += invMotion.rotation()( 1, 2 );
       start[ 2 ] += invMotion.rotation()( 2, 2 );
@@ -157,29 +164,27 @@ void MaskLinearResampler<T>::resample( const AimsData< T >& input_data,
 namespace {
 
 template <class T>
-void _sliceResamp( const AimsData<T>& input_data,
-                   AimsData<T>& resamp,
+void _sliceResamp( const carto::Volume<T>& input_data,
+                   carto::Volume<T> & resamp,
                    const T& background, T* out,
                    const Point3df& start, int t,
-                   const AimsData<float>& Rinv )
+                   const carto::Volume<float>& Rinv )
 {
   static_assert(std::numeric_limits<int>::digits >= 31,
                 "the optimizations need at least 32-bit int");
 
-  typename AimsData<T>::const_iterator
-    pOrig = input_data.begin() + input_data.oFirstPoint() +
-            t * input_data.oVolume();
+  const T* pOrig = &input_data.at( 0, 0, 0, t );
 
-  int dimX1 = input_data.dimX();
-  int dimX2 = resamp.dimX();
-  int dimY2 = resamp.dimY();
+  int dimX1 = input_data.getSizeX();
+  int dimX2 = resamp.getSizeX();
+  int dimY2 = resamp.getSizeY();
 
   const int SIXTEEN = 16;
   const int TWO_THEN_SIXTEEN = 65536;
 
   int maxX = TWO_THEN_SIXTEEN * ( dimX1 - 1 );
-  int maxY = TWO_THEN_SIXTEEN * ( input_data.dimY() - 1 );
-  int maxZ = TWO_THEN_SIXTEEN * ( input_data.dimZ() - 1 );
+  int maxY = TWO_THEN_SIXTEEN * ( input_data.getSizeY() - 1 );
+  int maxZ = TWO_THEN_SIXTEEN * ( input_data.getSizeZ() - 1 );
 
   int xLinCurrent = ( int )( 65536.0 * start[ 0 ] );
   int yLinCurrent = ( int )( 65536.0 * start[ 1 ] );
@@ -194,12 +199,18 @@ void _sliceResamp( const AimsData<T>& input_data,
 
   int xCurrent, yCurrent, zCurrent;
   int dx, dy, dz;
-  typename AimsData<T>::const_iterator it;
-  int   incr_vois[8] = {0, 1,
-			dimX1+1,dimX1, 
-			input_data.oSlice(),input_data.oSlice()+1,
-			input_data.oSlice()+ dimX1+1,input_data.oSlice() + dimX1};
-  float stock1, stock2, stock3;
+  const T* it;
+  long   incr_vois[8] = {
+    0,
+    1,
+    &input_data.at( 0, 1, 0 ) - &input_data.at( 0 ),
+    &input_data.at( 0, 1, 0 ) - &input_data.at( 0 ),
+    &input_data.at( 0, 0, 1 ) - &input_data.at( 0 ),
+    &input_data.at( 1, 0, 1 ) - &input_data.at( 0 ),
+    &input_data.at( 1, 1, 1 ) - &input_data.at( 0 ),
+    &input_data.at( 0, 1, 1 ) - &input_data.at( 0 )
+  };
+float stock1, stock2, stock3;
   for ( int v = dimY2; v--; )
   {
     xCurrent = xLinCurrent;
@@ -216,7 +227,7 @@ void _sliceResamp( const AimsData<T>& input_data,
         dy = yCurrent & 0xffff;
         dz = zCurrent & 0xffff;
 
-        it = pOrig + ( zCurrent >> SIXTEEN ) * input_data.oSlice()
+        it = pOrig + ( zCurrent >> SIXTEEN ) * incr_vois[4]
                    + ( yCurrent >> SIXTEEN ) * dimX1
                    + ( xCurrent >> SIXTEEN );
 
@@ -248,7 +259,7 @@ void _sliceResamp( const AimsData<T>& input_data,
 	    stock1 += stock2 * dy;
 	    stock1 /= TWO_THEN_SIXTEEN;
 
-	    it += input_data.oSlice() - dimX1;
+	    it += incr_vois[4] - dimX1;
 	    stock2 = *it * ( TWO_THEN_SIXTEEN - dx );
 	    stock2 += *(++it) * dx;
 	    stock2 /= TWO_THEN_SIXTEEN;

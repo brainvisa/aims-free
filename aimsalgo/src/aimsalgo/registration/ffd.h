@@ -52,6 +52,9 @@ namespace aims {
     template <typename T>
     FfdTransformation( int dimX, int dimY, int dimZ,
                        const AimsData<T> & test_volume );
+    template <typename T>
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const carto::Volume<T> & test_volume );
 
     FfdTransformation( const FfdTransformation & other );
     FfdTransformation( const AimsData<Point3df> & other );
@@ -83,9 +86,18 @@ namespace aims {
     int          dimX() const { return _dimx; }
     int          dimY() const { return _dimy; }
     int          dimZ() const { return _dimz; }
+    int getSizeX() const { return _dimx; }
+    int getSizeY() const { return _dimy; }
+    int getSizeZ() const { return _dimz; }
+    std::vector<int> getSize() const
+    { std::vector<int> s( 3 ); s[0] = _dimx; s[1] = _dimy; s[2] = _dimz;
+      return s; }
     float        sizeX() const { return _vsx; }
     float        sizeY() const { return _vsy; }
     float        sizeZ() const { return _vsz; }
+    std::vector<float> getVoxelSize() const
+    { std::vector<float> v( 3 ); v[0] = _vsx; v[1] = _vsy; v[2] = _vsz;
+      return v; }
     bool isFlat( int i ) const
     {
       switch(i)
@@ -138,6 +150,24 @@ namespace aims {
       _flatx ? test_volume.sizeX() : double(test_volume.dimX() - 1) / double(dimX - 1) * test_volume.sizeX(),
       _flaty ? test_volume.sizeY() : double(test_volume.dimY() - 1) / double(dimY - 1) * test_volume.sizeY(),
       _flatz ? test_volume.sizeZ() : double(test_volume.dimZ() - 1) / double(dimZ - 1) * test_volume.sizeZ()
+    );
+    updateDimensions();
+  }
+
+  template <typename T>
+  inline
+  FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
+                                        const carto::Volume<T> & test_volume ):
+    _ctrlPointDelta( dimX, dimY, dimZ ),
+    _dimx( dimX ), _dimy( dimY ), _dimz( dimZ ),
+    _flatx( dimX == 1 ), _flaty( dimY == 1 ), _flatz( dimZ == 1 )
+  {
+    _ctrlPointDelta = Point3df(0., 0., 0.);
+    std::vector<float> vs = test_volume.getVoxelSize();
+    _ctrlPointDelta.setSizeXYZT(
+      _flatx ? vs[0] : double(test_volume.getSizeX() - 1) / double(dimX - 1) * vs[0],
+      _flaty ? vs[1] : double(test_volume.getSizeY() - 1) / double(dimY - 1) * vs[1],
+      _flatz ? vs[2] : double(test_volume.getSizeZ() - 1) / double(dimZ - 1) * vs[2]
     );
     updateDimensions();
   }
