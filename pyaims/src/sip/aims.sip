@@ -229,6 +229,7 @@ typedef int int32_t;
 %Include reader_BucketMap_FLOAT.sip
 %Include reader_BucketMap_DOUBLE.sip
 
+%Include aimsdata_BOOL.sip
 %Include aimsdata_U8.sip
 %Include aimsdata_S16.sip
 %Include aimsdata_U16.sip
@@ -292,6 +293,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include reader_Object.sip
 %Include soma_reader_Object.sip
 
+%Include rcptr_AimsData_BOOL.sip
 %Include rcptr_AimsData_U8.sip
 %Include rcptr_AimsData_S16.sip
 %Include rcptr_AimsData_U16.sip
@@ -306,6 +308,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include rcptr_AimsData_CDOUBLE.sip
 %Include rcptr_AimsData_POINT3DF.sip
 
+// %Include reader_AimsData_BOOL.sip
 %Include reader_AimsData_U8.sip
 %Include reader_AimsData_S16.sip
 %Include reader_AimsData_U16.sip
@@ -365,6 +368,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 
 %Include volume_operators.sip
 
+// %Include reader_Volume_BOOL.sip
 %Include reader_Volume_U8.sip
 %Include reader_Volume_S16.sip
 %Include reader_Volume_U16.sip
@@ -379,6 +383,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include reader_Volume_CDOUBLE.sip
 %Include reader_Volume_POINT3DF.sip
 
+// %Include soma_reader_Volume_BOOL.sip
 %Include soma_reader_Volume_U8.sip
 %Include soma_reader_Volume_S16.sip
 %Include soma_reader_Volume_U16.sip
