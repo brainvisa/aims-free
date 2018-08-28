@@ -36,7 +36,7 @@
 #define AIMS_RESAMPLING_RESAMPLER_H
 
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/vector/vector.h>
 #include <aims/transformation/transformation.h>
 #include <aims/transformation/affinetransformation3d.h>
@@ -102,7 +102,7 @@ public:
       `--verbose` command-line argument is honoured).
   */
   void doit( const aims::AffineTransformation3d& transform,
-             AimsData<T>& output_data ) const;
+             carto::Volume<T>& output_data ) const;
 
   /** Resample the input volume set with setRef() in a newly allocated volume.
 
@@ -135,9 +135,9 @@ public:
           is missing or invalid), then a new transformation is added that
           points to the input volume.
   */
-  AimsData<T> doit( const aims::AffineTransformation3d& transform,
-                    int dimX, int dimY,
-                    int dimZ, const Point3df& voxel_size ) const;
+  carto::VolumeRef<T> doit( const aims::AffineTransformation3d& transform,
+                            int dimX, int dimY,
+                            int dimZ, const Point3df& voxel_size ) const;
 
   /** Resample a volume into an existing output volume.
 
@@ -165,10 +165,10 @@ public:
       full volume. The base class method simply calls doResample for each
       point.
   */
-  virtual void resample( const AimsData< T >& input_data,
+  virtual void resample( const carto::Volume< T >& input_data,
                          const aims::AffineTransformation3d& transform,
                          const T& background,
-                         AimsData< T >& output_data,
+                         carto::Volume< T > & output_data,
                          bool verbose = false ) const;
 
   /** Resample a volume at a single location.
@@ -189,7 +189,7 @@ public:
       This method does *not* use the instance state set by setRef() or
       setDefaultValue().
   */
-  void resample( const AimsData< T >& input_data,
+  void resample( const carto::Volume< T >& input_data,
                  const aims::AffineTransformation3d& transform,
                  const T& background,
                  const Point3df& output_location,
@@ -213,7 +213,7 @@ public:
       setDefaultValue().
   */
   void
-  resample_inv( const AimsData< T > &input_data,
+  resample_inv( const carto::Volume< T > &input_data,
                 const aims::Transformation3d &inverse_transform_to_mm,
                 const T &background, const Point3df &output_location,
                 T &output_value, int timestep ) const;
@@ -239,10 +239,10 @@ public:
       This method does *not* use the instance state set by setRef() or
       setDefaultValue().
   */
-  void resample_inv( const AimsData< T >& input_data,
+  void resample_inv( const carto::Volume< T >& input_data,
                      const aims::Transformation3d& inverse_transform_to_mm,
                      const T& background,
-                     AimsData< T >& output_data,
+                     carto::Volume< T > & output_data,
                      bool verbose = false ) const;
 
   /** Resample a volume at a single location.
@@ -263,10 +263,11 @@ public:
       setDefaultValue().
   */
   void
-  resample_inv_to_vox( const AimsData< T > &input_data,
+  resample_inv_to_vox( const carto::Volume< T > &input_data,
                        const aims::Transformation3d &inverse_transform_to_vox,
                        const T &background, const Point3df &output_location,
-                       T &output_value, int timestep ) const {
+                       T &output_value, int timestep ) const
+  {
     updateParameters( input_data, timestep, carto::verbose );
     return doResample(input_data, inverse_transform_to_vox, background,
                       output_location, output_value, timestep);
@@ -298,17 +299,17 @@ public:
       full volume. The base class method simply calls doResample for each
       point.
   */
-  virtual void resample_inv_to_vox( const AimsData< T >& input_data,
+  virtual void resample_inv_to_vox( const carto::Volume< T >& input_data,
                                     const aims::Transformation3d& inverse_transform_to_vox,
                                     const T& background,
-                                    AimsData< T >& output_data,
+                                    carto::Volume< T > & output_data,
                                     bool verbose = false ) const;
 
   /// Set the input data to be resampled by the doit() methods
-  void setRef( const AimsData<T>& ref );
+  void setRef( const carto::rc_ptr<carto::Volume<T> >& ref );
 
   /// Input data to be resampled by the doit() methods
-  const AimsData<T>& ref() const { return _ref; }
+  const carto::rc_ptr<carto::Volume<T> >& ref() const { return _ref; }
 
   /// Set the background value to be used by the doit() methods
   void setDefaultValue( T val ) { _defval = val; }
@@ -333,7 +334,7 @@ protected:
       \param[in]  timestep        for 4D volume, time step to be used
   */
   virtual void
-  doResample( const AimsData< T > &input_data,
+  doResample( const carto::Volume< T > &input_data,
               const aims::Transformation3d &inverse_transform,
               const T &background, const Point3df &output_location,
               T &output_value, int timestep ) const = 0;
@@ -345,10 +346,11 @@ protected:
 
       The base class version of this method does nothing.
    */
-  virtual void updateParameters( const AimsData< T > & /*inVolume*/, int /*time*/,
+  virtual void updateParameters( const carto::Volume< T > & /*inVolume*/,
+                                 int /*time*/,
                                  bool /*verbose*/ ) const {};
 
-  AimsData<T> _ref;
+  carto::rc_ptr<carto::Volume<T> > _ref;
   T _defval;
 };
 

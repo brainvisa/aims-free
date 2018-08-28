@@ -229,9 +229,14 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // Output resampled volume
   //--------------------------------------------------------------------------
-  AimsData<T> out( ffdproc.dx, ffdproc.dy, ffdproc.dz, in.dimT() );
-  out.setSizeXYZT( ffdproc.sx, ffdproc.sy, ffdproc.sz, in.sizeT() );
-  out = bv;
+  VolumeRef<T> out( ffdproc.dx, ffdproc.dy, ffdproc.dz, in.dimT() );
+  vector<float> vs( 4 );
+  vs[0] = ffdproc.sx;
+  vs[1] = ffdproc.sy;
+  vs[2] = ffdproc.sz;
+  vs[3] = in.sizeT();
+  out->header().setProperty( "voxel_size", vs );
+  out->fill( bv );
 
   //==========================================================================
   //
@@ -258,7 +263,7 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   cout << "Initialization done." << endl;
 
   cout << "Resampling... ";
-  rsp->resample_inv( in, *transform, bv, out, true );
+  rsp->resample_inv( *in.volume(), *transform, bv, *out, true );
   cout << endl;
 
   if(!ffdproc.compout.empty()
@@ -269,7 +274,7 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   //--------------------------------------------------------------------------
   // Output resampled volume
   //--------------------------------------------------------------------------
-  Writer<AimsData<T> > w3(ffdproc.output);
+  Writer<VolumeRef<T> > w3(ffdproc.output);
   success = w3.write(out) && success;
 
   return success;

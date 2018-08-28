@@ -59,33 +59,35 @@ namespace aims
 
 template <typename T>
 Resampler<T>::Resampler()
-  : _ref(0, 0, 0, 0), _defval( T() )
+  : _ref( 0 ), _defval( T() )
 {
 }
 
 
 template <typename T>
 void Resampler<T>::
-resample_inv_to_vox( const AimsData< T >& inVolume,
+resample_inv_to_vox( const carto::Volume< T >& inVolume,
                      const aims::Transformation3d& inverse_transform_to_vox,
                      const T& outBackground,
-                     AimsData< T >& outVolume,
+                     carto::Volume< T > & outVolume,
                      bool verbose ) const
 {
 
   Point3df outResolution;
-  outResolution[0] = outVolume.sizeX();
-  outResolution[1] = outVolume.sizeY();
-  outResolution[2] = outVolume.sizeZ();
+  std::vector<float> vs = outVolume.getVoxelSize();
+  outResolution[0] = vs[0];
+  outResolution[1] = vs[1];
+  outResolution[2] = vs[2];
 
-  int outSizeX = outVolume.dimX();
-  int outSizeY = outVolume.dimY();
-  int outSizeZ = outVolume.dimZ();
-  int outSizeT = outVolume.dimT();
-  if( outSizeT > inVolume.dimT() )
-    outSizeT = inVolume.dimT();
+  std::vector<int> sz = outVolume.getSize();
+  int outSizeX = sz[0];
+  int outSizeY = sz[1];
+  int outSizeZ = sz[2];
+  int outSizeT = sz[3];
+  if( outSizeT > inVolume.getVoxelSize()[3] )
+    outSizeT = inVolume.getVoxelSize()[3];
 
-  typename AimsData< T >::iterator o;
+  T* o;
 
   aims::Progression progress(0, static_cast<size_t>(outSizeX)
                              * outSizeY * outSizeZ * outSizeT);
@@ -101,7 +103,7 @@ resample_inv_to_vox( const AimsData< T >& inVolume,
 
           for ( y = 0; y < outSizeY; y++ )
             {
-              o = &outVolume( 0, y, z, t );
+              o = &outVolume.at( 0, y, z, t );
 
               for ( x = 0; x < outSizeX; x++ )
                 {
@@ -132,16 +134,14 @@ resample_inv_to_vox( const AimsData< T >& inVolume,
 
 template <typename T>
 void Resampler<T>::
-resample_inv( const AimsData< T >& input_data,
+resample_inv( const carto::Volume< T >& input_data,
               const aims::Transformation3d& inverse_transform_to_mm,
               const T& background,
-              AimsData< T >& output_volume,
+              carto::Volume< T > & output_volume,
               bool verbose ) const
 {
 
-  Point3df in_voxel_size(input_data.sizeX(),
-                         input_data.sizeY(),
-                         input_data.sizeZ());
+  Point3df in_voxel_size( input_data.getVoxelSize() );
 
   aims::AffineTransformation3d mm_to_voxel_transform;
   mm_to_voxel_transform.scale( Point3df( 1, 1, 1 ), in_voxel_size );
@@ -156,7 +156,7 @@ resample_inv( const AimsData< T >& input_data,
 
 template <typename T>
 void Resampler<T>::
-resample_inv( const AimsData< T >& input_data,
+resample_inv( const carto::Volume< T >& input_data,
               const aims::Transformation3d& inverse_transform_to_mm,
               const T& background,
               const Point3df& output_location,
@@ -164,9 +164,7 @@ resample_inv( const AimsData< T >& input_data,
               int timestep ) const
 {
 
-  Point3df in_voxel_size(input_data.sizeX(),
-                         input_data.sizeY(),
-                         input_data.sizeZ());
+  Point3df in_voxel_size( input_data.getVoxelSize() );
 
   aims::AffineTransformation3d mm_to_voxel_transform;
   mm_to_voxel_transform.scale( Point3df( 1, 1, 1 ), in_voxel_size );
@@ -182,17 +180,14 @@ resample_inv( const AimsData< T >& input_data,
 
 template < typename T >
 void
-Resampler< T >::resample( const AimsData< T >& inVolume,
+Resampler< T >::resample( const carto::Volume< T >& inVolume,
                           const aims::AffineTransformation3d& transform3d,
                           const T& outBackground,
-                          AimsData< T >& outVolume,
+                          carto::Volume< T > & outVolume,
                           bool verbose ) const
 {
 
-  Point3df inResolution;
-  inResolution[0] = inVolume.sizeX();
-  inResolution[1] = inVolume.sizeY();
-  inResolution[2] = inVolume.sizeZ();
+  Point3df inResolution( inVolume.getVoxelSize() );
 
   aims::AffineTransformation3d normTransform3d;
 
@@ -208,17 +203,14 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
 
 template < typename T >
 void
-Resampler< T >::resample( const AimsData< T >& inVolume,
+Resampler< T >::resample( const carto::Volume< T >& inVolume,
                           const aims::AffineTransformation3d& transform3d,
                           const T& outBackground,
                           const Point3df& outLocation,
                           T& outValue, int t ) const
 {
 
-  Point3df inResolution;
-  inResolution[0] = inVolume.sizeX();
-  inResolution[1] = inVolume.sizeY();
-  inResolution[2] = inVolume.sizeZ();
+  Point3df inResolution( inVolume.getVoxelSize() );
 
   aims::AffineTransformation3d normTransform3d;
 
@@ -236,85 +228,83 @@ Resampler< T >::resample( const AimsData< T >& inVolume,
 
 template <typename T>
 void Resampler<T>::doit( const aims::AffineTransformation3d& motion,
-                         AimsData<T>& thing ) const
+                         carto::Volume<T> & thing ) const
 {
-  if( _ref.empty() )
+  if( _ref.isNull() )
     throw std::runtime_error( "Resampler used without a ref volume to resample"
     );
-  resample( _ref, motion, _defval, thing, carto::verbose );
+  resample( *_ref, motion, _defval, thing, carto::verbose );
 }
 
 
 template <typename T>
-AimsData<T> Resampler<T>::doit( const aims::AffineTransformation3d& motion,
-                                int dimX, int dimY, int dimZ,
-                                const Point3df& resolution ) const
+carto::VolumeRef<T> Resampler<T>::doit(
+  const aims::AffineTransformation3d& motion,
+  int dimX, int dimY, int dimZ,
+  const Point3df& resolution ) const
 {
-  if( _ref.empty() )
+  if( _ref.isNull() )
     throw std::runtime_error( "Resampler used without a ref volume to resample"
     );
-  AimsData<T>	thing( dimX, dimY, dimZ, _ref.dimT() );
-  thing.setSizeXYZT( resolution[0], resolution[1], resolution[2],
-                     _ref.sizeT() );
+  carto::VolumeRef<T>	thing( dimX, dimY, dimZ, _ref->getSizeT() );
+  std::vector<float> vs( 4, 1. );
+  vs[0] = resolution[0];
+  vs[1] = resolution[1];
+  vs[2] = resolution[2];
+  vs[3] = _ref->getVoxelSize()[3];
+  thing->header().setProperty( "voxel_size", vs );
 
-  resample( _ref, motion, _defval, thing, carto::verbose );
-  thing.setHeader( _ref.header()->cloneHeader() );
-  thing.setSizeXYZT( resolution[0], resolution[1], resolution[2],
-                     _ref.sizeT() );
+  resample( *_ref, motion, _defval, *thing, carto::verbose );
+  thing->copyHeaderFrom( _ref->header() );
+  thing->header().setProperty( "voxel_size", vs );
   if( !motion.isIdentity() )
   {
-    aims::PythonHeader
-        *ph = dynamic_cast<aims::PythonHeader *>( thing.header() );
+    carto::PropertySet & ph = thing->header();
     try
     {
       // remove any referential ID since we are no longer in the same ref
-      ph->removeProperty( "referential" );
+      ph.removeProperty( "referential" );
     }
     catch( ... )
     {
     }
     try
     {
-      if( ph )
+      carto::Object trs = ph.getProperty( "transformations" );
+      carto::Object tit = trs->objectIterator();
+      aims::AffineTransformation3d motioninv = motion.inverse();
+      std::vector<std::vector<float> > trout;
+      trout.reserve( trs->size() );
+      for( ; tit->isValid(); tit->next() )
       {
-        carto::Object trs = ph->getProperty( "transformations" );
-        carto::Object tit = trs->objectIterator();
-        aims::AffineTransformation3d motioninv = motion.inverse();
-        std::vector<std::vector<float> > trout;
-        trout.reserve( trs->size() );
-        for( ; tit->isValid(); tit->next() )
-        {
-          aims::AffineTransformation3d m( tit->currentValue() );
-          m *= motioninv;
-          trout.push_back( m.toVector() );
-        }
-        ph->setProperty( "transformations", trout );
+        aims::AffineTransformation3d m( tit->currentValue() );
+        m *= motioninv;
+        trout.push_back( m.toVector() );
       }
+      ph.setProperty( "transformations", trout );
     }
     catch( ... )
     {
       // setup a new transformations list
       std::vector<std::vector<float> > trout;
       std::vector<std::string> refsout;
-      const aims::PythonHeader
-          *iph = dynamic_cast<const aims::PythonHeader *>( _ref.header() );
-      if( iph )
-        try
-        {
-          carto::Object iref = iph->getProperty( "referential" );
-          std::string refid = iref->getString();
-          refsout.push_back( refid );
-        }
-        catch( ... )
-        {
-        }
+      const carto::PropertySet & iph = _ref->header();
+      try
+      {
+        carto::Object iref = iph.getProperty( "referential" );
+        std::string refid = iref->getString();
+        refsout.push_back( refid );
+      }
+      catch( ... )
+      {
+      }
       if( refsout.empty() )
         refsout.push_back( "Coordinates aligned to another file or to "
             "anatomical truth" );
 
       trout.push_back( motion.inverse().toVector() );
-      ph->setProperty( "transformations", trout );
-      ph->setProperty( "referentials", refsout );
+      ph.setProperty( "transformations", trout );
+      ph.setProperty( "referentials", refsout );
     }
   }
   return thing;
@@ -322,7 +312,7 @@ AimsData<T> Resampler<T>::doit( const aims::AffineTransformation3d& motion,
 
 
 template <typename T>
-void Resampler<T>::setRef(const AimsData<T>& ref)
+void Resampler<T>::setRef(const carto::rc_ptr<carto::Volume<T> >& ref)
 {
   _ref = ref;
 }

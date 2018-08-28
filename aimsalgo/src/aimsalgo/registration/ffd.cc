@@ -135,20 +135,20 @@ void FfdTransformation::updateAllCtrlKnotFromDeformation( const AimsData<Point3d
   // Spline interpolation of displacement vectors of control points
   for( int c = 0; c <= 2; ++c )
   {
-    AimsData<float> def( newDeformationGrid.dimX(),
-                         newDeformationGrid.dimY(),
-                         newDeformationGrid.dimZ() );
-    def = 0.;
+    carto::VolumeRef<float> def( newDeformationGrid.dimX(),
+                                 newDeformationGrid.dimY(),
+                                 newDeformationGrid.dimZ() );
+    def->fill( 0. );
 
-    int dx = def.dimX(), dy = def.dimY(), dz = def.dimZ();
+    int dx = def->getSizeX(), dy = def->getSizeY(), dz = def->getSizeZ();
     // Copy of coefficients to def
     for( int k = 0; k < dz; ++k )
     for( int j = 0; j < dy; ++j )
     for( int i = 0; i < dx; ++i )
-      def(i, j, k) = newDeformationGrid(i, j, k)[c];
+      def->at(i, j, k) = newDeformationGrid(i, j, k)[c];
 
     // Construction of spline coefficients for test image
-    AimsData<double> splineCoeff;
+    VolumeRef<double> splineCoeff;
     {
       CubicResampler<float> interpolator;
       splineCoeff = interpolator.getSplineCoef( def );
@@ -157,7 +157,7 @@ void FfdTransformation::updateAllCtrlKnotFromDeformation( const AimsData<Point3d
     for( int k = 0; k < dz; ++k )
     for( int j = 0; j < dy; ++j )
     for( int i = 0; i < dx; ++i )
-      _ctrlPointDelta(i, j, k)[c] = (float)splineCoeff(i, j, k);
+      _ctrlPointDelta(i, j, k)[c] = (float)splineCoeff->at(i, j, k);
   }
 }
 

@@ -58,7 +58,7 @@ public:
 protected:
   typedef typename SplineResampler<T>::ChannelType ChannelType;
 
-  void doResampleChannel( const AimsData< ChannelType >& inVolume,
+  void doResampleChannel( const carto::Volume< ChannelType >& inVolume,
                           const aims::Transformation3d& transform3d,
                           const ChannelType& outBackground,
                           const Point3df& outLocation,

@@ -46,7 +46,7 @@ namespace aims
 
 template <class T>
 void
-NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
+NearestNeighborResampler<T>::doResample( const carto::Volume< T > &inVolume,
                                          const aims::Transformation3d &invTransform3d,
                                          const T &outBackground,
                                          const Point3df &outLocation,
@@ -60,7 +60,7 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
 
 template <class T>
 void
-NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
+NearestNeighborResampler<T>::doResample( const carto::Volume< T > &inVolume,
                                          const Point3df &inLocation,
                                          const T &outBackground,
                                          T &outValue, int t ) const
@@ -69,16 +69,18 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
   float yf = round(inLocation[1]);
   float zf = round(inLocation[2]);
 
+  std::vector<int> dims = inVolume.getSize();
+
   // The test is done using floating-point so that NaN values are excluded (the
   // background value is returned if the transformation yields NaN)
-  if ( ( xf >= 0 ) && ( xf < inVolume.dimX() ) &&
-       ( yf >= 0 ) && ( yf < inVolume.dimY() ) &&
-       ( zf >= 0 ) && ( zf < inVolume.dimZ() ) )
+  if ( ( xf >= 0 ) && ( xf < dims[0] ) &&
+       ( yf >= 0 ) && ( yf < dims[1] ) &&
+       ( zf >= 0 ) && ( zf < dims[2] ) )
   {
     int x = static_cast<int>(xf);
     int y = static_cast<int>(yf);
     int z = static_cast<int>(zf);
-    outValue = inVolume( x, y, z, t );
+    outValue = inVolume.at( x, y, z, t );
   }
   else
   {

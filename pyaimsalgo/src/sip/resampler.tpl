@@ -100,9 +100,9 @@ point only.
   typedef aims::Resampler<%Template1%> Resampler_%Template1typecode%;
   #endif
 
-  #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  #define PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  typedef AimsData<%Template1%> AimsData_%Template1typecode%;
+  #ifndef PYAIMSSIP_VOLUME_%Template1typecode%_DEFINED
+  #define PYAIMSSIP_VOLUME_%Template1typecode%_DEFINED
+  typedef carto::Volume<%Template1%> Volume_%Template1typecode%;
   #endif
 %End
 
@@ -112,7 +112,7 @@ public:
 
 
   void doit( const aims::AffineTransformation3d& transform,
-             AimsData_%Template1typecode% & output_data )
+             Volume_%Template1typecode% & output_data )
     const throw(std::runtime_error) /ReleaseGIL/;
 %Docstring
 doit(transform, output_data)
@@ -136,7 +136,7 @@ transform: AffineTransformation3d
     transformation from coordinates of the *input* volume (unit: mm), to
     coordinates of the *output* volume (unit: mm) (its inverse is used
     for resampling)
-output_data: AimsData_%Template1typecode%
+output_data: Volume_%Template1typecode%
     existing volume to be filled with resampled data (its pre-existing
     dimensions and voxel size are used)
 
@@ -148,9 +148,10 @@ RuntimeError
 %End
 
 
-  AimsData_%Template1typecode% doit(const aims::AffineTransformation3d & transform,
-                                    int dimx, int dimy, int dimz,
-                                    const Point3df & voxel_size )
+  rc_ptr_Volume_%Template1typecode% doit(const aims::AffineTransformation3d &
+                                         transform,
+                                         int dimx, int dimy, int dimz,
+                                         const Point3df & voxel_size )
   const throw(std::runtime_error) /Factory, ReleaseGIL/;
 %Docstring
 doit(transform, dimx, dimy, dimz, voxel_size)
@@ -190,7 +191,7 @@ voxel_size: Point3df (list of 3 floats)
 Returns
 -------
 
-AimsData_%Template1typecode%
+Volume_%Template1typecode%
     a newly allocated volume containing the resampled data (its size
     along the t axis is the same as the input volume).
 
@@ -201,10 +202,10 @@ RuntimeError: if no input volume has been set with setRef.
 %End
 
 
-  virtual void resample( const AimsData_%Template1typecode% & input_data,
+  virtual void resample( const Volume_%Template1typecode% & input_data,
                          const aims::AffineTransformation3d & transform,
                          const %Template1% & background,
-                         AimsData_%Template1typecode% & output_data,
+                         Volume_%Template1typecode% & output_data,
                          bool verbose = false ) const /ReleaseGIL/;
 %Docstring
 resample(input_data, transform, background, output_data, verbose=False)
@@ -226,7 +227,7 @@ point.
 Parameters
 ----------
 
-input_data: AimsData_%Template1typecode%
+input_data: Volume_%Template1typecode%
     data to be resampled (its voxel size is taken into account)
 transform: AffineTransformation3d
     transformation from coordinates of the *input* volume (unit: mm), to
@@ -235,7 +236,7 @@ transform: AffineTransformation3d
 background: %Template1PyType%
     value set in output regions that are outside of the transformed
     input volume
-output_data: AimsData_%Template1typecode%
+output_data: Volume_%Template1typecode%
     existing volume to be filled with resampled data (its pre-existing
     dimensions and voxel size are used)
 verbose: bool
@@ -244,7 +245,7 @@ verbose: bool
 %End
 
 
-  void resample( const AimsData_%Template1typecode% & input_data,
+  void resample( const Volume_%Template1typecode% & input_data,
                  const aims::AffineTransformation3d & transform,
                  const %Template1% & background,
                  const Point3df & output_location,
@@ -260,7 +261,7 @@ setDefaultValue().
 
 Parameters
 ----------
-input_data: AimsData_%Template1typecode%
+input_data: Volume_%Template1typecode%
     data to be resampled (its voxel size is taken into account)
 transform: AffineTransformation3d
     transformation from coordinates of the *input* volume (unit: mm), to
@@ -281,14 +282,14 @@ Returns
 %End
 
 
-  virtual void resample_inv( const AimsData_%Template1typecode% & input_data,
+  virtual void resample_inv( const Volume_%Template1typecode% & input_data,
                              const aims::Transformation3d & inverse_transform,
                              const %Template1% & background,
-                             AimsData_%Template1typecode% & output_data,
+                             Volume_%Template1typecode% & output_data,
                              bool verbose = false ) const /ReleaseGIL/;
 %Docstring
-resample(input_data, inverse_transform, background, output_data, verbose=False)
-===============================================================================
+resample_inv(input_data, inverse_transform, background, output_data, verbose=False)
+===================================================================================
 
 Resample a volume into an existing output volume.
 
@@ -302,7 +303,7 @@ setDefaultValue().
 Parameters
 ----------
 
-input_data: AimsData_%Template1typecode%
+input_data: Volume_%Template1typecode%
     data to be resampled (its voxel size is taken into account)
 inverse_transform: Transformation3d
     transformation from coordinates of the *output* volume (unit: mm), to
@@ -310,7 +311,7 @@ inverse_transform: Transformation3d
 background: %Template1PyType%
     value set in output regions that are outside of the transformed
     input volume
-output_data: AimsData_%Template1typecode%
+output_data: Volume_%Template1typecode%
     existing volume to be filled with resampled data (its pre-existing
     dimensions and voxel size are used)
 verbose: bool
@@ -319,22 +320,22 @@ verbose: bool
 %End
 
 
-  void resample_inv( const AimsData_%Template1typecode% & input_data,
+  void resample_inv( const Volume_%Template1typecode% & input_data,
                      const aims::Transformation3d & inverse_transform,
                      const %Template1% & background,
                      const Point3df & output_location,
                      %Template1% & output_value /Out/,
                      int timestep ) const /ReleaseGIL/;
 %Docstring
-resample(input_data, inverse_transform, background, output_location, timestep) -> output_value
-==============================================================================================
+resample_inv(input_data, inverse_transform, background, output_location, timestep) -> output_value
+==================================================================================================
 
 Resample a volume at a single location.
 
 This method does *not* use the instance state set by setRef() or
 setDefaultValue().
 
-input_data: AimsData_%Template1typecode%
+input_data: Volume_%Template1typecode%
     data to be resampled (its voxel size is taken into account)
 inverse_transform: Transformation3d
     transformation from output coordinates to coordinates of the input
@@ -354,14 +355,14 @@ Returns
 
 %End
 
-  virtual void resample_inv_to_vox( const AimsData_%Template1typecode% & input_data,
+  virtual void resample_inv_to_vox( const Volume_%Template1typecode% & input_data,
                                     const aims::Transformation3d & inverse_transform_to_vox,
                                     const %Template1% & background,
-                                    AimsData_%Template1typecode% & output_data,
+                                    Volume_%Template1typecode% & output_data,
                                     bool verbose=false ) const /ReleaseGIL/;
 %Docstring
-resample(input_data, inverse_transform_to_vox, background, output_data, verbose=False)
-======================================================================================
+resample_inv_to_vox(input_data, inverse_transform_to_vox, background, output_data, verbose=False)
+=================================================================================================
 
 Resample a volume into an existing output volume.
 
@@ -378,7 +379,7 @@ point.
 
 Parameters
 ----------
-input_data: AimsData_%Template1typecode%
+input_data: Volume_%Template1typecode%
     data to be resampled (its voxel size is taken into account)
 inverse_transform_to_vox: Transformation3d
     transformation from coordinates of the *output* volume (unit: mm),
@@ -386,7 +387,7 @@ inverse_transform_to_vox: Transformation3d
 background: %Template1PyType%
     value set in output regions that are outside of the transformed
     input volume
-output_data: AimsData_%Template1typecode%
+output_data: Volume_%Template1typecode%
     existing volume to be filled with resampled data (its pre-existing
     dimensions and voxel size are used)
 verbose: bool
@@ -395,22 +396,22 @@ verbose: bool
 %End
 
 
-  void resample_inv_to_vox( const AimsData_%Template1typecode% & input_data,
+  void resample_inv_to_vox( const Volume_%Template1typecode% & input_data,
                             const aims::Transformation3d & inverse_transform_to_vox,
                             const %Template1% & background,
                             const Point3df & output_location,
                             %Template1% & output_value /Out/,
                             int timestep ) const /ReleaseGIL/;
 %Docstring
-resample(input_data, inverse_transform_to_vox, background, output_location, timestep) -> output_value
-=====================================================================================================
+resample_inv_to_vox(input_data, inverse_transform_to_vox, background, output_location, timestep) -> output_value
+================================================================================================================
 
 Resample a volume at a single location.
 
 This method does *not* use the instance state set by setRef() or
 setDefaultValue().
 
-input_data: AimsData_%Template1typecode%
+input_data: Volume_%Template1typecode%
     data to be resampled (its voxel size is taken into account)
 inverse_transform_to_vox: Transformation3d
     transformation from output coordinates to coordinates of the input
@@ -431,7 +432,7 @@ Returns
 %End
 
 
-  void setRef( const AimsData_%Template1typecode% & /Transfer/ );
+  void setRef( const rc_ptr_Volume_%Template1typecode% & /Transfer/ );
 %Docstring
 setRef(input_data)
 
@@ -439,12 +440,12 @@ Set the input data to be resampled by the doit() methods
 
 Parameters
 ----------
-input_data: AimsData_%Template1typecode%
+input_data: Volume_%Template1typecode%
     volume to be resampled
 %End
 
 
-  const AimsData_%Template1typecode%& ref() const;
+  const rc_ptr_Volume_%Template1typecode%& ref() const;
 %Docstring
 ref()
 
@@ -452,7 +453,7 @@ Input data to be resampled by the doit() methods
 
 Returns
 -------
-AimsData_%Template1typecode%
+Volume_%Template1typecode%
 %End
 
 
@@ -497,14 +498,14 @@ class SplineResampler_%Template1typecode% : Resampler_%Template1typecode% /Abstr
   typedef aims::SplineResampler<%Template1%> SplineResampler_%Template1typecode%;
   #endif
 
-  #ifndef PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  #define PYAIMSSIP_AIMSDATA_%Template1typecode%_DEFINED
-  typedef AimsData<%Template1%> AimsData_%Template1typecode%;
+  #ifndef PYAIMSSIP_VOLUME_%Template1typecode%_DEFINED
+  #define PYAIMSSIP_VOLUME_%Template1typecode%_DEFINED
+  typedef carto::Volume<%Template1%> Volume_%Template1typecode%;
   #endif
 
-  #ifndef PYAIMSSIP_AIMSDATA_DOUBLE_DEFINED
-  #define PYAIMSSIP_AIMSDATA_DOUBLE_DEFINED
-  typedef AimsData<double> AimsData_DOUBLE;
+  #ifndef PYAIMSSIP_VOLUME_DOUBLE_DEFINED
+  #define PYAIMSSIP_VOLUME_DOUBLE_DEFINED
+  typedef carto::Volume<double> Volume_DOUBLE;
   #endif
 %End
 %Docstring
@@ -545,8 +546,8 @@ order: int (1 to 7)
 %End
 
 
-  AimsData_DOUBLE getSplineCoef(
-    const AimsData_%Template1typecode% & inVolume,
+  rc_ptr_Volume_DOUBLE getSplineCoef(
+    const Volume_%Template1typecode% & inVolume,
     int t = 0, bool verbose = false ) /Factory/;
 
 
@@ -566,7 +567,7 @@ container
 
 Parameters
 ----------
-inVolume: AimsData_%Template1typecode%
+inVolume: Volume_%Template1typecode%
   input image
 t: int
   volume to use in the T dimension in the case where inVolume is a
@@ -576,7 +577,7 @@ verbose: bool
 
 Returns
 -------
-AimsData_DOUBLE
+Volume_DOUBLE
   Volume of double containing the coefficients in the image domain.
   Border coefficient need to be retrieved by mirror.
 %End
