@@ -60,7 +60,7 @@ typedef AimsVector<%Template1%, %Template2%>
   {
     PyArrayObject *arr = 0;
     arr = (PyArrayObject *) sipPy;
-    if( arr->nd < 0 || arr->nd >1 )
+    if( PyArray_NDIM( arr ) < 0 || PyArray_NDIM( arr ) >1 )
     {
       *sipIsErr = 1;
       PyErr_SetString( PyExc_RuntimeError,
@@ -68,10 +68,10 @@ typedef AimsVector<%Template1%, %Template2%>
                        "AimsVector_%Template1typecode%_%Template2typecode%" );
       return 0;
     }
-    else if( arr->descr->type_num == %Template1NumType% )
+    else if( PyArray_DESCFR( arr )->type_num == %Template1NumType% )
     {
       // retreive dimensions
-      int dims = arr->dimensions[0], i;
+      int dims = PyArray_DIMS( arr )[0], i;
       if( dims != %Template2% )
       {
         *sipIsErr = 1;
@@ -150,7 +150,7 @@ public:
   {
     PyArrayObject *arr = 0;
     arr = (PyArrayObject *) a0;
-    if( arr->nd < 0 || arr->nd >1 )
+    if( PyArray_NDIM( arr ) < 0 || PyArray_NDIM( arr ) >1 )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_RuntimeError, 
@@ -158,7 +158,7 @@ public:
                        "AimsVector_%Template1typecode%_%Template2typecode%" );
       done = true; 
     }
-    else if( arr->descr->type_num != %Template1NumType% )
+    else if( PyArray_DESCR( arr )->type_num != %Template1NumType% )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_TypeError, "wrong array data type" );
@@ -166,7 +166,7 @@ public:
     if( !sipIsErr )
     {
       // retreive dimensions
-      int dims = arr->dimensions[0], i;
+      int dims = PyArray_DIMS( arr )[0], i;
       if( dims != %Template2% )
       {
         sipIsErr = 1;

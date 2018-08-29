@@ -143,7 +143,7 @@ public:
   {
     PyArrayObject *arr = 0;
     arr = (PyArrayObject *) a0;
-    if( arr->nd < 0 || arr->nd >1 )
+    if( PyArray_NDIM( arr ) < 0 || PyArray_NDIM( arr ) >1 )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_RuntimeError, 
@@ -158,7 +158,7 @@ public:
     if( !sipIsErr )
     {
       // retreive dimensions
-      int dims = arr->dimensions[0], i;
+      int dims = PyArray_DIMS( arr )[0], i;
 
       sipCpp = new sipTexture_%Template1typecode%( dims );
       for( i=0; i<dims; ++i )

@@ -112,7 +112,8 @@ namespace aims
           // if strides are specified, force them (volume views...)
           int dim;
           for( dim=0; dim<ndim; ++dim )
-            PyArray_STRIDES( sipRes )[dim] = strides[dim];
+            PyArray_STRIDES( reinterpret_cast<PyArrayObject *>( sipRes ) )[dim]
+              = strides[dim];
         }
         sipRes = PyArray_Return( (PyArrayObject *) sipRes );
         // make a weakref to the array with a deletion callback
@@ -166,11 +167,28 @@ namespace aims
       return;
     PyArrayObject *arr = (PyArrayObject *) o;
     // PyArray_NDIM( arr ) = ndim;
+#if (defined(NPY_NO_DEPRECATED_API) && (NPY_1_7_API_VERSION <= NPY_NO_DEPRECATED_API))
+    /* in numpy > 1.7, PyArray_BYTES is a function which returns a char*,
+       and we would need a reference to it to assign the pointer.
+    */
+    ((PyArrayObject_fields *)arr)->data = buffer;
+#else
     PyArray_BYTES( arr ) = buffer;
+#endif
     if( PyArray_NDIM( arr ) != ndim )
     {
+#if (defined(NPY_NO_DEPRECATED_API) && (NPY_1_7_API_VERSION <= NPY_NO_DEPRECATED_API))
+      /* in numpy > 1.7, PyArray_* are functions which do not return a copy
+        of the contents,
+        and we would need a reference to it to assign the pointer.
+      */
+      ((PyArrayObject_fields *)arr)->nd = ndim;
+      ((PyArrayObject_fields *)arr)->dimensions
+        = PyDimMem_RENEW( PyArray_DIMS( arr ), ndim*2 );
+#else
       PyArray_NDIM( arr ) = ndim;
       PyArray_DIMS( arr ) = PyDimMem_RENEW( PyArray_DIMS( arr ), ndim*2 );
+#endif
     }
     int i;
     if( strides )

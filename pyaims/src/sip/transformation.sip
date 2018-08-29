@@ -56,17 +56,17 @@ Base class for spatial transformations in 3D.
     if( PyArray_Check(a0) )
     {
       PyArrayObject *arr = (PyArrayObject *) a0;
-      if( arr->nd != 2 )
+      if( PyArray_NDIM( arr ) != 2 )
       {
         sipIsErr = 1;
         PyErr_SetString(PyExc_TypeError, "Array dimensions != 2");
       }
-      else if( arr->descr->type_num != PyArray_DOUBLE )
+      else if( PyArray_DESCR( arr )->type_num != NPY_DOUBLE )
       {
         sipIsErr = 1;
         PyErr_SetString( PyExc_TypeError, "wrong array data type: should be double" );
       }
-      else if( arr->dimensions[1] != 3 )
+      else if( PyArray_DIMS( arr )[1] != 3 )
       {
         sipIsErr = 1;
         PyErr_SetString(PyExc_TypeError, "Array width != 3");
@@ -75,10 +75,10 @@ Base class for spatial transformations in 3D.
       {
         npy_int stride0 = PyArray_STRIDE( arr, 0 );
         npy_int stride1 = PyArray_STRIDE( arr, 1 );
-        npy_int npoints = arr->dimensions[0], i;
-        char *point = (char *) arr->data;
-        sipRes = PyArray_SimpleNew( 2, arr->dimensions, PyArray_DOUBLE );
-        double *opoint = (double *) ((PyArrayObject *) sipRes)->data;
+        npy_int npoints = PyArray_DIMS( arr )[0], i;
+        char *point = (char *) PyArray_DATA( arr );
+        sipRes = PyArray_SimpleNew( 2, PyArray_DIMS( arr ), NPY_DOUBLE );
+        double *opoint = (double *) PyArray_DATA((PyArrayObject *) sipRes);
         for( i=0; i<npoints; ++i )
         {
           Point3dd tvec = sipCpp->transform( *(double *)point,

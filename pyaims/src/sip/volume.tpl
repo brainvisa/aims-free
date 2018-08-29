@@ -596,61 +596,61 @@ The header contains all meta-data.
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        tl.insert( PyArray_BYTE );
-        tl.insert( PyArray_INT8 );
+        tl.insert( NPY_BYTE );
+        tl.insert( NPY_INT8 );
       }
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        tl.insert( PyArray_UBYTE );
-        tl.insert( PyArray_UINT8 );
+        tl.insert( NPY_UBYTE );
+        tl.insert( NPY_UINT8 );
       }
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        tl.insert( PyArray_SHORT );
-        tl.insert( PyArray_INT16 );
+        tl.insert( NPY_SHORT );
+        tl.insert( NPY_INT16 );
       }
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        tl.insert( PyArray_USHORT );
-        tl.insert( PyArray_UINT16 );
+        tl.insert( NPY_USHORT );
+        tl.insert( NPY_UINT16 );
       }
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        tl.insert( PyArray_INT32 );
+        tl.insert( NPY_INT32 );
       }
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        // tl.insert( PyArray_UINT );
-        tl.insert( PyArray_UINT32 );
+        // tl.insert( NPY_UINT );
+        tl.insert( NPY_UINT32 );
       }
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        // tl.insert( PyArray_INT );
-        tl.insert( PyArray_INT64 );
+        // tl.insert( NPY_INT );
+        tl.insert( NPY_INT64 );
       }
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        tl.insert( PyArray_UINT );
-        tl.insert( PyArray_UINT64 );
+        tl.insert( NPY_UINT );
+        tl.insert( NPY_UINT64 );
       }
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        tl.insert( PyArray_FLOAT32 );
+        tl.insert( NPY_FLOAT32 );
       }
       compatibletypes.push_back( std::set<int>() );
       {
         std::set<int> & tl = compatibletypes.back();
-        // tl.insert( PyArray_FLOAT );
-        tl.insert( PyArray_DOUBLE );
-        tl.insert( PyArray_FLOAT64 );
+        // tl.insert( NPY_FLOAT );
+        tl.insert( NPY_DOUBLE );
+        tl.insert( NPY_FLOAT64 );
       }
     }
 
@@ -667,19 +667,20 @@ The header contains all meta-data.
     else
     */
 
-    if( arr->nd < 1 || arr->nd > carto::Volume<%Template1%>::DIM_MAX )
+    if( PyArray_NDIM( arr ) < 1
+        || PyArray_NDIM( arr ) > carto::Volume<%Template1%>::DIM_MAX )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_RuntimeError,
                        "Array dimensions are not compatible with Volume" );
     }
-    else if( arr->descr->type_num != %Template1NumType% )
+    else if( PyArray_DESCR( arr )->type_num != %Template1NumType% )
     {
       std::list<std::set<int> >::const_iterator ict, ect = compatibletypes.end();
       bool ok = false;
       int i = 0;
       for( ict=compatibletypes.begin(); ict!=ect; ++ict, ++i )
-        if( ict->find( arr->descr->type_num ) != ict->end() )
+        if( ict->find( PyArray_DESCR( arr )->type_num ) != ict->end() )
         {
           if( ict->find( %Template1NumType% ) != ict->end() )
           {
@@ -699,7 +700,7 @@ The header contains all meta-data.
   if( !sipIsErr )
   {
     // retreive dimensions
-    int nd = arr->nd;
+    int nd = PyArray_NDIM( arr );
     if( nd < 4 )
       nd = 4;
     std::vector<int> dims( nd, 1 );
@@ -711,14 +712,14 @@ The header contains all meta-data.
       {
         // increments higher index first
         inc = -1;
-        start = arr->nd-1;
+        start = PyArray_NDIM( arr )-1;
       }
     }
-    for( int i=0; i<arr->nd; ++i )
-      dims[i] = arr->dimensions[ start + inc * i];
+    for( int i=0; i<PyArray_NDIM( arr ); ++i )
+      dims[i] = PyArray_DIMS( arr )[ start + inc * i];
 
-    sipCpp = new sipVolume_%Template1typecode%( dims,
-                                                ( %Template1% *) arr->data );
+    sipCpp = new sipVolume_%Template1typecode%(
+      dims, ( %Template1% *) PyArray_DATA( arr ) );
     // keep ref to the array to prevent its destruction
     PyObject_SetAttrString( (PyObject *) sipSelf, "_arrayext", a0 );
   }
