@@ -266,13 +266,13 @@ namespace aims
       //If the output type is integer, "round" the values to the nearest integer (mostly necessary for label volumes)
       if ( (dtc.dataType()=="U8") || (dtc.dataType()=="S8")  || (dtc.dataType()=="U16") || (dtc.dataType()=="S16") || (dtc.dataType()=="U32") || (dtc.dataType()=="S32"))
       {
-        for( int t=0; t<dimt; ++t )
+        for( int t=tmin; t<dimt; ++t )
           for( int z=0; z<data.dimZ(); ++z )  
             for( int y=0; y<data.dimY(); ++y )  
               for( int x=0; x<data.dimX(); ++x )
               {
                 //data(x,y,z,t)=(T)rint(get_volume_real_value( volume, z, y, x, t, 0 ));
-                data(x,y,z,t) = (T)rint(get_volume_real_value(
+                data(x,y,z,t - tmin) = (T)rint(get_volume_real_value(
                   volume,
                   (X_pos)*data.dimX()-dirX*x-(X_pos),
                   (Y_pos)*data.dimY()-dirY*y-(Y_pos),
@@ -281,12 +281,12 @@ namespace aims
               }
       }
       else {
-        for( int t=0; t<dimt; ++t )
+        for( int t=tmin; t<dimt; ++t )
           for( int z=0; z<data.dimZ(); ++z )  
             for( int y=0; y<data.dimY(); ++y )  
               for( int x=0; x<data.dimX(); ++x ) {
                 //data(x,y,z,t)=(T)get_volume_real_value( volume, z, y, x, t, 0 );
-                data(x,y,z,t)=(T)get_volume_real_value(
+                data(x,y,z,t - tmin)=(T)get_volume_real_value(
                   volume,
                   (X_pos)*data.dimX()-dirX*x-(X_pos),
                   (Y_pos)*data.dimY()-dirY*y-(Y_pos),
@@ -300,12 +300,12 @@ namespace aims
     else
     {
       std::cout << "minc voxel mode\n";
-      for( int t=0; t<dimt; ++t )
+      for( int t=tmin; t<dimt; ++t )
         for( int z=0; z<data.dimZ(); ++z )  
           for( int y=0; y<data.dimY(); ++y )  
             for( int x=0; x<data.dimX(); ++x ) {
               //data(x,y,z,t)=(T)get_volume_voxel_value( volume, z, y, x, t, 0 );
-              data(x,y,z,t) = (T)get_volume_voxel_value(
+              data(x,y,z,t - tmin) = (T)get_volume_voxel_value(
                 volume,
                 (X_pos)*data.dimX()-dirX*x-(X_pos),
                 (Y_pos)*data.dimY()-dirY*y-(Y_pos),
@@ -327,13 +327,10 @@ namespace aims
   inline
   void MincReader<T>::readMinc2( AimsData<T>& data, int tmin, int dimt )
   {
-    Header *h = data.header();
-
     std::string source = _name;
 
     mihandle_t    minc_volume;
     int result, i;
-    double voxel;
 
     MincHeader::mincMutex().lock();
 
@@ -354,14 +351,12 @@ namespace aims
     }
 
     T *pdata;
-    long xinc, yinc;
+    long xinc;
 
     int ndim;
     miget_volume_dimension_count( minc_volume, MI_DIMCLASS_ANY,
                                   MI_DIMATTR_ALL, &ndim );
     std::vector<midimhandle_t> dimensions( ndim );
-    double        world_location[3];
-    double        dvoxel_location[3];
     std::vector<misize_t> start( ndim ), count( ndim );
     std::vector<aims_misize_t>  sizes( ndim );
 
@@ -464,12 +459,14 @@ namespace aims
     vdimz = sizes[ dimindex[1] ];
     vdimt = sizes[ dimindex[0] ];
     // std::cout << "vdim now: " << vdimx << ", " << vdimy << ", " << vdimz << ", " << vdimt << std::endl;
+    if( dimt > vdimt )
+      dimt = vdimt;
 
     std::vector<double> slab;
     double *buf;
     slab.resize( count[ndim-1] );
 
-    for( int t=0; t<vdimt; ++t )
+    for( int t=tmin; t<dimt; ++t )
     {
       start[ dimindex[0] ] = t;
 
@@ -478,7 +475,7 @@ namespace aims
         start[dimindex[1]] = z;
         for( int y=0; y<vdimy; ++y )
         {
-          Point4df ipos = Point4df( t, z, y, 0 ); // minc indices order
+          Point4df ipos = Point4df( t - tmin, z, y, 0 ); // minc indices order
           Point3df vpos( ipos[ vdimindex[0] ], ipos[ vdimindex[1] ], 
                          ipos[ vdimindex[2] ] );
           Point3df pos = s2m.transform( vpos );
