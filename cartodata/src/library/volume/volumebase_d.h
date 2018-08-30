@@ -631,7 +631,7 @@ namespace carto
           int i, n = VolumeProxy<T>::_size.size();
           for( i=0; i<n; ++i )
             size *= VolumeProxy<T>::_size[i];
-          _items = AllocatedVector<T>(
+          _items.allocate(
             0U,
             AllocatorContext( AllocatorStrategy::NotOwner,
                               rc_ptr<DataSource>( new BufferDataSource
@@ -639,7 +639,7 @@ namespace carto
                                   size ) ) ) );
         }
         else
-          _items = AllocatedVector<T>( 0U, allocatorContext() );
+          _items.allocate( 0U, allocatorContext() );
 
         if ( _refvol->allocatorContext().isAllocated() )
         {
