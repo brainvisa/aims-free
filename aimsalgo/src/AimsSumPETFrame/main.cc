@@ -33,23 +33,14 @@
 
 
 #include <cstdlib>
-#include <aims/getopt/getopt.h>
-#include <aims/data/data_g.h>
 #include <aims/data/data.h>
-#include <aims/io/io_g.h>
 #include <aims/io/ecatR.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
-#include <aims/roi/hie.h>
-#include <aims/io/hieR.h>
-#include <aims/io/roiselectorR.h>
-#include <aims/def/path.h>
+#include <aims/io/finder.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>
-#include <cartobase/stream/sstream.h>
 #include <cartobase/config/verbose.h>
-#include <cartobase/config/cartobase_config.h>
-#include <iostream>
 
 using namespace aims; 
 using namespace std; 
