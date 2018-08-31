@@ -115,7 +115,10 @@ namespace aims
 
   private:
     void readMinc1( AimsData<T> & data, int tmin, int dimt );
-#ifdef AIMS_HAS_MINC2
+#if 0
+    // readMinc2 is bugy, and the Minc1 API also works for Minc2, Nifti or
+    // other formats supported in newer minc libs
+// #ifdef AIMS_HAS_MINC2
     void readMinc2( AimsData<T> & data, int tmin, int dimt );
     static mitype_t minc2TypeCode();
 #endif
@@ -126,7 +129,8 @@ namespace aims
   };
 
 
-#ifdef AIMS_HAS_MINC2
+#if 0
+// #ifdef AIMS_HAS_MINC2
   template <> inline mitype_t MincReader<int8_t>::minc2TypeCode()
   {
     return MI_TYPE_BYTE;
@@ -322,7 +326,8 @@ namespace aims
   }
 
 
-#ifdef AIMS_HAS_MINC2
+#if 0
+// #ifdef AIMS_HAS_MINC2
   template <class T>
   inline
   void MincReader<T>::readMinc2( AimsData<T>& data, int tmin, int dimt )
@@ -582,7 +587,8 @@ namespace aims
     {
       // std::cout << "reading...\n";
 
-#if defined( AIMS_HAS_MINC2 ) && !defined( MINC_MNC2_SUPPORT )
+#if 0
+// #if defined( AIMS_HAS_MINC2 ) && !defined( MINC_MNC2_SUPPORT )
       /* if MINC_MNC2_SUPPORT then the general API also supports mnc2, so we
          don't need this readMinc2(), which moreover hangs on some versions.
       */
