@@ -5,12 +5,10 @@ TEMPLATE=       subdirs
 SUBDIRS = aimsalgo
 
 PSUBDIRS = \
-#    Aims3DAnalysis \
     Aims3DPointCloud \
     AimsActivPixel2Volume          \
     AimsAddNoise2Data              \
     AimsApplyVectorField      \
-#    AimsAtlasQualityAssessment    \
     AimsBuildDti              \
     AimsBuildIndex            \
     AimsBvalue                \
@@ -31,14 +29,12 @@ PSUBDIRS = \
     AimsDtiBck2Vol            \
     AimsElevationMap \
     AimsErosion              \
-#    AimsExtractRegionMasks \
     AimsFoldArgAtt            \
     AimsFrontDistanceMap      \
     AimsGaussianSmoothing          \
     AimsGaussianSmoothing1d        \
     AimsGraphMesh                  \
     AimsGraphTransferLabels        \
-#    AimsGTM                        \
     AimsGTMDump                    \
     AimsHJEvolution2d              \
     AimsHJEvolution3d              \
@@ -55,7 +51,6 @@ PSUBDIRS = \
     AimsKMeans                \
     AimsKMeansImageSegmentation                \
     AimsLightenAtlas \
-#    AimsLmaGtm            \
     AimsManualBiasCorrection       \
     AimsMask                  \
     AimsMaskPhantom           \
@@ -81,25 +76,15 @@ PSUBDIRS = \
     AimsMeshParcellation2VolumeParcellation \
     AimsMeshSmoothing         \
     AimsMeshWhite             \
-#    AimsMixtureOfPpcaForRats \
     AimsMIRegister \
     AimsMoment           \
     AimsMorphoMath            \
     AimsNormWithRegion             \
-    AimsNormDiff              \
-#    AimsNormalizeAtlasProbabilities \
     AimsOpening                    \
     AimsParamCorrectDti            \
-#    AimsRegisterStriataMainLines \
     AimsPCAfilter             \
     AimsPCAloc                \
     AimsPCAloc2                    \
-#    AimsPETInputFunctionEstimation \
-#    AimsPETMovieNormalise          \
-#    AimsPETMovieInterpolate        \
-#    AimsPETMaskAndCrop \
-#    AimsPETMIPProjection  \
-#    AimsRatClassif           \
     AimsRefineMesh            \
     AimsRegisterBMEstimate         \
     AimsRegisterFFDFromCoordImages \
@@ -109,11 +94,8 @@ PSUBDIRS = \
     AimsSimilarComponentAnalysisSegmentation \
     AimsSegmentsToMesh             \
     AimsSNR \
-    AimsSlice2Bucket          \
-    AimsSpaghettiModel        \
     AimsSphereDistribution         \
     AimsSplitArray    \
-#    AimsSplitHemispheres \
     AimsSubSampling                 \
     AimsSubTensor             \
     AimsSulcusSPAM              \
@@ -142,8 +124,6 @@ PSUBDIRS = \
     AimsVoronoi               \
     AimsZCat
 
-
-module(jpeg):PSUBDIRS +=    AimsData2Jpeg
 
 module(aimsecat):PSUBDIRS     += AimsFovSplit \
 #    AimsTestSino \
