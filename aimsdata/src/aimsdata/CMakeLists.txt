@@ -227,7 +227,6 @@ set( _headers
     utility/converter_volume.h
     utility/clock.h
     utility/flip.h
-    utility/linearcomb.h
     utility/masscenter.h
     utility/merge.h
     utility/minmax.h

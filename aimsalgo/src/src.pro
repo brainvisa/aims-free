@@ -55,7 +55,6 @@ PSUBDIRS = \
     AimsKMeans                \
     AimsKMeansImageSegmentation                \
     AimsLightenAtlas \
-    AimsLinearComb            \
 #    AimsLmaGtm            \
     AimsManualBiasCorrection       \
     AimsMask                  \
@@ -91,7 +90,6 @@ PSUBDIRS = \
 #    AimsNormalizeAtlasProbabilities \
     AimsOpening                    \
     AimsParamCorrectDti            \
-    AimsPowerComb                       \
 #    AimsRegisterStriataMainLines \
     AimsPCAfilter             \
     AimsPCAloc                \
