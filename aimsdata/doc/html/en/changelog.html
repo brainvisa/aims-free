@@ -16,6 +16,7 @@
 
 <hr width="100%"> <br>
 
+ <b><a href="#version-4.6.1">Version 4.6.1</a></b><br>
  <b><a href="#version-4.6.0">Version 4.6.0</a></b><br>
  <b><a href="#version-4.5.0">Version 4.5.0</a></b><br>
  <b><a href="#version-4.4.0">Version 4.4.0</a></b><br>
@@ -49,8 +50,15 @@
 <h4> <a name="version-4.6.1"></a>May. 22, 2018, Version 4.6.1</h4>
 
 <ul>
-  <li>Finally provide the method get(key, default=None) in dictionary-like GenericObject. Not to be confused with rc_ptr::get(), so for an Object we have to use: something.get().get('key', 'default')
+  <li>pyaims: finally provide the method get(key, default=None) in dictionary-like GenericObject. Not to be confused with rc_ptr::get(), so for an Object we have to use: something.get().get('key', 'default')
   </li>
+  <li>Fixes in Volume and AllocatedVector copies which caused (in rare cases) copies not to own their data
+  </li>
+  <li>Minc plugin has improved, allows to support more than .mnc files when additional formats are supported by libminc (.mgh/.mgz for instance)
+  </li>
+  <li>pyaims: more fixes for python3</li>
+  <li>Wavefront mesh reader fixed and improved</li>
+  <li>Many more small fixes</li>
 </ul>
 
 <!-- -->
