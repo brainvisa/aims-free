@@ -36,8 +36,6 @@ PSUBDIRS = \
     AimsGraphMesh                  \
     AimsGraphTransferLabels        \
     AimsGTMDump                    \
-    AimsHJEvolution2d              \
-    AimsHJEvolution3d              \
     AimsHippocampicReferential          \
     AimsIcmSpaghetti               \
     AimsIcmSpaghettiN              \
