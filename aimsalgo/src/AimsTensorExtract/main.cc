@@ -33,165 +33,159 @@
 
 
 #include <cstdlib>
-#include <aims/data/data_g.h>
-#include <aims/bucket/bucket_g.h>
-#include <aims/io/io_g.h>
-#include <aims/getopt/getopt.h>
-#include <aims/math/math_g.h>
+#include <aims/data/data.h>
+#include <aims/bucket/bucket.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/rgb/rgb.h>
-#include <iostream>
+#include <cartobase/stream/fileutil.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsTensorExtract [-h[elp]]                                     ",
-  "                   -i[nput] <filein>                            ", 
-  "                  [-o[utput] <fileout>]                         ",
-  "                   -x[dim] <dimX>                               ",
-  "                   -y[dim] <dimY>                               ",
-  "                   -z[dim] <dimZ>                               ",
-  "----------------------------------------------------------------",
-  "Extract anisotropy,trace,directions from dtitensor bucket       ",
-  "----------------------------------------------------------------",
-  "     filein     : source dtitensor bucket                       ",
-  "     fileout    : destination base file name                    ",
-  "                                  fileout_traceTC.ima           ",
-  "                                  fileout_traceEV.ima           ",
-  "                                  fileout_VR.ima                ",
-  "                                  fileout_FA.ima                ",
-  "                                  fileout_dir.ima               ",
-  "                                  fileout_dirRGB.ima            ",
-  "                  [default=filein]                              ",
-  "     dimX,dimY,dimZ : dimensions of output images               ",
-  "----------------------------------------------------------------",
-END_USAGE
 
-
-void Usage( void )
+int main( int argc, const char **argv )
 {
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char **argv )
-{
-  char *filein = NULL, *fileout = NULL;
+  Reader<AimsBucket<DtiTensor> >	bucketR;
+  string fileout;
   int dimX = 0, dimY = 0, dimZ = 0;
 
-  AimsOption opt[] = {
-  { 'h',"help"       ,AIMS_OPT_FLAG  ,( void* )Usage      ,AIMS_OPT_CALLFUNC,0,},
-  { 'i',"input"      ,AIMS_OPT_STRING,&filein    ,0                ,1},
-  { 'o',"output"     ,AIMS_OPT_STRING,&fileout   ,0                ,0},
-  { 'x',"xdim"       ,AIMS_OPT_INT   ,&dimX      ,0                ,1},
-  { 'y',"ydim"       ,AIMS_OPT_INT   ,&dimY      ,0                ,1},
-  { 'z',"zdim"       ,AIMS_OPT_INT   ,&dimZ      ,0                ,1},
-  { 0  ,0            ,AIMS_OPT_END   ,0          ,0                ,0}};
+  AimsApplication app( argc, argv,
+                       "Extract anisotropy,trace,directions from dtitensor "
+                       "bucket" );
+  app.addOption( bucketR, "-i", "source dtitensor bucket" );
+  app.addOption( fileout, "-o",
+                 "destination base file name, will be suffixed:"
+                 "fileout_traceTC.ima, "
+                 "fileout_traceEV.ima, "
+                 "fileout_VR.ima, "
+                 "fileout_FA.ima, "
+                 "fileout_dir.ima, "
+                 "fileout_dirRGB.ima. default=input file name", true );
+  app.addOption( dimX, "-x", "dimensions of output images" );
+  app.addOption( dimY, "-y", "dimensions of output images" );
+  app.addOption( dimZ, "-z", "dimensions of output images" );
+  app.alias( "--input", "-i" );
+  app.alias( "--output", "-o" );
+  app.alias( "--xdim", "-x" );
+  app.alias( "--ydim", "-y" );
+  app.alias( "--zdim", "-z" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
 
-  if ( fileout == NULL )
-    fileout = filein;
+    if ( fileout.empty() )
+      fileout = FileUtil::removeExtension( bucketR.fileName() );
 
-  AimsBucket<DtiTensor> bucket;
-  list< AimsBucketItem<DtiTensor> >::iterator it;
+    AimsBucket<DtiTensor> bucket;
+    list< AimsBucketItem<DtiTensor> >::iterator it;
 
-  cout << "reading tensor bucket : " << flush;
-  Reader<AimsBucket<DtiTensor> >	bucketR( filein );
-  bucketR >> bucket;
-  cout << "done" << endl;
+    cout << "reading tensor bucket : " << flush;
+    bucketR.read( bucket );
+    cout << "done" << endl;
 
-  cout << "saving trace  : " << flush;
-  Writer<AimsData<float> > dataW0( string( fileout ) + "_trace" );
-  AimsData<float>* trace = new AimsData<float>( dimX, dimY, dimZ );
-  trace->setSizeX( bucket.sizeX() );
-  trace->setSizeY( bucket.sizeY() );
-  trace->setSizeZ( bucket.sizeZ() );
-  *trace = 0;
-  for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
-    if ( it->value().category() <= DtiTensor::NO_PROBLEM )
-      (*trace)( it->location().item(0),
-                it->location().item(1),
-                it->location().item(2) ) = it->value().base().trace();
-  dataW0 << *trace;
-  delete trace;
-  cout << "done" << endl;
+    cout << "saving trace  : " << flush;
+    Writer<AimsData<float> > dataW0( string( fileout ) + "_trace" );
+    AimsData<float>* trace = new AimsData<float>( dimX, dimY, dimZ );
+    trace->setSizeX( bucket.sizeX() );
+    trace->setSizeY( bucket.sizeY() );
+    trace->setSizeZ( bucket.sizeZ() );
+    *trace = 0;
+    for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
+      if ( it->value().category() <= DtiTensor::NO_PROBLEM )
+        (*trace)( it->location().item(0),
+                  it->location().item(1),
+                  it->location().item(2) ) = it->value().base().trace();
+    dataW0.write( *trace );
+    delete trace;
+    cout << "done" << endl;
 
-  cout << "saving volume ratio : " << flush;
-  Writer<AimsData<float> > dataW2( string( fileout ) + "_VR" );
-  AimsData<float>* vr = new AimsData<float>( dimX, dimY, dimZ );
-  vr->setSizeX( bucket.sizeX() );
-  vr->setSizeY( bucket.sizeY() );
-  vr->setSizeZ( bucket.sizeZ() );
-  *vr = 0;
-  for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
-    if ( it->value().category() <= DtiTensor::NO_PROBLEM )
-      (*vr)( it->location().item(0),
-             it->location().item(1),
-             it->location().item(2) ) = it->value().anisotropyVR();
-  dataW2 << *vr;
-  delete vr;
-  cout << "done" << endl;
-
-  cout << "saving fractional anisotropy : " << flush;
-  Writer<AimsData<float> > dataW3( string( fileout ) + "_FA" );
-  AimsData<float>* fa = new AimsData<float>( dimX, dimY, dimZ );
-  fa->setSizeX( bucket.sizeX() );
-  fa->setSizeY( bucket.sizeY() );
-  fa->setSizeZ( bucket.sizeZ() );
-  *fa = 0;
-  for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
-    if ( it->value().category() <= DtiTensor::NO_PROBLEM )
-      (*fa)( it->location().item(0),
-             it->location().item(1),
-             it->location().item(2) ) = it->value().anisotropyFA();
-  dataW3 << *fa;
-  delete fa;
-  cout << "done" << endl;
-
-  cout << "saving direction : " << flush;
-  Writer<AimsData<Point3df> > dataW4( string( fileout ) + "_dir" );
-  AimsData<Point3df>* dir = new AimsData<Point3df>( dimX, dimY, dimZ );
-  dir->setSizeX( bucket.sizeX() );
-  dir->setSizeY( bucket.sizeY() );
-  dir->setSizeZ( bucket.sizeZ() );
-  *dir = Point3df(0,0,0);
-  for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
-    if ( it->value().category() <= DtiTensor::NO_PROBLEM )
-      (*dir)( it->location().item(0),
+    cout << "saving volume ratio : " << flush;
+    Writer<AimsData<float> > dataW2( string( fileout ) + "_VR" );
+    AimsData<float>* vr = new AimsData<float>( dimX, dimY, dimZ );
+    vr->setSizeX( bucket.sizeX() );
+    vr->setSizeY( bucket.sizeY() );
+    vr->setSizeZ( bucket.sizeZ() );
+    *vr = 0;
+    for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
+      if ( it->value().category() <= DtiTensor::NO_PROBLEM )
+        (*vr)( it->location().item(0),
               it->location().item(1),
-              it->location().item(2) ) = it->value().dir();
-  dataW4 << *dir;
-  delete dir;
-  cout << "done" << endl;
+              it->location().item(2) ) = it->value().anisotropyVR();
+    dataW2.write( *vr );
+    delete vr;
+    cout << "done" << endl;
 
-  cout << "saving direction in RGB : " << flush;
-  Writer<AimsData<AimsRGB> > dataW5( string( fileout ) + "_dirRGB" );
-  AimsData<AimsRGB>* dirRGB = new AimsData<AimsRGB>( dimX, dimY, dimZ );
-  dirRGB->setSizeX( bucket.sizeX() );
-  dirRGB->setSizeY( bucket.sizeY() );
-  dirRGB->setSizeZ( bucket.sizeZ() );
-  *dirRGB = AimsRGB(0,0,0);
-  for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
-    if ( it->value().category() <= DtiTensor::NO_PROBLEM )
-    {
-      (*dirRGB)( it->location().item(0),
-                 it->location().item(1),
-                 it->location().item(2) ).red() = 
-              byte( fabs( it->value().dir().item(0) ) * 255.0 );
-      (*dirRGB)( it->location().item(0),
-                 it->location().item(1),
-                 it->location().item(2) ).green() = 
-              byte( fabs( it->value().dir().item(1) ) * 255.0 );
-      (*dirRGB)( it->location().item(0),
-                 it->location().item(1),
-                 it->location().item(2) ).blue() = 
-              byte( fabs( it->value().dir().item(2) ) * 255.0 );
-    }
-  dataW5 << *dirRGB;
-  delete dirRGB;
-  cout << "done" << endl;
+    cout << "saving fractional anisotropy : " << flush;
+    Writer<AimsData<float> > dataW3( string( fileout ) + "_FA" );
+    AimsData<float>* fa = new AimsData<float>( dimX, dimY, dimZ );
+    fa->setSizeX( bucket.sizeX() );
+    fa->setSizeY( bucket.sizeY() );
+    fa->setSizeZ( bucket.sizeZ() );
+    *fa = 0;
+    for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
+      if ( it->value().category() <= DtiTensor::NO_PROBLEM )
+        (*fa)( it->location().item(0),
+              it->location().item(1),
+              it->location().item(2) ) = it->value().anisotropyFA();
+    dataW3.write( *fa );
+    delete fa;
+    cout << "done" << endl;
 
-  return EXIT_SUCCESS;
+    cout << "saving direction : " << flush;
+    Writer<AimsData<Point3df> > dataW4( string( fileout ) + "_dir" );
+    AimsData<Point3df>* dir = new AimsData<Point3df>( dimX, dimY, dimZ );
+    dir->setSizeX( bucket.sizeX() );
+    dir->setSizeY( bucket.sizeY() );
+    dir->setSizeZ( bucket.sizeZ() );
+    *dir = Point3df(0,0,0);
+    for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
+      if ( it->value().category() <= DtiTensor::NO_PROBLEM )
+        (*dir)( it->location().item(0),
+                it->location().item(1),
+                it->location().item(2) ) = it->value().dir();
+    dataW4.write( *dir );
+    delete dir;
+    cout << "done" << endl;
+
+    cout << "saving direction in RGB : " << flush;
+    Writer<AimsData<AimsRGB> > dataW5( string( fileout ) + "_dirRGB" );
+    AimsData<AimsRGB>* dirRGB = new AimsData<AimsRGB>( dimX, dimY, dimZ );
+    dirRGB->setSizeX( bucket.sizeX() );
+    dirRGB->setSizeY( bucket.sizeY() );
+    dirRGB->setSizeZ( bucket.sizeZ() );
+    *dirRGB = AimsRGB(0,0,0);
+    for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
+      if ( it->value().category() <= DtiTensor::NO_PROBLEM )
+      {
+        (*dirRGB)( it->location().item(0),
+                  it->location().item(1),
+                  it->location().item(2) ).red() =
+                byte( fabs( it->value().dir().item(0) ) * 255.0 );
+        (*dirRGB)( it->location().item(0),
+                  it->location().item(1),
+                  it->location().item(2) ).green() =
+                byte( fabs( it->value().dir().item(1) ) * 255.0 );
+        (*dirRGB)( it->location().item(0),
+                  it->location().item(1),
+                  it->location().item(2) ).blue() =
+                byte( fabs( it->value().dir().item(2) ) * 255.0 );
+      }
+    dataW5.write( *dirRGB );
+    delete dirRGB;
+    cout << "done" << endl;
+
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption &)
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
 }

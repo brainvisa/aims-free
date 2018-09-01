@@ -32,75 +32,70 @@
  */
 
 
-#include <cstdlib>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
-#include <aims/data/data_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/data/data.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/signalfilter/vfilter.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsVFilter -i[nput] <filein>                                   ",
-  "            -o[utput] <fileout>                                 ",
-  "            [-m[asksize] <size>]                                ",
-  "            [-t[ype] <algo>]                                    ",
-  "            [-h[elp]]                                           ",
-  "----------------------------------------------------------------",
-  "apply a V-Filter to an image                                    ",
-  "----------------------------------------------------------------",
-  "     filein  : origin file                                      ",
-  "     fileout : output file                                      ",
-  "     size    : mask size [default=2]                            ",
-  "     algo    : o -> optimized    n -> non optimized  [default=o]",
-  "----------------------------------------------------------------",
-END_USAGE
 
-
-void Usage( void )
+int main( int argc, const char **argv )
 {
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char **argv )
-{
-  char *filein, *fileout;
+  Reader<AimsData<short> > reader;
+  Writer<AimsData<short> > writer;
   int msize = 2;
   char *atype = NULL;
   AimsVFilter< short >::VFilterType algo;
- 
-  AimsOption opt[] = {
-    { 'h',"help"    ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0,},
-    { 'i',"input"   ,AIMS_OPT_STRING,&filein     ,0                ,1},
-    { 'o',"output"  ,AIMS_OPT_STRING,&fileout    ,0                ,1},
-    { 'm',"masksize",AIMS_OPT_INT   ,&msize      ,0                ,0},
-    { 't',"type"    ,AIMS_OPT_STRING,&atype      ,0                ,0},
-    { 0  ,0         ,AIMS_OPT_END   ,0           ,0                ,0}};
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  AimsApplication app( argc, argv, "apply a V-Filter to an image" );
+  app.addOption( reader, "-i", "input file" );
+  app.addOption( writer, "-o", "output file" );
+  app.addOption( msize, "-m", "mask size [default=2]", true );
+  app.addOption( atype, "-t",
+                 "algo type: o -> optimized, n -> non optimized  [default=o]",
+                 true );
+  app.alias( "--input", "-i" );
+  app.alias( "--output", "-o" );
+  app.alias( "--masksize", "-m" );
+  app.alias( "--type", "-t" );
 
-  AimsData< short > vol;
+  try
+  {
+    app.initialize();
 
-  Reader<AimsData<short> > reader( filein );
-  reader >> vol;
-    
-  if ( atype == NULL || string( atype ) == "o" )
-    algo = AimsVFilter< short >::Optimized;
-  else if ( string( atype ) == "n" )
-    algo = AimsVFilter< short >::NonOptimized;
-  else AimsUsage( usage );
-    
-  if ( msize < 2 )  msize = 2;
-    
-  AimsVFilter< short > vfilter( msize, algo );
-  AimsData< short > res = vfilter.doit( vol );
-    
-  Writer<AimsData<short> > writer( fileout );
-  writer << res;
- 
-  return EXIT_SUCCESS;
+    AimsData< short > vol;
+
+    reader.read( vol );
+
+    if ( atype == NULL || string( atype ) == "o" )
+      algo = AimsVFilter< short >::Optimized;
+    else if ( string( atype ) == "n" )
+      algo = AimsVFilter< short >::NonOptimized;
+    else
+    {
+      cerr << "unknown algo type " << atype << endl;
+      return EXIT_FAILURE;
+    }
+
+    if ( msize < 2 )  msize = 2;
+
+    AimsVFilter< short > vfilter( msize, algo );
+    AimsData< short > res = vfilter.doit( vol );
+
+    writer.write( res );
+
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
 }

@@ -13,7 +13,6 @@ PSUBDIRS = \
     AimsBuildIndex            \
     AimsBvalue                \
     AimsChamferDistanceMap         \
-    AimsClosing                    \
     AimsClusterArg            \
     AimsConvexHull            \
     AimsCorrectionEpi                   \
@@ -24,11 +23,7 @@ PSUBDIRS = \
     AimsCylinder              \
     AimsDanielssonDistanceMap \
     AimsCompareSPMtToPrimalSketch \
-    AimsDilation              \
-    AimsDistordDti            \
-    AimsDtiBck2Vol            \
     AimsElevationMap \
-    AimsErosion              \
     AimsFoldArgAtt            \
     AimsFrontDistanceMap      \
     AimsGaussianSmoothing          \
@@ -46,10 +41,7 @@ PSUBDIRS = \
     AimsImageSmoothing   \
     AimsParameterize2DImageDomain \
     AimsInflate                    \
-    AimsKMeans                \
-    AimsKMeansImageSegmentation                \
     AimsLightenAtlas \
-    AimsManualBiasCorrection       \
     AimsMask                  \
     AimsMaskPhantom           \
     AimsMeanCurvFlow          \
@@ -78,7 +70,6 @@ PSUBDIRS = \
     AimsMoment           \
     AimsMorphoMath            \
     AimsNormWithRegion             \
-    AimsOpening                    \
     AimsParamCorrectDti            \
     AimsPCAfilter             \
     AimsPCAloc                \
@@ -100,7 +91,6 @@ PSUBDIRS = \
     AimsSumFrame              \
     AimsTMStarget             \
     AimsTalairachTransform         \
-    AimsTensor2Bucket         \
     AimsTensorExtract         \
     AimsTensorSNR             \
     AimsTexture2Primal        \
