@@ -43,7 +43,6 @@ PSUBDIRS = \
     AimsInflate                    \
     AimsLightenAtlas \
     AimsMask                  \
-    AimsMaskPhantom           \
     AimsMeanCurvFlow          \
     AimsMedianSmoothing       \
     AimsSmoothing       \

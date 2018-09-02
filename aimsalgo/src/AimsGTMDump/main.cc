@@ -32,51 +32,44 @@
  */
 
 
-#include <aims/data/data_g.h>
-#include <aims/getopt/getopt.h>
-#include <aims/utility/utility_g.h>
-#include <aims/signalfilter/signalfilter_g.h>
-#include <aims/io/labelImage.h>
-#include <aims/roi/roi.h>
+#include <aims/data/data.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/roi/roigtm.h>
 using aims::RoiGtm;
 #include <aims/io/roigtmR.h>
 using aims::RoiGtmReader;
 
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsGTMDump -i[nput] <filein>                                   ",
-  "            -h[elp]                                             ",
+using namespace aims;
+using namespace carto;
+using namespace std;
 
-  "----------------------------------------------------------------",
-  " Dump Gtm                                                       ",
-  "----------------------------------------------------------------",
-  "     filein    : origin Roi file (arg format)                   ",
-  "----------------------------------------------------------------",
-END_USAGE
-
-
-static void Usage()
+int main( int argc, const char **argv )
 {
-  AimsUsage( usage );
-}
+  string filein;
 
+  AimsApplication app( argc, argv, "Dump Gtm" );
+  app.addOption( filein, "-i", "origin Roi file (arg format)" );
+  app.alias( "--input", "-i" );
 
-int main( int argc, char **argv )
-{
-  char  *filein = NULL;
-    
-  AimsOption opt[] = {
-  { 'h',"help"  ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0,},
-  { 'i',"input" ,AIMS_OPT_STRING,&filein     ,0                ,1},
-  { 0  ,0       ,AIMS_OPT_END   ,0           ,0                ,0}};
+  try
+  {
+    app.initialize();
 
-  AimsParseOptions( &argc, argv, opt, usage );
+    // Read GTM from file Arg (Preferred or image)
+    RoiGtm rgtm;
+    RoiGtmReader rgtmR( filein, RoiGtmReader::read_gtmarg_only );
+    rgtmR.read( rgtm );
 
-  // Read GTM from file Arg (Preferred or image)
-  RoiGtm rgtm;
-  RoiGtmReader rgtmR( filein, RoiGtmReader::read_gtmarg_only );
-  rgtmR.read( rgtm );
+    rgtm.streamout();
 
-  rgtm.streamout();
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
 }
