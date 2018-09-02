@@ -46,7 +46,6 @@ set( _headers
     fibers/bundlesSlicer.h
     fibers/fiberOversampler.h
     fibers/trackvisbundlereader.h
-    getopt/getopt.h
     getopt/getopt2.h
     getopt/getoptProcess.h
     graph/graphiterator.h
@@ -279,7 +278,6 @@ set(_aimsdata_sources
     fibers/bundlesSlicer.cc
     fibers/fiberOversampler.cc
     fibers/trackvisbundlereader.cc
-    getopt/getopt.cc
     getopt/getopt2.cc
     graph/graphiterator.cc
     graph/graphmanip.cc
