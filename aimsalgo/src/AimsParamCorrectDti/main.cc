@@ -32,146 +32,133 @@
  */
 
 
-#include <cstdlib>
 #include "interpolator.h"
-#include <aims/getopt/getopt.h>
-#include <aims/data/data_g.h>
-#include <aims/io/io_g.h>
-#include <aims/utility/utility_g.h>
-#include <aims/math/math_g.h>
+#include <aims/getopt/getopt2.h>
+#include <aims/data/data.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+// #include <aims/utility/utility_g.h>
+// #include <aims/math/math_g.h>
 #include <soma-io/allocator/mappingcopy.h>
-#include <iomanip>
 
 using namespace aims;
 using namespace carto;
 using namespace std;
 
-BEGIN_USAGE(usage)
-  "-------------------------------------------------------------------------",
-  "AimsParamCorrectDTI -d[istorded] <distorded>                             ",
-  "                    -o[utput] <fileout>                                  ",
-  "                    -p[arameter] <param>                                 ",
-  "                   [--memMap]                                            ",
-  "                   [-r[ead] <reader>]                                    ",
-  "                   [-h[elp]]                                             ",
-  "-------------------------------------------------------------------------",
-  "Correction of DTI distorsions from an existing parameter file            ",
-  "-------------------------------------------------------------------------",
-  "     distorded    : source S16 distorded data                            ",
-  "     fileout      : destination S16 data file name                       ",
-  "     param        : parameter file containing corrections                ",
-  "     memMap       : memory mapping activated (obsolete, automatic)       ",
-  "-------------------------------------------------------------------------",
-END_USAGE
 
-
-void Usage( void )
+int main( int argc, const char* argv[] )
 {
-  AimsUsage( usage );
-}
+  Reader<AimsData<short> > dataR;
+  Writer<AimsData<short> > dataW;
 
-
-int main( int argc, char* argv[] )
-{
-  char *fileDist = NULL, *fileOut = NULL, *fileParam = NULL;
-  int memMap = 0;
+  string fileParam;
   int x, y, z, t;
 
-  AimsOption opt[] = {
-  { 'h',"help"         ,AIMS_OPT_FLAG  ,( void* )Usage          ,AIMS_OPT_CALLFUNC,0},
-  { 'd',"distorded"    ,AIMS_OPT_STRING,&fileDist      ,0                ,1},
-  { 'o',"output"       ,AIMS_OPT_STRING,&fileOut       ,0                ,1},
-  { 'p',"parameter"    ,AIMS_OPT_STRING,&fileParam     ,0                ,1},
-  { ' ',"memMap"       ,AIMS_OPT_FLAG  ,&memMap        ,0                ,0},
-  { 0  ,0              ,AIMS_OPT_END   ,0              ,0                ,0}};
+  AimsApplication app( argc, argv,
+                       "Correction of DTI distorsions from an existing "
+                       "parameter file" );
+  app.addOption( dataR, "-d", "source S16 distorded data" );
+  app.addOption( dataW, "-o", "destination S16 data file name" );
+  app.addOption( fileParam, "-p", "parameter file containing corrections" );
+  app.alias( "--distorted", "-d" );
+  app.alias( "--output", "-o" );
+  app.alias( "--parameter", "-p" );
 
-  AimsParseOptions(&argc,argv,opt,usage);
-
-
-  //
-  // choice of interpolation
-  //
-  SplineInterpolator interpolator;
-
-
-  //
-  // read data
-  //
-  cout << "reading distorded image : " << flush;
-  AimsData<short> ima;
-  Reader<AimsData<short> > dataR( fileDist );
-  dataR.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly ) );
-  dataR >> ima;
-  cout << "done" << endl;
-
-  //
-  // get sizes
-  //
-  int dimX = ima.dimX();
-  int dimY = ima.dimY();
-  int dimZ = ima.dimZ();
-  int dimT = ima.dimT();
-
-
-  //
-  //  read parameters
-  //
-  cout << "reading parameters : " << flush;
-  ifstream is( fileParam );
-  AimsData< Point3df > parameter( dimZ, dimT );
-  int tmp;
-  for ( z = 0; z < dimZ; z++ )
-    for ( t = 0; t < dimT; t++ )
-    {
-      is >> tmp;
-      ASSERT( tmp == z );
-      is >> tmp;
-      ASSERT( tmp == t );
-      is >> parameter( z, t );
-    }
-  is.close();
-  cout << "done" << endl;
-
-  //
-  // allocate result and temporary images
-  //
-  AimsData<short> reg( dimX, dimY, dimZ, dimT );
-  reg.setSizeXYZT( ima );
-
-  AimsData<short> Sima( dimX, dimY );
-  Sima.setSizeX( ima.sizeX() );
-  Sima.setSizeY( ima.sizeY() );
-
-  AimsData<short> Sreg( dimX, dimY );
-  Sreg.setSizeX( reg.sizeX() );
-  Sreg.setSizeY( reg.sizeY() );
-
-
-  //
-  // output starting parameters
-  //
-  cout << "slice : " << setw( 3 ) << 0 << flush;
-  for ( z = 0; z < dimZ; z++ )
+  try
   {
-    cout << "\b\b\b" << setw( 3 ) << z + 1 << flush;
-    for ( t = 0; t < dimT; t++ )
+    app.initialize();
+
+    //
+    // choice of interpolation
+    //
+    SplineInterpolator interpolator;
+
+
+    //
+    // read data
+    //
+    cout << "reading distorded image : " << flush;
+    AimsData<short> ima;
+    dataR.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly ) );
+    dataR >> ima;
+    cout << "done" << endl;
+
+    //
+    // get sizes
+    //
+    int dimX = ima.dimX();
+    int dimY = ima.dimY();
+    int dimZ = ima.dimZ();
+    int dimT = ima.dimT();
+
+
+    //
+    //  read parameters
+    //
+    cout << "reading parameters : " << flush;
+    ifstream is( fileParam.c_str() );
+    AimsData< Point3df > parameter( dimZ, dimT );
+    int tmp;
+    for ( z = 0; z < dimZ; z++ )
+      for ( t = 0; t < dimT; t++ )
+      {
+        is >> tmp;
+        ASSERT( tmp == z );
+        is >> tmp;
+        ASSERT( tmp == t );
+        is >> parameter( z, t );
+      }
+    is.close();
+    cout << "done" << endl;
+
+    //
+    // allocate result and temporary images
+    //
+    AimsData<short> reg( dimX, dimY, dimZ, dimT );
+    reg.setSizeXYZT( ima );
+
+    AimsData<short> Sima( dimX, dimY );
+    Sima.setSizeX( ima.sizeX() );
+    Sima.setSizeY( ima.sizeY() );
+
+    AimsData<short> Sreg( dimX, dimY );
+    Sreg.setSizeX( reg.sizeX() );
+    Sreg.setSizeY( reg.sizeY() );
+
+
+    //
+    // output starting parameters
+    //
+    cout << "slice : " << setw( 3 ) << 0 << flush;
+    for ( z = 0; z < dimZ; z++ )
     {
-      ForEach2d( Sima, x, y )
-        Sima( x, y ) = ima( x, y, z, t );
+      cout << "\b\b\b" << setw( 3 ) << z + 1 << flush;
+      for ( t = 0; t < dimT; t++ )
+      {
+        ForEach2d( Sima, x, y )
+          Sima( x, y ) = ima( x, y, z, t );
 
-      interpolator.doit( Sima, Sreg, parameter( z, t ) );          
+        interpolator.doit( Sima, Sreg, parameter( z, t ) );
 
-      ForEach2d( Sreg, x, y )
-        reg( x, y, z, t ) = short( parameter( z, t )[0] * Sreg( x, y ) );
+        ForEach2d( Sreg, x, y )
+          reg( x, y, z, t ) = short( parameter( z, t )[0] * Sreg( x, y ) );
+      }
     }
+    cout << endl;
+
+    cout << "writing result : " << flush;
+    dataW << reg;
+    cout << "done" << endl;
+
+
+    return EXIT_SUCCESS;
   }
-  cout << endl;
-
-  cout << "writing result : " << flush;
-  Writer<AimsData<short> > dataW( fileOut );
-  dataW << reg;
-  cout << "done" << endl;
-
-
-  return EXIT_SUCCESS;
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
 }
