@@ -34,13 +34,15 @@
 /*
  *  Apply threshold
  */
-#include <cstdlib>
-#include <aims/io/io_g.h>
-#include <aims/data/data_g.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+#include <aims/io/finder.h>
+#include <cartodata/volume/volume.h>
 #include <cartobase/config/verbose.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>
-#include <aims/utility/utility_g.h>
+#include <aims/utility/minmax.h>
+#include <aims/utility/threshold.h>
 
 using namespace aims;
 using namespace std;
@@ -88,11 +90,12 @@ template<class T> bool
 doit( Process & p, const string & fname, Finder & f )
 {
   Thresholder		&tc = (Thresholder &) p;
-  AimsData<T>		data;
-  Reader<AimsData<T> >	r( fname );
+  VolumeRef<T>		data;
+  Reader<Volume<T> >	r( fname );
   string	format = f.format();
   if ( verbose ) cout << "reading " << fname << "...\n";
-  if( !r.read( data ) )
+  data.reset( r.read( 0, &format ) );
+  if( !data.get() )
     return( false );
   if ( verbose ) cout << "reading done\n";
 
@@ -116,18 +119,18 @@ doit( Process & p, const string & fname, Finder & f )
   AimsThreshold<T,short> thresh( tc.mode, (T) tc.t1, (T) tc.t2, (T) tc.bg, (short) tc.fg );
   if( tc.bin )
     {
-      Writer<AimsData<short> > writer( tc.fout );
-      return( writer.write( thresh.bin( data ) ) );
+      Writer<VolumeRef<short> > writer( tc.fout );
+      return( writer.write( thresh.bin( data ).volume() ) );
     }
   else if( tc.clip )
     {
-      Writer<AimsData<T> > writer( tc.fout );
-      return( writer.write( thresh.clip( data ) ) );
+      Writer<VolumeRef<T> > writer( tc.fout );
+      return( writer.write( thresh.clip( data ).volume() ) );
     }
   else
     {
-      Writer<AimsData<T> > writer( tc.fout );
-      return( writer.write( thresh( data ) ) );
+      Writer<VolumeRef<T> > writer( tc.fout );
+      return( writer.write( thresh( data ).volume() ) );
     }
 }
 
