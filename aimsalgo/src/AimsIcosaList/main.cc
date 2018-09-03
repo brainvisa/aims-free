@@ -82,7 +82,7 @@ int main( int argc, const char **argv )
 
     if ( all )
     {
-      ofstream os( fileOut );
+      ofstream os( fileOut.c_str() );
       os << distrib.size() << endl;
       for (vector< Point3df* >::const_iterator it=distrib.begin();
           it!=distrib.end();it++)
@@ -112,7 +112,7 @@ int main( int argc, const char **argv )
       }
       cout << "number of non-oriented directions : " << listPt.size() << endl;
 
-      ofstream os( fileOut );
+      ofstream os( fileOut.c_str() );
 
       os << listPt.size() << endl;
       for (list< Point3df* >::const_iterator it=listPt.begin();
