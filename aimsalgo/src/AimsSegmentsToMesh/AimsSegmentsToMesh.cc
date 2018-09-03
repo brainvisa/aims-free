@@ -77,7 +77,7 @@ int main(int argc, const char *argv[])
     vector< Point3df > points;
     {
       if ( verbose ) cout << "Read " << fileIn << flush;
-      ifstream in( fileIn );
+      ifstream in( fileIn.c_str() );
       DefaultAsciiItemReader< Point3df > pointReader;
       size_t segmentCount;
       in >> segmentCount;
