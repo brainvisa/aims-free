@@ -31,9 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <cstdlib>
 #include <aims/getopt/getopt2.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/io/finder.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
@@ -54,6 +53,8 @@ template<class T>
 static bool tcat( Process & p, const string & filename, Finder & finder );
 template<class T>
 static unsigned cat( T & out, const T & in, unsigned t );
+template<class T>
+static unsigned cat( Volume<T> & out, const Volume<T> & in, unsigned t );
 
 class TCat : public Process
 {
@@ -69,19 +70,19 @@ class TCat : public Process
 TCat::TCat( const vector<string> & in, const string & out )
   : Process(), inputs( in ), output( out )
 {
-  registerProcessType( "Volume", "S8", &tcat<AimsData<int8_t> > );
-  registerProcessType( "Volume", "U8", &tcat<AimsData<uint8_t> > );
-  registerProcessType( "Volume", "S16", &tcat<AimsData<int16_t> > );
-  registerProcessType( "Volume", "U16", &tcat<AimsData<uint16_t> > );
-  registerProcessType( "Volume", "S32", &tcat<AimsData<int32_t> > );
-  registerProcessType( "Volume", "U32", &tcat<AimsData<uint32_t> > );
-  registerProcessType( "Volume", "FLOAT", &tcat<AimsData<float> > );
-  registerProcessType( "Volume", "DOUBLE", &tcat<AimsData<double> > );
-  registerProcessType( "Volume", "CFLOAT", &tcat<AimsData<cfloat> > );
-  registerProcessType( "Volume", "CDOUBLE", &tcat<AimsData<cdouble> > );
-  registerProcessType( "Volume", "RGB", &tcat<AimsData<AimsRGB> > );
-  registerProcessType( "Volume", "RGBA", &tcat<AimsData<AimsRGBA> > );
-  registerProcessType( "Volume", "POINT3DF", &tcat<AimsData<Point3df> > );
+  registerProcessType( "Volume", "S8", &tcat<Volume<int8_t> > );
+  registerProcessType( "Volume", "U8", &tcat<Volume<uint8_t> > );
+  registerProcessType( "Volume", "S16", &tcat<Volume<int16_t> > );
+  registerProcessType( "Volume", "U16", &tcat<Volume<uint16_t> > );
+  registerProcessType( "Volume", "S32", &tcat<Volume<int32_t> > );
+  registerProcessType( "Volume", "U32", &tcat<Volume<uint32_t> > );
+  registerProcessType( "Volume", "FLOAT", &tcat<Volume<float> > );
+  registerProcessType( "Volume", "DOUBLE", &tcat<Volume<double> > );
+  registerProcessType( "Volume", "CFLOAT", &tcat<Volume<cfloat> > );
+  registerProcessType( "Volume", "CDOUBLE", &tcat<Volume<cdouble> > );
+  registerProcessType( "Volume", "RGB", &tcat<Volume<AimsRGB> > );
+  registerProcessType( "Volume", "RGBA", &tcat<Volume<AimsRGBA> > );
+  registerProcessType( "Volume", "POINT3DF", &tcat<Volume<Point3df> > );
   registerProcessType( "Mesh", "VOID", &tcat<AimsSurfaceTriangle> );
   registerProcessType( "Mesh2", "VOID", &tcat<AimsTimeSurface<2, Void> > );
   registerProcessType( "Mesh4", "VOID", &tcat<AimsSurfaceFacet> );
@@ -102,8 +103,8 @@ T* allocObject( T &, unsigned, TCat &, Finder & )
 
 
 template<class T> static
-AimsData<T>* allocObject( AimsData<T> & in0, unsigned n,
-			  TCat & /*tp*/, Finder & )
+Volume<T>* allocObject( Volume<T> & in0, unsigned n,
+                        TCat & /*tp*/, Finder & )
 {
   /* AllocatorContext mwalloc 
     = AllocatorContext( AllocatorStrategy::ReadWrite, 
@@ -111,21 +112,12 @@ AimsData<T>* allocObject( AimsData<T> & in0, unsigned n,
                                             DataSource::ReadWrite ), 
                                             ??diskok??, 0 ); */
 
-  AimsData<T>	*din = new AimsData<T>( in0.dimX(), in0.dimY(), in0.dimZ(), 
-					n /*, 0, mwalloc*/ );
+  Volume<T>	*din = new Volume<T>( in0.getSizeX(), in0.getSizeY(),
+                                      in0.getSizeZ(), n /*, 0, mwalloc*/ );
 
-  din->setHeader( in0.header()->cloneHeader() );
-  PythonHeader *ph = dynamic_cast< PythonHeader *>( din->header() );
-  vector<int> dims;
-  dims.push_back(in0.dimX());
-  dims.push_back(in0.dimY());
-  dims.push_back(in0.dimZ());
-  dims.push_back(n);
-  ph->setProperty("volume_dimension", dims);
-  din->setSizeXYZT( in0.sizeX(), in0.sizeY(), in0.sizeZ(), in0.sizeT() );
+  din->copyHeaderFrom( in0.header() );
 
-  in0.setHeader( 0 );
-  return( din );
+  return din;
 }
 
 
@@ -268,7 +260,7 @@ static bool tcat( Process & p, const string &, Finder & finder )
 {
   TCat		& tp = (TCat &) p;
   unsigned	n = tp.inputs.size(), i, t = 0, nt = 1;
-  T		*in0 = new T;	// for now all data must be of the same type
+  T		*in0;	// for now all data must be of the same type
   Reader<T>	r( tp.inputs[0] );
   string	format = finder.format();
 
@@ -306,8 +298,7 @@ static bool tcat( Process & p, const string &, Finder & finder )
   cout << "reading " << tp.inputs[0] << "...\n";
   r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly, 
                                            DataSource::none(), false, 0.01 ) );
-  if( !r.read( *in0, 0, &format ) )
-    return( false );
+  in0 = r.read( 0, &format );
 
   try
     {
@@ -323,15 +314,15 @@ static bool tcat( Process & p, const string &, Finder & finder )
       for( i=1; i<n; ++i )
 	{
 	  cout << "reading " << tp.inputs[i] << endl;
-	  T		in;	// for now all data must be of the same type
+	  T *in;	// for now all data must be of the same type
 	  Reader<T>	r( tp.inputs[i] );
 	  //	check dimensions ....
           r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly,
                                                    DataSource::none(), false, 
                                                    0.01 ) );
-	  if( !r.read( in ) )
-	    return( false );
-	  t = cat( *din, in, t );
+          in = r.read();
+	  t = cat( *din, *in, t );
+          delete in;
 	}
       cout << "done\nWriting result...";
       
@@ -350,7 +341,7 @@ static bool tcat( Process & p, const string &, Finder & finder )
 
 
 template<class T>
-unsigned cat( AimsData<T> & out, const AimsData<T> & in, unsigned t0 )
+unsigned cat( Volume<T> & out, const Volume<T> & in, unsigned t0 )
 {
   int	x, y, z, t;
 
@@ -359,51 +350,49 @@ unsigned cat( AimsData<T> & out, const AimsData<T> & in, unsigned t0 )
    int in_zst;
    in_zst = 0;
    vector<int> in_st, in_dt;
-   const PythonHeader *inph;
-   inph = dynamic_cast<const PythonHeader *>( in.header() );
+   const PropertySet &inph = in.header();
 
-   //   int kh;
-   //   if ( inph)  inph->getProperty("zero_start_time", kh);
-   //   cout << "lu   " << kh << endl;
-
-  if ( inph && inph->getProperty("zero_start_time", in_zst) &&
-       inph->getProperty("start_time", in_st) &&
-       inph->getProperty("duration_time", in_dt) )
+  if ( inph.getProperty("zero_start_time", in_zst) &&
+       inph.getProperty("start_time", in_st) &&
+       inph.getProperty("duration_time", in_dt) )
     {
       int out_zst;
       vector<int> out_st, out_dt;
-      
-      // out already have a python header (see allocObj)
-      PythonHeader *outph;
-      outph = dynamic_cast< PythonHeader *>( out.header() );
+
+      PropertySet &outph = out.header();
 
       // Check first file of the concatenation list
-      if( !outph->getProperty("zero_start_time", out_zst) )
+      if( !outph.getProperty("zero_start_time", out_zst) )
 	{ // first file
-	  outph->setProperty("zero_start_time", in_zst);
-	  outph->setProperty("start_time", in_st);
-	  outph->setProperty("duration_time", in_dt);
+	  outph.setProperty("zero_start_time", in_zst);
+	  outph.setProperty("start_time", in_st);
+	  outph.setProperty("duration_time", in_dt);
  	}
       else
 	{ // following files
 	  unsigned int i;
-	  outph->getProperty("zero_start_time", out_zst);
-	  outph->getProperty("start_time", out_st);
-	  outph->getProperty("duration_time", out_dt);
+	  outph.getProperty("zero_start_time", out_zst);
+	  outph.getProperty("start_time", out_st);
+	  outph.getProperty("duration_time", out_dt);
 	  for(i=0;i<in_st.size(); ++i)
 	    {
 	      out_st.push_back( in_st[i] + ( in_zst - out_zst)*1000 );
 	      out_dt.push_back( in_dt[i] );
 	    }
-	  outph->setProperty("start_time", out_st);
-	  outph->setProperty("duration_time", out_dt);
+	  outph.setProperty("start_time", out_st);
+	  outph.setProperty("duration_time", out_dt);
 	}
     }
 
 
+  vector<int> dims = in.getSize();
+  int dx = dims[0], dy = dims[1], dz = dims[2], dt = dims[3];
 
-  ForEach4d( in, x, y, z, t )
-    out( x, y, z, t0 + t ) = in( x, y, z, t );
+  for( t=0; t<dt; ++t )
+    for( z=0; z<dz; ++z )
+      for( y=0; y<dy; ++y )
+        for( x=0; x<dx; ++x )
+          out.at( x, y, z, t0 + t ) = in.at( x, y, z, t );
   return( t0 + t );
 }
 
