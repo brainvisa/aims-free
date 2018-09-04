@@ -43,6 +43,8 @@
 #include <soma-io/allocator/allocator.h>
 #include <aims/data/pheader.h>
 
+#include <algorithm>
+
 
 template<typename T>
 class AimsData : public carto::RCObject, public aims::Border
@@ -216,10 +218,14 @@ inline
 int AimsData<T>::Private::borderWidth( carto::rc_ptr<carto::Volume<T> > vol )
 {
   if( !vol->refVolume().isNull() ) // is a view to another volume
-  {
-    // this is only the border in X direction, but we can't be more precise.
-    return ( vol->refVolume()->getSizeX() - vol->getSizeX() ) / 2;
-  }
+    if (vol->refVolume()->allocatorContext().isAllocated()) {
+      // AimsData is not able to deal with different border sizes, so we get the 
+      // minimum border through dimensions
+      const std::vector<int> vborders = vol->getBorders();
+      std::vector<int>::const_iterator minit = std::min_element(vborders.begin(), 
+                                                                vborders.end());
+      return (minit == vborders.end() ? 0 : *minit);
+    }
   return 0;
 }
 
