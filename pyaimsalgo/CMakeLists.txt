@@ -1,5 +1,5 @@
 
-include_directories( ${PYAIMS_INCLUDE_DIRS} )
+include_directories( BEFORE ${PYAIMS_INCLUDE_DIRS} )
 
 add_subdirectory( src )
 add_subdirectory( python )
