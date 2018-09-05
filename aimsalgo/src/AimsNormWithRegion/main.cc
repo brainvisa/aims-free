@@ -156,7 +156,7 @@ namespace carto
 {
 
   template <>
-  bool SingleOption<Helper>::feed( const std::string &value )
+  bool SingleOption<Helper>::feed( const std::string & /* value */ )
   {
     if ( _valueRead )
     {
@@ -310,12 +310,12 @@ int main(int argc, const char **argv)
     RoiStats rsa( interpolator, &roiSel );
 
 
-    // Lecture des données ===================================================
+    // Lecture des donnï¿½es ===================================================
     AimsData< float > image;
     rd.read( image );
     rsa.populate( image, roi, motion );
 
-    // Récupération de la valeur lue dans le pons.
+    // Rï¿½cupï¿½ration de la valeur lue dans le pons.
     set<Vertex*>    sv = rsa.vertices();
 
     vector<float>   taCurv;
