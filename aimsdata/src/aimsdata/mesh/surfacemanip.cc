@@ -1816,10 +1816,10 @@ void SurfaceManip::cutMesh( const AimsSurfaceTriangle & insurf,
 {
   vector<const AimsSurfaceTriangle *> insurfl(1);
   insurfl[0] = &insurf;
-  vector<rc_ptr<AimsSurfaceTriangle> > outc(1);
-  outc[0].reset( &cut );
+  vector<rc_ptr<AimsSurfaceTriangle> > outc;
   cutMesh( insurfl, plane, outc, borderline );
-  outc[0].release();
+  if( outc.size() != 0 )
+    cut = *outc[0];
 }
 
 
@@ -1840,10 +1840,10 @@ void SurfaceManip::cutMesh( const AimsSurfaceTriangle & insurf,
 {
   vector<const AimsSurfaceTriangle *> insurfl(1);
   insurfl[0] = &insurf;
-  vector<rc_ptr<AimsSurfaceTriangle> > outc(1);
-  outc[0].reset( &cut );
+  vector<rc_ptr<AimsSurfaceTriangle> > outc;
   cutMesh( insurfl, plane, outc, pmesh, checkplane );
-  outc[0].release();
+  if( outc.size() != 0 )
+    cut = *outc[0];
 }
 
 
@@ -1866,10 +1866,10 @@ void SurfaceManip::cutMesh( const AimsSurfaceTriangle & insurf,
 {
   vector<const AimsSurfaceTriangle *> insurfl(1);
   insurfl[0] = &insurf;
-  vector<rc_ptr<AimsSurfaceTriangle> > outc(1);
-  outc[0].reset( &cut );
+  vector<rc_ptr<AimsSurfaceTriangle> > outc;
   cutMesh( insurfl, plane, outc, pmesh, borderline, checkplane );
-  outc[0].release();
+  if( outc.size() != 0 )
+    cut = *outc[0];
 }
 
 
@@ -1891,11 +1891,11 @@ void SurfaceManip::cutMesh( const AimsSurfaceTriangle & insurf,
                             bool meshplane, bool checkplane )
 {
   vector<const AimsSurfaceTriangle *> insurfl(1);
-  vector<rc_ptr<AimsSurfaceTriangle> > outc(1);
+  vector<rc_ptr<AimsSurfaceTriangle> > outc;
   insurfl[0] = &insurf;
-  outc[0].reset( &cut );
   cutMesh( insurfl, plane, outc, pmesh, borderline, meshplane, checkplane );
-  outc[0].release();
+  if( outc.size() != 0 )
+    cut = *outc[0];
 }
 
 
