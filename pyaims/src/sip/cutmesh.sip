@@ -35,7 +35,7 @@ To use it:
               bool checkplane = true );
     void cutBorder( int timestep = 0 );
 
-//     vector_rc_ptr_AimsSurfaceTriangle cutMeshes() const;
+    vector_rc_ptr_AimsTimeSurface_3_VOID cutMeshes() const;
     rc_ptr_AimsTimeSurface_2_VOID borderLine() const;
     rc_ptr_AimsTimeSurface_3_VOID planeMesh() const;
   };
