@@ -1,6 +1,7 @@
 OPTION( AIMS_PARTIAL_PYAIMSSIP "Use only parts of PyAims, shorter to compile, for devel purpose" OFF )
 
 set( PYAIMS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" )
+include_directories( BEFORE ${PYAIMS_INCLUDE_DIRS} )
 
 add_subdirectory( src )
 add_subdirectory( python )

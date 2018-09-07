@@ -1,3 +1,6 @@
+
+include_directories( BEFORE ${PYAIMS_INCLUDE_DIRS} )
+
 add_subdirectory( src )
 add_subdirectory( python )
 add_subdirectory( bin )
