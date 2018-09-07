@@ -1379,3 +1379,15 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( PyMapIter )
 INSTANTIATE_GENERIC_OBJECT_TYPE( PyObjIter )
 #undef PyMapIter
 
+#include <aims/mesh/surface.h>
+#include <cartobase/smart/rcptr.h>
+#include <vector>
+
+#define vector_rc_surf  std::vector<carto::rc_ptr<AimsTimeSurface<3, Void> > >
+
+namespace carto
+{
+  DECLARE_GENERIC_OBJECT_TYPE( vector_rc_surf )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( vector_rc_surf )
+}
+

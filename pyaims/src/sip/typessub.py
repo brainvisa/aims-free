@@ -2852,6 +2852,47 @@ typessub = {'bool':
             classInSomaNamespace('soma-io/datasourceinfo/datasourceinfo.h',
                                   'DataSourceInfo'),
 
+            'carto::rc_ptr<AimsTimeSurface_3_VOID>':
+            {'typecode': 'rc_ptr_AimsTimeSurface_3_VOID',
+               'pyFromC': 'pyaimsConvertFrom_rc_ptr_AimsTimeSurface_3_VOID',
+               'CFromPy': 'pyaimsConvertTo_rc_ptr_AimsTimeSurface_3_VOID',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new carto::rc_ptr<carto::rc_ptr<AimsTimeSurface<Void> > >',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'rc_ptr_AimsTimeSurface_3_VOID',
+               'sipClass': 'rc_ptr_AimsTimeSurface_3_VOID',
+               'typeinclude': '#include <aims/mesh/surface.h>\n'
+                  '#include <cartobase/smart/rcptr.h>',
+               'sipinclude': '#ifndef PYAIMS_RC_PTR_TIMESURFACE_3_VOID_CHECK_DEFINED\n'
+               '#define PYAIMS_RC_PTR_TIMESURFACE_3_VOID_CHECK_DEFINED\n'
+               '#ifndef PYAIMS_AIMSTIMESURFACE_3_VOID_DEFINED\n'
+               '#define PYAIMS_AIMSTIMESURFACE_3_void_DEFINED\n'
+               'typedef AimsTimeSurface<3, Void > AimsTimeSurface_3_VOID;\n'
+               '#endif\n'
+               'inline int pyaimsRcptr_TimeSurface_3_VOID_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "rc_ptr_AimsTimeSurface_3_VOID" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif\n'
+               '#ifndef PYAIMS_RC_PTR_TIMESURFACE_3_VOID_CONVERT_DEFINED\n'
+               '#define PYAIMS_RC_PTR_TIMESURFACE_3_VOID_CONVERT_DEFINED\n'
+               'inline carto::rc_ptr<AimsTimeSurface<3, Void> >* pyaimsConvertTo_rc_ptr_AimsTimeSurface_3_VOID( PyObject* o )\n'
+               '{ int iserr = 0;\n'
+               '  void *ptr = sipForceConvertToType( o, sipFindType( "rc_ptr_AimsTimeSurface_3_VOID" ), 0, 0, 0, &iserr );\n'
+               '  if( iserr ) return 0;\n'
+               '  return reinterpret_cast<carto::rc_ptr<AimsTimeSurface<3, Void> > *>( ptr );\n}\n'
+               'inline PyObject* pyaimsConvertFrom_rc_ptr_AimsTimeSurface_3_VOID( void * a )\n'
+               '{ return sipConvertFromType( a, sipFindType( "rc_ptr_AimsTimeSurface_3_VOID" ), 0 ); }\n'
+               '#endif\n',
+               'module': 'aims',
+               'testPyType': 'pyaimsRcptr_TimeSurface_3_VOID_Check',
+            },
+
+
             }
 if target_platform == 'windows-64':
     typessub['size_t'] = typessub['unsigned long long']
