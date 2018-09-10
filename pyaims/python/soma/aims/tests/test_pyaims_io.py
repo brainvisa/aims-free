@@ -159,7 +159,7 @@ class TestPyaimsIO(unittest.TestCase):
                                                thresh, rel_thresh))
         else:
             minf = {} # no .minf file (dicom)
-
+        
         view_pos1, view_size1, view_pos2, view_size2 = view
         if format in partial_read:
             if self.verbose:
@@ -174,7 +174,6 @@ class TestPyaimsIO(unittest.TestCase):
             self.assertTrue(compare_images(vol4, vol3, 'sub-volume',
                                            'patially read', thresh,
                                            rel_thresh))
-
         if format in partial_write:
             if self.verbose:
                 print('    testing partial writing:', format)
@@ -238,11 +237,11 @@ class TestPyaimsIO(unittest.TestCase):
             os.unlink(fname)
         if os.path.exists(minf_fname):
             os.unlink(minf_fname)
-        vol2 = aims.VolumeView(vol, (2, 3, 4, 0), (7, 5, 6, 1))
+        vol2 = aims.VolumeView(vol, (2, 3, 2, 0), (7, 5, 4, 1))
         aims.write(vol2, w_fname)
         fname = self.file_name(vol2, dtype, format)
         vol3 = aims.read(fname)
-        self.assertEqual(tuple(vol3.getSize()), (7, 5, 6, 1))
+        self.assertEqual(tuple(vol3.getSize()), (7, 5, 4, 1))
         self.assertTrue(compare_images(vol2, vol3, 'volume view',
                                        're-read volume view', thresh,
                                        rel_thresh))

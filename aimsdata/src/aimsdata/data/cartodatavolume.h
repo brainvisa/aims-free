@@ -222,9 +222,17 @@ int AimsData<T>::Private::borderWidth( carto::rc_ptr<carto::Volume<T> > vol )
       // AimsData is not able to deal with different border sizes, so we get the 
       // minimum border through dimensions
       const std::vector<int> vborders = vol->getBorders();
-      std::vector<int>::const_iterator minit = std::min_element(vborders.begin(), 
-                                                                vborders.end());
-      return (minit == vborders.end() ? 0 : *minit);
+      
+      // Borders are not defined for T dimension so we must only deal with 
+      // X, Y and Z dimensions
+      std::vector<int>::const_iterator vbordersend = (vborders.size() > 6 
+                                                    ? vborders.begin() + 6 
+                                                    : vborders.end());
+      if(vborders.begin() != vbordersend) {
+        std::vector<int>::const_iterator minit = std::min_element(vborders.begin(), 
+                                                                  vbordersend);
+        return (minit == vbordersend ? 0 : *minit);
+      }
     }
   return 0;
 }
@@ -416,6 +424,7 @@ AimsData<T> & AimsData<T>::operator = ( carto::rc_ptr<carto::Volume<T> > vol )
     return *this;
 
   int	border = Private::borderWidth( vol );
+
   _setBorder( vol->getSizeX(), vol->getSizeY(),
               vol->getSizeZ(), border );
   delete d->header;
