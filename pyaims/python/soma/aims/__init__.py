@@ -835,8 +835,9 @@ def _vol_getstate(self):
 
 
 def _vol_setstate(self, state):
-    self.__init__(state[1])
+    self.__init__(state[1].shape)
     self.copyHeaderFrom(state[0])
+    numpy.asarray(self)[:] = state[1][:]
 
 
 def _aimsdata_getstate(self):
@@ -844,8 +845,9 @@ def _aimsdata_getstate(self):
 
 
 def _aimsdata_setstate(self, state):
-    vol = Volume(state[1])
+    vol = Volume(state[1].shape)
     vol.copyHeaderFrom(state[0])
+    numpy.asarray(vol)[:] = state[1][:]
     self.__init__(vol)
 
 
