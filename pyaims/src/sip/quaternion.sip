@@ -19,7 +19,19 @@ class Quaternion
   void setVector( const Point4df &vec );
   // AimsVector_FLOAT_S16 rotationMatrix() const;
   // AimsVector_FLOAT_S16 inverseRotationMatrix() const;
-  void buildFromMatrix( const float *m );
+  void buildFromMatrix( const vector_FLOAT & m );
+%Docstring
+  buildFromMatrix(m)
+  Parameters
+  ----------
+  m: vector_FLOAT
+      4x4 matrix in **columns** (OpenGL-style). Be careful that it is not the
+      expected order for a numpy array using ravel(), which have to be
+      transposed.
+%End
+%MethodCode
+  sipCpp->buildFromMatrix( &(*a0)[0] );
+%End
   void buildFromMotion( const Motion & m );
   Point3df transform( const Point3df &p ) const;
   Point3df transform( float x, float y, float z ) const;

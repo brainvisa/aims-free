@@ -19,7 +19,7 @@ public:
 %End
 %If (!SIPTHROW_BUG)
   virtual %Template1PyType% *read( int = 0, const std::string * = 0, int = -1 )
-    throw ( carto::io_error, std::exception ) /Factory/; //, ReleaseGIL/;
+    throw ( carto::io_error, std::exception ) /Factory, ReleaseGIL/;
 %End
 
   void setFileName( std::string & );

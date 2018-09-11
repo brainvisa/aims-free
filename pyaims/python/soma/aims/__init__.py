@@ -830,6 +830,27 @@ def proxyget(self, *args, **kwargs):
     return self._get().get(*args, **kwargs)
 
 
+def _vol_getstate(self):
+    return (eval(repr(self.header())), numpy.asarray(self))
+
+
+def _vol_setstate(self, state):
+    self.__init__(state[1].shape)
+    self.copyHeaderFrom(state[0])
+    numpy.asarray(self)[:] = state[1][:]
+
+
+def _aimsdata_getstate(self):
+    return self.volume().__getstate__()
+
+
+def _aimsdata_setstate(self, state):
+    vol = Volume(state[1].shape)
+    vol.copyHeaderFrom(state[0])
+    numpy.asarray(vol)[:] = state[1][:]
+    self.__init__(vol)
+
+
 # scan classes and modify some of them
 def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
@@ -887,6 +908,9 @@ def __fixsipclasses__(classes):
                 else:
                     y.astype = types.MethodType(
                         __fixsipclasses__.__Volume_astype__, None, y)
+                # volume pickling
+                y.__getstate__ = __fixsipclasses__._vol_getstate
+                y.__setstate__ = __fixsipclasses__._vol_setstate
             else:
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
@@ -933,6 +957,8 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self.volume()).__getitem__(*args, **kwargs)
                 y.__setitem__ = lambda self, *args, **kwargs: \
                     numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
+                y.__getstate__ = __fixsipclasses__._aimsdata_getstate
+                y.__setstate__ = __fixsipclasses__._aimsdata_setstate
 
             # fix python3 iterators
             if sys.version_info[0] >= 3 and hasattr(y, 'next') \
@@ -963,11 +989,16 @@ __fixsipclasses__.proxyiter = proxyiter
 __fixsipclasses__.__operator_overload__ = __operator_overload__
 __fixsipclasses__.__Volume_astype__ = __Volume_astype__
 __fixsipclasses__.proxyget = proxyget
+__fixsipclasses__._vol_getstate = _vol_getstate
+__fixsipclasses__._vol_setstate = _vol_setstate
+__fixsipclasses__._aimsdata_getstate = _aimsdata_getstate
+__fixsipclasses__._aimsdata_setstate = _aimsdata_setstate
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
 del __getitem_vec__, __setitem_vec__, __operator_overload__, __Volume_astype__
 del proxyget
+del _vol_getstate, _vol_setstate, _aimsdata_getstate, _aimsdata_setstate
 
 __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
