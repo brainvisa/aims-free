@@ -304,32 +304,20 @@ void Quaternion::buildFromMatrix( const float* m )
   float	tr, s;
 
   tr = m[0] + m[5] + m[10];
-  if( tr > 0 )
-    {
-      s = sqrt( tr + 1. );
-      _vector[3] = s * 0.5;
-      s = 0.5 / s;
-      _vector[0] = ( m[6] - m[9] ) * s;
-      _vector[1] = ( m[8] - m[2] ) * s;
-      _vector[2] = ( m[1] - m[4] ) * s;
-    }
-  else
-    {
-      int	i = 0, j, k;
+  int	i = 0, j, k;
 
-      if( m[5] > m[0] )
-	i = 1;
-      if( m[10] > m[i+i*4] )
-	i = 2;
-      j = (i+1) % 3;
-      k = (j+1) % 3;
-      s = sqrt( m[i+i*4] - ( m[j+j*4] + m[k+k*4] ) + 1. );
-      _vector[i] = s * 0.5;
-      s = 0.5 / s;
-      _vector[3] = ( m[j*4+k] - m[k*4+j] ) * s;
-      _vector[j] = ( m[i*4+j] + m[j*4+i] ) * s;
-      _vector[k] = ( m[i*4+k] + m[k*4+i] ) * s;
-    }
+  if( fabs( m[5] ) > fabs( m[0] ) )
+    i = 1;
+  if( fabs( m[10] ) > fabs( m[i+i*4] ) )
+    i = 2;
+  j = (i+1) % 3;
+  k = (j+1) % 3;
+  s = sqrt( tr + 1. );
+  _vector[3] = s * 0.5;
+  s = 0.5 / s;
+  _vector[i] = ( m[j*4+k] - m[k*4+j] ) * s;
+  _vector[j] = ( m[k*4+i] - m[i*4+k] ) * s;
+  _vector[k] = ( m[i*4+j] - m[j*4+i] ) * s;
 }
 
 
@@ -344,32 +332,20 @@ void Quaternion::buildFromMotion( const Motion & m )
   const AimsData<float> & rotation = m.rotation();
 
   tr = rotation(0,0) + rotation(1,1) + rotation(2,2);
-  if( tr > 0 )
-  {
-    s = sqrt( tr + 1. );
-    _vector[3] = s * 0.5;
-    s = 0.5 / s;
-    _vector[0] = ( rotation(2,1) - rotation(1,2) ) * s;
-    _vector[1] = ( rotation(0,2) - rotation(2,0) ) * s;
-    _vector[2] = ( rotation(1,0) - rotation(0,1) ) * s;
-  }
-  else
-  {
-    int       i = 0, j, k;
+  int       i = 0, j, k;
 
-    if( rotation(1,1) > rotation(0,0) )
-      i = 1;
-    if( rotation(2,2) > rotation(i,i) )
-      i = 2;
-    j = (i+1) % 3;
-    k = (j+1) % 3;
-    s = sqrt( rotation(i,i) - ( rotation(j,j) + rotation(k,k) ) + 1. );
-    _vector[i] = s * 0.5;
-    s = 0.5 / s;
-    _vector[3] = ( rotation(k,j) - rotation(j,k) ) * s;
-    _vector[j] = ( rotation(j,i) - rotation(i,j) ) * s;
-    _vector[k] = ( rotation(k,i) - rotation(i,k) ) * s;
-  }
+  if( fabs( rotation(1,1) ) > fabs( rotation(0,0) ) )
+    i = 1;
+  if( fabs( rotation(2,2) ) > fabs( rotation(i,i) ) )
+    i = 2;
+  j = (i+1) % 3;
+  k = (j+1) % 3;
+  s = sqrt( tr + 1. );
+  _vector[3] = s * 0.5;
+  s = 0.5 / s;
+  _vector[i] = ( rotation(k,j) - rotation(j,k) ) * s;
+  _vector[j] = ( rotation(i,k) - rotation(k,i) ) * s;
+  _vector[k] = ( rotation(j,i) - rotation(i,j) ) * s;
 }
 
 
