@@ -306,9 +306,9 @@ void Quaternion::buildFromMatrix( const float* m )
   tr = m[0] + m[5] + m[10];
   int	i = 0, j, k;
 
-  if( m[5] > m[0] )
+  if( fabs( m[5] ) > fabs( m[0] ) )
     i = 1;
-  if( m[10] > m[i+i*4] )
+  if( fabs( m[10] ) > fabs( m[i+i*4] ) )
     i = 2;
   j = (i+1) % 3;
   k = (j+1) % 3;
@@ -334,9 +334,9 @@ void Quaternion::buildFromMotion( const Motion & m )
   tr = rotation(0,0) + rotation(1,1) + rotation(2,2);
   int       i = 0, j, k;
 
-  if( rotation(1,1) > rotation(0,0) )
+  if( fabs( rotation(1,1) ) > fabs( rotation(0,0) ) )
     i = 1;
-  if( rotation(2,2) > rotation(i,i) )
+  if( fabs( rotation(2,2) ) > fabs( rotation(i,i) ) )
     i = 2;
   j = (i+1) % 3;
   k = (j+1) % 3;
