@@ -110,7 +110,7 @@ namespace carto
           x = false;
       }
       // this at least avoids problems for numpy.float32 objects...
-      else if( !PyObject_HasAttrString( _value, "index" ) )
+      else if( !PyObject_HasAttrString( _value, "__contains__" ) )
         x = false;
     }
     if( !x )
