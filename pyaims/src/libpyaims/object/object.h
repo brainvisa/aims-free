@@ -67,7 +67,7 @@ namespace carto
     return "PyObject";
   }
 
-  template<> bool TypedObject<PyObject *>::isDictionary() const;
+  template <> bool TypedObject<PyObject *>::isDictionary() const;
   template <> bool TypedObject<PyObject *>::isIterable() const;
   template <> bool TypedObject<PyObject *>::isScalar() const;
   template <> bool TypedObject<PyObject *>::isString() const;
