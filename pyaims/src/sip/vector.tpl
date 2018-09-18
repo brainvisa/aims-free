@@ -256,6 +256,24 @@ public:
     }
 %End
 
+  int index( %Template1PyType%%Template1deref% ) const;
+%MethodCode
+  std::vector<%Template1% >::const_iterator i, e = sipCpp->end();
+  sipRes = -1;
+  int n = 0;
+  for( i=sipCpp->begin(); i!=e; ++i, ++n )
+    if( %Template1pyaddress%*i == %Template1pyaddress% %Template1deref%a0 )
+    {
+      sipRes = n;
+      break;
+    }
+  if( sipRes == -1 )
+  {
+    sipIsErr = 1;
+    PyErr_SetString( PyExc_ValueError, "element not in list" );
+  }
+%End
+
   void append( %Template1PyType%%Template1deref% );
 %MethodCode
   sipCpp->push_back( %Template1deref%a0 );
