@@ -217,8 +217,7 @@ public:
             sipCpp = 0;
             std::ostringstream s;
             s << "wrong list item type, item " << i;
-            if( !sipIsErr )
-              PyErr_SetString( PyExc_TypeError, s.str().c_str() );
+            PyErr_SetString( PyExc_TypeError, s.str().c_str() );
             if( pyitem )
               Py_DECREF( pyitem );
             break;
