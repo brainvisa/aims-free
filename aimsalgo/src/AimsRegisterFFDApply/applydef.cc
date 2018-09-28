@@ -709,7 +709,7 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //==========================================================================
   cout << "Resampling ";
 
-  transformGraph( *in, *transform,
+  transformGraph( *in, *transform, NULL,
                   Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
 
   cout << endl;
