@@ -60,30 +60,57 @@ namespace aims
       The voxel size of the output bucket can optionally be specified in
       \arg vs. By default, the same voxel size as the input bucket is used.
 
-      \warning{This method will not preserve the topology of the input bucket,
-      in fact it will create many holes for anything but a simple translation.
-      The correct way of resampling a bucket is to do nearest-neighbour
-      resampling using the inverse transformation. \todo{implement bucket
-      resampling}}
+      \warning{This method provides no guarantees of topology preservation; in
+      fact it will create holes in the resulting bucket, particularly when
+      upsampling. When possible, you should use resampleBucket() instead, which
+      performs nearest-neighbour resampling.}
    */
   carto::rc_ptr<BucketMap<Void> >
   transformBucketDirect( const BucketMap<Void> & bck,
                          const Transformation3d & direct_transformation,
                          Point3df vs = Point3df( 0., 0., 0. ) );
 
+  /** Apply a spatial transformation to a BucketMap
+
+      The bucket is transformed by resampling, using a pull-back method in the
+      same way as nearest neighbour resampling of a Volume.
+
+      Pure pull-back resampling does not behave well when downsampling (it
+      introduces holes), so by default this function returns the union of
+      voxels transformed using the pushforward and pullback methods. Set \arg
+      also_pushforward to \c false to disable this behaviour and only perform
+      pure pullback.
+
+      The voxel size of the output bucket can optionally be specified in
+      \arg vs. By default, the same voxel size as the input bucket is used.
+
+      \warning{Alhtough this method is more reliable than
+      transformBucketDirect, it still provides no guarantees of topology
+      preservation.}
+   */
+  carto::rc_ptr<BucketMap<Void> >
+  resampleBucket( const BucketMap<Void> & bck,
+                  const Transformation3d & direct_transformation,
+                  const Transformation3d & inverse_transformation,
+                  Point3df vs = Point3df( 0., 0., 0. ),
+                  bool also_pushforward = true);
+
   /** Apply a spatial transformation to all objects contained in a Graph.
 
       The graph is modified in-place.
 
-      \warning{Buckets are transformed with transformBucketDirect(), the same
-      caveats apply. Volumes are not transformed at the moment.}
+      An inverse transformation is necessary for correctly transforming Buckets
+      (see resampleBucket). If inverse_transformation is NULL, buckets will
+      be transformed with the push-forward method only (transformBucketDirect).
 
-      \warning{The interface of this function will change to allow specifying
-      an inverse transformation, so that buckets and volumes can be resampled
-      properly.}
+      \warning{Volumes are not transformed, neither are graph attributes.
+        Please run AimsFoldArgAtt to fix the values of basic attributes, or the
+        CorticalFoldsGraphUpgradeFromOld BrainVisa process, which can be found
+        under Morphologist/Sulci/graphmanipulation, for a complete update.}
    */
   void transformGraph( Graph & graph,
-                       const Transformation3d& direct_transformation,
+                       const Transformation3d & direct_transformation,
+                       const Transformation3d * inverse_transformation,
                        Point3df vs = Point3df( 0., 0., 0. ) );
 
   /** Apply a spatial transformation to fiber bundles.
