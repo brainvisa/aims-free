@@ -540,9 +540,9 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   //==========================================================================
 
   Writer<AimsTimeSurface<D, Void> > w3(ffdproc.output);
-  bool res = w3.write(in);
+  success = w3.write(in) && success;
 
-  return res;
+  return success;
 }
 
 
@@ -610,9 +610,9 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   //==========================================================================
 
   Writer<BucketMap<Void> > w3(ffdproc.output);
-  bool res = w3.write(*out);
+  success = w3.write(*out) && success;
 
-  return res;
+  return success;
 }
 
 
@@ -736,9 +736,9 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
 
   Writer<Graph> w3(ffdproc.output);
   in->setProperty("filename_base", "*" );
-  bool res = w3.write(*in);
+  success = w3.write(*in) && success;
 
-  return res;
+  return success;
 }
 
 
@@ -795,7 +795,7 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
       g << *ip << endl;
   }
 
-  return true;
+  return success;
 }
 
 
