@@ -585,11 +585,21 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   //      Do resampling
   //
   //==========================================================================
-  cout << "Resampling ";
 
-  rc_ptr<BucketMap<Void> > out
-    = transformBucketDirect( in, *transform,
-                             Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
+  rc_ptr<BucketMap<Void> > out;
+
+  if(transform->invertible()) {
+    cout << "Resampling the Bucket with the combined pushforward and pullback "
+      "methods... ";
+    rc_ptr<Transformation3d> inverse_transform = transform->getInverse();
+    out = resampleBucket( in, *transform, *inverse_transform,
+                          Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
+  } else {
+    cout << "Transforming the Bucket with the low-quality pushforward "
+      "method... ";
+    out = transformBucketDirect( in, *transform,
+                                 Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
+  }
 
   cout << endl;
 
@@ -707,9 +717,13 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //      Do resampling
   //
   //==========================================================================
-  cout << "Resampling ";
+  cout << "Resampling the Graph... ";
+  rc_ptr<Transformation3d> inverse_transform;
 
-  transformGraph( *in, *transform, NULL,
+  if(transform->invertible()) {
+    inverse_transform = transform->getInverse();
+  }
+  transformGraph( *in, *transform, inverse_transform.get(),
                   Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
 
   cout << endl;
