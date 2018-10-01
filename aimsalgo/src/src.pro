@@ -8,6 +8,7 @@ PSUBDIRS = \
     Aims3DPointCloud \
     AimsActivPixel2Volume          \
     AimsAddNoise2Data              \
+    AimsApplyTransform        \
     AimsApplyVectorField      \
     AimsBuildDti              \
     AimsBuildIndex            \
