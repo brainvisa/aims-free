@@ -76,6 +76,8 @@ public:
   void pop_front();
 
   bool isIdentity() const CARTO_OVERRIDE;
+  bool invertible() const CARTO_OVERRIDE;
+  std::unique_ptr<Transformation3d> getInverse() const CARTO_OVERRIDE;
 
 protected:
   ListType _transformations;

@@ -513,6 +513,21 @@ AffineTransformation3d AffineTransformation3d::inverse() const
   return AffineTransformation3d;
 }
 
+bool AffineTransformation3d::invertible() const
+{
+  // inverse() will throw carto::assert_error if matrix inversion fails
+  try {
+    inverse();
+  } catch(const assert_error&) {
+    return false;
+  }
+  return true;
+}
+
+unique_ptr<Transformation3d> AffineTransformation3d::getInverse() const
+{
+  return unique_ptr<Transformation3d>(new AffineTransformation3d(inverse()));
+}
 
 
 //-----------------------------------------------------------------------------

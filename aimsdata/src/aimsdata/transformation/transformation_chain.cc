@@ -68,6 +68,36 @@ bool aims::TransformationChain3d::isIdentity() const
   return true;
 }
 
+bool aims::TransformationChain3d::invertible() const
+{
+  for(ListType::const_iterator it = _transformations.begin() ;
+      it != _transformations.end() ;
+      ++it)
+  {
+    if(!(*it)->invertible()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::unique_ptr<aims::Transformation3d>
+aims::TransformationChain3d::getInverse() const
+{
+  std::unique_ptr<aims::Transformation3d> ret(new aims::TransformationChain3d);
+  aims::TransformationChain3d & new_chain
+    = dynamic_cast<aims::TransformationChain3d&>(*ret.get());
+
+  for(ListType::const_reverse_iterator rit = _transformations.rbegin() ;
+      rit != _transformations.rend() ;
+      ++rit)
+  {
+    new_chain.push_back((*rit)->getInverse());
+  }
+
+  return ret;
+}
+
 Point3dd aims::TransformationChain3d::
 transformPoint3dd( const Point3dd& point ) const
 {

@@ -154,6 +154,8 @@ public:
 
   // AffineTransformation3d algebraic operation
   AffineTransformation3d inverse() const;
+  bool invertible() const CARTO_OVERRIDE;
+  std::unique_ptr<Transformation3d> getInverse() const CARTO_OVERRIDE;
   virtual void scale( const Point3df& sizeFrom, const Point3df& sizeTo );
   /// true if the transformation is direct, false if it changes orientation
   bool isDirect() const;

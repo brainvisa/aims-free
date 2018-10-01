@@ -34,6 +34,8 @@
 #ifndef AIMS_TRANSFORMATION_TRANSFORMATION_H
 #define AIMS_TRANSFORMATION_TRANSFORMATION_H
 
+#include <stdexcept>
+
 #include <aims/vector/vector.h>
 #include <cartobase/smart/rcptr.h>
 
@@ -80,6 +82,24 @@ namespace aims
     Point3df transform( const Point3df & dir ) const;
     Point3df transform( float x, float y, float z ) const;
     Point3d transform( const Point3d & p ) const;
+
+    /** Test if the transformation can be inverted
+
+        getInverse() can be called if this method returns true, in order to
+        obtain the inverse transformation.
+     */
+    virtual bool invertible() const {
+      return false;
+    };
+    /** Obtain the inverse transformation
+
+        This method should only be called if invertible() returns true.
+        Otherwise, it will throw an exception if the transformation is not
+        actually invertible.
+     */
+    virtual std::unique_ptr<Transformation3d> getInverse() const {
+      throw std::logic_error("not implemented");
+    };
 
   protected:
     Transformation3d() {}
