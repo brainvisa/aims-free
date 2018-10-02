@@ -92,7 +92,8 @@ aims::TransformationChain3d::getInverse() const
       rit != _transformations.rend() ;
       ++rit)
   {
-    new_chain.push_back((*rit)->getInverse());
+    std::unique_ptr<aims::Transformation3d> inv((*rit)->getInverse());
+    new_chain.push_back(inv);
   }
 
   return ret;
