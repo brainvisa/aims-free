@@ -1106,7 +1106,7 @@ int main( int argc, const char **argv )
     bool ok = false;
     try {
       ok = ffdproc.execute( ffdpi.filename );
-    } catch(const FatalError& exc) {
+    } catch(const exception& exc) {
       clog << "Failed to run in File mode, will now try Points mode ("
            << exc.what() << ")."<< endl;
     }

@@ -418,11 +418,18 @@ bool doBucket(Process & process, const string & fileref, Finder &)
   input_reader.read(input_bucket);
 
   // Prepare the output dimensions
-  proc.sx = (proc.sx > 0 ? proc.sx : input_bucket.sizeX());
-  proc.sy = (proc.sy > 0 ? proc.sy : input_bucket.sizeY());
-  proc.sz = (proc.sz > 0 ? proc.sz : input_bucket.sizeZ());
-  cout << "Output voxel size: "
-       << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
+  if(!(proc.sx > 0 && proc.sy > 0 && proc.sz > 0)) {
+    if(!proc.reference.empty()) {
+      // FIXME
+      clog << "Warning: the --reference option is ignored in Bucket mode"
+           << endl;
+    }
+    proc.sx = (proc.sx > 0 ? proc.sx : input_bucket.sizeX());
+    proc.sy = (proc.sy > 0 ? proc.sy : input_bucket.sizeY());
+    proc.sz = (proc.sz > 0 ? proc.sz : input_bucket.sizeZ());
+    cout << "Output voxel size: "
+         << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
+  }
 
   // Load the transformation
   rc_ptr<Transformation3d> direct_transform, inverse_transform;
@@ -514,7 +521,13 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   graph.reset(input_reader.read());
 
   // Deduce the voxel size of the output Graph
-  {
+  if(!(proc.sx > 0 && proc.sy > 0 && proc.sz > 0)) {
+    if(!proc.reference.empty()) {
+      // FIXME
+      clog << "Warning: the --reference option is ignored in Graph mode"
+           << endl;
+    }
+
     vector<float> vs;
     if(!graph->getProperty("voxel_size", vs))
       vs = vector<float>(3, 0.f);
@@ -626,39 +639,48 @@ int main(int argc, const char **argv)
     // Collect arguments.
     //
     AimsApplication app(
-      argc, argv, // TODO rework help message
-      "Apply a spatial transformation on an image, a mesh, a 'bucket' "
+      argc, argv,
+      "Apply a spatial transformation on an image, a mesh, a 'bucket'\n"
       "(voxels list file), fiber tracts, a graph, or to points.\n"
       "\n"
-      "Note that when resampling an image, the transformations must represent "
-      "the inverse direction (for a destination point we seek the source "
-      "position of the point), but for meshes, buckets, fibers, or points the "
-      "transformations are applied directly (a vertex is moved according to "
-      "the vector field). Similarly, the transformations are applied in the "
-      "order that they are passed on the command-line. As a result:\n"
+      "Depending on the type of input, the direct transformation and/or the\n"
+      "inverse transformation are needed:\n"
+      "- Images need the inverse transformation, because they are resampled\n"
+      "  using pullback interpolation;\n"
+      "- Meshes and Bundles need the direct transformation only;\n"
+      "- Buckets and Graphs need the direct transformation (pushforward), but\n"
+      "  a better interpolation method will be used for Buckets if the\n"
+      "  inverse transformation is also available (combined pullback and \n"
+      "  pushforward).\n"
       "\n"
-      "- when resampling an image, inverse transformations must be given, "
-      "ordered from the target space to the input space. This also applies to "
-      "affine transformations (this is the opposite convention to "
-      "AimsResample, use the :inv suffix to invert affine transformations on "
-      "the fly).\n"
+      "These rules apply for passing the transformations:\n"
+      "- An arbitrary number of transformations can be specified, they will\n"
+      "  be composed in the order that they appear on the command line\n"
+      "  (e.g. for flags '-m A.trm -m B.ima', A will be applied before B);\n"
+      "- Each transformation can be an affine transform (in .trm format) or\n"
+      "  an displacement field (in .ima/.dim GIS format, a.k.a. \"FFD\" for\n"
+      "  Free-Form Deformation);"
+      "- Direct transformations must be given with --direct-transform/-d/-m,\n"
+      "  ordered from the input space to the target space;\n"
+      "- Inverse transformations must be given with --inverse-transform/-I/-M,\n"
+      "  ordered from the target space to the input space;\n"
+      "- If only one transformation is specified (direct or inverse), the\n"
+      "  the other will be computed automatically if the full transformation\n"
+      "  chain can be inverted. Otherwise, both transformation chains must\n"
+      "  be specified completely."
       "\n"
-      "- when resampling meshes, buckets, fibers, or points, the direct "
-      "transformations should be given, ordered from the input space to the "
-      "target space.\n"
+      "In points mode, the --input option either specifies an ASCII file\n"
+      "containing point coordinates, or is directly one or several points\n"
+      "coordinates on the command-line. Points should be formatted as\n"
+      "\"(x, y, z)\", with parentheses and commas.\n"
       "\n"
+      "Note also that for meshes or points, the dimensions, voxel sizes,\n"
+      "grid, reference, and resampling options are pointless and are unused.\n"
+      "Only the vector field interpolation (--vi) option is used.\n"
       "\n"
-      "In points mode, the -i options either specifies an ASCII file "
-      "containing point coordinates, or is directly one or several points "
-      "coordinates. Points shoud be in the shape (x, y, z) with parentheses.\n"
-      "\n"
-      "Note also that for meshes or points, the dimensions, voxel sizes, grid, "
-      "reference, and resampling options are pointless and are unused. Only "
-      "the vector field interpolation (--vi) option is used.\n\n"
-      "In Buckets and graph mode, the options --sx, --sy, --sz allow to "
-      "specify the output voxel size, but the reference (-r) is not used so "
-      "far. The transformation field is applied independently on each bucket "
-      "voxel with no resampling, so objects may end up with holes."
+      "In Buckets and Graph mode, the options --sx, --sy, --sz allow to\n"
+      "specify the output voxel size, but the reference (-r) is not used so\n"
+      "far."
    );
     app.addOption(proc_input, "--input", "Input image");
     app.addOptionSeries(proc.direct_transform_list,
@@ -678,8 +700,10 @@ int main(int argc, const char **argv)
                         "transformations may be suffixed with :inv to "
                         "use their inverse.");
     app.addOption(proc.interp_type, "--interp",
-                  "Voxel values resampling type : n[earest], "
-                  "l[inear], c[ubic] [default = cubic]", true);
+                  "Resampling type: n[earest], l[inear], q[uadratic], "
+                  "c[cubic], quartic, quintic, six[thorder], seven[thorder] "
+                  "[default=linear]. Modes may also be specified as order "
+                  "number: 0=nearest, 1=linear etc.", true);
     app.addOption(proc.background_value, "-bv",
                   "Background value to use", true);
     app.addOption(proc.dx, "--dx",
@@ -703,9 +727,10 @@ int main(int argc, const char **argv)
                   "Vector field interpolation type: l[inear], c[ubic] "
                   "[default = linear]", true); // TODO remove?
     app.alias("-i", "--input");
-    app.alias("-d", "--direct-transform");
     app.alias("-m", "--direct-transform");
+    app.alias("-d", "--direct-transform");
     app.alias("-I", "--inverse-transform");
+    app.alias("-M", "--inverse-transform");
     app.alias("--type", "--interp");
     app.alias("-t", "--interp");
     app.alias("-r", "--reference");
@@ -718,7 +743,7 @@ int main(int argc, const char **argv)
     bool ok = false;
     try {
       ok = proc.execute(proc_input.filename);
-    } catch(const FatalError& exc) {
+    } catch(const exception& exc) {
       clog << "Failed to run in File mode, will now try Points mode ("
            << exc.what() << ")."<< endl;
     }
