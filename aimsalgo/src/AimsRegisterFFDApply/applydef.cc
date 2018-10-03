@@ -591,7 +591,7 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   if(transform->invertible()) {
     cout << "Resampling the Bucket with the combined pushforward and pullback "
       "methods... ";
-    std::unique_ptr<Transformation3d> inverse_transform = transform->getInverse();
+    rc_ptr<Transformation3d> inverse_transform(transform->getInverse());
     out = resampleBucket( in, *transform, *inverse_transform,
                           Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
   } else {
@@ -718,10 +718,10 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //
   //==========================================================================
   cout << "Resampling the Graph... ";
-  std::unique_ptr<aims::Transformation3d> inverse_transform;
+  rc_ptr<Transformation3d> inverse_transform;
 
   if(transform->invertible()) {
-    inverse_transform = transform->getInverse();
+    inverse_transform = rc_ptr<Transformation3d>(transform->getInverse());
   }
   transformGraph( *in, *transform, inverse_transform.get(),
                   Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
