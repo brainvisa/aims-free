@@ -685,6 +685,7 @@ int main(int argc, const char **argv)
       "far."
    );
     app.addOption(proc_input, "--input", "Input image");
+    app.addOption(proc.output, "--output", "Output image");
     app.addOptionSeries(proc.direct_transform_list,
                         "--direct-transform",
                         "direct transformation (from input space to "
@@ -706,7 +707,7 @@ int main(int argc, const char **argv)
                   "c[cubic], quartic, quintic, six[thorder], seven[thorder] "
                   "[default=linear]. Modes may also be specified as order "
                   "number: 0=nearest, 1=linear etc.", true);
-    app.addOption(proc.background_value, "-bv",
+    app.addOption(proc.background_value, "--background",
                   "Background value to use", true);
     app.addOption(proc.dx, "--dx",
                   "Output X dimension [default: same as input]", true);
@@ -724,20 +725,23 @@ int main(int argc, const char **argv)
                   "Volume used to define output voxel size and volume "
                   "dimension (values are overrided by --dx, --dy, "
                   "--dz, --sx, --sy and --sz)", true);
-    app.addOption(proc.output, "--output", "Output image");
     app.addOption(proc.vfinterp, "--vectorinterpolation",
                   "Vector field interpolation type: l[inear], c[ubic] "
                   "[default = linear]", true); // TODO remove?
-    app.alias("-i", "--input");
-    app.alias("-m", "--direct-transform");
-    app.alias("-d", "--direct-transform");
-    app.alias("-I", "--inverse-transform");
-    app.alias("-M", "--inverse-transform");
-    app.alias("--type", "--interp");
-    app.alias("-t", "--interp");
-    app.alias("-r", "--reference");
-    app.alias("-o", "--output");
-    app.alias("--vi", "--vectorinterpolation"); // TODO remove?
+    app.alias("-i",             "--input");
+    app.alias("-m",             "--direct-transform");
+    app.alias("--motion",       "--direct-transform");
+    app.alias("-d",             "--direct-transform");
+    app.alias("-I",             "--inverse-transform");
+    app.alias("-M",             "--inverse-transform");
+    app.alias("--type",         "--interp");
+    app.alias("-t",             "--interp");
+    app.alias("--bg",           "--background");
+    app.alias("-bv",            "--background");
+    app.alias("--defaultvalue", "--background");
+    app.alias("-r",             "--reference");
+    app.alias("-o",             "--output");
+    app.alias("--vi",           "--vectorinterpolation"); // TODO remove?
     app.initialize();
 
 
