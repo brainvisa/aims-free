@@ -258,13 +258,11 @@ load_transformations(const ApplyTransformProc& proc)
   }
 
   if(!ret.first && ret.second->invertible()) {
-    std::unique_ptr<aims::Transformation3d> inv = ret.second->getInverse();
-    ret.first = inv;
+    ret.first = rc_ptr<Transformation3d>(ret.second->getInverse());
   }
 
   if(!ret.second && ret.first->invertible()) {
-    std::unique_ptr<aims::Transformation3d> inv = ret.first->getInverse();
-    ret.second = inv;
+    ret.second = rc_ptr<Transformation3d>(ret.first->getInverse());
   }
 
   return ret;
