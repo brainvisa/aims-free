@@ -63,6 +63,8 @@ def write_coordinate_volumes(reference_filename,
         dim = reference_header['volume_dimension']
         voxel_size = reference_header['voxel_size']
     except KeyError:
+        sys.stderr.write('Cannot find the dimensions and voxel size of the '
+                         'reference, aborting.\n')
         return EXIT_FAILURE
 
     # Volumes are written with force_disk_data_type in order to prevent the
@@ -80,7 +82,6 @@ def write_coordinate_volumes(reference_filename,
     vol_out = aims.Volume(dim[0], dim[1], dim[2], dtype='FLOAT')
     vol_out.copyHeaderFrom(reference_header)
     vect = voxel_size[1] * np.arange(dim[1], dtype=np.float32)
-    assert vect.dtype == np.float32  # TODO remove
     np.asarray(vol_out)[..., 0] = vect[np.newaxis, :, np.newaxis]
     aims.write(vol_out, image_y_filename,
                options={'force_disk_data_type': True})
@@ -104,7 +105,7 @@ containing the fields of X, Y, and Z coordinates expressed in millimetres.
 This is a companion script to the AimsRegisterFFDFromCoordImages command, see
 its documentation for more information.
 
-Coordianates are in the sense of AIMS, i.e. (0, 0, 0) is in the centre of the
+Coordinates are in the sense of AIMS, i.e. (0, 0, 0) is in the centre of the
 origin voxel, and coordinates increase toward the Left (X), Posterior (Y),
 Inferior (Z) directions (the volume is internally in LPS+ orientation).
 """)
