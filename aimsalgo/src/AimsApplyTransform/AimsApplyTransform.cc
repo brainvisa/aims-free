@@ -60,7 +60,7 @@ public:
   double  sx;
   double  sy;
   double  sz;
-  string  vfinterp; // TODO find a good way of choosing the vector field interpolation (URL param?)
+  string  vfinterp;
 };
 
 
@@ -137,7 +137,8 @@ load_ffd_deformation(const string &filename,
 {
   rc_ptr<FfdTransformation> deformation;
 
-  // TODO find a better way of choosing the vector field interpolation (URL param?)
+  // Maybe find a better way of choosing the vector field interpolation for
+  // each transformation (URL parameter?)
   if(proc.vfinterp == "cubic" || proc.vfinterp == "c")
     deformation.reset(new SplineFfd);
   else if(proc.vfinterp == "linear" || proc.vfinterp == "l")
@@ -166,9 +167,8 @@ load_transformation(const string &filename_arg,
   bool invert;
   string filename;
 
-  if(filename_arg.size() > 4
-     && filename_arg.substr(filename_arg.size() - 4) == ":inv") {
-    filename = filename_arg.substr(0, filename_arg.size() - 4);
+  if(filename_arg.substr(0, 4) == "inv:") {
+    filename = filename_arg.substr(4, std::string::npos);
     invert = true;
   } else {
     filename = filename_arg;
@@ -300,6 +300,7 @@ bool doVolume(Process & process, const string & fileref, Finder &)
     }
   }
 
+  // TODO put this in a function to reuse for Graphs and Buckets
   // Compute dimensions of the output volume
   if(!(proc.dx > 0 && proc.dy > 0 && proc.dz > 0
        && proc.sx > 0 && proc.sy > 0 && proc.sz > 0))
@@ -661,18 +662,19 @@ int main(int argc, const char **argv)
       "These rules apply for passing the transformations:\n"
       "- An arbitrary number of transformations can be specified, they will\n"
       "  be composed in the order that they appear on the command line\n"
-      "  (e.g. for flags '-m A.trm -m B.ima', A will be applied before B);\n"
+      "  (e.g. for flags '-m A.trm -m B.trm', A will be applied before B,\n"
+      "  in other words, the matrix product BA will be used);\n"
       "- Each transformation can be an affine transform (in .trm format) or\n"
-      "  an displacement field (in .ima/.dim GIS format, a.k.a. \"FFD\" for\n"
+      "  a displacement field (in .ima/.dim GIS format, a.k.a. \"FFD\" for\n"
       "  Free-Form Deformation);\n"
       "- Direct transformations must be given with --direct-transform/-d/-m,\n"
       "  ordered from the input space to the target space;\n"
       "- Inverse transformations must be given with --inverse-transform/-I/-M,\n"
       "  ordered from the target space to the input space;\n"
       "- If only one transformation is specified (direct or inverse), the\n"
-      "  the other will be computed automatically if the full transformation\n"
+      "  other will be computed automatically if the full transformation\n"
       "  chain can be inverted. Otherwise, both transformation chains must\n"
-      "  be specified completely."
+      "  be specified completely.\n"
       "\n"
       "In points mode, the --input option either specifies an ASCII file\n"
       "containing point coordinates, or is directly one or several points\n"
@@ -693,24 +695,25 @@ int main(int argc, const char **argv)
                         "direct transformation (from input space to "
                         "output space). Multiple transformations will "
                         "be composed in the order that they are "
-                        "passed on the command-line. Affine "
-                        "transformations may be suffixed with :inv to "
-                        "use their inverse.");
+                        "passed on the command-line. The file name may be "
+                        "prefixed with 'inv:', in which case the inverse of "
+                        "the transformation is used.");
     app.addOptionSeries(proc.inverse_transform_list,
                         "--inverse-transform",
                         "inverse transformation (from output space to "
                         "input space). Multiple transformations will "
                         "be composed in the order that they are "
-                        "passed on the command-line. Affine "
-                        "transformations may be suffixed with :inv to "
-                        "use their inverse.");
+                        "passed on the command-line. The file name may be "
+                        "prefixed with 'inv:', in which case the inverse of "
+                        "the transformation is used.");
     app.addOption(proc.interp_type, "--interp",
-                  "Resampling type: n[earest], l[inear], q[uadratic], "
-                  "c[cubic], quartic, quintic, six[thorder], seven[thorder] "
-                  "[default=linear]. Modes may also be specified as order "
-                  "number: 0=nearest, 1=linear etc.", true);
+                  "Type of interpolation used for Volumes: n[earest], "
+                  "l[inear], q[uadratic], c[cubic], quartic, quintic, "
+                  "six[thorder], seven[thorder] [default=linear]. Modes may "
+                  "also be specified as order number: 0=nearest, 1=linear...",
+                  true);
     app.addOption(proc.background_value, "--background",
-                  "Background value to use", true);
+                  "Value used for the background of Volumes", true);
     app.addOption(proc.dx, "--dx",
                   "Output X dimension [default: same as input]", true);
     app.addOption(proc.dy, "--dy",
@@ -725,11 +728,11 @@ int main(int argc, const char **argv)
                   "Output Z voxel size [default: same as input]", true);
     app.addOption(proc.reference, "--reference",
                   "Volume used to define output voxel size and volume "
-                  "dimension (values are overrided by --dx, --dy, "
+                  "dimension (values are overridden by --dx, --dy, "
                   "--dz, --sx, --sy and --sz)", true);
     app.addOption(proc.vfinterp, "--vectorinterpolation",
-                  "Vector field interpolation type: l[inear], c[ubic] "
-                  "[default = linear]", true); // TODO remove?
+                  "Interpolation used for vector field transformations "
+                  "(a.k.a. FFD): l[inear], c[ubic] [default = linear]", true);
     app.alias("-i",             "--input");
     app.alias("-m",             "--direct-transform");
     app.alias("--motion",       "--direct-transform");
@@ -743,7 +746,7 @@ int main(int argc, const char **argv)
     app.alias("--defaultvalue", "--background");
     app.alias("-r",             "--reference");
     app.alias("-o",             "--output");
-    app.alias("--vi",           "--vectorinterpolation"); // TODO remove?
+    app.alias("--vi",           "--vectorinterpolation");
     app.initialize();
 
 
