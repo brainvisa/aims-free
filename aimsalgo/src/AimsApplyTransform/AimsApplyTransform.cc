@@ -130,6 +130,76 @@ get_resampler(const std::string& interp_type)
 }
 
 
+void set_geometry_from_header(ApplyTransformProc& proc,
+                              const DictionaryInterface &header,
+                              bool dimension_ok,
+                              bool voxel_size_ok)
+{
+  if(!voxel_size_ok) {
+    Object voxel_size = header.getProperty("voxel_size");
+    if(!(proc.sx > 0))
+      proc.sx = voxel_size->getArrayItem(0)->getScalar();
+    if(!(proc.sy > 0))
+      proc.sy = voxel_size->getArrayItem(1)->getScalar();
+    if(!(proc.sz > 0))
+      proc.sz = voxel_size->getArrayItem(2)->getScalar();
+  }
+  if(!dimension_ok) {
+    Object volume_dimension = header.getProperty("volume_dimension");
+    if(!(proc.dx > 0))
+      proc.dx = volume_dimension->getArrayItem(0)->getScalar();
+    if(!(proc.dy > 0))
+      proc.dy = volume_dimension->getArrayItem(1)->getScalar();
+    if(!(proc.dz > 0))
+      proc.dz = volume_dimension->getArrayItem(2)->getScalar();
+  }
+}
+
+
+// Set dimensions and voxel size of the resampled object: in decreasing order
+// of priority, use commandline flags, else the reference object, else the
+// input object passed as fallback_header.
+void set_geometry(ApplyTransformProc& proc,
+                  const DictionaryInterface& fallback_header,
+                  bool set_dimensions)
+{
+  bool dimension_ok = !set_dimensions || (proc.dx > 0 && proc.dy > 0 && proc.dz > 0);
+  bool voxel_size_ok = proc.sx > 0 && proc.sy > 0 && proc.sz > 0;
+  if(dimension_ok && voxel_size_ok)
+    return;
+
+  // Reference volume
+  if(!proc.reference.empty()) {
+    Finder reffinder;
+    if(!reffinder.check(proc.reference)) {
+      throw FatalError("failed to read the header of the reference object "
+                       + proc.reference);
+    }
+    Object refheader = reffinder.headerObject();
+    try {
+      set_geometry_from_header(proc, *refheader, dimension_ok,
+                               voxel_size_ok);
+    } catch(...) {
+      throw FatalError("Failed to retrieve volume_dimension and voxel_size "
+                       "from the reference object (" + proc.reference + ")");
+    }
+  }
+
+  dimension_ok = !set_dimensions || (proc.dx > 0 && proc.dy > 0 && proc.dz > 0);
+  voxel_size_ok = proc.sx > 0 && proc.sy > 0 && proc.sz > 0;
+  if(dimension_ok && voxel_size_ok)
+    return;
+
+  try {
+    set_geometry_from_header(proc, fallback_header, dimension_ok,
+                             voxel_size_ok);
+  } catch(...) {
+    throw FatalError("Failed to retrieve volume_dimension and voxel_size "
+                     "from the fallback object");
+  }
+}
+
+
 // Throws FatalError in case of failure
 rc_ptr<FfdTransformation>
 load_ffd_deformation(const string &filename,
@@ -300,50 +370,9 @@ bool doVolume(Process & process, const string & fileref, Finder &)
     }
   }
 
-  // TODO put this in a function to reuse for Graphs and Buckets
   // Compute dimensions of the output volume
-  if(!(proc.dx > 0 && proc.dy > 0 && proc.dz > 0
-       && proc.sx > 0 && proc.sy > 0 && proc.sz > 0))
-  {
-    // Reference volume
-    int rdx = 0, rdy = 0, rdz = 0;
-    double rsx = 0., rsy = 0., rsz = 0.;
-    if(!proc.reference.empty()) {
-      Finder reffinder;
-      if(!reffinder.check(proc.reference)) {
-        ostringstream s;
-        s << "Failed to check the reference volume "
-          << proc.reference;
-        throw FatalError(s.str());
-      }
-      Object refheader = reffinder.headerObject();
-      try {
-        rdx = refheader->getProperty("volume_dimension")->getArrayItem(0)->getScalar();
-        rdy = refheader->getProperty("volume_dimension")->getArrayItem(1)->getScalar();
-        rdz = refheader->getProperty("volume_dimension")->getArrayItem(2)->getScalar();
-        rsx = refheader->getProperty("voxel_size")->getArrayItem(0)->getScalar();
-        rsy = refheader->getProperty("voxel_size")->getArrayItem(1)->getScalar();
-        rsz = refheader->getProperty("voxel_size")->getArrayItem(2)->getScalar();
-      } catch(...) {
-        ostringstream s;
-        s << "Failed to retrieve volume_dimension and voxel_size from "
-          "the reference volume "
-          << proc.reference;
-        throw FatalError(s.str());
-      }
-    }
-    // Dimensions and voxel size of the resampled volume: in decreasing order
-    // of priority, use commandline flags, else the reference volume, else the
-    // input volume.
-    vector<int> isize = input_image.getSize();
-    vector<float> ivoxel_size = input_image.getVoxelSize();
-    proc.dx = (proc.dx > 0 ? proc.dx : (rdx > 0 ? rdx : isize[0]));
-    proc.dy = (proc.dy > 0 ? proc.dy : (rdy > 0 ? rdy : isize[1]));
-    proc.dz = (proc.dz > 0 ? proc.dz : (rdz > 0 ? rdz : isize[2]));
-    proc.sx = (proc.sx > 0 ? proc.sx : (rsx > 0 ? rsx : ivoxel_size[0]));
-    proc.sy = (proc.sy > 0 ? proc.sy : (rsy > 0 ? rsy : ivoxel_size[1]));
-    proc.sz = (proc.sz > 0 ? proc.sz : (rsz > 0 ? rsz : ivoxel_size[2]));
-  }
+  set_geometry(proc, input_image.header(), true);
+
   cout << "Output dimensions: "
        << proc.dx << ", " << proc.dy << ", " << proc.dz << endl;
   cout << "Output voxel size: "
@@ -424,18 +453,9 @@ bool doBucket(Process & process, const string & fileref, Finder &)
   input_reader.read(input_bucket);
 
   // Prepare the output dimensions
-  if(!(proc.sx > 0 && proc.sy > 0 && proc.sz > 0)) {
-    if(!proc.reference.empty()) {
-      // FIXME
-      clog << "Warning: the --reference option is ignored in Bucket mode"
-           << endl;
-    }
-    proc.sx = (proc.sx > 0 ? proc.sx : input_bucket.sizeX());
-    proc.sy = (proc.sy > 0 ? proc.sy : input_bucket.sizeY());
-    proc.sz = (proc.sz > 0 ? proc.sz : input_bucket.sizeZ());
-    cout << "Output voxel size: "
-         << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
-  }
+  set_geometry(proc, input_bucket.header(), false);
+  cout << "Output voxel size: "
+       << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
 
   // Load the transformation
   rc_ptr<Transformation3d> direct_transform, inverse_transform;
@@ -527,23 +547,7 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   graph.reset(input_reader.read());
 
   // Deduce the voxel size of the output Graph
-  if(!(proc.sx > 0 && proc.sy > 0 && proc.sz > 0)) {
-    if(!proc.reference.empty()) {
-      // FIXME
-      clog << "Warning: the --reference option is ignored in Graph mode"
-           << endl;
-    }
-
-    vector<float> vs;
-    if(!graph->getProperty("voxel_size", vs))
-      vs = vector<float>(3, 0.f);
-
-    if(vs.size() < 3)
-      vs.resize(3, 1.);
-    proc.sx = (proc.sx > 0 ? proc.sx : vs[0]);
-    proc.sy = (proc.sy > 0 ? proc.sy : vs[1]);
-    proc.sz = (proc.sz > 0 ? proc.sz : vs[2]);
-  }
+  set_geometry(proc, *graph, false);
   cout << "Output voxel size: "
        << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
 
@@ -682,11 +686,7 @@ int main(int argc, const char **argv)
       "\"(x, y, z)\", with parentheses and commas.\n"
       "\n"
       "Note also that for meshes or points, the dimensions, voxel sizes,\n"
-      "grid, reference, and resampling options are pointless and are unused.\n"
-      "\n"
-      "In Buckets and Graph mode, the options --sx, --sy, --sz allow to\n"
-      "specify the output voxel size, but the reference (-r) is not used so\n"
-      "far." // FIXME
+      "reference, and resampling options are not needed and are ignored."
    );
     app.addOption(proc_input, "--input", "Input image");
     app.addOption(proc.output, "--output", "Output image");
