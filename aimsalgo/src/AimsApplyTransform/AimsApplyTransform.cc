@@ -66,9 +66,11 @@ public:
 
 ApplyTransformProc::ApplyTransformProc()
   : Process(),
+    interp_type("linear"),
     background_value("0"),
     dx(0), dy(0), dz(0),
-    sx(0.), sy(0.), sz(0.)
+    sx(0.), sy(0.), sz(0.),
+    vfinterp("linear")
 {
   registerProcessType("Volume", "S8",      &doVolume<int8_t, int8_t>);
   registerProcessType("Volume", "U8",      &doVolume<uint8_t, uint8_t>);
@@ -138,8 +140,11 @@ load_ffd_deformation(const string &filename,
   // TODO find a better way of choosing the vector field interpolation (URL param?)
   if(proc.vfinterp == "cubic" || proc.vfinterp == "c")
     deformation.reset(new SplineFfd);
-  else
+  else if(proc.vfinterp == "linear" || proc.vfinterp == "l")
     deformation.reset(new TrilinearFfd);
+  else
+    throw invalid_argument("invalid vector field interpolation type: "
+                           + proc.vfinterp + ", aborting.");
 
   aims::Reader<FfdTransformation> rdef(filename);
   bool read_success = rdef.read(*deformation);
@@ -676,11 +681,10 @@ int main(int argc, const char **argv)
       "\n"
       "Note also that for meshes or points, the dimensions, voxel sizes,\n"
       "grid, reference, and resampling options are pointless and are unused.\n"
-      "Only the vector field interpolation (--vi) option is used.\n"
       "\n"
       "In Buckets and Graph mode, the options --sx, --sy, --sz allow to\n"
       "specify the output voxel size, but the reference (-r) is not used so\n"
-      "far."
+      "far." // FIXME
    );
     app.addOption(proc_input, "--input", "Input image");
     app.addOption(proc.output, "--output", "Output image");
