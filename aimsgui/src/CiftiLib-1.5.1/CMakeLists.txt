@@ -119,7 +119,7 @@ ENABLE_TESTING()
 ADD_SUBDIRECTORY(src)
 
 #example directory, has build targets and tests
-ADD_SUBDIRECTORY(example)
+# ADD_SUBDIRECTORY(example)
 
 macro(append_subdir_files variable dirname)
     get_directory_property(holder DIRECTORY ${dirname} DEFINITION ${variable})
