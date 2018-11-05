@@ -315,6 +315,7 @@ namespace aims {
     /// registerShape( "diagonalcrossxz", DiagonalCrossXZ() );
     /// registerShape( "diagonalcrossyz", DiagonalCrossYZ() );
     /// registerShape( "circlexy", CircleXY() );
+    /// registerShape( "clockwisecirclexy", ClockWiseCircleXY() );
     /// \endcode
     class ShapeFactory {
       public:
@@ -469,8 +470,8 @@ namespace aims {
                                   const std::vector<double> & amplitude,     \
                                   const bool usecenter = false );            \
       virtual NAME* clone() const { return new NAME(*this); }                \
-  }
-
+  };
+  
 namespace aims {
   namespace strel {
     AIMS_DECLARE_STREL_SHAPE( Cube );
@@ -489,7 +490,38 @@ namespace aims {
     AIMS_DECLARE_STREL_SHAPE( DiagonalCrossXY );
     AIMS_DECLARE_STREL_SHAPE( DiagonalCrossXZ );
     AIMS_DECLARE_STREL_SHAPE( DiagonalCrossYZ );
-    AIMS_DECLARE_STREL_SHAPE( CircleXY );
+    AIMS_DECLARE_STREL_SHAPE( CircleXY );    
+    
+    class ClockWiseCircleXY: public CircleXY
+    {
+      public:
+        typedef StructuringElement::iterator        iterator;
+        typedef StructuringElement::const_iterator  const_iterator;
+        ClockWiseCircleXY( const double amplitude = 1.,
+                           const bool usecenter = false ): CircleXY()
+            { Shape::setParameters( amplitude, usecenter ); }
+        ClockWiseCircleXY( const Point3d & origin,
+                           const double amplitude = 1.,
+                            const bool usecenter = false ): CircleXY()
+            { Shape::setParameters( origin, amplitude, usecenter ); }
+        ClockWiseCircleXY( const std::vector<double> & amplitude,
+                           const bool usecenter = false ): CircleXY()
+            { Shape::setParameters( amplitude, usecenter ); }
+        ClockWiseCircleXY( const Point3d & origin,
+                           const std::vector<double> & amplitude,
+                           const bool usecenter = false ): CircleXY()
+            { setParameters( origin, amplitude, usecenter ); }
+        virtual ~ClockWiseCircleXY() {}
+        
+      protected:
+        virtual void clockwise_order();
+        virtual void setParameters( const Point3d & origin,
+                                    const std::vector<double> & amplitude,
+                                    const bool usecenter = false );
+        virtual ClockWiseCircleXY* clone() const
+            { return new ClockWiseCircleXY(*this); }
+    };
+    
   } // namespace strel
 } // namespace aims
 
