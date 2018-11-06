@@ -42,6 +42,7 @@
 #include <map>
 #include <set>
 #include <cmath>
+#include <algorithm>
 //----------------------------------------------------------------------------
 
 using namespace aims;
@@ -142,6 +143,7 @@ void ShapeFactory::init()
     registerShape( "diagonalcrossxz", DiagonalCrossXZ() );
     registerShape( "diagonalcrossyz", DiagonalCrossYZ() );
     registerShape( "circlexy", CircleXY() );
+    registerShape( "clockwisecirclexy", ClockWiseCircleXY() );
   }
 }
 
@@ -688,6 +690,128 @@ void CircleXY::setParameters(
           ( sqrt( pow((float)i, 2)  + pow((float)j, 2) * ( pow( amplitude[0], 2 ) / pow( amplitude[1], 2 ) ) ) <= amplitude[0] ) &&
           ( sqrt( pow((float)i, 2)  + pow((float)j, 2) * ( pow( amplitude[0], 2 ) / pow( amplitude[1], 2 ) ) ) > amplitude[0] - 1 ) )
         _vector.push_back( Point3d(i, j, 0) + origin );
+}
+
+void ClockWiseCircleXY::setParameters(
+    const Point3d & origin,
+    const vector<double> & amplitude,
+    const bool usecenter
+)
+{
+    CircleXY::setParameters(origin, amplitude, usecenter);
+    clockwise_order();
+}
+
+void ClockWiseCircleXY::clockwise_order() {
+
+    // Initialization
+    const std::vector<Point3d> & unordered_circle = _vector;
+    std::vector<int> amplitude = getAmplitude();
+    std::vector<Point3d>::const_iterator it, circle_end = unordered_circle.end();
+    std::vector<Point3d> clockwise_circle(unordered_circle.size());
+    std::vector<int> quarter_index(4, 0);
+    int circle_radius = amplitude[0]; 
+    int quarter_size = unordered_circle.size() / 4;
+              
+    // Reorder per quarter
+    for (it = unordered_circle.begin(); it != circle_end; ++it){
+        // Compute the difference between the current pixel and the central one
+        Point3d p((*it)[0], (*it)[1], (*it)[2]);
+
+        if (((p[0] > 0) && (p[1] < 0)) || ((p[0] == 0) && (p[1] == -circle_radius))) {
+            // Top right quarter
+            clockwise_circle[quarter_index[0]] = p;
+            quarter_index[0]++;
+        }
+        else if (((p[0] > 0) && (p[1] > 0)) || ((p[0] == circle_radius) && (p[1] == 0))) {
+            // Bottom right quarter
+            clockwise_circle[quarter_size + quarter_index[1]] = p;
+            quarter_index[1]++;
+        }
+        else if (((p[0] < 0) && (p[1] > 0)) || ((p[0] == 0) && (p[1] == circle_radius))) {
+            // Bottom left quarter
+            clockwise_circle[quarter_size * 2 + quarter_index[2]] = p;
+            quarter_index[2]++;
+        }
+        else {
+            // Top left quarter
+            clockwise_circle[quarter_size * 3 + quarter_index[3]] = p;
+            quarter_index[3]++;
+        }
+    }
+    
+    if (quarter_size > 1) {
+        // Reorder bottom right quarter
+        int quarter = 1;
+        std::vector<Point3d>::iterator sit, send, qit, 
+                                    qend = clockwise_circle.begin() 
+                                            + (quarter + 1) * quarter_size;
+        sit = clockwise_circle.begin() + quarter * quarter_size;
+        send = sit;
+        for (qit = clockwise_circle.begin() + quarter * quarter_size + 1; 
+             qit != qend; ++qit) {
+            if ((*qit)[1] == (*sit)[1]) {
+                // Same y coordinate
+                send = qit;
+            }
+            else {
+                // Sort preceding line and store new line start
+//                 std::cout << "quarter " << quarter
+//                           << ", reversing " << int(send + 1 - sit) << " elements of "
+//                           << "line " << (*sit)[1]
+//                           << std::endl << std::flush;
+                std::reverse(sit, send + 1);
+                sit = qit;
+                send = sit;
+            }
+        }
+//         std::cout << "quarter " << quarter
+//                   << ", reversing " << int(send + 1 - sit) << " elements of "
+//                   << "line " << (*sit)[1]
+//                   << std::endl << std::flush;
+        std::reverse(sit, send + 1);
+        
+        // Reorder bottom left quarter
+        quarter = 2;
+        std::reverse(clockwise_circle.begin() + quarter * quarter_size, 
+                     clockwise_circle.begin() + (quarter + 1) * quarter_size);
+        
+        // Reorder top left quarter
+        quarter = 3;
+        std::vector<Point3d>::reverse_iterator srit, srend, qrit, 
+                                    qrend = clockwise_circle.rbegin() 
+                                            + quarter_size;
+        srit = clockwise_circle.rbegin();
+        srend = srit;
+        for (qrit = clockwise_circle.rbegin() + 1; 
+             qrit != qrend; ++qrit) {
+            if ((*qrit)[1] == (*srit)[1]) {
+                // Same y coordinate
+                srend = qrit;
+            }
+            else {
+                // Sort preceding line and store new line start
+//                 std::cout << "quarter " << quarter
+//                           << ", reversing " << int(srend + 1 - srit) << " elements of "
+//                           << "line " << (*srit)[1]
+//                           << std::endl << std::flush;
+                std::reverse(srit, srend + 1);
+                srit = qrit;
+                srend = srit;
+            }
+        }
+//         std::cout << "quarter " << quarter
+//                   << ", reversing " << int(srend + 1 - srit) << " elements of "
+//                   << "line " << (*srit)[1]
+//                   << std::endl << std::flush;
+        std::reverse(srit, srend + 1);
+        
+        std::reverse(clockwise_circle.begin() + quarter * quarter_size, 
+                     clockwise_circle.end());
+        
+        // Replaces circle vector using the clockwise ordered one
+        _vector = clockwise_circle;
+    }
 }
 
 //============================================================================
