@@ -1159,7 +1159,7 @@ Point3df TrilinearFfdResampler<T, C>::resample(
         for( int i = pi_ref[0]; i <= kUp[0]; ++i )
         {
           bi3 = ( flatx ? 1. : 1. - std::abs( pv_ref[0] - i ) );
-          output_value += _ref(i, j, k) * bi3 * bj3 * bk3;
+          output_value += _ref(i, j, k, t) * bi3 * bj3 * bk3;
         }
       }
     }
