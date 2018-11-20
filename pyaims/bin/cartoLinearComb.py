@@ -102,5 +102,12 @@ if objtype in ('TimeTexture',):
     # transpose is needed for textures
     result = getattr(aims, objtype)(np.transpose(result))
 
+elif objtype in ('Volume',) and isinstance(result, np.ndarray):
+    # volumes have been converted to numpy in the expression
+    # convert it back to a volume, using the first image header
+    result = aims.Volume(result)
+    if len(image) > 1:
+        result.copyHeaderFrom(image[1].header())
+
 print('output type:', type(result).__name__)
 aims.write(result, options.output)

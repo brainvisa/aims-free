@@ -776,6 +776,37 @@ else:
             return NotImplemented
 
 
+def __vol_pow__(self, y, z=None):
+    ''' Power operation: x**y, pow(x, y [,z]) is performed using numpy.
+    '''
+    vol = aims.Volume(numpy.asarray(self).__pow__(y, z))
+    vol.copyHeaderFrom(self.header())
+    return vol
+
+
+def __vol_ipow__(self, y):
+    ''' Power operation: x **= y is performed using numpy.
+    '''
+    a = numpy.asarray(self)
+    a **= y
+    return self
+
+
+def __vol_floordiv__(self, y):
+    ''' Power operation: x // y is performed using numpy.
+    '''
+    vol = aims.Volume(numpy.asarray(self).__floordiv__(y))
+    vol.copyHeaderFrom(self.header())
+    return vol
+
+
+def __vol_ifloordiv__(self, y):
+    ''' Power operation: x //= y is performed using numpy.
+    '''
+    a = numpy.asarray(self)
+    a //= y
+    return self
+
 
 def __Volume_astype__(self, dtype, copy=False):
     '''Easy conversion method for volumes. Works in a similar was as numpy
@@ -898,6 +929,11 @@ def __fixsipclasses__(classes):
                                       __fixsipclasses__.__operator_overload__,
                                         add),
                                     None, y))
+                # pow, ipow, floordiv, ifloordiv
+                y.__pow__ = __fixsipclasses__.__vol_pow__
+                y.__ipow__ = __fixsipclasses__.__vol_ipow__
+                y.__floordiv__ = __fixsipclasses__.__vol_floordiv__
+                y.__ifloordiv__ = __fixsipclasses__.__vol_ifloordiv__
                 # volume item access
                 y.__getitem__ = lambda self, *args, **kwargs: \
                     numpy.asarray(self).__getitem__(*args, **kwargs)
@@ -993,12 +1029,17 @@ __fixsipclasses__._vol_getstate = _vol_getstate
 __fixsipclasses__._vol_setstate = _vol_setstate
 __fixsipclasses__._aimsdata_getstate = _aimsdata_getstate
 __fixsipclasses__._aimsdata_setstate = _aimsdata_setstate
+__fixsipclasses__.__vol_pow__ = __vol_pow__
+__fixsipclasses__.__vol_ipow__ = __vol_ipow__
+__fixsipclasses__.__vol_floordiv__ = __vol_floordiv__
+__fixsipclasses__.__vol_ifloordiv__ = __vol_ifloordiv__
 del newiter, newnext, objiter, objnext, proxygetattr, proxylen
 del proxygetitem, proxysetitem, proxystr, proxynonzero
 del rcptr_getAttributeNames
 del __getitem_vec__, __setitem_vec__, __operator_overload__, __Volume_astype__
 del proxyget
 del _vol_getstate, _vol_setstate, _aimsdata_getstate, _aimsdata_setstate
+del __vol_pow__, __vol_ipow__, __vol_floordiv__, __vol_ifloordiv__
 
 __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
