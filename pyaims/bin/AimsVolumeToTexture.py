@@ -78,7 +78,7 @@ if options.transform:
     vert = [trans.transform(v) for v in mesh.vertex()]
 else:
     vert = mesh.vertex()
-nv = vert.size()
+nv = len(vert)
 vs = vol.header()['voxel_size'][:3]
 ivert = np.round(np.array(vert) / vs).astype('int')
 # clamp indices
