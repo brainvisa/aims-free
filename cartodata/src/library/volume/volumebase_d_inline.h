@@ -432,6 +432,53 @@ namespace carto {
 
     return out.ostream();
   }
+      
+  template <typename T>
+  inline
+  void displayRefVolumes(const carto::Volume<T> & vol) {
+    int p = 0;
+    rc_ptr<Volume<T> > v(const_cast<Volume<T> *>(&vol));
+    
+    while (!v.isNull()) {
+      std::cout << "Volume " << (p ? carto::toString(p) + " " : "") << "is " 
+                << (v->allocatorContext().isAllocated() ? "" : "not ") 
+                << "allocated" << std::endl << std::flush;
+    
+      // Display volume dimensions
+      std::vector<int> dims = v->getSize();
+      if (dims.size()>0) {
+        std::cout << "Volume " << (p ? carto::toString(p) + " " : "") 
+                  << "dimensions [";   
+        for(int i=0; i<dims.size()-1; ++i)
+          std::cout << dims[i] << ", ";
+        std::cout << dims[dims.size()-1] << "]" << std::endl << std::flush;
+      }
+    
+      // Display volume borders
+      std::vector<int> borders = v->getBorders();
+      std::cout << "Volume " << (p ? carto::toString(p) + " " : "") 
+                << "borders [";
+      if (borders.size()>0) {
+        for(int i=0; i<borders.size()-1; ++i)
+          std::cout << borders[i] << ", ";
+        std::cout << borders[borders.size()-1] << "]" << std::endl << std::flush;
+      }
+    
+      // Display position in parent
+      typename Volume<T>::Position pos = v->posInRefVolume();
+      if (v->refVolume().isNull()) {
+        std::vector<int> pos = v->posInRefVolume();
+        std::cout << "Volume " << (p ? carto::toString(p) + " " : "") 
+                  << " position in parent [";
+        for(int i=0; i<pos.size()-1; ++i)
+          std::cout << pos[i] << ", ";
+        std::cout << pos[pos.size()-1] << "]" << std::endl << std::flush;
+      }
+  
+      v = v->refVolume();        
+      p++;
+    }
+  }
 
 } // namespace carto
 

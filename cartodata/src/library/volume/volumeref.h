@@ -92,6 +92,7 @@ namespace carto {
     //   TYPES
     //========================================================================
     typedef typename Volume<T>::Position4Di Position4Di;
+    typedef typename Volume<T>::Position Position;
     typedef typename Volume<T>::iterator iterator;
     typedef typename Volume<T>::const_iterator const_iterator;
 
@@ -205,10 +206,17 @@ namespace carto {
     template <typename OUTP>
     operator VolumeRef<OUTP>() const;
 
+    int getLevelsCount() const;
+    int refLevel(const int level) const;
     rc_ptr<Volume<T> > refVolume() const;
+    rc_ptr<Volume<T> > refVolumeAtLevel(const int level) const;
     void setRefVolume(const rc_ptr<Volume<T> > & refvol);
     const Position4Di posInRefVolume() const;
+    typename Volume<T>::Position posInRefVolumeAtLevel(const int level) const;
+    
     void setPosInRefVolume(const Position4Di & pos);
+    void setPosInRefVolume(const typename Volume<T>::Position & pos);
+    
     std::vector<int> getBorders() const;
     std::vector<size_t> getStrides() const;
 
@@ -302,6 +310,9 @@ namespace carto {
   std::ostream & operator<< ( std::ostream & out,
                               const carto::rc_ptr<carto::Volume<T> > & volume );
 
+  /// Display information about volume hierarchy
+  template <typename T>
+  void displayRefVolumes(const carto::VolumeRef<T> & vol);
 } // namespace carto
 
 
