@@ -375,6 +375,16 @@ namespace carto
     /// Cast to Volume of different datatype
     template <typename OUTP>
     operator Volume<OUTP>() const;
+    
+    /// Get levels count in volume hierarchy from the current volume to the 
+    /// topmost volume.
+    int getLevelsCount() const;
+    
+    /// Transform a level index to a valid level index in the volume hierarchy.
+    /// The current volume has level 0, parent volume as level 1, ... 
+    /// Level can also be a negative index from topmost volume. 
+    /// -1 is topmost volume, -2 is the the child volume below topmost volume.
+    int refLevel(const int level) const;
 
     /// Get parent volume
     ///
@@ -383,13 +393,26 @@ namespace carto
     /// objects, this result must be converted to a VolumeRef to be used in
     /// arithmetic operations.
     rc_ptr<Volume<T> > refVolume() const;
+    
+    /// Get parent volume at a specified level in volume hierarchy
+    ///
+    /// \note refVolumeAtLevel() returns a rc_ptr<Volume> and not a VolumeRef.
+    /// Because arithmetic operators are only defined for Volume and VolumeRef
+    /// objects, this result must be converted to a VolumeRef to be used in
+    /// arithmetic operations.    
+    rc_ptr<Volume<T> > refVolumeAtLevel(const int level) const;
+    
     /// Set parent volume
     void setRefVolume(const rc_ptr<Volume<T> > & refvol);
     /// Get position in parent volume
     const Position & posInRefVolume() const;
+    /// Get position relatively to parent volume at specified level
+    Position posInRefVolumeAtLevel(const int level) const;
+
     /// Set position in parent volume
     void setPosInRefVolume(const Position4Di & pos);
     void setPosInRefVolume(const Position & pos);
+    
 
     /// Get borders for the volume. A volume that can have borders is a volume \n
     /// that references another volume. It can be understood as a view in the reference volume.
@@ -675,6 +698,11 @@ namespace carto
   template <typename T>
   std::ostream & operator<< ( std::ostream & out,
                               const Volume<T> & volume );
+
+
+  /// Display information about volumes hierarchy
+  template <typename T>
+  void displayRefVolumes(const Volume<T> & vol);
 
 } // namespace carto:
 

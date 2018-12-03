@@ -364,6 +364,32 @@ namespace carto {
   {
     return (*this)->setPosInRefVolume( pos );
   }
+  
+
+  template <typename T>
+  inline
+  int VolumeRef<T>::getLevelsCount() const {
+    return (*this)->getLevelsCount();
+  }
+
+  template <typename T>
+  inline
+  int VolumeRef<T>::refLevel(const int level) const {
+    return (*this)->refLevel(level);
+  }
+
+  template <typename T>
+  inline
+  rc_ptr<Volume<T> > VolumeRef<T>::refVolumeAtLevel(const int level) const {
+    return (*this)->refVolumeAtLevel(level);
+  }
+
+  template <typename T>
+  inline
+  typename Volume<T>::Position VolumeRef<T>::posInRefVolumeAtLevel(
+      const int level) const {
+    return (*this)->posInRefVolumeAtLevel(level);
+  }
 
   template <typename T>
   inline
@@ -417,28 +443,34 @@ namespace carto {
   //==========================================================================
 
   template <typename T>
-std::ostream & operator<< ( const carto::VolumeOStream & out,
-                            const carto::rc_ptr<carto::Volume<T> > & volume )
-{
-  out.ostream() << "VolumeRef" << std::flush;
-  if( !volume.get() ) {
-    out.ostream() << " of " << carto::DataTypeCode<T>::dataType()
-                  << ": empty" << std::endl;
-    return out.ostream();
-  }
-  else
+  std::ostream & operator<< ( const carto::VolumeOStream & out,
+                              const carto::rc_ptr<carto::Volume<T> > & volume )
   {
-    out.ostream() << ": " << std::flush;
-    return out << *(volume.get());
+    out.ostream() << "VolumeRef" << std::flush;
+    if( !volume.get() ) {
+      out.ostream() << " of " << carto::DataTypeCode<T>::dataType()
+                    << ": empty" << std::endl;
+      return out.ostream();
+    }
+    else
+    {
+      out.ostream() << ": " << std::flush;
+      return out << *(volume.get());
+    }
   }
-}
 
-template <typename T>
-std::ostream & operator<< ( std::ostream & out,
-                            const carto::rc_ptr<carto::Volume<T> > & volume )
-{
-  carto::VolumeOStream volumeout( out );
-  return volumeout << volume;
+  template <typename T>
+  std::ostream & operator<< ( std::ostream & out,
+                              const carto::rc_ptr<carto::Volume<T> > & volume )
+  {
+    carto::VolumeOStream volumeout( out );
+    return volumeout << volume;
+  }
+  
+  template <typename T>
+  inline
+  void displayRefVolumes(const carto::VolumeRef<T> & vol) {
+    carto::displayRefVolumes(*(vol.get()));
   }
 
 } // namespace carto

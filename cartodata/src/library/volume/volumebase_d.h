@@ -609,6 +609,73 @@ namespace carto
   {
     return _pos;
   }
+  
+  template <typename T>
+  inline
+  int Volume<T>::getLevelsCount() const {
+    int l = 0;
+    rc_ptr<Volume<T> > v(const_cast<Volume<T> *>(this));
+    while (!v.isNull()) {
+      l++;
+      v = v->refVolume();
+    }
+    return l;
+  }
+
+  template <typename T>
+  inline
+  int Volume<T>::refLevel(const int level) const {
+    int c = getLevelsCount();
+    int l = level;
+    if (l < 0) {
+      l = c + l;
+    }
+        
+    if ((l < 0) && (l >= c)) {
+      throw std::out_of_range("level " + carto::toString(level)
+                             + " is out range (" + carto::toString(-c)
+                             + ", " + carto::toString(c-1) + ")");
+    }
+       
+    return l;
+  }
+
+  template <typename T>
+  inline
+  rc_ptr<Volume<T> > Volume<T>::refVolumeAtLevel(const int level) const {
+    int l = refLevel(level);
+    int c = 0;    
+    rc_ptr<Volume<T> > v(const_cast<Volume<T> *>(this));
+            
+    while ((c < l) && (!v.isNull())) {
+      v = v->refVolume();
+      c++;
+    }
+        
+    return v;
+  }
+
+  template <typename T>
+  inline
+  typename Volume<T>::Position Volume<T>::posInRefVolumeAtLevel(
+      const int level) const {
+    int l = refLevel(level);
+    size_t s = this->getSize().size();
+    typename Volume<T>::Position offset(s, 0);
+    int c = 0;
+    rc_ptr<Volume<T> > v(const_cast<Volume<T> *>(this));
+    while ((c < l) && (!v.isNull())) {
+      const Position & pos = v->posInRefVolume();
+      
+      for (size_t i = 0; i < s; ++i)
+        offset[i] += pos[i];
+      
+      v = v->refVolume();
+      c++;
+    }
+        
+    return offset;
+  }
 
   template <typename T> inline
   void Volume<T>::updateItemsBuffer()
