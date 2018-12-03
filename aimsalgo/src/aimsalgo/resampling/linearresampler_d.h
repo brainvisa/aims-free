@@ -35,9 +35,14 @@
 #ifndef AIMS_RESAMPLING_LINEARRESAMPLER_D_H
 #define AIMS_RESAMPLING_LINEARRESAMPLER_D_H
 
-#include <cstdlib>
 #include <aims/resampling/linearresampler.h>
-#include <aims/utility/channel.h>
+
+#include <cartobase/type/converter.h>
+
+#include <cmath>
+
+namespace aims
+{
 
 template < class T >
 LinearResampler< T >::LinearResampler()
@@ -62,53 +67,32 @@ int LinearResampler< T >::getOrder() const
 
 
 template < class T >
-void LinearResampler< T >::doResample(
-                                      const AimsData< T >& inVolume,
-                                      const Motion& invTransform3d,
-                                      const T& outBackground,
-                                      const Point3df& outLocation,
-                                      T& outValue, int t )
+void LinearResampler< T >::
+doResampleChannel( const carto::Volume< ChannelType >& inVolume,
+                   const aims::Transformation3d& invTransform3d,
+                   const ChannelType& outBackground,
+                   const Point3df& outLocation,
+                   ChannelType& outValue, int t ) const
 {
 
-  const T	*i = &inVolume( 0, 0, 0, t );
-  const T	*pi, *pj;
+  const ChannelType *i = &inVolume.at( 0, 0, 0, t );
+  const ChannelType *pi, *pj;
 
   Point3df normalizedInLocation;
   normalizedInLocation = invTransform3d.transform( outLocation );
 
-  normalizedInLocation[0] += 0.5;
-  normalizedInLocation[1] += 0.5;
-  normalizedInLocation[2] += 0.5;
+  float xf = round(normalizedInLocation[0]);
+  float yf = round(normalizedInLocation[1]);
+  float zf = round(normalizedInLocation[2]);
 
-  int x = ( int )normalizedInLocation[0];
-  int y = ( int )normalizedInLocation[1];
-  int z = ( int )normalizedInLocation[2];
+  std::vector<int> dims = inVolume.getSize();
+  int dimx = dims[0], dimy = dims[1], dimz = dims[2];
 
-  if ( ( normalizedInLocation[0] < 0.0 ) &&
-       ( ( double )x != normalizedInLocation[0] ) )
-  {
-
-    -- x;
-
-  }
-  if ( ( normalizedInLocation[1] < 0.0 ) &&
-       ( ( double )y != normalizedInLocation[1] ) )
-  {
-
-    -- y;
-
-  }
-  if ( ( normalizedInLocation[2] < 0.0 ) &&
-       ( ( double )z != normalizedInLocation[2] ) )
-  {
-
-    -- z;
-
-  }
-
-  if ( ( x >= 0 ) && ( x < inVolume.dimX() ) &&
-       ( y >= 0 ) && ( y < inVolume.dimY() ) &&
-       ( z >= 0 ) && ( z < inVolume.dimZ() ) )
+  // The test is done using floating-point so that NaN values are excluded (the
+  // background value is returned if the transformation yields NaN)
+  if ( ( xf >= 0 ) && ( xf < dimx ) &&
+       ( yf >= 0 ) && ( yf < dimy ) &&
+       ( zf >= 0 ) && ( zf < dimz ) )
   {
 
     double weightX0, weightY0, weightX1, weightY1;
@@ -116,42 +100,26 @@ void LinearResampler< T >::doResample(
     double intensity, qi, qj;
 
     // first y contribution
-    normalizedInLocation[1] -= 0.5;
-    y = ( int )normalizedInLocation[1];
-    if ( ( normalizedInLocation[1] < 0.0 ) &&
-         ( ( double )y != normalizedInLocation[1] ) )
-    {
-
-      -- y;
-
-    }
+    int y = static_cast<long>(floor(normalizedInLocation[1]));
     weightY0 = getBSplineWeight( y, normalizedInLocation[1] );
-    foldY0 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
+    foldY0 = (long)this->getFold( y, dims[1] ) * dims[0];
 
     // second y contribution
     ++ y;
     weightY1 = getBSplineWeight( y, normalizedInLocation[1] );
-    foldY1 = (long)this->getFold( y, inVolume.dimY() ) * inVolume.dimX();
+    foldY1 = (long)this->getFold( y, dimy ) * dimx;
 
     // first x contribution
-    normalizedInLocation[0] -= 0.5;
-    x = ( int )normalizedInLocation[0];
-    if ( ( normalizedInLocation[0] < 0.0 ) &&
-         ( ( double )x != normalizedInLocation[0] ) )
-    {
-
-      -- x;
-
-    }
+    int x = static_cast<long>(floor(normalizedInLocation[0]));
     weightX0 = getBSplineWeight( x, normalizedInLocation[0] );
-    foldX0 = (long)this->getFold( x, inVolume.dimX() );
+    foldX0 = (long)this->getFold( x, dimx );
 
     // second x contribution
     ++ x;
     weightX1 = getBSplineWeight( x, normalizedInLocation[0] );
-    foldX1 = (long)this->getFold( x, inVolume.dimX() );
+    foldX1 = (long)this->getFold( x, dimx );
 
-    if ( inVolume.dimZ() == 1 )
+    if ( dimz == 1 )
     {
 
       //summing contributions
@@ -170,17 +138,9 @@ void LinearResampler< T >::doResample(
     {
 
       // first z contribution
-      normalizedInLocation[2] -= 0.5;
-      z = ( int )normalizedInLocation[2];
-      if ( ( normalizedInLocation[2] < 0.0 ) &&
-           ( ( double )z != normalizedInLocation[2] ) )
-      {
-
-        -- z;
-
-      }
-      pj = i + (size_t)(this->getFold( z, inVolume.dimZ() )) * inVolume.dimX() *
-           inVolume.dimY();
+      int z = static_cast<long>(floor(normalizedInLocation[2]));
+      pj = i + (size_t)(this->getFold( z, dimz )) * dimx *
+           dimy;
       pi = pj + (size_t)(foldY0);
       qi = weightX0 * ( double )*( pi + (size_t)(foldX0) );
       qi += weightX1 * ( double )*( pi + (size_t)(foldX1) );
@@ -193,8 +153,8 @@ void LinearResampler< T >::doResample(
 
       // first z contribution
       ++ z;
-      pj = i + (size_t)(this->getFold( z, inVolume.dimZ() )) * inVolume.dimX() *
-           inVolume.dimY();
+      pj = i + (size_t)(this->getFold( z, dimz )) * dimx *
+           dimy;
       pi = pj + (size_t)(foldY0);
       qi = weightX0 * ( double )*( pi + (size_t)(foldX0) );
       qi += weightX1 * ( double )*( pi + (size_t)(foldX1) );
@@ -205,7 +165,8 @@ void LinearResampler< T >::doResample(
       qj += weightY1 * qi;
       intensity += getBSplineWeight( z, normalizedInLocation[2] ) * qj;
     }
-    outValue = ( T )intensity;
+
+    carto::RawConverter<double, ChannelType>().convert(intensity, outValue);
 
   }
   else
@@ -221,14 +182,11 @@ template < class T >
 double LinearResampler< T >::getBSplineWeight( int i, double x ) const
 {
 
-  x = std::fabs( x - ( double )i );
+  x = fabs( x - ( double )i );
   return ( x > 1.0 ) ? 0.0 : 1.0 - x;
 
 }
 
-// AimsRGB Specialization
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGB )
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGBA )
+} // namespace aims
 
 #endif
-

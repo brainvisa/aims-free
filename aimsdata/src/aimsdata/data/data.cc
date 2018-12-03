@@ -36,6 +36,7 @@
  
 namespace carto {
 
+INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<bool> )
 INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<int8_t> )
 INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<uint8_t> )
 INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<int16_t> )
@@ -61,6 +62,7 @@ INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<long> )
 INSTANTIATE_GENERIC_OBJECT_TYPE( AimsData<unsigned long> )
 #endif
 
+INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<bool> > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<int8_t> > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<uint8_t> > )
 INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<int16_t> > )

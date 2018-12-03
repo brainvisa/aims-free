@@ -41,7 +41,7 @@
 #include <aims/config/aimsdata_config.h>
 #include <aims/data/fastAllocationData.h>
 #include <aims/math/mathelem.h>
-#include <iostream>
+#include <iosfwd>
 
 namespace aims
 {
@@ -78,7 +78,7 @@ aims/resampling/motion.h (the former location of the Motion class) and should
 minimize inconvenience when compiling old code which used Motion. However a few
 API differences may cause compilation problems:
 
-- forward declatations for the Motion class will not work any longer, since
+- forward declarations for the Motion class will not work any longer, since
   Motion is not a class anymore but a typedef. It is still possible to replace:
 \code class Motion;
 \endcode
@@ -130,24 +130,39 @@ public:
   const aims::PythonHeader* header() const { return _header; }
   void setHeader( aims::PythonHeader* ph );
 
+  Point3dd transformVector( const Point3dd & vec ) const;
+  Point3df transformVector( const Point3df & dir ) const;
+  Point3dd transformVector( double x, double y, double z ) const;
+  Point3df transformVector( float x, float y, float z ) const;
+  Point3dd transformNormal( const Point3dd & dir ) const;
+  Point3df transformNormal( const Point3df & dir ) const;
+  Point3dd transformNormal( double x, double y, double z ) const;
+  Point3df transformNormal( float x, float y, float z ) const;
+  Point3dd transformUnitNormal( const Point3dd & dir ) const;
+  Point3df transformUnitNormal( const Point3df & dir ) const;
+  Point3dd transformUnitNormal( double x, double y, double z ) const;
+  Point3df transformUnitNormal( float x, float y, float z ) const;
+
   inline Point3df& translation() { return _translation; }
   inline const Point3df& translation() const { return _translation; }
 
   inline AimsData<float>& rotation() { return _rotation; }
   inline const AimsData<float>& rotation() const { return _rotation; }
 
-  virtual bool isIdentity() const;
-  virtual void setToIdentity() ;
+  bool isIdentity() const CARTO_OVERRIDE;
+  virtual void setToIdentity();
 
   // AffineTransformation3d algebraic operation
   AffineTransformation3d inverse() const;
+  bool invertible() const CARTO_OVERRIDE;
+  std::unique_ptr<Transformation3d> getInverse() const CARTO_OVERRIDE;
   virtual void scale( const Point3df& sizeFrom, const Point3df& sizeTo );
   /// true if the transformation is direct, false if it changes orientation
   bool isDirect() const;
 
   //Initialisation
   void setTranslation(Point3df trans);
-  virtual void setRotationAffine( float rx, float ry, float rz, 
+  virtual void setRotationAffine( float rx, float ry, float rz,
                                   const Point3df &cg = Point3df( 0.0 )  );
   //virtual void setRotationVectorial( const Point3df& v1, const Point3df& v2 );
 
@@ -173,12 +188,17 @@ public:
 
 
 protected:
-  virtual Point3dd transformDouble( double x, double y, double z ) const;
-  virtual Point3df transformFloat( float x, float y, float z ) const;
+  Point3dd transformDouble( double x, double y, double z ) const CARTO_OVERRIDE;
+  Point3df transformFloat( float x, float y, float z ) const CARTO_OVERRIDE;
 
+  virtual Point3dd transformVectorPoint3dd( const Point3dd & vec ) const;
+  virtual Point3df transformVectorPoint3df( const Point3df & dir ) const;
   virtual Point3dd transformVectorDouble( double x, double y, double z ) const;
   virtual Point3df transformVectorFloat( float x, float y, float z ) const;
-
+  virtual Point3dd transformNormalPoint3dd( const Point3dd & dir ) const;
+  virtual Point3df transformNormalPoint3df( const Point3df & dir ) const;
+  virtual Point3dd transformNormalDouble( double x, double y, double z ) const;
+  virtual Point3df transformNormalFloat( float x, float y, float z ) const;
 
   Point3df _translation;
   // _rotation contient pour le moment la matrice affine en fait!!
@@ -190,6 +210,141 @@ protected:
   AffineTransformation3d
       operator * ( const AffineTransformation3d& affineTransformation3d1,
                    const AffineTransformation3d& affineTransformation3d2 );
+
+
+  inline Point3dd
+  AffineTransformation3d::transformVector( double x, double y, double z ) const
+  {
+    return transformVectorDouble( x, y, z );
+  }
+
+
+  inline Point3df
+  AffineTransformation3d::transformVector( float x, float y, float z ) const
+  {
+    return transformVectorFloat( x, y, z );
+  }
+
+
+  inline Point3df
+  AffineTransformation3d::transformVector( const Point3df & pos ) const
+  {
+    return transformVectorPoint3df( pos );
+  }
+
+
+  inline Point3dd
+  AffineTransformation3d::transformVector( const Point3dd & pos ) const
+  {
+    return transformVectorPoint3dd( pos );
+  }
+
+
+  inline Point3dd
+  AffineTransformation3d::transformNormal( double x, double y, double z ) const
+  {
+    return transformNormalDouble( x, y, z );
+  }
+
+
+  inline Point3df
+  AffineTransformation3d::transformNormal( float x, float y, float z ) const
+  {
+    return transformNormalFloat( x, y, z );
+  }
+
+
+  inline Point3df
+  AffineTransformation3d::transformNormal( const Point3df & pos ) const
+  {
+    return transformNormalPoint3df( pos );
+  }
+
+
+  inline Point3dd
+  AffineTransformation3d::transformNormal( const Point3dd & pos ) const
+  {
+    return transformNormalPoint3dd( pos );
+  }
+
+
+  inline Point3df
+  AffineTransformation3d::transformVectorPoint3df( const Point3df & pos ) const
+  {
+    return transformVectorFloat( pos[0], pos[1], pos[2] );
+  }
+
+
+  inline Point3dd
+  AffineTransformation3d::transformVectorPoint3dd( const Point3dd & pos ) const
+  {
+    return transformVector( pos[0], pos[1], pos[2] );
+  }
+
+
+  inline Point3df
+  AffineTransformation3d::transformNormalPoint3df( const Point3df & pos ) const
+  {
+    Point3dd transformed = transformNormal( (double) pos[0], (double) pos[1],
+                                             (double) pos[2] );
+    return Point3df( (float) transformed[0], (float) transformed[1],
+                     (float) transformed[2] );
+  }
+
+
+  inline Point3dd
+  AffineTransformation3d::transformNormalPoint3dd( const Point3dd & pos ) const
+  {
+    return transformNormal( pos[0], pos[1], pos[2] );
+  }
+
+
+  inline Point3df
+  AffineTransformation3d::
+  transformNormalFloat( float x, float y, float z ) const
+  {
+    Point3dd transformed = transformNormal( (double) x, (double) y,
+                                             (double) z );
+    return Point3df( (float) transformed[0], (float) transformed[1],
+                      (float) transformed[2] );
+  }
+
+
+  inline Point3dd
+  AffineTransformation3d::
+  transformUnitNormal( double x, double y, double z ) const
+  {
+    return transformNormal( x, y, z ).normalize();
+  }
+
+
+  inline Point3df
+  AffineTransformation3d::transformUnitNormal( const Point3df & pos ) const
+  {
+    Point3dd transformed
+        = transformUnitNormal( (double) pos[0], (double) pos[1],
+                                (double) pos[2] );
+    return Point3df( (float) transformed[0], (float) transformed[1],
+                      (float) transformed[2] );
+  }
+
+
+  inline Point3dd
+  AffineTransformation3d::transformUnitNormal( const Point3dd & pos ) const
+  {
+    return transformUnitNormal( pos[0], pos[1], pos[2] );
+  }
+
+
+  inline Point3df
+  AffineTransformation3d::
+  transformUnitNormal( float x, float y, float z ) const
+  {
+    Point3dd transformed = transformUnitNormal( (double) x, (double) y,
+                                                (double) z );
+    return Point3df( (float) transformed[0], (float) transformed[1],
+                      (float) transformed[2] );
+  }
 
 }
 
@@ -208,8 +363,8 @@ namespace carto
     { return "AffineTransformation3d"; }
     static std::string dataType()
     { return "VOID"; }
-    static std::string name() 
-    { 
+    static std::string name()
+    {
       return "AffineTransformation3d";
     }
   };

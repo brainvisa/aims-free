@@ -47,28 +47,3 @@ for k, v in six.iteritems(aims.__dict__):
     except:
       pass
 del aims, ExtendedImporter, k, v
-
-# shorter names for double-templated classes
-
-SplineFfdResampler_DOUBLE = SplineFfdResampler_DOUBLE_DOUBLE
-SplineFfdResampler_FLOAT = SplineFfdResampler_FLOAT_FLOAT
-SplineFfdResampler_POINT3DF = SplineFfdResampler_POINT3DF_FLOAT
-SplineFfdResampler_RGB = SplineFfdResampler_RGB_U8
-SplineFfdResampler_RGBA = SplineFfdResampler_RGBA_U8
-SplineFfdResampler_U8 = SplineFfdResampler_U8_U8
-SplineFfdResampler_U16 = SplineFfdResampler_U16_U16
-SplineFfdResampler_S16 = SplineFfdResampler_S16_S16
-SplineFfdResampler_U32 = SplineFfdResampler_U32_U32
-SplineFfdResampler_S32 = SplineFfdResampler_S32_S32
-
-TrilinearFfdResampler_DOUBLE = TrilinearFfdResampler_DOUBLE_DOUBLE
-TrilinearFfdResampler_FLOAT = TrilinearFfdResampler_FLOAT_FLOAT
-TrilinearFfdResampler_POINT3DF = TrilinearFfdResampler_POINT3DF_FLOAT
-TrilinearFfdResampler_RGB = TrilinearFfdResampler_RGB_U8
-TrilinearFfdResampler_RGBA = TrilinearFfdResampler_RGBA_U8
-TrilinearFfdResampler_U8 = TrilinearFfdResampler_U8_U8
-TrilinearFfdResampler_U16 = TrilinearFfdResampler_U16_U16
-TrilinearFfdResampler_S16 = TrilinearFfdResampler_S16_S16
-TrilinearFfdResampler_U32 = TrilinearFfdResampler_U32_U32
-TrilinearFfdResampler_S32 = TrilinearFfdResampler_S32_S32
-

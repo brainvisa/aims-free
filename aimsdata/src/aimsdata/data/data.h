@@ -46,6 +46,7 @@
 
 namespace carto {
 
+DECLARE_GENERIC_OBJECT_TYPE( AimsData<bool> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<int8_t> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<uint8_t> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<int16_t> )
@@ -71,6 +72,7 @@ DECLARE_GENERIC_OBJECT_TYPE( AimsData<long> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<unsigned long> )
 #endif
 
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<bool> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<int8_t> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<uint8_t> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<int16_t> > )

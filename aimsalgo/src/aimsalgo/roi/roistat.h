@@ -42,6 +42,7 @@
 #include <aims/roi/roigtm.h>
 #include <aims/data/pheader.h>
 #include <aims/resampling/resampler.h>
+#include <aims/resampling/motion.h>
 #include <aims/math/mathelem.h>
 #include <graph/graph/graph.h>
 #include <float.h>

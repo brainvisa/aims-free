@@ -36,8 +36,15 @@
 #define AIMS_RESAMPLING_QUINTICRESAMPLER_H
 
 #include <aims/resampling/splineresampler.h>
-#include <aims/resampling/multichannelresampler.h>
 
+namespace aims
+{
+
+/** Volume resampler using quintic (order 5) interpolation.
+
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
 template <class T>
 class QuinticResampler : public SplineResampler< T >
 {
@@ -46,15 +53,13 @@ public:
   QuinticResampler();
   ~QuinticResampler();
 
-  int getOrder() const;
+  int getOrder() const CARTO_OVERRIDE;
 
 protected:
 
-  double getBSplineWeight( int i, double x ) const;
+  double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
 
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( QuinticResampler, AimsRGB, 5 )
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( QuinticResampler, AimsRGBA, 5 )
+} // namespace aims
 
 #endif
-

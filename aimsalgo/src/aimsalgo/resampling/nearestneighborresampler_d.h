@@ -37,13 +37,20 @@
 
 #include <aims/resampling/nearestneighborresampler.h>
 
+#include <cmath>
+
+using namespace std;
+
+namespace aims
+{
+
 template <class T>
-void 
-NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume, 
-                                         const Motion &invTransform3d, 
-                                         const T &outBackground, 
-                                         const Point3df &outLocation, 
-                                         T &outValue, int t )
+void
+NearestNeighborResampler<T>::doResample( const carto::Volume< T > &inVolume,
+                                         const aims::Transformation3d &invTransform3d,
+                                         const T &outBackground,
+                                         const Point3df &outLocation,
+                                         T &outValue, int t ) const
 {
 
   Point3df inLocation = invTransform3d.transform( outLocation );
@@ -52,59 +59,36 @@ NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume,
 }
 
 template <class T>
-void 
-NearestNeighborResampler<T>::doResample( const AimsData< T > &inVolume, 
-                                         const Point3df &inLocation, 
-                                         const T &outBackground, 
-                                         T &outValue, int t )
+void
+NearestNeighborResampler<T>::doResample( const carto::Volume< T > &inVolume,
+                                         const Point3df &inLocation,
+                                         const T &outBackground,
+                                         T &outValue, int t ) const
 {
-  Point3df normalizedInLocation = inLocation;
-  normalizedInLocation[0] += 0.5;
-  normalizedInLocation[1] += 0.5;
-  normalizedInLocation[2] += 0.5;
+  float xf = round(inLocation[0]);
+  float yf = round(inLocation[1]);
+  float zf = round(inLocation[2]);
 
-  int x = ( int )normalizedInLocation[0];
-  int y = ( int )normalizedInLocation[1];
-  int z = ( int )normalizedInLocation[2];
+  std::vector<int> dims = inVolume.getSize();
 
-  if ( ( normalizedInLocation[0] < 0.0 ) &&
-       ( ( double )x != normalizedInLocation[0] ) )
+  // The test is done using floating-point so that NaN values are excluded (the
+  // background value is returned if the transformation yields NaN)
+  if ( ( xf >= 0 ) && ( xf < dims[0] ) &&
+       ( yf >= 0 ) && ( yf < dims[1] ) &&
+       ( zf >= 0 ) && ( zf < dims[2] ) )
   {
-
-    -- x;
-
-  }
-  if ( ( normalizedInLocation[1] < 0.0 ) &&
-       ( ( double )y != normalizedInLocation[1] ) )
-  {
-
-    -- y;
-
-  }
-  if ( ( normalizedInLocation[2] < 0.0 ) &&
-       ( ( double )z != normalizedInLocation[2] ) )
-  {
-
-    -- z;
-
-  }
-    
-  if ( ( x >= 0 ) && ( x < inVolume.dimX() ) &&
-       ( y >= 0 ) && ( y < inVolume.dimY() ) &&
-       ( z >= 0 ) && ( z < inVolume.dimZ() ) )
-  {
-
-    outValue = inVolume( x, y, z, t );
-
+    int x = static_cast<int>(xf);
+    int y = static_cast<int>(yf);
+    int z = static_cast<int>(zf);
+    outValue = inVolume.at( x, y, z, t );
   }
   else
   {
-
     outValue = outBackground;
-
   }
 
 }
 
-#endif
+} // namespace aims
 
+#endif

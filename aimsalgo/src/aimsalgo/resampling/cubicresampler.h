@@ -36,8 +36,15 @@
 #define AIMS_RESAMPLING_CUBICRESAMPLER_H
 
 #include <aims/resampling/splineresampler.h>
-#include <aims/resampling/multichannelresampler.h>
 
+namespace aims
+{
+
+/** Volume resampler using cubic interpolation.
+
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
 template <class T>
 class CubicResampler : public SplineResampler< T >
 {
@@ -46,15 +53,13 @@ public:
   CubicResampler();
   ~CubicResampler();
 
-  int getOrder() const;
+  int getOrder() const CARTO_OVERRIDE;
 
 protected:
 
-  double getBSplineWeight( int i, double x ) const;
+  double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
 
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( CubicResampler, AimsRGB, 3 )
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( CubicResampler, AimsRGBA, 3 )
+} // namespace aims
 
 #endif
-

@@ -36,8 +36,15 @@
 #define AIMS_RESAMPLING_QUADRATICRESAMPLER_H
 
 #include <aims/resampling/splineresampler.h>
-#include <aims/resampling/multichannelresampler.h>
 
+namespace aims
+{
+
+/** Volume resampler using quadratic (order 2) interpolation.
+
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
 template <class T>
 class QuadraticResampler : public SplineResampler< T >
 {
@@ -46,15 +53,13 @@ public:
   QuadraticResampler();
   ~QuadraticResampler();
 
-  int getOrder() const;
+  int getOrder() const CARTO_OVERRIDE;
 
 protected:
 
-  double getBSplineWeight( int i, double x ) const;
+  double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
 
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( QuadraticResampler, AimsRGB, 2 )
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( QuadraticResampler, AimsRGBA, 2 )
+} // namespace aims
 
 #endif
-

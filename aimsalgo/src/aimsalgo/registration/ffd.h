@@ -19,7 +19,7 @@
 #include <aims/resampling/linearresampler.h>
 #include <aims/resampling/cubicresampler.h>
 #include <aims/resampling/resamplerfactory.h>
-#include <aims/transformation/transformation.h>       // aims::Transformatin
+#include <aims/transformation/transformation.h>       // aims::Transformation
 #include <aims/utility/channel.h>
 #include <aims/vector/vector.h>                       // Point*
 #include <aims/mesh/surface.h>
@@ -31,6 +31,162 @@
 class Graph;
 
 namespace aims {
+
+//==========================================================================
+  //   FFD TRANSFORMATION
+  //==========================================================================
+
+  /** FFD vector field deformation transform
+
+      Free Form Deformation is the registration technique used to build the
+      vector fields. This class is dedicated to the application of the vector
+      field deformation to transform coordinates.
+
+      Vector fields are stored in volumes AimsData<Point3df>.
+  **/
+  class FfdTransformation : public aims::Transformation3d
+  {
+  public:
+    FfdTransformation( int dimX = 0, int dimY = 1, int dimZ = 1,
+                       float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
+    template <typename T>
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const AimsData<T> & test_volume );
+    template <typename T>
+    FfdTransformation( int dimX, int dimY, int dimZ,
+                       const carto::Volume<T> & test_volume );
+
+    FfdTransformation( const FfdTransformation & other );
+    FfdTransformation( const AimsData<Point3df> & other );
+    FfdTransformation & operator=( const FfdTransformation & other );
+
+    operator const AimsData<Point3df>&() const { return _ctrlPointDelta; }
+    operator AimsData<Point3df>&() { return _ctrlPointDelta; }
+
+    /// Always false, because testing for identity is expensive
+    bool isIdentity() const CARTO_OVERRIDE { return false; }
+
+    //--- Control Knots ------------------------------------------------------
+    Point3df     getCtrlKnot( int nx, int ny, int nz ) const;
+    void         updateCtrlKnot( int nx, int ny, int nz, const Point3df & newCtrlKnot );
+    void         updateAllCtrlKnot( const AimsData<Point3df> & newCtrlKnotGrid );
+    void         updateAllCtrlKnotFromDeformation( const AimsData<Point3df> & newDeformationGrid );
+
+    //--- Modify -------------------------------------------------------------
+    void         increaseResolution( const Point3d & addKnots );
+    // void         inverseTransform();
+    // void         estimateLocalDisplacement( const Point3df & voxelSize);
+
+    //--- Deformation --------------------------------------------------------
+    Point3dd     deformation( const Point3dd& p_mm ) const;
+    Point3dd     ffdCoord( const Point3dd& p_mm ) const
+    { return mmToSplineVox(p_mm); }
+
+    //--- Parameters ---------------------------------------------------------
+    int          dimX() const { return _dimx; }
+    int          dimY() const { return _dimy; }
+    int          dimZ() const { return _dimz; }
+    int getSizeX() const { return _dimx; }
+    int getSizeY() const { return _dimy; }
+    int getSizeZ() const { return _dimz; }
+    std::vector<int> getSize() const
+    { std::vector<int> s( 3 ); s[0] = _dimx; s[1] = _dimy; s[2] = _dimz;
+      return s; }
+    float        sizeX() const { return _vsx; }
+    float        sizeY() const { return _vsy; }
+    float        sizeZ() const { return _vsz; }
+    std::vector<float> getVoxelSize() const
+    { std::vector<float> v( 3 ); v[0] = _vsx; v[1] = _vsy; v[2] = _vsz;
+      return v; }
+    bool isFlat( int i ) const
+    {
+      switch(i)
+      {
+        case 0:  return _flatx;
+        case 1:  return _flaty;
+        case 2:  return _flatz;
+        default: return false;
+      }
+    }
+    bool isXFlat() const { return _flatx; }
+    bool isYFlat() const { return _flaty; }
+    bool isZFlat() const { return _flatz; }
+    virtual void updateDimensions();
+
+    //--- Debug --------------------------------------------------------------
+    void  printControlPointsGrid() const;
+    void  writeDebugCtrlKnots( const std::string & filename ) const;
+    void  writeDebugDeformations( const std::string & filename,
+                                  int dimX, int dimY, int dimZ,
+                                  float sizeX, float sizeY, float sizeZ ) const;
+
+    //--- Output -------------------------------------------------------------
+    void   write( const std::string & filename ) const;
+
+  protected:
+    //--- Protected methods --------------------------------------------------
+    Point3dd     splineVoxToMm( const Point3dd& p ) const;
+    Point3dd     mmToSplineVox( const Point3dd& p ) const;
+    void         updateGridResolution( const AimsData<Point3df> & newGrid );
+
+    virtual Point3dd _deformation( const Point3dd& p_mm ) const = 0;
+
+    AimsData<Point3df>  _ctrlPointDelta;
+    int _dimx, _dimy, _dimz;
+    float _vsx, _vsy, _vsz;
+    bool _flatx, _flaty, _flatz;
+  };
+
+  template <typename T>
+  inline
+  FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
+                                        const AimsData<T> & test_volume ):
+    _ctrlPointDelta( dimX, dimY, dimZ ),
+    _dimx( dimX ), _dimy( dimY ), _dimz( dimZ ),
+    _flatx( dimX == 1 ), _flaty( dimY == 1 ), _flatz( dimZ == 1 )
+  {
+    _ctrlPointDelta = Point3df(0., 0., 0.);
+    _ctrlPointDelta.setSizeXYZT(
+      _flatx ? test_volume.sizeX() : double(test_volume.dimX() - 1) / double(dimX - 1) * test_volume.sizeX(),
+      _flaty ? test_volume.sizeY() : double(test_volume.dimY() - 1) / double(dimY - 1) * test_volume.sizeY(),
+      _flatz ? test_volume.sizeZ() : double(test_volume.dimZ() - 1) / double(dimZ - 1) * test_volume.sizeZ()
+    );
+    updateDimensions();
+  }
+
+  template <typename T>
+  inline
+  FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
+                                        const carto::Volume<T> & test_volume ):
+    _ctrlPointDelta( dimX, dimY, dimZ ),
+    _dimx( dimX ), _dimy( dimY ), _dimz( dimZ ),
+    _flatx( dimX == 1 ), _flaty( dimY == 1 ), _flatz( dimZ == 1 )
+  {
+    _ctrlPointDelta = Point3df(0., 0., 0.);
+    std::vector<float> vs = test_volume.getVoxelSize();
+    _ctrlPointDelta.setSizeXYZT(
+      _flatx ? vs[0] : double(test_volume.getSizeX() - 1) / double(dimX - 1) * vs[0],
+      _flaty ? vs[1] : double(test_volume.getSizeY() - 1) / double(dimY - 1) * vs[1],
+      _flatz ? vs[2] : double(test_volume.getSizeZ() - 1) / double(dimZ - 1) * vs[2]
+    );
+    updateDimensions();
+  }
+
+  inline Point3dd
+  FfdTransformation::splineVoxToMm( const Point3dd & p ) const
+  {
+    return Point3dd( p[0] * sizeX(),
+                     p[1] * sizeY(),
+                     p[2] * sizeZ() );
+  }
+
+  inline Point3dd
+  FfdTransformation::mmToSplineVox( const Point3dd & p ) const
+  {
+    return Point3dd( p[0] / sizeX(),
+                     p[1] / sizeY(),
+                     p[2] / sizeZ() );
+  }
 
   //==========================================================================
   //   FFD TRANSFORMATION
@@ -52,108 +208,43 @@ namespace aims {
       point-to-point transformation. It is used by various higher-level classes
       or functions to work on higher-level objects:
 
-      To resample full 2D or 3D images, see also the FfdResampler classs and
-      its derivatives - these classes are using SplineFfd and resample in
-      voxels space.
+      To resample full 2D or 3D images, see the Resampler class and its derived
+      classes (see also ResamplerFactory).
 
       As a Transformation3d specialization, the main method of this class is the
       transform() method, which actually performs 3D coordinates transformation.
       The other methods can be seen as "internal machinery".
 
-      \see ffdTransformMesh, ffdTransformBucket, ffdTransformGraph and
-      BundleFFDTransformer to apply vector field deformations to various types
+      \see transformMesh, transformBucket, transformGraph and
+      BundleTransformer to apply vector field deformations to various types
       of objects.
   */
-  class SplineFfd: public aims::Transformation3d
+  class SplineFfd: public FfdTransformation
   {
    public:
     //--- Constructor --------------------------------------------------------
     SplineFfd( int dimX = 0, int dimY = 1, int dimZ = 1,
-               float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
+                  float sizeX = 1., float sizeY = 1., float sizeZ = 1. );
     template <typename T>
     SplineFfd( int dimX, int dimY, int dimZ,
-               const AimsData<T> & test_volume );
+                  const AimsData<T> & test_volume );
 
     SplineFfd( const SplineFfd & other );
     SplineFfd( const AimsData<Point3df> & other );
     SplineFfd & operator=( const SplineFfd & other );
 
-    operator const AimsData<Point3df>&() const { return _ctrlPointDelta; }
-    operator AimsData<Point3df>&() { return _ctrlPointDelta; }
-
-    bool isIdentity() const
-    {
-      for( int z = 0; z < dimZ(); ++z )
-      for( int y = 0; y < dimY(); ++y )
-      for( int x = 0; x < dimX(); ++x )
-      {
-        if( _ctrlPointDelta(x, y, z) != Point3df(0., 0., 0.) )
-          return false;
-      }
-      return true;
-    }
-
-    //--- Control Knots ------------------------------------------------------
-    Point3df     getCtrlKnot( int nx, int ny, int nz ) const;
-    void         updateCtrlKnot( int nx, int ny, int nz, const Point3df & newCtrlKnot );
-    void         updateAllCtrlKnot( const AimsData<Point3df> & newCtrlKnotGrid );
-    void         updateAllCtrlKnotFromDeformation( const AimsData<Point3df> & newDeformationGrid );
-
-    //--- Modify -------------------------------------------------------------
-    void         increaseResolution( const Point3d & addKnots );
-    // void         inverseTransform();
-    // void         estimateLocalDisplacement( const Point3df & voxelSize);
-
+    virtual void updateDimensions();
     //--- Deformation --------------------------------------------------------
     Point3dd     deformation( const Point3dd& p_mm ) const;
-    Point3dd     ffdCoord( const Point3dd& p_mm ) const
-    { return mmToSplineVox(p_mm); }
     double spline3( double x ) const { return _spline(x); }
 
-    //--- Parameters ---------------------------------------------------------
-    int          dimX() const { return _dimx; }
-    int          dimY() const { return _dimy; }
-    int          dimZ() const { return _dimz; }
-    float        sizeX() const { return _vsx; }
-    float        sizeY() const { return _vsy; }
-    float        sizeZ() const { return _vsz; }
-    bool isFlat( int i ) const
-    {
-      switch(i)
-      {
-        case 0:  return _flatx;
-        case 1:  return _flaty;
-        case 2:  return _flatz;
-        default: return false;
-      }
-    }
-    bool isXFlat() const { return _flatx; }
-    bool isYFlat() const { return _flaty; }
-    bool isZFlat() const { return _flatz; }
-    void updateDimensions();
-
-    //--- Debug --------------------------------------------------------------
-    void  printControlPointsGrid() const;
-    void  writeDebugCtrlKnots( const std::string & filename ) const;
-    void  writeDebugDeformations( const std::string & filename,
-                                  int dimX, int dimY, int dimZ,
-                                  float sizeX, float sizeY, float sizeZ ) const;
-
-    //--- Output -------------------------------------------------------------
-    void   write( const std::string & filename ) const;
-
-  protected:
-    //--- Protected methods --------------------------------------------------
-    Point3dd     splineVoxToMm( const Point3dd& p ) const;
-    Point3dd     mmToSplineVox( const Point3dd& p ) const;
-    void         updateGridResolution( const AimsData<Point3df> & newGrid );
+  private:
     virtual Point3dd transformDouble( double x, double y, double z ) const;
+    virtual Point3dd _deformation( const Point3dd& p_mm ) const
+    { return deformation_private(p_mm); };
+    Point3dd deformation_private( const Point3dd& p_mm ) const;
 
-    AimsData<Point3df>  _ctrlPointDelta;
-    aims::TabulBSpline  _spline;
-    int _dimx, _dimy, _dimz;
-    float _vsx, _vsy, _vsz;
-    bool _flatx, _flaty, _flatz;
+    const aims::TabulBSpline _spline;
     std::vector<int> _mirrorcoefvecx;
     std::vector<int> _mirrorcoefvecy;
     std::vector<int> _mirrorcoefvecz;
@@ -166,35 +257,11 @@ namespace aims {
   inline
   SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
                         const AimsData<T> & test_volume ):
-    _spline(3, 0),
-    _ctrlPointDelta( dimX, dimY, dimZ ),
-    _dimx( dimX ), _dimy( dimY ), _dimz( dimZ ),
-    _flatx( dimX == 1 ), _flaty( dimY == 1 ), _flatz( dimZ == 1 )
+    FfdTransformation( dimX, dimY, dimZ, test_volume ),
+    _spline(3, 0)
   {
-    _ctrlPointDelta = Point3df(0., 0., 0.);
-    _ctrlPointDelta.setSizeXYZT(
-      _flatx ? test_volume.sizeX() : double(test_volume.dimX() - 1) / double(dimX - 1) * test_volume.sizeX(),
-      _flaty ? test_volume.sizeY() : double(test_volume.dimY() - 1) / double(dimY - 1) * test_volume.sizeY(),
-      _flatz ? test_volume.sizeZ() : double(test_volume.dimZ() - 1) / double(dimZ - 1) * test_volume.sizeZ()
-    );
-    updateDimensions();
   }
 
-  inline Point3dd
-  SplineFfd::splineVoxToMm( const Point3dd & p ) const
-  {
-    return Point3dd( p[0] * sizeX(),
-                     p[1] * sizeY(),
-                     p[2] * sizeZ() );
-  }
-
-  inline Point3dd
-  SplineFfd::mmToSplineVox( const Point3dd & p ) const
-  {
-    return Point3dd( p[0] / sizeX(),
-                     p[1] / sizeY(),
-                     p[2] / sizeZ() );
-  }
 
 //============================================================================
 //   FFD READER/WRITER
@@ -204,14 +271,14 @@ namespace aims {
       Point3df.
   */
   template <>
-  class Reader<aims::SplineFfd>: public Reader<AimsData<Point3df> >
+  class Reader<aims::FfdTransformation>: public Reader<AimsData<Point3df> >
   {
     typedef Reader<AimsData<Point3df> > base;
   public:
     Reader(): base() {}
     Reader( const std::string& filename ): base(filename) {}
     virtual ~Reader() {}
-    virtual bool read( aims::SplineFfd & obj,
+    virtual bool read( aims::FfdTransformation & obj,
                        int border=0,
                        const std::string* format = 0,
                        int frame = -1 )
@@ -229,7 +296,7 @@ namespace aims {
       Point3df.
   */
   template<>
-  class Writer<aims::SplineFfd> : public Writer<AimsData<Point3df> >
+  class Writer<aims::FfdTransformation> : public Writer<AimsData<Point3df> >
   {
     typedef Writer<AimsData<Point3df> > base;
   public:
@@ -238,7 +305,7 @@ namespace aims {
                    carto::Object options = carto::none() ):
       base( filename, options ) {}
     virtual ~Writer() {}
-    virtual bool write( const aims::SplineFfd & obj,
+    virtual bool write( const aims::FfdTransformation & obj,
                         bool ascii = false,
                         const std::string* format = 0 )
     {
@@ -258,11 +325,8 @@ namespace aims {
 
       This is a variant of SplineFfd which is performing trilinear interpolation
       between displacement vectors. See SplineFfd for details.
-
-      The implementation of TrilinearFfd inheriting SplineFfd is actually a
-      quick-and-dirty convenience implementation and is a design flaw.
   */
-  class TrilinearFfd: public SplineFfd
+  class TrilinearFfd: public FfdTransformation
   {
    public:
     //--- Constructor --------------------------------------------------------
@@ -277,208 +341,21 @@ namespace aims {
     TrilinearFfd & operator=( const TrilinearFfd & other );
 
     //--- Deformation --------------------------------------------------------
-    Point3dd     deformation( const Point3dd& p_mm ) const;
-
+    Point3dd deformation( const Point3dd& p_mm ) const;
   private:
     virtual Point3dd transformDouble( double x, double y, double z ) const;
+    virtual Point3dd _deformation( const Point3dd& p_mm ) const
+    { return deformation_private(p_mm); };
+    Point3dd deformation_private( const Point3dd& p_mm ) const;
   };
 
   template <typename T>
   inline
   TrilinearFfd::TrilinearFfd( int dimX, int dimY, int dimZ,
                               const AimsData<T> & test_volume ):
-    SplineFfd( dimX, dimY, dimZ, test_volume )
+    FfdTransformation( dimX, dimY, dimZ, test_volume )
   {
   }
-
-
-//============================================================================
-//   R E S A M P L I N G
-//============================================================================
-
-  /** Resampling image using Free Form Deformation transformations.
-
-      FfdResampler is using a SplineFfd or TrilinearFfd transformation to
-      resample a full volume. It is an abstract class which is specialized to
-      implement cubic spline, trilinear, or nearest neighbor interpolation in
-      voxels values.
-  */
-  template <class T>
-  class FfdResampler
-  {
-    public:
-
-      virtual ~FfdResampler();
-      virtual void init() = 0;
-      virtual void setRef(const AimsData<T> & ref) = 0;
-      virtual Point3df resample( const Point3df & output_location,
-                                 T & output_value, int t = 0 ) = 0;
-  };
-
-  /** Resampling image using Free Form Deformation transformations.
-
-      This variant of FfdResampler performs cubic spline interpolation in voxels
-      values.
-  */
-  template <class T, class C = T>
-  class SplineFfdResampler : public FfdResampler<T>,
-                             public CubicResampler<C>
-  {
-    public:
-
-      virtual ~SplineFfdResampler();
-      virtual void init();
-      SplineFfdResampler( const SplineFfd & spline,
-                          T background = defaultBackground() );
-      SplineFfdResampler( const SplineFfd & spline,
-                          const AffineTransformation3d & affine,
-                          T background = defaultBackground() );
-      virtual void setRef( const AimsData<T> & ref);
-      virtual Point3df resample( const Point3df & output_location,
-                                 T & output_value, int t = 0 );
-      static T defaultBackground();
-
-    private:
-      void updateCoef( int t = 0 );
-      AffineTransformation3d       _affine;
-      const SplineFfd &  _transformation;
-      AimsData<T>        _ref;
-      std::vector<AimsData<double> >  _channelcoef;
-      ChannelSelector<T,C>            _channelselector;
-
-      T   _background;
-      int _samples;
-      int _last_t;
-      std::vector<C>      _min;
-      std::vector<C>      _max;
-      int _dimx, _dimy, _dimz;
-      float _vsx, _vsy, _vsz;
-      bool _idaffine;
-  };
-
-  /** Resampling image using Free Form Deformation transformations.
-
-      This variant of FfdResampler uses nearest neighbor voxels values.
-  */
-  template <class T, class C = T>
-  class NearestNeighborFfdResampler : public FfdResampler<T>,
-                                       public NearestNeighborResampler<C>
-  {
-    public:
-
-      virtual ~NearestNeighborFfdResampler();
-      virtual void init();
-      NearestNeighborFfdResampler( const SplineFfd & spline,
-                                   T background = defaultBackground() );
-      NearestNeighborFfdResampler( const SplineFfd & spline,
-                                   const AffineTransformation3d & affine, T background = defaultBackground() );
-      virtual void setRef( const AimsData<T> & ref );
-      virtual Point3df resample( const Point3df & output_location,
-                                 T & output_value, int t = 0 );
-      static T defaultBackground();
-
-    private:
-      AffineTransformation3d       _affine;
-      const SplineFfd &  _transformation;
-      AimsData<T>        _ref;
-
-      T   _background;
-      int _samples;
-      int _dimx, _dimy, _dimz;
-      float _vsx, _vsy, _vsz;
-      bool _idaffine;
-  };
-
-
-  /** Resampling image using Free Form Deformation transformations.
-
-      This variant of FfdResampler performs trilinear interpolation in voxels
-      values.
-  */
-  template <class T, class C = T>
-  class TrilinearFfdResampler : public FfdResampler<T>,
-                                public LinearResampler<C>
-  {
-    public:
-
-      virtual ~TrilinearFfdResampler();
-      virtual void init();
-      TrilinearFfdResampler( const SplineFfd & spline,
-                             T background = defaultBackground() );
-      TrilinearFfdResampler( const SplineFfd & spline,
-                             const AffineTransformation3d & affine,
-                             T background = (T)0);
-      virtual void setRef( const AimsData<T> & ref );
-      virtual Point3df resample( const Point3df & output_location,
-                                 T & output_value, int t = 0 );
-      static T defaultBackground();
-
-    private:
-      const Motion         _affine;
-      const SplineFfd &    _transformation;
-      AimsData<T>          _ref;
-      ChannelSelector<T,C> _channelselector;
-
-      T   _background;
-      int _samples;
-      int _dimx, _dimy, _dimz;
-      float _vsx, _vsy, _vsz;
-      bool _idaffine;
-  };
-
-  /** Transform a mesh using FFD vector field deformation.
-      Changes the mesh vertices position in place, modifying the input mesh.
-  */
-  template <int D>
-  void ffdTransformMesh( AimsTimeSurface<D, Void> & mesh, SplineFfd & spline,
-                         const AffineTransformation3d & affine
-                           = AffineTransformation3d() );
-
-  /** Transform a bucket using FFD vector field deformation.
-      Returns a new bucket, with possibly a different voxel size from the input
-      one.
-  */
-  carto::rc_ptr<BucketMap<Void> >
-  ffdTransformBucket( const BucketMap<Void> & bck, SplineFfd & spline,
-                      const AffineTransformation3d & affine
-                        = AffineTransformation3d(),
-                      const Point3df & vs = Point3df( 0., 0., 0. ) );
-
-  /** Transform a graph using FFD vector field deformation.
-      Changes the graph meshes and buckets in place, modifying the input graph.
-  */
-  void ffdTransformGraph( Graph & graph, SplineFfd & spline,
-                          const AffineTransformation3d & affine
-                            = AffineTransformation3d(),
-                          const Point3df & vs = Point3df( 0., 0., 0. ) );
-
-  /** FFD vector field transform for bundles in stream.
-      This is a BundleListener / BundleProducer stream processing class
-      which applies vector field deformation to bundle data. It can be
-      typically connected to a BundleReader and a BundleWriter.
-  */
-  class BundleFFDTransformer : public BundleListener, public BundleProducer
-  {
-  public:
-    BundleFFDTransformer( carto::rc_ptr<SplineFfd> deformation,
-                          const AffineTransformation3d & affine );
-    virtual ~BundleFFDTransformer();
-
-    virtual void bundleStarted( const BundleProducer &, const BundleInfo & );
-    virtual void bundleTerminated( const BundleProducer &, const BundleInfo & );
-    virtual void fiberStarted( const BundleProducer &, const BundleInfo &,
-                               const FiberInfo & );
-    virtual void fiberTerminated( const BundleProducer &, const BundleInfo &,
-                                  const FiberInfo & );
-    virtual void newFiberPoint( const BundleProducer &, const BundleInfo &,
-                                const FiberInfo &, const FiberPoint & );
-    virtual void noMoreBundle( const BundleProducer & );
-
-  private:
-    carto::rc_ptr<SplineFfd> _deformation;
-    const AffineTransformation3d & _affine;
-    bool _idaffine;
-  };
 
 } // namespace aims
 

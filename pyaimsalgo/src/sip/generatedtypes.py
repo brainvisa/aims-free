@@ -46,16 +46,9 @@ todo = {
   'moment' : numtypes,
   'morphomath' : numtypes,
   'polynomial' : [('float', '3')],
-  'resampler' : numtypes,
+  'resampler' : basetypes + ['Point3df'],
   'sampler' : [('float', '3')],
   'smoothing' : numtypes,
   'histogram' : numtypes,
-  'rcptr': ['aims::SplineFfd'],
-  'ffd': basetypes + ['Point3df'],
-  'ffd2': [('unsigned char', 'unsigned char'), ('short', 'short'),
-           ('unsigned short', 'unsigned short'),
-           ('int', 'int'), ('unsigned', 'unsigned'), ('float', 'float'),
-           ('double', 'double'), ('AimsRGB', 'unsigned char'),
-           ('AimsRGBA', 'unsigned char'), ('Point3df', 'float')],
+  'rcptr': ['aims::FfdTransformation', 'aims::SplineFfd', 'aims::TrilinearFfd'],
 }
-

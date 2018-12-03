@@ -35,9 +35,12 @@
 #ifndef AIMS_RESAMPLING_SIXTHORDERRESAMPLER_D_H
 #define AIMS_RESAMPLING_SIXTHORDERRESAMPLER_D_H
 
-#include <cstdlib>
 #include <aims/resampling/sixthorderresampler.h>
-#include <aims/utility/channel.h>
+
+#include <cmath>
+
+namespace aims
+{
 
 template < class T >
 SixthOrderResampler< T >::SixthOrderResampler()
@@ -46,9 +49,9 @@ SixthOrderResampler< T >::SixthOrderResampler()
 
   this->_poles.push_back(
                  -0.488294589303044755130118038883789062112279161239377608394 );
-  this->_poles.push_back( 
+  this->_poles.push_back(
               -0.081679271076237512597937765737059080653379610398148178525368 );
-  this->_poles.push_back( 
+  this->_poles.push_back(
             -0.00141415180832581775108724397655859252786416905534669851652709 );
   this->_gain = 2.598975999348577818390170516255374207847876853191217652822;
 
@@ -111,9 +114,6 @@ double SixthOrderResampler< T >::getBSplineWeight( int i, double x ) const
 
 }
 
-// AimsRGB Specialization
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( SixthOrderResampler, AimsRGB )
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( SixthOrderResampler, AimsRGBA )
+} // namespace aims
 
 #endif
-

@@ -36,6 +36,7 @@
 #define AIMS_RESAMPLING_RESAMPLERFACTORY_D_H
 
 #include <aims/resampling/resamplerfactory.h>
+
 #include <aims/resampling/nearestneighborresampler.h>
 #include <aims/resampling/linearresampler.h>
 #include <aims/resampling/quadraticresampler.h>
@@ -46,38 +47,46 @@
 #include <aims/resampling/seventhorderresampler.h>
 #include <iostream>
 
+
+namespace {
+  template <class T, template<typename U> class ResamplerType>
+  std::unique_ptr<aims::Resampler<T> > make_ptr(ResamplerType<T>* obj) {
+    return std::unique_ptr<aims::Resampler<T> >(obj);
+  }
+} // anonymous namespace
+
 namespace aims
 {
 
   template <typename T>
-  Resampler<T> *ResamplerFactory<T>::getResampler( int order )
+  std::unique_ptr<Resampler<T> >
+  ResamplerFactory<T>::getResampler( int order )
   {
     switch( order )
       {
       case 0:
-        return new NearestNeighborResampler<T>;
+        return make_ptr(new NearestNeighborResampler<T>);
       case 1:
-        return new LinearResampler<T>;
+        return make_ptr(new LinearResampler<T>);
       case 2:
-        return new QuadraticResampler<T>;
+        return make_ptr(new QuadraticResampler<T>);
       case 3:
-        return new CubicResampler<T>;
+        return make_ptr(new CubicResampler<T>);
       case 4:
-        return new QuarticResampler<T>;
+        return make_ptr(new QuarticResampler<T>);
       case 5:
-        return new QuinticResampler<T>;
+        return make_ptr(new QuinticResampler<T>);
       case 6:
-        return new SixthOrderResampler<T>;
+        return make_ptr(new SixthOrderResampler<T>);
       case 7:
-        return new SeventhOrderResampler<T>;
+        return make_ptr(new SeventhOrderResampler<T>);
       default:
-        std::cerr << "no resampler for order " << order 
+        std::cerr << "no resampler for order " << order
                   << ", taking order 3 (cubic) instead" << std::endl;
       }
-    return new CubicResampler<T>;
+    return make_ptr(new CubicResampler<T>);
   }
 
-}
+} // namespace aims
 
 #endif
-

@@ -1,4 +1,4 @@
-/* This software and supporting documentation are distributed by
+ /* This software and supporting documentation are distributed by
  *     Institut Federatif de Recherche 49
  *     CEA/NeuroSpin, Batiment 145,
  *     91191 Gif-sur-Yvette cedex
@@ -35,20 +35,24 @@
 #ifndef AIMS_RESAMPLING_SEVENTHORDERRESAMPLER_D_H
 #define AIMS_RESAMPLING_SEVENTHORDERRESAMPLER_D_H
 
-#include <cstdlib>
 #include <aims/resampling/seventhorderresampler.h>
-#include <aims/utility/channel.h>
+
+#include <cmath>
+
+
+namespace aims
+{
 
 template < class T >
 SeventhOrderResampler< T >::SeventhOrderResampler()
   : SplineResampler< T >()
 {
 
-  this->_poles.push_back( 
+  this->_poles.push_back(
                 -0.5352804307964381655424037816816460718339231523426924148812 );
-  this->_poles.push_back( 
+  this->_poles.push_back(
               -0.122554615192326690515272264359357343605486549427295558490763 );
-  this->_poles.push_back( 
+  this->_poles.push_back(
              -0.0091486948096082769285930216516478534156925639545994482648003 );
   this->_gain = 3.0248282036441843886795463832305782146916878615537002580987;
 
@@ -111,9 +115,6 @@ double SeventhOrderResampler< T >::getBSplineWeight( int i, double x ) const
 
 }
 
-// AimsRGB Specialization
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( SeventhOrderResampler, AimsRGB )
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( SeventhOrderResampler, AimsRGBA )
+} // namespace aims
 
 #endif
-

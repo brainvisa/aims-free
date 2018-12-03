@@ -104,11 +104,12 @@ bool doit( Process & p, const string & fname, Finder & f )
 
   ResamplerFactory<T>	rf;
   rc_ptr<Resampler<T> >	resamp( rf.getResampler( i->second ) );
-  AimsData<T>		data;
+  VolumeRef<T>		data;
   string		format = f.format();
-  Reader<AimsData<T> >	r( fname );
+  Reader<Volume<T> >	r( fname );
   cout << "reading volume...\n";
-  if( !r.read( data, 0, &format ) )
+  data.reset( r.read( 0, &format ) );
+  if( data.isNull() )
     return false;
 
   cout << "done\n";
@@ -124,26 +125,27 @@ bool doit( Process & p, const string & fname, Finder & f )
   resampler.setDefaultValue( dv );
   
   if ( rp.dx == 0 )
-    rp.dx = data.dimX() ;
+    rp.dx = data.getSizeX();
   if ( rp.dy == 0 )
-    rp.dy = data.dimY() ;
+    rp.dy = data.getSizeY();
   if ( rp.dz == 0 )
-    rp.dz = data.dimZ() ;
+    rp.dz = data.getSizeZ();
 
+  vector<float> vs = data.getVoxelSize();
   if ( rp.size[0] == 0 )
-    rp.size[0] = data.sizeX() ;
+    rp.size[0] = vs[0];
   if ( rp.size[1] == 0 )
-    rp.size[1] = data.sizeY() ;
+    rp.size[1] = vs[1];
   if ( rp.size[2] == 0 )
-    rp.size[2] = data.sizeZ() ;
+    rp.size[2] = vs[2];
 
   cout << "resampling...\n";
-  AimsData<T> resampled = resampler.doit( motion, rp.dx, rp.dy, rp.dz, 
-					  rp.size );
+  VolumeRef<T> resampled = resampler.doit( motion, rp.dx, rp.dy, rp.dz,
+                                           rp.size );
 
   cout << "done\n";
 
-  Writer<AimsData<T> >	w( rp.fout );
+  Writer<VolumeRef<T> >	w( rp.fout );
   cout << "writing result...\n";
   return w.write( resampled );
 }

@@ -946,6 +946,30 @@ typessub = {'bool':
                'testPyType': 'pyaimsGenericObject_Check',
             },
 
+            'AimsData<bool>':
+           {'typecode': 'AimsData_BOOL',
+               'pyFromC': '',
+               'CFromPy': '',
+               'castFromSip': '',
+               'deref': '*',
+               'pyderef': '*',
+               'address': '&',
+               'pyaddress': '&',
+               'defScalar': '',
+               'defNumpyBindings': '',
+               'new': 'new AimsData<bool>',
+               'NumType': 'PyArray_OBJECT',
+               'PyType': 'AimsData_BOOL',
+               'sipClass': 'AimsData_BOOL',
+               'typeinclude': '#include <aims/data/data.h>',
+               'sipinclude': '#ifndef PYAIMS_AIMSDATA_BOOL_CHECK_DEFINED\n'
+               '#define PYAIMS_AIMSDATA_BOOL_CHECK_DEFINED\n'
+               'inline int pyaimsAimsData_BOOL_Check( PyObject* o )\n'
+               '{ return sipCanConvertToType( o, sipFindType( "AimsData_BOOL" ), SIP_NOT_NONE | SIP_NO_CONVERTORS ); }\n'
+               '#endif',
+               'module': 'aims',
+               'testPyType': 'pyaimsAimsData_BOOL_Check',
+            },
             'AimsData<int8_t>':
            {'typecode': 'AimsData_S8',
                'pyFromC': '',
@@ -2551,6 +2575,10 @@ typessub = {'bool':
                'module': 'aims',
                'testPyType': 'pyaimsBucketMap_DOUBLE_Check',
             },
+
+            'aims::Transformation3d':
+            classInAimsNamespace(
+                'aims/transformation/transformation.h', 'Transformation3d'),
 
             'aims::AffineTransformation3d':
             classInAimsNamespace(

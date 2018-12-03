@@ -270,6 +270,7 @@ set( _headers
     resampling/linearresampler.h
     resampling/linearresampler_d.h
     resampling/masklinresampler.h
+    resampling/masklinresampler_d.h
     resampling/meshToVoxelsResampler.h
     resampling/meshToVoxelsResampler_d.h
     resampling/nearestneighborresampler.h
@@ -294,7 +295,6 @@ set( _headers
     resampling/notnullmeansubsampling.h
     resampling/notnullmediansubsampling.h
     resampling/sumsubsampling.h
-    resampling/multichannelresampler.h
     resampling/samplable.h
     resampling/samplable_cone.h
     resampling/samplable_sphere.h
@@ -400,6 +400,8 @@ set( _headers
     transform/hilbert1d.h
     transform/least_square_estimation.h
     transform/rigidestimation.h
+    transform/transform_objects.h
+    transform/transform_objects_d.h
     utility/dynamic.h
     utility/dynamic_d.h
 )
@@ -616,6 +618,7 @@ set( _sources
     transform/xcor1d.cc
     transform/least_square_estimation.cc
     transform/rigidestimation.cc
+    transform/transform_objects.cc
     utility/dynamic.cc
 )
 

@@ -36,8 +36,15 @@
 #define AIMS_RESAMPLING_QUARTICRESAMPLER_H
 
 #include <aims/resampling/splineresampler.h>
-#include <aims/resampling/multichannelresampler.h>
 
+namespace aims
+{
+
+/** Volume resampler using quartic (order 4) interpolation.
+
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
 template <class T>
 class QuarticResampler : public SplineResampler< T >
 {
@@ -46,14 +53,13 @@ public:
   QuarticResampler();
   ~QuarticResampler();
 
-  int getOrder() const;
+  int getOrder() const CARTO_OVERRIDE;
 
 protected:
 
-  double getBSplineWeight( int i, double x ) const;
+  double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
 
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( QuarticResampler, AimsRGB, 4 )
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( QuarticResampler, AimsRGBA, 4 )
+} // namespace aims
 
 #endif

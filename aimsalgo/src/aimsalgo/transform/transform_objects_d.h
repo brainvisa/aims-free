@@ -31,36 +31,34 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#include <aims/transform/transform_objects.h>
 
-#ifndef AIMS_RESAMPLING_SEVENTHORDERRESAMPLER_H
-#define AIMS_RESAMPLING_SEVENTHORDERRESAMPLER_H
+#include <aims/mesh/surface.h>
 
-#include <aims/resampling/splineresampler.h>
+using namespace std;
+using namespace carto;
 
 namespace aims
 {
 
-/** Volume resampler using seventh-order interpolation.
-
-
-    The resampling API is described in the base classes, Resampler and
-    SplineResampler.
- */
-template <class T>
-class SeventhOrderResampler : public SplineResampler< T >
+template <int D>
+void transformMesh( AimsTimeSurface<D, Void> & mesh,
+                    const Transformation3d & direct_transformation )
 {
-public:
+  typename AimsTimeSurface<D, Void>::iterator is, es = mesh.end();
 
-  SeventhOrderResampler();
-  ~SeventhOrderResampler();
+  for( is=mesh.begin(); is!=es; ++is )
+  {
+    vector<Point3df> & vert = is->second.vertex();
+    vector<Point3df>::iterator iv, ev = vert.end();
+    for( iv=vert.begin(); iv!=ev; ++iv )
+    {
+      Point3df & p = *iv;
+      p = direct_transformation.transform( p );
+    }
+  }
 
-  int getOrder() const CARTO_OVERRIDE;
-
-protected:
-
-  double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
-};
+  mesh.updateNormals();
+}
 
 } // namespace aims
-
-#endif

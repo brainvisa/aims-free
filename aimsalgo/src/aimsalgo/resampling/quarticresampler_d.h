@@ -35,9 +35,13 @@
 #ifndef AIMS_RESAMPLING_QUARTICRESAMPLER_D_H
 #define AIMS_RESAMPLING_QUARTICRESAMPLER_D_H
 
-#include <cstdlib>
 #include <aims/resampling/quarticresampler.h>
-#include <aims/utility/channel.h>
+
+#include <cmath>
+
+
+namespace aims
+{
 
 template < class T >
 QuarticResampler< T >::QuarticResampler()
@@ -99,9 +103,6 @@ double QuarticResampler< T >::getBSplineWeight( int i, double x ) const
 
 }
 
-// AimsRGB Specialization
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuarticResampler, AimsRGB )
-AIMS_RESAMPLING_INSTANCIATE_MULTICHANNELRESAMPLER( QuarticResampler, AimsRGBA )
+} // namespace aims
 
 #endif
-

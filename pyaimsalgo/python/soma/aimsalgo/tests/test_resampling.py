@@ -115,8 +115,6 @@ class ResamplingTestCase(unittest.TestCase):
             np.int16
         )
 
-    # known rounding issue
-    @unittest.expectedFailure
     def test_identity_cubic_resampling_int16(self):
         self.do_identity_resampling_test(
             aimsalgo.CubicResampler_S16(),
@@ -124,13 +122,6 @@ class ResamplingTestCase(unittest.TestCase):
         )
 
     # known issue: the last element along each axis is -32768 (the mask value)
-    @unittest.expectedFailure
-    def test_identity_masklin_resampling_int16(self):
-        self.do_identity_resampling_test(
-            aimsalgo.MaskLinearResampler_S16(),
-            np.int16, border=0
-        )
-
     def test_identity_masklin_resampling_int16_except_last_elem(self):
         self.do_identity_resampling_test(
             aimsalgo.MaskLinearResampler_S16(),
@@ -162,15 +153,45 @@ class ResamplingTestCase(unittest.TestCase):
         out = resampler.resample(ref, identity_transform, 0, [0.5, 0, 0], 0)
         self.assertTrue(np.isclose(out, 0.5))
 
-    # known issue: not implemented
-    @unittest.expectedFailure
     def test_masklinresampler_one_value(self):
         shape = (3, 3, 3)
         ref = aims.Volume(np.arange(0, 2 * np.prod(shape), 2, dtype=np.int16)
                           .reshape(shape))
         resampler = aimsalgo.MaskLinearResampler_S16()
-        out = resampler.resample(ref, identity_transform, -1000, [0.5, 0, 0], 0)
+        out = resampler.resample(ref, identity_transform, -1, [0.5, 0, 0], 0)
         self.assertEqual(out, 1)
+
+    def test_resample_inv_identity(self):
+        ref = create_reference_volume(np.float32)
+        out = empty_volume_like(ref)
+        resampler = aimsalgo.LinearResampler_FLOAT()
+        resampler.resample_inv(ref, identity_transform, -1, out)
+        self.assertTrue(array_approx_equal(out, ref))
+
+    def test_resample_inv_to_vox_identity(self):
+        ref = create_reference_volume(np.float32)
+        out = empty_volume_like(ref)
+        resampler = aimsalgo.LinearResampler_FLOAT()
+        resampler.resample_inv_to_vox(ref, identity_transform, -1, out)
+        self.assertTrue(array_approx_equal(out, ref))
+
+    def test_resample_inv_scaling(self):
+        ref = create_reference_volume(np.int16)
+        out = empty_volume_like(ref)
+        ref.header()["voxel_size"] = [0.2, 0.3, 0.4]
+        transform = aims.AffineTransformation3d()
+        transform.scale(ref.header()["voxel_size"], [1, 1, 1])
+        resampler = aims.ResamplerFactory_S16().getResampler(0)
+        resampler.resample_inv(ref, transform, 0, out)
+        self.assertTrue(np.array_equal(out, ref))
+
+    def test_resample_inv_to_vox_scaling(self):
+        ref = create_reference_volume(np.int16)
+        out = empty_volume_like(ref)
+        ref.header()["voxel_size"] = [0.2, 0.3, 0.4]
+        resampler = aims.ResamplerFactory_S16().getResampler(0)
+        resampler.resample_inv_to_vox(ref, identity_transform, 0, out)
+        self.assertTrue(np.array_equal(out, ref))
 
 
 if __name__ == "__main__":

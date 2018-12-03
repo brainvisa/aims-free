@@ -36,112 +36,324 @@
 #define AIMS_RESAMPLING_RESAMPLER_H
 
 
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/vector/vector.h>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/transformation.h>
+#include <aims/transformation/affinetransformation3d.h>
 
+namespace aims
+{
 
-/** Resampler resamples an input data to build or fill an output data, using an affine transformation.
+/** Resampling of data from a volume, applying a transformation.
 
-Normally the input data should be set in the resampler using setRef().
+The doit() and resample() methods can be used to apply an **affine
+transformation** (aims::AffineTransformation3d). They take a _direct_
+transformation, i.e. the transformation goes from the space of the _input_
+image (unit: mm) to the space of the _output_ image (unit: mm). The
+transformation is inverted and normalized internally as needed, because the
+resamplers "pull" data by transforming output coordinates into input
+coordinates.
 
-Resampling is done using the doit() methods.
-resample() methods also provide alternatives.
+The doit() methods work on input data passed to the setRef() method.
+setDefaultValue() can also be called to set the background value.
+
+The resample() methods provide stateless alternatives.
+
+You can also use arbitrary **non-affine transformations** (inheriting
+aims::Transformation3d) by using the resample_inv() family of methods.
+In this case, you must pass the backward transformation (_from output space to
+input space_), because of the "pulling" mechanism described above.
+
+Beware that contrary to the other methods, the resample_inv_to_vox() overloads
+take a transformation that maps to **voxel** coordinates of the input image.
+These methods can be slightly faster than resample_inv() because they map
+directly to the API that the actual resamplers are implementing (doResample()).
+The performance gain is especially noticeable for repeated calls to the
+overloads that perform resampling for a single point only.
 */
 template <class T>
-class Resampler
+class Resampler : public virtual carto::RCObject
 {
 public:
 
-  Resampler() : _ref( 0 ), _defval( 0 ) { }
+  Resampler();
   virtual ~Resampler() { }
 
-  /** Resample the reference input data (set via setRef()) into an existing
-      output data.
+  /** Resample the input volume set with setRef() into an existing volume.
 
-      Parameters:
+      \param[in]     transform   transformation from coordinates of the *input*
+                                 volume (unit: mm), to coordinates of the
+                                 *output* volume (unit: mm) (its inverse is
+                                 used for resampling)
+      \param[in,out] output_data existing volume to be filled with resampled
+                                 data (its pre-existing dimensions and voxel
+                                 size are used)
 
-      transform: AffineTransformation3d
-          transformation to apply
-      output_data: AimsData<T>
-          resampled data will fill this existing output data
+      \throws std::runtime_error if no input volume has been set with setRef.
+
+      The background value (to be used for regions that are outside of the
+      input volume) can be set with setDefaultValue().
+
+      The \c transformations, \c referentials, and \c referential header
+      attributes of \p output_data are not touched; it is up to the calling
+      code to update them accordingly.
+
+      The level of verbosity is taken from carto::verbose (i.e. the
+      `--verbose` command-line argument is honoured).
   */
-  virtual void doit( const aims::AffineTransformation3d& transform,
-                     AimsData<T>& output_data );
+  void doit( const aims::AffineTransformation3d& transform,
+             carto::Volume<T>& output_data ) const;
 
-  /** Resample the reference input data (set via setRef()) into a new output
-      data.
+  /** Resample the input volume set with setRef() in a newly allocated volume.
 
-      Parameters:
+      \param[in] transform        transformation from coordinates of the
+                                  *input* volume (unit: mm), to coordinates of
+                                  the *output* volume (unit: mm) (its inverse
+                                  is used for resampling)
+      \param[in] dimX, dimY, dimZ dimensions of the newly allocated volume
+      \param[in] voxel_size       voxel size of the newly allocated volume
+                                  (unit: mm)
 
-      transform: transformation to apply
-      dimx, dimy, dimz: number of voxels in 3 dimensions
-      voxel_size: voxel size of the output data
+      \returns a newly allocated volume containing the resampled data (its size
+               along the \em t axis is the same as the input volume).
 
-      Returns the output resampled volume
+      \throws std::runtime_error if no input volume has been set with setRef.
+
+      The background value (to be used for regions that are outside of the
+      input volume) can be set with setDefaultValue().
+
+      The level of verbosity is taken from carto::verbose (i.e. the
+      `--verbose` command-line argument is honoured).
+
+      The \c transformations, \c referentials, and \c referential header
+      attributes of the new volume are reset if `transform.isIdentity()` is
+      false:
+      \li the \c referential attribute is removed
+      \li each transformation in \c transformations is composed with
+          \p transform so that the output volume still points to the original
+          space. If that is not possible (e.g. the \c transformations attribute
+          is missing or invalid), then a new transformation is added that
+          points to the input volume.
   */
-  virtual AimsData<T> doit( const aims::AffineTransformation3d& transform,
+  carto::VolumeRef<T> doit( const aims::AffineTransformation3d& transform,
                             int dimX, int dimY,
-                            int dimZ, const Point3df& voxel_size );
+                            int dimZ, const Point3df& voxel_size ) const;
 
-  /** Resample the input data into an existing output data.
+  /** Resample a volume into an existing output volume.
 
-      Parameters:
+      \param[in]     input_data  data to be resampled (its voxel size is taken
+                                 into account)
+      \param[in]     transform   transformation from coordinates of the *input*
+                                 volume (unit: mm), to coordinates of the
+                                 *output* volume (unit: mm) (its inverse is
+                                 used for resampling)
+      \param[in]     background  value set in output regions that are outside
+                                 of the transformed input volume
+      \param[in,out] output_data existing volume to be filled with resampled
+                                 data (its pre-existing dimensions and voxel
+                                 size are used)
+      \param[in]     verbose     print progress to stdout
 
-      input_data: data to be resampled
-      transform: transformation to apply
-      background: value set in output regions which are outside of the
-          transformation space of the input volume
-      output_data: resampled data will fill this existing output data
-      verbose: print more things during resampling
+      The \c transformations, \c referentials, and \c referential header
+      attributes of \p output_data are not touched; it is up to the calling
+      code to update them accordingly.
+
+      This method does *not* use the instance state set by setRef() or
+      setDefaultValue().
+
+      Derived classes can override this method to optimize interpolation of a
+      full volume. The base class method simply calls doResample for each
+      point.
   */
-  virtual void resample( const AimsData< T >& input_data,
+  virtual void resample( const carto::Volume< T >& input_data,
                          const aims::AffineTransformation3d& transform,
                          const T& background,
-                         AimsData< T >& output_data,
-                         bool verbose = false );
+                         carto::Volume< T > & output_data,
+                         bool verbose = false ) const;
 
-  /** Resample a single voxel of the input data at a given specified output
-      location, and set the output value.
+  /** Resample a volume at a single location.
 
-      Parameters:
+      \param[in]  input_data      data to be resampled (its voxel size is taken
+                                  into account)
+      \param[in]  transform       transformation from coordinates of the
+                                  *input* volume (unit: mm), to *output*
+                                  coordinates (its inverse is used for
+                                  resampling)
+      \param[in]  background      value set in output regions that are outside
+                                  of the transformed input volume
+      \param[in]  output_location coordinates in output space (destination
+                                  space of \p transform)
+      \param[out] output_value    variable to be filled with resampled data
+      \param[in]  timestep        for 4D volume, time step to be used
 
-      input_data: data to be resampled
-      transform: transformation to apply
-      background: value set in output regions which are outside of the
-          transformation space of the input volume
-      output_location: position in the output space (warning, this is actually
-          an input)
-      output_value: resampled output value
-      timestep: for 4D volume, time step to be used
+      This method does *not* use the instance state set by setRef() or
+      setDefaultValue().
   */
-  virtual void resample( const AimsData< T >& input_data,
-                         const aims::AffineTransformation3d& transform,
-                         const T& background,
-                         const Point3df& output_location,
-                         T& output_value, int timestep );
+  void resample( const carto::Volume< T >& input_data,
+                 const aims::AffineTransformation3d& transform,
+                 const T& background,
+                 const Point3df& output_location,
+                 T& output_value, int timestep ) const;
 
-  /// set the input data to be resampled
-  void setRef( const AimsData<T>& ref ) { _ref = &ref; }
-  /// set the default background value
+  /** Resample a volume at a single location.
+
+      \param[in]  input_data      data to be resampled (its voxel size is
+                                  taken into account)
+      \param[in]  inverse_transform transformation from output coordinates
+                                  to coordinates of the input volume
+                                  (unit: mm)
+      \param[in]  background      value set if the transformed point is outside
+                                  of the input volume
+      \param[in]  output_location coordinates in output space (source space
+                                  of \p transform)
+      \param[out] output_value    variable to be filled with resampled data
+      \param[in]  timestep        for 4D volume, time step to be used
+
+      This method does *not* use the instance state set by setRef() or
+      setDefaultValue().
+  */
+  void
+  resample_inv( const carto::Volume< T > &input_data,
+                const aims::Transformation3d &inverse_transform_to_mm,
+                const T &background, const Point3df &output_location,
+                T &output_value, int timestep ) const;
+
+  /** Resample a volume into an existing output volume.
+
+      \param[in]     input_data  data to be resampled (its voxel size is taken
+                                 into account)
+      \param[in]     transform   transformation from coordinates of the
+                                 *output* volume (unit: mm), to coordinates of
+                                 the *input* volume *(unit: mm)*
+      \param[in]     background  value set in output regions that are outside
+                                 of the transformed input volume
+      \param[in,out] output_data existing volume to be filled with resampled
+                                 data (its pre-existing dimensions and voxel
+                                 size are used)
+      \param[in]     verbose     print progress to stdout
+
+      The \c transformations, \c referentials, and \c referential header
+      attributes of \p output_data are not touched; it is up to the calling
+      code to update them accordingly.
+
+      This method does *not* use the instance state set by setRef() or
+      setDefaultValue().
+  */
+  void resample_inv( const carto::Volume< T >& input_data,
+                     const aims::Transformation3d& inverse_transform_to_mm,
+                     const T& background,
+                     carto::Volume< T > & output_data,
+                     bool verbose = false ) const;
+
+  /** Resample a volume at a single location.
+
+      \param[in]  input_data      data to be resampled (its voxel size is
+                                  **not** taken into account)
+      \param[in]  inverse_transform_to_vox transformation from output
+                                  coordinates to coordinates of the input
+                                  volume (**unit: voxel**)
+      \param[in]  background      value set if the transformed point is outside
+                                  of the input volume
+      \param[in]  output_location coordinates in output space (source space
+                                  of \p transform)
+      \param[out] output_value    variable to be filled with resampled data
+      \param[in]  timestep        for 4D volume, time step to be used
+
+      This method does *not* use the instance state set by setRef() or
+      setDefaultValue().
+  */
+  void
+  resample_inv_to_vox( const carto::Volume< T > &input_data,
+                       const aims::Transformation3d &inverse_transform_to_vox,
+                       const T &background, const Point3df &output_location,
+                       T &output_value, int timestep ) const
+  {
+    updateParameters( input_data, timestep, carto::verbose );
+    return doResample(input_data, inverse_transform_to_vox, background,
+                      output_location, output_value, timestep);
+  }
+
+  /** Resample a volume into an existing output volume.
+
+      \param[in]     input_data  data to be resampled (its voxel size is
+                                 **not** taken into account)
+      \param[in]     inverse_transform_to_vox transformation from coordinates
+                                 of the *output* volume (unit: mm), to
+                                 coordinates of the *input* volume
+                                 **(unit: voxel)**
+      \param[in]     background  value set in output regions that are outside
+                                 of the transformed input volume
+      \param[in,out] output_data existing volume to be filled with resampled
+                                 data (its pre-existing dimensions and voxel
+                                 size are used)
+      \param[in]     verbose     print progress to stdout
+
+      The \c transformations, \c referentials, and \c referential header
+      attributes of \p output_data are not touched; it is up to the calling
+      code to update them accordingly.
+
+      This method does *not* use the instance state set by setRef() or
+      setDefaultValue().
+
+      Derived classes can override this method to optimize interpolation of a
+      full volume. The base class method simply calls doResample for each
+      point.
+  */
+  virtual void resample_inv_to_vox( const carto::Volume< T >& input_data,
+                                    const aims::Transformation3d& inverse_transform_to_vox,
+                                    const T& background,
+                                    carto::Volume< T > & output_data,
+                                    bool verbose = false ) const;
+
+  /// Set the input data to be resampled by the doit() methods
+  void setRef( const carto::rc_ptr<carto::Volume<T> >& ref );
+
+  /// Input data to be resampled by the doit() methods
+  const carto::rc_ptr<carto::Volume<T> >& ref() const { return _ref; }
+
+  /// Set the background value to be used by the doit() methods
   void setDefaultValue( T val ) { _defval = val; }
+
+  /// Background value used by the doit() methods
+  const T& defaultValue() const { return _defval; };
 
 protected:
 
-  virtual void 
-  doResample( const AimsData< T > &inVolume, 
-              const aims::AffineTransformation3d &invTransform3d,
-              const T &outBackground, const Point3df &outLocation, 
-              T &outValue, int time ) = 0;
+  /** Resample a volume at a single location.
 
-  /// called before each time step, used in spline resamplers
-  virtual void updateParameters( const AimsData< T > &inVolume, int time, 
-                                 bool verbose );
+      \param[in]  input_data      data to be resampled (its voxel size is
+                                  *not* taken into account)
+      \param[in]  inverse_transform transformation from output coordinates
+                                  to coordinates of the input volume
+                                  (<b>unit: voxels</b>)
+      \param[in]  background      value set if the transformed point is outside
+                                  of the input volume
+      \param[in]  output_location coordinates in output space (source space
+                                  of \p transform)
+      \param[out] output_value    variable to be filled with resampled data
+      \param[in]  timestep        for 4D volume, time step to be used
+  */
+  virtual void
+  doResample( const carto::Volume< T > &input_data,
+              const aims::Transformation3d &inverse_transform,
+              const T &background, const Point3df &output_location,
+              T &output_value, int timestep ) const = 0;
 
-  const AimsData<T>* _ref;
+  /** Method called before doResample() for each time step.
+
+      This method is called by all the resampling methods (resample() and
+      doit()) before they call doResample for a given time point \c t.
+
+      The base class version of this method does nothing.
+   */
+  virtual void updateParameters( const carto::Volume< T > & /*inVolume*/,
+                                 int /*time*/,
+                                 bool /*verbose*/ ) const {};
+
+  carto::rc_ptr<carto::Volume<T> > _ref;
   T _defval;
 };
 
-
+} // namespace aims
 
 #endif

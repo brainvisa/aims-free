@@ -36,8 +36,15 @@
 #define AIMS_RESAMPLING_LINEARRESAMPLER_H
 
 #include <aims/resampling/splineresampler.h>
-#include <aims/resampling/multichannelresampler.h>
 
+namespace aims
+{
+
+/** Volume resampler using linear (order 1) interpolation.
+
+    The resampling API is described in the base classes, Resampler and
+    SplineResampler.
+ */
 template <class T>
 class LinearResampler : public SplineResampler< T >
 {
@@ -46,20 +53,19 @@ public:
   LinearResampler();
   ~LinearResampler();
 
-  int getOrder() const;
+  int getOrder() const CARTO_OVERRIDE;
 
 protected:
+  typedef typename SplineResampler<T>::ChannelType ChannelType;
 
-  void doResample( const AimsData< T >& inVolume,
-                   const Motion& transform3d,
-                   const T& outBackground,
-                   const Point3df& outLocation,
-                   T& outValue, int t );
-  double getBSplineWeight( int i, double x ) const;
+  void doResampleChannel( const carto::Volume< ChannelType >& inVolume,
+                          const aims::Transformation3d& transform3d,
+                          const ChannelType& outBackground,
+                          const Point3df& outLocation,
+                          ChannelType& outValue, int t ) const CARTO_OVERRIDE;
+  double getBSplineWeight( int i, double x ) const CARTO_OVERRIDE;
 };
 
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGB, 1 )
-AIMS_RESAMPLING_DECLARE_MULTICHANNELRESAMPLER( LinearResampler, AimsRGBA, 1 )
+} // namespace aims
 
 #endif
-

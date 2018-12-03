@@ -212,6 +212,7 @@ set( _headers
     sparsematrix/sparseordensematrix.h
     texdata/texdata.h
     transformation/transformation.h
+    transformation/transformation_chain.h
     transformation/affinetransformation3d.h
     utility/anytype_reader.h
     utility/anytype_reader_details.h
@@ -406,6 +407,7 @@ set(_aimsdata_sources
     sparsematrix/sparsematrixutil.cc
     sparsematrix/sparseordensematrix.cc
     transformation/transformation.cc
+    transformation/transformation_chain.cc
     transformation/affinetransformation3d.cc
     utility/boundingbox.cc
     utility/clock.cc

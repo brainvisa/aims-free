@@ -58,8 +58,8 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
   {
     Motion identity;
     identity.setToIdentity();
-      LinearResampler<T> reech;
-      reech.setRef( test );
+      aims::LinearResampler<T> reech;
+      reech.setRef( test.volume() );
 
       test = reech.doit( identity, 
                           unsigned (test.dimX()*test.sizeX()/(1.0*ref.sizeX()) + .5),
@@ -89,8 +89,8 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
   r.setToIdentity();
 
   {
-  LinearResampler<T> reech;
-  reech.setRef( test );
+  aims::LinearResampler<T> reech;
+  reech.setRef( test.volume() );
 
   testtrans = reech.doit( p,
                           testtrans.dimX(),
@@ -185,8 +185,8 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
 
   
       // Resampling de test en testtrans par r la transfo totale la plus recente
-      LinearResampler<T> resampler;
-      resampler.setRef( test );
+      aims::LinearResampler<T> resampler;
+      resampler.setRef( test.volume() );
       testtrans = resampler.doit( r, test.dimX(), test.dimY(), test.dimZ(),
                           Point3df(test.sizeX(),test.sizeY(),test.sizeZ()));
   
@@ -205,8 +205,8 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
 
 
   _result = test_orig.clone();
-  LinearResampler<T> linres;
-  linres.setRef( test_orig );
+  aims::LinearResampler<T> linres;
+  linres.setRef( test_orig.volume() );
   _result = linres.doit( r, 
                          test_orig.dimX(), 
                          test_orig.dimY(), 

@@ -167,9 +167,9 @@ namespace aims {
     /// @}
 
   protected:
-    carto::VolumeRef<double>  _coeff;
-    carto::rc_ptr<BSpline>    _spline;
     unsigned                  _order;
+    carto::rc_ptr<BSpline>    _spline;
+    carto::VolumeRef<double>  _coeff;
   };
 
 } // namespace aims
