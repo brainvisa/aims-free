@@ -38,6 +38,7 @@
 #define AIMS_IO_ARGW_H
 
 #include <cartobase/object/syntax.h>
+#include <cartobase/object/object.h>
 
 class Graph;
 
@@ -53,6 +54,12 @@ namespace aims
     /// in case of failure, raise an exception
     virtual void write( const std::string & filename, Graph & graph, 
                         bool forceglobal = false ) = 0;
+    /** get / reconstruct the minf header from the graph.
+        The default implementation takes it from the "header" property of the
+        graph (if any), and tries to rebuild referentials / transformations
+        properties from the graph properties if possible.
+    */
+    virtual carto::Object getMinf( const Graph & g );
   };
 
   /* This class is a wrapper for several GraphWriters: standard GraphWriter, 

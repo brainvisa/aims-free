@@ -35,6 +35,9 @@
 #include <cartobase/config/paths.h>
 #include <aims/io/aimsGraphW.h>
 #include <aims/data/pheader.h>
+#include <aims/transformation/affinetransformation3d.h>
+#include <aims/graph/graphmanip.h>
+#include <aims/resampling/standardreferentials.h>
 #include <graph/graph/graph.h>
 #include <graph/graph/gwriter.h>
 #include <cartobase/object/sreader.h>
@@ -129,8 +132,15 @@ bool ArgWriter::write( Graph & g, bool forceglobal ) const
   if( i != sp->writers.end() )
     try
       {
-	i->second->write( _name, g, forceglobal );
-	return( true );
+        i->second->write( name, g, forceglobal );
+        Object minf = i->second->getMinf( g );
+        if( minf->size() != 0 )
+        {
+          PythonHeader ph;
+          ph.copyProperties( minf );
+          ph.writeMinf( name + ".minf" );
+        }
+        return true;
       }
     catch( exception & )
       {
@@ -143,13 +153,68 @@ bool ArgWriter::write( Graph & g, bool forceglobal ) const
   if( i != sp->writers.end() )
     try
       {
-	i->second->write( _name, g, forceglobal );
-	return( true );
+        i->second->write( name, g, forceglobal );
+        Object minf = i->second->getMinf( g );
+        if( minf->size() != 0 )
+        {
+          PythonHeader ph;
+          ph.copyProperties( minf );
+          ph.writeMinf( name + ".minf" );
+        }
+        return( true );
       }
     catch( exception & )
       {
       }
   return( false );
+}
+
+// --------------------
+
+Object LowLevelArgWriter::getMinf( const Graph & g )
+{
+  Object hdr;
+  try
+  {
+    hdr = g.getProperty( "header" );
+  }
+  catch( ... )
+  {
+    hdr = Object::value( Dictionary() );
+  }
+  try
+  {
+    Object refs = g.getProperty( "referentials" );
+    Object trans = g.getProperty( "transformations" );
+    if( refs && trans && refs->size() == trans->size() )
+    {
+      hdr->setProperty( "referentials", refs );
+      hdr->setProperty( "transformations", trans );
+    }
+  }
+  catch( ... )
+  {
+    AffineTransformation3d tal = GraphManip::talairach( g );
+    if( !tal.isIdentity() )
+    {
+      vector<string> refs;
+      refs.push_back( StandardReferentials::acPcReferential() );
+      hdr->setProperty( "referentials", refs );
+      vector<vector<float> > trans;
+      trans.push_back( tal.toVector() );
+      hdr->setProperty( "transformations", trans );
+    }
+  }
+  try
+  {
+    Object ref = g.getProperty( "referential" );
+    hdr->setProperty( "referential", ref );
+  }
+  catch( ... )
+  {
+  }
+
+  return hdr;
 }
 
 // --------------------
@@ -187,40 +252,14 @@ void LowLevelStandardArgWriter::write( const string & filename, Graph & g,
   gw.writeElements( g, sm, sm );
   //cout << "writeElements done\n";
   try
-    {
-      w << g;
-    }
+  {
+    w << g;
+  }
   catch( exception & e )
-    {
-      cerr << e.what() << endl;
-      throw;
-    }
-
-  // make a .minf header
-  PythonHeader ph;
-  try
   {
-    Object v = g.getProperty( "referential" );
-    ph.setProperty( "referential", v );
+    cerr << e.what() << endl;
+    throw;
   }
-  catch( ... )
-  {}
-  try
-  {
-    Object v = g.getProperty( "referentials" );
-    ph.setProperty( "referentials", v );
-  }
-  catch( ... )
-  {}
-  try
-  {
-    Object v = g.getProperty( "transformations" );
-    ph.setProperty( "transformations", v );
-  }
-  catch( ... )
-  {}
-  if( ph.size() > 0 )
-    ph.writeMinf( filename + ".minf" );
   //cout << "LowLevelStandardArgWriter done\n";
 }
 
