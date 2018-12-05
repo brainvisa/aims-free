@@ -36,6 +36,9 @@
 #include <aims/io/argheader.h>
 #include <aims/io/aimsGraphR.h>
 #include <aims/io/roiR.h>
+#include <aims/resampling/standardreferentials.h>
+#include <aims/graph/graphmanip.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <graph/graph/graph.h>
 #include <graph/graph/greader.h>
 #include <cartobase/object/sreader.h>
@@ -152,9 +155,13 @@ Graph* ArgReader::read( int subobjectsfilter ) const
 	io_error::keepExceptionPriority( e, eprio, etype, emsg );
       }
   if( g )
-    return( g );
+  {
+    i->second->mergeMinf( *g, h );
+    return g;
+  }
+
   if( syntax.empty() )
-    return( 0 );
+    return 0;
 
   // try standard GraphReader
   i = sp->readers.find( "" );
@@ -162,7 +169,8 @@ Graph* ArgReader::read( int subobjectsfilter ) const
     g = i->second->read( _name, subobjectsfilter );
   if( !g )
     io_error::launchExcept( etype, emsg );
-  return( g );
+  i->second->mergeMinf( *g, h );
+  return g;
 }
 
 
@@ -252,3 +260,64 @@ Graph* LowLevelStandardArgReader::read( const string & filename,
 
   return g;
 }
+
+
+void LowLevelArgReader::mergeMinf( Graph & g, const PythonHeader & hdr )
+{
+  Object d = Object::value( Dictionary() );
+  d->copyProperties( Object::reference( hdr ) );
+  g.setProperty( "header", d );
+}
+
+
+void LowLevelArgReader::mergeTransformations( Graph & g,
+                                              const PythonHeader & hdr )
+{
+  try
+  {
+    Object refs = hdr.getProperty( "referentials" );
+    Object trans = hdr.getProperty( "transformations" );
+    if( refs && trans && refs->size() == trans->size() )
+    {
+      g.setProperty( "referentials", refs );
+      g.setProperty( "transformations", trans );
+
+      Object iref = refs->objectIterator();
+      Object itr = trans->objectIterator();
+      for( ; iref->isValid() && itr->isValid(); iref->next(), itr->next() )
+      {
+        if( iref->currentValue()->getString()
+            == StandardReferentials::acPcReferential() )
+        {
+          AffineTransformation3d tal( itr->currentValue() );
+          GraphManip::storeTalairach( g, tal );
+          break; // all done
+        }
+      }
+      // now remove those from graph["header"]
+      Object gh = g.getProperty( "header" );
+      gh->removeProperty( "referentials" );
+      gh->removeProperty( "transformations" );
+    }
+  }
+  catch( ... )
+  {
+  }
+  try
+  {
+    Object ref = hdr.getProperty( "referential" );
+    g.setProperty( "referential", ref );
+  }
+  catch( ... )
+  {
+  }
+}
+
+
+void LowLevelStandardArgReader::mergeMinf( Graph & g,
+                                           const PythonHeader & hdr )
+{
+  LowLevelArgReader::mergeMinf(g, hdr );
+  LowLevelArgReader::mergeTransformations( g, hdr );
+}
+

@@ -38,6 +38,7 @@
 #define AIMS_IO_ARGR_H
 
 #include <cartobase/object/syntax.h>
+#include <aims/data/pheader.h>
 #include <set>
 
 class Graph;
@@ -53,7 +54,27 @@ namespace aims
     virtual ~LowLevelArgReader();
     /// in case of failure, either raise an exception or return 0
     virtual Graph* read( const std::string & filename, 
-			 int subobjectsfilter = -1 ) = 0;
+                         int subobjectsfilter = -1 ) = 0;
+    /** set / merge .minf header into the graph.
+
+        This means set it into a graph property (typically "header"), but
+        also update some graph properties according to the contents of this
+        header.
+
+        The default implementation just copies the minf properties into a
+        dictionary stored in the "header" property of the graph.
+    */
+    virtual void mergeMinf( Graph & g, const PythonHeader & hdr );
+    /** stores referentials, transformations,
+        and updates the Talairach transformation in the graph, if such
+        information is present in the minf header.
+
+        This static method is not called by LowLevelArgReader::mergeMinf()
+        by default, this method is just provided so it can be called by
+        concrete implementations of LowLevelArgReader (such as
+        LowLevelStandardArgReader).
+    */
+    static void mergeTransformations( Graph & g, const PythonHeader & hdr );
   };
 
   /* This class is a wrapper for several GraphReaders: standard GraphReader, 
@@ -91,7 +112,11 @@ namespace aims
     LowLevelStandardArgReader();
     virtual ~LowLevelStandardArgReader();
     virtual Graph* read( const std::string & filename, 
-			 int subobjectsfilter = -1 );
+                         int subobjectsfilter = -1 );
+    /** In addition to LowLevelArgReader::mergeMinf(), the
+        LowLevelStandardArgReader calls mergeTransformations().
+    */
+    virtual void mergeMinf( Graph & g, const PythonHeader & hdr );
 
   protected:
     carto::SyntaxSet	*_syntax;
