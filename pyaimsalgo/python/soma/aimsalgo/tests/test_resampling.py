@@ -121,6 +121,14 @@ class ResamplingTestCase(unittest.TestCase):
             np.int16
         )
 
+    def test_4d_resampling(self):
+        resampler = aimsalgo.NearestNeighborResampler_S16()
+        ref = create_reference_volume(np.int16, shape=(1, 1, 1, 2))
+        out = empty_volume_like(ref)
+        resampler.setRef(ref)
+        resampler.doit(identity_transform, out)
+        self.assertTrue(np.array_equal(out, ref))
+
     # known issue: the last element along each axis is -32768 (the mask value)
     def test_identity_masklin_resampling_int16_except_last_elem(self):
         self.do_identity_resampling_test(

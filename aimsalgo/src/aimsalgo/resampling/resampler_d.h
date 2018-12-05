@@ -84,8 +84,8 @@ resample_inv_to_vox( const carto::Volume< T >& inVolume,
   int outSizeY = sz[1];
   int outSizeZ = sz[2];
   int outSizeT = sz[3];
-  if( outSizeT > inVolume.getVoxelSize()[3] )
-    outSizeT = inVolume.getVoxelSize()[3];
+  if( outSizeT > inVolume.getSizeT() )
+    outSizeT = inVolume.getSizeT();
 
   T* o;
 
