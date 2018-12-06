@@ -728,7 +728,7 @@ It is exactly the same thing as headers found in volumes, meshes, textures or bu
 { '__syntax__' : 'RoiArg', 'RoiArg_VERSION' : '1.0', 'filename_base' : 'basal_ganglia.data', ...
 >>> print('properties:', graph.keys())
 properties: ('RoiArg_VERSION', 'filename_base', 'roi.global.bck', 'type.global.bck', 'boundingbox_max', ...
->>> for p, v in graph.iteritems():
+>>> for p, v in graph.items():
 ...   print(p, ':', v)
 RoiArg_VERSION : 1.0
 filename_base : basal_ganglia.data
