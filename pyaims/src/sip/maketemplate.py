@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -97,7 +97,7 @@ def makeTemplate(
             qv = [convert_string_to_int(k) for k in x.split('.')]
             qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
             cppcmd.append('-DQT_VERSION=' + hex(qver))
-            # print >> sys.stderr, 'Qt version:', hex( qver )
+            # print('Qt version:', hex( qver ), file=sys.stderr)
         except Exception as e:
             if not quiet:
                 print(e)
