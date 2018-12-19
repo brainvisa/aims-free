@@ -462,6 +462,20 @@ namespace carto
     //========================================================================
     /// Fills the volume with a given value.
     void fill( const T & value );
+    /** Copy operator.
+        Care should be taken regarding the behavior of the copy operator:
+        depending on the allocation mode of the copied volume, and whether it
+        is a view into another volume, different behaviors will be achieved:
+
+        - if "value" is a "regular" volume, then a full copy is performed: if
+          "this" is modified later, "value" will not be changed.
+        - if "value" is a view into a larger volume (its volumeRef() is not
+          null, and its own data buffer is not actually allocated), then the
+          copied object, "this", will be another view into the same volume,
+          thus resulting in a shallow copy. If "this" is modified later, both
+          "value " and the reference volume from which the view is taken, will
+          be modified.
+    */
     Volume<T> & operator= ( const T & value );
 
   protected:
