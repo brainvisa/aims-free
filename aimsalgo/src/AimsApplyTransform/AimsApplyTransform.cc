@@ -386,7 +386,6 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   vs[2] = proc.sz;
   vs[3] = input_image.getVoxelSize()[3];
   out.header().setProperty("voxel_size", vs);
-  out.fill(background_value);
 
   // Prepare the resampler
   unique_ptr<aims::Resampler<T> > resampler
