@@ -835,7 +835,8 @@ namespace carto
     if( !b )
       Headered::blockSignals( true );
     this->VolumeProxy< T >::operator=( other );
-    _items = other._items;
+    // copy buffer, preserving allocator
+    _items.copy( other._items, other.allocatorContext() );
 
 #ifdef CARTO_USE_BLITZ
     // TODO: test blitz ownership / strides
@@ -1196,6 +1197,7 @@ namespace carto
     int oldy = VolumeProxy<T>::_size[1];
     int oldz = VolumeProxy<T>::_size[2];
     int oldt = VolumeProxy<T>::_size[3];
+    VolumeProxy<T>::_size.resize( 4 );
     VolumeProxy<T>::_size[0] = sizeX;
     VolumeProxy<T>::_size[1] = sizeY;
     VolumeProxy<T>::_size[2] = sizeZ;
@@ -1283,6 +1285,7 @@ namespace carto
     try {
       borders[2] = (int) rint( options->getProperty( "bz" )->getScalar() );
     } catch( ... ) {}
+
     Volume<T>        *obj;
     if( borders[0] != 0 || borders[1] != 0 || borders[2] != 0 )
     {
