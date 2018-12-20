@@ -35,7 +35,6 @@
 #include <aims/perfusion/perfMapBase.h>
 
 #include <aims/io/writer.h>
-#include <aims/io/gisheader.h>
 
 
 using namespace aims;

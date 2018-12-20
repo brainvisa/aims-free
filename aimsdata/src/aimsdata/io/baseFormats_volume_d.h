@@ -36,58 +36,17 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/io/baseFormats_volume.h>
-#include <aims/io/gisR.h>
-#include <aims/io/gisW.h>
 #include <aims/io/spmR.h>
 #include <aims/io/spmW.h>
 #include <aims/io/genesisR.h>
 #include <aims/io/imasparseheader.h>
 #include <soma-io/io/reader.h>
 #include <soma-io/io/writer.h>
+#include <aims/io/defaultItemR.h>
+#include <aims/io/defaultItemW.h>
 
 namespace aims
 {
-
-  //	GIS
-
-  template<typename T>
-  GisFormat<T>::~GisFormat()
-  {
-  }
-
-
-  template<class T>
-  bool GisFormat<T>::read( const std::string & filename, AimsData<T> & vol, 
-                           const carto::AllocatorContext & context, 
-                           carto::Object options )
-  {
-    GisReader<T>	r( filename );
-    r.read( vol, context, options );
-    return( true );
-  }
-
-
-  template<class T>
-  bool GisFormat<T>::write( const std::string & filename, 
-			    const AimsData<T> & vol, carto::Object options )
-  {
-    bool ascii = false;
-    try
-    {
-      if( !options.isNull() )
-      {
-        carto::Object aso = options->getProperty( "ascii" );
-        if( !aso.isNull() )
-          ascii = (bool) aso->getScalar();
-      }
-    }
-    catch( ... )
-    {
-    }
-    GisWriter<T>	r( filename, ascii );
-    r.write( vol );
-    return( true );
-  }
 
   //	SPM
 

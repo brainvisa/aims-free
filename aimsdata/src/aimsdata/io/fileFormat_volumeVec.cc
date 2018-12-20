@@ -148,7 +148,7 @@ FileFormatDictionary<AimsData<AimsRGB> >::registerBaseFormats()
   JpegFormat<AimsRGB>	*jf = new JpegFormat<AimsRGB>;
   registerFormat( "JPEG", jf, ext );
   vf = new VolumeFormat<AimsRGB>( "JPEG" );
-  FileFormatDictionary<Volume<AimsRGB> >::registerFormat( "GIS", vf, ext );
+  FileFormatDictionary<Volume<AimsRGB> >::registerFormat( "JPEG", vf, ext );
 #endif
 
   ext.clear();

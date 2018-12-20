@@ -38,8 +38,6 @@ namespace aims
     std::vector<std::string>      ext;
     ext.push_back( "ima" );
     ext.push_back( "dim" );
-    GisFormat<AimsData<Point3df> >     *gf = new GisFormat<AimsData<Point3df> >;
-    registerFormat( "GIS", gf, ext );
 #ifdef AIMSDATA_NEW_AIMSDATA
     VolumeFormat<AimsData<Point3df> >  *vf = new VolumeFormat<AimsData<Point3df> >( "GIS" );
     FileFormatDictionary<carto::Volume<AimsData<Point3df> > >::registerFormat( "GIS", vf, ext );
@@ -55,8 +53,6 @@ namespace aims
     std::vector<std::string>      ext;
     ext.push_back( "ima" );
     ext.push_back( "dim" );
-    GisFormat<Point3df>     *gf = new GisFormat<Point3df>;
-    registerFormat( "GIS", gf, ext );
 #ifdef AIMSDATA_NEW_AIMSDATA
     VolumeFormat<Point3df>  *vf = new VolumeFormat<Point3df>( "GIS" );
     FileFormatDictionary<carto::Volume<Point3df> >::registerFormat( "GIS", vf, ext );

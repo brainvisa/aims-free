@@ -43,19 +43,6 @@ namespace aims
 {
 
   template<class T>
-  class GisFormat : public FileFormat<AimsData<T> >
-  {
-  public:
-    virtual ~GisFormat();
-
-    virtual bool read( const std::string & filename, AimsData<T> & vol, 
-                       const carto::AllocatorContext & context, 
-                       carto::Object options );
-    virtual bool write( const std::string & filename, const AimsData<T> & vol, 
-                        carto::Object options = carto::none() );
-  };
-
-  template<class T>
   class SpmFormat : public FileFormat<AimsData<T> >
   {
   public:
