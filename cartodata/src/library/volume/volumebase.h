@@ -462,6 +462,12 @@ namespace carto
     //========================================================================
     /// Fills the volume with a given value.
     void fill( const T & value );
+    /** Fill border with a constant value
+
+        More precisely, fill the surrounding of the volume view in the
+        reference volume (if any) using the given value.
+    */
+    void fillBorder( const T & value );
     /** Copy operator.
         Care should be taken regarding the behavior of the copy operator:
         depending on the allocation mode of the copied volume, and whether it

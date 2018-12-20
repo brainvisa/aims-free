@@ -202,6 +202,94 @@ namespace carto {
     return *this;
   }
 
+  /// Fill borders with a constant value
+  template <typename T>
+  inline
+  void Volume<T>::fillBorder( const T & value )
+  {
+    rc_ptr<Volume<T> > ref = refVolume();
+    if( !ref )
+      return;
+    typename Volume<T>::Position pos = posInRefVolume();
+    std::vector<int> sz = ref->getSize();
+    std::vector<int> vsz = this->getSize();
+    int dim;
+    int nd = sz.size();
+    int vnd = vsz.size();
+    int np = pos.size();
+    std::vector<int> dmin( nd, 0 ), dmax( nd, 0 );
+    std::vector<int> ppos( nd, 0 );
+    std::vector<bool> is_inside( nd, true );
+    int i;
+
+    for( dim=nd - 1; dim>=0; --dim )
+    {
+      if( dim < vnd )
+      {
+        if( dim < np )
+          dmin[dim] = pos[dim];
+        else
+          dmin[dim] = 0;
+        dmax[dim] = vsz[dim] + dmin[dim];
+      }
+      else
+      {
+        dmin[dim] = 0;
+        dmax[dim] = sz[dim];
+      }
+      ppos[dim] = 0;
+      is_inside[dim] = (dmin[dim] == 0 );
+      if( dim < nd - 1 )
+        is_inside[dim] = is_inside[dim] && is_inside[dim + 1];
+    }
+
+    while( true )
+    {
+      // fill one line along dim0
+      if( is_inside[1] )
+      {
+        for( i=0; i<dmin[0]; ++i )
+        {
+          ppos[0] = i;
+          ref->at( ppos ) = value;
+        }
+        for( i=dmax[0]; i<sz[0]; ++i )
+        {
+          ppos[0] = i;
+          ref->at( ppos ) = value;
+        }
+      }
+      else
+      {
+        for( i=0; i<sz[0]; ++i )
+        {
+          ppos[0] = i;
+          ref->at( ppos ) = value;
+        }
+      }
+      // increment line
+      ++ppos[1];
+      dim = 1;
+      while( ppos[dim] >= sz[dim] )
+      {
+        ppos[dim] = 0;
+        ++dim;
+        if( dim >= nd )
+          break;
+        ++ppos[dim];
+      }
+      if( dim >= nd )
+        break;
+      // check if we are inside the view
+      for( ; dim > 0; --dim )
+      {
+        is_inside[dim] = ( dim < nd - 1 ? is_inside[dim + 1] : true  );
+        is_inside[dim] = is_inside[dim] && ( ppos[dim] >= dmin[dim] )
+                          && ( ppos[dim] < dmax[dim] );
+      }
+    }
+  }
+
   //==========================================================================
   //   COPY
   //==========================================================================

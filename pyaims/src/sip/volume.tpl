@@ -147,6 +147,13 @@ fill(value)
 Fill Volume_%Template1typecode% using the given value.
 %End
 
+    void fillBorder( const %Template1% & value ) /ReleaseGIL/;
+%Docstring
+fillBorder(value)
+
+Fill the surrounding of the volume view in the reference volume (if any) using the given value.
+%End
+
 %#ifdef PyAims_Volume_U8_defined%
     void fill( int ) /ReleaseGIL/;
 %MethodCode
