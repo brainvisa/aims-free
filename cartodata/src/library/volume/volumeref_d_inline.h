@@ -123,6 +123,14 @@ namespace carto {
     rc_ptr<Volume<T> >( new Volume<T>( other, pos, size, allocContext ) )
   {}
 
+  template <typename T>
+  VolumeRef<T>::VolumeRef( rc_ptr<Volume<T> > other,
+                           const Position & pos,
+                           const Position & size,
+                           const AllocatorContext & allocContext ):
+    rc_ptr<Volume<T> >( new Volume<T>( other, pos, size, allocContext ) )
+  {}
+
   //==========================================================================
   //   VOLUME PROXY
   //==========================================================================
