@@ -947,6 +947,8 @@ def __fixsipclasses__(classes):
                 # volume pickling
                 y.__getstate__ = __fixsipclasses__._vol_getstate
                 y.__setstate__ = __fixsipclasses__._vol_setstate
+                y.shape = property(lambda self: numpy.asarray(self).shape,
+                                   None, None)
             else:
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
