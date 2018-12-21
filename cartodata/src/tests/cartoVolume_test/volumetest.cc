@@ -39,6 +39,7 @@
 #include <time.h>
 #include <vector>
 
+
 using namespace carto;
 using namespace std;
 
@@ -96,7 +97,7 @@ test ( const container<T> & vol, const container<U> & other )
   return typename result<T,U>::result_type();
 }
 
-int main( int /*argc*/, char** /*argv*/ )
+int main( int /*argc*/, const char** /*argv*/ )
 {
   test( container<float>(), container<float>() );
   int   result = EXIT_SUCCESS;
@@ -402,6 +403,48 @@ int main( int /*argc*/, char** /*argv*/ )
   ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
   cout << nn << " x 8M voxels in " << ck2
        << "s : " << sz * nn / ck2 << " vox/s" << endl;
+
+
+  cout << "-- Test 8: fill methods --" << endl;
+  vector<int> dims8, pos, view_dims;
+  dims8.push_back( 15 );
+  dims8.push_back( 15 );
+  dims8.push_back( 15 );
+  pos.push_back( 2 );
+  pos.push_back( 3 );
+  pos.push_back( 1 );
+  view_dims.push_back( 10 );
+  view_dims.push_back( 8 );
+  view_dims.push_back( 9 );
+  VolumeRef<int16_t> rvol( dims8 );
+  VolumeRef<int16_t> vol8( rvol, pos, view_dims );
+  if( vol8.getSizeX() != 10 || vol8.getSizeY() != 8 || vol8.getSizeZ() != 9
+      || vol8.getSizeT() != 1 )
+  {
+    cerr << "wrong volume view size: ";
+    for( int i=0; i<vol8.getSize().size(); ++i )
+      cerr << vol8.getSize()[i] << ", ";
+    cerr << "instead of 10, 8, 9, 1\n";
+    result = EXIT_FAILURE;
+  }
+  vol8->fill( 24 );
+  vol8->fillBorder( 18 );
+  int sum8 = sum<int, int16_t>( vol8 );
+  if( sum8 != 24 * 10 * 8 * 9 )
+  {
+    cerr << "fill(): wrong sum: " << sum8 << " instead of " << 24 * 10 * 8 * 9
+         << endl;
+    cerr << "vol 0: " << vol8->at(0) << ", " << vol8->at( 5, 5, 5 ) << endl;
+    result = EXIT_FAILURE;
+  }
+  sum8 = sum<int, int16_t>( vol8->refVolume() );
+  int expected8 = 18 * 15 * 15 * 15 + (24 - 18) * 10 * 8 * 9;
+  if( sum8 != expected8 )
+  {
+    cerr << "fillBorder(): wrong sum: " << sum8 << " instead of " << expected8
+         << endl;
+    result = EXIT_FAILURE;
+  }
 
   cout << "===========\n";
   cout << "Overall result: "
