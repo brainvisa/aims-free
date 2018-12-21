@@ -66,10 +66,10 @@ namespace carto
 
   \section cartodata_maincontents Main contents
 
-  - <b>\ref cartovolumes</b>
+  - \ref cartovolumes
   - \ref cartovolumes_io : IO types and formats implementations on volumes
 
-  <!--- <b><a href="changelog.html">Change Log</a>--></b>
+  <!--- <b><a href="changelog.html">Change Log</a></b> -->
 
 */
 
@@ -239,7 +239,7 @@ namespace carto
   --------------------------------------|-------|-------------|-------------
   Volume::iterator with blitz++ support |   1.  |     yes     |     yes
   pointers                              |  20.  |     yes     |      no
-  accessors                             |   5.  |      no     |     yes
+  accessors with blitz++ support        |   5.  |      no     |     yes
   NDIterator                            |   1.2 |     yes     |     yes
   line_NDIterator                       |  18.  |     yes     |     yes
 
