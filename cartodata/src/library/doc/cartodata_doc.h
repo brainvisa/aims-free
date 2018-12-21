@@ -83,6 +83,8 @@ namespace carto
   data buffer) if it is not used directly, but its data values should not be 
   accessed until it is allocated.
 
+  \section sub_volume Volumes and sub-volumes
+
   A subvolume can be opened into an existing volume. This used to be a
   separate class, VolumeView, up to aims-4.3, but has been merged with
   the regular Volume class in aims-4.4.
@@ -162,6 +164,88 @@ namespace carto
 
   \attention What will a View become if the Volume it views in resizes
   or is reallocated ?
+
+  \section volume_iteration Iterating over volumes
+
+  There are several ways to iterate over the voxels of a volume:
+
+  - Accessors: volume.at( position ).
+    If the number of dimensions is fixed (typically 3, or 4) then the
+    programmer may write the required number of nested loops:
+    \code
+    Volume<float> vol( 10, 10, 10 ); // fill volume
+    std::vector<int> size = vol.getSize();
+    float sum = 0.;
+    for( int z=0; z<size[2]; ++z )
+      for( int y=0; y<size[1]; ++y )
+        for( int x=0; x<size[0]; ++x )
+          sum += vol.at( x, y, z );
+    \endcode
+
+  - iterators: the iterator returned by volume.begin() will iterate over all
+    dimensions. Depending on the implementation chosen at compilation time
+    (blitz++ support or not), the behavior will be different:
+    with blitz++ support, iterators will iterate as expected over each "actual"
+    voxel of the volume, but with reduced efficiency. Witout blitz++ support,
+    iterators will act like pointers: they will not take into account
+    borders in the case of a view into a larger volume. Thus it will make too
+    many iterations, and thus be wrong, in this case.
+    \code
+    Volume<float> vol( 10, 10, 10 ); // fill volume
+    Volume<float>::iterator it, e = vol.end();
+    float sum = 0.;
+    for( it=vol.begin(); it!=e; ++it )
+      sum += *it;
+    \endcode
+
+  - N-D iterators:  if the volume contains an arbitrary number of dimensions,
+    then the nested loops cannot be hard-coded in the iterating code. The
+    NDIterator and line_NDIterator classes in the CartoBase library provide
+    convenient ways of walking through a Volume:
+    \code
+    Volume<float> vol( 10, 10, 10 ); // fill volume
+    std::vector<size_t> sstrides = vol.getStrides();
+    std::vector<int> strides;
+    strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
+    float sum = 0.;
+    NDIterator<float> it( &vol.at( 0 ), vol.getSize(), strides );
+    for( ; !it.ended(); ++it )
+      sum += *it;
+    \endcode
+    or, using line_NDIterator:
+    \code
+    Volume<float> vol( 10, 10, 10 ); // fill volume
+    std::vector<size_t> sstrides = vol.getStrides();
+    std::vector<int> strides;
+    strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
+    float *p, *pp;
+    float sum = 0.;
+    line_NDIterator<float> it( &vol.at( 0 ), vol.getSize(), strides );
+    for( ; !it.ended(); ++it )
+    {
+      p = &*it;
+      for( pp=p + vol.getSizeX(); p!=pp; ++p )
+        ++(*p);
+    }
+    \endcode
+
+  In terms of performance, the impact depends on the "weight" of the operation
+  performed with each voxel, the lighter this operation, the more impacted it
+  is by the iteration overhead. For a very simple operation (like incrementing
+  each voxel value), if we take the Volume::iterator performance as reference
+  1., we can expect approximately:
+
+  Iteration type                        | Perf. | N-D support | view support
+  --------------------------------------|-------|-------------|-------------
+  Volume::iterator with blitz++ support |   1.  |     yes     |     yes
+  pointers                              |  20.  |     yes     |      no
+  accessors                             |   5.  |      no     |     yes
+  NDIterator                            |   1.2 |     yes     |     yes
+  line_NDIterator                       |  18.  |     yes     |     yes
+
+  Thus in most cases the best compromise between performance and flexibility
+  (support for the general N-dimension case, support for views inside larger
+  volumes) is using line_NDIterator.
 
 */
 

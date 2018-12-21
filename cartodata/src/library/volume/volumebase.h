@@ -75,7 +75,7 @@ namespace carto
 //============================================================================
 //   V O L U M E
 //============================================================================
-  /// 4D Volume main class
+  /// N-D Volume main class
   ///
   /// Since 2013 release (version 4.4), Volume and VolumeView are merged into
   /// a singleclass. Every Volume can be a view into an other volume. If it is
@@ -91,7 +91,13 @@ namespace carto
   /// the same operation between contained types is well defined.
   /// Several helper method (member and non member) are also included.
   ///
+  /// In version 4.6 Volume has extended support from 4D to N-D, still limited
+  /// to a fixed max number of dimensions at compilation time (normally set
+  /// to 8).
+  ///
   /// \sa \ref cartovolumes
+  ///
+  /// Iterating on volumes is described in \ref volume_iteration
   ///
   /// To use Volume classes on "standard" types (numeric types, on which the
   /// Volume class has already been compiled in the libraries), just include
