@@ -52,6 +52,7 @@ namespace carto {
 //     return _blitz.data()[
 //       blitz::dot( _blitz.stride(),
 //                   blitz::TinyVector<long,4>( x, y, z, t ) ) ];
+
     const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
       = _blitz.stride();
     return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
@@ -80,6 +81,7 @@ namespace carto {
 //     return _blitz.data()[
 //       blitz::dot( _blitz.stride(),
 //                   blitz::TinyVector<long,4>( x, y, z, t ) ) ];
+
     const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
       = _blitz.stride();
     return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
@@ -143,13 +145,144 @@ namespace carto {
 //       pos[i] = 0;
 //     return _blitz( pos );
 
-    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
+    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
       = _blitz.stride();
+
+#  if __GNUC__-0 < 5
+    /* the optimization of the accessor, and the best way to do it,
+       largely depends on the compiler (or processor ?)
+       For now it seems that for gcc 4.9 (on a i7 processor),
+       the best is this swich-based specialized cases. The for.. loop in this
+       situation is about 10 times slower.
+       For gcc 6 (on a i5), the compiler seems to optimize the for.. loop
+       better itself, and the swich slows the whole somewhat. But it is still
+       2 times slower than the (x, y, z, t) accessor, whereas it is only 30%
+       slower using gcc 4.
+    */
+    switch( index.size() )
+    {
+      case 1:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0] ];
+      }
+      case 2:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1] ];
+      }
+      case 3:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] // * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2] ];
+      }
+      case 4:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3] ];
+      }
+      case 5:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3]
+                                  + index[4] * strides[4] ];
+      }
+      case 6:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3]
+                                  + index[4] * strides[4]
+                                  + index[5] * strides[5] ];
+      }
+      case 7:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3]
+                                  + index[4] * strides[4]
+                                  + index[5] * strides[5]
+                                  + index[6] * strides[6] ];
+    }
+      case 8:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3]
+                                  + index[4] * strides[4]
+                                  + index[5] * strides[5]
+                                  + index[6] * strides[6]
+                                  + index[7] * strides[7] ];
+      }
+      default:
+      {
+        /* using gcc 4.9 the blitz++ solution is 2 times faster than the
+           regular multiplication loop.
+           This is not the case using gcc 6.
+        */
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
+        int i, n = index.size();
+        for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
+          pos[i] = index[i];
+        for( ; i<Volume<T>::DIM_MAX; ++i )
+          pos[i] = 0;
+        return _blitz( pos );
+
+//         const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+//           = _blitz.stride();
+//         size_t offset = 0;
+//         for( int i=0; i!=index.size(); ++i )
+//           offset += index[i] * strides[i];
+//         return _blitz.dataZero()[ offset ];
+      }
+    }
+
+    return *_blitz.dataZero();
+
+#  else
+    /* using gcc 6, the blitz++ implementation seems less efficient than a
+       regullar loop.
+    */
+
+    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+      = _blitz.stride();
+
     size_t offset = 0;
-    int n = index.size();
-    for( int i=0; i<n; ++i )
-      offset += index[i] * bstrides[i];
+    for( int i=0; i!=index.size(); ++i )
+      offset += index[i] * strides[i];
     return _blitz.dataZero()[ offset ];
+#  endif
 #else
     if( index.size() >= 4 )
       return at( index[0], index[1], index[2], index[3] );
@@ -174,77 +307,141 @@ namespace carto {
 //       pos[i] = 0;
 //     return _blitz( pos );
 
+#  if __GNUC__-0 < 5
+    /* the optimization of the accessor, and the best way to do it,
+       largely depends on the compiler (or processor ?)
+       For now it seems that for gcc 4.9 (on a i7 processor),
+       the best is this swich-based specialized cases. The for.. loop in this
+       situation is about 10 times slower.
+       For gcc 6 (on a i5), the compiler seems to optimize the for.. loop
+       better itself, and the swich slows the whole somewhat. But it is still
+       2 times slower than the (x, y, z, t) accessor, whereas it is only 30%
+       slower using gcc 4.
+    */
+    switch( index.size() )
+    {
+      case 1:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0] ];
+      }
+      case 2:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1] ];
+      }
+      case 3:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] // * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2] ];
+      }
+      case 4:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3] ];
+      }
+      case 5:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3]
+                                  + index[4] * strides[4] ];
+      }
+      case 6:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3]
+                                  + index[4] * strides[4]
+                                  + index[5] * strides[5] ];
+      }
+      case 7:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3]
+                                  + index[4] * strides[4]
+                                  + index[5] * strides[5]
+                                  + index[6] * strides[6] ];
+    }
+      case 8:
+      {
+        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+          = _blitz.stride();
+
+        return _blitz.dataZero()[ index[0] * strides[0]
+                                  + index[1] * strides[1]
+                                  + index[2] * strides[2]
+                                  + index[3] * strides[3]
+                                  + index[4] * strides[4]
+                                  + index[5] * strides[5]
+                                  + index[6] * strides[6]
+                                  + index[7] * strides[7] ];
+      }
+      default:
+      {
+        /* using gcc 4.9 the blitz++ solution is 2 times faster than the
+           regular multiplication loop.
+           This is not the case using gcc 6.
+        */
+        blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
+        int i, n = index.size();
+        for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
+          pos[i] = index[i];
+        for( ; i<Volume<T>::DIM_MAX; ++i )
+          pos[i] = 0;
+        return _blitz( pos );
+
+//         const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+//           = _blitz.stride();
+//         size_t offset = 0;
+//         for( int i=0; i!=index.size(); ++i )
+//           offset += index[i] * strides[i];
+//         return _blitz.dataZero()[ offset ];
+      }
+    }
+
+    return *_blitz.dataZero();
+
+#  else
+    /* using gcc 6, the blitz++ implementation seems less efficient than a
+       regullar loop.
+    */
+
     const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
       = _blitz.stride();
 
-//     switch( index.size() )
-//     {
-//       case 1:
-//         return _blitz.dataZero()[ index[0] * strides[0] ];
-//       case 2:
-//         return _blitz.dataZero()[ index[0] * strides[0]
-//                      + index[1] * strides[1] ];
-//       case 3:
-//         return _blitz.dataZero()[ index[0] // * strides[0]
-//                      + index[1] * strides[1]
-//                      + index[2] * strides[2] ];
-//       case 4:
-//         if( strides[0] == 1 )
-//         return _blitz.dataZero()[ index[0] // * strides[0]
-//                      + index[1] * strides[1]
-//                      + index[2] * strides[2]
-//                      + index[3] * strides[3] ];
-//         else
-//         return _blitz.dataZero()[ index[0] * strides[0]
-//                      + index[1] * strides[1]
-//                      + index[2] * strides[2]
-//                      + index[3] * strides[3] ];
-//       case 5:
-//         return _blitz.dataZero()[ index[0] * strides[0]
-//                      + index[1] * strides[1]
-//                      + index[2] * strides[2]
-//                      + index[3] * strides[3]
-//                      + index[4] * strides[4] ];
-//       case 6:
-//         return _blitz.dataZero()[ index[0] * strides[0]
-//                      + index[1] * strides[1]
-//                      + index[2] * strides[2]
-//                      + index[3] * strides[3]
-//                      + index[4] * strides[4]
-//                      + index[5] * strides[5] ];
-//       case 7:
-//         return _blitz.dataZero()[ index[0] * strides[0]
-//                      + index[1] * strides[1]
-//                      + index[2] * strides[2]
-//                      + index[3] * strides[3]
-//                      + index[4] * strides[4]
-//                      + index[5] * strides[5]
-//                      + index[6] * strides[6] ];
-//       case 8:
-//         return _blitz.dataZero()[ index[0] * strides[0]
-//                      + index[1] * strides[1]
-//                      + index[2] * strides[2]
-//                      + index[3] * strides[3]
-//                      + index[4] * strides[4]
-//                      + index[5] * strides[5]
-//                      + index[6] * strides[6]
-//                      + index[7] * strides[7] ];
-//       default:
-//       {
-        size_t offset = 0;
-        for( int i=0; i!=index.size(); ++i )
-          offset += index[i] * strides[i];
-        return _blitz.dataZero()[ offset ];
-//       }
-//     }
-//
-//     return *_blitz.dataZero();
-
-//     size_t offset = 0;
-//     int n = index.size();
-//     for( int i=0; i<n; i++ )
-//       offset += index[i] * bstrides[i];
-//     return _blitz.dataZero()[ offset ];
+    size_t offset = 0;
+    for( int i=0; i!=index.size(); ++i )
+      offset += index[i] * strides[i];
+    return _blitz.dataZero()[ offset ];
+#  endif
 #else
     if( index.size() >= 4 )
       return at( index[0], index[1], index[2], index[3] );
