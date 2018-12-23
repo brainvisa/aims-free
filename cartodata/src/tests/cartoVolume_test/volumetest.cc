@@ -89,6 +89,113 @@ test ( const container<T> & vol, const U & value )
   return typename result<T,U>::result_type();
 }
 
+template <typename T>
+inline
+T & volume_at( T* data, const vector<size_t> & strides,
+               long x, long y, long z, long t )
+{
+  return data[ x + y * strides[1] + z * strides[2] + t * strides[3] ];
+}
+
+template <typename T>
+inline
+T & volume_at( T* data, const vector<size_t> & strides,
+               const vector<int> & pos )
+{
+  size_t offset = 0;
+  int n = pos.size();
+  for( int i=0; i<n; ++i )
+    offset += pos[i] * strides[i];
+  return data[ offset ];
+}
+
+
+template <typename T>
+class VolumeAccessor
+{
+public:
+  VolumeAccessor( Volume<T> & vol )
+    : data( &vol.at( 0 ) ), strides( &vol.getStrides()[0] )
+//       nd( vol.getStrides().size() )
+  {
+  }
+
+  T & operator () ( long x, long y, long z, long t )
+  {
+    return data[ x * strides[0] + y * strides[1] + z * strides[2]
+                 + t * strides[3] ];
+  }
+
+  T & operator () ( const vector<int> & pos )
+  {
+//     size_t offset = 0;
+//     offset = 0;
+//     blitz::diffType *strides2 = strides;
+//     unsigned long *strides2 = strides;
+//     int nd = pos.size();
+    switch( pos.size() )
+    {
+      case 1:
+        return data[ pos[0] * strides[0] ];
+      case 2:
+        return data[ pos[0] * strides[0]
+                     + pos[1] * strides[1] ];
+      case 3:
+        return data[ pos[0] * strides[0]
+                     + pos[1] * strides[1]
+                     + pos[2] * strides[2] ];
+      case 4:
+        return data[ pos[0] * strides[0]
+                     + pos[1] * strides[1]
+                     + pos[2] * strides[2]
+                     + pos[3] * strides[3] ];
+      case 5:
+        return data[ pos[0] * strides[0]
+                     + pos[1] * strides[1]
+                     + pos[2] * strides[2]
+                     + pos[3] * strides[3]
+                     + pos[4] * strides[4] ];
+      case 6:
+        return data[ pos[0] * strides[0]
+                     + pos[1] * strides[1]
+                     + pos[2] * strides[2]
+                     + pos[3] * strides[3]
+                     + pos[4] * strides[4]
+                     + pos[5] * strides[5] ];
+      case 7:
+        return data[ pos[0] * strides[0]
+                     + pos[1] * strides[1]
+                     + pos[2] * strides[2]
+                     + pos[3] * strides[3]
+                     + pos[4] * strides[4]
+                     + pos[5] * strides[5]
+                     + pos[6] * strides[6] ];
+      case 8:
+        return data[ pos[0] * strides[0]
+                     + pos[1] * strides[1]
+                     + pos[2] * strides[2]
+                     + pos[3] * strides[3]
+                     + pos[4] * strides[4]
+                     + pos[5] * strides[5]
+                     + pos[6] * strides[6]
+                     + pos[7] * strides[7] ];
+      default:
+        size_t offset = 0;
+        for( int i=0; i!=pos.size(); ++i )
+          offset += pos[i] * strides[i];
+        return data[ offset ];
+    }
+    return data[0];
+  }
+
+  T* data;
+//   blitz::diffType *strides;
+  unsigned long *strides;
+//   int nd;
+//   size_t offset;
+};
+
+
 template <typename T, typename U>
 typename result<T,U>::result_type
 test ( const container<T> & vol, const container<U> & other )
@@ -333,6 +440,7 @@ int main( int /*argc*/, const char** /*argv*/ )
     ny = vol6->getSizeY(), nz = vol6->getSizeZ(), nt = vol6->getSizeT();
   long long     sz = nx * ny * nz * nt;
   cout << "accessors : " << flush;
+  cout << "value before: " << vol6->at( 200, 200, 100 ) << endl;
   clock_t	ck = clock();
   float		ck2;
   int		testtime = 5;
@@ -349,6 +457,65 @@ int main( int /*argc*/, const char** /*argv*/ )
   ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
   cout << nn << " x 8M voxels in " << ck2
        << "s : " << sz * nn / ck2 << " vox/s" << endl;
+
+  cout << "vector accessors (blitz++) : " << flush;
+  cout << "value before: " << vol6->at( 200, 200, 100 ) << endl;
+  ck = clock();
+  vector<int> pos6( 4, 0 );
+  int & x6t = pos6[3];
+  int & x6z = pos6[2];
+  int & x6y = pos6[1];
+  int & x6x = pos6[0];
+  for( n=0; n<nn; ++n )
+  {
+    for( x6t=0; x6t<nt; ++x6t )
+      for( x6z=0; x6z<nz; ++x6z )
+        for( x6y=0; x6y<ny; ++x6y )
+          for( x6x=0; x6x<nx; ++x6x )
+            ++vol6->at( pos6 );
+  }
+  ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
+  cout << nn << " x 8M voxels in " << ck2
+       << "s : " << sz * nn / ck2 << " vox/s" << endl;
+  cout << "value after: " << vol6->at( 200, 200, 100 ) << endl;
+
+  cout << "eumlated builtin accessors (no blitz++) : " << flush;
+  cout << "value before: " << vol6->at( 200, 200, 100 ) << endl;
+  ck = clock();
+  vector<size_t> strides6 = vol6->getStrides();
+  int16_t *data6 = &vol6->at( 0 );
+  VolumeAccessor<int16_t> acc( *vol6 );
+  for( n=0; n<nn; ++n )
+  {
+    for( t=0; t<nt; ++t )
+      for( z=0; z<nz; ++z )
+        for( y=0; y<ny; ++y )
+          for( x=0; x<nx; ++x )
+            ++acc( x, y, z, t );
+//             ++volume_at( data6, strides6, x, y, z, t );
+  }
+  ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
+  cout << nn << " x 8M voxels in " << ck2
+       << "s : " << sz * nn / ck2 << " vox/s" << endl;
+  cout << "value after: " << vol6->at( 200, 200, 100 ) << endl;
+
+  cout << "eumlated vector builtin accessors (no blitz++) : " << flush;
+  cout << "value before: " << vol6->at( 200, 200, 100 ) << endl;
+  ck = clock();
+  for( n=0; n<nn; ++n )
+  {
+    for( x6t=0; x6t<nt; ++x6t )
+      for( x6z=0; x6z<nz; ++x6z )
+        for( x6y=0; x6y<ny; ++x6y )
+          for( x6x=0; x6x<nx; ++x6x )
+            ++acc( pos6 );
+//             ++volume_at( data6, strides6, pos6 );
+  }
+  ck2 = float( clock() - ck ) / CLOCKS_PER_SEC;
+  cout << nn << " x 8M voxels in " << ck2
+       << "s : " << sz * nn / ck2 << " vox/s" << endl;
+  cout << "value after: " << vol6->at( 200, 200, 100 ) << endl;
+
   cout << "iterators : " << flush;
   ck = clock();
   Volume<int16_t>::iterator	i, e = vol6->end();

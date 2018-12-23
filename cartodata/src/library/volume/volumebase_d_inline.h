@@ -48,10 +48,14 @@ namespace carto {
   const T& Volume< T >::at( long x, long y, long z, long t ) const
   {
 #ifdef CARTO_USE_BLITZ
-    return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
+//     return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
 //     return _blitz.data()[
 //       blitz::dot( _blitz.stride(),
 //                   blitz::TinyVector<long,4>( x, y, z, t ) ) ];
+    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
+      = _blitz.stride();
+    return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
+                   + t * bstrides[3] ];
 #else
     return _items[ x + y * _lineoffset + z * _sliceoffset
                    + t * _volumeoffset ];
@@ -72,10 +76,14 @@ namespace carto {
   T& Volume< T >::at( long x, long y, long z, long t )
   {
 #ifdef CARTO_USE_BLITZ
-    return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
+//     return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
 //     return _blitz.data()[
 //       blitz::dot( _blitz.stride(),
 //                   blitz::TinyVector<long,4>( x, y, z, t ) ) ];
+    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
+      = _blitz.stride();
+    return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
+                   + t * bstrides[3] ];
 #else
     return _items[ x + y * _lineoffset + z * _sliceoffset
                    + t * _volumeoffset ];
@@ -127,13 +135,21 @@ namespace carto {
   const T & Volume< T >::at( const std::vector<int> & index ) const
   {
 #ifdef CARTO_USE_BLITZ
-    blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
-    int i, n = index.size();
-    for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
-      pos[i] = index[i];
-    for( ; i<Volume<T>::DIM_MAX; ++i )
-      pos[i] = 0;
-    return _blitz( pos );
+//     blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
+//     int i, n = index.size();
+//     for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
+//       pos[i] = index[i];
+//     for( ; i<Volume<T>::DIM_MAX; ++i )
+//       pos[i] = 0;
+//     return _blitz( pos );
+
+    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
+      = _blitz.stride();
+    size_t offset = 0;
+    int n = index.size();
+    for( int i=0; i<n; ++i )
+      offset += index[i] * bstrides[i];
+    return _blitz.dataZero()[ offset ];
 #else
     if( index.size() >= 4 )
       return at( index[0], index[1], index[2], index[3] );
@@ -150,13 +166,85 @@ namespace carto {
   T & Volume< T >::at( const std::vector<int> & index )
   {
 #ifdef CARTO_USE_BLITZ
-    blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
-    int i, n = index.size();
-    for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
-      pos[i] = index[i];
-    for( ; i<Volume<T>::DIM_MAX; ++i )
-      pos[i] = 0;
-    return _blitz( pos );
+//     blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
+//     int i, n = index.size();
+//     for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
+//       pos[i] = index[i];
+//     for( ; i<Volume<T>::DIM_MAX; ++i )
+//       pos[i] = 0;
+//     return _blitz( pos );
+
+    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+      = _blitz.stride();
+
+//     switch( index.size() )
+//     {
+//       case 1:
+//         return _blitz.dataZero()[ index[0] * strides[0] ];
+//       case 2:
+//         return _blitz.dataZero()[ index[0] * strides[0]
+//                      + index[1] * strides[1] ];
+//       case 3:
+//         return _blitz.dataZero()[ index[0] // * strides[0]
+//                      + index[1] * strides[1]
+//                      + index[2] * strides[2] ];
+//       case 4:
+//         if( strides[0] == 1 )
+//         return _blitz.dataZero()[ index[0] // * strides[0]
+//                      + index[1] * strides[1]
+//                      + index[2] * strides[2]
+//                      + index[3] * strides[3] ];
+//         else
+//         return _blitz.dataZero()[ index[0] * strides[0]
+//                      + index[1] * strides[1]
+//                      + index[2] * strides[2]
+//                      + index[3] * strides[3] ];
+//       case 5:
+//         return _blitz.dataZero()[ index[0] * strides[0]
+//                      + index[1] * strides[1]
+//                      + index[2] * strides[2]
+//                      + index[3] * strides[3]
+//                      + index[4] * strides[4] ];
+//       case 6:
+//         return _blitz.dataZero()[ index[0] * strides[0]
+//                      + index[1] * strides[1]
+//                      + index[2] * strides[2]
+//                      + index[3] * strides[3]
+//                      + index[4] * strides[4]
+//                      + index[5] * strides[5] ];
+//       case 7:
+//         return _blitz.dataZero()[ index[0] * strides[0]
+//                      + index[1] * strides[1]
+//                      + index[2] * strides[2]
+//                      + index[3] * strides[3]
+//                      + index[4] * strides[4]
+//                      + index[5] * strides[5]
+//                      + index[6] * strides[6] ];
+//       case 8:
+//         return _blitz.dataZero()[ index[0] * strides[0]
+//                      + index[1] * strides[1]
+//                      + index[2] * strides[2]
+//                      + index[3] * strides[3]
+//                      + index[4] * strides[4]
+//                      + index[5] * strides[5]
+//                      + index[6] * strides[6]
+//                      + index[7] * strides[7] ];
+//       default:
+//       {
+        size_t offset = 0;
+        for( int i=0; i!=index.size(); ++i )
+          offset += index[i] * strides[i];
+        return _blitz.dataZero()[ offset ];
+//       }
+//     }
+//
+//     return *_blitz.dataZero();
+
+//     size_t offset = 0;
+//     int n = index.size();
+//     for( int i=0; i<n; i++ )
+//       offset += index[i] * bstrides[i];
+//     return _blitz.dataZero()[ offset ];
 #else
     if( index.size() >= 4 )
       return at( index[0], index[1], index[2], index[3] );
