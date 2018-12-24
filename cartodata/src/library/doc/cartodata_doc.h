@@ -247,17 +247,17 @@ namespace carto
   (support for the general N-dimension case, support for views inside larger
   volumes) is using line_NDIterator.
 
-  For comparison, here are some tests results on a Core i7-46000U CPU (laptop) using different compilers on linux and trying different types of implementations. The reference (factor 1.) was actually 4.2e+08 voxels/s using iterators with gcc 4.9. The implementation choice was taken as the best between implementations (marked with a star), and depends on the compiler:
+  For comparison, here are some tests results on a Core i7-4600U 2.1GHz CPU (laptop) using different compilers on linux and trying different types of implementations, all running on the same machine. The reference (factor 1.) was actually 4.2e+08 voxels/s using iterators with gcc 4.9. The implementation choice was taken as the best between implementations (marked with a star), and depends on the compiler. It can be seen that there are striking behavior changes between compilers. Moreover it seems that there are also different behaviors using different machines / processors, so the choices we have made might not be the best ones for every machine. However for now they are hard-coded using preprocessor #if directives.
 
   Iteration type                  | gcc 4.9 | gcc 6  | clang 3.8 | clang 6
   --------------------------------|---------|--------|-----------|----------
   iterator                        |   1.    |  1.    |    0.9    |   0.8
   pointers                        |  10.9   | 10.9   |   10.6    |  11.2
   accessors (raw 4D)              |   4.6 * |  4.6 * |    5.4    |   5.4
-  accessors (blitz)               |  ~2     |  4.6   |   10.7 *  |  11.  *
-  vector accessor (loop)          |  ~1     |  2.1 * |    3.8 *  |   5.4 *
+  accessors (blitz)               |   4.5   |  4.6   |   10.7 *  |  11.  *
+  vector accessor (loop)          |   0.2   |  2.1 * |    3.8 *  |   5.4 *
   vector accessor (switch on dim) |   3.5 * |  1.2   |    0.5    |   0.5
-  vector accessor (blitz)         |  <0.5   |  0.7   |    0.17   |   0.2
+  vector accessor (blitz)         |   0.3   |  0.7   |    0.17   |   0.2
   NDIterator                      |   0.9   |  1.2   |    1.2    |   1.2
   line_NDIterator                 |  10.7   | 10.4   |   10.6    |  11.
 
