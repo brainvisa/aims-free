@@ -48,15 +48,19 @@ namespace carto {
   const T& Volume< T >::at( long x, long y, long z, long t ) const
   {
 #ifdef CARTO_USE_BLITZ
-//     return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
-//     return _blitz.data()[
-//       blitz::dot( _blitz.stride(),
-//                   blitz::TinyVector<long,4>( x, y, z, t ) ) ];
-
+    /* using clang, blitz++ is about 2 times more efficient than our
+       implementation and achieves performances similar to pointer iterators.
+       Using gcc on the contrary it's our implementation which is about twice
+       faster.
+     */
+#  ifdef __clang__
+    return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
+#  else
     const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
       = _blitz.stride();
     return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
                    + t * bstrides[3] ];
+#  endif
 #else
     return _items[ x + y * _lineoffset + z * _sliceoffset
                    + t * _volumeoffset ];
@@ -77,15 +81,19 @@ namespace carto {
   T& Volume< T >::at( long x, long y, long z, long t )
   {
 #ifdef CARTO_USE_BLITZ
-//     return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
-//     return _blitz.data()[
-//       blitz::dot( _blitz.stride(),
-//                   blitz::TinyVector<long,4>( x, y, z, t ) ) ];
-
+    /* using clang, blitz++ is about 2 times more efficient than our
+       implementation and achieves performances similar to pointer iterators.
+       Using gcc on the contrary it's our implementation which is about twice
+       faster.
+     */
+#  ifdef __clang__
+    return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
+#  else
     const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
       = _blitz.stride();
     return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
                    + t * bstrides[3] ];
+#  endif
 #else
     return _items[ x + y * _lineoffset + z * _sliceoffset
                    + t * _volumeoffset ];
@@ -137,6 +145,9 @@ namespace carto {
   const T & Volume< T >::at( const std::vector<int> & index ) const
   {
 #ifdef CARTO_USE_BLITZ
+    /* the blitz vector implementation with copy into a blitz TinyVector
+       seems always slower than direct use of index / strides
+     */
 //     blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
 //     int i, n = index.size();
 //     for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
@@ -145,10 +156,7 @@ namespace carto {
 //       pos[i] = 0;
 //     return _blitz( pos );
 
-    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
-      = _blitz.stride();
-
-#  if __GNUC__-0 < 5
+#  if !defined( __clang__ ) && __GNUC__-0 < 5
     /* the optimization of the accessor, and the best way to do it,
        largely depends on the compiler (or processor ?)
        For now it seems that for gcc 4.9 (on a i7 processor),
@@ -271,8 +279,9 @@ namespace carto {
     return *_blitz.dataZero();
 
 #  else
-    /* using gcc 6, the blitz++ implementation seems less efficient than a
-       regullar loop.
+    /* using gcc 6 or clang, the blitz++ implementation seems less efficient
+       than a regular loop, and the loop is more efficient that the above
+       switch-case implementation.
     */
 
     const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
@@ -299,6 +308,9 @@ namespace carto {
   T & Volume< T >::at( const std::vector<int> & index )
   {
 #ifdef CARTO_USE_BLITZ
+    /* the blitz vector implementation with copy into a blitz TinyVector
+       seems always slower than direct use of index / strides
+     */
 //     blitz::TinyVector<int, Volume<T>::DIM_MAX> pos;
 //     int i, n = index.size();
 //     for( i=0; i<n && i<Volume<T>::DIM_MAX; ++i )
@@ -307,7 +319,7 @@ namespace carto {
 //       pos[i] = 0;
 //     return _blitz( pos );
 
-#  if __GNUC__-0 < 5
+#  if !defined( __clang__ ) && __GNUC__-0 < 5
     /* the optimization of the accessor, and the best way to do it,
        largely depends on the compiler (or processor ?)
        For now it seems that for gcc 4.9 (on a i7 processor),
@@ -430,10 +442,10 @@ namespace carto {
     return *_blitz.dataZero();
 
 #  else
-    /* using gcc 6, the blitz++ implementation seems less efficient than a
-       regullar loop.
+    /* using gcc 6 or clang, the blitz++ implementation seems less efficient
+       than a regular loop, and the loop is more efficient that the above
+       switch-case implementation.
     */
-
     const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
       = _blitz.stride();
 

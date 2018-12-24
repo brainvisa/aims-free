@@ -280,6 +280,7 @@ namespace carto
     /// Warning: this operator is not virtual, so may not have the expected
     /// result on inherited classes (see old VolumeView)
     const T& operator()( long x, long y = 0, long z = 0, long t = 0 ) const;
+//     T& operator() ( long x );
     T& operator() ( long x, long y = 0, long z = 0, long t = 0 );
     const T& at( long x, long y = 0, long z = 0, long t = 0 ) const;
     T& at( long x, long y = 0, long z = 0, long t = 0 );
