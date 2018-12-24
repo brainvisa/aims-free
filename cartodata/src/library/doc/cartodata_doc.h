@@ -238,14 +238,30 @@ namespace carto
   Iteration type                        | Perf. | N-D support | view support
   --------------------------------------|-------|-------------|-------------
   Volume::iterator with blitz++ support |   1.  |     yes     |     yes
-  pointers                              |  20.  |     yes     |      no
-  accessors with blitz++ support        |   5.  |      no     |     yes
-  NDIterator                            |   1.2 |     yes     |     yes
-  line_NDIterator                       |  18.  |     yes     |     yes
+  pointers                              |  10.  |     yes     |      no
+  accessors with blitz++ support        |  5-10 |      no     |     yes
+  NDIterator                            |   1.  |     yes     |     yes
+  line_NDIterator                       |  10.  |     yes     |     yes
 
   Thus in most cases the best compromise between performance and flexibility
   (support for the general N-dimension case, support for views inside larger
   volumes) is using line_NDIterator.
+
+  For comparison, here are some tests results on a Core i7-46000U CPU (laptop) using different compilers on linux and trying different types of implementations. The reference (factor 1.) was actually 4.2e+08 voxels/s using iterators with gcc 4.9. The implementation choice was taken as the best between implementations (marked with a star), and depends on the compiler:
+
+  Iteration type                  | gcc 4.9 | gcc 6  | clang 3.8 | clang 6
+  --------------------------------|---------|--------|-----------|----------
+  iterator                        |   1.    |  1.    |    0.9    |   0.8
+  pointers                        |  10.9   | 10.9   |   10.6    |  11.2
+  accessors (raw 4D)              |   4.6 * |  4.6 * |    5.4    |   5.4
+  accessors (blitz)               |  ~2     |  4.6   |   10.7 *  |  11.  *
+  vector accessor (loop)          |  ~1     |  2.1 * |    3.8 *  |   5.4 *
+  vector accessor (switch on dim) |   3.5 * |  1.2   |    0.5    |   0.5
+  vector accessor (blitz)         |  <0.5   |  0.7   |    0.17   |   0.2
+  NDIterator                      |   0.9   |  1.2   |    1.2    |   1.2
+  line_NDIterator                 |  10.7   | 10.4   |   10.6    |  11.
+
+
 
 */
 
