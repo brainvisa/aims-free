@@ -175,6 +175,10 @@ namespace carto {
     T& operator() ( const Position4Di & position );
     const T& at( const Position4Di & position ) const;
     T& at( const Position4Di & position );
+    const T& operator() ( const Position & position ) const;
+    T& operator() ( const Position & position );
+    const T& at( const Position & position ) const;
+    T& at( const Position & position );
 
     //========================================================================
     //   INIT / ALLOCATION

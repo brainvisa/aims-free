@@ -294,6 +294,34 @@ namespace carto {
     return (*this)->at(position);
   }
 
+  template <typename T>
+  inline
+  const T& VolumeRef<T>::operator() ( const Position & position ) const
+  {
+    return (**this)(position);
+  }
+
+  template <typename T>
+  inline
+  T& VolumeRef<T>::operator() ( const Position & position )
+  {
+    return (**this)(position);
+  }
+
+  template <typename T>
+  inline
+  const T& VolumeRef<T>::at( const Position & position ) const
+  {
+    return (*this)->at(position);
+  }
+
+  template <typename T>
+  inline
+  T& VolumeRef<T>::at( const Position & position )
+  {
+    return (*this)->at(position);
+  }
+
   //==========================================================================
   //   INIT / ALLOCATION
   //==========================================================================
