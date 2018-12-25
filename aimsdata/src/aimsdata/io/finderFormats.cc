@@ -33,7 +33,6 @@
 
 #include <aims/io/finderFormats.h>
 #include <aims/io/finder.h>
-#include <aims/io/gisheader.h>
 #include <aims/io/spmheader.h>
 #ifdef VIDA_LIB
 #include <aims/io/vidaheader.h>
@@ -65,12 +64,6 @@
 using namespace aims;
 using namespace carto;
 using namespace std;
-
-
-bool FinderGisFormat::check( const string & /*filename*/, Finder & /*f*/ ) const
-{
-  return false; // disable Aims version
-}
 
 
 bool FinderSpmFormat::check( const string & filename, Finder & f ) const

@@ -123,6 +123,14 @@ namespace carto {
     rc_ptr<Volume<T> >( new Volume<T>( other, pos, size, allocContext ) )
   {}
 
+  template <typename T>
+  VolumeRef<T>::VolumeRef( rc_ptr<Volume<T> > other,
+                           const Position & pos,
+                           const Position & size,
+                           const AllocatorContext & allocContext ):
+    rc_ptr<Volume<T> >( new Volume<T>( other, pos, size, allocContext ) )
+  {}
+
   //==========================================================================
   //   VOLUME PROXY
   //==========================================================================
@@ -282,6 +290,34 @@ namespace carto {
   template <typename T>
   inline
   T& VolumeRef<T>::at( const Position4Di & position )
+  {
+    return (*this)->at(position);
+  }
+
+  template <typename T>
+  inline
+  const T& VolumeRef<T>::operator() ( const Position & position ) const
+  {
+    return (**this)(position);
+  }
+
+  template <typename T>
+  inline
+  T& VolumeRef<T>::operator() ( const Position & position )
+  {
+    return (**this)(position);
+  }
+
+  template <typename T>
+  inline
+  const T& VolumeRef<T>::at( const Position & position ) const
+  {
+    return (*this)->at(position);
+  }
+
+  template <typename T>
+  inline
+  T& VolumeRef<T>::at( const Position & position )
   {
     return (*this)->at(position);
   }

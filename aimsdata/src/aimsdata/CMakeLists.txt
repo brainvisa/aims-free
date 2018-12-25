@@ -103,9 +103,6 @@ set( _headers
     io/ge_imghdr.h
     io/genesisheader.h
     io/genesisR.h
-    io/gisheader.h
-    io/gisR.h
-    io/gisW.h
     io/graphBundlesFormat.h
     io/hieR.h
     io/imasparseheader.h
@@ -316,7 +313,6 @@ set(_aimsdata_sources
     io/finder.cc
     io/finderFormats.cc
     io/genesisheader.cc
-    io/gisheader.cc
     io/graphBundlesFormat.cc
     io/hieR.cc
     io/iooptions.cc

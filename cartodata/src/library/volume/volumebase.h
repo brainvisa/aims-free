@@ -75,7 +75,7 @@ namespace carto
 //============================================================================
 //   V O L U M E
 //============================================================================
-  /// 4D Volume main class
+  /// N-D Volume main class
   ///
   /// Since 2013 release (version 4.4), Volume and VolumeView are merged into
   /// a singleclass. Every Volume can be a view into an other volume. If it is
@@ -91,7 +91,13 @@ namespace carto
   /// the same operation between contained types is well defined.
   /// Several helper method (member and non member) are also included.
   ///
+  /// In version 4.6 Volume has extended support from 4D to N-D, still limited
+  /// to a fixed max number of dimensions at compilation time (normally set
+  /// to 8).
+  ///
   /// \sa \ref cartovolumes
+  ///
+  /// Iterating on volumes is described in \ref volume_iteration
   ///
   /// To use Volume classes on "standard" types (numeric types, on which the
   /// Volume class has already been compiled in the libraries), just include
@@ -274,6 +280,7 @@ namespace carto
     /// Warning: this operator is not virtual, so may not have the expected
     /// result on inherited classes (see old VolumeView)
     const T& operator()( long x, long y = 0, long z = 0, long t = 0 ) const;
+//     T& operator() ( long x );
     T& operator() ( long x, long y = 0, long z = 0, long t = 0 );
     const T& at( long x, long y = 0, long z = 0, long t = 0 ) const;
     T& at( long x, long y = 0, long z = 0, long t = 0 );
@@ -462,6 +469,12 @@ namespace carto
     //========================================================================
     /// Fills the volume with a given value.
     void fill( const T & value );
+    /** Fill border with a constant value
+
+        More precisely, fill the surrounding of the volume view in the
+        reference volume (if any) using the given value.
+    */
+    void fillBorder( const T & value );
     /** Copy operator.
         Care should be taken regarding the behavior of the copy operator:
         depending on the allocation mode of the copied volume, and whether it

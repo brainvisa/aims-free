@@ -131,6 +131,11 @@ namespace carto {
                         const Position4Di & pos,
                         const Position4Di & size = Position4Di( -1, -1, -1, -1 ),
                         const AllocatorContext & allocContext = AllocatorContext() );
+    explicit VolumeRef( rc_ptr<Volume<T> > other,
+                        const Position & pos,
+                        const Position & size = Position(),
+                        const AllocatorContext & allocContext
+                          = AllocatorContext() );
 
     //========================================================================
     //   VOLUME PROXY
@@ -170,6 +175,10 @@ namespace carto {
     T& operator() ( const Position4Di & position );
     const T& at( const Position4Di & position ) const;
     T& at( const Position4Di & position );
+    const T& operator() ( const Position & position ) const;
+    T& operator() ( const Position & position );
+    const T& at( const Position & position ) const;
+    T& at( const Position & position );
 
     //========================================================================
     //   INIT / ALLOCATION

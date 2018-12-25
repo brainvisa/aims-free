@@ -46,13 +46,6 @@
 namespace aims
 {
 
-  class FinderGisFormat : public FinderFormat
-  {
-  public:
-    virtual ~FinderGisFormat() {}
-    virtual bool check( const std::string & filename, Finder & f ) const;
-  };
-
   class FinderSpmFormat : public FinderFormat
   {
   public:
