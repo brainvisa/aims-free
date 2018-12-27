@@ -45,18 +45,18 @@ template<typename O> void MeshToVoxelsResampler<O>::fill_header(
 PythonHeader &hdr, O &output, const AimsVector<float,3> & offset, float spacing)
 const
 {
-	std::vector<float>		voxel_size(3, spacing);
-	std::vector<std::string>	refs(1, "to_mesh");
-	std::vector<std::vector<float> >trans;
-	Motion				mot;
-	mot.setToIdentity();
-	mot.translation() = offset;
-	trans.push_back( mot.toVector() );
+  std::vector<float>		voxel_size(3, spacing);
+  std::vector<std::string>	refs(1, "to_mesh");
+  std::vector<std::vector<float> >trans;
+  Motion				mot;
+  mot.setToIdentity();
+  mot.setTranslation( offset );
+  trans.push_back( mot.toVector() );
 
-	hdr.setProperty("voxel_size", voxel_size);
-	hdr.setProperty("referentials", refs);
-	hdr.setProperty("transformations", trans);
-	output.setSizeXYZT(spacing, spacing, spacing, 1.);
+  hdr.setProperty("voxel_size", voxel_size);
+  hdr.setProperty("referentials", refs);
+  hdr.setProperty("transformations", trans);
+  output.setSizeXYZT(spacing, spacing, spacing, 1.);
 }
 
 /** Ad-hoc covering of voxels, then test if there own to the resulting mesh

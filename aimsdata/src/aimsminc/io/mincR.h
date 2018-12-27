@@ -434,9 +434,9 @@ namespace aims
     s2m = flip * s2m;
 
     // fix offsets
-    s2m.translation()[0] = data.dimX() - 1;
-    s2m.translation()[1] = data.dimY() - 1;
-    s2m.translation()[2] = data.dimZ() - 1;
+    s2m.matrix()(0, 3) = data.dimX() - 1;
+    s2m.matrix()(1, 3) = data.dimY() - 1;
+    s2m.matrix()(2, 3) = data.dimZ() - 1;
 
     Point4df p( 0.F, 0.F, 0.F, 1.F );
     Point3df ptrans = s2m.transform( Point3df( p[ vdimindex[0] ],

@@ -264,17 +264,17 @@ Object TrackvisBundleReader::readHeaderStream( istream & file )
   if( !invert_x )
   {
     aims_s2m.rotation()( 0, 0 ) = -1;
-    aims_s2m.translation()[0] = dim[0] - 1;
+    aims_s2m.matrix()(0, 3) = dim[0] - 1;
   }
   if( !invert_y )
   {
     aims_s2m.rotation()( 1, 1 ) = -1;
-    aims_s2m.translation()[1] = dim[1] - 1;
+    aims_s2m.matrix()(1, 3) = dim[1] - 1;
   }
   if( !invert_z )
   {
     aims_s2m.rotation()( 2, 2 ) = -1;
-    aims_s2m.translation()[2] = dim[2] - 1;
+    aims_s2m.matrix()(2, 3) = dim[2] - 1;
   }
   // TODO: handle flips in s2m
   header->setProperty( "storage_to_memory", aims_s2m.toVector() );

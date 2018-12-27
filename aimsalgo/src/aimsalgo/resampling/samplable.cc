@@ -33,7 +33,6 @@
 
 #include <aims/resampling/samplable.h>
 
-using namespace aims;
 using namespace aimsalgo;
 
 /** The virtual template class fo which samplable classes must inherit from.

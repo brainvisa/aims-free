@@ -237,9 +237,9 @@ set( _headers
 # to be undefined when library exceed size limit
 # (size limit is probably 64MB, but it is not )
 set( _aimsdata_0_sources
-    vector/vector2d.cc
-    vector/vector3d.cc
-    vector/vector4d.cc
+#     vector/vector2d.cc
+#     vector/vector3d.cc
+#     vector/vector4d.cc
 )
 
 set(_aimsdata_sources
@@ -399,7 +399,6 @@ set(_aimsdata_sources
     sparsematrix/sparseMatrixItemW.cc
     sparsematrix/sparsematrixutil.cc
     sparsematrix/sparseordensematrix.cc
-    transformation/transformation.cc
     transformation/transformation_chain.cc
     transformation/affinetransformation3d.cc
     utility/boundingbox.cc
@@ -422,26 +421,28 @@ if( NOT LIBKDTREE_FOUND )
 endif()
 set(AIMSDATA_HEADERS ${_headers} PARENT_SCOPE)
 
-add_library( aimsdata_0 SHARED ${_aimsdata_0_sources} )
-add_dependencies( aimsdata_0 ${headersTarget} )
-set_property( TARGET aimsdata_0 PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
+# add_library( aimsdata_0 SHARED ${_aimsdata_0_sources} )
+# add_dependencies( aimsdata_0 ${headersTarget} )
+# set_property( TARGET aimsdata_0 PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 
 add_library( aimsdata SHARED ${_aimsdata_sources} )
 add_dependencies( aimsdata ${headersTarget} )
 set_property( TARGET aimsdata PROPERTY VERSION ${${PROJECT_NAME}_VERSION} )
 
 if( NOT LIBKDTREE_FOUND )
-  add_dependencies( aimsdata_0 ${_kdtreeHeadersTarget} )
+#   add_dependencies( aimsdata_0 ${_kdtreeHeadersTarget} )
   add_dependencies( aimsdata ${_kdtreeHeadersTarget} )
 endif()
 
-target_link_libraries( aimsdata_0 graph cartodata )
-target_link_libraries( aimsdata aimsdata_0 )
+# target_link_libraries( aimsdata_0 graph cartodata )
+# target_link_libraries( aimsdata aimsdata_0 )
+target_link_libraries( aimsdata graph cartodata )
 
 if( WIN32 AND CMAKE_CROSSCOMPILING )
-  target_link_libraries( aimsdata_0 gnurx )
-  target_link_libraries( aimsdata )
+#   target_link_libraries( aimsdata_0 gnurx )
+#   target_link_libraries( aimsdata )
+  target_link_libraries( aimsdata gnurx )
 endif( WIN32 AND CMAKE_CROSSCOMPILING )
-BRAINVISA_INSTALL( TARGETS aimsdata aimsdata_0
+BRAINVISA_INSTALL( TARGETS aimsdata # aimsdata_0
               DESTINATION lib
               COMPONENT ${PROJECT_NAME} )

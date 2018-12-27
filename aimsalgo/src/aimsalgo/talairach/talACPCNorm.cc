@@ -61,7 +61,7 @@ Motion TalairachACPCNorm::computeTransformation( const TalairachPoints& pt )
   rotation(2, 2) = -_crossVec[ 2 ];
   _transformation.rotation() = rotation ;
   _transformation.scale( Point3df(1., 1., 1. ), Point3df(_norm, _norm, _norm) ) ;
-  _transformation.translation() = _transformation.transform(translation) ;
+  _transformation.setTranslation( _transformation.transform(translation) );
   //m.rotation().transpose() ;
   return _transformation ;
 }

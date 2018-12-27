@@ -271,7 +271,7 @@ namespace aims
           }
         std::cout << "done\n";
         // translation is in other form: t' = r^-1 * t
-        AimsData<float>	& rm = motion.rotation();
+        AffineTransformation3d::Table<float> & rm = motion.matrix();
         rm(0,0) = rot[0];
         rm(0,1) = rot[1];
         rm(0,2) = rot[2];
@@ -282,10 +282,9 @@ namespace aims
         rm(2,1) = rot[7];
         rm(2,2) = rot[8];
         Motion	mot2 = motion.inverse();
-        Point3df	& mtr = motion.translation();
-        mtr[0] = transl[0];
-        mtr[1] = transl[1];
-        mtr[2] = transl[2];
+        rm(0, 3) = transl[0];
+        rm(1, 3) = transl[1];
+        rm(2, 3) = transl[2];
 
         Point3df	t2 = mot2.transform( transl[0], transl[1], transl[2] );
         transl[0] = t2[0];

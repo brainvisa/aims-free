@@ -50,7 +50,6 @@
 // #include <aims/math/dtitensor.h>
 
 
-using namespace aims;
 using namespace soma;
 using namespace carto;
 using namespace std;

@@ -37,7 +37,7 @@
 #include <list>
 
 #include <cartobase/smart/rcptr.h>
-#include <aims/transformation/transformation.h>
+#include <soma-io/transformation/transformation.h>
 
 
 namespace aims
@@ -62,7 +62,8 @@ namespace aims
       optimizations to be implemented (e.g. composing adjacent affine
       transformations by multiplying their matrices).
    */
-class TransformationChain3d : public Transformation3d {
+class TransformationChain3d : public soma::Transformation3d
+{
 public:
   typedef std::list<carto::const_ref<Transformation3d> > ListType;
 

@@ -81,10 +81,10 @@ bool aims::TransformationChain3d::invertible() const
   return true;
 }
 
-std::unique_ptr<aims::Transformation3d>
+std::unique_ptr<soma::Transformation3d>
 aims::TransformationChain3d::getInverse() const
 {
-  std::unique_ptr<aims::Transformation3d> ret(new aims::TransformationChain3d);
+  std::unique_ptr<soma::Transformation3d> ret(new aims::TransformationChain3d);
   aims::TransformationChain3d & new_chain
     = dynamic_cast<aims::TransformationChain3d&>(*ret.get());
 

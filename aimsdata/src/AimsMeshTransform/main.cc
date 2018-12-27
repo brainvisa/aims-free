@@ -88,7 +88,7 @@ int main( int argc, const char **argv )
 	  MotionReader	mr( fileTransf );
 	  mr.read( motion );
 	}
-      AimsData<float>	& r = motion.rotation();
+      AimsData<float> r = motion.rotation();
       r(0,0) *= scaling[0];
       r(1,0) *= scaling[0];
       r(2,0) *= scaling[0];

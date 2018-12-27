@@ -1087,17 +1087,14 @@ import numpy
 
 def __toMatrix(s):
     """ This function return a copy of the transformation matrix """
-    m = numpy.identity(4)
-    t, r = s.translation(), s.rotation()
-    m[0:3, 0:3].transpose().flat = [r.value(x) for x in xrange(9)]
-    m[0:3, 3].flat = t.items()
-    return m
+    return numpy.asarray(s.affine())[:, :, 0, 0]
 
 
 def __AffineTransformation3dFromMatrix(self, value):
-    self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
-        = value[0:3, 0:3]
-    self.translation().arraydata()[:] = value[0:3, 3].flatten()
+    numpy.asarray(self.affine())[:, :, 0, 0] = value
+    #self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
+        #= value[0:3, 0:3]
+    #self.translation().arraydata()[:] = value[0:3, 3].flatten()
 
 
 def __AffineTransformation3d__init__(self, *args):
@@ -1114,14 +1111,27 @@ def __AffineTransformation3d__header(self):
     h.__motion = self
     return h
 
+
+def __AffineTransformation3d__affine(self):
+    a = self.__oldaffine__(self)._get()
+    # get a ref to self into a to prevent deletion of self
+    # warning: setting it in the refvolume is not working since the python part
+    # of the Volume object is not preserved when only manipulating rc_ptrs
+    a._trans = self
+    return a
+
+
 AffineTransformation3d.toMatrix = __toMatrix
 AffineTransformation3d.fromMatrix = __AffineTransformation3dFromMatrix
 AffineTransformation3d.__oldinit__ = AffineTransformation3d.__init__
 AffineTransformation3d.__init__ = __AffineTransformation3d__init__
 AffineTransformation3d.__oldheader__ = AffineTransformation3d.header
 AffineTransformation3d.header = __AffineTransformation3d__header
+AffineTransformation3d.__oldaffine__ = AffineTransformation3d.affine
+AffineTransformation3d.affine = __AffineTransformation3d__affine
 del __toMatrix, __AffineTransformation3dFromMatrix, \
-    __AffineTransformation3d__init__, __AffineTransformation3d__header
+    __AffineTransformation3d__init__, __AffineTransformation3d__header, \
+    __AffineTransformation3d__affine
 # backward compatibility
 Motion = AffineTransformation3d
 

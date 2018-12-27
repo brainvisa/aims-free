@@ -419,7 +419,7 @@ int main( int argc, const char **argv )
       string		filein;
       // bool		verbose = false;
       AimsApplication	app( argc, argv, "Give information about a data file "
-                           "(any file Aims can read)" );
+                            "(any file Aims can read)" );
       app.addOption( filein, "-i", "input data file" );
       // app.addOption( verbose, "-v", 
       //                "give more info if possible (reads data)", true );

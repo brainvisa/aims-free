@@ -610,11 +610,11 @@ void MincHeader::read()
       = -(int)(volume->separations[0]/fabs(volume->separations[0]));
 
   if( s2m.rotation()( 0, 0 ) < 0 )
-    s2m.translation()[0] = _dimX-1;
+    s2m.matrix()(0, 3) = _dimX-1;
   if( s2m.rotation()( 1, 1 ) < 0 )
-    s2m.translation()[1] = _dimY-1;
+    s2m.matrix()(1, 3) = _dimY-1;
   if( s2m.rotation()( 2, 2 ) < 0 )
-    s2m.translation()[2] = _dimZ-1;
+    s2m.matrix()(2, 3) = _dimZ-1;
   setProperty( "storage_to_memory", s2m.toVector() );
 
   VIO_General_transform *gt=get_voxel_to_world_transform(volume);

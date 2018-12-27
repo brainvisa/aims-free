@@ -1177,8 +1177,8 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
               normc = 0.;
               Point3df	mg = -Point3df( grav[0] * vx, grav[1] * vy, 
                                         grav[2] * vz );
-              transmot.translation() = -Point3df( grav[0] * vx, grav[1] * vy, 
-                                                  grav[2] * vz );
+              transmot.setTranslation( -Point3df( grav[0] * vx, grav[1] * vy,
+                                                  grav[2] * vz ) );
               addCovariance( *ssb, normc, &transmot );
               if( btb )
                 addCovariance( *btb, normc, &transmot );
@@ -1398,7 +1398,7 @@ void FoldGraphAttributes::makeJunctionAttributes()
         if( n >= 10 )
           {
             dirc = 0.;
-            transmot.translation() = -grav;
+            transmot.setTranslation( -grav );
             addCovariance( *jbk, dirc, &transmot );
             dirc( 1, 0 ) = dirc( 0, 1 );	// sym
             dirc( 2, 0 ) = dirc( 0, 2 );

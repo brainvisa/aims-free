@@ -319,12 +319,11 @@ Motion GraphManip::talairach( const Graph & g )
 	  rot[7] *= scl[2];
 	  rot[8] *= scl[2];
 	}
-      Point3df	& t = m.translation();
-      t[0] = rot[0] * trans[0] + rot[1] * trans[1] + rot[2] * trans[2];
-      t[1] = rot[3] * trans[0] + rot[4] * trans[1] + rot[5] * trans[2];
-      t[2] = rot[6] * trans[0] + rot[7] * trans[1] + rot[8] * trans[2];
+      AffineTransformation3d::Table<float> & r = m.matrix();
+      r[3] = rot[0] * trans[0] + rot[1] * trans[1] + rot[2] * trans[2];
+      r[7] = rot[3] * trans[0] + rot[4] * trans[1] + rot[5] * trans[2];
+      r[11] = rot[6] * trans[0] + rot[7] * trans[1] + rot[8] * trans[2];
 
-      AimsData<float>	& r = m.rotation();
       r(0,0) = rot[0];
       r(0,1) = rot[1];
       r(0,2) = rot[2];

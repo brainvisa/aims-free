@@ -53,10 +53,11 @@ public:
   Point3df transformUnitNormal( const Point3df & dir ) const;
   Point3dd transformUnitNormal( double x, double y, double z ) const;
 
-  Point3df & translation();
-  // const Point3df & translation() const;
-  AimsData_FLOAT & rotation();
-  // const AimsData_FLOAT & rotation() const;
+  Point3df translation();
+  // const Point3df translation() const;
+  AimsData_FLOAT rotation();
+  // const AimsData_FLOAT rotation() const;
+  rc_ptr_Volume_FLOAT affine();
   bool isIdentity() const;
   virtual void setToIdentity();
   aims::AffineTransformation3d inverse() const;

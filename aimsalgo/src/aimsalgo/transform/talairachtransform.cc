@@ -205,7 +205,7 @@ TalairachTransformation::withoutMaskComputation()
   _motion->scale( Point3df(scale1, scale1, scale1), Point3df(scale2, scale2, scale2) ) ;
   
   //calcul du vecteur de translation
-  _motion->translation() = AC2 - AC1 ;
+  _motion->setTranslation( AC2 - AC1 );
   
   return *_motion ;  
 }
@@ -281,7 +281,7 @@ TalairachTransformationStrategy::transformation( const vector<Point3df>& base1, 
   motion.scale( Point3df(scale1, scale1, scale1), Point3df(scale2, scale2, scale2) ) ;
   
   //calcul du vecteur de translation
-  motion.translation() = AC2 - AC1 ;
+  motion.setTranslation( AC2 - AC1 );
   
   return motion ;
 
