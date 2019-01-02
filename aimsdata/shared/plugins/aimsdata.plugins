@@ -8,7 +8,7 @@ attributes = {
     'libaimstiff.so',
     'libaimsqsqlgraphformat.so',
     'libaimsqtformats.so',
-    'libaimsminc.so',
+#    'libaimsminc.so',
     'libaimsply.so',
     'libaimsgifti.so',
     'libaimscifti.so',

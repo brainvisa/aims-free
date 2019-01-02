@@ -20,6 +20,7 @@ if sys.version_info[0] >= 3:
 
 FLOAT_DATA_TYPES = ("FLOAT", "CFLOAT", "DOUBLE", "CDOUBLE")
 NO_NAN_FORMATS = ("DICOM", )
+NO_INF_FORMATS = ["MINC", "FREESURFER (MINC)"] # Minc supports NaN but not inf
 
 class TestPyaimsIO(unittest.TestCase):
 
@@ -113,7 +114,7 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def use_format(self, vol, format, view, options={}):
-        partial_read = ['.nii', '.nii.gz', '.ima'] #, '.dcm']
+        partial_read = ['.nii', '.nii.gz', '.ima', '.mnc', '.mgh', '.mgz'] #, '.dcm']
         partial_write = ['.nii', '.ima']
         dtype = aims.typeCode(np.asarray(vol).dtype)
 
@@ -169,7 +170,14 @@ class TestPyaimsIO(unittest.TestCase):
             url_ext += '&&' + '&&'.join(['sx%d=%d' % (i + 1, n)
                                          for i, n in enumerate(view_size1)])
             vol3 = aims.read(fname + '?%s' % url_ext)
-            self.assertEqual(vol3.getSize(), view_size1)
+            volsize = list(vol3.getSize())
+            if len(volsize) > len(view_size1):
+              view_size1 = view_size1 + (1, ) * (len(volsize)
+                                                 - len(view_size1))
+            self.assertEqual(
+                vol3.getSize(), view_size1,
+                msg='partial read test for %s, size differ: %s instead of %s'
+                % (format, repr(list(vol3.getSize())), repr(view_size1)))
             vol4 = aims.VolumeView(vol, view_pos1, view_size1)
             self.assertTrue(compare_images(vol4, vol3, 'sub-volume',
                                            'patially read', thresh,
@@ -415,8 +423,11 @@ class TestPyaimsIO(unittest.TestCase):
                 for f in lf:
                     # TODO: Check that format is also readable
                     fe = format_exceptions.get(f, dict())
+
+                    emsg = 'testing dtype %s, format %s:' % (data_type, f)
  
                     exts = dsil.extensions(f)
+                    #print('ext for write type', f, ':', exts)
                     for e in exts:
                         write_pattern = fe.get('write_pattern', 
                                                'Volume_%s_%d_%s%s')
@@ -428,6 +439,10 @@ class TestPyaimsIO(unittest.TestCase):
                                     and (cmath.isnan(volumes[i].at(0))
                                          or cmath.isinf(volumes[i].at(0))) \
                                     and f in NO_NAN_FORMATS:
+                                continue
+                            if data_type in FLOAT_DATA_TYPES \
+                                    and cmath.isinf(volumes[i].at(0)) \
+                                    and f in NO_INF_FORMATS:
                                 continue
                             fl = os.path.join(self.work_dir, 
                                             write_pattern % (
@@ -449,12 +464,12 @@ class TestPyaimsIO(unittest.TestCase):
                                             ('.' + e if len(e) > 0 else '')))
                             found_files = glob.glob(fl)
 
-                            self.assertNotEqual(len(found_files), 0)
+                            self.assertNotEqual(len(found_files), 0, emsg)
                             fl = found_files[0]
 
                             if self.verbose:
-                                print('reading', 'Volume_' + data_type, 'in', f,
-                                      'from file ', fl )
+                                print('reading', 'Volume_' + data_type, 'in',
+                                      f, 'from file ', fl)
 
                             volume_read_back = aims.read(fl)
                             if (data_type in FLOAT_DATA_TYPES
@@ -462,10 +477,14 @@ class TestPyaimsIO(unittest.TestCase):
                                      or cmath.isinf(volumes[i].at(0)))):
                                 if cmath.isnan(volumes[i].at(0)):
                                     self.assertTrue(
-                                        cmath.isnan(volume_read_back.at(0)) )
+                                        cmath.isnan(volume_read_back.at(0)),
+                                        msg='value %s should be nan'
+                                        % repr(volume_read_back.at(0)))
                                 else:
                                     self.assertTrue(
-                                        cmath.isinf(volume_read_back.at(0)) )
+                                        cmath.isinf(volume_read_back.at(0)),
+                                        msg='%s value %s should be inf'
+                                        % (emsg, repr(volume_read_back.at(0))))
                             else:
                                 #self.assertTrue( (volumes[i] == volume_read_back).all() )
                                 thresh, rel_thresh \
@@ -476,7 +495,7 @@ class TestPyaimsIO(unittest.TestCase):
                                         volumes[i], volume_read_back,
                                         'Volume_' + data_type,
                                         'Volume_' + data_type,
-                                        thresh, rel_thresh))
+                                        thresh, rel_thresh), emsg)
 
         # TODO: Add tests for aims format and read-only formats
         #print('- read format')
