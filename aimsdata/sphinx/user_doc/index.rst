@@ -54,31 +54,17 @@ PyAIMS: in Python
 Sources repository
 ==================
 
-The main repository is on https://bioproj.extra.cea.fr/neurosvn/brainvisa/, and the web interface: https://bioproj.extra.cea.fr/redmine/projects/brainvisa
-
-The server here is operated by the CEA institution, and has access rules that we cannot decide to change: it requires a login and password, which is somewhat annoying for open-source software.
-
-However there is a "public" login/password to access the open-source code for reading:
-
-::
-
-  login: brainvisa
-  password: Soma2009
-
-So it is normally possible to access the repository using this kind of link:
-
-* https://brainvisa:Soma2009@bioproj.extra.cea.fr/neurosvn/brainvisa/
-* https://brainvisa:Soma2009@bioproj.extra.cea.fr/redmine/projects/brainvisa
+The main repository is now on gitHub: https://github.com/brainvisa/aims-free.
 
 
 Building sources and using AIMS for custom programs
 ===================================================
 
-Projects are mainly in C++ and Python language. As BrainVISA is modular, it is made of multiple projects, which are separated by scope, aim, maintainers, language, and licence. To build the whole thing, we needed a tool to build an aggregation of the various projects. This tool is based on `CMake <http://cmake.org>`_ but needed a higher-level tool to glue the various projects. This is the role of the **brainvisa-cmake** project of BrainVisa, and its main program, **bv_maker**.
+Projects are mainly in C++ and Python language. As BrainVISA is modular, it is made of multiple projects, which are separated by scope, aim, maintainers, language, and licence. To build the whole thing, we needed a tool to build an aggregation of the various projects. This tool is based on `CMake <http://cmake.org>`_ but needed a higher-level tool to glue the various projects. This is the role of the `brainvisa-cmake <https://github.com/brainvisa/brainvisa-cmake>` project of BrainVisa, and its main program, **bv_maker**.
 
-Instructions on how to use it are available on the sources server wen interface:
+Instructions on how to use it are available on the BrainVISa web server:
 
-  https://brainvisa:Soma2009@bioproj.extra.cea.fr/redmine/projects/brainvisa-devel/wiki
+  http://brainvisa.info/brainvisa-cmake/index.html
 
 
 Miscelaneous
