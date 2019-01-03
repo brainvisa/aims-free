@@ -60,7 +60,7 @@ The main repository is now on gitHub: https://github.com/brainvisa/aims-free.
 Building sources and using AIMS for custom programs
 ===================================================
 
-Projects are mainly in C++ and Python language. As BrainVISA is modular, it is made of multiple projects, which are separated by scope, aim, maintainers, language, and licence. To build the whole thing, we needed a tool to build an aggregation of the various projects. This tool is based on `CMake <http://cmake.org>`_ but needed a higher-level tool to glue the various projects. This is the role of the `brainvisa-cmake <https://github.com/brainvisa/brainvisa-cmake>` project of BrainVisa, and its main program, **bv_maker**.
+Projects are mainly in C++ and Python language. As BrainVISA is modular, it is made of multiple projects, which are separated by scope, aim, maintainers, language, and licence. To build the whole thing, we needed a tool to build an aggregation of the various projects. This tool is based on `CMake <http://cmake.org>`_ but needed a higher-level tool to glue the various projects. This is the role of the `brainvisa-cmake <https://github.com/brainvisa/brainvisa-cmake>`_ project of BrainVisa, and its main program, **bv_maker**.
 
 Instructions on how to use it are available on the BrainVISa web server:
 
