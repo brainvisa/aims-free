@@ -132,7 +132,7 @@ FFDApplyProc::FFDApplyProc()
 bool write_node_bucket(const FFDApplyProc& ffdproc,
                        const FfdTransformation& deformation);
 bool doVolume_special_outputs(const FFDApplyProc &ffdproc,
-                              const Transformation3d& transform);
+                              const soma::Transformation3d& transform);
 
 template <class T, class C>
 bool doVolume( Process & process, const string & fileref, Finder & )
