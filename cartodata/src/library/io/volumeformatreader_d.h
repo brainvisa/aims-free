@@ -113,7 +113,8 @@ namespace soma
     typename std::set<std::string>::iterator plast = prop.end();
     for( p = prop.begin(); p != prop.end(); ++p )
     {
-      if( options->hasProperty( *p ) ) {
+      if( options->hasProperty( *p ) )
+      {
         VolumeUtilIO<T>::read( &obj, dsi, options );
         bool convert = false;
         options->getProperty( "convert_to_aims", convert );
@@ -308,7 +309,8 @@ namespace soma
     //=== full volume size ===================================================
     localMsg( "reading full volume size..." );
     std::vector<int>  imagesize( 4, 0 );
-    try {
+    try
+    {
       // first we look for "resolutions_dimension" property
       carto::Object dim
         = dsi->header()->getProperty( "resolutions_dimension" )->getArrayItem(
@@ -318,8 +320,11 @@ namespace soma
       for( i=0; i<ndim; ++i )
       imagesize[ i ] = (int) rint( dim->getArrayItem( i )->getScalar() );
       localMsg( " -> found \"resolutions_dimension\"." );
-    } catch( ... ) {
-      try {
+    }
+    catch( ... )
+    {
+      try
+      {
         // if it doesn't work, we look for "volume_dimension"
         carto::Object dim = dsi->header()->getProperty( "volume_dimension" );
         int i, ndim = dim->size();
@@ -327,7 +332,9 @@ namespace soma
         for( i=0; i<ndim; ++i )
           imagesize[ i ] = (int) rint( dim->getArrayItem( i )->getScalar() );
         localMsg( " -> found \"volume_dimension\"." );
-      } catch( ... ) {
+      }
+      catch( ... )
+      {
         // if still nothing, we look for parent volumes
         if( parent1 && !parent1->allocatorContext().isAllocated() ) {
           imagesize = parent1->getSize();

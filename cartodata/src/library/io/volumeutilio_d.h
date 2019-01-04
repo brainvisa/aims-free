@@ -379,7 +379,8 @@ namespace soma {
 //               + carto::toString( borders[2] ) + ", "
 //               + carto::toString( borders[3] ) + " )" );
     for( dim=0; dim<ndim; ++dim )
-      if( viewframe[ dim ] == 0 )
+      if( viewframe[ dim ] == 0
+          || viewframe[ dim ] + position[ dim ] > fullsize[ dim ] )
         viewframe[ dim ] = (fullsize[ dim ] - position[ dim ]);
     localMsg( "===" );
 

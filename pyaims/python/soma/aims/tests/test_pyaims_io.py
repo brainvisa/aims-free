@@ -179,7 +179,9 @@ class TestPyaimsIO(unittest.TestCase):
                 msg='partial read test for %s, size differ: %s instead of %s'
                 % (format, repr(list(vol3.getSize())), repr(view_size1)))
             vol4 = aims.VolumeView(vol, view_pos1, view_size1)
-            self.assertTrue(compare_images(vol4, vol3, 'sub-volume',
+            self.assertTrue(compare_images(vol4, vol3,
+                                           'sub-volume %s (write, format %s)'
+                                           % (aims.typeCode(vol), format),
                                            'patially read', thresh,
                                            rel_thresh))
         if format in partial_write:
