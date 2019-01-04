@@ -300,9 +300,9 @@ AffineTransformation3d AffineTransformation3d::inverse() const
   return inv;
 }
 
-unique_ptr<Transformation3d> AffineTransformation3d::getInverse() const
+unique_ptr<soma::Transformation3d> AffineTransformation3d::getInverse() const
 {
-  return unique_ptr<Transformation3d>(new AffineTransformation3d(inverse()));
+  return unique_ptr<soma::Transformation3d>(new AffineTransformation3d(inverse()));
 }
 
 
