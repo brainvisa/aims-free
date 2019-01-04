@@ -108,8 +108,10 @@ namespace
   }
 
   void transformGraphObject( GraphObject *go,
-                             const Transformation3d & direct_transformation,
-                             const Transformation3d * inverse_transformation,
+                             const soma::Transformation3d
+                                & direct_transformation,
+                             const soma::Transformation3d
+                                * inverse_transformation,
                              const Point3df & vso,
                              vector<int> *bbmin __attribute__((__nonnull__)),
                              vector<int> *bbmax __attribute__((__nonnull__)),
@@ -190,7 +192,7 @@ namespace
   transformBucketComponentDirect(
     const BucketMap<Void>::Bucket & in_bck,
     BucketMap<Void>::Bucket * out_bck __attribute__((__nonnull__)),
-    const Transformation3d & direct_transformation,
+    const soma::Transformation3d & direct_transformation,
     Point3df in_vs,
     Point3df out_vs )
   {
@@ -216,7 +218,7 @@ namespace aims
 
 rc_ptr<BucketMap<Void> >
 transformBucketDirect( const BucketMap<Void> & bck,
-                       const Transformation3d & direct_transformation,
+                       const soma::Transformation3d & direct_transformation,
                        Point3df vvs )
 {
   if( vvs == Point3df( 0., 0., 0. ) )
@@ -245,8 +247,8 @@ transformBucketDirect( const BucketMap<Void> & bck,
 
 rc_ptr<BucketMap<Void> >
 resampleBucket( const BucketMap<Void> & bck,
-                const Transformation3d & direct_transformation,
-                const Transformation3d & inverse_transformation,
+                const soma::Transformation3d & direct_transformation,
+                const soma::Transformation3d & inverse_transformation,
                 Point3df out_vs,
                 bool also_pushforward)
 {
@@ -348,8 +350,8 @@ resampleBucket( const BucketMap<Void> & bck,
 }
 
 void transformGraph( Graph & graph,
-                     const Transformation3d & direct_transformation,
-                     const Transformation3d * inverse_transformation,
+                     const soma::Transformation3d & direct_transformation,
+                     const soma::Transformation3d * inverse_transformation,
                      Point3df out_vs )
 {
   vector<float> vs;
@@ -428,7 +430,7 @@ void transformGraph( Graph & graph,
 // Bundles
 
 BundleTransformer::
-BundleTransformer(const rc_ptr<Transformation3d>& direct_transformation)
+BundleTransformer(const rc_ptr<soma::Transformation3d>& direct_transformation)
   : BundleListener(), BundleProducer(),
     _transformation( direct_transformation )
 {
@@ -492,7 +494,10 @@ void BundleTransformer::noMoreBundle( const BundleProducer & )
 #include <aims/transform/transform_objects_d.h>
 namespace aims
 {
-template void transformMesh( AimsTimeSurface<2, Void> &, const Transformation3d & );
-template void transformMesh( AimsTimeSurface<3, Void> &, const Transformation3d & );
-template void transformMesh( AimsTimeSurface<4, Void> &, const Transformation3d & );
+template void transformMesh( AimsTimeSurface<2, Void> &,
+                             const soma::Transformation3d & );
+template void transformMesh( AimsTimeSurface<3, Void> &,
+                             const soma::Transformation3d & );
+template void transformMesh( AimsTimeSurface<4, Void> &,
+                             const soma::Transformation3d & );
 } // namespace aims
