@@ -8,12 +8,5 @@
 
 #include <soma-io/transformation/transformation.h>
 
-namespace aims
-{
-
-  typedef soma::Transformation Transformation;
-
-}
-
 #endif
 

@@ -1,4 +1,4 @@
-namespace aims
+namespace soma
 {
 
   class Transformation : carto::RCObject
@@ -30,7 +30,7 @@ a test would be difficult to implement or expensive to run.
   };
 
 
-  class Transformation3d : aims::Transformation
+  class Transformation3d : soma::Transformation
   {
 %TypeHeaderCode
 #include <aims/transformation/transformation.h>

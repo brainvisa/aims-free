@@ -79,7 +79,7 @@ setDefaultValue() can also be called to set the background value.
 The resample() methods provide stateless alternatives.
 
 You can also use arbitrary **non-affine transformations** (inheriting
-aims::Transformation3d) by using the resample_inv() family of methods.
+soma::Transformation3d) by using the resample_inv() family of methods.
 In this case, you must pass the backward transformation (*from output space to
 input space*), because of the "pulling" mechanism described above.
 
@@ -283,7 +283,7 @@ Returns
 
 
   virtual void resample_inv( const Volume_%Template1typecode% & input_data,
-                             const aims::Transformation3d & inverse_transform,
+                             const soma::Transformation3d & inverse_transform,
                              const %Template1% & background,
                              Volume_%Template1typecode% & output_data,
                              bool verbose = false ) const /ReleaseGIL/;
@@ -321,7 +321,7 @@ verbose: bool
 
 
   void resample_inv( const Volume_%Template1typecode% & input_data,
-                     const aims::Transformation3d & inverse_transform,
+                     const soma::Transformation3d & inverse_transform,
                      const %Template1% & background,
                      const Point3df & output_location,
                      %Template1% & output_value /Out/,
@@ -356,7 +356,7 @@ Returns
 %End
 
   virtual void resample_inv_to_vox( const Volume_%Template1typecode% & input_data,
-                                    const aims::Transformation3d & inverse_transform_to_vox,
+                                    const soma::Transformation3d & inverse_transform_to_vox,
                                     const %Template1% & background,
                                     Volume_%Template1typecode% & output_data,
                                     bool verbose=false ) const /ReleaseGIL/;
@@ -397,7 +397,7 @@ verbose: bool
 
 
   void resample_inv_to_vox( const Volume_%Template1typecode% & input_data,
-                            const aims::Transformation3d & inverse_transform_to_vox,
+                            const soma::Transformation3d & inverse_transform_to_vox,
                             const %Template1% & background,
                             const Point3df & output_location,
                             %Template1% & output_value /Out/,

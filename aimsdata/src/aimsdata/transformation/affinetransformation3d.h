@@ -47,10 +47,6 @@ namespace aims
   class AffineTransformation3d;
   class PythonHeader;
   class Quaternion;
-  // redeclare in namespace aims
-  typedef soma::Transformation Transformation;
-  typedef soma::Transformation3d Transformation3d;
-  typedef soma::AffineTransformation3dBase AffineTransformation3dBase;
 
   void transformBoundingBox
       ( const AffineTransformation3d &AffineTransformation3d,

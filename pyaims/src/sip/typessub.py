@@ -2576,9 +2576,9 @@ typessub = {'bool':
                'testPyType': 'pyaimsBucketMap_DOUBLE_Check',
             },
 
-            'aims::Transformation3d':
-            classInAimsNamespace(
-                'aims/transformation/transformation.h', 'Transformation3d'),
+            'soma::Transformation3d':
+            classInSomaNamespace(
+                'soma-io/transformation/transformation.h', 'Transformation3d'),
 
             'aims::AffineTransformation3d':
             classInAimsNamespace(

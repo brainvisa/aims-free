@@ -51,7 +51,7 @@ namespace aims
    */
   template <int D>
   void transformMesh( AimsTimeSurface<D, Void> & mesh,
-                      const Transformation3d & direct_transformation );
+                      const soma::Transformation3d & direct_transformation );
 
   /** Apply a spatial transformation to a BucketMap
 
@@ -67,7 +67,7 @@ namespace aims
    */
   carto::rc_ptr<BucketMap<Void> >
   transformBucketDirect( const BucketMap<Void> & bck,
-                         const Transformation3d & direct_transformation,
+                         const soma::Transformation3d & direct_transformation,
                          Point3df vs = Point3df( 0., 0., 0. ) );
 
   /** Apply a spatial transformation to a BucketMap
@@ -90,8 +90,8 @@ namespace aims
    */
   carto::rc_ptr<BucketMap<Void> >
   resampleBucket( const BucketMap<Void> & bck,
-                  const Transformation3d & direct_transformation,
-                  const Transformation3d & inverse_transformation,
+                  const soma::Transformation3d & direct_transformation,
+                  const soma::Transformation3d & inverse_transformation,
                   Point3df vs = Point3df( 0., 0., 0. ),
                   bool also_pushforward = true);
 
@@ -109,8 +109,8 @@ namespace aims
         under Morphologist/Sulci/graphmanipulation, for a complete update.}
    */
   void transformGraph( Graph & graph,
-                       const Transformation3d & direct_transformation,
-                       const Transformation3d * inverse_transformation,
+                       const soma::Transformation3d & direct_transformation,
+                       const soma::Transformation3d * inverse_transformation,
                        Point3df vs = Point3df( 0., 0., 0. ) );
 
   /** Apply a spatial transformation to fiber bundles.
@@ -125,7 +125,7 @@ namespace aims
   class BundleTransformer : public BundleListener, public BundleProducer
   {
   public:
-    BundleTransformer( const carto::rc_ptr<Transformation3d>& direct_transformation );
+    BundleTransformer( const carto::rc_ptr<soma::Transformation3d>& direct_transformation );
     virtual ~BundleTransformer();
 
     virtual void bundleStarted( const BundleProducer &, const BundleInfo & );
@@ -139,7 +139,7 @@ namespace aims
     virtual void noMoreBundle( const BundleProducer & );
 
   private:
-    carto::rc_ptr<Transformation3d> _transformation;
+    carto::rc_ptr<soma::Transformation3d> _transformation;
   };
 
 } // namespace aims

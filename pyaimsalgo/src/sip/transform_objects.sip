@@ -17,7 +17,7 @@
 */
 
   void transformMesh( AimsTimeSurface_2_VOID & mesh,
-                      const aims::Transformation3d & direct_transformation);
+                      const soma::Transformation3d & direct_transformation);
 %Docstring
 Apply a spatial transformation to a mesh (AimsTimeSurface)
 
@@ -30,7 +30,7 @@ transformation. Normals are re-calculated from the new vertex positions.
 %End
 
   void transformMesh( AimsTimeSurface_3_VOID & mesh,
-                      const aims::Transformation3d & direct_transformation );
+                      const soma::Transformation3d & direct_transformation );
 %Docstring
 Apply a spatial transformation to a mesh (AimsTimeSurface)
 
@@ -43,7 +43,7 @@ transformation. Normals are re-calculated from the new vertex positions.
 %End
 
   void transformMesh( AimsTimeSurface_4_VOID & mesh,
-                      const aims::Transformation3d & direct_transformation );
+                      const soma::Transformation3d & direct_transformation );
 %Docstring
 Apply a spatial transformation to a mesh (AimsTimeSurface)
 
@@ -57,7 +57,7 @@ transformation. Normals are re-calculated from the new vertex positions.
 
   rc_ptr_BucketMap_VOID
   transformBucketDirect( const BucketMap_VOID & bck,
-                         const aims::Transformation3d & direct_transformation,
+                         const soma::Transformation3d & direct_transformation,
                          Point3df vs = Point3df( 0., 0., 0. ) );
 %Docstring
 Apply a spatial transformation to a BucketMap
@@ -78,8 +78,8 @@ nearest-neighbour resampling.
 
   rc_ptr_BucketMap_VOID
   resampleBucket( const BucketMap_VOID & bck,
-                  const aims::Transformation3d & direct_transformation,
-                  const aims::Transformation3d & inverse_transformation,
+                  const soma::Transformation3d & direct_transformation,
+                  const soma::Transformation3d & inverse_transformation,
                   Point3df vs = Point3df( 0., 0., 0. ),
                   bool also_pushforward = true);
 %Docstring
@@ -105,8 +105,8 @@ preservation.
 %End
 
   void transformGraph( Graph & graph,
-                       const aims::Transformation3d & direct_transformation,
-                       const aims::Transformation3d * inverse_transformation,
+                       const soma::Transformation3d & direct_transformation,
+                       const soma::Transformation3d * inverse_transformation,
                        Point3df vs = Point3df( 0., 0., 0. ) );
 %Docstring
 Apply a spatial transformation to all objects contained in a Graph.

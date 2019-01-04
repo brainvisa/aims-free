@@ -67,7 +67,7 @@ Resampler<T>::Resampler()
 template <typename T>
 void Resampler<T>::
 resample_inv_to_vox( const carto::Volume< T >& inVolume,
-                     const aims::Transformation3d& inverse_transform_to_vox,
+                     const soma::Transformation3d& inverse_transform_to_vox,
                      const T& outBackground,
                      carto::Volume< T > & outVolume,
                      bool verbose ) const
@@ -135,7 +135,7 @@ resample_inv_to_vox( const carto::Volume< T >& inVolume,
 template <typename T>
 void Resampler<T>::
 resample_inv( const carto::Volume< T >& input_data,
-              const aims::Transformation3d& inverse_transform_to_mm,
+              const soma::Transformation3d& inverse_transform_to_mm,
               const T& background,
               carto::Volume< T > & output_volume,
               bool verbose ) const
@@ -157,7 +157,7 @@ resample_inv( const carto::Volume< T >& input_data,
 template <typename T>
 void Resampler<T>::
 resample_inv( const carto::Volume< T >& input_data,
-              const aims::Transformation3d& inverse_transform_to_mm,
+              const soma::Transformation3d& inverse_transform_to_mm,
               const T& background,
               const Point3df& output_location,
               T &output_value,

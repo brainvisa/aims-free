@@ -9,7 +9,7 @@ namespace aims
   //   FFD TRANSFORMATION
   //==========================================================================
 
-  class FfdTransformation: aims::Transformation3d /Abstract/
+  class FfdTransformation: soma::Transformation3d /Abstract/
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>

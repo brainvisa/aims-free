@@ -9,7 +9,7 @@ void transformBoundingBox( const aims::AffineTransformation3d &motion,
                 const Point3df & pmax1, Point3df & pmin2, Point3df & pmax2 );
 
 
-class AffineTransformation3d : aims::Transformation3d
+class AffineTransformation3d : soma::Transformation3d
 {
 %TypeHeaderCode
 #include <aims/transformation/affinetransformation3d.h>

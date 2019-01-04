@@ -132,8 +132,10 @@ ExtendedImporter().importInModule(
     [GenericHandlers.removeChildren], ['Reader_', 'Writer_'])
 ExtendedImporter().importInModule('', globals(), locals(), 'aimssip',
                                   ['aimssip.aims'])
-# move Object out of carto namespace
+# move some objects out of carto namespace
 Object = carto.Object
+Transformation = soma.Transformation
+Transformation3d = soma.Transformation3d
 
 del aims, ExtendedImporter
 

@@ -60,7 +60,7 @@ setDefaultValue() can also be called to set the background value.
 The resample() methods provide stateless alternatives.
 
 You can also use arbitrary **non-affine transformations** (inheriting
-aims::Transformation3d) by using the resample_inv() family of methods.
+soma::Transformation3d) by using the resample_inv() family of methods.
 In this case, you must pass the backward transformation (_from output space to
 input space_), because of the "pulling" mechanism described above.
 
@@ -214,7 +214,7 @@ public:
   */
   void
   resample_inv( const carto::Volume< T > &input_data,
-                const aims::Transformation3d &inverse_transform_to_mm,
+                const soma::Transformation3d &inverse_transform_to_mm,
                 const T &background, const Point3df &output_location,
                 T &output_value, int timestep ) const;
 
@@ -240,7 +240,7 @@ public:
       setDefaultValue().
   */
   void resample_inv( const carto::Volume< T >& input_data,
-                     const aims::Transformation3d& inverse_transform_to_mm,
+                     const soma::Transformation3d& inverse_transform_to_mm,
                      const T& background,
                      carto::Volume< T > & output_data,
                      bool verbose = false ) const;
@@ -264,7 +264,7 @@ public:
   */
   void
   resample_inv_to_vox( const carto::Volume< T > &input_data,
-                       const aims::Transformation3d &inverse_transform_to_vox,
+                       const soma::Transformation3d &inverse_transform_to_vox,
                        const T &background, const Point3df &output_location,
                        T &output_value, int timestep ) const
   {
@@ -300,7 +300,7 @@ public:
       point.
   */
   virtual void resample_inv_to_vox( const carto::Volume< T >& input_data,
-                                    const aims::Transformation3d& inverse_transform_to_vox,
+                                    const soma::Transformation3d& inverse_transform_to_vox,
                                     const T& background,
                                     carto::Volume< T > & output_data,
                                     bool verbose = false ) const;
@@ -335,7 +335,7 @@ protected:
   */
   virtual void
   doResample( const carto::Volume< T > &input_data,
-              const aims::Transformation3d &inverse_transform,
+              const soma::Transformation3d &inverse_transform,
               const T &background, const Point3df &output_location,
               T &output_value, int timestep ) const = 0;
 
