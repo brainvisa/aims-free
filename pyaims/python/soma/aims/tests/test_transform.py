@@ -34,6 +34,21 @@ class TestTransform(unittest.TestCase):
         self.assertTrue(np.all(mat.T.ravel() - tr.toColumnVector() == 0))
         self.assertTrue(np.max(np.abs((tr.inverse() * tr).toMatrix()
                                       - np.eye(4))) < 1e-5)
+        tr2 = aims.AffineTransformation3d()
+        tr2.setTranslation([10, 20, 30])
+        tr3 = tr * tr2
+        mat3 = np.array(
+            [[ 1.11154199e+00,  7.64620006e-02,  1.96909998e-02,
+               1.32353888e+01],
+             [-7.11669996e-02,  9.96460021e-01,  1.48040995e-01,
+               2.36587601e+01],
+             [-8.38499982e-03, -1.67618006e-01,  1.12417996e+00,
+               3.02891884e+01],
+             [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,
+               1.00000000e+00]])
+        self.assertTrue(np.max(np.abs(tr3.toMatrix() - mat3)) < 1e-5)
+        tr *= tr2
+        self.assertEqual( tr, tr3 )
 
 
 def test():
