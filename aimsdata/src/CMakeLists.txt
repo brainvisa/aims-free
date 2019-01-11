@@ -2,7 +2,6 @@
 add_subdirectory(aimsdata)
 set(HEADERS ${AIMSDATA_HEADERS})
 
-add_subdirectory(aimsgis)
 if( BUILD_ECAT )
   add_subdirectory(aimsecat)
   set(HEADERS ${HEADERS} ${AIMSECAT_HEADERS})

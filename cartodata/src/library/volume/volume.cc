@@ -46,7 +46,13 @@
 
 using namespace carto;
 
-namespace carto {
+namespace
+{
+  typedef AimsVector<float,6> vectorf6;
+}
+
+namespace carto
+{
 
 template class VolumeProxy< bool >;
 template class VolumeProxy< int8_t >;
@@ -69,6 +75,10 @@ template class VolumeProxy< std::map<int, float> >;
 template class VolumeProxy< VoxelRGB >;
 template class VolumeProxy< VoxelRGBA >;
 template class VolumeProxy< VoxelHSV >;
+template class VolumeProxy< Point3df >;
+template class VolumeProxy< Point3d >;
+template class VolumeProxy< Point2d >;
+template class VolumeProxy< vectorf6 >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class VolumeProxy< long >;
 template class VolumeProxy< unsigned long >;
@@ -95,6 +105,10 @@ template class Volume< std::map<int, float> >;
 template class Volume< VoxelRGB >;
 template class Volume< VoxelRGBA >;
 template class Volume< VoxelHSV >;
+template class Volume< Point3df >;
+template class Volume< Point3d >;
+template class Volume< Point2d >;
+template class Volume< vectorf6 >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class Volume< long >;
 template class Volume< unsigned long >;
@@ -121,6 +135,10 @@ template class VolumeRef< std::map<int, float> >;
 template class VolumeRef< VoxelRGB >;
 template class VolumeRef< VoxelRGBA >;
 template class VolumeRef< VoxelHSV >;
+template class VolumeRef< Point3df >;
+template class VolumeRef< Point3d >;
+template class VolumeRef< Point2d >;
+template class VolumeRef< vectorf6 >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class VolumeRef< long >;
 template class VolumeRef< unsigned long >;
@@ -147,6 +165,10 @@ template class Creator<Volume< std::map<int, float> > >;
 template class Creator< Volume< VoxelRGB > >;
 template class Creator< Volume< VoxelRGBA > >;
 template class Creator< Volume< VoxelHSV > >;
+template class Creator< Volume< Point3df > >;
+template class Creator< Volume< Point3d > >;
+template class Creator< Volume< Point2d > >;
+template class Creator< Volume< vectorf6 > >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class Creator< Volume< long > >;
 template class Creator< Volume< unsigned long > >;
@@ -173,6 +195,10 @@ template class Creator<VolumeRef< std::map<int, float> > >;
 template class Creator< VolumeRef< VoxelRGB > >;
 template class Creator< VolumeRef< VoxelRGBA > >;
 template class Creator< VolumeRef< VoxelHSV > >;
+template class Creator< VolumeRef< Point3df > >;
+template class Creator< VolumeRef< Point3d > >;
+template class Creator< VolumeRef< Point2d > >;
+template class Creator< VolumeRef< vectorf6 > >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class Creator<VolumeRef< long > >;
 template class Creator<VolumeRef< unsigned long > >;
@@ -324,9 +350,44 @@ instantiate_volutil2( cdouble, std::minus<cdouble> )
 instantiate_volutil2( cdouble, std::multiplies<cdouble> )
 instantiate_volutil2( cdouble, std::divides<cdouble> )
 
+instantiate_volutil( VoxelRGB )
+instantiate_volutil2( VoxelRGB, std::plus<VoxelRGB> )
+instantiate_volutil2( VoxelRGB, std::minus<VoxelRGB> )
+instantiate_volutil2( VoxelRGB, std::multiplies<VoxelRGB> )
+instantiate_volutil2( VoxelRGB, std::divides<VoxelRGB> )
+
+instantiate_volutil( VoxelRGBA )
+instantiate_volutil2( VoxelRGBA, std::plus<VoxelRGBA> )
+instantiate_volutil2( VoxelRGBA, std::minus<VoxelRGBA> )
+instantiate_volutil2( VoxelRGBA, std::multiplies<VoxelRGBA> )
+instantiate_volutil2( VoxelRGBA, std::divides<VoxelRGBA> )
+
+instantiate_volutil( VoxelHSV )
+instantiate_volutil2( VoxelHSV, std::plus<VoxelHSV> )
+instantiate_volutil2( VoxelHSV, std::minus<VoxelHSV> )
+instantiate_volutil2( VoxelHSV, std::multiplies<VoxelHSV> )
+instantiate_volutil2( VoxelHSV, std::divides<VoxelHSV> )
+
+instantiate_volutil( Point3df )
+instantiate_volutil2( Point3df, std::plus<Point3df> )
+instantiate_volutil2( Point3df, std::minus<Point3df> )
+
+instantiate_volutil( Point3d )
+instantiate_volutil2( Point3d, std::plus<Point3d> )
+instantiate_volutil2( Point3d, std::minus<Point3d> )
+
+instantiate_volutil( Point2d )
+instantiate_volutil2( Point2d, std::plus<Point2d> )
+instantiate_volutil2( Point2d, std::minus<Point2d> )
+
+instantiate_volutil( vectorf6 )
+instantiate_volutil2( vectorf6, std::plus<vectorf6> )
+instantiate_volutil2( vectorf6, std::minus<vectorf6> )
+
 #endif
 
-namespace carto {
+namespace carto
+{
 
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< uint8_t > )
@@ -346,6 +407,10 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelRGB > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelRGBA > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelHSV > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3df > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3d > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point2d > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< vectorf6 > )
 #ifdef CARTO_LONG_IS_DISTINCT
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
@@ -369,6 +434,10 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelRGB > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelRGBA > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelHSV > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3d > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point2d > > )
+  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< vectorf6 > > )
 #ifdef CARTO_LONG_IS_DISTINCT
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
@@ -424,7 +493,8 @@ namespace carto {
 // Streams
 //----------------------------------------------------------------------------
 
-namespace carto {
+namespace carto
+{
 
   //--- VolumeOStream --------------------------------------------------------
 

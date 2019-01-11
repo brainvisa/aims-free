@@ -1,6 +1,5 @@
 attributes = {
   'release_plugins' : [
-    'libaimsgis.so',
     'libaimsvida.so',
     'libaimsecat.so',
     'libaimsfdf.so',
