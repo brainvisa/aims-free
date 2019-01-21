@@ -390,7 +390,7 @@ void transformGraph( Graph & graph,
   graph.setProperty( "boundingbox_max", bbmax );
 
   if(inverse_transformation_missing) {
-    std::clog << "Warning: no inverse transformation provided, buckets were "
+    std::cout << "Warning: no inverse transformation provided, buckets were "
       "transformed using a push-forward transformation only (this should work "
       "fine when downsampling, but will create holes when upsampling)."
       << std::endl;
@@ -416,7 +416,7 @@ void transformGraph( Graph & graph,
   // FIXME: We should remove attributes whose values are obsolete, but we
   // cannot remove them altogether because some of these attributes are
   // mandatory.
-  std::clog << "Warning: Graph attributes (volume, area, thickness...) "
+  std::cout << "Warning: Graph attributes (volume, area, thickness...) "
     "have not been updated according to the transformation. "
     "Please run AimsFoldArgAtt to fix the values of basic attributes, or the "
     "CorticalFoldsGraphUpgradeFromOld BrainVisa process, which can be found "
