@@ -428,7 +428,7 @@ void transformGraph( Graph & graph,
 // Bundles
 
 BundleTransformer::
-BundleTransformer(const rc_ptr<Transformation3d>& direct_transformation)
+BundleTransformer(const const_ref<Transformation3d>& direct_transformation)
   : BundleListener(), BundleProducer(),
     _transformation( direct_transformation )
 {

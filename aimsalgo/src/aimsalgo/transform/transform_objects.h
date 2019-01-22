@@ -125,7 +125,7 @@ namespace aims
   class BundleTransformer : public BundleListener, public BundleProducer
   {
   public:
-    BundleTransformer( const carto::rc_ptr<Transformation3d>& direct_transformation );
+    BundleTransformer( const carto::const_ref<Transformation3d>& direct_transformation );
     virtual ~BundleTransformer();
 
     virtual void bundleStarted( const BundleProducer &, const BundleInfo & );
@@ -139,7 +139,7 @@ namespace aims
     virtual void noMoreBundle( const BundleProducer & );
 
   private:
-    carto::rc_ptr<Transformation3d> _transformation;
+    carto::const_ref<Transformation3d> _transformation;
   };
 
 } // namespace aims
