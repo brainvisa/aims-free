@@ -33,6 +33,9 @@
 
 #include <aims/transformation/transformation_chain.h>
 
+#include <aims/transformation/affinetransformation3d.h>
+
+
 void aims::TransformationChain3d::
 push_back(const carto::const_ref<Transformation3d>& transformation)
 {
@@ -136,4 +139,75 @@ Point3df aims::TransformationChain3d::
 transformFloat( float x, float y, float z ) const
 {
   return transformPoint3df(Point3df(x, y, z));
+}
+
+carto::const_ref<aims::Transformation3d>
+aims::TransformationChain3d::simplify() const
+{
+  // 1. flat_chain is built by applying simplify() recursively to sub-chains,
+  // and inserting the elements of the resulting chains in a flat chain.
+  TransformationChain3d flat_chain;
+  for(ListType::const_iterator it = _transformations.begin() ;
+      it != _transformations.end() ;
+      ++it)
+  {
+    carto::const_ref<Transformation3d> current_trans = *it;
+    // 1a. Simplify sub-chains
+    {
+      const TransformationChain3d* current_trans_chain
+        = dynamic_cast<const TransformationChain3d*>(current_trans.pointer());
+      if(current_trans_chain) {
+        current_trans = carto::const_ref<TransformationChain3d>(current_trans_chain->simplify());
+      }
+    }
+    // 1b. Insert the (simplified) transformations into a flat chain
+    const TransformationChain3d* current_subchain
+      = dynamic_cast<const TransformationChain3d*>(current_trans.pointer());
+    if(current_subchain) {
+      for(ListType::const_iterator sub_it = current_subchain->_transformations.begin();
+          sub_it != current_subchain->_transformations.end();
+          ++sub_it) {
+        flat_chain.push_back(*sub_it);
+      }
+    } else {
+      if(!current_trans->isIdentity()) {
+        flat_chain.push_back(current_trans);
+      }
+    }
+  }
+
+  // 2. Now that we have a flat chain, we compose consecutive affine
+  // transformations.
+  carto::rc_ptr<TransformationChain3d> new_chain(new TransformationChain3d);
+  AffineTransformation3d accumulated_trans; // initialized to identity
+  for(ListType::const_reverse_iterator rit
+        = flat_chain._transformations.rbegin();
+      rit != flat_chain._transformations.rend();
+      ++rit)
+  {
+    carto::const_ref<Transformation3d> current_trans = *rit;
+
+    const AffineTransformation3d* current_affine_trans
+      = dynamic_cast<const AffineTransformation3d*>(current_trans.pointer());
+    if(current_affine_trans) {
+      accumulated_trans *= *current_affine_trans;
+    } else {
+      if(!accumulated_trans.isIdentity()) {
+        carto::const_ref<AffineTransformation3d> to_insert(new AffineTransformation3d(accumulated_trans));
+        new_chain->push_front(to_insert);
+        accumulated_trans.setToIdentity();
+      }
+      new_chain->push_front(current_trans);
+    }
+  }
+  if(!accumulated_trans.isIdentity()) {
+    carto::const_ref<AffineTransformation3d> to_insert(new AffineTransformation3d(accumulated_trans));
+    new_chain->push_front(to_insert);
+  }
+
+  if(new_chain->_transformations.size() == 1) {
+    return *new_chain->_transformations.begin();
+  }
+
+  return new_chain;
 }

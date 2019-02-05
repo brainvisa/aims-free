@@ -79,6 +79,36 @@ public:
   bool invertible() const CARTO_OVERRIDE;
   std::unique_ptr<Transformation3d> getInverse() const CARTO_OVERRIDE;
 
+  /** Compute a simpler transformation that is equivalent to the chain.
+
+      The transformation chain is simplified by applying the following rules,
+      so that it should provide equivalent results to the original chain, up to
+      numerical precision:
+
+      - The simplification is applied recursively to any sub-chain.
+
+      - Transformations of the simplified sub-chains are inserted at the top
+        level (i.e. the simplified chain is flat, it contains no sub-chains).
+
+      - Consecutive affine transformations are composed using matrix
+        multiplication.
+
+      - Identity transforms (i.e. transforms for which
+        Transformation::isIdentity() returns true) are removed from the list.
+
+      - If the simplified chain consists of only one transformation, no chain
+        is returned, the contained transformation is returned directly.
+        However, the transformation is not necessarily the same instance that
+        was inserted in the chain (it will be a copy if it is an
+        AffineTransformation3d).
+
+      - If the simplified chain is empty, an empty chain is returned.
+
+      No deep copy is made, so the result can contain pointers to the same
+      transformations as the original chain.
+   */
+  carto::const_ref<Transformation3d> simplify() const;
+
 protected:
   ListType _transformations;
 
