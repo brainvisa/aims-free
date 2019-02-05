@@ -120,7 +120,7 @@ public:
   virtual AffineTransformation3d &operator = ( const carto::Object mat );
   virtual AffineTransformation3d &operator = ( const aims::Quaternion & quat );
 
-  virtual bool operator == ( const AffineTransformation3d & );
+  virtual bool operator == ( const AffineTransformation3d & ) const;
 
   AffineTransformation3d & operator *= ( const AffineTransformation3d & trans );
   // AffineTransformation3d & operator += ( const AffineTransformation3d & trans );

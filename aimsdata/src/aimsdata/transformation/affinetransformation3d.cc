@@ -289,7 +289,7 @@ AffineTransformation3d& AffineTransformation3d::operator = ( const Quaternion & 
 
 
 //-----------------------------------------------------------------------------
-bool AffineTransformation3d::operator == ( const AffineTransformation3d & other )
+bool AffineTransformation3d::operator == ( const AffineTransformation3d & other ) const
 {
   static float eps = 1e-5;
   return fabs( _translation[0] - other._translation[0] ) < eps
