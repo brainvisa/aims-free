@@ -270,6 +270,18 @@ void adjust_header_transforms(const ApplyTransformProc& proc,
     header.removeProperty("referential");
   } catch(...) {}
 
+  // The transformation to Talairach stored in Graphs is no longer valid,
+  // delete it.
+  try {
+    header.removeProperty("Talairach_rotation");
+  } catch(...) {}
+  try {
+    header.removeProperty("Talairach_scale");
+  } catch(...) {}
+  try {
+    header.removeProperty("Talairach_translation");
+  } catch(...) {}
+
   const AffineTransformation3d * affine_inverse_transform
     = dynamic_cast<const AffineTransformation3d*>(inverse_transform);
   if(affine_inverse_transform) {
