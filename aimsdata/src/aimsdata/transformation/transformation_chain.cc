@@ -185,9 +185,10 @@ aims::TransformationChain3d::simplify() const
   // transformations.
   carto::rc_ptr<TransformationChain3d> new_chain(new TransformationChain3d);
   AffineTransformation3d accumulated_trans; // initialized to identity
+  const ListType::const_reverse_iterator rend = flat_chain._transformations.rend();
   for(ListType::const_reverse_iterator rit
         = flat_chain._transformations.rbegin();
-      rit != flat_chain._transformations.rend();
+      rit != rend;
       ++rit)
   {
     carto::const_ref<Transformation3d> current_trans = *rit;
