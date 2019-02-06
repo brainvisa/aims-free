@@ -522,6 +522,12 @@ bool doVolume(Process & process, const string & fileref, Finder &)
     = get_resampler<T>(proc.interp_type);
 
   adjust_header_transforms(proc, out.header(), inverse_transform.pointer());
+  // The UUID should NOT be preserved, because the output is a different file
+  // from the input. Keeping it triggers the infamous "duplicate UUID" problem
+  // in BrainVISA/Axon...
+  try {
+    out.header().removeProperty("uuid");
+  } catch(...) {}
 
   // Perform resampling
   cout << "Resampling " << DataTypeCode<Volume<T> >::name() << "... ";
