@@ -562,6 +562,13 @@ bool doMesh(Process & process, const string & fileref, Finder &)
   }
 
   adjust_header_transforms(proc, mesh.header(), inverse_transform.pointer());
+  // The UUID should NOT be preserved, because the output is a different file
+  // from the input. Keeping it triggers the infamous "duplicate UUID" problem
+  // in BrainVISA/Axon...
+  try {
+    graph->removeProperty("uuid");
+  } catch(...) {}
+
 
   // Perform the transformation
   cout << "Transforming " << DataTypeCode<MeshType>::name() << "... ";
@@ -622,6 +629,13 @@ bool doBucket(Process & process, const string & fileref, Finder &)
   cout << endl;
 
   out->setHeader(input_bucket.header());
+  // The UUID should NOT be preserved, because the output is a different file
+  // from the input. Keeping it triggers the infamous "duplicate UUID" problem
+  // in BrainVISA/Axon...
+  try {
+    out->header()->removeProperty("uuid");
+  } catch(...) {}
+
   adjust_header_transforms(proc, out->header(), inverse_transform.pointer());
 
   // Write the resampled volume
@@ -710,7 +724,17 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
     }
   }
 
-  adjust_header_transforms(proc, *graph, inverse_transform.pointer());
+  adjust_header_transforms(proc, *graph,
+                           inverse_transform.pointer());
+  // The UUID should NOT be preserved, because the output is a different file
+  // from the input. Keeping it triggers the infamous "duplicate UUID" problem
+  // in BrainVISA/Axon...
+  try {
+    graph->removeProperty("uuid");
+  } catch(...) {}
+  try {
+    graph->getProperty("header")->removeProperty("uuid");
+  } catch(...) {}
 
   // Perform the graph transformation
   cout << "Resampling Graph... ";
