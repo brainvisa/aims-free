@@ -566,7 +566,7 @@ bool doMesh(Process & process, const string & fileref, Finder &)
   // from the input. Keeping it triggers the infamous "duplicate UUID" problem
   // in BrainVISA/Axon...
   try {
-    graph->removeProperty("uuid");
+    mesh.header().removeProperty("uuid");
   } catch(...) {}
 
 
@@ -633,7 +633,7 @@ bool doBucket(Process & process, const string & fileref, Finder &)
   // from the input. Keeping it triggers the infamous "duplicate UUID" problem
   // in BrainVISA/Axon...
   try {
-    out->header()->removeProperty("uuid");
+    out->header().removeProperty("uuid");
   } catch(...) {}
 
   adjust_header_transforms(proc, out->header(), inverse_transform.pointer());
