@@ -162,7 +162,7 @@ aims::TransformationChain3d::simplify() const
       const TransformationChain3d* current_trans_chain
         = dynamic_cast<const TransformationChain3d*>(current_trans.pointer());
       if(current_trans_chain) {
-        current_trans = carto::const_ref<TransformationChain3d>(current_trans_chain->simplify());
+        current_trans = current_trans_chain->simplify();
       }
     }
     // 1b. Insert the (simplified) transformations into a flat chain
