@@ -36,6 +36,11 @@
 #include <aims/transformation/affinetransformation3d.h>
 
 
+aims::TransformationChain3d::TransformationChain3d()
+  : _transformations()
+{
+}
+
 void aims::TransformationChain3d::
 push_back(const carto::const_ref<Transformation3d>& transformation)
 {

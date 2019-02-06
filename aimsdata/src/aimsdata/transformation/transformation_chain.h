@@ -66,6 +66,8 @@ class TransformationChain3d : public Transformation3d {
 public:
   typedef std::list<carto::const_ref<Transformation3d> > ListType;
 
+  TransformationChain3d();
+
   /** Add a transformation to the back of the list (applied last) */
   void push_back(const carto::const_ref<Transformation3d>& transformation);
   /** Remove the last transformation from the list */
