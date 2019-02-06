@@ -6,6 +6,7 @@
 #include <aims/io/datatypecode.h>                           // DataTypeCode<T>
 #include <aims/io/io_g.h>                          // Reader - Writer - Finder
 #include <aims/mesh/surfaceOperation.h>            // SurfaceManip::meshVolume
+#include <aims/graph/graphmanip.h>                           // storeTalairach
 #include <aims/transformation/affinetransformation3d.h> // AffineTransformation3d
 #include <aims/transformation/transformation_chain.h> // TransformationChain3d
 #include <aims/transform/transform_objects.h>
@@ -53,6 +54,7 @@ public:
   vector<string> inverse_transform_list;
   string  interp_type;
   string  background_value;
+  bool    keep_transforms;
   string  reference;
   int32_t dx;
   int32_t dy;
@@ -68,6 +70,7 @@ ApplyTransformProc::ApplyTransformProc()
   : Process(),
     interp_type("linear"),
     background_value("0"),
+    keep_transforms(false),
     dx(0), dy(0), dz(0),
     sx(0.), sy(0.), sz(0.),
     vfinterp("linear")
@@ -199,6 +202,124 @@ void set_geometry(ApplyTransformProc& proc,
   }
 }
 
+void
+insert_transformation_to_old_referential(DictionaryInterface& header,
+                                         const AffineTransformation3d& inverse_transform,
+                                         std::string old_referential_id)
+{
+  if(old_referential_id.empty()) {
+    old_referential_id = "Coordinates aligned to another file or to "
+      "anatomical truth";
+  }
+
+  typedef std::vector<std::string> ReferentialVectorType;
+  typedef std::vector<std::vector<float> > TransformVectorType;
+  carto::Object new_referentials_obj
+    = carto::Object::value<ReferentialVectorType>();
+  carto::Object new_transforms_obj
+    = carto::Object::value<TransformVectorType>();
+  ReferentialVectorType& new_referentials
+    = new_referentials_obj->value<ReferentialVectorType>();
+  TransformVectorType& new_transforms
+    = new_transforms_obj->value<TransformVectorType>();
+
+  // Copy the existing referentials and transformations
+  try {
+    carto::Object old_referentials, old_transforms;
+    old_referentials = header.getProperty("referentials");
+    old_transforms = header.getProperty("transformations");
+    new_referentials.reserve(old_referentials->size() + 1);
+    new_transforms.reserve(old_transforms->size() + 1);
+
+    for( carto::Object tit = old_transforms->objectIterator(),
+           rit = old_referentials->objectIterator();
+         tit->isValid() && rit->isValid();
+         tit->next(), rit->next() ) {
+      new_referentials.push_back(rit->currentValue()->getString());
+      AffineTransformation3d transform(tit->currentValue());
+      new_transforms.push_back(transform.toVector());
+    }
+  } catch(...) {
+    // An error occured while reading the existing transformations, discard
+    // what has been read until now.
+    new_referentials.clear();
+    new_transforms.clear();
+  }
+
+  // Insert a transformation to the old referential at the end
+  new_referentials.push_back(old_referential_id);
+  new_transforms.push_back(inverse_transform.toVector());
+  header.setProperty("referentials", new_referentials_obj);
+  header.setProperty("transformations", new_transforms_obj);
+}
+
+void adjust_header_transforms(const ApplyTransformProc& proc,
+                              DictionaryInterface& header,
+                              const Transformation3d * inverse_transform)
+{
+  if(proc.keep_transforms)
+    return;  // the user explicitly requested to do nothing
+  if(inverse_transform && inverse_transform->isIdentity())
+    return;  // the transformations remain valid
+
+  std::string old_referential;
+  try {
+    old_referential = header.getProperty("referential")->getString();
+  } catch(...) {}
+  // The referential UUID used by Axon is no longer valid
+  try {
+    header.removeProperty("referential");
+  } catch(...) {}
+
+  const AffineTransformation3d * affine_inverse_transform
+    = dynamic_cast<const AffineTransformation3d*>(inverse_transform);
+  if(affine_inverse_transform) {
+    try {
+      carto::Object old_transforms = header.getProperty("transformations");
+
+      typedef std::vector<std::vector<float> > TransformVectorType;
+      carto::Object new_transforms_obj
+        = carto::Object::value<TransformVectorType>();
+      TransformVectorType& new_transforms
+        = new_transforms_obj->value<TransformVectorType>();
+      new_transforms.reserve(old_transforms->size());
+
+      for( carto::Object it = old_transforms->objectIterator();
+           it->isValid();
+           it->next() ) {
+        carto::Object old_transform_obj = it->currentValue();
+        AffineTransformation3d transform(old_transform_obj);
+        transform *= *affine_inverse_transform;
+        new_transforms.push_back(transform.toVector());
+      }
+
+      header.setProperty("transformations", new_transforms_obj);
+
+      insert_transformation_to_old_referential(header,
+                                               *affine_inverse_transform,
+                                               old_referential);
+      return; // success
+    } catch( ... ) {
+      // remove all transformations by falling through to reach the code below
+    }
+  }
+
+  // If we cannot reduce the transformation to an affine transformation, or if
+  // an error occurs while updating the transformations, the best we can do is
+  // to remove all pre-existing transformations.
+  try {
+    header.removeProperty("transformations");
+  } catch(...) {}
+  try {
+    header.removeProperty("referentials");
+  } catch(...) {}
+
+  if(affine_inverse_transform) {
+    insert_transformation_to_old_referential(header, *affine_inverse_transform,
+                                             old_referential);
+  }
+}
+
 
 // Throws FatalError in case of failure
 rc_ptr<FfdTransformation>
@@ -290,15 +411,13 @@ load_transformation(const string &filename_arg,
 
 
 // FatalError is thrown if the transformations cannot be loaded properly.
-std::pair<rc_ptr<Transformation3d>, rc_ptr<Transformation3d> >
+std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
 load_transformations(const ApplyTransformProc& proc)
 {
-  std::pair<rc_ptr<Transformation3d>, rc_ptr<Transformation3d> > ret;
+  std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > ret;
 
   if(!proc.direct_transform_list.empty()) {
-    ret.first.reset(new TransformationChain3d);
-    TransformationChain3d & direct_chain
-      = dynamic_cast<TransformationChain3d&>(*ret.first);
+    TransformationChain3d direct_chain;
 
     for(vector<string>::const_iterator filename_it = proc.direct_transform_list.begin();
         filename_it != proc.direct_transform_list.end();
@@ -308,12 +427,11 @@ load_transformations(const ApplyTransformProc& proc)
         = load_transformation(*filename_it, proc);
       direct_chain.push_back(transform);
     }
+    ret.first = direct_chain.simplify();
   }
 
   if(!proc.inverse_transform_list.empty()) {
-    ret.second.reset(new TransformationChain3d);
-    TransformationChain3d & inverse_chain
-      = dynamic_cast<TransformationChain3d&>(*ret.second);
+    TransformationChain3d inverse_chain;
 
     for(vector<string>::const_iterator filename_it = proc.inverse_transform_list.begin();
         filename_it != proc.inverse_transform_list.end();
@@ -323,21 +441,21 @@ load_transformations(const ApplyTransformProc& proc)
         = load_transformation(*filename_it, proc);
       inverse_chain.push_back(transform);
     }
+    ret.second = inverse_chain.simplify();
   }
 
-
-  if(!ret.first && !ret.second) {
+  if(ret.first.isNull() && ret.second.isNull()) {
     clog << "No transformation provided, identity will be used." << endl;
-    ret.first.reset(new TransformationChain3d);
-    ret.second.reset(new TransformationChain3d);
+    ret.first = const_ref<Transformation3d>(new TransformationChain3d);
+    ret.second = const_ref<Transformation3d>(new TransformationChain3d);
   }
 
-  if(!ret.first && ret.second->invertible()) {
-    ret.first = rc_ptr<Transformation3d>(ret.second->getInverse());
+  if(ret.first.isNull() && ret.second->invertible()) {
+    ret.first = const_ref<Transformation3d>(ret.second->getInverse());
   }
 
-  if(!ret.second && ret.first->invertible()) {
-    ret.second = rc_ptr<Transformation3d>(ret.first->getInverse());
+  if(ret.second.isNull() && ret.first->invertible()) {
+    ret.second = const_ref<Transformation3d>(ret.first->getInverse());
   }
 
   return ret;
@@ -359,12 +477,12 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   stringTo(proc.background_value, background_value);
 
   // Load the transformation
-  rc_ptr<Transformation3d> inverse_transform;
+  const_ref<Transformation3d> inverse_transform;
   {
-    std::pair<rc_ptr<Transformation3d>, rc_ptr<Transformation3d> > transforms
+    std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
       = load_transformations(proc);
     inverse_transform = transforms.second;
-    if(!inverse_transform) {
+    if(inverse_transform.isNull()) {
       clog << "Error: no inverse transform provided" << endl;
       return false;
     }
@@ -380,6 +498,7 @@ bool doVolume(Process & process, const string & fileref, Finder &)
 
   // Prepare the output resampled volume
   Volume<T> out(proc.dx, proc.dy, proc.dz, input_image.getSizeT());
+  out.copyHeaderFrom(input_image.header());
   vector<float> vs(4);
   vs[0] = proc.sx;
   vs[1] = proc.sy;
@@ -390,6 +509,14 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   // Prepare the resampler
   unique_ptr<aims::Resampler<T> > resampler
     = get_resampler<T>(proc.interp_type);
+
+  adjust_header_transforms(proc, out.header(), inverse_transform.pointer());
+  // The UUID should NOT be preserved, because the output is a different file
+  // from the input. Keeping it triggers the infamous "duplicate UUID" problem
+  // in BrainVISA/Axon...
+  try {
+    out.header().removeProperty("uuid");
+  } catch(...) {}
 
   // Perform resampling
   cout << "Resampling " << DataTypeCode<Volume<T> >::name() << "... ";
@@ -417,16 +544,26 @@ bool doMesh(Process & process, const string & fileref, Finder &)
   input_reader.read(mesh);
 
   // Load the transformation
-  rc_ptr<Transformation3d> direct_transform;
+  const_ref<Transformation3d> direct_transform, inverse_transform;
   {
-    std::pair<rc_ptr<Transformation3d>, rc_ptr<Transformation3d> > transforms
+    std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
       = load_transformations(proc);
     direct_transform = transforms.first;
-    if(!direct_transform) {
+    inverse_transform = transforms.second; // allowed to be null
+    if(direct_transform.isNull()) {
       clog << "Error: no direct transform provided" << endl;
       return false;
     }
   }
+
+  adjust_header_transforms(proc, mesh.header(), inverse_transform.pointer());
+  // The UUID should NOT be preserved, because the output is a different file
+  // from the input. Keeping it triggers the infamous "duplicate UUID" problem
+  // in BrainVISA/Axon...
+  try {
+    mesh.header().removeProperty("uuid");
+  } catch(...) {}
+
 
   // Perform the transformation
   cout << "Transforming " << DataTypeCode<MeshType>::name() << "... ";
@@ -457,13 +594,13 @@ bool doBucket(Process & process, const string & fileref, Finder &)
        << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
 
   // Load the transformation
-  rc_ptr<Transformation3d> direct_transform, inverse_transform;
+  const_ref<Transformation3d> direct_transform, inverse_transform;
   {
-    std::pair<rc_ptr<Transformation3d>, rc_ptr<Transformation3d> > transforms
+    std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
       = load_transformations(proc);
     direct_transform = transforms.first;
-    inverse_transform = transforms.second;
-    if(!direct_transform) {
+    inverse_transform = transforms.second; // allowed to be null
+    if(direct_transform.isNull()) {
       clog << "Error: no direct transform provided" << endl;
       return false;
     }
@@ -472,7 +609,8 @@ bool doBucket(Process & process, const string & fileref, Finder &)
   // Perform the transformation
   // TODO: add an option to use pushforward, pullback, or both
   rc_ptr<BucketMap<Void> > out;
-  if(inverse_transform) {
+
+  if(!inverse_transform.isNull()) {
     cout << "Resampling " << DataTypeCode<BucketType>::name()
          << " with the combined pushforward and pullback methods... ";
     out = resampleBucket(input_bucket, *direct_transform, *inverse_transform,
@@ -484,6 +622,16 @@ bool doBucket(Process & process, const string & fileref, Finder &)
                                 Point3df(proc.sx, proc.sy, proc.sz));
   }
   cout << endl;
+
+  out->setHeader(input_bucket.header());
+  // The UUID should NOT be preserved, because the output is a different file
+  // from the input. Keeping it triggers the infamous "duplicate UUID" problem
+  // in BrainVISA/Axon...
+  try {
+    out->header().removeProperty("uuid");
+  } catch(...) {}
+
+  adjust_header_transforms(proc, out->header(), inverse_transform.pointer());
 
   // Write the resampled volume
   Writer<BucketMap<Void> > w3(proc.output);
@@ -501,16 +649,23 @@ bool doBundles(Process & process, const string & fileref, Finder &)
   aims::BundleReader bundle_reader(fileref);
 
   // Load the transformation
-  rc_ptr<Transformation3d> direct_transform;
+  const_ref<Transformation3d> direct_transform, inverse_transform;
   {
-    std::pair<rc_ptr<Transformation3d>, rc_ptr<Transformation3d> > transforms
+    std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
       = load_transformations(proc);
     direct_transform = transforms.first;
-    if(!direct_transform) {
+    inverse_transform = transforms.second; // allowed to be null
+    if(direct_transform.isNull()) {
       clog << "Error: no direct transform provided" << endl;
       return false;
     }
   }
+
+  // FIXME: there is no API to set the output header, so the transformations
+  // will just be ignored for Bundles.
+  //
+  // carto::Object header = bundle_reader.readHeader();
+  // adjust_header_transforms(proc, header, inverse_transform.pointer());
 
   // Prepare the Bundles processing chain
   BundleTransformer transformer(direct_transform);
@@ -552,22 +707,39 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
 
   // Load the transformation
   // TODO: add an option to use pushforward, pullback, or both for Buckets
-  rc_ptr<Transformation3d> direct_transform, inverse_transform;
+  const_ref<Transformation3d> direct_transform, inverse_transform;
   {
-    std::pair<rc_ptr<Transformation3d>, rc_ptr<Transformation3d> > transforms
+    std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
       = load_transformations(proc);
     direct_transform = transforms.first;
-    inverse_transform = transforms.second;
-    if(!direct_transform) {
+    inverse_transform = transforms.second; // allowed to be null
+    if(direct_transform.isNull()) {
       clog << "Error: no direct transform provided" << endl;
       return false;
     }
   }
 
+  adjust_header_transforms(proc, *graph,
+                           inverse_transform.pointer());
+  // Update the transformation to Talairach stored in the old attributes
+  // (Talairach_rotation, Talairach_translation, and Talairach_scale) to
+  // reflect the updated transformations.
+  GraphManip::storeTalairach(*graph, GraphManip::talairach(*graph));
+
+  // The UUID should NOT be preserved, because the output is a different file
+  // from the input. Keeping it triggers the infamous "duplicate UUID" problem
+  // in BrainVISA/Axon...
+  try {
+    graph->removeProperty("uuid");
+  } catch(...) {}
+  try {
+    graph->getProperty("header")->removeProperty("uuid");
+  } catch(...) {}
+
   // Perform the graph transformation
   cout << "Resampling Graph... ";
-  transformGraph(*graph, *direct_transform, inverse_transform.get(),
-                  Point3df(proc.sx, proc.sy, proc.sz));
+  transformGraph(*graph, *direct_transform, inverse_transform.pointer(),
+                 Point3df(proc.sx, proc.sy, proc.sz));
   cout << endl;
 
   // Write the output Graph
@@ -598,12 +770,12 @@ bool doPoints(ApplyTransformProc & proc, const string & filename)
   }
 
   // Load the transformation
-  rc_ptr<Transformation3d> direct_transform;
+  const_ref<Transformation3d> direct_transform;
   {
-    std::pair<rc_ptr<Transformation3d>, rc_ptr<Transformation3d> > transforms
+    std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
       = load_transformations(proc);
     direct_transform = transforms.first;
-    if(!direct_transform) {
+    if(direct_transform.isNull()) {
       clog << "Error: no direct transform provided" << endl;
       return false;
     }
@@ -729,6 +901,8 @@ int main(int argc, const char **argv)
                   "Volume used to define output voxel size and volume "
                   "dimension (values are overridden by --dx, --dy, "
                   "--dz, --sx, --sy and --sz)", true);
+    app.addOption(proc.keep_transforms, "--keep-transforms",
+                  "Preserve the transformations of the input image", true);
     app.addOption(proc.vfinterp, "--vectorinterpolation",
                   "Interpolation used for vector field transformations "
                   "(a.k.a. FFD): l[inear], c[ubic] [default = linear]", true);

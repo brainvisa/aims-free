@@ -258,7 +258,7 @@ AffineTransformation3d& AffineTransformation3d::operator = (
 
 //-----------------------------------------------------------------------------
 bool AffineTransformation3d::operator == (
-  const AffineTransformation3d & other )
+  const AffineTransformation3d & other ) const
 {
   return AffineTransformation3dBase::operator == ( other );
 }
