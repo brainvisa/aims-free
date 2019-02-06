@@ -126,10 +126,37 @@ namespace aims
     typedef BucketMap<Void>* 
     (*CreateBucketFunc)( GraphObject*, const std::string & );
 
-    /// extract Talairach transformation (graph -> Talairach)
+    /** Extract Talairach transformation (graph -> Talairach)
+
+        The transformation is returned from one of these sources, in order of
+        priority:
+
+        1. The "transformations" attribute, corresponding to the
+           "Talairach-AC/PC-Anatomist" referential.
+
+        2. The legacy "Talairach_translation", "Talairach_rotation", and
+           "Talairach_scale" attributes.
+
+        3. Otherwise, identity is returned.
+     */
     static Motion talairach( const Graph & g );
-    /// stores Talairach transformation in graph
-    static void storeTalairach( Graph & g, const Motion & m );
+    /** Store Talairach transformation in graph
+
+        The transformation is written in the modern attributes ("referentials"
+        and "transformations"). It is also written to the legacy attributes
+        ("Talairach_translation", "Talairach_rotation", and "Talairach_scale"),
+        if these are already present, or if force_old_attributes is true.
+     */
+    static void storeTalairach( Graph & g, const Motion & m,
+                                bool force_old_attributes=false);
+    /** Test if a Graph has the old Talairach attributes
+
+        These attributes are "Talairach_translation", "Talairach_rotation"
+        (both required), and "Talairach_scale" (optional). The modern way of
+        storing the transformation to Talairach is in the "referentials" and
+        "transformations" attributes.
+     */
+    static bool hasOldTalairachTransform( const Graph & g );
     /** converts internal representations of graph nodes from buckets to 
         volume
         \return false if it fails: if all buckets have not been read from disk

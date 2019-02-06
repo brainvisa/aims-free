@@ -267,6 +267,7 @@ void LowLevelArgReader::mergeMinf( Graph & g, const PythonHeader & hdr )
   Object d = Object::value( Dictionary() );
   d->copyProperties( Object::reference( hdr ) );
   g.setProperty( "header", d );
+  mergeTransformations( g, hdr );
 }
 
 
@@ -277,28 +278,22 @@ void LowLevelArgReader::mergeTransformations( Graph & g,
   {
     Object refs = hdr.getProperty( "referentials" );
     Object trans = hdr.getProperty( "transformations" );
-    if( refs && trans && refs->size() == trans->size() )
-    {
-      g.setProperty( "referentials", refs );
-      g.setProperty( "transformations", trans );
+    g.setProperty( "referentials", refs );
+    g.setProperty( "transformations", trans );
 
-      Object iref = refs->objectIterator();
-      Object itr = trans->objectIterator();
-      for( ; iref->isValid() && itr->isValid(); iref->next(), itr->next() )
-      {
-        if( iref->currentValue()->getString()
-            == StandardReferentials::acPcReferential() )
-        {
-          AffineTransformation3d tal( itr->currentValue() );
-          GraphManip::storeTalairach( g, tal );
-          break; // all done
-        }
-      }
-      // now remove those from graph["header"]
-      Object gh = g.getProperty( "header" );
-      gh->removeProperty( "referentials" );
-      gh->removeProperty( "transformations" );
+    // If the graph has the old Talairach transform attributes, ensure that
+    // they are consistent with the Talairach transform that may be contained
+    // in the referentials/transformations attributes.
+    if( GraphManip::hasOldTalairachTransform(g) ) {
+      AffineTransformation3d tal(GraphManip::talairach(g));
+      GraphManip::storeTalairach(g, tal);
     }
+
+    // remove these properties from graph["header"] to avoid duplicates that
+    // could get out of sync
+    Object gh = g.getProperty( "header" );
+    gh->removeProperty( "referentials" );
+    gh->removeProperty( "transformations" );
   }
   catch( ... )
   {
@@ -308,7 +303,8 @@ void LowLevelArgReader::mergeTransformations( Graph & g,
     Object ref = hdr.getProperty( "referential" );
     g.setProperty( "referential", ref );
 
-    // now remove this property from graph["header"]
+    // remove this property from graph["header"] to avoid having a duplicate
+    // that could get out of sync
     Object gh = g.getProperty( "header" );
     gh->removeProperty( "referential" );
   }
@@ -316,12 +312,3 @@ void LowLevelArgReader::mergeTransformations( Graph & g,
   {
   }
 }
-
-
-void LowLevelStandardArgReader::mergeMinf( Graph & g,
-                                           const PythonHeader & hdr )
-{
-  LowLevelArgReader::mergeMinf(g, hdr );
-  LowLevelArgReader::mergeTransformations( g, hdr );
-}
-
