@@ -6,6 +6,7 @@
 #include <aims/io/datatypecode.h>                           // DataTypeCode<T>
 #include <aims/io/io_g.h>                          // Reader - Writer - Finder
 #include <aims/mesh/surfaceOperation.h>            // SurfaceManip::meshVolume
+#include <aims/graph/graphmanip.h>                           // storeTalairach
 #include <aims/transformation/affinetransformation3d.h> // AffineTransformation3d
 #include <aims/transformation/transformation_chain.h> // TransformationChain3d
 #include <aims/transform/transform_objects.h>
@@ -268,18 +269,6 @@ void adjust_header_transforms(const ApplyTransformProc& proc,
   // The referential UUID used by Axon is no longer valid
   try {
     header.removeProperty("referential");
-  } catch(...) {}
-
-  // The transformation to Talairach stored in Graphs is no longer valid,
-  // delete it.
-  try {
-    header.removeProperty("Talairach_rotation");
-  } catch(...) {}
-  try {
-    header.removeProperty("Talairach_scale");
-  } catch(...) {}
-  try {
-    header.removeProperty("Talairach_translation");
   } catch(...) {}
 
   const AffineTransformation3d * affine_inverse_transform
@@ -732,6 +721,11 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
 
   adjust_header_transforms(proc, *graph,
                            inverse_transform.pointer());
+  // Update the transformation to Talairach stored in the old attributes
+  // (Talairach_rotation, Talairach_translation, and Talairach_scale) to
+  // reflect the updated transformations.
+  GraphManip::storeTalairach(*graph, GraphManip::talairach(*graph));
+
   // The UUID should NOT be preserved, because the output is a different file
   // from the input. Keeping it triggers the infamous "duplicate UUID" problem
   // in BrainVISA/Axon...
