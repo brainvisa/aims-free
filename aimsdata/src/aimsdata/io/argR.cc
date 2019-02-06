@@ -307,6 +307,10 @@ void LowLevelArgReader::mergeTransformations( Graph & g,
   {
     Object ref = hdr.getProperty( "referential" );
     g.setProperty( "referential", ref );
+
+    // now remove this property from graph["header"]
+    Object gh = g.getProperty( "header" );
+    gh->removeProperty( "referential" );
   }
   catch( ... )
   {
