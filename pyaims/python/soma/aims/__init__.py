@@ -174,7 +174,7 @@ except:
 
 
 def RCObject_init(self, *args):
-    # print('RCObject init')
+    # print('RCObject init:', self)
     carto.RCObject.__oldinit__(self, *args)
     carto.RCObject._setupRC(self)
 
