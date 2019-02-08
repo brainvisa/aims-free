@@ -9,6 +9,32 @@ class RCObject
 // #define PYAIMS_DEBUG_RC
 %End
 
+%ConvertToSubClassCode
+  // std::cout << "ConvertToSubClassCode RCObject " << sipCpp << std::endl;
+  // sipType = sipType_carto_RCObject;
+  if( dynamic_cast<carto::SharedObject *>( sipCpp ) )
+  {
+    sipType = sipType_carto_SharedObject;
+    *sipCppRet = dynamic_cast<carto::SharedObject *>( sipCpp );
+    // std::cout << "I'm a SharedObject: " << sipCppRet << std::endl;
+  }
+  else if( dynamic_cast<carto::PropertySet *>( sipCpp ) )
+  {
+    sipType = sipType_carto_PropertySet;
+    *sipCppRet = dynamic_cast<carto::PropertySet *>( sipCpp );
+  }
+  else if( dynamic_cast<carto::GenericObject *>( sipCpp ) )
+  {
+    sipType = sipType_carto_GenericObject;
+    *sipCppRet = dynamic_cast<carto::GenericObject *>( sipCpp );
+  }
+  else if( dynamic_cast<carto::MutexedObject *>( sipCpp ) )
+  {
+    sipType = sipType_carto_MutexedObject;
+    *sipCppRet = dynamic_cast<carto::MutexedObject *>( sipCpp );
+  }
+%End
+
 public:
   RCObject( const carto::RCObject & );
   virtual ~RCObject();
