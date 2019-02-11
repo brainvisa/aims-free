@@ -60,10 +60,37 @@ namespace
     return carto::const_ref<T>(&object, true);
   }
 
+  // Functions with attributes are declared separately from their definition,
+  // because "attributes are not allowed on a function-definition" (GCC 4.9).
+  void
+  transformBucketComponentDirect(
+    const BucketMap<Void>::Bucket & in_bck,
+    BucketMap<Void>::Bucket * out_bck,
+    const Transformation3d & direct_transformation,
+    Point3df in_vs,
+    Point3df out_vs ) __attribute__((__nonnull__(2)));
   void update_bounding_box_bucket(
     const BucketMap<Void>::Bucket &bck,
-    vector<int> *bbmin __attribute__((__nonnull__)),
-    vector<int> *bbmax __attribute__((__nonnull__)))
+    vector<int> *bbmin,
+    vector<int> *bbmax) __attribute__((__nonnull__(2, 3)));
+  void transformGraphObject( GraphObject *go,
+                             const Transformation3d & direct_transformation,
+                             const Transformation3d * inverse_transformation,
+                             const Point3df & vso,
+                             vector<int> *bbmin,
+                             vector<int> *bbmax,
+                             bool *inverse_transformation_missing = NULL)
+    __attribute__((__nonnull__(1, 5, 6)));
+  void update_bounding_box_bucket(
+    const BucketMap<Void> &bck,
+    vector<int> *bbmin,
+    vector<int> *bbmax) __attribute__((__nonnull__(2, 3)));
+
+
+  void update_bounding_box_bucket(
+    const BucketMap<Void>::Bucket &bck,
+    vector<int> *bbmin,
+    vector<int> *bbmax)
   {
     BucketMap<Void>::Bucket::const_iterator
       ip, ep = bck.end();
@@ -98,8 +125,8 @@ namespace
 
   void update_bounding_box_bucket(
     const BucketMap<Void> &bck,
-    vector<int> *bbmin __attribute__((__nonnull__)),
-    vector<int> *bbmax __attribute__((__nonnull__)))
+    vector<int> *bbmin,
+    vector<int> *bbmax)
   {
     BucketMap<Void>::const_iterator ip, ep = bck.end();
     for( ip=bck.begin(); ip!=ep; ++ip ) {
@@ -111,9 +138,9 @@ namespace
                              const Transformation3d & direct_transformation,
                              const Transformation3d * inverse_transformation,
                              const Point3df & vso,
-                             vector<int> *bbmin __attribute__((__nonnull__)),
-                             vector<int> *bbmax __attribute__((__nonnull__)),
-                             bool *inverse_transformation_missing = NULL)
+                             vector<int> *bbmin,
+                             vector<int> *bbmax,
+                             bool *inverse_transformation_missing)
   {
     assert(bbmin);
     assert(bbmax);
@@ -189,7 +216,7 @@ namespace
   void
   transformBucketComponentDirect(
     const BucketMap<Void>::Bucket & in_bck,
-    BucketMap<Void>::Bucket * out_bck __attribute__((__nonnull__)),
+    BucketMap<Void>::Bucket * out_bck,
     const Transformation3d & direct_transformation,
     Point3df in_vs,
     Point3df out_vs )
