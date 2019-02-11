@@ -34,6 +34,7 @@
 #include <cartobase/object/object_d.h>
 #include <aims/graph/graphmanip_d.h>
 #include <aims/resampling/motion.h>
+#include <aims/resampling/standardreferentials.h>
 #include <aims/io/aimsGraphR.h>
 #include <aims/io/datatypecode.h>
 #include <aims/mesh/surface.h>
@@ -297,8 +298,37 @@ namespace aims
 
 // GraphManip class
 
+bool GraphManip::hasOldTalairachTransform( const Graph & g )
+{
+  return g.hasProperty( "Talairach_translation" )
+    && g.hasProperty( "Talairach_rotation" );
+}
+
+
 Motion GraphManip::talairach( const Graph & g )
 {
+  // First, try to read a Talairach transformation stored in the modern way
+  // (using the "referentials" and "transformations" attributes).
+  try
+  {
+    Object refs = g.getProperty( "referentials" );
+    Object trans = g.getProperty( "transformations" );
+    for( Object iref = refs->objectIterator(),
+           itr = trans->objectIterator();
+         iref->isValid() && itr->isValid();
+         iref->next(), itr->next() )
+    {
+      if( iref->currentValue()->getString()
+          == StandardReferentials::acPcReferential() )
+      {
+        AffineTransformation3d tal( itr->currentValue() );
+        return tal;
+      }
+    }
+  } catch(...) {}
+
+  // Read a Talairach transformation stored in the old attributes
+  // (Talairach_translation, Talairach_rotation, and Talairach_scale).
   Motion		m;
 
   vector<float>	trans, rot, scl;
@@ -339,27 +369,87 @@ Motion GraphManip::talairach( const Graph & g )
 }
 
 
-void GraphManip::storeTalairach( Graph & g, const Motion & m )
+void GraphManip::storeTalairach( Graph & g, const Motion & m,
+                                 bool force_old_attributes )
 {
-  vector<float>		rot(9), scl(3, 1.), trans(3);
-  Motion		minv = m.inverse();
-  const AimsData<float>	& r = m.rotation();
-  rot[0] = r( 0, 0 );
-  rot[1] = r( 0, 1 );
-  rot[2] = r( 0, 2 );
-  rot[3] = r( 1, 0 );
-  rot[4] = r( 1, 1 );
-  rot[5] = r( 1, 2 );
-  rot[6] = r( 2, 0 );
-  rot[7] = r( 2, 1 );
-  rot[8] = r( 2, 2 );
-  Point3df	t = -minv.translation();
-  trans[0] = t[0];
-  trans[1] = t[1];
-  trans[2] = t[2];
-  g.setProperty( "Talairach_rotation", rot );
-  g.setProperty( "Talairach_translation", trans );
-  g.setProperty( "Talairach_scale", scl );
+  // Part 1: store the transformation in the modern way (using the
+  // "referentials" and "transformations" attributes)
+  typedef std::vector<std::string> ReferentialVectorType;
+  typedef std::vector<std::vector<float> > TransformVectorType;
+  carto::Object new_referentials_obj
+    = carto::Object::value<ReferentialVectorType>();
+  carto::Object new_transforms_obj
+    = carto::Object::value<TransformVectorType>();
+  ReferentialVectorType& new_referentials
+    = new_referentials_obj->value<ReferentialVectorType>();
+  TransformVectorType& new_transforms
+    = new_transforms_obj->value<TransformVectorType>();
+
+  // Copy the existing referentials and transformations, amending the Talairach
+  // transformation on the fly.
+  bool transformation_stored = false;
+  try {
+    carto::Object old_referentials, old_transforms;
+    old_referentials = g.getProperty("referentials");
+    old_transforms = g.getProperty("transformations");
+    new_referentials.reserve(old_referentials->size() + 1);
+    new_transforms.reserve(old_transforms->size() + 1);
+
+    for( carto::Object tit = old_transforms->objectIterator(),
+           rit = old_referentials->objectIterator();
+         tit->isValid() && rit->isValid();
+         tit->next(), rit->next() ) {
+      const std::string old_referential = rit->currentValue()->getString();
+      AffineTransformation3d transform(tit->currentValue());
+      if(old_referential == StandardReferentials::acPcReferential())
+      {
+        transform = m;
+        transformation_stored = true;
+      }
+      new_referentials.push_back(old_referential);
+      new_transforms.push_back(transform.toVector());
+    }
+  } catch(...) {
+    // An error occured while reading the existing transformations, discard
+    // what has been read until now.
+    new_referentials.clear();
+    new_transforms.clear();
+    transformation_stored = false;
+  }
+
+  // If no transformation to Talairach was present in the old list, append it.
+  if(!transformation_stored)
+  {
+    new_referentials.push_back(StandardReferentials::acPcReferential());
+    new_transforms.push_back(m.toVector());
+  }
+  g.setProperty("referentials", new_referentials_obj);
+  g.setProperty("transformations", new_transforms_obj);
+
+  // Part 2: store the transformation in the old attributes only if they are
+  // already present, or if forced.
+  if(force_old_attributes || hasOldTalairachTransform(g))
+  {
+    vector<float>		rot(9), scl(3, 1.), trans(3);
+    Motion		minv = m.inverse();
+    const AimsData<float>	& r = m.rotation();
+    rot[0] = r( 0, 0 );
+    rot[1] = r( 0, 1 );
+    rot[2] = r( 0, 2 );
+    rot[3] = r( 1, 0 );
+    rot[4] = r( 1, 1 );
+    rot[5] = r( 1, 2 );
+    rot[6] = r( 2, 0 );
+    rot[7] = r( 2, 1 );
+    rot[8] = r( 2, 2 );
+    Point3df	t = -minv.translation();
+    trans[0] = t[0];
+    trans[1] = t[1];
+    trans[2] = t[2];
+    g.setProperty( "Talairach_rotation", rot );
+    g.setProperty( "Talairach_translation", trans );
+    g.setProperty( "Talairach_scale", scl );
+  }
 }
 
 

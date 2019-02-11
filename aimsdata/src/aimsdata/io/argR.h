@@ -65,8 +65,10 @@ namespace aims
         dictionary stored in the "header" property of the graph.
     */
     virtual void mergeMinf( Graph & g, const PythonHeader & hdr );
-    /** stores referentials, transformations,
-        and updates the Talairach transformation in the graph, if such
+
+  protected:
+    /** Store referentials, transformations,
+        and update the Talairach transformation in the graph, if such
         information is present in the minf header.
 
         This static method is not called by LowLevelArgReader::mergeMinf()
@@ -113,10 +115,6 @@ namespace aims
     virtual ~LowLevelStandardArgReader();
     virtual Graph* read( const std::string & filename, 
                          int subobjectsfilter = -1 );
-    /** In addition to LowLevelArgReader::mergeMinf(), the
-        LowLevelStandardArgReader calls mergeTransformations().
-    */
-    virtual void mergeMinf( Graph & g, const PythonHeader & hdr );
 
   protected:
     carto::SyntaxSet	*_syntax;
