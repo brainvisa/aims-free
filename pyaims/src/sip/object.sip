@@ -230,31 +230,6 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
 #include <pyaims/object/numconv.h>
 %End
 
-%ConvertToSubClassCode
-  //std::cout << "ConvertToSubClassCode GenericObject " << sipCpp << std::endl;
-  if (dynamic_cast<Vertex *>(sipCpp))
-        sipClass = sipClass_Vertex;
-  else if (dynamic_cast<Edge *>(sipCpp))
-        sipClass = sipClass_Edge;
-  else if (dynamic_cast<Graph*>(sipCpp))
-        sipClass = sipClass_Graph;
-  else if (dynamic_cast<GraphObject *>(sipCpp))
-        sipClass = sipClass_GraphObject;
-  else if(dynamic_cast<Tree *>( sipCpp ))
-  {
-    if(dynamic_cast<aims::Hierarchy *>( sipCpp ))
-      sipClass = sipClass_aims_Hierarchy;
-    else sipClass = sipClass_Tree;
-  }
-  else if (dynamic_cast<BucketMap_VOID *>(sipCpp))
-    sipClass = sipClass_BucketMap_VOID;
-  else if (dynamic_cast<carto::GenericObject *>(sipCpp))
-    sipClass = sipClass_carto_GenericObject;
-  else if (dynamic_cast<carto::RCObject *>(sipCpp))
-    sipClass = sipClass_carto_RCObject;
-  else  sipClass = NULL;
-%End
-
 %ConvertToTypeCode
   if( !sipIsErr )
   {

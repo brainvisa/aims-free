@@ -10,7 +10,7 @@ class RCObject
 %End
 
 %ConvertToSubClassCode
-  // std::cout << "ConvertToSubClassCode RCObject " << sipCpp << std::endl;
+  std::cout << "ConvertToSubClassCode RCObject " << sipCpp << " / " << typeid( *sipCpp ).name() << std::endl;
   // sipType = sipType_carto_RCObject;
   if( dynamic_cast<carto::SharedObject *>( sipCpp ) )
   {
@@ -25,14 +25,154 @@ class RCObject
   }
   else if( dynamic_cast<carto::GenericObject *>( sipCpp ) )
   {
+    std::cout << "I'm a GenericObject\n";
     sipType = sipType_carto_GenericObject;
     *sipCppRet = dynamic_cast<carto::GenericObject *>( sipCpp );
+
+    if( dynamic_cast<Tree *>( sipCpp ) )
+    {
+      sipType = sipType_Tree;
+      *sipCppRet = dynamic_cast<Tree *>( sipCpp );
+      if( dynamic_cast<aims::Hierarchy *>( sipCpp ) )
+      {
+        sipType = sipType_aims_Hierarchy;
+        *sipCppRet = dynamic_cast<aims::Hierarchy *>( sipCpp );
+      }
+    }
+    else if( dynamic_cast<GraphObject *>( sipCpp ) )
+    {
+      sipType = sipType_GraphObject;
+      *sipCppRet = dynamic_cast<GraphObject *>( sipCpp );
+
+      if( dynamic_cast<Vertex *>( sipCpp ) )
+      {
+        sipType = sipType_Vertex;
+        *sipCppRet = dynamic_cast<Vertex *>( sipCpp );
+      }
+      else if( dynamic_cast<Edge *>( sipCpp ) )
+      {
+        sipType = sipType_Edge;
+        *sipCppRet = dynamic_cast<Edge *>( sipCpp );
+      }
+      else if( dynamic_cast<Graph *>( sipCpp ) )
+      {
+        sipType = sipType_Graph;
+        *sipCppRet = dynamic_cast<Graph *>( sipCpp );
+      }
+    }
   }
   else if( dynamic_cast<carto::MutexedObject *>( sipCpp ) )
   {
     sipType = sipType_carto_MutexedObject;
     *sipCppRet = dynamic_cast<carto::MutexedObject *>( sipCpp );
   }
+  else if( dynamic_cast<carto::Headered *>( sipCpp ) )
+  {
+    sipType = sipType_carto_Headered;
+    *sipCppRet = dynamic_cast<carto::Headered *>( sipCpp );
+
+    if( dynamic_cast<carto::Volume<uint8_t> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_U8;
+      *sipCppRet = dynamic_cast<carto::Volume<uint8_t> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<int16_t> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_S16;
+      *sipCppRet = dynamic_cast<carto::Volume<int16_t> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<uint16_t> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_U16;
+      *sipCppRet = dynamic_cast<carto::Volume<uint16_t> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<int32_t> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_S32;
+      *sipCppRet = dynamic_cast<carto::Volume<int32_t> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<uint32_t> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_U32;
+      *sipCppRet = dynamic_cast<carto::Volume<uint32_t> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<bool> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_BOOL;
+      *sipCppRet = dynamic_cast<carto::Volume<bool> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<float> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_FLOAT;
+      *sipCppRet = dynamic_cast<carto::Volume<float> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<double> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_DOUBLE;
+      *sipCppRet = dynamic_cast<carto::Volume<double> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<AimsRGB> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_RGB;
+      *sipCppRet = dynamic_cast<carto::Volume<AimsRGB> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<AimsRGBA> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_RGBA;
+      *sipCppRet = dynamic_cast<carto::Volume<AimsRGBA> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<AimsHSV> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_HSV;
+      *sipCppRet = dynamic_cast<carto::Volume<AimsHSV> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<cfloat> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_CFLOAT;
+      *sipCppRet = dynamic_cast<carto::Volume<cfloat> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<cdouble> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_CDOUBLE;
+      *sipCppRet = dynamic_cast<carto::Volume<cdouble> *>( sipCpp );
+    }
+    else if( dynamic_cast<carto::Volume<Point3df> *>( sipCpp ) )
+    {
+      sipType = sipType_Volume_POINT3DF;
+      *sipCppRet = dynamic_cast<carto::Volume<Point3df> *>( sipCpp );
+    }
+  }
+  else if( dynamic_cast<BucketMap_VOID *>( sipCpp ) )
+  {
+    sipType = sipType_BucketMap_VOID;
+    *sipCppRet = dynamic_cast<BucketMap_VOID *>( sipCpp );
+  }
+  else if( dynamic_cast<BucketMap_S16 *>( sipCpp ) )
+  {
+    sipType = sipType_BucketMap_S16;
+    *sipCppRet = dynamic_cast<BucketMap_S16 *>( sipCpp );
+  }
+  else if( dynamic_cast<BucketMap_S32 *>( sipCpp ) )
+  {
+    sipType = sipType_BucketMap_S32;
+    *sipCppRet = dynamic_cast<BucketMap_S32 *>( sipCpp );
+  }
+  else if( dynamic_cast<BucketMap_U32 *>( sipCpp ) )
+  {
+    sipType = sipType_BucketMap_U32;
+    *sipCppRet = dynamic_cast<BucketMap_U32 *>( sipCpp );
+  }
+  else if( dynamic_cast<BucketMap_FLOAT *>( sipCpp ) )
+  {
+    sipType = sipType_BucketMap_FLOAT;
+    *sipCppRet = dynamic_cast<BucketMap_FLOAT *>( sipCpp );
+  }
+  else if( dynamic_cast<BucketMap_DOUBLE *>( sipCpp ) )
+  {
+    sipType = sipType_BucketMap_DOUBLE;
+    *sipCppRet = dynamic_cast<BucketMap_DOUBLE *>( sipCpp );
+  }
+
 %End
 
 public:
