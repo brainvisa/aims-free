@@ -504,9 +504,7 @@ void BundleTransformer::newFiberPoint( const BundleProducer &,
                                        const FiberInfo & fi,
                                        const FiberPoint & /*pt*/ )
 {
-  FiberPoint opt;
-  opt = _transformation->transform( opt );
-  addFiberPoint( bi, fi, opt );
+  addFiberPoint( bi, fi, _transformation->transform( pt ) );
 }
 
 
