@@ -10,8 +10,8 @@ class RCObject
 %End
 
 %ConvertToSubClassCode
-  std::cout << "ConvertToSubClassCode RCObject " << sipCpp << " / " << typeid( *sipCpp ).name() << std::endl;
-  // sipType = sipType_carto_RCObject;
+  // std::cout << "ConvertToSubClassCode RCObject " << sipCpp << " / " << typeid( *sipCpp ).name() << std::endl;
+  sipType = 0;
   if( dynamic_cast<carto::SharedObject *>( sipCpp ) )
   {
     sipType = sipType_carto_SharedObject;
@@ -25,7 +25,7 @@ class RCObject
   }
   else if( dynamic_cast<carto::GenericObject *>( sipCpp ) )
   {
-    std::cout << "I'm a GenericObject\n";
+    // std::cout << "I'm a GenericObject\n";
     sipType = sipType_carto_GenericObject;
     *sipCppRet = dynamic_cast<carto::GenericObject *>( sipCpp );
 
