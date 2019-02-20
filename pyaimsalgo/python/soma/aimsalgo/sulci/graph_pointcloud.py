@@ -293,13 +293,7 @@ if __name__ == '__main__':
         failed_cuts += loc_summary['failed_cuts']
         changed_vertices += loc_summary['changed_vertices']
 
-        #skeleton_output = '/tmp/skel4.nii'
-        #roots_output = '/tmp/skel_roots.nii'
-
-        #aims.write(lvol, '/tmp/skel3.nii')
-        #aims.write(skel, skeleton_output)
-        #aims.write(roots, roots_output)
-        #aims.write(voronoi, '/tmp/skel_voro.nii')
+        graph['label_property'] = 'label' # auto labeling
         aims.write(graph, output_graph)
 
 
