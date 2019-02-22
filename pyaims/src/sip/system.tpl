@@ -13,7 +13,10 @@ typedef vector_ULONGLONG vector_SIZE_T;
 
 %#else%
 
+// size_t is builtin in sip >= 4.19.14
+%If ( - SIP_4_19_13 )
 typedef unsigned size_t;
+%End
 typedef vector_U32 vector_SIZE_T;
 
 %#endif%
