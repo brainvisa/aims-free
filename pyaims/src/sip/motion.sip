@@ -37,7 +37,7 @@ public:
   AffineTransformation3d( const carto::Object );
   AffineTransformation3d( const vector_FLOAT & );
   virtual ~AffineTransformation3d();
-  virtual bool operator == ( const aims::AffineTransformation3d & );
+  virtual bool operator == ( const aims::AffineTransformation3d & ) const;
   aims::AffineTransformation3d *__neg__() const /Factory, ReleaseGIL/;
 %MethodCode
   sipRes = new aims::AffineTransformation3d( -*sipCpp );

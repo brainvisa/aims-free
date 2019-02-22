@@ -127,6 +127,15 @@ typedef int int32_t;
 // %Include map_STRING_HSV.sip
 %Include map_U32_set_U32.sip
 
+%If( SIP_4_19_14 - )
+// %Include map_STRING_SIZE_T.sip
+%Include map_S16_SIZE_T.sip
+%Include map_U16_SIZE_T.sip
+%Include map_S32_SIZE_T.sip
+%Include map_U32_SIZE_T.sip
+%Include map_U8_SIZE_T.sip
+%End
+
 %Include rcobject.sip
 %Include sharedobject.sip
 %Include object.sip

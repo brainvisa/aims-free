@@ -46,6 +46,7 @@ namespace aims
   };
 */
 
+%If( - SIP_4_19_13 )
   void AimsConnectedComponent( AimsData_%Template1typecode% & data,
                                aims::Connectivity::Type connectivity,
                                std::map<%Template1%, size_t>& valids,
@@ -73,6 +74,37 @@ namespace aims
   verbose: bool (optional)
 
 
+%End
+%End
+%If( SIP_4_19_14 - )
+  void AimsConnectedComponent( AimsData_%Template1typecode% & data,
+                               aims::Connectivity::Type connectivity,
+                               map_%Template1typecode%_SIZE_T & valids,
+                               const %Template1% & backgrnd = 0,
+                               bool bin = true,
+                               size_t minSize = 0, size_t numMax = 0,
+                               bool verbose = true );
+%Docstring
+  void AimsConnectedComponent(data, connectivity, valids, backgrnd=0,
+                              bin=True, minSize=0, numMax=0, verbose=True)
+
+  Connected components extraction.
+  The function modifies the input data, and does not return a new one.
+
+  Parameters
+  ----------
+  data: AimsData_%Template1typecode% instance
+      data will be modified during the process.
+  connectivity: Connectivity.Type enum code
+  valids: dict %Template1%: size_t
+  backgrnd: %Template1%
+  bin: bool (optional)
+  minsize: size_t (optional)
+  numMax: size_t (optional)
+  verbose: bool (optional)
+
+
+%End
 %End
 
   void AimsConnectedComponent( AimsData_%Template1typecode% & data,

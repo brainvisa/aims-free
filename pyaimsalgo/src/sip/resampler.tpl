@@ -282,11 +282,11 @@ Returns
 %End
 
 
-  virtual void resample_inv( const Volume_%Template1typecode% & input_data,
-                             const aims::Transformation3d & inverse_transform,
-                             const %Template1% & background,
-                             Volume_%Template1typecode% & output_data,
-                             bool verbose = false ) const /ReleaseGIL/;
+  void resample_inv( const Volume_%Template1typecode% & input_data,
+                     const aims::Transformation3d & inverse_transform,
+                     const %Template1% & background,
+                     Volume_%Template1typecode% & output_data,
+                     bool verbose = false ) const /ReleaseGIL/;
 %Docstring
 resample_inv(input_data, inverse_transform, background, output_data, verbose=False)
 ===================================================================================
