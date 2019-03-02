@@ -61,7 +61,7 @@ class Knn /Abstract/
     Knn(aims::knn::Database &db, unsigned int k);
     virtual ~Knn();
 
-    virtual SIP_PYTUPLE find(vector_DOUBLE &v) = 0 /ReleaseGIL/;
+    SIP_PYTUPLE find(vector_DOUBLE &v) = 0 /ReleaseGIL/;
 %MethodCode
     std::pair<std::vector<unsigned int>, std::vector<double> > res;
     res = sipCpp->find(*a0);

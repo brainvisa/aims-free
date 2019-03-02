@@ -31,9 +31,14 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+
+import sip
+
 numtypes = ['bool', 'unsigned char', 'short', 'unsigned short',
             'int', 'unsigned', 'unsigned long', 'unsigned long long',
             'float', 'double']
+if sip.SIP_VERSION >= 0x04130d:
+    numtypes.append('size_t')
 basetypes = numtypes + ['AimsRGB', 'AimsRGBA', 'AimsHSV']
 matrix = []
 for x in basetypes:
@@ -295,3 +300,9 @@ todo = {'system': ['Void'],
         'connected_component': ['short', 'int', 'unsigned char',
                                 'unsigned short', 'unsigned'],
         }
+
+if sip.SIP_VERSION >= 0x04130d:
+    todo['map'] += [
+        ('unsigned char', 'size_t'), ('short', 'size_t'), ('unsigned short', 'size_t'),
+        ('int', 'size_t'), ('unsigned', 'size_t'),
+    ]

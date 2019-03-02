@@ -1,5 +1,24 @@
 
+%#if '%Template2needs_typedef%' == '1'%
+
+/* This bidouille is needed because of a probable bug in sip 4.19.15, which 
+   doesn't allow size_t in a MappedType. So we use a typedef here.
+*/
+
+%ModuleHeaderCode
+#ifndef AIMS_MAP_%Template1typecode%_SIZE_T_DEFINED
+#define AIMS_MAP_%Template1typecode%_SIZE_T_DEFINED
+#include <map>
+typedef std::map<%Template1%, %Template2% > map_%Template1typecode%_SIZE_T;
+#endif
+%End
+
+typedef std::map<%Template1%, %Template2% > map_%Template1typecode%_SIZE_T;
+
+%MappedType map_%Template1typecode%_SIZE_T
+%#else%
 %MappedType std::map<%Template1%, %Template2% >
+%#endif%
 {
 %TypeHeaderCode
 #include <map>

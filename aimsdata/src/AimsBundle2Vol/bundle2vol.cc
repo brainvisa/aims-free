@@ -49,8 +49,8 @@ protected:
   virtual void bundleTerminated( const BundleProducer &, const BundleInfo & );
   virtual void fiberStarted( const BundleProducer &, const BundleInfo &,
                              const FiberInfo & );
-  virtual void fiberTerminated( const BundleProducer &, const BundleInfo &,
-                                const FiberInfo & ,FiberPoint *, int &);
+  virtual void newFiberPoint( const BundleProducer &, const BundleInfo &,
+                              const FiberInfo &, const FiberPoint & );
   virtual void noMoreBundle( const BundleProducer & );
 
 private:
@@ -105,75 +105,71 @@ void Curve2image::fiberStarted( const BundleProducer &,
 
 
 //-----------------------------------------------------------------------------
-void Curve2image::fiberTerminated( const BundleProducer &, 
-                                    const BundleInfo &,
-                                    const FiberInfo & ,FiberPoint *fiber , int &fiberSize)
+void Curve2image::newFiberPoint( const BundleProducer &, const BundleInfo &,
+                                 const FiberInfo &, const FiberPoint & point )
 {
   vector<float> vs = _image->getVoxelSize();
   vector<int> dims = _image->getSize();
 
-  for(int i=0; i<fiberSize; i++)
+  float x,y,z;
+
+  x = point[0] / vs[0];
+  y = point[1] / vs[1];
+  z = point[2] / vs[2];
+  const int indX = (int) rint(x);
+  const int indY = (int) rint(y);
+  const int indZ = (int) rint(z);
+
+  if ( indX == lastIndX && indY == lastIndY && indZ == lastIndZ )
   {
-    float x,y,z;
-    FiberPoint point=fiber[i];
-
-    x = point[0] / vs[0];
-    y = point[1] / vs[1];
-    z = point[2] / vs[2];
-    const int indX = (int) rint(x);
-    const int indY = (int) rint(y);
-    const int indZ = (int) rint(z);
-
-    if ( indX == lastIndX && indY == lastIndY && indZ == lastIndZ ) {
     // If several contiguous points of a fiber are in the same voxel,
     // only the first one is considered.
+  }
+  else
+  {
+    lastIndX = indX;
+    lastIndY = indY;
+    lastIndZ = indZ;
 
-    }
-    else
+    if( indX >= 0 && indX < dims[0]
+        && indY >= 0 && indY < dims[1]
+        && indZ >= 0 && indZ < dims[2] )
     {
-      lastIndX = indX;
-      lastIndY = indY;
-      lastIndZ = indZ;
-
-      if( indX >= 0 && indX < dims[0]
-          && indY >= 0 && indY < dims[1]
-          && indZ >= 0 && indZ < dims[2] )
+      if(_mode==2)
+        ++_image->at( indX, indY, indZ );
+      else if(_mode==3)
       {
-        if(_mode==2)
-          ++_image->at( indX, indY, indZ );
-        else if(_mode==3)
-        {
-          // ici il faut passer par une image de float qu'on instancie en mode 3
-          float dx,dy,dz;
-          dx = x-indX;
-          dy = y-indY;
-          dz = z-indZ;
-          _image->at( indX, indY, indZ )
-              += (int)(1000*(1-dx)*(1-dy)*(1-dz));
-          _image->at( indX, indY, indZ+1)
-            += (int)(1000*(1-dx)*(1-dy)*dz);
-          _image->at( indX, indY+1, indZ )
-            += (int)(1000*(1-dx)*dy*(1-dz));
-          _image->at( indX, indY+1, indZ+1 )
-            += (int)(1000*(1-dx)*dy*dz);
-          _image->at( indX+1, indY, indZ)
-            += (int)(1000*dx*(1-dy)*(1-dz));
-          _image->at( indX+1, indY, indZ+1 )
-            += (int)(1000*dx*(1-dy*dz));
-          _image->at( indX+1, indY+1, indZ )
-            += (int)(1000*dx*dy*(1-dz));
-          _image->at( indX+1, indY+1, indZ+1 )
-            += (int)(1000*dx*dy*dz);
-        }
-        else
-        {
-          _image->at(indX,indY,indZ) = 1;
-        }
+        // ici il faut passer par une image de float qu'on instancie en mode 3
+        float dx,dy,dz;
+        dx = x-indX;
+        dy = y-indY;
+        dz = z-indZ;
+        _image->at( indX, indY, indZ )
+            += (int)(1000*(1-dx)*(1-dy)*(1-dz));
+        _image->at( indX, indY, indZ+1)
+          += (int)(1000*(1-dx)*(1-dy)*dz);
+        _image->at( indX, indY+1, indZ )
+          += (int)(1000*(1-dx)*dy*(1-dz));
+        _image->at( indX, indY+1, indZ+1 )
+          += (int)(1000*(1-dx)*dy*dz);
+        _image->at( indX+1, indY, indZ)
+          += (int)(1000*dx*(1-dy)*(1-dz));
+        _image->at( indX+1, indY, indZ+1 )
+          += (int)(1000*dx*(1-dy*dz));
+        _image->at( indX+1, indY+1, indZ )
+          += (int)(1000*dx*dy*(1-dz));
+        _image->at( indX+1, indY+1, indZ+1 )
+          += (int)(1000*dx*dy*dz);
+      }
+      else
+      {
+        _image->at(indX,indY,indZ) = 1;
       }
     }
   }
-  delete []fiber;
 }
+
+
 
 
 

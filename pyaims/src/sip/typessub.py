@@ -33,6 +33,7 @@
 
 import sys
 import platform
+import sip
 
 def classInNamespace(include, cls, namespace, cppnamespace=None,
                      cppclass=None):
@@ -2923,11 +2924,84 @@ typessub = {'bool':
 
             }
 if target_platform == 'windows-64':
-    typessub['size_t'] = typessub['unsigned long long']
+    if sip.SIP_VERSION < 0x04130d:
+        typessub['size_t'] = typessub['unsigned long long']
+    else:
+        typessub['size_t'] = \
+           {'typecode': 'SIZE_T',
+               'pyFromC': 'PyLong_FromLongLong',
+               'CFromPy': 'PyLong_AsUnsignedLongLong',
+               'castFromSip': '',
+               'deref': '',
+               'pyderef': '',
+               'address': '',
+               'pyaddress': '',
+               'defScalar': '#define PYAIMS_SCALAR',
+               'defNumpyBindings': '',
+               'new': '',
+               'NumType': 'PyArray_UINT64',
+               'PyType': 'size_t',
+               'sipClass': '',
+               'typeinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
+               'module': 'aims',
+               'testPyType': 'carto::PyaimsInt_Check',
+               'compareElement': '',
+               'needs_typedef': '1',
+            }
+
 elif sys.platform == 'darwin' \
-    or platform.processor() == 'x86_64':
-    typessub['size_t'] = typessub['unsigned long']
+        or platform.processor() == 'x86_64':
+    if sip.SIP_VERSION < 0x04130d:
+        typessub['size_t'] = typessub['unsigned long']
+    else:
+        typessub['size_t'] = \
+            {'typecode': 'SIZE_T',
+               'pyFromC': 'PyLong_FromLong',
+               'CFromPy': 'PyLong_AsUnsignedLong',
+               'castFromSip': '',
+               'deref': '',
+               'pyderef': '',
+               'address': '',
+               'pyaddress': '',
+               'defScalar': '#define PYAIMS_SCALAR',
+               'defNumpyBindings': '',
+               'new': '',
+               'NumType': 'PyArray_UINT',
+               'PyType': 'size_t',
+               'sipClass': '',
+               'typeinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
+               'module': 'aims',
+               'testPyType': 'carto::PyaimsInt_Check',
+               'compareElement': '',
+               'needs_typedef': '1',
+            }
 else:
-    typessub['size_t'] = typessub['unsigned']
+    if sip.SIP_VERSION < 0x04130d:
+        typessub['size_t'] = typessub['unsigned']
+    else:   
+        typessub['size_t'] = \
+           {'typecode': 'SIZE_T',
+               'pyFromC': 'carto::PyaimsInt_FromLong',
+               'CFromPy': 'carto::uint32_FromPy',
+               'castFromSip': '',
+               'deref': '',
+               'pyderef': '',
+               'address': '',
+               'pyaddress': '',
+               'defScalar': '#define PYAIMS_SCALAR',
+               'defNumpyBindings': '',
+               'new': '',
+               'NumType': 'PyArray_UINT32',
+               'PyType': 'size_t',
+               'sipClass': '',
+               'typeinclude': '',
+               'sipinclude': '#include <pyaims/object/numconv.h>',
+               'module': 'aims',
+               'testPyType': 'carto::PyaimsInt_Check',
+               'compareElement': '',
+               'needs_typedef': '1',
+            },
 
 completeTypesSub(typessub)

@@ -61,22 +61,22 @@ May be used in 2 ways:
 
   public:
     virtual ~Info();
-    virtual void printPaths();
+    void printPaths();
 %Docstring
 Print on the standard output configured data paths.
 %End
 
-    virtual void printBuiltins();
+    void printBuiltins();
 %Docstring
 Print on the standard output buitin optional features, selected when the library has been built.
 %End
 
-    virtual void printOtherInfo();
+    void printOtherInfo();
 %Docstring
 Print on the standard output additional information (such as IO properties, settings options, etc).
 %End
 
-    virtual void printVersion();
+    void printVersion();
 %Docstring
 Print on the standard output the library version.
 %End
