@@ -558,7 +558,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     // std::cout << "setitem(int)\n";
     int state;
     try
-      {
+    {
         void	*obj;
 #if PY_VERSION_HEX < 0x03000000
         if( PyInt_Check( a1 ) )
@@ -611,14 +611,48 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         }
         sipIsErr = 0;
         PyErr_Clear();
-      }
+    }
     catch( std::exception & e )
+    {
+      /* try casts with conversions to Object
+
+         Indeed, the latest case, using Object::value() will build a
+         GenericObject<PyObject>, which will not be understood by every
+         undelying data dype for their setArrayItem() method.
+         Converters to Object, however, will use the original type (inside
+         the Pyobject of a0) to convert to Object.
+      */
+
+      try
+      {
+        void *obj;
+
+        if( sipCanConvertToInstance( a1, sipClass_carto_Object, 0 ) )
+        {
+          obj = sipForceConvertToInstance( a1, sipClass_carto_Object,
+            0, 0, &state, &sipIsErr );
+          carto::Object	*o = (carto::Object *) obj;
+          sipCpp->setArrayItem( a0, *o );
+          sipReleaseInstance( obj, sipClass_carto_Object, state );
+        }
+        else if( sipCanConvertToInstance( a1, sipClass_carto_GenericObject,
+                 0 ) )
+        {
+          obj = sipForceConvertToInstance( a1,
+            sipClass_carto_GenericObject, 0, 0, &state, &sipIsErr );
+          carto::GenericObject	*o = (carto::GenericObject *) obj;
+          sipCpp->setArrayItem( a0, carto::Object( o ) );
+          sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+        }
+      }
+      catch( std::exception & e )
       {
         sipIsErr = 1;
         SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_AttributeError, e.what() );
         SIP_UNBLOCK_THREADS
       }
+    }
 %End
 
     void __setitem__( const std::string &, const SIP_PYOBJECT ) /AutoGen/;
@@ -626,7 +660,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     // std::cout << "setitem\n";
     int state;
     try
-      {
+    {
         void    *obj;
 #if PY_VERSION_HEX < 0x03000000
         if( PyInt_Check( a1 ) )
@@ -674,14 +708,48 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
           }
         sipIsErr = 0;
         PyErr_Clear();
-      }
+    }
     catch( std::exception & e )
+    {
+      /* try casts with conversions to Object
+
+         Indeed, the latest case, using Object::value() will build a
+         GenericObject<PyObject>, which will not be understood by every
+         undelying data dype for their setArrayItem() method.
+         Converters to Object, however, will use the original type (inside
+         the Pyobject of a0) to convert to Object.
+      */
+
+      try
+      {
+        void *obj;
+
+        if( sipCanConvertToInstance( a1, sipClass_carto_Object, 0 ) )
+        {
+          obj = sipForceConvertToInstance( a1, sipClass_carto_Object,
+            0, 0, &state, &sipIsErr );
+          carto::Object	*o = (carto::Object *) obj;
+          sipCpp->setProperty( *a0, *o );
+          sipReleaseInstance( obj, sipClass_carto_Object, state );
+        }
+        else if( sipCanConvertToInstance( a1, sipClass_carto_GenericObject,
+                 0 ) )
+        {
+          obj = sipForceConvertToInstance( a1,
+            sipClass_carto_GenericObject, 0, 0, &state, &sipIsErr );
+          carto::GenericObject	*o = (carto::GenericObject *) obj;
+          sipCpp->setProperty( *a0, carto::Object( o ) );
+          sipReleaseInstance( obj, sipClass_carto_GenericObject, state );
+        }
+      }
+      catch( std::exception & e )
       {
         sipIsErr = 1;
         SIP_BLOCK_THREADS
         PyErr_SetString( PyExc_AttributeError, e.what() );
         SIP_UNBLOCK_THREADS
       }
+    }
 %End
 
 
