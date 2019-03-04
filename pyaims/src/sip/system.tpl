@@ -22,7 +22,7 @@ typedef vector_ULONGLONG vector_SIZE_T;
 // we can't use %If() because sip >= 4.19.14 generates a syntax error anyway
 %#if SIP_VERSION < 0x04130D%
 typedef unsigned size_t;
-%#endif
+%#endif%
 
 typedef vector_U32 vector_SIZE_T;
 
