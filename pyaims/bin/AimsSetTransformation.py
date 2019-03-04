@@ -39,8 +39,16 @@ import os
 from optparse import OptionParser
 from soma import aims
 
-parser = OptionParser(description='set an affine transformation '
-                      'information in an object header from a transformation file')
+parser = OptionParser(
+    description='set an affine transformation '
+        'information in an object header from a transformation file.\n'
+        'The command can append, remove, or replace an existing '
+        'transformation in the input file. Note that some formats will force '
+        'certain transformations to exist or to respect certain criteria, '
+        'such as the qform in nifti files which should be rotation + '
+        'translation only. In such a case it is possible that the output file '
+        'will contain some additional transformations which are not "wanted" '
+        'here (they are added by the IO layer upon writing).')
 parser.add_option('-i', '--input', dest='input', metavar='FILE',
                   help='object to set transformation info on (volume, mesh, etc).')
 parser.add_option("-t", "--transformation", dest="transformation",
@@ -54,6 +62,8 @@ parser.add_option('-n', '--number', dest='transnum', action='store',
 parser.add_option('-d', '--destination', dest='destination',
                   help='set destination referential name/UUID. Default: try to get it '
                   'from the transformation file header')
+parser.add_option('-o', '--output', dest='output',
+                  help='output object file name. Default: overwrite input')
 
 (options, args) = parser.parse_args()
 
@@ -141,7 +151,7 @@ else:
         transnum = len(translist)
         translist.append(trans.toVector())
     else:
-        if ( options.transnum >= 0 and len( translist ) <= options.transnum ) \
+        if (options.transnum >= 0 and len(translist) <= options.transnum) \
             or (options.transnum < 0 and
                 len(translist) < -options.transnum):
             print('No such transformation in header. Appending.',
@@ -165,8 +175,13 @@ else:
         refs[transnum] = dest
 
 # write back updated information
-if 'file_type' in hdr:
+if 'format' in hdr:
+    format = hdr['format']
+elif 'file_type' in hdr:
     format = hdr['file_type']
 else:
     format = None
-aims.write(obj, options.input, format=format)
+output = options.output
+if not output:
+    output = input
+aims.write(obj, output, format=format)
