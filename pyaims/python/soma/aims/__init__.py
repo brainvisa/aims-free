@@ -1541,7 +1541,7 @@ def somaio_typeCode(data):
         If 2-tuple, translate AIMS object type / data type couple
     '''
     def _somaio_objecttype(data):
-        if data == 'Volume':
+        if data in ('Volume', 'CartoVolume'):
             return 'carto_volume'
         elif data == 'GenericObject':
             return 'genericobject'
@@ -1983,6 +1983,71 @@ class StdOutInhibitorFix(carto.fdinhibitor.ResetCallback):
                 pass
 
 #carto.fdinhibitor.registerResetCallback('sys.stderr', StdOutInhibitorFix())
+
+
+def supported_io_formats(otypes=None, access=''):
+    '''
+    Returns a list of formats supported to read or write the given object
+    types. Both AIMS and Soma-IO support are queried.
+
+    Parameters
+    ----------
+    otypes: dict, list, str, or None
+        object types. May be given in several shapes: 1. None: will query all
+        possible object types. 2. str: will get all data types (voxel, texture)
+        for the given container object type (Volume, Mesh etc.). 3. list of
+        str: a list of container object types, as in the str case. 4. dict:
+        allows to specify precisely object type / data types mapping: for each
+        object type, a list of data types will be used. When a data type is
+        None, then all possible ones will be used.
+    access: str
+        read / write capabilities: restricts soma-io IO queries to the
+        specified access modes. aims IO will not be affected by this parameter
+        since it does not separate reading and writing capabilities. Possible
+        values are: '': any, 'r': read, 'w': write, 'rw': both needed.
+
+    Returns
+    -------
+    formats: set of str
+        set of formats names
+    '''
+    # make otypes a dict object_type: data_types (data_types may be None)
+    iotypes = IOObjectTypesDictionary.objectsTypes()
+    if otypes is None:
+        otypes = iotypes
+    elif isinstance(otypes, basestring):
+        otypes = {otypes: None}
+    elif isinstance(otypes, (list, tuple)):
+        otypes = dict([(x, None) for x in otypes])
+    iosread = carto.IOObjectTypesDictionary.readTypes()
+    ioswrite = carto.IOObjectTypesDictionary.writeTypes()
+    formats = set()
+    for otype, dtypes in six.iteritems(otypes):
+        if otype not in iotypes:
+            continue
+        if dtypes is None:
+            dtypes = iotypes[otype]
+        for dtype in dtypes:
+            aiof = IOObjectTypesDictionary.formats(otype, dtype)
+            # filter "real" formats (with actual extensions)
+            aiof = [f for f in aiof if len(Finder.extensions(f)) != 0]
+            formats.update(aiof)
+            stype = somaio_typeCode((otype, dtype))
+            siof = set()
+            if access in ('', 'r'):
+                siof = set(iosread.get(stype, []))
+            if access in ('', 'w'):
+                siof.update(ioswrite.get(stype, []))
+            elif access == 'rw':
+                # need both r and w
+                fr = iosread.get(stype, [])
+                fw = ioswrite.get(stype, [])
+                siof = set(fr).intersection(fw)
+            # filter "real" formats (with actual extensions)
+            siof = [f for f in siof
+                    if len(soma.DataSourceInfoLoader.extensions(f)) != 0]
+            formats.update(siof)
+    return formats
 
 
 # documentation
