@@ -42,7 +42,7 @@ h = tex.header()
 print('header:', h)
 
 print('timesteps:', tex.size())
-for t in xrange(tex.size()):
+for t in range(tex.size()):
     print('time:', t)
     tx = tex[t]
     print('texture:', tx, ', size:', tx.nItem())
