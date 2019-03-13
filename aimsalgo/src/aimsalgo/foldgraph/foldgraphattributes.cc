@@ -854,7 +854,7 @@ void FoldGraphAttributes::makeGlobalAttributes()
         _motion = new Motion( m );
     }
   else
-    GraphManip::storeTalairach( _graph, *_motion );
+    GraphManip::storeTalairach( _graph, *_motion, true );
 
   vector<float>	vs(3), nvs(3);
   vs[0] = _skel.sizeX();
