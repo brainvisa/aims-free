@@ -46,7 +46,7 @@ namespace aims
   };
 */
 
-%If( - SIP_4_19_13 )
+%#if SIP_VERSION < 0x04130e%
   void AimsConnectedComponent( AimsData_%Template1typecode% & data,
                                aims::Connectivity::Type connectivity,
                                std::map<%Template1%, size_t>& valids,
@@ -75,8 +75,7 @@ namespace aims
 
 
 %End
-%End
-%If( SIP_4_19_14 - )
+%#else%
   void AimsConnectedComponent( AimsData_%Template1typecode% & data,
                                aims::Connectivity::Type connectivity,
                                map_%Template1typecode%_SIZE_T & valids,
@@ -105,7 +104,7 @@ namespace aims
 
 
 %End
-%End
+%#endif%
 
   void AimsConnectedComponent( AimsData_%Template1typecode% & data,
                                aims::Connectivity::Type connectivity,
