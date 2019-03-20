@@ -130,7 +130,7 @@ AffineLeastSquareEstimation::computeMotion()
   _motion = new DecomposedMotion ;
   
   _motion->rotation() = yx.cross(invXX) ;
-  _motion->translation() = meanY - _motion->transform(meanX) ;
+  _motion->setTranslation(meanY - _motion->transform(meanX));
 
   return 1;
 }
@@ -231,7 +231,7 @@ RigidLeastSquareEstimation::computeRigidMotion()
 
   if( axis != Point3df(0., 0., 0. ) )
     axis.normalize() ;
-      
+
   if(_is2D) { 
     axis[0]=0;axis[1]=0;
   }
@@ -250,10 +250,9 @@ RigidLeastSquareEstimation::computeRigidMotion()
     
   _motion->rot() = _motion->rotation().clone();
 
-  _motion->translation() = 0. ;
-  _motion->translation() = meanY - _motion->transform(meanX) ;
-
-
+  _motion->setTranslation(Point3df(0.));
+  _motion->setTranslation(meanY - _motion->transform(meanX));
+  
   if(_is2D)
     _motion->translation()[2] = 0;
 
@@ -316,7 +315,7 @@ TranslationLeastSquareEstimation::computeTranslationMotion()
     throw runtime_error("TranslationLeastSquareEstimation:Both vectors must have same size !") ;
   size_t size = _pointsFrom.size();
 
-  _motion->translation() = Point3df( 0., 0., 0. ) ;
+  _motion->setTranslation(Point3df(0., 0., 0.));
   for( size_t n = 0 ; n < size ; ++n ){
     _motion->translation() += _pointsTo[n] - _pointsFrom[n] ;
   }
