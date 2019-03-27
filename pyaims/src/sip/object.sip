@@ -844,7 +844,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
       sipRes = false;
 %End
 
-    virtual std::string getSyntax() const /Factory, AutoGen/;
+    std::string getSyntax() const;
 %MethodCode
     try
       {
