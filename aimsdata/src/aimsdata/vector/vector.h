@@ -961,7 +961,7 @@ std::ostream& operator << ( std::ostream& out,const AimsVector<T,D>& thing)
 {
   out << '(';
   for (int d = 0; d < D-1 ; ++d)
-    out << thing.item(d) << " ,";
+    out << thing.item(d) << ", ";
   out << thing.item(D-1) << ')';
   return(out);
 }
@@ -973,7 +973,7 @@ std::ostream& operator << ( std::ostream& out,const AimsVector<char,D>& thing)
 {
   out << '(';
   for (int d = 0; d < D-1 ; ++d)
-    out << (int)thing.item(d) << " ,";
+    out << (int)thing.item(d) << ", ";
   out << (int)thing.item(D-1) << ')';
   return(out);
 }
@@ -985,7 +985,7 @@ std::ostream& operator << ( std::ostream& out,const AimsVector<byte,D>& thing)
 {
   out << '(';
   for (int d = 0; d < D-1 ; ++d)
-    out << (int)thing.item(d) << " ,";
+    out << (int)thing.item(d) << ", ";
   out << (int)thing.item(D-1) << ')';
   return(out);
 }
