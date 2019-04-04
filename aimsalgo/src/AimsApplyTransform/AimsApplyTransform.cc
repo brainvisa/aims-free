@@ -784,20 +784,41 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
 
 bool doPoints(ApplyTransformProc & proc, const string & filename)
 {
-  istream *s = 0;
-  ifstream f;
-  stringstream sf;
-  if(FileUtil::fileStat(filename).find('+') != string::npos)
+  // Open the input stream
+  istream *input_stream = 0;
+  ifstream input_file_stream;
+  stringstream input_string_stream;
+  if(filename == "-")
   {
-    f.open(filename.c_str());
-    if(!f)
+    input_stream = &std::cin;  // standard input stream
+  }
+  else if(FileUtil::fileStat(filename).find('+') != string::npos)
+  {
+    input_file_stream.open(filename.c_str());
+    if(!input_file_stream)
       throw errno_error();
-    s = &f;
+    input_stream = &input_file_stream;
   }
   else
   {
-    sf.str(filename);
-    s = &sf;
+    input_string_stream.str(filename);
+    input_stream = &input_string_stream;
+  }
+
+  // Open the output stream
+  const bool print_on_stdout = proc.output.empty() || proc.output == "-";
+  ostream * output_stream;
+  ofstream output_file_stream;
+  if(print_on_stdout)
+  {
+    output_stream = &std::cout;
+  }
+  else
+  {
+    output_file_stream.open(proc.output.c_str());
+    if(!output_file_stream)
+      throw errno_error();
+    output_stream = &output_file_stream;
   }
 
   // Load the transformation
@@ -812,27 +833,27 @@ bool doPoints(ApplyTransformProc & proc, const string & filename)
     }
   }
 
-  vector<Point3df> transformed;
-
-  while(!s->eof() && !s->fail())
+  // Transform all points in the input stream and write to the output stream
+  while(input_stream->good())
   {
     Point3df p(1e38, 1e38, 1e38), q;
-    (*s) >> p;
+    *input_stream >> p;
     if(p == Point3df(1e38, 1e38, 1e38))
       break;
     q = direct_transform->transform(p);
     if(proc.output.empty())
-      cout << "p : " << p << " -> " << q << endl;
-    else
-      transformed.push_back(q);
+      *output_stream << "p : " << p << " -> ";
+    *output_stream << q << "\n";
+    if(output_stream->fail()) {
+      std::clog << "Error writing to the output stream" << std::endl;
+      return false;
+    }
   }
-
-  if(!proc.output.empty())
-  {
-    ofstream g(proc.output.c_str());
-    vector<Point3df>::iterator ip, ep = transformed.end();
-    for(ip=transformed.begin(); ip!=ep; ++ip)
-      g << *ip << endl;
+  if(input_stream->bad()) {
+    // We should check for fail(), but it is also set when everything goes
+    // well...
+    std::clog << "Error reading the input stream of points" << std::endl;
+    return false;
   }
 
   return true;
@@ -888,7 +909,11 @@ int main(int argc, const char **argv)
       "In this mode, the --input option either specifies an ASCII file\n"
       "containing point coordinates, or is directly one or several points\n"
       "coordinates on the command-line. Points should be formatted as\n"
-      "\"(x, y, z)\", with parentheses and commas.\n"
+      "\"(x, y, z)\", with parentheses and commas. Points will be written\n"
+      "to the output stream in the same format, one point per line.\n"
+      "The input or output file names can also be -, which means standard\n"
+      "input and standard output, respectively. If --output is omitted,\n"
+      "the points are written on standard output in a user-friendly format.\n"
       "\n"
       "Note also that for meshes or points, the dimensions, voxel sizes,\n"
       "reference, and resampling options are not needed and are ignored."
