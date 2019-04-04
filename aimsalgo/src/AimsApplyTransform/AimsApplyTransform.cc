@@ -490,8 +490,9 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   ApplyTransformProc & proc = (ApplyTransformProc &) process;
 
   // Read the input image
-  Volume<T> input_image;
   aims::Reader<Volume<T> > input_reader(fileref);
+  input_reader.setAllocatorContext(AllocatorStrategy::ReadOnly);
+  Volume<T> input_image;
   input_reader.read(input_image);
 
   // Parse the background value to the data type
@@ -561,8 +562,9 @@ bool doMesh(Process & process, const string & fileref, Finder &)
   typedef AimsTimeSurface<D, Void> MeshType;
 
   // Read the input mesh
-  AimsTimeSurface<D, Void> mesh;
   aims::Reader<MeshType> input_reader(fileref);
+  input_reader.setAllocatorContext(AllocatorStrategy::InternalModif);
+  AimsTimeSurface<D, Void> mesh;
   input_reader.read(mesh);
 
   // Load the transformation
@@ -606,8 +608,9 @@ bool doBucket(Process & process, const string & fileref, Finder &)
 
   typedef BucketMap<Void> BucketType;
 
-  BucketType input_bucket;
   aims::Reader<BucketType> input_reader(fileref);
+  input_reader.setAllocatorContext(AllocatorStrategy::ReadOnly);
+  BucketType input_bucket;
   input_reader.read(input_bucket);
 
   // Prepare the output dimensions
@@ -718,9 +721,9 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   ApplyTransformProc & proc = (ApplyTransformProc &) process;
 
   // Read the input Graph
-  unique_ptr<Graph> graph;
   aims::Reader<Graph> input_reader(fileref);
-  graph.reset(input_reader.read());
+  input_reader.setAllocatorContext(AllocatorStrategy::InternalModif);
+  unique_ptr<Graph> graph(input_reader.read());
 
   // Deduce the voxel size of the output Graph
   set_geometry(proc, *graph, false);
