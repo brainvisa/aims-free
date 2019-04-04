@@ -32,6 +32,10 @@ using namespace std;
 using namespace carto;
 using namespace soma;
 
+namespace {
+
+static const int EXIT_USAGE_ERROR = 2;
+
 struct ApplyTransformProc;
 
 struct FatalError : public runtime_error {
@@ -55,6 +59,7 @@ public:
   string  output;
   vector<string> direct_transform_list;
   vector<string> inverse_transform_list;
+  bool    points_mode;
   string  interp_type;
   string  background_value;
   bool    keep_transforms;
@@ -72,6 +77,7 @@ public:
 
 ApplyTransformProc::ApplyTransformProc()
   : Process(),
+    points_mode(false),
     interp_type("linear"),
     background_value("0"),
     keep_transforms(false),
@@ -832,6 +838,8 @@ bool doPoints(ApplyTransformProc & proc, const string & filename)
   return true;
 }
 
+} // end of anonymous namespace
+
 
 int main(int argc, const char **argv)
 {
@@ -876,7 +884,8 @@ int main(int argc, const char **argv)
       "  chain can be inverted. Otherwise, both transformation chains must\n"
       "  be specified completely.\n"
       "\n"
-      "In points mode, the --input option either specifies an ASCII file\n"
+      "Points mode is activated by passing the --points option.\n"
+      "In this mode, the --input option either specifies an ASCII file\n"
       "containing point coordinates, or is directly one or several points\n"
       "coordinates on the command-line. Points should be formatted as\n"
       "\"(x, y, z)\", with parentheses and commas.\n"
@@ -885,7 +894,7 @@ int main(int argc, const char **argv)
       "reference, and resampling options are not needed and are ignored."
    );
     app.addOption(proc_input, "--input", "Input image");
-    app.addOption(proc.output, "--output", "Output image");
+    app.addOption(proc.output, "--output", "Output image", true);
     app.addOptionSeries(proc.direct_transform_list,
                         "--direct-transform",
                         "direct transformation (from input space to "
@@ -902,6 +911,8 @@ int main(int argc, const char **argv)
                         "passed on the command-line. The file name may be "
                         "prefixed with 'inv:', in which case the inverse of "
                         "the transformation is used.");
+    app.addOption(proc.points_mode, "--points",
+                  "Points mode: transform point coordinates (see above).", true);
     app.addOption(proc.interp_type, "--interp",
                   "Type of interpolation used for Volumes: n[earest], "
                   "l[inear], q[uadratic], c[cubic], quartic, quintic, "
@@ -949,32 +960,39 @@ int main(int argc, const char **argv)
     app.alias("-r",             "--reference");
     app.alias("-o",             "--output");
     app.alias("--vi",           "--vectorinterpolation");
-    app.initialize();
-
-
-    // TODO improve the switch to Points mode
-    bool ok = false;
-    try {
-      ok = proc.execute(proc_input.filename);
-    } catch(const exception& exc) {
-      clog << "Failed to run in File mode, will now try Points mode ("
-           << exc.what() << ")."<< endl;
+    try
+    {
+      app.initialize();
     }
-    if(!ok)
+    catch(const carto::user_interruption &)
+    {
+      // Exit after printing e.g. help
+      return EXIT_SUCCESS;
+    }
+    catch(const std::runtime_error &e)
+    {
+      clog << argv[0] << ": error processing command-line options: "
+           << e.what() << endl;
+      return EXIT_USAGE_ERROR;
+    }
+
+
+    bool ok = false;
+    if(proc.points_mode)
     {
       ok = doPoints(proc, proc_input.filename);
+    }
+    else
+    {
+      if(proc.output.empty()) {
+        std::clog << argv[0] << ": error: --output must be provided" << std::endl;
+        return EXIT_USAGE_ERROR;
+      }
+      ok = proc.execute(proc_input.filename);
     }
     if(!ok)
       result = EXIT_FAILURE;
 
-  }
-  catch(const FatalError &exc)
-  {
-    clog << exc.what() << endl;
-    result = EXIT_FAILURE;
-  }
-  catch(user_interruption &e) {
-    result = EXIT_FAILURE;
   }
   catch(std::exception &e) {
     cerr << argv[ 0 ] << ": " << e.what() << endl;
