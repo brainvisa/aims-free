@@ -18,6 +18,8 @@
 #include <cartobase/object/object.h>                                 // Object
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/errno.h>
+//--- soma -------------------------------------------------------------------
+#include <soma-io/allocator/allocator.h>
 //--- std --------------------------------------------------------------------
 #include <algorithm>
 #include <iostream>
@@ -28,6 +30,7 @@
 using namespace aims;
 using namespace std;
 using namespace carto;
+using namespace soma;
 
 struct ApplyTransformProc;
 
@@ -63,6 +66,7 @@ public:
   double  sy;
   double  sz;
   string  vfinterp;
+  bool    mmap_fields;
 };
 
 
@@ -73,7 +77,8 @@ ApplyTransformProc::ApplyTransformProc()
     keep_transforms(false),
     dx(0), dy(0), dz(0),
     sx(0.), sy(0.), sz(0.),
-    vfinterp("linear")
+    vfinterp("linear"),
+    mmap_fields(false)
 {
   registerProcessType("Volume", "S8",      &doVolume<int8_t, int8_t>);
   registerProcessType("Volume", "U8",      &doVolume<uint8_t, uint8_t>);
@@ -338,13 +343,30 @@ load_ffd_deformation(const string &filename,
     throw invalid_argument("invalid vector field interpolation type: "
                            + proc.vfinterp + ", aborting.");
 
+  AllocatorContext requested_allocator(AllocatorStrategy::ReadOnly);
+  if(proc.mmap_fields) {
+    // The "use factor" is used calculate a threshold size above which
+    // memory-mapping is attempted, based on the currently available memory. By
+    // setting it to zero, we can force memory-mapping to be always attempted.
+    requested_allocator.setUseFactor(0.f);
+  }
+
   aims::Reader<FfdTransformation> rdef(filename);
+  rdef.setAllocatorContext(requested_allocator);
   bool read_success = rdef.read(*deformation);
   if(!read_success) {
     ostringstream s;
     s << "Failed to load a deformation field from "
       << filename << ", aborting.";
     throw FatalError(s.str());
+  }
+
+  const AllocatorContext & actual_allocator =
+    static_cast<const AimsData<Point3df>>(*deformation.get()).allocator();
+  if(proc.mmap_fields
+     && actual_allocator.allocatorType() != AllocatorStrategy::ReadOnlyMap) {
+    std::clog << "Warning: memory-mapping was requested but could not be used"
+              << std::endl;
   }
 
   return deformation;
@@ -906,6 +928,10 @@ int main(int argc, const char **argv)
     app.addOption(proc.vfinterp, "--vectorinterpolation",
                   "Interpolation used for vector field transformations "
                   "(a.k.a. FFD): l[inear], c[ubic] [default = linear]", true);
+    app.addOption(proc.mmap_fields, "--mmap-fields",
+                  "Try to memory-map the deformation fields instead of"
+                  "loading them entirely in memory. This may improve the "
+                  "performance for transforming sparse point sets.", true);
     app.alias("-i",             "--input");
     app.alias("-m",             "--direct-transform");
     app.alias("--motion",       "--direct-transform");
