@@ -18,6 +18,8 @@
 #include <cartobase/object/object.h>                                 // Object
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/exception/errno.h>
+//--- soma -------------------------------------------------------------------
+#include <soma-io/allocator/allocator.h>
 //--- std --------------------------------------------------------------------
 #include <algorithm>
 #include <iostream>
@@ -28,6 +30,11 @@
 using namespace aims;
 using namespace std;
 using namespace carto;
+using namespace soma;
+
+namespace {
+
+static const int EXIT_USAGE_ERROR = 2;
 
 struct ApplyTransformProc;
 
@@ -52,6 +59,7 @@ public:
   string  output;
   vector<string> direct_transform_list;
   vector<string> inverse_transform_list;
+  bool    points_mode;
   string  interp_type;
   string  background_value;
   bool    keep_transforms;
@@ -63,17 +71,20 @@ public:
   double  sy;
   double  sz;
   string  vfinterp;
+  bool    mmap_fields;
 };
 
 
 ApplyTransformProc::ApplyTransformProc()
   : Process(),
+    points_mode(false),
     interp_type("linear"),
     background_value("0"),
     keep_transforms(false),
     dx(0), dy(0), dz(0),
     sx(0.), sy(0.), sz(0.),
-    vfinterp("linear")
+    vfinterp("linear"),
+    mmap_fields(false)
 {
   registerProcessType("Volume", "S8",      &doVolume<int8_t, int8_t>);
   registerProcessType("Volume", "U8",      &doVolume<uint8_t, uint8_t>);
@@ -338,13 +349,30 @@ load_ffd_deformation(const string &filename,
     throw invalid_argument("invalid vector field interpolation type: "
                            + proc.vfinterp + ", aborting.");
 
+  AllocatorContext requested_allocator(AllocatorStrategy::ReadOnly);
+  if(proc.mmap_fields) {
+    // The "use factor" is used calculate a threshold size above which
+    // memory-mapping is attempted, based on the currently available memory. By
+    // setting it to zero, we can force memory-mapping to be always attempted.
+    requested_allocator.setUseFactor(0.f);
+  }
+
   aims::Reader<FfdTransformation> rdef(filename);
+  rdef.setAllocatorContext(requested_allocator);
   bool read_success = rdef.read(*deformation);
   if(!read_success) {
     ostringstream s;
     s << "Failed to load a deformation field from "
       << filename << ", aborting.";
     throw FatalError(s.str());
+  }
+
+  const AllocatorContext & actual_allocator =
+    static_cast<const AimsData<Point3df> >(*deformation.get()).allocator();
+  if(proc.mmap_fields
+     && actual_allocator.allocatorType() != AllocatorStrategy::ReadOnlyMap) {
+    std::clog << "Warning: memory-mapping was requested but could not be used"
+              << std::endl;
   }
 
   return deformation;
@@ -468,8 +496,9 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   ApplyTransformProc & proc = (ApplyTransformProc &) process;
 
   // Read the input image
-  Volume<T> input_image;
   aims::Reader<Volume<T> > input_reader(fileref);
+  input_reader.setAllocatorContext(AllocatorStrategy::ReadOnly);
+  Volume<T> input_image;
   input_reader.read(input_image);
 
   // Parse the background value to the data type
@@ -539,8 +568,9 @@ bool doMesh(Process & process, const string & fileref, Finder &)
   typedef AimsTimeSurface<D, Void> MeshType;
 
   // Read the input mesh
-  AimsTimeSurface<D, Void> mesh;
   aims::Reader<MeshType> input_reader(fileref);
+  input_reader.setAllocatorContext(AllocatorStrategy::InternalModif);
+  AimsTimeSurface<D, Void> mesh;
   input_reader.read(mesh);
 
   // Load the transformation
@@ -584,8 +614,9 @@ bool doBucket(Process & process, const string & fileref, Finder &)
 
   typedef BucketMap<Void> BucketType;
 
-  BucketType input_bucket;
   aims::Reader<BucketType> input_reader(fileref);
+  input_reader.setAllocatorContext(AllocatorStrategy::ReadOnly);
+  BucketType input_bucket;
   input_reader.read(input_bucket);
 
   // Prepare the output dimensions
@@ -696,9 +727,9 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   ApplyTransformProc & proc = (ApplyTransformProc &) process;
 
   // Read the input Graph
-  unique_ptr<Graph> graph;
   aims::Reader<Graph> input_reader(fileref);
-  graph.reset(input_reader.read());
+  input_reader.setAllocatorContext(AllocatorStrategy::InternalModif);
+  unique_ptr<Graph> graph(input_reader.read());
 
   // Deduce the voxel size of the output Graph
   set_geometry(proc, *graph, false);
@@ -753,20 +784,41 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
 
 bool doPoints(ApplyTransformProc & proc, const string & filename)
 {
-  istream *s = 0;
-  ifstream f;
-  stringstream sf;
-  if(FileUtil::fileStat(filename).find('+') != string::npos)
+  // Open the input stream
+  istream *input_stream = 0;
+  ifstream input_file_stream;
+  stringstream input_string_stream;
+  if(filename == "-")
   {
-    f.open(filename.c_str());
-    if(!f)
+    input_stream = &std::cin;  // standard input stream
+  }
+  else if(FileUtil::fileStat(filename).find('+') != string::npos)
+  {
+    input_file_stream.open(filename.c_str());
+    if(!input_file_stream)
       throw errno_error();
-    s = &f;
+    input_stream = &input_file_stream;
   }
   else
   {
-    sf.str(filename);
-    s = &sf;
+    input_string_stream.str(filename);
+    input_stream = &input_string_stream;
+  }
+
+  // Open the output stream
+  const bool print_on_stdout = proc.output.empty() || proc.output == "-";
+  ostream * output_stream;
+  ofstream output_file_stream;
+  if(print_on_stdout)
+  {
+    output_stream = &std::cout;
+  }
+  else
+  {
+    output_file_stream.open(proc.output.c_str());
+    if(!output_file_stream)
+      throw errno_error();
+    output_stream = &output_file_stream;
   }
 
   // Load the transformation
@@ -781,31 +833,33 @@ bool doPoints(ApplyTransformProc & proc, const string & filename)
     }
   }
 
-  vector<Point3df> transformed;
-
-  while(!s->eof() && !s->fail())
+  // Transform all points in the input stream and write to the output stream
+  while(input_stream->good())
   {
     Point3df p(1e38, 1e38, 1e38), q;
-    (*s) >> p;
+    *input_stream >> p;
     if(p == Point3df(1e38, 1e38, 1e38))
       break;
     q = direct_transform->transform(p);
     if(proc.output.empty())
-      cout << "p : " << p << " -> " << q << endl;
-    else
-      transformed.push_back(q);
+      *output_stream << "p : " << p << " -> ";
+    *output_stream << q << "\n";
+    if(output_stream->fail()) {
+      std::clog << "Error writing to the output stream" << std::endl;
+      return false;
+    }
   }
-
-  if(!proc.output.empty())
-  {
-    ofstream g(proc.output.c_str());
-    vector<Point3df>::iterator ip, ep = transformed.end();
-    for(ip=transformed.begin(); ip!=ep; ++ip)
-      g << *ip << endl;
+  if(input_stream->bad()) {
+    // We should check for fail(), but it is also set when everything goes
+    // well...
+    std::clog << "Error reading the input stream of points" << std::endl;
+    return false;
   }
 
   return true;
 }
+
+} // end of anonymous namespace
 
 
 int main(int argc, const char **argv)
@@ -851,16 +905,21 @@ int main(int argc, const char **argv)
       "  chain can be inverted. Otherwise, both transformation chains must\n"
       "  be specified completely.\n"
       "\n"
-      "In points mode, the --input option either specifies an ASCII file\n"
+      "Points mode is activated by passing the --points option.\n"
+      "In this mode, the --input option either specifies an ASCII file\n"
       "containing point coordinates, or is directly one or several points\n"
       "coordinates on the command-line. Points should be formatted as\n"
-      "\"(x, y, z)\", with parentheses and commas.\n"
+      "\"(x, y, z)\", with parentheses and commas. Points will be written\n"
+      "to the output stream in the same format, one point per line.\n"
+      "The input or output file names can also be -, which means standard\n"
+      "input and standard output, respectively. If --output is omitted,\n"
+      "the points are written on standard output in a user-friendly format.\n"
       "\n"
       "Note also that for meshes or points, the dimensions, voxel sizes,\n"
       "reference, and resampling options are not needed and are ignored."
    );
     app.addOption(proc_input, "--input", "Input image");
-    app.addOption(proc.output, "--output", "Output image");
+    app.addOption(proc.output, "--output", "Output image", true);
     app.addOptionSeries(proc.direct_transform_list,
                         "--direct-transform",
                         "direct transformation (from input space to "
@@ -877,6 +936,8 @@ int main(int argc, const char **argv)
                         "passed on the command-line. The file name may be "
                         "prefixed with 'inv:', in which case the inverse of "
                         "the transformation is used.");
+    app.addOption(proc.points_mode, "--points",
+                  "Points mode: transform point coordinates (see above).", true);
     app.addOption(proc.interp_type, "--interp",
                   "Type of interpolation used for Volumes: n[earest], "
                   "l[inear], q[uadratic], c[cubic], quartic, quintic, "
@@ -906,6 +967,10 @@ int main(int argc, const char **argv)
     app.addOption(proc.vfinterp, "--vectorinterpolation",
                   "Interpolation used for vector field transformations "
                   "(a.k.a. FFD): l[inear], c[ubic] [default = linear]", true);
+    app.addOption(proc.mmap_fields, "--mmap-fields",
+                  "Try to memory-map the deformation fields instead of"
+                  "loading them entirely in memory. This may improve the "
+                  "performance for transforming sparse point sets.", true);
     app.alias("-i",             "--input");
     app.alias("-m",             "--direct-transform");
     app.alias("--motion",       "--direct-transform");
@@ -920,32 +985,39 @@ int main(int argc, const char **argv)
     app.alias("-r",             "--reference");
     app.alias("-o",             "--output");
     app.alias("--vi",           "--vectorinterpolation");
-    app.initialize();
-
-
-    // TODO improve the switch to Points mode
-    bool ok = false;
-    try {
-      ok = proc.execute(proc_input.filename);
-    } catch(const exception& exc) {
-      clog << "Failed to run in File mode, will now try Points mode ("
-           << exc.what() << ")."<< endl;
+    try
+    {
+      app.initialize();
     }
-    if(!ok)
+    catch(const carto::user_interruption &)
+    {
+      // Exit after printing e.g. help
+      return EXIT_SUCCESS;
+    }
+    catch(const std::runtime_error &e)
+    {
+      clog << argv[0] << ": error processing command-line options: "
+           << e.what() << endl;
+      return EXIT_USAGE_ERROR;
+    }
+
+
+    bool ok = false;
+    if(proc.points_mode)
     {
       ok = doPoints(proc, proc_input.filename);
+    }
+    else
+    {
+      if(proc.output.empty()) {
+        std::clog << argv[0] << ": error: --output must be provided" << std::endl;
+        return EXIT_USAGE_ERROR;
+      }
+      ok = proc.execute(proc_input.filename);
     }
     if(!ok)
       result = EXIT_FAILURE;
 
-  }
-  catch(const FatalError &exc)
-  {
-    clog << exc.what() << endl;
-    result = EXIT_FAILURE;
-  }
-  catch(user_interruption &e) {
-    result = EXIT_FAILURE;
   }
   catch(std::exception &e) {
     cerr << argv[ 0 ] << ": " << e.what() << endl;
