@@ -300,5 +300,9 @@ namespace carto
   For formats implemented in the Soma-IO layer, such options will be available
   with every reader/writer or progrem: anatomist, AimsFileConvert, or the
   AIMS python API (aims.read() etc).
+
+  \b Allocation:
+
+  The IO system (both in AIMS and Soma-IO) can make use of soma::AllocatorContext hints to allocate data. See the details in Soma-IO \ref reader_writer section.
 */
 }
