@@ -110,9 +110,9 @@ public:
   AffineTransformation3d();
   AffineTransformation3d( const AffineTransformation3d& other );
   /// Create a AffineTransformation3d from a 4x4 matrix given as a line vector
-  AffineTransformation3d( const std::vector<float> & mat );
+  explicit AffineTransformation3d( const std::vector<float> & mat );
   /// Create a AffineTransformation3d from a 4x4 matrix given as a line vector in an Object
-  AffineTransformation3d( const carto::Object mat );
+  explicit AffineTransformation3d( const carto::Object mat );
   AffineTransformation3d( const aims::Quaternion & quat );
   virtual ~AffineTransformation3d();
   virtual AffineTransformation3d &operator = ( const AffineTransformation3d& other );
