@@ -611,6 +611,7 @@ void FoldGraphAttributes::prepareNativeDepthMap()
   int16_t forbidden = -111;
   AimsDistanceFrontPropagation<int16_t>( _depth, forbidden, _inside, 3, 3, 3,
                                          depthfactor, false );
+
   if( verbose )
     cout << "depth map done." << endl;
 }
@@ -625,6 +626,10 @@ void FoldGraphAttributes::prepareNormalizedDepthMap
       cout << "building normalized depth map..." << endl;
     int16_t forbidden = -111;
     _ndepth = th.clone();
+    // force duplicate voxel size (because in clone(), header properties
+    // are shared via ref counting)
+    _ndepth.volume()->header().setProperty( 
+      "voxel_size", vector<float>( _ndepth.volume()->getVoxelSize() ) );
     Point3df  vs( _skel.sizeX(), _skel.sizeY(), _skel.sizeZ() );
     _ndepth.setSizeX
     ( ( _motion->transform( Point3df( vs[0], 0, 0 ) )
@@ -671,6 +676,7 @@ void FoldGraphAttributes::prepareDilatedDepthMap
             _dilated_depthmap(x, y, z, t) = forbidden;
   AimsDistanceFrontPropagation<float>( _dilated_depthmap, forbidden, _inside,
                                        3, 3, 3, 1., false );
+  
   if( verbose )
     cout << "dilated depth map done." << endl;
 }

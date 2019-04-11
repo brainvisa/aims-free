@@ -215,6 +215,11 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
   }
 %End
 
+  long __hash__() const /AutoGen/;
+%MethodCode
+  sipRes = (long) sipCpp;
+%End
+
   static void _releaseRC( carto::RCObject & /GetWrapper/ );
 %MethodCode
 #ifdef PYAIMS_DEBUG_RC

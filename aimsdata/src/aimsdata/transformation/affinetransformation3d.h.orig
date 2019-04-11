@@ -58,6 +58,7 @@ namespace aims
     //--------------------------//
    //  AffineTransformation3d  //
   //--------------------------//
+<<<<<<< HEAD
   //--------------------------------------------------------------------------
   /** Affine 3D transformation
 
@@ -145,6 +146,122 @@ namespace aims
     trans.translation() = Point3df(..) which do not work any longer.
   */
   class AffineTransformation3d : public soma::AffineTransformation3dBase
+=======
+ //  AffineTransformation3d  //
+//--------------------------//
+//-----------------------------------------------------------------------------
+/** Affine 3D transformation
+
+WARNING: this is the old Motion class of Aims 3.x, which has been renamed and
+changed in Aims 4.0.
+
+A new transformation classes tree has been setup to allow non-linear
+transformations: see Transformation and Transformation3d.
+AffineTransformation3d now inherits Transformation3d.
+
+A typedef is still provided for backward compatibility, in
+aims/resampling/motion.h (the former location of the Motion class) and should
+minimize inconvenience when compiling old code which used Motion. However a few
+API differences may cause compilation problems:
+
+- forward declarations for the Motion class will not work any longer, since
+  Motion is not a class anymore but a typedef. It is still possible to replace:
+\code class Motion;
+\endcode
+  by:
+\code namespace aims { class AffineTransformation3d; }
+typedef aims::AffineTransformation3d Motion;
+\endcode
+  but of course it is better to use directly the AffineTransformation3d class
+  under its real name.
+
+- the Motion::transform_normal() method is now transformUnitNormal()
+
+- there are now several overloaded transform() methods taking double, or float
+  numbers, or Point3df or Point3dd arguments. As there were formerly only float
+  and Point3df arguments, ambiguities may raise from calling them with mixed
+  double/float arguments
+
+- the base aims::Transformation class introduces a name ambiguity with
+  anatomist anatomist::Transformation class, so it now requires to handle
+  namespaces carefully.
+
+- the Motion DataTypeCode has also changed to AffineTransformation3d.
+*/
+class AffineTransformation3d : public Transformation3d
+{
+public:
+
+  /// Create an identity transformation
+  AffineTransformation3d();
+  AffineTransformation3d( const AffineTransformation3d& other );
+  /// Create a AffineTransformation3d from a 4x4 matrix given as a line vector
+  explicit AffineTransformation3d( const std::vector<float> & mat );
+  /// Create a AffineTransformation3d from a 4x4 matrix given as a line vector in an Object
+  explicit AffineTransformation3d( const carto::Object mat );
+  AffineTransformation3d( const aims::Quaternion & quat );
+  virtual ~AffineTransformation3d();
+  virtual AffineTransformation3d &operator = ( const AffineTransformation3d& other );
+  virtual AffineTransformation3d &operator = ( const std::vector<float> & mat );
+  virtual AffineTransformation3d &operator = ( const carto::Object mat );
+  virtual AffineTransformation3d &operator = ( const aims::Quaternion & quat );
+
+  virtual bool operator == ( const AffineTransformation3d & ) const;
+
+  AffineTransformation3d & operator *= ( const AffineTransformation3d & trans );
+  // AffineTransformation3d & operator += ( const AffineTransformation3d & trans );
+  virtual AffineTransformation3d operator - () const;
+
+  aims::PythonHeader* header() { return _header; }
+  const aims::PythonHeader* header() const { return _header; }
+  void setHeader( aims::PythonHeader* ph );
+
+  Point3dd transformVector( const Point3dd & vec ) const;
+  Point3df transformVector( const Point3df & dir ) const;
+  Point3dd transformVector( double x, double y, double z ) const;
+  Point3df transformVector( float x, float y, float z ) const;
+  Point3dd transformNormal( const Point3dd & dir ) const;
+  Point3df transformNormal( const Point3df & dir ) const;
+  Point3dd transformNormal( double x, double y, double z ) const;
+  Point3df transformNormal( float x, float y, float z ) const;
+  Point3dd transformUnitNormal( const Point3dd & dir ) const;
+  Point3df transformUnitNormal( const Point3df & dir ) const;
+  Point3dd transformUnitNormal( double x, double y, double z ) const;
+  Point3df transformUnitNormal( float x, float y, float z ) const;
+
+  inline Point3df& translation() { return _translation; }
+  inline const Point3df& translation() const { return _translation; }
+
+  inline AimsData<float>& rotation() { return _rotation; }
+  inline const AimsData<float>& rotation() const { return _rotation; }
+
+  bool isIdentity() const CARTO_OVERRIDE;
+  virtual void setToIdentity();
+
+  // AffineTransformation3d algebraic operation
+  AffineTransformation3d inverse() const;
+  bool invertible() const CARTO_OVERRIDE;
+  std::unique_ptr<Transformation3d> getInverse() const CARTO_OVERRIDE;
+  virtual void scale( const Point3df& sizeFrom, const Point3df& sizeTo );
+  /// true if the transformation is direct, false if it changes orientation
+  bool isDirect() const;
+
+  //Initialisation
+  void setTranslation(Point3df trans);
+  virtual void setRotationAffine( float rx, float ry, float rz,
+                                  const Point3df &cg = Point3df( 0.0 )  );
+  //virtual void setRotationVectorial( const Point3df& v1, const Point3df& v2 );
+
+  /// transform AffineTransformation3d to a line vector (useful for
+  /// conversions and IO)
+  std::vector<float> toVector() const;
+  /// transform AffineTransformation3d to a column vector (useful for
+  /// conversions to OpenGL matrices)
+  std::vector<float> toColumnVector() const;
+  /// transform a column vector to an AffineTransformation3d (useful for
+  /// conversions from OpenGL matrices)
+  void fromColumnVector( const std::vector<float> & vec )
+>>>>>>> origin/master
   {
   public:
 
@@ -153,9 +270,9 @@ namespace aims
     AffineTransformation3d( const AffineTransformation3d& other );
     AffineTransformation3d( const AffineTransformation3dBase& other );
     /// Create a AffineTransformation3d from a 4x4 matrix given as a line vector
-    explicit AffineTransformation3d( const std::vector<float> & mat );
+    AffineTransformation3d( const std::vector<float> & mat );
     /// Create a AffineTransformation3d from a 4x4 matrix given as a line vector in an Object
-    explicit AffineTransformation3d( const carto::Object mat );
+    AffineTransformation3d( const carto::Object mat );
     AffineTransformation3d( const aims::Quaternion & quat );
     virtual ~AffineTransformation3d();
     virtual AffineTransformation3d &
