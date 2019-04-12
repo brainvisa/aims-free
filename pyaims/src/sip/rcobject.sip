@@ -51,7 +51,7 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
 
   long __hash__() const /AutoGen/;
 %MethodCode
-  sipRes = (long) sipCpp;
+  sipRes = static_cast<long>( reinterpret_cast<unsigned long long>(sipCpp) );
 %End
 
   static void _releaseRC( carto::RCObject & /GetWrapper/ );
