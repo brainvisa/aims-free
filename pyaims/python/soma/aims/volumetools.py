@@ -31,11 +31,15 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 '''Volume functions'''
+
+from __future__ import print_function
+
 __docformat__ = 'restructuredtext en'
 
 from soma import aims
 import numpy as np
 import sys
+
 
 if sys.version_info[0] >= 3:
     xrange = range
