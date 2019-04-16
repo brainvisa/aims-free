@@ -35,10 +35,12 @@
 from __future__ import print_function
 
 from soma import aims
+from soma.aims import lazy_read_data
 import sys
 import re
 from optparse import OptionParser
-import numpy as np
+import numpy
+np = numpy  # allow both names for numpy
 
 parser = OptionParser(description='Apply a formula to a set of homogeneous '
                       'images or textures (homogeneous means all of the same '
@@ -46,9 +48,23 @@ parser = OptionParser(description='Apply a formula to a set of homogeneous '
 parser.add_option('-o', '--output', dest='output', help='output volume')
 parser.add_option("-f", "--formula",
                   dest="formula",
-                  help="image formula, ex: ( I1 * 2 + I2 * I3 ) / 1.2")
+                  help="image formula, ex: ( I1 * 2 + I2 * I3 ) / 1.2 . Image "
+                  "(or other objects) can be named I1, I2... or image[1], "
+                  "image[2] etc. Indices normally start at 1 (kind of "
+                  "matlab-style) but can start at 0 if the -z option is used. A formula is basically a python expression, thus can use anything supported in python expressions. ex: sum(images). Numpy may be used (as np), and numpy results can be converted to volumes: np.asarray(I1) ** 2, or np.sqrt(I1)")
 parser.add_option('-i', '--input', dest='filename', action='append',
                   help='input volume(s)')
+parser.add_option('-l', '--lazy', action='store_true',
+                  help='use lazy reading and release of objects during the '
+                  'formula evaluation. With this option, each image is loaded '
+                  'when used, and released once one operation has been '
+                  'performed with it. It allows to process large lists of '
+                  'images without loading all of them in memory, but will '
+                  'read them several times if they are used several times in '
+                  'the formula. (see aims.lazy_read_data.LasyReadData '
+                  'python class for details)')
+parser.add_option('-z', '--zero', dest='zero', action='store_true',
+                  help='start indexing images at index 0 (instead of 1 by default): I0, I1 etc and image[0], image[1] etc.')
 
 (options, args) = parser.parse_args()
 
@@ -72,29 +88,52 @@ formula = re.sub('I([0-9]+)', 'image[\\1]', options.formula)
 # print(formula)
 
 # read images
-image = [None]
+if options.zero:
+    image = []
+    i0 = 0
+else:
+    image = [None]
+    i0 = 1
 objtype = None
 
 r = aims.Reader({'Texture': 'TimeTexture'})
 for x in options.filename:
-    vol = r.read(x)
-    t = vol.header()['data_type']
-    if type(vol).__name__.startswith('Volume'):
+    if options.lazy:
+        vol = aims.lazy_read_data.LazyReadData(x, nops=1)
+        f = aims.Finder()
+        f.check(x)
+        t = f.header()['data_type']
+        ot = f.header()['object_type']
+        if ot.startswith('Volume'):
+            t_objtype = 'Volume'
+        elif ot.startswith('TimeTexture'):
+            t_objtype = 'TimeTexture'
+            vol = np.asarray(vol)
+        else:
+            raise TypeError('unsupported data: %s' % type(vol).__name__)
+    else:
+        vol = r.read(x)
+        t = vol.header()['data_type']
+        ot = type(vol).__name__
+    if ot.startswith('Volume'):
         t_objtype = 'Volume'
-    elif type(vol).__name__.startswith('TimeTexture'):
+    elif ot.startswith('TimeTexture'):
         t_objtype = 'TimeTexture'
         vol = np.asarray(vol)
     else:
-        raise TypeError('unsupported data: %s' % type(vol).__name__)
+        raise TypeError('unsupported data: %s' % ot)
     if objtype is None:
         objtype = t_objtype
     elif objtype != t_objtype:
-        raise TypeError('heterogeneous data: %s and %s' % (objtype, t_objtype))
+        raise TypeError('heterogeneous data: %s and %s'
+                        % (objtype, t_objtype))
     image.append(vol)
 
 # print(image)
 
 result = eval(formula)
+if isinstance(result, lazy_read_data.LazyReadData):
+    result = result.data
 # print(result)
 
 if objtype in ('TimeTexture',):
@@ -106,8 +145,8 @@ elif objtype in ('Volume',) and isinstance(result, np.ndarray):
     # volumes have been converted to numpy in the expression
     # convert it back to a volume, using the first image header
     result = aims.Volume(result)
-    if len(image) > 1:
-        result.copyHeaderFrom(image[1].header())
+    if len(image) > i0:
+        result.copyHeaderFrom(image[i0].header())
 
 print('output type:', type(result).__name__)
 aims.write(result, options.output)
