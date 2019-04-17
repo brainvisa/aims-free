@@ -86,7 +86,8 @@ class LazyReadData(object):
             number of operations before data is unloaded. 0 means never
             released.
         reader: aims.Reader
-            pre-built Reader instance, used when more specific reader options are needed. Otherwise a standard reader will be used.
+            pre-built Reader instance, used when more specific reader options
+            are needed. Otherwise a standard reader will be used.
         kwargs: dict
             if data is an AIMS object, kwargs may include an additional
             'filename' argument. The rest is passed to aims.read() when data is
