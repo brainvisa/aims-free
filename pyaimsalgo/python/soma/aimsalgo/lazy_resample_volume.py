@@ -6,6 +6,24 @@ from soma import aims, aimsalgo
 import six
 
 class LazyResampleVolume(LazyReadData):
+
+    '''
+    A specialized version of aims.LazyReadData dedicated to Volumes, which can perform voxel type conversion and resampling to another space when reading data.
+
+    LazyResampleVolume is useful when operations have to be performed on several volumes which are not initially in the same space.
+
+    ::
+
+        image_names = ['image%02d.nii' % i for i in range(10)]
+        transf_names = ['transform%02d' % i for i in range(10)]
+        rvols = [lazy_resample_volume.LazyResampleVolume(
+                    f, transform=t, nops=1, dims=(256, 256, 200, 1),
+                    vox_size=(1, 1, 1, 1), dtype='FLOAT')
+                  for f, t in zip(image_names, transf_names)]
+        res = sum(rvols) / len(rvols)
+
+    '''
+
     def __init__(self, data_or_filename, allocator_context=None,
                  read_options=None, nops=0, reader=None, dtype=None,
                  transform=None, dims=None, vox_size=(1., 1., 1., 1.),
@@ -13,8 +31,28 @@ class LazyResampleVolume(LazyReadData):
         '''
         Parameters
         ----------
+        data_or_filename: see LazyReadData
+        allocator_context: see LazyReadData
+        read_options: see LazyReadData
+        nops: see LazyReadData
+        reader: see LazyReadData
         dtype: str or type
             may specify a conversion to a specific voxel type
+        transform: str or aims.AffineTransformation3d or list
+            Transformations to be applied to the volume when it is read. May
+            be an AffineTransformation3d instance, or a filename (.trm file),
+            or a list of transformations / filenames to be combined (applied
+            rioght to left, thus matrices are multiplied in the left-to-right
+            order ).
+        dims: list or tuple of int
+            resampled volume dimensions in voxels
+        vox_size: list or tuple of float
+            resampled volume voxel sizes
+        resampling_order: int
+            interpolation order for the resampling
+        default_value: data type
+            default background value for the resampled volume
+        kwargs: see LazyReadData
         '''
         super(LazyResampleVolume, self).__init__(
             data_or_filename, allocator_context=allocator_context,
