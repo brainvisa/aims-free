@@ -109,6 +109,7 @@ PSUBDIRS = \
     AimsVeinExtraction             \
     AimsVFilter          \
     AimsVoiStat               \
+    AimsVol2Tex               \
     AimsVoronoi               \
     AimsZCat
 

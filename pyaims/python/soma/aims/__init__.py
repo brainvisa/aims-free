@@ -2050,6 +2050,54 @@ def supported_io_formats(otypes=None, access=''):
     return formats
 
 
+def get_transform_to(aims_obj, ref):
+    ''' Get a transformation object in an AIMS object header to the given referential identifier. Objects need to have a header() method following the aims conventions (``referentials`` and ``transformations`` elements beingn lists).
+
+    Parameters
+    ----------
+    aims_obj: Aims object with a header
+        object we want to get the transformation from
+    ref: str
+        target refetential identifier. May be an UUID string, or a known
+        identifier such as "Talairach-MNI template-SPM" (see
+        aims.StandardReferentials attributes)
+
+    Returns
+    -------
+    transform: aims.AffineTransformation3d
+        the transformation object, or None if no matching one is found
+    '''
+    h = aims_obj.header()
+    refs = h.get('referentials', [])
+    if len(refs) == 0:
+        return None
+    if ref not in refs:
+        if ref == StandardReferentials.acPcReferential():
+            if StandardReferentials.acPcReferentialID() in refs:
+                ref = StandardReferentials.acPcReferentialID()
+        elif ref == StandardReferentials.acPcReferentialID():
+            if StandardReferentials.acPcReferential() in refs:
+                ref = StandardReferentials.acPcReferential()
+        elif ref == aims.StandardReferentials.mniTemplateReferential():
+            if aims.StandardReferentials.mniTemplateReferentialID() in refs:
+                ref = aims.StandardReferentials.mniTemplateReferentialID()
+        elif ref \
+                == aims.StandardReferentials.commonScannerBasedReferentialID():
+            if aims.StandardReferentials.commonScannerBasedReferential() \
+                    in refs:
+                ref = aims.StandardReferentials.commonScannerBasedReferential()
+    print('ref:', ref)
+    if ref not in refs:
+        return None
+    index = refs.index(ref)
+    print('index:', index)
+    try:
+        tr = h.get('transformations', [])[index]
+    except IndexError:
+        return None
+    return aims.AffineTransformation3d(tr)
+
+
 # documentation
 
 carto.GenericObject.__doc__ = '''

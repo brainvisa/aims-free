@@ -46,4 +46,15 @@ for k, v in six.iteritems(aims.__dict__):
       v.__module__ = 'soma.aims'
     except:
       pass
-del aims, ExtendedImporter, k, v
+del ExtendedImporter, k, v
+
+
+def ResamplerFactory(volume):
+    cname = type(volume).__name__
+    if cname.startswith('Volume_'):
+        dtype = cname[7:]
+    elif cname.startswith('AimsData_'):
+        dtype = cname[9:]
+    rfac = getattr(aims, 'ResamplerFactory_%s' % dtype)
+    return rfac
+
