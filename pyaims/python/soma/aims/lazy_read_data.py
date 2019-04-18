@@ -1,3 +1,12 @@
+'''
+This modules provides wrappers for Aims readable data types which lazily load when they are used, and can release memory after they are used: :class:`LazyReadData`
+
+Specialized iterators can help parallelizing reading opertions, and perform it earlier (before they are really used) in an iteration: :class:`PreloadIterator`, :class:`PreloadList`.
+
+A specialized version in aimsalgo handles resampling while loading: :class:`~soma.aimsalgo.lazy_resample_volume.LazyResampleVolume`.
+
+'''
+
 from __future__ import print_function
 
 from soma import aims
@@ -433,12 +442,14 @@ class PreloadList(list):
     A list which provides a PreloadIterator to iterate over it.
 
     ::
+
         volumes = PreloadList(LazyReadData(f, nops=1) for f in filenames)
         res = sum(volumes, npreload=8)
 
     equivalent to:
 
     ::
+
         volumes = [LazyReadData(f, nops=1) for f in filenames]
         res = sum(PreloadIterator(volumes, npreload=8))
     '''
