@@ -1,6 +1,9 @@
 from __future__ import print_function
 
 from soma import aims
+import threading
+import itertools
+import multiprocessing
 import six
 
 
@@ -67,6 +70,13 @@ class LazyReadData(object):
     Thus in order to optimize things, *nops* should be set to the number of
     times the object will be used in an expression. A kind of pre-parsing of
     the expression may be needed in order to automatize this.
+
+    Loading is done in a thread-safe manner (using a lock) so that two (or
+    more) threads accessing data will not trigger several loads.
+
+    Subclasses may override the _lazy_read() method to implement a different
+    behavior or load additional data. This method should set self.data with the
+    loaded data.
     '''
 
     def __init__(self, data_or_filename, allocator_context=None,
@@ -119,6 +129,9 @@ class LazyReadData(object):
         self.kwargs = kwargs
         self.nops = nops
         self.reader = reader
+        self._lock = threading.RLock()
+        self._preload_lock = threading.RLock()
+        self._loading = False
 
     def _lazy_read(self):
         if self.data is None:
@@ -131,22 +144,40 @@ class LazyReadData(object):
             # print('read', self, ':', self.data)
         return self.data
 
+    def _lazy_read_(self):
+        with self._preload_lock:
+            self._loading = True
+        with self._lock:
+            return self._lazy_read()
+
+
     def _dec_release(self):
-        if self.nops > 0:
-            self.nops -= 1
-            if self.nops == 0:
-                # count reach 0, erase data to free memory
-                # print('release', self, self.data)
-                self.data = None
-                # allow one additional operation
-                self.nops = 1
+        with self._preload_lock:
+            if self.nops > 0:
+                self.nops -= 1
+                if self.nops == 0:
+                    # count reach 0, erase data to free memory
+                    # print('release', self, self.data)
+                    self.data = None
+                    # allow one additional operation
+                    self.nops = 1
+                    self._loading = False
+
+    def preloading(self):
+        ''' If a threaded load operation has been started ("preloading"), then
+        this method returns True as soon as the operation has started. It still
+        returns True as long as the data is in memory. Its goal is to tell that
+        another load operation is not needed.
+        '''
+        with self._preload_lock:
+            return self._loading
 
     #def write(self):
         #if self.data is not None:
             #aims.write(self.data, self.filename)
 
     def __getattr__(self, name):
-        self._lazy_read()
+        self._lazy_read_()
         return getattr(self.data, name)
 
     #def __del__(self):
@@ -154,10 +185,10 @@ class LazyReadData(object):
             #print('del', self, ':', self.data)
 
     def __add__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             ld = d
             d = d.data
         res = LazyReadData(self.data.__add__(d), filename=self.filename)
@@ -167,10 +198,10 @@ class LazyReadData(object):
         return res
 
     def __radd__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             ld = d
             filename = d.filename
             d = d.data
@@ -183,20 +214,21 @@ class LazyReadData(object):
         return res
 
     def __iadd__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             d = d.data
         self.data.__iadd__(d)
         if ld is not None:
             ld._dec_release()
+        return self
 
     def __sub__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             ld = d
             d = d.data
         res = LazyReadData(self.data.__sub__(d), filename=self.filename)
@@ -206,10 +238,10 @@ class LazyReadData(object):
         return res
 
     def __rsub__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             ld = d
             filename = d.filename
             d = d.data
@@ -222,20 +254,21 @@ class LazyReadData(object):
         return res
 
     def __isub__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             d = d.data
         self.data.__isub__(d)
         if ld is not None:
             ld._dec_release()
+        return self
 
     def __mul__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             ld = d
             d = d.data
         res = LazyReadData(self.data.__mul__(d), filename=self.filename)
@@ -245,10 +278,10 @@ class LazyReadData(object):
         return res
 
     def __rmul__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             ld = d
             filename = d.filename
             d = d.data
@@ -261,20 +294,21 @@ class LazyReadData(object):
         return res
 
     def __imul__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             d = d.data
         self.data.__imul__(d)
         if ld is not None:
             ld._dec_release()
+        return self
 
     def __div__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             ld = d
             d = d.data
         res = LazyReadData(self.data.__div__(d), filename=self.filename)
@@ -284,10 +318,10 @@ class LazyReadData(object):
         return res
 
     def __rdiv__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             ld = d
             filename = d.filename
             d = d.data
@@ -300,31 +334,118 @@ class LazyReadData(object):
         return res
 
     def __idiv__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         if isinstance(d, LazyReadData):
-            d._lazy_read()
+            d._lazy_read_()
             d = d.data
         self.data.__idiv__(d)
         if ld is not None:
             ld._dec_release()
+        return self
 
     def __pow__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         ld = None
         res = LazyReadData(self.data.__pow__(d), filename=self.filename)
         self._dec_release()
         return res
 
     def __ipow__(self, d):
-        self._lazy_read()
+        self._lazy_read_()
         self.data.__ipow__(d)
+        return self
 
     def __neg__(self):
-        self._lazy_read()
+        self._lazy_read_()
         return LazyReadData(-self.data, filename=filename)
 
     def __abs__(self):
-        self._lazy_read()
+        self._lazy_read_()
         return LazyReadData(self.data.__abs__(), filename=filename)
 
+
+class PreloadIterator(object):
+    '''
+    An iterator intended to be used to iterate over sequences of LazyReadData,
+    which performs pre-iterations and pre-loads data before they get used in an
+    actual iteration.
+
+    **Idea:**
+
+    When iterating over a list of LazyReadData, data is loaded when accessed,
+    thus at the last moment, sequentially. As data loading can be efficiently
+    threaded, the idea is to use threads to start preloading of a number of
+    data which be used later in the loop. This parallel loading idea is
+    somewhat antinomic with the lazy loading data principle, so the
+    PreloadIterator mixes both approaches. The number of preloaded data can be
+    specified, the default is the number of processors in the machine. Each
+    preload operation will run in a separate thread.
+
+    ::
+
+        volumes = [LazyReadData(f, nops=1) for f in filenames]
+        res = sum(PreloadIterator(volumes, npreload=8))
+
+    In the above example, 8 threads will be used to preload the next 8 items in
+    the list from the current iterator position. As the iterator advances, more
+    data preloads will be triggered.
+
+    '''
+    def __init__(self, iterable, npreload=multiprocessing.cpu_count()):
+        '''
+        Parameters
+        ----------
+        iterable: iterable
+            the iterable can be a list, a generator, or an iterator. It should
+            iterate over items which are LazyReadData instances, because it
+            will use their lazy loading mechanism and their threading locks.
+        npreload: number of preloaded data / number of threads used to preload
+        '''
+        self.iter = iter(iterable)
+        self.npreload = npreload
+        self.preload()
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        self.preload()
+        item = self.iter.next()
+        return item
+
+    def preload(self):
+        self.iter, iter = itertools.tee(self.iter)
+        for i in range(self.npreload):
+            try:
+                item = next(iter)
+                if not item.preloading():
+                    item._loading = True
+                    # print('preload:', item.filename)
+                    th = threading.Thread(target=item._lazy_read)
+                    th.start()
+            except StopIteration:
+                break
+
+
+class PreloadList(list):
+    '''
+    A list which provides a PreloadIterator to iterate over it.
+
+    ::
+        volumes = PreloadList(LazyReadData(f, nops=1) for f in filenames)
+        res = sum(volumes, npreload=8)
+
+    equivalent to:
+
+    ::
+        volumes = [LazyReadData(f, nops=1) for f in filenames]
+        res = sum(PreloadIterator(volumes, npreload=8))
+    '''
+    def __init__(self, iterable=None, npreload=multiprocessing.cpu_count()):
+        super(PreloadList, self).__init__(iterable)
+        self.npreload = npreload
+
+    def __iter__(self):
+        return PreloadIterator(super(PreloadList, self).__iter__(),
+                               npreload=self.npreload)
