@@ -31,7 +31,7 @@ class VoxelMapTexture : public Process
 {
 public:
   VoxelMapTexture( const string & meshfile, const string & brainfile, const string & outexfile,
-                int radius, int height, bool asciiFlag, int mod );
+                int radius, int height, bool asciiFlag, int mod, const string & volumefilep, const string & outexfilep );  /* NEW VAR */
   
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
@@ -40,14 +40,15 @@ public:
   bool voxelMap( AimsData<T> & data );
 
 private:
-  string        meshf, brainf, otexf;
+  string        meshf, brainf, otexf, otexfp, volfp;  /* NEW VAR */
   int          radius, height, mode;
   bool         ascii;
 };
 
+
 VoxelMapTexture::VoxelMapTexture( const string & meshfile, const string & brainfile,  const string & outexfile, 
-                            int rad, int hei, bool asciiFlag, int mod) 
-  	: Process(), meshf( meshfile ), brainf(brainfile), otexf( outexfile ), radius( rad ), height( hei ), ascii( asciiFlag ), mode( mod )
+                            int rad, int hei, bool asciiFlag, int mod, const string & volumefilep, const string & outexfilep ) 
+  	: Process(), meshf( meshfile ), brainf(brainfile), otexf( outexfile ), radius( rad ), height( hei ), ascii( asciiFlag ), mode( mod ), volfp( volumefilep ), otexfp( outexfilep )
    {
     registerProcessType( "Volume", "S8", &doit<int8_t> );
     registerProcessType( "Volume", "U8", &doit<uint8_t> );
@@ -56,7 +57,7 @@ VoxelMapTexture::VoxelMapTexture( const string & meshfile, const string & brainf
     registerProcessType( "Volume", "S32", &doit<int32_t> );
     registerProcessType( "Volume", "U32", &doit<uint32_t> );
     registerProcessType( "Volume", "FLOAT", &doit<float> );
-}
+}  /* NEW VAR */
 
 
 template<class T> 
@@ -70,6 +71,7 @@ bool doit( Process & p, const string & fname, Finder & f)
   string		format = f.format();
   if( !reader.read( data, 0, &format) )
     return( false );
+
   return( tp.voxelMap( data ) );
 } 
 
@@ -80,17 +82,17 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
   /* Loading input */
   if(verbose) {
     cout << "Starting VoxelMapTexture()" << endl;
-  	 cout << "reading mesh...";
+  	 cout << "Reading mesh...";
   }
   Reader<AimsSurfaceTriangle>	rmesh( meshf );
   AimsSurfaceTriangle		mesh;
   if( !rmesh.read( mesh ) )
     return( false );
   if(verbose)
-  	cout << "done.\n";
+  	cout << " done.\n";
 
   if(verbose)
-     cout << "reading brain mask...";
+     cout << "Reading brain mask...";
   AimsData<short>               brainData;
   bool BRAIN_MASK = 0;
   if( brainf.length() ) {
@@ -100,9 +102,20 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
       BRAIN_MASK = 1;
   }
   if(verbose)
-        cout << "done.\n";
-  
-  TimeTexture<float>             otex;
+        cout << " done.\n";
+
+  if(verbose)
+     cout << "Reading parallel brain...";
+  AimsData<float>               datap;
+  if( volfp.length() ) {
+      Reader<AimsData<float> >      readerp( volfp );
+      if(!readerp.read( datap, 0) )
+        return(false);
+  }
+  if(verbose)
+        cout << " done.\n";
+
+  TimeTexture<float>             otex, otexp;  /* NEW VAR */
 
   /***
   Algorithm
@@ -114,15 +127,16 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
   //    count mesh times
   for( itm=mesh.begin(); itm!=etm; ++itm )
     instants.insert( (*itm).first );
-  //    add remaining vomule times
+  //    add remaining volume times
   size_t                                vt, evt = data.dimT();
+
   for( vt = *instants.rbegin() + 1; vt<evt; ++vt )
     instants.insert( vt );
 
   set<size_t>::iterator             ins, endt = instants.end();
-  unsigned                         p;
+  unsigned                          p;
   int                               x, y, z, i, j, k, kmax, xmin, ymin, zmin, nval;
-  float                             val=0, meanVal, mval, Mval, Fval;
+  float                             val=0, valp=0, meanVal, meanValp, mval, mvalp, Mval, Mvalp, Fval;
 
   for( ins=instants.begin(); ins!=endt; ++ins )
     {
@@ -175,6 +189,7 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
       }
 
       otex.reserve( n );
+      otexp.reserve( n );
 
       for( p=0; p<n; p++ ) 
       {        
@@ -183,6 +198,7 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
         mval=99999999999999;
         Mval=-99999999999999;
         meanVal=0;
+        meanValp=0;
                
         // cylinder (radius, 2*height+1)
         for( i=-height; i<=height; i++ )
@@ -198,37 +214,62 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
                       if(x<data.dimX() && y<data.dimY() && z<data.dimZ())
                       {
                         val = (float) data( x, y, z, t );
+                        valp = (float) datap( x, y, z, t ); /* NEW LINE */
                         if( val!=0 && (!BRAIN_MASK || brainData(x, y, z, t)))
                           {
                           meanVal=meanVal+val;
+                          meanValp=meanValp+valp; /* NEW LINE */
                           nval=nval+1;
                           if( mode==2 )
                             {
-                              if( mval>val ) {mval=val;}
+                              if( mval>val )
+                                {
+                                  mval=val;
+                                  mvalp=valp; /* NEW LINE */
+                                }
                             }
                             else if( mode==3 )
                             {
-                              if( Mval<val ) {Mval=val;}
+                              if( Mval<val )
+                                {
+                                  Mval=val;
+                                  Mvalp=valp; /* NEW LINE */
+                                }
                             }
                           }
                       }
                     }
                 }
             }
-        if( nval>0 ) {meanVal=meanVal/nval;}
+        if( nval>0 )
+        {
+          meanVal=meanVal/nval;
+          meanValp=meanValp/nval; /* NEW LINE */
+        }
         if( mode==1 )
         {
           otex.push_back( meanVal );
+          otexp.push_back( meanValp ); /* NEW LINE */
         }
         else if( mode==2 )
         {
-          if( mval==99999999999999 ) {mval=meanVal;}
+          if( mval==99999999999999 )
+          {
+            mval=meanVal;
+            mvalp=meanValp; /* NEW LINE */
+          }
           otex.push_back( mval );
+          otexp.push_back( mvalp ); /* NEW LINE */
         }
         else if( mode==3 )
         {
-          if( Mval==-99999999999999 ) {Mval=meanVal;}
+          if( Mval==-99999999999999 )
+          {
+            Mval=meanVal;
+            Mvalp=meanValp; /* NEW LINE */
+          }
           otex.push_back( Mval );
+          otexp.push_back( Mvalp ); /* NEW LINE */
         }
       }      
     }
@@ -237,8 +278,11 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
   if(verbose)
     cout << "writing texture..." << endl;
   Writer<TimeTexture<float> >   w2( otexf );
+  Writer<TimeTexture<float> >   w3( otexfp ); /* NEW LINE */
   if( !w2.write( otex, ascii ) )
     return( false );
+  if( !w3.write( otexp, ascii ) ) /* NEW LINE */
+    return( false ); /* NEW LINE */
 
   if(verbose)
     cout << "End of the process." << endl;
@@ -248,7 +292,7 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
 
 int main( int argc, const char** argv )
 {
-  string			                 volumefile, outexfile;
+  string			                 volumefile, volumefilep, outexfile, outexfilep; /* NEW VAR */
   Reader<AimsSurfaceTriangle>   meshfile;
   string                        brainfile="";
   int                          radius=1, height=1, mod = 1;
@@ -256,8 +300,10 @@ int main( int argc, const char** argv )
 
   AimsApplication	app( argc, argv, "Compute label close to mesh and build texture file" );
   app.addOption( volumefile, "-i", "input Label volume" );
+  app.addOption( volumefilep, "-ip", "input parallel Label volume" ); /* NEW LINE */
   app.addOption( meshfile, "-m", "input mesh" );
   app.addOption( outexfile, "-o", "texture output");
+  app.addOption( outexfilep, "-op", "parallel texture output"); /* NEW LINE */
   app.addOption( height, "-height", "cylinder half height (voxels) [default=1]", 1 );
   app.addOption( radius, "-radius", "cylinder radius (voxels) [default=1]", 1 );
   app.addOption( brainfile, "-b", "brain mask file [default=no brain mask]", "");
@@ -272,9 +318,9 @@ int main( int argc, const char** argv )
       app.initialize();
       if( verbose )
         cout << "Init program" << endl;
-      VoxelMapTexture	proc( meshfile.fileName(), brainfile, outexfile, radius, height, asciiFlag, mod );
+      VoxelMapTexture	proc( meshfile.fileName(), brainfile, outexfile, radius, height, asciiFlag, mod, volumefilep, outexfilep );
       if( verbose )
-        cout << "Starting program.." << endl;      
+        cout << "Starting program..." << endl;      
       if( !proc.execute( volumefile ) )
       {
             cout << "Couldn't process file - aborted\n";
