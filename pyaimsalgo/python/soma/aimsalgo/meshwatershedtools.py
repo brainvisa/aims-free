@@ -10,8 +10,9 @@
 ############################################################################
 
 """
-This script does the following:
-* generate a reduced profile by bsains using the watershed algorithm
+This modles features the following:
+
+* generate a reduced profile by basins using the watershed algorithm
 * merge the items if necessary (measured criteria validating the basins)
 
 Main dependencies: PyAims library
@@ -139,8 +140,8 @@ def watershedWithBasinsMerging(
                         if size < k_size and depth < k_depth
             (2) or --> merge basins with its parent
                        if size < k_size or depth < k_depth
-    Result
-    ------
+    Returns
+    -------
     output_tex: (TimeTexture_S16)
         watershed results according to the thresholds
         indicated by k_size and k_depth

@@ -1,4 +1,6 @@
-''' Wrapper for Pandas which should work on MacOS 10.5 with python 2.6
+''' Wrapper for Pandas which should work on MacOS 10.5 with python 2.6.
+
+It just replaces the regular pandas import.
 '''
 
 from __future__ import absolute_import

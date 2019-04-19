@@ -60,10 +60,10 @@ SubModule: ``pandas``
     :members:
 
 
-SubModule: ``spmnormalization``
-===============================
+SubModule: ``spmnormalizationreader``
+=====================================
 
-.. automodule:: soma.aims.spmnormalization
+.. automodule:: soma.aims.spmnormalizationreader
     :members:
 
 
@@ -95,10 +95,10 @@ SubModule: ``aimsalgo.mesh_coordinates_sphere_resampling``
     :members:
 
 
-SubModule: ``aimsalgo.watershedtools``
-======================================
+SubModule: ``aimsalgo.meshwatershedtools``
+==========================================
 
-.. automodule:: soma.aimsalgo.watershedtools
+.. automodule:: soma.aimsalgo.meshwatershedtools
     :members:
 
 
