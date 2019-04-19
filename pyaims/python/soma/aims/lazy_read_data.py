@@ -1,5 +1,5 @@
 '''
-This modules provides wrappers for Aims readable data types which lazily load when they are used, and can release memory after they are used: :class:`LazyReadData`
+This module provides wrappers for Aims readable data types which lazily load when they are used, and can release memory after they are used: :class:`LazyReadData`
 
 Specialized iterators can help parallelizing reading opertions, and perform it earlier (before they are really used) in an iteration: :class:`PreloadIterator`, :class:`PreloadList`.
 
@@ -83,9 +83,15 @@ class LazyReadData(object):
     Loading is done in a thread-safe manner (using a lock) so that two (or
     more) threads accessing data will not trigger several loads.
 
-    Subclasses may override the _lazy_read() method to implement a different
-    behavior or load additional data. This method should set self.data with the
-    loaded data.
+    **Specializing**
+
+    Subclasses may override the :meth:`_lazy_read` method to implement a
+    different behavior or load additional data. This method should set
+    self.data with the loaded data. This method returns the loaded data.
+
+    Another way of specializing the load behavior is to provide a Reader object
+    which could also be a specialized version of :class:`soma.aims.Reader`.
+
     '''
 
     def __init__(self, data_or_filename, allocator_context=None,
@@ -143,6 +149,11 @@ class LazyReadData(object):
         self._loading = False
 
     def _lazy_read(self):
+        '''
+        Implements actual data reading. The default implementation calls
+        self.reader.read() if a Reader instance has been provided, or aims.read
+        otherwise. It may be called from a non-principal thread when used in a threaded context such as in :class:`PreloadIterator`.
+        '''
         if self.data is None:
             if self.reader is not None:
                 self.data = self.reader.read(self.filename, **self.kwargs)
