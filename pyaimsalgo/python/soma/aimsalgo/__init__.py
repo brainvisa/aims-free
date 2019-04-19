@@ -50,6 +50,11 @@ del ExtendedImporter, k, v
 
 
 def ResamplerFactory(volume):
+    '''
+    Factory function to instantiate a ResamplerFactory_<type> object. It builds from an existing volume to gets its voxel type.
+
+    .. seealso:: ResamplerFactory_S16, ResamplerFactory_FLOAT etc.
+    '''
     cname = type(volume).__name__
     if cname.startswith('Volume_'):
         dtype = cname[7:]
