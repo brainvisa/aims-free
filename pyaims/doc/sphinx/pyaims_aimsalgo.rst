@@ -7,6 +7,7 @@ Overview
 
 Many classes of AimsAlgo are actually found in the :aims:`soma.aims module <index.html>`, *after importing soma.aimsalgo* (mainly because of the C++ namespace aims being merged by SIP bindings). The additional `soma.aimsalgo` module contains C++ algorithms which do ne reside inside the aims C++ namespace, and additional python submodules.
 
+A more complete API is in :doc:`pyaims_api_aimsalgo`.
 
 Contents
 ++++++++
