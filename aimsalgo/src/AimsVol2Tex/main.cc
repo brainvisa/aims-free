@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <cartobase/config/verbose.h>
+#include <cfloat>
 
 using namespace aims;
 using namespace carto;
@@ -177,13 +178,13 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
       otex.reserve( n );
 
       for( p=0; p<n; p++ ) 
-      {        
+      {
         // voxel initialization
-        nval=0;
-        mval=99999999999999;
-        Mval=-99999999999999;
+        nval = 0;
+        mval = FLT_MAX;
+        Mval = -FLT_MAX;
         meanVal=0;
-               
+
         // cylinder (radius, 2*height+1)
         for( i=-height; i<=height; i++ )
             {
@@ -222,12 +223,12 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
         }
         else if( mode==2 )
         {
-          if( mval==99999999999999 ) {mval=meanVal;}
+          if( mval==FLT_MAX) {mval=meanVal;}
           otex.push_back( mval );
         }
         else if( mode==3 )
         {
-          if( Mval==-99999999999999 ) {Mval=meanVal;}
+          if( Mval==-FLT_MAX ) {Mval=meanVal;}
           otex.push_back( Mval );
         }
       }      
