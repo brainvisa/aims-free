@@ -226,16 +226,18 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
   std::cout << "releaseRC for " << a0 << ", c++ refcount: "
     << carto::rc_ptr_trick::refCount( *a0 ) << ", pyowned: "
     << sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) << std::endl;
+  if( carto::rc_ptr_trick::refCount( *a0 ) > 0 )
+    std::cout << "    " << typeid(*a0).name() << std::endl;
 #endif
-  if( PyObject_HasAttrString( a0Wrapper, "_cpp_rcptr" ) )
+  carto::RCObject::RefCounterType & rc
+    = carto::rc_ptr_trick::refCount( *a0 );
+  if( rc > 0 )
   {
-#ifdef PYAIMS_DEBUG_RC
-    std::cout << "has _cpp_ptr\n";
-#endif
-    carto::RCObject::RefCounterType & rc 
-      = carto::rc_ptr_trick::refCount( *a0 );
-    if( rc > 0 )
+    if( PyObject_HasAttrString( a0Wrapper, "_cpp_rcptr" ) )
     {
+#ifdef PYAIMS_DEBUG_RC
+      std::cout << "has _cpp_ptr\n";
+#endif
       --rc;
 #ifdef PYAIMS_DEBUG_RC
       std::cout << "dec rc: " << rc << std::endl;
@@ -266,6 +268,26 @@ if( sipIsPyOwned( (sipWrapper *) a0Wrapper )
 #endif
       }
     }
+#ifdef PYAIMS_DEBUG_RC
+    else
+      std::cout << "no _cpp_ptr\n";
+#endif
+  }
+  else if( sipIsPyOwned( (sipSimpleWrapper *) a0Wrapper ) )
+  {
+    // this situation should not happen, it is caused after forced
+    // destruction in C++ layer
+#ifdef PYAIMS_DEBUG_RC
+      std::cout << "refcount <= 0, the RCObject is probably already deleted. Transfer ownership to C++\n";
+#endif
+      // give ownership to C++ to avoid re-destruction by python
+      sipTransferTo( a0Wrapper, 0 );
+      // and leave a marker
+#if PY_VERSION_HEX >= 0x03000000
+      PyObject_SetAttrString( a0Wrapper, "_dontdel", PyLong_FromLong( 1 ) );
+#else
+      PyObject_SetAttrString( a0Wrapper, "_dontdel", PyInt_FromLong( 1 ) );
+#endif
   }
 %End
 
