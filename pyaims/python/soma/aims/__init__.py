@@ -1093,7 +1093,10 @@ def __toMatrix(s):
 
 
 def __AffineTransformation3dFromMatrix(self, value):
-    numpy.asarray(self.affine())[:, :, 0, 0] = value
+    if value.shape[0] == 3:
+        numpy.asarray(self.affine())[:3, :, 0, 0] = value
+    else:
+        numpy.asarray(self.affine())[:, :, 0, 0] = value
     #self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
         #= value[0:3, 0:3]
     #self.translation().arraydata()[:] = value[0:3, 3].flatten()
