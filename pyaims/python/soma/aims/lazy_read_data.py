@@ -396,7 +396,7 @@ class PreloadIterator(object):
     When iterating over a list of LazyReadData, data is loaded when accessed,
     thus at the last moment, sequentially. As data loading can be efficiently
     threaded, the idea is to use threads to start preloading of a number of
-    data which be used later in the loop. This parallel loading idea is
+    data which will be used later in the loop. This parallel loading idea is
     somewhat antinomic with the lazy loading data principle, so the
     PreloadIterator mixes both approaches. The number of preloaded data can be
     specified, the default is the number of processors in the machine. Each
@@ -454,8 +454,8 @@ class PreloadList(list):
 
     ::
 
-        volumes = PreloadList(LazyReadData(f, nops=1) for f in filenames)
-        res = sum(volumes, npreload=8)
+        volumes = PreloadList((LazyReadData(f, nops=1) for f in filenames), npreload=8)
+        res = sum(volumes)
 
     equivalent to:
 
