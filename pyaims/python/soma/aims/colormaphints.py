@@ -51,6 +51,9 @@ def checkVolume(vol):
         histo = getattr(aims, 'RegularBinnedHistogram_' + dtype)
         if type(bins) is not int:
             m, M = bins[0], bins[-1]
+            if dtype in ('U8', 'S8'):
+                m = chr(m)
+                M = chr(M)
             bins = len(bins) - 1
             hg = histo(bins)
             hg.doit(vol, m, M)
@@ -59,9 +62,13 @@ def checkVolume(vol):
             hg.doit(vol)
         d = hg.data()
         h = numpy.array(d.volume(), copy=False).reshape(d.dimX())
-        step = float(hg.maxDataValue() - hg.minDataValue()) / hg.bins()
-        his = (h, numpy.arange(hg.minDataValue(), hg.maxDataValue() + step,
-                               step))
+        if dtype in ('U8', 'S8'):
+            step = float(ord(hg.maxDataValue()) - ord(hg.minDataValue())) / hg.bins()
+            his = (h, numpy.arange(ord(hg.minDataValue()), ord(hg.maxDataValue()) + step,
+                                   step))
+        else:
+            step = float(hg.maxDataValue() - hg.minDataValue()) / hg.bins()
+            his = (h, numpy.arange(hg.minDataValue(), hg.maxDataValue() + step, step))
         return his
 
     def _unique(vol):
