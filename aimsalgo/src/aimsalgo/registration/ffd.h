@@ -228,6 +228,9 @@ namespace aims {
     template <typename T>
     SplineFfd( int dimX, int dimY, int dimZ,
                   const AimsData<T> & test_volume );
+    template <typename T>
+    SplineFfd( int dimX, int dimY, int dimZ,
+                  const carto::Volume<T> & test_volume );
 
     SplineFfd( const SplineFfd & other );
     SplineFfd( const AimsData<Point3df> & other );
@@ -257,6 +260,15 @@ namespace aims {
   inline
   SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
                         const AimsData<T> & test_volume ):
+    FfdTransformation( dimX, dimY, dimZ, test_volume ),
+    _spline(3, 0)
+  {
+  }
+
+  template <typename T>
+  inline
+  SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
+                        const carto::Volume<T> & test_volume ):
     FfdTransformation( dimX, dimY, dimZ, test_volume ),
     _spline(3, 0)
   {
