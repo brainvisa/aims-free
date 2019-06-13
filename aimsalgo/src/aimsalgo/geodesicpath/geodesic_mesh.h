@@ -245,7 +245,11 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
     {
       if(i<half_edges.size()-1)   //sanity check: there should be at most two equal half-edges
       {               //if it fails, most likely the input data are messed up
-//        assert(half_edges[i] != half_edges[i+1]);
+        if( half_edges[i] == half_edges[i+1])
+        {
+          throw std::logic_error("Duplicate edge. The mesh is malformed.");
+        }
+//         assert(half_edges[i] != half_edges[i+1]);
       }
     }
   }
