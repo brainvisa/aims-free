@@ -213,6 +213,13 @@ public:
                                  (char *) &sipCpp->item( 0 ) );
 %End
 
+  SIP_PYOBJECT __array__() /Factory/;
+%MethodCode
+  int dims = sipCpp->nItem();
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 1, &dims,
+                                 (char *) &sipCpp->item( 0 ) );
+%End
+
   void checkResize();
 %MethodCode
   int dims = sipCpp->nItem();
