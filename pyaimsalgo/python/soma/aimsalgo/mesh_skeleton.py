@@ -9,7 +9,7 @@ inspect = (70989, 70988)
 def mesh_skeleton(mesh, texture, curv_func=None):
 
     if curv_func is None:
-        curv_func = lambda nvert, ntex, v: 1.
+        curv_func = sharp_curve_func
 
     vert = mesh.vertex()
     nvert = np.asarray(vert)
@@ -20,8 +20,9 @@ def mesh_skeleton(mesh, texture, curv_func=None):
     out_tex = aims.TimeTexture(np.int16)
     out_tex[0].assign([0] * len(ntex))
 
-    bg = np.where(ntex==0)[0]
-    front = bg[[np.any(ntex[list(neigh[i])]) for i in bg]]
+    fg = np.where(ntex!=0)[0]
+    #bg = np.where(ntex==0)[0]
+    front = fg[[np.any(ntex[list(neigh[i])] == 0) for i in fg]]
 
     frozen = False
     p = 0
@@ -40,7 +41,7 @@ def mesh_skeleton(mesh, texture, curv_func=None):
         ntex[front] = 2  # front points are part of the object
 
         for v in front:
-            c = curv_func(nvert, ntex, v)
+            c = curv_func(nvert, ntex, neigh, v)
             v2 = can_move(mesh, ntex, v, neigh, c)
             if v in inspect:
                 print('v:', v, ', c:', c, ', v2:', v2)
@@ -66,6 +67,15 @@ def mesh_skeleton(mesh, texture, curv_func=None):
     np.asarray(out_tex[p])[front] = 1
 
     return out_tex
+
+
+def sharp_curve_func(nvert, ntex, neigh, v):
+    n_v = np.array(list(neigh[v]))
+    nval = ntex[n_v]
+    active = n_v[nval!=0]
+    if len(active) < 2:
+        return 0
+    return 1
 
 
 def _same_cc(active, neigh):
@@ -125,14 +135,13 @@ def sort_potential(front):
 if __name__ == '__main__':
     from soma import aims
     from soma.aimsalgo import mesh_skeleton
+    import numpy as np
 
     mesh = aims.read('/volatile/riviere/basetests-3.1.0/subjects/ratio_t1_dp/t1mri/default_acquisition/default_analysis/segmentation/mesh/ratio_t1_dp_Lwhite.gii')
     neigh = aims.SurfaceManip.surfaceNeighbours(mesh)
     tex = aims.read('/volatile/riviere/basetests-3.1.0/subjects/ratio_t1_dp/t1mri/default_acquisition/default_analysis/segmentation/mesh/surface_analysis/ratio_t1_dp_Lwhite_DPF.gii')
     texture = aims.TimeTexture((np.asarray(tex[0]) >= 0).astype(np.int32))
     ntex = np.asarray(texture[0])
-    vert = mesh.vertex()
-    nvert = np.asarray(vert)
     bg = np.where(ntex==0)[0]
     stex = mesh_skeleton.mesh_skeleton(mesh, texture)
     aims.write(stex, '/tmp/stex.gii')
