@@ -405,6 +405,13 @@ public:
                                  (char *) &(*sipCpp)[0] );
 %End
 
+  SIP_PYOBJECT __array__() /Factory/;
+%MethodCode
+  int dims = %Template2%;
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 1, &dims,
+                                 (char *) &(*sipCpp)[0] );
+%End
+
   void _arrayDestroyedCallback( SIP_PYOBJECT );
 %MethodCode
   // remove weak reference in volume
