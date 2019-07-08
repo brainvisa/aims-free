@@ -3,11 +3,13 @@ from __future__ import print_function
 
 from soma import aims, aimsalgo
 import numpy as np
+import six
 
 inspect = () # (70989, 70988)
 
 def mesh_skeleton(mesh, texture, curv_func=None, dist_tex=None,
-                  do_timesteps=False, debug_inspect=()):
+                  do_timesteps=False, min_cc_size=20, min_branch_size=20,
+                  debug_inspect=()):
     '''
     Process a skeleton of an object given as a binary texture.
 
@@ -38,6 +40,12 @@ def mesh_skeleton(mesh, texture, curv_func=None, dist_tex=None,
     do_timesteps: bool
         if True, the output texture will have one timestep per front
         propagation iteration
+    min_cc_size: int
+        small connected components can be removed afterwards. Such trimming
+        only happens if do_timesteps is False.
+    min_branch_size: int
+        small branches can be pruned afterwards. Such trimming only happens if
+        do_timesteps is False.
     debug_inspect: sequence (preferably set) of ints
         list of vertices for which debug information will be printed on the
         standard output. Useful to understand what happens there.
@@ -110,6 +118,10 @@ def mesh_skeleton(mesh, texture, curv_func=None, dist_tex=None,
     np.asarray(out_tex[p])[ntex!=0] = 2
     np.asarray(out_tex[p])[front] = 1
 
+    if not do_timesteps and (min_cc_size != 0 or min_branch_size != 0):
+        out_tex = trim_skeleton(mesh, out_tex, min_cc_size=min_cc_size,
+                                min_branch_size=min_branch_size)
+
     return out_tex
 
 
@@ -155,7 +167,6 @@ def _same_cc(active, neigh):
     return True
 
 
-#def is_changing_topology(mesh, ntex, v, neigh):
 def can_move(mesh, ntex, v, neigh, c, debug_inspect):
     if c <= 0:
         return None
@@ -177,6 +188,9 @@ def can_move(mesh, ntex, v, neigh, c, debug_inspect):
 
 
 def sort_potential(front, texture):
+    '''
+    Sort front points list according to texture value
+    '''
     return sorted(front, key=lambda v: texture[0][v])
 
 
@@ -186,6 +200,7 @@ def trim_skeleton(mesh, skeleton, min_cc_size=20, min_branch_size=20):
     branches.
     '''
 
+    #print('trim_skeleton')
     trimmed = aims.TimeTexture(skeleton)
     cc = aimsalgo.AimsMeshLabelConnectedComponent(mesh, skeleton,
                                                            0, 0)
@@ -198,7 +213,101 @@ def trim_skeleton(mesh, skeleton, min_cc_size=20, min_branch_size=20):
             print('remove:', v, ':', sizes[i], i)
             nskel[ncc==v] = 0
 
-    return trimmed
+    pruned = prune_branches(mesh, trimmed, min_branch_size=min_branch_size)
+
+    return pruned
+
+
+def topo_mark(mesh, texture, neigh=None):
+    '''
+    Mark skeleton vertices according to their topological type:
+
+    * 1: end point
+    * 2: line point
+    * 3: bifurcation
+    '''
+
+    if neigh is None:
+        neigh = aims.SurfaceManip.surfaceNeighbours(mesh)
+    ntex = np.asarray(texture[0])
+    otex = aims.TimeTexture(texture)
+    notex = np.asarray(otex[0])
+    todo = np.where(ntex != 0)[0]
+    for v in todo:
+        n_v = np.array(list(neigh[v]))
+        nval = ntex[n_v]
+        active = n_v[nval!=0]
+        n = len(active)
+        if n <= 1:
+            notex[v] = 2  # end point
+        elif n > 2:
+            notex[v] = 3  # bifurcation
+    return otex
+
+
+def prune_branches(mesh, texture, min_branch_size=20, neigh=None):
+    '''
+    Prune the smallest branches in a skeleton texture
+    '''
+
+    if neigh is None:
+        neigh = aims.SurfaceManip.surfaceNeighbours(mesh)
+    topo = topo_mark(mesh, texture, neigh)
+    ntopo = np.asarray(topo[0])
+    br = aims.TimeTexture(topo)
+    nbr = np.asarray(br[0])
+    nbr[nbr!=1] = 0
+    cc = aimsalgo.AimsMeshLabelConnectedComponent(mesh, br, 0, 0)
+    ncc = np.asarray(cc[0])
+    br = aims.TimeTexture(topo)
+    nbr = np.asarray(br[0])
+    nbr[nbr!=3] = 0
+    cc_bif = aimsalgo.AimsMeshLabelConnectedComponent(mesh, br, 0, 0)
+    ncc_bif = np.asarray(cc_bif[0])
+    ntex = np.asarray(texture[0])
+
+    otex = aims.TimeTexture(texture)
+    notex = np.asarray(otex[0])
+
+    end_points = np.where(np.asarray(topo[0]) == 2)[0]
+    branches_per_cc = {}
+    for v in end_points:
+        n_v = np.array(list(neigh[v]))
+        nval = ntex[n_v]
+        obj = n_v[nval != 0][0]
+        ccobj = ncc[obj]  # (may be -1 for bifurcation)
+        if ccobj == -1:
+            branches_per_cc.setdefault(ncc_bif[obj], []).append((v, ccobj))
+        else:
+            # find bifurcation attached to this cc
+            for v2 in np.where(ncc==ccobj)[0]:
+                n_v2 = np.array(list(neigh[v2]))
+                nval2 = ntopo[n_v2]
+                obj2 = n_v2[nval2 == 3]
+                if len(obj2) != 0:  # can be 0 for a line without bifurcation
+                    branches_per_cc.setdefault(ncc_bif[obj2[0]], []).append(
+                        (v, ccobj))
+                    break
+
+    for bif, branches in six.iteritems(branches_per_cc):
+        if len(branches) >= 3:
+            br_cc = [x[1] for x in branches]
+            br_sz = []
+            for b in br_cc:
+                if b == -1:  # no cc, size 0
+                    br_sz.append(0)
+                else:
+                    br_sz.append(len(np.where(ncc == b)[0]))
+            ranks = np.argsort(br_sz)  # smallest to biggest
+            for br in ranks[:-2]:  # leave at least the last 2 (biggest)
+                if br_sz[br] < min_branch_size:
+                    branch = branches[br]
+                    #print('remove branch size', br_sz[br], 'at vertex', branch[0], bif, branches)
+                    notex[branch[0]] = 0
+                    if branch[1] != -1:
+                        notex[ncc==branch[1]] = 0
+
+    return otex
 
 
 if __name__ == '__main__':
@@ -211,7 +320,8 @@ if __name__ == '__main__':
     tex = aims.read('/volatile/riviere/basetests-3.1.0/subjects/ratio_t1_dp/t1mri/default_acquisition/default_analysis/segmentation/mesh/surface_analysis/ratio_t1_dp_Lwhite_DPF.gii')
     texture = aims.TimeTexture((np.asarray(tex[0]) >= 0).astype(np.int32))
     ntex = np.asarray(texture[0])
-    bg = np.where(ntex==0)[0]
     stex = mesh_skeleton.mesh_skeleton(mesh, texture, dist_tex=tex)
     aims.write(stex, '/tmp/stex.gii')
+
+    bg = np.where(ntex==0)[0]
     front = np.where([np.any(ntex[list(neigh[i])]) for i in bg])[0]
