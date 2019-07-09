@@ -458,10 +458,11 @@ set<string> aims::meshdistance::GyrusModel2SetOfSulci(const char *model,const st
 }
 
 
-map<string, set<string> > aims::meshdistance::GyrusModel2GyriAndSulci(const char *model)
+map<string, set<string> > aims::meshdistance::GyrusModel2GyriAndSulci(
+  const string & model )
 {
   
-  ifstream 	mf(model);
+  ifstream 	mf( model.c_str() );
   map<string,set<string > > gyriAndSulci;
   //set<string >::iterator is,es = existingName.end() ;
   string 	name,gyrus,sulcusLeft,sulcusRight;
@@ -490,7 +491,7 @@ map<string, set<string> > aims::meshdistance::GyrusModel2GyriAndSulci(const char
 		sulcusRight = name;
 	    
 	      if (name != "unknown")
-		sulcusLeft= name + "_left";
+		sulcusLeft = name + "_left";
 	      else
 		sulcusLeft = name;
 	    
@@ -512,7 +513,9 @@ map<string, set<string> > aims::meshdistance::GyrusModel2GyriAndSulci(const char
   return (gyriAndSulci);
 }
 
-set<string> aims::meshdistance::GyrusModel2SetOfSulci(const map<string, set<string> > &gyriAndSulci,const std::set<string> &existingName )
+set<string> aims::meshdistance::GyrusModel2SetOfSulci(
+  const map<string, set<string> > &gyriAndSulci,
+  const std::set<string> &existingName )
 {
   
   set<string > sulci;
@@ -521,18 +524,22 @@ set<string> aims::meshdistance::GyrusModel2SetOfSulci(const map<string, set<stri
   set<string >::iterator is,es = existingName.end() ;
   string 	name;
   
-  for ( im = gyriAndSulci.begin(), em = gyriAndSulci.end(); im != em; ++im   )
-  for ( ist = (im->second).begin(), est = (im->second).end(); ist != est; ++ist  ) 
+  for( im = gyriAndSulci.begin(), em = gyriAndSulci.end(); im != em; ++im )
+    for( ist = (im->second).begin(), est = (im->second).end(); ist != est;
+        ++ist )
     { 
       name = *ist;
-      is = existingName.find(name);
-      if (is != es)
-	sulci.insert(name);
+      is = existingName.find( name );
+      if( is != es )
+      {
+        cout << "insert: " << name << "( " << im->first << " )" << endl;
+        sulci.insert(name);
+      }
       else
-	cerr << "The sulci " << name << " does not exist at this level of translation...\n";	
+        cerr << "The sulci " << name << " does not exist at this level of translation...\n";
     }
 
-  return (sulci);
+  return sulci;
 }
 
 
