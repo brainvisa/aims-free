@@ -42,7 +42,7 @@
 #include <iomanip>
 
 namespace carto {
-
+  
   template < typename T >
   inline
   const T& Volume< T >::at( long x, long y, long z, long t ) const
@@ -56,7 +56,7 @@ namespace carto {
 #  ifdef __clang__
     return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
 #  else
-    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
+    const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& bstrides
       = _blitz.stride();
     return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
                    + t * bstrides[3] ];
@@ -89,8 +89,22 @@ namespace carto {
 #  ifdef __clang__
     return _blitz( blitz::TinyVector<long,4>( x, y, z, t ) );
 #  else
-    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides
+    const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& bstrides
       = _blitz.stride();
+//     std::cout << "carto::Volume<" 
+//               << carto::DataTypeCode<Volume<T> >::dataType() << ">::at(" 
+//               << carto::toString(x) << ", "
+//               << carto::toString(y) << ", "
+//               << carto::toString(z) << ", "
+//               << carto::toString(t) << ")" << std::endl
+//               << "strides: [" << carto::toString(bstrides[0]) << ", "
+//                               << carto::toString(bstrides[1]) << ", "
+//                               << carto::toString(bstrides[2]) << ", "
+//                               << carto::toString(bstrides[3]) << "] "
+//               << "offset:" << carto::toString(
+//                    x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
+//                    + t * bstrides[3])
+//               << std::endl << std::flush;
     return _items[ x * bstrides[0] + y * bstrides[1] + z * bstrides[2]
                    + t * bstrides[3] ];
 #  endif
@@ -171,14 +185,14 @@ namespace carto {
     {
       case 1:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0] ];
       }
       case 2:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -186,7 +200,7 @@ namespace carto {
       }
       case 3:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] // * strides[0]
@@ -195,7 +209,7 @@ namespace carto {
       }
       case 4:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -205,7 +219,7 @@ namespace carto {
       }
       case 5:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -216,7 +230,7 @@ namespace carto {
       }
       case 6:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -228,7 +242,7 @@ namespace carto {
       }
       case 7:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -241,7 +255,7 @@ namespace carto {
     }
       case 8:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -267,7 +281,7 @@ namespace carto {
           pos[i] = 0;
         return _blitz( pos );
 
-//         const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+//         const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
 //           = _blitz.stride();
 //         size_t offset = 0;
 //         for( int i=0; i!=index.size(); ++i )
@@ -284,7 +298,7 @@ namespace carto {
        switch-case implementation.
     */
 
-    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+    const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
       = _blitz.stride();
 
     size_t offset = 0;
@@ -334,14 +348,14 @@ namespace carto {
     {
       case 1:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0] ];
       }
       case 2:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -349,7 +363,7 @@ namespace carto {
       }
       case 3:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] // * strides[0]
@@ -358,7 +372,7 @@ namespace carto {
       }
       case 4:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -368,7 +382,7 @@ namespace carto {
       }
       case 5:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -379,7 +393,7 @@ namespace carto {
       }
       case 6:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -391,7 +405,7 @@ namespace carto {
       }
       case 7:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -404,7 +418,7 @@ namespace carto {
     }
       case 8:
       {
-        const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+        const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
           = _blitz.stride();
 
         return _blitz.dataZero()[ index[0] * strides[0]
@@ -430,7 +444,7 @@ namespace carto {
           pos[i] = 0;
         return _blitz( pos );
 
-//         const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+//         const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
 //           = _blitz.stride();
 //         size_t offset = 0;
 //         for( int i=0; i!=index.size(); ++i )
@@ -446,7 +460,7 @@ namespace carto {
        than a regular loop, and the loop is more efficient that the above
        switch-case implementation.
     */
-    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& strides
+    const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& strides
       = _blitz.stride();
 
     size_t offset = 0;
