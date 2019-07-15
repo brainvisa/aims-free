@@ -1287,7 +1287,7 @@ typessub = {'bool':
                'defScalar': '',
                'defNumpyBindings': '#define PYAIMS_NUMPY_BINDINGS',
                'new': 'new AimsData<cfloat>',
-               'NumType': 'NPY_COMPLEX64',
+               'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_CFLOAT',
                'sipClass': 'AimsData_CFLOAT',
                'typeinclude':
@@ -1312,7 +1312,7 @@ typessub = {'bool':
                'defScalar': '',
                'defNumpyBindings': '#define PYAIMS_NUMPY_BINDINGS',
                'new': 'new AimsData<cdouble>',
-               'NumType': 'NPY_COMPLEX128',
+               'NumType': 'NPY_OBJECT',
                'PyType': 'AimsData_CDOUBLE',
                'sipClass': 'AimsData_CDOUBLE',
                'typeinclude':
