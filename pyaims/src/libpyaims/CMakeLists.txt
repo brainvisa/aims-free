@@ -13,6 +13,7 @@ set( _headers
         object/rcptrconv.h
         vector/numpyarrayfunc.h
         vector/numpytypes.h
+        vector/numpytypes_d.h
         vector/sipset.h
         vector/sipstdvector.h
         vector/sipvector.h

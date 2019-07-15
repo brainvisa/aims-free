@@ -832,11 +832,17 @@ The header contains all meta-data.
 
   for( i=0; i<n; ++i )
   {
-    dims[n - 1 - i] = vdims[i];
-    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
+    dims[i] = vdims[i];
+    strides[i] = vstrides[i] * sizeof( %Template1% );
   }
-  aims::resizeNumpyArray( sipSelf, n, &dims[0], (char *) &sipCpp->at( 0 ),
-    &strides[0] );
+
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  for( i=0; i<added_dims.size(); ++i )
+    strides.insert( strides.end(), sizeof( %Template1% ) / added_dims[i] ); // FIXME
+
+  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                          (char *) &sipCpp->at( 0 ), &strides[0] );
 %End
 
   void _arrayDestroyedCallback( SIP_PYOBJECT );

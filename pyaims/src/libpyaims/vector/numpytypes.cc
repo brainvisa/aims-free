@@ -1,7 +1,8 @@
 
-#include <pyaims/vector/numpytypes.h>
+#include <pyaims/vector/numpytypes_d.h>
 #include <iostream>
 #include <cstdio>
+
 
 PyArray_Descr* NPY_AimsRGB_Descr()
 {
@@ -10,11 +11,8 @@ PyArray_Descr* NPY_AimsRGB_Descr()
   {
     PyObject *op;
 
-    op = Py_BuildValue( "[(s, s), (s, s), (s, s)]",
-                        "r", "u1", "g", "u1", "b", "u1" );
-    PyObject_Print(op, stdout, 0);
+    op = Py_BuildValue( "[(s, s)]", "v", "3u1" );
     PyArray_DescrConverter( op, &descr );
-    std::cout << "descr for aimsRGB: " << descr << ", type_num: " << descr->type_num << std::endl;
     Py_DECREF( op );
   }
 
@@ -29,8 +27,7 @@ PyArray_Descr* NPY_AimsRGBA_Descr()
   {
     PyObject *op;
 
-    op = Py_BuildValue( "[(s, s), (s, s), (s, s), (s, s)]",
-                        "r", "u1", "g", "u1", "b", "u1", "a", "u1" );
+    op = Py_BuildValue( "[(s, s)", "v", "4u1" );
     PyArray_DescrConverter( op, &descr );
     Py_DECREF( op );
   }
@@ -46,8 +43,7 @@ PyArray_Descr* NPY_AimsHSV_Descr()
   {
     PyObject *op;
 
-    op = Py_BuildValue( "[(s, s), (s, s), (s, s)]",
-                        "h", "u1", "s", "u1", "v", "u1" );
+    op = Py_BuildValue( "[(s, s)]", "v", "3u1" );
     PyArray_DescrConverter( op, &descr );
     Py_DECREF( op );
   }
@@ -72,5 +68,67 @@ int NPY_AimsHSV()
 {
   return NPY_AimsHSV_Descr()->type_num;
 }
+
+
+template PyArray_Descr* NPY_AimsVector_Descr<uint8_t, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint8_t, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint8_t, 4>();
+template PyArray_Descr* NPY_AimsVector_Descr<int8_t, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<int8_t, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<int8_t, 4>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint16_t, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint16_t, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint16_t, 4>();
+template PyArray_Descr* NPY_AimsVector_Descr<int16_t, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<int16_t, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<int16_t, 4>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint32_t, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint32_t, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint32_t, 4>();
+template PyArray_Descr* NPY_AimsVector_Descr<int32_t, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<int32_t, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<int32_t, 4>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint64_t, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint64_t, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<uint64_t, 4>();
+template PyArray_Descr* NPY_AimsVector_Descr<int64_t, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<int64_t, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<int64_t, 4>();
+template PyArray_Descr* NPY_AimsVector_Descr<float, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<float, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<float, 4>();
+template PyArray_Descr* NPY_AimsVector_Descr<double, 2>();
+template PyArray_Descr* NPY_AimsVector_Descr<double, 3>();
+template PyArray_Descr* NPY_AimsVector_Descr<double, 4>();
+template int NPY_AimsVector<uint8_t, 2>();
+template int NPY_AimsVector<uint8_t, 3>();
+template int NPY_AimsVector<uint8_t, 4>();
+template int NPY_AimsVector<int8_t, 2>();
+template int NPY_AimsVector<int8_t, 3>();
+template int NPY_AimsVector<int8_t, 4>();
+template int NPY_AimsVector<uint16_t, 2>();
+template int NPY_AimsVector<uint16_t, 3>();
+template int NPY_AimsVector<uint16_t, 4>();
+template int NPY_AimsVector<int16_t, 2>();
+template int NPY_AimsVector<int16_t, 3>();
+template int NPY_AimsVector<int16_t, 4>();
+template int NPY_AimsVector<uint32_t, 2>();
+template int NPY_AimsVector<uint32_t, 3>();
+template int NPY_AimsVector<uint32_t, 4>();
+template int NPY_AimsVector<int32_t, 2>();
+template int NPY_AimsVector<int32_t, 3>();
+template int NPY_AimsVector<int32_t, 4>();
+template int NPY_AimsVector<uint64_t, 2>();
+template int NPY_AimsVector<uint64_t, 3>();
+template int NPY_AimsVector<uint64_t, 4>();
+template int NPY_AimsVector<int64_t, 2>();
+template int NPY_AimsVector<int64_t, 3>();
+template int NPY_AimsVector<int64_t, 4>();
+template int NPY_AimsVector<float, 2>();
+template int NPY_AimsVector<float, 3>();
+template int NPY_AimsVector<float, 4>();
+template int NPY_AimsVector<double, 2>();
+template int NPY_AimsVector<double, 3>();
+template int NPY_AimsVector<double, 4>();
 
 

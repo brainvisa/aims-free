@@ -69,7 +69,7 @@ namespace aims
                             int* dims, char* buffer, bool xyzorder,
                             size_t *strides )
   {
-    std::cout << "initNumpyArray from type: " << numType << std::endl;
+    std::cout << "(obsolete) initNumpyArray from type: " << numType << std::endl;
     PyArray_Descr *descr = PyArray_DescrFromType( numType );
     return initNumpyArray( sipSelf, descr, ndim, dims, buffer, xyzorder,
                            strides );
@@ -81,7 +81,8 @@ namespace aims
                             int* dims, char* buffer, bool xyzorder,
                             size_t *strides )
   {
-    std::cout << "initNumpyArray frpm descr: " << numType << std::endl;
+//     std::cout << "initNumpyArray from descr: " << numType << std::endl;
+
     PyObject *sipRes = 0;
     // if the object has been built from an existing array, just return it
     if( PyObject_HasAttrString( sipSelf, "_arrayext" ) )
