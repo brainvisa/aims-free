@@ -65,10 +65,23 @@ namespace
 namespace aims
 {
 
-  PyObject* initNumpyArray( PyObject* sipSelf, NPY_TYPES numType, int ndim,
+  PyObject* initNumpyArray( PyObject* sipSelf, int numType, int ndim,
                             int* dims, char* buffer, bool xyzorder,
                             size_t *strides )
   {
+    std::cout << "initNumpyArray from type: " << numType << std::endl;
+    PyArray_Descr *descr = PyArray_DescrFromType( numType );
+    return initNumpyArray( sipSelf, descr, ndim, dims, buffer, xyzorder,
+                           strides );
+  }
+
+
+  PyObject* initNumpyArray( PyObject* sipSelf, PyArray_Descr *numType,
+                            int ndim,
+                            int* dims, char* buffer, bool xyzorder,
+                            size_t *strides )
+  {
+    std::cout << "initNumpyArray frpm descr: " << numType << std::endl;
     PyObject *sipRes = 0;
     // if the object has been built from an existing array, just return it
     if( PyObject_HasAttrString( sipSelf, "_arrayext" ) )
@@ -103,8 +116,8 @@ namespace aims
       std::vector<npy_intp> dimsp( ndim );
       for( int i=0; i<ndim; ++i )
         dimsp[i] = dims[i];
-      sipRes = PyArray_SimpleNewFromData( ndim, &dimsp[0], numType, buffer );
-      //sipRes = PyArray_FromDimsAndData( ndim, dims, numType, buffer );
+      sipRes = PyArray_NewFromDescr( &PyArray_Type, numType, ndim,
+                                     &dimsp[0], 0, buffer, 0, 0 );
       if( sipRes )
       {
         if( strides )

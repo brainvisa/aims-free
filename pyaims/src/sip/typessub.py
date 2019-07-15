@@ -155,6 +155,9 @@ def completeTypesSub(typessub):
                 y['compareElement'] = '&'
         if 'NumDims' not in y:
             y['NumDims'] = 'std::vector<int>()'
+        if 'NumType_Descr' not in y:
+            y['NumType_Descr'] = '0'
+
 
 if 'options' in globals() and hasattr(options, 'target_platform'):
     target_platform = options.target_platform
@@ -499,8 +502,8 @@ typessub = {'bool':
                'defScalar': '',
                'defNumpyBindings': '#define PYAIMS_NUMPY_BINDINGS',
                'new': 'new AimsRGB',
-               'NumType': 'NPY_UBYTE',
-               'NumDims': 'std::vector<int>( 1, 3 )',
+               'NumType': 'NPY_AimsRGB()',
+               'NumType_Descr': 'NPY_AimsRGB_Descr()',
                'PyType': 'AimsRGB',
                'sipClass': 'AimsRGB',
                'typeinclude': '#include <aims/rgb/rgb.h>',

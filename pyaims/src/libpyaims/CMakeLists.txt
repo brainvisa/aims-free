@@ -12,6 +12,7 @@ set( _headers
         object/object.h
         object/rcptrconv.h
         vector/numpyarrayfunc.h
+        vector/numpytypes.h
         vector/sipset.h
         vector/sipstdvector.h
         vector/sipvector.h
@@ -23,7 +24,8 @@ set( _sources
         debugging/debuggingvol.cc
         object/numconv.cc
         object/object.cc
-        vector/numpyarrayfunc.cc )
+        vector/numpyarrayfunc.cc
+        vector/numpytypes.cc )
 
 set(PYAIMS_HEADERS ${_headers} PARENT_SCOPE)
 BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers pyaims headersTarget )

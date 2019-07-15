@@ -777,7 +777,10 @@ The header contains all meta-data.
   for( i=0; i<added_dims.size(); ++i )
     strides.push_back( sizeof( %Template1% ) / added_dims[i] ); // FIXME
 
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%,
+  PyArray_Descr *descr = %Template1NumType_Descr%;
+  if( !descr )
+    descr = PyArray_DescrFromType( %Template1NumType% );
+  sipRes = aims::initNumpyArray( sipSelf, descr,
                                  dims.size(), &dims[0],
                                  (char *) &sipCpp->at( 0 ), false,
                                  &strides[0] );
@@ -804,7 +807,14 @@ The header contains all meta-data.
   for( i=0; i<added_dims.size(); ++i )
     strides.insert( strides.end(), sizeof( %Template1% ) / added_dims[i] ); // FIXME
 
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%,
+  PyArray_Descr *descr = %Template1NumType_Descr%;
+  std::cout << "array descr: " << descr << std::endl;
+  if( !descr )
+  {
+    descr = PyArray_DescrFromType( %Template1NumType% );
+    std::cout << "rebuilt descr: " << descr << ", type_num: " << descr->type_num << std::endl;
+  }
+  sipRes = aims::initNumpyArray( sipSelf, descr,
                                  dims.size(), &dims[0],
                                  (char *) &sipCpp->at( 0 ), true,
                                  &strides[0] );

@@ -35,10 +35,15 @@
 #define PYAIMS_VECTOR_NUMPYARRAYFUNC_H
 
 #include <pyaims/numpyarray.h>
+#include <pyaims/vector/numpytypes.h>
 
 namespace aims
 {
-  PyObject* initNumpyArray( PyObject*, NPY_TYPES numType, int ndim, int* dims,
+  PyObject* initNumpyArray( PyObject*, int numType, int ndim, int* dims,
+                            char* buffer, bool xyzorder = false,
+                            size_t *strides = 0 );
+  PyObject* initNumpyArray( PyObject*, PyArray_Descr *numType, int ndim,
+                            int* dims,
                             char* buffer, bool xyzorder = false,
                             size_t *strides = 0 );
   void resizeNumpyArray( PyObject*, int ndim, int* dims, char* buffer,
