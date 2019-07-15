@@ -520,15 +520,21 @@ public:
 
   SIP_PYOBJECT arraydata() /Factory/;
 %MethodCode
-  int dims = sipCpp->size();
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 1, &dims,
+  std::vector<int> dims( 1, sipCpp->size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, dims.size(),
+                                 &dims[0],
                                  (char *) &(*sipCpp)[0] );
 %End
 
   SIP_PYOBJECT __array__() /Factory/;
 %MethodCode
-  int dims = sipCpp->size();
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 1, &dims,
+  std::vector<int> dims( 1, sipCpp->size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, dims.size(),
+                                 &dims[0],
                                  (char *) &(*sipCpp)[0] );
 %End
 

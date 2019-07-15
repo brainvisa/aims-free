@@ -758,6 +758,7 @@ The header contains all meta-data.
 
 %MethodCode
   std::vector<int> vdims = sipCpp->getSize();
+
   int i, n= vdims.size();
   std::vector<size_t> vstrides, strides( n );
   std::vector<int> dims( n );
@@ -770,7 +771,14 @@ The header contains all meta-data.
     dims[n - 1 - i] = vdims[i];
     strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
   }
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, n, &dims[0],
+
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  for( i=0; i<added_dims.size(); ++i )
+    strides.push_back( sizeof( %Template1% ) / added_dims[i] ); // FIXME
+
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%,
+                                 dims.size(), &dims[0],
                                  (char *) &sipCpp->at( 0 ), false,
                                  &strides[0] );
 %End
@@ -787,10 +795,17 @@ The header contains all meta-data.
 
   for( i=0; i<n; ++i )
   {
-    dims[n - 1 - i] = vdims[i];
-    strides[n - 1 - i] = vstrides[i] * sizeof( %Template1% );
+    dims[i] = vdims[i];
+    strides[i] = vstrides[i] * sizeof( %Template1% );
   }
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, n, &dims[0],
+
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  for( i=0; i<added_dims.size(); ++i )
+    strides.insert( strides.end(), sizeof( %Template1% ) / added_dims[i] ); // FIXME
+
+  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%,
+                                 dims.size(), &dims[0],
                                  (char *) &sipCpp->at( 0 ), true,
                                  &strides[0] );
 %End
