@@ -380,7 +380,6 @@ namespace carto
                                   rc_ptr<DataSource>( new BufferDataSource
                                     ( (char *) &(*other)( pos.toVector() ),
                                       bsize ) ) ) );
-
       // fix offsets
 #ifdef CARTO_USE_BLITZ
       blitz::TinyVector<int, Volume<T>::DIM_MAX> dims;
@@ -808,7 +807,7 @@ namespace carto
   {
 
 #ifdef CARTO_USE_BLITZ
-    const blitz::TinyVector<int, Volume<T>::DIM_MAX>& bstrides = _blitz.stride();
+    const blitz::TinyVector<BlitzStridesType, Volume<T>::DIM_MAX>& bstrides = _blitz.stride();
     int d, n = VolumeProxy<T>::_size.size();
     std::vector<size_t> strides( n );
     for (d = 0; d < n; ++d)
