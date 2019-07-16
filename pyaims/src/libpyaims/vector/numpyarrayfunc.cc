@@ -41,7 +41,6 @@ namespace
 
   PyObject* transposeNumpyArray( PyObject* a, bool xyzorder )
   {
-    cout << "transposeNumpyArray ?\n";
     PyArrayObject *arr = (PyArrayObject *) a;
     int i, ndim = PyArray_NDIM( arr );
     if( ndim < 2 )
@@ -50,7 +49,6 @@ namespace
         < PyArray_STRIDES( arr )[1] );
     if( xyzorder == firstindexinc )
       return a;
-    cout << "transposeNumpyArray do it\n";
     PyArray_Dims  adims;
     vector<npy_intp> dims( ndim );
     for( i=0; i<ndim; ++i )
@@ -83,14 +81,12 @@ namespace aims
                             int* dims, char* buffer, bool xyzorder,
                             size_t *strides )
   {
-    std::cout << "initNumpyArray from descr: " << numType << std::endl;
-    std::cout << "descr " << numType << " rc: " << Py_REFCNT( numType ) << endl;
+    // std::cout << "initNumpyArray from descr: " << numType << std::endl;
 
     PyObject *sipRes = 0;
     // if the object has been built from an existing array, just return it
     if( PyObject_HasAttrString( sipSelf, "_arrayext" ) )
     {
-      std::cout << "ext array\n";
       PyObject *arr = PyObject_GetAttrString( sipSelf, "_arrayext" );
       if( arr )
         sipRes = transposeNumpyArray( arr, xyzorder );
@@ -98,7 +94,6 @@ namespace aims
     // else look if an array has already been built on the object
     else if( PyObject_HasAttrString( sipSelf, "_arrayref" ) )
     {
-      cout << "array already here\n";
       PyObject *wr = PyObject_GetAttrString( sipSelf, "_arrayref" );
       if( wr )
       {
@@ -119,14 +114,10 @@ namespace aims
 
     if( !sipRes )
     {
-      cout << "ref sipSelf 1: " << Py_REFCNT( sipSelf ) << endl;
-      cout << "new array " << ndim << endl;
       std::vector<npy_intp> dimsp( ndim );
       for( int i=0; i<ndim; ++i )
         dimsp[i] = dims[i];
-      cout << "buffer: " << (void *) buffer << endl;
       buffer[0] = 42;
-      cout << "written\n";
       Py_INCREF( numType ); // PyArray_NewFromDescr steals a ref to numType
       sipRes = PyArray_NewFromDescr( &PyArray_Type, numType, ndim,
                                      &dimsp[0], 0, buffer,
@@ -134,7 +125,6 @@ namespace aims
                                      | NPY_ARRAY_ALIGNED
                                      | NPY_ARRAY_WRITEABLE,
                                      0 );
-      cout << "array created\n";
       if( !sipRes )
       {
         std::cerr << "PyArray_NewFromDescr failed !\n";
@@ -144,7 +134,6 @@ namespace aims
       {
         if( strides )
         {
-          cout << "with strides\n";
           // if strides are specified, force them (volume views...)
           int dim;
           for( dim=0; dim<ndim; ++dim )
@@ -164,9 +153,7 @@ namespace aims
         {
           sipRes = transposeNumpyArray( sipRes, xyzorder );
 
-          cout << "set _arrayref\n";
           PyObject *wr = PyWeakref_NewRef( sipRes, cbk );
-          cout << "wr: " << wr << endl;
           if( wr )
           {
             if( PyObject_SetAttrString( sipSelf, "_arrayref", wr )
@@ -174,15 +161,12 @@ namespace aims
             {
               std::cerr << "cannot set object ._arrayref" << std::endl;
             }
-            cout << "_arrayref set\n";
             // cbk holds a ref to self until the array is destroyed
             // so self will not be destroyed before the array
             Py_DECREF( wr );
             // increment refcount to self so it doesn't get destroyed until
             // the array is destroyed
-            cout << "sipSelf: " << sipSelf << endl;
             Py_INCREF( sipSelf );
-            cout << "ref sipSelf 2: " << Py_REFCNT( sipSelf ) << endl;
           }
           else
             std::cerr << "could not make a weakref to the array"
