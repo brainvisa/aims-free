@@ -191,6 +191,8 @@ namespace aims
     inline carto::VolumeRef<float> affine();
     inline const carto::VolumeRef<float> affine() const;
 
+    virtual void setMatrix(const carto::VolumeRef<float> & mat);
+    virtual void setMatrix(const AimsData<float> & mat);
     virtual void setRotationAffine( float rx, float ry, float rz,
                                     const Point3df &cg = Point3df( 0.0 )  );
     //virtual void setRotationVectorial( const Point3df& v1, const Point3df& v2 );

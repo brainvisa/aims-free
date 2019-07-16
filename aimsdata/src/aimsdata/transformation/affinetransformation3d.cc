@@ -356,6 +356,20 @@ line 38. */
 
 
 //-----------------------------------------------------------------------------
+void AffineTransformation3d::setMatrix(const carto::VolumeRef<float> & mat)
+{
+  for(int16_t i=0; i<3; i++)
+    for(int16_t j=0; j<3; j++)
+      rotation()(i, j) = mat->at(i, j);
+}
+
+//-----------------------------------------------------------------------------
+void AffineTransformation3d::setMatrix(const AimsData<float> & mat)
+{
+  setMatrix(carto::VolumeRef<float>(mat.volume()));
+}
+
+//-----------------------------------------------------------------------------
 AimsData<float> AffineTransformation3d::rotationaroundx(float rx)
 /* this method return a 4-by-4 matrix, but a 3-by-3 matrix would be
 enough and better. see NOTE, line 38. */

@@ -126,10 +126,9 @@ AffineLeastSquareEstimation::computeMotion()
     else w( i, i ) = 0.0f;
   }
   
-  AimsData<float> invXX = v.cross( w.cross(  u.transpose() ) ) ;
-  _motion = new DecomposedMotion ;
-  
-  _motion->rotation() = yx.cross(invXX) ;
+  AimsData<float> invXX = v.cross(w.cross(u.transpose())) ;
+  _motion = new DecomposedMotion;
+  _motion->setMatrix(yx.cross(invXX));            
   _motion->setTranslation(meanY - _motion->transform(meanX));
 
   return 1;
