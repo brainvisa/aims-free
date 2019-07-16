@@ -280,7 +280,7 @@ AffineTransformation3d AffineTransformation3d::inverse() const
 {
 //   AffineTransformation3d AffineTransformation3d;
 //
-//   AffineTransformation3d.rotation() = AimsInversionLU( rotation() );
+//   AffineTransformation3d.setMatrix(AimsInversionLU( rotation() ));
 //
 //   Point3df tmp( -translation() );
 //   AffineTransformation3d.matrix()( 0, 3 ) = AffineTransformation3d.rotation()( 0, 0 ) * tmp.item( 0 ) +

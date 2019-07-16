@@ -284,7 +284,7 @@ bool doit( Process & process, const string & fileinr, Finder & )
       AimsData<float> tmp(3,3);
       for(int i = 0;i < 9; i++)
         tmp[i] = masterMotionInfo[i+3];
-      p.rotation() = tmp;
+      p.setMatrix(tmp);
     }
     else p.setToIdentity();
   } //end slave

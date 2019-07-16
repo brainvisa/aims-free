@@ -76,7 +76,7 @@ Motion TalairachReferential::computeTransformation( const TalairachPoints& pt )
   rotation(2, 2) = -_hemiVec[ 2 ];
    
   _transformation.setTranslation( Point3df(0., 0., 0.) );
-  _transformation.rotation() = rotation ;
+  _transformation.setMatrix(rotation);
   _transformation.setTranslation( _transformation.transform(translation) );
   //m.rotation().transpose() ;
   return _transformation ;
