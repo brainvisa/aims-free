@@ -60,7 +60,7 @@
   #include <blitz/array.h>
   
 namespace carto {
-  typedef blitz::diffType BlitzStridesType;
+  typedef ptrdiff_t BlitzStridesType;
 }
 
 #endif
