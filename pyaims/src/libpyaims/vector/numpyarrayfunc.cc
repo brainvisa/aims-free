@@ -117,7 +117,6 @@ namespace aims
       std::vector<npy_intp> dimsp( ndim );
       for( int i=0; i<ndim; ++i )
         dimsp[i] = dims[i];
-      buffer[0] = 42;
       Py_INCREF( numType ); // PyArray_NewFromDescr steals a ref to numType
       sipRes = PyArray_NewFromDescr( &PyArray_Type, numType, ndim,
                                      &dimsp[0], 0, buffer,
