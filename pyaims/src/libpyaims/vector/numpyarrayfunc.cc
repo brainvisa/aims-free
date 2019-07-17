@@ -65,17 +65,6 @@ namespace
 namespace aims
 {
 
-  PyObject* initNumpyArray( PyObject* sipSelf, int numType, int ndim,
-                            int* dims, char* buffer, bool xyzorder,
-                            size_t *strides )
-  {
-    std::cout << "(obsolete) initNumpyArray from type: " << numType << std::endl;
-    PyArray_Descr *descr = PyArray_DescrFromType( numType );
-    return initNumpyArray( sipSelf, descr, ndim, dims, buffer, xyzorder,
-                           strides );
-  }
-
-
   PyObject* initNumpyArray( PyObject* sipSelf, PyArray_Descr *numType,
                             int ndim,
                             int* dims, char* buffer, bool xyzorder,
@@ -118,12 +107,20 @@ namespace aims
       for( int i=0; i<ndim; ++i )
         dimsp[i] = dims[i];
       Py_INCREF( numType ); // PyArray_NewFromDescr steals a ref to numType
+      int flags = NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE
+        | NPY_ARRAY_C_CONTIGUOUS;
+      npy_intp *stridesp = 0;
+      vector<npy_intp> stridesn;
+      if( strides )
+      {
+        stridesn.resize( ndim );
+        for( int dim=0; dim<ndim; ++dim )
+          stridesn[dim] = (npy_intp) strides[dim];
+        stridesp = &stridesn[0];
+      }
       sipRes = PyArray_NewFromDescr( &PyArray_Type, numType, ndim,
-                                     &dimsp[0], 0, buffer,
-                                     NPY_ARRAY_C_CONTIGUOUS
-                                     | NPY_ARRAY_ALIGNED
-                                     | NPY_ARRAY_WRITEABLE,
-                                     0 );
+                                     &dimsp[0], stridesp, buffer,
+                                     flags, 0 );
       if( !sipRes )
       {
         std::cerr << "PyArray_NewFromDescr failed !\n";
@@ -131,14 +128,14 @@ namespace aims
       }
       else
       {
-        if( strides )
-        {
-          // if strides are specified, force them (volume views...)
-          int dim;
-          for( dim=0; dim<ndim; ++dim )
-            PyArray_STRIDES( reinterpret_cast<PyArrayObject *>( sipRes ) )[dim]
-              = strides[dim];
-        }
+//         if( strides )
+//         {
+//           // if strides are specified, force them (volume views...)
+//           int dim;
+//           for( dim=0; dim<ndim; ++dim )
+//             PyArray_STRIDES( reinterpret_cast<PyArrayObject *>( sipRes ) )[dim]
+//               = strides[dim];
+//         }
         sipRes = PyArray_Return( (PyArrayObject *) sipRes );
         // make a weakref to the array with a deletion callback
         PyObject *cbk = PyObject_GetAttrString( sipSelf,

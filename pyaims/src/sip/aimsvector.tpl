@@ -131,6 +131,7 @@ typedef AimsVector<%Template1%, %Template2%>
 public:
 %%Template1defScalar%%
 %%Template1defNumpyBindings%%
+%%Template1defNumpyIsSubArray%%
 
   AimsVector_%Template1typecode%_%Template2typecode%();
   AimsVector_%Template1typecode%_%Template2typecode%
@@ -403,9 +404,22 @@ public:
   std::vector<int> dims( 1, %Template2% );
   std::vector<int> added_dims = %Template1NumDims%;
   dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%,
-                                 dims.size(), &dims[0],
+
+  PyArray_Descr *descr = %Template1NumType_Descr%;
+  if( !descr )
+    descr = PyArray_DescrFromType( %Template1NumType% );
+  sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
+                                 &dims[0],
                                  (char *) &(*sipCpp)[0] );
+%#ifdef PYAIMS_NPY_IS_SUBARRAY%
+  PyObject *sub_arr = PyMapping_GetItemString( sipRes,
+                                               const_cast<char *>( "v" ) );
+  if( sub_arr )
+  {
+    Py_DECREF( sipRes ); // we don't use the whole array
+    sipRes = sub_arr;
+  }
+%#endif%
 %End
 
   SIP_PYOBJECT __array__() /Factory/;
@@ -413,9 +427,22 @@ public:
   std::vector<int> dims( 1, %Template2% );
   std::vector<int> added_dims = %Template1NumDims%;
   dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%,
-                                 dims.size(), &dims[0],
+
+  PyArray_Descr *descr = %Template1NumType_Descr%;
+  if( !descr )
+    descr = PyArray_DescrFromType( %Template1NumType% );
+  sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
+                                 &dims[0],
                                  (char *) &(*sipCpp)[0] );
+%#ifdef PYAIMS_NPY_IS_SUBARRAY%
+  PyObject *sub_arr = PyMapping_GetItemString( sipRes,
+                                               const_cast<char *>( "v" ) );
+  if( sub_arr )
+  {
+    Py_DECREF( sipRes ); // we don't use the whole array
+    sipRes = sub_arr;
+  }
+%#endif%
 %End
 
   void _arrayDestroyedCallback( SIP_PYOBJECT );

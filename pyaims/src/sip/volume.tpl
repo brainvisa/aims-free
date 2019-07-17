@@ -782,7 +782,8 @@ The header contains all meta-data.
     descr = PyArray_DescrFromType( %Template1NumType% );
   sipRes = aims::initNumpyArray( sipSelf, descr,
                                  dims.size(), &dims[0],
-                                 (char *) &sipCpp->at( 0 ), false,
+                                 (char *) &sipCpp->at( 0 ),
+                                 false,
                                  &strides[0] );
 %End
 
@@ -812,7 +813,8 @@ The header contains all meta-data.
     descr = PyArray_DescrFromType( %Template1NumType% );
   sipRes = aims::initNumpyArray( sipSelf, descr,
                                  dims.size(), &dims[0],
-                                 (char *) &sipCpp->at( 0 ), true,
+                                 (char *) &sipCpp->at( 0 ),
+                                 true,
                                  &strides[0] );
 %End
 
