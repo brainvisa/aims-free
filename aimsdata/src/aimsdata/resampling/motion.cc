@@ -267,7 +267,7 @@ void DecomposedAffineTransformation3d::transAffine(Point3df C)
 // in spite of those IMPROPER terms. see NOTE, line 38.
 
   AffineTransformation3d::Table<float> & m = matrix();
-  rotation() = _rot.cross( _scaling.cross( _shear ) );
+  setMatrix(_rot.cross( _scaling.cross( _shear ) ));
                    
   m[3] += C.item(0) - m(0,0)*C.item(0) - m(0,1)*C.item(1) - m(0,2)*C.item(2);
 

@@ -202,7 +202,11 @@ namespace aims {
             carto::VolumeRef<T> & out
     ) const
     {
-      if( out->getSizeT() * out->getSizeZ() * out->getSizeY() > 0 )
+      int32_t st = (int32_t)out->getSizeT(),
+              sz = (int32_t)out->getSizeZ(),
+              sy = (int32_t)out->getSizeY(),
+              sx = (int32_t)out->getSizeX();
+      if( st * sz * sy > 0 )
       {
         // Creates a view in the input volume that has windows dimensions
         carto::VolumeRef<VoxelType> win(
@@ -215,26 +219,33 @@ namespace aims {
                                                             1 )
           )
         );
-
+        
         int32_t i, j, k, t;
-        aims::Progression progress( (long) out->getSizeT() *
-                                    (long) out->getSizeZ() *
-                                    (long) out->getSizeY() *
-                                    (long) out->getSizeX() );
+        aims::Progression progress( (long) st *
+                                    (long) sz *
+                                    (long) sy *
+                                    (long) sx );
 
         if( this->_verbose > 0 )
           std::cout << "Subsampling progress: ";
 
-        for( t = 0; t < (int32_t)out->getSizeT(); ++t )
-          for( k = 0; k < (int32_t)out->getSizeZ(); ++k )
-            for( j = 0; j < (int32_t)out->getSizeY(); ++j )
-              for( i = 0; i < (int32_t)out->getSizeX(); ++i )
+        for( t = 0; t < st; ++t )
+          for( k = 0; k < sz; ++k )
+            for( j = 0; j < sy; ++j )
+              for( i = 0; i < sx; ++i )
               {
                 if( this->_verbose > 0 )
                   (++progress).print();
                 // Set view position in the volume
                 win->setPosInRefVolume( typename carto::Volume<VoxelType>::Position4Di(
                   i * _win_size_x, j * _win_size_y, k * _win_size_z, t) );
+//                 std::cout << "Window position: [" 
+//                           << carto::toString(i * _win_size_x) << ", "
+//                           << carto::toString(j * _win_size_y) << ", "
+//                           << carto::toString(k * _win_size_z) << ", "
+//                           << carto::toString(t) << "]" 
+//                           << std::endl << std::flush;
+                
                 (*out)( i, j, k, t ) = _func->execute(win);
               }
 

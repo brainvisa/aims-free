@@ -129,8 +129,8 @@ Motion TalairachBoundingBoxPoints::computeTransformationAndBox( const TalairachP
   rotation(2, 1) = _hemiVec[ 1 ];
   rotation(2, 2) = _hemiVec[ 2 ];
   
-  _transformation.setTranslation( Point3df(0., 0., 0.) );
-  _transformation.rotation() = rotation ;  
+  _transformation.setTranslation(Point3df(0., 0., 0.));
+  _transformation.setMatrix(rotation);  
   
   std::cout << "Scale : " << _scale << std::endl ;
   _transformation.scale( Point3df(1., 1., 1. ), 
