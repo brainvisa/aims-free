@@ -45,8 +45,21 @@ namespace
     int i, ndim = PyArray_NDIM( arr );
     if( ndim < 2 )
       return a;
-    bool firstindexinc = ( PyArray_STRIDES( arr )[0]
-        < PyArray_STRIDES( arr )[1] );
+    bool firstindexinc = xyzorder;
+    for( i=0; i<ndim - 1; ++i )
+    {
+      if( PyArray_STRIDES( arr )[i] < PyArray_STRIDES( arr )[i + 1] )
+      {
+        firstindexinc = true;
+        break;
+      }
+      else if( PyArray_STRIDES( arr )[i] < PyArray_STRIDES( arr )[i +1] )
+      {
+        firstindexinc = false;
+        break;
+      }
+      // otherwise equal, check next dim
+    }
     if( xyzorder == firstindexinc )
       return a;
     PyArray_Dims  adims;
