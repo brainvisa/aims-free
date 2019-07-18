@@ -290,4 +290,5 @@ intersphinx_mapping = {
     'python': ('http://docs.python.org/'
                + '.'.join([str(x) for x in sys.version_info[:2]]),
                None),
+    'numpy': ('http://docs.scipy.org/doc/numpy/', None),
 }

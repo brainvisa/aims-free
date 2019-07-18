@@ -39,8 +39,12 @@ public:
   void push_back( const %Template1PyType% & );
 %MethodCode
   sipCpp->data().push_back( %Template1deref% a0 );
-  int dims = sipCpp->data().size();
-  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(sipCpp->data())[0] );
+
+  std::vector<int> dims( 1, sipCpp->data().size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                          (char *) &sipCpp->data()[0] );
 %End
 
   void push_back( unsigned, const %Template1PyType% & );
@@ -48,15 +52,21 @@ public:
   sipCpp->data().insert( sipCpp->data().end(), a0,
     static_cast<const vector_%Template1typecode%::value_type &>(
       const_cast<%Template1PyType% &>( %Template1deref%a1 ) ) );
-  int dims = sipCpp->data().size();
-  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(sipCpp->data())[0] );
+  std::vector<int> dims( 1, sipCpp->data().size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                          (char *) &sipCpp->data()[0] );
 %End
 
   void resize( unsigned );
 %MethodCode
   sipCpp->data().resize( a0 );
-  int dims = sipCpp->data().size();
-  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(sipCpp->data())[0] );
+  std::vector<int> dims( 1, sipCpp->data().size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                          (char *) &sipCpp->data()[0] );
 %End
 
   void resize( unsigned, const %Template1PyType% & );
@@ -64,8 +74,11 @@ public:
   sipCpp->data().resize( a0,
     static_cast<const vector_%Template1typecode%::value_type &>(
       const_cast<%Template1PyType% &>( %Template1deref%a1 ) )  );
-  int dims = sipCpp->data().size();
-  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(sipCpp->data())[0] );
+  std::vector<int> dims( 1, sipCpp->data().size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                          (char *) &sipCpp->data()[0] );
 %End
 
 // const vector_%Template1typecode% & data() const;
@@ -85,8 +98,11 @@ public:
   void append( const %Template1PyType% & );
 %MethodCode
   sipCpp->push_back( %Template1deref%( a0 ) );
-  int dims = sipCpp->nItem();
-  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(*sipCpp)[ 0 ] );
+  std::vector<int> dims( 1, sipCpp->data().size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                          (char *) &sipCpp->data()[0] );
 %End
 
   %Template1PyType% __getitem__( int );
@@ -135,6 +151,7 @@ public:
 %%Template1defScalar%%
 %%Template1defNumpyBindings%%
 %#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS )%
+%%Template1defNumpyIsSubArray%%
 
   Texture_%Template1typecode%( SIP_PYOBJECT ) [(int)];
 %MethodCode
@@ -208,22 +225,72 @@ public:
 
   SIP_PYOBJECT arraydata() /Factory/;
 %MethodCode
-  int dims = sipCpp->nItem();
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 1, &dims,
+  std::vector<int> dims( 1, sipCpp->nItem() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+
+  PyArray_Descr *descr = %Template1NumType_Descr%;
+  if( !descr )
+    descr = PyArray_DescrFromType( %Template1NumType% );
+  sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
+                                 &dims[0],
                                  (char *) &sipCpp->item( 0 ) );
+%#ifdef PYAIMS_NPY_IS_SUBARRAY%
+  PyObject *sub_arr = PyMapping_GetItemString( sipRes,
+                                               const_cast<char *>( "v" ) );
+  if( sub_arr )
+  {
+    Py_DECREF( sipRes ); // we don't use the whole array
+    sipRes = sub_arr;
+  }
+%#endif%
 %End
 
   SIP_PYOBJECT __array__() /Factory/;
 %MethodCode
-  int dims = sipCpp->nItem();
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 1, &dims,
+  std::vector<int> dims( 1, sipCpp->nItem() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+
+  PyArray_Descr *descr = %Template1NumType_Descr%;
+  if( !descr )
+    descr = PyArray_DescrFromType( %Template1NumType% );
+  sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
+                                 &dims[0],
+                                 (char *) &sipCpp->item( 0 ) );
+%#ifdef PYAIMS_NPY_IS_SUBARRAY%
+  PyObject *sub_arr = PyMapping_GetItemString( sipRes,
+                                               const_cast<char *>( "v" ) );
+  if( sub_arr )
+  {
+    Py_DECREF( sipRes ); // we don't use the whole array
+    sipRes = sub_arr;
+  }
+%#endif%
+%End
+
+
+  SIP_PYOBJECT array_struct() /Factory/;
+%MethodCode
+  std::vector<int> dims( 1, sipCpp->nItem() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+
+  PyArray_Descr *descr = %Template1NumType_Descr%;
+  if( !descr )
+    descr = PyArray_DescrFromType( %Template1NumType% );
+  sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
+                                 &dims[0],
                                  (char *) &sipCpp->item( 0 ) );
 %End
 
   void checkResize();
 %MethodCode
-  int dims = sipCpp->nItem();
-  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(*sipCpp)[ 0 ] );
+  std::vector<int> dims( 1, sipCpp->data().size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                          (char *) &sipCpp->data()[0] );
 %End
 
   void _arrayDestroyedCallback( SIP_PYOBJECT );
@@ -242,8 +309,11 @@ public:
   void assign( const vector_%Template1typecode% & );
 %MethodCode
   sipCpp->data() = *a0;
-  int dims = sipCpp->data().size();
-  aims::resizeNumpyArray( sipSelf, 1, &dims, (char *) &(*sipCpp)[0] );
+  std::vector<int> dims( 1, sipCpp->data().size() );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+  aims::resizeNumpyArray( sipSelf, dims.size(), &dims[0],
+                          (char *) &sipCpp->data()[0] );
 %End
 
 %#endif%
