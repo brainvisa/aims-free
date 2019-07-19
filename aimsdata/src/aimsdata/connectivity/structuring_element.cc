@@ -62,12 +62,12 @@ vector<int> StructuringElement::getAmplitude(
   vector<int> amplitude(6,0);
   for( i=begin(); i!=e; ++i )
   {
-    amplitude[0] = abs( min( (long)-amplitude[0], origin[0] + (*i)[0] ) );
-    amplitude[1] = abs( max( (long) amplitude[1], origin[0] + (*i)[0] ) );
-    amplitude[2] = abs( min( (long)-amplitude[2], origin[1] + (*i)[1] ) );
-    amplitude[3] = abs( max( (long) amplitude[3], origin[1] + (*i)[1] ) );
-    amplitude[4] = abs( min( (long)-amplitude[4], origin[2] + (*i)[2] ) );
-    amplitude[5] = abs( max( (long) amplitude[5], origin[2] + (*i)[2] ) );
+    amplitude[0] = abs( min( (int64_t)(-amplitude[0]), (origin[0] + (*i)[0]) ) );
+    amplitude[1] = (int) abs( max( (int64_t) amplitude[1], origin[0] + (*i)[0] ) );
+    amplitude[2] = (int) abs( min( (int64_t)-amplitude[2], origin[1] + (*i)[1] ) );
+    amplitude[3] = (int) abs( max( (int64_t) amplitude[3], origin[1] + (*i)[1] ) );
+    amplitude[4] = (int) abs( min( (int64_t)-amplitude[4], origin[2] + (*i)[2] ) );
+    amplitude[5] = (int) abs( max( (int64_t) amplitude[5], origin[2] + (*i)[2] ) );
   }
   return amplitude;
 }
@@ -198,7 +198,7 @@ Shape* ShapeFactory::create(
   const bool usecenter
 )
 {
-    create(type, Point3dl(origin[0], origin[1], origin[2]), amplitude, usecenter);
+  return create(type, Point3dl(origin[0], origin[1], origin[2]), amplitude, usecenter);
 }
 
 Shape* ShapeFactory::create(
