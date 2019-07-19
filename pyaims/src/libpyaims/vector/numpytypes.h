@@ -3,6 +3,7 @@
 
 
 #include <pyaims/numpyarray.h>
+#include <stdint.h>
 
 PyArray_Descr* NPY_AimsRGB_Descr();
 PyArray_Descr* NPY_AimsRGBA_Descr();
