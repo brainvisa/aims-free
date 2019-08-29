@@ -72,7 +72,7 @@ FoldGraphAttributes::FoldGraphAttributes( const AimsData<int16_t> & skel,
                                           const vector<int> & gver )
   : _skel( skel ), _graph( graph ), _inside( inside ), _outside( outside ), 
     _motion( motion ), _domeshes( withmeshes ), _graphversion( gver ),
-    _mesher()
+    _maxthreads( 0 ), _mesher()
 {
   _mesher.setVerbose( false );
   _mesher.setDecimation( 100.0, 5, 3, 180.0 );
