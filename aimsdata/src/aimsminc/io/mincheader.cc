@@ -507,9 +507,21 @@ void MincHeader::read()
   //In MINC, voxel size can be positive or negative. Here we take the absolute value of the voxel size and the case of negative increment steps (negative voxel sizes) is treated when the volume is read (in MincReader).
   _sizeT = fabs(volume->separations[3]);
   //std::cout << "dx="<< volume->separations[2] << ", dy="<< volume->separations[1] << ", dz="<< volume->separations[0]<<"\n";
-  _sizeX = fabs(volume->separations[0]);
-  _sizeY = fabs(volume->separations[1]);
-  _sizeZ = fabs(volume->separations[2]);
+  if( _name.substr( _name.length() - 4, 4 ) == ".mgz"
+      || _name.substr( _name.length() - 4, 4 ) == ".mgh" )
+  {
+    // freesurfer mgz / mgh files seem to be in a different order
+    // (is this a bug in minc io or in our interpretation ?)
+    _sizeX = fabs(volume->separations[2]);
+    _sizeY = fabs(volume->separations[1]);
+    _sizeZ = fabs(volume->separations[0]);
+  }
+  else
+  {
+    _sizeX = fabs(volume->separations[0]);
+    _sizeY = fabs(volume->separations[1]);
+    _sizeZ = fabs(volume->separations[2]);
+  }
 
   if(n_dimensions==5) {
     throw wrong_format_error( fileName );
