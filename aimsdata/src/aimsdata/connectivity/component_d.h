@@ -114,8 +114,8 @@ namespace aims
 
 
     O    label = 1;
-    Point3d   pos, newpos;
-    std::queue<Point3d> que;
+    Point3dl   pos, newpos;
+    std::queue<Point3dl> que;
     T     val;
     size_t    sz;
 
@@ -132,7 +132,7 @@ namespace aims
           if( !flag( x, y, z ) )
           {
             val = data( x, y, z, t );
-            que.push( Point3d( x, y, z ) );
+            que.push( Point3dl( x, y, z ) );
             flag( x, y, z ) = true;
             sz = 0;
             while ( !que.empty() )
@@ -143,7 +143,10 @@ namespace aims
               ++sz;
               for ( n = 0; n < cd.nbNeighbors(); n++ )
               {
-                newpos = pos + cd.xyzOffset( n );
+                newpos = pos + Point3dl(cd.xyzOffset( n )[0],
+                                        cd.xyzOffset( n )[1],
+                                        cd.xyzOffset( n )[2]);
+                
                 if ( newpos[0] >= 0   &&
                       newpos[0] < dimX &&
                       newpos[1] >= 0   &&
