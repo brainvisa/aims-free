@@ -370,10 +370,15 @@ bool doit( Process & process, const string & fileinr, Finder & )
     reech.setRef( test );
     reech.setDefaultValue( bv );
   
+//     std::cout << "main, resampled dims: ["
+//               << carto::toString(std::max((unsigned)(test.dimX()*test.sizeX()/ref.sizeX() + .5), (unsigned)1)) << ", "
+//               << carto::toString(std::max((unsigned)(test.dimY()*test.sizeY()/ref.sizeY() + .5), (unsigned)1)) << ", "
+//               << carto::toString(std::max((unsigned)(test.dimZ()*test.sizeZ()/ref.sizeZ() + .5), (unsigned)1)) << "]"
+//               << std::endl << std::flush;
     test = reech.doit( identity, 
-                       unsigned (test.dimX()*test.sizeX()/(1.0*ref.sizeX()) + .5),
-                       unsigned (test.dimY()*test.sizeY()/(1.0*ref.sizeY()) + .5),
-                       unsigned (test.dimZ()*test.sizeZ()/(1.0*ref.sizeZ()) + .5),
+                       std::max((unsigned)(test.dimX()*test.sizeX()/ref.sizeX() + .5), (unsigned)1),
+                       std::max((unsigned)(test.dimY()*test.sizeY()/ref.sizeY() + .5), (unsigned)1),
+                       std::max((unsigned)(test.dimZ()*test.sizeZ()/ref.sizeZ() + .5), (unsigned)1),
                        Point3df(ref.sizeX(),ref.sizeY(),ref.sizeZ()));
   }
 
@@ -392,7 +397,7 @@ bool doit( Process & process, const string & fileinr, Finder & )
 
   // Declaration de l image transformee a chaque etape
   AimsData<T> testtrans = test.clone();
-
+  
   //Prise en compte d'une transfo initiale éventuelle
   if(abm.filemotion.length() != 0)
     {
