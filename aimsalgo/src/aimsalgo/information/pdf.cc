@@ -278,36 +278,42 @@ void AimsJointPdf( const AimsData<short>& data1,
 
     ASSERT( p12.dimY() == levels && p1.dimX() == levels && p2.dimX() == levels );
 
+    // TODO: data1 and data2 must necessarily have the same voxel size. It would
+    // probably be better to use the lower voxel sizes and field of view 
+    // to determine the step and the grid to use during pdf updates
+    ASSERT( data1.sizeX() == data2.sizeX()
+         && data1.sizeY() == data2.sizeY()
+         && data1.sizeZ() == data2.sizeZ() );
+
+    int dx = min(data1.dimX(), data2.dimX()), 
+        dy = min(data1.dimY(), data2.dimY()), 
+        dz = min(data1.dimZ(), data2.dimZ());
+
     float mini1 = float( data1.minimum() );
     float maxi1 = float( data1.maximum() );
-    ASSERT( maxi1 != mini1 );
-
     float mini2 = float( data2.minimum() );
     float maxi2 = float( data2.maximum() );
-    if ( maxi2 == mini2 )
-    {
-        cerr << "Warning ! AimsJointPdf : maxi2 == mini2" << endl;
-        return;
-    }
 
-    float h1 = ( maxi1 - mini1 ) / levels;
-    float h2 = ( maxi2 - mini2 ) / levels;
+    double h1 = (( mini1 == maxi1) ? 1 : ( maxi1 - mini1 ) / levels);
+    double h2 = (( mini2 == maxi2) ? 1 : ( maxi2 - mini2 ) / levels);
 
     int i, j, k, n1, n2;
 
     p12 = 0.0;
 
-    ForEach3d( data1, i, j, k )
-    {
-        n1 = int( ( float( data1( i, j, k ) ) - mini1 ) / h1 );
-        n2 = int( ( float( data2( i, j, k ) ) - mini2 ) / h2 );
-        if ( n1 == levels )
-            n1--;
-        if ( n2 == levels )
-            n2--;
+    for(k = 0; k < dz; ++k)
+        for(j = 0; j < dy; ++j)
+            for(i = 0; i < dx; ++i)
+            {
+                n1 = int( ( float( data1( i, j, k ) ) - mini1 ) / h1 );
+                n2 = int( ( float( data2( i, j, k ) ) - mini2 ) / h2 );
+                if ( n1 == levels )
+                    n1--;
+                if ( n2 == levels )
+                    n2--;
 
-        p12( n1, n2 )++;
-    }
+                p12( n1, n2 )++;
+            }
 
     float sum=0.0;
     int x, y;
@@ -405,22 +411,25 @@ void AimsJointMaskPdf(const AimsData<short>& data1,
 
     ASSERT( p12.dimY() == levels && p1.dimX() == levels && p2.dimX() == levels );
 
+    // TODO: data1 and data2 must necessarily have the same voxel size. It would
+    // probably be better to use the lower voxel sizes and field of view 
+    // to determine the step and the grid to use during pdf updates
+    ASSERT( data1.sizeX() == data2.sizeX()
+         && data1.sizeY() == data2.sizeY()
+         && data1.sizeZ() == data2.sizeZ() );
+
+    int dx = min(data1.dimX(), data2.dimX()), 
+        dy = min(data1.dimY(), data2.dimY()), 
+        dz = min(data1.dimZ(), data2.dimZ());
+
     //  float mini1 = float( data1.minimum() );
     double mini1 = minMask( data1 );
     double maxi1 = double( data1.maximum() );
-    ASSERT( maxi1 != mini1 );
-
-    //  double mini2 = double( data2.minimum() );
     double mini2 = minMask( data2 );
     double maxi2 = double( data2.maximum() );
-    if ( maxi2 == mini2 )
-    {
-        cerr << "Warning ! AimsJointMaskPdf : maxi2 == mini2" << endl;
-        return;
-    }
-
-    double h1 = ( maxi1 - mini1 ) / levels;
-    double h2 = ( maxi2 - mini2 ) / levels;
+ 
+    double h1 = (( mini1 == maxi1) ? 1 : ( maxi1 - mini1 ) / levels);
+    double h2 = (( mini2 == maxi2) ? 1 : ( maxi2 - mini2 ) / levels);
 
     int i, j, k, n1, n2;
 
@@ -428,20 +437,23 @@ void AimsJointMaskPdf(const AimsData<short>& data1,
     #ifdef DEBUG
     cout << "DEBUG>>min1 max1 min2 max2 " << mini1 << " " << maxi1 <<" " <<mini2<<" "<<maxi2<<endl;
     #endif
-    ForEach3d( data1, i, j, k )
-    {
-        if (data1(i, j, k ) != short(-32768) && data2(i,j,k) != short(-32768))
-        {
-            n1 = int( ( double( data1( i, j, k ) ) - mini1 ) / h1 );
-            n2 = int( ( double( data2( i, j, k ) ) - mini2 ) / h2 );
-            if ( n1 == levels )
-                n1--;
-            if ( n2 == levels )
-                n2--;
-            
-            p12( n1, n2 )++;
-        }
-    }
+
+    for(k = 0; k < dz; ++k)
+        for(j = 0; j < dy; ++j)
+            for(i = 0; i < dx; ++i)
+            {
+                if (data1(i, j, k ) != short(-32768) && data2(i,j,k) != short(-32768))
+                {
+                    n1 = int( ( double( data1( i, j, k ) ) - mini1 ) / h1 );
+                    n2 = int( ( double( data2( i, j, k ) ) - mini2 ) / h2 );
+                    if ( n1 == levels )
+                        n1--;
+                    if ( n2 == levels )
+                        n2--;
+                    
+                    p12( n1, n2 )++;
+                }
+            }
 
     double sum=0.0;
     int x, y;
@@ -800,8 +812,7 @@ void  AimsKnnPdf(aims::knn::Database &db,
       AimsData<float> &pdf, unsigned int k)
 {
     int        x, y, z;
-    double        dx, dy, dz;
-    double        h, sum, val, dist;
+    double        h, sum, val;
     int        dim = db.dim();
     std::vector<double>    vec(dim);
     aims::knn::KnnGlobalFriedman  knn(db, k);
