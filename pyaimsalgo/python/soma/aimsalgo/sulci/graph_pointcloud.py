@@ -90,7 +90,6 @@ def build_split_graph(graph, data, roots, skel=None):
         askel = np.asarray(skel)
     lvol = aims.Volume(roots)
     lvol.fill(0)
-    aroots = np.asarray(roots)
 
     # get native coords from data
     coords = data.loc[:, ['point_x', 'point_y', 'point_z']].values
@@ -155,19 +154,20 @@ def build_split_graph(graph, data, roots, skel=None):
         fm.doit(roots, [roots_val], roots_nval)
         voronoi = fm.voronoiVol()
         avor = np.asarray(voronoi)
-        for l in roots_nval:
-            m = l
-            if l == roots_nval[-1]:
-                # set back old value in one of the new regions
-                m = roots_val
-            aroots[avor==l] = m
+        # reseet aroots for now, we'll do it later with actual split
+        for l in reversed(roots_nval):
+            aroots[avor==l] = roots_val
         convmask = ([-1, 0, 0, 0], [1, 0, 0, 0], [0, -1, 0, 0], [0, 1, 0, 0],
                     [0, 0, -1, 0], [0, 0, 1, 0]) # 6-connectivity
         split_bk = aims.BucketMap_VOID()
+        split_bk.header()['voxel_size'] = vs
         sb0 = split_bk[0]
         for p in apts.T:
             p2 = np.vstack([p+m for m in convmask]).T
             vals = np.unique(avor[tuple(p2)])
+            if -1 in vals:
+                # remove background value
+                vals = [val for val in vals if v >= 0]
             if len(vals) > 1:
                 if skel is not None:
                     askel[tuple(p)] = JUNCTION
@@ -199,6 +199,8 @@ def build_split_graph(graph, data, roots, skel=None):
                     print('    good enough.')
             v['label'] = labels_rmap[winner]
             print('v1 label:', v['label'])
+            # new voronoi in aroots
+            aroots[pts] = roots_new + 1
 
             apts = apts2
             pts = tuple(apts)
@@ -214,6 +216,17 @@ def build_split_graph(graph, data, roots, skel=None):
                     print('    good enough.')
             v2['label'] = labels_rmap[maj_label(labels, pts, avol)]
             print('v2 label:', v2['label'])
+            aroots[pts] = roots_new
+
+            # redo voronoi with new labels
+            fm = aims.FastMarching('6') # TODO: check if 6 connectivity is OK
+            fm.doit(roots, [roots_val], [roots_new, roots_new + 1])
+            voronoi = fm.voronoiVol()
+            avor = np.asarray(voronoi)
+            # change values, v gets initial roots_val, v2 gets roots_new
+            aroots[avor==roots_new + 1] = roots_val
+
+            roots_new += 1
 
     print('mislabeled points:', mislabeled)
     print()
