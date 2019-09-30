@@ -329,8 +329,11 @@ void AimsJointPdf( const AimsData<short>& data1,
     for ( y = 0; y < levels; y++ )
         for ( x = 0; x < levels; x++ )
         {
-            p1( x ) += p12( x, y );
-            p2( y ) += p12( x, y );
+            // Due to floatting point arithmetic, probability
+            // can be a little bit over 1. Min function is used
+            // to fix the issue
+            p1(x) = std::min((double)p1(x) + p12( x, y ), (double)1.0);
+            p2(y) = std::min((double)p2(y) + p12( x, y ), (double)1.0);
         }
 }
 
@@ -470,8 +473,11 @@ void AimsJointMaskPdf(const AimsData<short>& data1,
     for( y = 0; y < levels; y++)
         for ( x = 0; x < levels; x++ )
         {
-            p1(x) += p12( x, y );
-            p2(y) += p12( x, y );
+            // Due to floatting point arithmetic, probability
+            // can be a little bit over 1. Min function is used
+            // to fix the issue
+            p1(x) = std::min((double)p1(x) + p12( x, y ), (double)1.0);
+            p2(y) = std::min((double)p2(y) + p12( x, y ), (double)1.0);
         }
 }
 
