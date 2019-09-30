@@ -613,7 +613,7 @@ inline
 AimsVector<T,D>::AimsVector(const AimsVector<U,D>& other)
 {
   for (int d = 0; d < D; d++)
-    _value[d] = other._value[d];
+    _value[d] = other[d];
 }
 
 
