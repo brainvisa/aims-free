@@ -83,7 +83,7 @@ TCat::TCat( const vector<string> & in, const string & out )
   registerProcessType( "Volume", "RGBA", &tcat<AimsData<AimsRGBA> > );
   registerProcessType( "Volume", "POINT3DF", &tcat<AimsData<Point3df> > );
   registerProcessType( "Mesh", "VOID", &tcat<AimsSurfaceTriangle> );
-  registerProcessType( "Mesh2", "VOID", &tcat<AimsTimeSurface<2, Void> > );
+  registerProcessType( "Segments", "VOID", &tcat<AimsTimeSurface<2, Void> > );
   registerProcessType( "Mesh4", "VOID", &tcat<AimsSurfaceFacet> );
   registerProcessType( "Texture", "FLOAT", &tcat<Texture1d> );
   registerProcessType( "Texture", "S16", &tcat<TimeTexture<short> > );

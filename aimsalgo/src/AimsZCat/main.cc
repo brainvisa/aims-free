@@ -102,7 +102,7 @@ ZCat::ZCat( const list<string> & names, const string & out,
   registerProcessType( "Volume", "RGBA", &doit<AimsRGBA> );
   registerProcessType( "Volume", "POINT3DF", &doit<Point3df> );
   registerProcessType( "Mesh", "VOID", &doitMesh<3> );
-  registerProcessType( "Mesh2", "VOID", &doitMesh<2> );
+  registerProcessType( "Segments", "VOID", &doitMesh<2> );
   registerProcessType( "Mesh4", "VOID", &doitMesh<4> );
   registerProcessType( "Bucket", "VOID", &doitBucket );
 }
