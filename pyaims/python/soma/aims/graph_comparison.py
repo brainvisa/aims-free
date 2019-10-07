@@ -49,8 +49,8 @@ def same_graphs(ref_graph, test_graph, verbose=False):
     AIMS objects inside attributes are not compared (meshes, bucket, volumes
     in sulci graphs for instance)
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     ref_graph: string or Graph object
         reference graph to be compared. A filename may be passed here: in this
         case the graph is read using aims.read() function.
@@ -60,8 +60,8 @@ def same_graphs(ref_graph, test_graph, verbose=False):
     verbose: bool (optional, default: False)
         if True, messages are print on the standard output during comparison.
 
-    Returns:
-    --------
+    Returns
+    -------
         True if ref and test graphs are identical, or False otherwise.
     '''
 

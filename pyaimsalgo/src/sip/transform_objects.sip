@@ -19,7 +19,11 @@
   void transformMesh( AimsTimeSurface_2_VOID & mesh,
                       const soma::Transformation3d & direct_transformation);
 %Docstring
-Apply a spatial transformation to a mesh (AimsTimeSurface)
+transformMesh(mesh, direct_transformation)
+
+Apply a spatial transformation to a segments mesh (AimsTimeSurface).
+
+The mesh is transformed in-place and modified.
 
 Each vertex of the mesh is transformed according to the supplied
 transformation. Normals are re-calculated from the new vertex positions.
@@ -32,7 +36,11 @@ transformation. Normals are re-calculated from the new vertex positions.
   void transformMesh( AimsTimeSurface_3_VOID & mesh,
                       const soma::Transformation3d & direct_transformation );
 %Docstring
-Apply a spatial transformation to a mesh (AimsTimeSurface)
+transformMesh(mesh, direct_transformation)
+
+Apply a spatial transformation to a triangles mesh (AimsTimeSurface)
+
+The mesh is transformed in-place and modified.
 
 Each vertex of the mesh is transformed according to the supplied
 transformation. Normals are re-calculated from the new vertex positions.
@@ -45,7 +53,11 @@ transformation. Normals are re-calculated from the new vertex positions.
   void transformMesh( AimsTimeSurface_4_VOID & mesh,
                       const soma::Transformation3d & direct_transformation );
 %Docstring
-Apply a spatial transformation to a mesh (AimsTimeSurface)
+transformMesh(mesh, direct_transformation)
+
+Apply a spatial transformation to a quads mesh (AimsTimeSurface)
+
+The mesh is transformed in-place and modified.
 
 Each vertex of the mesh is transformed according to the supplied
 transformation. Normals are re-calculated from the new vertex positions.
@@ -60,6 +72,8 @@ transformation. Normals are re-calculated from the new vertex positions.
                          const soma::Transformation3d & direct_transformation,
                          Point3df vs = Point3df( 0., 0., 0. ) );
 %Docstring
+transformBucketDirect(bck, direct_transformation, vs=aims.Point3df(0., 0., 0.))
+
 Apply a spatial transformation to a BucketMap
 
 Each voxel of the input bucket is transformed with direct_transformation, and
@@ -83,7 +97,10 @@ nearest-neighbour resampling.
                   Point3df vs = Point3df( 0., 0., 0. ),
                   bool also_pushforward = true);
 %Docstring
-Apply a spatial transformation to a BucketMap
+resampleBucket(bck, direct_transformation, inverse_transformation,
+               vs=aims.Point3df(0., 0., 0.), also_pushforward=True)
+
+Apply a spatial transformation to a BucketMap.
 
 The bucket is transformed by resampling, using a pull-back method in the same
 way as nearest neighbour resampling of a Volume.
@@ -109,6 +126,9 @@ preservation.
                        const soma::Transformation3d * inverse_transformation,
                        Point3df vs = Point3df( 0., 0., 0. ) );
 %Docstring
+transformGraph(graph, direct_transformation, inverse_transformation,
+               vs=aims.Point3df(0., 0., 0.))
+
 Apply a spatial transformation to all objects contained in a Graph.
 
 The graph is modified in-place.
@@ -140,6 +160,8 @@ namespace aims
 %End
 
 %Docstring
+BundleTransformer.__init__(direct_transformation)
+
 Apply a spatial transformation to fiber bundles.
 
 Each point along the bundles is transformed according to the supplied

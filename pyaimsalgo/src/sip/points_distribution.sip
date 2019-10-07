@@ -92,10 +92,10 @@ namespace aims
       step: float
           move step factor
 
-    Returns
-    -------
-    new_pos: Point3df
-        Position after move and application of constraints
+      Returns
+      -------
+      new_pos: Point3df
+          Position after move and application of constraints
 %End
     };
 

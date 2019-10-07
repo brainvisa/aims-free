@@ -121,7 +121,7 @@ FFDApplyProc::FFDApplyProc()
   registerProcessType( "Volume", "RGBA",    &doVolume<AimsRGBA, AimsRGBA::ChannelType> );
   registerProcessType( "Volume", "POINT3DF", &doVolume<Point3df, float> );
   registerProcessType( "Mesh",   "VOID",    &doMesh<3> );
-  registerProcessType( "Mesh2",  "VOID",    &doMesh<2> );
+  registerProcessType( "Segments", "VOID",  &doMesh<2> );
   registerProcessType( "Mesh4",  "VOID",    &doMesh<4> );
   registerProcessType( "Bucket", "VOID",    &doBucket );
   registerProcessType( "Graph",  "VOID",    &doGraph );
