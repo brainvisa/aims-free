@@ -111,72 +111,6 @@ soma.aimsalgo module
 
   .. autoclass:: DiffusionSmoother_FLOAT
 
-  .. autoclass:: FfdResampler_DOUBLE
-
-  .. autoclass:: FfdResampler_FLOAT
-
-  .. autoclass:: FfdResampler_POINT3DF
-
-  .. autoclass:: FfdResampler_RGB
-
-  .. autoclass:: FfdResampler_RGBA
-
-  .. autoclass:: FfdResampler_S16
-
-  .. autoclass:: FfdResampler_S32
-
-  .. autoclass:: FfdResampler_U16
-
-  .. autoclass:: FfdResampler_U32
-
-  .. autoclass:: FfdResampler_U8
-
-  .. autofunction:: ffdTransformMesh
-
-  .. autofunction:: ffdTransformBucket
-
-  .. autofunction:: ffdTransformGraph
-
-  .. autoclass:: SplineFfdResampler_DOUBLE
-
-  .. autoclass:: SplineFfdResampler_FLOAT
-
-  .. autoclass:: SplineFfdResampler_POINT3DF
-
-  .. autoclass:: SplineFfdResampler_RGB
-
-  .. autoclass:: SplineFfdResampler_RGBA
-
-  .. autoclass:: SplineFfdResampler_S16
-
-  .. autoclass:: SplineFfdResampler_S32
-
-  .. autoclass:: SplineFfdResampler_U16
-
-  .. autoclass:: SplineFfdResampler_U32
-
-  .. autoclass:: SplineFfdResampler_U8
-
-  .. autoclass:: TrilinearFfdResampler_DOUBLE
-
-  .. autoclass:: TrilinearFfdResampler_FLOAT
-
-  .. autoclass:: TrilinearFfdResampler_POINT3DF
-
-  .. autoclass:: TrilinearFfdResampler_RGB
-
-  .. autoclass:: TrilinearFfdResampler_RGBA
-
-  .. autoclass:: TrilinearFfdResampler_S16
-
-  .. autoclass:: TrilinearFfdResampler_S32
-
-  .. autoclass:: TrilinearFfdResampler_U16
-
-  .. autoclass:: TrilinearFfdResampler_U32
-
-  .. autoclass:: TrilinearFfdResampler_U8
-
   .. autoclass:: Gaussian2DSmoothing_DOUBLE
 
   .. autoclass:: Gaussian2DSmoothing_FLOAT
@@ -234,6 +168,16 @@ soma.aimsalgo module
   .. autoclass:: Moment_FLOAT
 
   .. autoclass:: TriangulationMoment
+
+  .. autofunction:: transformGraph
+
+  .. autofunction:: transformMesh
+
+  .. autofunction:: transformBucketDirect
+
+  .. autofunction:: resampleBucket
+
+  .. autoclass:: BundleTransformer
 
 
 soma.aimsalgo.t1mapping module
