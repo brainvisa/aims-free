@@ -747,12 +747,26 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
   vector<BucketMap<float> > regions( plist.size()+1 );
   rc_ptr<BucketMap<int16_t> > voro = fm.voronoiVol();
   // split distance map into voronoi regions
+
+  BucketMap<Void> disconnected;
+  disconnected.header() = bucket->header();
+  BucketMap<Void>::Bucket &dis0 = disconnected[0];
+
   for( icb=(*voro)[0].begin(), ecb=(*voro)[0].end(); icb!=ecb; ++icb )
   {
-    ibf = fbk0.find( icb->first );
-    if( ibf != ebf )
-      regions[ icb->second ][0][icb->first] = fbk0[icb->first];
+    if( icb->second < 0 )
+      dis0[icb->first] = 1;
+    else
+    {
+      ibf = fbk0.find( icb->first );
+      if( ibf != ebf )
+        regions[ icb->second ][0][icb->first] = fbk0[icb->first];
+    }
   }
+
+  // cout << "regions: " << regions.size() << endl;
+  if( dis0.size() != 0 )
+    cout << "Warning: disconnected voxels: " << dis0.size() << endl;
 
   ip = plist.begin();
   i = 1;
