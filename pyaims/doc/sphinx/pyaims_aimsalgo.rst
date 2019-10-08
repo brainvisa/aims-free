@@ -67,7 +67,7 @@ In soma.aims module
 .. autoclass:: soma.aims.TrilinearFfd
   :members:
 
-.. autoclass:: soma.aims.BundleFFDTransformer
+.. autoclass:: BundleTransformer
   :members:
 
 
@@ -108,10 +108,12 @@ soma.aimsalgo module
   .. autofunction:: AimsMeshLabelConnectedComponent
 
   .. autoclass:: DiffusionSmoother_S16
+    :members:
 
   .. autoclass:: DiffusionSmoother_FLOAT
 
   .. autoclass:: Gaussian2DSmoothing_DOUBLE
+    :members:
 
   .. autoclass:: Gaussian2DSmoothing_FLOAT
 
@@ -126,6 +128,7 @@ soma.aimsalgo module
   .. autoclass:: Gaussian2DSmoothing_U8
 
   .. autoclass:: Gaussian3DSmoothing_DOUBLE
+    :members:
 
   .. autoclass:: Gaussian3DSmoothing_FLOAT
 
@@ -140,14 +143,19 @@ soma.aimsalgo module
   .. autoclass:: Gaussian3DSmoothing_U8
 
   .. autoclass:: GeneralSampler_FLOAT_3
+    :members:
 
   .. autoclass:: GeometricMoment_DOUBLE
+    :members:
 
   .. autoclass:: AimsGradient_FLOAT
+    :members:
 
   .. autoclass:: Histogram_FLOAT
+    :members:
 
   .. autoclass:: MedianSmoothing_DOUBLE
+    :members:
 
   .. autoclass:: MedianSmoothing_FLOAT
 
@@ -162,12 +170,16 @@ soma.aimsalgo module
   .. autoclass:: MedianSmoothing_U8
 
   .. autoclass:: Mesher
+    :members:
 
   .. autoclass:: MomentInvariant_FLOAT
+    :members:
 
   .. autoclass:: Moment_FLOAT
+    :members:
 
   .. autoclass:: TriangulationMoment
+    :members:
 
   .. autofunction:: transformGraph
 
@@ -176,8 +188,6 @@ soma.aimsalgo module
   .. autofunction:: transformBucketDirect
 
   .. autofunction:: resampleBucket
-
-  .. autoclass:: BundleTransformer
 
 
 soma.aimsalgo.t1mapping module
@@ -198,18 +208,22 @@ soma.wip.aimsalgo module
 .. automodule:: soma.wip.aimsalgo.moment
   :members:
 
-  .. autoclass:: Moment
+.. autoclass:: Moment
+    :members:
 
 .. automodule:: soma.wip.aimsalgo.samplables
   :members:
 
-  .. autoclass:: SuperQuadricSamplable
+.. autoclass:: SuperQuadricSamplable
+    :members:
 
 .. automodule:: soma.wip.aimsalgo.transform
   :members:
 
-  .. autoclass:: BendingTransform
+.. autoclass:: BendingTransform
+  :members:
 
-  .. autoclass:: TaperingTransform
+.. autoclass:: TaperingTransform
+  :members:
 
 
