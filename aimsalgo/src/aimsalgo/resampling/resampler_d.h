@@ -91,12 +91,10 @@ resample_inv_to_vox( const carto::Volume< T >& inVolume,
 
   aims::Progression progress(0, static_cast<size_t>(outSizeX)
                              * outSizeY * outSizeZ * outSizeT);
-  Point3df outLoc;
   int x, y, z, t;
   for ( t = 0; t < outSizeT; t++ )
     {
       updateParameters( inVolume, t, verbose );
-      outLoc = Point3df( 0.0, 0.0, 0.0 );
 
       for ( z = 0; z < outSizeZ; z++ )
         {
@@ -107,28 +105,22 @@ resample_inv_to_vox( const carto::Volume< T >& inVolume,
 
               for ( x = 0; x < outSizeX; x++ )
                 {
+                  const Point3df outLoc ( x * outResolution[0],
+                                          y * outResolution[1],
+                                          z * outResolution[2] );
 
                   doResample( inVolume, inverse_transform_to_vox, outBackground,
                               outLoc, *o, t );
                   ++ o;
                   ++progress;
-                  outLoc[0] += outResolution[0];
-
                 }
-              outLoc[1] += outResolution[1];
-              outLoc[0] = 0.0;
 
               if(verbose) {
                 progress.print();
               }
             }
-          outLoc[2] += outResolution[2];
-          outLoc[1] = 0.0;
-
         }
-
     }
-
 }
 
 
