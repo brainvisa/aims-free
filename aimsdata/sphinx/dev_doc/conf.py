@@ -209,7 +209,7 @@ extlinks = {
   'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
     'aimsdox '),
   'aimsdata' : ('../../aimsdata-' + version + '/%s', 'aimsdata '),
-  'aimsex' : ('../../aimsdata-' + version + '/code_examples/%s', 'aimsdata '),
+  'aimsex' : ('../../aimsdata-' + version + '/doc/code_examples/%s', 'aimsdata '),
   'pyaims': ('../../pyaims-' + version + '/sphinx/%s',
     'pyaims '),
   'aimsalgo' : ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo '),
