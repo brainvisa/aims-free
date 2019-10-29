@@ -856,7 +856,7 @@ void AimsData<T>::setHeader( aims::Header* hdr )
       const aims::PythonHeader 
         *ph = dynamic_cast<const aims::PythonHeader *>( hdr );
       if( ph )
-        mh->copy( *ph );
+        mh->copy( *ph, 1 );
       // hdr used to transfor ownership to me
       delete hdr;
     }
