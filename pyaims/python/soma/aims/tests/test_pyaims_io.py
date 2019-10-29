@@ -482,6 +482,189 @@ class TestPyaimsIO(unittest.TestCase):
         #print('- read format')
         #print(aims.carto.IOObjectTypesDictionary.readTypes())
 
+    def test_minf_uuid(self):
+        '''
+            check that uuid in minf is rightly written and conserved 
+            by writters for existing formats.
+            To summarize behaviour:
+            - when output .minf file does not exists, writers must
+              remove uuid property in given meta information, 
+              except when specific option is given. This is because
+              we want to avoid uuid copy when meta informations are 
+              copied.
+            - when output .minf file exists, writers must keep uuid
+              existing uuid of the .minf file except when specific 
+              option is given.
+        '''
+        from soma import aims, uuid
+
+        import six
+        import os
+
+        def write_minf(attributes, filename, options={}):
+            import os
+            
+            if options.get('update_minf', False):
+                if os.path.exists(filename):
+                    # Read minf first if it exists:
+                    read_attributes = aims.read(filename, options=options)
+                    read_attributes.update(attributes)
+                    attributes = read_attributes
+                
+            #print('attributes=', repr(attributes))
+            with open(filename, 'w+') as f:
+                print('attributes=', repr(attributes), file=f)
+
+        def check_meta_write_rewrite(f, format):
+
+            def write_and_read_with_meta(meta, f, format=None, options=dict()):
+                # Write image with uuid stored in .minf
+                
+                if self.verbose:
+                    print('Writing file (%s) with updated meta-informations' %f)
+                
+                vol1 = aims.Volume_S16()
+                h = vol1.header()
+                h.update(meta)
+                aims.write(vol1, f, format=format, options=options)
+                
+                if self.verbose:
+                    print('Written header:', h)
+
+                if self.verbose:
+                    print('Re-reading file (%s)' % f)
+                
+                vol2 = aims.read(f)
+                h = vol2.header()        
+                #h = aims.read(f + '.minf')
+                if self.verbose:
+                    print('Re-read header:', h)
+                    
+                for k, v in six.iteritems(meta):
+                    if self.verbose:
+                        print('Re-read', k, '(%s)' % str(h.get(k)), 
+                            '==', 'written', k, '(%s)' % str(v), ':', 
+                            (str(v) == str(h.get(k))))
+                
+                return dict(h)
+
+            #def remove_file(filename):
+                ##print('checking file:', filename)
+                #if os.path.exists(filename):
+                    #dsil = aims.soma.DataSourceInfoLoader()
+                    ##print('check file name:', filename)
+                    ##sys.stdout.flush()
+                    #try:
+                        #dsi = dsil.check(filename)
+                        
+                        #print(dsi)
+                        #sys.stdout.flush()
+                        #return
+                        #dsl = dsi.list()
+                        
+                        #for t in dsl.types():
+                            #dsts = dsl.size(t)
+                            ##print('type:', t, 'size:', dsts)
+                            
+                            #if t != 'default':
+                                #for i in xrange(dsts):
+                                    #ds = dsl.dataSource(t, i)
+                                    
+                                    ##print('url:', ds.url())
+                                    #if os.path.exists(ds.url()):
+                                        #os.unlink(ds.url())
+                    #except:
+                        #print('Unable to delete file', filename)
+                        
+            def remove_file(filename):
+                if os.path.exists(filename):
+                    os.unlink(filename)
+                    
+                if os.path.exists(filename + '.minf'):
+                    os.unlink(filename + '.minf')
+                
+            # Check uuid write / rewrite
+            if self.verbose:
+                print('Check written uuid for a new file:', f)
+            
+            remove_file(f)
+            
+            # Output .minf file does not exists so re-read meta
+            # must not contain uuid, even though it was given
+            # in meta
+            meta = {'uuid': str(uuid.Uuid())}
+            written_meta = write_and_read_with_meta(meta, f, format)
+            self.assertEqual(written_meta.get('uuid'), None)
+            
+            if self.verbose:
+                print()
+
+            # Force minf file update with uuid
+            if self.verbose:
+                print('Force minf file', f + '.minf', 'update with uuid:', meta['uuid'])
+            write_minf(meta, f + '.minf', options={'update_minf': True})
+                
+            if self.verbose:
+                print('Check rewritten uuid for an existing file:', f)
+
+            # Once .minf file have uuid, it must be preserved by 
+            # writters during rewriting
+            new_meta = {'uuid': str(uuid.Uuid())}            
+            rewritten_meta = write_and_read_with_meta(new_meta, f, format)
+            self.assertEqual(rewritten_meta.get('uuid'), meta.get('uuid'))
+            
+            if self.verbose:
+                print()
+                
+            if not self.debug:
+                remove_file(f)
+
+
+        #aims.carto.setVerbose(1)
+        #aims.carto.setDebugMessageLevel(4)
+
+        
+        #read_only_formats = (('FDF', '.fdf'), 
+                             #('GENESIS', '.hdr'),
+                             #('GIF', '.gif'),
+                             #('MNG', '.mng'),
+                             #('OPENSLIDE', '.czi'),
+                             #('OPENSLIDE', '.svs'),
+                             #('SPM', '.spm'),
+                             #('SVG', '.svg'),
+                             #('SVGZ', '.svgz'),
+                             #('TGA', '.tga'),
+                             #('VIDA', '.vida'))
+
+        read_write_formats = (('BMP', '.bmp'), 
+                              ('ECAT', '.v'),  
+                              ('GIS', '.ima'),
+                              ('ICO', '.ico'), 
+                              ('JPEG(Qt)', '.jpeg'),
+                              ('JPG', '.jpg'), 
+                              ('NIFTI-1', '.nii'),
+                              ('NIFTI-2', '.nii'),
+                              ('PBM', '.pbm'),
+                              ('PGM', '.pgm'),
+                              ('PNG', '.png'),
+                              ('PPM', '.ppm'),
+                              ('TIFF', '.tiff'),
+                              ('TIFF(Qt)', '.tiff'),
+                              ('XBM', '.xbm'),
+                              ('XPM', '.xpm'))
+                
+        for s, e in read_write_formats:
+            
+            if self.verbose:
+                print('== Check meta informations for format', s)
+                
+            # Check write/rewrite meta informations for a format
+            f = os.path.join(self.work_dir, 'test_uuid_%s%s' % (s, e))
+            check_meta_write_rewrite(f, s)
+                
+            if self.verbose:
+                print()
+        
     def tearDown(self):
         if self.debug:
             print('leaving files in', self.work_dir)

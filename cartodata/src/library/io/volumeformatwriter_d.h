@@ -40,6 +40,7 @@
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasourceinfo/datasourceinfo.h>      // function's argument
 #include <soma-io/image/imagewriter.h>              // use of member functions
+#include <soma-io/utilities/minfutil.h>          // used by filterProperties()
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/object/object.h>                       // header & options
@@ -73,9 +74,11 @@ namespace soma
   //   F I L T E R   M E T H O D S
   //==========================================================================
   template <typename T>
-  bool VolumeFormatWriter<T>::filterProperties(carto::Object header)
+  bool VolumeFormatWriter<T>::filterProperties(carto::Object header, 
+                                               carto::Object options)
   {
-      header->removeProperty("resolutions_dimension");
+      // Filter minf to remove irrelevant properties
+      soma::MinfUtil::filter(header, options);
       
       return true;
   }
@@ -267,7 +270,8 @@ namespace soma
       strides[dim] = &obj( pos ) - &obj(0,0,0,0);
     }
     
-    this->filterProperties(dsi->header());
+    this->filterProperties(dsi->header(), options);
+    
     
     *dsi = _imw->writeHeader( *dsi, (T*) &obj(0,0,0,0), position, view,
                               strides, options );
@@ -349,9 +353,11 @@ namespace soma
   }
   
   template <typename T>
-  bool VolumeRefFormatWriter<T>::filterProperties(carto::Object header)
+  bool VolumeRefFormatWriter<T>::filterProperties(carto::Object header,
+                                                  carto::Object options)
   {
-      header->removeProperty("resolutions_dimension");
+      // Filter minf to remove irrelevant properties
+      soma::MinfUtil::filter(header, options);
       
       return true;
   }
