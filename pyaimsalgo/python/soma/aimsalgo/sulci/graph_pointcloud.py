@@ -103,6 +103,7 @@ def build_split_graph(graph, data, roots, skel=None):
     labels = np.unique(data.after_cutting)
     labels_map = dict([(l, i + 1) for i, l in enumerate(sorted(labels))])
     labels_rmap = dict([(i + 1, l) for i, l in enumerate(sorted(labels))])
+    labels_rmap[0] = 'unknown'  # in case it is not already here
     labels_int = np.array([labels_map[l] for l in data.after_cutting])
     avol = np.asarray(lvol)
     avol[tuple(int_coords)] = labels_int
@@ -117,7 +118,7 @@ def build_split_graph(graph, data, roots, skel=None):
             # unique label in vertex
             if len(labels) == 1:
                 label = labels[0]
-                v['label'] = labels_rmap[label]
+                v['label'] = labels_rmap.get(label, 'unknown')
             continue
 
         todo.append(v)
@@ -138,7 +139,7 @@ def build_split_graph(graph, data, roots, skel=None):
         labels = np.unique(avol[pts])
         winner, sizes = maj_label(labels, pts, avol, True)
         print('split vertex', v.get('index'), 'in:', labels,
-              [labels_rmap[l] for l in labels],
+              [labels_rmap.get(l, 'unknown') for l in labels],
               ', size:', apts.shape[1], tuple(sizes))
 
         # grow a voronoi inside the roots region
