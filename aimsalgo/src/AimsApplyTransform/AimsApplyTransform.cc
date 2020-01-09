@@ -63,6 +63,7 @@ public:
   string  interp_type;
   string  background_value;
   bool    keep_transforms;
+  bool    ignore_reference_transforms;
   string  reference;
   int32_t dx;
   int32_t dy;
@@ -81,6 +82,7 @@ ApplyTransformProc::ApplyTransformProc()
     interp_type("linear"),
     background_value("0"),
     keep_transforms(false),
+    ignore_reference_transforms(false),
     dx(0), dy(0), dz(0),
     sx(0.), sy(0.), sz(0.),
     vfinterp("linear"),
@@ -170,10 +172,28 @@ void set_geometry_from_header(ApplyTransformProc& proc,
 }
 
 
+// Return the header of the reference object, or a null reference if there is
+// no reference object.
+carto::Object read_reference_header(const std::string reference_filename)
+{
+  carto::Object reference_header;
+  if(!reference_filename.empty()) {
+    Finder finder;
+    if(!finder.check(reference_filename)) {
+      throw FatalError("failed to read the header of the reference object "
+                       + reference_filename);
+    }
+    reference_header = finder.headerObject();
+  }
+  return reference_header;
+}
+
+
 // Set dimensions and voxel size of the resampled object: in decreasing order
 // of priority, use commandline flags, else the reference object, else the
 // input object passed as fallback_header.
 void set_geometry(ApplyTransformProc& proc,
+                  const carto::Object& reference_header,
                   const DictionaryInterface& fallback_header,
                   bool set_dimensions)
 {
@@ -183,15 +203,9 @@ void set_geometry(ApplyTransformProc& proc,
     return;
 
   // Reference volume
-  if(!proc.reference.empty()) {
-    Finder reffinder;
-    if(!reffinder.check(proc.reference)) {
-      throw FatalError("failed to read the header of the reference object "
-                       + proc.reference);
-    }
-    Object refheader = reffinder.headerObject();
+  if(!reference_header.isNull()) {
     try {
-      set_geometry_from_header(proc, *refheader, dimension_ok,
+      set_geometry_from_header(proc, *reference_header, dimension_ok,
                                voxel_size_ok);
     } catch(...) {
       throw FatalError("Failed to retrieve volume_dimension and voxel_size "
@@ -210,6 +224,32 @@ void set_geometry(ApplyTransformProc& proc,
   } catch(...) {
     throw FatalError("Failed to retrieve volume_dimension and voxel_size "
                      "from the fallback object");
+  }
+}
+
+void copy_referentials_and_transformations(const carto::Object& referentials,
+                                           const carto::Object& transformations,
+                                           carto::Object& referentials2,
+                                           carto::Object& transformations2)
+{
+  // Initialize new objects with empty vectors that they own
+  transformations2 = carto::Object::value<std::vector<std::vector<float> > >();
+  referentials2 = carto::Object::value<std::vector<std::string> >();
+
+  // Obtain a reference to the new vectors owned by the objects
+  std::vector<std::vector<float> > & t2
+    = transformations2->value<std::vector<std::vector<float> > >();
+  std::vector<std::string> & r2
+    = referentials2->value<std::vector<std::string> >();
+
+  // Copy the elements one by one
+  size_t nt = std::min(referentials->size(), transformations->size());
+  r2.reserve(nt);
+  t2.reserve(nt);
+  for( size_t i=0; i<nt; ++i ) {
+    AffineTransformation3d mat(transformations->getArrayItem(i));
+    t2.push_back(mat.toVector());
+    r2.push_back(referentials->getArrayItem(i)->getString());
   }
 }
 
@@ -264,12 +304,16 @@ insert_transformation_to_old_referential(DictionaryInterface& header,
   header.setProperty("transformations", new_transforms_obj);
 }
 
+
 void adjust_header_transforms(const ApplyTransformProc& proc,
                               DictionaryInterface& header,
-                              const Transformation3d * inverse_transform)
+                              const Transformation3d * inverse_transform,
+                              const carto::Object reference_header)
 {
-  if(proc.keep_transforms)
-    return;  // the user explicitly requested to do nothing
+  if(proc.keep_transforms) {
+    // Case 1: the user explicitly requests to keep the input header transforms
+    return;
+  }
   if(inverse_transform && inverse_transform->isIdentity())
     return;  // the transformations remain valid
 
@@ -284,7 +328,60 @@ void adjust_header_transforms(const ApplyTransformProc& proc,
 
   const AffineTransformation3d * affine_inverse_transform
     = dynamic_cast<const AffineTransformation3d*>(inverse_transform);
+
+  if(!proc.ignore_reference_transforms && !reference_header.isNull()) {
+    // Case 2: copy the referential and transformations from the reference
+    // object if enabled and available.
+
+    // TODO: specify the behaviour w.r.t. on-disk data orientation (i.e.
+    // storage_to_memory header field). We should probably copy it from the
+    // reference header, but only for Volumes (it is not used for other data
+    // types). Also, we should specify the behaviour w.r.t. preservation of the
+    // anatomical orientation (i.e. the allow_orientation_change flag of the
+    // somanifti writer).
+
+    // Copy the referential uuid from the reference header if present
+    std::string reference_referential;
+    try {
+      reference_referential =
+        reference_header->getProperty("referential")->getString();
+    } catch(...) {
+    }
+    if(!reference_referential.empty()) {
+      header.setProperty("referential",
+                         carto::Object::value(reference_referential));
+    }
+
+    // Copy the list of referentials and transformations from the reference
+    carto::Object new_referentials_obj, new_transforms_obj;
+    try {
+      copy_referentials_and_transformations(
+        reference_header->getProperty("referentials"),
+        reference_header->getProperty("transformations"),
+        new_referentials_obj,
+        new_transforms_obj
+      );
+    } catch(...) {
+      new_referentials_obj.reset();
+      new_transforms_obj.reset();
+    }
+    if(!new_referentials_obj.isNull()) {
+      header.setProperty("referentials", new_referentials_obj);
+      header.setProperty("transformations", new_transforms_obj);
+
+      if(affine_inverse_transform) {
+        insert_transformation_to_old_referential(header,
+                                                 *affine_inverse_transform,
+                                                 old_referential);
+      }
+      return; // success
+    }
+    // in case of failure, fall through to reach case 4
+  }
+
   if(affine_inverse_transform) {
+    // Case 3: reuse the  referential and transformations from the input object
+    // and compose them with the inverse affine transformation
     try {
       carto::Object old_transforms = header.getProperty("transformations");
 
@@ -311,13 +408,13 @@ void adjust_header_transforms(const ApplyTransformProc& proc,
                                                old_referential);
       return; // success
     } catch( ... ) {
-      // remove all transformations by falling through to reach the code below
+      // remove all transformations by falling through to reach case 4
     }
   }
 
-  // If we cannot reduce the transformation to an affine transformation, or if
-  // an error occurs while updating the transformations, the best we can do is
-  // to remove all pre-existing transformations.
+  // Case 4: if neither case 1 nor case 2 applies, or if an error occurs while
+  // updating the transformations, we fail gracefully by removing all
+  // pre-existing transformations from the input object.
   try {
     header.removeProperty("transformations");
   } catch(...) {}
@@ -518,7 +615,8 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   }
 
   // Compute dimensions of the output volume
-  set_geometry(proc, input_image.header(), true);
+  const carto::Object reference_header = read_reference_header(proc.reference);
+  set_geometry(proc, reference_header, input_image.header(), true);
 
   cout << "Output dimensions: "
        << proc.dx << ", " << proc.dy << ", " << proc.dz << endl;
@@ -539,7 +637,8 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   unique_ptr<aims::Resampler<T> > resampler
     = get_resampler<T>(proc.interp_type);
 
-  adjust_header_transforms(proc, out.header(), inverse_transform.pointer());
+  adjust_header_transforms(proc, out.header(), inverse_transform.pointer(),
+                           reference_header);
   // The UUID should NOT be preserved, because the output is a different file
   // from the input. Keeping it triggers the infamous "duplicate UUID" problem
   // in BrainVISA/Axon...
@@ -586,7 +685,9 @@ bool doMesh(Process & process, const string & fileref, Finder &)
     }
   }
 
-  adjust_header_transforms(proc, mesh.header(), inverse_transform.pointer());
+  const carto::Object reference_header = read_reference_header(proc.reference);
+  adjust_header_transforms(proc, mesh.header(), inverse_transform.pointer(),
+                           reference_header);
   // The UUID should NOT be preserved, because the output is a different file
   // from the input. Keeping it triggers the infamous "duplicate UUID" problem
   // in BrainVISA/Axon...
@@ -620,7 +721,8 @@ bool doBucket(Process & process, const string & fileref, Finder &)
   input_reader.read(input_bucket);
 
   // Prepare the output dimensions
-  set_geometry(proc, input_bucket.header(), false);
+  const carto::Object reference_header = read_reference_header(proc.reference);
+  set_geometry(proc, reference_header, input_bucket.header(), false);
   cout << "Output voxel size: "
        << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
 
@@ -662,7 +764,8 @@ bool doBucket(Process & process, const string & fileref, Finder &)
     out->header().removeProperty("uuid");
   } catch(...) {}
 
-  adjust_header_transforms(proc, out->header(), inverse_transform.pointer());
+  adjust_header_transforms(proc, out->header(), inverse_transform.pointer(),
+                           reference_header);
 
   // Write the resampled volume
   Writer<BucketMap<Void> > w3(proc.output);
@@ -696,7 +799,10 @@ bool doBundles(Process & process, const string & fileref, Finder &)
   // will just be ignored for Bundles.
   //
   // carto::Object header = bundle_reader.readHeader();
-  // adjust_header_transforms(proc, header, inverse_transform.pointer());
+  // const carto::Object reference_header
+  //   = read_reference_header(proc.reference);
+  // adjust_header_transforms(proc, header, inverse_transform.pointer(),
+  //                          reference_header);
 
   // Prepare the Bundles processing chain
   BundleTransformer transformer(direct_transform);
@@ -732,7 +838,8 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   unique_ptr<Graph> graph(input_reader.read());
 
   // Deduce the voxel size of the output Graph
-  set_geometry(proc, *graph, false);
+  const carto::Object reference_header = read_reference_header(proc.reference);
+  set_geometry(proc, reference_header, *graph, false);
   cout << "Output voxel size: "
        << proc.sx << ", " << proc.sy << ", " << proc.sz << " mm" << endl;
 
@@ -751,7 +858,8 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   }
 
   adjust_header_transforms(proc, *graph,
-                           inverse_transform.pointer());
+                           inverse_transform.pointer(),
+                           reference_header);
   // Update the transformation to Talairach stored in the old attributes
   // (Talairach_rotation, Talairach_translation, and Talairach_scale) to
   // reflect the updated transformations.
@@ -905,6 +1013,21 @@ int main(int argc, const char **argv)
       "  chain can be inverted. Otherwise, both transformation chains must\n"
       "  be specified completely.\n"
       "\n"
+      "The header transformations of the output are set according to the\n"
+      "first rule that applies:\n"
+      "1. If --keep-transforms is passed, or if the applied transformation\n"
+      "   is identity, the header transformations of the input object are\n"
+      "   copied verbatim to the output. This mode should be used when\n"
+      "   applying a corrective transformation.\n"
+      "2. If --reference is given and unless --ignore-reference-transform is\n"
+      "   passed, the transformations of the reference object are copied to\n"
+      "   the output.\n"
+      "3. If the applied transformation is affine, the output transformations\n"
+      "   are set to the header transforms of the input, composed with the\n"
+      "   applied transformation.\n"
+      "4. If none of the rules above apply, no transformations are set in\n"
+      "   the output header.\n"
+      "\n"
       "Points mode is activated by passing the --points option.\n"
       "In this mode, the --input option either specifies an ASCII file\n"
       "containing point coordinates, or is directly one or several points\n"
@@ -964,6 +1087,10 @@ int main(int argc, const char **argv)
                   "--dz, --sx, --sy and --sz)", true);
     app.addOption(proc.keep_transforms, "--keep-transforms",
                   "Preserve the transformations of the input image", true);
+    app.addOption(proc.ignore_reference_transforms,
+                  "--ignore-reference-transforms",
+                  "Do not try to copy the transformations from the reference "
+                  "image", true);
     app.addOption(proc.vfinterp, "--vectorinterpolation",
                   "Interpolation used for vector field transformations "
                   "(a.k.a. FFD): l[inear], c[ubic] [default = linear]", true);
