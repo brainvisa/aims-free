@@ -168,7 +168,7 @@ def build_split_graph(graph, data, roots, skel=None):
             vals = np.unique(avor[tuple(p2)])
             if -1 in vals:
                 # remove background value
-                vals = [val for val in vals if v >= 0]
+                vals = [val for val in vals if val >= 0]
             if len(vals) > 1:
                 if skel is not None:
                     askel[tuple(p)] = JUNCTION
