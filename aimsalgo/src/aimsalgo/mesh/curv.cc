@@ -1064,7 +1064,7 @@ namespace aims
     cout << "makeLaplacianMatrix... " << weights.size() << endl;
     float w = 0;
     unsigned i, j;
-    lmat.resize( weights.size(), weights.size() );
+    lmat.resize( weights.size(), weights.size(), false );
     LaplacianWeights::const_iterator iw, ew = weights.end();
 
     for( iw=weights.begin(); iw!=ew; ++iw )
