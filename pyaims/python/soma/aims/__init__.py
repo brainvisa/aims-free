@@ -117,7 +117,26 @@ if 'BRAINVISA_SHARE' not in os.environ:
     # have slightly different scopes...
 del os
 
-from soma.aims import aimssip
+try:
+    from soma.aims import aimssip
+except ImportError as exc:
+    if exc.args[0] == ('dynamic module does not define init function '
+                       '(initaimssip)'):
+        raise ImportError('version mismatch: you are running Python {0} '
+                          'but the soma.aims module was likely compiled for '
+                          'Python 3.'
+                          .format(sys.version.split()[0], sys.api_version))
+    elif exc.args[0] == ('dynamic module does not define module export '
+                         'function (PyInit_aimssip)'):
+        six.raise_from(
+            ImportError('version mismatch: you are running Python {0} '
+                        'but the soma.aims module was likely compiled for '
+                        'Python 2.'
+                        .format(sys.version.split()[0], sys.api_version)),
+            exc
+        )
+    raise  # other import errors are re-raised
+
 from soma.functiontools import partial
 from soma.importer import ExtendedImporter, GenericHandlers
 
