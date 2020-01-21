@@ -17,6 +17,18 @@
 
 %PostInitialisationCode
 carto::pyaims_init();
+// If an exception occurs while running pyaims_init, it must be propagated by
+// returning NULL from the module initialization function. Otherwise, the
+// original exception is discarded and Python shows a cryptic error:
+// "SystemError: initialization of aimssip raised unreported exception".
+if(PyErr_Occurred()) {
+#if PY_MAJOR_VERSION >= 3
+  Py_DECREF(sipModule);
+  return NULL;
+#else
+  return;
+#endif
+}
 %End
 
 typedef unsigned short uint16_t;
