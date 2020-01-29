@@ -86,6 +86,7 @@ typedef int int32_t;
 %Include vector_set_U32.sip
 %Include vector_VOID.sip
 %Include vector_vector_S32.sip
+%Include vector_vector_FLOAT.sip
 %Include vector_vector_STRING.sip
 %Include vector_vector_POINT3DF.sip
 %Include vector_rc_ptr_AimsTimeSurface_3_VOID.sip
