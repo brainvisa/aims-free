@@ -1246,15 +1246,26 @@ def getPython(self):
             return res
         except:
             pass
-    if t.startswith('vector of'):
-        dt = t.split()[-1]
+    t2 = str(t)
+    dtv = ''
+    while t2.startswith('vector of '):
+        dtv = dtv + 'vector_'
+        t2 = t2[10:]
+    if dtv != '':
         try:
-            vectype = eval('vector_' + dt)
+            vectype = eval(dtv + t2)
             res = vectype.fromObject(gen)
             res.__genericobject__ = gen
             return res
         except:
-            pass
+            try:
+                vectype = eval(dtv + t2.upper())
+                res = vectype.fromObject(gen)
+                res.__genericobject__ = gen
+                return res
+            except:
+                pass
+
     if t.startswith('VECTOR_OF_'):
         try:
             dt = t[10:]
