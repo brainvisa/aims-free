@@ -117,7 +117,26 @@ if 'BRAINVISA_SHARE' not in os.environ:
     # have slightly different scopes...
 del os
 
-from soma.aims import aimssip
+try:
+    from soma.aims import aimssip
+except ImportError as exc:
+    if exc.args[0] == ('dynamic module does not define init function '
+                       '(initaimssip)'):
+        raise ImportError('version mismatch: you are running Python {0} '
+                          'but the soma.aims module was likely compiled for '
+                          'Python 3.'
+                          .format(sys.version.split()[0], sys.api_version))
+    elif exc.args[0] == ('dynamic module does not define module export '
+                         'function (PyInit_aimssip)'):
+        six.raise_from(
+            ImportError('version mismatch: you are running Python {0} '
+                        'but the soma.aims module was likely compiled for '
+                        'Python 2.'
+                        .format(sys.version.split()[0], sys.api_version)),
+            exc
+        )
+    raise  # other import errors are re-raised
+
 from soma.functiontools import partial
 from soma.importer import ExtendedImporter, GenericHandlers
 
@@ -1242,15 +1261,26 @@ def getPython(self):
             return res
         except:
             pass
-    if t.startswith('vector of'):
-        dt = t.split()[-1]
+    t2 = str(t)
+    dtv = ''
+    while t2.startswith('vector of '):
+        dtv = dtv + 'vector_'
+        t2 = t2[10:]
+    if dtv != '':
         try:
-            vectype = eval('vector_' + dt)
+            vectype = eval(dtv + t2)
             res = vectype.fromObject(gen)
             res.__genericobject__ = gen
             return res
         except:
-            pass
+            try:
+                vectype = eval(dtv + t2.upper())
+                res = vectype.fromObject(gen)
+                res.__genericobject__ = gen
+                return res
+            except:
+                pass
+
     if t.startswith('VECTOR_OF_'):
         try:
             dt = t[10:]

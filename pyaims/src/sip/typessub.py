@@ -2860,6 +2860,35 @@ typessub = {'bool':
                 'compareElement': '',
               },
 
+            'std::vector<float>':
+            {
+                'typecode': 'vector_FLOAT',
+                'pyFromC': 'pyaimsConvertFrom_vector',
+                'CFromPy': 'pyaimsConvertTo_vector<float>',
+                'castFromSip': '',
+                'deref': '*',
+                'pyderef': '*',
+                'address': '&',
+                'pyaddress': '&',
+                'defScalar': '',
+                'defNumpyBindings': '',
+                'new': 'new vector_FLOAT',
+                'NumType': 'PyArray_OBJECT',
+                'PyType': 'vector_FLOAT',
+                'sipClass': 'vector_FLOAT',
+                'typeinclude': '#include <vector>',
+                'sipinclude': '#include <pyaims/vector/sipstdvector.h>\n'
+                '#ifndef PYAIMS_WRAPPER_VECTOR_FLOAT\n'
+                '#define PYAIMS_WRAPPER_VECTOR_FLOAT\n'
+                'template <> inline const sipTypeDef*\n'
+                'sipType_vector<float>()\n'
+                '{ return sipFindType( "vector_FLOAT" ); }\n'
+                '#endif',
+                'module': 'aims',
+                'testPyType': 'pyaimsCheck_vector<float>',
+                'compareElement': '',
+              },
+
             'std::vector<std::string>':
             {'typecode': 'vector_STRING',
                'pyFromC': 'pyaimsConvertFrom_vector',

@@ -469,9 +469,21 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
           {
             PyTuple_SetItem( pi, 0, PyLong_FromLong( i->intKey() ) );
           }
-          PyTuple_SetItem( pi, 1,
-            sipConvertFromInstance( new carto::Object( i->currentValue() ),
-              sipClass_carto_Object, Py_None ) );
+          PyObject* pitem = sipConvertFromInstance(
+            new carto::Object( i->currentValue() ),
+            sipClass_carto_Object, Py_None );
+          if( PyObject_HasAttrString( pitem, "getPython" ) )
+          {
+            // pitem is a wrapper to Object, but may be able to be converted
+            // into a lower-lever python type
+            PyObject *pitem2 = PyObject_CallMethod( pitem, "getPython", NULL );
+            if( pitem2 )
+            {
+              Py_DECREF( pitem );
+              pitem = pitem2;
+            }
+          }
+          PyTuple_SetItem( pi, 1, pitem );
           PyTuple_SetItem( po, c, pi );
         }
         sipRes = po;
@@ -500,9 +512,23 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         PyObject	*po = PyTuple_New( c );
         c = 0;
         for( i=sipCpp->objectIterator(); i->isValid(); i->next(), ++c )
-          PyTuple_SetItem( po, c,
-            sipConvertFromInstance( new carto::Object( i->currentValue() ),
-              sipClass_carto_Object, Py_None ) );
+        {
+          PyObject* pitem = sipConvertFromInstance(
+            new carto::Object( i->currentValue() ),
+            sipClass_carto_Object, Py_None );
+          if( PyObject_HasAttrString( pitem, "getPython" ) )
+          {
+            // pitem is a wrapper to Object, but may be able to be converted
+            // into a lower-lever python type
+            PyObject *pitem2 = PyObject_CallMethod( pitem, "getPython", NULL );
+            if( pitem2 )
+            {
+              Py_DECREF( pitem );
+              pitem = pitem2;
+            }
+          }
+          PyTuple_SetItem( po, c, pitem );
+        }
         sipRes = po;
     }
     catch( std::exception & e )
