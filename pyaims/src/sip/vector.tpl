@@ -313,6 +313,11 @@ public:
   sipRes = ( (*sipCpp) == *a0 );
 %End
 
+  bool operator != ( const vector_%Template1typecode% & ) const;
+%MethodCode
+  sipRes = ( (*sipCpp) != *a0 );
+%End
+
 
   vector_%Template1typecode% * operator + 
     ( const vector_%Template1typecode% & ) 
