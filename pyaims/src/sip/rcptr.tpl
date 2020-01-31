@@ -157,6 +157,7 @@ public:
 %End
 
   bool operator == ( const rc_ptr_%Template1typecode% & x ) const;
+  bool operator != ( const rc_ptr_%Template1typecode% & x ) const;
   bool operator < ( const rc_ptr_%Template1typecode% & x ) const;
   long __hash__() const;
 %MethodCode

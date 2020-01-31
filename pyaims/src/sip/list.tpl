@@ -299,6 +299,11 @@ public:
   sipRes = ( (*sipCpp) == *a0 );
 %End
 
+  bool operator != ( const list_%Template1typecode% & ) const;
+%MethodCode
+  sipRes = ( (*sipCpp) != *a0 );
+%End
+
 
   list_%Template1typecode% * operator +
     ( const list_%Template1typecode% & ) /Factory/;

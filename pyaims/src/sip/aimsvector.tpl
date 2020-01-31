@@ -246,6 +246,12 @@ public:
   sipRes = ( (*sipCpp) == *a0 );
 %End
 
+ bool operator !=
+   ( const AimsVector_%Template1typecode%_%Template2typecode% & ) const;
+%MethodCode
+  sipRes = ( (*sipCpp) != *a0 );
+%End
+
  AimsVector_%Template1typecode%_%Template2typecode%
    operator+ ( AimsVector_%Template1typecode%_%Template2typecode% & );
  AimsVector_%Template1typecode%_%Template2typecode% 
