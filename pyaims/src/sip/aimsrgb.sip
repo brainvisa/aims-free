@@ -33,6 +33,10 @@ public:
 %MethodCode
   sipRes = ( (*sipCpp) == a0 );
 %End
+  bool  operator != ( const unsigned char & ) const;
+%MethodCode
+  sipRes = ( (*sipCpp) != a0 );
+%End
 
   int __len__() const;
 %MethodCode
@@ -91,6 +95,10 @@ public:
   bool  operator == ( const unsigned char & );
 %MethodCode
   sipRes = ( (*sipCpp) == a0 );
+%End
+  bool  operator != ( const unsigned char & );
+%MethodCode
+  sipRes = ( (*sipCpp) != a0 );
 %End
 
   int __len__() const;
@@ -157,6 +165,10 @@ public:
   bool  operator == ( const unsigned char & );
 %MethodCode
   sipRes = ( (*sipCpp) == a0 );
+%End
+  bool  operator != ( const unsigned char & );
+%MethodCode
+  sipRes = ( (*sipCpp) != a0 );
 %End
 
   int __len__() const;
