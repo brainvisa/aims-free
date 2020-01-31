@@ -492,6 +492,23 @@ The header contains all meta-data.
   r2.release();
 %End
 
+  Volume_BOOL * operator != ( Volume_%Template1typecode% & )
+  /Factory, ReleaseGIL/;
+%MethodCode
+  carto::VolumeRef<%Template1% > r1( sipCpp );
+  carto::VolumeRef<%Template1% > r2( a0 );
+  
+  carto::VolumeRef<bool> r = 
+        carto::copyStructure<bool, %Template1% >( r1 );
+  carto::volumeutil::applyTowards( *r1, *r2, *r, 
+        carto::volumeutil::not_equal_to<%Template1%, %Template1% >() );
+  
+  sipRes = r.get();
+  r.release();
+  r1.release();
+  r2.release();
+%End
+
 %%Template1defScalar%%
 %#ifdef PYAIMS_SCALAR%
 

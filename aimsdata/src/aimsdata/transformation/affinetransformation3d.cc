@@ -264,6 +264,12 @@ bool AffineTransformation3d::operator == (
 }
 
 
+bool AffineTransformation3d::operator != ( const AffineTransformation3d & other ) const
+{
+  return !this->operator==(other);
+}
+
+
 //-----------------------------------------------------------------------------
 void AffineTransformation3d::setHeader( PythonHeader* ph )
 {

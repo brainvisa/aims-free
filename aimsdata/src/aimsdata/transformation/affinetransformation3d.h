@@ -168,6 +168,7 @@ namespace aims
     operator = ( const aims::Quaternion & quat );
 
     virtual bool operator == ( const AffineTransformation3d & ) const;
+  virtual bool operator != ( const AffineTransformation3d & ) const;
 
     AffineTransformation3d &
     operator *= ( const AffineTransformation3dBase & trans );

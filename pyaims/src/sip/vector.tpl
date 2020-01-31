@@ -464,16 +464,10 @@ public:
     str = PyObject_Str( po );
     if( str )
     {
-#if PY_VERSION_HEX >= 0x03000000
-      PyObject *enc = PyUnicode_EncodeLocale( str, 0 );
-      ss << PyBytes_AsString( enc );
-      Py_DECREF( enc );
-#else
       if( !strcmp( "%Template1typecode%", "STRING" ) )
         ss << carto::quotedString( carto::PyString_AsStdString( str ) );
       else
-        ss << PyString_AsString( str );
-#endif
+        ss << carto::PyString_AsStdString( str );
     }
     else
       ss << "<object not printable>";
