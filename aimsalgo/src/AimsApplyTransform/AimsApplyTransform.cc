@@ -828,7 +828,7 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   if(ph
      && ph->hasProperty("format")
      && ph->getProperty("format")->isString()
-     && ph->getProperty("format")->getString().compare("bundles_"))
+     && ph->getProperty("format")->getString().substr(0, 8) == "bundles_")
     return doBundles(process, fileref, f);
 
   // other cases are "real" graphs
