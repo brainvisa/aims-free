@@ -4,6 +4,8 @@ class vector_%Template1typecode%
 %TypeHeaderCode
 #include <vector>
 #include <cartobase/object/object.h>
+#include <pyaims/object/numconv.h>
+#include <cartobase/type/string_conversion.h>
 %Template1typeinclude%
 %Template1sipinclude%
 #ifndef PYAIMSSIP_VECTOR_%Template1typecode%_DEFINED
@@ -402,7 +404,7 @@ public:
 %%Template1defScalar%%
 %#ifdef PYAIMS_SCALAR%
   std::ostringstream  ss;
-  ss << "[ ";
+  ss << "[";
   unsigned i, n = sipCpp->size();
   if( n > 200 )
     n = 200;
@@ -414,7 +416,7 @@ public:
   }
   if( n < sipCpp->size() )
     ss << ", ...";
-  ss << " ]";
+  ss << "]";
   std::string	s = ss.str();
   const char	*s2 = s.c_str();
   if( s2 == 0 )
@@ -426,7 +428,7 @@ public:
 #endif
 %#else%
   std::ostringstream  ss;
-  ss << "[ ";
+  ss << "[";
   unsigned i, n = sipCpp->size();
   PyObject *po, *str;
   if( n > 200 )
@@ -442,7 +444,10 @@ public:
       ss << PyBytes_AsString( enc );
       Py_DECREF( enc );
 #else
-      ss << PyString_AsString( str );
+      if( !strcmp( "%Template1typecode%", "STRING" ) )
+        ss << carto::quotedString( carto::PyString_AsStdString( str ) );
+      else
+        ss << PyString_AsString( str );
 #endif
     }
     else
@@ -452,7 +457,7 @@ public:
   }
   if( n < sipCpp->size() )
     ss << ", ...";
-  ss << " ]";
+  ss << "]";
   std::string	s = ss.str();
   const char	*s2 = s.c_str();
   if( s2 == 0 )
