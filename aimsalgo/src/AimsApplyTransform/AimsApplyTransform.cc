@@ -825,7 +825,10 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   // (since they can be read as graphs, which is the only data structure to
   // represent them internally)
   const PythonHeader *ph = dynamic_cast<const PythonHeader *>(f.header());
-  if(ph && ph->getProperty("object_type")->getString() == "BundleMap")
+  if(ph
+     && ph->hasProperty("format")
+     && ph->getProperty("format")->isString()
+     && ph->getProperty("format")->getString().compare("bundles_"))
     return doBundles(process, fileref, f);
 
   // other cases are "real" graphs
