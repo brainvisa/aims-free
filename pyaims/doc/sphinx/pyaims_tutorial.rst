@@ -1,11 +1,10 @@
-
-.. _pyaims_tuto_py2:
+.. _pyaims_tuto_py3:
 
 **********************************************************
 PyAims tutorial : programming with AIMS in Python language
 **********************************************************
 
-This is the version of the tutorial for Python 2 (2.6 or higher). The Python3 version can be found :ref:`on this page <pyaims_tuto_py3>`
+This tutorial should work with Python 2 (2.6 or higher), and is also compatible with Python 3 (if pyaims is compiled in python3 mode).
 
 AIMS is a C++ library, but has python language bindings: **PyAIMS**. This means that the C++ classes and functions can be used from python. 
 This has many advantages compared to pure C++:
@@ -32,23 +31,43 @@ A cleaner alternative, especially if no write access is allowed on this data dir
 
 Doing this in python:
 
+To work smoothly with python2 or python3, let's use print():
+
+::
+    from __future__ import print_function
+    import sys
+    print(sys.version_info)
+
 ::
 
-    import urllib2
+    import sys
+    if sys.version_info[0] >= 3:
+        from urllib.request import urlopen
+    else:
+        from urllib2 import urlopen
     import zipfile
     import os
     import os.path
     import tempfile
-    f = urllib2.urlopen('ftp://ftp.cea.fr/pub/dsv/anatomist/data/test_data.zip')
-    test_data = os.path.join(tempfile.gettempdir(), 'test_data.zip')
-    tuto_dir = os.path.expanduser('~/bvcourse')
-    open(test_data, 'w').write(f.read())
-    f.close()
-    os.mkdir(tuto_dir)
+    # let's work in a temporary directory
+    tuto_dir = tempfile.mkdtemp(prefix='pyaims_tutorial_')
+    # either we already have test_data.zip in the current directory
+    # otherwise we fetch it from the server
+    older_cwd = os.getcwd()
+    test_data = os.path.join(older_cwd, 'test_data.zip')
+    print('old cwd:', older_cwd)
+    if not os.path.exists(test_data):
+        print('downloading test_data.zip...')
+        f = urlopen('ftp://ftp.cea.fr/pub/dsv/anatomist/data/test_data.zip')
+        test_data = os.path.join(tuto_dir, 'test_data.zip')
+        open(test_data, 'wb').write(f.read())
+        f.close()
+    print('test_data:', test_data)
     os.chdir(tuto_dir)
     f = zipfile.ZipFile(test_data)
     f.extractall()
     del f
+    print('we are working in:', tuto_dir)
 
 
 Using data structures
@@ -80,13 +99,13 @@ Reading operations are accessed via a single :py:func:`soma.aims.read()` functio
 
 >>> from soma import aims
 >>> obj = aims.read('data_for_anatomist/subject01/subject01.nii')
->>> print obj
+>>> print(obj)
 <soma.aims.Volume_S16 object at ...
 >>> obj2 = aims.read('data_for_anatomist/subject01/Audio-Video_T_map.nii')
->>> print obj2
+>>> print(obj2)
 <soma.aims.Volume_DOUBLE object at ...
 >>> obj3 = aims.read('data_for_anatomist/subject01/subject01_Lhemi.mesh')
->>> print obj3
+>>> print(obj3)
 <soma.aims.AimsTimeSurface_3_VOID object at ...
 
 The returned object can have various types according to what is found in the disk file(s).
@@ -126,12 +145,12 @@ Building a volume
 >>> vol.setValue(12, 100, 100, 60)
 >>> # get value at the same position
 >>> x = vol.value(100, 100, 60)
->>> print x
+>>> print(x)
 12
 
 >>> # set the voxels size
 >>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
->>> print vol.header()
+>>> print(vol.header())
 { 'volume_dimension' : [ 192, 256, 128, 1 ], 'sizeX' : 192, 'sizeY' : 256, 'sizeZ' : 128, 'sizeT' : 1, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 
@@ -156,7 +175,7 @@ Whole volume operations:
 >>> vol3.value(100, 100, 60)
 60
 >>> vol4 = vol2 * vol / 6
->>> print vol4.value(100, 100, 60)
+>>> print(vol4.value(100, 100, 60))
 168
 
 Voxel-wise operations:
@@ -164,9 +183,9 @@ Voxel-wise operations:
 >>> # fill the volume with the distance to voxel (100, 100, 60)
 >>> vs = vol.header()['voxel_size']
 >>> pos0 = (100 * vs[0], 100 * vs[1], 60 * vs[2]) # in millimeters
->>> for z in xrange(vol.getSizeZ()):
-...     for y in xrange(vol.getSizeY()):
-...         for x in xrange(vol.getSizeX()):
+>>> for z in range(vol.getSizeZ()):
+...     for y in range(vol.getSizeY()):
+...         for x in range(vol.getSizeX()):
 ...             # get current position in an aims.Point3df structure, in mm
 ...             p = aims.Point3df(x * vs[0], y * vs[1], z * vs[2])
 ...             # get relative position to pos0, in voxels
@@ -198,9 +217,9 @@ Now look at the *distance.nii* volume in Anatomist.
 >>> vol = aims.read('data_for_anatomist/subject01/Audio-Video_T_map.nii')
 >>> (vol.value(20, 20, 20) < 3.) and (vol.value(20, 20, 20) != 0.)
 True
->>> for z in xrange(vol.getSizeZ()):
-...     for y in xrange(vol.getSizeY()):
-...         for x in xrange(vol.getSizeX()):
+>>> for z in range(vol.getSizeZ()):
+...     for y in range(vol.getSizeY()):
+...         for x in range(vol.getSizeX()):
 ...             if vol.value(x, y, z) < 3.:
 ...                 vol.setValue(0, x, y, z)
 
@@ -229,9 +248,9 @@ True
 >>> vs = vol.header()['voxel_size']
 >>> vs2 = [x * 2 for x in vs]
 >>> vol2.header()['voxel_size'] = vs2
->>> for z in xrange(vol2.getSizeZ()):
-...     for y in xrange(vol2.getSizeY()):
-...         for x in xrange(vol2.getSizeX()):
+>>> for z in range(vol2.getSizeZ()):
+...     for y in range(vol2.getSizeY()):
+...         for x in range(vol2.getSizeX()):
 ...             vol2.setValue(vol.value(x*2, y*2, z*2), x, y, z)
 
 >>> vol.value(100, 100, 40)
@@ -328,9 +347,9 @@ To make a deep-copy of a volume, use the copy constructor:
 >>> vol2 = aims.Volume(vol)
 >>> vol2.setValue(12, 100, 100, 60)
 >>> # now vol and vol2 have different values
->>> print 'vol.value(100, 100, 60):', vol.value(100, 100, 60)
+>>> print('vol.value(100, 100, 60):', vol.value(100, 100, 60))
 vol.value(100, 100, 60): 0
->>> print 'vol2.value(100, 100, 60):', vol2.value(100, 100, 60)
+>>> print('vol2.value(100, 100, 60):', vol2.value(100, 100, 60))
 vol2.value(100, 100, 60): 12
 
 
@@ -346,22 +365,22 @@ so it is really very important to carry this information with duplicated or deri
 
 You can also build a volume from a numpy array:
 
->>> arr = numpy.array(numpy.diag(xrange(40)), dtype=numpy.float32).reshape(40, 40, 1) \
-...     + numpy.array(xrange(20), dtype=numpy.float32).reshape(1, 1, 20)
+>>> arr = numpy.array(numpy.diag(range(40)), dtype=numpy.float32).reshape(40, 40, 1) \
+...     + numpy.array(range(20), dtype=numpy.float32).reshape(1, 1, 20)
 >>> # WARNING: the array must be in Fortran ordering for AIMS, at leat at the moment
 >>> # whereas the numpy addition always returns a C-ordered array
 >>> arr = numpy.array(arr, order='F')
 >>> arr[10, 12, 3] = 25
 >>> vol = aims.Volume(arr)
->>> print 'vol.value(10, 12, 3):', vol.value(10, 12, 3)
+>>> print('vol.value(10, 12, 3):', vol.value(10, 12, 3))
 vol.value(10, 12, 3): 25.0
 
 >>> # data are shared with arr
 >>> vol.setValue(35, 10, 15, 2)
->>> print 'arr[10, 15, 2]:', arr[10, 15, 2]
+>>> print('arr[10, 15, 2]:', arr[10, 15, 2])
 arr[10, 15, 2]: 35.0
 >>> arr[12, 15, 1] = 44
->>> print 'vol.value(12, 15, 1):', vol.value(12, 15, 1)
+>>> print('vol.value(12, 15, 1):', vol.value(12, 15, 1))
 vol.value(12, 15, 1): 44.0
 
 
@@ -381,11 +400,11 @@ others are optional and default to 0, but up to 4 coordinates may be used. In th
 >>> vol.setValue(12, 10, 10, 20, 2)
 >>> # get value at the same position
 >>> x = vol.value(10, 10, 20, 2)
->>> print x
+>>> print(x)
 12
 >>> # set the voxels size
 >>> vol.header()['voxel_size'] = [0.9, 0.9, 1.2, 1.]
->>> print vol.header()
+>>> print(vol.header())
 { 'volume_dimension' : [ 30, 30, 30, 4 ], 'sizeX' : 30, 'sizeY' : 30, 'sizeZ' : 30, 'sizeT' : 4, 'voxel_size' : [ 0.9, 0.9, 1.2, 1 ] }
 
 Similarly, 1D or 2D volumes may be used exactly the same way.
@@ -407,10 +426,10 @@ Converting from and to :py:class:`soma.aims.Volume_FLOAT` classes is rather simp
 >>> advol = aims.AimsData(vol)
 >>> # vol and advol share the same header and voxel data
 >>> vol.setValue(12, 10, 10, 20, 2)
->>> print 'advol.value(10, 10, 20, 2):', advol.value(10, 10, 20, 2)
+>>> print('advol.value(10, 10, 20, 2):', advol.value(10, 10, 20, 2))
 advol.value(10, 10, 20, 2): 12
 >>> advol.setValue(44, 12, 12, 24, 1)
->>> print 'vol.value(12, 12, 24, 1):', vol.value(12, 12, 24, 1)
+>>> print('vol.value(12, 12, 24, 1):', vol.value(12, 12, 24, 1))
 vol.value(12, 12, 24, 1): 44
 
 And, in the other direction:
@@ -421,27 +440,27 @@ And, in the other direction:
 >>> vol = advol.volume()
 >>> # vol and advol share the same header and voxel data
 >>> vol.setValue(12, 10, 10, 20, 2)
->>> print 'advol.value(10, 10, 20, 2):', advol.value(10, 10, 20, 2)
+>>> print('advol.value(10, 10, 20, 2):', advol.value(10, 10, 20, 2))
 advol.value(10, 10, 20, 2): 12
 >>> advol.setValue(44, 12, 12, 24, 1)
->>> print 'vol.value(12, 12, 24, 1):', vol.value(12, 12, 24, 1)
+>>> print('vol.value(12, 12, 24, 1):', vol.value(12, 12, 24, 1))
 vol.value(12, 12, 24, 1): 44
 
 `AimsData` has a bit richer API, since it includes minor processing functions that have been removed from the newer `Volume` for the sake of API simplicity and minimalism.
 
 >>> # minimum / maximum
->>> print 'min:', advol.minimum(), 'at', advol.minIndex()
+>>> print('min:', advol.minimum(), 'at', advol.minIndex())
 min: 0 at ((0, 0, 0, 0), 0)
->>> print 'max:', advol.maximum(), 'at', advol.maxIndex()
+>>> print('max:', advol.maximum(), 'at', advol.maxIndex())
 max: 44 at ((12, 12, 24, 1), 44)
 
 >>> # clone copy
 >>> advol2 = advol.clone()
 >>> advol2.setValue(12, 4, 8, 11, 3)
 >>> # now advol and advol2 have different values
->>> print 'advol.value(4, 8, 11, 3):', advol.value(4, 8, 11, 3)
+>>> print('advol.value(4, 8, 11, 3):', advol.value(4, 8, 11, 3))
 advol.value(4, 8, 11, 3): 0
->>> print 'advol2.value(4, 8, 11, 3):', advol2.value(4, 8, 11, 3)
+>>> print('advol2.value(4, 8, 11, 3):', advol2.value(4, 8, 11, 3))
 advol2.value(4, 8, 11, 3): 12
 
 >>> # Border handling
@@ -453,10 +472,10 @@ advol2.value(4, 8, 11, 3): 12
 >>> vol = advol.volume()
 >>> refvol = vol.refVolume()
 >>> # the underlying refvol is 4 voxels wider in each direction, and shifted:
->>> print 'refvol.value(100, 100, 60):', refvol.value(100, 100, 60)
+>>> print('refvol.value(100, 100, 60):', refvol.value(100, 100, 60))
 refvol.value(100, 100, 60): 0
 >>> # ... it is 0, not 15...
->>> print 'refvol.value(102, 102, 62):', refvol.value(102, 102, 62)
+>>> print('refvol.value(102, 102, 62):', refvol.value(102, 102, 62))
 refvol.value(102, 102, 62): 15
 >>> # here we get 15
 >>> # some algorithms require this border to exist, otherwise fail or crash...
@@ -479,13 +498,13 @@ In our mesh structures, there is one normal for each vertex.
 >>> from soma import aims
 >>> mesh = aims.read('data_for_anatomist/subject01/subject01_Lhemi.mesh')
 >>> vert = mesh.vertex()
->>> print 'vertices:', len(vert)
+>>> print('vertices:', len(vert))
 vertices: 33837
 >>> poly = mesh.polygon()
->>> print 'polygons:', len(poly)
+>>> print('polygons:', len(poly))
 polygons: 67678
 >>> norm = mesh.normal()
->>> print 'normals:', len(norm)
+>>> print('normals:', len(norm))
 normals: 33837
 
 
@@ -510,7 +529,7 @@ Then we can add vertices, normals and polygons to the mesh:
 >>> pol[19, 1] = 2
 >>> pol2 = numpy.vstack((numpy.ogrid[2: 22], numpy.ogrid[3: 23], numpy.ones(20, dtype=numpy.int32))).transpose()
 >>> pol2[19, 1] = 2
->>> poly.assign([aims.AimsVector(x.astype('int'), dtype='U32',dim=3) for x in numpy.vstack((pol, pol2))])
+>>> poly.assign([aims.AimsVector(x, dtype='U32',dim=3) for x in numpy.vstack((pol, pol2))])
 >>> # write result
 >>> aims.write(mesh, 'saucer.mesh')
 >>> # automatically calculate normals
@@ -570,7 +589,7 @@ To copy a timestep to another, use the following:
 >>> # same for normals and polygons
 >>> mesh.normal(1).assign(mesh.normal(0))
 >>> mesh.polygon(1).assign(mesh.polygon(0))
->>> print 'number of time steps:', mesh.size()
+>>> print('number of time steps:', mesh.size())
 number of time steps: 2
 
 .. topic:: Exercise
@@ -583,12 +602,12 @@ number of time steps: 2
 >>> vert = mesh.vertex()
 >>> varr = numpy.array(vert)
 >>> norm = numpy.array(mesh.normal())
->>> for i in xrange(1, 10):
+>>> for i in range(1, 10):
 ...     mesh.normal(i).assign(mesh.normal())
 ...     mesh.polygon(i).assign(mesh.polygon())
 ...     varr += norm * 0.5
 ...     mesh.vertex(i).assign([aims.Point3df(x) for x in varr])
->>> print 'number of time steps:', mesh.size()
+>>> print('number of time steps:', mesh.size())
 number of time steps: 10
 >>> mesh.updateNormals()
 >>> aims.write(mesh, 'subject01_Lwhite_semiinflated_time.mesh')
@@ -609,13 +628,13 @@ A texture is also a time-texture.
 >>> tex = aims.TimeTexture('FLOAT')
 >>> t = tex[0] # time index, inserts on-the-fly
 >>> t.reserve(10) # pre-allocates memory
->>> for i in xrange(10):
+>>> for i in range(10):
 ...     t.append(i / 10.)
->>> print tex.size()
+>>> print(tex.size())
 1
->>> print tex[0].size()
+>>> print(tex[0].size())
 10
->>> print tex[0][5]
+>>> print(tex[0][5])
 0.5
 
 .. topic:: Exercise
@@ -627,7 +646,7 @@ A texture is also a time-texture.
 >>> vol = aims.read('data_for_anatomist/subject01/subject01.nii')
 >>> tex = aims.TimeTexture('FLOAT')
 >>> vs = vol.header()['voxel_size']
->>> for i in xrange(mesh.size()):
+>>> for i in range(mesh.size()):
 ...     t = tex[i]
 ...     vert = mesh.vertex(i)
 ...     t.reserve(len(vert))
@@ -668,7 +687,7 @@ True
 >>> anat2func = mvs.inverse() * anat2func
 >>> # now go as in the previous program
 >>> tex = aims.TimeTexture('FLOAT')
->>> for i in xrange(mesh.size()):
+>>> for i in range(mesh.size()):
 ...     t = tex[i]
 ...     vert = mesh.vertex(i)
 ...     t.reserve(len(vert))
@@ -689,15 +708,15 @@ A BucketMap is represented by the class :py:class:`soma.aims.BucketMap_VOID`.
 
 >>> from soma import aims
 >>> bck_map=aims.read('data_for_anatomist/roi/basal_ganglia.data/roi_Bucket.bck')
->>> print 'Bucket map: ', bck_map
+>>> print('Bucket map: ', bck_map)
 Bucket map:  <soma.aims.BucketMap_VOID object at ...
->>> print 'Nb buckets: ', bck_map.size()
+>>> print('Nb buckets: ', bck_map.size())
 Nb buckets:  15
->>> for i in xrange(bck_map.size()):
+>>> for i in range(bck_map.size()):
 ...     b = bck_map[i]
-...     print "Bucket", i, ", nb voxels:", b.size()
+...     print("Bucket", i, ", nb voxels:", b.size())
 ...     if b.keys():
-...         print "  Coordinates of the first voxel:", b.keys()[0].list()
+...         print("  Coordinates of the first voxel:", b.keys()[0].list())
 Bucket 0 , nb voxels: 2314
   Coordinates of the first voxel: [108, 132, 44]
 Bucket 1 , ...
@@ -723,20 +742,21 @@ Properties
 Properties are stored in a dictionary-like way. They can hold almost anything, but a restricted set of types can be saved and loaded. 
 It is exactly the same thing as headers found in volumes, meshes, textures or buckets.
 
+>>> from __future__ import print_function
 >>> from soma import aims
 >>> graph = aims.read('data_for_anatomist/roi/basal_ganglia.arg')
->>> print graph
+>>> print(graph)
 { '__syntax__' : 'RoiArg', 'RoiArg_VERSION' : '1.0', 'filename_base' : 'basal_ganglia.data', ...
->>> print 'properties:', graph.keys()
+>>> print('properties:', graph.keys())
 properties: ('RoiArg_VERSION', 'filename_base', 'roi.global.bck', 'type.global.bck', 'boundingbox_max', ...
->>> for p, v in graph.iteritems():
-...   print p, ':', v
+>>> for p, v in graph.items():
+...     print(p, ':', str(v))
 RoiArg_VERSION : 1.0
 filename_base : basal_ganglia.data
 roi.global.bck : roi roi_Bucket.bck roi_label
 type.global.bck : roi.global.bck
-boundingbox_max : [ 255, 255, 123 ]
-boundingbox_min : [ 0, 0, 0 ]
+boundingbox_max : [255, 255, 123]
+boundingbox_min : [0, 0, 0]
 ...
 >>> graph['gudule'] = [12, 'a comment']
 
@@ -748,7 +768,7 @@ Vertices
 Vertices (or nodes) can be accessed via the vertices() method. Each vertex is also a dictionary-like properties set.
 
 >>> for v_name in sorted([v['name'] for v in graph.vertices()]):
-...     print v_name
+...     print(v_name)
 Caude_droit
 Caude_gauche
 Corps_caude_droit
@@ -759,7 +779,7 @@ Pallidum_droit
 To insert a new vertex, the :py:meth:`soma.aims.Graph.addVertex()` method should be used:
 
 >>> v = graph.addVertex('roi')
->>> print v
+>>> print(v)
 { '__syntax__' : 'roi' }
 >>> v['name'] = 'new ROI'
 
@@ -774,10 +794,10 @@ Edges are also dictionary-like properties sets.
 >>> v2 = [x for x in graph.vertices() if x['name'] == 'Pallidum_gauche'][0]
 >>> del x
 >>> e = graph.addEdge(v, v2, 'roi_link')
->>> print graph.edges()
+>>> print(graph.edges())
 [ { '__syntax__' : 'roi_link' } ]
 >>> # get vertices linked by this edge
->>> print sorted([x['name'] for x in e.vertices()])
+>>> print(sorted([x['name'] for x in e.vertices()]))
 ['Pallidum_gauche', 'new ROI']
 
 
@@ -818,9 +838,9 @@ Volume Thresholding
 >>> ta = aims.AimsThreshold(aims.AIMS_GREATER_OR_EQUAL_TO, 600, intype=vol)
 >>> # use it to make a binary thresholded volume
 >>> tvol = ta.bin(vol)
->>> print tvol.value(0, 0, 0)
+>>> print(tvol.value(0, 0, 0))
 0
->>> print tvol.value(100, 100, 50)
+>>> print(tvol.value(100, 100, 50))
 32767
 >>> aims.write(tvol, 'thresholded.nii')
 
@@ -885,7 +905,7 @@ The :py:class:`soma.aims.SurfaceGenerator` allows to create simple meshes of pre
 ...     'point2': [100, 100, 100], 'radius': 20, 'arrow_radius': 30,
 ...     'arrow_length_factor': 0.7, 'facets': 50})
 >>> # get the list of all possible generated objects and parameters:
->>> print aims.SurfaceGenerator.description()
+>>> print(aims.SurfaceGenerator.description())
 [ { 'arrow_length_factor' : 'relative length of the head', 'arrow_radius' : ...
 
 
@@ -948,15 +968,15 @@ For instance, to convert the anatomical volume of the previous examples to float
 
 >>> from soma import aims
 >>> vol = aims.read('data_for_anatomist/subject01/subject01.nii')
->>> print 'type of vol:', type(vol)
+>>> print('type of vol:', type(vol))
 type of vol: <class 'soma.aims.Volume_S16'>
 >>> c = aims.Converter(intype=vol, outtype=aims.Volume('FLOAT'))
 >>> vol2 = c(vol)
->>> print 'type of converted volume:', type(vol2)
+>>> print('type of converted volume:', type(vol2))
 type of converted volume: <class 'soma.aims.Volume_FLOAT'>
->>> print 'value of initial volume at voxel (50, 50, 50):', vol.value(50, 50, 50)
+>>> print('value of initial volume at voxel (50, 50, 50):', vol.value(50, 50, 50))
 value of initial volume at voxel (50, 50, 50): 57
->>> print 'value of converted volume at voxel (50, 50, 50):', vol2.value(50, 50, 50)
+>>> print('value of converted volume at voxel (50, 50, 50):', vol2.value(50, 50, 50))
 value of converted volume at voxel (50, 50, 50): 57.0
 
 
@@ -981,12 +1001,12 @@ nearest-neighbour (order 0), linear (order 1), spline resampling with order 2 to
 >>> # resample into a volume of dimension 200x200x200 with voxel size 1.1, 1.1, 1.5
 >>> resampled = resp.doit(tr, 200, 200, 200, (1.1, 1.1, 1.5))
 >>> # Note that the header transformations to external referentials have been updated
->>> print resampled.header()['referentials']
-[ 'Scanner-based anatomical coordinates', 'Talairach-MNI template-SPM' ]
+>>> print(resampled.header()['referentials'])
+['Scanner-based anatomical coordinates', 'Talairach-MNI template-SPM']
 >>> import numpy
 >>> numpy.set_printoptions(precision=4)
 >>> for t in resampled.header()['transformations']:
-...   print  aims.AffineTransformation3d( t )
+...   print(aims.AffineTransformation3d( t ))
 [[  -0.9239   -0.3827    0.      193.2538]
  [   0.3827   -0.9239    0.       34.6002]
  [   0.        0.       -1.       73.1996]
