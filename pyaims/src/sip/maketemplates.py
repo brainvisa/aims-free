@@ -151,7 +151,8 @@ except Exception as e:
 # read generatedtypes file
 # expected to fill in the 'todo' dictionary variable
 if sys.version_info[0] >= 3:
-    code = compile(open(options.input).read(), options.input, 'exec')
+    with open(options.input) as f:
+        code = compile(f.read(), options.input, 'exec')
     exec(code, globals(), globals())
 else:
     execfile(options.input, globals(), globals())
@@ -166,7 +167,8 @@ typesmtime = 0
 for x in options.typessub:
     typesmtime = max(typesmtime, os.stat(x)[stat.ST_MTIME])
     if sys.version_info[0] >= 3:
-        code = compile(open(x).read(), x, 'exec')
+        with open(x) as f:
+            code = compile(f.read(), x, 'exec')
         exec(code, globals(), globals())
     else:
         execfile(x, globals(), globals())
