@@ -166,6 +166,7 @@ def makeTemplate(
                 lo = ''
             lo = enableprere.sub('\\1#\\3', lo)
             fo.write(lo)
+        cppout.close()
 
     fo.close()
     fi.close()
@@ -216,7 +217,8 @@ if __name__ == '__main__':
 
     if options.subs:
         if sys.version_info[0] >= 3:
-            code = compile(open(options.sub).read(), options.sub, 'exec')
+            with open(options.sub) as f:
+                code = compile(f.read(), options.sub, 'exec')
             exec(code, globals(), globals())
         else:
             execfile(options.subs)
