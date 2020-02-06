@@ -41,13 +41,11 @@ def teardown_doctest(test):
 
 def test_suite():
     suite = unittest.TestSuite()
-    if sys.version_info[0] >= 3:
-        tutorial_file = "pyaims_tutorial_py3.rst"
-    else:
-        tutorial_file = "pyaims_tutorial.rst"
+    tutorial_file = "pyaims_tutorial.rst"
     doctest_suite = unittest.TestSuite(
         doctest.DocFileSuite(tutorial_file,
-                             globs={'curdir': os.path.abspath(os.curdir)},
+                             globs={'curdir': os.path.abspath(os.curdir),
+                                    'print_function': print_function},
                              setUp=setup_doctest,
                              tearDown=teardown_doctest,
                              optionflags=doctest.ELLIPSIS))
@@ -58,6 +56,7 @@ if __name__ == '__main__':
     # try the notebook version if it can be processed on this system
     from soma.test_utils import test_notebook as tnb
     try:
+        raise Warning('no notebook')
         if tnb.test_notebook(
             os.path.join(os.path.dirname(sys.argv[0]),
                          'pyaims_tutorial_nb.ipynb'),

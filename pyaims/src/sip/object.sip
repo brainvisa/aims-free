@@ -488,6 +488,8 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
               Py_DECREF( pitem );
               pitem = pitem2;
             }
+            // if getPython raises an exception, ignore it and stick with pitem
+            PyErr_Clear();
           }
           PyTuple_SetItem( pi, 1, pitem );
           PyTuple_SetItem( po, c, pi );
