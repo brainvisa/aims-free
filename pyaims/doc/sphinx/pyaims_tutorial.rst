@@ -1003,17 +1003,21 @@ nearest-neighbour (order 0), linear (order 1), spline resampling with order 2 to
 >>> print(resampled.header()['referentials'])
 ["Scanner-based anatomical coordinates", "Talairach-MNI template-SPM"]
 >>> import numpy
->>> numpy.set_printoptions(precision=4)
+>>> if [int(x) for x in numpy.__version__.split('.')] >= [1, 14]:
+...     # print the same way whatever numpy version
+...     numpy.set_printoptions(precision=4, legacy='1.13')
+... else:
+...     numpy.set_printoptions(precision=4)
 >>> for t in resampled.header()['transformations']:
 ...   print(aims.AffineTransformation3d( t ))
-[[ -0.9239  -0.3827   0.     193.2538]
- [  0.3827  -0.9239   0.      34.6002]
- [  0.       0.      -1.      73.1996]
- [  0.       0.       0.       1.    ]]
-[[-9.6797e-01 -4.1623e-01  1.0548e-02  2.0329e+02]
- [ 3.8418e-01 -8.9829e-01  3.6210e-02  2.8707e+00]
- [ 3.9643e-03 -2.0773e-02 -1.2116e+00  9.3405e+01]
- [ 0.0000e+00  0.0000e+00  0.0000e+00  1.0000e+00]]
+[[  -0.9239   -0.3827    0.      193.2538]
+ [   0.3827   -0.9239    0.       34.6002]
+ [   0.        0.       -1.       73.1996]
+ [   0.        0.        0.        1.    ]]
+[[ -9.6797e-01  -4.1623e-01   1.0548e-02   2.0329e+02]
+ [  3.8418e-01  -8.9829e-01   3.6210e-02   2.8707e+00]
+ [  3.9643e-03  -2.0773e-02  -1.2116e+00   9.3405e+01]
+ [  0.0000e+00   0.0000e+00   0.0000e+00   1.0000e+00]]
 >>> aims.write(resampled, 'resampled.nii')
 
 Load the original image and the resampled in Anatomist. 
