@@ -742,7 +742,6 @@ Properties
 Properties are stored in a dictionary-like way. They can hold almost anything, but a restricted set of types can be saved and loaded. 
 It is exactly the same thing as headers found in volumes, meshes, textures or buckets.
 
->>> from __future__ import print_function
 >>> from soma import aims
 >>> graph = aims.read('data_for_anatomist/roi/basal_ganglia.arg')
 >>> print(graph)
@@ -1002,19 +1001,19 @@ nearest-neighbour (order 0), linear (order 1), spline resampling with order 2 to
 >>> resampled = resp.doit(tr, 200, 200, 200, (1.1, 1.1, 1.5))
 >>> # Note that the header transformations to external referentials have been updated
 >>> print(resampled.header()['referentials'])
-['Scanner-based anatomical coordinates', 'Talairach-MNI template-SPM']
+["Scanner-based anatomical coordinates", "Talairach-MNI template-SPM"]
 >>> import numpy
 >>> numpy.set_printoptions(precision=4)
 >>> for t in resampled.header()['transformations']:
 ...   print(aims.AffineTransformation3d( t ))
-[[  -0.9239   -0.3827    0.      193.2538]
- [   0.3827   -0.9239    0.       34.6002]
- [   0.        0.       -1.       73.1996]
- [   0.        0.        0.        1.    ]]
-[[ -9.6797e-01  -4.1623e-01   1.0548e-02   2.0329e+02]
- [  3.8418e-01  -8.9829e-01   3.6210e-02   2.8707e+00]
- [  3.9643e-03  -2.0773e-02  -1.2116e+00   9.3405e+01]
- [  0.0000e+00   0.0000e+00   0.0000e+00   1.0000e+00]]
+[[ -0.9239  -0.3827   0.     193.2538]
+ [  0.3827  -0.9239   0.      34.6002]
+ [  0.       0.      -1.      73.1996]
+ [  0.       0.       0.       1.    ]]
+[[-9.6797e-01 -4.1623e-01  1.0548e-02  2.0329e+02]
+ [ 3.8418e-01 -8.9829e-01  3.6210e-02  2.8707e+00]
+ [ 3.9643e-03 -2.0773e-02 -1.2116e+00  9.3405e+01]
+ [ 0.0000e+00  0.0000e+00  0.0000e+00  1.0000e+00]]
 >>> aims.write(resampled, 'resampled.nii')
 
 Load the original image and the resampled in Anatomist. 

@@ -44,7 +44,8 @@ def test_suite():
     tutorial_file = "pyaims_tutorial.rst"
     doctest_suite = unittest.TestSuite(
         doctest.DocFileSuite(tutorial_file,
-                             globs={'curdir': os.path.abspath(os.curdir)},
+                             globs={'curdir': os.path.abspath(os.curdir),
+                                    'print_function': print_function},
                              setUp=setup_doctest,
                              tearDown=teardown_doctest,
                              optionflags=doctest.ELLIPSIS))
