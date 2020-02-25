@@ -52,7 +52,7 @@ def mangle_docstrings(app, what, name, obj, options, lines,
         if sys.version_info[0] >= 3:
             doc = str(doc)
         else:
-            doc = six.text_type(doc)
+            doc = unicode(doc)
         lines[:] = doc.split(sixu("\n"))
 
     if app.config.numpydoc_edit_link and hasattr(obj, '__name__') and \
