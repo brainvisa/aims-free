@@ -1,13 +1,4 @@
-#! /usr/bin/env python2
-############################################################################
-# This software and supporting documentation are distributed by
-# CEA/NeuroSpin, Batiment 145, 91191 Gif-sur-Yvette cedex, France.
-# This software is governed by the CeCILL license version 2 under
-# French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the
-# terms of the CeCILL license version 2 as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info".
-############################################################################
+#! /usr/bin/env python
 
 """
 This modles features the following:
@@ -31,10 +22,6 @@ import sys
 # soma import
 from soma import aims, aimsalgo
 from six.moves import range
-
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 #----------------------------Functions-----------------------------------------
 
