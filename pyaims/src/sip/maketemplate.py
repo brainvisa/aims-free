@@ -34,6 +34,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 import sys
 import os
 import re
@@ -41,6 +42,7 @@ import sipconfig
 from optparse import OptionParser
 import subprocess
 import platform
+from six.moves import range
 
 if sys.version_info[0] >= 3:
     def xreadlines(f):
@@ -48,7 +50,7 @@ if sys.version_info[0] >= 3:
     xrange = range
 else:
     def xreadlines(f):
-        return f.xreadlines()
+        return f
 
 
 def convert_string_to_int(s):
@@ -56,7 +58,7 @@ def convert_string_to_int(s):
     Allow to convert string with digit followed by non digits
     Useful to buil Qt version such as 3.3.8b
     '''
-    for i in xrange(len(s)):
+    for i in range(len(s)):
         if not s[i].isdigit():
             s = s[:i]
             break
@@ -209,7 +211,7 @@ if __name__ == '__main__':
         if len(options.templates) % 2 != 0:
             print('template arguments go by pairs (key, value)')
             sys.exit(1)
-        for i in xrange(int(len(options.templates) / 2)):
+        for i in range(int(len(options.templates) / 2)):
             templates[options.templates[i * 2]] = options.templates[i * 2 + 1]
 
     # print('templates:', options.templates)
@@ -221,10 +223,10 @@ if __name__ == '__main__':
                 code = compile(f.read(), options.sub, 'exec')
             exec(code, globals(), globals())
         else:
-            execfile(options.subs)
+            exec(compile(open(options.subs, "rb").read(), options.subs, 'exec'))
         types = typessub
 
-    for i in xrange(int(len(args) / 2)):
+    for i in range(int(len(args) / 2)):
         types[args[i * 2]] = args[i * 2 + 1]
 
     makeTemplate(infile, outfile, types, templates, cppc, moc=options.moc)

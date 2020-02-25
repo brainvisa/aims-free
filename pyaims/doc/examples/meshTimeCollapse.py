@@ -39,8 +39,10 @@
 # aimsmesh via les fonctions de aims.surfacemanip.
 # Et car il charge tout en memoire.
 
+from __future__ import absolute_import
 from soma import aims
 from numpy import *
+from six.moves import range
 v = aims.read('/home/dr144257/data/ra_head.mesh')
 
 

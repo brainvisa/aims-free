@@ -31,6 +31,10 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 '''.APC (commissure coordinates) IO and other tools'''
+from __future__ import absolute_import
+import six
+from six.moves import range
+from six.moves import zip
 __docformat__ = 'restructuredtext en'
 
 from soma import aims
@@ -39,7 +43,7 @@ import sys
 
 if sys.version_info[0] >= 3:
     xrange = range
-    basestring = str
+    six.string_types = str
 
 
 def apcRead(filename, imagefile=None):
@@ -69,19 +73,19 @@ def apcRead(filename, imagefile=None):
     ihm = []
     for l in lines:
         if l[:3] == 'AC:':
-            apcdict['ac'] = map(lambda x: int(x), l.split()[1:4])
+            apcdict['ac'] = [int(x) for x in l.split()[1:4]]
         elif l[:3] == 'PC:':
-            apcdict['pc'] = map(lambda x: int(x), l.split()[1:4])
+            apcdict['pc'] = [int(x) for x in l.split()[1:4]]
         elif l[:3] == 'IH:':
-            apcdict['ih'] = map(lambda x: int(x), l.split()[1:4])
+            apcdict['ih'] = [int(x) for x in l.split()[1:4]]
         elif l[:5] == 'ACmm:':
-            acm = map(lambda x: float(x), l.split()[1:4])
+            acm = [float(x) for x in l.split()[1:4]]
             apcdict['acmm'] = acm
         elif l[:5] == 'PCmm:':
-            pcm = map(lambda x: float(x), l.split()[1:4])
+            pcm = [float(x) for x in l.split()[1:4]]
             apcdict['pcmm'] = pcm
         elif l[:5] == 'IHmm:':
-            ihm = map(lambda x: float(x), l.split()[1:4])
+            ihm = [float(x) for x in l.split()[1:4]]
             apcdict['ihmm'] = ihm
         else:
             comment = apcdict.get('comment', None)
@@ -95,7 +99,7 @@ def apcRead(filename, imagefile=None):
     if imagefile is None:
         return apcdict
 
-    if isinstqnce(imagefile, basestring):
+    if isinstqnce(imagefile, six.string_types):
         f = aims.Finder()
         if f.check(imagefile):
             image = f.header()
@@ -183,7 +187,7 @@ def apcTransform(apcdict, transform, outimagevoxelsize):
     Coordinates are transformed in the ``apcdict`` dictionary, which is
     modified in-place.
     '''
-    if isinstance(outimagevoxelsize, basestring):
+    if isinstance(outimagevoxelsize, six.string_types):
         f = aims.Finder()
         if f.check(outimagevoxelsize):
             outhdr = f.header()
@@ -203,7 +207,7 @@ def apcTransform(apcdict, transform, outimagevoxelsize):
         pmm = apcdict[p + 'mm']
         pmm2 = transform.transform(pmm)
         apcdict[p + 'mm'] = pmm2
-        vs = [pmm[i] / px[i] for i in xrange(3)]
+        vs = [pmm[i] / px[i] for i in range(3)]
         px2 = [int(round(x / y)) for x, y in zip(pmm2, outvs)]
         apcdict[p] = px2
 

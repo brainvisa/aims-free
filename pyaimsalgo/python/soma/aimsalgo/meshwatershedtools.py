@@ -23,11 +23,14 @@ Main dependencies: PyAims library
 
 
 # import system
+from __future__ import absolute_import
+from __future__ import print_function
 import numpy
 import sys
 
 # soma import
 from soma import aims, aimsalgo
+from six.moves import range
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -100,7 +103,7 @@ def _merge_ascending(labels, parents, valid):
     """
     labels = numpy.copy(labels)
     parents = numpy.copy(parents)
-    for j in xrange(len(valid)):
+    for j in range(len(valid)):
         if valid[j] == 0:
             fj = parents[j]
             if fj != j:
@@ -168,15 +171,15 @@ def watershedWithBasinsMerging(
 
     if size_min != 0 or depth_min != 0:
         size = numpy.asarray([len(numpy.where(labelW == x)[0])
-                             for x in xrange(idxW.size)])
-        print("criteria size: ", size)
+                             for x in range(idxW.size)])
+        print(("criteria size: ", size))
 
         # Blobs
         blobindices = aimsalgo.blobsHeights(
             mesh, tex[0].data(), labelWt[0].data())
         blobheights = data[blobindices.arraydata()]
         blobdepths = data[idxW] - blobheights
-        print("criteria depth: ", blobdepths)
+        print(("criteria depth: ", blobdepths))
 
         # criteria to regroup basins
         valid_size = size > size_min

@@ -31,6 +31,7 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 from __future__ import print_function
+from __future__ import absolute_import
 import sys
 from soma import aims
 import math
@@ -75,7 +76,7 @@ while roiIterator.isValid():
         else:
             invalid += 1
         print('8')
-        maskIterator.next()
+        next(maskIterator)
     print('  valid points:', valid)
     print('  invalid points:', invalid)
     if valid:
@@ -89,4 +90,4 @@ while roiIterator.isValid():
         stddev = 'N/A'
     print('  mean value:', mean)
     print('  std dev   :', stddev)
-    roiIterator.next()
+    next(roiIterator)

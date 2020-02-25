@@ -7,6 +7,7 @@ plus a few improvements functions (such as mask and B1 map holes filling).
 from __future__ import division
 from __future__ import print_function
 
+from __future__ import absolute_import
 import itertools
 import math
 import numpy as np

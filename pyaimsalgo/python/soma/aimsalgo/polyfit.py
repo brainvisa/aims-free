@@ -6,8 +6,10 @@ Inspired by Fitpoly.m, courtesy of Alexandre Vignaud.
 from __future__ import division
 from __future__ import print_function
 
+from __future__ import absolute_import
 import numpy as np
 import itertools
+from six.moves import range
 
 def meshgrid_volume(volume):
     """Return three arrays containing each voxel's coordinates."""
@@ -37,7 +39,7 @@ def _build_fitpoly_matrix(volume, order, mask=None, transformation=None):
         maskedY = Y[mask]
         maskedZ = Z[mask]
     P = np.empty((maskedX.size, order ** 3))
-    for k, m, n in itertools.product(range(order), repeat=3):
+    for k, m, n in itertools.product(list(range(order)), repeat=3):
         P[:, k * (order ** 2) + m * order + n] = ((maskedX ** k) *
                                                   (maskedY ** m) *
                                                   (maskedZ ** n))

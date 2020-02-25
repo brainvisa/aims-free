@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 import sys, os
 from soma import aims, aimsalgo
 import numpy

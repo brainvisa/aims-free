@@ -1,8 +1,9 @@
 from __future__ import print_function
 
+from __future__ import absolute_import
 import unittest
 import doctest
-import urllib
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 import zipfile
 import os
 from shutil import rmtree
@@ -24,7 +25,7 @@ def setup_doctest(test):
     if not os.path.exists("demo_data.zip"):
         print("Download ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip "
               "to ", tests_dir)
-        urllib.urlretrieve(
+        six.moves.urllib.request.urlretrieve(
             "ftp://ftp.cea.fr/pub/dsv/anatomist/data/demo_data.zip",
             "demo_data.zip")
     if os.path.exists("data_for_anatomist"):

@@ -34,6 +34,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 from soma.aims import lazy_read_data
 import sys

@@ -30,5 +30,6 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import absolute_import
 from soma.wip.aimsalgo.transform.bendingtransform import BendingTransform
 from soma.wip.aimsalgo.transform.taperingtransform import TaperingTransform

@@ -33,12 +33,13 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 import six
 import sys
 
 if sys.version_info[0] >= 3:
-    basestring = str
+    six.string_types = str
 
 
 def same_graphs(ref_graph, test_graph, verbose=False):
@@ -65,9 +66,9 @@ def same_graphs(ref_graph, test_graph, verbose=False):
         True if ref and test graphs are identical, or False otherwise.
     '''
 
-    if isinstance(ref_graph, basestring):
+    if isinstance(ref_graph, six.string_types):
         ref_graph = aims.read(ref_graph)
-    if isinstance(test_graph, basestring):
+    if isinstance(test_graph, six.string_types):
         test_graph = aims.read(test_graph)
 
     ref_vertices = _build_vertice_dictionary(ref_graph)

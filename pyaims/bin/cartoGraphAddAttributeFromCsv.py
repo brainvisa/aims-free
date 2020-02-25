@@ -35,6 +35,7 @@
 from __future__ import print_function
 
 
+from __future__ import absolute_import
 def graphAddAttributeFromCsv(input_graph, output_graph, input_csv, table_key_col, graph_key_attr, graph_val_attr, table_val_col, verbose):
     from soma import aims
     from datamind.core import DF

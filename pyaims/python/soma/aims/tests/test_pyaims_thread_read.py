@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 import threading
 from soma import aims
 import os
@@ -13,6 +14,7 @@ import shutil
 import soma.subprocess
 import time
 import six
+from six.moves import zip
 
 
 def aims_test_thread_read(filenames, verbose=True):
@@ -155,7 +157,7 @@ def test_all_formats(filename, number=30, separate_process=False):
     success = True
     unsafe_formats = []
     safe_formats = []
-    all_formats = zip(formats, [False] * len(formats)) \
+    all_formats = list(zip(formats, [False] * len(formats))) \
         + [(f, True) for f in soma_io_formats]
     for format, is_soma in all_formats:
         # JP2 writer in Qt (4.8.1 at least) systematically crashes.

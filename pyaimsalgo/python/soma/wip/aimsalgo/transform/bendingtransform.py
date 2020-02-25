@@ -40,6 +40,7 @@
 # 	This file contains BendingTransform class
 #
 #########################################################################
+from __future__ import absolute_import
 import sys, math
 
 from soma import aims

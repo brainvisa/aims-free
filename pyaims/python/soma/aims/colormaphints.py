@@ -31,10 +31,13 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import absolute_import
+from __future__ import print_function
 from soma import aims
 import numpy
 import types
 import sys
+from six.moves import range
 try:
     from soma import aimsalgo
 except:
@@ -242,7 +245,7 @@ def checkVolume(vol):
     # get specified palette information if any
 
     try:
-        print('hdr:', type(hdr))
+        print(('hdr:', type(hdr)))
         print(hdr)
         pal = hdr['palette']
         p = pal['palette']
@@ -426,6 +429,6 @@ def chooseColormaps(vols):
             rgbcmaps.append(cmap[1])
 
     orderedcmaps = [None] * len(ordered)
-    for i in xrange(len(ordered)):
+    for i in range(len(ordered)):
         orderedcmaps[ordered[i][1]] = cmaps[i]
     return orderedcmaps

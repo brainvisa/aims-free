@@ -33,9 +33,11 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 from __future__ import print_function
 
+from __future__ import absolute_import
 import sys
 import os
 from optparse import OptionParser
+from six.moves import range
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -93,16 +95,16 @@ if not input.endswith('.minf'):
 
 attributes = {}
 try:
-    execfile(input)
+    exec(compile(open(input, "rb").read(), input, 'exec'))
 except:
     if os.path.exists(input) and not input.endswith('.minf'):
         input += '.minf'
         try:
-            execfile(input)
+            exec(compile(open(input, "rb").read(), input, 'exec'))
         except:
             pass
 
-for i in xrange(len(options.property)):
+for i in range(len(options.property)):
     try:
         a = eval(options.value[i])
     except:

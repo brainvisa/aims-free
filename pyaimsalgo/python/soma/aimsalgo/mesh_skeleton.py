@@ -1,9 +1,11 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims, aimsalgo
 import numpy as np
 import six
+from six.moves import zip
 
 inspect = () # (70989, 70988)
 

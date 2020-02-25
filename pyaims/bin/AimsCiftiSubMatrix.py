@@ -2,12 +2,14 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 from argparse import ArgumentParser
 import numpy as np
 import sys
 import six
 import gc
+from six.moves import range
 
 # --cifti /volatile/riviere/hcp_course/HCP_2015_Course/home/hcpcourse/day3-wednesday/Diffusion_practicals/100307/MNINonLinear/Connectomes/Conn3_HCPcourse_log.dconn.nii
 # meshes:
