@@ -159,14 +159,14 @@ def watershedWithBasinsMerging(
     if size_min != 0 or depth_min != 0:
         size = numpy.asarray([len(numpy.where(labelW == x)[0])
                              for x in range(idxW.size)])
-        print(("criteria size: ", size))
+        print("criteria size: ", size)
 
         # Blobs
         blobindices = aimsalgo.blobsHeights(
             mesh, tex[0].data(), labelWt[0].data())
         blobheights = data[blobindices.arraydata()]
         blobdepths = data[idxW] - blobheights
-        print(("criteria depth: ", blobdepths))
+        print("criteria depth: ", blobdepths)
 
         # criteria to regroup basins
         valid_size = size > size_min
