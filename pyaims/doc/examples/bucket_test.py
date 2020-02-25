@@ -34,8 +34,10 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 import sys
+from six.moves import range
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -45,13 +47,13 @@ bck = aims.read(
 print('bucket:', bck)
 
 print('timesteps:', bck.size())
-for t in xrange(bck.size()):
+for t in range(bck.size()):
     print('time:', t)
     b = bck[t]
     print('bucket:', b, ', size:', b.size())
     for p in b.keys():
         sys.stdout.write(str(p.list()) + ' ')
-    print
+    print()
 
 fileout = '/tmp/toto.bck'
 print('writing bucket to', fileout)

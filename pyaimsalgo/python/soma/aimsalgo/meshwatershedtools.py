@@ -1,13 +1,4 @@
-#! /usr/bin/env python2
-############################################################################
-# This software and supporting documentation are distributed by
-# CEA/NeuroSpin, Batiment 145, 91191 Gif-sur-Yvette cedex, France.
-# This software is governed by the CeCILL license version 2 under
-# French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the
-# terms of the CeCILL license version 2 as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info".
-############################################################################
+#! /usr/bin/env python
 
 """
 This modles features the following:
@@ -23,15 +14,14 @@ Main dependencies: PyAims library
 
 
 # import system
+from __future__ import absolute_import
+from __future__ import print_function
 import numpy
 import sys
 
 # soma import
 from soma import aims, aimsalgo
-
-if sys.version_info[0] >= 3:
-    xrange = range
-
+from six.moves import range
 
 #----------------------------Functions-----------------------------------------
 
@@ -100,7 +90,7 @@ def _merge_ascending(labels, parents, valid):
     """
     labels = numpy.copy(labels)
     parents = numpy.copy(parents)
-    for j in xrange(len(valid)):
+    for j in range(len(valid)):
         if valid[j] == 0:
             fj = parents[j]
             if fj != j:
@@ -168,7 +158,7 @@ def watershedWithBasinsMerging(
 
     if size_min != 0 or depth_min != 0:
         size = numpy.asarray([len(numpy.where(labelW == x)[0])
-                             for x in xrange(idxW.size)])
+                             for x in range(idxW.size)])
         print("criteria size: ", size)
 
         # Blobs

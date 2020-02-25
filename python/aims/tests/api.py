@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+from __future__ import absolute_import
 import os
 import shutil
 import soma.subprocess
@@ -9,6 +10,8 @@ import errno
 import warnings
 
 import soma.test_utils
+from six.moves import map
+from six.moves import zip
 
 
 class ImageFileComparison:
@@ -423,8 +426,8 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
         files: list of tuples
             list of tuples (run_file, ref_file).
         """
-        files = zip(self.get_run_files(testcommand),
-                    self.get_ref_files(testcommand))
+        files = list(zip(self.get_run_files(testcommand),
+                    self.get_ref_files(testcommand)))
         if check_ref_files:
             ref_files = set([t[1] for t in files])
             real_ref_files = set(

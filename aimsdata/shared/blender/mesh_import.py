@@ -40,6 +40,8 @@ Tooltip: 'Import BrainVISA mesh File Format (.mesh)'
 
 from __future__ import print_function
 
+from __future__ import absolute_import
+from six.moves import range
 __author__ = "Yann Cointepas"
 __url__ = ("BrainVISA project, http://brainvisa.info",)
 __version__ = "1.0"
@@ -112,7 +114,7 @@ class MeshReader:
   def vertices( self ):
     if self._verticesRead:
       raise RuntimeError( 'Vertices can be read only once' )
-    for i in xrange( self.verticesCount ):
+    for i in range( self.verticesCount ):
       yield self._itemReader.read( 'fff', self._file )
     self._verticesRead = True
     self.normalsCount = self._itemReader.read( 'L', self._file )[0]
@@ -125,7 +127,7 @@ class MeshReader:
         raise RuntimeError( 'Vertices must be read before normals' )
     if self._normalsRead:
       raise RuntimeError( 'Normals can be read only once' )
-    for i in xrange( self.normalsCount ):
+    for i in range( self.normalsCount ):
       yield self._itemReader.read( 'fff', self._file )
     self._normalsRead = True
     textureCount = self._itemReader.read( 'L', self._file )[0]
@@ -151,7 +153,7 @@ class MeshReader:
     if self._facesRead:
       raise RuntimeError( 'Faces can be read only once' )
     format = 'L' * self._polygonDimension
-    for i in xrange( self.facesCount ):
+    for i in range( self.facesCount ):
       yield self._itemReader.read( format, self._file )
     self._facesRead = True
     self._file.close()

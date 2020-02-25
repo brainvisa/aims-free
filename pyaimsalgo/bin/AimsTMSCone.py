@@ -35,9 +35,11 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims, aimsalgo
 from optparse import OptionParser
 import numpy, math
+from six.moves import range
 
 parser = OptionParser( description = 'Creates a cone or other mesh '
   'representing the TMS active zone at the specified target position along '

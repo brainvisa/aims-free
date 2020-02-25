@@ -1,38 +1,8 @@
 #!/usr/bin/env python
-
-#  This software and supporting documentation are distributed by
-#      Institut Federatif de Recherche 49
-#      CEA/NeuroSpin, Batiment 145,
-#      91191 Gif-sur-Yvette cedex
-#      France
-#
-# This software is governed by the CeCILL-B license under
-# French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the
-# terms of the CeCILL-B license as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info".
-#
-# As a counterpart to the access to the source code and  rights to copy,
-# modify and redistribute granted by the license, users are provided only
-# with a limited warranty  and the software's author,  the holder of the
-# economic rights,  and the successive licensors  have only  limited
-# liability.
-#
-# In this respect, the user's attention is drawn to the risks associated
-# with loading,  using,  modifying and/or developing or reproducing the
-# software by the user in light of its specific status of free software,
-# that may mean  that it is complicated to manipulate,  and  that  also
-# therefore means  that it is reserved for developers  and  experienced
-# professionals having in-depth computer knowledge. Users are therefore
-# encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or
-# data to be ensured and,  more generally, to use and operate it in the
-# same conditions as regards security.
-#
-# The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL-B license and that you accept its terms.
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 
 import sys
 import os
@@ -41,22 +11,14 @@ import sipconfig
 from optparse import OptionParser
 import subprocess
 import platform
-
-if sys.version_info[0] >= 3:
-    def xreadlines(f):
-        return f.readlines()
-    xrange = range
-else:
-    def xreadlines(f):
-        return f.xreadlines()
-
+from six.moves import range
 
 def convert_string_to_int(s):
     '''
     Allow to convert string with digit followed by non digits
     Useful to buil Qt version such as 3.3.8b
     '''
-    for i in xrange(len(s)):
+    for i in range(len(s)):
         if not s[i].isdigit():
             s = s[:i]
             break
@@ -118,7 +80,7 @@ def makeTemplate(
     preprocre = re.compile('(^\s*)(%#)(.*)%$')
     removeprere = re.compile('^\s*#.*$')
 
-    for line in xreadlines(fi):
+    for line in fi:
         lo = line
         templ = templatere.search(lo)
         while templ:
@@ -156,7 +118,7 @@ def makeTemplate(
     if cpp:
         # cppout = p.communicate()[0]
         fo2.close()
-        for line in xreadlines(cppout):
+        for line in cppout:
             line = line.decode()
             # This is necessary to remove CR LF on windows
             if len(line) >= 2 and line[-2] == '\r':
@@ -209,7 +171,7 @@ if __name__ == '__main__':
         if len(options.templates) % 2 != 0:
             print('template arguments go by pairs (key, value)')
             sys.exit(1)
-        for i in xrange(int(len(options.templates) / 2)):
+        for i in range(int(len(options.templates) / 2)):
             templates[options.templates[i * 2]] = options.templates[i * 2 + 1]
 
     # print('templates:', options.templates)
@@ -221,10 +183,10 @@ if __name__ == '__main__':
                 code = compile(f.read(), options.sub, 'exec')
             exec(code, globals(), globals())
         else:
-            execfile(options.subs)
+            exec(compile(open(options.subs, "rb").read(), options.subs, 'exec'))
         types = typessub
 
-    for i in xrange(int(len(args) / 2)):
+    for i in range(int(len(args) / 2)):
         types[args[i * 2]] = args[i * 2 + 1]
 
     makeTemplate(infile, outfile, types, templates, cppc, moc=options.moc)

@@ -34,7 +34,7 @@
 # basetypes = numtypes + [ 'AimsRGB', 'AimsRGBA' ]
 basetypes = ['short', 'float']
 matrix = []
-for z in [map(lambda y: (x, y), basetypes) for x in basetypes]:
+for z in [[(x, y) for y in basetypes] for x in basetypes]:
     matrix += z
 
 todo = {'system': ['Void'],

@@ -2,11 +2,14 @@
 # -*- coding: utf-8
 
 from __future__ import print_function
+from __future__ import absolute_import
 from soma import aims, aimsalgo
 import pandas
 import numpy as np
 import subprocess
 import six
+from six.moves import range
+from six.moves import zip
 
 
 def get_vertex_points(v):
@@ -20,16 +23,16 @@ def get_vertex_points(v):
     bottom_pts = np.zeros((4, 0), dtype=int)
     other_pts = np.zeros((4, 0), dtype=int)
     if ss is not None and len(ss[0]) != 0:
-        ss_pts = np.array(ss[0].keys())
+        ss_pts = np.array(list(ss[0].keys()))
         ss_pts = np.hstack((ss_pts,
                             np.zeros((ss_pts.shape[0], 1), dtype=int))).T
     if bottom is not None and len(bottom[0]) != 0:
-        bottom_pts = np.array(bottom[0].keys())
+        bottom_pts = np.array(list(bottom[0].keys()))
         bottom_pts = np.hstack((bottom_pts,
                                 np.zeros((bottom_pts.shape[0], 1),
                                          dtype=int))).T
     if other is not None and len(other[0]) != 0:
-        other_pts = np.array(other[0].keys())
+        other_pts = np.array(list(other[0].keys()))
         other_pts = np.hstack((other_pts,
                                np.zeros((other_pts.shape[0], 1), dtype=int))).T
     apts = np.hstack((ss_pts, bottom_pts, other_pts))

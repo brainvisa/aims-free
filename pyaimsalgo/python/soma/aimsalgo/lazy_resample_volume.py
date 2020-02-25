@@ -1,6 +1,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma.aims.lazy_read_data import LazyReadData
 from soma import aims, aimsalgo
 import six
