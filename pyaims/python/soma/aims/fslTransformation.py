@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 '''FSL matrixes seem to transform from/to internal refs, like Aims but with
 a different convention:
 
