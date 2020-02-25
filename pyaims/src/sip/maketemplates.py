@@ -34,6 +34,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 import sys
 import os
 import types
@@ -45,9 +46,12 @@ import re
 from optparse import OptionParser
 import platform
 import subprocess
+import six
+from six.moves import filter
+from six.moves import range
 
 if sys.version_info[0] >= 3:
-    basestring = str
+    six.string_types = str
     xrange = range
 
 parser = OptionParser(description='Preprocess a template file to generate '
@@ -101,7 +105,7 @@ elif not cpp:
 
 if not options.typessub:
     p = [os.path.join(options.sourcepath, 'typessub.py'), 'typessub.py']
-    options.typessub = filter(os.path.exists, p)
+    options.typessub = list(filter(os.path.exists, p))
 
 pyaimssip = options.sourcepath
 sys.path.insert(0, '.')
@@ -115,7 +119,7 @@ def convert_string_to_int(s):
     Allow to convert string with digit followed by non digits
     Useful to buil Qt version such as 3.3.8b
     '''
-    for i in xrange(len(s)):
+    for i in range(len(s)):
         if not s[i].isdigit():
             s = s[:i]
             break
@@ -155,7 +159,7 @@ if sys.version_info[0] >= 3:
         code = compile(f.read(), options.input, 'exec')
     exec(code, globals(), globals())
 else:
-    execfile(options.input, globals(), globals())
+    exec(compile(open(options.input, "rb").read(), options.input, 'exec'), globals(), globals())
 
 if options.tpldir == '':
     dir_name = os.path.dirname(options.input)
@@ -171,7 +175,7 @@ for x in options.typessub:
             code = compile(f.read(), x, 'exec')
         exec(code, globals(), globals())
     else:
-        execfile(x, globals(), globals())
+        exec(compile(open(x, "rb").read(), x, 'exec'), globals(), globals())
 
 typesmtime = max(typesmtime,
                  os.stat(maketemplate.__file__)[stat.ST_MTIME])
@@ -193,7 +197,7 @@ for file, tps in todo.items():
     else:
         ofilebase = file
     for x in tps:
-        if isinstance(x, basestring):
+        if isinstance(x, six.string_types):
             templates = {'Template1': x}
             ts = typessub[x].get('typecode')
             if not ts:

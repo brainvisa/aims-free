@@ -1,35 +1,4 @@
 # -*- coding: utf-8 -*-
-#  This software and supporting documentation are distributed by
-#      Institut Federatif de Recherche 49
-#      CEA/NeuroSpin, Batiment 145,
-#      91191 Gif-sur-Yvette cedex
-#      France
-#
-# This software is governed by the CeCILL-B license under
-# French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the
-# terms of the CeCILL-B license as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info".
-#
-# As a counterpart to the access to the source code and  rights to copy,
-# modify and redistribute granted by the license, users are provided only
-# with a limited warranty  and the software's author,  the holder of the
-# economic rights,  and the successive licensors  have only  limited
-# liability.
-#
-# In this respect, the user's attention is drawn to the risks associated
-# with loading,  using,  modifying and/or developing or reproducing the
-# software by the user in light of its specific status of free software,
-# that may mean  that it is complicated to manipulate,  and  that  also
-# therefore means  that it is reserved for developers  and  experienced
-# professionals having in-depth computer knowledge. Users are therefore
-# encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or
-# data to be ensured and,  more generally, to use and operate it in the
-# same conditions as regards security.
-#
-# The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL-B license and that you accept its terms.
 
 '''
 The aims module allows access to the AIMS library in python.
@@ -93,6 +62,9 @@ Main classes:
 .. _numpy: http://numpy.scipy.org/
 '''
 from __future__ import print_function
+from __future__ import absolute_import
+from six.moves import range
+from six.moves import zip
 __docformat__ = 'restructuredtext en'
 
 
@@ -170,9 +142,6 @@ except:
 
 if sys.version_info[0] >= 3:
     import functools
-    unicode = str
-    basestring = str
-    xrange = range
 
 # restore the original IOError
 IOError = IOError_orig
@@ -549,7 +518,7 @@ if sys.version_info[0] >= 3:
         return self._get().__next__()
 else:
     def objnext(self):
-        return self._get().next()
+        return next(self._get())
 
 
 def objiteritems(self):
@@ -587,7 +556,7 @@ def objiteritems(self):
                     except:
                         key = self.iterator.keyObject()
                 res = (key, self.iterator.currentValue())
-                self.iterator.next()
+                next(self.iterator)
                 return res
 
     return iterator(self.objectIterator())
@@ -614,7 +583,7 @@ def objitervalues(self):
                 if not self.iterator.isValid():
                     raise StopIteration("iterator outside bounds")
                 res = self.iterator.currentValue()
-                self.iterator.next()
+                next(self.iterator)
                 return res
 
     return iterator(self.objectIterator())
@@ -641,7 +610,7 @@ class BckIter:
         def next(self):
             if self._iter is None:
                 self._iter = iter(self._bck.keys())
-            elem = self._iter.next()
+            elem = next(self._iter)
             return self._bck[elem]
 
 
@@ -666,7 +635,7 @@ class BckIterItem:
         def next(self):
             if self._iter is None:
                 self._iter = iter(self._bck.keys())
-            elem = self._iter.next()
+            elem = next(self._iter)
             return elem, self._bck[elem]
 
 # automatic rc_ptr dereferencing
@@ -742,8 +711,7 @@ def rcptr_getAttributeNames(self):
     while l:
         c = l.pop()
         done.add(c)
-        m += filter(lambda x: not x.startswith('_') and x not in m,
-                    c.__dict__.keys())
+        m += [x for x in list(c.__dict__.keys()) if not x.startswith('_') and x not in m]
         cl = getattr(c, '__bases__', None)
         if not cl:
             cl = getattr(c, '__class__', None)
@@ -751,14 +719,14 @@ def rcptr_getAttributeNames(self):
                 continue
             else:
                 cl = [cl]
-        l += filter(lambda x: x not in done, cl)
+        l += [x for x in cl if x not in done]
     return m
 
 
 def __getitem_vec__(self, s):
     if isinstance(s, slice):
         start, stop, step = s.indices(len(self))
-        return [self.__oldgetitem__(x) for x in xrange(start, stop, step)]
+        return [self.__oldgetitem__(x) for x in range(start, stop, step)]
     else:
         return self.__oldgetitem__(s)
 
@@ -767,7 +735,7 @@ def __setitem_vec__(self, s, val):
     if isinstance(s, slice):
         start, stop, step = s.indices(len(self))
         return [self.__oldsetitem__(x, v) for x, v in
-                zip(xrange(start, stop, step), val)]
+                zip(range(start, stop, step), val)]
     else:
         return self.__oldsetitem__(s, val)
 
@@ -848,7 +816,7 @@ def __Volume_astype__(self, dtype, copy=False):
     -------
     A volume of the converted type
     '''
-    if isinstance(dtype, basestring):
+    if isinstance(dtype, six.string_types):
         if dtype.startswith('Volume_'):
             dtype = typeCode(dtype[7:])
         else:
@@ -1024,7 +992,7 @@ def __fixsipclasses__(classes):
                     and not hasattr(y, '__next__'):
                 # cannot just assign y.__next__ = y.next
                 # because SIP functions seem not to be copied correctly.
-                y.__next__ = lambda self: self.next()
+                y.__next__ = lambda self: next(self)
                 #del y.next
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
@@ -1100,7 +1068,7 @@ Point4d.__repr__ = Point4du.__repr__ = Point4df.__repr__ = Point4dd.__repr__ \
     = Point3d.__repr__ = Point3du.__repr__ = Point3df.__repr__ \
     = Point3dd.__repr__ = Point2d.__repr__ = Point2du.__repr__ \
     = Point2df.__repr__ = Point2dd.__repr__ \
-    = lambda self: __fixsipclasses__.fakerepr(self) + "\n" + str(self.items())
+    = lambda self: __fixsipclasses__.fakerepr(self) + "\n" + str(list(self.items()))
 
 
 import numpy
@@ -1501,7 +1469,7 @@ def typeCode(data):
             }
     if isinstance(data, numpy.dtype):
         data = str(data)
-    if type(data) in (str, unicode):
+    if type(data) in (str, six.text_type):
         return dmap.get(data, data)
     if not isinstance(data, type):
         # we use the type, not an instance (which may not be hashable)
@@ -1582,7 +1550,7 @@ def somaio_typeCode(data):
             return data
     if isinstance(data, tuple):
         return '%s of %s' % (_somaio_objecttype(data[0]), data[1])
-    if not isinstance(data, str) and not isinstance(data, unicode):
+    if not isinstance(data, str) and not isinstance(data, six.text_type):
         if hasattr(data, '__name__'):
             data = data.__name__
         else:
@@ -1599,7 +1567,7 @@ def _parseTypeInArgs(*args, **kwargs):
         del kwargs['dtype']
     else:
         y = [i for i, x in enumerate(args)
-             if type(x) in (str, unicode) or hasattr(x, '__name__')]
+             if type(x) in (str, six.text_type) or hasattr(x, '__name__')]
         if len(y) != 0:
             i = y[0]
             dtype = args[y[0]]
@@ -1733,7 +1701,7 @@ def TimeTexture(*args, **kwargs):
             if len(arg.shape) == 1:
                 tex[0].assign(arg)
             else:
-                for i in xrange(arg.shape[1]):
+                for i in range(arg.shape[1]):
                     tex[i].assign(arg[:, i])
             return tex
         if type(arg).__name__.startswith('TimeTexture_'):
@@ -2048,7 +2016,7 @@ def supported_io_formats(otypes=None, access=''):
     iotypes = IOObjectTypesDictionary.objectsTypes()
     if otypes is None:
         otypes = iotypes
-    elif isinstance(otypes, basestring):
+    elif isinstance(otypes, six.string_types):
         otypes = {otypes: None}
     elif isinstance(otypes, (list, tuple)):
         otypes = dict([(x, None) for x in otypes])

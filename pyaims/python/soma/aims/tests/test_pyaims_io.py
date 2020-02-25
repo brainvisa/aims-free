@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+from __future__ import absolute_import
 import glob
 import cmath
 import tempfile
@@ -14,6 +15,7 @@ from soma.aims import soma
 import numpy as np
 import glob
 from soma.aims.volumetools import compare_images
+from six.moves import range
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -291,7 +293,7 @@ class TestPyaimsIO(unittest.TestCase):
             if sys.version_info[0] >= 3:
                 longtype = int
             else:
-                longtype = long
+                longtype = int
             tmap = {'U8': int, 'S8': int,
                     'U16': int, 'S16': int,
                     'U32': int, 'S32': int,
@@ -436,7 +438,7 @@ class TestPyaimsIO(unittest.TestCase):
                         read_pattern = fe.get('read_pattern', 
                                               'Volume_%s_%d_%s%s')
 
-                        for i in xrange(len(volumes)):
+                        for i in range(len(volumes)):
                             if data_type in FLOAT_DATA_TYPES \
                                     and (cmath.isnan(volumes[i].at(0))
                                          or cmath.isinf(volumes[i].at(0))) \

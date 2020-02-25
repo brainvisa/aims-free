@@ -35,6 +35,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 import glob
 import string
 import os
@@ -43,13 +44,14 @@ from optparse import OptionParser
 from soma import aims
 import tempfile
 import numpy as np
+from six.moves import range
 
 if sys.version_info[0] >= 3:
     xrange = range
 
 
 def graphTransform2(g, motions, tmpg):
-    ks = motions.keys()
+    ks = list(motions.keys())
     x = tmpg.rfind('.')
     if x >= 0:
         tmpdat = tmpg[:x] + '.data'
@@ -80,7 +82,7 @@ def graphTransform2(g, motions, tmpg):
 
 
 def graphTransform(g, motions):
-    ks = motions.keys()
+    ks = list(motions.keys())
     vs = g['voxel_size']
     print('voxel size:', vs)
     globalmot = None
@@ -241,7 +243,7 @@ def parseOpts(argv):
         # special case of a single, global, transformation
         motions[None] = options.transfo[0]
     else:
-        for i in xrange(len(options.transfo)):
+        for i in range(len(options.transfo)):
             motions[options.name[i]] = options.transfo[i]
     return (options.input, options.output, motions)
 

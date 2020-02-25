@@ -40,6 +40,7 @@
 # 	This file contains SuperQuadricSamplable class
 #
 #########################################################################
+from __future__ import absolute_import
 import sys
 import math
 import types
@@ -50,6 +51,7 @@ from soma import aimsalgo, aims
 from soma.aimsalgo import Samplable_FLOAT_3
 from soma.wip.aimsalgo.transform import BendingTransform
 from soma.wip.aimsalgo.transform import TaperingTransform
+from six.moves import range
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -367,7 +369,7 @@ class SuperQuadricSamplable( Samplable_FLOAT_3 ) :
 			minimum = aims.Point3df(points[0])
 			maximum = aims.Point3df(points[0])
 			for point in points :
-				for index in xrange(len(point)) :
+				for index in range(len(point)) :
 					if point[index] < minimum[index] :
 						minimum[index] = point[index]
 					if point[index] > maximum[index] :

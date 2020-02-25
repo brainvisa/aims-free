@@ -9,11 +9,13 @@ A specialized version in aimsalgo handles resampling while loading: :class:`~som
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 import threading
 import itertools
 import multiprocessing
 import six
+from six.moves import range
 
 
 class LazyReadData(object):
@@ -431,7 +433,7 @@ class PreloadIterator(object):
 
     def next(self):
         self.preload()
-        item = self.iter.next()
+        item = next(self.iter)
         return item
 
     def preload(self):

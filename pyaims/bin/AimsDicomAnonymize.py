@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from soma import argparse
 from soma.dicom import anonymizer
 

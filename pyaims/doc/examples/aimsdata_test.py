@@ -34,8 +34,10 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 import sys
+from six.moves import range
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -79,11 +81,11 @@ print('minIndex:', data.minIndex())
 print('maxIndex:', data.maxIndex())
 
 print('python min/max...')
-for t in xrange(dt):
-    for z in xrange(dz):
+for t in range(dt):
+    for z in range(dz):
         print('t:', t, 'z:', z)
-        for y in xrange(dy):
-            for x in xrange(dx):
+        for y in range(dy):
+            for x in range(dx):
                 v = data.value(x, y, z, t)
                 if mi > v:
                     mi = v

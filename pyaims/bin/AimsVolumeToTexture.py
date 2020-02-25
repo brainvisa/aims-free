@@ -33,11 +33,13 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import absolute_import
 import sys
 import os
 from optparse import OptionParser
 from soma import aims
 import numpy as np
+from six.moves import range
 
 if sys.version_info[0] >= 3:
     xrange = range
@@ -89,7 +91,7 @@ ivert[np.where(ivert[:, 2] >= vol.getSizeZ())[0], 2] = vol.getSizeZ() - 1
 ar = np.array(vol, copy=False)
 
 
-for t in xrange(vol.getSizeT()):
+for t in range(vol.getSizeT()):
     t = tex[t]
     t.reserve(nv)
     t.assign(ar[ivert[:, 0], ivert[:, 1], ivert[:, 2], 0])

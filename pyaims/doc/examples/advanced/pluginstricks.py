@@ -2,6 +2,7 @@
 
 '''Maniupulate the plugins loader to avoid loading some of them, or to load additional plugins afterwards
 '''
+from __future__ import absolute_import
 from soma import aims
 
 dicomfile = 'toto.dcm'

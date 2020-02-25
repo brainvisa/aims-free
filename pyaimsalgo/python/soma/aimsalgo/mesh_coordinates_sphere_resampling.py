@@ -12,6 +12,7 @@
 from __future__ import print_function
 
 # system import
+from __future__ import absolute_import
 import numpy
 
 # Soma import

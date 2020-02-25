@@ -1,46 +1,15 @@
-#  This software and supporting documentation are distributed by
-#      Institut Federatif de Recherche 49
-#      CEA/NeuroSpin, Batiment 145,
-#      91191 Gif-sur-Yvette cedex
-#      France
-#
-# This software is governed by the CeCILL-B license under
-# French law and abiding by the rules of distribution of free software.
-# You can  use, modify and/or redistribute the software under the
-# terms of the CeCILL-B license as circulated by CEA, CNRS
-# and INRIA at the following URL "http://www.cecill.info".
-#
-# As a counterpart to the access to the source code and  rights to copy,
-# modify and redistribute granted by the license, users are provided only
-# with a limited warranty  and the software's author,  the holder of the
-# economic rights,  and the successive licensors  have only  limited
-# liability.
-#
-# In this respect, the user's attention is drawn to the risks associated
-# with loading,  using,  modifying and/or developing or reproducing the
-# software by the user in light of its specific status of free software,
-# that may mean  that it is complicated to manipulate,  and  that  also
-# therefore means  that it is reserved for developers  and  experienced
-# professionals having in-depth computer knowledge. Users are therefore
-# encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or
-# data to be ensured and,  more generally, to use and operate it in the
-# same conditions as regards security.
-#
-# The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL-B license and that you accept its terms.
+# -*- coding: utf-8 -*-
 
 '''.APC (commissure coordinates) IO and other tools'''
+from __future__ import absolute_import
+import six
+from six.moves import range
+from six.moves import zip
 __docformat__ = 'restructuredtext en'
 
 from soma import aims
 import types
 import sys
-
-if sys.version_info[0] >= 3:
-    xrange = range
-    basestring = str
-
 
 def apcRead(filename, imagefile=None):
     '''Read a .APC file
@@ -69,19 +38,19 @@ def apcRead(filename, imagefile=None):
     ihm = []
     for l in lines:
         if l[:3] == 'AC:':
-            apcdict['ac'] = map(lambda x: int(x), l.split()[1:4])
+            apcdict['ac'] = [int(x) for x in l.split()[1:4]]
         elif l[:3] == 'PC:':
-            apcdict['pc'] = map(lambda x: int(x), l.split()[1:4])
+            apcdict['pc'] = [int(x) for x in l.split()[1:4]]
         elif l[:3] == 'IH:':
-            apcdict['ih'] = map(lambda x: int(x), l.split()[1:4])
+            apcdict['ih'] = [int(x) for x in l.split()[1:4]]
         elif l[:5] == 'ACmm:':
-            acm = map(lambda x: float(x), l.split()[1:4])
+            acm = [float(x) for x in l.split()[1:4]]
             apcdict['acmm'] = acm
         elif l[:5] == 'PCmm:':
-            pcm = map(lambda x: float(x), l.split()[1:4])
+            pcm = [float(x) for x in l.split()[1:4]]
             apcdict['pcmm'] = pcm
         elif l[:5] == 'IHmm:':
-            ihm = map(lambda x: float(x), l.split()[1:4])
+            ihm = [float(x) for x in l.split()[1:4]]
             apcdict['ihmm'] = ihm
         else:
             comment = apcdict.get('comment', None)
@@ -95,7 +64,7 @@ def apcRead(filename, imagefile=None):
     if imagefile is None:
         return apcdict
 
-    if isinstqnce(imagefile, basestring):
+    if isinstqnce(imagefile, six.string_types):
         f = aims.Finder()
         if f.check(imagefile):
             image = f.header()
@@ -183,7 +152,7 @@ def apcTransform(apcdict, transform, outimagevoxelsize):
     Coordinates are transformed in the ``apcdict`` dictionary, which is
     modified in-place.
     '''
-    if isinstance(outimagevoxelsize, basestring):
+    if isinstance(outimagevoxelsize, six.string_types):
         f = aims.Finder()
         if f.check(outimagevoxelsize):
             outhdr = f.header()
@@ -203,7 +172,7 @@ def apcTransform(apcdict, transform, outimagevoxelsize):
         pmm = apcdict[p + 'mm']
         pmm2 = transform.transform(pmm)
         apcdict[p + 'mm'] = pmm2
-        vs = [pmm[i] / px[i] for i in xrange(3)]
+        vs = [pmm[i] / px[i] for i in range(3)]
         px2 = [int(round(x / y)) for x, y in zip(pmm2, outvs)]
         apcdict[p] = px2
 
