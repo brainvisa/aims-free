@@ -986,12 +986,13 @@ def __fixsipclasses__(classes):
                 y.__setstate__ = __fixsipclasses__._aimsdata_setstate
 
             # fix python3 iterators
-            if sys.version_info[0] >= 3 and hasattr(y, 'next') \
-                    and not hasattr(y, '__next__'):
+            if hasattr(y, 'next') and not hasattr(y, '__next__'):
                 # cannot just assign y.__next__ = y.next
                 # because SIP functions seem not to be copied correctly.
-                y.__next__ = lambda self: next(self)
-                #del y.next
+                import warnings
+                warnings.warn('{0!r} implements the obsolete next() method, '
+                              'patching it to have __next__'.format(y))
+                y.__next__ = lambda self: self.next()
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
             pass
