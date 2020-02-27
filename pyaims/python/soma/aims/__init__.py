@@ -516,7 +516,7 @@ if sys.version_info[0] >= 3:
         return self._get().__next__()
 else:
     def objnext(self):
-        return next(self._get())
+        return self._get().next()
 
 
 def objiteritems(self):
