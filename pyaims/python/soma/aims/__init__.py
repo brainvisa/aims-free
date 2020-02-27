@@ -904,6 +904,8 @@ def _aimsdata_setstate(self, state):
 def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
     for x, y in classes:
+        if not isinstance(y, six.class_types):
+            continue
         try:
             if not hasattr(y, '__name__'):
                 # not a named class
