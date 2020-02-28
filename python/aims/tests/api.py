@@ -66,11 +66,9 @@ class ImageFileComparison:
             testcase.fail(msg)
             #print('ERROR: image (%s, %s) content is not the same' % (image1, image2), file=sys.stderr)
 
-        # testunit 1.63 for python 2.6 (installed on MacOS) does not have assertDictEqual method
-        if hasattr(testcase, 'assertDictEqual'):
-            # Process differences between headers
-            testcase.assertDictEqual(h1, h2, msg)
-            #print('ERROR: image (%s, %s) header is not the same' % (image1, image2), file=sys.stderr)
+        # Process differences between headers
+        testcase.assertDictEqual(h1, h2, msg)
+        #print('ERROR: image (%s, %s) header is not the same' % (image1, image2), file=sys.stderr)
 
         i1 = None
         i2 = None
@@ -231,26 +229,10 @@ class CommandTest:
             raise RuntimeError(
                 'Command exited because run directory \'%s\' does not exists.'
                 % (run_directory,))
-        if sys.version_info >= (2, 7):
-            retcode = soma.subprocess.call(self.__command,
-                                      stdout=fout,
-                                      stderr=ferr,
-                                      cwd=run_directory)
-        else:
-            # python 2.6 / Mac cat get a INTR signal
-            # https://bugs.python.org/issue1068268
-            p = soma.subprocess.Popen(self.__command,
-                                 stdout=fout,
-                                 stderr=ferr,
-                                 cwd=run_directory)
-            while p.returncode is None:
-                try:
-                    p.communicate()
-                    p.wait()
-                except OSError as e:
-                    if e.errno != errno.EINTR:
-                        raise
-            retcode = p.returncode
+        retcode = soma.subprocess.call(self.__command,
+                                       stdout=fout,
+                                       stderr=ferr,
+                                       cwd=run_directory)
         if retcode != 0:
             raise RuntimeError(
                 'Command exit code was not 0. code: %d, Command: %s'

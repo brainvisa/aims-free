@@ -4,7 +4,7 @@
 PyAims tutorial : programming with AIMS in Python language
 **********************************************************
 
-This tutorial should work with Python 2 (2.6 or higher), and is also compatible with Python 3 (if pyaims is compiled in python3 mode).
+This tutorial should work with Python 2 (2.7 or higher), and is also compatible with Python 3 (if pyaims is compiled in python3 mode).
 
 AIMS is a C++ library, but has python language bindings: **PyAIMS**. This means that the C++ classes and functions can be used from python. 
 This has many advantages compared to pure C++:

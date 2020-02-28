@@ -34,7 +34,7 @@
 '''
 The aims module allows access to the AIMS library in python.
 
-Since version 4.5.1 both Python 2 (2.6 and higher) and Python 3 (3.4 and higher) are supported.
+Since version 4.7.0 both Python 2 (2.7 and higher) and Python 3 (3.4 and higher) are supported.
 
 - organization: `NeuroSpin <http://www.neurospin.org>`_ and former IFR 49
 
