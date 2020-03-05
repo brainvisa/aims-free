@@ -1050,7 +1050,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
     virtual bool isValid() const = 0;
     /*virtual*/ carto::Object currentValue() const = 0;
 
-    SIP_PYOBJECT next() /AutoGen/;
+    SIP_PYOBJECT __objnext__() /AutoGen/;
 %MethodCode
     //std::cout << "it next\n";
     if( !sipCpp->isIterator() )
@@ -1089,6 +1089,7 @@ typedef carto::rc_ptr<carto::GenericObject> rc_ptr_GenericObject;
         sipCpp->next();
       }
 %End
+
 
     virtual std::string key() const = 0;
     virtual long intKey() const = 0;

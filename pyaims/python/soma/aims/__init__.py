@@ -1,4 +1,35 @@
 # -*- coding: utf-8 -*-
+#  This software and supporting documentation are distributed by
+#      Institut Federatif de Recherche 49
+#      CEA/NeuroSpin, Batiment 145,
+#      91191 Gif-sur-Yvette cedex
+#      France
+#
+# This software is governed by the CeCILL-B license under
+# French law and abiding by the rules of distribution of free software.
+# You can  use, modify and/or redistribute the software under the
+# terms of the CeCILL-B license as circulated by CEA, CNRS
+# and INRIA at the following URL "http://www.cecill.info".
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability.
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or
+# data to be ensured and,  more generally, to use and operate it in the
+# same conditions as regards security.
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL-B license and that you accept its terms.
 
 '''
 The aims module allows access to the AIMS library in python.
@@ -513,12 +544,8 @@ def objiter(self):
     return self._get().__iter__()
 
 
-if sys.version_info[0] >= 3:
-    def objnext(self):
-        return self._get().__next__()
-else:
-    def objnext(self):
-        return next(self._get())
+def objnext(self):
+    return self._get().__next__()
 
 
 def objiteritems(self):
@@ -875,6 +902,8 @@ def _aimsdata_setstate(self, state):
 def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
     for x, y in classes:
+        if not isinstance(y, six.class_types):
+            continue
         try:
             if not hasattr(y, '__name__'):
                 # not a named class
@@ -942,9 +971,8 @@ def __fixsipclasses__(classes):
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
                 if hasattr(y, '__objnext__'):
-                    if sys.version_info[0] >= 3:
-                        y.__next__ = __fixsipclasses__.newnext
-                    else:
+                    y.__next__ = __fixsipclasses__.newnext
+                    if sys.version_info[0] < 3:
                         y.next = __fixsipclasses__.newnext
                 elif y.__name__.startswith('AimsVector_') \
                         or y.__name__.startswith('Texture_') \
@@ -986,14 +1014,6 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
                 y.__getstate__ = __fixsipclasses__._aimsdata_getstate
                 y.__setstate__ = __fixsipclasses__._aimsdata_setstate
-
-            # fix python3 iterators
-            if sys.version_info[0] >= 3 and hasattr(y, 'next') \
-                    and not hasattr(y, '__next__'):
-                # cannot just assign y.__next__ = y.next
-                # because SIP functions seem not to be copied correctly.
-                y.__next__ = lambda self: next(self)
-                #del y.next
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
             pass
@@ -1035,9 +1055,8 @@ del __vol_pow__, __vol_ipow__, __vol_floordiv__, __vol_ifloordiv__
 __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
 Object.__iter__ = __fixsipclasses__.objiter
-if sys.version_info[0] >= 3:
-    Object.__next__ = __fixsipclasses__.objnext
-else:
+Object.__next__ = __fixsipclasses__.objnext
+if sys.version_info[0] < 3:
     Object.next = __fixsipclasses__.objnext
 Object.__delitem__ = __fixsipclasses__.proxydelitem
 Object._getAttributeNames = __fixsipclasses__.getAttributeNames
