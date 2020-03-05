@@ -542,12 +542,8 @@ def objiter(self):
     return self._get().__iter__()
 
 
-if sys.version_info[0] >= 3:
-    def objnext(self):
-        return self._get().__next__()
-else:
-    def objnext(self):
-        return self._get().next()
+def objnext(self):
+    return self._get().__next__()
 
 
 def objiteritems(self):
@@ -973,9 +969,8 @@ def __fixsipclasses__(classes):
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
                 if hasattr(y, '__objnext__'):
-                    if sys.version_info[0] >= 3:
-                        y.__next__ = __fixsipclasses__.newnext
-                    else:
+                    y.__next__ = __fixsipclasses__.newnext
+                    if sys.version_info[0] < 3:
                         y.next = __fixsipclasses__.newnext
                 elif y.__name__.startswith('AimsVector_') \
                         or y.__name__.startswith('Texture_') \
@@ -1017,15 +1012,6 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
                 y.__getstate__ = __fixsipclasses__._aimsdata_getstate
                 y.__setstate__ = __fixsipclasses__._aimsdata_setstate
-
-            # fix python3 iterators
-            if hasattr(y, 'next') and not hasattr(y, '__next__'):
-                # cannot just assign y.__next__ = y.next
-                # because SIP functions seem not to be copied correctly.
-                import warnings
-                warnings.warn('{0!r} implements the obsolete next() method, '
-                              'patching it to have __next__'.format(y))
-                y.__next__ = lambda self: self.next()
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
             pass
@@ -1067,9 +1053,8 @@ del __vol_pow__, __vol_ipow__, __vol_floordiv__, __vol_ifloordiv__
 __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
 Object.__iter__ = __fixsipclasses__.objiter
-if sys.version_info[0] >= 3:
-    Object.__next__ = __fixsipclasses__.objnext
-else:
+Object.__next__ = __fixsipclasses__.objnext
+if sys.version_info[0] < 3:
     Object.next = __fixsipclasses__.objnext
 Object.__delitem__ = __fixsipclasses__.proxydelitem
 Object._getAttributeNames = __fixsipclasses__.getAttributeNames
