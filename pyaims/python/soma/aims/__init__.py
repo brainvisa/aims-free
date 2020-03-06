@@ -1362,7 +1362,7 @@ class _proxy:
 def genobj__getattribute__(self, attr):
     ga = object.__getattribute__(self, '__oldgetattribute__')
     x = ga(attr)
-    if(attr.startswith('__')) or attr == '_proxy':
+    if(attr.startswith('__') or attr == '_proxy') and attr != '__next__':
         return x
     return ga('_proxy').retvalue(x)
 
