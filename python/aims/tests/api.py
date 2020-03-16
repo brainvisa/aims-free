@@ -14,7 +14,7 @@ from six.moves import map
 from six.moves import zip
 
 
-class ImageFileComparison:
+class ImageFileComparison(object):
 
     """ Class to compare test command output image files.
     """
@@ -76,7 +76,7 @@ class ImageFileComparison:
         i2 = None
 
 
-class TextFileComparison:
+class TextFileComparison(object):
 
     """ Class to compare test command output text files.
     """
@@ -109,7 +109,7 @@ class TextFileComparison:
         testcase.assertEqual(f1content, f2content, msg)
 
 
-class FileComparison:
+class FileComparison(object):
 
     """ Class to compare test command output files.
     """
@@ -166,7 +166,7 @@ class FileComparison:
             ImageFileComparison.assertEqual(testcase, file1, file2, msg)
 
 
-class CommandTest:
+class CommandTest(object):
 
     """ CommandsTest class references a test command and its output files.
         It is used for testing a command and compare its output files to

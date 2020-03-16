@@ -46,7 +46,7 @@ if sys.version_info[0] >= 3:
     xrange = range
 
 
-class AimsDataAdjuster :
+class AimsDataAdjuster( object ) :
 
 	def adjust( self, dataSource, dataTarget ) :
 		# Process geometric moments on source and target

@@ -62,8 +62,8 @@ if sys.version_info[0] >= 3:
     xrange = range
 
 
-class BundlesReader:
-  class CurveIterator:
+class BundlesReader(object):
+  class CurveIterator(object):
     def __init__( self, name, dataFile, count ):
       self.name = name
       self._dataFile = dataFile
@@ -88,7 +88,7 @@ class BundlesReader:
         return BundlesReader.PointIterator( self._dataFile, count )
       raise StopIteration
         
-  class PointIterator:
+  class PointIterator(object):
     def __init__( self, dataFile, count ):
       self._dataFile = dataFile
       self._count = count

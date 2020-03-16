@@ -70,7 +70,7 @@ def anonymize(dicom_in, dicom_out,
         pack(os.path.abspath(dicom_out), glob(os.path.join(wip_dicom_out, '*')))
         shutil.rmtree(wip_dicom_out)
 
-class Anonymizer():
+class Anonymizer(object):
     """
     Anonymizes a DICOM file according to DICOM standard.
     """

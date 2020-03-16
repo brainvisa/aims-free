@@ -396,7 +396,7 @@ class Reader(object):
 
 # generic Writer class
 
-class Writer:
+class Writer(object):
 
     def __init__(self):
         self._objectType = None
@@ -499,7 +499,7 @@ def write(obj, filename, format=None, options={}):
 
 # vector-like iterator
 
-class VecIter:
+class VecIter(object):
 
     '''iterator class for some aims containers (AimsVector)'''
 
@@ -587,7 +587,7 @@ def objitervalues(self):
     return iterator(self.objectIterator())
 
 
-class BckIter:
+class BckIter(object):
 
     '''iterator class for bucket containers'''
 
@@ -607,7 +607,7 @@ class BckIter:
     next = __next__  # Python 2 compatibility
 
 
-class BckIterItem:
+class BckIterItem(object):
 
     '''item iterator class for bucket containers'''
 
@@ -1273,7 +1273,7 @@ del toObject, ptrToObject, rcToObject
 
 # customize GenericObject to get automatic conversions between
 # Objects and concrete types
-class _proxy:
+class _proxy(object):
 
     def retvalue(x):
         if callable(x):
