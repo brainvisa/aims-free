@@ -1415,7 +1415,7 @@ def __getattribute__(self, name):
     if g("__refParent")():
         return g(name)
     else:
-        raise "Underlying C++ object has been deleted"
+        raise RuntimeError("Underlying C++ object has been deleted")
 Point3df.__getattribute__ = __getattribute__
 del __getattribute__
 
