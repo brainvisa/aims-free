@@ -37,7 +37,7 @@ from soma import aims, aimsalgo
 
 from soma.aimsalgo import MomentBase, TriangulationMoment, MomentInvariant_S16, GeometricMoment_S16
 
-class Moment :
+class Moment( object ) :
 
 	@staticmethod
 	def processInvariantFromSurface( object, momentType = MomentBase.Volumic ) :

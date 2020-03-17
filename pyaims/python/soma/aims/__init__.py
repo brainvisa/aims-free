@@ -95,7 +95,6 @@ Main classes:
 from __future__ import print_function
 from __future__ import absolute_import
 from six.moves import range
-from six.moves import zip
 __docformat__ = 'restructuredtext en'
 
 
@@ -399,7 +398,7 @@ class Reader(object):
 
 # generic Writer class
 
-class Writer:
+class Writer(object):
 
     def __init__(self):
         self._objectType = None
@@ -502,7 +501,7 @@ def write(obj, filename, format=None, options={}):
 
 # vector-like iterator
 
-class VecIter:
+class VecIter(object):
 
     '''iterator class for some aims containers (AimsVector)'''
 
@@ -513,21 +512,14 @@ class VecIter:
     def __iter__(self):
         return self
 
-    if sys.version_info[0] >= 3:
-        def __next__(self):
-            if self._index >= len(self._vector):
-                raise StopIteration('iterator outside bounds')
-            val = self._vector[self._index]
-            self._index += 1
-            return val
+    def __next__(self):
+        if self._index >= len(self._vector):
+            raise StopIteration('iterator outside bounds')
+        val = self._vector[self._index]
+        self._index += 1
+        return val
 
-    else:
-        def next(self):
-            if self._index >= len(self._vector):
-                raise StopIteration('iterator outside bounds')
-            val = self._vector[self._index]
-            self._index += 1
-            return val
+    next = __next__  # Python 2 compatibility
 
 # Iterator (doesn't work when implemented in SIP so far)
 
@@ -557,34 +549,21 @@ def objiteritems(self):
         def __iter__(self):
             return self
 
-        if sys.version_info[0] >= 3:
-            def __next__(self):
-                if not self.iterator.isValid():
-                    raise StopIteration("iterator outside bounds")
+        def __next__(self):
+            if not self.iterator.isValid():
+                raise StopIteration("iterator outside bounds")
+            try:
+                key = self.iterator.key()
+            except:
                 try:
-                    key = self.iterator.key()
+                    key = self.iterator.intKey()
                 except:
-                    try:
-                        key = self.iterator.intKey()
-                    except:
-                        key = self.iterator.keyObject()
-                res = (key, self.iterator.currentValue())
-                self.iterator.__next__()
-                return res
-        else:
-            def next(self):
-                if not self.iterator.isValid():
-                    raise StopIteration("iterator outside bounds")
-                try:
-                    key = self.iterator.key()
-                except:
-                    try:
-                        key = self.iterator.intKey()
-                    except:
-                        key = self.iterator.keyObject()
-                res = (key, self.iterator.currentValue())
-                next(self.iterator)
-                return res
+                    key = self.iterator.keyObject()
+            res = (key, self.iterator.currentValue())
+            next(self.iterator)
+            return res
+
+        next = __next__  # Python 2 compatibility
 
     return iterator(self.objectIterator())
 
@@ -598,25 +577,19 @@ def objitervalues(self):
         def __iter__(self):
             return self
 
-        if sys.version_info[0] >= 3:
-            def __next__(self):
-                if not self.iterator.isValid():
-                    raise StopIteration("iterator outside bounds")
-                res = self.iterator.currentValue()
-                self.iterator.__next__()
-                return res
-        else:
-            def next(self):
-                if not self.iterator.isValid():
-                    raise StopIteration("iterator outside bounds")
-                res = self.iterator.currentValue()
-                next(self.iterator)
-                return res
+        def __next__(self):
+            if not self.iterator.isValid():
+                raise StopIteration("iterator outside bounds")
+            res = self.iterator.currentValue()
+            next(self.iterator)
+            return res
+
+        next = __next__  # Python 2 compatibility
 
     return iterator(self.objectIterator())
 
 
-class BckIter:
+class BckIter(object):
 
     '''iterator class for bucket containers'''
 
@@ -627,21 +600,16 @@ class BckIter:
     def __iter__(self):
         return self
 
-    if sys.version_info[0] >= 3:
-        def __next__(self):
-            if self._iter is None:
-                self._iter = iter(self._bck.keys())
-            elem = self._iter.__next__()
-            return self._bck[elem]
-    else:
-        def next(self):
-            if self._iter is None:
-                self._iter = iter(self._bck.keys())
-            elem = next(self._iter)
-            return self._bck[elem]
+    def __next__(self):
+        if self._iter is None:
+            self._iter = iter(self._bck.keys())
+        elem = next(self._iter)
+        return self._bck[elem]
+
+    next = __next__  # Python 2 compatibility
 
 
-class BckIterItem:
+class BckIterItem(object):
 
     '''item iterator class for bucket containers'''
 
@@ -652,18 +620,13 @@ class BckIterItem:
     def __iter__(self):
         return self
 
-    if sys.version_info[0] >= 3:
-        def __next__(self):
-            if self._iter is None:
-                self._iter = iter(self._bck.keys())
-            elem = self._iter.__next__()
-            return elem, self._bck[elem]
-    else:
-        def next(self):
-            if self._iter is None:
-                self._iter = iter(self._bck.keys())
-            elem = next(self._iter)
-            return elem, self._bck[elem]
+    def __next__(self):
+        if self._iter is None:
+            self._iter = iter(self._bck.keys())
+        elem = next(self._iter)
+        return elem, self._bck[elem]
+
+    next = __next__  # Python 2 compatibility
 
 # automatic rc_ptr dereferencing
 
@@ -1014,6 +977,14 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
                 y.__getstate__ = __fixsipclasses__._aimsdata_getstate
                 y.__setstate__ = __fixsipclasses__._aimsdata_setstate
+            if (hasattr(y, 'next')
+                    and hasattr(y, '__iter__')
+                    and not hasattr(y, '__next__')):
+                import warnings
+                warnings.warn('{0!r} looks like an iterator implementing the '
+                              'Python 2 next() method, it will not work as an '
+                              'iterator under Python 3'.format(y),
+                              DeprecationWarning)
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
             pass
@@ -1317,7 +1288,7 @@ del toObject, ptrToObject, rcToObject
 
 # customize GenericObject to get automatic conversions between
 # Objects and concrete types
-class _proxy:
+class _proxy(object):
 
     def retvalue(x):
         if callable(x):
@@ -1459,7 +1430,7 @@ def __getattribute__(self, name):
     if g("__refParent")():
         return g(name)
     else:
-        raise "Underlying C++ object has been deleted"
+        raise RuntimeError("Underlying C++ object has been deleted")
 Point3df.__getattribute__ = __getattribute__
 del __getattribute__
 

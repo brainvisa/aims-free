@@ -100,7 +100,7 @@ if __name__ == '__main__':
     if options.input_graph is None or options.input_csv is None:
         print("Error: input graph or csv file is missing")
         parser.parse_args(['-h'])
-    # class O:pass
+    # class O(object):pass
     # options=O()
     # options.input_csv='stats-values.csv';options.verbose=False;options.table_key_col=0;options.graph_key_attr='name';options.graph_val_attr='custom_num_val';options.output_graph='out.arg';options.input_graph='input_fold_graph.arg';options.table_val_col=1
 

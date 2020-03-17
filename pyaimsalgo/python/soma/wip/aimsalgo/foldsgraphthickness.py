@@ -39,7 +39,7 @@ from soma import aims
 from soma import aimsalgo
 import numpy
 
-class FoldsGraphThickness:
+class FoldsGraphThickness(object):
   def __init__( self, fold_graph, lgw_vol, gm_wm_mesh, gm_lcr_mesh,
     voronoi=None ):
     self.fold_graph = fold_graph

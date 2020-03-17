@@ -125,11 +125,17 @@ VolumeRef<Point3df> ffd_from_transformed_multichannel_5d_coord_volume(
     for(int y = 0; y < size_y; ++y) {
       for(int x = 0; x < size_x; ++x)
       {
-        ret->at(x, y, z)[0] = multichannel_volume->at(x, y, z, 0, 0)
+        std::vector<int> pos( 5, 0 );
+        pos[0] = x;
+        pos[1] = y;
+        pos[2] = z;
+        ret->at(x, y, z)[0] = multichannel_volume->at( pos )
                               - x * voxel_size_x;
-        ret->at(x, y, z)[1] = multichannel_volume->at(x, y, z, 0, 1)
+        pos[4] = 1;
+        ret->at(x, y, z)[1] = multichannel_volume->at( pos )
                               - y * voxel_size_y;
-        ret->at(x, y, z)[2] = multichannel_volume->at(x, y, z, 0, 2)
+        pos[5] = 2;
+        ret->at(x, y, z)[2] = multichannel_volume->at( pos )
                               - z * voxel_size_z;
       }
     }

@@ -70,7 +70,7 @@ if sys.version_info[0] >= 3:
 def readAndUnpack( format, file ):
   return struct.unpack( format, file.read( struct.calcsize( format ) ) )
 
-class BinaryItemReader:
+class BinaryItemReader(object):
   def __init__( self, bigEndian=True ):
     if bigEndian:
       self._endianess = '>'
@@ -91,7 +91,7 @@ class BinaryItemReader:
         result = result + readAndUnpack( self._endianess + f, file )
     return result
         
-class MeshReader:
+class MeshReader(object):
   def __init__( self, fileName ):
     self._file = None
     self._file = open( fileName, 'rb' )
