@@ -50,9 +50,6 @@ import six
 from six.moves import filter
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    six.string_types = str
-    xrange = range
 
 parser = OptionParser(description='Preprocess a template file to generate '
                       'typed SIP inpuyt files')
