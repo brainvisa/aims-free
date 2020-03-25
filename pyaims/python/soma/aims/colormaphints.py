@@ -43,9 +43,6 @@ try:
 except:
     aimsalgo = None
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 def checkVolume(vol):
     '''Checks colormap-related clues in a volume, and tries to determine whether it is an anatomical volume, a diffusion volume, a functional volume, or a labels volume. This is determined as "likelihoods" for each class (based on a pure empirical heurisrtic), based on, mainly, the histogram, voxel type, and voxel sizes.

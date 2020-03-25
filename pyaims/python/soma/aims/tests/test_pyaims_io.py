@@ -17,8 +17,6 @@ import glob
 from soma.aims.volumetools import compare_images
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
 
 FLOAT_DATA_TYPES = ("FLOAT", "CFLOAT", "DOUBLE", "CDOUBLE")
 NO_NAN_FORMATS = ("DICOM", )
@@ -280,8 +278,8 @@ class TestPyaimsIO(unittest.TestCase):
             return (o, d)
 
         def get_python_type(type_code):
-            if sys.version_info[0] >= 3:
-                longtype = int
+            if six.PY2:
+                longtype = long
             else:
                 longtype = int
             tmap = {'U8': int, 'S8': int,
@@ -569,7 +567,7 @@ class TestPyaimsIO(unittest.TestCase):
                             ##print('type:', t, 'size:', dsts)
                             
                             #if t != 'default':
-                                #for i in xrange(dsts):
+                                #for i in range(dsts):
                                     #ds = dsl.dataSource(t, i)
                                     
                                     ##print('url:', ds.url())

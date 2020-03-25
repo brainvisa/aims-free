@@ -39,9 +39,6 @@ import os
 from optparse import OptionParser
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 parser = OptionParser(description='set/create properties in a .minf '
                       'header')

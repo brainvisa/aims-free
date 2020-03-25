@@ -41,9 +41,6 @@ from soma import aims
 import numpy as np
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 parser = OptionParser(
     description='Project volume voxels valus on a mesh into a texture. Each vertex simply gets the volume value at its position.')
 parser.add_option('-i', '--input', dest='input',

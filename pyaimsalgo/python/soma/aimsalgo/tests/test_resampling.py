@@ -33,12 +33,7 @@
 
 from __future__ import absolute_import
 import sys
-if sys.version_info[:2] <= (2, 6):
-    # @unittest.expectedFailure decorator is not available on python 2.6:
-    # we need a backport of a newer version of unittest.
-    import unittest2 as unittest
-else:
-    import unittest
+import unittest
 
 import numpy as np
 

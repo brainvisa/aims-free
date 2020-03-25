@@ -46,9 +46,9 @@ import re
 from optparse import OptionParser
 import platform
 import subprocess
+
 import six
-from six.moves import filter
-from six.moves import range
+from six.moves import filter, range
 
 
 parser = OptionParser(description='Preprocess a template file to generate '
@@ -151,12 +151,9 @@ except Exception as e:
 
 # read generatedtypes file
 # expected to fill in the 'todo' dictionary variable
-if sys.version_info[0] >= 3:
-    with open(options.input) as f:
-        code = compile(f.read(), options.input, 'exec')
-    exec(code, globals(), globals())
-else:
-    exec(compile(open(options.input, "rb").read(), options.input, 'exec'), globals(), globals())
+with open(options.input, 'rb') as f:
+    code = compile(f.read(), options.input, 'exec')
+six.exec_(code, globals(), globals())
 
 if options.tpldir == '':
     dir_name = os.path.dirname(options.input)
@@ -167,12 +164,9 @@ else:
 typesmtime = 0
 for x in options.typessub:
     typesmtime = max(typesmtime, os.stat(x)[stat.ST_MTIME])
-    if sys.version_info[0] >= 3:
-        with open(x) as f:
-            code = compile(f.read(), x, 'exec')
-        exec(code, globals(), globals())
-    else:
-        exec(compile(open(x, "rb").read(), x, 'exec'), globals(), globals())
+    with open(x, 'rb') as f:
+        code = compile(f.read(), x, 'exec')
+    six.exec_(code, globals(), globals())
 
 typesmtime = max(typesmtime,
                  os.stat(maketemplate.__file__)[stat.ST_MTIME])

@@ -12,9 +12,6 @@ import six
 import sys
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 def mergeLabelsFromTexture(tex, labels_list, new_label):
     """
