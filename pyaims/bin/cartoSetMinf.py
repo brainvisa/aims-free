@@ -37,6 +37,8 @@ from __future__ import absolute_import
 import sys
 import os
 from optparse import OptionParser
+
+import six
 from six.moves import range
 
 
@@ -92,12 +94,16 @@ if not input.endswith('.minf'):
 
 attributes = {}
 try:
-    exec(compile(open(input, "rb").read(), input, 'exec'))
+    with open(input, 'rb') as f:
+        code = compile(f.read(), input, 'exec')
+    six.exec_(f)
 except:
     if os.path.exists(input) and not input.endswith('.minf'):
         input += '.minf'
         try:
-            exec(compile(open(input, "rb").read(), input, 'exec'))
+            with open(input, 'rb') as f:
+                code = compile(f.read(), input, 'exec')
+            six.exec_(code)
         except:
             pass
 
