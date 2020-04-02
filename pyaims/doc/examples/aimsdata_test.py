@@ -39,9 +39,6 @@ from soma import aims
 import sys
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 app = aims.AimsApplication(sys.argv, 'AimsData test in python')
 

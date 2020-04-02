@@ -63,9 +63,6 @@ import Blender
 from Blender import NMesh
 import sys
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 def readAndUnpack( format, file ):
   return struct.unpack( format, file.read( struct.calcsize( format ) ) )

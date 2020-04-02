@@ -121,17 +121,17 @@ attributes = {
 }        \endcode
      */
     static AimsSurfaceTriangle* 
-    icosahedron( const carto::GenericObject & params );
+      icosahedron( const carto::GenericObject & params );
     static AimsSurfaceTriangle* icosahedron( const Point3df & center, 
-					     float radius );
+                                             float radius );
 
     static AimsSurfaceTriangle* 
-    sphere( const carto::GenericObject & params );
+      sphere( const carto::GenericObject & params );
     static AimsSurfaceTriangle* sphere( const Point3df & p1, float radius, 
                                         unsigned nfacets,
                                         bool uniquevertices = false );
     static AimsSurfaceTriangle*
-    ellipse( const carto::GenericObject & params );
+      ellipse( const carto::GenericObject & params );
     static AimsSurfaceTriangle* ellipse( const Point3df & p1, float radius1,
                                          float radius2,
                                          unsigned nfacets,
@@ -142,12 +142,18 @@ attributes = {
                                            float radius, unsigned nfacets );
 
     static AimsTimeSurface<2,Void>*
-    parallelepiped_wireframe( const carto::GenericObject & params );
+      parallelepiped_wireframe( const carto::GenericObject & params );
     static AimsTimeSurface<2,Void>* parallelepiped_wireframe( 
       const Point3df & boundingbox_min, const Point3df & boundingbox_max );
 
+    static AimsSurfaceTriangle*
+      parallelepiped( const carto::GenericObject & params );
+    static AimsSurfaceTriangle* parallelepiped(
+      const Point3df & boundingbox_min, const Point3df & boundingbox_max,
+      bool smooth = false );
+
     static AimsTimeSurface<2,Void>*
-    circle_wireframe( const carto::GenericObject & params );
+      circle_wireframe( const carto::GenericObject & params );
     /** Circle, or part of circle.
      center, radius are classical.
      nseg is the number of segments in the circle polygon
@@ -163,7 +169,7 @@ attributes = {
       float stopangle = M_PI*2 );
 
     static AimsTimeSurface<2,Void>*
-    grid( const carto::GenericObject & params );
+      grid( const carto::GenericObject & params );
 
     /** Grid wireframe.
      Similar to parallelepiped_wireframe, with a regular grid sampling.

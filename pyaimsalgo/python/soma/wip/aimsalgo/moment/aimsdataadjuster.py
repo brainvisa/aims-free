@@ -42,9 +42,6 @@ from soma.aimsalgo import MomentBase, GeometricMoment_S16, MomentInvariant_S16
 from soma.wip.aimsalgo.moment import Moment
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 class AimsDataAdjuster( object ) :
 

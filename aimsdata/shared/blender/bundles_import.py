@@ -58,9 +58,6 @@ import Blender
 from Blender import Curve, Object, Scene
 import sys
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 class BundlesReader(object):
   class CurveIterator(object):

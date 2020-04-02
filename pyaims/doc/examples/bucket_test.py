@@ -39,9 +39,6 @@ from soma import aims
 import sys
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 bck = aims.read(
     '/neurospin/lnao/Panabase/data/diffusion/chaos/t1mri/default_acquisition/default_analysis/folds/3.0/base2005_manual/Rchaos_base2005_manual.data/ss_Bucket.bck')
 print('bucket:', bck)

@@ -121,7 +121,7 @@ def build_split_graph(graph, data, roots, skel=None):
             # unique label in vertex
             if len(labels) == 1:
                 label = labels[0]
-                v['label'] = labels_rmap.get(label, 'unknown')
+                v['label'] = six.ensure_text(labels_rmap.get(label, 'unknown'))
             continue
 
         todo.append(v)
@@ -180,7 +180,7 @@ def build_split_graph(graph, data, roots, skel=None):
         v2 = aims.FoldArgOverSegment(graph).splitVertex(v, split_bk, min_size)
         if v2 is None:
             print('split failed.')
-            v['label'] = labels_rmap[winner]
+            v['label'] = six.ensure_text(labels_rmap[winner])
             failed_cuts += 1
             loc_mis = sum(sizes) - sizes[np.where(labels == winner)[0][0]]
             print('mislabeled:', loc_mis)
@@ -201,7 +201,7 @@ def build_split_graph(graph, data, roots, skel=None):
                 else:
                     mislabeled += loc_mis
                     print('    good enough.')
-            v['label'] = labels_rmap[winner]
+            v['label'] = six.ensure_text(labels_rmap[winner])
             print('v1 label:', v['label'])
             # new voronoi in aroots
             aroots[pts] = roots_new + 1
@@ -218,7 +218,8 @@ def build_split_graph(graph, data, roots, skel=None):
                 else:
                     mislabeled += loc_mis
                     print('    good enough.')
-            v2['label'] = labels_rmap[maj_label(labels, pts, avol)]
+            v2['label'] = six.ensure_text(labels_rmap[maj_label(
+                labels, pts, avol)])
             print('v2 label:', v2['label'])
             aroots[pts] = roots_new
 

@@ -3,15 +3,13 @@ from __future__ import print_function
 from __future__ import absolute_import
 import unittest
 import doctest
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 import zipfile
 import os
 from shutil import rmtree
 import tempfile
 import sys
 
-if sys.version_info[0] >= 3:
-    from urllib import request as urllib
+import six.moves.urllib.request
 
 
 def setup_doctest(test):

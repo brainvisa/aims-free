@@ -99,6 +99,7 @@ __docformat__ = 'restructuredtext en'
 
 
 import collections
+import functools
 import types
 import sip
 import os
@@ -139,7 +140,6 @@ except ImportError as exc:
         )
     raise  # other import errors are re-raised
 
-from soma.functiontools import partial
 from soma.importer import ExtendedImporter, GenericHandlers
 
 # Rename sip modules and reorganize namespaces using the Importer class
@@ -170,8 +170,6 @@ try:
 except:
     pass  # probably cannot import scipy.io
 
-if sys.version_info[0] >= 3:
-    import functools
 
 # restore the original IOError
 IOError = IOError_orig
@@ -730,7 +728,7 @@ def __setitem_vec__(self, s, val):
         return self.__oldsetitem__(s, val)
 
 
-if sys.version_info[0] >= 3:
+if six.PY34:
     def __operator_overload__(self, op, other):
         try:
             return op(self, other)
@@ -897,7 +895,7 @@ def __fixsipclasses__(classes):
                     add = getattr(aimssip, '__%s_%s__' % (op, y.__name__),
                                   None)
                     if add is not None:
-                        if sys.version_info[0] >= 3:
+                        if six.PY34:
                             setattr(
                                 y, '__%s__' % op, functools.partialmethod(
                                     __fixsipclasses__.__operator_overload__,
@@ -906,7 +904,7 @@ def __fixsipclasses__(classes):
                             setattr(
                                 y, '__%s__' % op,
                                 types.MethodType(
-                                    partial(
+                                    functools.partial(
                                       __fixsipclasses__.__operator_overload__,
                                         add),
                                     None, y))
@@ -920,7 +918,7 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self).__getitem__(*args, **kwargs)
                 y.__setitem__ = lambda self, *args, **kwargs: \
                     numpy.asarray(self).__setitem__(*args, **kwargs)
-                if sys.version_info[0] >= 3:
+                if not six.PY2:
                     y.astype = __fixsipclasses__.__Volume_astype__
                 else:
                     y.astype = types.MethodType(
@@ -935,7 +933,7 @@ def __fixsipclasses__(classes):
                     y.__iter__ = __fixsipclasses__.newiter
                 if hasattr(y, '__objnext__'):
                     y.__next__ = __fixsipclasses__.newnext
-                    if sys.version_info[0] < 3:
+                    if six.PY2:
                         y.next = __fixsipclasses__.newnext
                 elif y.__name__.startswith('AimsVector_') \
                         or y.__name__.startswith('Texture_') \
@@ -956,7 +954,7 @@ def __fixsipclasses__(classes):
                     y.__iter__ = lambda self: self.__iterclass__(self)
                     y.iteritems = lambda self: self.__iteritemclass__(
                         self)
-                    if sys.version_info[0] >= 3:
+                    if not six.PY2:
                         y.items = lambda self: self.__iteritemclass__(
                             self)
                     if y.__name__.startswith('BucketMap_'):
@@ -966,7 +964,7 @@ def __fixsipclasses__(classes):
                             = lambda self: self.__iterclass__(self)
                         y.Bucket.iteritems \
                             = lambda self: self.__iteritemclass__(self)
-                        if sys.version_info[0] >= 3:
+                        if not six.PY2:
                             y.Bucket.items \
                                 = lambda self: self.__iteritemclass__(self)
             if y.__name__.startswith('AimsData_'):
@@ -1027,7 +1025,7 @@ __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
 Object.__iter__ = __fixsipclasses__.objiter
 Object.__next__ = __fixsipclasses__.objnext
-if sys.version_info[0] < 3:
+if six.PY2:
     Object.next = __fixsipclasses__.objnext
 Object.__delitem__ = __fixsipclasses__.proxydelitem
 Object._getAttributeNames = __fixsipclasses__.getAttributeNames
@@ -1406,7 +1404,7 @@ carto.GenericObject.__getattribute__ = genobj__getattribute__
 carto.GenericObject.update = genobj__update__
 carto.GenericObject.__iadd__ = genobj__iadd__
 carto.GenericObject.iteritems = objiteritems
-if sys.version_info[0] >= 3:
+if not six.PY2:
     carto.GenericObject.items = objiteritems
 carto.GenericObject.itervalues = objitervalues
 carto.GenericObject.iterkeys = carto.GenericObject.__iter__

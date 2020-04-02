@@ -44,10 +44,6 @@ import numpy as np
 import sys
 
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
-
 def crop_volume(vol, threshold=0, border=0):
     '''
     Crop the input volume, removing slices filled with values under a

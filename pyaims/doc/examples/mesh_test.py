@@ -39,9 +39,6 @@ from soma import aims
 import sys
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 mesh = aims.read('/home/dr144257/data/ra_head.mesh')
 print('mesh:', mesh)

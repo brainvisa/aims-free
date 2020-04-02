@@ -37,9 +37,6 @@ from optparse import OptionParser
 import sys
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 parser = OptionParser(description='Graphs concatenation')
 parser.add_option('-o', '--output', dest='output', help='output graph')
 parser.add_option('-i', '--input', dest='filename', action='append',

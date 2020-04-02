@@ -46,9 +46,6 @@ import tempfile
 import numpy as np
 from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 def graphTransform2(g, motions, tmpg):
     ks = list(motions.keys())

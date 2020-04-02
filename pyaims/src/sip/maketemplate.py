@@ -43,7 +43,10 @@ import sipconfig
 from optparse import OptionParser
 import subprocess
 import platform
+
+import six
 from six.moves import range
+
 
 def convert_string_to_int(s):
     '''
@@ -85,9 +88,9 @@ def makeTemplate(
             l = moc_out[1].decode()
             if l == '':
                 l = moc_out[0].decode() # moc 5
-                x = re.search('^.*moc ([0-9\.]+).*$', l).group(1)
+                x = re.search(r'^.*moc ([0-9\.]+).*$', l).group(1)
             else:
-                x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
+                x = re.search(r'^.*\(Qt ([^\)]*)\).*$', l).group(1)
             qv = [convert_string_to_int(k) for k in x.split('.')]
             qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
             cppcmd.append('-DQT_VERSION=' + hex(qver))
@@ -107,10 +110,10 @@ def makeTemplate(
         fo2, cppout = (p.stdin, p.stdout)
 
     templatere = re.compile('(%(Template[0-9]+)([^%]*)%)')
-    disableprere = re.compile('(^\s*)(#)(.*$)', re.M)
-    enableprere = re.compile('(^\s*)(//!#!)(.*$)')
-    preprocre = re.compile('(^\s*)(%#)(.*)%$')
-    removeprere = re.compile('^\s*#.*$')
+    disableprere = re.compile(r'(^\s*)(#)(.*$)', re.M)
+    enableprere = re.compile(r'(^\s*)(//!#!)(.*$)')
+    preprocre = re.compile(r'(^\s*)(%#)(.*)%$')
+    removeprere = re.compile(r'^\s*#.*$')
 
     for line in fi:
         lo = line
@@ -203,22 +206,19 @@ if __name__ == '__main__':
         if len(options.templates) % 2 != 0:
             print('template arguments go by pairs (key, value)')
             sys.exit(1)
-        for i in range(int(len(options.templates) / 2)):
+        for i in range(len(options.templates) // 2):
             templates[options.templates[i * 2]] = options.templates[i * 2 + 1]
 
     # print('templates:', options.templates)
     # print('subs:', options.subs)
 
     if options.subs:
-        if sys.version_info[0] >= 3:
-            with open(options.sub) as f:
-                code = compile(f.read(), options.sub, 'exec')
-            exec(code, globals(), globals())
-        else:
-            exec(compile(open(options.subs, "rb").read(), options.subs, 'exec'))
+        with open(options.subs, 'rb') as f:
+            code = compile(f.read(), options.subs, 'exec')
+        six.exec_(code)
         types = typessub
 
-    for i in range(int(len(args) / 2)):
+    for i in range(len(args) // 2):
         types[args[i * 2]] = args[i * 2 + 1]
 
     makeTemplate(infile, outfile, types, templates, cppc, moc=options.moc)
