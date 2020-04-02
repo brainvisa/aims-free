@@ -142,6 +142,24 @@ Compared to sphere() which performs meridian / parallels tesselation, icosphere 
 parallelepiped_wireframe( Point3df boundingbox_min, Point3df boundingbox_max )
 %End
 
+  static AimsSurfaceTriangle*
+    parallelepiped( const carto::GenericObject & params ) /Factory/;
+  static AimsSurfaceTriangle* parallelepiped(
+    const Point3df & boundingbox_min, const Point3df & boundingbox_max,
+    bool smooth = false ) /Factory/;
+%Docstring
+parallelepiped(boundingbox_min, boundingbox_max, smooth=False)
+
+Parameters
+----------
+boundingbox_min: Point3df
+    "lower bound" corner position
+boundingbox_min: Point3df
+    "upper bound" corner position
+smooth: bool
+    if True, make smooth faces and shared vertices in corners
+%End
+
   static AimsTimeSurface_2_VOID*
   circle_wireframe( const carto::GenericObject & params ) /Factory/;
   static AimsTimeSurface_2_VOID* circle_wireframe(
