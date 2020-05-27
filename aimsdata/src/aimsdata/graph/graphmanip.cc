@@ -1112,6 +1112,16 @@ void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
     Object gh = Object::value( Dictionary() );
     gh->copyProperties( Object::reference( *ph ) );
     g.setProperty( "header", gh );
+
+    set<string> forbidden;
+    forbidden.insert( "object_type" );
+    forbidden.insert( "data_type" );
+    forbidden.insert( "preferred_data_type" );
+    forbidden.insert( "bits_allocated" );
+    set<string>::iterator i, e = forbidden.end();
+    for( i=forbidden.begin(); i!=e; ++i )
+      if( gh->hasProperty( *i ) )
+        gh->removeProperty( *i );
   }
   delete hdr;
 }
