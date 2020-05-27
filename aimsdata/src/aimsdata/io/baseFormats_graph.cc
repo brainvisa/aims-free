@@ -99,14 +99,28 @@ bool ArgFormat::write( const string & filename, const Graph & obj,
 {
   //cout << "ArgFormat::write " << filename << endl;
   ArgWriter	w( filename );
-  bool forceglobal = false;
+  ArgWriter::SavingMode mode = ArgWriter::Keep;
   try
   {
     if( !options.isNull() )
     {
       carto::Object aso = options->getProperty( "force_global" );
       if( !aso.isNull() )
-        forceglobal = (bool) aso->getScalar();
+        if( (bool) aso->getScalar() )
+          mode = ArgWriter::Global;
+      aso = options->getProperty( "saving_mode" );
+      if( !aso.isNull() )
+        try
+        {
+          string sm = aso->getString();
+          if( sm == "local" )
+            mode = ArgWriter::Local;
+          else if( sm == "global" )
+            mode = ArgWriter::Global;
+        }
+        catch( ... )
+        {
+        }
     }
   }
   catch( ... )
@@ -115,14 +129,14 @@ bool ArgFormat::write( const string & filename, const Graph & obj,
     {
       // compatibility: try the old ascii flag which was misused
       carto::Object aso = options->getProperty( "ascii" );
-      if( !aso.isNull() )
-        forceglobal = (bool) aso->getScalar();
+      if( !aso.isNull() && (bool) aso->getScalar() )
+        mode = ArgWriter::Global;
     }
     catch( ... )
     {
     }
   }
-  return w.write( (Graph &) obj, forceglobal );
+  return w.write( (Graph &) obj, mode );
 }
 
 

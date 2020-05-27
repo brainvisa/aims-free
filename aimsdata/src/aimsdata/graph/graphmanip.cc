@@ -1104,6 +1104,17 @@ void GraphManip::graphFromVolume( const AimsData<T> & vol, Graph & g,
       }
     }
   }
+
+  // copy volume header properties into the graph "header" property
+  Header *hdr = vol.header()->cloneHeader();
+  PythonHeader *ph = dynamic_cast<PythonHeader *>( hdr );
+  if( ph )
+  {
+    Object gh = Object::value( Dictionary() );
+    gh->copyProperties( Object::reference( *ph ) );
+    g.setProperty( "header", gh );
+  }
+  delete hdr;
 }
 
 
