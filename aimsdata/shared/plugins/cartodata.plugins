@@ -4,6 +4,7 @@ attributes = {
     'libcartogis.so',
     'libcartonifti.so',
     'libcartodicom.so',
-    'libcartominc.so'
+    'libcartominc.so',
+    'libcartotiff.so'
   ], 
 }
