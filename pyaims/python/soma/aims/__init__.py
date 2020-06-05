@@ -669,11 +669,15 @@ def proxynonzero(self):
         return False
     try:
         return self._get().__nonzero__()
-    except:
+    except Exception:
         try:
-            return len(self._get())
-        except:
-            return True
+            return len(self._get()) != 0
+        except Exception:
+            try:
+                if self == 0:
+                    return False
+            except Exception:
+                return True
 
 
 def proxystr(self):
@@ -876,8 +880,9 @@ def __fixsipclasses__(classes):
                 y.__getitem__ = __fixsipclasses__.proxygetitem
                 # y.__setitem__ = __fixsipclasses__.proxysetitem
                 y.__delitem__ = __fixsipclasses__.proxydelitem
-                y.__str__ = __fixsipclasses__.proxystr
+                #y.__str__ = __fixsipclasses__.proxystr
                 y.__nonzero__ = __fixsipclasses__.proxynonzero
+                y.__bool__ = __fixsipclasses__.proxynonzero
                 y._getAttributeNames = __fixsipclasses__.getAttributeNames
                 # to maintain compatibiity with pyaims 3.x
                 y.get = __fixsipclasses__.proxyget
