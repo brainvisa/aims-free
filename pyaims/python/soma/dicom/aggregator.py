@@ -36,9 +36,12 @@ from __future__ import absolute_import
 from __future__ import print_function
 import os
 try:
-    import dicom
+    import pydicom as dicom
 except ImportError as e:
-    raise Exception("DICOM aggregator requires pydicom.")
+    try:
+        import dicom
+    except ImportError as e:
+        raise Exception("DICOM aggregator requires pydicom.")
 
 class DicomAggregator( object ):
     def __init__( self ):
