@@ -48,6 +48,7 @@
 #include <aims/fibers/bundles.h>
 // FIXME: temporary
 #include <aims/fibers/trackvisbundlereader.h>
+#include <aims/fibers/mrtrixbundlereader.h>
 #include <cartobase/type/byte_order.h>
 #include <cartobase/config/verbose.h>
 #include <cartobase/type/string_conversion.h>
@@ -616,6 +617,9 @@ void BundleReader::read()
   if( _fileName.length() >= 4
       && _fileName.substr( _fileName.size() - 4 ) == ".trk" )
     low_reader.reset( new TrackvisBundleReader( _fileName ) );
+  else if( _fileName.length() >= 4
+      && _fileName.substr( _fileName.size() - 4 ) == ".tck" )
+    low_reader.reset( new MRTrixBundleReader( _fileName ) );
   else
     low_reader.reset( new ConnectomistBundlesReader( _fileName ) );
 
@@ -632,6 +636,9 @@ Object BundleReader::readHeader()
   if( _fileName.length() >= 4
       && _fileName.substr( _fileName.size() - 4 ) == ".trk" )
     low_reader.reset( new TrackvisBundleReader( _fileName ) );
+  else if( _fileName.length() >= 4
+      && _fileName.substr( _fileName.size() - 4 ) == ".tck" )
+    low_reader.reset( new MRTrixBundleReader( _fileName ) );
   else
     low_reader.reset( new ConnectomistBundlesReader( _fileName ) );
 
@@ -687,6 +694,15 @@ void ConnectomistBundlesReader::read()
     && _fileName.substr( _fileName.size() - 4 ) == ".trk" )
   {
     TrackvisBundleReader tbr( _fileName );
+    tbr.read();
+
+    return;
+  }
+
+  if( _fileName.length() >= 4
+    && _fileName.substr( _fileName.size() - 4 ) == ".tck" )
+  {
+    MRTrixBundleReader tbr( _fileName );
     tbr.read();
 
     return;

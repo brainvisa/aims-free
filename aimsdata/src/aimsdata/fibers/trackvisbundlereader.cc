@@ -325,7 +325,8 @@ void TrackvisBundleReader::read()
   header->getProperty( "dim", dim );
   header->getProperty( "voxel_size", vs );
   header->getProperty( "storage_to_memory", s2m_v );
-  ByteSwapper byteSwapper( byte_swapping ? byteOrder() + 1 : byteOrder() );
+  ByteSwapper byteSwapper;
+  byteSwapper.setSwapped( byte_swapping );
 
   AffineTransformation3d s2m( s2m_v );
   AffineTransformation3d tvs;

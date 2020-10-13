@@ -144,6 +144,7 @@ void Finder::initPrivate()
       ext.push_back( "arg" );
       ext.push_back( "bundles" );
       ext.push_back( "trk" );
+      ext.push_back( "tck" );
       registerFormat( "ARG", new FinderGraphFormat, ext );
       ext.clear();
       ext.push_back( "trm" );
