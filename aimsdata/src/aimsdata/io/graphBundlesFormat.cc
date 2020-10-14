@@ -124,13 +124,9 @@ bool GraphBundlesFormat::read( const string & filename, Graph & obj,
     try
     {
       Object filter_large = options->getProperty( "max_filtered_memory" );
-      cout << "mem filtering\n";
-      cout << filter_large->getScalar() << endl;
       size_t max_mem = size_t( filter_large->getScalar() );
-      cout << "max_mem: " << max_mem << endl;
       Object fsize = header->getProperty( "data_size" );
       size_t dsize = fsize->getScalar();
-      cout << dsize << " / " << max_mem << endl;
       if( dsize > max_mem )
       {
         bs = new BundleSampler( max_mem * 100. / dsize, "dummy", "dummy", 1 );
