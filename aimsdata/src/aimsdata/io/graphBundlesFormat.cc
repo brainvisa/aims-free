@@ -35,6 +35,7 @@
 
 #include <aims/io/graphBundlesFormat.h>
 #include <aims/fibers/bundles.h>
+#include <aims/fibers/bundleSampler.h>
 
 using namespace std;
 using namespace carto;
@@ -116,26 +117,62 @@ bool GraphBundlesFormat::read( const string & filename, Graph & obj,
   obj.clearProperties();
   BundleReader reader( filename );
   Object header = reader.readHeader();
+
+  BundleSampler *bs = 0;
+  if( options )
+  {
+    try
+    {
+      Object filter_large = options->getProperty( "max_filtered_memory" );
+      cout << "mem filtering\n";
+      cout << filter_large->getScalar() << endl;
+      size_t max_mem = size_t( filter_large->getScalar() );
+      cout << "max_mem: " << max_mem << endl;
+      Object fsize = header->getProperty( "data_size" );
+      size_t dsize = fsize->getScalar();
+      cout << dsize << " / " << max_mem << endl;
+      if( dsize > max_mem )
+      {
+        bs = new BundleSampler( max_mem * 100. / dsize, "dummy", "dummy", 1 );
+        cout << "Filter out and keep only " << max_mem * 100. / dsize
+             << " % of fibers to reduce size\n";
+      }
+    }
+    catch( ... )
+    {
+    }
+  }
+
   BundleToGraph bundleToGraph( obj );
   setBundlesOptions( bundleToGraph, options );
-  reader.addBundleListener( bundleToGraph );
+  if( bs )
+  {
+    reader.addBundleListener( *bs );
+    bs->addBundleListener( bundleToGraph );
+  }
+  else
+    reader.addBundleListener( bundleToGraph );
   obj.copyProperties( header );
-  reader.read();
+  try
+  {
+    reader.read();
+  }
+  catch( ... )
+  {
+    delete bs;
+    throw;
+  }
+  delete bs;
+
   return true;
 }
 
 
 Graph* GraphBundlesFormat::read( const string & filename, 
-                                 const carto::AllocatorContext & /*context*/, 
+                                 const carto::AllocatorContext & context,
                                  carto::Object options )
 {
   Graph *result = new Graph( "RoiArg" );
-  BundleReader reader( filename );
-  Object header = reader.readHeader();
-  BundleToGraph bundleToGraph( *result );
-  setBundlesOptions( bundleToGraph, options );
-  reader.addBundleListener( bundleToGraph );
-  result->copyProperties( header );
-  reader.read();
+  read( filename, *result, context, options );
   return result;
 }

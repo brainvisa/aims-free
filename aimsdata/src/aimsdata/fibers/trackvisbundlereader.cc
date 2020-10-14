@@ -297,6 +297,12 @@ Object TrackvisBundleReader::readHeaderStream( istream & file )
     header->setProperty( "referentials", refs );
   }
 
+  // get data size
+  streampos pos = file.tellg();
+  file.seekg( 0, ios::end );
+  header->setProperty( "data_size", size_t( file.tellg() - pos ) );
+  file.seekg( pos, ios::beg );
+
   return header;
 }
 

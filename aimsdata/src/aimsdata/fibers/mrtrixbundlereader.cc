@@ -205,7 +205,18 @@ Object MRTrixBundleReader::readHeaderStream( istream & file )
     }
     else
       header->setProperty( prop, svalue );
+
+    if( prop == "count" )
+    {
+      header->setProperty( "curves_count", header->getProperty( prop ) );
+    }
   }
+
+  // get data size
+  streampos pos = file.tellg();
+  file.seekg( 0, ios::end );
+  header->setProperty( "data_size", size_t( file.tellg() - pos ) );
+  file.seekg( pos, ios::beg );
 
   return header;
 }
@@ -225,7 +236,7 @@ void MRTrixBundleReader::read()
 //   int64_t n_count;
   bool byte_swapping;
 
-  vector<float> s2m_v;
+//   vector<float> s2m_v;
 //   unsigned char invert_x = 0, invert_y = 0, invert_z = 0;
 
 //   header->getProperty( "count", n_count );

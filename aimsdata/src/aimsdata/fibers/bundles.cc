@@ -60,6 +60,9 @@
 #include <stdexcept>
 #include <math.h>
 #include <iostream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 
 using namespace std;
@@ -867,6 +870,13 @@ Object ConnectomistBundlesReader::readHeader()
   {
   }
   header->setProperty( "voxel_size", vs );
+
+  // get data size
+  struct stat st;
+  if( ::stat( ( _fileName + ".bundlesdata" ).c_str(), &st ) == 0 )
+  {
+    header->setProperty( "data_size", st.st_size );
+  }
 
   return header;
 }
