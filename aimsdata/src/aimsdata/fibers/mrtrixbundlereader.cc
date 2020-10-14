@@ -35,9 +35,8 @@
 
 #include <aims/fibers/mrtrixbundlereader.h>
 #include <cartobase/type/byte_order.h>
-#include <aims/transformation/affinetransformation3d.h>
+// #include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/stream/stringutil.h>
-#include <soma-io/writer/pythonwriter.h>
 
 using namespace aims;
 using namespace carto;
@@ -207,10 +206,6 @@ Object MRTrixBundleReader::readHeaderStream( istream & file )
     else
       header->setProperty( prop, svalue );
   }
-
-  PythonWriter pw;
-  pw.attach( cout );
-  pw.write( header );
 
   return header;
 }

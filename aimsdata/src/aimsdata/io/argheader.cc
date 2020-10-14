@@ -35,6 +35,7 @@
 #include <aims/def/general.h>
 #include <aims/io/defaultItemR.h>
 #include <aims/io/defaultItemW.h>
+#include <aims/fibers/bundles.h>
 #include <cartobase/exception/ioexcept.h>
 #include <soma-io/datasource/streamdatasource.h>
 
@@ -63,29 +64,19 @@ string ArgHeader::filename() const
 void ArgHeader::read( size_t * )
 {
   string fileName = filename();
-  if( fileName.length() >= 8 && 
-      fileName.substr( _name.length() - 8, 8 ) == ".bundles" )
+  if( ( fileName.length() >= 8 &&
+        fileName.substr( _name.length() - 8, 8 ) == ".bundles" )
+      || ( fileName.length() >= 4 &&
+           fileName.substr( _name.length() - 4, 4 ) == ".trk" )
+      || ( fileName.length() >= 4 &&
+           fileName.substr( _name.length() - 4, 4 ) == ".tck" ) )
   {
-    setProperty( "file_type", string( "BUNDLES" ) );
-    setProperty( "object_type", string( "Graph" ) );
-    setProperty( "data_type", string( "VOID" ) );
-    // Read bundles header
-    readMinf( fileName );
-    // add meta-info to header
-    readMinf( fileName + ".minf" );
-  }
-  else if(fileName.length() >= 4 &&
-      fileName.substr( _name.length() - 4, 4 ) == ".trk" )
-  {
-    setProperty( "file_type", string( "BUNDLES" ) );
-    setProperty( "object_type", string( "Graph" ) );
-    setProperty( "data_type", string( "VOID" ) );
-    // add meta-info to header
-    readMinf( fileName + ".minf" );
-  }
-  else if(fileName.length() >= 4 &&
-      fileName.substr( _name.length() - 4, 4 ) == ".tck" )
-  {
+    BundleReader bundelReader( fileName );
+    Object hdr = bundelReader.readHeader();
+
+    if( hdr )
+      copyProperties( hdr );
+
     setProperty( "file_type", string( "BUNDLES" ) );
     setProperty( "object_type", string( "Graph" ) );
     setProperty( "data_type", string( "VOID" ) );
@@ -142,7 +133,7 @@ void ArgHeader::write()
   if( !os )
     io_error::launchErrnoExcept( fileName );
 
-// Yann // A v�rifier et compl�ter
+// Yann // To check and complete
 
   // write meta-info header
   setProperty( "file_type", string( "ARG" ) );
