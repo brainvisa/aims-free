@@ -91,6 +91,7 @@ namespace aims
     ext.clear();
     ext.push_back( "bundles" );
     ext.push_back( "trk" );
+    ext.push_back( "tck" );
     registerFormat( "BUNDLES", new GraphBundlesFormat, ext );
   }
 

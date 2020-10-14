@@ -296,6 +296,12 @@ Object TrackvisBundleReader::readHeaderStream( istream & file )
     header->setProperty( "referentials", refs );
   }
 
+  // get data size
+  streampos pos = file.tellg();
+  file.seekg( 0, ios::end );
+  header->setProperty( "data_size", size_t( file.tellg() - pos ) );
+  file.seekg( pos, ios::beg );
+
   return header;
 }
 
@@ -323,7 +329,8 @@ void TrackvisBundleReader::read()
   header->getProperty( "dim", dim );
   header->getProperty( "voxel_size", vs );
   header->getProperty( "storage_to_memory", s2m_v );
-  ByteSwapper byteSwapper( byte_swapping ? byteOrder() + 1 : byteOrder() );
+  ByteSwapper byteSwapper;
+  byteSwapper.setSwapped( byte_swapping );
 
   AffineTransformation3d s2m( s2m_v );
   AffineTransformation3d tvs;
