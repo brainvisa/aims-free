@@ -125,13 +125,17 @@ bool GraphBundlesFormat::read( const string & filename, Graph & obj,
     {
       Object filter_large = options->getProperty( "max_filtered_memory" );
       size_t max_mem = size_t( filter_large->getScalar() );
-      Object fsize = header->getProperty( "data_size" );
-      size_t dsize = fsize->getScalar();
-      if( dsize > max_mem )
+      if( max_mem > 0 )  // 0 means unlimited.
       {
-        bs = new BundleSampler( max_mem * 100. / dsize, "dummy", "dummy", 1 );
-        cout << "Filter out and keep only " << max_mem * 100. / dsize
-             << " % of fibers to reduce size\n";
+        Object fsize = header->getProperty( "data_size" );
+        size_t dsize = fsize->getScalar();
+        if( dsize > max_mem )
+        {
+          bs = new BundleSampler( max_mem * 100. / dsize, "dummy", "dummy",
+                                  1 );
+          cout << "Filter out and keep only " << max_mem * 100. / dsize
+              << " % of fibers to reduce size\n";
+        }
       }
     }
     catch( ... )

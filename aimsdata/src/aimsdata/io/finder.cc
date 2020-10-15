@@ -220,10 +220,10 @@ FinderFormat* Finder::finderFormat( const string & format )
 }
 
 
-bool Finder::check( const string& filename )
+bool Finder::check( const string& filename_uri )
 {
 #ifdef AIMS_DEBUG_IO
-  cout << "FINDER:: check( " << filename << " )\n";
+  cout << "FINDER:: check( " << filename_uri << " )\n";
 #endif
   static bool plugs = false;
   if( !plugs )
@@ -237,7 +237,7 @@ bool Finder::check( const string& filename )
 
   // try using DataSourceInfo first (new system 2005)
   #ifdef AIMS_DEBUG_IO
-  cout << "FINDER:: trying check " << filename
+  cout << "FINDER:: trying check " << filename_uri
     << " through DataSourceInfoLoader... " << endl;
   #endif
   Object h;
@@ -246,7 +246,7 @@ bool Finder::check( const string& filename )
   {
     // try first 2 passes
     DataSourceInfoLoader dsil;
-    rc_ptr<DataSource> ds( new FileDataSource( filename ) );
+    rc_ptr<DataSource> ds( new FileDataSource( filename_uri ) );
     DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ),
                                       carto::none(), 1, 2 );
     h = dsi.header();
@@ -282,7 +282,7 @@ bool Finder::check( const string& filename )
     setHeader( ph );
 
     #ifdef AIMS_DEBUG_IO
-    cout << "FINDER:: DataSourceInfo worked for " << filename
+    cout << "FINDER:: DataSourceInfo worked for " << filename_uri
       << " with extension: " << somaio_ext << endl;
     #endif
 
@@ -297,11 +297,15 @@ bool Finder::check( const string& filename )
     */
   }
   #ifdef AIMS_DEBUG_IO
-  cout << "FINDER:: for " << filename << ", trying through Finder... " << endl;
+  cout << "FINDER:: for " << filename_uri << ", trying through Finder... "
+       << endl;
   #endif
 
   _errorcode = -1;
   _errormsg.clear();
+
+  // remove query-string part or URI
+  string filename = carto::FileUtil::uriFilename( filename_uri );
 
   //	find filename extension
   string                bname = FileUtil::basename( filename );
