@@ -233,6 +233,16 @@ namespace aims
     int					exct = -1;
     std::string				excm;
 
+    // parse/split query-string part or URI
+    std::string filename = carto::FileUtil::uriFilename( _filename );
+    carto::Object uri_opt = carto::FileUtil::uriOptions( _filename );
+    if( uri_opt )
+    {
+      if( read_options.isNull() )
+        read_options = carto::Object::value( carto::Dictionary() );
+      read_options->copyProperties( uri_opt );
+    }
+
     if( format )	// priority to format hint
     {
       reader = FileFormatDictionary<T>::fileFormat( *format );
@@ -243,7 +253,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
           localMsg("1. try reader " + *format);
 #endif
-          if( reader->read( _filename, obj, _alloccontext, read_options ) )
+          if( reader->read( filename, obj, _alloccontext, read_options ) )
           {
 #ifdef AIMS_DEBUG_IO
             localMsg("1. " + *format + " OK");
@@ -267,13 +277,13 @@ namespace aims
       }
     }
 
-    std::string                bname = carto::FileUtil::basename( _filename );
+    std::string                bname = carto::FileUtil::basename( filename );
     std::string::size_type     pos = bname.find( '.' );
-    std::string::size_type     dlen = _filename.length() - bname.length();
+    std::string::size_type     dlen = filename.length() - bname.length();
     std::string                ext;
 
     if( pos != std::string::npos )
-      ext = _filename.substr( dlen+pos+1, _filename.length() - pos - 1 );
+      ext = filename.substr( dlen+pos+1, filename.length() - pos - 1 );
 
     const std::map<std::string, std::list<std::string> >	& extensions
       = FileFormatDictionary<T>::extensions();
@@ -285,7 +295,7 @@ namespace aims
 
     while( iext == eext && (pos=bname.find( '.', pos+1 ))!=std::string::npos )
     {
-      ext = _filename.substr( dlen+pos+1, _filename.length() - pos - 1 );
+      ext = filename.substr( dlen+pos+1, filename.length() - pos - 1 );
       iext = extensions.find( ext );
     }
 
@@ -302,7 +312,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
               localMsg("2. try reader " + *ie);
 #endif
-              if( reader->read( _filename, obj, _alloccontext, read_options ) )
+              if( reader->read( filename, obj, _alloccontext, read_options ) )
               {
 #ifdef AIMS_DEBUG_IO
                 localMsg("2. " + *ie + " OK");
@@ -346,7 +356,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
                 localMsg("3. try reader " + *ie);
 #endif
-                if( reader->read( _filename, obj, _alloccontext, read_options ) )
+                if( reader->read( filename, obj, _alloccontext, read_options ) )
                 {
 #ifdef AIMS_DEBUG_IO
                   localMsg("3. " + *ie + " OK");
@@ -384,7 +394,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
               localMsg("4. try reader " + *ie);
 #endif
-              if( reader->read( _filename, obj, _alloccontext, read_options ) )
+              if( reader->read( filename, obj, _alloccontext, read_options ) )
               {
 #ifdef AIMS_DEBUG_IO
                 localMsg("4. " + *ie + " OK");
@@ -413,7 +423,7 @@ namespace aims
     try
     {
       // building uri
-      std::string uri = _filename;
+      std::string uri = filename;
       if( border != 0 || frame != -1 )
         uri += "?";
       if( border != 0 )
@@ -432,7 +442,7 @@ namespace aims
 
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm, 
-                                   _filename + " : no matching format" );
+                                   filename + " : no matching format" );
     return( false );
   }
 
@@ -535,6 +545,16 @@ namespace aims
     int					exct = -1;
     std::string				excm;
 
+    // parse/split query-string part or URI
+    std::string filename = carto::FileUtil::uriFilename( _filename );
+    carto::Object uri_opt = carto::FileUtil::uriOptions( _filename );
+    if( uri_opt )
+    {
+      if( read_options.isNull() )
+        read_options = carto::Object::value( carto::Dictionary() );
+      read_options->copyProperties( uri_opt );
+    }
+
     if( format )	// priority to format hint
     {
       reader = FileFormatDictionary<T>::fileFormat( *format );
@@ -545,7 +565,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
           localMsg("1. try reader " + *format);
 #endif
-          obj = reader->read( _filename, _alloccontext, read_options );
+          obj = reader->read( filename, _alloccontext, read_options );
           if( obj )
           {
 #ifdef AIMS_DEBUG_IO
@@ -570,7 +590,7 @@ namespace aims
       }
     }
 
-    std::string	ext = carto::FileUtil::extension( _filename );
+    std::string	ext = carto::FileUtil::extension( filename );
 
     const std::map<std::string, std::list<std::string> >	& extensions
         = FileFormatDictionary<T>::extensions();
@@ -593,7 +613,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
               localMsg("2. try reader " + *ie);
 #endif
-              obj = reader->read( _filename, _alloccontext, read_options );
+              obj = reader->read( filename, _alloccontext, read_options );
               if( obj )
               {
 #ifdef AIMS_DEBUG_IO
@@ -638,7 +658,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
                 localMsg("3. try reader " + *ie);
 #endif
-                obj = reader->read( _filename, _alloccontext, read_options );
+                obj = reader->read( filename, _alloccontext, read_options );
                 if( obj )
                 {
 #ifdef AIMS_DEBUG_IO
@@ -677,7 +697,7 @@ namespace aims
 #ifdef AIMS_DEBUG_IO
               localMsg("4. try reader " + *ie);
 #endif
-              obj = reader->read( _filename, _alloccontext, read_options );
+              obj = reader->read( filename, _alloccontext, read_options );
               if( obj )
               {
 #ifdef AIMS_DEBUG_IO
@@ -707,7 +727,7 @@ namespace aims
     try
     {
       // building uri
-      std::string uri = _filename;
+      std::string uri = filename;
       if( border != 0 || frame != -1 )
         uri += "?";
       if( border != 0 )
@@ -725,7 +745,7 @@ namespace aims
 
     // still not succeeded, it's hopeless...
     carto::io_error::launchExcept( exct, excm, 
-				   _filename + " : no matching format" );
+				   filename + " : no matching format" );
     return( 0 );
   }
 
