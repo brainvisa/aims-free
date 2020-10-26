@@ -33,8 +33,7 @@ class LabelMapTexture : public Process
 public:
   LabelMapTexture( const string & meshfile, const string & brainfile,
                    const string & outexfile,
-                   int radius, int height, int int_height, int mode,
-                   bool asciiFlag );
+                   float radius, float height, float int_height, int mode );
   
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
@@ -43,19 +42,18 @@ public:
   bool labelMap( AimsData<T> & data );
 
 private:
-  string        meshf, brainf, otexf;
-  int          radius, height, int_height, mode;
-  bool         ascii;
+  string       meshf, brainf, otexf;
+  float        radius, height, int_height;
+  int          mode;
 };
 
 LabelMapTexture::LabelMapTexture( const string & meshfile,
                                   const string & brainfile,
                                   const string & outexfile,
-                                  int rad, int hei, int int_height,
-                                  int mod, bool asciiFlag)
+                                  float rad, float hei, float int_height,
+                                  int mod )
     : Process(), meshf( meshfile ), brainf(brainfile), otexf( outexfile ),
-      radius( rad ), height( hei ), int_height( int_height ), mode( mod ),
-      ascii( asciiFlag )
+      radius( rad ), height( hei ), int_height( int_height ), mode( mod )
 {
     registerProcessType( "Volume", "S8", &doit<int8_t> );
     registerProcessType( "Volume", "U8", &doit<uint8_t> );
@@ -172,8 +170,8 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
     instants.insert( vt );
 
   set<size_t>::iterator             ins, endt = instants.end();
-  unsigned                         p;
-  int                               x, y, z, i, j, k, kmax, xmin, ymin, zmin, min_cyl, max_cyl;
+  unsigned                          p;
+  int                               min_cyl, max_cyl;
   short                             val=0, nlabel, nlabel_max, label_max, cur_label;
   vector< short >::iterator         lab, endlab;
   vector< short >                   label;
@@ -317,7 +315,7 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
   if(verbose)
     cout << "writing texture..." << endl;
   Writer<TimeTexture<float> >   w2( otexf );
-  if( !w2.write( otex, ascii ) )
+  if( !w2.write( otex ) )
     return( false );
 
   if(verbose)
@@ -328,22 +326,21 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
 
 int main( int argc, const char** argv )
 {
-  string			                 volumefile, outexfile;
-  Reader<AimsSurfaceTriangle>   meshfile;
-  string                        brainfile="";
-  int                          radius=1, height=1, mode=3, int_height = 0;
-  bool                         asciiFlag = false;
+  string                       volumefile, outexfile;
+  Reader<AimsSurfaceTriangle>  meshfile;
+  string                       brainfile="";
+  float                        radius = 1., height = 1., int_height = 0;
+  int                          mode = 3;
 
   AimsApplication	app( argc, argv, "Compute label close to mesh and build texture file" );
   app.addOption( volumefile, "-i", "input Label volume" );
   app.addOption( meshfile, "-m", "input mesh" );
   app.addOption( outexfile, "-o", "texture output");
-  app.addOption( height, "-height", "cylinder half height (voxels) [default=1]", 1 );
-  app.addOption( int_height, "-int_height", "cylinder half height on interior side of the mesh (voxels). Only used if mode=4. [default=0]", 1 );
-  app.addOption( radius, "-radius", "cylinder radius (voxels) [default=1]", 1 );
+  app.addOption( height, "-height", "cylinder half height (mm) [default=1]", 1 );
+  app.addOption( int_height, "-int_height", "cylinder half height on interior side of the mesh (mm). Only used if mode=4. [default=0]", 1 );
+  app.addOption( radius, "-radius", "cylinder radius (mm) [default=1]", 1 );
   app.addOption( mode, "-mode", "cylinder direction (1:interior, 2:exterior, 3:both, 4: both with differing sizes) [default=3]", 1 );
   app.addOption( brainfile, "-b", "brain mask file [default=no brain mask]", "");
-  app.addOption( asciiFlag, "--ascii", "write texture file in ASCII [default=false]", true );
   app.alias( "--mesh", "-m" );
   app.alias( "--input", "-i" );
   app.alias( "--output", "-o" );
@@ -354,7 +351,7 @@ int main( int argc, const char** argv )
       if( verbose )
         cout << "Init program" << endl;
       LabelMapTexture	proc( meshfile.fileName(), brainfile, outexfile,
-                              radius, height, int_height, mode, asciiFlag );
+                              radius, height, int_height, mode );
       if( verbose )
         cout << "Starting program.." << endl;      
       if( !proc.execute( volumefile ) )
