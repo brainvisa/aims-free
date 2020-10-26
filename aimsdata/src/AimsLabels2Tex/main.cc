@@ -16,7 +16,7 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/vector/vector.h>
 #include <aims/mesh/texture.h>
-#include <aims/bucket/bucketMap.h>
+#include <aims/connectivity/connectivity.h>
 
 #include <iostream>
 #include <cartobase/config/verbose.h>
@@ -84,22 +84,34 @@ void buildCylinder( set<Point3d, BucketMapLess> & cylinder, const Point3df & u,
                     const Point3df & v, const Point3df & w, float min_cyl,
                     float max_cyl, float radius, const Point3df & p,
                     bool BRAIN_MASK, const VolumeRef<short> & brainData,
-                    const vector<float> & vs
+                    const vector<float> & vs, const Connectivity & connect
                   )
 {
   float max_radius = max( -min_cyl, max_cyl );
   max_radius = max( max_radius, radius );
-  int x, y, z, nx, ny, nz;
+  int x, y, z, nx, ny, nz, i;
   float radius2 = radius * radius;
 
   nx = ceil( max_radius / vs[0] );
   ny = ceil( max_radius / vs[1] );
   nz = ceil( max_radius / vs[2] );
 
-  // set<Point3d> todo;
+  set<Point3d, BucketMapLess> todo;
   cylinder.clear();
   Point3d pint( short( rint( p[0] / vs[0] ) ), short( rint( p[1] / vs[1] ) ),
                 short( rint( p[2] / vs[2] ) ) );
+  Point3d pn( nx + 1, ny + 1, nz + 1 );
+
+  VolumeRef<short> mask;
+  if( BRAIN_MASK )
+  {
+    mask.reset( new Volume<short>(
+      nx * 2 + 3, ny * 2 + 3, nz * 2 + 3, 1,
+      AllocatorContext( &MemoryAllocator::singleton() ) ) );
+    // (include a border)
+    mask.fill( 0 );
+    mask->at( nx + 1, ny + 1, nz + 1 ) = 1; // central point is valid
+  }
 
   for( z=-nz; z<= nz; ++z )
     for( y=-ny; y<= ny; ++y )
@@ -114,13 +126,61 @@ void buildCylinder( set<Point3d, BucketMapLess> & cylinder, const Point3df & u,
         if( r2 > radius2 )
           // out of radius to normal axis
           continue;
-        Point3d pint2 = pint + Point3d( x, y, z );
+        Point3d pd = Point3d( x, y, z );
+        Point3d pint2 = pint + pd;
         if( BRAIN_MASK && brainData->at( pint2 ) == 0 )
           // out of brain mask
           continue;
-        // TODO: check connectivity to central point in mask
-        cylinder.insert( pint2 );
+        if( BRAIN_MASK && ( x != 0 || y != 0 || z != 0 ) )
+        {
+          // check connectivity to central point in mask
+          for( i=0; i<connect.nbNeighbors(); ++i )
+            if( mask->at( pn + pd + connect.xyzOffset( i ) ) )
+            {
+              cylinder.insert( pint2 );
+              mask->at( pn + pd ) = 1;
+              break;
+            }
+          if( i == connect.nbNeighbors() ) // no connection
+          {
+            todo.insert( pd );
+          }
+        }
+        else
+          cylinder.insert( pint2 );
       }
+
+  // process mask points which did not have a proven connection to the center
+  bool removed = true;
+  set<Point3d, BucketMapLess>::iterator it, jt;
+
+//   cout << "point: " << p << endl;
+  while( removed && !todo.empty() ) // exit when no point has been updated
+  {
+//     cout << "todo: " << todo.size() << endl;
+    removed = false;
+    it = todo.begin();
+    while( it!=todo.end() )
+    {
+      // check connectivity to central point in mask
+      for( i=0; i<connect.nbNeighbors(); ++i )
+      {
+        if( mask->at( pn + *it + connect.xyzOffset( i ) ) != 0 )
+        {
+          cylinder.insert( *it );
+          mask->at( *it + pn ) = 1;
+          jt = it;
+          ++it;
+          todo.erase( jt );
+          removed = true;
+          break;
+        }
+      }
+      if( i == connect.nbNeighbors() ) // no connection
+        ++it;
+    }
+  }
+//   cout << "non-connected: " << todo.size() << endl;
 }
 
 
@@ -208,6 +268,8 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
       max_cyl = height;
   }
 
+  Connectivity connect( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
+
   for( ins=instants.begin(); ins!=endt; ++ins )
     {
       size_t                             t;
@@ -265,7 +327,7 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
         label.clear();
 
         buildCylinder( cylinder, u[p], v[p], w[p], min_cyl, max_cyl, radius,
-                       vert[p], BRAIN_MASK, brainData, vs );
+                       vert[p], BRAIN_MASK, brainData, vs, connect );
 
         for( ic=cylinder.begin(); ic!=ec; ++ic )
         {
