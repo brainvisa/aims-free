@@ -31,14 +31,13 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 from __future__ import print_function
-
 from __future__ import absolute_import
+
 import scipy
 import scipy.io
 import numpy
 import sys
 from soma import uuid
-aims = sys.modules['soma.aims']
 
 __docformat__ = 'restructuredtext en'
 
@@ -88,6 +87,7 @@ def readSpmNormalization(matfilename, source=None, destref=None, srcref=None):
 
       the converted transformation
     '''
+    aims = sys.modules['soma.aims']
     if source is None:
         if matfilename.endswith('_sn3d.mat'):
             # SPM 99
