@@ -107,6 +107,11 @@ import six
 import sys
 import numbers
 
+# list of namespace objects that should not be patched to avoid a side effect
+# in sip imported namespaces: we must not access their attributes during
+# imports.
+__namespaces__ = ['soma', 'aims', 'carto', 'anatomist']
+
 # save the original IOError type, it will be replaced by aims bindings
 IOError_orig = IOError
 
@@ -875,6 +880,11 @@ def __fixsipclasses__(classes):
                 # not a named class
                 continue
 
+            # we have to filter out namespace objects. I don't know how to
+            # detect them.
+            if name in __namespaces__:
+                continue
+
             if name.startswith('rc_ptr_') \
                     or name.startswith('weak_shared_ptr_') \
                         or name.startswith('weak_ptr_'):
@@ -968,12 +978,8 @@ def __fixsipclasses__(classes):
                     property(lambda self: numpy.asarray(self).shape, None,
                              None))
             else:
-                try:
-                    z = object.__getattribute__(y, '__objiter__')
-                    sip.wrappertype.__setattr__(y, '__iter__',
-                                                __fixsipclasses__.newiter)
-                except AttributeError:
-                    pass
+                if hasattr(y, '__objiter__'):
+                    y.__iter__ = __fixsipclasses__.newiter
                 try:
                     z = object.__getattribute__(y, '__objnext__')
                     sip.wrappertype.__setattr__(y, '__next__',
