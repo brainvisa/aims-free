@@ -94,10 +94,8 @@ Main classes:
 '''
 from __future__ import print_function
 from __future__ import absolute_import
+
 from six.moves import range
-__docformat__ = 'restructuredtext en'
-
-
 import collections
 import functools
 import types
@@ -107,10 +105,8 @@ import six
 import sys
 import numbers
 
-# list of namespace objects that should not be patched to avoid a side effect
-# in sip imported namespaces: we must not access their attributes during
-# imports.
-__namespaces__ = ['soma', 'aims', 'carto', 'anatomist']
+
+__docformat__ = 'restructuredtext en'
 
 # save the original IOError type, it will be replaced by aims bindings
 IOError_orig = IOError
@@ -145,7 +141,7 @@ except ImportError as exc:
         )
     raise  # other import errors are re-raised
 
-from soma.importer import ExtendedImporter, GenericHandlers
+from soma.importer import ExtendedImporter, GenericHandlers, __namespaces__
 
 # Rename sip modules and reorganize namespaces using the Importer class
 # this class manages changes that can occur during import of other modules
@@ -888,35 +884,23 @@ def __fixsipclasses__(classes):
             if name.startswith('rc_ptr_') \
                     or name.startswith('weak_shared_ptr_') \
                         or name.startswith('weak_ptr_'):
-                # add __getattr__ method
-                sip.wrappertype.__setattr__(y, '__len__',
-                                            __fixsipclasses__.proxylen)
-                sip.wrappertype.__setattr__(y, '__getattr__',
-                                            __fixsipclasses__.proxygetattr)
-                sip.wrappertype.__setattr__(y, '__getitem__',
-                                            __fixsipclasses__.proxygetitem)
+                # add methods
+                y.__len__ = __fixsipclasses__.proxylen
+                y.__getattr__ = __fixsipclasses__.proxygetattr
+                y.__getitem__ = __fixsipclasses__.proxygetitem
                 # y.__setitem__ = __fixsipclasses__.proxysetitem
-                sip.wrappertype.__setattr__(y, '__delitem__',
-                                            __fixsipclasses__.proxydelitem)
+                y.__delitem__ = __fixsipclasses__.proxydelitem
                 #y.__str__ = __fixsipclasses__.proxystr
-                sip.wrappertype.__setattr__(y, '__nonzero__',
-                                            __fixsipclasses__.proxynonzero)
-                sip.wrappertype.__setattr__(y, '__bool__',
-                                            __fixsipclasses__.proxynonzero)
-                sip.wrappertype.__setattr__(
-                    y, '_getAttributeNames',
-                    __fixsipclasses__.getAttributeNames)
+                y.__nonzero__ = __fixsipclasses__.proxynonzero
+                y.__bool__ = __fixsipclasses__.proxynonzero
+                y._getAttributeNames = __fixsipclasses__.getAttributeNames
                 # to maintain compatibiity with pyaims 3.x
-                sip.wrappertype.__setattr__(y, 'get',
-                                            __fixsipclasses__.proxyget)
-                sip.wrappertype.__setattr__(y, '__iter__',
-                                            __fixsipclasses__.proxyiter)
+                y.get = __fixsipclasses__.proxyget
+                y.__iter__ = __fixsipclasses__.proxyiter
 
             elif name.startswith('ShallowConverter_'):
-                sip.wrappertype.__setattr__(y, '__oldcall__', y.__call__)
-                sip.wrappertype.__setattr__(
-                    y, '__call__',
-                    lambda self, obj: self.__oldcall__(obj)._get())
+                y.__oldcall__ = y.__call__
+                y.__call__ = lambda self, obj: self.__oldcall__(obj)._get()
 
             elif name.startswith('Volume_'):
                 for op in ('add', 'iadd', 'radd', 'sub', 'isub', 'rsub',
@@ -925,17 +909,17 @@ def __fixsipclasses__(classes):
                            'or', 'ior', 'ror', 'xor', 'ixor' 'rxor'):
                     try:
                         add = object.__getattribute__(
-                            aimssip, '__%s_%s__' % (op, y.__name__))
+                            aimssip, '__%s_%s__' % (op, name))
                     except AttributeError:
                         add = None
                     if add is not None:
                         if six.PY34:
-                            sip.wrappertype.__setattr__(
+                            setattr(
                                 y, '__%s__' % op, functools.partialmethod(
                                     __fixsipclasses__.__operator_overload__,
                                     add))
                         else:
-                            sip.wrappertype.__setattr__(
+                            setattr(
                                 y, '__%s__' % op,
                                 types.MethodType(
                                     functools.partial(
@@ -943,141 +927,85 @@ def __fixsipclasses__(classes):
                                         add),
                                     None, y))
                 # pow, ipow, floordiv, ifloordiv
-                sip.wrappertype.__setattr__(y, '__pow__',
-                                            __fixsipclasses__.__vol_pow__)
-                sip.wrappertype.__setattr__(y, '__ipow__',
-                                            __fixsipclasses__.__vol_ipow__)
-                sip.wrappertype.__setattr__(y, '__floordiv__',
-                                            __fixsipclasses__.__vol_floordiv__)
-                sip.wrappertype.__setattr__(
-                    y, '__ifloordiv__', __fixsipclasses__.__vol_ifloordiv__)
+                y.__pow__ = __fixsipclasses__.__vol_pow__
+                y.__ipow__ = __fixsipclasses__.__vol_ipow__
+                y.__floordiv__ = __fixsipclasses__.__vol_floordiv__
+                y.__ifloordiv__ = __fixsipclasses__.__vol_ifloordiv__
                 # volume item access
-                sip.wrappertype.__setattr__(
-                    y, '__getitem__',
-                    lambda self, *args, **kwargs:
-                        numpy.asarray(self).__getitem__(*args, **kwargs))
-                sip.wrappertype.__setattr__(
-                    y, '__setitem__',
-                    lambda self, *args, **kwargs:
-                        numpy.asarray(self).__setitem__(*args, **kwargs))
+                y.__getitem__ = lambda self, *args, **kwargs: \
+                    numpy.asarray(self).__getitem__(*args, **kwargs)
+                y.__setitem__ = lambda self, *args, **kwargs: \
+                    numpy.asarray(self).__setitem__(*args, **kwargs)
                 if not six.PY2:
-                    sip.wrappertype.__setattr__(
-                        y, 'astype', __fixsipclasses__.__Volume_astype__)
+                    y.astype = __fixsipclasses__.__Volume_astype__
                 else:
-                    sip.wrappertype.__setattr__(
-                        y, 'astype',
-                        types.MethodType(
-                            __fixsipclasses__.__Volume_astype__, None, y))
+                    y.astype = types.MethodType(
+                        __fixsipclasses__.__Volume_astype__, None, y)
                 # volume pickling
-                sip.wrappertype.__setattr__(y, '__getstate__',
-                                            __fixsipclasses__._vol_getstate)
-                sip.wrappertype.__setattr__(y, '__setstate__',
-                                            __fixsipclasses__._vol_setstate)
-                sip.wrappertype.__setattr__(
-                    y, 'shape',
-                    property(lambda self: numpy.asarray(self).shape, None,
-                             None))
+                y.__getstate__ = __fixsipclasses__._vol_getstate
+                y.__setstate__ = __fixsipclasses__._vol_setstate
+                y.shape = property(lambda self: numpy.asarray(self).shape,
+                                   None, None)
+
             else:
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
-                try:
-                    z = object.__getattribute__(y, '__objnext__')
-                    sip.wrappertype.__setattr__(y, '__next__',
-                                                __fixsipclasses__.newnext)
+                if hasattr(y, '__objnext__'):
+                    y.__next__ = __fixsipclasses__.newnext
                     if six.PY2:
-                        sip.wrappertype.__setattr__(y, 'next',
-                                                    __fixsipclasses__.newnext)
-                except AttributeError:
-                    pass
-
+                        y.next = __fixsipclasses__.newnext
                 if name.startswith('AimsVector_') \
                         or name.startswith('Texture_') \
                         or name in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
-                    sip.wrappertype.__setattr__(y, '__iterclass__',
-                                                VecIter)
-                    sip.wrappertype.__setattr__(
-                        y, '__iter__',
-                        lambda self: self.__iterclass__(self))
-
-                if (name.startswith('vector_') \
+                    y.__iterclass__ = VecIter
+                    y.__iter__ = lambda self: self.__iterclass__(self)
+                elif (name.startswith('vector_') \
                         or name.startswith('AimsVector_')) \
                         and 'iterator' not in name:
-                    sip.wrappertype.__setattr__(
-                        y, '__oldgetitem__',
-                        object.__getattribute__(y, '__getitem__'))
-                    sip.wrappertype.__setattr__(
-                        y, '__getitem__', __fixsipclasses__.__getitem_vec__)
-                    sip.wrappertype.__setattr__(
-                        y, '__oldsetitem__',
-                        object.__getattribute__(y, '__setitem__'))
-                    sip.wrappertype.__setattr__(
-                        y, '__setitem__', __fixsipclasses__.__setitem_vec__)
-                continue
-                if name.startswith('BucketMap_') \
+                    y.__oldgetitem__ = y.__getitem__
+                    y.__getitem__ = __fixsipclasses__.__getitem_vec__
+                    y.__oldsetitem__ = y.__setitem__
+                    y.__setitem__ = __fixsipclasses__.__setitem_vec__
+                elif name.startswith('BucketMap_') \
                         or name.startswith('TimeTexture_'):
-                    sip.wrappertype.__setattr__(y, '__iterclass__', BckIter)
-                    sip.wrappertype.__setattr__(y, '__iteritemclass__',
-                                                BckIterItem)
-                    sip.wrappertype.__setattr__(
-                        y, '__iter__', lambda self: self.__iterclass__(self))
-                    sip.wrappertype.__setattr__(
-                        y, 'iteritems',
-                        lambda self: self.__iteritemclass__(self))
+                    y.__iterclass__ = BckIter
+                    y.__iteritemclass__ = BckIterItem
+                    y.__iter__ = lambda self: self.__iterclass__(self)
+                    y.iteritems = lambda self: self.__iteritemclass__(
+                        self)
                     if not six.PY2:
-                        sip.wrappertype.__setattr__(
-                            y, 'items',
-                            lambda self: self.__iteritemclass__(self))
+                        y.items = lambda self: self.__iteritemclass__(
+                            self)
                     if name.startswith('BucketMap_'):
-                        sip.wrappertype.__setattr__(
-                            object.__getattribute__(y, 'Bucket'),
-                            '__iterclass__', BckIter)
-                        sip.wrappertype.__setattr__(
-                            object.__getattribute__(y, 'Bucket'),
-                            '__iteritemclass__', BckIterItem)
-                        sip.wrappertype.__setattr__(
-                            object.__getattribute__(y, 'Bucket'), '__iter__',
-                            lambda self: self.__iterclass__(self))
-                        sip.wrappertype.__setattr__(
-                            object.__getattribute__(y, 'Bucket'), 'iteritems',
-                            lambda self: self.__iteritemclass__(self))
+                        y.Bucket.__iterclass__ = BckIter
+                        y.Bucket.__iteritemclass__ = BckIterItem
+                        y.Bucket.__iter__ \
+                            = lambda self: self.__iterclass__(self)
+                        y.Bucket.iteritems \
+                            = lambda self: self.__iteritemclass__(self)
                         if not six.PY2:
-                            sip.wrappertype.__setattr__(
-                                object.__getattribute__(y, 'Bucket'), 'items',
-                                lambda self: self.__iteritemclass__(self))
+                            y.Bucket.items \
+                                = lambda self: self.__iteritemclass__(self)
+
             if name.startswith('AimsData_'):
                 # volume item access
-                sip.wrappertype.__setattr__(
-                    y, '__getitem__',
-                    lambda self, *args, **kwargs: \
-                        numpy.asarray(self.volume()).__getitem__(*args,
-                                                                 **kwargs))
-                sip.wrappertype.__setattr__(
-                    y, '__setitem__',
-                    lambda self, *args, **kwargs: \
-                        numpy.asarray(self.volume()).__setitem__(*args,
-                                                                 **kwargs))
-                sip.wrappertype.__setattr__(
-                    y, '__getstate__', __fixsipclasses__._aimsdata_getstate)
-                sip.wrappertype.__setattr__(
-                    y, '__setstate__',  __fixsipclasses__._aimsdata_setstate)
-            try:
-                z = object.__getattribute__(y, 'next')
-                z = object.__getattribute__(y, '__iter__')
-                try:
-                    z = object.__getattribute__(y, '__next__')
-                    import warnings
-                    warnings.warn('{0!r} looks like an iterator implementing '
-                                  'the Python 2 next() method, it will not '
-                                  'work as an iterator under '
-                                  'Python 3'.format(y),
-                                  DeprecationWarning)
-                except AttributeError:
-                    pass
-            except AttributeError:
-                pass
+                y.__getitem__ = lambda self, *args, **kwargs: \
+                    numpy.asarray(self.volume()).__getitem__(*args, **kwargs)
+                y.__setitem__ = lambda self, *args, **kwargs: \
+                    numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
+                y.__getstate__ = __fixsipclasses__._aimsdata_getstate
+                y.__setstate__ = __fixsipclasses__._aimsdata_setstate
+
+            if (hasattr(y, 'next')
+                    and hasattr(y, '__iter__')
+                    and not hasattr(y, '__next__')):
+                import warnings
+                warnings.warn('{0!r} looks like an iterator implementing the '
+                              'Python 2 next() method, it will not work as an '
+                              'iterator under Python 3'.format(y),
+                              DeprecationWarning)
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
-            pass
 
 __fixsipclasses__.newiter = newiter
 __fixsipclasses__.newnext = newnext
