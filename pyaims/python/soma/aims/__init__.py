@@ -959,7 +959,7 @@ def __fixsipclasses__(classes):
                         or name in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
                     y.__iterclass__ = VecIter
                     y.__iter__ = lambda self: self.__iterclass__(self)
-                elif (name.startswith('vector_') \
+                if (name.startswith('vector_') \
                         or name.startswith('AimsVector_')) \
                         and 'iterator' not in name:
                     y.__oldgetitem__ = y.__getitem__
