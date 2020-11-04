@@ -34,11 +34,16 @@
 '''
 The aims module allows access to the AIMS library in python.
 
-Since version 4.5.1 both Python 2 (2.6 and higher) and Python 3 (3.4 and higher) are supported.
-
 - organization: `NeuroSpin <http://www.neurospin.org>`_ and former IFR 49
 
 - license: `CeCILL-B <http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html>`_ (a free licence comparable to BSD)
+
+Comptibility and requirements
+-----------------------------
+
+Since version 4.5.1 both Python 2 (2.7 and higher) and Python 3 (3.4 and higher) are supported. However as the module contains compiled code (python / C++ bindings) using specific python C interfaces (APIs/ABIs), PyAIMS has to be compiled separately for a given version of python.
+
+PyAIMS also has bindings to the `numpy <https://numpy.org>`_ library, allowing easy array manipulations. This also involves constraints on the Numpy ABI version: once PyAims is compiled, it is not possible to swith numpy to a different version featuring a different ABI (which `pip <https://docs.python.org/3.9/installing/index.html>`_ often does without warning, unfortunately).
 
 Most of it is a set of direct bindings to the
 :aimsdox:`AIMS C++ library <index.html>` API. But a few
@@ -49,7 +54,9 @@ aims contains mainly the AIMS and carto data structures and IO system.
 It covers several C++ libraries: cartobase, cartodata, graph, aimsdata, plus
 some C++ classes from the standard library (like std::vector)
 
-Main classes:
+Main classes
+------------
+
   - :py:class:`Reader` and :py:class:`Writer` for the generic IO system,
     which allows to read and write everything, and which can be, in most
     cases, replaced with the more convenient global :py:func:`read` and
@@ -90,7 +97,7 @@ Main classes:
     functions :py:func:`Converter` and :py:func:`ShallowConverter`
   - a few algorithms will be added
 
-.. _numpy: http://numpy.scipy.org/
+.. _numpy: https://numpy.org/
 '''
 from __future__ import print_function
 from __future__ import absolute_import
@@ -959,9 +966,11 @@ def __fixsipclasses__(classes):
                         or name in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
                     y.__iterclass__ = VecIter
                     y.__iter__ = lambda self: self.__iterclass__(self)
-                if (name.startswith('vector_') \
-                        or name.startswith('AimsVector_')) \
-                        and 'iterator' not in name:
+                if ((name.startswith('vector_') \
+                        or name.startswith('AimsVector_')
+                        or name.startswith('Texture_')) \
+                        and 'iterator' not in name) \
+                            or name in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
                     y.__oldgetitem__ = y.__getitem__
                     y.__getitem__ = __fixsipclasses__.__getitem_vec__
                     y.__oldsetitem__ = y.__setitem__
