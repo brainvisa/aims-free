@@ -895,7 +895,7 @@ def __fixsipclasses__(classes):
                 y.__len__ = __fixsipclasses__.proxylen
                 y.__getattr__ = __fixsipclasses__.proxygetattr
                 y.__getitem__ = __fixsipclasses__.proxygetitem
-                # y.__setitem__ = __fixsipclasses__.proxysetitem
+                y.__setitem__ = __fixsipclasses__.proxysetitem
                 y.__delitem__ = __fixsipclasses__.proxydelitem
                 #y.__str__ = __fixsipclasses__.proxystr
                 y.__nonzero__ = __fixsipclasses__.proxynonzero
