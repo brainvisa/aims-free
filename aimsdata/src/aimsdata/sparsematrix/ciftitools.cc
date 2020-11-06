@@ -1067,7 +1067,8 @@ vector<int> CiftiTools::getIndicesForSurfaceIndices(
 {
   Object cifti_info = getDimensionObject( dim );
 
-  if( !cifti_info )
+  if( !cifti_info
+      || !cifti_info->hasProperty( "brain_models" ) )
   {
     size_t i, n = std::min( (size_t) roi_indices.size(),
                             (size_t) _matrix->getSize()[ dim ] );
@@ -1123,7 +1124,18 @@ list<string> CiftiTools::getBrainStructures( int dim, bool keepSurfaces,
     return structures;
   }
 
-  Object models = cifti_info->getProperty( "brain_models" );
+  Object models;
+  try
+  {
+    models = cifti_info->getProperty( "brain_models" );
+  }
+  catch( ... )
+  {
+    // not a "brain_model" dimension
+    structures.push_back( "CORTEX" ); // assume single whole cortex mesh
+    return structures;
+  }
+
   Object iter = models->objectIterator();
 
   for( ; iter->isValid(); iter->next() )
@@ -1628,11 +1640,11 @@ void CiftiTools::buildDimensionObjectFromLabelsTexture(
   _smap[ "COREXT" ] = 0;
 
   size_t i, n = texture.nItem();
+  Object par_def;
   for( i=0; i<n; ++i )
   {
     int region = texture[i];
     Object & plabel = parc[ region ];
-    Object par_def;
 
     if( !plabel )
     {
@@ -1650,6 +1662,30 @@ void CiftiTools::buildDimensionObjectFromLabelsTexture(
     vector<int> & roi
       = par_def->getProperty( "CORTEX" )->value< vector<int> >();
     roi.push_back( i );
+  }
+
+  n = _matrix->getSize()[ dim ];
+  if( parc.size() < n )
+  {
+    /* the size of the matrix doesn't match the number of actually used
+       regions: perhaps the matrix is lager (uses emty lines / cols) to
+       match the regions numbers.
+       fill in missing (unused) regions to match matrix definition */
+    map<int, Object>::iterator im;
+    for( i=0; i<n; ++i )
+    {
+      if( parc.find( i ) == parc.end() )
+      {
+        Object plabel = Object::value( Dictionary() );
+        stringstream name;
+        name << i;
+        plabel->setProperty( "name", name.str() );
+        par_def = Object::value( Dictionary() );
+        plabel->setProperty( "surface_nodes", par_def );
+        par_def->setProperty( "CORTEX", vector<int>() );
+        parc[i] = plabel;
+      }
+    }
   }
 
   Object surf_str = Object::value( Dictionary() );
