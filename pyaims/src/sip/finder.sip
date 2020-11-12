@@ -10,6 +10,7 @@ class Finder
 
 %TypeCode
 #include <pyaims/object/numconv.h>
+#include <aims/data/pheader.h>
 %End
 
 public:
@@ -44,6 +45,30 @@ public:
     }
   }
 %End
+
+  void setHeader( carto::Object hdr );
+  void setObjectType( const std::string & obj );
+  void setDataType( const std::string & dat );
+  void setPossibleDataTypes( const vector_STRING & dt );
+
+  static void registerFormat( const std::string & fmtid,
+                              aims::FinderFormat* format /Transfer/,
+                              const vector_STRING & extensions,
+                              const std::string & before = "" );
+  static void unregisterFormat( const std::string & format );
+  static FinderFormat* finderFormat( const std::string & format );
+
 };
+
+  class FinderFormat
+  {
+%TypeHeaderCode
+#include <aims/io/fileFormat.h>
+%End
+
+  public:
+    virtual ~FinderFormat();
+    virtual bool check( const std::string & filename, aims::Finder & f ) const = 0;
+  };
 
 };

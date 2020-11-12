@@ -2535,3 +2535,7 @@ for x in dir():
     if not x.startswith('_') and x not in private:
         __all__.append(x)
 del x, private
+
+# add IO formats defined in python
+from . import io_ext
+

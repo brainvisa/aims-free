@@ -181,7 +181,7 @@ Finder::~Finder()
 
 
 void Finder::registerFormat( const string & fmtid, FinderFormat* format,
-			     const vector<std::string> & extensions,
+                             const vector<std::string> & extensions,
                              const string & before )
 {
   initPrivate();
@@ -204,6 +204,39 @@ void Finder::registerFormat( const string & fmtid, FinderFormat* format,
           break;
       ext.insert( ie2, fmtid );
     }
+  }
+}
+
+
+void Finder::unregisterFormat( const string & fmtid )
+{
+  initPrivate();
+
+  map<string, FinderFormat *>::const_iterator	i
+    = pd->formats.find( fmtid );
+  if( i != pd->formats.end() )
+    pd->formats.erase( i );
+  map<string, list<string> >::iterator ie = pd->extensions.begin(),
+    je, ee = pd->extensions.end();
+  list<string>::iterator il, jl, el;
+
+  while( ie!=ee )
+  {
+    il=ie->second.begin();
+    el=ie->second.end();
+    je = ie;
+    ++ie;
+    while( il!=el )
+      if( *il == fmtid )
+      {
+        jl = il;
+        ++il;
+        ie->second.erase( jl );
+      }
+      else
+        ++il;
+    if( je->second.empty() )
+      pd->extensions.erase( je );
   }
 }
 
@@ -536,7 +569,11 @@ void Finder::setHeader( Header* hdr )
 void Finder::setHeader( Object hdr )
 {
   if( !dynamic_cast<PythonHeader *>( hdr.get() ) )
-    throw runtime_error( "Finder::setHeader: Object is not a Header" );
+  {
+    Object phdr( new PythonHeader );
+    phdr->copyProperties( hdr );
+    hdr = phdr;
+  }
   _header = hdr;
 }
 
