@@ -31,8 +31,8 @@ public:
   if( (sipRes = PyList_New(extensions.size())) == NULL )
     return NULL;
 
-  for (i=0, it = extensions.begin(), et = extensions.end();
-						it != et; ++it, ++i)
+  for( i=0, it = extensions.begin(), et = extensions.end();
+        it != et; ++it, ++i)
   {
     PyObject *extension_py = carto::PyString_FromStdString( *it );
     if (PyList_SetItem(sipRes, i, extension_py) < 0)
@@ -56,7 +56,7 @@ public:
                               const vector_STRING & extensions,
                               const std::string & before = "" );
   static void unregisterFormat( const std::string & format );
-  static FinderFormat* finderFormat( const std::string & format );
+  static aims::FinderFormat* finderFormat( const std::string & format );
 
 };
 
