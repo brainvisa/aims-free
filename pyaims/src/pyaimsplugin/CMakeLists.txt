@@ -8,7 +8,7 @@ set( _sources
    )
 
 set(PYAIMS_HEADERS ${_headers} PARENT_SCOPE)
-BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers aims headersTarget )
+BRAINVISA_COPY_AND_INSTALL_HEADERS( _headers pyaims headersTarget )
 
 add_library( pyaimsplugin MODULE ${_sources} )
 
