@@ -1,7 +1,8 @@
 
-from soma import aims
 import numpy as np
 import atexit
+import sys
+aims = sys.modules['soma.aims']
 
 '''
 IO formats readers / writers written in python for aims.
