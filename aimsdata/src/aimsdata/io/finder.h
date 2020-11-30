@@ -133,6 +133,7 @@ namespace aims
                                 const std::string & before = "" );
     ///	Finds the FinderFormat associated with the given string ID
     static FinderFormat* finderFormat( const std::string & format );
+    static void unregisterFormat( const std::string & format );
     /** Determines object associated to file name and returns true if success.
 	If successful, appropriate infos are stored into the Finder, including 
 	the full format header */

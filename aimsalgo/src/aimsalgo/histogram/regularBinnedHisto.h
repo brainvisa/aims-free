@@ -39,6 +39,8 @@
 #include <vector>
 #include <map>
 
+// #include <time.h> // FIXME DEBUG
+
 namespace aims
 {
 
@@ -62,7 +64,8 @@ namespace aims
       void setBins( unsigned bins );
       T minDataValue() const { return _minvalue; }
       T maxDataValue() const { return _maxvalue; }
-      std::vector<T> *unique( const AimsData<T>& thing ) const;
+      std::vector<T> *unique( const AimsData<T>& thing,
+                              size_t abort_max = 0 ) const;
 
     private:
       unsigned _bins;
@@ -146,19 +149,32 @@ namespace aims
 
   template< typename T > inline
   std::vector<T> *
-  RegularBinnedHistogram<T>::unique( const AimsData<T>& thing ) const
+  RegularBinnedHistogram<T>::unique( const AimsData<T>& thing,
+                                     size_t abort_max ) const
   {
     std::map<T, unsigned> vals;
     typename AimsData<T>::const_iterator  iv, fv=thing.end();
+    // std::cout << "unique...\n";
+    // clock_t t0 = clock();
+    size_t n = 0;
+
     for( iv=thing.begin(); iv!=fv; ++iv )
     {
       ++vals[*iv];
+      if( abort_max != 0 )
+      {
+        ++n;
+        if( n % 1000 == 0 && vals.size() >= abort_max )
+          throw std::runtime_error( "too many values" );
+      }
     }
+    // std::cout << "unique map done in " << float(clock() - t0) / CLOCKS_PER_SEC << "s: " << thing.dimX() * thing.dimY() * thing.dimZ() * thing.dimT() * CLOCKS_PER_SEC / float(clock() - t0) << " vox/s.\n";
     std::vector<T> *res = new std::vector<T>( vals.size() );
     typename std::map<T, unsigned>::iterator im, e = vals.end();
     typename std::vector<T>::iterator i = res->begin();
     for( im=vals.begin(); im!=e; ++im, ++i )
       *i = im->first;
+    // std::cout << "unique vector done.\n";
     return res;
   }
 

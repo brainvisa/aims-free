@@ -73,7 +73,8 @@ def checkVolume(vol):
 
     def _unique(vol):
         hg = getattr(aims, 'RegularBinnedHistogram_' + dtype)()
-        return hg.unique(vol).arraydata()
+        # abort if more than 100000 values (this will not be labels)
+        return hg.unique(vol, 100000).arraydata()
 
     if aimsalgo is not None:
         # aims histogram is 15 times faster than numpy...
@@ -100,46 +101,66 @@ def checkVolume(vol):
         # not a scalar, we cannot perform scalar things, and the volume will have
         # no colormap, so we are done
         return hints
-    u = unique(vol)
-    maxv = u[-1]
-    minv = u[0]
-    if len(u) == 2:
-        hints['binary_volume'] = True
-    else:
+    try:
+        u = unique(vol)
+        maxv = u[-1]
+        minv = u[0]
+    except:
+        maxv = vol.max()
+        minv = vol.min()
+        u = None
         hints['binary_volume'] = False
-    if dtype[0] == 'S' or dtype[0] == 'U' and dtype[1:] in ('8', '16', '32',
-                                                            '64'):
-        hints['int_type'] = True
-    else:
-        if len(numpy.where(u.astype('int32') == u)) != len(u):
-            hints['int_type'] = False
-            hints['labels_likelihood'] = 0.
+        hints['int_type'] = False
+        hints['labels_likelihood'] = 0.
+
+    if u is not None:
+        if len(u) == 2:
+            hints['binary_volume'] = True
         else:
+            hints['binary_volume'] = False
+        if dtype[0] == 'S' or dtype[0] == 'U' and dtype[1:] in ('8', '16', '32',
+                                                                '64'):
             hints['int_type'] = True
-    if hints['int_type']:
-        labell = maxv / 250. - 1.
-        labell = numpy.exp(-labell) / (numpy.exp(labell) + numpy.exp(-labell))
-        hints['labels_likelihood'] = labell
+        else:
+            if len(numpy.where(u.astype('int32') == u)) != len(u):
+                hints['int_type'] = False
+                hints['labels_likelihood'] = 0.
+            else:
+                hints['int_type'] = True
+        if hints['int_type']:
+            labell = maxv / 250. - 1.
+            labell = numpy.exp(-labell) / (numpy.exp(labell)
+                                           + numpy.exp(-labell))
+            hints['labels_likelihood'] = labell
+
     if minv < 0:
         hints['negative_values'] = True
     else:
         hints['negative_values'] = False
 
     # determine background color (most frequent value)
-    his = histogram(vol, min(len(u), 200))
-    maxhis = numpy.argmax(his[0])
-    subval = numpy.where((u < his[1][maxhis + 1]).__and__(
-                         u >= his[1][maxhis]))[0]
-    if len(subval) == 0:
-        subval = [0]  # FIXME: take the next lower used bin
-    if len(subval) == 1:
-        hints['background'] = u[subval[0]]
+    if u is not None:
+        nbins = min(len(u), 200)
     else:
-        # more precise histogram
-        bins = numpy.hstack((u[subval], u[subval[-1] + 1]))
-        h = histogram(vol, bins)
-        hints['background'] = h[1][numpy.argmax(h[0])]
-        maxhis = numpy.where(his[1] <= hints['background'])[0][-1]
+        nbins = 200
+    his = histogram(vol, nbins)
+    maxhis = numpy.argmax(his[0])
+    if u is not None:
+        subval = numpy.where((u < his[1][maxhis + 1]).__and__(
+                            u >= his[1][maxhis]))[0]
+        if len(subval) == 0:
+            subval = [0]  # FIXME: take the next lower used bin
+        if len(subval) == 1:
+            hints['background'] = u[subval[0]]
+        else:
+            # more precise histogram
+            bins = numpy.hstack((u[subval], u[subval[-1] + 1]))
+            h = histogram(vol, bins)
+            hints['background'] = h[1][numpy.argmax(h[0])]
+            maxhis = numpy.where(his[1] <= hints['background'])[0][-1]
+    else:
+        # float values
+        hints['background'] = minv
 
     # determine cmap bounds
     # "positive" values
@@ -155,7 +176,8 @@ def checkVolume(vol):
     if maxcmap < len(chis):
         hints['histo_99percent_positive'] = his[1][maxhis + maxcmap]
     else:
-        hints['histo_99percent_positive'] = u[-1]
+
+        hints['histo_99percent_positive'] = maxv
     # correct the labels likelihood
     hints['labels_likelihood'] *= float(maxcmap) / len(chis)
     if hints['binary_volume']:
@@ -173,7 +195,7 @@ def checkVolume(vol):
     if maxcmap < len(chis):
         hints['histo_99percent_negative'] = his[1][maxhis - maxcmap]
     else:
-        hints['histo_99percent_negative'] = u[0]
+        hints['histo_99percent_negative'] = minv
     hdr = vol.header()
     dims = [vol.getSizeX(), vol.getSizeY(), vol.getSizeZ(), vol.getSizeT()]
     vs = hdr['voxel_size']

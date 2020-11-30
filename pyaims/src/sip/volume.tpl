@@ -744,7 +744,12 @@ The header contains all meta-data.
 
     sipCpp = new sipVolume_%Template1typecode%(
       dims, ( %Template1% *) PyArray_DATA( arr ) );
-    // keep ref to the array to prevent its destruction
+    /* keep ref to the array to prevent its destruction
+       WARNING: this is not enough in every situation: if the python object
+       is returned to C++, then the python attribute will be deleted and the
+       numpy array will be released, thus it can be destroyed while the Volume
+       is still living.
+    */
     PyObject_SetAttrString( (PyObject *) sipSelf, "_arrayext", a0 );
   }
   else
