@@ -136,7 +136,7 @@ bool IOTest<GenericObject>::iotest( ReaderAlgorithm & algo, Object hdr,
 
 
 template<typename T>
-bool IOTest<Volume<T> >::iotest( ReaderAlgorithm & algo, Object hdr, 
+bool IOTest<Volume<T> >::iotest( ReaderAlgorithm & algo, Object /* hdr */, 
                                  rc_ptr<DataSource> source )
 {
   cout << "reading object of type " << DataTypeCode<Volume<T> >::name() 

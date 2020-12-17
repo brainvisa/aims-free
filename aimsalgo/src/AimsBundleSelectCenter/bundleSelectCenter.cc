@@ -108,7 +108,7 @@ void SelectCenterFiber::bundleTerminated( const BundleProducer &producer,
 
     for(int i=0; i<100; i++)
     {
-      int num = rand()%(_faisceau.size());
+      int num = rand()%size;
       bool isUnique = true;
       for(int j= 0; j<i ; j++)
       {
@@ -129,7 +129,7 @@ void SelectCenterFiber::bundleTerminated( const BundleProducer &producer,
   }
   else
   {
-    for (int i = 0; i<_faisceau.size();i++)
+    for (int i = 0; i<size;i++)
     {
       fiberMat.push_back(i);
     }
@@ -145,7 +145,7 @@ void SelectCenterFiber::bundleTerminated( const BundleProducer &producer,
 
   if ( _faisceau.size() > 0 )
   {
-    float dist;
+    float dist = 0.0f;
 
     // Calculate disctance Matrix
     //std::cout << "creating distance matrix... " << std::endl;

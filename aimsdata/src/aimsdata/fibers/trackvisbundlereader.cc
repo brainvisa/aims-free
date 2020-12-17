@@ -74,7 +74,6 @@ Object TrackvisBundleReader::readHeaderStream( istream & file )
   Object header;
   header = Object::value( Dictionary() );
 
-  char c;
   char id_string[6];
   unsigned int i;
 
@@ -265,17 +264,17 @@ Object TrackvisBundleReader::readHeaderStream( istream & file )
   if( !invert_x )
   {
     aims_s2m.rotation()( 0, 0 ) = -1;
-    aims_s2m.translation()[0] = dim[0] - 1;
+    aims_s2m.matrix()(0, 3) = dim[0] - 1;
   }
   if( !invert_y )
   {
     aims_s2m.rotation()( 1, 1 ) = -1;
-    aims_s2m.translation()[1] = dim[1] - 1;
+    aims_s2m.matrix()(1, 3) = dim[1] - 1;
   }
   if( !invert_z )
   {
     aims_s2m.rotation()( 2, 2 ) = -1;
-    aims_s2m.translation()[2] = dim[2] - 1;
+    aims_s2m.matrix()(2, 3) = dim[2] - 1;
   }
   // TODO: handle flips in s2m
   header->setProperty( "storage_to_memory", aims_s2m.toVector() );
@@ -322,7 +321,6 @@ void TrackvisBundleReader::read()
   vector<int> dim;
   vector<float> vs;
   vector<float> s2m_v;
-  unsigned char invert_x = 0, invert_y = 0, invert_z = 0;
 
   header->getProperty( "n_count", n_count );
   header->getProperty( "n_scalars", n_scalars );

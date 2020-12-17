@@ -161,8 +161,10 @@ ExtendedImporter().importInModule(
     [GenericHandlers.removeChildren], ['Reader_', 'Writer_'])
 ExtendedImporter().importInModule('', globals(), locals(), 'aimssip',
                                   ['aimssip.aims'])
-# move Object out of carto namespace
+# move some objects out of carto namespace
 Object = carto.Object
+Transformation = soma.Transformation
+Transformation3d = soma.Transformation3d
 
 del ExtendedImporter
 
@@ -1093,17 +1095,17 @@ import numpy
 
 def __toMatrix(s):
     """ This function return a copy of the transformation matrix """
-    m = numpy.identity(4)
-    t, r = s.translation(), s.rotation()
-    m[0:3, 0:3].transpose().flat = [r.value(x) for x in range(9)]
-    m[0:3, 3].flat = list(t.items())
-    return m
+    return numpy.asarray(s.affine())[:, :, 0, 0]
 
 
 def __AffineTransformation3dFromMatrix(self, value):
-    self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
-        = value[0:3, 0:3]
-    self.translation().arraydata()[:] = value[0:3, 3].flatten()
+    if value.shape[0] == 3:
+        numpy.asarray(self.affine())[:3, :, 0, 0] = value
+    else:
+        numpy.asarray(self.affine())[:, :, 0, 0] = value
+    #self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
+        #= value[0:3, 0:3]
+    #self.translation().arraydata()[:] = value[0:3, 3].flatten()
 
 
 def __AffineTransformation3d__init__(self, *args):
@@ -1120,14 +1122,27 @@ def __AffineTransformation3d__header(self):
     h.__motion = self
     return h
 
+
+def __AffineTransformation3d__affine(self):
+    a = self.__oldaffine__(self)._get()
+    # get a ref to self into a to prevent deletion of self
+    # warning: setting it in the refvolume is not working since the python part
+    # of the Volume object is not preserved when only manipulating rc_ptrs
+    a._trans = self
+    return a
+
+
 AffineTransformation3d.toMatrix = __toMatrix
 AffineTransformation3d.fromMatrix = __AffineTransformation3dFromMatrix
 AffineTransformation3d.__oldinit__ = AffineTransformation3d.__init__
 AffineTransformation3d.__init__ = __AffineTransformation3d__init__
 AffineTransformation3d.__oldheader__ = AffineTransformation3d.header
 AffineTransformation3d.header = __AffineTransformation3d__header
+AffineTransformation3d.__oldaffine__ = AffineTransformation3d.affine
+AffineTransformation3d.affine = __AffineTransformation3d__affine
 del __toMatrix, __AffineTransformation3dFromMatrix, \
-    __AffineTransformation3d__init__, __AffineTransformation3d__header
+    __AffineTransformation3d__init__, __AffineTransformation3d__header, \
+    __AffineTransformation3d__affine
 # backward compatibility
 Motion = AffineTransformation3d
 
@@ -2376,6 +2391,8 @@ removed in the future.
 '''
 
 _volumedoc = '''
+**Generalities**
+
 The various Volume_<type> classes are bindings to the :cartoddox:`C++ template classes carto::Volume <classcarto_1_1Volume.html>`. It represents a 4D volume (1D to 4D, actually) storing a
 specific type of data: for instance S16 is signed 16 bit short ints, FLOAT is
 32 bit floats,
@@ -2394,21 +2411,44 @@ A volume of a given type can be built either using its specialized class constru
     >>> import numpy
     >>> v = aims.Volume(numpy.int16, 100, 100, 10)
 
+**Numpy arrays and volumes**
+
 A volume is an array of voxels, which can be accessed via the ``at()``
 method.
-For standard numeric types, it is also posisble to get the voxels array as a
-numpy_ array, using the ``arraydata()`` method, or more conveniently,
+For standard numeric types, it is also possible to get the voxels array as a
+numpy_ array, using the ``__array__()`` method, or more conveniently,
 ``numpy.asarray(volume)`` or ``numpy.array(volume, copy=False)``.
 The array returned is a reference to the actual data block, so any
 modification to its contents also affect the Volume contents, so it is
 generally an easy way of manipulating volume voxels because all the power of
 the numpy module can be used on Volumes.
 The ``arraydata()`` method returns a numpy array just like it is in memory,
-that is a 4D array indexed by ``[t][z][y][x]``, which is generally not what you like and is not consistent with AIMS indexing. Contrarily, using
+that is a 4D (or more) array indexed by ``[t][z][y][x]``, which is generally not what you like and is not consistent with AIMS indexing. Contrarily, using
 ``numpy.asarray(volume)`` sets strides in the returned numpy
 array, so that indexing is in the "normal" order ``[x][y][z][t]``, while still sharing the same memory block.
 The Volume object now also wraps the numpy accessors to the volume object itself, so that ``volume[x, y, z, t]`` is the same as
 ``nupmy.asarray(volume)[x, y, z, t]``.
+
+*new in PyAims 4.7*
+
+Since PyAims 4.7 the numpy arrays bindings have notably improved, and are now able to bind arrays to voxels types which are not scalar numeric types. Volumes of RGB, RGBA, HSV, or Point3df now have numpy bindings. The bound object have generally a "numpy struct" binding, that is not the usual C++/python object binding, but instead a structure managed by numpy which also supports indexing. For most objects we are using, they also have an array stucture (a RGB is an array with 3 int8 items), and are bound under a sturcture with a unique field, named "v" (for "vector"):
+
+    >>> v = aims.Volume('RGB', 100, 100, 10)
+    >>> numpy.asarray(v)[0, 0, 0, 0]
+    ([0, 0, 0],)
+
+Such an array may be indexed by the field name, which returns another array with scalar values and additional dimensions:
+
+    >>> numpy.asarray(v)['v'].dtype
+    dtype('uint8')
+    >>> numpy.asarray(v)['v'].shape
+    (100, 100, 10, 1, 3)
+
+Both arrays share their memory with the aims volume.
+
+.. seealso:: :ref:`numpy_bindings`
+
+**Header**
 
 Volumes also store a header which can contain various information (including
 sizes and voxel sizes). The header is a dictionary-like generic object
@@ -2437,6 +2477,8 @@ The converter can also be called using type arguments:
     >>> vol1 = aims.Volume('S16', 100, 100, 10)
     >>> c = aims.Converter(intype=vol1, outtype='Volume_DOUBLE')
     >>> vol2 = c(vol1)
+
+**Volume from a numpy array**
 
 It is also possible to build a Volume from a numpy array:
 

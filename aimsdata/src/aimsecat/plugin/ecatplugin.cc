@@ -50,7 +50,7 @@ namespace
     return true;
   }
 
-  bool ecatinit = initecat();
+  bool ecatinit __attribute__((unused)) = initecat();
 
 }
 

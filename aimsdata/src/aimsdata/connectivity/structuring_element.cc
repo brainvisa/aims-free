@@ -33,7 +33,7 @@
 
 //--- aims -------------------------------------------------------------------
 #include <aims/connectivity/structuring_element.h>
-#include <aims/vector/vector.h>                                     // Point3d
+#include <aims/vector/vector.h>                                     // Point3dl
 //--- carto ------------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>                           // smart pointers
 //--- std --------------------------------------------------------------------
@@ -55,19 +55,19 @@ using namespace std;
 //============================================================================
 
 vector<int> StructuringElement::getAmplitude(
-  const Point3d & origin
+  const Point3dl & origin
 ) const
 {
   const_iterator i, e = end();
   vector<int> amplitude(6,0);
   for( i=begin(); i!=e; ++i )
   {
-    amplitude[0] = abs( min( -amplitude[0], origin[0] + (*i)[0] ) );
-    amplitude[1] = abs( max(  amplitude[1], origin[0] + (*i)[0] ) );
-    amplitude[2] = abs( min( -amplitude[2], origin[1] + (*i)[1] ) );
-    amplitude[3] = abs( max(  amplitude[3], origin[1] + (*i)[1] ) );
-    amplitude[4] = abs( min( -amplitude[4], origin[2] + (*i)[2] ) );
-    amplitude[5] = abs( max(  amplitude[5], origin[2] + (*i)[2] ) );
+    amplitude[0] = abs( min( (int64_t)(-amplitude[0]), (origin[0] + (*i)[0]) ) );
+    amplitude[1] = (int) abs( max( (int64_t) amplitude[1], origin[0] + (*i)[0] ) );
+    amplitude[2] = (int) abs( min( (int64_t)-amplitude[2], origin[1] + (*i)[1] ) );
+    amplitude[3] = (int) abs( max( (int64_t) amplitude[3], origin[1] + (*i)[1] ) );
+    amplitude[4] = (int) abs( min( (int64_t)-amplitude[4], origin[2] + (*i)[2] ) );
+    amplitude[5] = (int) abs( max( (int64_t) amplitude[5], origin[2] + (*i)[2] ) );
   }
   return amplitude;
 }
@@ -91,8 +91,18 @@ void Shape::setParameters(
   const bool usecenter
 )
 {
-  Point3d origin(0,0,0);
+  Point3dl origin(0,0,0);
   setParameters( origin, amplitude, usecenter );
+}
+
+void Shape::setParameters(
+  const Point3dl & origin,
+  const double amplitude,
+  const bool usecenter
+)
+{
+  vector<double> vamplitude(3, amplitude);
+  setParameters( origin, vamplitude, usecenter );
 }
 
 void Shape::setParameters(
@@ -101,8 +111,8 @@ void Shape::setParameters(
   const bool usecenter
 )
 {
-  vector<double> vamplitude(3, amplitude);
-  setParameters( origin, vamplitude, usecenter );
+  setParameters( Point3dl(origin[0], origin[1], origin[2]),
+                 amplitude, usecenter );
 }
 
 void Shape::setParameters(
@@ -110,9 +120,18 @@ void Shape::setParameters(
   const bool usecenter
 )
 {
-  Point3d origin(0,0,0);
+  Point3dl origin(0,0,0);
   vector<double> vamplitude(3, amplitude);
   setParameters( origin, vamplitude, usecenter );
+}
+
+void Shape::setParameters(
+  const Point3d & origin,
+  const vector<double> & amplitude,
+  const bool usecenter )
+{
+  setParameters( Point3dl(origin[0], origin[1], origin[2]),
+                 amplitude, usecenter );
 }
 
 
@@ -179,6 +198,16 @@ Shape* ShapeFactory::create(
   const bool usecenter
 )
 {
+  return create(type, Point3dl(origin[0], origin[1], origin[2]), amplitude, usecenter);
+}
+
+Shape* ShapeFactory::create(
+  const string & type,
+  const Point3dl & origin,
+  const vector<double> & amplitude,
+  const bool usecenter
+)
+{
   init();
   map<string,rc_ptr<Shape> >::const_iterator i;
   i = _map().find( type );
@@ -195,13 +224,13 @@ Shape* ShapeFactory::create(
   const bool usecenter
 )
 {
-  Point3d origin(0,0,0);
+  Point3dl origin(0,0,0);
   return create( type, origin, amplitude, usecenter );
 }
 
 Shape* ShapeFactory::create(
   const string & type,
-  const Point3d & origin,
+  const Point3dl & origin,
   const double amplitude,
   const bool usecenter
 )
@@ -212,11 +241,21 @@ Shape* ShapeFactory::create(
 
 Shape* ShapeFactory::create(
   const string & type,
+  const Point3d & origin,
   const double amplitude,
   const bool usecenter
 )
 {
-  Point3d origin(0,0,0);
+  return create( type, Point3dl(origin[0], origin[1], origin[2]), amplitude, usecenter );
+}
+
+Shape* ShapeFactory::create(
+  const string & type,
+  const double amplitude,
+  const bool usecenter
+)
+{
+  Point3dl origin(0,0,0);
   vector<double> vamplitude( 3, amplitude );
   return create( type, origin, vamplitude, usecenter );
 }
@@ -226,7 +265,7 @@ Shape* ShapeFactory::create(
 //============================================================================
 
 void Connectivity::setVectorFromMatrix(
-  const Point3d & origin,
+  const Point3dl & origin,
   const bool usecenter
 )
 {
@@ -236,7 +275,7 @@ void Connectivity::setVectorFromMatrix(
     for( int y=0; y<3; ++y )
       for( int x=0; x<3; ++x )
           if( (m[z][y][x]) )
-            _vector.push_back( origin + Point3d( x-1, y-1, z-1 ) );
+            _vector.push_back( origin + Point3dl( x-1, y-1, z-1 ) );
   if( usecenter )
     _vector.push_back( origin );
 }
@@ -312,7 +351,7 @@ set<string> ConnectivityFactory::connectivities()
 
 Connectivity* ConnectivityFactory::create(
   const string & type,
-  const Point3d & origin,
+  const Point3dl & origin,
   const bool usecenter
 )
 {
@@ -328,17 +367,26 @@ Connectivity* ConnectivityFactory::create(
 
 Connectivity* ConnectivityFactory::create(
   const string & type,
+  const Point3d & origin,
   const bool usecenter
 )
 {
-  return create( type, Point3d(0,0,0), usecenter );
+  return create(type, Point3dl(origin[0], origin[1], origin[2]), usecenter);
+}
+
+Connectivity* ConnectivityFactory::create(
+  const string & type,
+  const bool usecenter
+)
+{
+  return create( type, Point3dl(0,0,0), usecenter );
 }
 
 //============================================================================
 // SHAPE: DERIVED CLASSES
 //============================================================================
 void Cube::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -356,11 +404,11 @@ void Cube::setParameters(
     for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
       for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
         if( usecenter || ( i != 0 ) || ( j != 0 ) || ( k != 0 ) )
-          _vector.push_back( Point3d(i, j, k) + origin );
+          _vector.push_back( Point3dl(i, j, k) + origin );
 }
 
 void SquareXY::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -375,11 +423,11 @@ void SquareXY::setParameters(
   for(int j = - (int)amplitude[1]; j <= (int)amplitude[1]; ++j)
     for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
       if( usecenter || ( i != 0 ) || ( j != 0 ) )
-        _vector.push_back( Point3d(i, j, 0) + origin );
+        _vector.push_back( Point3dl(i, j, 0) + origin );
 }
 
 void SquareXZ::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -394,11 +442,11 @@ void SquareXZ::setParameters(
   for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
     for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
       if( usecenter || ( i != 0 ) || ( k != 0 ) )
-        _vector.push_back( Point3d(i, 0, k) + origin );
+        _vector.push_back( Point3dl(i, 0, k) + origin );
 }
 
 void SquareYZ::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -413,11 +461,11 @@ void SquareYZ::setParameters(
   for(int k = - (int)amplitude[1]; k <= (int)amplitude[1]; ++k)
     for(int j = - (int)amplitude[0]; j <= (int)amplitude[0]; ++j)
       if( usecenter || ( j != 0 ) || ( k != 0 ) )
-        _vector.push_back( Point3d(0, j, k) + origin );
+        _vector.push_back( Point3dl(0, j, k) + origin );
 }
 
 void Sphere::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -438,11 +486,11 @@ void Sphere::setParameters(
             sqrt( pow((float)i,2)/pow((float)amplitude[0],2) + 
                   pow((float)j,2)/pow((float)amplitude[1],2) + 
                   pow((float)k,2)/pow((float)amplitude[2],2) ) <= 1 )
-          _vector.push_back( Point3d(i, j, k) + origin );
+          _vector.push_back( Point3dl(i, j, k) + origin );
 }
 
 void DiskXY::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -459,11 +507,11 @@ void DiskXY::setParameters(
       if( ( usecenter || ( i != 0 ) || ( j != 0 ) ) &&
           sqrt( pow((float)i, 2) / pow((float)amplitude[0], 2) + 
                 pow((float)j, 2) / pow((float)amplitude[1], 2) ) <= 1 )
-        _vector.push_back( Point3d(i, j, 0) + origin );
+        _vector.push_back( Point3dl(i, j, 0) + origin );
 }
 
 void DiskXZ::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -480,11 +528,11 @@ void DiskXZ::setParameters(
       if( ( usecenter || ( i != 0 ) || ( k != 0 ) ) &&
           sqrt( pow((float)i, 2) / pow((float)amplitude[0], 2) + 
                 pow((float)k, 2) / pow((float)amplitude[1], 2) ) <= 1 )
-        _vector.push_back( Point3d(i, 0, k) + origin );
+        _vector.push_back( Point3dl(i, 0, k) + origin );
 }
 
 void DiskYZ::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -501,11 +549,11 @@ void DiskYZ::setParameters(
       if( ( usecenter || ( j != 0 ) || ( k != 0 ) ) &&
           sqrt( pow((float)j, 2) / pow((float)amplitude[0], 2) + 
                 pow((float)k, 2) / pow((float)amplitude[1], 2) ) <= 1 )
-        _vector.push_back( Point3d(0, j, k) + origin );
+        _vector.push_back( Point3dl(0, j, k) + origin );
 }
 
 void Cross::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -525,11 +573,11 @@ void Cross::setParameters(
         if( ( ( i == 0 ) && ( ( j == 0 ) || ( k == 0 ) ) ) || 
             ( ( j == 0 ) && ( k == 0 ) ) )
           if( usecenter || ( i != 0 ) || ( j != 0 ) || ( k != 0 ) )
-            _vector.push_back( Point3d(i, j, k) + origin );
+            _vector.push_back( Point3dl(i, j, k) + origin );
 }
 
 void CrossXY::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -545,11 +593,11 @@ void CrossXY::setParameters(
     for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
       if( ( i == 0 ) || ( j == 0 ) )
         if( usecenter || ( i != 0 ) || ( j != 0 ) )
-          _vector.push_back( Point3d(i, j, 0) + origin );
+          _vector.push_back( Point3dl(i, j, 0) + origin );
 }
 
 void CrossXZ::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -565,11 +613,11 @@ void CrossXZ::setParameters(
     for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
       if( ( i == 0 ) || ( k == 0 ) )
         if( usecenter || ( i != 0 ) || ( k != 0 ) )
-          _vector.push_back( Point3d(i, 0, k) + origin );
+          _vector.push_back( Point3dl(i, 0, k) + origin );
 }
 
 void CrossYZ::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -585,11 +633,11 @@ void CrossYZ::setParameters(
     for(int j = - (int)amplitude[0]; j <= (int)amplitude[0]; ++j)
       if( ( j == 0 ) || ( k == 0 ) )
         if( usecenter || ( j != 0 ) || ( k != 0 ) )
-          _vector.push_back( Point3d(0, j, k) + origin );
+          _vector.push_back( Point3dl(0, j, k) + origin );
 }
 
 void DiagonalCross::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -608,11 +656,11 @@ void DiagonalCross::setParameters(
       for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
         if( ( abs(i) == abs(j) ) && ( abs(i) == abs(k) ) )
           if( usecenter || ( i != 0 ) || ( j != 0 ) || ( k != 0 ) )
-            _vector.push_back( Point3d(i, j, k) + origin );
+            _vector.push_back( Point3dl(i, j, k) + origin );
 }
 
 void DiagonalCrossXY::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -628,11 +676,11 @@ void DiagonalCrossXY::setParameters(
       for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
         if( abs(i) == abs(j) )
           if( usecenter || ( i != 0 ) || ( j != 0 ) )
-            _vector.push_back( Point3d(i, j, 0) + origin );
+            _vector.push_back( Point3dl(i, j, 0) + origin );
 }
 
 void DiagonalCrossXZ::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -648,11 +696,11 @@ void DiagonalCrossXZ::setParameters(
       for(int i = - (int)amplitude[0]; i <= (int)amplitude[0]; ++i)
         if( abs(i) == abs(k) )
           if( usecenter || ( i != 0 ) || ( k != 0 ) )
-            _vector.push_back( Point3d(i, 0, k) + origin );
+            _vector.push_back( Point3dl(i, 0, k) + origin );
 }
 
 void DiagonalCrossYZ::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -668,11 +716,11 @@ void DiagonalCrossYZ::setParameters(
       for(int j = - (int)amplitude[0]; j <= (int)amplitude[0]; ++j)
         if( abs(j) == abs(k) )
           if( usecenter || ( j != 0 ) || ( k != 0 ) )
-            _vector.push_back( Point3d(0, j, k) + origin );
+            _vector.push_back( Point3dl(0, j, k) + origin );
 }
 
 void CircleXY::setParameters(
-  const Point3d & origin,
+  const Point3dl & origin,
   const vector<double> & amplitude,
   const bool usecenter
 )
@@ -689,11 +737,11 @@ void CircleXY::setParameters(
       if( ( usecenter || ( i != 0 ) || ( j != 0 ) ) &&
           ( sqrt( pow((float)i, 2)  + pow((float)j, 2) * ( pow( amplitude[0], 2 ) / pow( amplitude[1], 2 ) ) ) <= amplitude[0] ) &&
           ( sqrt( pow((float)i, 2)  + pow((float)j, 2) * ( pow( amplitude[0], 2 ) / pow( amplitude[1], 2 ) ) ) > amplitude[0] - 1 ) )
-        _vector.push_back( Point3d(i, j, 0) + origin );
+        _vector.push_back( Point3dl(i, j, 0) + origin );
 }
 
 void ClockWiseCircleXY::setParameters(
-    const Point3d & origin,
+    const Point3dl & origin,
     const vector<double> & amplitude,
     const bool usecenter
 )
@@ -705,10 +753,10 @@ void ClockWiseCircleXY::setParameters(
 void ClockWiseCircleXY::clockwise_order() {
 
     // Initialization
-    const std::vector<Point3d> & unordered_circle = _vector;
+    const std::vector<Point3dl> & unordered_circle = _vector;
     std::vector<int> amplitude = getAmplitude();
-    std::vector<Point3d>::const_iterator it, circle_end = unordered_circle.end();
-    std::vector<Point3d> clockwise_circle(unordered_circle.size());
+    std::vector<Point3dl>::const_iterator it, circle_end = unordered_circle.end();
+    std::vector<Point3dl> clockwise_circle(unordered_circle.size());
     std::vector<int> quarter_index(4, 0);
     int circle_radius = amplitude[0]; 
     int quarter_size = unordered_circle.size() / 4;
@@ -716,7 +764,7 @@ void ClockWiseCircleXY::clockwise_order() {
     // Reorder per quarter
     for (it = unordered_circle.begin(); it != circle_end; ++it){
         // Compute the difference between the current pixel and the central one
-        Point3d p((*it)[0], (*it)[1], (*it)[2]);
+        Point3dl p((*it)[0], (*it)[1], (*it)[2]);
 
         if (((p[0] > 0) && (p[1] < 0)) || ((p[0] == 0) && (p[1] == -circle_radius))) {
             // Top right quarter
@@ -743,7 +791,7 @@ void ClockWiseCircleXY::clockwise_order() {
     if (quarter_size > 1) {
         // Reorder bottom right quarter
         int quarter = 1;
-        std::vector<Point3d>::iterator sit, send, qit, 
+        std::vector<Point3dl>::iterator sit, send, qit, 
                                     qend = clockwise_circle.begin() 
                                             + (quarter + 1) * quarter_size;
         sit = clockwise_circle.begin() + quarter * quarter_size;
@@ -778,7 +826,7 @@ void ClockWiseCircleXY::clockwise_order() {
         
         // Reorder top left quarter
         quarter = 3;
-        std::vector<Point3d>::reverse_iterator srit, srend, qrit, 
+        std::vector<Point3dl>::reverse_iterator srit, srend, qrit, 
                                     qrend = clockwise_circle.rbegin() 
                                             + quarter_size;
         srit = clockwise_circle.rbegin();

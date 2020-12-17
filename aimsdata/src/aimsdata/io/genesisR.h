@@ -100,7 +100,7 @@ namespace aims
     options->getProperty( "frame", frame );
     options->getProperty( "border", border );
 
-    int	dimt, tmin;
+    int	dimt;
     if( frame >= 0 )
       {
 	if( frame >= hdr->dimT() )
@@ -109,12 +109,10 @@ namespace aims
 	    throw std::domain_error( "frame higher than file dimT" );
 	  }
 	dimt = 1;
-	tmin = frame;
       }
     else
       {
 	dimt = hdr->dimT();
-	tmin = 0;
       }
 
     /*cout << "dimensions: " << hdr->dimX() << ", " << hdr->dimY() << ", " 

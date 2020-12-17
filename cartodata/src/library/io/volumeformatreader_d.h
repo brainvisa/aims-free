@@ -113,7 +113,8 @@ namespace soma
     typename std::set<std::string>::iterator plast = prop.end();
     for( p = prop.begin(); p != prop.end(); ++p )
     {
-      if( options->hasProperty( *p ) ) {
+      if( options->hasProperty( *p ) )
+      {
         VolumeUtilIO<T>::read( &obj, dsi, options );
         bool convert = false;
         options->getProperty( "convert_to_aims", convert );
@@ -209,7 +210,7 @@ namespace soma
   template <typename T>
   void VolumeFormatReader<T>::read( carto::Volume<T> & obj,
                                     carto::rc_ptr<DataSourceInfo> dsi,
-                                    const AllocatorContext & context,
+                                    const AllocatorContext & /* context */,
                                     carto::Object options )
   {
     localMsg( "Reading object ( " + dsi->url() + " )" );
@@ -265,13 +266,17 @@ namespace soma
               + ( obj.allocatorContext().isAllocated() ? "is" : "isn't" )
               + " allocated." );
     if( parent1 )
+    {
       localMsg( std::string(" -> parent exists and ")
                 + ( parent1->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
+    }
     if( parent2 )
+    {
       localMsg( std::string(" -> grandparent exists and ")
                 + ( parent2->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
+    }
 
     //=== view size ==========================================================
     localMsg( "reading view size..." );
@@ -304,7 +309,8 @@ namespace soma
     //=== full volume size ===================================================
     localMsg( "reading full volume size..." );
     std::vector<int>  imagesize( 4, 0 );
-    try {
+    try
+    {
       // first we look for "resolutions_dimension" property
       carto::Object dim
         = dsi->header()->getProperty( "resolutions_dimension" )->getArrayItem(
@@ -314,8 +320,11 @@ namespace soma
       for( i=0; i<ndim; ++i )
       imagesize[ i ] = (int) rint( dim->getArrayItem( i )->getScalar() );
       localMsg( " -> found \"resolutions_dimension\"." );
-    } catch( ... ) {
-      try {
+    }
+    catch( ... )
+    {
+      try
+      {
         // if it doesn't work, we look for "volume_dimension"
         carto::Object dim = dsi->header()->getProperty( "volume_dimension" );
         int i, ndim = dim->size();
@@ -323,7 +332,9 @@ namespace soma
         for( i=0; i<ndim; ++i )
           imagesize[ i ] = (int) rint( dim->getArrayItem( i )->getScalar() );
         localMsg( " -> found \"volume_dimension\"." );
-      } catch( ... ) {
+      }
+      catch( ... )
+      {
         // if still nothing, we look for parent volumes
         if( parent1 && !parent1->allocatorContext().isAllocated() ) {
           imagesize = parent1->getSize();
@@ -365,7 +376,7 @@ namespace soma
               + carto::toString( allocsize[ 3 ] ) + " )" );
 
     //=== strides ============================================================
-    int i, ndim = allocsize.size();
+    size_t i, ndim = allocsize.size();
     std::vector<long> strides( ndim );
     std::vector<int> stride_pos;
     for( i=0; i<ndim; ++i )
@@ -405,9 +416,10 @@ namespace soma
               + std::string( ( withborders ? "yes" : "no" ) ) );
     localMsg( "Partial Reading : "
               + std::string( ( partialreading ? "yes" : "no" ) ) );
+    partialreading = partialreading; // compilation warning
     
     //=== reading volume =====================================================
-    int y, z, t;
+    //int y, z, t;
     if( !withborders || dsi->capabilities().canHandleStrides() )
     {
       localMsg( "reading volume using strides..." );
@@ -425,7 +437,7 @@ namespace soma
       std::vector<int> volpos( ndim, 0 );
       volpos[1] = -1;
       sizeline[ 0 ] = viewsize[ 0 ];
-      int dim;
+      size_t dim;
       bool nextrow = false, ended = false;
 
       bool was_open = _imr->isOpen( *dsi );
@@ -443,7 +455,7 @@ namespace soma
             ++volpos[dim];
             if( volpos[dim] == viewsize[dim] )
             {
-              if( dim == ndim - 1 )
+              if( dim == ( ndim - 1 ) )
                 ended = true;
               volpos[dim] = 0;
             }

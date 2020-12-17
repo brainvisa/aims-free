@@ -160,8 +160,8 @@ inline void GeodesicAlgorithmExact::best_point_on_the_edge_set(SurfacePoint& poi
     edge_pointer e = storage[i];
     list_pointer list = interval_list(e);
 
-    double offset;
-    double distance;
+    double offset = 0.0;
+    double distance = 0.0;
     interval_pointer interval;
 
     list->find_closest_point(&point,
@@ -568,7 +568,7 @@ inline void GeodesicAlgorithmExact::propagate(std::vector<SurfacePoint>& sources
     interval_pointer min_interval = *m_queue.begin();
     m_queue.erase(m_queue.begin());
     edge_pointer edge = min_interval->edge();
-    list_pointer list = interval_list(edge);
+    //list_pointer list = interval_list(edge);
 
     assert(min_interval->d() < GEODESIC_INF);
 
@@ -1223,8 +1223,8 @@ inline interval_pointer GeodesicAlgorithmExact::best_first_interval(SurfacePoint
       edge_pointer e = f->adjacent_edges()[i];
       list_pointer list = interval_list(e);
 
-      double offset;
-      double distance;
+      double offset = 0.0;
+      double distance = 0.0;
       interval_pointer interval;
 
       list->find_closest_point(&point,
@@ -1293,7 +1293,7 @@ inline interval_pointer GeodesicAlgorithmExact::best_first_interval(SurfacePoint
 }
 
 inline void GeodesicAlgorithmExact::trace_back_with_index(SurfacePoint& destination,
-                      std::vector<SurfacePoint>& path,std::vector<unsigned>& indexVertex)
+                      std::vector<SurfacePoint>& path,std::vector<unsigned>& /*indexVertex*/)
 {
   trace_back(destination,path);
 }
@@ -1328,9 +1328,9 @@ inline void GeodesicAlgorithmExact::trace_back(SurfacePoint& destination,   //tr
 
       possible_traceback_edges(q, possible_edges);
 
-      interval_pointer interval;
+      interval_pointer interval = NULL;
       double total_distance;
-      double position;
+      double position = 0.0;
 
       best_point_on_the_edge_set(q,
                      possible_edges,

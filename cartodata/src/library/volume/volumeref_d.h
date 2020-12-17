@@ -53,9 +53,9 @@ namespace carto {
   }
 
   template <typename T>
-  VolumeRef<T>* Creator<VolumeRef<T> >::create( Object header,
-                                   const AllocatorContext & context,
-                                   Object options )
+  VolumeRef<T>* Creator<VolumeRef<T> >::create( Object /* header */,
+                                   const AllocatorContext & /* context */,
+                                   Object /* options */ )
   {
     return new VolumeRef<T>;
   }

@@ -11,7 +11,8 @@
 #ifndef		matrix_64_h
 #define		matrix_64_h
 
-#include "matrix.h"
+#include <ecat/kernel/matrix.h>
+
 typedef short int word;
 
 typedef struct mat_main_header {
@@ -177,5 +178,7 @@ typedef struct mat_attn_subheader{
 			sample_distance;
 	}
 Attn_subheader_64;
+
+int mat_lookup_64( FILE* fptr, int matnum, struct MatDir* entry);
 
 #endif	/* 	matrix_64_h */

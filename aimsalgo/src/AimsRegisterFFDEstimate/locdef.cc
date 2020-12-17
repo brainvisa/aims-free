@@ -59,7 +59,6 @@ int main( int argc, const char **argv )
     int         bref = 64, btest = 64;
     int         init_ctrl_numx = 4, init_ctrl_numy = 4, init_ctrl_numz = 4;
     int         final_ctrl_numx = 8, final_ctrl_numy = 8, final_ctrl_numz = 8;
-    int         startScale = 4, endScale = 1;
     Point3d     incr(2, 2, 2);
     float       mi_ref = 0., gain_final_th = 0.01, gain_pyr_coef = 1.0;
     int         gain_first = 3;

@@ -149,8 +149,8 @@ namespace aims
       // no storage orientation: take a default one
       stom.rotation()(1,1) = -1;
       stom.rotation()(2,2) = -1;
-      stom.translation()[1] = thing.dimY() - 1;
-      stom.translation()[2] = thing.dimZ() - 1;
+      stom.matrix()(1, 3) = thing.dimY() - 1;
+      stom.matrix()(2, 3) = thing.dimZ() - 1;
       bool        radio = true;
       try
       {
@@ -162,7 +162,7 @@ namespace aims
       if( !radio )
       {
         stom.rotation()(0,0) = -1;
-        stom.translation()[0] = thing.dimX() - 1;
+        stom.matrix()(0, 3) = thing.dimX() - 1;
       }
     }
 

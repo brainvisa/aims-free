@@ -42,7 +42,7 @@ namespace aims
 {
 
   template<class T> AimsData<T> DericheSmoother<T>::doSmoothing(
-    const AimsData<T> & ima, int maxiter, bool verbose)
+    const AimsData<T> & ima, int maxiter, bool /*verbose*/)
   {
 
     if (maxiter >= 0)

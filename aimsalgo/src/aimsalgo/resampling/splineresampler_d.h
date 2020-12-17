@@ -83,7 +83,7 @@ template < class T >
 void
 SplineResampler< T >::doResampleChannel(
   const carto::Volume< ChannelType >& inVolume,
-  const aims::Transformation3d& invTransform3d,
+  const soma::Transformation3d& invTransform3d,
   const ChannelType& outBackground,
   const Point3df& outLocation,
   ChannelType& outValue, int t ) const
@@ -532,7 +532,7 @@ int SplineResampler< T >::getFold( int i, int size ) const
 template <typename T>
 void SplineResampler<T>::
 resample_channel_inv_to_vox(const carto::Volume< ChannelType >& inVolume,
-                            const aims::Transformation3d&
+                            const soma::Transformation3d&
                               inverse_transform_to_vox,
                             const ChannelType& outBackground,
                             carto::Volume< ChannelType > & outVolume,
@@ -598,7 +598,7 @@ struct MultiChannelResamplerSwitch<false, T>
 
   static void doResample( const SplineResampler<T>* spline_resampler,
                           const carto::Volume< T > &input_data,
-                          const aims::Transformation3d &inverse_transform,
+                          const soma::Transformation3d &inverse_transform,
                           const T &background,
                           const Point3df &output_location,
                           T &output_value,
@@ -614,7 +614,7 @@ struct MultiChannelResamplerSwitch<false, T>
 
   static void resample_inv_to_vox( const SplineResampler<T>* spline_resampler,
                                    const carto::Volume< T >& input_data,
-                                   const aims::Transformation3d&
+                                   const soma::Transformation3d&
                                     inverse_transform_to_vox,
                                    const T& background,
                                    carto::Volume< T > & output_data,
@@ -644,7 +644,7 @@ struct MultiChannelResamplerSwitch<true, T>
 
   static void doResample( const SplineResampler<T>* spline_resampler,
                           const carto::Volume< T > &input_data,
-                          const aims::Transformation3d &inverse_transform,
+                          const soma::Transformation3d &inverse_transform,
                           const T &background,
                           const Point3df &output_location,
                           T &output_value,
@@ -677,7 +677,7 @@ struct MultiChannelResamplerSwitch<true, T>
 
   static void resample_inv_to_vox( const SplineResampler<T>* spline_resampler,
                                    const carto::Volume< T >& input_data,
-                                   const aims::Transformation3d&
+                                   const soma::Transformation3d&
                                     inverse_transform_to_vox,
                                    const T& background,
                                    carto::Volume< T > & output_data,
@@ -749,7 +749,7 @@ SplineResampler< T >::updateParameters( const carto::Volume< T >& inVolume,
 template < class T >
 void SplineResampler<T>::
 resample_inv_to_vox( const carto::Volume< T >& input_data,
-                     const aims::Transformation3d& inverse_transform_to_vox,
+                     const soma::Transformation3d& inverse_transform_to_vox,
                      const T& background,
                      carto::Volume< T > & output_data,
                      bool verbose ) const
@@ -766,7 +766,7 @@ resample_inv_to_vox( const carto::Volume< T >& input_data,
 template < class T >
 void SplineResampler<T>::
 doResample( const carto::Volume< T > &input_data,
-            const aims::Transformation3d &inverse_transform,
+            const soma::Transformation3d &inverse_transform,
             const T &background,
             const Point3df &output_location,
             T &output_value,

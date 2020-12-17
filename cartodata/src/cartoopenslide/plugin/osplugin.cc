@@ -65,7 +65,7 @@ namespace
     return true;
   }
 
-  bool osinit = initos();
+  bool osinit __attribute__((unused)) = initos();
 
 }
 

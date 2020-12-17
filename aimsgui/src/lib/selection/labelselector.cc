@@ -768,7 +768,6 @@ void LabelSelector::startDrag( QTreeWidgetItem* item, Qt::MouseButtons,
     {
       QTreeWidgetItem	*li;
       QTreeWidgetItemIterator il( d->hieview );
-      unsigned i, n = d->hieview->topLevelItemCount();
       SelectionSet	ss;
       Selection		s;
       bool		deep = !(state & Qt::ShiftModifier);
@@ -806,6 +805,7 @@ void LabelSelector::startDrag( QTreeWidgetItem* item, Qt::MouseButtons,
       mimeData->setText( ostr.str().c_str() );
       drag->setMimeData( mimeData );
       Qt::DropAction dropAction = drag->exec( Qt::CopyAction );
+      dropAction = dropAction; // compilation warning...
     }
 }
 
@@ -845,6 +845,7 @@ void LabelSelector::startDragModel( QListWidgetItem*, Qt::MouseButtons,
   mimeData->setText( ostr.str().c_str() );
   drag->setMimeData( mimeData );
   Qt::DropAction dropAction = drag->exec( Qt::CopyAction );
+  dropAction = dropAction; // compilation warning...
 }
 
 
@@ -1120,7 +1121,6 @@ void LabelSelector::ModelBox::mousePressEvent( QMouseEvent* event )
 void LabelSelector::ModelBox::mouseMoveEvent( QMouseEvent* event )
 {
   QPoint p = event->pos();
-  QListWidgetItem *item = itemAt( p );
 
   if( d->dragpossible )
   {

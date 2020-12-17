@@ -15,14 +15,14 @@ float fiberDistance(FiberPoint* f1, FiberPoint* f2, int &fiberSize1, int &fiberS
   Point3df pMin;
 
   // distance(f1, f2)
-  for (size_t i = 0; i < fiberSize1; i++)
+  for (int i = 0; i < fiberSize1; i++)
   {
 
     dist1 += getClosestFiberPointDist(f1[i], f2, pMin, fiberSize2);
   }
 
   // distance(f2, f1)
-  for (size_t i = 0; i < fiberSize2; i++)
+  for (int i = 0; i < fiberSize2; i++)
   {
     dist2 += getClosestFiberPointDist(f2[i], f1, pMin, fiberSize1);
   }
@@ -69,13 +69,13 @@ float fiberDistanceMax(FiberPoint* f1, FiberPoint* f2, int &fiberSize1, int &fib
   Point3df pMin;
 
   // distance(f1, f2)
-  for (size_t i = 0; i < fiberSize1; i++)
+  for (int i = 0; i < fiberSize1; i++)
   {
     dist1 += getClosestFiberPointDist(f1[i], f2, pMin, fiberSize2);
   }
 
   // distance(f2, f1)
-  for (size_t i = 0; i < fiberSize2; i++)
+  for (int i = 0; i < fiberSize2; i++)
   {
     dist2 += getClosestFiberPointDist(f2[i], f1, pMin, fiberSize1);
   }
@@ -122,7 +122,7 @@ float getClosestFiberPointDist(Point3df& p1, FiberPoint* f2, Point3df& pMin, int
   float min = 10e10, norm2;
   Point3df p3;
 
-  for (size_t i = 0; i < fiberSize2; i++)
+  for (int i = 0; i < fiberSize2; i++)
   {
     p3 = f2[i] - p1;
 
@@ -170,7 +170,7 @@ float fiberDistanceMaxDistCorrespPoints(FiberPoint* f1, FiberPoint* f2, int &fib
   int size = fiberSize1;
 
   // distance(f1, f2)
-  for (size_t i = 0; i < size; i++)
+  for (int i = 0; i < size; i++)
   {
     p = f2[i] - f1[i];
     dist = p.norm2();
@@ -181,7 +181,7 @@ float fiberDistanceMaxDistCorrespPoints(FiberPoint* f1, FiberPoint* f2, int &fib
   }
 
   // distance(f1, f2)
-  for (size_t i = 0; i < size; i++)
+  for (int i = 0; i < size; i++)
   {
     p = f2[size - i - 1] - f1[i];
     dist = p.norm2();
@@ -217,7 +217,7 @@ float fiberDistanceMaxDistCorrespPoints(vector<Point3df>& f1, vector<Point3df>& 
   int size = f1.size();
 
   // distance(f1, f2)
-  for (size_t i = 0; i < size; i++)
+  for (int i = 0; i < size; i++)
   {
     p = f2[i] - f1[i];
     dist = p.norm2();
@@ -229,7 +229,7 @@ float fiberDistanceMaxDistCorrespPoints(vector<Point3df>& f1, vector<Point3df>& 
   }
 
   // distance(f1, f2)
-  for (size_t i = 0; i < size; i++)
+  for (int i = 0; i < size; i++)
   {
     p = f2[size - i - 1] - f1[i];
     dist = p.norm2();
@@ -265,7 +265,7 @@ float calculateMinFibersLength(FiberPoint* f1, FiberPoint* f2, int &fiberSize1, 
    //fiber 2
    diff = f2[1] - f2[0];
    d = diff.norm();
-   float l2 = float(fiberSize1) * d;
+   float l2 = float(fiberSize2) * d;
 
    if (l1 < l2)
    {
@@ -286,7 +286,7 @@ float calculateMinFibersLength(vector<Point3df>& f1, vector<Point3df>& f2)
    //fiber 2
    diff = f2[1] - f2[0];
    d = diff.norm();
-   float l2 = float(f1.size()) * d;
+   float l2 = float(f2.size()) * d;
 
    if (l1 < l2)
    {
@@ -428,7 +428,7 @@ float fiberAffinity(FiberPoint* f1, FiberPoint* f2, float var, int &fiberSize1, 
 
 } // fiberAffinity
 
-float fiberAffinityMaxDistCorrespPoints(FiberPoint* f1, FiberPoint* f2, float var, int &fiberSize1, int &fiberSize2)
+float fiberAffinityMaxDistCorrespPoints(FiberPoint* f1, FiberPoint* f2, float var, int &fiberSize1, int & /*fiberSize2*/)
 {
   float dist, aff;
   dist = fiberDistanceMaxDistCorrespPoints(f1, f2, fiberSize1);

@@ -42,7 +42,8 @@
 #include <cartobase/type/voxelhsv.h>
 //----------------------------------------------------------------------------
 
-namespace carto {
+namespace carto
+{
 
 //============================================================================
 //   I N S T A N C I A T I O N
@@ -68,6 +69,10 @@ namespace carto {
   extern template class Creator<VolumeRef<soma::VoxelRGB> >;
   extern template class Creator<VolumeRef<soma::VoxelRGBA> >;
   extern template class Creator<VolumeRef<soma::VoxelHSV> >;
+  extern template class Creator<VolumeRef<Point3df> >;
+  extern template class Creator<VolumeRef<Point3d> >;
+  extern template class Creator<VolumeRef<Point2d> >;
+  extern template class Creator<VolumeRef<AimsVector<float, 6> > >;
 #ifdef CARTO_LONG_IS_DISTINCT
   extern template class Creator<VolumeRef<long> >;
   extern template class Creator<VolumeRef<unsigned long> >;
@@ -91,6 +96,12 @@ namespace carto {
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelRGB > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelRGBA > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelHSV > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< Point3df > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< Point3d > )
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< Point2d > )
+#define CARTO_COMA ,
+  DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< AimsVector<float CARTO_COMA 6 > > )
+#undef CARTO_COMA
 #ifdef CARTO_LONG_IS_DISTINCT
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
   DECLARE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )

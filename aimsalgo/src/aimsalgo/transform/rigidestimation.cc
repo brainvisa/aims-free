@@ -169,11 +169,11 @@ RigidTransformEstimation::looseEstimation()
   _motion->rotation()(2, 1) = t * axis[1] * axis[2] + s * axis[0] ;
   _motion->rotation()(2, 2) = t * axis[2] * axis[2] + c ;
   
-  _motion->translation() = 0. ;
-  Point3df gravCenter( (float).5 * ( _pointsFrom[0] + _pointsFrom[1] ) ) ;
+  _motion->setTranslation(Point3df(0.));
+  Point3df gravCenter((float).5 * (_pointsFrom[0] + _pointsFrom[1]));
   
-  _motion->translation() = (float).5 * (_pointsTo[0] + _pointsTo[1]) 
-    - _motion->transform( gravCenter[0], gravCenter[1], gravCenter[2] ) ;
+  _motion->setTranslation((float).5 * (_pointsTo[0] + _pointsTo[1]) 
+    - _motion->transform(gravCenter[0], gravCenter[1], gravCenter[2]));
 }
 
 
@@ -403,8 +403,8 @@ RigidTransformEstimation::pointToPointEstimation()
     _motion->rotation()(2, 1) = t * axis[1] * axis[2] + s * axis[0] ;
     _motion->rotation()(2, 2) = t * axis[2] * axis[2] + c ;
     
-    _motion->translation() = 0. ;
-    _motion->translation() = gcTo - _motion->transform( gcFrom[0], gcFrom[1], gcFrom[2] ) ;
+    _motion->setTranslation(0.);
+    _motion->setTranslation(gcTo - _motion->transform( gcFrom[0], gcFrom[1], gcFrom[2] )) ;
 	 if(_is2D)	_motion->translation()[2]=0;
 
     

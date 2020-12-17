@@ -82,14 +82,14 @@ endif()
 find_package( MINC )
 if( MINC_FOUND )
   BRAINVISA_DEPENDENCY( RUN DEPENDS libminc RUN )
+  BRAINVISA_DEPENDENCY( DEV RECOMMENDS libminc DEV )
 endif()
-BRAINVISA_DEPENDENCY( DEV RECOMMENDS libminc DEV )
 
 find_package( EXPAT )
 if( EXPAT_FOUND )
   BRAINVISA_DEPENDENCY( RUN DEPENDS libexpat1 RUN )
+  BRAINVISA_DEPENDENCY( DEV RECOMMENDS libexpat1 DEV )
 endif()
-BRAINVISA_DEPENDENCY( DEV RECOMMENDS libexpat1 DEV )
 
 find_package( ZLIB )
 if( ZLIB_FOUND )
@@ -145,6 +145,9 @@ endif()
 
 include_directories( ${CMAKE_BINARY_DIR}/include ${AIMS_INCLUDE_DIRS} )
 
+#set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall" )
+#set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall" )
+
 set( AIMS_AIMSDATA_LIBRARIES aimsdata graph cartodata cartobase soma-io "${LIBXML2_LIBRARIES}" )
 set( AIMS_PYAIMS_LIBRARIES pyaims ${AIMS_AIMSDATA_LIBRARIES} "${PYTHON_LIBRARY}" )
 
@@ -154,14 +157,10 @@ BRAINVISA_COPY_PYTHON_DIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}/python"
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/cartodata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/cartodata/config/config.h" @ONLY )
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/config/config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/config.h" @ONLY )
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/aimsdata/src/aimsminc/config/aimsminc_config.h.in" "${CMAKE_BINARY_DIR}/include/aims/config/aimsminc_config.h" @ONLY )
 BRAINVISA_INSTALL( FILES "${CMAKE_BINARY_DIR}/include/cartodata/config/config.h"
                    DESTINATION "include/cartodata/config"
                    COMPONENT ${PROJECT_NAME}-dev )
 BRAINVISA_INSTALL( FILES "${CMAKE_BINARY_DIR}/include/aims/config/config.h"
-                   DESTINATION "include/aims/config"
-                   COMPONENT ${PROJECT_NAME}-dev )
-BRAINVISA_INSTALL( FILES "${CMAKE_BINARY_DIR}/include/aims/config/aimsminc_config.h"
                    DESTINATION "include/aims/config"
                    COMPONENT ${PROJECT_NAME}-dev )
 add_subdirectory( cartodata )

@@ -33,6 +33,13 @@
 
 #include <aims/interpolation/interpolatedvolume_d.h>
 
+//--- aims -------------------------------------------------------------------
+#include <aims/resampling/splineresampler.h> // aims::mirrorCoeff
+//--- std --------------------------------------------------------------------
+#include <cmath>                                    // std::min / max / floor
+#include <stdexcept>                                // std::runtime_error
+//----------------------------------------------------------------------------
+
 namespace aims {
 
   //--------------------------------------------------------------------------

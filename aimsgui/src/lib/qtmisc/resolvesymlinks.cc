@@ -49,7 +49,13 @@ bool aims::qtResolveSymlinks()
 }
 
 
-void aims::setQtResolveSymlinks( bool x )
+void aims::setQtResolveSymlinks(
+#if QT_VERSION < 0x040000
+  bool x 
+#else
+  bool
+#endif
+)
 {
 #if QT_VERSION < 0x040000
   qt_resolve_symlinks = x;

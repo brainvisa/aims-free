@@ -59,7 +59,7 @@ static int             period,threshold;
 /*****************************************************************************
 *   Routine:  usage                                                          *
 *****************************************************************************/
-usage()
+void usage()
 {
     fprintf(stderr, "Usage: dclz [infile] [outfile] [c|d]\n");
     exit(-1);
@@ -77,8 +77,6 @@ int dclz(in_filename, out_filename, comp_mode)
 char *in_filename, *out_filename;
 int comp_mode;
 {
-    double          ratio;
-
 	inp_byte_cnt = 0;
 	out_byte_cnt = 0;
 

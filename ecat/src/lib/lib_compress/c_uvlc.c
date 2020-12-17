@@ -36,17 +36,15 @@
 #include <math.h>
 
 /* main routine */
-pcpet(skipdpcm, Long, input_filename, output_filename, ncol,nline)
+void pcpet(skipdpcm, Long, input_filename, output_filename, ncol,nline)
 int skipdpcm, Long;
 char *input_filename, *output_filename;
 int ncol,nline;
 {
-	int *p1,*p2,*pn,i,j,i1,i2,j1,pp2[1024],d1,d2,d3,d4,dmin,*d;
-	int pred,l,pout,rout,lo,hi,indd,length,pp[1024], nind,flag;
-	int pin,rin,pind[8],ntot,nx,pp3[1024],freq[65536],ix;
+	int *p1,*p2,i,j,i1,d1,d2,d3,d4,dmin;
+	int pout,rout,length,pp[1024], nind;
 	short ij;
-	FILE *input, *output, *filein;
-	int *f;
+	FILE *input, *output;
 
 	nind=0;
 	input = fopen(input_filename,"r");
@@ -60,14 +58,13 @@ int ncol,nline;
 */
 
 	p1=(int *) malloc(sizeof(int)*ncol*nline);
-	d=(int *) malloc(sizeof(int)*ncol*nline);
 	p2=(int *) malloc(sizeof(int)*ncol*nline);
 
 	for(i=0; i<nline; i++)
 		for(j=0; j<ncol; j++)
 		{
-	 		fread(&ij,2,1,input);	
-			p2[i*ncol+j]=ij;
+	 		if ( fread(&ij,2,1,input) == 1 )	
+			  p2[i*ncol+j]=ij;
 		}
 
 /*

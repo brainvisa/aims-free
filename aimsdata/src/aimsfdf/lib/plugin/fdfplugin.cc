@@ -53,7 +53,7 @@ namespace
     return true;
   }
 
-  bool fdfinit = initfdf();
+  bool fdfinit __attribute__((unused)) = initfdf();
 
 }
 

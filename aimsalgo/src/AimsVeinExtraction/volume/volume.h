@@ -238,7 +238,7 @@ Volume<T>::interpolation( const Point3df& p )
     //std::cout << "\nOut of image" << std::endl ;
     return 0. ;
   }
-  float r, s, t, rm, sm, tm, w[8] ;
+  float r, s, t, rm, sm, tm/*, w[8] */;
   Point3d pint( static_cast<int>( p[0]), static_cast<int>( p[1]), static_cast<int>( p[2] ) ) ;
   r = p[0] - pint[0] ;
   s = p[1] - pint[1] ;
@@ -248,6 +248,7 @@ Volume<T>::interpolation( const Point3df& p )
   sm = 1. - s;
   tm = 1. - t;
 
+/*
   w[0] = rm * sm * tm;
   w[1] = r * sm * tm;
   w[2] = rm * s * tm;
@@ -256,6 +257,7 @@ Volume<T>::interpolation( const Point3df& p )
   w[5] = r * sm * t;
   w[6] = rm * s * t;
   w[7] = r * s * t;
+*/
 
   return (*this)( pint ) * rm * sm * tm 
     + (*this)( pint[0]+1, pint[1], pint[2] ) * r * sm * tm 

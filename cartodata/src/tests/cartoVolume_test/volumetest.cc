@@ -201,7 +201,7 @@ public:
 
 template <typename T, typename U>
 typename result<T,U>::result_type
-test ( const container<T> & vol, const container<U> & other )
+test ( const container<T> & /* vol */, const container<U> & /* other */ )
 {
   cout << "c + c" << endl;
   return typename result<T,U>::result_type();

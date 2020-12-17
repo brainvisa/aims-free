@@ -83,7 +83,7 @@ VolumeRef<int16_t>
 aims::GradientAdvection::doit(const VolumeRef<int16_t> &label_vol,
                               const VolumeRef<float> &gradX,
                               const VolumeRef<float> &gradY,
-                              const VolumeRef<float> &gradZ,
+                              const VolumeRef<float> & /*gradZ*/,
                               int16_t seedlabel)
 {
   // Wouldn't a smaller neighbourhood suffice / be faster?

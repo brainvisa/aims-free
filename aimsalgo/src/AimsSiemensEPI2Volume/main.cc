@@ -32,125 +32,114 @@
  */
 
 
-#include <cstdlib>
-#include <aims/io/io_g.h>
-#include <aims/data/data_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+#include <aims/data/data.h>
+#include <aims/getopt/getopt2.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/directory.h>
-#include <map>
-#include <string>
-#include <iostream>
 
 using namespace aims;
 using namespace carto;
 using namespace std;
 
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsSiemensEPI2Volume -i[nput] <filein>                         ",
-  "                      -o[utput] <fileout>                       ",
-  "                      -f[irst] <num>                            ",
-  "                      -s[lices] <nbslice>                       ",
-  "                      -r[epetitions] <nbrep>                    ",
-  "                      [-w[rite] <writer>]                       ",
-  "                      [-h[elp]]                                 ",
-  "----------------------------------------------------------------",
-  "Concatenates all Siemens NEMA EPI images to a 4D data file      ",
-  "----------------------------------------------------------------",
-  "     filein  : origin file                                      ",
-  "     fileout : output file                                      ",
-  "     num     : first image number in series                     ",
-  "     nbslice : number of slices                                 ",
-  "     nbrep   : number of repetitions                            ",
-  "----------------------------------------------------------------",
-END_USAGE
 
-
-void Usage( void )
+int main( int argc, const char **argv )
 {
-  AimsUsage( usage );
-}
-
-
-int main( int argc, char **argv )
-{
-  char *filein, *fileout;
+  string filein;
   int first = -1, nbslice = -1, nbrep = -1;
- 
-  AimsOption opt[] = {
-    { 'h',"help"        ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0,},
-    { 'i',"input"       ,AIMS_OPT_STRING,&filein     ,0                ,1},
-    { 'o',"output"      ,AIMS_OPT_STRING,&fileout    ,0                ,1},
-    { 'f',"first"       ,AIMS_OPT_INT   ,&first      ,0                ,1},
-    { 's',"slices"      ,AIMS_OPT_INT   ,&nbslice    ,0                ,1},
-    { 'r',"repetitions" ,AIMS_OPT_INT   ,&nbrep      ,0                ,1},
-    { 0  ,0             ,AIMS_OPT_END   ,0           ,0                ,0}};
+  Writer<AimsData<short> > writer;
 
-  AimsParseOptions( &argc, argv, opt, usage );
+  AimsApplication app( argc, argv,
+                       "Concatenates all Siemens NEMA EPI images to a 4D data "
+                       "file" );
+  app.addOption( filein, "-i", "input file - its directory is actually used" );
+  app.addOption( writer, "-o", "output file" );
+  app.addOption( first, "-f", "first image number in series" );
+  app.addOption( nbslice, "-s", "number of slices" );
+  app.addOption( nbrep, "-r", "number of repetitions" );
+  app.alias( "--input", "-i" );
+  app.alias( "--output", "-o" );
+  app.alias( "--first", "-f" );
+  app.alias( "--slices", "-s" );
+  app.alias( "--repetitions", "-r" );
 
-  if ( first < 0 )  AimsUsage( usage );
-  if ( nbslice <= 0 )  AimsUsage( usage );
-  if ( nbrep <= 0 )  AimsUsage( usage );
-  std::string filebasename( FileUtil::basename( filein ) );
-  std::string directoryname( FileUtil::dirname( filein ) );
+  try
+  {
+    app.initialize();
 
-  Directory	dir( directoryname );
-  set<string>	files = dir.files();
-  set<string>::iterator	ifl, efl = files.end();
-  map< int, string > listname;
-  int nfin = first + nbslice * nbrep;
-
-  for( ifl=files.begin(); ifl!=efl; ++ifl )
+    if ( first < 0 || nbslice <= 0 || nbrep <= 0 )
     {
-      const string	& s = *ifl;
-      string sno = s.substr( s.rfind( "_" ) + 1, 
-                             s.rfind( ".nema" ) - s.rfind( "_" ) );
-      int no = atoi( sno.c_str() );
-      if ( no >= first && no < nfin && ( ( no - first ) % nbslice ) == 0 )
-        listname[ no ] = directoryname + FileUtil::separator() + s;
+      cerr << "bad or missing first, slices or Repetitions arguments\n";
+      return EXIT_FAILURE;
     }
+    std::string filebasename( FileUtil::basename( filein ) );
+    std::string directoryname( FileUtil::dirname( filein ) );
 
-  map< int, string >::const_iterator it = listname.begin();
+    Directory	dir( directoryname );
+    set<string>	files = dir.files();
+    set<string>::iterator	ifl, efl = files.end();
+    map< int, string > listname;
+    int nfin = first + nbslice * nbrep;
 
-  cout << "Repetition 1 : " << it->second << endl;
-  AimsData< short > in;
-  Reader< AimsData<short> > readfirst( it->second );
-  readfirst >> in;
-  ++it;
+    for( ifl=files.begin(); ifl!=efl; ++ifl )
+      {
+        const string	& s = *ifl;
+        string sno = s.substr( s.rfind( "_" ) + 1,
+                              s.rfind( ".nema" ) - s.rfind( "_" ) );
+        int no = atoi( sno.c_str() );
+        if ( no >= first && no < nfin && ( ( no - first ) % nbslice ) == 0 )
+          listname[ no ] = directoryname + FileUtil::separator() + s;
+      }
 
-  int i, j, k, theRep = 0;
-  int dx = in.dimX();
-  int dy = in.dimY();
-  AimsData< short > res( dx, dy, nbslice, nbrep );
-  res.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ() );
+    map< int, string >::const_iterator it = listname.begin();
 
-  for ( k=0; k<nbslice; k++ )
-    for ( j=0; j<dy; j++ )
-      for ( i=0; i<dx; i++ )
-	res( i, j, k, theRep ) = in( i, j, k );
-	
-  theRep++;
-  
-  do 
-    {
-      cout << "Repetition " << theRep + 1 << " : " << it->second << endl;
-      Reader< AimsData<short> > reader( it->second );
-      reader >> in;
-      ++it;
+    cout << "Repetition 1 : " << it->second << endl;
+    AimsData< short > in;
+    Reader< AimsData<short> > readfirst( it->second );
+    readfirst >> in;
+    ++it;
 
-      for ( k=0; k<nbslice; k++ )
-        for ( j=0; j<dy; j++ )
-	  for ( i=0; i<dx; i++ )
-	    res( i, j, k, theRep ) = in( i, j, k );
+    int i, j, k, theRep = 0;
+    int dx = in.dimX();
+    int dy = in.dimY();
+    AimsData< short > res( dx, dy, nbslice, nbrep );
+    res.setSizeXYZT( in.sizeX(), in.sizeY(), in.sizeZ() );
 
-      theRep++;
-    }
-  while ( it != listname.end() );
+    for ( k=0; k<nbslice; k++ )
+      for ( j=0; j<dy; j++ )
+        for ( i=0; i<dx; i++ )
+          res( i, j, k, theRep ) = in( i, j, k );
 
-  Writer<AimsData<short> > writer( fileout );
-  writer << res;
- 
-  return EXIT_SUCCESS;
+    theRep++;
+
+    do
+      {
+        cout << "Repetition " << theRep + 1 << " : " << it->second << endl;
+        Reader< AimsData<short> > reader( it->second );
+        reader >> in;
+        ++it;
+
+        for ( k=0; k<nbslice; k++ )
+          for ( j=0; j<dy; j++ )
+            for ( i=0; i<dx; i++ )
+              res( i, j, k, theRep ) = in( i, j, k );
+
+        theRep++;
+      }
+    while ( it != listname.end() );
+
+    writer << res;
+
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
 }
 

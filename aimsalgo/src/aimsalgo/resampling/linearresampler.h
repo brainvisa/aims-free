@@ -59,7 +59,7 @@ protected:
   typedef typename SplineResampler<T>::ChannelType ChannelType;
 
   void doResampleChannel( const carto::Volume< ChannelType >& inVolume,
-                          const aims::Transformation3d& transform3d,
+                          const soma::Transformation3d& transform3d,
                           const ChannelType& outBackground,
                           const Point3df& outLocation,
                           ChannelType& outValue, int t ) const CARTO_OVERRIDE;

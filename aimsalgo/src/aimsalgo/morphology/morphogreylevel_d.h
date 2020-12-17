@@ -291,7 +291,7 @@ namespace aims
 
   template<typename T>
   carto::VolumeRef<T> MorphoGreyLevel<T>::tryChamferErosion(
-    const carto::VolumeRef< T >& dataIn, float radius )
+    const carto::VolumeRef< T >& /*dataIn*/, float /*radius*/ )
   {
     return 0;
   }
@@ -299,7 +299,7 @@ namespace aims
 
   template<typename T>
   carto::VolumeRef<T> MorphoGreyLevel<T>::tryChamferDilation(
-    const carto::VolumeRef< T >& dataIn, float radius )
+    const carto::VolumeRef< T >& /*dataIn*/, float /*radius*/ )
   {
     return 0;
   }
@@ -307,7 +307,7 @@ namespace aims
 
   template<typename T>
   carto::VolumeRef<T> MorphoGreyLevel<T>::tryChamferClosing(
-    const carto::VolumeRef< T >& dataIn, float radius )
+    const carto::VolumeRef< T >& /*dataIn*/, float /*radius*/ )
   {
     return 0;
   }
@@ -315,7 +315,7 @@ namespace aims
 
   template<typename T>
   carto::VolumeRef<T> MorphoGreyLevel<T>::tryChamferOpening(
-    const carto::VolumeRef< T >& dataIn, float radius )
+    const carto::VolumeRef< T >& /*dataIn*/, float /*radius*/ )
   {
     return 0;
   }

@@ -40,6 +40,7 @@
 #include <cartodata/io/volumeformatwriter.h>
 //--- soma-io ----------------------------------------------------------------
 #include <soma-io/io/formatdictionary.h>
+#include <soma-io/vector/vector.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/type/types.h>
 // #include <cartobase/type/voxelrgb.h>
@@ -69,7 +70,7 @@ namespace {
     return true;
   }
 
-  bool gisinit = initgis();
+  bool gisinit __attribute__((unused)) = initgis();
 
 }
 
@@ -78,6 +79,8 @@ GisPlugin::GisPlugin() : Plugin()
     vector<string>  exts(2);
     exts[0] = "ima";
     exts[1] = "dim";
+
+    typedef AimsVector<float,6> vectorf6;
 
     ///////////////////////////////////////////////////////////////////////////
     ////                           R E A D E R                             ////
@@ -157,6 +160,29 @@ GisPlugin::GisPlugin() : Plugin()
     vfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new GisImageReader<std::complex<double> > ) );
     FormatDictionary<Volume<std::complex<double> > >::registerFormat( "GIS", vfr_cd, exts );
 
+    //--- VECTORS -------------------------------------------------------------
+
+    VolumeFormatReader<Point3df> *vfrv3f = new VolumeFormatReader<Point3df>;
+    vfrv3f->attach( rc_ptr<ImageReader<Point3df> >(
+      new GisImageReader<Point3df> ) );
+    FormatDictionary<Volume<Point3df> >::registerFormat( "GIS", vfrv3f, exts );
+
+    VolumeFormatReader<Point3d> *vfrv3s = new VolumeFormatReader<Point3d>;
+    vfrv3s->attach( rc_ptr<ImageReader<Point3d> >(
+      new GisImageReader<Point3d> ) );
+    FormatDictionary<Volume<Point3d> >::registerFormat( "GIS", vfrv3s, exts );
+
+    VolumeFormatReader<Point2d> *vfrv2s = new VolumeFormatReader<Point2d>;
+    vfrv2s->attach( rc_ptr<ImageReader<Point2d> >( new GisImageReader<Point2d> ) );
+    FormatDictionary<Volume<Point2d> >::registerFormat( "GIS", vfrv2s, exts );
+
+    typedef AimsVector<float,6> vectorf6;
+
+    VolumeFormatReader<vectorf6> *vfrv6f = new VolumeFormatReader<vectorf6>;
+    vfrv6f->attach( rc_ptr<ImageReader<vectorf6> >(
+      new GisImageReader<vectorf6> ) );
+    FormatDictionary<Volume<vectorf6> >::registerFormat( "GIS", vfrv6f, exts );
+
     //=========================================================================
     //   V O L U M E   R E F
     //=========================================================================
@@ -230,6 +256,35 @@ GisPlugin::GisPlugin() : Plugin()
     VolumeRefFormatReader<std::complex<double> > *rfr_cd = new VolumeRefFormatReader<std::complex<double> >;
     rfr_cd->attach( rc_ptr<ImageReader<std::complex<double> > >( new GisImageReader<std::complex<double> > ) );
     FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "GIS", rfr_cd, exts );
+
+    //--- VECTORS -------------------------------------------------------------
+
+    VolumeRefFormatReader<Point3df> *rfrv3f = new VolumeRefFormatReader<Point3df>;
+    rfrv3f->attach( rc_ptr<ImageReader<Point3df> >(
+      new GisImageReader<Point3df> ) );
+    FormatDictionary<VolumeRef<Point3df> >::registerFormat( "GIS", rfrv3f,
+                                                            exts );
+
+    VolumeRefFormatReader<Point3d> *rfrv3s
+      = new VolumeRefFormatReader<Point3d>;
+    rfrv3s->attach( rc_ptr<ImageReader<Point3d> >(
+      new GisImageReader<Point3d> ) );
+    FormatDictionary<VolumeRef<Point3d> >::registerFormat( "GIS", rfrv3s,
+                                                           exts );
+
+    VolumeRefFormatReader<Point2d> *rfrv2s
+      = new VolumeRefFormatReader<Point2d>;
+    rfrv2s->attach( rc_ptr<ImageReader<Point2d> >(
+      new GisImageReader<Point2d> ) );
+    FormatDictionary<VolumeRef<Point2d> >::registerFormat( "GIS", rfrv2s,
+                                                           exts );
+
+    VolumeRefFormatReader<vectorf6> *rfrv6f
+      = new VolumeRefFormatReader<vectorf6>;
+    rfrv6f->attach( rc_ptr<ImageReader<vectorf6> >(
+      new GisImageReader<vectorf6> ) );
+    FormatDictionary<VolumeRef<vectorf6> >::registerFormat( "GIS", rfrv6f,
+                                                            exts );
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -310,6 +365,29 @@ GisPlugin::GisPlugin() : Plugin()
     vfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new GisImageWriter<std::complex<double> > ) );
     FormatDictionary<Volume<std::complex<double> > >::registerFormat( "GIS", vfw_cd, exts );
 
+    //--- VECTORS -------------------------------------------------------------
+
+    VolumeFormatWriter<Point3df> *vfwv3f = new VolumeFormatWriter<Point3df>;
+    vfwv3f->attach( rc_ptr<ImageWriter<Point3df> >(
+      new GisImageWriter<Point3df> ) );
+    FormatDictionary<Volume<Point3df> >::registerFormat( "GIS", vfwv3f, exts );
+
+    VolumeFormatWriter<Point3d> *vfwv3s = new VolumeFormatWriter<Point3d>;
+    vfwv3s->attach( rc_ptr<ImageWriter<Point3d> >(
+      new GisImageWriter<Point3d> ) );
+    FormatDictionary<Volume<Point3d> >::registerFormat( "GIS", vfwv3s, exts );
+
+    VolumeFormatWriter<Point2d> *vfwc2s = new VolumeFormatWriter<Point2d>;
+    vfwc2s->attach( rc_ptr<ImageWriter<Point2d> >(
+      new GisImageWriter<Point2d> ) );
+    FormatDictionary<Volume<Point2d> >::registerFormat( "GIS", vfwc2s, exts );
+
+    VolumeFormatWriter<vectorf6> *vfwv6f = new VolumeFormatWriter<vectorf6>;
+    vfwv6f->attach( rc_ptr<ImageWriter<vectorf6> >(
+      new GisImageWriter<vectorf6> ) );
+    FormatDictionary<Volume<vectorf6> >::registerFormat( "GIS", vfwv6f, exts );
+
+
     //=========================================================================
     //   V O L U M E   R E F
     //=========================================================================
@@ -384,6 +462,36 @@ GisPlugin::GisPlugin() : Plugin()
     rfw_cd->attach( rc_ptr<ImageWriter<std::complex<double> > >( new GisImageWriter<std::complex<double> > ) );
     FormatDictionary<VolumeRef<std::complex<double> > >::registerFormat( "GIS", rfw_cd, exts );
 
+    //--- VECTORS -------------------------------------------------------------
+
+    VolumeRefFormatWriter<Point3df> *rfwv3f
+      = new VolumeRefFormatWriter<Point3df>;
+    rfwv3f->attach( rc_ptr<ImageWriter<Point3df> >(
+      new GisImageWriter<Point3df> ) );
+    FormatDictionary<VolumeRef<Point3df> >::registerFormat( "GIS", rfwv3f,
+                                                            exts );
+
+    VolumeRefFormatWriter<Point3d> *rfwv3s
+      = new VolumeRefFormatWriter<Point3d>;
+    rfwv3s->attach( rc_ptr<ImageWriter<Point3d> >(
+      new GisImageWriter<Point3d> ) );
+    FormatDictionary<VolumeRef<Point3d> >::registerFormat( "GIS", rfwv3s,
+                                                           exts );
+
+    VolumeRefFormatWriter<Point2d> *rfwv2s
+      = new VolumeRefFormatWriter<Point2d>;
+    rfwv2s->attach( rc_ptr<ImageWriter<Point2d> >(
+      new GisImageWriter<Point2d> ) );
+    FormatDictionary<VolumeRef<Point2d> >::registerFormat( "GIS", rfwv2s,
+                                                           exts );
+
+    VolumeRefFormatWriter<vectorf6> *rfwv6f
+      = new VolumeRefFormatWriter<vectorf6>;
+    rfwv6f->attach( rc_ptr<ImageWriter<vectorf6> >(
+      new GisImageWriter<vectorf6> ) );
+    FormatDictionary<VolumeRef<vectorf6> >::registerFormat( "GIS", rfwv6f,
+                                                            exts );
+
 }
 
 
@@ -401,5 +509,23 @@ string GisPlugin::name() const
 bool GisPlugin::noop()
 {
   return true;
+}
+
+
+#include <soma-io/image/gisimagereader_d.h>
+#include <soma-io/image/gisimagewriter_d.h>
+#include <aims/io/asciidatasourcetraits_aims.h>
+
+namespace carto
+{
+  template class GisImageReader<Point3df>;
+  template class GisImageReader<Point3d>;
+  template class GisImageReader<Point2d>;
+  template class GisImageReader<AimsVector<float, 6> >;
+
+  template class GisImageWriter<Point3df>;
+  template class GisImageWriter<Point3d>;
+  template class GisImageWriter<Point2d>;
+  template class GisImageWriter<AimsVector<float, 6> >;
 }
 

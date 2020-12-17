@@ -31,11 +31,12 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <stdint.h>
+#include <aims/utility/progress.h>
+
 #include <sstream>
+#include <iostream>
 #include <iomanip>
 #include <cmath>
-#include <aims/utility/progress.h>
 
 using namespace std;
 
@@ -91,12 +92,12 @@ namespace aims {
   }
 
   template <class T1, class T2>
-  const double ProgressInfo<T1, T2>::rescale(const T1& value) const {
+  double ProgressInfo<T1, T2>::rescale(const T1& value) const {
     return round((((double)value) - _min) * _scale + _progressmin);
   }
 
   template <class T1, class T2>
-  const double ProgressInfo<T1, T2>::progression() const {
+  double ProgressInfo<T1, T2>::progression() const {
     return rescale(_current);
   }
 

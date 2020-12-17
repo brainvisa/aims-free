@@ -140,9 +140,9 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
   }
 
   // MISE DE p EN VOXELS !
-  p.translation()[0] /= test.sizeX();
-  p.translation()[1] /= test.sizeY();
-  p.translation()[2] /= test.sizeZ();
+  p.matrix()(0, 3) /= test.sizeX();
+  p.matrix()(1, 3) /= test.sizeY();
+  p.matrix()(2, 3) /= test.sizeZ();
 
   
   do
@@ -179,9 +179,9 @@ Motion BlockMatching<T>::doit( AimsData<T>& ref, const AimsData<T>& test_orig )
       r = q * p ;
   
       // MISE DES TRANSLATIONS EN MILLIMETRES !
-      r.translation()[0] *= test.sizeX();
-      r.translation()[1] *= test.sizeY();
-      r.translation()[2] *= test.sizeZ();
+      r.matrix()(0, 3) *= test.sizeX();
+      r.matrix()(1, 3) *= test.sizeY();
+      r.matrix()(2, 3) *= test.sizeZ();
 
   
       // Resampling de test en testtrans par r la transfo totale la plus recente

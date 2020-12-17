@@ -216,10 +216,6 @@ int main( int argc, const char* argv[] )
 {
   Voronoi voronoi;
   ProcessInput pi( voronoi );
-  string filein, fileout;
-  int xmask = 3, ymask = 3, zmask = 3;
-  float factor = 50;
-  double val_domain = 0, val_outside = -1;
 
   AimsApplication app( argc, argv,
                        "Construct a Voronoi diagram from labelled seeds" );

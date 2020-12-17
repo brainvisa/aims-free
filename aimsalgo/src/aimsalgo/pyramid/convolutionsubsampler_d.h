@@ -309,7 +309,7 @@ namespace aims {
   {
     _dir.assign( 4, true );
     _dir[3] = false;
-    for( int i = 0; i < dir.size() && i < _dir.size(); ++i )
+    for( std::vector<bool>::size_type i = 0; i < dir.size() && i < _dir.size(); ++i )
       _dir[i] = dir[i];
   }
 

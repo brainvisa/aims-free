@@ -2,10 +2,10 @@
 #ifndef EcatModel_h
 #define EcatModel_h
 
-static int MaxBuckets = 56;   		/* maximum number of buckets */
+/*static int MaxBuckets = 56;*/   		/* maximum number of buckets */
     					/* maximum number of crystals in the axial direction */
-static int MaxAxialCrystals = 32;
-static int MaxCrossPlanes = 6;
+/*static int MaxAxialCrystals = 32;
+static int MaxCrossPlanes = 6;*/
 
 enum TransmissionSource {none, Ring, Rod};
 enum Septa {NoSepta, Fixed, Retractable};

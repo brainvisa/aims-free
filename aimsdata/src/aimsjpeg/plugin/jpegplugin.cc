@@ -54,7 +54,7 @@ namespace
     return true;
   }
 
-  bool jpeginit = initjpeg();
+  bool jpeginit __attribute__((unused)) = initjpeg();
 
 }
 

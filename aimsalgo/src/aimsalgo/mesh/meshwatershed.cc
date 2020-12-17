@@ -55,7 +55,7 @@ namespace aims
      */
     const vector<Point3df> & vert = mesh.vertex();
     const vector<AimsVector<uint,3> > & poly = mesh.polygon();
-    int i, N = vert.size();
+    int i;
     int E = poly.size();
     int sa, sb, sc;
     set<pair<int, int> > sedges;

@@ -41,6 +41,7 @@
 #ifndef NO_IMPORT_ARRAY
 #define NO_IMPORT_ARRAY
 #endif
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
 #endif

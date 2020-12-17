@@ -31,9 +31,9 @@ void init(SIP_PYOBJECT);
 				"x must be a contiguous array");
       		} else {
 			double	*x = NULL;
-			int size = a->dimensions[0];
-			int dim = a->dimensions[1];
-    			x = (double *) a->data;
+			int size = PyArray_DIMS( a )[0];
+			int dim = PyArray_DIMS( a )[1];
+    			x = (double *) PyArray_DATA( a );
 			sipCpp->init(x, size, dim);
 		}
 	}

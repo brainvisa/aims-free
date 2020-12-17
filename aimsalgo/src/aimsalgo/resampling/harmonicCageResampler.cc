@@ -62,7 +62,7 @@ aims::HarmonicCageMeshResampler::HarmonicCageMeshResampler(
 	_border(border), _inside(inside), _keep_image_coords(false) {}
 
 
-void aims::HarmonicCageMeshResampler::computeCoordinates(float threshold)
+void aims::HarmonicCageMeshResampler::computeCoordinates(float /*threshold*/)
 {
 	float		dt = 0.1;
 	int		maxiter = 100; //FIXME : use error on enery

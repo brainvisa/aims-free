@@ -266,18 +266,13 @@ void DecomposedAffineTransformation3d::transAffine(Point3df C)
 // A is put in the _rotation attribute and t is in the _translation attribute,
 // in spite of those IMPROPER terms. see NOTE, line 38.
 
-	rotation() = _rot.cross( _scaling.cross( _shear ) );
+  AffineTransformation3d::Table<float> & m = matrix();
+  setMatrix(_rot.cross( _scaling.cross( _shear ) ));
                    
-  translation().item(0) += C.item(0) - _rotation(0,0)*C.item(0)
-                                     - _rotation(0,1)*C.item(1)
-	                                   - _rotation(0,2)*C.item(2);
-																			
-  translation().item(1) += C.item(1) - _rotation(1,0)*C.item(0)
-                                     - _rotation(1,1)*C.item(1)
-	                                   - _rotation(1,2)*C.item(2);
-																			
-  translation().item(2) += C.item(2) - _rotation(2,0)*C.item(0)
-                                     - _rotation(2,1)*C.item(1)
-	                                   - _rotation(2,2)*C.item(2);
+  m[3] += C.item(0) - m(0,0)*C.item(0) - m(0,1)*C.item(1) - m(0,2)*C.item(2);
+
+  m[7] += C.item(1) - m(1,0)*C.item(0) - m(1,1)*C.item(1) - m(1,2)*C.item(2);
+
+  m[11] += C.item(2) - m(2,0)*C.item(0) - m(2,1)*C.item(1) - m(2,2)*C.item(2);
 }
 

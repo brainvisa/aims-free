@@ -67,7 +67,7 @@ namespace {
     return true;
   }
 
-  bool niftiinit = initnifti();
+  bool niftiinit __attribute__((unused)) = initnifti();
 
 }
 

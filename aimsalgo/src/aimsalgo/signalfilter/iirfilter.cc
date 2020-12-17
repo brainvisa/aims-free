@@ -61,18 +61,18 @@ namespace aims {
   //--------------------------------------------------------------------------
 
   IIRFilterBase::IIRFilterBase():
-    _boundary(FilterType::Mirror),
     _verbose(verbose),
     _dir(4, true),
+    _boundary(FilterType::Mirror),
     _copy(FilterType::Copy)
   {
     _dir[3] = false;
   }
 
   IIRFilterBase::IIRFilterBase( const IIRFilterBase & other ):
-    _boundary( other._boundary ),
     _verbose(other._verbose),
     _dir(other._dir),
+    _boundary( other._boundary ),
     _copy(other._copy)
   {}
 
@@ -312,7 +312,7 @@ namespace aims {
   {
     _dir.assign( 4, true );
     _dir[3] = false;
-    for( int i = 0; i < dir.size() && i < _dir.size(); ++i )
+    for( size_t i = 0; (i < dir.size()) && (i < _dir.size()); ++i )
       _dir[i] = dir[i];
   }
 
@@ -634,7 +634,7 @@ namespace aims {
         }
       }
 
-      // WARNING \\
+      // WARNING 
       // Ce que je fais est faux !
 
       // forward sweep with mirroring
@@ -948,9 +948,9 @@ namespace aims {
 
   SymAllPoleIIRFilter::SymAllPoleIIRFilter( const double gain, const vector<double> & poles ):
     IIRFilterBase(),
-    _gain(gain),
     _poles(poles),
     _k0(),
+    _gain(gain),
     _precisegain(),
     _precise(false)
   {
@@ -961,9 +961,9 @@ namespace aims {
 
   SymAllPoleIIRFilter::SymAllPoleIIRFilter( const SymAllPoleIIRFilter & other ):
     IIRFilterBase(other),
-    _gain(other._gain),
     _poles(other._poles),
     _k0(other._k0),
+    _gain(other._gain),
     _precisegain(other._precisegain),
     _precise(other._precise)
   {}

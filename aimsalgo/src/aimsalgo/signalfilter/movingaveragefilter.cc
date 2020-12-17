@@ -52,15 +52,15 @@ namespace aims {
 //----------------------------------------------------------------------------
 
 MovingAverageKernel::MovingAverageKernel( unsigned length, FilterType::Direction symtype ):
-  _values( length, 1./length ),
-  _support()
+  _support(),
+  _values( length, 1./length )
 {
   setSupport( symtype );
 }
 
 MovingAverageKernel::MovingAverageKernel( const MovingAverageKernel & other ):
-  _values( other._values ),
-  _support( other._support )
+  _support( other._support ),
+  _values( other._values )
 {}
 
 MovingAverageKernel::~MovingAverageKernel()
@@ -172,17 +172,17 @@ void MovingAverageKernel::setSupport( FilterType::Direction symtype )
 //----------------------------------------------------------------------------
 
 MovingAverageCascadeKernel::MovingAverageCascadeKernel( unsigned length, unsigned n, FilterType::Direction symtype ):
-  _values(length),
+  _n(n),
   _support(),
-  _n(n)
+  _values(length)
 {
   setValues( length, n, symtype );
 }
 
 MovingAverageCascadeKernel::MovingAverageCascadeKernel( const MovingAverageCascadeKernel & other ):
-  _values( other._values ),
+  _n( other._n ),
   _support( other._support ),
-  _n( other._n )
+  _values( other._values )
 {}
 
 MovingAverageCascadeKernel::~MovingAverageCascadeKernel()
@@ -274,12 +274,12 @@ void MovingAverageCascadeKernel::setValues( unsigned length, unsigned n, FilterT
   _values.assign( size, 0. );
   _values.back() = 1.;
   std::vector<double> prev = _values;
-  for( int i = 0; i < n; ++i )
+  for( unsigned i = 0; i < n; ++i )
   {
     _values.assign( size, 0. );
-    for( int j = 0; j < size; ++j )
-      for( int k = 0; k < length; ++k )
-        _values[j] += ( j+k < size ? prev[j+k] / length : 0. );
+    for( unsigned j = 0; j < size; ++j )
+      for( unsigned k = 0; k < length; ++k )
+        _values[j] += ( (j+k) < size ? prev[j+k] / length : 0. );
   }
 
   switch( symtype )
@@ -347,19 +347,19 @@ MovingAverageFilter & MovingAverageFilter::operator=( const MovingAverageFilter 
 
 void MovingAverageFilter::setLength( unsigned length )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setLength( length );
 }
 
 void MovingAverageFilter::setLength( const Point4du & length )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setLength( length[i] );
 }
 
 void MovingAverageFilter::setType( FilterType::Direction symtype )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setType( symtype );
 }
 
@@ -370,7 +370,7 @@ void MovingAverageFilter::setType( FilterType::Direction symtype )
 Point4du MovingAverageFilter::length() const
 {
   Point4du length;
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     length[i] = this->_func[i].length();
   return length;
 }
@@ -433,31 +433,31 @@ MovingAverageCascadeFilter & MovingAverageCascadeFilter::operator=( const Moving
 
 void MovingAverageCascadeFilter::setLength( unsigned length )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setLength( length );
 }
 
 void MovingAverageCascadeFilter::setLength( const Point4du & length )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setLength( length[i] );
 }
 
 void MovingAverageCascadeFilter::setCascade( unsigned n )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setCascade( n );
 }
 
 void MovingAverageCascadeFilter::setCascade( const Point4du & n )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setCascade( n[i] );
 }
 
 void MovingAverageCascadeFilter::setType( FilterType::Direction symtype )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setType( symtype );
 }
 
@@ -468,7 +468,7 @@ void MovingAverageCascadeFilter::setType( FilterType::Direction symtype )
 Point4du MovingAverageCascadeFilter::length() const
 {
   Point4du length;
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     length[i] = this->_func[i].length();
   return length;
 }
@@ -476,7 +476,7 @@ Point4du MovingAverageCascadeFilter::length() const
 Point4du MovingAverageCascadeFilter::cascade() const
 {
   Point4du cascade;
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     cascade[i] = this->_func[i].cascade();
   return cascade;
 }

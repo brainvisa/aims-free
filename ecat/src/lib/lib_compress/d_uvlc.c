@@ -65,18 +65,17 @@
 #include <stdlib.h>
 
 /* main routine */
-pdpet(skipdpcm, Long, input_filename, output_filename, ncol,nline)
+void pdpet(skipdpcm, Long, input_filename, output_filename, ncol,nline)
 int skipdpcm, Long;
 char *input_filename, *output_filename;
 int ncol,nline;
 {
-	int *p1,*p2,*pn,i,j,i1,i2,j1,pp2[1024],d1,d2,d3,d4,dmin;
-	int pred,l,pout,rout,lo,hi,indd,length,pp[1024], nind,flag;
-	int pin,rin,pind[8],ntot,nx,pp3[1024];
+	int *p1,*pn,i,j,d1,d2,d3,d4,dmin;
+	int pred,length,pp[1024], nind;
+	int pin,rin,ntot;
 	short *sp1;
-	FILE *input, *output, *filein;
-	int *f, size;
-	double prob,entro;
+	FILE *input, *output;
+	int size;
 
 	nind=0;
 	input = fopen(input_filename,"r");

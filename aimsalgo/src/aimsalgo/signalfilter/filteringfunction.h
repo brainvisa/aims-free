@@ -69,12 +69,12 @@ namespace aims {
       /// If a parameter value is not set in the options object, a default
       /// value must be assigned.
       /// This method may do nothing if no options are available.
-      virtual void setOptions( const carto::Object & options ) {}
+      virtual void setOptions( const carto::Object & /*options*/ ) {}
       /// Update the parameters of the filters
       /// If a parameter value is not set in the options object, the current
       /// value must be kept.
       /// This method may do nothing if no options are available.
-      virtual void updateOptions( const carto::Object & options ) {}
+      virtual void updateOptions( const carto::Object & /*options*/ ) {}
       /// clone method. It is better to implement it using a copy constructor.
       virtual FilteringFunctionInterface *clone() const = 0;
 

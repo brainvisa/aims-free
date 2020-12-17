@@ -195,8 +195,8 @@ void CiftiLazyReader::selectDimension( const vector<int32_t> & dims )
 
 bool CiftiFormat::read( const std::string & filename,
                         SparseOrDenseMatrix & vol,
-                        const carto::AllocatorContext & context,
-                        carto::Object options )
+                        const carto::AllocatorContext & /*context*/,
+                        carto::Object /*options*/ )
 {
   CiftiFile *inputFile = new CiftiFile( filename.c_str() );//on-disk reading
 
@@ -268,9 +268,9 @@ bool CiftiFormat::read( const std::string & filename,
 }
 
 
-bool CiftiFormat::write( const std::string & filename,
-                        const SparseOrDenseMatrix & vol,
-                        carto::Object options )
+bool CiftiFormat::write( const std::string & /*filename*/,
+                        const SparseOrDenseMatrix & /*vol*/,
+                        carto::Object /*options*/ )
 {
   return false;
 }

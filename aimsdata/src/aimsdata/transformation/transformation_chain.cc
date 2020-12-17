@@ -89,10 +89,10 @@ bool aims::TransformationChain3d::invertible() const
   return true;
 }
 
-std::unique_ptr<aims::Transformation3d>
+std::unique_ptr<soma::Transformation3d>
 aims::TransformationChain3d::getInverse() const
 {
-  std::unique_ptr<aims::Transformation3d> ret(new aims::TransformationChain3d);
+  std::unique_ptr<soma::Transformation3d> ret(new aims::TransformationChain3d);
   aims::TransformationChain3d & new_chain
     = dynamic_cast<aims::TransformationChain3d&>(*ret.get());
 
@@ -146,7 +146,7 @@ transformFloat( float x, float y, float z ) const
   return transformPoint3df(Point3df(x, y, z));
 }
 
-carto::const_ref<aims::Transformation3d>
+carto::const_ref<soma::Transformation3d>
 aims::TransformationChain3d::simplify() const
 {
   // 1. flat_chain is built by applying simplify() recursively to sub-chains,

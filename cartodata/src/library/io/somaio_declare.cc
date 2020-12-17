@@ -41,6 +41,9 @@
 #include <soma-io/io/writer_d.h>
 #include <soma-io/io/formatdictionary_d.h>
 #include <soma-io/reader/formatreader_d.h>
+#include <soma-io/vector/vector.h>
+#include <soma-io/image/imagereader_d.h>
+#include <soma-io/image/imagewriter_d.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/type/voxelrgb.h>
@@ -51,7 +54,14 @@
 using namespace soma;
 using namespace carto;
 
-namespace soma {
+namespace
+{
+  typedef AimsVector<float,6> vectorf6;
+}
+
+
+namespace soma
+{
 
 //============================================================================
 //   R E A D E R
@@ -74,6 +84,10 @@ template class Reader<Volume<VoxelRGBA> >;
 template class Reader<Volume<VoxelHSV> >;
 template class Reader<Volume<std::complex<float> > >;
 template class Reader<Volume<std::complex<double> > >;
+template class Reader<Volume<Point3df> >;
+template class Reader<Volume<Point3d> >;
+template class Reader<Volume<Point2d> >;
+template class Reader<Volume<vectorf6> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class Reader<Volume<char> >;
@@ -96,6 +110,10 @@ template class Reader<VolumeRef<VoxelRGBA> >;
 template class Reader<VolumeRef<VoxelHSV> >;
 template class Reader<VolumeRef<std::complex<float> > >;
 template class Reader<VolumeRef<std::complex<double> > >;
+template class Reader<VolumeRef<Point3df> >;
+template class Reader<VolumeRef<Point3d> >;
+template class Reader<VolumeRef<Point2d> >;
+template class Reader<VolumeRef<vectorf6> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class Reader<VolumeRef<char> >;
@@ -122,6 +140,10 @@ template class Writer<Volume<VoxelRGBA> >;
 template class Writer<Volume<VoxelHSV> >;
 template class Writer<Volume<std::complex<float> > >;
 template class Writer<Volume<std::complex<double> > >;
+template class Writer<Volume<Point3df> >;
+template class Writer<Volume<Point3d> >;
+template class Writer<Volume<Point2d> >;
+template class Writer<Volume<vectorf6> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class Writer<Volume<char> >;
@@ -144,6 +166,10 @@ template class Writer<VolumeRef<VoxelRGBA> >;
 template class Writer<VolumeRef<VoxelHSV> >;
 template class Writer<VolumeRef<std::complex<float> > >;
 template class Writer<VolumeRef<std::complex<double> > >;
+template class Writer<VolumeRef<Point3df> >;
+template class Writer<VolumeRef<Point3d> >;
+template class Writer<VolumeRef<Point2d> >;
+template class Writer<VolumeRef<vectorf6> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class Writer<VolumeRef<char> >;
@@ -170,6 +196,10 @@ template class FormatDictionary<Volume<VoxelRGBA> >;
 template class FormatDictionary<Volume<VoxelHSV> >;
 template class FormatDictionary<Volume<std::complex<float> > >;
 template class FormatDictionary<Volume<std::complex<double> > >;
+template class FormatDictionary<Volume<Point3df> >;
+template class FormatDictionary<Volume<Point3d> >;
+template class FormatDictionary<Volume<Point2d> >;
+template class FormatDictionary<Volume<vectorf6> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class FormatDictionary<Volume<char> >;
@@ -192,6 +222,10 @@ template class FormatDictionary<VolumeRef<VoxelRGBA> >;
 template class FormatDictionary<VolumeRef<VoxelHSV> >;
 template class FormatDictionary<VolumeRef<std::complex<float> > >;
 template class FormatDictionary<VolumeRef<std::complex<double> > >;
+template class FormatDictionary<VolumeRef<Point3df> >;
+template class FormatDictionary<VolumeRef<Point3d> >;
+template class FormatDictionary<VolumeRef<Point2d> >;
+template class FormatDictionary<VolumeRef<vectorf6> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class FormatDictionary<VolumeRef<char> >;
@@ -218,6 +252,10 @@ template class FormatReader<Volume<VoxelRGBA> >;
 template class FormatReader<Volume<VoxelHSV> >;
 template class FormatReader<Volume<std::complex<float> > >;
 template class FormatReader<Volume<std::complex<double> > >;
+template class FormatReader<Volume<Point3df> >;
+template class FormatReader<Volume<Point3d> >;
+template class FormatReader<Volume<Point2d> >;
+template class FormatReader<Volume<vectorf6> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class FormatReader<Volume<char> >;
@@ -240,6 +278,10 @@ template class FormatReader<VolumeRef<VoxelRGBA> >;
 template class FormatReader<VolumeRef<VoxelHSV> >;
 template class FormatReader<VolumeRef<std::complex<float> > >;
 template class FormatReader<VolumeRef<std::complex<double> > >;
+template class FormatReader<VolumeRef<Point3df> >;
+template class FormatReader<VolumeRef<Point3d> >;
+template class FormatReader<VolumeRef<Point2d> >;
+template class FormatReader<VolumeRef<vectorf6> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class FormatReader<VolumeRef<char> >;
@@ -262,6 +304,10 @@ template class VolumeFormatReader<VoxelRGBA>;
 template class VolumeFormatReader<VoxelHSV>;
 template class VolumeFormatReader<std::complex<float> >;
 template class VolumeFormatReader<std::complex<double> >;
+template class VolumeFormatReader<Point3df>;
+template class VolumeFormatReader<Point3d>;
+template class VolumeFormatReader<Point2d>;
+template class VolumeFormatReader<vectorf6>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class VolumeFormatReader<char>;
@@ -284,6 +330,10 @@ template class VolumeRefFormatReader<VoxelRGBA>;
 template class VolumeRefFormatReader<VoxelHSV>;
 template class VolumeRefFormatReader<std::complex<float> >;
 template class VolumeRefFormatReader<std::complex<double> >;
+template class VolumeRefFormatReader<Point3df>;
+template class VolumeRefFormatReader<Point3d>;
+template class VolumeRefFormatReader<Point2d>;
+template class VolumeRefFormatReader<vectorf6>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class VolumeRefFormatReader<char>;
@@ -310,6 +360,10 @@ template class VolumeFormatWriter<VoxelRGBA>;
 template class VolumeFormatWriter<VoxelHSV>;
 template class VolumeFormatWriter<std::complex<float> >;
 template class VolumeFormatWriter<std::complex<double> >;
+template class VolumeFormatWriter<Point3df>;
+template class VolumeFormatWriter<Point3d>;
+template class VolumeFormatWriter<Point2d>;
+template class VolumeFormatWriter<vectorf6>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class VolumeFormatWriter<char>;
@@ -332,9 +386,27 @@ template class VolumeRefFormatWriter<VoxelRGBA>;
 template class VolumeRefFormatWriter<VoxelHSV>;
 template class VolumeRefFormatWriter<std::complex<float> >;
 template class VolumeRefFormatWriter<std::complex<double> >;
+template class VolumeRefFormatWriter<Point3df>;
+template class VolumeRefFormatWriter<Point3d>;
+template class VolumeRefFormatWriter<Point2d>;
+template class VolumeRefFormatWriter<vectorf6>;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class VolumeRefFormatWriter<char>;
 #endif
+
+//=== IMAGEREADER ============================================================
+
+template class ImageReader<Point3df>;
+template class ImageReader<Point3d>;
+template class ImageReader<Point2d>;
+template class ImageReader<AimsVector<float, 6> >;
+
+//=== IMAGEWRITER ============================================================
+
+template class ImageWriter<Point3df>;
+template class ImageWriter<Point3d>;
+template class ImageWriter<Point2d>;
+template class ImageWriter<AimsVector<float, 6> >;
 
 }

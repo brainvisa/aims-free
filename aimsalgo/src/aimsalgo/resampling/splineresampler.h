@@ -126,7 +126,7 @@ public:
 
   // Overridden for performance in case of multi-channel data
   void resample_inv_to_vox( const carto::Volume< T >& input_data,
-                            const aims::Transformation3d&
+                            const soma::Transformation3d&
                               inverse_transform_to_vox,
                             const T& background,
                             carto::Volume< T > & output_data,
@@ -140,21 +140,21 @@ public:
 
   void resample_channel_inv_to_vox(
     const carto::Volume< ChannelType >& inVolume,
-    const aims::Transformation3d& inverse_transform_to_vox,
+    const soma::Transformation3d& inverse_transform_to_vox,
     const ChannelType& outBackground,
     carto::Volume< ChannelType > & outVolume,
     bool verbose) const;
 protected:
 
   void doResample( const carto::Volume< T > &inVolume,
-                   const aims::Transformation3d &transform3d,
+                   const soma::Transformation3d &transform3d,
                    const T &outBackground,
                    const Point3df &outLocation,
                    T &outValue,
                    int t ) const CARTO_OVERRIDE;
 
   virtual void doResampleChannel( const carto::Volume< ChannelType > &inVolume,
-                                  const aims::Transformation3d &transform3d,
+                                  const soma::Transformation3d &transform3d,
                                   const ChannelType &outBackground,
                                   const Point3df &outLocation,
                                   ChannelType &outValue,

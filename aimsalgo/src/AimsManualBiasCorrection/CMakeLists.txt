@@ -1,1 +1,0 @@
-SHFJ_ADD_EXECUTABLE(AimsManualBiasCorrection main.cc aimsalgo)

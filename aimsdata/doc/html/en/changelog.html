@@ -16,6 +16,7 @@
 
 <hr width="100%"> <br>
 
+ <b><a href="#version-4.7.0">Version 4.7.0</a></b><br>
  <b><a href="#version-4.6.2">Version 4.6.2</a></b><br>
  <b><a href="#version-4.6.1">Version 4.6.1</a></b><br>
  <b><a href="#version-4.6.0">Version 4.6.0</a></b><br>
@@ -45,6 +46,42 @@
  <b><a href="#version-2.12">Version 2.12</a></b><br>
  <b><a href="#version-2.11">Version 2.11</a></b><br>
  <b><a href="#version-2.10">Version 2.10</a></b><br>
+
+
+<!-- -->
+<h4> <a name="version-4.7.0"></a>Sep. 1, 2018, Version 4.7.0</h4>
+
+<ul>
+  <li>Removed a bunch of obsolete commands:
+    <ul>
+      <li>AimsClosing</li>
+      <li>AimsData2Jpeg</li>
+      <li>AimsDilation</li>
+      <li>AimsDtiBk2Vol</li>
+      <li>AimsErosion</li>
+      <li>AimsLinearComb</li>
+      <li>AimsManualBiasCorrection</li>
+      <li>AimsMaskPhantom</li>
+      <li>AimsNormDiff</li>
+      <li>AimsOpening</li>
+      <li>AimsPowerComb</li>
+      <li>AimsSlice2Bucket</li>
+      <li>AimsSpaghettiModel</li>
+      <li>AimsHJEvolution2D</li>
+      <li>AimsHJEvolution3D</li>
+      <li>AimsKMeans</li>
+      <li>AimsKMeansImageSegmentation</li>
+      <li>AimsTensor2Bucket</li>
+    </ul>
+    and classes:
+    <ul>
+      <li>AimsLinearCombination classes</li>
+      <li>Finally get rid of old getopt (obsolete for almost 20 years...)</li>
+    </ul>
+  </li>
+  <li>PyAims bindings to numpy arrays are now allowed when items types are not scalar numbers: vectors of Point3Df or of RGB are mapped to array structures.
+  </li>
+</ul>
 
 
 <!-- -->

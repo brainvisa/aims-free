@@ -113,7 +113,7 @@ void GCoef::initialize( float s, GCoef::GOrder o )
 }
 
 
-void GCoef::fillSmoothing( float s )
+void GCoef::fillSmoothing( float /*s*/ )
 {
 
 

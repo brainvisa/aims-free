@@ -29,15 +29,15 @@ ParzenProbDensFunction::ParzenProbDensFunction(
   short refBinNb,
   short testBinNb
 ):
-  _refBinNb(refBinNb),
-  _testBinNb(testBinNb),
-  _dimParam(!is2dx + !is2dy + !is2dz),
   _jpdf(refBinNb, testBinNb+2*PAD),
   _xpdf(refBinNb),
   _ypdf(testBinNb + 2*PAD),
   _derjpdf(d.dimX(), d.dimY(), d.dimZ()),
+  _refBinNb(refBinNb),
+  _testBinNb(testBinNb),
+  _spline(3, 1),
   _is2d( is2dx, is2dy, is2dz ),
-  _spline(3, 1)
+  _dimParam(!is2dx + !is2dy + !is2dz)
 {
   _jpdf = 0.0;
   _xpdf = 0.0;
@@ -131,7 +131,7 @@ ParzenProbDensFunction::getPartDer( vector<float>&  v )
   // //--->
 
 
-  double p_xy, p_y, p_x;
+  double p_xy, p_y/*, p_x*/;
   Point3dd t, dp_dmu_i_xy, dpT_dmu_i_y;
 
   int ind = 0;

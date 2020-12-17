@@ -8,21 +8,16 @@
  *  	France
  */ 
 
-//#include <cstdlib>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <aims/io/process.h>
 #include <aims/io/finder.h>
-//#include <aims/math/math_g.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/vector/vector.h>
 #include <aims/mesh/texture.h>
-//#include <aims/utility/utility_g.h>
-
-#include <iostream>
-#include <limits>
 #include <cartobase/config/verbose.h>
+#include <limits>
 
 using namespace aims;
 using namespace carto;
@@ -41,7 +36,7 @@ public:
   friend bool doit( Process &, const string &, Finder & );
 
   template<class T> 
-  bool parcellation( AimsData<T> & data );
+  bool parcellation( VolumeRef<T> & data );
 
 private:
   string        meshf, itexf, parcelf;
@@ -68,25 +63,29 @@ bool doit( Process & p, const string & fname, Finder & f)
   if( verbose )
     cout << "Starting doit()" << endl;
   CxParcel              & cx = (CxParcel&) p;
-  AimsData<T>		data;
-  Reader<AimsData<T> >	reader( fname );
+  VolumeRef<T>		data;
+  Reader<Volume<T> >	reader( fname );
   string		format = f.format();
-  if( !reader.read( data, 0, &format) )
-    return( false );
+  data.reset( reader.read( 0, &format) );
   return( cx.parcellation( data ) );
 } 
 
 
 template<class T> 
-bool CxParcel::parcellation( AimsData<T> & gmdata )
+bool CxParcel::parcellation( VolumeRef<T> & gmdata )
 {
   unsigned                          p, pmin;
   int                               x, y, z, xmax, ymax, zmax;
   long                              g, gmax;
   float                             sx, sy, sz;
   double                            d2, d2min;
-  xmax = gmdata.dimX(); ymax = gmdata.dimY(); zmax = gmdata.dimZ();
-  sx = gmdata.sizeX(); sy = gmdata.sizeY(); sz = gmdata.sizeZ();
+  xmax = gmdata->getSizeX();
+  ymax = gmdata->getSizeY();
+  zmax = gmdata->getSizeZ();
+  vector<float> vs = gmdata->getVoxelSize();
+  sx = vs[0];
+  sy = vs[1];
+  sz = vs[2];
   
   /* Loading input */
   if(verbose) {
@@ -111,14 +110,14 @@ bool CxParcel::parcellation( AimsData<T> & gmdata )
   if(verbose)
         cout << "done.\n";
   
-  AimsData<short> parcel (xmax, ymax, zmax);
-  parcel.setSizeXYZT(sx, sy, sz);
+  VolumeRef<short> parcel (xmax, ymax, zmax);
+  parcel->header().setProperty( "voxel_size", vs );
   if( parcelf .length() ==0 )
   {
     cerr<<"ERROR: output parcellation file has not been defined!" << flush;
     return(false);
   }    
-  Writer< AimsData< short > > w( parcelf );
+  Writer< VolumeRef< short > > w( parcelf );
 
   /***
   Algorithm
@@ -136,7 +135,7 @@ bool CxParcel::parcellation( AimsData<T> & gmdata )
   for(z=0; z<zmax; z++)
     for(y=0; y<ymax; y++)
       for(x=0; x<xmax; x++)
-        if(gmdata(x,y,z) == static_cast<T>(gm_value))
+        if(gmdata->at(x,y,z) == static_cast<T>(gm_value))
 	       gmax++;
   gm.reserve(gmax);
 
@@ -144,7 +143,7 @@ bool CxParcel::parcellation( AimsData<T> & gmdata )
   for(z=0; z<zmax; z++)
      for(y=0; y<ymax; y++)
        for(x=0; x<xmax; x++)
-         if(gmdata(x,y,z) == static_cast<T>(gm_value))
+         if(gmdata->at(x,y,z) == static_cast<T>(gm_value))
          {
             gm[g][0]=x*sx;
             gm[g][1]=y*sy;
@@ -179,7 +178,7 @@ bool CxParcel::parcellation( AimsData<T> & gmdata )
       x=(int)round(gm[g][0]/sx);
       y=(int)round(gm[g][1]/sy);
       z=(int)round(gm[g][2]/sz);
-      parcel(x,y,z,0) = (short int)(round) (itex.item(pmin));
+      parcel->at(x,y,z,0) = (short int)(round) (itex.item(pmin));
     }
     else
       printf("ERROR: could not find any single vertex closer than 1m to (%.0f, %.0f, %.f)!\n",

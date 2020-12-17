@@ -31,14 +31,12 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <cstdlib>
 #include <aims/getopt/getopt2.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
+#include <cartodata/volume/volumeutil.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <list>
-#include <map>
-#include <string>
 
 
 using namespace aims;
@@ -102,8 +100,8 @@ int main( int argc, const char **argv )
 
     }
 
-    Reader< AimsData< short > > reader;
-    AimsData< short > *data = new AimsData< short >[ inFiles.size() ];
+    Reader< Volume< short > > reader;
+    VolumeRef< short > *data = new VolumeRef< short >[ inFiles.size() ];
 
     cout << "reading input label data : " << flush;
     list< string >::const_iterator f = inFiles.begin(),
@@ -114,7 +112,7 @@ int main( int argc, const char **argv )
 
       cout << *f << " " << flush;
       reader.setFileName( *f );
-      reader >> data[ dataCount ];
+      data[ dataCount ].reset( reader.read() );
       f ++;
       dataCount ++;
 
@@ -122,25 +120,17 @@ int main( int argc, const char **argv )
     cout << endl;
 
     cout << "checking geometry coherence between data" << flush;
-    int dimX = data[ 0 ].dimX();
-    int dimY = data[ 0 ].dimY();
-    int dimZ = data[ 0 ].dimZ();
-    int dimT = data[ 0 ].dimT();
-    float sizeX = data[ 0 ].sizeX();
-    float sizeY = data[ 0 ].sizeY();
-    float sizeZ = data[ 0 ].sizeZ();
-    float sizeT = data[ 0 ].sizeT();
+    vector<int> dims = data[ 0 ] ->getSize();
+    int dimX = data[ 0 ]->getSizeX();
+    int dimY = data[ 0 ]->getSizeY();
+    int dimZ = data[ 0 ]->getSizeZ();
+    int dimT = data[ 0 ]->getSizeT();
+    vector<float> vs = data[ 0 ]->getVoxelSize();
     for ( d = 1; d < dataCount; d++ )
     {
 
-      if ( data[ d ].dimX() != dimX ||
-           data[ d ].dimY() != dimY ||
-           data[ d ].dimZ() != dimZ ||
-           data[ d ].dimT() != dimT ||
-           data[ d ].sizeX() != sizeX ||
-           data[ d ].sizeY() != sizeY ||
-           data[ d ].sizeZ() != sizeZ ||
-           data[ d ].sizeT() != sizeT )
+      if ( data[ d ]->getSize() != dims ||
+           data[ d ]->getVoxelSize() != vs )
       {
 
         delete [] data;
@@ -154,19 +144,13 @@ int main( int argc, const char **argv )
     cout << endl;
 
     cout << "initializing output structures" << flush;
-    AimsData< short > merged( dimX, dimY, dimZ, dimT );
-    merged.setSizeX( sizeX );
-    merged.setSizeY( sizeY );
-    merged.setSizeZ( sizeZ );
-    merged.setSizeT( sizeT );
-    merged = outBackground;
+    VolumeRef< short > merged( dims );
+    merged->header().setProperty( "voxel_size", vs );
+    merged->fill( outBackground );
 
-    AimsData< byte > intersections( dimX, dimY, dimZ, dimT );
-    intersections.setSizeX( sizeX );
-    intersections.setSizeY( sizeY );
-    intersections.setSizeZ( sizeZ );
-    intersections.setSizeT( sizeT );
-    intersections = 0;
+    VolumeRef< byte > intersections( dims );
+    intersections->header().setProperty( "voxel_size", vs );
+    intersections->fill( 0 );
     cout << endl;
 
     // relabel the whole data set with unique label for each
@@ -188,7 +172,7 @@ int main( int argc, const char **argv )
             for ( x = 0; x < dimX; x++ )
             {
 
-              short value = data[ d ]( x, y, z, t );
+              short value = data[ d ]->at( x, y, z, t );
               if ( value != background )
               {
 
@@ -199,7 +183,7 @@ int main( int argc, const char **argv )
                    label ++;
 
                 }
-                data[ d ]( x, y, z, t ) = labelLut[ value ];
+                data[ d ]->at( x, y, z, t ) = labelLut[ value ];
 
               }
 
@@ -212,7 +196,7 @@ int main( int argc, const char **argv )
 
     cout << "merging labels" << flush;
     int labelCount;
-    short outputLabel;
+    short outputLabel = 0;
     for ( t = 0; t < dimT; t++ )
       for ( z = 0; z < dimZ; z++ )
         for ( y = 0; y < dimY; y++ )
@@ -225,7 +209,7 @@ int main( int argc, const char **argv )
             {
 
               short background = *b;
-              short value = data[ d ]( x, y, z, t );
+              short value = data[ d ]->at( x, y, z, t );
               if ( value != background )
               {
 
@@ -238,13 +222,13 @@ int main( int argc, const char **argv )
             if ( labelCount == 1 )
             {
 
-              merged( x, y, z, t ) = outputLabel;
+              merged->at( x, y, z, t ) = outputLabel;
 
             }
             else if ( labelCount > 1 )
             {
 
-              intersections( x, y, z, t ) = 1;
+              intersections->at( x, y, z, t ) = 1;
 
             }
 
@@ -253,11 +237,11 @@ int main( int argc, const char **argv )
 
 
     cout << "saving merged label data" << flush;
-    Writer< AimsData< short > > mergedWriter( fileOut );
-    mergedWriter << merged;
+    Writer< VolumeRef< short > > mergedWriter( fileOut );
+    mergedWriter.write( merged );
     cout << endl;
 
-    if ( intersections.maximum() )
+    if ( carto::max( intersections ) )
     {
 
       cout << "saving intersection mask" << flush;
@@ -268,8 +252,8 @@ int main( int argc, const char **argv )
       if (ext == ".dim" || ext == ".ima")
         res = res.substr( 0, res.length() - 4 );
       fileOut = res + "_intersections";
-      Writer< AimsData< byte > > intersectionsWriter( fileOut );
-      intersectionsWriter << intersections;
+      Writer< VolumeRef< byte > > intersectionsWriter( fileOut );
+      intersectionsWriter.write( intersections );
       cout << endl;
 
     }

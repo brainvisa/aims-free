@@ -41,6 +41,7 @@
 #include <cartobase/type/types.h>
 #include <cartobase/type/voxelrgb.h>
 #include <cartobase/type/voxelhsv.h>
+#include <soma-io/vector/vector.h>
 //----------------------------------------------------------------------------
 
 namespace carto {
@@ -69,6 +70,10 @@ namespace carto {
   extern template class Volume< soma::VoxelRGB >;
   extern template class Volume< soma::VoxelRGBA >;
   extern template class Volume< soma::VoxelHSV >;
+  extern template class Volume<Point3df>;
+  extern template class Volume<Point3d>;
+  extern template class Volume<Point2d>;
+  extern template class Volume<AimsVector<float,6> >;
 #ifdef CARTO_LONG_IS_DISTINCT
   extern template class Volume<long>;
   extern template class Volume<unsigned long>;
@@ -94,6 +99,10 @@ namespace carto {
   extern template class Creator<Volume<soma::VoxelRGB> >;
   extern template class Creator<Volume<soma::VoxelRGBA> >;
   extern template class Creator<Volume<soma::VoxelHSV> >;
+  extern template class Creator<Point3df>;
+  extern template class Creator<Point3d>;
+  extern template class Creator<Point2d>;
+  extern template class Creator<AimsVector<float,6> >;
 #ifdef CARTO_LONG_IS_DISTINCT
   extern template class Creator<Volume<long> >;
   extern template class Creator<Volume<unsigned long> >;
@@ -117,6 +126,12 @@ namespace carto {
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelRGB > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelRGBA > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelHSV > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3d > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point2d > > )
+#define CARTO_COMA ,
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< AimsVector<float CARTO_COMA 6> > > )
+#undef CARTO_COMA
 #ifdef CARTO_LONG_IS_DISTINCT
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )

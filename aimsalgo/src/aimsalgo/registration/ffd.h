@@ -19,7 +19,7 @@
 #include <aims/resampling/linearresampler.h>
 #include <aims/resampling/cubicresampler.h>
 #include <aims/resampling/resamplerfactory.h>
-#include <aims/transformation/transformation.h>       // aims::Transformation
+#include <soma-io/transformation/transformation.h>    // soma::Transformation
 #include <aims/utility/channel.h>
 #include <aims/vector/vector.h>                       // Point*
 #include <aims/mesh/surface.h>
@@ -44,7 +44,7 @@ namespace aims {
 
       Vector fields are stored in volumes AimsData<Point3df>.
   **/
-  class FfdTransformation : public aims::Transformation3d
+  class FfdTransformation : public soma::Transformation3d
   {
   public:
     FfdTransformation( int dimX = 0, int dimY = 1, int dimZ = 1,
