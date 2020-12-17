@@ -58,6 +58,8 @@ import Blender
 from Blender import Curve, Object, Scene
 import sys
 
+import six
+
 
 class BundlesReader(object):
   class CurveIterator(object):
@@ -109,7 +111,9 @@ class BundlesReader(object):
 
   def __init__( self, fileName ):
       attributes = {}
-      exec(compile(open( fileName, "rb" ).read(), fileName, 'exec'), attributes, attributes)
+      with open(fileName, 'rb') as f:
+          code = compile(f.read(), fileName, 'exec')
+      six.exec_(code, attributes, attributes)
       attributes = attributes[ 'attributes' ]
       if not attributes[ 'binary' ]:
         raise RuntimeError( 'Ascii bundle reading not implemented' )
