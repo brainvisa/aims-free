@@ -50,7 +50,7 @@ namespace
     return true;
   }
 
-  bool giftiinit = initgifti();
+  bool giftiinit __attribute__((unused)) = initgifti();
 
 }
 

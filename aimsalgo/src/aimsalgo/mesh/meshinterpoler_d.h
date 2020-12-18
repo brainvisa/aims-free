@@ -67,7 +67,7 @@ namespace aims
     else
     {
       // get corresponding timestep on source time mesh
-      AimsSurfaceTriangle::const_iterator its, ets = d->source->end();
+      AimsSurfaceTriangle::const_iterator its;
       its = d->source->upper_bound( timestep );
       --its;
       stimestep = its->first;
@@ -97,7 +97,7 @@ namespace aims
     else
     {
       // get corresponding timestep on source time mesh
-      AimsSurfaceTriangle::const_iterator its, ets = d->source->end();
+      AimsSurfaceTriangle::const_iterator its;
       its = d->source->upper_bound( timestep );
       --its;
       stimestep = its->first;

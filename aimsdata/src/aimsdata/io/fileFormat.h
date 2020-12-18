@@ -140,9 +140,10 @@ namespace aims
   {
   public:
     static void registerFormat( const std::string & formatID, 
-				FileFormat<T>* format, 
-				const std::vector<std::string> & extensions,
+                                FileFormat<T>* format,
+                                const std::vector<std::string> & extensions,
                                 const std::string & before = "" );
+    static void unregisterFormat( const std::string & formatID );
     static FileFormat<T>* fileFormat( const std::string & format );
     static const std::map<std::string, std::list<std::string> > & extensions();
     static std::set<std::string> formats();

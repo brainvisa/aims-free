@@ -90,7 +90,7 @@ MovingAverageSubSampler & MovingAverageSubSampler::operator=( const MovingAverag
 Point4du MovingAverageSubSampler::length() const
 {
   Point4du length;
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     length[i] = this->_func[i].length();
   return length;
 }
@@ -102,19 +102,19 @@ FilterType::Direction MovingAverageSubSampler::type() const
 
 void MovingAverageSubSampler::setLength( unsigned length )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setLength( length );
 }
 
 void MovingAverageSubSampler::setLength( const Point4du & length )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setLength( length[i] );
 }
 
 void MovingAverageSubSampler::setType( FilterType::Direction symtype )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setType( symtype );
 }
 
@@ -176,7 +176,7 @@ MovingAverageCascadeSubSampler & MovingAverageCascadeSubSampler::operator=( cons
 Point4du MovingAverageCascadeSubSampler::length() const
 {
   Point4du length;
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     length[i] = this->_func[i].length();
   return length;
 }
@@ -184,7 +184,7 @@ Point4du MovingAverageCascadeSubSampler::length() const
 Point4du MovingAverageCascadeSubSampler::cascade() const
 {
   Point4du cascade;
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     cascade[i] = this->_func[i].cascade();
   return cascade;
 }
@@ -196,31 +196,31 @@ FilterType::Direction MovingAverageCascadeSubSampler::type() const
 
 void MovingAverageCascadeSubSampler::setLength( unsigned length )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setLength( length );
 }
 
 void MovingAverageCascadeSubSampler::setLength( const Point4du & length )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setLength( length[i] );
 }
 
 void MovingAverageCascadeSubSampler::setCascade( unsigned n )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setCascade( n );
 }
 
 void MovingAverageCascadeSubSampler::setCascade( const Point4du & n )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setCascade( n[i] );
 }
 
 void MovingAverageCascadeSubSampler::setType( FilterType::Direction symtype )
 {
-  for( int i = 0; i < this->_func.size(); ++i )
+  for( size_t i = 0; i < this->_func.size(); ++i )
     this->_func[i].setType( symtype );
 }
 

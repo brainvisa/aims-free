@@ -42,6 +42,7 @@ FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
 }
 
 FfdTransformation::FfdTransformation( const FfdTransformation & other ):
+  RCObject(),
   _dimx( other._dimx ), _dimy( other._dimy ),
   _dimz( other._dimz ), _vsx( other._vsx ), _vsy( other._vsy ),
   _vsz( other._vsz ),
@@ -586,6 +587,7 @@ SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
 }
 
 SplineFfd::SplineFfd( const SplineFfd & other ):
+  RCObject(),
   FfdTransformation( other ),
   _spline(3, 0)
 {
@@ -610,23 +612,19 @@ SplineFfd & SplineFfd::operator=( const SplineFfd & other )
 void SplineFfd::updateDimensions()
 {
   FfdTransformation::updateDimensions();
-  /* 26/6/2018 (Yael)
-   * I went back to computing mirrored indices on the fly because it is hard
-   * to know in advance how many will be necessary.
-   */
-  // int i;
-  // _mirrorcoefvecx.resize( _dimx + 3 );
-  // _mirrorcoefvecy.resize( _dimy + 3 );
-  // _mirrorcoefvecz.resize( _dimz + 3 );
-  // _mirrorcoefx = &_mirrorcoefvecx[1];
-  // _mirrorcoefy = &_mirrorcoefvecy[1];
-  // _mirrorcoefz = &_mirrorcoefvecz[1];
-  // for( i=-1; i<_dimx + 2; ++i )
-  //   _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
-  // for( i=-1; i<_dimy + 2; ++i )
-  //   _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
-  // for( i=-1; i<_dimz + 2; ++i )
-  //   _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
+  int i;
+  _mirrorcoefvecx.resize( _dimx + 3 );
+  _mirrorcoefvecy.resize( _dimy + 3 );
+  _mirrorcoefvecz.resize( _dimz + 3 );
+  _mirrorcoefx = &_mirrorcoefvecx[1];
+  _mirrorcoefy = &_mirrorcoefvecy[1];
+  _mirrorcoefz = &_mirrorcoefvecz[1];
+  for( i=-1; i<_dimx + 2; ++i )
+    _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
+  for( i=-1; i<_dimy + 2; ++i )
+    _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
+  for( i=-1; i<_dimz + 2; ++i )
+    _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
 }
 
 Point3dd SplineFfd::transformDouble( double x, double y, double z ) const
@@ -703,6 +701,7 @@ TrilinearFfd::TrilinearFfd( int dimX, int dimY, int dimZ,
 }
 
 TrilinearFfd::TrilinearFfd( const TrilinearFfd & other ):
+  RCObject(),
   FfdTransformation( other )
 {
 }

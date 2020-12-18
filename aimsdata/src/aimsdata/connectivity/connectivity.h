@@ -38,6 +38,9 @@
 
 #include <aims/config/aimsdata_config.h>
 #include <aims/vector/vector.h>
+#include <aims/bucket/bucketMap.h>  // for CoordinatesLess operator
+#include <set>
+
 
 namespace aims
 {
@@ -101,6 +104,8 @@ namespace aims
     const Point3d& xyzOffset( int n ) const { return _xyzOffset[n]; }
     /// Get the normalized directive vector of the nth element
     const Point3df& dir( int n ) const { return _dir[n]; }
+    bool isNeighbor( const Point3d & offset )
+    { return _xyzOffsets.find( offset ) != _xyzOffsets.end(); }
 
   Connectivity& 
   operator=(const Connectivity& other)
@@ -141,6 +146,8 @@ namespace aims
     int *_offset;
     /// xyz offset pointer
     Point3d* _xyzOffset;
+    /// xyz offsets as a searchcable set
+    std::set<Point3d, BucketMapLess> _xyzOffsets;
     /// Normalized vectors for the different directions
     Point3df* _dir;
 

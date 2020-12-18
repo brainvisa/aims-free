@@ -36,13 +36,8 @@
 //--- aims -------------------------------------------------------------------
 #include <aims/interpolation/interpolatedvolume.h>
 #include <aims/signalfilter/splinefilter.h>
-#include <aims/resampling/splineresampler.h> // aims::mirrorCoeff
 //--- cartodata --------------------------------------------------------------
 #include <cartodata/volume/volumeutil.h>            // carto::copy
-#include <cartobase/type/string_conversion.h>       // carto::toString
-//--- std --------------------------------------------------------------------
-#include <cmath>                                    // std::min / max / floor
-#include <stdexcept>                                // std::runtime_error
 //----------------------------------------------------------------------------
 
 namespace aims {

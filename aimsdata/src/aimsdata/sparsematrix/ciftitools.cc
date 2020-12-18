@@ -97,7 +97,7 @@ Object CiftiTools::getDimensionObject( int dim ) const
   {
     return none();
   }
-  if( dim >= cifti_dims->size() )
+  if( dim >= (int)cifti_dims->size() )
     return none();
   Object cdim;
   try
@@ -310,7 +310,7 @@ void CiftiTools::getParcelsInfo( Object cifti_info,
       string struct_name = pditer->key();
       Object elem = pditer->currentValue();
       int surfnum = _smap.find( struct_name )->second;
-      while( roilist.size() <= surfnum )
+      while( (int)roilist.size() <= surfnum )
         roilist.push_back( rc_ptr<TimeTexture<int> >() );
       rc_ptr<TimeTexture<int> > & troi
         = roilist[ _smap.find( struct_name )->second ];
@@ -349,7 +349,7 @@ void CiftiTools::getParcelsInfo( Object cifti_info,
       for( ; viter->isValid(); viter->next() )
       {
         v = int( rint( viter->currentValue()->getScalar() ) );
-        if( roi.nItem() <= v )
+        if( (int64_t)roi.nItem() <= v )
           roi.data().resize( v + 1 );
         roi[v] = label;
       }
@@ -370,7 +370,7 @@ namespace
       string struct_name = siter->key();
       Object surf = siter->currentValue();
       int surfnum = smap.find( struct_name )->second;
-      while( roilist.size() <= surfnum )
+      while( (int)roilist.size() <= surfnum )
         roilist.push_back( rc_ptr<TimeTexture<int> >() );
       rc_ptr<TimeTexture<int> > & troi
         = roilist[ smap.find( struct_name )->second ];
@@ -725,7 +725,7 @@ namespace
 
   void getLabelsPointData( SparseOrDenseMatrix & matrix, int value_dim,
     vector<int32_t> & pos, CiftiTools::TextureList & texlist,
-    int tex_index, size_t pos_in_tex, float background, bool single )
+    int tex_index, size_t pos_in_tex, float /* background */, bool single )
   {
     if( single )
     {
@@ -780,7 +780,7 @@ namespace
     {
       string struct_name = siter->key();
       Object isurf = siter->currentValue();
-      int surfnum = smap.find( struct_name )->second;
+      unsigned surfnum = smap.find( struct_name )->second;
       if( surfnum >= nsurfaces )
         nsurfaces = surfnum + 1;
     }
@@ -821,8 +821,7 @@ void CiftiTools::getSurfaceModelTexture(
     structures[ struct_name ] = isurf;
   }
 
-  unsigned ntex = nsurfaces * nrepet;
-  int csurf;
+  unsigned csurf;
 
   for( repet=0; repet<nrepet; ++repet )
     for( csurf=0; csurf<nsurfaces; ++csurf )
@@ -852,7 +851,7 @@ void CiftiTools::getSurfaceModelTexture(
     size_t nnodes
       = size_t( isurf->getProperty( "number_of_nodes" )->getScalar() );
     // fill cache
-    if( d->surfaceSize[dim].size() <= tex_index )
+    if( (int)d->surfaceSize[dim].size() <= tex_index )
       d->surfaceSize[dim].resize( tex_index + 1, 0 );
     d->surfaceSize[dim][tex_index] = nnodes;
 
@@ -886,7 +885,7 @@ void CiftiTools::getSurfaceModelTexture(
 
     // build cache
     vector<map<uint32_t, uint32_t> > & vcache = d->dimVertexMatrixMap[ dim ];
-    while( vcache.size() <= tex_index )
+    while( (int)vcache.size() <= tex_index )
       vcache.push_back( map<uint32_t, uint32_t>() );
     map<uint32_t, uint32_t> & cache = vcache[ tex_index ];
     uint32_t vertex;
@@ -1067,7 +1066,8 @@ vector<int> CiftiTools::getIndicesForSurfaceIndices(
 {
   Object cifti_info = getDimensionObject( dim );
 
-  if( !cifti_info )
+  if( !cifti_info
+      || !cifti_info->hasProperty( "brain_models" ) )
   {
     size_t i, n = std::min( (size_t) roi_indices.size(),
                             (size_t) _matrix->getSize()[ dim ] );
@@ -1077,7 +1077,7 @@ vector<int> CiftiTools::getIndicesForSurfaceIndices(
         indices[i] = i;
     else if( dim == 1 )
     {
-      size_t nv = (size_t) _matrix->getSize()[ dim ];
+      int nv = _matrix->getSize()[ dim ];
       for( i=0; i<n; ++i )
         if( roi_indices[i] >= nv )
           indices[i] = 0;
@@ -1123,7 +1123,18 @@ list<string> CiftiTools::getBrainStructures( int dim, bool keepSurfaces,
     return structures;
   }
 
-  Object models = cifti_info->getProperty( "brain_models" );
+  Object models;
+  try
+  {
+    models = cifti_info->getProperty( "brain_models" );
+  }
+  catch( ... )
+  {
+    // not a "brain_model" dimension
+    structures.push_back( "CORTEX" ); // assume single whole cortex mesh
+    return structures;
+  }
+
   Object iter = models->objectIterator();
 
   for( ; iter->isValid(); iter->next() )
@@ -1197,7 +1208,7 @@ void CiftiTools::getParcelsTexture(
       string struct_name = pditer->key();
       Object elem = pditer->currentValue();
       int surfnum = _smap.find( struct_name )->second;
-      while( texlist.size() <= surfnum )
+      while( (int)texlist.size() <= surfnum )
         texlist.push_back( rc_ptr<TimeTexture<float> >() );
       int tex_index = _smap.find( struct_name )->second;
       rc_ptr<TimeTexture<float> > & troi = texlist[ tex_index ];
@@ -1237,7 +1248,7 @@ void CiftiTools::getParcelsTexture(
       for( ; viter->isValid(); viter->next() )
       {
         v = int( rint( viter->currentValue()->getScalar() ) );
-        if( roi.nItem() <= v )
+        if( (int)roi.nItem() <= v )
           roi.data().resize( v + 1 );
         pos[dim] = label;
         // select needed dimension when more than 2 are available
@@ -1541,7 +1552,7 @@ bool CiftiTools::isMatchingSurfaceOrTexture( int dim, size_t nvert,
 {
   Object dimobj = getDimensionObject( dim );
   if( dimobj.isNull() )
-    return nvert == _matrix->getSize()[ dim ];
+    return ( nvert == (size_t)_matrix->getSize()[ dim ] );
 
   if( dimensionType( dim ) != "brain_models" )
     return false;
@@ -1586,6 +1597,103 @@ bool CiftiTools::isMatchingSurfaceOrTexture( int dim, size_t nvert,
 }
 
 
+template <typename T>
+void CiftiTools::buildDimensionObjectFromLabelsTexture(
+  int dim, const TimeTexture<T> & tex )
+{
+  Object hdr = _matrix->header();
+  if( !hdr )
+  {
+    hdr = Object::value( PropertySet() );
+    _matrix->setHeader( hdr );
+  }
+
+  Object cifti_dims;
+  try
+  {
+    cifti_dims = hdr->getProperty( "cifti_dimensions" );
+  }
+  catch( exception & )
+  {
+    cifti_dims = Object::value( vector<Object>() );
+    hdr->setProperty( "cifti_dimensions", cifti_dims );
+  }
+
+  vector<Object> & dims_vec = cifti_dims->value< vector<Object> >();
+
+  while( dim >= dims_vec.size() )
+    dims_vec.push_back( Object::value( Dictionary() ) );
+
+  Object cifti_info = dims_vec[ dim ];
+  cifti_info->setProperty( "dimension_length", _matrix->getSize()[ dim ] );
+  Object parcels_o = Object::value( Dictionary() );
+  cifti_info->setProperty( "parcels", parcels_o );
+  Object parcels = Object::value( map<int, Object>() );
+  parcels_o->setProperty( "parcels", parcels );
+  Object surfaces = Object::value( Dictionary() );
+  parcels_o->setProperty( "surface_structures", surfaces );
+
+  const Texture<T> & texture = tex.begin()->second;
+  map<int, Object> & parc = parcels->value< map<int, Object> >();
+
+  _smap[ "COREXT" ] = 0;
+
+  size_t i, n = texture.nItem();
+  Object par_def;
+  for( i=0; i<n; ++i )
+  {
+    int region = texture[i];
+    Object & plabel = parc[ region ];
+
+    if( !plabel )
+    {
+      plabel.reset( new ValueObject<Dictionary> );
+      stringstream name;
+      name << region;
+      plabel->setProperty( "name", name.str() );
+      par_def = Object::value( Dictionary() );
+      plabel->setProperty( "surface_nodes", par_def );
+      par_def->setProperty( "CORTEX", vector<int>() );
+    }
+    else
+      par_def = plabel->getProperty( "surface_nodes" );
+
+    vector<int> & roi
+      = par_def->getProperty( "CORTEX" )->value< vector<int> >();
+    roi.push_back( i );
+  }
+
+  n = _matrix->getSize()[ dim ];
+  if( parc.size() < n )
+  {
+    /* the size of the matrix doesn't match the number of actually used
+       regions: perhaps the matrix is lager (uses emty lines / cols) to
+       match the regions numbers.
+       fill in missing (unused) regions to match matrix definition */
+    map<int, Object>::iterator im;
+    for( i=0; i<n; ++i )
+    {
+      if( parc.find( i ) == parc.end() )
+      {
+        Object plabel = Object::value( Dictionary() );
+        stringstream name;
+        name << i;
+        plabel->setProperty( "name", name.str() );
+        par_def = Object::value( Dictionary() );
+        plabel->setProperty( "surface_nodes", par_def );
+        par_def->setProperty( "CORTEX", vector<int>() );
+        parc[i] = plabel;
+      }
+    }
+  }
+
+  Object surf_str = Object::value( Dictionary() );
+  surfaces->setProperty( "CORTEX", surf_str );
+  surf_str->setProperty( "number_of_nodes", n );
+}
+
+
+
 template bool
 CiftiTools::isMatchingSurfaceOrTexture<AimsSurfaceTriangle>(
   int, const AimsSurfaceTriangle &, list<string> &, int &, int ) const;
@@ -1599,4 +1707,10 @@ template bool
 CiftiTools::isMatchingSurfaceOrTexture<TimeTexture<float> >(
   int, const TimeTexture<float> &, list<string> &, int &, int ) const;
 
+template void CiftiTools::buildDimensionObjectFromLabelsTexture(
+  int dim, const TimeTexture<float> & tex );
+template void CiftiTools::buildDimensionObjectFromLabelsTexture(
+  int dim, const TimeTexture<int> & tex );
+template void CiftiTools::buildDimensionObjectFromLabelsTexture(
+  int dim, const TimeTexture<int16_t> & tex );
 

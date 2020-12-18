@@ -279,7 +279,7 @@ conv_instantiate_methods( double )
 
   void DirectBSplineFilter::setOrder( const unsigned & n )
   {
-    for( int i = 0; i < this->_func.size(); ++i )
+    for( size_t i = 0; i < this->_func.size(); ++i )
       this->_func[i].setOrder( n );
   }
 
@@ -292,7 +292,7 @@ conv_instantiate_methods( double )
   void DirectBSplineFilter::setScale( const Point4df & scale )
   {
     this->_func.reserve(4);
-    for( int i = 0; i < this->_func.size(); ++i )
+    for( size_t i = 0; i < this->_func.size(); ++i )
       this->_func[i].setScale( scale[i] );
     for( int i = this->_func.size(); i < 4; ++i )
     {

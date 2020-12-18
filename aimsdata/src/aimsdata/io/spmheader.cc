@@ -286,7 +286,7 @@ bool SpmHeader::read()
   cal[6] = header.dime.cal_units[6] ;
   cal[7] = header.dime.cal_units[7] ;
   cal[8] = '\0' ;
-  string calUnits ;
+  string calUnits(cal);
   
   setProperty( "cal_units", calUnits );
 
@@ -473,8 +473,8 @@ bool SpmHeader::read()
   // unconditionally flip Y and Z axes
   stom.rotation()(1,1) = -1;
   stom.rotation()(2,2) = -1;
-  stom.translation()[1] = dims[1] - 1;
-  stom.translation()[2] = dims[2] - 1;
+  stom.matrix()(1, 3) = dims[1] - 1;
+  stom.matrix()(2, 3) = dims[2] - 1;
 
   try
     {
@@ -534,7 +534,7 @@ bool SpmHeader::read()
   {
     // neuro storage: also flip X axis
     stom.rotation()(0,0) = -1;
-    stom.translation()[0] = dims[0] - 1;
+    stom.matrix()(0, 3) = dims[0] - 1;
   }
 
   vector<float> stomvec;
@@ -631,22 +631,11 @@ bool SpmHeader::read()
               // GCC 4.4 does not support the use of directive
               // #pragma GCC diagnostic
               // inside a function.
-#if defined(__GNUC__) && ( __GNUC__ * 0x100 + __GNUC_MINOR__ >= 0x450 )
-              #pragma GCC diagnostic push
-              #pragma GCC diagnostic warning "-Wstrict-aliasing"
-#endif
-              origin.push_back( byteswap16( *( (short *)
-                                               & header.hist.originator[0]
-                                               ) ) );
-              origin.push_back( byteswap16( *( (short *) 
-                                               & header.hist.originator[2] 
-                                               ) ) );
-              origin.push_back( byteswap16( *( (short *) 
-                                               & header.hist.originator[4] 
-                                               ) ) );
-#if defined(__GNUC__) && ( __GNUC__ * 0x100 + __GNUC_MINOR__ >= 0x450 )
-              #pragma GCC diagnostic pop
-#endif
+              // FPoupon 20/07/2018 : use a temporary variable to fix this 
+              short* origShort = (short*)&header.hist.originator[ 0 ];
+              origin.push_back( byteswap16( origShort[ 0 ] ) );
+              origin.push_back( byteswap16( origShort[ 1 ] ) );
+              origin.push_back( byteswap16( origShort[ 2 ] ) );
             }
           else
             {
@@ -747,7 +736,7 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
             Motion  mm( titer->currentValue() );
             origin = mm.translation();
             // cout << "origin: " << origin << endl;
-            mm.translation() = Point3df( 0, 0, 0 );
+            mm.setTranslation( Point3df( 0, 0, 0 ) );
             if( mm == m )
             {
               reftrans = titer->currentValue();
@@ -830,8 +819,8 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
   stom.setToIdentity();
   stom.rotation()(1,1) = -1;
   stom.rotation()(2,2) = -1;
-  stom.translation()[1] = dims[1] - 1;
-  stom.translation()[2] = dims[2] - 1;
+  stom.matrix()(1, 3) = dims[1] - 1;
+  stom.matrix()(2, 3) = dims[2] - 1;
   /* orient values:
   0: axial unflipped
   1: coronal unflipped
@@ -856,8 +845,8 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
       stom.setToIdentity();
       stom.rotation()(1,1) = -1;
       stom.rotation()(2,2) = -1;
-      stom.translation()[1] = dims[1] - 1;
-      stom.translation()[2] = dims[2] - 1;
+      stom.matrix()(1, 3) = dims[1] - 1;
+      stom.matrix()(2, 3) = dims[2] - 1;
 
       //cout << "...storage modified..." << endl;
 
@@ -878,7 +867,7 @@ bool SpmHeader::write( bool writeminf, bool allow4d )
         // flip X axis
         Motion m2;
         m2.rotation()(0,0) = -1.;
-        stom.translation()[0] = dims[0] - 1;
+        stom.matrix()(0, 3) = dims[0] - 1;
         stom = m2 * stom;
 
         cout << "...flip x axis..." << endl;

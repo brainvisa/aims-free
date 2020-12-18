@@ -43,7 +43,7 @@ using namespace std;
 
 
 RoiSelectorReader::RoiSelectorReader(  const string& name, 
-                                       const SyntaxSet& stx )
+                                       const SyntaxSet& /* stx */ )
   : _name( name )
 {
 }

@@ -160,7 +160,7 @@ namespace aims {
     ConvolutionSubSampler<DiscreteBSpline>::execute( in, out );
     std::vector<int> size = in.getSize();
     double div = 1;
-    for( int i = 0; i < 4; ++i )
+    for( std::size_t i = 0; i < 4; ++i )
       if( this->_dir[i] && size[i] > 1 )
         div *= ( this->_func.size() > i ? this->_func[i].scale()
                                         : this->_func[0].scale() );

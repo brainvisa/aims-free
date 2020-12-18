@@ -54,6 +54,7 @@ namespace
 
   /* This sets Qt plugins path for binary packages (actually needed only on 
      Mac/Fink Qt), according to an arbitrary path */
+#ifdef __APPLE__
   bool initQtPlugins()
   {
     const Path		& p = Path::singleton();
@@ -71,6 +72,7 @@ namespace
       }
     return true;
   }
+#endif
 
   bool initqtformats()
   {
@@ -82,7 +84,7 @@ namespace
     return true;
   }
 
-  bool qtformatsinit = initqtformats();
+  bool qtformatsinit __attribute__((unused)) = initqtformats();
 
 }
 

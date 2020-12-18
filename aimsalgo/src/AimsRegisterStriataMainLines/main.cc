@@ -2757,9 +2757,10 @@ int main( int argc, const char **argv )
   
   vector<Point3df> symYDir( mainLines.size() ) ;
   vector<Point3df> symZDir( mainLines.size() ) ;
-  for( unsigned int i = 0 ; i < symYDir.size() ; ++i ){
+  for( unsigned int i = 0 ; i < symYDir.size() ; ++i )
+  {
     Motion mot = motionsToRef[i] ;
-    mot.translation() = Point3df(0., 0., 0.) ;
+    mot.setTranslation( Point3df(0., 0., 0.) );
     cout << subjects[i] << endl ;
     cout << "Motion to ref : " << motionsToRef[i] << endl ;
     cout << "Mot : " << mot << endl ;

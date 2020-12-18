@@ -30,16 +30,16 @@ namespace aims
                              aims::Connectivity::Type connectivity,
                              std::map<O, size_t>& valids,
                              const T & backgrnd = 0, bool bin = true,
-                             size_t minSize = 0, size_t numMax = 0,
-                             bool verbose = true );
+                             size_t minSize = 0, size_t maxSize = 0,
+                             size_t numMax = 0, bool verbose = true );
 
 
       static void connected( const AimsData<T>& data,
                              AimsData<O>& out,
                              aims::Connectivity::Type connectivity,
                              const T & backgrnd = 0, bool bin = true,
-                             size_t minSize = 0, size_t numMax = 0,
-                             bool verbose = true );
+                             size_t minSize = 0, size_t maxSize = 0,
+                             size_t numMax = 0, bool verbose = true );
 
     private:
       ConnectedComponentEngine();
@@ -52,11 +52,12 @@ namespace aims
                                std::map<%Template1%, size_t>& valids,
                                const %Template1% & backgrnd = 0,
                                bool bin = true,
-                               size_t minSize = 0, size_t numMax = 0,
-                               bool verbose = true );
+                               size_t minSize = 0, size_t maxSize = 0,
+                               size_t numMax = 0, bool verbose = true );
 %Docstring
   void AimsConnectedComponent(data, connectivity, valids, backgrnd=0,
-                              bin=True, minSize=0, numMax=0, verbose=True)
+                              bin=True, minSize=0, maxSize=0, 
+                              numMax=0, verbose=True)
 
   Connected components extraction.
   The function modifies the input data, and does not return a new one.
@@ -70,6 +71,7 @@ namespace aims
   backgrnd: %Template1%
   bin: bool (optional)
   minsize: size_t (optional)
+  maxsize: size_t (optional)
   numMax: size_t (optional)
   verbose: bool (optional)
 
@@ -110,11 +112,11 @@ namespace aims
                                aims::Connectivity::Type connectivity,
                                const %Template1% & backgrnd = 0,
                                bool bin = true,
-                               size_t minSize = 0, size_t numMax = 0,
-                               bool verbose = true );
+                               size_t minSize = 0, size_t maxSize = 0, 
+                               size_t numMax = 0, bool verbose = true );
 %Docstring
   void AimsConnectedComponent(data, connectivity, backgrnd=0, bin=True,
-                              minSize=0, numMax=0, verbose=True)
+                              minSize=0, maxSize=0, numMax=0, verbose=True)
 
   Connected components extraction.
   The function modifies the input data, and does not return a new one.
@@ -127,6 +129,7 @@ namespace aims
   backgrnd: %Template1%
   bin: bool (optional)
   minsize: size_t (optional)
+  maxsize: size_t (optional)
   numMax: size_t (optional)
   verbose: bool (optional)
 
@@ -137,11 +140,11 @@ namespace aims
                                aims::Connectivity::Type connectivity,
                                const %Template1% & backgrnd = 0,
                                bool bin = true,
-                               size_t minSize = 0, size_t numMax = 0,
-                               bool verbose = true );
+                               size_t minSize = 0, size_t maxSize = 0, 
+                               size_t numMax = 0, bool verbose = true );
 %Docstring
   void AimsConnectedComponent(data, connectivity, backgrnd=0, bin=True,
-                              minSize=0, numMax=0, verbose=True)
+                              minSize=0, maxSize=0, numMax=0, verbose=True)
 
   Connected components extraction, Bucket version.
   The function modifies the input data, and does not return a new one.
@@ -154,6 +157,7 @@ namespace aims
   backgrnd: %Template1%
   bin: bool (optional)
   minsize: size_t (optional)
+  maxsize: size_t (optional)
   numMax: size_t (optional)
   verbose: bool (optional)
 
@@ -167,16 +171,16 @@ namespace aims
                                aims::Connectivity::Type connectivity,
                                const %Template1% & backgrnd = 0,
                                bool bin = true,
-                               size_t minsize = 0, size_t maxcomp = 0,
-                               bool verbose = true );
+                               size_t minsize = 0, size_t maxsize = 0, 
+                               size_t maxcomp = 0, bool verbose = true );
 
   void AimsConnectedComponent( AimsBucket_VOID & component,
                                const BucketMap_%Template1typecode% & data,
                                Connectivity::Type connectivity,
                                const %Template1% & backgrnd = 0,
                                bool bin = true,
-                               size_t minsize = 0, size_t maxcomp = 0,
-                               bool verbose = true );
+                               size_t minsize = 0, size_t maxsize = 0, 
+                               size_t maxcomp = 0, bool verbose = true );
 
   AimsData_S16 AimsLabeledConnectedComponent(
     AimsBucket_VOID & component,
@@ -185,6 +189,7 @@ namespace aims
     const %Template1% & backgrnd = 0,
     bool bin = true,
     size_t minsize = 0,
+    size_t maxsize = 0,
     size_t maxcomp = 0,
     bool verbose = true );
 */

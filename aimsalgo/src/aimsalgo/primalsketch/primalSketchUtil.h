@@ -122,18 +122,15 @@ namespace aims
 	{
 		typedef std::pair<Point3df,uint> Site;
 
-		TexturedData<AimsSurface<D, Void>, Texture<T> > *textBlob;
+		//TexturedData<AimsSurface<D, Void>, Texture<T> > *textBlob;
 		std::list<ScaleSpaceBlob<Site>*> ssBlobList=sketch->BlobSet();
 		std::list<ScaleSpaceBlob<Site>*>::iterator itBlob=ssBlobList.begin();
 		GreyLevelBlob<Site>	*glBlob;
 		std::set<Site,ltstr_p3d<Site> > points;
 		std::set<Site,ltstr_p3d<Site> >::iterator itPoints;
-		int label;
+		//int label;
 
-		textBlob=new TexturedData<AimsSurface<D, Void>, Texture<T> >(sketch->scaleSpace()->Mesh(), &(sketch->scaleSpace()->GetOriginalImage()));
-                
-		SiteIterator<AimsSurface<D,Void> > itSite=textBlob->siteBegin();
-
+		//textBlob=new TexturedData<AimsSurface<D, Void>, Texture<T> >(sketch->scaleSpace()->Mesh(), &(sketch->scaleSpace()->GetOriginalImage()));
 
                 std::set<float> scale= sketch->scaleSpace()->GetScaleList();
                
@@ -143,13 +140,13 @@ namespace aims
                   for (uint j=0;j<sketch->scaleSpace()->Mesh()->vertex().size();j++)
                     tex[i].item(j)=0;
                   
-                float sc;
+                float sc = 0.0f;
                 std::set<float>::iterator it;
                 uint test=0;
                 uint i=0;
                 for (; itBlob!=ssBlobList.end(); ++itBlob)
                 {
-                        label=(*itBlob)->Label();
+                        //label=(*itBlob)->Label();
 			glBlob=(*itBlob)->GlBlobRep();
 			points=glBlob->GetListePoints();
 			itPoints=points.begin();
@@ -238,7 +235,7 @@ namespace aims
 		std::set<Site,ltstr_p3d<Site> > points;
 		
 		std::map<int,int> tableNodes;
-		int label, index,countNode=0,countPoly=0;
+		int label, index;
                 uint count=0, count2=0;
 		Point3df coord;
 		AimsTimeSurface<3,Void> oneMesh, tempMesh;
@@ -267,8 +264,6 @@ namespace aims
 
                   for (count = 0;count<1 && count <glblobmap.size();count++,mapit++){ // ON PARCOURT LES GLBLOBS DU SSB 
                       tempMesh=AimsSurfaceTriangle();
-                      countNode=0;
-                      countPoly=0;
                       tableNodes.clear();
                       points=(*mapit).second->GetListePoints();
                       points=(*ssblobit)->GlBlobRep()->GetListePoints();

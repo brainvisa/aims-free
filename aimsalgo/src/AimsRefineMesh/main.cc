@@ -158,7 +158,7 @@ void addNewTriangles( list< AimsVector< uint, 3 > >& triangles,
                       uint k1, uint k2, uint newK )
 {
 
-  int k3;
+  int k3 = 0;
   list< AimsVector< uint, 3 > >::const_iterator r = removed.begin(),
                                                 re = removed.end();
   while ( r != re )

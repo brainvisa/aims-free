@@ -123,6 +123,7 @@ namespace aims {
 
   template <typename T>
   GaborFilterFunc<T>::GaborFilterFunc( const GaborFilterFunc<T> & other ):
+    LinearFilteringFunction<T>(),
     _sigma(other._sigma),
     _theta(other._theta),
     _lambda(other._lambda),

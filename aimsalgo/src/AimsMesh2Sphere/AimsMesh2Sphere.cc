@@ -282,7 +282,7 @@ void surface_coordinates(MeshPtr m)
 	double		*X,*Y,*Z;
 	int			*U;
 
-	double		area,sum,X0,Y0,Z0;
+	double		area,sum,X0=0.0,Y0=0.0,Z0=0.0;
 	double		px,nx,py,ny,pz,nz;
         
         double		closeto0;
@@ -889,7 +889,7 @@ void msh_storeEdge(int2D *E, int *n, int2D e)
 {
 	int	i,max,min;
 	int	j;
-	bool	ismin=false,ismax=false,isequal=false;
+	bool	ismin=false,/*ismax=false,*/isequal=false;
 	
 	max=(*n);min=0;i=(*n)/2;
 	if ((*n)>0)
@@ -897,11 +897,11 @@ void msh_storeEdge(int2D *E, int *n, int2D e)
 		{
 			if (E[i].a<e.a){	min=i;	ismin=true;}
 			else
-			if (E[i].a>e.a){	max=i;	ismax=true;}
+			if (E[i].a>e.a){	max=i;	/*ismax=true;*/}
 			else
 			if (E[i].b<e.b){	min=i;	ismin=true;}
 			else
-			if (E[i].b>e.b){	max=i;	ismax=true;}
+			if (E[i].b>e.b){	max=i;	/*ismax=true;*/}
 			else
 			{				isequal=true;break;}
 			
@@ -1056,7 +1056,7 @@ void msh_laplace_fe(MeshPtr m, double *U,int nDir, int *iDir, double *Dir,
 	int			pstack[SIZESTACK],estack[SIZESTACK];
 	double		coef;
 	double		*D,*N,*B;
-	char		*M;
+	char		*M = NULL;
 	int			iter=0;
 	double		err=0;
 	bool		isDirichlet;
@@ -1228,7 +1228,7 @@ void msh_linbcgDN(int n,int en, double D[], double N[], int2D *E, double b[], do
 // So, data in the D matrix is organized in the NT matrix.
 {
 	int		j;
-	double		ak,akden,bk,bkden,bknum,bnrm,dxnrm,xnrm,zm1nrm,znrm;
+	double		ak,akden,bk,bkden=1.0,bknum,bnrm=1.0,dxnrm,xnrm,zm1nrm,znrm = 0.0;
 	double		*p,*pp,*r,*rr,*z,*zz;//Double precision is a good idea in this routine.
 
 	p=dvector_new(n);
@@ -1423,7 +1423,7 @@ int msh_esort(MeshPtr m, int indx, int *pstack, int *estack)
 {
 	int			i,j,n;
 	int			nt,ne;
-	float3D		*p;
+	//float3D		*p;
 	int3D		*T;
 	NTriRec		*NT;
 	int2D		*E;
@@ -1433,7 +1433,7 @@ int msh_esort(MeshPtr m, int indx, int *pstack, int *estack)
 	bool		isNest;
 	int			old_n;
 	
-	p = msh_getPointsPtr(m);
+	//p = msh_getPointsPtr(m);
 	T = msh_getTrianglesPtr(m);
 	NT = msh_getNeighborTrianglesPtr(m);
 	E = msh_getEdgesPtr(m);
@@ -1772,12 +1772,12 @@ float3D em_getPointFromSphericalCoordinate(float3D c)
 void em_sphereFromTexture(MeshPtr m)
 {
 	float3D		*p;
-	int3D		*T;
+	//int3D		*T;
 	float3D		*C;
 	float		area,R;
 
 	p=msh_getPointsPtr(m);
-	T=msh_getTrianglesPtr(m);
+	//T=msh_getTrianglesPtr(m);
 	C=msh_getTexturePtr(m);
 	
 	area=0;

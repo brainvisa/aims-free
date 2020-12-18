@@ -31,13 +31,11 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <cstdlib>
 #include <aims/getopt/getopt2.h>
-#include <aims/data/data.h>
+#include <cartodata/volume/volume.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <list>
-#include <string>
 
 
 using namespace aims;
@@ -79,23 +77,24 @@ int main( int argc, const char **argv )
     }
 
 
-    Reader< AimsData< short > > reader( fileIn );
-    AimsData< short > data;
+    Reader< Volume< short > > reader( fileIn );
+    VolumeRef< short > data;
 
     cout << "reading input label data" << flush;
-    reader >> data;
+    data.reset( reader.read() );
     cout << endl;
 
     cout << "selecting labels" << flush;
     list< short >::const_iterator l = labels.begin(), le = labels.end();
-    for ( t = 0; t < data.dimT(); t++ )
-      for ( z = 0; z < data.dimZ(); z++ )
-        for ( y = 0; y < data.dimY(); y++ )
-          for ( x = 0; x < data.dimX(); x++ )
+    int dx = data->getSizeX(), dy = data->getSizeY(), dz = data->getSizeZ(),
+      dt = data->getSizeT();
+    for ( t = 0; t < dt; t++ )
+      for ( z = 0; z < dz; z++ )
+        for ( y = 0; y < dy; y++ )
+          for ( x = 0; x < dx; x++ )
           {
 
-            
-            short value = data( x, y, z, t );
+            short value = data->at( x, y, z, t );
 
             l = labels.begin();
             keepIt = false;
@@ -114,7 +113,7 @@ int main( int argc, const char **argv )
             if ( !keepIt )
             {
 
-              data( x, y, z, t ) = background;
+              data->at( x, y, z, t ) = background;
 
             }
 
@@ -123,8 +122,8 @@ int main( int argc, const char **argv )
 
 
     cout << "saving selection" << flush;
-    Writer< AimsData< short > > writer( fileOut );
-    writer << data;
+    Writer< VolumeRef< short > > writer( fileOut );
+    writer.write( data );
     cout << endl;
 
   }

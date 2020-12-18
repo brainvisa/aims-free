@@ -877,5 +877,5 @@ namespace
     return true;
   }
 
-  static bool voldic = _voldic();
+  static bool voldic __attribute__((unused)) = _voldic();
 }

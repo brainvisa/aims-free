@@ -60,19 +60,19 @@ namespace aims
         /** tells if row s1 has already been read.
             If so, SparseOrDenseMatrix::readRow will not read it again.
         */
-        virtual bool hasRow( int32_t s1 ) const { return true; }
+        virtual bool hasRow( int32_t /* s1 */ ) const { return true; }
         /** tells if column s2 has already been read.
             If so, SparseOrDenseMatrix::readColumn will not read it again.
         */
-        virtual bool hasColumn( int32_t s2 ) const { return true; }
-        virtual std::vector<double> *readRow( int32_t s1, bool store = true )
-        { return new std::vector<double>; }
-        virtual std::vector<double> *readColumn( int32_t s2,
+        virtual bool hasColumn( int32_t /* s2 */ ) const { return true; }
+        virtual std::vector<double> *readRow( int32_t /* s1 */, bool store = true )
+        { (void)(store); return new std::vector<double>; }
+        virtual std::vector<double> *readColumn( int32_t /* s2 */,
                                                  bool store = true )
-        { return new std::vector<double>; }
-        virtual void freeRow( int32_t s1 ) {}
-        virtual void freeColumn( int32_t s2 ) {}
-        virtual void selectDimension( const std::vector<int32_t> & dims ) {}
+        { (void)(store); return new std::vector<double>; }
+        virtual void freeRow( int32_t /* s1 */  ) {}
+        virtual void freeColumn( int32_t /* s2 */ ) {}
+        virtual void selectDimension( const std::vector<int32_t> & /* dims */ ) {}
         void setInfFiltering( bool keep_inf, bool keep_nan )
         { _keep_inf = keep_inf; _keep_nan = keep_nan; }
         bool keepsInf() const { return _keep_inf; }

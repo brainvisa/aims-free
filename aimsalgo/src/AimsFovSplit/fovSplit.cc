@@ -81,7 +81,7 @@ int main(int argc, const char **argv)
     vector<string> outputFileNames ;
     list <string>::const_iterator it ;
     string        attFileName = "";
-    time_t        time_origin;
+    time_t        time_origin = 0;
     float         isotope_hl;
     vector<int>   ref_dims;
     vector<float> ref_voxsize;
@@ -94,7 +94,6 @@ int main(int argc, const char **argv)
     float t1 = THRESHOLD_INIT;
     float ratio = THRESHOLD_RATIO;
     float pas_seuil, init_t1, radius;
-    int   emiX, emiY, emiZ;
 
     AimsApplication application( argc, argv, 
 				 "Premier program  rats" );
@@ -420,10 +419,6 @@ int main(int argc, const char **argv)
 	  dataR >> in;
 	}
       }
- 
-      emiX = in.dimX();
-      emiY = in.dimY();
-      emiZ = in.dimZ();
       
       // Lecture & affichage des dimensions et taille de voxel de l'image
       // (lecture d'infos du header d'image)
@@ -900,6 +895,6 @@ int main(int argc, const char **argv)
     result = EXIT_FAILURE;
   }
   
-  return ( EXIT_FAILURE );
+  return ( result );
 }
 

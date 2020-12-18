@@ -57,7 +57,6 @@ int main( int argc, const char** argv )
   float deciMaxClearance = 10.0;
   float deciMaxError = 10.0 ;
   float deciAngle = 180.0;
-  int triFlag = 0;
   uint minFacetNumber = 50;
   int asciiFlag = 0;
   Reader<AimsSurfaceTriangle> triR;

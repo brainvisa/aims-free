@@ -240,10 +240,12 @@ namespace aims {
 
       public:
         LinearFilteringImageAlgorithm( const LinearFilteringFunction<T> & f ):
+          ImageAlgorithmInterface<T>(),
           _func(f.clone())
         {}
 
         LinearFilteringImageAlgorithm( const ::aims::singlechannel::LinearFilteringImageAlgorithm<T> & other ):
+          ImageAlgorithmInterface<T>(),
           _func(other._func->clone())
         {}
 
@@ -385,11 +387,13 @@ namespace aims {
       public:
         ElementFilteringImageAlgorithm( const ElementFilteringFunction<T> & f,
                                         const StructuringElement & se = strel::Cube(1.) ):
+          ImageAlgorithmInterface<T>(),
           _func(f.clone()),
           _strel(se.clone())
         {}
 
         ElementFilteringImageAlgorithm( const ::aims::singlechannel::ElementFilteringImageAlgorithm<T> & other ):
+          ImageAlgorithmInterface<T>(),
           _func(other._func->clone()),
           _strel(other._strel->clone())
         {}

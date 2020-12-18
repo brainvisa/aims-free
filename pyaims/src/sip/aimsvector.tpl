@@ -60,7 +60,7 @@ typedef AimsVector<%Template1%, %Template2%>
   {
     PyArrayObject *arr = 0;
     arr = (PyArrayObject *) sipPy;
-    if( arr->nd < 0 || arr->nd >1 )
+    if( PyArray_NDIM( arr ) < 0 || PyArray_NDIM( arr ) >1 )
     {
       *sipIsErr = 1;
       PyErr_SetString( PyExc_RuntimeError,
@@ -68,10 +68,10 @@ typedef AimsVector<%Template1%, %Template2%>
                        "AimsVector_%Template1typecode%_%Template2typecode%" );
       return 0;
     }
-    else if( arr->descr->type_num == %Template1NumType% )
+    else if( PyArray_DESCFR( arr )->type_num == %Template1NumType% )
     {
       // retreive dimensions
-      int dims = arr->dimensions[0], i;
+      int dims = PyArray_DIMS( arr )[0], i;
       if( dims != %Template2% )
       {
         *sipIsErr = 1;
@@ -131,6 +131,7 @@ typedef AimsVector<%Template1%, %Template2%>
 public:
 %%Template1defScalar%%
 %%Template1defNumpyBindings%%
+%%Template1defNumpyIsSubArray%%
 
   AimsVector_%Template1typecode%_%Template2typecode%();
   AimsVector_%Template1typecode%_%Template2typecode%
@@ -150,7 +151,7 @@ public:
   {
     PyArrayObject *arr = 0;
     arr = (PyArrayObject *) a0;
-    if( arr->nd < 0 || arr->nd >1 )
+    if( PyArray_NDIM( arr ) < 0 || PyArray_NDIM( arr ) >1 )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_RuntimeError, 
@@ -158,7 +159,7 @@ public:
                        "AimsVector_%Template1typecode%_%Template2typecode%" );
       done = true; 
     }
-    else if( arr->descr->type_num != %Template1NumType% )
+    else if( PyArray_DESCR( arr )->type_num != %Template1NumType% )
     {
       sipIsErr = 1;
       PyErr_SetString( PyExc_TypeError, "wrong array data type" );
@@ -166,7 +167,7 @@ public:
     if( !sipIsErr )
     {
       // retreive dimensions
-      int dims = arr->dimensions[0], i;
+      int dims = PyArray_DIMS( arr )[0], i;
       if( dims != %Template2% )
       {
         sipIsErr = 1;
@@ -406,16 +407,48 @@ public:
 
   SIP_PYOBJECT arraydata() /Factory/;
 %MethodCode
-  int dims = %Template2%;
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 1, &dims,
+  std::vector<int> dims( 1, %Template2% );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+
+  PyArray_Descr *descr = %Template1NumType_Descr%;
+  if( !descr )
+    descr = PyArray_DescrFromType( %Template1NumType% );
+  sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
+                                 &dims[0],
                                  (char *) &(*sipCpp)[0] );
+%#ifdef PYAIMS_NPY_IS_SUBARRAY%
+  PyObject *sub_arr = PyMapping_GetItemString( sipRes,
+                                               const_cast<char *>( "v" ) );
+  if( sub_arr )
+  {
+    Py_DECREF( sipRes ); // we don't use the whole array
+    sipRes = sub_arr;
+  }
+%#endif%
 %End
 
   SIP_PYOBJECT __array__() /Factory/;
 %MethodCode
-  int dims = %Template2%;
-  sipRes = aims::initNumpyArray( sipSelf, %Template1NumType%, 1, &dims,
+  std::vector<int> dims( 1, %Template2% );
+  std::vector<int> added_dims = %Template1NumDims%;
+  dims.insert( dims.end(), added_dims.begin(), added_dims.end() );
+
+  PyArray_Descr *descr = %Template1NumType_Descr%;
+  if( !descr )
+    descr = PyArray_DescrFromType( %Template1NumType% );
+  sipRes = aims::initNumpyArray( sipSelf, descr, dims.size(),
+                                 &dims[0],
                                  (char *) &(*sipCpp)[0] );
+%#ifdef PYAIMS_NPY_IS_SUBARRAY%
+  PyObject *sub_arr = PyMapping_GetItemString( sipRes,
+                                               const_cast<char *>( "v" ) );
+  if( sub_arr )
+  {
+    Py_DECREF( sipRes ); // we don't use the whole array
+    sipRes = sub_arr;
+  }
+%#endif%
 %End
 
   void _arrayDestroyedCallback( SIP_PYOBJECT );

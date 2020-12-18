@@ -440,12 +440,12 @@ void TextureSmoothing::tayd_core( const int *IND_NEIGHS, const float *PINV,
         }
     }
 
-  float                       Ux, Uxx, Uy, Uyy /*, Uxy, anis*/;
+  float                       /*Ux,*/ Uxx, /*Uy,*/ Uyy /*, Uxy, anis*/;
 
   for( j=0; j<nodes_iter; ++j )
     {
-      Ux = *(Df+0*nodes_iter+j);
-      Uy = *(Df+1*nodes_iter+j);
+      //Ux = *(Df+0*nodes_iter+j);
+      //Uy = *(Df+1*nodes_iter+j);
       Uxx = *(Df+2*nodes_iter+j);
       Uyy = *(Df+3*nodes_iter+j);
       if (Uxx + Uyy > Umax)

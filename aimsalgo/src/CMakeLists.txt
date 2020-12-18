@@ -42,24 +42,6 @@ if( BUILD_ECAT )
   endforeach()
 endif( BUILD_ECAT )
   
-# Targets linking with aimsjpeg
-if( JPEG_FOUND )
-  foreach( _command AimsData2Jpeg )
-    file( GLOB _pro "${_command}/*.pro" )
-    BRAINVISA_GET_FILE_LIST_FROM_PRO( "${_pro}"
-                                TARGET _target
-                                SOURCES _proSources )
-    set( _sources )
-    foreach( _f ${_proSources} )
-      set( _sources ${_sources} ${_command}/${_f} )
-    endforeach()
-    BRAINVISA_ADD_EXECUTABLE( ${_target} ${_sources} )
-    target_link_libraries( ${_target} aimsalgo aimsjpeg )
-    BRAINVISA_INSTALL( TARGETS ${_target}
-                  DESTINATION bin
-                  COMPONENT ${PROJECT_NAME} )
-  endforeach()
-endif()
 # Targets linking with aimsdicom.
 if( DCMTK_FOUND )
   include_directories( ${DCMTK_INCLUDE_DIR} )

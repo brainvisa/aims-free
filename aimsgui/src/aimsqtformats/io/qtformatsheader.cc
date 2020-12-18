@@ -383,6 +383,8 @@ string QtFormatsHeader::removeExtension( const string & name ) const
 }
 
 
+// defined but not used...
+#if 0
 namespace
 {
 
@@ -402,6 +404,7 @@ namespace
   }
 
 }
+#endif
 
 
 bool QtFormatsHeader::hasRead() const

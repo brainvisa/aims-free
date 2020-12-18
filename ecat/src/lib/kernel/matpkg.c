@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-matmpy(a,b,c)
+void matmpy(a,b,c)
   Matrix a,b,c;
 {	int i,j,k;
 	float t;
@@ -19,7 +19,7 @@ matmpy(a,b,c)
 	  }
 }
 
-mat_print(a)
+void mat_print(a)
   Matrix a;
 {
 	int i,j;
@@ -31,7 +31,7 @@ mat_print(a)
 	}
 }
 
-mat_unity(a)
+void mat_unity(a)
   Matrix a;
 {
 	int i,j;
@@ -54,7 +54,14 @@ Matrix mat_alloc(ncols,nrows)
 	return t;
 }
 
-mat_copy(a,b)
+void mat_free(a)
+  Matrix a;
+{
+	free(a->data);
+	free(a);
+}
+
+void mat_copy(a,b)
   Matrix a,b;
 {
 	int i;
@@ -63,7 +70,7 @@ mat_copy(a,b)
 	  a->data[i] = b->data[i];
 }
 
-rotate(a,rx,ry,rz)
+void rotate(a,rx,ry,rz)
   Matrix a;
   float rx,ry,rz;
 {
@@ -98,7 +105,7 @@ rotate(a,rx,ry,rz)
 	mat_free(b);
 }
 
-translate(a,dx,dy,dz)
+void translate(a,dx,dy,dz)
   Matrix a;
   float dx,dy,dz;
 {
@@ -116,7 +123,7 @@ translate(a,dx,dy,dz)
 	mat_free(t);
 }
 
-scale(a,sx,sy,sz)
+void scale(a,sx,sy,sz)
   Matrix a;
   float sx,sy,sz;
 {
@@ -132,13 +139,6 @@ scale(a,sx,sy,sz)
 	matmpy(a,b,t);
 	mat_free(b);
 	mat_free(t);
-}
-
-mat_free(a)
-  Matrix a;
-{
-	free(a->data);
-	free(a);
 }
 
 #ifdef TEST

@@ -380,7 +380,6 @@ void resizeVolume( rc_ptr<Volume<T> > & vol,
                    int rpox, int rpoy, int rpoz, int rpot )
 {
   VolumeRef<T> newvol( dimx, dimy, dimz, dimt );
-  int i, j, k, l;
   int ni=posx, nj=posy, nk=posz, nl=post;
   for( int l=rpot; l<( regt ? regt+rpot : vol->getSizeT()-rpot ); ++l ) {
     for( int k=rpoz; l<( regz ? regz+rpoz : vol->getSizeZ()-rpoz ); ++k ) {
@@ -605,13 +604,13 @@ map<string,somaReadSomaWrite_g> somaReadSomaWrite;
 // Write output using soma-io
 // ===========================================================================
 template <typename T>
-void aimsReadSomaWrite_f( const string       & ifname,
-                          const string       & ofname,
-                          const vector<int>  & regionin,
-                          const vector<int>  & posin,
-                          const vector<int>  & sizeout,
-                          const vector<int>  & posout,
-                          const bool         & extract )
+void aimsReadSomaWrite_f( const string       & /*ifname*/,
+                          const string       & /*ofname*/,
+                          const vector<int>  & /*regionin*/,
+                          const vector<int>  & /*posin*/,
+                          const vector<int>  & /*sizeout*/,
+                          const vector<int>  & /*posout*/,
+                          const bool         & /*extract*/ )
 {
   cerr << "Not implemented yet." << endl;
 }
@@ -629,13 +628,13 @@ map<string,aimsReadSomaWrite_g> aimsReadSomaWrite;
 // Write output using aims
 // ===========================================================================
 template <typename T>
-void aimsReadAimsWrite_f( const string       & ifname,
-                          const string       & ofname,
-                          const vector<int>  & regionin,
-                          const vector<int>  & posin,
-                          const vector<int>  & sizeout,
-                          const vector<int>  & posout,
-                          const bool         & extract )
+void aimsReadAimsWrite_f( const string       & /*ifname*/,
+                          const string       & /*ofname*/,
+                          const vector<int>  & /*regionin*/,
+                          const vector<int>  & /*posin*/,
+                          const vector<int>  & /*sizeout*/,
+                          const vector<int>  & /*posout*/,
+                          const bool         & /*extract*/ )
 {
   cerr << "Not implemented yet." << endl;
 }
@@ -653,13 +652,13 @@ map<string,aimsReadAimsWrite_g> aimsReadAimsWrite;
 // Write output using aims
 // ===========================================================================
 template <typename T>
-void somaReadAimsWrite_f( const string       & ifname,
-                          const string       & ofname,
-                          const vector<int>  & regionin,
-                          const vector<int>  & posin,
-                          const vector<int>  & sizeout,
-                          const vector<int>  & posout,
-                          const bool         & extract )
+void somaReadAimsWrite_f( const string       & /*ifname*/,
+                          const string       & /*ofname*/,
+                          const vector<int>  & /*regionin*/,
+                          const vector<int>  & /*posin*/,
+                          const vector<int>  & /*sizeout*/,
+                          const vector<int>  & /*posout*/,
+                          const bool         & /*extract*/ )
 {
   cerr << "Not implemented yet." << endl;
 }

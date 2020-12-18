@@ -125,10 +125,10 @@ gyrusSeedDefinition( const AimsSurface<3,Void> & mesh,
  typename std::map<unsigned,std::set<T> >::reverse_iterator im,em;
  std::multimap<unsigned,std::set<T> > matchedLabel;
 
-  bool ok;
+  //bool ok;
   for ( il = labelNeigh.begin(), el = labelNeigh.end(); il!= el; ++il) 
     {
-      ok = false;
+      //ok = false;
       sizeNeigh = (il->second).size();
       //2 neighbours
       

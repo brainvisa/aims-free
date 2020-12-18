@@ -111,9 +111,9 @@ void aims::spmAttributesConverter( GenericObject & hdr )
 
     if( !hasorg )
     {
-      mot.translation()[0] = 78.;
-      mot.translation()[1] = 76.;
-      mot.translation()[2] = 85.;
+      mot.matrix()(0, 3) = 78.;
+      mot.matrix()(1, 3) = 76.;
+      mot.matrix()(2, 3) = 85.;
       /* (78,76,85) is the standard origin which is already taken
       into account in the ACPC->MNI transformation, so we must not
       count it again here */
@@ -124,9 +124,9 @@ void aims::spmAttributesConverter( GenericObject & hdr )
     else
     {
       // SPM-like origin
-      mot.translation()[0] = origin[0] * vs[0];
-      mot.translation()[1] = origin[1] * vs[1];
-      mot.translation()[2] = origin[2] * vs[2];
+      mot.matrix()(0, 3) = origin[0] * vs[0];
+      mot.matrix()(1, 3) = origin[1] * vs[1];
+      mot.matrix()(2, 3) = origin[2] * vs[2];
       mot.rotation()( 0, 0 ) = -1.;
       mot.rotation()( 1, 1 ) = -1.;
       mot.rotation()( 2, 2 ) = -1.;
@@ -144,9 +144,9 @@ void aims::spmAttributesConverter( GenericObject & hdr )
     hdr.getProperty( "volume_dimension", dims );
     while( dims.size() < 3 )
       dims.push_back( 1 );
-    mot.translation()[0] = ( dims[0] - origin[0] ) * vs[0];
-    mot.translation()[1] = ( dims[1] - origin[1] ) * vs[1];
-    mot.translation()[2] = ( dims[2] - origin[2] ) * vs[2];
+    mot.matrix()(0, 3) = ( dims[0] - origin[0] ) * vs[0];
+    mot.matrix()(1, 3) = ( dims[1] - origin[1] ) * vs[1];
+    mot.matrix()(2, 3) = ( dims[2] - origin[2] ) * vs[2];
     refs.push_back( "other_referential" );
   }
   hdr.setProperty( "referentials", refs );

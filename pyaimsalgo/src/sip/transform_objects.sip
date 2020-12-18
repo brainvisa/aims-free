@@ -5,11 +5,19 @@
 /* for an unknown reason functions defined in aimsalgo in the aims namespace
    are not seen from the python module. Classes are, so are functions defined
    the same way in aimsdata. The only workaround found is to define them
-   outside of their namespace
+   outside of their namespace.
+
+   Even then, the behavior is incinsistant:
+   transformBucketDirect and other functions don't need to be declared in
+   namespace aims, or to be redefined to use the function in the namespace
+   (where they are actually).
+   transformMesh and transformGraph used to work the same way (by chance?)
+   and, one day, did not compile any longer unless we define a MethodCode
+   for them and call the functions in the namespace aims.
 */
 
   void transformMesh( AimsTimeSurface_2_VOID & mesh,
-                      const aims::Transformation3d & direct_transformation);
+                      const soma::Transformation3d & direct_transformation);
 %Docstring
 transformMesh(mesh, direct_transformation)
 
@@ -21,8 +29,12 @@ Each vertex of the mesh is transformed according to the supplied
 transformation. Normals are re-calculated from the new vertex positions.
 %End
 
+%MethodCode
+  aims::transformMesh( *a0, *a1 );
+%End
+
   void transformMesh( AimsTimeSurface_3_VOID & mesh,
-                      const aims::Transformation3d & direct_transformation );
+                      const soma::Transformation3d & direct_transformation );
 %Docstring
 transformMesh(mesh, direct_transformation)
 
@@ -34,8 +46,12 @@ Each vertex of the mesh is transformed according to the supplied
 transformation. Normals are re-calculated from the new vertex positions.
 %End
 
+%MethodCode
+  aims::transformMesh( *a0, *a1 );
+%End
+
   void transformMesh( AimsTimeSurface_4_VOID & mesh,
-                      const aims::Transformation3d & direct_transformation );
+                      const soma::Transformation3d & direct_transformation );
 %Docstring
 transformMesh(mesh, direct_transformation)
 
@@ -47,9 +63,13 @@ Each vertex of the mesh is transformed according to the supplied
 transformation. Normals are re-calculated from the new vertex positions.
 %End
 
+%MethodCode
+  aims::transformMesh( *a0, *a1 );
+%End
+
   rc_ptr_BucketMap_VOID
   transformBucketDirect( const BucketMap_VOID & bck,
-                         const aims::Transformation3d & direct_transformation,
+                         const soma::Transformation3d & direct_transformation,
                          Point3df vs = Point3df( 0., 0., 0. ) );
 %Docstring
 transformBucketDirect(bck, direct_transformation, vs=aims.Point3df(0., 0., 0.))
@@ -72,8 +92,8 @@ nearest-neighbour resampling.
 
   rc_ptr_BucketMap_VOID
   resampleBucket( const BucketMap_VOID & bck,
-                  const aims::Transformation3d & direct_transformation,
-                  const aims::Transformation3d & inverse_transformation,
+                  const soma::Transformation3d & direct_transformation,
+                  const soma::Transformation3d & inverse_transformation,
                   Point3df vs = Point3df( 0., 0., 0. ),
                   bool also_pushforward = true);
 %Docstring
@@ -102,8 +122,8 @@ preservation.
 %End
 
   void transformGraph( Graph & graph,
-                       const aims::Transformation3d & direct_transformation,
-                       const aims::Transformation3d * inverse_transformation,
+                       const soma::Transformation3d & direct_transformation,
+                       const soma::Transformation3d * inverse_transformation,
                        Point3df vs = Point3df( 0., 0., 0. ) );
 %Docstring
 transformGraph(graph, direct_transformation, inverse_transformation,
@@ -124,6 +144,10 @@ Volumes are not transformed, neither are graph attributes. Please run
 AimsFoldArgAtt to fix the values of basic attributes, or the
 CorticalFoldsGraphUpgradeFromOld BrainVisa process, which can be found under
 Morphologist/Sulci/graphmanipulation, for a complete update.
+%End
+
+%MethodCode
+  aims::transformGraph( *a0, *a1, a2, *a3 );
 %End
 
 namespace aims

@@ -49,7 +49,7 @@ namespace
     return true;
   }
 
-  bool ciftiformatinit = initciftiformat();
+  bool ciftiformatinit __attribute__((unused)) = initciftiformat();
 
 }
 

@@ -52,7 +52,6 @@ int main( int argc, const char **argv )
   int direction = 0;
   int Nstep = 1000;
   double step=0.01, radius = 1;
-  const double minimal_step=1.e-10;
 
   AimsApplication app( argc, argv,
                        "Output a file with coordinates of discrete spheric "

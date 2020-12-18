@@ -252,6 +252,7 @@ namespace
   }
 
 
+#if 0
   void extrema( const BucketMap<Void> & bck, 
                 const AimsData<int16_t> & depth, int16_t & dmin, 
                 int16_t & dmax, bool reset )
@@ -275,6 +276,7 @@ namespace
             dmax = x;
         }
   }
+#endif
 
 
   void extremaLoc( const BucketMap<Void> & bck, 
@@ -399,7 +401,7 @@ namespace
     // keep only biggest connected component
     // cout << "before AimsConnectedComponent, thread " << pthread_self() << endl;
     AimsConnectedComponent( vol, Connectivity::CONNECTIVITY_18_XYZ, int16_t(0),
-                            true, 0, 1, false );
+                            true, 0, 0, 1, false );
     // cout << "after AimsConnectedComponent, thread " << pthread_self() << endl;
 
     // mesh
@@ -1181,8 +1183,8 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
               normc = 0.;
               Point3df	mg = -Point3df( grav[0] * vx, grav[1] * vy, 
                                         grav[2] * vz );
-              transmot.translation() = -Point3df( grav[0] * vx, grav[1] * vy, 
-                                                  grav[2] * vz );
+              transmot.setTranslation( -Point3df( grav[0] * vx, grav[1] * vy,
+                                                  grav[2] * vz ) );
               addCovariance( *ssb, normc, &transmot );
               if( btb )
                 addCovariance( *btb, normc, &transmot );
@@ -1196,7 +1198,7 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
               AimsEigen<float>	eigen;
               eigen.setReturnType( AimsEigen<float>::VectorOfEigenValues );
               AimsData<float>	eigenval = eigen.doit( normc );
-              unsigned		mineig = 0, maxeig = 0, deptheig = 0;
+              unsigned		mineig = 0, /*maxeig = 0,*/ deptheig = 0;
 	      unsigned          eig1 = 0, eig2 = 0;
 	      float             dotmax = 0;
 	      v->getProperty("depth_direction", point);
@@ -1215,10 +1217,10 @@ void FoldGraphAttributes::makeSimpleSurfaceAttributes()
               eig2 = (deptheig + 2) % 3;
               if( eigenval( eig1 ) < eigenval( eig2 ) ) {
                    mineig = eig1;
-                   maxeig = eig2;
+                   //maxeig = eig2;
 	      } else {
                    mineig = eig2;
-                   maxeig = eig1;
+                   //maxeig = eig1;
 	      }
               norm = Point3df( normc( 0, mineig ), normc( 1, mineig ), 
                                normc( 2, mineig ) );
@@ -1402,7 +1404,7 @@ void FoldGraphAttributes::makeJunctionAttributes()
         if( n >= 10 )
           {
             dirc = 0.;
-            transmot.translation() = -grav;
+            transmot.setTranslation( -grav );
             addCovariance( *jbk, dirc, &transmot );
             dirc( 1, 0 ) = dirc( 0, 1 );	// sym
             dirc( 2, 0 ) = dirc( 0, 2 );

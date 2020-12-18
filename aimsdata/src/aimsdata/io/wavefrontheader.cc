@@ -56,7 +56,7 @@ WavefrontHeader::~WavefrontHeader()
 }
 
 
-bool WavefrontHeader::read( size_t* offset )
+bool WavefrontHeader::read( size_t* /* offset */ )
 {
   setProperty( "file_type", string( "WAVEFRONT" ) );
   setProperty( "data_type", string( "VOID" ) );
@@ -130,9 +130,8 @@ void WavefrontHeader::readMesh( bool stopWhenIdentified, int poly_size,
   std::vector<int> normals_ind;
   std::vector<int> texture_ind;
   int timestep = 0;
-  bool update_normals = false;
+  //bool update_normals = false;
   carto::Object mtl_dict;
-  int has_texture = -1;
 
   while( ds && !ds.eof() )
   {

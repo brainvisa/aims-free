@@ -16,6 +16,7 @@
 #include <aims/getopt/getopt2.h>
 #include <aims/vector/vector.h>
 #include <aims/mesh/texture.h>
+#include <aims/connectivity/connectivity.h>
 
 #include <iostream>
 #include <cartobase/config/verbose.h>
@@ -30,8 +31,9 @@ static bool doit( Process &p, const string &filename, Finder & finder);
 class LabelMapTexture : public Process
 {
 public:
-  LabelMapTexture( const string & meshfile, const string & brainfile, const string & outexfile,
-                int radius, int height, int mode, bool asciiFlag );
+  LabelMapTexture( const string & meshfile, const string & brainfile,
+                   const string & outexfile,
+                   float radius, float height, float int_height, int mode );
   
   template<class T>
   friend bool doit( Process &, const string &, Finder & );
@@ -40,15 +42,19 @@ public:
   bool labelMap( AimsData<T> & data );
 
 private:
-  string        meshf, brainf, otexf;
-  int          radius, height, mode;
-  bool         ascii;
+  string       meshf, brainf, otexf;
+  float        radius, height, int_height;
+  int          mode;
 };
 
-LabelMapTexture::LabelMapTexture( const string & meshfile, const string & brainfile,  const string & outexfile, 
-                            int rad, int hei, int mod, bool asciiFlag) 
-  	: Process(), meshf( meshfile ), brainf(brainfile), otexf( outexfile ), radius( rad ), height( hei ), mode( mod ), ascii( asciiFlag )
-   {
+LabelMapTexture::LabelMapTexture( const string & meshfile,
+                                  const string & brainfile,
+                                  const string & outexfile,
+                                  float rad, float hei, float int_height,
+                                  int mod )
+    : Process(), meshf( meshfile ), brainf(brainfile), otexf( outexfile ),
+      radius( rad ), height( hei ), int_height( int_height ), mode( mod )
+{
     registerProcessType( "Volume", "S8", &doit<int8_t> );
     registerProcessType( "Volume", "U8", &doit<uint8_t> );
     registerProcessType( "Volume", "S16", &doit<int16_t> );
@@ -71,7 +77,111 @@ bool doit( Process & p, const string & fname, Finder & f)
   if( !reader.read( data, 0, &format) )
     return( false );
   return( tp.labelMap( data ) );
-} 
+}
+
+
+void buildCylinder( set<Point3d, BucketMapLess> & cylinder, const Point3df & u,
+                    const Point3df & v, const Point3df & w, float min_cyl,
+                    float max_cyl, float radius, const Point3df & p,
+                    bool BRAIN_MASK, const VolumeRef<short> & brainData,
+                    const vector<float> & vs, const Connectivity & connect
+                  )
+{
+  float max_radius = max( -min_cyl, max_cyl );
+  max_radius = max( max_radius, radius );
+  int x, y, z, nx, ny, nz, i;
+  float radius2 = radius * radius;
+
+  nx = ceil( max_radius / vs[0] );
+  ny = ceil( max_radius / vs[1] );
+  nz = ceil( max_radius / vs[2] );
+
+  set<Point3d, BucketMapLess> todo;
+  cylinder.clear();
+  Point3d pint( short( rint( p[0] / vs[0] ) ), short( rint( p[1] / vs[1] ) ),
+                short( rint( p[2] / vs[2] ) ) );
+  Point3d pn( nx + 1, ny + 1, nz + 1 );
+
+  VolumeRef<short> mask;
+  if( BRAIN_MASK )
+  {
+    mask.reset( new Volume<short>(
+      nx * 2 + 3, ny * 2 + 3, nz * 2 + 3, 1,
+      AllocatorContext( &MemoryAllocator::singleton() ) ) );
+    // (include a border)
+    mask.fill( 0 );
+    mask->at( nx + 1, ny + 1, nz + 1 ) = 1; // central point is valid
+  }
+
+  for( z=-nz; z<= nz; ++z )
+    for( y=-ny; y<= ny; ++y )
+      for( x=-nx; x<= nx; ++x )
+      {
+        Point3df pos( x * vs[0], y * vs[1], z * vs[2] );
+        float proj = u.dot( pos );
+        if( proj < min_cyl || proj > max_cyl )
+          // out of normal projection
+          continue;
+        float r2 = square( v.dot( pos ) ) + square( w.dot( pos ) );
+        if( r2 > radius2 )
+          // out of radius to normal axis
+          continue;
+        Point3d pd = Point3d( x, y, z );
+        Point3d pint2 = pint + pd;
+        if( BRAIN_MASK && brainData->at( pint2 ) == 0 )
+          // out of brain mask
+          continue;
+        if( BRAIN_MASK && ( x != 0 || y != 0 || z != 0 ) )
+        {
+          // check connectivity to central point in mask
+          for( i=0; i<connect.nbNeighbors(); ++i )
+            if( mask->at( pn + pd + connect.xyzOffset( i ) ) )
+            {
+              cylinder.insert( pint2 );
+              mask->at( pn + pd ) = 1;
+              break;
+            }
+          if( i == connect.nbNeighbors() ) // no connection
+          {
+            todo.insert( pd );
+          }
+        }
+        else
+          cylinder.insert( pint2 );
+      }
+
+  // process mask points which did not have a proven connection to the center
+  bool removed = true;
+  set<Point3d, BucketMapLess>::iterator it, jt;
+
+//   cout << "point: " << p << endl;
+  while( removed && !todo.empty() ) // exit when no point has been updated
+  {
+//     cout << "todo: " << todo.size() << endl;
+    removed = false;
+    it = todo.begin();
+    while( it!=todo.end() )
+    {
+      // check connectivity to central point in mask
+      for( i=0; i<connect.nbNeighbors(); ++i )
+      {
+        if( mask->at( pn + *it + connect.xyzOffset( i ) ) != 0 )
+        {
+          cylinder.insert( *it );
+          mask->at( *it + pn ) = 1;
+          jt = it;
+          ++it;
+          todo.erase( jt );
+          removed = true;
+          break;
+        }
+      }
+      if( i == connect.nbNeighbors() ) // no connection
+        ++it;
+    }
+  }
+//   cout << "non-connected: " << todo.size() << endl;
+}
 
 
 template<class T> 
@@ -91,10 +201,10 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
 
   if(verbose)
      cout << "reading brain mask...";
-  AimsData<short>               brainData;
+  VolumeRef<short>               brainData;
   bool BRAIN_MASK = 0;
   if( brainf.length() ) {
-      Reader<AimsData<short> >      reader3( brainf );
+      Reader<VolumeRef<short> >      reader3( brainf );
       if(!reader3.read( brainData, 0) )
         return(false);
       BRAIN_MASK = 1;
@@ -120,11 +230,45 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
     instants.insert( vt );
 
   set<size_t>::iterator             ins, endt = instants.end();
-  unsigned                         p;
-  int                               x, y, z, i, j, k, kmax, xmin, ymin, zmin, min_cyl, max_cyl;
+  unsigned                          p;
+  int                               min_cyl, max_cyl;
   short                             val=0, nlabel, nlabel_max, label_max, cur_label;
   vector< short >::iterator         lab, endlab;
   vector< short >                   label;
+  vector< float >                   vs( 3, 1. );
+
+  vs[0] = data.sizeX();
+  vs[1] = data.sizeY();
+  vs[2] = data.sizeZ();
+
+  set<Point3d, BucketMapLess>                 cylinder;
+  set<Point3d, BucketMapLess>::const_iterator ic, ec = cylinder.end();
+
+  // cylinder (radius, alpha*height+1)
+  switch ( mode )
+  {
+    case 1:
+      min_cyl = -height;
+      max_cyl = 0;
+      break;
+    case 2:
+      min_cyl = 0;
+      max_cyl = height;
+      break;
+    case 3:
+      min_cyl = -height;
+      max_cyl = height;
+      break;
+    case 4:
+      min_cyl = -int_height;
+      max_cyl = height;
+      break;
+    default:
+      min_cyl = -height;
+      max_cyl = height;
+  }
+
+  Connectivity connect( 0, 0, Connectivity::CONNECTIVITY_26_XYZ );
 
   for( ins=instants.begin(); ins!=endt; ++ins )
     {
@@ -152,7 +296,6 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
 
       for( p=0; p<n; ++p )
         {
-          // cout << i << ' ' << flush;
           if( u[p][0]!=1 && u[p][0]!=-1 ) /* main case */
             {
                 w[p][0] = (float) sqrt( 1 - u[p][0]*u[p][0] );
@@ -178,49 +321,21 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
 
       otex.reserve( n );
 
-      for( p=0; p<n; p++ ) 
+      for( p=0; p<n; p++ )
       {
         // label initialization
         label.clear();
 
-        // cylinder (radius, alpha*height+1)
-	switch ( mode )
-      	{
-         case 1:
-            min_cyl = -height;
-	    max_cyl = 0;
-            break;
-         case 2:
-            min_cyl = 0;
-	    max_cyl = height;
-            break;
-         case 3:
-            min_cyl = -height;
-	    max_cyl = height;
-	 default:
-            min_cyl = -height;
-	    max_cyl = height;
-      	}
-        for( i=min_cyl; i<=max_cyl; i++ )
-            {
-              for( j=-radius; j<=radius; j++)
-                {
-                  kmax = (short) (sqrt(radius*radius-j*j)+.5);
-                  for( k=-kmax; k<=kmax; k++ )
-                    {
-                      x = round(vert[p][0]/data.sizeX() + i*u[p][0] + j*v[p][0] + k*w[p][0]);
-                      y = round(vert[p][1]/data.sizeY() + i*u[p][1] + j*v[p][1] + k*w[p][1]);
-                      z = round(vert[p][2]/data.sizeZ() + i*u[p][2] + j*v[p][2] + k*w[p][2]);
-                      if(x >= 0 && x<data.dimX() && y >= 0 && y<data.dimY()
-                         && z >= 0 && z<data.dimZ())
-                      {
-                        val = (short) data( x, y, z, t );
-                        if( val>0 && (!BRAIN_MASK || brainData(x, y, z, t)))
-                          label.push_back( val );
-                      }
-                    }
-                }
-            }
+        buildCylinder( cylinder, u[p], v[p], w[p], min_cyl, max_cyl, radius,
+                       vert[p], BRAIN_MASK, brainData, vs, connect );
+
+        for( ic=cylinder.begin(); ic!=ec; ++ic )
+        {
+          val = (short) data( (*ic)[0], (*ic)[1], (*ic)[2], t );
+          if( val > 0 )
+            label.push_back( val );
+        }
+
         if( !label.empty() )
         {
            sort(label.begin(), label.end());
@@ -262,7 +377,7 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
   if(verbose)
     cout << "writing texture..." << endl;
   Writer<TimeTexture<float> >   w2( otexf );
-  if( !w2.write( otex, ascii ) )
+  if( !w2.write( otex ) )
     return( false );
 
   if(verbose)
@@ -273,21 +388,21 @@ bool LabelMapTexture::labelMap( AimsData<T> & data )
 
 int main( int argc, const char** argv )
 {
-  string			                 volumefile, outexfile;
-  Reader<AimsSurfaceTriangle>   meshfile;
-  string                        brainfile="";
-  int                          radius=1, height=1, mode=3;
-  bool                         asciiFlag = false;
+  string                       volumefile, outexfile;
+  Reader<AimsSurfaceTriangle>  meshfile;
+  string                       brainfile="";
+  float                        radius = 1., height = 1., int_height = 0;
+  int                          mode = 3;
 
   AimsApplication	app( argc, argv, "Compute label close to mesh and build texture file" );
   app.addOption( volumefile, "-i", "input Label volume" );
   app.addOption( meshfile, "-m", "input mesh" );
   app.addOption( outexfile, "-o", "texture output");
-  app.addOption( height, "-height", "cylinder half height (voxels) [default=1]", 1 );
-  app.addOption( radius, "-radius", "cylinder radius (voxels) [default=1]", 1 );
-  app.addOption( mode, "-mode", "cylinder direction (1:interior, 2:exterior, 3:both) [default=3]", 1 );
+  app.addOption( height, "-height", "cylinder half height (mm) [default=1]", 1 );
+  app.addOption( int_height, "-int_height", "cylinder half height on interior side of the mesh (mm). Only used if mode=4. [default=0]", 1 );
+  app.addOption( radius, "-radius", "cylinder radius (mm) [default=1]", 1 );
+  app.addOption( mode, "-mode", "cylinder direction (1:interior, 2:exterior, 3:both, 4: both with differing sizes) [default=3]", 1 );
   app.addOption( brainfile, "-b", "brain mask file [default=no brain mask]", "");
-  app.addOption( asciiFlag, "--ascii", "write texture file in ASCII [default=false]", true );
   app.alias( "--mesh", "-m" );
   app.alias( "--input", "-i" );
   app.alias( "--output", "-o" );
@@ -297,7 +412,8 @@ int main( int argc, const char** argv )
       app.initialize();
       if( verbose )
         cout << "Init program" << endl;
-      LabelMapTexture	proc( meshfile.fileName(), brainfile, outexfile, radius, height, mode, asciiFlag );
+      LabelMapTexture	proc( meshfile.fileName(), brainfile, outexfile,
+                              radius, height, int_height, mode );
       if( verbose )
         cout << "Starting program.." << endl;      
       if( !proc.execute( volumefile ) )

@@ -37,16 +37,19 @@
 #include <cartodata/volume/volumeutil_d.h>
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/object/object_d.h>
-#include <cartobase/type/voxelrgb.h>
-#include <cartobase/type/voxelrgba.h>
-#include <cartobase/type/voxelhsv.h>
 //--- std --------------------------------------------------------------------
 #include <functional>
 //----------------------------------------------------------------------------
 
 using namespace carto;
 
-namespace carto {
+namespace
+{
+  typedef AimsVector<float,6> vectorf6;
+}
+
+namespace carto
+{
 
 template class VolumeProxy< bool >;
 template class VolumeProxy< int8_t >;
@@ -65,10 +68,6 @@ template class VolumeProxy< float >;
 template class VolumeProxy< double >;
 template class VolumeProxy< cfloat >;
 template class VolumeProxy< cdouble >;
-template class VolumeProxy< std::map<int, float> >;
-template class VolumeProxy< VoxelRGB >;
-template class VolumeProxy< VoxelRGBA >;
-template class VolumeProxy< VoxelHSV >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class VolumeProxy< long >;
 template class VolumeProxy< unsigned long >;
@@ -91,10 +90,6 @@ template class Volume< float >;
 template class Volume< double >;
 template class Volume< cfloat >;
 template class Volume< cdouble >;
-template class Volume< std::map<int, float> >;
-template class Volume< VoxelRGB >;
-template class Volume< VoxelRGBA >;
-template class Volume< VoxelHSV >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class Volume< long >;
 template class Volume< unsigned long >;
@@ -117,10 +112,6 @@ template class VolumeRef< float >;
 template class VolumeRef< double >;
 template class VolumeRef< cfloat >;
 template class VolumeRef< cdouble >;
-template class VolumeRef< std::map<int, float> >;
-template class VolumeRef< VoxelRGB >;
-template class VolumeRef< VoxelRGBA >;
-template class VolumeRef< VoxelHSV >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class VolumeRef< long >;
 template class VolumeRef< unsigned long >;
@@ -143,10 +134,6 @@ template class Creator<Volume< float > >;
 template class Creator<Volume< double > >;
 template class Creator<Volume< cfloat > >;
 template class Creator<Volume< cdouble > >;
-template class Creator<Volume< std::map<int, float> > >;
-template class Creator< Volume< VoxelRGB > >;
-template class Creator< Volume< VoxelRGBA > >;
-template class Creator< Volume< VoxelHSV > >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class Creator< Volume< long > >;
 template class Creator< Volume< unsigned long > >;
@@ -169,10 +156,6 @@ template class Creator<VolumeRef< float > >;
 template class Creator<VolumeRef< double > >;
 template class Creator<VolumeRef< cfloat > >;
 template class Creator<VolumeRef< cdouble > >;
-template class Creator<VolumeRef< std::map<int, float> > >;
-template class Creator< VolumeRef< VoxelRGB > >;
-template class Creator< VolumeRef< VoxelRGBA > >;
-template class Creator< VolumeRef< VoxelHSV > >;
 #ifdef CARTO_LONG_IS_DISTINCT
 template class Creator<VolumeRef< long > >;
 template class Creator<VolumeRef< unsigned long > >;
@@ -326,7 +309,8 @@ instantiate_volutil2( cdouble, std::divides<cdouble> )
 
 #endif
 
-namespace carto {
+namespace carto
+{
 
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< int8_t > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< uint8_t > )
@@ -343,9 +327,6 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< double > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< cfloat > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< cdouble > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelRGB > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelRGBA > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< soma::VoxelHSV > )
 #ifdef CARTO_LONG_IS_DISTINCT
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< long > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< unsigned long > )
@@ -366,9 +347,6 @@ namespace carto {
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< double > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cfloat > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< cdouble > > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelRGB > > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelRGBA > > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelHSV > > )
 #ifdef CARTO_LONG_IS_DISTINCT
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< long > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< unsigned long > > )
@@ -407,10 +385,6 @@ namespace carto {
   instantiate_copy( double )
   instantiate_copy( cfloat )
   instantiate_copy( cdouble )
-  instantiate_copy( std::map<int COMMA float> )
-  instantiate_copy( VoxelRGB )
-  instantiate_copy( VoxelRGBA )
-  instantiate_copy( VoxelHSV )
 #ifdef CARTO_LONG_IS_DISTINCT
   instantiate_copy( long )
   instantiate_copy( unsigned long )
@@ -424,7 +398,8 @@ namespace carto {
 // Streams
 //----------------------------------------------------------------------------
 
-namespace carto {
+namespace carto
+{
 
   //--- VolumeOStream --------------------------------------------------------
 

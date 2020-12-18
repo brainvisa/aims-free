@@ -144,6 +144,7 @@ void Finder::initPrivate()
       ext.push_back( "arg" );
       ext.push_back( "bundles" );
       ext.push_back( "trk" );
+      ext.push_back( "tck" );
       registerFormat( "ARG", new FinderGraphFormat, ext );
       ext.clear();
       ext.push_back( "trm" );
@@ -180,7 +181,7 @@ Finder::~Finder()
 
 
 void Finder::registerFormat( const string & fmtid, FinderFormat* format,
-			     const vector<std::string> & extensions,
+                             const vector<std::string> & extensions,
                              const string & before )
 {
   initPrivate();
@@ -207,6 +208,39 @@ void Finder::registerFormat( const string & fmtid, FinderFormat* format,
 }
 
 
+void Finder::unregisterFormat( const string & fmtid )
+{
+  initPrivate();
+
+  map<string, FinderFormat *>::const_iterator	i
+    = pd->formats.find( fmtid );
+  if( i != pd->formats.end() )
+    pd->formats.erase( i );
+  map<string, list<string> >::iterator ie = pd->extensions.begin(),
+    je, ee = pd->extensions.end();
+  list<string>::iterator il, jl, el;
+
+  while( ie!=ee )
+  {
+    il=ie->second.begin();
+    el=ie->second.end();
+    je = ie;
+    ++ie;
+    while( il!=el )
+      if( *il == fmtid )
+      {
+        jl = il;
+        ++il;
+        ie->second.erase( jl );
+      }
+      else
+        ++il;
+    if( je->second.empty() )
+      pd->extensions.erase( je );
+  }
+}
+
+
 FinderFormat* Finder::finderFormat( const string & format )
 {
   initPrivate();
@@ -219,10 +253,10 @@ FinderFormat* Finder::finderFormat( const string & format )
 }
 
 
-bool Finder::check( const string& filename )
+bool Finder::check( const string& filename_uri )
 {
 #ifdef AIMS_DEBUG_IO
-  cout << "FINDER:: check( " << filename << " )\n";
+  cout << "FINDER:: check( " << filename_uri << " )\n";
 #endif
   static bool plugs = false;
   if( !plugs )
@@ -236,7 +270,7 @@ bool Finder::check( const string& filename )
 
   // try using DataSourceInfo first (new system 2005)
   #ifdef AIMS_DEBUG_IO
-  cout << "FINDER:: trying check " << filename
+  cout << "FINDER:: trying check " << filename_uri
     << " through DataSourceInfoLoader... " << endl;
   #endif
   Object h;
@@ -245,7 +279,7 @@ bool Finder::check( const string& filename )
   {
     // try first 2 passes
     DataSourceInfoLoader dsil;
-    rc_ptr<DataSource> ds( new FileDataSource( filename ) );
+    rc_ptr<DataSource> ds( new FileDataSource( filename_uri ) );
     DataSourceInfo dsi = dsil.check( DataSourceInfo( ds ),
                                       carto::none(), 1, 2 );
     h = dsi.header();
@@ -281,7 +315,7 @@ bool Finder::check( const string& filename )
     setHeader( ph );
 
     #ifdef AIMS_DEBUG_IO
-    cout << "FINDER:: DataSourceInfo worked for " << filename
+    cout << "FINDER:: DataSourceInfo worked for " << filename_uri
       << " with extension: " << somaio_ext << endl;
     #endif
 
@@ -296,11 +330,15 @@ bool Finder::check( const string& filename )
     */
   }
   #ifdef AIMS_DEBUG_IO
-  cout << "FINDER:: for " << filename << ", trying through Finder... " << endl;
+  cout << "FINDER:: for " << filename_uri << ", trying through Finder... "
+       << endl;
   #endif
 
   _errorcode = -1;
   _errormsg.clear();
+
+  // remove query-string part or URI
+  string filename = carto::FileUtil::uriFilename( filename_uri );
 
   //	find filename extension
   string                bname = FileUtil::basename( filename );
@@ -531,7 +569,11 @@ void Finder::setHeader( Header* hdr )
 void Finder::setHeader( Object hdr )
 {
   if( !dynamic_cast<PythonHeader *>( hdr.get() ) )
-    throw runtime_error( "Finder::setHeader: Object is not a Header" );
+  {
+    Object phdr( new PythonHeader );
+    phdr->copyProperties( hdr );
+    hdr = phdr;
+  }
   _header = hdr;
 }
 

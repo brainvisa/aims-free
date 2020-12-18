@@ -47,7 +47,7 @@ namespace aims
 template <class T>
 void
 NearestNeighborResampler<T>::doResample( const carto::Volume< T > &inVolume,
-                                         const aims::Transformation3d &invTransform3d,
+                                         const soma::Transformation3d &invTransform3d,
                                          const T &outBackground,
                                          const Point3df &outLocation,
                                          T &outValue, int t ) const

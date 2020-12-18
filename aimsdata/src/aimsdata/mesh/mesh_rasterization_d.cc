@@ -69,7 +69,7 @@ namespace aims
     T & volume, int value )
   {
     float dx, dy, dz, dx2, dy2, dz2;
-    float ax, ay, az, lx, ly, lz, l;
+    float ax, ay, az, lx = 0.0f, ly = 0.0f, lz = 0.0f, l;
     Point3d pint;
 
     dx = direction[0] == 0.F ? 0 : ( direction[0] > 0.F ? 1.F : -1.F );

@@ -53,15 +53,15 @@ int  forward_proj3d_view(float *image, float *projection2d, float cosfi, float s
 				     one in a sinogram, i.e. xr=0  */
   float   delxx0, delyy0, delzz0;
 				  /* floating steps (in pixel) when moving one pixel in x (or) y */
-  float   rescale;                /* Jacobian for usinf x or y as integration var. , lenrth element */
-  float   tantheta,cos_theta;
+  /*float   rescale;*/                /* Jacobian for usinf x or y as integration var. , lenrth element */
+  float   tantheta/*,cos_theta*/;
   float   x1,x2,z1,z2;            /* interpolation parameters */
   int     bin_img,bin_proj;
   float   xr_off,x_off,y_off,z_off,scale_z,value;
  
   /*{{{  initializations*/
   delxx0 = delyy0 = xx00 = yy00 = 0;
-  cos_theta = cos(theta);
+  /*cos_theta = cos(theta);*/
   tantheta = tan(theta);
   xr_off = ((float)xr_pixels - 1.)/2.;
   x_off  = ((float)x_pixels  - 1.)/2. - x_offset/x_size;
@@ -82,14 +82,14 @@ int  forward_proj3d_view(float *image, float *projection2d, float cosfi, float s
   
   scale_z = yr_size/z_size;
   if (fabs(incy) > fabs(incx)) {
-    rescale = y_size / fabs (cosfi*cos_theta);
+    /*rescale = y_size / fabs (cosfi*cos_theta);*/
     delxx0 = -(y_size*sinfi)/(x_size*cosfi);
     xx00 = x_off - xr_off*incx - y_off*delxx0;
     incz = -tantheta*xr_size*sinfi/(cosfi*z_size);
     delzz0 = (y_size*tantheta)/(z_size*cosfi);
     zz00 = -((float)yr_pixels -1.)/2.*scale_z + z_off - xr_off*incz - y_off*delzz0;
   } else {
-    rescale = fabs(x_size/(sinfi*cos_theta));
+    /*rescale = fabs(x_size/(sinfi*cos_theta));*/
     delyy0 = - (x_size*cosfi) / (y_size*sinfi);
     yy00 = y_off -xr_off*incy - x_off*delyy0;
     incz = tantheta*xr_size*cosfi/(sinfi*z_size);

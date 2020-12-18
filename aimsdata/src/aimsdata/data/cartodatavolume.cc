@@ -48,129 +48,9 @@
 #include <set>
 #include <map>
 
-#define instantiate_volutil( T ) \
-template class VolumeUtil<T>; \
-template VolumeRef<T> \
-VolumeUtil<T>::apply( Scaler<T, double>, const VolumeRef<T> & ); \
-template void \
-VolumeUtil<T>::selfApply( Scaler<T, double>, VolumeRef<T> & ); \
-template VolumeRef<T> \
-VolumeUtil<T>::apply( Scaler<T, float>, const VolumeRef<T> & ); \
-template void \
-VolumeUtil<T>::selfApply( Scaler<T, float>, VolumeRef<T> & ); \
-template VolumeRef<T> \
-VolumeUtil<T>::apply( Scaler<T, long>, const VolumeRef<T> & ); \
-template void \
-VolumeUtil<T>::selfApply( Scaler<T, long>, VolumeRef<T> & ); \
-template VolumeRef<T> \
-VolumeUtil<T>::apply( Divider<T, double>, const VolumeRef<T> & ); \
-template void \
-VolumeUtil<T>::selfApply( Divider<T, double>, VolumeRef<T> & ); \
-template VolumeRef<T> \
-VolumeUtil<T>::apply( Divider<T, long>, const VolumeRef<T> & ); \
-template void \
-VolumeUtil<T>::selfApply( Divider<T, long>, VolumeRef<T> & );
-
-#define instantiate_volutil2( T, BinaryFunction ) \
-template VolumeRef<T> \
-VolumeUtil<T>::apply( BinaryFunction, const VolumeRef<T> &, \
-                      const VolumeRef<T> & ); \
-template void \
-VolumeUtil<T>::selfApply( BinaryFunction, VolumeRef<T> &, \
-                          const VolumeRef<T> & ); \
-template VolumeRef<T> \
-VolumeUtil<T>::apply( UnaryFromConstantBinaryFunctor<T, \
-                      BinaryFunction >, const VolumeRef<T> & ); \
-template void \
-VolumeUtil<T>::selfApply( UnaryFromConstantBinaryFunctor<T, \
-                          BinaryFunction >, VolumeRef<T> & ); \
-template VolumeRef<T> \
-VolumeUtil<T>::apply( UnaryFromConstantBinaryFunctor2<T, \
-                      BinaryFunction >, const VolumeRef<T> & ); \
-
 
 namespace carto
 {
-
-  template<> template<> VolumeRef<AimsRGB> 
-  VolumeUtil<AimsRGB>::apply( std::negate<AimsRGB>, 
-                              const VolumeRef<AimsRGB> & o )
-  {
-    return apply( Scaler<AimsRGB, long>( -1 ), o );
-  }
-
-  template<> template<> VolumeRef<AimsRGBA> 
-  VolumeUtil<AimsRGBA>::apply( std::negate<AimsRGBA>, 
-                               const VolumeRef<AimsRGBA> & o )
-  {
-    return apply( Scaler<AimsRGBA, long>( -1 ), o );
-  }
-
-  template<> template<> VolumeRef<AimsHSV> 
-  VolumeUtil<AimsHSV>::apply( std::negate<AimsHSV>, 
-                              const VolumeRef<AimsHSV> & o )
-  {
-    return apply( Scaler<AimsHSV, long>( -1 ), o );
-  }
-
-template class carto::VolumeProxy< AimsRGB >;
-template class carto::Volume< AimsRGB >;
-instantiate_volutil( AimsRGB )
-instantiate_volutil2( AimsRGB, std::plus<AimsRGB> )
-instantiate_volutil2( AimsRGB, std::minus<AimsRGB> )
-
-template class carto::VolumeProxy< AimsRGBA >;
-template class carto::Volume< AimsRGBA >;
-instantiate_volutil( AimsRGBA )
-instantiate_volutil2( AimsRGBA, std::plus<AimsRGBA> )
-instantiate_volutil2( AimsRGBA, std::minus<AimsRGBA> )
-
-template class carto::VolumeProxy< AimsHSV >;
-template class carto::Volume< AimsHSV >;
-instantiate_volutil( AimsHSV )
-instantiate_volutil2( AimsHSV, std::plus<AimsHSV> )
-instantiate_volutil2( AimsHSV, std::minus<AimsHSV> )
-
-template class carto::VolumeProxy< Point3df >;
-template class carto::Volume< Point3df >;
-// template class VolumeUtil<Point3df>;
-template VolumeRef<Point3df> 
-VolumeUtil<Point3df>::apply( std::negate<Point3df>, 
-                             const VolumeRef<Point3df> & );
-instantiate_volutil( Point3df )
-instantiate_volutil2( Point3df, std::plus<Point3df> )
-instantiate_volutil2( Point3df, std::minus<Point3df> )
-
-template class carto::VolumeProxy< Point3d >;
-template class carto::Volume< Point3d >;
-// template class VolumeUtil<Point3d>;
-template VolumeRef<Point3d>
-VolumeUtil<Point3d>::apply( std::negate<Point3d>, 
-                            const VolumeRef<Point3d> & );
-instantiate_volutil( Point3d )
-instantiate_volutil2( Point3d, std::plus<Point3d> )
-instantiate_volutil2( Point3d, std::minus<Point3d> )
-
-template class carto::VolumeProxy< Point2d >;
-template class carto::Volume< Point2d >;
-// template class VolumeUtil<Point2d>;
-template VolumeRef<Point2d> 
-VolumeUtil<Point2d>::apply( std::negate<Point2d>, 
-                            const VolumeRef<Point2d> & );
-instantiate_volutil( Point2d )
-instantiate_volutil2( Point2d, std::plus<Point2d> )
-instantiate_volutil2( Point2d, std::minus<Point2d> )
-
-typedef AimsVector<float,6> vectorf6;
-template class carto::VolumeProxy< vectorf6 >;
-template class carto::Volume< vectorf6 >;
-// template class VolumeUtil<vectorf6>;
-template VolumeRef<vectorf6> 
-VolumeUtil<vectorf6>::apply( std::negate<vectorf6>, 
-                             const VolumeRef<vectorf6> & );
-instantiate_volutil( vectorf6 )
-instantiate_volutil2( vectorf6, std::plus<vectorf6> )
-instantiate_volutil2( vectorf6, std::minus<vectorf6> )
 
 template class carto::VolumeProxy< DtiTensor * >;
 template class carto::Volume< DtiTensor * >;
@@ -182,35 +62,15 @@ template class carto::VolumeProxy< std::map<int, float> >;
 template class carto::Volume< std::map<int, float> >;
 
 // Mac LLVM compiler does not seem to allow indirect instanciation
-template class carto::VolumeRef< AimsRGB >;
-template class carto::VolumeRef< AimsRGBA >;
-template class carto::VolumeRef< AimsHSV >;
-template class carto::VolumeRef< Point3df >;
-template class carto::VolumeRef< Point3d >;
-template class carto::VolumeRef< Point2d >;
-template class carto::VolumeRef< vectorf6 >;
 template class carto::VolumeRef< DtiTensor * >;
 template class carto::VolumeRef< std::set<float> >;
 template class carto::VolumeRef< std::map<int, float> >;
 
-  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< Point3df > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< vectorf6 > )
-  INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< vectorf6 > > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( VolumeRef< DtiTensor* > )
   INSTANTIATE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< DtiTensor* > > )
 
 
-template class Creator<Volume<Point3df> >;
-template class Creator<Volume<Point3d> >;
-template class Creator<Volume<Point2d> >;
-template class Creator<Volume<vectorf6> >;
 template class Creator<Volume<DtiTensor*> >;
-
-template class Creator<VolumeRef<Point3df> >;
-template class Creator<VolumeRef<Point3d> >;
-template class Creator<VolumeRef<Point2d> >;
-template class Creator<VolumeRef<vectorf6> >;
 template class Creator<VolumeRef<DtiTensor*> >;
 
 } // namespace carto

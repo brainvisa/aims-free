@@ -278,7 +278,7 @@ BucketSampler<T>::doit( const Motion& motion,
   float transl1 = invMotion.translation()[1];
   float transl2 = invMotion.translation()[2];
 
-  invMotion.translation() = 0. ;
+  invMotion.setTranslation( 0. );
 
   x = invMotion.transform( 1.F, 0.F, 0.F ) ;
   y = invMotion.transform( 0.F, 1.F, 0.F ) ;

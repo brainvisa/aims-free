@@ -130,8 +130,8 @@ namespace aims
 
   template<class T> void 
   FileFormatDictionary<T>::registerFormat( const std::string & format, 
-					   FileFormat<T>* formatObj, 
-					   const std::vector<std::string> 
+                                           FileFormat<T>* formatObj,
+                                           const std::vector<std::string>
                                                & extensions,
                                            const std::string & before )
   {
@@ -159,7 +159,41 @@ namespace aims
   }
 
 
-  template<class T> FileFormat<T> * 
+  template<class T> void
+  FileFormatDictionary<T>::unregisterFormat( const std::string & format )
+  {
+    typename std::map<std::string, FileFormat<T>*>::iterator
+      ir = _formats().find( format);
+
+    if( ir != _formats().end() )
+      _formats().erase( ir );
+
+    std::map<std::string, std::list<std::string> >::iterator
+      ie = _extensions().begin(), je, ee = _extensions().end();
+    std::list<std::string>::iterator il, jl, el;
+
+    while( ie != ee )
+    {
+      je = ie;
+      ++ie;
+      il = je->second.begin();
+      el = je->second.end();
+      while( il != el )
+      {
+        jl = il;
+        ++il;
+        if( *il == format )
+        {
+          je->second.erase( il );
+          if( je->second.empty() )
+            _extensions().erase( je );
+        }
+      }
+    }
+  }
+
+
+  template<class T> FileFormat<T> *
   FileFormatDictionary<T>::fileFormat( const std::string & format )
   {
     init();

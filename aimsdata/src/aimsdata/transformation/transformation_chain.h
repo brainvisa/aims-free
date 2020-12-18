@@ -37,7 +37,7 @@
 #include <list>
 
 #include <cartobase/smart/rcptr.h>
-#include <aims/transformation/transformation.h>
+#include <soma-io/transformation/transformation.h>
 
 
 namespace aims
@@ -62,7 +62,8 @@ namespace aims
       optimizations to be implemented (e.g. composing adjacent affine
       transformations by multiplying their matrices).
    */
-class TransformationChain3d : public Transformation3d {
+class TransformationChain3d : public soma::Transformation3d
+{
 public:
   typedef std::list<carto::const_ref<Transformation3d> > ListType;
 
@@ -79,7 +80,7 @@ public:
 
   bool isIdentity() const CARTO_OVERRIDE;
   bool invertible() const CARTO_OVERRIDE;
-  std::unique_ptr<Transformation3d> getInverse() const CARTO_OVERRIDE;
+  std::unique_ptr<soma::Transformation3d> getInverse() const CARTO_OVERRIDE;
 
   /** Compute a simpler transformation that is equivalent to the chain.
 
@@ -109,7 +110,7 @@ public:
       No deep copy is made, so the result can contain pointers to the same
       transformations as the original chain.
    */
-  carto::const_ref<Transformation3d> simplify() const;
+  carto::const_ref<soma::Transformation3d> simplify() const;
 
 protected:
   ListType _transformations;

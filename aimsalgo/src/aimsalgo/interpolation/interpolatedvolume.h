@@ -34,15 +34,13 @@
 #define AIMS_INTERPOLATION_INTERPOLATEDVOLUME_H
 
 //--- aims -------------------------------------------------------------------
-#include <aims/data/data_g.h>               // AimsData
+#include <aims/data/data.h>                 // AimsData
 #include <aims/math/bspline.h>              // aims::TabulBSpline
 #include <aims/vector/vector.h>             // Point*
 //--- cartodata --------------------------------------------------------------
 #include <cartodata/volume/volume.h>        // carto::VolumeRef
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>          // carto::rc_ptr
-//--- forward declaration ----------------------------------------------------
-template <typename T> class SplineResampler;
 //----------------------------------------------------------------------------
 
 namespace aims {

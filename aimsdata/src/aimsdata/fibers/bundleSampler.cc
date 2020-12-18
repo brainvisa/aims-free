@@ -49,7 +49,8 @@ namespace aims
 //-----------------------------------------------------------------------------
 BundleSampler::BundleSampler(float percent, const string &bundle_name,
   const string &sampled_bundle_name, int mode) :
-  _percent(percent), _bundle_name(bundle_name), _sampled_bundle_name(sampled_bundle_name), _mode(mode)
+  _percent(percent), _mode(mode), _bundle_name(bundle_name),
+  _sampled_bundle_name(sampled_bundle_name)
 {
   srand(time(0)); // WARNING: sould maybe remove this here
   _fiber_count = 0;
@@ -60,8 +61,10 @@ BundleSampler::BundleSampler(float percent, const string &bundle_name,
 //-----------------------------------------------------------------------------
 BundleSampler::BundleSampler(float percent, const string &bundle_name,
   const string &sampled_bundle_name,
-  int mode, bool discarded) : _percent(percent), _bundle_name(bundle_name),
-  _sampled_bundle_name(sampled_bundle_name), _mode(mode), _discarded(discarded)
+  int mode, bool discarded) : _percent(percent), _mode(mode), 
+  _bundle_name(bundle_name),
+  _sampled_bundle_name(sampled_bundle_name),
+  _discarded(discarded)
 {
   srand(time(0)); // WARNING: sould maybe remove this here
   _fiber_count = 0;

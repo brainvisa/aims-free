@@ -138,7 +138,7 @@ int Read_Scan3D_Ecat7( MatrixFile *mptr, Scan3D_subheader *sh, short *outdata,
     return( -1);
   }
 
-  /* Il faut mieux gèrer cela */
+  /* Il faut mieux gï¿½rer cela */
 /*   if (mptr->mhptr->file_type == Short3dSinogram) */
 /*     { */
 /*       for (bin=0; bin<data_size; bin++) */
@@ -250,7 +250,7 @@ int Read_Scan3D_Ecat7_FLOAT(MatrixFile *mptr, Scan3D_subheader *sh, float *outda
   }
   printf( "max on data is %f and max on scaled data is %f", maxOnData, maxOnScaledData ) ;
   
-  /* Il faut mieux gèrer cela */
+  /* Il faut mieux gï¿½rer cela */
 /*   if (mptr->mhptr->file_type == Short3dSinogram) */
 /*     { */
 /*       for (bin=0; bin<data_size; bin++) */
@@ -287,7 +287,7 @@ short* EcatSinoRead_S16( UnifiedEcatSinoInfo *uesi, int segment,
 
 
 
-/*  printf("EcatSinoRead_S16 segment n° %d de %s \n", segment, uesi->fname );*/
+/*  printf("EcatSinoRead_S16 segment nï¿½ %d de %s \n", segment, uesi->fname );*/
 
   if ( (bed != 0 && gate != 1) || (bed != 0 && frame != 1) || (frame != 0 && gate != 1) ) 
     {
@@ -307,7 +307,7 @@ short* EcatSinoRead_S16( UnifiedEcatSinoInfo *uesi, int segment,
       mptr->mhptr->file_type == Float3dSinogram) 
     {
       /* lit  Main Header :                      */
-      /*.. he oui on le relit.. cela a déjà été fait par le EcatSinoOpen */
+      /*.. he oui on le relit.. cela a dï¿½jï¿½ ï¿½tï¿½ fait par le EcatSinoOpen */
       Mh = mptr->mhptr;
  
 
@@ -325,8 +325,8 @@ short* EcatSinoRead_S16( UnifiedEcatSinoInfo *uesi, int segment,
 	  return ECATSHFJ_FAIL;
 	}
 
-      /* Allocation du buffer intermédiaire pour remonter les données */
-      /* a la procédure appelante */
+      /* Allocation du buffer intermï¿½diaire pour remonter les donnï¿½es */
+      /* a la procï¿½dure appelante */
       if (mptr->mhptr->file_type == Short3dSinogram)
 	{
 	  dataByte_num  = sizeof(short);
@@ -353,7 +353,7 @@ short* EcatSinoRead_S16( UnifiedEcatSinoInfo *uesi, int segment,
       mdlist = mptr->dirlist;
       if (mdlist->nmats != 1) /* On est pas dans un sino mono lit */
       /*-----------Ici faire un algo de calcul du matnum */
-      /* La fonction devra prendre un argument supplémentaire: lit */
+      /* La fonction devra prendre un argument supplï¿½mentaire: lit */
       /* L'algorithme sera
        matnode = mdlist->first; 
        for (l=0; l < bedOrDataOrFrame ; l++)
@@ -364,7 +364,7 @@ short* EcatSinoRead_S16( UnifiedEcatSinoInfo *uesi, int segment,
 	matnum = mat_numcod( frame, 1, gate, 0, bed ) ;
       else
 	matnum = mdlist->first->matnum;
-      /* Appel à la lecture des données */
+      /* Appel ï¿½ la lecture des donnï¿½es */
       if ( (ret=Read_Scan3D_Ecat7( mptr, sh, outdata, matnum, segment))
 	     != data_size )
 	{
@@ -393,7 +393,7 @@ float* EcatSinoRead_FLOAT( UnifiedEcatSinoInfo *uesi, int segment,
 			   int bed, int gate, int frame )
 {
   
-  Main_header 		*Mh = 0;
+  /*Main_header 		*Mh = 0;*/
   MatrixFile 	        *mptr = 0;
   Scan3D_subheader 	*sh = 0;
   MatDirList            *mdlist = 0;
@@ -405,7 +405,7 @@ float* EcatSinoRead_FLOAT( UnifiedEcatSinoInfo *uesi, int segment,
   int i ;
 
 
-/*  printf("EcatSinoRead_S16 segment n° %d de %s \n", segment, uesi->fname );*/
+/*  printf("EcatSinoRead_S16 segment nï¿½ %d de %s \n", segment, uesi->fname );*/
 
   if ( (bed != 0 && gate != 1) || (bed != 0 && frame != 1) || (frame != 0 && gate != 1) ) 
     {
@@ -425,8 +425,8 @@ float* EcatSinoRead_FLOAT( UnifiedEcatSinoInfo *uesi, int segment,
       mptr->mhptr->file_type == Float3dSinogram) 
     {
       /* lit  Main Header :                      */
-      /*.. he oui on le relit.. cela a déjà été fait par le EcatSinoOpen */
-      Mh = mptr->mhptr;
+      /*.. he oui on le relit.. cela a dï¿½jï¿½ ï¿½tï¿½ fait par le EcatSinoOpen */
+      /*Mh = mptr->mhptr;*/
       //printf("A\n");
 
       /* On lit le premier subheader */
@@ -443,8 +443,8 @@ float* EcatSinoRead_FLOAT( UnifiedEcatSinoInfo *uesi, int segment,
 	  return ECATSHFJ_FAIL;
 	}
 
-      /* Allocation du buffer intermédiaire pour remonter les données */
-      /* a la procédure appelante */
+      /* Allocation du buffer intermï¿½diaire pour remonter les donnï¿½es */
+      /* a la procï¿½dure appelante */
       if (mptr->mhptr->file_type == Float3dSinogram)
 	{
 	  dataByte_num  = sizeof(float);
@@ -475,7 +475,7 @@ float* EcatSinoRead_FLOAT( UnifiedEcatSinoInfo *uesi, int segment,
       mdlist = mptr->dirlist;
       if (mdlist->nmats != 1) /* On est pas dans un sino mono lit */
       /*-----------Ici faire un algo de calcul du matnum */
-      /* La fonction devra prendre un argument supplémentaire: lit */
+      /* La fonction devra prendre un argument supplï¿½mentaire: lit */
       /* L'algorithme sera
        matnode = mdlist->first; 
        for (l=0; l < bedOrDataOrFrame ; l++)
@@ -492,7 +492,7 @@ float* EcatSinoRead_FLOAT( UnifiedEcatSinoInfo *uesi, int segment,
       ret=Read_Scan3D_Ecat7_FLOAT( mptr, sh, outdata, matnum, segment) ;
       //printf("D aft\n");
 
-      /* Appel à la lecture des données */
+      /* Appel ï¿½ la lecture des donnï¿½es */
       if ( ret != data_size )
 	{
 	  printf(" EcatSinoRead>!!! Error: Read %d bytes instead of %d from %s)\n",

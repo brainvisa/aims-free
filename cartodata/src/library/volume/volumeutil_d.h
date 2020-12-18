@@ -358,6 +358,96 @@ namespace carto
               internal_max<T>, o, min_limit<T>() );
   }
 
+#if 0
+  // VolumeUtil declarations (needed on Mac)
+  extern template VolumeRef<VoxelRGB>
+  VolumeUtil<VoxelRGB>::apply( Scaler<VoxelRGB, double>,
+                              const VolumeRef<VoxelRGB> & );
+  extern template void
+  VolumeUtil<VoxelRGB>::selfApply( Scaler<VoxelRGB, double>,
+                                  VolumeRef<VoxelRGB> & );
+  extern template VolumeRef<VoxelRGB>
+  VolumeUtil<VoxelRGB>::apply( std::plus<VoxelRGB>, const VolumeRef<VoxelRGB> &,
+                              const VolumeRef<VoxelRGB> & );
+  extern template void
+  VolumeUtil<VoxelRGB>::selfApply( std::plus<VoxelRGB>, VolumeRef<VoxelRGB> &,
+                                  const VolumeRef<VoxelRGB> & );
+  extern template VolumeRef<VoxelRGB>
+  VolumeUtil<VoxelRGB>::apply( UnaryFromConstantBinaryFunctor<VoxelRGB,
+                              std::plus<VoxelRGB> >,
+                              const VolumeRef<VoxelRGB> & );
+  extern template void
+  VolumeUtil<VoxelRGB>::selfApply( UnaryFromConstantBinaryFunctor<VoxelRGB,
+                                  std::plus<VoxelRGB> >, VolumeRef<VoxelRGB> & );
+  extern template VolumeRef<VoxelRGB>
+  VolumeUtil<VoxelRGB>::apply( UnaryFromConstantBinaryFunctor2<VoxelRGB,
+                              std::plus<VoxelRGB> >,
+                              const VolumeRef<VoxelRGB> & );
+  extern template VolumeRef<VoxelRGB>
+  VolumeUtil<VoxelRGB>::apply( std::minus<VoxelRGB>, const VolumeRef<VoxelRGB> &,
+                              const VolumeRef<VoxelRGB> & );
+  extern template void
+  VolumeUtil<VoxelRGB>::selfApply( std::minus<VoxelRGB>, VolumeRef<VoxelRGB> &,
+                                  const VolumeRef<VoxelRGB> & );
+  extern template VolumeRef<VoxelRGB>
+  VolumeUtil<VoxelRGB>::apply( UnaryFromConstantBinaryFunctor<VoxelRGB,
+                              std::minus<VoxelRGB> >,
+                              const VolumeRef<VoxelRGB> & );
+  extern template void
+  VolumeUtil<VoxelRGB>::selfApply( UnaryFromConstantBinaryFunctor<VoxelRGB,
+                                  std::minus<VoxelRGB> >,
+                                  VolumeRef<VoxelRGB> & );
+  extern template VolumeRef<VoxelRGB>
+  VolumeUtil<VoxelRGB>::apply( UnaryFromConstantBinaryFunctor2<VoxelRGB,
+                              std::minus<VoxelRGB> >,
+                              const VolumeRef<VoxelRGB> & );
+
+  extern template VolumeRef<VoxelRGBA>
+  VolumeUtil<VoxelRGBA>::apply( Scaler<VoxelRGBA, double>,
+                               const VolumeRef<VoxelRGBA> & );
+  extern template void
+  VolumeUtil<VoxelRGBA>::selfApply( Scaler<VoxelRGBA, double>,
+                                   VolumeRef<VoxelRGBA> & );
+  extern template VolumeRef<VoxelRGBA>
+  VolumeUtil<VoxelRGBA>::apply( std::plus<VoxelRGBA>,
+                               const VolumeRef<VoxelRGBA> &,
+                               const VolumeRef<VoxelRGBA> & );
+  extern template void
+  VolumeUtil<VoxelRGBA>::selfApply( std::plus<VoxelRGBA>, VolumeRef<VoxelRGBA> &,
+                                   const VolumeRef<VoxelRGBA> & );
+  extern template VolumeRef<VoxelRGBA>
+  VolumeUtil<VoxelRGBA>::apply( UnaryFromConstantBinaryFunctor<VoxelRGBA,
+                               std::plus<VoxelRGBA> >,
+                               const VolumeRef<VoxelRGBA> & );
+  extern template void
+  VolumeUtil<VoxelRGBA>::selfApply( UnaryFromConstantBinaryFunctor<VoxelRGBA,
+                                   std::plus<VoxelRGBA> >,
+                                   VolumeRef<VoxelRGBA> & );
+  extern template VolumeRef<VoxelRGBA>
+  VolumeUtil<VoxelRGBA>::apply( UnaryFromConstantBinaryFunctor2<VoxelRGBA,
+                               std::plus<VoxelRGBA> >,
+                               const VolumeRef<VoxelRGBA> & );
+  extern template VolumeRef<VoxelRGBA>
+  VolumeUtil<VoxelRGBA>::apply( std::minus<VoxelRGBA>,
+                               const VolumeRef<VoxelRGBA> &,
+                               const VolumeRef<VoxelRGBA> & );
+  extern template void
+  VolumeUtil<VoxelRGBA>::selfApply( std::minus<VoxelRGBA>,
+                                   VolumeRef<VoxelRGBA> &,
+                                   const VolumeRef<VoxelRGBA> & );
+  extern template VolumeRef<VoxelRGBA>
+  VolumeUtil<VoxelRGBA>::apply( UnaryFromConstantBinaryFunctor<VoxelRGBA,
+                               std::minus<VoxelRGBA> >,
+                               const VolumeRef<VoxelRGBA> & );
+  extern template void
+  VolumeUtil<VoxelRGBA>::selfApply( UnaryFromConstantBinaryFunctor<VoxelRGBA,
+                                   std::minus<VoxelRGBA> >,
+                                   VolumeRef<VoxelRGBA> & );
+  extern template VolumeRef<VoxelRGBA>
+  VolumeUtil<VoxelRGBA>::apply( UnaryFromConstantBinaryFunctor2<VoxelRGBA,
+                               std::minus<VoxelRGBA> >,
+                               const VolumeRef<VoxelRGBA> & );
+#endif
 
 }
 

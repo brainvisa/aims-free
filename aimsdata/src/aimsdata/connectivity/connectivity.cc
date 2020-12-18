@@ -179,6 +179,11 @@ void Connectivity::setConnectivity()
       AimsError("void Connectivity::setConnectivity() : \
                  not a valid connectivity");
   }
+
+  // build offsets set
+  _xyzOffsets.clear();
+  for( int i=0; i<_nbNeighbors; ++i )
+    _xyzOffsets.insert( _xyzOffset[i] );
 }
 
 
@@ -955,4 +960,5 @@ void Connectivity::setConnectivity_5_YZplus()
         }
       }
 }
+
 

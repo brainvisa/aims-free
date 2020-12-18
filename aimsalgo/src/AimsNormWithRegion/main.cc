@@ -33,7 +33,7 @@
 
 
 #include <cstdlib>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/data/data_g.h>
 #include <aims/roi/roi_g.h>
 #include <aims/roi/roigtm.h>
@@ -53,6 +53,7 @@
 #include <dirent.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
@@ -88,45 +89,6 @@ static void Listsel()
   closedir( dir );      
 }
 
-
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsNormWithRegion                                              ",
-  "            -i[nput series]   < dynamic series >                ",
-  "            -v[oi]      < voifile >                             ",
-  "            -m[otion]    < motionfile (default is identity) >    ",
-  "            -n[ame]     < reference ROI name (from selectionlist)>",
-  "            -o[utput]   < norm image >                          ",
-  "            -s[elector] < user defined selector file name >     ",
-  "            -l[ist]     < list of available template selectors> ",
-  "            -d[ose]     < injected dose > ",
-  "            --hierarchy < hierarchyfile >                       ",
-  "            --selection < template selector>                    ",
-  "           [-h[elp]]                                            ",
-  "----------------------------------------------------------------",
-  "     dyn series   : input dynamic data                           ",
-  "     motionfile   : displacement file default val : Identity     ",
-  "     voifile      : file containing roi information see(--voitype)",
-  "     injected dose: if injected dose is specified, ROI          ",
-  "                    activity is normalized by this dose :       ",
-  "                    (Region - Reference)/Dose.                  ",
-  "                    Otherwise it is normalized by the reference ",
-  "                    ROI name : (Region - Reference)/Reference   ",
-  "                                                                ",
-  "       --selection:   template selector name  available         ",
-  "                 :        selectors may be listed (switch -l)   ",
-  "                 :    OR                                        ",
-  "                 :    all to disable selection mode             ",
-  "                                                                ",
-  "----------------------------------------------------------------",
-END_USAGE
-
-
-
-void Usage( void )
-{
-  AimsUsage( usage );
-}
 
 void selectAll (const AimsRoi& roi, RoiSelector& sel )
 {
@@ -175,171 +137,249 @@ void selectAll (const AimsRoi& roi, RoiSelector& sel )
 }
 
 
-int main(int argc,char **argv)
+class Helper
 {
-  char *fileseries=NULL, *filevoi=NULL; // Mandatory file name input
+public:
+  Helper() {};
+  void message();
+};
 
-  char  *filemotion=NULL, *filehierarchy=NULL, 
-        *fileoutput=NULL, *fileroiselector=NULL, *fileroiseluser=NULL;
-  char *refname=NULL;
-  float dose = 0. ;
 
-  AimsOption opt[] = {
-  { 'h',"help"     ,AIMS_OPT_FLAG  ,( void* )Usage       ,AIMS_OPT_CALLFUNC,0},
-  { 'i',"input series",AIMS_OPT_STRING,&fileseries ,0             ,1},
-  { 'v',"voi"      ,AIMS_OPT_STRING,&filevoi    ,0                ,1},
-  { 'm',"motion"    ,AIMS_OPT_STRING,&filemotion ,0                ,0},
-  { 'n',"name"     ,AIMS_OPT_STRING,&refname       ,0                ,1},
-  { 's',"selector" ,AIMS_OPT_STRING,&fileroiseluser,0            ,0},
-  { 'o',"output"   ,AIMS_OPT_STRING,&fileoutput ,0                ,1},
-  { 'l',"list"     ,AIMS_OPT_FLAG   ,( void* )Listsel    ,AIMS_OPT_CALLFUNC,0},
-  { 'd',"injected dose"     ,AIMS_OPT_STRING, &dose, 0    ,0},
-  { ' ',"hierarchy",AIMS_OPT_STRING,&filehierarchy,0              ,0},
-  { ' ',"selection",AIMS_OPT_STRING,&fileroiselector,0            ,0},
-  { 0  ,0          ,AIMS_OPT_END   ,0           ,0                ,0}};
+void Helper::message()
+{
+  Listsel();
+  throw user_interruption();
+}
 
-  AimsParseOptions(&argc,argv,opt,usage);
-  if( (string(fileroiselector) != string("all") ) )
-      {
-	cerr << "only --selection all is implemented as for now\n";
-	return( 1 );
+
+namespace carto
+{
+
+  template <>
+  bool SingleOption<Helper>::feed( const std::string & /* value */ )
+  {
+    if ( _valueRead )
+    {
+      return false;
+    }
+    else
+    {
+      _valueRead = true;
+      return true;
+    }
+
+  }
+
+  template <>
+  bool SingleOption<Helper>::recognizeName( const std::string &n )
+  {
+    if( _nameInList( n ) ) {
+      if ( _valueRead ) {
+        throw unexpected_option( n );
       }
-  // Read Hierarchy info =====================================================
-  Hierarchy hie;
-  try {
-  if (filehierarchy)
-    {
-    HierarchyReader hrd( filehierarchy, hie.syntax());
-    hrd >> hie;
+      _valueRead = true;
+      _value.message();
+      return true;
     }
-  else
-    {
-      HierarchyReader hrd( (Path::singleton()).hierarchy()+
-			  "/neuronames.hie", hie.syntax());
-      hrd >> hie;
-    }
+    return false;
   }
-  catch(exception& e)
-    {
-      cerr << e.what() << endl;
-      throw;
+
+}
+
+
+
+
+int main(int argc, const char **argv)
+{
+  Reader< AimsData< float > > rd;
+  Reader<Graph> rrd;
+  Reader<AffineTransformation3d> mrd;
+  Reader<Hierarchy > hrd;
+  Writer< AimsData< float > > wt;
+
+  string fileroiselector;
+//   string fileroiseluser;
+  string refname;
+  float dose = 0.;
+  Helper listsel;
+  bool nothing = false;
+
+  AimsApplication app( argc, argv,
+                       "? - Anybody knows what this command does ?" );
+  app.addOption( rd, "-i", "dynamic series: input dynamic data" );
+  app.addOption( wt, "-o", "norm image" );
+  app.addOption( rrd, "-v",
+                 "voifile: ile containing roi information see(--voitype" );
+  app.addOption( refname, "-n", "reference ROI name (from selectionlist)" );
+  app.addOption( mrd, "-m", "displacement file default val : Identity", true );
+  app.addOption( listsel, "-l", "list of available template selectors", true );
+  app.addOption( dose, "-d",
+                 "injected dose: if injected dose is specified, ROI "
+                 "activity is normalized by this dose: "
+                 "(Region - Reference)/Dose. Otherwise it is normalized by "
+                 "the reference ROI name : (Region - Reference)/Reference",
+                 true );
+  app.addOption( hrd, "--hierarchy", "hierarchyfile", true );
+  app.addOption( fileroiselector, "--selection", "template selector: "
+                 "template selector name  available selectors may be "
+                 "listed (switch -l), or all to disable selection mode",
+                 true );
+  app.addOption( nothing, "-x", "nothing", true );
+//   app.addOption( fileroiseluser, "-s", "user defined selector file name",
+//                  true );
+  app.alias( "--input", "-i" );
+  app.alias( "--output", "-o" );
+  app.alias( "--motion", "-m" );
+  app.alias( "--name", "-n" );
+  app.alias( "--voi", "-v" );
+//   app.alias( "--selector", "-s" );
+  app.alias( "--list", "-l" );
+  app.alias( "--dose", "-d" );
+
+  try
+  {
+    app.initialize();
+
+    if( (fileroiselector != "all" ) )
+        {
+          cerr << "only --selection all is implemented as for now\n";
+          return( 1 );
+        }
+    // Read Hierarchy info =====================================================
+    Hierarchy hie;
+    try {
+      if( hrd.fileName().empty() )
+        hrd.setFileName( (Path::singleton()).hierarchy() + "/neuronames.hie" );
+      hrd.read( hie );
     }
-  // Read roi info (arg mode) ==================================
-  AimsRoi roi(&hie);
-  RoiGtm rgtm;
-  try {
-    Reader<Graph> rrd( filevoi );
-    rrd.read( roi );
-  }
-  catch(exception& e)
-    {
-      cerr << e.what() << endl;
-      throw;
-    }
-
-  //Read Motion info =========================================================
-  Motion motion;  // set with Identity
-  if (filemotion)
-    {
-      MotionReader mrd( filemotion );
-      mrd >> motion;
-    }
-
-  // Initialisation
-//   bool	gtm = ( string(voitype) == string("gtm") );
-//   AimsRoi	& newroi = 
-//     gtm ? rgtm.getMaskRoi() : roi;
-//   RoiGtm	*newrgtm = 0;
-//   if( gtm )
-//     newrgtm = &rgtm;
-
-
-  // Read RoiSelection Info =================================================
-  RoiSelector roiSel;
-  try {
-    if (fileroiselector)
+    catch(exception& e)
       {
-	if( string(fileroiselector) == string("all") || 
-	    string(fileroiselector) == string("all.sel") )
-	  {
-	    selectAll( roi, roiSel ) ;
-	  }
+        cerr << e.what() << endl;
+        throw;
       }
+    // Read roi info (arg mode) ==================================
+    AimsRoi roi(&hie);
+    RoiGtm rgtm;
+    try {
+      rrd.read( roi );
+    }
+    catch(exception& e)
+      {
+        cerr << e.what() << endl;
+        throw;
+      }
+
+    //Read Motion info =========================================================
+    Motion motion;  // set with Identity
+    if (!mrd.fileName().empty() )
+      {
+        mrd.read( motion );
+      }
+
+    // Initialisation
+  //   bool	gtm = ( string(voitype) == string("gtm") );
+  //   AimsRoi	& newroi =
+  //     gtm ? rgtm.getMaskRoi() : roi;
+  //   RoiGtm	*newrgtm = 0;
+  //   if( gtm )
+  //     newrgtm = &rgtm;
+
+
+    // Read RoiSelection Info =================================================
+    RoiSelector roiSel;
+    try {
+      if( !fileroiselector.empty() )
+        {
+          if( fileroiselector == string("all") ||
+              fileroiselector == string("all.sel") )
+            {
+              selectAll( roi, roiSel ) ;
+            }
+        }
+    }
+    catch(exception& e)
+      {
+        cerr << e.what() << endl;
+        throw;
+      }
+
+
+    // Get a Stat Actuator Object with chosen interpolator and perf. stats
+    try {
+    Resampler< float > *interpolator = new LinearResampler< float >();
+    RoiStats rsa( interpolator, &roiSel );
+
+
+    // Lecture des donnï¿½es ===================================================
+    AimsData< float > image;
+    rd.read( image );
+    rsa.populate( image, roi, motion );
+
+    // Rï¿½cupï¿½ration de la valeur lue dans le pons.
+    set<Vertex*>    sv = rsa.vertices();
+
+    vector<float>   taCurv;
+    string          surname;
+    int x, y, z, t;
+    bool found=false;
+
+    if( dose == 0. )
+      cout << " Normalization : (Voxel - Reference) / Dose " << endl ;
+    else
+      cout << " Normalization : (Voxel - Reference) / Reference " << endl ;
+
+    ASSERT( sv.begin() != sv.end() );         // There at least one frame !!!
+    (*sv.begin())->getProperty("mean_ac", taCurv);
+    ASSERT( image.dimT() == (int) taCurv.size()); //Checking
+
+
+    for (set< Vertex* >::const_iterator it=sv.begin();
+        it != sv.end();
+        it++)
+      {
+        (*it)->getProperty("mean_ac", taCurv);
+        (*it)->getProperty("surname", surname);
+        if( surname == refname )
+          {
+            cout << "Chosen ROI : " << surname << endl;
+            found = true;
+            for (t=0; t < image.dimT();++t)
+              {
+                cout << "Compute for each voxels\n"
+                    << "    (vox - Roi(pons) )/ Roi(Pons)  with Roi(Pons) = " << taCurv[t]<< endl;
+                if ( dose != 0. )
+                  ForEach3d(image, x, y, z)
+                    image(x, y, z) = ( image(x, y, z) -taCurv[t] )/ dose ;
+                else
+                  ForEach3d(image, x, y, z)
+                    image(x, y, z) = ( image(x, y, z) -taCurv[t] )/ taCurv[t];
+
+              }
+          }
+        if (! found)
+          {
+            cerr << "No convenient region to perform normalization" << endl;
+            exit ( EXIT_FAILURE );
+          }
+      }
+
+    wt.write( image );
+    }
+    catch(exception& e)
+      {
+        cerr << e.what() << endl;
+        throw;
+      }
+    return EXIT_SUCCESS;
+
   }
-  catch(exception& e)
-    {
-      cerr << e.what() << endl;
-      throw;
-    }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
 
-
-  // Get a Stat Actuator Object with chosen interpolator and perf. stats
-  try {
-  Resampler< float > *interpolator = new LinearResampler< float >();
-  RoiStats rsa( interpolator, &roiSel );
-
-
-  // Lecture des données ===================================================
-  AimsData< float > image;
-  Reader< AimsData< float > > rd( fileseries );
-    rd >> image;
-  rsa.populate( image, roi, motion );
-  
-  // Récupération de la valeur lue dans le pons.
-  set<Vertex*>    sv = rsa.vertices();
-
-  vector<float>   taCurv;
-  string          surname; 
-  int x, y, z, t;
-  bool found=false; 
-  
-  if( dose == 0. )
-    cout << " Normalization : (Voxel - Reference) / Dose " << endl ;
-  else
-    cout << " Normalization : (Voxel - Reference) / Reference " << endl ;
-
-  ASSERT( sv.begin() != sv.end() );         // There at least one frame !!!
-  (*sv.begin())->getProperty("mean_ac", taCurv);
-  ASSERT( image.dimT() == (int) taCurv.size()); //Checking
-
-
-  for (set< Vertex* >::const_iterator it=sv.begin();
-      it != sv.end();
-      it++)
-    {
-      (*it)->getProperty("mean_ac", taCurv);
-      (*it)->getProperty("surname", surname);
-      if (surname == string(refname))
-	{    
-	  cout << "Chosen ROI : " << surname << endl;
-	  found = true;
-	  for (t=0; t < image.dimT();++t)
-	    {
-	      cout << "Compute for each voxels\n" 
-		   << "    (vox - Roi(pons) )/ Roi(Pons)  with Roi(Pons) = " << taCurv[t]<< endl;
-	      if ( dose != 0. )
-		ForEach3d(image, x, y, z)
-		  image(x, y, z) = ( image(x, y, z) -taCurv[t] )/ dose ; 
-	      else
-		ForEach3d(image, x, y, z)
-		  image(x, y, z) = ( image(x, y, z) -taCurv[t] )/ taCurv[t]; 
-		
-	    }	
-	}
-      if (! found)
-	{
-	  cerr << "No convenient region to perform normalization" << endl;
-	  exit ( EXIT_FAILURE );
-	}
-    }
-  
-  Writer< AimsData< float > > wt( fileoutput );
-  wt << image;
-   }
-  catch(exception& e)
-    {
-      cerr << e.what() << endl;
-      throw;
-    }
-  return EXIT_SUCCESS;
+  return EXIT_FAILURE;
 }

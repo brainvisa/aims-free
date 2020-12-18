@@ -42,7 +42,7 @@ using namespace carto;
 
 class FFDApplyProc;
 
-rc_ptr<Transformation3d>
+rc_ptr<soma::Transformation3d>
 load_transformation(const string &filename_arg,
                     const FFDApplyProc &ffdproc,
                     bool *successp,
@@ -54,7 +54,7 @@ load_ffd_deformation(const string &filename,
                      bool *successp,
                      const vector<int>& in_size,
                      const vector<float>& in_voxel_size);
-rc_ptr<Transformation3d> load_transformations(
+rc_ptr<soma::Transformation3d> load_transformations(
   const FFDApplyProc& ffdproc,
   bool *successp,
   const std::vector<int>& in_size = std::vector<int>(),
@@ -132,7 +132,7 @@ FFDApplyProc::FFDApplyProc()
 bool write_node_bucket(const FFDApplyProc& ffdproc,
                        const FfdTransformation& deformation);
 bool doVolume_special_outputs(const FFDApplyProc &ffdproc,
-                              const Transformation3d& transform);
+                              const soma::Transformation3d& transform);
 
 template <class T, class C>
 bool doVolume( Process & process, const string & fileref, Finder & )
@@ -165,7 +165,7 @@ bool doVolume( Process & process, const string & fileref, Finder & )
   stringTo( ffdproc.defaultval, bv );
 
   bool success = true;
-  rc_ptr<Transformation3d> transform = load_transformations(
+  rc_ptr<soma::Transformation3d> transform = load_transformations(
     ffdproc, &success, in.volume()->getSize(), in.volume()->getVoxelSize());
 
   //--------------------------------------------------------------------------
@@ -336,7 +336,7 @@ bool write_node_bucket(const FFDApplyProc& ffdproc,
 
 
 bool doVolume_special_outputs(const FFDApplyProc &ffdproc,
-                              const Transformation3d& transform_chain)
+                              const soma::Transformation3d& transform_chain)
 {
   bool success = true;
 
@@ -520,7 +520,7 @@ bool doMesh( Process & process, const string & fileref, Finder & )
   // FFD motion
   //--------------------------------------------------------------------------
   bool success = true;
-  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
+  rc_ptr<soma::Transformation3d> transform = load_transformations(ffdproc, &success);
 
   //==========================================================================
   //
@@ -578,7 +578,7 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   // FFD motion
   //--------------------------------------------------------------------------
   bool success = true;
-  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
+  rc_ptr<soma::Transformation3d> transform = load_transformations(ffdproc, &success);
 
   //==========================================================================
   //
@@ -591,7 +591,7 @@ bool doBucket( Process & process, const string & fileref, Finder & )
   if(transform->invertible()) {
     cout << "Resampling the Bucket with the combined pushforward and pullback "
       "methods... ";
-    rc_ptr<Transformation3d> inverse_transform(transform->getInverse());
+    rc_ptr<soma::Transformation3d> inverse_transform(transform->getInverse());
     out = resampleBucket( in, *transform, *inverse_transform,
                           Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
   } else {
@@ -641,7 +641,7 @@ bool doBundles( Process & process, const string & fileref, Finder & )
   // FFD motion
   //--------------------------------------------------------------------------
   bool success = true;
-  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
+  rc_ptr<soma::Transformation3d> transform = load_transformations(ffdproc, &success);
 
   //==========================================================================
   //
@@ -710,7 +710,7 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   // FFD motion
   //--------------------------------------------------------------------------
   bool success = true;
-  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
+  rc_ptr<soma::Transformation3d> transform = load_transformations(ffdproc, &success);
 
   //==========================================================================
   //
@@ -718,10 +718,10 @@ bool doGraph( Process & process, const string & fileref, Finder & f )
   //
   //==========================================================================
   cout << "Resampling the Graph... ";
-  rc_ptr<Transformation3d> inverse_transform;
+  rc_ptr<soma::Transformation3d> inverse_transform;
 
   if(transform->invertible()) {
-    inverse_transform = rc_ptr<Transformation3d>(transform->getInverse());
+    inverse_transform = rc_ptr<soma::Transformation3d>(transform->getInverse());
   }
   transformGraph( *in, *transform, inverse_transform.get(),
                   Point3df( ffdproc.sx, ffdproc.sy, ffdproc.sz ) );
@@ -770,7 +770,7 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
   // FFD motion
   //--------------------------------------------------------------------------
   bool success = true;
-  rc_ptr<Transformation3d> transform = load_transformations(ffdproc, &success);
+  rc_ptr<soma::Transformation3d> transform = load_transformations(ffdproc, &success);
 
   vector<Point3df> transformed;
 
@@ -806,7 +806,7 @@ bool doPoints( FFDApplyProc & ffdproc, const string & filename )
 // behaviours:
 // - it can read --old-mode deformation fields
 // - it will invert the affine transformation passed as -m / --motion.
-rc_ptr<Transformation3d>
+rc_ptr<soma::Transformation3d>
 load_transformations(const FFDApplyProc& ffdproc,
                      bool *successp,
                      const std::vector<int>& in_size,
@@ -843,17 +843,17 @@ load_transformations(const FFDApplyProc& ffdproc,
       filename_it != ffdproc.transform_list.end();
       ++filename_it)
   {
-    rc_ptr<Transformation3d> transform = load_transformation(
+    rc_ptr<soma::Transformation3d> transform = load_transformation(
       *filename_it, ffdproc, successp, in_size, in_voxel_size
     );
     transform_chain->push_back(transform);
   }
 
-  return rc_ptr<Transformation3d>(transform_chain.release());
+  return rc_ptr<soma::Transformation3d>(transform_chain.release());
 }
 
 
-rc_ptr<Transformation3d>
+rc_ptr<soma::Transformation3d>
 load_transformation(const string &filename_arg,
                     const FFDApplyProc &ffdproc,
                     bool *successp,
@@ -890,7 +890,7 @@ load_transformation(const string &filename_arg,
     rc_ptr<FfdTransformation> deformation = load_ffd_deformation(
       filename, ffdproc, successp, in_size, in_voxel_size
       );
-    return rc_ptr<Transformation3d>(deformation.release());
+    return rc_ptr<soma::Transformation3d>(deformation.release());
   }
   else if(finder.objectType() == "AffineTransformation3d")
   {
@@ -906,7 +906,7 @@ load_transformation(const string &filename_arg,
     if(invert) {
       *affine = affine->inverse();
     }
-    return rc_ptr<Transformation3d>(affine.release());
+    return rc_ptr<soma::Transformation3d>(affine.release());
   }
 
   ostringstream s;

@@ -149,7 +149,7 @@ namespace
     return true;
   }
 
-  bool dummy = addAimsPlugins();
+  bool dummy __attribute__((unused)) = addAimsPlugins();
 
 }
 

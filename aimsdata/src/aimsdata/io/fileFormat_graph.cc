@@ -91,6 +91,7 @@ namespace aims
     ext.clear();
     ext.push_back( "bundles" );
     ext.push_back( "trk" );
+    ext.push_back( "tck" );
     registerFormat( "BUNDLES", new GraphBundlesFormat, ext );
   }
 
@@ -120,5 +121,5 @@ static bool _graphdic()
   return true;
 }
 
-static bool graphdic = _graphdic();
+static bool graphdic __attribute__((unused)) = _graphdic();
 

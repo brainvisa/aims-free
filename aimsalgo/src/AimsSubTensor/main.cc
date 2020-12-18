@@ -33,148 +33,128 @@
 
 
 #include <cstdlib>
-#include <aims/bucket/bucket_g.h>
-#include <aims/io/io_g.h>
-#include <aims/getopt/getopt.h>
-#include <aims/math/math_g.h>
-#include <iomanip>
+#include <aims/bucket/bucket.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+#include <aims/getopt/getopt2.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
-BEGIN_USAGE(usage)
-  "----------------------------------------------------------------",
-  "AimsSubTensor [-h[elp]]                                         ",
-  "               -i[nput] <filein>                                ", 
-  "               -o[utput] <fileout>                              ",
-  "              [-x <xmin> -y <ymin> -z <zmin>                    ",
-  "               -X <xmax> -Y <ymax> -Z <zmax>]                   ",
-  "              [-m<ask> <bucket>]                                ",
-  "              [-a[scii]]                                        ",
-  "----------------------------------------------------------------",
-  "Extracting a subpart from a DtiTensor bucket                    ",
-  "----------------------------------------------------------------",
-  "     filein         : source tensor bucket                      ",
-  "     fileout        : destination bucket of sub-dtitensor       ",
-  "                      generates    fileout.bck                  ",
-  "     xmin,ymin,zmin : inferior point of the box sub-part        ",
-  "     xmax,ymax,zmax : superior point of the box sub-part        ",
-  "     bucket         : Void bucket mask                          ",
-  "     ascii          : write in ascii mode rather than binary    ",
-  "                      [default=binary]                          ",
-  "----------------------------------------------------------------",
-END_USAGE
 
-
-void Usage( void )
+int main( int argc, const char **argv )
 {
-  AimsUsage( usage );
-}
-
-
-
-int main( int argc, char **argv )
-{
-  char *filein = NULL, *fileout = NULL, *fileMask = NULL;
+  Reader<AimsBucket<DtiTensor> > bucketR;
+  Writer<AimsBucket<DtiTensor> > bucketW;
+    Reader<AimsBucket<Void> > bucketRM;
   short xmin = -1, xmax = -1, ymin = -1, ymax = -1, zmin = -1, zmax = -1;
   int ascii = 0;
 
-  AimsOption opt[] = {
-  { 'h',"help"      ,AIMS_OPT_FLAG  ,( void* )Usage      ,AIMS_OPT_CALLFUNC,0,},
-  { 'i',"input"     ,AIMS_OPT_STRING,&filein    ,0                ,1},
-  { 'o',"output"    ,AIMS_OPT_STRING,&fileout   ,0                ,1},
-  { 'x',"x"         ,AIMS_OPT_SHORT ,&xmin      ,0                ,0},
-  { 'y',"y"         ,AIMS_OPT_SHORT ,&ymin      ,0                ,0},
-  { 'z',"z"         ,AIMS_OPT_SHORT ,&zmin      ,0                ,0},
-  { 'X',"X"         ,AIMS_OPT_SHORT ,&xmax      ,0                ,0},
-  { 'Y',"Y"         ,AIMS_OPT_SHORT ,&ymax      ,0                ,0},
-  { 'Z',"Z"         ,AIMS_OPT_SHORT ,&zmax      ,0                ,0},
-  { 'm',"mask"      ,AIMS_OPT_STRING,&fileMask  ,0                ,0},
-  { 'a',"ascii"     ,AIMS_OPT_FLAG  ,&ascii     ,0                ,0},
-  { 0  ,0           ,AIMS_OPT_END   ,0          ,0                ,0}};
+  AimsApplication app( argc, argv,
+                       "Extracting a subpart from a DtiTensor bucket" );
+  app.addOption( bucketR, "-i", "source tensor bucket" );
+  app.addOption( bucketW, "-o", "output bucket of sub-dtitensor" );
+  app.addOption( xmin, "-x", "inferior point of the box sub-part", true );
+  app.addOption( ymin, "-y", "inferior point of the box sub-part", true );
+  app.addOption( zmin, "-z", "inferior point of the box sub-part", true );
+  app.addOption( xmax, "-X", "superior point of the box sub-part", true );
+  app.addOption( ymax, "-Y", "superior point of the box sub-part", true );
+  app.addOption( zmax, "-Z", "superior point of the box sub-part", true );
+  app.addOption( bucketRM, "-m", "Void bucket file mask", true );
+  app.alias( "--input", "-i" );
+  app.alias( "--output", "-o" );
+  app.alias( "--mask", "-m" );
 
-  AimsParseOptions( &argc, argv, opt, usage );
-
-  cout << "reading " << filein << " bucket : " << flush;
-  AimsBucket<DtiTensor> bucket;
-  Reader<AimsBucket<DtiTensor> > bucketR( filein );
-  bucketR >> bucket;
-  cout << "done" << endl;
-
-
-
-  AimsData<byte>* mask = NULL;
-  int dimX = 0, dimY = 0, dimZ = 0;
-
-  if ( fileMask )
+  try
   {
-    cout << "reading " << fileMask << " void bucket : " << flush;
-    AimsBucket<Void> bucketM;
-    Reader<AimsBucket<Void> > bucketRM( fileMask );
-    bucketRM >> bucketM;
-    list< AimsBucketItem<DtiTensor> >::iterator it;
-    for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
-    {
-      if ( it->location().item(0) > dimX )
-        dimX = it->location().item(0);
-      if ( it->location().item(1) > dimY )
-        dimY = it->location().item(1);
-      if ( it->location().item(2) > dimZ )
-        dimZ = it->location().item(2);
-    }
-    mask = new AimsData<byte>( ++dimX, ++dimY, ++dimZ );
-    *mask = false;
-    list< AimsBucketItem<Void> >::iterator vi;
-    for ( vi = bucketM[0].begin(); vi != bucketM[0].end(); vi++ )
-      (*mask)( vi->location().item(0),
-               vi->location().item(1),
-               vi->location().item(2) ) = true;
+    app.initialize();
 
+    cout << "reading " << bucketR.fileName() << " bucket : " << flush;
+    AimsBucket<DtiTensor> bucket;
+    bucketR.read( bucket );
     cout << "done" << endl;
+
+
+
+    AimsData<byte>* mask = NULL;
+    int dimX = 0, dimY = 0, dimZ = 0;
+
+    if( !bucketRM.fileName().empty() )
+    {
+      cout << "reading " << bucketRM.fileName() << " void bucket : " << flush;
+      AimsBucket<Void> bucketM;
+      bucketRM.read( bucketM );
+      list< AimsBucketItem<DtiTensor> >::iterator it;
+      for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
+      {
+        if ( it->location().item(0) > dimX )
+          dimX = it->location().item(0);
+        if ( it->location().item(1) > dimY )
+          dimY = it->location().item(1);
+        if ( it->location().item(2) > dimZ )
+          dimZ = it->location().item(2);
+      }
+      mask = new AimsData<byte>( ++dimX, ++dimY, ++dimZ );
+      *mask = false;
+      list< AimsBucketItem<Void> >::iterator vi;
+      for ( vi = bucketM[0].begin(); vi != bucketM[0].end(); vi++ )
+        (*mask)( vi->location().item(0),
+                vi->location().item(1),
+                vi->location().item(2) ) = true;
+
+      cout << "done" << endl;
+    }
+    cout << "dimX=" << dimX << endl
+        << "dimY=" << dimY << endl
+        << "dimZ=" << dimZ << endl;
+
+    AimsBucket<DtiTensor> subpart;
+
+    subpart.setSizeX( bucket.sizeX() );
+    subpart.setSizeY( bucket.sizeY() );
+    subpart.setSizeZ( bucket.sizeZ() );
+    subpart.setSizeT( bucket.sizeT() );
+
+
+    cout << "filling subpart : " << flush;
+    if ( bucketRM.fileName().empty() )
+    {
+      list< AimsBucketItem<DtiTensor> >::iterator it;
+      for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
+        if ( it->location().item(0) >= xmin &&
+            it->location().item(0) <= xmax &&
+            it->location().item(1) >= ymin &&
+            it->location().item(1) <= ymax &&
+            it->location().item(2) >= zmin &&
+            it->location().item(2) <= zmax   )
+          subpart.push_back( *it );
+    }
+    else
+    {
+      list< AimsBucketItem<DtiTensor> >::iterator it;
+      for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
+        if ( (*mask)( it->location().item(0),
+                      it->location().item(1),
+                      it->location().item(2) ) == true )
+          subpart.push_back( *it );
+      delete mask;
+    }
+    cout << "done" << endl;
+
+
+    cout << "writing " << bucketW.fileName() << " bucket : " << flush;
+    bucketW.write( subpart, ascii );
+    cout << "done" << endl;
+
+
+    return EXIT_SUCCESS;
   }
-  cout << "dimX=" << dimX << endl
-       << "dimY=" << dimY << endl
-       << "dimZ=" << dimZ << endl;
-  
-  AimsBucket<DtiTensor> subpart;
-
-  subpart.setSizeX( bucket.sizeX() );
-  subpart.setSizeY( bucket.sizeY() );
-  subpart.setSizeZ( bucket.sizeZ() );
-  subpart.setSizeT( bucket.sizeT() );
-
-
-  cout << "filling subpart : " << flush;
-  if ( fileMask == NULL )
+  catch( user_interruption & )
   {
-    list< AimsBucketItem<DtiTensor> >::iterator it;
-    for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
-      if ( it->location().item(0) >= xmin &&
-           it->location().item(0) <= xmax &&
-           it->location().item(1) >= ymin &&
-           it->location().item(1) <= ymax &&
-           it->location().item(2) >= zmin &&
-           it->location().item(2) <= zmax   )
-        subpart.push_back( *it );
   }
-  else
+  catch( exception & e )
   {
-    list< AimsBucketItem<DtiTensor> >::iterator it;
-    for ( it = bucket[0].begin(); it != bucket[0].end(); it++ )
-      if ( (*mask)( it->location().item(0),
-                    it->location().item(1),
-                    it->location().item(2) ) == true )
-        subpart.push_back( *it );
-    delete mask;
+    cerr << e.what() << endl;
   }
-  cout << "done" << endl;
-
-
-  cout << "writing " << fileout << " bucket : " << flush;
-  Writer<AimsBucket<DtiTensor> > bucketW( fileout );
-  bucketW.write( subpart, ascii );
-  cout << "done" << endl;
-
-
-  return EXIT_SUCCESS;
 }

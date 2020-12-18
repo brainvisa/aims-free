@@ -276,12 +276,15 @@ bool doit( Process & process, const string & fileinr, Finder & )
     test = AimsData<T>(masterIntInfo[4],masterIntInfo[5],masterIntInfo[6],masterIntInfo[7]);
     ref.setSizeXYZT(masterFInfo[0],masterFInfo[1],masterFInfo[2],masterFInfo[3]);
     test.setSizeXYZT(masterFInfo[4],masterFInfo[5],masterFInfo[6],masterFInfo[7]);
-    if(abm.filemotion.length() != 0) {
-      p.translation() = Point3df(masterMotionInfo[0],masterMotionInfo[1],masterMotionInfo[2]);
+    if(abm.filemotion.length() != 0)
+    {
+      p.setTranslation(
+        Point3df( masterMotionInfo[0], masterMotionInfo[1],
+                  masterMotionInfo[2]) );
       AimsData<float> tmp(3,3);
       for(int i = 0;i < 9; i++)
         tmp[i] = masterMotionInfo[i+3];
-      p.rotation() = tmp;
+      p.setMatrix(tmp);
     }
     else p.setToIdentity();
   } //end slave
@@ -410,9 +413,9 @@ bool doit( Process & process, const string & fileinr, Finder & )
     }
 
   // MISE DE p EN VOXELS !
-  p.translation()[0] /= test.sizeX();
-  p.translation()[1] /= test.sizeY();
-  p.translation()[2] /= test.sizeZ();
+  p.matrix()(0, 3) /= test.sizeX();
+  p.matrix()(1, 3) /= test.sizeY();
+  p.matrix()(2, 3) /= test.sizeZ();
   
 
   do
@@ -473,9 +476,9 @@ bool doit( Process & process, const string & fileinr, Finder & )
       r = q * p ;
       
       // MISE DES TRANSLATIONS EN MILLIMETRES !
-      r.translation()[0] *= test.sizeX();
-      r.translation()[1] *= test.sizeY();
-      r.translation()[2] *= test.sizeZ();
+      r.matrix()(0, 3) *= test.sizeX();
+      r.matrix()(1, 3) *= test.sizeY();
+      r.matrix()(2, 3) *= test.sizeZ();
       
       cartoMsg( 2, "Resampling using transformation ...", "BlockMatching" );
       // Resampling de test en testtrans par r la transfo totale la plus recente
