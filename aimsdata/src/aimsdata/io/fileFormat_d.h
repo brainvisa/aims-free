@@ -182,9 +182,11 @@ namespace aims
       {
         jl = il;
         ++il;
-        if( *il == format )
+        
+        if( (il != el)  && (*il == format ) )
         {
           je->second.erase( il );
+          el = je->second.end();
           if( je->second.empty() )
             _extensions().erase( je );
         }
