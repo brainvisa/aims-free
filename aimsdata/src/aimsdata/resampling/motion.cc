@@ -268,11 +268,10 @@ void DecomposedAffineTransformation3d::transAffine(Point3df C)
 
   AffineTransformation3d::Table<float> & m = matrix();
   setMatrix(_rot.cross( _scaling.cross( _shear ) ));
-                   
-  m[3] += C.item(0) - m(0,0)*C.item(0) - m(0,1)*C.item(1) - m(0,2)*C.item(2);
 
-  m[7] += C.item(1) - m(1,0)*C.item(0) - m(1,1)*C.item(1) - m(1,2)*C.item(2);
+  m(0, 3) += C.item(0) - m(0,0)*C.item(0) - m(0,1)*C.item(1) - m(0,2)*C.item(2);
 
-  m[11] += C.item(2) - m(2,0)*C.item(0) - m(2,1)*C.item(1) - m(2,2)*C.item(2);
+  m(1, 3) += C.item(1) - m(1,0)*C.item(0) - m(1,1)*C.item(1) - m(1,2)*C.item(2);
+
+  m(2, 3) += C.item(2) - m(2,0)*C.item(0) - m(2,1)*C.item(1) - m(2,2)*C.item(2);
 }
-
