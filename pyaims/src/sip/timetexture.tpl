@@ -147,6 +147,7 @@ public:
       }
 %End
 
+  bool operator == ( const Texture_%Template1typecode% & ) const /ReleaseGIL/;
 
 %%Template1defScalar%%
 %%Template1defNumpyBindings%%
@@ -425,5 +426,6 @@ public:
     }
 %End
 
+  bool operator == ( const TimeTexture_%Template1typecode% & ) const /ReleaseGIL/;
 };
 

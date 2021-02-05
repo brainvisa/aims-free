@@ -80,6 +80,7 @@ public:
   std::vector<T> & data() { return( _data ); }
 
   void erase() { _data.clear(); }
+  bool operator == ( const Texture<T> & x ) const { return _data == x.data(); }
 
   friend
   std::ostream& operator << <>( std::ostream& out, 
@@ -153,6 +154,15 @@ class TimeTexture : public virtual carto::RCObject,
     void push_back( const T& item ) { (*this)[0].push_back( item ); }
 
     void erase();
+
+    bool operator == ( const TimeTexture<T> & x ) const
+    {
+      if( x.nItem() != nItem() ) return false;
+      if( _header != x.header() ) return false;
+      for( int i=0; i<nItem(); ++i )
+        if( item(i) != x.item(i) ) return false;
+      return true;
+    }
 
     friend
     std::ostream& operator << <>( std::ostream& out, 
