@@ -206,7 +206,7 @@ int main( int argc, const char **argv )
         TalairachReferential talairach ;
         transf = talairach.computeTransformation(talPoints) ;
         Motion transl ;
-        transl.translation() = acp ;
+        transl.setTranslation( acp );
         transf = transl * transf ;
         cout << "AC transformed : " << transf.transform( acp ) << "\tPC transformed : " << transf.transform( pcp ) 
              << "\tIPH transformed : " << transf.transform( ihpp ) << endl ;

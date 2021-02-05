@@ -51,7 +51,7 @@ namespace
     return true;
   }
 
-  bool vidainit = initvida();
+  bool vidainit __attribute__((unused)) = initvida();
 
 }
 

@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma.dicom import tag_lists
 from soma.archive import unpack, pack, is_archive
 from tempfile import mkdtemp
@@ -69,7 +70,7 @@ def anonymize(dicom_in, dicom_out,
         pack(os.path.abspath(dicom_out), glob(os.path.join(wip_dicom_out, '*')))
         shutil.rmtree(wip_dicom_out)
 
-class Anonymizer():
+class Anonymizer(object):
     """
     Anonymizes a DICOM file according to DICOM standard.
     """
@@ -120,7 +121,7 @@ class Anonymizer():
         element = data_element.tag.element
         # Check if the value must be forced
         if self._forced_values is not None and \
-           (group, element) in self._forced_values.keys():
+           (group, element) in list(self._forced_values.keys()):
             data_element.value = self._forced_values[(group, element)]
             return
         # Check if the data element has to be kept
@@ -129,7 +130,7 @@ class Anonymizer():
             return
         
         # Check if the data element is in the DICOM part 15/annex E tag list
-        if (group, element) in tag_lists.annex_e.keys():
+        if (group, element) in list(tag_lists.annex_e.keys()):
             # Apply the recommended action
             action = tag_lists.annex_e[(group, element)][2][0]
             if 'X' == action:
@@ -146,7 +147,7 @@ class Anonymizer():
                 return
             private_creator_value = ds.get(self._get_private_creator_tag(data_element), None).value
             # Check if the private creator is in the safe private attribute keys
-            if private_creator_value not in tag_lists.safe_private_attributes.keys():
+            if private_creator_value not in list(tag_lists.safe_private_attributes.keys()):
                 return
             block = element & 0x00ff
             # Check if the data element is in the safe private attributes list

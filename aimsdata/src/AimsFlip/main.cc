@@ -34,14 +34,11 @@
 /*
  *  Image flip
  */
-#include <cstdlib>
-#include <aims/data/data_g.h>
 #include <aims/io/process.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 #include <aims/io/finder.h>
 #include <aims/getopt/getopt2.h>
-#include <iostream>
 #include <aims/utility/flip.h>
 
 using namespace aims;
@@ -58,7 +55,7 @@ public:
   Flip( const string & fout, const string& mode );
 
   template<class T> 
-  bool flip_m( AimsData<T> & data, const string & filename, Finder & f );
+  bool flip_m( VolumeRef<T> & data, const string & filename, Finder & f );
 
 private:
   string	fileout;
@@ -83,46 +80,47 @@ template<class T>
 bool flip( Process & p, const string & filename, Finder & f )
 {
   Flip	& dp = (Flip &) p;
-  AimsData<T>		data;
+  VolumeRef<T> data;
   return( dp.flip_m( data, filename, f ) );
 }
 
 
 template<class T> 
-bool Flip::flip_m( AimsData<T> & data, const string & filename, Finder & f )
+bool Flip::flip_m( VolumeRef<T> & data, const string & filename, Finder & f )
 {
-  Reader<AimsData<T> >	reader( filename );
+  Reader<Volume<T> >	reader( filename );
   string	format = f.format();
-  if( !reader.read( data, 1, &format ) )
+  data.reset( reader.read( 1, &format ) );
+  if( !data.get() )
     return( false );
-  AimsData<T> outimage ;
+  VolumeRef<T> outimage ;
   
   AimsFlip<T> flip ;
   
   if( mode == "XX" )
-    outimage = flip.doXX(data) ;
+    outimage = flip.doXX(data).volume();
   else if( mode == "YY" )
-      outimage = flip.doYY(data) ;
+      outimage = flip.doYY(data).volume();
   else if( mode == "ZZ" )
-      outimage = flip.doZZ(data) ;
+      outimage = flip.doZZ(data).volume();
   else if( mode == "XXYY" )
-      outimage = flip.doXXYY(data) ;
+      outimage = flip.doXXYY(data).volume();
   else if( mode == "XXZZ" )
-      outimage = flip.doXXZZ(data) ;
+      outimage = flip.doXXZZ(data).volume();
   else if( mode == "YYZZ" )
-      outimage = flip.doYYZZ(data) ;
+      outimage = flip.doYYZZ(data).volume();
   else if( mode == "XXYYZZ" )
-      outimage = flip.doXXYYZZ(data) ;
+      outimage = flip.doXXYYZZ(data).volume();
   else if( mode == "XY" )
-      outimage = flip.doXY(data) ;
+      outimage = flip.doXY(data).volume();
   else if( mode == "XZ" )
-      outimage = flip.doXZ(data) ;
+      outimage = flip.doXZ(data).volume();
   else if( mode == "YZ" )
-      outimage = flip.doYZ(data) ;
+      outimage = flip.doYZ(data).volume();
   else
       throw runtime_error("Wrong mode") ;
 
-  Writer< AimsData<T> >	writer( fileout );
+  Writer< VolumeRef<T> > writer( fileout );
   return( writer.write( outimage ) );
 }
 

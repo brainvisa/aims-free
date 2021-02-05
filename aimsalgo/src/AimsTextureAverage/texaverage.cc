@@ -32,167 +32,141 @@
  */
 
 
-#include <aims/io/io_g.h>
-#include <aims/getopt/getopt.h>
+#include <aims/getopt/getopt2.h>
 #include <aims/mesh/texture.h>
-#include <aims/distancemap/meshvoronoi.h>
 #include <aims/io/reader.h>
 #include <aims/io/writer.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
-BEGIN_USAGE(usage)
-  "-------------------------------------------------------------------------",
-  "AimsTextureAverage -f[loat_texture] <input_float_texture>]              ",
-  "                   -o[utput <output_mesh>]                               ",
-  "                   --binary                                              ",
-  "                   --max                                              ",
-  "                   --min                                              ",
-  "                  [-h[elp]]                                              ",
-  "-------------------------------------------------------------------------",
-  " Compute the average of a time-serie texture                             ",
-  "-------------------------------------------------------------------------",
-  "     input_float_texture : input time-serie texture                  ",
-  "     output_texture      : output mean texture                           ",
-  "     binary              : binarise the input texture                    ",
-  "     max                 : compute the maximum instead of the mean input texture                    ",
-  "     min                 : compute the minimum instead of the mean input texture           ",
-  "-------------------------------------------------------------------------",
-END_USAGE
-
-
-//
-// Usage
-//
-void Usage( void )
+int main( int argc, const char** argv )
 {
-  AimsUsage( usage );
-}
+  Reader<TimeTexture<float> >	texF;
+  Writer<TimeTexture<float> >	texW;
+  bool binary = 0, maxFlag=0, minFlag=0;
 
+  AimsApplication app( argc, argv,
+                       "Compute the average of a time-series texture" );
+  app.addOption( texF, "-f", "input time-series texture" );
+  app.addOption( texW, "-o", "output mean texture" );
+  app.addOption( binary, "-b", "binarize the input texture", true );
+  app.addOption( maxFlag,
+                 "--max", "compute the maximum instead of the mean input "
+                 "texture", true );
+  app.addOption( minFlag,
+                 "--min", "compute the minimum instead of the mean input "
+                 "texture", true );
+  app.alias( "--float_texture", "-f" );
+  app.alias( "-i", "-f" );
+  app.alias( "--output", "-o" );
+  app.alias( "--binary", "-b" );
 
-int main( int argc, char** argv )
-{
-  char	*floattexfile = 0, *outtexfile = 0;
-  int  binary = 0, maxFlag=0, minFlag=0;
-
-  //
-  // Parser of options
-  //
-  AimsOption opt[] = {
-    { 'h',"help"         ,AIMS_OPT_FLAG  ,( void* )Usage  ,AIMS_OPT_CALLFUNC,0},
-    { 'f',"float_texture",AIMS_OPT_STRING,&floattexfile   ,0                ,0},
-    { 'o',"out_texture"  ,AIMS_OPT_STRING,&outtexfile     ,0                ,0},
-    { ' ',"binary"       ,AIMS_OPT_FLAG  ,&binary         ,0                ,0},
-    { ' ',"max"          ,AIMS_OPT_FLAG  ,&maxFlag        ,0                ,0},
-    { ' ',"min"          ,AIMS_OPT_FLAG  ,&minFlag        ,0                ,0},
-    { 0  ,0              ,AIMS_OPT_END   ,0               ,0                ,0}};
-
-  AimsParseOptions( &argc, argv, opt, usage );
+  try
+  {
+    app.initialize();
   
-  if (*floattexfile == 0)
-    {
-      cerr << "You must choose an input texture \n";
-      ASSERT (0);
-    }
-  
-  if (maxFlag && minFlag)  
-    {
-      cerr << "You must choose either max or min flag\n";
-      ASSERT (0);
-    }
-
-  //	read texture
-  TimeTexture<float>	tex;
-  unsigned             nnodes, ntimes;
-  unsigned            j, i ;
-
- 
-  cout << "reading texture " << floattexfile << endl;
-  Reader<TimeTexture<float> >	texF( floattexfile );
-  texF >> tex ;
-  
-  nnodes = tex[0].nItem(); ntimes = tex.size();
-  TimeTexture<float>	itex(ntimes,nnodes);
-  
-   if (binary != 0)
-     {
-       cout << "Texture binarization.\n";
-       for (j=0;j<nnodes;++j)
-         for (i=0;i<ntimes;++i)
-           if (tex[i].item(j) != 0)
-             itex[i].item(j) = 1;
-           else
-             itex[i].item(j) = 0;
-     }
-   else
-     for (j=0;j<nnodes;++j)
-      for (i=0;i<ntimes;++i)
-	itex[i].item(j) = tex[i].item(j);
-  
-
-   float               m = 0;
-   //float s = 0;
-  TimeTexture<float>  outTex(1,nnodes);
-
-  cout << ntimes << " time series, " << nnodes << " nodes" <<endl;
-
-  if (!minFlag && !maxFlag)
-    for (j=0;j<nnodes;++j)
+    if (maxFlag && minFlag)
       {
-        m = 0;
-        for (i=0;i<ntimes;++i)
-          m += itex[i].item(j);
-        m =  m / ntimes;
-
-        outTex[0].item(j)= m ;
-
-        /* 
-        s = 0;   
-        for (i=0;i<ntimes;++i)
-          s += (itex[i].item(j) - m) * (itex[i].item(j) - m);
-        s = sqrt(s) / ntimes;
-
-        outTex[1].item(j) = (float)s ;
-        */ 
+        cerr << "You must choose either max or min flag\n";
+        ASSERT (0);
       }
-  
-  if (minFlag)
-    {
-      cout << "Compute minimum texture (instead of mean texture).\n" ; 
+
+    //	read texture
+    TimeTexture<float>	tex;
+    unsigned             nnodes, ntimes;
+    unsigned            j, i ;
+
+    cout << "reading texture " << texF.fileName() << endl;
+    texF.read( tex );
+
+    nnodes = tex[0].nItem(); ntimes = tex.size();
+    TimeTexture<float>	itex(ntimes,nnodes);
+
+    if (binary != 0)
+      {
+        cout << "Texture binarization.\n";
+        for (j=0;j<nnodes;++j)
+          for (i=0;i<ntimes;++i)
+            if (tex[i].item(j) != 0)
+              itex[i].item(j) = 1;
+            else
+              itex[i].item(j) = 0;
+      }
+    else
+      for (j=0;j<nnodes;++j)
+        for (i=0;i<ntimes;++i)
+          itex[i].item(j) = tex[i].item(j);
+
+
+    float               m = 0;
+    //float s = 0;
+    TimeTexture<float>  outTex(1,nnodes);
+
+    cout << ntimes << " time series, " << nnodes << " nodes" <<endl;
+
+    if (!minFlag && !maxFlag)
       for (j=0;j<nnodes;++j)
         {
           m = 0;
           for (i=0;i<ntimes;++i)
-            if (itex[i].item(j) < m ) 
+            m += itex[i].item(j);
+          m =  m / ntimes;
+
+          outTex[0].item(j)= m ;
+
+          /*
+          s = 0;
+          for (i=0;i<ntimes;++i)
+            s += (itex[i].item(j) - m) * (itex[i].item(j) - m);
+          s = sqrt(s) / ntimes;
+
+          outTex[1].item(j) = (float)s ;
+          */
+        }
+
+    if (minFlag)
+      {
+        cout << "Compute minimum texture (instead of mean texture).\n" ;
+        for (j=0;j<nnodes;++j)
+          {
+            m = 0;
+            for (i=0;i<ntimes;++i)
+              if (itex[i].item(j) < m )
+                m = itex[i].item(j);
+
+            outTex[0].item(j)= m ;
+          }
+      }
+
+    if (maxFlag)
+      {
+        cout << "Compute maximum texture (instead of mean texture).\n" ;
+        for (j=0;j<nnodes;++j)
+        {
+          m = 0;
+          for (i=0;i<ntimes;++i)
+            if (itex[i].item(j) > m )
               m = itex[i].item(j);
-        
+
           outTex[0].item(j)= m ;
         }
-    }
-
-  if (maxFlag)
-    {
-      cout << "Compute maximum texture (instead of mean texture).\n" ; 
-      for (j=0;j<nnodes;++j)
-      {
-        m = 0;
-        for (i=0;i<ntimes;++i)
-          if (itex[i].item(j) > m ) 
-            m = itex[i].item(j);
-        
-        outTex[0].item(j)= m ;
       }
-    }
 
+    cout << "writing texture : " << endl;
+    texW.write( outTex );
+    cout << "done " << endl;
 
-
-  cout << "writing texture : " << endl;
-  Writer<TimeTexture<float> >	texW( outtexfile );
-  texW << outTex ;
-  cout << "done " << endl;
-
-  
-  return 0;
+    return EXIT_SUCCESS;
+  }
+  catch( user_interruption & )
+  {
+  }
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
 }

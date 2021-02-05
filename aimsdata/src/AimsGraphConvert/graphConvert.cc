@@ -554,18 +554,20 @@ int main( int argc, const char **argv )
         substituteLabelsName( g, labelFileName );        
 
      }
-      
+
       // write
       AimsGraphWriter	agw( fileout );
-      AimsGraphWriter::SavingMode	sm = AimsGraphWriter::Keep;
+      string mode;
       if( global )
-	sm = AimsGraphWriter::Global;
+        mode = "global";
       else if( local )
-	sm = AimsGraphWriter::Local;
+        mode = "local";
+      Object options = Object::value( Dictionary() );
+      if( !mode.empty() )
+        options->setProperty( "saving_mode", mode );
 
-      agw.writeElements( g, sm, sm, false );
-      GraphWriter	gw( fileout, syntax );
-      gw << g;
+      Writer<Graph> gw( fileout, options );
+      gw.write( g );
 
       return EXIT_SUCCESS;
     }

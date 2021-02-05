@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
@@ -35,6 +35,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aimsalgo
 from soma import aims
 from soma.wip.aimsalgo import foldsgraphthickness

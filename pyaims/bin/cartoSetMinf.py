@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -33,12 +33,13 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 from __future__ import print_function
 
+from __future__ import absolute_import
 import sys
 import os
 from optparse import OptionParser
 
-if sys.version_info[0] >= 3:
-    xrange = range
+import six
+from six.moves import range
 
 
 parser = OptionParser(description='set/create properties in a .minf '
@@ -93,16 +94,20 @@ if not input.endswith('.minf'):
 
 attributes = {}
 try:
-    execfile(input)
+    with open(input, 'rb') as f:
+        code = compile(f.read(), input, 'exec')
+    six.exec_(f)
 except:
     if os.path.exists(input) and not input.endswith('.minf'):
         input += '.minf'
         try:
-            execfile(input)
+            with open(input, 'rb') as f:
+                code = compile(f.read(), input, 'exec')
+            six.exec_(code)
         except:
             pass
 
-for i in xrange(len(options.property)):
+for i in range(len(options.property)):
     try:
         a = eval(options.value[i])
     except:

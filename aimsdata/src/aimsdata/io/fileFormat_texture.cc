@@ -144,5 +144,5 @@ static bool _texdic()
   return true;
 }
 
-static bool texdic = _texdic();
+static bool texdic __attribute__((unused)) = _texdic();
 

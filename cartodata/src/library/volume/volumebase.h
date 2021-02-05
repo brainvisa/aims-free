@@ -58,6 +58,11 @@
     #endif
   #endif
   #include <blitz/array.h>
+  
+namespace carto {
+  typedef ptrdiff_t BlitzStridesType;
+}
+
 #endif
 
 //--- std --------------------------------------------------------------------

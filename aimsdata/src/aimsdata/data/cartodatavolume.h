@@ -856,7 +856,7 @@ void AimsData<T>::setHeader( aims::Header* hdr )
       const aims::PythonHeader 
         *ph = dynamic_cast<const aims::PythonHeader *>( hdr );
       if( ph )
-        mh->copy( *ph );
+        mh->copy( *ph, 1 );
       // hdr used to transfor ownership to me
       delete hdr;
     }
@@ -1313,109 +1313,9 @@ namespace carto
 {
   //  instanciations of Volume classes
 
-  extern template class VolumeProxy<AimsRGB>;
-  extern template class Volume<AimsRGB>;
-  extern template class VolumeProxy<AimsRGBA>;
-  extern template class Volume<AimsRGBA>;
-  extern template class VolumeProxy<Point3d>;
-  extern template class Volume<Point3d>;
-  extern template class VolumeProxy<Point3df>;
-  extern template class Volume<Point3df>;
-  extern template class VolumeProxy<Point2d>;
-  extern template class Volume<Point2d>;
-  extern template class VolumeProxy<AimsVector<float,6> >;
-  extern template class Volume<AimsVector<float,6> >;
   extern template class VolumeProxy<DtiTensor*>;
   extern template class Volume<DtiTensor*>;
 
-  // VolumeUtil declarations (needed on Mac)
-  extern template VolumeRef<AimsRGB> 
-  VolumeUtil<AimsRGB>::apply( Scaler<AimsRGB, double>,
-                              const VolumeRef<AimsRGB> & );
-  extern template void 
-  VolumeUtil<AimsRGB>::selfApply( Scaler<AimsRGB, double>,
-                                  VolumeRef<AimsRGB> & );
-  extern template VolumeRef<AimsRGB> 
-  VolumeUtil<AimsRGB>::apply( std::plus<AimsRGB>, const VolumeRef<AimsRGB> &, 
-                              const VolumeRef<AimsRGB> & );
-  extern template void 
-  VolumeUtil<AimsRGB>::selfApply( std::plus<AimsRGB>, VolumeRef<AimsRGB> &, 
-                                  const VolumeRef<AimsRGB> & );
-  extern template VolumeRef<AimsRGB> 
-  VolumeUtil<AimsRGB>::apply( UnaryFromConstantBinaryFunctor<AimsRGB, 
-                              std::plus<AimsRGB> >, 
-                              const VolumeRef<AimsRGB> & );
-  extern template void 
-  VolumeUtil<AimsRGB>::selfApply( UnaryFromConstantBinaryFunctor<AimsRGB, 
-                                  std::plus<AimsRGB> >, VolumeRef<AimsRGB> & );
-  extern template VolumeRef<AimsRGB> 
-  VolumeUtil<AimsRGB>::apply( UnaryFromConstantBinaryFunctor2<AimsRGB, 
-                              std::plus<AimsRGB> >, 
-                              const VolumeRef<AimsRGB> & );
-  extern template VolumeRef<AimsRGB> 
-  VolumeUtil<AimsRGB>::apply( std::minus<AimsRGB>, const VolumeRef<AimsRGB> &, 
-                              const VolumeRef<AimsRGB> & );
-  extern template void 
-  VolumeUtil<AimsRGB>::selfApply( std::minus<AimsRGB>, VolumeRef<AimsRGB> &, 
-                                  const VolumeRef<AimsRGB> & );
-  extern template VolumeRef<AimsRGB> 
-  VolumeUtil<AimsRGB>::apply( UnaryFromConstantBinaryFunctor<AimsRGB, 
-                              std::minus<AimsRGB> >, 
-                              const VolumeRef<AimsRGB> & );
-  extern template void 
-  VolumeUtil<AimsRGB>::selfApply( UnaryFromConstantBinaryFunctor<AimsRGB, 
-                                  std::minus<AimsRGB> >, 
-                                  VolumeRef<AimsRGB> & );
-  extern template VolumeRef<AimsRGB> 
-  VolumeUtil<AimsRGB>::apply( UnaryFromConstantBinaryFunctor2<AimsRGB, 
-                              std::minus<AimsRGB> >, 
-                              const VolumeRef<AimsRGB> & );
-
-  extern template VolumeRef<AimsRGBA> 
-  VolumeUtil<AimsRGBA>::apply( Scaler<AimsRGBA, double>,
-                               const VolumeRef<AimsRGBA> & );
-  extern template void 
-  VolumeUtil<AimsRGBA>::selfApply( Scaler<AimsRGBA, double>,
-                                   VolumeRef<AimsRGBA> & );
-  extern template VolumeRef<AimsRGBA> 
-  VolumeUtil<AimsRGBA>::apply( std::plus<AimsRGBA>, 
-                               const VolumeRef<AimsRGBA> &, 
-                               const VolumeRef<AimsRGBA> & );
-  extern template void 
-  VolumeUtil<AimsRGBA>::selfApply( std::plus<AimsRGBA>, VolumeRef<AimsRGBA> &, 
-                                   const VolumeRef<AimsRGBA> & );
-  extern template VolumeRef<AimsRGBA> 
-  VolumeUtil<AimsRGBA>::apply( UnaryFromConstantBinaryFunctor<AimsRGBA, 
-                               std::plus<AimsRGBA> >, 
-                               const VolumeRef<AimsRGBA> & );
-  extern template void 
-  VolumeUtil<AimsRGBA>::selfApply( UnaryFromConstantBinaryFunctor<AimsRGBA, 
-                                   std::plus<AimsRGBA> >, 
-                                   VolumeRef<AimsRGBA> & );
-  extern template VolumeRef<AimsRGBA> 
-  VolumeUtil<AimsRGBA>::apply( UnaryFromConstantBinaryFunctor2<AimsRGBA, 
-                               std::plus<AimsRGBA> >, 
-                               const VolumeRef<AimsRGBA> & );
-  extern template VolumeRef<AimsRGBA> 
-  VolumeUtil<AimsRGBA>::apply( std::minus<AimsRGBA>, 
-                               const VolumeRef<AimsRGBA> &, 
-                               const VolumeRef<AimsRGBA> & );
-  extern template void 
-  VolumeUtil<AimsRGBA>::selfApply( std::minus<AimsRGBA>, 
-                                   VolumeRef<AimsRGBA> &, 
-                                   const VolumeRef<AimsRGBA> & );
-  extern template VolumeRef<AimsRGBA> 
-  VolumeUtil<AimsRGBA>::apply( UnaryFromConstantBinaryFunctor<AimsRGBA, 
-                               std::minus<AimsRGBA> >, 
-                               const VolumeRef<AimsRGBA> & );
-  extern template void 
-  VolumeUtil<AimsRGBA>::selfApply( UnaryFromConstantBinaryFunctor<AimsRGBA, 
-                                   std::minus<AimsRGBA> >, 
-                                   VolumeRef<AimsRGBA> & );
-  extern template VolumeRef<AimsRGBA> 
-  VolumeUtil<AimsRGBA>::apply( UnaryFromConstantBinaryFunctor2<AimsRGBA, 
-                               std::minus<AimsRGBA> >, 
-                               const VolumeRef<AimsRGBA> & );
 }
 
 

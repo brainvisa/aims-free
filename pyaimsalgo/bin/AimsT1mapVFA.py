@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # -*- coding: utf-8 -*-
 
@@ -36,6 +36,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 import sys
 import numpy as np
 from soma import aims, aimsalgo

@@ -630,14 +630,14 @@ namespace aims
       && indivPriorProbabilities.dimY( ) == 1
       && indivPriorProbabilities.dimZ( ) == 1 ) ;
     int count = 0 ; 
-    double uniformPriorProba ; 
+    //double uniformPriorProba ; 
     int x, y, z ;
     if( noPriorProba )
       {
         ForEach3d( mask, x, y, z )
           if( mask( x, y, z ) )
             ++count ;
-        uniformPriorProba = 1. / count ;
+        //uniformPriorProba = 1. / count ;
       }
     if( dynamicImage.dimT() != _data.dimT() ) 
       return false ;

@@ -135,13 +135,13 @@ namespace aims {
 
 #define AIMS_DEFINE_ELEMENTFILTERFUNC_BASIC( NAME )                          \
   template <typename T>                                                      \
-  NAME<T>::NAME( const NAME<T> & other ) {}                                  \
+  NAME<T>::NAME( const NAME<T> & /*other*/ ) : ElementFilteringFunction<T>() {} \
   template <typename T>                                                      \
   NAME<T>::~NAME() {}                                                        \
   template <typename T>                                                      \
-  NAME<T> & NAME<T>::operator=( const NAME<T> & other ) { return *this; }    \
+  NAME<T> & NAME<T>::operator=( const NAME<T> & /*other*/ ) { return *this; } \
   template <typename T>                                                      \
-  void NAME<T>::setOptions( const carto::Object & options ) {}
+  void NAME<T>::setOptions( const carto::Object & /*options*/ ) {}
 
 #define AIMS_DECLARE_ELEMENTFILTERFUNC_BASIC( NAME )                         \
   AIMS_DECLARE_ELEMENTFILTERFUNC_CUSTOMIZED(NAME)                            \

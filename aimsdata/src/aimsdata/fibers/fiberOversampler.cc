@@ -38,13 +38,13 @@ void FiberOversampler::newFiberPoint( const BundleProducer &,
 }
 
 
-void FiberOversampler::fiberTerminated( const BundleProducer & producer,
+void FiberOversampler::fiberTerminated( const BundleProducer & /* producer */,
                                const BundleInfo & bundleInfo, const FiberInfo & fiberInfo)
 {
 
   BundleProducer::startFiber( bundleInfo, fiberInfo );
 
-  for (int i = 0; i < _fiberPoints.size() - 1; i++)
+  for (int i = 0; i < (int)_fiberPoints.size() - 1; i++)
   {
     BundleProducer::addFiberPoint(bundleInfo, fiberInfo, _fiberPoints[i]);
     float currentFact = _fact;

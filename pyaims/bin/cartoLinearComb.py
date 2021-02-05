@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -34,6 +34,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 from soma.aims import lazy_read_data
 import sys
@@ -63,6 +64,8 @@ parser.add_option('-l', '--lazy', action='store_true',
                   'read them several times if they are used several times in '
                   'the formula. (see aims.lazy_read_data.LasyReadData '
                   'python class for details)')
+parser.add_option('-t', '--threads', type='int', default=1,
+                  help='use threaded preloading when iterating over the list of images (see soma.aims.lazy_read_data.PreloadIterator python class for details). Implies -l, and only useful when using an iteration over the list of volumes, such as in the formula "sum(image)". In such an iteration volumes in the later iterations can be preloaded using threads, making the process much faster. The number of threads / preloads is specified with this option. 0 means guess the number of CPUs of the current machine. Default is 1: no thraading/preloading')
 parser.add_option('-z', '--zero', dest='zero', action='store_true',
                   help='start indexing images at index 0 (instead of 1 by default): I0, I1 etc and image[0], image[1] etc.')
 
@@ -77,6 +80,9 @@ if args and not options.formula:
 if options.filename is None:
     options.filename = []
 options.filename += args
+
+if options.threads != 1:
+    options.lazy = True
 
 # print(options)
 # print(args)
@@ -128,6 +134,10 @@ for x in options.filename:
         raise TypeError('heterogeneous data: %s and %s'
                         % (objtype, t_objtype))
     image.append(vol)
+
+if options.threads:
+    # list with preloading iterator
+    image = aims.lazy_read_data.PreloadList(image, npreload=options.threads)
 
 # print(image)
 

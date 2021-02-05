@@ -53,7 +53,7 @@ SparseOrDenseMatrix::SparseOrDenseMatrix(
 
 
 SparseOrDenseMatrix::SparseOrDenseMatrix( const SparseOrDenseMatrix& other )
-  : _lazyreader( new MatrixLazyReader )
+  : RCObject(), _lazyreader( new MatrixLazyReader )
 {
   if( other.isDense() )
   {

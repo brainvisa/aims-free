@@ -34,11 +34,10 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 import sys
-
-if sys.version_info[0] >= 3:
-    xrange = range
+from six.moves import range
 
 
 mesh = aims.read('/home/dr144257/data/ra_head.mesh')
@@ -47,7 +46,7 @@ h = mesh.header()
 print('header:', h)
 
 print('timesteps:', mesh.size())
-for t in xrange(mesh.size()):
+for t in range(mesh.size()):
     print('time:', t)
     v = mesh.vertex(t)
     print('vertices:', v)

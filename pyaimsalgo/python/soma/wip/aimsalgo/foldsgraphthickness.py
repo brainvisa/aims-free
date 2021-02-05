@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -34,11 +34,12 @@
 
 from  __future__  import print_function
 
+from __future__ import absolute_import
 from soma import aims
 from soma import aimsalgo
 import numpy
 
-class FoldsGraphThickness:
+class FoldsGraphThickness(object):
   def __init__( self, fold_graph, lgw_vol, gm_wm_mesh, gm_lcr_mesh,
     voronoi=None ):
     self.fold_graph = fold_graph

@@ -68,7 +68,7 @@ where
 	C is the "center" of the linear transformation
 	T is the translation.
 	
- # then, an AffineAffineTransformation3d should contain the following attributes:
+ # then, an AffineTransformation3d should contain the following attributes:
  	_rotation (the equivalent of _rot in DecomposedAffineTransformation3d), 3x3 matrix
  	_scaling (equivalent in DecomposedAffineTransformation3d), 3x3 matrix
  	_shearing (equivalent in DecomposedAffineTransformation3d), 3x3 matrix
@@ -100,7 +100,7 @@ computes (1) consistently with all attributes i.e. this methods do
 
 */
 #include <cstdlib>
-#include <aims/resampling/motion.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <aims/resampling/quaternion.h>
 #include <aims/vector/vector.h>
 #include <aims/data/data.h>
@@ -142,15 +142,9 @@ ostream& operator << ( ostream& os, const AffineTransformation3d& thing )
 
 //-----------------------------------------------------------------------------
 AffineTransformation3d::AffineTransformation3d()
-  : _translation( 0.0 ), _rotation( 3, 3 ),
+  : AffineTransformation3dBase(),
     _header( new PythonHeader )
 {
-  _rotation = 0.0f;
-  _translation = 0.0f;
-  for ( int i = 0; i < 3; i++ )
-  {
-    _rotation( i, i ) = 1.0;
-  }
 }
 
 
@@ -165,9 +159,7 @@ AffineTransformation3d::~AffineTransformation3d()
 AffineTransformation3d::AffineTransformation3d(
   const AffineTransformation3d& other ) :
   RCObject(),
-  Transformation3d( other ),
-  _translation( other._translation ),
-  _rotation( other._rotation.clone() ), 
+  AffineTransformation3dBase( other ),
   _header( other.header() ? new PythonHeader( *other.header() )
     : new PythonHeader )
 {
@@ -175,36 +167,44 @@ AffineTransformation3d::AffineTransformation3d(
 
 
 //-----------------------------------------------------------------------------
-AffineTransformation3d::AffineTransformation3d( const vector<float> & mat ) :
-    Transformation3d(), _rotation( 3, 3 ), _header( new PythonHeader )
+AffineTransformation3d::AffineTransformation3d(
+  const AffineTransformation3dBase& other ) :
+  RCObject(),
+  AffineTransformation3dBase( other ),
+  _header( new PythonHeader )
 {
-  *this = mat;
+}
+
+
+//-----------------------------------------------------------------------------
+AffineTransformation3d::AffineTransformation3d( const vector<float> & mat ) :
+    AffineTransformation3dBase( mat ), _header( new PythonHeader )
+{
 }
 
 
 //-----------------------------------------------------------------------------
 AffineTransformation3d::AffineTransformation3d( const Object mat ) :
-    Transformation3d(), _rotation( 3, 3 ), _header( new PythonHeader )
+    AffineTransformation3dBase( mat ), _header( new PythonHeader )
 {
-  *this = mat;
 }
 
 
 //-----------------------------------------------------------------------------
 AffineTransformation3d::AffineTransformation3d( const Quaternion & quat ) :
-    Transformation3d(), _rotation( 3, 3 ), _header( new PythonHeader )
+    AffineTransformation3dBase(), _header( new PythonHeader )
 {
   *this = quat;
 }
 
 
 //-----------------------------------------------------------------------------
-AffineTransformation3d& AffineTransformation3d::operator = ( const AffineTransformation3d& other )
+AffineTransformation3d& AffineTransformation3d::operator = (
+  const AffineTransformation3d& other )
 {
   if( &other == this )
     return *this;
-  _translation = other._translation;      // ie cloning (from stl library
-  _rotation = (other._rotation).clone();  // explicit cloning from AimsData
+  AffineTransformation3dBase::operator = ( other );
   delete _header;
   if( other.header() )
     _header = new PythonHeader( *other.header() );
@@ -215,20 +215,10 @@ AffineTransformation3d& AffineTransformation3d::operator = ( const AffineTransfo
 
 
 //-----------------------------------------------------------------------------
-AffineTransformation3d& AffineTransformation3d::operator = ( const vector<float> & mat )
+AffineTransformation3d& AffineTransformation3d::operator = (
+  const vector<float> & mat )
 {
-  _translation[0] = mat[3];
-  _translation[1] = mat[7];
-  _translation[2] = mat[11];
-  _rotation( 0, 0 ) = mat[0];
-  _rotation( 0, 1 ) = mat[1];
-  _rotation( 0, 2 ) = mat[2];
-  _rotation( 1, 0 ) = mat[4];
-  _rotation( 1, 1 ) = mat[5];
-  _rotation( 1, 2 ) = mat[6];
-  _rotation( 2, 0 ) = mat[8];
-  _rotation( 2, 1 ) = mat[9];
-  _rotation( 2, 2 ) = mat[10];
+  AffineTransformation3dBase::operator = ( mat );
   return *this;
 }
 
@@ -236,74 +226,47 @@ AffineTransformation3d& AffineTransformation3d::operator = ( const vector<float>
 //-----------------------------------------------------------------------------
 AffineTransformation3d& AffineTransformation3d::operator = ( const Object mat )
 {
-  if( mat->size() < 12 )
-    return *this; // or throw something ?
-  Object  iter = mat->objectIterator();
-  if( !iter->isValid() )
-    return *this; // or throw something ?
-  _rotation( 0, 0 ) = iter->currentValue()->getScalar();
-  iter->next();
-  _rotation( 0, 1 ) = iter->currentValue()->getScalar();
-  iter->next();
-  _rotation( 0, 2 ) = iter->currentValue()->getScalar();
-  iter->next();
-  _translation[0] = iter->currentValue()->getScalar();
-  iter->next();
-  _rotation( 1, 0 ) = iter->currentValue()->getScalar();
-  iter->next();
-  _rotation( 1, 1 ) = iter->currentValue()->getScalar();
-  iter->next();
-  _rotation( 1, 2 ) = iter->currentValue()->getScalar();
-  iter->next();
-  _translation[1] = iter->currentValue()->getScalar();
-  iter->next();
-  _rotation( 2, 0 ) = iter->currentValue()->getScalar();
-  iter->next();
-  _rotation( 2, 1 ) = iter->currentValue()->getScalar();
-  iter->next();
-  _rotation( 2, 2 ) = iter->currentValue()->getScalar();
-  iter->next();
-  _translation[2] = iter->currentValue()->getScalar();
+  AffineTransformation3dBase::operator = ( mat );
   return *this;
 }
 
 
 //-----------------------------------------------------------------------------
-AffineTransformation3d& AffineTransformation3d::operator = ( const Quaternion & quat )
+AffineTransformation3d& AffineTransformation3d::operator = (
+  const Quaternion & quat )
 {
   AimsVector<float,16>  mat = quat.rotationMatrix();
-  _translation[0] = mat[3];
-  _translation[1] = mat[7];
-  _translation[2] = mat[11];
-  _rotation( 0, 0 ) = mat[0];
-  _rotation( 0, 1 ) = mat[1];
-  _rotation( 0, 2 ) = mat[2];
-  _rotation( 1, 0 ) = mat[4];
-  _rotation( 1, 1 ) = mat[5];
-  _rotation( 1, 2 ) = mat[6];
-  _rotation( 2, 0 ) = mat[8];
-  _rotation( 2, 1 ) = mat[9];
-  _rotation( 2, 2 ) = mat[10];
+  _matrix[0] = mat[0];
+  _matrix[4] = mat[1];
+  _matrix[8] = mat[2];
+  _matrix[12] = mat[3];
+  _matrix[1] = mat[4];
+  _matrix[5] = mat[5];
+  _matrix[9] = mat[6];
+  _matrix[13] = mat[7];
+  _matrix[2] = mat[8];
+  _matrix[6] = mat[9];
+  _matrix[10] = mat[10];
+  _matrix[14] = mat[11];
+  _matrix[3] = 0.F;
+  _matrix[7] = 0.F;
+  _matrix[11] = 0.F;
+  _matrix[15] = 1.F;
   return *this;
 }
 
 
 //-----------------------------------------------------------------------------
-bool AffineTransformation3d::operator == ( const AffineTransformation3d & other ) const
+bool AffineTransformation3d::operator == (
+  const AffineTransformation3d & other ) const
 {
-  static float eps = 1e-5;
-  return fabs( _translation[0] - other._translation[0] ) < eps
-      && fabs( _translation[1] - other._translation[1] ) < eps
-      && fabs( _translation[2] - other._translation[2] ) < eps
-      && fabs( _rotation(0,0) - other._rotation(0,0) ) < eps
-      && fabs( _rotation(0,1) - other._rotation(0,1) ) < eps
-      && fabs( _rotation(0,1) - other._rotation(0,1) ) < eps
-      && fabs( _rotation(1,0) - other._rotation(1,0) ) < eps
-      && fabs( _rotation(1,1) - other._rotation(1,1) ) < eps
-      && fabs( _rotation(1,1) - other._rotation(1,1) ) < eps
-      && fabs( _rotation(2,0) - other._rotation(2,0) ) < eps
-      && fabs( _rotation(2,1) - other._rotation(2,1) ) < eps
-      && fabs( _rotation(2,1) - other._rotation(2,1) ) < eps;
+  return AffineTransformation3dBase::operator == ( other );
+}
+
+
+bool AffineTransformation3d::operator != ( const AffineTransformation3d & other ) const
+{
+  return !this->operator==(other);
 }
 
 
@@ -319,305 +282,35 @@ void AffineTransformation3d::setHeader( PythonHeader* ph )
 
 
 //-----------------------------------------------------------------------------
-Point3dd
-AffineTransformation3d::transformDouble( double x, double y, double z ) const
-{
-  return Point3dd( _rotation(0,0) * x + _rotation(0,1) * y
-                   + _rotation(0,2) * z,
-                   _rotation(1,0) * x + _rotation(1,1) * y
-                   + _rotation(1,2) * z,
-                   _rotation(2,0) * x + _rotation(2,1) * y 
-                   + _rotation(2,2) * z
-                 ) + Point3dd( _translation[0], _translation[1],
-                              _translation[2] );
-}
-
-
-Point3df
-AffineTransformation3d::transformFloat( float x, float y, float z ) const
-{
-  return Point3df( _rotation(0,0) * x + _rotation(0,1) * y
-                   + _rotation(0,2) * z, 
-                   _rotation(1,0) * x + _rotation(1,1) * y
-                   + _rotation(1,2) * z, 
-                   _rotation(2,0) * x + _rotation(2,1) * y 
-                   + _rotation(2,2) * z
-                   ) + _translation;
-}
-
-
-Point3dd
-AffineTransformation3d::transformVectorDouble( double x, double y,
-                                               double z ) const
-{
-  return Point3dd( _rotation(0,0) * x + _rotation(0,1) * y
-                   + _rotation(0,2) * z,
-                   _rotation(1,0) * x + _rotation(1,1) * y
-                   + _rotation(1,2) * z,
-                   _rotation(2,0) * x + _rotation(2,1) * y 
-                   + _rotation(2,2) * z
-                   );
-}
-
-
-Point3df
-AffineTransformation3d::transformVectorFloat( float x, float y, float z ) const
-{
-  return Point3df( _rotation(0,0) * x + _rotation(0,1) * y
-                   + _rotation(0,2) * z, 
-                   _rotation(1,0) * x + _rotation(1,1) * y
-                   + _rotation(1,2) * z, 
-                   _rotation(2,0) * x + _rotation(2,1) * y 
-                   + _rotation(2,2) * z
-                   );
-}
-
-
-Point3dd AffineTransformation3d::transformNormalDouble( double x, double y,
-                                                  double z ) const
-{
-  Point3dd      dir2( x, y, z );
-  Point3dd	u = vectProduct( dir2, Point3dd( 0, 0, 1 ) );
-  if( u.norm() <= 1e-4 ) u = vectProduct( dir2, Point3dd( 0, 1, 0 ) );
-  Point3dd      w = vectProduct( dir2, u );
-
-  u = transformVector( u );
-  w = transformVector( w );
-  dir2 = vectProduct( u, w );
-  return dir2;
-}
-
-
-//-----------------------------------------------------------------------------
-bool AffineTransformation3d::isIdentity() const
-{
-  if ( _rotation( 0, 0 )  != 1.0 ) return 0;
-  if ( _rotation( 1, 1 )  != 1.0 ) return 0;
-  if ( _rotation( 2, 2 )  != 1.0 ) return 0;
-  if ( _rotation( 0, 1 )  != 0.0 ) return 0;
-  if ( _rotation( 0, 2 )  != 0.0 ) return 0;
-  if ( _rotation( 1, 0 )  != 0.0 ) return 0;
-  if ( _rotation( 1, 2 )  != 0.0 ) return 0;
-  if ( _rotation( 2, 0 )  != 0.0 ) return 0;
-  if ( _rotation( 2, 1 )  != 0.0 ) return 0;
-  
-  if ( _translation.item(0)  != 0.0 ) return 0;
-  if ( _translation.item(1)  != 0.0 ) return 0;
-  if ( _translation.item(2)  != 0.0 ) return 0;
-
-  return 1;
-}
-
-
-//-----------------------------------------------------------------------------
-void AffineTransformation3d::setToIdentity()
-{
-  _translation = Point3df( 0., 0., 0. ) ;
-  _rotation = 0 ;
-  _rotation(0,0) = _rotation(1,1) = _rotation(2,2) = 1. ;
-}
-
-
-//-----------------------------------------------------------------------------
 AffineTransformation3d AffineTransformation3d::inverse() const
 {
-/* from Anatomist:
+//   AffineTransformation3d AffineTransformation3d;
+//
+//   AffineTransformation3d.setMatrix(AimsInversionLU( rotation() ));
+//
+//   Point3df tmp( -translation() );
+//   AffineTransformation3d.matrix()( 0, 3 ) = AffineTransformation3d.rotation()( 0, 0 ) * tmp.item( 0 ) +
+//                                    AffineTransformation3d.rotation()( 0, 1 ) * tmp.item( 1 ) +
+//                                    AffineTransformation3d.rotation()( 0, 2 ) * tmp.item( 2 ) ;
+//   AffineTransformation3d.matrix()( 1, 3 ) = AffineTransformation3d.rotation()( 1, 0 ) * tmp.item( 0 ) +
+//                                    AffineTransformation3d.rotation()( 1, 1 ) * tmp.item( 1 ) +
+//                                    AffineTransformation3d.rotation()( 1, 2 ) * tmp.item( 2 ) ;
+//   AffineTransformation3d.matrix()( 2, 3 ) = AffineTransformation3d.rotation()( 2, 0 ) * tmp.item( 0 ) +
+//                                    AffineTransformation3d.rotation()( 2, 1 ) * tmp.item( 1 ) +
+//                                    AffineTransformation3d.rotation()( 2, 2 ) * tmp.item( 2 ) ;
+//
+//   return AffineTransformation3d;
 
-  float det = _rotation[0][0]*
-  (_rotation[1][1]*_rotation[2][2]-_rotation[2][1]*_rotation[1][2])
-  - _rotation[1][0]*
-  (_rotation[0][1]*_rotation[2][2]-_rotation[2][1]*_rotation[0][2])
-  + _rotation[2][0]*
-  (_rotation[0][1]*_rotation[1][2]-_rotation[1][1]*_rotation[0][2]);
-
-  if( det == 0 )
-  {
-  cerr << "Transformation::invert : determinant = 0\n";
-  _rotation[0][0] = 1.;
-  _rotation[1][0] = 0.;
-  _rotation[2][0] = 0.;
-  _rotation[0][1] = 0.;
-  _rotation[1][1] = 1.;
-  _rotation[2][1] = 0.;
-  _rotation[0][2] = 0.;
-  _rotation[1][2] = 0.;
-  _rotation[2][2] = 1.;
-  _translation[0] = 0.;
-  _translation[1] = 0.;
-  _translation[2] = 0.;
-  return;
-}
-  else
-  {
-  float	i[3][3];
-  i[0][0] = (_rotation[1][1]*_rotation[2][2]
-  -_rotation[2][1]*_rotation[1][2]) / det;
-  i[0][1] = -(_rotation[1][0]*_rotation[2][2]
-  -_rotation[2][0]*_rotation[1][2]) / det;
-  i[0][2] =  (_rotation[1][0]*_rotation[2][1]
-  -_rotation[2][0]*_rotation[1][1]) / det;
-  i[1][0] = -(_rotation[0][1]*_rotation[2][2]
-  -_rotation[2][1]*_rotation[0][2]) / det;
-  i[1][1] =  (_rotation[0][0]*_rotation[2][2]
-  -_rotation[2][0]*_rotation[0][2]) / det;
-  i[1][2] = -(_rotation[0][0]*_rotation[2][1]
-  -_rotation[2][0]*_rotation[0][1]) / det;
-  i[2][0] =  (_rotation[0][1]*_rotation[1][2]
-  -_rotation[1][1]*_rotation[0][2]) / det;
-  i[2][1] = -(_rotation[0][0]*_rotation[1][2]
-  -_rotation[1][0]*_rotation[0][2]) / det;
-  i[2][2] =  (_rotation[0][0]*_rotation[1][1]
-  -_rotation[1][0]*_rotation[0][1]) / det;
-
-  _rotation[0][0] = i[0][0];
-  _rotation[0][1] = i[1][0];
-  _rotation[0][2] = i[2][0];
-  _rotation[1][0] = i[0][1];
-  _rotation[1][1] = i[1][1];
-  _rotation[1][2] = i[2][1];
-  _rotation[2][0] = i[0][2];
-  _rotation[2][1] = i[1][2];
-  _rotation[2][2] = i[2][2];
-
-  float tmp0, tmp1, tmp2;
-
-  // translation inverse = - Rtransposee * T
-
-  tmp0 = _translation[0];
-  tmp1 = _translation[1];
-  tmp2 = _translation[2];
-  _translation[0] = - ( _rotation[0][0] * tmp0 + _rotation[0][1] * tmp1
-      + _rotation[0][2] * tmp2 );
-  _translation[1] = - ( _rotation[1][0] * tmp0 + _rotation[1][1] * tmp1
-      + _rotation[1][2] * tmp2 );
-  _translation[2] = - ( _rotation[2][0] * tmp0 + _rotation[2][1] * tmp1
-      + _rotation[2][2] * tmp2 );
+  AffineTransformation3d inv( AffineTransformation3dBase::inverse() );
+  inv.header()->copy( *header() );
+  return inv;
 }
 
-  */
-  AffineTransformation3d AffineTransformation3d;
-
-  AffineTransformation3d.rotation() = AimsInversionLU( rotation() );
-
-  Point3df tmp( -translation() );
-  AffineTransformation3d.translation().item( 0 ) = AffineTransformation3d.rotation()( 0, 0 ) * tmp.item( 0 ) +
-                                   AffineTransformation3d.rotation()( 0, 1 ) * tmp.item( 1 ) +
-                                   AffineTransformation3d.rotation()( 0, 2 ) * tmp.item( 2 ) ;
-  AffineTransformation3d.translation().item( 1 ) = AffineTransformation3d.rotation()( 1, 0 ) * tmp.item( 0 ) +
-                                   AffineTransformation3d.rotation()( 1, 1 ) * tmp.item( 1 ) +
-                                   AffineTransformation3d.rotation()( 1, 2 ) * tmp.item( 2 ) ;
-  AffineTransformation3d.translation().item( 2 ) = AffineTransformation3d.rotation()( 2, 0 ) * tmp.item( 0 ) +
-                                   AffineTransformation3d.rotation()( 2, 1 ) * tmp.item( 1 ) +
-                                   AffineTransformation3d.rotation()( 2, 2 ) * tmp.item( 2 ) ;
-
-  return AffineTransformation3d;
-}
-
-bool AffineTransformation3d::invertible() const
+unique_ptr<soma::Transformation3d> AffineTransformation3d::getInverse() const
 {
-  // inverse() will throw carto::assert_error if matrix inversion fails
-  try {
-    inverse();
-  } catch(const assert_error&) {
-    return false;
-  }
-  return true;
+  return unique_ptr<soma::Transformation3d>(new AffineTransformation3d(inverse()));
 }
 
-unique_ptr<Transformation3d> AffineTransformation3d::getInverse() const
-{
-  return unique_ptr<Transformation3d>(new AffineTransformation3d(inverse()));
-}
-
-
-//-----------------------------------------------------------------------------
-void AffineTransformation3d::scale( const Point3df& sizeFrom, const Point3df& sizeTo )
-{
-  _rotation( 0, 0 ) *= sizeFrom[ 0 ] / sizeTo[ 0 ]; 
-  _rotation( 0, 1 ) *= sizeFrom[ 1 ] / sizeTo[ 0 ]; 
-  _rotation( 0, 2 ) *= sizeFrom[ 2 ] / sizeTo[ 0 ]; 
-
-  _rotation( 1, 0 ) *= sizeFrom[ 0 ] / sizeTo[ 1 ]; 
-  _rotation( 1, 1 ) *= sizeFrom[ 1 ] / sizeTo[ 1 ]; 
-  _rotation( 1, 2 ) *= sizeFrom[ 2 ] / sizeTo[ 1 ]; 
-
-  _rotation( 2, 0 ) *= sizeFrom[ 0 ] / sizeTo[ 2 ]; 
-  _rotation( 2, 1 ) *= sizeFrom[ 1 ] / sizeTo[ 2 ]; 
-  _rotation( 2, 2 ) *= sizeFrom[ 2 ] / sizeTo[ 2 ]; 
-
-  _translation.item( 0 ) /= sizeTo[ 0 ];
-  _translation.item( 1 ) /= sizeTo[ 1 ];
-  _translation.item( 2 ) /= sizeTo[ 2 ];
-}
-
-
-//-----------------------------------------------------------------------------
-bool AffineTransformation3d::isDirect() const
-{
-  float	det = _rotation(0,0) * ( _rotation(1,1) * _rotation(2,2) 
-				  - _rotation(2,1) * _rotation(1,2) ) 
-    + _rotation(1,0) * ( _rotation(2,1) * _rotation(0,2) 
-			  - _rotation(0,1) * _rotation(2,2) ) 
-    + _rotation(2,0) * ( _rotation(0,1) * _rotation(1,2) 
-			  - _rotation(1,1) * _rotation(0,2) );
-  return( det >= 0 );
-}
-
-
-//-----------------------------------------------------------------------------
-void AffineTransformation3d::setTranslation(Point3df t)
-/* NOTE: for the moment, in spite of its name, this method actually ADD t to the
-current translation ( _translation <- (_translation + t) ). This LONG and
-UNCLEAR code seems to be strictly equivalent to
-	  translation() += t;
-To be more relevent (and consistent with the name of the method), one should
-even use
-		translation() = t;
-however, it should be noted that for the moment, the informations about the
-center of transformations are contained in the _translation attribute (see for
-example AffineTransformation3d::setRotationAffine or DecomposedAffineTransformation3d::transAffine) so that
- using this last form would reset the center of transformation to the origin
-(0,0,0).
-
-see NOTE, line 38. */
-{
-  AimsData<float> THomogene(4,4), AffineTransformation3dHomogene(4,4);
-
-
-  THomogene(3,0) = t.item(0);
-  THomogene(3,1) = t.item(1);
-  THomogene(3,2) = t.item(2);
-  THomogene(0,0) = THomogene(1,1) = THomogene(2,2) = THomogene(3,3) = 1.0;
-
-  AffineTransformation3dHomogene(3,0) = translation().item(0);
-  AffineTransformation3dHomogene(3,1) = translation().item(1);
-  AffineTransformation3dHomogene(3,2) = translation().item(2);
-  AffineTransformation3dHomogene(0,0) = rotation()(0,0);  //Transp
-  AffineTransformation3dHomogene(0,1) = rotation()(1,0);
-  AffineTransformation3dHomogene(0,2) = rotation()(2,0);
-  AffineTransformation3dHomogene(1,0) = rotation()(0,1);
-  AffineTransformation3dHomogene(1,1) = rotation()(1,1);
-  AffineTransformation3dHomogene(1,2) = rotation()(2,1);
-  AffineTransformation3dHomogene(2,0) = rotation()(0,2);
-  AffineTransformation3dHomogene(2,1) = rotation()(1,2);
-  AffineTransformation3dHomogene(2,2) = rotation()(2,2);
-  AffineTransformation3dHomogene(3,3) = 1.0;
-
-  AimsData<float> tmp = AffineTransformation3dHomogene.cross( THomogene ); // produit transpose
-
-  translation().item(0) = tmp(3,0);
-  translation().item(1) = tmp(3,1);
-  translation().item(2) = tmp(3,2);
-  rotation()(0,0) = tmp(0,0);
-  rotation()(0,1) = tmp(1,0);
-  rotation()(0,2) = tmp(2,0);
-  rotation()(1,0) = tmp(0,1);
-  rotation()(1,1) = tmp(1,1);
-  rotation()(1,2) = tmp(2,1);
-  rotation()(2,0) = tmp(0,2);
-  rotation()(2,1) = tmp(1,2);
-  rotation()(2,2) = tmp(2,2);
-}
 
 //-----------------------------------------------------------------------------
 void AffineTransformation3d::setRotationAffine( float rx, float ry, float rz,
@@ -626,9 +319,9 @@ void AffineTransformation3d::setRotationAffine( float rx, float ry, float rz,
 
 Currently this methid destroys any already specified translation.
 We could avoid this side effect with
-  translation().item(0) += tmp(3,0);
-  translation().item(1) += tmp(3,1);
-  translation().item(2) += tmp(3,2);
+  matrix()(0, 3) += tmp(3,0);
+  matrix()(1, 3) += tmp(3,1);
+  matrix()(2, 3) += tmp(3,2);
 in the current code but it would be better to follow specification in NOTE,
 line 38. */
 {
@@ -652,9 +345,9 @@ line 38. */
 
 
   AimsData<float> tmp = T.cross( vectRot.cross( Tmoins1 ) ); //Produit transpos
-  translation().item(0) = tmp(3,0);
-  translation().item(1) = tmp(3,1);
-  translation().item(2) = tmp(3,2);
+  _matrix[12] = tmp(3,0);
+  _matrix[13] = tmp(3,1);
+  _matrix[14] = tmp(3,2);
 
   rotation()(0,0) = tmp(0,0);  //Transpo
   rotation()(0,1) = tmp(1,0);
@@ -667,6 +360,20 @@ line 38. */
   rotation()(2,2) = tmp(2,2);
 }
 
+
+//-----------------------------------------------------------------------------
+void AffineTransformation3d::setMatrix(const carto::VolumeRef<float> & mat)
+{
+  for(int16_t i=0; i<3; i++)
+    for(int16_t j=0; j<3; j++)
+      rotation()(i, j) = mat->at(i, j);
+}
+
+//-----------------------------------------------------------------------------
+void AffineTransformation3d::setMatrix(const AimsData<float> & mat)
+{
+  setMatrix(carto::VolumeRef<float>(mat.volume()));
+}
 
 //-----------------------------------------------------------------------------
 AimsData<float> AffineTransformation3d::rotationaroundx(float rx)
@@ -833,78 +540,18 @@ enough and better. see NOTE, line 38. */
 // }
 
 
-AffineTransformation3d & AffineTransformation3d::operator *= ( const AffineTransformation3d & m )
+AffineTransformation3d & AffineTransformation3d::operator *= ( const AffineTransformation3dBase & m )
 {
-  Point3df	r2 = transform( m.translation() );
-  _translation[0] = r2[0];
-  _translation[1] = r2[1];
-  _translation[2] = r2[2];
-
-  float	x[3];
-  x[0] = _rotation(0,0);
-  x[1] = _rotation(0,1);
-  x[2] = _rotation(0,2);
-  _rotation(0,0) = x[0] * m._rotation(0,0) + x[1] * m._rotation(1,0)
-      + x[2] * m._rotation(2,0);
-  _rotation(0,1) = x[0] * m._rotation(0,1) + x[1] * m._rotation(1,1)
-      + x[2] * m._rotation(2,1);
-  _rotation(0,2) = x[0] * m._rotation(0,2) + x[1] * m._rotation(1,2)
-      + x[2] * m._rotation(2,2);
-  x[0] = _rotation(1,0);
-  x[1] = _rotation(1,1);
-  x[2] = _rotation(1,2);
-  _rotation(1,0) = x[0] * m._rotation(0,0) + x[1] * m._rotation(1,0)
-      + x[2] * m._rotation(2,0);
-  _rotation(1,1) = x[0] * m._rotation(0,1) + x[1] * m._rotation(1,1)
-      + x[2] * m._rotation(2,1);
-  _rotation(1,2) = x[0] * m._rotation(0,2) + x[1] * m._rotation(1,2)
-      + x[2] * m._rotation(2,2);
-  x[0] = _rotation(2,0);
-  x[1] = _rotation(2,1);
-  x[2] = _rotation(2,2);
-  _rotation(2,0) = x[0] * m._rotation(0,0) + x[1] * m._rotation(1,0)
-      + x[2] * m._rotation(2,0);
-  _rotation(2,1) = x[0] * m._rotation(0,1) + x[1] * m._rotation(1,1)
-      + x[2] * m._rotation(2,1);
-  _rotation(2,2) = x[0] * m._rotation(0,2) + x[1] * m._rotation(1,2)
-      + x[2] * m._rotation(2,2);
-
+  AffineTransformation3dBase::operator *= ( m );
   return( *this );
 }
-
-
-/*
-AffineTransformation3d & AffineTransformation3d::operator += ( const AffineTransformation3d & t )
-{
-  _translation[0] += t._translation[0];
-  _translation[1] += t._translation[1];
-  _translation[2] += t._translation[2];
-
-  _rotation[0][0] += t._rotation[0][0];
-  _rotation[0][1] += t._rotation[0][1];
-  _rotation[0][2] += t._rotation[0][2];
-  _rotation[1][0] += t._rotation[1][0];
-  _rotation[1][1] += t._rotation[1][1];
-  _rotation[1][2] += t._rotation[1][2];
-  _rotation[2][0] += t._rotation[2][0];
-  _rotation[2][1] += t._rotation[2][1];
-  _rotation[2][2] += t._rotation[2][2];
-
-  return( *this );
-}
-*/
 
 
 AffineTransformation3d AffineTransformation3d::operator - () const
 {
-  AffineTransformation3d t;
-
-  t._translation = -_translation;
-  t._rotation = -VolumeRef<float>( _rotation.volume() );
-
-  return t;
+  AffineTransformation3dBase t = AffineTransformation3dBase::operator - ();
+  return AffineTransformation3d( t );
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -915,124 +562,23 @@ AffineTransformation3d operator * (
   const AffineTransformation3d& AffineTransformation3d1, 
   const AffineTransformation3d& AffineTransformation3d2 )
 {
-  AffineTransformation3d AffineTransformation3dOut;
-
-  AimsData< float > mat1(4,4), mat2(4,4), mat3(4,4);
-  
-  int i, j, k;
-
-  for(i=0;i<3;++i)
-    for(j=0;j<3;++j)
-      {
-	mat1(j,i) = AffineTransformation3d1.rotation()(i,j);
-	mat2(j,i) = AffineTransformation3d2.rotation()(i,j);
-      }
-
-  for(i=0;i<3;++i)
-    {
-      mat1(3,i) = AffineTransformation3d1.translation().item(i);
-      mat2(3,i) = AffineTransformation3d2.translation().item(i);
-      mat1(i,3) = mat2(i,3) = 0;
-    }
-
-  mat1(3,3) = mat2(3,3) = 1.0;
-  mat3 = 0;
-
-  ForEach2d(mat3, i, j)
-    {
-      for(k=0;k<4;++k)
-        mat3(i,j) += mat2(i,k)*mat1(k,j);
-    }
-  
-  
-  for(i=0;i<3;++i)
-    {
-      AffineTransformation3dOut.translation()[i] = mat3(3,i);
-    }
-  
-  for(i=0;i<3;++i)
-    for(j=0;j<3;++j)
-      {
-	AffineTransformation3dOut.rotation()(j,i) = mat3(i,j);
-      }
-  // cout << "Compose  : " << AffineTransformation3dOut << endl << endl;
-
-  return AffineTransformation3dOut;
+  AffineTransformation3dBase out
+    = operator * ( static_cast<const AffineTransformation3dBase &>(
+        AffineTransformation3d1 ),
+      static_cast<const AffineTransformation3dBase &>(
+        AffineTransformation3d2 ) );
+  return AffineTransformation3d( out );
 }
 
-}
-
-//-----------------------------------------------------------------------------
-vector<float> AffineTransformation3d::toVector() const
-{
-  vector<float> vec( 16 );
-  vec[0] = _rotation( 0,0 );
-  vec[1] = _rotation( 0,1 );
-  vec[2] = _rotation( 0,2 );
-  vec[3] = _translation[0];
-  vec[4] = _rotation( 1,0 );
-  vec[5] = _rotation( 1,1 );
-  vec[6] = _rotation( 1,2 );
-  vec[7] = _translation[1];
-  vec[8] = _rotation( 2,0 );
-  vec[9] = _rotation( 2,1 );
-  vec[10] = _rotation( 2,2 );
-  vec[11] = _translation[2];
-  vec[12] = 0;
-  vec[13] = 0;
-  vec[14] = 0;
-  vec[15] = 1.;
-  return vec;
-}
-
-
-//-----------------------------------------------------------------------------
-vector<float> AffineTransformation3d::toColumnVector() const
-{
-  vector<float> vec( 16 );
-  vec[0] = _rotation( 0,0 );
-  vec[1] = _rotation( 1,0 );
-  vec[2] = _rotation( 2,0 );
-  vec[3] = 0;
-  vec[4] = _rotation( 0,1 );
-  vec[5] = _rotation( 1,1 );
-  vec[6] = _rotation( 2,1 );
-  vec[7] = 0;
-  vec[8] = _rotation( 0,2 );
-  vec[9] = _rotation( 1,2 );
-  vec[10] = _rotation( 2,2 );
-  vec[11] = 0;
-  vec[12] = _translation[0];
-  vec[13] = _translation[1];
-  vec[14] = _translation[2];
-  vec[15] = 1.;
-  return vec;
-}
-
-
-//-----------------------------------------------------------------------------
-void AffineTransformation3d::fromColumnVector( const float* vec )
-{
-  _rotation( 0, 0 ) = vec[0];
-  _rotation( 1, 0 ) = vec[1];
-  _rotation( 2, 0 ) = vec[2];
-  _translation[0] = vec[3];
-  _rotation( 0, 1 ) = vec[4];
-  _rotation( 1, 1 ) = vec[5];
-  _rotation( 2, 1 ) = vec[6];
-  _translation[1] = vec[7];
-  _rotation( 0, 2 ) = vec[8];
-  _rotation( 1, 2 ) = vec[9];
-  _rotation( 2, 2 ) = vec[10];
-  _translation[2] = vec[11];
 }
 
 //-----------------------------------------------------------------------------
 namespace aims
 {
 
-void transformBoundingBox( const AffineTransformation3d &AffineTransformation3d, const Point3df & pmin1,
-		const Point3df & pmax1, Point3df & pmin2, Point3df & pmax2 )
+void transformBoundingBox(
+  const AffineTransformation3d &AffineTransformation3d, const Point3df & pmin1,
+  const Point3df & pmax1, Point3df & pmin2, Point3df & pmax2 )
 {
   pmin2 = pmax2 = AffineTransformation3d.transform( pmin1 );
   Point3df	p = Point3df( pmax1[0], pmin1[1], pmin1[2] ), p2;

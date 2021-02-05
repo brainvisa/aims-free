@@ -140,10 +140,14 @@ public:
 /* // these operators are not defined in cartodata volumes
   int operator == ( const AimsData_%Template1typecode% & );
   int operator == ( const %Template1% & );
+  int operator != ( const AimsData_%Template1typecode% & );
+  int operator != ( const %Template1% & );
 */
 
   AimsData_%Template1typecode% clone () const /ReleaseGIL/;
   void fillBorder( const %Template1% & ) /ReleaseGIL/;
+
+  bool empty() const;
 
   void fill( const %Template1% & ) /ReleaseGIL/;
 %MethodCode

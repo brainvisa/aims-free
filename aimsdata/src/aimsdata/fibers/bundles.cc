@@ -48,6 +48,7 @@
 #include <aims/fibers/bundles.h>
 // FIXME: temporary
 #include <aims/fibers/trackvisbundlereader.h>
+#include <aims/fibers/mrtrixbundlereader.h>
 #include <cartobase/type/byte_order.h>
 #include <cartobase/config/verbose.h>
 #include <cartobase/type/string_conversion.h>
@@ -59,6 +60,9 @@
 #include <stdexcept>
 #include <math.h>
 #include <iostream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 
 using namespace std;
@@ -107,7 +111,7 @@ private:
 //           in aimsdata (io ?) or cartobase (attributed ?)
 
 std::string fileNameAndParameters( const std::string &,
-                                   carto::Object );
+                                   carto::PropertySet& );
 
 
 
@@ -285,19 +289,6 @@ void BundleProducer::terminateFiber( const BundleInfo &bundleInfo,
 }
 
 //-----------------------------------------------------------------------------
-void BundleProducer::terminateFiber( const BundleInfo &bundleInfo,
-                                     const FiberInfo &fiberInfo,
-                                     FiberPoint* fiber,
-                                     int &fiberSize )
-{
-
-  for( BundleListenerList::iterator i = _bundleListeners.begin();
-       i != _bundleListeners.end(); ++i ) {
-    (*i)->fiberTerminated( *this, bundleInfo, fiberInfo, fiber, fiberSize );
-  }
-}
-
-//-----------------------------------------------------------------------------
 void BundleProducer::addFiberPoint( const BundleInfo &bundleInfo, 
                                     const FiberInfo &fiberInfo,
                                     const FiberPoint &fiberPoint )
@@ -355,13 +346,6 @@ void BundleListener::fiberTerminated( const BundleProducer &, const BundleInfo &
 {
 }
 
-
-//-----------------------------------------------------------------------------
-void BundleListener::fiberTerminated( const BundleProducer &, const BundleInfo &,
-                                      const FiberInfo & ,
-                                      FiberPoint * , int & )
-{
-}
 
 //-----------------------------------------------------------------------------
 void BundleListener::newFiberPoint( const BundleProducer &, const BundleInfo &,
@@ -616,6 +600,9 @@ void BundleReader::read()
   if( _fileName.length() >= 4
       && _fileName.substr( _fileName.size() - 4 ) == ".trk" )
     low_reader.reset( new TrackvisBundleReader( _fileName ) );
+  else if( _fileName.length() >= 4
+      && _fileName.substr( _fileName.size() - 4 ) == ".tck" )
+    low_reader.reset( new MRTrixBundleReader( _fileName ) );
   else
     low_reader.reset( new ConnectomistBundlesReader( _fileName ) );
 
@@ -632,6 +619,9 @@ Object BundleReader::readHeader()
   if( _fileName.length() >= 4
       && _fileName.substr( _fileName.size() - 4 ) == ".trk" )
     low_reader.reset( new TrackvisBundleReader( _fileName ) );
+  else if( _fileName.length() >= 4
+      && _fileName.substr( _fileName.size() - 4 ) == ".tck" )
+    low_reader.reset( new MRTrixBundleReader( _fileName ) );
   else
     low_reader.reset( new ConnectomistBundlesReader( _fileName ) );
 
@@ -687,6 +677,15 @@ void ConnectomistBundlesReader::read()
     && _fileName.substr( _fileName.size() - 4 ) == ".trk" )
   {
     TrackvisBundleReader tbr( _fileName );
+    tbr.read();
+
+    return;
+  }
+
+  if( _fileName.length() >= 4
+    && _fileName.substr( _fileName.size() - 4 ) == ".tck" )
+  {
+    MRTrixBundleReader tbr( _fileName );
     tbr.read();
 
     return;
@@ -763,13 +762,13 @@ void ConnectomistBundlesReader::read()
   int fiberRead = 0;
   do {
     startBundle( currentBundle );
-    bool noMoreBundle;
+    //bool noMoreBundle;
     int stopOnFiber;
     if ( it == bundles.end() ) {
-      noMoreBundle = true;
+      //noMoreBundle = true;
       stopOnFiber = fiberCount;
     } else {
-      noMoreBundle = false;
+      //noMoreBundle = false;
       bundleName = (*it)->value<string>();
       ++it;
       stopOnFiber = static_cast<int>( (*it)->value<double>() );
@@ -851,6 +850,13 @@ Object ConnectomistBundlesReader::readHeader()
   {
   }
   header->setProperty( "voxel_size", vs );
+
+  // get data size
+  struct stat st;
+  if( ::stat( ( _fileName + ".bundlesdata" ).c_str(), &st ) == 0 )
+  {
+    header->setProperty( "data_size", st.st_size );
+  }
 
   return header;
 }
@@ -1288,7 +1294,7 @@ void BundleToGraph::noMoreBundle( const BundleProducer & )
       _relatveFiberStartPos = bmin + (bmax - bmin ) / 2;
     }
     Graph::iterator iv, ev = _meshResult->end();
-    int i, n;
+    int n;
     for( iv=_meshResult->begin(); iv!=ev; ++iv )
     {
       rc_ptr<AimsTimeSurface<2, Void> > mesh;

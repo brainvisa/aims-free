@@ -41,6 +41,8 @@
 #include <aims/signalfilter/gslices.h>
 
 
+/** 3D Deriche's recursive gaussian smoothing filter
+*/
 template< class T >
 class Gaussian3DSmoothing
 {
@@ -63,9 +65,9 @@ template< class T > inline
 Gaussian3DSmoothing< T >::Gaussian3DSmoothing( float sx, float sy, float sz )
   : sigx( sx ), sigy( sy ), sigz( sz )
 {
-  ASSERT( sigx >= 0.1f && sigx <= 100.0f );
-  ASSERT( sigy >= 0.1f && sigy <= 100.0f );
-  ASSERT( sigz >= 0.1f && sigz <= 100.0f );
+//   ASSERT( sigx >= 0.1f && sigx <= 100.0f );
+//   ASSERT( sigy >= 0.1f && sigy <= 100.0f );
+//   ASSERT( sigz >= 0.1f && sigz <= 100.0f );
 }
 
 

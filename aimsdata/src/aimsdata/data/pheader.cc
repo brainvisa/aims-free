@@ -155,6 +155,7 @@ bool PythonHeader::readMinf( const string &filename )
       setProperty( "byte_swapping", bs );
     else if( hasProperty( "byte_swapping" ) )
       removeProperty( "byte_swapping" );
+    
     return true;
   }
   catch( file_error & ) {
@@ -198,17 +199,31 @@ bool PythonHeader::writeMinf( const string & filename ) const
   string		uuid;
   Object options = Object::value( Dictionary() );
   options->setProperty( "syntaxset", rc_ptr<SyntaxSet>( syntax(), true ) );
-  if( !getProperty( "uuid", uuid ) )
+  
+  
+  try
+  {
+    Object u = getProperty("uuid");
+    uuid = u->getString();
+  }
+  catch( exception & )
+  {
+  }
+  
+  if( uuid.empty() )
     try
     {
       Reader<GenericObject> r( filename );
       r.setOptions( options );
       Object oh( r.read() );
-      oh->getProperty( "uuid", uuid );
+      Object u = oh->getProperty("uuid");
+      uuid = u->getString();    
     }
     catch( exception & )
     {
     }
+    
+  //std::cout << "writeMinf, setting uuid " << uuid << std::endl << std::flush;
   if( !uuid.empty() )
     ph.setProperty( "uuid", uuid );
 
@@ -239,16 +254,14 @@ bool PythonHeader::writeMinf( const string & filename ) const
 
 Header* PythonHeader::cloneHeader( bool keepUuid ) const
 {
-  /*
-  cout << "PythonHeader::cloneHeader: " << this << ", " << d->owner 
-       << ", props: " << &const_cast<PythonHeader *>(this)->getValue() 
-       << endl;
-  PythonHeader	*ph = new PythonHeader( *this );
-  cout << "PythonHeader::cloneHeader after cloning: " << ph << "," 
-       << ph->d->owner << ", props: " << &ph->getValue() << endl;
-  return ph;
-  */
+//   cout << "PythonHeader::cloneHeader: " << this 
+//        << ", props: " << &const_cast<PythonHeader *>(this)->getValue() 
+//        << endl;
+
   PythonHeader* ph = new PythonHeader( *this );
+//   cout << "PythonHeader::cloneHeader after cloning: " << ph << "," 
+//        << ", props: " << &ph->getValue() << endl;
+       
   // remove uuid property to keep it unique
   if( !keepUuid && ph->hasProperty( "uuid" ) )
     ph->removeProperty( "uuid" );
@@ -259,7 +272,7 @@ Header* PythonHeader::cloneHeader( bool keepUuid ) const
 
 void PythonHeader::copy( const PythonHeader & ph, bool keepUuid )
 {
-  /*
+/*
   cout << "PythonHeader::copy this: " << this << ", other: " << &ph << endl;
   cout << "this:" << endl;
   PythonWriter	pw;
@@ -267,11 +280,11 @@ void PythonHeader::copy( const PythonHeader & ph, bool keepUuid )
   pw.write( *this );
   cout << "other:" << endl;
   pw.write( ph );
-  */
-
+*/
   if( this != &ph )
     copyProperties( Object::reference( const_cast<PythonHeader &>( ph )
       .value<PropertySet>() ) );
+  
   if( !keepUuid && hasProperty( "uuid" ) )
     removeProperty( "uuid" );
 }

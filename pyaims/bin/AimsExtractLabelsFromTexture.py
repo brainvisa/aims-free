@@ -33,6 +33,8 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 from optparse import OptionParser
 from soma.aims import texturetools
 from soma import aims

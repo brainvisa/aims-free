@@ -110,8 +110,8 @@ namespace aims {
   }
 
   DiscreteU::DiscreteU( const DiscreteU & other ):
-    _values( other._values ),
-    _support( other._support )
+    _support( other._support ),
+    _values( other._values )
   {}
 
   DiscreteU::~DiscreteU()
@@ -223,8 +223,8 @@ namespace aims {
   }
 
   DiscreteUB::DiscreteUB( const DiscreteUB & other ):
-    _values( other._values ),
-    _support( other._support )
+    _support( other._support ),
+    _values( other._values )
   {}
 
   DiscreteUB::~DiscreteUB()
@@ -528,7 +528,7 @@ namespace aims {
   {
     _dir.assign( 4, true );
     _dir[3] = false;
-    for( int i = 0; i < dir.size() && i < _dir.size(); ++i )
+    for( std::vector<bool>::size_type i = 0; i < dir.size() && i < _dir.size(); ++i )
       _dir[i] = dir[i];
   }
 
@@ -567,7 +567,7 @@ namespace aims {
     else
       _pyramid.reserve( pyramid.size() );
 
-    for( int i = 0; i < pyramid.size(); ++i )
+    for( size_t i = 0; i < pyramid.size(); ++i )
     {
       if( is_coeff )
         _pyramid[i].setCoeff( pyramid[i] );

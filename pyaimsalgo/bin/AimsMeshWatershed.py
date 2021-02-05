@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 ############################################################################
 # This software and supporting documentation are distributed by
 # CEA/NeuroSpin, Batiment 145, 91191 Gif-sur-Yvette cedex, France.
@@ -24,6 +24,7 @@ Author: Sandrine Lefranc, 2015
 
 
 # python modules
+from __future__ import absolute_import
 import sys
 try:
     import argparse

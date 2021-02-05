@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+from __future__ import absolute_import
 import os
 import shutil
 import soma.subprocess
@@ -9,9 +10,11 @@ import errno
 import warnings
 
 import soma.test_utils
+from six.moves import map
+from six.moves import zip
 
 
-class ImageFileComparison:
+class ImageFileComparison(object):
 
     """ Class to compare test command output image files.
     """
@@ -73,7 +76,7 @@ class ImageFileComparison:
         i2 = None
 
 
-class TextFileComparison:
+class TextFileComparison(object):
 
     """ Class to compare test command output text files.
     """
@@ -106,7 +109,7 @@ class TextFileComparison:
         testcase.assertEqual(f1content, f2content, msg)
 
 
-class FileComparison:
+class FileComparison(object):
 
     """ Class to compare test command output files.
     """
@@ -163,7 +166,7 @@ class FileComparison:
             ImageFileComparison.assertEqual(testcase, file1, file2, msg)
 
 
-class CommandTest:
+class CommandTest(object):
 
     """ CommandsTest class references a test command and its output files.
         It is used for testing a command and compare its output files to
@@ -228,26 +231,10 @@ class CommandTest:
             raise RuntimeError(
                 'Command exited because run directory \'%s\' does not exists.'
                 % (run_directory,))
-        if sys.version_info >= (2, 7):
-            retcode = soma.subprocess.call(self.__command,
-                                      stdout=fout,
-                                      stderr=ferr,
-                                      cwd=run_directory)
-        else:
-            # python 2.6 / Mac cat get a INTR signal
-            # https://bugs.python.org/issue1068268
-            p = soma.subprocess.Popen(self.__command,
-                                 stdout=fout,
-                                 stderr=ferr,
-                                 cwd=run_directory)
-            while p.returncode is None:
-                try:
-                    p.communicate()
-                    p.wait()
-                except OSError as e:
-                    if e.errno != errno.EINTR:
-                        raise
-            retcode = p.returncode
+        retcode = soma.subprocess.call(self.__command,
+                                       stdout=fout,
+                                       stderr=ferr,
+                                       cwd=run_directory)
         if retcode != 0:
             raise RuntimeError(
                 'Command exit code was not 0. code: %d, Command: %s'
@@ -423,8 +410,8 @@ class CommandsTestManager(soma.test_utils.SomaTestCase):
         files: list of tuples
             list of tuples (run_file, ref_file).
         """
-        files = zip(self.get_run_files(testcommand),
-                    self.get_ref_files(testcommand))
+        files = list(zip(self.get_run_files(testcommand),
+                    self.get_ref_files(testcommand)))
         if check_ref_files:
             ref_files = set([t[1] for t in files])
             real_ref_files = set(

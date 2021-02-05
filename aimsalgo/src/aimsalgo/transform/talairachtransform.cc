@@ -197,7 +197,7 @@ TalairachTransformation::withoutMaskComputation()
     matriceRot2(i,2) = cross2[i] ;
   }
   
-  _motion->rotation() = matriceRot2.cross(matriceRot1) ;
+  _motion->setMatrix(matriceRot2.cross(matriceRot1));
   
  //calcul de la matrice de scaling
 
@@ -205,7 +205,7 @@ TalairachTransformation::withoutMaskComputation()
   _motion->scale( Point3df(scale1, scale1, scale1), Point3df(scale2, scale2, scale2) ) ;
   
   //calcul du vecteur de translation
-  _motion->translation() = AC2 - AC1 ;
+  _motion->setTranslation( AC2 - AC1 );
   
   return *_motion ;  
 }
@@ -273,7 +273,7 @@ TalairachTransformationStrategy::transformation( const vector<Point3df>& base1, 
     matriceRot2(i,2) = cross2[i] ;
   }
   
-  motion.rotation() = matriceRot2.cross(matriceRot1) ;
+  motion.setMatrix(matriceRot2.cross(matriceRot1));
   
  //calcul de la matrice de scaling
 
@@ -281,7 +281,7 @@ TalairachTransformationStrategy::transformation( const vector<Point3df>& base1, 
   motion.scale( Point3df(scale1, scale1, scale1), Point3df(scale2, scale2, scale2) ) ;
   
   //calcul du vecteur de translation
-  motion.translation() = AC2 - AC1 ;
+  motion.setTranslation( AC2 - AC1 );
   
   return motion ;
 

@@ -40,11 +40,12 @@
 # 	This file contains TaperingTransform class
 #
 #########################################################################
+from __future__ import absolute_import
 import sys, math
 
 from soma import aims
 
-class TaperingTransform :
+class TaperingTransform( object ) :
 
 	def __init__( self, coefficients) :
 		self._coefficients = coefficients

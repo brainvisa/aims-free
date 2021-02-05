@@ -63,7 +63,8 @@ class Texture
 {
 public:
   Texture() { }
-  Texture(size_t n): _data(n) { }
+  Texture( size_t n ): _data( n ) { }
+  Texture( size_t n, const T & value ): _data( n, value ) { }
   virtual ~Texture() { }
 
   size_t nItem() const { return _data.size(); }
@@ -124,8 +125,14 @@ class TimeTexture : public virtual carto::RCObject,
     TimeTexture(int ntimes, size_t nitems) : 
       std::map< int, Texture< T > >() 
     {
-      for (int i=0; i<ntimes; ++i)
-        (*this)[i]=Texture<T>(nitems);
+      for( int i=0; i<ntimes; ++i )
+        (*this)[i] = Texture<T>( nitems );
+    }
+    TimeTexture( int ntimes, size_t nitems, const T & value ) :
+      std::map< int, Texture< T > >()
+    {
+      for( int i=0; i<ntimes; ++i )
+        (*this)[i] = Texture<T>( nitems, value );
     }
     virtual ~TimeTexture() {}
 

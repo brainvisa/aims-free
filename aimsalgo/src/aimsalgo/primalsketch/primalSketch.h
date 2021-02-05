@@ -216,11 +216,7 @@ namespace aims
          ScaleLevel<Geom,Text> *levelDown;
          levelDown=_scaleSpace->Scale(tmin);
 
-         int nbBlobs;
-
          levelUp->DetectBlobs( _mask );
-
-         nbBlobs = levelUp->nbBlobs();
 
          GreyLevelBlob<Site> *glBlob;
          ScaleSpaceBlob<Site> *ssBlob;
@@ -867,7 +863,7 @@ namespace aims
         std::map<float, BlobMeasurements > statsM, statsSD;
         FILE *fileStats;
         float t;
-        float max_int, mean_int, max_cont, mean_cont, area, areamoy, areavar, tvalue, tv2;
+        float max_int, mean_int, max_cont, mean_cont, area, areamoy, areavar, tvalue;
         BlobMeasurements *measurements;
         GreyLevelBlob<Site> *glBlob, *glBlob1, *glBlob2;
         int res;
@@ -891,10 +887,22 @@ namespace aims
             while (!feof(fileStats))
             {
                 res = fscanf(fileStats, "%f\n", &t); // !!! this defines the stat file format (simple)
+                if ( res != 1 )
+                {
+                  std::cerr << "file corrupted" << std::endl;
+                }
                 res = fscanf(fileStats, "%f %f %f %f %f", &max_int, &mean_int, &max_cont, &mean_cont, &area);
+                if ( res != 5 )
+                {
+                  std::cerr << "file corrupted" << std::endl;
+                }
                 measurements=new BlobMeasurements(max_int, mean_int, max_cont, mean_cont, area);
                 statsM.insert(std::pair<float, BlobMeasurements>(t, *measurements));
                 res = fscanf(fileStats, "%f %f %f %f %f", &max_int, &mean_int, &max_cont, &mean_cont, &area);
+                if ( res != 5 )
+                {
+                  std::cerr << "file corrupted" << std::endl;
+                }
                 measurements=new BlobMeasurements(max_int, mean_int, max_cont, mean_cont, area);
                 statsSD.insert(std::pair<float, BlobMeasurements>(t, *measurements));
             }
@@ -956,7 +964,7 @@ namespace aims
             typename std::list<GreyLevelBlob<Site>*>::iterator itGLBlobs=ssBlob->glBlobs.begin();
             BlobMeasurements measure;
             float t2,t1, dt;
-            max_int=0; mean_int=0; max_cont=0; mean_cont=0; area=0; areamoy=0; areavar=0; tvalue=0, tv2 = 0;
+            max_int=0; mean_int=0; max_cont=0; mean_cont=0; area=0; areamoy=0; areavar=0; tvalue=0;
             glBlob1=*itGLBlobs;
             t1=glBlob1->GetScale();
             dt=log(ssBlob->TopBifurcation()->tMid())-log(t1);

@@ -159,7 +159,7 @@ void QATreeWidget::mouseReleaseEvent( QMouseEvent* event )
 }
 
 
-void QATreeWidget::leaveEvent( QEvent* ev )
+void QATreeWidget::leaveEvent( QEvent* /*ev*/ )
 {
   if( hasMouseTracking() )
     emit cursorMoved( 0, 0 );

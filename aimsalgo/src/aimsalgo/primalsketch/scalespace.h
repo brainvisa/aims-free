@@ -365,7 +365,7 @@ namespace aims
         {
             std::cout << "Smoothing from previous scale " << std::flush;
 
-            float tlow, tmax;
+            float tlow = 0.0f, tmax = 0.0f;
             AimsData<T> imageLow;
             typename std::map<float, ScaleLevel<AimsData<T>, AimsData<T> >*>::const_iterator itS = scales.begin();
 
@@ -439,7 +439,7 @@ namespace aims
       {
         std::cout << "Smoothing from previous scale " << std::flush;
 
-        float tlow, tmax;
+        float tlow = 0.0f, tmax = 0.0f;
         Texture<T> imageLow;
         typename std::map<float, ScaleLevel<AimsSurface<D>, Texture<T> >*>::const_iterator itS = scales.begin();
         for ( ; itS!=scales.end(); ++itS)

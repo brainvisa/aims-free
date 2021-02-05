@@ -35,7 +35,7 @@
 #define AIMS_CONNECTIVITY_STRUCTURING_ELEMENT_2_H
 
 //--- aims -------------------------------------------------------------------
-#include <aims/vector/vector.h>                                     // Point3d
+#include <aims/vector/vector.h>                                     // Point3dl
 //--- carto ------------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>                           // smart pointers
 #include <cartobase/smart/refwrapper.h>               // wrapper to references
@@ -91,17 +91,17 @@ namespace aims {
       //----------------------------------------------------------------------
       // TYPEDEF
       //----------------------------------------------------------------------
-      /// \typedef iterator over Point3d of the aims::StructuringElement.
-      typedef std::vector<Point3d>::iterator iterator;
-      /// \typedef const_iterator over Point3d of the
+      /// \typedef iterator over Point3dl of the aims::StructuringElement.
+      typedef std::vector<Point3dl>::iterator iterator;
+      /// \typedef const_iterator over Point3dl of the
       ///          const aims::StructuringElement.
-      typedef std::vector<Point3d>::const_iterator const_iterator;
+      typedef std::vector<Point3dl>::const_iterator const_iterator;
 
       //----------------------------------------------------------------------
       // CONSTRUCTOR
       //----------------------------------------------------------------------
       StructuringElement(): _vector() {}
-      StructuringElement( const std::vector<Point3d> & vector ):
+      StructuringElement( const std::vector<Point3dl> & vector ):
         _vector(vector) {}
       virtual ~StructuringElement() {}
       // Use default compiler-supplied copy constructor and assignment operator
@@ -117,7 +117,7 @@ namespace aims {
       iterator end() { return _vector.end(); }
       /// \brief Return const_iterator to beginning
       /// \return aims::StructuringElement::const_iterator that points to
-      ///         the beginning Point3d
+      ///         the beginning Point3dl
       const_iterator begin() const { return _vector.begin(); }
       /// \brief Return const_iterator to end
       /// \return aims::StructuringElement::const_iterator that points to
@@ -129,10 +129,10 @@ namespace aims {
       // ACCESSOR
       //----------------------------------------------------------------------
       size_t size() const { return _vector.size(); }
-      /// \brief Return std::vector<Point3d>
-      /// \return std::vector<Point3d> that contains 3d positions of the
+      /// \brief Return std::vector<Point3dl>
+      /// \return std::vector<Point3dl> that contains 3d positions of the
       ///         structuring element
-      const std::vector<Point3d> & getVector() const { return _vector; }
+      const std::vector<Point3dl> & getVector() const { return _vector; }
       /// \brief Maximum distance to \c origin in each direction.
       /// Warning: it is computed at each call.
       /// \return std::vector<uint16_t> that contains the borders availables
@@ -143,12 +143,12 @@ namespace aims {
       ///         vector[3]: amplitude in high y direction
       ///         vector[4]: amplitude in low z direction
       ///         vector[5]: amplitude in high z direction
-      std::vector<int> getAmplitude( const Point3d & origin = Point3d(0,0,0) ) const;
+      std::vector<int> getAmplitude( const Point3dl & origin = Point3dl(0,0,0) ) const;
 
       /// Clone the StructuringElement
       virtual StructuringElement* clone() const { return new StructuringElement(*this); }
     protected:
-      std::vector<Point3d> _vector;
+      std::vector<Point3dl> _vector;
   };
 
   //==========================================================================
@@ -242,10 +242,10 @@ namespace aims {
       const_iterator end() const { return (*this)->end(); }
 
       size_t size() const { return (*this)->size(); }
-      const std::vector<Point3d> & getVector() const
+      const std::vector<Point3dl> & getVector() const
       { return (*this)->getVector(); }
       std::vector<int>
-      getAmplitude( const Point3d & origin = Point3d(0,0,0) ) const
+      getAmplitude( const Point3dl & origin = Point3dl(0,0,0) ) const
       { return (*this)->getAmplitude(origin); }
   };
 
@@ -279,13 +279,20 @@ namespace aims {
         // Defined methods
         void setParameters( const double amplitude = 1.,
                             const bool usecenter = false );
-        void setParameters( const Point3d & origin,
+        void setParameters( const Point3dl & origin,
                             const double amplitude = 1.,
                             const bool usecenter = false );
+        void setParameters( const Point3d & origin,
+                            const double amplitude = 1,
+                            const bool usecenter = false );   
         void setParameters( const std::vector<double> & amplitude,
                             const bool usecenter = false );
+        void setParameters( const Point3d & origin,
+                            const std::vector<double> & amplitude,
+                            const bool usecenter = false );
+        
         // Pure virtual methods:
-        virtual void setParameters( const Point3d & origin,
+        virtual void setParameters( const Point3dl & origin,
                                     const std::vector<double> & amplitude,
                                     const bool usecenter = false ) = 0;
     };
@@ -327,10 +334,18 @@ namespace aims {
                               const double amplitude = 1.,
                               const bool usecenter = false );
         static Shape* create( const std::string & type,
+                              const Point3dl & origin,
+                              const double amplitude = 1.,
+                              const bool usecenter = false );
+        static Shape* create( const std::string & type,
                               const std::vector<double> & amplitude,
                               const bool usecenter = false );
         static Shape* create( const std::string & type,
                               const Point3d & origin,
+                              const std::vector<double> & amplitude,
+                              const bool usecenter = false );
+        static Shape* create( const std::string & type,
+                              const Point3dl & origin,
                               const std::vector<double> & amplitude,
                               const bool usecenter = false );
         static void registerShape( const std::string & type,
@@ -377,7 +392,7 @@ namespace aims {
          ///         for the structuring element.
         virtual Matrix3x3x3Const getMatrix() const = 0;
       protected:
-        void setVectorFromMatrix( const Point3d & origin = Point3d(0,0,0),
+        void setVectorFromMatrix( const Point3dl & origin = Point3dl(0,0,0),
                                   const bool usecenter = false );
     };
 
@@ -429,6 +444,9 @@ namespace aims {
         static Connectivity* create( const std::string & type,
                                      const Point3d & origin,
                                      const bool usecenter = false );
+        static Connectivity* create( const std::string & type,
+                                     const Point3dl & origin,
+                                     const bool usecenter = false );
         static void registerConnectivity( const std::string & type,
                                           const Connectivity & strel );
         static std::set<std::string> connectivities();
@@ -457,16 +475,24 @@ namespace aims {
             const double amplitude = 1.,                                     \
             const bool usecenter = false ): Shape()                          \
           { Shape::setParameters( origin, amplitude, usecenter ); }          \
+      NAME( const Point3dl & origin,                                         \
+            const double amplitude = 1.,                                     \
+            const bool usecenter = false ): Shape()                          \
+          { Shape::setParameters( origin, amplitude, usecenter ); }          \
       NAME( const std::vector<double> & amplitude,                           \
             const bool usecenter = false ): Shape()                          \
           { Shape::setParameters( amplitude, usecenter ); }                  \
       NAME( const Point3d & origin,                                          \
             const std::vector<double> & amplitude,                           \
             const bool usecenter = false ): Shape()                          \
+          { Shape::setParameters( origin, amplitude, usecenter ); }          \
+      NAME( const Point3dl & origin,                                         \
+            const std::vector<double> & amplitude,                           \
+            const bool usecenter = false ): Shape()                          \
           { setParameters( origin, amplitude, usecenter ); }                 \
       virtual ~NAME() {}                                                     \
     protected:                                                               \
-      virtual void setParameters( const Point3d & origin,                    \
+      virtual void setParameters( const Point3dl & origin,                   \
                                   const std::vector<double> & amplitude,     \
                                   const bool usecenter = false );            \
       virtual NAME* clone() const { return new NAME(*this); }                \
@@ -502,7 +528,11 @@ namespace aims {
             { Shape::setParameters( amplitude, usecenter ); }
         ClockWiseCircleXY( const Point3d & origin,
                            const double amplitude = 1.,
-                            const bool usecenter = false ): CircleXY()
+                           const bool usecenter = false ): CircleXY()
+            { Shape::setParameters( origin, amplitude, usecenter ); }
+        ClockWiseCircleXY( const Point3dl & origin,
+                           const double amplitude = 1.,
+                           const bool usecenter = false ): CircleXY()
             { Shape::setParameters( origin, amplitude, usecenter ); }
         ClockWiseCircleXY( const std::vector<double> & amplitude,
                            const bool usecenter = false ): CircleXY()
@@ -510,12 +540,16 @@ namespace aims {
         ClockWiseCircleXY( const Point3d & origin,
                            const std::vector<double> & amplitude,
                            const bool usecenter = false ): CircleXY()
+            { Shape::setParameters( origin, amplitude, usecenter ); }
+        ClockWiseCircleXY( const Point3dl & origin,
+                           const std::vector<double> & amplitude,
+                           const bool usecenter = false ): CircleXY()
             { setParameters( origin, amplitude, usecenter ); }
         virtual ~ClockWiseCircleXY() {}
         
       protected:
         virtual void clockwise_order();
-        virtual void setParameters( const Point3d & origin,
+        virtual void setParameters( const Point3dl & origin,
                                     const std::vector<double> & amplitude,
                                     const bool usecenter = false );
         virtual ClockWiseCircleXY* clone() const

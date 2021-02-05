@@ -7,6 +7,7 @@ plus a few improvements functions (such as mask and B1 map holes filling).
 from __future__ import division
 from __future__ import print_function
 
+from __future__ import absolute_import
 import itertools
 import math
 import numpy as np
@@ -16,7 +17,7 @@ from soma import aims, aimsalgo
 twopi = 2 * np.pi
 
 
-class BAFIData:
+class BAFIData(object):
     ''' B1 map reconstruction class using the VFA (Variable Flip Angle) method.
 
     Pass the BAFI data as two amplitude-phase 4D AIMS volumes.
@@ -309,7 +310,7 @@ class BAFIData:
             return B1map_volume
 
 
-class GREData2FlipAngles:
+class GREData2FlipAngles(object):
     ''' GREData2FlipAngles
     '''
     def __init__(self, min_FA_volume, max_FA_volume):

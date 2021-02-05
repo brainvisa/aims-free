@@ -49,11 +49,18 @@ namespace aims
   class LowLevelArgWriter
   {
   public:
+    enum SavingMode
+    {
+      Keep,
+      Global,
+      Local
+    };
+
     LowLevelArgWriter();
     virtual ~LowLevelArgWriter();
     /// in case of failure, raise an exception
     virtual void write( const std::string & filename, Graph & graph, 
-                        bool forceglobal = false ) = 0;
+                        SavingMode mode = Keep ) = 0;
     /** get / reconstruct the minf header from the graph.
         The default implementation takes it from the "header" property of the
         graph (if any), and tries to rebuild referentials / transformations
@@ -69,9 +76,16 @@ namespace aims
   class ArgWriter
   {
   public:
+    enum SavingMode
+    {
+      Keep,
+      Global,
+      Local
+    };
+
     ArgWriter( const std::string& filename );
     ~ArgWriter();
-    bool write( Graph &, bool forceglobal = false ) const;
+    bool write( Graph &, SavingMode mode = Keep ) const;
     /** sets the writer to use for graphs of a specific syntax. The writer 
 	then belongs to ArgWriter (never delete it) */
     static void registerWriter( const std::string & syntax, 
@@ -94,7 +108,7 @@ namespace aims
     LowLevelStandardArgWriter();
     virtual ~LowLevelStandardArgWriter();
     virtual void write( const std::string & filename, Graph & graph, 
-                        bool forceglobal = false );
+                        SavingMode mode = Keep );
 
   private:
     carto::SyntaxSet	*_syntax;

@@ -31,80 +31,71 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <cstdlib>
-#include <cstdlib>
-#include <aims/data/data_g.h>
-#include <aims/distancemap/distancemap_g.h>
-#include <aims/io/io_g.h>
-#include <aims/getopt/getopt.h>
-#include <assert.h>
+#include <aims/data/data.h>
+#include <aims/distancemap/danielsson.h>
+#include <aims/io/reader.h>
+#include <aims/io/writer.h>
+#include <aims/getopt/getopt2.h>
 
 using namespace aims;
+using namespace carto;
 using namespace std;
 
 
-BEGIN_USAGE(usage)
-  "-------------------------------------------------------------------------",
-  "AimsDanielssonDistanceMap  -i[nput] <filein>                             ",
-  "                           -o[utput] <fileout>                           ",
-  "                          [-s[ide] <S>] [-h[elp]]                        ",
-  "-------------------------------------------------------------------------",
-  "Danielsson's distance map on a volume                                    ",
-  "-------------------------------------------------------------------------",
-  "     filein  : source volume                                             ",
-  "     fileout : destination volume                                        ",
-  "     S       : OUTSIDE, INSIDE, SIGNED [default=SIGNED]                  ",
-  "-------------------------------------------------------------------------",
-END_USAGE
-
-
-void Usage( void )
+int main( int argc, const char **argv )
 {
-  AimsUsage( usage );
-}
+  Reader<AimsData<short> > reader;
+  Writer<AimsData<float> > writer;
 
+  string c_side;
 
-int main( int argc, char **argv )
-{
-  char *filein = NULL, *fileout = NULL;
-  char* c_side = NULL;
+  AimsApplication app( argc, argv, "Danielsson's distance map on a volume" );
+  app.addOption( reader, "-i", "source volume" );
+  app.addOption( writer, "-o", "destination volume" );
+  app.addOption( c_side, "-s", "OUTSIDE, INSIDE, SIGNED [default=SIGNED]",
+                 true );
+  app.alias( "--input", "-i" );
+  app.alias( "--output", "-o" );
+  app.alias( "--side", "-s" );
 
-  AimsOption opt[] = {
-  { 'h',"help"    ,AIMS_OPT_FLAG  ,( void* )Usage    ,AIMS_OPT_CALLFUNC,0},
-  { 's',"side"    ,AIMS_OPT_STRING,&c_side  ,0                ,0},
-  { 'i',"input"   ,AIMS_OPT_STRING,&filein  ,0                ,1},
-  { 'o',"output"  ,AIMS_OPT_STRING,&fileout ,0                ,1},
-  { 0  ,0         ,AIMS_OPT_END   ,0        ,0                ,0}};
-
-  AimsParseOptions( &argc, argv, opt, usage );
-
-  string side = "SIGNED";
-  if ( c_side != NULL )
+  try
   {
-    side = string( c_side );
-    ASSERT( side == "INSIDE" || side == "OUTSIDE" || side == "SIGNED" );
+    app.initialize();
+
+    string side = "SIGNED";
+    if ( !c_side.empty() )
+    {
+      side = c_side;
+      ASSERT( side == "INSIDE" || side == "OUTSIDE" || side == "SIGNED" );
+    }
+
+    AimsData<short> vol;
+
+    if( !reader.read( vol, 1 ) )
+      return EXIT_FAILURE;
+
+    AimsData<float> map;
+
+    if ( side == "INSIDE" )
+      map = AimsDanielssonDistanceMap( vol, AIMS_DANIELSSON_INSIDE );
+    else if ( side == "OUTSIDE" )
+      map = AimsDanielssonDistanceMap( vol, AIMS_DANIELSSON_OUTSIDE );
+    else
+      map = AimsSignedDanielssonDistanceMap( vol );
+
+    if( ! writer.write( map ) )
+    {
+      throw logic_error( "Internal error: write failed" );
+    }
+
+    return EXIT_SUCCESS;
   }
-
-  AimsData<short> vol;
- 
-  Reader<AimsData<short> > reader( filein );
-  if( !reader.read( vol, 1 ) )
-    AimsUsage( usage );
- 
-  AimsData<float> map;
-
-  if ( side == "INSIDE" )
-    map = AimsDanielssonDistanceMap( vol, AIMS_DANIELSSON_INSIDE );
-  else if ( side == "OUTSIDE" )
-    map = AimsDanielssonDistanceMap( vol, AIMS_DANIELSSON_OUTSIDE );
-  else
-    map = AimsSignedDanielssonDistanceMap( vol );
-
-  Writer<AimsData<float> > writer( fileout );
-  if( ! writer.write( map ) )
+  catch( user_interruption & )
   {
-    throw logic_error( "Internal error: write failed" );
   }
-
-  return EXIT_SUCCESS;
+  catch( exception & e )
+  {
+    cerr << e.what() << endl;
+  }
+  return EXIT_FAILURE;
 }

@@ -5,41 +5,75 @@
 /* for an unknown reason functions defined in aimsalgo in the aims namespace
    are not seen from the python module. Classes are, so are functions defined
    the same way in aimsdata. The only workaround found is to define them
-   outside of their namespace
+   outside of their namespace.
+
+   Even then, the behavior is incinsistant:
+   transformBucketDirect and other functions don't need to be declared in
+   namespace aims, or to be redefined to use the function in the namespace
+   (where they are actually).
+   transformMesh and transformGraph used to work the same way (by chance?)
+   and, one day, did not compile any longer unless we define a MethodCode
+   for them and call the functions in the namespace aims.
 */
 
   void transformMesh( AimsTimeSurface_2_VOID & mesh,
-                      const aims::Transformation3d & direct_transformation);
+                      const soma::Transformation3d & direct_transformation);
 %Docstring
-Apply a spatial transformation to a mesh (AimsTimeSurface)
+transformMesh(mesh, direct_transformation)
+
+Apply a spatial transformation to a segments mesh (AimsTimeSurface).
+
+The mesh is transformed in-place and modified.
 
 Each vertex of the mesh is transformed according to the supplied
 transformation. Normals are re-calculated from the new vertex positions.
+%End
+
+%MethodCode
+  aims::transformMesh( *a0, *a1 );
 %End
 
   void transformMesh( AimsTimeSurface_3_VOID & mesh,
-                      const aims::Transformation3d & direct_transformation );
+                      const soma::Transformation3d & direct_transformation );
 %Docstring
-Apply a spatial transformation to a mesh (AimsTimeSurface)
+transformMesh(mesh, direct_transformation)
+
+Apply a spatial transformation to a triangles mesh (AimsTimeSurface)
+
+The mesh is transformed in-place and modified.
 
 Each vertex of the mesh is transformed according to the supplied
 transformation. Normals are re-calculated from the new vertex positions.
 %End
 
+%MethodCode
+  aims::transformMesh( *a0, *a1 );
+%End
+
   void transformMesh( AimsTimeSurface_4_VOID & mesh,
-                      const aims::Transformation3d & direct_transformation );
+                      const soma::Transformation3d & direct_transformation );
 %Docstring
-Apply a spatial transformation to a mesh (AimsTimeSurface)
+transformMesh(mesh, direct_transformation)
+
+Apply a spatial transformation to a quads mesh (AimsTimeSurface)
+
+The mesh is transformed in-place and modified.
 
 Each vertex of the mesh is transformed according to the supplied
 transformation. Normals are re-calculated from the new vertex positions.
+%End
+
+%MethodCode
+  aims::transformMesh( *a0, *a1 );
 %End
 
   rc_ptr_BucketMap_VOID
   transformBucketDirect( const BucketMap_VOID & bck,
-                         const aims::Transformation3d & direct_transformation,
+                         const soma::Transformation3d & direct_transformation,
                          Point3df vs = Point3df( 0., 0., 0. ) );
 %Docstring
+transformBucketDirect(bck, direct_transformation, vs=aims.Point3df(0., 0., 0.))
+
 Apply a spatial transformation to a BucketMap
 
 Each voxel of the input bucket is transformed with direct_transformation, and
@@ -58,12 +92,15 @@ nearest-neighbour resampling.
 
   rc_ptr_BucketMap_VOID
   resampleBucket( const BucketMap_VOID & bck,
-                  const aims::Transformation3d & direct_transformation,
-                  const aims::Transformation3d & inverse_transformation,
+                  const soma::Transformation3d & direct_transformation,
+                  const soma::Transformation3d & inverse_transformation,
                   Point3df vs = Point3df( 0., 0., 0. ),
                   bool also_pushforward = true);
 %Docstring
-Apply a spatial transformation to a BucketMap
+resampleBucket(bck, direct_transformation, inverse_transformation,
+               vs=aims.Point3df(0., 0., 0.), also_pushforward=True)
+
+Apply a spatial transformation to a BucketMap.
 
 The bucket is transformed by resampling, using a pull-back method in the same
 way as nearest neighbour resampling of a Volume.
@@ -85,10 +122,13 @@ preservation.
 %End
 
   void transformGraph( Graph & graph,
-                       const aims::Transformation3d & direct_transformation,
-                       const aims::Transformation3d * inverse_transformation,
+                       const soma::Transformation3d & direct_transformation,
+                       const soma::Transformation3d * inverse_transformation,
                        Point3df vs = Point3df( 0., 0., 0. ) );
 %Docstring
+transformGraph(graph, direct_transformation, inverse_transformation,
+               vs=aims.Point3df(0., 0., 0.))
+
 Apply a spatial transformation to all objects contained in a Graph.
 
 The graph is modified in-place.
@@ -106,6 +146,10 @@ CorticalFoldsGraphUpgradeFromOld BrainVisa process, which can be found under
 Morphologist/Sulci/graphmanipulation, for a complete update.
 %End
 
+%MethodCode
+  aims::transformGraph( *a0, *a1, a2, *a3 );
+%End
+
 namespace aims
 {
 
@@ -116,6 +160,8 @@ namespace aims
 %End
 
 %Docstring
+BundleTransformer.__init__(direct_transformation)
+
 Apply a spatial transformation to fiber bundles.
 
 Each point along the bundles is transformed according to the supplied

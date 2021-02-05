@@ -1,17 +1,16 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims, aimsalgo
 import exceptions
 import numpy
 import os
 import six
 import sys
-
-if sys.version_info[0] >= 3:
-    xrange = range
+from six.moves import range
 
 
 def mergeLabelsFromTexture(tex, labels_list, new_label):
@@ -41,7 +40,7 @@ def extractLabelsFromTexture(tex, labels_list, new_label):
     """
     otex = aims.TimeTexture_S16()
     otex[0].reserve(tex[0].nItem())
-    for i in xrange(tex[0].nItem()):
+    for i in range(tex[0].nItem()):
         otex[0].push_back(0)
     tex_ar = tex[0].arraydata()
     otex_ar = otex[0].arraydata()
@@ -291,7 +290,7 @@ def vertex_texture_to_polygon_texture(mesh, tex, allow_cut=False):
       * new mesh with possibly split triangles
     It only works for meshes of triangles.
     """
-    dtype = tex[tex.keys()[0]].arraydata().dtype
+    dtype = tex[list(tex.keys())[0]].arraydata().dtype
     poly_tex = aims.TimeTexture(dtype=dtype)
 
     if allow_cut:
@@ -403,7 +402,7 @@ def mesh_to_polygon_textured_mesh(mesh, poly_tex):
     out_mesh = mesh.__class__()
     out_tex = poly_tex.__class__()
     polygons = mesh.polygon()
-    dtype = poly_tex[poly_tex.keys()[0]].arraydata().dtype
+    dtype = poly_tex[list(poly_tex.keys())[0]].arraydata().dtype
     for t, tex0 in six.iteritems(poly_tex):
         print('t:', t)
         overt = out_mesh.vertex(t)
@@ -417,7 +416,7 @@ def mesh_to_polygon_textured_mesh(mesh, poly_tex):
         #otex_arr = otex.arraydata()
         tex_arr = tex0.arraydata()
         added = {}
-        for p in xrange(len(mesh.polygon())):
+        for p in range(len(mesh.polygon())):
             plabel = tex_arr[p]
             poly = opoly[p]
             for i, v in enumerate(poly):

@@ -38,6 +38,8 @@ Group: 'Import'
 Tooltip: 'Import BrainVISA bundles File Format (.bundles)'
 """
 
+from __future__ import absolute_import
+from six.moves import range
 __author__ = "Yann Cointepas"
 __url__ = ("BrainVISA project, http://brainvisa.info",)
 __version__ = "1.0"
@@ -56,12 +58,11 @@ import Blender
 from Blender import Curve, Object, Scene
 import sys
 
-if sys.version_info[0] >= 3:
-    xrange = range
+import six
 
 
-class BundlesReader:
-  class CurveIterator:
+class BundlesReader(object):
+  class CurveIterator(object):
     def __init__( self, name, dataFile, count ):
       self.name = name
       self._dataFile = dataFile
@@ -73,7 +74,7 @@ class BundlesReader:
     
     def __iter__( self ):
       size = struct.calcsize( 'L' )
-      for i in xrange( len( self ) ):
+      for i in range( len( self ) ):
         self._read += 1
         count = struct.unpack( 'L', self._dataFile.read( size ) )[0]
         yield BundlesReader.PointIterator( self._dataFile, count )
@@ -86,7 +87,7 @@ class BundlesReader:
         return BundlesReader.PointIterator( self._dataFile, count )
       raise StopIteration
         
-  class PointIterator:
+  class PointIterator(object):
     def __init__( self, dataFile, count ):
       self._dataFile = dataFile
       self._count = count
@@ -97,7 +98,7 @@ class BundlesReader:
   
     def __iter__( self ):
       size = struct.calcsize( 'fff' )
-      for i in xrange( len( self ) ):
+      for i in range( len( self ) ):
         self._read += 1
         yield struct.unpack( 'fff', self._dataFile.read( size ) )
 
@@ -110,7 +111,9 @@ class BundlesReader:
 
   def __init__( self, fileName ):
       attributes = {}
-      execfile( fileName, attributes, attributes )
+      with open(fileName, 'rb') as f:
+          code = compile(f.read(), fileName, 'exec')
+      six.exec_(code, attributes, attributes)
       attributes = attributes[ 'attributes' ]
       if not attributes[ 'binary' ]:
         raise RuntimeError( 'Ascii bundle reading not implemented' )
@@ -155,7 +158,7 @@ def read(filename):
     for curve in bundle:
       lastCurve += 1
       if len( curve ) > 1:
-        lastPoint = curve.next()
+        lastPoint = next(curve)
         nurb = c.appendNurb( lastPoint + ( 0, ) )
         nurb.setType( 0 )
         for point in curve:

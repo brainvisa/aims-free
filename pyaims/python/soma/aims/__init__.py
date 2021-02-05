@@ -34,11 +34,16 @@
 '''
 The aims module allows access to the AIMS library in python.
 
-Since version 4.5.1 both Python 2 (2.6 and higher) and Python 3 (3.4 and higher) are supported.
-
 - organization: `NeuroSpin <http://www.neurospin.org>`_ and former IFR 49
 
 - license: `CeCILL-B <http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html>`_ (a free licence comparable to BSD)
+
+Comptibility and requirements
+-----------------------------
+
+Since version 4.5.1 both Python 2 (2.7 and higher) and Python 3 (3.4 and higher) are supported. However as the module contains compiled code (python / C++ bindings) using specific python C interfaces (APIs/ABIs), PyAIMS has to be compiled separately for a given version of python.
+
+PyAIMS also has bindings to the `numpy <https://numpy.org>`_ library, allowing easy array manipulations. This also involves constraints on the Numpy ABI version: once PyAims is compiled, it is not possible to swith numpy to a different version featuring a different ABI (which `pip <https://docs.python.org/3.9/installing/index.html>`_ often does without warning, unfortunately).
 
 Most of it is a set of direct bindings to the
 :aimsdox:`AIMS C++ library <index.html>` API. But a few
@@ -49,7 +54,9 @@ aims contains mainly the AIMS and carto data structures and IO system.
 It covers several C++ libraries: cartobase, cartodata, graph, aimsdata, plus
 some C++ classes from the standard library (like std::vector)
 
-Main classes:
+Main classes
+------------
+
   - :py:class:`Reader` and :py:class:`Writer` for the generic IO system,
     which allows to read and write everything, and which can be, in most
     cases, replaced with the more convenient global :py:func:`read` and
@@ -90,19 +97,23 @@ Main classes:
     functions :py:func:`Converter` and :py:func:`ShallowConverter`
   - a few algorithms will be added
 
-.. _numpy: http://numpy.scipy.org/
+.. _numpy: https://numpy.org/
 '''
 from __future__ import print_function
-__docformat__ = 'restructuredtext en'
+from __future__ import absolute_import
 
-
+from six.moves import range
 import collections
+import functools
 import types
 import sip
 import os
 import six
 import sys
 import numbers
+
+
+__docformat__ = 'restructuredtext en'
 
 # save the original IOError type, it will be replaced by aims bindings
 IOError_orig = IOError
@@ -117,9 +128,27 @@ if 'BRAINVISA_SHARE' not in os.environ:
     # have slightly different scopes...
 del os
 
-from soma.aims import aimssip
-from soma.functiontools import partial
-from soma.importer import ExtendedImporter, GenericHandlers
+try:
+    from soma.aims import aimssip
+except ImportError as exc:
+    if exc.args[0] == ('dynamic module does not define init function '
+                       '(initaimssip)'):
+        raise ImportError('version mismatch: you are running Python {0} '
+                          'but the soma.aims module was likely compiled for '
+                          'Python 3.'
+                          .format(sys.version.split()[0], sys.api_version))
+    elif exc.args[0] == ('dynamic module does not define module export '
+                         'function (PyInit_aimssip)'):
+        six.raise_from(
+            ImportError('version mismatch: you are running Python {0} '
+                        'but the soma.aims module was likely compiled for '
+                        'Python 2.'
+                        .format(sys.version.split()[0], sys.api_version)),
+            exc
+        )
+    raise  # other import errors are re-raised
+
+from soma.importer import ExtendedImporter, GenericHandlers, __namespaces__
 
 # Rename sip modules and reorganize namespaces using the Importer class
 # this class manages changes that can occur during import of other modules
@@ -132,10 +161,12 @@ ExtendedImporter().importInModule(
     [GenericHandlers.removeChildren], ['Reader_', 'Writer_'])
 ExtendedImporter().importInModule('', globals(), locals(), 'aimssip',
                                   ['aimssip.aims'])
-# move Object out of carto namespace
+# move some objects out of carto namespace
 Object = carto.Object
+Transformation = soma.Transformation
+Transformation3d = soma.Transformation3d
 
-del aims, ExtendedImporter
+del ExtendedImporter
 
 # version string is more or less standard as __version__
 __version__ = versionString()
@@ -147,11 +178,6 @@ try:
 except:
     pass  # probably cannot import scipy.io
 
-if sys.version_info[0] >= 3:
-    import functools
-    unicode = str
-    basestring = str
-    xrange = range
 
 # restore the original IOError
 IOError = IOError_orig
@@ -378,7 +404,7 @@ class Reader(object):
 
 # generic Writer class
 
-class Writer:
+class Writer(object):
 
     def __init__(self):
         self._objectType = None
@@ -481,7 +507,7 @@ def write(obj, filename, format=None, options={}):
 
 # vector-like iterator
 
-class VecIter:
+class VecIter(object):
 
     '''iterator class for some aims containers (AimsVector)'''
 
@@ -492,21 +518,14 @@ class VecIter:
     def __iter__(self):
         return self
 
-    if sys.version_info[0] >= 3:
-        def __next__(self):
-            if self._index >= len(self._vector):
-                raise StopIteration('iterator outside bounds')
-            val = self._vector[self._index]
-            self._index += 1
-            return val
+    def __next__(self):
+        if self._index >= len(self._vector):
+            raise StopIteration('iterator outside bounds')
+        val = self._vector[self._index]
+        self._index += 1
+        return val
 
-    else:
-        def next(self):
-            if self._index >= len(self._vector):
-                raise StopIteration('iterator outside bounds')
-            val = self._vector[self._index]
-            self._index += 1
-            return val
+    next = __next__  # Python 2 compatibility
 
 # Iterator (doesn't work when implemented in SIP so far)
 
@@ -523,12 +542,8 @@ def objiter(self):
     return self._get().__iter__()
 
 
-if sys.version_info[0] >= 3:
-    def objnext(self):
-        return self._get().__next__()
-else:
-    def objnext(self):
-        return self._get().next()
+def objnext(self):
+    return self._get().__next__()
 
 
 def objiteritems(self):
@@ -540,34 +555,21 @@ def objiteritems(self):
         def __iter__(self):
             return self
 
-        if sys.version_info[0] >= 3:
-            def __next__(self):
-                if not self.iterator.isValid():
-                    raise StopIteration("iterator outside bounds")
+        def __next__(self):
+            if not self.iterator.isValid():
+                raise StopIteration("iterator outside bounds")
+            try:
+                key = self.iterator.key()
+            except:
                 try:
-                    key = self.iterator.key()
+                    key = self.iterator.intKey()
                 except:
-                    try:
-                        key = self.iterator.intKey()
-                    except:
-                        key = self.iterator.keyObject()
-                res = (key, self.iterator.currentValue())
-                self.iterator.__next__()
-                return res
-        else:
-            def next(self):
-                if not self.iterator.isValid():
-                    raise StopIteration("iterator outside bounds")
-                try:
-                    key = self.iterator.key()
-                except:
-                    try:
-                        key = self.iterator.intKey()
-                    except:
-                        key = self.iterator.keyObject()
-                res = (key, self.iterator.currentValue())
-                self.iterator.next()
-                return res
+                    key = self.iterator.keyObject()
+            res = (key, self.iterator.currentValue())
+            next(self.iterator)
+            return res
+
+        next = __next__  # Python 2 compatibility
 
     return iterator(self.objectIterator())
 
@@ -581,25 +583,19 @@ def objitervalues(self):
         def __iter__(self):
             return self
 
-        if sys.version_info[0] >= 3:
-            def __next__(self):
-                if not self.iterator.isValid():
-                    raise StopIteration("iterator outside bounds")
-                res = self.iterator.currentValue()
-                self.iterator.__next__()
-                return res
-        else:
-            def next(self):
-                if not self.iterator.isValid():
-                    raise StopIteration("iterator outside bounds")
-                res = self.iterator.currentValue()
-                self.iterator.next()
-                return res
+        def __next__(self):
+            if not self.iterator.isValid():
+                raise StopIteration("iterator outside bounds")
+            res = self.iterator.currentValue()
+            next(self.iterator)
+            return res
+
+        next = __next__  # Python 2 compatibility
 
     return iterator(self.objectIterator())
 
 
-class BckIter:
+class BckIter(object):
 
     '''iterator class for bucket containers'''
 
@@ -610,21 +606,16 @@ class BckIter:
     def __iter__(self):
         return self
 
-    if sys.version_info[0] >= 3:
-        def __next__(self):
-            if self._iter is None:
-                self._iter = iter(self._bck.keys())
-            elem = self._iter.__next__()
-            return self._bck[elem]
-    else:
-        def next(self):
-            if self._iter is None:
-                self._iter = iter(self._bck.keys())
-            elem = self._iter.next()
-            return self._bck[elem]
+    def __next__(self):
+        if self._iter is None:
+            self._iter = iter(self._bck.keys())
+        elem = next(self._iter)
+        return self._bck[elem]
+
+    next = __next__  # Python 2 compatibility
 
 
-class BckIterItem:
+class BckIterItem(object):
 
     '''item iterator class for bucket containers'''
 
@@ -635,18 +626,13 @@ class BckIterItem:
     def __iter__(self):
         return self
 
-    if sys.version_info[0] >= 3:
-        def __next__(self):
-            if self._iter is None:
-                self._iter = iter(self._bck.keys())
-            elem = self._iter.__next__()
-            return elem, self._bck[elem]
-    else:
-        def next(self):
-            if self._iter is None:
-                self._iter = iter(self._bck.keys())
-            elem = self._iter.next()
-            return elem, self._bck[elem]
+    def __next__(self):
+        if self._iter is None:
+            self._iter = iter(self._bck.keys())
+        elem = next(self._iter)
+        return elem, self._bck[elem]
+
+    next = __next__  # Python 2 compatibility
 
 # automatic rc_ptr dereferencing
 
@@ -693,11 +679,15 @@ def proxynonzero(self):
         return False
     try:
         return self._get().__nonzero__()
-    except:
+    except Exception:
         try:
-            return len(self._get())
-        except:
-            return True
+            return len(self._get()) != 0
+        except Exception:
+            try:
+                if self == 0:
+                    return False
+            except Exception:
+                return True
 
 
 def proxystr(self):
@@ -721,8 +711,7 @@ def rcptr_getAttributeNames(self):
     while l:
         c = l.pop()
         done.add(c)
-        m += filter(lambda x: not x.startswith('_') and x not in m,
-                    c.__dict__.keys())
+        m += [x for x in list(c.__dict__.keys()) if not x.startswith('_') and x not in m]
         cl = getattr(c, '__bases__', None)
         if not cl:
             cl = getattr(c, '__class__', None)
@@ -730,14 +719,14 @@ def rcptr_getAttributeNames(self):
                 continue
             else:
                 cl = [cl]
-        l += filter(lambda x: x not in done, cl)
+        l += [x for x in cl if x not in done]
     return m
 
 
 def __getitem_vec__(self, s):
     if isinstance(s, slice):
         start, stop, step = s.indices(len(self))
-        return [self.__oldgetitem__(x) for x in xrange(start, stop, step)]
+        return [self.__oldgetitem__(x) for x in range(start, stop, step)]
     else:
         return self.__oldgetitem__(s)
 
@@ -746,12 +735,12 @@ def __setitem_vec__(self, s, val):
     if isinstance(s, slice):
         start, stop, step = s.indices(len(self))
         return [self.__oldsetitem__(x, v) for x, v in
-                zip(xrange(start, stop, step), val)]
+                zip(range(start, stop, step), val)]
     else:
         return self.__oldsetitem__(s, val)
 
 
-if sys.version_info[0] >= 3:
+if six.PY34:
     def __operator_overload__(self, op, other):
         try:
             return op(self, other)
@@ -827,7 +816,7 @@ def __Volume_astype__(self, dtype, copy=False):
     -------
     A volume of the converted type
     '''
-    if isinstance(dtype, basestring):
+    if isinstance(dtype, six.string_types):
         if dtype.startswith('Volume_'):
             dtype = typeCode(dtype[7:])
         else:
@@ -885,38 +874,55 @@ def _aimsdata_setstate(self, state):
 # scan classes and modify some of them
 def __fixsipclasses__(classes):
     '''Fix some classes methods which Sip doesn't correctly bind'''
+    import sip
     for x, y in classes:
+        if not isinstance(y, six.class_types):
+            continue
         try:
-            if not hasattr(y, '__name__'):
+            try:
+                name = object.__getattribute__(y, '__name__')
+            except AttributeError:
                 # not a named class
                 continue
-            if y.__name__.startswith('rc_ptr_') \
-                or y.__name__.startswith('weak_shared_ptr_') \
-                    or y.__name__.startswith('weak_ptr_'):
-                # add __getattr__ method
+
+            # we have to filter out namespace objects. I don't know how to
+            # detect them.
+            if name in __namespaces__:
+                continue
+
+            if name.startswith('rc_ptr_') \
+                    or name.startswith('weak_shared_ptr_') \
+                        or name.startswith('weak_ptr_'):
+                # add methods
                 y.__len__ = __fixsipclasses__.proxylen
                 y.__getattr__ = __fixsipclasses__.proxygetattr
                 y.__getitem__ = __fixsipclasses__.proxygetitem
-                # y.__setitem__ = __fixsipclasses__.proxysetitem
+                y.__setitem__ = __fixsipclasses__.proxysetitem
                 y.__delitem__ = __fixsipclasses__.proxydelitem
-                y.__str__ = __fixsipclasses__.proxystr
+                #y.__str__ = __fixsipclasses__.proxystr
                 y.__nonzero__ = __fixsipclasses__.proxynonzero
+                y.__bool__ = __fixsipclasses__.proxynonzero
                 y._getAttributeNames = __fixsipclasses__.getAttributeNames
                 # to maintain compatibiity with pyaims 3.x
                 y.get = __fixsipclasses__.proxyget
                 y.__iter__ = __fixsipclasses__.proxyiter
-            elif y.__name__.startswith('ShallowConverter_'):
+
+            elif name.startswith('ShallowConverter_'):
                 y.__oldcall__ = y.__call__
                 y.__call__ = lambda self, obj: self.__oldcall__(obj)._get()
-            elif y.__name__.startswith('Volume_'):
+
+            elif name.startswith('Volume_'):
                 for op in ('add', 'iadd', 'radd', 'sub', 'isub', 'rsub',
                            'mul', 'imul', 'rmul', 'div', 'idiv', 'rdiv',
                            'mod', 'imod', 'rmod', 'and', 'iand', 'rand',
                            'or', 'ior', 'ror', 'xor', 'ixor' 'rxor'):
-                    add = getattr(aimssip, '__%s_%s__' % (op, y.__name__),
-                                  None)
+                    try:
+                        add = object.__getattribute__(
+                            aimssip, '__%s_%s__' % (op, name))
+                    except AttributeError:
+                        add = None
                     if add is not None:
-                        if sys.version_info[0] >= 3:
+                        if six.PY34:
                             setattr(
                                 y, '__%s__' % op, functools.partialmethod(
                                     __fixsipclasses__.__operator_overload__,
@@ -925,7 +931,7 @@ def __fixsipclasses__(classes):
                             setattr(
                                 y, '__%s__' % op,
                                 types.MethodType(
-                                    partial(
+                                    functools.partial(
                                       __fixsipclasses__.__operator_overload__,
                                         add),
                                     None, y))
@@ -939,7 +945,7 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self).__getitem__(*args, **kwargs)
                 y.__setitem__ = lambda self, *args, **kwargs: \
                     numpy.asarray(self).__setitem__(*args, **kwargs)
-                if sys.version_info[0] >= 3:
+                if not six.PY2:
                     y.astype = __fixsipclasses__.__Volume_astype__
                 else:
                     y.astype = types.MethodType(
@@ -949,47 +955,50 @@ def __fixsipclasses__(classes):
                 y.__setstate__ = __fixsipclasses__._vol_setstate
                 y.shape = property(lambda self: numpy.asarray(self).shape,
                                    None, None)
+
             else:
                 if hasattr(y, '__objiter__'):
                     y.__iter__ = __fixsipclasses__.newiter
                 if hasattr(y, '__objnext__'):
-                    if sys.version_info[0] >= 3:
-                        y.__next__ = __fixsipclasses__.newnext
-                    else:
+                    y.__next__ = __fixsipclasses__.newnext
+                    if six.PY2:
                         y.next = __fixsipclasses__.newnext
-                elif y.__name__.startswith('AimsVector_') \
-                        or y.__name__.startswith('Texture_') \
-                        or y.__name__ in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
+                if name.startswith('AimsVector_') \
+                        or name.startswith('Texture_') \
+                        or name in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
                     y.__iterclass__ = VecIter
                     y.__iter__ = lambda self: self.__iterclass__(self)
-                if (y.__name__.startswith('vector_') \
-                        or y.__name__.startswith('AimsVector_')) \
-                        and 'iterator' not in y.__name__:
+                if ((name.startswith('vector_') \
+                        or name.startswith('AimsVector_')
+                        or name.startswith('Texture_')) \
+                        and 'iterator' not in name) \
+                            or name in ('AimsRGB', 'AimsRGBA', 'AimsHSV'):
                     y.__oldgetitem__ = y.__getitem__
                     y.__getitem__ = __fixsipclasses__.__getitem_vec__
                     y.__oldsetitem__ = y.__setitem__
                     y.__setitem__ = __fixsipclasses__.__setitem_vec__
-                if y.__name__.startswith('BucketMap_') \
-                        or y.__name__.startswith('TimeTexture_'):
+                elif name.startswith('BucketMap_') \
+                        or name.startswith('TimeTexture_'):
                     y.__iterclass__ = BckIter
                     y.__iteritemclass__ = BckIterItem
                     y.__iter__ = lambda self: self.__iterclass__(self)
                     y.iteritems = lambda self: self.__iteritemclass__(
                         self)
-                    if sys.version_info[0] >= 3:
+                    if not six.PY2:
                         y.items = lambda self: self.__iteritemclass__(
                             self)
-                    if y.__name__.startswith('BucketMap_'):
+                    if name.startswith('BucketMap_'):
                         y.Bucket.__iterclass__ = BckIter
                         y.Bucket.__iteritemclass__ = BckIterItem
                         y.Bucket.__iter__ \
                             = lambda self: self.__iterclass__(self)
                         y.Bucket.iteritems \
                             = lambda self: self.__iteritemclass__(self)
-                        if sys.version_info[0] >= 3:
+                        if not six.PY2:
                             y.Bucket.items \
                                 = lambda self: self.__iteritemclass__(self)
-            if y.__name__.startswith('AimsData_'):
+
+            if name.startswith('AimsData_'):
                 # volume item access
                 y.__getitem__ = lambda self, *args, **kwargs: \
                     numpy.asarray(self.volume()).__getitem__(*args, **kwargs)
@@ -998,16 +1007,16 @@ def __fixsipclasses__(classes):
                 y.__getstate__ = __fixsipclasses__._aimsdata_getstate
                 y.__setstate__ = __fixsipclasses__._aimsdata_setstate
 
-            # fix python3 iterators
-            if sys.version_info[0] >= 3 and hasattr(y, 'next') \
-                    and not hasattr(y, '__next__'):
-                # cannot just assign y.__next__ = y.next
-                # because SIP functions seem not to be copied correctly.
-                y.__next__ = lambda self: self.next()
-                #del y.next
+            if (hasattr(y, 'next')
+                    and hasattr(y, '__iter__')
+                    and not hasattr(y, '__next__')):
+                import warnings
+                warnings.warn('{0!r} looks like an iterator implementing the '
+                              'Python 2 next() method, it will not work as an '
+                              'iterator under Python 3'.format(y),
+                              DeprecationWarning)
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
-            pass
 
 __fixsipclasses__.newiter = newiter
 __fixsipclasses__.newnext = newnext
@@ -1046,9 +1055,8 @@ del __vol_pow__, __vol_ipow__, __vol_floordiv__, __vol_ifloordiv__
 __fixsipclasses__(list(globals().items()) + list(carto.__dict__.items()))
 
 Object.__iter__ = __fixsipclasses__.objiter
-if sys.version_info[0] >= 3:
-    Object.__next__ = __fixsipclasses__.objnext
-else:
+Object.__next__ = __fixsipclasses__.objnext
+if six.PY2:
     Object.next = __fixsipclasses__.objnext
 Object.__delitem__ = __fixsipclasses__.proxydelitem
 Object._getAttributeNames = __fixsipclasses__.getAttributeNames
@@ -1079,7 +1087,7 @@ Point4d.__repr__ = Point4du.__repr__ = Point4df.__repr__ = Point4dd.__repr__ \
     = Point3d.__repr__ = Point3du.__repr__ = Point3df.__repr__ \
     = Point3dd.__repr__ = Point2d.__repr__ = Point2du.__repr__ \
     = Point2df.__repr__ = Point2dd.__repr__ \
-    = lambda self: __fixsipclasses__.fakerepr(self) + "\n" + str(self.items())
+    = lambda self: __fixsipclasses__.fakerepr(self) + "\n" + str(list(self.items()))
 
 
 import numpy
@@ -1087,17 +1095,17 @@ import numpy
 
 def __toMatrix(s):
     """ This function return a copy of the transformation matrix """
-    m = numpy.identity(4)
-    t, r = s.translation(), s.rotation()
-    m[0:3, 0:3].transpose().flat = [r.value(x) for x in xrange(9)]
-    m[0:3, 3].flat = t.items()
-    return m
+    return numpy.asarray(s.affine())[:, :, 0, 0]
 
 
 def __AffineTransformation3dFromMatrix(self, value):
-    self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
-        = value[0:3, 0:3]
-    self.translation().arraydata()[:] = value[0:3, 3].flatten()
+    if value.shape[0] == 3:
+        numpy.asarray(self.affine())[:3, :, 0, 0] = value
+    else:
+        numpy.asarray(self.affine())[:, :, 0, 0] = value
+    #self.rotation().volume().arraydata().reshape(3, 3).transpose()[:, :] \
+        #= value[0:3, 0:3]
+    #self.translation().arraydata()[:] = value[0:3, 3].flatten()
 
 
 def __AffineTransformation3d__init__(self, *args):
@@ -1114,14 +1122,27 @@ def __AffineTransformation3d__header(self):
     h.__motion = self
     return h
 
+
+def __AffineTransformation3d__affine(self):
+    a = self.__oldaffine__(self)._get()
+    # get a ref to self into a to prevent deletion of self
+    # warning: setting it in the refvolume is not working since the python part
+    # of the Volume object is not preserved when only manipulating rc_ptrs
+    a._trans = self
+    return a
+
+
 AffineTransformation3d.toMatrix = __toMatrix
 AffineTransformation3d.fromMatrix = __AffineTransformation3dFromMatrix
 AffineTransformation3d.__oldinit__ = AffineTransformation3d.__init__
 AffineTransformation3d.__init__ = __AffineTransformation3d__init__
 AffineTransformation3d.__oldheader__ = AffineTransformation3d.header
 AffineTransformation3d.header = __AffineTransformation3d__header
+AffineTransformation3d.__oldaffine__ = AffineTransformation3d.affine
+AffineTransformation3d.affine = __AffineTransformation3d__affine
 del __toMatrix, __AffineTransformation3dFromMatrix, \
-    __AffineTransformation3d__init__, __AffineTransformation3d__header
+    __AffineTransformation3d__init__, __AffineTransformation3d__header, \
+    __AffineTransformation3d__affine
 # backward compatibility
 Motion = AffineTransformation3d
 
@@ -1227,15 +1248,26 @@ def getPython(self):
             return res
         except:
             pass
-    if t.startswith('vector of'):
-        dt = t.split()[-1]
+    t2 = str(t)
+    dtv = ''
+    while t2.startswith('vector of '):
+        dtv = dtv + 'vector_'
+        t2 = t2[10:]
+    if dtv != '':
         try:
-            vectype = eval('vector_' + dt)
+            vectype = eval(dtv + t2)
             res = vectype.fromObject(gen)
             res.__genericobject__ = gen
             return res
         except:
-            pass
+            try:
+                vectype = eval(dtv + t2.upper())
+                res = vectype.fromObject(gen)
+                res.__genericobject__ = gen
+                return res
+            except:
+                pass
+
     if t.startswith('VECTOR_OF_'):
         try:
             dt = t[10:]
@@ -1285,7 +1317,7 @@ del toObject, ptrToObject, rcToObject
 
 # customize GenericObject to get automatic conversions between
 # Objects and concrete types
-class _proxy:
+class _proxy(object):
 
     def retvalue(x):
         if callable(x):
@@ -1345,7 +1377,7 @@ class _proxy:
 def genobj__getattribute__(self, attr):
     ga = object.__getattribute__(self, '__oldgetattribute__')
     x = ga(attr)
-    if(attr.startswith('__')) or attr == '_proxy':
+    if(attr.startswith('__') or attr == '_proxy') and attr != '__next__':
         return x
     return ga('_proxy').retvalue(x)
 
@@ -1403,7 +1435,7 @@ carto.GenericObject.__getattribute__ = genobj__getattribute__
 carto.GenericObject.update = genobj__update__
 carto.GenericObject.__iadd__ = genobj__iadd__
 carto.GenericObject.iteritems = objiteritems
-if sys.version_info[0] >= 3:
+if not six.PY2:
     carto.GenericObject.items = objiteritems
 carto.GenericObject.itervalues = objitervalues
 carto.GenericObject.iterkeys = carto.GenericObject.__iter__
@@ -1427,7 +1459,7 @@ def __getattribute__(self, name):
     if g("__refParent")():
         return g(name)
     else:
-        raise "Underlying C++ object has been deleted"
+        raise RuntimeError("Underlying C++ object has been deleted")
 Point3df.__getattribute__ = __getattribute__
 del __getattribute__
 
@@ -1456,7 +1488,7 @@ def typeCode(data):
             }
     if isinstance(data, numpy.dtype):
         data = str(data)
-    if type(data) in (str, unicode):
+    if type(data) in (str, six.text_type):
         return dmap.get(data, data)
     if not isinstance(data, type):
         # we use the type, not an instance (which may not be hashable)
@@ -1537,7 +1569,7 @@ def somaio_typeCode(data):
             return data
     if isinstance(data, tuple):
         return '%s of %s' % (_somaio_objecttype(data[0]), data[1])
-    if not isinstance(data, str) and not isinstance(data, unicode):
+    if not isinstance(data, str) and not isinstance(data, six.text_type):
         if hasattr(data, '__name__'):
             data = data.__name__
         else:
@@ -1554,7 +1586,7 @@ def _parseTypeInArgs(*args, **kwargs):
         del kwargs['dtype']
     else:
         y = [i for i, x in enumerate(args)
-             if type(x) in (str, unicode) or hasattr(x, '__name__')]
+             if type(x) in (str, six.text_type) or hasattr(x, '__name__')]
         if len(y) != 0:
             i = y[0]
             dtype = args[y[0]]
@@ -1688,7 +1720,7 @@ def TimeTexture(*args, **kwargs):
             if len(arg.shape) == 1:
                 tex[0].assign(arg)
             else:
-                for i in xrange(arg.shape[1]):
+                for i in range(arg.shape[1]):
                     tex[i].assign(arg[:, i])
             return tex
         if type(arg).__name__.startswith('TimeTexture_'):
@@ -2003,7 +2035,7 @@ def supported_io_formats(otypes=None, access=''):
     iotypes = IOObjectTypesDictionary.objectsTypes()
     if otypes is None:
         otypes = iotypes
-    elif isinstance(otypes, basestring):
+    elif isinstance(otypes, six.string_types):
         otypes = {otypes: None}
     elif isinstance(otypes, (list, tuple)):
         otypes = dict([(x, None) for x in otypes])
@@ -2359,6 +2391,8 @@ removed in the future.
 '''
 
 _volumedoc = '''
+**Generalities**
+
 The various Volume_<type> classes are bindings to the :cartoddox:`C++ template classes carto::Volume <classcarto_1_1Volume.html>`. It represents a 4D volume (1D to 4D, actually) storing a
 specific type of data: for instance S16 is signed 16 bit short ints, FLOAT is
 32 bit floats,
@@ -2377,21 +2411,44 @@ A volume of a given type can be built either using its specialized class constru
     >>> import numpy
     >>> v = aims.Volume(numpy.int16, 100, 100, 10)
 
+**Numpy arrays and volumes**
+
 A volume is an array of voxels, which can be accessed via the ``at()``
 method.
-For standard numeric types, it is also posisble to get the voxels array as a
-numpy_ array, using the ``arraydata()`` method, or more conveniently,
+For standard numeric types, it is also possible to get the voxels array as a
+numpy_ array, using the ``__array__()`` method, or more conveniently,
 ``numpy.asarray(volume)`` or ``numpy.array(volume, copy=False)``.
 The array returned is a reference to the actual data block, so any
 modification to its contents also affect the Volume contents, so it is
 generally an easy way of manipulating volume voxels because all the power of
 the numpy module can be used on Volumes.
 The ``arraydata()`` method returns a numpy array just like it is in memory,
-that is a 4D array indexed by ``[t][z][y][x]``, which is generally not what you like and is not consistent with AIMS indexing. Contrarily, using
+that is a 4D (or more) array indexed by ``[t][z][y][x]``, which is generally not what you like and is not consistent with AIMS indexing. Contrarily, using
 ``numpy.asarray(volume)`` sets strides in the returned numpy
 array, so that indexing is in the "normal" order ``[x][y][z][t]``, while still sharing the same memory block.
 The Volume object now also wraps the numpy accessors to the volume object itself, so that ``volume[x, y, z, t]`` is the same as
 ``nupmy.asarray(volume)[x, y, z, t]``.
+
+*new in PyAims 4.7*
+
+Since PyAims 4.7 the numpy arrays bindings have notably improved, and are now able to bind arrays to voxels types which are not scalar numeric types. Volumes of RGB, RGBA, HSV, or Point3df now have numpy bindings. The bound object have generally a "numpy struct" binding, that is not the usual C++/python object binding, but instead a structure managed by numpy which also supports indexing. For most objects we are using, they also have an array stucture (a RGB is an array with 3 int8 items), and are bound under a sturcture with a unique field, named "v" (for "vector"):
+
+    >>> v = aims.Volume('RGB', 100, 100, 10)
+    >>> numpy.asarray(v)[0, 0, 0, 0]
+    ([0, 0, 0],)
+
+Such an array may be indexed by the field name, which returns another array with scalar values and additional dimensions:
+
+    >>> numpy.asarray(v)['v'].dtype
+    dtype('uint8')
+    >>> numpy.asarray(v)['v'].shape
+    (100, 100, 10, 1, 3)
+
+Both arrays share their memory with the aims volume.
+
+.. seealso:: :ref:`numpy_bindings`
+
+**Header**
 
 Volumes also store a header which can contain various information (including
 sizes and voxel sizes). The header is a dictionary-like generic object
@@ -2420,6 +2477,8 @@ The converter can also be called using type arguments:
     >>> vol1 = aims.Volume('S16', 100, 100, 10)
     >>> c = aims.Converter(intype=vol1, outtype='Volume_DOUBLE')
     >>> vol2 = c(vol1)
+
+**Volume from a numpy array**
 
 It is also possible to build a Volume from a numpy array:
 
@@ -2518,3 +2577,7 @@ for x in dir():
     if not x.startswith('_') and x not in private:
         __all__.append(x)
 del x, private
+
+# add IO formats defined in python
+from . import io_ext
+

@@ -76,7 +76,7 @@ Algo::Algo()
 
 
 template<typename T> bool
-Algo::doit( Process & p, const string & fname, Finder & f )
+Algo::doit( Process & p, const string & fname, Finder & /*f*/ )
 {
   Algo                & mp = (Algo &) p;
   Reader<AimsData<T> > reader( fname );

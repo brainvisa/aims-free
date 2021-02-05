@@ -1,7 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from optparse import OptionParser
 import math
 import numpy as np
@@ -42,7 +43,7 @@ def relabel_STAP_vertices(vertices, plane_normal, planes_d):
             planes_d_side = planes_d[1]
         bucket = vertex['aims_ss']
         vs = (bucket.sizeX(), bucket.sizeY(), bucket.sizeZ())
-        centroid = np.average(np.asarray(bucket[0].keys()), axis=0) * vs
+        centroid = np.average(np.asarray(list(bucket[0].keys())), axis=0) * vs
         plane_dot = plane_normal.dot(centroid)
         if plane_dot + planes_d_side[0] >= 0 \
                 and plane_dot + planes_d_side[1] <= 0:

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright CEA (2017, 2018).
@@ -39,6 +39,7 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 
+from __future__ import absolute_import
 import os.path
 import sys
 

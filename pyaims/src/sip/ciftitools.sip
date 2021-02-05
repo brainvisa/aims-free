@@ -51,6 +51,13 @@ smap: map_STRING_S32
       const aims::CiftiTools::BrainStuctureToMeshMap & smap );
 
     carto::Object getDimensionObject( int dim ) const;
+    void buildDimensionObjectFromLabelsTexture(
+      int dim, const TimeTexture_FLOAT & tex );
+    void buildDimensionObjectFromLabelsTexture(
+      int dim, const TimeTexture_S16 & tex );
+    void buildDimensionObjectFromLabelsTexture(
+      int dim, const TimeTexture_S32 & tex );
+
     SIP_PYLIST roiTextureFromDimension( int dim ) const;
 %Docstring
 roiTextureFromDimension(dim)

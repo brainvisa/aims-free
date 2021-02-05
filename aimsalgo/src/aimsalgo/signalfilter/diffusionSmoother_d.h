@@ -236,7 +236,7 @@ template<typename T>
 void MaskedDiffusionSmoother<T, std::vector<Point3df> >::
 update_neumann_conditions(AimsData<float> &ima)
 {
-  int    i, d;
+  int    d;
   Point3df  dim(ima.dimX(), ima.dimY(), ima.dimZ());
 
   for (unsigned int i = 0; i < _neumann_conditions.size(); ++i)

@@ -321,5 +321,5 @@ static bool _buckdic()
   return true;
 }
 
-static bool buckdic = _buckdic();
+static bool buckdic __attribute__((unused)) = _buckdic();
 

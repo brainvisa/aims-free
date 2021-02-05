@@ -77,7 +77,6 @@ The header contains all meta-data.
   if( (sipRes = PyList_New(sipCpp->size())) == NULL )
     return NULL;
 
-  unsigned n = sipCpp->size();
   BucketMap_%Template1typecode%::const_iterator it, et = sipCpp->end();
   unsigned i = 0;
 

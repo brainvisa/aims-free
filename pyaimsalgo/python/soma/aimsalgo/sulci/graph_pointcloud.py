@@ -2,11 +2,14 @@
 # -*- coding: utf-8
 
 from __future__ import print_function
+from __future__ import absolute_import
 from soma import aims, aimsalgo
 import pandas
 import numpy as np
 import subprocess
 import six
+from six.moves import range
+from six.moves import zip
 
 
 def get_vertex_points(v):
@@ -20,16 +23,16 @@ def get_vertex_points(v):
     bottom_pts = np.zeros((4, 0), dtype=int)
     other_pts = np.zeros((4, 0), dtype=int)
     if ss is not None and len(ss[0]) != 0:
-        ss_pts = np.array(ss[0].keys())
+        ss_pts = np.array(list(ss[0].keys()))
         ss_pts = np.hstack((ss_pts,
                             np.zeros((ss_pts.shape[0], 1), dtype=int))).T
     if bottom is not None and len(bottom[0]) != 0:
-        bottom_pts = np.array(bottom[0].keys())
+        bottom_pts = np.array(list(bottom[0].keys()))
         bottom_pts = np.hstack((bottom_pts,
                                 np.zeros((bottom_pts.shape[0], 1),
                                          dtype=int))).T
     if other is not None and len(other[0]) != 0:
-        other_pts = np.array(other[0].keys())
+        other_pts = np.array(list(other[0].keys()))
         other_pts = np.hstack((other_pts,
                                np.zeros((other_pts.shape[0], 1), dtype=int))).T
     apts = np.hstack((ss_pts, bottom_pts, other_pts))
@@ -90,7 +93,6 @@ def build_split_graph(graph, data, roots, skel=None):
         askel = np.asarray(skel)
     lvol = aims.Volume(roots)
     lvol.fill(0)
-    aroots = np.asarray(roots)
 
     # get native coords from data
     coords = data.loc[:, ['point_x', 'point_y', 'point_z']].values
@@ -104,6 +106,7 @@ def build_split_graph(graph, data, roots, skel=None):
     labels = np.unique(data.after_cutting)
     labels_map = dict([(l, i + 1) for i, l in enumerate(sorted(labels))])
     labels_rmap = dict([(i + 1, l) for i, l in enumerate(sorted(labels))])
+    labels_rmap[0] = 'unknown'  # in case it is not already here
     labels_int = np.array([labels_map[l] for l in data.after_cutting])
     avol = np.asarray(lvol)
     avol[tuple(int_coords)] = labels_int
@@ -118,7 +121,7 @@ def build_split_graph(graph, data, roots, skel=None):
             # unique label in vertex
             if len(labels) == 1:
                 label = labels[0]
-                v['label'] = labels_rmap[label]
+                v['label'] = six.ensure_text(labels_rmap.get(label, 'unknown'))
             continue
 
         todo.append(v)
@@ -139,7 +142,7 @@ def build_split_graph(graph, data, roots, skel=None):
         labels = np.unique(avol[pts])
         winner, sizes = maj_label(labels, pts, avol, True)
         print('split vertex', v.get('index'), 'in:', labels,
-              [labels_rmap[l] for l in labels],
+              [labels_rmap.get(l, 'unknown') for l in labels],
               ', size:', apts.shape[1], tuple(sizes))
 
         # grow a voronoi inside the roots region
@@ -155,19 +158,20 @@ def build_split_graph(graph, data, roots, skel=None):
         fm.doit(roots, [roots_val], roots_nval)
         voronoi = fm.voronoiVol()
         avor = np.asarray(voronoi)
-        for l in roots_nval:
-            m = l
-            if l == roots_nval[-1]:
-                # set back old value in one of the new regions
-                m = roots_val
-            aroots[avor==l] = m
+        # reseet aroots for now, we'll do it later with actual split
+        for l in reversed(roots_nval):
+            aroots[avor==l] = roots_val
         convmask = ([-1, 0, 0, 0], [1, 0, 0, 0], [0, -1, 0, 0], [0, 1, 0, 0],
                     [0, 0, -1, 0], [0, 0, 1, 0]) # 6-connectivity
         split_bk = aims.BucketMap_VOID()
+        split_bk.header()['voxel_size'] = vs
         sb0 = split_bk[0]
         for p in apts.T:
             p2 = np.vstack([p+m for m in convmask]).T
             vals = np.unique(avor[tuple(p2)])
+            if -1 in vals:
+                # remove background value
+                vals = [val for val in vals if val >= 0]
             if len(vals) > 1:
                 if skel is not None:
                     askel[tuple(p)] = JUNCTION
@@ -176,7 +180,7 @@ def build_split_graph(graph, data, roots, skel=None):
         v2 = aims.FoldArgOverSegment(graph).splitVertex(v, split_bk, min_size)
         if v2 is None:
             print('split failed.')
-            v['label'] = labels_rmap[winner]
+            v['label'] = six.ensure_text(labels_rmap[winner])
             failed_cuts += 1
             loc_mis = sum(sizes) - sizes[np.where(labels == winner)[0][0]]
             print('mislabeled:', loc_mis)
@@ -197,8 +201,10 @@ def build_split_graph(graph, data, roots, skel=None):
                 else:
                     mislabeled += loc_mis
                     print('    good enough.')
-            v['label'] = labels_rmap[winner]
+            v['label'] = six.ensure_text(labels_rmap[winner])
             print('v1 label:', v['label'])
+            # new voronoi in aroots
+            aroots[pts] = roots_new + 1
 
             apts = apts2
             pts = tuple(apts)
@@ -212,8 +218,20 @@ def build_split_graph(graph, data, roots, skel=None):
                 else:
                     mislabeled += loc_mis
                     print('    good enough.')
-            v2['label'] = labels_rmap[maj_label(labels, pts, avol)]
+            v2['label'] = six.ensure_text(labels_rmap[maj_label(
+                labels, pts, avol)])
             print('v2 label:', v2['label'])
+            aroots[pts] = roots_new
+
+            # redo voronoi with new labels
+            fm = aims.FastMarching('6') # TODO: check if 6 connectivity is OK
+            fm.doit(roots, [roots_val], [roots_new, roots_new + 1])
+            voronoi = fm.voronoiVol()
+            avor = np.asarray(voronoi)
+            # change values, v gets initial roots_val, v2 gets roots_new
+            aroots[avor==roots_new + 1] = roots_val
+
+            roots_new += 1
 
     print('mislabeled points:', mislabeled)
     print()

@@ -85,7 +85,7 @@ void carto::setOrientationInformation( Object hdr, const string & orient )
   catch( ... )
   {
     // default orientation: Nifti/MNI-like, and ratio convention
-    stom.translation() = Point3df( 0., vdims[1] - 1., vdims[2] - 1. );
+    stom.setTranslation( Point3df( 0., vdims[1] - 1., vdims[2] - 1. ) );
     stom.rotation()(1, 1) = -1.;
     stom.rotation()(2, 2) = -1.;
   }
@@ -179,9 +179,9 @@ void carto::setOrientationInformation( Object hdr, const string & orient )
     for( int i=0; i<3; ++i )
       for( int j=0; j<3; ++j )
         omatrix.rotation()(i, j) = omat[j+i*4];
-    omatrix.translation()[0] = omat[3];
-    omatrix.translation()[1] = omat[7];
-    omatrix.translation()[2] = omat[11];
+    omatrix.matrix()(0, 3) = omat[3];
+    omatrix.matrix()(1, 3) = omat[7];
+    omatrix.matrix()(2, 3) = omat[11];
   }
   else if( omat.size() == 0 )
   {
@@ -245,7 +245,7 @@ void carto::setOrientationInformation( Object hdr, const string & orient )
   // fix translation if needed
   for( int i=0; i<3; ++i )
     if( omatrix.rotation()(i,i) == -1. )
-      omatrix.translation()[i] = vdims[i]-1.;
+      omatrix.matrix()(i, 3) = vdims[i]-1.;
 
   // compose to existing one
   stom *= omatrix;

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+from __future__ import absolute_import
 import glob
 import cmath
 import tempfile
@@ -14,12 +15,12 @@ from soma.aims import soma
 import numpy as np
 import glob
 from soma.aims.volumetools import compare_images
+from six.moves import range
 
-if sys.version_info[0] >= 3:
-    xrange = range
 
 FLOAT_DATA_TYPES = ("FLOAT", "CFLOAT", "DOUBLE", "CDOUBLE")
 NO_NAN_FORMATS = ("DICOM", )
+NO_INF_FORMATS = ["MINC", "FREESURFER (MINC)"] # Minc supports NaN but not inf
 
 class TestPyaimsIO(unittest.TestCase):
 
@@ -113,7 +114,7 @@ class TestPyaimsIO(unittest.TestCase):
 
 
     def use_format(self, vol, format, view, options={}):
-        partial_read = ['.nii', '.nii.gz', '.ima'] #, '.dcm']
+        partial_read = ['.nii', '.nii.gz', '.ima', '.mnc', '.mgh', '.mgz'] #, '.dcm']
         partial_write = ['.nii', '.ima']
         dtype = aims.typeCode(np.asarray(vol).dtype)
 
@@ -169,9 +170,18 @@ class TestPyaimsIO(unittest.TestCase):
             url_ext += '&&' + '&&'.join(['sx%d=%d' % (i + 1, n)
                                          for i, n in enumerate(view_size1)])
             vol3 = aims.read(fname + '?%s' % url_ext)
-            self.assertEqual(vol3.getSize(), view_size1)
+            volsize = list(vol3.getSize())
+            if len(volsize) > len(view_size1):
+              view_size1 = view_size1 + (1, ) * (len(volsize)
+                                                 - len(view_size1))
+            self.assertEqual(
+                vol3.getSize(), view_size1,
+                msg='partial read test for %s, size differ: %s instead of %s'
+                % (format, repr(list(vol3.getSize())), repr(view_size1)))
             vol4 = aims.VolumeView(vol, view_pos1, view_size1)
-            self.assertTrue(compare_images(vol4, vol3, 'sub-volume',
+            self.assertTrue(compare_images(vol4, vol3,
+                                           'sub-volume %s (write, format %s)'
+                                           % (aims.typeCode(vol), format),
                                            'patially read', thresh,
                                            rel_thresh))
         if format in partial_write:
@@ -278,10 +288,10 @@ class TestPyaimsIO(unittest.TestCase):
             return (o, d)
 
         def get_python_type(type_code):
-            if sys.version_info[0] >= 3:
-                longtype = int
-            else:
+            if six.PY2:
                 longtype = long
+            else:
+                longtype = int
             tmap = {'U8': int, 'S8': int,
                     'U16': int, 'S16': int,
                     'U32': int, 'S32': int,
@@ -415,19 +425,26 @@ class TestPyaimsIO(unittest.TestCase):
                 for f in lf:
                     # TODO: Check that format is also readable
                     fe = format_exceptions.get(f, dict())
+
+                    emsg = 'testing dtype %s, format %s:' % (data_type, f)
  
                     exts = dsil.extensions(f)
+                    #print('ext for write type', f, ':', exts)
                     for e in exts:
                         write_pattern = fe.get('write_pattern', 
                                                'Volume_%s_%d_%s%s')
                         read_pattern = fe.get('read_pattern', 
                                               'Volume_%s_%d_%s%s')
 
-                        for i in xrange(len(volumes)):
+                        for i in range(len(volumes)):
                             if data_type in FLOAT_DATA_TYPES \
                                     and (cmath.isnan(volumes[i].at(0))
                                          or cmath.isinf(volumes[i].at(0))) \
                                     and f in NO_NAN_FORMATS:
+                                continue
+                            if data_type in FLOAT_DATA_TYPES \
+                                    and cmath.isinf(volumes[i].at(0)) \
+                                    and f in NO_INF_FORMATS:
                                 continue
                             fl = os.path.join(self.work_dir, 
                                             write_pattern % (
@@ -449,12 +466,12 @@ class TestPyaimsIO(unittest.TestCase):
                                             ('.' + e if len(e) > 0 else '')))
                             found_files = glob.glob(fl)
 
-                            self.assertNotEqual(len(found_files), 0)
+                            self.assertNotEqual(len(found_files), 0, emsg)
                             fl = found_files[0]
 
                             if self.verbose:
-                                print('reading', 'Volume_' + data_type, 'in', f,
-                                      'from file ', fl )
+                                print('reading', 'Volume_' + data_type, 'in',
+                                      f, 'from file ', fl)
 
                             volume_read_back = aims.read(fl)
                             if (data_type in FLOAT_DATA_TYPES
@@ -462,10 +479,14 @@ class TestPyaimsIO(unittest.TestCase):
                                      or cmath.isinf(volumes[i].at(0)))):
                                 if cmath.isnan(volumes[i].at(0)):
                                     self.assertTrue(
-                                        cmath.isnan(volume_read_back.at(0)) )
+                                        cmath.isnan(volume_read_back.at(0)),
+                                        msg='value %s should be nan'
+                                        % repr(volume_read_back.at(0)))
                                 else:
                                     self.assertTrue(
-                                        cmath.isinf(volume_read_back.at(0)) )
+                                        cmath.isinf(volume_read_back.at(0)),
+                                        msg='%s value %s should be inf'
+                                        % (emsg, repr(volume_read_back.at(0))))
                             else:
                                 #self.assertTrue( (volumes[i] == volume_read_back).all() )
                                 thresh, rel_thresh \
@@ -476,12 +497,195 @@ class TestPyaimsIO(unittest.TestCase):
                                         volumes[i], volume_read_back,
                                         'Volume_' + data_type,
                                         'Volume_' + data_type,
-                                        thresh, rel_thresh))
+                                        thresh, rel_thresh), emsg)
 
         # TODO: Add tests for aims format and read-only formats
         #print('- read format')
         #print(aims.carto.IOObjectTypesDictionary.readTypes())
 
+    def test_minf_uuid(self):
+        '''
+            check that uuid in minf is rightly written and conserved 
+            by writters for existing formats.
+            To summarize behaviour:
+            - when output .minf file does not exists, writers must
+              remove uuid property in given meta information, 
+              except when specific option is given. This is because
+              we want to avoid uuid copy when meta informations are 
+              copied.
+            - when output .minf file exists, writers must keep uuid
+              existing uuid of the .minf file except when specific 
+              option is given.
+        '''
+        from soma import aims, uuid
+
+        import six
+        import os
+
+        def write_minf(attributes, filename, options={}):
+            import os
+            
+            if options.get('update_minf', False):
+                if os.path.exists(filename):
+                    # Read minf first if it exists:
+                    read_attributes = aims.read(filename, options=options)
+                    read_attributes.update(attributes)
+                    attributes = read_attributes
+                
+            #print('attributes=', repr(attributes))
+            with open(filename, 'w+') as f:
+                print('attributes=', repr(attributes), file=f)
+
+        def check_meta_write_rewrite(f, format):
+
+            def write_and_read_with_meta(meta, f, format=None, options=dict()):
+                # Write image with uuid stored in .minf
+                
+                if self.verbose:
+                    print('Writing file (%s) with updated meta-informations' %f)
+                
+                vol1 = aims.Volume_S16()
+                h = vol1.header()
+                h.update(meta)
+                aims.write(vol1, f, format=format, options=options)
+                
+                if self.verbose:
+                    print('Written header:', h)
+
+                if self.verbose:
+                    print('Re-reading file (%s)' % f)
+                
+                vol2 = aims.read(f)
+                h = vol2.header()        
+                #h = aims.read(f + '.minf')
+                if self.verbose:
+                    print('Re-read header:', h)
+                    
+                for k, v in six.iteritems(meta):
+                    if self.verbose:
+                        print('Re-read', k, '(%s)' % str(h.get(k)), 
+                            '==', 'written', k, '(%s)' % str(v), ':', 
+                            (str(v) == str(h.get(k))))
+                
+                return dict(h)
+
+            #def remove_file(filename):
+                ##print('checking file:', filename)
+                #if os.path.exists(filename):
+                    #dsil = aims.soma.DataSourceInfoLoader()
+                    ##print('check file name:', filename)
+                    ##sys.stdout.flush()
+                    #try:
+                        #dsi = dsil.check(filename)
+                        
+                        #print(dsi)
+                        #sys.stdout.flush()
+                        #return
+                        #dsl = dsi.list()
+                        
+                        #for t in dsl.types():
+                            #dsts = dsl.size(t)
+                            ##print('type:', t, 'size:', dsts)
+                            
+                            #if t != 'default':
+                                #for i in range(dsts):
+                                    #ds = dsl.dataSource(t, i)
+                                    
+                                    ##print('url:', ds.url())
+                                    #if os.path.exists(ds.url()):
+                                        #os.unlink(ds.url())
+                    #except:
+                        #print('Unable to delete file', filename)
+                        
+            def remove_file(filename):
+                if os.path.exists(filename):
+                    os.unlink(filename)
+                    
+                if os.path.exists(filename + '.minf'):
+                    os.unlink(filename + '.minf')
+                
+            # Check uuid write / rewrite
+            if self.verbose:
+                print('Check written uuid for a new file:', f)
+            
+            remove_file(f)
+            
+            # Output .minf file does not exists so re-read meta
+            # must not contain uuid, even though it was given
+            # in meta
+            meta = {'uuid': str(uuid.Uuid())}
+            written_meta = write_and_read_with_meta(meta, f, format)
+            self.assertEqual(written_meta.get('uuid'), None)
+            
+            if self.verbose:
+                print()
+
+            # Force minf file update with uuid
+            if self.verbose:
+                print('Force minf file', f + '.minf', 'update with uuid:', meta['uuid'])
+            write_minf(meta, f + '.minf', options={'update_minf': True})
+                
+            if self.verbose:
+                print('Check rewritten uuid for an existing file:', f)
+
+            # Once .minf file have uuid, it must be preserved by 
+            # writters during rewriting
+            new_meta = {'uuid': str(uuid.Uuid())}            
+            rewritten_meta = write_and_read_with_meta(new_meta, f, format)
+            self.assertEqual(rewritten_meta.get('uuid'), meta.get('uuid'))
+            
+            if self.verbose:
+                print()
+                
+            if not self.debug:
+                remove_file(f)
+
+
+        #aims.carto.setVerbose(1)
+        #aims.carto.setDebugMessageLevel(4)
+
+        
+        #read_only_formats = (('FDF', '.fdf'), 
+                             #('GENESIS', '.hdr'),
+                             #('GIF', '.gif'),
+                             #('MNG', '.mng'),
+                             #('OPENSLIDE', '.czi'),
+                             #('OPENSLIDE', '.svs'),
+                             #('SPM', '.spm'),
+                             #('SVG', '.svg'),
+                             #('SVGZ', '.svgz'),
+                             #('TGA', '.tga'),
+                             #('VIDA', '.vida'))
+
+        read_write_formats = (('BMP', '.bmp'), 
+                              ('ECAT', '.v'),  
+                              ('GIS', '.ima'),
+                              ('ICO', '.ico'), 
+                              ('JPEG(Qt)', '.jpeg'),
+                              ('JPG', '.jpg'), 
+                              ('NIFTI-1', '.nii'),
+                              ('NIFTI-2', '.nii'),
+                              ('PBM', '.pbm'),
+                              ('PGM', '.pgm'),
+                              ('PNG', '.png'),
+                              ('PPM', '.ppm'),
+                              ('TIFF', '.tiff'),
+                              ('TIFF(Qt)', '.tiff'),
+                              ('XBM', '.xbm'),
+                              ('XPM', '.xpm'))
+                
+        for s, e in read_write_formats:
+            
+            if self.verbose:
+                print('== Check meta informations for format', s)
+                
+            # Check write/rewrite meta informations for a format
+            f = os.path.join(self.work_dir, 'test_uuid_%s%s' % (s, e))
+            check_meta_write_rewrite(f, s)
+                
+            if self.verbose:
+                print()
+        
     def tearDown(self):
         if self.debug:
             print('leaving files in', self.work_dir)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -31,12 +31,11 @@
 #
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
+from __future__ import absolute_import
 from soma import aims
 from optparse import OptionParser
 import sys
-
-if sys.version_info[0] >= 3:
-    xrange = range
+from six.moves import range
 
 parser = OptionParser(description='Graphs concatenation')
 parser.add_option('-o', '--output', dest='output', help='output graph')
@@ -56,14 +55,14 @@ options.filename += args
 r = aims.Reader()
 g1 = r.read(options.filename[0])
 
-for i in xrange(1, len(options.filename)):
+for i in range(1, len(options.filename)):
     g2 = r.read(options.filename[i])
 
     # remove bucket indices in g2
     # toremove = ( 'bucket_label', 'Tmtktri_label', 'roi_label', 'cluster_label',
     #'ss_label', 'bottom_label', 'other_label' )
     for v in g2.vertices():
-        for x in filter(lambda x: x.endswith('_label'), v.keys()):
+        for x in [x for x in list(v.keys()) if x.endswith('_label')]:
             del v[x]
     # copy subgraph g2 into g1
     g2.extract(g1, g2.vertices())

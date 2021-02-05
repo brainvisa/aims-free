@@ -78,7 +78,7 @@ namespace aims
                              aims::Connectivity::Type connectivity,
                              std::map<O, size_t>& valids, 
                              const T & backgrnd = 0, bool bin = true, 
-                             size_t minSize = 0, size_t numMax = 0, 
+                             size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0, 
                              bool verbose = true );
                              
     
@@ -86,7 +86,7 @@ namespace aims
                              AimsData<O>& out, 
                              aims::Connectivity::Type connectivity,
                              const T & backgrnd = 0, bool bin = true, 
-                             size_t minSize = 0, size_t numMax = 0, 
+                             size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0, 
                              bool verbose = true );
                                   
     private:
@@ -99,7 +99,7 @@ namespace aims
                                                                        AimsData<O>& out, 
                                                                        aims::Connectivity::Type connectivity,
                                                                        const T & backgrnd, bool bin, 
-                                                                       size_t minSize, size_t numMax, 
+                                                                       size_t minSize, size_t maxSize, size_t numMax,
                                                                        bool verbose )
   {
     std::map<O, size_t> valids;
@@ -107,7 +107,7 @@ namespace aims
                                                                    out,
                                                                    connectivity, 
                                                                    valids, 
-                                                                   backgrnd, bin, minSize, 
+                                                                   backgrnd, bin, minSize, maxSize,
                                                                    numMax, verbose);
   }
 
@@ -117,14 +117,14 @@ namespace aims
                                aims::Connectivity::Type connectivity,
                                std::map<T, size_t>& valids, 
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minSize = 0, size_t numMax = 0, 
+                               size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0,
                                bool verbose = true )
   {
     ConnectedComponentEngine<AimsData<T>, AimsData<T> >::connected(data, 
                                               data,
                                               connectivity, 
                                               valids, 
-                                              backgrnd, bin, minSize, 
+                                              backgrnd, bin, minSize, maxSize,
                                               numMax, verbose);
   }
 
@@ -133,7 +133,7 @@ namespace aims
   void AimsConnectedComponent( AimsData<T>& data,
                                aims::Connectivity::Type connectivity,
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minSize = 0, size_t numMax = 0, 
+                               size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0,
                                bool verbose = true )
   {
       std::map<T, size_t> valids;
@@ -142,7 +142,7 @@ namespace aims
                                                 data,
                                                 connectivity, 
                                                 valids, 
-                                                backgrnd, bin, minSize, 
+                                                backgrnd, bin, minSize, maxSize,
                                                 numMax, verbose);
   }
 
@@ -150,7 +150,7 @@ namespace aims
   void AimsConnectedComponent( BucketMap<T>& data,
                                aims::Connectivity::Type connectivity,
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minSize = 0, size_t numMax = 0, 
+                               size_t minSize = 0, size_t maxSize = 0, size_t numMax = 0,
                                bool verbose = true );
 
   template <typename T>
@@ -158,7 +158,7 @@ namespace aims
                                const AimsData<T>& data,
                                aims::Connectivity::Type connectivity, 
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minsize = 0, size_t maxcomp = 0, 
+                               size_t minsize = 0, size_t maxSize = 0, size_t maxcomp = 0,
                                bool verbose = true );
     
   template <typename T>
@@ -166,7 +166,7 @@ namespace aims
                                const BucketMap<T>& data,
                                Connectivity::Type connectivity, 
                                const T & backgrnd = 0, bool bin = true, 
-                               size_t minsize = 0, size_t maxcomp = 0, 
+                               size_t minsize = 0, size_t maxSize = 0, size_t maxcomp = 0,
                                bool verbose = true );
                                
   template <typename T>
@@ -174,7 +174,7 @@ namespace aims
                                                    const AimsData<T>& data,
                                                    aims::Connectivity::Type connectivity, 
                                                    const T & backgrnd = 0, bool bin = true, 
-                                                   size_t minsize = 0, size_t maxcomp = 0, 
+                                                   size_t minsize = 0, size_t maxSize = 0, size_t maxcomp = 0,
                                                    bool verbose = true );
                                                    
 }

@@ -13,6 +13,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 import sys, os
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -209,7 +210,7 @@ extlinks = {
   'aimsdox': ('../../aimsdata-' + version + '/doxygen/%s',
     'aimsdox '),
   'aimsdata' : ('../../aimsdata-' + version + '/%s', 'aimsdata '),
-  'aimsex' : ('../../aimsdata-' + version + '/code_examples/%s', 'aimsdata '),
+  'aimsex' : ('../../aimsdata-' + version + '/doc/code_examples/%s', 'aimsdata '),
   'pyaims': ('../../pyaims-' + version + '/sphinx/%s',
     'pyaims '),
   'aimsalgo' : ('../../aimsalgo-' + version + '/doxygen/%s', 'aimsalgo '),

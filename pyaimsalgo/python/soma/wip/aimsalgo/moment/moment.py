@@ -31,12 +31,13 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 
+from __future__ import absolute_import
 import copy
 from soma import aims, aimsalgo
 
 from soma.aimsalgo import MomentBase, TriangulationMoment, MomentInvariant_S16, GeometricMoment_S16
 
-class Moment :
+class Moment( object ) :
 
 	@staticmethod
 	def processInvariantFromSurface( object, momentType = MomentBase.Volumic ) :

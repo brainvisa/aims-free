@@ -632,7 +632,8 @@ namespace
     return &p0;
   }
 
-
+// not used ...
+#if 0
   void planarMeshMergeFronts( _Point & p1, _Point & p2 )
   {
     if( p1.front == p2.front )
@@ -662,7 +663,7 @@ namespace
       }
     }
   }
-
+#endif
 
   void planarMeshRaiseBorderPoint( _Point & oldp, _Point & newp,
                                    AimsSurface<3, Void> & mesh,
@@ -1261,6 +1262,8 @@ namespace
     }
   };
 
+// not used...
+#if 0
   bool checkLine( AimsTimeSurface<2, Void> & lmesh )
   {
     vector<Point3df>			& vert = lmesh.vertex();
@@ -1395,6 +1398,7 @@ namespace
 
     return result;
   }
+
 
   void meshPlane( const Point4df & plane, 
 		  AimsTimeSurface<2, Void> & border, 
@@ -1806,6 +1810,7 @@ namespace
     cout << "           polygons : " << cpoly.size() << endl;
     */
   }
+#endif
 
 }
 
@@ -1953,7 +1958,7 @@ bool SurfaceManip::checkMesh( const AimsSurfaceTriangle & insurf,
   bool					cuta[3], cutb[3], weaka[3], weakb[3];
   int					ia1, ia2, ib1, ib2;
   float					amin, amax, bmin, bmax;
-  bool 					clean = true, copied = false, done;
+  bool 					clean = true, copied = false;
   const float				eps = 1e-6, oneeps = 1-1e-6, 
     eps2 = -1e-6, oneeps2 = 1+1e-6;
 
@@ -1994,7 +1999,6 @@ bool SurfaceManip::checkMesh( const AimsSurfaceTriangle & insurf,
 	    y1 = na.dot( sb1 ) - x;
 	    y2 = na.dot( sb2 ) - x;
 	    y3 = na.dot( sb3 ) - x;
-	    done = false;
 	    if( !( y1 >= 0 && y2 >= 0 && y3 >= 0 ) 
 		&& !( y1 <= 0 && y2 <= 0 && y3 <= 0 ) )
 	      {
@@ -2506,7 +2510,8 @@ namespace
   void split_tri_1( vector<AimsVector<uint, 3> > &opoly,
                     AimsVector<uint, 3> & op,
                     const AimsVector<uint, 3> & p,
-                    uint a, uint b, uint c, bool hasa, bool hasb, bool hasc )
+                    uint a, uint b, uint c, 
+                    bool hasa, bool hasb, bool /* hasc */ )
   {
     // triangle cut on 1 edge
     /*       p[0]
@@ -2558,7 +2563,8 @@ namespace
   void split_tri_2( vector<AimsVector<uint, 3> > &opoly,
                     AimsVector<uint, 3> & op,
                     const AimsVector<uint, 3> & p,
-                    uint a, uint b, uint c, bool hasa, bool hasb, bool hasc )
+                    uint a, uint b, uint c, 
+                    bool hasa, bool hasb, bool /* hasc */ )
   {
     // triangle cut on 2 edges
     /*       p[0]
@@ -2619,7 +2625,8 @@ namespace
   void split_tri_3( vector<AimsVector<uint, 3> > &opoly,
                     AimsVector<uint, 3> & op,
                     const AimsVector<uint, 3> & p,
-                    uint a, uint b, uint c, bool hasa, bool hasb, bool hasc )
+                    uint a, uint b, uint c, 
+                    bool /* hasa */, bool /* hasb */, bool /* hasc */ )
   {
     // triangle split "normally" with 3 edges cut
     /*       p[0]
@@ -2738,7 +2745,7 @@ AimsSurfaceTriangle* SurfaceManip::refineMeshTri4(
       }
     }
     // remake triangles
-    uint a, b, c;
+    uint a = 0, b = 0, c = 0;
     bool hasa, hasb, hasc;
     int nedges;
     isel = selectedPolygons.begin();

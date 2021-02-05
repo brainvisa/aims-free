@@ -31,7 +31,7 @@ extern MatrixErrorCode matrix_errno;
 
 
 #if defined(__STDC__) || defined(__cplusplus)
-typedef (*qsort_func)(const void *, const void *);
+typedef void (*qsort_func)(const void *, const void *);
 #endif
 #if defined(__cplusplus)
 extern void display_message(const char*);

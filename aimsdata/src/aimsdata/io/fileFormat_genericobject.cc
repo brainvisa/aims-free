@@ -79,7 +79,7 @@ namespace aims
     return true;
   }
 
-  static bool minfdic = _minfdic();
+  static bool minfdic __attribute__((unused)) = _minfdic();
 
 }
 

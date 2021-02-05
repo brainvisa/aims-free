@@ -193,8 +193,8 @@ namespace aims
       // standard orientation
       stom.rotation()(1,1) = -1;
       stom.rotation()(2,2) = -1;
-      stom.translation()[1] = data.dimY() - 1;
-      stom.translation()[2] = data.dimZ() - 1;
+      stom.matrix()(1, 3) = data.dimY() - 1;
+      stom.matrix()(2, 3) = data.dimZ() - 1;
       bool        radio = false;
       try
       {
@@ -206,7 +206,7 @@ namespace aims
       if( !radio )
       {
         stom.rotation()(0,0) = -1;
-        stom.translation()[0] = data.dimX() - 1;
+        stom.matrix()(0, 3) = data.dimX() - 1;
       }
     }
 

@@ -89,11 +89,11 @@ void printheader( Object hdr )
 
 
 template <typename T> 
-bool readPartial( ReaderAlgorithm& a, Object hdr, rc_ptr<DataSource> src )
+bool readPartial( ReaderAlgorithm& a, Object /*hdr*/, rc_ptr<DataSource> src )
 {
   PartialIOAlgo & ma = (PartialIOAlgo &) a;
   Object options, urioptions;
-  bool   partial_writing = false;
+  //bool   partial_writing = false;
   string fullname;
   
   //=== READ VOLUME ==========================================================

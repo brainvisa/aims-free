@@ -113,8 +113,7 @@ public:
 		\exception range_error if a vertex is not in the graph
 	*/
 	template <class InputIterator>
-	void extract(Graph& graph, InputIterator iv1, InputIterator iv2)
-		throw(std::range_error);
+	void extract(Graph& graph, InputIterator iv1, InputIterator iv2);
 
 	//---------------------------------------------------------------------
 	/**	@name Clean up*/
@@ -166,7 +165,7 @@ public:
 		\param vertex pointer to the vertex to remove
 		\exception range_error if vertex is not in the graph
 	*/
-	void removeVertex(Vertex* vertex) throw(std::range_error);
+	void removeVertex(Vertex* vertex);
 
 	/**	Return a random vertex (CAUTION: not perfectly random!)
 		\return a random vertex
@@ -214,13 +213,11 @@ public:
 		\exception range_error if a vertex is not in the graph
 	*/
 	Edge* addUndirectedEdge(Vertex* vertex1, Vertex* vertex2, std::
-				string s)
-	  throw(std::range_error);
+				string s);
 
 	/**	A synonym of addUnDirectedEdge - see above
 	*/
-	Edge* addEdge(Vertex* vertex1, Vertex* vertex2, std::string s = "")
-		throw(std::range_error);
+	Edge* addEdge(Vertex* vertex1, Vertex* vertex2, std::string s = "");
 
 	/**	Allocate and add to the graph a directed edge
 		containing the given vertices. Note that the pointer
@@ -234,8 +231,7 @@ public:
 		\param s syntactic attribute of the new edge
 		\exception range_error if a vertex is not in the graph
 	*/
-	Edge* addDirectedEdge(Vertex* vertex1, Vertex* vertex2, std::string s)
-		throw(std::range_error);
+	Edge* addDirectedEdge(Vertex* vertex1, Vertex* vertex2, std::string s);
 
 	/**	Does the graph contain a particular edge?
 		\return true if the graph contains it, false otherwise
@@ -249,7 +245,7 @@ public:
 		\param edge pointer to the edge to remove
 		\exception range_error if \c edge is not in the graph
 	*/
-	void removeEdge(Edge* edge) throw(std::range_error);
+	void removeEdge(Edge* edge);
 
 	/**	Return the edges of the graph
 		\return the internal collection of edge pointers
@@ -397,8 +393,7 @@ private:
 		\param graph extracted graph
 		\exception range_error if a vertex is not in the graph
 	*/
-	void internalExtract(Graph& graph, const std::set<Vertex*>& vertices)
-		throw(std::range_error);
+	void internalExtract(Graph& graph, const std::set<Vertex*>& vertices);
 
 	//@}
 
@@ -512,7 +507,6 @@ Graph::getVerticesWith(const std::string& s, const T& t) const
 inline
 Edge*
 Graph::addEdge(Vertex* vertex1, Vertex* vertex2, std::string s) 
-  throw(std::range_error)
 {
 	return addUndirectedEdge(vertex1, vertex2, s);
 }
@@ -553,7 +547,6 @@ template <class InputIterator>
 inline
 void
 Graph::extract(Graph& graph, InputIterator iv1, InputIterator iv2)
-	throw(std::range_error)
 {
 	internalExtract(graph, std::set<Vertex*>(iv1, iv2));
 }

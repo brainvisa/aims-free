@@ -84,52 +84,92 @@ int FillStructSData(S_DATA *infos,FILE *fp)
   infos->fr_time.active   = 0;
   infos->val_calib.active = VIDA_NOCALIB;
 
-  fgets(buff,buflen,fp);	/* le champs ## VidaInfo		 */
+  if ( !fgets(buff,buflen,fp) )	/* le champs ## VidaInfo		 */
+  {
+      fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+      return(1);     
+  }
 
   if (strncmp(buff,"##VidaInfo",10) != 0)
     {
-      fprintf(stderr,"FillStructSData : fichier .vinfo invalide\n");
+      fprintf(stderr,"FillStructSData : invalid .vinfo file\n");
       return(1);
     }
-  fgets(buff,buflen,fp);
+  if ( !fgets(buff,buflen,fp) )
+  {
+      fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+      return(1);     
+  }
   while (strncmp(buff, "##EndVidaInfo",13) !=0)
     { 
       key_word_find = 0;
       if (strncmp(buff, "#Dev", 4) == 0)
 	{ key_word_find = 1;
-	fgets(buff,buflen,fp);
+	if ( !fgets(buff,buflen,fp) )
+  {
+    fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+    return(1);
+  }
 	sscanf(buff,"%s\n",device);
 	sprintf(infos->acq_device,"%s",device);
-	fgets(buff, buflen, fp);
+	if ( !fgets(buff, buflen, fp) )
+  {
+    fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+    return(1);
+  }
 	}
       if (strncmp(buff, "#Fra", 4) == 0)
 	{
 	  key_word_find = 1;
-	  fgets(buff,buflen,fp);
+	  if ( !fgets(buff,buflen,fp) )
+    {
+      fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+      return(1);
+    }
 	  sscanf(buff,"%d	%d\n",&fr_numb,&pl_numb);
 	  infos->nb_pl = pl_numb;
 	  infos->nb_fr = fr_numb;
-	  fgets(buff, buflen, fp);
+	  if ( !fgets(buff, buflen, fp) )
+    {
+      fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+      return(1);
+    }
 	}
       if (strncmp(buff, "#Half",5) == 0)
 	{ 
 	  key_word_find = 1;
-	  fgets(buff,buflen,fp);
+	  if ( !fgets(buff,buflen,fp) )
+    {
+      fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+      return(1);
+    }
 	  sscanf(buff, "%f %f\n",&half, &decay);
 	  SetIsoHalf(infos,half);
 	  SetIsoDecay(infos,decay);
-	  fgets(buff, buflen, fp);
+	  if ( !fgets(buff, buflen, fp) )
+    {
+      fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+      return(1);
+    }
 	}
       if (strncmp(buff, "#Start",6) == 0)
 	{ 
 	  key_word_find = 1;
-	  fgets(buff, buflen, fp);
+	  if ( !fgets(buff, buflen, fp) )
+    {
+      fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+      return(1);
+    }
 	  for(nb=0;nb<fr_numb;nb++)
 	    { 
 	      sscanf(buff,"%d %d\n",&start,&dura);
 	      SetTimeStart(infos,nb,start);
 	      SetTimeDura (infos,nb,dura);
-	      fgets(buff,buflen,fp);
+	      if ( !fgets(buff,buflen,fp) )
+        {
+          fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+          return(1);
+        }
 	    }
 	}  
       if (strncmp(buff,"#Min",4) == 0)
@@ -137,8 +177,16 @@ int FillStructSData(S_DATA *infos,FILE *fp)
 	  key_word_find = 1;
 	  for(i=0;i<infos->nb_fr;i++)
 	    {
-	      fgets(buff, buflen, fp);
-	      fgets(buff, buflen, fp);
+	      if ( !fgets(buff, buflen, fp) )
+        {
+          fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+          return(1);
+        }
+	      if ( !fgets(buff, buflen, fp) )
+        {
+          fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+          return(1);
+        }
 	      ptbuf = buff;
 	      for(j=0;j<infos->nb_pl;j++)
 		{ 
@@ -149,7 +197,11 @@ int FillStructSData(S_DATA *infos,FILE *fp)
 		  ptbuf += 3;
 		}
 	    }
-	  fgets(buff, buflen, fp);
+	  if ( !fgets(buff, buflen, fp) )
+    {
+      fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+      return(1);
+    }
 	}
       if (strncmp(buff, "#Cali", 5) == 0)
 	/* assure la compatibilite avec la version 3.0 en ecriture */
@@ -173,9 +225,17 @@ int FillStructSData(S_DATA *infos,FILE *fp)
 	  key_word_find = 1;
 	  for (i=0;i<infos->nb_fr;i++)
 	    { 
-	      fgets(buff,buflen,fp);
+	      if ( !fgets(buff,buflen,fp) )
+        {
+          fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+          return(1);
+        }
 	      sscanf(buff, "#Fr.%d", &fr);
-	      fgets(buff, buflen, fp);
+	      if ( !fgets(buff, buflen, fp) )
+        {
+          fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+          return(1);
+        }
 	      ptbuf = buff;
 	      for(j=0;j<infos->nb_pl;j++)
 		{ 
@@ -186,9 +246,20 @@ int FillStructSData(S_DATA *infos,FILE *fp)
 		  ptbuf +=3;
 		}
 	    }
-	  fgets(buff,buflen,fp);
+	  if ( !fgets(buff,buflen,fp) )
+    {
+      fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+      return(1);
+    }
 	}
-      if (!key_word_find) fgets(buff, buflen, fp);
+      if (!key_word_find)
+      {
+        if (! fgets(buff, buflen, fp) )
+        {
+          fprintf(stderr,"FillStructSData : .vinfo is corrupted\n");
+          return(1);
+        }
+      }
     }
   if (!infos->fr_time.active) 
     for(nb=0;nb<fr_numb;nb++)

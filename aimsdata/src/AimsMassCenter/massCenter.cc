@@ -33,7 +33,6 @@
 
 
 #include <cartobase/config/verbose.h>
-#include <aims/data/data_g.h>
 #include <aims/getopt/getopt2.h>
 #include <aims/getopt/getoptProcess.h>
 #include <aims/io/reader.h>
@@ -79,12 +78,12 @@ MassCenter::~MassCenter()
 template<typename T>
 bool masscenter( Process & p, const string & filein, Finder & f )
 {
-  AimsData<T>   data;
-  Reader<AimsData<T> >  r( filein );
+  VolumeRef<T>   data;
+  Reader<Volume<T> >  r( filein );
   string    format = f.format();
   r.setAllocatorContext( AllocatorContext( AllocatorStrategy::ReadOnly, 
                                            DataSource::none(), false, 0.01 ) );
-  r.read( data, 0, &format );
+  data.reset( r.read( 0, &format ) );
   
   MassCenter & m = ((MassCenter &) p);
   bool   bin = m.binary;
@@ -92,13 +91,12 @@ bool masscenter( Process & p, const string & filein, Finder & f )
   
   if (!roi.empty()) {
       rc_ptr<RoiIterator> roiIterator = getRoiIterator( roi );
-      MassCenters<T>(data, 
-                     roiIterator, 
-                     bin).doit();
+      MassCenters<T>( data,
+                      roiIterator,
+                      bin).doit();
   }
   else {
-    MassCenters<T>(data, 
-                   bin).doit();
+    MassCenters<T>( data, bin).doit();
   }
   return( true );
 }

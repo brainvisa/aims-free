@@ -55,7 +55,7 @@ namespace
     return true;
   }
 
-  bool dummy = aimsinfo();
+  bool dummy __attribute__((unused)) = aimsinfo();
 
 }
 
@@ -80,7 +80,7 @@ void AimsDataInfo::printPaths( ostream & out )
 }
 
 
-void AimsDataInfo::printBuiltins( ostream & out )
+void AimsDataInfo::printBuiltins( ostream & /* out */ )
 {
 #if 0 // builtin plugins is completely obsolete.
   out << "VIDA IO           : ";

@@ -18,6 +18,7 @@
 #include <graph/graph/graph.h>
 #include <cstdio>
 #include <cmath>
+#include <limits>
 #include <string>
 
 using namespace aims;
@@ -41,6 +42,7 @@ FfdTransformation::FfdTransformation( int dimX, int dimY, int dimZ,
 }
 
 FfdTransformation::FfdTransformation( const FfdTransformation & other ):
+  RCObject(),
   _dimx( other._dimx ), _dimy( other._dimy ),
   _dimz( other._dimz ), _vsx( other._vsx ), _vsy( other._vsy ),
   _vsz( other._vsz ),
@@ -585,6 +587,7 @@ SplineFfd::SplineFfd( int dimX, int dimY, int dimZ,
 }
 
 SplineFfd::SplineFfd( const SplineFfd & other ):
+  RCObject(),
   FfdTransformation( other ),
   _spline(3, 0)
 {
@@ -609,23 +612,19 @@ SplineFfd & SplineFfd::operator=( const SplineFfd & other )
 void SplineFfd::updateDimensions()
 {
   FfdTransformation::updateDimensions();
-  /* 26/6/2018 (Yael)
-   * I went back to computing mirrored indices on the fly because it is hard
-   * to know in advance how many will be necessary.
-   */
-  // int i;
-  // _mirrorcoefvecx.resize( _dimx + 3 );
-  // _mirrorcoefvecy.resize( _dimy + 3 );
-  // _mirrorcoefvecz.resize( _dimz + 3 );
-  // _mirrorcoefx = &_mirrorcoefvecx[1];
-  // _mirrorcoefy = &_mirrorcoefvecy[1];
-  // _mirrorcoefz = &_mirrorcoefvecz[1];
-  // for( i=-1; i<_dimx + 2; ++i )
-  //   _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
-  // for( i=-1; i<_dimy + 2; ++i )
-  //   _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
-  // for( i=-1; i<_dimz + 2; ++i )
-  //   _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
+  int i;
+  _mirrorcoefvecx.resize( _dimx + 3 );
+  _mirrorcoefvecy.resize( _dimy + 3 );
+  _mirrorcoefvecz.resize( _dimz + 3 );
+  _mirrorcoefx = &_mirrorcoefvecx[1];
+  _mirrorcoefy = &_mirrorcoefvecy[1];
+  _mirrorcoefz = &_mirrorcoefvecz[1];
+  for( i=-1; i<_dimx + 2; ++i )
+    _mirrorcoefx[i] = aims::mirrorCoeff( i, _dimx );
+  for( i=-1; i<_dimy + 2; ++i )
+    _mirrorcoefy[i] = aims::mirrorCoeff( i, _dimy );
+  for( i=-1; i<_dimz + 2; ++i )
+    _mirrorcoefz[i] = aims::mirrorCoeff( i, _dimz );
 }
 
 Point3dd SplineFfd::transformDouble( double x, double y, double z ) const
@@ -702,6 +701,7 @@ TrilinearFfd::TrilinearFfd( int dimX, int dimY, int dimZ,
 }
 
 TrilinearFfd::TrilinearFfd( const TrilinearFfd & other ):
+  RCObject(),
   FfdTransformation( other )
 {
 }
@@ -719,26 +719,25 @@ TrilinearFfd & TrilinearFfd::operator=( const TrilinearFfd & other )
 
 Point3dd TrilinearFfd::deformation_private( const Point3dd& pImage ) const
 {
-  Point3dd deformation(0., 0., 0.);
-  Point3df fdef;
-  Point3dd pSpline( mmToSplineVox(pImage) );
+  const Point3dd pSpline( mmToSplineVox(pImage) );
 
-  Point3di kSpline(static_cast<int>(std::floor(pSpline[0])),
-                   static_cast<int>(std::floor(pSpline[1])),
-                   static_cast<int>(std::floor(pSpline[2])));
+  // Return NaN if the position is not covered by the deformation field
+  if( !( pSpline[0] >= 0 && pSpline[0] < dimX() &&
+         pSpline[1] >= 0 && pSpline[1] < dimY() &&
+         pSpline[2] >= 0 && pSpline[2] < dimZ() ) )
+  {
+    const double NaN = std::numeric_limits<double>::quiet_NaN();
+    return Point3dd(NaN, NaN, NaN);
+  }
 
-  if( kSpline[0] < 0 || kSpline[0] >= dimX() ||
-      kSpline[1] < 0 || kSpline[1] >= dimY() ||
-      kSpline[2] < 0 || kSpline[2] >= dimZ() )
-    return deformation;
+  const Point3di kSpline ( static_cast<int>( std::floor( pSpline[0] ) ),
+                           static_cast<int>( std::floor( pSpline[1] ) ),
+                           static_cast<int>( std::floor( pSpline[2] ) ) );
+  Point3di kUp ( kSpline[0] + 1,
+                 kSpline[1] + 1,
+                 kSpline[2] + 1 );
 
-  Point3di kUp  ( kSpline[0] + 1,
-                  kSpline[1] + 1,
-                  kSpline[2] + 1 );
-
-  double bz, by, byz;
   double bxt[2], byt[2], bzt[2];
-
   if( _flatx || kUp[0] >= dimX() )
   {
     kUp[0] = kSpline[0];
@@ -775,31 +774,17 @@ Point3dd TrilinearFfd::deformation_private( const Point3dd& pImage ) const
     bzt[0] = 1. - bzt[1];
   }
 
-  const Point3df *pCtrlPt;
-  long incr = &_ctrlPointDelta( 1 ) - & _ctrlPointDelta( 0 );
-  kUp[0] -= kSpline[0];
-
+  Point3dd deformation(0., 0., 0.);
   for( int k = kSpline[2]; k <= kUp[2]; ++k )
   {
-    bz = bzt[ k - kSpline[2] ];
     for( int j = kSpline[1]; j <= kUp[1]; ++j )
     {
-      by = byt[ j - kSpline[1] ];
-      byz = bz * by;
-      pCtrlPt = &_ctrlPointDelta( kSpline[0], j, k );
-
-      fdef = *pCtrlPt * bxt[0] * byz;
-      pCtrlPt += incr;
-      deformation[0] += fdef[0];
-      deformation[1] += fdef[1];
-      deformation[2] += fdef[2];
-
-      if( kUp[0] != 0 )
+      for( int i = kSpline[0]; i <= kUp[0]; ++i )
       {
-        fdef = *pCtrlPt * bxt[1] * byz;
-        deformation[0] += fdef[0];
-        deformation[1] += fdef[1];
-        deformation[2] += fdef[2];
+        deformation += static_cast<Point3dd>(_ctrlPointDelta( i, j, k ))
+                       * (bxt[i - kSpline[0]]
+                          * byt[j - kSpline[1]]
+                          * bzt[k - kSpline[2]]);
       }
     }
   }

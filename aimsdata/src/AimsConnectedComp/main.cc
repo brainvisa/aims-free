@@ -83,6 +83,7 @@ class CCProcess : public Process
     CCProcess & operator = (const CCProcess &val) { 
       this->connectivity = val.connectivity;
       this->minSize = val.minSize;
+      this->maxSize = val.maxSize;
       this->numMax = val.numMax;
       this->bin = val.bin;
       this->in = val.in;
@@ -93,6 +94,7 @@ class CCProcess : public Process
   
     Connectivity::Type  connectivity;
     size_t    minSize;
+    size_t    maxSize;
     size_t    numMax;
     bool      bin;
     string    in;
@@ -144,7 +146,7 @@ class DataConverter<T, T>
 
 CCProcess::CCProcess()
   : connectivity( Connectivity::CONNECTIVITY_26_XYZ ), 
-                minSize( 0 ), numMax( 0 ), bin( false )
+                minSize( 0 ), maxSize( 0 ), numMax( 0 ), bin( false )
 {}
 
                 
@@ -165,7 +167,7 @@ CC::CC()
 }
 
 template <typename T>
-bool CC::convert( Process & p, const string & filename, Finder & finder )
+bool CC::convert( Process & p, const string & /*filename*/, Finder & finder )
 {
   CCConverter<T> c;
   c = (CCProcess &) p;
@@ -203,7 +205,7 @@ CCConverter<T>::CCConverter()
 }
 
 template <typename T, typename O>
-bool DataConverter<T, O>::doit( Process & p, const string & filename, Finder & finder )
+bool DataConverter<T, O>::doit( Process & p, const string & /*filename*/, Finder & finder )
 {
 //   cout << "data type needs conversion to " << finder.objectType() << " / " << finder.dataType() << endl << flush;
   CCProcess & c = (CCProcess &) p;
@@ -218,10 +220,10 @@ bool DataConverter<T, O>::doit( Process & p, const string & filename, Finder & f
   O out(data.dimX(), data.dimY(), data.dimZ(), data.dimT() );
   out.volume()->header() = data.volume()->header();
 
-  cout << "minsize: " << c.minSize << ", nummax: " << c.numMax << endl;
+  cout << "minsize: " << c.minSize << ", maxsize: " << c.maxSize << ", nummax: " << c.numMax << endl;
   ConnectedComponentEngine<T, O>::connected( data, out, c.connectivity, 
                                              typename datatype<T>::data_type(0), 
-                                             c.bin, c.minSize, c.numMax );
+                                             c.bin, c.minSize, c.maxSize, c.numMax );
 
   Writer<O> dataW( c.out );
   dataW.write( out );
@@ -229,7 +231,7 @@ bool DataConverter<T, O>::doit( Process & p, const string & filename, Finder & f
 }
 
 template <typename T>
-bool DataConverter<T, T>::doit( Process & p, const string & filename, Finder & finder )
+bool DataConverter<T, T>::doit( Process & p, const string & /*filename*/, Finder & finder )
 {
   CCProcess & c = (CCProcess &) p;
   cout << "output file: " << c.out << " is processed as " << finder.objectType() << " / " << finder.dataType() << " (data type kept)" << endl << flush;
@@ -240,10 +242,10 @@ bool DataConverter<T, T>::doit( Process & p, const string & filename, Finder & f
 
   dataR.read( data, 1, format.empty() ? 0 : &format );
 
-  cout << "minsize: " << c.minSize << ", nummax: " << c.numMax << endl;
+  cout << "minsize: " << c.minSize << ", maxsize: " << c.maxSize << ", nummax: " << c.numMax << endl;
   AimsConnectedComponent( data, c.connectivity, 
-                          typename datatype<T>::data_type(0), 
-                          c.bin, c.minSize, c.numMax );
+                          typename datatype<T>::data_type(0),
+                          c.bin, c.minSize, c.maxSize, c.numMax );
 
   Writer<T> dataW( c.out );
   dataW.write( data );
@@ -264,6 +266,8 @@ int main( int argc, const char **argv )
   app.addOption( connect, "-c", "connectivity  4xy / 4xz / 4yz / 6 / 8xy / " 
                  "8xz / 8yz / 18 / 26 [default=26]", true );
   app.addOption( proc.minSize, "-s", "minimum size of the seeds [default=0]", 
+                 true );
+  app.addOption( proc.maxSize, "-S", "maximum size of the seeds [default=0]", 
                  true );
   app.addOption( proc.numMax, "-n", 
                  "number of components kept  [default=all]", true );

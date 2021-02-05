@@ -61,6 +61,10 @@ template class VolumeUtilIO<VoxelRGBA>;
 template class VolumeUtilIO<VoxelHSV>;
 template class VolumeUtilIO<std::complex<float> >;
 template class VolumeUtilIO<std::complex<double> >;
+template class VolumeUtilIO<Point3df>;
+template class VolumeUtilIO<Point3d>;
+template class VolumeUtilIO<Point2d>;
+template class VolumeUtilIO<AimsVector<float, 6> >;
 #if !defined(__sun__) || !defined(_CHAR_IS_SIGNED)
 // char may be a different type from int8_t and uint8_t
 template class VolumeUtilIO<char>;

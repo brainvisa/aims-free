@@ -5,6 +5,7 @@ class list_%Template1typecode%
 #include <list>
 #include <cartobase/object/object.h>
 #include <pyaims/object/numconv.h>
+#include <cartobase/type/string_conversion.h>
 %Template1typeinclude%
 %Template1sipinclude%
 #ifndef PYAIMSSIP_LIST_%Template1typecode%_DEFINED
@@ -204,7 +205,7 @@ public:
   std::list<%Template1% >::iterator i, e = sipCpp->end();
   if( a0 < 0 )
     a0 = sipCpp->size() + a0;
-  if( a0 < 0 || a0 >= sipCpp->size() )
+  if( a0 < 0 || a0 >= (long)sipCpp->size() )
   {
     sipRes = 0;
     sipIsErr = 1;
@@ -230,7 +231,7 @@ public:
   std::list<%Template1% >::iterator i, e = sipCpp->end();
   if( a0 < 0 )
     a0 = sipCpp->size() + a0;
-  if( a0 < 0 || a0 >= sipCpp->size() )
+  if( a0 < 0 || a0 >= (long)sipCpp->size() )
   {
     sipIsErr = 1;
     PyErr_SetString( PyExc_IndexError, "std::list index out of range" );
@@ -297,6 +298,11 @@ public:
   bool operator == ( const list_%Template1typecode% & ) const;
 %MethodCode
   sipRes = ( (*sipCpp) == *a0 );
+%End
+
+  bool operator != ( const list_%Template1typecode% & ) const;
+%MethodCode
+  sipRes = ( (*sipCpp) != *a0 );
 %End
 
 
@@ -392,7 +398,7 @@ public:
 %%Template1defScalar%%
 %#ifdef PYAIMS_SCALAR%
   std::ostringstream  ss;
-  ss << "[ ";
+  ss << "[";
   unsigned i, n = sipCpp->size(), n0 = n;
   std::list<%Template1% >::iterator il, e = sipCpp->end();
   if( n > 200 )
@@ -405,12 +411,12 @@ public:
   }
   if( n < n0 )
     ss << ", ...";
-  ss << " ]";
+  ss << "]";
   std::string	s = ss.str();
   sipRes = carto::PyString_FromStdString(s);
 %#else%
   std::ostringstream  ss;
-  ss << "[ ";
+  ss << "[";
   unsigned i, n = sipCpp->size(), n0 = n;
   std::list<%Template1% >::iterator il, e = sipCpp->end();
   PyObject *po, *str;
@@ -421,7 +427,10 @@ public:
     po = %Template1pyFromC%(%Template1address% *il);
     str = PyObject_Str( po );
     if( str )
-      ss << carto::PyString_AsStdString( str );
+      if( !strcmp( "%Template1typecode%", "STRING" ) )
+        ss << carto::quotedString( carto::PyString_AsStdString( str ) );
+      else
+        ss << carto::PyString_AsStdString( str );
     else
       ss << "<object not printable>";
     if( i < n-1 )
@@ -429,7 +438,7 @@ public:
   }
   if( n < n0 )
     ss << ", ...";
-  ss << " ]";
+  ss << "]";
   std::string	s = ss.str();
   sipRes = carto::PyString_FromStdString(s);
 %#endif%

@@ -59,7 +59,7 @@ namespace aims
 template <class T>
 void MaskLinearResampler<T>::
 doResample( const carto::Volume<T> &input_data,
-            const aims::Transformation3d &inverse_transform,
+            const soma::Transformation3d &inverse_transform,
             const T &background,
             const Point3df& output_location,
             T &output_value, int t ) const

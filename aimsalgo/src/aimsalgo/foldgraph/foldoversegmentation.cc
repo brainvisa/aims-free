@@ -249,7 +249,7 @@ namespace
       // extract connected components
       AimsBucket<Void> & abk = ccomps[i];
       AimsConnectedComponent( abk, *bcks[i], Connectivity::CONNECTIVITY_26_XYZ,
-                              Void(), true, 0, 0, false );
+                              Void(), true, 0, 0, 0, false );
       // scan component by component
       for( iab=abk.begin(), eab=abk.end(); iab!=eab; ++iab )
       {
@@ -464,7 +464,7 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
 
   AimsConnectedComponent( sssplb, *ss,
                         Connectivity::CONNECTIVITY_26_XYZ,
-                        Void(), true, 0, 0, false );
+                        Void(), true, 0, 0, 0, false );
   unsigned ncss = sssplb.size();
   rc_ptr<BucketMap<Void> > sscomp( new BucketMap<Void>( sssplb ) );
   sscomp->setSizeXYZT( ss->sizeX(), ss->sizeY(), ss->sizeZ(), ss->sizeT() );
@@ -488,7 +488,7 @@ bool FoldArgOverSegment::splitSimpleSurface( rc_ptr<BucketMap<Void> > ss,
       sssplb.clear();
       AimsConnectedComponent( sssplb, *sssplit,
                               Connectivity::CONNECTIVITY_26_XYZ,
-                              Void(), true, 0, 0, false );
+                              Void(), true, 0, 0, 0, false );
       ++nssdil;
     }
   }
@@ -747,12 +747,26 @@ rc_ptr<BucketMap<Void> > FoldArgOverSegment::splitLineOnBucket(
   vector<BucketMap<float> > regions( plist.size()+1 );
   rc_ptr<BucketMap<int16_t> > voro = fm.voronoiVol();
   // split distance map into voronoi regions
+
+  BucketMap<Void> disconnected;
+  disconnected.header() = bucket->header();
+  BucketMap<Void>::Bucket &dis0 = disconnected[0];
+
   for( icb=(*voro)[0].begin(), ecb=(*voro)[0].end(); icb!=ecb; ++icb )
   {
-    ibf = fbk0.find( icb->first );
-    if( ibf != ebf )
-      regions[ icb->second ][0][icb->first] = fbk0[icb->first];
+    if( icb->second < 0 )
+      dis0[icb->first] = 1;
+    else
+    {
+      ibf = fbk0.find( icb->first );
+      if( ibf != ebf )
+        regions[ icb->second ][0][icb->first] = fbk0[icb->first];
+    }
   }
+
+  // cout << "regions: " << regions.size() << endl;
+  if( dis0.size() != 0 )
+    cout << "Warning: disconnected voxels: " << dis0.size() << endl;
 
   ip = plist.begin();
   i = 1;
@@ -1342,7 +1356,7 @@ int FoldArgOverSegment::subdivizeVertex( Vertex* v, float piecelength,
     return 0;
   }
   const BucketMap<Void>::Bucket & ss0 = ss->begin()->second;
-  size_t totalsize = ss0.size();
+  //size_t totalsize = ss0.size();
   // cout << "ss size: " << totalsize << endl;
 
   rc_ptr<BucketMap<int16_t> > iss( new BucketMap<int16_t> );

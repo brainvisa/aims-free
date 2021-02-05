@@ -136,6 +136,13 @@ namespace aims
 
     // lower-level (could probably be private)
     carto::Object getDimensionObject( int dim ) const;
+
+    /** buid a dimension object in a simple case where the matrix (probably
+        non-cifti) is a reduced matrix over regions of a single mesh */
+    template <typename T>
+    void buildDimensionObjectFromLabelsTexture( int dim,
+                                                const TimeTexture<T> & tex );
+
     static void getLabelsInfo( carto::Object cifti_info, RoiTextureList & );
     static void getSeriesInfo( carto::Object cifti_info, RoiTextureList & );
     void getParcelsInfo( carto::Object cifti_info, RoiTextureList & ) const;

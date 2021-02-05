@@ -40,6 +40,7 @@
 #include <soma-io/config/soma_config.h>
 #include <soma-io/datasourceinfo/datasourceinfo.h>      // function's argument
 #include <soma-io/image/imagewriter.h>              // use of member functions
+#include <soma-io/utilities/minfutil.h>          // used by filterProperties()
 //--- cartobase --------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>
 #include <cartobase/object/object.h>                       // header & options
@@ -73,9 +74,11 @@ namespace soma
   //   F I L T E R   M E T H O D S
   //==========================================================================
   template <typename T>
-  bool VolumeFormatWriter<T>::filterProperties(carto::Object header)
+  bool VolumeFormatWriter<T>::filterProperties(carto::Object header, 
+                                               carto::Object options)
   {
-      header->removeProperty("resolutions_dimension");
+      // Filter minf to remove irrelevant properties
+      soma::MinfUtil::filter(header, options);
       
       return true;
   }
@@ -116,7 +119,9 @@ namespace soma
     if( options->hasProperty( "partial_writing" ) )
       partial = true;
     if( partial )
+    {
       localMsg( " -> partial writing enabled." );
+    }
 
     size_t dim, ndim = obj.getSize().size();
     std::vector<int> position( ndim, 0 );
@@ -134,13 +139,17 @@ namespace soma
               + ( obj.allocatorContext().isAllocated() ? "is" : "isn't" )
               + " allocated." );
     if( parent1 )
+    {
       localMsg( std::string("parent1 exists and ")
                 + ( parent1->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
+    }
     if( parent2 )
+    {
       localMsg( std::string("parent2 exists and ")
                 + ( parent2->allocatorContext().isAllocated() ? "is" : "isn't" )
                 + " allocated." );
+    }
 
     //=== view size ==========================================================
     localMsg( "reading view size..." );
@@ -193,6 +202,7 @@ namespace soma
     if( parent1 && parent1->allocatorContext().isAllocated() )
       withborders = true;
     localMsg( std::string(" -> ") + ( withborders ? "with borders" : "without borders" ) );
+    withborders = withborders; // compilation warning
 
     //=== header info ========================================================
     localMsg( "setting header..." );
@@ -238,7 +248,7 @@ namespace soma
         localMsg( "override ot : " + carto::toString(position[3]) );
 //         std::cout << "override ot : " + carto::toString(position[3]) << std::endl;
       } catch( ... ) {}
-      int dim, value;
+      size_t dim, value;
       for( dim=0; dim<carto::Volume<T>::DIM_MAX; ++dim )
       {
         try
@@ -267,7 +277,8 @@ namespace soma
       strides[dim] = &obj( pos ) - &obj(0,0,0,0);
     }
     
-    this->filterProperties(dsi->header());
+    this->filterProperties(dsi->header(), options);
+    
     
     *dsi = _imw->writeHeader( *dsi, (T*) &obj(0,0,0,0), position, view,
                               strides, options );
@@ -349,9 +360,11 @@ namespace soma
   }
   
   template <typename T>
-  bool VolumeRefFormatWriter<T>::filterProperties(carto::Object header)
+  bool VolumeRefFormatWriter<T>::filterProperties(carto::Object header,
+                                                  carto::Object options)
   {
-      header->removeProperty("resolutions_dimension");
+      // Filter minf to remove irrelevant properties
+      soma::MinfUtil::filter(header, options);
       
       return true;
   }

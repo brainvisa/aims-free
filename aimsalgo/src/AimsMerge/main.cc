@@ -108,7 +108,7 @@ Merger2<T>::Merger2( Merger & merger, const string & format,
 
 
 template<typename T, typename U>
-bool doit2( Process & p, const string & fname, Finder & f )
+bool doit2( Process & p, const string & /*fname*/, Finder & /*f*/ )
 {
   Merger2<T>            & mp = (Merger2<T> &) p;
   Merger                & m = mp.merger;

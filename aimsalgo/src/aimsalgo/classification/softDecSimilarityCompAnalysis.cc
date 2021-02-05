@@ -166,12 +166,12 @@ SoftDecisionSimilarComponent::expectationStep( const AimsData<float>& indivMatri
       if( val[k] > maxLnProb )
 	maxLnProb = val[k] ;
     }
-    bool nonNullRnk = false ;
+    //bool nonNullRnk = false ;
     for( int k = 0 ; k < _nbClasses ; ++k ){
       double value =  exp( val[k] - maxLnProb ) * _pk[k] ;
       _Rnk( ind, k ) = value ;
-      if( value != 0. )
-	nonNullRnk = true ;
+      //if( value != 0. )
+      //	nonNullRnk = true ;
       normFact += value ;
     }
     
@@ -244,7 +244,7 @@ SoftDecisionSimilarComponent::maximisationStep( const AimsData<float>& indivMatr
     if( !_valids[ind] )
       continue ;
     double num = 0., den = 0. ;
-    bool nonNullRnk = false ;
+    //bool nonNullRnk = false ;
     for( int k = 0 ; k < _nbClasses ; ++k ){
       double proj = projection( indivMatrix, ind, k, _newek[k] ) ;
       //cout << "proj = " << proj << endl ;
@@ -258,8 +258,8 @@ SoftDecisionSimilarComponent::maximisationStep( const AimsData<float>& indivMatr
       //cout << "noise = " << noise << endl ;
       den += _Rnk(ind, k) * noise ;
       //cout << "ind " <<ind << " : an = " << _An[ind] << endl ;
-      if( _Rnk(ind,k) != 0. )
-	nonNullRnk = true ;
+      //if( _Rnk(ind,k) != 0. )
+	    // nonNullRnk = true ;
     }
     _newAn[ind] = (_nbVar - 1) * num / den ;
     //cout << "ind " << ind << " : " << num << " / " << den << " = " << _An[ind] << endl ;

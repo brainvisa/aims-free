@@ -7,6 +7,7 @@ Overview
 
 Many classes of AimsAlgo are actually found in the :aims:`soma.aims module <index.html>`, *after importing soma.aimsalgo* (mainly because of the C++ namespace aims being merged by SIP bindings). The additional `soma.aimsalgo` module contains C++ algorithms which do ne reside inside the aims C++ namespace, and additional python submodules.
 
+A more complete API is in :doc:`pyaims_api_aimsalgo`.
 
 Contents
 ++++++++
@@ -66,7 +67,7 @@ In soma.aims module
 .. autoclass:: soma.aims.TrilinearFfd
   :members:
 
-.. autoclass:: soma.aims.BundleFFDTransformer
+.. autoclass:: BundleTransformer
   :members:
 
 
@@ -107,76 +108,12 @@ soma.aimsalgo module
   .. autofunction:: AimsMeshLabelConnectedComponent
 
   .. autoclass:: DiffusionSmoother_S16
+    :members:
 
   .. autoclass:: DiffusionSmoother_FLOAT
 
-  .. autoclass:: FfdResampler_DOUBLE
-
-  .. autoclass:: FfdResampler_FLOAT
-
-  .. autoclass:: FfdResampler_POINT3DF
-
-  .. autoclass:: FfdResampler_RGB
-
-  .. autoclass:: FfdResampler_RGBA
-
-  .. autoclass:: FfdResampler_S16
-
-  .. autoclass:: FfdResampler_S32
-
-  .. autoclass:: FfdResampler_U16
-
-  .. autoclass:: FfdResampler_U32
-
-  .. autoclass:: FfdResampler_U8
-
-  .. autofunction:: ffdTransformMesh
-
-  .. autofunction:: ffdTransformBucket
-
-  .. autofunction:: ffdTransformGraph
-
-  .. autoclass:: SplineFfdResampler_DOUBLE
-
-  .. autoclass:: SplineFfdResampler_FLOAT
-
-  .. autoclass:: SplineFfdResampler_POINT3DF
-
-  .. autoclass:: SplineFfdResampler_RGB
-
-  .. autoclass:: SplineFfdResampler_RGBA
-
-  .. autoclass:: SplineFfdResampler_S16
-
-  .. autoclass:: SplineFfdResampler_S32
-
-  .. autoclass:: SplineFfdResampler_U16
-
-  .. autoclass:: SplineFfdResampler_U32
-
-  .. autoclass:: SplineFfdResampler_U8
-
-  .. autoclass:: TrilinearFfdResampler_DOUBLE
-
-  .. autoclass:: TrilinearFfdResampler_FLOAT
-
-  .. autoclass:: TrilinearFfdResampler_POINT3DF
-
-  .. autoclass:: TrilinearFfdResampler_RGB
-
-  .. autoclass:: TrilinearFfdResampler_RGBA
-
-  .. autoclass:: TrilinearFfdResampler_S16
-
-  .. autoclass:: TrilinearFfdResampler_S32
-
-  .. autoclass:: TrilinearFfdResampler_U16
-
-  .. autoclass:: TrilinearFfdResampler_U32
-
-  .. autoclass:: TrilinearFfdResampler_U8
-
   .. autoclass:: Gaussian2DSmoothing_DOUBLE
+    :members:
 
   .. autoclass:: Gaussian2DSmoothing_FLOAT
 
@@ -191,6 +128,7 @@ soma.aimsalgo module
   .. autoclass:: Gaussian2DSmoothing_U8
 
   .. autoclass:: Gaussian3DSmoothing_DOUBLE
+    :members:
 
   .. autoclass:: Gaussian3DSmoothing_FLOAT
 
@@ -205,14 +143,19 @@ soma.aimsalgo module
   .. autoclass:: Gaussian3DSmoothing_U8
 
   .. autoclass:: GeneralSampler_FLOAT_3
+    :members:
 
   .. autoclass:: GeometricMoment_DOUBLE
+    :members:
 
   .. autoclass:: AimsGradient_FLOAT
+    :members:
 
   .. autoclass:: Histogram_FLOAT
+    :members:
 
   .. autoclass:: MedianSmoothing_DOUBLE
+    :members:
 
   .. autoclass:: MedianSmoothing_FLOAT
 
@@ -227,12 +170,24 @@ soma.aimsalgo module
   .. autoclass:: MedianSmoothing_U8
 
   .. autoclass:: Mesher
+    :members:
 
   .. autoclass:: MomentInvariant_FLOAT
+    :members:
 
   .. autoclass:: Moment_FLOAT
+    :members:
 
   .. autoclass:: TriangulationMoment
+    :members:
+
+  .. autofunction:: transformGraph
+
+  .. autofunction:: transformMesh
+
+  .. autofunction:: transformBucketDirect
+
+  .. autofunction:: resampleBucket
 
 
 soma.aimsalgo.t1mapping module
@@ -253,18 +208,22 @@ soma.wip.aimsalgo module
 .. automodule:: soma.wip.aimsalgo.moment
   :members:
 
-  .. autoclass:: Moment
+.. autoclass:: Moment
+    :members:
 
 .. automodule:: soma.wip.aimsalgo.samplables
   :members:
 
-  .. autoclass:: SuperQuadricSamplable
+.. autoclass:: SuperQuadricSamplable
+    :members:
 
 .. automodule:: soma.wip.aimsalgo.transform
   :members:
 
-  .. autoclass:: BendingTransform
+.. autoclass:: BendingTransform
+  :members:
 
-  .. autoclass:: TaperingTransform
+.. autoclass:: TaperingTransform
+  :members:
 
 

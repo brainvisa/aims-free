@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -34,6 +34,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aimsalgo
 from soma import aims
 import sys

@@ -24,8 +24,9 @@ ENDIF ( DOXYGEN_FOUND )
 
 #tests
 BRAINVISA_COPY_FILES( ${PROJECT_NAME} "pyaims_tutorial.rst"
-    "pyaims_tutorial_py3.rst" "pyaims_tutorial_nb.ipynb"
+    "pyaims_tutorial_nb.ipynb"
     SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/doc/sphinx"
     DESTINATION "python/soma/aims/tests" )
 brainvisa_add_test(pyaims-tests "${PYTHON_EXECUTABLE_NAME}" -m soma.aims.tests.test_pyaims)
 brainvisa_add_test(pyaims-io-tests "${PYTHON_EXECUTABLE_NAME}" -m soma.aims.tests.test_pyaims_io)
+brainvisa_add_test(pyaims-transform-tests "${PYTHON_EXECUTABLE_NAME}" -m soma.aims.tests.test_transform)

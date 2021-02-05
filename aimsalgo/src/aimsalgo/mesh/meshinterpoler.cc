@@ -195,8 +195,6 @@ void MeshInterpoler::findNeighbours_timestep( const Point3df *vert1,
   const Point3df* vert2, uint n2, int timestep )
 {
   unsigned                      i, t;
-  float                         dd, dmin;
-  unsigned                      trimin;
   Point3df                      bary;
 
   Texture<unsigned> & triCorresp = d->projTriangles[ timestep ];
@@ -255,6 +253,9 @@ void MeshInterpoler::findNeighbours_timestep( const Point3df *vert1,
   }
 
 #else
+
+  float dd, dmin;
+  unsigned trimin;
 
   for( i=0; i<n2; ++i )
   {
@@ -358,11 +359,11 @@ void MeshInterpoler::processCoordinates_timestep( const Point3df *vert1,
   coord3.clear();
   coord3.reserve(n);
 
-  unsigned                      i, t;
+  unsigned                      i;
   unsigned                      tri, j1, j2, j3;
   float                         d1, d2, d3, x1, x2, a, b, l1, l2;
   Point3df                      vec1, vec2, vec3, vec4;
-  bool                          xxfar;
+  //bool                          xxfar;
 
   for( i=0; i<n; ++i )
   {
@@ -440,31 +441,31 @@ void MeshInterpoler::processCoordinates_timestep( const Point3df *vert1,
     d2 = ( x1 + a * x2 ) * l1;
     d3 = ( b * x2 ) * l2;
 
-    xxfar = false;
+    //xxfar = false;
 
 
     if( d2 < 0 )
     {
-      if( d2 < -1 )
-        xxfar = true;
+      //if( d2 < -1 )
+      //  xxfar = true;
       d2 = 0;
     }
     else if( d2 > 1 )
     {
-      if( d2 > 2 )
-        xxfar = true;
+      //if( d2 > 2 )
+      //  xxfar = true;
       d2 = 1;
     }
     if( d3 < 0 )
     {
-      if( d3 < -1 )
-        xxfar = true;
+      //if( d3 < -1 )
+      //  xxfar = true;
       d3 = 0;
     }
     else if( d3 > 1. - d2 )
     {
-      if( d3 > 2 - d2 )
-        xxfar = true;
+      //if( d3 > 2 - d2 )
+      //  xxfar = true;
       d3 = 1. - d2;
     }
 

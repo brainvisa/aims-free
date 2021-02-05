@@ -122,7 +122,7 @@ public:
 
 // Process 1: doit
 template <typename M>
-bool doitMask( Process & p, const string & fname, Finder & f )
+bool doitMask( Process & p, const string & fname, Finder & /*f*/ )
 {
   MaskProcess & mp = (MaskProcess &) p;
   DataProcess<M> ip;

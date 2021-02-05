@@ -6,6 +6,7 @@ class FoldGraphAttributes
 %TypeHeaderCode
   #include <aims/foldgraph/foldgraphattributes.h>
 %End
+
   public:
     FoldGraphAttributes( const AimsData_S16 & skel, Graph & graph,
                          const Motion *talairachMotion = 0,
@@ -42,6 +43,15 @@ class FoldGraphAttributes
     void greyAndCSFVolumes( const rc_ptr_Volume_S16 gw,
                             const rc_ptr_Volume_S16 voronoi );
 
+    void setMaxThreads( int mt );
+%Docstring
+Sets the maxumum number of threads used in multithreaded-enabled
+parts. 1 means mono-threaded, 0 means une thread per CPU.
+A negative value means one thread per CPU, but never use more CPUs
+than the absolute value of the given number.
+%End
+    int maxThreads() const;
+    Mesher & mesher();
 };
 
 

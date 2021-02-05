@@ -88,7 +88,7 @@ class __attribute__((__deprecated__)) MaskLinearResampler : public Resampler< T 
 
     void
     doResample( const carto::Volume< T > &,
-                const aims::Transformation3d &, const T &,
+                const soma::Transformation3d &, const T &,
                 const Point3df &, T &, int ) const CARTO_OVERRIDE;
 
     LinearResampler<T> _linearresampler;

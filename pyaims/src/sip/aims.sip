@@ -17,6 +17,18 @@
 
 %PostInitialisationCode
 carto::pyaims_init();
+// If an exception occurs while running pyaims_init, it must be propagated by
+// returning NULL from the module initialization function. Otherwise, the
+// original exception is discarded and Python shows a cryptic error:
+// "SystemError: initialization of aimssip raised unreported exception".
+if(PyErr_Occurred()) {
+#if PY_MAJOR_VERSION >= 3
+  Py_DECREF(sipModule);
+  return NULL;
+#else
+  return;
+#endif
+}
 %End
 
 typedef unsigned short uint16_t;
@@ -74,6 +86,7 @@ typedef int int32_t;
 %Include vector_set_U32.sip
 %Include vector_VOID.sip
 %Include vector_vector_S32.sip
+%Include vector_vector_FLOAT.sip
 %Include vector_vector_STRING.sip
 %Include vector_vector_POINT3DF.sip
 %Include vector_rc_ptr_AimsTimeSurface_3_VOID.sip
@@ -328,6 +341,7 @@ typedef rc_ptr_AimsTimeSurface_4_VOID rc_ptr_AimsTimeSurface_4;
 %Include rcptr_SparseOrDenseMatrix.sip
 %Include reader_SparseMatrix.sip
 %Include reader_SparseOrDenseMatrix.sip
+%Include fileformat_SparseOrDenseMatrix.sip
 
 %Include aimsgraphreader.sip
 %Include iotypes.sip

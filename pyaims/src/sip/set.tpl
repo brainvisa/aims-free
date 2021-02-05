@@ -165,6 +165,11 @@ public:
   sipRes = ( (*sipCpp) == *a0 );
 %End
 
+  bool operator != ( const set_%Template1typecode% & ) const;
+%MethodCode
+  sipRes = ( (*sipCpp) != *a0 );
+%End
+
 /*
   set_%Template1typecode% * operator +
     ( const set_%Template1typecode% & )

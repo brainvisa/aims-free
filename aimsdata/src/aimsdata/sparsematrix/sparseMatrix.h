@@ -185,7 +185,7 @@ namespace aims
       VectorType row( getSize2() );
       boost_sparse_matrix::const_iterator1
         ir = _matrix.find1( 0, i, 0 );
-      if( ir != _matrix.end1() && ir.index1() == i )
+      if( (ir != _matrix.end1()) && ((int)ir.index1() == i ))
       {
         boost_sparse_matrix::const_iterator2
           ic, ec = ir.end();

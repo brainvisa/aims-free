@@ -479,6 +479,7 @@ void	ConstructHull( void )
       if ( !v->mark ) {
          v->mark = PROCESSED;
 	 changed = AddOne( v );
+   changed = changed; // compilation warning...
 	 CleanUp();
 
 	 if ( check ) {

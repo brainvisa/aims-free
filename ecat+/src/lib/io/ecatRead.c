@@ -279,6 +279,7 @@ short* EcatReadVolume_S16(UnifiedEcatInfo *uei , int t)
 	    label_map = 0;
 	  }
 	}
+	label_map = label_map; /* compilation warning */
 	if (strcmp(EcatCalibUnit(uei),ECATSHFJ_LABELS) == 0) {
 	  if (fabs(sh->scale_factor - 1.0) > FLT_MIN) {
 	    printf("EcatReadVolume_S16 : Error for labels map : scale factor != 1 for plane %0d and matrix %0d\n",

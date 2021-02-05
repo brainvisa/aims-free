@@ -65,10 +65,13 @@ PlyHeader::~PlyHeader()
 
 namespace
 {
+  
+#if 0
   int vertex_cb(p_ply_argument /*argument*/)
   {
     return 1;
   }
+#endif
 
   int face_cb( p_ply_argument argument )
   {

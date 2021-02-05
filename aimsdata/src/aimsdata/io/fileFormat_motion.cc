@@ -73,5 +73,5 @@ static bool _motiondic()
   return true;
 }
 
-static bool motiondic = _motiondic();
+static bool motiondic __attribute__((unused)) = _motiondic();
 

@@ -117,67 +117,67 @@ namespace aims
 
   template void 
   AimsConnectedComponent( BucketMap<Void>&, Connectivity::Type, 
-                          const Void &, bool, size_t, size_t, bool );
+                          const Void &, bool, size_t, size_t, size_t, bool );
   template void 
   AimsConnectedComponent( BucketMap<uint8_t>&, Connectivity::Type, 
-                          const uint8_t &, bool, size_t, size_t, bool );
+                          const uint8_t &, bool, size_t, size_t,size_t,  bool );
   template void 
   AimsConnectedComponent( BucketMap<int16_t>&, Connectivity::Type, 
-                          const int16_t &, bool, size_t, size_t, bool );
+                          const int16_t &, bool, size_t, size_t, size_t, bool );
   template void
   AimsConnectedComponent( BucketMap<uint16_t>&, Connectivity::Type,
-                          const uint16_t &, bool, size_t, size_t, bool );
+                          const uint16_t &, bool, size_t, size_t, size_t, bool );
   template void
   AimsConnectedComponent( BucketMap<int32_t>&, Connectivity::Type,
-                          const int32_t &, bool, size_t, size_t, bool );
+                          const int32_t &, bool, size_t, size_t, size_t, bool );
   template void
   AimsConnectedComponent( BucketMap<uint32_t>&, Connectivity::Type,
-                          const uint32_t &, bool, size_t, size_t, bool );
-  template void
+                          const uint32_t &, bool, size_t, size_t, size_t, bool );
+  template void 
   AimsConnectedComponent( BucketMap<float>&, Connectivity::Type, 
-                          const float &, bool, size_t, size_t, bool );
+                          const float &, bool, size_t, size_t, size_t, bool );
 
   template void 
   AimsConnectedComponent( AimsBucket<Void> &, const AimsData<uint8_t> &,
-                          Connectivity::Type, const uint8_t &, bool, size_t, 
+                          Connectivity::Type, const uint8_t &, bool, size_t, size_t, 
                           size_t, bool );
   template void 
   AimsConnectedComponent( AimsBucket<Void> &, const AimsData<int16_t> &,
-                          Connectivity::Type, const int16_t &, bool, size_t, 
+                          Connectivity::Type, const int16_t &, bool, size_t, size_t, 
                           size_t, bool );
   template void 
   AimsConnectedComponent( AimsBucket<Void> &, const AimsData<float> &,
-                          Connectivity::Type, const float &, bool, size_t, 
+                          Connectivity::Type, const float &, bool, size_t, size_t, 
                           size_t, bool );
 
 
   template void 
   AimsConnectedComponent( AimsBucket<Void> &, const BucketMap<Void> &,
-                          Connectivity::Type, const Void &, bool, size_t, 
+                          Connectivity::Type, const Void &, bool, size_t, size_t, 
                           size_t, bool );
   template void 
   AimsConnectedComponent( AimsBucket<Void> &, const BucketMap<uint8_t> &,
-                          Connectivity::Type, const uint8_t &, bool, size_t, 
+                          Connectivity::Type, const uint8_t &, bool, size_t, size_t, 
                           size_t, bool );
   template void 
   AimsConnectedComponent( AimsBucket<Void> &, const BucketMap<int16_t> &,
-                          Connectivity::Type, const int16_t &, bool, size_t, 
+                          Connectivity::Type, const int16_t &, bool, size_t, size_t, 
                           size_t, bool );
   template void 
   AimsConnectedComponent( AimsBucket<Void> &, const BucketMap<float> &,
-                          Connectivity::Type, const float &, bool, size_t, 
+                          Connectivity::Type, const float &, bool, size_t, size_t, 
                           size_t, bool );
                           
   template AimsData<int16_t>
   AimsLabeledConnectedComponent( AimsBucket<Void> &, const AimsData<uint8_t> &,
-                                 Connectivity::Type, const uint8_t &, bool, size_t, 
+                                 Connectivity::Type, const uint8_t &, bool, size_t, size_t, 
                                  size_t, bool );
   template AimsData<int16_t>
   AimsLabeledConnectedComponent( AimsBucket<Void> &, const AimsData<int16_t> &,
-                                 Connectivity::Type, const int16_t &, bool, size_t, 
+                                 Connectivity::Type, const int16_t &, bool, size_t, size_t, 
                                  size_t, bool );
   template AimsData<int16_t>
   AimsLabeledConnectedComponent( AimsBucket<Void> &, const AimsData<float> &,
-                                 Connectivity::Type, const float &, bool, size_t, 
+                                 Connectivity::Type, const float &, bool, size_t, size_t, 
                                  size_t, bool );  
 }

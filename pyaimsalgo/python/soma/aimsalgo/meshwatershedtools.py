@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python
 ############################################################################
 # This software and supporting documentation are distributed by
 # CEA/NeuroSpin, Batiment 145, 91191 Gif-sur-Yvette cedex, France.
@@ -10,8 +10,9 @@
 ############################################################################
 
 """
-This script does the following:
-* generate a reduced profile by bsains using the watershed algorithm
+This modles features the following:
+
+* generate a reduced profile by basins using the watershed algorithm
 * merge the items if necessary (measured criteria validating the basins)
 
 Main dependencies: PyAims library
@@ -22,15 +23,14 @@ Main dependencies: PyAims library
 
 
 # import system
+from __future__ import absolute_import
+from __future__ import print_function
 import numpy
 import sys
 
 # soma import
 from soma import aims, aimsalgo
-
-if sys.version_info[0] >= 3:
-    xrange = range
-
+from six.moves import range
 
 #----------------------------Functions-----------------------------------------
 
@@ -99,7 +99,7 @@ def _merge_ascending(labels, parents, valid):
     """
     labels = numpy.copy(labels)
     parents = numpy.copy(parents)
-    for j in xrange(len(valid)):
+    for j in range(len(valid)):
         if valid[j] == 0:
             fj = parents[j]
             if fj != j:
@@ -139,8 +139,8 @@ def watershedWithBasinsMerging(
                         if size < k_size and depth < k_depth
             (2) or --> merge basins with its parent
                        if size < k_size or depth < k_depth
-    Result
-    ------
+    Returns
+    -------
     output_tex: (TimeTexture_S16)
         watershed results according to the thresholds
         indicated by k_size and k_depth
@@ -167,7 +167,7 @@ def watershedWithBasinsMerging(
 
     if size_min != 0 or depth_min != 0:
         size = numpy.asarray([len(numpy.where(labelW == x)[0])
-                             for x in xrange(idxW.size)])
+                             for x in range(idxW.size)])
         print("criteria size: ", size)
 
         # Blobs

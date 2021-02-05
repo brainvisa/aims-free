@@ -34,6 +34,7 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 import sys
 
@@ -44,7 +45,7 @@ if not infile:
     infile = 'Rbase.arg'
 graph = aims.read(infile)
 print('graph:', graph)
-print('global properties:', graph.keys())
+print('global properties:', list(graph.keys()))
 print('nodes:', graph.order())
 print('relations:', graph.edgesSize())
 

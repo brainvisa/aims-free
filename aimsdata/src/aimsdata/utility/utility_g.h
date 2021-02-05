@@ -49,7 +49,7 @@ The utility package provides miscellaneous functions.
         //@include: utility/flip.h
 //@}
 
-#include <aims/utility/linearcomb.h>
+//#include <aims/utility/linearcomb.h>
 #include <aims/utility/threshold.h>
 #include <aims/utility/bininverse.h>
 #include <aims/utility/merge.h>

@@ -60,6 +60,6 @@ namespace
     }
   }
 
-  bool dummy = addCartodataPlugins();
+  bool dummy __attribute((unused)) = addCartodataPlugins();
 
 }

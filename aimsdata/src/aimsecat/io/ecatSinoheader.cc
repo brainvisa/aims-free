@@ -262,18 +262,18 @@ EcatSinoHeader::getSingleBedDataFrame( int bedDataOrFrame ) const
   subHdr.setProperty( "ecat_num_planes", num_planes); 
 
 
-  int multi_type, num_files ;
+  int multi_type/*, num_files*/ ;
   if( num_frames > 1 ){
     multi_type = MULTIFRAME ;
-    num_files = num_frames ;
+    /*num_files = num_frames ;*/
   }
   else if( num_gates > 1 ){
     multi_type = MULTIGATE ;
-    num_files = num_gates ;
+    /*num_files = num_gates ;*/
   }
   else if( num_bed_pos > 0 ){
     multi_type = MULTIBED ;
-    num_files = num_bed_pos + 1 ;
+    /*num_files = num_bed_pos + 1 ;*/
   }
 
   subHdr.setProperty( "multi_files_type", multi_type ) ;

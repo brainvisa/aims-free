@@ -116,7 +116,6 @@ static GenericObject* edgesHelper( GenericObject* parent, const string &,
       return 0;
     }
 
-  bool			end = false;
   string		id, type;
   DataSource		& ds = *r.dataSource();
   SyntaxedInterface	*si = g->getInterface<SyntaxedInterface>();
@@ -147,7 +146,6 @@ static GenericObject* edgesHelper( GenericObject* parent, const string &,
 	}
       if( c == mark )
 	{
-	  end = true;
 	  break;	// end
 	}
       ds.ungetch( c );
@@ -234,7 +232,6 @@ static GenericObject* treesHelper( GenericObject* parent, const string &,
       return 0;
     }
 
-  bool		end = false;
   string	id, type;
   DataSource	& ds = *r.dataSource();
 
@@ -264,7 +261,6 @@ static GenericObject* treesHelper( GenericObject* parent, const string &,
 	}
       if( c == mark )
 	{
-	  end = true;
 	  break;	// end
 	}
       ds.ungetch( c );

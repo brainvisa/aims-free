@@ -53,5 +53,9 @@ Contents
   pyaims_examples
   pyaims_examples_advanced
   pyaims_aimsalgo
+  pyaims_api_aims
+  pyaims_api_aimsalgo
+  pyaims_modules_api
 ..  pyaims_aimsalgo_examples
+
 

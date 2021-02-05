@@ -108,8 +108,8 @@ namespace aims
       virtual void execute( const carto::VolumeRef<T> & in,
                                   carto::VolumeRef<T> & out ) const = 0;
 
-      virtual void setOptions( const carto::Object & options ) {};
-      virtual void updateOptions( const carto::Object & options ) {};
+      virtual void setOptions( const carto::Object & /*options*/ ) {};
+      virtual void updateOptions( const carto::Object & /*options*/ ) {};
 
       /// \c ImageAlgorithmInterface<T> Pure virtual method.
       /// Clone the object
@@ -340,6 +340,7 @@ namespace aims
                                  carto::VolumeRef<T> & out,
                            int verbose = carto::verbose )
       {
+        (void)(verbose);
         return algo.execute( in, out );
       }
   };

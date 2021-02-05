@@ -40,7 +40,6 @@
     The first template argument provides the type of vector stored items and
     the second template argument provides the size of vector.
 */
-using namespace aims;
 using namespace aimsalgo;
 
 template <class T,unsigned D>

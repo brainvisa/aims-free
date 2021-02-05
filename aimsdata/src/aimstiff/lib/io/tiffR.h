@@ -308,14 +308,14 @@ namespace aims
         {
           TIFFSetDirectory(tif,  z );
           stripSize = TIFFStripSize(tif);
-          uint16_t bits, samplesize, items;
+          uint16_t bits, samplesize/*, items*/;
 
           // Read tif frame properties
           TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rowsPerStrip);
           TIFFGetFieldDefaulted(tif, TIFFTAG_PHOTOMETRIC, &photometric);
           TIFFGetFieldDefaulted(tif, TIFFTAG_BITSPERSAMPLE, &bits);
           samplesize = stripSize / dx / rowsPerStrip;
-          items = samplesize / (bits >> 3);
+          //items = samplesize / (bits >> 3);
 //           std::cout << "tiff rowsPerStrip: " << rowsPerStrip << ", photometric: " << photometric << ", t: " << tframe << ", z: " << z << ", stripsize: " << stripSize << ", bits: " << bits << ", samplesize: " << samplesize << ", items: " << items << std::endl;
           if( photometric != PHOTOMETRIC_PALETTE )
           {
@@ -324,15 +324,15 @@ namespace aims
             {
               TIFFReadEncodedStrip(tif, i, &buffer[0], stripSize);
               if( samplesize == sizeof(T) )
-                for( int y=s; y<std::min(s+rowsPerStrip, dy); ++y )
+                for( uint y=s; y<std::min(s+rowsPerStrip, dy); ++y )
                   memcpy( &data(0, y, z, tframe),
                           &buffer[(y-s) * dx * samplesize],
                           dx * sizeof(T) );
               else
-                for( int y=s; y<std::min(s+rowsPerStrip, dy); ++y )
+                for( uint y=s; y<std::min(s+rowsPerStrip, dy); ++y )
                 {
                   T* ibuf = &data( 0, y, z, tframe );
-                  for( int x=0; x<dx; ++x, ++ibuf )
+                  for( uint x=0; x<dx; ++x, ++ibuf )
                     *ibuf = tiff_scaled_value<T>(
                       &buffer[((y-s) * dx + x) * samplesize], bits );
                 }

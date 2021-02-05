@@ -164,7 +164,6 @@ void BaseHarrisDetector<T>::filter(int minDistance) {
   int s, c, r;
   int dist;
   Point3d n, p;
-  double hn, hp;
   for (int t = 0; t < sz; t++) {
     aims::BucketMap<double>::Bucket::iterator it = this->_corners[t].begin(), 
                                               ir, it2, ie = this->_corners[t].end();

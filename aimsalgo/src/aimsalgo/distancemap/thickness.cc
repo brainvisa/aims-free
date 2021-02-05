@@ -251,7 +251,7 @@ void  aims::meshdistance::SulcusOperture( const AimsSurface<3,Void> & mesh,
   AimsData<short>     ccvol = svol.clone() ;
   cout << "Extracting connex components (with at least " << MINCC << " points in each components)" << endl;
   AimsConnectedComponent( ccvol, aims::Connectivity::CONNECTIVITY_26_XYZ, 
-                          short(0), false, MINCC );
+                          short(0), short(0), false, MINCC );
   cc_labels.clear();
   ForEach3d(ccvol,x,y,z)
       if (ccvol(x,y,z) != 0)

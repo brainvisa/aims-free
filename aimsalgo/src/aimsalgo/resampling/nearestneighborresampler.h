@@ -62,7 +62,7 @@ class NearestNeighborResampler : public Resampler< T >
 
     void
     doResample( const carto::Volume< T > &inVolume,
-                const aims::Transformation3d &transform3d,
+                const soma::Transformation3d &transform3d,
                 const T &outBackground, const Point3df &outLocation,
                 T &outValue, int t ) const CARTO_OVERRIDE;
 };

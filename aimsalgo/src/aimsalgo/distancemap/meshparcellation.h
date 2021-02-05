@@ -142,7 +142,7 @@ namespace aims
 			  const std::set<std::string> &existingName );
     
     std::map<std::string, std::set<std::string> > 
-    GyrusModel2GyriAndSulci(const char *model);
+    GyrusModel2GyriAndSulci( const std::string & model );
 
     /// global variable...
     extern  const short MESHDISTANCE_FORBIDDEN;

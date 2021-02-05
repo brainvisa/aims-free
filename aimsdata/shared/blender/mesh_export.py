@@ -38,6 +38,7 @@ Group: 'Export'
 Tooltip: 'Export selected mesh to BrainVISA mesh Format (.mesh)'
 """
 
+from __future__ import absolute_import
 __author__ = "Yann Cointepas"
 __url__ = ("BrainVISA project, http://brainvisa.info",)
 __version__ = "1.0"

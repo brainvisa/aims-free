@@ -1,6 +1,5 @@
-static char sccsid[]="@(#)matrix_extra.c	1.13 5/7/93 Copyright 1991,1992 CTI Pet Systems, Inc.";
-
-/*
+/* static char sccsid[]="@(#)matrix_extra.c	1.13 5/7/93 Copyright 1991,1992 CTI Pet Systems, Inc.";
+ *
  * Modification history :
  * March-1996 :		Sibomana@topo.ucl.ac.be
  *      Add ECAT V70, Interfile and Analyze support
@@ -55,6 +54,7 @@ static char sccsid[]="@(#)matrix_extra.c	1.13 5/7/93 Copyright 1991,1992 CTI Pet
 #include	<ecat/kernel/interfile.h>
 #include	<ecat/kernel/num_sort.h>
 #include	<ecat/kernel/machine_indep.h>
+#include	<ecat/kernel/matrix_extra.h>
 
 
 #define ERROR   -1
@@ -99,10 +99,8 @@ char* matrix_errors[] =
 		"Invalid multibed position"
 	};
 
-is_acs(fname)
-
+int is_acs(fname)
   char	*fname ;
-
 {
  	if (strstr(fname, "/sd") == fname)
 		return(TRUE) ; 
@@ -110,26 +108,13 @@ is_acs(fname)
 	   return(FALSE) ;
 }
 
-matrix_convert_data()
+int matrix_convert_data()
 {
 	return OK ;	/* dummy for now */
 }
 
-static void free_matrix_file(mptr)
-  MatrixFile *mptr ;
-{
-	if (mptr == NULL) return;
-	if (mptr->mhptr != NULL) free(mptr->mhptr) ;
-	if (mptr->dirlist != NULL) matrix_freelist(mptr->dirlist) ;
-	if (mptr->fptr) fclose(mptr->fptr);
-	if (mptr->fname) free(mptr->fname);
-	free(mptr);
-}
-
-matrix_freelist(matdirlist)
-
+int matrix_freelist(matdirlist)
   MatDirList	*matdirlist ;
-
 {
   MatDirNode	*node, *next ;
 
@@ -149,6 +134,17 @@ matrix_freelist(matdirlist)
 	return OK;
 }
 
+static void free_matrix_file(mptr)
+  MatrixFile *mptr ;
+{
+	if (mptr == NULL) return;
+	if (mptr->mhptr != NULL) free(mptr->mhptr) ;
+	if (mptr->dirlist != NULL) matrix_freelist(mptr->dirlist) ;
+	if (mptr->fptr) fclose(mptr->fptr);
+	if (mptr->fname) free(mptr->fname);
+	free(mptr);
+}
+
 int 
 mh_update(file)
 	MatrixFile     *file;
@@ -163,7 +159,6 @@ mh_update(file)
 	int            frame_max,gate_max,bed_max;
 			
 	Main_header    *mh = file->mhptr;
-	MatDirList     *dir_list = file->dirlist;
 	int             mod = 0, nmats;					/* correction  7/12/99 MS */
 	if (file->dirlist == NULL || file->dirlist->nmats == 0)
 		return OK;
@@ -291,6 +286,10 @@ static int acs_read_scan_subheader( fname, mhptr, blknum, header)
         return unmap64_scan_header(buf,header, mhptr);
     return unmap_scan_header(buf,header);
 #else
+  (void)(fname);
+  (void)(mhptr);
+  (void)(blknum);
+  (void)(header);
 	return ERROR;
 #endif
 
@@ -308,6 +307,10 @@ static int acs_read_Scan3D_subheader( fname, mhptr, blknum, header)
     rtsRblk(fname, blknum+1, buf+MatBLKSIZE);
 	return unmap_Scan3D_header(buf,header);
 #else
+  (void)(fname);
+  (void)(mhptr);
+  (void)(blknum);
+  (void)(header);
 	return ERROR;
 #endif
 }
@@ -417,9 +420,6 @@ MatrixFile *matrix_open(fname, fmode, mtype)
   int	fmode, mtype ;
 #endif
 {
-#ifndef _WIN32
-  int status;
-#endif
   MatrixFile *mptr ;
   char *omode;
 
@@ -445,7 +445,7 @@ MatrixFile *matrix_open(fname, fmode, mtype)
 	/* read the main header from the file */
 	if (mptr->acs) {				/* located on the ACS filesystem */
 #ifdef _ACS_REACHABLE /* ACS access not implemented on WIN32 plateform */
-		if ( (status = rts_rmhd(fname, mptr->mhptr)) == ERROR) {
+		if ( rts_rmhd(fname, mptr->mhptr) == ERROR ) {
 #endif
 		  matrix_errno = MAT_ACS_FILE_NOT_FOUND ;
 		  free( mptr->mhptr);
@@ -646,7 +646,7 @@ MatrixData *matrix_read(mptr, matnum, dtype)
 	if (read_host_data(mptr, matnum, data, dtype) != OK) {
 		free_matrix_data(data);
 		data = NULL;
-	} else if (dtype != NoData && data->data_type != dtype)
+	} else if ((dtype != NoData) && ((int)data->data_type != dtype))
 		matrix_convert_data(data, dtype);
 	return (data);
 }
@@ -724,7 +724,7 @@ int   matnum, plane;
 		}
 }
 
-matrix_write(mptr, matnum, data)
+int matrix_write(mptr, matnum, data)
   MatrixFile *mptr ;
   MatrixData *data ;
   int	matnum;
@@ -865,12 +865,10 @@ float find_fmax( fdata, nvals)
 }
 
 
-read_host_data(mptr, matnum, data, dtype) 
-
+int read_host_data(mptr, matnum, data, dtype) 
   MatrixFile	*mptr ;
   MatrixData	*data ;
   int	matnum , dtype;
-
  {
   struct MatDir matdir;
   int	 nblks, data_size ;
@@ -881,7 +879,7 @@ read_host_data(mptr, matnum, data, dtype)
   Norm_subheader *normsub ;
   Norm3D_subheader *norm3d;
   int sx,sy,sz;
-  int elem_size= 2, datasize;
+  int elem_size= 2;
 
 	matrix_errno = MAT_OK;
 	matrix_errtxt[0] = '\0';
@@ -1266,14 +1264,9 @@ void free_matrix_data(data)
 
 
 
-file_exists(filename)	/* subroutine to see if file exists or not */
-
+int file_exists(filename)	/* subroutine to see if file exists or not */
   char *filename ;
-
 {
-#ifndef _WIN32
-  Main_header mhead;
-#endif
   struct stat stbuf;
 	if (!is_acs(filename))
 	{
@@ -1282,6 +1275,9 @@ file_exists(filename)	/* subroutine to see if file exists or not */
 	}
 	else {
 #ifdef _ACS_REACHABLE
+#ifndef _WIN32
+    Main_header mhead;
+#endif
 		if (rts_rmhd(filename, &mhead) == OK) return (TRUE);
 #endif
 		return FALSE;
@@ -1292,10 +1288,8 @@ file_exists(filename)	/* subroutine to see if file exists or not */
 /* subroutine to return starting position of substring within string */
 /* return index of t in s, -1 if none */
 
-strindex(s, t)
-
+int strindex(s, t)
   char	s[], t[] ;
-
 {
   int	i, j, k ;
 
@@ -1319,10 +1313,10 @@ void matrix_perror( s)
 	else perror(s);
 }
 
-copy_proto_object( new, old)
+int copy_proto_object( new, old)
   MatrixData *new, *old;
 {
-	int sh_size;
+	int sh_size = 0;
 
 	matrix_errno = MAT_OK;
 	matrix_errtxt[0] = '\0';
@@ -1342,6 +1336,8 @@ copy_proto_object( new, old)
 		case Normalization:
 			sh_size = sizeof(Norm_subheader);
 			break;
+		default:
+		  break;
 	  }
 	  new->shptr = (caddr_t) malloc( sh_size);
 	  if( !new->shptr ) return( ERROR );
@@ -1386,7 +1382,7 @@ void matrix_free( matrix)
 	free( matrix);
 }
 
-convert_float_scan( scan, fdata)
+int convert_float_scan( scan, fdata)
   MatrixData *scan;
   float *fdata;
 {
@@ -1427,7 +1423,7 @@ convert_float_scan( scan, fdata)
 	return OK;
 }
 
-convert_long_scan( scan, ldata)
+int convert_long_scan( scan, ldata)
   MatrixData *scan;
   int *ldata;
 {

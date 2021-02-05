@@ -34,15 +34,14 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
+from six.moves import range
+from six.moves import zip
 __docformat__ = 'restructuredtext en'
 
 from soma import aims
 import numpy as np
 import sys
-
-
-if sys.version_info[0] >= 3:
-    xrange = range
 
 
 def crop_volume(vol, threshold=0, border=0):
@@ -74,7 +73,7 @@ def crop_volume(vol, threshold=0, border=0):
     arr = np.asarray(vol)
     # look for empty slices
     zeroslice = -1
-    for z in xrange(vol.getSizeZ()):
+    for z in range(vol.getSizeZ()):
         slicevol = arr[:,:, z,:]
         if np.all(slicevol <= threshold):
             zeroslice = z
@@ -85,7 +84,7 @@ def crop_volume(vol, threshold=0, border=0):
     zmin = np.max((zeroslice + 1 - border, 0))
     zeroslice = vol.getSizeZ()
     if z != -1:
-        for z in xrange(vol.getSizeZ()-1, 0, -1):
+        for z in range(vol.getSizeZ()-1, 0, -1):
             slicevol = arr[:,:, z,:]
             if np.all(slicevol <= threshold):
                 zeroslice = z
@@ -94,7 +93,7 @@ def crop_volume(vol, threshold=0, border=0):
     zup = np.min((zeroslice + border, vol.getSizeZ()))
 
     zeroslice = -1
-    for y in xrange(vol.getSizeY()):
+    for y in range(vol.getSizeY()):
         slicevol = arr[:, y,:,:]
         if np.all(slicevol <= threshold):
             zeroslice = y
@@ -105,7 +104,7 @@ def crop_volume(vol, threshold=0, border=0):
     ymin = np.max((zeroslice + 1 - border, 0))
     zeroslice = vol.getSizeY()
     if y != -1:
-        for y in xrange(vol.getSizeY()-1, 0, -1):
+        for y in range(vol.getSizeY()-1, 0, -1):
             slicevol = arr[:, y,:,:]
             if np.all(slicevol <= threshold):
                 zeroslice = y
@@ -114,7 +113,7 @@ def crop_volume(vol, threshold=0, border=0):
     yup = np.min((zeroslice + border, vol.getSizeY()))
 
     zeroslice = -1
-    for x in xrange(vol.getSizeX()):
+    for x in range(vol.getSizeX()):
         slicevol = arr[x,:,:,:]
         if np.all(slicevol <= threshold):
             zeroslice = x
@@ -125,7 +124,7 @@ def crop_volume(vol, threshold=0, border=0):
     xmin = np.max((zeroslice + 1 - border, 0))
     zeroslice = vol.getSizeX()
     if x != -1:
-        for x in xrange(vol.getSizeX()-1, 0, -1):
+        for x in range(vol.getSizeX()-1, 0, -1):
             slicevol = arr[x,:,:,:]
             if np.all(slicevol <= threshold):
                 zeroslice = x
@@ -202,11 +201,17 @@ def compare_images(vol, vol2, vol1_name='input', vol2_name='output',
         val_range = float(np.max(np.asarray(vol))) \
             - np.min(np.asarray(vol))
         thresh = thresh * val_range
-        
-    if np.max(np.abs(np.asarray(vol) - np.asarray(vol2))) >= thresh:
+
+    nvol = np.asarray(vol)
+    nvol2 = np.asarray(vol2)
+    if nvol.dtype.fields is not None and 'v' in nvol.dtype.fields:
+        # bound as struct containing an array named "v" (RGB, AimsVector...)
+        # use it as array with additional dimensions
+        nvol = nvol['v']
+        nvol2 = nvol2['v']
+    if np.max(np.abs(nvol - nvol2)) >= thresh:
         raise RuntimeError(msg + ', max diff: %f, max allowed: %f'
-                            % (np.max(np.abs(np.asarray(vol) - np.asarray(vol2))),
-                               thresh))
+                            % (np.max(np.abs(vol - vol2)), thresh))
     
     return True
 

@@ -253,5 +253,5 @@ static bool _meshdic()
   return true;
 }
 
-static bool meshdic = _meshdic();
+static bool meshdic __attribute__((unused)) = _meshdic();
 

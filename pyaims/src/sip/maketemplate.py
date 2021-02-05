@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -33,6 +34,7 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 
 from __future__ import print_function
+from __future__ import absolute_import
 
 import sys
 import os
@@ -42,13 +44,8 @@ from optparse import OptionParser
 import subprocess
 import platform
 
-if sys.version_info[0] >= 3:
-    def xreadlines(f):
-        return f.readlines()
-    xrange = range
-else:
-    def xreadlines(f):
-        return f.xreadlines()
+import six
+from six.moves import range
 
 
 def convert_string_to_int(s):
@@ -56,7 +53,7 @@ def convert_string_to_int(s):
     Allow to convert string with digit followed by non digits
     Useful to buil Qt version such as 3.3.8b
     '''
-    for i in xrange(len(s)):
+    for i in range(len(s)):
         if not s[i].isdigit():
             s = s[:i]
             break
@@ -91,9 +88,9 @@ def makeTemplate(
             l = moc_out[1].decode()
             if l == '':
                 l = moc_out[0].decode() # moc 5
-                x = re.search('^.*moc ([0-9\.]+).*$', l).group(1)
+                x = re.search(r'^.*moc ([0-9\.]+).*$', l).group(1)
             else:
-                x = re.search('^.*\(Qt ([^\)]*)\).*$', l).group(1)
+                x = re.search(r'^.*\(Qt ([^\)]*)\).*$', l).group(1)
             qv = [convert_string_to_int(k) for k in x.split('.')]
             qver = qv[0] * 0x10000 + qv[1] * 0x100 + qv[2]
             cppcmd.append('-DQT_VERSION=' + hex(qver))
@@ -113,12 +110,12 @@ def makeTemplate(
         fo2, cppout = (p.stdin, p.stdout)
 
     templatere = re.compile('(%(Template[0-9]+)([^%]*)%)')
-    disableprere = re.compile('(^\s*)(#)(.*$)', re.M)
-    enableprere = re.compile('(^\s*)(//!#!)(.*$)')
-    preprocre = re.compile('(^\s*)(%#)(.*)%$')
-    removeprere = re.compile('^\s*#.*$')
+    disableprere = re.compile(r'(^\s*)(#)(.*$)', re.M)
+    enableprere = re.compile(r'(^\s*)(//!#!)(.*$)')
+    preprocre = re.compile(r'(^\s*)(%#)(.*)%$')
+    removeprere = re.compile(r'^\s*#.*$')
 
-    for line in xreadlines(fi):
+    for line in fi:
         lo = line
         templ = templatere.search(lo)
         while templ:
@@ -156,7 +153,7 @@ def makeTemplate(
     if cpp:
         # cppout = p.communicate()[0]
         fo2.close()
-        for line in xreadlines(cppout):
+        for line in cppout:
             line = line.decode()
             # This is necessary to remove CR LF on windows
             if len(line) >= 2 and line[-2] == '\r':
@@ -166,6 +163,7 @@ def makeTemplate(
                 lo = ''
             lo = enableprere.sub('\\1#\\3', lo)
             fo.write(lo)
+        cppout.close()
 
     fo.close()
     fi.close()
@@ -208,21 +206,19 @@ if __name__ == '__main__':
         if len(options.templates) % 2 != 0:
             print('template arguments go by pairs (key, value)')
             sys.exit(1)
-        for i in xrange(int(len(options.templates) / 2)):
+        for i in range(len(options.templates) // 2):
             templates[options.templates[i * 2]] = options.templates[i * 2 + 1]
 
     # print('templates:', options.templates)
     # print('subs:', options.subs)
 
     if options.subs:
-        if sys.version_info[0] >= 3:
-            code = compile(open(options.sub).read(), options.sub, 'exec')
-            exec(code, globals(), globals())
-        else:
-            execfile(options.subs)
+        with open(options.subs, 'rb') as f:
+            code = compile(f.read(), options.subs, 'exec')
+        six.exec_(code)
         types = typessub
 
-    for i in xrange(int(len(args) / 2)):
+    for i in range(len(args) // 2):
         types[args[i * 2]] = args[i * 2 + 1]
 
     makeTemplate(infile, outfile, types, templates, cppc, moc=options.moc)

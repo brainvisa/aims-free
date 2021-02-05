@@ -9,13 +9,45 @@ class Gaussian3DSmoothing_%Template1typecode%
 #endif
 %End
 
+%Docstring
+3D Deriche's recursive gaussian smoothing filter
+%End
+
 public:
   Gaussian3DSmoothing_%Template1typecode%(float sx=1.0, float sy=1.0,
     float sz=1.0);
+%Docstring
+Gaussian3DSmoothing_%Template1typecode%(sx=1., sy=1., sz=1.)
+
+Parameters
+----------
+sx: float
+    filter stdev (sigma) on x direction (mm)
+sy: float
+    filter stdev (sigma) on y direction (mm)
+sz: float
+    filter stdev (sigma) on z direction (mm)
+%End
+
   virtual ~Gaussian3DSmoothing_%Template1typecode%();
 
   AimsData_%Template1typecode% doit( const AimsData_%Template1typecode% &)
     /Factory, ReleaseGIL/;
+%Docstring
+doit(volume)
+
+Actually perform the smoothing on the given data.
+
+Parameters
+----------
+volume: Volume or AimsData
+    data to be smoothed
+
+Returns
+-------
+smoothed: AimsData
+    smoothed volume
+%End
 };
 
 

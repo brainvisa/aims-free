@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
@@ -32,11 +32,16 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license version 2 and that you accept its terms.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 try:
-    import dicom
+    import pydicom as dicom
 except ImportError as e:
-    raise Exception("DICOM aggregator requires pydicom.")
+    try:
+        import dicom
+    except ImportError as e:
+        raise Exception("DICOM aggregator requires pydicom.")
 
 class DicomAggregator( object ):
     def __init__( self ):

@@ -44,7 +44,7 @@ Connectivity6::Connectivity6() : TopologicalRelation()
 
 void Connectivity6::fillNeighbors()
 {
-  int i, j, k, x, y, z, *rel;
+  int i, j, x, y, z, *rel;
 
   for ( i=0; i<27; i++ )
     {
@@ -56,7 +56,7 @@ void Connectivity6::fillNeighbors()
 
       _nbNeighbors[ i ] = 0;
 
-      for ( j=0, k=0; j<27; j++ )
+      for ( j=0; j<27; j++ )
 	if ( ( abs( x - P[ j ][ 0 ] ) <= 1 ) && 
 	     ( abs( y - P[ j ][ 1 ] ) <= 1 ) && 
 	     ( abs( z - P[ j ][ 2 ] ) <= 1 ) )

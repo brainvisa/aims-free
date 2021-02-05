@@ -22,8 +22,8 @@ double hyp0f1(double a, SIP_PYOBJECT x, int MAX);
 				"x must be a contiguous array");
       		} else {
 			double	*x = NULL;
-			int n = a->dimensions[0];
-    			x = (double *) a->data;
+			int n = PyArray_DIMS( a )[0];
+    			x = (double *) PyArray_DATA( a );
 			sipRes = hyp0f1(a0, x, n, a2);
 		}
 	}
@@ -47,8 +47,8 @@ double hyp1f1(double a, double b, SIP_PYOBJECT x, int MAX);
 				"x must be a contiguous array");
       		} else {
 			double	*x = NULL;
-			int n = a->dimensions[0];
-    			x = (double *) a->data;
+			int n = PyArray_DIMS( a )[0];
+    			x = (double *) PyArray_DATA( a );
 			sipRes = hyp1f1(a0, a1, x, n, a3);
 		}
 	}
@@ -72,8 +72,8 @@ double loghyp0f1(double a, SIP_PYOBJECT x, int MAX);
 				"x must be a contiguous array");
       		} else {
 			double	*x = NULL;
-			int n = a->dimensions[0];
-    			x = (double *) a->data;
+			int n = PyArray_DIMS( a )[0];
+    			x = (double *) PyArray_DATA( a );
 			sipRes = loghyp0f1(a0, x, n, a2);
 		}
 	}
@@ -97,8 +97,8 @@ double loghyp1f1(double a, double b, SIP_PYOBJECT x, int MAX);
 				"x must be a contiguous array");
       		} else {
 			double	*x = NULL;
-			int n = a->dimensions[0];
-    			x = (double *) a->data;
+			int n = PyArray_DIMS( a )[0];
+    			x = (double *) PyArray_DATA( a );
 			sipRes = loghyp1f1(a0, a1, x, n, a3);
 		}
 	}

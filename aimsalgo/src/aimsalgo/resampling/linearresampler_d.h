@@ -69,7 +69,7 @@ int LinearResampler< T >::getOrder() const
 template < class T >
 void LinearResampler< T >::
 doResampleChannel( const carto::Volume< ChannelType >& inVolume,
-                   const aims::Transformation3d& invTransform3d,
+                   const soma::Transformation3d& invTransform3d,
                    const ChannelType& outBackground,
                    const Point3df& outLocation,
                    ChannelType& outValue, int t ) const

@@ -59,7 +59,7 @@ class MassCenters {
   
   private:
     bool _init;
-    const AimsData<T> & _data;
+    const AimsData<T> _data;
     bool _bin;
     carto::rc_ptr<aims::Interpolator> _interpolator;
     carto::rc_ptr<aims::RoiIterator> _roiIterator;

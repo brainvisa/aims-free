@@ -16,7 +16,7 @@
 
 <hr width="100%"> <br>
 
- <b><a href="#version-4.6.2">Version 4.6.2</a></b><br>
+ <b><a href="#version-5.0.0">Version 5.0.0</a></b><br>
  <b><a href="#version-4.6.1">Version 4.6.1</a></b><br>
  <b><a href="#version-4.6.0">Version 4.6.0</a></b><br>
  <b><a href="#version-4.5.0">Version 4.5.0</a></b><br>
@@ -48,11 +48,49 @@
 
 
 <!-- -->
-<h4> <a name="version-4.6.2"></a>Nov. 20, 2018, Version 4.6.2</h4>
+<h4> <a name="version-5.0.0"></a>Jan. 20, 2021, Version 5.0.0</h4>
 
 <ul>
+  <li>Removed a bunch of obsolete commands:
+    <ul>
+      <li>AimsClosing</li>
+      <li>AimsData2Jpeg</li>
+      <li>AimsDilation</li>
+      <li>AimsDtiBk2Vol</li>
+      <li>AimsErosion</li>
+      <li>AimsLinearComb</li>
+      <li>AimsManualBiasCorrection</li>
+      <li>AimsMaskPhantom</li>
+      <li>AimsNormDiff</li>
+      <li>AimsOpening</li>
+      <li>AimsPowerComb</li>
+      <li>AimsSlice2Bucket</li>
+      <li>AimsSpaghettiModel</li>
+      <li>AimsHJEvolution2D</li>
+      <li>AimsHJEvolution3D</li>
+      <li>AimsKMeans</li>
+      <li>AimsKMeansImageSegmentation</li>
+      <li>AimsTensor2Bucket</li>
+    </ul>
+    and classes:
+    <ul>
+      <li>AimsLinearCombination classes</li>
+      <li>Finally get rid of old getopt (obsolete for almost 20 years...)</li>
+    </ul>
+  </li>
+  <li>PyAims bindings to numpy arrays are now allowed when items types are not scalar numbers: vectors of Point3Df or of RGB are mapped to array structures.
+  </li>
   <li>pyaims: added operators **, **=, //, //= to volumes</li>
   <li>cartoLinearComb.py can now convert numpy expressions back to volumes before writing output</li>
+  <li>Added support for MRTrix .tck tracks format</li>
+  <li>Extended the URL query-string-like syntax to all AIMS IO (not only Soma-IO) to pass reading/writing options</li>
+  <li>Reading option to fiber tracks formats: "<tt>max_filtered_memory</tt>" to filter out some tracks and limit memory usage (mainly for visualization in Anatomist)</li>
+  <li>SurgaceGenerator new model type: parallelepiped (triangulated)</li>
+  <li>new command: <tt>AimsApplyTransform</tt> which will replace <tt>AimsResample</tt>, <tt>AimsFFDApply</tt> and other transform commands. Supports many kinds of objects (volumes, meshes, graphs, buckets), linear and non-linear transforms, and transform chains.</li>
+  <li>pyaims: lazy readers for better memory management, used in <tt>cartoLinearComb.py</tt> for instance
+  </li>
+  <li>Python plugin in aims: implements some IO in python language: numpy matrix readoing</li>
+  <li>Many more small fixes</li>
 </ul>
 
 <!-- -->

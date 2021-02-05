@@ -34,24 +34,23 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 import sys
-
-if sys.version_info[0] >= 3:
-    xrange = range
+from six.moves import range
 
 bck = aims.read(
     '/neurospin/lnao/Panabase/data/diffusion/chaos/t1mri/default_acquisition/default_analysis/folds/3.0/base2005_manual/Rchaos_base2005_manual.data/ss_Bucket.bck')
 print('bucket:', bck)
 
 print('timesteps:', bck.size())
-for t in xrange(bck.size()):
+for t in range(bck.size()):
     print('time:', t)
     b = bck[t]
     print('bucket:', b, ', size:', b.size())
     for p in b.keys():
         sys.stdout.write(str(p.list()) + ' ')
-    print
+    print()
 
 fileout = '/tmp/toto.bck'
 print('writing bucket to', fileout)

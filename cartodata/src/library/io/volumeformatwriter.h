@@ -82,7 +82,8 @@ namespace soma
       
       /// FormatWriter derived function
       /// It removes properties that must not be written.
-      virtual bool filterProperties(carto::Object header);
+      virtual bool filterProperties(carto::Object header,
+                                    carto::Object options = carto::none());
       
       /// FormatWriter derived function
       /// This method understands a volume and calls appropriate ImageWriter
@@ -114,7 +115,8 @@ namespace soma
 
       /// FormatWriter derived function
       /// It removes properties that must not be written.
-      virtual bool filterProperties(carto::Object header);
+      virtual bool filterProperties(carto::Object header,
+                                    carto::Object options = carto::none());
       
       /// FormatWriter derived function
       /// This method understands a volume and calls appropriate ImageWriter

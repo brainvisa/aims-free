@@ -116,6 +116,15 @@ namespace
   };
 
 
+  struct ParallelepipedGen
+    : public SurfaceGenerator::Generator
+  {
+    virtual AimsSurfaceTriangle*
+    generator( const carto::GenericObject & ) const;
+    virtual Object parameters() const;
+  };
+
+
   struct CircleGen_wireframe
     : public SurfaceGenerator::Generator_wireframe
   {
@@ -139,22 +148,24 @@ namespace
     static map<string,rc_ptr<SurfaceGenerator::Generator> >	functs;
     if( functs.empty() )
       {
-        functs[ "cube"        ] 
+        functs[ "cube"           ]
           = rc_ptr<SurfaceGenerator::Generator>( new CubeGen );
-        functs[ "cylinder"    ] 
+        functs[ "cylinder"       ]
           = rc_ptr<SurfaceGenerator::Generator>( new CylinderGen );
-        functs[ "cone"        ] 
+        functs[ "cone"           ]
           = rc_ptr<SurfaceGenerator::Generator>( new ConeGen );
-        functs[ "arrow"       ] 
+        functs[ "arrow"          ]
           = rc_ptr<SurfaceGenerator::Generator>( new ArrowGen );
-        functs[ "icosahedron" ] 
+        functs[ "icosahedron"    ]
           = rc_ptr<SurfaceGenerator::Generator>( new IcosahedronGen );
-        functs[ "sphere"      ] 
+        functs[ "sphere"         ]
           = rc_ptr<SurfaceGenerator::Generator>( new SphereGen );
-        functs[ "ellipse"      ]
+        functs[ "ellipse"        ]
           = rc_ptr<SurfaceGenerator::Generator>( new EllipseGen );
         functs[ "icosphere"      ]
           = rc_ptr<SurfaceGenerator::Generator>( new IcosphereGen );
+        functs[ "parallelepiped" ]
+          = rc_ptr<SurfaceGenerator::Generator>( new ParallelepipedGen );
       }
     return functs;
   }
@@ -170,10 +181,10 @@ namespace
       functs[ "parallelepiped" ] 
         = rc_ptr<SurfaceGenerator::Generator_wireframe>( 
           new ParallelepipedGen_wireframe );
-      functs[ "circle" ]
+      functs[ "circle"         ]
         = rc_ptr<SurfaceGenerator::Generator_wireframe>(
           new CircleGen_wireframe );
-      functs[ "grid" ]
+      functs[ "grid"           ]
         = rc_ptr<SurfaceGenerator::Generator_wireframe>(
           new GridGen_wireframe );
     }
@@ -382,7 +393,30 @@ namespace
   }
 
 
-  AimsTimeSurface<2,Void>* 
+  AimsSurfaceTriangle*
+  ParallelepipedGen::generator(
+    const carto::GenericObject & x ) const
+  {
+    return SurfaceGenerator::parallelepiped( x );
+  }
+
+
+  Object ParallelepipedGen::parameters() const
+  {
+    Object              d = Object::value( Dictionary() );
+    Dictionary  & p = d->value<Dictionary>();
+    p[ "boundingbox_min" ] = Object::value( string(
+      "3D position of the lower bounding box" ) );
+    p[ "boundingbox_max" ] = Object::value( string(
+      "3D position of the higher bounding box" ) );
+    p[ "smooth"          ] = Object::value(
+      string( "(optional) make smooth normals and shared "
+              "vertices (default: 0)" ) );
+    return d;
+  }
+
+
+  AimsTimeSurface<2,Void>*
   ParallelepipedGen_wireframe::generator( 
     const carto::GenericObject & x ) const
   {
@@ -1606,6 +1640,187 @@ AimsTimeSurface<2,Void>* SurfaceGenerator::parallelepiped_wireframe(
   pol.push_back( AimsVector<uint32_t, 2>( 6, 7 ) );
 
   return mesh;
+}
+
+
+AimsSurfaceTriangle* SurfaceGenerator::parallelepiped(
+  const carto::GenericObject & params )
+{
+  Object        vp1;
+  Point3df      corner1, corner2;
+
+  vp1 = params.getProperty( "boundingbox_min" );
+
+  int i = 0;
+  Object it;
+  for( it=vp1->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
+    corner1[i] = it->currentValue()->getScalar();
+  if( i != 3 )
+    cerr << "parallelepiped needs 3 coords in boundingbox_min\n";
+
+  vp1 = params.getProperty( "boundingbox_max" );
+  for( i=0, it=vp1->objectIterator(); it->isValid() && i < 3; ++i, it->next() )
+    corner2[i] = it->currentValue()->getScalar();
+  if( i != 3 )
+    cerr << "parallelepiped needs 3 coords in boundingbox_max\n";
+
+  bool smooth = false;
+  try
+  {
+    Object s = params.getProperty( "smooth" );
+    if( !s.isNull() )
+      smooth = bool( s->getScalar() );
+  }
+  catch( ... )
+  {
+  }
+
+  return parallelepiped( corner1, corner2, smooth );
+}
+
+
+AimsSurfaceTriangle* SurfaceGenerator::parallelepiped(
+  const Point3df & corner1, const Point3df & corner2, bool smooth )
+{
+  AimsSurfaceTriangle		*surf = new AimsSurfaceTriangle;
+  AimsSurface<3,Void>		& s = (*surf)[0];
+  vector<Point3df>		& vert = s.vertex();
+  vector<Point3df>		& norm = s.normal();
+  vector< AimsVector<uint,3> >	& poly = s.polygon();
+  Point3df			v ;
+  float				len = 0.58;
+
+  if( smooth )
+    {
+      vert.reserve( 8 );
+      norm.reserve( 8 );
+      poly.reserve( 12 );
+
+      v = corner1;
+      vert.push_back( v );
+      v[0] = corner2[0];
+      vert.push_back( v );
+      v[1] = corner2[1];
+      vert.push_back( v );
+      v[0] = corner1[0];
+      vert.push_back( v );
+      v[2] = corner2[2];
+      vert.push_back( v );
+      v[1] = corner1[1];
+      vert.push_back( v );
+      v[0] = corner2[0];
+      vert.push_back( v );
+      v[1] = corner2[1];
+      vert.push_back( v );
+
+      norm.push_back( Point3df( -len, -len, -len ) );
+      norm.push_back( Point3df( len, -len, -len ) );
+      norm.push_back( Point3df( len, len, -len ) );
+      norm.push_back( Point3df( -len, len, -len ) );
+      norm.push_back( Point3df( -len, len, len ) );
+      norm.push_back( Point3df( -len, -len, len ) );
+      norm.push_back( Point3df( len, -len, len ) );
+      norm.push_back( Point3df( len, len, len ) );
+
+      poly.push_back( AimsVector<uint,3>( 0, 2, 1 ) );
+      poly.push_back( AimsVector<uint,3>( 0, 3, 2 ) );
+      poly.push_back( AimsVector<uint,3>( 0, 1, 5 ) );
+      poly.push_back( AimsVector<uint,3>( 1, 6, 5 ) );
+      poly.push_back( AimsVector<uint,3>( 1, 2, 7 ) );
+      poly.push_back( AimsVector<uint,3>( 1, 7, 6 ) );
+      poly.push_back( AimsVector<uint,3>( 2, 3, 4 ) );
+      poly.push_back( AimsVector<uint,3>( 2, 4, 7 ) );
+      poly.push_back( AimsVector<uint,3>( 0, 5, 3 ) );
+      poly.push_back( AimsVector<uint,3>( 3, 5, 4 ) );
+      poly.push_back( AimsVector<uint,3>( 4, 5, 6 ) );
+      poly.push_back( AimsVector<uint,3>( 6, 7, 4 ) );
+    }
+  else
+    {
+      vert.reserve( 24 );
+      norm.reserve( 24 );
+      poly.reserve( 12 );
+
+      v = corner1;
+      vert.push_back( v );
+      vert.push_back( v );
+      vert.push_back( v );
+      v[0] = corner2[0];
+      vert.push_back( v );
+      vert.push_back( v );
+      vert.push_back( v );
+      v[1] = corner2[1];
+      vert.push_back( v );
+      vert.push_back( v );
+      vert.push_back( v );
+      v[0] = corner1[0];
+      vert.push_back( v );
+      vert.push_back( v );
+      vert.push_back( v );
+      v[2] = corner2[2];
+      vert.push_back( v );
+      vert.push_back( v );
+      vert.push_back( v );
+      v[1] = corner1[1];
+      vert.push_back( v );
+      vert.push_back( v );
+      vert.push_back( v );
+      v[0] = corner2[0];
+      vert.push_back( v );
+      vert.push_back( v );
+      vert.push_back( v );
+      v[1] = corner2[1];
+      vert.push_back( v );
+      vert.push_back( v );
+      vert.push_back( v );
+
+      norm.push_back( Point3df( 0, 0, -1 ) );
+      norm.push_back( Point3df( 0, -1, 0 ) );
+      norm.push_back( Point3df( -1, 0, 0 ) );
+
+      norm.push_back( Point3df( 0, 0, -1 ) );
+      norm.push_back( Point3df( 0, -1, 0 ) );
+      norm.push_back( Point3df( 1, 0, 0 ) );
+
+      norm.push_back( Point3df( 0, 0, -1 ) );
+      norm.push_back( Point3df( 0, 1, 0 ) );
+      norm.push_back( Point3df( 1, 0, 0 ) );
+
+      norm.push_back( Point3df( 0, 0, -1 ) );
+      norm.push_back( Point3df( 0, 1, 0 ) );
+      norm.push_back( Point3df( -1, 0, 0 ) );
+
+      norm.push_back( Point3df( 0, 0, 1 ) );
+      norm.push_back( Point3df( 0, 1, 0 ) );
+      norm.push_back( Point3df( -1, 0, 0 ) );
+
+      norm.push_back( Point3df( 0, 0, 1 ) );
+      norm.push_back( Point3df( 0, -1, 0 ) );
+      norm.push_back( Point3df( -1, 0, 0 ) );
+
+      norm.push_back( Point3df( 0, 0, 1 ) );
+      norm.push_back( Point3df( 0, -1, 0 ) );
+      norm.push_back( Point3df( 1, 0, 0 ) );
+
+      norm.push_back( Point3df( 0, 0, 1 ) );
+      norm.push_back( Point3df( 0, 1, 0 ) );
+      norm.push_back( Point3df( 1, 0, 0 ) );
+
+      poly.push_back( AimsVector<uint,3>( 0, 6, 3 ) );
+      poly.push_back( AimsVector<uint,3>( 0, 9, 6 ) );
+      poly.push_back( AimsVector<uint,3>( 1, 4, 16 ) );
+      poly.push_back( AimsVector<uint,3>( 4, 19, 16 ) );
+      poly.push_back( AimsVector<uint,3>( 5, 8, 23 ) );
+      poly.push_back( AimsVector<uint,3>( 5, 23, 20 ) );
+      poly.push_back( AimsVector<uint,3>( 7, 10, 13 ) );
+      poly.push_back( AimsVector<uint,3>( 7, 13, 22 ) );
+      poly.push_back( AimsVector<uint,3>( 2, 17, 11 ) );
+      poly.push_back( AimsVector<uint,3>( 11, 17, 14 ) );
+      poly.push_back( AimsVector<uint,3>( 12, 15, 18 ) );
+      poly.push_back( AimsVector<uint,3>( 18, 21, 12 ) );
+    }
+
+  return( surf );
 }
 
 

@@ -235,17 +235,32 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
   std::sort(half_edges.begin(), half_edges.end());
 
   unsigned number_of_edges = 1;
+  bool last_shared = false;
+  bool warned = false;
   for(unsigned i=1; i<half_edges.size(); ++i)
   {
-    if(half_edges[i] != half_edges[i-1])
+    if( half_edges[i] != half_edges[i-1] || last_shared )
     {
       ++number_of_edges;
+      last_shared = false;
     }
     else
     {
+      last_shared = true;
       if(i<half_edges.size()-1)   //sanity check: there should be at most two equal half-edges
       {               //if it fails, most likely the input data are messed up
-//        assert(half_edges[i] != half_edges[i+1]);
+        if( half_edges[i] == half_edges[i+1])
+        {
+//           throw std::logic_error("Duplicate edge. The mesh is malformed: some "
+//             "triangles share an edge with more than one other triangle.");
+          if( !warned )
+          {
+            std::cerr << "Warning: Duplicate edges. The mesh is malformed: "
+                      << "some triangles share an edge with more than one "
+                      << "other triangle.\n";
+            warned = true;
+          }
+        }
       }
     }
   }
@@ -255,6 +270,8 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
   unsigned edge_id = 0;
   for(unsigned i=0; i<half_edges.size();)
   {
+    std::cout << "\ri: " << i << std::flush;
+
     Edge& e = m_edges[edge_id];
     e.id() = edge_id++;
 
@@ -275,7 +292,7 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
 //    else
 //      e.length() = e.adjacent_vertices()[0]->distance(e.adjacent_vertices()[1]);
 //
-    double a1,a2;
+    double a1 = 0.0,a2 = 0.0;
 
     if (curvature!= NULL && mode != 0)
       {
@@ -360,7 +377,7 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
     }
   }
 
-    //compute angles for the faces
+  //compute angles for the faces
   for(unsigned i=0; i<m_faces.size(); ++i)
   {
     Face& f = m_faces[i];
@@ -385,7 +402,7 @@ inline void Mesh::build_adjacencies(const float *curvature, int mode, int strain
     //assert(std::abs(sum - M_PI) < 1e-5);    //algorithm works well with non-degenerate meshes only
   }
 
-    //define m_turn_around_flag for vertices
+  //define m_turn_around_flag for vertices
   std::vector<double> total_vertex_angle(m_vertices.size());
   for(unsigned i=0; i<m_faces.size(); ++i)
   {
@@ -512,7 +529,7 @@ inline void Mesh::update_weight(const float *curvature, int mode,double strain,d
 //    else
 //      e.length() = e.adjacent_vertices()[0]->distance(e.adjacent_vertices()[1]);
 //
-    double a1,a2;
+    double a1 = 0.0,a2 = 0.0;
 
     if (curvature!= NULL && mode != 0)
       {
@@ -791,7 +808,7 @@ inline void fill_surface_point_structure(geodesic::SurfacePoint* point,
 
 inline void fill_surface_point_double(geodesic::SurfacePoint* point, 
                     double* data,
-                    long mesh_id)
+                    long /*mesh_id*/)
 {
   data[0] = point->x();
   data[1] = point->y();

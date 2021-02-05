@@ -2,7 +2,6 @@
 add_subdirectory(aimsdata)
 set(HEADERS ${AIMSDATA_HEADERS})
 
-add_subdirectory(aimsgis)
 if( BUILD_ECAT )
   add_subdirectory(aimsecat)
   set(HEADERS ${HEADERS} ${AIMSECAT_HEADERS})
@@ -33,15 +32,6 @@ IF(JPEG_FOUND)
     add_subdirectory(bundle_aimsjpeg)
   ENDIF(APPLE)
 ENDIF(JPEG_FOUND)
-
-
-IF(MINC_FOUND)
-  add_subdirectory(aimsminc)
-  set(HEADERS ${HEADERS} ${AIMSMINC_HEADERS})
-  IF(APPLE)
-    add_subdirectory(bundle_aimsminc)
-  ENDIF(APPLE)
-ENDIF(MINC_FOUND)
 
 
 IF(TIFF_FOUND AND ZLIB_FOUND)

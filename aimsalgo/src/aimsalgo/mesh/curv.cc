@@ -171,7 +171,7 @@ Texture<float> AimsMeshFiniteElementCurvature( const AimsSurface<3,Void> & mesh,
   Texture<float>				tex(n);
   list<unsigned>::const_iterator		ilist,elist;
   list<float>::const_iterator		        iphi,idot,itheta,isurf;
-  unsigned					nb,s,p,d,t;	
+  unsigned					/*nb,*/s,p,d,t;	
   float 					K,surface;
   
   for (i=0; i<n; ++i)
@@ -180,7 +180,7 @@ Texture<float> AimsMeshFiniteElementCurvature( const AimsSurface<3,Void> & mesh,
       p = PHI[i].size();
       t = THETA[i].size();
       d = DOT[i].size();
-      nb = neighbourso[i].size() ;
+      //nb = neighbourso[i].size() ;
       if ( !( s == p && s == t && s == d && p==t && p==d && t==d ) )
 	{
 	  cout << "Problem with the mesh features..." << endl;
@@ -226,7 +226,7 @@ vector< list<float> > AimsMeshFiniteElementPhi( const AimsSurface<3,Void> & mesh
   list<unsigned>::const_iterator        	el;
   list<float>::const_iterator        	        efl,iflist;
   unsigned					v1, v2;
-  float						T,phi,t;	
+  float						phi,t;	
   vector< list<unsigned> >                     neigho = neighbourso;
   vector< list<float> >                        surfl = surf;
   
@@ -244,7 +244,6 @@ vector< list<float> > AimsMeshFiniteElementPhi( const AimsSurface<3,Void> & mesh
   for (i=0; i<n; ++i)
     {
       phi = 0;
-      T = 0;
       ASSERT(neigho[i].size() == surfl[i].size() );
       iflist = surfl[i].begin();
       elist = neigho[i].end();
@@ -414,7 +413,7 @@ vector< list<float> > AimsMeshFiniteElementTheta( const AimsSurface<3,Void> & me
   list<float>::const_iterator		        il;
   list<unsigned>::iterator       		ilist,elist;
   unsigned					v1, v2;
-  float						T,theta,t;	
+  float						theta,t;	
   vector< list<unsigned> >                      neigho = neighbourso;
   vector< list<float> >                         surfl=surf;
 
@@ -427,7 +426,6 @@ vector< list<float> > AimsMeshFiniteElementTheta( const AimsSurface<3,Void> & me
   for (i=0; i<n; ++i)
     {
       theta = 0;
-      T = 0;
       il = surfl[i].begin();      
       elist =  neigho[i].end();
       --elist;
@@ -661,7 +659,7 @@ vector< list<unsigned> > AimsMeshOrderTriangle(const AimsSurface<3,Void> & mesh)
 Texture<float> AimsMeshLaplacian( const Texture<float> &inittex, 
                                   const map<unsigned, set< pair<unsigned,float> > > &lapl)
 {
-  unsigned					neigh,node, n =inittex.nItem();
+  unsigned					n =inittex.nItem();
   Texture<float>				tex(n);
   AimsMeshLaplacian( inittex.data(), tex.data(), lapl );
 
@@ -722,7 +720,7 @@ map<unsigned, set< pair<unsigned,float> > >  AimsMeshWeightFiniteElementLaplacia
   unsigned					neigh,i, n =mesh.vertex().size();
   list<unsigned>::const_iterator		ilist,elist;
   list<float>::const_iterator		        iphi,itheta,isurf,esurf;
-  float						weight,L,s,p,t,surface;	
+  float						weight,s,p,t,surface;	
   map<unsigned, set< pair<unsigned,float> > > lapl;
   map<unsigned, set< pair<unsigned,float> > >::iterator il,el;
   vector< list<unsigned> > neighbourso;
@@ -756,7 +754,6 @@ map<unsigned, set< pair<unsigned,float> > >  AimsMeshWeightFiniteElementLaplacia
     isurf = SURFACE[i].begin();
     esurf = SURFACE[i].end();
     itheta = THETA[i].begin();
-    L = 0;
     surface = 0;
     while ( isurf != esurf )
     {
@@ -1064,7 +1061,7 @@ namespace aims
     cout << "makeLaplacianMatrix... " << weights.size() << endl;
     float w = 0;
     unsigned i, j;
-    lmat.resize( weights.size(), weights.size() );
+    lmat.resize( weights.size(), weights.size(), false );
     LaplacianWeights::const_iterator iw, ew = weights.end();
 
     for( iw=weights.begin(); iw!=ew; ++iw )
@@ -1193,11 +1190,11 @@ namespace aims
   }
 
 
-#ifdef use_boost
   LaplacianWeights* sparseMult( const LaplacianWeights & in1,
                                 const LaplacianWeights & in2,
                                 float sparseThresh )
   {
+#ifdef use_boost
     cout << "sparseMult...\n";
     LaplacianWeights *out = new LaplacianWeights;
     unsigned ncoef = 0; // debug
@@ -1238,6 +1235,7 @@ namespace aims
       }
     }
 
+    sparseThresh = sparseThresh; // compilation warning...
     cout << "out size: " << mat3.size1() << " x " << mat3.size2() << " / " << out->size() << endl;
     cout << "\nsparseMult done, weights num: " << ncoef << endl;
     return out;

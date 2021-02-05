@@ -57,7 +57,6 @@ namespace aims {
     size_t background_labels = 0;
     size_t extra_toplabels   = 0;
     size_t extra_lowlabels   = 0;
-    size_t emptyLabel        = 0;
     int label                = 0;
 
     const Texture<short> & intex0 = intex.begin()->second;

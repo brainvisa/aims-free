@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 #  This software and supporting documentation are distributed by
 #      Institut Federatif de Recherche 49
 #      CEA/NeuroSpin, Batiment 145,
@@ -39,6 +41,8 @@ a different convention:
 
 which appears to be Y and Z flipped compared to Aims
 '''
+from __future__ import absolute_import
+import six
 __docformat__ = 'restructuredtext en'
 
 from soma import aims
@@ -47,10 +51,6 @@ import numpy
 import types
 import os
 import sys
-
-if sys.version_info[0] >= 3:
-    basestring = str
-
 
 def fslMatToTrm(matfile, srcimage, dstimage):
     '''
@@ -121,7 +121,7 @@ def fslMatToTrm(matfile, srcimage, dstimage):
     #   vsm2 * s2m2 * inv(vsd2) * inv(flip2)
     # with mot between both parts.
 
-    if isinstance(srcimage, basestring):
+    if isinstance(srcimage, six.string_types):
         f = aims.Finder()
         f.check(srcimage)
         im1 = f.header()
@@ -130,7 +130,7 @@ def fslMatToTrm(matfile, srcimage, dstimage):
             im1 = srcimage.header()
         except:  # otherwise it is considered to already be a header
             im1 = srcimage
-    if isinstance(dstimage, basestring):
+    if isinstance(dstimage, six.string_types):
         f = aims.Finder()
         f.check(dstimage)
         im2 = f.header()

@@ -33,13 +33,10 @@
 
 from __future__ import print_function
 
+from __future__ import absolute_import
 from soma import aims
 import six
 import sys
-
-if sys.version_info[0] >= 3:
-    basestring = str
-
 
 def same_graphs(ref_graph, test_graph, verbose=False):
     '''
@@ -49,8 +46,8 @@ def same_graphs(ref_graph, test_graph, verbose=False):
     AIMS objects inside attributes are not compared (meshes, bucket, volumes
     in sulci graphs for instance)
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     ref_graph: string or Graph object
         reference graph to be compared. A filename may be passed here: in this
         case the graph is read using aims.read() function.
@@ -60,14 +57,14 @@ def same_graphs(ref_graph, test_graph, verbose=False):
     verbose: bool (optional, default: False)
         if True, messages are print on the standard output during comparison.
 
-    Returns:
-    --------
+    Returns
+    -------
         True if ref and test graphs are identical, or False otherwise.
     '''
 
-    if isinstance(ref_graph, basestring):
+    if isinstance(ref_graph, six.string_types):
         ref_graph = aims.read(ref_graph)
-    if isinstance(test_graph, basestring):
+    if isinstance(test_graph, six.string_types):
         test_graph = aims.read(test_graph)
 
     ref_vertices = _build_vertice_dictionary(ref_graph)
