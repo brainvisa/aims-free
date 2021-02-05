@@ -289,13 +289,17 @@ bool VoxelMapTexture::voxelMap( AimsData<T> & data )
   if(verbose)
     cout << "writing texture(s)..." << endl;
   Writer<TimeTexture<float> >   w2( otexf );
-  if( !w2.write( otex, ascii ) )
+  if( !w2.write( otex, ascii ) ) {
+    clog << "error writing " + otexf << endl;
     return( false );
+  }
 
   if(!datap.empty()) {
     Writer<TimeTexture<float> >   w3( otexfp );
-    if( !w3.write( otexp, ascii ) )
+    if( !w3.write( otexp, ascii ) ) {
+      clog << "error writing " + otexfp << endl;
       return( false );
+    }
   }
 
   if(verbose)
@@ -355,5 +359,5 @@ int main( int argc, const char** argv )
     {
       cerr << e.what() << endl;
     }
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
