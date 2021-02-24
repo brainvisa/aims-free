@@ -5,7 +5,7 @@ AIMS documentation
 
 AIMS meant something like *"Analysis of Images and Signals"* but nobody really knows what it exactly means now...
 
-Anyway it is the neuroimaging structures manipulation library of the `BrainVISA project <http://brainvisa.info>`_.
+Anyway it is the neuroimaging structures manipulation library of the `BrainVISA project <https://brainvisa.info>`_.
 
 General
 =======
@@ -64,7 +64,7 @@ Projects are mainly in C++ and Python language. As BrainVISA is modular, it is m
 
 Instructions on how to use it are available on the BrainVISa web server:
 
-  http://brainvisa.info/brainvisa-cmake/index.html
+  https://brainvisa.info/brainvisa-cmake/index.html
 
 
 Miscelaneous

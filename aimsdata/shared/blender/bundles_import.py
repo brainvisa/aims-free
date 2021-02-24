@@ -41,7 +41,7 @@ Tooltip: 'Import BrainVISA bundles File Format (.bundles)'
 from __future__ import absolute_import
 from six.moves import range
 __author__ = "Yann Cointepas"
-__url__ = ("BrainVISA project, http://brainvisa.info",)
+__url__ = ("BrainVISA project, https://brainvisa.info",)
 __version__ = "1.0"
 
 __bpydoc__ = """\

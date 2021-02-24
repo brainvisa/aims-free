@@ -8,7 +8,7 @@ Introduction
 
 .. note:: Disclaimer
 
-  All contributors of BrainVISA project are very happy to propose tools, libraries, demonstration data and documentation available free of charge on http://brainvisa.info. The BrainVISA project is focused on neuroimaging and the development of tools only in a context of research. Although every care has been taken by all contributors of the BrainVISA project no warranty can be given in respect of the accuracy, reliability, up-to-dateness or completeness of the information contained within BrainVISA project. In the same way no one will be responsible or liable for any loss or damage of any sort.
+  All contributors of BrainVISA project are very happy to propose tools, libraries, demonstration data and documentation available free of charge on https://brainvisa.info. The BrainVISA project is focused on neuroimaging and the development of tools only in a context of research. Although every care has been taken by all contributors of the BrainVISA project no warranty can be given in respect of the accuracy, reliability, up-to-dateness or completeness of the information contained within BrainVISA project. In the same way no one will be responsible or liable for any loss or damage of any sort.
 
   Any contributor reserves the right to alter or remove the content, in full or in part, without prior notice.
 
@@ -24,7 +24,7 @@ In order to read the help of one commande line, either type
 
   command_name -h
 
-or refer to the list of commandlines on :cmds:`http://brainvisa.info <>`.
+or refer to the list of commandlines on :cmds:`https://brainvisa.info <>`.
 
 .. highlight:: bash
 
@@ -489,7 +489,7 @@ Internally, SPM *thinks* things are always in the same orientation, which is als
 
 This is a *neurological* convention orientation. The axes happen to be exactly the contrary of what is done in AIMS. Bad luck... But this referential is direct so is probably better than in AIMS...
 
-Working on the coordinate transformations for years and regularly getting headaches from it, I am still not 100% sure of what I say here, so if I'm wrong, please correct me by sending a message on BrainVisa forum (http://brainvisa.info/forum/). Especially, I'm not sure that SPM99 and SPM2 really use the same referentials.
+Working on the coordinate transformations for years and regularly getting headaches from it, I am still not 100% sure of what I say here, so if I'm wrong, please correct me by sending a message on BrainVisa forum (https://brainvisa.info/forum/). Especially, I'm not sure that SPM99 and SPM2 really use the same referentials.
 
 Externally
 ##########

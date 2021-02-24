@@ -72,8 +72,8 @@ def fslMatToTrm(matfile, srcimage, dstimage):
     # We want: the Aims transform (trm) from the Aims referential of the 1st
     # image, in mm (R_AIMSmm1) to the same one for the 2nd image (R_AIMSmm2)
     # see:
-    #   http://brainvisa.info/doc/aimsdata/aims_training/en/html/ch06.html
-    #   http://brainvisa.info/doc/anatomist/anatomist_referentials.pdf)
+    #   https://brainvisa.info/doc/aimsdata/aims_training/en/html/ch06.html
+    #   https://brainvisa.info/doc/anatomist/anatomist_referentials.pdf)
     #
     # Figure:
     #                       ----------------

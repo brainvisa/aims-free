@@ -3,7 +3,7 @@ Analysis of Images and Signal for neuroimaging
 
 ## Documentation
 
-See http://brainvisa.info/aimsdata/user_doc
+See https://brainvisa.info/aimsdata/user_doc
 
 ## License
 
