@@ -1,5 +1,0 @@
-<!ENTITY DIR_IMG "images/aims/">
-<!ENTITY DIR_DEMO "data_for_aims/">
-<!ENTITY DIR_ANAT "data_for_anatomist/">
-<!ENTITY DIR_BV "database_brainvisa/">
-<!ENTITY PATH_WEB "http://brainvisa.info/doc/index_commands.html">
