@@ -14,6 +14,7 @@
 #include <aims/math/bspline3.h>
 #include <aims/math/bspline2.h>
 #include <aims/io/io_g.h>
+#include <aims/io/reader_d.h>
 #include <aims/graph/graphmanip.h>
 #include <graph/graph/graph.h>
 #include <cstdio>
@@ -797,5 +798,70 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
   Point3dd p(x, y, z);
   return p + deformation_private(p);
 }
+
+
+  /** FFD vector field transformation reader. It actually reads a volume of
+      Point3df.
+  */
+  template <>
+  bool Reader<aims::FfdTransformation>::read( aims::FfdTransformation & obj,
+                                              int border,
+                                              const std::string* format,
+                                              int frame )
+  {
+    Reader<AimsData<Point3df> > _reader( fileName() );
+    _reader.setOptions( options() );
+    _reader.setMode( _mode );
+    _reader.setAllocatorContext( allocatorContext() );
+
+    bool res = _reader.read(obj, border, format, frame);
+    if( res )
+    {
+      obj.updateDimensions();
+    }
+    return res;
+  }
+
+
+  template <>
+  aims::FfdTransformation* Reader<aims::FfdTransformation>::read(
+      int border, const std::string* format, int frame )
+  {
+    carto::Object opt = options();
+    aims::FfdTransformation *ffd = 0;
+    if( !opt.isNull() )
+    {
+      try
+      {
+        carto::Object interp = opt->getProperty( "interpolation" );
+        if( !interp.isNull() )
+        {
+          std::string ints = interp->getString();
+          if( ints == "cubic" || ints == "c" )
+            ffd = new aims::SplineFfd;
+        }
+      }
+      catch( ... )
+      {
+      }
+    }
+    if( !ffd )
+      ffd = new aims::TrilinearFfd;
+
+    bool read_success = read( *ffd );
+    if(!read_success)
+    {
+      std::ostringstream s;
+      s << "Failed to load a deformation field from "
+        << fileName() << ", aborting.";
+      throw std::runtime_error( s.str() );
+    }
+
+    return ffd;
+  }
+
+// templates
+
+template class Reader<FfdTransformation>;
 
 } // namespace aims

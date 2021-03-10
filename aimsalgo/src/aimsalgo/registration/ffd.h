@@ -275,56 +275,6 @@ namespace aims {
   }
 
 
-//============================================================================
-//   FFD READER/WRITER
-//============================================================================
-
-  /** FFD vector field transformation reader. It actually reads a volume of
-      Point3df.
-  */
-  template <>
-  class Reader<aims::FfdTransformation>: public Reader<AimsData<Point3df> >
-  {
-    typedef Reader<AimsData<Point3df> > base;
-  public:
-    Reader(): base() {}
-    Reader( const std::string& filename ): base(filename) {}
-    virtual ~Reader() {}
-    virtual bool read( aims::FfdTransformation & obj,
-                       int border=0,
-                       const std::string* format = 0,
-                       int frame = -1 )
-    {
-      bool res = base::read(obj, border, format, frame);
-      if( res )
-      {
-        obj.updateDimensions();
-      }
-      return res;
-    }
-  };
-
-  /** FFD vector field transformation writer. It actually reads a volume of
-      Point3df.
-  */
-  template<>
-  class Writer<aims::FfdTransformation> : public Writer<AimsData<Point3df> >
-  {
-    typedef Writer<AimsData<Point3df> > base;
-  public:
-    inline Writer(): base() {}
-    inline Writer( const std::string& filename,
-                   carto::Object options = carto::none() ):
-      base( filename, options ) {}
-    virtual ~Writer() {}
-    virtual bool write( const aims::FfdTransformation & obj,
-                        bool ascii = false,
-                        const std::string* format = 0 )
-    {
-      return base::write(obj, ascii, format);
-    }
-  };
-
   //==========================================================================
   //   FFD TRILINEAR RESAMPLED TRANSFORMATION
   //==========================================================================
@@ -368,6 +318,31 @@ namespace aims {
     FfdTransformation( dimX, dimY, dimZ, test_volume )
   {
   }
+
+//============================================================================
+//   FFD READER/WRITER
+//============================================================================
+
+  /** FFD vector field transformation writer. It actually reads a volume of
+      Point3df.
+  */
+  template<>
+  class Writer<aims::FfdTransformation> : public Writer<AimsData<Point3df> >
+  {
+    typedef Writer<AimsData<Point3df> > base;
+  public:
+    inline Writer(): base() {}
+    inline Writer( const std::string& filename,
+                   carto::Object options = carto::none() ):
+      base( filename, options ) {}
+    virtual ~Writer() {}
+    virtual bool write( const aims::FfdTransformation & obj,
+                        bool ascii = false,
+                        const std::string* format = 0 )
+    {
+      return base::write(obj, ascii, format);
+    }
+  };
 
 } // namespace aims
 
