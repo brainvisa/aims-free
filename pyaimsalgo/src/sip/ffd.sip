@@ -9,7 +9,7 @@ namespace aims
   //   FFD TRANSFORMATION
   //==========================================================================
 
-  class FfdTransformation: soma::Transformation3d /Abstract/
+  class FfdTransformation: soma::Transformation3d
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
@@ -86,7 +86,6 @@ Vector fields are stored in volumes AimsData_POINT3DF.
     bool isXFlat() const;
     bool isYFlat() const;
     bool isZFlat() const;
-    void updateDimensions();
 
     //--- Debug --------------------------------------------------------------
     void  printControlPointsGrid() const;
@@ -97,6 +96,9 @@ Vector fields are stored in volumes AimsData_POINT3DF.
 
     //--- Output -------------------------------------------------------------
     void   write( const std::string & filename ) const;
+
+  protected:
+    virtual Point3dd _deformation( const Point3dd& p_mm ) const = 0;
   };
 
 }; // namespace aims
@@ -105,14 +107,13 @@ Vector fields are stored in volumes AimsData_POINT3DF.
 //   FFD READER/WRITER
 //============================================================================
 
-  class Reader_FfdTransformation : Reader_AimsData_POINT3DF
+  class Reader_FfdTransformation
   {
 %TypeHeaderCode
 #include <aims/registration/ffd.h>
 #ifndef PYAIMS_READER_FFDTRANSFORMATION_DEFINED
 #define PYAIMS_READER_FFDTRANSFORMATION_DEFINED
 typedef aims::Reader<aims::FfdTransformation> Reader_FfdTransformation;
-typedef aims::Reader<AimsData<Point3df> >Reader_AimsData_POINT3DF;
 #endif
 %End
 
@@ -129,6 +130,9 @@ Point3df.
                        int border=0,
                        const std::string* format = 0,
                        int frame = -1 );
+    virtual aims::FfdTransformation* read(
+      int border = 0, const std::string* format = 0, int frame = 0 )
+        /Factory/;
   };
 
   class Writer_FfdTransformation : Writer_AimsData_POINT3DF
@@ -227,6 +231,17 @@ of objects.
     SplineFfd( const AimsData_POINT3DF & other );
 
     double spline3( double x ) const;
+
+    static aims::SplineFfd* instance() /Factory/;
+%MethodCode
+    /** Sip persists in seeing this class as abstract. We need to have a means
+        to instantiate it. It is a temporary workaround, of course. */
+    aims::SplineFfd* ffd = new aims::SplineFfd;
+    sipRes = ffd;
+%End
+
+  private:
+    virtual Point3dd _deformation( const Point3dd& p_mm ) const;
   };
 
   //==========================================================================
@@ -280,6 +295,17 @@ between displacement vectors. See SplineFfd for details.
 
     TrilinearFfd( const aims::TrilinearFfd & other );
     TrilinearFfd( const AimsData_POINT3DF & other );
+
+    static aims::TrilinearFfd* instance() /Factory/;
+%MethodCode
+    /** Sip persists in seeing this class as abstract. We need to have a means
+        to instantiate it. It is a temporary workaround, of course. */
+    aims::TrilinearFfd* ffd = new aims::TrilinearFfd;
+    sipRes = ffd;
+%End
+
+  private:
+    virtual Point3dd _deformation( const Point3dd& p_mm ) const;
   };
 
 }; // namespace aims

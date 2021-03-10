@@ -50,6 +50,11 @@ for k, v in six.iteritems(aims.__dict__):
 del ExtendedImporter, k, v
 
 
+aims.aimssip.Reader_FfdTransformation \
+    = aimsalgosip.Reader_FfdTransformation
+aims.aimssip.Writer_FfdTransformation \
+    = aimsalgosip.Writer_FfdTransformation
+
 def ResamplerFactory(volume):
     '''
     Factory function to instantiate a ResamplerFactory_<type> object. It builds from an existing volume to gets its voxel type.
