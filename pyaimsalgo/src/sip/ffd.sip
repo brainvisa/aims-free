@@ -232,16 +232,9 @@ of objects.
 
     double spline3( double x ) const;
 
-    static aims::SplineFfd* instance() /Factory/;
-%MethodCode
-    /** Sip persists in seeing this class as abstract. We need to have a means
-        to instantiate it. It is a temporary workaround, of course. */
-    aims::SplineFfd* ffd = new aims::SplineFfd;
-    sipRes = ffd;
-%End
-
   private:
     virtual Point3dd _deformation( const Point3dd& p_mm ) const;
+    virtual Point3dd transformDouble( double x, double y, double z ) const;
   };
 
   //==========================================================================
@@ -296,16 +289,9 @@ between displacement vectors. See SplineFfd for details.
     TrilinearFfd( const aims::TrilinearFfd & other );
     TrilinearFfd( const AimsData_POINT3DF & other );
 
-    static aims::TrilinearFfd* instance() /Factory/;
-%MethodCode
-    /** Sip persists in seeing this class as abstract. We need to have a means
-        to instantiate it. It is a temporary workaround, of course. */
-    aims::TrilinearFfd* ffd = new aims::TrilinearFfd;
-    sipRes = ffd;
-%End
-
   private:
     virtual Point3dd _deformation( const Point3dd& p_mm ) const;
+    virtual Point3dd transformDouble( double x, double y, double z ) const;
   };
 
 }; // namespace aims
