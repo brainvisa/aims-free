@@ -86,6 +86,7 @@ Vector fields are stored in volumes AimsData_POINT3DF.
     bool isXFlat() const;
     bool isYFlat() const;
     bool isZFlat() const;
+    virtual void updateDimensions();
 
     //--- Debug --------------------------------------------------------------
     void  printControlPointsGrid() const;
