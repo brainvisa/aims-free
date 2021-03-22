@@ -171,7 +171,7 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
   ForEach3d(sulcvol,x,y,z)
     ccvol(x,y,z) = sulcvol(x,y,z);
   AimsConnectedComponent( ccvol, aims::Connectivity::CONNECTIVITY_26_XYZ, 
-                          (short)0, (short)0, false, (size_t) MINCC );
+                          (short)0, false, (size_t) MINCC );
   
   //-----------------------------------------------------------------------------------------------------
   //           First projection - Closest points according to euclidean and curvature/depth
@@ -293,84 +293,83 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
   // bool closing = false;
  
       cout << "Closing Sulcal lines  \n";
-      for (ilab=sulci_labels.begin(),elab=sulci_labels.end();ilab != elab; ++ilab)
-	if (trans.find(*ilab)->second != "INSULA")
-	  {  
-	    cout << "Label: " << trans.find(*ilab)->second << endl;
-	    ForEach3d(sulcvol,x,y,z)
-	      if (sulcvol(x,y,z) == *ilab)
-		tempvol(x,y,z) = 1;
-	      else
-		tempvol(x,y,z) = 0;
+      for( ilab=sulci_labels.begin(),elab=sulci_labels.end();ilab != elab;
+           ++ilab )
+        if (trans.find(*ilab)->second != "INSULA")
+        {
+          cout << "Label: " << trans.find(*ilab)->second << endl;
+          ForEach3d(sulcvol,x,y,z)
+            if (sulcvol(x,y,z) == *ilab)
+              tempvol(x,y,z) = 1;
+            else
+              tempvol(x,y,z) = 0;
 
 
+          //tempvol = AimsMorphoConnectivityChamferDilation(tempvol,radius_close,aims::Connectivity::CONNECTIVITY_26_XYZ);
+          //tempvol = AimsMorphoConnectivityChamferHomotopicErosion(tempvol,radius_close,aims::Connectivity::CONNECTIVITY_26_XYZ);
 
-	    //tempvol = AimsMorphoConnectivityChamferDilation(tempvol,radius_close,aims::Connectivity::CONNECTIVITY_26_XYZ);
-	    //tempvol = AimsMorphoConnectivityChamferHomotopicErosion(tempvol,radius_close,aims::Connectivity::CONNECTIVITY_26_XYZ);
-	
-	
-	    ForEach3d(tempvol,x,y,z)
-	      if (tempvol(x,y,z) != 0 )
-		ccvol(x,y,z) = *ilab;
+          ForEach3d(tempvol,x,y,z)
+            if (tempvol(x,y,z) != 0 )
+          ccvol(x,y,z) = *ilab;
 
-	  }
+        }
 
       ForEach3d(sulcvol,x,y,z)
-	sulcvol(x,y,z) = ccvol(x,y,z);
+        sulcvol(x,y,z) = ccvol(x,y,z);
 
  
       
       ccvol = svol.clone();
       cout << "Closing Sulcal surface \n";
       for (ilab=sulci_labels.begin(),elab=sulci_labels.end();ilab != elab; ++ilab)
-	{  
-	  cout << "Label: " << trans.find(*ilab)->second << endl;
-	  ForEach3d(svol,x,y,z)
-	    if (svol(x,y,z) == *ilab)
-	      tempvol(x,y,z) = 1;
-	    else
-	      tempvol(x,y,z) = 0;
-	
-	  //tempvol = AimsMorphoChamferDilation(tempvol,radius_close,aims::Connectivity::CONNECTIVITY_26_XYZ);
-	  //tempvol = AimsMorphoConnectivityChamferHomotopicErosion(tempvol,radius_close,aims::Connectivity::CONNECTIVITY_26_XYZ);
+      {
+        cout << "Label: " << trans.find(*ilab)->second << endl;
+        ForEach3d(svol,x,y,z)
+          if (svol(x,y,z) == *ilab)
+            tempvol(x,y,z) = 1;
+          else
+            tempvol(x,y,z) = 0;
 
-      
-	  ForEach3d(tempvol,x,y,z)
-	    if (tempvol(x,y,z) != 0 )
-	      ccvol(x,y,z) = *ilab;
-	}
+        //tempvol = AimsMorphoChamferDilation(tempvol,radius_close,aims::Connectivity::CONNECTIVITY_26_XYZ);
+        //tempvol = AimsMorphoConnectivityChamferHomotopicErosion(tempvol,radius_close,aims::Connectivity::CONNECTIVITY_26_XYZ);
+
+
+        ForEach3d(tempvol,x,y,z)
+          if (tempvol(x,y,z) != 0 )
+            ccvol(x,y,z) = *ilab;
+      }
    
    
   //Sulcal surface and bottom point in svol
   ForEach3d(sulcvol,x,y,z)
-    {
-      svol(x,y,z) = ccvol(x,y,z);
-      if(sulcvol(x,y,z)!=0) 
-	svol(x,y,z)=sulcvol(x,y,z);
-    }
-  
+  {
+    svol(x,y,z) = ccvol(x,y,z);
+    if(sulcvol(x,y,z)!=0)
+      svol(x,y,z)=sulcvol(x,y,z);
+  }
+
   //bottom volume for INSULA : 
   //bottom pt projected in the direction of the tangent plane
   //+ pt of the surface projected on the direction of the normal of the tgt plane 
   short label_insula_left=0,label_insula_right=0;
   is = labels.find("INSULA_left");
   if (is != es)
+  {
+    cout << "Some points have the label 'INSULA'" << endl;
+    for (flab = trans.begin();flab != glab; ++flab)
     {
-      cout << "Some points have the label 'INSULA'" << endl;
-      for (flab = trans.begin();flab != glab; ++flab)
-	{
-	  if (flab->second == "INSULA_left")
-	    label_insula_left = flab->first;
-	  if (flab->second == "INSULA_right")
-	    label_insula_right = flab->first;
-	}	
-      ForEach3d(svol,x,y,z)
-	if (svol(x,y,z) == label_insula_left)
-	  sulcvol(x,y,z) = label_insula_left;
-	else
-	  if (svol(x,y,z) == label_insula_right)
-	    sulcvol(x,y,z) = label_insula_right;
+      if (flab->second == "INSULA_left")
+        label_insula_left = flab->first;
+      if (flab->second == "INSULA_right")
+        label_insula_right = flab->first;
     }
+    ForEach3d(svol,x,y,z)
+    if (svol(x,y,z) == label_insula_left)
+      sulcvol(x,y,z) = label_insula_left;
+    else
+      if (svol(x,y,z) == label_insula_right)
+        sulcvol(x,y,z) = label_insula_right;
+  }
   
 
 
@@ -379,12 +378,14 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
   //-----------------------------------------------------------------------------------------------------
 
   cout << "Find the neighbourhood of each bottom point in the sulci"<< endl;
-   Point3dfNeigh neigh;
+  Point3dfNeigh neigh;
 
   Point3dfSet                              cc;
   unsigned NEIGH_SIZE = 1;
   for (ilab=sulci_labels.begin(),elab=sulci_labels.end();ilab != elab; ++ilab)
-    NeighbourInCC(neigh ,sulcvol,svol,aims::Connectivity::CONNECTIVITY_26_XYZ,*ilab,NEIGH_SIZE);
+    NeighbourInCC( neigh , sulcvol, svol,
+                   aims::Connectivity::CONNECTIVITY_26_XYZ, *ilab,
+                   NEIGH_SIZE );
 
   //-----------------------------------------------------------------------------------------------------
   //                             Extract connected components
@@ -395,7 +396,7 @@ TimeTexture<short>  aims::meshdistance::SulcusVolume2Texture( const AimsSurface<
   ForEach3d(sulcvol,x,y,z)
     ccvol(x,y,z) = sulcvol(x,y,z);
   AimsConnectedComponent( ccvol, aims::Connectivity::CONNECTIVITY_26_XYZ, 
-                          short(0), short(0), false, MINCC );
+                          short(0), false, MINCC );
   
 
 
