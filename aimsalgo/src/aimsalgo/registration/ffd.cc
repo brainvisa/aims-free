@@ -17,6 +17,7 @@
 #include <aims/io/reader_d.h>
 #include <aims/graph/graphmanip.h>
 #include <graph/graph/graph.h>
+#include <cartobase/containers/nditerator.h>
 #include <cstdio>
 #include <cmath>
 #include <limits>
@@ -814,7 +815,51 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
     _reader.setMode( _mode );
     _reader.setAllocatorContext( allocatorContext() );
 
-    bool res = _reader.read(obj, border, format, frame);
+    bool res = false;
+
+    try
+    {
+      res = _reader.read(obj, border, format, frame);
+    }
+    catch( ... )
+    {
+      // try reading as a N+1 dimension volume of float.
+      // last dimension size should be 3 (x, y, z of the vector)
+      Reader<Volume<float> > freader( fileName() );
+      freader.setOptions( options() );
+      freader.setMode( _mode );
+      freader.setAllocatorContext( allocatorContext() );
+      VolumeRef<float> fvol = freader.read( border, format, frame );
+      vector<int> dims = fvol->getSize();
+      if( dims.size() < 2 || dims[ dims.size() - 1 ] != 3 )
+        throw runtime_error( "not a vector field" );
+      vector<int> ffdims( dims.size() - 1 );
+      for( int i=0; i<ffdims.size(); ++i )
+        ffdims[i] = dims[i];
+      VolumeRef<Point3df> rvol = AimsData<Point3df>( obj ).volume();
+      rvol->reallocate( ffdims );
+      rvol->copyHeaderFrom( fvol->header() );
+
+      // copy and convert contents
+      vector<size_t> sstrides = rvol->getStrides();
+      vector<int> strides;
+      strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
+      int x, y, z;
+
+      NDIterator<Point3df> it( &rvol->at( 0 ), rvol->getSize(), strides );
+      for( ; !it.ended(); ++it )
+      {
+        x = it.position()[0];
+        y = it.position()[0];
+        z = it.position()[0];
+        *it = Point3df( fvol->at( x, y, z, 0 ),
+                        fvol->at( x, y, z, 1 ),
+                        fvol->at( x, y, z, 2 ) );
+      }
+
+      res = true;
+    }
+
     if( res )
     {
       obj.updateDimensions();
