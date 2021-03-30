@@ -905,6 +905,47 @@ Point3dd TrilinearFfd::transformDouble( double x, double y, double z ) const
     return ffd;
   }
 
+
+  bool aims::Writer<aims::FfdTransformation>::write(
+    const aims::FfdTransformation & obj, bool ascii, const string* format )
+  {
+    if( ( format && *format == "GIS" )
+        || fileName().substr( fileName().length() - 4, 4 ) == ".ima" )
+      return base::write( obj, ascii, format );
+
+    // write as a (N+1)D volume
+
+    VolumeRef<Point3df> rvol = AimsData<Point3df>( obj ).volume();
+    vector<int> dims = rvol->getSize();
+    dims.push_back( 3 );
+    Volume<float> def( dims );
+    def.copyHeaderFrom( rvol->header() );
+
+    // copy and convert contents
+    vector<size_t> sstrides = rvol->getStrides();
+    vector<int> strides;
+    strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
+    vector<int> pos;
+    int n = dims.size() - 1;
+
+    NDIterator<Point3df> it( &rvol->at( 0 ), rvol->getSize(), strides );
+    for( ; !it.ended(); ++it )
+    {
+      pos = it.position();
+      pos.push_back( 0 );
+      const Point3df & p = *it;
+      def.at( pos ) = p[0];
+      pos[n] = 1;
+      def.at( pos ) = p[1];
+      pos[n] = 2;
+      def.at( pos ) = p[2];
+    }
+
+    Writer<Volume<float> > wima( fileName() );
+    wima.write( def );
+  }
+
+
 // templates
 
 template class Reader<FfdTransformation>;

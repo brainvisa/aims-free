@@ -338,10 +338,7 @@ namespace aims {
     virtual ~Writer() {}
     virtual bool write( const aims::FfdTransformation & obj,
                         bool ascii = false,
-                        const std::string* format = 0 )
-    {
-      return base::write(obj, ascii, format);
-    }
+                        const std::string* format = 0 );
   };
 
 } // namespace aims
