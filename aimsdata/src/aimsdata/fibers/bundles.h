@@ -280,6 +280,9 @@ public:
   */
   void read();
   virtual carto::Object readHeader();
+  static std::set<std::string> supportedFormats();
+  static std::set<std::string> formatExtensions(
+    const std::string & format = "ALL" );
 
 protected:
 

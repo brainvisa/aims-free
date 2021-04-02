@@ -227,6 +227,20 @@ public:
   BundleReader( const std::string & );
   virtual ~BundleReader();
 
+  static set_STRING supportedFormats();
+%Docstring
+supportedFormats()
+
+return a set of fiber tracts formats names supported by the BundlesReader.
+%End
+
+  static set_STRING formatExtensions( const std::string & format = "ALL" );
+%Docstring
+formatExtensions(format='ALL')
+
+return a set of file extensions associated with the given format. If the format is "ALL" (default) then all extensions of all supported formats are returned. If the format does not exist, an empty set is returned, and no error is issued.
+%End
+
   void read();
 %Docstring
 read()
