@@ -64,6 +64,7 @@ DECLARE_GENERIC_OBJECT_TYPE( AimsData<AimsRGBA> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<AimsHSV> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<Point3d> )
 DECLARE_GENERIC_OBJECT_TYPE( AimsData<Point3df> )
+DECLARE_GENERIC_OBJECT_TYPE( AimsData<Point3dd> )
 #define _TMP_ AimsData< AimsVector<float, 6> > 
 DECLARE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
@@ -90,6 +91,7 @@ DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<AimsRGBA> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<AimsHSV> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<Point3d> > )
 DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<Point3df> > )
+DECLARE_GENERIC_OBJECT_TYPE( rc_ptr< AimsData<Point3dd> > )
 #define _TMP_ rc_ptr< AimsData< AimsVector<float, 6> > >
 DECLARE_GENERIC_OBJECT_TYPE( _TMP_ )
 #undef _TMP_
