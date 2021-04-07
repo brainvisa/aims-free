@@ -592,6 +592,48 @@ void BundleReader::noMoreBundle( const BundleProducer & )
 }
 
 
+set<string> BundleReader::supportedFormats()
+{
+  set<string> formats;
+  formats.insert( "CONNECTOMIST" );
+  formats.insert( "TRACKVIZ" );
+  formats.insert( "MRTRIX" );
+  return formats;
+}
+
+
+set<string> BundleReader::formatExtensions( const string & format )
+{
+  set<string> exts;
+
+  if( format == "ALL" )
+  {
+    set<string> all_formats = supportedFormats();
+    set<string>::const_iterator i, e = all_formats.end();
+    for( i=all_formats.begin(); i!=e; ++i )
+    {
+      set<string> extf = formatExtensions( *i );
+      exts.insert( extf.begin(), extf.end() );
+    }
+  }
+  else if( format == "CONNECTOMIST" )
+  {
+    exts.insert( "bundles" );
+  }
+  else if( format == "TRACKVIZ" )
+  {
+    exts.insert( "trk" );
+  }
+  else if( format == "MRTRIX" )
+  {
+    exts.insert( "tck" );
+  }
+
+  return exts;
+}
+
+
+
 //-----------------------------------------------------------------------------
 void BundleReader::read()
 {

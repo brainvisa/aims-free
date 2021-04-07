@@ -142,10 +142,12 @@ void Finder::initPrivate()
       registerFormat( "BCK", new FinderBckFormat, ext );
       ext.clear();
       ext.push_back( "arg" );
+      registerFormat( "ARG", new FinderGraphFormat, ext );
+      ext.clear();
       ext.push_back( "bundles" );
       ext.push_back( "trk" );
       ext.push_back( "tck" );
-      registerFormat( "ARG", new FinderGraphFormat, ext );
+      registerFormat( "BUNDLES", new FinderGraphFormat, ext );
       ext.clear();
       ext.push_back( "trm" );
       registerFormat( "TRM", new FinderTrmFormat, ext );
