@@ -12,6 +12,7 @@
 #include <aims/transform/transform_objects.h>
 #include <aims/resampling/linearresampler.h>                // LinearResampler
 #include <aims/resampling/cubicresampler.h>                  // CubicResampler
+#include <aims/resampling/standardreferentials.h>
 #include <aims/registration/ffd.h>                        // FfdTransformation
 //--- carto ------------------------------------------------------------------
 #include <cartobase/smart/rcptr.h>                                   // rc_ptr
@@ -27,6 +28,8 @@
 #include <sstream>
 //--- boost ------------------------------------------------------------------
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/lexical_cast.hpp>
 //----------------------------------------------------------------------------
 
 using namespace aims;
@@ -545,16 +548,132 @@ load_transformations(const ApplyTransformProc& proc,
                      const DictionaryInterface* input_header = nullptr)
 {
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > ret;
-  AffineTransformation3d input_aims_to_input_transform; // identity
+  rc_ptr<AffineTransformation3d> aims_to_input_space_transform; // null
 
   // boost::iequals is used for case-insensitive comparison
-  if(!boost::iequals(proc.input_coords, "AIMS")) {
-    // TODO
-    throw FatalError("--input-coords not implemented");
+  using boost::iequals;
+  const string trimmed_input_coords = boost::trim_copy(proc.input_coords);
+  if(!iequals(trimmed_input_coords, "AIMS")) {
+    if(proc.points_mode) {
+      throw FatalError("--input-coords cannot be used in points mode");
+    }
+    if(!input_header || !input_header->isDictionary()) {
+      throw FatalError("--input-coords cannot be used, because no header "
+                       "could be read for the input data");
+    }
+
+    carto::Object referentials;
+    carto::Object transformations;
+    try
+    {
+      referentials = input_header->getProperty( "referentials" );
+      transformations = input_header->getProperty( "transformations" );
+    }
+    catch( ... )
+    {
+      throw FatalError("--input-coords cannot be used, because no "
+                       "transformations could be read in the input header");
+    }
+
+    // Valid values are >= 0
+    int transform_position = -1;
+    // Detect special values
+    if(iequals(trimmed_input_coords, "first")) {
+      transform_position = 0;
+    } else if(iequals(trimmed_input_coords, "qform")
+       || iequals(trimmed_input_coords, "ITK")
+       || iequals(trimmed_input_coords, "ANTS")) {
+      // TODO determine transform_position
+      throw FatalError("--input-coords qform not implemented yet");
+    } else if(iequals(trimmed_input_coords, "sform")) {
+      // TODO determine transform_position
+      throw FatalError("--input-coords sform not implemented yet");
+    } else {
+      try {
+        transform_position = boost::lexical_cast<int>(trimmed_input_coords);
+      } catch(const boost::bad_lexical_cast &) {}
+    }
+
+    if(transform_position < 0) {
+      string referential_name, referential_id;
+
+      if(iequals(trimmed_input_coords, "mni")
+         || iequals(trimmed_input_coords, "mni152")) {
+        referential_name = StandardReferentials::mniTemplateReferential();
+        referential_id = StandardReferentials::mniTemplateReferentialID();
+      } else if(iequals(trimmed_input_coords, "scanner")) {
+        referential_name = StandardReferentials::commonScannerBasedReferential();
+        referential_id = StandardReferentials::commonScannerBasedReferentialID();
+      } else if(iequals(trimmed_input_coords, "acpc")) {
+        referential_name = StandardReferentials::acPcReferential();
+        referential_id = StandardReferentials::acPcReferentialID();
+      } else if(iequals(trimmed_input_coords, "talairach")) {
+        referential_name = StandardReferentials::talairachReferential();
+      } else if(iequals(trimmed_input_coords, "aligned")) {
+        referential_name = "Coordinates aligned to another file or to anatomical truth";
+      } else {
+        referential_name = proc.input_coords;
+      }
+
+      // Look for the target referential or id in header['referentials']
+      size_t i = 0;
+      for( carto::Object it = referentials->objectIterator();
+           it->isValid();
+           it->next(), ++i ) {
+        const carto::Object referential_obj = it->currentValue();
+        if(!referential_obj.isNone() && referential_obj->isString()) {
+          const string current_ref_name = referential_obj->getString();
+          if(current_ref_name == referential_name
+             || (!referential_id.empty()
+                 && current_ref_name == referential_id)) {
+            transform_position = i;
+            if(carto::verbose)
+            break;
+          }
+        }
+      }
+    }
+
+    if(transform_position >= 0) {
+      carto::Object transformation_object;
+      if(!transformations->isArray())
+        throw FatalError("--input-coords cannot find a valid 'transformations'"
+                         "header field");
+      if(!(transform_position < transformations->size())) {
+        stringstream error_message;
+        error_message << "--input-coords cannot use transform in position "
+                      << transform_position
+                      << " (0-based), the header contains only "
+                      << transformations->size() << " transformations.";
+        throw FatalError(error_message.str());
+      }
+      transformation_object = transformations->getArrayItem(transform_position);
+      if(!transformation_object.isNull()) {
+        aims_to_input_space_transform.reset(
+          new AffineTransformation3d(transformation_object));
+        if(carto::verbose) {
+          std::cout << "--input-coords will use the referential in position "
+                    << transform_position
+                    << " (0-based) which is named '"
+                    << referentials->getArrayItem(transform_position)->getString()
+                    << "'\n";
+          std::cout << "--input-coords transformation:\n"
+                    << *aims_to_input_space_transform
+                    << "\n";
+        }
+      } else {
+        throw FatalError("Error in the input header, --input-coords failed");
+      }
+    } else {
+      throw FatalError("Cannot find the header transformation corresponding "
+                       "to --input-coords '" + proc.input_coords + "'");
+    }
   }
 
   if(!proc.direct_transform_list.empty()) {
     TransformationChain3d direct_chain;
+    if(!aims_to_input_space_transform.isNull())
+      direct_chain.push_back(aims_to_input_space_transform);
 
     for(vector<string>::const_iterator filename_it = proc.direct_transform_list.begin();
         filename_it != proc.direct_transform_list.end();
@@ -578,13 +697,26 @@ load_transformations(const ApplyTransformProc& proc,
         = load_transformation(*filename_it, proc);
       inverse_chain.push_back(transform);
     }
+    if(!aims_to_input_space_transform.isNull()) {
+      if(!aims_to_input_space_transform->invertible()) {
+        throw FatalError("Error using --input-coords: the transformation "
+                         "is not invertible");
+      }
+      inverse_chain.push_back(aims_to_input_space_transform->getInverse());
+    }
     ret.second = inverse_chain.simplify();
   }
 
   if(ret.first.isNull() && ret.second.isNull()) {
-    clog << "No transformation provided, identity will be used." << endl;
-    ret.first = const_ref<Transformation3d>(new TransformationChain3d);
-    ret.second = const_ref<Transformation3d>(new TransformationChain3d);
+    if(aims_to_input_space_transform.isNull()) {
+      clog << "No transformation provided, identity will be used." << endl;
+      ret.first = const_ref<Transformation3d>(new TransformationChain3d);
+      ret.second = const_ref<Transformation3d>(new TransformationChain3d);
+    } else {
+      TransformationChain3d direct_chain;
+      direct_chain.push_back(aims_to_input_space_transform);
+      ret.first = direct_chain.simplify();
+    }
   }
 
   if(ret.first.isNull() && ret.second->invertible()) {
@@ -1059,6 +1191,7 @@ int main(int argc, const char **argv)
       "    in AIMS.\n"
       "  - 'scanner': use 'Scanner-based anatomical coordinates', which\n"
       "    correspond to the NIFTI_XFORM_SCANNER_ANAT intent.\n"
+      "  - 'acpc': use the 'Talairach-AC/PC-Anatomist' referential.\n"
       "  - 'aligned': use the referential that corresponds to\n"
       "    the NIFTI_XFORM_ALIGNED_ANAT intent, a.k.a. 'Coordinates aligned\n"
       "    to another file or to anatomical truth' in AIMS.\n"
