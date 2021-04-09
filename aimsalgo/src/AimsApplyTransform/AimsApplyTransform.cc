@@ -25,6 +25,8 @@
 #include <iostream>
 #include <exception>
 #include <sstream>
+//--- boost ------------------------------------------------------------------
+#include <boost/algorithm/string/predicate.hpp>
 //----------------------------------------------------------------------------
 
 using namespace aims;
@@ -59,6 +61,7 @@ public:
   string  output;
   vector<string> direct_transform_list;
   vector<string> inverse_transform_list;
+  string  input_coords;
   bool    points_mode;
   string  interp_type;
   string  background_value;
@@ -78,6 +81,7 @@ public:
 
 ApplyTransformProc::ApplyTransformProc()
   : Process(),
+    input_coords("AIMS"),
     points_mode(false),
     interp_type("linear"),
     background_value("0"),
@@ -537,9 +541,17 @@ load_transformation(const string &filename_arg,
 
 // FatalError is thrown if the transformations cannot be loaded properly.
 std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> >
-load_transformations(const ApplyTransformProc& proc)
+load_transformations(const ApplyTransformProc& proc,
+                     const DictionaryInterface* input_header = nullptr)
 {
   std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > ret;
+  AffineTransformation3d input_aims_to_input_transform; // identity
+
+  // boost::iequals is used for case-insensitive comparison
+  if(!boost::iequals(proc.input_coords, "AIMS")) {
+    // TODO
+    throw FatalError("--input-coords not implemented");
+  }
 
   if(!proc.direct_transform_list.empty()) {
     TransformationChain3d direct_chain;
@@ -606,7 +618,7 @@ bool doVolume(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, &input_image.header());
     inverse_transform = transforms.second;
     if(inverse_transform.isNull()) {
       clog << "Error: no inverse transform provided" << endl;
@@ -676,7 +688,7 @@ bool doMesh(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, &mesh.header());
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -730,7 +742,7 @@ bool doBucket(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, &input_bucket.header());
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -786,7 +798,7 @@ bool doBundles(Process & process, const string & fileref, Finder &)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, bundle_reader.readHeader().get());
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -851,7 +863,7 @@ bool doGraph(Process & process, const string & fileref, Finder & f)
   const_ref<Transformation3d> direct_transform, inverse_transform;
   {
     std::pair<const_ref<Transformation3d>, const_ref<Transformation3d> > transforms
-      = load_transformations(proc);
+      = load_transformations(proc, graph.get());
     direct_transform = transforms.first;
     inverse_transform = transforms.second; // allowed to be null
     if(direct_transform.isNull()) {
@@ -1016,6 +1028,43 @@ int main(int argc, const char **argv)
       "  chain can be inverted. Otherwise, both transformation chains must\n"
       "  be specified completely.\n"
       "\n"
+      "The meaning of coordinates in the input image can be specified with \n"
+      "the --input-coords option. This option specifies how to interpret the\n"
+      "transformations contained in the image header. --input-coords can\n"
+      "take the following values:\n"
+      "- 'AIMS' (default): internal coordinate system of the AIMS library.\n"
+      "  For images, this is defined as 'physical' coordinates in\n"
+      "  millimetres, starting from zero at the centre of the rightmost,\n"
+      "  most anterior, most superior voxel in the image. Note that AIMS\n"
+      "  determines the anatomical orientation based on the header in a\n"
+      "  format-dependent manner. For NIfTI it uses first qform then sform\n"
+      "  if they point to a referential of known orientation, and falls back\n"
+      "  to assuming a RAS+ on-disk orientation.\n"
+      "- 'first': use the first transformation defined in the AIMS metadata,\n"
+      "  i.e. the first or qform or sform to be defined.\n"
+      "- '0', '1'... or any non-negative integer: use the transformation\n"
+      "  in that position (0-based) in the AIMS metadata field\n"
+      "  'transformations' (0 is a synonym of 'first').\n"
+      "- 'qform', 'ITK', or 'ANTS': use the target space of the qform stored\n"
+      "  in a NIfTI file. This corresponds to the physical space used in\n"
+      "  tools based on the ITK library, such as ANTS.\n"
+      "- sform: use the target space of the sform stored in a NIfTI file.\n"
+      // TODO: do some tools use sform?
+      "- a referential name or UUID: use that referential from the\n"
+      "  'referentials' field of the AIMS image header, which is read from\n"
+      "  the image header or the sidecar .minf file (the .minf takes\n"
+      "  precedence). There are shortcuts for common cases:\n"
+      "  - 'mni', or 'mni152': use MNI coordinates, which correspond to the\n"
+      "    NIFTI_XFORM_MNI_152 intent, a.k.a. 'Talairach-MNI template-SPM',\n"
+      "    in AIMS.\n"
+      "  - 'scanner': use 'Scanner-based anatomical coordinates', which\n"
+      "    correspond to the NIFTI_XFORM_SCANNER_ANAT intent.\n"
+      "  - 'aligned': use the referential that corresponds to\n"
+      "    the NIFTI_XFORM_ALIGNED_ANAT intent, a.k.a. 'Coordinates aligned\n"
+      "    to another file or to anatomical truth' in AIMS.\n"
+      "  - 'talairach': use the referential that corresponds to the\n"
+      "    NIFTI_XFORM_TALAIRACH intent.\n"
+      "\n"
       "The header transformations of the output are set according to the\n"
       "first rule that applies:\n"
       "1. If --keep-transforms is passed, or if the applied transformation\n"
@@ -1062,6 +1111,10 @@ int main(int argc, const char **argv)
                         "passed on the command-line. The file name may be "
                         "prefixed with 'inv:', in which case the inverse of "
                         "the transformation is used.");
+    app.addOption(proc.input_coords, "--input-coords",
+                  "How to interpret coordinates in the input image w.r.t. "
+                  "the transformations written in the image header. See above."
+                  " [default: AIMS]", true);
     app.addOption(proc.points_mode, "--points",
                   "Points mode: transform point coordinates (see above).", true);
     app.addOption(proc.interp_type, "--interp",
