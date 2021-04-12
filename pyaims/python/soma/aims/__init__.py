@@ -1015,6 +1015,11 @@ def __fixsipclasses__(classes):
                               'Python 2 next() method, it will not work as an '
                               'iterator under Python 3'.format(y),
                               DeprecationWarning)
+
+            # useful shortcut: volume.np is handier than np.asarray(volume)
+            if hasattr(y, '__array__') and not hasattr(y, 'np'):
+                y.np = property(lambda self: self.__array__())
+
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
 
