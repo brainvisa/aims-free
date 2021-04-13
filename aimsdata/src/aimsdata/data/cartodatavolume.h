@@ -1153,35 +1153,35 @@ void AimsData<T>::fillBorder( const T& val )
 
 template<typename T>
 AimsData<T> AimsData<T>::clone() const
-{   
-  carto::rc_ptr<carto::Volume<T> > src = this->volume();
-  carto::rc_ptr<carto::Volume<T> > dst( new carto::Volume<T>(
-      src->getSizeX(), src->getSizeY(),
-      src->getSizeZ(), src->getSizeT(),
-      src->allocatorContext(),
-      src->allocatorContext().isAllocated() ) );
-
-  dst->header().copyProperties(
-      carto::Object::reference( src->header() ) );
-      
-  if( src->allocatorContext().isAllocated() )
-    transfer( src, dst );
-
-  if( !src->refVolume().isNull() )
+{
+  AimsData<T>	dat( *this );
+  if( !_volume->refVolume().isNull() )
   {
-    carto::rc_ptr<carto::Volume<T> > srcparent = src->refVolume();
-    carto::rc_ptr<carto::Volume<T> > dstparent( new carto::Volume<T>(
-        srcparent->getSizeX(), srcparent->getSizeY(),
-        srcparent->getSizeZ(), srcparent->getSizeT(),
-        srcparent->allocatorContext(),
-        srcparent->allocatorContext().isAllocated() ) );
-    if( srcparent->allocatorContext().isAllocated() )
-      transfer( srcparent, dstparent );
-    dst->setRefVolume( dstparent );
-    dst->setPosInRefVolume( src->posInRefVolume() );
+    // border has to be copied
+    carto::rc_ptr<carto::Volume<T> > rvol( new carto::Volume<T>(
+        _volume->refVolume()->getSizeX(), _volume->refVolume()->getSizeY(),
+        _volume->refVolume()->getSizeZ(), _volume->refVolume()->getSizeT(),
+        _volume->refVolume()->allocatorContext(),
+        _volume->refVolume()->allocatorContext().isAllocated() ) );
+    
+    if( _volume->refVolume()->allocatorContext().isAllocated() )
+      transfer( _volume->refVolume(), rvol );
+    
+    dat._volume.reset( new carto::Volume<T>( rvol, _volume->posInRefVolume(),
+      typename carto::Volume<T>::Position4Di( _volume->getSizeX(),
+                                              _volume->getSizeY(),
+                                              _volume->getSizeZ(),
+                                              _volume->getSizeT() ) ) );
+    dat._volume->header().copyProperties(
+      carto::Object::reference( _volume->header() ) );
   }
-
-  return AimsData<T>(dst);
+  else
+    dat._volume.reset( new carto::Volume<T>( *_volume ) );
+  delete dat.d->header;
+  dat.d->header = new aims::PythonHeader( *dat._volume );
+  dat.initBorder();
+  
+  return dat;
 }
 
 
