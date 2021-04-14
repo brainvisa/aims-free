@@ -72,6 +72,7 @@ namespace carto {
   extern template class Volume< soma::VoxelHSV >;
   extern template class Volume<Point3df>;
   extern template class Volume<Point3d>;
+  extern template class Volume<Point3dd>;
   extern template class Volume<Point2d>;
   extern template class Volume<AimsVector<float,6> >;
 #ifdef CARTO_LONG_IS_DISTINCT
@@ -101,6 +102,7 @@ namespace carto {
   extern template class Creator<Volume<soma::VoxelHSV> >;
   extern template class Creator<Point3df>;
   extern template class Creator<Point3d>;
+  extern template class Creator<Point3dd>;
   extern template class Creator<Point2d>;
   extern template class Creator<AimsVector<float,6> >;
 #ifdef CARTO_LONG_IS_DISTINCT
@@ -128,6 +130,7 @@ namespace carto {
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< soma::VoxelHSV > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3df > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3d > > )
+  DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point3dd > > )
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< Point2d > > )
 #define CARTO_COMA ,
   DECLARE_GENERIC_OBJECT_TYPE( rc_ptr<Volume< AimsVector<float CARTO_COMA 6> > > )
