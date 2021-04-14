@@ -1006,6 +1006,7 @@ def __fixsipclasses__(classes):
                     numpy.asarray(self.volume()).__setitem__(*args, **kwargs)
                 y.__getstate__ = __fixsipclasses__._aimsdata_getstate
                 y.__setstate__ = __fixsipclasses__._aimsdata_setstate
+                y.__array__ = lambda self: self.volume().__array__()
 
             if (hasattr(y, 'next')
                     and hasattr(y, '__iter__')
@@ -1019,6 +1020,13 @@ def __fixsipclasses__(classes):
             # useful shortcut: volume.np is handier than np.asarray(volume)
             if hasattr(y, '__array__') and not hasattr(y, 'np'):
                 y.np = property(lambda self: self.__array__())
+                y.np.__doc__ = '''The ``np`` property is a shortcut to the ``__array__`` method. Thus::
+
+    something.np
+
+is a handier equivalent to::
+
+    numpy.asarray(something)'''
 
         except Exception as e:
             print('warning: exception during classes patching:', e, ' for:', y)
