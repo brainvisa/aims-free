@@ -375,7 +375,7 @@ namespace carto
     if( out.dimX() == 0
         || ( in.dimX() == out.dimX() && in.dimY() == out.dimY()
              && in.dimZ() == out.dimZ() && in.dimT() == out.dimT()
-             && in.borderWidth() == out.borderWidth() ) )
+             && in.borders() == out.borders() ) )
     {
       if( this->_shallowcopy )
         out = in;

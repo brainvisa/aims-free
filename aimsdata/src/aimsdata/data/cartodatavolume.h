@@ -143,6 +143,7 @@ class AimsData : public carto::RCObject, public aims::Border
   AimsData<T>& transpose();
 
  private:
+  void initBorder();
   struct Private;
 
   carto::rc_ptr<carto::Volume<T> >  _volume;
@@ -299,6 +300,20 @@ bool AimsData<T>::empty() const
   return _volume->begin() == _volume->end();
 }
 
+template<typename T>
+inline
+void AimsData<T>::initBorder()
+{
+  _oFirstPoint = 0;
+  _oLine       = &_volume->at( 0, 1 ) - &_volume->at( 0 );
+  _oPointBetweenLine = &_volume->at( 0, 1 ) - &_volume->at( dimX() );
+  _oSlice      =  &_volume->at( 0, 0, 1 ) - &_volume->at( 0 );
+  _oLineBetweenSlice = &_volume->at( 0, 0, 1 ) - &_volume->at( 0, dimY() );
+  _oVolume     = &_volume->at( 0, 0, 0, 1 ) - &_volume->at( 0 );
+  _oSliceBetweenVolume = &_volume->at( 0, 0, 0, 1 )
+    - &_volume->at( 0, 0, dimZ() );
+}
+
 
 template<typename T>
 inline
@@ -313,8 +328,8 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt, int borderw )
       _volume,
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ) ) );
-  _oFirstPoint = 0;
   d->header = new aims::PythonHeader( *_volume );
+  initBorder();
 }
 
 
@@ -332,8 +347,8 @@ AimsData<T>::AimsData( int dimx, int dimy, int dimz, int dimt,
       _volume,
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( dimx, dimy, dimz, dimt ), al ) );
-  _oFirstPoint = 0;
   d->header = new aims::PythonHeader( *_volume );
+  initBorder();
 }
 
 
@@ -341,19 +356,12 @@ template < typename T >
 inline 
 AimsData<T>::AimsData( const AimsData<T>& other )
   : carto::RCObject(), aims::Border( other.dimX(), other.dimY(), 
-                                     other.dimZ(), other.borderWidth() ),
+                                     other.dimZ(), other.borders() ),
     _volume( other._volume ), 
     d( new Private )
 {
-  _oFirstPoint = 0;
-  _oLine       = &_volume->at( 0, 1 ) - &_volume->at( 0 );
-  _oPointBetweenLine = &_volume->at( 0, 1 ) - &_volume->at( dimX() );
-  _oSlice      =  &_volume->at( 0, 0, 1 ) - &_volume->at( 0 );
-  _oLineBetweenSlice = &_volume->at( 0, 0, 1 ) - &_volume->at( 0, dimY() );
-  _oVolume     = &_volume->at( 0, 0, 0, 1 ) - &_volume->at( 0 );
-  _oSliceBetweenVolume = &_volume->at( 0, 0, 0, 1 )
-    - &_volume->at( 0, 0, dimZ() );
   d->header = new aims::PythonHeader( *_volume );
+  initBorder();
 }
 
 
@@ -373,7 +381,6 @@ AimsData<T>::AimsData( const AimsData<T>& other, int borderw )
       typename carto::Volume<T>::Position4Di( borderw, borderw, borderw, 0 ),
       typename carto::Volume<T>::Position4Di( other.dimX(), other.dimY(),
                                               other.dimZ(), other.dimT() ) ) );
-  _oFirstPoint = 0;
 
   long x, xm = dimX(), y, ym = dimY(), z, zm = dimZ(), t, tm = dimT();
   for ( t = 0; t < tm; t++ )
@@ -382,6 +389,8 @@ AimsData<T>::AimsData( const AimsData<T>& other, int borderw )
         for ( x = 0; x < xm; x++ )
           (*this)( x, y, z, t ) = other( x, y, z, t );
   d->header = new aims::PythonHeader( *_volume );
+  
+  initBorder();
 }
 
 
@@ -400,19 +409,12 @@ AimsData<T>::AimsData( carto::rc_ptr<carto::Volume<T> > vol )
     aims::Border( vol->getSizeX(),
                   vol->getSizeY(),
                   vol->getSizeZ(),
-                  Private::borderWidth( vol ) ),
+                  vol->getBorders() ),
     _volume( vol ), 
     d( new Private )
 {
-  _oFirstPoint = 0;
-  _oLine       = &_volume->at( 0, 1 ) - &_volume->at( 0 );
-  _oPointBetweenLine = &_volume->at( 0, 1 ) - &_volume->at( dimX() );
-  _oSlice      =  &_volume->at( 0, 0, 1 ) - &_volume->at( 0 );
-  _oLineBetweenSlice = &_volume->at( 0, 0, 1 ) - &_volume->at( 0, dimY() );
-  _oVolume     = &_volume->at( 0, 0, 0, 1 ) - &_volume->at( 0 );
-  _oSliceBetweenVolume = &_volume->at( 0, 0, 0, 1 )
-    - &_volume->at( 0, 0, dimZ() );
   d->header = new aims::PythonHeader( *_volume );
+  initBorder();
 }
 
 
@@ -423,15 +425,13 @@ AimsData<T> & AimsData<T>::operator = ( carto::rc_ptr<carto::Volume<T> > vol )
   if( _volume.get() == vol.get() )
     return *this;
 
-  int	border = Private::borderWidth( vol );
-
-  _setBorder( vol->getSizeX(), vol->getSizeY(),
-              vol->getSizeZ(), border );
+  _setBorder( vol->getSizeX(), vol->getSizeY(), vol->getSizeZ(), 
+              vol->getBorders() );
   delete d->header;
   _volume = vol;
-  _oFirstPoint = 0;
   d->header = new aims::PythonHeader( *_volume );
-
+  initBorder();
+  
   return *this;
 }
 
@@ -443,19 +443,13 @@ AimsData<T>& AimsData<T>::operator = ( const AimsData<T>& other )
   if ( &other == this )
     return *this;
 
-  _setBorder( other.dimX(), other.dimY(), other.dimZ(), other.borderWidth() );
+  _setBorder( other.dimX(), other.dimY(), other.dimZ(), 
+              other.borders() );
   delete d->header;
   _volume = other._volume;
   *d = *other.d;
-  _oFirstPoint = 0;
-  _oLine       = &_volume->at( 0, 1 ) - &_volume->at( 0 );
-  _oPointBetweenLine = &_volume->at( 0, 1 ) - &_volume->at( dimX() );
-  _oSlice      =  &_volume->at( 0, 0, 1 ) - &_volume->at( 0 );
-  _oLineBetweenSlice = &_volume->at( 0, 0, 1 ) - &_volume->at( 0, dimY() );
-  _oVolume     = &_volume->at( 0, 0, 0, 1 ) - &_volume->at( 0 );
-  _oSliceBetweenVolume = &_volume->at( 0, 0, 0, 1 )
-    - &_volume->at( 0, 0, dimZ() );
   d->header = new aims::PythonHeader( *_volume );
+  initBorder();
   return *this;
 }
 
@@ -857,7 +851,7 @@ void AimsData<T>::setHeader( aims::Header* hdr )
         *ph = dynamic_cast<const aims::PythonHeader *>( hdr );
       if( ph )
         mh->copy( *ph, 1 );
-      // hdr used to transfor ownership to me
+      // hdr used to transfer ownership to me
       delete hdr;
     }
 }
@@ -1164,8 +1158,15 @@ AimsData<T> AimsData<T>::clone() const
   if( !_volume->refVolume().isNull() )
   {
     // border has to be copied
-    carto::rc_ptr<carto::Volume<T> > rvol(
-      new carto::Volume<T>( *_volume->refVolume() ) );
+    carto::rc_ptr<carto::Volume<T> > rvol( new carto::Volume<T>(
+        _volume->refVolume()->getSizeX(), _volume->refVolume()->getSizeY(),
+        _volume->refVolume()->getSizeZ(), _volume->refVolume()->getSizeT(),
+        _volume->refVolume()->allocatorContext(),
+        _volume->refVolume()->allocatorContext().isAllocated() ) );
+    
+    if( _volume->refVolume()->allocatorContext().isAllocated() )
+      transfer( _volume->refVolume(), rvol );
+    
     dat._volume.reset( new carto::Volume<T>( rvol, _volume->posInRefVolume(),
       typename carto::Volume<T>::Position4Di( _volume->getSizeX(),
                                               _volume->getSizeY(),
@@ -1178,6 +1179,8 @@ AimsData<T> AimsData<T>::clone() const
     dat._volume.reset( new carto::Volume<T>( *_volume ) );
   delete dat.d->header;
   dat.d->header = new aims::PythonHeader( *dat._volume );
+  dat.initBorder();
+  
   return dat;
 }
 
