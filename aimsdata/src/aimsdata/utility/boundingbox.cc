@@ -121,18 +121,24 @@ void BoundingBox::add( const Point3df & pos )
 }
 
 
-void BoundingBox::add( const BucketMap<Void> & bck )
+template <typename T>
+void BoundingBox::add( const BucketMap<T> & bck )
 {
   if( bck.empty() )
     return;
-  const BucketMap<Void>::Bucket	& bk = bck.begin()->second;
+  const typename BucketMap<T>::Bucket	& bk = bck.begin()->second;
   float	vx = bck.sizeX();
   float	vy = bck.sizeY();
   float	vz = bck.sizeZ();
-  BucketMap<Void>::Bucket::const_iterator	ib, eb = bk.end();
+  typename BucketMap<T>::Bucket::const_iterator	ib, eb = bk.end();
 
   for( ib=bk.begin(); ib!=eb; ++ib )
     add( Point3df( ib->first[0] * vx, ib->first[1] * vy, ib->first[2] * vz ) );
 }
+
+
+template void BoundingBox::add( const BucketMap<Void> & bck );
+template void BoundingBox::add( const BucketMap<int16_t> & bck );
+template void BoundingBox::add( const BucketMap<int32_t> & bck );
 
 

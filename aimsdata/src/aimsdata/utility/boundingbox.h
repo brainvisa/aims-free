@@ -57,7 +57,8 @@ namespace aims
     Point3df minimum() const;
     Point3df maximum() const;
     void add( const Point3df & pos );
-    void add( const BucketMap<Void> & bck );
+    template <typename T>
+    void add( const BucketMap<T> & bck );
 
   private:
     unsigned	_npoints;
