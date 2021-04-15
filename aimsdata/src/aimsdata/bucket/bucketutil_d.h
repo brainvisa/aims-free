@@ -11,10 +11,9 @@ namespace aims
   template <typename T, typename U=T>
   carto::VolumeRef<U>
   BucketUtil::volumeFromBucket(
-    const BucketMap<T> & bucket, int borderwidth, bool enable_shift,
-    Point3d** pos )
+    const BucketMap<T> & bucket, int borderwidth, Point3d* pos )
   {
-    Point3d *bmin = new Point3d( 0, 0, 0 );
+    Point3d bmin( 0, 0, 0 );
 
     // bounding box of all buckets
     BoundingBox	bb;
@@ -26,17 +25,19 @@ namespace aims
     Point3d bmax = Point3d( int16_t( round( dmax[0] / vx ) ),
                             int16_t( round( dmax[1] / vy ) ),
                             int16_t( round( dmax[2] / vz ) ) );
-    if( enable_shift )
+    if( pos )
     {
       Point3df dmin = bb.minimum();
-      *bmin = Point3d( int16_t( round( dmin[0] / vx ) ),
-                       int16_t( round( dmin[1] / vy ) ),
-                       int16_t( round( dmin[2] / vz ) ) );
-      if( pos )
-        *pos = bmin;
+      bmin = Point3d( int16_t( round( dmin[0] / vx ) ),
+                      int16_t( round( dmin[1] / vy ) ),
+                      int16_t( round( dmin[2] / vz ) ) );
+      *pos = bmin;
     }
 
-    return volumeFromBucket<T, U>( bucket, *bmin, bmax, borderwidth );
+    carto::VolumeRef<U> res = volumeFromBucket<T, U>( bucket, bmin, bmax,
+                                                      borderwidth );
+
+    return res;
   }
 
 

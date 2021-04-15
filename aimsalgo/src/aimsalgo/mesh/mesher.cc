@@ -35,6 +35,8 @@
 #include <aims/mesh/mesher.h>
 #include <aims/mesh/surfaceOperation.h> // surfacemanip
 #include <aims/io/writer.h>
+#include <aims/bucket/bucketutil.h>
+#include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/sstream.h>
 #include <iomanip>
@@ -100,6 +102,16 @@ void Mesher::unsetSplitting()
   _splittingFlag = false;
 }
 
+
+
+void Mesher::doit( const BucketMap<Void>& thing,
+                   const string& name, const string& mode )
+{
+  VolumeRef<int16_t> vol = BucketUtil::volumeFromBucket<Void, int16_t>(
+    thing, 1, 0 );
+
+  doit( vol, name, mode );
+}
 
 
 void Mesher::doit( const AimsData<short>& thing,
@@ -269,6 +281,81 @@ void Mesher::doit( const AimsData<short>& thing,
 }
 
 
+namespace
+{
+
+  void translateMesh( AimsSurfaceTriangle & surface, const Point3d & pos,
+                      const BucketMap<Void> & bucket )
+  {
+    AffineTransformation3d tr;
+    tr.setTranslation( Point3df( pos[0] * bucket.sizeX(),
+                                 pos[1] * bucket.sizeY(),
+                                 pos[2] * bucket.sizeZ() ) );
+    SurfaceManip::meshTransform( surface, tr );
+  }
+
+
+  void translateMesh( list< AimsSurfaceTriangle > & surface,
+                      const Point3d & pos,
+                      const BucketMap<Void> & bucket )
+  {
+    list< AimsSurfaceTriangle >::iterator is, es = surface.end();
+    for( is=surface.begin(); is!=es; ++is )
+      translateMesh( *is, pos, bucket );
+  }
+
+
+  void translateMesh( map< size_t, list< AimsSurfaceTriangle > > & surface,
+                      const Point3d & pos,
+                      const BucketMap<Void> & bucket )
+  {
+    map< size_t, list< AimsSurfaceTriangle > >::iterator
+      is, es = surface.end();
+    for( is=surface.begin(); is!=es; ++is )
+      translateMesh( is->second, pos, bucket );
+  }
+
+
+  void translateMesh( map< short, list< AimsSurfaceTriangle > > & surface,
+                      const Point3d & pos,
+                      const BucketMap<Void> & bucket )
+  {
+    map< short, list< AimsSurfaceTriangle > >::iterator
+      is, es = surface.end();
+    for( is=surface.begin(); is!=es; ++is )
+      translateMesh( is->second, pos, bucket );
+  }
+
+
+  void translateMesh( map< size_t, list< map< short,
+                        list < AimsSurfaceTriangle > > > >& surface,
+                      const Point3d & pos,
+                      const BucketMap<Void> & bucket )
+  {
+    map< size_t, list< map< short, list < AimsSurfaceTriangle > > > >::iterator
+      is, es = surface.end();
+    list< map< short, list < AimsSurfaceTriangle > > >::iterator iss, ess;
+
+    for( is=surface.begin(); is!=es; ++is )
+      for( iss=is->second.begin(), ess=is->second.end(); iss!=ess; ++iss )
+        translateMesh( *iss, pos, bucket );
+  }
+
+}
+
+
+void Mesher::doit( const BucketMap<Void>& thing,
+                   map< size_t, list< AimsSurfaceTriangle > >& surface )
+{
+  Point3d pos;
+
+  VolumeRef<int16_t> vol = BucketUtil::volumeFromBucket<Void, int16_t>(
+    thing, 1, &pos );
+
+  doit( vol, surface );
+  translateMesh( surface, pos, thing );
+}
+
 
 void Mesher::doit( const AimsData<short>& thing,
                    map< size_t, list< AimsSurfaceTriangle > >& surface )
@@ -363,6 +450,20 @@ void Mesher::doit( const AimsData<short>& thing,
     cout << "done                       " << endl;
 
   clear( interface );
+}
+
+
+void Mesher::doit( const BucketMap<Void>& thing,
+                   map< size_t, list< map< short,
+                   list < AimsSurfaceTriangle > > > >& surface )
+{
+  Point3d pos;
+
+  VolumeRef<int16_t> vol = BucketUtil::volumeFromBucket<Void, int16_t>(
+    thing, 1, &pos );
+
+  doit( vol, surface );
+  translateMesh( surface, pos, thing );
 }
 
 

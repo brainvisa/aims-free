@@ -16,17 +16,22 @@ namespace aims
   public:
     /** Bucket to volume conversion.
         Compared to Converter<BucketMap, carto::Volume>, this function has
-        options to handle min bounding box handling, and allows to have
-        borders.
+        options to handle min bounding box, and allows to have borders.
+
+        If pos is non null, it should point to an (allocated) Point3d where the
+        bounding box min position will be copied.
+
+        If pos is null, the volume will start at coordinates
+        (0, 0, 0), without an offset (thus the volume may be much lager than
+        needed, or may not contain the whole bucket if it has negative
+        coordinates). In such case, pos is not used (thus passing 0 is OK).
     */
     template <typename T, typename U=T>
     static carto::VolumeRef<U> volumeFromBucket(
-      const BucketMap<T> & bucket, int borderwidth = 0,
-      bool enable_shift = true, Point3d** pos = 0 );
+      const BucketMap<T> & bucket, int borderwidth = 0, Point3d* pos = 0 );
     /** Bucket to volume conversion.
         Compared to Converter<BucketMap, carto::Volume>, this function has
-        options to handle bounding box handling, and allows to have
-        borders.
+        options to handle bounding box, and allows to have borders.
     */
     template <typename T, typename U=T>
     static carto::VolumeRef<U> volumeFromBucket(

@@ -27,6 +27,16 @@ doit(volume, filename_base, write_mode="binar")
 
 Mesh every interface of objects in the input label volume. Each mesh is written in a separate file. Files are numbered according to objects interfaces (label1_label2) and an interface number for this pair of objects.
 write_mode is an old flag to write files in ascii or binary modes. It's obsolete.
+
+%End
+
+    void doit( const BucketMap_VOID&, const std::string&,
+               const std::string& = "binar" ) /ReleaseGIL/;
+%Docstring
+doit(bucket, filename_base, write_mode="binar")
+
+Mesh every interface of objects in the input label volume. Each mesh is written in a separate file. Files are numbered according to objects interfaces (label1_label2) and an interface number for this pair of objects.
+write_mode is an old flag to write files in ascii or binary modes. It's obsolete.
 %End
 
     void setSmoothing( SmoothingType smoothType, int nIteration, float factor );
@@ -64,6 +74,10 @@ write_mode is an old flag to write files in ascii or binary modes. It's obsolete
       bool insideinterface=false )
       throw ( std::runtime_error, carto::assert_error ) /ReleaseGIL/;
 %End
+
+    void getBrain( const BucketMap_VOID&, AimsSurfaceTriangle&,
+      bool insideinterface=false )
+      throw ( std::runtime_error, carto::assert_error ) /ReleaseGIL/;
 
     void getWhite( const AimsData_S16& , AimsSurfaceTriangle& ) /ReleaseGIL/;
 

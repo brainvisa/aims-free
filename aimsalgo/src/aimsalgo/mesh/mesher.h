@@ -39,6 +39,7 @@
 #include <aims/mesh/facet.h>
 #include <aims/mesh/surface.h>
 #include <aims/data/data.h>
+#include <aims/bucket/bucket.h>
 #include <map>
 #include <list>
 #include <vector>
@@ -48,7 +49,7 @@ typedef std::map< uint, Facet*, std::less< int > > MapOfFacet;
 template <typename T> class TimeTexture;
 
 
-class AIMSALGO_API Mesher
+class Mesher
 {
   public:
     enum SmoothingType
@@ -81,14 +82,22 @@ class AIMSALGO_API Mesher
                        const AimsData<short>& thing );
     void doit( const AimsData<short>& thing, const std::string& name,
                const std::string& mode = "binar" );
+    void doit( const aims::BucketMap<Void>& thing, const std::string& name,
+               const std::string& mode = "binar" );
     void doit( const AimsData<short>& thing,
                std::map<size_t, std::list<AimsSurfaceTriangle> >& surface );
-    void getBrain( const AimsData<short>& thing, 
-		   AimsSurfaceTriangle& surface, bool insideinterface=false );
-  // like getBrain but dedicated to gray/white interface in 6 connectivity,
-  // which solves hole problems. JFM
+    void doit( const aims::BucketMap<Void>& thing,
+               std::map<size_t, std::list<AimsSurfaceTriangle> >& surface );
+    void getBrain( const AimsData<short>& thing,
+                   AimsSurfaceTriangle& surface, bool insideinterface=false );
+    void getBrain( const aims::BucketMap<Void>& thing,
+                   AimsSurfaceTriangle& surface, bool insideinterface=false );
+    // like getBrain but dedicated to gray/white interface in 6 connectivity,
+    // which solves hole problems. JFM
     void getWhite( const AimsData<short>& thing, 
-		   AimsSurfaceTriangle& surface );
+                   AimsSurfaceTriangle& surface );
+    void getWhite( const aims::BucketMap<Void>& thing,
+                   AimsSurfaceTriangle& surface );
 
     // create one mesh for all components of each label
     void getSingleLabel( const AimsData<short>& thing,
@@ -139,8 +148,11 @@ class AIMSALGO_API Mesher
     // SPLITTING SURFACE OF CONNECTED COMP.
     // ====================================
     void doit( const AimsData<short>& thing,
-               std::map< size_t, std::list< std::map<short, 
-	       std::list<AimsSurfaceTriangle > > > >& surface );
+               std::map< size_t, std::list< std::map<short,
+                  std::list<AimsSurfaceTriangle > > > >& surface );
+    void doit( const aims::BucketMap<Void>& thing,
+               std::map< size_t, std::list< std::map<short,
+                  std::list<AimsSurfaceTriangle > > > >& surface );
     void setSplitting();
     void unsetSplitting();
 
