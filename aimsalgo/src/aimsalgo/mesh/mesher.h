@@ -108,25 +108,28 @@ class Mesher
     void getMeshFromMapOfFacet(const AimsData<short>& thing,
              AimsSurfaceTriangle& surface, MapOfFacet &mof);
 
-    // SMOOTHING
-    // =========
-    // default : smoothType = LOWPASS
-    //           smoothIt = 30
-    //           smoothRate in [0.0;1.0] (instance : 0.4)
-    //           smoothFeatureAngle = 180.0 deg
-    //           smoothForce in [0.0;1.0] (instance : 0.2)
+    /** Smoothing
+
+    default : smoothType = LOWPASS (other values are LAPLACIAN, SIMPLESPRING,
+                                    POLYGONSPRING)
+              smoothIt = 30
+              smoothRate in [0.0;1.0] (instance : 0.4)
+              smoothForce in [0.0;1.0] (instance : 0.2)
+    */
     void setSmoothing( SmoothingType smoothType, int smoothIt, float smoothRate );
+    // smoothFeatureAngle good value: 180. degrees
     void setSmoothingLaplacian( float smoothFeatureAngle );
     void setSmoothingSpring( float smoothForce );
     void unsetSmoothing();
     void smooth( AimsSurfaceTriangle& surface );
 
-    // DECIMATION
-    // ==========
-    // default : deciReductionRate = 100.0 %
-    //           deciMaxClearance = 5.0
-    //           deciMaxError = 0.003
-    //           deciFeatureAngle = 120.0 deg
+    /** Decimation
+
+    default : deciReductionRate = 100.0 %
+              deciMaxClearance = 5.0
+              deciMaxError = 0.003
+              deciFeatureAngle = 120.0 deg
+    */
     void setDecimation( float deciReductionRate,
                         float deciMaxClearance,
                         float deciMaxError,
