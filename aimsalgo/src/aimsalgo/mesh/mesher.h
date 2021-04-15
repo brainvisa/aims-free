@@ -67,6 +67,10 @@ class Mesher
                _smoothForce( 0.2 ),
                _smoothType( LOWPASS ),
                _deciFlag( false ),
+               _deciReductionRate( 99. ),
+               _deciMaxClearance( 3. ),
+               _deciMaxError( .2 ),
+               _deciFeatureAngle( 180. ),
                _splittingFlag( false ),
                _labelInf( 1 ),
                _labelSup( 32767 ),	// should maybe disapear ?
@@ -125,10 +129,10 @@ class Mesher
 
     /** Decimation
 
-    default : deciReductionRate = 100.0 %
-              deciMaxClearance = 5.0
-              deciMaxError = 0.003
-              deciFeatureAngle = 120.0 deg
+    default : deciReductionRate = 99.0 %
+              deciMaxClearance = 3.0
+              deciMaxError = 0.2
+              deciFeatureAngle = 180.0 deg
     */
     void setDecimation( float deciReductionRate,
                         float deciMaxClearance,
@@ -270,13 +274,16 @@ class Mesher
     void splitting( const AimsData< short >& thing,
                     const std::vector< Facet* >& vfac,
                     const AimsSurfaceTriangle& surface,
-                    std::map<short,std::list< AimsSurfaceTriangle> >& 
-		    splitted );
+                    std::map<short,std::list< AimsSurfaceTriangle> >&
+                      splitted );
 
     void getFacet( const AimsSurfaceTriangle& surface, 
-		   std::vector< Facet* >& vfac );
+                   std::vector< Facet* >& vfac );
 
     void clear( std::map< size_t, std::list< MapOfFacet > >& interface );
+    /// reshape (if needed) the input volume to add a border filled with -1
+    static carto::VolumeRef<int16_t> reshapedVolume(
+      const carto::VolumeRef<int16_t> in_vol );
 };
 
 

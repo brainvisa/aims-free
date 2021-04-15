@@ -75,10 +75,10 @@ When meshing a volume, the input volume needs to have a border of at least
                   deciFeatureAngle)
 
     good values:
-    deciReductionRate: 100.0 (%)
-    deciMaxClearance: 5.0
-    deciMaxError: 0.003
-    deciFeatureAngle: 120.0 (deg)
+    deciReductionRate: 99.0 (%)
+    deciMaxClearance: 3.0
+    deciMaxError: 0.2
+    deciFeatureAngle: 180.0 (deg)
 %End
 
     void unsetDecimation();

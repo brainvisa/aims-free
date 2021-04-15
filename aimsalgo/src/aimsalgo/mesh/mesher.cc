@@ -39,12 +39,118 @@
 #include <aims/transformation/affinetransformation3d.h>
 #include <cartobase/stream/fileutil.h>
 #include <cartobase/stream/sstream.h>
+#include <cartobase/containers/nditerator.h>
 #include <iomanip>
 #include <stdio.h>
 
 using namespace aims;
 using namespace carto;
 using namespace std;
+
+
+VolumeRef<int16_t> Mesher::reshapedVolume( const VolumeRef<int16_t> in_vol )
+{
+  if( in_vol->refVolume() )
+  {
+    vector<int> borders = in_vol->getBorders();
+    if( borders.size() >= 6 && borders[0] >= 1 && borders[1] >= 1
+        && borders[2] >= 1 && borders[3] >= 1
+        && borders[4] >= 1 && borders[5] >= 1 )
+    {
+      // check border contents
+      int x, y, z;
+      vector<int> size = in_vol->getSize();
+      bool ok = true;
+
+      for( z=0; ok && z<size[2]; ++z )
+      {
+        for( y=0; y<size[1]; ++y )
+        {
+          if( in_vol->at( -1, y, z ) != -1 )
+          {
+            ok = false;
+            break;
+          }
+          if( in_vol->at( size[0], y, z ) != -1 )
+          {
+            ok = false;
+            break;
+          }
+        }
+        if( !ok )
+          break;
+        for( x=-1; x<=size[0]; ++x )
+        {
+          if( in_vol->at( x, -1, z ) != -1 )
+          {
+            ok = false;
+            break;
+          }
+          if( in_vol->at( x, size[1], z ) != -1 )
+          {
+            ok = false;
+            break;
+          }
+        }
+      }
+
+      for( y=-1; ok && y<=size[1]; ++y )
+      {
+        for( x=-1; x<=size[0]; ++x )
+        {
+          if( in_vol->at( x, y, -1 ) != -1 )
+          {
+            ok = false;
+            break;
+          }
+          if( in_vol->at( x, y, size[2] ) != -1 )
+          {
+            ok = false;
+            break;
+          }
+        }
+      }
+
+      if( ok )
+        return in_vol;
+
+    }
+  }
+
+  cout << "in volume, sizeZ: " << in_vol->getSizeZ() << endl;
+  VolumeRef<int16_t> nvol( in_vol->getSizeX(), in_vol->getSizeY(),
+                           in_vol->getSizeZ(), in_vol->getSizeT(), 1 );
+
+  cout << "new copy volume, sizeZ: " << nvol->getSizeZ() << endl;
+
+  nvol->copyHeaderFrom( in_vol->header() );
+
+  nvol->fillBorder( -1 );
+
+  vector<size_t> sstrides = in_vol->getStrides();
+  vector<int> in_strides;
+  in_strides.insert( in_strides.end(), sstrides.begin(), sstrides.end() );
+  sstrides = nvol->getStrides();
+  vector<int> nstrides;
+  nstrides.insert( nstrides.end(), sstrides.begin(), sstrides.end() );
+
+  int16_t *in_p, *in_pp, *np, *npp;
+  line_NDIterator<int16_t> in_it( &in_vol->at( 0 ), in_vol->getSize(),
+                                  in_strides );
+  line_NDIterator<int16_t> nit( &nvol->at( 0 ), nvol->getSize(), nstrides );
+  int nx = in_vol->getSizeX();
+
+  for( ; !in_it.ended(); ++in_it, ++nit )
+  {
+    in_p = &*in_it;
+    np = &*nit;
+    for( in_pp=in_p + nx; in_p!=in_pp; ++in_p, ++np )
+      *np = *in_p;
+  }
+
+  return nvol;
+
+}
 
 
 void Mesher::setSmoothing( SmoothingType smoothType, int smoothIt, float smoothRate )
