@@ -29,8 +29,8 @@ Mesh every interface of objects in the input label volume. Each mesh is written 
 write_mode is an old flag to write files in ascii or binary modes. It's obsolete.
 
 object_to_mesh may be a volume of int16 values (labels), or a bucket.
-When meshing a volume, the input volume needs to have a border of at least
-1 voxel, filled with the value -1.
+When meshing a volume, the input volume should have a border of at least
+1 voxel, filled with the value -1. If not, a new one will be allocated to perform the operation, thus using more memory and a copy overhead.
 %End
 
     void doit( const BucketMap_VOID&, const std::string&,
@@ -108,9 +108,9 @@ When meshing a volume, the input volume needs to have a border of at least
 
     Get a smoothed mesh of the external (unless insideinterface is True) interface of the biggest object.
 
-    object_to_mesh may be a volume of int16 values (labels), or a bucket.
-    When meshing a volume, the input volume needs to have a border of at least
-    1 voxel, filled with the value -1.
+object_to_mesh may be a volume of int16 values (labels), or a bucket.
+When meshing a volume, the input volume should have a border of at least
+1 voxel, filled with the value -1. If not, a new one will be allocated to perform the operation, thus using more memory and a copy overhead.
 %End
 
     void getBrain( const BucketMap_VOID&, AimsSurfaceTriangle&,
@@ -123,9 +123,9 @@ When meshing a volume, the input volume needs to have a border of at least
 
     Get a smoothed mesh of the intternal interface of the biggest object.
 
-    object_to_mesh may be a volume of int16 values (labels), or a bucket.
-    When meshing a volume, the input volume needs to have a border of at least
-    1 voxel, filled with the value -1.
+object_to_mesh may be a volume of int16 values (labels), or a bucket.
+When meshing a volume, the input volume should have a border of at least
+1 voxel, filled with the value -1. If not, a new one will be allocated to perform the operation, thus using more memory and a copy overhead.
 %End
 
     void getWhite( const BucketMap_VOID & thing,
