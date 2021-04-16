@@ -10,6 +10,7 @@ typedef carto::Volume<%Template1% > Volume_%Template1typecode%;
 #include <cartodata/volume/volumeoperators.h>
 #include <weakrefobject.h>
 #define PY_ARRAY_TYPES_PREFIX PyAIMSTypes
+#include <pyaims/vector/stdvector.h>
 %End
 
 %TypeCode
@@ -258,6 +259,8 @@ Set a voxel value at given position
  sipCpp->at( *a1 ) = %Template1deref%a0;
 %End
 %#endif%
+
+  vector_SIZE_T getStrides() const;
 
   SIP_PYOBJECT header() /Factory/;
 %Docstring
