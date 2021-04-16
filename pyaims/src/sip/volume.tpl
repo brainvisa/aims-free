@@ -576,7 +576,7 @@ The header contains all meta-data.
 %#if defined( PYAIMS_SCALAR ) || defined( PYAIMS_NUMPY_BINDINGS) %
 
   Volume_%Template1typecode%( SIP_PYOBJECT )
-    [(vector_S32, %Template1% *)];
+    [(vector_S32, %Template1% *, const vector_SIZE_T *)];
 %MethodCode
   PyArrayObject *arr = 0;
   if( !PyArray_Check( a0 ) )
@@ -732,6 +732,7 @@ The header contains all meta-data.
       nd = 4;
     std::vector<int> dims( nd, 1 );
     int inc = 1, start = 0;
+    /*
     // TODO: retreive exact strides and react accordingly
     if( PyArray_NDIM( arr ) >= 2 )
     {
@@ -742,11 +743,19 @@ The header contains all meta-data.
         start = PyArray_NDIM( arr )-1;
       }
     }
+    */
+
+    std::vector<size_t> strides( nd, 1 );
+
     for( int i=0; i<PyArray_NDIM( arr ); ++i )
+    {
       dims[i] = PyArray_DIMS( arr )[ start + inc * i];
+      strides[i] = PyArray_STRIDES( arr )[ start + inc * i ]
+        / sizeof( %Template1% );
+    }
 
     sipCpp = new sipVolume_%Template1typecode%(
-      dims, ( %Template1% *) PyArray_DATA( arr ) );
+      dims, ( %Template1% *) PyArray_DATA( arr ), &strides );
     /* keep ref to the array to prevent its destruction
        WARNING: this is not enough in every situation: if the python object
        is returned to C++, then the python attribute will be deleted and the

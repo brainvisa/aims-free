@@ -2431,13 +2431,17 @@ method.
 For standard numeric types, it is also possible to get the voxels array as a
 numpy_ array, using the ``__array__()`` method, or more conveniently,
 ``numpy.asarray(volume)`` or ``numpy.array(volume, copy=False)``.
+In aims >= 5.0.2, a more concise shortcut is also available: volume.np (this is available on all types providing numpy bindings actually).
+
 The array returned is a reference to the actual data block, so any
 modification to its contents also affect the Volume contents, so it is
 generally an easy way of manipulating volume voxels because all the power of
 the numpy module can be used on Volumes.
-The ``arraydata()`` method returns a numpy array just like it is in memory,
-that is a 4D (or more) array indexed by ``[t][z][y][x]``, which is generally not what you like and is not consistent with AIMS indexing. Contrarily, using
-``numpy.asarray(volume)`` sets strides in the returned numpy
+The obsoloete ``arraydata()`` method used to return a numpy array just like it
+is in memory, that is a 4D (or more) array generally indexed by
+``[t][z][y][x]`` (but it depands how it has been built), which is generally not
+what you like and is not consistent with AIMS indexing. Contrarily, using
+``volume.np`` sets strides in the returned numpy
 array, so that indexing is in the "normal" order ``[x][y][z][t]``, while still sharing the same memory block.
 The Volume object now also wraps the numpy accessors to the volume object itself, so that ``volume[x, y, z, t]`` is the same as
 ``nupmy.asarray(volume)[x, y, z, t]``.
@@ -2447,14 +2451,14 @@ The Volume object now also wraps the numpy accessors to the volume object itself
 Since PyAims 4.7 the numpy arrays bindings have notably improved, and are now able to bind arrays to voxels types which are not scalar numeric types. Volumes of RGB, RGBA, HSV, or Point3df now have numpy bindings. The bound object have generally a "numpy struct" binding, that is not the usual C++/python object binding, but instead a structure managed by numpy which also supports indexing. For most objects we are using, they also have an array stucture (a RGB is an array with 3 int8 items), and are bound under a sturcture with a unique field, named "v" (for "vector"):
 
     >>> v = aims.Volume('RGB', 100, 100, 10)
-    >>> numpy.asarray(v)[0, 0, 0, 0]
+    >>> v.np[0, 0, 0, 0]
     ([0, 0, 0],)
 
 Such an array may be indexed by the field name, which returns another array with scalar values and additional dimensions:
 
-    >>> numpy.asarray(v)['v'].dtype
+    >>> v.np['v'].dtype
     dtype('uint8')
-    >>> numpy.asarray(v)['v'].shape
+    >>> v.['v'].shape
     (100, 100, 10, 1, 3)
 
 Both arrays share their memory with the aims volume.
@@ -2502,13 +2506,34 @@ Note that passing a 1D numpy array of ints will build a volume mapping the array
     >>> v = aims.Volume(numpy.array([100, 100, 10]).astype('int32'))
     >>> print(v.getSize())
     [ 3, 1, 1, 1 ]
-    >>> print(np.asarray(v))
+    >>> print(v.np)
     [100 100  10]
     >>> v = aims.Volume([100, 100, 10])
     >>> print(v.getSize())
     [ 100, 100, 10, 1 ]
 
 .. _numpy: http://numpy.scipy.org/
+
+Array ordering:
+
+In pyaims <= 5.0.x the Volume classes were only working with the X axis (the
+first) being contiguous, and, for numpy, should be interpreted as
+"Fortran-contiguous". So to convert a numpy array into a Volume and keep the
+same axes ordering, you had to convert it to Fortran order first:
+
+    >>> v = aims.Volume(numpy.zeros((2, 3, 4, dtype='int32')))
+    # v.getSize() used to return [4, 3, 2, 1]
+    >>> v = aims.Volume(np.asfortranarray(numpy.zeros((2, 3, 4), dtype='int32')))
+    >>> print(v.getSize())
+    [2, 3, 4, 1]
+
+In pyaims 5.1 this limitation is gone, you can omit the fortran order
+conversion. Strides are taken into account in the C++ volume. But you have to
+be careful with such volumes as many C++ programs assume internally that the X
+axis is contiguous in memory, which is not true in this situation. These
+programs and functions may not work, crash, or produce incorrect results when
+used with non-contiguous X axis volumes.
+
 '''
 
 _aimsdatadoc = '''

@@ -231,12 +231,15 @@ namespace carto
                      bool allocated = true );
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
-    Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer );
+    Volume( int sizeX, int sizeY, int sizeZ, int sizeT, T* buffer,
+            const std::vector<size_t> *strides = 0 );
     /// Position4Di version
     /// This constructor builds a Volume on an already allocated buffer.
     /// The Volume is not owner of the underlying data.
-    Volume( const Position4Di & size, T* buffer );
-    Volume( const std::vector<int> & size, T* buffer );
+    Volume( const Position4Di & size, T* buffer,
+            const std::vector<size_t> *strides = 0 );
+    Volume( const std::vector<int> & size, T* buffer,
+            const std::vector<size_t> *strides = 0 );
     /// This is the volume view constructor.
     /// Beware not to mix it up with the copy constructor ( it takes a pointer
     /// to volume instead of a volume )
@@ -352,15 +355,18 @@ namespace carto
     virtual void reallocate( int sizeX = 1, int sizeY = 1, int sizeZ = 1,
                              int sizeT = 1, bool keepcontents = false,
                              const AllocatorContext& allocatorContext
-                             = AllocatorContext(), bool allocate = true );
+                             = AllocatorContext(), bool allocate = true,
+                             const std::vector<size_t> *strides = 0 );
     virtual void reallocate( const Position4Di & size,
                              bool keepcontents = false,
                              const AllocatorContext& allocatorContext
-                             = AllocatorContext(), bool allocate = true );
+                             = AllocatorContext(), bool allocate = true,
+                             const std::vector<size_t> *strides = 0 );
     virtual void reallocate( const std::vector<int> & size,
                              bool keepcontents = false,
                              const AllocatorContext& allocatorContext
-                             = AllocatorContext(), bool allocate = true );
+                             = AllocatorContext(), bool allocate = true,
+                             const std::vector<size_t> *strides = 0 );
 
     //========================================================================
     //   COPY / VIEW
@@ -501,9 +507,11 @@ namespace carto
     //   PRIVATE UTILS
     //========================================================================
     void allocate( int oldSizeX, int oldSizeY, int oldSizeZ, int oldSizeT,
-                   bool allocate, const AllocatorContext& allocatorContext );
+                   bool allocate, const AllocatorContext& allocatorContext,
+                   const std::vector<size_t> *strides = 0 );
     void allocate( const std::vector<int> & oldSize,
-                   bool allocate, const AllocatorContext& allocatorContext );
+                   bool allocate, const AllocatorContext& allocatorContext,
+                   const std::vector<size_t> *strides = 0 );
     void slotSizeChanged( const PropertyFilter& propertyFilter );
     void updateItemsBuffer();
 
