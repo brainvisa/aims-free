@@ -476,8 +476,7 @@ int main( int /*argc*/, const char** /*argv*/ )
     cerr << endl;
   }
   size_t dim, ndim = vol7->getSize().size();
-  vector<size_t> sstrides = vol7->getStrides();
-  vector<int> strides( sstrides.begin(), sstrides.end() );
+  vector<size_t> strides = vol7->getStrides();
   NDIterator<int16_t> it( &vol7->at( 0 ), vol7->getSize(), strides );
   size_t cnt = 0;
   for( ; !it.ended(); ++it, ++cnt )
@@ -653,9 +652,7 @@ int main( int /*argc*/, const char** /*argv*/ )
        << "s : " << sz * nn / ck2 << " vox/s" << endl;
 
   cout << "N-D iterators : " << flush;
-  sstrides = vol6->getStrides();
-  strides.clear();
-  strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
+  strides = vol6->getStrides();
   int stride0 = strides[0];
   ck = clock();
 //   for( n=0; n<nn; ++n )

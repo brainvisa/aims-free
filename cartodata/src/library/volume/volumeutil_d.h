@@ -43,6 +43,7 @@
 #include <cartodata/volume/volumeref_d_instantiate.h>
 #include <cartobase/type/datatypetraits.h>
 #include <cartobase/exception/assert.h>
+#include <cartobase/containers/nditerator.h>
 #include <cartobase/type/converter.h>  // carto::min_limit<T>()
 #include <limits>
 
@@ -77,18 +78,20 @@ namespace carto
                        o->getSizeT() ) );
     res->header() = o->header();
 
-    unsigned	x, nx = o->getSizeX(), y, ny = o->getSizeY(),
-      z, nz = o->getSizeZ(), t, nt = o->getSizeT();
-    T	*op, *rp;
-    for( t=0; t<nt; ++t )
-      for( z=0; z<nz; ++z )
-        for( y=0; y<ny; ++y )
-          {
-            op = &o->at( 0, y, z, t );
-            rp = &res->at( 0, y, z, t );
-            for( x=0; x<nx; ++x )
-              *rp++ = f( *op++ );
-          }
+    const_line_NDIterator<T> it( &o->at( 0 ), o->getSize(), o->getStrides() );
+    line_NDIterator<T> rit( &res->at( 0 ), res->getSize(), res->getStrides() );
+    const T *op, *pp;
+    T *rp;
+
+    for( ; !it.ended(); ++it, ++rit )
+    {
+      op = &*it;
+      rp = &*rit;
+      for( pp=op + it.line_length(); op!=pp;
+           it.inc_line_ptr( op ), rit.inc_line_ptr( rp ) )
+        *rp = f( *op );
+    }
+
     return res;
   }
 
@@ -246,15 +249,16 @@ namespace carto
 
                 x = 0;
                 if( x1 && x2 )
-                  {
-                    for( ; x<nx; ++x )
-                      *rp++ = f( *o1p++, *o2p++ );
-                    nx3 = nx2;
-                    if( nx == o1->getSizeX() )
-                      x1 = false;
-                    else
-                      x2 = false;
-                  }
+                {
+                  for( ; x<nx; ++x )
+                    res->at( x, y, z, t ) = f( o1->at( x, y, z, t ),
+                                               o2->at( x, y, z, t ) );
+                  nx3 = nx2;
+                  if( nx == o1->getSizeX() )
+                    x1 = false;
+                  else
+                    x2 = false;
+                }
                 else if( x1 )
                   nx3 = o1->getSizeX();
                 else if( x2 )
@@ -263,13 +267,15 @@ namespace carto
                   nx3 = 0;
                 if( !x1 && x2 )
                   for( ; x<nx3; ++x )
-                    *rp++ = f( internal::_neutral<T>(), *o2p++ );
+                    res->at( x, y, z, t ) = f( internal::_neutral<T>(),
+                                               o2->at( x, y, z, t ) );
                 else if( x1 && !x2 )
                   for( ; x<nx3; ++x )
-                    *rp++ = f( *o1p++, internal::_neutral<T>() );
+                    res->at( x, y, z, t ) = f( o1->at( x, y, z, t ),
+                                               internal::_neutral<T>() );
                 for( ; x<nx2; ++x )
-                  *rp++ = f( internal::_neutral<T>(),
-                             internal::_neutral<T>() );
+                  res->at( x, y, z, t ) = f( internal::_neutral<T>(),
+                                             internal::_neutral<T>() );
               }
           }
       }
@@ -280,17 +286,15 @@ namespace carto
   template <typename T> template <class UnaryFunction>
   void VolumeUtil<T>::selfApply( UnaryFunction f, VolumeRef<T> & o )
   {
-    int	x, nx = o->getSizeX(), y, ny = o->getSizeY(),
-      z, nz = o->getSizeZ(), t, nt = o->getSizeT();
-    T	*op;
-    for( t=0; t<nt; ++t )
-      for( z=0; z<nz; ++z )
-        for( y=0; y<ny; ++y )
-          {
-            op = &o->at( 0, y, z, t );
-            for( x=0; x<nx; ++x, ++op )
-              *op = f( *op );
-          }
+    line_NDIterator<T> it( &o->at( 0 ), o->getSize(), o->getStrides(), true );
+    T *op, *pp;
+
+    for( ; !it.ended(); ++it )
+    {
+      op = &*it;
+      for( pp=op + it.line_length(); op!=pp; it.inc_line_ptr( op ) )
+        *op = f( *op );
+    }
   }
 
 
@@ -310,16 +314,20 @@ namespace carto
     if( o2->getSizeT() < nt )
       nt = o2->getSizeT();
 
-    T	*o1p, *o2p;
-    for( t=0; t<nt; ++t )
-      for( z=0; z<nz; ++z )
-        for( y=0; y<ny; ++y )
-          {
-            o1p = &o1->at( 0, y, z, t );
-            o2p = &o2->at( 0, y, z, t );
-            for( x=0; x<nx; ++x, ++o1p )
-              *o1p = f( *o1p, *o2p++ );
-          }
+    line_NDIterator<T> o1it( &o1->at( 0 ), o1->getSize(), o1->getStrides() );
+    const_line_NDIterator<T> o2it( &o2->at( 0 ), o2->getSize(),
+                                   o2->getStrides() );
+    T *o1p, *pp;
+    const T *o2p;
+
+    for( ; !o1it.ended(); ++o1it, ++o2it )
+    {
+      o1p = &*o1it;
+      o2p = &*o2it;
+      for( pp=o1p + o1it.line_length(); o1p!=pp;
+           o1it.inc_line_ptr( o1p ), o2it.inc_line_ptr( o2p ) )
+        *o1p = f( *o1p, *o2p );
+    }
   }
 
 
@@ -329,17 +337,17 @@ namespace carto
   {
     T res = initial;
 
-    unsigned    x, nx = o.getSizeX(), y, ny = o.getSizeY(),
-      z, nz = o.getSizeZ(), t, nt = o.getSizeT();
-    const T   *op;
-    for( t=0; t<nt; ++t )
-      for( z=0; z<nz; ++z )
-        for( y=0; y<ny; ++y )
-          {
-            op = &o.at( 0, y, z, t );
-            for( x=0; x<nx; ++x )
-              res = f( *op++, res );
-          }
+    const_line_NDIterator<T> it( &o.at( 0 ), o.getSize(), o.getStrides(),
+                                 true );
+    const T *op, *pp;
+
+    for( ; !it.ended(); ++it )
+    {
+      op = &*it;
+      for( pp=op + it.line_length(); op!=pp; it.inc_line_ptr( op ) )
+        res = f( *op, res );
+    }
+
     return res;
   }
 
