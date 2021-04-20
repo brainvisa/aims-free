@@ -36,6 +36,7 @@
 #define AIMS_HISTOGRAM_REGULARBINNEDHISTO_H
 
 #include <aims/histogram/histogram.h>
+#include <cartobase/containers/nditerator.h>
 #include <vector>
 #include <map>
 
@@ -123,13 +124,15 @@ namespace aims
     double scl = (double) _bins / (double) ( maxi - mini );
     double x;
     int y;
+    long stride = &thing( 1 ) - &thing( 0 );
 
     int iy, iz, it, nx = thing.dimX(), ny = thing.dimY(), nz = thing.dimZ(),
       nt = thing.dimT();
     for( it=0; it<nt; ++it )
       for( iz=0; iz<nz; ++iz )
         for( iy=0; iy<ny; ++iy )
-          for( iv=&thing( 0, iy, iz, it ), fv=iv+nx; iv!=fv; ++iv )
+          for( iv=&thing( 0, iy, iz, it ), fv=iv+nx * stride; iv!=fv;
+               iv+=stride )
           {
 //             std::cout << "iv: " << iv << ", nx: " << nx << ", ny: " << ny << ", nz: " << nz << ", nt: " << nt << ", iv+1: " << &thing( 1, iy, iz, it ) << std::endl;
             x = (double) ( (double) (*iv) - mini ) * scl;
@@ -153,19 +156,29 @@ namespace aims
                                      size_t abort_max ) const
   {
     std::map<T, unsigned> vals;
-    typename AimsData<T>::const_iterator  iv, fv=thing.end();
     // std::cout << "unique...\n";
     // clock_t t0 = clock();
     size_t n = 0;
+    std::vector<size_t> sstrides = thing.volume()->getStrides();
+    std::vector<int> strides;
+    strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
+    const T *iv, *pp;
+    long stride = sstrides[0];
 
-    for( iv=thing.begin(); iv!=fv; ++iv )
+    carto::const_line_NDIterator<T> it( &thing( 0 ), thing.volume()->getSize(),
+                                        strides );
+    for( ; !it.ended(); ++it )
     {
-      ++vals[*iv];
-      if( abort_max != 0 )
+      iv = &*it;
+      for( pp=iv + thing.volume()->getSizeX() * stride; iv!=pp; iv+=stride )
       {
-        ++n;
-        if( n % 1000 == 0 && vals.size() >= abort_max )
-          throw std::runtime_error( "too many values" );
+        ++vals[*iv];
+        if( abort_max != 0 )
+        {
+          ++n;
+          if( n % 1000 == 0 && vals.size() >= abort_max )
+            throw std::runtime_error( "too many values" );
+        }
       }
     }
     // std::cout << "unique map done in " << float(clock() - t0) / CLOCKS_PER_SEC << "s: " << thing.dimX() * thing.dimY() * thing.dimZ() * thing.dimT() * CLOCKS_PER_SEC / float(clock() - t0) << " vox/s.\n";
