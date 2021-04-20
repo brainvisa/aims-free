@@ -220,11 +220,11 @@ namespace carto
     strides.insert( strides.end(), sstrides.begin(), sstrides.end() );
     float *p, *pp;
     float sum = 0.;
-    line_NDIterator<float> it( &vol.at( 0 ), vol.getSize(), strides );
+    line_NDIterator<float> it( &vol.at( 0 ), vol.getSize(), strides, true );
     for( ; !it.ended(); ++it )
     {
       p = &*it;
-      for( pp=p + vol.getSizeX(); p!=pp; ++p )
+      for( pp=p + it.line_length(); p!=pp; it.inc_line_ptr( p ) )
         ++(*p);
     }
     \endcode
