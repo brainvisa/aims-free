@@ -8,7 +8,7 @@
 namespace aims
 {
 
-  template <typename T, typename U=T>
+  template <typename T, typename U>
   carto::VolumeRef<U>
   BucketUtil::volumeFromBucket(
     const BucketMap<T> & bucket, int borderwidth, Point3d* pos )
@@ -41,7 +41,7 @@ namespace aims
   }
 
 
-  template <typename T, typename U=T>
+  template <typename T, typename U>
   carto::VolumeRef<U>
   BucketUtil::volumeFromBucket(
     const BucketMap<T> & bucket, const Point3d & bbmin, const Point3d & bbmax,
