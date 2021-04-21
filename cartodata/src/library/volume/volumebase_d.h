@@ -535,6 +535,7 @@ namespace carto
       // _blitz = other.blitz;
       _blitz( &_items[0],
               other._blitz.shape(),
+              other._blitz.stride(),
               blitz::GeneralArrayStorage<8>
               ( blitz::shape( 0, 1, 2, 3, 4, 5, 6, 7 ), true ) ),
 #else
@@ -979,6 +980,7 @@ namespace carto
     int i = 0, n = oldSize.size(), nn = VolumeProxy<T>::_size.size();
 
     unsigned long long int stride_max = 0;
+    int i_smax = 1;
 
     if( nstrides )
     {
@@ -986,7 +988,10 @@ namespace carto
       {
         strides[i] = (*nstrides)[i];
         if( strides[i] > stride_max )
+        {
           stride_max = strides[i];
+          i_smax = i;
+        }
       }
     }
 
@@ -994,13 +999,17 @@ namespace carto
     {
       strides[i] = ( i == 0 ? 1 : VolumeProxy<T>::_size[i-1] * stride_max );
       if( strides[i] > stride_max )
+      {
         stride_max = strides[i];
+        i_smax = i;
+      }
     }
     for( ; i<Volume<T>::DIM_MAX; ++i )
       strides[i] = ( i == nn ? VolumeProxy<T>::_size[i-1] * stride_max
                      : strides[i-1] );
 
-    unsigned long long int total_len = stride_max;
+    unsigned long long int total_len
+      = stride_max * VolumeProxy<T>::_size[i_smax];
 
     if ( total_len * sizeof(T) >
          (unsigned long long int) std::numeric_limits< size_t >::max() )
@@ -1202,9 +1211,9 @@ namespace carto
   void Volume< T >::slotSizeChanged( const PropertyFilter& propertyFilter )
   {
 
-    std::cout << "Volume< " << DataTypeCode<T>::name()
+    /* std::cout << "Volume< " << DataTypeCode<T>::name()
               << " >::slotSizeChanged"
-              << std::endl;
+              << std::endl; */
 
     std::vector<int> oldSize = VolumeProxy<T>::_size;
 
@@ -1236,12 +1245,14 @@ namespace carto
           propertyFilter.getOldValue( "sizeT" )->GenericObject::value< int >();
 
       }
+    /*
     std::cout << "old size: " << oldSize[0] << ", " << oldSize[1] << ", "
               << oldSize[2] << ", " << oldSize[3] << std::endl;
     std::cout << "new size: " << VolumeProxy<T>::_size[0] << ", "
               << VolumeProxy<T>::_size[1] << ", "
               << VolumeProxy<T>::_size[2] << ", " << VolumeProxy<T>::_size[3]
               << std::endl;
+    */
     allocate( oldSize,
               _items.allocatorContext().isAllocated(), allocatorContext() );
 

@@ -67,7 +67,6 @@ namespace carto {
 
 //--- std --------------------------------------------------------------------
 #include <vector>
-#include <iostream>
 //--- forward declarations ---------------------------------------------------
 namespace carto {
   class AllocatorContext;
